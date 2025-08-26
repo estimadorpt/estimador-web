@@ -1,36 +1,154 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# estimador.pt - Portuguese Election Forecasting
 
-## Getting Started
+A modern, professional election forecasting website for Portuguese elections. Built as a migration from Observable Framework to Next.js with improved design and user experience.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 🏠 Professional Homepage
+- Hero section with top-line forecasts
+- Key metrics dashboard showing probabilities
+- Latest polling snapshot with party avatars  
+- Trust indicators (last updated, simulation count)
+- Newsletter signup (UI only)
+
+### 📊 Interactive Forecast Dashboard
+- **National Trends**: Improved polling average charts with confidence intervals
+- **Seat Projections**: Clear seat distribution visualizations
+- **District Analysis**: Geographic breakdown (placeholder for future maps)
+- **Polling Analysis**: House effects and bias analysis (placeholder)
+
+### 📝 Content Pages
+- **About**: Mission, approach, team information
+- **Methodology**: Comprehensive technical explanation with accordions
+- **Articles**: Blog-style analysis pieces with sample content
+
+## Technology Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **UI Components**: shadcn/ui (Radix UI)
+- **Charts**: Observable Plot + D3
+- **Deployment**: Azure Static Web Apps
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── page.tsx           # Homepage
+│   ├── forecast/          # Forecast dashboard
+│   ├── about/             # About page
+│   ├── articles/          # Articles listing
+│   └── methodology/       # Technical documentation
+├── components/
+│   ├── ui/                # shadcn/ui components
+│   └── charts/            # Chart components
+├── lib/
+│   ├── config/            # Colors, party definitions
+│   └── utils/             # Data loading, calculations
+└── types/                 # TypeScript definitions
+
+public/data/               # Election data (JSON files)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Data Sources
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The application uses the following data files:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `seat_forecast_simulations.json` - Monte Carlo simulation results
+- `national_trends.json` - Polling averages over time
+- `district_forecast.json` - District-level projections
+- `contested_summary.json` - Competitive seat analysis
+- `house_effects.json` - Pollster bias analysis
+- `poll_bias.json` - Historical polling accuracy
 
-## Learn More
+## Key Improvements from Observable
 
-To learn more about Next.js, take a look at the following resources:
+### Design & UX
+- ✅ Professional media-style homepage (FiveThirtyEight inspired)
+- ✅ Consistent navigation and branding
+- ✅ Mobile-first responsive design
+- ✅ Improved chart design with better labels and annotations
+- ✅ Trust indicators and transparency features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Technical
+- ✅ Modern Next.js architecture
+- ✅ Type-safe data handling
+- ✅ Server-side rendering for performance
+- ✅ Azure deployment configuration
+- ✅ Improved chart rendering with Observable Plot
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Content Strategy
+- ✅ General audience focus (less academic language)
+- ✅ Clear hierarchy and scannable layout
+- ✅ Context and explanations for complex metrics
+- ✅ Dedicated methodology section
 
-## Deploy on Vercel
+## Development
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Install dependencies
+npm install
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## Deployment
+
+Configured for Azure Static Web Apps with:
+
+- GitHub Actions workflow
+- Static export configuration
+- Route handling for SPA behavior
+- Cache optimization for data files
+
+### Azure Setup
+
+1. Create Azure Static Web App resource
+2. Connect to GitHub repository
+3. Add `AZURE_STATIC_WEB_APPS_API_TOKEN` secret
+4. Push to main branch triggers automatic deployment
+
+## Future Enhancements
+
+### Charts & Visualizations
+- [ ] Interactive district map with TopoJSON
+- [ ] Coalition probability visualizations
+- [ ] Improved contested seats heatmap
+- [ ] House effects heatmap
+- [ ] Polling diagnostics charts
+
+### Features
+- [ ] Real newsletter signup integration
+- [ ] MDX-based article system
+- [ ] Live data updates
+- [ ] Historical forecast tracking
+- [ ] Mobile chart optimization
+
+### Content
+- [ ] Portuguese language support
+- [ ] More analysis articles
+- [ ] Historical election data
+- [ ] API documentation
+
+## Data Pipeline
+
+The current setup expects data files to be manually updated in `public/data/`. 
+Future versions could include:
+
+- Automated polling data collection
+- Real-time model updates
+- API integration for dynamic content
+
+## License
+
+© 2025 estimador.pt - Built with transparency and open methodology
+Developed by Bernardo Caldas

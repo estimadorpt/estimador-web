@@ -1,0 +1,743 @@
+module.exports = [
+"[externals]/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js [external] (next/dist/compiled/next-server/app-page-turbo.runtime.dev.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("next/dist/compiled/next-server/app-page-turbo.runtime.dev.js", () => require("next/dist/compiled/next-server/app-page-turbo.runtime.dev.js"));
+
+module.exports = mod;
+}),
+"[externals]/next/dist/server/app-render/action-async-storage.external.js [external] (next/dist/server/app-render/action-async-storage.external.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("next/dist/server/app-render/action-async-storage.external.js", () => require("next/dist/server/app-render/action-async-storage.external.js"));
+
+module.exports = mod;
+}),
+"[externals]/next/dist/server/app-render/work-unit-async-storage.external.js [external] (next/dist/server/app-render/work-unit-async-storage.external.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("next/dist/server/app-render/work-unit-async-storage.external.js", () => require("next/dist/server/app-render/work-unit-async-storage.external.js"));
+
+module.exports = mod;
+}),
+"[externals]/next/dist/server/app-render/work-async-storage.external.js [external] (next/dist/server/app-render/work-async-storage.external.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("next/dist/server/app-render/work-async-storage.external.js", () => require("next/dist/server/app-render/work-async-storage.external.js"));
+
+module.exports = mod;
+}),
+"[project]/src/lib/config/colors.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "partyColors",
+    ()=>partyColors,
+    "partyNames",
+    ()=>partyNames,
+    "partyOrder",
+    ()=>partyOrder
+]);
+const partyColors = {
+    "AD": "#FF8C00",
+    "PS": "#E57373",
+    "CH": "#377EB8",
+    "IL": "#A6CEE3",
+    "BE": "#000000",
+    "CDU": "#E41A1C",
+    "L": "#90EE90",
+    "PAN": "#4CAF50",
+    "OTH": "#A65628" // Brown
+};
+const partyOrder = [
+    "AD",
+    "PS",
+    "CH",
+    "IL",
+    "BE",
+    "CDU",
+    "L",
+    "PAN",
+    "OTH"
+];
+const partyNames = {
+    "AD": "Aliança Democrática",
+    "PS": "Partido Socialista",
+    "CH": "Chega",
+    "IL": "Iniciativa Liberal",
+    "BE": "Bloco de Esquerda",
+    "CDU": "CDU",
+    "L": "Livre",
+    "PAN": "PAN",
+    "OTH": "Others"
+};
+}),
+"[project]/src/components/charts/PollingChart.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "PollingChart",
+    ()=>PollingChart
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/index.js [app-ssr] (ecmascript) <locals>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$plot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/plot.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$axis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/marks/axis.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$line$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/marks/line.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$dot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/marks/dot.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/marks/text.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$transforms$2f$dodge$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/transforms/dodge.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$colors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/config/colors.ts [app-ssr] (ecmascript)");
+"use client";
+;
+;
+;
+;
+function PollingChart({ data }) {
+    const containerRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        if (!data || data.length === 0 || !containerRef.current) return;
+        // Get actual container width for truly responsive sizing
+        const containerWidth = containerRef.current.offsetWidth || 900;
+        const containerHeight = 450; // Good height for the space
+        // Filter for vote share data only
+        const voteShareData = data.filter((d)=>d.metric === 'vote_share_mean');
+        // Filter to recent time period - show all parties
+        const cutoffDate = new Date();
+        cutoffDate.setFullYear(cutoffDate.getFullYear() - 2); // Last 2 years only
+        const filteredData = voteShareData.filter((d)=>new Date(d.date) >= cutoffDate);
+        // Get latest values for all parties
+        const latestData = filteredData.filter((d)=>{
+            const maxDate = new Date(Math.max(...filteredData.map((dd)=>new Date(dd.date).getTime())));
+            return new Date(d.date).getTime() === maxDate.getTime();
+        }).sort((a, b)=>b.value - a.value);
+        const plot = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$plot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["plot"]({
+            width: containerWidth,
+            height: containerHeight,
+            marginLeft: 60,
+            marginRight: 120,
+            marginTop: 20,
+            marginBottom: 50,
+            style: {
+                backgroundColor: "transparent",
+                fontSize: "12px",
+                fontFamily: "Inter, system-ui, sans-serif"
+            },
+            x: {
+                type: "time",
+                label: null,
+                tickFormat: "%b %Y",
+                grid: true,
+                ticks: 4
+            },
+            y: {
+                label: "Vote share (%)",
+                domain: [
+                    0,
+                    0.5
+                ],
+                tickFormat: (d)=>`${(d * 100).toFixed(0)}%`,
+                grid: true
+            },
+            color: {
+                type: "categorical",
+                domain: Object.keys(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$colors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["partyColors"]),
+                range: Object.values(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$colors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["partyColors"])
+            },
+            marks: [
+                // Background grid
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$axis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["gridY"]({
+                    stroke: "#f3f4f6",
+                    strokeWidth: 1
+                }),
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$axis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["gridX"]({
+                    stroke: "#f3f4f6",
+                    strokeWidth: 1
+                }),
+                // Lines for each party
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$line$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["line"](filteredData, {
+                    x: (d)=>new Date(d.date),
+                    y: "value",
+                    stroke: "party",
+                    strokeWidth: 2.5,
+                    curve: "catmull-rom"
+                }),
+                // Points for latest values
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$dot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["dot"](latestData, {
+                    x: (d)=>new Date(d.date),
+                    y: "value",
+                    fill: "party",
+                    r: 4,
+                    stroke: "white",
+                    strokeWidth: 2
+                }),
+                // Major parties - label at line end
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["text"](latestData.filter((d)=>d.value > 0.1), {
+                    x: (d)=>new Date(d.date),
+                    y: "value",
+                    text: (d)=>`${d.party} ${(d.value * 100).toFixed(1)}%`,
+                    fill: "party",
+                    dx: 8,
+                    fontSize: 11,
+                    fontWeight: "600",
+                    textAnchor: "start"
+                }),
+                // Minor parties - sorted bottom to top to match visual order
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["text"](latestData.filter((d)=>d.value <= 0.1).sort((a, b)=>a.value - b.value), __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$transforms$2f$dodge$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["dodgeY"]({
+                    x: (d)=>new Date(d.date),
+                    y: "value",
+                    text: (d)=>`${d.party} ${(d.value * 100).toFixed(1)}%`,
+                    fill: "party",
+                    dx: 8,
+                    dy: -3,
+                    fontSize: 10,
+                    fontWeight: "500",
+                    textAnchor: "start",
+                    padding: 4 // Increase spacing between dodged labels
+                }))
+            ]
+        });
+        if (containerRef.current) {
+            containerRef.current.replaceChildren(plot);
+        }
+        return ()=>plot.remove();
+    }, [
+        data
+    ]);
+    // Add resize observer for responsive behavior
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        if (!containerRef.current) return;
+        const resizeObserver = new ResizeObserver(()=>{
+            // Re-render chart when container size changes
+            if (containerRef.current && data && data.length > 0) {
+                // Small delay to ensure container has final dimensions
+                setTimeout(()=>{
+                    if (!containerRef.current) return;
+                    const containerWidth = containerRef.current.offsetWidth || 900;
+                    const containerHeight = 450;
+                    // Filter for vote share data only
+                    const voteShareData = data.filter((d)=>d.metric === 'vote_share_mean');
+                    // Filter to recent time period - show all parties
+                    const cutoffDate = new Date();
+                    cutoffDate.setFullYear(cutoffDate.getFullYear() - 2);
+                    const filteredData = voteShareData.filter((d)=>new Date(d.date) >= cutoffDate);
+                    // Get latest values for all parties
+                    const latestData = filteredData.filter((d)=>{
+                        const maxDate = new Date(Math.max(...filteredData.map((dd)=>new Date(dd.date).getTime())));
+                        return new Date(d.date).getTime() === maxDate.getTime();
+                    }).sort((a, b)=>b.value - a.value);
+                    const plot = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$plot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["plot"]({
+                        width: containerWidth,
+                        height: containerHeight,
+                        marginLeft: 60,
+                        marginRight: 120,
+                        marginTop: 20,
+                        marginBottom: 50,
+                        style: {
+                            backgroundColor: "transparent",
+                            fontSize: "12px",
+                            fontFamily: "Inter, system-ui, sans-serif"
+                        },
+                        x: {
+                            type: "time",
+                            label: null,
+                            tickFormat: "%b %Y",
+                            grid: true,
+                            ticks: 4
+                        },
+                        y: {
+                            label: "Vote share (%)",
+                            domain: [
+                                0,
+                                0.5
+                            ],
+                            tickFormat: (d)=>`${(d * 100).toFixed(0)}%`,
+                            grid: true
+                        },
+                        color: {
+                            type: "categorical",
+                            domain: Object.keys(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$colors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["partyColors"]),
+                            range: Object.values(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$colors$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["partyColors"])
+                        },
+                        marks: [
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$axis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["gridY"]({
+                                stroke: "#f3f4f6",
+                                strokeWidth: 1
+                            }),
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$axis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["gridX"]({
+                                stroke: "#f3f4f6",
+                                strokeWidth: 1
+                            }),
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$line$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["line"](filteredData, {
+                                x: (d)=>new Date(d.date),
+                                y: "value",
+                                stroke: "party",
+                                strokeWidth: 2.5,
+                                curve: "catmull-rom"
+                            }),
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$dot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["dot"](latestData, {
+                                x: (d)=>new Date(d.date),
+                                y: "value",
+                                fill: "party",
+                                r: 4,
+                                stroke: "white",
+                                strokeWidth: 2
+                            }),
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["text"](latestData.filter((d)=>d.value > 0.1), {
+                                x: (d)=>new Date(d.date),
+                                y: "value",
+                                text: (d)=>`${d.party} ${(d.value * 100).toFixed(1)}%`,
+                                fill: "party",
+                                dx: 8,
+                                fontSize: 11,
+                                fontWeight: "600",
+                                textAnchor: "start"
+                            }),
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["text"](latestData.filter((d)=>d.value <= 0.1).sort((a, b)=>a.value - b.value), __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$transforms$2f$dodge$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["dodgeY"]({
+                                x: (d)=>new Date(d.date),
+                                y: "value",
+                                text: (d)=>`${d.party} ${(d.value * 100).toFixed(1)}%`,
+                                fill: "party",
+                                dx: 8,
+                                dy: -3,
+                                fontSize: 10,
+                                fontWeight: "500",
+                                textAnchor: "start",
+                                padding: 4
+                            }))
+                        ]
+                    });
+                    containerRef.current.replaceChildren(plot);
+                }, 100);
+            }
+        });
+        resizeObserver.observe(containerRef.current);
+        return ()=>resizeObserver.disconnect();
+    }, [
+        data
+    ]);
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        className: "w-full",
+        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            ref: containerRef,
+            className: "overflow-x-auto"
+        }, void 0, false, {
+            fileName: "[project]/src/components/charts/PollingChart.tsx",
+            lineNumber: 254,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "[project]/src/components/charts/PollingChart.tsx",
+        lineNumber: 253,
+        columnNumber: 5
+    }, this);
+}
+}),
+"[project]/src/lib/config/blocs.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "leftBlocParties",
+    ()=>leftBlocParties,
+    "leftPlusScenarioParties",
+    ()=>leftPlusScenarioParties,
+    "majorityThreshold",
+    ()=>majorityThreshold,
+    "rightBlocParties",
+    ()=>rightBlocParties,
+    "rightPlusParties",
+    ()=>rightPlusParties
+]);
+const leftBlocParties = [
+    "PS",
+    "BE",
+    "CDU",
+    "L"
+];
+const rightBlocParties = [
+    "AD",
+    "IL"
+];
+const majorityThreshold = 116;
+const rightPlusParties = [
+    "AD",
+    "IL"
+];
+const leftPlusScenarioParties = [
+    "PS",
+    "L",
+    "PAN",
+    "BE",
+    "CDU"
+];
+}),
+"[project]/src/components/charts/CoalitionDotPlot.tsx [app-ssr] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "CoalitionDotPlot",
+    ()=>CoalitionDotPlot
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/index.js [app-ssr] (ecmascript) <locals>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$plot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/plot.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$rule$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/marks/rule.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$dot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/marks/dot.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$transforms$2f$dodge$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/transforms/dodge.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@observablehq/plot/src/marks/text.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$d3$2f$src$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/d3/src/index.js [app-ssr] (ecmascript) <locals>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$d3$2d$array$2f$src$2f$group$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/d3-array/src/group.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$d3$2d$array$2f$src$2f$median$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__median$3e$__ = __turbopack_context__.i("[project]/node_modules/d3-array/src/median.js [app-ssr] (ecmascript) <export default as median>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$d3$2d$array$2f$src$2f$shuffle$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__shuffle$3e$__ = __turbopack_context__.i("[project]/node_modules/d3-array/src/shuffle.js [app-ssr] (ecmascript) <export default as shuffle>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/config/blocs.ts [app-ssr] (ecmascript)");
+"use client";
+;
+;
+;
+;
+;
+function CoalitionDotPlot({ data }) {
+    const containerRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        if (!data || data.length === 0 || !containerRef.current) {
+            console.log("CoalitionDotPlot: No data available");
+            return;
+        }
+        // Get actual container width for responsive sizing
+        const containerWidth = containerRef.current.offsetWidth || 1000;
+        const containerHeight = 350;
+        console.log(`CoalitionDotPlot: Processing ${data.length} data points, container width: ${containerWidth}`);
+        console.log('First 3 data points:', data.slice(0, 3));
+        // Calculate coalition seats for each simulation
+        const blocDrawData = data.flatMap((simulation, index)=>{
+            const leftSeats = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["leftBlocParties"].reduce((sum, party)=>sum + (simulation[party] || 0), 0);
+            const rightSeats = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["rightBlocParties"].reduce((sum, party)=>sum + (simulation[party] || 0), 0);
+            return [
+                {
+                    draw: index,
+                    bloc: "Left coalition",
+                    totalSeats: leftSeats
+                },
+                {
+                    draw: index,
+                    bloc: "Right coalition",
+                    totalSeats: rightSeats
+                }
+            ];
+        });
+        // Calculate medians
+        const blocMedians = Array.from(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$d3$2d$array$2f$src$2f$group$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["rollup"](blocDrawData, (v)=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$d3$2d$array$2f$src$2f$median$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__median$3e$__["median"](v, (d)=>d.totalSeats), (d)=>d.bloc), ([bloc, medianSeats])=>({
+                bloc,
+                medianSeats
+            }));
+        // Sample data for performance - increase for better density
+        const sampleSize = Math.min(1600, blocDrawData.length);
+        const sampledData = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$d3$2d$array$2f$src$2f$shuffle$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__shuffle$3e$__["shuffle"](blocDrawData.slice()).slice(0, sampleSize);
+        console.log(`CoalitionDotPlot: ${blocDrawData.length} coalition data points, sampling ${sampledData.length}`);
+        console.log('Sample of blocDrawData:', blocDrawData.slice(0, 5));
+        console.log('Sample of sampledData:', sampledData.slice(0, 5));
+        console.log('Bloc medians:', blocMedians);
+        const plot = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$plot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["plot"]({
+            width: containerWidth,
+            height: containerHeight,
+            marginLeft: 140,
+            marginRight: 60,
+            marginTop: 30,
+            marginBottom: 50,
+            style: {
+                backgroundColor: "transparent",
+                fontSize: "12px",
+                fontFamily: "Inter, system-ui, sans-serif"
+            },
+            x: {
+                label: "Projected seats",
+                domain: [
+                    40,
+                    140
+                ],
+                grid: true,
+                ticks: [
+                    50,
+                    75,
+                    100,
+                    __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["majorityThreshold"],
+                    125
+                ]
+            },
+            fy: {
+                domain: [
+                    "Left coalition",
+                    "Right coalition"
+                ],
+                label: null,
+                axis: "left",
+                padding: 0.1
+            },
+            color: {
+                domain: [
+                    "Left coalition",
+                    "Right coalition"
+                ],
+                range: [
+                    "#10b981",
+                    "#f59e0b"
+                ]
+            },
+            marks: [
+                // Majority line (spans across facets)
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$rule$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ruleX"]([
+                    __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["majorityThreshold"]
+                ], {
+                    stroke: "#dc2626",
+                    strokeWidth: 2,
+                    strokeDasharray: "4,2",
+                    facet: "exclude"
+                }),
+                // Dodged dots with slight horizontal jitter
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$dot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["dotX"](sampledData, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$transforms$2f$dodge$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["dodgeY"]({
+                    x: (d)=>d.totalSeats + (Math.random() - 0.5) * 1.5,
+                    fy: "bloc",
+                    fill: "bloc",
+                    fillOpacity: 0.7,
+                    r: 1.2,
+                    anchor: "middle"
+                })),
+                // Median lines
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$rule$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ruleX"](blocMedians, {
+                    x: "medianSeats",
+                    fy: "bloc",
+                    stroke: "black",
+                    strokeWidth: 2,
+                    strokeDasharray: "2,2"
+                }),
+                // Median labels
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["text"](blocMedians, {
+                    x: "medianSeats",
+                    fy: "bloc",
+                    text: (d)=>Math.round(d.medianSeats).toString(),
+                    dy: -8,
+                    dx: 5,
+                    fontSize: 11,
+                    fontWeight: "bold",
+                    fill: "black"
+                }),
+                // Majority label
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["text"]([
+                    {
+                        x: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["majorityThreshold"],
+                        fy: "Left coalition"
+                    }
+                ], {
+                    x: "x",
+                    fy: "fy",
+                    text: `Majority (${__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["majorityThreshold"]})`,
+                    dx: 5,
+                    dy: -10,
+                    fontSize: 11,
+                    fill: "#dc2626",
+                    fontWeight: "600"
+                })
+            ]
+        });
+        if (containerRef.current) {
+            containerRef.current.replaceChildren(plot);
+        }
+        return ()=>plot.remove();
+    }, [
+        data
+    ]);
+    // Add resize observer for responsive behavior
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        if (!containerRef.current) return;
+        const resizeObserver = new ResizeObserver(()=>{
+            // Re-render chart when container size changes
+            if (containerRef.current && data && data.length > 0) {
+                // Small delay to ensure container has final dimensions
+                setTimeout(()=>{
+                    if (!containerRef.current) return;
+                    const containerWidth = containerRef.current.offsetWidth || 1000;
+                    const containerHeight = 350;
+                    // Calculate coalition seats for each simulation
+                    const blocDrawData = data.flatMap((simulation, index)=>{
+                        const leftSeats = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["leftBlocParties"].reduce((sum, party)=>sum + (simulation[party] || 0), 0);
+                        const rightSeats = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["rightBlocParties"].reduce((sum, party)=>sum + (simulation[party] || 0), 0);
+                        return [
+                            {
+                                draw: index,
+                                bloc: "Left coalition",
+                                totalSeats: leftSeats
+                            },
+                            {
+                                draw: index,
+                                bloc: "Right coalition",
+                                totalSeats: rightSeats
+                            }
+                        ];
+                    });
+                    // Calculate medians
+                    const blocMedians = Array.from(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$d3$2d$array$2f$src$2f$group$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["rollup"](blocDrawData, (v)=>__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$d3$2d$array$2f$src$2f$median$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__median$3e$__["median"](v, (d)=>d.totalSeats), (d)=>d.bloc), ([bloc, medianSeats])=>({
+                            bloc,
+                            medianSeats
+                        }));
+                    // Sample data for performance
+                    const sampleSize = Math.min(1600, blocDrawData.length);
+                    const sampledData = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$d3$2d$array$2f$src$2f$shuffle$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__shuffle$3e$__["shuffle"](blocDrawData.slice()).slice(0, sampleSize);
+                    const plot = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$plot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["plot"]({
+                        width: containerWidth,
+                        height: containerHeight,
+                        marginLeft: 140,
+                        marginRight: 60,
+                        marginTop: 30,
+                        marginBottom: 50,
+                        style: {
+                            backgroundColor: "transparent",
+                            fontSize: "12px",
+                            fontFamily: "Inter, system-ui, sans-serif"
+                        },
+                        x: {
+                            label: "Projected seats",
+                            domain: [
+                                40,
+                                140
+                            ],
+                            grid: true,
+                            ticks: [
+                                50,
+                                75,
+                                100,
+                                __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["majorityThreshold"],
+                                125
+                            ]
+                        },
+                        fy: {
+                            domain: [
+                                "Left coalition",
+                                "Right coalition"
+                            ],
+                            label: null,
+                            axis: "left",
+                            padding: 0.1
+                        },
+                        color: {
+                            domain: [
+                                "Left coalition",
+                                "Right coalition"
+                            ],
+                            range: [
+                                "#10b981",
+                                "#f59e0b"
+                            ]
+                        },
+                        marks: [
+                            // Majority line (spans across facets)
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$rule$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ruleX"]([
+                                __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["majorityThreshold"]
+                            ], {
+                                stroke: "#dc2626",
+                                strokeWidth: 2,
+                                strokeDasharray: "4,2",
+                                facet: "exclude"
+                            }),
+                            // Dodged dots with slight horizontal jitter
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$dot$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["dotX"](sampledData, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$transforms$2f$dodge$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["dodgeY"]({
+                                x: (d)=>d.totalSeats + (Math.random() - 0.5) * 1.5,
+                                fy: "bloc",
+                                fill: "bloc",
+                                fillOpacity: 0.7,
+                                r: 1.2,
+                                anchor: "middle"
+                            })),
+                            // Median lines
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$rule$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ruleX"](blocMedians, {
+                                x: "medianSeats",
+                                fy: "bloc",
+                                stroke: "black",
+                                strokeWidth: 2,
+                                strokeDasharray: "2,2"
+                            }),
+                            // Median labels
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["text"](blocMedians, {
+                                x: "medianSeats",
+                                fy: "bloc",
+                                text: (d)=>Math.round(d.medianSeats).toString(),
+                                dy: -8,
+                                dx: 5,
+                                fontSize: 11,
+                                fontWeight: "bold",
+                                fill: "black"
+                            }),
+                            // Majority label
+                            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$observablehq$2f$plot$2f$src$2f$marks$2f$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["text"]([
+                                {
+                                    x: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["majorityThreshold"],
+                                    fy: "Left coalition"
+                                }
+                            ], {
+                                x: "x",
+                                fy: "fy",
+                                text: `Majority (${__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$config$2f$blocs$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["majorityThreshold"]})`,
+                                dx: 5,
+                                dy: -10,
+                                fontSize: 11,
+                                fill: "#dc2626",
+                                fontWeight: "600"
+                            })
+                        ]
+                    });
+                    containerRef.current.replaceChildren(plot);
+                }, 100);
+            }
+        });
+        resizeObserver.observe(containerRef.current);
+        return ()=>resizeObserver.disconnect();
+    }, [
+        data
+    ]);
+    if (!data || data.length === 0) {
+        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "w-full h-64 flex items-center justify-center text-gray-500",
+            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                children: "Loading coalition data..."
+            }, void 0, false, {
+                fileName: "[project]/src/components/charts/CoalitionDotPlot.tsx",
+                lineNumber: 277,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "[project]/src/components/charts/CoalitionDotPlot.tsx",
+            lineNumber: 276,
+            columnNumber: 7
+        }, this);
+    }
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        className: "w-full",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                ref: containerRef,
+                className: "overflow-x-auto"
+            }, void 0, false, {
+                fileName: "[project]/src/components/charts/CoalitionDotPlot.tsx",
+                lineNumber: 284,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "text-xs text-gray-500 mt-2",
+                children: [
+                    "Showing ",
+                    data.length,
+                    " simulation outcomes"
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/components/charts/CoalitionDotPlot.tsx",
+                lineNumber: 285,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "[project]/src/components/charts/CoalitionDotPlot.tsx",
+        lineNumber: 283,
+        columnNumber: 5
+    }, this);
+}
+}),
+];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__00c1adc2._.js.map

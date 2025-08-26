@@ -1,0 +1,285 @@
+{
+    "metadata": {
+        "run_A_path": "/Users/bernardocaldas/code/models/outputs/dynamic_gp_run_20250516_090447",
+        "run_B_path": "/Users/bernardocaldas/code/models/outputs/dynamic_gp_run_20250515_221117",
+        "prediction_date_mode": "election_day",
+        "hdi_prob_used_for_columns": 0.94,
+        "comparison_timestamp": "2025-05-16T14:06:38.017244"
+    },
+    "vote_share_comparison": {
+        "latent_popularity_national[AD]": {
+            "run_A": {
+                "mean_value": 0.342,
+                "sd_value": 0.011,
+                "hdi_low_value": 0.322,
+                "hdi_high_value": 0.363
+            },
+            "run_B": {
+                "mean_value": 0.343,
+                "sd_value": 0.011,
+                "hdi_low_value": 0.321,
+                "hdi_high_value": 0.364
+            },
+            "change": {
+                "mean_value": -0.0010000000000000009
+            }
+        },
+        "latent_popularity_national[BE]": {
+            "run_A": {
+                "mean_value": 0.027,
+                "sd_value": 0.002,
+                "hdi_low_value": 0.022,
+                "hdi_high_value": 0.031
+            },
+            "run_B": {
+                "mean_value": 0.026,
+                "sd_value": 0.002,
+                "hdi_low_value": 0.021,
+                "hdi_high_value": 0.03
+            },
+            "change": {
+                "mean_value": 0.0010000000000000009
+            }
+        },
+        "latent_popularity_national[CDU]": {
+            "run_A": {
+                "mean_value": 0.032,
+                "sd_value": 0.003,
+                "hdi_low_value": 0.027,
+                "hdi_high_value": 0.038
+            },
+            "run_B": {
+                "mean_value": 0.032,
+                "sd_value": 0.003,
+                "hdi_low_value": 0.026,
+                "hdi_high_value": 0.038
+            },
+            "change": {
+                "mean_value": 0.0
+            }
+        },
+        "latent_popularity_national[CH]": {
+            "run_A": {
+                "mean_value": 0.205,
+                "sd_value": 0.012,
+                "hdi_low_value": 0.183,
+                "hdi_high_value": 0.226
+            },
+            "run_B": {
+                "mean_value": 0.208,
+                "sd_value": 0.012,
+                "hdi_low_value": 0.186,
+                "hdi_high_value": 0.231
+            },
+            "change": {
+                "mean_value": -0.0030000000000000027
+            }
+        },
+        "latent_popularity_national[IL]": {
+            "run_A": {
+                "mean_value": 0.056,
+                "sd_value": 0.005,
+                "hdi_low_value": 0.048,
+                "hdi_high_value": 0.065
+            },
+            "run_B": {
+                "mean_value": 0.056,
+                "sd_value": 0.005,
+                "hdi_low_value": 0.047,
+                "hdi_high_value": 0.065
+            },
+            "change": {
+                "mean_value": 0.0
+            }
+        },
+        "latent_popularity_national[L]": {
+            "run_A": {
+                "mean_value": 0.047,
+                "sd_value": 0.004,
+                "hdi_low_value": 0.038,
+                "hdi_high_value": 0.055
+            },
+            "run_B": {
+                "mean_value": 0.044,
+                "sd_value": 0.004,
+                "hdi_low_value": 0.036,
+                "hdi_high_value": 0.053
+            },
+            "change": {
+                "mean_value": 0.0030000000000000027
+            }
+        },
+        "latent_popularity_national[PAN]": {
+            "run_A": {
+                "mean_value": 0.013,
+                "sd_value": 0.002,
+                "hdi_low_value": 0.01,
+                "hdi_high_value": 0.017
+            },
+            "run_B": {
+                "mean_value": 0.013,
+                "sd_value": 0.002,
+                "hdi_low_value": 0.01,
+                "hdi_high_value": 0.017
+            },
+            "change": {
+                "mean_value": 0.0
+            }
+        },
+        "latent_popularity_national[PS]": {
+            "run_A": {
+                "mean_value": 0.277,
+                "sd_value": 0.01,
+                "hdi_low_value": 0.259,
+                "hdi_high_value": 0.296
+            },
+            "run_B": {
+                "mean_value": 0.277,
+                "sd_value": 0.01,
+                "hdi_low_value": 0.259,
+                "hdi_high_value": 0.297
+            },
+            "change": {
+                "mean_value": 0.0
+            }
+        }
+    },
+    "seat_comparison": {
+        "AD": {
+            "run_A": {
+                "mean_value": 89.7,
+                "sd_value": 3.1,
+                "hdi_low_value": 84.0,
+                "hdi_high_value": 95.0
+            },
+            "run_B": {
+                "mean_value": 89.7,
+                "sd_value": 3.2,
+                "hdi_low_value": 83.0,
+                "hdi_high_value": 95.0
+            },
+            "change": {
+                "mean_value": 0.0
+            }
+        },
+        "BE": {
+            "run_A": {
+                "mean_value": 2.0,
+                "sd_value": 0.2,
+                "hdi_low_value": 2.0,
+                "hdi_high_value": 2.0
+            },
+            "run_B": {
+                "mean_value": 2.0,
+                "sd_value": 0.2,
+                "hdi_low_value": 2.0,
+                "hdi_high_value": 2.0
+            },
+            "change": {
+                "mean_value": 0.0
+            }
+        },
+        "CDU": {
+            "run_A": {
+                "mean_value": 3.3,
+                "sd_value": 0.7,
+                "hdi_low_value": 2.0,
+                "hdi_high_value": 4.0
+            },
+            "run_B": {
+                "mean_value": 3.4,
+                "sd_value": 0.7,
+                "hdi_low_value": 2.0,
+                "hdi_high_value": 4.0
+            },
+            "change": {
+                "mean_value": -0.10000000000000009
+            }
+        },
+        "CH": {
+            "run_A": {
+                "mean_value": 48.7,
+                "sd_value": 3.0,
+                "hdi_low_value": 43.0,
+                "hdi_high_value": 54.0
+            },
+            "run_B": {
+                "mean_value": 49.4,
+                "sd_value": 3.1,
+                "hdi_low_value": 44.0,
+                "hdi_high_value": 55.0
+            },
+            "change": {
+                "mean_value": -0.6999999999999957
+            }
+        },
+        "IL": {
+            "run_A": {
+                "mean_value": 9.8,
+                "sd_value": 1.3,
+                "hdi_low_value": 8.0,
+                "hdi_high_value": 12.0
+            },
+            "run_B": {
+                "mean_value": 9.7,
+                "sd_value": 1.2,
+                "hdi_low_value": 8.0,
+                "hdi_high_value": 12.0
+            },
+            "change": {
+                "mean_value": 0.10000000000000142
+            }
+        },
+        "L": {
+            "run_A": {
+                "mean_value": 6.4,
+                "sd_value": 1.3,
+                "hdi_low_value": 4.0,
+                "hdi_high_value": 8.0
+            },
+            "run_B": {
+                "mean_value": 5.9,
+                "sd_value": 1.3,
+                "hdi_low_value": 4.0,
+                "hdi_high_value": 8.0
+            },
+            "change": {
+                "mean_value": 0.5
+            }
+        },
+        "PAN": {
+            "run_A": {
+                "mean_value": 0.2,
+                "sd_value": 0.4,
+                "hdi_low_value": 0.0,
+                "hdi_high_value": 1.0
+            },
+            "run_B": {
+                "mean_value": 0.2,
+                "sd_value": 0.4,
+                "hdi_low_value": 0.0,
+                "hdi_high_value": 1.0
+            },
+            "change": {
+                "mean_value": 0.0
+            }
+        },
+        "PS": {
+            "run_A": {
+                "mean_value": 69.9,
+                "sd_value": 2.9,
+                "hdi_low_value": 65.0,
+                "hdi_high_value": 75.0
+            },
+            "run_B": {
+                "mean_value": 69.8,
+                "sd_value": 3.0,
+                "hdi_low_value": 64.0,
+                "hdi_high_value": 75.0
+            },
+            "change": {
+                "mean_value": 0.10000000000000853
+            }
+        }
+    }
+}

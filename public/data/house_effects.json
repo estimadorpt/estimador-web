@@ -1,0 +1,282 @@
+[
+  {
+    "pollster": "Aximage",
+    "party": "PS",
+    "house_effect": -0.0057
+  },
+  {
+    "pollster": "Aximage",
+    "party": "CH",
+    "house_effect": 0.018
+  },
+  {
+    "pollster": "Aximage",
+    "party": "IL",
+    "house_effect": 0.0505
+  },
+  {
+    "pollster": "Aximage",
+    "party": "BE",
+    "house_effect": -0.0078
+  },
+  {
+    "pollster": "Aximage",
+    "party": "CDU",
+    "house_effect": -0.0162
+  },
+  {
+    "pollster": "Aximage",
+    "party": "PAN",
+    "house_effect": 0.0405
+  },
+  {
+    "pollster": "Aximage",
+    "party": "L",
+    "house_effect": 0.0936
+  },
+  {
+    "pollster": "Aximage",
+    "party": "AD",
+    "house_effect": -0.0385
+  },
+  {
+    "pollster": "CESOP-U.Católica",
+    "party": "PS",
+    "house_effect": 0.0065
+  },
+  {
+    "pollster": "CESOP-U.Católica",
+    "party": "CH",
+    "house_effect": -0.0253
+  },
+  {
+    "pollster": "CESOP-U.Católica",
+    "party": "IL",
+    "house_effect": 0.1753
+  },
+  {
+    "pollster": "CESOP-U.Católica",
+    "party": "BE",
+    "house_effect": -0.0179
+  },
+  {
+    "pollster": "CESOP-U.Católica",
+    "party": "CDU",
+    "house_effect": 0.0036
+  },
+  {
+    "pollster": "CESOP-U.Católica",
+    "party": "PAN",
+    "house_effect": -0.1389
+  },
+  {
+    "pollster": "CESOP-U.Católica",
+    "party": "L",
+    "house_effect": 0.1522
+  },
+  {
+    "pollster": "CESOP-U.Católica",
+    "party": "AD",
+    "house_effect": 0.0096
+  },
+  {
+    "pollster": "Consulmark2",
+    "party": "PS",
+    "house_effect": -0.0275
+  },
+  {
+    "pollster": "Consulmark2",
+    "party": "CH",
+    "house_effect": -0.0097
+  },
+  {
+    "pollster": "Consulmark2",
+    "party": "IL",
+    "house_effect": 0.2195
+  },
+  {
+    "pollster": "Consulmark2",
+    "party": "BE",
+    "house_effect": 0.0111
+  },
+  {
+    "pollster": "Consulmark2",
+    "party": "CDU",
+    "house_effect": -0.0388
+  },
+  {
+    "pollster": "Consulmark2",
+    "party": "PAN",
+    "house_effect": -0.2128
+  },
+  {
+    "pollster": "Consulmark2",
+    "party": "L",
+    "house_effect": 0.2224
+  },
+  {
+    "pollster": "Consulmark2",
+    "party": "AD",
+    "house_effect": 0.027
+  },
+  {
+    "pollster": "ICS/ISCTE/GFK Metris",
+    "party": "PS",
+    "house_effect": 0.0381
+  },
+  {
+    "pollster": "ICS/ISCTE/GFK Metris",
+    "party": "CH",
+    "house_effect": 0.0426
+  },
+  {
+    "pollster": "ICS/ISCTE/GFK Metris",
+    "party": "IL",
+    "house_effect": -0.2386
+  },
+  {
+    "pollster": "ICS/ISCTE/GFK Metris",
+    "party": "BE",
+    "house_effect": -0.0158
+  },
+  {
+    "pollster": "ICS/ISCTE/GFK Metris",
+    "party": "CDU",
+    "house_effect": 0.0639
+  },
+  {
+    "pollster": "ICS/ISCTE/GFK Metris",
+    "party": "PAN",
+    "house_effect": 0.0374
+  },
+  {
+    "pollster": "ICS/ISCTE/GFK Metris",
+    "party": "L",
+    "house_effect": -0.3903
+  },
+  {
+    "pollster": "ICS/ISCTE/GFK Metris",
+    "party": "AD",
+    "house_effect": 0.0189
+  },
+  {
+    "pollster": "Intercampus",
+    "party": "PS",
+    "house_effect": -0.0775
+  },
+  {
+    "pollster": "Intercampus",
+    "party": "CH",
+    "house_effect": -0.0051
+  },
+  {
+    "pollster": "Intercampus",
+    "party": "IL",
+    "house_effect": 0.2461
+  },
+  {
+    "pollster": "Intercampus",
+    "party": "BE",
+    "house_effect": 0.0173
+  },
+  {
+    "pollster": "Intercampus",
+    "party": "CDU",
+    "house_effect": -0.0567
+  },
+  {
+    "pollster": "Intercampus",
+    "party": "PAN",
+    "house_effect": 0.2654
+  },
+  {
+    "pollster": "Intercampus",
+    "party": "L",
+    "house_effect": 0.2373
+  },
+  {
+    "pollster": "Intercampus",
+    "party": "AD",
+    "house_effect": -0.1164
+  },
+  {
+    "pollster": "Metris",
+    "party": "PS",
+    "house_effect": 0.017
+  },
+  {
+    "pollster": "Metris",
+    "party": "CH",
+    "house_effect": 0.0098
+  },
+  {
+    "pollster": "Metris",
+    "party": "IL",
+    "house_effect": 0.016
+  },
+  {
+    "pollster": "Metris",
+    "party": "BE",
+    "house_effect": 0.0046
+  },
+  {
+    "pollster": "Metris",
+    "party": "CDU",
+    "house_effect": 0.0185
+  },
+  {
+    "pollster": "Metris",
+    "party": "PAN",
+    "house_effect": -0.0434
+  },
+  {
+    "pollster": "Metris",
+    "party": "L",
+    "house_effect": -0.1913
+  },
+  {
+    "pollster": "Metris",
+    "party": "AD",
+    "house_effect": 0.0037
+  },
+  {
+    "pollster": "Pitagorica",
+    "party": "PS",
+    "house_effect": 0.0097
+  },
+  {
+    "pollster": "Pitagorica",
+    "party": "CH",
+    "house_effect": -0.0256
+  },
+  {
+    "pollster": "Pitagorica",
+    "party": "IL",
+    "house_effect": 0.191
+  },
+  {
+    "pollster": "Pitagorica",
+    "party": "BE",
+    "house_effect": -0.0394
+  },
+  {
+    "pollster": "Pitagorica",
+    "party": "CDU",
+    "house_effect": 0.0094
+  },
+  {
+    "pollster": "Pitagorica",
+    "party": "PAN",
+    "house_effect": -0.1078
+  },
+  {
+    "pollster": "Pitagorica",
+    "party": "L",
+    "house_effect": 0.1958
+  },
+  {
+    "pollster": "Pitagorica",
+    "party": "AD",
+    "house_effect": 0.0042
+  }
+]
