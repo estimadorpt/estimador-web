@@ -86,7 +86,7 @@ export default async function Home({
 
   return (
     <div className="min-h-screen bg-white">
-      <Header lastUpdate={lastUpdate} />
+      <Header />
 
       {/* News-style Headline Section */}
       <section className="border-b border-gray-200">
@@ -119,7 +119,15 @@ export default async function Home({
       {/* Key Numbers - BBC Style */}
       <section className="bg-green-pale border-b border-green-medium/30">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('homepage.chanceWinningMostSeats')}</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">{t('homepage.chanceWinningMostSeats')}</h2>
+            {lastUpdate && (
+              <div className="flex items-center gap-1 text-xs text-green-dark/70">
+                <Calendar className="w-3 h-3" />
+                <span>{t('common.updated')} {lastUpdate}</span>
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {['AD', 'PS', 'CH'].map(party => {
               const prob = party === 'AD' ? probAdMostSeats : 
