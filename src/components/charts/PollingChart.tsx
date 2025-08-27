@@ -13,9 +13,10 @@ interface TrendData {
 
 interface PollingChartProps {
   data: TrendData[];
+  voteShareLabel?: string;
 }
 
-export function PollingChart({ data }: PollingChartProps) {
+export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: PollingChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export function PollingChart({ data }: PollingChartProps) {
         ticks: 4
       },
       y: {
-        label: "Vote share (%)",
+        label: voteShareLabel,
         domain: [0, 0.5],
         tickFormat: d => `${(d * 100).toFixed(0)}%`,
         grid: true
@@ -182,7 +183,7 @@ export function PollingChart({ data }: PollingChartProps) {
               ticks: 4
             },
             y: {
-              label: "Vote share (%)",
+              label: voteShareLabel,
               domain: [0, 0.5],
               tickFormat: d => `${(d * 100).toFixed(0)}%`,
               grid: true

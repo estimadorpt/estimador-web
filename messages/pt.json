@@ -1,0 +1,159 @@
+{
+  "nav": {
+    "home": "Início",
+    "forecast": "Previsões",
+    "analysis": "Análise",
+    "about": "Sobre",
+    "methodology": "Metodologia"
+  },
+  "common": {
+    "updated": "Atualizado",
+    "simulations": "simulações",
+    "basedOn": "Baseado em",
+    "methodology": "Metodologia",
+    "readMore": "Ler mais",
+    "share": "Partilhar",
+    "loading": "A carregar...",
+    "others": "Outros",
+    "seats": "mandatos"
+  },
+  "homepage": {
+    "tagline": "Previsões Eleitorais Portuguesas",
+    "leadingWith": "{party} lidera a corrida eleitoral com {percentage} de apoio",
+    "forecastShows": "A última previsão mostra {party} à frente por {margin} pontos, com {probability} de probabilidade de ganhar mais assentos",
+    "chanceWinningMostSeats": "Probabilidade de ganhar mais assentos",
+    "rightMajority": "Maioria de direita",
+    "leftMajority": "Maioria de esquerda",
+    "hungParliament": "Parlamento suspenso",
+    "coalitionScenarios": "Cenários de coligação",
+    "currentStandings": "Situação atual",
+    "aboutForecast": "Sobre esta previsão",
+    "aboutDescription": "Este modelo eleitoral combina dados de sondagens, padrões históricos de voto e informações demográficas para projetar resultados prováveis para as eleições parlamentares portuguesas. A previsão é atualizada regularmente à medida que novos dados ficam disponíveis."
+  },
+  "forecast": {
+    "title": "Previsão Eleitoral Completa",
+    "subtitle": "Eleições Parlamentares Portuguesas",
+    "pollingTrends": "Tendências das sondagens",
+    "coalitionSeats": "Distribuição de mandatos por coligação",
+    "individualParties": "Projeções de partidos individuais",
+    "districtAnalysis": "Análise Distrital",
+    "leftCoalition": "Coligação de esquerda",
+    "rightCoalition": "Coligação de direita",
+    "majorityChance": "Probabilidade de maioria",
+    "pollingHouseEffects": "Efeitos das casas de sondagens",
+    "aboutModel": "Sobre este modelo",
+    "dataSources": "Fontes de dados",
+    "methodology": "Metodologia",
+    "updates": "Atualizações",
+    "mostSeats": "mais mandatos",
+    "coalitionDescription": "Cada ponto representa um resultado de simulação. Linhas pretas mostram a contagem mediana de mandatos para cada coligação.",
+    "simulationDescription": "Baseado em {count} simulações de Monte Carlo. Pontos mostram projeções médias, bandas mostram intervalos de confiança de 50% e 80%.",
+    "pollingTrendsDescription": "Médias de sondagens suavizadas baseadas em {count} pontos de dados. Linhas mostram percentagem estimada de votos ao longo do tempo com bandas de incerteza.",
+    "dataSourcesDescription": "Dados de sondagens das principais empresas de sondagens portuguesas, ponderados por fiabilidade e atualidade. Resultados históricos de eleições e dados demográficos.",
+    "methodologyDescription": "Simulação de Monte Carlo considerando incerteza das sondagens, variações distritais e sistema de alocação de mandatos D'Hondt.",
+    "updatesDescription": "O modelo é atualizado à medida que novos dados de sondagens ficam disponíveis. A incerteza diminui à medida que o dia das eleições se aproxima.",
+    "voteShareLabel": "Percentagem de votos (%)"
+  },
+  "articles": {
+    "title": "Análise e Artigos",
+    "subtitle": "Análise aprofundada da política portuguesa e tendências eleitorais",
+    "comingSoon": "Mais Análises em Breve",
+    "comingSoonDescription": "Estamos a trabalhar em mais peças de análise aprofundada cobrindo dinâmicas eleitorais portuguesas, tendências de sondagens e metodologia de previsão.",
+    "newsletterNotification": "Subscreva a nossa newsletter para ser notificado quando novos artigos forem publicados.",
+    "readTime": "leitura",
+    "by": "Por",
+    "sampleArticles": {
+      "article1": {
+        "title": "Compreender o Sistema Eleitoral Português",
+        "excerpt": "Um guia abrangente sobre como funciona o sistema de representação proporcional de Portugal e porque é importante para as previsões.",
+        "tags": "Sistema Eleitoral,Análise"
+      },
+      "article2": {
+        "title": "A Ascensão do Chega: Analisando a Onda de Direita",
+        "excerpt": "Examinando os fatores por trás do rápido crescimento do Chega e o que significa para a política portuguesa.",
+        "tags": "Análise Partidária,Chega"
+      },
+      "article3": {
+        "title": "Precisão das Sondagens nas Eleições Portuguesas: Uma Análise Histórica",
+        "excerpt": "Quão precisas têm sido as sondagens portuguesas historicamente, e o que podemos aprender para futuras previsões?",
+        "tags": "Sondagens,Metodologia"
+      }
+    }
+  },
+  "about": {
+    "title": "Sobre o estimador.pt",
+    "subtitle": "Previsões eleitorais independentes e baseadas em dados para Portugal",
+    "mission": "A Nossa Missão",
+    "whatWeDo": "O Que Fazemos",
+    "approach": "A Nossa Abordagem",
+    "team": "Sobre a Equipa",
+    "limitations": "Limitações e Advertências",
+    "contact": "Para questões, sugestões ou consultas dos media, por favor contacte-nos em",
+    "founder": "O estimador.pt foi fundado por",
+    "combiningExpertise": "combinando experiência em ciência de dados, estatística e política portuguesa.",
+    "missionDescription1": "O estimador.pt fornece previsões transparentes e baseadas em dados para as eleições portuguesas. Acreditamos que análises eleitorais de alta qualidade devem ser acessíveis a todos, não apenas a iniciados políticos.",
+    "missionDescription2": "O nosso objetivo é ajudar os cidadãos portugueses a compreender melhor as dinâmicas eleitorais e tomar decisões informadas, fornecendo análises claras, precisas e imparciais de dados de sondagens e tendências eleitorais.",
+    "whatWeDoList": {
+      "forecasting": "Modelos estatísticos que combinam dados de sondagens com padrões históricos",
+      "seatProjections": "Análise detalhada de como os votos se traduzem em mandatos parlamentares",
+      "trendAnalysis": "Acompanhamento a longo prazo do apoio partidário e dinâmicas eleitorais",
+      "pollingAnalysis": "Exame dos efeitos das casas e padrões de viés nas sondagens portuguesas"
+    },
+    "approachDescription1": "Utilizamos métodos estatísticos rigorosos combinados com transparência sobre as nossas assunções e limitações. Os nossos modelos são inspirados nos principais esforços internacionais de previsão, mas são especificamente desenhados para o sistema pluripartidário e de representação proporcional de Portugal.",
+    "approachDescription2": "Princípios fundamentais:",
+    "approachPrinciples": {
+      "transparency": "Metodologia aberta e comunicação clara da incerteza",
+      "independence": "Sem afiliações políticas ou financiamento de fontes partidárias",
+      "accuracy": "Melhoria contínua baseada em resultados eleitorais",
+      "accessibility": "Tornar análises complexas compreensíveis para audiências gerais"
+    },
+    "limitationsDescription1": "A previsão eleitoral é inerentemente incerta. Os nossos modelos representam probabilidades, não certezas. Fatores que consideramos incluem:",
+    "limitationsList": {
+      "pollingError": "Erro e viés das sondagens",
+      "campaignDynamics": "Dinâmicas tardias de campanha",
+      "turnout": "Variações na participação eleitoral",
+      "regional": "Padrões regionais de voto"
+    },
+    "limitationsDescription2": "As nossas previsões devem ser entendidas como uma peça de informação entre muitas ao analisar as eleições portuguesas.",
+    "footerCopyright": "© 2025 estimador.pt • Construído com transparência e metodologia aberta",
+    "footerDeveloper": "Desenvolvido por Bernardo Caldas"
+  },
+  "methodology": {
+    "title": "Metodologia",
+    "subtitle": "Como funciona o nosso Modelo Eleitoral de Processo Gaussiano Dinâmico",
+    "overview": "Visão Geral",
+    "challenge": "O Desafio de Prever Eleições Portuguesas",
+    "dynamicModel": "O Modelo de Processo Gaussiano Dinâmico",
+    "pollingAnalysis": "Análise de Sondagens",
+    "seatSimulation": "Processo de Simulação de Mandatos",
+    "uncertainty": "Quantificação da Incerteza",
+    "validation": "Validação do Modelo",
+    "limitations": "Limitações e Advertências",
+    "dataSources": "Fontes de Dados",
+    "overviewDescription": "Desenvolvemos um modelo estatístico de previsão para as eleições portuguesas que captura tanto tendências políticas de longo prazo como dinâmicas distritais. Representa uma evolução dos modelos eleitorais tradicionais, desenhado especificamente para enfrentar os desafios do sistema eleitoral português multi-partidário e baseado em distritos.",
+    "challengeDescription1": "O panorama eleitoral português apresenta desafios únicos de previsão. O país tem múltiplos partidos políticos significativos que vão desde os tradicionais centro-esquerda (PS) e centro-direita (AD) a novos participantes como o liberal IL e o Chega de direita. As eleições são decididas através de um sistema de representação proporcional em múltiplos distritos, com mandatos alocados usando o método D'Hondt.",
+    "challengeDescription2": "As abordagens tradicionais de previsão lutam com vários aspetos deste sistema:",
+    "validationDescription": "Refinamos continuamente o nosso modelo com base nestes exercícios de validação.",
+    "limitationsDescription1": "O nosso modelo tem várias limitações importantes:",
+    "limitationsDescription2": "Encorajamos os utilizadores a interpretar as nossas previsões como estimativas probabilísticas, não certezas."
+  },
+  "parties": {
+    "AD": "Aliança Democrática",
+    "PS": "Partido Socialista",
+    "CH": "Chega",
+    "IL": "Iniciativa Liberal",
+    "BE": "Bloco de Esquerda",
+    "CDU": "Coligação Democrática Unitária",
+    "L": "LIVRE",
+    "PAN": "Pessoas-Animais-Natureza"
+  },
+  "meta": {
+    "defaultTitle": "estimador.pt - Previsões Eleitorais Portuguesas",
+    "defaultDescription": "Previsões eleitorais baseadas em dados para a democracia portuguesa. Previsões probabilísticas em tempo real, análise de sondagens e insights eleitorais.",
+    "homepageTitle": "Previsão Eleitoral Portuguesa - estimador.pt",
+    "forecastTitle": "Painel de Previsões Eleitorais - estimador.pt",
+    "articlesTitle": "Análise Política e Artigos - estimador.pt",
+    "aboutTitle": "Sobre o estimador.pt - Previsões Eleitorais",
+    "methodologyTitle": "Metodologia - Como Funciona o Nosso Modelo"
+  }
+}

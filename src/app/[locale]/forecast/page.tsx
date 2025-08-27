@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { 
   calculateBlocMajorityProbability, 
   calculatePartyMostSeatsProbability,
@@ -14,8 +13,39 @@ import { DistrictSummary } from "@/components/charts/DistrictSummary";
 import { HouseEffects } from "@/components/charts/HouseEffects";
 import { CoalitionDotPlot } from "@/components/charts/CoalitionDotPlot";
 import { Header } from "@/components/Header";
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/routing';
+import type { Metadata } from 'next';
 
-export default async function ForecastPage() {
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: Promise<{ locale: string }> 
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
+  
+  return {
+    title: t('meta.forecastTitle'),
+    description: t('meta.defaultDescription'),
+    openGraph: {
+      title: t('meta.forecastTitle'),
+      description: t('meta.defaultDescription'),
+      url: `https://estimador.pt/${locale}/forecast`,
+    },
+    alternates: {
+      canonical: `https://estimador.pt/${locale}/forecast`,
+    },
+  };
+}
+
+export default async function ForecastPage({
+  params
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
   const { seatData, nationalTrends, districtForecast, contestedSeats, houseEffects } = await loadForecastData();
   
   // Calculate probabilities
@@ -52,25 +82,25 @@ export default async function ForecastPage() {
               <div className="text-2xl font-bold text-gray-900 mb-1">
                 {formatProbabilityPercent(probAdMostSeats)}
               </div>
-              <div className="text-sm text-gray-600">AD most seats</div>
+              <div className="text-sm text-gray-600">AD {t('forecast.mostSeats', { default: 'most seats' })}</div>
             </div>
             <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
               <div className="text-2xl font-bold text-gray-900 mb-1">
                 {formatProbabilityPercent(probPsMostSeats)}
               </div>
-              <div className="text-sm text-gray-600">PS most seats</div>
+              <div className="text-sm text-gray-600">PS {t('forecast.mostSeats', { default: 'most seats' })}</div>
             </div>
             <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
               <div className="text-2xl font-bold text-gray-900 mb-1">
                 {formatProbabilityPercent(probRightMajority)}
               </div>
-              <div className="text-sm text-gray-600">Right majority</div>
+              <div className="text-sm text-gray-600">{t('homepage.rightMajority')}</div>
             </div>
             <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
               <div className="text-2xl font-bold text-gray-900 mb-1">
                 {formatProbabilityPercent(probLeftMajority)}
               </div>
-              <div className="text-sm text-gray-600">Left majority</div>
+              <div className="text-sm text-gray-600">{t('homepage.leftMajority')}</div>
             </div>
           </div>
         </div>
@@ -84,12 +114,11 @@ export default async function ForecastPage() {
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
               <TrendingUp className="w-5 h-5 text-green-medium" />
-              <h2 className="text-xl font-semibold text-gray-900">Polling trends</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('forecast.pollingTrends')}</h2>
             </div>
-            <PollingChart data={nationalTrends} />
+            <PollingChart data={nationalTrends} voteShareLabel={t('forecast.voteShareLabel')} />
             <p className="text-sm text-gray-600 mt-4">
-              Smoothed polling averages based on {nationalTrends.length} data points. 
-              Lines show estimated vote share over time with uncertainty bands.
+              {t('forecast.pollingTrendsDescription', { count: nationalTrends.length })}
             </p>
           </div>
 
@@ -97,11 +126,15 @@ export default async function ForecastPage() {
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
               <BarChart3 className="w-5 h-5 text-green-medium" />
-              <h2 className="text-xl font-semibold text-gray-900">Coalition seat distributions</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('forecast.coalitionSeats')}</h2>
             </div>
-            <CoalitionDotPlot data={seatData} />
+            <CoalitionDotPlot 
+              data={seatData} 
+              leftCoalitionLabel={t('forecast.leftCoalition')}
+              rightCoalitionLabel={t('forecast.rightCoalition')}
+            />
             <p className="text-sm text-gray-600 mt-4">
-              Each dot represents one simulation outcome. Black lines show median seat counts for each coalition.
+              {t('forecast.coalitionDescription')}
             </p>
           </div>
 
@@ -109,7 +142,7 @@ export default async function ForecastPage() {
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
               <Users className="w-5 h-5 text-green-medium" />
-              <h2 className="text-xl font-semibold text-gray-900">Individual party projections</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('forecast.individualParties')}</h2>
             </div>
             <SeatChart data={seatData.flatMap((simulation, index) => 
               Object.entries(simulation)
@@ -120,8 +153,7 @@ export default async function ForecastPage() {
                 }))
             )} />
             <p className="text-sm text-gray-600 mt-4">
-              Based on {seatData.length.toLocaleString()} Monte Carlo simulations. 
-              Dots show mean projections, bands show 50% and 80% confidence intervals.
+              {t('forecast.simulationDescription', { count: seatData.length.toLocaleString() })}
             </p>
           </div>
 
@@ -129,7 +161,7 @@ export default async function ForecastPage() {
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
               <Map className="w-5 h-5 text-green-medium" />
-              <h2 className="text-xl font-semibold text-gray-900">District Analysis</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('forecast.districtAnalysis')}</h2>
             </div>
             <DistrictSummary districtData={districtForecast} contestedData={contestedSeats} />
           </div>
@@ -137,7 +169,7 @@ export default async function ForecastPage() {
           {/* Coalition Analysis */}
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Left-wing coalition</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('forecast.leftCoalition')}</h3>
               <div className="space-y-3">
                 {leftBlocParties.map(party => {
                   const partyData = parties.find((p: any) => p.party === party);
@@ -149,7 +181,7 @@ export default async function ForecastPage() {
                           style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }}
                         />
                         <span className="text-sm font-medium text-gray-900">
-                          {partyNames[party as keyof typeof partyNames]}
+                          {t(`parties.${party}`)}
                         </span>
                       </div>
                       <span className="text-sm font-bold text-gray-900">
@@ -160,7 +192,7 @@ export default async function ForecastPage() {
                 })}
                 <div className="border-t pt-3 mt-3">
                   <div className="flex items-center justify-between font-semibold">
-                    <span className="text-sm text-gray-900">Majority chance</span>
+                    <span className="text-sm text-gray-900">{t('forecast.majorityChance')}</span>
                     <span className="text-lg text-gray-900">
                       {formatProbabilityPercent(probLeftMajority)}
                     </span>
@@ -170,7 +202,7 @@ export default async function ForecastPage() {
             </div>
 
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Right-wing coalition</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('forecast.rightCoalition')}</h3>
               <div className="space-y-3">
                 {rightBlocParties.map(party => {
                   const partyData = parties.find((p: any) => p.party === party);
@@ -182,7 +214,7 @@ export default async function ForecastPage() {
                           style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }}
                         />
                         <span className="text-sm font-medium text-gray-900">
-                          {partyNames[party as keyof typeof partyNames]}
+                          {t(`parties.${party}`)}
                         </span>
                       </div>
                       <span className="text-sm font-bold text-gray-900">
@@ -193,7 +225,7 @@ export default async function ForecastPage() {
                 })}
                 <div className="border-t pt-3 mt-3">
                   <div className="flex items-center justify-between font-semibold">
-                    <span className="text-sm text-gray-900">Majority chance</span>
+                    <span className="text-sm text-gray-900">{t('forecast.majorityChance')}</span>
                     <span className="text-lg text-gray-900">
                       {formatProbabilityPercent(probRightMajority)}
                     </span>
@@ -207,43 +239,40 @@ export default async function ForecastPage() {
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
               <Users className="w-5 h-5 text-green-medium" />
-              <h2 className="text-xl font-semibold text-gray-900">Polling house effects</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('forecast.pollingHouseEffects')}</h2>
             </div>
             <HouseEffects data={houseEffects} />
           </div>
 
           {/* Model Details */}
           <div className="bg-green-pale border border-green-medium/30 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">About this model</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('forecast.aboutModel')}</h3>
             <div className="grid md:grid-cols-3 gap-6 text-sm text-gray-600">
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4" />
-                  <span className="font-medium">Data sources</span>
+                  <span className="font-medium">{t('forecast.dataSources')}</span>
                 </div>
                 <p>
-                  Polling data from major Portuguese polling firms, weighted by reliability 
-                  and recency. Historical election results and demographic data.
+                  {t('forecast.dataSourcesDescription')}
                 </p>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <BarChart3 className="w-4 h-4" />
-                  <span className="font-medium">Methodology</span>
+                  <span className="font-medium">{t('forecast.methodology')}</span>
                 </div>
                 <p>
-                  Monte Carlo simulation accounting for polling uncertainty, district-level 
-                  variations, and D'Hondt seat allocation system.
+                  {t('forecast.methodologyDescription')}
                 </p>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="w-4 h-4" />
-                  <span className="font-medium">Updates</span>
+                  <span className="font-medium">{t('forecast.updates')}</span>
                 </div>
                 <p>
-                  Model is updated as new polling data becomes available. 
-                  Uncertainty decreases as election day approaches.
+                  {t('forecast.updatesDescription')}
                 </p>
               </div>
             </div>

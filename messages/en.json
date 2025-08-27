@@ -1,0 +1,159 @@
+{
+  "nav": {
+    "home": "Home",
+    "forecast": "Forecast",
+    "analysis": "Analysis",
+    "about": "About",
+    "methodology": "Methodology"
+  },
+  "common": {
+    "updated": "Updated",
+    "simulations": "simulations",
+    "basedOn": "Based on",
+    "methodology": "Methodology",
+    "readMore": "Read more",
+    "share": "Share",
+    "loading": "Loading...",
+    "others": "Others",
+    "seats": "seats"
+  },
+  "homepage": {
+    "tagline": "Portuguese Election Forecast",
+    "leadingWith": "{party} leads election race with {percentage} support",
+    "forecastShows": "Latest forecast shows {party} ahead by {margin} points, with a {probability} chance of winning the most seats",
+    "chanceWinningMostSeats": "Chance of winning most seats",
+    "rightMajority": "Right majority",
+    "leftMajority": "Left majority",
+    "hungParliament": "Hung parliament",
+    "coalitionScenarios": "Coalition scenarios",
+    "currentStandings": "Current standings",
+    "aboutForecast": "About this forecast",
+    "aboutDescription": "This election model combines polling data, historical voting patterns, and demographic information to project likely outcomes for Portugal's parliamentary elections. The forecast is updated regularly as new data becomes available."
+  },
+  "forecast": {
+    "title": "Full Election Forecast",
+    "subtitle": "Portugal Parliamentary Elections",
+    "pollingTrends": "Polling trends",
+    "coalitionSeats": "Coalition seat distributions",
+    "individualParties": "Individual party projections",
+    "districtAnalysis": "District Analysis",
+    "leftCoalition": "Left-wing coalition",
+    "rightCoalition": "Right-wing coalition",
+    "majorityChance": "Majority chance",
+    "pollingHouseEffects": "Polling house effects",
+    "aboutModel": "About this model",
+    "dataSources": "Data sources",
+    "methodology": "Methodology",
+    "updates": "Updates",
+    "mostSeats": "most seats",
+    "coalitionDescription": "Each dot represents one simulation outcome. Black lines show median seat counts for each coalition.",
+    "simulationDescription": "Based on {count} Monte Carlo simulations. Dots show mean projections, bands show 50% and 80% confidence intervals.",
+    "pollingTrendsDescription": "Smoothed polling averages based on {count} data points. Lines show estimated vote share over time with uncertainty bands.",
+    "dataSourcesDescription": "Polling data from major Portuguese polling firms, weighted by reliability and recency. Historical election results and demographic data.",
+    "methodologyDescription": "Monte Carlo simulation accounting for polling uncertainty, district-level variations, and D'Hondt seat allocation system.",
+    "updatesDescription": "Model is updated as new polling data becomes available. Uncertainty decreases as election day approaches.",
+    "voteShareLabel": "Vote share (%)"
+  },
+  "articles": {
+    "title": "Analysis & Articles",
+    "subtitle": "In-depth analysis of Portuguese politics and election trends",
+    "comingSoon": "More Analysis Coming Soon",
+    "comingSoonDescription": "We're working on more in-depth analysis pieces covering Portuguese electoral dynamics, polling trends, and forecast methodology.",
+    "newsletterNotification": "Subscribe to our newsletter to be notified when new articles are published.",
+    "readTime": "read",
+    "by": "By",
+    "sampleArticles": {
+      "article1": {
+        "title": "Understanding Portugal's Electoral System",
+        "excerpt": "A comprehensive guide to how Portugal's proportional representation system works and why it matters for forecasting.",
+        "tags": "Electoral System,Analysis"
+      },
+      "article2": {
+        "title": "The Rise of Chega: Analyzing the Right-Wing Surge", 
+        "excerpt": "Examining the factors behind Chega's rapid growth and what it means for Portuguese politics.",
+        "tags": "Party Analysis,Chega"
+      },
+      "article3": {
+        "title": "Polling Accuracy in Portuguese Elections: A Historical Analysis",
+        "excerpt": "How accurate have Portuguese polls been historically, and what can we learn for future forecasting?",
+        "tags": "Polling,Methodology"
+      }
+    }
+  },
+  "about": {
+    "title": "About estimador.pt",
+    "subtitle": "Independent, data-driven election forecasting for Portugal",
+    "mission": "Our Mission",
+    "whatWeDo": "What We Do",
+    "approach": "Our Approach",
+    "team": "About the Team",
+    "limitations": "Limitations & Disclaimers",
+    "contact": "For questions, suggestions, or media inquiries, please contact us at",
+    "founder": "estimador.pt was founded by",
+    "combiningExpertise": "combining expertise in data science, statistics, and Portuguese politics.",
+    "missionDescription1": "estimador.pt provides transparent, data-driven forecasts for Portuguese elections. We believe that high-quality election analysis should be accessible to everyone, not just political insiders.",
+    "missionDescription2": "Our goal is to help Portuguese citizens better understand electoral dynamics and make informed decisions by providing clear, accurate, and unbiased analysis of polling data and electoral trends.",
+    "whatWeDoList": {
+      "forecasting": "Statistical models that combine polling data with historical patterns",
+      "seatProjections": "Detailed analysis of how votes translate to parliamentary seats", 
+      "trendAnalysis": "Long-term tracking of party support and electoral dynamics",
+      "pollingAnalysis": "Examination of house effects and bias patterns in Portuguese polling"
+    },
+    "approachDescription1": "We use rigorous statistical methods combined with transparency about our assumptions and limitations. Our models are inspired by leading international forecasting efforts but are specifically designed for Portugal's multi-party, proportional representation system.",
+    "approachDescription2": "Key principles:",
+    "approachPrinciples": {
+      "transparency": "Open methodology and clear communication of uncertainty",
+      "independence": "No political affiliations or funding from partisan sources", 
+      "accuracy": "Continuous improvement based on electoral outcomes",
+      "accessibility": "Making complex analysis understandable to general audiences"
+    },
+    "limitationsDescription1": "Election forecasting is inherently uncertain. Our models represent probabilities, not certainties. Factors we consider include:",
+    "limitationsList": {
+      "pollingError": "Polling error and bias",
+      "campaignDynamics": "Late campaign dynamics", 
+      "turnout": "Turnout variations",
+      "regional": "Regional voting patterns"
+    },
+    "limitationsDescription2": "Our forecasts should be understood as one piece of information among many when analyzing Portuguese elections.",
+    "footerCopyright": "© 2025 estimador.pt • Built with transparency and open methodology",
+    "footerDeveloper": "Developed by Bernardo Caldas"
+  },
+  "methodology": {
+    "title": "Methodology",
+    "subtitle": "How our Dynamic Gaussian Process Election Model works",
+    "overview": "Overview",
+    "challenge": "The Challenge of Forecasting Portuguese Elections",
+    "dynamicModel": "The Dynamic Gaussian Process Model",
+    "pollingAnalysis": "Polling Analysis", 
+    "seatSimulation": "Seat Simulation Process",
+    "uncertainty": "Uncertainty Quantification",
+    "validation": "Model Validation",
+    "limitations": "Limitations and Caveats",
+    "dataSources": "Data Sources",
+    "overviewDescription": "We've developed a statistical forecasting model for Portuguese elections that captures both long-term political trends and district-level dynamics. It represents an evolution of traditional election models, designed specifically to address the challenges of Portugal's multi-party, district-based electoral system.",
+    "challengeDescription1": "Portugal's electoral landscape presents unique forecasting challenges. The country has multiple significant political parties ranging from the traditional center-left (PS) and center-right (AD) to newer entrants like the liberal IL and right-wing Chega. Elections are decided through a proportional representation system across multiple districts, with seats allocated using the D'Hondt method.",
+    "challengeDescription2": "Traditional forecasting approaches struggle with several aspects of this system:",
+    "validationDescription": "We continuously refine our model based on these validation exercises.",
+    "limitationsDescription1": "Our model has several important limitations:",
+    "limitationsDescription2": "We encourage users to interpret our forecasts as probabilistic estimates, not certainties."
+  },
+  "parties": {
+    "AD": "Democratic Alliance",
+    "PS": "Socialist Party",
+    "CH": "Chega",
+    "IL": "Liberal Initiative",
+    "BE": "Left Bloc",
+    "CDU": "Unitary Democratic Coalition",
+    "L": "LIVRE",
+    "PAN": "People-Animals-Nature"
+  },
+  "meta": {
+    "defaultTitle": "estimador.pt - Portuguese Election Forecasting",
+    "defaultDescription": "Data-driven election forecasting for Portuguese democracy. Real-time probabilistic forecasts, polling analysis, and electoral insights.",
+    "homepageTitle": "Portuguese Election Forecast - estimador.pt",
+    "forecastTitle": "Election Forecast Dashboard - estimador.pt",
+    "articlesTitle": "Political Analysis & Articles - estimador.pt",
+    "aboutTitle": "About estimador.pt - Election Forecasting",
+    "methodologyTitle": "Methodology - How Our Model Works"
+  }
+}

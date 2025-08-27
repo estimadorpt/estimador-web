@@ -11,9 +11,15 @@ interface SeatData {
 
 interface CoalitionDotPlotProps {
   data: SeatData[];
+  leftCoalitionLabel?: string;
+  rightCoalitionLabel?: string;
 }
 
-export function CoalitionDotPlot({ data }: CoalitionDotPlotProps) {
+export function CoalitionDotPlot({ 
+  data, 
+  leftCoalitionLabel = "Left coalition", 
+  rightCoalitionLabel = "Right coalition" 
+}: CoalitionDotPlotProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,8 +41,8 @@ export function CoalitionDotPlot({ data }: CoalitionDotPlotProps) {
       const rightSeats = rightBlocParties.reduce((sum, party) => sum + (simulation[party] || 0), 0);
       
       return [
-        { draw: index, bloc: "Left coalition", totalSeats: leftSeats },
-        { draw: index, bloc: "Right coalition", totalSeats: rightSeats }
+        { draw: index, bloc: leftCoalitionLabel, totalSeats: leftSeats },
+        { draw: index, bloc: rightCoalitionLabel, totalSeats: rightSeats }
       ];
     });
 
@@ -74,13 +80,13 @@ export function CoalitionDotPlot({ data }: CoalitionDotPlotProps) {
         ticks: [50, 75, 100, majorityThreshold, 125]
       },
       fy: {
-        domain: ["Left coalition", "Right coalition"],
+        domain: [leftCoalitionLabel, rightCoalitionLabel],
         label: null,
         axis: "left",
         padding: 0.1
       },
       color: {
-        domain: ["Left coalition", "Right coalition"],
+        domain: [leftCoalitionLabel, rightCoalitionLabel],
         range: ["#10b981", "#f59e0b"]
       },
       marks: [
@@ -198,13 +204,13 @@ export function CoalitionDotPlot({ data }: CoalitionDotPlotProps) {
               ticks: [50, 75, 100, majorityThreshold, 125]
             },
             fy: {
-              domain: ["Left coalition", "Right coalition"],
+              domain: [leftCoalitionLabel, rightCoalitionLabel],
               label: null,
               axis: "left",
               padding: 0.1
             },
             color: {
-              domain: ["Left coalition", "Right coalition"],
+              domain: [leftCoalitionLabel, rightCoalitionLabel],
               range: ["#10b981", "#f59e0b"]
             },
             marks: [

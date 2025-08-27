@@ -2,6 +2,7 @@
   "name": "estimador-web",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -19,6 +20,7 @@
     "d3": "^7.9.0",
     "lucide-react": "^0.541.0",
     "next": "15.5.0",
+    "next-intl": "^4.3.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "tailwind-merge": "^3.3.1"
