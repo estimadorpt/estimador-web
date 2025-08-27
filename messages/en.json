@@ -1,0 +1,100 @@
+{
+  "nav": {
+    "home": "Home",
+    "forecast": "Forecast",
+    "analysis": "Analysis",
+    "about": "About",
+    "methodology": "Methodology"
+  },
+  "common": {
+    "updated": "Updated",
+    "simulations": "simulations",
+    "basedOn": "Based on",
+    "methodology": "Methodology",
+    "readMore": "Read more",
+    "share": "Share",
+    "loading": "Loading..."
+  },
+  "homepage": {
+    "tagline": "Portuguese Election Forecast",
+    "leadingWith": "{party} leads election race with {percentage} support",
+    "forecastShows": "Latest forecast shows {party} ahead by {margin} points, with a {probability} chance of winning the most seats",
+    "chanceWinningMostSeats": "Chance of winning most seats",
+    "rightMajority": "Right majority",
+    "leftMajority": "Left majority",
+    "hungParliament": "Hung parliament",
+    "coalitionScenarios": "Coalition scenarios",
+    "currentStandings": "Current standings",
+    "aboutForecast": "About this forecast",
+    "aboutDescription": "This election model combines polling data, historical voting patterns, and demographic information to project likely outcomes for Portugal's parliamentary elections. The forecast is updated regularly as new data becomes available."
+  },
+  "forecast": {
+    "title": "Full Election Forecast",
+    "subtitle": "Portugal Parliamentary Elections",
+    "pollingTrends": "Polling trends",
+    "coalitionSeats": "Coalition seat distributions",
+    "individualParties": "Individual party projections",
+    "districtAnalysis": "District Analysis",
+    "leftCoalition": "Left-wing coalition",
+    "rightCoalition": "Right-wing coalition",
+    "majorityChance": "Majority chance",
+    "pollingHouseEffects": "Polling house effects",
+    "aboutModel": "About this model",
+    "dataSources": "Data sources",
+    "methodology": "Methodology",
+    "updates": "Updates"
+  },
+  "articles": {
+    "title": "Analysis & Articles",
+    "subtitle": "In-depth analysis of Portuguese politics and election trends",
+    "comingSoon": "More Analysis Coming Soon",
+    "comingSoonDescription": "We're working on more in-depth analysis pieces covering Portuguese electoral dynamics, polling trends, and forecast methodology.",
+    "newsletterNotification": "Subscribe to our newsletter to be notified when new articles are published.",
+    "readTime": "read",
+    "by": "By"
+  },
+  "about": {
+    "title": "About estimador.pt",
+    "subtitle": "Independent, data-driven election forecasting for Portugal",
+    "mission": "Our Mission",
+    "whatWeDo": "What We Do",
+    "approach": "Our Approach",
+    "team": "About the Team",
+    "limitations": "Limitations & Disclaimers",
+    "contact": "For questions, suggestions, or media inquiries, please contact us at",
+    "founder": "estimador.pt was founded by",
+    "combiningExpertise": "combining expertise in data science, statistics, and Portuguese politics."
+  },
+  "methodology": {
+    "title": "Methodology",
+    "subtitle": "How our Dynamic Gaussian Process Election Model works",
+    "overview": "Overview",
+    "challenge": "The Challenge of Forecasting Portuguese Elections",
+    "dynamicModel": "The Dynamic Gaussian Process Model",
+    "pollingAnalysis": "Polling Analysis",
+    "seatSimulation": "Seat Simulation Process",
+    "uncertainty": "Uncertainty Quantification",
+    "validation": "Model Validation",
+    "limitations": "Limitations and Caveats",
+    "dataSources": "Data Sources"
+  },
+  "parties": {
+    "AD": "Democratic Alliance",
+    "PS": "Socialist Party",
+    "CH": "Chega",
+    "IL": "Liberal Initiative",
+    "BE": "Left Bloc",
+    "CDU": "Unitary Democratic Coalition",
+    "L": "LIVRE",
+    "PAN": "People-Animals-Nature"
+  },
+  "meta": {
+    "defaultTitle": "estimador.pt - Portuguese Election Forecasting",
+    "defaultDescription": "Data-driven election forecasting for Portuguese democracy. Real-time probabilistic forecasts, polling analysis, and electoral insights.",
+    "homepageTitle": "Portuguese Election Forecast - estimador.pt",
+    "forecastTitle": "Election Forecast Dashboard - estimador.pt",
+    "articlesTitle": "Political Analysis & Articles - estimador.pt",
+    "aboutTitle": "About estimador.pt - Election Forecasting",
+    "methodologyTitle": "Methodology - How Our Model Works"
+  }
+}
