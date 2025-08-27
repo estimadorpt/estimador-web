@@ -1,7 +1,7 @@
-import { Article } from "@/lib/articles";
+import { MDXArticleMetadata } from "@/lib/mdx-articles";
 
 interface ArticleStructuredDataProps {
-  article: Article;
+  article: MDXArticleMetadata;
 }
 
 export function ArticleStructuredData({ article }: ArticleStructuredDataProps) {

@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/Header";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { getArticles } from "@/lib/articles";
+import { getMDXArticlesByLocale } from "@/lib/mdx-articles";
 import { ArticleListStructuredData } from "@/components/StructuredData";
 import type { Metadata } from 'next';
 
@@ -36,7 +36,7 @@ export default async function ArticlesPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  const articles = getArticles();
+  const articles = getMDXArticlesByLocale(locale);
 
   return (
     <>
