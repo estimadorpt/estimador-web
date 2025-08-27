@@ -98,9 +98,9 @@ export function CoalitionDotPlot({
           facet: "exclude"
         }),
         
-        // Dodged dots with slight horizontal jitter
+        // Dodged dots with consistent horizontal jitter
         Plot.dotX(sampledData, Plot.dodgeY({
-          x: d => d.totalSeats + (Math.random() - 0.5) * 1.5, // Add small horizontal jitter
+          x: d => d.totalSeats + (d.draw % 100 - 50) * 0.03, // Consistent jitter based on draw index
           fy: "bloc",
           fill: "bloc",
           fillOpacity: 0.7,
@@ -170,8 +170,8 @@ export function CoalitionDotPlot({
             const rightSeats = rightBlocParties.reduce((sum, party) => sum + (simulation[party] || 0), 0);
             
             return [
-              { draw: index, bloc: "Left coalition", totalSeats: leftSeats },
-              { draw: index, bloc: "Right coalition", totalSeats: rightSeats }
+              { draw: index, bloc: leftCoalitionLabel, totalSeats: leftSeats },
+              { draw: index, bloc: rightCoalitionLabel, totalSeats: rightSeats }
             ];
           });
 
@@ -222,9 +222,9 @@ export function CoalitionDotPlot({
                 facet: "exclude"
               }),
               
-              // Dodged dots with slight horizontal jitter
+              // Dodged dots with consistent horizontal jitter
               Plot.dotX(sampledData, Plot.dodgeY({
-                x: d => d.totalSeats + (Math.random() - 0.5) * 1.5, // Add small horizontal jitter
+                x: d => d.totalSeats + (d.draw % 100 - 50) * 0.03, // Consistent jitter based on draw index
                 fy: "bloc",
                 fill: "bloc",
                 fillOpacity: 0.7,
