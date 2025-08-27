@@ -13,6 +13,7 @@ import { SeatChart } from "@/components/charts/SeatChart";
 import { DistrictSummary } from "@/components/charts/DistrictSummary";
 import { HouseEffects } from "@/components/charts/HouseEffects";
 import { CoalitionDotPlot } from "@/components/charts/CoalitionDotPlot";
+import { Header } from "@/components/Header";
 
 export default async function ForecastPage() {
   const { seatData, nationalTrends, districtForecast, contestedSeats, houseEffects } = await loadForecastData();
@@ -41,33 +42,10 @@ export default async function ForecastPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link 
-                href="/" 
-                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
-              >
-                <ArrowLeft className="w-4 h-4 mr-1" />
-                Back to home
-              </Link>
-              <div className="border-l pl-4">
-                <h1 className="text-xl font-bold text-gray-900">Full Election Forecast</h1>
-                <p className="text-sm text-gray-600">Portugal Parliamentary Elections</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-gray-500">
-              <Calendar className="w-3 h-3" />
-              <span>Updated {lastUpdate}</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header lastUpdate={lastUpdate} />
 
       {/* Summary Stats */}
-      <section className="bg-gray-50 border-b border-gray-200">
+      <section className="bg-green-pale border-b border-green-medium/30">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
@@ -105,7 +83,7 @@ export default async function ForecastPage() {
           {/* Polling Trends */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
-              <TrendingUp className="w-5 h-5 text-blue-600" />
+              <TrendingUp className="w-5 h-5 text-green-medium" />
               <h2 className="text-xl font-semibold text-gray-900">Polling trends</h2>
             </div>
             <PollingChart data={nationalTrends} />
@@ -118,7 +96,7 @@ export default async function ForecastPage() {
           {/* Coalition Outcomes */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
-              <BarChart3 className="w-5 h-5 text-green-600" />
+              <BarChart3 className="w-5 h-5 text-green-medium" />
               <h2 className="text-xl font-semibold text-gray-900">Coalition seat distributions</h2>
             </div>
             <CoalitionDotPlot data={seatData} />
@@ -130,7 +108,7 @@ export default async function ForecastPage() {
           {/* Seat Projections */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
-              <Users className="w-5 h-5 text-purple-600" />
+              <Users className="w-5 h-5 text-green-medium" />
               <h2 className="text-xl font-semibold text-gray-900">Individual party projections</h2>
             </div>
             <SeatChart data={seatData.flatMap((simulation, index) => 
@@ -150,7 +128,7 @@ export default async function ForecastPage() {
           {/* District Analysis */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
-              <Map className="w-5 h-5 text-purple-600" />
+              <Map className="w-5 h-5 text-green-medium" />
               <h2 className="text-xl font-semibold text-gray-900">District Analysis</h2>
             </div>
             <DistrictSummary districtData={districtForecast} contestedData={contestedSeats} />
@@ -228,14 +206,14 @@ export default async function ForecastPage() {
           {/* Polling Analysis */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-6">
-              <Users className="w-5 h-5 text-indigo-600" />
+              <Users className="w-5 h-5 text-green-medium" />
               <h2 className="text-xl font-semibold text-gray-900">Polling house effects</h2>
             </div>
             <HouseEffects data={houseEffects} />
           </div>
 
           {/* Model Details */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+          <div className="bg-green-pale border border-green-medium/30 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">About this model</h3>
             <div className="grid md:grid-cols-3 gap-6 text-sm text-gray-600">
               <div>

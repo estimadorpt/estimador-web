@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { Header } from "@/components/Header";
 
 export default function ArticlesPage() {
   // Sample articles - in a real app these would come from a CMS or database
@@ -35,37 +36,13 @@ export default function ArticlesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Link href="/" className="text-2xl font-bold text-slate-900 hover:text-slate-700">
-                estimador.pt
-              </Link>
-              <p className="text-sm text-slate-600">Portuguese Election Forecasting</p>
-            </div>
-            <nav className="flex gap-6">
-              <Link href="/" className="text-slate-700 hover:text-slate-900 font-medium">
-                Home
-              </Link>
-              <Link href="/forecast" className="text-slate-700 hover:text-slate-900 font-medium">
-                Forecast
-              </Link>
-              <span className="text-slate-900 font-medium">Analysis</span>
-              <Link href="/about" className="text-slate-700 hover:text-slate-900 font-medium">
-                About
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-green-pale">
+      <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-4">Analysis & Articles</h1>
-          <p className="text-lg text-slate-600">
+          <h1 className="text-3xl font-bold text-green-dark mb-4">Analysis & Articles</h1>
+          <p className="text-lg text-green-dark/70">
             In-depth analysis of Portuguese politics and election trends
           </p>
         </div>
@@ -77,7 +54,7 @@ export default function ArticlesPage() {
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <CardTitle className="text-xl">
-                      <Link href={`/articles/${article.id}`} className="hover:text-blue-600 transition-colors">
+                      <Link href={`/articles/${article.id}`} className="hover:text-green-medium transition-colors">
                         {article.title}
                       </Link>
                     </CardTitle>
@@ -117,10 +94,10 @@ export default function ArticlesPage() {
         <Card className="mt-8">
           <CardContent className="pt-6">
             <div className="text-center py-8">
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              <h3 className="text-lg font-semibold text-green-dark mb-2">
                 More Analysis Coming Soon
               </h3>
-              <p className="text-slate-600 mb-4">
+              <p className="text-green-dark/70 mb-4">
                 We're working on more in-depth analysis pieces covering Portuguese electoral dynamics, 
                 polling trends, and forecast methodology.
               </p>
@@ -133,13 +110,13 @@ export default function ArticlesPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-white mt-16">
+      <footer className="border-t border-green-medium/30 bg-white mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-sm text-slate-600">
             <p>© 2025 estimador.pt • Built with transparency and open methodology</p>
             <p className="mt-2">
               Developed by Bernardo Caldas • 
-              <Link href="mailto:info@estimador.pt" className="text-blue-600 hover:underline ml-1">
+              <Link href="mailto:info@estimador.pt" className="text-green-medium hover:text-green-dark hover:underline ml-1">
                 info@estimador.pt
               </Link>
             </p>

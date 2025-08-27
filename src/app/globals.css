@@ -83,6 +83,12 @@
   --primary-light: #3b82f6;
   --primary-dark: #1e3a8a;
   
+  /* Dark Green Accents */
+  --green-dark: #064e3b;
+  --green-medium: #059669;
+  --green-light: #10b981;
+  --green-pale: #fafafa;
+  
   /* Political Party Colors (Portugal) */
   --ps-color: #e91e63;
   --ad-color: #ff6f00;
@@ -238,10 +244,22 @@
   .bg-livre { background-color: var(--livre-color); }
   .bg-pan { background-color: var(--pan-color); }
   
+  /* Green Accent Classes */
+  .text-green-dark { color: var(--green-dark); }
+  .text-green-medium { color: var(--green-medium); }
+  .text-green-light { color: var(--green-light); }
+  .bg-green-dark { background-color: var(--green-dark); }
+  .bg-green-medium { background-color: var(--green-medium); }
+  .bg-green-light { background-color: var(--green-light); }
+  .bg-green-pale { background-color: var(--green-pale); }
+  .border-green-dark { border-color: var(--green-dark); }
+  .border-green-medium { border-color: var(--green-medium); }
+  
   /* Navigation Styles */
   .nav-primary {
-    @apply bg-white/95 backdrop-blur-sm border-b border-gray-200;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    @apply bg-white/95 backdrop-blur-sm border-b;
+    border-color: var(--green-medium);
+    box-shadow: 0 1px 3px 0 rgba(6, 78, 59, 0.1);
   }
   
   /* Card Styles */

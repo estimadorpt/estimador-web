@@ -12,6 +12,7 @@ import { ArrowRight, TrendingUp, BarChart3, Map, Users, Calendar } from "lucide-
 import { PollingChart } from "@/components/charts/PollingChart";
 import { CoalitionDotPlot } from "@/components/charts/CoalitionDotPlot";
 import { SimpleCoalitionDots } from "@/components/charts/SimpleCoalitionDots";
+import { Header } from "@/components/Header";
 
 export default async function Home() {
   const { seatData, nationalTrends } = await loadForecastData();
@@ -55,21 +56,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Minimal Header */}
-      <header className="border-b border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-center relative">
-            <div className="flex items-center gap-3">
-              <h1 className="text-lg font-bold text-gray-900">estimador.pt</h1>
-              <span className="text-xs text-gray-500 border-l pl-3 ml-3">Portuguese Election Forecast</span>
-            </div>
-            <div className="absolute right-0 flex items-center gap-1 text-xs text-gray-500">
-              <Calendar className="w-3 h-3" />
-              <span>Updated {lastUpdate}</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header lastUpdate={lastUpdate} />
 
       {/* News-style Headline Section */}
       <section className="border-b border-gray-200">
@@ -86,7 +73,7 @@ export default async function Home() {
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span>Based on {seatData.length.toLocaleString()} simulations</span>
               <span>•</span>
-              <Link href="/methodology" className="text-blue-600 hover:text-blue-800">
+              <Link href="/methodology" className="text-green-medium hover:text-green-dark">
                 Methodology
               </Link>
             </div>
@@ -95,7 +82,7 @@ export default async function Home() {
       </section>
 
       {/* Key Numbers - BBC Style */}
-      <section className="bg-gray-50 border-b border-gray-200">
+      <section className="bg-green-pale border-b border-green-medium/30">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Chance of winning most seats</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -220,21 +207,21 @@ export default async function Home() {
           <div className="flex flex-wrap gap-3">
             <Link 
               href="/forecast" 
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-green-dark bg-green-pale border border-green-medium rounded-md hover:bg-green-light/20 transition-colors"
             >
               <BarChart3 className="w-4 h-4 mr-2" />
               Full forecast model
             </Link>
             <Link 
               href="/articles" 
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-green-pale transition-colors"
             >
               <TrendingUp className="w-4 h-4 mr-2" />
               Analysis & insights
             </Link>
             <Link 
               href="/methodology" 
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-green-pale transition-colors"
             >
               <Map className="w-4 h-4 mr-2" />
               How this works

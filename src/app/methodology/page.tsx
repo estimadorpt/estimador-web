@@ -1,41 +1,16 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { Header } from "@/components/Header";
 
 export default function MethodologyPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Link href="/" className="text-2xl font-bold text-slate-900 hover:text-slate-700">
-                estimador.pt
-              </Link>
-              <p className="text-sm text-slate-600">Portuguese Election Forecasting</p>
-            </div>
-            <nav className="flex gap-6">
-              <Link href="/" className="text-slate-700 hover:text-slate-900 font-medium">
-                Home
-              </Link>
-              <Link href="/forecast" className="text-slate-700 hover:text-slate-900 font-medium">
-                Forecast
-              </Link>
-              <Link href="/articles" className="text-slate-700 hover:text-slate-900 font-medium">
-                Analysis
-              </Link>
-              <Link href="/about" className="text-slate-700 hover:text-slate-900 font-medium">
-                About
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-green-pale">
+      <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-4">Methodology</h1>
-          <p className="text-lg text-slate-600">
+          <h1 className="text-3xl font-bold text-green-dark mb-4">Methodology</h1>
+          <p className="text-lg text-green-dark/70">
             How our Dynamic Gaussian Process Election Model works
           </p>
         </div>
@@ -44,7 +19,7 @@ export default function MethodologyPage() {
           <CardContent className="p-8">
             <div className="max-w-none space-y-6 text-slate-700 leading-relaxed">
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-900 border-b pb-2">Overview</h2>
+              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">Overview</h2>
               <p>
                 We've developed a statistical forecasting model for Portuguese elections that captures 
                 both long-term political trends and district-level dynamics. It represents an evolution 
@@ -54,7 +29,7 @@ export default function MethodologyPage() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-900 border-b pb-2">The Challenge of Forecasting Portuguese Elections</h2>
+              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">The Challenge of Forecasting Portuguese Elections</h2>
               <p>
                 Portugal's electoral landscape presents unique forecasting challenges. The country has 
                 multiple significant political parties ranging from the traditional center-left (PS) 
@@ -72,7 +47,7 @@ export default function MethodologyPage() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-900 border-b pb-2">The Dynamic Gaussian Process Model</h2>
+              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">The Dynamic Gaussian Process Model</h2>
               <p>
                 Our approach uses Gaussian processes to model the evolution of party support over time. 
                 This allows us to capture both smooth trends and sudden shifts while accounting for uncertainty.
@@ -89,7 +64,7 @@ export default function MethodologyPage() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-900 border-b pb-2">Polling Analysis</h2>
+              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">Polling Analysis</h2>
               <p>
                 We collect polling data from major Portuguese polling organizations and apply several corrections:
               </p>
@@ -103,7 +78,7 @@ export default function MethodologyPage() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-900 border-b pb-2">Seat Simulation Process</h2>
+              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">Seat Simulation Process</h2>
               <div className="space-y-4">
                 <div>
                   <h4 className="text-lg font-medium text-slate-800 mb-2">National to District Translation</h4>
@@ -133,7 +108,7 @@ export default function MethodologyPage() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-900 border-b pb-2">Uncertainty Quantification</h2>
+              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">Uncertainty Quantification</h2>
               <p>Our model incorporates several sources of uncertainty:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li><span className="font-medium">Polling Error:</span> Historical polling accuracy in Portuguese elections</li>
@@ -145,7 +120,7 @@ export default function MethodologyPage() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-900 border-b pb-2">Model Validation</h2>
+              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">Model Validation</h2>
               <p>We validate our approach through:</p>
               <ol className="list-decimal pl-6 space-y-2">
                 <li>Backtesting on historical Portuguese elections</li>
@@ -160,7 +135,7 @@ export default function MethodologyPage() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-900 border-b pb-2">Limitations and Caveats</h2>
+              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">Limitations and Caveats</h2>
               <p>Our model has several important limitations:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Relies on polling data, which can be biased or unrepresentative</li>
@@ -175,7 +150,7 @@ export default function MethodologyPage() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-900 border-b pb-2">Data Sources</h2>
+              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">Data Sources</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li>Portuguese polling organizations (CESOP, Aximage, Pitagórica, etc.)</li>
                 <li>Historical election results from CNE (Comissão Nacional de Eleições)</li>
@@ -188,13 +163,13 @@ export default function MethodologyPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-white mt-16">
+      <footer className="border-t border-green-medium/30 bg-white mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-sm text-slate-600">
             <p>© 2025 estimador.pt • Built with transparency and open methodology</p>
             <p className="mt-2">
               Developed by Bernardo Caldas • 
-              <Link href="mailto:info@estimador.pt" className="text-blue-600 hover:underline ml-1">
+              <Link href="mailto:info@estimador.pt" className="text-green-medium hover:text-green-dark hover:underline ml-1">
                 info@estimador.pt
               </Link>
             </p>
