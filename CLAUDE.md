@@ -80,6 +80,42 @@ const normalized = Math.max(-1, Math.min(1, value / 0.4));
 - **RSC .txt files**: Include `.txt` in MIME types and exclusions
 - **Build output**: Uses `out/` directory (not `dist/`)
 
+## Development Workflow
+
+### Git Branch Strategy
+**IMPORTANT**: Always use feature branches for development. Never commit directly to `main`.
+
+```bash
+# Start new feature/fix
+git checkout -b feature/your-feature-name
+git checkout -b fix/issue-description
+
+# Work on changes...
+git add .
+git commit -m "Your commit message"
+git push -u origin feature/your-feature-name
+
+# Create PR when ready
+gh pr create --title "Feature: Your feature name" --body "Description of changes"
+
+# After PR approval, merge and clean up
+git checkout main
+git pull origin main
+git branch -d feature/your-feature-name
+```
+
+### Branch Naming Convention
+- `feature/` - New features or enhancements
+- `fix/` - Bug fixes
+- `update/` - Updates to existing functionality
+- `docs/` - Documentation changes
+
+### Commit Guidelines
+- Use descriptive commit messages
+- Include Claude Code attribution footer
+- Keep commits focused and atomic
+- Reference issues when applicable
+
 ## Development Notes
 
 ### Adding New Charts
