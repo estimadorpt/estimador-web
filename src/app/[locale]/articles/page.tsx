@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/Header";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
+import { getMDXArticlesByLocale } from "@/lib/mdx-articles";
+import { ArticleListStructuredData } from "@/components/StructuredData";
 import type { Metadata } from 'next';
 
 export async function generateMetadata({ 
@@ -34,40 +36,13 @@ export default async function ArticlesPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  // Sample articles - in a real app these would come from a CMS or database
-  const articles = [
-    {
-      id: 1,
-      title: t('articles.sampleArticles.article1.title'),
-      excerpt: t('articles.sampleArticles.article1.excerpt'),
-      date: "2025-01-20",
-      author: "Bernardo Caldas",
-      tags: t('articles.sampleArticles.article1.tags').split(','),
-      readTime: "8 min"
-    },
-    {
-      id: 2,
-      title: t('articles.sampleArticles.article2.title'),
-      excerpt: t('articles.sampleArticles.article2.excerpt'),
-      date: "2025-01-15",
-      author: "Bernardo Caldas", 
-      tags: t('articles.sampleArticles.article2.tags').split(','),
-      readTime: "12 min"
-    },
-    {
-      id: 3,
-      title: t('articles.sampleArticles.article3.title'),
-      excerpt: t('articles.sampleArticles.article3.excerpt'),
-      date: "2025-01-10",
-      author: "Bernardo Caldas",
-      tags: t('articles.sampleArticles.article3.tags').split(','),
-      readTime: "10 min"
-    }
-  ];
+  const articles = getMDXArticlesByLocale(locale);
 
   return (
-    <div className="min-h-screen bg-green-pale">
-      <Header />
+    <>
+      <ArticleListStructuredData articles={articles} />
+      <div className="min-h-screen bg-green-pale">
+        <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
@@ -79,12 +54,12 @@ export default async function ArticlesPage({
 
         <div className="grid gap-6">
           {articles.map((article) => (
-            <Card key={article.id} className="hover:shadow-md transition-shadow">
+            <Card key={article.slug} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <CardTitle className="text-xl">
-                      <Link href={`/articles/${article.id}`} className="hover:text-green-medium transition-colors">
+                      <Link href={`/articles/${article.slug}`} className="hover:text-green-medium transition-colors">
                         {article.title}
                       </Link>
                     </CardTitle>
@@ -152,6 +127,7 @@ export default async function ArticlesPage({
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }

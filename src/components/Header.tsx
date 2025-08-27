@@ -4,11 +4,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Calendar, Globe } from "lucide-react";
 
-interface HeaderProps {
-  lastUpdate?: string;
-}
-
-export function Header({ lastUpdate }: HeaderProps) {
+export function Header() {
   const t = useTranslations();
   const locale = useLocale();
   const pathname = usePathname();
@@ -96,12 +92,6 @@ export function Header({ lastUpdate }: HeaderProps) {
                 </div>
               </div>
               
-              {lastUpdate && (
-                <div className="flex items-center gap-1 text-xs text-green-dark/70">
-                  <Calendar className="w-3 h-3" />
-                  <span>{t('common.updated')} {lastUpdate}</span>
-                </div>
-              )}
             </div>
           </div>
         </div>

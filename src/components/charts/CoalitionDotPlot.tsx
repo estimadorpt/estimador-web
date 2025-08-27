@@ -13,12 +13,18 @@ interface CoalitionDotPlotProps {
   data: SeatData[];
   leftCoalitionLabel?: string;
   rightCoalitionLabel?: string;
+  projectedSeatsLabel?: string;
+  majorityLabel?: string;
+  showingOutcomesLabel?: string;
 }
 
 export function CoalitionDotPlot({ 
   data, 
   leftCoalitionLabel = "Left coalition", 
-  rightCoalitionLabel = "Right coalition" 
+  rightCoalitionLabel = "Right coalition",
+  projectedSeatsLabel = "Projected seats",
+  majorityLabel = "Majority",
+  showingOutcomesLabel = "Showing {count} simulation outcomes"
 }: CoalitionDotPlotProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -74,7 +80,7 @@ export function CoalitionDotPlot({
         fontFamily: "Inter, system-ui, sans-serif"
       },
       x: {
-        label: "Projected seats",
+        label: projectedSeatsLabel,
         domain: [40, 140],
         grid: true,
         ticks: [50, 75, 100, majorityThreshold, 125]
@@ -98,9 +104,9 @@ export function CoalitionDotPlot({
           facet: "exclude"
         }),
         
-        // Dodged dots with slight horizontal jitter
+        // Dodged dots with consistent horizontal jitter
         Plot.dotX(sampledData, Plot.dodgeY({
-          x: d => d.totalSeats + (Math.random() - 0.5) * 1.5, // Add small horizontal jitter
+          x: d => d.totalSeats + (d.draw % 100 - 50) * 0.03, // Consistent jitter based on draw index
           fy: "bloc",
           fill: "bloc",
           fillOpacity: 0.7,
@@ -130,10 +136,10 @@ export function CoalitionDotPlot({
         }),
         
         // Majority label
-        Plot.text([{ x: majorityThreshold, fy: "Left coalition" }], {
+        Plot.text([{ x: majorityThreshold, fy: leftCoalitionLabel }], {
           x: "x",
           fy: "fy",
-          text: `Majority (${majorityThreshold})`,
+          text: `${majorityLabel} (${majorityThreshold})`,
           dx: 5,
           dy: -10,
           fontSize: 11,
@@ -170,8 +176,8 @@ export function CoalitionDotPlot({
             const rightSeats = rightBlocParties.reduce((sum, party) => sum + (simulation[party] || 0), 0);
             
             return [
-              { draw: index, bloc: "Left coalition", totalSeats: leftSeats },
-              { draw: index, bloc: "Right coalition", totalSeats: rightSeats }
+              { draw: index, bloc: leftCoalitionLabel, totalSeats: leftSeats },
+              { draw: index, bloc: rightCoalitionLabel, totalSeats: rightSeats }
             ];
           });
 
@@ -198,7 +204,7 @@ export function CoalitionDotPlot({
               fontFamily: "Inter, system-ui, sans-serif"
             },
             x: {
-              label: "Projected seats",
+              label: projectedSeatsLabel,
               domain: [40, 140],
               grid: true,
               ticks: [50, 75, 100, majorityThreshold, 125]
@@ -222,9 +228,9 @@ export function CoalitionDotPlot({
                 facet: "exclude"
               }),
               
-              // Dodged dots with slight horizontal jitter
+              // Dodged dots with consistent horizontal jitter
               Plot.dotX(sampledData, Plot.dodgeY({
-                x: d => d.totalSeats + (Math.random() - 0.5) * 1.5, // Add small horizontal jitter
+                x: d => d.totalSeats + (d.draw % 100 - 50) * 0.03, // Consistent jitter based on draw index
                 fy: "bloc",
                 fill: "bloc",
                 fillOpacity: 0.7,
@@ -254,10 +260,10 @@ export function CoalitionDotPlot({
               }),
               
               // Majority label
-              Plot.text([{ x: majorityThreshold, fy: "Left coalition" }], {
+              Plot.text([{ x: majorityThreshold, fy: leftCoalitionLabel }], {
                 x: "x",
                 fy: "fy",
-                text: `Majority (${majorityThreshold})`,
+                text: `${majorityLabel} (${majorityThreshold})`,
                 dx: 5,
                 dy: -10,
                 fontSize: 11,
@@ -289,7 +295,7 @@ export function CoalitionDotPlot({
     <div className="w-full">
       <div ref={containerRef} className="overflow-x-auto" />
       <div className="text-xs text-gray-500 mt-2">
-        Showing {data.length} simulation outcomes
+        {showingOutcomesLabel.replace('{count}', data.length.toString())}
       </div>
     </div>
   );

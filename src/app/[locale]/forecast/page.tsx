@@ -72,11 +72,18 @@ export default async function ForecastPage({
 
   return (
     <div className="min-h-screen bg-white">
-      <Header lastUpdate={lastUpdate} />
+      <Header />
 
       {/* Summary Stats */}
       <section className="bg-green-pale border-b border-green-medium/30">
         <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">{t('forecast.subtitle')}</h2>
+            <div className="flex items-center gap-1 text-xs text-green-dark/70">
+              <Calendar className="w-3 h-3" />
+              <span>{t('common.updated')} {lastUpdate}</span>
+            </div>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
               <div className="text-2xl font-bold text-gray-900 mb-1">
@@ -132,6 +139,9 @@ export default async function ForecastPage({
               data={seatData} 
               leftCoalitionLabel={t('forecast.leftCoalition')}
               rightCoalitionLabel={t('forecast.rightCoalition')}
+              projectedSeatsLabel={t('forecast.projectedSeats')}
+              majorityLabel={t('forecast.majority')}
+              showingOutcomesLabel={t('forecast.showingOutcomes', { count: seatData.length })}
             />
             <p className="text-sm text-gray-600 mt-4">
               {t('forecast.coalitionDescription')}
