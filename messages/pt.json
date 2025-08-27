@@ -52,7 +52,10 @@
     "dataSourcesDescription": "Dados de sondagens das principais empresas de sondagens portuguesas, ponderados por fiabilidade e atualidade. Resultados históricos de eleições e dados demográficos.",
     "methodologyDescription": "Simulação de Monte Carlo considerando incerteza das sondagens, variações distritais e sistema de alocação de mandatos D'Hondt.",
     "updatesDescription": "O modelo é atualizado à medida que novos dados de sondagens ficam disponíveis. A incerteza diminui à medida que o dia das eleições se aproxima.",
-    "voteShareLabel": "Percentagem de votos (%)"
+    "voteShareLabel": "Percentagem de votos (%)",
+    "projectedSeats": "Mandatos projetados",
+    "majority": "Maioria",
+    "showingOutcomes": "Mostrando {count} resultados de simulação"
   },
   "articles": {
     "title": "Análise e Artigos",

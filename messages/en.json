@@ -52,7 +52,10 @@
     "dataSourcesDescription": "Polling data from major Portuguese polling firms, weighted by reliability and recency. Historical election results and demographic data.",
     "methodologyDescription": "Monte Carlo simulation accounting for polling uncertainty, district-level variations, and D'Hondt seat allocation system.",
     "updatesDescription": "Model is updated as new polling data becomes available. Uncertainty decreases as election day approaches.",
-    "voteShareLabel": "Vote share (%)"
+    "voteShareLabel": "Vote share (%)",
+    "projectedSeats": "Projected seats",
+    "majority": "Majority",
+    "showingOutcomes": "Showing {count} simulation outcomes"
   },
   "articles": {
     "title": "Analysis & Articles",
