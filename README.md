@@ -1,92 +1,119 @@
-# estimador.pt - Portuguese Election Forecasting
+# estimador.pt - Portugal's Election Forecasting Platform
 
-A modern, professional election forecasting website for Portuguese elections. Built as a migration from Observable Framework to Next.js with improved design and user experience.
+**Data-driven election analysis for Portuguese democracy**
 
-## Features
+estimador.pt is Portugal's premier election forecasting platform, bringing rigorous statistical analysis to Portuguese politics in an accessible, trustworthy format. Think FiveThirtyEight for Portugal - we combine sophisticated modeling with clear, engaging journalism to help citizens understand electoral dynamics.
 
-### 🏠 Professional Homepage
-- Hero section with top-line forecasts
-- Key metrics dashboard showing probabilities
-- Latest polling snapshot with party avatars  
-- Trust indicators (last updated, simulation count)
-- Newsletter signup (UI only)
+## Our Vision
 
-### 📊 Interactive Forecast Dashboard
-- **National Trends**: Improved polling average charts with confidence intervals
-- **Seat Projections**: Clear seat distribution visualizations
-- **District Analysis**: Geographic breakdown (placeholder for future maps)
-- **Polling Analysis**: House effects and bias analysis (placeholder)
+We're building a credible media platform that makes complex electoral data accessible to everyone, not just political insiders. Our goal is to elevate public discourse around Portuguese elections through:
 
-### 📝 Content Pages
-- **About**: Mission, approach, team information
-- **Methodology**: Comprehensive technical explanation with accordions
-- **Articles**: Blog-style analysis pieces with sample content
+- **Transparent methodology** - Open about our assumptions and limitations
+- **Accessible analysis** - Complex statistics explained for general audiences  
+- **Professional presentation** - Media-quality visualizations and design
+- **Timely updates** - Regular forecasts throughout election cycles
+- **Independent voice** - Non-partisan analysis focused on data, not opinions
 
-## Technology Stack
+## What We Provide
 
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
-- **UI Components**: shadcn/ui (Radix UI)
-- **Charts**: Observable Plot + D3
-- **Deployment**: Azure Static Web Apps
+### 🎯 Election Forecasts
+Real-time probabilistic forecasts for Portuguese parliamentary elections, updated as new polling data becomes available. Our models account for polling uncertainty, historical patterns, and Portugal's proportional representation system.
+
+### 📊 Data Visualization
+Interactive charts and maps that make electoral trends immediately understandable:
+- **Polling trends** - How party support evolves over time
+- **Seat projections** - Monte Carlo simulations of likely outcomes
+- **District analysis** - Where elections will be won and lost
+- **Coalition scenarios** - Paths to parliamentary majorities
+
+### 📝 Electoral Analysis
+In-depth articles examining Portuguese political trends, polling methodology, and electoral dynamics. Written for engaged citizens who want to understand the data behind the headlines.
+
+### 🔍 Methodology Transparency
+Complete documentation of our forecasting approach, data sources, and model assumptions. We believe transparency builds trust in democratic institutions.
+
+## Technology & Design
+
+Built as a modern media website with professional news-style design:
+
+### Technical Stack
+- **Next.js 15** - Modern React framework with server-side rendering
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first styling  
+- **shadcn/ui** - Professional UI components
+- **Observable Plot** - Statistical visualizations
+- **Azure Static Web Apps** - Reliable, scalable hosting
+
+### Design Philosophy
+1. **Mobile-first** - Optimized for smartphones and tablets
+2. **Scannable content** - Key insights visible in seconds
+3. **Professional aesthetics** - News-quality design and typography
+4. **Accessible** - Works for colorblind users, includes proper alt text
+5. **Trust indicators** - Clear attribution, update times, and data sources
 
 ## Project Structure
 
 ```
 src/
-├── app/                    # Next.js App Router pages
-│   ├── page.tsx           # Homepage
-│   ├── forecast/          # Forecast dashboard
-│   ├── about/             # About page
-│   ├── articles/          # Articles listing
+├── app/                    # Next.js pages
+│   ├── page.tsx           # Homepage with latest forecasts
+│   ├── forecast/          # Main forecast dashboard
+│   ├── articles/          # Analysis and insights
+│   ├── about/             # Mission and team
 │   └── methodology/       # Technical documentation
 ├── components/
-│   ├── ui/                # shadcn/ui components
-│   └── charts/            # Chart components
+│   ├── ui/                # Design system components
+│   ├── charts/            # Data visualizations
+│   └── Header.tsx         # Shared navigation
 ├── lib/
-│   ├── config/            # Colors, party definitions
-│   └── utils/             # Data loading, calculations
-└── types/                 # TypeScript definitions
+│   ├── config/            # Party colors, coalition definitions
+│   └── utils/             # Data processing and calculations
+└── types/                 # TypeScript interfaces
 
-public/data/               # Election data (JSON files)
+public/data/               # Election data and forecasts
 ```
+
+## Key Features
+
+### 🏠 Professional Homepage
+- Current election status and key probabilities
+- Latest polling snapshot with party standings
+- Trust indicators (last update, simulation count)
+- Recent analysis articles
+- Clear value proposition for new visitors
+
+### 📈 Forecast Dashboard  
+- **National view** - Polling trends and vote share projections
+- **Seats** - Parliamentary seat distribution forecasts
+- **Districts** - Geographic breakdown of competitive races
+- **Polling** - House effects and bias analysis
+
+### 📰 Article System
+- Typography-focused reading experience
+- Live chart embedding from forecast data
+- Mobile-optimized layout
+- Social sharing integration
+
+### 🔧 Methodology Documentation
+- Model explanation for technical audiences
+- Data sources and collection methods
+- Historical accuracy and validation
+- Limitations and uncertainty quantification
 
 ## Data Sources
 
-The application uses the following data files:
+Our forecasts are based on:
 
-- `seat_forecast_simulations.json` - Monte Carlo simulation results
-- `national_trends.json` - Polling averages over time
-- `district_forecast.json` - District-level projections
-- `contested_summary.json` - Competitive seat analysis
-- `house_effects.json` - Pollster bias analysis
-- `poll_bias.json` - Historical polling accuracy
+- **Polling data** from major Portuguese firms (CESOP, Aximage, Pitagórica, etc.)
+- **Historical results** from CNE (Comissão Nacional de Eleições)
+- **Demographic data** from INE (Instituto Nacional de Estatística)
+- **Electoral system modeling** using D'Hondt seat allocation
 
-## Key Improvements from Observable
+All data is processed through our statistical models to produce probabilistic forecasts.
 
-### Design & UX
-- ✅ Professional media-style homepage (FiveThirtyEight inspired)
-- ✅ Consistent navigation and branding
-- ✅ Mobile-first responsive design
-- ✅ Improved chart design with better labels and annotations
-- ✅ Trust indicators and transparency features
+## Development Workflow
 
-### Technical
-- ✅ Modern Next.js architecture
-- ✅ Type-safe data handling
-- ✅ Server-side rendering for performance
-- ✅ Azure deployment configuration
-- ✅ Improved chart rendering with Observable Plot
-
-### Content Strategy
-- ✅ General audience focus (less academic language)
-- ✅ Clear hierarchy and scannable layout
-- ✅ Context and explanations for complex metrics
-- ✅ Dedicated methodology section
-
-## Development
-
+### Getting Started
 ```bash
 # Install dependencies
 npm install
@@ -96,59 +123,79 @@ npm run dev
 
 # Build for production
 npm run build
-
-# Start production server
-npm start
 ```
+
+### Git Workflow
+We use feature branches for all development:
+
+```bash
+# Create feature branch
+git checkout -b feature/your-feature-name
+
+# Work on changes, commit, and push
+git add .
+git commit -m "Your descriptive commit message"
+git push -u origin feature/your-feature-name
+
+# Create pull request
+gh pr create --title "Feature: Your feature name" --body "Description"
+```
+
+See `CLAUDE.md` for detailed development guidelines.
 
 ## Deployment
 
-Configured for Azure Static Web Apps with:
+Automatically deploys to Azure Static Web Apps on push to `main`:
 
-- GitHub Actions workflow
-- Static export configuration
-- Route handling for SPA behavior
-- Cache optimization for data files
+- **GitHub Actions** workflow handles CI/CD
+- **Static export** for optimal performance
+- **Route handling** for single-page app behavior  
+- **Cache optimization** for data files
 
-### Azure Setup
+## Roadmap
 
-1. Create Azure Static Web App resource
-2. Connect to GitHub repository
-3. Add `AZURE_STATIC_WEB_APPS_API_TOKEN` secret
-4. Push to main branch triggers automatic deployment
+### Phase 1: Core Platform ✅
+- [x] Professional homepage and navigation
+- [x] Main forecast dashboard
+- [x] Basic chart visualizations  
+- [x] About and methodology pages
+- [x] Azure deployment pipeline
 
-## Future Enhancements
-
-### Charts & Visualizations
+### Phase 2: Enhanced Visualizations
 - [ ] Interactive district map with TopoJSON
-- [ ] Coalition probability visualizations
-- [ ] Improved contested seats heatmap
-- [ ] House effects heatmap
-- [ ] Polling diagnostics charts
-
-### Features
-- [ ] Real newsletter signup integration
-- [ ] MDX-based article system
-- [ ] Live data updates
-- [ ] Historical forecast tracking
+- [ ] Improved contested seats analysis
+- [ ] Coalition probability tracking
 - [ ] Mobile chart optimization
 
-### Content
+### Phase 3: Content & Features  
+- [ ] MDX-based article system
+- [ ] Newsletter signup integration
+- [ ] Historical forecast tracking
 - [ ] Portuguese language support
-- [ ] More analysis articles
-- [ ] Historical election data
-- [ ] API documentation
 
-## Data Pipeline
+### Phase 4: Advanced Analytics
+- [ ] Real-time data pipeline
+- [ ] Polling aggregation automation
+- [ ] API for external consumption
+- [ ] Historical accuracy tracking
 
-The current setup expects data files to be manually updated in `public/data/`. 
-Future versions could include:
+## Contributing
 
-- Automated polling data collection
-- Real-time model updates
-- API integration for dynamic content
+We welcome contributions that improve electoral transparency and democratic discourse. Key areas:
 
-## License
+- **Data visualization** improvements
+- **Mobile experience** optimization  
+- **Accessibility** enhancements
+- **Content** creation and fact-checking
+- **Translation** to Portuguese
 
-© 2025 estimador.pt - Built with transparency and open methodology
-Developed by Bernardo Caldas
+## About
+
+**estimador.pt** was founded by Bernardo Caldas to bring rigorous, transparent election analysis to Portuguese democracy. Our mission is to help citizens make informed decisions by providing trustworthy, accessible forecasts and analysis.
+
+For questions or media inquiries: [info@estimador.pt](mailto:info@estimador.pt)
+
+---
+
+*Built with transparency and open methodology*  
+*© 2025 estimador.pt*
