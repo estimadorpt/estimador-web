@@ -70,18 +70,30 @@ export function Header({ lastUpdate }: HeaderProps) {
               {/* Language Switcher */}
               <div className="flex items-center gap-2">
                 <Globe className="w-4 h-4 text-green-dark/70" />
-                <select 
-                  value={locale}
-                  onChange={(e) => {
-                    const newLocale = e.target.value;
-                    // This will be handled by next-intl routing
-                    window.location.href = `/${newLocale}${pathname === '/' ? '' : pathname}`;
-                  }}
-                  className="text-sm text-green-dark/70 bg-transparent border-none focus:outline-none cursor-pointer"
-                >
-                  <option value="pt">PT</option>
-                  <option value="en">EN</option>
-                </select>
+                <div className="flex gap-1">
+                  <Link 
+                    href={pathname} 
+                    locale="pt"
+                    className={`px-2 py-1 text-sm rounded ${
+                      locale === 'pt' 
+                        ? 'bg-green-medium text-white' 
+                        : 'text-green-dark/70 hover:text-green-dark'
+                    }`}
+                  >
+                    PT
+                  </Link>
+                  <Link 
+                    href={pathname} 
+                    locale="en"
+                    className={`px-2 py-1 text-sm rounded ${
+                      locale === 'en' 
+                        ? 'bg-green-medium text-white' 
+                        : 'text-green-dark/70 hover:text-green-dark'
+                    }`}
+                  >
+                    EN
+                  </Link>
+                </div>
               </div>
               
               {lastUpdate && (

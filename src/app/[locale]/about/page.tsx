@@ -1,86 +1,109 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
 import { Header } from "@/components/Header";
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/routing';
+import type { Metadata } from 'next';
 
-export default function AboutPage() {
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: Promise<{ locale: string }> 
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
+  
+  return {
+    title: t('meta.aboutTitle'),
+    description: t('about.subtitle'),
+    openGraph: {
+      title: t('meta.aboutTitle'),
+      description: t('about.subtitle'),
+      url: `https://estimador.pt/${locale}/about`,
+    },
+    alternates: {
+      canonical: `https://estimador.pt/${locale}/about`,
+    },
+  };
+}
+
+export default async function AboutPage({
+  params
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
   return (
     <div className="min-h-screen bg-green-pale">
       <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-green-dark mb-4">About estimador.pt</h1>
+          <h1 className="text-3xl font-bold text-green-dark mb-4">{t('about.title')}</h1>
           <p className="text-lg text-green-dark/70">
-            Independent, data-driven election forecasting for Portugal
+            {t('about.subtitle')}
           </p>
         </div>
 
         <div className="space-y-8">
           <Card>
             <CardHeader>
-              <CardTitle>Our Mission</CardTitle>
+              <CardTitle>{t('about.mission')}</CardTitle>
             </CardHeader>
             <CardContent className="prose prose-slate max-w-none">
               <p>
-                estimador.pt provides transparent, data-driven forecasts for Portuguese elections. 
-                We believe that high-quality election analysis should be accessible to everyone, 
-                not just political insiders.
+                {t('about.missionDescription1')}
               </p>
               <p>
-                Our goal is to help Portuguese citizens better understand electoral dynamics 
-                and make informed decisions by providing clear, accurate, and unbiased analysis 
-                of polling data and electoral trends.
+                {t('about.missionDescription2')}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>What We Do</CardTitle>
+              <CardTitle>{t('about.whatWeDo')}</CardTitle>
             </CardHeader>
             <CardContent className="prose prose-slate max-w-none">
               <ul>
-                <li><strong>Election Forecasting:</strong> Statistical models that combine polling data with historical patterns</li>
-                <li><strong>Seat Projections:</strong> Detailed analysis of how votes translate to parliamentary seats</li>
-                <li><strong>Trend Analysis:</strong> Long-term tracking of party support and electoral dynamics</li>
-                <li><strong>Polling Analysis:</strong> Examination of house effects and bias patterns in Portuguese polling</li>
+                <li><strong>Election Forecasting:</strong> {t('about.whatWeDoList.forecasting')}</li>
+                <li><strong>Seat Projections:</strong> {t('about.whatWeDoList.seatProjections')}</li>
+                <li><strong>Trend Analysis:</strong> {t('about.whatWeDoList.trendAnalysis')}</li>
+                <li><strong>Polling Analysis:</strong> {t('about.whatWeDoList.pollingAnalysis')}</li>
               </ul>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Our Approach</CardTitle>
+              <CardTitle>{t('about.approach')}</CardTitle>
             </CardHeader>
             <CardContent className="prose prose-slate max-w-none">
               <p>
-                We use rigorous statistical methods combined with transparency about our assumptions 
-                and limitations. Our models are inspired by leading international forecasting efforts 
-                but are specifically designed for Portugal's multi-party, proportional representation system.
+                {t('about.approachDescription1')}
               </p>
               <p>
-                Key principles:
+                {t('about.approachDescription2')}
               </p>
               <ul>
-                <li><strong>Transparency:</strong> Open methodology and clear communication of uncertainty</li>
-                <li><strong>Independence:</strong> No political affiliations or funding from partisan sources</li>
-                <li><strong>Accuracy:</strong> Continuous improvement based on electoral outcomes</li>
-                <li><strong>Accessibility:</strong> Making complex analysis understandable to general audiences</li>
+                <li><strong>Transparency:</strong> {t('about.approachPrinciples.transparency')}</li>
+                <li><strong>Independence:</strong> {t('about.approachPrinciples.independence')}</li>
+                <li><strong>Accuracy:</strong> {t('about.approachPrinciples.accuracy')}</li>
+                <li><strong>Accessibility:</strong> {t('about.approachPrinciples.accessibility')}</li>
               </ul>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>About the Team</CardTitle>
+              <CardTitle>{t('about.team')}</CardTitle>
             </CardHeader>
             <CardContent className="prose prose-slate max-w-none">
               <p>
-                estimador.pt was founded by <strong>Bernardo Caldas</strong>, combining expertise 
-                in data science, statistics, and Portuguese politics.
+                {t('about.founder')} <strong>Bernardo Caldas</strong>, {t('about.combiningExpertise')}
               </p>
               <p>
-                For questions, suggestions, or media inquiries, please contact us at{' '}
+                {t('about.contact')}{' '}
                 <a href="mailto:info@estimador.pt" className="text-green-medium hover:text-green-dark hover:underline">
                   info@estimador.pt
                 </a>
@@ -90,22 +113,20 @@ export default function AboutPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Limitations & Disclaimers</CardTitle>
+              <CardTitle>{t('about.limitations')}</CardTitle>
             </CardHeader>
             <CardContent className="prose prose-slate max-w-none">
               <p>
-                Election forecasting is inherently uncertain. Our models represent probabilities, 
-                not certainties. Factors we consider include:
+                {t('about.limitationsDescription1')}
               </p>
               <ul>
-                <li>Polling error and bias</li>
-                <li>Late campaign dynamics</li>
-                <li>Turnout variations</li>
-                <li>Regional voting patterns</li>
+                <li>{t('about.limitationsList.pollingError')}</li>
+                <li>{t('about.limitationsList.campaignDynamics')}</li>
+                <li>{t('about.limitationsList.turnout')}</li>
+                <li>{t('about.limitationsList.regional')}</li>
               </ul>
               <p>
-                Our forecasts should be understood as one piece of information among many when 
-                analyzing Portuguese elections.
+                {t('about.limitationsDescription2')}
               </p>
             </CardContent>
           </Card>
@@ -116,9 +137,9 @@ export default function AboutPage() {
       <footer className="border-t border-green-medium/30 bg-white mt-16">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-sm text-slate-600">
-            <p>© 2025 estimador.pt • Built with transparency and open methodology</p>
+            <p>{t('about.footerCopyright')}</p>
             <p className="mt-2">
-              Developed by Bernardo Caldas • 
+              {t('about.footerDeveloper')} • 
               <Link href="mailto:info@estimador.pt" className="text-green-medium hover:text-green-dark hover:underline ml-1">
                 info@estimador.pt
               </Link>

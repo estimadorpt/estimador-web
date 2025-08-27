@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { 
   calculateBlocMajorityProbability, 
   calculatePartyMostSeatsProbability,
@@ -13,8 +12,39 @@ import { PollingChart } from "@/components/charts/PollingChart";
 import { CoalitionDotPlot } from "@/components/charts/CoalitionDotPlot";
 import { SimpleCoalitionDots } from "@/components/charts/SimpleCoalitionDots";
 import { Header } from "@/components/Header";
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/routing';
+import type { Metadata } from 'next';
 
-export default async function Home() {
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: Promise<{ locale: string }> 
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
+  
+  return {
+    title: t('meta.homepageTitle'),
+    description: t('meta.defaultDescription'),
+    openGraph: {
+      title: t('meta.homepageTitle'),
+      description: t('meta.defaultDescription'),
+      url: `https://estimador.pt/${locale}`,
+    },
+    alternates: {
+      canonical: `https://estimador.pt/${locale}`,
+    },
+  };
+}
+
+export default async function Home({
+  params
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
   const { seatData, nationalTrends } = await loadForecastData();
   
   // Calculate key probabilities
@@ -63,18 +93,23 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="max-w-4xl">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-              {partyNames[leader.party]} leads election race with {(leader.value * 100).toFixed(1)}% support
+              {t('homepage.leadingWith', {
+                party: t(`parties.${leader.party}`),
+                percentage: `${(leader.value * 100).toFixed(1)}%`
+              })}
             </h1>
             <p className="text-lg text-gray-600 mb-6">
-              Latest forecast shows {partyNames[leader.party]} ahead by {margin} points, 
-              with a {formatProbabilityPercent(probAdMostSeats > probPsMostSeats ? probAdMostSeats : probPsMostSeats)} 
-              chance of winning the most seats
+              {t('homepage.forecastShows', {
+                party: t(`parties.${leader.party}`),
+                margin: margin,
+                probability: formatProbabilityPercent(probAdMostSeats > probPsMostSeats ? probAdMostSeats : probPsMostSeats)
+              })}
             </p>
             <div className="flex items-center gap-4 text-sm text-gray-500">
-              <span>Based on {seatData.length.toLocaleString()} simulations</span>
+              <span>{t('common.basedOn')} {seatData.length.toLocaleString()} {t('common.simulations')}</span>
               <span>•</span>
               <Link href="/methodology" className="text-green-medium hover:text-green-dark">
-                Methodology
+                {t('common.methodology')}
               </Link>
             </div>
           </div>
@@ -84,7 +119,7 @@ export default async function Home() {
       {/* Key Numbers - BBC Style */}
       <section className="bg-green-pale border-b border-green-medium/30">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Chance of winning most seats</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('homepage.chanceWinningMostSeats')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {['AD', 'PS', 'CH'].map(party => {
               const prob = party === 'AD' ? probAdMostSeats : 
@@ -98,13 +133,13 @@ export default async function Home() {
                       className="w-4 h-4 rounded"
                       style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }}
                     />
-                    <span className="font-medium text-gray-900">{partyNames[party as keyof typeof partyNames]}</span>
+                    <span className="font-medium text-gray-900">{t(`parties.${party}`)}</span>
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
                     {formatProbabilityPercent(prob)}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {seats.min}-{seats.max} seats
+                    {seats.min}-{seats.max} {t('common.seats')}
                   </div>
                 </div>
               );
@@ -112,13 +147,13 @@ export default async function Home() {
             <div className="bg-white p-4 rounded-lg border border-gray-200">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-4 h-4 rounded bg-gray-400" />
-                <span className="font-medium text-gray-900">Others</span>
+                <span className="font-medium text-gray-900">{t('common.others')}</span>
               </div>
               <div className="text-2xl font-bold text-gray-900 mb-1">
                 {formatProbabilityPercent(1 - probAdMostSeats - probPsMostSeats - (1 - probAdMostSeats - probPsMostSeats))}
               </div>
               <div className="text-sm text-gray-500">
-                0-20 seats
+                0-20 {t('common.seats')}
               </div>
             </div>
           </div>
@@ -131,12 +166,16 @@ export default async function Home() {
           
           {/* Coalition Outcomes - Key Visual */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Coalition seat projections</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('forecast.coalitionSeats')}</h2>
             <p className="text-sm text-gray-600 mb-6">
-              Each dot represents one simulation outcome. Lines show median projections.
+              {t('forecast.coalitionDescription')}
             </p>
             <div className="w-full">
-              <CoalitionDotPlot data={seatData} />
+              <CoalitionDotPlot 
+                data={seatData} 
+                leftCoalitionLabel={t('forecast.leftCoalition')}
+                rightCoalitionLabel={t('forecast.rightCoalition')}
+              />
             </div>
           </div>
 
@@ -145,13 +184,13 @@ export default async function Home() {
             
             {/* Polling Trends */}
             <div className="lg:col-span-3 bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Polling trends</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('forecast.pollingTrends')}</h3>
               <PollingChart data={nationalTrends} />
             </div>
 
             {/* Current standings */}
             <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Current standings</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('homepage.currentStandings')}</h3>
               <div className="space-y-3">
                 {parties.slice(0, 6).map((party: any, index) => (
                   <div key={party.party} className="flex items-center justify-between">
@@ -162,7 +201,7 @@ export default async function Home() {
                         style={{ backgroundColor: partyColors[party.party as keyof typeof partyColors] }}
                       />
                       <span className="text-sm font-medium text-gray-900">
-                        {partyNames[party.party as keyof typeof partyNames] || party.party}
+                        {t(`parties.${party.party}`, { default: party.party })}
                       </span>
                     </div>
                     <span className="text-sm font-bold text-gray-900">
@@ -174,22 +213,22 @@ export default async function Home() {
               
               {/* Coalition scenarios in sidebar */}
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Coalition scenarios</h4>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">{t('homepage.coalitionScenarios')}</h4>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-900">Right majority</span>
+                    <span className="text-sm text-gray-900">{t('homepage.rightMajority')}</span>
                     <span className="text-lg font-bold text-gray-900">
                       {formatProbabilityPercent(probRightMajority)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-900">Left majority</span>
+                    <span className="text-sm text-gray-900">{t('homepage.leftMajority')}</span>
                     <span className="text-lg font-bold text-gray-900">
                       {formatProbabilityPercent(probLeftMajority)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-900">Hung parliament</span>
+                    <span className="text-sm text-gray-900">{t('homepage.hungParliament')}</span>
                     <span className="text-lg font-bold text-gray-900">
                       {formatProbabilityPercent(1 - probRightMajority - probLeftMajority)}
                     </span>
@@ -210,21 +249,21 @@ export default async function Home() {
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-green-dark bg-green-pale border border-green-medium rounded-md hover:bg-green-light/20 transition-colors"
             >
               <BarChart3 className="w-4 h-4 mr-2" />
-              Full forecast model
+              {t('nav.forecast')}
             </Link>
             <Link 
               href="/articles" 
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-green-pale transition-colors"
             >
               <TrendingUp className="w-4 h-4 mr-2" />
-              Analysis & insights
+              {t('nav.analysis')}
             </Link>
             <Link 
               href="/methodology" 
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-green-pale transition-colors"
             >
               <Map className="w-4 h-4 mr-2" />
-              How this works
+              {t('common.methodology')}
             </Link>
           </div>
         </div>
@@ -234,20 +273,18 @@ export default async function Home() {
       <section className="bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="max-w-3xl">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">About this forecast</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('homepage.aboutForecast')}</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              This election model combines polling data, historical voting patterns, and demographic 
-              information to project likely outcomes for Portugal's parliamentary elections. The forecast 
-              is updated regularly as new data becomes available.
+              {t('homepage.aboutDescription')}
             </p>
             <div className="flex items-center gap-6 text-sm text-gray-500">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                <span>{seatData.length.toLocaleString()} simulations</span>
+                <span>{seatData.length.toLocaleString()} {t('common.simulations')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" />
-                <span>Based on {nationalTrends.length} polling data points</span>
+                <span>{t('common.basedOn')} {nationalTrends.length} polling data points</span>
               </div>
             </div>
           </div>
