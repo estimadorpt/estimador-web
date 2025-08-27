@@ -28,7 +28,7 @@
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/data/*", "/*.{css,scss,js,png,gif,ico,jpg,svg}"]
+    "exclude": ["/data/*", "/_next/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2}"]
   },
   "mimeTypes": {
     ".json": "application/json"
