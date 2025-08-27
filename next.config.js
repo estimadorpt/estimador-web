@@ -2,7 +2,7 @@
 const nextConfig = {
   // Azure Static Web Apps configuration
   output: 'export',
-  distDir: 'dist',
+  distDir: 'out',
   trailingSlash: true,
   images: {
     unoptimized: true,
