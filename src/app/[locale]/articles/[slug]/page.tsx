@@ -1,12 +1,14 @@
 import { getArticles, getArticleBySlug } from '@/lib/articles';
 import { ArticleLayout } from '@/components/ArticleLayout';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
 interface ArticlePageProps {
-  params: {
+  params: Promise<{
+    locale: string;
     slug: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -17,7 +19,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
-  const article = getArticleBySlug(params.slug);
+  const { locale, slug } = await params;
+  const article = getArticleBySlug(slug);
   
   if (!article) {
     return {
@@ -38,6 +41,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       publishedTime: article.date,
       tags: article.tags,
       siteName: 'estimador.pt',
+      url: `https://estimador.pt/${locale}/articles/${slug}`,
     },
     twitter: {
       card: 'summary_large_image',
@@ -45,11 +49,15 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       description: article.excerpt,
       creator: '@estimadorpt',
     },
+    alternates: {
+      canonical: `https://estimador.pt/${locale}/articles/${slug}`,
+    },
   };
 }
 
-export default function ArticlePage({ params }: ArticlePageProps) {
-  const article = getArticleBySlug(params.slug);
+export default async function ArticlePage({ params }: ArticlePageProps) {
+  const { locale, slug } = await params;
+  const article = getArticleBySlug(slug);
   
   if (!article) {
     notFound();

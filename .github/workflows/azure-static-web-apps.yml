@@ -43,6 +43,7 @@ jobs:
           app_location: "/"
           api_location: ""
           output_location: "out"
+          deployment_environment: ${{ github.event_name == 'pull_request' && 'staging' || 'production' }}
           
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
