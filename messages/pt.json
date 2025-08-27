@@ -55,7 +55,7 @@
     "voteShareLabel": "Percentagem de votos (%)",
     "projectedSeats": "Mandatos projetados",
     "majority": "Maioria",
-    "showingOutcomes": "Mostrando {count} resultados de simulação"
+    "showingOutcomes": "Com base em {count} simulações"
   },
   "articles": {
     "title": "Análise e Artigos",

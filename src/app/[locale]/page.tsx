@@ -175,6 +175,9 @@ export default async function Home({
                 data={seatData} 
                 leftCoalitionLabel={t('forecast.leftCoalition')}
                 rightCoalitionLabel={t('forecast.rightCoalition')}
+                projectedSeatsLabel={t('forecast.projectedSeats')}
+                majorityLabel={t('forecast.majority')}
+                showingOutcomesLabel={t('forecast.showingOutcomes', { count: seatData.length })}
               />
             </div>
           </div>

@@ -134,7 +134,7 @@ export default async function ForecastPage({
               rightCoalitionLabel={t('forecast.rightCoalition')}
               projectedSeatsLabel={t('forecast.projectedSeats')}
               majorityLabel={t('forecast.majority')}
-              showingOutcomesLabel={t('forecast.showingOutcomes')}
+              showingOutcomesLabel={t('forecast.showingOutcomes', { count: seatData.length })}
             />
             <p className="text-sm text-gray-600 mt-4">
               {t('forecast.coalitionDescription')}
