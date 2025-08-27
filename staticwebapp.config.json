@@ -7,6 +7,13 @@
       }
     },
     {
+      "route": "/favicon.ico",
+      "serve": "/favicon.ico",
+      "headers": {
+        "cache-control": "public, max-age=86400"
+      }
+    },
+    {
       "route": "/",
       "serve": "/index.html"
     },
