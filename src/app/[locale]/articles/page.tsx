@@ -59,7 +59,7 @@ export default async function ArticlesPage({
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <CardTitle className="text-xl">
-                      <Link href={`/${locale}/articles/${article.slug}`} className="hover:text-green-medium transition-colors">
+                      <Link href={`/articles/${article.slug}`} className="hover:text-green-medium transition-colors">
                         {article.title}
                       </Link>
                     </CardTitle>

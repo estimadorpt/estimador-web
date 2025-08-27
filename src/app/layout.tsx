@@ -8,8 +8,8 @@ export default function RootLayout({
   // This layout should only be used for the root redirect
   // All actual pages use the locale-specific layout
   return (
-    <html>
-      <body>
+    <html suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>
         {children}
       </body>
     </html>
