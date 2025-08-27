@@ -1,6 +1,12 @@
 {
   "routes": [
     {
+      "route": "/_next/static/*",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
       "route": "/",
       "serve": "/index.html"
     },
@@ -28,7 +34,7 @@
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/data/*", "/_next/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2}"]
+    "exclude": ["/data/*", "/_next/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,json}"]
   },
   "mimeTypes": {
     ".json": "application/json"
