@@ -8,8 +8,16 @@ export function useTopoJsonData() {
   const [portugalTopoJson, setPortugalTopoJson] = useState<PortugalTopoJSON | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure client-side only loading
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
+    if (!isClient) return;
+    
     async function loadTopoJson() {
       try {
         const response = await fetch('/data/Portugal-Distritos-Ilhas_TopoJSON.json');
@@ -27,7 +35,7 @@ export function useTopoJsonData() {
     }
 
     loadTopoJson();
-  }, []);
+  }, [isClient]);
 
   return { portugalTopoJson, isLoading, error };
 }
