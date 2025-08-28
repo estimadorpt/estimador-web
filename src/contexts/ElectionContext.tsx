@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { ElectionConfig, ContestantData } from '@/types';
 import { getCurrentElection, getElectionById, getElectionContestants } from '@/lib/config/elections';
 import { getParliamentaryContestants } from '@/lib/config/colors';
@@ -22,7 +21,6 @@ interface ElectionProviderProps {
 }
 
 export function ElectionProvider({ children, initialElectionId }: ElectionProviderProps) {
-  const searchParams = useSearchParams();
   const [currentElection, setCurrentElection] = useState<ElectionConfig>(() => {
     if (initialElectionId) {
       return getElectionById(initialElectionId) || getCurrentElection();
@@ -62,38 +60,10 @@ export function ElectionProvider({ children, initialElectionId }: ElectionProvid
     loadContestants();
   }, [currentElection]);
 
-  // Listen for URL parameter changes using Next.js hook
-  useEffect(() => {
-    const electionParam = searchParams.get('election');
-    
-    console.log('SearchParams change detected:', {
-      electionParam,
-      currentId: currentElection.id,
-      searchParamsString: searchParams.toString()
-    });
-    
-    if (electionParam && electionParam !== currentElection.id) {
-      // URL has an election parameter and it's different from current
-      const election = getElectionById(electionParam);
-      console.log('Switching to election from URL:', election);
-      if (election) {
-        setCurrentElection(election);
-      }
-    } else if (!electionParam && currentElection.id !== 'parliamentary-2024') {
-      // No URL parameter - default to 2024 election
-      console.log('No election param, switching to default 2024');
-      const defaultElection = getElectionById('parliamentary-2024');
-      if (defaultElection) {
-        setCurrentElection(defaultElection);
-      }
-    }
-  }, [searchParams]); // React to searchParams changes
-
   const switchElection = (electionId: string) => {
     const election = getElectionById(electionId);
     if (election && election.id !== currentElection.id) {
-      // Don't update state here - let the URL change trigger the effect
-      console.log('switchElection called for:', electionId);
+      setCurrentElection(election);
     }
   };
 
