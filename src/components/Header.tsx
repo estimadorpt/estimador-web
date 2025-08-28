@@ -3,25 +3,28 @@
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Calendar, Globe } from "lucide-react";
+import { ElectionSelector } from './ElectionSelector';
+import { useElection } from '@/contexts/ElectionContext';
 
 export function Header() {
   const t = useTranslations();
   const locale = useLocale();
   const pathname = usePathname();
+  const { currentElection } = useElection();
 
   const getPageTitle = () => {
     if (pathname === '/forecast') return t('forecast.title');
     if (pathname === '/about') return t('about.title');
     if (pathname === '/articles') return t('articles.title');
     if (pathname === '/methodology') return t('methodology.title');
-    if (pathname === '/map') return 'Mapa Distrital';
+    if (pathname === '/map') return t('map.title');
     return '';
   };
 
   const navigationItems = [
     { href: '/', label: t('nav.home') },
     { href: '/forecast', label: t('nav.forecast') },
-    { href: '/map', label: 'Mapa' },
+    { href: '/map', label: t('nav.map') },
     { href: '/articles', label: t('nav.analysis') },
     { href: '/about', label: t('nav.about') },
   ];
@@ -48,6 +51,8 @@ export function Header() {
           </div>
           
           <div className="flex items-center gap-6">
+            {/* Election Selector hidden - only one election available */}
+            
             <nav className="hidden md:flex gap-6">
               {navigationItems.map((item) => (
                 <Link

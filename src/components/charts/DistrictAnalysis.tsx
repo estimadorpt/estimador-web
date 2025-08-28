@@ -147,7 +147,7 @@ export function DistrictAnalysis({ districtData, contestedData, height = 400 }: 
       <div ref={containerRef} />
       <div className="mt-2 text-xs text-gray-500">
         <span className="inline-block w-3 h-3 bg-yellow-200 mr-1"></span>
-        Highlighted districts are highly contested (ENSC > 1.5)
+        Highlighted districts are highly contested (ENSC &gt; 1.5)
       </div>
     </div>
   );

@@ -16,6 +16,8 @@ import { Header } from "@/components/Header";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
+import { ElectionAwareContent } from '@/components/ElectionAwareContent';
+import { ElectionSummaryStats } from '@/components/ElectionSummaryStats';
 
 export async function generateMetadata({ 
   params 
@@ -78,38 +80,32 @@ export default async function ForecastPage({
       <section className="bg-green-pale border-b border-green-medium/30">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">{t('forecast.subtitle')}</h2>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">{t('forecast.subtitle')}</h2>
+            </div>
             <div className="flex items-center gap-1 text-xs text-green-dark/70">
               <Calendar className="w-3 h-3" />
               <span>{t('common.updated')} {lastUpdate}</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                {formatProbabilityPercent(probAdMostSeats)}
-              </div>
-              <div className="text-sm text-gray-600">AD {t('forecast.mostSeats', { default: 'most seats' })}</div>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                {formatProbabilityPercent(probPsMostSeats)}
-              </div>
-              <div className="text-sm text-gray-600">PS {t('forecast.mostSeats', { default: 'most seats' })}</div>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                {formatProbabilityPercent(probRightMajority)}
-              </div>
-              <div className="text-sm text-gray-600">{t('homepage.rightMajority')}</div>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                {formatProbabilityPercent(probLeftMajority)}
-              </div>
-              <div className="text-sm text-gray-600">{t('homepage.leftMajority')}</div>
-            </div>
-          </div>
+          <ElectionSummaryStats
+            probAdMostSeats={probAdMostSeats}
+            probPsMostSeats={probPsMostSeats}
+            probRightMajority={probRightMajority}
+            probLeftMajority={probLeftMajority}
+            translations={{
+              mostSeats: t('forecast.mostSeats'),
+              rightMajority: t('homepage.rightMajority'),
+              leftMajority: t('homepage.leftMajority'),
+              presidentialLeading: t('forecast.presidentialLeading'),
+              secondRound: t('forecast.secondRound'),
+              comingSoon: t('forecast.comingSoon'),
+              mayoralRaces: t('forecast.mayoralRaces'),
+              municipalCouncils: t('forecast.municipalCouncils'),
+              mepAllocation: t('forecast.mepAllocation'),
+              politicalGroups: t('forecast.politicalGroups')
+            }}
+          />
         </div>
       </section>
 
@@ -117,17 +113,32 @@ export default async function ForecastPage({
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4 space-y-8">
           
-          {/* Polling Trends */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <TrendingUp className="w-5 h-5 text-green-medium" />
-              <h2 className="text-xl font-semibold text-gray-900">{t('forecast.pollingTrends')}</h2>
+          {/* Election-Aware Polling Trends */}
+          <ElectionAwareContent
+            fallback={
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <TrendingUp className="w-5 h-5 text-green-medium" />
+                  <h2 className="text-xl font-semibold text-gray-900">{t('forecast.pollingTrends')}</h2>
+                </div>
+                <PollingChart data={nationalTrends} voteShareLabel={t('forecast.voteShareLabel')} />
+                <p className="text-sm text-gray-600 mt-4">
+                  {t('forecast.pollingTrendsDescription', { count: nationalTrends.length })}
+                </p>
+              </div>
+            }
+          >
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <TrendingUp className="w-5 h-5 text-green-medium" />
+                <h2 className="text-xl font-semibold text-gray-900">{t('forecast.pollingTrends')}</h2>
+              </div>
+              <PollingChart data={nationalTrends} voteShareLabel={t('forecast.voteShareLabel')} />
+              <p className="text-sm text-gray-600 mt-4">
+                {t('forecast.pollingTrendsDescription', { count: nationalTrends.length })}
+              </p>
             </div>
-            <PollingChart data={nationalTrends} voteShareLabel={t('forecast.voteShareLabel')} />
-            <p className="text-sm text-gray-600 mt-4">
-              {t('forecast.pollingTrendsDescription', { count: nationalTrends.length })}
-            </p>
-          </div>
+          </ElectionAwareContent>
 
           {/* Coalition Outcomes */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">

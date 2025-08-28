@@ -42,6 +42,8 @@ Built as a modern media website with professional news-style design:
 - **Tailwind CSS** - Utility-first styling  
 - **shadcn/ui** - Professional UI components
 - **Observable Plot** - Statistical visualizations
+- **next-intl** - Internationalization (PT/EN support)
+- **React Context** - Election state management
 - **Azure Static Web Apps** - Reliable, scalable hosting
 
 ### Design Philosophy
@@ -66,8 +68,9 @@ src/
 │   ├── charts/            # Data visualizations
 │   └── Header.tsx         # Shared navigation
 ├── lib/
-│   ├── config/            # Party colors, coalition definitions
+│   ├── config/            # Party colors, coalition definitions, election configs
 │   └── utils/             # Data processing and calculations
+├── contexts/              # React contexts for state management
 └── types/                 # TypeScript interfaces
 
 public/data/               # Election data and forecasts
@@ -99,6 +102,13 @@ public/data/               # Election data and forecasts
 - Data sources and collection methods
 - Historical accuracy and validation
 - Limitations and uncertainty quantification
+
+### 🗳️ Multi-Election Support
+- **Flexible Architecture** - Supports different election types (Parliamentary, Presidential, Municipal, European)
+- **Election-Specific Metrics** - Contextually appropriate statistics for each election type
+- **Internationalization** - Portuguese and English support with election-aware translations
+- **Unified Interface** - Consistent user experience across different electoral systems
+- **Current Focus** - 2025 Portuguese Legislative Elections (May 18, 2025)
 
 ## Data Sources
 
@@ -161,17 +171,19 @@ Automatically deploys to Azure Static Web Apps on push to `main`:
 - [x] About and methodology pages
 - [x] Azure deployment pipeline
 
-### Phase 2: Enhanced Visualizations
-- [ ] Interactive district map with TopoJSON
-- [ ] Improved contested seats analysis
-- [ ] Coalition probability tracking
-- [ ] Mobile chart optimization
+### Phase 2: Multi-Election Platform ✅
+- [x] Flexible election configuration system
+- [x] Election-aware components and state management
+- [x] Portuguese/English internationalization support
+- [x] Election-specific metrics and visualizations
+- [x] Interactive district map with TopoJSON
 
-### Phase 3: Content & Features  
-- [ ] MDX-based article system
+### Phase 3: Enhanced Features
+- [ ] URL parameter-based election switching
+- [ ] MDX-based article system with embedded charts
 - [ ] Newsletter signup integration
-- [ ] Historical forecast tracking
-- [ ] Portuguese language support
+- [ ] Historical forecast accuracy tracking
+- [ ] Comprehensive E2E testing with Playwright
 
 ### Phase 4: Advanced Analytics
 - [ ] Real-time data pipeline
@@ -187,7 +199,9 @@ We welcome contributions that improve electoral transparency and democratic disc
 - **Mobile experience** optimization  
 - **Accessibility** enhancements
 - **Content** creation and fact-checking
-- **Translation** to Portuguese
+- **Multi-election features** - Adding support for future elections
+- **Testing infrastructure** - Playwright E2E testing
+- **Internationalization** - Translation improvements and new languages
 
 ## About
 
