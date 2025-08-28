@@ -6,6 +6,7 @@ import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { partyColors, partyOrder } from '@/lib/config/colors';
 import { getRegionForIsland } from '@/lib/geography/regionMapping';
+import { useTopoJsonData } from '@/hooks/useTopoJsonData';
 import type { 
   DistrictForecast, 
   PortugalTopoJSON, 
@@ -28,36 +29,13 @@ export default function DistrictMap({
   selectedDistrict 
 }: DistrictMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [portugalTopoJson, setPortugalTopoJson] = useState<PortugalTopoJSON | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { portugalTopoJson, isLoading, error } = useTopoJsonData();
   const [tooltip, setTooltip] = useState<{
     show: boolean;
     x: number;
     y: number;
     content: string;
   }>({ show: false, x: 0, y: 0, content: '' });
-
-  // Load TopoJSON data
-  useEffect(() => {
-    async function loadTopoJson() {
-      try {
-        const response = await fetch('/data/Portugal-Distritos-Ilhas_TopoJSON.json');
-        if (!response.ok) {
-          throw new Error('Failed to load TopoJSON data');
-        }
-        const data = await response.json();
-        setPortugalTopoJson(data);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error loading TopoJSON:', err);
-        setError('Failed to load map data');
-        setIsLoading(false);
-      }
-    }
-
-    loadTopoJson();
-  }, []);
 
   useEffect(() => {
     if (!containerRef.current || !portugalTopoJson || !districtForecast || isLoading) {
