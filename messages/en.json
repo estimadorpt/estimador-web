@@ -4,7 +4,8 @@
     "forecast": "Forecast",
     "analysis": "Analysis",
     "about": "About",
-    "methodology": "Methodology"
+    "methodology": "Methodology",
+    "map": "Map"
   },
   "common": {
     "updated": "Updated",
@@ -34,8 +35,21 @@
     "districtDescription": "Geographic distribution of forecasts by district."
   },
   "map": {
+    "title": "District Map",
+    "subtitle": "Interactive District Map",
     "voteShareByParty": "Vote Share by Party",
-    "selectDistrict": "Select a district to view detailed vote projections"
+    "selectDistrict": "Explore election forecasts by district. Click on any district to see the predicted vote percentage for each party.",
+    "portugalForecasts": "Portugal - District Forecasts",
+    "howToInterpret": "How to Interpret",
+    "colors": "Colors",
+    "colorsDescription": "Each district is colored with the party that has the highest predicted vote percentage in that region.",
+    "interaction": "Interaction",
+    "interactionDescription": "Hover over a district to see the leading party and percentage, or click to see all details.",
+    "islands": "Islands",
+    "islandsDescription": "The Azores and Madeira appear as multiple islands, but forecasts are aggregated by region.",
+    "generalStats": "General Statistics",
+    "districtsLed": "Districts Led:",
+    "totalDistricts": "Total districts:"
   },
   "forecast": {
     "title": "Full Election Forecast",

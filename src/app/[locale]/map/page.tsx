@@ -24,15 +24,27 @@ async function getDistrictForecast(): Promise<DistrictForecast[]> {
   }
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
+  
   return {
-    title: 'Mapa Distrital - estimador.pt',
-    description: 'Mapa interativo com previsões eleitorais por distrito português',
+    title: `${t('map.title')} - estimador.pt`,
+    description: t('map.selectDistrict'),
   };
 }
 
-export default async function MapPage() {
-  const t = await getTranslations();
+export default async function MapPage({
+  params
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
   const districtForecast = await getDistrictForecast();
 
   return (
@@ -44,11 +56,10 @@ export default async function MapPage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-slate-900 mb-4">
-              Mapa Distrital Interativo
+              {t('map.subtitle')}
             </h1>
             <p className="text-lg text-slate-600 max-w-3xl">
-              Explore as previsões eleitorais por distrito. Clique em qualquer distrito 
-              para ver a percentagem de votos prevista para cada partido.
+              {t('map.selectDistrict')}
             </p>
           </div>
 
@@ -57,7 +68,7 @@ export default async function MapPage() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Portugal - Previsões por Distrito</CardTitle>
+                  <CardTitle>{t('map.portugalForecasts')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <MapPageClient districtForecast={districtForecast} />
@@ -70,28 +81,25 @@ export default async function MapPage() {
               {/* Legend */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Como Interpretar</CardTitle>
+                  <CardTitle>{t('map.howToInterpret')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-medium mb-2">Cores</h4>
+                    <h4 className="font-medium mb-2">{t('map.colors')}</h4>
                     <p className="text-sm text-slate-600">
-                      Cada distrito está colorido com a cor do partido com maior 
-                      percentagem de votos prevista nessa região.
+                      {t('map.colorsDescription')}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-medium mb-2">Interação</h4>
+                    <h4 className="font-medium mb-2">{t('map.interaction')}</h4>
                     <p className="text-sm text-slate-600">
-                      Passe o rato sobre um distrito para ver o partido líder e percentagem, 
-                      ou clique para ver todos os detalhes.
+                      {t('map.interactionDescription')}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-medium mb-2">Ilhas</h4>
+                    <h4 className="font-medium mb-2">{t('map.islands')}</h4>
                     <p className="text-sm text-slate-600">
-                      Os Açores e Madeira aparecem como múltiplas ilhas, mas as 
-                      previsões são agregadas por região.
+                      {t('map.islandsDescription')}
                     </p>
                   </div>
                 </CardContent>
@@ -100,10 +108,10 @@ export default async function MapPage() {
               {/* Key Stats */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Estatísticas Gerais</CardTitle>
+                  <CardTitle>{t('map.generalStats')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <MapStats districtForecast={districtForecast} />
+                  <MapStats districtForecast={districtForecast} t={t} />
                 </CardContent>
               </Card>
             </div>
@@ -115,7 +123,7 @@ export default async function MapPage() {
 }
 
 // Component for map statistics
-function MapStats({ districtForecast }: { districtForecast: DistrictForecast[] }) {
+function MapStats({ districtForecast, t }: { districtForecast: DistrictForecast[], t: any }) {
   const partyWins = districtForecast.reduce((acc, district) => {
     acc[district.winning_party] = (acc[district.winning_party] || 0) + 1;
     return acc;
@@ -126,7 +134,7 @@ function MapStats({ districtForecast }: { districtForecast: DistrictForecast[] }
 
   return (
     <div className="space-y-3">
-      <h4 className="font-medium">Distritos Liderados:</h4>
+      <h4 className="font-medium">{t('map.districtsLed')}</h4>
       <div className="space-y-2">
         {sortedParties.map(([party, count]) => (
           <div key={party} className="flex justify-between items-center">
@@ -137,7 +145,7 @@ function MapStats({ districtForecast }: { districtForecast: DistrictForecast[] }
       </div>
       <div className="pt-3 border-t">
         <p className="text-sm text-slate-600">
-          Total de distritos: {districtForecast.length}
+          {t('map.totalDistricts')} {districtForecast.length}
         </p>
       </div>
     </div>

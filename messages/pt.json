@@ -4,7 +4,8 @@
     "forecast": "Previsões",
     "analysis": "Análise",
     "about": "Sobre",
-    "methodology": "Metodologia"
+    "methodology": "Metodologia",
+    "map": "Mapa"
   },
   "common": {
     "updated": "Atualizado",
@@ -34,8 +35,21 @@
     "districtDescription": "Distribuição geográfica das previsões por distrito."
   },
   "map": {
+    "title": "Mapa Distrital",
+    "subtitle": "Mapa Distrital Interativo",
     "voteShareByParty": "Previsão de Votos por Partido",
-    "selectDistrict": "Selecione um distrito para ver as projeções detalhadas de votos"
+    "selectDistrict": "Explore as previsões eleitorais por distrito. Clique em qualquer distrito para ver a percentagem de votos prevista para cada partido.",
+    "portugalForecasts": "Portugal - Previsões por Distrito",
+    "howToInterpret": "Como Interpretar",
+    "colors": "Cores",
+    "colorsDescription": "Cada distrito está colorido com a cor do partido com maior percentagem de votos prevista nessa região.",
+    "interaction": "Interação",
+    "interactionDescription": "Passe o rato sobre um distrito para ver o partido líder e percentagem, ou clique para ver todos os detalhes.",
+    "islands": "Ilhas",
+    "islandsDescription": "Os Açores e Madeira aparecem como múltiplas ilhas, mas as previsões são agregadas por região.",
+    "generalStats": "Estatísticas Gerais",
+    "districtsLed": "Distritos Liderados:",
+    "totalDistricts": "Total de distritos:"
   },
   "forecast": {
     "title": "Previsão Eleitoral Completa",

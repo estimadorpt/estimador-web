@@ -311,7 +311,7 @@ export default async function Home({
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-green-pale transition-colors"
             >
               <Map className="w-4 h-4 mr-2" />
-              Mapa Distrital
+{t('map.title')}
             </Link>
             <Link 
               href="/articles" 
