@@ -33,6 +33,10 @@
     "districtForecast": "Previsões por Distrito",
     "districtDescription": "Distribuição geográfica das previsões por distrito."
   },
+  "map": {
+    "voteShareByParty": "Previsão de Votos por Partido",
+    "selectDistrict": "Selecione um distrito para ver as projeções detalhadas de votos"
+  },
   "forecast": {
     "title": "Previsão Eleitoral Completa",
     "subtitle": "Eleições Parlamentares Portuguesas",

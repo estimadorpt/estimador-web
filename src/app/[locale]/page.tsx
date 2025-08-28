@@ -13,6 +13,7 @@ import { CoalitionDotPlot } from "@/components/charts/CoalitionDotPlot";
 import { SimpleCoalitionDots } from "@/components/charts/SimpleCoalitionDots";
 import DistrictMapPreview from "@/components/charts/DistrictMapPreview";
 import { Header } from "@/components/Header";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
@@ -230,10 +231,12 @@ export default async function Home({
                 {t('homepage.districtDescription')}
               </p>
               <div className="w-full h-80 md:h-96">
-                <DistrictMapPreview 
-                  districtForecast={districtForecast}
-                  className="rounded overflow-hidden h-full"
-                />
+                <ErrorBoundary componentName="District Map Preview">
+                  <DistrictMapPreview 
+                    districtForecast={districtForecast}
+                    className="rounded overflow-hidden h-full"
+                  />
+                </ErrorBoundary>
               </div>
             </div>
           </div>

@@ -40,7 +40,10 @@ export default async function ArticlesPage({
 
   return (
     <>
-      <ArticleListStructuredData articles={articles} />
+      <ArticleListStructuredData articles={articles.map(article => ({
+        ...article,
+        id: article.slug
+      }))} />
       <div className="min-h-screen bg-green-pale">
         <Header />
 

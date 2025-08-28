@@ -8,27 +8,27 @@ import { Suspense } from 'react';
 const PollingChart = dynamic(() => import('./PollingChart'), { 
   ssr: false,
   loading: () => <ChartSkeleton />
-});
+}) as any;
 
 const SeatChart = dynamic(() => import('./seat-projection'), { 
   ssr: false,
   loading: () => <ChartSkeleton />
-});
+}) as any;
 
 const CoalitionDotPlot = dynamic(() => import('./CoalitionDotPlot'), { 
   ssr: false,
   loading: () => <ChartSkeleton />
-});
+}) as any;
 
 const HouseEffects = dynamic(() => import('./HouseEffects'), { 
   ssr: false,
   loading: () => <ChartSkeleton />
-});
+}) as any;
 
 const DistrictSummary = dynamic(() => import('./DistrictSummary'), { 
   ssr: false,
   loading: () => <ChartSkeleton />
-});
+}) as any;
 
 function ChartSkeleton() {
   return (

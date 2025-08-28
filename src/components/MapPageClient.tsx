@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import DistrictMap from '@/components/charts/DistrictMap';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { partyColors } from '@/lib/config/colors';
+import { MapErrorBoundary } from '@/components/ErrorBoundary';
 
 interface DistrictForecast {
   district_name: string;
@@ -19,6 +21,7 @@ interface MapPageClientProps {
 export default function MapPageClient({ districtForecast }: MapPageClientProps) {
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedData, setSelectedData] = useState<{ id: string; probs: Record<string, number> } | null>(null);
+  const t = useTranslations('map');
 
   const handleDistrictClick = (district: { id: string; probs: Record<string, number> }) => {
     setSelectedDistrict(district.id);
@@ -27,12 +30,14 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
 
   return (
     <div className="space-y-6">
-      <DistrictMap
-        districtForecast={districtForecast}
-        onDistrictClick={handleDistrictClick}
-        selectedDistrict={selectedDistrict}
-        className="border rounded-lg"
-      />
+      <MapErrorBoundary>
+        <DistrictMap
+          districtForecast={districtForecast}
+          onDistrictClick={handleDistrictClick}
+          selectedDistrict={selectedDistrict}
+          className="border rounded-lg"
+        />
+      </MapErrorBoundary>
       
       {/* Selected District Details */}
       {selectedData && (
@@ -42,7 +47,7 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <h4 className="font-medium">Previsão de Votos por Partido:</h4>
+              <h4 className="font-medium">{t('voteShareByParty')}:</h4>
               <div className="space-y-3">
                 {Object.entries(selectedData.probs)
                   .sort(([,a], [,b]) => b - a)

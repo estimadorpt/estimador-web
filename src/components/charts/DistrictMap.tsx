@@ -5,13 +5,13 @@ import * as Plot from '@observablehq/plot';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { partyColors, partyOrder } from '@/lib/config/colors';
+import { getRegionForIsland } from '@/lib/geography/regionMapping';
 import type { 
   DistrictForecast, 
   PortugalTopoJSON, 
   DistrictFeatureCollection,
   GeometryDataMap,
-  SelectedDistrict,
-  RegionMapper
+  SelectedDistrict
 } from '@/types/geography';
 
 interface DistrictMapProps {
@@ -21,19 +21,6 @@ interface DistrictMapProps {
   selectedDistrict?: string | null;
 }
 
-// Function to identify island geometries belonging to aggregated regions
-function getRegionForIsland(islandName: string): string {
-  const azoresIslands = [
-    "Ilha do Faial", "Ilha de São Jorge", "Ilha da Graciosa", "Ilha Terceira", 
-    "Ilha das Flores", "Ilha do Corvo", "Ilha de São Miguel", "Ilha de Santa Maria", "Ilha do Pico"
-  ];
-  const madeiraIslands = ["Ilha da Madeira", "Ilha de Porto Santo"];
-
-  if (azoresIslands.includes(islandName)) return "Açores";
-  if (madeiraIslands.includes(islandName)) return "Madeira";
-  return islandName; // If not an island, return the name itself (continental district)
-}
-
 export default function DistrictMap({ 
   districtForecast, 
   className = '', 
@@ -41,7 +28,7 @@ export default function DistrictMap({
   selectedDistrict 
 }: DistrictMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [portugalTopoJson, setPortugalTopoJson] = useState<any>(null);
+  const [portugalTopoJson, setPortugalTopoJson] = useState<PortugalTopoJSON | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{

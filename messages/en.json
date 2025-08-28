@@ -33,6 +33,10 @@
     "districtForecast": "District forecasts",
     "districtDescription": "Geographic distribution of forecasts by district."
   },
+  "map": {
+    "voteShareByParty": "Vote Share by Party",
+    "selectDistrict": "Select a district to view detailed vote projections"
+  },
   "forecast": {
     "title": "Full Election Forecast",
     "subtitle": "Portugal Parliamentary Elections",

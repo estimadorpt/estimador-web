@@ -5,8 +5,9 @@ import * as Plot from '@observablehq/plot';
 import * as topojson from 'topojson-client';
 import { partyColors } from '@/lib/config/colors';
 import { useTopoJsonData } from '@/hooks/useTopoJsonData';
-import { useDistrictData, useGeometryDataMap, getRegionForIsland } from '@/hooks/useDistrictData';
+import { useDistrictData, useGeometryDataMap } from '@/hooks/useDistrictData';
 import { useTooltip } from '@/hooks/useTooltip';
+import { getRegionForIsland } from '@/lib/geography/regionMapping';
 import type { 
   DistrictForecast, 
   DistrictFeatureCollection
