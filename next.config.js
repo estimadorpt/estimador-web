@@ -9,9 +9,12 @@ const withMDX = createMDX({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Azure Static Web Apps configuration
-  output: 'export',
-  distDir: 'out',
+  // Azure Static Web Apps configuration - only in production
+  ...(process.env.NODE_ENV === 'production' && {
+    output: 'export',
+    distDir: 'out',
+  }),
+  
   trailingSlash: true,
   assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
   images: {

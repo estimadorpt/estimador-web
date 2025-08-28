@@ -64,7 +64,7 @@ export default async function ForecastPage({
     }, {} as any);
 
   const parties = Object.values(latest).sort((a: any, b: any) => b.value - a.value);
-  const lastUpdate = new Date(parties[0].date).toLocaleDateString('en-US', {
+  const lastUpdate = new Date((parties[0] as any).date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long', 
     day: 'numeric'
@@ -195,7 +195,7 @@ export default async function ForecastPage({
                         </span>
                       </div>
                       <span className="text-sm font-bold text-gray-900">
-                        {partyData ? (partyData.value * 100).toFixed(1) : '0.0'}%
+                        {partyData ? ((partyData as any).value * 100).toFixed(1) : '0.0'}%
                       </span>
                     </div>
                   );
@@ -228,7 +228,7 @@ export default async function ForecastPage({
                         </span>
                       </div>
                       <span className="text-sm font-bold text-gray-900">
-                        {partyData ? (partyData.value * 100).toFixed(1) : '0.0'}%
+                        {partyData ? ((partyData as any).value * 100).toFixed(1) : '0.0'}%
                       </span>
                     </div>
                   );

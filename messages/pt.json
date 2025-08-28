@@ -15,7 +15,8 @@
     "share": "Partilhar",
     "loading": "A carregar...",
     "others": "Outros",
-    "seats": "mandatos"
+    "seats": "mandatos",
+    "viewFull": "Ver completo"
   },
   "homepage": {
     "tagline": "Previsões Eleitorais Portuguesas",
@@ -28,7 +29,13 @@
     "coalitionScenarios": "Cenários de coligação",
     "currentStandings": "Situação atual",
     "aboutForecast": "Sobre esta previsão",
-    "aboutDescription": "Este modelo eleitoral combina dados de sondagens, padrões históricos de voto e informações demográficas para projetar resultados prováveis para as eleições parlamentares portuguesas. A previsão é atualizada regularmente à medida que novos dados ficam disponíveis."
+    "aboutDescription": "Este modelo eleitoral combina dados de sondagens, padrões históricos de voto e informações demográficas para projetar resultados prováveis para as eleições parlamentares portuguesas. A previsão é atualizada regularmente à medida que novos dados ficam disponíveis.",
+    "districtForecast": "Previsões por Distrito",
+    "districtDescription": "Distribuição geográfica das previsões por distrito."
+  },
+  "map": {
+    "voteShareByParty": "Previsão de Votos por Partido",
+    "selectDistrict": "Selecione um distrito para ver as projeções detalhadas de votos"
   },
   "forecast": {
     "title": "Previsão Eleitoral Completa",

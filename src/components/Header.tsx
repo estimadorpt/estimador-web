@@ -14,12 +14,14 @@ export function Header() {
     if (pathname === '/about') return t('about.title');
     if (pathname === '/articles') return t('articles.title');
     if (pathname === '/methodology') return t('methodology.title');
+    if (pathname === '/map') return 'Mapa Distrital';
     return '';
   };
 
   const navigationItems = [
     { href: '/', label: t('nav.home') },
     { href: '/forecast', label: t('nav.forecast') },
+    { href: '/map', label: 'Mapa' },
     { href: '/articles', label: t('nav.analysis') },
     { href: '/about', label: t('nav.about') },
   ];
