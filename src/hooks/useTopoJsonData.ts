@@ -20,15 +20,19 @@ export function useTopoJsonData() {
     
     async function loadTopoJson() {
       try {
+        console.log('useTopoJsonData: Starting TopoJSON fetch...');
         const response = await fetch('/data/Portugal-Distritos-Ilhas_TopoJSON.json');
+        console.log('useTopoJsonData: Fetch response status:', response.status, response.statusText);
+        
         if (!response.ok) {
-          throw new Error('Failed to load TopoJSON data');
+          throw new Error(`Failed to load TopoJSON data: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
+        console.log('useTopoJsonData: TopoJSON loaded successfully, type:', data.type);
         setPortugalTopoJson(data);
         setIsLoading(false);
       } catch (err) {
-        console.error('Error loading TopoJSON:', err);
+        console.error('useTopoJsonData: Error loading TopoJSON:', err);
         setError('Failed to load map data');
         setIsLoading(false);
       }
