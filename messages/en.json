@@ -15,7 +15,8 @@
     "share": "Share",
     "loading": "Loading...",
     "others": "Others",
-    "seats": "seats"
+    "seats": "seats",
+    "viewFull": "View full"
   },
   "homepage": {
     "tagline": "Portuguese Election Forecast",
@@ -28,7 +29,9 @@
     "coalitionScenarios": "Coalition scenarios",
     "currentStandings": "Current standings",
     "aboutForecast": "About this forecast",
-    "aboutDescription": "This election model combines polling data, historical voting patterns, and demographic information to project likely outcomes for Portugal's parliamentary elections. The forecast is updated regularly as new data becomes available."
+    "aboutDescription": "This election model combines polling data, historical voting patterns, and demographic information to project likely outcomes for Portugal's parliamentary elections. The forecast is updated regularly as new data becomes available.",
+    "districtForecast": "District forecasts",
+    "districtDescription": "Geographic distribution of forecasts by district."
   },
   "forecast": {
     "title": "Full Election Forecast",
