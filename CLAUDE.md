@@ -28,6 +28,7 @@ The project deploys automatically to Azure Static Web Apps via GitHub Actions wh
 - **Static Data**: Election data lives in `public/data/` as JSON files
 - **Chart Components**: Use Observable Plot + D3 for visualizations in `src/components/charts/`
 - **Configuration**: Party colors, names, and order defined in `src/lib/config/colors.ts`
+- **Election Management**: Election configs and switching logic in `src/lib/config/elections.ts`
 - **Types**: Election data interfaces in `src/types/index.ts`
 
 ### Chart Architecture
@@ -144,3 +145,110 @@ Election data files are manually updated in `public/data/`. Future automation co
 
 ### Party Configuration
 All party-related configuration (colors, names, order) centralized in `src/lib/config/colors.ts`. This ensures consistency across all charts and components.
+
+## Multi-Election Platform Architecture
+
+### Overview
+The platform supports multiple election types through a flexible architecture that can handle different electoral systems while maintaining consistent UI/UX.
+
+### Current Elections
+- **2025 Legislative Elections** (May 18, 2025) - Active election with full forecast data
+- Future elections can be added when forecast data becomes available
+
+### Election Configuration
+Elections are defined in `src/lib/config/elections.ts`:
+
+```typescript
+export const PARLIAMENTARY_2025: ElectionConfig = {
+  type: 'parliamentary',
+  id: 'parliamentary-2025',
+  name: 'Eleições Legislativas 2025',
+  date: '2025-05-18',
+  description: 'Eleições para a Assembleia da República',
+  isActive: true,
+  geographicLevel: 'district'
+};
+```
+
+### Election Types Supported
+- **Parliamentary**: Portuguese legislative elections with district-level D'Hondt allocation
+- **Presidential**: Direct election with potential second round (future)
+- **Municipal**: Local elections for mayors and municipal assemblies (future)
+- **European**: EU Parliament elections (future)
+
+### Election Context System
+The `ElectionContext` provides election state management:
+
+```typescript
+// Usage in components
+const { currentElection, contestants, switchElection } = useElection();
+
+// Election-specific data filtering
+const { filterDataByContestants, isValidContestant } = useElectionFiltering();
+
+// Election-specific data paths
+const { getDataPath, electionId } = useElectionDataPaths();
+```
+
+### Election-Aware Components
+
+#### ElectionSummaryStats
+Displays contextually appropriate metrics based on election type:
+- **Parliamentary**: AD/PS most seats, left/right majority chances
+- **Presidential**: Leading candidate, second round probability (future)
+- **Municipal**: Mayoral races, municipal councils (future)
+
+#### ElectionAwareContent
+Conditional rendering for election-specific content:
+- Shows appropriate charts and visualizations per election type
+- Maintains consistent UI while adapting content
+
+#### ElectionSelector
+Dropdown for switching between elections (hidden when only one election available):
+- Grouped by election type
+- Shows election status (Active, Historical, Upcoming)
+- Proper internationalization support
+
+### Adding New Elections
+
+1. **Define Election Config** in `src/lib/config/elections.ts`:
+```typescript
+export const NEW_ELECTION: ElectionConfig = {
+  type: 'parliamentary',
+  id: 'parliamentary-2029',
+  name: 'Eleições Legislativas 2029',
+  date: '2029-03-XX',
+  description: 'Description',
+  isActive: false,
+  geographicLevel: 'district'
+};
+```
+
+2. **Add to ALL_ELECTIONS array**
+3. **Add translation keys** in `messages/pt.json` and `messages/en.json`
+4. **Add data files** in `public/data/` (if different structure needed)
+5. **Update ElectionSummaryStats** if new metrics needed
+
+### Internationalization
+Election-specific translations support:
+- Election names and descriptions
+- Type-specific terminology (e.g., "candidato" vs "partido")
+- Status indicators (Active, Historical, Upcoming)
+- Metric labels appropriate for each election type
+
+### Data Organization
+Currently all election data lives in `public/data/`. Future organization:
+```
+public/data/
+├── shared/           # Common data across elections
+├── parliamentary-2025/  # Election-specific data
+├── presidential-2026/   # Future election data
+└── municipal-2025/      # Municipal election data
+```
+
+### Best Practices
+- Only add elections with real forecast data
+- Test election switching thoroughly
+- Ensure all components handle election context gracefully
+- Maintain consistent chart styling across elections
+- Add proper loading states for election transitions
