@@ -5,17 +5,19 @@ import * as Plot from '@observablehq/plot';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { partyColors, partyOrder } from '@/lib/config/colors';
-
-interface DistrictForecast {
-  district_name: string;
-  winning_party: string;
-  probs: Record<string, number>;
-}
+import type { 
+  DistrictForecast, 
+  PortugalTopoJSON, 
+  DistrictFeatureCollection,
+  GeometryDataMap,
+  SelectedDistrict,
+  RegionMapper
+} from '@/types/geography';
 
 interface DistrictMapProps {
   districtForecast: DistrictForecast[];
   className?: string;
-  onDistrictClick?: (district: { id: string; probs: Record<string, number> }) => void;
+  onDistrictClick?: (district: SelectedDistrict) => void;
   selectedDistrict?: string | null;
 }
 
