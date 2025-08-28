@@ -15,23 +15,47 @@
     },
     {
       "route": "/",
-      "serve": "/index.html"
+      "serve": "/pt/index.html"
     },
     {
-      "route": "/forecast",
-      "serve": "/forecast/index.html"
+      "route": "/pt",
+      "serve": "/pt/index.html"
     },
     {
-      "route": "/articles",
-      "serve": "/articles/index.html"
+      "route": "/en",
+      "serve": "/en/index.html"
     },
     {
-      "route": "/about",
-      "serve": "/about/index.html"
+      "route": "/pt/forecast",
+      "serve": "/pt/forecast/index.html"
     },
     {
-      "route": "/methodology",
-      "serve": "/methodology/index.html"
+      "route": "/en/forecast",
+      "serve": "/en/forecast/index.html"
+    },
+    {
+      "route": "/pt/articles",
+      "serve": "/pt/articles/index.html"
+    },
+    {
+      "route": "/en/articles",
+      "serve": "/en/articles/index.html"
+    },
+    {
+      "route": "/pt/about",
+      "serve": "/pt/about/index.html"
+    },
+    {
+      "route": "/en/about",
+      "serve": "/en/about/index.html"
+    },
+    {
+      "route": "/pt/methodology",
+      "serve": "/pt/methodology/index.html"
+    },
+    {
+      "route": "/en/methodology",
+      "serve": "/en/methodology/index.html"
     },
     {
       "route": "/*",
@@ -40,7 +64,7 @@
     }
   ],
   "navigationFallback": {
-    "rewrite": "/index.html",
+    "rewrite": "/pt/index.html",
     "exclude": ["/data/*", "/_next/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,json,txt}"]
   },
   "mimeTypes": {

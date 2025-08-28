@@ -37,9 +37,12 @@ export function CoalitionDotPlot({
     // Get actual container width for responsive sizing
     const containerWidth = containerRef.current.offsetWidth || 1000;
     const containerHeight = 350;
+    const isMobile = containerWidth < 768;
     
     console.log(`CoalitionDotPlot: Processing ${data.length} data points, container width: ${containerWidth}`);
     console.log('First 3 data points:', data.slice(0, 3));
+    console.log('User agent:', navigator.userAgent);
+    console.log('Is mobile device:', isMobile);
 
     // Calculate coalition seats for each simulation
     const blocDrawData = data.flatMap((simulation, index) => {
@@ -58,8 +61,8 @@ export function CoalitionDotPlot({
       ([bloc, medianSeats]) => ({ bloc, medianSeats })
     );
 
-    // Sample data for performance - increase for better density
-    const sampleSize = Math.min(1600, blocDrawData.length);
+    // Sample data for performance - reduce for mobile devices
+    const sampleSize = Math.min(isMobile ? 200 : 1600, blocDrawData.length);
     const sampledData = d3.shuffle(blocDrawData.slice()).slice(0, sampleSize);
     
     console.log(`CoalitionDotPlot: ${blocDrawData.length} coalition data points, sampling ${sampledData.length}`);
@@ -70,8 +73,8 @@ export function CoalitionDotPlot({
     const plot = Plot.plot({
       width: containerWidth,
       height: containerHeight,
-      marginLeft: 140,
-      marginRight: 60,
+      marginLeft: isMobile ? 80 : 140,
+      marginRight: isMobile ? 30 : 60,
       marginTop: 30,
       marginBottom: 50,
       style: {
@@ -104,13 +107,15 @@ export function CoalitionDotPlot({
           facet: "exclude"
         }),
         
-        // Dodged dots with consistent horizontal jitter
+        // Dodged dots with mobile-optimized sizing
         Plot.dotX(sampledData, Plot.dodgeY({
           x: d => d.totalSeats + (d.draw % 100 - 50) * 0.03, // Consistent jitter based on draw index
           fy: "bloc",
           fill: "bloc",
-          fillOpacity: 0.7,
-          r: 1.2,
+          fillOpacity: isMobile ? 0.8 : 0.7,
+          r: isMobile ? 2 : 1.2, // Larger dots for mobile
+          stroke: "white",
+          strokeWidth: isMobile ? 0.5 : 0.3,
           anchor: "middle"
         })),
         
@@ -150,10 +155,48 @@ export function CoalitionDotPlot({
     });
 
     if (containerRef.current) {
-      containerRef.current.replaceChildren(plot);
+      // Clear previous content
+      containerRef.current.innerHTML = '';
+      
+      // Check if the plot was rendered successfully
+      try {
+        containerRef.current.appendChild(plot);
+        
+        // Verify dots were actually rendered
+        const dots = plot.querySelectorAll('circle');
+        console.log(`CoalitionDotPlot: Rendered ${dots.length} dots`);
+        
+        if (dots.length === 0) {
+          console.warn('CoalitionDotPlot: No dots rendered, might be Android compatibility issue');
+          // Force a re-render with simpler visualization
+          setTimeout(() => {
+            if (containerRef.current) {
+              containerRef.current.innerHTML = `
+                <div style="padding: 20px; text-align: center; background: #f9fafb; border-radius: 8px;">
+                  <p style="margin: 0; color: #6b7280;">Coalition visualization temporarily unavailable on this device.</p>
+                  <p style="margin: 8px 0 0 0; font-size: 14px; color: #9ca3af;">Please try viewing on desktop for full chart functionality.</p>
+                </div>
+              `;
+            }
+          }, 100);
+        }
+      } catch (error) {
+        console.error('CoalitionDotPlot: Error rendering plot:', error);
+        containerRef.current.innerHTML = `
+          <div style="padding: 20px; text-align: center; background: #fef2f2; border-radius: 8px;">
+            <p style="margin: 0; color: #dc2626;">Error loading coalition chart</p>
+          </div>
+        `;
+      }
     }
 
-    return () => plot.remove();
+    return () => {
+      try {
+        plot.remove();
+      } catch (e) {
+        console.warn('Error removing plot:', e);
+      }
+    };
   }, [data]);
 
   // Add resize observer for responsive behavior
@@ -187,15 +230,15 @@ export function CoalitionDotPlot({
             ([bloc, medianSeats]) => ({ bloc, medianSeats })
           );
 
-          // Sample data for performance
-          const sampleSize = Math.min(1600, blocDrawData.length);
+          // Sample data for performance - reduce for mobile devices
+          const sampleSize = Math.min(containerWidth < 768 ? 200 : 1600, blocDrawData.length);
           const sampledData = d3.shuffle(blocDrawData.slice()).slice(0, sampleSize);
 
           const plot = Plot.plot({
             width: containerWidth,
             height: containerHeight,
-            marginLeft: 140,
-            marginRight: 60,
+            marginLeft: containerWidth < 768 ? 80 : 140,
+            marginRight: containerWidth < 768 ? 30 : 60,
             marginTop: 30,
             marginBottom: 50,
             style: {
@@ -228,13 +271,15 @@ export function CoalitionDotPlot({
                 facet: "exclude"
               }),
               
-              // Dodged dots with consistent horizontal jitter
+              // Dodged dots with mobile-optimized sizing
               Plot.dotX(sampledData, Plot.dodgeY({
                 x: d => d.totalSeats + (d.draw % 100 - 50) * 0.03, // Consistent jitter based on draw index
                 fy: "bloc",
                 fill: "bloc",
-                fillOpacity: 0.7,
-                r: 1.2,
+                fillOpacity: containerWidth < 768 ? 0.8 : 0.7,
+                r: containerWidth < 768 ? 2 : 1.2, // Larger dots for mobile
+                stroke: "white",
+                strokeWidth: containerWidth < 768 ? 0.5 : 0.3,
                 anchor: "middle"
               })),
               
@@ -273,7 +318,35 @@ export function CoalitionDotPlot({
             ]
           });
 
-          containerRef.current.replaceChildren(plot);
+          // Clear previous content and add new plot with error handling
+          try {
+            containerRef.current.innerHTML = '';
+            containerRef.current.appendChild(plot);
+            
+            // Verify dots were rendered
+            const dots = plot.querySelectorAll('circle');
+            console.log(`CoalitionDotPlot (resize): Rendered ${dots.length} dots`);
+            
+            if (dots.length === 0) {
+              console.warn('CoalitionDotPlot (resize): No dots rendered, Android compatibility issue');
+              setTimeout(() => {
+                if (containerRef.current) {
+                  containerRef.current.innerHTML = `
+                    <div style="padding: 20px; text-align: center; background: #f9fafb; border-radius: 8px;">
+                      <p style="margin: 0; color: #6b7280;">Coalition visualization temporarily unavailable on this device.</p>
+                    </div>
+                  `;
+                }
+              }, 100);
+            }
+          } catch (error) {
+            console.error('CoalitionDotPlot (resize): Error rendering plot:', error);
+            containerRef.current.innerHTML = `
+              <div style="padding: 20px; text-align: center; background: #fef2f2; border-radius: 8px;">
+                <p style="margin: 0; color: #dc2626;">Error loading coalition chart</p>
+              </div>
+            `;
+          }
         }, 100);
       }
     });
