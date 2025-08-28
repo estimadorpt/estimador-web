@@ -51,7 +51,6 @@ export function ElectionProvider({ children, initialElectionId }: ElectionProvid
         setContestants(electionContestants);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load contestants');
-        console.error('Error loading contestants:', err);
       } finally {
         setIsLoading(false);
       }
@@ -61,9 +60,16 @@ export function ElectionProvider({ children, initialElectionId }: ElectionProvid
   }, [currentElection]);
 
   const switchElection = (electionId: string) => {
-    const election = getElectionById(electionId);
-    if (election && election.id !== currentElection.id) {
-      setCurrentElection(election);
+    try {
+      const election = getElectionById(electionId);
+      if (election && election.id !== currentElection.id) {
+        setCurrentElection(election);
+        setError(null); // Clear any previous errors
+      } else if (!election) {
+        setError(`Election with ID "${electionId}" not found`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to switch election');
     }
   };
 

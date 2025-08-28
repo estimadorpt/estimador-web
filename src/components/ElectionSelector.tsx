@@ -41,7 +41,7 @@ export function ElectionSelector({ currentElectionId, className = '' }: Election
     
     // Navigate to the same page but with the new election context
     const url = new URL(window.location.href);
-    if (election.id === 'parliamentary-2024') {
+    if (election.id === 'parliamentary-2025') {
       // For the default election, remove the parameter to clean up URL
       url.searchParams.delete('election');
     } else {

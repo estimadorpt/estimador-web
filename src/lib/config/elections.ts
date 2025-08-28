@@ -42,10 +42,11 @@ export function getElectionContestants(electionId: string): ContestantData[] {
   
   // For parliamentary elections, convert parties to contestants
   if (election.type === 'parliamentary') {
-    // Import party data and convert to ContestantData format
-    // This will be expanded when we integrate with existing party config
-    return [];
+    // Import and convert party data from the colors config
+    const { getParliamentaryContestants } = require('@/lib/config/colors');
+    return getParliamentaryContestants();
   }
   
+  // For other election types, return empty array (to be implemented when needed)
   return [];
 }
