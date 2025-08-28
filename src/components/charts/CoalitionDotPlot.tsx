@@ -36,11 +36,6 @@ export function CoalitionDotPlot({
 
   useEffect(() => {
     if (!isClient || !data || data.length === 0 || !containerRef.current) {
-      if (!isClient) {
-        console.log("CoalitionDotPlot: Waiting for client-side rendering");
-      } else {
-        console.log("CoalitionDotPlot: No data available");
-      }
       return;
     }
     
@@ -49,11 +44,6 @@ export function CoalitionDotPlot({
     const containerHeight = 350;
     const isMobile = containerWidth < 768;
     
-    console.log(`CoalitionDotPlot: Processing ${data.length} data points, container width: ${containerWidth}`);
-    console.log('First 3 data points:', data.slice(0, 3));
-    console.log('User agent:', navigator.userAgent);
-    console.log('Is mobile device:', isMobile);
-
     // Calculate coalition seats for each simulation
     const blocDrawData = data.flatMap((simulation, index) => {
       const leftSeats = leftBlocParties.reduce((sum, party) => sum + (simulation[party] || 0), 0);
@@ -74,13 +64,7 @@ export function CoalitionDotPlot({
     // Sample data for performance - reduce for mobile devices
     const sampleSize = Math.min(isMobile ? 200 : 1600, blocDrawData.length);
     const sampledData = d3.shuffle(blocDrawData.slice()).slice(0, sampleSize);
-    
-    console.log(`CoalitionDotPlot: ${blocDrawData.length} coalition data points, sampling ${sampledData.length}`);
-    console.log('Sample of blocDrawData:', blocDrawData.slice(0, 5));
-    console.log('Sample of sampledData:', sampledData.slice(0, 5));
-    console.log('Bloc medians:', blocMedians);
 
-    console.log('CoalitionDotPlot: About to create Plot.plot()');
     let plot;
     try {
       plot = Plot.plot({
@@ -166,7 +150,6 @@ export function CoalitionDotPlot({
         })
       ]
       });
-      console.log('CoalitionDotPlot: Plot.plot() created successfully');
     } catch (plotError) {
       console.error('CoalitionDotPlot: Error creating Plot.plot():', plotError);
       return;
@@ -178,14 +161,10 @@ export function CoalitionDotPlot({
       
       // Check if the plot was rendered successfully
       try {
-        console.log('CoalitionDotPlot: Attempting to append plot to container');
         containerRef.current.appendChild(plot);
-        console.log('CoalitionDotPlot: Plot appended successfully');
         
         // Verify dots were actually rendered
         const dots = plot.querySelectorAll('circle');
-        console.log(`CoalitionDotPlot: Rendered ${dots.length} dots`);
-        console.log('CoalitionDotPlot: Plot HTML preview:', plot.outerHTML.substring(0, 500));
         
         if (dots.length === 0) {
           console.warn('CoalitionDotPlot: No dots rendered, Observable Plot may have failed');
