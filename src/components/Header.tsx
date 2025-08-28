@@ -3,11 +3,14 @@
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Calendar, Globe } from "lucide-react";
+import { ElectionSelector } from './ElectionSelector';
+import { useElection } from '@/contexts/ElectionContext';
 
 export function Header() {
   const t = useTranslations();
   const locale = useLocale();
   const pathname = usePathname();
+  const { currentElection } = useElection();
 
   const getPageTitle = () => {
     if (pathname === '/forecast') return t('forecast.title');
@@ -48,6 +51,8 @@ export function Header() {
           </div>
           
           <div className="flex items-center gap-6">
+            {/* Election Selector hidden - only one election available */}
+            
             <nav className="hidden md:flex gap-6">
               {navigationItems.map((item) => (
                 <Link

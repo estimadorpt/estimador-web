@@ -76,7 +76,14 @@
     "voteShareLabel": "Percentagem de votos (%)",
     "projectedSeats": "Mandatos projetados",
     "majority": "Maioria",
-    "showingOutcomes": "Com base em {count} simulações"
+    "showingOutcomes": "Com base em {count} simulações",
+    "presidentialLeading": "Candidato líder",
+    "secondRound": "Segunda volta necessária",
+    "comingSoon": "Em breve",
+    "mayoralRaces": "Corridas autárquicas",
+    "municipalCouncils": "Câmaras municipais",
+    "mepAllocation": "Distribuição de deputados",
+    "politicalGroups": "Grupos políticos"
   },
   "articles": {
     "title": "Análise e Artigos",

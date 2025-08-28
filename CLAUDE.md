@@ -83,7 +83,21 @@ const normalized = Math.max(-1, Math.min(1, value / 0.4));
 ## Development Workflow
 
 ### Git Branch Strategy
-**IMPORTANT**: Always use feature branches for development. Never commit directly to `main`.
+**DEFAULT WORKFLOW**: Use feature branches for development. This is the preferred approach.
+
+**BEST PRACTICE**: Create feature branches for non-trivial work:
+- New features or significant changes
+- Bug fixes that require testing
+- Experimental work
+- When you want to review changes before merging
+
+**DIRECT TO MAIN**: Allowed for:
+- Small fixes and updates
+- Documentation changes  
+- Quick configuration tweaks
+- When explicitly requested by the user
+
+**BEFORE ANY WORK**: Default to `git checkout -b feature/description` unless otherwise specified.
 
 ```bash
 # Start new feature/fix

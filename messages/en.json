@@ -76,7 +76,14 @@
     "voteShareLabel": "Vote share (%)",
     "projectedSeats": "Projected seats",
     "majority": "Majority",
-    "showingOutcomes": "Showing {count} simulation outcomes"
+    "showingOutcomes": "Showing {count} simulation outcomes",
+    "presidentialLeading": "Leading candidate",
+    "secondRound": "Second round needed",
+    "comingSoon": "Coming soon",
+    "mayoralRaces": "Mayoral races",
+    "municipalCouncils": "Municipal councils",
+    "mepAllocation": "MEP allocation",
+    "politicalGroups": "Political groups"
   },
   "articles": {
     "title": "Analysis & Articles",
