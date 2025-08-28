@@ -160,14 +160,17 @@ export function CoalitionDotPlot({
       
       // Check if the plot was rendered successfully
       try {
+        console.log('CoalitionDotPlot: Attempting to append plot to container');
         containerRef.current.appendChild(plot);
+        console.log('CoalitionDotPlot: Plot appended successfully');
         
         // Verify dots were actually rendered
         const dots = plot.querySelectorAll('circle');
         console.log(`CoalitionDotPlot: Rendered ${dots.length} dots`);
+        console.log('CoalitionDotPlot: Plot HTML preview:', plot.outerHTML.substring(0, 500));
         
         if (dots.length === 0) {
-          console.warn('CoalitionDotPlot: No dots rendered, might be Android compatibility issue');
+          console.warn('CoalitionDotPlot: No dots rendered, Observable Plot may have failed');
           // Force a re-render with simpler visualization
           setTimeout(() => {
             if (containerRef.current) {
