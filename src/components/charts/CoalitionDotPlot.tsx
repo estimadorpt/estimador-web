@@ -2,7 +2,7 @@
 
 import * as Plot from "@observablehq/plot";
 import * as d3 from "d3";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { leftBlocParties, rightBlocParties, majorityThreshold } from "@/lib/config/blocs";
 
 interface SeatData {
@@ -27,10 +27,20 @@ export function CoalitionDotPlot({
   showingOutcomesLabel = "Showing {count} simulation outcomes"
 }: CoalitionDotPlotProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure client-side only rendering to prevent hydration issues
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
-    if (!data || data.length === 0 || !containerRef.current) {
-      console.log("CoalitionDotPlot: No data available");
+    if (!isClient || !data || data.length === 0 || !containerRef.current) {
+      if (!isClient) {
+        console.log("CoalitionDotPlot: Waiting for client-side rendering");
+      } else {
+        console.log("CoalitionDotPlot: No data available");
+      }
       return;
     }
     
@@ -208,7 +218,7 @@ export function CoalitionDotPlot({
         console.warn('Error removing plot:', e);
       }
     };
-  }, [data, leftCoalitionLabel, rightCoalitionLabel, projectedSeatsLabel, majorityLabel]);
+  }, [isClient, data, leftCoalitionLabel, rightCoalitionLabel, projectedSeatsLabel, majorityLabel]);
 
 
   if (!data || data.length === 0) {
