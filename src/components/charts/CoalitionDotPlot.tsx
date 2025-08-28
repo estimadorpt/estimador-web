@@ -70,7 +70,10 @@ export function CoalitionDotPlot({
     console.log('Sample of sampledData:', sampledData.slice(0, 5));
     console.log('Bloc medians:', blocMedians);
 
-    const plot = Plot.plot({
+    console.log('CoalitionDotPlot: About to create Plot.plot()');
+    let plot;
+    try {
+      plot = Plot.plot({
       width: containerWidth,
       height: containerHeight,
       marginLeft: isMobile ? 80 : 140,
@@ -152,7 +155,12 @@ export function CoalitionDotPlot({
           fontWeight: "600"
         })
       ]
-    });
+      });
+      console.log('CoalitionDotPlot: Plot.plot() created successfully');
+    } catch (plotError) {
+      console.error('CoalitionDotPlot: Error creating Plot.plot():', plotError);
+      return;
+    }
 
     if (containerRef.current) {
       // Clear previous content
