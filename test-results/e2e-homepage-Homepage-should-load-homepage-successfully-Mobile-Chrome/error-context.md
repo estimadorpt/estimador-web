@@ -1,0 +1,190 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - generic [ref=e7]:
+          - link "estimador.pt" [ref=e8] [cursor=pointer]:
+            - /url: /pt/
+          - paragraph [ref=e9]: Previsões Eleitorais Portuguesas
+        - generic [ref=e12]:
+          - img [ref=e13]
+          - generic [ref=e16]:
+            - link "PT" [ref=e17] [cursor=pointer]:
+              - /url: /pt/
+            - link "EN" [ref=e18] [cursor=pointer]:
+              - /url: /en/
+    - generic [ref=e21]:
+      - heading "Aliança Democrática lidera a corrida eleitoral com 34.2% de apoio" [level=1] [ref=e22]
+      - paragraph [ref=e23]: A última previsão mostra Aliança Democrática à frente por 6.5 pontos, com 100% de probabilidade de ganhar mais assentos
+      - generic [ref=e24]:
+        - generic [ref=e25]: Baseado em 9,000 simulações
+        - generic [ref=e26]: •
+        - link "Metodologia" [ref=e27] [cursor=pointer]:
+          - /url: /pt/methodology/
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - heading "Probabilidade de ganhar mais assentos" [level=2] [ref=e31]
+        - generic [ref=e32]:
+          - img [ref=e33]
+          - generic [ref=e35]: Atualizado May 18, 2025
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e40]: Aliança Democrática
+          - generic [ref=e41]: 100%
+          - generic [ref=e42]: 86-94 mandatos
+        - generic [ref=e43]:
+          - generic [ref=e46]: Partido Socialista
+          - generic [ref=e47]: 0%
+          - generic [ref=e48]: 66-74 mandatos
+        - generic [ref=e49]:
+          - generic [ref=e52]: Chega
+          - generic [ref=e53]: 0%
+          - generic [ref=e54]: 45-53 mandatos
+        - generic [ref=e55]:
+          - generic [ref=e58]: Outros
+          - generic [ref=e59]: 0%
+          - generic [ref=e60]: 0-20 mandatos
+    - generic [ref=e62]:
+      - generic [ref=e63]:
+        - heading "Distribuição de mandatos por coligação" [level=2] [ref=e64]
+        - paragraph [ref=e65]: Cada ponto representa um resultado de simulação. Linhas pretas mostram a contagem mediana de mandatos para cada coligação.
+        - generic [ref=e67]:
+          - img [ref=e69]:
+            - generic "fy-axis tick label" [ref=e70]:
+              - generic [ref=e72]: Esquerda
+              - generic [ref=e74]: Direita
+            - generic [ref=e81]:
+              - generic [ref=e82]: "50"
+              - generic [ref=e83]: "75"
+              - generic [ref=e84]: "100"
+              - generic [ref=e85]: "116"
+              - generic [ref=e86]: "125"
+            - generic [ref=e88]: Mandatos projetados →
+            - generic "text" [ref=e293]:
+              - generic [ref=e295]: "82"
+              - generic [ref=e297]: "99"
+          - generic [ref=e298]: Com base em 9000 simulações
+      - generic [ref=e299]:
+        - generic [ref=e300]:
+          - heading "Tendências das sondagens" [level=2] [ref=e301]
+          - img [ref=e304]:
+            - generic "y-axis tick label" [ref=e307]:
+              - generic [ref=e308]: 0%
+              - generic [ref=e309]: 5%
+              - generic [ref=e310]: 10%
+              - generic [ref=e311]: 15%
+              - generic [ref=e312]: 20%
+              - generic [ref=e313]: 25%
+              - generic [ref=e314]: 30%
+              - generic [ref=e315]: 35%
+              - generic [ref=e316]: 40%
+              - generic [ref=e317]: 45%
+              - generic [ref=e318]: 50%
+            - generic [ref=e320]: ↑ Vote share (%)
+            - generic "x-axis tick label" [ref=e323]:
+              - generic [ref=e324]: Oct 2023
+              - generic [ref=e325]: Jan 2024
+              - generic [ref=e326]: Apr 2024
+              - generic [ref=e327]: Jul 2024
+              - generic [ref=e328]: Oct 2024
+              - generic [ref=e329]: Jan 2025
+              - generic [ref=e330]: Apr 2025
+            - generic "text" [ref=e351]:
+              - generic [ref=e352]: AD 34.2%
+              - generic [ref=e353]: PS 27.7%
+              - generic [ref=e354]: CH 20.5%
+            - generic "text" [ref=e355]:
+              - generic [ref=e356]: PAN 1.3%
+              - generic [ref=e357]: BE 2.7%
+              - generic [ref=e358]: CDU 3.2%
+              - generic [ref=e359]: L 4.7%
+              - generic [ref=e360]: IL 5.6%
+        - generic [ref=e361]:
+          - generic [ref=e362]:
+            - heading "Previsões por Distrito" [level=2] [ref=e363]
+            - link "Ver completo" [ref=e364] [cursor=pointer]:
+              - /url: /pt/map/
+              - text: Ver completo
+              - img [ref=e365] [cursor=pointer]
+          - paragraph [ref=e367]: Distribuição geográfica das previsões por distrito.
+          - img [ref=e371]
+      - generic [ref=e402]:
+        - generic [ref=e403]:
+          - heading "Situação atual" [level=3] [ref=e404]
+          - generic [ref=e405]:
+            - generic [ref=e406]:
+              - generic [ref=e407]:
+                - generic [ref=e408]: "#1"
+                - generic [ref=e410]: Aliança Democrática
+              - generic [ref=e411]: 34.2%
+            - generic [ref=e412]:
+              - generic [ref=e413]:
+                - generic [ref=e414]: "#2"
+                - generic [ref=e416]: Partido Socialista
+              - generic [ref=e417]: 27.7%
+            - generic [ref=e418]:
+              - generic [ref=e419]:
+                - generic [ref=e420]: "#3"
+                - generic [ref=e422]: Chega
+              - generic [ref=e423]: 20.5%
+            - generic [ref=e424]:
+              - generic [ref=e425]:
+                - generic [ref=e426]: "#4"
+                - generic [ref=e428]: Iniciativa Liberal
+              - generic [ref=e429]: 5.6%
+            - generic [ref=e430]:
+              - generic [ref=e431]:
+                - generic [ref=e432]: "#5"
+                - generic [ref=e434]: LIVRE
+              - generic [ref=e435]: 4.7%
+            - generic [ref=e436]:
+              - generic [ref=e437]:
+                - generic [ref=e438]: "#6"
+                - generic [ref=e440]: Coligação Democrática Unitária
+              - generic [ref=e441]: 3.2%
+        - generic [ref=e442]:
+          - heading "Cenários de coligação" [level=3] [ref=e443]
+          - generic [ref=e444]:
+            - generic [ref=e445]:
+              - generic [ref=e446]: Maioria de direita
+              - generic [ref=e447]: 0%
+            - generic [ref=e448]:
+              - generic [ref=e449]: Maioria de esquerda
+              - generic [ref=e450]: 0%
+            - generic [ref=e451]:
+              - generic [ref=e452]: Parlamento suspenso
+              - generic [ref=e453]: 100%
+    - generic [ref=e456]:
+      - link "Previsões" [ref=e457] [cursor=pointer]:
+        - /url: /pt/forecast/
+        - img [ref=e458] [cursor=pointer]
+        - text: Previsões
+      - link "Mapa Distrital" [ref=e460] [cursor=pointer]:
+        - /url: /pt/map/
+        - img [ref=e461] [cursor=pointer]
+        - text: Mapa Distrital
+      - link "Análise" [ref=e463] [cursor=pointer]:
+        - /url: /pt/articles/
+        - img [ref=e464] [cursor=pointer]
+        - text: Análise
+      - link "Metodologia" [ref=e467] [cursor=pointer]:
+        - /url: /pt/methodology/
+        - img [ref=e468] [cursor=pointer]
+        - text: Metodologia
+    - generic [ref=e475]:
+      - heading "Sobre esta previsão" [level=2] [ref=e476]
+      - paragraph [ref=e477]: Este modelo eleitoral combina dados de sondagens, padrões históricos de voto e informações demográficas para projetar resultados prováveis para as eleições parlamentares portuguesas. A previsão é atualizada regularmente à medida que novos dados ficam disponíveis.
+      - generic [ref=e478]:
+        - generic [ref=e479]:
+          - img [ref=e480]
+          - generic [ref=e485]: 9,000 simulações
+        - generic [ref=e486]:
+          - img [ref=e487]
+          - generic [ref=e490]: Baseado em 13056 polling data points
+  - button "Open Next.js Dev Tools" [ref=e496] [cursor=pointer]:
+    - img [ref=e497] [cursor=pointer]
+  - alert [ref=e500]
+```

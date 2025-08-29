@@ -5,23 +5,19 @@
   - generic [active]:
     - generic [ref=e4]:
       - generic [ref=e5]:
-        - generic [ref=e6]:
-          - navigation [ref=e7]:
-            - button "previous" [disabled] [ref=e8]:
-              - img "previous" [ref=e9]
-            - generic [ref=e11]:
-              - generic [ref=e12]: 1/
-              - generic [ref=e13]: "1"
-            - button "next" [disabled] [ref=e14]:
-              - img "next" [ref=e15]
-          - img
-        - generic [ref=e17]:
-          - link "Next.js 15.5.0 (stale) Turbopack" [ref=e18] [cursor=pointer]:
-            - /url: https://nextjs.org/docs/messages/version-staleness
-            - img [ref=e19] [cursor=pointer]
-            - generic "There is a newer version (15.5.2) available, upgrade recommended!" [ref=e21] [cursor=pointer]: Next.js 15.5.0 (stale)
-            - generic [ref=e22] [cursor=pointer]: Turbopack
-          - img
+        - navigation [ref=e7]:
+          - button "previous" [disabled] [ref=e8]:
+            - img "previous" [ref=e9]
+          - generic [ref=e11]:
+            - generic [ref=e12]: 1/
+            - generic [ref=e13]: "1"
+          - button "next" [disabled] [ref=e14]:
+            - img "next" [ref=e15]
+        - link "Next.js 15.5.0 (stale) Turbopack" [ref=e18] [cursor=pointer]:
+          - /url: https://nextjs.org/docs/messages/version-staleness
+          - img [ref=e19] [cursor=pointer]
+          - generic "There is a newer version (15.5.2) available, upgrade recommended!" [ref=e21] [cursor=pointer]: Next.js 15.5.0 (stale)
+          - generic [ref=e22] [cursor=pointer]: Turbopack
       - generic [ref=e23]:
         - dialog "Runtime Error" [ref=e24]:
           - generic [ref=e28]:

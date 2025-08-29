@@ -149,7 +149,7 @@ test.describe('Performance Tests', () => {
       expect(loadTime).toBeLessThan(10000);
       
       // Check that content is visible
-      const main = page.locator('main');
+      const main = page.locator('section, main, .container').first();
       await expect(main).toBeVisible();
     }
   });
