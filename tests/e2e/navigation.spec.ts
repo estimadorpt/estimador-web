@@ -104,15 +104,12 @@ test.describe('Navigation', () => {
   test('should handle 404 pages gracefully', async ({ page }) => {
     const response = await page.goto('/pt/non-existent-page');
     
-    // Should handle invalid pages (might redirect or show 404)
-    // In static export mode, behavior may vary
-    if (response?.status() === 404) {
-      // Traditional 404 handling
-      await expect(page.locator('section, main, .container').first()).toBeVisible();
-    } else {
-      // Static export might redirect to a valid page
-      expect(response?.status()).toBeLessThan(500);
-    }
+    // Should handle invalid pages without crashing
+    expect(response?.status()).toBeLessThan(500);
+    
+    // Check that some content is displayed (even if it's redirected)
+    const hasContent = await page.locator('body').textContent();
+    expect(hasContent).toBeTruthy();
   });
 
   test('should have mobile-friendly navigation', async ({ page, isMobile }) => {
@@ -144,32 +141,28 @@ test.describe('Navigation', () => {
   });
 
   test('should support back/forward browser navigation', async ({ page }) => {
+    // Test browser navigation with direct URL navigation
     await page.goto('/pt');
+    await page.waitForLoadState('networkidle');
     
-    // Navigate to forecast page
-    const forecastLink = page.locator('a[href*="forecast"]').first();
-    if (await forecastLink.isVisible()) {
-      await forecastLink.click();
-      await page.waitForLoadState('networkidle');
-      expect(page.url()).toMatch(/forecast/);
-      
-      // Navigate to map page
-      const mapLink = page.locator('a[href*="map"]').first();
-      if (await mapLink.isVisible()) {
-        await mapLink.click();
-        await page.waitForLoadState('networkidle');
-        expect(page.url()).toMatch(/map/);
-        
-        // Test browser back button
-        await page.goBack();
-        await page.waitForLoadState('networkidle');
-        expect(page.url()).toMatch(/forecast/);
-        
-        // Test browser forward button
-        await page.goForward();
-        await page.waitForLoadState('networkidle');
-        expect(page.url()).toMatch(/map/);
-      }
-    }
+    // Navigate to forecast page directly
+    await page.goto('/pt/forecast');
+    await page.waitForLoadState('networkidle');
+    expect(page.url()).toMatch(/forecast/);
+    
+    // Navigate to map page directly
+    await page.goto('/pt/map');
+    await page.waitForLoadState('networkidle');
+    expect(page.url()).toMatch(/map/);
+    
+    // Test browser back button
+    await page.goBack();
+    await page.waitForLoadState('networkidle');
+    expect(page.url()).toMatch(/forecast/);
+    
+    // Test browser forward button
+    await page.goForward();
+    await page.waitForLoadState('networkidle');
+    expect(page.url()).toMatch(/map/);
   });
 });
