@@ -153,8 +153,19 @@ test.describe('Accessibility Tests', () => {
       const chart = charts.nth(i);
       
       if (await chart.isVisible()) {
-        // Charts should have titles or aria-labels
-        const title = await chart.locator('title').textContent();
+        // Charts should have titles or aria-labels - use safer methods
+        let title = null;
+        try {
+          const titleElement = chart.locator('title');
+          const titleCount = await titleElement.count();
+          if (titleCount > 0) {
+            title = await titleElement.first().textContent({ timeout: 5000 });
+          }
+        } catch (error) {
+          // Title element doesn't exist or is not accessible
+          title = null;
+        }
+        
         const ariaLabel = await chart.getAttribute('aria-label');
         const ariaLabelledBy = await chart.getAttribute('aria-labelledby');
         
@@ -165,8 +176,19 @@ test.describe('Accessibility Tests', () => {
           // Check if chart is contained in an element with a label
           const parent = chart.locator('..').first();
           const parentLabel = await parent.getAttribute('aria-label');
-          const nearbyHeading = page.locator('h1, h2, h3, h4, h5, h6').near(chart).first();
-          const headingText = await nearbyHeading.textContent();
+          
+          // Use safer method for nearby headings
+          let headingText = null;
+          try {
+            const nearbyHeading = page.locator('h1, h2, h3, h4, h5, h6').near(chart).first();
+            const headingCount = await nearbyHeading.count();
+            if (headingCount > 0) {
+              headingText = await nearbyHeading.textContent({ timeout: 5000 });
+            }
+          } catch (error) {
+            // No nearby heading found
+            headingText = null;
+          }
           
           const hasContextualLabel = parentLabel || headingText;
           expect(hasContextualLabel).toBeTruthy();
