@@ -1,0 +1,100 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - link "estimador.pt" [ref=e8] [cursor=pointer]:
+              - /url: /pt/
+            - paragraph [ref=e9]: Previsões Eleitorais Portuguesas
+          - generic:
+            - heading [level=1]
+        - generic [ref=e10]:
+          - navigation [ref=e11]:
+            - link "Início" [ref=e12] [cursor=pointer]:
+              - /url: /pt/
+            - link "Previsões" [ref=e13] [cursor=pointer]:
+              - /url: /pt/forecast/
+            - link "Mapa" [ref=e14] [cursor=pointer]:
+              - /url: /pt/map/
+            - link "Análise" [ref=e15] [cursor=pointer]:
+              - /url: /pt/articles/
+            - link "Sobre" [ref=e16] [cursor=pointer]:
+              - /url: /pt/about/
+          - generic [ref=e18]:
+            - img [ref=e19]
+            - generic [ref=e22]:
+              - link "PT" [ref=e23] [cursor=pointer]:
+                - /url: /pt/map/
+              - link "EN" [ref=e24] [cursor=pointer]:
+                - /url: /en/map/
+    - main [ref=e25]:
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - heading "Mapa Distrital Interativo" [level=1] [ref=e28]
+          - paragraph [ref=e29]: Explore as previsões eleitorais por distrito. Clique em qualquer distrito para ver a percentagem de votos prevista para cada partido.
+        - generic [ref=e30]:
+          - generic [ref=e32]:
+            - generic [ref=e34]: Portugal - Previsões por Distrito
+            - figure [ref=e38]:
+              - generic [ref=e39]:
+                - generic [ref=e40]:
+                  - img [ref=e41]
+                  - text: AD
+                - generic [ref=e43]:
+                  - img [ref=e44]
+                  - text: PS
+                - generic [ref=e46]:
+                  - img [ref=e47]
+                  - text: CH
+                - generic [ref=e49]:
+                  - img [ref=e50]
+                  - text: IL
+                - generic [ref=e52]:
+                  - img [ref=e53]
+                  - text: BE
+                - generic [ref=e55]:
+                  - img [ref=e56]
+                  - text: CDU
+                - generic [ref=e58]:
+                  - img [ref=e59]
+                  - text: L
+                - generic [ref=e61]:
+                  - img [ref=e62]
+                  - text: PAN
+              - img [ref=e64]
+          - generic [ref=e95]:
+            - generic [ref=e96]:
+              - generic [ref=e98]: Como Interpretar
+              - generic [ref=e99]:
+                - generic [ref=e100]:
+                  - heading "Cores" [level=4] [ref=e101]
+                  - paragraph [ref=e102]: Cada distrito está colorido com a cor do partido com maior percentagem de votos prevista nessa região.
+                - generic [ref=e103]:
+                  - heading "Interação" [level=4] [ref=e104]
+                  - paragraph [ref=e105]: Passe o rato sobre um distrito para ver o partido líder e percentagem, ou clique para ver todos os detalhes.
+                - generic [ref=e106]:
+                  - heading "Ilhas" [level=4] [ref=e107]
+                  - paragraph [ref=e108]: Os Açores e Madeira aparecem como múltiplas ilhas, mas as previsões são agregadas por região.
+            - generic [ref=e109]:
+              - generic [ref=e111]: Estatísticas Gerais
+              - generic [ref=e113]:
+                - heading "Distritos Liderados:" [level=4] [ref=e114]
+                - generic [ref=e115]:
+                  - generic [ref=e116]:
+                    - generic [ref=e117]: AD
+                    - generic [ref=e118]: "14"
+                  - generic [ref=e119]:
+                    - generic [ref=e120]: PS
+                    - generic [ref=e121]: "5"
+                  - generic [ref=e122]:
+                    - generic [ref=e123]: CH
+                    - generic [ref=e124]: "1"
+                - paragraph [ref=e126]: "Total de distritos: 20"
+  - button "Open Next.js Dev Tools" [ref=e132] [cursor=pointer]:
+    - img [ref=e133] [cursor=pointer]
+  - alert [ref=e136]
+```
