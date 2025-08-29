@@ -1,0 +1,143 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    
+    - name: Build the application
+      run: npm run build
+    
+    - name: Run Playwright tests
+      run: npx playwright test
+    
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+    
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: test-results/
+        retention-days: 30
+
+  visual-regression:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    
+    - name: Build the application
+      run: npm run build
+    
+    - name: Run visual regression tests
+      run: npx playwright test tests/visual/
+    
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: visual-test-results
+        path: test-results/
+        retention-days: 30
+    
+    - name: Upload visual diffs
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: visual-diffs
+        path: test-results/**/*-diff.png
+        retention-days: 30
+
+  accessibility:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+    
+    - name: Build the application
+      run: npm run build
+    
+    - name: Run accessibility tests
+      run: npx playwright test tests/accessibility/
+    
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-results
+        path: test-results/
+        retention-days: 30
+
+  performance:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+    
+    - name: Build the application
+      run: npm run build
+    
+    - name: Run performance tests
+      run: npx playwright test --grep "performance"
+    
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-results
+        path: test-results/
+        retention-days: 30
