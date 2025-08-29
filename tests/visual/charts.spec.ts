@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Chart Visual Regression', () => {
   test('should render polling trends chart consistently', async ({ page }) => {
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     
     // Wait for charts to load
@@ -18,7 +18,7 @@ test.describe('Chart Visual Regression', () => {
   });
 
   test('should render seat forecast chart consistently', async ({ page }) => {
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -31,7 +31,7 @@ test.describe('Chart Visual Regression', () => {
   });
 
   test('should render coalition chart consistently', async ({ page }) => {
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -44,7 +44,7 @@ test.describe('Chart Visual Regression', () => {
   });
 
   test('should render house effects matrix consistently', async ({ page }) => {
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -57,7 +57,7 @@ test.describe('Chart Visual Regression', () => {
   });
 
   test('should render district map consistently', async ({ page }) => {
-    await page.goto('/map');
+    await page.goto('/pt/map');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(4000);
     
@@ -71,7 +71,7 @@ test.describe('Chart Visual Regression', () => {
 
   test('should render charts consistently on mobile', async ({ page, isMobile }) => {
     if (isMobile) {
-      await page.goto('/forecast');
+      await page.goto('/pt/forecast');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(3000);
       
@@ -81,7 +81,7 @@ test.describe('Chart Visual Regression', () => {
   });
 
   test('should handle chart hover states consistently', async ({ page }) => {
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -100,7 +100,7 @@ test.describe('Chart Visual Regression', () => {
   test('should render responsive chart layouts consistently', async ({ page }) => {
     // Test desktop layout
     await page.setViewportSize({ width: 1200, height: 800 });
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -115,7 +115,7 @@ test.describe('Chart Visual Regression', () => {
 
   test('should render chart loading states consistently', async ({ page }) => {
     // Start navigation but don't wait for full load
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     
     // Take screenshot of loading state (if visible)
     const loadingIndicator = page.locator('[data-testid="loading"], .loading, .spinner');
@@ -132,7 +132,7 @@ test.describe('Chart Visual Regression', () => {
     // This test would need to simulate error conditions
     // For now, just check if error boundaries render consistently
     
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     
     // Look for any error messages that might be displayed

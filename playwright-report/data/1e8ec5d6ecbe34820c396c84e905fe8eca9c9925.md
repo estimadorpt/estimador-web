@@ -1,0 +1,529 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - link "estimador.pt" [ref=e8] [cursor=pointer]:
+              - /url: /pt/
+            - paragraph [ref=e9]: Previsões Eleitorais Portuguesas
+          - generic:
+            - heading [level=1]
+        - generic [ref=e10]:
+          - navigation [ref=e11]:
+            - link "Início" [ref=e12] [cursor=pointer]:
+              - /url: /pt/
+            - link "Previsões" [ref=e13] [cursor=pointer]:
+              - /url: /pt/forecast/
+            - link "Mapa" [ref=e14] [cursor=pointer]:
+              - /url: /pt/map/
+            - link "Análise" [ref=e15] [cursor=pointer]:
+              - /url: /pt/articles/
+            - link "Sobre" [ref=e16] [cursor=pointer]:
+              - /url: /pt/about/
+          - generic [ref=e18]:
+            - img [ref=e19]
+            - generic [ref=e22]:
+              - link "PT" [ref=e23] [cursor=pointer]:
+                - /url: /pt/forecast/
+              - link "EN" [ref=e24] [cursor=pointer]:
+                - /url: /en/forecast/
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - heading "Eleições Parlamentares Portuguesas" [level=2] [ref=e29]
+        - generic [ref=e30]:
+          - img [ref=e31]
+          - generic [ref=e33]: Atualizado May 18, 2025
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - generic [ref=e36]: 100%
+          - generic [ref=e37]: AD mais mandatos
+        - generic [ref=e38]:
+          - generic [ref=e39]: 0%
+          - generic [ref=e40]: PS mais mandatos
+        - generic [ref=e41]:
+          - generic [ref=e42]: 0%
+          - generic [ref=e43]: Maioria de direita
+        - generic [ref=e44]:
+          - generic [ref=e45]: 0%
+          - generic [ref=e46]: Maioria de esquerda
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - generic [ref=e50]:
+          - img [ref=e51]
+          - heading "Tendências das sondagens" [level=2] [ref=e54]
+        - img [ref=e57]:
+          - generic "y-axis tick label" [ref=e60]:
+            - generic [ref=e61]: 0%
+            - generic [ref=e62]: 5%
+            - generic [ref=e63]: 10%
+            - generic [ref=e64]: 15%
+            - generic [ref=e65]: 20%
+            - generic [ref=e66]: 25%
+            - generic [ref=e67]: 30%
+            - generic [ref=e68]: 35%
+            - generic [ref=e69]: 40%
+            - generic [ref=e70]: 45%
+            - generic [ref=e71]: 50%
+          - generic [ref=e73]: ↑ Percentagem de votos (%)
+          - generic "x-axis tick label" [ref=e76]:
+            - generic [ref=e77]: Oct 2023
+            - generic [ref=e78]: Jan 2024
+            - generic [ref=e79]: Apr 2024
+            - generic [ref=e80]: Jul 2024
+            - generic [ref=e81]: Oct 2024
+            - generic [ref=e82]: Jan 2025
+            - generic [ref=e83]: Apr 2025
+          - generic "text" [ref=e104]:
+            - generic [ref=e105]: AD 34.2%
+            - generic [ref=e106]: PS 27.7%
+            - generic [ref=e107]: CH 20.5%
+          - generic "text" [ref=e108]:
+            - generic [ref=e109]: PAN 1.3%
+            - generic [ref=e110]: BE 2.7%
+            - generic [ref=e111]: CDU 3.2%
+            - generic [ref=e112]: L 4.7%
+            - generic [ref=e113]: IL 5.6%
+        - paragraph [ref=e114]: Médias de sondagens suavizadas baseadas em 13056 pontos de dados. Linhas mostram percentagem estimada de votos ao longo do tempo com bandas de incerteza.
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - img [ref=e117]
+          - heading "Distribuição de mandatos por coligação" [level=2] [ref=e119]
+        - generic [ref=e120]:
+          - img [ref=e122]:
+            - generic "fy-axis tick label" [ref=e123]:
+              - generic [ref=e125]: Esquerda
+              - generic [ref=e127]: Direita
+            - generic [ref=e134]:
+              - generic [ref=e135]: "50"
+              - generic [ref=e136]: "75"
+              - generic [ref=e137]: "100"
+              - generic [ref=e138]: "116"
+              - generic [ref=e139]: "125"
+            - generic [ref=e141]: Mandatos projetados →
+            - generic "text" [ref=e1746]:
+              - generic [ref=e1748]: "82"
+              - generic [ref=e1750]: "99"
+          - generic [ref=e1751]: Com base em 9000 simulações
+        - paragraph [ref=e1752]: Cada ponto representa um resultado de simulação. Linhas pretas mostram a contagem mediana de mandatos para cada coligação.
+      - generic [ref=e1753]:
+        - generic [ref=e1754]:
+          - img [ref=e1755]
+          - heading "Projeções de partidos individuais" [level=2] [ref=e1760]
+        - img [ref=e1763]:
+          - generic "y-axis tick label" [ref=e1765]:
+            - generic [ref=e1766]: Aliança Democrática
+            - generic [ref=e1767]: Partido Socialista
+            - generic [ref=e1768]: Chega
+            - generic [ref=e1769]: Iniciativa Liberal
+            - generic [ref=e1770]: Livre
+            - generic [ref=e1771]: CDU
+            - generic [ref=e1772]: Bloco de Esquerda
+            - generic [ref=e1773]: PAN
+          - generic "x-axis tick label" [ref=e1776]:
+            - generic [ref=e1777]: "0"
+            - generic [ref=e1778]: "10"
+            - generic [ref=e1779]: "20"
+            - generic [ref=e1780]: "30"
+            - generic [ref=e1781]: "40"
+            - generic [ref=e1782]: "50"
+            - generic [ref=e1783]: "60"
+            - generic [ref=e1784]: "70"
+            - generic [ref=e1785]: "80"
+            - generic [ref=e1786]: "90"
+            - generic [ref=e1787]: "100"
+            - generic [ref=e1788]: "110"
+          - generic [ref=e1790]: Projected seats →
+          - generic "text" [ref=e1816]:
+            - generic [ref=e1817]: "90"
+            - generic [ref=e1818]: "70"
+            - generic [ref=e1819]: "49"
+            - generic [ref=e1820]: "10"
+            - generic [ref=e1821]: "6"
+            - generic [ref=e1822]: "3"
+            - generic [ref=e1823]: "2"
+            - generic [ref=e1824]: "0"
+        - paragraph [ref=e1825]: Baseado em 9,000 simulações de Monte Carlo. Pontos mostram projeções médias, bandas mostram intervalos de confiança de 50% e 80%.
+      - generic [ref=e1826]:
+        - generic [ref=e1827]:
+          - img [ref=e1828]
+          - heading "Análise Distrital" [level=2] [ref=e1830]
+        - generic [ref=e1831]:
+          - generic [ref=e1832]:
+            - heading "Seats in Play (7 districts)" [level=3] [ref=e1833]
+            - paragraph [ref=e1834]: Districts where seat allocation is uncertain - small changes in vote share could flip seats between parties.
+            - generic [ref=e1835]:
+              - generic [ref=e1836]:
+                - generic [ref=e1837]:
+                  - heading "Lisboa" [level=4] [ref=e1838]
+                  - generic [ref=e1839]: "ENSC: 3.04"
+                - generic [ref=e1840]:
+                  - generic [ref=e1841]:
+                    - generic [ref=e1844]: Chega
+                    - generic [ref=e1845]:
+                      - generic [ref=e1846]: "+1 seat: 26%"
+                      - generic [ref=e1847]: •
+                      - generic [ref=e1848]: "-1 seat: 30%"
+                  - generic [ref=e1849]:
+                    - generic [ref=e1852]: Partido Socialista
+                    - generic [ref=e1853]:
+                      - generic [ref=e1854]: "+1 seat: 43%"
+                      - generic [ref=e1855]: •
+                      - generic [ref=e1856]: "-1 seat: 10%"
+                  - generic [ref=e1857]:
+                    - generic [ref=e1860]: Aliança Democrática
+                    - generic [ref=e1861]:
+                      - generic [ref=e1862]: "+1 seat: 24%"
+                      - generic [ref=e1863]: •
+                      - generic [ref=e1864]: "-1 seat: 26%"
+              - generic [ref=e1865]:
+                - generic [ref=e1866]:
+                  - heading "Porto" [level=4] [ref=e1867]
+                  - generic [ref=e1868]: "ENSC: 2.17"
+                - generic [ref=e1869]:
+                  - generic [ref=e1870]:
+                    - generic [ref=e1873]: Chega
+                    - generic [ref=e1874]:
+                      - generic [ref=e1875]: "+1 seat: 47%"
+                      - generic [ref=e1876]: •
+                      - generic [ref=e1877]: "-1 seat: 7%"
+                  - generic [ref=e1878]:
+                    - generic [ref=e1881]: Iniciativa Liberal
+                    - generic [ref=e1883]: "-1 seat: 46%"
+                  - generic [ref=e1884]:
+                    - generic [ref=e1887]: Aliança Democrática
+                    - generic [ref=e1888]:
+                      - generic [ref=e1889]: "+1 seat: 27%"
+                      - generic [ref=e1890]: •
+                      - generic [ref=e1891]: "-1 seat: 18%"
+              - generic [ref=e1892]:
+                - generic [ref=e1893]:
+                  - heading "Braga" [level=4] [ref=e1894]
+                  - generic [ref=e1895]: "ENSC: 1.37"
+                - generic [ref=e1896]:
+                  - generic [ref=e1897]:
+                    - generic [ref=e1900]: Chega
+                    - generic [ref=e1902]: "+1 seat: 48%"
+                  - generic [ref=e1903]:
+                    - generic [ref=e1906]: Livre
+                    - generic [ref=e1908]: "+1 seat: 40%"
+                  - generic [ref=e1909]:
+                    - generic [ref=e1912]: Aliança Democrática
+                    - generic [ref=e1914]: "+1 seat: 27%"
+              - generic [ref=e1915]:
+                - generic [ref=e1916]:
+                  - heading "Aveiro" [level=4] [ref=e1917]
+                  - generic [ref=e1918]: "ENSC: 1.29"
+                - generic [ref=e1919]:
+                  - generic [ref=e1920]:
+                    - generic [ref=e1923]: Aliança Democrática
+                    - generic [ref=e1925]: "-1 seat: 46%"
+                  - generic [ref=e1926]:
+                    - generic [ref=e1929]: Partido Socialista
+                    - generic [ref=e1931]: "+1 seat: 45%"
+                  - generic [ref=e1932]:
+                    - generic [ref=e1935]: Livre
+                    - generic [ref=e1937]: "+1 seat: 14%"
+              - generic [ref=e1938]:
+                - generic [ref=e1939]:
+                  - heading "Leiria" [level=4] [ref=e1940]
+                  - generic [ref=e1941]: "ENSC: 1.04"
+                - generic [ref=e1942]:
+                  - generic [ref=e1943]:
+                    - generic [ref=e1946]: Partido Socialista
+                    - generic [ref=e1948]: "+1 seat: 46%"
+                  - generic [ref=e1949]:
+                    - generic [ref=e1952]: Chega
+                    - generic [ref=e1954]: "+1 seat: 34%"
+                  - generic [ref=e1955]:
+                    - generic [ref=e1958]: Iniciativa Liberal
+                    - generic [ref=e1960]: "+1 seat: 16%"
+              - generic [ref=e1961]:
+                - generic [ref=e1962]:
+                  - heading "Castelo Branco" [level=4] [ref=e1963]
+                  - generic [ref=e1964]: "ENSC: 1.00"
+                - generic [ref=e1965]:
+                  - generic [ref=e1966]:
+                    - generic [ref=e1969]: Partido Socialista
+                    - generic [ref=e1971]: "-1 seat: 50%"
+                  - generic [ref=e1972]:
+                    - generic [ref=e1975]: Aliança Democrática
+                    - generic [ref=e1977]: "-1 seat: 50%"
+              - generic [ref=e1978]:
+                - generic [ref=e1979]:
+                  - heading "Guarda" [level=4] [ref=e1980]
+                  - generic [ref=e1981]: "ENSC: 0.99"
+                - generic [ref=e1982]:
+                  - generic [ref=e1983]:
+                    - generic [ref=e1986]: Chega
+                    - generic [ref=e1988]: "+1 seat: 50%"
+                  - generic [ref=e1989]:
+                    - generic [ref=e1992]: Aliança Democrática
+                    - generic [ref=e1994]: "-1 seat: 50%"
+          - generic [ref=e1995]:
+            - heading "Likely Winners by District" [level=3] [ref=e1996]
+            - generic [ref=e1998]:
+              - generic [ref=e1999]:
+                - generic [ref=e2000]: "8"
+                - generic [ref=e2001]: Aliança Democrática
+                - generic [ref=e2002]: districts
+              - generic [ref=e2003]:
+                - generic [ref=e2004]: "4"
+                - generic [ref=e2005]: Partido Socialista
+                - generic [ref=e2006]: districts
+              - generic [ref=e2007]:
+                - generic [ref=e2008]: "1"
+                - generic [ref=e2009]: Chega
+                - generic [ref=e2010]: districts
+          - generic [ref=e2011]:
+            - generic [ref=e2012]:
+              - generic [ref=e2013]:
+                - generic [ref=e2014]: "20"
+                - generic [ref=e2015]: Total districts
+              - generic [ref=e2016]:
+                - generic [ref=e2017]: "7"
+                - generic [ref=e2018]: Seats in play
+              - generic [ref=e2019]:
+                - generic [ref=e2020]: "13"
+                - generic [ref=e2021]: Stable allocation
+            - paragraph [ref=e2023]:
+              - strong [ref=e2024]: ENSC (Effective Number of Seat Changes)
+              - text: measures seat allocation uncertainty. Districts with ENSC > 0.8 are classified as having "seats in play" where small vote share changes could flip seats between parties under the D'Hondt proportional system.
+      - generic [ref=e2025]:
+        - generic [ref=e2026]:
+          - heading "Esquerda" [level=3] [ref=e2027]
+          - generic [ref=e2028]:
+            - generic [ref=e2029]:
+              - generic [ref=e2032]: Partido Socialista
+              - generic [ref=e2033]: 27.7%
+            - generic [ref=e2034]:
+              - generic [ref=e2037]: Bloco de Esquerda
+              - generic [ref=e2038]: 2.7%
+            - generic [ref=e2039]:
+              - generic [ref=e2042]: Coligação Democrática Unitária
+              - generic [ref=e2043]: 3.2%
+            - generic [ref=e2044]:
+              - generic [ref=e2047]: LIVRE
+              - generic [ref=e2048]: 4.7%
+            - generic [ref=e2050]:
+              - generic [ref=e2051]: Probabilidade de maioria
+              - generic [ref=e2052]: 0%
+        - generic [ref=e2053]:
+          - heading "Direita" [level=3] [ref=e2054]
+          - generic [ref=e2055]:
+            - generic [ref=e2056]:
+              - generic [ref=e2059]: Aliança Democrática
+              - generic [ref=e2060]: 34.2%
+            - generic [ref=e2061]:
+              - generic [ref=e2064]: Iniciativa Liberal
+              - generic [ref=e2065]: 5.6%
+            - generic [ref=e2067]:
+              - generic [ref=e2068]: Probabilidade de maioria
+              - generic [ref=e2069]: 0%
+      - generic [ref=e2070]:
+        - generic [ref=e2071]:
+          - img [ref=e2072]
+          - heading "Efeitos das casas de sondagens" [level=2] [ref=e2077]
+        - generic [ref=e2078]:
+          - table [ref=e2081]:
+            - rowgroup [ref=e2082]:
+              - row "Pollster AD PS CH IL BE CDU L PAN" [ref=e2083]:
+                - cell "Pollster" [ref=e2084]
+                - cell "AD" [ref=e2085]
+                - cell "PS" [ref=e2086]
+                - cell "CH" [ref=e2087]
+                - cell "IL" [ref=e2088]
+                - cell "BE" [ref=e2089]
+                - cell "CDU" [ref=e2090]
+                - cell "L" [ref=e2091]
+                - cell "PAN" [ref=e2092]
+            - rowgroup [ref=e2093]:
+              - 'row "Aximage -0.04 Aximage → AD: -0.038 logit Aximage → PS: -0.006 logit Aximage → CH: 0.018 logit +0.05 Aximage → IL: 0.051 logit Aximage → BE: -0.008 logit Aximage → CDU: -0.016 logit +0.09 Aximage → L: 0.094 logit +0.04 Aximage → PAN: 0.041 logit" [ref=e2094]':
+                - cell "Aximage" [ref=e2095]
+                - 'cell "-0.04 Aximage → AD: -0.038 logit" [ref=e2096]':
+                  - generic [ref=e2097]: "-0.04"
+                  - generic: "Aximage → AD: -0.038 logit"
+                - 'cell "Aximage → PS: -0.006 logit" [ref=e2098]':
+                  - generic: "Aximage → PS: -0.006 logit"
+                - 'cell "Aximage → CH: 0.018 logit" [ref=e2099]':
+                  - generic: "Aximage → CH: 0.018 logit"
+                - 'cell "+0.05 Aximage → IL: 0.051 logit" [ref=e2100]':
+                  - generic [ref=e2101]: "+0.05"
+                  - generic: "Aximage → IL: 0.051 logit"
+                - 'cell "Aximage → BE: -0.008 logit" [ref=e2102]':
+                  - generic: "Aximage → BE: -0.008 logit"
+                - 'cell "Aximage → CDU: -0.016 logit" [ref=e2103]':
+                  - generic: "Aximage → CDU: -0.016 logit"
+                - 'cell "+0.09 Aximage → L: 0.094 logit" [ref=e2104]':
+                  - generic [ref=e2105]: "+0.09"
+                  - generic: "Aximage → L: 0.094 logit"
+                - 'cell "+0.04 Aximage → PAN: 0.041 logit" [ref=e2106]':
+                  - generic [ref=e2107]: "+0.04"
+                  - generic: "Aximage → PAN: 0.041 logit"
+              - 'row "CESOP-U.Católica CESOP-U.Católica → AD: 0.010 logit CESOP-U.Católica → PS: 0.006 logit -0.03 CESOP-U.Católica → CH: -0.025 logit +0.18 CESOP-U.Católica → IL: 0.175 logit CESOP-U.Católica → BE: -0.018 logit CESOP-U.Católica → CDU: 0.004 logit +0.15 CESOP-U.Católica → L: 0.152 logit -0.14 CESOP-U.Católica → PAN: -0.139 logit" [ref=e2108]':
+                - cell "CESOP-U.Católica" [ref=e2109]
+                - 'cell "CESOP-U.Católica → AD: 0.010 logit" [ref=e2110]':
+                  - generic: "CESOP-U.Católica → AD: 0.010 logit"
+                - 'cell "CESOP-U.Católica → PS: 0.006 logit" [ref=e2111]':
+                  - generic: "CESOP-U.Católica → PS: 0.006 logit"
+                - 'cell "-0.03 CESOP-U.Católica → CH: -0.025 logit" [ref=e2112]':
+                  - generic [ref=e2113]: "-0.03"
+                  - generic: "CESOP-U.Católica → CH: -0.025 logit"
+                - 'cell "+0.18 CESOP-U.Católica → IL: 0.175 logit" [ref=e2114]':
+                  - generic [ref=e2115]: "+0.18"
+                  - generic: "CESOP-U.Católica → IL: 0.175 logit"
+                - 'cell "CESOP-U.Católica → BE: -0.018 logit" [ref=e2116]':
+                  - generic: "CESOP-U.Católica → BE: -0.018 logit"
+                - 'cell "CESOP-U.Católica → CDU: 0.004 logit" [ref=e2117]':
+                  - generic: "CESOP-U.Católica → CDU: 0.004 logit"
+                - 'cell "+0.15 CESOP-U.Católica → L: 0.152 logit" [ref=e2118]':
+                  - generic [ref=e2119]: "+0.15"
+                  - generic: "CESOP-U.Católica → L: 0.152 logit"
+                - 'cell "-0.14 CESOP-U.Católica → PAN: -0.139 logit" [ref=e2120]':
+                  - generic [ref=e2121]: "-0.14"
+                  - generic: "CESOP-U.Católica → PAN: -0.139 logit"
+              - 'row "Consulmark2 +0.03 Consulmark2 → AD: 0.027 logit -0.03 Consulmark2 → PS: -0.028 logit Consulmark2 → CH: -0.010 logit +0.22 Consulmark2 → IL: 0.220 logit Consulmark2 → BE: 0.011 logit -0.04 Consulmark2 → CDU: -0.039 logit +0.22 Consulmark2 → L: 0.222 logit -0.21 Consulmark2 → PAN: -0.213 logit" [ref=e2122]':
+                - cell "Consulmark2" [ref=e2123]
+                - 'cell "+0.03 Consulmark2 → AD: 0.027 logit" [ref=e2124]':
+                  - generic [ref=e2125]: "+0.03"
+                  - generic: "Consulmark2 → AD: 0.027 logit"
+                - 'cell "-0.03 Consulmark2 → PS: -0.028 logit" [ref=e2126]':
+                  - generic [ref=e2127]: "-0.03"
+                  - generic: "Consulmark2 → PS: -0.028 logit"
+                - 'cell "Consulmark2 → CH: -0.010 logit" [ref=e2128]':
+                  - generic: "Consulmark2 → CH: -0.010 logit"
+                - 'cell "+0.22 Consulmark2 → IL: 0.220 logit" [ref=e2129]':
+                  - generic [ref=e2130]: "+0.22"
+                  - generic: "Consulmark2 → IL: 0.220 logit"
+                - 'cell "Consulmark2 → BE: 0.011 logit" [ref=e2131]':
+                  - generic: "Consulmark2 → BE: 0.011 logit"
+                - 'cell "-0.04 Consulmark2 → CDU: -0.039 logit" [ref=e2132]':
+                  - generic [ref=e2133]: "-0.04"
+                  - generic: "Consulmark2 → CDU: -0.039 logit"
+                - 'cell "+0.22 Consulmark2 → L: 0.222 logit" [ref=e2134]':
+                  - generic [ref=e2135]: "+0.22"
+                  - generic: "Consulmark2 → L: 0.222 logit"
+                - 'cell "-0.21 Consulmark2 → PAN: -0.213 logit" [ref=e2136]':
+                  - generic [ref=e2137]: "-0.21"
+                  - generic: "Consulmark2 → PAN: -0.213 logit"
+              - 'row "ICS/ISCTE/GFK Metris ICS/ISCTE/GFK Metris → AD: 0.019 logit +0.04 ICS/ISCTE/GFK Metris → PS: 0.038 logit +0.04 ICS/ISCTE/GFK Metris → CH: 0.043 logit -0.24 ICS/ISCTE/GFK Metris → IL: -0.239 logit ICS/ISCTE/GFK Metris → BE: -0.016 logit +0.06 ICS/ISCTE/GFK Metris → CDU: 0.064 logit -0.39 ICS/ISCTE/GFK Metris → L: -0.390 logit +0.04 ICS/ISCTE/GFK Metris → PAN: 0.037 logit" [ref=e2138]':
+                - cell "ICS/ISCTE/GFK Metris" [ref=e2139]
+                - 'cell "ICS/ISCTE/GFK Metris → AD: 0.019 logit" [ref=e2140]':
+                  - generic: "ICS/ISCTE/GFK Metris → AD: 0.019 logit"
+                - 'cell "+0.04 ICS/ISCTE/GFK Metris → PS: 0.038 logit" [ref=e2141]':
+                  - generic [ref=e2142]: "+0.04"
+                  - generic: "ICS/ISCTE/GFK Metris → PS: 0.038 logit"
+                - 'cell "+0.04 ICS/ISCTE/GFK Metris → CH: 0.043 logit" [ref=e2143]':
+                  - generic [ref=e2144]: "+0.04"
+                  - generic: "ICS/ISCTE/GFK Metris → CH: 0.043 logit"
+                - 'cell "-0.24 ICS/ISCTE/GFK Metris → IL: -0.239 logit" [ref=e2145]':
+                  - generic [ref=e2146]: "-0.24"
+                  - generic: "ICS/ISCTE/GFK Metris → IL: -0.239 logit"
+                - 'cell "ICS/ISCTE/GFK Metris → BE: -0.016 logit" [ref=e2147]':
+                  - generic: "ICS/ISCTE/GFK Metris → BE: -0.016 logit"
+                - 'cell "+0.06 ICS/ISCTE/GFK Metris → CDU: 0.064 logit" [ref=e2148]':
+                  - generic [ref=e2149]: "+0.06"
+                  - generic: "ICS/ISCTE/GFK Metris → CDU: 0.064 logit"
+                - 'cell "-0.39 ICS/ISCTE/GFK Metris → L: -0.390 logit" [ref=e2150]':
+                  - generic [ref=e2151]: "-0.39"
+                  - generic: "ICS/ISCTE/GFK Metris → L: -0.390 logit"
+                - 'cell "+0.04 ICS/ISCTE/GFK Metris → PAN: 0.037 logit" [ref=e2152]':
+                  - generic [ref=e2153]: "+0.04"
+                  - generic: "ICS/ISCTE/GFK Metris → PAN: 0.037 logit"
+              - 'row "Intercampus -0.12 Intercampus → AD: -0.116 logit -0.08 Intercampus → PS: -0.077 logit Intercampus → CH: -0.005 logit +0.25 Intercampus → IL: 0.246 logit Intercampus → BE: 0.017 logit -0.06 Intercampus → CDU: -0.057 logit +0.24 Intercampus → L: 0.237 logit +0.27 Intercampus → PAN: 0.265 logit" [ref=e2154]':
+                - cell "Intercampus" [ref=e2155]
+                - 'cell "-0.12 Intercampus → AD: -0.116 logit" [ref=e2156]':
+                  - generic [ref=e2157]: "-0.12"
+                  - generic: "Intercampus → AD: -0.116 logit"
+                - 'cell "-0.08 Intercampus → PS: -0.077 logit" [ref=e2158]':
+                  - generic [ref=e2159]: "-0.08"
+                  - generic: "Intercampus → PS: -0.077 logit"
+                - 'cell "Intercampus → CH: -0.005 logit" [ref=e2160]':
+                  - generic: "Intercampus → CH: -0.005 logit"
+                - 'cell "+0.25 Intercampus → IL: 0.246 logit" [ref=e2161]':
+                  - generic [ref=e2162]: "+0.25"
+                  - generic: "Intercampus → IL: 0.246 logit"
+                - 'cell "Intercampus → BE: 0.017 logit" [ref=e2163]':
+                  - generic: "Intercampus → BE: 0.017 logit"
+                - 'cell "-0.06 Intercampus → CDU: -0.057 logit" [ref=e2164]':
+                  - generic [ref=e2165]: "-0.06"
+                  - generic: "Intercampus → CDU: -0.057 logit"
+                - 'cell "+0.24 Intercampus → L: 0.237 logit" [ref=e2166]':
+                  - generic [ref=e2167]: "+0.24"
+                  - generic: "Intercampus → L: 0.237 logit"
+                - 'cell "+0.27 Intercampus → PAN: 0.265 logit" [ref=e2168]':
+                  - generic [ref=e2169]: "+0.27"
+                  - generic: "Intercampus → PAN: 0.265 logit"
+              - 'row "Metris Metris → AD: 0.004 logit Metris → PS: 0.017 logit Metris → CH: 0.010 logit Metris → IL: 0.016 logit Metris → BE: 0.005 logit Metris → CDU: 0.018 logit -0.19 Metris → L: -0.191 logit -0.04 Metris → PAN: -0.043 logit" [ref=e2170]':
+                - cell "Metris" [ref=e2171]
+                - 'cell "Metris → AD: 0.004 logit" [ref=e2172]':
+                  - generic: "Metris → AD: 0.004 logit"
+                - 'cell "Metris → PS: 0.017 logit" [ref=e2173]':
+                  - generic: "Metris → PS: 0.017 logit"
+                - 'cell "Metris → CH: 0.010 logit" [ref=e2174]':
+                  - generic: "Metris → CH: 0.010 logit"
+                - 'cell "Metris → IL: 0.016 logit" [ref=e2175]':
+                  - generic: "Metris → IL: 0.016 logit"
+                - 'cell "Metris → BE: 0.005 logit" [ref=e2176]':
+                  - generic: "Metris → BE: 0.005 logit"
+                - 'cell "Metris → CDU: 0.018 logit" [ref=e2177]':
+                  - generic: "Metris → CDU: 0.018 logit"
+                - 'cell "-0.19 Metris → L: -0.191 logit" [ref=e2178]':
+                  - generic [ref=e2179]: "-0.19"
+                  - generic: "Metris → L: -0.191 logit"
+                - 'cell "-0.04 Metris → PAN: -0.043 logit" [ref=e2180]':
+                  - generic [ref=e2181]: "-0.04"
+                  - generic: "Metris → PAN: -0.043 logit"
+              - 'row "Pitagorica Pitagorica → AD: 0.004 logit Pitagorica → PS: 0.010 logit -0.03 Pitagorica → CH: -0.026 logit +0.19 Pitagorica → IL: 0.191 logit -0.04 Pitagorica → BE: -0.039 logit Pitagorica → CDU: 0.009 logit +0.20 Pitagorica → L: 0.196 logit -0.11 Pitagorica → PAN: -0.108 logit" [ref=e2182]':
+                - cell "Pitagorica" [ref=e2183]
+                - 'cell "Pitagorica → AD: 0.004 logit" [ref=e2184]':
+                  - generic: "Pitagorica → AD: 0.004 logit"
+                - 'cell "Pitagorica → PS: 0.010 logit" [ref=e2185]':
+                  - generic: "Pitagorica → PS: 0.010 logit"
+                - 'cell "-0.03 Pitagorica → CH: -0.026 logit" [ref=e2186]':
+                  - generic [ref=e2187]: "-0.03"
+                  - generic: "Pitagorica → CH: -0.026 logit"
+                - 'cell "+0.19 Pitagorica → IL: 0.191 logit" [ref=e2188]':
+                  - generic [ref=e2189]: "+0.19"
+                  - generic: "Pitagorica → IL: 0.191 logit"
+                - 'cell "-0.04 Pitagorica → BE: -0.039 logit" [ref=e2190]':
+                  - generic [ref=e2191]: "-0.04"
+                  - generic: "Pitagorica → BE: -0.039 logit"
+                - 'cell "Pitagorica → CDU: 0.009 logit" [ref=e2192]':
+                  - generic: "Pitagorica → CDU: 0.009 logit"
+                - 'cell "+0.20 Pitagorica → L: 0.196 logit" [ref=e2193]':
+                  - generic [ref=e2194]: "+0.20"
+                  - generic: "Pitagorica → L: 0.196 logit"
+                - 'cell "-0.11 Pitagorica → PAN: -0.108 logit" [ref=e2195]':
+                  - generic [ref=e2196]: "-0.11"
+                  - generic: "Pitagorica → PAN: -0.108 logit"
+          - generic [ref=e2197]:
+            - paragraph [ref=e2198]:
+              - strong [ref=e2199]: House effects
+              - text: show how each pollster systematically differs from the polling average in logit space. Red cells indicate the pollster tends to show higher support for that party, blue cells show lower support.
+            - paragraph [ref=e2200]: Values are logit deviations. Larger absolute values indicate stronger systematic bias. Hover over cells for exact values.
+      - generic [ref=e2201]:
+        - heading "Sobre este modelo" [level=3] [ref=e2202]
+        - generic [ref=e2203]:
+          - generic [ref=e2204]:
+            - generic [ref=e2205]:
+              - img [ref=e2206]
+              - generic [ref=e2211]: Fontes de dados
+            - paragraph [ref=e2212]: Dados de sondagens das principais empresas de sondagens portuguesas, ponderados por fiabilidade e atualidade. Resultados históricos de eleições e dados demográficos.
+          - generic [ref=e2213]:
+            - generic [ref=e2214]:
+              - img [ref=e2215]
+              - generic [ref=e2217]: Metodologia
+            - paragraph [ref=e2218]: Simulação de Monte Carlo considerando incerteza das sondagens, variações distritais e sistema de alocação de mandatos D'Hondt.
+          - generic [ref=e2219]:
+            - generic [ref=e2220]:
+              - img [ref=e2221]
+              - generic [ref=e2224]: Atualizações
+            - paragraph [ref=e2225]: O modelo é atualizado à medida que novos dados de sondagens ficam disponíveis. A incerteza diminui à medida que o dia das eleições se aproxima.
+  - button "Open Next.js Dev Tools" [ref=e2231] [cursor=pointer]:
+    - img [ref=e2232] [cursor=pointer]
+  - alert [ref=e2235]
+```

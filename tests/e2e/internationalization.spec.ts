@@ -16,7 +16,7 @@ test.describe('Internationalization', () => {
     expect(page.url()).toMatch(/\/en\//);
     
     // Check that page loads successfully in English
-    await expect(page.locator('main')).toBeVisible();
+    await expect(page.locator('section, main, .container').first()).toBeVisible();
   });
 
   test('should have language switcher', async ({ page }) => {

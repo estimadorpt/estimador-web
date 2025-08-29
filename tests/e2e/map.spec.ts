@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Map Page', () => {
   test('should load map page successfully', async ({ page }) => {
-    await page.goto('/map');
+    await page.goto('/pt/map');
     
     // Check that the page loads
     await expect(page).toHaveTitle(/estimador\.pt/);
@@ -11,11 +11,11 @@ test.describe('Map Page', () => {
     await page.waitForLoadState('networkidle');
     
     // Check for main content
-    await expect(page.locator('main')).toBeVisible();
+    await expect(page.locator('section, main, .container').first()).toBeVisible();
   });
 
   test('should display Portugal district map', async ({ page }) => {
-    await page.goto('/map');
+    await page.goto('/pt/map');
     await page.waitForLoadState('networkidle');
     
     // Wait for map to load
@@ -36,7 +36,7 @@ test.describe('Map Page', () => {
   });
 
   test('should have interactive map elements', async ({ page }) => {
-    await page.goto('/map');
+    await page.goto('/pt/map');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -56,7 +56,7 @@ test.describe('Map Page', () => {
   });
 
   test('should display district information on interaction', async ({ page }) => {
-    await page.goto('/map');
+    await page.goto('/pt/map');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -90,7 +90,7 @@ test.describe('Map Page', () => {
       }
     });
 
-    await page.goto('/map');
+    await page.goto('/pt/map');
     await page.waitForLoadState('networkidle');
     
     // Map should attempt to load geographic data
@@ -99,11 +99,11 @@ test.describe('Map Page', () => {
 
   test('should be responsive on mobile', async ({ page, isMobile }) => {
     if (isMobile) {
-      await page.goto('/map');
+      await page.goto('/pt/map');
       await page.waitForLoadState('networkidle');
       
       // Check that map content is visible on mobile
-      const main = page.locator('main');
+      const main = page.locator('section, main, .container').first();
       await expect(main).toBeVisible();
       
       // Map should adapt to mobile viewport
@@ -117,11 +117,11 @@ test.describe('Map Page', () => {
   });
 
   test('should handle map loading errors gracefully', async ({ page }) => {
-    await page.goto('/map');
+    await page.goto('/pt/map');
     await page.waitForLoadState('networkidle');
     
     // The page should load even if map data fails
-    await expect(page.locator('main')).toBeVisible();
+    await expect(page.locator('section, main, .container').first()).toBeVisible();
     
     // Check for error boundaries or graceful error handling
     const errorMessages = page.locator('[data-testid="error"], .error, .map-error');

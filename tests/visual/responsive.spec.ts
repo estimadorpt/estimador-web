@@ -11,7 +11,7 @@ test.describe('Responsive Design Visual Tests', () => {
   for (const viewport of viewports) {
     test(`should render homepage correctly on ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
-      await page.goto('/');
+      await page.goto('/pt');
       await page.waitForLoadState('networkidle');
       
       await expect(page).toHaveScreenshot(`homepage-${viewport.name}.png`, {
@@ -21,7 +21,7 @@ test.describe('Responsive Design Visual Tests', () => {
 
     test(`should render forecast page correctly on ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
-      await page.goto('/forecast');
+      await page.goto('/pt/forecast');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(3000); // Wait for charts to load
       
@@ -32,7 +32,7 @@ test.describe('Responsive Design Visual Tests', () => {
 
     test(`should render map page correctly on ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
-      await page.goto('/map');
+      await page.goto('/pt/map');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(4000); // Wait for map to load
       

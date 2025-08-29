@@ -4,7 +4,7 @@ test.describe('Performance Tests', () => {
   test('should load homepage within acceptable time', async ({ page }) => {
     const startTime = Date.now();
     
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('networkidle');
     
     const endTime = Date.now();
@@ -15,7 +15,7 @@ test.describe('Performance Tests', () => {
   });
 
   test('should have acceptable Core Web Vitals', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     
     // Measure Core Web Vitals
     const vitals = await page.evaluate(() => {
@@ -69,7 +69,7 @@ test.describe('Performance Tests', () => {
   test('should load forecast page charts efficiently', async ({ page }) => {
     const startTime = Date.now();
     
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     
     // Wait for charts to render
@@ -88,7 +88,7 @@ test.describe('Performance Tests', () => {
   });
 
   test('should handle multiple chart interactions efficiently', async ({ page }) => {
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -126,7 +126,7 @@ test.describe('Performance Tests', () => {
       }
     });
     
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     
     // Should load data efficiently
@@ -138,7 +138,7 @@ test.describe('Performance Tests', () => {
     if (isMobile) {
       const startTime = Date.now();
       
-      await page.goto('/forecast');
+      await page.goto('/pt/forecast');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(3000);
       
@@ -155,7 +155,7 @@ test.describe('Performance Tests', () => {
   });
 
   test('should handle memory usage efficiently', async ({ page }) => {
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -181,7 +181,7 @@ test.describe('Performance Tests', () => {
   });
 
   test('should handle rapid navigation efficiently', async ({ page }) => {
-    const pages = ['/', '/forecast', '/map', '/about'];
+    const pages = ['/pt', '/pt/forecast', '/pt/map', '/pt/about'];
     const startTime = Date.now();
     
     for (const pagePath of pages) {
@@ -211,7 +211,7 @@ test.describe('Performance Tests', () => {
       }
     });
     
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('domcontentloaded');
     
     // Should minimize render-blocking resources
@@ -231,7 +231,7 @@ test.describe('Performance Tests', () => {
       }
     });
     
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('networkidle');
     
     // Check for images in the DOM

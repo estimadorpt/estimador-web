@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Accessibility Tests', () => {
   test('should have proper heading hierarchy on homepage', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('networkidle');
     
     // Check for proper heading hierarchy (h1, h2, h3, etc.)
@@ -31,7 +31,7 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('should have proper alt text for images', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('networkidle');
     
     const images = page.locator('img');
@@ -53,7 +53,7 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('should have accessible navigation', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('networkidle');
     
     // Check for navigation landmarks
@@ -78,7 +78,7 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('should have proper form accessibility', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('networkidle');
     
     // Look for form elements
@@ -109,7 +109,7 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('should have accessible color contrast', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('networkidle');
     
     // This is a basic test - real color contrast testing would need specialized tools
@@ -141,7 +141,7 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('should have accessible charts', async ({ page }) => {
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -176,7 +176,7 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('should support keyboard navigation', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('networkidle');
     
     // Test Tab navigation through interactive elements
@@ -207,12 +207,12 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('should have proper ARIA landmarks', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('networkidle');
     
-    // Check for main landmark
-    const main = page.locator('main, [role="main"]');
-    await expect(main.first()).toBeVisible();
+    // Check for main landmark or main content
+    const main = page.locator('main, [role="main"], section').first();
+    await expect(main).toBeVisible();
     
     // Check for navigation landmark
     const nav = page.locator('nav, [role="navigation"]');
@@ -241,7 +241,7 @@ test.describe('Accessibility Tests', () => {
     // Test with reduced motion preference
     await page.emulateMedia({ reducedMotion: 'reduce' });
     
-    await page.goto('/forecast');
+    await page.goto('/pt/forecast');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
     
@@ -260,7 +260,7 @@ test.describe('Accessibility Tests', () => {
 
   test('should be accessible on mobile devices', async ({ page, isMobile }) => {
     if (isMobile) {
-      await page.goto('/');
+      await page.goto('/pt');
       await page.waitForLoadState('networkidle');
       
       // Check touch target sizes

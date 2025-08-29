@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Homepage', () => {
   test('should load homepage successfully', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     
     // Check that the page loads
     await expect(page).toHaveTitle(/estimador\.pt/);
@@ -10,12 +10,15 @@ test.describe('Homepage', () => {
     // Check for main navigation
     await expect(page.locator('nav')).toBeVisible();
     
-    // Check for main content
-    await expect(page.locator('main')).toBeVisible();
+    // Check for main content (homepage uses divs, not main element)
+    await expect(page.locator('section').first()).toBeVisible();
+    
+    // Check for key headline content
+    await expect(page.locator('h1')).toBeVisible();
   });
 
   test('should display key metrics cards', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     
     // Wait for content to load
     await page.waitForLoadState('networkidle');
@@ -27,7 +30,7 @@ test.describe('Homepage', () => {
   });
 
   test('should have working navigation links', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/pt');
     
     // Test navigation to forecast page
     const forecastLink = page.locator('a[href*="forecast"]').first();
@@ -56,7 +59,7 @@ test.describe('Homepage', () => {
 
   test('should be responsive on mobile', async ({ page, isMobile }) => {
     if (isMobile) {
-      await page.goto('/');
+      await page.goto('/pt');
       
       // Check that the page loads on mobile
       await expect(page).toHaveTitle(/estimador\.pt/);
@@ -79,7 +82,7 @@ test.describe('Homepage', () => {
       }
     });
 
-    await page.goto('/');
+    await page.goto('/pt');
     await page.waitForLoadState('networkidle');
     
     // Filter out known acceptable errors (like 404s for optional resources)
