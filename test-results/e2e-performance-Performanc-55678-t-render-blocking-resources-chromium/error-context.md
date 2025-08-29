@@ -1,0 +1,202 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - generic [ref=e7]:
+          - link "estimador.pt" [ref=e8] [cursor=pointer]:
+            - /url: /pt/
+          - paragraph [ref=e9]: Previsões Eleitorais Portuguesas
+        - generic [ref=e10]:
+          - navigation [ref=e11]:
+            - link "Início" [ref=e12] [cursor=pointer]:
+              - /url: /pt/
+            - link "Previsões" [ref=e13] [cursor=pointer]:
+              - /url: /pt/forecast/
+            - link "Mapa" [ref=e14] [cursor=pointer]:
+              - /url: /pt/map/
+            - link "Análise" [ref=e15] [cursor=pointer]:
+              - /url: /pt/articles/
+            - link "Sobre" [ref=e16] [cursor=pointer]:
+              - /url: /pt/about/
+          - generic [ref=e18]:
+            - img [ref=e19]
+            - generic [ref=e22]:
+              - link "PT" [ref=e23] [cursor=pointer]:
+                - /url: /pt/
+              - link "EN" [ref=e24] [cursor=pointer]:
+                - /url: /en/
+    - generic [ref=e27]:
+      - heading "Aliança Democrática lidera a corrida eleitoral com 34.2% de apoio" [level=1] [ref=e28]
+      - paragraph [ref=e29]: A última previsão mostra Aliança Democrática à frente por 6.5 pontos, com 100% de probabilidade de ganhar mais assentos
+      - generic [ref=e30]:
+        - generic [ref=e31]: Baseado em 9,000 simulações
+        - generic [ref=e32]: •
+        - link "Metodologia" [ref=e33] [cursor=pointer]:
+          - /url: /pt/methodology/
+    - generic [ref=e35]:
+      - generic [ref=e36]:
+        - heading "Probabilidade de ganhar mais assentos" [level=2] [ref=e37]
+        - generic [ref=e38]:
+          - img [ref=e39]
+          - generic [ref=e41]: Atualizado May 18, 2025
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e46]: Aliança Democrática
+          - generic [ref=e47]: 100%
+          - generic [ref=e48]: 86-94 mandatos
+        - generic [ref=e49]:
+          - generic [ref=e52]: Partido Socialista
+          - generic [ref=e53]: 0%
+          - generic [ref=e54]: 66-74 mandatos
+        - generic [ref=e55]:
+          - generic [ref=e58]: Chega
+          - generic [ref=e59]: 0%
+          - generic [ref=e60]: 45-53 mandatos
+        - generic [ref=e61]:
+          - generic [ref=e64]: Outros
+          - generic [ref=e65]: 0%
+          - generic [ref=e66]: 0-20 mandatos
+    - generic [ref=e68]:
+      - generic [ref=e69]:
+        - heading "Distribuição de mandatos por coligação" [level=2] [ref=e70]
+        - paragraph [ref=e71]: Cada ponto representa um resultado de simulação. Linhas pretas mostram a contagem mediana de mandatos para cada coligação.
+        - generic [ref=e73]:
+          - img [ref=e75]:
+            - generic "fy-axis tick label" [ref=e76]:
+              - generic [ref=e78]: Esquerda
+              - generic [ref=e80]: Direita
+            - generic [ref=e87]:
+              - generic [ref=e88]: "50"
+              - generic [ref=e89]: "75"
+              - generic [ref=e90]: "100"
+              - generic [ref=e91]: "116"
+              - generic [ref=e92]: "125"
+            - generic [ref=e94]: Mandatos projetados →
+            - generic "text" [ref=e1699]:
+              - generic [ref=e1701]: "82"
+              - generic [ref=e1703]: "99"
+          - generic [ref=e1704]: Com base em 9000 simulações
+      - generic [ref=e1705]:
+        - generic [ref=e1706]:
+          - heading "Tendências das sondagens" [level=2] [ref=e1707]
+          - img [ref=e1710]:
+            - generic "y-axis tick label" [ref=e1713]:
+              - generic [ref=e1714]: 0%
+              - generic [ref=e1715]: 5%
+              - generic [ref=e1716]: 10%
+              - generic [ref=e1717]: 15%
+              - generic [ref=e1718]: 20%
+              - generic [ref=e1719]: 25%
+              - generic [ref=e1720]: 30%
+              - generic [ref=e1721]: 35%
+              - generic [ref=e1722]: 40%
+              - generic [ref=e1723]: 45%
+              - generic [ref=e1724]: 50%
+            - generic [ref=e1726]: ↑ Vote share (%)
+            - generic "x-axis tick label" [ref=e1729]:
+              - generic [ref=e1730]: Oct 2023
+              - generic [ref=e1731]: Jan 2024
+              - generic [ref=e1732]: Apr 2024
+              - generic [ref=e1733]: Jul 2024
+              - generic [ref=e1734]: Oct 2024
+              - generic [ref=e1735]: Jan 2025
+              - generic [ref=e1736]: Apr 2025
+            - generic "text" [ref=e1757]:
+              - generic [ref=e1758]: AD 34.2%
+              - generic [ref=e1759]: PS 27.7%
+              - generic [ref=e1760]: CH 20.5%
+            - generic "text" [ref=e1761]:
+              - generic [ref=e1762]: PAN 1.3%
+              - generic [ref=e1763]: BE 2.7%
+              - generic [ref=e1764]: CDU 3.2%
+              - generic [ref=e1765]: L 4.7%
+              - generic [ref=e1766]: IL 5.6%
+        - generic [ref=e1767]:
+          - generic [ref=e1768]:
+            - heading "Previsões por Distrito" [level=2] [ref=e1769]
+            - link "Ver completo" [ref=e1770] [cursor=pointer]:
+              - /url: /pt/map/
+              - text: Ver completo
+              - img [ref=e1771] [cursor=pointer]
+          - paragraph [ref=e1773]: Distribuição geográfica das previsões por distrito.
+          - img [ref=e1777]
+      - generic [ref=e1808]:
+        - generic [ref=e1809]:
+          - heading "Situação atual" [level=3] [ref=e1810]
+          - generic [ref=e1811]:
+            - generic [ref=e1812]:
+              - generic [ref=e1813]:
+                - generic [ref=e1814]: "#1"
+                - generic [ref=e1816]: Aliança Democrática
+              - generic [ref=e1817]: 34.2%
+            - generic [ref=e1818]:
+              - generic [ref=e1819]:
+                - generic [ref=e1820]: "#2"
+                - generic [ref=e1822]: Partido Socialista
+              - generic [ref=e1823]: 27.7%
+            - generic [ref=e1824]:
+              - generic [ref=e1825]:
+                - generic [ref=e1826]: "#3"
+                - generic [ref=e1828]: Chega
+              - generic [ref=e1829]: 20.5%
+            - generic [ref=e1830]:
+              - generic [ref=e1831]:
+                - generic [ref=e1832]: "#4"
+                - generic [ref=e1834]: Iniciativa Liberal
+              - generic [ref=e1835]: 5.6%
+            - generic [ref=e1836]:
+              - generic [ref=e1837]:
+                - generic [ref=e1838]: "#5"
+                - generic [ref=e1840]: LIVRE
+              - generic [ref=e1841]: 4.7%
+            - generic [ref=e1842]:
+              - generic [ref=e1843]:
+                - generic [ref=e1844]: "#6"
+                - generic [ref=e1846]: Coligação Democrática Unitária
+              - generic [ref=e1847]: 3.2%
+        - generic [ref=e1848]:
+          - heading "Cenários de coligação" [level=3] [ref=e1849]
+          - generic [ref=e1850]:
+            - generic [ref=e1851]:
+              - generic [ref=e1852]: Maioria de direita
+              - generic [ref=e1853]: 0%
+            - generic [ref=e1854]:
+              - generic [ref=e1855]: Maioria de esquerda
+              - generic [ref=e1856]: 0%
+            - generic [ref=e1857]:
+              - generic [ref=e1858]: Parlamento suspenso
+              - generic [ref=e1859]: 100%
+    - generic [ref=e1862]:
+      - link "Previsões" [ref=e1863] [cursor=pointer]:
+        - /url: /pt/forecast/
+        - img [ref=e1864] [cursor=pointer]
+        - text: Previsões
+      - link "Mapa Distrital" [ref=e1866] [cursor=pointer]:
+        - /url: /pt/map/
+        - img [ref=e1867] [cursor=pointer]
+        - text: Mapa Distrital
+      - link "Análise" [ref=e1869] [cursor=pointer]:
+        - /url: /pt/articles/
+        - img [ref=e1870] [cursor=pointer]
+        - text: Análise
+      - link "Metodologia" [ref=e1873] [cursor=pointer]:
+        - /url: /pt/methodology/
+        - img [ref=e1874] [cursor=pointer]
+        - text: Metodologia
+    - generic [ref=e1881]:
+      - heading "Sobre esta previsão" [level=2] [ref=e1882]
+      - paragraph [ref=e1883]: Este modelo eleitoral combina dados de sondagens, padrões históricos de voto e informações demográficas para projetar resultados prováveis para as eleições parlamentares portuguesas. A previsão é atualizada regularmente à medida que novos dados ficam disponíveis.
+      - generic [ref=e1884]:
+        - generic [ref=e1885]:
+          - img [ref=e1886]
+          - generic [ref=e1891]: 9,000 simulações
+        - generic [ref=e1892]:
+          - img [ref=e1893]
+          - generic [ref=e1896]: Baseado em 13056 polling data points
+  - button "Open Next.js Dev Tools" [ref=e1902] [cursor=pointer]:
+    - img [ref=e1903] [cursor=pointer]
+  - alert [ref=e1906]
+```

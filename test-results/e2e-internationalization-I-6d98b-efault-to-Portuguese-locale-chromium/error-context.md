@@ -1,0 +1,202 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - generic [ref=e7]:
+          - link "estimador.pt" [ref=e8] [cursor=pointer]:
+            - /url: /en/
+          - paragraph [ref=e9]: Portuguese Election Forecast
+        - generic [ref=e10]:
+          - navigation [ref=e11]:
+            - link "Home" [ref=e12] [cursor=pointer]:
+              - /url: /en/
+            - link "Forecast" [ref=e13] [cursor=pointer]:
+              - /url: /en/forecast/
+            - link "Map" [ref=e14] [cursor=pointer]:
+              - /url: /en/map/
+            - link "Analysis" [ref=e15] [cursor=pointer]:
+              - /url: /en/articles/
+            - link "About" [ref=e16] [cursor=pointer]:
+              - /url: /en/about/
+          - generic [ref=e18]:
+            - img [ref=e19]
+            - generic [ref=e22]:
+              - link "PT" [ref=e23] [cursor=pointer]:
+                - /url: /pt/
+              - link "EN" [ref=e24] [cursor=pointer]:
+                - /url: /en/
+    - generic [ref=e27]:
+      - heading "Democratic Alliance leads election race with 34.2% support" [level=1] [ref=e28]
+      - paragraph [ref=e29]: Latest forecast shows Democratic Alliance ahead by 6.5 points, with a 100% chance of winning the most seats
+      - generic [ref=e30]:
+        - generic [ref=e31]: Based on 9,000 simulations
+        - generic [ref=e32]: •
+        - link "Methodology" [ref=e33] [cursor=pointer]:
+          - /url: /pt/methodology/
+    - generic [ref=e35]:
+      - generic [ref=e36]:
+        - heading "Chance of winning most seats" [level=2] [ref=e37]
+        - generic [ref=e38]:
+          - img [ref=e39]
+          - generic [ref=e41]: Updated May 18, 2025
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e46]: Democratic Alliance
+          - generic [ref=e47]: 100%
+          - generic [ref=e48]: 86-94 seats
+        - generic [ref=e49]:
+          - generic [ref=e52]: Socialist Party
+          - generic [ref=e53]: 0%
+          - generic [ref=e54]: 66-74 seats
+        - generic [ref=e55]:
+          - generic [ref=e58]: Chega
+          - generic [ref=e59]: 0%
+          - generic [ref=e60]: 45-53 seats
+        - generic [ref=e61]:
+          - generic [ref=e64]: Others
+          - generic [ref=e65]: 0%
+          - generic [ref=e66]: 0-20 seats
+    - generic [ref=e68]:
+      - generic [ref=e69]:
+        - heading "Coalition seat distributions" [level=2] [ref=e70]
+        - paragraph [ref=e71]: Each dot represents one simulation outcome. Black lines show median seat counts for each coalition.
+        - generic [ref=e73]:
+          - img [ref=e75]:
+            - generic "fy-axis tick label" [ref=e76]:
+              - generic [ref=e78]: Left
+              - generic [ref=e80]: Right
+            - generic [ref=e87]:
+              - generic [ref=e88]: "50"
+              - generic [ref=e89]: "75"
+              - generic [ref=e90]: "100"
+              - generic [ref=e91]: "116"
+              - generic [ref=e92]: "125"
+            - generic [ref=e94]: Projected seats →
+            - generic "text" [ref=e1699]:
+              - generic [ref=e1701]: "82"
+              - generic [ref=e1703]: "99"
+          - generic [ref=e1704]: Showing 9000 simulation outcomes
+      - generic [ref=e1705]:
+        - generic [ref=e1706]:
+          - heading "Polling trends" [level=2] [ref=e1707]
+          - img [ref=e1710]:
+            - generic "y-axis tick label" [ref=e1713]:
+              - generic [ref=e1714]: 0%
+              - generic [ref=e1715]: 5%
+              - generic [ref=e1716]: 10%
+              - generic [ref=e1717]: 15%
+              - generic [ref=e1718]: 20%
+              - generic [ref=e1719]: 25%
+              - generic [ref=e1720]: 30%
+              - generic [ref=e1721]: 35%
+              - generic [ref=e1722]: 40%
+              - generic [ref=e1723]: 45%
+              - generic [ref=e1724]: 50%
+            - generic [ref=e1726]: ↑ Vote share (%)
+            - generic "x-axis tick label" [ref=e1729]:
+              - generic [ref=e1730]: Oct 2023
+              - generic [ref=e1731]: Jan 2024
+              - generic [ref=e1732]: Apr 2024
+              - generic [ref=e1733]: Jul 2024
+              - generic [ref=e1734]: Oct 2024
+              - generic [ref=e1735]: Jan 2025
+              - generic [ref=e1736]: Apr 2025
+            - generic "text" [ref=e1757]:
+              - generic [ref=e1758]: AD 34.2%
+              - generic [ref=e1759]: PS 27.7%
+              - generic [ref=e1760]: CH 20.5%
+            - generic "text" [ref=e1761]:
+              - generic [ref=e1762]: PAN 1.3%
+              - generic [ref=e1763]: BE 2.7%
+              - generic [ref=e1764]: CDU 3.2%
+              - generic [ref=e1765]: L 4.7%
+              - generic [ref=e1766]: IL 5.6%
+        - generic [ref=e1767]:
+          - generic [ref=e1768]:
+            - heading "District forecasts" [level=2] [ref=e1769]
+            - link "View full" [ref=e1770] [cursor=pointer]:
+              - /url: /pt/map/
+              - text: View full
+              - img [ref=e1771] [cursor=pointer]
+          - paragraph [ref=e1773]: Geographic distribution of forecasts by district.
+          - img [ref=e1777]
+      - generic [ref=e1808]:
+        - generic [ref=e1809]:
+          - heading "Current standings" [level=3] [ref=e1810]
+          - generic [ref=e1811]:
+            - generic [ref=e1812]:
+              - generic [ref=e1813]:
+                - generic [ref=e1814]: "#1"
+                - generic [ref=e1816]: Democratic Alliance
+              - generic [ref=e1817]: 34.2%
+            - generic [ref=e1818]:
+              - generic [ref=e1819]:
+                - generic [ref=e1820]: "#2"
+                - generic [ref=e1822]: Socialist Party
+              - generic [ref=e1823]: 27.7%
+            - generic [ref=e1824]:
+              - generic [ref=e1825]:
+                - generic [ref=e1826]: "#3"
+                - generic [ref=e1828]: Chega
+              - generic [ref=e1829]: 20.5%
+            - generic [ref=e1830]:
+              - generic [ref=e1831]:
+                - generic [ref=e1832]: "#4"
+                - generic [ref=e1834]: Liberal Initiative
+              - generic [ref=e1835]: 5.6%
+            - generic [ref=e1836]:
+              - generic [ref=e1837]:
+                - generic [ref=e1838]: "#5"
+                - generic [ref=e1840]: LIVRE
+              - generic [ref=e1841]: 4.7%
+            - generic [ref=e1842]:
+              - generic [ref=e1843]:
+                - generic [ref=e1844]: "#6"
+                - generic [ref=e1846]: Unitary Democratic Coalition
+              - generic [ref=e1847]: 3.2%
+        - generic [ref=e1848]:
+          - heading "Coalition scenarios" [level=3] [ref=e1849]
+          - generic [ref=e1850]:
+            - generic [ref=e1851]:
+              - generic [ref=e1852]: Right majority
+              - generic [ref=e1853]: 0%
+            - generic [ref=e1854]:
+              - generic [ref=e1855]: Left majority
+              - generic [ref=e1856]: 0%
+            - generic [ref=e1857]:
+              - generic [ref=e1858]: Hung parliament
+              - generic [ref=e1859]: 100%
+    - generic [ref=e1862]:
+      - link "Forecast" [ref=e1863] [cursor=pointer]:
+        - /url: /pt/forecast/
+        - img [ref=e1864] [cursor=pointer]
+        - text: Forecast
+      - link "District Map" [ref=e1866] [cursor=pointer]:
+        - /url: /pt/map/
+        - img [ref=e1867] [cursor=pointer]
+        - text: District Map
+      - link "Analysis" [ref=e1869] [cursor=pointer]:
+        - /url: /pt/articles/
+        - img [ref=e1870] [cursor=pointer]
+        - text: Analysis
+      - link "Methodology" [ref=e1873] [cursor=pointer]:
+        - /url: /pt/methodology/
+        - img [ref=e1874] [cursor=pointer]
+        - text: Methodology
+    - generic [ref=e1881]:
+      - heading "About this forecast" [level=2] [ref=e1882]
+      - paragraph [ref=e1883]: This election model combines polling data, historical voting patterns, and demographic information to project likely outcomes for Portugal's parliamentary elections. The forecast is updated regularly as new data becomes available.
+      - generic [ref=e1884]:
+        - generic [ref=e1885]:
+          - img [ref=e1886]
+          - generic [ref=e1891]: 9,000 simulations
+        - generic [ref=e1892]:
+          - img [ref=e1893]
+          - generic [ref=e1896]: Based on 13056 polling data points
+  - button "Open Next.js Dev Tools" [ref=e1902] [cursor=pointer]:
+    - img [ref=e1903] [cursor=pointer]
+  - alert [ref=e1906]
+```
