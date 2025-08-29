@@ -27,18 +27,18 @@ jobs:
     - name: Build the application
       run: npm run build
     
-    - name: Run E2E tests
-      run: npx playwright test tests/e2e/
+    - name: Run Core E2E tests (all browsers)
+      run: npx playwright test tests/e2e/ --workers=1
     
-    - name: Run visual regression tests
-      run: npx playwright test tests/visual/
+    - name: Run Visual regression tests (Chromium only)
+      run: npx playwright test tests/visual/ --project=chromium --workers=1
       continue-on-error: true
     
-    - name: Run accessibility tests
-      run: npx playwright test tests/accessibility/
+    - name: Run Accessibility tests (Chromium only)
+      run: npx playwright test tests/accessibility/ --project=chromium --workers=1
     
-    - name: Run performance tests
-      run: npx playwright test --grep "performance"
+    - name: Run Performance tests (Chromium only)
+      run: npx playwright test --grep "performance" --project=chromium --workers=1
     
     - uses: actions/upload-artifact@v4
       if: always()

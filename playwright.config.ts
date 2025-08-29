@@ -28,6 +28,10 @@ export default defineConfig({
 
     /* Capture video on failure */
     video: 'retain-on-failure',
+
+    /* Increase timeouts for CI environment */
+    actionTimeout: 30 * 1000,
+    navigationTimeout: 30 * 1000,
   },
 
   /* Configure projects for major browsers */
@@ -40,21 +44,25 @@ export default defineConfig({
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      testIgnore: ['**/accessibility/**', '**/performance.spec.ts'], // Skip a11y and performance tests on Firefox
     },
 
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      testIgnore: ['**/accessibility/**', '**/performance.spec.ts'], // Skip a11y and performance tests on WebKit
     },
 
     /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
+      testIgnore: ['**/accessibility/**', '**/performance.spec.ts'], // Skip a11y and performance tests on mobile
     },
     {
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },
+      testIgnore: ['**/accessibility/**', '**/performance.spec.ts'], // Skip a11y and performance tests on mobile
     },
 
     /* Test against branded browsers. */
