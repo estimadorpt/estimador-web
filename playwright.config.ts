@@ -30,8 +30,8 @@ export default defineConfig({
     video: 'retain-on-failure',
 
     /* Increase timeouts for CI environment */
-    actionTimeout: 30 * 1000,
-    navigationTimeout: 30 * 1000,
+    actionTimeout: 60 * 1000,
+    navigationTimeout: 60 * 1000,
   },
 
   /* Configure projects for major browsers */
