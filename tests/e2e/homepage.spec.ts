@@ -1,14 +1,20 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Homepage', () => {
-  test('should load homepage successfully', async ({ page }) => {
+  test('should load homepage successfully', async ({ page, isMobile }) => {
     await page.goto('/pt');
     
     // Check that the page loads
     await expect(page).toHaveTitle(/estimador\.pt/);
     
-    // Check for main navigation
-    await expect(page.locator('nav')).toBeVisible();
+    // Check for navigation
+    if (!isMobile) {
+      // Desktop: nav should be visible
+      await expect(page.locator('nav').first()).toBeVisible();
+    } else {
+      // Mobile: hamburger menu button should be visible
+      await expect(page.locator('button[aria-label="Toggle mobile menu"]')).toBeVisible();
+    }
     
     // Check for main content (homepage uses divs, not main element)
     await expect(page.locator('section').first()).toBeVisible();
@@ -61,9 +67,27 @@ test.describe('Homepage', () => {
       // Check that the page loads on mobile
       await expect(page).toHaveTitle(/estimador\.pt/);
       
-      // Check for mobile navigation (might be hamburger menu)
-      const nav = page.locator('nav');
-      await expect(nav).toBeVisible();
+      // Test mobile navigation functionality
+      const menuButton = page.locator('button[aria-label="Toggle mobile menu"]');
+      await expect(menuButton).toBeVisible();
+      
+      // Open mobile menu
+      await menuButton.click();
+      
+      // Verify mobile navigation menu appears
+      const mobileNav = page.locator('nav').nth(1); // Second nav is the mobile menu
+      await expect(mobileNav).toBeVisible();
+      
+      // Verify navigation links are visible in mobile menu specifically
+      await expect(mobileNav.locator('text=Previsões')).toBeVisible();
+      await expect(mobileNav.locator('text=Mapa')).toBeVisible();
+      
+      // Verify language switcher is accessible in mobile menu
+      await expect(mobileNav.locator('text=PT')).toBeVisible();
+      await expect(mobileNav.locator('text=EN')).toBeVisible();
+      
+      // Close mobile menu
+      await menuButton.click();
       
       // Ensure content is visible and not cut off
       const main = page.locator('section, main, .container').first();
