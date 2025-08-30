@@ -1,12 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
-import { Calendar, Globe } from "lucide-react";
+import { Calendar, Globe, Menu, X } from "lucide-react";
 import { ElectionSelector } from './ElectionSelector';
 import { useElection } from '@/contexts/ElectionContext';
 
 export function Header() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const t = useTranslations();
   const locale = useLocale();
   const pathname = usePathname();
@@ -51,8 +53,7 @@ export function Header() {
           </div>
           
           <div className="flex items-center gap-6">
-            {/* Election Selector hidden - only one election available */}
-            
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex gap-6">
               {navigationItems.map((item) => (
                 <Link
@@ -69,8 +70,8 @@ export function Header() {
               ))}
             </nav>
             
-            <div className="flex items-center gap-4">
-              {/* Language Switcher */}
+            <div className="hidden md:flex items-center gap-4">
+              {/* Language Switcher - Desktop */}
               <div className="flex items-center gap-2">
                 <Globe className="w-4 h-4 text-green-dark/70" />
                 <div className="flex gap-1">
@@ -98,10 +99,73 @@ export function Header() {
                   </Link>
                 </div>
               </div>
-              
             </div>
+
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden p-2 text-green-dark hover:text-green-medium"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-green-medium bg-green-pale">
+            <nav className="px-4 py-4">
+              <div className="flex flex-col gap-4">
+                {navigationItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`font-medium transition-colors py-2 ${
+                      pathname === item.href
+                        ? 'text-green-dark border-l-4 border-green-medium pl-4'
+                        : 'text-green-dark/70 hover:text-green-dark pl-4'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                
+                {/* Language Switcher - Mobile */}
+                <div className="flex items-center gap-2 pt-4 border-t border-green-medium/30">
+                  <Globe className="w-4 h-4 text-green-dark/70" />
+                  <div className="flex gap-2">
+                    <Link 
+                      href={pathname} 
+                      locale="pt"
+                      className={`px-3 py-2 text-sm rounded ${
+                        locale === 'pt' 
+                          ? 'bg-green-medium text-white' 
+                          : 'text-green-dark/70 hover:text-green-dark'
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      PT
+                    </Link>
+                    <Link 
+                      href={pathname} 
+                      locale="en"
+                      className={`px-3 py-2 text-sm rounded ${
+                        locale === 'en' 
+                          ? 'bg-green-medium text-white' 
+                          : 'text-green-dark/70 hover:text-green-dark'
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      EN
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );
