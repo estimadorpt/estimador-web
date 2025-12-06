@@ -2,15 +2,12 @@
 
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
-import { Calendar, Globe } from "lucide-react";
-import { ElectionSelector } from './ElectionSelector';
-import { useElection } from '@/contexts/ElectionContext';
+import { Globe } from "lucide-react";
 
 export function Header() {
   const t = useTranslations();
   const locale = useLocale();
   const pathname = usePathname();
-  const { currentElection } = useElection();
 
   const getPageTitle = () => {
     if (pathname === '/forecast') return t('forecast.title');
@@ -23,45 +20,43 @@ export function Header() {
 
   const navigationItems = [
     { href: '/', label: t('nav.home') },
-    { href: '/forecast', label: t('nav.forecast') },
+    { href: '/forecast', label: t('nav.parliamentaryForecast') },
     { href: '/map', label: t('nav.map') },
     { href: '/articles', label: t('nav.analysis') },
     { href: '/about', label: t('nav.about') },
   ];
 
   return (
-    <header className="border-b border-green-medium bg-green-pale sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-4">
+    <header className="border-b border-stone-200 bg-white sticky top-0 z-50 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <Link href="/" className="text-2xl font-bold text-green-dark hover:text-green-medium">
+              <Link href="/" className="text-xl font-bold text-stone-900 hover:text-blue-700 transition-colors">
                 estimador.pt
               </Link>
-              <p className="text-sm text-green-dark/70">{t('homepage.tagline')}</p>
+              <p className="text-xs text-stone-500">{t('homepage.tagline')}</p>
             </div>
             {pathname !== '/' && (
-              <div className="border-l border-green-medium pl-4">
-                <h1 className="text-xl font-bold text-green-dark">{getPageTitle()}</h1>
+              <div className="border-l border-stone-200 pl-4">
+                <h1 className="text-lg font-semibold text-stone-900">{getPageTitle()}</h1>
                 {pathname === '/forecast' && (
-                  <p className="text-sm text-green-dark/70">{t('forecast.subtitle')}</p>
+                  <p className="text-xs text-stone-500">{t('forecast.subtitle')}</p>
                 )}
               </div>
             )}
           </div>
           
           <div className="flex items-center gap-6">
-            {/* Election Selector hidden - only one election available */}
-            
-            <nav className="hidden md:flex gap-6">
+            <nav className="hidden md:flex gap-1">
               {navigationItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`font-medium transition-colors ${
+                  className={`text-sm px-3 py-1.5 rounded-md transition-colors ${
                     pathname === item.href
-                      ? 'text-green-dark'
-                      : 'text-green-dark/70 hover:text-green-dark'
+                      ? 'text-blue-700 bg-blue-50 font-medium'
+                      : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
                   }`}
                 >
                   {item.label}
@@ -71,16 +66,16 @@ export function Header() {
             
             <div className="flex items-center gap-4">
               {/* Language Switcher */}
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-green-dark/70" />
-                <div className="flex gap-1">
+              <div className="flex items-center gap-2 text-sm">
+                <Globe className="w-4 h-4 text-stone-400" />
+                <div className="flex gap-1 bg-stone-100 rounded-md p-0.5">
                   <Link 
                     href={pathname} 
                     locale="pt"
-                    className={`px-2 py-1 text-sm rounded ${
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                       locale === 'pt' 
-                        ? 'bg-green-medium text-white' 
-                        : 'text-green-dark/70 hover:text-green-dark'
+                        ? 'bg-white text-stone-900 shadow-sm' 
+                        : 'text-stone-500 hover:text-stone-700'
                     }`}
                   >
                     PT
@@ -88,17 +83,16 @@ export function Header() {
                   <Link 
                     href={pathname} 
                     locale="en"
-                    className={`px-2 py-1 text-sm rounded ${
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                       locale === 'en' 
-                        ? 'bg-green-medium text-white' 
-                        : 'text-green-dark/70 hover:text-green-dark'
+                        ? 'bg-white text-stone-900 shadow-sm' 
+                        : 'text-stone-500 hover:text-stone-700'
                     }`}
                   >
                     EN
                   </Link>
                 </div>
               </div>
-              
             </div>
           </div>
         </div>

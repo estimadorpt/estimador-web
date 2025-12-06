@@ -1,0 +1,89 @@
+{
+  "election_date": "2026-01-18",
+  "updated_at": "2024-11-29T00:27:00.000Z",
+  "candidates": [
+    {
+      "name": "Gouveia e Melo",
+      "color": "#4A90D9",
+      "mean": 0.2409,
+      "median": 0.2393,
+      "ci_lower": 0.1627,
+      "ci_upper": 0.3294,
+      "ci_10": 0.1906,
+      "ci_90": 0.2923
+    },
+    {
+      "name": "Marques Mendes",
+      "color": "#FF8C00",
+      "mean": 0.2298,
+      "median": 0.2288,
+      "ci_lower": 0.1538,
+      "ci_upper": 0.3120,
+      "ci_10": 0.1811,
+      "ci_90": 0.2785
+    },
+    {
+      "name": "André Ventura",
+      "color": "#8B0000",
+      "mean": 0.1808,
+      "median": 0.1793,
+      "ci_lower": 0.1226,
+      "ci_upper": 0.2502,
+      "ci_10": 0.1448,
+      "ci_90": 0.2169
+    },
+    {
+      "name": "António José Seguro",
+      "color": "#FF69B4",
+      "mean": 0.1727,
+      "median": 0.1709,
+      "ci_lower": 0.1154,
+      "ci_upper": 0.2404,
+      "ci_10": 0.1368,
+      "ci_90": 0.2104
+    },
+    {
+      "name": "Cotrim Figueiredo",
+      "color": "#00CED1",
+      "mean": 0.0760,
+      "median": 0.0738,
+      "ci_lower": 0.0517,
+      "ci_upper": 0.1149,
+      "ci_10": 0.0601,
+      "ci_90": 0.0944
+    },
+    {
+      "name": "Catarina Martins",
+      "color": "#DC143C",
+      "mean": 0.0405,
+      "median": 0.0397,
+      "ci_lower": 0.0273,
+      "ci_upper": 0.0597,
+      "ci_10": 0.0323,
+      "ci_90": 0.0496
+    },
+    {
+      "name": "António Filipe",
+      "color": "#228B22",
+      "mean": 0.0300,
+      "median": 0.0294,
+      "ci_lower": 0.0199,
+      "ci_upper": 0.0442,
+      "ci_10": 0.0239,
+      "ci_90": 0.0364
+    },
+    {
+      "name": "Others",
+      "color": "#808080",
+      "mean": 0.0293,
+      "median": 0.0288,
+      "ci_lower": 0.0194,
+      "ci_upper": 0.0420,
+      "ci_10": 0.0232,
+      "ci_90": 0.0356
+    }
+  ]
+}
+
+
+

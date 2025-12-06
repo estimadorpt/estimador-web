@@ -27,7 +27,52 @@ export const partyNames = {
   "OTH": "Others"
 };
 
-// Presidential candidates color palette (gender-neutral professional colors)
+// Presidential candidates configuration (2026 election)
+export const presidentialCandidateColors: Record<string, string> = {
+  "Gouveia e Melo": "#4A90D9",      // Blue (independent/military)
+  "Marques Mendes": "#FF8C00",       // Orange (PSD-aligned)
+  "António José Seguro": "#FF69B4",  // Pink (PS-aligned)
+  "André Ventura": "#8B0000",        // Dark red (CH)
+  "Cotrim Figueiredo": "#00CED1",    // Cyan (IL)
+  "Catarina Martins": "#DC143C",     // Crimson (BE)
+  "António Filipe": "#228B22",       // Green (CDU)
+  "Others": "#808080",               // Gray
+};
+
+export const presidentialCandidateOrder = [
+  "Gouveia e Melo",
+  "Marques Mendes",
+  "António José Seguro",
+  "André Ventura",
+  "Cotrim Figueiredo",
+  "Catarina Martins",
+  "António Filipe",
+  "Others"
+];
+
+export const presidentialCandidateNames: Record<string, string> = {
+  "Gouveia e Melo": "Henrique Gouveia e Melo",
+  "Marques Mendes": "Luís Marques Mendes",
+  "António José Seguro": "António José Seguro",
+  "André Ventura": "André Ventura",
+  "Cotrim Figueiredo": "João Cotrim de Figueiredo",
+  "Catarina Martins": "Catarina Martins",
+  "António Filipe": "António Filipe",
+  "Others": "Others",
+};
+
+export const presidentialCandidateParties: Record<string, string | null> = {
+  "Gouveia e Melo": null,           // Independent
+  "Marques Mendes": "AD",
+  "António José Seguro": "PS",
+  "André Ventura": "CH",
+  "Cotrim Figueiredo": "IL",
+  "Catarina Martins": "BE",
+  "António Filipe": "CDU",
+  "Others": null,
+};
+
+// Legacy presidential colors (by political alignment)
 export const presidentialColors = {
   "incumbent": "#2E7D32",     // Forest Green
   "center-right": "#FF8C00",  // Orange  

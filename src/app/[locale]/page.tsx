@@ -1,22 +1,14 @@
-import { Button } from "@/components/ui/button";
-import { 
-  calculateBlocMajorityProbability, 
-  calculatePartyMostSeatsProbability,
-  formatProbabilityPercent 
-} from "@/lib/utils/probability-calculator";
-import { leftBlocParties, rightBlocParties, majorityThreshold } from "@/lib/config/blocs";
-import { partyColors, partyNames } from "@/lib/config/colors";
-import { loadForecastData } from "@/lib/utils/data-loader";
-import { ArrowRight, TrendingUp, BarChart3, Map, Users, Calendar } from "lucide-react";
-import { PollingChart } from "@/components/charts/PollingChart";
-import { CoalitionDotPlot } from "@/components/charts/CoalitionDotPlot";
-import { SimpleCoalitionDots } from "@/components/charts/SimpleCoalitionDots";
-import DistrictMapPreview from "@/components/charts/DistrictMapPreview";
+import { loadPresidentialData } from "@/lib/utils/data-loader";
+import { ArrowRight, Calendar, Users } from "lucide-react";
+import { PresidentialCandidateCards, SecondRoundIndicator } from "@/components/charts/PresidentialCandidateCards";
+import { PresidentialSpaghettiPlot } from "@/components/charts/PresidentialSpaghettiPlot";
+import { PresidentialForecastBars } from "@/components/charts/PresidentialForecastBars";
 import { Header } from "@/components/Header";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
+import { PRESIDENTIAL_2026 } from "@/lib/config/elections";
 
 export async function generateMetadata({ 
   params 
@@ -27,11 +19,11 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   
   return {
-    title: t('meta.homepageTitle'),
-    description: t('meta.defaultDescription'),
+    title: t('meta.presidentialTitle'),
+    description: t('meta.presidentialDescription'),
     openGraph: {
-      title: t('meta.homepageTitle'),
-      description: t('meta.defaultDescription'),
+      title: t('meta.presidentialTitle'),
+      description: t('meta.presidentialDescription'),
       url: `https://estimador.pt/${locale}`,
     },
     alternates: {
@@ -47,84 +39,78 @@ export default async function Home({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  const { seatData, nationalTrends } = await loadForecastData();
   
-  // Load district forecast data for map preview
-  const districtForecast = await (async () => {
-    try {
-      const fs = await import('fs');
-      const path = await import('path');
-      const filePath = path.join(process.cwd(), 'public', 'data', 'district_forecast.json');
-      const fileContents = fs.readFileSync(filePath, 'utf8');
-      return JSON.parse(fileContents);
-    } catch (error) {
-      console.error('Error loading district forecast:', error);
-      return [];
-    }
-  })();
+  // Load presidential forecast data
+  const { forecast, winProbabilities, trends, trajectories, polls } = await loadPresidentialData();
   
-  // Calculate key probabilities
-  const probLeftMajority = calculateBlocMajorityProbability(seatData, leftBlocParties, majorityThreshold);
-  const probRightMajority = calculateBlocMajorityProbability(seatData, rightBlocParties, majorityThreshold);
-  const probAdMostSeats = calculatePartyMostSeatsProbability(seatData, 'AD', ['PS', 'CH']);
-  const probPsMostSeats = calculatePartyMostSeatsProbability(seatData, 'PS', ['AD', 'CH']);
+  // Get the leading candidate
+  const leadingCandidate = winProbabilities.candidates[0];
+  const secondRoundProbability = winProbabilities.second_round_probability;
   
-  // Get latest trends and determine leader
-  const latest = nationalTrends
-    .filter(d => d.metric === 'vote_share_mean')
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .reduce((acc, d) => {
-      if (!acc[d.party]) acc[d.party] = d;
-      return acc;
-    }, {} as any);
+  // Calculate days until election
+  const electionDate = new Date(PRESIDENTIAL_2026.date);
+  const today = new Date();
+  const daysUntilElection = Math.ceil((electionDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-  const parties = Object.values(latest).sort((a: any, b: any) => b.value - a.value);
-  const leader = parties[0] as any;
-  const secondPlace = parties[1] as any;
-  const margin = ((leader.value - secondPlace.value) * 100).toFixed(1);
+  // Get the last update date
+  const lastUpdate = forecast.updated_at 
+    ? new Date(forecast.updated_at).toLocaleDateString(locale === 'pt' ? 'pt-PT' : 'en-US', {
+        year: 'numeric',
+        month: 'long', 
+        day: 'numeric'
+      })
+    : null;
 
-  const lastUpdate = new Date(leader.date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long', 
-    day: 'numeric'
-  });
-
-  // Calculate seat projections for top parties
-  const getPartySeats = (party: string) => {
-    const partySeats = seatData.map(simulation => simulation[party] || 0).sort((a, b) => a - b);
-    if (partySeats.length === 0) return { mean: 0, min: 0, max: 0 };
-    return {
-      mean: Math.round(partySeats.reduce((sum, s) => sum + s, 0) / partySeats.length),
-      min: partySeats[Math.floor(partySeats.length * 0.1)],
-      max: partySeats[Math.floor(partySeats.length * 0.9)]
-    };
+  // Format probability as percentage
+  const formatProbability = (value: number) => {
+    const pct = value * 100;
+    if (pct >= 99.5) return '>99%';
+    if (pct < 1) return '<1%';
+    return `${Math.round(pct)}%`;
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-stone-50">
       <Header />
 
-      {/* News-style Headline Section */}
-      <section className="border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="max-w-4xl">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-              {t('homepage.leadingWith', {
-                party: t(`parties.${leader.party}`),
-                percentage: `${(leader.value * 100).toFixed(1)}%`
-              })}
+      {/* Presidential Election Banner */}
+      <div className="bg-stone-800 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between text-sm">
+          <div className="flex items-center gap-3">
+            <span className="font-semibold tracking-wide">{t('presidential.electionName')}</span>
+            <span className="text-stone-500">·</span>
+            <span className="text-stone-300">{t('presidential.electionDate', { date: 'January 18, 2026' })}</span>
+          </div>
+          <div className="flex items-center gap-2 text-stone-300 bg-stone-700/50 px-3 py-1 rounded-full text-xs">
+            <Calendar className="w-3.5 h-3.5" />
+            <span className="font-medium">{daysUntilElection} days</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Section */}
+      <section className="bg-white border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 py-10">
+          <div className="max-w-3xl">
+            <h1 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4 leading-tight">
+              {leadingCandidate ? (
+                t('presidential.leadingHeadline', {
+                  candidate: leadingCandidate.name,
+                  probability: formatProbability(leadingCandidate.leading_probability)
+                })
+              ) : (
+                t('presidential.forecastTitle')
+              )}
             </h1>
-            <p className="text-lg text-gray-600 mb-6">
-              {t('homepage.forecastShows', {
-                party: t(`parties.${leader.party}`),
-                margin: margin,
-                probability: formatProbabilityPercent(probAdMostSeats > probPsMostSeats ? probAdMostSeats : probPsMostSeats)
+            <p className="text-lg text-stone-600 mb-5 leading-relaxed">
+              {t('presidential.forecastDescription', {
+                secondRoundProbability: formatProbability(secondRoundProbability)
               })}
             </p>
-            <div className="flex items-center gap-4 text-sm text-gray-500">
-              <span>{t('common.basedOn')} {seatData.length.toLocaleString()} {t('common.simulations')}</span>
-              <span>•</span>
-              <Link href="/methodology" className="text-green-medium hover:text-green-dark">
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-stone-500">{t('presidential.basedOnPolls')}</span>
+              <span className="text-stone-300">·</span>
+              <Link href="/methodology" className="text-blue-600 hover:text-blue-800 font-medium">
                 {t('common.methodology')}
               </Link>
             </div>
@@ -132,162 +118,114 @@ export default async function Home({
         </div>
       </section>
 
-      {/* Key Numbers - BBC Style */}
-      <section className="bg-green-pale border-b border-green-medium/30">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Second Round Indicator */}
+      <section className="bg-stone-100 border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 py-5">
+          <SecondRoundIndicator 
+            probability={secondRoundProbability}
+            translations={{
+              secondRoundNeeded: t('presidential.secondRoundNeeded'),
+              probabilityLabel: t('presidential.probability'),
+            }}
+          />
+        </div>
+      </section>
+
+      {/* Win Probability Cards */}
+      <section className="py-8 bg-white border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">{t('homepage.chanceWinningMostSeats')}</h2>
+            <h2 className="text-xl font-semibold text-stone-900">
+              {t('presidential.winProbabilities')}
+            </h2>
             {lastUpdate && (
-              <div className="flex items-center gap-1 text-xs text-green-dark/70">
-                <Calendar className="w-3 h-3" />
-                <span>{t('common.updated')} {lastUpdate}</span>
+              <div className="text-xs text-stone-500 bg-stone-100 px-3 py-1 rounded-full">
+                {t('common.updated')} {lastUpdate}
               </div>
             )}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {['AD', 'PS', 'CH'].map(party => {
-              const prob = party === 'AD' ? probAdMostSeats : 
-                          party === 'PS' ? probPsMostSeats : 
-                          1 - probAdMostSeats - probPsMostSeats;
-              const seats = getPartySeats(party);
-              return (
-                <div key={party} className="bg-white p-4 rounded-lg border border-gray-200">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div 
-                      className="w-4 h-4 rounded"
-                      style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }}
-                    />
-                    <span className="font-medium text-gray-900">{t(`parties.${party}`)}</span>
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
-                    {formatProbabilityPercent(prob)}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {seats.min}-{seats.max} {t('common.seats')}
-                  </div>
-                </div>
-              );
-            })}
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-4 h-4 rounded bg-gray-400" />
-                <span className="font-medium text-gray-900">{t('common.others')}</span>
-              </div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                {formatProbabilityPercent(1 - probAdMostSeats - probPsMostSeats - (1 - probAdMostSeats - probPsMostSeats))}
-              </div>
-              <div className="text-sm text-gray-500">
-                0-20 {t('common.seats')}
-              </div>
-            </div>
-          </div>
+          <ErrorBoundary componentName="Candidate Cards">
+            <PresidentialCandidateCards
+              winProbabilities={winProbabilities}
+              forecast={forecast}
+              maxCandidates={5}
+              translations={{
+                chanceOfLeading: t('presidential.chanceOfLeading'),
+                voteShare: t('presidential.voteShare'),
+                partyLabel: t('presidential.partyAffiliation'),
+              }}
+            />
+          </ErrorBoundary>
         </div>
       </section>
 
-      {/* Main Analysis Section */}
-      <section className="py-8">
-        <div className="max-w-7xl mx-auto px-4 space-y-8">
-          
-          {/* Coalition Outcomes - Key Visual */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('forecast.coalitionSeats')}</h2>
-            <p className="text-sm text-gray-600 mb-6">
-              {t('forecast.coalitionDescription')}
-            </p>
-            <div className="w-full">
-              <CoalitionDotPlot 
-                data={seatData} 
-                leftCoalitionLabel={t('forecast.leftCoalition')}
-                rightCoalitionLabel={t('forecast.rightCoalition')}
-                projectedSeatsLabel={t('forecast.projectedSeats')}
-                majorityLabel={t('forecast.majority')}
-                showingOutcomesLabel={t('forecast.showingOutcomes', { count: seatData.length })}
-              />
-            </div>
-          </div>
+      {/* Spaghetti Plot */}
+      <section className="py-10 border-b border-stone-300">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
+            {t('presidential.supportTrajectory')}
+          </h2>
+          <p className="text-sm text-stone-500 mb-8 max-w-xl">
+            {t('presidential.spaghettiDescription')}
+          </p>
+          <ErrorBoundary componentName="Spaghetti Plot">
+            <PresidentialSpaghettiPlot
+              trajectories={trajectories}
+              polls={polls}
+              electionDate={PRESIDENTIAL_2026.date}
+              height={420}
+              showPolls={true}
+              maxTrajectories={50}
+            />
+          </ErrorBoundary>
+        </div>
+      </section>
 
-          {/* Content Grid with Map and Polling */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* Polling Trends */}
-            <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('forecast.pollingTrends')}</h2>
-              <PollingChart data={nationalTrends} />
-            </div>
-
-            {/* District Map */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">{t('homepage.districtForecast')}</h2>
-                <Link 
-                  href="/map" 
-                  className="inline-flex items-center text-xs font-medium text-green-dark hover:text-green-medium transition-colors"
-                >
-                  {t('common.viewFull')}
-                  <ArrowRight className="w-3 h-3 ml-1" />
-                </Link>
-              </div>
-              <p className="text-xs text-gray-600 mb-4">
-                {t('homepage.districtDescription')}
-              </p>
-              <div className="w-full h-80 md:h-96">
-                <ErrorBoundary componentName="District Map Preview">
-                  <DistrictMapPreview 
-                    districtForecast={districtForecast}
-                    className="rounded overflow-hidden h-full"
-                  />
-                </ErrorBoundary>
-              </div>
-            </div>
-          </div>
-
-          {/* Second row with current standings and coalition scenarios */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Current standings */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('homepage.currentStandings')}</h3>
-              <div className="space-y-3">
-                {parties.slice(0, 6).map((party: any, index) => (
-                  <div key={party.party} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-gray-600">#{index + 1}</span>
-                      <div 
-                        className="w-3 h-3 rounded"
-                        style={{ backgroundColor: partyColors[party.party as keyof typeof partyColors] }}
-                      />
-                      <span className="text-sm font-medium text-gray-900">
-                        {t(`parties.${party.party}`, { default: party.party })}
-                      </span>
-                    </div>
-                    <span className="text-sm font-bold text-gray-900">
-                      {(party.value * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                ))}
-              </div>
+      {/* Vote Share Forecast */}
+      <section className="py-10 border-b border-stone-300">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+            {/* Forecast Bars - takes 3 columns */}
+            <div className="lg:col-span-3">
+              <h3 className="text-xl font-bold text-stone-900 mb-6 tracking-tight">
+                {t('presidential.projectedVoteShare')}
+              </h3>
+              <ErrorBoundary componentName="Forecast Bars">
+                <PresidentialForecastBars
+                  forecast={forecast}
+                  showUncertainty={true}
+                  maxCandidates={8}
+                  translations={{
+                    projectedVoteShare: t('presidential.projectedVoteShare'),
+                    confidenceInterval: t('presidential.confidenceInterval'),
+                  }}
+                />
+              </ErrorBoundary>
             </div>
 
-            {/* Coalition scenarios */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('homepage.coalitionScenarios')}</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-900">{t('homepage.rightMajority')}</span>
-                  <span className="text-2xl font-bold text-gray-900">
-                    {formatProbabilityPercent(probRightMajority)}
-                  </span>
+            {/* About the Model - takes 2 columns */}
+            <div className="lg:col-span-2 lg:border-l lg:border-stone-200 lg:pl-12">
+              <h3 className="text-sm font-bold text-stone-500 uppercase tracking-wider mb-4">
+                {t('presidential.aboutModel')}
+              </h3>
+              <div className="space-y-4 text-sm text-stone-600">
+                <p className="leading-relaxed">
+                  {t('presidential.modelDescription')}
+                </p>
+                <div className="border-l-2 border-amber-500 pl-4 py-2 bg-amber-50/50">
+                  <p className="text-amber-800 text-sm">
+                    <strong>Note:</strong> {t('presidential.undecidedWarning')}
+                  </p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-900">{t('homepage.leftMajority')}</span>
-                  <span className="text-2xl font-bold text-gray-900">
-                    {formatProbabilityPercent(probLeftMajority)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-900">{t('homepage.hungParliament')}</span>
-                  <span className="text-2xl font-bold text-gray-900">
-                    {formatProbabilityPercent(1 - probRightMajority - probLeftMajority)}
-                  </span>
+                <div className="pt-2">
+                  <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
+                    {t('presidential.keyFactors')}
+                  </h4>
+                  <ul className="space-y-1 text-stone-600 text-sm">
+                    <li>→ {t('presidential.factor1')}</li>
+                    <li>→ {t('presidential.factor2')}</li>
+                    <li>→ {t('presidential.factor3')}</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -295,58 +233,57 @@ export default async function Home({
         </div>
       </section>
 
-      {/* Navigation to detailed pages */}
-      <section className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex flex-wrap gap-3">
+      {/* Navigation to Other Pages */}
+      <section className="py-8 border-b border-stone-300">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">
+            More from estimador.pt
+          </div>
+          <div className="flex flex-wrap gap-6">
             <Link 
               href="/forecast" 
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-green-dark bg-green-pale border border-green-medium rounded-md hover:bg-green-light/20 transition-colors"
+              className="group inline-flex items-center gap-2 text-stone-700 hover:text-blue-700 transition-colors"
             >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              {t('nav.forecast')}
+              <span className="font-semibold">{t('nav.parliamentaryForecast')}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link 
               href="/map" 
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-green-pale transition-colors"
+              className="group inline-flex items-center gap-2 text-stone-700 hover:text-blue-700 transition-colors"
             >
-              <Map className="w-4 h-4 mr-2" />
-{t('map.title')}
-            </Link>
-            <Link 
-              href="/articles" 
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-green-pale transition-colors"
-            >
-              <TrendingUp className="w-4 h-4 mr-2" />
-              {t('nav.analysis')}
+              <span className="font-semibold">{t('map.title')}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link 
               href="/methodology" 
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-green-pale transition-colors"
+              className="group inline-flex items-center gap-2 text-stone-700 hover:text-blue-700 transition-colors"
             >
-              <Users className="w-4 h-4 mr-2" />
-              {t('common.methodology')}
+              <span className="font-semibold">{t('common.methodology')}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* About section */}
-      <section className="bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="max-w-3xl">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('homepage.aboutForecast')}</h2>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              {t('homepage.aboutDescription')}
+      {/* Footer Info */}
+      <section className="bg-stone-800 text-stone-300 py-10">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="max-w-2xl">
+            <h2 className="text-lg font-semibold text-white mb-3">
+              {t('presidential.aboutForecast')}
+            </h2>
+            <p className="text-sm leading-relaxed mb-5">
+              {t('presidential.aboutDescription')}
             </p>
-            <div className="flex items-center gap-6 text-sm text-gray-500">
+            <div className="flex items-center gap-4 text-sm text-stone-400">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                <span>{seatData.length.toLocaleString()} {t('common.simulations')}</span>
+                <span>{forecast.candidates.length} {t('presidential.candidatesModeled')}</span>
               </div>
+              <span>·</span>
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                <span>{t('common.basedOn')} {nationalTrends.length} polling data points</span>
+                <Calendar className="w-4 h-4" />
+                <span>{t('presidential.electionDate', { date: 'Jan 18, 2026' })}</span>
               </div>
             </div>
           </div>

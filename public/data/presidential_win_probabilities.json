@@ -1,0 +1,65 @@
+{
+  "election_date": "2026-01-18",
+  "second_round_probability": 1.0,
+  "candidates": [
+    {
+      "name": "Gouveia e Melo",
+      "color": "#4A90D9",
+      "leading_probability": 0.5183,
+      "first_round_win_probability": 0.0,
+      "mean_support": 0.2409
+    },
+    {
+      "name": "Marques Mendes",
+      "color": "#FF8C00",
+      "leading_probability": 0.3911,
+      "first_round_win_probability": 0.0,
+      "mean_support": 0.2298
+    },
+    {
+      "name": "André Ventura",
+      "color": "#8B0000",
+      "leading_probability": 0.0513,
+      "first_round_win_probability": 0.0,
+      "mean_support": 0.1808
+    },
+    {
+      "name": "António José Seguro",
+      "color": "#FF69B4",
+      "leading_probability": 0.0393,
+      "first_round_win_probability": 0.0,
+      "mean_support": 0.1727
+    },
+    {
+      "name": "Cotrim Figueiredo",
+      "color": "#00CED1",
+      "leading_probability": 0.0001,
+      "first_round_win_probability": 0.0,
+      "mean_support": 0.0760
+    },
+    {
+      "name": "Catarina Martins",
+      "color": "#DC143C",
+      "leading_probability": 0.0,
+      "first_round_win_probability": 0.0,
+      "mean_support": 0.0405
+    },
+    {
+      "name": "António Filipe",
+      "color": "#228B22",
+      "leading_probability": 0.0,
+      "first_round_win_probability": 0.0,
+      "mean_support": 0.0300
+    },
+    {
+      "name": "Others",
+      "color": "#808080",
+      "leading_probability": 0.0,
+      "first_round_win_probability": 0.0,
+      "mean_support": 0.0293
+    }
+  ]
+}
+
+
+
