@@ -24,11 +24,11 @@
   "homepage": {
     "tagline": "Previsões Eleitorais Portuguesas",
     "leadingWith": "{party} lidera a corrida eleitoral com {percentage} de apoio",
-    "forecastShows": "A última previsão mostra {party} à frente por {margin} pontos, com {probability} de probabilidade de ganhar mais assentos",
-    "chanceWinningMostSeats": "Probabilidade de ganhar mais assentos",
+    "forecastShows": "A última previsão mostra {party} à frente por {margin} pontos, com {probability} de probabilidade de ganhar mais mandatos",
+    "chanceWinningMostSeats": "Probabilidade de ganhar mais mandatos",
     "rightMajority": "Maioria de direita",
     "leftMajority": "Maioria de esquerda",
-    "hungParliament": "Parlamento suspenso",
+    "hungParliament": "Parlamento sem maioria",
     "coalitionScenarios": "Cenários de coligação",
     "currentStandings": "Situação atual",
     "aboutForecast": "Sobre esta previsão",
@@ -126,7 +126,7 @@
     "founder": "O estimador.pt foi criado por",
     "combiningExpertise": "como um projeto independente que combina estatística Bayesiana, métodos computacionais e análise de dados eleitorais portugueses.",
     "missionDescription1": "O estimador.pt fornece previsões transparentes e probabilísticas para as eleições portuguesas. Acreditamos que as sociedades democráticas beneficiam quando os cidadãos têm acesso a análises rigorosas e imparciais de dados eleitorais—não apenas comentários e especulação.",
-    "missionDescription2": "O nosso objetivo é trazer os padrões da previsão eleitoral moderna—pioneirados por projetos como o FiveThirtyEight e The Economist—para o contexto português, adaptando os nossos métodos ao sistema pluripartidário de representação proporcional de Portugal.",
+    "missionDescription2": "O nosso objetivo é trazer os padrões da previsão eleitoral moderna—estabelecidos por projetos como o FiveThirtyEight e The Economist—para o contexto português, adaptando os nossos métodos ao sistema pluripartidário de representação proporcional de Portugal.",
     "whatWeDoLabels": {
       "forecasting": "Previsões Eleitorais",
       "seatProjections": "Projeções de Mandatos",
