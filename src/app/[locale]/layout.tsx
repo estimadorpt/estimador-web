@@ -3,6 +3,7 @@ import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/routing';
 import { ElectionProvider } from '@/contexts/ElectionContext';
+import { PostHogProvider } from '@/components/PostHogProvider';
 import '../globals.css';
 import type { Metadata } from 'next';
 import fs from 'fs';
@@ -117,11 +118,13 @@ export default async function RootLayout({
         <meta name="twitter:image" content={ogImageUrl} />
       </head>
       <body className="antialiased" suppressHydrationWarning>
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <ElectionProvider>
-            {children}
-          </ElectionProvider>
-        </NextIntlClientProvider>
+        <PostHogProvider>
+          <NextIntlClientProvider messages={messages} locale={locale}>
+            <ElectionProvider>
+              {children}
+            </ElectionProvider>
+          </NextIntlClientProvider>
+        </PostHogProvider>
       </body>
     </html>
   );
