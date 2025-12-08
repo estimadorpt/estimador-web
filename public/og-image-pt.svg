@@ -40,10 +40,10 @@
   <!-- Three candidates - name on top, percentage below -->
   
     <rect x="196" y="525" width="8" height="80" rx="4" fill="#FF8C00"/>
-    <text x="220" y="555" fill="#e4e4e7" font-size="26" font-weight="500">Mendes</text>
+    <text x="220" y="555" fill="#e4e4e7" font-size="26" font-weight="500">M. Mendes</text>
     <text x="220" y="600" fill="#FF8C00" font-size="40" font-weight="800">21%</text>
     <rect x="596" y="525" width="8" height="80" rx="4" fill="#60a5fa"/>
-    <text x="620" y="555" fill="#e4e4e7" font-size="26" font-weight="500">Melo</text>
+    <text x="620" y="555" fill="#e4e4e7" font-size="26" font-weight="500">G. e Melo</text>
     <text x="620" y="600" fill="#60a5fa" font-size="40" font-weight="800">19%</text>
     <rect x="996" y="525" width="8" height="80" rx="4" fill="#ff6b6b"/>
     <text x="1020" y="555" fill="#e4e4e7" font-size="26" font-weight="500">Ventura</text>
