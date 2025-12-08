@@ -80,7 +80,7 @@
   ],
   "navigationFallback": {
     "rewrite": "/pt/index.html",
-    "exclude": ["/data/*", "/_next/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,json,txt}", "/og-image-*.png", "/og-image-*.svg"]
+    "exclude": ["/data/*", "/_next/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,json,txt}", "/og-image-*.png"]
   },
   "mimeTypes": {
     ".json": "application/json",

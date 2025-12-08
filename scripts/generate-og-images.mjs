@@ -213,18 +213,13 @@ async function main() {
   for (const locale of ['pt', 'en']) {
     const svg = generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRoundProb);
     
-    // Save SVG
-    const svgPath = path.join(rootDir, 'public', `og-image-${locale}.svg`);
-    fs.writeFileSync(svgPath, svg);
-    console.log(`   ✅ Generated SVG: ${svgPath}`);
-    
-    // Convert to PNG using sharp
+    // Convert to PNG using sharp (SVG is just intermediate, not saved)
     const pngPath = path.join(rootDir, 'public', `og-image-${locale}.png`);
     await sharp(Buffer.from(svg))
       .resize(1200, 630)
       .png()
       .toFile(pngPath);
-    console.log(`   ✅ Generated PNG: ${pngPath}`);
+    console.log(`   ✅ Generated: ${pngPath}`);
   }
   
   console.log('✅ Open Graph images generated!');
