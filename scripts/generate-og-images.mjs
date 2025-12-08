@@ -153,12 +153,10 @@ function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRo
     const xPos = 200 + i * 400;
     const readableColor = getReadableColor(c.color, c.name);
     const supportPct = `${(c.support * 100).toFixed(0)}%`;
-    // Use appropriate short names for Portuguese politics
+    // Use recognizable names for Portuguese politics
     let displayName = c.name;
-    if (c.name === 'Marques Mendes') displayName = 'M. Mendes';
-    else if (c.name === 'Gouveia e Melo') displayName = 'G. e Melo';
-    else if (c.name === 'André Ventura') displayName = 'Ventura';
-    else displayName = c.name.split(' ').slice(-1)[0];
+    if (c.name === 'André Ventura') displayName = 'Ventura';
+    // Keep full names for Marques Mendes and Gouveia e Melo
     return `
     <rect x="${xPos - 4}" y="525" width="8" height="80" rx="4" fill="${readableColor}"/>
     <text x="${xPos + 20}" y="555" fill="#e4e4e7" font-size="26" font-weight="500">${displayName}</text>
