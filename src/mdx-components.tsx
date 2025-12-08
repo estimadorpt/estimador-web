@@ -102,6 +102,16 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </td>
     ),
+    details: ({ children }) => (
+      <details className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+        {children}
+      </details>
+    ),
+    summary: ({ children }) => (
+      <summary className="px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100 font-medium text-green-dark">
+        {children}
+      </summary>
+    ),
     
     ...components,
   }

@@ -120,12 +120,12 @@ O modelo presidencial é diferente do legislativo porque:
 - O sistema é de duas voltas (maioria absoluta necessária)
 - A dinâmica de campanha é mais importante
 
-Utilizamos um modelo de **passeio aleatório (random walk)** no espaço log-odds para capturar a evolução do apoio aos candidatos.
+Utilizamos um modelo de **random walk** no espaço log-odds para capturar a evolução do apoio aos candidatos.
 
 <details>
-<summary>**Detalhes Técnicos: Passeio Aleatório**</summary>
+<summary>**Detalhes Técnicos: Random Walk**</summary>
 
-O passeio aleatório é definido como:
+O random walk é definido como:
 ```
 latent[t] = latent[t-1] + innovation[t]
 ```
@@ -160,12 +160,10 @@ Para cada simulação:
 
 Os nossos modelos incorporam múltiplas fontes de incerteza:
 
-| Fonte | Descrição |
-|-------|-----------|
-| **Erro de sondagem** | Variação esperada entre sondagens e resultado real |
-| **House effects** | Incerteza nos vieses estimados de cada instituto |
-| **Incerteza do modelo** | Parâmetros dos GPs e outros componentes |
-| **Efeitos de campanha** | Potencial para mudanças tardias não captadas |
+- **Erro de sondagem** — Variação esperada entre sondagens e resultado real
+- **House effects** — Incerteza nos vieses estimados de cada instituto
+- **Incerteza do modelo** — Parâmetros dos GPs e outros componentes
+- **Efeitos de campanha** — Potencial para mudanças tardias não captadas
 
 ### Comunicação da Incerteza
 
