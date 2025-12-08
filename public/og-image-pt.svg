@@ -3,15 +3,13 @@
     <style>
       text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     </style>
-    <!-- Subtle gradient background -->
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#18181b"/>
       <stop offset="50%" style="stop-color:#27272a"/>
       <stop offset="100%" style="stop-color:#18181b"/>
     </linearGradient>
-    <!-- Accent glow -->
-    <radialGradient id="accentGlow" cx="50%" cy="35%" r="45%">
-      <stop offset="0%" style="stop-color:#FF8C00;stop-opacity:0.12"/>
+    <radialGradient id="accentGlow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" style="stop-color:#FF8C00;stop-opacity:0.15"/>
       <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:0"/>
     </radialGradient>
   </defs>
@@ -20,42 +18,34 @@
   <rect width="1200" height="630" fill="url(#bgGradient)"/>
   <rect width="1200" height="630" fill="url(#accentGlow)"/>
   
-  <!-- Header -->
-  <text x="600" y="65" fill="#fafafa" font-size="30" font-weight="700" text-anchor="middle">estimador.pt</text>
-  <text x="600" y="95" fill="#a1a1aa" font-size="15" text-anchor="middle">Previsões Eleitorais · Presidenciais 2026</text>
+  <!-- Header - larger for mobile readability (40px→10px at 300px) -->
+  <text x="600" y="70" fill="#fafafa" font-size="40" font-weight="700" text-anchor="middle">estimador.pt</text>
   
-  <!-- Main content -->
-  <text x="600" y="175" fill="#fafafa" font-size="44" font-weight="700" text-anchor="middle">Marques Mendes</text>
+  <!-- Candidate name - LARGE (60px→15px at 300px = readable) -->
+  <text x="600" y="170" fill="#fafafa" font-size="60" font-weight="700" text-anchor="middle">Marques Mendes</text>
   
-  <!-- Big probability -->
-  <text x="600" y="295" fill="#FF8C00" font-size="130" font-weight="900" text-anchor="middle">56%</text>
+  <!-- Big probability - HERO SIZE (180px→45px at 300px = very readable) -->
+  <text x="600" y="340" fill="#FF8C00" font-size="180" font-weight="900" text-anchor="middle">56%</text>
   
-  <!-- Label -->
-  <text x="600" y="345" fill="#a1a1aa" font-size="22" text-anchor="middle">prob. de ganhar a 1ª volta</text>
+  <!-- Label - larger (32px→8px at 300px = borderline but acceptable) -->
+  <text x="600" y="400" fill="#a1a1aa" font-size="32" text-anchor="middle">prob. de ganhar a 1ª volta</text>
   
-  <!-- Second round pill badge - positioned prominently -->
-  <rect x="505" y="365" width="190" height="32" rx="16" fill="#3f3f46"/>
-  <text x="600" y="387" fill="#e4e4e7" font-size="14" font-weight="600" text-anchor="middle">2ª volta: >99%</text>
+  <!-- Second round pill - larger text (24px→6px visible as badge) -->
+  <rect x="470" y="430" width="260" height="50" rx="25" fill="#3f3f46"/>
+  <text x="600" y="463" fill="#e4e4e7" font-size="24" font-weight="600" text-anchor="middle">2ª volta: >99%</text>
   
-  <!-- Divider -->
-  <line x1="100" y1="430" x2="1100" y2="430" stroke="#3f3f46" stroke-width="1"/>
+  <!-- Bottom bar with key stats - stacked layout for clarity -->
+  <rect x="0" y="505" width="1200" height="125" fill="#18181b" opacity="0.85"/>
   
-  <!-- Bottom section label -->
-  <text x="600" y="465" fill="#71717a" font-size="12" font-weight="600" text-anchor="middle" letter-spacing="2">INTENÇÃO DE VOTO</text>
+  <!-- Three candidates - name on top, percentage below -->
   
-  <!-- Bottom row - top 3 candidates with voting intentions -->
-  
-    <rect x="105" y="490" width="4" height="32" rx="2" fill="#FF8C00"/>
-    <text x="120" y="512" fill="#d4d4d8" font-size="17" font-weight="500">Marques Mendes</text>
-    <text x="365" y="512" fill="#FF8C00" font-size="20" font-weight="700" text-anchor="end">21%</text>
-    <rect x="505" y="490" width="4" height="32" rx="2" fill="#60a5fa"/>
-    <text x="520" y="512" fill="#d4d4d8" font-size="17" font-weight="500">Gouveia e Melo</text>
-    <text x="765" y="512" fill="#60a5fa" font-size="20" font-weight="700" text-anchor="end">19%</text>
-    <rect x="905" y="490" width="4" height="32" rx="2" fill="#ff6b6b"/>
-    <text x="920" y="512" fill="#d4d4d8" font-size="17" font-weight="500">André Ventura</text>
-    <text x="1165" y="512" fill="#ff6b6b" font-size="20" font-weight="700" text-anchor="end">18%</text>
-  
-  <!-- Footer branding line -->
-  <rect x="0" y="560" width="1200" height="70" fill="#18181b" opacity="0.6"/>
-  <text x="600" y="600" fill="#52525b" font-size="13" text-anchor="middle">estimador.pt — Modelo bayesiano de previsão eleitoral</text>
+    <rect x="196" y="525" width="8" height="80" rx="4" fill="#FF8C00"/>
+    <text x="220" y="555" fill="#e4e4e7" font-size="26" font-weight="500">Mendes</text>
+    <text x="220" y="600" fill="#FF8C00" font-size="40" font-weight="800">21%</text>
+    <rect x="596" y="525" width="8" height="80" rx="4" fill="#60a5fa"/>
+    <text x="620" y="555" fill="#e4e4e7" font-size="26" font-weight="500">Melo</text>
+    <text x="620" y="600" fill="#60a5fa" font-size="40" font-weight="800">19%</text>
+    <rect x="996" y="525" width="8" height="80" rx="4" fill="#ff6b6b"/>
+    <text x="1020" y="555" fill="#e4e4e7" font-size="26" font-weight="500">Ventura</text>
+    <text x="1020" y="600" fill="#ff6b6b" font-size="40" font-weight="800">18%</text>
 </svg>

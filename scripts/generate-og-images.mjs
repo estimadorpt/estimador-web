@@ -94,21 +94,17 @@ function formatProbability(value) {
   return `${Math.round(pct)}%`;
 }
 
-// Generate SVG for OG image - professional election forecast design
+// Generate SVG for OG image - optimized for mobile display (300-500px width)
+// At 300px display: 130px→32px, 60px→15px, 36px→9px minimum readable
 function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRoundProb) {
-  const electionLabel = locale === 'pt' ? 'Presidenciais 2026' : 'Presidential 2026';
   const chanceLabel = locale === 'pt' ? 'prob. de ganhar a 1ª volta' : 'chance of winning 1st round';
-  const supportLabel = locale === 'pt' ? 'Intenção de voto' : 'Voting intention';
   const secondRoundLabel = locale === 'pt' ? '2ª volta' : '2nd round';
-  const tagline = locale === 'pt' ? 'Previsões Eleitorais' : 'Election Forecast';
 
   const top3 = candidatesWithSupport.slice(0, 3);
   
-  // Improve readability - ensure WCAG compliant contrast on dark backgrounds
+  // Ensure readable colors on dark backgrounds
   function getReadableColor(color, name) {
-    // André Ventura's red needs to be brighter for accessibility
     if (name === 'André Ventura') return '#ff6b6b';
-    // Gouveia e Melo's blue needs to be lighter
     if (name === 'Gouveia e Melo') return '#60a5fa';
     return color;
   }
@@ -118,15 +114,13 @@ function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRo
     <style>
       text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     </style>
-    <!-- Subtle gradient background -->
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#18181b"/>
       <stop offset="50%" style="stop-color:#27272a"/>
       <stop offset="100%" style="stop-color:#18181b"/>
     </linearGradient>
-    <!-- Accent glow -->
-    <radialGradient id="accentGlow" cx="50%" cy="35%" r="45%">
-      <stop offset="0%" style="stop-color:${leadingCandidate.color};stop-opacity:0.12"/>
+    <radialGradient id="accentGlow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" style="stop-color:${leadingCandidate.color};stop-opacity:0.15"/>
       <stop offset="100%" style="stop-color:${leadingCandidate.color};stop-opacity:0"/>
     </radialGradient>
   </defs>
@@ -135,43 +129,37 @@ function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRo
   <rect width="1200" height="630" fill="url(#bgGradient)"/>
   <rect width="1200" height="630" fill="url(#accentGlow)"/>
   
-  <!-- Header -->
-  <text x="600" y="65" fill="#fafafa" font-size="30" font-weight="700" text-anchor="middle">estimador.pt</text>
-  <text x="600" y="95" fill="#a1a1aa" font-size="15" text-anchor="middle">${tagline} · ${electionLabel}</text>
+  <!-- Header - larger for mobile readability (40px→10px at 300px) -->
+  <text x="600" y="70" fill="#fafafa" font-size="40" font-weight="700" text-anchor="middle">estimador.pt</text>
   
-  <!-- Main content -->
-  <text x="600" y="175" fill="#fafafa" font-size="44" font-weight="700" text-anchor="middle">${leadingCandidate.name}</text>
+  <!-- Candidate name - LARGE (60px→15px at 300px = readable) -->
+  <text x="600" y="170" fill="#fafafa" font-size="60" font-weight="700" text-anchor="middle">${leadingCandidate.name}</text>
   
-  <!-- Big probability -->
-  <text x="600" y="295" fill="${leadingCandidate.color}" font-size="130" font-weight="900" text-anchor="middle">${formatProbability(leadingCandidate.probability)}</text>
+  <!-- Big probability - HERO SIZE (180px→45px at 300px = very readable) -->
+  <text x="600" y="340" fill="${leadingCandidate.color}" font-size="180" font-weight="900" text-anchor="middle">${formatProbability(leadingCandidate.probability)}</text>
   
-  <!-- Label -->
-  <text x="600" y="345" fill="#a1a1aa" font-size="22" text-anchor="middle">${chanceLabel}</text>
+  <!-- Label - larger (32px→8px at 300px = borderline but acceptable) -->
+  <text x="600" y="400" fill="#a1a1aa" font-size="32" text-anchor="middle">${chanceLabel}</text>
   
-  <!-- Second round pill badge - positioned prominently -->
-  <rect x="505" y="365" width="190" height="32" rx="16" fill="#3f3f46"/>
-  <text x="600" y="387" fill="#e4e4e7" font-size="14" font-weight="600" text-anchor="middle">${secondRoundLabel}: ${formatProbability(secondRoundProb)}</text>
+  <!-- Second round pill - larger text (24px→6px visible as badge) -->
+  <rect x="470" y="430" width="260" height="50" rx="25" fill="#3f3f46"/>
+  <text x="600" y="463" fill="#e4e4e7" font-size="24" font-weight="600" text-anchor="middle">${secondRoundLabel}: ${formatProbability(secondRoundProb)}</text>
   
-  <!-- Divider -->
-  <line x1="100" y1="430" x2="1100" y2="430" stroke="#3f3f46" stroke-width="1"/>
+  <!-- Bottom bar with key stats - stacked layout for clarity -->
+  <rect x="0" y="505" width="1200" height="125" fill="#18181b" opacity="0.85"/>
   
-  <!-- Bottom section label -->
-  <text x="600" y="465" fill="#71717a" font-size="12" font-weight="600" text-anchor="middle" letter-spacing="2">${supportLabel.toUpperCase()}</text>
-  
-  <!-- Bottom row - top 3 candidates with voting intentions -->
+  <!-- Three candidates - name on top, percentage below -->
   ${top3.map((c, i) => {
     const xPos = 200 + i * 400;
     const readableColor = getReadableColor(c.color, c.name);
     const supportPct = `${(c.support * 100).toFixed(0)}%`;
+    // Use last name for cleaner display
+    const displayName = c.name.split(' ').slice(-1)[0];
     return `
-    <rect x="${xPos - 95}" y="490" width="4" height="32" rx="2" fill="${readableColor}"/>
-    <text x="${xPos - 80}" y="512" fill="#d4d4d8" font-size="17" font-weight="500">${c.name}</text>
-    <text x="${xPos + 165}" y="512" fill="${readableColor}" font-size="20" font-weight="700" text-anchor="end">${supportPct}</text>`;
+    <rect x="${xPos - 4}" y="525" width="8" height="80" rx="4" fill="${readableColor}"/>
+    <text x="${xPos + 20}" y="555" fill="#e4e4e7" font-size="26" font-weight="500">${displayName}</text>
+    <text x="${xPos + 20}" y="600" fill="${readableColor}" font-size="40" font-weight="800">${supportPct}</text>`;
   }).join('')}
-  
-  <!-- Footer branding line -->
-  <rect x="0" y="560" width="1200" height="70" fill="#18181b" opacity="0.6"/>
-  <text x="600" y="600" fill="#52525b" font-size="13" text-anchor="middle">estimador.pt — Modelo bayesiano de previsão eleitoral</text>
 </svg>`;
 }
 
