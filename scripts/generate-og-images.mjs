@@ -148,19 +148,17 @@ function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRo
   <!-- Bottom bar with key stats - stacked layout for clarity -->
   <rect x="0" y="505" width="1200" height="125" fill="#18181b" opacity="0.85"/>
   
-  <!-- Three candidates - name on top, percentage below -->
+  <!-- Three candidates - centered in each column -->
   ${top3.map((c, i) => {
-    const xPos = 200 + i * 400;
+    const xPos = 200 + i * 400; // Centers at 200, 600, 1000
     const readableColor = getReadableColor(c.color, c.name);
     const supportPct = `${(c.support * 100).toFixed(0)}%`;
     // Use recognizable names for Portuguese politics
     let displayName = c.name;
     if (c.name === 'André Ventura') displayName = 'Ventura';
-    // Keep full names for Marques Mendes and Gouveia e Melo
     return `
-    <rect x="${xPos - 4}" y="525" width="8" height="80" rx="4" fill="${readableColor}"/>
-    <text x="${xPos + 20}" y="555" fill="#e4e4e7" font-size="26" font-weight="500">${displayName}</text>
-    <text x="${xPos + 20}" y="600" fill="${readableColor}" font-size="40" font-weight="800">${supportPct}</text>`;
+    <text x="${xPos}" y="555" fill="#e4e4e7" font-size="26" font-weight="500" text-anchor="middle">${displayName}</text>
+    <text x="${xPos}" y="600" fill="${readableColor}" font-size="40" font-weight="800" text-anchor="middle">${supportPct}</text>`;
   }).join('')}
 </svg>`;
 }
