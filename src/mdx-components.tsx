@@ -65,13 +65,20 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </blockquote>
     ),
-    code: ({ children }) => (
-      <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">
-        {children}
-      </code>
-    ),
+    code: ({ children, className }) => {
+      // If className exists, it's a code block (inside pre), don't add inline styles
+      const isBlock = className?.includes('language-') || false;
+      if (isBlock) {
+        return <code className={className}>{children}</code>;
+      }
+      return (
+        <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800">
+          {children}
+        </code>
+      );
+    },
     pre: ({ children }) => (
-      <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto mb-4">
+      <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4 font-mono text-sm [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-inherit">
         {children}
       </pre>
     ),
