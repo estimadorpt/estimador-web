@@ -42,7 +42,12 @@ A função de covariância do GP de baseline é:
 ```
 k(t, t') = σ² × exp(-|t-t'|² / (2ℓ²))
 ```
-onde σ é a amplitude e ℓ é o lengthscale (~1460 dias).
+
+**Priors utilizados:**
+- Lengthscale baseline: LogNormal(μ=log(1460), σ=0.3) — centrado em ~4 anos
+- Lengthscale médio prazo: LogNormal(μ=log(365), σ=0.5) — centrado em ~1 ano
+- Lengthscale curto prazo: LogNormal(μ=log(14), σ=0.3) — centrado em ~14 dias
+- Amplitude dos GPs: HalfNormal(σ=0.2-0.3)
 
 </details>
 
