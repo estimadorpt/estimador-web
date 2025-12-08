@@ -29,9 +29,33 @@ interface PresidentialWinProbabilitiesData {
   candidates: PresidentialWinProbability[];
 }
 
-async function loadWinProbabilities(): Promise<PresidentialWinProbabilitiesData | null> {
+interface PresidentialTrendsData {
+  election_date: string;
+  dates: string[];
+  candidates: Record<string, {
+    mean: number[];
+    ci_05: number[];
+    ci_95: number[];
+    ci_25: number[];
+    ci_75: number[];
+    color: string;
+  }>;
+}
+
+interface PresidentialPoll {
+  date: string;
+  pollster: string;
+  sample_size: number;
+  [candidate: string]: string | number;
+}
+
+interface PresidentialPollsData {
+  polls: PresidentialPoll[];
+}
+
+async function loadJsonData<T>(filename: string): Promise<T | null> {
   try {
-    const filePath = path.join(process.cwd(), 'public', 'data', 'presidential_win_probabilities.json');
+    const filePath = path.join(process.cwd(), 'public', 'data', filename);
     const fileContents = await fs.readFile(filePath, 'utf8');
     return JSON.parse(fileContents);
   } catch {
@@ -39,12 +63,109 @@ async function loadWinProbabilities(): Promise<PresidentialWinProbabilitiesData 
   }
 }
 
+// Simple seeded random for reproducibility
+function seededRandom(seed: number) {
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+}
+
+// Box-Muller transform for normal distribution
+function normalRandom(mean: number, std: number, seed: number): number {
+  const u1 = seededRandom(seed);
+  const u2 = seededRandom(seed + 1);
+  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  return mean + std * z;
+}
+
+// Compute approximate win probabilities at cutoff using Monte Carlo simulation
+function computeLeadingProbabilitiesAtCutoff(
+  trends: PresidentialTrendsData,
+  winProbabilities: PresidentialWinProbabilitiesData,
+  cutoffDate: string | null,
+  numSimulations: number = 5000
+): { name: string; probability: number; color: string }[] {
+  if (!cutoffDate) {
+    return winProbabilities.candidates.map(c => ({
+      name: c.name,
+      probability: c.leading_probability,
+      color: c.color,
+    }));
+  }
+  
+  const cutoff = new Date(cutoffDate);
+  const idx = trends.dates.findIndex(d => new Date(d) > cutoff);
+  const cutoffIndex = idx === -1 ? trends.dates.length - 1 : idx - 1;
+  
+  const candidates = Object.entries(trends.candidates)
+    .filter(([name]) => name !== 'Others')
+    .map(([name, data]) => {
+      const mean = data.mean[cutoffIndex];
+      const std = (data.ci_95[cutoffIndex] - data.ci_05[cutoffIndex]) / 3.92;
+      const wpData = winProbabilities.candidates.find(c => c.name === name);
+      return {
+        name,
+        mean,
+        std: Math.max(std, 0.001),
+        color: wpData?.color || '#888888',
+      };
+    });
+  
+  const wins: Record<string, number> = {};
+  candidates.forEach(c => { wins[c.name] = 0; });
+  
+  for (let sim = 0; sim < numSimulations; sim++) {
+    let maxValue = -Infinity;
+    let winner = '';
+    
+    candidates.forEach((c, i) => {
+      const value = normalRandom(c.mean, c.std, sim * candidates.length + i);
+      if (value > maxValue) {
+        maxValue = value;
+        winner = c.name;
+      }
+    });
+    
+    if (winner) wins[winner]++;
+  }
+  
+  return candidates
+    .map(c => ({
+      name: c.name,
+      probability: wins[c.name] / numSimulations,
+      color: c.color,
+    }))
+    .sort((a, b) => b.probability - a.probability);
+}
+
 export default async function Image({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const data = await loadWinProbabilities();
   
-  const leadingCandidate = data?.candidates[0];
-  const secondRoundProb = data?.second_round_probability ?? 0.98;
+  // Load all required data
+  const [winProbabilities, trends, polls] = await Promise.all([
+    loadJsonData<PresidentialWinProbabilitiesData>('presidential_win_probabilities.json'),
+    loadJsonData<PresidentialTrendsData>('presidential_trends.json'),
+    loadJsonData<PresidentialPollsData>('presidential_polls.json'),
+  ]);
+  
+  // Calculate last poll date
+  let lastPollDate: string | null = null;
+  if (polls && polls.polls.length > 0) {
+    lastPollDate = polls.polls[0].date;
+    for (const poll of polls.polls) {
+      if (poll.date > lastPollDate) {
+        lastPollDate = poll.date;
+      }
+    }
+  }
+  
+  // Compute probabilities at cutoff date (same as main page)
+  let cutoffProbabilities: { name: string; probability: number; color: string }[] = [];
+  if (winProbabilities && trends) {
+    cutoffProbabilities = computeLeadingProbabilitiesAtCutoff(trends, winProbabilities, lastPollDate);
+  }
+  
+  const leadingCandidate = cutoffProbabilities[0] || null;
+  const secondRoundProb = winProbabilities?.second_round_probability ?? 0.98;
   
   const formatProbability = (value: number) => {
     const pct = value * 100;
@@ -55,7 +176,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
 
   const electionLabel = locale === 'pt' ? 'Eleições Presidenciais 2026' : 'Presidential Election 2026';
   const leadingLabel = locale === 'pt' ? 'lidera com' : 'leads with';
-  const chanceLabel = locale === 'pt' ? 'probabilidade de vencer' : 'chance of winning';
+  const chanceLabel = locale === 'pt' ? 'prob. de ganhar a 1ª volta' : 'chance of winning first round';
   const tagline = locale === 'pt' ? 'Previsões Eleitorais Portuguesas' : 'Portuguese Election Forecast';
   const secondRoundLabel = locale === 'pt' ? 'Prob. 2ª volta' : 'Runoff probability';
 
@@ -200,7 +321,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
                     letterSpacing: '-0.03em',
                   }}
                 >
-                  {formatProbability(leadingCandidate.leading_probability)}
+                  {formatProbability(leadingCandidate.probability)}
                 </div>
                 <div
                   style={{
@@ -261,7 +382,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
             </div>
 
             {/* Top 3 Candidates */}
-            {data?.candidates.slice(0, 3).map((candidate, i) => (
+            {cutoffProbabilities.slice(0, 3).map((candidate, i) => (
               <div
                 key={candidate.name}
                 style={{
@@ -304,7 +425,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
                     color: candidate.color,
                   }}
                 >
-                  {formatProbability(candidate.leading_probability)}
+                  {formatProbability(candidate.probability)}
                 </div>
               </div>
             ))}
@@ -317,4 +438,3 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
     }
   );
 }
-
