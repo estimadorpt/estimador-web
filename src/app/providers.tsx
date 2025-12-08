@@ -11,6 +11,10 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       person_profiles: 'identified_only',
       defaults: '2025-11-30'
     })
+    // Expose posthog globally for debugging
+    if (typeof window !== 'undefined') {
+      (window as unknown as { posthog: typeof posthog }).posthog = posthog
+    }
   }, [])
 
   return (
