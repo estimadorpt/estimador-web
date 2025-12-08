@@ -40,7 +40,7 @@ export async function generateMetadata({
       type: 'website',
       images: [
         {
-          url: `/${locale}/opengraph-image`,
+          url: `/og-image-${locale}.png`,
           width: 1200,
           height: 630,
           alt: t('meta.defaultTitle'),
@@ -52,7 +52,7 @@ export async function generateMetadata({
       title: t('meta.defaultTitle'),
       description: t('meta.defaultDescription'),
       creator: '@estimadorpt',
-      images: [`/${locale}/twitter-image`],
+      images: [`/og-image-${locale}.png`],
     },
     alternates: {
       canonical: `https://estimador.pt/${locale}`,
