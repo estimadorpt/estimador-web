@@ -94,13 +94,11 @@ function formatProbability(value) {
   return `${Math.round(pct)}%`;
 }
 
-// Generate SVG for OG image
+// Generate SVG for OG image - centered layout for social media cropping
 function generateOgSvg(locale, leadingCandidate, cutoffProbabilities, secondRoundProb) {
-  const electionLabel = locale === 'pt' ? 'Eleições Presidenciais 2026' : 'Presidential Election 2026';
-  const leadingLabel = locale === 'pt' ? 'lidera com' : 'leads with';
-  const chanceLabel = locale === 'pt' ? 'prob. de ganhar a 1ª volta' : 'chance of winning first round';
-  const tagline = locale === 'pt' ? 'Previsões Eleitorais Portuguesas' : 'Portuguese Election Forecast';
-  const secondRoundLabel = locale === 'pt' ? 'Prob. 2ª volta' : 'Runoff probability';
+  const electionLabel = locale === 'pt' ? 'Presidenciais 2026' : 'Presidential 2026';
+  const chanceLabel = locale === 'pt' ? 'prob. de ganhar a 1ª volta' : 'chance of winning 1st round';
+  const tagline = locale === 'pt' ? 'Previsões Eleitorais' : 'Election Forecast';
 
   const top3 = cutoffProbabilities.slice(0, 3);
   
@@ -114,42 +112,33 @@ function generateOgSvg(locale, leadingCandidate, cutoffProbabilities, secondRoun
   <!-- Background -->
   <rect width="1200" height="630" fill="#292524"/>
   
-  <!-- Header -->
-  <text x="60" y="95" fill="#fafaf9" font-size="42" font-weight="700">estimador.pt</text>
-  <text x="60" y="125" fill="#a8a29e" font-size="20">${tagline}</text>
+  <!-- Header - centered -->
+  <text x="600" y="70" fill="#fafaf9" font-size="36" font-weight="700" text-anchor="middle">estimador.pt</text>
+  <text x="600" y="100" fill="#a8a29e" font-size="18" text-anchor="middle">${tagline} · ${electionLabel}</text>
   
-  <!-- Election badge -->
-  <rect x="880" y="60" width="260" height="50" rx="8" fill="#44403c"/>
-  <text x="1010" y="93" fill="#fafaf9" font-size="18" font-weight="600" text-anchor="middle">${electionLabel}</text>
+  <!-- Main content - centered -->
+  <!-- Candidate name -->
+  <text x="600" y="200" fill="#fafaf9" font-size="56" font-weight="800" text-anchor="middle">${leadingCandidate.name}</text>
   
-  <!-- Leading candidate color bar -->
-  <rect x="60" y="180" width="8" height="80" rx="4" fill="${leadingCandidate.color}"/>
+  <!-- Big probability - centered -->
+  <text x="600" y="340" fill="${leadingCandidate.color}" font-size="150" font-weight="900" text-anchor="middle">${formatProbability(leadingCandidate.probability)}</text>
   
-  <!-- Leading candidate name -->
-  <text x="88" y="220" fill="#fafaf9" font-size="48" font-weight="800">${leadingCandidate.name}</text>
-  <text x="88" y="255" fill="#a8a29e" font-size="22">${leadingLabel}</text>
+  <!-- Label below -->
+  <text x="600" y="400" fill="#a8a29e" font-size="28" text-anchor="middle">${chanceLabel}</text>
   
-  <!-- Win probability -->
-  <text x="88" y="380" fill="${leadingCandidate.color}" font-size="110" font-weight="900">${formatProbability(leadingCandidate.probability)}</text>
+  <!-- Bottom row - top 3 candidates -->
+  <line x1="100" y1="460" x2="1100" y2="460" stroke="#44403c" stroke-width="1"/>
   
-  <!-- Label below percentage -->
-  <text x="88" y="430" fill="#78716c" font-size="24">${chanceLabel}</text>
+  ${top3.map((c, i) => {
+    const xPos = 200 + i * 400;
+    return `
+    <rect x="${xPos - 80}" y="490" width="6" height="40" rx="3" fill="${c.color}"/>
+    <text x="${xPos - 60}" y="520" fill="#e7e5e3" font-size="22" font-weight="500">${c.name}</text>
+    <text x="${xPos + 180}" y="520" fill="${c.color}" font-size="26" font-weight="700" text-anchor="end">${formatProbability(c.probability)}</text>`;
+  }).join('')}
   
-  <!-- Divider line -->
-  <line x1="680" y1="180" x2="680" y2="550" stroke="#57534e" stroke-width="1"/>
-  
-  <!-- Second round box -->
-  <rect x="720" y="200" width="280" height="100" rx="8" fill="#44403c"/>
-  <text x="740" y="235" fill="#a8a29e" font-size="14" font-weight="600" letter-spacing="1">${secondRoundLabel.toUpperCase()}</text>
-  <text x="740" y="285" fill="#f59e0b" font-size="48" font-weight="800">${formatProbability(secondRoundProb)}</text>
-  
-  <!-- Top 3 candidates -->
-  ${top3.map((c, i) => `
-  <rect x="720" y="${330 + i * 70}" width="4" height="32" rx="2" fill="${c.color}"/>
-  <text x="740" y="${355 + i * 70}" fill="#e7e5e3" font-size="18" font-weight="500">${c.name}</text>
-  <text x="1000" y="${355 + i * 70}" fill="${c.color}" font-size="20" font-weight="700" text-anchor="end">${formatProbability(c.probability)}</text>
-  ${i < 2 ? `<line x1="720" y1="${385 + i * 70}" x2="1000" y2="${385 + i * 70}" stroke="#44403c" stroke-width="1"/>` : ''}
-  `).join('')}
+  <!-- Second round indicator -->
+  <text x="600" y="590" fill="#78716c" font-size="18" text-anchor="middle">2ª volta: ${formatProbability(secondRoundProb)}</text>
 </svg>`;
 }
 
