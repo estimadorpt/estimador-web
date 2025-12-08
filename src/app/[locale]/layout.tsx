@@ -5,6 +5,19 @@ import { locales } from '@/i18n/routing';
 import { ElectionProvider } from '@/contexts/ElectionContext';
 import '../globals.css';
 import type { Metadata } from 'next';
+import fs from 'fs';
+import path from 'path';
+
+// Read OG image version at build time for cache busting
+function getOgImageVersion(): string {
+  try {
+    const manifestPath = path.join(process.cwd(), 'public', 'og-manifest.json');
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    return manifest.timestamp?.toString() || Date.now().toString();
+  } catch {
+    return Date.now().toString();
+  }
+}
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -22,6 +35,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
+  const ogVersion = getOgImageVersion();
+  const ogImageUrl = `https://estimador.pt/og-image-${locale}.png?v=${ogVersion}`;
   
   return {
     metadataBase: new URL('https://estimador.pt'),
@@ -40,7 +55,7 @@ export async function generateMetadata({
       type: 'website',
       images: [
         {
-          url: `https://estimador.pt/og-image-${locale}.png`,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: t('meta.defaultTitle'),
@@ -52,7 +67,7 @@ export async function generateMetadata({
       title: t('meta.defaultTitle'),
       description: t('meta.defaultDescription'),
       creator: '@estimadorpt',
-      images: [`https://estimador.pt/og-image-${locale}.png`],
+      images: [ogImageUrl],
     },
     alternates: {
       canonical: `https://estimador.pt/${locale}`,
@@ -89,7 +104,8 @@ export default async function RootLayout({
   // side is the easiest way to get started
   const messages = await getMessages({ locale });
 
-  const ogImageUrl = `https://estimador.pt/og-image-${locale}.png`;
+  const ogVersion = getOgImageVersion();
+  const ogImageUrl = `https://estimador.pt/og-image-${locale}.png?v=${ogVersion}`;
   
   return (
     <html lang={locale} suppressHydrationWarning>

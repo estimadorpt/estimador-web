@@ -6,6 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 
@@ -218,7 +219,21 @@ async function main() {
     console.log(`   ✅ Generated: ${pngPath}`);
   }
   
+  // Write manifest with timestamp for cache busting
+  const manifest = {
+    generatedAt: new Date().toISOString(),
+    timestamp: Date.now(),
+    files: ['og-image-pt.png', 'og-image-en.png']
+  };
+  const manifestPath = path.join(rootDir, 'public', 'og-manifest.json');
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  console.log(`   ✅ Manifest: ${manifestPath}`);
+  
   console.log('✅ Open Graph images generated!');
+  console.log(`\n📋 To force social media refresh after deploy:`);
+  console.log(`   Facebook: https://developers.facebook.com/tools/debug/?q=https://estimador.pt/pt`);
+  console.log(`   Twitter:  https://cards-dev.twitter.com/validator`);
+  console.log(`   LinkedIn: https://www.linkedin.com/post-inspector/`);
 }
 
 main().catch(console.error);
