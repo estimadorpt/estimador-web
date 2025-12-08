@@ -123,15 +123,17 @@ function generateOgSvg(locale, leadingCandidate, cutoffProbabilities, secondRoun
   <text x="1010" y="93" fill="#fafaf9" font-size="18" font-weight="600" text-anchor="middle">${electionLabel}</text>
   
   <!-- Leading candidate color bar -->
-  <rect x="60" y="200" width="8" height="100" rx="4" fill="${leadingCandidate.color}"/>
+  <rect x="60" y="180" width="8" height="80" rx="4" fill="${leadingCandidate.color}"/>
   
   <!-- Leading candidate name -->
-  <text x="88" y="250" fill="#fafaf9" font-size="52" font-weight="800">${leadingCandidate.name}</text>
-  <text x="88" y="290" fill="#a8a29e" font-size="24">${leadingLabel}</text>
+  <text x="88" y="220" fill="#fafaf9" font-size="48" font-weight="800">${leadingCandidate.name}</text>
+  <text x="88" y="255" fill="#a8a29e" font-size="22">${leadingLabel}</text>
   
   <!-- Win probability -->
-  <text x="88" y="420" fill="${leadingCandidate.color}" font-size="120" font-weight="900">${formatProbability(leadingCandidate.probability)}</text>
-  <text x="330" y="380" fill="#78716c" font-size="28">${chanceLabel}</text>
+  <text x="88" y="380" fill="${leadingCandidate.color}" font-size="110" font-weight="900">${formatProbability(leadingCandidate.probability)}</text>
+  
+  <!-- Label below percentage -->
+  <text x="88" y="430" fill="#78716c" font-size="24">${chanceLabel}</text>
   
   <!-- Divider line -->
   <line x1="680" y1="180" x2="680" y2="550" stroke="#57534e" stroke-width="1"/>
