@@ -206,28 +206,39 @@ async function main() {
   console.log(`   Second round: ${formatProbability(secondRoundProb)}`);
   console.log(`   Voting intentions:`, candidatesWithSupport.slice(0, 3).map(c => `${c.name}: ${(c.support * 100).toFixed(1)}%`).join(', '));
   
-  // Generate for each locale
+  // Generate short hash for cache busting
+  const version = Date.now().toString(36).slice(-6);
+  
+  // Generate for each locale with versioned filename
   for (const locale of ['pt', 'en']) {
     const svg = generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRoundProb);
     
-    // Convert to PNG using sharp (SVG is just intermediate, not saved)
-    const pngPath = path.join(rootDir, 'public', `og-image-${locale}.png`);
+    // Convert to PNG using sharp with versioned filename
+    const filename = `og-image-${locale}-${version}.png`;
+    const pngPath = path.join(rootDir, 'public', filename);
     await sharp(Buffer.from(svg))
       .resize(1200, 630)
       .png()
       .toFile(pngPath);
-    console.log(`   ✅ Generated: ${pngPath}`);
+    console.log(`   ✅ Generated: ${filename}`);
+    
+    // Also create unversioned symlink/copy for backwards compatibility
+    const unversionedPath = path.join(rootDir, 'public', `og-image-${locale}.png`);
+    fs.copyFileSync(pngPath, unversionedPath);
   }
   
-  // Write manifest with timestamp for cache busting
+  // Write manifest with version for filename-based cache busting
   const manifest = {
     generatedAt: new Date().toISOString(),
-    timestamp: Date.now(),
-    files: ['og-image-pt.png', 'og-image-en.png']
+    version: version,
+    files: {
+      pt: `og-image-pt-${version}.png`,
+      en: `og-image-en-${version}.png`
+    }
   };
   const manifestPath = path.join(rootDir, 'public', 'og-manifest.json');
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-  console.log(`   ✅ Manifest: ${manifestPath}`);
+  console.log(`   ✅ Manifest: og-manifest.json (version: ${version})`);
   
   console.log('✅ Open Graph images generated!');
   console.log(`\n📋 To force social media refresh after deploy:`);

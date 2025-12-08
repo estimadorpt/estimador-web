@@ -8,14 +8,14 @@ import type { Metadata } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-// Read OG image version at build time for cache busting
-function getOgImageVersion(): string {
+// Read OG image filename at build time (versioned filename for cache busting)
+function getOgImageFilename(locale: string): string {
   try {
     const manifestPath = path.join(process.cwd(), 'public', 'og-manifest.json');
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    return manifest.timestamp?.toString() || Date.now().toString();
+    return manifest.files?.[locale] || `og-image-${locale}.png`;
   } catch {
-    return Date.now().toString();
+    return `og-image-${locale}.png`;
   }
 }
 
@@ -35,8 +35,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  const ogVersion = getOgImageVersion();
-  const ogImageUrl = `https://estimador.pt/og-image-${locale}.png?v=${ogVersion}`;
+  const ogImageFilename = getOgImageFilename(locale);
+  const ogImageUrl = `https://estimador.pt/${ogImageFilename}`;
   
   return {
     metadataBase: new URL('https://estimador.pt'),
@@ -104,8 +104,8 @@ export default async function RootLayout({
   // side is the easiest way to get started
   const messages = await getMessages({ locale });
 
-  const ogVersion = getOgImageVersion();
-  const ogImageUrl = `https://estimador.pt/og-image-${locale}.png?v=${ogVersion}`;
+  const ogImageFilename = getOgImageFilename(locale);
+  const ogImageUrl = `https://estimador.pt/${ogImageFilename}`;
   
   return (
     <html lang={locale} suppressHydrationWarning>
