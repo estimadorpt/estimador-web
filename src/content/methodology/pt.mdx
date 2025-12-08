@@ -1,0 +1,85 @@
+# Metodologia
+
+## Visão Geral
+
+Desenvolvemos um modelo estatístico Bayesiano para prever as eleições presidenciais portuguesas. O modelo combina dados de sondagens com informação sobre a afiliação partidária dos candidatos, ajustando para os efeitos das empresas de sondagens e quantificando a incerteza através de simulações de Monte Carlo.
+
+## O Desafio de Prever Eleições Presidenciais
+
+As eleições presidenciais portuguesas utilizam um sistema de duas voltas. Se nenhum candidato obtiver mais de 50% dos votos na primeira volta, os dois candidatos mais votados disputam uma segunda volta. Com múltiplos candidatos e uma percentagem significativa de eleitores indecisos, prever os resultados requer modelar cuidadosamente a incerteza.
+
+Os principais desafios incluem:
+
+- **Elevada percentagem de eleitores indecisos** (~35%)
+- **Candidatos com diferentes níveis de reconhecimento público**
+- **Dinâmicas de campanha** que podem mudar rapidamente
+- **Potencial transferência de votos** entre voltas
+
+## O Modelo Bayesiano de Previsão
+
+A nossa abordagem utiliza um modelo Bayesiano hierárquico para estimar a evolução do apoio a cada candidato ao longo do tempo. Isto permite-nos capturar tanto tendências suaves como mudanças súbitas, quantificando sempre a incerteza.
+
+### Componentes Principais
+
+1. **Estimação de Tendências:** Modelamos o apoio subjacente a cada candidato usando dados de sondagens
+2. **Efeitos das Empresas de Sondagens:** Contabilizamos os vieses sistemáticos de diferentes institutos de sondagens
+3. **Afiliação Partidária:** Incorporamos priors baseados nos partidos que apoiam cada candidato
+4. **Simulação de Resultados:** Executamos milhares de simulações para calcular probabilidades de vitória
+
+## Análise de Sondagens
+
+Recolhemos dados de sondagens dos principais institutos portugueses e aplicamos várias correções:
+
+- **Efeitos das Empresas:** Cada instituto tem tendências sistemáticas para sobre ou subestimar certos candidatos
+- **Ajuste por Dimensão da Amostra:** Sondagens maiores recebem maior peso
+- **Ponderação por Recência:** Sondagens mais recentes têm maior influência
+- **Efeitos de Modo:** Contabilizamos diferenças entre sondagens online, telefónicas e presenciais
+
+## Processo de Simulação
+
+Para cada simulação, geramos percentagens de votos para cada candidato e verificamos:
+
+1. Se algum candidato atinge mais de 50% na primeira volta
+2. Quais os dois candidatos que avançam para a segunda volta
+3. Registamos o resultado de cada simulação
+
+Executamos milhares destas simulações para construir distribuições de probabilidade para os resultados.
+
+## Quantificação da Incerteza
+
+O nosso modelo incorpora várias fontes de incerteza:
+
+- **Erro das Sondagens:** Precisão histórica das sondagens em eleições portuguesas
+- **Efeitos de Campanha:** Potencial para mudanças tardias nas preferências dos eleitores
+- **Eleitores Indecisos:** Grande incerteza sobre como os indecisos votarão
+- **Incerteza do Modelo:** Incerteza na estimação dos parâmetros
+
+## Validação do Modelo
+
+Validamos a nossa abordagem através de:
+
+1. Backtesting em eleições presidenciais portuguesas anteriores
+2. Validação cruzada usando dados de sondagens retidos
+3. Comparação com resultados eleitorais reais
+4. Testes de calibração para garantir probabilidades bem calibradas
+
+Refinamos continuamente o nosso modelo com base nestes exercícios de validação.
+
+## Limitações e Advertências
+
+O nosso modelo tem várias limitações importantes:
+
+- Depende de dados de sondagens, que podem ser enviesados ou não representativos
+- Pode não capturar desenvolvimentos políticos sem precedentes
+- Assume que padrões históricos continuam a verificar-se
+- Não consegue prever o impacto de eventos de campanha importantes ou escândalos
+- Dificuldade em prever como os eleitores indecisos se comportarão
+
+Encorajamos os utilizadores a interpretar as nossas previsões como estimativas probabilísticas, não como certezas.
+
+## Fontes de Dados
+
+- Institutos de sondagens portugueses (CESOP, Aximage, Pitagórica, Intercampus, etc.)
+- Resultados de eleições presidenciais anteriores da CNE
+- Dados demográficos do INE (Instituto Nacional de Estatística)
+

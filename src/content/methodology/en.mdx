@@ -1,0 +1,85 @@
+# Methodology
+
+## Overview
+
+We've developed a Bayesian statistical model to forecast Portuguese presidential elections. The model combines polling data with candidate party affiliations, adjusting for pollster house effects and quantifying uncertainty through Monte Carlo simulations.
+
+## The Challenge of Forecasting Presidential Elections
+
+Portuguese presidential elections use a two-round system. If no candidate receives more than 50% of the vote in the first round, the top two candidates proceed to a runoff. With multiple candidates and a significant percentage of undecided voters, forecasting outcomes requires carefully modeling uncertainty.
+
+Key challenges include:
+
+- **High percentage of undecided voters** (~35%)
+- **Candidates with varying levels of public recognition**
+- **Campaign dynamics** that can shift rapidly
+- **Potential vote transfer** between rounds
+
+## The Bayesian Forecasting Model
+
+Our approach uses a hierarchical Bayesian model to estimate the evolution of support for each candidate over time. This allows us to capture both smooth trends and sudden shifts while always quantifying uncertainty.
+
+### Key Components
+
+1. **Trend Estimation:** We model the underlying support for each candidate using polling data
+2. **Pollster House Effects:** We account for systematic biases in different polling organizations
+3. **Party Affiliation:** We incorporate priors based on the parties supporting each candidate
+4. **Outcome Simulation:** We run thousands of simulations to calculate win probabilities
+
+## Polling Analysis
+
+We collect polling data from major Portuguese polling organizations and apply several corrections:
+
+- **House Effects:** Each pollster has systematic tendencies to over- or under-estimate certain candidates
+- **Sample Size Adjustments:** Larger polls receive more weight
+- **Recency Weighting:** More recent polls have greater influence
+- **Mode Effects:** We account for differences between online, telephone, and in-person polling
+
+## Simulation Process
+
+For each simulation, we generate vote shares for each candidate and check:
+
+1. Whether any candidate reaches more than 50% in the first round
+2. Which two candidates advance to the second round
+3. Record the outcome of each simulation
+
+We run thousands of these simulations to build probability distributions for outcomes.
+
+## Uncertainty Quantification
+
+Our model incorporates several sources of uncertainty:
+
+- **Polling Error:** Historical polling accuracy in Portuguese elections
+- **Campaign Effects:** Potential for late shifts in voter preference
+- **Undecided Voters:** Significant uncertainty about how undecided voters will vote
+- **Model Uncertainty:** Parameter estimation uncertainty
+
+## Model Validation
+
+We validate our approach through:
+
+1. Backtesting on previous Portuguese presidential elections
+2. Cross-validation using held-out polling data
+3. Comparison with actual election results
+4. Calibration tests to ensure our probabilities are well-calibrated
+
+We continuously refine our model based on these validation exercises.
+
+## Limitations and Caveats
+
+Our model has several important limitations:
+
+- Relies on polling data, which can be biased or unrepresentative
+- May not capture unprecedented political developments
+- Assumes historical patterns continue to hold
+- Cannot predict the impact of major campaign events or scandals
+- Difficulty predicting how undecided voters will behave
+
+We encourage users to interpret our forecasts as probabilistic estimates, not certainties.
+
+## Data Sources
+
+- Portuguese polling organizations (CESOP, Aximage, Pitagórica, Intercampus, etc.)
+- Previous presidential election results from CNE
+- Demographic data from INE (Instituto Nacional de Estatística)
+

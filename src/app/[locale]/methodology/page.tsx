@@ -1,8 +1,12 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
+import { readFileSync, existsSync } from 'fs';
+import path from 'path';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import { useMDXComponents } from '@/mdx-components';
 
 export async function generateMetadata({ 
   params 
@@ -26,6 +30,44 @@ export async function generateMetadata({
   };
 }
 
+function getMethodologyPath(locale: string): string {
+  return path.join(process.cwd(), 'src/content/methodology', `${locale}.mdx`);
+}
+
+function getMethodologyContent(locale: string): { content: string; actualLocale: string } {
+  // Try preferred locale first
+  let mdxPath = getMethodologyPath(locale);
+  
+  if (existsSync(mdxPath)) {
+    return {
+      content: readFileSync(mdxPath, 'utf8'),
+      actualLocale: locale
+    };
+  }
+  
+  // Fallback to Portuguese
+  if (locale !== 'pt') {
+    mdxPath = getMethodologyPath('pt');
+    if (existsSync(mdxPath)) {
+      return {
+        content: readFileSync(mdxPath, 'utf8'),
+        actualLocale: 'pt'
+      };
+    }
+  }
+  
+  // Fallback to English
+  mdxPath = getMethodologyPath('en');
+  if (existsSync(mdxPath)) {
+    return {
+      content: readFileSync(mdxPath, 'utf8'),
+      actualLocale: 'en'
+    };
+  }
+  
+  throw new Error('No methodology content found');
+}
+
 export default async function MethodologyPage({
   params
 }: {
@@ -33,135 +75,32 @@ export default async function MethodologyPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
+  
+  const { content: mdxContent, actualLocale } = getMethodologyContent(locale);
+  const components = useMDXComponents({});
+
   return (
     <div className="min-h-screen bg-green-pale">
       <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-green-dark mb-4">{t('methodology.title')}</h1>
-          <p className="text-lg text-green-dark/70">
-            {t('methodology.subtitle')}
-          </p>
-        </div>
+        {/* Locale Notice (if fallback) */}
+        {actualLocale !== locale && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-700">
+              {locale === 'en' 
+                ? `This page is only available in Portuguese. Showing Portuguese version.`
+                : `Esta página apenas está disponível em português.`
+              }
+            </p>
+          </div>
+        )}
 
         <Card>
           <CardContent className="p-8">
-            <div className="max-w-none space-y-6 text-slate-700 leading-relaxed">
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">{t('methodology.overview')}</h2>
-              <p>
-                {t('methodology.overviewDescription')}
-              </p>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">{t('methodology.challenge')}</h2>
-              <p>
-                {t('methodology.challengeDescription1')}
-              </p>
-              <p>{t('methodology.challengeDescription2')}</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>{t('methodology.challengeList1')}</li>
-                <li>{t('methodology.challengeList2')}</li>
-                <li>{t('methodology.challengeList3')}</li>
-                <li>{t('methodology.challengeList4')}</li>
-              </ul>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">{t('methodology.dynamicModel')}</h2>
-              <p>
-                {t('methodology.modelDescription')}
-              </p>
-              <div className="space-y-3">
-                <h4 className="text-lg font-medium text-slate-800">{t('methodology.keyComponents')}</h4>
-                <ol className="list-decimal pl-6 space-y-2">
-                  <li><span className="font-medium">{t('methodology.component1Title')}</span> {t('methodology.component1Desc')}</li>
-                  <li><span className="font-medium">{t('methodology.component2Title')}</span> {t('methodology.component2Desc')}</li>
-                  <li><span className="font-medium">{t('methodology.component3Title')}</span> {t('methodology.component3Desc')}</li>
-                  <li><span className="font-medium">{t('methodology.component4Title')}</span> {t('methodology.component4Desc')}</li>
-                </ol>
-              </div>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">{t('methodology.pollingAnalysis')}</h2>
-              <p>
-                {t('methodology.pollingCollect')}
-              </p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><span className="font-medium">{t('methodology.pollingHouseEffects')}</span> {t('methodology.pollingHouseEffectsDesc')}</li>
-                <li><span className="font-medium">{t('methodology.pollingSampleSize')}</span> {t('methodology.pollingSampleSizeDesc')}</li>
-                <li><span className="font-medium">{t('methodology.pollingRecency')}</span> {t('methodology.pollingRecencyDesc')}</li>
-                <li><span className="font-medium">{t('methodology.pollingMode')}</span> {t('methodology.pollingModeDesc')}</li>
-              </ul>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">{t('methodology.seatSimulation')}</h2>
-              <div className="space-y-4">
-                <p>{t('methodology.simulationDesc')}</p>
-                <ol className="list-decimal pl-6 space-y-1 mt-2">
-                  <li>{t('methodology.simulationStep1')}</li>
-                  <li>{t('methodology.simulationStep2')}</li>
-                  <li>{t('methodology.simulationStep3')}</li>
-                </ol>
-                <p className="mt-3">
-                  {t('methodology.simulationConclusion')}
-                </p>
-              </div>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">{t('methodology.uncertainty')}</h2>
-              <p>{t('methodology.uncertaintyDesc')}</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><span className="font-medium">{t('methodology.uncertaintyPolling')}</span> {t('methodology.uncertaintyPollingDesc')}</li>
-                <li><span className="font-medium">{t('methodology.uncertaintyCampaign')}</span> {t('methodology.uncertaintyCampaignDesc')}</li>
-                <li><span className="font-medium">{t('methodology.uncertaintyUndecided')}</span> {t('methodology.uncertaintyUndecidedDesc')}</li>
-                <li><span className="font-medium">{t('methodology.uncertaintyModel')}</span> {t('methodology.uncertaintyModelDesc')}</li>
-              </ul>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">{t('methodology.validation')}</h2>
-              <p>{t('methodology.validationDesc')}</p>
-              <ol className="list-decimal pl-6 space-y-2">
-                <li>{t('methodology.validationStep1')}</li>
-                <li>{t('methodology.validationStep2')}</li>
-                <li>{t('methodology.validationStep3')}</li>
-                <li>{t('methodology.validationStep4')}</li>
-              </ol>
-              <p className="mt-4">
-                {t('methodology.validationDescription')}
-              </p>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">{t('methodology.limitations')}</h2>
-              <p>{t('methodology.limitationsDescription1')}</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li>{t('methodology.limitationsList1')}</li>
-                <li>{t('methodology.limitationsList2')}</li>
-                <li>{t('methodology.limitationsList3')}</li>
-                <li>{t('methodology.limitationsList4')}</li>
-                <li>{t('methodology.limitationsList5')}</li>
-              </ul>
-              <p className="mt-4">
-                {t('methodology.limitationsDescription2')}
-              </p>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-green-dark border-b border-green-medium/30 pb-2">{t('methodology.dataSources')}</h2>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>{t('methodology.dataSourcesList1')}</li>
-                <li>{t('methodology.dataSourcesList2')}</li>
-                <li>{t('methodology.dataSourcesList3')}</li>
-              </ul>
-            </section>
-            </div>
+            <article className="prose prose-lg max-w-none mdx-content">
+              <MDXRemote source={mdxContent} components={components} />
+            </article>
           </CardContent>
         </Card>
       </main>
