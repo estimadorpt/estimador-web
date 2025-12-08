@@ -97,7 +97,7 @@ function formatProbability(value) {
 // Generate SVG for OG image - optimized for mobile display (300-500px width)
 // At 300px display: 130px→32px, 60px→15px, 36px→9px minimum readable
 function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRoundProb) {
-  const chanceLabel = locale === 'pt' ? 'prob. de ganhar a 1ª volta' : 'chance of winning 1st round';
+  const chanceLabel = locale === 'pt' ? 'probabilidade de ganhar a 1ª volta' : 'probability of winning 1st round';
   const secondRoundLabel = locale === 'pt' ? '2ª volta' : '2nd round';
 
   const top3 = candidatesWithSupport.slice(0, 3);
