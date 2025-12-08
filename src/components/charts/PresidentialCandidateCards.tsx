@@ -1,12 +1,14 @@
 "use client";
 
-import React from 'react';
-import { PresidentialWinProbabilitiesData, PresidentialForecastData } from '@/types';
+import React, { useMemo } from 'react';
+import { PresidentialWinProbabilitiesData, PresidentialForecastData, PresidentialTrendsData } from '@/types';
 import { presidentialCandidateParties, partyColors } from '@/lib/config/colors';
 
 interface PresidentialCandidateCardsProps {
   winProbabilities: PresidentialWinProbabilitiesData;
   forecast: PresidentialForecastData;
+  trends?: PresidentialTrendsData;
+  cutoffDate?: string;
   maxCandidates?: number;
   translations?: {
     chanceOfLeading: string;
@@ -15,32 +17,58 @@ interface PresidentialCandidateCardsProps {
   };
 }
 
-// Momentum badge component
-function MomentumBadge({ trend }: { trend: 'up' | 'down' | 'stable' }) {
-  if (trend === 'up') {
-    return (
-      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-        ↑
-      </span>
-    );
+// Simple seeded random for reproducibility
+function seededRandom(seed: number) {
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+}
+
+// Box-Muller transform for normal distribution
+function normalRandom(mean: number, std: number, seed: number): number {
+  const u1 = seededRandom(seed);
+  const u2 = seededRandom(seed + 1);
+  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  return mean + std * z;
+}
+
+// Compute approximate win probabilities using Monte Carlo simulation
+function computeLeadingProbabilities(
+  candidates: Array<{ name: string; mean: number; std: number; color: string }>,
+  numSimulations: number = 5000
+): Record<string, number> {
+  const wins: Record<string, number> = {};
+  candidates.forEach(c => { wins[c.name] = 0; });
+  
+  for (let sim = 0; sim < numSimulations; sim++) {
+    let maxValue = -Infinity;
+    let winner = '';
+    
+    candidates.forEach((c, idx) => {
+      const value = normalRandom(c.mean, c.std, sim * candidates.length + idx);
+      if (value > maxValue) {
+        maxValue = value;
+        winner = c.name;
+      }
+    });
+    
+    if (winner) {
+      wins[winner]++;
+    }
   }
-  if (trend === 'down') {
-    return (
-      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-        ↓
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-      →
-    </span>
-  );
+  
+  const probs: Record<string, number> = {};
+  candidates.forEach(c => {
+    probs[c.name] = wins[c.name] / numSimulations;
+  });
+  
+  return probs;
 }
 
 export function PresidentialCandidateCards({
   winProbabilities,
   forecast,
+  trends,
+  cutoffDate,
   maxCandidates = 5,
   translations = {
     chanceOfLeading: 'Chance of leading',
@@ -48,20 +76,75 @@ export function PresidentialCandidateCards({
     partyLabel: 'Party',
   },
 }: PresidentialCandidateCardsProps) {
-  // Combine data from both sources
+  // Calculate cutoff index for trends data
+  const cutoffIndex = useMemo(() => {
+    if (!trends || !cutoffDate) return -1;
+    const cutoff = new Date(cutoffDate);
+    const idx = trends.dates.findIndex(d => new Date(d) > cutoff);
+    return idx === -1 ? trends.dates.length - 1 : idx - 1;
+  }, [trends, cutoffDate]);
+
+  // Compute leading probabilities at cutoff using Monte Carlo
+  const leadingProbabilities = useMemo(() => {
+    if (!trends || cutoffIndex < 0) return null;
+    
+    // Build candidate data for simulation (include all candidates, not just top N)
+    const allCandidates = Object.entries(trends.candidates)
+      .filter(([name]) => name !== 'Others')
+      .map(([name, data]) => {
+        const mean = data.mean[cutoffIndex];
+        // Estimate std from 95% CI: std ≈ (ci_95 - ci_05) / 3.92
+        const std = (data.ci_95[cutoffIndex] - data.ci_05[cutoffIndex]) / 3.92;
+        const wpData = winProbabilities.candidates.find(c => c.name === name);
+        return {
+          name,
+          mean,
+          std: Math.max(std, 0.001), // Avoid zero std
+          color: wpData?.color || '#888888',
+        };
+      });
+    
+    return computeLeadingProbabilities(allCandidates);
+  }, [trends, cutoffIndex, winProbabilities.candidates]);
+
+  // Combine data from both sources, using trends data at cutoff if available
   const candidateData = winProbabilities.candidates
     .slice(0, maxCandidates)
     .map(wp => {
       const forecastData = forecast.candidates.find(f => f.name === wp.name);
       const party = presidentialCandidateParties[wp.name];
       
+      // Get values at cutoff date from trends if available
+      let displayMean = forecastData?.mean || 0;
+      let displayCI = forecastData ? (forecastData.ci_upper - forecastData.ci_lower) / 2 : 0;
+      let displayLeadingProb = wp.leading_probability;
+      
+      if (trends && cutoffIndex >= 0 && trends.candidates[wp.name]) {
+        const trendData = trends.candidates[wp.name];
+        displayMean = trendData.mean[cutoffIndex];
+        // Use ci_25 and ci_75 for a tighter interval display
+        const ciLow = trendData.ci_25[cutoffIndex];
+        const ciHigh = trendData.ci_75[cutoffIndex];
+        displayCI = (ciHigh - ciLow) / 2;
+        
+        // Use computed probability at cutoff if available
+        if (leadingProbabilities && leadingProbabilities[wp.name] !== undefined) {
+          displayLeadingProb = leadingProbabilities[wp.name];
+        }
+      }
+      
       return {
         ...wp,
         forecastData,
+        displayMean,
+        displayCI,
+        displayLeadingProb,
         party,
         partyColor: party ? partyColors[party as keyof typeof partyColors] : null,
       };
-    });
+    })
+    // Re-sort by leading probability at cutoff
+    .sort((a, b) => b.displayLeadingProb - a.displayLeadingProb);
 
   const formatPercent = (value: number) => {
     return `${(value * 100).toFixed(1)}%`;
@@ -111,7 +194,7 @@ export function PresidentialCandidateCards({
               className="text-4xl font-black tabular-nums tracking-tighter"
               style={{ color: candidate.color }}
             >
-              {formatPercentRounded(candidate.leading_probability)}
+              {formatPercentRounded(candidate.displayLeadingProb)}
             </div>
             <div className="text-[10px] text-stone-400 uppercase tracking-wide">
               {translations.chanceOfLeading}
@@ -119,14 +202,14 @@ export function PresidentialCandidateCards({
           </div>
 
           {/* Vote share range */}
-          {candidate.forecastData && (
+          {candidate.displayMean > 0 && (
             <div className="pt-2 mt-2 border-t border-stone-100">
               <div className="text-sm tabular-nums">
                 <span className="font-semibold text-stone-800">
-                  {formatPercent(candidate.forecastData.mean)}
+                  {formatPercent(candidate.displayMean)}
                 </span>
                 <span className="text-stone-400 text-xs ml-1">
-                  ±{formatPercent((candidate.forecastData.ci_upper - candidate.forecastData.ci_lower) / 2)}
+                  ±{formatPercent(candidate.displayCI)}
                 </span>
               </div>
               <div className="text-[10px] text-stone-400 uppercase tracking-wide">

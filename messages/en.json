@@ -2,7 +2,7 @@
   "nav": {
     "home": "Presidential 2026",
     "forecast": "Forecast",
-    "parliamentaryForecast": "Parliamentary 2024",
+    "parliamentaryForecast": "Parliamentary 2025",
     "pastElections": "Past Elections",
     "analysis": "Analysis",
     "about": "About",
@@ -197,6 +197,7 @@
     "partyAffiliation": "Party",
     "supportTrajectory": "Support trajectory over time",
     "spaghettiDescription": "Each line represents one possible simulation outcome. The spread of lines shows the uncertainty in our forecast - with ~35% undecided voters, outcomes remain highly uncertain.",
+    "trendDescription": "Estimated support over time for the top candidates. Lines show the mean estimate, shaded bands show 50% and 95% credible intervals. Dots represent individual polls.",
     "projectedVoteShare": "Projected vote share",
     "confidenceInterval": "95% confidence interval",
     "aboutModel": "About this model",
@@ -208,7 +209,15 @@
     "factor3": "Pollster reliability and house effects",
     "aboutForecast": "About the presidential forecast",
     "aboutDescription": "Portuguese presidential elections use a two-round system. If no candidate receives more than 50% of votes in the first round, the top two candidates proceed to a second round. This forecast models declared voting intention based on available polling data.",
-    "candidatesModeled": "candidates modeled"
+    "candidatesModeled": "candidates modeled",
+    "headToHeadTitle": "Head-to-Head Probability",
+    "headToHeadDescription": "Probability that {candidateA} leads {candidateB} over time",
+    "leads": "leads",
+    "runoffScenariosTitle": "Runoff Scenarios",
+    "runoffScenariosDescription": "With a second round nearly certain, these are the most likely candidate matchups based on our simulations.",
+    "mostLikelyMatchups": "Most likely matchups",
+    "runoffMatrix": "All pair probabilities",
+    "vs": "vs"
   },
   "meta": {
     "defaultTitle": "estimador.pt - Portuguese Election Forecasting",

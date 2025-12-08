@@ -2,7 +2,7 @@
   "nav": {
     "home": "Presidenciais 2026",
     "forecast": "Previsões",
-    "parliamentaryForecast": "Legislativas 2024",
+    "parliamentaryForecast": "Legislativas 2025",
     "pastElections": "Eleições Anteriores",
     "analysis": "Análise",
     "about": "Sobre",
@@ -197,6 +197,7 @@
     "partyAffiliation": "Partido",
     "supportTrajectory": "Trajetória de apoio ao longo do tempo",
     "spaghettiDescription": "Cada linha representa um resultado possível da simulação. A dispersão das linhas mostra a incerteza na nossa previsão - com ~35% de eleitores indecisos, os resultados permanecem altamente incertos.",
+    "trendDescription": "Apoio estimado ao longo do tempo para os principais candidatos. As linhas mostram a estimativa média, as bandas sombreadas mostram intervalos de credibilidade de 50% e 95%. Os pontos representam sondagens individuais.",
     "projectedVoteShare": "Intenção de voto prevista",
     "confidenceInterval": "Intervalo de confiança de 95%",
     "aboutModel": "Sobre este modelo",
@@ -208,7 +209,15 @@
     "factor3": "Fiabilidade das sondagens e efeitos das casas",
     "aboutForecast": "Sobre a previsão presidencial",
     "aboutDescription": "As eleições presidenciais portuguesas utilizam um sistema de duas voltas. Se nenhum candidato receber mais de 50% dos votos na primeira volta, os dois candidatos mais votados avançam para uma segunda volta. Esta previsão modela a intenção de voto declarada com base nos dados de sondagens disponíveis.",
-    "candidatesModeled": "candidatos modelados"
+    "candidatesModeled": "candidatos modelados",
+    "headToHeadTitle": "Probabilidade Frente-a-Frente",
+    "headToHeadDescription": "Probabilidade de {candidateA} liderar sobre {candidateB} ao longo do tempo",
+    "leads": "lidera",
+    "runoffScenariosTitle": "Cenários de Segunda Volta",
+    "runoffScenariosDescription": "Com uma segunda volta quase certa, estes são os confrontos de candidatos mais prováveis com base nas nossas simulações.",
+    "mostLikelyMatchups": "Confrontos mais prováveis",
+    "runoffMatrix": "Todas as probabilidades de pares",
+    "vs": "vs"
   },
   "meta": {
     "defaultTitle": "estimador.pt - Previsões Eleitorais Portuguesas",

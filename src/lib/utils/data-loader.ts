@@ -10,7 +10,9 @@ import {
   PresidentialTrendsData,
   PresidentialTrajectoriesData,
   PresidentialPollsData,
-  PresidentialHouseEffectsData
+  PresidentialHouseEffectsData,
+  PresidentialHeadToHeadData,
+  PresidentialRunoffPairsData
 } from '@/types';
 
 // Load data from the public directory
@@ -53,7 +55,7 @@ export async function loadForecastData() {
 // Presidential forecast data loader
 export async function loadPresidentialData() {
   try {
-    const [forecast, winProbabilities, trends, trajectories, polls, houseEffects] = await Promise.all([
+    const [forecast, winProbabilities, trends, trajectories, polls, houseEffects, headToHead, runoffPairs] = await Promise.all([
       loadJsonData<PresidentialForecastData>('presidential_forecast.json'),
       loadJsonData<PresidentialWinProbabilitiesData>('presidential_win_probabilities.json'),
       loadJsonData<PresidentialTrendsData>('presidential_trends.json'),
@@ -63,8 +65,33 @@ export async function loadPresidentialData() {
         pollsters: [], 
         candidates: [], 
         effects: {} 
+      })),
+      loadJsonData<PresidentialHeadToHeadData>('presidential_head_to_head.json').catch(() => ({
+        election_date: '2026-01-18',
+        candidate_a: '',
+        candidate_b: '',
+        color_a: '#000000',
+        color_b: '#000000',
+        dates: [],
+        probability_a_leads: []
+      })),
+      loadJsonData<PresidentialRunoffPairsData>('presidential_runoff_pairs.json').catch(() => ({
+        election_date: '2026-01-18',
+        pairs: [],
+        matrix: { candidates: [], colors: [], probabilities: [] }
       }))
     ]);
+
+    // Calculate last poll date
+    let lastPollDate = forecast.election_date;
+    if (polls.polls.length > 0) {
+      lastPollDate = polls.polls[0].date;
+      for (const poll of polls.polls) {
+        if (poll.date > lastPollDate) {
+          lastPollDate = poll.date;
+        }
+      }
+    }
 
     return {
       forecast,
@@ -72,7 +99,10 @@ export async function loadPresidentialData() {
       trends,
       trajectories,
       polls,
-      houseEffects
+      houseEffects,
+      headToHead,
+      runoffPairs,
+      lastPollDate
     };
   } catch (error) {
     console.error('Error loading presidential forecast data:', error);
@@ -106,7 +136,22 @@ export async function loadPresidentialData() {
         pollsters: [],
         candidates: [],
         effects: {}
-      } as PresidentialHouseEffectsData
+      } as PresidentialHouseEffectsData,
+      headToHead: {
+        election_date: '2026-01-18',
+        candidate_a: '',
+        candidate_b: '',
+        color_a: '#000000',
+        color_b: '#000000',
+        dates: [],
+        probability_a_leads: []
+      } as PresidentialHeadToHeadData,
+      runoffPairs: {
+        election_date: '2026-01-18',
+        pairs: [],
+        matrix: { candidates: [], colors: [], probabilities: [] }
+      } as PresidentialRunoffPairsData,
+      lastPollDate: '2026-01-18'
     };
   }
 }

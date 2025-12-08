@@ -1,14 +1,96 @@
 import { loadPresidentialData } from "@/lib/utils/data-loader";
 import { ArrowRight, Calendar, Users } from "lucide-react";
 import { PresidentialCandidateCards, SecondRoundIndicator } from "@/components/charts/PresidentialCandidateCards";
-import { PresidentialSpaghettiPlot } from "@/components/charts/PresidentialSpaghettiPlot";
+import { PresidentialTrendChart } from "@/components/charts/PresidentialTrendChart";
 import { PresidentialForecastBars } from "@/components/charts/PresidentialForecastBars";
+import { PresidentialHeadToHead } from "@/components/charts/PresidentialHeadToHead";
+import { PresidentialRunoffPairs } from "@/components/charts/PresidentialRunoffPairs";
 import { Header } from "@/components/Header";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { PRESIDENTIAL_2026 } from "@/lib/config/elections";
+import { PresidentialTrendsData, PresidentialWinProbabilitiesData } from "@/types";
+
+// Simple seeded random for reproducibility
+function seededRandom(seed: number) {
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+}
+
+// Box-Muller transform for normal distribution
+function normalRandom(mean: number, std: number, seed: number): number {
+  const u1 = seededRandom(seed);
+  const u2 = seededRandom(seed + 1);
+  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  return mean + std * z;
+}
+
+// Compute approximate win probabilities at cutoff using Monte Carlo simulation
+function computeLeadingProbabilitiesAtCutoff(
+  trends: PresidentialTrendsData,
+  winProbabilities: PresidentialWinProbabilitiesData,
+  cutoffDate: string | null,
+  numSimulations: number = 5000
+): { name: string; probability: number; color: string }[] {
+  if (!cutoffDate) {
+    // Return election day probabilities
+    return winProbabilities.candidates.map(c => ({
+      name: c.name,
+      probability: c.leading_probability,
+      color: c.color,
+    }));
+  }
+  
+  // Find cutoff index
+  const cutoff = new Date(cutoffDate);
+  const idx = trends.dates.findIndex(d => new Date(d) > cutoff);
+  const cutoffIndex = idx === -1 ? trends.dates.length - 1 : idx - 1;
+  
+  // Build candidate data for simulation
+  const candidates = Object.entries(trends.candidates)
+    .filter(([name]) => name !== 'Others')
+    .map(([name, data]) => {
+      const mean = data.mean[cutoffIndex];
+      const std = (data.ci_95[cutoffIndex] - data.ci_05[cutoffIndex]) / 3.92;
+      const wpData = winProbabilities.candidates.find(c => c.name === name);
+      return {
+        name,
+        mean,
+        std: Math.max(std, 0.001),
+        color: wpData?.color || '#888888',
+      };
+    });
+  
+  // Monte Carlo simulation
+  const wins: Record<string, number> = {};
+  candidates.forEach(c => { wins[c.name] = 0; });
+  
+  for (let sim = 0; sim < numSimulations; sim++) {
+    let maxValue = -Infinity;
+    let winner = '';
+    
+    candidates.forEach((c, i) => {
+      const value = normalRandom(c.mean, c.std, sim * candidates.length + i);
+      if (value > maxValue) {
+        maxValue = value;
+        winner = c.name;
+      }
+    });
+    
+    if (winner) wins[winner]++;
+  }
+  
+  // Convert to sorted array
+  return candidates
+    .map(c => ({
+      name: c.name,
+      probability: wins[c.name] / numSimulations,
+      color: c.color,
+    }))
+    .sort((a, b) => b.probability - a.probability);
+}
 
 export async function generateMetadata({ 
   params 
@@ -41,10 +123,13 @@ export default async function Home({
   const t = await getTranslations({ locale });
   
   // Load presidential forecast data
-  const { forecast, winProbabilities, trends, trajectories, polls } = await loadPresidentialData();
+  const { forecast, winProbabilities, trends, trajectories, polls, headToHead, runoffPairs, lastPollDate } = await loadPresidentialData();
   
-  // Get the leading candidate
-  const leadingCandidate = winProbabilities.candidates[0];
+  // Compute leading probabilities at cutoff date
+  const cutoffProbabilities = computeLeadingProbabilitiesAtCutoff(trends, winProbabilities, lastPollDate);
+  
+  // Get the leading candidate at cutoff
+  const leadingCandidate = cutoffProbabilities[0];
   const secondRoundProbability = winProbabilities.second_round_probability;
   
   // Calculate days until election
@@ -96,7 +181,7 @@ export default async function Home({
               {leadingCandidate ? (
                 t('presidential.leadingHeadline', {
                   candidate: leadingCandidate.name,
-                  probability: formatProbability(leadingCandidate.leading_probability)
+                  probability: formatProbability(leadingCandidate.probability)
                 })
               ) : (
                 t('presidential.forecastTitle')
@@ -148,6 +233,8 @@ export default async function Home({
             <PresidentialCandidateCards
               winProbabilities={winProbabilities}
               forecast={forecast}
+              trends={trends}
+              cutoffDate={lastPollDate}
               maxCandidates={5}
               translations={{
                 chanceOfLeading: t('presidential.chanceOfLeading'),
@@ -159,27 +246,88 @@ export default async function Home({
         </div>
       </section>
 
-      {/* Spaghetti Plot */}
+      {/* Support Trends Chart */}
       <section className="py-10 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
             {t('presidential.supportTrajectory')}
           </h2>
           <p className="text-sm text-stone-500 mb-8 max-w-xl">
-            {t('presidential.spaghettiDescription')}
+            {t('presidential.trendDescription')}
           </p>
-          <ErrorBoundary componentName="Spaghetti Plot">
-            <PresidentialSpaghettiPlot
-              trajectories={trajectories}
+          <ErrorBoundary componentName="Support Trends">
+            <PresidentialTrendChart
+              trends={trends}
               polls={polls}
               electionDate={PRESIDENTIAL_2026.date}
+              cutoffDate={lastPollDate}
               height={420}
               showPolls={true}
-              maxTrajectories={50}
+              maxCandidates={5}
             />
           </ErrorBoundary>
         </div>
       </section>
+
+      {/* Head-to-Head Probability */}
+      {headToHead.dates.length > 0 && (
+        <section className="py-10 bg-white border-b border-stone-300">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
+              {t('presidential.headToHeadTitle')}
+            </h2>
+            <p className="text-sm text-stone-500 mb-8 max-w-xl">
+              {t('presidential.headToHeadDescription', {
+                candidateA: headToHead.candidate_a,
+                candidateB: headToHead.candidate_b
+              })}
+            </p>
+            <ErrorBoundary componentName="Head-to-Head">
+              <PresidentialHeadToHead
+                data={headToHead}
+                cutoffDate={lastPollDate}
+                height={280}
+                translations={{
+                  title: t('presidential.headToHeadTitle'),
+                  description: t('presidential.headToHeadDescription', {
+                    candidateA: headToHead.candidate_a,
+                    candidateB: headToHead.candidate_b
+                  }),
+                  probability: t('presidential.leads'),
+                }}
+              />
+            </ErrorBoundary>
+          </div>
+        </section>
+      )}
+
+      {/* Runoff Scenarios */}
+      {runoffPairs.pairs.length > 0 && (
+        <section className="py-10 border-b border-stone-300">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
+              {t('presidential.runoffScenariosTitle')}
+            </h2>
+            <p className="text-sm text-stone-500 mb-8 max-w-xl">
+              {t('presidential.runoffScenariosDescription')}
+            </p>
+            
+            <div>
+              <ErrorBoundary componentName="Runoff Pairs">
+                <PresidentialRunoffPairs
+                  data={runoffPairs}
+                  maxPairs={6}
+                  translations={{
+                    title: t('presidential.mostLikelyMatchups'),
+                    vs: t('presidential.vs'),
+                    probability: t('presidential.probability'),
+                  }}
+                />
+              </ErrorBoundary>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Vote Share Forecast */}
       <section className="py-10 border-b border-stone-300">

@@ -24,6 +24,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   
   return {
+    metadataBase: new URL('https://estimador.pt'),
     title: t('meta.defaultTitle'),
     description: t('meta.defaultDescription'),
     keywords: ['eleições', 'portugal', 'previsões', 'sondagens', 'politics', 'elections', 'forecasting', 'polls'],

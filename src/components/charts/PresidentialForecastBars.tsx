@@ -22,7 +22,10 @@ export function PresidentialForecastBars({
     confidenceInterval: '95% CI',
   },
 }: PresidentialForecastBarsProps) {
-  const candidates = forecast.candidates.slice(0, maxCandidates);
+  // Filter out "Others" and take top candidates
+  const candidates = forecast.candidates
+    .filter(c => c.name !== 'Others')
+    .slice(0, maxCandidates);
   
   // Find the max value for scaling
   const maxValue = Math.max(
@@ -33,117 +36,96 @@ export function PresidentialForecastBars({
   const formatPercent = (value: number) => `${(value * 100).toFixed(1)}%`;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {candidates.map((candidate, index) => {
-        const meanWidth = (candidate.mean / scaleMax) * 100;
-        const ciLowerWidth = (candidate.ci_lower / scaleMax) * 100;
-        const ciUpperWidth = (candidate.ci_upper / scaleMax) * 100;
-        const ci90LowerWidth = (candidate.ci_10 / scaleMax) * 100;
-        const ci90UpperWidth = (candidate.ci_90 / scaleMax) * 100;
+        const meanPos = (candidate.mean / scaleMax) * 100;
+        const ciLowerPos = (candidate.ci_lower / scaleMax) * 100;
+        const ciUpperPos = (candidate.ci_upper / scaleMax) * 100;
 
         return (
           <div key={candidate.name}>
             {/* Candidate name and value */}
-            <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <div
-                  className="w-2.5 h-2.5 rounded-full"
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                   style={{ backgroundColor: candidate.color }}
                 />
-                <span className="text-sm text-gray-700">
+                <span className="text-sm font-medium text-gray-800">
                   {candidate.name}
                 </span>
                 {index === 0 && (
-                  <span className="text-[10px] text-gray-400 uppercase">
+                  <span className="text-[10px] text-gray-400 uppercase tracking-wide">
                     Leader
                   </span>
                 )}
               </div>
-              <div className="text-right flex items-baseline gap-2">
-                <span className="text-sm font-medium text-gray-900 tabular-nums">
+              <div className="text-right">
+                <span className="text-sm font-semibold text-gray-900 tabular-nums">
                   {formatPercent(candidate.mean)}
                 </span>
-                {showUncertainty && (
-                  <span className="text-xs text-gray-400 tabular-nums">
-                    [{formatPercent(candidate.ci_lower)} – {formatPercent(candidate.ci_upper)}]
-                  </span>
-                )}
               </div>
             </div>
 
-            {/* Bar visualization - clean style */}
-            <div className="relative h-5 bg-gray-100 rounded overflow-hidden">
-              {/* 95% CI range */}
+            {/* Clean lollipop chart - error bar with dot at mean */}
+            <div className="relative h-5 flex items-center">
+              {/* Background track */}
+              <div className="absolute inset-0 bg-gray-100 rounded-full" />
+
+              {/* Error bar - horizontal line spanning CI */}
               {showUncertainty && (
                 <div
-                  className="absolute h-full"
+                  className="absolute h-1 rounded-full"
                   style={{
-                    left: `${ciLowerWidth}%`,
-                    width: `${ciUpperWidth - ciLowerWidth}%`,
+                    left: `${ciLowerPos}%`,
+                    width: `${ciUpperPos - ciLowerPos}%`,
                     backgroundColor: candidate.color,
-                    opacity: 0.15,
-                  }}
-                />
-              )}
-              
-              {/* 80% CI range */}
-              {showUncertainty && (
-                <div
-                  className="absolute h-full"
-                  style={{
-                    left: `${ci90LowerWidth}%`,
-                    width: `${ci90UpperWidth - ci90LowerWidth}%`,
-                    backgroundColor: candidate.color,
-                    opacity: 0.3,
+                    opacity: 0.4,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
                   }}
                 />
               )}
 
-              {/* Mean bar */}
+              {/* Mean marker - larger dot */}
               <div
-                className="absolute h-full"
+                className="absolute w-4 h-4 rounded-full shadow-sm"
                 style={{
-                  width: `${meanWidth}%`,
+                  left: `${meanPos}%`,
                   backgroundColor: candidate.color,
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  border: '2px solid white',
                 }}
               />
 
               {/* 50% threshold marker */}
-              <div
-                className="absolute h-full w-px bg-gray-400"
-                style={{ left: `${(0.5 / scaleMax) * 100}%` }}
-              />
+              {(0.5 / scaleMax) <= 1 && (
+                <div
+                  className="absolute h-full w-px bg-red-400 opacity-50"
+                  style={{ left: `${(0.5 / scaleMax) * 100}%` }}
+                />
+              )}
             </div>
+
+            {/* CI text below bar */}
+            {showUncertainty && (
+              <div className="text-[11px] text-gray-400 mt-1 tabular-nums">
+                95% CI: {formatPercent(candidate.ci_lower)} – {formatPercent(candidate.ci_upper)}
+              </div>
+            )}
           </div>
         );
       })}
 
       {/* Scale markers */}
-      <div className="relative h-4 mt-2">
+      <div className="relative h-4 mt-3 border-t border-gray-200 pt-2">
         <div className="absolute inset-x-0 flex justify-between text-xs text-gray-400">
           <span>0%</span>
           <span>25%</span>
           <span>{(scaleMax * 100).toFixed(0)}%</span>
         </div>
       </div>
-
-      {/* Legend */}
-      {showUncertainty && (
-        <div className="flex items-center gap-4 text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-2 bg-gray-400 rounded-sm" />
-            <span>Mean</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-2 bg-gray-400/40 rounded-sm" />
-            <span>80% CI</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-2 bg-gray-400/20 rounded-sm" />
-            <span>95% CI</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

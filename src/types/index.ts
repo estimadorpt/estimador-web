@@ -178,6 +178,38 @@ export interface PresidentialHouseEffectsData {
   effects: Record<string, Record<string, PresidentialHouseEffect>>;
 }
 
+// Presidential head-to-head data (from presidential_head_to_head.json)
+export interface PresidentialHeadToHeadData {
+  election_date: string;
+  candidate_a: string;
+  candidate_b: string;
+  color_a: string;
+  color_b: string;
+  dates: string[];
+  probability_a_leads: number[];
+}
+
+// Presidential runoff pairs data (from presidential_runoff_pairs.json)
+export interface PresidentialRunoffPair {
+  candidate_a: string;
+  candidate_b: string;
+  probability: number;
+  color_a: string;
+  color_b: string;
+}
+
+export interface PresidentialRunoffMatrix {
+  candidates: string[];
+  colors: string[];
+  probabilities: number[][];
+}
+
+export interface PresidentialRunoffPairsData {
+  election_date: string;
+  pairs: PresidentialRunoffPair[];
+  matrix: PresidentialRunoffMatrix;
+}
+
 // Municipal election types
 export interface MunicipalElection extends ElectionConfig {
   type: 'municipal';

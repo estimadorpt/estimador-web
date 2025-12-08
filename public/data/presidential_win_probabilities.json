@@ -1,65 +1,70 @@
 {
+  "election_type": "presidential",
   "election_date": "2026-01-18",
-  "second_round_probability": 1.0,
   "candidates": [
-    {
-      "name": "Gouveia e Melo",
-      "color": "#4A90D9",
-      "leading_probability": 0.5183,
-      "first_round_win_probability": 0.0,
-      "mean_support": 0.2409
-    },
     {
       "name": "Marques Mendes",
       "color": "#FF8C00",
-      "leading_probability": 0.3911,
+      "leading_probability": 0.35,
+      "first_round_win_probability": 0.0003,
+      "mean_support": 0.205
+    },
+    {
+      "name": "Gouveia e Melo",
+      "color": "#4A90D9",
+      "leading_probability": 0.2895,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.2298
+      "mean_support": 0.1944
     },
     {
       "name": "André Ventura",
       "color": "#8B0000",
-      "leading_probability": 0.0513,
-      "first_round_win_probability": 0.0,
-      "mean_support": 0.1808
+      "leading_probability": 0.2137,
+      "first_round_win_probability": 0.0003,
+      "mean_support": 0.1777
     },
     {
       "name": "António José Seguro",
       "color": "#FF69B4",
-      "leading_probability": 0.0393,
+      "leading_probability": 0.1148,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.1727
+      "mean_support": 0.1527
     },
     {
       "name": "Cotrim Figueiredo",
       "color": "#00CED1",
-      "leading_probability": 0.0001,
+      "leading_probability": 0.0283,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0760
+      "mean_support": 0.11
+    },
+    {
+      "name": "Others",
+      "color": "#808080",
+      "leading_probability": 0.0037,
+      "first_round_win_probability": 0.0,
+      "mean_support": 0.0766
     },
     {
       "name": "Catarina Martins",
       "color": "#DC143C",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0405
+      "mean_support": 0.0413
     },
     {
       "name": "António Filipe",
       "color": "#228B22",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0300
+      "mean_support": 0.0336
     },
     {
-      "name": "Others",
-      "color": "#808080",
+      "name": "Jorge Pinto",
+      "color": "#666666",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0293
+      "mean_support": 0.0087
     }
-  ]
+  ],
+  "second_round_probability": 0.9995
 }
-
-
-
