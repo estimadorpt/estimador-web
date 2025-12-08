@@ -120,41 +120,53 @@
     "mission": "A Nossa Missão",
     "whatWeDo": "O Que Fazemos",
     "approach": "A Nossa Abordagem",
-    "team": "Sobre a Equipa",
+    "team": "Sobre o Projeto",
     "limitations": "Limitações e Advertências",
     "contact": "Para questões, sugestões ou consultas dos media, por favor contacte-nos em",
-    "founder": "O estimador.pt foi fundado por",
-    "combiningExpertise": "combinando experiência em ciência de dados, estatística e política portuguesa.",
-    "missionDescription1": "O estimador.pt fornece previsões transparentes e baseadas em dados para as eleições portuguesas. Acreditamos que análises eleitorais de alta qualidade devem ser acessíveis a todos, não apenas a iniciados políticos.",
-    "missionDescription2": "O nosso objetivo é ajudar os cidadãos portugueses a compreender melhor as dinâmicas eleitorais e tomar decisões informadas, fornecendo análises claras, precisas e imparciais de dados de sondagens e tendências eleitorais.",
+    "founder": "O estimador.pt foi criado por",
+    "combiningExpertise": "como um projeto independente que combina estatística Bayesiana, métodos computacionais e análise de dados eleitorais portugueses.",
+    "missionDescription1": "O estimador.pt fornece previsões transparentes e probabilísticas para as eleições portuguesas. Acreditamos que as sociedades democráticas beneficiam quando os cidadãos têm acesso a análises rigorosas e imparciais de dados eleitorais—não apenas comentários e especulação.",
+    "missionDescription2": "O nosso objetivo é trazer os padrões da previsão eleitoral moderna—pioneirados por projetos como o FiveThirtyEight e The Economist—para o contexto português, adaptando os nossos métodos ao sistema pluripartidário de representação proporcional de Portugal.",
+    "whatWeDoLabels": {
+      "forecasting": "Previsões Eleitorais",
+      "seatProjections": "Projeções de Mandatos",
+      "trendAnalysis": "Análise de Tendências",
+      "pollingAnalysis": "Análise de Sondagens"
+    },
     "whatWeDoList": {
-      "forecasting": "Modelos estatísticos que combinam dados de sondagens com padrões históricos",
-      "seatProjections": "Análise detalhada de como os votos se traduzem em mandatos parlamentares",
-      "trendAnalysis": "Acompanhamento a longo prazo do apoio partidário e dinâmicas eleitorais",
-      "pollingAnalysis": "Exame dos efeitos das casas e padrões de viés nas sondagens portuguesas"
+      "forecasting": "Modelos Bayesianos que combinam dados de sondagens com padrões históricos, contabilizando a incerteza em cada etapa",
+      "seatProjections": "Análise ao nível distrital usando o método D'Hondt para projetar como os votos nacionais se traduzem em mandatos parlamentares",
+      "trendAnalysis": "Modelos de Processos Gaussianos que acompanham a evolução do apoio partidário ao longo do tempo, separando o sinal do ruído",
+      "pollingAnalysis": "Estimação sistemática dos efeitos das empresas de sondagens—os vieses consistentes que cada instituto mostra em relação a certos partidos"
     },
-    "approachDescription1": "Utilizamos métodos estatísticos rigorosos combinados com transparência sobre as nossas assunções e limitações. Os nossos modelos são inspirados nos principais esforços internacionais de previsão, mas são especificamente desenhados para o sistema pluripartidário e de representação proporcional de Portugal.",
+    "approachDescription1": "Utilizamos métodos estatísticos Bayesianos que quantificam explicitamente a incerteza. Ao contrário de previsões pontuais, as nossas previsões produzem distribuições de probabilidade que refletem o que realmente sabemos—e não sabemos—sobre os resultados eleitorais.",
     "approachDescription2": "Princípios fundamentais:",
+    "approachPrincipleLabels": {
+      "transparency": "Transparência",
+      "independence": "Independência",
+      "accuracy": "Rigor",
+      "accessibility": "Acessibilidade"
+    },
     "approachPrinciples": {
-      "transparency": "Metodologia aberta e comunicação clara da incerteza",
-      "independence": "Sem afiliações políticas ou financiamento de fontes partidárias",
-      "accuracy": "Melhoria contínua baseada em resultados eleitorais",
-      "accessibility": "Tornar análises complexas compreensíveis para audiências gerais"
+      "transparency": "Metodologia aberta com documentação detalhada dos nossos modelos e pressupostos",
+      "independence": "Sem afiliações políticas, sem financiamento partidário, sem pressão editorial",
+      "accuracy": "Validação contínua contra resultados eleitorais reais, com avaliação honesta dos erros de previsão",
+      "accessibility": "Apresentar previsões probabilísticas de forma compreensível para o público em geral"
     },
-    "limitationsDescription1": "A previsão eleitoral é inerentemente incerta. Os nossos modelos representam probabilidades, não certezas. Fatores que consideramos incluem:",
+    "limitationsDescription1": "A previsão eleitoral é inerentemente incerta—por isso apresentamos probabilidades, não previsões absolutas. Os nossos modelos consideram várias fontes de incerteza:",
     "limitationsList": {
-      "pollingError": "Erro e viés das sondagens",
-      "campaignDynamics": "Dinâmicas tardias de campanha",
-      "turnout": "Variações na participação eleitoral",
-      "regional": "Padrões regionais de voto"
+      "pollingError": "Erro sistemático e aleatório das sondagens, incluindo potenciais vieses não captados por eleições anteriores",
+      "campaignDynamics": "Notícias de última hora e eventos de campanha que podem alterar as preferências dos eleitores",
+      "turnout": "Padrões de participação diferencial que podem não corresponder a padrões históricos",
+      "regional": "Variações distritais que se desviam das tendências nacionais"
     },
-    "limitationsDescription2": "As nossas previsões devem ser entendidas como uma peça de informação entre muitas ao analisar as eleições portuguesas.",
+    "limitationsDescription2": "Uma previsão mostrando um partido com 70% de probabilidade de ganhar mais mandatos também significa que há 30% de probabilidade de não ganhar. As nossas previsões devem ser interpretadas como avaliações probabilísticas informadas, não como certezas.",
     "footerCopyright": "© 2025 estimador.pt • Construído com transparência e metodologia aberta",
     "footerDeveloper": "Desenvolvido por Bernardo Caldas"
   },
   "methodology": {
     "title": "Metodologia",
-    "subtitle": "Como funciona o nosso modelo de previsão para as eleições presidenciais"
+    "subtitle": "Como funcionam os nossos modelos de previsão eleitoral"
   },
   "parties": {
     "AD": "Aliança Democrática",

@@ -2,84 +2,210 @@
 
 ## Visão Geral
 
-Desenvolvemos um modelo estatístico Bayesiano para prever as eleições presidenciais portuguesas. O modelo combina dados de sondagens com informação sobre a afiliação partidária dos candidatos, ajustando para os efeitos das empresas de sondagens e quantificando a incerteza através de simulações de Monte Carlo.
+O estimador.pt utiliza modelos estatísticos Bayesianos para prever eleições portuguesas. A nossa abordagem é fundamentalmente probabilística: em vez de prever um único resultado, estimamos distribuições de probabilidade que refletem a incerteza inerente ao processo eleitoral.
 
-## O Desafio de Prever Eleições Presidenciais
+Os nossos modelos são implementados em [PyMC](https://www.pymc.io/), uma biblioteca de programação probabilística que permite definir modelos estatísticos complexos e realizar inferência Bayesiana de forma eficiente.
 
-As eleições presidenciais portuguesas utilizam um sistema de duas voltas. Se nenhum candidato obtiver mais de 50% dos votos na primeira volta, os dois candidatos mais votados disputam uma segunda volta. Com múltiplos candidatos e uma percentagem significativa de eleitores indecisos, prever os resultados requer modelar cuidadosamente a incerteza.
+---
 
-Os principais desafios incluem:
+## Eleições Legislativas
 
-- **Elevada percentagem de eleitores indecisos** (~35%)
-- **Candidatos com diferentes níveis de reconhecimento público**
-- **Dinâmicas de campanha** que podem mudar rapidamente
-- **Potencial transferência de votos** entre voltas
+### Estrutura do Modelo
 
-## O Modelo Bayesiano de Previsão
+O modelo de eleições legislativas combina dados de sondagens com resultados eleitorais históricos para estimar a evolução do apoio a cada partido ao longo do tempo. A estrutura central utiliza três **Processos Gaussianos (GPs)** sobrepostos que capturam dinâmicas em diferentes escalas temporais:
 
-A nossa abordagem utiliza um modelo Bayesiano hierárquico para estimar a evolução do apoio a cada candidato ao longo do tempo. Isto permite-nos capturar tanto tendências suaves como mudanças súbitas, quantificando sempre a incerteza.
+**1. GP de Baseline (Tendência de Longo Prazo)**
+- Escala temporal: ~4 anos
+- Captura mudanças estruturais no sistema partidário
+- Utiliza um kernel ExpQuad (Exponencial Quadrático)
 
-### Componentes Principais
+**2. GP de Médio Prazo**
+- Escala temporal: ~1 ano
+- Captura ciclos políticos e mudanças graduais na opinião pública
+- Utiliza um kernel Matern 5/2
 
-1. **Estimação de Tendências:** Modelamos o apoio subjacente a cada candidato usando dados de sondagens
-2. **Efeitos das Empresas de Sondagens:** Contabilizamos os vieses sistemáticos de diferentes institutos de sondagens
-3. **Afiliação Partidária:** Incorporamos priors baseados nos partidos que apoiam cada candidato
-4. **Simulação de Resultados:** Executamos milhares de simulações para calcular probabilidades de vitória
+**3. GP de Curto Prazo**
+- Escala temporal: ~14 dias
+- Captura dinâmicas de campanha e reações a eventos
+- Utiliza um kernel Matern 3/2 para permitir variações mais rápidas
 
-## Análise de Sondagens
+A combinação destes três processos permite separar o sinal de longo prazo do ruído de curto prazo, enquanto ainda captura movimentos reais durante a campanha.
 
-Recolhemos dados de sondagens dos principais institutos portugueses e aplicamos várias correções:
+<details>
+<summary>**Detalhes Técnicos: Processos Gaussianos**</summary>
 
-- **Efeitos das Empresas:** Cada instituto tem tendências sistemáticas para sobre ou subestimar certos candidatos
-- **Ajuste por Dimensão da Amostra:** Sondagens maiores recebem maior peso
-- **Ponderação por Recência:** Sondagens mais recentes têm maior influência
-- **Efeitos de Modo:** Contabilizamos diferenças entre sondagens online, telefónicas e presenciais
+Os Processos Gaussianos são uma forma não-paramétrica de modelar funções desconhecidas. Definimos priors sobre funções em vez de parâmetros fixos, o que permite que o modelo aprenda a forma das tendências a partir dos dados.
 
-## Processo de Simulação
+Utilizamos a aproximação **HSGP (Hilbert Space Gaussian Process)** para eficiência computacional. Esta técnica aproxima o GP usando uma série de funções base, reduzindo drasticamente o custo computacional sem perda significativa de precisão.
 
-Para cada simulação, geramos percentagens de votos para cada candidato e verificamos:
+A função de covariância do GP de baseline é:
+```
+k(t, t') = σ² × exp(-|t-t'|² / (2ℓ²))
+```
+onde σ é a amplitude e ℓ é o lengthscale (~1460 dias).
 
-1. Se algum candidato atinge mais de 50% na primeira volta
-2. Quais os dois candidatos que avançam para a segunda volta
-3. Registamos o resultado de cada simulação
+</details>
 
-Executamos milhares destas simulações para construir distribuições de probabilidade para os resultados.
+### Efeitos das Empresas de Sondagens (House Effects)
 
-## Quantificação da Incerteza
+Cada instituto de sondagens tem tendências sistemáticas para sobre ou subestimar certos partidos. O nosso modelo estima estes "efeitos de casa" (house effects) a partir dos dados históricos.
 
-O nosso modelo incorpora várias fontes de incerteza:
+Por exemplo, se uma empresa consistentemente sobrestima o PS em 2 pontos percentuais, o modelo corrige esta tendência ao agregar sondagens de múltiplas fontes.
 
-- **Erro das Sondagens:** Precisão histórica das sondagens em eleições portuguesas
-- **Efeitos de Campanha:** Potencial para mudanças tardias nas preferências dos eleitores
-- **Eleitores Indecisos:** Grande incerteza sobre como os indecisos votarão
-- **Incerteza do Modelo:** Incerteza na estimação dos parâmetros
+Os house effects são modelados com uma restrição de soma zero: se uma empresa sobrestima um partido, tem de subestimar outro(s) para compensar.
+
+### Efeitos Distritais
+
+Portugal utiliza um sistema de representação proporcional com alocação de mandatos ao nível distrital. O modelo inclui **offsets distritais estáticos** que capturam as diferenças regionais no apoio partidário.
+
+Estes offsets são estimados a partir de resultados eleitorais anteriores e permitem prever como os votos nacionais se traduzem em votos em cada distrito.
+
+### Verosimilhança
+
+As observações de sondagens seguem uma distribuição **Dirichlet-Multinomial**, que é a escolha natural para dados composicionais (percentagens que somam 100%).
+
+<details>
+<summary>**Detalhes Técnicos: Dirichlet-Multinomial**</summary>
+
+A Dirichlet-Multinomial é parametrizada por:
+- `n`: tamanho da amostra da sondagem
+- `α`: vetor de concentração (proporcional às probabilidades de cada partido)
+
+Esta distribuição tem duas fontes de variação: o erro de amostragem (que depende de n) e a variação extra captada pelo parâmetro de concentração. Isto permite modelar corretamente o facto de que sondagens nem sempre se comportam como amostras aleatórias simples.
+
+</details>
+
+### Método D'Hondt e Alocação de Mandatos
+
+Para converter previsões de votos em previsões de mandatos, simulamos o sistema eleitoral português:
+
+1. **22 círculos eleitorais**: 18 distritos continentais + 2 regiões autónomas + Europa + Fora da Europa
+2. **Método D'Hondt**: Sistema de divisores sequenciais (1, 2, 3, ...) para alocação proporcional de mandatos
+3. **230 mandatos no total** (excluindo os 4 da emigração nas eleições de 2024)
+
+O modelo executa milhares de **simulações de Monte Carlo**:
+1. Para cada simulação, extrai-se uma amostra da distribuição posterior dos votos nacionais
+2. Aplica-se os offsets distritais para obter votos por distrito
+3. Executa-se o algoritmo D'Hondt em cada distrito
+4. Soma-se os mandatos de cada partido
+
+O resultado é uma distribuição completa de possíveis composições parlamentares.
+
+### Métricas de Interesse
+
+A partir das simulações, calculamos:
+
+- **Probabilidade de cada partido ganhar mais mandatos**
+- **Probabilidade de maiorias**: direita, esquerda, ou parlamento sem maioria clara
+- **Mandatos esperados**: média e intervalos de credibilidade (50% e 80%)
+- **Distritos contestados**: usando o ENSC (Effective Number of Seat Changes) com limiar de 0.8
+
+---
+
+## Eleições Presidenciais
+
+### Estrutura do Modelo
+
+O modelo presidencial é diferente do legislativo porque:
+- Os candidatos são indivíduos, não partidos com histórico longo
+- O sistema é de duas voltas (maioria absoluta necessária)
+- A dinâmica de campanha é mais importante
+
+Utilizamos um modelo de **passeio aleatório (random walk)** no espaço log-odds para capturar a evolução do apoio aos candidatos.
+
+<details>
+<summary>**Detalhes Técnicos: Passeio Aleatório**</summary>
+
+O passeio aleatório é definido como:
+```
+latent[t] = latent[t-1] + innovation[t]
+```
+onde `innovation[t] ~ ZeroSumNormal(σ)` garante que os ganhos de um candidato correspondem a perdas de outros.
+
+O desvio padrão das inovações (σ ≈ 0.05 log-odds/dia) é calibrado para permitir movimentos de ~5 pontos percentuais ao longo de uma campanha de 50 dias.
+
+</details>
+
+### Priors Específicos por Candidato
+
+Para candidatos com afiliação partidária conhecida, utilizamos priors informativos baseados no apoio histórico desses partidos. Isto ajuda a estabilizar as estimativas quando há poucas sondagens disponíveis.
+
+### Efeitos das Empresas de Sondagens
+
+Quando disponíveis, utilizamos os house effects estimados no modelo legislativo como **priors informativos** para o modelo presidencial. Isto permite transferir informação sobre os vieses sistemáticos de cada instituto.
+
+### Modelação da Segunda Volta
+
+Para cada simulação:
+1. Verificamos se algum candidato atinge >50% na primeira volta
+2. Se não, identificamos os dois candidatos mais votados
+3. Registamos a probabilidade de cada par de candidatos disputar a segunda volta
+
+---
+
+## Quantificação de Incerteza
+
+Os nossos modelos incorporam múltiplas fontes de incerteza:
+
+| Fonte | Descrição |
+|-------|-----------|
+| **Erro de sondagem** | Variação esperada entre sondagens e resultado real |
+| **House effects** | Incerteza nos vieses estimados de cada instituto |
+| **Incerteza do modelo** | Parâmetros dos GPs e outros componentes |
+| **Efeitos de campanha** | Potencial para mudanças tardias não captadas |
+
+### Comunicação da Incerteza
+
+Apresentamos a incerteza através de:
+- **Intervalos de credibilidade**: bandas de 50% e 80% nos gráficos de tendências
+- **Probabilidades**: "70% de probabilidade de X ganhar mais mandatos"
+- **Distribuições de simulações**: visualizações que mostram a gama completa de resultados possíveis
+
+---
 
 ## Validação do Modelo
 
-Validamos a nossa abordagem através de:
+Validamos os nossos modelos através de:
 
-1. Backtesting em eleições presidenciais portuguesas anteriores
-2. Validação cruzada usando dados de sondagens retidos
-3. Comparação com resultados eleitorais reais
-4. Testes de calibração para garantir probabilidades bem calibradas
+1. **Backtesting**: Aplicamos o modelo a eleições passadas, usando apenas dados disponíveis antes de cada eleição
+2. **Calibração**: Verificamos se os intervalos de credibilidade contêm os resultados reais com a frequência esperada
+3. **Métricas de erro**: Calculamos MAE, RMSE e log-scores
+4. **Comparação com resultados**: Analisamos o desempenho após cada eleição
 
-Refinamos continuamente o nosso modelo com base nestes exercícios de validação.
-
-## Limitações e Advertências
-
-O nosso modelo tem várias limitações importantes:
-
-- Depende de dados de sondagens, que podem ser enviesados ou não representativos
-- Pode não capturar desenvolvimentos políticos sem precedentes
-- Assume que padrões históricos continuam a verificar-se
-- Não consegue prever o impacto de eventos de campanha importantes ou escândalos
-- Dificuldade em prever como os eleitores indecisos se comportarão
-
-Encorajamos os utilizadores a interpretar as nossas previsões como estimativas probabilísticas, não como certezas.
+---
 
 ## Fontes de Dados
 
-- Institutos de sondagens portugueses (CESOP, Aximage, Pitagórica, Intercampus, etc.)
-- Resultados de eleições presidenciais anteriores da CNE
-- Dados demográficos do INE (Instituto Nacional de Estatística)
+### Sondagens
+- Aximage, CESOP, Pitagórica, Intercampus, Eurosondagem, e outras empresas registadas na ERC
+
+### Resultados Eleitorais
+- Comissão Nacional de Eleições (CNE)
+- SGMAI (Secretaria-Geral do Ministério da Administração Interna)
+
+### Dados Demográficos
+- Instituto Nacional de Estatística (INE)
+
+---
+
+## Limitações
+
+O nosso modelo tem limitações importantes:
+
+- **Dependência de sondagens**: Se as sondagens tiverem vieses sistemáticos não captados pelo histórico, as previsões serão afetadas
+- **Eventos imprevistos**: Escândalos, crises, ou outros eventos podem alterar rapidamente o panorama eleitoral
+- **Padrões históricos**: Assumimos que padrões passados informam o futuro, o que pode não ser verdade em contextos sem precedentes
+- **Eleitores indecisos**: Dificuldade em prever como os eleitores indecisos se comportarão
+
+As nossas previsões devem ser interpretadas como **estimativas probabilísticas informadas**, não como certezas.
+
+---
+
+## Referências e Inspiração
+
+A nossa metodologia é inspirada por:
+- [The Economist Election Forecast](https://www.economist.com/interactive/us-2024-election/prediction-model/president)
+- [FiveThirtyEight](https://fivethirtyeight.com/)
+- [Andrew Gelman - Bayesian Data Analysis](http://www.stat.columbia.edu/~gelman/book/)
+- [PyMC Documentation](https://www.pymc.io/projects/docs/en/stable/)
 

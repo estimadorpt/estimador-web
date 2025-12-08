@@ -66,10 +66,10 @@ export default async function AboutPage({
             </CardHeader>
             <CardContent className="prose prose-slate max-w-none">
               <ul>
-                <li><strong>Election Forecasting:</strong> {t('about.whatWeDoList.forecasting')}</li>
-                <li><strong>Seat Projections:</strong> {t('about.whatWeDoList.seatProjections')}</li>
-                <li><strong>Trend Analysis:</strong> {t('about.whatWeDoList.trendAnalysis')}</li>
-                <li><strong>Polling Analysis:</strong> {t('about.whatWeDoList.pollingAnalysis')}</li>
+                <li><strong>{t('about.whatWeDoLabels.forecasting')}:</strong> {t('about.whatWeDoList.forecasting')}</li>
+                <li><strong>{t('about.whatWeDoLabels.seatProjections')}:</strong> {t('about.whatWeDoList.seatProjections')}</li>
+                <li><strong>{t('about.whatWeDoLabels.trendAnalysis')}:</strong> {t('about.whatWeDoList.trendAnalysis')}</li>
+                <li><strong>{t('about.whatWeDoLabels.pollingAnalysis')}:</strong> {t('about.whatWeDoList.pollingAnalysis')}</li>
               </ul>
             </CardContent>
           </Card>
@@ -86,10 +86,10 @@ export default async function AboutPage({
                 {t('about.approachDescription2')}
               </p>
               <ul>
-                <li><strong>Transparency:</strong> {t('about.approachPrinciples.transparency')}</li>
-                <li><strong>Independence:</strong> {t('about.approachPrinciples.independence')}</li>
-                <li><strong>Accuracy:</strong> {t('about.approachPrinciples.accuracy')}</li>
-                <li><strong>Accessibility:</strong> {t('about.approachPrinciples.accessibility')}</li>
+                <li><strong>{t('about.approachPrincipleLabels.transparency')}:</strong> {t('about.approachPrinciples.transparency')}</li>
+                <li><strong>{t('about.approachPrincipleLabels.independence')}:</strong> {t('about.approachPrinciples.independence')}</li>
+                <li><strong>{t('about.approachPrincipleLabels.accuracy')}:</strong> {t('about.approachPrinciples.accuracy')}</li>
+                <li><strong>{t('about.approachPrincipleLabels.accessibility')}:</strong> {t('about.approachPrinciples.accessibility')}</li>
               </ul>
             </CardContent>
           </Card>

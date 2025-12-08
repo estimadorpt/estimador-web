@@ -2,84 +2,210 @@
 
 ## Overview
 
-We've developed a Bayesian statistical model to forecast Portuguese presidential elections. The model combines polling data with candidate party affiliations, adjusting for pollster house effects and quantifying uncertainty through Monte Carlo simulations.
+estimador.pt uses Bayesian statistical models to forecast Portuguese elections. Our approach is fundamentally probabilistic: rather than predicting a single outcome, we estimate probability distributions that reflect the inherent uncertainty in the electoral process.
 
-## The Challenge of Forecasting Presidential Elections
+Our models are implemented in [PyMC](https://www.pymc.io/), a probabilistic programming library that enables defining complex statistical models and performing efficient Bayesian inference.
 
-Portuguese presidential elections use a two-round system. If no candidate receives more than 50% of the vote in the first round, the top two candidates proceed to a runoff. With multiple candidates and a significant percentage of undecided voters, forecasting outcomes requires carefully modeling uncertainty.
+---
 
-Key challenges include:
+## Parliamentary Elections
 
-- **High percentage of undecided voters** (~35%)
-- **Candidates with varying levels of public recognition**
-- **Campaign dynamics** that can shift rapidly
-- **Potential vote transfer** between rounds
+### Model Structure
 
-## The Bayesian Forecasting Model
+The parliamentary election model combines polling data with historical election results to estimate the evolution of party support over time. The core structure uses three overlapping **Gaussian Processes (GPs)** that capture dynamics at different time scales:
 
-Our approach uses a hierarchical Bayesian model to estimate the evolution of support for each candidate over time. This allows us to capture both smooth trends and sudden shifts while always quantifying uncertainty.
+**1. Baseline GP (Long-Term Trend)**
+- Time scale: ~4 years
+- Captures structural changes in the party system
+- Uses an ExpQuad (Exponential Quadratic) kernel
 
-### Key Components
+**2. Medium-Term GP**
+- Time scale: ~1 year
+- Captures political cycles and gradual shifts in public opinion
+- Uses a Matern 5/2 kernel
 
-1. **Trend Estimation:** We model the underlying support for each candidate using polling data
-2. **Pollster House Effects:** We account for systematic biases in different polling organizations
-3. **Party Affiliation:** We incorporate priors based on the parties supporting each candidate
-4. **Outcome Simulation:** We run thousands of simulations to calculate win probabilities
+**3. Short-Term GP**
+- Time scale: ~14 days
+- Captures campaign dynamics and reactions to events
+- Uses a Matern 3/2 kernel to allow faster variations
 
-## Polling Analysis
+The combination of these three processes separates long-term signal from short-term noise while still capturing real movements during the campaign.
 
-We collect polling data from major Portuguese polling organizations and apply several corrections:
+<details>
+<summary>**Technical Details: Gaussian Processes**</summary>
 
-- **House Effects:** Each pollster has systematic tendencies to over- or under-estimate certain candidates
-- **Sample Size Adjustments:** Larger polls receive more weight
-- **Recency Weighting:** More recent polls have greater influence
-- **Mode Effects:** We account for differences between online, telephone, and in-person polling
+Gaussian Processes are a non-parametric way to model unknown functions. We define priors over functions rather than fixed parameters, which allows the model to learn the shape of trends from the data.
 
-## Simulation Process
+We use the **HSGP (Hilbert Space Gaussian Process)** approximation for computational efficiency. This technique approximates the GP using a series of basis functions, drastically reducing computational cost without significant loss of precision.
 
-For each simulation, we generate vote shares for each candidate and check:
+The baseline GP covariance function is:
+```
+k(t, t') = σ² × exp(-|t-t'|² / (2ℓ²))
+```
+where σ is the amplitude and ℓ is the lengthscale (~1460 days).
 
-1. Whether any candidate reaches more than 50% in the first round
-2. Which two candidates advance to the second round
-3. Record the outcome of each simulation
+</details>
 
-We run thousands of these simulations to build probability distributions for outcomes.
+### Pollster House Effects
+
+Each polling organization has systematic tendencies to over- or under-estimate certain parties. Our model estimates these "house effects" from historical data.
+
+For example, if a pollster consistently overestimates PS by 2 percentage points, the model corrects for this tendency when aggregating polls from multiple sources.
+
+House effects are modeled with a zero-sum constraint: if a pollster overestimates one party, they must underestimate other(s) to compensate.
+
+### District Effects
+
+Portugal uses a proportional representation system with seat allocation at the district level. The model includes **static district offsets** that capture regional differences in party support.
+
+These offsets are estimated from previous election results and allow predicting how national vote shares translate into district-level votes.
+
+### Likelihood
+
+Poll observations follow a **Dirichlet-Multinomial** distribution, which is the natural choice for compositional data (percentages that sum to 100%).
+
+<details>
+<summary>**Technical Details: Dirichlet-Multinomial**</summary>
+
+The Dirichlet-Multinomial is parameterized by:
+- `n`: poll sample size
+- `α`: concentration vector (proportional to each party's probabilities)
+
+This distribution has two sources of variation: sampling error (which depends on n) and extra variation captured by the concentration parameter. This correctly models the fact that polls don't always behave like simple random samples.
+
+</details>
+
+### D'Hondt Method and Seat Allocation
+
+To convert vote forecasts into seat forecasts, we simulate the Portuguese electoral system:
+
+1. **22 electoral districts**: 18 mainland districts + 2 autonomous regions + Europe + Outside Europe
+2. **D'Hondt method**: Sequential divisor system (1, 2, 3, ...) for proportional seat allocation
+3. **230 total seats** (excluding the 4 emigration seats in the 2024 elections)
+
+The model runs thousands of **Monte Carlo simulations**:
+1. For each simulation, draw a sample from the posterior distribution of national vote shares
+2. Apply district offsets to obtain district-level votes
+3. Run the D'Hondt algorithm in each district
+4. Sum each party's seats
+
+The result is a complete distribution of possible parliamentary compositions.
+
+### Metrics of Interest
+
+From the simulations, we calculate:
+
+- **Probability of each party winning the most seats**
+- **Majority probabilities**: right-wing, left-wing, or hung parliament
+- **Expected seats**: mean and credibility intervals (50% and 80%)
+- **Contested districts**: using ENSC (Effective Number of Seat Changes) with a threshold of 0.8
+
+---
+
+## Presidential Elections
+
+### Model Structure
+
+The presidential model differs from the parliamentary one because:
+- Candidates are individuals, not parties with long track records
+- The system uses two rounds (absolute majority required)
+- Campaign dynamics are more important
+
+We use a **random walk** model in log-odds space to capture the evolution of candidate support.
+
+<details>
+<summary>**Technical Details: Random Walk**</summary>
+
+The random walk is defined as:
+```
+latent[t] = latent[t-1] + innovation[t]
+```
+where `innovation[t] ~ ZeroSumNormal(σ)` ensures that one candidate's gains correspond to others' losses.
+
+The innovation standard deviation (σ ≈ 0.05 log-odds/day) is calibrated to allow movements of ~5 percentage points over a 50-day campaign.
+
+</details>
+
+### Candidate-Specific Priors
+
+For candidates with known party affiliation, we use informative priors based on those parties' historical support. This helps stabilize estimates when few polls are available.
+
+### Pollster House Effects
+
+When available, we use house effects estimated from the parliamentary model as **informative priors** for the presidential model. This transfers information about each pollster's systematic biases.
+
+### Second Round Modeling
+
+For each simulation:
+1. We check if any candidate reaches >50% in the first round
+2. If not, we identify the top two candidates
+3. We record the probability of each pair of candidates facing off in the runoff
+
+---
 
 ## Uncertainty Quantification
 
-Our model incorporates several sources of uncertainty:
+Our models incorporate multiple sources of uncertainty:
 
-- **Polling Error:** Historical polling accuracy in Portuguese elections
-- **Campaign Effects:** Potential for late shifts in voter preference
-- **Undecided Voters:** Significant uncertainty about how undecided voters will vote
-- **Model Uncertainty:** Parameter estimation uncertainty
+| Source | Description |
+|--------|-------------|
+| **Polling error** | Expected variation between polls and actual results |
+| **House effects** | Uncertainty in estimated pollster biases |
+| **Model uncertainty** | GP parameters and other model components |
+| **Campaign effects** | Potential for late shifts not captured in polls |
+
+### Communicating Uncertainty
+
+We present uncertainty through:
+- **Credibility intervals**: 50% and 80% bands in trend charts
+- **Probabilities**: "70% probability of X winning the most seats"
+- **Simulation distributions**: visualizations showing the full range of possible outcomes
+
+---
 
 ## Model Validation
 
-We validate our approach through:
+We validate our models through:
 
-1. Backtesting on previous Portuguese presidential elections
-2. Cross-validation using held-out polling data
-3. Comparison with actual election results
-4. Calibration tests to ensure our probabilities are well-calibrated
+1. **Backtesting**: Apply the model to past elections using only data available before each election
+2. **Calibration**: Verify that credibility intervals contain actual results at the expected frequency
+3. **Error metrics**: Calculate MAE, RMSE, and log-scores
+4. **Post-election comparison**: Analyze performance after each election
 
-We continuously refine our model based on these validation exercises.
-
-## Limitations and Caveats
-
-Our model has several important limitations:
-
-- Relies on polling data, which can be biased or unrepresentative
-- May not capture unprecedented political developments
-- Assumes historical patterns continue to hold
-- Cannot predict the impact of major campaign events or scandals
-- Difficulty predicting how undecided voters will behave
-
-We encourage users to interpret our forecasts as probabilistic estimates, not certainties.
+---
 
 ## Data Sources
 
-- Portuguese polling organizations (CESOP, Aximage, Pitagórica, Intercampus, etc.)
-- Previous presidential election results from CNE
-- Demographic data from INE (Instituto Nacional de Estatística)
+### Polls
+- Aximage, CESOP, Pitagórica, Intercampus, Eurosondagem, and other ERC-registered polling firms
+
+### Election Results
+- National Elections Commission (CNE)
+- SGMAI (General Secretariat of the Ministry of Internal Administration)
+
+### Demographic Data
+- National Statistics Institute (INE)
+
+---
+
+## Limitations
+
+Our model has important limitations:
+
+- **Poll dependence**: If polls have systematic biases not captured by historical data, forecasts will be affected
+- **Unforeseen events**: Scandals, crises, or other events can rapidly alter the electoral landscape
+- **Historical patterns**: We assume past patterns inform the future, which may not hold in unprecedented contexts
+- **Undecided voters**: Difficulty predicting how undecided voters will behave
+
+Our forecasts should be interpreted as **informed probabilistic estimates**, not certainties.
+
+---
+
+## References and Inspiration
+
+Our methodology is inspired by:
+- [The Economist Election Forecast](https://www.economist.com/interactive/us-2024-election/prediction-model/president)
+- [FiveThirtyEight](https://fivethirtyeight.com/)
+- [Andrew Gelman - Bayesian Data Analysis](http://www.stat.columbia.edu/~gelman/book/)
+- [PyMC Documentation](https://www.pymc.io/projects/docs/en/stable/)
 
