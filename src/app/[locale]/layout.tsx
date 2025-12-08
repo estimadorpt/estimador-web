@@ -38,12 +38,21 @@ export async function generateMetadata({
       siteName: 'estimador.pt',
       locale: locale,
       type: 'website',
+      images: [
+        {
+          url: `/${locale}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: t('meta.defaultTitle'),
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: t('meta.defaultTitle'),
       description: t('meta.defaultDescription'),
       creator: '@estimadorpt',
+      images: [`/${locale}/twitter-image`],
     },
     alternates: {
       canonical: `https://estimador.pt/${locale}`,
