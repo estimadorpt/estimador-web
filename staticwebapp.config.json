@@ -14,6 +14,18 @@
       }
     },
     {
+      "route": "/og-image-pt.png",
+      "headers": {
+        "cache-control": "public, max-age=3600"
+      }
+    },
+    {
+      "route": "/og-image-en.png",
+      "headers": {
+        "cache-control": "public, max-age=3600"
+      }
+    },
+    {
       "route": "/",
       "serve": "/pt/index.html"
     },
@@ -68,7 +80,7 @@
   ],
   "navigationFallback": {
     "rewrite": "/pt/index.html",
-    "exclude": ["/data/*", "/_next/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,json,txt}"]
+    "exclude": ["/data/*", "/_next/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,json,txt}", "/og-image-*.png", "/og-image-*.svg"]
   },
   "mimeTypes": {
     ".json": "application/json",
