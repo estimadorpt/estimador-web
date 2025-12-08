@@ -34,13 +34,13 @@ export async function generateMetadata({
     openGraph: {
       title: t('meta.defaultTitle'),
       description: t('meta.defaultDescription'),
-      url: 'https://estimador.pt',
+      url: `https://estimador.pt/${locale}`,
       siteName: 'estimador.pt',
       locale: locale,
       type: 'website',
       images: [
         {
-          url: `/og-image-${locale}.png`,
+          url: `https://estimador.pt/og-image-${locale}.png`,
           width: 1200,
           height: 630,
           alt: t('meta.defaultTitle'),
@@ -52,7 +52,7 @@ export async function generateMetadata({
       title: t('meta.defaultTitle'),
       description: t('meta.defaultDescription'),
       creator: '@estimadorpt',
-      images: [`/og-image-${locale}.png`],
+      images: [`https://estimador.pt/og-image-${locale}.png`],
     },
     alternates: {
       canonical: `https://estimador.pt/${locale}`,
@@ -89,8 +89,17 @@ export default async function RootLayout({
   // side is the easiest way to get started
   const messages = await getMessages({ locale });
 
+  const ogImageUrl = `https://estimador.pt/og-image-${locale}.png`;
+  
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/png" />
+        <meta name="twitter:image" content={ogImageUrl} />
+      </head>
       <body className="antialiased" suppressHydrationWarning>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <ElectionProvider>
