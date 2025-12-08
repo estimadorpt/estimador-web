@@ -1,17 +1,21 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
+import { readFileSync, existsSync } from 'fs';
+import path from 'path';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import { useMDXComponents } from '@/mdx-components';
 
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: Promise<{ locale: string }> 
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  
+
   return {
     title: t('meta.aboutTitle'),
     description: t('about.subtitle'),
@@ -26,6 +30,44 @@ export async function generateMetadata({
   };
 }
 
+function getAboutPath(locale: string): string {
+  return path.join(process.cwd(), 'src/content/about', `${locale}.mdx`);
+}
+
+function getAboutContent(locale: string): { content: string; actualLocale: string } {
+  // Try preferred locale first
+  let mdxPath = getAboutPath(locale);
+
+  if (existsSync(mdxPath)) {
+    return {
+      content: readFileSync(mdxPath, 'utf8'),
+      actualLocale: locale
+    };
+  }
+
+  // Fallback to Portuguese
+  if (locale !== 'pt') {
+    mdxPath = getAboutPath('pt');
+    if (existsSync(mdxPath)) {
+      return {
+        content: readFileSync(mdxPath, 'utf8'),
+        actualLocale: 'pt'
+      };
+    }
+  }
+
+  // Fallback to English
+  mdxPath = getAboutPath('en');
+  if (existsSync(mdxPath)) {
+    return {
+      content: readFileSync(mdxPath, 'utf8'),
+      actualLocale: 'en'
+    };
+  }
+
+  throw new Error('No about content found');
+}
+
 export default async function AboutPage({
   params
 }: {
@@ -33,104 +75,34 @@ export default async function AboutPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
+
+  const { content: mdxContent, actualLocale } = getAboutContent(locale);
+  const components = useMDXComponents({});
+
   return (
     <div className="min-h-screen bg-green-pale">
       <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-green-dark mb-4">{t('about.title')}</h1>
-          <p className="text-lg text-green-dark/70">
-            {t('about.subtitle')}
-          </p>
-        </div>
+        {/* Locale Notice (if fallback) */}
+        {actualLocale !== locale && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-700">
+              {locale === 'en'
+                ? `This page is only available in Portuguese. Showing Portuguese version.`
+                : `Esta página apenas está disponível em português.`
+              }
+            </p>
+          </div>
+        )}
 
-        <div className="space-y-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('about.mission')}</CardTitle>
-            </CardHeader>
-            <CardContent className="prose prose-slate max-w-none">
-              <p>
-                {t('about.missionDescription1')}
-              </p>
-              <p>
-                {t('about.missionDescription2')}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('about.whatWeDo')}</CardTitle>
-            </CardHeader>
-            <CardContent className="prose prose-slate max-w-none">
-              <ul>
-                <li><strong>{t('about.whatWeDoLabels.forecasting')}:</strong> {t('about.whatWeDoList.forecasting')}</li>
-                <li><strong>{t('about.whatWeDoLabels.seatProjections')}:</strong> {t('about.whatWeDoList.seatProjections')}</li>
-                <li><strong>{t('about.whatWeDoLabels.trendAnalysis')}:</strong> {t('about.whatWeDoList.trendAnalysis')}</li>
-                <li><strong>{t('about.whatWeDoLabels.pollingAnalysis')}:</strong> {t('about.whatWeDoList.pollingAnalysis')}</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('about.approach')}</CardTitle>
-            </CardHeader>
-            <CardContent className="prose prose-slate max-w-none">
-              <p>
-                {t('about.approachDescription1')}
-              </p>
-              <p>
-                {t('about.approachDescription2')}
-              </p>
-              <ul>
-                <li><strong>{t('about.approachPrincipleLabels.transparency')}:</strong> {t('about.approachPrinciples.transparency')}</li>
-                <li><strong>{t('about.approachPrincipleLabels.independence')}:</strong> {t('about.approachPrinciples.independence')}</li>
-                <li><strong>{t('about.approachPrincipleLabels.accuracy')}:</strong> {t('about.approachPrinciples.accuracy')}</li>
-                <li><strong>{t('about.approachPrincipleLabels.accessibility')}:</strong> {t('about.approachPrinciples.accessibility')}</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('about.team')}</CardTitle>
-            </CardHeader>
-            <CardContent className="prose prose-slate max-w-none">
-              <p>
-                {t('about.founder')} <strong>Bernardo Caldas</strong>, {t('about.combiningExpertise')}
-              </p>
-              <p>
-                {t('about.contact')}{' '}
-                <a href="mailto:info@estimador.pt" className="text-green-medium hover:text-green-dark hover:underline">
-                  info@estimador.pt
-                </a>
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('about.limitations')}</CardTitle>
-            </CardHeader>
-            <CardContent className="prose prose-slate max-w-none">
-              <p>
-                {t('about.limitationsDescription1')}
-              </p>
-              <ul>
-                <li>{t('about.limitationsList.pollingError')}</li>
-                <li>{t('about.limitationsList.campaignDynamics')}</li>
-                <li>{t('about.limitationsList.turnout')}</li>
-                <li>{t('about.limitationsList.regional')}</li>
-              </ul>
-              <p>
-                {t('about.limitationsDescription2')}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardContent className="p-8">
+            <article className="prose prose-lg max-w-none mdx-content">
+              <MDXRemote source={mdxContent} components={components} />
+            </article>
+          </CardContent>
+        </Card>
       </main>
 
       {/* Footer */}
@@ -139,7 +111,7 @@ export default async function AboutPage({
           <div className="text-center text-sm text-slate-600">
             <p>{t('about.footerCopyright')}</p>
             <p className="mt-2">
-              {t('about.footerDeveloper')} • 
+              {t('about.footerDeveloper')} •
               <Link href="mailto:info@estimador.pt" className="text-green-medium hover:text-green-dark hover:underline ml-1">
                 info@estimador.pt
               </Link>
