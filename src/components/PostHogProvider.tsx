@@ -2,37 +2,39 @@
 
 import { useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { posthog, initPostHog, POSTHOG_KEY } from '@/lib/posthog';
 
-function PostHogPageView() {
+declare global {
+  interface Window {
+    posthog?: {
+      capture: (event: string, properties?: Record<string, unknown>) => void;
+    };
+  }
+}
+
+function PageViewTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (pathname && POSTHOG_KEY) {
+    if (pathname && typeof window !== 'undefined' && window.posthog) {
       let url = window.origin + pathname;
       if (searchParams?.toString()) {
         url = url + '?' + searchParams.toString();
       }
-      posthog.capture('$pageview', { $current_url: url });
+      // PostHog already captures pageviews automatically when using the snippet,
+      // but we can capture SPA navigation manually if needed
+      window.posthog.capture('$pageview', { $current_url: url });
     }
   }, [pathname, searchParams]);
 
   return null;
 }
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    initPostHog();
-  }, []);
-
+export function PostHogPageView() {
   return (
-    <>
-      <Suspense fallback={null}>
-        <PostHogPageView />
-      </Suspense>
-      {children}
-    </>
+    <Suspense fallback={null}>
+      <PageViewTracker />
+    </Suspense>
   );
 }
 
