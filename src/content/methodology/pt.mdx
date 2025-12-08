@@ -57,13 +57,13 @@ Cada instituto de sondagens tem tendências sistemáticas para sobre ou subestim
 
 Por exemplo, se uma empresa consistentemente sobrestima o PS em 2 pontos percentuais, o modelo corrige esta tendência ao agregar sondagens de múltiplas fontes.
 
-Os house effects são modelados com uma restrição de soma zero: se uma empresa sobrestima um partido, tem de subestimar outro(s) para compensar.
+Os house effects são modelados com uma restrição de soma zero: se uma empresa sobrestima um partido, tem de subestimar outro(s) para compensar. O prior para o desvio padrão dos house effects é HalfNormal(σ=0.05) por partido, permitindo vieses típicos de ~2-3 pontos percentuais.
 
 ### Efeitos Distritais
 
 Portugal utiliza um sistema de representação proporcional com alocação de mandatos ao nível distrital. O modelo inclui **offsets distritais estáticos** que capturam as diferenças regionais no apoio partidário.
 
-Estes offsets são estimados a partir de resultados eleitorais anteriores e permitem prever como os votos nacionais se traduzem em votos em cada distrito.
+Estes offsets são estimados a partir de resultados eleitorais anteriores e permitem prever como os votos nacionais se traduzem em votos em cada distrito. O prior para os offsets distritais é HalfNormal(σ=0.1) por partido, refletindo variações regionais típicas de ~5 pontos percentuais.
 
 ### Verosimilhança
 
@@ -77,6 +77,10 @@ A Dirichlet-Multinomial é parametrizada por:
 - `α`: vetor de concentração (proporcional às probabilidades de cada partido)
 
 Esta distribuição tem duas fontes de variação: o erro de amostragem (que depende de n) e a variação extra captada pelo parâmetro de concentração. Isto permite modelar corretamente o facto de que sondagens nem sempre se comportam como amostras aleatórias simples.
+
+**Priors para concentração:**
+- Sondagens: Gamma(α=2, β=0.01) — média ~200, permite variação extra além do erro de amostragem
+- Resultados eleitorais: Gamma(α=100, β=0.1) — média ~1000, ajuste mais preciso aos resultados reais
 
 </details>
 
@@ -127,7 +131,11 @@ latent[t] = latent[t-1] + innovation[t]
 ```
 onde `innovation[t] ~ ZeroSumNormal(σ)` garante que os ganhos de um candidato correspondem a perdas de outros.
 
-O desvio padrão das inovações (σ ≈ 0.05 log-odds/dia) é calibrado para permitir movimentos de ~5 pontos percentuais ao longo de uma campanha de 50 dias.
+O desvio padrão das inovações (σ ≈ 0.05 log-odds/dia) é calibrado para permitir movimentos de ~5 pontos percentuais ao longo de uma campanha de 50 dias. Este valor é fixo (não aprendido) seguindo a metodologia do Economist, dado que com poucas sondagens não é possível estimar a volatilidade de forma fiável.
+
+**Priors para candidatos:**
+- Baseline: Normal(μ=logit(prior_partido), σ=transformado) — centrado no apoio histórico do partido do candidato
+- Concentração da verosimilhança: Fixo em 60 para sondagens presidenciais
 
 </details>
 

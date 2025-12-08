@@ -42,7 +42,12 @@ The baseline GP covariance function is:
 ```
 k(t, t') = σ² × exp(-|t-t'|² / (2ℓ²))
 ```
-where σ is the amplitude and ℓ is the lengthscale (~1460 days).
+
+**Priors used:**
+- Baseline lengthscale: LogNormal(μ=log(1460), σ=0.3) — centered at ~4 years
+- Medium-term lengthscale: LogNormal(μ=log(365), σ=0.5) — centered at ~1 year
+- Short-term lengthscale: LogNormal(μ=log(14), σ=0.3) — centered at ~14 days
+- GP amplitudes: HalfNormal(σ=0.2-0.3)
 
 </details>
 
@@ -52,13 +57,13 @@ Each polling organization has systematic tendencies to over- or under-estimate c
 
 For example, if a pollster consistently overestimates PS by 2 percentage points, the model corrects for this tendency when aggregating polls from multiple sources.
 
-House effects are modeled with a zero-sum constraint: if a pollster overestimates one party, they must underestimate other(s) to compensate.
+House effects are modeled with a zero-sum constraint: if a pollster overestimates one party, they must underestimate other(s) to compensate. The prior for house effect standard deviation is HalfNormal(σ=0.05) per party, allowing typical biases of ~2-3 percentage points.
 
 ### District Effects
 
 Portugal uses a proportional representation system with seat allocation at the district level. The model includes **static district offsets** that capture regional differences in party support.
 
-These offsets are estimated from previous election results and allow predicting how national vote shares translate into district-level votes.
+These offsets are estimated from previous election results and allow predicting how national vote shares translate into district-level votes. The prior for district offsets is HalfNormal(σ=0.1) per party, reflecting typical regional variations of ~5 percentage points.
 
 ### Likelihood
 
@@ -72,6 +77,10 @@ The Dirichlet-Multinomial is parameterized by:
 - `α`: concentration vector (proportional to each party's probabilities)
 
 This distribution has two sources of variation: sampling error (which depends on n) and extra variation captured by the concentration parameter. This correctly models the fact that polls don't always behave like simple random samples.
+
+**Concentration priors:**
+- Polls: Gamma(α=2, β=0.01) — mean ~200, allows extra variation beyond sampling error
+- Election results: Gamma(α=100, β=0.1) — mean ~1000, tighter fit to actual results
 
 </details>
 
@@ -122,7 +131,11 @@ latent[t] = latent[t-1] + innovation[t]
 ```
 where `innovation[t] ~ ZeroSumNormal(σ)` ensures that one candidate's gains correspond to others' losses.
 
-The innovation standard deviation (σ ≈ 0.05 log-odds/day) is calibrated to allow movements of ~5 percentage points over a 50-day campaign.
+The innovation standard deviation (σ ≈ 0.05 log-odds/day) is calibrated to allow movements of ~5 percentage points over a 50-day campaign. This value is fixed (not learned) following The Economist's methodology, since with few polls it's not possible to reliably estimate volatility.
+
+**Candidate priors:**
+- Baseline: Normal(μ=logit(party_prior), σ=transformed) — centered on the candidate's party historical support
+- Likelihood concentration: Fixed at 60 for presidential polls
 
 </details>
 
