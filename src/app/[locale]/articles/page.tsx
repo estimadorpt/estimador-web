@@ -62,14 +62,18 @@ export default async function ArticlesPage({
       {/* Footer */}
       <footer className="border-t border-stone-200 bg-stone-800 text-stone-300 mt-16">
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center text-sm">
-            <p>{t('about.footerCopyright')}</p>
-            <p className="mt-2">
-              {t('about.footerDeveloper')} · 
-              <Link href="mailto:info@estimador.pt" className="text-stone-100 hover:text-white hover:underline ml-1">
-                info@estimador.pt
-              </Link>
-            </p>
+          <div className="flex flex-col items-center gap-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-light.svg" alt="estimador.pt" className="h-8 w-auto opacity-80" />
+            <div className="text-center text-sm">
+              <p>{t('about.footerCopyright')}</p>
+              <p className="mt-2">
+                {t('about.footerDeveloper')} ·
+                <Link href="mailto:info@estimador.pt" className="text-stone-100 hover:text-white hover:underline ml-1">
+                  info@estimador.pt
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </footer>

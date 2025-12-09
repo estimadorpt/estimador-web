@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Globe, Menu, X } from "lucide-react";
+import { LogoHorizontal, LogoIconOnly } from './Logo';
 
 export function Header() {
   const t = useTranslations();
@@ -33,10 +34,17 @@ export function Header() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <Link href="/" className="text-xl font-bold text-stone-900 hover:text-blue-700 transition-colors">
-                estimador.pt
+              <Link href="/" className="block hover:opacity-80 transition-opacity">
+                {/* Desktop: Full horizontal logo */}
+                <span className="hidden sm:block">
+                  <LogoHorizontal showWordmark={true} />
+                </span>
+                {/* Mobile: Icon only */}
+                <span className="sm:hidden">
+                  <LogoIconOnly size={32} />
+                </span>
               </Link>
-              <p className="text-xs text-stone-500 hidden sm:block">{t('homepage.tagline')}</p>
+              <p className="text-xs text-stone-500 hidden sm:block mt-0.5">{t('homepage.tagline')}</p>
             </div>
             {pathname !== '/' && (
               <div className="hidden sm:block border-l border-stone-200 pl-4">
@@ -57,7 +65,7 @@ export function Header() {
                   href={item.href}
                   className={`text-sm px-3 py-1.5 rounded-md transition-colors ${
                     pathname === item.href
-                      ? 'text-blue-700 bg-blue-50 font-medium'
+                      ? 'text-navy bg-navy/10 font-medium'
                       : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
                   }`}
                 >
@@ -118,7 +126,7 @@ export function Header() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`block px-4 py-3 rounded-md text-base font-medium transition-colors ${
                   pathname === item.href
-                    ? 'text-blue-700 bg-blue-50'
+                    ? 'text-navy bg-navy/10'
                     : 'text-stone-700 hover:text-stone-900 hover:bg-stone-50'
                 }`}
               >

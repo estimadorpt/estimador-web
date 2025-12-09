@@ -388,23 +388,23 @@ export default async function Home({
             More from estimador.pt
           </div>
           <div className="flex flex-wrap gap-6">
-            <Link 
-              href="/forecast" 
-              className="group inline-flex items-center gap-2 text-stone-700 hover:text-blue-700 transition-colors"
+            <Link
+              href="/forecast"
+              className="group inline-flex items-center gap-2 text-stone-700 hover:text-navy transition-colors"
             >
               <span className="font-semibold">{t('nav.parliamentaryForecast')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link 
-              href="/map" 
-              className="group inline-flex items-center gap-2 text-stone-700 hover:text-blue-700 transition-colors"
+            <Link
+              href="/map"
+              className="group inline-flex items-center gap-2 text-stone-700 hover:text-navy transition-colors"
             >
               <span className="font-semibold">{t('map.title')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link 
-              href="/methodology" 
-              className="group inline-flex items-center gap-2 text-stone-700 hover:text-blue-700 transition-colors"
+            <Link
+              href="/methodology"
+              className="group inline-flex items-center gap-2 text-stone-700 hover:text-navy transition-colors"
             >
               <span className="font-semibold">{t('common.methodology')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -416,24 +416,28 @@ export default async function Home({
       {/* Footer Info */}
       <section className="bg-stone-800 text-stone-300 py-10">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="max-w-2xl">
-            <h2 className="text-lg font-semibold text-white mb-3">
-              {t('presidential.aboutForecast')}
-            </h2>
-            <p className="text-sm leading-relaxed mb-5">
-              {t('presidential.aboutDescription')}
-            </p>
-            <div className="flex items-center gap-4 text-sm text-stone-400">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <span>{forecast.candidates.length} {t('presidential.candidatesModeled')}</span>
-              </div>
-              <span>·</span>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <span>{t('presidential.electionDate', { date: 'Jan 18, 2026' })}</span>
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8">
+            <div className="max-w-2xl">
+              <h2 className="text-lg font-semibold text-white mb-3">
+                {t('presidential.aboutForecast')}
+              </h2>
+              <p className="text-sm leading-relaxed mb-5">
+                {t('presidential.aboutDescription')}
+              </p>
+              <div className="flex items-center gap-4 text-sm text-stone-400">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  <span>{forecast.candidates.length} {t('presidential.candidatesModeled')}</span>
+                </div>
+                <span>·</span>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>{t('presidential.electionDate', { date: 'Jan 18, 2026' })}</span>
+                </div>
               </div>
             </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-light.svg" alt="estimador.pt" className="h-10 w-auto opacity-80 hidden md:block" />
           </div>
         </div>
       </section>

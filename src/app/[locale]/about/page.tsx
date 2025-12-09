@@ -108,14 +108,18 @@ export default async function AboutPage({
       {/* Footer */}
       <footer className="border-t border-green-medium/30 bg-white mt-16">
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-sm text-slate-600">
-            <p>{t('about.footerCopyright')}</p>
-            <p className="mt-2">
-              {t('about.footerDeveloper')} •
-              <Link href="mailto:info@estimador.pt" className="text-green-medium hover:text-green-dark hover:underline ml-1">
-                info@estimador.pt
-              </Link>
-            </p>
+          <div className="flex flex-col items-center gap-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="estimador.pt" className="h-8 w-auto opacity-60" />
+            <div className="text-center text-sm text-slate-600">
+              <p>{t('about.footerCopyright')}</p>
+              <p className="mt-2">
+                {t('about.footerDeveloper')} •
+                <Link href="mailto:info@estimador.pt" className="text-green-medium hover:text-green-dark hover:underline ml-1">
+                  info@estimador.pt
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </footer>

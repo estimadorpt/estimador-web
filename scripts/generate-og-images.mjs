@@ -6,7 +6,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 
@@ -42,11 +41,11 @@ function computeLeadingProbabilitiesAtCutoff(trends, winProbabilities, cutoffDat
       color: c.color,
     }));
   }
-  
+
   const cutoff = new Date(cutoffDate);
   const idx = trends.dates.findIndex(d => new Date(d) > cutoff);
   const cutoffIndex = idx === -1 ? trends.dates.length - 1 : idx - 1;
-  
+
   const candidates = Object.entries(trends.candidates)
     .filter(([name]) => name !== 'Others')
     .map(([name, data]) => {
@@ -60,14 +59,14 @@ function computeLeadingProbabilitiesAtCutoff(trends, winProbabilities, cutoffDat
         color: wpData?.color || '#888888',
       };
     });
-  
+
   const wins = {};
   candidates.forEach(c => { wins[c.name] = 0; });
-  
+
   for (let sim = 0; sim < numSimulations; sim++) {
     let maxValue = -Infinity;
     let winner = '';
-    
+
     candidates.forEach((c, i) => {
       const value = normalRandom(c.mean, c.std, sim * candidates.length + i);
       if (value > maxValue) {
@@ -75,10 +74,10 @@ function computeLeadingProbabilitiesAtCutoff(trends, winProbabilities, cutoffDat
         winner = c.name;
       }
     });
-    
+
     if (winner) wins[winner]++;
   }
-  
+
   return candidates
     .map(c => ({
       name: c.name,
@@ -95,21 +94,20 @@ function formatProbability(value) {
   return `${Math.round(pct)}%`;
 }
 
-// Generate SVG for OG image - optimized for mobile display (300-500px width)
-// At 300px display: 130px→32px, 60px→15px, 36px→9px minimum readable
+// Generate SVG for OG image with logo
 function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRoundProb) {
   const chanceLabel = locale === 'pt' ? 'probabilidade de ganhar a 1ª volta' : 'probability of winning 1st round';
   const secondRoundLabel = locale === 'pt' ? '2ª volta' : '2nd round';
 
   const top3 = candidatesWithSupport.slice(0, 3);
-  
+
   // Ensure readable colors on dark backgrounds
   function getReadableColor(color, name) {
     if (name === 'André Ventura') return '#ff6b6b';
     if (name === 'Gouveia e Melo') return '#60a5fa';
     return color;
   }
-  
+
   return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <style>
@@ -125,36 +123,42 @@ function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRo
       <stop offset="100%" style="stop-color:${leadingCandidate.color};stop-opacity:0"/>
     </radialGradient>
   </defs>
-  
+
   <!-- Background -->
   <rect width="1200" height="630" fill="url(#bgGradient)"/>
   <rect width="1200" height="630" fill="url(#accentGlow)"/>
-  
-  <!-- Header - larger for mobile readability (40px→10px at 300px) -->
-  <text x="600" y="70" fill="#fafafa" font-size="40" font-weight="700" text-anchor="middle">estimador.pt</text>
-  
-  <!-- Candidate name - LARGE (60px→15px at 300px = readable) -->
+
+  <!-- Header with logo -->
+  <g transform="translate(480, 35)">
+    <!-- Logo circles -->
+    <circle cx="15" cy="25" r="8" fill="#4A6FA5"/>
+    <circle cx="42" cy="25" r="12" fill="#0F766E"/>
+    <circle cx="78" cy="25" r="16" fill="#D4A000"/>
+    <!-- Logo text -->
+    <text x="105" y="33" fill="#fafafa" font-size="28" font-weight="700">estimador</text>
+  </g>
+
+  <!-- Candidate name -->
   <text x="600" y="170" fill="#fafafa" font-size="60" font-weight="700" text-anchor="middle">${leadingCandidate.name}</text>
-  
-  <!-- Big probability - HERO SIZE (180px→45px at 300px = very readable) -->
+
+  <!-- Big probability -->
   <text x="600" y="340" fill="${leadingCandidate.color}" font-size="180" font-weight="900" text-anchor="middle">${formatProbability(leadingCandidate.probability)}</text>
-  
-  <!-- Label - larger (32px→8px at 300px = borderline but acceptable) -->
+
+  <!-- Label -->
   <text x="600" y="400" fill="#a1a1aa" font-size="32" text-anchor="middle">${chanceLabel}</text>
-  
-  <!-- Second round pill - larger text (24px→6px visible as badge) -->
+
+  <!-- Second round pill -->
   <rect x="470" y="430" width="260" height="50" rx="25" fill="#3f3f46"/>
   <text x="600" y="463" fill="#e4e4e7" font-size="24" font-weight="600" text-anchor="middle">${secondRoundLabel}: ${formatProbability(secondRoundProb)}</text>
-  
-  <!-- Bottom bar with key stats - stacked layout for clarity -->
+
+  <!-- Bottom bar with key stats -->
   <rect x="0" y="505" width="1200" height="125" fill="#18181b" opacity="0.85"/>
-  
-  <!-- Three candidates - centered in each column -->
+
+  <!-- Three candidates -->
   ${top3.map((c, i) => {
-    const xPos = 200 + i * 400; // Centers at 200, 600, 1000
+    const xPos = 200 + i * 400;
     const readableColor = getReadableColor(c.color, c.name);
     const supportPct = `${(c.support * 100).toFixed(0)}%`;
-    // Use recognizable names for Portuguese politics
     let displayName = c.name;
     if (c.name === 'André Ventura') displayName = 'Ventura';
     return `
@@ -166,12 +170,12 @@ function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRo
 
 async function main() {
   console.log('🖼️  Generating Open Graph images...');
-  
+
   // Load data
   const winProbabilities = loadJsonData('presidential_win_probabilities.json');
   const trends = loadJsonData('presidential_trends.json');
   const polls = loadJsonData('presidential_polls.json');
-  
+
   // Calculate last poll date
   let lastPollDate = null;
   if (polls.polls.length > 0) {
@@ -182,37 +186,37 @@ async function main() {
       }
     }
   }
-  
+
   // Compute probabilities
   const cutoffProbabilities = computeLeadingProbabilitiesAtCutoff(trends, winProbabilities, lastPollDate);
   const leadingCandidate = cutoffProbabilities[0];
   const secondRoundProb = winProbabilities.second_round_probability;
-  
+
   // Get voting intentions (mean support) at cutoff date for bottom section
   const cutoffDate = lastPollDate ? new Date(lastPollDate) : null;
-  const cutoffIndex = cutoffDate 
-    ? trends.dates.findIndex(d => new Date(d) > cutoffDate) - 1 
+  const cutoffIndex = cutoffDate
+    ? trends.dates.findIndex(d => new Date(d) > cutoffDate) - 1
     : trends.dates.length - 1;
   const safeIndex = Math.max(0, cutoffIndex === -1 ? trends.dates.length - 1 : cutoffIndex);
-  
+
   // Combine probabilities with voting intentions
   const candidatesWithSupport = cutoffProbabilities.map(c => {
     const trendData = trends.candidates[c.name];
     const support = trendData ? trendData.mean[safeIndex] : 0;
     return { ...c, support };
   });
-  
+
   console.log(`   Leading: ${leadingCandidate.name} (${formatProbability(leadingCandidate.probability)})`);
   console.log(`   Second round: ${formatProbability(secondRoundProb)}`);
   console.log(`   Voting intentions:`, candidatesWithSupport.slice(0, 3).map(c => `${c.name}: ${(c.support * 100).toFixed(1)}%`).join(', '));
-  
+
   // Generate short hash for cache busting
   const version = Date.now().toString(36).slice(-6);
-  
+
   // Generate for each locale with versioned filename
   for (const locale of ['pt', 'en']) {
     const svg = generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRoundProb);
-    
+
     // Convert to PNG using sharp with versioned filename
     const filename = `og-image-${locale}-${version}.png`;
     const pngPath = path.join(rootDir, 'public', filename);
@@ -221,12 +225,12 @@ async function main() {
       .png()
       .toFile(pngPath);
     console.log(`   ✅ Generated: ${filename}`);
-    
-    // Also create unversioned symlink/copy for backwards compatibility
+
+    // Also create unversioned copy for backwards compatibility
     const unversionedPath = path.join(rootDir, 'public', `og-image-${locale}.png`);
     fs.copyFileSync(pngPath, unversionedPath);
   }
-  
+
   // Write manifest with version for filename-based cache busting
   const manifest = {
     generatedAt: new Date().toISOString(),
@@ -239,7 +243,7 @@ async function main() {
   const manifestPath = path.join(rootDir, 'public', 'og-manifest.json');
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
   console.log(`   ✅ Manifest: og-manifest.json (version: ${version})`);
-  
+
   console.log('✅ Open Graph images generated!');
   console.log(`\n📋 To force social media refresh after deploy:`);
   console.log(`   Facebook: https://developers.facebook.com/tools/debug/?q=https://estimador.pt/pt`);
@@ -248,4 +252,3 @@ async function main() {
 }
 
 main().catch(console.error);
-
