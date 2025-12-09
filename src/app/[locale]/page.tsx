@@ -44,18 +44,75 @@ export default async function Home({
   
   // Load presidential forecast data
   const { forecast, winProbabilities, trends, trajectories, polls, headToHead, runoffPairs, lastPollDate } = await loadPresidentialData();
-  
-  // Use election day probabilities for the headline (not cutoff snapshot)
-  // This shows the model's forecast for who will win on election day,
-  // accounting for uncertainty over the remaining campaign period
-  const electionDayProbabilities = winProbabilities.candidates.map(c => ({
-    name: c.name,
-    probability: c.leading_probability,
-    color: c.color,
-  })).sort((a, b) => b.probability - a.probability);
-  
-  // Get the leading candidate based on election day forecast
-  const leadingCandidate = electionDayProbabilities[0];
+
+  // Use snapshot probabilities (as of last poll date) instead of election day forecast
+  // This shows "if the election were held today" which is more appropriate when
+  // we're far from election day and don't have strong assumptions about future movement
+
+  // Helper functions for Monte Carlo simulation
+  function seededRandom(seed: number) {
+    const x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function normalRandom(mean: number, std: number, seed: number): number {
+    const u1 = seededRandom(seed);
+    const u2 = seededRandom(seed + 1);
+    const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    return mean + std * z;
+  }
+
+  // Calculate cutoff index for trends data (last poll date)
+  const cutoffDate = lastPollDate ? new Date(lastPollDate) : null;
+  const cutoffIndex = cutoffDate
+    ? trends.dates.findIndex((d: string) => new Date(d) > cutoffDate) - 1
+    : trends.dates.length - 1;
+  const safeIndex = Math.max(0, cutoffIndex === -1 ? trends.dates.length - 1 : cutoffIndex);
+
+  // Compute snapshot probabilities using Monte Carlo simulation
+  const candidates = Object.entries(trends.candidates as Record<string, { mean: number[]; ci_95: number[]; ci_05: number[] }>)
+    .filter(([name]) => name !== 'Others')
+    .map(([name, data]) => {
+      const mean = data.mean[safeIndex];
+      const std = (data.ci_95[safeIndex] - data.ci_05[safeIndex]) / 3.92;
+      const wpData = winProbabilities.candidates.find((c: { name: string; color: string }) => c.name === name);
+      return {
+        name,
+        mean,
+        std: Math.max(std, 0.001),
+        color: wpData?.color || '#888888',
+      };
+    });
+
+  // Run Monte Carlo simulation for snapshot probabilities
+  const numSimulations = 5000;
+  const wins: Record<string, number> = {};
+  candidates.forEach(c => { wins[c.name] = 0; });
+
+  for (let sim = 0; sim < numSimulations; sim++) {
+    let maxValue = -Infinity;
+    let winner = '';
+    candidates.forEach((c, idx) => {
+      const value = normalRandom(c.mean, c.std, sim * candidates.length + idx);
+      if (value > maxValue) {
+        maxValue = value;
+        winner = c.name;
+      }
+    });
+    if (winner) wins[winner]++;
+  }
+
+  // Calculate snapshot probabilities
+  const snapshotProbabilities = candidates
+    .map(c => ({
+      name: c.name,
+      probability: wins[c.name] / numSimulations,
+      color: c.color,
+    }))
+    .sort((a, b) => b.probability - a.probability);
+
+  // Get the leading candidate based on snapshot
+  const leadingCandidate = snapshotProbabilities[0];
   const secondRoundProbability = winProbabilities.second_round_probability;
   
   // Calculate days until election
@@ -103,9 +160,12 @@ export default async function Home({
       <section className="bg-white border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 py-10">
           <div className="max-w-3xl">
+            <div className="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+              {t('presidential.snapshotNote')}
+            </div>
             <h1 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4 leading-tight">
               {leadingCandidate ? (
-                t('presidential.leadingHeadline', {
+                t('presidential.snapshotHeadline', {
                   candidate: leadingCandidate.name,
                   probability: formatProbability(leadingCandidate.probability)
                 })
@@ -114,14 +174,14 @@ export default async function Home({
               )}
             </h1>
             <p className="text-lg text-stone-600 mb-5 leading-relaxed">
-              {t('presidential.forecastDescription', {
+              {t('presidential.snapshotDescription', {
                 secondRoundProbability: formatProbability(secondRoundProbability)
               })}
             </p>
             <div className="flex items-center gap-3 text-sm">
               <span className="text-stone-500">{t('presidential.basedOnPolls')}</span>
               <span className="text-stone-300">·</span>
-              <Link href="/methodology" className="text-blue-600 hover:text-blue-800 font-medium">
+              <Link href="/methodology" className="text-navy hover:text-navy-light font-medium">
                 {t('common.methodology')}
               </Link>
             </div>
@@ -147,7 +207,7 @@ export default async function Home({
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-stone-900">
-              {t('presidential.winProbabilities')}
+              {t('presidential.winProbabilitiesToday')}
             </h2>
             {lastUpdate && (
               <div className="text-xs text-stone-500 bg-stone-100 px-3 py-1 rounded-full">
@@ -160,7 +220,7 @@ export default async function Home({
               winProbabilities={winProbabilities}
               forecast={forecast}
               trends={trends}
-              cutoffDate={null}  // Use election day probabilities, not snapshot
+              cutoffDate={lastPollDate}  // Use snapshot probabilities (as of last poll)
               maxCandidates={5}
               translations={{
                 chanceOfLeading: t('presidential.chanceOfLeading'),
