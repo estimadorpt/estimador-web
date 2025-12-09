@@ -197,7 +197,9 @@ export function PresidentialTrendChart({
     return positions;
   }, [topCandidates, candidatePaths]);
 
-  // Parse poll data for scatter points (normalized to redistribute undecideds)
+  // Parse poll data for scatter points (show raw values without normalization)
+  // The model trends are normalized, but poll dots show raw observed values
+  // to accurately represent what the polls actually measured
   const pollPoints = useMemo(() => {
     if (!polls || !showPolls) return [];
 
@@ -206,43 +208,23 @@ export function PresidentialTrendChart({
     const lastDataDate = chartConfig.parsedDates[chartConfig.cutoffIndex - 1];
     const maxTime = lastDataDate.getTime();
 
-    // Get all candidate names we're tracking
-    const candidateNames = topCandidates.map(([name]) => name);
-
     polls.polls.forEach(poll => {
       const pollDate = new Date(poll.date);
       if (pollDate.getTime() < minTime || pollDate.getTime() > maxTime) return;
 
       const x = chartConfig.xScale(pollDate);
 
-      // Calculate sum of all candidate values in this poll to normalize
-      let totalDeclared = 0;
-      candidateNames.forEach(name => {
-        const val = poll[name];
-        if (typeof val === 'number') {
-          totalDeclared += val;
-        }
-      });
-      // Also include "Others" if present
-      const othersVal = poll['Others'];
-      if (typeof othersVal === 'number') {
-        totalDeclared += othersVal;
-      }
-
-      // Normalize factor: if totalDeclared < 1, redistribute undecideds proportionally
-      const normalizeFactor = totalDeclared > 0 ? 1 / totalDeclared : 1;
-
+      // Show raw poll values without normalization
+      // This accurately represents what the polls measured
       topCandidates.forEach(([candidateName, candidateData]) => {
         const rawValue = poll[candidateName];
         if (typeof rawValue === 'number') {
-          // Normalize the value by redistributing undecideds
-          const normalizedValue = rawValue * normalizeFactor;
           points.push({
             x,
-            y: chartConfig.yScale(normalizedValue),
+            y: chartConfig.yScale(rawValue),
             color: candidateData.color,
             candidate: candidateName,
-            value: normalizedValue,
+            value: rawValue,
             pollster: poll.pollster,
             date: pollDate,
           });
