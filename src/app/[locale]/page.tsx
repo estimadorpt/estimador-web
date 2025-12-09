@@ -11,86 +11,6 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { PRESIDENTIAL_2026 } from "@/lib/config/elections";
-import { PresidentialTrendsData, PresidentialWinProbabilitiesData } from "@/types";
-
-// Simple seeded random for reproducibility
-function seededRandom(seed: number) {
-  const x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
-}
-
-// Box-Muller transform for normal distribution
-function normalRandom(mean: number, std: number, seed: number): number {
-  const u1 = seededRandom(seed);
-  const u2 = seededRandom(seed + 1);
-  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-  return mean + std * z;
-}
-
-// Compute approximate win probabilities at cutoff using Monte Carlo simulation
-function computeLeadingProbabilitiesAtCutoff(
-  trends: PresidentialTrendsData,
-  winProbabilities: PresidentialWinProbabilitiesData,
-  cutoffDate: string | null,
-  numSimulations: number = 5000
-): { name: string; probability: number; color: string }[] {
-  if (!cutoffDate) {
-    // Return election day probabilities
-    return winProbabilities.candidates.map(c => ({
-      name: c.name,
-      probability: c.leading_probability,
-      color: c.color,
-    }));
-  }
-  
-  // Find cutoff index
-  const cutoff = new Date(cutoffDate);
-  const idx = trends.dates.findIndex(d => new Date(d) > cutoff);
-  const cutoffIndex = idx === -1 ? trends.dates.length - 1 : idx - 1;
-  
-  // Build candidate data for simulation
-  const candidates = Object.entries(trends.candidates)
-    .filter(([name]) => name !== 'Others')
-    .map(([name, data]) => {
-      const mean = data.mean[cutoffIndex];
-      const std = (data.ci_95[cutoffIndex] - data.ci_05[cutoffIndex]) / 3.92;
-      const wpData = winProbabilities.candidates.find(c => c.name === name);
-      return {
-        name,
-        mean,
-        std: Math.max(std, 0.001),
-        color: wpData?.color || '#888888',
-      };
-    });
-  
-  // Monte Carlo simulation
-  const wins: Record<string, number> = {};
-  candidates.forEach(c => { wins[c.name] = 0; });
-  
-  for (let sim = 0; sim < numSimulations; sim++) {
-    let maxValue = -Infinity;
-    let winner = '';
-    
-    candidates.forEach((c, i) => {
-      const value = normalRandom(c.mean, c.std, sim * candidates.length + i);
-      if (value > maxValue) {
-        maxValue = value;
-        winner = c.name;
-      }
-    });
-    
-    if (winner) wins[winner]++;
-  }
-  
-  // Convert to sorted array
-  return candidates
-    .map(c => ({
-      name: c.name,
-      probability: wins[c.name] / numSimulations,
-      color: c.color,
-    }))
-    .sort((a, b) => b.probability - a.probability);
-}
 
 export async function generateMetadata({ 
   params 
@@ -125,11 +45,17 @@ export default async function Home({
   // Load presidential forecast data
   const { forecast, winProbabilities, trends, trajectories, polls, headToHead, runoffPairs, lastPollDate } = await loadPresidentialData();
   
-  // Compute leading probabilities at cutoff date
-  const cutoffProbabilities = computeLeadingProbabilitiesAtCutoff(trends, winProbabilities, lastPollDate);
+  // Use election day probabilities for the headline (not cutoff snapshot)
+  // This shows the model's forecast for who will win on election day,
+  // accounting for uncertainty over the remaining campaign period
+  const electionDayProbabilities = winProbabilities.candidates.map(c => ({
+    name: c.name,
+    probability: c.leading_probability,
+    color: c.color,
+  })).sort((a, b) => b.probability - a.probability);
   
-  // Get the leading candidate at cutoff
-  const leadingCandidate = cutoffProbabilities[0];
+  // Get the leading candidate based on election day forecast
+  const leadingCandidate = electionDayProbabilities[0];
   const secondRoundProbability = winProbabilities.second_round_probability;
   
   // Calculate days until election
@@ -234,7 +160,7 @@ export default async function Home({
               winProbabilities={winProbabilities}
               forecast={forecast}
               trends={trends}
-              cutoffDate={lastPollDate}
+              cutoffDate={null}  // Use election day probabilities, not snapshot
               maxCandidates={5}
               translations={{
                 chanceOfLeading: t('presidential.chanceOfLeading'),
