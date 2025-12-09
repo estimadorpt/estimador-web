@@ -13,6 +13,9 @@ interface PresidentialTrendChartProps {
   maxCandidates?: number;
 }
 
+// Mobile breakpoint (matches Tailwind's md)
+const MOBILE_BREAKPOINT = 768;
+
 export function PresidentialTrendChart({
   trends,
   polls,
@@ -23,7 +26,21 @@ export function PresidentialTrendChart({
   maxCandidates = 5,
 }: PresidentialTrendChartProps) {
   const { dates, candidates } = trends;
-  const [hoveredCandidate, setHoveredCandidate] = useState<string | null>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // On mobile, use tap to select; on desktop, hover works too
+  const hoveredCandidate = selectedCandidate;
 
   // Filter dates up to cutoff date + a few days padding
   const { filteredDates, cutoffIndex, displayMaxDate } = useMemo(() => {
@@ -63,14 +80,20 @@ export function PresidentialTrendChart({
     return candidateEntries.slice(0, maxCandidates);
   }, [candidates, maxCandidates, cutoffIndex]);
 
-  // Chart configuration
+  // Chart configuration - responsive margins
   const chartConfig = useMemo(() => {
     const parsedDates = filteredDates.map(d => new Date(d));
     const minDate = parsedDates[0];
     const maxDate = displayMaxDate;
     const dateRange = maxDate.getTime() - minDate.getTime();
 
-    const margin = { top: 30, right: 150, bottom: 50, left: 55 };
+    // Mobile: minimal right margin (labels go below); Desktop: space for inline labels
+    const margin = { 
+      top: 30, 
+      right: isMobile ? 20 : 150, 
+      bottom: isMobile ? 40 : 50, 
+      left: isMobile ? 45 : 55 
+    };
     const width = 800;
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
@@ -105,7 +128,7 @@ export function PresidentialTrendChart({
       yScale,
       cutoffIndex,
     };
-  }, [filteredDates, displayMaxDate, height, topCandidates, cutoffIndex]);
+  }, [filteredDates, displayMaxDate, height, topCandidates, cutoffIndex, isMobile]);
 
   // Generate paths for each candidate
   const candidatePaths = useMemo(() => {
@@ -273,11 +296,10 @@ export function PresidentialTrendChart({
   const lastDataX = chartConfig.xScale(chartConfig.parsedDates[chartConfig.cutoffIndex - 1]);
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full">
       <svg
         viewBox={`0 0 ${chartConfig.width} ${chartConfig.height}`}
-        className="w-full"
-        style={{ minWidth: '600px' }}
+        className="w-full h-auto"
       >
         {/* Background grid */}
         {yTicks.map(tick => (
@@ -426,8 +448,8 @@ export function PresidentialTrendChart({
           );
         })}
 
-        {/* End labels with connector lines */}
-        {labelPositions.map((pos) => {
+        {/* End labels with connector lines - desktop only */}
+        {!isMobile && labelPositions.map((pos) => {
           const { color, lastMean } = candidatePaths[pos.name];
           const isHovered = hoveredCandidate === pos.name;
           const isOtherHovered = hoveredCandidate !== null && !isHovered;
@@ -451,8 +473,8 @@ export function PresidentialTrendChart({
               {/* Label group */}
               <g
                 transform={`translate(${chartConfig.width - chartConfig.margin.right + 8}, ${pos.y})`}
-                onMouseEnter={() => setHoveredCandidate(pos.name)}
-                onMouseLeave={() => setHoveredCandidate(null)}
+                onMouseEnter={() => setSelectedCandidate(pos.name)}
+                onMouseLeave={() => setSelectedCandidate(null)}
                 style={{ cursor: 'pointer' }}
               >
                 <circle cx={0} cy={0} r={4} fill={color} />
@@ -499,22 +521,64 @@ export function PresidentialTrendChart({
         </text>
       </svg>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-4 mt-4 justify-center text-xs text-gray-500">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-0.5 bg-gray-400 rounded" />
+      {/* Mobile: Interactive candidate legend */}
+      {isMobile && (
+        <div className="grid grid-cols-2 gap-2 mt-4 px-1">
+          {topCandidates.map(([name, data]) => {
+            const lastMean = data.mean[chartConfig.cutoffIndex - 1];
+            const isSelected = selectedCandidate === name;
+            const isOtherSelected = selectedCandidate !== null && !isSelected;
+            
+            return (
+              <button
+                key={name}
+                onClick={() => setSelectedCandidate(isSelected ? null : name)}
+                className={`
+                  flex items-center gap-2 p-2 rounded-lg text-left transition-all
+                  ${isSelected 
+                    ? 'bg-gray-100 ring-2 ring-gray-300' 
+                    : 'bg-gray-50 hover:bg-gray-100'
+                  }
+                  ${isOtherSelected ? 'opacity-40' : 'opacity-100'}
+                `}
+              >
+                <div 
+                  className="w-3 h-3 rounded-full flex-shrink-0" 
+                  style={{ backgroundColor: data.color }} 
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-medium text-gray-700 truncate">
+                    {name}
+                  </div>
+                  <div 
+                    className="text-sm font-semibold tabular-nums"
+                    style={{ color: data.color }}
+                  >
+                    {(lastMean * 100).toFixed(1)}%
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Legend - always show, more compact on mobile */}
+      <div className="flex flex-wrap gap-3 md:gap-4 mt-4 justify-center text-[10px] md:text-xs text-gray-500">
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <div className="w-4 md:w-6 h-0.5 bg-gray-400 rounded" />
           <span>Mean estimate</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-3 bg-gray-400/30 rounded" />
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <div className="w-4 md:w-6 h-2 md:h-3 bg-gray-400/30 rounded" />
           <span>50% CI</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-3 bg-gray-400/15 rounded" />
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <div className="w-4 md:w-6 h-2 md:h-3 bg-gray-400/15 rounded" />
           <span>95% CI</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-gray-400" />
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-gray-400" />
           <span>Poll result</span>
         </div>
       </div>
