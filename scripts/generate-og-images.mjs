@@ -97,7 +97,6 @@ function formatProbability(value) {
 // Generate SVG for OG image with logo
 function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRoundProb) {
   const chanceLabel = locale === 'pt' ? 'probabilidade de ganhar a 1ª volta' : 'chance of winning 1st round';
-  const snapshotLabel = locale === 'pt' ? 'se as eleições fossem hoje' : 'if the election were held today';
   const secondRoundLabel = locale === 'pt' ? '2ª volta' : '2nd round';
 
   const top3 = candidatesWithSupport.slice(0, 3);
@@ -139,12 +138,8 @@ function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRo
     <text x="105" y="33" fill="#fafafa" font-size="28" font-weight="700">estimador</text>
   </g>
 
-  <!-- Snapshot label -->
-  <rect x="470" y="90" width="260" height="36" rx="18" fill="#f59e0b" opacity="0.9"/>
-  <text x="600" y="116" fill="#18181b" font-size="18" font-weight="700" text-anchor="middle">${snapshotLabel}</text>
-
   <!-- Candidate name -->
-  <text x="600" y="170" fill="#fafafa" font-size="60" font-weight="700" text-anchor="middle">${leadingCandidate.name}</text>
+  <text x="600" y="140" fill="#fafafa" font-size="60" font-weight="700" text-anchor="middle">${leadingCandidate.name}</text>
 
   <!-- Big probability -->
   <text x="600" y="340" fill="${leadingCandidate.color}" font-size="180" font-weight="900" text-anchor="middle">${formatProbability(leadingCandidate.probability)}</text>
