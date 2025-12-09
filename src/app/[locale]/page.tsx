@@ -229,6 +229,9 @@ export default async function Home({
               }}
             />
           </ErrorBoundary>
+          <p className="text-xs text-stone-500 mt-4 italic">
+            {t('presidential.firstRoundNote')}
+          </p>
         </div>
       </section>
 
