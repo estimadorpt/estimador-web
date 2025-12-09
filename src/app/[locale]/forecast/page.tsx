@@ -180,9 +180,17 @@ export default async function ForecastPage({
 
           {/* District Analysis */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Map className="w-5 h-5 text-green-medium" />
-              <h2 className="text-xl font-semibold text-gray-900">{t('forecast.districtAnalysis')}</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <Map className="w-5 h-5 text-green-medium" />
+                <h2 className="text-xl font-semibold text-gray-900">{t('forecast.districtAnalysis')}</h2>
+              </div>
+              <Link
+                href="/map"
+                className="text-sm text-navy hover:text-navy-light font-medium flex items-center gap-1"
+              >
+                {t('map.title')} →
+              </Link>
             </div>
             <DistrictSummary districtData={districtForecast} contestedData={contestedSeats} />
           </div>

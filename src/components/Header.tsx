@@ -24,7 +24,6 @@ export function Header() {
   const navigationItems = [
     { href: '/', label: t('nav.home') },
     { href: '/forecast', label: t('nav.parliamentaryForecast') },
-    { href: '/map', label: t('nav.map') },
     { href: '/about', label: t('nav.about') },
   ];
 
