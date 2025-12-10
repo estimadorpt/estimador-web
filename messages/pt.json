@@ -224,7 +224,7 @@
   "model": {
     "assumptions": {
       "title": "Pressupostos do Modelo",
-      "declared_voters": "Prevê apenas eleitores DECLARADOS (~65% do eleitorado)",
+      "declared_voters": "Prevê apenas eleitores declarados (~65% do eleitorado)",
       "undecided": "~35% de indecisos representam incerteza adicional",
       "house_effects": "House effects informados por dados de eleições parlamentares",
       "random_walk": "Dinâmica random walk (metodologia Economist/538)"
