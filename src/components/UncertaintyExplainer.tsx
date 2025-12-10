@@ -33,7 +33,7 @@ export function UncertaintyExplainer({ numPolls = 8 }: UncertaintyExplainerProps
             • {t('uncertainty.wider_bands')}
           </li>
           <li>
-            • <strong>{t('uncertainty.note')}:</strong> {t('uncertainty.undecided_note')}
+            • <strong>{t('uncertainty.note')}</strong> {t('uncertainty.undecided_note')}
           </li>
         </ul>
       </div>

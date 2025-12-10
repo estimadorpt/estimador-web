@@ -236,7 +236,7 @@
       "ci_explanation": "Estamos 80% confiantes de que o valor real está neste intervalo",
       "based_on_polls": "Baseado em {count} sondagens e modelação estatística Bayesiana",
       "wider_bands": "Bandas mais largas = mais incerteza",
-      "note": "Nota",
+      "note": "Nota:",
       "undecided_note": "~35% de eleitores indecisos adicionam incerteza adicional não mostrada"
     }
   },

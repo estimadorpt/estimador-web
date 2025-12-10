@@ -236,7 +236,7 @@
       "ci_explanation": "We're 80% confident the true value is in this range",
       "based_on_polls": "Based on {count} polls and Bayesian statistical modeling",
       "wider_bands": "Wider bands = more uncertainty",
-      "note": "Note",
+      "note": "Note:",
       "undecided_note": "~35% undecided voters add additional uncertainty not shown"
     }
   },
