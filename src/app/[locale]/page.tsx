@@ -7,6 +7,8 @@ import { PresidentialHeadToHead } from "@/components/charts/PresidentialHeadToHe
 import { PresidentialRunoffPairs } from "@/components/charts/PresidentialRunoffPairs";
 import { Header } from "@/components/Header";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ModelAssumptionsCard } from "@/components/ModelAssumptionsCard";
+import { UncertaintyExplainer } from "@/components/UncertaintyExplainer";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
@@ -364,6 +366,14 @@ export default async function Home({
                     <li>→ {t('presidential.factor3')}</li>
                   </ul>
                 </div>
+
+                {/* Model Assumptions Card */}
+                <div className="pt-4">
+                  <ModelAssumptionsCard />
+                </div>
+
+                {/* Uncertainty Explainer */}
+                <UncertaintyExplainer numPolls={polls?.length || 8} />
               </div>
             </div>
           </div>

@@ -221,6 +221,25 @@
     "runoffMatrix": "Todas as probabilidades de pares",
     "vs": "vs"
   },
+  "model": {
+    "assumptions": {
+      "title": "Pressupostos do Modelo",
+      "declared_voters": "Prevê apenas eleitores DECLARADOS (~65% do eleitorado)",
+      "undecided": "~35% de indecisos representam incerteza adicional",
+      "house_effects": "House effects informados por dados de eleições parlamentares",
+      "random_walk": "Dinâmica random walk (metodologia Economist/538)"
+    },
+    "uncertainty": {
+      "title": "O que significam estas bandas de incerteza?",
+      "description": "As bandas sombreadas mostram o intervalo onde esperamos que o apoio real esteja:",
+      "credible_interval": "Intervalo de credibilidade de 80%",
+      "ci_explanation": "Estamos 80% confiantes de que o valor real está neste intervalo",
+      "based_on_polls": "Baseado em {count} sondagens e modelação estatística Bayesiana",
+      "wider_bands": "Bandas mais largas = mais incerteza",
+      "note": "Nota",
+      "undecided_note": "~35% de eleitores indecisos adicionam incerteza adicional não mostrada"
+    }
+  },
   "meta": {
     "defaultTitle": "estimador.pt - Previsões Eleitorais Portuguesas",
     "defaultDescription": "Previsões eleitorais baseadas em dados para a democracia portuguesa. Previsões probabilísticas em tempo real, análise de sondagens e insights eleitorais.",

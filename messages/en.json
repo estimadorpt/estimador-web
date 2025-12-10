@@ -221,6 +221,25 @@
     "runoffMatrix": "All pair probabilities",
     "vs": "vs"
   },
+  "model": {
+    "assumptions": {
+      "title": "Model Assumptions",
+      "declared_voters": "Forecasts DECLARED voters only (~65% of electorate)",
+      "undecided": "~35% undecided represent additional uncertainty",
+      "house_effects": "House effects informed by parliamentary election data",
+      "random_walk": "Random walk dynamics (Economist/538 methodology)"
+    },
+    "uncertainty": {
+      "title": "What do these uncertainty bands mean?",
+      "description": "The shaded bands show the range where we expect true support to lie:",
+      "credible_interval": "80% credible interval",
+      "ci_explanation": "We're 80% confident the true value is in this range",
+      "based_on_polls": "Based on {count} polls and Bayesian statistical modeling",
+      "wider_bands": "Wider bands = more uncertainty",
+      "note": "Note",
+      "undecided_note": "~35% undecided voters add additional uncertainty not shown"
+    }
+  },
   "meta": {
     "defaultTitle": "estimador.pt - Portuguese Election Forecasting",
     "defaultDescription": "Data-driven election forecasting for Portuguese democracy. Real-time probabilistic forecasts, polling analysis, and electoral insights.",
