@@ -139,6 +139,20 @@ export interface PresidentialTrendsData {
   candidates: Record<string, PresidentialCandidateTrend>;
 }
 
+// Presidential snapshot leader probabilities over time
+// (from presidential_snapshot_probabilities.json)
+export interface PresidentialCandidateSnapshotProbabilities {
+  color: string;
+  leading_probability: number[];
+}
+
+export interface PresidentialSnapshotProbabilitiesData {
+  election_date: string;
+  dates: string[];
+  metric: string;
+  candidates: Record<string, PresidentialCandidateSnapshotProbabilities>;
+}
+
 // Presidential trajectories for spaghetti plot (from presidential_trajectories.json)
 export interface PresidentialCandidateTrajectories {
   color: string;

@@ -184,7 +184,7 @@
     "daysUntil": "{days} days until election",
     "forecastTitle": "Presidential Election Forecast",
     "leadingHeadline": "{candidate} leads with {probability} chance of winning the first round",
-    "snapshotHeadline": "If the election were held today, {candidate} would have a {probability} chance of winning the first round",
+    "snapshotHeadline": "If the election were held today, {candidate} would have a {probability} chance of leading the first round",
     "forecastDescription": "Our model shows a {secondRoundProbability} probability of a second round being needed, with no candidate reaching the 50% threshold in the first round.",
     "snapshotDescription": "Based on the latest polls, there is a {secondRoundProbability} probability of a second round being needed.",
     "basedOnPolls": "Based on latest polling data",

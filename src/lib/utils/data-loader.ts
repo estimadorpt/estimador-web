@@ -8,6 +8,7 @@ import {
   PresidentialForecastData,
   PresidentialWinProbabilitiesData,
   PresidentialTrendsData,
+  PresidentialSnapshotProbabilitiesData,
   PresidentialTrajectoriesData,
   PresidentialPollsData,
   PresidentialHouseEffectsData,
@@ -55,10 +56,16 @@ export async function loadForecastData() {
 // Presidential forecast data loader
 export async function loadPresidentialData() {
   try {
-    const [forecast, winProbabilities, trends, trajectories, polls, houseEffects, headToHead, runoffPairs] = await Promise.all([
+    const [forecast, winProbabilities, trends, snapshotProbabilities, trajectories, polls, houseEffects, headToHead, runoffPairs] = await Promise.all([
       loadJsonData<PresidentialForecastData>('presidential_forecast.json'),
       loadJsonData<PresidentialWinProbabilitiesData>('presidential_win_probabilities.json'),
       loadJsonData<PresidentialTrendsData>('presidential_trends.json'),
+      loadJsonData<PresidentialSnapshotProbabilitiesData>('presidential_snapshot_probabilities.json').catch(() => ({
+        election_date: '2026-01-18',
+        dates: [],
+        metric: 'first_round_leader_probability',
+        candidates: {}
+      })),
       loadJsonData<PresidentialTrajectoriesData>('presidential_trajectories.json'),
       loadJsonData<PresidentialPollsData>('presidential_polls.json').catch(() => ({ polls: [] })),
       loadJsonData<PresidentialHouseEffectsData>('presidential_house_effects.json').catch(() => ({ 
@@ -97,6 +104,7 @@ export async function loadPresidentialData() {
       forecast,
       winProbabilities,
       trends,
+      snapshotProbabilities,
       trajectories,
       polls,
       houseEffects,
@@ -123,6 +131,12 @@ export async function loadPresidentialData() {
         dates: [],
         candidates: {}
       } as PresidentialTrendsData,
+      snapshotProbabilities: {
+        election_date: '2026-01-18',
+        dates: [],
+        metric: 'first_round_leader_probability',
+        candidates: {}
+      } as PresidentialSnapshotProbabilitiesData,
       trajectories: {
         election_date: '2026-01-18',
         dates: [],

@@ -45,71 +45,29 @@ export default async function Home({
   const t = await getTranslations({ locale });
   
   // Load presidential forecast data
-  const { forecast, winProbabilities, trends, trajectories, polls, headToHead, runoffPairs, lastPollDate } = await loadPresidentialData();
+  const { forecast, winProbabilities, trends, snapshotProbabilities: snapshotProbabilitiesData, trajectories, polls, headToHead, runoffPairs, lastPollDate } = await loadPresidentialData();
 
   // Use snapshot probabilities (as of last poll date) instead of election day forecast
   // This shows "if the election were held today" which is more appropriate when
   // we're far from election day and don't have strong assumptions about future movement
 
-  // Helper functions for Monte Carlo simulation
-  function seededRandom(seed: number) {
-    const x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
-  }
-
-  function normalRandom(mean: number, std: number, seed: number): number {
-    const u1 = seededRandom(seed);
-    const u2 = seededRandom(seed + 1);
-    const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    return mean + std * z;
-  }
-
-  // Calculate cutoff index for trends data (last poll date)
+  // Calculate cutoff index for snapshot probabilities data (last poll date)
   const cutoffDate = lastPollDate ? new Date(lastPollDate) : null;
+  const snapshotDates = snapshotProbabilitiesData?.dates?.length
+    ? snapshotProbabilitiesData.dates
+    : trends.dates;
   const cutoffIndex = cutoffDate
-    ? trends.dates.findIndex((d: string) => new Date(d) > cutoffDate) - 1
-    : trends.dates.length - 1;
-  const safeIndex = Math.max(0, cutoffIndex === -1 ? trends.dates.length - 1 : cutoffIndex);
+    ? snapshotDates.findIndex((d: string) => new Date(d) > cutoffDate) - 1
+    : snapshotDates.length - 1;
+  const safeIndex = Math.max(0, cutoffIndex === -1 ? snapshotDates.length - 1 : cutoffIndex);
 
-  // Compute snapshot probabilities using Monte Carlo simulation
-  const candidates = Object.entries(trends.candidates as Record<string, { mean: number[]; ci_95: number[]; ci_05: number[] }>)
+  // Snapshot probabilities are computed from joint posterior draws (not independent normals)
+  const snapshotProbabilities = Object.entries(snapshotProbabilitiesData?.candidates || {})
     .filter(([name]) => name !== 'Others')
-    .map(([name, data]) => {
-      const mean = data.mean[safeIndex];
-      const std = (data.ci_95[safeIndex] - data.ci_05[safeIndex]) / 3.92;
-      const wpData = winProbabilities.candidates.find((c: { name: string; color: string }) => c.name === name);
-      return {
-        name,
-        mean,
-        std: Math.max(std, 0.001),
-        color: wpData?.color || '#888888',
-      };
-    });
-
-  // Run Monte Carlo simulation for snapshot probabilities
-  const numSimulations = 5000;
-  const wins: Record<string, number> = {};
-  candidates.forEach(c => { wins[c.name] = 0; });
-
-  for (let sim = 0; sim < numSimulations; sim++) {
-    let maxValue = -Infinity;
-    let winner = '';
-    candidates.forEach((c, idx) => {
-      const value = normalRandom(c.mean, c.std, sim * candidates.length + idx);
-      if (value > maxValue) {
-        maxValue = value;
-        winner = c.name;
-      }
-    });
-    if (winner) wins[winner]++;
-  }
-
-  // Calculate snapshot probabilities
-  const snapshotProbabilities = candidates
-    .map(c => ({
-      name: c.name,
-      probability: wins[c.name] / numSimulations,
-      color: c.color,
+    .map(([name, data]) => ({
+      name,
+      probability: data.leading_probability?.[safeIndex] ?? 0,
+      color: data.color,
     }))
     .sort((a, b) => b.probability - a.probability);
 
