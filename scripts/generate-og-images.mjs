@@ -18,71 +18,30 @@ function loadJsonData(filename) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
-// Simple seeded random for reproducibility
-function seededRandom(seed) {
-  const x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
-}
-
-// Box-Muller transform for normal distribution
-function normalRandom(mean, std, seed) {
-  const u1 = seededRandom(seed);
-  const u2 = seededRandom(seed + 1);
-  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-  return mean + std * z;
-}
-
-// Compute probabilities at cutoff
-function computeLeadingProbabilitiesAtCutoff(trends, winProbabilities, cutoffDate, numSimulations = 5000) {
-  if (!cutoffDate) {
-    return winProbabilities.candidates.map(c => ({
-      name: c.name,
-      probability: c.leading_probability,
-      color: c.color,
-    }));
+// Get probabilities from snapshot data (computed from joint posterior)
+function getLeadingProbabilitiesAtCutoff(snapshotProbabilities, cutoffDate) {
+  if (!snapshotProbabilities?.dates || !cutoffDate) {
+    // Fallback to election day probabilities
+    return Object.entries(snapshotProbabilities?.candidates || {})
+      .filter(([name]) => name !== 'Others')
+      .map(([name, data]) => ({
+        name,
+        probability: data.leading_probability?.[data.leading_probability.length - 1] ?? 0,
+        color: data.color,
+      }))
+      .sort((a, b) => b.probability - a.probability);
   }
 
   const cutoff = new Date(cutoffDate);
-  const idx = trends.dates.findIndex(d => new Date(d) > cutoff);
-  const cutoffIndex = idx === -1 ? trends.dates.length - 1 : idx - 1;
+  const idx = snapshotProbabilities.dates.findIndex(d => new Date(d) > cutoff);
+  const cutoffIndex = idx === -1 ? snapshotProbabilities.dates.length - 1 : Math.max(0, idx - 1);
 
-  const candidates = Object.entries(trends.candidates)
+  return Object.entries(snapshotProbabilities.candidates)
     .filter(([name]) => name !== 'Others')
-    .map(([name, data]) => {
-      const mean = data.mean[cutoffIndex];
-      const std = (data.ci_95[cutoffIndex] - data.ci_05[cutoffIndex]) / 3.92;
-      const wpData = winProbabilities.candidates.find(c => c.name === name);
-      return {
-        name,
-        mean,
-        std: Math.max(std, 0.001),
-        color: wpData?.color || '#888888',
-      };
-    });
-
-  const wins = {};
-  candidates.forEach(c => { wins[c.name] = 0; });
-
-  for (let sim = 0; sim < numSimulations; sim++) {
-    let maxValue = -Infinity;
-    let winner = '';
-
-    candidates.forEach((c, i) => {
-      const value = normalRandom(c.mean, c.std, sim * candidates.length + i);
-      if (value > maxValue) {
-        maxValue = value;
-        winner = c.name;
-      }
-    });
-
-    if (winner) wins[winner]++;
-  }
-
-  return candidates
-    .map(c => ({
-      name: c.name,
-      probability: wins[c.name] / numSimulations,
-      color: c.color,
+    .map(([name, data]) => ({
+      name,
+      probability: data.leading_probability[cutoffIndex],
+      color: data.color,
     }))
     .sort((a, b) => b.probability - a.probability);
 }
@@ -175,6 +134,7 @@ async function main() {
   const winProbabilities = loadJsonData('presidential_win_probabilities.json');
   const trends = loadJsonData('presidential_trends.json');
   const polls = loadJsonData('presidential_polls.json');
+  const snapshotProbabilities = loadJsonData('presidential_snapshot_probabilities.json');
 
   // Calculate last poll date
   let lastPollDate = null;
@@ -187,8 +147,8 @@ async function main() {
     }
   }
 
-  // Compute probabilities
-  const cutoffProbabilities = computeLeadingProbabilitiesAtCutoff(trends, winProbabilities, lastPollDate);
+  // Get probabilities from snapshot data (computed from joint posterior)
+  const cutoffProbabilities = getLeadingProbabilitiesAtCutoff(snapshotProbabilities, lastPollDate);
   const leadingCandidate = cutoffProbabilities[0];
   const secondRoundProb = winProbabilities.second_round_probability;
 
