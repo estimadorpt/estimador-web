@@ -180,7 +180,8 @@ export default async function Home({
               winProbabilities={winProbabilities}
               forecast={forecast}
               trends={trends}
-              cutoffDate={lastPollDate}  // Use snapshot probabilities (as of last poll)
+              snapshotProbabilities={snapshotProbabilitiesData}
+              cutoffDate={lastPollDate}
               maxCandidates={5}
               translations={{
                 chanceOfLeading: t('presidential.chanceOfLeading'),

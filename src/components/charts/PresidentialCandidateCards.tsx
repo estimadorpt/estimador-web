@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { PresidentialWinProbabilitiesData, PresidentialForecastData, PresidentialTrendsData } from '@/types';
+import { PresidentialWinProbabilitiesData, PresidentialForecastData, PresidentialTrendsData, PresidentialSnapshotProbabilitiesData } from '@/types';
 import { presidentialCandidateParties, partyColors } from '@/lib/config/colors';
 
 interface PresidentialCandidateCardsProps {
   winProbabilities: PresidentialWinProbabilitiesData;
   forecast: PresidentialForecastData;
   trends?: PresidentialTrendsData;
+  snapshotProbabilities?: PresidentialSnapshotProbabilitiesData;
   cutoffDate?: string;
   maxCandidates?: number;
   translations?: {
@@ -17,57 +18,11 @@ interface PresidentialCandidateCardsProps {
   };
 }
 
-// Simple seeded random for reproducibility
-function seededRandom(seed: number) {
-  const x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
-}
-
-// Box-Muller transform for normal distribution
-function normalRandom(mean: number, std: number, seed: number): number {
-  const u1 = seededRandom(seed);
-  const u2 = seededRandom(seed + 1);
-  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-  return mean + std * z;
-}
-
-// Compute approximate win probabilities using Monte Carlo simulation
-function computeLeadingProbabilities(
-  candidates: Array<{ name: string; mean: number; std: number; color: string }>,
-  numSimulations: number = 5000
-): Record<string, number> {
-  const wins: Record<string, number> = {};
-  candidates.forEach(c => { wins[c.name] = 0; });
-  
-  for (let sim = 0; sim < numSimulations; sim++) {
-    let maxValue = -Infinity;
-    let winner = '';
-    
-    candidates.forEach((c, idx) => {
-      const value = normalRandom(c.mean, c.std, sim * candidates.length + idx);
-      if (value > maxValue) {
-        maxValue = value;
-        winner = c.name;
-      }
-    });
-    
-    if (winner) {
-      wins[winner]++;
-    }
-  }
-  
-  const probs: Record<string, number> = {};
-  candidates.forEach(c => {
-    probs[c.name] = wins[c.name] / numSimulations;
-  });
-  
-  return probs;
-}
-
 export function PresidentialCandidateCards({
   winProbabilities,
   forecast,
   trends,
+  snapshotProbabilities,
   cutoffDate,
   maxCandidates = 5,
   translations = {
@@ -76,36 +31,26 @@ export function PresidentialCandidateCards({
     partyLabel: 'Party',
   },
 }: PresidentialCandidateCardsProps) {
-  // Calculate cutoff index for trends data
+  // Calculate cutoff index for trends/snapshot data
   const cutoffIndex = useMemo(() => {
-    if (!trends || !cutoffDate) return -1;
+    if (!cutoffDate) return -1;
+    const dates = snapshotProbabilities?.dates || trends?.dates;
+    if (!dates) return -1;
     const cutoff = new Date(cutoffDate);
-    const idx = trends.dates.findIndex(d => new Date(d) > cutoff);
-    return idx === -1 ? trends.dates.length - 1 : idx - 1;
-  }, [trends, cutoffDate]);
+    const idx = dates.findIndex(d => new Date(d) > cutoff);
+    return idx === -1 ? dates.length - 1 : idx - 1;
+  }, [snapshotProbabilities, trends, cutoffDate]);
 
-  // Compute leading probabilities at cutoff using Monte Carlo
+  // Get leading probabilities from snapshot data (computed from joint posterior)
   const leadingProbabilities = useMemo(() => {
-    if (!trends || cutoffIndex < 0) return null;
+    if (!snapshotProbabilities || cutoffIndex < 0) return null;
     
-    // Build candidate data for simulation (include all candidates, not just top N)
-    const allCandidates = Object.entries(trends.candidates)
-      .filter(([name]) => name !== 'Others')
-      .map(([name, data]) => {
-        const mean = data.mean[cutoffIndex];
-        // Estimate std from 95% CI: std ≈ (ci_95 - ci_05) / 3.92
-        const std = (data.ci_95[cutoffIndex] - data.ci_05[cutoffIndex]) / 3.92;
-        const wpData = winProbabilities.candidates.find(c => c.name === name);
-        return {
-          name,
-          mean,
-          std: Math.max(std, 0.001), // Avoid zero std
-          color: wpData?.color || '#888888',
-        };
-      });
-    
-    return computeLeadingProbabilities(allCandidates);
-  }, [trends, cutoffIndex, winProbabilities.candidates]);
+    const probs: Record<string, number> = {};
+    for (const [name, data] of Object.entries(snapshotProbabilities.candidates)) {
+      probs[name] = data.leading_probability[cutoffIndex];
+    }
+    return probs;
+  }, [snapshotProbabilities, cutoffIndex]);
 
   // Combine data from both sources, using trends data at cutoff if available
   const candidateData = winProbabilities.candidates
