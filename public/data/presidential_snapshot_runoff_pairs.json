@@ -1,0 +1,150 @@
+{
+  "election_date": "2026-01-18",
+  "pairs": [
+    {
+      "candidate_a": "Gouveia e Melo",
+      "candidate_b": "Marques Mendes",
+      "probability": 0.3232,
+      "color_a": "#4A90D9",
+      "color_b": "#FF8C00"
+    },
+    {
+      "candidate_a": "André Ventura",
+      "candidate_b": "Marques Mendes",
+      "probability": 0.2308,
+      "color_a": "#8B0000",
+      "color_b": "#FF8C00"
+    },
+    {
+      "candidate_a": "André Ventura",
+      "candidate_b": "Gouveia e Melo",
+      "probability": 0.1668,
+      "color_a": "#8B0000",
+      "color_b": "#4A90D9"
+    },
+    {
+      "candidate_a": "António José Seguro",
+      "candidate_b": "Marques Mendes",
+      "probability": 0.1087,
+      "color_a": "#FF69B4",
+      "color_b": "#FF8C00"
+    },
+    {
+      "candidate_a": "António José Seguro",
+      "candidate_b": "Gouveia e Melo",
+      "probability": 0.0803,
+      "color_a": "#FF69B4",
+      "color_b": "#4A90D9"
+    },
+    {
+      "candidate_a": "André Ventura",
+      "candidate_b": "António José Seguro",
+      "probability": 0.0512,
+      "color_a": "#8B0000",
+      "color_b": "#FF69B4"
+    },
+    {
+      "candidate_a": "Cotrim Figueiredo",
+      "candidate_b": "Marques Mendes",
+      "probability": 0.015,
+      "color_a": "#00CED1",
+      "color_b": "#FF8C00"
+    },
+    {
+      "candidate_a": "Cotrim Figueiredo",
+      "candidate_b": "Gouveia e Melo",
+      "probability": 0.0123,
+      "color_a": "#00CED1",
+      "color_b": "#4A90D9"
+    },
+    {
+      "candidate_a": "André Ventura",
+      "candidate_b": "Cotrim Figueiredo",
+      "probability": 0.0065,
+      "color_a": "#8B0000",
+      "color_b": "#00CED1"
+    },
+    {
+      "candidate_a": "António José Seguro",
+      "candidate_b": "Cotrim Figueiredo",
+      "probability": 0.0032,
+      "color_a": "#FF69B4",
+      "color_b": "#00CED1"
+    },
+    {
+      "candidate_a": "Marques Mendes",
+      "candidate_b": "Others",
+      "probability": 0.001,
+      "color_a": "#FF8C00",
+      "color_b": "#808080"
+    },
+    {
+      "candidate_a": "Gouveia e Melo",
+      "candidate_b": "Others",
+      "probability": 0.0008,
+      "color_a": "#4A90D9",
+      "color_b": "#808080"
+    },
+    {
+      "candidate_a": "André Ventura",
+      "candidate_b": "Others",
+      "probability": 0.0003,
+      "color_a": "#8B0000",
+      "color_b": "#808080"
+    }
+  ],
+  "matrix": {
+    "candidates": [
+      "Gouveia e Melo",
+      "Marques Mendes",
+      "António José Seguro",
+      "André Ventura",
+      "Cotrim Figueiredo"
+    ],
+    "colors": [
+      "#4A90D9",
+      "#FF8C00",
+      "#FF69B4",
+      "#8B0000",
+      "#00CED1"
+    ],
+    "probabilities": [
+      [
+        0.0,
+        0.3232,
+        0.0803,
+        0.1668,
+        0.0123
+      ],
+      [
+        0.3232,
+        0.0,
+        0.1087,
+        0.2308,
+        0.015
+      ],
+      [
+        0.0803,
+        0.1087,
+        0.0,
+        0.0512,
+        0.0032
+      ],
+      [
+        0.1668,
+        0.2308,
+        0.0512,
+        0.0,
+        0.0065
+      ],
+      [
+        0.0123,
+        0.015,
+        0.0032,
+        0.0065,
+        0.0
+      ]
+    ]
+  },
+  "snapshot_date": "2025-12-16"
+}
