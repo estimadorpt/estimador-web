@@ -45,6 +45,7 @@ export default async function Home({
   const t = await getTranslations({ locale });
   
   // Load presidential forecast data
+  // runoffPairs is either snapshot (at last poll date) or election day, handled by data loader
   const { forecast, winProbabilities, trends, snapshotProbabilities: snapshotProbabilitiesData, trajectories, polls, headToHead, runoffPairs, lastPollDate } = await loadPresidentialData();
 
   // Use snapshot probabilities (as of last poll date) instead of election day forecast

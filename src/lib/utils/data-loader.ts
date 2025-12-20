@@ -56,7 +56,7 @@ export async function loadForecastData() {
 // Presidential forecast data loader
 export async function loadPresidentialData() {
   try {
-    const [forecast, winProbabilities, trends, snapshotProbabilities, trajectories, polls, houseEffects, headToHead, runoffPairs] = await Promise.all([
+    const [forecast, winProbabilities, trends, snapshotProbabilities, trajectories, polls, houseEffects, headToHead, electionDayRunoffPairs, snapshotRunoffPairs] = await Promise.all([
       loadJsonData<PresidentialForecastData>('presidential_forecast.json'),
       loadJsonData<PresidentialWinProbabilitiesData>('presidential_win_probabilities.json'),
       loadJsonData<PresidentialTrendsData>('presidential_trends.json'),
@@ -86,7 +86,9 @@ export async function loadPresidentialData() {
         election_date: '2026-01-18',
         pairs: [],
         matrix: { candidates: [], colors: [], probabilities: [] }
-      }))
+      })),
+      // Try to load snapshot runoff pairs (computed at last poll date from full posterior)
+      loadJsonData<PresidentialRunoffPairsData>('presidential_snapshot_runoff_pairs.json').catch(() => null)
     ]);
 
     // Calculate last poll date
@@ -99,6 +101,10 @@ export async function loadPresidentialData() {
         }
       }
     }
+
+    // Use snapshot runoff pairs (computed at last poll date from full posterior)
+    // if available, otherwise fall back to election day runoff pairs
+    const runoffPairs = snapshotRunoffPairs || electionDayRunoffPairs;
 
     return {
       forecast,
