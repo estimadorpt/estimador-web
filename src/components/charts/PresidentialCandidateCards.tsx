@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { PresidentialWinProbabilitiesData, PresidentialForecastData, PresidentialTrendsData, PresidentialSnapshotProbabilitiesData } from '@/types';
+import { PresidentialWinProbabilitiesData, PresidentialForecastData, PresidentialTrendsData, PresidentialSnapshotProbabilitiesData, PresidentialChangesData } from '@/types';
 import { presidentialCandidateParties, partyColors } from '@/lib/config/colors';
 
 interface PresidentialCandidateCardsProps {
@@ -9,12 +9,14 @@ interface PresidentialCandidateCardsProps {
   forecast: PresidentialForecastData;
   trends?: PresidentialTrendsData;
   snapshotProbabilities?: PresidentialSnapshotProbabilitiesData;
+  changes?: PresidentialChangesData | null;
   cutoffDate?: string;
   maxCandidates?: number;
   translations?: {
     chanceOfLeading: string;
     voteShare: string;
     partyLabel: string;
+    sinceLastPoll: string;
   };
 }
 
@@ -23,12 +25,14 @@ export function PresidentialCandidateCards({
   forecast,
   trends,
   snapshotProbabilities,
+  changes,
   cutoffDate,
   maxCandidates = 5,
   translations = {
     chanceOfLeading: 'Chance of leading',
     voteShare: 'Vote share',
     partyLabel: 'Party',
+    sinceLastPoll: 'since last poll',
   },
 }: PresidentialCandidateCardsProps) {
   // Calculate cutoff index for trends/snapshot data
@@ -51,6 +55,16 @@ export function PresidentialCandidateCards({
     }
     return probs;
   }, [snapshotProbabilities, cutoffIndex]);
+
+  // Build a map of changes by candidate name
+  const changesMap = useMemo(() => {
+    if (!changes) return {};
+    const map: Record<string, { change: number; change_pp: number }> = {};
+    for (const c of changes.candidates) {
+      map[c.name] = { change: c.change, change_pp: c.change_pp };
+    }
+    return map;
+  }, [changes]);
 
   // Combine data from both sources, using trends data at cutoff if available
   const candidateData = winProbabilities.candidates
@@ -78,6 +92,9 @@ export function PresidentialCandidateCards({
         }
       }
       
+      // Get change since last poll
+      const candidateChange = changesMap[wp.name];
+      
       return {
         ...wp,
         forecastData,
@@ -86,6 +103,7 @@ export function PresidentialCandidateCards({
         displayLeadingProb,
         party,
         partyColor: party ? partyColors[party as keyof typeof partyColors] : null,
+        change_pp: candidateChange?.change_pp || 0,
       };
     })
     // Re-sort by leading probability at cutoff
@@ -135,11 +153,24 @@ export function PresidentialCandidateCards({
 
           {/* Win probability - big number */}
           <div className="mb-2">
-            <div 
-              className="text-4xl font-black tabular-nums tracking-tighter"
-              style={{ color: candidate.color }}
-            >
-              {formatPercentRounded(candidate.displayLeadingProb)}
+            <div className="flex items-baseline gap-2">
+              <div 
+                className="text-4xl font-black tabular-nums tracking-tighter"
+                style={{ color: candidate.color }}
+              >
+                {formatPercentRounded(candidate.displayLeadingProb)}
+              </div>
+              {/* Change indicator */}
+              {candidate.change_pp !== 0 && Math.abs(candidate.change_pp) >= 0.5 && (
+                <div 
+                  className={`text-sm font-semibold tabular-nums ${
+                    candidate.change_pp > 0 ? 'text-emerald-600' : 'text-red-500'
+                  }`}
+                >
+                  {candidate.change_pp > 0 ? '↑' : '↓'}
+                  {Math.abs(Math.round(candidate.change_pp))}
+                </div>
+              )}
             </div>
             <div className="text-[10px] text-stone-400 uppercase tracking-wide">
               {translations.chanceOfLeading}

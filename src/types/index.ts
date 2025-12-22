@@ -224,6 +224,25 @@ export interface PresidentialRunoffPairsData {
   matrix: PresidentialRunoffMatrix;
 }
 
+// Presidential changes since last poll (from presidential_changes.json)
+export interface PresidentialCandidateChange {
+  name: string;
+  color: string;
+  current: number;
+  previous: number;
+  change: number;
+  change_pp: number;
+}
+
+export interface PresidentialChangesData {
+  current_date: string;
+  previous_date: string;
+  n_polls_current: number;
+  n_polls_previous: number;
+  total_polls: number;
+  candidates: PresidentialCandidateChange[];
+}
+
 // Municipal election types
 export interface MunicipalElection extends ElectionConfig {
   type: 'municipal';

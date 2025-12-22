@@ -1,0 +1,73 @@
+{
+  "current_date": "2025-12-19",
+  "previous_date": "2025-12-16",
+  "n_polls_current": 1,
+  "n_polls_previous": 1,
+  "total_polls": 12,
+  "candidates": [
+    {
+      "name": "André Ventura",
+      "color": "#8B0000",
+      "current": 0.462,
+      "previous": 0.4763,
+      "change": -0.0143,
+      "change_pp": -1.43
+    },
+    {
+      "name": "Marques Mendes",
+      "color": "#FF8C00",
+      "current": 0.4193,
+      "previous": 0.4215,
+      "change": -0.0022,
+      "change_pp": -0.22
+    },
+    {
+      "name": "Gouveia e Melo",
+      "color": "#4A90D9",
+      "current": 0.0762,
+      "previous": 0.072,
+      "change": 0.0042,
+      "change_pp": 0.42
+    },
+    {
+      "name": "António José Seguro",
+      "color": "#FF69B4",
+      "current": 0.041,
+      "previous": 0.03,
+      "change": 0.011,
+      "change_pp": 1.1
+    },
+    {
+      "name": "Cotrim Figueiredo",
+      "color": "#00CED1",
+      "current": 0.0015,
+      "previous": 0.0003,
+      "change": 0.0012,
+      "change_pp": 0.12
+    },
+    {
+      "name": "Catarina Martins",
+      "color": "#DC143C",
+      "current": 0.0,
+      "previous": 0.0,
+      "change": 0.0,
+      "change_pp": 0.0
+    },
+    {
+      "name": "António Filipe",
+      "color": "#228B22",
+      "current": 0.0,
+      "previous": 0.0,
+      "change": 0.0,
+      "change_pp": 0.0
+    },
+    {
+      "name": "Jorge Pinto",
+      "color": "#666666",
+      "current": 0.0,
+      "previous": 0.0,
+      "change": 0.0,
+      "change_pp": 0.0
+    }
+  ]
+}

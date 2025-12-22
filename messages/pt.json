@@ -219,7 +219,8 @@
     "runoffScenariosDescription": "Com uma segunda volta quase certa, estes são os confrontos de candidatos mais prováveis com base nas nossas simulações.",
     "mostLikelyMatchups": "Confrontos mais prováveis",
     "runoffMatrix": "Todas as probabilidades de pares",
-    "vs": "vs"
+    "vs": "vs",
+    "sinceLastPoll": "desde última sondagem"
   },
   "model": {
     "assumptions": {

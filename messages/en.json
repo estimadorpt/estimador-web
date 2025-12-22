@@ -219,7 +219,8 @@
     "runoffScenariosDescription": "With a second round nearly certain, these are the most likely candidate matchups based on our simulations.",
     "mostLikelyMatchups": "Most likely matchups",
     "runoffMatrix": "All pair probabilities",
-    "vs": "vs"
+    "vs": "vs",
+    "sinceLastPoll": "since last poll"
   },
   "model": {
     "assumptions": {

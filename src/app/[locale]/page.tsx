@@ -46,7 +46,7 @@ export default async function Home({
   
   // Load presidential forecast data
   // runoffPairs is either snapshot (at last poll date) or election day, handled by data loader
-  const { forecast, winProbabilities, trends, snapshotProbabilities: snapshotProbabilitiesData, trajectories, polls, headToHead, runoffPairs, lastPollDate } = await loadPresidentialData();
+  const { forecast, winProbabilities, trends, snapshotProbabilities: snapshotProbabilitiesData, trajectories, polls, headToHead, runoffPairs, changes, lastPollDate } = await loadPresidentialData();
 
   // Use snapshot probabilities (as of last poll date) instead of election day forecast
   // This shows "if the election were held today" which is more appropriate when
@@ -182,12 +182,14 @@ export default async function Home({
               forecast={forecast}
               trends={trends}
               snapshotProbabilities={snapshotProbabilitiesData}
+              changes={changes}
               cutoffDate={lastPollDate}
               maxCandidates={5}
               translations={{
                 chanceOfLeading: t('presidential.chanceOfLeading'),
                 voteShare: t('presidential.voteShare'),
                 partyLabel: t('presidential.partyAffiliation'),
+                sinceLastPoll: t('presidential.sinceLastPoll'),
               }}
             />
           </ErrorBoundary>

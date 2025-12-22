@@ -13,7 +13,8 @@ import {
   PresidentialPollsData,
   PresidentialHouseEffectsData,
   PresidentialHeadToHeadData,
-  PresidentialRunoffPairsData
+  PresidentialRunoffPairsData,
+  PresidentialChangesData
 } from '@/types';
 
 // Load data from the public directory
@@ -56,7 +57,7 @@ export async function loadForecastData() {
 // Presidential forecast data loader
 export async function loadPresidentialData() {
   try {
-    const [forecast, winProbabilities, trends, snapshotProbabilities, trajectories, polls, houseEffects, headToHead, electionDayRunoffPairs, snapshotRunoffPairs] = await Promise.all([
+    const [forecast, winProbabilities, trends, snapshotProbabilities, trajectories, polls, houseEffects, headToHead, electionDayRunoffPairs, snapshotRunoffPairs, changes] = await Promise.all([
       loadJsonData<PresidentialForecastData>('presidential_forecast.json'),
       loadJsonData<PresidentialWinProbabilitiesData>('presidential_win_probabilities.json'),
       loadJsonData<PresidentialTrendsData>('presidential_trends.json'),
@@ -88,7 +89,9 @@ export async function loadPresidentialData() {
         matrix: { candidates: [], colors: [], probabilities: [] }
       })),
       // Try to load snapshot runoff pairs (computed at last poll date from full posterior)
-      loadJsonData<PresidentialRunoffPairsData>('presidential_snapshot_runoff_pairs.json').catch(() => null)
+      loadJsonData<PresidentialRunoffPairsData>('presidential_snapshot_runoff_pairs.json').catch(() => null),
+      // Load changes since last poll
+      loadJsonData<PresidentialChangesData>('presidential_changes.json').catch(() => null)
     ]);
 
     // Calculate last poll date
@@ -116,6 +119,7 @@ export async function loadPresidentialData() {
       houseEffects,
       headToHead,
       runoffPairs,
+      changes,
       lastPollDate
     };
   } catch (error) {
@@ -171,6 +175,7 @@ export async function loadPresidentialData() {
         pairs: [],
         matrix: { candidates: [], colors: [], probabilities: [] }
       } as PresidentialRunoffPairsData,
+      changes: null as PresidentialChangesData | null,
       lastPollDate: '2026-01-18'
     };
   }
