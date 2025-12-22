@@ -2,102 +2,74 @@
   "election_date": "2026-01-18",
   "pairs": [
     {
+      "candidate_a": "André Ventura",
+      "candidate_b": "Marques Mendes",
+      "probability": 0.3305,
+      "color_a": "#8B0000",
+      "color_b": "#FF8C00"
+    },
+    {
+      "candidate_a": "André Ventura",
+      "candidate_b": "Gouveia e Melo",
+      "probability": 0.1535,
+      "color_a": "#8B0000",
+      "color_b": "#4A90D9"
+    },
+    {
       "candidate_a": "Gouveia e Melo",
       "candidate_b": "Marques Mendes",
-      "probability": 0.2645,
+      "probability": 0.1502,
       "color_a": "#4A90D9",
       "color_b": "#FF8C00"
     },
     {
       "candidate_a": "André Ventura",
-      "candidate_b": "Marques Mendes",
-      "probability": 0.2438,
-      "color_a": "#8B0000",
-      "color_b": "#FF8C00"
-    },
-    {
-      "candidate_a": "André Ventura",
-      "candidate_b": "Gouveia e Melo",
-      "probability": 0.1978,
-      "color_a": "#8B0000",
-      "color_b": "#4A90D9"
-    },
-    {
-      "candidate_a": "António José Seguro",
-      "candidate_b": "Marques Mendes",
-      "probability": 0.0802,
-      "color_a": "#FF69B4",
-      "color_b": "#FF8C00"
-    },
-    {
-      "candidate_a": "António José Seguro",
-      "candidate_b": "Gouveia e Melo",
-      "probability": 0.06,
-      "color_a": "#FF69B4",
-      "color_b": "#4A90D9"
-    },
-    {
-      "candidate_a": "André Ventura",
       "candidate_b": "António José Seguro",
-      "probability": 0.0555,
+      "probability": 0.1158,
       "color_a": "#8B0000",
       "color_b": "#FF69B4"
     },
     {
-      "candidate_a": "Cotrim Figueiredo",
+      "candidate_a": "António José Seguro",
+      "candidate_b": "Marques Mendes",
+      "probability": 0.106,
+      "color_a": "#FF69B4",
+      "color_b": "#FF8C00"
+    },
+    {
+      "candidate_a": "António José Seguro",
       "candidate_b": "Gouveia e Melo",
-      "probability": 0.033,
-      "color_a": "#00CED1",
+      "probability": 0.0498,
+      "color_a": "#FF69B4",
       "color_b": "#4A90D9"
+    },
+    {
+      "candidate_a": "André Ventura",
+      "candidate_b": "Cotrim Figueiredo",
+      "probability": 0.0375,
+      "color_a": "#8B0000",
+      "color_b": "#00CED1"
     },
     {
       "candidate_a": "Cotrim Figueiredo",
       "candidate_b": "Marques Mendes",
-      "probability": 0.0313,
+      "probability": 0.0352,
       "color_a": "#00CED1",
       "color_b": "#FF8C00"
     },
     {
-      "candidate_a": "André Ventura",
-      "candidate_b": "Cotrim Figueiredo",
-      "probability": 0.0235,
-      "color_a": "#8B0000",
-      "color_b": "#00CED1"
+      "candidate_a": "Cotrim Figueiredo",
+      "candidate_b": "Gouveia e Melo",
+      "probability": 0.013,
+      "color_a": "#00CED1",
+      "color_b": "#4A90D9"
     },
     {
       "candidate_a": "António José Seguro",
       "candidate_b": "Cotrim Figueiredo",
-      "probability": 0.0092,
+      "probability": 0.0085,
       "color_a": "#FF69B4",
       "color_b": "#00CED1"
-    },
-    {
-      "candidate_a": "André Ventura",
-      "candidate_b": "Catarina Martins",
-      "probability": 0.0005,
-      "color_a": "#8B0000",
-      "color_b": "#DC143C"
-    },
-    {
-      "candidate_a": "André Ventura",
-      "candidate_b": "Others",
-      "probability": 0.0003,
-      "color_a": "#8B0000",
-      "color_b": "#808080"
-    },
-    {
-      "candidate_a": "Marques Mendes",
-      "candidate_b": "Others",
-      "probability": 0.0002,
-      "color_a": "#FF8C00",
-      "color_b": "#808080"
-    },
-    {
-      "candidate_a": "Catarina Martins",
-      "candidate_b": "Gouveia e Melo",
-      "probability": 0.0002,
-      "color_a": "#DC143C",
-      "color_b": "#4A90D9"
     }
   ],
   "matrix": {
@@ -118,37 +90,37 @@
     "probabilities": [
       [
         0.0,
-        0.2645,
-        0.06,
-        0.1978,
-        0.033
+        0.1502,
+        0.0498,
+        0.1535,
+        0.013
       ],
       [
-        0.2645,
+        0.1502,
         0.0,
-        0.0802,
-        0.2438,
-        0.0313
+        0.106,
+        0.3305,
+        0.0352
       ],
       [
-        0.06,
-        0.0802,
+        0.0498,
+        0.106,
         0.0,
-        0.0555,
-        0.0092
+        0.1158,
+        0.0085
       ],
       [
-        0.1978,
-        0.2438,
-        0.0555,
+        0.1535,
+        0.3305,
+        0.1158,
         0.0,
-        0.0235
+        0.0375
       ],
       [
-        0.033,
-        0.0313,
-        0.0092,
-        0.0235,
+        0.013,
+        0.0352,
+        0.0085,
+        0.0375,
         0.0
       ]
     ]

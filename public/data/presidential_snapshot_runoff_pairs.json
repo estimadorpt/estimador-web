@@ -4,63 +4,63 @@
     {
       "candidate_a": "André Ventura",
       "candidate_b": "Marques Mendes",
-      "probability": 0.5817,
+      "probability": 0.5787,
       "color_a": "#8B0000",
       "color_b": "#FF8C00"
     },
     {
       "candidate_a": "André Ventura",
       "candidate_b": "Gouveia e Melo",
-      "probability": 0.182,
+      "probability": 0.138,
       "color_a": "#8B0000",
       "color_b": "#4A90D9"
     },
     {
       "candidate_a": "Gouveia e Melo",
       "candidate_b": "Marques Mendes",
-      "probability": 0.1578,
+      "probability": 0.1182,
       "color_a": "#4A90D9",
       "color_b": "#FF8C00"
     },
     {
       "candidate_a": "André Ventura",
       "candidate_b": "António José Seguro",
-      "probability": 0.038,
+      "probability": 0.079,
       "color_a": "#8B0000",
       "color_b": "#FF69B4"
     },
     {
       "candidate_a": "António José Seguro",
       "candidate_b": "Marques Mendes",
-      "probability": 0.0238,
+      "probability": 0.0675,
       "color_a": "#FF69B4",
       "color_b": "#FF8C00"
     },
     {
       "candidate_a": "António José Seguro",
       "candidate_b": "Gouveia e Melo",
-      "probability": 0.008,
+      "probability": 0.0115,
       "color_a": "#FF69B4",
       "color_b": "#4A90D9"
     },
     {
+      "candidate_a": "Cotrim Figueiredo",
+      "candidate_b": "Marques Mendes",
+      "probability": 0.003,
+      "color_a": "#00CED1",
+      "color_b": "#FF8C00"
+    },
+    {
       "candidate_a": "André Ventura",
       "candidate_b": "Cotrim Figueiredo",
-      "probability": 0.004,
+      "probability": 0.003,
       "color_a": "#8B0000",
       "color_b": "#00CED1"
     },
     {
       "candidate_a": "Cotrim Figueiredo",
-      "candidate_b": "Marques Mendes",
-      "probability": 0.0032,
-      "color_a": "#00CED1",
-      "color_b": "#FF8C00"
-    },
-    {
-      "candidate_a": "Cotrim Figueiredo",
       "candidate_b": "Gouveia e Melo",
-      "probability": 0.0013,
+      "probability": 0.0008,
       "color_a": "#00CED1",
       "color_b": "#4A90D9"
     },
@@ -88,29 +88,29 @@
     "probabilities": [
       [
         0.0,
-        0.1578,
-        0.008,
-        0.182
+        0.1182,
+        0.0115,
+        0.138
       ],
       [
-        0.1578,
+        0.1182,
         0.0,
-        0.0238,
-        0.5817
+        0.0675,
+        0.5787
       ],
       [
-        0.008,
-        0.0238,
+        0.0115,
+        0.0675,
         0.0,
-        0.038
+        0.079
       ],
       [
-        0.182,
-        0.5817,
-        0.038,
+        0.138,
+        0.5787,
+        0.079,
         0.0
       ]
     ]
   },
-  "snapshot_date": "2025-12-16"
+  "snapshot_date": "2025-12-19"
 }
