@@ -243,6 +243,13 @@ export interface PresidentialChangesData {
   candidates: PresidentialCandidateChange[];
 }
 
+// Presidential runoff probability changes (from presidential_runoff_changes.json)
+export interface PresidentialRunoffChangesData {
+  current_date: string;
+  previous_date: string;
+  candidates: PresidentialCandidateChange[];
+}
+
 // Municipal election types
 export interface MunicipalElection extends ElectionConfig {
   type: 'municipal';

@@ -46,7 +46,7 @@ export default async function Home({
   
   // Load presidential forecast data
   // runoffPairs is either snapshot (at last poll date) or election day, handled by data loader
-  const { forecast, winProbabilities, trends, snapshotProbabilities: snapshotProbabilitiesData, trajectories, polls, headToHead, runoffPairs, changes, lastPollDate } = await loadPresidentialData();
+  const { forecast, winProbabilities, trends, snapshotProbabilities: snapshotProbabilitiesData, trajectories, polls, headToHead, runoffPairs, changes, runoffChanges, lastPollDate } = await loadPresidentialData();
 
   // Use snapshot probabilities (as of last poll date) instead of election day forecast
   // This shows "if the election were held today" which is more appropriate when
@@ -62,18 +62,32 @@ export default async function Home({
     : snapshotDates.length - 1;
   const safeIndex = Math.max(0, cutoffIndex === -1 ? snapshotDates.length - 1 : cutoffIndex);
 
-  // Snapshot probabilities are computed from joint posterior draws (not independent normals)
-  const snapshotProbabilities = Object.entries(snapshotProbabilitiesData?.candidates || {})
-    .filter(([name]) => name !== 'Others')
-    .map(([name, data]) => ({
-      name,
-      probability: data.leading_probability?.[safeIndex] ?? 0,
-      color: data.color,
-    }))
-    .sort((a, b) => b.probability - a.probability);
+  // Compute runoff probability for each candidate (sum of all pairs where they appear)
+  const computeRunoffProbability = (candidateName: string, pairs: typeof runoffPairs.pairs) => {
+    return pairs.reduce((sum, pair) => {
+      if (pair.candidate_a === candidateName || pair.candidate_b === candidateName) {
+        return sum + pair.probability;
+      }
+      return sum;
+    }, 0);
+  };
 
-  // Get the leading candidate based on snapshot
-  const leadingCandidate = snapshotProbabilities[0];
+  // Get runoff probabilities for headline
+  const runoffProbabilitiesForHeadline = runoffPairs.pairs.length > 0
+    ? Array.from(new Set([
+        ...runoffPairs.pairs.map(p => p.candidate_a),
+        ...runoffPairs.pairs.map(p => p.candidate_b)
+      ])).map(name => ({
+        name,
+        probability: computeRunoffProbability(name, runoffPairs.pairs),
+        color: runoffPairs.pairs.find(p => p.candidate_a === name)?.color_a 
+            || runoffPairs.pairs.find(p => p.candidate_b === name)?.color_b 
+            || '#888',
+      })).sort((a, b) => b.probability - a.probability)
+    : [];
+
+  // Get the leading candidate based on runoff probability
+  const leadingCandidate = runoffProbabilitiesForHeadline[0];
   const secondRoundProbability = winProbabilities.second_round_probability;
   
   // Calculate days until election
@@ -182,20 +196,26 @@ export default async function Home({
               forecast={forecast}
               trends={trends}
               snapshotProbabilities={snapshotProbabilitiesData}
+              runoffPairs={runoffPairs}
+              runoffChanges={runoffChanges}
               changes={changes}
               cutoffDate={lastPollDate}
               maxCandidates={5}
               translations={{
-                chanceOfLeading: t('presidential.chanceOfLeading'),
+                chanceOfRunoff: t('presidential.chanceOfRunoff'),
                 voteShare: t('presidential.voteShare'),
                 partyLabel: t('presidential.partyAffiliation'),
                 sinceLastPoll: t('presidential.sinceLastPoll'),
               }}
             />
           </ErrorBoundary>
-          <p className="text-xs text-stone-500 mt-4 italic">
-            {t('presidential.firstRoundNote')}
-          </p>
+          {/* Warning box about metric change */}
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-xs text-blue-800">
+              <span className="font-semibold">ℹ️ {t('presidential.metricChangeTitle')}</span>{' '}
+              {t('presidential.metricChangeDescription')}
+            </p>
+          </div>
         </div>
       </section>
 

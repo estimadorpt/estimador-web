@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { PresidentialWinProbabilitiesData, PresidentialForecastData, PresidentialTrendsData, PresidentialSnapshotProbabilitiesData, PresidentialChangesData } from '@/types';
+import { PresidentialWinProbabilitiesData, PresidentialForecastData, PresidentialTrendsData, PresidentialSnapshotProbabilitiesData, PresidentialChangesData, PresidentialRunoffPairsData, PresidentialRunoffChangesData } from '@/types';
 import { presidentialCandidateParties, partyColors } from '@/lib/config/colors';
 
 interface PresidentialCandidateCardsProps {
@@ -9,15 +9,38 @@ interface PresidentialCandidateCardsProps {
   forecast: PresidentialForecastData;
   trends?: PresidentialTrendsData;
   snapshotProbabilities?: PresidentialSnapshotProbabilitiesData;
+  runoffPairs?: PresidentialRunoffPairsData;
+  runoffChanges?: PresidentialRunoffChangesData | null;
   changes?: PresidentialChangesData | null;
   cutoffDate?: string;
   maxCandidates?: number;
   translations?: {
-    chanceOfLeading: string;
+    chanceOfRunoff: string;
     voteShare: string;
     partyLabel: string;
     sinceLastPoll: string;
   };
+}
+
+// Compute runoff probability for each candidate by summing all pairs where they appear
+function computeRunoffProbabilities(pairs: PresidentialRunoffPairsData['pairs']): Record<string, { probability: number; color: string }> {
+  const probs: Record<string, { probability: number; color: string }> = {};
+  
+  for (const pair of pairs) {
+    // Add probability to candidate_a
+    if (!probs[pair.candidate_a]) {
+      probs[pair.candidate_a] = { probability: 0, color: pair.color_a };
+    }
+    probs[pair.candidate_a].probability += pair.probability;
+    
+    // Add probability to candidate_b
+    if (!probs[pair.candidate_b]) {
+      probs[pair.candidate_b] = { probability: 0, color: pair.color_b };
+    }
+    probs[pair.candidate_b].probability += pair.probability;
+  }
+  
+  return probs;
 }
 
 export function PresidentialCandidateCards({
@@ -25,11 +48,13 @@ export function PresidentialCandidateCards({
   forecast,
   trends,
   snapshotProbabilities,
+  runoffPairs,
+  runoffChanges,
   changes,
   cutoffDate,
   maxCandidates = 5,
   translations = {
-    chanceOfLeading: 'Chance of leading',
+    chanceOfRunoff: 'Runoff odds',
     voteShare: 'Vote share',
     partyLabel: 'Party',
     sinceLastPoll: 'since last poll',
@@ -45,28 +70,23 @@ export function PresidentialCandidateCards({
     return idx === -1 ? dates.length - 1 : idx - 1;
   }, [snapshotProbabilities, trends, cutoffDate]);
 
-  // Get leading probabilities from snapshot data (computed from joint posterior)
-  const leadingProbabilities = useMemo(() => {
-    if (!snapshotProbabilities || cutoffIndex < 0) return null;
-    
-    const probs: Record<string, number> = {};
-    for (const [name, data] of Object.entries(snapshotProbabilities.candidates)) {
-      probs[name] = data.leading_probability[cutoffIndex];
-    }
-    return probs;
-  }, [snapshotProbabilities, cutoffIndex]);
+  // Compute runoff probabilities from pairs data
+  const runoffProbabilities = useMemo(() => {
+    if (!runoffPairs?.pairs?.length) return null;
+    return computeRunoffProbabilities(runoffPairs.pairs);
+  }, [runoffPairs]);
 
-  // Build a map of changes by candidate name
-  const changesMap = useMemo(() => {
-    if (!changes) return {};
+  // Build a map of runoff changes by candidate name
+  const runoffChangesMap = useMemo(() => {
+    if (!runoffChanges) return {};
     const map: Record<string, { change: number; change_pp: number }> = {};
-    for (const c of changes.candidates) {
+    for (const c of runoffChanges.candidates) {
       map[c.name] = { change: c.change, change_pp: c.change_pp };
     }
     return map;
-  }, [changes]);
+  }, [runoffChanges]);
 
-  // Combine data from both sources, using trends data at cutoff if available
+  // Combine data from sources, prioritizing runoff probabilities
   const candidateData = winProbabilities.candidates
     .slice(0, maxCandidates)
     .map(wp => {
@@ -76,7 +96,6 @@ export function PresidentialCandidateCards({
       // Get values at cutoff date from trends if available
       let displayMean = forecastData?.mean || 0;
       let displayCI = forecastData ? (forecastData.ci_upper - forecastData.ci_lower) / 2 : 0;
-      let displayLeadingProb = wp.leading_probability;
       
       if (trends && cutoffIndex >= 0 && trends.candidates[wp.name]) {
         const trendData = trends.candidates[wp.name];
@@ -85,29 +104,28 @@ export function PresidentialCandidateCards({
         const ciLow = trendData.ci_25[cutoffIndex];
         const ciHigh = trendData.ci_75[cutoffIndex];
         displayCI = (ciHigh - ciLow) / 2;
-        
-        // Use computed probability at cutoff if available
-        if (leadingProbabilities && leadingProbabilities[wp.name] !== undefined) {
-          displayLeadingProb = leadingProbabilities[wp.name];
-        }
       }
       
-      // Get change since last poll
-      const candidateChange = changesMap[wp.name];
+      // Use runoff probability if available, otherwise fall back to leading probability
+      const runoffProb = runoffProbabilities?.[wp.name]?.probability ?? 0;
+      const displayRunoffProb = runoffProb > 0 ? runoffProb : wp.leading_probability;
+      
+      // Get runoff probability change since last poll
+      const runoffChange = runoffChangesMap[wp.name];
       
       return {
         ...wp,
         forecastData,
         displayMean,
         displayCI,
-        displayLeadingProb,
+        displayRunoffProb,
         party,
         partyColor: party ? partyColors[party as keyof typeof partyColors] : null,
-        change_pp: candidateChange?.change_pp || 0,
+        runoffChange_pp: runoffChange?.change_pp || 0,
       };
     })
-    // Re-sort by leading probability at cutoff
-    .sort((a, b) => b.displayLeadingProb - a.displayLeadingProb);
+    // Sort by runoff probability
+    .sort((a, b) => b.displayRunoffProb - a.displayRunoffProb);
 
   const formatPercent = (value: number) => {
     return `${(value * 100).toFixed(1)}%`;
@@ -151,29 +169,29 @@ export function PresidentialCandidateCards({
             </div>
           </div>
 
-          {/* Win probability - big number */}
+          {/* Runoff probability - big number */}
           <div className="mb-2">
             <div className="flex items-baseline gap-2">
               <div 
                 className="text-4xl font-black tabular-nums tracking-tighter"
                 style={{ color: candidate.color }}
               >
-                {formatPercentRounded(candidate.displayLeadingProb)}
+                {formatPercentRounded(candidate.displayRunoffProb)}
               </div>
               {/* Change indicator */}
-              {candidate.change_pp !== 0 && Math.abs(candidate.change_pp) >= 0.5 && (
+              {candidate.runoffChange_pp !== 0 && Math.abs(candidate.runoffChange_pp) >= 1 && (
                 <div 
                   className={`text-sm font-semibold tabular-nums ${
-                    candidate.change_pp > 0 ? 'text-emerald-600' : 'text-red-500'
+                    candidate.runoffChange_pp > 0 ? 'text-emerald-600' : 'text-red-500'
                   }`}
                 >
-                  {candidate.change_pp > 0 ? '↑' : '↓'}
-                  {Math.abs(Math.round(candidate.change_pp))}
+                  {candidate.runoffChange_pp > 0 ? '↑' : '↓'}
+                  {Math.abs(Math.round(candidate.runoffChange_pp))}
                 </div>
               )}
             </div>
             <div className="text-[10px] text-stone-400 uppercase tracking-wide">
-              {translations.chanceOfLeading}
+              {translations.chanceOfRunoff}
             </div>
           </div>
 

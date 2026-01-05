@@ -74,12 +74,11 @@ export function PresidentialRunoffPairs({
 
             {/* Bar */}
             <div className="relative h-4 bg-gray-100 rounded overflow-hidden">
-              {/* Gradient bar using both candidate colors */}
+              {/* Neutral color bar */}
               <div
-                className="absolute h-full rounded"
+                className="absolute h-full rounded bg-stone-400"
                 style={{
                   width: `${barWidth}%`,
-                  background: `linear-gradient(90deg, ${pair.color_a}, ${pair.color_b})`,
                 }}
               />
             </div>

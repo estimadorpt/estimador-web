@@ -14,7 +14,8 @@ import {
   PresidentialHouseEffectsData,
   PresidentialHeadToHeadData,
   PresidentialRunoffPairsData,
-  PresidentialChangesData
+  PresidentialChangesData,
+  PresidentialRunoffChangesData
 } from '@/types';
 
 // Load data from the public directory
@@ -57,7 +58,7 @@ export async function loadForecastData() {
 // Presidential forecast data loader
 export async function loadPresidentialData() {
   try {
-    const [forecast, winProbabilities, trends, snapshotProbabilities, trajectories, polls, houseEffects, headToHead, electionDayRunoffPairs, snapshotRunoffPairs, changes] = await Promise.all([
+    const [forecast, winProbabilities, trends, snapshotProbabilities, trajectories, polls, houseEffects, headToHead, electionDayRunoffPairs, snapshotRunoffPairs, changes, runoffChanges] = await Promise.all([
       loadJsonData<PresidentialForecastData>('presidential_forecast.json'),
       loadJsonData<PresidentialWinProbabilitiesData>('presidential_win_probabilities.json'),
       loadJsonData<PresidentialTrendsData>('presidential_trends.json'),
@@ -90,8 +91,10 @@ export async function loadPresidentialData() {
       })),
       // Try to load snapshot runoff pairs (computed at last poll date from full posterior)
       loadJsonData<PresidentialRunoffPairsData>('presidential_snapshot_runoff_pairs.json').catch(() => null),
-      // Load changes since last poll
-      loadJsonData<PresidentialChangesData>('presidential_changes.json').catch(() => null)
+      // Load leading probability changes since last poll
+      loadJsonData<PresidentialChangesData>('presidential_changes.json').catch(() => null),
+      // Load runoff probability changes since last poll
+      loadJsonData<PresidentialRunoffChangesData>('presidential_runoff_changes.json').catch(() => null)
     ]);
 
     // Calculate last poll date
@@ -120,6 +123,7 @@ export async function loadPresidentialData() {
       headToHead,
       runoffPairs,
       changes,
+      runoffChanges,
       lastPollDate
     };
   } catch (error) {
@@ -176,6 +180,7 @@ export async function loadPresidentialData() {
         matrix: { candidates: [], colors: [], probabilities: [] }
       } as PresidentialRunoffPairsData,
       changes: null as PresidentialChangesData | null,
+      runoffChanges: null as PresidentialRunoffChangesData | null,
       lastPollDate: '2026-01-18'
     };
   }
