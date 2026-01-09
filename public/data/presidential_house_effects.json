@@ -23,393 +23,393 @@
   "effects": {
     "Aximage": {
       "Gouveia e Melo": {
-        "mean": 0.0022,
-        "ci_lower": -0.0865,
-        "ci_upper": 0.0916,
+        "mean": 0.0026,
+        "ci_lower": -0.0862,
+        "ci_upper": 0.0923,
         "color": "#4A90D9"
       },
       "Marques Mendes": {
-        "mean": -0.0269,
-        "ci_lower": -0.1029,
-        "ci_upper": 0.0488,
+        "mean": -0.027,
+        "ci_lower": -0.0999,
+        "ci_upper": 0.0487,
         "color": "#FF8C00"
       },
       "António José Seguro": {
-        "mean": -0.004,
-        "ci_lower": -0.0824,
-        "ci_upper": 0.0726,
+        "mean": -0.005,
+        "ci_lower": -0.0814,
+        "ci_upper": 0.0705,
         "color": "#FF69B4"
       },
       "André Ventura": {
-        "mean": 0.0209,
-        "ci_lower": -0.056,
-        "ci_upper": 0.096,
+        "mean": 0.0198,
+        "ci_lower": -0.0549,
+        "ci_upper": 0.0938,
         "color": "#8B0000"
       },
       "Cotrim Figueiredo": {
-        "mean": -0.0431,
-        "ci_lower": -0.1177,
-        "ci_upper": 0.0309,
+        "mean": -0.0439,
+        "ci_lower": -0.1164,
+        "ci_upper": 0.0268,
         "color": "#00CED1"
       },
       "Catarina Martins": {
-        "mean": 0.0045,
-        "ci_lower": -0.0694,
-        "ci_upper": 0.0782,
+        "mean": 0.0036,
+        "ci_lower": -0.074,
+        "ci_upper": 0.0818,
         "color": "#DC143C"
       },
       "António Filipe": {
-        "mean": -0.0109,
-        "ci_lower": -0.0843,
-        "ci_upper": 0.0647,
+        "mean": -0.0114,
+        "ci_lower": -0.0865,
+        "ci_upper": 0.0633,
         "color": "#228B22"
       },
       "Jorge Pinto": {
-        "mean": 0.0221,
-        "ci_lower": -0.0545,
-        "ci_upper": 0.1008,
+        "mean": 0.0231,
+        "ci_lower": -0.0502,
+        "ci_upper": 0.0964,
         "color": "#666666"
       },
       "Others": {
-        "mean": 0.0015,
-        "ci_lower": -0.0891,
-        "ci_upper": 0.0942,
+        "mean": 0.0007,
+        "ci_lower": -0.0856,
+        "ci_upper": 0.0864,
         "color": "#808080"
       }
     },
     "CESOP-UCP": {
       "Gouveia e Melo": {
-        "mean": 0.0007,
-        "ci_lower": -0.0943,
-        "ci_upper": 0.0926,
+        "mean": 0.0005,
+        "ci_lower": -0.0927,
+        "ci_upper": 0.0925,
         "color": "#4A90D9"
       },
       "Marques Mendes": {
-        "mean": 0.0247,
-        "ci_lower": -0.0531,
-        "ci_upper": 0.101,
+        "mean": 0.0233,
+        "ci_lower": -0.0507,
+        "ci_upper": 0.0966,
         "color": "#FF8C00"
       },
       "António José Seguro": {
-        "mean": 0.0158,
-        "ci_lower": -0.0584,
-        "ci_upper": 0.0916,
+        "mean": 0.0168,
+        "ci_lower": -0.0572,
+        "ci_upper": 0.0892,
         "color": "#FF69B4"
       },
       "André Ventura": {
         "mean": -0.0209,
-        "ci_lower": -0.1008,
-        "ci_upper": 0.0595,
+        "ci_lower": -0.0991,
+        "ci_upper": 0.0564,
         "color": "#8B0000"
       },
       "Cotrim Figueiredo": {
-        "mean": 0.0845,
-        "ci_lower": 0.0077,
-        "ci_upper": 0.1604,
+        "mean": 0.0847,
+        "ci_lower": 0.0129,
+        "ci_upper": 0.1575,
         "color": "#00CED1"
       },
       "Catarina Martins": {
-        "mean": -0.012,
-        "ci_lower": -0.0874,
-        "ci_upper": 0.063,
+        "mean": -0.0122,
+        "ci_lower": -0.0888,
+        "ci_upper": 0.0651,
         "color": "#DC143C"
       },
       "António Filipe": {
-        "mean": 0.0088,
-        "ci_lower": -0.0678,
-        "ci_upper": 0.0851,
+        "mean": 0.0076,
+        "ci_lower": -0.066,
+        "ci_upper": 0.0826,
         "color": "#228B22"
       },
       "Jorge Pinto": {
-        "mean": 0.0807,
-        "ci_lower": 0.0034,
-        "ci_upper": 0.1582,
+        "mean": 0.0804,
+        "ci_lower": 0.0028,
+        "ci_upper": 0.1579,
         "color": "#666666"
       },
       "Others": {
-        "mean": -0.0119,
-        "ci_lower": -0.0988,
-        "ci_upper": 0.075,
+        "mean": -0.0114,
+        "ci_lower": -0.1022,
+        "ci_upper": 0.0783,
         "color": "#808080"
       }
     },
     "Consulmark2": {
       "Gouveia e Melo": {
         "mean": -0.0055,
-        "ci_lower": -0.0953,
-        "ci_upper": 0.0853,
+        "ci_lower": -0.099,
+        "ci_upper": 0.0848,
         "color": "#4A90D9"
       },
       "Marques Mendes": {
-        "mean": 0.0416,
-        "ci_lower": -0.0351,
-        "ci_upper": 0.118,
+        "mean": 0.0415,
+        "ci_lower": -0.0323,
+        "ci_upper": 0.1161,
         "color": "#FF8C00"
       },
       "António José Seguro": {
-        "mean": -0.016,
-        "ci_lower": -0.0945,
-        "ci_upper": 0.0618,
+        "mean": -0.0162,
+        "ci_lower": -0.0906,
+        "ci_upper": 0.0569,
         "color": "#FF69B4"
       },
       "André Ventura": {
-        "mean": -0.0127,
-        "ci_lower": -0.0877,
-        "ci_upper": 0.0616,
+        "mean": -0.0124,
+        "ci_lower": -0.0868,
+        "ci_upper": 0.0614,
         "color": "#8B0000"
       },
       "Cotrim Figueiredo": {
-        "mean": 0.1303,
-        "ci_lower": 0.054,
-        "ci_upper": 0.206,
+        "mean": 0.1312,
+        "ci_lower": 0.0563,
+        "ci_upper": 0.2056,
         "color": "#00CED1"
       },
       "Catarina Martins": {
-        "mean": 0.0161,
-        "ci_lower": -0.0606,
-        "ci_upper": 0.0904,
+        "mean": 0.0164,
+        "ci_lower": -0.0602,
+        "ci_upper": 0.0931,
         "color": "#DC143C"
       },
       "António Filipe": {
         "mean": -0.0351,
-        "ci_lower": -0.1084,
-        "ci_upper": 0.04,
+        "ci_lower": -0.1093,
+        "ci_upper": 0.0374,
         "color": "#228B22"
       },
       "Jorge Pinto": {
-        "mean": 0.1486,
-        "ci_lower": 0.0724,
-        "ci_upper": 0.2239,
+        "mean": 0.1481,
+        "ci_lower": 0.0703,
+        "ci_upper": 0.2267,
         "color": "#666666"
       },
       "Others": {
-        "mean": 0.0049,
-        "ci_lower": -0.0871,
-        "ci_upper": 0.0974,
+        "mean": 0.0055,
+        "ci_lower": -0.0861,
+        "ci_upper": 0.0976,
         "color": "#808080"
       }
     },
     "ICS": {
       "Gouveia e Melo": {
-        "mean": 0.0062,
-        "ci_lower": -0.0834,
-        "ci_upper": 0.0984,
+        "mean": 0.0056,
+        "ci_lower": -0.0817,
+        "ci_upper": 0.0931,
         "color": "#4A90D9"
       },
       "Marques Mendes": {
-        "mean": 0.0317,
-        "ci_lower": -0.0434,
-        "ci_upper": 0.1077,
+        "mean": 0.0322,
+        "ci_lower": -0.0445,
+        "ci_upper": 0.107,
         "color": "#FF8C00"
       },
       "António José Seguro": {
-        "mean": 0.0428,
-        "ci_lower": -0.0325,
-        "ci_upper": 0.1191,
+        "mean": 0.0431,
+        "ci_lower": -0.0336,
+        "ci_upper": 0.1178,
         "color": "#FF69B4"
       },
       "André Ventura": {
-        "mean": 0.0472,
-        "ci_lower": -0.0259,
-        "ci_upper": 0.1214,
+        "mean": 0.0475,
+        "ci_lower": -0.0288,
+        "ci_upper": 0.1228,
         "color": "#8B0000"
       },
       "Cotrim Figueiredo": {
-        "mean": -0.3361,
-        "ci_lower": -0.4127,
-        "ci_upper": -0.2602,
+        "mean": -0.3355,
+        "ci_lower": -0.4105,
+        "ci_upper": -0.259,
         "color": "#00CED1"
       },
       "Catarina Martins": {
-        "mean": -0.012,
-        "ci_lower": -0.0817,
-        "ci_upper": 0.0602,
+        "mean": -0.0126,
+        "ci_lower": -0.088,
+        "ci_upper": 0.0634,
         "color": "#DC143C"
       },
       "António Filipe": {
-        "mean": 0.0661,
-        "ci_lower": -0.0098,
-        "ci_upper": 0.1421,
+        "mean": 0.0667,
+        "ci_lower": -0.0086,
+        "ci_upper": 0.141,
         "color": "#228B22"
       },
       "Jorge Pinto": {
         "mean": -0.4664,
-        "ci_lower": -0.538,
-        "ci_upper": -0.3945,
+        "ci_lower": -0.5418,
+        "ci_upper": -0.392,
         "color": "#666666"
       },
       "Others": {
-        "mean": 0.0168,
-        "ci_lower": -0.0744,
-        "ci_upper": 0.1094,
+        "mean": 0.0167,
+        "ci_lower": -0.0764,
+        "ci_upper": 0.1089,
         "color": "#808080"
       }
     },
     "ICS/ISCTE": {
       "Gouveia e Melo": {
-        "mean": 0.0018,
-        "ci_lower": -0.0861,
-        "ci_upper": 0.0909,
+        "mean": 0.0023,
+        "ci_lower": -0.0866,
+        "ci_upper": 0.094,
         "color": "#4A90D9"
       },
       "Marques Mendes": {
-        "mean": 0.0121,
-        "ci_lower": -0.0622,
-        "ci_upper": 0.0879,
+        "mean": 0.0127,
+        "ci_lower": -0.0627,
+        "ci_upper": 0.0871,
         "color": "#FF8C00"
       },
       "António José Seguro": {
-        "mean": 0.0066,
-        "ci_lower": -0.068,
-        "ci_upper": 0.0793,
+        "mean": 0.0061,
+        "ci_lower": -0.0706,
+        "ci_upper": 0.0821,
         "color": "#FF69B4"
       },
       "André Ventura": {
-        "mean": 0.0029,
-        "ci_lower": -0.072,
-        "ci_upper": 0.0788,
+        "mean": 0.0023,
+        "ci_lower": -0.0743,
+        "ci_upper": 0.0793,
         "color": "#8B0000"
       },
       "Cotrim Figueiredo": {
-        "mean": -0.0942,
-        "ci_lower": -0.1691,
-        "ci_upper": -0.0225,
+        "mean": -0.0935,
+        "ci_lower": -0.1694,
+        "ci_upper": -0.0197,
         "color": "#00CED1"
       },
       "Catarina Martins": {
-        "mean": 0.0087,
-        "ci_lower": -0.0696,
-        "ci_upper": 0.0882,
+        "mean": 0.0091,
+        "ci_lower": -0.0666,
+        "ci_upper": 0.0842,
         "color": "#DC143C"
       },
       "António Filipe": {
-        "mean": 0.0038,
-        "ci_lower": -0.0689,
-        "ci_upper": 0.0764,
+        "mean": 0.0048,
+        "ci_lower": -0.0691,
+        "ci_upper": 0.0773,
         "color": "#228B22"
       },
       "Jorge Pinto": {
-        "mean": -0.0721,
-        "ci_lower": -0.1473,
-        "ci_upper": 0.0044,
+        "mean": -0.072,
+        "ci_lower": -0.1466,
+        "ci_upper": 0.0015,
         "color": "#666666"
       },
       "Others": {
-        "mean": -0.0,
-        "ci_lower": -0.0885,
-        "ci_upper": 0.0897,
+        "mean": 0.0005,
+        "ci_lower": -0.0913,
+        "ci_upper": 0.0913,
         "color": "#808080"
       }
     },
     "Intercampus": {
       "Gouveia e Melo": {
         "mean": -0.0156,
-        "ci_lower": -0.1023,
-        "ci_upper": 0.073,
+        "ci_lower": -0.1038,
+        "ci_upper": 0.075,
         "color": "#4A90D9"
       },
       "Marques Mendes": {
-        "mean": -0.101,
-        "ci_lower": -0.1746,
-        "ci_upper": -0.0255,
+        "mean": -0.1005,
+        "ci_lower": -0.1734,
+        "ci_upper": -0.0276,
         "color": "#FF8C00"
       },
       "António José Seguro": {
-        "mean": -0.0785,
-        "ci_lower": -0.1518,
-        "ci_upper": -0.004,
+        "mean": -0.079,
+        "ci_lower": -0.1572,
+        "ci_upper": -0.0004,
         "color": "#FF69B4"
       },
       "André Ventura": {
-        "mean": -0.0043,
-        "ci_lower": -0.0788,
-        "ci_upper": 0.0686,
+        "mean": -0.004,
+        "ci_lower": -0.0763,
+        "ci_upper": 0.068,
         "color": "#8B0000"
       },
       "Cotrim Figueiredo": {
-        "mean": 0.1536,
-        "ci_lower": 0.0815,
-        "ci_upper": 0.2256,
+        "mean": 0.1516,
+        "ci_lower": 0.0779,
+        "ci_upper": 0.2255,
         "color": "#00CED1"
       },
       "Catarina Martins": {
-        "mean": 0.0319,
-        "ci_lower": -0.0466,
-        "ci_upper": 0.1103,
+        "mean": 0.0326,
+        "ci_lower": -0.0402,
+        "ci_upper": 0.1048,
         "color": "#DC143C"
       },
       "António Filipe": {
         "mean": -0.046,
-        "ci_lower": -0.122,
-        "ci_upper": 0.029,
+        "ci_lower": -0.1245,
+        "ci_upper": 0.0338,
         "color": "#228B22"
       },
       "Jorge Pinto": {
-        "mean": 0.1641,
-        "ci_lower": 0.0885,
-        "ci_upper": 0.2405,
+        "mean": 0.1646,
+        "ci_lower": 0.0901,
+        "ci_upper": 0.2371,
         "color": "#666666"
       },
       "Others": {
-        "mean": 0.0064,
-        "ci_lower": -0.0805,
-        "ci_upper": 0.0913,
+        "mean": 0.0069,
+        "ci_lower": -0.0841,
+        "ci_upper": 0.1012,
         "color": "#808080"
       }
     },
     "Pitagórica": {
       "Gouveia e Melo": {
-        "mean": 0.0102,
-        "ci_lower": -0.0782,
-        "ci_upper": 0.0977,
+        "mean": 0.0101,
+        "ci_lower": -0.0792,
+        "ci_upper": 0.0988,
         "color": "#4A90D9"
       },
       "Marques Mendes": {
-        "mean": 0.0179,
-        "ci_lower": -0.0551,
-        "ci_upper": 0.0916,
+        "mean": 0.0177,
+        "ci_lower": -0.0587,
+        "ci_upper": 0.0923,
         "color": "#FF8C00"
       },
       "António José Seguro": {
-        "mean": 0.0332,
-        "ci_lower": -0.0393,
-        "ci_upper": 0.107,
+        "mean": 0.0342,
+        "ci_lower": -0.0382,
+        "ci_upper": 0.1067,
         "color": "#FF69B4"
       },
       "André Ventura": {
-        "mean": -0.033,
-        "ci_lower": -0.1071,
-        "ci_upper": 0.0414,
+        "mean": -0.0324,
+        "ci_lower": -0.1052,
+        "ci_upper": 0.0394,
         "color": "#8B0000"
       },
       "Cotrim Figueiredo": {
-        "mean": 0.1051,
-        "ci_lower": 0.0308,
-        "ci_upper": 0.1775,
+        "mean": 0.1054,
+        "ci_lower": 0.0296,
+        "ci_upper": 0.1807,
         "color": "#00CED1"
       },
       "Catarina Martins": {
-        "mean": -0.0373,
-        "ci_lower": -0.1164,
-        "ci_upper": 0.0412,
+        "mean": -0.0368,
+        "ci_lower": -0.1126,
+        "ci_upper": 0.041,
         "color": "#DC143C"
       },
       "António Filipe": {
         "mean": 0.0133,
-        "ci_lower": -0.062,
-        "ci_upper": 0.0888,
+        "ci_lower": -0.0638,
+        "ci_upper": 0.0895,
         "color": "#228B22"
       },
       "Jorge Pinto": {
-        "mean": 0.123,
-        "ci_lower": 0.0487,
-        "ci_upper": 0.1983,
+        "mean": 0.1222,
+        "ci_lower": 0.0473,
+        "ci_upper": 0.198,
         "color": "#666666"
       },
       "Others": {
-        "mean": -0.0178,
-        "ci_lower": -0.105,
-        "ci_upper": 0.0699,
+        "mean": -0.0189,
+        "ci_lower": -0.1103,
+        "ci_upper": 0.0716,
         "color": "#808080"
       }
     }

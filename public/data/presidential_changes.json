@@ -1,49 +1,49 @@
 {
-  "current_date": "2026-01-04",
-  "previous_date": "2025-12-19",
+  "current_date": "2026-01-07",
+  "previous_date": "2026-01-04",
   "n_polls_current": 1,
   "n_polls_previous": 1,
-  "total_polls": 13,
+  "total_polls": 14,
   "candidates": [
     {
       "name": "André Ventura",
       "color": "#8B0000",
-      "current": 0.453,
-      "previous": 0.502,
-      "change": -0.049,
-      "change_pp": -4.9
-    },
-    {
-      "name": "Marques Mendes",
-      "color": "#FF8C00",
-      "current": 0.2072,
-      "previous": 0.3503,
-      "change": -0.1431,
-      "change_pp": -14.31
-    },
-    {
-      "name": "Gouveia e Melo",
-      "color": "#4A90D9",
-      "current": 0.1842,
-      "previous": 0.092,
-      "change": 0.0922,
-      "change_pp": 9.22
+      "current": 0.4858,
+      "previous": 0.503,
+      "change": -0.0172,
+      "change_pp": -1.72
     },
     {
       "name": "António José Seguro",
       "color": "#FF69B4",
-      "current": 0.1348,
-      "previous": 0.054,
-      "change": 0.0808,
-      "change_pp": 8.08
+      "current": 0.1713,
+      "previous": 0.1535,
+      "change": 0.0178,
+      "change_pp": 1.78
+    },
+    {
+      "name": "Gouveia e Melo",
+      "color": "#4A90D9",
+      "current": 0.1635,
+      "previous": 0.1673,
+      "change": -0.0038,
+      "change_pp": -0.38
+    },
+    {
+      "name": "Marques Mendes",
+      "color": "#FF8C00",
+      "current": 0.1532,
+      "previous": 0.1573,
+      "change": -0.0041,
+      "change_pp": -0.41
     },
     {
       "name": "Cotrim Figueiredo",
       "color": "#00CED1",
-      "current": 0.0208,
-      "previous": 0.0018,
-      "change": 0.019,
-      "change_pp": 1.9
+      "current": 0.0262,
+      "previous": 0.019,
+      "change": 0.0072,
+      "change_pp": 0.72
     },
     {
       "name": "Catarina Martins",

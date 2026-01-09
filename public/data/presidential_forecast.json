@@ -1,97 +1,97 @@
 {
   "election_type": "presidential",
   "election_date": "2026-01-18",
-  "updated_at": "2026-01-05T20:44:52.776049",
+  "updated_at": "2026-01-09T16:33:08.898448",
   "candidates": [
     {
       "name": "André Ventura",
       "color": "#8B0000",
-      "mean": 0.2042,
-      "ci_lower": 0.1222,
-      "ci_upper": 0.3105,
-      "median": 0.2003,
-      "ci_10": 0.1463,
-      "ci_90": 0.2673
-    },
-    {
-      "name": "Marques Mendes",
-      "color": "#FF8C00",
-      "mean": 0.1842,
-      "ci_lower": 0.1097,
-      "ci_upper": 0.2842,
-      "median": 0.18,
-      "ci_10": 0.1316,
-      "ci_90": 0.2425
+      "mean": 0.2059,
+      "ci_lower": 0.1314,
+      "ci_upper": 0.296,
+      "median": 0.2029,
+      "ci_10": 0.1538,
+      "ci_90": 0.2622
     },
     {
       "name": "Gouveia e Melo",
       "color": "#4A90D9",
-      "mean": 0.1799,
-      "ci_lower": 0.1065,
-      "ci_upper": 0.273,
-      "median": 0.1761,
-      "ci_10": 0.1267,
-      "ci_90": 0.2373
+      "mean": 0.1789,
+      "ci_lower": 0.1116,
+      "ci_upper": 0.2624,
+      "median": 0.1747,
+      "ci_10": 0.1314,
+      "ci_90": 0.232
     },
     {
       "name": "António José Seguro",
       "color": "#FF69B4",
-      "mean": 0.1716,
-      "ci_lower": 0.0973,
-      "ci_upper": 0.2663,
-      "median": 0.1679,
-      "ci_10": 0.1183,
-      "ci_90": 0.2305
+      "mean": 0.1781,
+      "ci_lower": 0.1101,
+      "ci_upper": 0.2634,
+      "median": 0.1753,
+      "ci_10": 0.1289,
+      "ci_90": 0.2309
+    },
+    {
+      "name": "Marques Mendes",
+      "color": "#FF8C00",
+      "mean": 0.1779,
+      "ci_lower": 0.1102,
+      "ci_upper": 0.2611,
+      "median": 0.1756,
+      "ci_10": 0.1292,
+      "ci_90": 0.2292
     },
     {
       "name": "Cotrim Figueiredo",
       "color": "#00CED1",
-      "mean": 0.1403,
-      "ci_lower": 0.0793,
-      "ci_upper": 0.2217,
-      "median": 0.1373,
-      "ci_10": 0.0959,
-      "ci_90": 0.1881
+      "mean": 0.1467,
+      "ci_lower": 0.0886,
+      "ci_upper": 0.2232,
+      "median": 0.1436,
+      "ci_10": 0.1054,
+      "ci_90": 0.192
     },
     {
       "name": "Catarina Martins",
       "color": "#DC143C",
-      "mean": 0.0456,
-      "ci_lower": 0.0224,
-      "ci_upper": 0.0802,
-      "median": 0.0435,
-      "ci_10": 0.0285,
-      "ci_90": 0.0657
+      "mean": 0.0435,
+      "ci_lower": 0.022,
+      "ci_upper": 0.0738,
+      "median": 0.0422,
+      "ci_10": 0.0276,
+      "ci_90": 0.0609
     },
     {
       "name": "António Filipe",
       "color": "#228B22",
-      "mean": 0.0371,
-      "ci_lower": 0.0167,
-      "ci_upper": 0.068,
-      "median": 0.0351,
-      "ci_10": 0.0219,
-      "ci_90": 0.0542
+      "mean": 0.0353,
+      "ci_lower": 0.0176,
+      "ci_upper": 0.0623,
+      "median": 0.0336,
+      "ci_10": 0.022,
+      "ci_90": 0.0504
     },
     {
       "name": "Jorge Pinto",
       "color": "#666666",
-      "mean": 0.0192,
-      "ci_lower": 0.0083,
-      "ci_upper": 0.0379,
-      "median": 0.0178,
-      "ci_10": 0.0108,
-      "ci_90": 0.0296
+      "mean": 0.0177,
+      "ci_lower": 0.0077,
+      "ci_upper": 0.033,
+      "median": 0.0166,
+      "ci_10": 0.0101,
+      "ci_90": 0.0268
     },
     {
       "name": "Others",
       "color": "#808080",
-      "mean": 0.018,
-      "ci_lower": 0.0077,
-      "ci_upper": 0.0345,
-      "median": 0.0169,
-      "ci_10": 0.0104,
-      "ci_90": 0.027
+      "mean": 0.0162,
+      "ci_lower": 0.0075,
+      "ci_upper": 0.0298,
+      "median": 0.0153,
+      "ci_10": 0.0096,
+      "ci_90": 0.0239
     }
   ]
 }
