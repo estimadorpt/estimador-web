@@ -196,6 +196,20 @@
       "António Filipe": 0.024,
       "Jorge Pinto": 0.008,
       "Others": 0.004
+    },
+    {
+      "date": "2026-01-10",
+      "pollster": "Pitagórica",
+      "sample_size": 608,
+      "Gouveia e Melo": 0.1702,
+      "Marques Mendes": 0.1451,
+      "António José Seguro": 0.2142,
+      "André Ventura": 0.1972,
+      "Cotrim Figueiredo": 0.2112,
+      "Catarina Martins": 0.026,
+      "António Filipe": 0.02,
+      "Jorge Pinto": 0.009,
+      "Others": 0.007
     }
   ]
 }
