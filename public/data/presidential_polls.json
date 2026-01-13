@@ -198,6 +198,20 @@
       "Others": 0.004
     },
     {
+      "date": "2026-01-09",
+      "pollster": "CESOP-UCP",
+      "sample_size": 1770,
+      "Gouveia e Melo": 0.14,
+      "Marques Mendes": 0.14,
+      "António José Seguro": 0.23,
+      "André Ventura": 0.24,
+      "Cotrim Figueiredo": 0.19,
+      "Catarina Martins": 0.02,
+      "António Filipe": 0.02,
+      "Jorge Pinto": 0.015,
+      "Others": 0.005
+    },
+    {
       "date": "2026-01-10",
       "pollster": "Pitagórica",
       "sample_size": 608,
