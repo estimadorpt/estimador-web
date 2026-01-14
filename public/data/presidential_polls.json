@@ -224,6 +224,20 @@
       "António Filipe": 0.02,
       "Jorge Pinto": 0.009,
       "Others": 0.007
+    },
+    {
+      "date": "2026-01-13",
+      "pollster": "Intercampus",
+      "sample_size": 806,
+      "Gouveia e Melo": 0.153,
+      "Marques Mendes": 0.1903,
+      "António José Seguro": 0.1555,
+      "André Ventura": 0.2313,
+      "Cotrim Figueiredo": 0.1779,
+      "Catarina Martins": 0.0323,
+      "António Filipe": 0.0211,
+      "Jorge Pinto": 0.0236,
+      "Others": 0.0149
     }
   ]
 }

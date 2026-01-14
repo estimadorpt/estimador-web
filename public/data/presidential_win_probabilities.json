@@ -5,65 +5,65 @@
     {
       "name": "André Ventura",
       "color": "#8B0000",
-      "leading_probability": 0.3407,
+      "leading_probability": 0.4437,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.2051
+      "mean_support": 0.2128
     },
     {
       "name": "António José Seguro",
       "color": "#FF69B4",
-      "leading_probability": 0.304,
+      "leading_probability": 0.2087,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.2002
+      "mean_support": 0.1847
     },
     {
       "name": "Cotrim Figueiredo",
       "color": "#00CED1",
-      "leading_probability": 0.1855,
+      "leading_probability": 0.1658,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.1807
-    },
-    {
-      "name": "Gouveia e Melo",
-      "color": "#4A90D9",
-      "leading_probability": 0.1005,
-      "first_round_win_probability": 0.0,
-      "mean_support": 0.163
+      "mean_support": 0.1791
     },
     {
       "name": "Marques Mendes",
       "color": "#FF8C00",
-      "leading_probability": 0.0693,
+      "leading_probability": 0.1035,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.1528
+      "mean_support": 0.1633
+    },
+    {
+      "name": "Gouveia e Melo",
+      "color": "#4A90D9",
+      "leading_probability": 0.0783,
+      "first_round_win_probability": 0.0,
+      "mean_support": 0.1596
     },
     {
       "name": "Catarina Martins",
       "color": "#DC143C",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0354
+      "mean_support": 0.0357
     },
     {
       "name": "António Filipe",
       "color": "#228B22",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0306
+      "mean_support": 0.0301
     },
     {
       "name": "Jorge Pinto",
       "color": "#666666",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0193
+      "mean_support": 0.0209
     },
     {
       "name": "Others",
       "color": "#808080",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0128
+      "mean_support": 0.0139
     }
   ],
   "second_round_probability": 1.0

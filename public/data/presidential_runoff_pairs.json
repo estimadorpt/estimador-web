@@ -4,70 +4,70 @@
     {
       "candidate_a": "André Ventura",
       "candidate_b": "António José Seguro",
-      "probability": 0.2755,
+      "probability": 0.2465,
       "color_a": "#8B0000",
       "color_b": "#FF69B4"
     },
     {
       "candidate_a": "André Ventura",
       "candidate_b": "Cotrim Figueiredo",
-      "probability": 0.1608,
+      "probability": 0.199,
       "color_a": "#8B0000",
       "color_b": "#00CED1"
+    },
+    {
+      "candidate_a": "André Ventura",
+      "candidate_b": "Marques Mendes",
+      "probability": 0.1378,
+      "color_a": "#8B0000",
+      "color_b": "#FF8C00"
+    },
+    {
+      "candidate_a": "André Ventura",
+      "candidate_b": "Gouveia e Melo",
+      "probability": 0.1055,
+      "color_a": "#8B0000",
+      "color_b": "#4A90D9"
     },
     {
       "candidate_a": "António José Seguro",
       "candidate_b": "Cotrim Figueiredo",
-      "probability": 0.1467,
+      "probability": 0.0988,
       "color_a": "#FF69B4",
       "color_b": "#00CED1"
     },
     {
-      "candidate_a": "André Ventura",
-      "candidate_b": "Gouveia e Melo",
-      "probability": 0.097,
-      "color_a": "#8B0000",
-      "color_b": "#4A90D9"
-    },
-    {
-      "candidate_a": "António José Seguro",
-      "candidate_b": "Gouveia e Melo",
-      "probability": 0.083,
-      "color_a": "#FF69B4",
-      "color_b": "#4A90D9"
-    },
-    {
-      "candidate_a": "André Ventura",
-      "candidate_b": "Marques Mendes",
-      "probability": 0.0648,
-      "color_a": "#8B0000",
-      "color_b": "#FF8C00"
-    },
-    {
       "candidate_a": "António José Seguro",
       "candidate_b": "Marques Mendes",
-      "probability": 0.0585,
+      "probability": 0.0542,
       "color_a": "#FF69B4",
       "color_b": "#FF8C00"
     },
     {
-      "candidate_a": "Cotrim Figueiredo",
+      "candidate_a": "António José Seguro",
       "candidate_b": "Gouveia e Melo",
-      "probability": 0.0515,
-      "color_a": "#00CED1",
+      "probability": 0.053,
+      "color_a": "#FF69B4",
       "color_b": "#4A90D9"
     },
     {
       "candidate_a": "Cotrim Figueiredo",
       "candidate_b": "Marques Mendes",
-      "probability": 0.0425,
+      "probability": 0.0413,
       "color_a": "#00CED1",
       "color_b": "#FF8C00"
+    },
+    {
+      "candidate_a": "Cotrim Figueiredo",
+      "candidate_b": "Gouveia e Melo",
+      "probability": 0.0398,
+      "color_a": "#00CED1",
+      "color_b": "#4A90D9"
     },
     {
       "candidate_a": "Gouveia e Melo",
       "candidate_b": "Marques Mendes",
-      "probability": 0.0198,
+      "probability": 0.0243,
       "color_a": "#4A90D9",
       "color_b": "#FF8C00"
     }
@@ -90,37 +90,37 @@
     "probabilities": [
       [
         0.0,
-        0.0198,
-        0.083,
-        0.097,
-        0.0515
+        0.0243,
+        0.053,
+        0.1055,
+        0.0398
       ],
       [
-        0.0198,
+        0.0243,
         0.0,
-        0.0585,
-        0.0648,
-        0.0425
+        0.0542,
+        0.1378,
+        0.0413
       ],
       [
-        0.083,
-        0.0585,
+        0.053,
+        0.0542,
         0.0,
-        0.2755,
-        0.1467
+        0.2465,
+        0.0988
       ],
       [
-        0.097,
-        0.0648,
-        0.2755,
+        0.1055,
+        0.1378,
+        0.2465,
         0.0,
-        0.1608
+        0.199
       ],
       [
-        0.0515,
-        0.0425,
-        0.1467,
-        0.1608,
+        0.0398,
+        0.0413,
+        0.0988,
+        0.199,
         0.0
       ]
     ]
