@@ -5,65 +5,65 @@
     {
       "name": "André Ventura",
       "color": "#8B0000",
-      "leading_probability": 0.4437,
+      "leading_probability": 0.4477,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.2128
+      "mean_support": 0.216
     },
     {
       "name": "António José Seguro",
       "color": "#FF69B4",
-      "leading_probability": 0.2087,
+      "leading_probability": 0.3438,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.1847
+      "mean_support": 0.2063
     },
     {
       "name": "Cotrim Figueiredo",
       "color": "#00CED1",
-      "leading_probability": 0.1658,
+      "leading_probability": 0.1663,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.1791
+      "mean_support": 0.1848
     },
     {
       "name": "Marques Mendes",
       "color": "#FF8C00",
-      "leading_probability": 0.1035,
+      "leading_probability": 0.028,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.1633
+      "mean_support": 0.1506
     },
     {
       "name": "Gouveia e Melo",
       "color": "#4A90D9",
-      "leading_probability": 0.0783,
+      "leading_probability": 0.0143,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.1596
+      "mean_support": 0.1422
     },
     {
       "name": "Catarina Martins",
       "color": "#DC143C",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0357
+      "mean_support": 0.0356
     },
     {
       "name": "António Filipe",
       "color": "#228B22",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0301
+      "mean_support": 0.0283
     },
     {
       "name": "Jorge Pinto",
       "color": "#666666",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0209
+      "mean_support": 0.0208
     },
     {
       "name": "Others",
       "color": "#808080",
       "leading_probability": 0.0,
       "first_round_win_probability": 0.0,
-      "mean_support": 0.0139
+      "mean_support": 0.0152
     }
   ],
   "second_round_probability": 1.0

@@ -1,46 +1,46 @@
 {
-  "current_date": "2026-01-13",
-  "previous_date": "2026-01-10",
+  "current_date": "2026-01-15",
+  "previous_date": "2026-01-13",
   "candidates": [
     {
       "name": "André Ventura",
       "color": "#8B0000",
-      "current": 0.7788,
-      "previous": 0.7932,
-      "change": -0.0144,
-      "change_pp": -1.44
+      "current": 0.8137,
+      "previous": 0.863,
+      "change": -0.0493,
+      "change_pp": -4.93
     },
     {
       "name": "António José Seguro",
       "color": "#FF69B4",
-      "current": 0.4607,
-      "previous": 0.548,
-      "change": -0.0873,
-      "change_pp": -8.73
+      "current": 0.7217,
+      "previous": 0.7297,
+      "change": -0.008,
+      "change_pp": -0.8
     },
     {
       "name": "Cotrim Figueiredo",
       "color": "#00CED1",
-      "current": 0.3887,
-      "previous": 0.3835,
-      "change": 0.0052,
-      "change_pp": 0.52
+      "current": 0.3842,
+      "previous": 0.3198,
+      "change": 0.0644,
+      "change_pp": 6.44
     },
     {
       "name": "Marques Mendes",
       "color": "#FF8C00",
-      "current": 0.21,
-      "previous": 0.1263,
-      "change": 0.0837,
-      "change_pp": 8.37
+      "current": 0.0514,
+      "previous": 0.0635,
+      "change": -0.0121,
+      "change_pp": -1.21
     },
     {
       "name": "Gouveia e Melo",
       "color": "#4A90D9",
-      "current": 0.1618,
-      "previous": 0.149,
-      "change": 0.0128,
-      "change_pp": 1.28
+      "current": 0.0288,
+      "previous": 0.024,
+      "change": 0.0048,
+      "change_pp": 0.48
     }
   ]
 }

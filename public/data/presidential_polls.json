@@ -226,6 +226,34 @@
       "Others": 0.007
     },
     {
+      "date": "2026-01-12",
+      "pollster": "Aximage",
+      "sample_size": 800,
+      "Gouveia e Melo": 0.136,
+      "Marques Mendes": 0.149,
+      "António José Seguro": 0.23,
+      "André Ventura": 0.247,
+      "Cotrim Figueiredo": 0.149,
+      "Catarina Martins": 0.035,
+      "António Filipe": 0.025,
+      "Jorge Pinto": 0.019,
+      "Others": 0.01
+    },
+    {
+      "date": "2026-01-13",
+      "pollster": "Consulmark2",
+      "sample_size": 993,
+      "Gouveia e Melo": 0.144,
+      "Marques Mendes": 0.178,
+      "António José Seguro": 0.207,
+      "André Ventura": 0.189,
+      "Cotrim Figueiredo": 0.185,
+      "Catarina Martins": 0.03,
+      "António Filipe": 0.014,
+      "Jorge Pinto": 0.012,
+      "Others": 0.041
+    },
+    {
       "date": "2026-01-13",
       "pollster": "Intercampus",
       "sample_size": 806,
@@ -238,6 +266,20 @@
       "António Filipe": 0.0211,
       "Jorge Pinto": 0.0236,
       "Others": 0.0149
+    },
+    {
+      "date": "2026-01-15",
+      "pollster": "Pitagórica",
+      "sample_size": 1200,
+      "Gouveia e Melo": 0.116,
+      "Marques Mendes": 0.115,
+      "António José Seguro": 0.251,
+      "André Ventura": 0.23,
+      "Cotrim Figueiredo": 0.223,
+      "Catarina Martins": 0.025,
+      "António Filipe": 0.02,
+      "Jorge Pinto": 0.015,
+      "Others": 0.005
     }
   ]
 }
