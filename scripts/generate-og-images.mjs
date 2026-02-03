@@ -53,6 +53,51 @@ function formatProbability(value) {
   return `${Math.round(pct)}%`;
 }
 
+// Generate generic SVG for OG image (no forecast data)
+function generateGenericOgSvg(locale) {
+  const tagline = locale === 'pt'
+    ? 'Previsões Eleitorais para Portugal'
+    : 'Portuguese Election Forecast';
+  const subtitle = locale === 'pt'
+    ? 'Modelo Bayesiano de Sondagens'
+    : 'Bayesian Polling Model';
+
+  return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    </style>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b"/>
+      <stop offset="50%" style="stop-color:#334155"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+
+  <!-- Logo circles - centered and larger -->
+  <g transform="translate(600, 220)">
+    <circle cx="-120" cy="0" r="45" fill="#4A6FA5"/>
+    <circle cx="0" cy="0" r="60" fill="#0F766E"/>
+    <circle cx="140" cy="0" r="75" fill="#D4A000"/>
+  </g>
+
+  <!-- Logo text -->
+  <text x="600" y="370" fill="#fafafa" font-size="72" font-weight="700" text-anchor="middle">estimador</text>
+
+  <!-- Tagline -->
+  <text x="600" y="440" fill="#94a3b8" font-size="32" font-weight="400" text-anchor="middle">${tagline}</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="490" fill="#64748b" font-size="24" font-weight="400" text-anchor="middle">${subtitle}</text>
+
+  <!-- URL -->
+  <text x="600" y="580" fill="#475569" font-size="22" font-weight="500" text-anchor="middle">estimador.pt</text>
+</svg>`;
+}
+
 // Generate SVG for OG image with logo
 function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRoundProb) {
   const chanceLabel = locale === 'pt' ? 'probabilidade de ganhar a 1ª volta' : 'chance of winning 1st round';
@@ -128,6 +173,49 @@ function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRo
 }
 
 async function main() {
+  const isGeneric = process.argv.includes('--generic');
+
+  if (isGeneric) {
+    console.log('🖼️  Generating generic Open Graph images...');
+
+    // Generate short hash for cache busting
+    const version = Date.now().toString(36).slice(-6);
+
+    // Generate for each locale with versioned filename
+    for (const locale of ['pt', 'en']) {
+      const svg = generateGenericOgSvg(locale);
+
+      // Convert to PNG using sharp with versioned filename
+      const filename = `og-image-${locale}-${version}.png`;
+      const pngPath = path.join(rootDir, 'public', filename);
+      await sharp(Buffer.from(svg))
+        .resize(1200, 630)
+        .png()
+        .toFile(pngPath);
+      console.log(`   ✅ Generated: ${filename}`);
+
+      // Also create unversioned copy for backwards compatibility
+      const unversionedPath = path.join(rootDir, 'public', `og-image-${locale}.png`);
+      fs.copyFileSync(pngPath, unversionedPath);
+    }
+
+    // Write manifest with version for filename-based cache busting
+    const manifest = {
+      generatedAt: new Date().toISOString(),
+      version: version,
+      files: {
+        pt: `og-image-pt-${version}.png`,
+        en: `og-image-en-${version}.png`
+      }
+    };
+    const manifestPath = path.join(rootDir, 'public', 'og-manifest.json');
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+    console.log(`   ✅ Manifest: og-manifest.json (version: ${version})`);
+
+    console.log('✅ Generic Open Graph images generated!');
+    return;
+  }
+
   console.log('🖼️  Generating Open Graph images...');
 
   // Load data
