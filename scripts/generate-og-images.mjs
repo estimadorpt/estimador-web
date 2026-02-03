@@ -58,9 +58,6 @@ function generateGenericOgSvg(locale) {
   const tagline = locale === 'pt'
     ? 'Previsões Eleitorais para Portugal'
     : 'Portuguese Election Forecast';
-  const subtitle = locale === 'pt'
-    ? 'Modelo Bayesiano de Sondagens'
-    : 'Bayesian Polling Model';
 
   return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -78,23 +75,20 @@ function generateGenericOgSvg(locale) {
   <rect width="1200" height="630" fill="url(#bgGradient)"/>
 
   <!-- Logo circles - centered and larger -->
-  <g transform="translate(600, 220)">
+  <g transform="translate(600, 240)">
     <circle cx="-120" cy="0" r="45" fill="#4A6FA5"/>
     <circle cx="0" cy="0" r="60" fill="#0F766E"/>
     <circle cx="140" cy="0" r="75" fill="#D4A000"/>
   </g>
 
   <!-- Logo text -->
-  <text x="600" y="370" fill="#fafafa" font-size="72" font-weight="700" text-anchor="middle">estimador</text>
+  <text x="600" y="400" fill="#fafafa" font-size="72" font-weight="700" text-anchor="middle">estimador</text>
 
   <!-- Tagline -->
-  <text x="600" y="440" fill="#94a3b8" font-size="32" font-weight="400" text-anchor="middle">${tagline}</text>
-
-  <!-- Subtitle -->
-  <text x="600" y="490" fill="#64748b" font-size="24" font-weight="400" text-anchor="middle">${subtitle}</text>
+  <text x="600" y="470" fill="#94a3b8" font-size="32" font-weight="400" text-anchor="middle">${tagline}</text>
 
   <!-- URL -->
-  <text x="600" y="580" fill="#475569" font-size="22" font-weight="500" text-anchor="middle">estimador.pt</text>
+  <text x="600" y="570" fill="#64748b" font-size="24" font-weight="500" text-anchor="middle">estimador.pt</text>
 </svg>`;
 }
 
