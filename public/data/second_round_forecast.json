@@ -1,0 +1,31 @@
+{
+  "election_type": "presidential",
+  "election_date": "2026-02-08",
+  "updated_at": "2026-02-03T09:34:23.254380",
+  "candidates": [
+    {
+      "name": "António José Seguro",
+      "color": "#FF69B4",
+      "mean": 0.6489,
+      "ci_lower": 0.5707,
+      "ci_upper": 0.7162,
+      "median": 0.6504
+    },
+    {
+      "name": "André Ventura",
+      "color": "#8B0000",
+      "mean": 0.312,
+      "ci_lower": 0.2476,
+      "ci_upper": 0.3872,
+      "median": 0.3102
+    },
+    {
+      "name": "Blank/Null",
+      "color": "#A9A9A9",
+      "mean": 0.0391,
+      "ci_lower": 0.0243,
+      "ci_upper": 0.0571,
+      "median": 0.0385
+    }
+  ]
+}

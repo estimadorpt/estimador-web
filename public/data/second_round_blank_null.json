@@ -1,0 +1,8 @@
+{
+  "election_date": "2026-02-08",
+  "name": "Blank/Null",
+  "color": "#A9A9A9",
+  "mean": 0.0391,
+  "ci_lower": 0.0243,
+  "ci_upper": 0.0571
+}
