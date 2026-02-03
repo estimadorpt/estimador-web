@@ -1,9 +1,9 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import { 
-  SeatData, 
-  TrendData, 
-  DistrictForecast, 
+import {
+  SeatData,
+  TrendData,
+  DistrictForecast,
   ContestedSeat,
   PresidentialForecastData,
   PresidentialWinProbabilitiesData,
@@ -15,7 +15,13 @@ import {
   PresidentialHeadToHeadData,
   PresidentialRunoffPairsData,
   PresidentialChangesData,
-  PresidentialRunoffChangesData
+  PresidentialRunoffChangesData,
+  SecondRoundForecastData,
+  SecondRoundTrendsData,
+  SecondRoundTrajectoriesData,
+  SecondRoundValidVotesData,
+  SecondRoundWinProbabilityData,
+  SecondRoundBlankNullData
 } from '@/types';
 
 // Load data from the public directory
@@ -182,6 +188,64 @@ export async function loadPresidentialData() {
       changes: null as PresidentialChangesData | null,
       runoffChanges: null as PresidentialRunoffChangesData | null,
       lastPollDate: '2026-01-18'
+    };
+  }
+}
+
+// Second round forecast data loader
+export async function loadSecondRoundData() {
+  try {
+    const [forecast, trends, trajectories, validVotes, winProbability, blankNull] =
+      await Promise.all([
+        loadJsonData<SecondRoundForecastData>('second_round_forecast.json'),
+        loadJsonData<SecondRoundTrendsData>('second_round_trends.json'),
+        loadJsonData<SecondRoundTrajectoriesData>('second_round_trajectories.json'),
+        loadJsonData<SecondRoundValidVotesData>('second_round_valid_votes.json'),
+        loadJsonData<SecondRoundWinProbabilityData>('second_round_win_probability.json'),
+        loadJsonData<SecondRoundBlankNullData>('second_round_blank_null.json'),
+      ]);
+
+    return { forecast, trends, trajectories, validVotes, winProbability, blankNull };
+  } catch (error) {
+    console.error('Error loading second round data:', error);
+    return {
+      forecast: {
+        election_type: 'presidential',
+        election_date: '2026-02-08',
+        updated_at: new Date().toISOString(),
+        candidates: []
+      } as SecondRoundForecastData,
+      trends: {
+        election_type: 'presidential',
+        election_date: '2026-02-08',
+        dates: [],
+        candidates: {}
+      } as SecondRoundTrendsData,
+      trajectories: {
+        election_type: 'presidential',
+        election_date: '2026-02-08',
+        dates: [],
+        n_samples: 0,
+        candidates: {}
+      } as SecondRoundTrajectoriesData,
+      validVotes: {
+        election_type: 'presidential',
+        election_date: '2026-02-08',
+        updated_at: new Date().toISOString(),
+        candidates: []
+      } as SecondRoundValidVotesData,
+      winProbability: {
+        election_date: '2026-02-08',
+        candidates: []
+      } as SecondRoundWinProbabilityData,
+      blankNull: {
+        election_date: '2026-02-08',
+        name: 'Blank/Null',
+        color: '#A9A9A9',
+        mean: 0,
+        ci_lower: 0,
+        ci_upper: 0
+      } as SecondRoundBlankNullData
     };
   }
 }

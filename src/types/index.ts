@@ -257,9 +257,82 @@ export interface MunicipalElection extends ElectionConfig {
   positions: ('mayor' | 'assembly')[];
 }
 
-// European election types  
+// European election types
 export interface EuropeanElection extends ElectionConfig {
   type: 'european';
   constituencies: string[];
   politicalGroups: string[];
+}
+
+// Second Round Types
+export interface SecondRoundCandidateForecast {
+  name: string;
+  color: string;
+  mean: number;
+  ci_lower: number;
+  ci_upper: number;
+  median: number;
+}
+
+export interface SecondRoundForecastData {
+  election_type: string;
+  election_date: string;
+  updated_at: string;
+  candidates: SecondRoundCandidateForecast[];
+}
+
+export interface SecondRoundCandidateTrend {
+  color: string;
+  mean: number[];
+  ci_05: number[];
+  ci_95: number[];
+  ci_25: number[];
+  ci_75: number[];
+}
+
+export interface SecondRoundTrendsData {
+  election_type: string;
+  election_date: string;
+  dates: string[];
+  candidates: Record<string, SecondRoundCandidateTrend>;
+}
+
+export interface SecondRoundCandidateTrajectories {
+  color: string;
+  trajectories: number[][];
+}
+
+export interface SecondRoundTrajectoriesData {
+  election_type: string;
+  election_date: string;
+  dates: string[];
+  n_samples: number;
+  candidates: Record<string, SecondRoundCandidateTrajectories>;
+}
+
+export interface SecondRoundValidVotesData {
+  election_type: string;
+  election_date: string;
+  updated_at: string;
+  candidates: SecondRoundCandidateForecast[];
+}
+
+export interface SecondRoundWinProbabilityCandidate {
+  name: string;
+  color: string;
+  win_probability: number;
+}
+
+export interface SecondRoundWinProbabilityData {
+  election_date: string;
+  candidates: SecondRoundWinProbabilityCandidate[];
+}
+
+export interface SecondRoundBlankNullData {
+  election_date: string;
+  name: string;
+  color: string;
+  mean: number;
+  ci_lower: number;
+  ci_upper: number;
 }

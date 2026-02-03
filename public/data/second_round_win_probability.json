@@ -1,0 +1,15 @@
+{
+  "election_date": "2026-02-08",
+  "candidates": [
+    {
+      "name": "António José Seguro",
+      "color": "#FF69B4",
+      "win_probability": 0.9996
+    },
+    {
+      "name": "André Ventura",
+      "color": "#8B0000",
+      "win_probability": 0.0004
+    }
+  ]
+}
