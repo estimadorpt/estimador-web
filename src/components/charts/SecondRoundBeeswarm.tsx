@@ -49,8 +49,8 @@ export function SecondRoundBeeswarm({
       });
     }
 
-    // Sample for performance if needed
-    const sampleSize = Math.min(isMobile ? 100 : 200, simulationPoints.length);
+    // Sample for performance - more on desktop, conservative on mobile
+    const sampleSize = Math.min(isMobile ? 150 : 800, simulationPoints.length);
     const sampledData = d3.shuffle(simulationPoints.slice()).slice(0, sampleSize);
 
     // Calculate medians for each candidate
@@ -113,10 +113,10 @@ export function SecondRoundBeeswarm({
             x: d => d.voteShare + (d.draw % 100 - 50) * 0.001,
             fy: "candidate",
             fill: "candidate",
-            fillOpacity: isMobile ? 0.8 : 0.7,
-            r: isMobile ? 3 : 2,
+            fillOpacity: isMobile ? 0.8 : 0.6,
+            r: isMobile ? 3 : 1.5,
             stroke: "white",
-            strokeWidth: isMobile ? 0.5 : 0.3,
+            strokeWidth: isMobile ? 0.5 : 0.2,
             anchor: "middle"
           })),
 
