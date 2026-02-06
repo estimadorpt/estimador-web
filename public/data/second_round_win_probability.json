@@ -4,12 +4,12 @@
     {
       "name": "António José Seguro",
       "color": "#FF69B4",
-      "win_probability": 0.9996
+      "win_probability": 1.0
     },
     {
       "name": "André Ventura",
       "color": "#8B0000",
-      "win_probability": 0.0004
+      "win_probability": 0.0
     }
   ]
 }
