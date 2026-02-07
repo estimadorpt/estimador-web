@@ -133,6 +133,7 @@ export function PresidentialCandidateCards({
 
   const formatPercentRounded = (value: number) => {
     const pct = value * 100;
+    if (pct > 99) return '>99%';
     if (pct < 1) return '<1%';
     return `${Math.round(pct)}%`;
   };
@@ -235,7 +236,7 @@ export function SecondRoundIndicator({
 }: SecondRoundIndicatorProps) {
   const formatPercent = (value: number) => {
     const pct = value * 100;
-    if (pct >= 99.5) return '>99%';
+    if (pct > 99) return '>99%';
     if (pct < 1) return '<1%';
     return `${Math.round(pct)}%`;
   };
@@ -267,4 +268,3 @@ export function SecondRoundIndicator({
     </div>
   );
 }
-

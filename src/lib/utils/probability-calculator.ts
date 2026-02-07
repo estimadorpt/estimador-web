@@ -57,5 +57,8 @@ export function calculateBlocAGreaterThanBlocBProbability(
 
 // Format probability as percentage
 export function formatProbabilityPercent(probability: number): string {
-  return `${Math.round(probability * 100)}%`;
+  const pct = probability * 100;
+  if (pct > 99) return '>99%';
+  if (pct < 1) return '<1%';
+  return `${Math.round(pct)}%`;
 }

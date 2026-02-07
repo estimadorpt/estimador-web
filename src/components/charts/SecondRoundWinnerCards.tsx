@@ -20,7 +20,7 @@ export function SecondRoundWinnerCards({
 }: SecondRoundWinnerCardsProps) {
   const formatPercent = (value: number) => {
     const pct = value * 100;
-    if (pct >= 99.95) return `${pct.toFixed(2)}%`;
+    if (pct > 99) return '>99%';
     if (pct < 0.01) return '<0.01%';
     if (pct < 1) return `${pct.toFixed(2)}%`;
     return `${pct.toFixed(1)}%`;

@@ -48,6 +48,7 @@ export function PresidentialRunoffMatrix({
   const formatPercent = (value: number) => {
     if (value === 0) return '';
     const pct = value * 100;
+    if (pct > 99) return '>99';
     if (pct < 1) return '<1';
     return pct.toFixed(0);
   };
@@ -167,6 +168,5 @@ export function PresidentialRunoffMatrix({
     </div>
   );
 }
-
 
 

@@ -111,7 +111,7 @@ export default async function Home({
   // Format probability as percentage
   const formatProbability = (value: number) => {
     const pct = value * 100;
-    if (pct >= 99.5) return '>99%';
+    if (pct > 99) return '>99%';
     if (pct < 1) return '<1%';
     return `${Math.round(pct)}%`;
   };
@@ -153,7 +153,7 @@ export default async function Home({
           title: t('secondRound.title'),
           headline: t('secondRound.headline', {
             candidate: secondRoundData.winProbability.candidates[0]?.name || '',
-            probability: `${(secondRoundData.winProbability.candidates[0]?.win_probability * 100 || 0).toFixed(2)}%`
+            probability: formatProbability(secondRoundData.winProbability.candidates[0]?.win_probability || 0)
           }),
           headlineDescription: t('secondRound.headlineDescription', {
             candidateA: secondRoundData.winProbability.candidates[0]?.name || '',
