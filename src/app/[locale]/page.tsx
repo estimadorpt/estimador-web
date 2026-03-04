@@ -130,8 +130,8 @@ export default async function HomePage({
               <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
                 {t("nav.elections")}
               </span>
-              <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5">
-                {t("sections.activeSection")}
+              <span className="text-[10px] bg-stone-100 text-stone-500 font-bold px-2 py-0.5">
+                {t("sections.archiveSection")}
               </span>
             </div>
 
