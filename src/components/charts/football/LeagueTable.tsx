@@ -1,0 +1,97 @@
+"use client";
+
+import { ligaTeamColors, ligaTeamShortNames } from "@/lib/config/football";
+import type { TeamStanding } from "@/types/football";
+
+interface LeagueTableProps {
+  data: TeamStanding[];
+  labels: {
+    team: string;
+    meanPoints: string;
+    goalDifference: string;
+    championship: string;
+    top3: string;
+    relegation: string;
+  };
+}
+
+function formatProb(value: number): string {
+  const pct = value * 100;
+  if (pct > 99 && pct < 100) return ">99%";
+  if (pct < 1 && pct > 0) return "<1%";
+  if (pct === 0) return "—";
+  if (pct === 100) return "100%";
+  return `${Math.round(pct)}%`;
+}
+
+export function LeagueTable({ data, labels }: LeagueTableProps) {
+  if (!data || data.length === 0) return null;
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b-2 border-stone-800 text-left">
+            <th className="py-2 pr-2 w-8 text-stone-500 font-medium">#</th>
+            <th className="py-2 pr-4 font-medium">{labels.team}</th>
+            <th className="py-2 px-3 text-right font-medium">{labels.meanPoints}</th>
+            <th className="py-2 px-3 text-right font-medium hidden sm:table-cell">{labels.goalDifference}</th>
+            <th className="py-2 px-3 text-right font-medium">{labels.championship}</th>
+            <th className="py-2 px-3 text-right font-medium hidden sm:table-cell">{labels.top3}</th>
+            <th className="py-2 px-3 text-right font-medium">{labels.relegation}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((team, i) => {
+            const color = ligaTeamColors[team.team] || '#78716c';
+            const isRelegationZone = i >= data.length - 3;
+            const isChampionZone = i < 3;
+            return (
+              <tr
+                key={team.team}
+                className={`border-b border-stone-200 ${
+                  isRelegationZone ? 'bg-red-50/40' : isChampionZone ? 'bg-stone-50' : ''
+                }`}
+              >
+                <td className="py-2.5 pr-2 text-stone-400 tabular-nums">{i + 1}</td>
+                <td className="py-2.5 pr-4">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-1 h-5 flex-shrink-0"
+                      style={{ backgroundColor: color }}
+                    />
+                    <span className="font-medium text-stone-900 sm:hidden">
+                      {ligaTeamShortNames[team.team] || team.team}
+                    </span>
+                    <span className="font-medium text-stone-900 hidden sm:inline">
+                      {team.team}
+                    </span>
+                  </div>
+                </td>
+                <td className="py-2.5 px-3 text-right tabular-nums font-semibold">
+                  {team.mean_pts.toFixed(1)}
+                </td>
+                <td className="py-2.5 px-3 text-right tabular-nums text-stone-500 hidden sm:table-cell">
+                  {team.mean_gd > 0 ? '+' : ''}{team.mean_gd.toFixed(0)}
+                </td>
+                <td className="py-2.5 px-3 text-right tabular-nums">
+                  <span className={team.p_champion > 0.01 ? 'font-semibold' : 'text-stone-400'}>
+                    {formatProb(team.p_champion)}
+                  </span>
+                </td>
+                <td className="py-2.5 px-3 text-right tabular-nums hidden sm:table-cell">
+                  {formatProb(team.p_top3)}
+                </td>
+                <td className="py-2.5 px-3 text-right tabular-nums">
+                  <span className={team.p_relegation > 0.1 ? 'font-semibold text-red-700' : team.p_relegation > 0 ? 'text-red-600' : 'text-stone-400'}>
+                    {formatProb(team.p_relegation)}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}

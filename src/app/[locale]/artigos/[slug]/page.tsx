@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: MDXArticlePageProps): Promise
       publishedTime: article.date,
       tags: article.tags,
       siteName: 'estimador.pt',
-      url: `https://estimador.pt/${locale}/articles/${slug}`,
+      url: `https://estimador.pt/${locale}/artigos/${slug}`,
     },
     twitter: {
       card: 'summary_large_image',
@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: MDXArticlePageProps): Promise
       creator: '@estimadorpt',
     },
     alternates: {
-      canonical: `https://estimador.pt/${locale}/articles/${slug}`,
+      canonical: `https://estimador.pt/${locale}/artigos/${slug}`,
     },
   };
 }
@@ -104,7 +104,7 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
         <main className="container mx-auto px-4 py-8 max-w-4xl">
           {/* Breadcrumb */}
           <nav className="mb-6">
-            <Link href="/articles" className="text-green-medium hover:text-green-dark hover:underline">
+            <Link href="/artigos" locale={locale} className="text-green-medium hover:text-green-dark hover:underline">
               ← {t('articles.backToArticles')}
             </Link>
           </nav>
@@ -160,8 +160,9 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
           {/* Footer */}
           <footer className="mt-12 pt-8 border-t border-gray-200">
             <div className="text-center">
-              <Link 
-                href="/articles" 
+              <Link
+                href="/artigos"
+                locale={locale}
                 className="inline-flex items-center text-green-medium hover:text-green-dark hover:underline"
               >
                 ← {t('articles.backToArticles')}

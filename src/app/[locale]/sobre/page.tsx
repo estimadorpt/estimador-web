@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
@@ -8,46 +7,46 @@ import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { useMDXComponents } from '@/mdx-components';
 
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: Promise<{ locale: string }> 
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  
+
   return {
-    title: t('meta.methodologyTitle'),
-    description: t('methodology.subtitle'),
+    title: t('meta.aboutTitle'),
+    description: t('about.subtitle'),
     openGraph: {
-      title: t('meta.methodologyTitle'),
-      description: t('methodology.subtitle'),
-      url: `https://estimador.pt/${locale}/methodology`,
+      title: t('meta.aboutTitle'),
+      description: t('about.subtitle'),
+      url: `https://estimador.pt/${locale}/sobre`,
     },
     alternates: {
-      canonical: `https://estimador.pt/${locale}/methodology`,
+      canonical: `https://estimador.pt/${locale}/sobre`,
     },
   };
 }
 
-function getMethodologyPath(locale: string): string {
-  return path.join(process.cwd(), 'src/content/methodology', `${locale}.mdx`);
+function getAboutPath(locale: string): string {
+  return path.join(process.cwd(), 'src/content/about', `${locale}.mdx`);
 }
 
-function getMethodologyContent(locale: string): { content: string; actualLocale: string } {
+function getAboutContent(locale: string): { content: string; actualLocale: string } {
   // Try preferred locale first
-  let mdxPath = getMethodologyPath(locale);
-  
+  let mdxPath = getAboutPath(locale);
+
   if (existsSync(mdxPath)) {
     return {
       content: readFileSync(mdxPath, 'utf8'),
       actualLocale: locale
     };
   }
-  
+
   // Fallback to Portuguese
   if (locale !== 'pt') {
-    mdxPath = getMethodologyPath('pt');
+    mdxPath = getAboutPath('pt');
     if (existsSync(mdxPath)) {
       return {
         content: readFileSync(mdxPath, 'utf8'),
@@ -55,40 +54,40 @@ function getMethodologyContent(locale: string): { content: string; actualLocale:
       };
     }
   }
-  
+
   // Fallback to English
-  mdxPath = getMethodologyPath('en');
+  mdxPath = getAboutPath('en');
   if (existsSync(mdxPath)) {
     return {
       content: readFileSync(mdxPath, 'utf8'),
       actualLocale: 'en'
     };
   }
-  
-  throw new Error('No methodology content found');
+
+  throw new Error('No about content found');
 }
 
-export default async function MethodologyPage({
+export default async function AboutPage({
   params
 }: {
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  
-  const { content: mdxContent, actualLocale } = getMethodologyContent(locale);
+
+  const { content: mdxContent, actualLocale } = getAboutContent(locale);
   const components = useMDXComponents({});
 
   return (
-    <div className="min-h-screen bg-green-pale">
+    <div className="min-h-screen bg-white">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="max-w-3xl mx-auto px-4 py-10 md:py-16">
         {/* Locale Notice (if fallback) */}
         {actualLocale !== locale && (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-700">
-              {locale === 'en' 
+              {locale === 'en'
                 ? `This page is only available in Portuguese. Showing Portuguese version.`
                 : `Esta página apenas está disponível em português.`
               }
@@ -96,26 +95,22 @@ export default async function MethodologyPage({
           </div>
         )}
 
-        <Card>
-          <CardContent className="p-8">
-            <article className="prose prose-lg max-w-none mdx-content">
-              <MDXRemote source={mdxContent} components={components} />
-            </article>
-          </CardContent>
-        </Card>
+        <article className="prose prose-stone prose-lg max-w-none">
+          <MDXRemote source={mdxContent} components={components} />
+        </article>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-green-medium/30 bg-white mt-16">
-        <div className="container mx-auto px-4 py-8">
+      <footer className="border-t border-stone-200 bg-white mt-16">
+        <div className="max-w-3xl mx-auto px-4 py-8">
           <div className="flex flex-col items-center gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.svg" alt="estimador.pt" className="h-8 w-auto opacity-60" />
-            <div className="text-center text-sm text-slate-600">
+            <div className="text-center text-sm text-stone-500">
               <p>{t('about.footerCopyright')}</p>
               <p className="mt-2">
                 {t('about.footerDeveloper')} •
-                <Link href="mailto:info@estimador.pt" className="text-green-medium hover:text-green-dark hover:underline ml-1">
+                <Link href="mailto:info@estimador.pt" locale={locale} className="text-stone-600 hover:text-stone-800 hover:underline ml-1">
                   info@estimador.pt
                 </Link>
               </p>

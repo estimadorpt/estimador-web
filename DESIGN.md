@@ -36,6 +36,13 @@ amber-500  #f59e0b  - Warnings, second round indicator
 amber-600  #d97706  - Warning text
 ```
 
+### Section Accent Colors
+Each platform section has a distinct accent color shown as a thin bar below the header:
+```
+Football (Liga Portugal)  #006B3F  Green
+Elections                 #1e3a5f  Navy
+```
+
 ### Candidate Colors
 Each candidate has a distinctive color used for:
 - Vertical identification bars
@@ -52,6 +59,9 @@ Catarina Martins   #DC143C  Crimson
 António Filipe     #228B22  Green
 Others             #808080  Gray
 ```
+
+### Football Team Colors
+Each Liga Portugal team has a distinctive color for identification bars and charts. Defined in `src/lib/config/football.ts`.
 
 ---
 
@@ -106,6 +116,30 @@ div.flex.items-start.gap-2
 ---
 
 ## Component Patterns
+
+### League Table (Football)
+Editorial-style table with team color bars, no card borders:
+```
+table.w-full.text-sm
+  thead (bold border-b-2)
+  tbody
+    tr.border-b.border-stone-200
+      td: rank
+      td: div.w-1.h-5 (team color bar) + name
+      td: mean_pts (font-semibold tabular-nums)
+      td: championship probability
+      td: relegation probability (red if > 10%)
+```
+Relegation zone rows get `bg-red-50/40`, champion zone gets `bg-stone-50`.
+
+### Probability Bar (Match Predictions)
+Three-segment horizontal bar (home/draw/away):
+```
+div.flex.h-5
+  div (home color, width = p_home%)
+  div (stone-200, width = p_draw%)
+  div (away color, width = p_away%)
+```
 
 ### Second Round Indicator
 Simple layout with vertical color bar:

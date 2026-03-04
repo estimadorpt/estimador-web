@@ -70,7 +70,7 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
             <div className="flex items-center gap-3 text-sm">
               <span className="text-stone-500">{translations.basedOnPolls}</span>
               <span className="text-stone-300">·</span>
-              <Link href="/methodology" className="text-navy hover:text-navy-light font-medium">
+              <Link href="/metodologia" className="text-navy hover:text-navy-light font-medium">
                 {translations.methodology}
               </Link>
             </div>

@@ -2,7 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/routing';
-import { ElectionProvider } from '@/contexts/ElectionContext';
+
 import { PostHogProvider } from '../providers';
 import '../globals.css';
 import type { Metadata } from 'next';
@@ -43,7 +43,7 @@ export async function generateMetadata({
     metadataBase: new URL('https://estimador.pt'),
     title: t('meta.defaultTitle'),
     description: t('meta.defaultDescription'),
-    keywords: ['eleições', 'portugal', 'previsões', 'sondagens', 'politics', 'elections', 'forecasting', 'polls'],
+    keywords: ['portugal', 'previsões', 'dados', 'futebol', 'liga portugal', 'eleições', 'sondagens', 'forecasting', 'data analysis'],
     authors: [{ name: 'Bernardo Caldas' }],
     creator: 'Bernardo Caldas',
     publisher: 'estimador.pt',
@@ -120,9 +120,7 @@ export default async function RootLayout({
       <body className="antialiased" suppressHydrationWarning>
         <PostHogProvider>
           <NextIntlClientProvider messages={messages} locale={locale}>
-            <ElectionProvider>
-              {children}
-            </ElectionProvider>
+            {children}
           </NextIntlClientProvider>
         </PostHogProvider>
       </body>

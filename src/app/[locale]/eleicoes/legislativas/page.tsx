@@ -29,14 +29,14 @@ export async function generateMetadata({
   
   return {
     title: t('meta.forecastTitle'),
-    description: t('meta.defaultDescription'),
+    description: t('sections.parliamentary2025Description'),
     openGraph: {
       title: t('meta.forecastTitle'),
-      description: t('meta.defaultDescription'),
-      url: `https://estimador.pt/${locale}/forecast`,
+      description: t('sections.parliamentary2025Description'),
+      url: `https://estimador.pt/${locale}/eleicoes/legislativas`,
     },
     alternates: {
-      canonical: `https://estimador.pt/${locale}/forecast`,
+      canonical: `https://estimador.pt/${locale}/eleicoes/legislativas`,
     },
   };
 }
@@ -186,7 +186,8 @@ export default async function ForecastPage({
                 <h2 className="text-xl font-semibold text-gray-900">{t('forecast.districtAnalysis')}</h2>
               </div>
               <Link
-                href="/map"
+                href="/eleicoes/mapa"
+                locale={locale}
                 className="text-sm text-navy hover:text-navy-light font-medium flex items-center gap-1"
               >
                 {t('map.title')} →

@@ -25,21 +25,26 @@ import {
 } from '@/types';
 
 // Load data from the public directory
-export async function loadJsonData<T>(filename: string): Promise<T> {
-  const filePath = path.join(process.cwd(), 'public', 'data', filename);
+export async function loadJsonData<T>(filename: string, subdirectory?: string): Promise<T> {
+  const filePath = subdirectory
+    ? path.join(process.cwd(), 'public', 'data', subdirectory, filename)
+    : path.join(process.cwd(), 'public', 'data', filename);
   const fileContents = await fs.readFile(filePath, 'utf8');
   return JSON.parse(fileContents);
 }
+
+const PRESIDENTIAL_DIR = 'elections/presidential-2026';
+const PARLIAMENTARY_DIR = 'elections/parliamentary-2025';
 
 // Parliamentary forecast data loader
 export async function loadForecastData() {
   try {
     const [seatData, nationalTrends, districtForecast, contestedSeats, houseEffects] = await Promise.all([
-      loadJsonData<SeatData[]>('seat_forecast_simulations.json'),
-      loadJsonData<TrendData[]>('national_trends.json'),
-      loadJsonData<any[]>('district_forecast.json'),
-      loadJsonData<any>('contested_summary.json'),
-      loadJsonData<any[]>('house_effects.json').catch(() => [])
+      loadJsonData<SeatData[]>('seat_forecast_simulations.json', PARLIAMENTARY_DIR),
+      loadJsonData<TrendData[]>('national_trends.json', PARLIAMENTARY_DIR),
+      loadJsonData<any[]>('district_forecast.json', PARLIAMENTARY_DIR),
+      loadJsonData<any>('contested_summary.json', PARLIAMENTARY_DIR),
+      loadJsonData<any[]>('house_effects.json', PARLIAMENTARY_DIR).catch(() => [])
     ]);
 
     return {
@@ -65,23 +70,23 @@ export async function loadForecastData() {
 export async function loadPresidentialData() {
   try {
     const [forecast, winProbabilities, trends, snapshotProbabilities, trajectories, polls, houseEffects, headToHead, electionDayRunoffPairs, snapshotRunoffPairs, changes, runoffChanges] = await Promise.all([
-      loadJsonData<PresidentialForecastData>('presidential_forecast.json'),
-      loadJsonData<PresidentialWinProbabilitiesData>('presidential_win_probabilities.json'),
-      loadJsonData<PresidentialTrendsData>('presidential_trends.json'),
-      loadJsonData<PresidentialSnapshotProbabilitiesData>('presidential_snapshot_probabilities.json').catch(() => ({
+      loadJsonData<PresidentialForecastData>('presidential_forecast.json', PRESIDENTIAL_DIR),
+      loadJsonData<PresidentialWinProbabilitiesData>('presidential_win_probabilities.json', PRESIDENTIAL_DIR),
+      loadJsonData<PresidentialTrendsData>('presidential_trends.json', PRESIDENTIAL_DIR),
+      loadJsonData<PresidentialSnapshotProbabilitiesData>('presidential_snapshot_probabilities.json', PRESIDENTIAL_DIR).catch(() => ({
         election_date: '2026-01-18',
         dates: [],
         metric: 'first_round_leader_probability',
         candidates: {}
       })),
-      loadJsonData<PresidentialTrajectoriesData>('presidential_trajectories.json'),
-      loadJsonData<PresidentialPollsData>('presidential_polls.json').catch(() => ({ polls: [] })),
-      loadJsonData<PresidentialHouseEffectsData>('presidential_house_effects.json').catch(() => ({ 
-        pollsters: [], 
-        candidates: [], 
-        effects: {} 
+      loadJsonData<PresidentialTrajectoriesData>('presidential_trajectories.json', PRESIDENTIAL_DIR),
+      loadJsonData<PresidentialPollsData>('presidential_polls.json', PRESIDENTIAL_DIR).catch(() => ({ polls: [] })),
+      loadJsonData<PresidentialHouseEffectsData>('presidential_house_effects.json', PRESIDENTIAL_DIR).catch(() => ({
+        pollsters: [],
+        candidates: [],
+        effects: {}
       })),
-      loadJsonData<PresidentialHeadToHeadData>('presidential_head_to_head.json').catch(() => ({
+      loadJsonData<PresidentialHeadToHeadData>('presidential_head_to_head.json', PRESIDENTIAL_DIR).catch(() => ({
         election_date: '2026-01-18',
         candidate_a: '',
         candidate_b: '',
@@ -90,17 +95,17 @@ export async function loadPresidentialData() {
         dates: [],
         probability_a_leads: []
       })),
-      loadJsonData<PresidentialRunoffPairsData>('presidential_runoff_pairs.json').catch(() => ({
+      loadJsonData<PresidentialRunoffPairsData>('presidential_runoff_pairs.json', PRESIDENTIAL_DIR).catch(() => ({
         election_date: '2026-01-18',
         pairs: [],
         matrix: { candidates: [], colors: [], probabilities: [] }
       })),
       // Try to load snapshot runoff pairs (computed at last poll date from full posterior)
-      loadJsonData<PresidentialRunoffPairsData>('presidential_snapshot_runoff_pairs.json').catch(() => null),
+      loadJsonData<PresidentialRunoffPairsData>('presidential_snapshot_runoff_pairs.json', PRESIDENTIAL_DIR).catch(() => null),
       // Load leading probability changes since last poll
-      loadJsonData<PresidentialChangesData>('presidential_changes.json').catch(() => null),
+      loadJsonData<PresidentialChangesData>('presidential_changes.json', PRESIDENTIAL_DIR).catch(() => null),
       // Load runoff probability changes since last poll
-      loadJsonData<PresidentialRunoffChangesData>('presidential_runoff_changes.json').catch(() => null)
+      loadJsonData<PresidentialRunoffChangesData>('presidential_runoff_changes.json', PRESIDENTIAL_DIR).catch(() => null)
     ]);
 
     // Calculate last poll date
@@ -197,12 +202,12 @@ export async function loadSecondRoundData() {
   try {
     const [forecast, trends, trajectories, validVotes, winProbability, blankNull] =
       await Promise.all([
-        loadJsonData<SecondRoundForecastData>('second_round_forecast.json'),
-        loadJsonData<SecondRoundTrendsData>('second_round_trends.json'),
-        loadJsonData<SecondRoundTrajectoriesData>('second_round_trajectories.json'),
-        loadJsonData<SecondRoundValidVotesData>('second_round_valid_votes.json'),
-        loadJsonData<SecondRoundWinProbabilityData>('second_round_win_probability.json'),
-        loadJsonData<SecondRoundBlankNullData>('second_round_blank_null.json'),
+        loadJsonData<SecondRoundForecastData>('second_round_forecast.json', PRESIDENTIAL_DIR),
+        loadJsonData<SecondRoundTrendsData>('second_round_trends.json', PRESIDENTIAL_DIR),
+        loadJsonData<SecondRoundTrajectoriesData>('second_round_trajectories.json', PRESIDENTIAL_DIR),
+        loadJsonData<SecondRoundValidVotesData>('second_round_valid_votes.json', PRESIDENTIAL_DIR),
+        loadJsonData<SecondRoundWinProbabilityData>('second_round_win_probability.json', PRESIDENTIAL_DIR),
+        loadJsonData<SecondRoundBlankNullData>('second_round_blank_null.json', PRESIDENTIAL_DIR),
       ]);
 
     return { forecast, trends, trajectories, validVotes, winProbability, blankNull };

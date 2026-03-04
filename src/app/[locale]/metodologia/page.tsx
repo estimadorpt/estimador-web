@@ -8,46 +8,46 @@ import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { useMDXComponents } from '@/mdx-components';
 
-export async function generateMetadata({
-  params
-}: {
-  params: Promise<{ locale: string }>
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: Promise<{ locale: string }> 
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-
+  
   return {
-    title: t('meta.aboutTitle'),
-    description: t('about.subtitle'),
+    title: t('meta.methodologyTitle'),
+    description: t('methodology.subtitle'),
     openGraph: {
-      title: t('meta.aboutTitle'),
-      description: t('about.subtitle'),
-      url: `https://estimador.pt/${locale}/about`,
+      title: t('meta.methodologyTitle'),
+      description: t('methodology.subtitle'),
+      url: `https://estimador.pt/${locale}/metodologia`,
     },
     alternates: {
-      canonical: `https://estimador.pt/${locale}/about`,
+      canonical: `https://estimador.pt/${locale}/metodologia`,
     },
   };
 }
 
-function getAboutPath(locale: string): string {
-  return path.join(process.cwd(), 'src/content/about', `${locale}.mdx`);
+function getMethodologyPath(locale: string): string {
+  return path.join(process.cwd(), 'src/content/methodology', `${locale}.mdx`);
 }
 
-function getAboutContent(locale: string): { content: string; actualLocale: string } {
+function getMethodologyContent(locale: string): { content: string; actualLocale: string } {
   // Try preferred locale first
-  let mdxPath = getAboutPath(locale);
-
+  let mdxPath = getMethodologyPath(locale);
+  
   if (existsSync(mdxPath)) {
     return {
       content: readFileSync(mdxPath, 'utf8'),
       actualLocale: locale
     };
   }
-
+  
   // Fallback to Portuguese
   if (locale !== 'pt') {
-    mdxPath = getAboutPath('pt');
+    mdxPath = getMethodologyPath('pt');
     if (existsSync(mdxPath)) {
       return {
         content: readFileSync(mdxPath, 'utf8'),
@@ -55,28 +55,28 @@ function getAboutContent(locale: string): { content: string; actualLocale: strin
       };
     }
   }
-
+  
   // Fallback to English
-  mdxPath = getAboutPath('en');
+  mdxPath = getMethodologyPath('en');
   if (existsSync(mdxPath)) {
     return {
       content: readFileSync(mdxPath, 'utf8'),
       actualLocale: 'en'
     };
   }
-
-  throw new Error('No about content found');
+  
+  throw new Error('No methodology content found');
 }
 
-export default async function AboutPage({
+export default async function MethodologyPage({
   params
 }: {
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-
-  const { content: mdxContent, actualLocale } = getAboutContent(locale);
+  
+  const { content: mdxContent, actualLocale } = getMethodologyContent(locale);
   const components = useMDXComponents({});
 
   return (
@@ -88,7 +88,7 @@ export default async function AboutPage({
         {actualLocale !== locale && (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-700">
-              {locale === 'en'
+              {locale === 'en' 
                 ? `This page is only available in Portuguese. Showing Portuguese version.`
                 : `Esta página apenas está disponível em português.`
               }
@@ -115,7 +115,7 @@ export default async function AboutPage({
               <p>{t('about.footerCopyright')}</p>
               <p className="mt-2">
                 {t('about.footerDeveloper')} •
-                <Link href="mailto:info@estimador.pt" className="text-green-medium hover:text-green-dark hover:underline ml-1">
+                <Link href="mailto:info@estimador.pt" locale={locale} className="text-green-medium hover:text-green-dark hover:underline ml-1">
                   info@estimador.pt
                 </Link>
               </p>

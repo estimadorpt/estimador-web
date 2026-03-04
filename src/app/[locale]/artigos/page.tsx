@@ -17,10 +17,10 @@ export async function generateMetadata({
     openGraph: {
       title: t('meta.articlesTitle'),
       description: t('articles.subtitle'),
-      url: `https://estimador.pt/${locale}/articles`,
+      url: `https://estimador.pt/${locale}/artigos`,
     },
     alternates: {
-      canonical: `https://estimador.pt/${locale}/articles`,
+      canonical: `https://estimador.pt/${locale}/artigos`,
     },
   };
 }
@@ -69,7 +69,7 @@ export default async function ArticlesPage({
               <p>{t('about.footerCopyright')}</p>
               <p className="mt-2">
                 {t('about.footerDeveloper')} ·
-                <Link href="mailto:info@estimador.pt" className="text-stone-100 hover:text-white hover:underline ml-1">
+                <Link href="mailto:info@estimador.pt" locale={locale} className="text-stone-100 hover:text-white hover:underline ml-1">
                   info@estimador.pt
                 </Link>
               </p>

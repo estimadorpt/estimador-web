@@ -15,7 +15,7 @@ interface DistrictForecast {
 
 async function getDistrictForecast(): Promise<DistrictForecast[]> {
   try {
-    const filePath = path.join(process.cwd(), 'public', 'data', 'district_forecast.json');
+    const filePath = path.join(process.cwd(), 'public', 'data', 'elections', 'parliamentary-2025', 'district_forecast.json');
     const fileContents = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(fileContents);
   } catch (error) {
@@ -35,6 +35,9 @@ export async function generateMetadata({
   return {
     title: `${t('map.title')} - estimador.pt`,
     description: t('map.selectDistrict'),
+    alternates: {
+      canonical: `https://estimador.pt/${locale}/eleicoes/mapa`,
+    },
   };
 }
 
@@ -48,7 +51,7 @@ export default async function MapPage({
   const districtForecast = await getDistrictForecast();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-stone-50">
       <Header />
       
       <main className="container mx-auto px-4 py-8">

@@ -20,7 +20,7 @@ export function useTopoJsonData() {
     
     async function loadTopoJson() {
       try {
-        const response = await fetch('/data/Portugal-Distritos-Ilhas_TopoJSON.json');
+        const response = await fetch('/data/elections/parliamentary-2025/Portugal-Distritos-Ilhas_TopoJSON.json');
         if (!response.ok) {
           throw new Error('Failed to load TopoJSON data');
         }

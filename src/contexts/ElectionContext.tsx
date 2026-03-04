@@ -101,13 +101,10 @@ export function useElectionDataPaths() {
   const { currentElection } = useElection();
   
   const getDataPath = (filename: string): string => {
-    // For now, all data is in the same directory
-    // Later, we can organize by election: `/data/${currentElection.id}/${filename}`
-    return `/data/${filename}`;
+    return `/data/elections/${currentElection.id}/${filename}`;
   };
-  
+
   const getElectionSpecificPath = (filename: string): string => {
-    // Future: election-specific data organization
     return `/data/elections/${currentElection.id}/${filename}`;
   };
   

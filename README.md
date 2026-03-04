@@ -1,12 +1,12 @@
-# estimador.pt - Portugal's Election Forecasting Platform
+# estimador.pt - Data Analysis for Portugal
 
-**Data-driven election analysis for Portuguese democracy**
+**Data-driven analysis and forecasts for Portugal**
 
-estimador.pt is Portugal's premier election forecasting platform, bringing rigorous statistical analysis to Portuguese politics in an accessible, trustworthy format. Think FiveThirtyEight for Portugal - we combine sophisticated modeling with clear, engaging journalism to help citizens understand electoral dynamics.
+estimador.pt is a multi-domain data analysis platform for Portugal, providing rigorous statistical analysis across different domains — from football league forecasts to election predictions. We combine sophisticated Bayesian modeling with clear, engaging editorial design.
 
 ## Our Vision
 
-We're building a credible media platform that makes complex electoral data accessible to everyone, not just political insiders. Our goal is to elevate public discourse around Portuguese elections through:
+We're building a credible data platform that makes complex analysis accessible to everyone. Our goal is to elevate public discourse through:
 
 - **Transparent methodology** - Open about our assumptions and limitations
 - **Accessible analysis** - Complex statistics explained for general audiences  
@@ -57,23 +57,33 @@ Built as a modern media website with professional news-style design:
 
 ```
 src/
-├── app/                    # Next.js pages
-│   ├── page.tsx           # Homepage with latest forecasts
-│   ├── forecast/          # Main forecast dashboard
-│   ├── articles/          # Analysis and insights
-│   ├── about/             # Mission and team
-│   └── methodology/       # Technical documentation
+├── app/[locale]/
+│   ├── page.tsx                    # Hub homepage
+│   ├── desporto/liga/              # Liga Portugal forecast
+│   ├── eleicoes/presidenciais/     # Presidential election
+│   ├── eleicoes/legislativas/      # Parliamentary election
+│   ├── eleicoes/mapa/              # District map
+│   ├── artigos/                    # Articles
+│   ├── sobre/                      # About
+│   └── metodologia/                # Methodology
 ├── components/
-│   ├── ui/                # Design system components
-│   ├── charts/            # Data visualizations
-│   └── Header.tsx         # Shared navigation
+│   ├── charts/                     # Election chart components
+│   ├── charts/football/            # Football chart components
+│   └── Header.tsx                  # Navigation with dropdowns
 ├── lib/
-│   ├── config/            # Party colors, coalition definitions, election configs
-│   └── utils/             # Data processing and calculations
-├── contexts/              # React contexts for state management
-└── types/                 # TypeScript interfaces
+│   ├── config/                     # Section, election, football configs
+│   └── utils/                      # Data loaders
+├── types/                          # TypeScript interfaces
+│   ├── index.ts                    # Election types
+│   └── football.ts                 # Football types
+└── contexts/                       # React contexts
 
-public/data/               # Election data and forecasts
+public/data/
+├── elections/
+│   ├── presidential-2026/          # Presidential forecast data
+│   └── parliamentary-2025/         # Parliamentary forecast data
+└── football/
+    └── liga-2025-26/               # Liga Portugal matchday predictions
 ```
 
 ## Key Features
@@ -103,12 +113,17 @@ public/data/               # Election data and forecasts
 - Historical accuracy and validation
 - Limitations and uncertainty quantification
 
-### 🗳️ Multi-Election Support
-- **Flexible Architecture** - Supports different election types (Parliamentary, Presidential, Municipal, European)
-- **Election-Specific Metrics** - Contextually appropriate statistics for each election type
-- **Internationalization** - Portuguese and English support with election-aware translations
-- **Unified Interface** - Consistent user experience across different electoral systems
-- **Current Focus** - 2025 Portuguese Legislative Elections (May 18, 2025)
+### Liga Portugal
+- **Predicted standings** with championship, top 3, and relegation probabilities
+- **Title race** and relegation battle evolution charts
+- **Next matchday** predictions with probability bars
+- **Position heatmap** — 18x18 probability matrix
+- **Decisive matches** and critical paths analysis
+
+### Multi-Section Architecture
+- **Section-based navigation** with dropdown menus
+- **Football + Elections** with consistent design language
+- **Extensible** — new domains can be added with minimal friction
 
 ## Data Sources
 
@@ -164,32 +179,24 @@ Automatically deploys to Azure Static Web Apps on push to `main`:
 
 ## Roadmap
 
-### Phase 1: Core Platform ✅
+### Phase 1: Core Election Platform ✅
 - [x] Professional homepage and navigation
-- [x] Main forecast dashboard
-- [x] Basic chart visualizations  
-- [x] About and methodology pages
+- [x] Election forecast dashboard with interactive charts
+- [x] Multi-election support (parliamentary + presidential)
+- [x] Portuguese/English internationalization
 - [x] Azure deployment pipeline
 
-### Phase 2: Multi-Election Platform ✅
-- [x] Flexible election configuration system
-- [x] Election-aware components and state management
-- [x] Portuguese/English internationalization support
-- [x] Election-specific metrics and visualizations
-- [x] Interactive district map with TopoJSON
+### Phase 2: Multi-Domain Platform ✅
+- [x] Liga Portugal football forecasts
+- [x] Section-based architecture (sections.ts)
+- [x] Hub homepage with section summaries
+- [x] Data reorganization into subdirectories
+- [x] Dropdown navigation with section grouping
 
-### Phase 3: Enhanced Features
-- [ ] URL parameter-based election switching
-- [ ] MDX-based article system with embedded charts
-- [ ] Newsletter signup integration
-- [ ] Historical forecast accuracy tracking
-- [ ] Comprehensive E2E testing with Playwright
-
-### Phase 4: Advanced Analytics
-- [ ] Real-time data pipeline
-- [ ] Polling aggregation automation
-- [ ] API for external consumption
-- [ ] Historical accuracy tracking
+### Phase 3: Future Domains
+- [ ] Economics section (GDP, inflation, employment forecasts)
+- [ ] Demographics section (population, migration trends)
+- [ ] Additional sports (Champions League, national team)
 
 ## Contributing
 
@@ -205,7 +212,7 @@ We welcome contributions that improve electoral transparency and democratic disc
 
 ## About
 
-**estimador.pt** was founded by Bernardo Caldas to bring rigorous, transparent election analysis to Portuguese democracy. Our mission is to help citizens make informed decisions by providing trustworthy, accessible forecasts and analysis.
+**estimador.pt** was founded by Bernardo Caldas to bring rigorous, data-driven analysis to Portuguese public life. Our mission is to help citizens make informed decisions by providing trustworthy, accessible forecasts and analysis across multiple domains.
 
 For questions or media inquiries: [info@estimador.pt](mailto:info@estimador.pt)
 

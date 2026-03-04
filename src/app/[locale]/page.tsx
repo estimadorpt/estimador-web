@@ -1,34 +1,26 @@
-import { loadPresidentialData, loadSecondRoundData } from "@/lib/utils/data-loader";
-import { ArrowRight, Calendar, Users } from "lucide-react";
-import { PresidentialCandidateCards, SecondRoundIndicator } from "@/components/charts/PresidentialCandidateCards";
-import { PresidentialTrendChart } from "@/components/charts/PresidentialTrendChart";
-import { PresidentialForecastBars } from "@/components/charts/PresidentialForecastBars";
-import { PresidentialHeadToHead } from "@/components/charts/PresidentialHeadToHead";
-import { PresidentialRunoffPairs } from "@/components/charts/PresidentialRunoffPairs";
-import { SecondRoundView, BannerToggle } from "@/components/SecondRoundView";
 import { Header } from "@/components/Header";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ModelAssumptionsCard } from "@/components/ModelAssumptionsCard";
-import { UncertaintyExplainer } from "@/components/UncertaintyExplainer";
-import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/routing';
-import type { Metadata } from 'next';
-import { PRESIDENTIAL_2026 } from "@/lib/config/elections";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/routing";
+import { ArrowRight, Trophy, Vote, BarChart3 } from "lucide-react";
+import type { Metadata } from "next";
+import { loadLigaSummary } from "@/lib/utils/football-data-loader";
+import { ligaTeamColors } from "@/lib/config/football";
+import { getActiveSections, getArchiveSections } from "@/lib/config/sections";
 
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: Promise<{ locale: string }> 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  
+
   return {
-    title: t('meta.presidentialTitle'),
-    description: t('meta.presidentialDescription'),
+    title: t("meta.homepageTitle"),
+    description: t("meta.defaultDescription"),
     openGraph: {
-      title: t('meta.presidentialTitle'),
-      description: t('meta.presidentialDescription'),
+      title: t("meta.homepageTitle"),
+      description: t("meta.defaultDescription"),
       url: `https://estimador.pt/${locale}`,
     },
     alternates: {
@@ -37,440 +29,196 @@ export async function generateMetadata({
   };
 }
 
-export default async function Home({
-  params
+export default async function HomePage({
+  params,
 }: {
-  params: Promise<{ locale: string }>
+  params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
 
-  // Load presidential forecast data
-  // runoffPairs is either snapshot (at last poll date) or election day, handled by data loader
-  const { forecast, winProbabilities, trends, snapshotProbabilities: snapshotProbabilitiesData, trajectories, polls, headToHead, runoffPairs, changes, runoffChanges, lastPollDate } = await loadPresidentialData();
-
-  // Load second round data (always load for client-side switching)
-  const secondRoundData = await loadSecondRoundData();
-
-  // Use snapshot probabilities (as of last poll date) instead of election day forecast
-  // This shows "if the election were held today" which is more appropriate when
-  // we're far from election day and don't have strong assumptions about future movement
-
-  // Calculate cutoff index for snapshot probabilities data (last poll date)
-  const cutoffDate = lastPollDate ? new Date(lastPollDate) : null;
-  const snapshotDates = snapshotProbabilitiesData?.dates?.length
-    ? snapshotProbabilitiesData.dates
-    : trends.dates;
-  const cutoffIndex = cutoffDate
-    ? snapshotDates.findIndex((d: string) => new Date(d) > cutoffDate) - 1
-    : snapshotDates.length - 1;
-  const safeIndex = Math.max(0, cutoffIndex === -1 ? snapshotDates.length - 1 : cutoffIndex);
-
-  // Compute runoff probability for each candidate (sum of all pairs where they appear)
-  const computeRunoffProbability = (candidateName: string, pairs: typeof runoffPairs.pairs) => {
-    return pairs.reduce((sum, pair) => {
-      if (pair.candidate_a === candidateName || pair.candidate_b === candidateName) {
-        return sum + pair.probability;
-      }
-      return sum;
-    }, 0);
-  };
-
-  // Get runoff probabilities for headline
-  const runoffProbabilitiesForHeadline = runoffPairs.pairs.length > 0
-    ? Array.from(new Set([
-        ...runoffPairs.pairs.map(p => p.candidate_a),
-        ...runoffPairs.pairs.map(p => p.candidate_b)
-      ])).map(name => ({
-        name,
-        probability: computeRunoffProbability(name, runoffPairs.pairs),
-        color: runoffPairs.pairs.find(p => p.candidate_a === name)?.color_a 
-            || runoffPairs.pairs.find(p => p.candidate_b === name)?.color_b 
-            || '#888',
-      })).sort((a, b) => b.probability - a.probability)
-    : [];
-
-  // Get the leading candidate based on runoff probability
-  const leadingCandidate = runoffProbabilitiesForHeadline[0];
-  const secondRoundProbability = winProbabilities.second_round_probability;
-  
-  // Calculate days until election
-  const electionDate = new Date(PRESIDENTIAL_2026.date);
-  const today = new Date();
-  const daysUntilElection = Math.ceil((electionDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  // Get the last update date
-  const lastUpdate = forecast.updated_at 
-    ? new Date(forecast.updated_at).toLocaleDateString(locale === 'pt' ? 'pt-PT' : 'en-US', {
-        year: 'numeric',
-        month: 'long', 
-        day: 'numeric'
-      })
-    : null;
-
-  // Format probability as percentage
-  const formatProbability = (value: number) => {
-    const pct = value * 100;
-    if (pct > 99) return '>99%';
-    if (pct < 1) return '<1%';
-    return `${Math.round(pct)}%`;
-  };
+  const ligaSummary = await loadLigaSummary();
+  const activeSections = getActiveSections();
+  const archiveSections = getArchiveSections();
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-white">
       <Header />
 
-      {/* Presidential Election Banner */}
-      <div className="bg-stone-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between text-sm">
-          <div className="flex items-center gap-3">
-            <span className="font-semibold tracking-wide">{t('presidential.electionName')}</span>
-            <span className="text-stone-500">·</span>
-            <span className="text-stone-300">{t('presidential.electionDate', { date: 'January 18, 2026' })}</span>
+      {/* Hero */}
+      <section className="bg-stone-800 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
+          <div className="flex items-center gap-2 mb-3">
+            <BarChart3 className="w-5 h-5 text-stone-400" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              estimador.pt
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <BannerToggle
-              toggleTranslations={{
-                firstRound: t('secondRound.firstRoundTab'),
-                secondRound: t('secondRound.secondRoundTab'),
-              }}
-            />
-            <div className="flex items-center gap-2 text-stone-300 bg-stone-700/50 px-3 py-1 rounded-full text-xs">
-              <Calendar className="w-3.5 h-3.5" />
-              <span className="font-medium">{daysUntilElection} days</span>
-            </div>
-          </div>
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 leading-tight">
+            {t("meta.defaultTitle").replace(" — ", "\n").split("\n")[0]}
+          </h1>
+          <p className="text-lg text-stone-400 max-w-2xl">
+            {t("meta.defaultDescription")}
+          </p>
         </div>
-      </div>
+      </section>
 
-      <SecondRoundView
-        secondRoundData={secondRoundData}
-        toggleTranslations={{
-          firstRound: t('secondRound.firstRoundTab'),
-          secondRound: t('secondRound.secondRoundTab'),
-        }}
-        translations={{
-          title: t('secondRound.title'),
-          headline: t('secondRound.headline', {
-            candidate: secondRoundData.winProbability.candidates[0]?.name || '',
-            probability: formatProbability(secondRoundData.winProbability.candidates[0]?.win_probability || 0)
-          }),
-          headlineDescription: t('secondRound.headlineDescription', {
-            candidateA: secondRoundData.winProbability.candidates[0]?.name || '',
-            candidateB: secondRoundData.winProbability.candidates[1]?.name || ''
-          }),
-          basedOnPolls: t('presidential.basedOnPolls'),
-          methodology: t('common.methodology'),
-          winProbability: t('secondRound.winProbability'),
-          validVoteShare: t('secondRound.validVoteShare'),
-          versus: t('secondRound.versus'),
-          validVotesNote: t('secondRound.validVotesNote'),
-          simulationDistribution: t('secondRound.simulationDistribution'),
-          simulationDescription: t('secondRound.simulationDescription'),
-          fiftyPercentLine: t('secondRound.fiftyPercentLine'),
-          showingOutcomes: t('secondRound.showingOutcomes', { count: secondRoundData.trajectories.n_samples }),
-          keyScenarios: t('secondRound.keyScenarios'),
-          scenarioVenturaBeatsAD: t('secondRound.scenarioVenturaBeatsAD'),
-          scenarioCloseRace: t('secondRound.scenarioCloseRace'),
-          scenarioVentura40: t('secondRound.scenarioVentura40'),
-          scenarioDescription: t('secondRound.scenarioDescription'),
-          projectedVoteShare: t('secondRound.projectedVoteShare'),
-          confidenceInterval: t('presidential.confidenceInterval'),
-          blankNull: t('secondRound.blankNull'),
-        }}
-        firstRoundContent={
-          <>
-            {/* Hero Section - First Round */}
-            <section className="bg-white border-b border-stone-200">
-              <div className="max-w-7xl mx-auto px-4 py-10">
-                <div className="max-w-3xl">
-                  <div className="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                    {t('presidential.snapshotNote')}
-                  </div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4 leading-tight">
-                    {leadingCandidate ? (
-                      t('presidential.snapshotHeadline', {
-                        candidate: leadingCandidate.name,
-                        probability: formatProbability(leadingCandidate.probability)
-                      })
-                    ) : (
-                      t('presidential.forecastTitle')
-                    )}
-                  </h1>
-                  <p className="text-lg text-stone-600 mb-5 leading-relaxed">
-                    {t('presidential.snapshotDescription', {
-                      secondRoundProbability: formatProbability(secondRoundProbability)
-                    })}
-                  </p>
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className="text-stone-500">{t('presidential.basedOnPolls')}</span>
-                    <span className="text-stone-300">·</span>
-                    <Link href="/methodology" className="text-navy hover:text-navy-light font-medium">
-                      {t('common.methodology')}
-                    </Link>
-                  </div>
-                </div>
+      {/* Active Sections */}
+      <section className="border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 py-10">
+          {/* Liga Portugal card */}
+          {ligaSummary && (
+            <div className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <Trophy className="w-5 h-5 text-stone-400" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  {t("football.title")} — {t("football.season")}{" "}
+                  {ligaSummary.season}
+                </span>
+                <span className="text-[10px] bg-green-100 text-green-800 font-bold px-2 py-0.5">
+                  {t("sections.activeSection")}
+                </span>
               </div>
-            </section>
 
-            {/* Second Round Indicator */}
-            <section className="bg-stone-100 border-b border-stone-200">
-              <div className="max-w-7xl mx-auto px-4 py-5">
-                <SecondRoundIndicator
-                  probability={secondRoundProbability}
-                  translations={{
-                    secondRoundNeeded: t('presidential.secondRoundNeeded'),
-                    probabilityLabel: t('presidential.probability'),
-                  }}
-                />
-              </div>
-            </section>
-
-            {/* Win Probability Cards */}
-            <section className="py-8 bg-white border-b border-stone-200">
-              <div className="max-w-7xl mx-auto px-4">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-stone-900">
-                    {t('presidential.winProbabilitiesToday')}
-                  </h2>
-                  {lastUpdate && (
-                    <div className="text-xs text-stone-500 bg-stone-100 px-3 py-1 rounded-full">
-                      {t('common.updated')} {lastUpdate}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-stone-200 border border-stone-200">
+                {ligaSummary.top3.map((team, i) => {
+                  const color = ligaTeamColors[team.team] || "#78716c";
+                  return (
+                    <div key={team.team} className="bg-white p-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div
+                          className="w-1.5 h-5"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="text-sm font-medium text-stone-600">
+                          {i + 1}. {team.team}
+                        </span>
+                      </div>
+                      <div className="text-3xl font-black tabular-nums text-stone-900">
+                        {Math.round(team.p_champion * 100)}%
+                      </div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mt-1">
+                        {t("football.championship")}
+                      </div>
                     </div>
-                  )}
-                </div>
-                <ErrorBoundary componentName="Candidate Cards">
-                  <PresidentialCandidateCards
-                    winProbabilities={winProbabilities}
-                    forecast={forecast}
-                    trends={trends}
-                    snapshotProbabilities={snapshotProbabilitiesData}
-                    runoffPairs={runoffPairs}
-                    runoffChanges={runoffChanges}
-                    changes={changes}
-                    cutoffDate={lastPollDate}
-                    maxCandidates={5}
-                    translations={{
-                      chanceOfRunoff: t('presidential.chanceOfRunoff'),
-                      voteShare: t('presidential.voteShare'),
-                      partyLabel: t('presidential.partyAffiliation'),
-                      sinceLastPoll: t('presidential.sinceLastPoll'),
-                    }}
-                  />
-                </ErrorBoundary>
-                {/* Warning box about metric change */}
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-xs text-blue-800">
-                    <span className="font-semibold">&#x2139;&#xfe0f; {t('presidential.metricChangeTitle')}</span>{' '}
-                    {t('presidential.metricChangeDescription')}
-                  </p>
-                </div>
+                  );
+                })}
               </div>
-            </section>
 
-            {/* Support Trends Chart */}
-            <section className="py-10 border-b border-stone-300">
-              <div className="max-w-7xl mx-auto px-4">
-                <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
-                  {t('presidential.supportTrajectory')}
-                </h2>
-                <p className="text-sm text-stone-500 mb-8 max-w-xl">
-                  {t('presidential.trendDescription')}
-                </p>
-                <ErrorBoundary componentName="Support Trends">
-                  <PresidentialTrendChart
-                    trends={trends}
-                    polls={polls}
-                    electionDate={PRESIDENTIAL_2026.date}
-                    cutoffDate={lastPollDate}
-                    height={420}
-                    showPolls={true}
-                    maxCandidates={5}
-                  />
-                </ErrorBoundary>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xs text-stone-500">
+                  {t("football.matchday")} {ligaSummary.matchday} ·{" "}
+                  {ligaSummary.nextMatchday.matches.length}{" "}
+                  {locale === "pt" ? "jogos na próxima jornada" : "matches next matchday"}
+                </span>
+                <Link
+                  href="/desporto/liga"
+                  locale={locale}
+                  className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+                >
+                  {t("common.viewFull")}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </Link>
               </div>
-            </section>
+            </div>
+          )}
 
-            {/* Head-to-Head Probability */}
-            {headToHead.dates.length > 0 && (
-              <section className="py-10 bg-white border-b border-stone-300">
-                <div className="max-w-7xl mx-auto px-4">
-                  <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
-                    {t('presidential.headToHeadTitle')}
-                  </h2>
-                  <p className="text-sm text-stone-500 mb-8 max-w-xl">
-                    {t('presidential.headToHeadDescription', {
-                      candidateA: headToHead.candidate_a,
-                      candidateB: headToHead.candidate_b
-                    })}
-                  </p>
-                  <ErrorBoundary componentName="Head-to-Head">
-                    <PresidentialHeadToHead
-                      data={headToHead}
-                      cutoffDate={lastPollDate}
-                      height={280}
-                      translations={{
-                        title: t('presidential.headToHeadTitle'),
-                        description: t('presidential.headToHeadDescription', {
-                          candidateA: headToHead.candidate_a,
-                          candidateB: headToHead.candidate_b
-                        }),
-                        probability: t('presidential.leads'),
-                      }}
-                    />
-                  </ErrorBoundary>
-                </div>
-              </section>
-            )}
+          {/* Elections card */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Vote className="w-5 h-5 text-stone-400" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                {t("nav.elections")}
+              </span>
+              <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5">
+                {t("sections.activeSection")}
+              </span>
+            </div>
 
-            {/* Runoff Scenarios */}
-            {runoffPairs.pairs.length > 0 && (
-              <section className="py-10 border-b border-stone-300">
-                <div className="max-w-7xl mx-auto px-4">
-                  <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
-                    {t('presidential.runoffScenariosTitle')}
-                  </h2>
-                  <p className="text-sm text-stone-500 mb-8 max-w-xl">
-                    {t('presidential.runoffScenariosDescription')}
-                  </p>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-stone-200 border border-stone-200">
+              {/* Presidential */}
+              <Link
+                href="/eleicoes/presidenciais"
+                locale={locale}
+                className="bg-white p-5 hover:bg-stone-50 transition-colors group"
+              >
+                <div className="flex items-center justify-between">
                   <div>
-                    <ErrorBoundary componentName="Runoff Pairs">
-                      <PresidentialRunoffPairs
-                        data={runoffPairs}
-                        maxPairs={6}
-                        translations={{
-                          title: t('presidential.mostLikelyMatchups'),
-                          vs: t('presidential.vs'),
-                          probability: t('presidential.probability'),
-                        }}
-                      />
-                    </ErrorBoundary>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Vote Share Forecast */}
-            <section className="py-10 border-b border-stone-300">
-              <div className="max-w-7xl mx-auto px-4">
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-                  {/* Forecast Bars - takes 3 columns */}
-                  <div className="lg:col-span-3">
-                    <h3 className="text-xl font-bold text-stone-900 mb-6 tracking-tight">
-                      {t('presidential.projectedVoteShare')}
-                    </h3>
-                    <ErrorBoundary componentName="Forecast Bars">
-                      <PresidentialForecastBars
-                        forecast={forecast}
-                        showUncertainty={true}
-                        maxCandidates={8}
-                        translations={{
-                          projectedVoteShare: t('presidential.projectedVoteShare'),
-                          confidenceInterval: t('presidential.confidenceInterval'),
-                        }}
-                      />
-                    </ErrorBoundary>
-                  </div>
-
-                  {/* About the Model - takes 2 columns */}
-                  <div className="lg:col-span-2 lg:border-l lg:border-stone-200 lg:pl-12">
-                    <h3 className="text-sm font-bold text-stone-500 uppercase tracking-wider mb-4">
-                      {t('presidential.aboutModel')}
-                    </h3>
-                    <div className="space-y-4 text-sm text-stone-600">
-                      <p className="leading-relaxed">
-                        {t('presidential.modelDescription')}
-                      </p>
-                      <div className="border-l-2 border-amber-500 pl-4 py-2 bg-amber-50/50">
-                        <p className="text-amber-800 text-sm">
-                          <strong>Note:</strong> {t('presidential.undecidedWarning')}
-                        </p>
-                      </div>
-                      <div className="pt-2">
-                        <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">
-                          {t('presidential.keyFactors')}
-                        </h4>
-                        <ul className="space-y-1 text-stone-600 text-sm">
-                          <li>→ {t('presidential.factor1')}</li>
-                          <li>→ {t('presidential.factor2')}</li>
-                          <li>→ {t('presidential.factor3')}</li>
-                        </ul>
-                      </div>
-
-                      {/* Model Assumptions Card */}
-                      <div className="pt-4">
-                        <ModelAssumptionsCard />
-                      </div>
-
-                      {/* Uncertainty Explainer */}
-                      <UncertaintyExplainer numPolls={polls?.length || 8} />
+                    <div className="text-sm font-medium text-stone-900 group-hover:text-blue-700">
+                      {t("sections.presidential2026")}
+                    </div>
+                    <div className="text-xs text-stone-500 mt-1">
+                      {t("sections.presidential2026Description")}
                     </div>
                   </div>
+                  <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-blue-700 group-hover:translate-x-0.5 transition-all" />
                 </div>
-              </div>
-            </section>
-          </>
-        }
-      />
+              </Link>
 
-      {/* Navigation to Other Pages */}
-      <section className="py-8 border-b border-stone-300">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">
-            More from estimador.pt
-          </div>
-          <div className="flex flex-wrap gap-6">
-            <Link
-              href="/forecast"
-              className="group inline-flex items-center gap-2 text-stone-700 hover:text-navy transition-colors"
-            >
-              <span className="font-semibold">{t('nav.parliamentaryForecast')}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href="/map"
-              className="group inline-flex items-center gap-2 text-stone-700 hover:text-navy transition-colors"
-            >
-              <span className="font-semibold">{t('map.title')}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href="/methodology"
-              className="group inline-flex items-center gap-2 text-stone-700 hover:text-navy transition-colors"
-            >
-              <span className="font-semibold">{t('common.methodology')}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+              {/* Parliamentary */}
+              <Link
+                href="/eleicoes/legislativas"
+                locale={locale}
+                className="bg-white p-5 hover:bg-stone-50 transition-colors group"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-medium text-stone-900 group-hover:text-blue-700">
+                      {t("sections.parliamentary2025")}
+                    </div>
+                    <div className="text-xs text-stone-500 mt-1">
+                      {t("sections.parliamentary2025Description")}
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-blue-700 group-hover:translate-x-0.5 transition-all" />
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer Info */}
+      {/* Footer links */}
       <section className="bg-stone-800 text-stone-300 py-10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8">
             <div className="max-w-2xl">
               <h2 className="text-lg font-semibold text-white mb-3">
-                {t('presidential.aboutForecast')}
+                {t("about.title")}
               </h2>
               <p className="text-sm leading-relaxed mb-5">
-                {t('presidential.aboutDescription')}
+                {t("about.missionDescription1")}
               </p>
-              <div className="flex items-center gap-4 text-sm text-stone-400">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  <span>{forecast.candidates.length} {t('presidential.candidatesModeled')}</span>
-                </div>
-                <span>·</span>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>{t('presidential.electionDate', { date: 'Jan 18, 2026' })}</span>
-                </div>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <Link
+                  href="/sobre"
+                  locale={locale}
+                  className="text-stone-400 hover:text-white transition-colors"
+                >
+                  {t("nav.about")}
+                </Link>
+                <Link
+                  href="/metodologia"
+                  locale={locale}
+                  className="text-stone-400 hover:text-white transition-colors"
+                >
+                  {t("nav.methodology")}
+                </Link>
+                <Link
+                  href="/artigos"
+                  locale={locale}
+                  className="text-stone-400 hover:text-white transition-colors"
+                >
+                  {t("articles.title")}
+                </Link>
               </div>
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-light.svg" alt="estimador.pt" className="h-10 w-auto opacity-80 hidden md:block" />
+            <img
+              src="/logo-light.svg"
+              alt="estimador.pt"
+              className="h-10 w-auto opacity-80 hidden md:block"
+            />
           </div>
         </div>
       </section>

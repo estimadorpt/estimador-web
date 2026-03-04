@@ -20,6 +20,81 @@
       }
     },
     {
+      "route": "/forecast",
+      "redirect": "/pt/eleicoes/legislativas",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/forecast",
+      "redirect": "/pt/eleicoes/legislativas",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/forecast",
+      "redirect": "/en/eleicoes/legislativas",
+      "statusCode": 301
+    },
+    {
+      "route": "/about",
+      "redirect": "/pt/sobre",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/about",
+      "redirect": "/pt/sobre",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/about",
+      "redirect": "/en/sobre",
+      "statusCode": 301
+    },
+    {
+      "route": "/methodology",
+      "redirect": "/pt/metodologia",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/methodology",
+      "redirect": "/pt/metodologia",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/methodology",
+      "redirect": "/en/metodologia",
+      "statusCode": 301
+    },
+    {
+      "route": "/map",
+      "redirect": "/pt/eleicoes/mapa",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/map",
+      "redirect": "/pt/eleicoes/mapa",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/map",
+      "redirect": "/en/eleicoes/mapa",
+      "statusCode": 301
+    },
+    {
+      "route": "/articles",
+      "redirect": "/pt/artigos",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/articles",
+      "redirect": "/pt/artigos",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/articles",
+      "redirect": "/en/artigos",
+      "statusCode": 301
+    },
+    {
       "route": "/",
       "serve": "/pt/index.html"
     },
@@ -32,36 +107,68 @@
       "serve": "/en/index.html"
     },
     {
-      "route": "/pt/forecast",
-      "serve": "/pt/forecast/index.html"
+      "route": "/pt/eleicoes/presidenciais",
+      "serve": "/pt/eleicoes/presidenciais/index.html"
     },
     {
-      "route": "/en/forecast",
-      "serve": "/en/forecast/index.html"
+      "route": "/en/eleicoes/presidenciais",
+      "serve": "/en/eleicoes/presidenciais/index.html"
     },
     {
-      "route": "/pt/articles",
-      "serve": "/pt/articles/index.html"
+      "route": "/pt/eleicoes/legislativas",
+      "serve": "/pt/eleicoes/legislativas/index.html"
     },
     {
-      "route": "/en/articles",
-      "serve": "/en/articles/index.html"
+      "route": "/en/eleicoes/legislativas",
+      "serve": "/en/eleicoes/legislativas/index.html"
     },
     {
-      "route": "/pt/about",
-      "serve": "/pt/about/index.html"
+      "route": "/pt/eleicoes/mapa",
+      "serve": "/pt/eleicoes/mapa/index.html"
     },
     {
-      "route": "/en/about",
-      "serve": "/en/about/index.html"
+      "route": "/en/eleicoes/mapa",
+      "serve": "/en/eleicoes/mapa/index.html"
     },
     {
-      "route": "/pt/methodology",
-      "serve": "/pt/methodology/index.html"
+      "route": "/pt/desporto/liga",
+      "serve": "/pt/desporto/liga/index.html"
     },
     {
-      "route": "/en/methodology",
-      "serve": "/en/methodology/index.html"
+      "route": "/en/desporto/liga",
+      "serve": "/en/desporto/liga/index.html"
+    },
+    {
+      "route": "/pt/desporto/liga/metodologia",
+      "serve": "/pt/desporto/liga/metodologia/index.html"
+    },
+    {
+      "route": "/en/desporto/liga/metodologia",
+      "serve": "/en/desporto/liga/metodologia/index.html"
+    },
+    {
+      "route": "/pt/metodologia",
+      "serve": "/pt/metodologia/index.html"
+    },
+    {
+      "route": "/en/metodologia",
+      "serve": "/en/metodologia/index.html"
+    },
+    {
+      "route": "/pt/sobre",
+      "serve": "/pt/sobre/index.html"
+    },
+    {
+      "route": "/en/sobre",
+      "serve": "/en/sobre/index.html"
+    },
+    {
+      "route": "/pt/artigos",
+      "serve": "/pt/artigos/index.html"
+    },
+    {
+      "route": "/en/artigos",
+      "serve": "/en/artigos/index.html"
     },
     {
       "route": "/data/*"
