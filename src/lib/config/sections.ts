@@ -30,7 +30,7 @@ export const SECTIONS: SectionConfig[] = [
     slug: 'eleicoes/presidenciais',
     nameKey: 'sections.presidential2026',
     descriptionKey: 'sections.presidential2026Description',
-    isActive: true,
+    isActive: false,
     accentColor: '#1e3a5f',
     dataPath: 'elections/presidential-2026',
     href: '/eleicoes/presidenciais',
