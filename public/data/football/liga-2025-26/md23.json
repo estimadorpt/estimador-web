@@ -3,7 +3,7 @@
   "matchday": 23,
   "model": "joint_sot",
   "n_sims": 50000,
-  "timestamp": "2026-03-05T11:19:32.565838+00:00",
+  "timestamp": "2026-03-05T14:06:05.388749+00:00",
   "table": [
     {
       "team": "Porto",
@@ -240,6 +240,226 @@
       "p_relegation_hi": 1.0
     }
   ],
+  "actual_standings": [
+    {
+      "team": "Porto",
+      "played": 23,
+      "points": 62,
+      "gd": 37,
+      "gf": 44,
+      "ga": 7
+    },
+    {
+      "team": "Sporting CP",
+      "played": 23,
+      "points": 58,
+      "gd": 47,
+      "gf": 59,
+      "ga": 12
+    },
+    {
+      "team": "Benfica",
+      "played": 23,
+      "points": 55,
+      "gd": 36,
+      "gf": 49,
+      "ga": 13
+    },
+    {
+      "team": "SC Braga",
+      "played": 23,
+      "points": 42,
+      "gd": 26,
+      "gf": 48,
+      "ga": 22
+    },
+    {
+      "team": "Gil Vicente",
+      "played": 23,
+      "points": 40,
+      "gd": 13,
+      "gf": 34,
+      "ga": 21
+    },
+    {
+      "team": "Famalicao",
+      "played": 23,
+      "points": 35,
+      "gd": 8,
+      "gf": 29,
+      "ga": 21
+    },
+    {
+      "team": "Estoril",
+      "played": 23,
+      "points": 33,
+      "gd": 7,
+      "gf": 46,
+      "ga": 39
+    },
+    {
+      "team": "Moreirense",
+      "played": 23,
+      "points": 33,
+      "gd": -4,
+      "gf": 29,
+      "ga": 33
+    },
+    {
+      "team": "Vitoria SC",
+      "played": 23,
+      "points": 31,
+      "gd": -7,
+      "gf": 27,
+      "ga": 34
+    },
+    {
+      "team": "Alverca",
+      "played": 23,
+      "points": 26,
+      "gd": -15,
+      "gf": 23,
+      "ga": 38
+    },
+    {
+      "team": "Arouca",
+      "played": 23,
+      "points": 26,
+      "gd": -18,
+      "gf": 31,
+      "ga": 49
+    },
+    {
+      "team": "Estrela Amadora",
+      "played": 23,
+      "points": 23,
+      "gd": -15,
+      "gf": 26,
+      "ga": 41
+    },
+    {
+      "team": "Casa Pia",
+      "played": 23,
+      "points": 22,
+      "gd": -18,
+      "gf": 25,
+      "ga": 43
+    },
+    {
+      "team": "Nacional",
+      "played": 23,
+      "points": 21,
+      "gd": -7,
+      "gf": 27,
+      "ga": 34
+    },
+    {
+      "team": "Rio Ave",
+      "played": 23,
+      "points": 20,
+      "gd": -21,
+      "gf": 23,
+      "ga": 44
+    },
+    {
+      "team": "Santa Clara",
+      "played": 23,
+      "points": 18,
+      "gd": -11,
+      "gf": 18,
+      "ga": 29
+    },
+    {
+      "team": "Tondela",
+      "played": 23,
+      "points": 18,
+      "gd": -19,
+      "gf": 17,
+      "ga": 36
+    },
+    {
+      "team": "AVS",
+      "played": 23,
+      "points": 8,
+      "gd": -39,
+      "gf": 18,
+      "ga": 57
+    }
+  ],
+  "team_strengths": {
+    "AVS": {
+      "attack": -0.265,
+      "defense": 0.41
+    },
+    "Alverca": {
+      "attack": -0.064,
+      "defense": -0.0
+    },
+    "Arouca": {
+      "attack": -0.02,
+      "defense": 0.197
+    },
+    "Benfica": {
+      "attack": 0.557,
+      "defense": -0.97
+    },
+    "Casa Pia": {
+      "attack": -0.139,
+      "defense": 0.124
+    },
+    "Estoril": {
+      "attack": 0.204,
+      "defense": 0.057
+    },
+    "Estrela Amadora": {
+      "attack": -0.105,
+      "defense": 0.195
+    },
+    "Famalicao": {
+      "attack": 0.131,
+      "defense": -0.33
+    },
+    "Gil Vicente": {
+      "attack": 0.159,
+      "defense": -0.216
+    },
+    "Moreirense": {
+      "attack": -0.05,
+      "defense": 0.019
+    },
+    "Nacional": {
+      "attack": 0.003,
+      "defense": 0.068
+    },
+    "Porto": {
+      "attack": 0.471,
+      "defense": -1.212
+    },
+    "Rio Ave": {
+      "attack": -0.025,
+      "defense": 0.149
+    },
+    "SC Braga": {
+      "attack": 0.407,
+      "defense": -0.568
+    },
+    "Santa Clara": {
+      "attack": -0.104,
+      "defense": -0.163
+    },
+    "Sporting CP": {
+      "attack": 0.708,
+      "defense": -1.034
+    },
+    "Tondela": {
+      "attack": -0.136,
+      "defense": 0.137
+    },
+    "Vitoria SC": {
+      "attack": -0.012,
+      "defense": 0.042
+    }
+  },
   "position_probs": {
     "AVS": [
       0.0,

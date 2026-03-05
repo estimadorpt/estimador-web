@@ -30,6 +30,20 @@ export interface NextMatchday {
 
 export type PositionProbs = Record<string, number[]>;
 
+export interface ActualStanding {
+  team: string;
+  played: number;
+  points: number;
+  gd: number;
+  gf: number;
+  ga: number;
+}
+
+export interface TeamStrength {
+  attack: number;
+  defense: number;
+}
+
 export interface LigaPrediction {
   season: string;
   matchday: number;
@@ -37,6 +51,8 @@ export interface LigaPrediction {
   n_sims: number;
   timestamp: string;
   table: TeamStanding[];
+  actual_standings?: ActualStanding[];
+  team_strengths?: Record<string, TeamStrength>;
   position_probs: PositionProbs;
   next_matchday: NextMatchday;
 }
