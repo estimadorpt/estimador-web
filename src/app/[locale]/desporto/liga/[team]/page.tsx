@@ -11,6 +11,8 @@ import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
 import { TeamTimeline } from "@/components/charts/football/TeamTimeline";
 import { RemainingSchedule } from "@/components/charts/football/RemainingSchedule";
 import { PositionDistribution } from "@/components/charts/football/PositionDistribution";
+import { PointsPace } from "@/components/charts/football/PointsPace";
+import type { PointsPaceEntry } from "@/components/charts/football/PointsPace";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft } from "lucide-react";
@@ -145,6 +147,23 @@ export default async function TeamDetailPage({
     });
   }
 
+  // Team strength KPI
+  const teamStrength = prediction.team_strengths?.[teamName];
+
+  // Points pace for this team
+  const actualStanding = prediction.actual_standings?.find(s => s.team === teamName);
+  let pointsPaceEntry: PointsPaceEntry | null = null;
+  if (actualStanding && actualStanding.played > 0) {
+    const ppg = actualStanding.points / actualStanding.played;
+    pointsPaceEntry = {
+      team: teamName,
+      played: actualStanding.played,
+      points: actualStanding.points,
+      ppg,
+      projected: ppg * 34,
+    };
+  }
+
   // Decisive matches: direct impact on this team
   const teamDecisiveMatches = scenarios?.decisive_matches?.filter((m) => {
     if (isSurvival) return m.most_affected_relegation_team === teamName;
@@ -243,7 +262,49 @@ export default async function TeamDetailPage({
                   </strong>
                 </span>
               )}
+              {teamStrength && (
+                <>
+                  <span>
+                    {t("football.attack")}:{" "}
+                    <strong className="text-stone-800">
+                      {teamStrength.attack > 0 ? '+' : ''}{teamStrength.attack.toFixed(2)}
+                    </strong>
+                  </span>
+                  <span>
+                    {t("football.defense")}:{" "}
+                    <strong className="text-stone-800">
+                      {teamStrength.defense > 0 ? '+' : ''}{teamStrength.defense.toFixed(2)}
+                    </strong>
+                  </span>
+                </>
+              )}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Points Pace */}
+      {pointsPaceEntry && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-3">
+              {t("football.pointsPace")}
+            </div>
+            <PointsPace
+              data={[pointsPaceEntry]}
+              threshold={isTitleContender ? 84 : 33}
+              labels={{
+                sectionLabel: isTitleContender
+                  ? `${t("football.titleZone")} — ~84 pts`
+                  : isRelegationCandidate
+                    ? `${t("football.relegationZone")} — ~33 pts`
+                    : undefined,
+                thresholdLabel: isTitleContender ? "~84 pts" : isRelegationCandidate ? "~33 pts" : undefined,
+              }}
+            />
+            <p className="text-[11px] text-stone-400 mt-2">
+              {t("football.pointsPaceDescription")}
+            </p>
           </div>
         </section>
       )}

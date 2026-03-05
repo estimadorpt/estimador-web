@@ -44,6 +44,14 @@ export interface TeamStrength {
   defense: number;
 }
 
+export interface XptsEntry {
+  team: string;
+  played: number;
+  xpts: number;
+  xgf: number;
+  xga: number;
+}
+
 export interface LigaPrediction {
   season: string;
   matchday: number;
@@ -53,6 +61,7 @@ export interface LigaPrediction {
   table: TeamStanding[];
   actual_standings?: ActualStanding[];
   team_strengths?: Record<string, TeamStrength>;
+  xpts_table?: XptsEntry[];
   position_probs: PositionProbs;
   next_matchday: NextMatchday;
 }

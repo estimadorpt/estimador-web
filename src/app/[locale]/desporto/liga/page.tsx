@@ -8,12 +8,17 @@ import { RelegationChart } from "@/components/charts/football/RelegationChart";
 import { PositionHeatmap } from "@/components/charts/football/PositionHeatmap";
 import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
 import { PathsToVictory } from "@/components/charts/football/PathsToVictory";
-
+import { ScheduleDifficulty } from "@/components/charts/football/ScheduleDifficulty";
+import type { ScheduleDifficultyEntry } from "@/components/charts/football/ScheduleDifficulty";
+import { TeamStrengthRatings } from "@/components/charts/football/TeamStrengthRatings";
+import { LuckIndex } from "@/components/charts/football/LuckIndex";
+import type { LuckEntry } from "@/components/charts/football/LuckIndex";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ligaTeamSlugs } from "@/lib/config/football";
 import { Trophy, ArrowRight, SlidersHorizontal } from "lucide-react";
 import type { Metadata } from "next";
+import type { CriticalPath, TeamStrength } from "@/types/football";
 
 export async function generateMetadata({
   params,
@@ -58,6 +63,47 @@ export default async function LigaPage({
         </div>
       </div>
     );
+  }
+
+  // Compute schedule difficulty from critical_paths + team_strengths
+  let scheduleDifficultyData: ScheduleDifficultyEntry[] = [];
+  if (scenarios?.critical_paths && prediction.team_strengths) {
+    const strengths = prediction.team_strengths;
+    const rawEntries: { team: string; avgStrength: number; toughest: string[]; remaining: number }[] = [];
+
+    for (const [team, path] of Object.entries(scenarios.critical_paths)) {
+      const matches = (path as CriticalPath).matches;
+      if (!matches || matches.length === 0) continue;
+      const opponentStrengths = matches.map(m => {
+        const s = strengths[m.opponent];
+        return s ? s.attack - s.defense : 0;
+      });
+      const avg = opponentStrengths.reduce((a, b) => a + b, 0) / opponentStrengths.length;
+      // Top 3 toughest opponents
+      const toughest = [...matches]
+        .sort((a, b) => {
+          const sa = strengths[a.opponent];
+          const sb = strengths[b.opponent];
+          return ((sb?.attack ?? 0) - (sb?.defense ?? 0)) - ((sa?.attack ?? 0) - (sa?.defense ?? 0));
+        })
+        .slice(0, 3)
+        .map(m => m.opponent);
+      rawEntries.push({ team, avgStrength: avg, toughest, remaining: matches.length });
+    }
+
+    if (rawEntries.length > 0) {
+      const minS = Math.min(...rawEntries.map(e => e.avgStrength));
+      const maxS = Math.max(...rawEntries.map(e => e.avgStrength));
+      const range = maxS - minS || 1;
+      scheduleDifficultyData = rawEntries
+        .sort((a, b) => b.avgStrength - a.avgStrength)
+        .map(e => ({
+          team: e.team,
+          difficulty: (e.avgStrength - minS) / range,
+          toughestOpponents: e.toughest,
+          remainingGames: e.remaining,
+        }));
+    }
   }
 
   const leader = prediction.table[0];
@@ -144,6 +190,7 @@ export default async function LigaPage({
           </p>
           <LeagueTable
             data={prediction.table}
+            actualStandings={prediction.actual_standings}
             labels={{
               team: t("football.team"),
               meanPoints: t("football.meanPoints"),
@@ -152,8 +199,49 @@ export default async function LigaPage({
               top3: t("football.top3"),
               relegation: t("football.relegation"),
               teamClickHint: t("football.teamClickHint"),
+              played: t("football.played"),
+              actualPoints: t("football.actualPoints"),
             }}
           />
+
+          {/* xPts — expected points from match-level xG */}
+          {prediction.xpts_table && prediction.xpts_table.length > 0 && prediction.actual_standings && (() => {
+            const actualMap = new Map(prediction.actual_standings!.map(s => [s.team, s]));
+            const luckEntries: LuckEntry[] = prediction.xpts_table!
+              .map(xp => {
+                const actual = actualMap.get(xp.team);
+                if (!actual) return null;
+                return {
+                  team: xp.team,
+                  actualPts: actual.points,
+                  expectedPts: xp.xpts,
+                  delta: actual.points - xp.xpts,
+                };
+              })
+              .filter((e): e is LuckEntry => e !== null)
+              .sort((a, b) => b.delta - a.delta);
+            if (luckEntries.length === 0) return null;
+            return (
+              <div className="mt-10">
+                <h3 className="text-base font-bold text-stone-900 mb-1">
+                  {t("football.luckIndex")}
+                </h3>
+                <p className="text-sm text-stone-500 mb-4">
+                  {t("football.luckIndexDescription")}
+                </p>
+                <LuckIndex
+                  entries={luckEntries}
+                  labels={{
+                    overperforming: t("football.overperforming"),
+                    underperforming: t("football.underperforming"),
+                  }}
+                />
+                <p className="text-[10px] text-stone-400 mt-2 text-right">
+                  {t("football.xgAttribution")}
+                </p>
+              </div>
+            );
+          })()}
         </div>
       </section>
 
@@ -227,6 +315,7 @@ export default async function LigaPage({
               away: t("football.away"),
               titleImpact: t("football.titleImpact"),
               relegationImpact: t("football.relegationImpact"),
+              matchOfTheWeek: t("football.matchOfTheWeek"),
             }}
             decisiveMatches={scenarios?.decisive_matches?.filter(
               (m) => m.matchday === prediction.next_matchday.matchday
@@ -354,6 +443,28 @@ export default async function LigaPage({
         </section>
       )}
 
+      {/* Schedule Difficulty */}
+      {scheduleDifficultyData.length > 0 && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <h2 className="text-xl font-bold tracking-tight mb-1">
+              {t("football.scheduleDifficulty")}
+            </h2>
+            <p className="text-sm text-stone-500 mb-6">
+              {t("football.scheduleDifficultyDescription")}
+            </p>
+            <ScheduleDifficulty
+              data={scheduleDifficultyData}
+              labels={{
+                hardest: t("football.hardestSchedule"),
+                easiest: t("football.easiestSchedule"),
+                toughOpponents: t("football.toughOpponents"),
+              }}
+            />
+          </div>
+        </section>
+      )}
+
       {/* Position Heatmap */}
       <section className="border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 py-10">
@@ -373,6 +484,27 @@ export default async function LigaPage({
           />
         </div>
       </section>
+
+      {/* Team Strength Ratings */}
+      {prediction.team_strengths && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <h2 className="text-xl font-bold tracking-tight mb-1">
+              {t("football.teamStrengths")}
+            </h2>
+            <p className="text-sm text-stone-500 mb-6">
+              {t("football.teamStrengthsDescription")}
+            </p>
+            <TeamStrengthRatings
+              strengths={prediction.team_strengths}
+              labels={{
+                attack: t("football.attack"),
+                defense: t("football.defense"),
+              }}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Model Info */}
       <section className="border-b border-stone-200">

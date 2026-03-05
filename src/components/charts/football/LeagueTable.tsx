@@ -1,7 +1,7 @@
 "use client";
 
 import { ligaTeamColors, ligaTeamShortNames, ligaTeamSlugs, teamLogoSrc } from "@/lib/config/football";
-import type { TeamStanding } from "@/types/football";
+import type { ActualStanding, TeamStanding } from "@/types/football";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { ChevronRight } from "lucide-react";
@@ -10,6 +10,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 interface LeagueTableProps {
   data: TeamStanding[];
+  actualStandings?: ActualStanding[];
   labels: {
     team: string;
     meanPoints: string;
@@ -18,6 +19,8 @@ interface LeagueTableProps {
     top3: string;
     relegation: string;
     teamClickHint?: string;
+    played?: string;
+    actualPoints?: string;
   };
 }
 
@@ -30,10 +33,19 @@ function formatProb(value: number): string {
   return `${Math.round(pct)}%`;
 }
 
-export function LeagueTable({ data, labels }: LeagueTableProps) {
+export function LeagueTable({ data, actualStandings, labels }: LeagueTableProps) {
   const locale = useLocale();
   const router = useRouter();
   const [showHint, setShowHint] = useState(false);
+
+  // Build lookup for actual standings
+  const actualLookup = new Map<string, ActualStanding>();
+  if (actualStandings) {
+    for (const s of actualStandings) {
+      actualLookup.set(s.team, s);
+    }
+  }
+  const hasActual = actualLookup.size > 0;
 
   const dismissHint = useCallback(() => {
     setShowHint(false);
@@ -67,6 +79,12 @@ export function LeagueTable({ data, labels }: LeagueTableProps) {
           <tr className="border-b-2 border-stone-800 text-left">
             <th className="py-2 pr-2 w-8 text-stone-500 font-medium">#</th>
             <th className="py-2 pr-4 font-medium">{labels.team}</th>
+            {hasActual && (
+              <>
+                <th className="py-2 px-2 text-right font-medium hidden sm:table-cell text-stone-500 text-xs">{labels.played ?? "J"}</th>
+                <th className="py-2 px-2 text-right font-medium text-xs">{labels.actualPoints ?? "Pts"}</th>
+              </>
+            )}
             <th className="py-2 px-3 text-right font-medium">{labels.meanPoints}</th>
             <th className="py-2 px-3 text-right font-medium hidden sm:table-cell">{labels.goalDifference}</th>
             <th className="py-2 px-3 text-right font-medium">{labels.championship}</th>
@@ -131,6 +149,20 @@ export function LeagueTable({ data, labels }: LeagueTableProps) {
                     </AnimatePresence>
                   </div>
                 </td>
+                {hasActual && (() => {
+                  const actual = actualLookup.get(team.team);
+                  if (!actual) return <><td className="py-2.5 px-2 text-right hidden sm:table-cell" /><td className="py-2.5 px-2 text-right" /></>;
+                  return (
+                    <>
+                      <td className="py-2.5 px-2 text-right tabular-nums text-stone-400 text-xs hidden sm:table-cell">
+                        {actual.played}
+                      </td>
+                      <td className="py-2.5 px-2 text-right tabular-nums font-semibold">
+                        {actual.points}
+                      </td>
+                    </>
+                  );
+                })()}
                 <td className="py-2.5 px-3 text-right tabular-nums font-semibold">
                   {team.mean_pts.toFixed(1)}
                 </td>
