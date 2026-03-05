@@ -97,20 +97,21 @@ function StepRow({
       </div>
 
       {/* Probability */}
-      <div className="w-14 shrink-0 text-right">
-        <div
-          className="text-sm font-bold tabular-nums"
-          style={{ color: isPositive ? teamColor : "#dc2626" }}
-        >
-          {pct(step.p_target_after)}
-        </div>
-        <div
-          className={`text-[10px] tabular-nums ${
-            isPositive ? "text-stone-400" : "text-red-400"
-          }`}
-        >
-          {isPositive ? "+" : ""}
-          {Math.round(delta * 100)}pp
+      <div className="w-16 shrink-0 text-right">
+        <div className="flex items-baseline justify-end gap-1">
+          <span
+            className="text-sm font-bold tabular-nums"
+            style={{ color: isPositive ? teamColor : "#dc2626" }}
+          >
+            {pct(step.p_target_after)}
+          </span>
+          <span
+            className={`text-[10px] tabular-nums font-semibold ${
+              isPositive ? "text-emerald-600" : "text-red-500"
+            }`}
+          >
+            {isPositive ? "+" : ""}{Math.round(delta * 100)}
+          </span>
         </div>
       </div>
     </div>
@@ -136,20 +137,23 @@ function RivalConditions({
       <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
         {labels.thisWorksBecause}
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {conditions.map((rc, i) => {
           const rivalColor = ligaTeamColors[rc.rival] || "#78716c";
+          const boost = Math.round((rc.p_rival_drops_in_scenario - rc.p_rival_drops_baseline) * 100);
           return (
-            <div key={i} className="text-xs text-stone-500 flex items-baseline gap-1 flex-wrap">
+            <div key={i} className="text-xs text-stone-600">
               <span className="font-medium" style={{ color: rivalColor }}>
                 {rc.rival}
               </span>
-              <span>
-                {labels.dropsPointsVs} {rc.opponent} (J{rc.matchday})
-              </span>
-              <span className="tabular-nums text-stone-400">
-                {labels.normally} {pct(rc.p_rival_drops_baseline)} → {labels.inThisScenario} {pct(rc.p_rival_drops_in_scenario)}
-              </span>
+              {" "}
+              {labels.dropsPointsVs} {rc.opponent}
+              <span className="text-stone-400"> (J{rc.matchday})</span>
+              {boost > 0 && (
+                <span className="ml-1 text-[10px] tabular-nums text-emerald-600 font-semibold">
+                  +{boost}pp
+                </span>
+              )}
             </div>
           );
         })}
@@ -183,12 +187,13 @@ function ScenarioCard({
   target?: string;
 }) {
   const borderOpacity = index === 0 ? 1 : index === 1 ? 0.4 : 0.2;
-  const scenarioName =
+  const baseName =
     scenario.label === "comfortable"
       ? labels.scenarioComfortable
       : scenario.label === "realistic"
       ? labels.scenarioRealistic
       : labels.scenarioUnlikely;
+  const scenarioName = `${baseName} ${index + 1}`;
 
   const freqLabel = labels.ofChampionSims;
   const finalP = scenario.steps[scenario.steps.length - 1]?.p_target_after ?? pCurrent;
@@ -221,7 +226,7 @@ function ScenarioCard({
           >
             {pct(finalP)}
           </div>
-          <div className="text-[10px] text-stone-400">prob. final</div>
+          <div className="text-[10px] text-stone-400">&rarr;</div>
         </div>
       </div>
 
@@ -281,9 +286,6 @@ export function NarrativeScenarios({
   return (
     <div className="space-y-3">
       {data.scenarios
-        .filter((scenario, i, arr) =>
-          arr.findIndex((s) => s.label === scenario.label) === i
-        )
         .map((scenario, i) => (
           <ScenarioCard
             key={i}
@@ -296,11 +298,6 @@ export function NarrativeScenarios({
           />
         ))}
 
-      {/* Disclaimer */}
-      <p className="text-xs text-stone-400">
-        Cada cenário representa um grupo de simulações com percursos semelhantes
-        — não é uma previsão de resultados específicos.
-      </p>
     </div>
   );
 }
