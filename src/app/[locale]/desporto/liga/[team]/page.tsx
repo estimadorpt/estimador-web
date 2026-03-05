@@ -274,16 +274,37 @@ export default async function TeamDetailPage({
                 </span>
               )}
               {teamStrength && totalTeams > 0 && (
-                <span>
-                  {t("football.attack")}:{" "}
-                  <strong className="text-stone-800">
-                    {ordinal(attackRank, locale)}/{totalTeams}
-                  </strong>
-                  {" · "}
-                  {t("football.defense")}:{" "}
-                  <strong className="text-stone-800">
-                    {ordinal(defenseRank, locale)}/{totalTeams}
-                  </strong>
+                <span className="inline-flex items-center gap-3">
+                  <span className="inline-flex items-center gap-1.5">
+                    {t("football.attack")}:
+                    <span className="inline-flex items-center gap-1">
+                      <span className="inline-block w-12 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                        <span
+                          className="block h-full rounded-full"
+                          style={{
+                            width: `${((totalTeams - attackRank + 1) / totalTeams) * 100}%`,
+                            backgroundColor: teamColor,
+                          }}
+                        />
+                      </span>
+                      <strong className="text-stone-800 text-xs">{ordinal(attackRank, locale)}</strong>
+                    </span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    {t("football.defense")}:
+                    <span className="inline-flex items-center gap-1">
+                      <span className="inline-block w-12 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                        <span
+                          className="block h-full rounded-full"
+                          style={{
+                            width: `${((totalTeams - defenseRank + 1) / totalTeams) * 100}%`,
+                            backgroundColor: teamColor,
+                          }}
+                        />
+                      </span>
+                      <strong className="text-stone-800 text-xs">{ordinal(defenseRank, locale)}</strong>
+                    </span>
+                  </span>
                 </span>
               )}
             </div>
