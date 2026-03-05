@@ -11,8 +11,6 @@ import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
 import { TeamTimeline } from "@/components/charts/football/TeamTimeline";
 import { RemainingSchedule } from "@/components/charts/football/RemainingSchedule";
 import { PositionDistribution } from "@/components/charts/football/PositionDistribution";
-import { PointsPace } from "@/components/charts/football/PointsPace";
-import type { PointsPaceEntry } from "@/components/charts/football/PointsPace";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft } from "lucide-react";
@@ -161,27 +159,7 @@ export default async function TeamDetailPage({
     defenseRank = defenseSorted.findIndex(([t]) => t === teamName) + 1;
   }
 
-  // Points pace for this team + leader for context
   const actualStanding = prediction.actual_standings?.find(s => s.team === teamName);
-  let pointsPaceEntry: PointsPaceEntry | null = null;
-  let leaderProjected = 0;
-  if (actualStanding && actualStanding.played > 0) {
-    const ppg = actualStanding.points / actualStanding.played;
-    pointsPaceEntry = {
-      team: teamName,
-      played: actualStanding.played,
-      points: actualStanding.points,
-      ppg,
-      projected: ppg * 34,
-    };
-  }
-  // Find league leader's projected pace for threshold context
-  if (prediction.actual_standings) {
-    const leader = [...prediction.actual_standings].sort((a, b) => b.points - a.points)[0];
-    if (leader && leader.played > 0) {
-      leaderProjected = Math.round((leader.points / leader.played) * 34);
-    }
-  }
 
   // Decisive matches: direct impact on this team
   const teamDecisiveMatches = scenarios?.decisive_matches?.filter((m) => {
@@ -320,30 +298,6 @@ export default async function TeamDetailPage({
         </section>
       )}
 
-      {/* Points Pace */}
-      {pointsPaceEntry && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-3">
-              {t("football.pointsPace")}
-            </div>
-            <PointsPace
-              data={[pointsPaceEntry]}
-              threshold={isRelegationCandidate ? 33 : leaderProjected || 84}
-              labels={{
-                sectionLabel: isRelegationCandidate
-                  ? `${t("football.relegationZone")} — ~33 pts`
-                  : undefined,
-                thresholdLabel: isRelegationCandidate ? "~33 pts" : `${t("football.leaderPace")}`,
-              }}
-            />
-            <p className="text-[11px] text-stone-400 mt-2">
-              {t("football.pointsPaceDescription")}
-            </p>
-          </div>
-        </section>
-      )}
-
       {/* Position distribution */}
       {positionProbs && positionProbs.length > 0 && (
         <section className="border-b border-stone-200">
@@ -406,8 +360,15 @@ export default async function TeamDetailPage({
                 ofSurvivalSims: t("football.ofSurvivalSims"),
                 thisWorksBecause: t("football.thisWorksBecause"),
                 dropsPointsVs: t("football.dropsPointsVs"),
-                inThisScenario: t("football.inThisScenario"),
-                normally: t("football.normally"),
+                resultWin: t("football.resultWin"),
+                resultDraw: t("football.resultDraw"),
+                resultLoss: t("football.resultLoss"),
+                matchdayPrefix: t("football.matchdayPrefix"),
+                home: t("football.homeAbbr"),
+                away: t("football.awayAbbr"),
+                winAbbr: t("football.winAbbr"),
+                drawAbbr: t("football.drawAbbr"),
+                lossAbbr: t("football.lossAbbr"),
               }}
             />
           </div>
