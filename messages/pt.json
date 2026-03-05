@@ -448,6 +448,7 @@
     "pointsPaceDescription": "Projeção de pontos com base no rendimento atual. Barra sólida: pontos atuais. Barra clara: projeção para 34 jornadas.",
     "titleZone": "Ritmo de campeão",
     "relegationZone": "Zona de despromoção",
+    "leaderPace": "Ritmo do líder",
     "luckIndex": "Sorte ou mérito?",
     "luckIndexDescription": "Pontos esperados (xPts) calculados a partir dos golos esperados (xG) de cada jogo. A diferença para os pontos reais mede a eficácia no remate e a sorte.",
     "overperforming": "Acima do esperado",

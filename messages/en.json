@@ -448,6 +448,7 @@
     "pointsPaceDescription": "Points projection based on current performance. Solid bar: actual points. Faded bar: projection to 34 matchdays.",
     "titleZone": "Champion pace",
     "relegationZone": "Relegation zone",
+    "leaderPace": "Leader's pace",
     "luckIndex": "Luck or merit?",
     "luckIndexDescription": "Expected points (xPts) computed from each match's expected goals (xG). The difference to actual points measures finishing efficiency and luck.",
     "overperforming": "Overperforming",

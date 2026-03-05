@@ -161,9 +161,10 @@ export default async function TeamDetailPage({
     defenseRank = defenseSorted.findIndex(([t]) => t === teamName) + 1;
   }
 
-  // Points pace for this team
+  // Points pace for this team + leader for context
   const actualStanding = prediction.actual_standings?.find(s => s.team === teamName);
   let pointsPaceEntry: PointsPaceEntry | null = null;
+  let leaderProjected = 0;
   if (actualStanding && actualStanding.played > 0) {
     const ppg = actualStanding.points / actualStanding.played;
     pointsPaceEntry = {
@@ -173,6 +174,13 @@ export default async function TeamDetailPage({
       ppg,
       projected: ppg * 34,
     };
+  }
+  // Find league leader's projected pace for threshold context
+  if (prediction.actual_standings) {
+    const leader = [...prediction.actual_standings].sort((a, b) => b.points - a.points)[0];
+    if (leader && leader.played > 0) {
+      leaderProjected = Math.round((leader.points / leader.played) * 34);
+    }
   }
 
   // Decisive matches: direct impact on this team
@@ -321,14 +329,12 @@ export default async function TeamDetailPage({
             </div>
             <PointsPace
               data={[pointsPaceEntry]}
-              threshold={isTitleContender ? 84 : 33}
+              threshold={isRelegationCandidate ? 33 : leaderProjected || 84}
               labels={{
-                sectionLabel: isTitleContender
-                  ? `${t("football.titleZone")} — ~84 pts`
-                  : isRelegationCandidate
-                    ? `${t("football.relegationZone")} — ~33 pts`
-                    : undefined,
-                thresholdLabel: isTitleContender ? "~84 pts" : isRelegationCandidate ? "~33 pts" : undefined,
+                sectionLabel: isRelegationCandidate
+                  ? `${t("football.relegationZone")} — ~33 pts`
+                  : undefined,
+                thresholdLabel: isRelegationCandidate ? "~33 pts" : `${t("football.leaderPace")}`,
               }}
             />
             <p className="text-[11px] text-stone-400 mt-2">
