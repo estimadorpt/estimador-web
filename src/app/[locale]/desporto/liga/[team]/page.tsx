@@ -147,8 +147,19 @@ export default async function TeamDetailPage({
     });
   }
 
-  // Team strength KPI
+  // Team strength KPI — convert to qualitative league rank
   const teamStrength = prediction.team_strengths?.[teamName];
+  let attackRank = 0;
+  let defenseRank = 0;
+  let totalTeams = 0;
+  if (prediction.team_strengths) {
+    const allTeams = Object.entries(prediction.team_strengths);
+    totalTeams = allTeams.length;
+    const attackSorted = [...allTeams].sort(([, a], [, b]) => b.attack - a.attack);
+    const defenseSorted = [...allTeams].sort(([, a], [, b]) => a.defense - b.defense); // lower = better
+    attackRank = attackSorted.findIndex(([t]) => t === teamName) + 1;
+    defenseRank = defenseSorted.findIndex(([t]) => t === teamName) + 1;
+  }
 
   // Points pace for this team
   const actualStanding = prediction.actual_standings?.find(s => s.team === teamName);
@@ -262,21 +273,18 @@ export default async function TeamDetailPage({
                   </strong>
                 </span>
               )}
-              {teamStrength && (
-                <>
-                  <span>
-                    {t("football.attack")}:{" "}
-                    <strong className="text-stone-800">
-                      {teamStrength.attack > 0 ? '+' : ''}{teamStrength.attack.toFixed(2)}
-                    </strong>
-                  </span>
-                  <span>
-                    {t("football.defense")}:{" "}
-                    <strong className="text-stone-800">
-                      {teamStrength.defense > 0 ? '+' : ''}{teamStrength.defense.toFixed(2)}
-                    </strong>
-                  </span>
-                </>
+              {teamStrength && totalTeams > 0 && (
+                <span>
+                  {t("football.attack")}:{" "}
+                  <strong className="text-stone-800">
+                    {ordinal(attackRank, locale)}/{totalTeams}
+                  </strong>
+                  {" · "}
+                  {t("football.defense")}:{" "}
+                  <strong className="text-stone-800">
+                    {ordinal(defenseRank, locale)}/{totalTeams}
+                  </strong>
+                </span>
               )}
             </div>
           </div>
