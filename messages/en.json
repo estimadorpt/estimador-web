@@ -420,7 +420,13 @@
     "projectedFinish": "Most likely finish",
     "matchdayAbbr": "MD",
     "homeAbbr": "H",
-    "awayAbbr": "A"
+    "awayAbbr": "A",
+    "whatIfTitle": "What If This Weekend?",
+    "whatIfDescription": "Pick results and see how probabilities change",
+    "resetAll": "Reset all",
+    "impactOnTitle": "Impact on title",
+    "impactOnRelegation": "Impact on relegation",
+    "noChange": "no change"
   },
   "meta": {
     "defaultTitle": "estimador.pt — Data analysis for Portugal",

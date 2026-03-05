@@ -8,6 +8,7 @@ import { RelegationChart } from "@/components/charts/football/RelegationChart";
 import { PositionHeatmap } from "@/components/charts/football/PositionHeatmap";
 import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
 import { PathsToVictory } from "@/components/charts/football/PathsToVictory";
+import { MatchdayPicker } from "@/components/charts/football/MatchdayPicker";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ligaTeamSlugs } from "@/lib/config/football";
@@ -198,6 +199,35 @@ export default async function LigaPage({
           />
         </div>
       </section>
+
+      {/* What If This Weekend? */}
+      {scenarios?.next_matchday_scenarios && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <h2 className="text-xl font-bold tracking-tight mb-1">
+              {t("football.whatIfTitle")}
+            </h2>
+            <p className="text-sm text-stone-500 mb-6">
+              {t("football.whatIfDescription")}
+            </p>
+            <MatchdayPicker
+              data={scenarios.next_matchday_scenarios}
+              labels={{
+                whatIfTitle: t("football.whatIfTitle"),
+                whatIfDescription: t("football.whatIfDescription"),
+                resetAll: t("football.resetAll"),
+                impactOnTitle: t("football.impactOnTitle"),
+                impactOnRelegation: t("football.impactOnRelegation"),
+                noChange: t("football.noChange"),
+                home: t("football.home"),
+                draw: t("football.draw"),
+                away: t("football.away"),
+                win: t("football.win"),
+              }}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Paths to Victory */}
       {scenarios?.victory_paths && (

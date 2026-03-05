@@ -420,7 +420,13 @@
     "projectedFinish": "Posição mais provável",
     "matchdayAbbr": "Jorn.",
     "homeAbbr": "C",
-    "awayAbbr": "F"
+    "awayAbbr": "F",
+    "whatIfTitle": "E Se Este Fim de Semana?",
+    "whatIfDescription": "Escolha resultados e veja como as probabilidades mudam",
+    "resetAll": "Limpar tudo",
+    "impactOnTitle": "Impacto no título",
+    "impactOnRelegation": "Impacto na despromoção",
+    "noChange": "sem alteração"
   },
   "meta": {
     "defaultTitle": "estimador.pt — Análise de dados para Portugal",

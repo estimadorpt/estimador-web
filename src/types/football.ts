@@ -118,6 +118,7 @@ export interface ScenarioData {
   victory_paths?: Record<string, VictoryPath>;
   survival_paths?: Record<string, VictoryPath>;
   narrative_scenarios?: Record<string, TeamNarrativeScenarios>;
+  next_matchday_scenarios?: NextMatchdayScenarios;
 }
 
 // Narrative scenarios: archetype-based paths to victory/survival
@@ -170,6 +171,24 @@ export interface TeamNarrativeScenarios {
   scenario_coverage: number;
   story_matches: StoryMatch[];
   scenarios: NarrativeScenario[];
+}
+
+// Next matchday interactive scenarios (What If?)
+export interface NextMatchdayScenarioConditional {
+  n_sims: number;
+  teams: Record<string, { p_champion: number; p_top3: number; p_relegation: number }>;
+}
+
+export interface NextMatchdayScenarioMatch {
+  home_team: string;
+  away_team: string;
+  conditionals: Record<'H' | 'D' | 'A', NextMatchdayScenarioConditional>;
+}
+
+export interface NextMatchdayScenarios {
+  matchday: number;
+  baseline: Record<string, { p_champion: number; p_top3: number; p_relegation: number }>;
+  matches: NextMatchdayScenarioMatch[];
 }
 
 // Historical data: array of predictions per matchday for time-series charts
