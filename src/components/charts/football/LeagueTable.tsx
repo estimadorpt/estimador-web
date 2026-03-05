@@ -33,6 +33,36 @@ function formatProb(value: number): string {
   return `${Math.round(pct)}%`;
 }
 
+/**
+ * Largest remainder method: round probabilities so they sum to 100%.
+ * Returns a map from index to display string.
+ */
+function roundToSum100(values: number[]): string[] {
+  const pcts = values.map(v => v * 100);
+  const floors = pcts.map(p => Math.floor(p));
+  let remainder = 100 - floors.reduce((s, f) => s + f, 0);
+
+  // Sort by fractional part descending, allocate +1 to largest remainders
+  const indices = values.map((_, i) => i);
+  indices.sort((a, b) => (pcts[b] - floors[b]) - (pcts[a] - floors[a]));
+
+  const result = [...floors];
+  for (const idx of indices) {
+    if (remainder <= 0) break;
+    result[idx] += 1;
+    remainder -= 1;
+  }
+
+  return result.map((r, i) => {
+    const raw = pcts[i];
+    if (raw > 99 && raw < 100) return ">99%";
+    if (raw < 1 && raw > 0) return "<1%";
+    if (raw === 0) return "—";
+    if (raw === 100) return "100%";
+    return `${r}%`;
+  });
+}
+
 export function LeagueTable({ data, actualStandings, labels }: LeagueTableProps) {
   const locale = useLocale();
   const router = useRouter();
@@ -46,6 +76,10 @@ export function LeagueTable({ data, actualStandings, labels }: LeagueTableProps)
     }
   }
   const hasActual = actualLookup.size > 0;
+
+  // Pre-compute consistent rounded probabilities (sum to 100%)
+  const champRounded = roundToSum100(data.map(t => t.p_champion));
+  const relegRounded = roundToSum100(data.map(t => t.p_relegation));
 
   const dismissHint = useCallback(() => {
     setShowHint(false);
@@ -171,7 +205,7 @@ export function LeagueTable({ data, actualStandings, labels }: LeagueTableProps)
                 </td>
                 <td className="py-2.5 px-3 text-right tabular-nums">
                   <span className={team.p_champion > 0.01 ? 'font-semibold' : 'text-stone-400'}>
-                    {formatProb(team.p_champion)}
+                    {champRounded[i]}
                   </span>
                 </td>
                 <td className="py-2.5 px-3 text-right tabular-nums hidden sm:table-cell">
@@ -179,7 +213,7 @@ export function LeagueTable({ data, actualStandings, labels }: LeagueTableProps)
                 </td>
                 <td className="py-2.5 px-3 text-right tabular-nums">
                   <span className={team.p_relegation > 0.1 ? 'font-semibold text-red-700' : team.p_relegation > 0 ? 'text-red-600' : 'text-stone-400'}>
-                    {formatProb(team.p_relegation)}
+                    {relegRounded[i]}
                   </span>
                 </td>
               </tr>
