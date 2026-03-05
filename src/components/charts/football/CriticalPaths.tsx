@@ -89,7 +89,7 @@ export function CriticalPaths({ paths, nSims, labels, maxMatchesPerTeam = 5, max
             return (
               <div key={i} className="flex items-center gap-2">
                 {/* Match info */}
-                <div className="flex items-center gap-1 w-40 shrink-0">
+                <div className="flex items-center gap-1 w-28 sm:w-40 shrink-0">
                   <span className="text-xs text-stone-400 tabular-nums w-6">J{m.matchday}</span>
                   <span className="text-sm font-medium text-stone-800 truncate">{m.opponent}</span>
                   <span className="text-[10px] text-stone-400 shrink-0">({m.venue === 'H' ? 'C' : 'F'})</span>

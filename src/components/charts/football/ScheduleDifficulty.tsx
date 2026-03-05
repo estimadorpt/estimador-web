@@ -33,7 +33,7 @@ export function ScheduleDifficulty({ data, labels }: ScheduleDifficultyProps) {
           const color = ligaTeamColors[entry.team] || '#78716c';
           return (
             <div key={entry.team} className="flex items-center gap-2">
-              <div className="w-24 sm:w-32 flex items-center gap-1.5 flex-shrink-0">
+              <div className="w-16 sm:w-32 flex items-center gap-1.5 flex-shrink-0">
                 {teamLogoSrc(entry.team) ? (
                   <img src={teamLogoSrc(entry.team)} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
                 ) : (
@@ -56,7 +56,7 @@ export function ScheduleDifficulty({ data, labels }: ScheduleDifficultyProps) {
                   }}
                 />
               </div>
-              <div className="w-28 sm:w-40 flex-shrink-0 text-[10px] text-stone-500 truncate text-right">
+              <div className="w-20 sm:w-40 flex-shrink-0 text-[10px] text-stone-500 truncate text-right">
                 {entry.toughestOpponents.map(op => ligaTeamShortNames[op] || op).join(", ")}
               </div>
             </div>

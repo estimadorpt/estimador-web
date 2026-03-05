@@ -26,12 +26,12 @@ export function LuckIndex({ entries, labels }: LuckIndexProps) {
     <div>
       {/* Scale labels */}
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-20 sm:w-28 flex-shrink-0" />
+        <div className="w-16 sm:w-28 flex-shrink-0" />
         <div className="flex-1 flex justify-between text-[10px] font-bold uppercase tracking-wider px-1">
           <span className="text-red-400">{labels.underperforming ?? "Abaixo do esperado"}</span>
           <span className="text-emerald-600">{labels.overperforming ?? "Acima do esperado"}</span>
         </div>
-        <div className="w-24 sm:w-36 flex-shrink-0" />
+        <div className="w-16 sm:w-36 flex-shrink-0" />
       </div>
 
       <div className="space-y-1">
@@ -42,7 +42,7 @@ export function LuckIndex({ entries, labels }: LuckIndexProps) {
           return (
             <div key={entry.team} className="flex items-center gap-2">
               {/* Team name */}
-              <div className="w-20 sm:w-28 flex items-center gap-1.5 flex-shrink-0">
+              <div className="w-16 sm:w-28 flex items-center gap-1.5 flex-shrink-0">
                 {teamLogoSrc(entry.team) ? (
                   <img src={teamLogoSrc(entry.team)} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
                 ) : (
@@ -103,7 +103,7 @@ export function LuckIndex({ entries, labels }: LuckIndexProps) {
               </div>
 
               {/* Actual vs expected annotation */}
-              <div className="w-24 sm:w-36 text-right flex-shrink-0">
+              <div className="w-16 sm:w-36 text-right flex-shrink-0">
                 <span className="text-xs tabular-nums font-semibold text-stone-700">
                   {entry.actualPts}
                 </span>

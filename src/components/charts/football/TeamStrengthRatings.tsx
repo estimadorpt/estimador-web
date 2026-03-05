@@ -33,16 +33,16 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
     <div>
       {/* Column headers */}
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-24 sm:w-32 flex-shrink-0" />
+        <div className="w-16 sm:w-32 flex-shrink-0" />
         <div className="flex-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-stone-400 px-1">
-          <span className="text-red-400">&larr; pior</span>
+          <span className="text-red-400 hidden sm:inline">&larr; pior</span>
           <span>{labels.defense ?? "Defesa"}</span>
-          <span className="text-emerald-600">melhor &rarr;</span>
+          <span className="text-emerald-600 hidden sm:inline">melhor &rarr;</span>
         </div>
         <div className="flex-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-stone-400 px-1">
-          <span className="text-red-400">&larr; pior</span>
+          <span className="text-red-400 hidden sm:inline">&larr; pior</span>
           <span>{labels.attack ?? "Ataque"}</span>
-          <span className="text-emerald-600">melhor &rarr;</span>
+          <span className="text-emerald-600 hidden sm:inline">melhor &rarr;</span>
         </div>
       </div>
 
@@ -60,7 +60,7 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
 
           return (
             <div key={entry.team} className="flex items-center gap-2">
-              <div className="w-24 sm:w-32 flex items-center gap-1.5 flex-shrink-0">
+              <div className="w-16 sm:w-32 flex items-center gap-1.5 flex-shrink-0">
                 {teamLogoSrc(entry.team) ? (
                   <img src={teamLogoSrc(entry.team)} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
                 ) : (

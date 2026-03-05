@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
+import { ligaTeamColors, ligaTeamShortNames, teamLogoSrc } from "@/lib/config/football";
 import type { NextMatchdayScenarios } from "@/types/football";
 
 type Outcome = "H" | "D" | "A";
@@ -159,8 +159,11 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
                 className="flex items-center gap-2 py-2 border-b border-stone-100 last:border-b-0"
               >
                 {/* Home team */}
-                <div className="flex items-center gap-1.5 w-[120px] justify-end">
-                  <span className="text-xs font-medium text-stone-700 text-right truncate">
+                <div className="flex items-center gap-1.5 w-[80px] sm:w-[120px] justify-end">
+                  <span className="text-xs font-medium text-stone-700 text-right truncate sm:hidden">
+                    {ligaTeamShortNames[match.home_team] || match.home_team}
+                  </span>
+                  <span className="text-xs font-medium text-stone-700 text-right truncate hidden sm:inline">
                     {match.home_team}
                   </span>
                   {teamLogoSrc(match.home_team) && (
@@ -222,7 +225,7 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
                 </div>
 
                 {/* Away team */}
-                <div className="flex items-center gap-1.5 w-[120px]">
+                <div className="flex items-center gap-1.5 w-[80px] sm:w-[120px]">
                   {teamLogoSrc(match.away_team) && (
                     <img
                       src={teamLogoSrc(match.away_team)}
@@ -230,7 +233,10 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
                       className="w-5 h-5 object-contain flex-shrink-0"
                     />
                   )}
-                  <span className="text-xs font-medium text-stone-700 truncate">
+                  <span className="text-xs font-medium text-stone-700 truncate sm:hidden">
+                    {ligaTeamShortNames[match.away_team] || match.away_team}
+                  </span>
+                  <span className="text-xs font-medium text-stone-700 truncate hidden sm:inline">
                     {match.away_team}
                   </span>
                 </div>
