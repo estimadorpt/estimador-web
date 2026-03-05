@@ -26,15 +26,15 @@ function cssPct(v: number): string {
 /** Generate a one-line summary of the scenario from its steps */
 function scenarioSummary(
   scenario: NarrativeScenario,
-  labels: { win: string; draw: string; loss: string },
+  labels: { win: string; winPlural: string; draw: string; drawPlural: string; loss: string; lossPlural: string },
 ): string {
   const wins = scenario.steps.filter(s => s.result === "W").length;
   const draws = scenario.steps.filter(s => s.result === "D").length;
   const losses = scenario.steps.filter(s => s.result === "L").length;
   const parts: string[] = [];
-  if (wins > 0) parts.push(`${wins} ${wins === 1 ? labels.win : labels.win}`);
-  if (draws > 0) parts.push(`${draws} ${draws === 1 ? labels.draw : labels.draw}`);
-  if (losses > 0) parts.push(`${losses} ${losses === 1 ? labels.loss : labels.loss}`);
+  if (wins > 0) parts.push(`${wins} ${wins === 1 ? labels.win : labels.winPlural}`);
+  if (draws > 0) parts.push(`${draws} ${draws === 1 ? labels.draw : labels.drawPlural}`);
+  if (losses > 0) parts.push(`${losses} ${losses === 1 ? labels.loss : labels.lossPlural}`);
   return parts.join(", ");
 }
 
@@ -202,8 +202,11 @@ interface ScenarioCardLabels {
   home: string;
   away: string;
   winAbbr: string;
+  winAbbrPlural: string;
   drawAbbr: string;
+  drawAbbrPlural: string;
   lossAbbr: string;
+  lossAbbrPlural: string;
 }
 
 function ScenarioCard({
@@ -221,13 +224,6 @@ function ScenarioCard({
   labels: ScenarioCardLabels;
   summary: string;
 }) {
-  const baseName =
-    scenario.label === "comfortable"
-      ? labels.scenarioComfortable
-      : scenario.label === "realistic"
-      ? labels.scenarioRealistic
-      : labels.scenarioUnlikely;
-
   const finalP = scenario.steps[scenario.steps.length - 1]?.p_target_after ?? pCurrent;
 
   return (
@@ -242,11 +238,8 @@ function ScenarioCard({
       <div className="flex items-start justify-between gap-3 p-3 md:p-4 border-b border-stone-100 bg-stone-50">
         <div className="flex-1 min-w-0">
           <h4 className="text-base font-bold text-stone-900">
-            {baseName}
-          </h4>
-          <div className="text-xs text-stone-500 mt-0.5">
             {summary}
-          </div>
+          </h4>
           <div className="text-[10px] text-stone-400 mt-0.5">
             <span className="tabular-nums font-medium">{pct(scenario.frequency)}</span>{" "}
             {labels.ofChampionSims}
@@ -314,8 +307,11 @@ export function NarrativeScenarios({
     home: string;
     away: string;
     winAbbr: string;
+    winAbbrPlural: string;
     drawAbbr: string;
+    drawAbbrPlural: string;
     lossAbbr: string;
+    lossAbbrPlural: string;
   };
 }) {
   const teamColor = ligaTeamColors[data.team] || "#78716c";
@@ -342,8 +338,11 @@ export function NarrativeScenarios({
             labels={adjustedLabels}
             summary={scenarioSummary(scenario, {
               win: adjustedLabels.winAbbr,
+              winPlural: adjustedLabels.winAbbrPlural,
               draw: adjustedLabels.drawAbbr,
+              drawPlural: adjustedLabels.drawAbbrPlural,
               loss: adjustedLabels.lossAbbr,
+              lossPlural: adjustedLabels.lossAbbrPlural,
             })}
           />
         ))}

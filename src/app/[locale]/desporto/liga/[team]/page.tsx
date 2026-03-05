@@ -367,8 +367,11 @@ export default async function TeamDetailPage({
                 home: t("football.homeAbbr"),
                 away: t("football.awayAbbr"),
                 winAbbr: t("football.winAbbr"),
+                winAbbrPlural: t("football.winAbbrPlural"),
                 drawAbbr: t("football.drawAbbr"),
+                drawAbbrPlural: t("football.drawAbbrPlural"),
                 lossAbbr: t("football.lossAbbr"),
+                lossAbbrPlural: t("football.lossAbbrPlural"),
               }}
             />
           </div>
