@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamColors } from "@/lib/config/football";
+import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import type { CriticalPath } from "@/types/football";
 
 interface CriticalPathsProps {
@@ -59,7 +59,11 @@ export function CriticalPaths({ paths, nSims, labels, maxMatchesPerTeam = 5, max
       <div key={team} className="border-b border-stone-100 pb-5 last:border-0">
         {/* Team header */}
         <div className="flex items-center gap-3 mb-1">
-          <div className="w-1.5 h-6" style={{ backgroundColor: teamColor }} />
+          {teamLogoSrc(team) ? (
+            <img src={teamLogoSrc(team)} alt="" className="w-6 h-6 object-contain" />
+          ) : (
+            <div className="w-1.5 h-6" style={{ backgroundColor: teamColor }} />
+          )}
           <span className="font-bold text-stone-900 text-base">{team}</span>
           <span className="text-sm text-stone-500">
             {probLabel}: <strong className="text-stone-800">{formatPct(path.p_current)}</strong>

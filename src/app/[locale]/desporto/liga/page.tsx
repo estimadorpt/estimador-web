@@ -1,5 +1,5 @@
 import { loadLigaData, loadLigaHistorical } from "@/lib/utils/football-data-loader";
-import { ligaTeamColors } from "@/lib/config/football";
+import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import { Header } from "@/components/Header";
 import { LeagueTable } from "@/components/charts/football/LeagueTable";
 import { MatchdayPredictions } from "@/components/charts/football/MatchdayPredictions";
@@ -10,6 +10,7 @@ import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
 import { PathsToVictory } from "@/components/charts/football/PathsToVictory";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
+import { ligaTeamSlugs } from "@/lib/config/football";
 import { Trophy, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -97,15 +98,31 @@ export default async function LigaPage({
           <div className="grid grid-cols-3 gap-6 md:gap-8">
             {[leader, second, third].map((team) => {
               const teamColor = ligaTeamColors[team.team] || "#78716c";
+              const teamSlug = ligaTeamSlugs[team.team];
               return (
                 <div key={team.team} className="border-t-2 pt-3" style={{ borderColor: teamColor }}>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                    {team.team}
+                  <div className="flex items-center gap-1.5 mb-1">
+                    {teamLogoSrc(team.team) && (
+                      <img src={teamLogoSrc(team.team)} alt="" className="w-4 h-4 object-contain" />
+                    )}
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                      {team.team}
+                    </span>
                   </div>
                   <div className="text-4xl md:text-5xl font-black tabular-nums text-stone-900">
                     {Math.round(team.p_champion * 100)}
                     <span className="text-xl md:text-2xl font-bold text-stone-400">%</span>
                   </div>
+                  {teamSlug && (
+                    <Link
+                      href={`/desporto/liga/${teamSlug}`}
+                      locale={locale}
+                      className="text-xs text-stone-400 hover:text-blue-700 inline-flex items-center gap-1 mt-2 transition-colors"
+                    >
+                      {t("football.viewScenarios")}
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  )}
                 </div>
               );
             })}

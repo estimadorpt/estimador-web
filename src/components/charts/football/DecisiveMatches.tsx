@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamColors } from "@/lib/config/football";
+import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import type { DecisiveMatch } from "@/types/football";
 
 interface DecisiveMatchesProps {
@@ -108,7 +108,11 @@ function TeamSection({
   return (
     <div>
       <div className="flex items-center gap-2 py-1.5 border-b border-stone-200">
-        <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: teamColor }} />
+        {teamLogoSrc(team) ? (
+          <img src={teamLogoSrc(team)} alt="" className="w-5 h-5 object-contain" />
+        ) : (
+          <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: teamColor }} />
+        )}
         <span className="font-semibold text-stone-800 text-sm">{team}</span>
       </div>
       {teamMatches.map((match, i) => (

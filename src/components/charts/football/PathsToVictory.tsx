@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamColors } from "@/lib/config/football";
+import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import type { VictoryPath, RivalCondition } from "@/types/football";
 
 interface PathsToVictoryProps {
@@ -158,10 +158,14 @@ export function PathsToVictory({ paths, labels }: PathsToVictoryProps) {
           <div key={team}>
             {/* Header */}
             <div className="flex items-center gap-3 mb-1">
-              <div
-                className="w-1 h-12 shrink-0"
-                style={{ backgroundColor: teamColor }}
-              />
+              {teamLogoSrc(team) ? (
+                <img src={teamLogoSrc(team)} alt="" className="w-8 h-8 object-contain shrink-0" />
+              ) : (
+                <div
+                  className="w-1 h-12 shrink-0"
+                  style={{ backgroundColor: teamColor }}
+                />
+              )}
               <div>
                 <div className="flex items-baseline gap-2">
                   <span className="font-bold text-stone-900 text-lg">

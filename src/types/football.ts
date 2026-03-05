@@ -117,6 +117,59 @@ export interface ScenarioData {
   critical_paths: Record<string, CriticalPath>;
   victory_paths?: Record<string, VictoryPath>;
   survival_paths?: Record<string, VictoryPath>;
+  narrative_scenarios?: Record<string, TeamNarrativeScenarios>;
+}
+
+// Narrative scenarios: archetype-based paths to victory/survival
+export interface StoryMatch {
+  opponent: string;
+  venue: 'H' | 'A';
+  matchday: number;
+  p_win_overall: number;
+  p_win_given_target: number;
+  p_draw_given_target: number;
+  p_loss_given_target: number;
+  within_target_entropy: number;
+  team_swing: number;
+}
+
+export interface ScenarioStep {
+  matchday: number;
+  opponent: string;
+  venue: 'H' | 'A';
+  result: 'W' | 'D' | 'L';
+  p_target_before: number;
+  p_target_after: number;
+  n_sims_remaining: number;
+}
+
+export interface ScenarioRivalCondition {
+  rival: string;
+  opponent: string;
+  matchday: number;
+  p_rival_drops_baseline: number;
+  p_rival_drops_in_scenario: number;
+  drop_uplift: number;
+}
+
+export interface NarrativeScenario {
+  label: 'comfortable' | 'realistic' | 'unlikely';
+  results: Record<string, 'W' | 'D' | 'L'>;
+  frequency: number;
+  n_sims_matching: number;
+  steps: ScenarioStep[];
+  rival_conditions: ScenarioRivalCondition[];
+}
+
+export interface TeamNarrativeScenarios {
+  team: string;
+  target: 'champion' | 'survival';
+  p_current: number;
+  n_target: number;
+  n_sims: number;
+  scenario_coverage: number;
+  story_matches: StoryMatch[];
+  scenarios: NarrativeScenario[];
 }
 
 // Historical data: array of predictions per matchday for time-series charts

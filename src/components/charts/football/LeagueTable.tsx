@@ -1,7 +1,9 @@
 "use client";
 
-import { ligaTeamColors, ligaTeamShortNames } from "@/lib/config/football";
+import { ligaTeamColors, ligaTeamShortNames, ligaTeamSlugs, teamLogoSrc } from "@/lib/config/football";
 import type { TeamStanding } from "@/types/football";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 interface LeagueTableProps {
   data: TeamStanding[];
@@ -25,6 +27,9 @@ function formatProb(value: number): string {
 }
 
 export function LeagueTable({ data, labels }: LeagueTableProps) {
+  const locale = useLocale();
+  const router = useRouter();
+
   if (!data || data.length === 0) return null;
 
   return (
@@ -55,15 +60,29 @@ export function LeagueTable({ data, labels }: LeagueTableProps) {
               >
                 <td className="py-2.5 pr-2 text-stone-400 tabular-nums">{i + 1}</td>
                 <td className="py-2.5 pr-4">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-1 h-5 flex-shrink-0"
-                      style={{ backgroundColor: color }}
-                    />
-                    <span className="font-medium text-stone-900 sm:hidden">
+                  <div
+                    className="flex items-center gap-2 cursor-pointer group"
+                    onClick={() => {
+                      const slug = ligaTeamSlugs[team.team];
+                      if (slug) router.push(`/${locale}/desporto/liga/${slug}`);
+                    }}
+                  >
+                    {teamLogoSrc(team.team) ? (
+                      <img
+                        src={teamLogoSrc(team.team)}
+                        alt=""
+                        className="w-5 h-5 flex-shrink-0 object-contain"
+                      />
+                    ) : (
+                      <div
+                        className="w-1 h-5 flex-shrink-0"
+                        style={{ backgroundColor: color }}
+                      />
+                    )}
+                    <span className="font-medium text-stone-900 group-hover:text-blue-700 transition-colors sm:hidden">
                       {ligaTeamShortNames[team.team] || team.team}
                     </span>
-                    <span className="font-medium text-stone-900 hidden sm:inline">
+                    <span className="font-medium text-stone-900 group-hover:text-blue-700 transition-colors hidden sm:inline">
                       {team.team}
                     </span>
                   </div>
