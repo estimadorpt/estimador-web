@@ -426,7 +426,12 @@
     "resetAll": "Reset all",
     "impactOnTitle": "Impact on title",
     "impactOnRelegation": "Impact on relegation",
-    "noChange": "no change"
+    "noChange": "no change",
+    "simulator": "Simulator",
+    "simulatorCta": "Pick match results and see the impact on probabilities",
+    "trySimulator": "Try it",
+    "teamClickHint": "Click a team to see detailed scenarios",
+    "simulatedStandings": "Simulated standings"
   },
   "meta": {
     "defaultTitle": "estimador.pt — Data analysis for Portugal",

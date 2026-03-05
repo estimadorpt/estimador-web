@@ -20,6 +20,11 @@ interface MatchdayPickerProps {
     draw: string;
     away: string;
     win: string;
+    simulatedStandings?: string;
+    team?: string;
+    championship?: string;
+    top3?: string;
+    relegation?: string;
   };
 }
 
@@ -388,6 +393,133 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
           </div>
         )}
       </div>
+
+      {/* Full probability table */}
+      {labels.simulatedStandings && (
+        <SimulatedTable
+          probabilities={probabilities}
+          baseline={data.baseline}
+          hasSelections={hasSelections}
+          labels={labels}
+        />
+      )}
     </div>
+  );
+}
+
+function SimulatedTable({
+  probabilities,
+  baseline,
+  hasSelections,
+  labels,
+}: {
+  probabilities: Record<string, { p_champion: number; p_top3: number; p_relegation: number }>;
+  baseline: Record<string, { p_champion: number; p_top3: number; p_relegation: number }>;
+  hasSelections: boolean;
+  labels: MatchdayPickerProps["labels"];
+}) {
+  const sorted = useMemo(() => {
+    return Object.entries(probabilities)
+      .sort((a, b) => {
+        // Sort by champion desc, then top3 desc, then relegation asc
+        if (b[1].p_champion !== a[1].p_champion) return b[1].p_champion - a[1].p_champion;
+        if (b[1].p_top3 !== a[1].p_top3) return b[1].p_top3 - a[1].p_top3;
+        return a[1].p_relegation - b[1].p_relegation;
+      });
+  }, [probabilities]);
+
+  return (
+    <div className="col-span-1 lg:col-span-2 mt-8 border-t border-stone-200 pt-8">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-4">
+        {labels.simulatedStandings}
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b-2 border-stone-800 text-left">
+              <th className="py-2 pr-2 w-8 text-stone-500 font-medium">#</th>
+              <th className="py-2 pr-4 font-medium">{labels.team}</th>
+              <th className="py-2 px-3 text-right font-medium">{labels.championship}</th>
+              <th className="py-2 px-3 text-right font-medium">{labels.top3}</th>
+              <th className="py-2 px-3 text-right font-medium">{labels.relegation}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map(([team, probs], i) => {
+              const base = baseline[team];
+              const champDelta = probs.p_champion - base.p_champion;
+              const relegDelta = probs.p_relegation - base.p_relegation;
+              const isRelegationZone = i >= sorted.length - 3;
+              const isChampionZone = i < 3;
+              const teamColor = ligaTeamColors[team] || "#78716c";
+
+              return (
+                <motion.tr
+                  key={team}
+                  layout
+                  transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                  className={`border-b border-stone-200 ${
+                    isRelegationZone ? "bg-red-50/40" : isChampionZone ? "bg-stone-50" : ""
+                  }`}
+                >
+                  <td className="py-2 pr-2 text-stone-400 tabular-nums">{i + 1}</td>
+                  <td className="py-2 pr-4">
+                    <div className="flex items-center gap-2">
+                      {teamLogoSrc(team) ? (
+                        <img src={teamLogoSrc(team)} alt="" className="w-5 h-5 flex-shrink-0 object-contain" />
+                      ) : (
+                        <div className="w-1 h-5 flex-shrink-0" style={{ backgroundColor: teamColor }} />
+                      )}
+                      <span className="font-medium text-stone-900">{team}</span>
+                    </div>
+                  </td>
+                  <td className="py-2 px-3 text-right tabular-nums">
+                    <DeltaCell value={probs.p_champion} delta={champDelta} hasSelections={hasSelections} bold={probs.p_champion > 0.01} />
+                  </td>
+                  <td className="py-2 px-3 text-right tabular-nums">
+                    {formatPct(probs.p_top3)}
+                  </td>
+                  <td className="py-2 px-3 text-right tabular-nums">
+                    <DeltaCell value={probs.p_relegation} delta={relegDelta} hasSelections={hasSelections} bold={probs.p_relegation > 0.1} danger />
+                  </td>
+                </motion.tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function DeltaCell({
+  value,
+  delta,
+  hasSelections,
+  bold,
+  danger,
+}: {
+  value: number;
+  delta: number;
+  hasSelections: boolean;
+  bold?: boolean;
+  danger?: boolean;
+}) {
+  const showDelta = hasSelections && Math.abs(delta * 100) >= 0.5;
+  const deltaColor = danger
+    ? delta > 0.005 ? "text-red-600" : delta < -0.005 ? "text-emerald-600" : "text-stone-400"
+    : delta > 0.005 ? "text-emerald-600" : delta < -0.005 ? "text-red-600" : "text-stone-400";
+
+  return (
+    <span className="inline-flex items-center gap-1 justify-end">
+      <span className={bold ? (danger ? "font-semibold text-red-700" : "font-semibold") : danger && value > 0 ? "text-red-600" : "text-stone-400"}>
+        {formatPct(value)}
+      </span>
+      {showDelta && (
+        <span className={`text-[10px] font-bold ${deltaColor}`}>
+          {formatDelta(delta)}
+        </span>
+      )}
+    </span>
   );
 }

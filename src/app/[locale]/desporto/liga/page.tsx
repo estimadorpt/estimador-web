@@ -8,11 +8,11 @@ import { RelegationChart } from "@/components/charts/football/RelegationChart";
 import { PositionHeatmap } from "@/components/charts/football/PositionHeatmap";
 import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
 import { PathsToVictory } from "@/components/charts/football/PathsToVictory";
-import { MatchdayPicker } from "@/components/charts/football/MatchdayPicker";
+
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ligaTeamSlugs } from "@/lib/config/football";
-import { Trophy, ArrowRight } from "lucide-react";
+import { Trophy, ArrowRight, SlidersHorizontal } from "lucide-react";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -151,10 +151,45 @@ export default async function LigaPage({
               championship: t("football.championship"),
               top3: t("football.top3"),
               relegation: t("football.relegation"),
+              teamClickHint: t("football.teamClickHint"),
             }}
           />
         </div>
       </section>
+
+      {/* Simulator CTA */}
+      {scenarios?.next_matchday_scenarios && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <Link
+              href="/desporto/liga/simulador"
+              locale={locale}
+              className="block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+            >
+              <div className="flex items-start gap-3">
+                <SlidersHorizontal className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="font-bold text-stone-900">
+                      {t("football.simulator")}
+                    </h3>
+                    <span className="text-xs text-stone-400">
+                      {t("football.matchday")} {prediction.next_matchday.matchday}
+                    </span>
+                  </div>
+                  <p className="text-sm text-stone-500 mt-0.5">
+                    {t("football.simulatorCta")}
+                  </p>
+                </div>
+                <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+                  {t("football.trySimulator")}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </div>
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Title Race */}
       {historical.length > 1 && (
@@ -199,35 +234,6 @@ export default async function LigaPage({
           />
         </div>
       </section>
-
-      {/* What If This Weekend? */}
-      {scenarios?.next_matchday_scenarios && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
-              {t("football.whatIfTitle")}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.whatIfDescription")}
-            </p>
-            <MatchdayPicker
-              data={scenarios.next_matchday_scenarios}
-              labels={{
-                whatIfTitle: t("football.whatIfTitle"),
-                whatIfDescription: t("football.whatIfDescription"),
-                resetAll: t("football.resetAll"),
-                impactOnTitle: t("football.impactOnTitle"),
-                impactOnRelegation: t("football.impactOnRelegation"),
-                noChange: t("football.noChange"),
-                home: t("football.home"),
-                draw: t("football.draw"),
-                away: t("football.away"),
-                win: t("football.win"),
-              }}
-            />
-          </div>
-        </section>
-      )}
 
       {/* Paths to Victory */}
       {scenarios?.victory_paths && (

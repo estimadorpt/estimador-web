@@ -426,7 +426,12 @@
     "resetAll": "Limpar tudo",
     "impactOnTitle": "Impacto no título",
     "impactOnRelegation": "Impacto na despromoção",
-    "noChange": "sem alteração"
+    "noChange": "sem alteração",
+    "simulator": "Simulador",
+    "simulatorCta": "Escolha resultados e veja o impacto nas probabilidades",
+    "trySimulator": "Experimentar",
+    "teamClickHint": "Clique numa equipa para ver cenários detalhados",
+    "simulatedStandings": "Classificação simulada"
   },
   "meta": {
     "defaultTitle": "estimador.pt — Análise de dados para Portugal",

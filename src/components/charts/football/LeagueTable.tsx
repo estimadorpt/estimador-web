@@ -4,6 +4,9 @@ import { ligaTeamColors, ligaTeamShortNames, ligaTeamSlugs, teamLogoSrc } from "
 import type { TeamStanding } from "@/types/football";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
+import { ChevronRight } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface LeagueTableProps {
   data: TeamStanding[];
@@ -14,6 +17,7 @@ interface LeagueTableProps {
     championship: string;
     top3: string;
     relegation: string;
+    teamClickHint?: string;
   };
 }
 
@@ -29,8 +33,32 @@ function formatProb(value: number): string {
 export function LeagueTable({ data, labels }: LeagueTableProps) {
   const locale = useLocale();
   const router = useRouter();
+  const [showHint, setShowHint] = useState(false);
+
+  const dismissHint = useCallback(() => {
+    setShowHint(false);
+    try { localStorage.setItem("liga-team-hint-seen", "1"); } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("liga-team-hint-seen")) {
+        setShowHint(true);
+        const timer = setTimeout(dismissHint, 8000);
+        return () => clearTimeout(timer);
+      }
+    } catch {}
+  }, [dismissHint]);
 
   if (!data || data.length === 0) return null;
+
+  const handleTeamClick = (teamName: string) => {
+    const slug = ligaTeamSlugs[teamName];
+    if (slug) {
+      dismissHint();
+      router.push(`/${locale}/desporto/liga/${slug}`);
+    }
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -61,11 +89,8 @@ export function LeagueTable({ data, labels }: LeagueTableProps) {
                 <td className="py-2.5 pr-2 text-stone-400 tabular-nums">{i + 1}</td>
                 <td className="py-2.5 pr-4">
                   <div
-                    className="flex items-center gap-2 cursor-pointer group"
-                    onClick={() => {
-                      const slug = ligaTeamSlugs[team.team];
-                      if (slug) router.push(`/${locale}/desporto/liga/${slug}`);
-                    }}
+                    className="flex items-center gap-2 cursor-pointer group relative"
+                    onClick={() => handleTeamClick(team.team)}
                   >
                     {teamLogoSrc(team.team) ? (
                       <img
@@ -85,6 +110,25 @@ export function LeagueTable({ data, labels }: LeagueTableProps) {
                     <span className="font-medium text-stone-900 group-hover:text-blue-700 transition-colors hidden sm:inline">
                       {team.team}
                     </span>
+                    <ChevronRight className="w-3.5 h-3.5 text-stone-300 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                    {/* Tooltip on first row */}
+                    <AnimatePresence>
+                      {i === 0 && showHint && labels.teamClickHint && (
+                        <motion.div
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -8 }}
+                          transition={{ duration: 0.3 }}
+                          className="pointer-events-none flex-shrink-0 ml-1"
+                        >
+                          <div className="relative bg-stone-800 text-white text-[11px] px-2.5 py-1 whitespace-nowrap shadow-lg flex items-center">
+                            {/* Arrow pointing left */}
+                            <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-stone-800 rotate-45" />
+                            <span className="relative">{labels.teamClickHint}</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </td>
                 <td className="py-2.5 px-3 text-right tabular-nums font-semibold">

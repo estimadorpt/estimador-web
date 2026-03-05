@@ -280,17 +280,21 @@ export function NarrativeScenarios({
 
   return (
     <div className="space-y-3">
-      {data.scenarios.map((scenario, i) => (
-        <ScenarioCard
-          key={i}
-          scenario={scenario}
-          teamColor={teamColor}
-          index={i}
-          pCurrent={data.p_current}
-          labels={adjustedLabels}
-          target={data.target}
-        />
-      ))}
+      {data.scenarios
+        .filter((scenario, i, arr) =>
+          arr.findIndex((s) => s.label === scenario.label) === i
+        )
+        .map((scenario, i) => (
+          <ScenarioCard
+            key={i}
+            scenario={scenario}
+            teamColor={teamColor}
+            index={i}
+            pCurrent={data.p_current}
+            labels={adjustedLabels}
+            target={data.target}
+          />
+        ))}
 
       {/* Disclaimer */}
       <p className="text-xs text-stone-400">
