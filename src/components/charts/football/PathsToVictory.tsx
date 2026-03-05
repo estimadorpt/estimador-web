@@ -192,7 +192,7 @@ export function PathsToVictory({ paths, labels }: PathsToVictoryProps) {
             </div>
 
             {/* Gates */}
-            <div className="flex gap-2 mt-3">
+            <div className="flex flex-col sm:flex-row gap-2 mt-3">
               {/* Gate 1: Own results */}
               <Gate
                 label={ownGateLabel}
@@ -207,7 +207,7 @@ export function PathsToVictory({ paths, labels }: PathsToVictoryProps) {
               />
 
               {/* Rival gates — one per rival */}
-              {rivalNames.map((rival, i) => {
+              {rivalNames.map((rival) => {
                 const rivalColor = ligaTeamColors[rival] || "#78716c";
                 const rivalMatches = rivalGroups[rival].map(rc => ({
                   opponent: rc.opponent,
