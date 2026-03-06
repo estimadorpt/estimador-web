@@ -463,7 +463,18 @@
     "luckIndexDescription": "Expected points (xPts) computed from each match's expected goals (xG). The difference to actual points measures finishing efficiency and luck.",
     "overperforming": "Overperforming",
     "underperforming": "Underperforming",
-    "xgAttribution": "xG data: FotMob"
+    "xgAttribution": "xG data: FotMob",
+    "magicNumbers": "Magic numbers",
+    "magicNumbersDescription": "Points each team needs to mathematically guarantee each objective.",
+    "magicTitleRace": "Title",
+    "magicChampionsLeague": "Champions League",
+    "magicEuropaLeague": "Europa League",
+    "magicSafety": "Safety",
+    "magicClinched": "Clinched",
+    "magicEliminated": "Eliminated",
+    "magicSafe": "Safe",
+    "magicRelegated": "Relegated",
+    "magicPtsAbbr": "pts"
   },
   "meta": {
     "defaultTitle": "estimador.pt — Data analysis for Portugal",

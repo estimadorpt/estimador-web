@@ -161,6 +161,43 @@ export default async function TeamDetailPage({
 
   const actualStanding = prediction.actual_standings?.find(s => s.team === teamName);
 
+  // Magic numbers: compute for this team
+  const TOTAL_MATCHES = 34;
+  let magicNumbers: { label: string; pointsNeeded: number; maxRemaining: number; clinched: boolean; eliminated: boolean }[] = [];
+  if (actualStanding && prediction.actual_standings) {
+    const allTeams = prediction.actual_standings.map(s => ({
+      team: s.team,
+      currentPoints: s.points,
+      maxPossible: s.points + (TOTAL_MATCHES - s.played) * 3,
+    }));
+    const others = allTeams.filter(o => o.team !== teamName);
+    const rivalsByMax = [...others].sort((a, b) => b.maxPossible - a.maxPossible);
+    const teamsAbove = others.filter(o => o.currentPoints > (actualStanding.points + (TOTAL_MATCHES - actualStanding.played) * 3)).length;
+    const maxRemaining = (TOTAL_MATCHES - actualStanding.played) * 3;
+    const myPoints = actualStanding.points;
+
+    const zones: { label: string; threatIdx: number; eliminatedThreshold: number }[] = [
+      { label: "magicTitleRace", threatIdx: 0, eliminatedThreshold: 1 },
+      { label: "magicChampionsLeague", threatIdx: 1, eliminatedThreshold: 2 },
+      { label: "magicEuropaLeague", threatIdx: 2, eliminatedThreshold: 3 },
+      { label: "magicSafety", threatIdx: 15, eliminatedThreshold: 16 },
+    ];
+
+    magicNumbers = zones
+      .filter(z => rivalsByMax.length > z.threatIdx)
+      .map(z => {
+        const threat = rivalsByMax[z.threatIdx].maxPossible;
+        const needed = threat + 1 - myPoints;
+        return {
+          label: z.label,
+          pointsNeeded: needed,
+          maxRemaining,
+          clinched: needed <= 0,
+          eliminated: teamsAbove >= z.eliminatedThreshold,
+        };
+      });
+  }
+
   // Decisive matches: direct impact on this team
   const teamDecisiveMatches = scenarios?.decisive_matches?.filter((m) => {
     if (isSurvival) return m.most_affected_relegation_team === teamName;
@@ -294,6 +331,47 @@ export default async function TeamDetailPage({
                 </span>
               )}
             </div>
+
+            {/* Magic Numbers */}
+            {magicNumbers.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-stone-100">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-2">
+                  {t("football.magicNumbers")}
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {magicNumbers.map(mn => {
+                    const impossible = mn.pointsNeeded > mn.maxRemaining;
+                    return (
+                      <div key={mn.label} className="flex items-center gap-2 bg-stone-50 border border-stone-200 px-3 py-2">
+                        <span className="text-xs text-stone-500">
+                          {t(`football.${mn.label}`)}
+                        </span>
+                        {mn.clinched ? (
+                          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5">
+                            {t("football.magicClinched")}
+                          </span>
+                        ) : mn.eliminated ? (
+                          <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5">
+                            {t("football.magicEliminated")}
+                          </span>
+                        ) : (
+                          <span className={`text-sm font-black tabular-nums ${impossible ? "text-stone-400" : ""}`}
+                            style={impossible ? {} : { color: teamColor }}>
+                            {mn.pointsNeeded}
+                            <span className="text-[10px] text-stone-400 font-normal ml-0.5">
+                              {t("football.magicPtsAbbr")}
+                            </span>
+                            <span className="text-[10px] text-stone-400 font-normal ml-1">
+                              / {mn.maxRemaining}
+                            </span>
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </section>
       )}

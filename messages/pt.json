@@ -463,7 +463,18 @@
     "luckIndexDescription": "Pontos esperados (xPts) calculados a partir dos golos esperados (xG) de cada jogo. A diferença para os pontos reais mede a eficácia no remate e a sorte.",
     "overperforming": "Acima do esperado",
     "underperforming": "Abaixo do esperado",
-    "xgAttribution": "Dados xG: FotMob"
+    "xgAttribution": "Dados xG: FotMob",
+    "magicNumbers": "Números mágicos",
+    "magicNumbersDescription": "Pontos que cada equipa precisa de somar para garantir matematicamente cada objetivo.",
+    "magicTitleRace": "Título",
+    "magicChampionsLeague": "Champions League",
+    "magicEuropaLeague": "Liga Europa",
+    "magicSafety": "Salvação",
+    "magicClinched": "Garantido",
+    "magicEliminated": "Eliminado",
+    "magicSafe": "Salvo",
+    "magicRelegated": "Despromovido",
+    "magicPtsAbbr": "pts"
   },
   "meta": {
     "defaultTitle": "estimador.pt — Análise de dados para Portugal",
