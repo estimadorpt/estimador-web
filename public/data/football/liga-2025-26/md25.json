@@ -3,7 +3,7 @@
   "matchday": 25,
   "model": "joint_sot",
   "n_sims": 50000,
-  "timestamp": "2026-03-08T20:47:48.484473+00:00",
+  "timestamp": "2026-03-08T21:30:22.860797+00:00",
   "table": [
     {
       "team": "Porto",
@@ -463,45 +463,52 @@
   "xpts_table": [
     {
       "team": "Sporting CP",
-      "played": 24,
-      "xpts": 52.8,
-      "xgf": 51.3,
-      "xga": 15.4
+      "played": 25,
+      "xpts": 54.4,
+      "xgf": 53.2,
+      "xga": 16.9
     },
     {
       "team": "Porto",
-      "played": 24,
-      "xpts": 51.5,
-      "xgf": 44.2,
-      "xga": 13.9
-    },
-    {
-      "team": "Benfica",
-      "played": 23,
-      "xpts": 48.6,
-      "xgf": 44.9,
+      "played": 25,
+      "xpts": 53.4,
+      "xgf": 46.3,
       "xga": 15.2
     },
     {
+      "team": "Benfica",
+      "played": 25,
+      "xpts": 50.7,
+      "xgf": 47.0,
+      "xga": 18.2
+    },
+    {
       "team": "SC Braga",
-      "played": 24,
-      "xpts": 45.8,
-      "xgf": 47.4,
-      "xga": 24.5
+      "played": 25,
+      "xpts": 46.9,
+      "xgf": 49.0,
+      "xga": 26.4
     },
     {
       "team": "Gil Vicente",
-      "played": 23,
-      "xpts": 36.9,
-      "xgf": 32.4,
-      "xga": 23.4
+      "played": 25,
+      "xpts": 40.2,
+      "xgf": 35.2,
+      "xga": 25.3
     },
     {
       "team": "Famalicao",
-      "played": 24,
-      "xpts": 36.5,
-      "xgf": 32.5,
-      "xga": 27.4
+      "played": 25,
+      "xpts": 37.9,
+      "xgf": 33.5,
+      "xga": 28.3
+    },
+    {
+      "team": "Alverca",
+      "played": 25,
+      "xpts": 33.1,
+      "xgf": 30.8,
+      "xga": 34.6
     },
     {
       "team": "Santa Clara",
@@ -511,11 +518,18 @@
       "xga": 26.6
     },
     {
-      "team": "Alverca",
-      "played": 24,
-      "xpts": 31.3,
-      "xgf": 29.8,
-      "xga": 34.2
+      "team": "Estoril",
+      "played": 25,
+      "xpts": 30.7,
+      "xgf": 34.8,
+      "xga": 40.9
+    },
+    {
+      "team": "Nacional",
+      "played": 25,
+      "xpts": 30.6,
+      "xgf": 31.8,
+      "xga": 39.5
     },
     {
       "team": "Tondela",
@@ -532,39 +546,25 @@
       "xga": 34.4
     },
     {
-      "team": "Estoril",
-      "played": 24,
-      "xpts": 29.9,
-      "xgf": 34.1,
-      "xga": 39.4
-    },
-    {
-      "team": "Nacional",
-      "played": 24,
-      "xpts": 28.9,
-      "xgf": 30.4,
-      "xga": 38.6
-    },
-    {
       "team": "Moreirense",
-      "played": 24,
-      "xpts": 27.5,
-      "xgf": 24.4,
-      "xga": 35.5
+      "played": 25,
+      "xpts": 28.5,
+      "xgf": 25.4,
+      "xga": 36.9
     },
     {
       "team": "Estrela Amadora",
-      "played": 24,
-      "xpts": 26.7,
-      "xgf": 27.0,
-      "xga": 37.6
+      "played": 25,
+      "xpts": 27.6,
+      "xgf": 28.2,
+      "xga": 39.5
     },
     {
       "team": "Arouca",
-      "played": 24,
-      "xpts": 23.6,
-      "xgf": 21.1,
-      "xga": 41.4
+      "played": 25,
+      "xpts": 24.9,
+      "xgf": 22.0,
+      "xga": 42.4
     },
     {
       "team": "Rio Ave",
@@ -575,17 +575,17 @@
     },
     {
       "team": "Casa Pia",
-      "played": 24,
-      "xpts": 20.2,
-      "xgf": 21.5,
-      "xga": 42.2
+      "played": 25,
+      "xpts": 22.1,
+      "xgf": 22.9,
+      "xga": 42.9
     },
     {
       "team": "AVS",
-      "played": 24,
-      "xpts": 19.9,
-      "xgf": 21.9,
-      "xga": 44.8
+      "played": 25,
+      "xpts": 20.7,
+      "xgf": 22.3,
+      "xga": 45.8
     }
   ],
   "position_probs": {
