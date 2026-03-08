@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamColors, ligaTeamShortNames, ligaTeamSlugs, teamLogoSrc } from "@/lib/config/football";
+import { ligaTeamColors, ligaTeamShortNames, ligaTeamSlugs, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { ActualStanding, TeamStanding } from "@/types/football";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
@@ -160,7 +160,7 @@ export function LeagueTable({ data, actualStandings, labels }: LeagueTableProps)
                       {ligaTeamShortNames[team.team] || team.team}
                     </span>
                     <span className="font-medium text-stone-900 group-hover:text-blue-700 transition-colors hidden sm:inline">
-                      {team.team}
+                      {teamDisplayName(team.team)}
                     </span>
                     <ChevronRight className="w-3.5 h-3.5 text-stone-300 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                     {/* Tooltip on first row */}

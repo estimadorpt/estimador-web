@@ -7,7 +7,7 @@ import type {
   ScenarioStep,
   ScenarioRivalCondition,
 } from "@/types/football";
-import { ligaTeamColors, ligaTeamShortNames } from "@/lib/config/football";
+import { ligaTeamColors, ligaTeamShortNames, teamDisplayName } from "@/lib/config/football";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -82,7 +82,7 @@ function StepRow({
             {ligaTeamShortNames[step.opponent] || step.opponent}
           </span>
           <span className="text-sm text-stone-700 truncate hidden sm:inline">
-            {step.opponent}
+            {teamDisplayName(step.opponent)}
           </span>
           <span className="text-[10px] text-stone-400 shrink-0">({venueLabel})</span>
           <span
@@ -173,12 +173,12 @@ function RivalConditions({
           return (
             <div key={i} className="text-xs text-stone-600">
               <span className="font-medium" style={{ color: rivalColor }}>
-                {rc.rival}
+                {teamDisplayName(rc.rival)}
               </span>
               {" "}
               {labels.dropsPointsVs}{" "}
               <span className="sm:hidden">{ligaTeamShortNames[rc.opponent] || rc.opponent}</span>
-              <span className="hidden sm:inline">{rc.opponent}</span>
+              <span className="hidden sm:inline">{teamDisplayName(rc.opponent)}</span>
               <span className="text-stone-400"> ({labels.matchdayPrefix}{rc.matchday})</span>
             </div>
           );

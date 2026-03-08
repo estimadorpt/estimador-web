@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamColors } from "@/lib/config/football";
+import { ligaTeamColors, teamDisplayName } from "@/lib/config/football";
 import type { PositionProbs, TeamStanding } from "@/types/football";
 
 interface PositionHeatmapProps {
@@ -60,7 +60,7 @@ export function PositionHeatmap({ positionProbs, table, labels }: PositionHeatma
                 <td className="py-1 pr-2 sticky left-0 bg-white z-10">
                   <div className="flex items-center gap-1.5">
                     <div className="w-1 h-4" style={{ backgroundColor: teamColor }} />
-                    <span className="font-medium text-stone-800 whitespace-nowrap">{team}</span>
+                    <span className="font-medium text-stone-800 whitespace-nowrap">{teamDisplayName(team)}</span>
                   </div>
                 </td>
                 {positions.map((_, posIdx) => {

@@ -422,6 +422,11 @@
     "probabilityOverTimeDescription": "How {target} probability has evolved across matchdays.",
     "remainingSchedule": "Remaining schedule",
     "remainingScheduleDescription": "All remaining fixtures with win, draw, and loss probabilities.",
+    "buildYourPath": "Build your scenario",
+    "buildYourPathDescription": "Pick results and see how the probability changes match by match.",
+    "pointsFromPicks": "points from your picks",
+    "expectedPointsFromPicks": "expected points",
+    "yourScenario": "Your scenario",
     "positionDistribution": "Position distribution",
     "positionDistributionDescription": "Probability of finishing in each league position.",
     "win": "Win",
@@ -465,7 +470,7 @@
     "underperforming": "Underperforming",
     "xgAttribution": "xG data: FotMob",
     "magicNumbers": "Magic numbers",
-    "magicNumbersDescription": "Points each team needs to mathematically guarantee each objective.",
+    "magicNumbersDescription": "Points needed to mathematically guarantee each objective, regardless of other results.",
     "magicTitleRace": "Title",
     "magicChampionsLeague": "Champions League",
     "magicEuropaLeague": "Europa League",
@@ -474,7 +479,9 @@
     "magicEliminated": "Eliminated",
     "magicSafe": "Safe",
     "magicRelegated": "Relegated",
-    "magicPtsAbbr": "pts"
+    "magicPtsAbbr": "pts",
+    "magicNeedsOf": "of {available} available",
+    "magicDependsOnOthers": "Depends on others"
   },
   "meta": {
     "defaultTitle": "estimador.pt — Data analysis for Portugal",

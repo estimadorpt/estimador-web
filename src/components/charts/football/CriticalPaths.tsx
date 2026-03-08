@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
+import { ligaTeamColors, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { CriticalPath } from "@/types/football";
 
 interface CriticalPathsProps {
@@ -64,7 +64,7 @@ export function CriticalPaths({ paths, nSims, labels, maxMatchesPerTeam = 5, max
           ) : (
             <div className="w-1.5 h-6" style={{ backgroundColor: teamColor }} />
           )}
-          <span className="font-bold text-stone-900 text-base">{team}</span>
+          <span className="font-bold text-stone-900 text-base">{teamDisplayName(team)}</span>
           <span className="text-sm text-stone-500">
             {probLabel}: <strong className="text-stone-800">{formatPct(path.p_current)}</strong>
           </span>
@@ -74,7 +74,7 @@ export function CriticalPaths({ paths, nSims, labels, maxMatchesPerTeam = 5, max
         <p className="text-xs text-stone-400 italic mb-3 ml-4">
           {(isTitle ? labels.freqFramingTitle : labels.freqFramingSurvival)
             .replace('__NSIMS__', formatNum(nSims))
-            .replace('__TEAM__', team)
+            .replace('__TEAM__', teamDisplayName(team))
             .replace('__COUNT__', formatNum(targetCount))
           }
         </p>
@@ -91,7 +91,7 @@ export function CriticalPaths({ paths, nSims, labels, maxMatchesPerTeam = 5, max
                 {/* Match info */}
                 <div className="flex items-center gap-1 w-28 sm:w-40 shrink-0">
                   <span className="text-xs text-stone-400 tabular-nums w-6">J{m.matchday}</span>
-                  <span className="text-sm font-medium text-stone-800 truncate">{m.opponent}</span>
+                  <span className="text-sm font-medium text-stone-800 truncate">{teamDisplayName(m.opponent)}</span>
                   <span className="text-[10px] text-stone-400 shrink-0">({m.venue === 'H' ? 'C' : 'F'})</span>
                 </div>
 

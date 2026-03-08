@@ -133,6 +133,20 @@ export interface VictoryPath {
   rival_conditions: RivalCondition[];
 }
 
+// Points-to-probability lookup table for interactive path builder
+export interface PointsLookupEntry {
+  p_target: number;
+  n_sims: number;
+}
+
+export interface PointsLookup {
+  team: string;
+  target: 'champion' | 'survival';
+  current_points: number;
+  p_current: number;
+  lookup: Record<string, PointsLookupEntry>;
+}
+
 export interface ScenarioData {
   season: string;
   matchday: number;
@@ -144,6 +158,7 @@ export interface ScenarioData {
   survival_paths?: Record<string, VictoryPath>;
   narrative_scenarios?: Record<string, TeamNarrativeScenarios>;
   next_matchday_scenarios?: NextMatchdayScenarios;
+  points_lookup?: Record<string, PointsLookup>;
 }
 
 // Narrative scenarios: archetype-based paths to victory/survival

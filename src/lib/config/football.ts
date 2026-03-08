@@ -64,6 +64,35 @@ export const ligaTeamSlugs: Record<string, string> = {
   'Alverca': 'alverca',
 };
 
+// Display names: Portuguese-friendly names with proper accents
+// Data keys use ASCII names without accents; this maps to proper display names
+export const ligaDisplayNames: Record<string, string> = {
+  'Porto': 'Porto',
+  'Sporting CP': 'Sporting',
+  'Benfica': 'Benfica',
+  'SC Braga': 'Sp. Braga',
+  'Gil Vicente': 'Gil Vicente',
+  'Famalicao': 'Famalicão',
+  'Moreirense': 'Moreirense',
+  'Estoril': 'Estoril',
+  'Santa Clara': 'Santa Clara',
+  'Vitoria SC': 'Vitória',
+  'Casa Pia': 'Casa Pia',
+  'Rio Ave': 'Rio Ave',
+  'Nacional': 'Nacional',
+  'Arouca': 'Arouca',
+  'Estrela Amadora': 'Estrela',
+  'AVS': 'AVS',
+  'Boavista': 'Boavista',
+  'Tondela': 'Tondela',
+  'Alverca': 'Alverca',
+};
+
+/** Get the Portuguese display name for a team (with accents, abbreviated). */
+export function teamDisplayName(team: string): string {
+  return ligaDisplayNames[team] ?? team;
+}
+
 // Reverse lookup: slug → team name
 export const ligaSlugToTeam: Record<string, string> = Object.fromEntries(
   Object.entries(ligaTeamSlugs).map(([team, slug]) => [slug, team])

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ligaTeamColors, ligaTeamShortNames, teamLogoSrc } from "@/lib/config/football";
+import { ligaTeamColors, ligaTeamShortNames, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { NextMatchdayScenarios } from "@/types/football";
 
 type Outcome = "H" | "D" | "A";
@@ -164,7 +164,7 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
                     {ligaTeamShortNames[match.home_team] || match.home_team}
                   </span>
                   <span className="text-xs font-medium text-stone-700 text-right truncate hidden sm:inline">
-                    {match.home_team}
+                    {teamDisplayName(match.home_team)}
                   </span>
                   {teamLogoSrc(match.home_team) && (
                     <img
@@ -237,7 +237,7 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
                     {ligaTeamShortNames[match.away_team] || match.away_team}
                   </span>
                   <span className="text-xs font-medium text-stone-700 truncate hidden sm:inline">
-                    {match.away_team}
+                    {teamDisplayName(match.away_team)}
                   </span>
                 </div>
               </div>

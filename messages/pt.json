@@ -422,6 +422,11 @@
     "probabilityOverTimeDescription": "Evolução da probabilidade de {target} ao longo das jornadas.",
     "remainingSchedule": "Calendário restante",
     "remainingScheduleDescription": "Todos os jogos restantes com probabilidades de vitória, empate e derrota.",
+    "buildYourPath": "Cria o teu cenário",
+    "buildYourPathDescription": "Escolhe resultados e vê como a probabilidade muda jogo a jogo.",
+    "pointsFromPicks": "pontos das tuas escolhas",
+    "expectedPointsFromPicks": "pontos esperados",
+    "yourScenario": "O teu cenário",
     "positionDistribution": "Distribuição por posição",
     "positionDistributionDescription": "Probabilidade de terminar em cada posição da classificação.",
     "win": "Vitória",
@@ -465,7 +470,7 @@
     "underperforming": "Abaixo do esperado",
     "xgAttribution": "Dados xG: FotMob",
     "magicNumbers": "Números mágicos",
-    "magicNumbersDescription": "Pontos que cada equipa precisa de somar para garantir matematicamente cada objetivo.",
+    "magicNumbersDescription": "Pontos para garantir matematicamente cada objetivo, independentemente dos outros resultados.",
     "magicTitleRace": "Título",
     "magicChampionsLeague": "Champions League",
     "magicEuropaLeague": "Liga Europa",
@@ -474,7 +479,9 @@
     "magicEliminated": "Eliminado",
     "magicSafe": "Salvo",
     "magicRelegated": "Despromovido",
-    "magicPtsAbbr": "pts"
+    "magicPtsAbbr": "pts",
+    "magicNeedsOf": "de {available} disponíveis",
+    "magicDependsOnOthers": "Depende de outros"
   },
   "meta": {
     "defaultTitle": "estimador.pt — Análise de dados para Portugal",

@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
+import { ligaTeamColors, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { VictoryPath, RivalCondition } from "@/types/football";
 
 interface PathsToVictoryProps {
@@ -169,7 +169,7 @@ export function PathsToVictory({ paths, labels }: PathsToVictoryProps) {
               <div>
                 <div className="flex items-baseline gap-2">
                   <span className="font-bold text-stone-900 text-lg">
-                    {team}
+                    {teamDisplayName(team)}
                   </span>
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">
                     {subtitle}
@@ -222,7 +222,7 @@ export function PathsToVictory({ paths, labels }: PathsToVictoryProps) {
                       +
                     </div>
                     <Gate
-                      label={labels.gateMustStumble.replace("__RIVAL__", rival)}
+                      label={labels.gateMustStumble.replace("__RIVAL__", teamDisplayName(rival))}
                       accentColor={rivalColor}
                       matches={rivalMatches}
                     />

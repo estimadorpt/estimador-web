@@ -1,6 +1,6 @@
 "use client";
 
-import { teamLogoSrc } from "@/lib/config/football";
+import { teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { CriticalPathMatch } from "@/types/football";
 
 interface RemainingScheduleProps {
@@ -57,7 +57,7 @@ export function RemainingSchedule({ matches, teamColor, labels }: RemainingSched
                 />
               )}
               <span className="text-sm font-medium text-stone-800 truncate">
-                {m.opponent}
+                {teamDisplayName(m.opponent)}
               </span>
               <span className="text-[10px] text-stone-400 shrink-0">
                 ({m.venue === "H" ? labels.home : labels.away})

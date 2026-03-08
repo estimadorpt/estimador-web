@@ -2,7 +2,7 @@
   "season": "2025-26",
   "matchday": 23,
   "n_sims": 50000,
-  "timestamp": "2026-03-05T14:06:07.958092+00:00",
+  "timestamp": "2026-03-06T15:01:47.448864+00:00",
   "decisive_matches": [
     {
       "home_team": "Tondela",
@@ -7932,5 +7932,963 @@
         }
       }
     ]
+  },
+  "points_lookup": {
+    "Benfica": {
+      "team": "Benfica",
+      "target": "champion",
+      "current_points": 55,
+      "p_current": 0.0155,
+      "lookup": {
+        "12": {
+          "p_target": 0.0,
+          "n_sims": 68
+        },
+        "13": {
+          "p_target": 0.0,
+          "n_sims": 113
+        },
+        "14": {
+          "p_target": 0.0,
+          "n_sims": 255
+        },
+        "15": {
+          "p_target": 0.0,
+          "n_sims": 409
+        },
+        "16": {
+          "p_target": 0.0,
+          "n_sims": 678
+        },
+        "17": {
+          "p_target": 0.0,
+          "n_sims": 1109
+        },
+        "18": {
+          "p_target": 0.0,
+          "n_sims": 1648
+        },
+        "19": {
+          "p_target": 0.0,
+          "n_sims": 2304
+        },
+        "20": {
+          "p_target": 0.0,
+          "n_sims": 3252
+        },
+        "21": {
+          "p_target": 0.0,
+          "n_sims": 3941
+        },
+        "22": {
+          "p_target": 0.0,
+          "n_sims": 4598
+        },
+        "23": {
+          "p_target": 0.0,
+          "n_sims": 5392
+        },
+        "24": {
+          "p_target": 0.0,
+          "n_sims": 5246
+        },
+        "25": {
+          "p_target": 0.0008,
+          "n_sims": 5105
+        },
+        "26": {
+          "p_target": 0.0038,
+          "n_sims": 5031
+        },
+        "27": {
+          "p_target": 0.0102,
+          "n_sims": 3423
+        },
+        "28": {
+          "p_target": 0.0217,
+          "n_sims": 3229
+        },
+        "29": {
+          "p_target": 0.0716,
+          "n_sims": 2025
+        },
+        "30": {
+          "p_target": 0.1112,
+          "n_sims": 845
+        },
+        "31": {
+          "p_target": 0.2519,
+          "n_sims": 1036
+        },
+        "33": {
+          "p_target": 0.6186,
+          "n_sims": 236
+        }
+      }
+    },
+    "Porto": {
+      "team": "Porto",
+      "target": "champion",
+      "current_points": 62,
+      "p_current": 0.6593,
+      "lookup": {
+        "15": {
+          "p_target": 0.0,
+          "n_sims": 66
+        },
+        "16": {
+          "p_target": 0.0,
+          "n_sims": 138
+        },
+        "17": {
+          "p_target": 0.0195,
+          "n_sims": 257
+        },
+        "18": {
+          "p_target": 0.0179,
+          "n_sims": 446
+        },
+        "19": {
+          "p_target": 0.0577,
+          "n_sims": 814
+        },
+        "20": {
+          "p_target": 0.0924,
+          "n_sims": 1288
+        },
+        "21": {
+          "p_target": 0.1379,
+          "n_sims": 1893
+        },
+        "22": {
+          "p_target": 0.2223,
+          "n_sims": 2735
+        },
+        "23": {
+          "p_target": 0.3499,
+          "n_sims": 3690
+        },
+        "24": {
+          "p_target": 0.4636,
+          "n_sims": 4689
+        },
+        "25": {
+          "p_target": 0.6023,
+          "n_sims": 5253
+        },
+        "26": {
+          "p_target": 0.7324,
+          "n_sims": 6260
+        },
+        "27": {
+          "p_target": 0.8057,
+          "n_sims": 5534
+        },
+        "28": {
+          "p_target": 0.9406,
+          "n_sims": 5407
+        },
+        "29": {
+          "p_target": 0.9386,
+          "n_sims": 4996
+        },
+        "30": {
+          "p_target": 1.0,
+          "n_sims": 2036
+        },
+        "31": {
+          "p_target": 1.0,
+          "n_sims": 3407
+        },
+        "33": {
+          "p_target": 1.0,
+          "n_sims": 1028
+        }
+      }
+    },
+    "Sporting CP": {
+      "team": "Sporting CP",
+      "target": "champion",
+      "current_points": 58,
+      "p_current": 0.3252,
+      "lookup": {
+        "17": {
+          "p_target": 0.0,
+          "n_sims": 65
+        },
+        "18": {
+          "p_target": 0.0,
+          "n_sims": 161
+        },
+        "19": {
+          "p_target": 0.0,
+          "n_sims": 302
+        },
+        "20": {
+          "p_target": 0.0057,
+          "n_sims": 523
+        },
+        "21": {
+          "p_target": 0.0055,
+          "n_sims": 904
+        },
+        "22": {
+          "p_target": 0.0124,
+          "n_sims": 1454
+        },
+        "23": {
+          "p_target": 0.0306,
+          "n_sims": 2254
+        },
+        "24": {
+          "p_target": 0.0534,
+          "n_sims": 3054
+        },
+        "25": {
+          "p_target": 0.0905,
+          "n_sims": 3989
+        },
+        "26": {
+          "p_target": 0.1476,
+          "n_sims": 5359
+        },
+        "27": {
+          "p_target": 0.2167,
+          "n_sims": 5423
+        },
+        "28": {
+          "p_target": 0.3108,
+          "n_sims": 6904
+        },
+        "29": {
+          "p_target": 0.4274,
+          "n_sims": 6284
+        },
+        "30": {
+          "p_target": 0.5389,
+          "n_sims": 3711
+        },
+        "31": {
+          "p_target": 0.6557,
+          "n_sims": 6596
+        },
+        "33": {
+          "p_target": 0.8535,
+          "n_sims": 2949
+        }
+      }
+    },
+    "AVS": {
+      "team": "AVS",
+      "target": "survival",
+      "current_points": 8,
+      "p_current": 0.0011,
+      "lookup": {
+        "0": {
+          "p_target": 0.0,
+          "n_sims": 416
+        },
+        "1": {
+          "p_target": 0.0,
+          "n_sims": 1285
+        },
+        "2": {
+          "p_target": 0.0,
+          "n_sims": 1972
+        },
+        "3": {
+          "p_target": 0.0,
+          "n_sims": 2913
+        },
+        "4": {
+          "p_target": 0.0,
+          "n_sims": 4451
+        },
+        "5": {
+          "p_target": 0.0,
+          "n_sims": 4809
+        },
+        "6": {
+          "p_target": 0.0,
+          "n_sims": 5144
+        },
+        "7": {
+          "p_target": 0.0,
+          "n_sims": 5613
+        },
+        "8": {
+          "p_target": 0.0,
+          "n_sims": 5150
+        },
+        "9": {
+          "p_target": 0.0,
+          "n_sims": 4309
+        },
+        "10": {
+          "p_target": 0.0,
+          "n_sims": 4049
+        },
+        "11": {
+          "p_target": 0.0,
+          "n_sims": 3032
+        },
+        "12": {
+          "p_target": 0.0,
+          "n_sims": 2209
+        },
+        "13": {
+          "p_target": 0.0,
+          "n_sims": 1777
+        },
+        "14": {
+          "p_target": 0.0,
+          "n_sims": 1125
+        },
+        "15": {
+          "p_target": 0.0,
+          "n_sims": 661
+        },
+        "16": {
+          "p_target": 0.002,
+          "n_sims": 504
+        },
+        "17": {
+          "p_target": 0.0102,
+          "n_sims": 295
+        },
+        "18": {
+          "p_target": 0.0153,
+          "n_sims": 131
+        },
+        "19": {
+          "p_target": 0.1282,
+          "n_sims": 78
+        }
+      }
+    },
+    "Casa Pia": {
+      "team": "Casa Pia",
+      "target": "survival",
+      "current_points": 22,
+      "p_current": 0.8812,
+      "lookup": {
+        "1": {
+          "p_target": 0.0088,
+          "n_sims": 114
+        },
+        "2": {
+          "p_target": 0.0438,
+          "n_sims": 297
+        },
+        "3": {
+          "p_target": 0.0788,
+          "n_sims": 495
+        },
+        "4": {
+          "p_target": 0.1682,
+          "n_sims": 999
+        },
+        "5": {
+          "p_target": 0.3239,
+          "n_sims": 1596
+        },
+        "6": {
+          "p_target": 0.514,
+          "n_sims": 2222
+        },
+        "7": {
+          "p_target": 0.6797,
+          "n_sims": 2988
+        },
+        "8": {
+          "p_target": 0.8182,
+          "n_sims": 3774
+        },
+        "9": {
+          "p_target": 0.9277,
+          "n_sims": 4204
+        },
+        "10": {
+          "p_target": 0.9781,
+          "n_sims": 4743
+        },
+        "11": {
+          "p_target": 0.9967,
+          "n_sims": 4853
+        },
+        "12": {
+          "p_target": 0.9991,
+          "n_sims": 4522
+        },
+        "13": {
+          "p_target": 0.9995,
+          "n_sims": 4293
+        },
+        "14": {
+          "p_target": 1.0,
+          "n_sims": 3871
+        },
+        "15": {
+          "p_target": 1.0,
+          "n_sims": 2995
+        },
+        "16": {
+          "p_target": 1.0,
+          "n_sims": 2422
+        },
+        "17": {
+          "p_target": 1.0,
+          "n_sims": 1900
+        },
+        "18": {
+          "p_target": 1.0,
+          "n_sims": 1283
+        },
+        "19": {
+          "p_target": 1.0,
+          "n_sims": 981
+        },
+        "20": {
+          "p_target": 1.0,
+          "n_sims": 610
+        },
+        "21": {
+          "p_target": 1.0,
+          "n_sims": 360
+        },
+        "22": {
+          "p_target": 1.0,
+          "n_sims": 231
+        },
+        "23": {
+          "p_target": 1.0,
+          "n_sims": 111
+        }
+      }
+    },
+    "Estrela Amadora": {
+      "team": "Estrela Amadora",
+      "target": "survival",
+      "current_points": 23,
+      "p_current": 0.8778,
+      "lookup": {
+        "0": {
+          "p_target": 0.0405,
+          "n_sims": 74
+        },
+        "1": {
+          "p_target": 0.0608,
+          "n_sims": 296
+        },
+        "2": {
+          "p_target": 0.1254,
+          "n_sims": 630
+        },
+        "3": {
+          "p_target": 0.2463,
+          "n_sims": 1015
+        },
+        "4": {
+          "p_target": 0.3762,
+          "n_sims": 1858
+        },
+        "5": {
+          "p_target": 0.5544,
+          "n_sims": 2722
+        },
+        "6": {
+          "p_target": 0.7095,
+          "n_sims": 3301
+        },
+        "7": {
+          "p_target": 0.8454,
+          "n_sims": 4296
+        },
+        "8": {
+          "p_target": 0.9339,
+          "n_sims": 4855
+        },
+        "9": {
+          "p_target": 0.9794,
+          "n_sims": 4808
+        },
+        "10": {
+          "p_target": 0.9949,
+          "n_sims": 5065
+        },
+        "11": {
+          "p_target": 0.9994,
+          "n_sims": 4718
+        },
+        "12": {
+          "p_target": 1.0,
+          "n_sims": 3905
+        },
+        "13": {
+          "p_target": 1.0,
+          "n_sims": 3491
+        },
+        "14": {
+          "p_target": 1.0,
+          "n_sims": 2737
+        },
+        "15": {
+          "p_target": 1.0,
+          "n_sims": 1969
+        },
+        "16": {
+          "p_target": 1.0,
+          "n_sims": 1611
+        },
+        "17": {
+          "p_target": 1.0,
+          "n_sims": 1078
+        },
+        "18": {
+          "p_target": 1.0,
+          "n_sims": 604
+        },
+        "19": {
+          "p_target": 1.0,
+          "n_sims": 452
+        },
+        "20": {
+          "p_target": 1.0,
+          "n_sims": 244
+        },
+        "21": {
+          "p_target": 1.0,
+          "n_sims": 127
+        },
+        "22": {
+          "p_target": 1.0,
+          "n_sims": 94
+        }
+      }
+    },
+    "Nacional": {
+      "team": "Nacional",
+      "target": "survival",
+      "current_points": 21,
+      "p_current": 0.9474,
+      "lookup": {
+        "2": {
+          "p_target": 0.04,
+          "n_sims": 50
+        },
+        "3": {
+          "p_target": 0.0629,
+          "n_sims": 143
+        },
+        "4": {
+          "p_target": 0.0897,
+          "n_sims": 234
+        },
+        "5": {
+          "p_target": 0.2485,
+          "n_sims": 515
+        },
+        "6": {
+          "p_target": 0.452,
+          "n_sims": 843
+        },
+        "7": {
+          "p_target": 0.6061,
+          "n_sims": 1338
+        },
+        "8": {
+          "p_target": 0.7842,
+          "n_sims": 1918
+        },
+        "9": {
+          "p_target": 0.8978,
+          "n_sims": 2544
+        },
+        "10": {
+          "p_target": 0.9646,
+          "n_sims": 3420
+        },
+        "11": {
+          "p_target": 0.9923,
+          "n_sims": 3877
+        },
+        "12": {
+          "p_target": 0.9979,
+          "n_sims": 4291
+        },
+        "13": {
+          "p_target": 0.9996,
+          "n_sims": 4573
+        },
+        "14": {
+          "p_target": 1.0,
+          "n_sims": 4691
+        },
+        "15": {
+          "p_target": 1.0,
+          "n_sims": 4326
+        },
+        "16": {
+          "p_target": 1.0,
+          "n_sims": 4040
+        },
+        "17": {
+          "p_target": 1.0,
+          "n_sims": 3564
+        },
+        "18": {
+          "p_target": 1.0,
+          "n_sims": 2761
+        },
+        "19": {
+          "p_target": 1.0,
+          "n_sims": 2351
+        },
+        "20": {
+          "p_target": 1.0,
+          "n_sims": 1614
+        },
+        "21": {
+          "p_target": 1.0,
+          "n_sims": 1035
+        },
+        "22": {
+          "p_target": 1.0,
+          "n_sims": 822
+        },
+        "23": {
+          "p_target": 1.0,
+          "n_sims": 471
+        },
+        "24": {
+          "p_target": 1.0,
+          "n_sims": 255
+        },
+        "25": {
+          "p_target": 1.0,
+          "n_sims": 164
+        },
+        "26": {
+          "p_target": 1.0,
+          "n_sims": 72
+        }
+      }
+    },
+    "Rio Ave": {
+      "team": "Rio Ave",
+      "target": "survival",
+      "current_points": 20,
+      "p_current": 0.8544,
+      "lookup": {
+        "2": {
+          "p_target": 0.0,
+          "n_sims": 85
+        },
+        "3": {
+          "p_target": 0.0338,
+          "n_sims": 207
+        },
+        "4": {
+          "p_target": 0.0411,
+          "n_sims": 462
+        },
+        "5": {
+          "p_target": 0.0873,
+          "n_sims": 825
+        },
+        "6": {
+          "p_target": 0.1702,
+          "n_sims": 1275
+        },
+        "7": {
+          "p_target": 0.3381,
+          "n_sims": 1878
+        },
+        "8": {
+          "p_target": 0.4771,
+          "n_sims": 2576
+        },
+        "9": {
+          "p_target": 0.6643,
+          "n_sims": 2967
+        },
+        "10": {
+          "p_target": 0.8261,
+          "n_sims": 3766
+        },
+        "11": {
+          "p_target": 0.9263,
+          "n_sims": 4385
+        },
+        "12": {
+          "p_target": 0.9746,
+          "n_sims": 4496
+        },
+        "13": {
+          "p_target": 0.9964,
+          "n_sims": 4662
+        },
+        "14": {
+          "p_target": 0.9991,
+          "n_sims": 4448
+        },
+        "15": {
+          "p_target": 1.0,
+          "n_sims": 3846
+        },
+        "16": {
+          "p_target": 1.0,
+          "n_sims": 3627
+        },
+        "17": {
+          "p_target": 1.0,
+          "n_sims": 2945
+        },
+        "18": {
+          "p_target": 1.0,
+          "n_sims": 2255
+        },
+        "19": {
+          "p_target": 1.0,
+          "n_sims": 1797
+        },
+        "20": {
+          "p_target": 1.0,
+          "n_sims": 1347
+        },
+        "21": {
+          "p_target": 1.0,
+          "n_sims": 807
+        },
+        "22": {
+          "p_target": 1.0,
+          "n_sims": 554
+        },
+        "23": {
+          "p_target": 1.0,
+          "n_sims": 328
+        },
+        "24": {
+          "p_target": 1.0,
+          "n_sims": 172
+        },
+        "25": {
+          "p_target": 1.0,
+          "n_sims": 137
+        },
+        "26": {
+          "p_target": 1.0,
+          "n_sims": 53
+        }
+      }
+    },
+    "Santa Clara": {
+      "team": "Santa Clara",
+      "target": "survival",
+      "current_points": 18,
+      "p_current": 0.8237,
+      "lookup": {
+        "2": {
+          "p_target": 0.0,
+          "n_sims": 56
+        },
+        "3": {
+          "p_target": 0.0,
+          "n_sims": 95
+        },
+        "4": {
+          "p_target": 0.0039,
+          "n_sims": 254
+        },
+        "5": {
+          "p_target": 0.0396,
+          "n_sims": 454
+        },
+        "6": {
+          "p_target": 0.0599,
+          "n_sims": 818
+        },
+        "7": {
+          "p_target": 0.1534,
+          "n_sims": 1284
+        },
+        "8": {
+          "p_target": 0.251,
+          "n_sims": 1936
+        },
+        "9": {
+          "p_target": 0.4136,
+          "n_sims": 2534
+        },
+        "10": {
+          "p_target": 0.5691,
+          "n_sims": 3189
+        },
+        "11": {
+          "p_target": 0.7465,
+          "n_sims": 3898
+        },
+        "12": {
+          "p_target": 0.8742,
+          "n_sims": 4245
+        },
+        "13": {
+          "p_target": 0.9571,
+          "n_sims": 4683
+        },
+        "14": {
+          "p_target": 0.988,
+          "n_sims": 4822
+        },
+        "15": {
+          "p_target": 0.9978,
+          "n_sims": 4473
+        },
+        "16": {
+          "p_target": 1.0,
+          "n_sims": 4007
+        },
+        "17": {
+          "p_target": 1.0,
+          "n_sims": 3684
+        },
+        "18": {
+          "p_target": 1.0,
+          "n_sims": 2807
+        },
+        "19": {
+          "p_target": 1.0,
+          "n_sims": 2288
+        },
+        "20": {
+          "p_target": 1.0,
+          "n_sims": 1702
+        },
+        "21": {
+          "p_target": 1.0,
+          "n_sims": 1040
+        },
+        "22": {
+          "p_target": 1.0,
+          "n_sims": 771
+        },
+        "23": {
+          "p_target": 1.0,
+          "n_sims": 434
+        },
+        "24": {
+          "p_target": 1.0,
+          "n_sims": 245
+        },
+        "25": {
+          "p_target": 1.0,
+          "n_sims": 165
+        }
+      }
+    },
+    "Tondela": {
+      "team": "Tondela",
+      "target": "survival",
+      "current_points": 18,
+      "p_current": 0.6492,
+      "lookup": {
+        "1": {
+          "p_target": 0.0,
+          "n_sims": 59
+        },
+        "2": {
+          "p_target": 0.0,
+          "n_sims": 166
+        },
+        "3": {
+          "p_target": 0.0,
+          "n_sims": 309
+        },
+        "4": {
+          "p_target": 0.0028,
+          "n_sims": 707
+        },
+        "5": {
+          "p_target": 0.0113,
+          "n_sims": 1147
+        },
+        "6": {
+          "p_target": 0.0301,
+          "n_sims": 1692
+        },
+        "7": {
+          "p_target": 0.0593,
+          "n_sims": 2395
+        },
+        "8": {
+          "p_target": 0.1486,
+          "n_sims": 3088
+        },
+        "9": {
+          "p_target": 0.2737,
+          "n_sims": 3792
+        },
+        "10": {
+          "p_target": 0.4362,
+          "n_sims": 4450
+        },
+        "11": {
+          "p_target": 0.6269,
+          "n_sims": 4894
+        },
+        "12": {
+          "p_target": 0.7895,
+          "n_sims": 4689
+        },
+        "13": {
+          "p_target": 0.916,
+          "n_sims": 4584
+        },
+        "14": {
+          "p_target": 0.9673,
+          "n_sims": 4279
+        },
+        "15": {
+          "p_target": 0.992,
+          "n_sims": 3489
+        },
+        "16": {
+          "p_target": 0.9985,
+          "n_sims": 3230
+        },
+        "17": {
+          "p_target": 1.0,
+          "n_sims": 2417
+        },
+        "18": {
+          "p_target": 1.0,
+          "n_sims": 1592
+        },
+        "19": {
+          "p_target": 1.0,
+          "n_sims": 1194
+        },
+        "20": {
+          "p_target": 1.0,
+          "n_sims": 754
+        },
+        "21": {
+          "p_target": 1.0,
+          "n_sims": 468
+        },
+        "22": {
+          "p_target": 1.0,
+          "n_sims": 306
+        },
+        "23": {
+          "p_target": 1.0,
+          "n_sims": 152
+        },
+        "24": {
+          "p_target": 1.0,
+          "n_sims": 73
+        }
+      }
+    }
   }
 }

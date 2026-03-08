@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamShortNames, teamLogoSrc } from "@/lib/config/football";
+import { ligaTeamShortNames, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { TeamStrength } from "@/types/football";
 
 interface TeamStrengthRatingsProps {
@@ -70,7 +70,7 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
                   {ligaTeamShortNames[entry.team] || entry.team}
                 </span>
                 <span className="text-xs font-medium text-stone-700 truncate hidden sm:inline">
-                  {entry.team}
+                  {teamDisplayName(entry.team)}
                 </span>
               </div>
 

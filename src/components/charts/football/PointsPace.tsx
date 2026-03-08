@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamColors, ligaTeamShortNames, teamLogoSrc } from "@/lib/config/football";
+import { ligaTeamColors, ligaTeamShortNames, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 
 export interface PointsPaceEntry {
   team: string;
@@ -38,7 +38,7 @@ function PaceBar({ entry, threshold, thresholdLabel, teamColor }: PointsPaceProp
           {ligaTeamShortNames[entry.team] || entry.team}
         </span>
         <span className="text-xs font-medium text-stone-700 truncate hidden sm:inline">
-          {entry.team}
+          {teamDisplayName(entry.team)}
         </span>
       </div>
       <div className="flex-1 h-5 bg-stone-100 relative">

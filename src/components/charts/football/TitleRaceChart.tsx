@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { ligaTeamColors } from "@/lib/config/football";
+import { ligaTeamColors, teamDisplayName } from "@/lib/config/football";
 import type { LigaHistorical } from "@/types/football";
 
 interface TitleRaceChartProps {
@@ -115,7 +115,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
             {
               x: "matchday",
               y: "adjustedY",
-              text: (d: { team: string; p_champion: number }) => `${d.team} ${Math.round(d.p_champion)}%`,
+              text: (d: { team: string; p_champion: number }) => `${teamDisplayName(d.team)} ${Math.round(d.p_champion)}%`,
               textAnchor: "start",
               dx: 6,
               fill: "team",

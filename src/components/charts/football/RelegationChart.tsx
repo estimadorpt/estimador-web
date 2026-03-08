@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { ligaTeamColors } from "@/lib/config/football";
+import { ligaTeamColors, teamDisplayName } from "@/lib/config/football";
 import type { LigaHistorical } from "@/types/football";
 
 interface RelegationChartProps {
@@ -117,7 +117,7 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)" }: R
             {
               x: "matchday",
               y: "adjustedY",
-              text: (d: { team: string; p_relegation: number }) => `${d.team} ${Math.round(d.p_relegation)}%`,
+              text: (d: { team: string; p_relegation: number }) => `${teamDisplayName(d.team)} ${Math.round(d.p_relegation)}%`,
               textAnchor: "start",
               dx: 6,
               fill: "team",

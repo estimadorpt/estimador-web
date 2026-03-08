@@ -4,12 +4,14 @@ import {
   ligaTeamSlugs,
   ligaSlugToTeam,
   teamLogoSrc,
+  teamDisplayName,
 } from "@/lib/config/football";
 import { Header } from "@/components/Header";
 import { NarrativeScenarios } from "@/components/charts/football/NarrativeScenarios";
 import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
 import { TeamTimeline } from "@/components/charts/football/TeamTimeline";
 import { RemainingSchedule } from "@/components/charts/football/RemainingSchedule";
+import { PathBuilder } from "@/components/charts/football/PathBuilder";
 import { PositionDistribution } from "@/components/charts/football/PositionDistribution";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
@@ -44,9 +46,9 @@ export async function generateMetadata({
   const { prediction } = await loadLigaData();
 
   return {
-    title: t("football.teamPageTitle", { team: teamName }),
+    title: t("football.teamPageTitle", { team: teamDisplayName(teamName) }),
     description: t("football.teamPageDescription", {
-      team: teamName,
+      team: teamDisplayName(teamName),
       season: prediction?.season ?? "",
     }),
     alternates: {
@@ -236,7 +238,7 @@ export default async function TeamDetailPage({
               />
             )}
             <h1 className="text-3xl md:text-4xl font-bold text-white">
-              {teamName}
+              {teamDisplayName(teamName)}
             </h1>
           </div>
           <p className="text-white/60 text-sm">
@@ -335,17 +337,20 @@ export default async function TeamDetailPage({
             {/* Magic Numbers */}
             {magicNumbers.length > 0 && (
               <div className="mt-4 pt-4 border-t border-stone-100">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-2">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
                   {t("football.magicNumbers")}
+                </div>
+                <div className="text-[11px] text-stone-400 mb-2">
+                  {t("football.magicNumbersDescription")}
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {magicNumbers.map(mn => {
                     const impossible = mn.pointsNeeded > mn.maxRemaining;
                     return (
-                      <div key={mn.label} className="flex items-center gap-2 bg-stone-50 border border-stone-200 px-3 py-2">
-                        <span className="text-xs text-stone-500">
+                      <div key={mn.label} className="bg-stone-50 border border-stone-200 px-3 py-2 min-w-[120px]">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                           {t(`football.${mn.label}`)}
-                        </span>
+                        </div>
                         {mn.clinched ? (
                           <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5">
                             {t("football.magicClinched")}
@@ -354,17 +359,22 @@ export default async function TeamDetailPage({
                           <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5">
                             {t("football.magicEliminated")}
                           </span>
-                        ) : (
-                          <span className={`text-sm font-black tabular-nums ${impossible ? "text-stone-400" : ""}`}
-                            style={impossible ? {} : { color: teamColor }}>
-                            {mn.pointsNeeded}
-                            <span className="text-[10px] text-stone-400 font-normal ml-0.5">
-                              {t("football.magicPtsAbbr")}
-                            </span>
-                            <span className="text-[10px] text-stone-400 font-normal ml-1">
-                              / {mn.maxRemaining}
-                            </span>
+                        ) : impossible ? (
+                          <span className="text-xs font-medium text-amber-700 bg-amber-50 px-1.5 py-0.5">
+                            {t("football.magicDependsOnOthers")}
                           </span>
+                        ) : (
+                          <div>
+                            <span className="text-lg font-black tabular-nums" style={{ color: teamColor }}>
+                              {mn.pointsNeeded}
+                              <span className="text-xs text-stone-400 font-normal ml-0.5">
+                                {t("football.magicPtsAbbr")}
+                              </span>
+                            </span>
+                            <div className="text-[10px] text-stone-400 mt-0.5">
+                              {t("football.magicNeedsOf", { needed: mn.pointsNeeded, available: mn.maxRemaining })}
+                            </div>
+                          </div>
                         )}
                       </div>
                     );
@@ -456,28 +466,62 @@ export default async function TeamDetailPage({
         </section>
       )}
 
-      {/* Remaining schedule */}
+      {/* Build Your Path / Remaining schedule */}
       {remainingMatches && remainingMatches.length > 0 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
-              {t("football.remainingSchedule")}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.remainingScheduleDescription")}
-            </p>
-            <RemainingSchedule
-              matches={remainingMatches}
-              teamColor={teamColor}
-              labels={{
-                matchdayAbbr: t("football.matchdayAbbr"),
-                win: t("football.win"),
-                draw: t("football.draw"),
-                loss: t("football.loss"),
-                home: t("football.homeAbbr"),
-                away: t("football.awayAbbr"),
-              }}
-            />
+            {scenarios?.critical_paths?.[teamName] ? (
+              <>
+                <h2 className="text-xl font-bold tracking-tight mb-1">
+                  {t("football.buildYourPath")}
+                </h2>
+                <p className="text-sm text-stone-500 mb-6">
+                  {t("football.buildYourPathDescription")}
+                </p>
+                <PathBuilder
+                  matches={remainingMatches}
+                  pCurrent={scenarios.critical_paths[teamName].p_current}
+                  target={scenarios.critical_paths[teamName].target}
+                  teamColor={teamColor}
+                  pointsLookup={scenarios.points_lookup?.[teamName]?.lookup}
+                  labels={{
+                    matchdayAbbr: t("football.matchdayAbbr"),
+                    win: t("football.win"),
+                    draw: t("football.draw"),
+                    loss: t("football.loss"),
+                    home: t("football.homeAbbr"),
+                    away: t("football.awayAbbr"),
+                    resetAll: t("football.resetAll"),
+                    pointsFromPicks: t("football.pointsFromPicks"),
+                    expectedPoints: t("football.expectedPointsFromPicks"),
+                    yourScenario: t("football.yourScenario"),
+                    championship: t("football.championship"),
+                    survival: t("football.survival"),
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold tracking-tight mb-1">
+                  {t("football.remainingSchedule")}
+                </h2>
+                <p className="text-sm text-stone-500 mb-6">
+                  {t("football.remainingScheduleDescription")}
+                </p>
+                <RemainingSchedule
+                  matches={remainingMatches}
+                  teamColor={teamColor}
+                  labels={{
+                    matchdayAbbr: t("football.matchdayAbbr"),
+                    win: t("football.win"),
+                    draw: t("football.draw"),
+                    loss: t("football.loss"),
+                    home: t("football.homeAbbr"),
+                    away: t("football.awayAbbr"),
+                  }}
+                />
+              </>
+            )}
           </div>
         </section>
       )}

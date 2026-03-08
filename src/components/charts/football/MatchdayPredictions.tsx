@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamColors } from "@/lib/config/football";
+import { ligaTeamColors, teamDisplayName } from "@/lib/config/football";
 import type { DecisiveMatch, MatchPrediction } from "@/types/football";
 
 interface MatchdayPredictionsProps {
@@ -100,11 +100,11 @@ export function MatchdayPredictions({ matches, matchday, labels, decisiveMatches
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <div className="w-1 h-4" style={{ backgroundColor: homeColor }} />
-                <span className="text-sm font-medium text-stone-900">{match.home}</span>
+                <span className="text-sm font-medium text-stone-900">{teamDisplayName(match.home)}</span>
               </div>
               <span className="text-xs text-stone-400 px-2">vs</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-stone-900">{match.away}</span>
+                <span className="text-sm font-medium text-stone-900">{teamDisplayName(match.away)}</span>
                 <div className="w-1 h-4" style={{ backgroundColor: awayColor }} />
               </div>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
+import { ligaTeamColors, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { DecisiveMatch } from "@/types/football";
 
 interface DecisiveMatchesProps {
@@ -57,9 +57,9 @@ function MatchRow({ match, affectedTeam, baseline, probs, labels, isTitle }: Mat
       {/* Match: home vs away · matchday */}
       <div className="flex items-center gap-1.5 shrink-0">
         <div className="w-1 h-3.5" style={{ backgroundColor: homeColor }} />
-        <span className="text-sm font-medium text-stone-800">{match.home_team}</span>
+        <span className="text-sm font-medium text-stone-800">{teamDisplayName(match.home_team)}</span>
         <span className="text-xs text-stone-400">vs</span>
-        <span className="text-sm font-medium text-stone-800">{match.away_team}</span>
+        <span className="text-sm font-medium text-stone-800">{teamDisplayName(match.away_team)}</span>
         <div className="w-1 h-3.5" style={{ backgroundColor: awayColor }} />
         <span className="text-xs text-stone-400 ml-1">J{match.matchday}</span>
       </div>
@@ -113,7 +113,7 @@ function TeamSection({
         ) : (
           <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: teamColor }} />
         )}
-        <span className="font-semibold text-stone-800 text-sm">{team}</span>
+        <span className="font-semibold text-stone-800 text-sm">{teamDisplayName(team)}</span>
       </div>
       {teamMatches.map((match, i) => (
         <MatchRow
