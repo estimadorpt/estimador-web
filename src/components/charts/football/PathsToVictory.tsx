@@ -16,11 +16,15 @@ interface PathsToVictoryProps {
     gateWinEverything: string; // "Vencer tudo"
     gateMustStumble: string; // "__RIVAL__ tem de tropeçar"
     and: string; // "e"
+    matchdayPrefix?: string; // "J" (PT) or "GW" (EN)
+    homeAbbr?: string; // "C" (PT) or "H" (EN)
+    awayAbbr?: string; // "F" (PT) or "A" (EN)
   };
+  locale?: string;
 }
 
-function formatNum(n: number): string {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+function formatNum(n: number, locale?: string): string {
+  return n.toLocaleString(locale === "en" ? "en-US" : "pt-PT");
 }
 
 function formatPct(value: number): string {
@@ -84,7 +88,7 @@ function getKeyMatches(path: VictoryPath): { opponent: string; venue: string; ma
     .sort((a, b) => a.matchday - b.matchday)
     .map(s => ({
       opponent: s.opponent,
-      venue: s.venue === "H" ? "C" : "F",
+      venue: s.venue,
       matchday: s.matchday,
     }));
 }
@@ -95,12 +99,18 @@ function Gate({
   accentColor,
   matches,
   isUrgent,
+  mdPrefix = "J",
+  homeAbbr = "H",
+  awayAbbr = "A",
 }: {
   label: string;
   detail?: string;
   accentColor: string;
   matches?: { opponent: string; venue: string; matchday: number }[];
   isUrgent?: boolean;
+  mdPrefix?: string;
+  homeAbbr?: string;
+  awayAbbr?: string;
 }) {
   return (
     <div
@@ -119,8 +129,8 @@ function Gate({
         <div className="mt-2 space-y-0.5">
           {matches.map((m, i) => (
             <div key={i} className="text-[11px] text-stone-600">
-              <span className="text-stone-400">J{m.matchday}</span>{" "}
-              {m.opponent}{m.venue ? ` (${m.venue})` : ""}
+              <span className="text-stone-400">{mdPrefix}{m.matchday}</span>{" "}
+              {teamDisplayName(m.opponent)}{m.venue ? ` (${m.venue === "H" ? homeAbbr : awayAbbr})` : ""}
             </div>
           ))}
         </div>
@@ -129,7 +139,7 @@ function Gate({
   );
 }
 
-export function PathsToVictory({ paths, labels }: PathsToVictoryProps) {
+export function PathsToVictory({ paths, labels, locale }: PathsToVictoryProps) {
   if (!paths || Object.keys(paths).length === 0) return null;
 
   const teams = Object.entries(paths).sort(
@@ -184,8 +194,8 @@ export function PathsToVictory({ paths, labels }: PathsToVictoryProps) {
                   </span>
                   <span className="text-xs text-stone-400">
                     {labels.freqFrame
-                      .replace("__COUNT__", formatNum(path.n_target))
-                      .replace("__NSIMS__", formatNum(path.n_sims))}
+                      .replace("__COUNT__", formatNum(path.n_target, locale))
+                      .replace("__NSIMS__", formatNum(path.n_sims, locale))}
                   </span>
                 </div>
               </div>
@@ -204,6 +214,9 @@ export function PathsToVictory({ paths, labels }: PathsToVictoryProps) {
                 accentColor={teamColor}
                 matches={keyMatches.length > 0 ? keyMatches : undefined}
                 isUrgent={mustWinCount >= 4}
+                mdPrefix={labels.matchdayPrefix}
+                homeAbbr={labels.homeAbbr}
+                awayAbbr={labels.awayAbbr}
               />
 
               {/* Rival gates — one per rival */}
@@ -225,6 +238,9 @@ export function PathsToVictory({ paths, labels }: PathsToVictoryProps) {
                       label={labels.gateMustStumble.replace("__RIVAL__", teamDisplayName(rival))}
                       accentColor={rivalColor}
                       matches={rivalMatches}
+                      mdPrefix={labels.matchdayPrefix}
+                      homeAbbr={labels.homeAbbr}
+                      awayAbbr={labels.awayAbbr}
                     />
                   </div>
                 );

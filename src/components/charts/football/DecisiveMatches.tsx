@@ -17,6 +17,7 @@ interface DecisiveMatchesProps {
     relegationProb?: string;
     titleRaceSection?: string;
     relegationSection?: string;
+    matchdayPrefix?: string;
   };
   maxItemsPerTeam?: number;
 }
@@ -61,7 +62,7 @@ function MatchRow({ match, affectedTeam, baseline, probs, labels, isTitle }: Mat
         <span className="text-xs text-stone-400">vs</span>
         <span className="text-sm font-medium text-stone-800">{teamDisplayName(match.away_team)}</span>
         <div className="w-1 h-3.5" style={{ backgroundColor: awayColor }} />
-        <span className="text-xs text-stone-400 ml-1">J{match.matchday}</span>
+        <span className="text-xs text-stone-400 ml-1">{labels.matchdayPrefix ?? "J"}{match.matchday}</span>
       </div>
 
       {/* Separator */}

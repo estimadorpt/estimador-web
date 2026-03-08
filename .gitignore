@@ -40,3 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 dist/
+
+# playwright MCP
+.playwright-mcp/
+
+# review screenshots
+*.png
+snapshot-*.md

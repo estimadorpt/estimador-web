@@ -1,4 +1,4 @@
-import { loadLigaData, loadLigaHistorical } from "@/lib/utils/football-data-loader";
+import { loadLigaWithDeltas, loadLigaHistorical } from "@/lib/utils/football-data-loader";
 import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import { Header } from "@/components/Header";
 import { LeagueTable } from "@/components/charts/football/LeagueTable";
@@ -49,8 +49,8 @@ export default async function LigaPage({
   const { locale } = await params;
   const t = await getTranslations({ locale });
 
-  const [{ prediction, scenarios }, historical] = await Promise.all([
-    loadLigaData(),
+  const [{ prediction, scenarios, deltas }, historical] = await Promise.all([
+    loadLigaWithDeltas(),
     loadLigaHistorical(),
   ]);
 
@@ -109,6 +109,7 @@ export default async function LigaPage({
   const leader = prediction.table[0];
   const second = prediction.table[1];
   const third = prediction.table[2];
+  const matchdayComplete = !prediction.matches_remaining?.length;
   const updatedDate = new Date(prediction.timestamp).toLocaleDateString(
     locale === "pt" ? "pt-PT" : "en-US",
     { day: "numeric", month: "long", year: "numeric" }
@@ -146,6 +147,8 @@ export default async function LigaPage({
             {[leader, second, third].map((team) => {
               const teamColor = ligaTeamColors[team.team] || "#78716c";
               const teamSlug = ligaTeamSlugs[team.team];
+              const delta = deltas?.[team.team]?.p_champion_delta;
+              const showDelta = delta !== undefined && Math.abs(delta) >= 1;
               return (
                 <div key={team.team} className="border-t-2 pt-3" style={{ borderColor: teamColor }}>
                   <div className="flex items-center gap-1.5 mb-1">
@@ -156,9 +159,16 @@ export default async function LigaPage({
                       {team.team}
                     </span>
                   </div>
-                  <div className="text-4xl md:text-5xl font-black tabular-nums text-stone-900">
-                    {Math.round(team.p_champion * 100)}
-                    <span className="text-xl md:text-2xl font-bold text-stone-400">%</span>
+                  <div className="flex items-baseline gap-2">
+                    <div className="text-4xl md:text-5xl font-black tabular-nums text-stone-900">
+                      {Math.round(team.p_champion * 100)}
+                      <span className="text-xl md:text-2xl font-bold text-stone-400">%</span>
+                    </div>
+                    {showDelta && (
+                      <span className={`text-sm font-semibold tabular-nums ${delta! > 0 ? "text-emerald-600" : "text-red-500"}`}>
+                        {delta! > 0 ? "\u25B2" : "\u25BC"}{Math.abs(Math.round(delta!))}
+                      </span>
+                    )}
                   </div>
                   {teamSlug && (
                     <Link
@@ -177,6 +187,8 @@ export default async function LigaPage({
         </div>
       </section>
 
+      {/* MatchdayLive section removed — deltas shown inline on cards + table */}
+
       {/* League Table */}
       <section className="border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 py-10">
@@ -191,6 +203,7 @@ export default async function LigaPage({
           <LeagueTable
             data={prediction.table}
             actualStandings={prediction.actual_standings}
+            deltas={prediction.matchday_results?.length ? deltas : undefined}
             labels={{
               team: t("football.team"),
               meanPoints: t("football.meanPoints"),
@@ -245,8 +258,8 @@ export default async function LigaPage({
         </div>
       </section>
 
-      {/* Simulator CTA */}
-      {scenarios?.next_matchday_scenarios && (
+      {/* Simulator CTA — only when current matchday is complete */}
+      {matchdayComplete && scenarios?.next_matchday_scenarios && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-6">
             <Link
@@ -294,35 +307,37 @@ export default async function LigaPage({
         </section>
       )}
 
-      {/* Next Matchday */}
-      <section className="border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 py-10">
-          <h2 className="text-xl font-bold tracking-tight mb-1">
-            {t("football.nextMatchday")} — {t("football.matchday")}{" "}
-            {prediction.next_matchday.matchday}
-          </h2>
-          <p className="text-sm text-stone-500 mb-6">
-            {t("football.nextMatchdayDescription", {
-              matchday: prediction.next_matchday.matchday,
-            })}
-          </p>
-          <MatchdayPredictions
-            matches={prediction.next_matchday.matches}
-            matchday={prediction.next_matchday.matchday}
-            labels={{
-              home: t("football.home"),
-              draw: t("football.draw"),
-              away: t("football.away"),
-              titleImpact: t("football.titleImpact"),
-              relegationImpact: t("football.relegationImpact"),
-              matchOfTheWeek: t("football.matchOfTheWeek"),
-            }}
-            decisiveMatches={scenarios?.decisive_matches?.filter(
-              (m) => m.matchday === prediction.next_matchday.matchday
-            )}
-          />
-        </div>
-      </section>
+      {/* Next Matchday — only when current matchday is complete */}
+      {matchdayComplete && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <h2 className="text-xl font-bold tracking-tight mb-1">
+              {t("football.nextMatchday")} — {t("football.matchday")}{" "}
+              {prediction.next_matchday.matchday}
+            </h2>
+            <p className="text-sm text-stone-500 mb-6">
+              {t("football.nextMatchdayDescription", {
+                matchday: prediction.next_matchday.matchday,
+              })}
+            </p>
+            <MatchdayPredictions
+              matches={prediction.next_matchday.matches}
+              matchday={prediction.next_matchday.matchday}
+              labels={{
+                home: t("football.home"),
+                draw: t("football.draw"),
+                away: t("football.away"),
+                titleImpact: t("football.titleImpact"),
+                relegationImpact: t("football.relegationImpact"),
+                matchOfTheWeek: t("football.matchOfTheWeek"),
+              }}
+              decisiveMatches={scenarios?.decisive_matches?.filter(
+                (m) => m.matchday === prediction.next_matchday.matchday
+              )}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Paths to Victory */}
       {scenarios?.victory_paths && (
@@ -336,6 +351,7 @@ export default async function LigaPage({
             </p>
             <PathsToVictory
               paths={scenarios.victory_paths}
+              locale={locale}
               labels={{
                 freqFrame: t("football.pathFreqFrame"),
                 subtitleOwn: t("football.pathSubtitleOwn"),
@@ -347,6 +363,9 @@ export default async function LigaPage({
                 gateWinEverything: t("football.pathGateWinEverything"),
                 gateMustStumble: t("football.pathGateMustStumble"),
                 and: t("football.pathAnd"),
+                matchdayPrefix: t("football.matchdayPrefix"),
+                homeAbbr: t("football.homeAbbr"),
+                awayAbbr: t("football.awayAbbr"),
               }}
             />
           </div>
@@ -380,6 +399,7 @@ export default async function LigaPage({
               </p>
               <PathsToVictory
                 paths={atRiskPaths}
+                locale={locale}
                 labels={{
                   freqFrame: t("football.survivalFreqFrame"),
                   subtitleOwn: t("football.survivalSubtitleSafe"),
@@ -391,6 +411,9 @@ export default async function LigaPage({
                   gateWinEverything: t("football.pathGateWinEverything"),
                   gateMustStumble: t("football.pathGateMustStumble"),
                   and: t("football.pathAnd"),
+                  matchdayPrefix: t("football.matchdayPrefix"),
+                  homeAbbr: t("football.homeAbbr"),
+                  awayAbbr: t("football.awayAbbr"),
                 }}
               />
             </div>
@@ -422,6 +445,7 @@ export default async function LigaPage({
                 relegationProb: t("football.relegationProb"),
                 titleRaceSection: t("football.titleRaceSection"),
                 relegationSection: t("football.relegationSection"),
+                matchdayPrefix: t("football.matchdayPrefix"),
               }}
             />
           </div>
@@ -500,6 +524,8 @@ export default async function LigaPage({
               labels={{
                 attack: t("football.attack"),
                 defense: t("football.defense"),
+                worse: t("football.worse"),
+                better: t("football.better"),
               }}
             />
           </div>

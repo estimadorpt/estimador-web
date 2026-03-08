@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import type { LigaPrediction, ScenarioData, LigaHistorical } from '@/types/football';
+import type { LigaPrediction, ScenarioData, LigaHistorical, TeamDelta } from '@/types/football';
 
 const FOOTBALL_DIR = 'football/liga-2025-26';
 
@@ -56,6 +56,80 @@ export async function loadLigaHistorical(): Promise<LigaHistorical> {
   } catch (error) {
     console.error('Error loading historical liga data:', error);
     return [];
+  }
+}
+
+// Load a specific matchday prediction
+async function loadMatchdayPrediction(md: number): Promise<LigaPrediction | null> {
+  try {
+    return await loadFootballJson<LigaPrediction>(`md${md}.json`);
+  } catch {
+    return null;
+  }
+}
+
+// Compute per-team deltas between current and baseline predictions
+function computeDeltas(
+  currentTable: LigaPrediction['table'],
+  baselineTable: LigaPrediction['table'] | undefined,
+): Record<string, TeamDelta> {
+  const deltas: Record<string, TeamDelta> = {};
+  if (!baselineTable) return deltas;
+
+  const baselineLookup = new Map(baselineTable.map(t => [t.team, t]));
+
+  for (const team of currentTable) {
+    const baseline = baselineLookup.get(team.team);
+    if (!baseline) continue;
+
+    const champDelta = (team.p_champion - baseline.p_champion) * 100;
+    const relegDelta = (team.p_relegation - baseline.p_relegation) * 100;
+    const ptsDelta = team.mean_pts - baseline.mean_pts;
+
+    deltas[team.team] = {
+      team: team.team,
+      p_champion_delta: Math.round(champDelta * 10) / 10,
+      p_relegation_delta: Math.round(relegDelta * 10) / 10,
+      mean_pts_delta: Math.round(ptsDelta * 10) / 10,
+    };
+  }
+
+  return deltas;
+}
+
+// Load latest prediction with deltas compared to previous matchday
+export async function loadLigaWithDeltas() {
+  try {
+    const latestMd = await findLatestMatchday();
+    const [prediction, scenarios] = await Promise.all([
+      loadFootballJson<LigaPrediction>(`md${latestMd}.json`),
+      loadFootballJson<ScenarioData>(`md${latestMd}_scenarios.json`).catch(() => null),
+    ]);
+
+    // Load previous matchday as baseline
+    const prevPrediction = latestMd > 1
+      ? await loadMatchdayPrediction(latestMd - 1)
+      : null;
+
+    // Compute deltas
+    const deltas = computeDeltas(prediction.table, prevPrediction?.table);
+
+    return {
+      prediction,
+      scenarios,
+      matchday: latestMd,
+      prevPrediction,
+      deltas,
+    };
+  } catch (error) {
+    console.error('Error loading liga data with deltas:', error);
+    return {
+      prediction: null,
+      scenarios: null,
+      matchday: 0,
+      prevPrediction: null,
+      deltas: {} as Record<string, TeamDelta>,
+    };
   }
 }
 

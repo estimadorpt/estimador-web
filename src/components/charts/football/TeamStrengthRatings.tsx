@@ -8,6 +8,8 @@ interface TeamStrengthRatingsProps {
   labels: {
     attack?: string;
     defense?: string;
+    worse?: string;
+    better?: string;
   };
 }
 
@@ -35,14 +37,14 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
       <div className="flex items-center gap-2 mb-3">
         <div className="w-16 sm:w-32 flex-shrink-0" />
         <div className="flex-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-stone-400 px-1">
-          <span className="text-red-400 hidden sm:inline">&larr; pior</span>
-          <span>{labels.defense ?? "Defesa"}</span>
-          <span className="text-emerald-600 hidden sm:inline">melhor &rarr;</span>
+          <span className="text-red-400 hidden sm:inline">&larr; {labels.worse ?? "worse"}</span>
+          <span>{labels.defense ?? "Defense"}</span>
+          <span className="text-emerald-600 hidden sm:inline">{labels.better ?? "better"} &rarr;</span>
         </div>
         <div className="flex-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-stone-400 px-1">
-          <span className="text-red-400 hidden sm:inline">&larr; pior</span>
-          <span>{labels.attack ?? "Ataque"}</span>
-          <span className="text-emerald-600 hidden sm:inline">melhor &rarr;</span>
+          <span className="text-red-400 hidden sm:inline">&larr; {labels.worse ?? "worse"}</span>
+          <span>{labels.attack ?? "Attack"}</span>
+          <span className="text-emerald-600 hidden sm:inline">{labels.better ?? "better"} &rarr;</span>
         </div>
       </div>
 

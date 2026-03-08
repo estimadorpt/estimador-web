@@ -1,7 +1,8 @@
 "use client";
 
 import { ligaTeamColors, ligaTeamShortNames, ligaTeamSlugs, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
-import type { ActualStanding, TeamStanding } from "@/types/football";
+import type { ActualStanding, TeamStanding, TeamDelta } from "@/types/football";
+import { ArrowUp, ArrowDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { ChevronRight } from "lucide-react";
@@ -11,6 +12,7 @@ import { AnimatePresence, motion } from "framer-motion";
 interface LeagueTableProps {
   data: TeamStanding[];
   actualStandings?: ActualStanding[];
+  deltas?: Record<string, TeamDelta>;
   labels: {
     team: string;
     meanPoints: string;
@@ -22,6 +24,21 @@ interface LeagueTableProps {
     played?: string;
     actualPoints?: string;
   };
+}
+
+function DeltaIndicator({ value, invert = false }: { value: number; invert?: boolean }) {
+  const rounded = Math.round(Math.abs(value));
+  if (rounded < 1) return null;
+  const isUp = value > 0;
+  // For championship: up=good (green), down=bad (red)
+  // For relegation (invert): up=bad (red), down=good (green)
+  const isGood = invert ? !isUp : isUp;
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-[10px] tabular-nums ml-0.5 ${isGood ? "text-emerald-600" : "text-red-500"}`}>
+      {isUp ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
+      {rounded}
+    </span>
+  );
 }
 
 function formatProb(value: number): string {
@@ -63,7 +80,7 @@ function roundToSum100(values: number[]): string[] {
   });
 }
 
-export function LeagueTable({ data, actualStandings, labels }: LeagueTableProps) {
+export function LeagueTable({ data, actualStandings, deltas, labels }: LeagueTableProps) {
   const locale = useLocale();
   const router = useRouter();
   const [showHint, setShowHint] = useState(false);
@@ -207,6 +224,9 @@ export function LeagueTable({ data, actualStandings, labels }: LeagueTableProps)
                   <span className={team.p_champion > 0.01 ? 'font-semibold' : 'text-stone-400'}>
                     {champRounded[i]}
                   </span>
+                  {deltas?.[team.team] && (
+                    <DeltaIndicator value={deltas[team.team].p_champion_delta} />
+                  )}
                 </td>
                 <td className="py-2.5 px-3 text-right tabular-nums hidden sm:table-cell">
                   {formatProb(team.p_top3)}
@@ -215,6 +235,9 @@ export function LeagueTable({ data, actualStandings, labels }: LeagueTableProps)
                   <span className={team.p_relegation > 0.1 ? 'font-semibold text-red-700' : team.p_relegation > 0 ? 'text-red-600' : 'text-stone-400'}>
                     {relegRounded[i]}
                   </span>
+                  {deltas?.[team.team] && (
+                    <DeltaIndicator value={deltas[team.team].p_relegation_delta} invert />
+                  )}
                 </td>
               </tr>
             );

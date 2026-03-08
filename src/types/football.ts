@@ -52,6 +52,29 @@ export interface XptsEntry {
   xga: number;
 }
 
+// Matchday result (from live SofaScore data embedded in prediction JSON)
+export interface MatchdayResult {
+  home: string;
+  away: string;
+  home_goals: number;
+  away_goals: number;
+}
+
+// Remaining match in current matchday (not yet played)
+export interface RemainingMatch {
+  home: string;
+  away: string;
+  kickoff: string; // ISO 8601 timestamp
+}
+
+// Per-team probability delta (current vs pre-matchday baseline)
+export interface TeamDelta {
+  team: string;
+  p_champion_delta: number; // in percentage points (e.g., +6 means +6pp)
+  p_relegation_delta: number;
+  mean_pts_delta: number;
+}
+
 export interface LigaPrediction {
   season: string;
   matchday: number;
@@ -64,6 +87,8 @@ export interface LigaPrediction {
   xpts_table?: XptsEntry[];
   position_probs: PositionProbs;
   next_matchday: NextMatchday;
+  matchday_results?: MatchdayResult[];
+  matches_remaining?: RemainingMatch[];
 }
 
 export interface DecisiveMatch {

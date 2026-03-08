@@ -11,7 +11,7 @@
     "elections": "Elections",
     "presidential": "Presidential 2026",
     "parliamentary": "Parliamentary 2025",
-    "sport": "Sport",
+    "sport": "Sports",
     "liga": "Liga Portugal"
   },
   "common": {
@@ -166,7 +166,7 @@
       "regional": "District-level variations that deviate from national trends"
     },
     "limitationsDescription2": "A forecast showing a party with a 70% chance of winning most seats also means there's a 30% chance they won't. Our forecasts should be interpreted as informed probabilistic assessments, not certainties.",
-    "footerCopyright": "© 2025 estimador.pt • Built with transparency and open methodology",
+    "footerCopyright": "© 2025–2026 estimador.pt • Built with transparency and open methodology",
     "footerDeveloper": "Developed by Bernardo Caldas"
   },
   "methodology": {
@@ -459,6 +459,8 @@
     "teamStrengthsDescription": "Attack and defense parameters estimated by the Bayesian model.",
     "attack": "Attack",
     "defense": "Defense",
+    "worse": "worse",
+    "better": "better",
     "pointsPace": "Points pace",
     "pointsPaceDescription": "Points projection based on current performance. Solid bar: actual points. Faded bar: projection to 34 matchdays.",
     "titleZone": "Champion pace",
@@ -481,7 +483,14 @@
     "magicRelegated": "Relegated",
     "magicPtsAbbr": "pts",
     "magicNeedsOf": "of {available} available",
-    "magicDependsOnOthers": "Depends on others"
+    "magicDependsOnOthers": "Depends on others",
+    "matchdayLive": "Matchday {n}",
+    "matchesPlayed": "{n} of {total} matches played",
+    "matchesPlayedLabel": "Played",
+    "matchesRemainingLabel": "Remaining",
+    "matchdayImpact": "Impact",
+    "championDelta": "title",
+    "relegationDelta": "relegation"
   },
   "meta": {
     "defaultTitle": "estimador.pt — Data analysis for Portugal",

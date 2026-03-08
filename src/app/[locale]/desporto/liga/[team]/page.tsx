@@ -552,6 +552,7 @@ export default async function TeamDetailPage({
                 relegationProb: t("football.relegationProb"),
                 titleRaceSection: t("football.titleRaceSection"),
                 relegationSection: t("football.relegationSection"),
+                matchdayPrefix: t("football.matchdayPrefix"),
               }}
               maxItemsPerTeam={10}
             />
@@ -583,6 +584,7 @@ export default async function TeamDetailPage({
                 relegationProb: t("football.relegationProb"),
                 titleRaceSection: t("football.titleRaceSection"),
                 relegationSection: t("football.relegationSection"),
+                matchdayPrefix: t("football.matchdayPrefix"),
               }}
               maxItemsPerTeam={10}
             />

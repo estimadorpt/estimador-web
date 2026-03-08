@@ -166,7 +166,7 @@
       "regional": "Variações distritais que se desviam das tendências nacionais"
     },
     "limitationsDescription2": "Uma previsão mostrando um partido com 70% de probabilidade de ganhar mais mandatos também significa que há 30% de probabilidade de não ganhar. As nossas previsões devem ser interpretadas como avaliações probabilísticas informadas, não como certezas.",
-    "footerCopyright": "© 2025 estimador.pt • Construído com transparência e metodologia aberta",
+    "footerCopyright": "© 2025–2026 estimador.pt • Construído com transparência e metodologia aberta",
     "footerDeveloper": "Desenvolvido por Bernardo Caldas"
   },
   "methodology": {
@@ -459,6 +459,8 @@
     "teamStrengthsDescription": "Parâmetros de ataque e defesa estimados pelo modelo Bayesiano.",
     "attack": "Ataque",
     "defense": "Defesa",
+    "worse": "pior",
+    "better": "melhor",
     "pointsPace": "Ritmo de pontos",
     "pointsPaceDescription": "Projeção de pontos com base no rendimento atual. Barra sólida: pontos atuais. Barra clara: projeção para 34 jornadas.",
     "titleZone": "Ritmo de campeão",
@@ -481,7 +483,14 @@
     "magicRelegated": "Despromovido",
     "magicPtsAbbr": "pts",
     "magicNeedsOf": "de {available} disponíveis",
-    "magicDependsOnOthers": "Depende de outros"
+    "magicDependsOnOthers": "Depende de outros",
+    "matchdayLive": "Jornada {n}",
+    "matchesPlayed": "{n} de {total} jogos disputados",
+    "matchesPlayedLabel": "Disputados",
+    "matchesRemainingLabel": "Por disputar",
+    "matchdayImpact": "Impacto",
+    "championDelta": "título",
+    "relegationDelta": "despromoção"
   },
   "meta": {
     "defaultTitle": "estimador.pt — Análise de dados para Portugal",
