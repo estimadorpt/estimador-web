@@ -1,0 +1,1066 @@
+{
+  "season": "2025-26",
+  "matchday": 31,
+  "model": "joint_sot",
+  "n_sims": 50000,
+  "timestamp": "2026-04-30T22:56:18.984603+00:00",
+  "table": [
+    {
+      "team": "Porto",
+      "mean_pts": 89.8,
+      "std_pts": 1.5,
+      "mean_gd": 54.3,
+      "p_champion": 0.9978,
+      "p_top3": 1.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.994,
+      "p_champion_hi": 1.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Sporting CP",
+      "mean_pts": 82.6,
+      "std_pts": 1.7,
+      "mean_gd": 64.9,
+      "p_champion": 0.0019,
+      "p_top3": 1.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.006,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Benfica",
+      "mean_pts": 81.1,
+      "std_pts": 2.1,
+      "mean_gd": 50.0,
+      "p_champion": 0.0002,
+      "p_top3": 1.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.002,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "SC Braga",
+      "mean_pts": 60.8,
+      "std_pts": 2.2,
+      "mean_gd": 30.8,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Famalicao",
+      "mean_pts": 55.6,
+      "std_pts": 2.1,
+      "mean_gd": 12.8,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Gil Vicente",
+      "mean_pts": 52.8,
+      "std_pts": 2.0,
+      "mean_gd": 13.1,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Vitoria SC",
+      "mean_pts": 45.2,
+      "std_pts": 1.9,
+      "mean_gd": -7.2,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Moreirense",
+      "mean_pts": 44.1,
+      "std_pts": 2.2,
+      "mean_gd": -9.6,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Alverca",
+      "mean_pts": 40.5,
+      "std_pts": 1.9,
+      "mean_gd": -18.0,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Estoril",
+      "mean_pts": 39.3,
+      "std_pts": 1.9,
+      "mean_gd": -4.1,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Arouca",
+      "mean_pts": 39.0,
+      "std_pts": 2.2,
+      "mean_gd": -21.2,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Rio Ave",
+      "mean_pts": 36.9,
+      "std_pts": 2.0,
+      "mean_gd": -21.4,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Nacional",
+      "mean_pts": 35.8,
+      "std_pts": 2.2,
+      "mean_gd": -5.9,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Santa Clara",
+      "mean_pts": 35.3,
+      "std_pts": 2.0,
+      "mean_gd": -11.4,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.0,
+      "p_relegation_hi": 0.0
+    },
+    {
+      "team": "Casa Pia",
+      "mean_pts": 30.6,
+      "std_pts": 2.4,
+      "mean_gd": -26.4,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0573,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.04,
+      "p_relegation_hi": 0.0761
+    },
+    {
+      "team": "Estrela Amadora",
+      "mean_pts": 30.4,
+      "std_pts": 1.9,
+      "mean_gd": -19.9,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.0077,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.002,
+      "p_relegation_hi": 0.016
+    },
+    {
+      "team": "Tondela",
+      "mean_pts": 24.6,
+      "std_pts": 2.2,
+      "mean_gd": -33.0,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 0.935,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 0.912,
+      "p_relegation_hi": 0.954
+    },
+    {
+      "team": "AVS",
+      "mean_pts": 15.6,
+      "std_pts": 1.7,
+      "mean_gd": -47.6,
+      "p_champion": 0.0,
+      "p_top3": 0.0,
+      "p_relegation": 1.0,
+      "p_champion_lo": 0.0,
+      "p_champion_hi": 0.0,
+      "p_relegation_lo": 1.0,
+      "p_relegation_hi": 1.0
+    }
+  ],
+  "actual_standings": [
+    {
+      "team": "Porto",
+      "played": 31,
+      "points": 82,
+      "gd": 48,
+      "gf": 63,
+      "ga": 15
+    },
+    {
+      "team": "Benfica",
+      "played": 31,
+      "points": 75,
+      "gd": 47,
+      "gf": 67,
+      "ga": 20
+    },
+    {
+      "team": "Sporting CP",
+      "played": 30,
+      "points": 72,
+      "gd": 55,
+      "gf": 75,
+      "ga": 20
+    },
+    {
+      "team": "SC Braga",
+      "played": 30,
+      "points": 53,
+      "gd": 27,
+      "gf": 58,
+      "ga": 31
+    },
+    {
+      "team": "Famalicao",
+      "played": 31,
+      "points": 51,
+      "gd": 12,
+      "gf": 39,
+      "ga": 27
+    },
+    {
+      "team": "Gil Vicente",
+      "played": 31,
+      "points": 49,
+      "gd": 14,
+      "gf": 46,
+      "ga": 32
+    },
+    {
+      "team": "Vitoria SC",
+      "played": 31,
+      "points": 42,
+      "gd": -5,
+      "gf": 38,
+      "ga": 43
+    },
+    {
+      "team": "Moreirense",
+      "played": 31,
+      "points": 39,
+      "gd": -11,
+      "gf": 34,
+      "ga": 45
+    },
+    {
+      "team": "Alverca",
+      "played": 31,
+      "points": 38,
+      "gd": -15,
+      "gf": 34,
+      "ga": 49
+    },
+    {
+      "team": "Estoril",
+      "played": 31,
+      "points": 37,
+      "gd": -1,
+      "gf": 51,
+      "ga": 52
+    },
+    {
+      "team": "Arouca",
+      "played": 31,
+      "points": 35,
+      "gd": -21,
+      "gf": 39,
+      "ga": 60
+    },
+    {
+      "team": "Rio Ave",
+      "played": 31,
+      "points": 34,
+      "gd": -19,
+      "gf": 33,
+      "ga": 52
+    },
+    {
+      "team": "Santa Clara",
+      "played": 31,
+      "points": 32,
+      "gd": -10,
+      "gf": 28,
+      "ga": 38
+    },
+    {
+      "team": "Nacional",
+      "played": 31,
+      "points": 31,
+      "gd": -7,
+      "gf": 34,
+      "ga": 41
+    },
+    {
+      "team": "Estrela Amadora",
+      "played": 31,
+      "points": 28,
+      "gd": -17,
+      "gf": 34,
+      "ga": 51
+    },
+    {
+      "team": "Casa Pia",
+      "played": 30,
+      "points": 26,
+      "gd": -25,
+      "gf": 29,
+      "ga": 54
+    },
+    {
+      "team": "Tondela",
+      "played": 30,
+      "points": 21,
+      "gd": -29,
+      "gf": 21,
+      "ga": 50
+    },
+    {
+      "team": "AVS",
+      "played": 31,
+      "points": 14,
+      "gd": -43,
+      "gf": 22,
+      "ga": 65
+    }
+  ],
+  "team_strengths": {
+    "AVS": {
+      "attack": -0.279,
+      "defense": 0.378
+    },
+    "Alverca": {
+      "attack": 0.002,
+      "defense": 0.045
+    },
+    "Arouca": {
+      "attack": -0.027,
+      "defense": 0.111
+    },
+    "Benfica": {
+      "attack": 0.58,
+      "defense": -0.847
+    },
+    "Casa Pia": {
+      "attack": -0.15,
+      "defense": 0.125
+    },
+    "Estoril": {
+      "attack": 0.177,
+      "defense": 0.075
+    },
+    "Estrela Amadora": {
+      "attack": -0.108,
+      "defense": 0.136
+    },
+    "Famalicao": {
+      "attack": 0.177,
+      "defense": -0.297
+    },
+    "Gil Vicente": {
+      "attack": 0.142,
+      "defense": -0.154
+    },
+    "Moreirense": {
+      "attack": -0.097,
+      "defense": 0.034
+    },
+    "Nacional": {
+      "attack": -0.003,
+      "defense": 0.028
+    },
+    "Porto": {
+      "attack": 0.53,
+      "defense": -1.038
+    },
+    "Rio Ave": {
+      "attack": 0.022,
+      "defense": 0.124
+    },
+    "SC Braga": {
+      "attack": 0.403,
+      "defense": -0.535
+    },
+    "Santa Clara": {
+      "attack": -0.119,
+      "defense": -0.159
+    },
+    "Sporting CP": {
+      "attack": 0.755,
+      "defense": -0.877
+    },
+    "Tondela": {
+      "attack": -0.185,
+      "defense": 0.147
+    },
+    "Vitoria SC": {
+      "attack": 0.025,
+      "defense": 0.021
+    }
+  },
+  "xpts_table": [
+    {
+      "team": "Porto",
+      "played": 31,
+      "xpts": 65.0,
+      "xgf": 57.5,
+      "xga": 20.3
+    },
+    {
+      "team": "Sporting CP",
+      "played": 30,
+      "xpts": 63.3,
+      "xgf": 62.8,
+      "xga": 22.9
+    },
+    {
+      "team": "Benfica",
+      "played": 31,
+      "xpts": 63.3,
+      "xgf": 60.7,
+      "xga": 24.5
+    },
+    {
+      "team": "SC Braga",
+      "played": 30,
+      "xpts": 53.7,
+      "xgf": 54.0,
+      "xga": 32.4
+    },
+    {
+      "team": "Gil Vicente",
+      "played": 31,
+      "xpts": 49.8,
+      "xgf": 43.6,
+      "xga": 31.8
+    },
+    {
+      "team": "Famalicao",
+      "played": 31,
+      "xpts": 49.0,
+      "xgf": 41.6,
+      "xga": 32.5
+    },
+    {
+      "team": "Alverca",
+      "played": 31,
+      "xpts": 41.7,
+      "xgf": 38.2,
+      "xga": 41.1
+    },
+    {
+      "team": "Santa Clara",
+      "played": 31,
+      "xpts": 41.2,
+      "xgf": 33.1,
+      "xga": 33.0
+    },
+    {
+      "team": "Vitoria SC",
+      "played": 31,
+      "xpts": 41.1,
+      "xgf": 37.6,
+      "xga": 41.1
+    },
+    {
+      "team": "Nacional",
+      "played": 31,
+      "xpts": 37.0,
+      "xgf": 36.6,
+      "xga": 48.3
+    },
+    {
+      "team": "Estoril",
+      "played": 31,
+      "xpts": 36.1,
+      "xgf": 39.4,
+      "xga": 49.8
+    },
+    {
+      "team": "Estrela Amadora",
+      "played": 31,
+      "xpts": 35.8,
+      "xgf": 37.1,
+      "xga": 47.3
+    },
+    {
+      "team": "Tondela",
+      "played": 30,
+      "xpts": 35.4,
+      "xgf": 35.5,
+      "xga": 45.8
+    },
+    {
+      "team": "Arouca",
+      "played": 31,
+      "xpts": 34.5,
+      "xgf": 30.9,
+      "xga": 49.1
+    },
+    {
+      "team": "Rio Ave",
+      "played": 31,
+      "xpts": 33.6,
+      "xgf": 32.9,
+      "xga": 49.0
+    },
+    {
+      "team": "Moreirense",
+      "played": 31,
+      "xpts": 33.1,
+      "xgf": 28.9,
+      "xga": 46.0
+    },
+    {
+      "team": "Casa Pia",
+      "played": 30,
+      "xpts": 26.5,
+      "xgf": 27.1,
+      "xga": 52.4
+    },
+    {
+      "team": "AVS",
+      "played": 31,
+      "xpts": 25.0,
+      "xgf": 27.9,
+      "xga": 58.1
+    }
+  ],
+  "position_probs": {
+    "AVS": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0005,
+      0.9995
+    ],
+    "Alverca": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0121,
+      0.0796,
+      0.4055,
+      0.2296,
+      0.1799,
+      0.0792,
+      0.014,
+      0.0001,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Arouca": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0037,
+      0.0268,
+      0.1373,
+      0.2771,
+      0.2093,
+      0.169,
+      0.122,
+      0.0519,
+      0.0027,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Benfica": [
+      0.0002,
+      0.1828,
+      0.8169,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Casa Pia": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0003,
+      0.0021,
+      0.0083,
+      0.0259,
+      0.0594,
+      0.3834,
+      0.4633,
+      0.0573,
+      0.0
+    ],
+    "Estoril": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0142,
+      0.0662,
+      0.2508,
+      0.2435,
+      0.2499,
+      0.1391,
+      0.0338,
+      0.0025,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Estrela Amadora": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0001,
+      0.0023,
+      0.0095,
+      0.0464,
+      0.4633,
+      0.4706,
+      0.0077,
+      0.0
+    ],
+    "Famalicao": [
+      0.0,
+      0.0,
+      0.0,
+      0.0345,
+      0.7497,
+      0.2158,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Gil Vicente": [
+      0.0,
+      0.0,
+      0.0,
+      0.0023,
+      0.2149,
+      0.7816,
+      0.0012,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Moreirense": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.3179,
+      0.5164,
+      0.1223,
+      0.0345,
+      0.0081,
+      0.0007,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Nacional": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0009,
+      0.0142,
+      0.0702,
+      0.1234,
+      0.2126,
+      0.2515,
+      0.2784,
+      0.0443,
+      0.0046,
+      0.0,
+      0.0
+    ],
+    "Porto": [
+      0.9978,
+      0.0018,
+      0.0004,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Rio Ave": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0001,
+      0.0028,
+      0.0245,
+      0.0858,
+      0.1325,
+      0.2469,
+      0.2982,
+      0.174,
+      0.0331,
+      0.0022,
+      0.0,
+      0.0
+    ],
+    "SC Braga": [
+      0.0,
+      0.0,
+      0.0,
+      0.9632,
+      0.0354,
+      0.0014,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Santa Clara": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0008,
+      0.0061,
+      0.0565,
+      0.0947,
+      0.142,
+      0.2452,
+      0.3873,
+      0.063,
+      0.0044,
+      0.0,
+      0.0
+    ],
+    "Sporting CP": [
+      0.0019,
+      0.8154,
+      0.1827,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "Tondela": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0102,
+      0.0548,
+      0.9345,
+      0.0005
+    ],
+    "Vitoria SC": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0012,
+      0.6507,
+      0.3065,
+      0.0393,
+      0.0023,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "matchday_results": [
+    {
+      "home": "Vitoria SC",
+      "away": "Rio Ave",
+      "home_goals": 2,
+      "away_goals": 0
+    },
+    {
+      "home": "Tondela",
+      "away": "Nacional",
+      "home_goals": 0,
+      "away_goals": 2
+    },
+    {
+      "home": "Santa Clara",
+      "away": "SC Braga",
+      "home_goals": 2,
+      "away_goals": 1
+    },
+    {
+      "home": "AVS",
+      "away": "Sporting CP",
+      "home_goals": 1,
+      "away_goals": 1
+    },
+    {
+      "home": "Estoril",
+      "away": "Famalicao",
+      "home_goals": 0,
+      "away_goals": 1
+    },
+    {
+      "home": "Estrela Amadora",
+      "away": "Porto",
+      "home_goals": 1,
+      "away_goals": 2
+    },
+    {
+      "home": "Gil Vicente",
+      "away": "Casa Pia",
+      "home_goals": 2,
+      "away_goals": 1
+    }
+  ],
+  "matches_remaining": [],
+  "next_matchday": {
+    "matchday": 32,
+    "matches": [
+      {
+        "home": "SC Braga",
+        "away": "Estoril",
+        "p_home": 0.7131,
+        "p_draw": 0.1731,
+        "p_away": 0.1138
+      },
+      {
+        "home": "Casa Pia",
+        "away": "Tondela",
+        "p_home": 0.4535,
+        "p_draw": 0.2644,
+        "p_away": 0.2821
+      },
+      {
+        "home": "Sporting CP",
+        "away": "Vitoria SC",
+        "p_home": 0.8758,
+        "p_draw": 0.089,
+        "p_away": 0.0352
+      },
+      {
+        "home": "Famalicao",
+        "away": "Benfica",
+        "p_home": 0.1779,
+        "p_draw": 0.276,
+        "p_away": 0.5461
+      },
+      {
+        "home": "Arouca",
+        "away": "Santa Clara",
+        "p_home": 0.3756,
+        "p_draw": 0.2865,
+        "p_away": 0.3379
+      },
+      {
+        "home": "Porto",
+        "away": "Alverca",
+        "p_home": 0.8357,
+        "p_draw": 0.1182,
+        "p_away": 0.046
+      },
+      {
+        "home": "Moreirense",
+        "away": "Estrela Amadora",
+        "p_home": 0.4786,
+        "p_draw": 0.2556,
+        "p_away": 0.2657
+      },
+      {
+        "home": "Nacional",
+        "away": "AVS",
+        "p_home": 0.6416,
+        "p_draw": 0.1985,
+        "p_away": 0.1599
+      },
+      {
+        "home": "Rio Ave",
+        "away": "Gil Vicente",
+        "p_home": 0.3234,
+        "p_draw": 0.2519,
+        "p_away": 0.4248
+      }
+    ]
+  }
+}
