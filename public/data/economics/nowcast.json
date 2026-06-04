@@ -1,6 +1,6 @@
 {
   "vintage_date": "2026-06-04",
-  "computed_at": "2026-06-04T18:01:19.713787Z",
+  "computed_at": "2026-06-04T18:55:49.168761Z",
   "target_quarter": "2026Q2",
   "models": {
     "dfm": {
@@ -15,20 +15,20 @@
       ]
     },
     "bridge": {
-      "point": 0.0038,
+      "point": 0.0035,
       "ci_80": [
-        -0.003,
-        0.0106
+        -0.0048,
+        0.0118
       ],
       "ci_95": [
-        -0.0066,
-        0.0142
+        -0.0092,
+        0.0162
       ],
       "components": {
         "private_consumption": {
           "label": "Private Consumption",
-          "point": 0.003546,
-          "se": 0.003434,
+          "point": 0.003414,
+          "se": 0.003493,
           "n_equations": 11,
           "top_indicators": [
             {
@@ -60,24 +60,24 @@
         },
         "gfcf": {
           "label": "GFCF (Investment)",
-          "point": 0.00799,
-          "se": 0.012107,
-          "n_equations": 8,
+          "point": 0.008108,
+          "se": 0.011609,
+          "n_equations": 9,
           "top_indicators": [
             {
-              "name": "MV(Construction Production,Construction Confidence)",
-              "r2": 0.2822,
-              "forecast": 0.008546
-            },
-            {
-              "name": "MV(Construction Production,Construction Confidence)",
-              "r2": 0.2822,
-              "forecast": 0.008546
-            },
-            {
               "name": "Construction Production",
-              "r2": 0.2709,
-              "forecast": -0.001812
+              "r2": 0.3534,
+              "forecast": 0.000332
+            },
+            {
+              "name": "MV(Construction Production,Construction Confidence)",
+              "r2": 0.3463,
+              "forecast": 0.005628
+            },
+            {
+              "name": "MV(Construction Production,Construction Confidence)",
+              "r2": 0.3463,
+              "forecast": 0.005628
             },
             {
               "name": "Construction Confidence",
@@ -85,9 +85,9 @@
               "forecast": 0.023745
             },
             {
-              "name": "Commercial Vehicles <3.5t New YoY",
-              "r2": 0.1876,
-              "forecast": 0.003209
+              "name": "Building Permits Dwellings",
+              "r2": 0.195,
+              "forecast": 0.016212
             }
           ]
         },
@@ -126,46 +126,41 @@
         },
         "imports": {
           "label": "Imports",
-          "point": 0.004948,
-          "se": 0.01632,
-          "n_equations": 2,
+          "point": 0.006006,
+          "se": 0.021965,
+          "n_equations": 1,
           "top_indicators": [
             {
               "name": "Imports of Goods ITS",
               "r2": 0.2904,
               "forecast": 0.006006
-            },
-            {
-              "name": "Retail Trade Volume",
-              "r2": 0.152,
-              "forecast": 0.003738
             }
           ]
         }
       }
     },
     "supply_side_bridge": {
-      "point": 0.0039,
+      "point": 0.004,
       "ci_80": [
-        -0.0031,
-        0.0109
+        -0.0025,
+        0.0106
       ],
       "ci_95": [
-        -0.0068,
-        0.0146
+        -0.006,
+        0.014
       ],
       "method": "supply_side_bridge",
       "coefficients": {
-        "sector_weight_industry": 0.0894,
-        "sector_weight_services": 0.1139,
-        "sector_weight_construction": 0.0852,
-        "sector_weight_domestic": 0.6288,
-        "sector_weight_external": 0.0827
+        "sector_weight_industry": 0.097,
+        "sector_weight_services": 0.1397,
+        "sector_weight_construction": 0.0841,
+        "sector_weight_domestic": 0.5778,
+        "sector_weight_external": 0.1014
       },
       "sector_composites": [
         {
           "name": "industry",
-          "value": -0.4293,
+          "value": -0.4838,
           "indicators": [
             "Industrial Production Index",
             "Industrial Turnover Total",
@@ -198,7 +193,7 @@
         },
         {
           "name": "construction",
-          "value": 0.3767,
+          "value": 0.3148,
           "indicators": [
             "Construction Production",
             "Cement Sales",
@@ -211,7 +206,7 @@
         },
         {
           "name": "domestic",
-          "value": -0.1354,
+          "value": -0.1338,
           "indicators": [
             "Retail Trade Volume",
             "Retail Turnover YoY deflated sca",
@@ -252,24 +247,24 @@
       "used_blackout_recovery": false
     },
     "regularized": {
-      "point": 0.0065,
+      "point": 0.0064,
       "ci_80": [
         -0.0212,
-        0.0342
+        0.0341
       ],
       "ci_95": [
-        -0.0358,
-        0.0488
+        -0.0359,
+        0.0487
       ],
       "method": "elastic_net",
       "n_features_selected": 1,
       "alpha": 0.113488,
-      "r2_train": 0.0325,
+      "r2_train": 0.0329,
       "top_features": [
         {
           "name": "f0",
-          "coefficient": 0.000374,
-          "abs_importance": 0.000374
+          "coefficient": 0.000377,
+          "abs_importance": 0.000377
         }
       ]
     },
@@ -566,13 +561,13 @@
       ]
     },
     "ensemble": {
-      "point": 0.0044,
+      "point": 0.0043,
       "ci_80": [
-        -0.0065,
+        -0.0066,
         0.0152
       ],
       "ci_95": [
-        -0.0122,
+        -0.0123,
         0.021
       ],
       "method": "stacking",
@@ -587,22 +582,22 @@
       "members": [
         {
           "name": "dfm",
-          "point": 0.002353822894116042,
+          "point": 0.0023525154839725507,
           "weight": 0.16666666666666666
         },
         {
           "name": "bridge",
-          "point": 0.0038,
+          "point": 0.0035,
           "weight": 0.16666666666666666
         },
         {
           "name": "supply_side_bridge",
-          "point": 0.0039,
+          "point": 0.004,
           "weight": 0.16666666666666666
         },
         {
           "name": "regularized",
-          "point": 0.0065,
+          "point": 0.0064,
           "weight": 0.16666666666666666
         },
         {
@@ -617,9 +612,9 @@
         }
       ],
       "shadow_forecasts": {
+        "equal": 0.0043,
         "dma": 0.0039,
-        "inverse_msfe": 0.004,
-        "equal": 0.0044
+        "inverse_msfe": 0.004
       }
     }
   },
@@ -641,7 +636,7 @@
   },
   "news_decomposition": null,
   "data_availability": {
-    "pct_complete": 0.28,
+    "pct_complete": 0.29,
     "n_series": 198,
     "latest_date": "2026-06-01",
     "data_age_days": 0,
@@ -649,9 +644,9 @@
   },
   "vintage": {
     "position": "M2",
-    "pct_complete": 0.28,
+    "pct_complete": 0.3,
     "coverage_by_month": {
-      "m1": 0.58,
+      "m1": 0.63,
       "m2": 0.23,
       "m3": 0.03
     },
@@ -706,18 +701,18 @@
   },
   "headline": {
     "model": "supply_side_bridge",
-    "point": 0.0039,
+    "point": 0.004,
     "ci_80": [
-      -0.0089,
-      0.0167
+      -0.0088,
+      0.0168
     ],
     "ci_95": [
-      -0.0157,
-      0.0235
+      -0.0156,
+      0.0236
     ],
     "typical_error_band": [
-      -0.0061,
-      0.0139
+      -0.006,
+      0.014
     ],
     "typical_error_pp": 1.0,
     "intervals_method": "rmse_scaled_excl_covid",
@@ -729,18 +724,18 @@
   "recommendations": {
     "production_single_model": {
       "model": "supply_side_bridge",
-      "point": 0.0039,
+      "point": 0.004,
       "ci_80": [
-        -0.0089,
-        0.0167
+        -0.0088,
+        0.0168
       ],
       "ci_95": [
-        -0.0157,
-        0.0235
+        -0.0156,
+        0.0236
       ],
       "typical_error_band": [
-        -0.0061,
-        0.0139
+        -0.006,
+        0.014
       ],
       "typical_error_pp": 1.0,
       "intervals_method": "rmse_scaled_excl_covid",
@@ -757,19 +752,19 @@
     }
   },
   "model_agreement": {
-    "mean": 0.003657,
+    "mean": 0.003614,
     "median": 0.0039,
-    "std": 0.002184,
+    "std": 0.002167,
     "range": [
       -0.0007,
-      0.0065
+      0.0064
     ],
     "n_models": 7,
     "model_points": {
       "dfm": 0.0024,
-      "bridge": 0.0038,
-      "supply_side_bridge": 0.0039,
-      "regularized": 0.0065,
+      "bridge": 0.0035,
+      "supply_side_bridge": 0.004,
+      "regularized": 0.0064,
       "midas": 0.0058,
       "random_forest": -0.0007,
       "sc_midas": 0.0039
