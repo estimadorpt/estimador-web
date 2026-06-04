@@ -1,6 +1,6 @@
 {
   "vintage_date": "2026-06-04",
-  "computed_at": "2026-06-04T11:35:07.959836Z",
+  "computed_at": "2026-06-04T18:01:19.713787Z",
   "target_quarter": "2026Q2",
   "models": {
     "dfm": {
@@ -147,22 +147,20 @@
     "supply_side_bridge": {
       "point": 0.0039,
       "ci_80": [
-        0.0004,
-        0.0073
+        -0.0031,
+        0.0109
       ],
       "ci_95": [
-        -0.0014,
-        0.0091
+        -0.0068,
+        0.0146
       ],
       "method": "supply_side_bridge",
       "coefficients": {
-        "sector_weight_industry": 0.0028,
-        "sector_weight_services": 0.0059,
-        "sector_weight_construction": 0.0024,
-        "sector_weight_domestic": 0.9866,
-        "sector_weight_external": 0.0022,
-        "blend_weight_pool": 0.7,
-        "blend_weight_sector": 0.3
+        "sector_weight_industry": 0.0894,
+        "sector_weight_services": 0.1139,
+        "sector_weight_construction": 0.0852,
+        "sector_weight_domestic": 0.6288,
+        "sector_weight_external": 0.0827
       },
       "sector_composites": [
         {
@@ -570,12 +568,12 @@
     "ensemble": {
       "point": 0.0044,
       "ci_80": [
-        -0.0064,
+        -0.0065,
         0.0152
       ],
       "ci_95": [
         -0.0122,
-        0.0209
+        0.021
       ],
       "method": "stacking",
       "weights": {
@@ -620,8 +618,8 @@
       ],
       "shadow_forecasts": {
         "dma": 0.0039,
-        "equal": 0.0044,
-        "inverse_msfe": 0.004
+        "inverse_msfe": 0.004,
+        "equal": 0.0044
       }
     }
   },
@@ -709,12 +707,21 @@
   "headline": {
     "model": "supply_side_bridge",
     "point": 0.0039,
-    "typical_error_band": [
-      -0.0081,
-      0.0159
+    "ci_80": [
+      -0.0089,
+      0.0167
     ],
-    "typical_error_pp": 1.2,
-    "intervals_calibrated": false,
+    "ci_95": [
+      -0.0157,
+      0.0235
+    ],
+    "typical_error_band": [
+      -0.0061,
+      0.0139
+    ],
+    "typical_error_pp": 1.0,
+    "intervals_method": "rmse_scaled_excl_covid",
+    "intervals_calibrated": true,
     "operating_point": "M2",
     "status": "preliminary",
     "caveat": "Preliminary: produced before the quarter's hard data is in (or on stale data). At this stage the model is not better than a naive benchmark; treat as indicative only, not a published nowcast."
@@ -723,12 +730,21 @@
     "production_single_model": {
       "model": "supply_side_bridge",
       "point": 0.0039,
-      "typical_error_band": [
-        -0.0081,
-        0.0159
+      "ci_80": [
+        -0.0089,
+        0.0167
       ],
-      "typical_error_pp": 1.2,
-      "intervals_calibrated": false,
+      "ci_95": [
+        -0.0157,
+        0.0235
+      ],
+      "typical_error_band": [
+        -0.0061,
+        0.0139
+      ],
+      "typical_error_pp": 1.0,
+      "intervals_method": "rmse_scaled_excl_covid",
+      "intervals_calibrated": true,
       "operating_point": "M2",
       "status": "preliminary",
       "caveat": "Preliminary: produced before the quarter's hard data is in (or on stale data). At this stage the model is not better than a naive benchmark; treat as indicative only, not a published nowcast."
