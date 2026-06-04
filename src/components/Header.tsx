@@ -29,6 +29,7 @@ export function Header() {
   const accentColor = getSectionAccentColor(pathname);
 
   const getPageTitle = () => {
+    if (pathname.includes('/economia')) return t('economics.title');
     if (pathname.includes('/desporto/liga/metodologia')) return t('football.methodologyTitle');
     if (pathname.includes('/desporto/liga')) return t('football.title');
     if (pathname.includes('/eleicoes/presidenciais')) return t('sections.presidential2026');
@@ -42,6 +43,7 @@ export function Header() {
 
   const navigationItems: NavItem[] = [
     { href: '/', label: t('nav.home') },
+    { href: '/economia', label: t('nav.economics') },
     {
       label: t('nav.sport'),
       dropdown: [

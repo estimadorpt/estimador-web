@@ -24,6 +24,8 @@ import {
   SecondRoundBlankNullData
 } from '@/types';
 
+import type { EconomicsNowcast } from '@/types/economics';
+
 // Load data from the public directory
 export async function loadJsonData<T>(filename: string, subdirectory?: string): Promise<T> {
   const filePath = subdirectory
@@ -35,6 +37,18 @@ export async function loadJsonData<T>(filename: string, subdirectory?: string): 
 
 const PRESIDENTIAL_DIR = 'elections/presidential-2026';
 const PARLIAMENTARY_DIR = 'elections/parliamentary-2025';
+const ECONOMICS_DIR = 'economics';
+
+// Portuguese GDP nowcast loader. Returns null on any failure so the page can
+// render an honest "unavailable" state rather than crash.
+export async function loadEconomicsData(): Promise<EconomicsNowcast | null> {
+  try {
+    return await loadJsonData<EconomicsNowcast>('nowcast.json', ECONOMICS_DIR);
+  } catch (error) {
+    console.error('Error loading economics nowcast data:', error);
+    return null;
+  }
+}
 
 // Parliamentary forecast data loader
 export async function loadForecastData() {

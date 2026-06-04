@@ -1,0 +1,839 @@
+{
+  "vintage_date": "2026-06-04",
+  "computed_at": "2026-06-04T11:35:07.959836Z",
+  "target_quarter": "2026Q2",
+  "models": {
+    "dfm": {
+      "point": 0.0024,
+      "ci_80": [
+        -0.0494,
+        0.0541
+      ],
+      "ci_95": [
+        -0.0767,
+        0.0814
+      ]
+    },
+    "bridge": {
+      "point": 0.0038,
+      "ci_80": [
+        -0.003,
+        0.0106
+      ],
+      "ci_95": [
+        -0.0066,
+        0.0142
+      ],
+      "components": {
+        "private_consumption": {
+          "label": "Private Consumption",
+          "point": 0.003546,
+          "se": 0.003434,
+          "n_equations": 11,
+          "top_indicators": [
+            {
+              "name": "MV(Retail Non-Food excl Fuel sca,Services Turnover Total sca)",
+              "r2": 0.7152,
+              "forecast": 0.003179
+            },
+            {
+              "name": "MV(Retail Non-Food excl Fuel sca,Services Turnover Total sca)",
+              "r2": 0.7152,
+              "forecast": 0.003179
+            },
+            {
+              "name": "Retail Non-Food excl Fuel sca",
+              "r2": 0.6321,
+              "forecast": 0.003565
+            },
+            {
+              "name": "Services Turnover Total sca",
+              "r2": 0.576,
+              "forecast": 0.00282
+            },
+            {
+              "name": "Passenger Vehicles New YoY",
+              "r2": 0.4801,
+              "forecast": 0.005199
+            }
+          ]
+        },
+        "gfcf": {
+          "label": "GFCF (Investment)",
+          "point": 0.00799,
+          "se": 0.012107,
+          "n_equations": 8,
+          "top_indicators": [
+            {
+              "name": "MV(Construction Production,Construction Confidence)",
+              "r2": 0.2822,
+              "forecast": 0.008546
+            },
+            {
+              "name": "MV(Construction Production,Construction Confidence)",
+              "r2": 0.2822,
+              "forecast": 0.008546
+            },
+            {
+              "name": "Construction Production",
+              "r2": 0.2709,
+              "forecast": -0.001812
+            },
+            {
+              "name": "Construction Confidence",
+              "r2": 0.2315,
+              "forecast": 0.023745
+            },
+            {
+              "name": "Commercial Vehicles <3.5t New YoY",
+              "r2": 0.1876,
+              "forecast": 0.003209
+            }
+          ]
+        },
+        "exports": {
+          "label": "Exports",
+          "point": 0.010851,
+          "se": 0.010044,
+          "n_equations": 8,
+          "top_indicators": [
+            {
+              "name": "Services Turnover Transport sca",
+              "r2": 0.288,
+              "forecast": 0.019999
+            },
+            {
+              "name": "Services Turnover Hotels sca",
+              "r2": 0.2675,
+              "forecast": 0.009817
+            },
+            {
+              "name": "Exports of Goods ITS",
+              "r2": 0.1989,
+              "forecast": -0.006694
+            },
+            {
+              "name": "Services Credit sa",
+              "r2": 0.1893,
+              "forecast": 0.01285
+            },
+            {
+              "name": "MV(Services Turnover Transport sca,Services Turnover Hotels sca)",
+              "r2": 0.162,
+              "forecast": 0.00978
+            }
+          ]
+        },
+        "imports": {
+          "label": "Imports",
+          "point": 0.004948,
+          "se": 0.01632,
+          "n_equations": 2,
+          "top_indicators": [
+            {
+              "name": "Imports of Goods ITS",
+              "r2": 0.2904,
+              "forecast": 0.006006
+            },
+            {
+              "name": "Retail Trade Volume",
+              "r2": 0.152,
+              "forecast": 0.003738
+            }
+          ]
+        }
+      }
+    },
+    "supply_side_bridge": {
+      "point": 0.0039,
+      "ci_80": [
+        0.0004,
+        0.0073
+      ],
+      "ci_95": [
+        -0.0014,
+        0.0091
+      ],
+      "method": "supply_side_bridge",
+      "coefficients": {
+        "sector_weight_industry": 0.0028,
+        "sector_weight_services": 0.0059,
+        "sector_weight_construction": 0.0024,
+        "sector_weight_domestic": 0.9866,
+        "sector_weight_external": 0.0022,
+        "blend_weight_pool": 0.7,
+        "blend_weight_sector": 0.3
+      },
+      "sector_composites": [
+        {
+          "name": "industry",
+          "value": -0.4293,
+          "indicators": [
+            "Industrial Production Index",
+            "Industrial Turnover Total",
+            "Industrial Turnover Domestic sca",
+            "Industrial Turnover External",
+            "IPI Intermediate Goods sca",
+            "IPI Capital Goods sca",
+            "IPI Consumer Goods sca",
+            "Export Volume Index",
+            "Industry Confidence",
+            "Industry Order Books",
+            "Industry Production Expectations"
+          ]
+        },
+        {
+          "name": "services",
+          "value": 0.1843,
+          "indicators": [
+            "Services Turnover Total sca",
+            "Services Turnover Transport sca",
+            "Services Turnover Hotels sca",
+            "Services Credit sa",
+            "Travel Credit sa",
+            "Tourism Nights",
+            "Foreign Card POS Purchases Value",
+            "Foreign Card POS Purchases Volume",
+            "Coincident Activity",
+            "Services Confidence"
+          ]
+        },
+        {
+          "name": "construction",
+          "value": 0.3767,
+          "indicators": [
+            "Construction Production",
+            "Cement Sales",
+            "Building Permits Dwellings",
+            "New Residential Permits",
+            "Construction Confidence",
+            "Construction Order Books",
+            "Commercial Vehicles <3.5t New YoY"
+          ]
+        },
+        {
+          "name": "domestic",
+          "value": -0.1354,
+          "indicators": [
+            "Retail Trade Volume",
+            "Retail Turnover YoY deflated sca",
+            "Retail Food Beverages Tobacco sca",
+            "Retail Non-Food excl Fuel sca",
+            "New Car Registrations",
+            "Passenger Vehicles New YoY",
+            "Consumer Confidence",
+            "Coincident Consumption",
+            "POS Card Purchases Value",
+            "POS Card Purchases Volume",
+            "Domestic POS Purchases Value",
+            "Domestic POS Purchases Volume",
+            "ATM Cash Withdrawals Volume",
+            "ATM Cash Withdrawals Value",
+            "ATM Deposits Value",
+            "ATM Deposits Volume",
+            "VAT Revenue",
+            "IEFP Registered Unemployment"
+          ]
+        },
+        {
+          "name": "external",
+          "value": 0.4729,
+          "indicators": [
+            "Goods Exports sa",
+            "Goods Imports sa",
+            "Exports of Goods ITS",
+            "Imports of Goods ITS",
+            "Travel Credit sa",
+            "Services Credit sa",
+            "Foreign Card POS Purchases Value",
+            "Portuguese Cards POS Abroad Value",
+            "Industry Export Order Books"
+          ]
+        }
+      ],
+      "used_blackout_recovery": false
+    },
+    "regularized": {
+      "point": 0.0065,
+      "ci_80": [
+        -0.0212,
+        0.0342
+      ],
+      "ci_95": [
+        -0.0358,
+        0.0488
+      ],
+      "method": "elastic_net",
+      "n_features_selected": 1,
+      "alpha": 0.113488,
+      "r2_train": 0.0325,
+      "top_features": [
+        {
+          "name": "f0",
+          "coefficient": 0.000374,
+          "abs_importance": 0.000374
+        }
+      ]
+    },
+    "midas": {
+      "point": 0.0058,
+      "ci_80": [
+        -0.0152,
+        0.0268
+      ],
+      "ci_95": [
+        -0.0263,
+        0.0379
+      ],
+      "n_equations": 9,
+      "equations": [
+        {
+          "indicator": "Brent Oil",
+          "r_squared": 0.5974,
+          "forecast": 0.01626
+        },
+        {
+          "indicator": "PSI-20",
+          "r_squared": 0.4956,
+          "forecast": 0.009982
+        },
+        {
+          "indicator": "GT: turismo",
+          "r_squared": 0.4101,
+          "forecast": 0.004514
+        },
+        {
+          "indicator": "GT: cr\u00e9dito habita\u00e7\u00e3o",
+          "r_squared": 0.4045,
+          "forecast": 0.005961
+        },
+        {
+          "indicator": "GT: insolv\u00eancia",
+          "r_squared": 0.3265,
+          "forecast": 0.001676
+        },
+        {
+          "indicator": "GT: gasolina",
+          "r_squared": 0.292,
+          "forecast": -0.009646
+        },
+        {
+          "indicator": "VIX",
+          "r_squared": 0.2167,
+          "forecast": -0.003822
+        },
+        {
+          "indicator": "GT: infla\u00e7\u00e3o",
+          "r_squared": 0.1231,
+          "forecast": 0.009989
+        },
+        {
+          "indicator": "GT: supermercado",
+          "r_squared": 0.1117,
+          "forecast": 0.012205
+        }
+      ]
+    },
+    "random_forest": {
+      "point": -0.0007,
+      "ci_80": [
+        -0.0116,
+        0.0101
+      ],
+      "ci_95": [
+        -0.0173,
+        0.0158
+      ],
+      "method": "random_forest",
+      "n_features_selected": 19,
+      "r2_train": 0.2822,
+      "oob_score": -0.1605,
+      "top_features": [
+        {
+          "name": "Coincident Activity",
+          "importance": 0.252109,
+          "abs_importance": 0.252109
+        },
+        {
+          "name": "__gdp_lag2",
+          "importance": 0.134946,
+          "abs_importance": 0.134946
+        },
+        {
+          "name": "Services Turnover Total sca",
+          "importance": 0.1178,
+          "abs_importance": 0.1178
+        },
+        {
+          "name": "__gdp_momentum",
+          "importance": 0.084403,
+          "abs_importance": 0.084403
+        },
+        {
+          "name": "__gdp_lag1",
+          "importance": 0.076725,
+          "abs_importance": 0.076725
+        },
+        {
+          "name": "__roll4_std_Total Loans adj YoY",
+          "importance": 0.060253,
+          "abs_importance": 0.060253
+        },
+        {
+          "name": "__roll4_std_Loans to NFC adj YoY",
+          "importance": 0.053678,
+          "abs_importance": 0.053678
+        },
+        {
+          "name": "__roll4_mean_Loans to NFC adj for",
+          "importance": 0.040866,
+          "abs_importance": 0.040866
+        },
+        {
+          "name": "Travel Credit sa",
+          "importance": 0.034776,
+          "abs_importance": 0.034776
+        },
+        {
+          "name": "__roll4_std_Coincident Activity",
+          "importance": 0.027798,
+          "abs_importance": 0.027798
+        }
+      ]
+    },
+    "sc_midas": {
+      "point": 0.0039,
+      "se": 0.0098,
+      "ci_80": [
+        -0.0087,
+        0.0165
+      ],
+      "ci_95": [
+        -0.0154,
+        0.0231
+      ],
+      "target_quarter": "2026Q2",
+      "n_soft_equations": 21,
+      "n_hard_equations": 7,
+      "soft_composite": 0.0047,
+      "hard_composite": 0.0061,
+      "ols_combination": {
+        "alpha": 0.003848,
+        "beta_hard": 0.00435,
+        "beta_soft": 0.002154
+      },
+      "soft_equations": [
+        {
+          "indicator": "GT: turismo",
+          "r_squared": 0.435,
+          "forecast": 0.003117
+        },
+        {
+          "indicator": "Retail Confidence",
+          "r_squared": 0.3842,
+          "forecast": 0.009466
+        },
+        {
+          "indicator": "Economic Sentiment (ESI)",
+          "r_squared": 0.3607,
+          "forecast": 0.004118
+        },
+        {
+          "indicator": "GT: cr\u00e9dito habita\u00e7\u00e3o",
+          "r_squared": 0.3435,
+          "forecast": 0.011657
+        },
+        {
+          "indicator": "Industry Production Expectations",
+          "r_squared": 0.3187,
+          "forecast": 0.000327
+        },
+        {
+          "indicator": "Industry Confidence",
+          "r_squared": 0.3079,
+          "forecast": 0.003927
+        },
+        {
+          "indicator": "Services Confidence",
+          "r_squared": 0.2972,
+          "forecast": 0.005404
+        },
+        {
+          "indicator": "Industry Order Books",
+          "r_squared": 0.2819,
+          "forecast": 0.005884
+        },
+        {
+          "indicator": "Construction Confidence",
+          "r_squared": 0.247,
+          "forecast": 0.011356
+        },
+        {
+          "indicator": "GT: insolv\u00eancia",
+          "r_squared": 0.2455,
+          "forecast": 0.008753
+        },
+        {
+          "indicator": "Consumer Confidence",
+          "r_squared": 0.2277,
+          "forecast": 0.000858
+        },
+        {
+          "indicator": "Industry Export Order Books",
+          "r_squared": 0.2229,
+          "forecast": 0.004363
+        },
+        {
+          "indicator": "Consumer Unemployment Expectations",
+          "r_squared": 0.21,
+          "forecast": 0.00542
+        },
+        {
+          "indicator": "Consumer Financial Situation Future",
+          "r_squared": 0.2058,
+          "forecast": 0.001464
+        },
+        {
+          "indicator": "GT: supermercado",
+          "r_squared": 0.1938,
+          "forecast": 0.005937
+        },
+        {
+          "indicator": "Construction Order Books",
+          "r_squared": 0.1888,
+          "forecast": 0.011206
+        },
+        {
+          "indicator": "Financial Stress Indicator Monthly",
+          "r_squared": 0.1885,
+          "forecast": 0.005169
+        },
+        {
+          "indicator": "GT: gasolina",
+          "r_squared": 0.1391,
+          "forecast": -0.003404
+        },
+        {
+          "indicator": "Employment Expectations",
+          "r_squared": 0.1293,
+          "forecast": 0.003873
+        },
+        {
+          "indicator": "GT: emprego",
+          "r_squared": 0.1059,
+          "forecast": 0.003905
+        },
+        {
+          "indicator": "Consumer Major Purchases Intention",
+          "r_squared": 0.1001,
+          "forecast": 0.003487
+        }
+      ],
+      "hard_equations": [
+        {
+          "indicator": "Retail Turnover YoY deflated sca",
+          "r_squared": 0.5432,
+          "forecast": 0.007487
+        },
+        {
+          "indicator": "Coincident Activity",
+          "r_squared": 0.523,
+          "forecast": 0.003816
+        },
+        {
+          "indicator": "Electricity Consumption YoY",
+          "r_squared": 0.5043,
+          "forecast": 0.011983
+        },
+        {
+          "indicator": "Coincident Consumption",
+          "r_squared": 0.4801,
+          "forecast": 0.004171
+        },
+        {
+          "indicator": "Passenger Vehicles New YoY",
+          "r_squared": 0.4353,
+          "forecast": 0.005051
+        },
+        {
+          "indicator": "Tourism Overnight Stays Total",
+          "r_squared": 0.2943,
+          "forecast": 0.006783
+        },
+        {
+          "indicator": "Tourism Overnight Stays Non-Residents",
+          "r_squared": 0.2359,
+          "forecast": 0.006813
+        }
+      ]
+    },
+    "ensemble": {
+      "point": 0.0044,
+      "ci_80": [
+        -0.0064,
+        0.0152
+      ],
+      "ci_95": [
+        -0.0122,
+        0.0209
+      ],
+      "method": "stacking",
+      "weights": {
+        "dfm": 0.16666666666666666,
+        "bridge": 0.16666666666666666,
+        "supply_side_bridge": 0.16666666666666666,
+        "regularized": 0.16666666666666666,
+        "midas": 0.16666666666666666,
+        "sc_midas": 0.16666666666666666
+      },
+      "members": [
+        {
+          "name": "dfm",
+          "point": 0.002353822894116042,
+          "weight": 0.16666666666666666
+        },
+        {
+          "name": "bridge",
+          "point": 0.0038,
+          "weight": 0.16666666666666666
+        },
+        {
+          "name": "supply_side_bridge",
+          "point": 0.0039,
+          "weight": 0.16666666666666666
+        },
+        {
+          "name": "regularized",
+          "point": 0.0065,
+          "weight": 0.16666666666666666
+        },
+        {
+          "name": "midas",
+          "point": 0.0058,
+          "weight": 0.16666666666666666
+        },
+        {
+          "name": "sc_midas",
+          "point": 0.0039,
+          "weight": 0.16666666666666666
+        }
+      ],
+      "shadow_forecasts": {
+        "dma": 0.0039,
+        "equal": 0.0044,
+        "inverse_msfe": 0.004
+      }
+    }
+  },
+  "next_quarter": {
+    "target_quarter": "2026Q3",
+    "models": {
+      "dfm": {
+        "point": 0.0024,
+        "ci_80": [
+          -0.0494,
+          0.0541
+        ],
+        "ci_95": [
+          -0.0767,
+          0.0814
+        ]
+      }
+    }
+  },
+  "news_decomposition": null,
+  "data_availability": {
+    "pct_complete": 0.28,
+    "n_series": 198,
+    "latest_date": "2026-06-01",
+    "data_age_days": 0,
+    "stale": false
+  },
+  "vintage": {
+    "position": "M2",
+    "pct_complete": 0.28,
+    "coverage_by_month": {
+      "m1": 0.58,
+      "m2": 0.23,
+      "m3": 0.03
+    },
+    "calendar_date": "2026-06-04",
+    "models_skipped": [
+      {
+        "name": "lstm",
+        "reason": "lean production roster"
+      },
+      {
+        "name": "cnn",
+        "reason": "lean production roster"
+      },
+      {
+        "name": "gp_midas",
+        "reason": "lean production roster"
+      },
+      {
+        "name": "bayesian_dfm",
+        "reason": "lean production roster"
+      },
+      {
+        "name": "anchored_bayesian_dfm",
+        "reason": "lean production roster"
+      }
+    ]
+  },
+  "model_status": {
+    "dfm": "ok",
+    "bridge": "ok",
+    "supply_side_bridge": "ok",
+    "regularized": "ok",
+    "midas": "ok",
+    "lstm": "skipped",
+    "cnn": "skipped",
+    "gp_midas": "skipped",
+    "bayesian_dfm": "skipped",
+    "anchored_bayesian_dfm": "skipped",
+    "random_forest": "ok",
+    "sc_midas": "ok",
+    "ensemble": "ok",
+    "dfm_mq": "failed",
+    "robust_dfm_mq": "failed",
+    "quantile_random_forest": "failed",
+    "linear_bdfm": "not_routed",
+    "bayesian_dfm_linear": "not_routed",
+    "robust_anchored_bayesian_dfm": "not_routed",
+    "bayesian_dfm_mq_sv": "not_routed",
+    "bayesian_component_dfm": "not_routed",
+    "hierarchical_bayesian_dfm_mq": "not_routed",
+    "gp_dfm_experimental": "not_routed"
+  },
+  "headline": {
+    "model": "supply_side_bridge",
+    "point": 0.0039,
+    "typical_error_band": [
+      -0.0081,
+      0.0159
+    ],
+    "typical_error_pp": 1.2,
+    "intervals_calibrated": false,
+    "operating_point": "M2",
+    "status": "preliminary",
+    "caveat": "Preliminary: produced before the quarter's hard data is in (or on stale data). At this stage the model is not better than a naive benchmark; treat as indicative only, not a published nowcast."
+  },
+  "recommendations": {
+    "production_single_model": {
+      "model": "supply_side_bridge",
+      "point": 0.0039,
+      "typical_error_band": [
+        -0.0081,
+        0.0159
+      ],
+      "typical_error_pp": 1.2,
+      "intervals_calibrated": false,
+      "operating_point": "M2",
+      "status": "preliminary",
+      "caveat": "Preliminary: produced before the quarter's hard data is in (or on stale data). At this stage the model is not better than a naive benchmark; treat as indicative only, not a published nowcast."
+    },
+    "uncertainty_leader": {
+      "model": "midas"
+    },
+    "factor_news_reference": {
+      "model": "dfm_mq"
+    }
+  },
+  "model_agreement": {
+    "mean": 0.003657,
+    "median": 0.0039,
+    "std": 0.002184,
+    "range": [
+      -0.0007,
+      0.0065
+    ],
+    "n_models": 7,
+    "model_points": {
+      "dfm": 0.0024,
+      "bridge": 0.0038,
+      "supply_side_bridge": 0.0039,
+      "regularized": 0.0065,
+      "midas": 0.0058,
+      "random_forest": -0.0007,
+      "sc_midas": 0.0039
+    }
+  },
+  "recession": {
+    "current_regime": "expansion",
+    "recession_probability": 0.0009,
+    "regime_means": {
+      "expansion": 0.004369,
+      "recession": -0.008484
+    },
+    "expected_durations": {
+      "expansion": 105.9,
+      "recession": 5.3
+    },
+    "probability_history": {
+      "2024-04-01": 0.0006,
+      "2024-07-01": 0.0007,
+      "2024-10-01": 0.0013,
+      "2025-01-01": 0.0018,
+      "2025-04-01": 0.0009,
+      "2025-07-01": 0.0007,
+      "2025-10-01": 0.0008,
+      "2026-01-01": 0.0009
+    }
+  },
+  "latest_official": {
+    "quarter": "2026Q1",
+    "qoq_growth": 0.00047,
+    "source": "Eurostat namq_10_gdp (chain-linked volume, q/q log-diff)"
+  },
+  "gdp_history": [
+    {
+      "quarter": "2023Q2",
+      "qoq_growth": 0.00484
+    },
+    {
+      "quarter": "2023Q3",
+      "qoq_growth": 0.00102
+    },
+    {
+      "quarter": "2023Q4",
+      "qoq_growth": 0.00733
+    },
+    {
+      "quarter": "2024Q1",
+      "qoq_growth": 0.00712
+    },
+    {
+      "quarter": "2024Q2",
+      "qoq_growth": 0.0052
+    },
+    {
+      "quarter": "2024Q3",
+      "qoq_growth": 0.00145
+    },
+    {
+      "quarter": "2024Q4",
+      "qoq_growth": 0.01173
+    },
+    {
+      "quarter": "2025Q1",
+      "qoq_growth": -0.00283
+    },
+    {
+      "quarter": "2025Q2",
+      "qoq_growth": 0.00683
+    },
+    {
+      "quarter": "2025Q3",
+      "qoq_growth": 0.00599
+    },
+    {
+      "quarter": "2025Q4",
+      "qoq_growth": 0.00926
+    },
+    {
+      "quarter": "2026Q1",
+      "qoq_growth": 0.00047
+    }
+  ]
+}

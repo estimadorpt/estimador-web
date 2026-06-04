@@ -12,7 +12,8 @@
     "presidential": "Presidenciais 2026",
     "parliamentary": "Legislativas 2025",
     "sport": "Desporto",
-    "liga": "Liga Portugal"
+    "liga": "Liga Portugal",
+    "economics": "Economia"
   },
   "common": {
     "updated": "Atualizado",
@@ -280,7 +281,9 @@
     "parliamentary2025": "Legislativas 2025",
     "parliamentary2025Description": "Resultados das eleições legislativas de 2025",
     "activeSection": "Ativo",
-    "archiveSection": "Arquivo"
+    "archiveSection": "Arquivo",
+    "economics": "Economia",
+    "economicsDescription": "Estimativa do crescimento trimestral do PIB português"
   },
   "football": {
     "title": "Liga Portugal",
@@ -360,7 +363,6 @@
     "normallyWins": "Normalmente vence __PCT__.",
     "asChampion": "Como campeão, vence __PCT__.",
     "forSurvival": "Para se salvar, vence __PCT__.",
-    "titleRaceSection": "Corrida pelo título",
     "survivalSection": "Luta pela permanência",
     "currentTitleProb": "Prob. atual de título",
     "currentSurvivalProb": "Prob. atual de permanência",
@@ -503,6 +505,30 @@
     "ligaDescription": "Previsões baseadas em dados para a Liga Portugal. Classificação prevista, probabilidades de título e despromoção, e análise de jogos decisivos.",
     "articlesTitle": "Análise e Artigos - estimador.pt",
     "aboutTitle": "Sobre o estimador.pt",
-    "methodologyTitle": "Metodologia - Como Funcionam os Nossos Modelos"
+    "methodologyTitle": "Metodologia - Como Funcionam os Nossos Modelos",
+    "economicsTitle": "Economia — Estimativa do PIB | Estimador",
+    "economicsDescription": "Estimativa em tempo quase real do crescimento trimestral do PIB de Portugal"
+  },
+  "economics": {
+    "eyebrow": "PIB de Portugal",
+    "title": "Estimativa do crescimento do PIB",
+    "updated": "Atualizado a",
+    "officialLabel": "Último valor oficial",
+    "officialSource": "Fonte: Eurostat",
+    "nowcastLabel": "Estimativa do trimestre em curso",
+    "preliminaryBadge": "Preliminar",
+    "authoritativeBadge": "Fim de trimestre",
+    "qoq": "trimestre a trimestre",
+    "bandLabel": "Erro típico",
+    "historyTitle": "Histórico do crescimento do PIB",
+    "historyDescription": "Crescimento real do PIB, trimestre a trimestre. A última barra é a estimativa para o trimestre em curso.",
+    "methodologyTitle": "Como funciona",
+    "methodologyBody": "Esta estimativa é produzida por um único modelo de pontes setoriais que agrega indicadores oficiais de atividade (produção industrial, comércio a retalho, turismo). Em testes fora da amostra de 2020 a 2025 (excluindo os trimestres de COVID de 2020), no fim do trimestre o erro quadrático médio foi cerca de 20–25% inferior ao de um referencial autorregressivo simples (AR(1)) — uma vantagem modesta e que não é estatisticamente significativa nesta amostra curta. Antes do fim do trimestre, com os dados ainda incompletos, a estimativa é preliminar e não supera o referencial simples; deve ser lida como indicativa. É uma estimativa informada, não uma previsão precisa.",
+    "unavailable": "Dados indisponíveis de momento.",
+    "modelLabel": "Modelo",
+    "chartOfficial": "Valores oficiais",
+    "chartNowcast": "Estimativa",
+    "caveatPreliminary": "Preliminar: produzida antes de os dados firmes do trimestre estarem disponíveis. Nesta fase a estimativa não supera um referencial simples; é apenas indicativa.",
+    "caveatAuthoritative": "Estimativa de fim de trimestre: cerca de 20–25% menos erro (RMSE) do que um referencial AR(1) simples em testes de 2020–2025 — modesto e não significativo."
   }
 }

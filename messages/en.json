@@ -12,7 +12,8 @@
     "presidential": "Presidential 2026",
     "parliamentary": "Parliamentary 2025",
     "sport": "Sports",
-    "liga": "Liga Portugal"
+    "liga": "Liga Portugal",
+    "economics": "Economy"
   },
   "common": {
     "updated": "Updated",
@@ -108,7 +109,7 @@
         "tags": "Electoral System,Analysis"
       },
       "article2": {
-        "title": "The Rise of Chega: Analyzing the Right-Wing Surge", 
+        "title": "The Rise of Chega: Analyzing the Right-Wing Surge",
         "excerpt": "Examining the factors behind Chega's rapid growth and what it means for Portuguese politics.",
         "tags": "Party Analysis,Chega"
       },
@@ -280,7 +281,9 @@
     "parliamentary2025": "Parliamentary 2025",
     "parliamentary2025Description": "Results from the 2025 parliamentary elections",
     "activeSection": "Active",
-    "archiveSection": "Archive"
+    "archiveSection": "Archive",
+    "economics": "Economy",
+    "economicsDescription": "Nowcast of Portuguese quarterly GDP growth"
   },
   "football": {
     "title": "Liga Portugal",
@@ -360,7 +363,6 @@
     "normallyWins": "Normally wins __PCT__.",
     "asChampion": "As champion, wins __PCT__.",
     "forSurvival": "To survive, wins __PCT__.",
-    "titleRaceSection": "Title race",
     "survivalSection": "Relegation battle",
     "currentTitleProb": "Current title prob.",
     "currentSurvivalProb": "Current survival prob.",
@@ -503,6 +505,30 @@
     "ligaDescription": "Data-driven forecasts for Liga Portugal. Predicted standings, title and relegation probabilities, and decisive match analysis.",
     "articlesTitle": "Analysis & Articles - estimador.pt",
     "aboutTitle": "About estimador.pt",
-    "methodologyTitle": "Methodology - How Our Models Work"
+    "methodologyTitle": "Methodology - How Our Models Work",
+    "economicsTitle": "Economy — GDP Nowcast | Estimador",
+    "economicsDescription": "Near-real-time estimate of Portugal's quarterly GDP growth"
+  },
+  "economics": {
+    "eyebrow": "Portugal GDP",
+    "title": "GDP growth nowcast",
+    "updated": "Updated",
+    "officialLabel": "Latest official figure",
+    "officialSource": "Source: Eurostat",
+    "nowcastLabel": "Current-quarter nowcast",
+    "preliminaryBadge": "Preliminary",
+    "authoritativeBadge": "Quarter-end",
+    "qoq": "quarter on quarter",
+    "bandLabel": "Typical error",
+    "historyTitle": "GDP growth history",
+    "historyDescription": "Real GDP growth, quarter on quarter. The last bar is the current-quarter estimate.",
+    "methodologyTitle": "How it works",
+    "methodologyBody": "This estimate is produced by a single sector-bridge model that aggregates official Portuguese activity indicators (industrial production, retail, tourism). In 2020–2025 out-of-sample tests (excluding the 2020 COVID quarters), at quarter-end its root-mean-square error was about 20–25% lower than a naive autoregressive (AR(1)) benchmark — a modest advantage that is not statistically significant on this short sample. Before quarter-end, with data still incomplete, the estimate is preliminary and does not beat the simple benchmark; treat it as indicative. It is an informed estimate, not a precise forecast.",
+    "unavailable": "Data currently unavailable.",
+    "modelLabel": "Model",
+    "chartOfficial": "Official values",
+    "chartNowcast": "Nowcast",
+    "caveatPreliminary": "Preliminary: produced before the quarter's hard data is in. At this stage the estimate does not beat a naive benchmark; it is indicative only.",
+    "caveatAuthoritative": "Quarter-end estimate: about 20–25% lower RMSE than a naive AR(1) benchmark in 2020–2025 tests — modest and not significant."
   }
 }

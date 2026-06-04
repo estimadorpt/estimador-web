@@ -14,6 +14,17 @@ export interface SectionConfig {
 
 export const SECTIONS: SectionConfig[] = [
   {
+    id: 'gdp-nowcast',
+    type: 'economics',
+    slug: 'economia',
+    nameKey: 'sections.economics',
+    descriptionKey: 'sections.economicsDescription',
+    isActive: true,
+    accentColor: '#1B4D5E',
+    dataPath: 'economics',
+    href: '/economia',
+  },
+  {
     id: 'liga-portugal',
     type: 'football',
     slug: 'desporto/liga',
