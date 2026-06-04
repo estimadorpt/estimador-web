@@ -1,6 +1,7 @@
 import { loadEconomicsData } from "@/lib/utils/data-loader";
 import { Header } from "@/components/Header";
 import { GdpNowcastChart, type GdpChartPoint } from "@/components/economics/GdpNowcastChart";
+import { GdpTrajectory } from "@/components/economics/GdpTrajectory";
 import { getTranslations } from "next-intl/server";
 import { TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
@@ -66,6 +67,21 @@ export default async function EconomiaPage({
   ];
 
   const [bandLo, bandHi] = headline.typical_error_band;
+
+  const trajectoryLabels = {
+    stepM1: t("economics.stepM1"),
+    stepM2: t("economics.stepM2"),
+    stepM3: t("economics.stepM3"),
+    pendingBadge: t("economics.pendingBadge"),
+    preliminaryBadge: t("economics.preliminaryBadge"),
+    authoritativeBadge: t("economics.authoritativeBadge"),
+    reliabilityPreliminary: t("economics.reliabilityPreliminary"),
+    reliabilityAuthoritative: t("economics.reliabilityAuthoritative"),
+    reliabilityPending: t("economics.reliabilityPending"),
+    officialOutturnLabel: t("economics.officialOutturnLabel"),
+    bandWhiskerLabel: t("economics.bandWhiskerLabel"),
+    movedBy: t("economics.movedBy"),
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -140,6 +156,53 @@ export default async function EconomiaPage({
           </div>
         </div>
       </section>
+
+      {/* Intra-quarter trajectory: how the current-quarter estimate firms up */}
+      {data.current_quarter_trajectory && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <h2 className="text-xl font-bold tracking-tight mb-1">
+              {t("economics.trajectoryTitle")}
+            </h2>
+            <p className="text-sm text-stone-500 mb-6 max-w-3xl">
+              {t("economics.trajectoryDescription")}
+            </p>
+            <GdpTrajectory
+              vintages={data.current_quarter_trajectory.vintages}
+              currentPosition={data.current_quarter_trajectory.current_position}
+              sectorDeltas={data.current_quarter_trajectory.sector_deltas}
+              labels={trajectoryLabels}
+              locale={locale}
+            />
+            <p className="text-xs text-stone-500 mt-4 leading-relaxed max-w-3xl">
+              {t("economics.trajectoryNote")}
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* Convergence demo: how last quarter's estimate met the official figure */}
+      {data.last_completed_quarter_trajectory && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <h2 className="text-lg font-bold tracking-tight mb-1">
+              {t("economics.lastQuarterTitle")} ·{" "}
+              {data.last_completed_quarter_trajectory.target_quarter}
+            </h2>
+            <p className="text-sm text-stone-500 mb-6 max-w-3xl">
+              {t("economics.lastQuarterNote")}
+            </p>
+            <GdpTrajectory
+              vintages={data.last_completed_quarter_trajectory.vintages}
+              officialOutturn={
+                data.last_completed_quarter_trajectory.official_outturn
+              }
+              labels={trajectoryLabels}
+              locale={locale}
+            />
+          </div>
+        </section>
+      )}
 
       {/* History chart */}
       {chartData.length > 1 && (

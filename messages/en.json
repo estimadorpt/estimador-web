@@ -529,6 +529,21 @@
     "chartOfficial": "Official values",
     "chartNowcast": "Nowcast",
     "caveatPreliminary": "Preliminary: produced before the quarter's hard data is in. At this stage the estimate does not beat a naive benchmark; it is indicative only.",
-    "caveatAuthoritative": "Quarter-end estimate: about 20–25% lower RMSE than a naive AR(1) benchmark in 2020–2025 tests — modest and not significant."
+    "caveatAuthoritative": "Quarter-end estimate: about 20–25% lower RMSE than a naive AR(1) benchmark in 2020–2025 tests — modest and not significant.",
+    "trajectoryTitle": "How the estimate firms up through the quarter",
+    "trajectoryDescription": "Watch the current-quarter estimate firm up as official data arrives. This is transparency about timeliness, not an accuracy gain: only the quarter-end (M3) figure has verified skill; the 1-month and 2-month reads are preliminary and not yet better than a naive benchmark.",
+    "trajectoryNote": "The typical error band stays just as wide at every milestone — the estimate firms (the central value moves) but does not get more precise. Quarterly growth typically runs around 0.4% with a quarter-end error of roughly 0.8–1.0pp, so the uncertainty shown is real and calibrated, not optimistic.",
+    "stepM1": "1 month in",
+    "stepM2": "2 months in",
+    "stepM3": "Quarter-end",
+    "pendingBadge": "Pending",
+    "reliabilityPreliminary": "Preliminary — not yet better than a naive benchmark",
+    "reliabilityAuthoritative": "Quarter-end estimate — the only read with verified skill",
+    "reliabilityPending": "Awaiting the quarter's hard data",
+    "lastQuarterTitle": "How last quarter converged",
+    "lastQuarterNote": "How last quarter's estimate converged to the official figure as hard data arrived. This illustrates the mechanism — earlier reads are not necessarily closer; the value is firming toward the reliable quarter-end estimate.",
+    "officialOutturnLabel": "Official outturn",
+    "bandWhiskerLabel": "Typical error",
+    "movedBy": "{sector} moved the estimate the most."
   }
 }

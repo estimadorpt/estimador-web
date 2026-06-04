@@ -15,7 +15,7 @@ DATA_DIR="$PROJECT_DIR/public/data"
 SECTION="${1:-all}"
 
 sync_football() {
-  local FOOTBALL_SRC="$HOME/code/football/output/2025-26/predictions"
+  local FOOTBALL_SRC="$HOME/code/estimador-football/output/2025-26/predictions"
   local FOOTBALL_DEST="$DATA_DIR/football/liga-2025-26"
 
   if [ ! -d "$FOOTBALL_SRC" ]; then
@@ -35,6 +35,29 @@ sync_elections() {
   echo "  Parliamentary: $(ls "$DATA_DIR/elections/parliamentary-2025/" 2>/dev/null | wc -l | tr -d ' ') files"
 }
 
+sync_economics() {
+  local ECONOMICS_SRC="$HOME/code/estimador-economics/output"
+  local ECONOMICS_DEST="$DATA_DIR/economics"
+
+  if [ ! -d "$ECONOMICS_SRC" ]; then
+    echo "Warning: Economics source not found at $ECONOMICS_SRC"
+    return 1
+  fi
+
+  mkdir -p "$ECONOMICS_DEST"
+  # Publish ONLY the production nowcast, renamed to nowcast.json (the file the web
+  # app reads). NEVER `cp *.json` here: output/ holds ~190 internal research/eval
+  # artifacts (backtest_*, bayesian_dfm_eval_*, statistical_validation_*, ...) that
+  # must not be published to the public site.
+  if [ -f "$ECONOMICS_SRC/nowcast_latest.json" ]; then
+    cp "$ECONOMICS_SRC/nowcast_latest.json" "$ECONOMICS_DEST/nowcast.json"
+    echo "Synced economics nowcast -> $ECONOMICS_DEST/nowcast.json"
+  else
+    echo "No economics nowcast at $ECONOMICS_SRC/nowcast_latest.json (run the daily pipeline first)"
+    return 1
+  fi
+}
+
 case "$SECTION" in
   football)
     sync_football
@@ -42,13 +65,17 @@ case "$SECTION" in
   elections)
     sync_elections
     ;;
+  economics)
+    sync_economics
+    ;;
   all)
     sync_football
     sync_elections
+    sync_economics
     ;;
   *)
     echo "Unknown section: $SECTION"
-    echo "Usage: $0 [football|elections|all]"
+    echo "Usage: $0 [football|elections|economics|all]"
     exit 1
     ;;
 esac

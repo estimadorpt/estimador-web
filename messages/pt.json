@@ -529,6 +529,21 @@
     "chartOfficial": "Valores oficiais",
     "chartNowcast": "Estimativa",
     "caveatPreliminary": "Preliminar: produzida antes de os dados firmes do trimestre estarem disponíveis. Nesta fase a estimativa não supera um referencial simples; é apenas indicativa.",
-    "caveatAuthoritative": "Estimativa de fim de trimestre: cerca de 20–25% menos erro (RMSE) do que um referencial AR(1) simples em testes de 2020–2025 — modesto e não significativo."
+    "caveatAuthoritative": "Estimativa de fim de trimestre: cerca de 20–25% menos erro (RMSE) do que um referencial AR(1) simples em testes de 2020–2025 — modesto e não significativo.",
+    "trajectoryTitle": "Como a estimativa se consolida ao longo do trimestre",
+    "trajectoryDescription": "Acompanhe a estimativa do trimestre em curso a firmar-se à medida que os dados oficiais vão chegando. Isto é transparência sobre a oportunidade da informação, não um ganho de precisão: só o valor de fim de trimestre (M3) tem mérito comprovado; as leituras de 1.º e 2.º mês são preliminares e ainda não superam um referencial ingénuo.",
+    "trajectoryNote": "A margem de erro típica mantém-se igualmente larga em todos os momentos — a estimativa firma-se (o valor central move-se), mas não fica mais precisa. O crescimento trimestral ronda tipicamente 0,4% e o erro de fim de trimestre é de cerca de 0,8 a 1,0 p.p., pelo que a incerteza mostrada é real e calibrada, não otimista.",
+    "stepM1": "1.º mês",
+    "stepM2": "2 meses",
+    "stepM3": "Fim de trimestre",
+    "pendingBadge": "A aguardar dados",
+    "reliabilityPreliminary": "Preliminar — ainda não supera uma referência ingénua",
+    "reliabilityAuthoritative": "Estimativa de fim de trimestre — a única com mérito comprovado",
+    "reliabilityPending": "A aguardar os dados definitivos do trimestre",
+    "lastQuarterTitle": "Como o trimestre anterior convergiu",
+    "lastQuarterNote": "Como a estimativa do trimestre anterior convergiu para o valor oficial à medida que os dados firmes chegaram. Ilustra o mecanismo — as leituras iniciais não são necessariamente mais próximas; o valor está em firmar-se para a estimativa fiável de fim de trimestre.",
+    "officialOutturnLabel": "Valor oficial",
+    "bandWhiskerLabel": "Erro típico",
+    "movedBy": "{sector} foi o setor que mais moveu a estimativa."
   }
 }
