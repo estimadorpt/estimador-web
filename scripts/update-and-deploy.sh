@@ -7,7 +7,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-FOOTBALL_DIR="$HOME/code/football"
+FOOTBALL_DIR="$HOME/code/estimador-football"
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') — Starting update pipeline"
 
@@ -28,11 +28,19 @@ if git diff --quiet public/data/football/; then
   exit 0
 fi
 
-# Step 4: Build
+# Step 4: Generate social media content (non-blocking)
+echo "$(date '+%Y-%m-%d %H:%M:%S') — Generating social media content..."
+python3 "$SCRIPT_DIR/generate-social-content.py" || echo "$(date '+%Y-%m-%d %H:%M:%S') — Warning: social content generation failed (non-blocking)"
+
+# Step 4b: Generate social media image (non-blocking)
+echo "$(date '+%Y-%m-%d %H:%M:%S') — Generating social media image..."
+node "$SCRIPT_DIR/generate-social-images.mjs" || echo "$(date '+%Y-%m-%d %H:%M:%S') — Warning: social image generation failed (non-blocking)"
+
+# Step 5: Build
 echo "$(date '+%Y-%m-%d %H:%M:%S') — Building..."
 npm run build
 
-# Step 5: Commit and push
+# Step 6: Commit and push
 git add public/data/football/
 git commit -m "$(cat <<'EOF'
 data: update predictions after matchday results

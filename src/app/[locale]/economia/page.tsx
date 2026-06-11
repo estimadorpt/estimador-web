@@ -1,10 +1,22 @@
-import { loadEconomicsData } from "@/lib/utils/data-loader";
+import { loadEconomyDashboard } from "@/lib/utils/data-loader";
+import { isTileAvailable, type EconomyDashboardTiles } from "@/types/economy-dashboard";
+import { fmtDate } from "@/lib/utils/economy-format";
 import { Header } from "@/components/Header";
-import { GdpNowcastChart, type GdpChartPoint } from "@/components/economics/GdpNowcastChart";
-import { GdpTrajectory } from "@/components/economics/GdpTrajectory";
 import { getTranslations } from "next-intl/server";
 import { TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
+
+import { DisclaimerCard } from "@/components/economics/dashboard/DisclaimerCard";
+import { UnavailableTile } from "@/components/economics/dashboard/UnavailableTile";
+import { HealthScoreTile } from "@/components/economics/dashboard/HealthScoreTile";
+import { PulseTile } from "@/components/economics/dashboard/PulseTile";
+import { AnnualOutlookTile } from "@/components/economics/dashboard/AnnualOutlookTile";
+import { ContributionsTile } from "@/components/economics/dashboard/ContributionsTile";
+import { RecessionTile } from "@/components/economics/dashboard/RecessionTile";
+import { GrowthAtRiskTile } from "@/components/economics/dashboard/GrowthAtRiskTile";
+import { OfficialQuarterlyTile } from "@/components/economics/dashboard/OfficialQuarterlyTile";
+import { TrackRecordTile } from "@/components/economics/dashboard/TrackRecordTile";
+import { LabourTile } from "@/components/economics/dashboard/LabourTile";
 
 export async function generateMetadata({
   params,
@@ -27,61 +39,37 @@ export async function generateMetadata({
   };
 }
 
-function fmtSignedPct(v: number): string {
-  const pct = v * 100;
-  return `${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`;
-}
-
 export default async function EconomiaPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale });
+  const t = await getTranslations({ locale, namespace: "economics" });
 
-  const data = await loadEconomicsData();
+  const data = await loadEconomyDashboard();
 
-  if (!data || !data.headline) {
+  // Whole-feed failure → honest, non-crashing fallback.
+  if (!data) {
     return (
       <div className="min-h-screen bg-white">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 py-20 text-center text-stone-500">
-          <p>{t("economics.unavailable")}</p>
+        <div className="max-w-5xl mx-auto px-4 py-20 text-center text-stone-500">
+          <p>{t("unavailable")}</p>
         </div>
       </div>
     );
   }
 
-  const { headline, latest_official, gdp_history } = data;
-  const isPreliminary = headline.status !== "authoritative";
+  const tiles: EconomyDashboardTiles = data.tiles ?? {};
+  const updatedDate = fmtDate(data.vintage_date, locale);
 
-  const updatedDate = new Date(data.vintage_date).toLocaleDateString(
-    locale === "pt" ? "pt-PT" : "en-US",
-    { day: "numeric", month: "long", year: "numeric" }
-  );
-
-  const chartData: GdpChartPoint[] = [
-    ...(gdp_history ?? []).map((p) => ({ quarter: p.quarter, value: p.qoq_growth })),
-    { quarter: data.target_quarter, value: headline.point, isNowcast: true },
-  ];
-
-  const [bandLo, bandHi] = headline.typical_error_band;
-
-  const trajectoryLabels = {
-    stepM1: t("economics.stepM1"),
-    stepM2: t("economics.stepM2"),
-    stepM3: t("economics.stepM3"),
-    pendingBadge: t("economics.pendingBadge"),
-    preliminaryBadge: t("economics.preliminaryBadge"),
-    authoritativeBadge: t("economics.authoritativeBadge"),
-    reliabilityPreliminary: t("economics.reliabilityPreliminary"),
-    reliabilityAuthoritative: t("economics.reliabilityAuthoritative"),
-    reliabilityPending: t("economics.reliabilityPending"),
-    officialOutturnLabel: t("economics.officialOutturnLabel"),
-    bandWhiskerLabel: t("economics.bandWhiskerLabel"),
-    movedBy: t("economics.movedBy"),
-  };
+  // Top-level narrative lede — fixed-rule template over the published tiles
+  // (the payload is bilingual; pick the locale, fall back to the other).
+  const narrative =
+    locale === "pt"
+      ? data.narrative?.pt ?? data.narrative?.en
+      : data.narrative?.en ?? data.narrative?.pt;
 
   return (
     <div className="min-h-screen bg-white">
@@ -89,156 +77,165 @@ export default async function EconomiaPage({
 
       {/* Hero */}
       <section className="bg-stone-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+        <div className="max-w-5xl mx-auto px-4 py-8 md:py-12">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-5 h-5 text-stone-400" />
             <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-              {t("economics.eyebrow")}
+              {t("eyebrow")}
             </span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            {t("economics.title")}
-          </h1>
-          <p className="text-stone-400 text-sm">
-            {t("economics.updated")} {updatedDate}
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{t("title")}</h1>
+          <p className="text-stone-300 text-sm md:text-base max-w-2xl">
+            {t("pageIntro")}
+          </p>
+          <p className="text-stone-400 text-xs mt-3">
+            {t("updated")} {updatedDate}
           </p>
         </div>
       </section>
 
-      {/* Headline numbers: latest official + current-quarter nowcast */}
-      <section className="border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Latest official quarter */}
-          {latest_official && (
-            <div className="border-t-2 border-stone-300 pt-4">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                {t("economics.officialLabel")} · {latest_official.quarter}
-              </div>
-              <div className="text-5xl font-black tabular-nums text-stone-900">
-                {fmtSignedPct(latest_official.qoq_growth)}
-              </div>
-              <p className="text-xs text-stone-400 mt-2">
-                {t("economics.qoq")} · {t("economics.officialSource")}
+      {/* Tiles */}
+      <main className="max-w-5xl mx-auto px-4 py-8 space-y-5">
+        {/* Narrative lede — the page's plain-language summary, straight from the
+            feed (locale-aware). A presentation feature: no model, no new claim. */}
+        {narrative && (
+          <section className="border-l-2 border-stone-300 pl-4">
+            <p className="text-base md:text-lg leading-relaxed text-stone-700 max-w-4xl">
+              {narrative}
+            </p>
+            {data.narrative?.generated_by && (
+              <p className="mt-1.5 text-[10px] text-stone-400">
+                {t("narrativeBy")}: {data.narrative.generated_by}
               </p>
-            </div>
-          )}
+            )}
+          </section>
+        )}
 
-          {/* Current-quarter nowcast */}
-          <div className="border-t-2 pt-4" style={{ borderColor: "#1B4D5E" }}>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                {t("economics.nowcastLabel")} · {data.target_quarter}
-              </span>
-              <span
-                className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                  isPreliminary
-                    ? "bg-amber-100 text-amber-700"
-                    : "bg-emerald-100 text-emerald-700"
-                }`}
-              >
-                {isPreliminary
-                  ? t("economics.preliminaryBadge")
-                  : t("economics.authoritativeBadge")}
-              </span>
-            </div>
-            <div className="text-5xl font-black tabular-nums" style={{ color: "#1B4D5E" }}>
-              {fmtSignedPct(headline.point)}
-            </div>
-            <p className="text-xs text-stone-500 mt-2">
-              {t("economics.bandLabel")}: {fmtSignedPct(bandLo)} … {fmtSignedPct(bandHi)}
-              {" "}({t("economics.qoq")})
-            </p>
-            <p className="text-xs text-stone-500 mt-3 leading-relaxed max-w-md">
-              {isPreliminary
-                ? t("economics.caveatPreliminary")
-                : t("economics.caveatAuthoritative")}
-            </p>
+        <DisclaimerCard
+          vintageDate={data.vintage_date}
+          vintage={data.vintage}
+          locale={locale}
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* 1 · health score (hero) */}
+          <div className="lg:col-span-2">
+            {isTileAvailable(tiles.health_score) ? (
+              <HealthScoreTile data={tiles.health_score} locale={locale} />
+            ) : (
+              <UnavailableTile
+                title={t("healthTitle")}
+                reason={tiles.health_score?.reason}
+                locale={locale}
+              />
+            )}
+          </div>
+
+          {/* 2 · pulse (anchored) */}
+          <div className="lg:col-span-2">
+            {isTileAvailable(tiles.pulse) ? (
+              <PulseTile data={tiles.pulse} locale={locale} />
+            ) : (
+              <UnavailableTile
+                title={t("pulseTitle")}
+                reason={tiles.pulse?.reason}
+                locale={locale}
+              />
+            )}
+          </div>
+
+          {/* 3 · annual outlook — the editorial centerpiece */}
+          <div className="lg:col-span-2">
+            {isTileAvailable(tiles.annual_outlook) ? (
+              <AnnualOutlookTile data={tiles.annual_outlook} locale={locale} />
+            ) : (
+              <UnavailableTile
+                title={t("annualTitleFallback")}
+                reason={tiles.annual_outlook?.reason}
+                locale={locale}
+              />
+            )}
+          </div>
+
+          {/* 4 · contributions */}
+          <div>
+            {isTileAvailable(tiles.contributions) ? (
+              <ContributionsTile data={tiles.contributions} locale={locale} />
+            ) : (
+              <UnavailableTile
+                title={t("contributionsTitle")}
+                reason={tiles.contributions?.reason}
+                locale={locale}
+              />
+            )}
+          </div>
+
+          {/* 5 · labour market */}
+          <div>
+            {isTileAvailable(tiles.labour) ? (
+              <LabourTile data={tiles.labour} locale={locale} />
+            ) : (
+              <UnavailableTile
+                title={t("labourTitle")}
+                reason={tiles.labour?.reason}
+                locale={locale}
+              />
+            )}
+          </div>
+
+          {/* 6 · recession */}
+          <div className="lg:col-span-2">
+            {isTileAvailable(tiles.recession) ? (
+              <RecessionTile data={tiles.recession} locale={locale} />
+            ) : (
+              <UnavailableTile
+                title={t("recessionTitle")}
+                reason={tiles.recession?.reason}
+                locale={locale}
+              />
+            )}
+          </div>
+
+          {/* 7 · growth at risk */}
+          <div className="lg:col-span-2">
+            {isTileAvailable(tiles.growth_at_risk) ? (
+              <GrowthAtRiskTile data={tiles.growth_at_risk} locale={locale} />
+            ) : (
+              <UnavailableTile
+                title={t("garTitle")}
+                reason={tiles.growth_at_risk?.reason}
+                locale={locale}
+              />
+            )}
+          </div>
+
+          {/* 8 · official quarterly (demoted) */}
+          <div>
+            {isTileAvailable(tiles.official_quarterly) ? (
+              <OfficialQuarterlyTile data={tiles.official_quarterly} locale={locale} />
+            ) : (
+              <UnavailableTile
+                title={t("officialTitle")}
+                reason={tiles.official_quarterly?.reason}
+                locale={locale}
+              />
+            )}
+          </div>
+
+          {/* 9 · track record */}
+          <div>
+            {isTileAvailable(tiles.track_record) ? (
+              <TrackRecordTile data={tiles.track_record} locale={locale} />
+            ) : (
+              <UnavailableTile
+                title={t("trackTitle")}
+                reason={tiles.track_record?.reason}
+                locale={locale}
+              />
+            )}
           </div>
         </div>
-      </section>
-
-      {/* Intra-quarter trajectory: how the current-quarter estimate firms up */}
-      {data.current_quarter_trajectory && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
-              {t("economics.trajectoryTitle")}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6 max-w-3xl">
-              {t("economics.trajectoryDescription")}
-            </p>
-            <GdpTrajectory
-              vintages={data.current_quarter_trajectory.vintages}
-              currentPosition={data.current_quarter_trajectory.current_position}
-              sectorDeltas={data.current_quarter_trajectory.sector_deltas}
-              labels={trajectoryLabels}
-              locale={locale}
-            />
-            <p className="text-xs text-stone-500 mt-4 leading-relaxed max-w-3xl">
-              {t("economics.trajectoryNote")}
-            </p>
-          </div>
-        </section>
-      )}
-
-      {/* Convergence demo: how last quarter's estimate met the official figure */}
-      {data.last_completed_quarter_trajectory && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-lg font-bold tracking-tight mb-1">
-              {t("economics.lastQuarterTitle")} ·{" "}
-              {data.last_completed_quarter_trajectory.target_quarter}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6 max-w-3xl">
-              {t("economics.lastQuarterNote")}
-            </p>
-            <GdpTrajectory
-              vintages={data.last_completed_quarter_trajectory.vintages}
-              officialOutturn={
-                data.last_completed_quarter_trajectory.official_outturn
-              }
-              labels={trajectoryLabels}
-              locale={locale}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* History chart */}
-      {chartData.length > 1 && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
-              {t("economics.historyTitle")}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("economics.historyDescription")}
-            </p>
-            <GdpNowcastChart
-              data={chartData}
-              labels={{
-                official: t("economics.chartOfficial"),
-                nowcast: t("economics.chartNowcast"),
-              }}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* Methodology / honest disclosure */}
-      <section>
-        <div className="max-w-7xl mx-auto px-4 py-10">
-          <h2 className="text-xl font-bold tracking-tight mb-3">
-            {t("economics.methodologyTitle")}
-          </h2>
-          <p className="text-sm text-stone-600 leading-relaxed max-w-3xl">
-            {t("economics.methodologyBody")}
-          </p>
-          <p className="text-xs text-stone-400 mt-4">
-            {t("economics.modelLabel")}: {headline.model}
-          </p>
-        </div>
-      </section>
+      </main>
     </div>
   );
 }

@@ -149,8 +149,12 @@ gh pr create --title "Feature: Your feature name" --body "Description"
 12. **Update sync script** `scripts/sync-data.sh`
 
 ### Data Updates
-- **Football**: Run `./scripts/sync-data.sh football` to copy from `~/code/football/output/`
+- **Football**: Run `./scripts/sync-data.sh football` to copy from `~/code/estimador-football/output/`
 - **Elections**: Manually update JSON files in `public/data/elections/`
+- **Economics**: Run `./scripts/sync-data.sh economics` to copy from `~/code/estimador-economics/output/`
+
+### Ecosystem Architecture
+All data acquisition is centralized in `estimador-data`. Model repos (`estimador-football`, `estimador-elections`, `estimador-economics`, `estimador-microsynthesis`) are pure modeling — they consume data from `estimador-data`, run models, and output JSONs that `estimador-web` displays.
 
 ### Portuguese Electoral Context
 - **Parties**: AD (center-right), PS (center-left), CH (right), IL (liberal), BE (left), CDU (communist), L (green), PAN (animal rights)

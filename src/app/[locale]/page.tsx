@@ -1,11 +1,17 @@
 import { Header } from "@/components/Header";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { ArrowRight, Trophy, Vote, BarChart3 } from "lucide-react";
+import { ArrowRight, Trophy, Vote, BarChart3, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import { loadLigaSummary } from "@/lib/utils/football-data-loader";
+import { loadEconomyDashboard } from "@/lib/utils/data-loader";
 import { ligaTeamColors } from "@/lib/config/football";
 import { getActiveSections, getArchiveSections } from "@/lib/config/sections";
+import {
+  fmtScore,
+  fmtSignedPctValue,
+  fmtProbPct,
+} from "@/lib/utils/economy-format";
 
 export async function generateMetadata({
   params,
@@ -38,6 +44,8 @@ export default async function HomePage({
   const t = await getTranslations({ locale });
 
   const ligaSummary = await loadLigaSummary();
+  const economy = await loadEconomyDashboard();
+  const economyTiles = economy?.tiles;
   const activeSections = getActiveSections();
   const archiveSections = getArchiveSections();
 
@@ -122,6 +130,92 @@ export default async function HomePage({
               </div>
             </div>
           )}
+
+          {/* Economia card */}
+          <div className="mb-10">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-5 h-5 text-stone-400" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                {t("sections.economics")}
+              </span>
+              <span className="text-[10px] bg-green-100 text-green-800 font-bold px-2 py-0.5">
+                {t("sections.activeSection")}
+              </span>
+            </div>
+
+            {economyTiles ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-stone-200 border border-stone-200">
+                {/* health score */}
+                <div className="bg-white p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-1.5 h-5" style={{ backgroundColor: "#1B4D5E" }} />
+                    <span className="text-sm font-medium text-stone-600">
+                      {t("economics.homeCardHealth")}
+                    </span>
+                  </div>
+                  <div className="text-3xl font-black tabular-nums text-stone-900">
+                    {fmtScore(economyTiles.health_score?.score_0_100)}
+                    <span className="text-base font-bold text-stone-400">/100</span>
+                  </div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mt-1">
+                    {t("economics.labelStateOfEconomy")}
+                  </div>
+                </div>
+                {/* activity anchor (BdP coincident, YoY) */}
+                <div className="bg-white p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-1.5 h-5" style={{ backgroundColor: "#1B4D5E" }} />
+                    <span className="text-sm font-medium text-stone-600">
+                      {t("economics.homeCardPulse")}
+                    </span>
+                  </div>
+                  <div className="text-3xl font-black tabular-nums text-stone-900">
+                    {fmtSignedPctValue(economyTiles.pulse?.anchor?.value, 1)}
+                  </div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mt-1">
+                    {t("economics.labelPreliminary")}
+                  </div>
+                </div>
+                {/* recession risk */}
+                <div className="bg-white p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-1.5 h-5" style={{ backgroundColor: "#1B4D5E" }} />
+                    <span className="text-sm font-medium text-stone-600">
+                      {t("economics.homeCardRecession")}
+                    </span>
+                  </div>
+                  <div className="text-3xl font-black tabular-nums text-stone-900">
+                    {fmtProbPct(economyTiles.recession?.probability, 0)}
+                  </div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mt-1">
+                    {t("economics.labelRecessionRisk")}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-px bg-stone-200 border border-stone-200">
+                <div className="bg-white p-5">
+                  <div className="text-xs text-stone-500">
+                    {t("sections.economicsDescription")}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-3 flex items-center justify-between">
+              <span className="text-xs text-stone-500">
+                {t("economics.pageIntro")}
+              </span>
+              <Link
+                href="/economia"
+                locale={locale}
+                className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              >
+                {t("common.viewFull")}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+          </div>
 
           {/* Elections card */}
           <div>

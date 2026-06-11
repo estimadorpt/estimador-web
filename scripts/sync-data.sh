@@ -45,15 +45,15 @@ sync_economics() {
   fi
 
   mkdir -p "$ECONOMICS_DEST"
-  # Publish ONLY the production nowcast, renamed to nowcast.json (the file the web
+  # Publish ONLY the dashboard feed, renamed to dashboard.json (the file the web
   # app reads). NEVER `cp *.json` here: output/ holds ~190 internal research/eval
   # artifacts (backtest_*, bayesian_dfm_eval_*, statistical_validation_*, ...) that
   # must not be published to the public site.
-  if [ -f "$ECONOMICS_SRC/nowcast_latest.json" ]; then
-    cp "$ECONOMICS_SRC/nowcast_latest.json" "$ECONOMICS_DEST/nowcast.json"
-    echo "Synced economics nowcast -> $ECONOMICS_DEST/nowcast.json"
+  if [ -f "$ECONOMICS_SRC/dashboard_latest.json" ]; then
+    cp "$ECONOMICS_SRC/dashboard_latest.json" "$ECONOMICS_DEST/dashboard.json"
+    echo "Synced economics dashboard -> $ECONOMICS_DEST/dashboard.json"
   else
-    echo "No economics nowcast at $ECONOMICS_SRC/nowcast_latest.json (run the daily pipeline first)"
+    echo "No economics dashboard at $ECONOMICS_SRC/dashboard_latest.json (run the daily pipeline first)"
     return 1
   fi
 }

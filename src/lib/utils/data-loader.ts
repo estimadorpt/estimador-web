@@ -24,7 +24,7 @@ import {
   SecondRoundBlankNullData
 } from '@/types';
 
-import type { EconomicsNowcast } from '@/types/economics';
+import type { EconomyDashboard } from '@/types/economy-dashboard';
 
 // Load data from the public directory
 export async function loadJsonData<T>(filename: string, subdirectory?: string): Promise<T> {
@@ -39,13 +39,14 @@ const PRESIDENTIAL_DIR = 'elections/presidential-2026';
 const PARLIAMENTARY_DIR = 'elections/parliamentary-2025';
 const ECONOMICS_DIR = 'economics';
 
-// Portuguese GDP nowcast loader. Returns null on any failure so the page can
-// render an honest "unavailable" state rather than crash.
-export async function loadEconomicsData(): Promise<EconomicsNowcast | null> {
+// "State of the economy" dashboard loader (schema estimador-economy-dashboard/v1).
+// Returns null on any failure so the page renders an honest "unavailable" state
+// rather than crash. Individual tiles are guarded separately at render time.
+export async function loadEconomyDashboard(): Promise<EconomyDashboard | null> {
   try {
-    return await loadJsonData<EconomicsNowcast>('nowcast.json', ECONOMICS_DIR);
+    return await loadJsonData<EconomyDashboard>('dashboard.json', ECONOMICS_DIR);
   } catch (error) {
-    console.error('Error loading economics nowcast data:', error);
+    console.error('Error loading economy dashboard data:', error);
     return null;
   }
 }

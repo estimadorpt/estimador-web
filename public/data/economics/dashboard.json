@@ -1,0 +1,3351 @@
+{
+  "schema": "estimador-economy-dashboard/v1",
+  "as_of": "2026-06-11T13:38:51.176348+00:00",
+  "vintage_date": "2026-06-11",
+  "disclaimer": "Preliminary / tracking. This dashboard describes the current state of the Portuguese economy by combining official high-frequency indicators; it largely co-moves with (and is partly built from) the same activity data published by the Banco de Portugal (notably the Coincident Activity index) and Eurostat. It is a faster, consolidated READ-OUT of that state, NOT a more-accurate forecast of GDP. No tile is statistically shown to beat its same-frequency baseline; treat every number as indicative. The q/q-GDP nowcast in 'official_quarterly' is preliminary and noisy and is only meaningful at quarter-end (M3). All backtests are PSEUDO-real-time (the final revised panel masked by nominal publication lag, NOT true data vintages), so live performance is likely somewhat optimistic; and the effective sample is tiny (\u224840 ex-COVID quarters; ~3 recession episodes), so no edge here is statistically significant \u2014 this is an honest read-out, not a validated forecasting system. The annual outlook is an arithmetic carryover plus an AR(1) extrapolation that assumes no new shock; its backtested intervals missed in every crisis year.",
+  "narrative": {
+    "en": "The Portuguese economy is steady (health score 51/100). Activity is running at about +1.8% year-on-year on the BdP coincident indicator, with the weekly pulse pointing down since that print. Our indicative mid-quarter estimate for Q2 2026 GDP is +0.3% quarter-on-quarter (80% band -0.1% to +1.1%), implying about +1.9% year-on-year. For 2026 as a whole, the median projection is +1.8% annual growth (P(>2%) \u2248 35%); the 5 official forecasts sit between the 46th and 65th percentiles of our distribution. Recession risk is low (P\u22489%); in an adverse quarter (5% worst case) GDP growth could come in around -0.7%. The labour market looks stable, with the unemployment rate at 5.7%. Indicative read-out, not an official forecast \u2014 see each tile's caveats.",
+    "pt": "A economia portuguesa est\u00e1 est\u00e1vel (\u00edndice de sa\u00fade 51/100). A atividade cresce cerca de +1,8% em termos hom\u00f3logos segundo o indicador coincidente do BdP, com o pulso semanal a apontar para baixo desde essa publica\u00e7\u00e3o. A nossa estimativa indicativa a meio do trimestre para o PIB do 2.\u00ba trimestre de 2026 \u00e9 +0,3% em cadeia (banda de 80%: -0,1% a +1,1%), o que implica cerca de +1,9% hom\u00f3logos. Para o conjunto de 2026, a proje\u00e7\u00e3o mediana \u00e9 +1,8% de crescimento anual (P(>2%) \u2248 35%); as 5 previs\u00f5es oficiais situam-se entre os percentis 46 e 65 da nossa distribui\u00e7\u00e3o. O risco de recess\u00e3o \u00e9 baixo (P\u22489%); num trimestre adverso (pior cen\u00e1rio de 5%), o crescimento do PIB rondaria -0,7%. O mercado de trabalho parece est\u00e1vel, com a taxa de desemprego em 5,7%. Leitura indicativa, n\u00e3o uma previs\u00e3o oficial \u2014 ver as ressalvas de cada painel.",
+    "generated_by": "fixed-rule template over the published tiles (no model, no new claim)"
+  },
+  "vintage": {
+    "position": "M2",
+    "pct_complete": 0.33,
+    "target_quarter": "2026Q2",
+    "coverage_by_month": {
+      "m1": 0.68,
+      "m2": 0.26,
+      "m3": 0.04
+    }
+  },
+  "tiles": {
+    "health_score": {
+      "status": "ok",
+      "label": "state of the economy",
+      "score_0_100": 51.0,
+      "verdict": "steady",
+      "components": {
+        "activity_subscore": 54.0,
+        "downside_subscore": 45.5,
+        "recession_cap": 100.0,
+        "blended_before_recession_cap": 51.0,
+        "weights": {
+          "activity": 0.65,
+          "downside": 0.35,
+          "recession": "cap (override), not weighted"
+        }
+      },
+      "inputs_used": {
+        "pulse_yoy": 1.8,
+        "p_recession": 0.086,
+        "gar_q05_pct": -0.709
+      },
+      "inputs_available": {
+        "pulse": "True",
+        "recession": "True",
+        "gar_downside": "True"
+      },
+      "honesty_note": "A PRESENTATION composite, not a model and not a skill claim. It is a FIXED, transparent monotone blend of three signals the dashboard already shows \u2014 the activity pulse (65%), the next-quarter downside (35%), capped by the recession probability \u2014 using documented anchor curves, with NO fitting on the score itself. By construction it cannot be more accurate than its parts; its only job is to consolidate them into one honest read. The anchors are tied to PT GDP history (a GFC/Troika/COVID-class contraction maps near 0; trend growth ~50; a boom ~90-100). Inherits every caveat of its inputs: pulse tracks (does not beat) BdP coincident activity, the recession gauge is coincident (timeliness, not anticipation), and the downside band is indicative on a short sample.",
+      "source_tiles": {
+        "pulse_yoy_pct": 1.8,
+        "pulse_source": "anchored combined_read (BdP Coincident Activity + weekly tilt)",
+        "recession_probability": 0.086,
+        "gar_downside_q05_pct": -0.709
+      }
+    },
+    "pulse": {
+      "status": "ok",
+      "label": "preliminary",
+      "lead": "anchor",
+      "mode": "anchored",
+      "anchor": {
+        "value": 1.8,
+        "date": "2026-04-01",
+        "units": "yoy_pct_bdp_native",
+        "source": "BdP Coincident Activity (BPstat 12099329)",
+        "corr_yoy_gdp_exclcovid": 0.81
+      },
+      "tilt": {
+        "value": -0.536,
+        "window_days": 42,
+        "direction": "down"
+      },
+      "combined_read": 1.264,
+      "anchor_honesty": {
+        "anchor_claim": "corr 0.81 ex-COVID with YoY GDP (pseudo-real-time, 40 normal quarters 2014-2025; the monthly BdP 'Coincident Activity' print carries the level information, not the weekly pulse)",
+        "tilt_claim": "direction-only, adds no verified level information (partial corr +0.01); its value is timeliness between monthly BdP prints",
+        "hybrid_validation": "pseudo-real-time check (scripts/validate_pulse.py --hybrid, 48 quarters 2014-2025, ex-2020/21): anchor alone corr 0.83 / RMSE 1.05pp vs YoY GDP; anchor+tilt corr 0.59 / RMSE 1.71pp; raw pulse 0.23 / 1.92pp. Adding the tilt WORSENS the anchor-only level read \u2014 treat combined_read as a freshness overlay, and the anchor as the best level estimate"
+      },
+      "honesty_note": "ANCHORED activity read, not a forecast. The LEVEL is the monthly BdP 'Coincident Activity' print \u2014 pseudo-real-time corr 0.81 with realized YoY GDP on normal quarters (40 quarters 2014-2025, ex-2020/21). The weekly index adds NO verified level information beyond that free monthly print (partial corr +0.01; its raw level tracks YoY GDP at only 0.23 ex-COVID): its one asset is CADENCE, so it enters only as the TILT \u2014 the direction of the weekly pulse since the BdP print. Measured warning (validate_pulse.py --hybrid, 48 expanding refits ex-2020/21): anchor alone corr 0.83 / RMSE 1.05pp; anchor+tilt 0.59 / 1.71pp; raw pulse 0.23 / 1.92pp \u2014 adding the tilt WORSENS the level read, so headline the ANCHOR as the level and read combined_read as a freshness overlay only. ~80% of the weekly index's movement is forward-filled monthly data ('weekly' is cadence, not resolution). Pseudo-real-time masks the final revised panel (not true vintages), so live skill is likely optimistic.",
+      "components": {
+        "weekly_index": {
+          "indicator": "weekly_activity_index",
+          "units": "yoy_gdp_growth_pct",
+          "description": "Weekly coincident activity index (WEI/Lewis-Mertens-Stock spirit), scaled to YoY GDP growth. Tracking/preliminary.",
+          "latest": {
+            "date": "2026-06-26",
+            "value": 1.643
+          },
+          "n_inputs": 9,
+          "inputs_used": [
+            "Coincident Consumption",
+            "Tourism Nights",
+            "Retail Trade Volume",
+            "Economic Sentiment (ESI)",
+            "Industrial Production Index",
+            "Services Turnover Total sca",
+            "Unemployment Rate",
+            "ICF",
+            "PSI-20"
+          ],
+          "weights": {
+            "Coincident Consumption": 0.2313,
+            "Tourism Nights": 0.0233,
+            "Retail Trade Volume": 0.0535,
+            "Economic Sentiment (ESI)": 0.1902,
+            "Industrial Production Index": 0.0373,
+            "Services Turnover Total sca": 0.0915,
+            "Unemployment Rate": 0.1505,
+            "ICF": 0.179,
+            "PSI-20": 0.0434
+          },
+          "trailing_52w_min": 1.643,
+          "trailing_52w_max": 4.1,
+          "tracking": {
+            "corr_bdp_coincident_activity_insample": 0.776,
+            "lead_lag_verdict": "index LAGS coincident",
+            "pseudo_rt_level_corr_yoy_gdp_inclcovid": 0.8,
+            "pseudo_rt_level_corr_yoy_gdp_exclcovid": 0.23,
+            "pseudo_rt_change_corr_yoy_gdp_inclcovid": 0.77,
+            "pseudo_rt_change_corr_yoy_gdp_exclcovid": 0.18,
+            "pseudo_rt_corr_bdp_coincident": 0.69,
+            "pseudo_rt_revision_stability": 0.87,
+            "incremental_vs_ar1_exclcovid_relrmse": 0.95,
+            "incremental_significant": false
+          },
+          "history_recent": [
+            {
+              "date": "2024-07-05",
+              "value": 3.132
+            },
+            {
+              "date": "2024-07-12",
+              "value": 3.162
+            },
+            {
+              "date": "2024-07-19",
+              "value": 3.131
+            },
+            {
+              "date": "2024-07-26",
+              "value": 3.116
+            },
+            {
+              "date": "2024-08-02",
+              "value": 3.705
+            },
+            {
+              "date": "2024-08-09",
+              "value": 3.618
+            },
+            {
+              "date": "2024-08-16",
+              "value": 3.702
+            },
+            {
+              "date": "2024-08-23",
+              "value": 3.742
+            },
+            {
+              "date": "2024-08-30",
+              "value": 3.752
+            },
+            {
+              "date": "2024-09-06",
+              "value": 2.495
+            },
+            {
+              "date": "2024-09-13",
+              "value": 2.447
+            },
+            {
+              "date": "2024-09-20",
+              "value": 2.444
+            },
+            {
+              "date": "2024-09-27",
+              "value": 2.408
+            },
+            {
+              "date": "2024-10-04",
+              "value": 2.516
+            },
+            {
+              "date": "2024-10-11",
+              "value": 2.479
+            },
+            {
+              "date": "2024-10-18",
+              "value": 2.467
+            },
+            {
+              "date": "2024-10-25",
+              "value": 2.382
+            },
+            {
+              "date": "2024-11-01",
+              "value": 4.091
+            },
+            {
+              "date": "2024-11-08",
+              "value": 4.013
+            },
+            {
+              "date": "2024-11-15",
+              "value": 4.116
+            },
+            {
+              "date": "2024-11-22",
+              "value": 4.138
+            },
+            {
+              "date": "2024-11-29",
+              "value": 4.173
+            },
+            {
+              "date": "2024-12-06",
+              "value": 3.652
+            },
+            {
+              "date": "2024-12-13",
+              "value": 3.678
+            },
+            {
+              "date": "2024-12-20",
+              "value": 3.689
+            },
+            {
+              "date": "2024-12-27",
+              "value": 3.723
+            },
+            {
+              "date": "2025-01-03",
+              "value": 4.974
+            },
+            {
+              "date": "2025-01-10",
+              "value": 4.95
+            },
+            {
+              "date": "2025-01-17",
+              "value": 5.018
+            },
+            {
+              "date": "2025-01-24",
+              "value": 5.108
+            },
+            {
+              "date": "2025-01-31",
+              "value": 5.11
+            },
+            {
+              "date": "2025-02-07",
+              "value": 3.47
+            },
+            {
+              "date": "2025-02-14",
+              "value": 3.488
+            },
+            {
+              "date": "2025-02-21",
+              "value": 3.454
+            },
+            {
+              "date": "2025-02-28",
+              "value": 3.468
+            },
+            {
+              "date": "2025-03-07",
+              "value": 2.452
+            },
+            {
+              "date": "2025-03-14",
+              "value": 2.411
+            },
+            {
+              "date": "2025-03-21",
+              "value": 2.439
+            },
+            {
+              "date": "2025-03-28",
+              "value": 2.458
+            },
+            {
+              "date": "2025-04-04",
+              "value": 3.368
+            },
+            {
+              "date": "2025-04-11",
+              "value": 3.179
+            },
+            {
+              "date": "2025-04-18",
+              "value": 3.242
+            },
+            {
+              "date": "2025-04-25",
+              "value": 3.283
+            },
+            {
+              "date": "2025-05-02",
+              "value": 3.375
+            },
+            {
+              "date": "2025-05-09",
+              "value": 3.414
+            },
+            {
+              "date": "2025-05-16",
+              "value": 3.461
+            },
+            {
+              "date": "2025-05-23",
+              "value": 3.517
+            },
+            {
+              "date": "2025-05-30",
+              "value": 3.537
+            },
+            {
+              "date": "2025-06-06",
+              "value": 2.444
+            },
+            {
+              "date": "2025-06-13",
+              "value": 2.459
+            },
+            {
+              "date": "2025-06-20",
+              "value": 2.379
+            },
+            {
+              "date": "2025-06-27",
+              "value": 2.401
+            },
+            {
+              "date": "2025-07-04",
+              "value": 4.07
+            },
+            {
+              "date": "2025-07-11",
+              "value": 4.073
+            },
+            {
+              "date": "2025-07-18",
+              "value": 4.079
+            },
+            {
+              "date": "2025-07-25",
+              "value": 4.1
+            },
+            {
+              "date": "2025-08-01",
+              "value": 2.84
+            },
+            {
+              "date": "2025-08-08",
+              "value": 2.837
+            },
+            {
+              "date": "2025-08-15",
+              "value": 2.846
+            },
+            {
+              "date": "2025-08-22",
+              "value": 2.842
+            },
+            {
+              "date": "2025-08-29",
+              "value": 2.807
+            },
+            {
+              "date": "2025-09-05",
+              "value": 2.39
+            },
+            {
+              "date": "2025-09-12",
+              "value": 2.394
+            },
+            {
+              "date": "2025-09-19",
+              "value": 2.423
+            },
+            {
+              "date": "2025-09-26",
+              "value": 2.478
+            },
+            {
+              "date": "2025-10-03",
+              "value": 2.68
+            },
+            {
+              "date": "2025-10-10",
+              "value": 2.648
+            },
+            {
+              "date": "2025-10-17",
+              "value": 2.682
+            },
+            {
+              "date": "2025-10-24",
+              "value": 2.763
+            },
+            {
+              "date": "2025-10-31",
+              "value": 2.866
+            },
+            {
+              "date": "2025-11-07",
+              "value": 3.184
+            },
+            {
+              "date": "2025-11-14",
+              "value": 3.094
+            },
+            {
+              "date": "2025-11-21",
+              "value": 3.058
+            },
+            {
+              "date": "2025-11-28",
+              "value": 3.068
+            },
+            {
+              "date": "2025-12-05",
+              "value": 2.954
+            },
+            {
+              "date": "2025-12-12",
+              "value": 2.872
+            },
+            {
+              "date": "2025-12-19",
+              "value": 2.946
+            },
+            {
+              "date": "2025-12-26",
+              "value": 2.938
+            },
+            {
+              "date": "2026-01-02",
+              "value": 2.872
+            },
+            {
+              "date": "2026-01-09",
+              "value": 2.895
+            },
+            {
+              "date": "2026-01-16",
+              "value": 2.908
+            },
+            {
+              "date": "2026-01-23",
+              "value": 2.851
+            },
+            {
+              "date": "2026-01-30",
+              "value": 2.906
+            },
+            {
+              "date": "2026-02-06",
+              "value": 2.013
+            },
+            {
+              "date": "2026-02-13",
+              "value": 1.987
+            },
+            {
+              "date": "2026-02-20",
+              "value": 1.955
+            },
+            {
+              "date": "2026-02-27",
+              "value": 1.978
+            },
+            {
+              "date": "2026-03-06",
+              "value": 3.594
+            },
+            {
+              "date": "2026-03-13",
+              "value": 3.542
+            },
+            {
+              "date": "2026-03-20",
+              "value": 3.462
+            },
+            {
+              "date": "2026-03-27",
+              "value": 3.421
+            },
+            {
+              "date": "2026-04-03",
+              "value": 2.878
+            },
+            {
+              "date": "2026-04-10",
+              "value": 3.079
+            },
+            {
+              "date": "2026-04-17",
+              "value": 3.003
+            },
+            {
+              "date": "2026-04-24",
+              "value": 2.938
+            },
+            {
+              "date": "2026-05-01",
+              "value": 2.825
+            },
+            {
+              "date": "2026-05-08",
+              "value": 2.656
+            },
+            {
+              "date": "2026-05-15",
+              "value": 2.654
+            },
+            {
+              "date": "2026-05-22",
+              "value": 2.692
+            },
+            {
+              "date": "2026-05-29",
+              "value": 2.657
+            },
+            {
+              "date": "2026-06-05",
+              "value": 2.402
+            },
+            {
+              "date": "2026-06-12",
+              "value": 2.392
+            },
+            {
+              "date": "2026-06-19",
+              "value": 1.643
+            },
+            {
+              "date": "2026-06-26",
+              "value": 1.643
+            }
+          ]
+        }
+      }
+    },
+    "contributions": {
+      "target_quarter": "2026Q2",
+      "vintage_date": "2026-06-01",
+      "position": "M2",
+      "pct_complete": 0.33,
+      "status": "ok",
+      "summary": "preliminary GDP nowcast for 2026Q2 is +0.22% q/q (prior +0.22%); biggest movers: Activity Indicators dragging down (-0.04pp); Surveys pushing up (+0.03pp).",
+      "note": "Attribution of the DFM factor nowcast (the repo's factor-news reference model), not the production headline and not a causal claim. Units are q/q GDP growth (decimal).",
+      "level_decomposition": {
+        "target_quarter": "2026Q2",
+        "vintage_date": "2026-06-01",
+        "nowcast": 0.002194,
+        "prior": 0.002241,
+        "explained": -4.7e-05,
+        "residual": 3.8e-07,
+        "identity_ok": true,
+        "groups": [
+          {
+            "group": "Activity Indicators",
+            "contribution": -0.00038775,
+            "share": 0.4961,
+            "top_drivers": [
+              {
+                "variable": "Coincident Activity",
+                "impact": -0.00038775,
+                "surprise": -0.209765,
+                "weight": 0.0018485
+              }
+            ]
+          },
+          {
+            "group": "Surveys",
+            "contribution": 0.00032874,
+            "share": 0.4206,
+            "top_drivers": [
+              {
+                "variable": "Economic Sentiment (ESI)",
+                "impact": 0.00015616,
+                "surprise": -2.51798,
+                "weight": -5.702e-05
+              },
+              {
+                "variable": "Employment Expectations",
+                "impact": 8.794e-05,
+                "surprise": -13.751593,
+                "weight": -4.05e-06
+              },
+              {
+                "variable": "Consumer Confidence",
+                "impact": 7.332e-05,
+                "surprise": -8.96038,
+                "weight": -5.15e-06
+              }
+            ]
+          },
+          {
+            "group": "Prices",
+            "contribution": 2.586e-05,
+            "share": 0.0331,
+            "top_drivers": [
+              {
+                "variable": "HICP Annual Rate",
+                "impact": 2.236e-05,
+                "surprise": 0.937251,
+                "weight": 6.72e-06
+              },
+              {
+                "variable": "PPI Total Industry",
+                "impact": 3.5e-06,
+                "surprise": 0.0223,
+                "weight": 0.00015717
+              }
+            ]
+          },
+          {
+            "group": "Google Trends",
+            "contribution": -2.4e-05,
+            "share": 0.0307,
+            "top_drivers": [
+              {
+                "variable": "GT: turismo",
+                "impact": -2.395e-05,
+                "surprise": -1.352424,
+                "weight": 1.712e-05
+              },
+              {
+                "variable": "GT: desemprego",
+                "impact": -4.98e-06,
+                "surprise": -0.678781,
+                "weight": 5.41e-06
+              },
+              {
+                "variable": "GT: supermercado",
+                "impact": 4.93e-06,
+                "surprise": 4.093798,
+                "weight": 1.25e-06
+              }
+            ]
+          },
+          {
+            "group": "Financial",
+            "contribution": 6.77e-06,
+            "share": 0.0087,
+            "top_drivers": [
+              {
+                "variable": "VIX",
+                "impact": 6.49e-06,
+                "surprise": 3.374106,
+                "weight": 1.04e-06
+              },
+              {
+                "variable": "PSI-20",
+                "impact": 7.7e-07,
+                "surprise": -0.001886,
+                "weight": -0.00023485
+              },
+              {
+                "variable": "Financial Stress Indicator Daily",
+                "impact": -4.9e-07,
+                "surprise": -0.006696,
+                "weight": 7.433e-05
+              }
+            ]
+          },
+          {
+            "group": "Energy",
+            "contribution": 2.19e-06,
+            "share": 0.0028,
+            "top_drivers": [
+              {
+                "variable": "Gas Consumption",
+                "impact": 1.6e-06,
+                "surprise": -0.149596,
+                "weight": -9.6e-06
+              },
+              {
+                "variable": "Electricity Consumption",
+                "impact": 5.9e-07,
+                "surprise": -0.128171,
+                "weight": -1.031e-05
+              }
+            ]
+          },
+          {
+            "group": "Consumption",
+            "contribution": 2.12e-06,
+            "share": 0.0027,
+            "top_drivers": [
+              {
+                "variable": "Coincident Consumption",
+                "impact": 2.34e-06,
+                "surprise": -0.256227,
+                "weight": -9.12e-06
+              },
+              {
+                "variable": "Retail Trade Volume",
+                "impact": -2.6e-07,
+                "surprise": 0.008749,
+                "weight": -2.966e-05
+              },
+              {
+                "variable": "New Car Registrations",
+                "impact": 4e-08,
+                "surprise": -0.223496,
+                "weight": -1.8e-07
+              }
+            ]
+          },
+          {
+            "group": "External",
+            "contribution": -1.86e-06,
+            "share": 0.0024,
+            "top_drivers": [
+              {
+                "variable": "Brent Oil Price Daily",
+                "impact": -1.86e-06,
+                "surprise": -0.015469,
+                "weight": 0.00031156
+              }
+            ]
+          },
+          {
+            "group": "Labour",
+            "contribution": -8e-07,
+            "share": 0.001,
+            "top_drivers": [
+              {
+                "variable": "Unemployment Rate",
+                "impact": -8e-07,
+                "surprise": -0.016463,
+                "weight": 4.831e-05
+              }
+            ]
+          },
+          {
+            "group": "Real Activity",
+            "contribution": 7.9e-07,
+            "share": 0.001,
+            "top_drivers": [
+              {
+                "variable": "Industrial Production Index",
+                "impact": 5.6e-07,
+                "surprise": -0.02566,
+                "weight": -2.17e-05
+              },
+              {
+                "variable": "Cement Sales",
+                "impact": 2.3e-07,
+                "surprise": -0.044537,
+                "weight": -5.07e-06
+              }
+            ]
+          },
+          {
+            "group": "Credit & Monetary",
+            "contribution": 6.1e-07,
+            "share": 0.0008,
+            "top_drivers": [
+              {
+                "variable": "Loans to NFC adj YoY",
+                "impact": 6.1e-07,
+                "surprise": 8.1754,
+                "weight": 7e-08
+              }
+            ]
+          },
+          {
+            "group": "Other",
+            "contribution": -5e-08,
+            "share": 0.0001,
+            "top_drivers": [
+              {
+                "variable": "Domestic POS Purchases Volume",
+                "impact": -3e-08,
+                "surprise": -0.030226,
+                "weight": 9.9e-07
+              },
+              {
+                "variable": "POS Card Purchases Volume",
+                "impact": -2e-08,
+                "surprise": -0.012488,
+                "weight": 1.61e-06
+              }
+            ]
+          }
+        ]
+      },
+      "revision_decomposition": {
+        "vintage_old": "2026-06-01",
+        "vintage_new": "2026-06-01",
+        "target_quarter": "2026Q2",
+        "nowcast_old": 0.0022,
+        "nowcast_new": 0.0022,
+        "revision": 0.0,
+        "groups": []
+      },
+      "tile_label": "preliminary"
+    },
+    "recession": {
+      "status": "ok",
+      "label": "recession risk",
+      "probability": 0.086,
+      "as_of_quarter": "2026Q2",
+      "recession_probability": {
+        "available": true,
+        "probability": 0.086,
+        "as_of_quarter": "2026Q2",
+        "method": "expanding-window logistic: financial-stress + (\u2212)coincident-activity + (\u2212)ESI",
+        "probability_history": [
+          {
+            "quarter": "2005Q1",
+            "p": 0.273
+          },
+          {
+            "quarter": "2005Q2",
+            "p": 0.278
+          },
+          {
+            "quarter": "2005Q3",
+            "p": 0.342
+          },
+          {
+            "quarter": "2005Q4",
+            "p": 0.223
+          },
+          {
+            "quarter": "2006Q1",
+            "p": 0.232
+          },
+          {
+            "quarter": "2006Q2",
+            "p": 0.148
+          },
+          {
+            "quarter": "2006Q3",
+            "p": 0.088
+          },
+          {
+            "quarter": "2006Q4",
+            "p": 0.04
+          },
+          {
+            "quarter": "2007Q1",
+            "p": 0.031
+          },
+          {
+            "quarter": "2007Q2",
+            "p": 0.018
+          },
+          {
+            "quarter": "2007Q3",
+            "p": 0.017
+          },
+          {
+            "quarter": "2007Q4",
+            "p": 0.021
+          },
+          {
+            "quarter": "2008Q1",
+            "p": 0.03
+          },
+          {
+            "quarter": "2008Q2",
+            "p": 0.954
+          },
+          {
+            "quarter": "2008Q3",
+            "p": 0.999
+          },
+          {
+            "quarter": "2008Q4",
+            "p": 1.0
+          },
+          {
+            "quarter": "2009Q1",
+            "p": 1.0
+          },
+          {
+            "quarter": "2009Q2",
+            "p": 0.999
+          },
+          {
+            "quarter": "2009Q3",
+            "p": 0.779
+          },
+          {
+            "quarter": "2009Q4",
+            "p": 0.459
+          },
+          {
+            "quarter": "2010Q1",
+            "p": 0.273
+          },
+          {
+            "quarter": "2010Q2",
+            "p": 0.225
+          },
+          {
+            "quarter": "2010Q3",
+            "p": 0.212
+          },
+          {
+            "quarter": "2010Q4",
+            "p": 0.252
+          },
+          {
+            "quarter": "2011Q1",
+            "p": 0.383
+          },
+          {
+            "quarter": "2011Q2",
+            "p": 0.608
+          },
+          {
+            "quarter": "2011Q3",
+            "p": 0.849
+          },
+          {
+            "quarter": "2011Q4",
+            "p": 0.941
+          },
+          {
+            "quarter": "2012Q1",
+            "p": 0.948
+          },
+          {
+            "quarter": "2012Q2",
+            "p": 0.946
+          },
+          {
+            "quarter": "2012Q3",
+            "p": 0.944
+          },
+          {
+            "quarter": "2012Q4",
+            "p": 0.933
+          },
+          {
+            "quarter": "2013Q1",
+            "p": 0.908
+          },
+          {
+            "quarter": "2013Q2",
+            "p": 0.856
+          },
+          {
+            "quarter": "2013Q3",
+            "p": 0.551
+          },
+          {
+            "quarter": "2013Q4",
+            "p": 0.281
+          },
+          {
+            "quarter": "2014Q1",
+            "p": 0.188
+          },
+          {
+            "quarter": "2014Q2",
+            "p": 0.177
+          },
+          {
+            "quarter": "2014Q3",
+            "p": 0.222
+          },
+          {
+            "quarter": "2014Q4",
+            "p": 0.241
+          },
+          {
+            "quarter": "2015Q1",
+            "p": 0.158
+          },
+          {
+            "quarter": "2015Q2",
+            "p": 0.115
+          },
+          {
+            "quarter": "2015Q3",
+            "p": 0.107
+          },
+          {
+            "quarter": "2015Q4",
+            "p": 0.102
+          },
+          {
+            "quarter": "2016Q1",
+            "p": 0.136
+          },
+          {
+            "quarter": "2016Q2",
+            "p": 0.125
+          },
+          {
+            "quarter": "2016Q3",
+            "p": 0.098
+          },
+          {
+            "quarter": "2016Q4",
+            "p": 0.061
+          },
+          {
+            "quarter": "2017Q1",
+            "p": 0.036
+          },
+          {
+            "quarter": "2017Q2",
+            "p": 0.023
+          },
+          {
+            "quarter": "2017Q3",
+            "p": 0.019
+          },
+          {
+            "quarter": "2017Q4",
+            "p": 0.022
+          },
+          {
+            "quarter": "2018Q1",
+            "p": 0.031
+          },
+          {
+            "quarter": "2018Q2",
+            "p": 0.04
+          },
+          {
+            "quarter": "2018Q3",
+            "p": 0.048
+          },
+          {
+            "quarter": "2018Q4",
+            "p": 0.059
+          },
+          {
+            "quarter": "2019Q1",
+            "p": 0.047
+          },
+          {
+            "quarter": "2019Q2",
+            "p": 0.076
+          },
+          {
+            "quarter": "2019Q3",
+            "p": 0.147
+          },
+          {
+            "quarter": "2019Q4",
+            "p": 0.273
+          },
+          {
+            "quarter": "2020Q1",
+            "p": 0.647
+          },
+          {
+            "quarter": "2020Q2",
+            "p": 0.994
+          },
+          {
+            "quarter": "2020Q3",
+            "p": 0.974
+          },
+          {
+            "quarter": "2020Q4",
+            "p": 0.721
+          },
+          {
+            "quarter": "2021Q1",
+            "p": 0.347
+          },
+          {
+            "quarter": "2021Q2",
+            "p": 0.049
+          },
+          {
+            "quarter": "2021Q3",
+            "p": 0.02
+          },
+          {
+            "quarter": "2021Q4",
+            "p": 0.015
+          },
+          {
+            "quarter": "2022Q1",
+            "p": 0.017
+          },
+          {
+            "quarter": "2022Q2",
+            "p": 0.026
+          },
+          {
+            "quarter": "2022Q3",
+            "p": 0.054
+          },
+          {
+            "quarter": "2022Q4",
+            "p": 0.095
+          },
+          {
+            "quarter": "2023Q1",
+            "p": 0.054
+          },
+          {
+            "quarter": "2023Q2",
+            "p": 0.052
+          },
+          {
+            "quarter": "2023Q3",
+            "p": 0.058
+          },
+          {
+            "quarter": "2023Q4",
+            "p": 0.081
+          },
+          {
+            "quarter": "2024Q1",
+            "p": 0.075
+          },
+          {
+            "quarter": "2024Q2",
+            "p": 0.081
+          },
+          {
+            "quarter": "2024Q3",
+            "p": 0.082
+          },
+          {
+            "quarter": "2024Q4",
+            "p": 0.064
+          },
+          {
+            "quarter": "2025Q1",
+            "p": 0.065
+          },
+          {
+            "quarter": "2025Q2",
+            "p": 0.069
+          },
+          {
+            "quarter": "2025Q3",
+            "p": 0.063
+          },
+          {
+            "quarter": "2025Q4",
+            "p": 0.054
+          },
+          {
+            "quarter": "2026Q1",
+            "p": 0.062
+          },
+          {
+            "quarter": "2026Q2",
+            "p": 0.086
+          }
+        ],
+        "scorecard": {
+          "brier": 0.0905,
+          "brier_base_rate": 0.1586,
+          "brier_skill_vs_base_rate": 0.429,
+          "brier_persistence": 0.0698,
+          "brier_skill_vs_persistence": -0.297,
+          "auc": 0.907,
+          "n_oos": 86,
+          "n_oos_episodes": 3
+        },
+        "signals_used": [
+          "Financial Stress Indicator Monthly",
+          "Coincident Activity",
+          "Economic Sentiment (ESI)"
+        ],
+        "honesty_note": "Coincident recession-risk READ-OUT (current state), NOT a recession forecast. Brier skill +0.43 vs the climatological base rate \u2014 BUT it does NOT beat lag-1 persistence (-0.30): since recession labels are autocorrelated, 'same as last quarter' (which a real-time user has) is the honest baseline. Its genuine value is TIMELINESS (a calibrated read available before the GDP print), not prediction skill. AUC 0.91 is ~matched by a single coincident-activity rule, so it mostly consolidates/calibrates activity it co-moves with. Scored on only ~3 OOS episodes (GFC/Troika/COVID); leave-one-recession-out shows the skill leans on Troika (fragile), and it is NOT statistically significant (DM vs base-rate p~0.35). Pseudo-real-time on revised data, so live performance is likely optimistic."
+      },
+      "leading_recession_probability": {
+        "available": true,
+        "probability": 0.091,
+        "as_of_quarter": "2026Q4",
+        "horizon_quarters": 2,
+        "method": "expanding-window logistic, 2q-ahead, on leading signals: consumer/industry expectations + financial stress (lagged)",
+        "probability_history": [
+          {
+            "quarter": "2005Q3",
+            "p": 0.205
+          },
+          {
+            "quarter": "2005Q4",
+            "p": 0.187
+          },
+          {
+            "quarter": "2006Q1",
+            "p": 0.314
+          },
+          {
+            "quarter": "2006Q2",
+            "p": 0.207
+          },
+          {
+            "quarter": "2006Q3",
+            "p": 0.169
+          },
+          {
+            "quarter": "2006Q4",
+            "p": 0.167
+          },
+          {
+            "quarter": "2007Q1",
+            "p": 0.126
+          },
+          {
+            "quarter": "2007Q2",
+            "p": 0.138
+          },
+          {
+            "quarter": "2007Q3",
+            "p": 0.23
+          },
+          {
+            "quarter": "2007Q4",
+            "p": 0.142
+          },
+          {
+            "quarter": "2008Q1",
+            "p": 0.226
+          },
+          {
+            "quarter": "2008Q2",
+            "p": 0.888
+          },
+          {
+            "quarter": "2008Q3",
+            "p": 0.998
+          },
+          {
+            "quarter": "2008Q4",
+            "p": 0.998
+          },
+          {
+            "quarter": "2009Q1",
+            "p": 1.0
+          },
+          {
+            "quarter": "2009Q2",
+            "p": 1.0
+          },
+          {
+            "quarter": "2009Q3",
+            "p": 0.295
+          },
+          {
+            "quarter": "2009Q4",
+            "p": 0.118
+          },
+          {
+            "quarter": "2010Q1",
+            "p": 0.073
+          },
+          {
+            "quarter": "2010Q2",
+            "p": 0.087
+          },
+          {
+            "quarter": "2010Q3",
+            "p": 0.159
+          },
+          {
+            "quarter": "2010Q4",
+            "p": 0.583
+          },
+          {
+            "quarter": "2011Q1",
+            "p": 0.579
+          },
+          {
+            "quarter": "2011Q2",
+            "p": 0.968
+          },
+          {
+            "quarter": "2011Q3",
+            "p": 0.925
+          },
+          {
+            "quarter": "2011Q4",
+            "p": 0.943
+          },
+          {
+            "quarter": "2012Q1",
+            "p": 0.927
+          },
+          {
+            "quarter": "2012Q2",
+            "p": 0.985
+          },
+          {
+            "quarter": "2012Q3",
+            "p": 0.935
+          },
+          {
+            "quarter": "2012Q4",
+            "p": 0.907
+          },
+          {
+            "quarter": "2013Q1",
+            "p": 0.933
+          },
+          {
+            "quarter": "2013Q2",
+            "p": 0.98
+          },
+          {
+            "quarter": "2013Q3",
+            "p": 0.89
+          },
+          {
+            "quarter": "2013Q4",
+            "p": 0.772
+          },
+          {
+            "quarter": "2014Q1",
+            "p": 0.582
+          },
+          {
+            "quarter": "2014Q2",
+            "p": 0.363
+          },
+          {
+            "quarter": "2014Q3",
+            "p": 0.369
+          },
+          {
+            "quarter": "2014Q4",
+            "p": 0.169
+          },
+          {
+            "quarter": "2015Q1",
+            "p": 0.112
+          },
+          {
+            "quarter": "2015Q2",
+            "p": 0.094
+          },
+          {
+            "quarter": "2015Q3",
+            "p": 0.09
+          },
+          {
+            "quarter": "2015Q4",
+            "p": 0.154
+          },
+          {
+            "quarter": "2016Q1",
+            "p": 0.078
+          },
+          {
+            "quarter": "2016Q2",
+            "p": 0.076
+          },
+          {
+            "quarter": "2016Q3",
+            "p": 0.199
+          },
+          {
+            "quarter": "2016Q4",
+            "p": 0.083
+          },
+          {
+            "quarter": "2017Q1",
+            "p": 0.053
+          },
+          {
+            "quarter": "2017Q2",
+            "p": 0.025
+          },
+          {
+            "quarter": "2017Q3",
+            "p": 0.017
+          },
+          {
+            "quarter": "2017Q4",
+            "p": 0.008
+          },
+          {
+            "quarter": "2018Q1",
+            "p": 0.009
+          },
+          {
+            "quarter": "2018Q2",
+            "p": 0.016
+          },
+          {
+            "quarter": "2018Q3",
+            "p": 0.018
+          },
+          {
+            "quarter": "2018Q4",
+            "p": 0.006
+          },
+          {
+            "quarter": "2019Q1",
+            "p": 0.012
+          },
+          {
+            "quarter": "2019Q2",
+            "p": 0.016
+          },
+          {
+            "quarter": "2019Q3",
+            "p": 0.012
+          },
+          {
+            "quarter": "2019Q4",
+            "p": 0.008
+          },
+          {
+            "quarter": "2020Q1",
+            "p": 0.009
+          },
+          {
+            "quarter": "2020Q2",
+            "p": 0.017
+          },
+          {
+            "quarter": "2020Q3",
+            "p": 0.034
+          },
+          {
+            "quarter": "2020Q4",
+            "p": 0.044
+          },
+          {
+            "quarter": "2021Q1",
+            "p": 0.305
+          },
+          {
+            "quarter": "2021Q2",
+            "p": 0.134
+          },
+          {
+            "quarter": "2021Q3",
+            "p": 0.058
+          },
+          {
+            "quarter": "2021Q4",
+            "p": 0.108
+          },
+          {
+            "quarter": "2022Q1",
+            "p": 0.088
+          },
+          {
+            "quarter": "2022Q2",
+            "p": 0.11
+          },
+          {
+            "quarter": "2022Q3",
+            "p": 0.141
+          },
+          {
+            "quarter": "2022Q4",
+            "p": 0.355
+          },
+          {
+            "quarter": "2023Q1",
+            "p": 0.315
+          },
+          {
+            "quarter": "2023Q2",
+            "p": 0.329
+          },
+          {
+            "quarter": "2023Q3",
+            "p": 0.216
+          },
+          {
+            "quarter": "2023Q4",
+            "p": 0.071
+          },
+          {
+            "quarter": "2024Q1",
+            "p": 0.027
+          },
+          {
+            "quarter": "2024Q2",
+            "p": 0.056
+          },
+          {
+            "quarter": "2024Q3",
+            "p": 0.045
+          },
+          {
+            "quarter": "2024Q4",
+            "p": 0.029
+          },
+          {
+            "quarter": "2025Q1",
+            "p": 0.034
+          },
+          {
+            "quarter": "2025Q2",
+            "p": 0.051
+          },
+          {
+            "quarter": "2025Q3",
+            "p": 0.037
+          },
+          {
+            "quarter": "2025Q4",
+            "p": 0.058
+          },
+          {
+            "quarter": "2026Q1",
+            "p": 0.059
+          },
+          {
+            "quarter": "2026Q2",
+            "p": 0.066
+          }
+        ],
+        "scorecard": {
+          "brier": 0.0969,
+          "brier_base_rate": 0.1614,
+          "brier_skill_vs_base_rate": 0.399,
+          "brier_persistence": 0.1429,
+          "brier_skill_vs_persistence": 0.321,
+          "auc": 0.853,
+          "n_oos": 84,
+          "n_oos_episodes": 4
+        },
+        "signals_used": [
+          "Consumer Financial Situation Future",
+          "Consumer Confidence",
+          "Consumer Unemployment Expectations",
+          "Industry Production Expectations",
+          "Economic Sentiment (ESI)",
+          "Financial Stress Indicator Monthly"
+        ],
+        "honesty_note": "LEADING recession gauge: probability of recession 2 quarters ahead from survey/credit/financial-stress signals. It beats lag-2 persistence out-of-sample (BSS_vs_persistence +0.32; ex-COVID ~+0.23; leave-one-recession-out +0.23..+0.32, not dependent on any single episode; bootstrap P(BSS>0)~0.93) \u2014 modest anticipation value. READ THIS BEFORE TRUSTING THE NUMBER \u2014 the 'beats persistence' claim is BASELINE-DEPENDENT: the bar here is y_{t-h} (the label h quarters back, matched to the model's signal vintage). Against the TIGHTEST bar, lag-1 persistence ('same as the last published quarter'), this model LOSES (BSS ~-0.36, ex-COVID ~-0.55). And the lag-h win is LARGELY a forecast-horizon artifact, not unique leading skill: a purely COINCIDENT logistic run h-ahead also beats lag-2/lag-3 persistence (any decent recession reading beats a 2-3-quarter-stale label); the leading signals only edge the coincident model. Other caveats: (1) NOT statistically significant on DM (p~0.19) \u2014 n\u22484 recession episodes is the binding limit; (2) it cannot anticipate sudden shocks \u2014 it predicts the 2020 crash from the pre-pandemic 2019Q4 survey and (correctly) misses it; its edge is gradual onsets (GFC-deepening, Troika-onset) and recovery timing; (3) pseudo-real-time on revised survey data, so live skill is likely optimistic. Bottom line: a reasonable, leak-free anticipation gauge, but its headline skill vs persistence is an artifact of the horizon-matched (stale) baseline \u2014 do NOT present it as 'beats same-as-last-quarter'."
+      },
+      "sahm_tripwire": {
+        "available": true,
+        "triggered": false,
+        "latest_gap_pp": 0.1333,
+        "threshold_pp": 0.7272,
+        "k_std": 1.0,
+        "gap_std_pp": 0.7272,
+        "recessions_caught": 3,
+        "n_recessions_in_window": 4,
+        "false_positive_episodes": 5,
+        "honesty_note": "PT-recalibrated Sahm rule (threshold = 1 std of the PT unemployment-gap distribution, not the US 0.5pp). Caught 3/4 historical PT recessions with 5 false-positive episodes; threshold is in-sample, not out-of-sample optimized."
+      },
+      "lead_signal": "recession_probability"
+    },
+    "growth_at_risk": {
+      "horizon_quarters": 1,
+      "as_of": "2026-04-01",
+      "quantiles": {
+        "q05": -0.00709,
+        "q10": -0.00396,
+        "q50": 0.00408,
+        "q90": 0.01303,
+        "q95": 0.0168
+      },
+      "median": 0.00408,
+      "downside_q05": -0.00709,
+      "upside_q95": 0.0168,
+      "downside_band": [
+        -0.00709,
+        0.0168
+      ],
+      "baseline_quantiles": {
+        "q05": -0.00758,
+        "q10": -0.00512,
+        "q50": 0.00357,
+        "q90": 0.01227,
+        "q95": 0.01473
+      },
+      "baseline_kind": "garch",
+      "conditioning": {
+        "stress": 0.1163756,
+        "activity": 1.8
+      },
+      "stress_widens_downside": true,
+      "n_train": 104,
+      "status": "ok",
+      "label": "risk context, not a forecast",
+      "quantile_method": "johnsonsu",
+      "honesty_note": "Risk CONTEXT, not a point forecast. Conditional quantiles of next-quarter GDP growth (Adrian-Boyarchenko-Giannone style), fitted as a conditional Johnson-SU (location+scale respond to stress+activity; skew/tail shape estimated once). The genuine, leak-free, COVID-robust signal is the DOWNSIDE band (q05/q10): through the production backtest rel-pinball 0.75 vs a GARCH/EWMA baseline ex-COVID (0.81 dropping the 2021 rebound too) \u2014 a modest improvement over the earlier independent quantile-regression (0.78/0.84, ~3.5% lower pinball) that holds on BOTH panels. The bigger, more robust win is CALIBRATION: tail hit-rates q05 0.050 / q10 0.075 (vs target 0.05/0.10) where QR overshot the 10% tail at 0.11, and PIT-KS p improves 0.13->0.36. The pinball gain ALONE is not bootstrap-significant (p(JSU<QR)\u22480.79, 90% CI on the paired difference includes 0); it is adopted because it is consistently better-calibrated with a small pinball gain and no downside, not because it is a proven skill jump. HONEST attribution (ablation): the downside edge over the baseline comes almost entirely from the real-ACTIVITY regressor, NOT from financial stress (activity-only ~0.78 \u2248 full; stress-only ~0.91). Financial stress is a correctly-signed conditioner (higher stress lowers q05 via the scale channel) but carries little of the skill \u2014 do not bill this as 'financial-conditions-driven'. Still a short sample (~40 ex-COVID-and-rebound quarters); treat it as indicative, not a validated forecasting claim. Lead with the downside; do not read the median as authoritative. Interval coverage (5-95) is ~0.83 vs 0.90 nominal \u2014 the band is still modestly too narrow. Pseudo-real-time on revised data, so OOS skill is likely optimistic."
+    },
+    "official_quarterly": {
+      "status": "ok",
+      "label": "indicative",
+      "model": "shrink_combo",
+      "target_quarter": "2026Q2",
+      "position": "M2",
+      "pct_complete": 0.33,
+      "point_qoq": 0.0033,
+      "ci_80": [
+        -0.0007,
+        0.0106
+      ],
+      "ci_95": [
+        -0.0042,
+        0.0114
+      ],
+      "se": 0.0044,
+      "band_method": "expanding_split_conformal_asymmetric_excl_anomalous",
+      "band_calibrated": true,
+      "band_shape": "asymmetric",
+      "native_se": 0.012,
+      "is_meaningful": false,
+      "implied_yoy": {
+        "point_yoy": 0.019,
+        "ci_80": [
+          0.015,
+          0.0263
+        ],
+        "ci_95": [
+          0.0115,
+          0.0271
+        ],
+        "published_lags_sum": 0.0157,
+        "note": "Implied YoY = nowcast q/q log-growth plus the three published prior quarters (treated as known); the band width equals the q/q band."
+      },
+      "sector_composites": [],
+      "combo_weights": {
+        "ar1": 0.2,
+        "supply_side_bridge": 0.2875,
+        "factor_dfm": 0.2863,
+        "esi_momentum": 0.2262
+      },
+      "combo_member_points": {
+        "ar1": 0.0044,
+        "supply_side_bridge": 0.0041,
+        "factor_dfm": 0.0029,
+        "esi_momentum": 0.002
+      },
+      "honesty_note": "DEMOTED tile. q/q-GDP is near-white-noise and hard to nowcast; no model here is statistically distinguishable from an AR(1) at the 5% level. Mid-quarter read from shrink_combo (supply-side bridge + mixed-frequency factor DFM + a 3-parameter ESI-momentum equation, inverse-MSE weighted with a hard AR(1) floor): rel-RMSE 0.81 vs AR(1) ex-COVID (corr +0.67, DM p=0.014), bootstrap CI excluding parity under every seed tested, and a direction-consistent replication on a never-touched 2000-2004 window. PROVISIONAL: this configuration was picked as the best of ~19 tested variants; after accounting for that search the evidence it beats our previous combination is suggestive (selection-adjusted p ~ 0.06-0.1), the out-of-window edge is smaller than the headline (~0.01-0.04 rel), and the gain is concentrated in crisis quarters (2009, 2021) \u2014 in calm years expect it to roughly match the previous model. We are tracking it on new quarters. An indicative mid-quarter signal, not an authoritative number. The band is the EXPANDING split-conformal interval on this horizon's production model's own realized errors (COVID/2021-rebound excluded), replacing the native model band. It is ASYMMETRIC \u2014 wider above the point than below (-0.40pp/+0.73pp at 80%) \u2014 because the model's historical errors are skewed: it has tended to under-predict growth. On the normal-quarter backtest it covers 82%/86% at nominal 80%/95%. Full distributional (PIT) calibration also passes on that panel. Coverage is calibrated for normal quarters; a genuine boom/bust will pierce it.",
+      "first_release_note": "INE first prints have revised UP by +0.15pp on average (sd 0.34pp, n=36 ex-COVID genuine first releases) relative to today's revised series; our backtest edge survives first-release scoring (M3 rel-RMSE 0.81 vs the production AR(1) \u2014 see output/track_record.json)."
+    },
+    "annual_outlook": {
+      "status": "ok",
+      "target_year": 2026,
+      "published_through": "2026Q1",
+      "nowcast_quarter": "2026Q2",
+      "nowcast_source": "quarterly_nowcast",
+      "point": 1.75,
+      "median": 1.76,
+      "bands": {
+        "p10": 0.94,
+        "p25": 1.33,
+        "p50": 1.76,
+        "p75": 2.18,
+        "p90": 2.55
+      },
+      "prob_ladder": {
+        "gt_0": 0.996,
+        "gt_1": 0.883,
+        "gt_2": 0.351,
+        "gt_3": 0.022,
+        "lt_0": 0.004
+      },
+      "carryover_floor": 1.22,
+      "n_sims": 20000,
+      "validation": {
+        "replay_years": "2006-2025",
+        "cov80_all": 0.75,
+        "cov80_excl_covid": 0.83,
+        "crps_skill_vs_climatology": 0.58,
+        "crps_skill_excl_covid": 0.69
+      },
+      "honesty_note": "Carryover from published quarters plus an AR(1) extrapolation does most of the work; the nowcast narrows the 80% band by ~0.3pp. Backtested intervals miss in crisis years (2008, 2011-12, 2020-21): this outlook assumes no new shock. Pseudo-real-time on revised data; annual-average-of-quarterly may differ slightly from official annual accounts.",
+      "label": "annual outlook",
+      "units": "percent (annual average real GDP growth)",
+      "nowcast_seed": {
+        "point_qoq": 0.0033,
+        "sigma": 0.0044,
+        "source": "official_quarterly tile (point + calibrated band se)",
+        "band_calibrated": true
+      },
+      "consensus": {
+        "available": true,
+        "forecasts": [
+          {
+            "institution": "Banco de Portugal",
+            "publication": "Boletim Econ\u00f3mico \u2014 mar\u00e7o 2026",
+            "pub_date": "2026-03-25",
+            "value_pct": 1.8,
+            "url": "https://www.bportugal.pt/en/publicacao/economic-bulletin-march-2026",
+            "percentile_on_our_distribution": 52.3
+          },
+          {
+            "institution": "IMF",
+            "publication": "World Economic Outlook \u2014 April 2026",
+            "pub_date": "2026-04-14",
+            "value_pct": 1.9,
+            "url": "https://www.imf.org/en/publications/weo/issues/2026/04/14/world-economic-outlook-april-2026",
+            "percentile_on_our_distribution": 58.6
+          },
+          {
+            "institution": "Governo (Minist\u00e9rio das Finan\u00e7as)",
+            "publication": "Relat\u00f3rio de progresso do plano or\u00e7amental de m\u00e9dio prazo (abril 2026)",
+            "pub_date": "2026-04-30",
+            "value_pct": 2.0,
+            "url": "https://eco.sapo.pt/2026/04/30/governo-reve-em-baixa-crescimento-para-2-este-ano-e-piora-previsao-do-saldo-orcamental-para-zero/",
+            "percentile_on_our_distribution": 64.9
+          },
+          {
+            "institution": "European Commission",
+            "publication": "Spring 2026 Economic Forecast",
+            "pub_date": "2026-05-21",
+            "value_pct": 1.7,
+            "url": "https://economy-finance.ec.europa.eu/economic-surveillance-eu-member-states/country-pages/portugal/economic-forecast-portugal_en",
+            "percentile_on_our_distribution": 45.9
+          },
+          {
+            "institution": "OECD",
+            "publication": "Economic Outlook No. 119 (Under Pressure) \u2014 June 2026",
+            "pub_date": "2026-06-03",
+            "value_pct": 1.8,
+            "url": "https://www.oecd.org/en/publications/2026/06/oecd-economic-outlook-volume-2026-issue-1_8be0dba6.html",
+            "percentile_on_our_distribution": 52.3
+          }
+        ],
+        "note": "Hand-curated, sourced institutional forecasts (data/consensus_forecasts.csv; latest publication per institution). The percentile places each point forecast on OUR simulated distribution \u2014 proximity is context, not validation."
+      }
+    },
+    "track_record": {
+      "status": "ok",
+      "label": "track record",
+      "as_of": "2026-06-11",
+      "framing": "Until 2026-06-04 these are backtested as-if calls on a leak-free publication-lag harness, scored against the GDP number as FIRST published \u2014 from then on every dot is a call we actually published.",
+      "eras": {
+        "backtest": {
+          "label": "backtest (as-if calls, leak-free publication-lag harness)",
+          "definition_genuine": "quarters whose first ALFRED vintage is <= 120 days after quarter end; 44 pre-2016 pseudo-first-release quarters (first vintage = 2016-04 backfill snapshot) excluded",
+          "sources": [
+            "output/firstrelease_supply_side_bridge.json",
+            "output/backtest_results_20260604_184626_M3.csv",
+            "output/redteam/inc_shrink_combo_control_rows.csv"
+          ],
+          "notes": [
+            "M1/M2 rows are shrink_combo (the production in-quarter model); ar1 is the production AR(1) fitted on the SAME publication-lag information set.",
+            "hit80 compares |our_call - first_release| to the per-horizon 80% split-conformal half-width from src/evaluation/quarterly_band_calibration.json; those bands were calibrated on overlapping quarters (against the revised target), so the hit-rate is indicative, not an out-of-sample coverage claim."
+          ],
+          "rows": [
+            {
+              "quarter": "2015Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0028,
+              "ar1": 0.002361,
+              "first_release": 0.0024,
+              "latest_outturn": 0.00473,
+              "abs_error": 0.0004,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2016Q2",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0034,
+              "ar1": 0.00303,
+              "first_release": 0.00303,
+              "latest_outturn": 0.00465,
+              "abs_error": 0.00037,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2016Q3",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0045,
+              "ar1": 0.003479,
+              "first_release": 0.00836,
+              "latest_outturn": 0.011,
+              "abs_error": 0.00386,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2016Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0026,
+              "ar1": 0.005849,
+              "first_release": 0.00624,
+              "latest_outturn": 0.01125,
+              "abs_error": 0.00364,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q1",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0024,
+              "ar1": 0.006058,
+              "first_release": 0.0104,
+              "latest_outturn": 0.00964,
+              "abs_error": 0.008,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q2",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0035,
+              "ar1": 0.005542,
+              "first_release": 0.00343,
+              "latest_outturn": 0.00286,
+              "abs_error": 7e-05,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q3",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0055,
+              "ar1": 0.003002,
+              "first_release": 0.00461,
+              "latest_outturn": 0.00681,
+              "abs_error": 0.00089,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0039,
+              "ar1": 0.004496,
+              "first_release": 0.00704,
+              "latest_outturn": 0.00938,
+              "abs_error": 0.00314,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q1",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0035,
+              "ar1": 0.005511,
+              "first_release": 0.00435,
+              "latest_outturn": 0.00584,
+              "abs_error": 0.00085,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q2",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0051,
+              "ar1": 0.004205,
+              "first_release": 0.00503,
+              "latest_outturn": 0.00951,
+              "abs_error": 7e-05,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q3",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.006,
+              "ar1": 0.005637,
+              "first_release": 0.00333,
+              "latest_outturn": 0.00669,
+              "abs_error": 0.00267,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0048,
+              "ar1": 0.004598,
+              "first_release": 0.00362,
+              "latest_outturn": 0.00621,
+              "abs_error": 0.00118,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q1",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0043,
+              "ar1": 0.004437,
+              "first_release": 0.0053,
+              "latest_outturn": 0.0082,
+              "abs_error": 0.001,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q2",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0052,
+              "ar1": 0.005233,
+              "first_release": 0.00543,
+              "latest_outturn": 0.00553,
+              "abs_error": 0.00023,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q3",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0071,
+              "ar1": 0.004231,
+              "first_release": 0.00305,
+              "latest_outturn": 0.00412,
+              "abs_error": 0.00405,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0031,
+              "ar1": 0.003698,
+              "first_release": 0.00729,
+              "latest_outturn": 0.00924,
+              "abs_error": 0.00419,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2020Q1",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0031,
+              "ar1": 0.005686,
+              "first_release": -0.03835,
+              "latest_outturn": -0.04348,
+              "abs_error": 0.04145,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2020Q2",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0028,
+              "ar1": -0.012637,
+              "first_release": -0.14923,
+              "latest_outturn": -0.16305,
+              "abs_error": 0.15203,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2020Q3",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0006,
+              "ar1": -0.190495,
+              "first_release": 0.12509,
+              "latest_outturn": 0.13394,
+              "abs_error": 0.12449,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2020Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0018,
+              "ar1": -0.041352,
+              "first_release": 0.00243,
+              "latest_outturn": 0.00341,
+              "abs_error": 0.00063,
+              "hit80": true,
+              "covid": true
+            },
+            {
+              "quarter": "2021Q1",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": -0.0076,
+              "ar1": 0.002596,
+              "first_release": -0.03366,
+              "latest_outturn": -0.02958,
+              "abs_error": 0.02606,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2021Q2",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0111,
+              "ar1": 0.00964,
+              "first_release": 0.04814,
+              "latest_outturn": 0.04517,
+              "abs_error": 0.03704,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2021Q3",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0121,
+              "ar1": -0.007582,
+              "first_release": 0.02843,
+              "latest_outturn": 0.0349,
+              "abs_error": 0.01633,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2021Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0112,
+              "ar1": -0.003647,
+              "first_release": 0.0157,
+              "latest_outturn": 0.01941,
+              "abs_error": 0.0045,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q1",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0046,
+              "ar1": 6.1e-05,
+              "first_release": 0.02535,
+              "latest_outturn": 0.01456,
+              "abs_error": 0.02075,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q2",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.014,
+              "ar1": 0.001207,
+              "first_release": -7e-05,
+              "latest_outturn": 0.00388,
+              "abs_error": 0.01407,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q3",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0067,
+              "ar1": 0.003316,
+              "first_release": 0.00375,
+              "latest_outturn": 0.01128,
+              "abs_error": 0.00295,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0056,
+              "ar1": 0.00195,
+              "first_release": 0.00338,
+              "latest_outturn": 0.00713,
+              "abs_error": 0.00222,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q1",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.005,
+              "ar1": 0.002807,
+              "first_release": 0.01631,
+              "latest_outturn": 0.01262,
+              "abs_error": 0.01131,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q2",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0058,
+              "ar1": 0.001836,
+              "first_release": 0.0,
+              "latest_outturn": 0.00484,
+              "abs_error": 0.0058,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q3",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0075,
+              "ar1": 0.003367,
+              "first_release": -0.00239,
+              "latest_outturn": 0.00102,
+              "abs_error": 0.00989,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0037,
+              "ar1": 0.004083,
+              "first_release": 0.00793,
+              "latest_outturn": 0.00733,
+              "abs_error": 0.00423,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q1",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.003,
+              "ar1": 0.002895,
+              "first_release": 0.00841,
+              "latest_outturn": 0.00712,
+              "abs_error": 0.00541,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q2",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0081,
+              "ar1": 0.002973,
+              "first_release": 0.0011,
+              "latest_outturn": 0.0052,
+              "abs_error": 0.007,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q3",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0067,
+              "ar1": 0.003362,
+              "first_release": 0.00162,
+              "latest_outturn": 0.00145,
+              "abs_error": 0.00508,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0046,
+              "ar1": 0.004069,
+              "first_release": 0.01532,
+              "latest_outturn": 0.01173,
+              "abs_error": 0.01072,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q1",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0028,
+              "ar1": 0.002149,
+              "first_release": -0.00539,
+              "latest_outturn": -0.00283,
+              "abs_error": 0.00819,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q2",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0056,
+              "ar1": 0.004921,
+              "first_release": 0.00565,
+              "latest_outturn": 0.00683,
+              "abs_error": 5e-05,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q3",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0072,
+              "ar1": 0.003067,
+              "first_release": 0.00827,
+              "latest_outturn": 0.00599,
+              "abs_error": 0.00107,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q4",
+              "horizon": "M3",
+              "model": "supply_side_bridge",
+              "our_call": 0.0054,
+              "ar1": 0.003253,
+              "first_release": 0.00916,
+              "latest_outturn": 0.00926,
+              "abs_error": 0.00376,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2015Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0034,
+              "ar1": 0.0020272600521506336,
+              "first_release": 0.0024,
+              "latest_outturn": 0.00473,
+              "abs_error": 0.001,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2016Q2",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0034,
+              "ar1": 0.0034872204380012187,
+              "first_release": 0.00303,
+              "latest_outturn": 0.00465,
+              "abs_error": 0.00037,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2016Q3",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0036,
+              "ar1": 0.003029516364444752,
+              "first_release": 0.00836,
+              "latest_outturn": 0.011,
+              "abs_error": 0.00476,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2016Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0041,
+              "ar1": 0.003478595762214292,
+              "first_release": 0.00624,
+              "latest_outturn": 0.01125,
+              "abs_error": 0.00214,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q1",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0056,
+              "ar1": 0.005848934982949804,
+              "first_release": 0.0104,
+              "latest_outturn": 0.00964,
+              "abs_error": 0.0048,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q2",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0062,
+              "ar1": 0.0060579088960632885,
+              "first_release": 0.00343,
+              "latest_outturn": 0.00286,
+              "abs_error": 0.00277,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q3",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0068,
+              "ar1": 0.005541865096934632,
+              "first_release": 0.00461,
+              "latest_outturn": 0.00681,
+              "abs_error": 0.00219,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0058,
+              "ar1": 0.0030016067217895964,
+              "first_release": 0.00704,
+              "latest_outturn": 0.00938,
+              "abs_error": 0.00124,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q1",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0058,
+              "ar1": 0.004495783419452959,
+              "first_release": 0.00435,
+              "latest_outturn": 0.00584,
+              "abs_error": 0.00145,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q2",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0057,
+              "ar1": 0.0055108000251533895,
+              "first_release": 0.00503,
+              "latest_outturn": 0.00951,
+              "abs_error": 0.00067,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q3",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.005,
+              "ar1": 0.004204855486535748,
+              "first_release": 0.00333,
+              "latest_outturn": 0.00669,
+              "abs_error": 0.00167,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0051,
+              "ar1": 0.005636836288873174,
+              "first_release": 0.00362,
+              "latest_outturn": 0.00621,
+              "abs_error": 0.00148,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q1",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0048,
+              "ar1": 0.004597526285510233,
+              "first_release": 0.0053,
+              "latest_outturn": 0.0082,
+              "abs_error": 0.0005,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q2",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0046,
+              "ar1": 0.004436813362216493,
+              "first_release": 0.00543,
+              "latest_outturn": 0.00553,
+              "abs_error": 0.00083,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q3",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.004,
+              "ar1": 0.00523268884155007,
+              "first_release": 0.00305,
+              "latest_outturn": 0.00412,
+              "abs_error": 0.00095,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0024,
+              "ar1": 0.0042305195839841495,
+              "first_release": 0.00729,
+              "latest_outturn": 0.00924,
+              "abs_error": 0.00489,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2020Q1",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0002,
+              "ar1": 0.0036976385634995505,
+              "first_release": -0.03835,
+              "latest_outturn": -0.04348,
+              "abs_error": 0.03855,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2020Q2",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": -0.0018,
+              "ar1": 0.0056856233972308705,
+              "first_release": -0.14923,
+              "latest_outturn": -0.16305,
+              "abs_error": 0.14743,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2020Q3",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": -0.0108,
+              "ar1": -0.012637147257435947,
+              "first_release": 0.12509,
+              "latest_outturn": 0.13394,
+              "abs_error": 0.13589,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2020Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": -0.0787,
+              "ar1": -0.19049497432708956,
+              "first_release": 0.00243,
+              "latest_outturn": 0.00341,
+              "abs_error": 0.08113,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2021Q1",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": -0.0099,
+              "ar1": -0.041351546977822375,
+              "first_release": -0.03366,
+              "latest_outturn": -0.02958,
+              "abs_error": 0.02376,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2021Q2",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.002,
+              "ar1": 0.002595954070669302,
+              "first_release": 0.04814,
+              "latest_outturn": 0.04517,
+              "abs_error": 0.04614,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2021Q3",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0095,
+              "ar1": 0.00964024092297527,
+              "first_release": 0.02843,
+              "latest_outturn": 0.0349,
+              "abs_error": 0.01893,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2021Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0042,
+              "ar1": -0.007581660058667977,
+              "first_release": 0.0157,
+              "latest_outturn": 0.01941,
+              "abs_error": 0.0115,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q1",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0049,
+              "ar1": -0.003647430310534344,
+              "first_release": 0.02535,
+              "latest_outturn": 0.01456,
+              "abs_error": 0.02045,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q2",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0054,
+              "ar1": 6.0527195134967536e-05,
+              "first_release": -7e-05,
+              "latest_outturn": 0.00388,
+              "abs_error": 0.00547,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q3",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0056,
+              "ar1": 0.0012074925377364792,
+              "first_release": 0.00375,
+              "latest_outturn": 0.01128,
+              "abs_error": 0.00185,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0049,
+              "ar1": 0.003315800303067522,
+              "first_release": 0.00338,
+              "latest_outturn": 0.00713,
+              "abs_error": 0.00152,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q1",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0046,
+              "ar1": 0.0019501420503053478,
+              "first_release": 0.01631,
+              "latest_outturn": 0.01262,
+              "abs_error": 0.01171,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q2",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0054,
+              "ar1": 0.0028069155437106877,
+              "first_release": 0.0,
+              "latest_outturn": 0.00484,
+              "abs_error": 0.0054,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q3",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0052,
+              "ar1": 0.0018358315591390077,
+              "first_release": -0.00239,
+              "latest_outturn": 0.00102,
+              "abs_error": 0.00759,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0043,
+              "ar1": 0.0033666086243336253,
+              "first_release": 0.00793,
+              "latest_outturn": 0.00733,
+              "abs_error": 0.00363,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q1",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0042,
+              "ar1": 0.0040826427866539235,
+              "first_release": 0.00841,
+              "latest_outturn": 0.00712,
+              "abs_error": 0.00421,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q2",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0045,
+              "ar1": 0.0028950950152342326,
+              "first_release": 0.0011,
+              "latest_outturn": 0.0052,
+              "abs_error": 0.0034,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q3",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0048,
+              "ar1": 0.0029727476734894586,
+              "first_release": 0.00162,
+              "latest_outturn": 0.00145,
+              "abs_error": 0.00318,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0047,
+              "ar1": 0.003361753428508361,
+              "first_release": 0.01532,
+              "latest_outturn": 0.01173,
+              "abs_error": 0.01062,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q1",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.005,
+              "ar1": 0.0040686431246446195,
+              "first_release": -0.00539,
+              "latest_outturn": -0.00283,
+              "abs_error": 0.01039,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q2",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0045,
+              "ar1": 0.0021494181578114897,
+              "first_release": 0.00565,
+              "latest_outturn": 0.00683,
+              "abs_error": 0.00115,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q3",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0053,
+              "ar1": 0.004921360854223755,
+              "first_release": 0.00827,
+              "latest_outturn": 0.00599,
+              "abs_error": 0.00297,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q4",
+              "horizon": "M1",
+              "model": "shrink_combo",
+              "our_call": 0.0048,
+              "ar1": 0.0030671828495615738,
+              "first_release": 0.00916,
+              "latest_outturn": 0.00926,
+              "abs_error": 0.00436,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2015Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0032,
+              "ar1": 0.0020272600521506336,
+              "first_release": 0.0024,
+              "latest_outturn": 0.00473,
+              "abs_error": 0.0008,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2016Q2",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0032,
+              "ar1": 0.0034872204380012187,
+              "first_release": 0.00303,
+              "latest_outturn": 0.00465,
+              "abs_error": 0.00017,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2016Q3",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0037,
+              "ar1": 0.003029516364444752,
+              "first_release": 0.00836,
+              "latest_outturn": 0.011,
+              "abs_error": 0.00466,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2016Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.004,
+              "ar1": 0.003478595762214292,
+              "first_release": 0.00624,
+              "latest_outturn": 0.01125,
+              "abs_error": 0.00224,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q1",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0056,
+              "ar1": 0.005848934982949804,
+              "first_release": 0.0104,
+              "latest_outturn": 0.00964,
+              "abs_error": 0.0048,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q2",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0061,
+              "ar1": 0.0060579088960632885,
+              "first_release": 0.00343,
+              "latest_outturn": 0.00286,
+              "abs_error": 0.00267,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q3",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0069,
+              "ar1": 0.005541865096934632,
+              "first_release": 0.00461,
+              "latest_outturn": 0.00681,
+              "abs_error": 0.00229,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2017Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0056,
+              "ar1": 0.0030016067217895964,
+              "first_release": 0.00704,
+              "latest_outturn": 0.00938,
+              "abs_error": 0.00144,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q1",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0058,
+              "ar1": 0.004495783419452959,
+              "first_release": 0.00435,
+              "latest_outturn": 0.00584,
+              "abs_error": 0.00145,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q2",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0055,
+              "ar1": 0.0055108000251533895,
+              "first_release": 0.00503,
+              "latest_outturn": 0.00951,
+              "abs_error": 0.00047,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q3",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0051,
+              "ar1": 0.004204855486535748,
+              "first_release": 0.00333,
+              "latest_outturn": 0.00669,
+              "abs_error": 0.00177,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2018Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0051,
+              "ar1": 0.005636836288873174,
+              "first_release": 0.00362,
+              "latest_outturn": 0.00621,
+              "abs_error": 0.00148,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q1",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0049,
+              "ar1": 0.004597526285510233,
+              "first_release": 0.0053,
+              "latest_outturn": 0.0082,
+              "abs_error": 0.0004,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q2",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0048,
+              "ar1": 0.004436813362216493,
+              "first_release": 0.00543,
+              "latest_outturn": 0.00553,
+              "abs_error": 0.00063,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q3",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0043,
+              "ar1": 0.00523268884155007,
+              "first_release": 0.00305,
+              "latest_outturn": 0.00412,
+              "abs_error": 0.00125,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2019Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0023,
+              "ar1": 0.0042305195839841495,
+              "first_release": 0.00729,
+              "latest_outturn": 0.00924,
+              "abs_error": 0.00499,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2020Q1",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0003,
+              "ar1": 0.0036976385634995505,
+              "first_release": -0.03835,
+              "latest_outturn": -0.04348,
+              "abs_error": 0.03865,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2020Q2",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": -0.0018,
+              "ar1": 0.0056856233972308705,
+              "first_release": -0.14923,
+              "latest_outturn": -0.16305,
+              "abs_error": 0.14743,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2020Q3",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": -0.0108,
+              "ar1": -0.012637147257435947,
+              "first_release": 0.12509,
+              "latest_outturn": 0.13394,
+              "abs_error": 0.13589,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2020Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": -0.0803,
+              "ar1": -0.19049497432708956,
+              "first_release": 0.00243,
+              "latest_outturn": 0.00341,
+              "abs_error": 0.08273,
+              "hit80": false,
+              "covid": true
+            },
+            {
+              "quarter": "2021Q1",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": -0.0098,
+              "ar1": -0.041351546977822375,
+              "first_release": -0.03366,
+              "latest_outturn": -0.02958,
+              "abs_error": 0.02386,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2021Q2",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0053,
+              "ar1": 0.002595954070669302,
+              "first_release": 0.04814,
+              "latest_outturn": 0.04517,
+              "abs_error": 0.04284,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2021Q3",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0094,
+              "ar1": 0.00964024092297527,
+              "first_release": 0.02843,
+              "latest_outturn": 0.0349,
+              "abs_error": 0.01903,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2021Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0037,
+              "ar1": -0.007581660058667977,
+              "first_release": 0.0157,
+              "latest_outturn": 0.01941,
+              "abs_error": 0.012,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q1",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0048,
+              "ar1": -0.003647430310534344,
+              "first_release": 0.02535,
+              "latest_outturn": 0.01456,
+              "abs_error": 0.02055,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q2",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.006,
+              "ar1": 6.0527195134967536e-05,
+              "first_release": -7e-05,
+              "latest_outturn": 0.00388,
+              "abs_error": 0.00607,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q3",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0064,
+              "ar1": 0.0012074925377364792,
+              "first_release": 0.00375,
+              "latest_outturn": 0.01128,
+              "abs_error": 0.00265,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2022Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0048,
+              "ar1": 0.003315800303067522,
+              "first_release": 0.00338,
+              "latest_outturn": 0.00713,
+              "abs_error": 0.00142,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q1",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0049,
+              "ar1": 0.0019501420503053478,
+              "first_release": 0.01631,
+              "latest_outturn": 0.01262,
+              "abs_error": 0.01141,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q2",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0054,
+              "ar1": 0.0028069155437106877,
+              "first_release": 0.0,
+              "latest_outturn": 0.00484,
+              "abs_error": 0.0054,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q3",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0053,
+              "ar1": 0.0018358315591390077,
+              "first_release": -0.00239,
+              "latest_outturn": 0.00102,
+              "abs_error": 0.00769,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2023Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0042,
+              "ar1": 0.0033666086243336253,
+              "first_release": 0.00793,
+              "latest_outturn": 0.00733,
+              "abs_error": 0.00373,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q1",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0044,
+              "ar1": 0.0040826427866539235,
+              "first_release": 0.00841,
+              "latest_outturn": 0.00712,
+              "abs_error": 0.00401,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q2",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0047,
+              "ar1": 0.0028950950152342326,
+              "first_release": 0.0011,
+              "latest_outturn": 0.0052,
+              "abs_error": 0.0036,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q3",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0052,
+              "ar1": 0.0029727476734894586,
+              "first_release": 0.00162,
+              "latest_outturn": 0.00145,
+              "abs_error": 0.00358,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2024Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0046,
+              "ar1": 0.003361753428508361,
+              "first_release": 0.01532,
+              "latest_outturn": 0.01173,
+              "abs_error": 0.01072,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q1",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.005,
+              "ar1": 0.0040686431246446195,
+              "first_release": -0.00539,
+              "latest_outturn": -0.00283,
+              "abs_error": 0.01039,
+              "hit80": false,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q2",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0047,
+              "ar1": 0.0021494181578114897,
+              "first_release": 0.00565,
+              "latest_outturn": 0.00683,
+              "abs_error": 0.00095,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q3",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0059,
+              "ar1": 0.004921360854223755,
+              "first_release": 0.00827,
+              "latest_outturn": 0.00599,
+              "abs_error": 0.00237,
+              "hit80": true,
+              "covid": false
+            },
+            {
+              "quarter": "2025Q4",
+              "horizon": "M2",
+              "model": "shrink_combo",
+              "our_call": 0.0049,
+              "ar1": 0.0030671828495615738,
+              "first_release": 0.00916,
+              "latest_outturn": 0.00926,
+              "abs_error": 0.00426,
+              "hit80": true,
+              "covid": false
+            }
+          ],
+          "summary": {
+            "M3": {
+              "n": 40,
+              "n_covid": 4,
+              "excl_covid": {
+                "n_scored": 36,
+                "rmse_pp_vs_first_release": 1.0146,
+                "rel_vs_ar1_first_release": 0.806,
+                "rmse_pp_vs_latest": 0.9159,
+                "rel_vs_ar1_latest": 0.744,
+                "band_hit_rate_80": 0.694
+              },
+              "incl_covid": {
+                "n_scored": 40,
+                "rmse_pp_vs_first_release": 3.318,
+                "rel_vs_ar1_first_release": 0.587,
+                "rmse_pp_vs_latest": 3.5524,
+                "rel_vs_ar1_latest": 0.605,
+                "band_hit_rate_80": 0.65
+              }
+            },
+            "M1": {
+              "n": 40,
+              "n_covid": 4,
+              "excl_covid": {
+                "n_scored": 36,
+                "rmse_pp_vs_first_release": 1.0882,
+                "rel_vs_ar1_first_release": 0.968,
+                "rmse_pp_vs_latest": 1.0187,
+                "rel_vs_ar1_latest": 0.924,
+                "band_hit_rate_80": 0.75
+              },
+              "incl_covid": {
+                "n_scored": 40,
+                "rmse_pp_vs_first_release": 3.624,
+                "rel_vs_ar1_first_release": 0.779,
+                "rmse_pp_vs_latest": 3.8515,
+                "rel_vs_ar1_latest": 0.794,
+                "band_hit_rate_80": 0.675
+              }
+            },
+            "M2": {
+              "n": 40,
+              "n_covid": 4,
+              "excl_covid": {
+                "n_scored": 36,
+                "rmse_pp_vs_first_release": 1.0541,
+                "rel_vs_ar1_first_release": 0.938,
+                "rmse_pp_vs_latest": 0.9836,
+                "rel_vs_ar1_latest": 0.892,
+                "band_hit_rate_80": 0.722
+              },
+              "incl_covid": {
+                "n_scored": 40,
+                "rmse_pp_vs_first_release": 3.6242,
+                "rel_vs_ar1_first_release": 0.779,
+                "rmse_pp_vs_latest": 3.8522,
+                "rel_vs_ar1_latest": 0.794,
+                "band_hit_rate_80": 0.65
+              }
+            }
+          }
+        },
+        "live": {
+          "label": "4 days of live history as of 2026-06-11",
+          "source": "output/vintage_history.json",
+          "started": "2026-06-04",
+          "rows": [
+            {
+              "date": "2026-06-04",
+              "target_quarter": "2026Q2",
+              "position": "M1",
+              "model": "ensemble",
+              "our_call": 0.004,
+              "ci_80": null,
+              "outturn": null
+            },
+            {
+              "date": "2026-06-04",
+              "target_quarter": "2026Q2",
+              "position": "M2",
+              "model": "supply_side_bridge",
+              "our_call": 0.004,
+              "ci_80": [
+                -0.0088,
+                0.0168
+              ],
+              "outturn": null
+            },
+            {
+              "date": "2026-06-05",
+              "target_quarter": "2026Q2",
+              "position": "M2",
+              "model": "supply_side_bridge",
+              "our_call": 0.004,
+              "ci_80": [
+                -0.0088,
+                0.0168
+              ],
+              "outturn": null
+            },
+            {
+              "date": "2026-06-10",
+              "target_quarter": "2026Q2",
+              "position": "M2",
+              "model": "supply_side_bridge",
+              "our_call": 0.004,
+              "ci_80": [
+                -0.0088,
+                0.0168
+              ],
+              "outturn": null
+            },
+            {
+              "date": "2026-06-11",
+              "target_quarter": "2026Q2",
+              "position": "M2",
+              "model": "supply_side_bridge",
+              "our_call": 0.0041,
+              "ci_80": [
+                -0.0087,
+                0.0169
+              ],
+              "outturn": null
+            }
+          ],
+          "summary": {
+            "n_records": 5,
+            "n_days": 4,
+            "n_with_outturn": 0,
+            "rmse_pp_vs_first_release": null,
+            "rel_vs_ar1_first_release": null,
+            "band_hit_rate_80": null,
+            "note": "Sparse by construction \u2014 the live era only started on 2026-06-04. No live-covered quarter has an official outturn yet; live scoring begins when INE/Eurostat publish the first one."
+          }
+        }
+      },
+      "honesty_note": "Backtest rows are as-if calls from the leak-free publication-lag harness, scored against the GDP number as FIRST published \u2014 genuine first releases only (first ALFRED vintage within 120 days of quarter end; pre-2016 pseudo-vintages excluded). Pseudo-real-time (final revised panel masked by nominal lag, not true input vintages), so live performance is likely somewhat worse. Band hit-rates are indicative: the bands were calibrated on overlapping quarters against the REVISED target. The live era is days old and has no scored outturn yet \u2014 judge it only as it accumulates."
+    },
+    "labour": {
+      "status": "ok",
+      "label": "labour market",
+      "verdict": "stable",
+      "verdict_rule": "fixed sign rule: improving if BOTH the unemployment-rate 3m change (dead-zone \u00b10.1pp) and the IEFP registered-unemployment 3m change (dead-zone \u00b12000 persons) are falling; deteriorating if both rising; else stable",
+      "unemployment_rate": {
+        "level_pct": 5.7,
+        "level_date": "2026-04-01",
+        "change_3m_pp": 0.1,
+        "change_as_of": "2026-04-01"
+      },
+      "iefp_registered_unemployment": {
+        "change_3m_persons": 5727.0,
+        "change_as_of": "2026-02-01"
+      },
+      "employment_expectations": {
+        "value": -6.1,
+        "date": "2026-05-01"
+      },
+      "honesty_note": "A state read-out of published labour data; no forecast \u2014 next-month unemployment is at its noise floor (discovery 2026-06-11). The verdict is a fixed sign rule on published 3-month changes, not a model."
+    }
+  }
+}
