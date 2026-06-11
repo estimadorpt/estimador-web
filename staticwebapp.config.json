@@ -107,6 +107,14 @@
       "serve": "/en/index.html"
     },
     {
+      "route": "/pt/economia",
+      "serve": "/pt/economia/index.html"
+    },
+    {
+      "route": "/en/economia",
+      "serve": "/en/economia/index.html"
+    },
+    {
       "route": "/pt/eleicoes/presidenciais",
       "serve": "/pt/eleicoes/presidenciais/index.html"
     },
@@ -181,7 +189,12 @@
   ],
   "navigationFallback": {
     "rewrite": "/pt/index.html",
-    "exclude": ["/data/*", "/_next/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,json,txt}", "/og-image-*.png"]
+    "exclude": [
+      "/data/*",
+      "/_next/*",
+      "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,json,txt}",
+      "/og-image-*.png"
+    ]
   },
   "mimeTypes": {
     ".json": "application/json",
