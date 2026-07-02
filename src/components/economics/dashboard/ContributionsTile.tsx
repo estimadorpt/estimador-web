@@ -9,8 +9,9 @@
 
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
+import { StatusBadge } from './StatusBadge';
 import { fmtSignedPp, COLORS } from '@/lib/utils/economy-format';
-import { groupKey, labelKey } from '@/lib/i18n/economy-labels';
+import { groupKey, labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { ContributionsTileData } from '@/types/economy-dashboard';
 
 const MAX_ROWS = 7;
@@ -71,13 +72,25 @@ export async function ContributionsTile({
       eyebrow={t('contributionsEyebrow')}
       label={lblKey ? t(lblKey) : data?.tile_label}
       labelTone="amber"
-      honesty={data?.note ?? t('contributionsHonesty')}
+      honesty={
+        pickNote(
+          locale,
+          data?.note_i18n ?? data?.honesty_note_i18n,
+          data?.note,
+          data?.note_pt
+        ) ?? t('contributionsHonesty')
+      }
     >
       {/* Directional lead — which groups are pushing the factor nowcast up/down.
           No q/q point estimate here; the official tile owns that single number. */}
-      {moversLine && (
-        <p className="text-sm leading-relaxed text-stone-700 mb-3">{moversLine}</p>
-      )}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
+        {moversLine && (
+          <p className="w-full text-sm leading-relaxed text-stone-700 sm:w-auto sm:flex-1">
+            {moversLine}
+          </p>
+        )}
+      </div>
 
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3 text-[11px] text-stone-500">

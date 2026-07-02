@@ -8,7 +8,8 @@ import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
 import { Gauge } from './Gauge';
 import { toneForLabel } from './LabelBadge';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { StatusBadge } from './StatusBadge';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { HealthScoreTileData } from '@/types/economy-dashboard';
 import {
   COLORS,
@@ -56,7 +57,10 @@ export async function HealthScoreTile({
       eyebrow={t('healthEyebrow')}
       label={lblKey ? t(lblKey) : data?.label}
       labelTone={toneForLabel(data?.label)}
-      honesty={data?.honesty_note ?? t('healthHonesty')}
+      honesty={
+        pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt) ??
+        t('healthHonesty')
+      }
       accent={COLORS.teal}
       hero
     >
@@ -80,11 +84,14 @@ export async function HealthScoreTile({
 
         {/* Right: verdict word, always-visible caveat, component breakdown */}
         <div>
-          <div
-            className="text-2xl md:text-3xl font-bold tracking-tight tabular-nums"
-            style={{ color: vColor }}
-          >
-            {verdictWord}
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              className="text-2xl md:text-3xl font-bold tracking-tight tabular-nums"
+              style={{ color: vColor }}
+            >
+              {verdictWord}
+            </div>
+            <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
           </div>
 
           {/* HONESTY: short caveat ALWAYS visible next to the headline — this is

@@ -3,12 +3,18 @@
 // honesty_note says so and is rendered verbatim). The verdict is a fixed sign
 // rule on published 3-month changes — also stated verbatim (verdict_rule).
 //
+// Each datum carries its own "as of {date}" badge (labour series arrive with
+// very different lags — the IEFP registered count can trail the LFS rate by
+// months). When the producer flags a leg as stale (`stale` / `age_days`), the
+// badge turns amber so nobody reads an old print as current.
+//
 // Sign colouring follows labour-market semantics: RISING unemployment (UR pp
 // or IEFP persons) is adverse (red); falling is favourable (teal). Employment
 // expectations are a survey balance (positive = teal).
 
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
+import { StatusBadge } from './StatusBadge';
 import {
   COLORS,
   fmtPctValue,
@@ -17,7 +23,7 @@ import {
   fmtSignedNum,
   fmtDate,
 } from '@/lib/utils/economy-format';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { LabourTileData } from '@/types/economy-dashboard';
 
 function isNum(v: number | null | undefined): v is number {
@@ -35,6 +41,40 @@ const VERDICT_KEYS: Record<string, string> = {
   stable: 'labourVerdictStable',
   deteriorating: 'labourVerdictDeteriorating',
 };
+
+// Per-datum provenance badge: "as of {date}", amber when the producer flags the
+// leg as stale (or reports an age above ~2 months without a flag).
+function AsOfBadge({
+  date,
+  ageDays,
+  stale,
+  locale,
+  asOfLabel,
+  staleTitle,
+}: {
+  date?: string;
+  ageDays?: number;
+  stale?: boolean;
+  locale: string;
+  asOfLabel: string;
+  staleTitle?: string;
+}) {
+  if (!date) return null;
+  const isStale = stale === true || (stale === undefined && isNum(ageDays) && ageDays > 75);
+  return (
+    <span
+      title={isStale ? staleTitle : undefined}
+      className={`inline-block text-[10px] px-1.5 py-0.5 rounded tabular-nums ${
+        isStale
+          ? 'bg-amber-100 text-amber-800 font-semibold'
+          : 'bg-stone-100 text-stone-500'
+      }`}
+    >
+      {asOfLabel} {fmtDate(date, locale)}
+      {isNum(ageDays) ? ` · ${Math.round(ageDays)}d` : ''}
+    </span>
+  );
+}
 
 export async function LabourTile({
   data,
@@ -60,8 +100,11 @@ export async function LabourTile({
         ? 'bg-red-100 text-red-800'
         : 'bg-stone-100 text-stone-600';
 
-  // Honesty: payload note verbatim + the fixed verdict rule, verbatim.
-  const honesty = [data?.honesty_note, data?.verdict_rule]
+  // Honesty: payload note (bilingual when shipped) + the fixed verdict rule, verbatim.
+  const honesty = [
+    pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt),
+    data?.verdict_rule,
+  ]
     .filter(Boolean)
     .join(' — ');
 
@@ -78,15 +121,21 @@ export async function LabourTile({
         <span className="text-4xl md:text-5xl font-black tabular-nums tracking-tighter leading-none text-stone-900">
           {fmtPctValue(ur?.level_pct, 1)}
         </span>
-        <span className="text-sm text-stone-500">
-          {t('labourUrLabel')}
-          {ur?.level_date ? ` · ${fmtDate(ur.level_date, locale)}` : ''}
-        </span>
+        <span className="text-sm text-stone-500">{t('labourUrLabel')}</span>
+        <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
         <span
           className={`inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 ${verdictClasses}`}
         >
           {verdictWord}
         </span>
+        <AsOfBadge
+          date={ur?.level_date}
+          ageDays={ur?.age_days}
+          stale={ur?.stale}
+          locale={locale}
+          asOfLabel={t('asOf')}
+          staleTitle={t('labourStaleTitle')}
+        />
       </div>
 
       {/* the no-forecast honesty line — always visible, not only collapsed */}
@@ -106,8 +155,15 @@ export async function LabourTile({
           >
             {fmtSignedPpValue(ur?.change_3m_pp, 1, locale)}
           </div>
-          <div className="text-[10px] text-stone-400 mt-0.5">
-            {ur?.change_as_of ? fmtDate(ur.change_as_of, locale) : '—'}
+          <div className="mt-1">
+            <AsOfBadge
+              date={ur?.change_as_of}
+              ageDays={ur?.age_days}
+              stale={ur?.stale}
+              locale={locale}
+              asOfLabel={t('asOf')}
+              staleTitle={t('labourStaleTitle')}
+            />
           </div>
         </div>
 
@@ -121,9 +177,16 @@ export async function LabourTile({
           >
             {fmtSignedInt(iefp?.change_3m_persons, locale)}
           </div>
-          <div className="text-[10px] text-stone-400 mt-0.5">
-            {t('labourPersons')}
-            {iefp?.change_as_of ? ` · ${fmtDate(iefp.change_as_of, locale)}` : ''}
+          <div className="text-[10px] text-stone-400 mt-0.5">{t('labourPersons')}</div>
+          <div className="mt-1">
+            <AsOfBadge
+              date={iefp?.change_as_of}
+              ageDays={iefp?.age_days}
+              stale={iefp?.stale}
+              locale={locale}
+              asOfLabel={t('asOf')}
+              staleTitle={t('labourStaleTitle')}
+            />
           </div>
         </div>
 
@@ -143,9 +206,16 @@ export async function LabourTile({
           >
             {fmtSignedNum(emp?.value, 1)}
           </div>
-          <div className="text-[10px] text-stone-400 mt-0.5">
-            {t('labourEmpExpUnits')}
-            {emp?.date ? ` · ${fmtDate(emp.date, locale)}` : ''}
+          <div className="text-[10px] text-stone-400 mt-0.5">{t('labourEmpExpUnits')}</div>
+          <div className="mt-1">
+            <AsOfBadge
+              date={emp?.date}
+              ageDays={emp?.age_days}
+              stale={emp?.stale}
+              locale={locale}
+              asOfLabel={t('asOf')}
+              staleTitle={t('labourStaleTitle')}
+            />
           </div>
         </div>
       </div>

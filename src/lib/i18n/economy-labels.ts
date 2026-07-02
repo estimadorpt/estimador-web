@@ -37,6 +37,27 @@ export function labelKey(value?: string): string | undefined {
   return value ? LABEL_KEY[value] : undefined;
 }
 
+/**
+ * Resolve a producer-supplied honesty note for a locale.
+ * Preference order (defensive — the bilingual fields ship incrementally):
+ *   1. `honesty_note_i18n[locale]` (new bilingual object)
+ *   2. legacy `*_pt` sidecar when locale is 'pt'
+ *   3. the plain (English) note
+ * Returns undefined if nothing is present so callers can fall back to their
+ * i18n message-file default.
+ */
+export function pickNote(
+  locale: string,
+  i18n?: { en?: string; pt?: string },
+  plain?: string,
+  legacyPt?: string
+): string | undefined {
+  const localized = locale === 'pt' ? i18n?.pt : i18n?.en;
+  if (localized) return localized;
+  if (locale === 'pt' && legacyPt) return legacyPt;
+  return i18n?.en ?? plain ?? undefined;
+}
+
 /** Message key for a contributions group identifier, or undefined if unknown. */
 export function groupKey(value?: string | null): string | undefined {
   return value ? GROUP_KEY[value] : undefined;

@@ -11,6 +11,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '', changeFrequency: 'daily' as const, priority: 0.9 },
     { path: '/desporto/liga', changeFrequency: 'daily' as const, priority: 0.9 },
     { path: '/desporto/liga/metodologia', changeFrequency: 'monthly' as const, priority: 0.5 },
+    { path: '/economia', changeFrequency: 'daily' as const, priority: 0.8 },
+    { path: '/economia/metodologia', changeFrequency: 'monthly' as const, priority: 0.5 },
     { path: '/eleicoes/presidenciais', changeFrequency: 'daily' as const, priority: 0.8 },
     { path: '/eleicoes/legislativas', changeFrequency: 'weekly' as const, priority: 0.7 },
     { path: '/eleicoes/mapa', changeFrequency: 'weekly' as const, priority: 0.6 },

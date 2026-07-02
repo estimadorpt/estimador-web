@@ -11,6 +11,14 @@
 
 export type TileStatus = 'ok' | 'unavailable' | (string & {});
 
+// Bilingual honesty note added by the producer (2026-07 campaign). The legacy
+// English `honesty_note` is kept alongside; the UI prefers the locale entry,
+// falls back to `honesty_note`, then to the i18n message-file fallback.
+export interface HonestyNoteI18n {
+  en?: string;
+  pt?: string;
+}
+
 export interface DashboardVintage {
   position?: string; // 'M1' | 'M2' | 'M3'
   pct_complete?: number;
@@ -58,6 +66,7 @@ export interface HealthScoreTileData {
   inputs_available?: Record<string, string>;
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   source_tiles?: Record<string, number | string>;
   reason?: string;
 }
@@ -127,9 +136,11 @@ export interface PulseTileData {
   anchor?: PulseAnchor;
   tilt?: PulseTilt;
   combined_read?: number; // anchor + tilt, YoY % — freshness overlay only
+  render_as?: string; // 'direction' → render the combined read as direction only
   anchor_honesty?: PulseAnchorHonesty;
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   components?: { weekly_index?: PulseWeeklyIndex };
   reason?: string;
 }
@@ -183,6 +194,8 @@ export interface ContributionsTileData {
   summary_pt?: string;
   note?: string;
   note_pt?: string;
+  note_i18n?: HonestyNoteI18n;
+  honesty_note_i18n?: HonestyNoteI18n;
   level_decomposition?: ContributionsLevelDecomposition;
   revision_decomposition?: ContributionsRevisionDecomposition;
   reason?: string;
@@ -217,6 +230,7 @@ export interface RecessionProbabilityBlock {
   signals_used?: string[];
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
 }
 
 export interface SahmTripwire {
@@ -231,6 +245,7 @@ export interface SahmTripwire {
   false_positive_episodes?: number;
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
 }
 
 export interface RecessionTileData {
@@ -273,6 +288,7 @@ export interface GrowthAtRiskTileData {
   quantile_method?: string;
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   reason?: string;
 }
 
@@ -314,7 +330,16 @@ export interface OfficialQuarterlyTileData {
   combo_member_points?: Record<string, number>; // member -> q/q fraction
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   first_release_note?: string;
+  // Post-selection tracking of the provisional M2 combo (2026-06-11 bake-off):
+  // scored/of quarters, running status vs the pre-committed demotion trigger.
+  post_selection_tracking?: {
+    scored?: number;
+    of?: number;
+    status?: string;
+    detail?: string;
+  };
   reason?: string;
 }
 
@@ -382,6 +407,7 @@ export interface AnnualOutlookTileData {
   validation?: AnnualOutlookValidation;
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   units?: string;
   nowcast_seed?: AnnualOutlookNowcastSeed;
   consensus?: AnnualOutlookConsensus;
@@ -424,6 +450,10 @@ export interface TrackRecordBacktestEra {
   definition_genuine?: string;
   sources?: string[];
   notes?: string[];
+  // Producer's own selection caveat for the backtest-era numbers (the M2 combo
+  // was the best of ~19 pre-registered candidates; selection-adjusted p≈0.06–0.1).
+  selection_caveat?: string;
+  selection_caveat_i18n?: HonestyNoteI18n;
   rows?: TrackRecordBacktestRow[];
   summary?: Record<string, TrackRecordHorizonSummary>; // keyed by horizon
 }
@@ -467,6 +497,7 @@ export interface TrackRecordTileData {
   };
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   reason?: string;
 }
 
@@ -482,17 +513,24 @@ export interface LabourTileData {
     level_date?: string;
     change_3m_pp?: number;
     change_as_of?: string;
+    age_days?: number;
+    stale?: boolean;
   };
   iefp_registered_unemployment?: {
     change_3m_persons?: number;
     change_as_of?: string;
+    age_days?: number;
+    stale?: boolean;
   };
   employment_expectations?: {
     value?: number;
     date?: string;
+    age_days?: number;
+    stale?: boolean;
   };
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   reason?: string;
 }
 
@@ -516,6 +554,8 @@ export interface EconomyDashboard {
   vintage_date?: string;
   disclaimer?: string;
   disclaimer_pt?: string;
+  // ISO date the producer expects to publish the next payload (staleness aid).
+  expected_next_update?: string;
   narrative?: DashboardNarrative;
   vintage?: DashboardVintage;
   tiles?: EconomyDashboardTiles;

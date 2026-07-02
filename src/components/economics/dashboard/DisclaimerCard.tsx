@@ -11,20 +11,26 @@ import { ReadMore } from './ReadMore';
 export async function DisclaimerCard({
   vintageDate,
   vintage,
+  expectedNextUpdate,
   locale,
 }: {
   vintageDate?: string;
   vintage?: DashboardVintage;
+  expectedNextUpdate?: string;
   locale: string;
 }) {
   const t = await getTranslations({ locale, namespace: 'economics' });
 
-  const fmtVintage = vintageDate
-    ? new Date(vintageDate + 'T00:00:00').toLocaleDateString(
-        locale === 'pt' ? 'pt-PT' : 'en-US',
-        { day: 'numeric', month: 'long', year: 'numeric' }
-      )
-    : null;
+  const fmtLong = (iso?: string) =>
+    iso
+      ? new Date(iso + 'T00:00:00').toLocaleDateString(locale === 'pt' ? 'pt-PT' : 'en-US', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+      : null;
+  const fmtVintage = fmtLong(vintageDate);
+  const fmtNextUpdate = fmtLong(expectedNextUpdate);
 
   const coverage =
     vintage?.position &&
@@ -66,6 +72,12 @@ export async function DisclaimerCard({
               {t('quarterCoverage')}:
             </span>{' '}
             {coverage}
+          </span>
+        )}
+        {fmtNextUpdate && (
+          <span>
+            <span className="font-semibold text-stone-600">{t('nextUpdate')}:</span>{' '}
+            {fmtNextUpdate}
           </span>
         )}
       </div>

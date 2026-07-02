@@ -15,9 +15,10 @@ import { TileCard } from './TileCard';
 import { Gauge } from './Gauge';
 import { LabelBadge } from './LabelBadge';
 import { HonestyNote } from './HonestyNote';
+import { StatusBadge } from './StatusBadge';
 import { toneForLabel } from './LabelBadge';
 import { fmtProbPct, fmtNum, COLORS } from '@/lib/utils/economy-format';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { RecessionTileData, RecessionProbPoint } from '@/types/economy-dashboard';
 
 // Past Portuguese recession spans (GFC, Troika, COVID). Matched to the history
@@ -171,7 +172,10 @@ export async function RecessionTile({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* ---- A) CURRENT recession risk ---- */}
         <div className="md:border-r md:border-stone-100 md:pr-6">
-          <h3 className="text-sm font-bold text-stone-900">{t('recessionCurrentTitle')}</h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-sm font-bold text-stone-900">{t('recessionCurrentTitle')}</h3>
+            <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
+          </div>
           <p className="text-[11px] text-stone-500 mt-0.5">
             {t('recessionCurrentSub', { quarter: current?.as_of_quarter ?? '—' })}
           </p>
@@ -222,7 +226,16 @@ export async function RecessionTile({
             </div>
           </div>
 
-          <HonestyNote note={current?.honesty_note ?? t('recessionCurrentHonesty')} />
+          <HonestyNote
+            note={
+              pickNote(
+                locale,
+                current?.honesty_note_i18n,
+                current?.honesty_note,
+                current?.honesty_note_pt
+              ) ?? t('recessionCurrentHonesty')
+            }
+          />
         </div>
 
         {/* ---- B) 2-QUARTER OUTLOOK ---- */}
@@ -254,7 +267,16 @@ export async function RecessionTile({
             {t('recessionLeadingCaveat')}
           </p>
 
-          <HonestyNote note={leading?.honesty_note ?? t('recessionLeadingHonesty')} />
+          <HonestyNote
+            note={
+              pickNote(
+                locale,
+                leading?.honesty_note_i18n,
+                leading?.honesty_note,
+                leading?.honesty_note_pt
+              ) ?? t('recessionLeadingHonesty')
+            }
+          />
         </div>
       </div>
 
@@ -276,7 +298,12 @@ export async function RecessionTile({
             threshold: fmtNum(sahm?.threshold_pp),
           })}
         </p>
-        <HonestyNote note={sahm?.honesty_note ?? t('sahmHonesty')} />
+        <HonestyNote
+          note={
+            pickNote(locale, sahm?.honesty_note_i18n, sahm?.honesty_note, sahm?.honesty_note_pt) ??
+            t('sahmHonesty')
+          }
+        />
       </div>
     </TileCard>
   );

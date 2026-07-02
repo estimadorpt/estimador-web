@@ -15,7 +15,8 @@
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
 import { LabelBadge } from './LabelBadge';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { StatusBadge } from './StatusBadge';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { OfficialQuarterlyTileData } from '@/types/economy-dashboard';
 import { fmtSignedPct, fmtSignedNum, COLORS } from '@/lib/utils/economy-format';
 
@@ -98,7 +99,10 @@ export async function OfficialQuarterlyTile({
       eyebrow={t('officialEyebrow')}
       label={lblKey ? t(lblKey) : data?.label}
       labelTone="amber"
-      honesty={data?.honesty_note ?? t('officialHonesty')}
+      honesty={
+        pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt) ??
+        t('officialHonesty')
+      }
       className="opacity-95"
     >
       {/* Headline: deliberately SMALLER than a hero tile, muted stone tone. */}
@@ -113,6 +117,11 @@ export async function OfficialQuarterlyTile({
           {fmtSignedPct(point)}
         </span>
         <span className="text-xs text-stone-400">{t('qoq')}</span>
+        <StatusBadge
+          kind="indicative"
+          label={t('badgeIndicative')}
+          title={t('badgeIndicativeDef')}
+        />
         {isEarly && (
           <LabelBadge tone="red" title={t('officialCaveat')}>
             {t('officialEarly')}
@@ -341,6 +350,23 @@ export async function OfficialQuarterlyTile({
           pct: Math.round((data?.pct_complete ?? 0) * 100),
         })}
       </p>
+
+      {/* Post-selection tracking of the provisional M2 combo (pre-committed
+          demotion trigger) — rendered verbatim when the producer ships it. */}
+      {data?.post_selection_tracking &&
+        (isNum(data.post_selection_tracking.scored) ||
+          data.post_selection_tracking.status) && (
+          <p
+            className="mt-1.5 text-[11px] text-stone-400"
+            title={data.post_selection_tracking.detail}
+          >
+            {t('officialPostSelection', {
+              scored: data.post_selection_tracking.scored ?? 0,
+              of: data.post_selection_tracking.of ?? 4,
+              status: data.post_selection_tracking.status ?? '—',
+            })}
+          </p>
+        )}
 
       {/* First-release footnote (verbatim payload string). */}
       {data?.first_release_note && (
