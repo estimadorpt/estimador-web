@@ -1,6 +1,6 @@
 {
-  "vintage_date": "2026-07-02",
-  "computed_at": "2026-07-02T20:25:22.493197Z",
+  "vintage_date": "2026-07-03",
+  "computed_at": "2026-07-03T09:00:19.846657Z",
   "target_quarter": "2026Q3",
   "models": {
     "dfm": {
@@ -487,8 +487,8 @@
       ],
       "shadow_forecasts": {
         "inverse_msfe": 0.0046,
-        "equal": 0.0041,
-        "dma": 0.0053
+        "dma": 0.0053,
+        "equal": 0.0041
       }
     }
   },
@@ -509,295 +509,20 @@
     }
   },
   "news_decomposition": {
-    "vintage_old": "2026-06-01",
+    "vintage_old": "2026-07-01",
     "vintage_new": "2026-07-01",
     "target_quarter": "2026Q3",
-    "nowcast_old": 0.003215,
-    "nowcast_new": 0.002587,
-    "revision": -0.000627,
-    "contributions": [
-      {
-        "variable": "Economic Sentiment (ESI)",
-        "group": "Surveys",
-        "forecast": 100.885893,
-        "actual": 103.0,
-        "surprise": 2.114107,
-        "weight": 0.00020762,
-        "impact": 0.00043894
-      },
-      {
-        "variable": "Imports of Goods ITS",
-        "group": "Trade",
-        "forecast": 8928.170138,
-        "actual": 10282.76,
-        "surprise": 1354.589862,
-        "weight": 1.3e-07,
-        "impact": 0.00017193
-      },
-      {
-        "variable": "Exports of Goods ITS",
-        "group": "Trade",
-        "forecast": 6685.200161,
-        "actual": 7400.23,
-        "surprise": 715.029839,
-        "weight": 1.4e-07,
-        "impact": 0.00010044
-      },
-      {
-        "variable": "Employment Expectations",
-        "group": "Surveys",
-        "forecast": 6.490881,
-        "actual": 1.6,
-        "surprise": -4.890881,
-        "weight": 1.888e-05,
-        "impact": -9.234e-05
-      },
-      {
-        "variable": "Coincident Activity",
-        "group": "Activity Indicators",
-        "forecast": 1.946655,
-        "actual": 1.7,
-        "surprise": -0.246655,
-        "weight": -0.0002649,
-        "impact": 6.534e-05
-      },
-      {
-        "variable": "Industry Confidence",
-        "group": "Surveys",
-        "forecast": -5.795487,
-        "actual": -4.3,
-        "surprise": 1.495487,
-        "weight": 3.672e-05,
-        "impact": 5.491e-05
-      },
-      {
-        "variable": "GT: desemprego",
-        "group": "Google Trends",
-        "forecast": 9.118088,
-        "actual": 11.75,
-        "surprise": 2.631912,
-        "weight": -1.927e-05,
-        "impact": -5.072e-05
-      },
-      {
-        "variable": "GT: turismo",
-        "group": "Google Trends",
-        "forecast": 15.919739,
-        "actual": 13.5,
-        "surprise": -2.419739,
-        "weight": -1.339e-05,
-        "impact": 3.241e-05
-      },
-      {
-        "variable": "Services Confidence",
-        "group": "Surveys",
-        "forecast": 8.227785,
-        "actual": 9.5,
-        "surprise": 1.272215,
-        "weight": 1.705e-05,
-        "impact": 2.17e-05
-      },
-      {
-        "variable": "Financial Stress Indicator Daily",
-        "group": "Financial",
-        "forecast": 0.146901,
-        "actual": 0.0971,
-        "surprise": -0.049801,
-        "weight": -0.00026875,
-        "impact": 1.338e-05
-      },
-      {
-        "variable": "HICP Annual Rate",
-        "group": "Prices",
-        "forecast": 2.633073,
-        "actual": 3.1,
-        "surprise": 0.466927,
-        "weight": -2.582e-05,
-        "impact": -1.206e-05
-      },
-      {
-        "variable": "Unemployment Rate",
-        "group": "Labour",
-        "forecast": -0.061381,
-        "actual": -0.2,
-        "surprise": -0.138619,
-        "weight": -7.442e-05,
-        "impact": 1.032e-05
-      },
-      {
-        "variable": "PSI-20",
-        "group": "Financial",
-        "forecast": 0.000473,
-        "actual": 0.004246,
-        "surprise": 0.003774,
-        "weight": -0.00205959,
-        "impact": -7.77e-06
-      },
-      {
-        "variable": "Loans to NFC adj YoY",
-        "group": "Credit & Monetary",
-        "forecast": -2.121754,
-        "actual": 5.52,
-        "surprise": 7.641754,
-        "weight": -9.7e-07,
-        "impact": -7.41e-06
-      },
-      {
-        "variable": "VIX",
-        "group": "Financial",
-        "forecast": 17.251052,
-        "actual": 16.59,
-        "surprise": -0.661052,
-        "weight": -9.66e-06,
-        "impact": 6.38e-06
-      },
-      {
-        "variable": "Consumer Confidence",
-        "group": "Surveys",
-        "forecast": -22.158735,
-        "actual": -21.9,
-        "surprise": 0.258735,
-        "weight": 1.904e-05,
-        "impact": 4.93e-06
-      },
-      {
-        "variable": "Coincident Consumption",
-        "group": "Consumption",
-        "forecast": 2.260214,
-        "actual": 2.0,
-        "surprise": -0.260214,
-        "weight": 1.45e-05,
-        "impact": -3.77e-06
-      },
-      {
-        "variable": "Gas Consumption",
-        "group": "Energy",
-        "forecast": -0.005466,
-        "actual": -0.065945,
-        "surprise": -0.060478,
-        "weight": 3.576e-05,
-        "impact": -2.16e-06
-      },
-      {
-        "variable": "PPI Total Industry",
-        "group": "Prices",
-        "forecast": 0.001617,
-        "actual": 0.009983,
-        "surprise": 0.008367,
-        "weight": -0.0002422,
-        "impact": -2.03e-06
-      },
-      {
-        "variable": "Tourism Nights",
-        "group": "Real Activity",
-        "forecast": -0.002178,
-        "actual": 0.2462,
-        "surprise": 0.248378,
-        "weight": -2.27e-06,
-        "impact": -5.6e-07
-      },
-      {
-        "variable": "Cement Sales",
-        "group": "Real Activity",
-        "forecast": 0.003405,
-        "actual": -0.042694,
-        "surprise": -0.046099,
-        "weight": 8.51e-06,
-        "impact": -3.9e-07
-      },
-      {
-        "variable": "Retail Trade Volume",
-        "group": "Consumption",
-        "forecast": 0.004396,
-        "actual": -0.002141,
-        "surprise": -0.006537,
-        "weight": 5.18e-05,
-        "impact": -3.4e-07
-      },
-      {
-        "variable": "Industrial Production Index",
-        "group": "Real Activity",
-        "forecast": -0.000433,
-        "actual": 0.009014,
-        "surprise": 0.009447,
-        "weight": 3.085e-05,
-        "impact": 2.9e-07
-      },
-      {
-        "variable": "New Car Registrations",
-        "group": "Consumption",
-        "forecast": 0.012388,
-        "actual": 0.149748,
-        "surprise": 0.13736,
-        "weight": 1.39e-06,
-        "impact": 1.9e-07
-      },
-      {
-        "variable": "Services Turnover Total sca",
-        "group": "Real Activity",
-        "forecast": 0.003412,
-        "actual": 0.012017,
-        "surprise": 0.008605,
-        "weight": 1.868e-05,
-        "impact": 1.6e-07
-      },
-      {
-        "variable": "POS Card Purchases Volume",
-        "group": "Other",
-        "forecast": 0.010078,
-        "actual": 0.078456,
-        "surprise": 0.068378,
-        "weight": -1.73e-06,
-        "impact": -1.2e-07
-      },
-      {
-        "variable": "GT: supermercado",
-        "group": "Google Trends",
-        "forecast": 10.474988,
-        "actual": 10.5,
-        "surprise": 0.025012,
-        "weight": -4.27e-06,
-        "impact": -1.1e-07
-      },
-      {
-        "variable": "Domestic POS Purchases Volume",
-        "group": "Other",
-        "forecast": 0.00963,
-        "actual": 0.074631,
-        "surprise": 0.065001,
-        "weight": -8.6e-07,
-        "impact": -6e-08
-      },
-      {
-        "variable": "Electricity Consumption",
-        "group": "Energy",
-        "forecast": 0.002481,
-        "actual": 0.001655,
-        "surprise": -0.000826,
-        "weight": 3.867e-05,
-        "impact": -3e-08
-      }
-    ],
-    "contributions_by_group": {
-      "Surveys": 0.00042814,
-      "Trade": 0.00027237,
-      "Activity Indicators": 6.534e-05,
-      "Google Trends": -1.842e-05,
-      "Prices": -1.409e-05,
-      "Financial": 1.199e-05,
-      "Labour": 1.032e-05,
-      "Credit & Monetary": -7.41e-06,
-      "Consumption": -3.92e-06,
-      "Energy": -2.19e-06,
-      "Real Activity": -5e-07,
-      "Other": -1.8e-07
-    }
+    "nowcast_old": 0.0026,
+    "nowcast_new": 0.0026,
+    "revision": 0.0,
+    "contributions": [],
+    "contributions_by_group": {}
   },
   "data_availability": {
     "pct_complete": 0.31,
     "n_series": 212,
     "latest_date": "2026-07-01",
-    "data_age_days": 0,
+    "data_age_days": 1,
     "stale": false
   },
   "vintage": {
@@ -808,7 +533,7 @@
       "m2": 0.0,
       "m3": 0.0
     },
-    "calendar_date": "2026-07-02",
+    "calendar_date": "2026-07-03",
     "models_skipped": [
       {
         "name": "midas",
@@ -995,254 +720,13 @@
       ]
     },
     "revision_decomposition": {
-      "vintage_old": "2026-06-01",
+      "vintage_old": "2026-07-01",
       "vintage_new": "2026-07-01",
       "target_quarter": "2026Q3",
-      "nowcast_old": 0.003215,
-      "nowcast_new": 0.002587,
-      "revision": -0.000627,
-      "groups": [
-        {
-          "group": "Surveys",
-          "contribution": 0.00042814,
-          "share": 0.5128,
-          "top_drivers": [
-            {
-              "variable": "Economic Sentiment (ESI)",
-              "impact": 0.00043894,
-              "surprise": 2.114107,
-              "weight": 0.00020762
-            },
-            {
-              "variable": "Employment Expectations",
-              "impact": -9.234e-05,
-              "surprise": -4.890881,
-              "weight": 1.888e-05
-            },
-            {
-              "variable": "Industry Confidence",
-              "impact": 5.491e-05,
-              "surprise": 1.495487,
-              "weight": 3.672e-05
-            }
-          ]
-        },
-        {
-          "group": "Trade",
-          "contribution": 0.00027237,
-          "share": 0.3262,
-          "top_drivers": [
-            {
-              "variable": "Imports of Goods ITS",
-              "impact": 0.00017193,
-              "surprise": 1354.589862,
-              "weight": 1.3e-07
-            },
-            {
-              "variable": "Exports of Goods ITS",
-              "impact": 0.00010044,
-              "surprise": 715.029839,
-              "weight": 1.4e-07
-            }
-          ]
-        },
-        {
-          "group": "Activity Indicators",
-          "contribution": 6.534e-05,
-          "share": 0.0783,
-          "top_drivers": [
-            {
-              "variable": "Coincident Activity",
-              "impact": 6.534e-05,
-              "surprise": -0.246655,
-              "weight": -0.0002649
-            }
-          ]
-        },
-        {
-          "group": "Google Trends",
-          "contribution": -1.842e-05,
-          "share": 0.0221,
-          "top_drivers": [
-            {
-              "variable": "GT: desemprego",
-              "impact": -5.072e-05,
-              "surprise": 2.631912,
-              "weight": -1.927e-05
-            },
-            {
-              "variable": "GT: turismo",
-              "impact": 3.241e-05,
-              "surprise": -2.419739,
-              "weight": -1.339e-05
-            },
-            {
-              "variable": "GT: supermercado",
-              "impact": -1.1e-07,
-              "surprise": 0.025012,
-              "weight": -4.27e-06
-            }
-          ]
-        },
-        {
-          "group": "Prices",
-          "contribution": -1.409e-05,
-          "share": 0.0169,
-          "top_drivers": [
-            {
-              "variable": "HICP Annual Rate",
-              "impact": -1.206e-05,
-              "surprise": 0.466927,
-              "weight": -2.582e-05
-            },
-            {
-              "variable": "PPI Total Industry",
-              "impact": -2.03e-06,
-              "surprise": 0.008367,
-              "weight": -0.0002422
-            }
-          ]
-        },
-        {
-          "group": "Financial",
-          "contribution": 1.199e-05,
-          "share": 0.0144,
-          "top_drivers": [
-            {
-              "variable": "Financial Stress Indicator Daily",
-              "impact": 1.338e-05,
-              "surprise": -0.049801,
-              "weight": -0.00026875
-            },
-            {
-              "variable": "PSI-20",
-              "impact": -7.77e-06,
-              "surprise": 0.003774,
-              "weight": -0.00205959
-            },
-            {
-              "variable": "VIX",
-              "impact": 6.38e-06,
-              "surprise": -0.661052,
-              "weight": -9.66e-06
-            }
-          ]
-        },
-        {
-          "group": "Labour",
-          "contribution": 1.032e-05,
-          "share": 0.0124,
-          "top_drivers": [
-            {
-              "variable": "Unemployment Rate",
-              "impact": 1.032e-05,
-              "surprise": -0.138619,
-              "weight": -7.442e-05
-            }
-          ]
-        },
-        {
-          "group": "Credit & Monetary",
-          "contribution": -7.41e-06,
-          "share": 0.0089,
-          "top_drivers": [
-            {
-              "variable": "Loans to NFC adj YoY",
-              "impact": -7.41e-06,
-              "surprise": 7.641754,
-              "weight": -9.7e-07
-            }
-          ]
-        },
-        {
-          "group": "Consumption",
-          "contribution": -3.92e-06,
-          "share": 0.0047,
-          "top_drivers": [
-            {
-              "variable": "Coincident Consumption",
-              "impact": -3.77e-06,
-              "surprise": -0.260214,
-              "weight": 1.45e-05
-            },
-            {
-              "variable": "Retail Trade Volume",
-              "impact": -3.4e-07,
-              "surprise": -0.006537,
-              "weight": 5.18e-05
-            },
-            {
-              "variable": "New Car Registrations",
-              "impact": 1.9e-07,
-              "surprise": 0.13736,
-              "weight": 1.39e-06
-            }
-          ]
-        },
-        {
-          "group": "Energy",
-          "contribution": -2.19e-06,
-          "share": 0.0026,
-          "top_drivers": [
-            {
-              "variable": "Gas Consumption",
-              "impact": -2.16e-06,
-              "surprise": -0.060478,
-              "weight": 3.576e-05
-            },
-            {
-              "variable": "Electricity Consumption",
-              "impact": -3e-08,
-              "surprise": -0.000826,
-              "weight": 3.867e-05
-            }
-          ]
-        },
-        {
-          "group": "Real Activity",
-          "contribution": -5e-07,
-          "share": 0.0006,
-          "top_drivers": [
-            {
-              "variable": "Tourism Nights",
-              "impact": -5.6e-07,
-              "surprise": 0.248378,
-              "weight": -2.27e-06
-            },
-            {
-              "variable": "Cement Sales",
-              "impact": -3.9e-07,
-              "surprise": -0.046099,
-              "weight": 8.51e-06
-            },
-            {
-              "variable": "Industrial Production Index",
-              "impact": 2.9e-07,
-              "surprise": 0.009447,
-              "weight": 3.085e-05
-            }
-          ]
-        },
-        {
-          "group": "Other",
-          "contribution": -1.8e-07,
-          "share": 0.0002,
-          "top_drivers": [
-            {
-              "variable": "POS Card Purchases Volume",
-              "impact": -1.2e-07,
-              "surprise": 0.068378,
-              "weight": -1.73e-06
-            },
-            {
-              "variable": "Domestic POS Purchases Volume",
-              "impact": -6e-08,
-              "surprise": 0.065001,
-              "weight": -8.6e-07
-            }
-          ]
-        }
-      ]
+      "nowcast_old": 0.0026,
+      "nowcast_new": 0.0026,
+      "revision": 0.0,
+      "groups": []
     }
   },
   "current_quarter_trajectory": {
@@ -1525,6 +1009,17 @@
     "official_quarterly": "ok",
     "annual_outlook": "ok",
     "track_record": "ok",
-    "labour": "ok"
+    "labour": "ok",
+    "inflation": "ok"
+  },
+  "stories_status": {
+    "real_wages": "ok",
+    "mortgage_reset": "ok",
+    "housing_affordability": "ok",
+    "savings_gap": "ok",
+    "food_basket": "ok",
+    "tourism_pulse": "ok",
+    "public_accounts": "ok",
+    "release_calendar": "ok"
   }
 }

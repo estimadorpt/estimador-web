@@ -1,8 +1,8 @@
 {
   "schema": "estimador-economy-dashboard/v1",
-  "as_of": "2026-07-02T20:25:26.262842+00:00",
-  "vintage_date": "2026-07-02",
-  "expected_next_update": "2026-07-03",
+  "as_of": "2026-07-03T09:00:23.767825+00:00",
+  "vintage_date": "2026-07-03",
+  "expected_next_update": "2026-07-06",
   "disclaimer": "Preliminary / tracking. This dashboard describes the current state of the Portuguese economy by combining official high-frequency indicators; it largely co-moves with (and is partly built from) the same activity data published by the Banco de Portugal (notably the Coincident Activity index) and Eurostat. It is a faster, consolidated READ-OUT of that state, NOT a more-accurate forecast of GDP. Precise inventory of what is and is not validated: one in-quarter result survives strict 5% inference pre-selection (the M2 combo vs AR(1), Diebold-Mariano p=0.047); tail calibration (growth-at-risk q05/q10 hit rates ~exact) and the annual outlook's CRPS (+58% vs climatology) are validated; everything else is indicative. The q/q-GDP nowcast in 'official_quarterly' is preliminary and noisy and is most meaningful at quarter-end (M3). All backtests are PSEUDO-real-time (the final revised panel masked by nominal publication lag, NOT true data vintages), so live performance is likely somewhat optimistic; and the effective sample is small (n=80 ex-COVID quarters, 2005-2025; ~3 recession episodes) \u2014 this is an honest read-out, not a validated forecasting system. The annual outlook is an arithmetic carryover plus an AR(1) extrapolation that assumes no new shock; its backtested intervals missed in every crisis year.",
   "narrative": {
     "en": "The Portuguese economy is steady (health score 50/100). Activity is running at about +1.7% year-on-year on the BdP coincident indicator, with the weekly pulse pointing up since that print. Our indicative quarter-end estimate for Q2 2026 GDP is +0.6% quarter-on-quarter (80% band -0.1% to +1.3%), implying about +2.2% year-on-year. For 2026 as a whole, the median projection is +2.0% annual growth (P(>2%) \u2248 51%); the 5 official forecasts sit between the 33rd and 49th percentiles of our distribution. Recession risk is low (P\u22488%); in an adverse quarter (5% worst case) GDP growth could come in around -0.7%. The labour market looks stable (partial data), with the unemployment rate at 5.5%. Indicative read-out, not an official forecast \u2014 see each tile's caveats.",
@@ -73,11 +73,11 @@
         "corr_yoy_gdp_exclcovid": 0.81
       },
       "tilt": {
-        "value": 0.083,
-        "window_days": 28,
+        "value": 0.109,
+        "window_days": 35,
         "direction": "up"
       },
-      "combined_read": 1.783,
+      "combined_read": 1.809,
       "combined_read_render_as": "direction",
       "anchor_honesty": {
         "anchor_claim": "corr 0.81 ex-COVID with YoY GDP (pseudo-real-time, 40 normal quarters 2014-2025; the monthly BdP 'Coincident Activity' print carries the level information, not the weekly pulse)",
@@ -91,8 +91,8 @@
           "units": "yoy_gdp_growth_pct",
           "description": "Weekly coincident activity index (WEI/Lewis-Mertens-Stock spirit), scaled to YoY GDP growth. Tracking/preliminary.",
           "latest": {
-            "date": "2026-06-26",
-            "value": 2.798
+            "date": "2026-07-03",
+            "value": 2.824
           },
           "n_inputs": 9,
           "inputs_used": [
@@ -132,10 +132,6 @@
             "incremental_significant": false
           },
           "history_recent": [
-            {
-              "date": "2024-07-05",
-              "value": 1.624
-            },
             {
               "date": "2024-07-12",
               "value": 1.654
@@ -547,6 +543,10 @@
             {
               "date": "2026-06-26",
               "value": 2.798
+            },
+            {
+              "date": "2026-07-03",
+              "value": 2.824
             }
           ]
         }
@@ -829,254 +829,13 @@
         ]
       },
       "revision_decomposition": {
-        "vintage_old": "2026-06-01",
+        "vintage_old": "2026-07-01",
         "vintage_new": "2026-07-01",
         "target_quarter": "2026Q2",
-        "nowcast_old": 0.002194,
-        "nowcast_new": 0.001956,
-        "revision": -0.000238,
-        "groups": [
-          {
-            "group": "Trade",
-            "contribution": 0.00025624,
-            "share": 0.6291,
-            "top_drivers": [
-              {
-                "variable": "Imports of Goods ITS",
-                "impact": 0.00015925,
-                "surprise": 1354.589862,
-                "weight": 1.2e-07
-              },
-              {
-                "variable": "Exports of Goods ITS",
-                "impact": 9.699e-05,
-                "surprise": 715.029839,
-                "weight": 1.4e-07
-              }
-            ]
-          },
-          {
-            "group": "Surveys",
-            "contribution": 8.025e-05,
-            "share": 0.197,
-            "top_drivers": [
-              {
-                "variable": "Economic Sentiment (ESI)",
-                "impact": 9.373e-05,
-                "surprise": 2.114107,
-                "weight": 4.434e-05
-              },
-              {
-                "variable": "Employment Expectations",
-                "impact": -3.007e-05,
-                "surprise": -4.890881,
-                "weight": 6.15e-06
-              },
-              {
-                "variable": "Industry Confidence",
-                "impact": 1.025e-05,
-                "surprise": 1.495487,
-                "weight": 6.85e-06
-              }
-            ]
-          },
-          {
-            "group": "Activity Indicators",
-            "contribution": 4.076e-05,
-            "share": 0.1001,
-            "top_drivers": [
-              {
-                "variable": "Coincident Activity",
-                "impact": 4.076e-05,
-                "surprise": -0.246655,
-                "weight": -0.00016526
-              }
-            ]
-          },
-          {
-            "group": "Labour",
-            "contribution": 8.73e-06,
-            "share": 0.0214,
-            "top_drivers": [
-              {
-                "variable": "Unemployment Rate",
-                "impact": 8.73e-06,
-                "surprise": -0.138619,
-                "weight": -6.296e-05
-              }
-            ]
-          },
-          {
-            "group": "Prices",
-            "contribution": -4.94e-06,
-            "share": 0.0121,
-            "top_drivers": [
-              {
-                "variable": "HICP Annual Rate",
-                "impact": -3.22e-06,
-                "surprise": 0.466927,
-                "weight": -6.9e-06
-              },
-              {
-                "variable": "PPI Total Industry",
-                "impact": -1.72e-06,
-                "surprise": 0.008367,
-                "weight": -0.00020581
-              }
-            ]
-          },
-          {
-            "group": "Financial",
-            "contribution": 4.72e-06,
-            "share": 0.0116,
-            "top_drivers": [
-              {
-                "variable": "Financial Stress Indicator Daily",
-                "impact": 3.14e-06,
-                "surprise": -0.049801,
-                "weight": -6.296e-05
-              },
-              {
-                "variable": "PSI-20",
-                "impact": 8.2e-07,
-                "surprise": 0.003774,
-                "weight": 0.00021753
-              },
-              {
-                "variable": "VIX",
-                "impact": 7.6e-07,
-                "surprise": -0.661052,
-                "weight": -1.14e-06
-              }
-            ]
-          },
-          {
-            "group": "Credit & Monetary",
-            "contribution": -3.53e-06,
-            "share": 0.0087,
-            "top_drivers": [
-              {
-                "variable": "Loans to NFC adj YoY",
-                "impact": -3.53e-06,
-                "surprise": 7.641754,
-                "weight": -4.6e-07
-              }
-            ]
-          },
-          {
-            "group": "Consumption",
-            "contribution": -3.42e-06,
-            "share": 0.0084,
-            "top_drivers": [
-              {
-                "variable": "Coincident Consumption",
-                "impact": -3.25e-06,
-                "surprise": -0.260214,
-                "weight": 1.248e-05
-              },
-              {
-                "variable": "Retail Trade Volume",
-                "impact": -2.7e-07,
-                "surprise": -0.006537,
-                "weight": 4.161e-05
-              },
-              {
-                "variable": "New Car Registrations",
-                "impact": 1e-07,
-                "surprise": 0.13736,
-                "weight": 7.3e-07
-              }
-            ]
-          },
-          {
-            "group": "Google Trends",
-            "contribution": 2.58e-06,
-            "share": 0.0063,
-            "top_drivers": [
-              {
-                "variable": "GT: turismo",
-                "impact": 1.434e-05,
-                "surprise": -2.419739,
-                "weight": -5.92e-06
-              },
-              {
-                "variable": "GT: desemprego",
-                "impact": -1.173e-05,
-                "surprise": 2.631912,
-                "weight": -4.46e-06
-              },
-              {
-                "variable": "GT: supermercado",
-                "impact": -3e-08,
-                "surprise": 0.025012,
-                "weight": -1e-06
-              }
-            ]
-          },
-          {
-            "group": "Real Activity",
-            "contribution": -1.48e-06,
-            "share": 0.0036,
-            "top_drivers": [
-              {
-                "variable": "Tourism Nights",
-                "impact": -1.54e-06,
-                "surprise": 0.248378,
-                "weight": -6.2e-06
-              },
-              {
-                "variable": "Cement Sales",
-                "impact": -3.2e-07,
-                "surprise": -0.046099,
-                "weight": 7.03e-06
-              },
-              {
-                "variable": "Industrial Production Index",
-                "impact": 2.6e-07,
-                "surprise": 0.009447,
-                "weight": 2.769e-05
-              }
-            ]
-          },
-          {
-            "group": "Energy",
-            "contribution": -4.9e-07,
-            "share": 0.0012,
-            "top_drivers": [
-              {
-                "variable": "Gas Consumption",
-                "impact": -4.8e-07,
-                "surprise": -0.060478,
-                "weight": 7.88e-06
-              },
-              {
-                "variable": "Electricity Consumption",
-                "impact": -1e-08,
-                "surprise": -0.000826,
-                "weight": 1.253e-05
-              }
-            ]
-          },
-          {
-            "group": "Other",
-            "contribution": -1.8e-07,
-            "share": 0.0004,
-            "top_drivers": [
-              {
-                "variable": "POS Card Purchases Volume",
-                "impact": -1.2e-07,
-                "surprise": 0.068378,
-                "weight": -1.75e-06
-              },
-              {
-                "variable": "Domestic POS Purchases Volume",
-                "impact": -6e-08,
-                "surprise": 0.065001,
-                "weight": -9.8e-07
-              }
-            ]
-          }
-        ]
+        "nowcast_old": 0.002,
+        "nowcast_new": 0.002,
+        "revision": 0.0,
+        "groups": []
       },
       "tile_label": "preliminary",
       "honesty_note": "Attribution of the DFM factor nowcast (the repo's factor-news reference model), not the production headline and not a causal claim. Units are q/q GDP growth (decimal). The summary quotes the DFM member's nowcast, which can differ from the production headline in official_quarterly.",
@@ -2037,6 +1796,31 @@
       },
       "honesty_note": "DEMOTED tile. q/q-GDP is near-white-noise and hard to nowcast; exactly one result here survives strict 5% inference pre-selection (the M2 combo vs AR(1), DM p=0.047) \u2014 treat every in-quarter number as indicative, never authoritative. Quarter-end read from supply_side_bridge (the certified model): rel-RMSE 0.775 vs AR(1) ex-COVID (corr +0.70) \u2014 MODEST, not statistically significant (DM p\u22480.10), and partly carried by the 2021 rebound: dropping 2021 too it is rel 0.87 / corr +0.57, and on the last 4 calm years (n=16) the correlation is negative/noise. The most meaningful read of the quarter \u2014 still preliminary and noisy. Since 2016 a rolling 12-quarter mean matches or beats these models on calm quarters \u2014 our edge concentrates in downturns and rebounds. Backtests mask today's revised panel by publication lags, not true vintages \u2014 this flatters hard-data members most; the in-quarter combo's edge comes mainly from DG-ECFIN surveys, which are published once and never revised. Post-selection tracking (1 of 4 quarters scored, trigger clean): on 2026Q1 combo_esi's absolute error was 0.39pp vs 0.40pp for the 2-member combo (a tie-to-slightly-ahead); every model trailed AR(1) (0.28pp) on that sharp-slowdown quarter, and the 80% band covered by just 0.007pp. The band is the EXPANDING split-conformal interval on this horizon's production model's own realized errors (COVID/2021-rebound excluded), replacing the native model band. On the normal-quarter backtest it covers 79%/93% at nominal 80%/95%. Full distributional (PIT) calibration also passes on that panel. Band-coverage check: cov80 0.79 [0.60-0.90] n=28; cov95 0.93 [0.77-0.98]; vs first releases: 0.71. Coverage is calibrated for normal quarters; a genuine boom/bust will pierce it.",
       "first_release_note": "First-release GDP has been revised UP by +0.15pp on average (sd 0.34pp, n=36 ex-COVID genuine first releases, measured on ALFRED (FRED) vintages of PT real GDP (CLVMNACSCAB1GQPT), not INE first prints) relative to today's revised series; our backtest edge survives first-release scoring (M3 rel-RMSE 0.81 vs the production AR(1) \u2014 see output/track_record.json).",
+      "changes_since_last_run": {
+        "available": true,
+        "previous_run": {
+          "date": "2026-07-02",
+          "position": "M1",
+          "model": "supply_side_bridge",
+          "point_qoq": 0.0048
+        },
+        "current_run": {
+          "date": "2026-07-03",
+          "position": "M1",
+          "model": "supply_side_bridge",
+          "point_qoq": 0.0048
+        },
+        "delta_pp": 0.0,
+        "release_window": [
+          "2026-07-02",
+          "2026-07-03"
+        ],
+        "note_i18n": {
+          "en": "Unchanged since the previous published run (2026-07-02): no data released between 2026-07-02 and 2026-07-03 moved the published point (published-run ledger).",
+          "pt": "Sem altera\u00e7\u00f5es desde a execu\u00e7\u00e3o publicada anterior (2026-07-02): nenhuma publica\u00e7\u00e3o de dados entre 2026-07-02 e 2026-07-03 moveu o ponto publicado (registo das execu\u00e7\u00f5es publicadas)."
+        },
+        "source": "output/vintage_history.json (published headline ledger)"
+      },
       "honesty_note_i18n": {
         "en": "DEMOTED tile. q/q-GDP is near-white-noise and hard to nowcast; exactly one result here survives strict 5% inference pre-selection (the M2 combo vs AR(1), DM p=0.047) \u2014 treat every in-quarter number as indicative, never authoritative. Quarter-end read from supply_side_bridge (the certified model): rel-RMSE 0.775 vs AR(1) ex-COVID (corr +0.70) \u2014 MODEST, not statistically significant (DM p\u22480.10), and partly carried by the 2021 rebound: dropping 2021 too it is rel 0.87 / corr +0.57, and on the last 4 calm years (n=16) the correlation is negative/noise. The most meaningful read of the quarter \u2014 still preliminary and noisy. Since 2016 a rolling 12-quarter mean matches or beats these models on calm quarters \u2014 our edge concentrates in downturns and rebounds. Backtests mask today's revised panel by publication lags, not true vintages \u2014 this flatters hard-data members most; the in-quarter combo's edge comes mainly from DG-ECFIN surveys, which are published once and never revised. Post-selection tracking (1 of 4 quarters scored, trigger clean): on 2026Q1 combo_esi's absolute error was 0.39pp vs 0.40pp for the 2-member combo (a tie-to-slightly-ahead); every model trailed AR(1) (0.28pp) on that sharp-slowdown quarter, and the 80% band covered by just 0.007pp. The band is the EXPANDING split-conformal interval on this horizon's production model's own realized errors (COVID/2021-rebound excluded), replacing the native model band. On the normal-quarter backtest it covers 79%/93% at nominal 80%/95%. Full distributional (PIT) calibration also passes on that panel. Band-coverage check: cov80 0.79 [0.60-0.90] n=28; cov95 0.93 [0.77-0.98]; vs first releases: 0.71. Coverage is calibrated for normal quarters; a genuine boom/bust will pierce it.",
         "pt": "Painel DESPROMOVIDO. O PIB em cadeia est\u00e1 perto de ru\u00eddo branco e \u00e9 dif\u00edcil de prever em tempo real; exatamente um resultado aqui sobrevive a infer\u00eancia estrita a 5% antes do ajuste de sele\u00e7\u00e3o (o combo M2 vs AR(1), DM p=0,047) \u2014 tratar qualquer n\u00famero intra-trimestre como indicativo, nunca autoritativo. Leitura de fim de trimestre do supply_side_bridge (o modelo certificado): RMSE relativo de 0,775 vs AR(1) excl. COVID (corr +0,70) \u2014 MODESTO, n\u00e3o estatisticamente significativo (DM p\u22480,10), e em parte sustentado pelo ressalto de 2021: excluindo tamb\u00e9m 2021 fica em 0,87 / corr +0,57, e nos \u00faltimos 4 anos calmos (n=16) a correla\u00e7\u00e3o \u00e9 negativa/ru\u00eddo. A leitura mais significativa do trimestre \u2014 ainda assim preliminar e ruidosa. Desde 2016, uma m\u00e9dia m\u00f3vel de 12 trimestres iguala ou bate estes modelos em trimestres calmos \u2014 a nossa vantagem concentra-se em recess\u00f5es e recupera\u00e7\u00f5es. Os backtests mascaram o painel revisto de hoje pelos desfasamentos de publica\u00e7\u00e3o, n\u00e3o por vintages verdadeiros \u2014 isto favorece sobretudo os membros de dados 'duros'; a vantagem intra-trimestre do combo vem principalmente dos inqu\u00e9ritos DG-ECFIN, que s\u00e3o publicados uma \u00fanica vez e nunca revistos. Acompanhamento p\u00f3s-sele\u00e7\u00e3o (1 de 4 trimestres avaliado, gatilho limpo): em 2026Q1 o erro absoluto do combo_esi foi de 0,39pp vs 0,40pp do combo de 2 membros (empate ligeiramente favor\u00e1vel); todos os modelos ficaram atr\u00e1s do AR(1) (0,28pp) nesse trimestre de forte abrandamento, e a banda de 80% cobriu por apenas 0,007pp. A banda \u00e9 o intervalo split-conformal EXPANSIVO sobre os erros realizados do modelo de produ\u00e7\u00e3o deste horizonte (excluindo COVID e o ressalto de 2021), substituindo a banda nativa do modelo. No backtest de trimestres normais cobre 79%/93% para n\u00edveis nominais de 80%/95%. A calibra\u00e7\u00e3o distribucional completa (PIT) tamb\u00e9m passa nesse painel. Verifica\u00e7\u00e3o de cobertura da banda: cov80 0.79 [0.60-0.90] n=28; cov95 0.93 [0.77-0.98]; vs primeiras estimativas: 0.71. A cobertura est\u00e1 calibrada para trimestres normais; um verdadeiro boom/colapso ir\u00e1 ultrapass\u00e1-la."
@@ -2086,14 +1870,6 @@
         "available": true,
         "forecasts": [
           {
-            "institution": "Banco de Portugal",
-            "publication": "Boletim Econ\u00f3mico \u2014 mar\u00e7o 2026",
-            "pub_date": "2026-03-25",
-            "value_pct": 1.8,
-            "url": "https://www.bportugal.pt/en/publicacao/economic-bulletin-march-2026",
-            "percentile_on_our_distribution": 38.0
-          },
-          {
             "institution": "IMF",
             "publication": "World Economic Outlook \u2014 April 2026",
             "pub_date": "2026-04-14",
@@ -2124,11 +1900,19 @@
             "value_pct": 1.8,
             "url": "https://www.oecd.org/en/publications/2026/06/oecd-economic-outlook-volume-2026-issue-1_8be0dba6.html",
             "percentile_on_our_distribution": 38.0
+          },
+          {
+            "institution": "Banco de Portugal",
+            "publication": "Boletim Econ\u00f3mico \u2014 junho 2026",
+            "pub_date": "2026-06-15",
+            "value_pct": 1.8,
+            "url": "https://www.bportugal.pt/publicacao/boletim-economico-junho-2026",
+            "percentile_on_our_distribution": 38.0
           }
         ],
         "note": "Hand-curated, sourced institutional forecasts (data/consensus_forecasts.csv; latest publication per institution). The percentile places each point forecast on OUR simulated distribution \u2014 proximity is context, not validation.",
-        "newest_pub_date": "2026-06-03",
-        "newest_age_days": 29
+        "newest_pub_date": "2026-06-15",
+        "newest_age_days": 18
       },
       "honesty_note_i18n": {
         "en": "Carryover from published quarters plus an AR(1) extrapolation does most of the work; the nowcast narrows the 80% band by ~0.3pp. Backtested intervals miss in crisis years (2008, 2011-12, 2020-21): this outlook assumes no new shock. Pseudo-real-time on revised data; annual-average-of-quarterly may differ slightly from official annual accounts.",
@@ -2138,7 +1922,7 @@
     "track_record": {
       "status": "ok",
       "label": "track record",
-      "as_of": "2026-07-02",
+      "as_of": "2026-07-03",
       "framing": "Until 2026-06-04 these are backtested as-if calls on a leak-free publication-lag harness, scored against the GDP number as FIRST published \u2014 from then on every dot is a call we actually published.",
       "eras": {
         "backtest": {
@@ -4033,7 +3817,7 @@
           }
         },
         "live": {
-          "label": "4 days of live history as of 2026-07-02",
+          "label": "6 days of live history as of 2026-07-03",
           "source": "output/vintage_history.json",
           "started": "2026-06-04",
           "annotations": [
@@ -4103,11 +3887,35 @@
                 0.0106
               ],
               "outturn": null
+            },
+            {
+              "date": "2026-07-02",
+              "target_quarter": "2026Q3",
+              "position": "M1",
+              "model": "supply_side_bridge",
+              "our_call": 0.0048,
+              "ci_80": [
+                -0.008,
+                0.0176
+              ],
+              "outturn": null
+            },
+            {
+              "date": "2026-07-03",
+              "target_quarter": "2026Q3",
+              "position": "M1",
+              "model": "supply_side_bridge",
+              "our_call": 0.0048,
+              "ci_80": [
+                -0.008,
+                0.0176
+              ],
+              "outturn": null
             }
           ],
           "summary": {
-            "n_records": 5,
-            "n_days": 4,
+            "n_records": 7,
+            "n_days": 6,
             "n_with_outturn": 0,
             "rmse_pp_vs_first_release": null,
             "rel_vs_ar1_first_release": null,
@@ -4134,25 +3942,110 @@
         "level_date": "2026-05-01",
         "change_3m_pp": -0.5,
         "change_as_of": "2026-05-01",
-        "age_days": 62,
+        "age_days": 63,
         "stale": false
       },
       "iefp_registered_unemployment": {
         "change_3m_persons": 5727.0,
         "change_as_of": "2026-02-01",
-        "age_days": 151,
+        "age_days": 152,
         "stale": true
       },
       "employment_expectations": {
         "value": 1.6,
         "date": "2026-06-01",
-        "age_days": 31,
+        "age_days": 32,
         "stale": false
       },
       "honesty_note": "A state read-out of published labour data; no forecast \u2014 next-month unemployment is at its noise floor (discovery 2026-06-11). The verdict is a fixed sign rule on published 3-month changes, not a model. Any leg older than 90 days flags the verdict '(partial data)'.",
       "honesty_note_i18n": {
         "en": "A state read-out of published labour data; no forecast \u2014 next-month unemployment is at its noise floor (discovery 2026-06-11). The verdict is a fixed sign rule on published 3-month changes, not a model. Any leg older than 90 days flags the verdict '(partial data)'.",
         "pt": "Uma leitura do estado dos dados de emprego publicados; sem previs\u00e3o \u2014 o desemprego do m\u00eas seguinte est\u00e1 no seu piso de ru\u00eddo (verifica\u00e7\u00e3o de 2026-06-11). O veredicto \u00e9 uma regra fixa de sinais sobre varia\u00e7\u00f5es publicadas de 3 meses, n\u00e3o um modelo. Qualquer componente com mais de 90 dias marca o veredicto como '(dados parciais)'."
+      }
+    },
+    "inflation": {
+      "status": "ok",
+      "label": "inflation \u2014 official-data tracker",
+      "mode": "tracker",
+      "badge": "Dado oficial",
+      "gate": {
+        "verdict": "TRACKER_ONLY",
+        "pre_registration": "PR-1 \u2014 docs/experiment-log.md '2026-07-02 \u2014 PRE-REGISTRATIONS' (frozen before any evaluation was run)",
+        "rule": "ship ONLY if energy_bridge (or es_flash at pre-flash) beats infl_ar on RMSE with bootstrap 90% CI excluding parity at >=1 checkpoint AND the published path never trails infl_seasonal_naive at any checkpoint (PR-1, pre-committed)",
+        "reason": "CI win exists but the path trails the seasonal naive at: day5, day15, day25, preflash",
+        "source": "inflation_eval_20260703_015421.json",
+        "evaluated_at": "2026-07-03T01:54:21+00:00",
+        "detail": {
+          "bridge_rel_rmse_vs_ar": [
+            0.927,
+            0.929
+          ],
+          "bridge_dm_p_vs_ar": [
+            0.0015,
+            0.0126
+          ],
+          "bridge_rel_rmse_vs_naive": [
+            1.073,
+            1.082
+          ],
+          "seasonal_naive_rmse_pp": 0.513
+        }
+      },
+      "official": {
+        "month": "2026-06",
+        "source": "Eurostat prc_hicp_manr(_core/_nrg/_food) + prc_hicp_midx (INE HICP)",
+        "badge": "Dado oficial",
+        "headline_yoy_pct": 3.1,
+        "core_yoy_pct": 2.6,
+        "energy_yoy_pct": 9.9,
+        "food_yoy_pct": 3.0,
+        "mm_pp": 0.1,
+        "mm_badge": "dado oficial, c\u00e1lculo nosso",
+        "provisional": true,
+        "provisional_note": "latest month = INE flash (first release); component detail is provisional until the full release (~2026-07-12)",
+        "age_months": 1
+      },
+      "next_flash": {
+        "reference_month": "2026-07",
+        "expected_date": "2026-07-31",
+        "note": "INE publishes the first estimate of the month's inflation on the last business day of that month; the full HICP detail follows ~2 weeks later."
+      },
+      "tracking_rule": {
+        "en": "Pre-committed (PR-1): every INE flash is scored against the published read from day one; 6 consecutive scored months worse than the seasonal AR benchmark remove the model number from this tile.",
+        "pt": "Pr\u00e9-definido (PR-1): cada primeira estimativa do INE \u00e9 avaliada contra a leitura publicada desde o primeiro dia; 6 meses consecutivos avaliados piores do que a refer\u00eancia AR sazonal retiram o n\u00famero do modelo deste painel."
+      },
+      "naming_rules": {
+        "en": "Hard naming rules: this tile never calls any of its numbers a forecast; a model read, when the gate allows one, is published as an 'estimativa indicativa da infla\u00e7\u00e3o' \u2014 never under INE's official flash-publication name.",
+        "pt": "Regras de designa\u00e7\u00e3o: este painel nunca chama 'previs\u00e3o' a nenhum dos seus n\u00fameros; uma leitura de modelo, quando a regra de publica\u00e7\u00e3o o permitir, \u00e9 publicada como 'estimativa indicativa da infla\u00e7\u00e3o' \u2014 nunca com o nome da publica\u00e7\u00e3o oficial do INE."
+      },
+      "seasonal_carry_reference": {
+        "kind": "seasonal_carry_reference",
+        "reference_month": "2026-07",
+        "mm_pp_same_month_mean": -0.37,
+        "n_years": 5,
+        "years_used": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ],
+        "badge": "dado oficial, c\u00e1lculo nosso",
+        "not_a_model_estimate": true,
+        "label_i18n": {
+          "en": "seasonal-carry reference (5-year same-month average)",
+          "pt": "refer\u00eancia de arrasto sazonal (m\u00e9dia de 5 anos do mesmo m\u00eas)"
+        },
+        "note_i18n": {
+          "en": "Mechanical average of the official m/m HICP change in July over 5 recent years \u2014 context for what this calendar month typically looks like (clothing-sales/holiday seasonality dominates the PT monthly profile). NOT a model estimate, NOT an 'estimativa indicativa', NOT a forecast.",
+          "pt": "M\u00e9dia mec\u00e2nica da varia\u00e7\u00e3o mensal oficial do IHPC em julho nos \u00faltimos 5 anos \u2014 contexto sobre o que este m\u00eas do calend\u00e1rio costuma mostrar (os saldos de vestu\u00e1rio e a sazonalidade das f\u00e9rias dominam o perfil mensal portugu\u00eas). N\u00c3O \u00e9 uma estimativa de modelo, N\u00c3O \u00e9 uma 'estimativa indicativa', N\u00c3O \u00e9 uma previs\u00e3o."
+        },
+        "implied_yoy_pct": 3.12
+      },
+      "honesty_note": "Official-data TRACKER, not a model estimate \u2014 publishing that honestly IS the product. We built a pre-registered PT HICP m/m nowcast (PR-1, frozen 2026-07-02 before any evaluation: 4 frozen models, checkpoints day 5/15/25/pre-flash, expanding out-of-sample 2016-2026) and applied the pre-committed publication gate verbatim; it returned TRACKER_ONLY: CI win exists but the path trails the seasonal naive at: day5, day15, day25, preflash. The binding numbers: the fuel bridge's rel-RMSE vs the seasonal AR was 0.93 (a real edge), but it trailed the 5-year same-month mean everywhere (rel-RMSE 1.07-1.08). Independently verified: the evaluation reproduces exactly; poison tests confirm the information timing is leak-free; the verdict does not flip in any subperiod (2016-19, 2023-26, ex-2022, 2021-22-only); and the bridge's edge over the AR is broad-based but ABSENT within the 2021-22 shock itself \u2014 never claim the fuel term helps most in shocks. Pseudo-real-time limits disclosed: current-vintage HICP history (revisions rare/small), the weekly fuel-bulletin lag on pre-2015 training rows, and occasional 1-day ES-flash gaps. The numbers shown are official INE/Eurostat data; the latest month is the INE flash (first release) and component detail is provisional until the full release ~2 weeks later. If a future re-evaluation clears the gate, a model number would be published as an 'estimativa indicativa da infla\u00e7\u00e3o' with an 80% band \u2014 never as a forecast and never under INE's official flash-publication name \u2014 with the pre-committed demotion rule (6 consecutive scored months worse than the seasonal AR remove it).",
+      "honesty_note_i18n": {
+        "en": "Official-data TRACKER, not a model estimate \u2014 publishing that honestly IS the product. We built a pre-registered PT HICP m/m nowcast (PR-1, frozen 2026-07-02 before any evaluation: 4 frozen models, checkpoints day 5/15/25/pre-flash, expanding out-of-sample 2016-2026) and applied the pre-committed publication gate verbatim; it returned TRACKER_ONLY: CI win exists but the path trails the seasonal naive at: day5, day15, day25, preflash. The binding numbers: the fuel bridge's rel-RMSE vs the seasonal AR was 0.93 (a real edge), but it trailed the 5-year same-month mean everywhere (rel-RMSE 1.07-1.08). Independently verified: the evaluation reproduces exactly; poison tests confirm the information timing is leak-free; the verdict does not flip in any subperiod (2016-19, 2023-26, ex-2022, 2021-22-only); and the bridge's edge over the AR is broad-based but ABSENT within the 2021-22 shock itself \u2014 never claim the fuel term helps most in shocks. Pseudo-real-time limits disclosed: current-vintage HICP history (revisions rare/small), the weekly fuel-bulletin lag on pre-2015 training rows, and occasional 1-day ES-flash gaps. The numbers shown are official INE/Eurostat data; the latest month is the INE flash (first release) and component detail is provisional until the full release ~2 weeks later. If a future re-evaluation clears the gate, a model number would be published as an 'estimativa indicativa da infla\u00e7\u00e3o' with an 80% band \u2014 never as a forecast and never under INE's official flash-publication name \u2014 with the pre-committed demotion rule (6 consecutive scored months worse than the seasonal AR remove it).",
+        "pt": "SEGUIMENTO de dados oficiais, n\u00e3o uma estimativa de modelo \u2014 publicar isto com honestidade \u00c9 o produto. Constru\u00edmos um nowcast pr\u00e9-registado da infla\u00e7\u00e3o (IHPC) em cadeia para Portugal (PR-1, congelado a 2026-07-02 antes de qualquer avalia\u00e7\u00e3o: 4 modelos congelados, pontos de verifica\u00e7\u00e3o nos dias 5/15/25 e pr\u00e9-flash, avalia\u00e7\u00e3o fora da amostra expansiva 2016-2026) e aplic\u00e1mos textualmente a regra de publica\u00e7\u00e3o pr\u00e9-definida; o resultado foi TRACKER_ONLY. Os n\u00fameros vinculativos: o RMSE relativo da ponte de combust\u00edveis face ao AR sazonal foi 0,93 (uma vantagem real), mas ficou atr\u00e1s da m\u00e9dia de 5 anos do mesmo m\u00eas em todos os pontos de verifica\u00e7\u00e3o (RMSE relativo 1,07-1,08). Verificado de forma independente: a avalia\u00e7\u00e3o reproduz-se exatamente; os testes de contamina\u00e7\u00e3o confirmam que a disciplina temporal da informa\u00e7\u00e3o n\u00e3o tem fugas; o veredicto n\u00e3o se inverte em nenhum subper\u00edodo (2016-19, 2023-26, excl. 2022, apenas 2021-22); e a vantagem da ponte sobre o AR \u00e9 generalizada mas est\u00e1 AUSENTE dentro do pr\u00f3prio choque de 2021-22 \u2014 nunca afirmar que o termo dos combust\u00edveis ajuda mais em choques. Limites do pseudo-tempo-real divulgados: hist\u00f3rico do IHPC na vintage atual (revis\u00f5es raras/pequenas), o desfasamento do boletim semanal de combust\u00edveis nas linhas de treino anteriores a 2015, e meses ocasionais com apenas 1 dia de intervalo do flash espanhol. Os n\u00fameros apresentados s\u00e3o dados oficiais do INE/Eurostat; o m\u00eas mais recente \u00e9 a primeira estimativa do INE e o detalhe por componentes \u00e9 provis\u00f3rio at\u00e9 \u00e0 publica\u00e7\u00e3o completa ~2 semanas depois. Se uma reavalia\u00e7\u00e3o futura passar a regra de publica\u00e7\u00e3o, um n\u00famero de modelo seria publicado como 'estimativa indicativa da infla\u00e7\u00e3o' com uma banda de 80% \u2014 nunca como uma previs\u00e3o e nunca com o nome da publica\u00e7\u00e3o oficial do INE \u2014 com a regra de despromo\u00e7\u00e3o pr\u00e9-definida (6 meses consecutivos avaliados piores do que o AR sazonal retiram-no)."
       }
     }
   }

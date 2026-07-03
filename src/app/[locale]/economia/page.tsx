@@ -1,5 +1,6 @@
-import { loadEconomyDashboard } from "@/lib/utils/data-loader";
+import { loadEconomyDashboard, loadEconomyStories } from "@/lib/utils/data-loader";
 import { isTileAvailable, type EconomyDashboardTiles } from "@/types/economy-dashboard";
+import { isModuleAvailable } from "@/types/economy-stories";
 import { fmtDate } from "@/lib/utils/economy-format";
 import { Header } from "@/components/Header";
 import { getTranslations } from "next-intl/server";
@@ -23,6 +24,9 @@ import { GrowthAtRiskTile } from "@/components/economics/dashboard/GrowthAtRiskT
 import { OfficialQuarterlyTile } from "@/components/economics/dashboard/OfficialQuarterlyTile";
 import { TrackRecordTile } from "@/components/economics/dashboard/TrackRecordTile";
 import { LabourTile } from "@/components/economics/dashboard/LabourTile";
+import { InflationTile } from "@/components/economics/dashboard/InflationTile";
+import { StoriesSection } from "@/components/economics/stories/StoriesSection";
+import { NextReleaseLine } from "@/components/economics/stories/ReleaseCalendar";
 
 export async function generateMetadata({
   params,
@@ -54,6 +58,7 @@ export default async function EconomiaPage({
   const t = await getTranslations({ locale, namespace: "economics" });
 
   const data = await loadEconomyDashboard();
+  const stories = await loadEconomyStories();
 
   // Whole-feed failure → honest, non-crashing fallback.
   if (!data) {
@@ -106,6 +111,16 @@ export default async function EconomiaPage({
               {t("methodologyLink")}
             </Link>
           </div>
+          {/* next official release (estimated date, from the stories feed) */}
+          {stories?.modules?.release_calendar &&
+            isModuleAvailable(stories.modules.release_calendar) && (
+              <div className="mt-2">
+                <NextReleaseLine
+                  data={stories.modules.release_calendar}
+                  locale={locale}
+                />
+              </div>
+            )}
         </div>
       </section>
 
@@ -207,6 +222,19 @@ export default async function EconomiaPage({
             )}
           </div>
 
+          {/* 5b · inflation (PR-1 gated official-data tracker) */}
+          <div className="lg:col-span-2">
+            {isTileAvailable(tiles.inflation) ? (
+              <InflationTile data={tiles.inflation} locale={locale} />
+            ) : tiles.inflation ? (
+              <UnavailableTile
+                title={t("inflationTitle")}
+                reason={tiles.inflation?.reason}
+                locale={locale}
+              />
+            ) : null}
+          </div>
+
           {/* 6 · recession */}
           <div className="lg:col-span-2">
             {isTileAvailable(tiles.recession) ? (
@@ -259,6 +287,9 @@ export default async function EconomiaPage({
             )}
           </div>
         </div>
+
+        {/* Data stories — official numbers + explicit arithmetic, no models. */}
+        {stories && <StoriesSection stories={stories} locale={locale} />}
       </main>
     </div>
   );

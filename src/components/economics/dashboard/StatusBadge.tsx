@@ -15,7 +15,10 @@ export type BadgeKind =
   | 'indicative' // Estimativa indicativa — model estimate, not authoritative
   | 'forecast' // Previsão (distribuição) — simulated distribution
   | 'officialCalls' // Dado oficial + as nossas chamadas — ledger of both
-  | 'risk'; // Cenário de risco — conditional risk context
+  | 'risk' // Cenário de risco — conditional risk context
+  | 'official' // Dado oficial — official number republished verbatim
+  | 'officialCalc' // Dado oficial, cálculo nosso — official numbers recombined
+  | 'scenario'; // Cenário — hypothetical arithmetic, never a forecast
 
 const KIND_STYLE: Record<BadgeKind, { border: string; text: string; dot: string }> = {
   reading: { border: 'border-[#1B4D5E]/30', text: 'text-[#1B4D5E]', dot: 'bg-[#1B4D5E]' },
@@ -23,6 +26,9 @@ const KIND_STYLE: Record<BadgeKind, { border: string; text: string; dot: string 
   forecast: { border: 'border-stone-300', text: 'text-stone-600', dot: 'bg-stone-400' },
   officialCalls: { border: 'border-emerald-300', text: 'text-emerald-800', dot: 'bg-emerald-600' },
   risk: { border: 'border-red-200', text: 'text-red-800', dot: 'bg-red-600' },
+  official: { border: 'border-emerald-300', text: 'text-emerald-800', dot: 'bg-emerald-600' },
+  officialCalc: { border: 'border-[#1B4D5E]/30', text: 'text-[#1B4D5E]', dot: 'bg-[#1B4D5E]' },
+  scenario: { border: 'border-stone-300', text: 'text-stone-600', dot: 'bg-stone-400' },
 };
 
 /** i18n message key (economics namespace) for each badge kind. */
@@ -32,7 +38,18 @@ export const BADGE_LABEL_KEY: Record<BadgeKind, string> = {
   forecast: 'badgeForecast',
   officialCalls: 'badgeOfficialCalls',
   risk: 'badgeRisk',
+  official: 'badgeOfficial',
+  officialCalc: 'badgeOfficialCalc',
+  scenario: 'badgeScenario',
 };
+
+/** Map a stories-payload badge kind ('official' | 'official_calc' | 'scenario')
+ *  to a StatusBadge kind; unknown kinds fall back to 'official'. */
+export function storyBadgeKind(kind?: string | null): BadgeKind {
+  if (kind === 'official_calc') return 'officialCalc';
+  if (kind === 'scenario') return 'scenario';
+  return 'official';
+}
 
 export function StatusBadge({
   kind,

@@ -534,6 +534,122 @@ export interface LabourTileData {
   reason?: string;
 }
 
+// ---- inflation (PR-1 gated: TRACKER_ONLY <-> SHIP_MODEL) ----------------------
+// The tile republishes OFFICIAL HICP data; a model number appears ONLY if the
+// pre-registered publication gate (PR-1) says SHIP_MODEL. In tracker mode the
+// honest gate-failure sentence IS the product. All display text is bilingual
+// via *_i18n; the UI must never call any number here a forecast, and never use
+// INE's official flash-publication name for a model read.
+
+export interface InflationGateDetail {
+  bridge_rel_rmse_vs_ar?: [number, number];
+  bridge_dm_p_vs_ar?: [number, number];
+  bridge_rel_rmse_vs_naive?: [number, number];
+  seasonal_naive_rmse_pp?: number;
+}
+
+export interface InflationGate {
+  verdict?: 'TRACKER_ONLY' | 'SHIP_MODEL' | (string & {});
+  pre_registration?: string;
+  rule?: string;
+  reason?: string;
+  source?: string;
+  evaluated_at?: string;
+  detail?: InflationGateDetail;
+}
+
+export interface InflationOfficialBlock {
+  status?: TileStatus; // absent when ok; 'unavailable' sidecar possible
+  reason?: string;
+  month?: string; // 'YYYY-MM'
+  source?: string;
+  badge?: string; // producer's badge string ('Dado oficial')
+  headline_yoy_pct?: number;
+  core_yoy_pct?: number;
+  energy_yoy_pct?: number;
+  food_yoy_pct?: number;
+  mm_pp?: number;
+  mm_badge?: string; // 'dado oficial, cálculo nosso'
+  provisional?: boolean;
+  provisional_note?: string;
+  age_months?: number;
+}
+
+export interface InflationNextFlash {
+  reference_month?: string; // 'YYYY-MM'
+  expected_date?: string; // ISO date
+  note?: string;
+}
+
+// Labelled seasonal-carry reference (official arithmetic; explicitly NOT a
+// model estimate, NOT an 'estimativa indicativa', NOT a forecast).
+export interface InflationSeasonalCarry {
+  kind?: string;
+  reference_month?: string;
+  mm_pp_same_month_mean?: number;
+  n_years?: number;
+  years_used?: number[];
+  badge?: string;
+  not_a_model_estimate?: boolean;
+  label_i18n?: HonestyNoteI18n;
+  note_i18n?: HonestyNoteI18n;
+  implied_yoy_pct?: number;
+}
+
+// Dormant SHIP_MODEL branch payload (published-path model read).
+export interface InflationModelBlock {
+  variant?: string;
+  target_month?: string;
+  checkpoint?: {
+    name?: string;
+    frozen_at_day?: number;
+    cutoff?: string;
+    basis?: string;
+  };
+  point_mm_pp?: number;
+  implied_yoy_pct?: number;
+  band80_mm_pp?: [number, number];
+  band_method?: string;
+  band_note?: string;
+  n_train?: number;
+  name?: string; // 'estimativa indicativa da inflação' — render verbatim
+}
+
+export interface InflationScoredLedgerRow {
+  month?: string;
+  model_mm_pp?: number;
+  flash_mm_pp?: number;
+  abs_error_pp?: number;
+  worse_than_seasonal_ar?: boolean;
+}
+
+export interface InflationScoredLedger {
+  rows?: InflationScoredLedgerRow[];
+  n_scored?: number;
+  consecutive_worse_than_seasonal_ar?: number;
+  note?: string;
+}
+
+export interface InflationTileData {
+  status: TileStatus;
+  label?: string;
+  mode?: 'tracker' | 'model' | (string & {});
+  badge?: string; // producer badge ('Dado oficial' | 'Estimativa indicativa')
+  gate?: InflationGate;
+  official?: InflationOfficialBlock;
+  next_flash?: InflationNextFlash;
+  tracking_rule?: HonestyNoteI18n;
+  naming_rules?: HonestyNoteI18n;
+  seasonal_carry_reference?: InflationSeasonalCarry;
+  model?: InflationModelBlock;
+  scored_vs_flash?: InflationScoredLedger;
+  model_unavailable_reason?: string;
+  honesty_note?: string;
+  honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
+  reason?: string;
+}
+
 // ---- top level --------------------------------------------------------------
 
 export interface EconomyDashboardTiles {
@@ -546,6 +662,7 @@ export interface EconomyDashboardTiles {
   annual_outlook?: AnnualOutlookTileData;
   track_record?: TrackRecordTileData;
   labour?: LabourTileData;
+  inflation?: InflationTileData;
 }
 
 export interface EconomyDashboard {
@@ -562,8 +679,10 @@ export interface EconomyDashboard {
 }
 
 // A tile is renderable when it exists and is not explicitly unavailable.
+// The predicate narrows to an "available" subtype (nominally status 'ok') so
+// the negative branch keeps the tile type (for `?.reason`) instead of `never`.
 export function isTileAvailable<T extends { status?: TileStatus }>(
   tile: T | undefined | null
-): tile is T {
+): tile is T & { status: 'ok' } {
   return !!tile && tile.status !== 'unavailable';
 }

@@ -4,7 +4,12 @@ import { Link } from "@/i18n/routing";
 import { ArrowRight, Trophy, Vote, BarChart3, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import { loadLigaSummary } from "@/lib/utils/football-data-loader";
-import { loadEconomyDashboard } from "@/lib/utils/data-loader";
+import { loadEconomyDashboard, loadEconomyStories } from "@/lib/utils/data-loader";
+import { isModuleAvailable, pickText } from "@/types/economy-stories";
+import {
+  HomeStoryHeadline,
+  type HomeStoryItem,
+} from "@/components/economics/HomeStoryHeadline";
 import { ligaTeamColors } from "@/lib/config/football";
 import { getActiveSections, getArchiveSections } from "@/lib/config/sections";
 import {
@@ -46,6 +51,17 @@ export default async function HomePage({
   const ligaSummary = await loadLigaSummary();
   const economy = await loadEconomyDashboard();
   const economyTiles = economy?.tiles;
+
+  // Data-story headlines (official numbers + explicit arithmetic, no model
+  // values) for the rotating one-liner on the economics card.
+  const stories = await loadEconomyStories();
+  const storyItems: HomeStoryItem[] = Object.values(stories?.modules ?? {})
+    .filter((mod) => isModuleAvailable(mod) && mod.id !== "release_calendar")
+    .map((mod) => ({
+      id: mod.id ?? "",
+      headline: pickText(locale, mod.headline) ?? "",
+    }))
+    .filter((it) => it.headline);
   const activeSections = getActiveSections();
   const archiveSections = getArchiveSections();
 
@@ -202,14 +218,19 @@ export default async function HomePage({
               </div>
             )}
 
-            <div className="mt-3 flex items-center justify-between">
-              <span className="text-xs text-stone-500">
-                {t("economics.pageIntro")}
-              </span>
+            <div className="mt-3 flex items-start justify-between gap-4">
+              {/* one rotating data-story headline (official numbers, no model) */}
+              {storyItems.length > 0 ? (
+                <HomeStoryHeadline items={storyItems} />
+              ) : (
+                <span className="text-xs text-stone-500">
+                  {t("economics.pageIntro")}
+                </span>
+              )}
               <Link
                 href="/economia"
                 locale={locale}
-                className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+                className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group shrink-0"
               >
                 {t("common.viewFull")}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />

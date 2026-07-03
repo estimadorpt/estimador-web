@@ -15,6 +15,9 @@ const LABEL_KEY: Record<string, string> = {
   'annual outlook': 'labelAnnualOutlook',
   'track record': 'labelTrackRecord',
   'labour market': 'labelLabourMarket',
+  // inflation tile (PR-1 gated): the label states which branch is live
+  'inflation — official-data tracker': 'labelInflationTracker',
+  'inflation — estimativa indicativa': 'labelInflationIndicative',
 };
 
 const GROUP_KEY: Record<string, string> = {

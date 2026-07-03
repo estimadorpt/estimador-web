@@ -25,6 +25,7 @@ import {
 } from '@/types';
 
 import type { EconomyDashboard } from '@/types/economy-dashboard';
+import type { EconomyStories } from '@/types/economy-stories';
 
 // Load data from the public directory
 export async function loadJsonData<T>(filename: string, subdirectory?: string): Promise<T> {
@@ -47,6 +48,18 @@ export async function loadEconomyDashboard(): Promise<EconomyDashboard | null> {
     return await loadJsonData<EconomyDashboard>('dashboard.json', ECONOMICS_DIR);
   } catch (error) {
     console.error('Error loading economy dashboard data:', error);
+    return null;
+  }
+}
+
+// "Data stories" loader (schema estimador-stories/v1) — official numbers +
+// explicit arithmetic only, no model values. Returns null on any failure so the
+// stories section simply does not render rather than crash the page.
+export async function loadEconomyStories(): Promise<EconomyStories | null> {
+  try {
+    return await loadJsonData<EconomyStories>('stories.json', ECONOMICS_DIR);
+  } catch (error) {
+    console.error('Error loading economy stories data:', error);
     return null;
   }
 }
