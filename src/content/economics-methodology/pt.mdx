@@ -1,0 +1,155 @@
+# Metodologia — Estado da economia
+
+O painel do estado da economia é uma leitura rápida, consolidada e honesta de onde está a
+economia portuguesa agora. Não é uma previsão do PIB e não compete com o Banco de Portugal
+ou com o INE em autoridade — compete em **rapidez, explicação, risco calibrado e abertura**.
+Esta página explica de onde vêm os dados, que modelos publicamos em cada momento do
+trimestre, como medimos a nossa própria pontaria e que limites assumimos.
+
+O princípio que governa tudo: **cada número no painel diz o que é e o que não é**. Quando um
+resultado é modesto, dizemo-lo; quando é provisório, está marcado como provisório; quando um
+modelo perde para uma referência ingénua, é essa referência que publicamos.
+
+---
+
+## De onde vêm os dados
+
+O painel assenta em cerca de **210 séries públicas**, todas recolhidas de fontes oficiais ou
+abertas e processadas num pipeline aberto:
+
+- **BPstat (Banco de Portugal)** — 117 séries: atividade coincidente, crédito, depósitos,
+  taxas de juro, stress financeiro, salários;
+- **Eurostat** — 57 séries: contas nacionais (o PIB alvo), produção industrial, comércio a
+  retalho, preços, mercado de trabalho, e os inquéritos de confiança da **DG-ECFIN**
+  (consumidores, indústria, serviços, construção, comércio — publicados no fim de cada mês,
+  sem desfasamento);
+- **FRED / ALFRED** — 15 séries, incluindo os *vintages* históricos do PIB português que nos
+  permitem avaliar contra o valor **tal como publicado pela primeira vez**;
+- **Google Trends** — 9 séries de pesquisa;
+- **BCE, REN, ENTSO-E, FMI e outros** — taxas de referência, consumo de eletricidade,
+  incerteza de política económica.
+
+As transformações (variações homólogas, em cadeia, ajustamentos) são determinísticas e
+reproduzíveis; nenhum dado é editado à mão.
+
+---
+
+## O que publicamos — os quatro selos
+
+Cada número no painel carrega um selo que diz o seu estatuto epistemológico. A taxonomia é
+fixa:
+
+1. **Dado oficial** — um valor publicado por uma fonte oficial (INE, Eurostat, BdP, IEFP),
+   reproduzido tal e qual. Não é nosso; apenas o mostramos com a data a que se refere.
+2. **Leitura** — uma síntese de dados oficiais já publicados (o pulso de atividade, o
+   mercado de trabalho, o risco de recessão corrente, as contribuições). Descreve o
+   presente; **não é uma previsão**.
+3. **Estimativa indicativa** — uma estimativa de modelo para um valor que ainda não foi
+   publicado (o PIB t/t do trimestre corrente). Nunca é autoritativa: o número oficial é o
+   do INE, e as nossas estimativas intra-trimestrais não se distinguem estatisticamente de
+   referências simples ao nível de 5%.
+4. **Previsão** — uma distribuição simulada de resultados futuros (a perspetiva anual).
+   Publicamo-la sempre como distribuição — leia os intervalos, não o ponto central.
+
+Dois selos compostos derivam destes: **Cenário de risco** (quantis condicionais do
+crescimento — contexto de risco, não o que esperamos) e **Dado oficial + as nossas
+chamadas** (o histórico, onde os valores oficiais do PIB aparecem lado a lado com as
+chamadas que efetivamente publicámos).
+
+---
+
+## Os modelos, por momento do trimestre
+
+O PIB em cadeia (t/t) é quase ruído branco num trimestre normal — é a série mais difícil de
+estimar em tempo real. Por isso a publicação é **consciente do horizonte**: o modelo muda
+consoante o mês do trimestre em que estamos, e cada horizonte publica apenas o que
+sobreviveu à avaliação.
+
+| Momento | Modelo publicado | Desempenho (excl. COVID, vs AR(1)) |
+|---|---|---|
+| **M1** (1.º mês) | Combinação com encolhimento: *bridge* do lado da oferta + DFM de fatores, com **piso fixo no AR(1)** | rel-RMSE ≈ 0,90 |
+| **M2** (2.º mês) | A mesma combinação **+ um membro de momentum do ESI** (3 parâmetros) | rel-RMSE ≈ 0,81 — **PROVISÓRIO** (ver abaixo) |
+| **M3** (fim do trimestre) | *Bridge* do lado da oferta certificado | rel-RMSE 0,775, correlação +0,70 |
+
+Três honestidades obrigatórias sobre esta tabela:
+
+- **O membro ESI em M2 é provisório.** Foi o único sobrevivente de um concurso
+  pré-registado com 19 candidatos e uma regra de seleção congelada. O p-value bruto
+  (Diebold–Mariano) é 0,014, mas como foi *o melhor de 19*, o p ajustado à seleção é
+  **≈0,06–0,1** — abaixo do limiar convencional de confiança. Está a ser acompanhado em
+  trimestres novos com um **gatilho de despromoção pré-definido**: se a vantagem não se
+  mantiver nos trimestres avaliados após a seleção, o membro sai e M2 regressa à combinação
+  de dois membros. Este compromisso foi escrito **antes** de conhecermos os resultados.
+- **A vantagem M3 é modesta e não é significativa a 5%** (DM p≈0,23; em parte sustentada
+  pelo ressalto de 2021 — retirando 2021, rel 0,87). Nunca a apresentamos como um trunfo
+  isolado.
+- **Parte da vantagem sobre o AR(1) é adaptação de nível.** Na última década, uma simples
+  média móvel de 12 trimestres capta a maior parte do ganho; a capacidade genuína de
+  co-movimento concentra-se em 2005–2014 e 2021. O nosso arnês de avaliação reporta sempre
+  também a comparação com essa média móvel.
+
+---
+
+## Como nos medimos a nós próprios
+
+- **Avaliação pseudo-em-tempo-real.** Repetimos a história: em cada trimestre desde 2005, o
+  modelo só vê o que estaria publicado nessa data (mascaramos o painel pelos desfasamentos
+  de publicação de cada série). Uma ressalva séria e declarada: para a maioria das séries
+  não existem arquivos de *vintages*, por isso usamos os valores **revistos** mascarados
+  pela data — o que tende a **sobrestimar** a capacidade em tempo real. A defesa parcial:
+  os inquéritos DG-ECFIN, que carregam grande parte do sinal intra-trimestral, **quase não
+  são revistos** — para eles, o valor revisto e o valor da época coincidem.
+- **Avaliação contra a primeira publicação.** Onde os *vintages* existem (ALFRED), avaliamos
+  as chamadas contra o PIB **tal como saiu pela primeira vez** — não contra o valor de hoje,
+  que o modelo nunca poderia ter conhecido. A vantagem M3 sobrevive a esta pontuação
+  (rel ≈ 0,81 contra a primeira publicação).
+- **A referência é sempre justa.** Comparamo-nos com um AR(1) que usa exatamente o mesmo
+  conjunto de informação, nunca com um espantalho. E dizemos quando perdemos: no primeiro
+  trimestre avaliado após a seleção (2026Q1), **todos os nossos modelos perderam para o
+  AR(1)** — está escrito no histórico.
+
+---
+
+## Intervalos: calibrados nos nossos próprios erros
+
+Os intervalos de incerteza do PIB t/t não vêm da teoria do modelo (o erro-padrão nativo era
+~2–3× demasiado estreito — di-lo a nossa própria auditoria). Vêm de **conformal prediction
+por divisão**, construída sobre a distribuição dos **nossos próprios erros passados** em
+cada horizonte:
+
+- em **M1/M2** o intervalo é **assimétrico** — o modelo tende a subestimar o crescimento,
+  por isso a banda é mais larga acima do ponto;
+- em **M3** o intervalo simétrico passa os testes de cobertura e de uniformidade (PIT);
+- a cobertura está calibrada para trimestres normais: uma crise genuína fura a banda, e
+  dizemo-lo no próprio painel.
+
+No primeiro trimestre de acompanhamento (2026Q1), a banda de 80% cobriu o valor observado
+nos três horizontes — em M2 por apenas 0,007 pontos percentuais; a banda nativa do modelo
+teria falhado. É exatamente para isto que a calibração serve.
+
+---
+
+## O piso das revisões
+
+Um argumento estrutural que enquadra tudo: **a primeira publicação do PIB português é, ela
+própria, uma estimativa**. Entre a estimativa rápida do INE e os valores finais, as revisões
+têm um RMSE de **≈0,3 pontos percentuais** (medido em mais de mil *vintages* históricos; a
+revisão média é +0,15pp). Nenhum *nowcast* do PIB final pode ser mais autoritativo do que
+isso — nem o nosso, nem o de ninguém. É por isso que o painel lidera com leituras do estado
+da economia e trata o número t/t como o menos autoritativo dos seus nove mosaicos.
+
+---
+
+## Limites que assumimos
+
+- Amostras pequenas (≈80 trimestres úteis excl. COVID) significam pouca potência
+  estatística; muitos resultados honestos são "modestos, não significativos".
+- Sem *vintages* verdadeiros para a maioria dos inputs, a avaliação é pseudo-em-tempo-real.
+- As leituras intra-trimestrais são **indicativas, nunca autoritativas**.
+- O painel encolhe o que não sobrevive à auditoria: modelos anteriormente celebrados foram
+  despromovidos quando os números não se reproduziram, e os números antigos foram banidos
+  da comunicação.
+
+*Última revisão desta página: julho de 2026. O código de recolha, modelação e avaliação é
+aberto; os artefactos de avaliação (backtests, calibração, concursos pré-registados) são
+guardados com data e nunca reescritos.*

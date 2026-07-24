@@ -1,0 +1,201 @@
+# Metodologia e confiança — População Sintética de Portugal
+
+A *População Sintética de Portugal* é um retrato estatístico da população portuguesa, freguesia a
+freguesia — **gerado, não copiado**. Não é o Censos, não substitui o INE e não descreve nenhuma
+pessoa real. Serve para responder a cruzamentos que o INE não pode divulgar por sigilo estatístico,
+mantendo a fidelidade às contagens oficiais, e para funcionar como camada de dados aberta que outros
+podem reutilizar.
+
+O princípio que governa tudo é o mesmo do resto do estimador.pt: **cada número diz o que é e o que
+não é**. Quando um resultado é modesto, dizemo-lo; quando é de referência e ainda não nacional, está
+marcado como tal; quando o erro existe, publicamo-lo — freguesia a freguesia — em vez de o esconder.
+
+---
+
+## O que é
+
+É, **tanto quanto sabemos**, a primeira população sintética de acesso aberto que cobre **todas as
+freguesias de Portugal**, gerada a partir dos **Censos 2021**. A frase carrega o "tanto quanto
+sabemos" de propósito: a diligência de anterioridade que fizemos apoia a afirmação com os quatro
+qualificadores juntos — *acesso aberto* + *todas as freguesias* + *Portugal* + *Censos 2021* — mas
+assenta em indexação pública, e trabalho interno ou não indexado não pode ser totalmente excluído.
+Sem esses qualificadores a frase deixa de ser defensável.
+
+**Estas pessoas não são reais.** Cada pessoa e cada agregado familiar foram gerados por um modelo
+generativo — um *variational autoencoder* — a partir das distribuições dos Censos 2021. Nenhum
+registo corresponde a uma pessoa, família ou morada real, e o conjunto não contém respondentes
+*verbatim* dos Censos.
+
+**Como se posiciona.** Populações sintéticas abertas são já um bem público reconhecido: o Reino Unido
+tem a *SIPHER Synthetic Population* (ao nível MSOA), os EUA a *RTI SynthPop™* (block-group), e a
+Irlanda publicou em 2025 a sua primeira população sintética aberta (Electoral Divisions). Todas usam
+*reponderação / iterative proportional fitting / otimização combinatória*. Portugal não tinha
+equivalente — apenas populações sintéticas da área de Lisboa como insumo interno de simulações de
+transportes (não publicadas como dados nem ao nível da freguesia). O nosso contributo é duplo: **é a
+primeira ao nível da freguesia para todo o país e é gerada por um modelo generativo profundo**, não
+por reponderação. **Funciona como modelo de base (foundation layer) para análise demográfica** — é
+uma camada sobre a qual se constroem cruzamentos e modelos, não um número oficial.
+
+---
+
+## De onde vêm os dados
+
+Duas fontes, ambas do INE, com papéis diferentes:
+
+- **As margens dos Censos 2021** — as distribuições marginais publicadas pelo INE ao nível da
+  freguesia (sexo, idade, escolaridade, situação perante o trabalho, estado civil, e outras). São o
+  **alvo**: é a elas que o modelo é calibrado, freguesia a freguesia, através de **14 tabelas de restrição
+  de pequena área** do INE.
+- **A amostra pública (PUF/semente)** — o Ficheiro de Uso Público dos Censos 2021, usado **uma só
+  vez** para pré-treinar o modelo generativo. Não é redistribuído em nenhum ficheiro que publicamos
+  (ver *Licença*).
+
+O caminho, numa frase: **um VAE é pré-treinado uma vez sobre os microdados nacionais → é afinado por
+freguesia, ajustando o espaço latente às 14 margens do INE (o descodificador fica congelado) →
+descodificação autorregressiva → seleção P1 + reamostragem guiada G1 → coerência de idade →
+avaliação** contra as margens do INE. O descodificador é treinado uma vez e congelado; o que muda de
+freguesia para freguesia é apenas a afinação latente.
+
+---
+
+## Como é gerado — gerado, não copiado
+
+Esta é a afirmação que carrega o produto inteiro, e é medível. A alternativa clássica — *Simulated
+Annealing / Combinatorial Optimization* (SA/CO) — é uma **reprodução de doadores**: escolhe e recombina
+registos reais do Censos, e por isso **99,07% das suas pessoas são cópias exatas** de um respondente
+real. Fica cerca de 0,01 melhor em SRMSE precisamente **porque copia**.
+
+O nosso motor é generativo. Nas 13 características centrais, apenas **~14% dos agregados** e **~32% das
+pessoas** coincidem integralmente com um registo da semente; **cerca de 86% dos agregados não
+correspondem a nenhum agregado da semente**. Pagamos ~0,01 de SRMSE por não copiar — e é um preço que
+escolhemos pagar, porque é o que torna a afirmação "não são pessoas reais" verdadeira.
+
+**Operações pós-descodificação.** Nem tudo é lido diretamente do modelo; há operações a jusante, e
+distinguimo-las por nível, cada um com um estatuto teórico diferente. Não são todas "reparação":
+
+| Nível | O que faz | Estatuto | Fração tocada |
+|---|---|---|---|
+| **0 — Restrições no modelo** | Combinações impossíveis tornadas impossíveis na origem (máscara de *logits*) | Correto por construção | não é pós-decode |
+| **1 — Derivação** | Contagens de composição e atributos da pessoa de referência recalculados a partir das próprias pessoas | Prática-padrão de ML (fonte única de verdade, não "reparação") | determinístico |
+| **2 — Reamostragem principiada** | P1 (sobre-amostra + escolha gulosa) e G1 (reamostragem guiada) — o modelo propõe, as margens da freguesia escolhem (*sampling-importance-resampling*) | Monte Carlo sólido; cada agregado enviado foi proposto pelo modelo | G1 reamostra ~11% das pessoas não-referência |
+| **3 — Edição fora do *manifold*** | Trocas de coerência de idade — saídas que o modelo não propôs, criadas na direção de alvos empíricos | O nível mais fraco; é andaime, não arquitetura | pequena; registada por freguesia (`n_swaps`), com interruptor e meta a tender para 0 |
+
+Os níveis 0–2 são **arquitetura**, não desculpa. O nível 3 é o único que sai do suporte do modelo:
+carrega sempre um item de causa-raiz no *backlog*, uma métrica de encolhimento (`n_swaps` por
+freguesia, que deve tender para zero ao longo das versões) e um interruptor para se poder avaliar com
+e sem ele. A taxa de novidade acima é medida **depois de todas estas operações** — é o que sai, não
+a saída bruta do descodificador.
+
+---
+
+## O que valida
+
+Medimos o ajuste com o **SRMSE** (*standardised root-mean-square error*) de cada tabela sintética
+face à margem do INE correspondente, freguesia a freguesia. Os números abaixo são de **referência —
+50 freguesias do distrito de Aveiro**, a configuração congelada. **Não são ainda o resultado
+nacional**; o apuramento nacional substitui-os quando concluído (por isso o painel de desempenho é um
+*feed* com âmbito e estado, e troca sozinho).
+
+| Métrica | Valor (referência) | Âmbito | Limite (gate) |
+|---|---|---|---|
+| Erro mediano por pessoa (SRMSE) | **0,089** (próprias-50) / **0,092** (comuns-48) | 50 freguesias (Aveiro) | ≤ 0,10 |
+| Estado civil | **0,062** | 50 freguesias | ≈ SA/CO (0,063) |
+| Défice de crianças (menos de 15 anos) | **−1,7%** | Aveiro | ≥ −10% |
+| Falhas estruturais | **0** | 50 freguesias | 0 |
+
+Esta foi a primeira configuração VAE a passar o limiar de 0,10 na mediana por pessoa. **A generalização
+foi testada fora da amostra** num conjunto de 50 freguesias estratificadas (incluindo ilhas e o grupo
+das Flores), com bandas de aceitação **pré-registadas por dimensão de freguesia**. Todos os estratos de
+dimensão passam a sua banda; as freguesias mais pequenas (menos de 500 residentes) pagam uma
+penalização de cauda — e são **suprimidas** de qualquer forma (ver abaixo).
+
+**O défice de crianças nas ilhas — encontrado, diagnosticado e corrigido.** Numa versão anterior, as
+freguesias dos Açores e das Flores geravam **crianças a menos (−13%)**, e isto foi um **bloqueio real** à
+publicação insular. Diagnosticámos a causa — eram sobretudo as freguesias **médias a grandes com alvo de
+crianças elevado** do INE, não as minúsculas — e corrigimo-la com um descodificador sensível à composição
+do agregado (`v7_d2fix_cs`) e uma restrição de crianças por ascensão dual. Na **bateria de relançamento**
+(as mesmas 50 freguesias fora da amostra), o défice passou a **Açores −7,6% / Flores −8,7%**, ambos
+**dentro do limite de −10%**; todos os estratos ficam em banda, com **16/16 de cobertura e 0 falhas
+estruturais**. O resultado: a retenção condicional anterior ("segurar as ilhas") foi **elevada a um GO
+incondicional, ilhas incluídas**. Estes são os números da bateria de relançamento (50 freguesias fora da
+amostra); a corrida nacional (R=3) está agora em curso e os seus números substituem estes de referência
+quando concluída.
+
+---
+
+## Privacidade
+
+A taxa de novidade prova **"não copiado"**. Não prova **"não reidentificável"** — um registo pode ser
+novo (sem gémeo exato na semente) e ainda assim ficar tão perto de um respondente real que revele algo
+sobre ele. Reidentificação é uma questão de **distância e inferência**, não de cópia exata. Por isso
+corremos os três testes empíricos que a literatura de controlo de divulgação estatística usa. As
+medições abaixo são de **um distrito (50 freguesias de Aveiro)** e **têm de ser repetidas no
+apuramento nacional** antes de a afirmação valer para o produto nacional.
+
+Um ponto estrutural enquadra tudo: as 13 características são categóricas e grosseiras, e a população
+real é enormemente redundante nelas — **74,6% dos respondentes reais partilham o seu registo completo
+de 13 atributos com pelo menos outro respondente real**. A pergunta certa nunca é "um registo
+sintético está perto de um real?" (estão todos), mas "**está *mais* perto da semente do que a semente
+está de si própria?**".
+
+- **Distância ao registo mais próximo (DCR).** Uma pessoa sintética está, em mediana, a **2** atributos
+  do registo real mais próximo; um respondente real está a **0** de outro respondente real. Ou seja, os
+  registos sintéticos estão **mais afastados** dos dados reais do que os reais estão entre si — sem
+  sinal de memorização.
+- **Inferência de pertença.** Saber se uma pessoa concreta esteve nos dados de treino não é mais fácil
+  a partir da população sintética do que a partir de uma amostra *real* independente: o sinal
+  adicional atribuível à síntese é **≈ 0** (agregados +0,001; pessoas −0,059).
+- **Divulgação de atributos.** Conhecer freguesia, sexo, idade e estado civil de alguém e ler o
+  rendimento nos dados sintéticos acerta **0,812** — estatisticamente igual ao oráculo treinado em
+  dados reais (**0,813**). O ganho sobre a base pública é **estrutura da população**, não segredo
+  individual; se o modelo tivesse memorizado indivíduos raros, ultrapassaria o oráculo real, e não
+  ultrapassa.
+
+Contra os três testes da **Opinião 05/2014 do WP29** (*singling out*, *linkability*, *inference*) o
+risco medido é **baixo** em todos, e cada registo divulgado é totalmente gerado — não há sujeito de
+dados por trás de uma linha sintética, o que enquadra a saída como **informação anónima** no sentido
+do Considerando 26 do RGPD. Isto é uma **posição técnica defensável, não uma determinação jurídica**.
+Como salvaguarda concreta, **freguesias com menos de 500 residentes são suprimidas** dos microdados
+(ficam apenas no ficheiro de qualidade, com a indicação do município para onde agregar) e não
+publicamos atributos não validados (profissão, deslocações).
+
+---
+
+## Limites e âmbito
+
+- **Cauda das freguesias pequenas.** As freguesias mais pequenas são as mais difíceis para qualquer
+  método e as que suprimimos. Nas de qualidade intermédia, leia os cruzamentos ao nível do município.
+- **Uma só edição.** Tudo assenta nos **Censos 2021**. Não há série temporal; é um retrato de um
+  momento.
+- **Auditável, não totalmente reproduzível.** O código de síntese e avaliação é aberto e os artefactos
+  são datados, mas a **semente não é redistribuível** — quem está de fora não a pode obter para
+  reproduzir a corrida do zero. Por isso dizemos *auditável*, não *totalmente reproduzível*.
+- **Estimativas de modelo são estimativas.** A população **tem erro de síntese**, que publicamos
+  freguesia a freguesia no ficheiro de qualidade. Onde um número é do modelo, é rotulado como do
+  modelo; onde é do INE, é rotulado como oficial.
+
+---
+
+## Licença e atribuição
+
+O conjunto de dados é publicado sob **CC BY 4.0**. Podemos licenciá-lo porque os registos são
+**totalmente gerados** (não são uma cópia dos microdados do INE) — um argumento apoiado pelos ~86% de
+agregados novos, mas argumentado, não assumido. A calibração é derivada dos Censos 2021, por isso a
+atribuição ao INE é **obrigatória**. Todo o produto publicado provém de **uma configuração numa
+corrida** — nunca misturamos freguesias de corridas diferentes.
+
+Crédito obrigatório (reproduzir tal e qual):
+
+> **Fonte dos dados de calibração:** INE — Instituto Nacional de Estatística, *Recenseamento Geral da
+> População e Habitação — Censos 2021*. Os dados aqui publicados são uma **população sintética** gerada
+> por estimador.pt a partir das distribuições marginais e da amostra pública (PUF) dos Censos 2021;
+> **não constituem microdados oficiais do INE** e o INE não é responsável pelo seu conteúdo.
+>
+> **Data calibration source:** Statistics Portugal (INE), *2021 Population and Housing Census*. This is
+> a **synthetic population** produced by estimador.pt from the Census 2021 published marginals and
+> Public Use File; it is **not official INE microdata** and INE is not responsible for its content.
+>
+> **Citar como / Cite as:** estimador.pt, *População Sintética de Portugal* (2026), CC BY 4.0.
+
+*Última revisão desta página: julho de 2026. Os números de validação e de privacidade são de
+referência (50 freguesias de Aveiro); o apuramento nacional substitui-os quando concluído.*

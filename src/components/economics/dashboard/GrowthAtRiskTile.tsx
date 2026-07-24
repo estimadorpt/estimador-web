@@ -11,8 +11,9 @@
 
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
+import { StatusBadge } from './StatusBadge';
 import { toneForLabel } from './LabelBadge';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { GrowthAtRiskTileData, GarQuantiles } from '@/types/economy-dashboard';
 import { fmtSignedPct, COLORS } from '@/lib/utils/economy-format';
 
@@ -87,7 +88,10 @@ export async function GrowthAtRiskTile({
       label={lblKey ? t(lblKey) : data?.label}
       labelTone={toneForLabel(data?.label)}
       labelTitle={lblKey ? t(lblKey) : data?.label}
-      honesty={data?.honesty_note ?? t('garHonesty')}
+      honesty={
+        pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt) ??
+        t('garHonesty')
+      }
       accent={COLORS.teal}
     >
       <p className="text-sm text-stone-500 mb-4">{t('garSubtitle')}</p>
@@ -103,6 +107,7 @@ export async function GrowthAtRiskTile({
         <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">
           {t('garDownsideRange')}
         </span>
+        <StatusBadge kind="risk" label={t('badgeRisk')} title={t('badgeRiskDef')} />
       </div>
       <p className="text-xs text-stone-500 leading-relaxed mb-5 max-w-2xl">
         {t('garCaveat')}

@@ -1,0 +1,176 @@
+// Methodology page for the state-of-the-economy dashboard.
+//
+// Mirrors the site's methodology culture (/metodologia for elections) but is
+// themed like /economia (stone palette) and rendered from its own bilingual
+// MDX content in src/content/economics-methodology/{locale}.mdx: data sources,
+// the horizon-aware model roster, the pseudo-real-time caveat, conformal bands
+// built from our own past misses, first-release scoring, the four-badge
+// taxonomy, the pre-committed demotion trigger and the revision-floor argument.
+//
+// Every HonestyNote "read more" and every StatusBadge on the dashboard links
+// here — keep this page in sync with what the tiles actually claim.
+
+import { Header } from '@/components/Header';
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/routing';
+import { ArrowLeft, BookOpen } from 'lucide-react';
+import type { Metadata } from 'next';
+import { readFileSync, existsSync } from 'fs';
+import path from 'path';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import remarkGfm from 'remark-gfm';
+import type { MDXComponents } from 'mdx/types';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
+  return {
+    title: t('meta.economicsMethodologyTitle'),
+    description: t('meta.economicsMethodologyDescription'),
+    openGraph: {
+      title: t('meta.economicsMethodologyTitle'),
+      description: t('meta.economicsMethodologyDescription'),
+      url: `https://estimador.pt/${locale}/economia/metodologia`,
+    },
+    alternates: {
+      canonical: `https://estimador.pt/${locale}/economia/metodologia`,
+    },
+  };
+}
+
+function contentPath(locale: string): string {
+  return path.join(process.cwd(), 'src/content/economics-methodology', `${locale}.mdx`);
+}
+
+function getContent(locale: string): { content: string; actualLocale: string } {
+  for (const candidate of [locale, 'pt', 'en']) {
+    const p = contentPath(candidate);
+    if (existsSync(p)) {
+      return { content: readFileSync(p, 'utf8'), actualLocale: candidate };
+    }
+  }
+  throw new Error('No economics methodology content found');
+}
+
+// Stone-toned MDX components (the shared mdx-components.tsx carries the
+// election-green theme; the economy surface uses its own palette).
+const components: MDXComponents = {
+  h1: ({ children }) => (
+    <h1 className="text-3xl md:text-4xl font-bold text-stone-900 mt-8 mb-4 first:mt-0">
+      {children}
+    </h1>
+  ),
+  h2: ({ children }) => (
+    <h2 className="text-xl md:text-2xl font-bold text-stone-900 mt-8 mb-3">{children}</h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="text-lg font-semibold text-stone-800 mt-5 mb-2">{children}</h3>
+  ),
+  p: ({ children }) => <p className="mb-4 text-stone-700 leading-relaxed">{children}</p>,
+  ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1.5">{children}</ul>,
+  ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1.5">{children}</ol>,
+  li: ({ children }) => <li className="text-stone-700 leading-relaxed">{children}</li>,
+  strong: ({ children }) => <strong className="font-semibold text-stone-900">{children}</strong>,
+  em: ({ children }) => <em className="italic">{children}</em>,
+  hr: () => <hr className="my-8 border-stone-200" />,
+  a: ({ href, children }) => (
+    <a href={href} className="text-[#1B4D5E] font-medium hover:underline">
+      {children}
+    </a>
+  ),
+  blockquote: ({ children }) => (
+    <blockquote className="border-l-4 border-stone-300 pl-4 my-4 text-stone-600 italic">
+      {children}
+    </blockquote>
+  ),
+  table: ({ children }) => (
+    <div className="overflow-x-auto mb-4">
+      <table className="min-w-full border border-stone-200 text-sm">{children}</table>
+    </div>
+  ),
+  thead: ({ children }) => <thead className="bg-stone-50">{children}</thead>,
+  th: ({ children }) => (
+    <th className="border border-stone-200 px-3 py-2 text-left font-semibold text-stone-800">
+      {children}
+    </th>
+  ),
+  td: ({ children }) => (
+    <td className="border border-stone-200 px-3 py-2 text-stone-700 align-top">{children}</td>
+  ),
+  code: ({ children }) => (
+    <code className="bg-stone-100 rounded px-1 py-0.5 text-[0.9em] text-stone-800">
+      {children}
+    </code>
+  ),
+};
+
+export default async function EconomicsMethodologyPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'economics' });
+
+  const { content: mdxContent, actualLocale } = getContent(locale);
+
+  return (
+    <div className="min-h-screen bg-white">
+      <Header />
+
+      {/* Hero — same stone theme as /economia */}
+      <section className="bg-stone-800 text-white">
+        <div className="max-w-4xl mx-auto px-4 py-8 md:py-10">
+          <div className="flex items-center gap-2 mb-2">
+            <BookOpen className="w-5 h-5 text-stone-400" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              {t('eyebrow')}
+            </span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">{t('methodologyLink')}</h1>
+          <Link
+            href="/economia"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-stone-300 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            {t('title')}
+          </Link>
+        </div>
+      </section>
+
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {actualLocale !== locale && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm text-amber-800">
+              {locale === 'en'
+                ? 'This page is only available in Portuguese. Showing the Portuguese version.'
+                : 'Esta página apenas está disponível em inglês. A mostrar a versão inglesa.'}
+            </p>
+          </div>
+        )}
+
+        <article className="max-w-none">
+          <MDXRemote
+            source={mdxContent}
+            components={components}
+            options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+          />
+        </article>
+
+        <div className="mt-10 border-t border-stone-200 pt-6">
+          <Link
+            href="/economia"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-[#1B4D5E] hover:underline"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t('title')}
+          </Link>
+        </div>
+      </main>
+    </div>
+  );
+}

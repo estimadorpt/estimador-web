@@ -14,6 +14,17 @@ export interface SectionConfig {
 
 export const SECTIONS: SectionConfig[] = [
   {
+    id: 'populacao-sintetica',
+    type: 'demographics',
+    slug: 'populacao',
+    nameKey: 'sections.populacao',
+    descriptionKey: 'sections.populacaoDescription',
+    isActive: true,
+    accentColor: '#9A4A2E',
+    dataPath: 'demographics',
+    href: '/populacao',
+  },
+  {
     id: 'gdp-nowcast',
     type: 'economics',
     slug: 'economia',

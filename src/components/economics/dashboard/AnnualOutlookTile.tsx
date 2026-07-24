@@ -14,6 +14,7 @@
 
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
+import { StatusBadge } from './StatusBadge';
 import {
   COLORS,
   fmtSignedPctValue,
@@ -21,7 +22,7 @@ import {
   fmtNum,
   fmtDate,
 } from '@/lib/utils/economy-format';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type {
   AnnualOutlookTileData,
   ConsensusForecast,
@@ -132,7 +133,9 @@ export async function AnnualOutlookTile({
           : 0,
       })
     : '';
-  const honesty = `${data?.honesty_note ?? ''}${validationLine}`.trim() || undefined;
+  const note =
+    pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt) ?? '';
+  const honesty = `${note}${validationLine}`.trim() || undefined;
 
   return (
     <TileCard
@@ -153,6 +156,7 @@ export async function AnnualOutlookTile({
           {fmtSignedPctValue(data?.median, 1)}
         </span>
         <span className="text-sm text-stone-500">{t('annualMedianLabel')}</span>
+        <StatusBadge kind="forecast" label={t('badgeForecast')} title={t('badgeForecastDef')} />
       </div>
       <p className="mt-1.5 text-xs leading-relaxed text-stone-500 max-w-prose">
         {t('annualCaveat', {

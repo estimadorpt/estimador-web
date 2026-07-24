@@ -15,6 +15,7 @@
 import { getTranslations } from 'next-intl/server';
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { TileCard } from './TileCard';
+import { StatusBadge } from './StatusBadge';
 import {
   COLORS,
   fmtSignedPctValue,
@@ -23,7 +24,7 @@ import {
   fmtDate,
   fmtDateShort,
 } from '@/lib/utils/economy-format';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { PulseTileData, PulsePoint } from '@/types/economy-dashboard';
 
 function isNum(v: number | null | undefined): v is number {
@@ -105,9 +106,12 @@ function WeeklySparkline({
 export async function PulseTile({
   data,
   locale,
+  asOf,
 }: {
   data: PulseTileData;
   locale: string;
+  /** Payload as_of (ISO) — used to drop any future-dated sparkline points. */
+  asOf?: string;
 }) {
   const t = await getTranslations({ locale, namespace: 'economics' });
   const lblKey = labelKey(data?.label);
@@ -115,7 +119,13 @@ export async function PulseTile({
   const anchor = data?.anchor;
   const tilt = data?.tilt;
   const weekly = data?.components?.weekly_index;
-  const history = Array.isArray(weekly?.history_recent) ? weekly.history_recent : [];
+  // Defense in depth: never draw points dated AFTER the payload's as_of (the
+  // producer also clips, but a future-dated point must not survive rendering).
+  // Dates are ISO strings, so a lexicographic prefix compare is exact.
+  const asOfDay = typeof asOf === 'string' && asOf.length >= 10 ? asOf.slice(0, 10) : null;
+  const history = (Array.isArray(weekly?.history_recent) ? weekly.history_recent : []).filter(
+    (p) => p && (!asOfDay || (typeof p.date === 'string' && p.date.slice(0, 10) <= asOfDay))
+  );
 
   // Tilt direction chip: payload `direction` is authoritative; value is in pp.
   const dir = (tilt?.direction ?? '').toLowerCase();
@@ -133,7 +143,10 @@ export async function PulseTile({
       eyebrow={t('pulseEyebrow')}
       label={lblKey ? t(lblKey) : data?.label}
       labelTone="amber"
-      honesty={data?.honesty_note ?? t('pulseHonesty')}
+      honesty={
+        pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt) ??
+        t('pulseHonesty')
+      }
     >
       <p className="text-sm text-stone-500">{t('pulseSubtitle')}</p>
 
@@ -154,6 +167,7 @@ export async function PulseTile({
               {t('yoy')}
               {anchor?.date ? ` · ${fmtDate(anchor.date, locale)}` : ''}
             </span>
+            <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
           </div>
           {/* source + the anchor's measured correlation */}
           <p className="mt-1.5 text-[11px] text-stone-500">
@@ -205,8 +219,12 @@ export async function PulseTile({
               <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
                 {t('pulseCombinedTitle')}
               </div>
+              {/* When the producer marks render_as='direction', the combined
+                  number is NOT a validated level — show the direction word only. */}
               <span className="text-lg font-bold tabular-nums text-stone-500">
-                {fmtSignedPctValue(data.combined_read, 1)}
+                {data?.render_as === 'direction'
+                  ? tiltWord
+                  : fmtSignedPctValue(data.combined_read, 1)}
               </span>
               <span className="ml-2 text-[10px] text-stone-400">{t('pulseCombinedNote')}</span>
             </div>

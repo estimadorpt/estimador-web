@@ -29,6 +29,7 @@ export function Header() {
   const accentColor = getSectionAccentColor(pathname);
 
   const getPageTitle = () => {
+    if (pathname.includes('/populacao')) return t('populacao.title');
     if (pathname.includes('/economia')) return t('economics.title');
     if (pathname.includes('/desporto/liga/metodologia')) return t('football.methodologyTitle');
     if (pathname.includes('/desporto/liga')) return t('football.title');
@@ -43,6 +44,7 @@ export function Header() {
 
   const navigationItems: NavItem[] = [
     { href: '/', label: t('nav.home') },
+    { href: '/populacao', label: t('nav.populacao') },
     { href: '/economia', label: t('nav.economics') },
     {
       label: t('nav.sport'),

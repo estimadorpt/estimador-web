@@ -11,6 +11,14 @@
 
 export type TileStatus = 'ok' | 'unavailable' | (string & {});
 
+// Bilingual honesty note added by the producer (2026-07 campaign). The legacy
+// English `honesty_note` is kept alongside; the UI prefers the locale entry,
+// falls back to `honesty_note`, then to the i18n message-file fallback.
+export interface HonestyNoteI18n {
+  en?: string;
+  pt?: string;
+}
+
 export interface DashboardVintage {
   position?: string; // 'M1' | 'M2' | 'M3'
   pct_complete?: number;
@@ -58,6 +66,7 @@ export interface HealthScoreTileData {
   inputs_available?: Record<string, string>;
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   source_tiles?: Record<string, number | string>;
   reason?: string;
 }
@@ -127,9 +136,11 @@ export interface PulseTileData {
   anchor?: PulseAnchor;
   tilt?: PulseTilt;
   combined_read?: number; // anchor + tilt, YoY % — freshness overlay only
+  render_as?: string; // 'direction' → render the combined read as direction only
   anchor_honesty?: PulseAnchorHonesty;
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   components?: { weekly_index?: PulseWeeklyIndex };
   reason?: string;
 }
@@ -183,6 +194,8 @@ export interface ContributionsTileData {
   summary_pt?: string;
   note?: string;
   note_pt?: string;
+  note_i18n?: HonestyNoteI18n;
+  honesty_note_i18n?: HonestyNoteI18n;
   level_decomposition?: ContributionsLevelDecomposition;
   revision_decomposition?: ContributionsRevisionDecomposition;
   reason?: string;
@@ -217,6 +230,7 @@ export interface RecessionProbabilityBlock {
   signals_used?: string[];
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
 }
 
 export interface SahmTripwire {
@@ -231,6 +245,7 @@ export interface SahmTripwire {
   false_positive_episodes?: number;
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
 }
 
 export interface RecessionTileData {
@@ -273,6 +288,7 @@ export interface GrowthAtRiskTileData {
   quantile_method?: string;
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   reason?: string;
 }
 
@@ -314,7 +330,16 @@ export interface OfficialQuarterlyTileData {
   combo_member_points?: Record<string, number>; // member -> q/q fraction
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   first_release_note?: string;
+  // Post-selection tracking of the provisional M2 combo (2026-06-11 bake-off):
+  // scored/of quarters, running status vs the pre-committed demotion trigger.
+  post_selection_tracking?: {
+    scored?: number;
+    of?: number;
+    status?: string;
+    detail?: string;
+  };
   reason?: string;
 }
 
@@ -382,6 +407,7 @@ export interface AnnualOutlookTileData {
   validation?: AnnualOutlookValidation;
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   units?: string;
   nowcast_seed?: AnnualOutlookNowcastSeed;
   consensus?: AnnualOutlookConsensus;
@@ -424,6 +450,10 @@ export interface TrackRecordBacktestEra {
   definition_genuine?: string;
   sources?: string[];
   notes?: string[];
+  // Producer's own selection caveat for the backtest-era numbers (the M2 combo
+  // was the best of ~19 pre-registered candidates; selection-adjusted p≈0.06–0.1).
+  selection_caveat?: string;
+  selection_caveat_i18n?: HonestyNoteI18n;
   rows?: TrackRecordBacktestRow[];
   summary?: Record<string, TrackRecordHorizonSummary>; // keyed by horizon
 }
@@ -467,6 +497,7 @@ export interface TrackRecordTileData {
   };
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   reason?: string;
 }
 
@@ -482,17 +513,140 @@ export interface LabourTileData {
     level_date?: string;
     change_3m_pp?: number;
     change_as_of?: string;
+    age_days?: number;
+    stale?: boolean;
   };
   iefp_registered_unemployment?: {
     change_3m_persons?: number;
     change_as_of?: string;
+    age_days?: number;
+    stale?: boolean;
   };
   employment_expectations?: {
     value?: number;
     date?: string;
+    age_days?: number;
+    stale?: boolean;
   };
   honesty_note?: string;
   honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
+  reason?: string;
+}
+
+// ---- inflation (PR-1 gated: TRACKER_ONLY <-> SHIP_MODEL) ----------------------
+// The tile republishes OFFICIAL HICP data; a model number appears ONLY if the
+// pre-registered publication gate (PR-1) says SHIP_MODEL. In tracker mode the
+// honest gate-failure sentence IS the product. All display text is bilingual
+// via *_i18n; the UI must never call any number here a forecast, and never use
+// INE's official flash-publication name for a model read.
+
+export interface InflationGateDetail {
+  bridge_rel_rmse_vs_ar?: [number, number];
+  bridge_dm_p_vs_ar?: [number, number];
+  bridge_rel_rmse_vs_naive?: [number, number];
+  seasonal_naive_rmse_pp?: number;
+}
+
+export interface InflationGate {
+  verdict?: 'TRACKER_ONLY' | 'SHIP_MODEL' | (string & {});
+  pre_registration?: string;
+  rule?: string;
+  reason?: string;
+  source?: string;
+  evaluated_at?: string;
+  detail?: InflationGateDetail;
+}
+
+export interface InflationOfficialBlock {
+  status?: TileStatus; // absent when ok; 'unavailable' sidecar possible
+  reason?: string;
+  month?: string; // 'YYYY-MM'
+  source?: string;
+  badge?: string; // producer's badge string ('Dado oficial')
+  headline_yoy_pct?: number;
+  core_yoy_pct?: number;
+  energy_yoy_pct?: number;
+  food_yoy_pct?: number;
+  mm_pp?: number;
+  mm_badge?: string; // 'dado oficial, cálculo nosso'
+  provisional?: boolean;
+  provisional_note?: string;
+  age_months?: number;
+}
+
+export interface InflationNextFlash {
+  reference_month?: string; // 'YYYY-MM'
+  expected_date?: string; // ISO date
+  note?: string;
+}
+
+// Labelled seasonal-carry reference (official arithmetic; explicitly NOT a
+// model estimate, NOT an 'estimativa indicativa', NOT a forecast).
+export interface InflationSeasonalCarry {
+  kind?: string;
+  reference_month?: string;
+  mm_pp_same_month_mean?: number;
+  n_years?: number;
+  years_used?: number[];
+  badge?: string;
+  not_a_model_estimate?: boolean;
+  label_i18n?: HonestyNoteI18n;
+  note_i18n?: HonestyNoteI18n;
+  implied_yoy_pct?: number;
+}
+
+// Dormant SHIP_MODEL branch payload (published-path model read).
+export interface InflationModelBlock {
+  variant?: string;
+  target_month?: string;
+  checkpoint?: {
+    name?: string;
+    frozen_at_day?: number;
+    cutoff?: string;
+    basis?: string;
+  };
+  point_mm_pp?: number;
+  implied_yoy_pct?: number;
+  band80_mm_pp?: [number, number];
+  band_method?: string;
+  band_note?: string;
+  n_train?: number;
+  name?: string; // 'estimativa indicativa da inflação' — render verbatim
+}
+
+export interface InflationScoredLedgerRow {
+  month?: string;
+  model_mm_pp?: number;
+  flash_mm_pp?: number;
+  abs_error_pp?: number;
+  worse_than_seasonal_ar?: boolean;
+}
+
+export interface InflationScoredLedger {
+  rows?: InflationScoredLedgerRow[];
+  n_scored?: number;
+  consecutive_worse_than_seasonal_ar?: number;
+  note?: string;
+}
+
+export interface InflationTileData {
+  status: TileStatus;
+  label?: string;
+  mode?: 'tracker' | 'model' | (string & {});
+  badge?: string; // producer badge ('Dado oficial' | 'Estimativa indicativa')
+  gate?: InflationGate;
+  official?: InflationOfficialBlock;
+  next_flash?: InflationNextFlash;
+  tracking_rule?: HonestyNoteI18n;
+  naming_rules?: HonestyNoteI18n;
+  seasonal_carry_reference?: InflationSeasonalCarry;
+  model?: InflationModelBlock;
+  scored_vs_flash?: InflationScoredLedger;
+  model_unavailable_reason?: string;
+  honesty_note?: string;
+  honesty_note_pt?: string;
+  honesty_note_i18n?: HonestyNoteI18n;
   reason?: string;
 }
 
@@ -508,6 +662,7 @@ export interface EconomyDashboardTiles {
   annual_outlook?: AnnualOutlookTileData;
   track_record?: TrackRecordTileData;
   labour?: LabourTileData;
+  inflation?: InflationTileData;
 }
 
 export interface EconomyDashboard {
@@ -516,14 +671,18 @@ export interface EconomyDashboard {
   vintage_date?: string;
   disclaimer?: string;
   disclaimer_pt?: string;
+  // ISO date the producer expects to publish the next payload (staleness aid).
+  expected_next_update?: string;
   narrative?: DashboardNarrative;
   vintage?: DashboardVintage;
   tiles?: EconomyDashboardTiles;
 }
 
 // A tile is renderable when it exists and is not explicitly unavailable.
+// The predicate narrows to an "available" subtype (nominally status 'ok') so
+// the negative branch keeps the tile type (for `?.reason`) instead of `never`.
 export function isTileAvailable<T extends { status?: TileStatus }>(
   tile: T | undefined | null
-): tile is T {
+): tile is T & { status: 'ok' } {
   return !!tile && tile.status !== 'unavailable';
 }

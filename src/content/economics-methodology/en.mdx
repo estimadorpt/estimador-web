@@ -1,0 +1,152 @@
+# Methodology — State of the economy
+
+The state-of-the-economy dashboard is a fast, consolidated, honest read on where the
+Portuguese economy stands right now. It is not a GDP forecast and it does not compete with
+Banco de Portugal or INE on authority — it competes on **timeliness, explanation,
+calibrated risk and openness**. This page explains where the data comes from, which models
+we publish at each point of the quarter, how we score ourselves, and which limits we accept.
+
+The governing principle: **every number on the dashboard says what it is and what it is
+not**. When a result is modest we say so; when it is provisional it is labelled
+provisional; when a model loses to a naive benchmark, the benchmark is what we publish.
+
+---
+
+## Where the data comes from
+
+The dashboard rests on roughly **210 public series**, all collected from official or open
+sources through an open pipeline:
+
+- **BPstat (Banco de Portugal)** — 117 series: coincident activity, credit, deposits,
+  interest rates, financial stress, wages;
+- **Eurostat** — 57 series: national accounts (the GDP target), industrial production,
+  retail trade, prices, the labour market, and the **DG-ECFIN** confidence surveys
+  (consumers, industry, services, construction, retail — released at the end of each
+  month, with zero publication lag);
+- **FRED / ALFRED** — 15 series, including the historical vintages of Portuguese GDP that
+  let us score calls against the number **as first published**;
+- **Google Trends** — 9 search series;
+- **ECB, REN, ENTSO-E, IMF and others** — reference rates, electricity consumption,
+  economic-policy uncertainty.
+
+All transformations (year-on-year, quarter-on-quarter, adjustments) are deterministic and
+reproducible; no data is hand-edited.
+
+---
+
+## What we publish — the four badges
+
+Every number on the dashboard carries a badge stating its epistemic status. The taxonomy is
+fixed:
+
+1. **Official datum** ("Dado oficial") — a value published by an official source (INE,
+   Eurostat, BdP, IEFP), reproduced verbatim. It is not ours; we simply show it with the
+   date it refers to.
+2. **Reading** ("Leitura") — a synthesis of already-published official data (the activity
+   pulse, the labour market, current recession risk, the contributions). It describes the
+   present; **it is not a forecast**.
+3. **Indicative estimate** ("Estimativa indicativa") — a model estimate of a value not yet
+   published (current-quarter q/q GDP). Never authoritative: the official number is INE's,
+   and our in-quarter estimates are not statistically distinguishable from simple
+   benchmarks at the 5% level.
+4. **Forecast** ("Previsão") — a simulated distribution of future outcomes (the annual
+   outlook). We always publish it as a distribution — read the bands, not the midpoint.
+
+Two compound badges derive from these: **Risk scenario** (conditional growth quantiles —
+risk context, not what we expect) and **Official data + our calls** (the track record,
+where official GDP outturns sit side by side with the calls we actually published).
+
+---
+
+## The models, by point in the quarter
+
+Quarter-on-quarter GDP is near-white-noise in a normal quarter — the hardest series here to
+nowcast. Publication is therefore **horizon-aware**: the model changes with the month of
+the quarter, and each horizon publishes only what survived evaluation.
+
+| Point | Published model | Performance (ex-COVID, vs AR(1)) |
+|---|---|---|
+| **M1** (1st month) | Shrinkage combination: supply-side bridge + factor DFM, with a **hard AR(1) floor** | rel-RMSE ≈ 0.90 |
+| **M2** (2nd month) | The same combination **+ an ESI-momentum member** (3 parameters) | rel-RMSE ≈ 0.81 — **PROVISIONAL** (see below) |
+| **M3** (quarter-end) | Certified supply-side bridge | rel-RMSE 0.775, correlation +0.70 |
+
+Three mandatory honesty notes on this table:
+
+- **The M2 ESI member is provisional.** It was the sole survivor of a pre-registered
+  bake-off of 19 candidates under a frozen selection rule. The raw Diebold–Mariano p-value
+  is 0.014, but because it was *the best of 19*, the selection-adjusted p is **≈0.06–0.1**
+  — short of the conventional confidence bar. It is tracked on new quarters under a
+  **pre-committed demotion trigger**: if the edge does not hold on post-selection scored
+  quarters, the member is dropped and M2 reverts to the two-member combination. That
+  commitment was written down **before** seeing the results.
+- **The M3 edge is modest and not significant at 5%** (DM p≈0.23; partly carried by the
+  2021 rebound — dropping 2021, rel 0.87). We never present it as a standalone asset.
+- **Part of the edge over AR(1) is level-adaptation.** Over the last decade, a simple
+  rolling 12-quarter mean captures most of the gain; genuine co-movement skill is
+  concentrated in 2005–2014 and 2021. Our evaluation harness always reports the
+  rolling-mean comparison too.
+
+---
+
+## How we score ourselves
+
+- **Pseudo-real-time evaluation.** We replay history: for every quarter since 2005 the
+  model sees only what would have been published by that date (the panel is masked by each
+  series' publication lag). A serious, stated caveat: true vintage archives do not exist
+  for most inputs, so we use **revised** values masked by date — which tends to
+  **overstate** real-time skill. The partial defence: the DG-ECFIN surveys, which carry
+  much of the in-quarter signal, are **essentially never revised** — for them the revised
+  and the real-time value coincide.
+- **First-release scoring.** Where vintages exist (ALFRED), we score calls against GDP
+  **as it was first published** — not against today's revised value, which the model could
+  never have known. The M3 edge survives first-release scoring (rel ≈ 0.81).
+- **The benchmark is always fair.** We compare against an AR(1) using exactly the same
+  information set, never a strawman. And we say when we lose: in the first post-selection
+  scored quarter (2026Q1), **all of our models lost to the AR(1)** — it is written into
+  the track record.
+
+---
+
+## Intervals: calibrated on our own past misses
+
+The q/q GDP uncertainty bands do not come from model theory (the native standard error was
+~2–3× too narrow — our own audit says so). They come from **split-conformal prediction**,
+built on the distribution of **our own past errors** at each horizon:
+
+- at **M1/M2** the interval is **asymmetric** — the model tends to under-predict growth,
+  so the band is wider above the point;
+- at **M3** the symmetric interval passes coverage and PIT uniformity tests;
+- coverage is calibrated for normal quarters: a genuine crisis will pierce the band, and
+  the tile says so.
+
+In the first tracking quarter (2026Q1), the 80% band covered the outturn at all three
+horizons — at M2 by just 0.007 percentage points; the model's native band would have
+missed. That is precisely what the calibration is for.
+
+---
+
+## The revision floor
+
+A structural argument that frames everything: **the first print of Portuguese GDP is
+itself an estimate**. Between INE's flash estimate and the final figures, revisions have an
+RMSE of **≈0.3 percentage points** (measured across more than a thousand historical
+vintages; the mean revision is +0.15pp). No nowcast of final GDP can be more authoritative
+than that — not ours, not anyone's. That is why the dashboard leads with readings of the
+state of the economy and treats the q/q number as the least authoritative of its nine
+tiles.
+
+---
+
+## Limits we accept
+
+- Small samples (≈80 usable ex-COVID quarters) mean low statistical power; many honest
+  results are "modest, not significant".
+- Without true vintages for most inputs, the evaluation is pseudo-real-time.
+- In-quarter reads are **indicative, never authoritative**.
+- The dashboard shrinks whatever fails audit: previously-celebrated models were demoted
+  when their numbers did not reproduce, and the old headline figures were banned from our
+  communication.
+
+*Last revision of this page: July 2026. The collection, modelling and evaluation code is
+open; evaluation artifacts (backtests, calibration, pre-registered bake-offs) are stored
+timestamped and never overwritten.*

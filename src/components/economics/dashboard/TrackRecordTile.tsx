@@ -11,8 +11,9 @@
 
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
+import { StatusBadge } from './StatusBadge';
 import { fmtSignedPct, fmtNum, fmtDate } from '@/lib/utils/economy-format';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { TrackRecordTileData } from '@/types/economy-dashboard';
 
 function isNum(v: number | null | undefined): v is number {
@@ -45,8 +46,16 @@ export async function TrackRecordTile({
       eyebrow={t('trackEyebrow')}
       label={lblKey ? t(lblKey) : data?.label}
       labelTone="neutral"
-      honesty={data?.honesty_note ?? undefined}
+      honesty={pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt)}
     >
+      <div className="mb-2">
+        <StatusBadge
+          kind="officialCalls"
+          label={t('badgeOfficialCalls')}
+          title={t('badgeOfficialCallsDef')}
+        />
+      </div>
+
       {/* the producer's verbatim two-era framing — the key honesty line */}
       {data?.framing && (
         <p className="text-sm leading-relaxed text-stone-700 max-w-prose border-l-2 border-stone-300 pl-3">
@@ -117,6 +126,24 @@ export async function TrackRecordTile({
           </div>
         )}
 
+        {/* selection caveat for the backtest-era numbers (the M2 combo was the
+            best of ~19 pre-registered candidates) — verbatim when the producer
+            ships it, bilingual when available. */}
+        {(() => {
+          const sel = pickNote(locale, backtest?.selection_caveat_i18n, backtest?.selection_caveat);
+          return sel ? (
+            <p className="mt-2 text-[10px] leading-snug text-amber-700 max-w-prose border-l-2 border-amber-200 pl-2">
+              {sel}
+            </p>
+          ) : null;
+        })()}
+
+        {/* model naming reflects the 2026-06-11 M2 promotion — older rows keep
+            their pre-promotion label (supply_side_bridge at M2). */}
+        <p className="mt-2 text-[10px] leading-snug text-stone-400 max-w-prose">
+          {t('trackModelNamingNote')}
+        </p>
+
         {/* the producer's own methodological notes, verbatim */}
         {Array.isArray(backtest?.notes) && backtest.notes.length > 0 && (
           <ul className="mt-2 space-y-1">
@@ -165,7 +192,17 @@ export async function TrackRecordTile({
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-xs text-stone-400">—</p>
+          // Emptiness as integrity: no live quarter has been scored yet — say
+          // so plainly instead of leaving a bare dash.
+          <p className="mt-2 text-xs text-stone-500">{t('trackLiveEmpty')}</p>
+        )}
+
+        {/* "every dot is a call we actually published" — honest only while it
+            stays paired with the fact that nothing has been scored yet. */}
+        {liveRows.length > 0 && !liveRows.some((r) => isNum(r?.outturn)) && (
+          <p className="mt-1.5 text-[10px] leading-snug text-stone-400 max-w-prose">
+            {t('trackLivePending')}
+          </p>
         )}
 
         {/* the live-era summary note, verbatim */}
