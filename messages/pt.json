@@ -13,7 +13,8 @@
     "parliamentary": "Legislativas 2025",
     "sport": "Desporto",
     "liga": "Liga Portugal",
-    "economics": "Economia"
+    "economics": "Economia",
+    "populacao": "População"
   },
   "common": {
     "updated": "Atualizado",
@@ -283,7 +284,9 @@
     "activeSection": "Ativo",
     "archiveSection": "Arquivo",
     "economics": "Economia",
-    "economicsDescription": "Uma leitura consolidada e centrada na incerteza do estado atual da economia portuguesa — atividade, risco de recessão e risco em baixa. Não é uma previsão."
+    "economicsDescription": "Uma leitura consolidada e centrada na incerteza do estado atual da economia portuguesa — atividade, risco de recessão e risco em baixa. Não é uma previsão.",
+    "populacao": "População Sintética",
+    "populacaoDescription": "Uma população sintética de acesso aberto, freguesia a freguesia, gerada a partir dos Censos 2021 — para análise demográfica. Estas pessoas não são reais."
   },
   "football": {
     "title": "Liga Portugal",
@@ -509,7 +512,13 @@
     "economicsTitle": "Estado da economia — Portugal | Estimador",
     "economicsDescription": "Uma leitura consolidada e centrada na incerteza do estado atual da economia portuguesa — pulso da atividade, risco de recessão, risco em baixa e uma estimativa preliminar do PIB. Não é uma previsão.",
     "economicsMethodologyTitle": "Metodologia da economia — como funciona o painel | Estimador",
-    "economicsMethodologyDescription": "Fontes de dados, modelos, intervalos calibrados e as regras de honestidade por trás do painel do estado da economia."
+    "economicsMethodologyDescription": "Fontes de dados, modelos, intervalos calibrados e as regras de honestidade por trás do painel do estado da economia.",
+    "populacaoTitle": "População Sintética de Portugal — estimador.pt",
+    "populacaoDescription": "Uma população sintética de acesso aberto que cobre todas as freguesias de Portugal, gerada a partir dos Censos 2021. Estas pessoas não são reais.",
+    "populacaoMethodologyTitle": "Metodologia e confiança — População Sintética | estimador.pt",
+    "populacaoMethodologyDescription": "Como é gerada a população sintética, o que valida, privacidade e licença.",
+    "populacaoExplorarTitle": "Explorar a população sintética — estimador.pt",
+    "populacaoExplorarDescription": "Componha tabelas cruzadas da população sintética para qualquer freguesia, município ou distrito."
   },
   "economics": {
     "title": "Estado da economia",
@@ -795,5 +804,72 @@
     "calendarTitle": "Próximas divulgações",
     "calendarEstimated": "data estimada",
     "calendarUpdates": "atualiza"
+  },
+  "populacao": {
+    "eyebrow": "População sintética",
+    "title": "População Sintética de Portugal",
+    "tagline": "Um retrato estatístico da população portuguesa, freguesia a freguesia — gerado, não copiado.",
+    "hedge": "tanto quanto sabemos",
+    "intro": "É, tanto quanto sabemos, a primeira população sintética de acesso aberto que cobre todas as freguesias de Portugal, gerada a partir dos Censos 2021.",
+    "notReal": "Estas pessoas não são reais.",
+    "notRealBody": "Cada pessoa e cada agregado familiar foram gerados por um modelo generativo a partir das distribuições dos Censos 2021 — não são cópias de nenhum inquirido. Nenhum registo corresponde a uma pessoa, família ou morada real.",
+    "positioning": "Funciona como modelo de base para análise demográfica.",
+    "methodologyLink": "Metodologia e confiança",
+    "exploreLink": "Explorar os dados",
+    "preLaunch": "Pré-lançamento — números de referência (50 freguesias). O apuramento nacional substitui-os automaticamente quando estiver concluído.",
+    "scorecard": {
+      "title": "Como se comporta",
+      "subtitle": "O ajuste do modelo às margens do INE, medido freguesia a freguesia.",
+      "preliminaryNote": "Números de referência (50 freguesias). Ainda não são o resultado nacional.",
+      "personMedian": "Erro mediano (pessoas)",
+      "marital": "Estado civil",
+      "childDeficit": "Défice de crianças",
+      "coverage": "Freguesias dentro do limite",
+      "strataTitle": "Por estrato",
+      "constraintsTitle": "Por dimensão",
+      "retrodiction": "Teste de retrodição",
+      "externalChecks": "Verificações independentes",
+      "unavailable": "Indisponível de momento.",
+      "pending": "A apurar no nacional",
+      "gatePass": "dentro do limite",
+      "gateFail": "acima do limite",
+      "scopeLabel": "Âmbito"
+    },
+    "tabulator": {
+      "title": "Explorar os dados",
+      "subtitle": "Componha uma tabela cruzada para qualquer freguesia, município ou distrito.",
+      "geo": "Geografia",
+      "rows": "Linhas",
+      "cols": "Colunas",
+      "measure": "Medida",
+      "count": "Contagem",
+      "share": "Proporção",
+      "permalink": "Ligação para esta tabela",
+      "copyLink": "Copiar ligação",
+      "linkCopied": "Ligação copiada",
+      "loading": "A carregar o motor de consulta…",
+      "wasmFallback": "A mostrar uma tabela pré-calculada (o motor interativo não carregou).",
+      "minCell": "Células com menos de {n} pessoas são suprimidas.",
+      "download": "Descarregar (CSV)",
+      "empty": "Sem dados para esta combinação.",
+      "featured": "Tabelas em destaque"
+    },
+    "uncertainty": {
+      "point": "estimativa pontual",
+      "high": "alta precisão",
+      "medium": "precisão média",
+      "low": "baixa precisão",
+      "tied": "estatisticamente empatado",
+      "aboutTitle": "Como lemos a incerteza",
+      "aboutBody": "Cada número é arredondado à precisão que o intervalo entre réplicas suporta, e comparações cujos intervalos se sobrepõem não são apresentadas como diferenças. Até existirem réplicas (R≥2), mostramos estimativas pontuais sem intervalo e evitamos superlativos."
+    },
+    "common": {
+      "source": "Fonte",
+      "official": "Dado oficial",
+      "model": "Estimativa do modelo",
+      "updated": "Atualizado",
+      "readMore": "Saber mais",
+      "back": "Voltar"
+    }
   }
 }

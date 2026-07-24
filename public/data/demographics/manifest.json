@@ -1,0 +1,1267 @@
+{
+ "status": "ok",
+ "schema": "estimador-populacao-manifest/v1",
+ "release_version": "0.9-rc",
+ "generated_at": "2026-07-24T14:09:23.256010+00:00",
+ "data_tier": "duckdb-wasm",
+ "parquet_glob": "data/demographics/release/{entity}/district=*/part-0.parquet",
+ "scope_note_pt": "Pré-lançamento: apenas o distrito de Aveiro (distrito 01). O apuramento nacional será adicionado depois.",
+ "scope_note_en": "Pre-launch: Aveiro district (01) only. The national tabulation is added later.",
+ "min_cell": 10,
+ "license": "CC BY 4.0",
+ "attribution": {
+  "source_pt": "INE — Censos 2021 (fonte de calibração)",
+  "source_en": "Statistics Portugal (INE) — 2021 Census (calibration source)",
+  "disclaimer_pt": "População sintética gerada por estimador.pt — não são microdados oficiais do INE.",
+  "disclaimer_en": "Synthetic population produced by estimador.pt — not official INE microdata.",
+  "cite_as": "estimador.pt, População Sintética de Portugal (2026), CC BY 4.0."
+ },
+ "variables": [
+  {
+   "id": "sex",
+   "entity": "person",
+   "label": "Sexo",
+   "label_en": "Sex",
+   "categories": [
+    {
+     "code": "H",
+     "label": "Homens",
+     "label_en": "Men"
+    },
+    {
+     "code": "M",
+     "label": "Mulheres",
+     "label_en": "Women"
+    }
+   ],
+   "ordered": false
+  },
+  {
+   "id": "age_5y",
+   "entity": "person",
+   "label": "Idade (grupos de 5 anos)",
+   "label_en": "Age (5-year groups)",
+   "categories": [
+    {
+     "code": "0 - 4 anos",
+     "label": "0 - 4 anos",
+     "label_en": "0–4 years"
+    },
+    {
+     "code": "5 - 9 anos",
+     "label": "5 - 9 anos",
+     "label_en": "5–9 years"
+    },
+    {
+     "code": "10 - 14 anos",
+     "label": "10 - 14 anos",
+     "label_en": "10–14 years"
+    },
+    {
+     "code": "15 - 19 anos",
+     "label": "15 - 19 anos",
+     "label_en": "15–19 years"
+    },
+    {
+     "code": "20 - 24 anos",
+     "label": "20 - 24 anos",
+     "label_en": "20–24 years"
+    },
+    {
+     "code": "25 - 29 anos",
+     "label": "25 - 29 anos",
+     "label_en": "25–29 years"
+    },
+    {
+     "code": "30 - 34 anos",
+     "label": "30 - 34 anos",
+     "label_en": "30–34 years"
+    },
+    {
+     "code": "35 - 39 anos",
+     "label": "35 - 39 anos",
+     "label_en": "35–39 years"
+    },
+    {
+     "code": "40 - 44 anos",
+     "label": "40 - 44 anos",
+     "label_en": "40–44 years"
+    },
+    {
+     "code": "45 - 49 anos",
+     "label": "45 - 49 anos",
+     "label_en": "45–49 years"
+    },
+    {
+     "code": "50 - 54 anos",
+     "label": "50 - 54 anos",
+     "label_en": "50–54 years"
+    },
+    {
+     "code": "55 - 59 anos",
+     "label": "55 - 59 anos",
+     "label_en": "55–59 years"
+    },
+    {
+     "code": "60 - 64 anos",
+     "label": "60 - 64 anos",
+     "label_en": "60–64 years"
+    },
+    {
+     "code": "65 - 69 anos",
+     "label": "65 - 69 anos",
+     "label_en": "65–69 years"
+    },
+    {
+     "code": "70 - 74 anos",
+     "label": "70 - 74 anos",
+     "label_en": "70–74 years"
+    },
+    {
+     "code": "75 - 79 anos",
+     "label": "75 - 79 anos",
+     "label_en": "75–79 years"
+    },
+    {
+     "code": "80 - 84 anos",
+     "label": "80 - 84 anos",
+     "label_en": "80–84 years"
+    },
+    {
+     "code": "85 - 89 anos",
+     "label": "85 - 89 anos",
+     "label_en": "85–89 years"
+    },
+    {
+     "code": "90 ou mais anos",
+     "label": "90 ou mais anos",
+     "label_en": "90 years or more"
+    }
+   ],
+   "ordered": true
+  },
+  {
+   "id": "age_15grp",
+   "entity": "person",
+   "label": "Idade (15 grupos)",
+   "label_en": "Age (15 groups)",
+   "categories": [
+    {
+     "code": "Menos de 15 anos",
+     "label": "Menos de 15 anos",
+     "label_en": "Under 15 years"
+    },
+    {
+     "code": "15 - 19 anos",
+     "label": "15 - 19 anos",
+     "label_en": "15–19 years"
+    },
+    {
+     "code": "20 - 24 anos",
+     "label": "20 - 24 anos",
+     "label_en": "20–24 years"
+    },
+    {
+     "code": "25 - 29 anos",
+     "label": "25 - 29 anos",
+     "label_en": "25–29 years"
+    },
+    {
+     "code": "30 - 34 anos",
+     "label": "30 - 34 anos",
+     "label_en": "30–34 years"
+    },
+    {
+     "code": "35 - 39 anos",
+     "label": "35 - 39 anos",
+     "label_en": "35–39 years"
+    },
+    {
+     "code": "40 - 44 anos",
+     "label": "40 - 44 anos",
+     "label_en": "40–44 years"
+    },
+    {
+     "code": "45 - 49 anos",
+     "label": "45 - 49 anos",
+     "label_en": "45–49 years"
+    },
+    {
+     "code": "50 - 54 anos",
+     "label": "50 - 54 anos",
+     "label_en": "50–54 years"
+    },
+    {
+     "code": "55 - 59 anos",
+     "label": "55 - 59 anos",
+     "label_en": "55–59 years"
+    },
+    {
+     "code": "60 - 64 anos",
+     "label": "60 - 64 anos",
+     "label_en": "60–64 years"
+    },
+    {
+     "code": "65 - 69 anos",
+     "label": "65 - 69 anos",
+     "label_en": "65–69 years"
+    },
+    {
+     "code": "70 - 74 anos",
+     "label": "70 - 74 anos",
+     "label_en": "70–74 years"
+    },
+    {
+     "code": "75 ou mais anos",
+     "label": "75 ou mais anos",
+     "label_en": "75 years or more"
+    }
+   ],
+   "ordered": true
+  },
+  {
+   "id": "education_level_code",
+   "entity": "person",
+   "label": "Escolaridade",
+   "label_en": "Education level",
+   "categories": [
+    {
+     "code": "1",
+     "label": "Nenhum",
+     "label_en": "No formal education"
+    },
+    {
+     "code": "21",
+     "label": "1.º ciclo",
+     "label_en": "Basic education, 1st cycle"
+    },
+    {
+     "code": "22",
+     "label": "2.º ciclo",
+     "label_en": "Basic education, 2nd cycle"
+    },
+    {
+     "code": "23",
+     "label": "3.º ciclo",
+     "label_en": "Basic education, 3rd cycle"
+    },
+    {
+     "code": "3",
+     "label": "Ensino secundário",
+     "label_en": "Secondary education"
+    },
+    {
+     "code": "4",
+     "label": "Ensino pós-secundário",
+     "label_en": "Post-secondary education"
+    },
+    {
+     "code": "51",
+     "label": "Curso técnico superior profissional",
+     "label_en": "Short-cycle tertiary (CTeSP)"
+    },
+    {
+     "code": "52",
+     "label": "Bacharelato",
+     "label_en": "Bachelor"
+    },
+    {
+     "code": "53",
+     "label": "Licenciatura",
+     "label_en": "Licentiate"
+    },
+    {
+     "code": "54",
+     "label": "Mestrado",
+     "label_en": "Master"
+    },
+    {
+     "code": "55",
+     "label": "Doutoramento",
+     "label_en": "Doctorate"
+    }
+   ],
+   "ordered": true
+  },
+  {
+   "id": "education_level_coarse5",
+   "entity": "person",
+   "label": "Escolaridade (5 níveis)",
+   "label_en": "Education (5 levels)",
+   "categories": [
+    {
+     "code": "1",
+     "label": "Nenhum",
+     "label_en": "No formal education"
+    },
+    {
+     "code": "2",
+     "label": "Ensino básico",
+     "label_en": "Basic education"
+    },
+    {
+     "code": "3",
+     "label": "Ensino secundário",
+     "label_en": "Secondary education"
+    },
+    {
+     "code": "4",
+     "label": "Pós-secundário",
+     "label_en": "Post-secondary education"
+    },
+    {
+     "code": "5",
+     "label": "Ensino superior",
+     "label_en": "Tertiary education"
+    }
+   ],
+   "ordered": true
+  },
+  {
+   "id": "employment_status_code",
+   "entity": "person",
+   "label": "Condição perante o trabalho",
+   "label_en": "Employment status",
+   "categories": [
+    {
+     "code": "11",
+     "label": "Empregados",
+     "label_en": "Employed"
+    },
+    {
+     "code": "12",
+     "label": "Desempregados",
+     "label_en": "Unemployed"
+    },
+    {
+     "code": "21",
+     "label": "Estudantes",
+     "label_en": "Student"
+    },
+    {
+     "code": "22",
+     "label": "Domésticos",
+     "label_en": "Homemaker"
+    },
+    {
+     "code": "23",
+     "label": "Reformados, aposentados ou na reserva",
+     "label_en": "Retired"
+    },
+    {
+     "code": "24",
+     "label": "Incapacitados permanentes para o trabalho",
+     "label_en": "Permanently disabled for work"
+    },
+    {
+     "code": "25",
+     "label": "Outros casos",
+     "label_en": "Other"
+    }
+   ],
+   "ordered": false
+  },
+  {
+   "id": "employment_status_coarse3",
+   "entity": "person",
+   "label": "Condição (3 classes)",
+   "label_en": "Employment (3 classes)",
+   "categories": [
+    {
+     "code": "11",
+     "label": "Empregados",
+     "label_en": "Employed"
+    },
+    {
+     "code": "12",
+     "label": "Desempregados",
+     "label_en": "Unemployed"
+    },
+    {
+     "code": "2",
+     "label": "Inativos",
+     "label_en": "Inactive"
+    }
+   ],
+   "ordered": false
+  },
+  {
+   "id": "marital_status_code",
+   "entity": "person",
+   "label": "Estado civil",
+   "label_en": "Marital status",
+   "categories": [
+    {
+     "code": "1",
+     "label": "Solteiro(a)",
+     "label_en": "Single"
+    },
+    {
+     "code": "2",
+     "label": "Casado(a)",
+     "label_en": "Married"
+    },
+    {
+     "code": "3",
+     "label": "Viúvo(a)",
+     "label_en": "Widowed"
+    },
+    {
+     "code": "4",
+     "label": "Divorciado(a)",
+     "label_en": "Divorced"
+    }
+   ],
+   "ordered": false
+  },
+  {
+   "id": "nationality_group",
+   "entity": "person",
+   "label": "Nacionalidade",
+   "label_en": "Nationality",
+   "categories": [
+    {
+     "code": "Foreign",
+     "label": "Estrangeira",
+     "label_en": "Foreign"
+    },
+    {
+     "code": "PT",
+     "label": "Portuguesa",
+     "label_en": "Portuguese"
+    }
+   ],
+   "ordered": false
+  },
+  {
+   "id": "religion_group",
+   "entity": "person",
+   "label": "Religião",
+   "label_en": "Religion",
+   "categories": [
+    {
+     "code": "Catholic",
+     "label": "Católica",
+     "label_en": "Catholic"
+    },
+    {
+     "code": "No religion",
+     "label": "Sem religião",
+     "label_en": "No religion"
+    },
+    {
+     "code": "Other",
+     "label": "Outra",
+     "label_en": "Other"
+    },
+    {
+     "code": "Unknown",
+     "label": "Desconhecida",
+     "label_en": "Unknown"
+    }
+   ],
+   "ordered": false
+  },
+  {
+   "id": "activity_sector_code",
+   "entity": "person",
+   "label": "Setor de atividade",
+   "label_en": "Activity sector",
+   "categories": [
+    {
+     "code": "1",
+     "label": "Primário",
+     "label_en": "Primary"
+    },
+    {
+     "code": "2",
+     "label": "Secundário",
+     "label_en": "Secondary"
+    },
+    {
+     "code": "3",
+     "label": "Terciário (social)",
+     "label_en": "Tertiary (social)"
+    },
+    {
+     "code": "4",
+     "label": "Terciário (económico)",
+     "label_en": "Tertiary (economic)"
+    }
+   ],
+   "ordered": true
+  },
+  {
+   "id": "income_source_code",
+   "entity": "person",
+   "label": "Principal meio de vida",
+   "label_en": "Main source of income",
+   "categories": [
+    {
+     "code": "1",
+     "label": "Trabalho",
+     "label_en": "Work"
+    },
+    {
+     "code": "2",
+     "label": "Reforma/pensão",
+     "label_en": "Pension"
+    },
+    {
+     "code": "3",
+     "label": "Subsídio de desemprego",
+     "label_en": "Unemployment benefit"
+    },
+    {
+     "code": "4",
+     "label": "Rendimento social de inserção",
+     "label_en": "Social insertion income (RSI)"
+    },
+    {
+     "code": "5",
+     "label": "Outro subsídio temporário (doença, maternidade, etc.)",
+     "label_en": "Other temporary benefit"
+    },
+    {
+     "code": "6",
+     "label": "Rendimento da propriedade ou da empresa",
+     "label_en": "Property or business income"
+    },
+    {
+     "code": "7",
+     "label": "A cargo da família",
+     "label_en": "Family dependent"
+    },
+    {
+     "code": "8",
+     "label": "Outra situação",
+     "label_en": "Other"
+    }
+   ],
+   "ordered": false
+  },
+  {
+   "id": "sitprof_code",
+   "entity": "person",
+   "label": "Situação na profissão",
+   "label_en": "Employment situation",
+   "categories": [
+    {
+     "code": "1",
+     "label": "Empregador/patrão com menos de 10 empregados",
+     "label_en": "Employer with fewer than 10 employees"
+    },
+    {
+     "code": "2",
+     "label": "Empregador/patrão com 10 ou mais empregados",
+     "label_en": "Employer with 10+ employees"
+    },
+    {
+     "code": "3",
+     "label": "Trabalhador por conta própria ou isolado",
+     "label_en": "Self-employed / own-account"
+    },
+    {
+     "code": "4",
+     "label": "Trabalhador por conta de outrem",
+     "label_en": "Employee"
+    },
+    {
+     "code": "5",
+     "label": "Outra situação",
+     "label_en": "Other"
+    }
+   ],
+   "ordered": false
+  },
+  {
+   "id": "union_de_facto",
+   "entity": "person",
+   "label": "União de facto",
+   "label_en": "Cohabiting union",
+   "categories": [
+    {
+     "code": "No",
+     "label": "Não",
+     "label_en": "No"
+    },
+    {
+     "code": "Yes",
+     "label": "Sim",
+     "label_en": "Yes"
+    }
+   ],
+   "ordered": false
+  },
+  {
+   "id": "hh_type_top",
+   "entity": "household",
+   "label": "Tipo de agregado",
+   "label_en": "Household type",
+   "categories": [
+    {
+     "code": "1",
+     "label": "Sem núcleo familiar",
+     "label_en": "No family nucleus"
+    },
+    {
+     "code": "2",
+     "label": "Um núcleo familiar",
+     "label_en": "One family nucleus"
+    },
+    {
+     "code": "3",
+     "label": "Dois núcleos familiares",
+     "label_en": "Two family nuclei"
+    },
+    {
+     "code": "4",
+     "label": "Três ou mais núcleos",
+     "label_en": "Three or more nuclei"
+    }
+   ],
+   "ordered": false
+  },
+  {
+   "id": "hh_size_bin",
+   "entity": "household",
+   "label": "Dimensão do agregado",
+   "label_en": "Household size",
+   "categories": [
+    {
+     "code": "1",
+     "label": "1 pessoa",
+     "label_en": "1 person"
+    },
+    {
+     "code": "2",
+     "label": "2 pessoas",
+     "label_en": "2 persons"
+    },
+    {
+     "code": "3",
+     "label": "3 pessoas",
+     "label_en": "3 persons"
+    },
+    {
+     "code": "4",
+     "label": "4 pessoas",
+     "label_en": "4 persons"
+    },
+    {
+     "code": "5",
+     "label": "5 ou mais",
+     "label_en": "5 or more"
+    }
+   ],
+   "ordered": true
+  },
+  {
+   "id": "n_nuclei",
+   "entity": "household",
+   "label": "Núcleos familiares",
+   "label_en": "Family nuclei",
+   "categories": [
+    {
+     "code": "0",
+     "label": "0 núcleos",
+     "label_en": "0 nuclei"
+    },
+    {
+     "code": "1",
+     "label": "1 núcleo",
+     "label_en": "1 nucleus"
+    },
+    {
+     "code": "2",
+     "label": "2 núcleos",
+     "label_en": "2 nuclei"
+    },
+    {
+     "code": "3",
+     "label": "3 núcleos",
+     "label_en": "3 nuclei"
+    }
+   ],
+   "ordered": true
+  }
+ ],
+ "geographies": [
+  {
+   "code": "01",
+   "name": "Aveiro",
+   "level": "distrito",
+   "parent": null,
+   "population": 168773,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010200",
+   "name": "Albergaria-a-Velha",
+   "level": "municipio",
+   "parent": "01",
+   "population": 24842,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010300",
+   "name": "Anadia",
+   "level": "municipio",
+   "parent": "01",
+   "population": 27532,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010400",
+   "name": "Arouca",
+   "level": "municipio",
+   "parent": "01",
+   "population": 21133,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010500",
+   "name": "Aveiro",
+   "level": "municipio",
+   "parent": "01",
+   "population": 49155,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010100",
+   "name": "Águeda",
+   "level": "municipio",
+   "parent": "01",
+   "population": 46111,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010103",
+   "name": "AGUADA DE CIMA",
+   "name_display": "Aguada de Cima",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 3884,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010109",
+   "name": "FERMENTELOS",
+   "name_display": "Fermentelos",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 3041,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010112",
+   "name": "MACINHATA DO VOUGA",
+   "name_display": "Macinhata do Vouga",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 3207,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010119",
+   "name": "VALONGO DO VOUGA",
+   "name_display": "Valongo do Vouga",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 4620,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010121",
+   "name": "UNIÃO DAS FREGUESIAS DE ÁGUEDA E BORRALHA",
+   "name_display": "União das Freguesias de Águeda e Borralha",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 13722,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010122",
+   "name": "UNIÃO DAS FREGUESIAS DE BARRÔ E AGUADA DE BAIXO",
+   "name_display": "União das Freguesias de Barrô e Aguada de Baixo",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 3098,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010123",
+   "name": "UNIÃO DAS FREGUESIAS DE BELAZAIMA DO CHÃO, CASTANHEIRA DO VOUGA E AGADÃO",
+   "name_display": "União das Freguesias de Belazaima do Chão, Castanheira do Vouga e Agadão",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 1412,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010124",
+   "name": "UNIÃO DAS FREGUESIAS DE RECARDÃES E ESPINHEL",
+   "name_display": "União das Freguesias de Recardães e Espinhel",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 5767,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010125",
+   "name": "UNIÃO DAS FREGUESIAS DE TRAVASSÔ E ÓIS DA RIBEIRA",
+   "name_display": "União das Freguesias de Travassô e Óis da Ribeira",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 2186,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010126",
+   "name": "UNIÃO DAS FREGUESIAS DE TROFA, SEGADÃES E LAMAS DO VOUGA",
+   "name_display": "União das Freguesias de Trofa, Segadães e Lamas do Vouga",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 4471,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010127",
+   "name": "UNIÃO DAS FREGUESIAS DO PRÉSTIMO E MACIEIRA DE ALCOBA",
+   "name_display": "União das Freguesias do Préstimo e Macieira de Alcoba",
+   "level": "freguesia",
+   "parent": "010100",
+   "population": 703,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010202",
+   "name": "ALQUERUBIM",
+   "name_display": "Alquerubim",
+   "level": "freguesia",
+   "parent": "010200",
+   "population": 2239,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010203",
+   "name": "ANGEJA",
+   "name_display": "Angeja",
+   "level": "freguesia",
+   "parent": "010200",
+   "population": 1858,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010204",
+   "name": "BRANCA",
+   "name_display": "Branca",
+   "level": "freguesia",
+   "parent": "010200",
+   "population": 5447,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010206",
+   "name": "RIBEIRA DE FRÁGUAS",
+   "name_display": "Ribeira de Fráguas",
+   "level": "freguesia",
+   "parent": "010200",
+   "population": 1490,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010209",
+   "name": "ALBERGARIA-A-VELHA E VALMAIOR",
+   "name_display": "Albergaria-a-Velha e Valmaior",
+   "level": "freguesia",
+   "parent": "010200",
+   "population": 11068,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010210",
+   "name": "SÃO JOÃO DE LOURE E FROSSOS",
+   "name_display": "São João de Loure e Frossos",
+   "level": "freguesia",
+   "parent": "010200",
+   "population": 2740,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010304",
+   "name": "AVELÃS DE CAMINHO",
+   "name_display": "Avelãs de Caminho",
+   "level": "freguesia",
+   "parent": "010300",
+   "population": 1296,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010305",
+   "name": "AVELÃS DE CIMA",
+   "name_display": "Avelãs de Cima",
+   "level": "freguesia",
+   "parent": "010300",
+   "population": 1941,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010307",
+   "name": "MOITA",
+   "name_display": "Moita",
+   "level": "freguesia",
+   "parent": "010300",
+   "population": 2207,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010309",
+   "name": "SANGALHOS",
+   "name_display": "Sangalhos",
+   "level": "freguesia",
+   "parent": "010300",
+   "population": 3824,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010310",
+   "name": "SÃO LOURENÇO DO BAIRRO",
+   "name_display": "São Lourenço do Bairro",
+   "level": "freguesia",
+   "parent": "010300",
+   "population": 2283,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010312",
+   "name": "VILA NOVA DE MONSARROS",
+   "name_display": "Vila Nova de Monsarros",
+   "level": "freguesia",
+   "parent": "010300",
+   "population": 1540,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010313",
+   "name": "VILARINHO DO BAIRRO",
+   "name_display": "Vilarinho do Bairro",
+   "level": "freguesia",
+   "parent": "010300",
+   "population": 2493,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010316",
+   "name": "UNIÃO DAS FREGUESIAS DE AMOREIRA DA GÂNDARA, PAREDES DO BAIRRO E ANCAS",
+   "name_display": "União das Freguesias de Amoreira da Gândara, Paredes do Bairro e Ancas",
+   "level": "freguesia",
+   "parent": "010300",
+   "population": 2408,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010317",
+   "name": "UNIÃO DAS FREGUESIAS DE ARCOS E MOGOFORES",
+   "name_display": "União das Freguesias de Arcos e Mogofores",
+   "level": "freguesia",
+   "parent": "010300",
+   "population": 6259,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010318",
+   "name": "UNIÃO DAS FREGUESIAS DE TAMENGOS, AGUIM E ÓIS DO BAIRRO",
+   "name_display": "União das Freguesias de Tamengos, Aguim e Óis do Bairro",
+   "level": "freguesia",
+   "parent": "010300",
+   "population": 3281,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010402",
+   "name": "ALVARENGA",
+   "name_display": "Alvarenga",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 1064,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010407",
+   "name": "CHAVE",
+   "name_display": "Chave",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 1278,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010409",
+   "name": "ESCARIZ",
+   "name_display": "Escariz",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 2109,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010411",
+   "name": "FERMEDO",
+   "name_display": "Fermedo",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 1262,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010413",
+   "name": "MANSORES",
+   "name_display": "Mansores",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 1090,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010414",
+   "name": "MOLDES",
+   "name_display": "Moldes",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 1126,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010415",
+   "name": "ROSSAS",
+   "name_display": "Rossas",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 1482,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010416",
+   "name": "SANTA EULÁLIA",
+   "name_display": "Santa Eulália",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 2108,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010417",
+   "name": "SÃO MIGUEL DO MATO",
+   "name_display": "São Miguel do Mato",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 558,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010418",
+   "name": "TROPEÇO",
+   "name_display": "Tropeço",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 1089,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010419",
+   "name": "URRÔ",
+   "name_display": "Urrô",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 898,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010420",
+   "name": "VÁRZEA",
+   "name_display": "Várzea",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 535,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010421",
+   "name": "UNIÃO DAS FREGUESIAS DE AROUCA E BURGO",
+   "name_display": "União das Freguesias de Arouca e Burgo",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 5113,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010422",
+   "name": "UNIÃO DAS FREGUESIAS DE CABREIROS E ALBERGARIA DA SERRA",
+   "name_display": "União das Freguesias de Cabreiros e Albergaria da Serra",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 185,
+   "suppressed": true,
+   "fallback_geography": "010400"
+  },
+  {
+   "code": "010423",
+   "name": "UNIÃO DAS FREGUESIAS DE CANELAS E ESPIUNCA",
+   "name_display": "União das Freguesias de Canelas e Espiunca",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 1060,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010424",
+   "name": "UNIÃO DAS FREGUESIAS DE COVELO DE PAIVÓ E JANARDE",
+   "name_display": "União das Freguesias de Covelo de Paivó e Janarde",
+   "level": "freguesia",
+   "parent": "010400",
+   "population": 176,
+   "suppressed": true,
+   "fallback_geography": "010400"
+  },
+  {
+   "code": "010501",
+   "name": "ARADAS",
+   "name_display": "Aradas",
+   "level": "freguesia",
+   "parent": "010500",
+   "population": 10113,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010502",
+   "name": "CACIA",
+   "name_display": "Cacia",
+   "level": "freguesia",
+   "parent": "010500",
+   "population": 6834,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010505",
+   "name": "ESGUEIRA",
+   "name_display": "Esgueira",
+   "level": "freguesia",
+   "parent": "010500",
+   "population": 13473,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010508",
+   "name": "OLIVEIRINHA",
+   "name_display": "Oliveirinha",
+   "level": "freguesia",
+   "parent": "010500",
+   "population": 4670,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010510",
+   "name": "SÃO BERNARDO",
+   "name_display": "São Bernardo",
+   "level": "freguesia",
+   "parent": "010500",
+   "population": 5298,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010511",
+   "name": "SÃO JACINTO",
+   "name_display": "São Jacinto",
+   "level": "freguesia",
+   "parent": "010500",
+   "population": 760,
+   "suppressed": false,
+   "fallback_geography": null
+  },
+  {
+   "code": "010513",
+   "name": "SANTA JOANA",
+   "name_display": "Santa Joana",
+   "level": "freguesia",
+   "parent": "010500",
+   "population": 8007,
+   "suppressed": false,
+   "fallback_geography": null
+  }
+ ],
+ "featured": [
+  {
+   "slug": "eyJ2IjoidjEiLCJnZW9MZXZlbCI6ImRpc3RyaXRvIiwiZ2VvIjoiMDEiLCJtZWFzdXJlIjoic2hhcmUiLCJkaW1zIjpbImVkdWNhdGlvbl9sZXZlbF9jb2Fyc2U1Iiwic2V4Il0sImZpbHRlcnMiOnt9fQ",
+   "label": "Escolaridade por sexo",
+   "label_en": "Education by sex"
+  },
+  {
+   "slug": "eyJ2IjoidjEiLCJnZW9MZXZlbCI6ImRpc3RyaXRvIiwiZ2VvIjoiMDEiLCJtZWFzdXJlIjoiY291bnQiLCJkaW1zIjpbImFnZV8xNWdycCIsInNleCJdLCJmaWx0ZXJzIjp7fX0",
+   "label": "Idade por sexo",
+   "label_en": "Age by sex"
+  },
+  {
+   "slug": "eyJ2IjoidjEiLCJnZW9MZXZlbCI6ImRpc3RyaXRvIiwiZ2VvIjoiMDEiLCJtZWFzdXJlIjoic2hhcmUiLCJkaW1zIjpbIm1hcml0YWxfc3RhdHVzX2NvZGUiLCJzZXgiXSwiZmlsdGVycyI6e319",
+   "label": "Estado civil por sexo",
+   "label_en": "Marital status by sex"
+  },
+  {
+   "slug": "eyJ2IjoidjEiLCJnZW9MZXZlbCI6ImRpc3RyaXRvIiwiZ2VvIjoiMDEiLCJtZWFzdXJlIjoiY291bnQiLCJkaW1zIjpbImhoX3NpemVfYmluIiwiaGhfdHlwZV90b3AiXSwiZmlsdGVycyI6e319",
+   "label": "Tipo e dimensão do agregado",
+   "label_en": "Household type and size"
+  }
+ ]
+}

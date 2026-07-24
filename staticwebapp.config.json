@@ -107,6 +107,38 @@
       "serve": "/en/index.html"
     },
     {
+      "route": "/pt/populacao",
+      "serve": "/pt/populacao/index.html"
+    },
+    {
+      "route": "/en/populacao",
+      "serve": "/en/populacao/index.html"
+    },
+    {
+      "route": "/pt/populacao/metodologia",
+      "serve": "/pt/populacao/metodologia/index.html"
+    },
+    {
+      "route": "/en/populacao/metodologia",
+      "serve": "/en/populacao/metodologia/index.html"
+    },
+    {
+      "route": "/pt/populacao/explorar",
+      "serve": "/pt/populacao/explorar/index.html"
+    },
+    {
+      "route": "/en/populacao/explorar",
+      "serve": "/en/populacao/explorar/index.html"
+    },
+    {
+      "route": "/pt/populacao/incerteza",
+      "serve": "/pt/populacao/incerteza/index.html"
+    },
+    {
+      "route": "/en/populacao/incerteza",
+      "serve": "/en/populacao/incerteza/index.html"
+    },
+    {
       "route": "/pt/economia",
       "serve": "/pt/economia/index.html"
     },

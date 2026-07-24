@@ -26,6 +26,7 @@ import {
 
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyStories } from '@/types/economy-stories';
+import type { PopulacaoScorecard, PopulacaoManifest } from '@/types/populacao';
 
 // Load data from the public directory
 export async function loadJsonData<T>(filename: string, subdirectory?: string): Promise<T> {
@@ -60,6 +61,31 @@ export async function loadEconomyStories(): Promise<EconomyStories | null> {
     return await loadJsonData<EconomyStories>('stories.json', ECONOMICS_DIR);
   } catch (error) {
     console.error('Error loading economy stories data:', error);
+    return null;
+  }
+}
+
+const DEMOGRAPHICS_DIR = 'demographics';
+
+// Synthetic-population scorecard loader (schema estimador-populacao-scorecard/v1).
+// Returns null on any failure so the L0 scorecard renders an honest "unavailable"
+// state rather than crash; individual blocks are guarded again at render time.
+export async function loadPopulacaoScorecard(): Promise<PopulacaoScorecard | null> {
+  try {
+    return await loadJsonData<PopulacaoScorecard>('scorecard.json', DEMOGRAPHICS_DIR);
+  } catch (error) {
+    console.error('Error loading populacao scorecard data:', error);
+    return null;
+  }
+}
+
+// Tabulator manifest loader (schema estimador-populacao-manifest/v1): the variable
+// dictionary, geography list and featured-tab index that drive the L1 explorer.
+export async function loadPopulacaoManifest(): Promise<PopulacaoManifest | null> {
+  try {
+    return await loadJsonData<PopulacaoManifest>('manifest.json', DEMOGRAPHICS_DIR);
+  } catch (error) {
+    console.error('Error loading populacao manifest data:', error);
     return null;
   }
 }

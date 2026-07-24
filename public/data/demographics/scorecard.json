@@ -1,0 +1,222 @@
+{
+  "status": "preliminary",
+  "schema": "estimador-populacao-scorecard/v1",
+  "scope": "referência 50 freguesias (Aveiro)",
+  "scope_en": "reference — 50 parishes (Aveiro)",
+  "generated_at": "2026-07-24T17:34:09+00:00",
+  "provenance": {
+    "run": "pt-synthpop",
+    "engine": "vae",
+    "model_version": "v7-composition",
+    "code_commit": "c67cb1dafcced02ee687e888febac65746848b85",
+    "census_vintage": "INE Censos 2021",
+    "config": {
+      "p1_oversample": 3.0,
+      "g1_eta": 6.0,
+      "child_gate_dual": true,
+      "n_constraints": 14
+    },
+    "n_parishes": 50,
+    "n_persons": 168412,
+    "n_households": 65336,
+    "n_replicates": 1
+  },
+  "headline": {
+    "person_srmse_own": {
+      "value": 0.086034,
+      "n_replicates": 1
+    },
+    "person_srmse_common": {
+      "value": 0.08296,
+      "n_replicates": 1
+    },
+    "marital_srmse": {
+      "value": 0.063199,
+      "n_replicates": 1
+    },
+    "n_failures": 0,
+    "gate_threshold": 0.1,
+    "passes_gate": true,
+    "coverage_in_band": 0.56
+  },
+  "strata": [
+    {
+      "key": "01",
+      "label": "Aveiro",
+      "label_en": "Aveiro",
+      "kind": "distrito",
+      "n_parishes": 50,
+      "person_srmse_median": {
+        "value": 0.086034,
+        "n_replicates": 1
+      },
+      "in_band": true
+    }
+  ],
+  "constraints": [
+    {
+      "key": "p_age5",
+      "label": "Idade (grupos de 5 anos)",
+      "label_en": "Age (5-year bands)",
+      "srmse_median": {
+        "value": 0.034419,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_marital",
+      "label": "Estado civil",
+      "label_en": "Marital status",
+      "srmse_median": {
+        "value": 0.063199,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_educ",
+      "label": "Escolaridade",
+      "label_en": "Education",
+      "srmse_median": {
+        "value": 0.182441,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_labour",
+      "label": "Situação perante o trabalho",
+      "label_en": "Labour-force status",
+      "srmse_median": {
+        "value": 0.147461,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_income",
+      "label": "Principal meio de vida",
+      "label_en": "Main source of income",
+      "srmse_median": {
+        "value": 0.168391,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_sitprof",
+      "label": "Situação na profissão",
+      "label_en": "Employment situation",
+      "srmse_median": {
+        "value": 0.125917,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_sector",
+      "label": "Setor de atividade",
+      "label_en": "Activity sector",
+      "srmse_median": {
+        "value": 0.07759,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_nat",
+      "label": "Nacionalidade",
+      "label_en": "Nationality",
+      "srmse_median": {
+        "value": 0.006424,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_religion",
+      "label": "Religião",
+      "label_en": "Religion",
+      "srmse_median": {
+        "value": 0.035032,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_union",
+      "label": "União de facto",
+      "label_en": "De facto union",
+      "srmse_median": {
+        "value": 0.042232,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_labour3_educ5",
+      "label": "Trabalho × escolaridade",
+      "label_en": "Labour × education",
+      "srmse_median": {
+        "value": 0.21732,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_labour3_income",
+      "label": "Trabalho × rendimento",
+      "label_en": "Labour × income",
+      "srmse_median": {
+        "value": 0.117664,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "h_size",
+      "label": "Dimensão do agregado",
+      "label_en": "Household size",
+      "srmse_median": {
+        "value": 0.009301,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "h_nuclei_size",
+      "label": "Núcleos × dimensão",
+      "label_en": "Nuclei × household size",
+      "srmse_median": {
+        "value": 0.072408,
+        "n_replicates": 1
+      },
+      "was_constrained": true
+    }
+  ],
+  "retrodiction": {
+    "status": "unavailable",
+    "reason": "aguarda o apuramento nacional"
+  },
+  "external_checks": [],
+  "novelty": {
+    "household_novel_pct": 86.0,
+    "note_pt": "Cerca de 86% dos agregados são combinações novas, não copiadas de nenhum registo. «Não copiada» não é o mesmo que «não re-identificável».",
+    "note": "About 86% of households are novel combinations, not copied from any record. “Not copied” is not the same as “not re-identifiable”."
+  },
+  "honesty_notes": [
+    {
+      "pt": "Erro medido freguesia a freguesia (mediana das medianas por freguesia, SRMSE). Difere ligeiramente do valor agregado (pooled) do doc 20 para o mesmo âmbito.",
+      "en": "Error measured parish by parish (median of per-parish medians, SRMSE). It differs slightly from doc 20's pooled figure for the same scope."
+    },
+    {
+      "pt": "O défice de crianças fica a apurar: não é derivável das colunas de SRMSE agregado deste apuramento e será calculado a partir das margens etárias nacionais.",
+      "en": "The child deficit is pending: it is not derivable from this run's aggregate SRMSE columns and will be computed from the national age margins."
+    },
+    {
+      "pt": "«Freguesias dentro do limite» é a fração de freguesias com erro mediano ≤ 0,10 (o limiar de aprovação usado como banda), até existirem bandas pré-registadas por estrato.",
+      "en": "“Parishes within threshold” is the fraction of parishes with median error ≤ 0.10 (the gate threshold used as the band) until pre-registered per-stratum bands exist."
+    }
+  ]
+}

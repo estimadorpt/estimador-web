@@ -47,3 +47,7 @@ dist/
 # review screenshots
 *.png
 snapshot-*.md
+
+# self-hosted DuckDB-WASM bundles (~75MB) — regenerated from the pinned
+# @duckdb/duckdb-wasm dep by scripts/copy-duckdb.mjs (postinstall + prebuild).
+public/duckdb/
