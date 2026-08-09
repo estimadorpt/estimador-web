@@ -1,6 +1,7 @@
-import { loadLigaData } from "@/lib/utils/football-data-loader";
+import { loadLigaData, loadLigaSamples } from "@/lib/utils/football-data-loader";
 import { Header } from "@/components/Header";
 import { MatchdayPicker } from "@/components/charts/football/MatchdayPicker";
+import { DueloFinal } from "@/components/charts/football/DueloFinal";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, Trophy } from "lucide-react";
@@ -32,7 +33,10 @@ export default async function SimuladorPage({
   const { locale } = await params;
   const t = await getTranslations({ locale });
 
-  const { prediction, scenarios } = await loadLigaData();
+  const [{ prediction, scenarios }, seasonSamples] = await Promise.all([
+    loadLigaData(),
+    loadLigaSamples(),
+  ]);
 
   if (!prediction || !scenarios?.next_matchday_scenarios) {
     return (
@@ -100,6 +104,15 @@ export default async function SimuladorPage({
           />
         </div>
       </section>
+
+      {/* Rivalry duel over the real sampled seasons */}
+      {seasonSamples && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <DueloFinal samples={seasonSamples} locale={locale} />
+          </div>
+        </section>
+      )}
     </div>
   );
 }
