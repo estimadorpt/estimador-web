@@ -10,6 +10,9 @@ async function loadFootballJson<T>(filename: string): Promise<T> {
   return JSON.parse(fileContents);
 }
 
+// Prediction files are zero-padded (md01.json .. md34.json)
+const mdFile = (md: number, suffix = '') => `md${String(md).padStart(2, '0')}${suffix}.json`;
+
 // Find the latest matchday file (highest number)
 async function findLatestMatchday(): Promise<number> {
   const dir = path.join(process.cwd(), 'public', 'data', FOOTBALL_DIR);
@@ -26,8 +29,8 @@ export async function loadLigaData(_season?: string) {
   try {
     const latestMd = await findLatestMatchday();
     const [prediction, scenarios] = await Promise.all([
-      loadFootballJson<LigaPrediction>(`md${latestMd}.json`),
-      loadFootballJson<ScenarioData>(`md${latestMd}_scenarios.json`).catch(() => null),
+      loadFootballJson<LigaPrediction>(mdFile(latestMd)),
+      loadFootballJson<ScenarioData>(mdFile(latestMd, '_scenarios')).catch(() => null),
     ]);
     return { prediction, scenarios, matchday: latestMd };
   } catch (error) {
@@ -62,7 +65,7 @@ export async function loadLigaHistorical(): Promise<LigaHistorical> {
 // Load a specific matchday prediction
 async function loadMatchdayPrediction(md: number): Promise<LigaPrediction | null> {
   try {
-    return await loadFootballJson<LigaPrediction>(`md${md}.json`);
+    return await loadFootballJson<LigaPrediction>(mdFile(md));
   } catch {
     return null;
   }
@@ -102,8 +105,8 @@ export async function loadLigaWithDeltas() {
   try {
     const latestMd = await findLatestMatchday();
     const [prediction, scenarios] = await Promise.all([
-      loadFootballJson<LigaPrediction>(`md${latestMd}.json`),
-      loadFootballJson<ScenarioData>(`md${latestMd}_scenarios.json`).catch(() => null),
+      loadFootballJson<LigaPrediction>(mdFile(latestMd)),
+      loadFootballJson<ScenarioData>(mdFile(latestMd, '_scenarios')).catch(() => null),
     ]);
 
     // Load previous matchday as baseline
@@ -137,7 +140,7 @@ export async function loadLigaWithDeltas() {
 export async function loadLigaSummary() {
   try {
     const latestMd = await findLatestMatchday();
-    const prediction = await loadFootballJson<LigaPrediction>(`md${latestMd}.json`);
+    const prediction = await loadFootballJson<LigaPrediction>(mdFile(latestMd));
     return {
       matchday: latestMd,
       season: prediction.season,

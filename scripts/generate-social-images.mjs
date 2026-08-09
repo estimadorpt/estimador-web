@@ -305,19 +305,20 @@ async function main() {
   }
 
   const currentMd = matchday || available[available.length - 1];
+  const pad = (n) => String(n).padStart(2, '0');
   const idx = available.indexOf(currentMd);
   const previousMd = idx > 0 ? available[idx - 1] : null;
 
   console.log(`Matchday: ${currentMd} (previous: ${previousMd || 'none'})`);
 
   // Load data
-  const current = loadJson(path.join(dataDir, `md${currentMd}.json`));
+  const current = loadJson(path.join(dataDir, `md${pad(currentMd)}.json`));
   const previous = previousMd
-    ? loadJson(path.join(dataDir, `md${previousMd}.json`))
+    ? loadJson(path.join(dataDir, `md${pad(previousMd)}.json`))
     : null;
 
   let scenarios = null;
-  const scenariosPath = path.join(dataDir, `md${currentMd}_scenarios.json`);
+  const scenariosPath = path.join(dataDir, `md${pad(currentMd)}_scenarios.json`);
   if (fs.existsSync(scenariosPath)) {
     scenarios = loadJson(scenariosPath);
   }
@@ -328,7 +329,7 @@ async function main() {
   const outDir = path.join(dataDir, 'social');
   fs.mkdirSync(outDir, { recursive: true });
 
-  const pngPath = path.join(outDir, `md${currentMd}.png`);
+  const pngPath = path.join(outDir, `md${pad(currentMd)}.png`);
   await sharp(Buffer.from(svg))
     .resize(1200, 675)
     .png()

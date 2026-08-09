@@ -299,14 +299,14 @@ def main():
     print(f"Matchday: {current_md} (previous: {previous_md or 'none'})")
 
     # Load data
-    current = load_json(DATA_DIR / f"md{current_md}.json")
+    current = load_json(DATA_DIR / f"md{current_md:02d}.json")
 
     previous = None
     if previous_md:
-        previous = load_json(DATA_DIR / f"md{previous_md}.json")
+        previous = load_json(DATA_DIR / f"md{previous_md:02d}.json")
 
     scenarios = None
-    scenarios_path = DATA_DIR / f"md{current_md}_scenarios.json"
+    scenarios_path = DATA_DIR / f"md{current_md:02d}_scenarios.json"
     if scenarios_path.exists():
         scenarios = load_json(scenarios_path)
 
@@ -332,7 +332,7 @@ def main():
             platform: {"text": posts.get(platform, ""), "chars": len(posts.get(platform, ""))}
             for platform in ["x", "linkedin", "bluesky"]
         },
-        "image": f"social/md{current_md}.png",
+        "image": f"social/md{current_md:02d}.png",
         "data_context": {
             "championship_probs": ctx.get("championship_probs", []),
             "championship_movers": ctx.get("championship_movers", []),
@@ -352,7 +352,7 @@ def main():
     else:
         out_dir = DATA_DIR / "social"
         out_dir.mkdir(exist_ok=True)
-        out_path = out_dir / f"md{current_md}.json"
+        out_path = out_dir / f"md{current_md:02d}.json"
         with open(out_path, "w") as f:
             json.dump(output, f, indent=2, ensure_ascii=False)
         print(f"Saved to {out_path}")
