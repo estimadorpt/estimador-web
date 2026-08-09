@@ -1,4 +1,4 @@
-import { loadLigaWithDeltas, loadLigaHistorical } from "@/lib/utils/football-data-loader";
+import { loadLigaWithDeltas, loadLigaHistorical, loadLigaSamples } from "@/lib/utils/football-data-loader";
 import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import { Header } from "@/components/Header";
 import { LeagueTable } from "@/components/charts/football/LeagueTable";
@@ -6,6 +6,7 @@ import { MatchdayPredictions } from "@/components/charts/football/MatchdayPredic
 import { TitleRaceChart } from "@/components/charts/football/TitleRaceChart";
 import { RelegationChart } from "@/components/charts/football/RelegationChart";
 import { PositionHeatmap } from "@/components/charts/football/PositionHeatmap";
+import { SeasonDraw } from "@/components/charts/football/SeasonDraw";
 import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
 import { PathsToVictory } from "@/components/charts/football/PathsToVictory";
 import { ScheduleDifficulty } from "@/components/charts/football/ScheduleDifficulty";
@@ -49,9 +50,10 @@ export default async function LigaPage({
   const { locale } = await params;
   const t = await getTranslations({ locale });
 
-  const [{ prediction, scenarios, deltas }, historical] = await Promise.all([
+  const [{ prediction, scenarios, deltas }, historical, seasonSamples] = await Promise.all([
     loadLigaWithDeltas(),
     loadLigaHistorical(),
+    loadLigaSamples(),
   ]);
 
   if (!prediction) {
@@ -508,6 +510,13 @@ export default async function LigaPage({
           />
         </div>
       </section>
+
+      {/* Draw-a-season widget (real samples from the Monte Carlo) */}
+      {seasonSamples && (
+        <section className="max-w-7xl mx-auto px-4 py-6">
+          <SeasonDraw samples={seasonSamples} locale={locale} />
+        </section>
+      )}
 
       {/* Team Strength Ratings */}
       {prediction.team_strengths && (

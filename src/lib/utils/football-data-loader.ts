@@ -62,6 +62,15 @@ export async function loadLigaHistorical(): Promise<LigaHistorical> {
   }
 }
 
+// Load sampled complete seasons for the SeasonDraw widget (null if absent)
+export async function loadLigaSamples() {
+  try {
+    return await loadFootballJson<import('@/components/charts/football/SeasonDraw').SeasonSamples>('samples.json');
+  } catch {
+    return null;
+  }
+}
+
 // Load a specific matchday prediction
 async function loadMatchdayPrediction(md: number): Promise<LigaPrediction | null> {
   try {
