@@ -32,7 +32,7 @@ export const SECTIONS: SectionConfig[] = [
     descriptionKey: 'sections.ligaPortugalDescription',
     isActive: true,
     accentColor: '#006B3F',
-    dataPath: 'football/liga-2025-26',
+    dataPath: 'football/liga-2026-27',
     href: '/desporto/liga',
   },
   {

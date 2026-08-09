@@ -67,7 +67,7 @@ Formato de output — responde APENAS com JSON válido, sem markdown:
 }
 """
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "public" / "data" / "football" / "liga-2025-26"
+DATA_DIR = Path(__file__).resolve().parent.parent / "public" / "data" / "football" / "liga-2026-27"
 
 
 def find_matchday_files(data_dir: Path) -> list[int]:

@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import type { LigaPrediction, ScenarioData, LigaHistorical, TeamDelta } from '@/types/football';
 
-const FOOTBALL_DIR = 'football/liga-2025-26';
+const FOOTBALL_DIR = 'football/liga-2026-27';
 
 async function loadFootballJson<T>(filename: string): Promise<T> {
   const filePath = path.join(process.cwd(), 'public', 'data', FOOTBALL_DIR, filename);

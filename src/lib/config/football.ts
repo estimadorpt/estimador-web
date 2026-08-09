@@ -19,6 +19,9 @@ export const ligaTeamColors: Record<string, string> = {
   'AVS': '#1D428A',
   'Boavista': '#000000',
   'Tondela': '#006B3E',
+  'Alverca': '#D4121F',
+  'Maritimo': '#009655',
+  'Academico Viseu': '#1A1A1A',
 };
 
 export const ligaTeamShortNames: Record<string, string> = {
@@ -40,6 +43,9 @@ export const ligaTeamShortNames: Record<string, string> = {
   'AVS': 'AVS',
   'Boavista': 'BOA',
   'Tondela': 'TON',
+  'Alverca': 'ALV',
+  'Maritimo': 'MAR',
+  'Academico Viseu': 'ACV',
 };
 
 export const ligaTeamSlugs: Record<string, string> = {
@@ -62,6 +68,8 @@ export const ligaTeamSlugs: Record<string, string> = {
   'Boavista': 'boavista',
   'Tondela': 'tondela',
   'Alverca': 'alverca',
+  'Maritimo': 'maritimo',
+  'Academico Viseu': 'academico-viseu',
 };
 
 // Display names: Portuguese-friendly names with proper accents
@@ -86,6 +94,8 @@ export const ligaDisplayNames: Record<string, string> = {
   'Boavista': 'Boavista',
   'Tondela': 'Tondela',
   'Alverca': 'Alverca',
+  'Maritimo': 'Marítimo',
+  'Academico Viseu': 'Ac. Viseu',
 };
 
 /** Get the Portuguese display name for a team (with accents, abbreviated). */
@@ -105,4 +115,4 @@ export function teamLogoSrc(team: string): string {
 }
 
 // Current season
-export const CURRENT_LIGA_SEASON = '2025-26';
+export const CURRENT_LIGA_SEASON = '2026-27';

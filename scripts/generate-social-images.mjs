@@ -15,7 +15,7 @@ import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, '..');
-const dataDir = path.join(rootDir, 'public', 'data', 'football', 'liga-2025-26');
+const dataDir = path.join(rootDir, 'public', 'data', 'football', 'liga-2026-27');
 
 // Team colors (matching src/lib/config/football.ts)
 const teamColors = {
@@ -36,6 +36,8 @@ const teamColors = {
   'AVS': '#1D428A',
   'Tondela': '#006B3E',
   'Alverca': '#D4121F',
+  'Maritimo': '#009655',
+  'Academico Viseu': '#1A1A1A',
   'Gil Vicente': '#D4121F',
   'Boavista': '#000000',
 };

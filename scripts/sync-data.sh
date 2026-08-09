@@ -15,8 +15,8 @@ DATA_DIR="$PROJECT_DIR/public/data"
 SECTION="${1:-all}"
 
 sync_football() {
-  local FOOTBALL_SRC="$HOME/code/estimador-football/output/2025-26/predictions"
-  local FOOTBALL_DEST="$DATA_DIR/football/liga-2025-26"
+  local FOOTBALL_SRC="$HOME/code/estimador-football/output/2026-27/predictions"
+  local FOOTBALL_DEST="$DATA_DIR/football/liga-2026-27"
 
   if [ ! -d "$FOOTBALL_SRC" ]; then
     echo "Warning: Football source not found at $FOOTBALL_SRC"
