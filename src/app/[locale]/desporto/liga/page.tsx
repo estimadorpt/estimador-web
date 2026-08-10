@@ -26,7 +26,7 @@ import { injuryReasonLabel } from "@/lib/i18n/football-labels";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ligaTeamSlugs } from "@/lib/config/football";
-import { Trophy, ArrowRight, SlidersHorizontal } from "lucide-react";
+import { Trophy, ArrowRight, SlidersHorizontal, Scale } from "lucide-react";
 import type { Metadata } from "next";
 import type { CriticalPath, TeamStrength } from "@/types/football";
 
@@ -611,6 +611,32 @@ export default async function LigaPage({
               count: prediction.n_sims.toLocaleString(),
             })}
           </p>
+
+          {/* Model vs Market — evaluation against the closing line */}
+          <Link
+            href="/desporto/liga/modelo"
+            locale={locale}
+            className="mt-6 block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+          >
+            <div className="flex items-start gap-3">
+              <Scale className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-stone-900">
+                  {locale === "en" ? "Model vs Market" : "Modelo vs Mercado"}
+                </h3>
+                <p className="text-sm text-stone-500 mt-0.5">
+                  {locale === "en"
+                    ? "We tested the model against Pinnacle's closing line over 504 matches and eight seasons. From matchday 14 it matches the market — the whole deficit is early season."
+                    : "Testámos o modelo contra a linha de fecho da Pinnacle em 504 jogos e oito épocas. A partir da jornada 14 iguala o mercado — toda a desvantagem está no início da época."}
+                </p>
+              </div>
+              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+                {locale === "en" ? "See the scorecard" : "Ver a avaliação"}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </div>
+          </Link>
+
           <div className="mt-4">
             <Link
               href="/desporto/liga/metodologia"

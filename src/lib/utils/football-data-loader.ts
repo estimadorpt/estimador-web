@@ -80,6 +80,15 @@ export async function loadLigaPlayers() {
   }
 }
 
+// Load the model-vs-market backtest scorecard (null if absent)
+export async function loadLigaMarketScorecard() {
+  try {
+    return await loadFootballJson<import('@/components/charts/football/MarketScorecard').MarketScorecardData>('market_scorecard.json');
+  } catch {
+    return null;
+  }
+}
+
 // Load the injuries / suspensions snapshot (null if absent)
 export async function loadLigaInjuries() {
   try {
