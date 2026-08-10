@@ -1,6 +1,8 @@
 "use client";
 
 import { ligaTeamColors, teamDisplayName } from "@/lib/config/football";
+import { Link } from "@/i18n/routing";
+import { ChevronRight } from "lucide-react";
 import type { DecisiveMatch, MatchPrediction } from "@/types/football";
 
 interface MatchdayPredictionsProps {
@@ -13,8 +15,15 @@ interface MatchdayPredictionsProps {
     titleImpact?: string;
     relegationImpact?: string;
     matchOfTheWeek?: string;
+    matchPage?: string;
   };
   decisiveMatches?: DecisiveMatch[];
+  /**
+   * Per-match page hrefs keyed by `${home}|${away}`. Rows without an entry stay
+   * unlinked, so a fixture with no generated page never becomes a dead link.
+   */
+  matchHrefs?: Record<string, string>;
+  locale?: string;
 }
 
 function ProbabilityBar({ pHome, pDraw, pAway }: {
@@ -46,7 +55,14 @@ function ProbabilityBar({ pHome, pDraw, pAway }: {
   );
 }
 
-export function MatchdayPredictions({ matches, matchday, labels, decisiveMatches }: MatchdayPredictionsProps) {
+export function MatchdayPredictions({
+  matches,
+  matchday,
+  labels,
+  decisiveMatches,
+  matchHrefs,
+  locale,
+}: MatchdayPredictionsProps) {
   if (!matches || matches.length === 0) return null;
 
   // Build lookup for decisive match annotations
@@ -89,14 +105,10 @@ export function MatchdayPredictions({ matches, matchday, labels, decisiveMatches
         const hasTitleImpact = dm && dm.title_swing > 0.05;
         const hasRelegImpact = dm && (dm.relegation_swing ?? 0) > 0.05;
         const isMatchOfWeek = i === 0 && hasMatchOfWeek;
+        const href = matchHrefs?.[`${match.home}|${match.away}`];
 
-        return (
-          <div key={i} className={`border-b border-stone-100 pb-3 last:border-0 ${isMatchOfWeek ? 'pt-1' : ''}`}>
-            {isMatchOfWeek && (
-              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 inline-flex items-center px-2 py-0.5 mb-2">
-                {labels.matchOfTheWeek ?? "Jogo da Jornada"}
-              </div>
-            )}
+        const rowBody = (
+          <>
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <div className="w-1 h-4" style={{ backgroundColor: homeColor }} />
@@ -106,6 +118,9 @@ export function MatchdayPredictions({ matches, matchday, labels, decisiveMatches
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-stone-900">{teamDisplayName(match.away)}</span>
                 <div className="w-1 h-4" style={{ backgroundColor: awayColor }} />
+                {href && (
+                  <ChevronRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-stone-700 transition-colors" />
+                )}
               </div>
             </div>
             <ProbabilityBar
@@ -127,6 +142,33 @@ export function MatchdayPredictions({ matches, matchday, labels, decisiveMatches
                   </span>
                 )}
               </div>
+            )}
+            {href && (
+              <span className="mt-1.5 inline-block text-[10px] font-bold uppercase tracking-wider text-stone-400 group-hover:text-stone-700 transition-colors">
+                {labels.matchPage ?? "Análise do jogo"}
+              </span>
+            )}
+          </>
+        );
+
+        return (
+          <div key={i} className={`border-b border-stone-100 pb-3 last:border-0 ${isMatchOfWeek ? 'pt-1' : ''}`}>
+            {isMatchOfWeek && (
+              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 inline-flex items-center px-2 py-0.5 mb-2">
+                {labels.matchOfTheWeek ?? "Jogo da Jornada"}
+              </div>
+            )}
+            {href ? (
+              <Link
+                href={href}
+                locale={locale}
+                className="group block -mx-2 px-2 py-1 hover:bg-stone-50 transition-colors"
+                aria-label={`${teamDisplayName(match.home)} - ${teamDisplayName(match.away)}`}
+              >
+                {rowBody}
+              </Link>
+            ) : (
+              rowBody
             )}
           </div>
         );

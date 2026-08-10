@@ -14,8 +14,13 @@ DATA_DIR="$PROJECT_DIR/public/data"
 
 SECTION="${1:-all}"
 
+# Seasons that are over. Only the end-of-season review is republished for
+# these — the matchday files were already synced while the season ran.
+ARCHIVED_SEASONS=("2025-26")
+
 sync_football() {
-  local FOOTBALL_SRC="$HOME/code/estimador-football/output/2026-27/predictions"
+  local FOOTBALL_ROOT="$HOME/code/estimador-football/output"
+  local FOOTBALL_SRC="$FOOTBALL_ROOT/2026-27/predictions"
   local FOOTBALL_DEST="$DATA_DIR/football/liga-2026-27"
 
   if [ ! -d "$FOOTBALL_SRC" ]; then
@@ -27,6 +32,22 @@ sync_football() {
   cp "$FOOTBALL_SRC"/*.json "$FOOTBALL_DEST/"
   echo "Synced football data from $FOOTBALL_SRC"
   echo "  Files: $(ls "$FOOTBALL_DEST" | wc -l | tr -d ' ')"
+
+  # Archived seasons — review.json only (produced by the model repo's
+  # scripts/export_season_review.py). Missing file is not an error: the review
+  # is generated once, after the last matchday.
+  local season src dest
+  for season in "${ARCHIVED_SEASONS[@]}"; do
+    src="$FOOTBALL_ROOT/$season/predictions/review.json"
+    dest="$DATA_DIR/football/liga-$season"
+    if [ -f "$src" ]; then
+      mkdir -p "$dest"
+      cp "$src" "$dest/review.json"
+      echo "Synced $season season review"
+    else
+      echo "  No review for $season yet (run export_season_review.py)"
+    fi
+  done
 }
 
 sync_elections() {

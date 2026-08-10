@@ -1,0 +1,25 @@
+{
+  "season": "2026-27",
+  "matchday": 1,
+  "generated": "2026-08-10T18:13:04.652256+00:00",
+  "cards": [
+    {
+      "id": "movers",
+      "file": "movers_md01.png",
+      "matchday": 1,
+      "title_pt": "Movimentos da jornada 1",
+      "title_en": "Matchday 1 movers",
+      "description_pt": "As maiores variações de probabilidade de título, top 3 e descida desde a jornada anterior.",
+      "description_en": "The biggest swings in title, top-three and relegation probability since the previous matchday."
+    },
+    {
+      "id": "luck",
+      "file": "luck_md01.png",
+      "matchday": 1,
+      "title_pt": "Sorte da época até à jornada 1",
+      "title_en": "Season luck through matchday 1",
+      "description_pt": "Pontos conquistados menos pontos esperados a partir do xG, acumulados na época.",
+      "description_en": "Points won minus expected points from xG, accumulated over the season."
+    }
+  ]
+}

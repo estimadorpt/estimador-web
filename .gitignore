@@ -44,6 +44,9 @@ dist/
 # playwright MCP
 .playwright-mcp/
 
-# review screenshots
+# review screenshots — these pile up at the repo root during design reviews
 *.png
+# ...but the share cards are published assets, written here by the model repo's
+# scripts/publish_cards.py. They must stay tracked.
+!public/images/cards/*.png
 snapshot-*.md

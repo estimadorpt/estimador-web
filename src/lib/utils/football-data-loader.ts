@@ -1,11 +1,28 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import type { LigaPrediction, ScenarioData, LigaHistorical, TeamDelta } from '@/types/football';
+import type {
+  LigaPrediction,
+  ScenarioData,
+  LigaHistorical,
+  TeamDelta,
+  DecisiveMatch,
+  NextMatchdayScenarioMatch,
+} from '@/types/football';
+import { assignFixtureSlugs } from '@/lib/config/fixtures';
 
 const FOOTBALL_DIR = 'football/liga-2026-27';
 
 async function loadFootballJson<T>(filename: string): Promise<T> {
   const filePath = path.join(process.cwd(), 'public', 'data', FOOTBALL_DIR, filename);
+  const fileContents = await fs.readFile(filePath, 'utf8');
+  return JSON.parse(fileContents);
+}
+
+// Read a JSON file from any season directory (archived seasons included)
+async function loadSeasonJson<T>(season: string, filename: string): Promise<T> {
+  const filePath = path.join(
+    process.cwd(), 'public', 'data', 'football', `liga-${season}`, filename
+  );
   const fileContents = await fs.readFile(filePath, 'utf8');
   return JSON.parse(fileContents);
 }
@@ -80,6 +97,139 @@ export async function loadLigaPlayers() {
   }
 }
 
+/* ------------------------------------------------ per-match fixture pages */
+
+// One upcoming fixture with everything the match page needs. Every field
+// beyond home/away/matchday/slug is optional: feeds go stale independently.
+export interface UpcomingFixture {
+  slug: string;
+  home: string;
+  away: string;
+  matchday: number;
+  kickoff: string | null;
+  /** True when the fixture is a leftover of the matchday already in progress. */
+  inProgressMatchday: boolean;
+  p_home: number | null;
+  p_draw: number | null;
+  p_away: number | null;
+  /** Per-outcome conditional title/Europe/relegation probabilities, if published. */
+  scenario: NextMatchdayScenarioMatch | null;
+  /** Season-wide swing entry for this fixture, if it made the decisive list. */
+  decisive: DecisiveMatch | null;
+  /** Final score, when the fixture has already been played. */
+  played: { home_goals: number; away_goals: number } | null;
+}
+
+/**
+ * Slug used when the feed carries no fixtures at all (end of season, broken
+ * publication). Static export refuses to build a dynamic route whose
+ * generateStaticParams() returns an empty array, so one page must always exist.
+ */
+export const NO_FIXTURES_SLUG = 'sem-jogos';
+
+// 1X2 from the scenario sim counts: matches_remaining carries no probabilities,
+// but the conditional blocks record how many sims produced each outcome.
+function probsFromConditionals(
+  scenario: NextMatchdayScenarioMatch | null,
+): { p_home: number | null; p_draw: number | null; p_away: number | null } {
+  const none = { p_home: null, p_draw: null, p_away: null };
+  if (!scenario?.conditionals) return none;
+  const h = scenario.conditionals.H?.n_sims ?? 0;
+  const d = scenario.conditionals.D?.n_sims ?? 0;
+  const a = scenario.conditionals.A?.n_sims ?? 0;
+  const total = h + d + a;
+  if (total <= 0) return none;
+  return { p_home: h / total, p_draw: d / total, p_away: a / total };
+}
+
+/**
+ * Every fixture that still has to be played and is covered by the current
+ * publication: leftovers of the matchday in progress first, then the whole of
+ * the next matchday. Returns [] on any failure.
+ */
+export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
+  try {
+    const { prediction, scenarios } = await loadLigaData();
+    if (!prediction) return [];
+
+    const scenarioMatches = scenarios?.next_matchday_scenarios?.matches ?? [];
+    const findScenario = (home: string, away: string) =>
+      scenarioMatches.find(m => m.home_team === home && m.away_team === away) ?? null;
+    const findDecisive = (home: string, away: string, md: number) =>
+      scenarios?.decisive_matches?.find(
+        m => m.home_team === home && m.away_team === away && m.matchday === md,
+      ) ?? null;
+
+    const raw: Omit<UpcomingFixture, 'slug'>[] = [];
+
+    for (const m of prediction.matches_remaining ?? []) {
+      const scenario = findScenario(m.home, m.away);
+      raw.push({
+        home: m.home,
+        away: m.away,
+        matchday: prediction.matchday,
+        kickoff: m.kickoff ?? null,
+        inProgressMatchday: true,
+        ...probsFromConditionals(scenario),
+        scenario,
+        decisive: findDecisive(m.home, m.away, prediction.matchday),
+        played: null,
+      });
+    }
+
+    const nextMd = prediction.next_matchday?.matchday ?? prediction.matchday + 1;
+    for (const m of prediction.next_matchday?.matches ?? []) {
+      raw.push({
+        home: m.home,
+        away: m.away,
+        matchday: nextMd,
+        kickoff: null,
+        inProgressMatchday: false,
+        p_home: m.p_home ?? null,
+        p_draw: m.p_draw ?? null,
+        p_away: m.p_away ?? null,
+        scenario: findScenario(m.home, m.away),
+        decisive: findDecisive(m.home, m.away, nextMd),
+        played: null,
+      });
+    }
+
+    // End of season: nothing left to play. Fall back to the fixtures of the
+    // matchday just finished so the route still has pages to generate.
+    if (raw.length === 0) {
+      for (const r of prediction.matchday_results ?? []) {
+        raw.push({
+          home: r.home,
+          away: r.away,
+          matchday: prediction.matchday,
+          kickoff: null,
+          inProgressMatchday: false,
+          p_home: null,
+          p_draw: null,
+          p_away: null,
+          scenario: findScenario(r.home, r.away),
+          decisive: findDecisive(r.home, r.away, prediction.matchday),
+          played:
+            typeof r.home_goals === 'number' && typeof r.away_goals === 'number'
+              ? { home_goals: r.home_goals, away_goals: r.away_goals }
+              : null,
+        });
+      }
+    }
+
+    return assignFixtureSlugs(raw);
+  } catch (error) {
+    console.error('Error loading upcoming fixtures:', error);
+    return [];
+  }
+}
+
+/** Resolve one fixture page by slug (null when the slug is unknown). */
+export async function loadFixtureBySlug(slug: string): Promise<UpcomingFixture | null> {
+  const fixtures = await loadUpcomingFixtures();
+  return fixtures.find(f => f.slug === slug) ?? null;
+}
+
 // Load the model-vs-market backtest scorecard (null if absent)
 export async function loadLigaMarketScorecard() {
   try {
@@ -93,6 +243,100 @@ export async function loadLigaMarketScorecard() {
 export async function loadLigaInjuries() {
   try {
     return await loadFootballJson<import('@/components/charts/football/InjuriesPanel').InjuriesData>('injuries.json');
+  } catch {
+    return null;
+  }
+}
+
+// Load the shareable matchday cards (null if absent).
+//
+// The manifest is written by the model repo (scripts/publish_cards.py) and the
+// PNGs are copied into public/images/cards/. The two can drift — a manifest
+// entry whose image never arrived is dropped here rather than published as a
+// broken image.
+export async function loadLigaCards() {
+  try {
+    const manifest = await loadFootballJson<
+      import('@/components/charts/football/ShareCards').CardsManifest
+    >('cards.json');
+    if (!manifest?.cards?.length) return null;
+
+    const present = await Promise.all(
+      manifest.cards.map(async card => {
+        try {
+          await fs.access(
+            path.join(process.cwd(), 'public', 'images', 'cards', card.file)
+          );
+          return card;
+        } catch {
+          return null;
+        }
+      })
+    );
+    const cards = present.filter((c): c is NonNullable<typeof c> => c !== null);
+    return cards.length > 0 ? { ...manifest, cards } : null;
+  } catch {
+    return null;
+  }
+}
+
+/* ------------------------------------------------------- open data catalog */
+
+export interface PublishedFile {
+  name: string;
+  bytes: number;
+}
+
+export interface PublishedSeason {
+  season: string;
+  /** URL path the files are served from, e.g. /data/football/liga-2026-27 */
+  basePath: string;
+  current: boolean;
+  files: PublishedFile[];
+}
+
+// List the JSON files actually published under public/data/football/, so the
+// open-data page documents what is really there rather than what we remember
+// putting there. Returns [] on any failure.
+export async function loadPublishedFootballData(): Promise<PublishedSeason[]> {
+  try {
+    const root = path.join(process.cwd(), 'public', 'data', 'football');
+    const dirs = (await fs.readdir(root, { withFileTypes: true }))
+      .filter(d => d.isDirectory() && d.name.startsWith('liga-'))
+      .map(d => d.name)
+      .sort()
+      .reverse();
+
+    const seasons: PublishedSeason[] = [];
+    for (const dir of dirs) {
+      const entries = await fs.readdir(path.join(root, dir));
+      const files: PublishedFile[] = [];
+      for (const name of entries.filter(f => f.endsWith('.json')).sort()) {
+        const stat = await fs.stat(path.join(root, dir, name));
+        files.push({ name, bytes: stat.size });
+      }
+      if (files.length === 0) continue;
+      const season = dir.replace(/^liga-/, '');
+      seasons.push({
+        season,
+        basePath: `/data/football/${dir}`,
+        current: dir === FOOTBALL_DIR.split('/')[1],
+        files,
+      });
+    }
+    return seasons;
+  } catch (error) {
+    console.error('Error listing published football data:', error);
+    return [];
+  }
+}
+
+// Load the end-of-season review for a finished season (null if absent)
+export async function loadSeasonReview(season: string) {
+  try {
+    return await loadSeasonJson<
+      import('@/components/charts/football/SeasonReview').SeasonReviewData
+    >(season, 'review.json');
   } catch {
     return null;
   }

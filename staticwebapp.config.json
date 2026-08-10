@@ -163,6 +163,22 @@
       "serve": "/en/desporto/liga/modelo/index.html"
     },
     {
+      "route": "/pt/desporto/liga/dados",
+      "serve": "/pt/desporto/liga/dados/index.html"
+    },
+    {
+      "route": "/en/desporto/liga/dados",
+      "serve": "/en/desporto/liga/dados/index.html"
+    },
+    {
+      "route": "/pt/desporto/liga/2025-26",
+      "serve": "/pt/desporto/liga/2025-26/index.html"
+    },
+    {
+      "route": "/en/desporto/liga/2025-26",
+      "serve": "/en/desporto/liga/2025-26/index.html"
+    },
+    {
       "route": "/pt/metodologia",
       "serve": "/pt/metodologia/index.html"
     },
