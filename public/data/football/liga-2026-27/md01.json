@@ -1,9 +1,9 @@
 {
   "season": "2026-27",
   "matchday": 1,
-  "model": "bivcross_early",
+  "model": "bivcross",
   "n_sims": 50000,
-  "timestamp": "2026-08-10T20:29:25.147913+00:00",
+  "timestamp": "2026-08-10T21:33:52.828166+00:00",
   "table": [
     {
       "team": "Sporting CP",
