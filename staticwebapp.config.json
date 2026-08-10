@@ -206,6 +206,18 @@
       "route": "/data/*"
     },
     {
+      "route": "/pt/desporto/liga/jogo/*"
+    },
+    {
+      "route": "/en/desporto/liga/jogo/*"
+    },
+    {
+      "route": "/pt/desporto/liga/*"
+    },
+    {
+      "route": "/en/desporto/liga/*"
+    },
+    {
       "route": "/*",
       "serve": "/404.html",
       "statusCode": 404
