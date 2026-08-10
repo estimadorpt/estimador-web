@@ -496,9 +496,9 @@ function CheckpointChart({
         <div
           className="pointer-events-none absolute z-10 rounded-md border border-stone-200 bg-white/95 px-3 py-2 text-xs shadow-sm"
           style={{
-            left: Math.min(Math.max(hoverX - 84, 0), Math.max(0, width - 168)),
+            left: Math.min(Math.max(hoverX - 92, 0), Math.max(0, width - 184)),
             top: padT + 4,
-            width: 168,
+            width: 184,
           }}
         >
           <div className="font-semibold text-stone-900 mb-1">
@@ -515,9 +515,10 @@ function CheckpointChart({
           </div>
           <div className="flex justify-between tabular-nums border-t border-stone-100 mt-1 pt-1">
             <span className="text-stone-500">{pt ? "Diferença" : "Difference"}</span>
-            <span className="font-medium text-stone-800">
-              {signed(h.delta, 4)} <span className="text-stone-400">± {num(h.se, 4)}</span>
-            </span>
+            <span className="font-medium text-stone-800">{signed(h.delta, 4)}</span>
+          </div>
+          <div className="text-right tabular-nums text-[11px] text-stone-400">
+            ± {num(h.se, 4)}
           </div>
         </div>
       )}
