@@ -71,6 +71,24 @@ export async function loadLigaSamples() {
   }
 }
 
+// Load the Soccer Factor Model player ranking (null if absent)
+export async function loadLigaPlayers() {
+  try {
+    return await loadFootballJson<import('@/components/charts/football/PlayerSkillRanking').PlayerSkillData>('players.json');
+  } catch {
+    return null;
+  }
+}
+
+// Load the injuries / suspensions snapshot (null if absent)
+export async function loadLigaInjuries() {
+  try {
+    return await loadFootballJson<import('@/components/charts/football/InjuriesPanel').InjuriesData>('injuries.json');
+  } catch {
+    return null;
+  }
+}
+
 // Load a specific matchday prediction
 async function loadMatchdayPrediction(md: number): Promise<LigaPrediction | null> {
   try {

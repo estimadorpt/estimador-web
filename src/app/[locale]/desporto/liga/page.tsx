@@ -1,4 +1,10 @@
-import { loadLigaWithDeltas, loadLigaHistorical, loadLigaSamples } from "@/lib/utils/football-data-loader";
+import {
+  loadLigaWithDeltas,
+  loadLigaHistorical,
+  loadLigaSamples,
+  loadLigaPlayers,
+  loadLigaInjuries,
+} from "@/lib/utils/football-data-loader";
 import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import { Header } from "@/components/Header";
 import { LeagueTable } from "@/components/charts/football/LeagueTable";
@@ -14,6 +20,9 @@ import type { ScheduleDifficultyEntry } from "@/components/charts/football/Sched
 import { TeamStrengthRatings } from "@/components/charts/football/TeamStrengthRatings";
 import { LuckIndex } from "@/components/charts/football/LuckIndex";
 import type { LuckEntry } from "@/components/charts/football/LuckIndex";
+import { PlayerSkillRanking } from "@/components/charts/football/PlayerSkillRanking";
+import { InjuriesPanel } from "@/components/charts/football/InjuriesPanel";
+import { injuryReasonLabel } from "@/lib/i18n/football-labels";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ligaTeamSlugs } from "@/lib/config/football";
@@ -50,11 +59,14 @@ export default async function LigaPage({
   const { locale } = await params;
   const t = await getTranslations({ locale });
 
-  const [{ prediction, scenarios, deltas }, historical, seasonSamples] = await Promise.all([
-    loadLigaWithDeltas(),
-    loadLigaHistorical(),
-    loadLigaSamples(),
-  ]);
+  const [{ prediction, scenarios, deltas }, historical, seasonSamples, playerSkill, injuries] =
+    await Promise.all([
+      loadLigaWithDeltas(),
+      loadLigaHistorical(),
+      loadLigaSamples(),
+      loadLigaPlayers(),
+      loadLigaInjuries(),
+    ]);
 
   if (!prediction) {
     return (
@@ -106,6 +118,30 @@ export default async function LigaPage({
           remainingGames: e.remaining,
         }));
     }
+  }
+
+  // Cross-links between the player ranking and the availability snapshot
+  const currentTeams = prediction.table.map((row) => row.team);
+  const skillRanks: Record<string, number> = {};
+  for (const p of playerSkill?.players ?? []) {
+    skillRanks[p.player] = p.rank;
+  }
+  const unavailableByPlayer: Record<string, string> = {};
+  for (const p of injuries?.players ?? []) {
+    const reason = injuryReasonLabel(p.reason, locale);
+    const back = p.expected_return
+      ? new Date(p.expected_return).toLocaleDateString(
+          locale === "pt" ? "pt-PT" : "en-GB",
+          { day: "numeric", month: "long" }
+        )
+      : null;
+    const suffix = back
+      ? locale === "pt"
+        ? ` · regresso previsto ${back}`
+        : ` · expected back ${back}`
+      : "";
+    unavailableByPlayer[p.player] =
+      (reason || (locale === "pt" ? "Indisponível" : "Unavailable")) + suffix;
   }
 
   const leader = prediction.table[0];
@@ -337,6 +373,29 @@ export default async function LigaPage({
                 (m) => m.matchday === prediction.next_matchday.matchday
               )}
             />
+          </div>
+        </section>
+      )}
+
+      {/* Player skill ranking — Soccer Factor Model */}
+      {playerSkill && playerSkill.players?.length > 0 && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <PlayerSkillRanking
+              data={playerSkill}
+              locale={locale}
+              currentTeams={currentTeams}
+              unavailable={unavailableByPlayer}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Injuries / suspensions snapshot */}
+      {injuries && injuries.players?.length > 0 && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <InjuriesPanel data={injuries} locale={locale} skillRanks={skillRanks} />
           </div>
         </section>
       )}
