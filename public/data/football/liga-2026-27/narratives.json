@@ -1,0 +1,2816 @@
+{
+  "season": "2026-27",
+  "matchday": 1,
+  "baseline_matchday": 0,
+  "language": "pt",
+  "salience_rule": {
+    "description": "Cada facto candidato recebe salience = peso x magnitude, com a magnitude na unidade natural da categoria (pontos percentuais para probabilidades, pontos da liga para xPts e para a decomposicao da forca, golos por 90 para o SAR). Sao publicados o lead fixo e os 2 a 4 factos de maior salience que cumpram o limiar minimo da sua categoria, no maximo um por categoria. Empates desempatam pela ordem fixa das categorias.",
+    "weights": {
+      "title_move": 1.5,
+      "relegation_move": 1.5,
+      "europe_move": 0.6,
+      "next_fixture": 1.2,
+      "luck": 4.0,
+      "squad_change": 1.0,
+      "injuries": 25.0,
+      "best_player": 8.0
+    },
+    "thresholds": {
+      "title_move": 1.0,
+      "relegation_move": 1.0,
+      "europe_move": 1.0,
+      "next_fixture": 1.0,
+      "luck": 0.5,
+      "squad_change": 2.0,
+      "injuries": 0.02,
+      "best_player": 0.0
+    },
+    "category_order": [
+      "next_fixture",
+      "title_move",
+      "relegation_move",
+      "europe_move",
+      "luck",
+      "squad_change",
+      "injuries",
+      "best_player"
+    ],
+    "max_facts": 4,
+    "min_facts": 2
+  },
+  "sources": {
+    "prediction": true,
+    "baseline": true,
+    "scenarios": true,
+    "squad_change": true,
+    "players": true,
+    "injuries": true
+  },
+  "clubs": {
+    "Sporting CP": {
+      "team": "Sporting CP",
+      "name_pt": "Sporting",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_champion",
+      "text": "O Sporting soma 1 ponto em 1 jornada. A projeção final do Sporting é de 78 pontos (±6), com o 1º lugar como desfecho mais frequente (59% das simulações). Na jornada 2, o Sporting recebe o Vitória de Guimarães, com 77% de hipóteses de vencer no modelo. A probabilidade de ser campeão está em 59%: com vitória passa a 62%, com empate a 52% e com derrota a 46%. O modelo coloca o Sporting 5,9 pontos acima do que o valor do plantel sozinho implica. Contra 2,3 pontos esperados (xPts), o Sporting está 1,3 pontos abaixo do que as ocasiões criadas e concedidas justificam. Luis Javier Suárez é o jogador do plantel com maior SAR (Skill Above Replacement): 0,53 golos por 90 minutos acima de um substituto, com intervalo de 0,35 a 0,71, o 1º da liga.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Sporting soma 1 ponto em 1 jornada. A projeção final do Sporting é de 78 pontos (±6), com o 1º lugar como desfecho mais frequente (59% das simulações).",
+        "values": {
+          "mean_pts": 78.4,
+          "std_pts": 6.4,
+          "p_champion": 0.5908,
+          "p_top3": 0.9828,
+          "p_relegation": 0.0,
+          "played": 1,
+          "points": 1,
+          "modal_position": 1,
+          "modal_position_prob": 0.5908
+        }
+      },
+      "facts": [
+        {
+          "category": "next_fixture",
+          "magnitude": 15.53,
+          "salience": 18.636,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Sporting recebe o Vitória de Guimarães, com 77% de hipóteses de vencer no modelo. A probabilidade de ser campeão está em 59%: com vitória passa a 62%, com empate a 52% e com derrota a 46%.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Vitoria SC",
+            "venue": "H",
+            "p_win": 0.77178,
+            "p_draw": 0.15238,
+            "p_loss": 0.07584,
+            "metric": "p_champion",
+            "baseline": 0.5908,
+            "if_win": 0.6176,
+            "if_draw": 0.5194,
+            "if_loss": 0.4623,
+            "swing": 0.15530000000000005
+          }
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 5.86,
+          "salience": 5.86,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Sporting 5,9 pontos acima do que o valor do plantel sozinho implica.",
+          "values": {
+            "xpts_season_model": 79.9,
+            "xpts_season_value_only": 74.04,
+            "gap_points": 5.859999999999999,
+            "flag": "value_channel_carries_it",
+            "leaning_on_old_form": false
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 1.3,
+          "salience": 5.2,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 2,3 pontos esperados (xPts), o Sporting está 1,3 pontos abaixo do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 1.0,
+            "xpts": 2.3,
+            "gap": -1.2999999999999998,
+            "xgf": 2.6,
+            "xga": 1.0
+          }
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.5275,
+          "salience": 4.22,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "text": "Luis Javier Suárez é o jogador do plantel com maior SAR (Skill Above Replacement): 0,53 golos por 90 minutos acima de um substituto, com intervalo de 0,35 a 0,71, o 1º da liga.",
+          "values": {
+            "player": "Luis Javier Suárez",
+            "sar": 0.5275,
+            "skill_lo": 0.3465,
+            "skill_hi": 0.7102,
+            "rank": 1,
+            "minutes": 2727,
+            "goals": 28,
+            "position": "F",
+            "per_minutes": 90,
+            "unavailable": false
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "next_fixture",
+          "magnitude": 15.53,
+          "salience": 18.636,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 5.86,
+          "salience": 5.86,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 1.3,
+          "salience": 5.2,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.5275,
+          "salience": 4.22,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.0392,
+          "salience": 0.98,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "title_move",
+          "magnitude": 0.19,
+          "salience": 0.285,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.08,
+          "salience": 0.048,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Benfica": {
+      "team": "Benfica",
+      "name_pt": "Benfica",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_champion",
+      "text": "O Benfica soma 1 ponto em 1 jornada. A projeção final do Benfica é de 73 pontos (±7), com o 2º lugar como desfecho mais frequente (36% das simulações). Na jornada 2, o Benfica visita o Casa Pia, com 74% de hipóteses de vencer no modelo. A probabilidade de ser campeão passa a 24% com vitória, 17% com empate e 14% com derrota. Contra 2,4 pontos esperados (xPts), o Benfica está 1,4 pontos abaixo do que as ocasiões criadas e concedidas justificam. A probabilidade de ser campeão desceu de 24% para 22% face à projeção de pré-época (-2,4 pontos percentuais). Vangelis Pavlidis é o jogador do plantel com maior SAR (Skill Above Replacement): 0,39 golos por 90 minutos acima de um substituto, com intervalo de 0,26 a 0,52, o 3º da liga.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Benfica soma 1 ponto em 1 jornada. A projeção final do Benfica é de 73 pontos (±7), com o 2º lugar como desfecho mais frequente (36% das simulações).",
+        "values": {
+          "mean_pts": 73.0,
+          "std_pts": 6.8,
+          "p_champion": 0.2183,
+          "p_top3": 0.9142,
+          "p_relegation": 0.0,
+          "played": 1,
+          "points": 1,
+          "modal_position": 2,
+          "modal_position_prob": 0.3601
+        }
+      },
+      "facts": [
+        {
+          "category": "next_fixture",
+          "magnitude": 10.09,
+          "salience": 12.108,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Benfica visita o Casa Pia, com 74% de hipóteses de vencer no modelo. A probabilidade de ser campeão passa a 24% com vitória, 17% com empate e 14% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Casa Pia",
+            "venue": "A",
+            "p_win": 0.74238,
+            "p_draw": 0.16362,
+            "p_loss": 0.094,
+            "metric": "p_champion",
+            "baseline": 0.2183,
+            "if_win": 0.2388,
+            "if_draw": 0.1716,
+            "if_loss": 0.1379,
+            "swing": 0.10090000000000002
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 1.4,
+          "salience": 5.6,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 2,4 pontos esperados (xPts), o Benfica está 1,4 pontos abaixo do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 1.0,
+            "xpts": 2.4,
+            "gap": -1.4,
+            "xgf": 3.1,
+            "xga": 1.2
+          }
+        },
+        {
+          "category": "title_move",
+          "magnitude": 2.38,
+          "salience": 3.57,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de ser campeão desceu de 24% para 22% face à projeção de pré-época (-2,4 pontos percentuais).",
+          "values": {
+            "metric": "p_champion",
+            "current": 0.2183,
+            "baseline": 0.2421,
+            "delta": -0.023800000000000016,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.3863,
+          "salience": 3.09,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "text": "Vangelis Pavlidis é o jogador do plantel com maior SAR (Skill Above Replacement): 0,39 golos por 90 minutos acima de um substituto, com intervalo de 0,26 a 0,52, o 3º da liga.",
+          "values": {
+            "player": "Vangelis Pavlidis",
+            "sar": 0.3863,
+            "skill_lo": 0.2594,
+            "skill_hi": 0.5182,
+            "rank": 3,
+            "minutes": 4942,
+            "goals": 41,
+            "position": "F",
+            "per_minutes": 90,
+            "unavailable": false
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "next_fixture",
+          "magnitude": 10.09,
+          "salience": 12.108,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 1.4,
+          "salience": 5.6,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "title_move",
+          "magnitude": 2.38,
+          "salience": 3.57,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.3863,
+          "salience": 3.09,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 2.79,
+          "salience": 2.79,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 1.24,
+          "salience": 0.744,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": false
+        }
+      ]
+    },
+    "Porto": {
+      "team": "Porto",
+      "name_pt": "FC Porto",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_champion",
+      "text": "O FC Porto soma 3 pontos em 1 jornada. A projeção final do FC Porto é de 72 pontos (±7), com o 3º lugar como desfecho mais frequente (38% das simulações). Na jornada 2, o FC Porto visita o Rio Ave, com 69% de hipóteses de vencer no modelo. A probabilidade de ser campeão passa a 21% com vitória, 14% com empate e 11% com derrota. Contra 1,9 pontos esperados (xPts), o FC Porto está 1,1 pontos acima do que as ocasiões criadas e concedidas justificam. A probabilidade de ser campeão subiu de 16% para 18% face à projeção de pré-época (+2,6 pontos percentuais). Há 3 jogadores indisponíveis no FC Porto, 15% do valor do plantel; o mais valioso é Samu Aghehowa (45,0 M€).",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O FC Porto soma 3 pontos em 1 jornada. A projeção final do FC Porto é de 72 pontos (±7), com o 3º lugar como desfecho mais frequente (38% das simulações).",
+        "values": {
+          "mean_pts": 72.3,
+          "std_pts": 7.0,
+          "p_champion": 0.182,
+          "p_top3": 0.8935,
+          "p_relegation": 0.0,
+          "played": 1,
+          "points": 3,
+          "modal_position": 3,
+          "modal_position_prob": 0.3833
+        }
+      },
+      "facts": [
+        {
+          "category": "next_fixture",
+          "magnitude": 9.34,
+          "salience": 11.208,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o FC Porto visita o Rio Ave, com 69% de hipóteses de vencer no modelo. A probabilidade de ser campeão passa a 21% com vitória, 14% com empate e 11% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Rio Ave",
+            "venue": "A",
+            "p_win": 0.6904,
+            "p_draw": 0.19562,
+            "p_loss": 0.11398,
+            "metric": "p_champion",
+            "baseline": 0.182,
+            "if_win": 0.2052,
+            "if_draw": 0.1409,
+            "if_loss": 0.1118,
+            "swing": 0.0934
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 1.1,
+          "salience": 4.4,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 1,9 pontos esperados (xPts), o FC Porto está 1,1 pontos acima do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 3.0,
+            "xpts": 1.9,
+            "gap": 1.1,
+            "xgf": 2.6,
+            "xga": 1.7
+          }
+        },
+        {
+          "category": "title_move",
+          "magnitude": 2.58,
+          "salience": 3.87,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de ser campeão subiu de 16% para 18% face à projeção de pré-época (+2,6 pontos percentuais).",
+          "values": {
+            "metric": "p_champion",
+            "current": 0.182,
+            "baseline": 0.1562,
+            "delta": 0.02579999999999999,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.1541,
+          "salience": 3.852,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "text": "Há 3 jogadores indisponíveis no FC Porto, 15% do valor do plantel; o mais valioso é Samu Aghehowa (45,0 M€).",
+          "values": {
+            "count": 3,
+            "share_of_squad_value": 0.1541,
+            "value_out_eur": 72000000,
+            "squad_value_eur": 467100000,
+            "top_player": "Samu Aghehowa",
+            "top_player_value_eur": 45000000,
+            "top_player_value_meur": 45.0,
+            "players": [
+              "Samu Aghehowa",
+              "Oskar Pietuszewski",
+              "Vasco Sousa"
+            ]
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "next_fixture",
+          "magnitude": 9.34,
+          "salience": 11.208,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 1.1,
+          "salience": 4.4,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "title_move",
+          "magnitude": 2.58,
+          "salience": 3.87,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.1541,
+          "salience": 3.852,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.437,
+          "salience": 3.496,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 2.45,
+          "salience": 2.45,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 1.82,
+          "salience": 1.092,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": false
+        }
+      ]
+    },
+    "SC Braga": {
+      "team": "SC Braga",
+      "name_pt": "Sp. Braga",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_top3",
+      "text": "O Sp. Braga soma 1 ponto em 1 jornada. A projeção final do Sp. Braga é de 60 pontos (±7), com o 4º lugar como desfecho mais frequente (56% das simulações). Na jornada 2, o Sp. Braga recebe o Gil Vicente, com 59% de hipóteses de vencer no modelo. A probabilidade de acabar entre os três primeiros está em 19%: com vitória passa a 22%, com empate a 15% e com derrota a 13%. Contra 2,4 pontos esperados (xPts), o Sp. Braga está 1,4 pontos abaixo do que as ocasiões criadas e concedidas justificam. Há 3 jogadores indisponíveis no Sp. Braga, 12% do valor do plantel; o mais valioso é Bright Arrey-Mbi (9,0 M€). Pau Víctor é o jogador do plantel com maior SAR (Skill Above Replacement): 0,20 golos por 90 minutos acima de um substituto, com intervalo de 0,08 a 0,34, o 26º da liga.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Sp. Braga soma 1 ponto em 1 jornada. A projeção final do Sp. Braga é de 60 pontos (±7), com o 4º lugar como desfecho mais frequente (56% das simulações).",
+        "values": {
+          "mean_pts": 60.1,
+          "std_pts": 7.4,
+          "p_champion": 0.0087,
+          "p_top3": 0.1862,
+          "p_relegation": 0.0001,
+          "played": 1,
+          "points": 1,
+          "modal_position": 4,
+          "modal_position_prob": 0.5556
+        }
+      },
+      "facts": [
+        {
+          "category": "next_fixture",
+          "magnitude": 8.5,
+          "salience": 10.2,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Sp. Braga recebe o Gil Vicente, com 59% de hipóteses de vencer no modelo. A probabilidade de acabar entre os três primeiros está em 19%: com vitória passa a 22%, com empate a 15% e com derrota a 13%.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Gil Vicente",
+            "venue": "H",
+            "p_win": 0.59066,
+            "p_draw": 0.23244,
+            "p_loss": 0.1769,
+            "metric": "p_top3",
+            "baseline": 0.1862,
+            "if_win": 0.2155,
+            "if_draw": 0.154,
+            "if_loss": 0.1305,
+            "swing": 0.08499999999999999
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 1.4,
+          "salience": 5.6,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 2,4 pontos esperados (xPts), o Sp. Braga está 1,4 pontos abaixo do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 1.0,
+            "xpts": 2.4,
+            "gap": -1.4,
+            "xgf": 1.5,
+            "xga": 0.2
+          }
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.1226,
+          "salience": 3.065,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "text": "Há 3 jogadores indisponíveis no Sp. Braga, 12% do valor do plantel; o mais valioso é Bright Arrey-Mbi (9,0 M€).",
+          "values": {
+            "count": 3,
+            "share_of_squad_value": 0.1226,
+            "value_out_eur": 19000000,
+            "squad_value_eur": 155000000,
+            "top_player": "Bright Arrey-Mbi",
+            "top_player_value_eur": 9000000,
+            "top_player_value_meur": 9.0,
+            "players": [
+              "Bright Arrey-Mbi",
+              "Sikou Niakaté",
+              "Adrian Barisic"
+            ]
+          }
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.1985,
+          "salience": 1.588,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "text": "Pau Víctor é o jogador do plantel com maior SAR (Skill Above Replacement): 0,20 golos por 90 minutos acima de um substituto, com intervalo de 0,08 a 0,34, o 26º da liga.",
+          "values": {
+            "player": "Pau Víctor",
+            "sar": 0.1985,
+            "skill_lo": 0.0769,
+            "skill_hi": 0.3403,
+            "rank": 26,
+            "minutes": 2269,
+            "goals": 10,
+            "position": "F",
+            "per_minutes": 90,
+            "unavailable": false
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "next_fixture",
+          "magnitude": 8.5,
+          "salience": 10.2,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 1.4,
+          "salience": 5.6,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.1226,
+          "salience": 3.065,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.1985,
+          "salience": 1.588,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 1.58,
+          "salience": 1.58,
+          "threshold": 2.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 1.12,
+          "salience": 0.672,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "title_move",
+          "magnitude": 0.01,
+          "salience": 0.015,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 0.01,
+          "salience": 0.015,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Famalicao": {
+      "team": "Famalicao",
+      "name_pt": "Famalicão",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_top3",
+      "text": "O Famalicão soma 1 ponto em 1 jornada. A projeção final do Famalicão é de 47 pontos (±7), com o 5º lugar como desfecho mais frequente (18% das simulações). Contra 1,7 pontos esperados (xPts), o Famalicão está 0,7 pontos abaixo do que as ocasiões criadas e concedidas justificam. Na jornada 2, o Famalicão recebe o Marítimo, com 52% de hipóteses de vencer no modelo. A probabilidade de descida está em 1,4%: com vitória passa a 0,9%, com empate a 1,5% e com derrota a 2,6%. O modelo coloca o Famalicão 2,1 pontos acima do que o valor do plantel sozinho implica. Yassir Zabiri é o jogador do plantel com maior SAR (Skill Above Replacement): 0,23 golos por 90 minutos acima de um substituto, com intervalo de 0,06 a 0,43, o 14º da liga.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Famalicão soma 1 ponto em 1 jornada. A projeção final do Famalicão é de 47 pontos (±7), com o 5º lugar como desfecho mais frequente (18% das simulações).",
+        "values": {
+          "mean_pts": 47.0,
+          "std_pts": 7.4,
+          "p_champion": 0.0,
+          "p_top3": 0.0071,
+          "p_relegation": 0.0143,
+          "played": 1,
+          "points": 1,
+          "modal_position": 5,
+          "modal_position_prob": 0.183
+        }
+      },
+      "facts": [
+        {
+          "category": "luck",
+          "magnitude": 0.7,
+          "salience": 2.8,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 1,7 pontos esperados (xPts), o Famalicão está 0,7 pontos abaixo do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 1.0,
+            "xpts": 1.7,
+            "gap": -0.7,
+            "xgf": 1.5,
+            "xga": 1.1
+          }
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 1.76,
+          "salience": 2.112,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Famalicão recebe o Marítimo, com 52% de hipóteses de vencer no modelo. A probabilidade de descida está em 1,4%: com vitória passa a 0,9%, com empate a 1,5% e com derrota a 2,6%.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Maritimo",
+            "venue": "H",
+            "p_win": 0.51518,
+            "p_draw": 0.26802,
+            "p_loss": 0.2168,
+            "metric": "p_relegation",
+            "baseline": 0.0143,
+            "if_win": 0.0088,
+            "if_draw": 0.0151,
+            "if_loss": 0.0264,
+            "swing": 0.017599999999999998
+          }
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 2.09,
+          "salience": 2.09,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Famalicão 2,1 pontos acima do que o valor do plantel sozinho implica.",
+          "values": {
+            "xpts_season_model": 47.43,
+            "xpts_season_value_only": 45.34,
+            "gap_points": 2.0899999999999963,
+            "flag": "value_channel_carries_it",
+            "leaning_on_old_form": false
+          }
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.226,
+          "salience": 1.808,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "text": "Yassir Zabiri é o jogador do plantel com maior SAR (Skill Above Replacement): 0,23 golos por 90 minutos acima de um substituto, com intervalo de 0,06 a 0,43, o 14º da liga.",
+          "values": {
+            "player": "Yassir Zabiri",
+            "sar": 0.226,
+            "skill_lo": 0.0618,
+            "skill_hi": 0.433,
+            "rank": 14,
+            "minutes": 715,
+            "goals": 5,
+            "position": "F",
+            "per_minutes": 90,
+            "unavailable": false
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "luck",
+          "magnitude": 0.7,
+          "salience": 2.8,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 1.76,
+          "salience": 2.112,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 2.09,
+          "salience": 2.09,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.226,
+          "salience": 1.808,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 0.67,
+          "salience": 1.005,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.08,
+          "salience": 0.048,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "title_move",
+          "magnitude": 0.01,
+          "salience": 0.015,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Gil Vicente": {
+      "team": "Gil Vicente",
+      "name_pt": "Gil Vicente",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_top3",
+      "text": "O Gil Vicente soma 3 pontos em 1 jornada. A projeção final do Gil Vicente é de 45 pontos (±7), com o 6º lugar como desfecho mais frequente (13% das simulações). O modelo coloca o Gil Vicente 7,5 pontos acima do que o valor do plantel sozinho implica, e essa margem vem de um histórico que ainda é do plantel atual: 50% dos minutos do ano passado continuam no clube. Contra 2,3 pontos esperados (xPts), o Gil Vicente está 0,7 pontos acima do que as ocasiões criadas e concedidas justificam. Pablo Felipe é o jogador do plantel com maior SAR (Skill Above Replacement): 0,32 golos por 90 minutos acima de um substituto, com intervalo de 0,17 a 0,49, o 5º da liga. Na jornada 2, o Gil Vicente visita o Sp. Braga, com 18% de hipóteses de vencer no modelo. A probabilidade de descida está em 2,6%: com vitória passa a 1,1%, com empate a 2,3% e com derrota a 3,2%.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Gil Vicente soma 3 pontos em 1 jornada. A projeção final do Gil Vicente é de 45 pontos (±7), com o 6º lugar como desfecho mais frequente (13% das simulações).",
+        "values": {
+          "mean_pts": 45.0,
+          "std_pts": 7.4,
+          "p_champion": 0.0001,
+          "p_top3": 0.0046,
+          "p_relegation": 0.0265,
+          "played": 1,
+          "points": 3,
+          "modal_position": 6,
+          "modal_position_prob": 0.1268
+        }
+      },
+      "facts": [
+        {
+          "category": "squad_change",
+          "magnitude": 7.54,
+          "salience": 7.54,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Gil Vicente 7,5 pontos acima do que o valor do plantel sozinho implica, e essa margem vem de um histórico que ainda é do plantel atual: 50% dos minutos do ano passado continuam no clube.",
+          "values": {
+            "xpts_season_model": 43.77,
+            "xpts_season_value_only": 36.23,
+            "gap_points": 7.540000000000006,
+            "flag": "history_backed_stable_squad",
+            "leaning_on_old_form": false,
+            "retained_minutes_share": 0.504
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.7,
+          "salience": 2.8,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 2,3 pontos esperados (xPts), o Gil Vicente está 0,7 pontos acima do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 3.0,
+            "xpts": 2.3,
+            "gap": 0.7000000000000002,
+            "xgf": 1.5,
+            "xga": 0.3
+          }
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.3226,
+          "salience": 2.581,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "text": "Pablo Felipe é o jogador do plantel com maior SAR (Skill Above Replacement): 0,32 golos por 90 minutos acima de um substituto, com intervalo de 0,17 a 0,49, o 5º da liga.",
+          "values": {
+            "player": "Pablo Felipe",
+            "sar": 0.3226,
+            "skill_lo": 0.1673,
+            "skill_hi": 0.4906,
+            "rank": 5,
+            "minutes": 1968,
+            "goals": 15,
+            "position": "F",
+            "per_minutes": 90,
+            "unavailable": false
+          }
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 2.1,
+          "salience": 2.52,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Gil Vicente visita o Sp. Braga, com 18% de hipóteses de vencer no modelo. A probabilidade de descida está em 2,6%: com vitória passa a 1,1%, com empate a 2,3% e com derrota a 3,2%.",
+          "values": {
+            "matchday": 2,
+            "opponent": "SC Braga",
+            "venue": "A",
+            "p_win": 0.1769,
+            "p_draw": 0.23244,
+            "p_loss": 0.59066,
+            "metric": "p_relegation",
+            "baseline": 0.0265,
+            "if_win": 0.0115,
+            "if_draw": 0.0228,
+            "if_loss": 0.0325,
+            "swing": 0.021
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "squad_change",
+          "magnitude": 7.54,
+          "salience": 7.54,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.7,
+          "salience": 2.8,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.3226,
+          "salience": 2.581,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 2.1,
+          "salience": 2.52,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.053,
+          "salience": 1.325,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.31,
+          "salience": 0.186,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 0.02,
+          "salience": 0.03,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "title_move",
+          "magnitude": 0.01,
+          "salience": 0.015,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Vitoria SC": {
+      "team": "Vitoria SC",
+      "name_pt": "Vitória de Guimarães",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_top3",
+      "text": "O Vitória de Guimarães soma 0 pontos em 1 jornada. A projeção final do Vitória de Guimarães é de 45 pontos (±7), com o 5º lugar como desfecho mais frequente (12% das simulações). Contra 2,5 pontos esperados (xPts), o Vitória de Guimarães está 2,5 pontos abaixo do que as ocasiões criadas e concedidas justificam. O modelo coloca o Vitória de Guimarães 3,9 pontos acima do que o valor do plantel sozinho implica. A probabilidade de descida subiu de 1,0% para 3,0% face à projeção de pré-época (+2,0 pontos percentuais). Na jornada 2, o Vitória de Guimarães visita o Sporting, com 7,6% de hipóteses de vencer no modelo. A probabilidade de descida passa a 1,1% com vitória, 2,5% com empate e 3,3% com derrota.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Vitória de Guimarães soma 0 pontos em 1 jornada. A projeção final do Vitória de Guimarães é de 45 pontos (±7), com o 5º lugar como desfecho mais frequente (12% das simulações).",
+        "values": {
+          "mean_pts": 44.6,
+          "std_pts": 7.4,
+          "p_champion": 0.0,
+          "p_top3": 0.0036,
+          "p_relegation": 0.03,
+          "played": 1,
+          "points": 0,
+          "modal_position": 5,
+          "modal_position_prob": 0.121
+        }
+      },
+      "facts": [
+        {
+          "category": "luck",
+          "magnitude": 2.5,
+          "salience": 10.0,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 2,5 pontos esperados (xPts), o Vitória de Guimarães está 2,5 pontos abaixo do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 0.0,
+            "xpts": 2.5,
+            "gap": -2.5,
+            "xgf": 2.2,
+            "xga": 0.5
+          }
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 3.87,
+          "salience": 3.87,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Vitória de Guimarães 3,9 pontos acima do que o valor do plantel sozinho implica.",
+          "values": {
+            "xpts_season_model": 46.32,
+            "xpts_season_value_only": 42.45,
+            "gap_points": 3.8699999999999974,
+            "flag": "value_channel_carries_it",
+            "leaning_on_old_form": false
+          }
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 1.97,
+          "salience": 2.955,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de descida subiu de 1,0% para 3,0% face à projeção de pré-época (+2,0 pontos percentuais).",
+          "values": {
+            "metric": "p_relegation",
+            "current": 0.03,
+            "baseline": 0.0103,
+            "delta": 0.0197,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 2.25,
+          "salience": 2.7,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Vitória de Guimarães visita o Sporting, com 7,6% de hipóteses de vencer no modelo. A probabilidade de descida passa a 1,1% com vitória, 2,5% com empate e 3,3% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Sporting CP",
+            "venue": "A",
+            "p_win": 0.07584,
+            "p_draw": 0.15238,
+            "p_loss": 0.77178,
+            "metric": "p_relegation",
+            "baseline": 0.03,
+            "if_win": 0.0105,
+            "if_draw": 0.0247,
+            "if_loss": 0.033,
+            "swing": 0.0225
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "luck",
+          "magnitude": 2.5,
+          "salience": 10.0,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 3.87,
+          "salience": 3.87,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 1.97,
+          "salience": 2.955,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 2.25,
+          "salience": 2.7,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2667,
+          "salience": 2.134,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.12,
+          "salience": 0.072,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Santa Clara": {
+      "team": "Santa Clara",
+      "name_pt": "Santa Clara",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_top3",
+      "text": "O Santa Clara soma 1 ponto em 1 jornada. A projeção final do Santa Clara é de 43 pontos (±7), com o 6º lugar como desfecho mais frequente (10% das simulações). O modelo coloca o Santa Clara 7,2 pontos acima do que o valor do plantel sozinho implica, por causa do que o clube fez na época passada. Só que o valor do plantel caiu 14% e apenas 40% dos minutos do ano passado continuam no clube, pelo que essa forma pode ser de um plantel que já não existe. Na jornada 2, o Santa Clara visita o Académico de Viseu, com 37% de hipóteses de vencer no modelo. A probabilidade de descida está em 4,4%: com vitória passa a 2,3%, com empate a 4,9% e com derrota a 6,4%. Há um jogador indisponível no Santa Clara, 12% do valor do plantel; o mais valioso é MT (3,5 M€). Contra 1,5 pontos esperados (xPts), o Santa Clara está 0,5 pontos abaixo do que as ocasiões criadas e concedidas justificam.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Santa Clara soma 1 ponto em 1 jornada. A projeção final do Santa Clara é de 43 pontos (±7), com o 6º lugar como desfecho mais frequente (10% das simulações).",
+        "values": {
+          "mean_pts": 43.1,
+          "std_pts": 7.4,
+          "p_champion": 0.0,
+          "p_top3": 0.0021,
+          "p_relegation": 0.0441,
+          "played": 1,
+          "points": 1,
+          "modal_position": 6,
+          "modal_position_prob": 0.1038
+        }
+      },
+      "facts": [
+        {
+          "category": "squad_change",
+          "magnitude": 7.22,
+          "salience": 7.22,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Santa Clara 7,2 pontos acima do que o valor do plantel sozinho implica, por causa do que o clube fez na época passada. Só que o valor do plantel caiu 14% e apenas 40% dos minutos do ano passado continuam no clube, pelo que essa forma pode ser de um plantel que já não existe.",
+          "values": {
+            "xpts_season_model": 43.61,
+            "xpts_season_value_only": 36.39,
+            "gap_points": 7.219999999999999,
+            "flag": "over_rating_risk",
+            "leaning_on_old_form": true,
+            "value_change_pct": -13.5,
+            "retained_minutes_share": 0.395
+          }
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 4.05,
+          "salience": 4.86,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Santa Clara visita o Académico de Viseu, com 37% de hipóteses de vencer no modelo. A probabilidade de descida está em 4,4%: com vitória passa a 2,3%, com empate a 4,9% e com derrota a 6,4%.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Academico Viseu",
+            "venue": "A",
+            "p_win": 0.37322,
+            "p_draw": 0.30538,
+            "p_loss": 0.3214,
+            "metric": "p_relegation",
+            "baseline": 0.0441,
+            "if_win": 0.0232,
+            "if_draw": 0.0489,
+            "if_loss": 0.0637,
+            "swing": 0.04050000000000001
+          }
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.122,
+          "salience": 3.05,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "text": "Há um jogador indisponível no Santa Clara, 12% do valor do plantel; o mais valioso é MT (3,5 M€).",
+          "values": {
+            "count": 1,
+            "share_of_squad_value": 0.122,
+            "value_out_eur": 3500000,
+            "squad_value_eur": 28680000,
+            "top_player": "MT",
+            "top_player_value_eur": 3500000,
+            "top_player_value_meur": 3.5,
+            "players": [
+              "MT"
+            ]
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.5,
+          "salience": 2.0,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 1,5 pontos esperados (xPts), o Santa Clara está 0,5 pontos abaixo do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 1.0,
+            "xpts": 1.5,
+            "gap": -0.5,
+            "xgf": 1.4,
+            "xga": 1.2
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "squad_change",
+          "magnitude": 7.22,
+          "salience": 7.22,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 4.05,
+          "salience": 4.86,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.122,
+          "salience": 3.05,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.5,
+          "salience": 2.0,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 1.1,
+          "salience": 1.65,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.1889,
+          "salience": 1.511,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.07,
+          "salience": 0.042,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Arouca": {
+      "team": "Arouca",
+      "name_pt": "Arouca",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_relegation",
+      "text": "O Arouca soma 3 pontos em 1 jornada. A projeção final do Arouca é de 42 pontos (±7), com o 8º lugar como desfecho mais frequente (9,3% das simulações). Contra 0,4 pontos esperados (xPts), o Arouca está 2,6 pontos acima do que as ocasiões criadas e concedidas justificam. Na jornada 2, o Arouca recebe o Moreirense, com 43% de hipóteses de vencer no modelo. A probabilidade de descida está em 5,7%: com vitória passa a 3,4%, com empate a 6,3% e com derrota a 8,7%. O modelo coloca o Arouca 4,7 pontos acima do que o valor do plantel sozinho implica. Ivan Barbero é o jogador do plantel com maior SAR (Skill Above Replacement): 0,22 golos por 90 minutos acima de um substituto, com intervalo de 0,08 a 0,37, o 19º da liga.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Arouca soma 3 pontos em 1 jornada. A projeção final do Arouca é de 42 pontos (±7), com o 8º lugar como desfecho mais frequente (9,3% das simulações).",
+        "values": {
+          "mean_pts": 42.4,
+          "std_pts": 7.4,
+          "p_champion": 0.0,
+          "p_top3": 0.0019,
+          "p_relegation": 0.0572,
+          "played": 1,
+          "points": 3,
+          "modal_position": 8,
+          "modal_position_prob": 0.0932
+        }
+      },
+      "facts": [
+        {
+          "category": "luck",
+          "magnitude": 2.6,
+          "salience": 10.4,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 0,4 pontos esperados (xPts), o Arouca está 2,6 pontos acima do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 3.0,
+            "xpts": 0.4,
+            "gap": 2.6,
+            "xgf": 0.5,
+            "xga": 2.2
+          }
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 5.26,
+          "salience": 6.312,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Arouca recebe o Moreirense, com 43% de hipóteses de vencer no modelo. A probabilidade de descida está em 5,7%: com vitória passa a 3,4%, com empate a 6,3% e com derrota a 8,7%.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Moreirense",
+            "venue": "H",
+            "p_win": 0.43304,
+            "p_draw": 0.28044,
+            "p_loss": 0.28652,
+            "metric": "p_relegation",
+            "baseline": 0.0572,
+            "if_win": 0.0341,
+            "if_draw": 0.0626,
+            "if_loss": 0.0867,
+            "swing": 0.0526
+          }
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 4.7,
+          "salience": 4.7,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Arouca 4,7 pontos acima do que o valor do plantel sozinho implica.",
+          "values": {
+            "xpts_season_model": 40.38,
+            "xpts_season_value_only": 35.68,
+            "gap_points": 4.700000000000003,
+            "flag": "stable",
+            "leaning_on_old_form": false
+          }
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2163,
+          "salience": 1.73,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "text": "Ivan Barbero é o jogador do plantel com maior SAR (Skill Above Replacement): 0,22 golos por 90 minutos acima de um substituto, com intervalo de 0,08 a 0,37, o 19º da liga.",
+          "values": {
+            "player": "Ivan Barbero",
+            "sar": 0.2163,
+            "skill_lo": 0.0834,
+            "skill_hi": 0.3704,
+            "rank": 19,
+            "minutes": 1977,
+            "goals": 9,
+            "position": "F",
+            "per_minutes": 90,
+            "unavailable": false
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "luck",
+          "magnitude": 2.6,
+          "salience": 10.4,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 5.26,
+          "salience": 6.312,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 4.7,
+          "salience": 4.7,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2163,
+          "salience": 1.73,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 0.52,
+          "salience": 0.78,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.11,
+          "salience": 0.066,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Estoril": {
+      "team": "Estoril",
+      "name_pt": "Estoril",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_relegation",
+      "text": "O Estoril soma 1 ponto em 1 jornada. A projeção final do Estoril é de 42 pontos (±7), com o 9º lugar como desfecho mais frequente (9,0% das simulações). Na jornada 2, o Estoril visita o Nacional, com 34% de hipóteses de vencer no modelo. A probabilidade de descida passa a 4,0% com vitória, 7,1% com empate e 9,8% com derrota. A probabilidade de descida subiu de 4,1% para 7,1% face à projeção de pré-época (+3,0 pontos percentuais). Yanis Begraoui é o jogador do plantel com maior SAR (Skill Above Replacement): 0,29 golos por 90 minutos acima de um substituto, com intervalo de 0,18 a 0,42, o 7º da liga.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Estoril soma 1 ponto em 1 jornada. A projeção final do Estoril é de 42 pontos (±7), com o 9º lugar como desfecho mais frequente (9,0% das simulações).",
+        "values": {
+          "mean_pts": 41.5,
+          "std_pts": 7.4,
+          "p_champion": 0.0,
+          "p_top3": 0.0011,
+          "p_relegation": 0.0712,
+          "played": 1,
+          "points": 1,
+          "modal_position": 9,
+          "modal_position_prob": 0.0896
+        }
+      },
+      "facts": [
+        {
+          "category": "next_fixture",
+          "magnitude": 5.85,
+          "salience": 7.02,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Estoril visita o Nacional, com 34% de hipóteses de vencer no modelo. A probabilidade de descida passa a 4,0% com vitória, 7,1% com empate e 9,8% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Nacional",
+            "venue": "A",
+            "p_win": 0.34162,
+            "p_draw": 0.25996,
+            "p_loss": 0.39842,
+            "metric": "p_relegation",
+            "baseline": 0.0712,
+            "if_win": 0.0397,
+            "if_draw": 0.0713,
+            "if_loss": 0.0982,
+            "swing": 0.058499999999999996
+          }
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 3.05,
+          "salience": 4.575,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de descida subiu de 4,1% para 7,1% face à projeção de pré-época (+3,0 pontos percentuais).",
+          "values": {
+            "metric": "p_relegation",
+            "current": 0.0712,
+            "baseline": 0.0407,
+            "delta": 0.0305,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2917,
+          "salience": 2.334,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "text": "Yanis Begraoui é o jogador do plantel com maior SAR (Skill Above Replacement): 0,29 golos por 90 minutos acima de um substituto, com intervalo de 0,18 a 0,42, o 7º da liga.",
+          "values": {
+            "player": "Yanis Begraoui",
+            "sar": 0.2917,
+            "skill_lo": 0.1761,
+            "skill_hi": 0.4167,
+            "rank": 7,
+            "minutes": 4746,
+            "goals": 32,
+            "position": "F",
+            "per_minutes": 90,
+            "unavailable": false
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "next_fixture",
+          "magnitude": 5.85,
+          "salience": 7.02,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 3.05,
+          "salience": 4.575,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2917,
+          "salience": 2.334,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 0.73,
+          "salience": 0.73,
+          "threshold": 2.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.1,
+          "salience": 0.4,
+          "threshold": 0.5,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.02,
+          "salience": 0.012,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Alverca": {
+      "team": "Alverca",
+      "name_pt": "Alverca",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_relegation",
+      "text": "O Alverca soma 0 pontos em 1 jornada. A projeção final do Alverca é de 40 pontos (±8), com o 12º lugar como desfecho mais frequente (8,4% das simulações). Na jornada 2, o Alverca recebe o Estrela da Amadora, com 48% de hipóteses de vencer no modelo. A probabilidade de descida passa a 7,3% com vitória, 12% com empate e 16% com derrota. Contra 0,9 pontos esperados (xPts), o Alverca está 0,9 pontos abaixo do que as ocasiões criadas e concedidas justificam. A probabilidade de descida subiu de 8,4% para 11% face à projeção de pré-época (+2,4 pontos percentuais). Marko Milovanović é o jogador do plantel com maior SAR (Skill Above Replacement): 0,25 golos por 90 minutos acima de um substituto, com intervalo de 0,11 a 0,42, o 12º da liga.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Alverca soma 0 pontos em 1 jornada. A projeção final do Alverca é de 40 pontos (±8), com o 12º lugar como desfecho mais frequente (8,4% das simulações).",
+        "values": {
+          "mean_pts": 39.8,
+          "std_pts": 7.6,
+          "p_champion": 0.0,
+          "p_top3": 0.0008,
+          "p_relegation": 0.1076,
+          "played": 1,
+          "points": 0,
+          "modal_position": 12,
+          "modal_position_prob": 0.0837
+        }
+      },
+      "facts": [
+        {
+          "category": "next_fixture",
+          "magnitude": 8.78,
+          "salience": 10.536,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Alverca recebe o Estrela da Amadora, com 48% de hipóteses de vencer no modelo. A probabilidade de descida passa a 7,3% com vitória, 12% com empate e 16% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Estrela Amadora",
+            "venue": "H",
+            "p_win": 0.48258,
+            "p_draw": 0.27726,
+            "p_loss": 0.24016,
+            "metric": "p_relegation",
+            "baseline": 0.1076,
+            "if_win": 0.0728,
+            "if_draw": 0.1223,
+            "if_loss": 0.1606,
+            "swing": 0.08779999999999999
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.9,
+          "salience": 3.6,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 0,9 pontos esperados (xPts), o Alverca está 0,9 pontos abaixo do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 0.0,
+            "xpts": 0.9,
+            "gap": -0.9,
+            "xgf": 1.7,
+            "xga": 2.6
+          }
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 2.38,
+          "salience": 3.57,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de descida subiu de 8,4% para 11% face à projeção de pré-época (+2,4 pontos percentuais).",
+          "values": {
+            "metric": "p_relegation",
+            "current": 0.1076,
+            "baseline": 0.0838,
+            "delta": 0.0238,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2531,
+          "salience": 2.025,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "text": "Marko Milovanović é o jogador do plantel com maior SAR (Skill Above Replacement): 0,25 golos por 90 minutos acima de um substituto, com intervalo de 0,11 a 0,42, o 12º da liga.",
+          "values": {
+            "player": "Marko Milovanović",
+            "sar": 0.2531,
+            "skill_lo": 0.1096,
+            "skill_hi": 0.4223,
+            "rank": 12,
+            "minutes": 1535,
+            "goals": 9,
+            "position": "F",
+            "per_minutes": 90,
+            "unavailable": false
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "next_fixture",
+          "magnitude": 8.78,
+          "salience": 10.536,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.9,
+          "salience": 3.6,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 2.38,
+          "salience": 3.57,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2531,
+          "salience": 2.025,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 1.42,
+          "salience": 1.42,
+          "threshold": 2.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.05,
+          "salience": 0.03,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Nacional": {
+      "team": "Nacional",
+      "name_pt": "Nacional",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_relegation",
+      "text": "O Nacional soma 1 ponto em 1 jornada. A projeção final do Nacional é de 39 pontos (±7), com o 14º lugar como desfecho mais frequente (8,7% das simulações). Na jornada 2, o Nacional recebe o Estoril, com 40% de hipóteses de vencer no modelo. A probabilidade de descida está em 12%: com vitória passa a 7,8%, com empate a 13% e com derrota a 17%. O modelo coloca o Nacional 9,0 pontos acima do que o valor do plantel sozinho implica, por causa do que o clube fez na época passada. Só que o valor do plantel caiu 19% e apenas 49% dos minutos do ano passado continuam no clube, pelo que essa forma pode ser de um plantel que já não existe. Jesús Ramírez é o jogador do plantel com maior SAR (Skill Above Replacement): 0,26 golos por 90 minutos acima de um substituto, com intervalo de 0,14 a 0,39, o 11º da liga. Há 2 jogadores indisponíveis no Nacional, 6,9% do valor do plantel; o mais valioso é Ulisses (1,0 M€).",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Nacional soma 1 ponto em 1 jornada. A projeção final do Nacional é de 39 pontos (±7), com o 14º lugar como desfecho mais frequente (8,7% das simulações).",
+        "values": {
+          "mean_pts": 39.1,
+          "std_pts": 7.4,
+          "p_champion": 0.0,
+          "p_top3": 0.0007,
+          "p_relegation": 0.1214,
+          "played": 1,
+          "points": 1,
+          "modal_position": 14,
+          "modal_position_prob": 0.0868
+        }
+      },
+      "facts": [
+        {
+          "category": "next_fixture",
+          "magnitude": 8.85,
+          "salience": 10.62,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Nacional recebe o Estoril, com 40% de hipóteses de vencer no modelo. A probabilidade de descida está em 12%: com vitória passa a 7,8%, com empate a 13% e com derrota a 17%.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Estoril",
+            "venue": "H",
+            "p_win": 0.39842,
+            "p_draw": 0.25996,
+            "p_loss": 0.34162,
+            "metric": "p_relegation",
+            "baseline": 0.1214,
+            "if_win": 0.0775,
+            "if_draw": 0.1299,
+            "if_loss": 0.166,
+            "swing": 0.08850000000000001
+          }
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 8.97,
+          "salience": 8.97,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Nacional 9,0 pontos acima do que o valor do plantel sozinho implica, por causa do que o clube fez na época passada. Só que o valor do plantel caiu 19% e apenas 49% dos minutos do ano passado continuam no clube, pelo que essa forma pode ser de um plantel que já não existe.",
+          "values": {
+            "xpts_season_model": 39.24,
+            "xpts_season_value_only": 30.27,
+            "gap_points": 8.970000000000002,
+            "flag": "over_rating_risk",
+            "leaning_on_old_form": true,
+            "value_change_pct": -19.3,
+            "retained_minutes_share": 0.487
+          }
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2585,
+          "salience": 2.068,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "text": "Jesús Ramírez é o jogador do plantel com maior SAR (Skill Above Replacement): 0,26 golos por 90 minutos acima de um substituto, com intervalo de 0,14 a 0,39, o 11º da liga.",
+          "values": {
+            "player": "Jesús Ramírez",
+            "sar": 0.2585,
+            "skill_lo": 0.1412,
+            "skill_hi": 0.3942,
+            "rank": 11,
+            "minutes": 3646,
+            "goals": 21,
+            "position": "F",
+            "per_minutes": 90,
+            "unavailable": false
+          }
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.0692,
+          "salience": 1.73,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "text": "Há 2 jogadores indisponíveis no Nacional, 6,9% do valor do plantel; o mais valioso é Ulisses (1,0 M€).",
+          "values": {
+            "count": 2,
+            "share_of_squad_value": 0.0692,
+            "value_out_eur": 1200000,
+            "squad_value_eur": 17330000,
+            "top_player": "Ulisses",
+            "top_player_value_eur": 1000000,
+            "top_player_value_meur": 1.0,
+            "players": [
+              "Ulisses",
+              "Ivanildo Fernandes"
+            ]
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "next_fixture",
+          "magnitude": 8.85,
+          "salience": 10.62,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 8.97,
+          "salience": 8.97,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2585,
+          "salience": 2.068,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.0692,
+          "salience": 1.73,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.2,
+          "salience": 0.8,
+          "threshold": 0.5,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 0.19,
+          "salience": 0.285,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.04,
+          "salience": 0.024,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Maritimo": {
+      "team": "Maritimo",
+      "name_pt": "Marítimo",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_relegation",
+      "text": "O Marítimo soma 3 pontos em 1 jornada. A projeção final do Marítimo é de 38 pontos (±8), com o 14º lugar como desfecho mais frequente (8,6% das simulações). A probabilidade de descida desceu de 42% para 16% face à projeção de pré-época (-26,2 pontos percentuais). Na jornada 2, o Marítimo visita o Famalicão, com 22% de hipóteses de vencer no modelo. A probabilidade de descida passa a 9,0% com vitória, 15% com empate e 19% com derrota. O modelo coloca o Marítimo 7,9 pontos acima do que o valor do plantel sozinho implica, mas essa margem vem da II Liga: o histórico que o modelo usa foi feito noutro escalão. Contra 1,9 pontos esperados (xPts), o Marítimo está 1,1 pontos acima do que as ocasiões criadas e concedidas justificam.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Marítimo soma 3 pontos em 1 jornada. A projeção final do Marítimo é de 38 pontos (±8), com o 14º lugar como desfecho mais frequente (8,6% das simulações).",
+        "values": {
+          "mean_pts": 38.3,
+          "std_pts": 7.6,
+          "p_champion": 0.0,
+          "p_top3": 0.0005,
+          "p_relegation": 0.157,
+          "played": 1,
+          "points": 3,
+          "modal_position": 14,
+          "modal_position_prob": 0.0862
+        }
+      },
+      "facts": [
+        {
+          "category": "relegation_move",
+          "magnitude": 26.25,
+          "salience": 39.375,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de descida desceu de 42% para 16% face à projeção de pré-época (-26,2 pontos percentuais).",
+          "values": {
+            "metric": "p_relegation",
+            "current": 0.157,
+            "baseline": 0.4195,
+            "delta": -0.26249999999999996,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 9.93,
+          "salience": 11.916,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Marítimo visita o Famalicão, com 22% de hipóteses de vencer no modelo. A probabilidade de descida passa a 9,0% com vitória, 15% com empate e 19% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Famalicao",
+            "venue": "A",
+            "p_win": 0.2168,
+            "p_draw": 0.26802,
+            "p_loss": 0.51518,
+            "metric": "p_relegation",
+            "baseline": 0.157,
+            "if_win": 0.0902,
+            "if_draw": 0.1483,
+            "if_loss": 0.1895,
+            "swing": 0.0993
+          }
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 7.86,
+          "salience": 7.86,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Marítimo 7,9 pontos acima do que o valor do plantel sozinho implica, mas essa margem vem da II Liga: o histórico que o modelo usa foi feito noutro escalão.",
+          "values": {
+            "xpts_season_model": 36.89,
+            "xpts_season_value_only": 29.03,
+            "gap_points": 7.859999999999999,
+            "flag": "promoted_history_is_liga2",
+            "leaning_on_old_form": true
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 1.1,
+          "salience": 4.4,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 1,9 pontos esperados (xPts), o Marítimo está 1,1 pontos acima do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 3.0,
+            "xpts": 1.9,
+            "gap": 1.1,
+            "xgf": 1.3,
+            "xga": 0.6
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "relegation_move",
+          "magnitude": 26.25,
+          "salience": 39.375,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 9.93,
+          "salience": 11.916,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 7.86,
+          "salience": 7.86,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 1.1,
+          "salience": 4.4,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.05,
+          "salience": 0.03,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Moreirense": {
+      "team": "Moreirense",
+      "name_pt": "Moreirense",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_relegation",
+      "text": "O Moreirense soma 1 ponto em 1 jornada. A projeção final do Moreirense é de 38 pontos (±7), com o 14º lugar como desfecho mais frequente (9,0% das simulações). Na jornada 2, o Moreirense visita o Arouca, com 29% de hipóteses de vencer no modelo. A probabilidade de descida passa a 8,8% com vitória, 13% com empate e 18% com derrota. O modelo coloca o Moreirense 6,1 pontos acima do que o valor do plantel sozinho implica, por causa do que o clube fez na época passada. Só que o valor do plantel caiu 23% e apenas 50% dos minutos do ano passado continuam no clube, pelo que essa forma pode ser de um plantel que já não existe. A probabilidade de descida subiu de 11% para 14% face à projeção de pré-época (+3,2 pontos percentuais). Contra 0,4 pontos esperados (xPts), o Moreirense está 0,6 pontos acima do que as ocasiões criadas e concedidas justificam.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Moreirense soma 1 ponto em 1 jornada. A projeção final do Moreirense é de 38 pontos (±7), com o 14º lugar como desfecho mais frequente (9,0% das simulações).",
+        "values": {
+          "mean_pts": 38.3,
+          "std_pts": 7.2,
+          "p_champion": 0.0,
+          "p_top3": 0.0003,
+          "p_relegation": 0.1385,
+          "played": 1,
+          "points": 1,
+          "modal_position": 14,
+          "modal_position_prob": 0.0896
+        }
+      },
+      "facts": [
+        {
+          "category": "next_fixture",
+          "magnitude": 8.74,
+          "salience": 10.488,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Moreirense visita o Arouca, com 29% de hipóteses de vencer no modelo. A probabilidade de descida passa a 8,8% com vitória, 13% com empate e 18% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Arouca",
+            "venue": "A",
+            "p_win": 0.28652,
+            "p_draw": 0.28044,
+            "p_loss": 0.43304,
+            "metric": "p_relegation",
+            "baseline": 0.1385,
+            "if_win": 0.0878,
+            "if_draw": 0.1337,
+            "if_loss": 0.1752,
+            "swing": 0.08739999999999999
+          }
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 6.13,
+          "salience": 6.13,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Moreirense 6,1 pontos acima do que o valor do plantel sozinho implica, por causa do que o clube fez na época passada. Só que o valor do plantel caiu 23% e apenas 50% dos minutos do ano passado continuam no clube, pelo que essa forma pode ser de um plantel que já não existe.",
+          "values": {
+            "xpts_season_model": 38.2,
+            "xpts_season_value_only": 32.07,
+            "gap_points": 6.130000000000003,
+            "flag": "over_rating_risk",
+            "leaning_on_old_form": true,
+            "value_change_pct": -23.0,
+            "retained_minutes_share": 0.502
+          }
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 3.18,
+          "salience": 4.77,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de descida subiu de 11% para 14% face à projeção de pré-época (+3,2 pontos percentuais).",
+          "values": {
+            "metric": "p_relegation",
+            "current": 0.1385,
+            "baseline": 0.1067,
+            "delta": 0.03180000000000001,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.6,
+          "salience": 2.4,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 0,4 pontos esperados (xPts), o Moreirense está 0,6 pontos acima do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 1.0,
+            "xpts": 0.4,
+            "gap": 0.6,
+            "xgf": 0.2,
+            "xga": 1.5
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "next_fixture",
+          "magnitude": 8.74,
+          "salience": 10.488,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 6.13,
+          "salience": 6.13,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 3.18,
+          "salience": 4.77,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.6,
+          "salience": 2.4,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2252,
+          "salience": 1.802,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.01,
+          "salience": 0.006,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Academico Viseu": {
+      "team": "Academico Viseu",
+      "name_pt": "Académico de Viseu",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_relegation",
+      "text": "O Académico de Viseu soma 1 ponto em 1 jornada. A projeção final do Académico de Viseu é de 37 pontos (±8), com o 17º lugar como desfecho mais frequente (10% das simulações). A probabilidade de descida desceu de 43% para 20% face à projeção de pré-época (-22,9 pontos percentuais). Na jornada 2, o Académico de Viseu recebe o Santa Clara, com 32% de hipóteses de vencer no modelo. A probabilidade de descida passa a 13% com vitória, 20% com empate e 26% com derrota. O modelo coloca o Académico de Viseu 7,4 pontos acima do que o valor do plantel sozinho implica, mas essa margem vem da II Liga: o histórico que o modelo usa foi feito noutro escalão. Contra 0,5 pontos esperados (xPts), o Académico de Viseu está 0,5 pontos acima do que as ocasiões criadas e concedidas justificam.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Académico de Viseu soma 1 ponto em 1 jornada. A projeção final do Académico de Viseu é de 37 pontos (±8), com o 17º lugar como desfecho mais frequente (10% das simulações).",
+        "values": {
+          "mean_pts": 37.0,
+          "std_pts": 7.7,
+          "p_champion": 0.0,
+          "p_top3": 0.0005,
+          "p_relegation": 0.2011,
+          "played": 1,
+          "points": 1,
+          "modal_position": 17,
+          "modal_position_prob": 0.1018
+        }
+      },
+      "facts": [
+        {
+          "category": "relegation_move",
+          "magnitude": 22.94,
+          "salience": 34.41,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de descida desceu de 43% para 20% face à projeção de pré-época (-22,9 pontos percentuais).",
+          "values": {
+            "metric": "p_relegation",
+            "current": 0.2011,
+            "baseline": 0.4305,
+            "delta": -0.2294,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 12.6,
+          "salience": 15.12,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Académico de Viseu recebe o Santa Clara, com 32% de hipóteses de vencer no modelo. A probabilidade de descida passa a 13% com vitória, 20% com empate e 26% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Santa Clara",
+            "venue": "H",
+            "p_win": 0.3214,
+            "p_draw": 0.30538,
+            "p_loss": 0.37322,
+            "metric": "p_relegation",
+            "baseline": 0.2011,
+            "if_win": 0.1319,
+            "if_draw": 0.2044,
+            "if_loss": 0.2579,
+            "swing": 0.12600000000000003
+          }
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 7.44,
+          "salience": 7.44,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Académico de Viseu 7,4 pontos acima do que o valor do plantel sozinho implica, mas essa margem vem da II Liga: o histórico que o modelo usa foi feito noutro escalão.",
+          "values": {
+            "xpts_season_model": 36.17,
+            "xpts_season_value_only": 28.73,
+            "gap_points": 7.440000000000001,
+            "flag": "promoted_history_is_liga2",
+            "leaning_on_old_form": true
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.5,
+          "salience": 2.0,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 0,5 pontos esperados (xPts), o Académico de Viseu está 0,5 pontos acima do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 1.0,
+            "xpts": 0.5,
+            "gap": 0.5,
+            "xgf": 1.2,
+            "xga": 3.1
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "relegation_move",
+          "magnitude": 22.94,
+          "salience": 34.41,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 12.6,
+          "salience": 15.12,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 7.44,
+          "salience": 7.44,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.5,
+          "salience": 2.0,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.05,
+          "salience": 0.03,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Rio Ave": {
+      "team": "Rio Ave",
+      "name_pt": "Rio Ave",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_relegation",
+      "text": "O Rio Ave soma 0 pontos em 1 jornada. A projeção final do Rio Ave é de 35 pontos (±7), com o 18º lugar como desfecho mais frequente (15% das simulações). A probabilidade de descida subiu de 14% para 29% face à projeção de pré-época (+14,6 pontos percentuais). Na jornada 2, o Rio Ave recebe o FC Porto, com 11% de hipóteses de vencer no modelo. A probabilidade de descida passa a 19% com vitória, 26% com empate e 32% com derrota. Há 2 jogadores indisponíveis no Rio Ave, 19% do valor do plantel; o mais valioso é Cezary Miszta (5,0 M€). O modelo coloca o Rio Ave 2,8 pontos abaixo do que o valor do plantel sozinho implica.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Rio Ave soma 0 pontos em 1 jornada. A projeção final do Rio Ave é de 35 pontos (±7), com o 18º lugar como desfecho mais frequente (15% das simulações).",
+        "values": {
+          "mean_pts": 34.6,
+          "std_pts": 7.2,
+          "p_champion": 0.0,
+          "p_top3": 0.0001,
+          "p_relegation": 0.291,
+          "played": 1,
+          "points": 0,
+          "modal_position": 18,
+          "modal_position_prob": 0.1538
+        }
+      },
+      "facts": [
+        {
+          "category": "relegation_move",
+          "magnitude": 14.63,
+          "salience": 21.945,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de descida subiu de 14% para 29% face à projeção de pré-época (+14,6 pontos percentuais).",
+          "values": {
+            "metric": "p_relegation",
+            "current": 0.291,
+            "baseline": 0.1447,
+            "delta": 0.14629999999999999,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 12.7,
+          "salience": 15.24,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Rio Ave recebe o FC Porto, com 11% de hipóteses de vencer no modelo. A probabilidade de descida passa a 19% com vitória, 26% com empate e 32% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Porto",
+            "venue": "H",
+            "p_win": 0.11398,
+            "p_draw": 0.19562,
+            "p_loss": 0.6904,
+            "metric": "p_relegation",
+            "baseline": 0.291,
+            "if_win": 0.1892,
+            "if_draw": 0.2612,
+            "if_loss": 0.3162,
+            "swing": 0.12699999999999997
+          }
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.1856,
+          "salience": 4.64,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "text": "Há 2 jogadores indisponíveis no Rio Ave, 19% do valor do plantel; o mais valioso é Cezary Miszta (5,0 M€).",
+          "values": {
+            "count": 2,
+            "share_of_squad_value": 0.1856,
+            "value_out_eur": 6500000,
+            "squad_value_eur": 35030000,
+            "top_player": "Cezary Miszta",
+            "top_player_value_eur": 5000000,
+            "top_player_value_meur": 5.0,
+            "players": [
+              "Cezary Miszta",
+              "Brandon Aguilera"
+            ]
+          }
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 2.75,
+          "salience": 2.75,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Rio Ave 2,8 pontos abaixo do que o valor do plantel sozinho implica.",
+          "values": {
+            "xpts_season_model": 35.6,
+            "xpts_season_value_only": 38.35,
+            "gap_points": -2.75,
+            "flag": "stable",
+            "leaning_on_old_form": false
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "relegation_move",
+          "magnitude": 14.63,
+          "salience": 21.945,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 12.7,
+          "salience": 15.24,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "injuries",
+          "magnitude": 0.1856,
+          "salience": 4.64,
+          "threshold": 0.02,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 2.75,
+          "salience": 2.75,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.2951,
+          "salience": 2.361,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.5,
+          "salience": 2.0,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": false
+        },
+        {
+          "category": "europe_move",
+          "magnitude": 0.01,
+          "salience": 0.006,
+          "threshold": 1.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    },
+    "Estrela Amadora": {
+      "team": "Estrela Amadora",
+      "name_pt": "Estrela da Amadora",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_relegation",
+      "text": "O Estrela da Amadora soma 1 ponto em 1 jornada. A projeção final do Estrela da Amadora é de 34 pontos (±7), com o 18º lugar como desfecho mais frequente (17% das simulações). Na jornada 2, o Estrela da Amadora visita o Alverca, com 24% de hipóteses de vencer no modelo. A probabilidade de descida passa a 22% com vitória, 31% com empate e 37% com derrota. A probabilidade de descida subiu de 26% para 32% face à projeção de pré-época (+5,3 pontos percentuais). O modelo coloca o Estrela da Amadora 2,2 pontos acima do que o valor do plantel sozinho implica. Contra 0,5 pontos esperados (xPts), o Estrela da Amadora está 0,5 pontos acima do que as ocasiões criadas e concedidas justificam.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Estrela da Amadora soma 1 ponto em 1 jornada. A projeção final do Estrela da Amadora é de 34 pontos (±7), com o 18º lugar como desfecho mais frequente (17% das simulações).",
+        "values": {
+          "mean_pts": 33.9,
+          "std_pts": 7.0,
+          "p_champion": 0.0,
+          "p_top3": 0.0,
+          "p_relegation": 0.316,
+          "played": 1,
+          "points": 1,
+          "modal_position": 18,
+          "modal_position_prob": 0.1677
+        }
+      },
+      "facts": [
+        {
+          "category": "next_fixture",
+          "magnitude": 15.45,
+          "salience": 18.54,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Estrela da Amadora visita o Alverca, com 24% de hipóteses de vencer no modelo. A probabilidade de descida passa a 22% com vitória, 31% com empate e 37% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Alverca",
+            "venue": "A",
+            "p_win": 0.24016,
+            "p_draw": 0.27726,
+            "p_loss": 0.48258,
+            "metric": "p_relegation",
+            "baseline": 0.316,
+            "if_win": 0.2162,
+            "if_draw": 0.3073,
+            "if_loss": 0.3707,
+            "swing": 0.15449999999999997
+          }
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 5.31,
+          "salience": 7.965,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de descida subiu de 26% para 32% face à projeção de pré-época (+5,3 pontos percentuais).",
+          "values": {
+            "metric": "p_relegation",
+            "current": 0.316,
+            "baseline": 0.2629,
+            "delta": 0.05309999999999998,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 2.22,
+          "salience": 2.22,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "text": "O modelo coloca o Estrela da Amadora 2,2 pontos acima do que o valor do plantel sozinho implica.",
+          "values": {
+            "xpts_season_model": 33.33,
+            "xpts_season_value_only": 31.11,
+            "gap_points": 2.219999999999999,
+            "flag": "value_channel_carries_it",
+            "leaning_on_old_form": false
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.5,
+          "salience": 2.0,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 0,5 pontos esperados (xPts), o Estrela da Amadora está 0,5 pontos acima do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 1.0,
+            "xpts": 0.5,
+            "gap": 0.5,
+            "xgf": 1.0,
+            "xga": 2.6
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "next_fixture",
+          "magnitude": 15.45,
+          "salience": 18.54,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "relegation_move",
+          "magnitude": 5.31,
+          "salience": 7.965,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 2.22,
+          "salience": 2.22,
+          "threshold": 2.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.5,
+          "salience": 2.0,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.188,
+          "salience": 1.504,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": false
+        }
+      ]
+    },
+    "Casa Pia": {
+      "team": "Casa Pia",
+      "name_pt": "Casa Pia",
+      "article_pt": "o",
+      "gender": "m",
+      "headline_metric": "p_relegation",
+      "text": "O Casa Pia soma 0 pontos em 1 jornada. A projeção final do Casa Pia é de 32 pontos (±7), com o 18º lugar como desfecho mais frequente (25% das simulações). A probabilidade de descida subiu de 25% para 42% face à projeção de pré-época (+17,6 pontos percentuais). Na jornada 2, o Casa Pia recebe o Benfica, com 9,4% de hipóteses de vencer no modelo. A probabilidade de descida passa a 29% com vitória, 39% com empate e 45% com derrota. Contra 0,9 pontos esperados (xPts), o Casa Pia está 0,9 pontos abaixo do que as ocasiões criadas e concedidas justificam. Cassiano é o jogador do plantel com maior SAR (Skill Above Replacement): 0,20 golos por 90 minutos acima de um substituto, com intervalo de 0,11 a 0,30, o 25º da liga.",
+      "lead": {
+        "category": "lead",
+        "magnitude": null,
+        "salience": null,
+        "threshold": null,
+        "above_threshold": true,
+        "text": "O Casa Pia soma 0 pontos em 1 jornada. A projeção final do Casa Pia é de 32 pontos (±7), com o 18º lugar como desfecho mais frequente (25% das simulações).",
+        "values": {
+          "mean_pts": 32.1,
+          "std_pts": 7.0,
+          "p_champion": 0.0,
+          "p_top3": 0.0,
+          "p_relegation": 0.4241,
+          "played": 1,
+          "points": 0,
+          "modal_position": 18,
+          "modal_position_prob": 0.2504
+        }
+      },
+      "facts": [
+        {
+          "category": "relegation_move",
+          "magnitude": 17.63,
+          "salience": 26.445,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "A probabilidade de descida subiu de 25% para 42% face à projeção de pré-época (+17,6 pontos percentuais).",
+          "values": {
+            "metric": "p_relegation",
+            "current": 0.4241,
+            "baseline": 0.2478,
+            "delta": 0.17629999999999998,
+            "baseline_matchday": 0
+          }
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 16.36,
+          "salience": 19.632,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "text": "Na jornada 2, o Casa Pia recebe o Benfica, com 9,4% de hipóteses de vencer no modelo. A probabilidade de descida passa a 29% com vitória, 39% com empate e 45% com derrota.",
+          "values": {
+            "matchday": 2,
+            "opponent": "Benfica",
+            "venue": "H",
+            "p_win": 0.094,
+            "p_draw": 0.16362,
+            "p_loss": 0.74238,
+            "metric": "p_relegation",
+            "baseline": 0.4241,
+            "if_win": 0.2857,
+            "if_draw": 0.3893,
+            "if_loss": 0.4493,
+            "swing": 0.16359999999999997
+          }
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.9,
+          "salience": 3.6,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "text": "Contra 0,9 pontos esperados (xPts), o Casa Pia está 0,9 pontos abaixo do que as ocasiões criadas e concedidas justificam.",
+          "values": {
+            "played": 1,
+            "points": 0.0,
+            "xpts": 0.9,
+            "gap": -0.9,
+            "xgf": 0.6,
+            "xga": 1.3
+          }
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.1997,
+          "salience": 1.598,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "text": "Cassiano é o jogador do plantel com maior SAR (Skill Above Replacement): 0,20 golos por 90 minutos acima de um substituto, com intervalo de 0,11 a 0,30, o 25º da liga.",
+          "values": {
+            "player": "Cassiano",
+            "sar": 0.1997,
+            "skill_lo": 0.1078,
+            "skill_hi": 0.3013,
+            "rank": 25,
+            "minutes": 5492,
+            "goals": 23,
+            "position": "F",
+            "per_minutes": 90,
+            "unavailable": false
+          }
+        }
+      ],
+      "considered": [
+        {
+          "category": "relegation_move",
+          "magnitude": 17.63,
+          "salience": 26.445,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "next_fixture",
+          "magnitude": 16.36,
+          "salience": 19.632,
+          "threshold": 1.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "luck",
+          "magnitude": 0.9,
+          "salience": 3.6,
+          "threshold": 0.5,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "best_player",
+          "magnitude": 0.1997,
+          "salience": 1.598,
+          "threshold": 0.0,
+          "above_threshold": true,
+          "selected": true
+        },
+        {
+          "category": "squad_change",
+          "magnitude": 0.45,
+          "salience": 0.45,
+          "threshold": 2.0,
+          "above_threshold": false,
+          "selected": false
+        }
+      ]
+    }
+  },
+  "generated": "2026-08-11T17:48:37.243219+00:00"
+}
