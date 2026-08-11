@@ -1,5 +1,14 @@
 {
+  "platform": {
+    "apiRuntime": "node:20"
+  },
   "routes": [
+    {
+      "route": "/api/*",
+      "headers": {
+        "cache-control": "no-store"
+      }
+    },
     {
       "route": "/_next/static/*",
       "headers": {
@@ -248,6 +257,7 @@
   "navigationFallback": {
     "rewrite": "/pt/index.html",
     "exclude": [
+      "/api/*",
       "/data/*",
       "/_next/*",
       "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,json,txt}",

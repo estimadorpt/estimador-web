@@ -84,10 +84,13 @@ export default async function JogoPrevisoesPage({
 
       <section className="border-t border-stone-200">
         <div className="max-w-3xl mx-auto px-4 py-8 text-xs text-stone-500 space-y-2">
+          {/* Where a season is stored depends on whether the season backend is
+              configured, which only the browser can know — this page is
+              rendered at build time. The component states the accurate version. */}
           <p>
             {pt
-              ? "As tuas previsões ficam guardadas apenas neste navegador (localStorage). Não há contas nem servidor — se limpares os dados do navegador, perdes o histórico."
-              : "Your predictions are stored only in this browser (localStorage). There are no accounts and no server — clearing your browser data wipes your history."}
+              ? "Jogar é anónimo: escolhes um nome e as previsões contam para a classificação da época. Nunca guardamos email nem perfil."
+              : "Playing is anonymous: pick a name and your forecasts count towards the season standings. We never store an email or a profile."}
           </p>
           <p>
             {pt ? (

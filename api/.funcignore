@@ -1,0 +1,6 @@
+# Kept deliberately minimal. `src/` and `tsconfig.json` are NOT excluded:
+# Oryx compiles them in CI (api_build_command), and if this file were applied
+# before that build, excluding them would break the deployment.
+local.settings.json
+.vscode
+*.js.map

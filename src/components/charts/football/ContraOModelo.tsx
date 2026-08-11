@@ -1,8 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { teamDisplayName, teamLogoSrc } from "@/lib/config/football";
 import { Swords, Lock, Trash2, SlidersHorizontal, Check, Share2 } from "lucide-react";
+import { useSeasonGame } from "@/hooks/useSeasonGame";
+import { SeasonAccount } from "./SeasonAccount";
+import { SeasonLeaderboard } from "./SeasonLeaderboard";
 import {
   CONFIDENCE_LEVELS,
   clearPicks,
@@ -55,30 +58,74 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
     return () => clearInterval(id);
   }, [data.season]);
 
+  // Season-long play, when a backend exists. `status` stays 'local' otherwise
+  // and every branch below collapses to the original local-only behaviour.
+  const game = useSeasonGame(data);
+  const online = game.status === "online";
+  const openRoundRef = useRef<GameRound | null>(null);
+  const hydrated = useRef(false);
+  const { push, serverPicks } = game;
+
   const updatePick = useCallback(
     (key: string, next: { p: ProbVector; pick?: Outcome; conf?: Confidence; mode: "quick" | "fine" }) => {
       setPicks(prev => {
         const merged: PickMap = { ...prev, [key]: { ...prev[key], ...next } };
         savePicks(data.season, merged);
+        // A no-op offline. Debounced, so holding a slider is one request.
+        const round = openRoundRef.current;
+        if (round) push(round.matchday, merged, round.fixtures.map(f => f.key));
         return merged;
       });
     },
-    [data.season],
+    [data.season, push],
   );
 
   const reset = useCallback(() => {
-    const question = pt
-      ? "Apagar todas as tuas previsões e o resultado da época?"
-      : "Delete all your predictions and your season score?";
+    // Online, this clears the browser copy only. Deleting a season off the
+    // server on a single click is not a mistake anyone should be able to make.
+    const question = online
+      ? pt
+        ? "Limpar as previsões guardadas neste navegador? A tua época no ranking mantém-se e volta se voltares a entrar."
+        : "Clear the predictions stored in this browser? Your season in the standings stays, and returns when you sign back in."
+      : pt
+        ? "Apagar todas as tuas previsões e o resultado da época?"
+        : "Delete all your predictions and your season score?";
     if (typeof window !== "undefined" && !window.confirm(question)) return;
     clearPicks();
     setPicks({});
-  }, [pt]);
+  }, [pt, online]);
 
   const openRound = useMemo(
     () => (mounted ? findOpenRound(data, now) : null),
     [data, now, mounted],
   );
+
+  useEffect(() => {
+    openRoundRef.current = openRound;
+  }, [openRound]);
+
+  /**
+   * Fold the server's copy in, once.
+   *
+   * The server wins where it has a pick — that is the copy that survived a
+   * cleared browser — and local-only picks for the open round are pushed back
+   * up so work done before signing in is not lost. Guarded to run a single time
+   * per mount so it can never fight the user's own edits.
+   */
+  useEffect(() => {
+    if (!online || hydrated.current || serverPicks === null) return;
+    hydrated.current = true;
+
+    const merged: PickMap = { ...picks };
+    for (const [key, value] of Object.entries(serverPicks)) {
+      merged[key] = { ...picks[key], ...value };
+    }
+    setPicks(merged);
+    savePicks(data.season, merged);
+
+    const round = openRoundRef.current;
+    if (round) push(round.matchday, merged, round.fixtures.map(f => f.key));
+  }, [online, serverPicks, push, data.season, picks]);
 
   const season = useMemo(() => scoreSeason(data, picks), [data, picks]);
 
@@ -153,6 +200,13 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
       media: pt ? "Favorito" : "Favourite",
       alta: pt ? "Muito confiante" : "Very confident",
     } as Record<Confidence, string>,
+    storageNote: online
+      ? pt
+        ? "As tuas previsões ficam guardadas neste navegador e na classificação da época. Guardamos apenas o nome que escolheste, as tuas probabilidades e a pontuação — nunca o teu email nem o teu perfil."
+        : "Your predictions are stored in this browser and in the season standings. We keep only the name you chose, your probabilities and your score — never your email or your profile."
+      : pt
+        ? "As tuas previsões ficam guardadas apenas neste navegador (localStorage). Se limpares os dados do navegador, perdes o histórico."
+        : "Your predictions are stored only in this browser (localStorage). Clearing your browser data wipes your history.",
   };
 
   const outcomeLabel = (o: Outcome, fixture: GameFixture) => {
@@ -208,6 +262,20 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
         <p className="text-xs text-stone-500">{t.rpsNote}</p>
       </div>
 
+      {/* ------------------------------------------------- season identity */}
+      {online && (
+        <SeasonAccount
+          player={game.player}
+          authenticated={game.authenticated}
+          syncState={game.syncState}
+          rejected={game.rejected}
+          deadline={game.deadline}
+          signInUrl={game.signInUrl}
+          onName={game.setDisplayName}
+          locale={locale}
+        />
+      )}
+
       {/* ------------------------------------------------------ scoreboard */}
       <section>
         {season.matchesScored === 0 ? (
@@ -254,6 +322,15 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
           </div>
         )}
       </section>
+
+      {/* ---------------------------------------------------- leaderboard */}
+      {online && (
+        <SeasonLeaderboard
+          board={game.leaderboard}
+          locale={locale}
+          onRefresh={game.refreshLeaderboard}
+        />
+      )}
 
       {/* ---------------------------------------------------- active round */}
       {openRound ? (
@@ -345,7 +422,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
         </section>
       )}
 
-      <section className="pt-2">
+      <section className="pt-2 space-y-2">
         <button
           onClick={reset}
           className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-red-700 transition-colors"
@@ -353,6 +430,9 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
           <Trash2 className="w-4 h-4" />
           {t.reset}
         </button>
+        {/* The honest version of where a season lives, which only the client
+            knows — the page is rendered at build time. */}
+        <p className="text-[11px] text-stone-400 max-w-xl">{t.storageNote}</p>
       </section>
     </div>
   );

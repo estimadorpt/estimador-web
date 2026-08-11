@@ -1,0 +1,23 @@
+{
+  "name": "estimador-game-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Season-long backend for the Contra o Modelo prediction game (Azure Static Web Apps managed functions).",
+  "scripts": {
+    "build": "tsc -p .",
+    "clean": "rimraf dist",
+    "prestart": "npm run build",
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/data-tables": "^13.3.1"
+  },
+  "devDependencies": {
+    "@azure/functions": "^3.5.1",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

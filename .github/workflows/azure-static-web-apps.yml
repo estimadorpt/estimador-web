@@ -44,7 +44,14 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "/"
-          api_location: ""
+          # Managed Azure Functions for the "Contra o Modelo" season game.
+          # The API is TypeScript, so Oryx must compile it before packaging —
+          # without api_build_command the dist/ that the function.json files
+          # point at would never exist. Deploying the API is safe before any
+          # storage account is provisioned: every endpoint answers "not
+          # configured" and the site stays in local-only mode.
+          api_location: "api"
+          api_build_command: "npm run build"
           output_location: "out"
           
   close_pull_request_job:
