@@ -9,11 +9,11 @@ const copy = {
   pt: {
     title: "Modelo vs Mercado",
     description:
-      "O nosso modelo da Liga Portugal testado contra a linha de fecho da Pinnacle em 504 jogos e oito épocas: iguala o mercado a partir da jornada 14, e toda a desvantagem está no início da época.",
+      "O nosso modelo da Liga Portugal testado contra a linha de fecho do mercado em 504 jogos e oito épocas: iguala o mercado a partir da jornada 14, e toda a desvantagem está no início da época.",
     back: "Liga Portugal",
     kicker: "Avaliação do modelo",
     standfirstA:
-      "Há uma pergunta a que qualquer modelo de futebol tem de responder antes de merecer atenção: é melhor do que o preço que o mercado de apostas já publicou? A linha de fecho da Pinnacle — a última cotação antes do apito inicial — é o padrão-ouro, e nós fomos medir-nos contra ela.",
+      "Há uma pergunta a que qualquer modelo de futebol tem de responder antes de merecer atenção: é melhor do que a previsão implícita no mercado? A linha de fecho — o consenso do mercado imediatamente antes do apito inicial — é o padrão de referência em previsão desportiva, e nós fomos medir-nos contra ela. Não publicamos cotações nem sugestões de aposta: o mercado aparece aqui apenas como termo de comparação.",
     standfirstB:
       "O veredicto, em 504 jogos ao longo de oito épocas: a partir da jornada 14 o modelo iguala a linha de fecho, e chega a ficar ligeiramente à frente. Toda a desvantagem está concentrada no primeiro terço da época, quando ainda há poucos jogos para aprender com eles. No conjunto da época a diferença é de +0,0010 com um erro padrão de 0,0021 — ou seja, indistinguível de zero.",
     caveat:
@@ -21,17 +21,17 @@ const copy = {
     unavailable: "Dados de avaliação indisponíveis.",
     footnoteTitle: "A letra pequena",
     footnote:
-      "Avaliação em 504 jogos: oito épocas (2017-18 a 2024-25) × sete jornadas de referência (6, 10, 14, 18, 22, 26, 30). Em cada ponto o modelo é ajustado apenas com os jogos disputados até essa jornada e prevê a jornada seguinte — nunca vê o futuro. As probabilidades do mercado vêm das cotações de fecho da Pinnacle, com a margem da casa retirada pelo método de Shin, e cobrem 100% dos jogos avaliados. O modelo avaliado é o mesmo que produz as previsões publicadas neste site.",
+      "Avaliação em 504 jogos: oito épocas (2017-18 a 2024-25) × sete jornadas de referência (6, 10, 14, 18, 22, 26, 30). Em cada ponto o modelo é ajustado apenas com os jogos disputados até essa jornada e prevê a jornada seguinte — nunca vê o futuro. As probabilidades do mercado derivam das cotações de fecho publicadas pela football-data.co.uk (Pinnacle), com a margem retirada pelo método de Shin, e cobrem 100% dos jogos avaliados. O modelo avaliado é o mesmo que produz as previsões publicadas neste site.",
     methodology: "Como funciona o modelo",
   },
   en: {
     title: "Model vs Market",
     description:
-      "Our Liga Portugal model tested against Pinnacle's closing line over 504 matches and eight seasons: it matches the market from matchday 14, and the entire deficit sits in the early season.",
+      "Our Liga Portugal model tested against the market's closing line over 504 matches and eight seasons: it matches the market from matchday 14, and the entire deficit sits in the early season.",
     back: "Liga Portugal",
     kicker: "Model evaluation",
     standfirstA:
-      "There is one question any football model has to answer before it deserves attention: is it better than the price the betting market has already published? Pinnacle's closing line — the last quote before kick-off — is the gold standard, and we went and measured ourselves against it.",
+      "There is one question any football model has to answer before it deserves attention: is it better than the forecast implied by the market? The closing line — the market consensus immediately before kick-off — is the reference standard in sports forecasting, and we measured ourselves against it. We publish no odds and no betting advice: the market appears here purely as a yardstick.",
     standfirstB:
       "The verdict, over 504 matches across eight seasons: from matchday 14 onward the model matches the closing line, and edges slightly ahead of it. The whole deficit is concentrated in the first third of the season, when there are still few matches to learn from. Across the season as a whole the gap is +0.0010 with a standard error of 0.0021 — indistinguishable from zero.",
     caveat:
@@ -39,7 +39,7 @@ const copy = {
     unavailable: "Evaluation data unavailable.",
     footnoteTitle: "The small print",
     footnote:
-      "Evaluated on 504 matches: eight seasons (2017-18 to 2024-25) × seven reference matchdays (6, 10, 14, 18, 22, 26, 30). At each point the model is fitted only on matches played up to that matchday and forecasts the next one — it never sees the future. Market probabilities come from Pinnacle's closing odds, with the bookmaker's margin removed using Shin's method, and cover 100% of the evaluated matches. The evaluated model is the same one that produces the forecasts published on this site.",
+      "Evaluated on 504 matches: eight seasons (2017-18 to 2024-25) × seven reference matchdays (6, 10, 14, 18, 22, 26, 30). At each point the model is fitted only on matches played up to that matchday and forecasts the next one — it never sees the future. Market probabilities are derived from closing odds published by football-data.co.uk (Pinnacle), with the margin removed using Shin's method, and cover 100% of the evaluated matches. The evaluated model is the same one that produces the forecasts published on this site.",
     methodology: "How the model works",
   },
 } as const;

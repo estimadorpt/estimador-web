@@ -830,8 +830,8 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
             </dt>
             <dd className="text-stone-600 leading-relaxed">
               {pt
-                ? "É a última cotação da Pinnacle antes do apito inicial, já sem a margem da casa (método de Shin). A essa hora o preço absorveu tudo: lesões, onzes, castigos, o dinheiro de quem sabe mais do que nós."
-                : "It is Pinnacle's last price before kick-off, with the bookmaker's margin stripped out (Shin's method). By then the price has absorbed everything: injuries, line-ups, suspensions, the money of people who know more than we do."}
+                ? "É o último preço do mercado antes do apito inicial, já sem a margem (método de Shin). A essa hora incorporou tudo: lesões, onzes, castigos, e o dinheiro de quem sabe mais do que nós."
+                : "It is the market's last price before kick-off, with the margin stripped out (Shin's method). By then it has absorbed everything: injuries, line-ups, suspensions, and the money of people who know more than we do."}
             </dd>
           </div>
           <div>
