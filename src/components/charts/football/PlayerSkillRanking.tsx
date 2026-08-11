@@ -105,15 +105,15 @@ export function PlayerSkillRanking({
 
   const t = {
     title: pt
-      ? "Os melhores da Liga segundo o modelo"
-      : "The league's best players, according to the model",
+      ? "Os melhores finalizadores da Liga, segundo o modelo"
+      : "The league's best finishers, according to the model",
     intro: pt
       ? `Um modelo bayesiano de jogadores estimado sobre ${int(
           data.generated_from.n_observations
-        )} atuações individuais desde ${data.generated_from.seasons[0]}. Para cada jogador mede o talento a marcar depois de descontar os minutos jogados, o adversário, o fator casa e a posição — golos a mais por 90 minutos face a um jogador de nível de substituição.`
+        )} atuações individuais desde ${data.generated_from.seasons[0]}. Para cada jogador mede o talento a marcar depois de descontar os minutos jogados, o adversário, o fator casa e a posição — golos a mais por 90 minutos face a um jogador de nível de substituição. Mede apenas finalização: guarda-redes e defesas ficam todos no mesmo mínimo, por isso esta é na prática uma lista de avançados.`
       : `A Bayesian player model fitted on ${int(
           data.generated_from.n_observations
-        )} individual appearances since ${data.generated_from.seasons[0]}. For each player it estimates scoring skill after adjusting for minutes played, opponent, home advantage and position — extra goals per 90 minutes over a replacement-level player.`,
+        )} individual appearances since ${data.generated_from.seasons[0]}. For each player it estimates scoring skill after adjusting for minutes played, opponent, home advantage and position — extra goals per 90 minutes over a replacement-level player. It measures finishing only: goalkeepers and defenders all sit at the same floor, so this is in practice a list of forwards.`,
     metric: pt ? "Golos por 90' acima do substituto" : "Goals per 90 above replacement",
     rangeHint: pt
       ? "A barra é a estimativa central; a linha fina é o intervalo de 94% de credibilidade. Quantos menos minutos, mais larga é a linha."
