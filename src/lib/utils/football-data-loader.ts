@@ -9,6 +9,13 @@ import type {
   NextMatchdayScenarioMatch,
 } from '@/types/football';
 import { assignFixtureSlugs } from '@/lib/config/fixtures';
+import {
+  fixtureKey,
+  matchOutcome,
+  normalizeProbs,
+  type GameRound,
+  type PredictionGameData,
+} from '@/lib/utils/prediction-game';
 
 const FOOTBALL_DIR = 'football/liga-2026-27';
 
@@ -95,6 +102,42 @@ export async function loadLigaPlayers() {
   } catch {
     return null;
   }
+}
+
+// Load the per-player detail payload behind the player pages (null if absent).
+// Written by the model repo's scripts/export_players_detail.py; players.json
+// stays the ranking, this file carries history and recent form.
+export async function loadLigaPlayersDetail() {
+  try {
+    const data = await loadFootballJson<
+      import('@/components/charts/football/PlayerProfile').PlayerDetailData
+    >('players_detail.json');
+    return data?.players?.length ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Slug used when no player detail is published at all. Static export refuses
+ * to build a dynamic route whose generateStaticParams() returns an empty
+ * array, so one page must always exist.
+ */
+export const NO_PLAYERS_SLUG = 'sem-jogadores';
+
+/** Resolve one player page by slug (null when the slug is unknown). */
+export async function loadPlayerBySlug(slug: string) {
+  const data = await loadLigaPlayersDetail();
+  if (!data) return null;
+  const player = data.players.find(p => p.slug === slug);
+  return player ? { player, data } : null;
+}
+
+/** Player name → page slug, for linking the ranking rows. Empty when absent. */
+export async function loadPlayerSlugs(): Promise<Record<string, string>> {
+  const data = await loadLigaPlayersDetail();
+  if (!data) return {};
+  return Object.fromEntries(data.players.map(p => [p.player, p.slug]));
 }
 
 /* ------------------------------------------------ per-match fixture pages */
@@ -230,10 +273,125 @@ export async function loadFixtureBySlug(slug: string): Promise<UpcomingFixture |
   return fixtures.find(f => f.slug === slug) ?? null;
 }
 
+/* ------------------------------------------------- "Contra o Modelo" game */
+
+/**
+ * Everything the prediction game needs, assembled from the published matchday
+ * files.
+ *
+ * Three indexes are built by scanning *every* mdNN.json rather than trusting a
+ * single file:
+ *
+ *  - forecasts: md(M-1).json `next_matchday` is the model's pre-round call for
+ *    matchday M. The earliest publication carrying a given matchday wins, so
+ *    the opponent forecast can never have seen that round's results.
+ *  - results:  keyed by the ordered (home, away) pair across every
+ *    `matchday_results` array. In a double round-robin an ordered pair occurs
+ *    once per season, so this is unambiguous and survives a late backfill
+ *    landing in a different file than expected.
+ *  - kickoffs: from `matches_remaining`, the only place timestamps appear.
+ *
+ * Returns null on any failure, like every other loader here.
+ */
+export async function loadPredictionGameData(): Promise<PredictionGameData | null> {
+  try {
+    const dir = path.join(process.cwd(), 'public', 'data', FOOTBALL_DIR);
+    const files = await fs.readdir(dir);
+    const matchdayNumbers = files
+      .filter(f => /^md\d+\.json$/.test(f))
+      .map(f => parseInt(f.match(/^md(\d+)\.json$/)![1], 10))
+      .sort((a, b) => a - b);
+
+    if (matchdayNumbers.length === 0) return null;
+
+    const predictions = await Promise.all(
+      matchdayNumbers.map(md => loadFootballJson<LigaPrediction>(mdFile(md)))
+    );
+
+    const results = new Map<string, { home_goals: number; away_goals: number }>();
+    const kickoffs = new Map<string, string>();
+
+    for (const p of predictions) {
+      for (const r of p.matchday_results ?? []) {
+        if (typeof r.home_goals !== 'number' || typeof r.away_goals !== 'number') continue;
+        results.set(fixtureKey(r.home, r.away), {
+          home_goals: r.home_goals,
+          away_goals: r.away_goals,
+        });
+      }
+      for (const m of p.matches_remaining ?? []) {
+        if (m.kickoff) kickoffs.set(fixtureKey(m.home, m.away), m.kickoff);
+      }
+    }
+
+    // Earliest publication wins; `predictions` is already ascending by matchday.
+    const roundsByMd = new Map<number, GameRound>();
+    for (const p of predictions) {
+      const md = p.next_matchday?.matchday;
+      const matches = p.next_matchday?.matches ?? [];
+      if (typeof md !== 'number' || matches.length === 0) continue;
+      if (roundsByMd.has(md)) continue;
+
+      roundsByMd.set(md, {
+        matchday: md,
+        fixtures: matches.map(m => {
+          const key = fixtureKey(m.home, m.away);
+          const played = results.get(key) ?? null;
+          return {
+            key,
+            home: m.home,
+            away: m.away,
+            model: normalizeProbs([m.p_home ?? 0, m.p_draw ?? 0, m.p_away ?? 0]),
+            kickoff: kickoffs.get(key) ?? null,
+            result: played
+              ? {
+                  homeGoals: played.home_goals,
+                  awayGoals: played.away_goals,
+                  outcome: matchOutcome(played.home_goals, played.away_goals),
+                }
+              : null,
+          };
+        }),
+      });
+    }
+
+    const rounds = [...roundsByMd.values()].sort((a, b) => a.matchday - b.matchday);
+    if (rounds.length === 0) return null;
+
+    const latest = predictions[predictions.length - 1];
+    return {
+      season: latest.season,
+      generatedAt: latest.timestamp,
+      rounds,
+    };
+  } catch (error) {
+    console.error('Error loading prediction game data:', error);
+    return null;
+  }
+}
+
 // Load the model-vs-market backtest scorecard (null if absent)
 export async function loadLigaMarketScorecard() {
   try {
     return await loadFootballJson<import('@/components/charts/football/MarketScorecard').MarketScorecardData>('market_scorecard.json');
+  } catch {
+    return null;
+  }
+}
+
+// Load the Liga Portugal 2 export (null if absent).
+//
+// Liga 2 sits in its own directory because it is a different competition on a
+// lighter model, not another view of the Primeira. One file holds either the
+// running season or, before it kicks off, the completed one.
+export async function loadLiga2(season = '2026-27') {
+  try {
+    const filePath = path.join(
+      process.cwd(), 'public', 'data', 'football', `liga2-${season}`, 'liga2.json'
+    );
+    const fileContents = await fs.readFile(filePath, 'utf8');
+    return JSON.parse(fileContents) as
+      import('@/components/charts/football/Liga2Table').Liga2Data;
   } catch {
     return null;
   }

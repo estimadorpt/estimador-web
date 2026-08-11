@@ -116,3 +116,75 @@ export function teamLogoSrc(team: string): string {
 
 // Current season
 export const CURRENT_LIGA_SEASON = '2026-27';
+
+/* ------------------------------------------------------------- Liga 2 ---- */
+//
+// The second tier passes ~39 clubs through six seasons, most of which have
+// never played in the Primeira and so carry no entry above. Two deliberate
+// restraints here:
+//
+//   * Colours are only listed for clubs whose identity we actually know
+//     (mostly ones that have been up). Everyone else falls back to a neutral
+//     stone, rather than a confidently-wrong brand colour.
+//   * Logos exist for a handful of clubs only, so `liga2LogoSrc` returns null
+//     instead of a path to a 404, and components draw an initials badge.
+
+export const liga2TeamColors: Record<string, string> = {
+  'Chaves': '#0B3C8C',
+  'Farense': '#1F1F1F',
+  'Feirense': '#0B5CAB',
+  'Leixoes': '#C8102E',
+  'Pacos Ferreira': '#F4C300',
+  'Portimonense': '#1F1F1F',
+  'Torreense': '#1B7A43',
+  'Benfica B': '#E20E1B',
+  'Porto B': '#003893',
+  'Sporting CP B': '#006B3F',
+};
+
+/** Portuguese display names for clubs that only appear in the second tier. */
+export const liga2DisplayNames: Record<string, string> = {
+  'Academica': 'Académica',
+  'Belenenses': 'Belenenses',
+  'Belenenses SAD': 'Belenenses SAD',
+  'Benfica B': 'Benfica B',
+  'Chaves': 'Desp. Chaves',
+  'Cova da Piedade': 'Cova da Piedade',
+  'Covilha': 'Sp. Covilhã',
+  'Leixoes': 'Leixões',
+  'Pacos Ferreira': 'Paços de Ferreira',
+  'Porto B': 'FC Porto B',
+  'Sporting CP B': 'Sporting B',
+  'Uniao Leiria': 'U. Leiria',
+  'Vilafranquense': 'Vilafranquense',
+  'Vilaverdense': 'Vilaverdense',
+};
+
+/** Display name for a Liga 2 club, falling back to the Primeira map. */
+export function liga2DisplayName(team: string): string {
+  return liga2DisplayNames[team] ?? ligaDisplayNames[team] ?? team;
+}
+
+/** Accent colour for a Liga 2 club; neutral stone when we do not know it. */
+export function liga2TeamColor(team: string): string {
+  return liga2TeamColors[team] ?? ligaTeamColors[team] ?? '#78716c';
+}
+
+/** Logo path, or null when no file exists for this club. */
+export function liga2LogoSrc(team: string): string | null {
+  const slug = ligaTeamSlugs[team];
+  return slug ? `/images/teams/${slug}.png` : null;
+}
+
+/** Short badge text: first three letters of a one-word name, else initials. */
+export function liga2Initials(team: string): string {
+  const name = liga2DisplayName(team);
+  const words = name.split(/[\s.]+/).filter(Boolean);
+  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
+  return words.map(w => w[0]).join('').slice(0, 3).toUpperCase();
+}
+
+/** True for reserve sides, which play in Liga 2 but cannot be promoted. */
+export function isReserveSide(team: string): boolean {
+  return team.endsWith(' B');
+}

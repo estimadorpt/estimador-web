@@ -1,7 +1,7 @@
 {
   "season": "2026-27",
   "matchday": 1,
-  "generated": "2026-08-10T21:33:54.919331+00:00",
+  "generated": "2026-08-11T15:08:02.376201+00:00",
   "cards": [
     {
       "id": "movers",
@@ -20,6 +20,42 @@
       "title_en": "Season luck through matchday 1",
       "description_pt": "Pontos conquistados menos pontos esperados a partir do xG, acumulados na época.",
       "description_en": "Points won minus expected points from xG, accumulated over the season."
+    },
+    {
+      "id": "title_race",
+      "file": "title_race_md01.png",
+      "matchday": 1,
+      "title_pt": "Corrida ao título — jornada 1",
+      "title_en": "Title race — matchday 1",
+      "description_pt": "Probabilidade de cada candidato ser campeão, com a variação desde a jornada anterior.",
+      "description_en": "Each contender's probability of winning the league, with the move since the previous matchday."
+    },
+    {
+      "id": "relegation_race",
+      "file": "relegation_race_md01.png",
+      "matchday": 1,
+      "title_pt": "Luta pela manutenção — jornada 1",
+      "title_en": "Relegation race — matchday 1",
+      "description_pt": "Probabilidade de descida das equipas em risco, com a variação desde a jornada anterior.",
+      "description_en": "Relegation probability for the teams at risk, with the move since the previous matchday."
+    },
+    {
+      "id": "upset",
+      "file": "upset_md01.png",
+      "matchday": 1,
+      "title_pt": "A maior surpresa da jornada 1",
+      "title_en": "Biggest upset of matchday 1",
+      "description_pt": "O resultado a que o modelo tinha dado menos probabilidade antes de a jornada começar.",
+      "description_en": "The result the model rated least likely before the matchday kicked off."
+    },
+    {
+      "id": "preview",
+      "file": "preview_md01.png",
+      "matchday": 1,
+      "title_pt": "O jogo que mais mexe na próxima jornada",
+      "title_en": "The fixture that moves the league most",
+      "description_pt": "O próximo jogo com maior impacto na tabela e o que cada resultado faz às duas equipas.",
+      "description_en": "The next fixture with the largest impact on the table, and what each outcome does to both teams."
     }
   ]
 }

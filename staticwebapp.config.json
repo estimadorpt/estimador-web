@@ -171,12 +171,28 @@
       "serve": "/en/desporto/liga/dados/index.html"
     },
     {
+      "route": "/pt/desporto/liga/jogo-previsoes",
+      "serve": "/pt/desporto/liga/jogo-previsoes/index.html"
+    },
+    {
+      "route": "/en/desporto/liga/jogo-previsoes",
+      "serve": "/en/desporto/liga/jogo-previsoes/index.html"
+    },
+    {
       "route": "/pt/desporto/liga/2025-26",
       "serve": "/pt/desporto/liga/2025-26/index.html"
     },
     {
       "route": "/en/desporto/liga/2025-26",
       "serve": "/en/desporto/liga/2025-26/index.html"
+    },
+    {
+      "route": "/pt/desporto/liga2",
+      "serve": "/pt/desporto/liga2/index.html"
+    },
+    {
+      "route": "/en/desporto/liga2",
+      "serve": "/en/desporto/liga2/index.html"
     },
     {
       "route": "/pt/metodologia",
@@ -210,6 +226,12 @@
     },
     {
       "route": "/en/desporto/liga/jogo/*"
+    },
+    {
+      "route": "/pt/desporto/liga/jogador/*"
+    },
+    {
+      "route": "/en/desporto/liga/jogador/*"
     },
     {
       "route": "/pt/desporto/liga/*"

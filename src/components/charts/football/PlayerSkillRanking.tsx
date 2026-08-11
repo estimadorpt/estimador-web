@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronRight } from "lucide-react";
+import { Link } from "@/i18n/routing";
 import {
   ligaTeamColors,
   ligaTeamShortNames,
@@ -64,6 +66,8 @@ interface PlayerSkillRankingProps {
   currentTeams?: string[];
   /** Player names currently unavailable (injury/suspension). */
   unavailable?: Record<string, string>;
+  /** Player name → player-page slug. Rows without a slug stay unlinked. */
+  playerSlugs?: Record<string, string>;
 }
 
 // Single-hue magnitude ramp — identity is carried by the logo + club chip,
@@ -77,6 +81,7 @@ export function PlayerSkillRanking({
   locale = "pt",
   currentTeams,
   unavailable,
+  playerSlugs,
 }: PlayerSkillRankingProps) {
   const pt = locale !== "en";
   const [showAll, setShowAll] = useState(false);
@@ -87,6 +92,7 @@ export function PlayerSkillRanking({
   const teamSet = currentTeams && currentTeams.length ? new Set(currentTeams) : null;
   const players = data.players;
   const hasUnavailable = players.some((p) => unavailable?.[p.player]);
+  const hasPages = players.some((p) => playerSlugs?.[p.player]);
   const visible = showAll ? players : players.slice(0, 15);
   const maxHi = Math.max(...players.map((p) => p.skill_hi), 0.1);
 
@@ -121,6 +127,12 @@ export function PlayerSkillRanking({
     matches: pt ? "jogos" : "matches",
     perNinety: pt ? "golos/90 reais" : "actual goals/90",
     interval: pt ? "intervalo 94%" : "94% interval",
+    playerPage: pt ? "Página do jogador" : "Player page",
+    legendPage: pt
+      ? "Seta à direita: página do jogador, com o intervalo e o histórico época a época"
+      : "Arrow on the right: the player's page, with the interval and season-by-season history",
+    openPlayer: (name: string) =>
+      pt ? `Abrir a página de ${name}` : `Open ${name}'s page`,
     notInLeague: pt ? "fora da Liga 26/27" : "not in Liga 26/27",
     out: pt ? "lesionado" : "injured",
     legendOut: pt
@@ -165,12 +177,21 @@ export function PlayerSkillRanking({
         <div className="w-12 sm:w-16 flex-shrink-0 text-right text-[10px] font-bold uppercase tracking-wider text-stone-400">
           SAR
         </div>
+        {/* Keeps the header aligned with the per-row link column */}
+        <div className="w-6 flex-shrink-0" />
       </div>
 
       {hasUnavailable && (
         <div className="flex items-center gap-1.5 mb-1 mt-1">
           <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
           <span className="text-[10px] text-stone-400">{t.legendOut}</span>
+        </div>
+      )}
+
+      {hasPages && (
+        <div className="flex items-center gap-1.5 mb-1 mt-1">
+          <ChevronRight className="w-3 h-3 text-stone-300 flex-shrink-0" />
+          <span className="text-[10px] text-stone-400">{t.legendPage}</span>
         </div>
       )}
 
@@ -183,14 +204,18 @@ export function PlayerSkillRanking({
           const outReason = unavailable?.[p.player];
           const isOpen = openRank === p.rank;
           const chip = ligaTeamColors[p.team] || "#78716c";
+          const slug = playerSlugs?.[p.player];
 
           return (
             <div key={p.rank}>
+              {/* The row expands on click; the trailing chevron is a separate
+                  link, so no anchor is ever nested inside the button. */}
+              <div className="flex items-stretch">
               <button
                 type="button"
                 onClick={() => setOpenRank(isOpen ? null : p.rank)}
                 aria-expanded={isOpen}
-                className="w-full flex items-center gap-2 py-1.5 text-left hover:bg-stone-50 transition-colors"
+                className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left hover:bg-stone-50 transition-colors"
               >
                 {/* Rank */}
                 <div className="w-6 flex-shrink-0 text-right text-xs font-bold tabular-nums text-stone-400">
@@ -298,6 +323,19 @@ export function PlayerSkillRanking({
                   </span>
                 </div>
               </button>
+                {slug ? (
+                  <Link
+                    href={`/desporto/liga/jogador/${slug}`}
+                    locale={locale}
+                    aria-label={t.openPlayer(p.player)}
+                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-300 hover:text-stone-800 hover:bg-stone-50 transition-colors"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                ) : (
+                  <span className="w-6 flex-shrink-0" />
+                )}
+              </div>
 
               {isOpen && (
                 <div className="pl-8 pr-2 pb-3 pt-1 bg-stone-50/60">
@@ -337,6 +375,16 @@ export function PlayerSkillRanking({
                   </div>
                   {outReason && (
                     <div className="mt-2 text-[11px] text-red-600">{outReason}</div>
+                  )}
+                  {slug && (
+                    <Link
+                      href={`/desporto/liga/jogador/${slug}`}
+                      locale={locale}
+                      className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-blue-700 hover:text-blue-800"
+                    >
+                      {t.playerPage}
+                      <ChevronRight className="w-3 h-3" />
+                    </Link>
                   )}
                 </div>
               )}

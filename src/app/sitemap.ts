@@ -1,5 +1,8 @@
 import { MetadataRoute } from 'next'
-import { loadUpcomingFixtures } from '@/lib/utils/football-data-loader'
+import {
+  loadLigaPlayersDetail,
+  loadUpcomingFixtures,
+} from '@/lib/utils/football-data-loader'
 
 export const dynamic = 'force-static'
 
@@ -14,7 +17,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/desporto/liga/metodologia', changeFrequency: 'monthly' as const, priority: 0.5 },
     { path: '/desporto/liga/modelo', changeFrequency: 'monthly' as const, priority: 0.6 },
     { path: '/desporto/liga/dados', changeFrequency: 'monthly' as const, priority: 0.6 },
+    { path: '/desporto/liga/jogo-previsoes', changeFrequency: 'weekly' as const, priority: 0.7 },
     { path: '/desporto/liga/2025-26', changeFrequency: 'yearly' as const, priority: 0.6 },
+    { path: '/desporto/liga2', changeFrequency: 'weekly' as const, priority: 0.7 },
     { path: '/eleicoes/presidenciais', changeFrequency: 'daily' as const, priority: 0.8 },
     { path: '/eleicoes/legislativas', changeFrequency: 'weekly' as const, priority: 0.7 },
     { path: '/eleicoes/mapa', changeFrequency: 'weekly' as const, priority: 0.6 },
@@ -60,6 +65,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch {
     // no fixture pages in the sitemap this build
+  }
+
+  // Per-player pages for the published ranking (fail soft: skip on error).
+  // The placeholder page is never listed — it exists only so the static
+  // export has something to build when no players are published.
+  try {
+    const players = await loadLigaPlayersDetail()
+    for (const locale of locales) {
+      for (const player of players?.players ?? []) {
+        urls.push({
+          url: `${baseUrl}/${locale}/desporto/liga/jogador/${player.slug}`,
+          lastModified: new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.6,
+        })
+      }
+    }
+  } catch {
+    // no player pages in the sitemap this build
   }
 
   return urls

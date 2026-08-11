@@ -6,10 +6,12 @@ import {
   loadLigaInjuries,
   loadLigaCards,
   loadUpcomingFixtures,
+  loadPlayerSlugs,
 } from "@/lib/utils/football-data-loader";
 import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import { Header } from "@/components/Header";
 import { LeagueTable } from "@/components/charts/football/LeagueTable";
+import type { PointsInterval } from "@/components/charts/football/LeagueTable";
 import { MatchdayPredictions } from "@/components/charts/football/MatchdayPredictions";
 import { TitleRaceChart } from "@/components/charts/football/TitleRaceChart";
 import { RelegationChart } from "@/components/charts/football/RelegationChart";
@@ -29,7 +31,7 @@ import { injuryReasonLabel } from "@/lib/i18n/football-labels";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ligaTeamSlugs } from "@/lib/config/football";
-import { Trophy, ArrowRight, SlidersHorizontal, Scale, History } from "lucide-react";
+import { Trophy, ArrowRight, SlidersHorizontal, Scale, History, Layers } from "lucide-react";
 import type { Metadata } from "next";
 import type { CriticalPath, TeamStrength } from "@/types/football";
 
@@ -70,6 +72,7 @@ export default async function LigaPage({
     injuries,
     shareCards,
     upcomingFixtures,
+    playerSlugs,
   ] = await Promise.all([
     loadLigaWithDeltas(),
     loadLigaHistorical(),
@@ -78,6 +81,7 @@ export default async function LigaPage({
     loadLigaInjuries(),
     loadLigaCards(),
     loadUpcomingFixtures(),
+    loadPlayerSlugs(),
   ]);
 
   // Fixture row → match page. Rows without a generated page stay unlinked.
@@ -149,6 +153,30 @@ export default async function LigaPage({
           remainingGames: e.remaining,
         }));
     }
+  }
+
+  // Final-points intervals for the league table. samples.json carries the
+  // quantiles index-aligned with its own teams array; a feed without the
+  // quartiles simply leaves the table as it was.
+  const pointsIntervals: Record<string, PointsInterval> = {};
+  if (
+    seasonSamples?.teams &&
+    seasonSamples.points_q25 &&
+    seasonSamples.points_q75
+  ) {
+    seasonSamples.teams.forEach((team, i) => {
+      const q05 = seasonSamples.points_q05?.[i];
+      const q25 = seasonSamples.points_q25?.[i];
+      const q50 = seasonSamples.points_q50?.[i];
+      const q75 = seasonSamples.points_q75?.[i];
+      const q95 = seasonSamples.points_q95?.[i];
+      if (
+        q05 == null || q25 == null || q50 == null || q75 == null || q95 == null
+      ) {
+        return;
+      }
+      pointsIntervals[team] = { q05, q25, q50, q75, q95 };
+    });
   }
 
   // Cross-links between the player ranking and the availability snapshot
@@ -273,6 +301,9 @@ export default async function LigaPage({
             data={prediction.table}
             actualStandings={prediction.actual_standings}
             deltas={prediction.matchday_results?.length ? deltas : undefined}
+            intervals={
+              Object.keys(pointsIntervals).length ? pointsIntervals : undefined
+            }
             labels={{
               team: t("football.team"),
               meanPoints: t("football.meanPoints"),
@@ -461,6 +492,7 @@ export default async function LigaPage({
               locale={locale}
               currentTeams={currentTeams}
               unavailable={unavailableByPlayer}
+              playerSlugs={playerSlugs}
             />
           </div>
         </section>
@@ -734,6 +766,31 @@ export default async function LigaPage({
               </div>
               <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
                 {locale === "en" ? "Read the review" : "Ver a revisão"}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </div>
+          </Link>
+
+          {/* Liga 2 — the second tier, on the lighter goals-only model */}
+          <Link
+            href="/desporto/liga2"
+            locale={locale}
+            className="mt-4 block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+          >
+            <div className="flex items-start gap-3">
+              <Layers className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-stone-900">
+                  {locale === "en" ? "Liga 2 in probabilities" : "A Liga 2 em probabilidades"}
+                </h3>
+                <p className="text-sm text-stone-500 mt-0.5">
+                  {locale === "en"
+                    ? "Promotion and relegation probabilities for the second tier, from 1,836 matches over six seasons. A deliberately lighter model: goals only, no xG and no squad values."
+                    : "Probabilidades de subida e de descida no segundo escalão, a partir de 1836 jogos em seis épocas. Um modelo assumidamente mais leve: só golos, sem xG nem valores de plantel."}
+                </p>
+              </div>
+              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+                {locale === "en" ? "See Liga 2" : "Ver a Liga 2"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </div>

@@ -13,7 +13,10 @@ export interface SeasonSamples {
   p_champion: number[];
   position_probs: number[][];
   points_q05: number[];
+  /** Quartiles — published next to the 90% bounds, used by the league table. */
+  points_q25?: number[];
   points_q50: number[];
+  points_q75?: number[];
   points_q95: number[];
   samples: { pos: number[]; pts: number[]; gd: number[] }[];
 }
