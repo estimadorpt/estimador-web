@@ -17,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/desporto/liga/metodologia', changeFrequency: 'monthly' as const, priority: 0.5 },
     { path: '/desporto/liga/modelo', changeFrequency: 'monthly' as const, priority: 0.6 },
     { path: '/desporto/liga/dados', changeFrequency: 'monthly' as const, priority: 0.6 },
+    { path: '/desporto/liga/jogadores', changeFrequency: 'weekly' as const, priority: 0.7 },
     { path: '/desporto/liga/jogo-previsoes', changeFrequency: 'weekly' as const, priority: 0.7 },
     { path: '/desporto/liga/2025-26', changeFrequency: 'yearly' as const, priority: 0.6 },
     { path: '/desporto/liga2', changeFrequency: 'weekly' as const, priority: 0.7 },

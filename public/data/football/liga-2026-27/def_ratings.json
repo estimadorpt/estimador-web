@@ -1,0 +1,1414 @@
+{
+  "generated_for_season": "2026-27",
+  "model": "defensive adjusted plus-minus (RAPM) on goals conceded",
+  "adr": "019",
+  "separable": false,
+  "ranking": null,
+  "verdict": {
+    "walkforward_t": 1.698603,
+    "criterion": ">= 20 players with shrinkage >= 0.2 AND positive walk-forward log-score gain",
+    "n_players": 786,
+    "n_separable": 0,
+    "median_shrinkage": -0.022024,
+    "max_shrinkage": 0.133673,
+    "n_ci_excludes_zero": 12,
+    "expected_false_positives_at_90pct": 78.6,
+    "walkforward_logscore_gain": 2.339685,
+    "passes_shrinkage": false,
+    "passes_out_of_sample": true,
+    "separable": false
+  },
+  "data": {
+    "team_match_rows": 1854,
+    "seasons": [
+      "2023-24",
+      "2024-25",
+      "2025-26",
+      "2026-27"
+    ],
+    "players_modelled": 786,
+    "players_with_any_minutes": 1177,
+    "min_minutes": 450.0,
+    "mean_goals_conceded": 1.352211
+  },
+  "positional_distribution": {
+    "G": {
+      "n": 55,
+      "median": 0.093096,
+      "mean": 0.098374,
+      "sd": 0.040833,
+      "vmin": -0.010895,
+      "vmax": 0.247141,
+      "n_unique": 55,
+      "degenerate": false
+    },
+    "D": {
+      "n": 266,
+      "median": 0.10029,
+      "mean": 0.099865,
+      "sd": 0.029913,
+      "vmin": 0.016573,
+      "vmax": 0.229941,
+      "n_unique": 266,
+      "degenerate": false
+    },
+    "M": {
+      "n": 265,
+      "median": 0.098653,
+      "mean": 0.100854,
+      "sd": 0.029025,
+      "vmin": 0.031311,
+      "vmax": 0.215052,
+      "n_unique": 265,
+      "degenerate": false
+    },
+    "F": {
+      "n": 200,
+      "median": 0.097645,
+      "mean": 0.096636,
+      "sd": 0.026564,
+      "vmin": 0.021614,
+      "vmax": 0.22085,
+      "n_unique": 200,
+      "degenerate": false
+    }
+  },
+  "collinearity": {
+    "teammate_posterior_correlation": {
+      "min_shared": 20,
+      "frequent_teammates": {
+        "n_pairs": 3382,
+        "mean": 0.067255,
+        "median": 0.067352,
+        "p05": 0.017568,
+        "p95": 0.116291,
+        "min": -0.053323
+      },
+      "never_together": {
+        "n_pairs": 296338,
+        "mean": 0.097643,
+        "median": 0.097638,
+        "p05": 0.056644,
+        "p95": 0.138561,
+        "min": -0.026093
+      },
+      "frequent_teammates_demeaned": {
+        "n_pairs": 3382,
+        "mean": -0.035558,
+        "median": -0.035246,
+        "p05": -0.089023,
+        "p95": 0.017331,
+        "min": -0.168372
+      },
+      "never_together_demeaned": {
+        "n_pairs": 296338,
+        "mean": -0.000616,
+        "median": -0.000642,
+        "p05": -0.043046,
+        "p95": 0.041745,
+        "min": -0.114635
+      },
+      "max_shared_matches": 92
+    },
+    "theta_variance_decomposition_spec_b": {
+      "n_clubs": 23,
+      "posterior_mean_between_share": 0.270967,
+      "posterior_mean_between_sd": 0.010593,
+      "posterior_mean_within_sd": 0.017376,
+      "per_draw_between_var_mean": 0.000198,
+      "per_draw_within_var_mean": 0.005363,
+      "per_draw_between_share_mean": 0.036229,
+      "per_draw_between_share_hdi90": [
+        0.022586,
+        0.053236
+      ]
+    },
+    "theta_variance_decomposition_spec_a_no_team_effect": {
+      "n_clubs": 23,
+      "posterior_mean_between_share": 0.276942,
+      "posterior_mean_between_sd": 0.011764,
+      "posterior_mean_within_sd": 0.019009,
+      "per_draw_between_var_mean": 0.000222,
+      "per_draw_within_var_mean": 0.005855,
+      "per_draw_between_share_mean": 0.037309,
+      "per_draw_between_share_hdi90": [
+        0.023141,
+        0.053708
+      ]
+    },
+    "information_audit": {
+      "median_best_case_shrinkage": 0.113462,
+      "median_actual_shrinkage": -0.022024,
+      "max_best_case_shrinkage": 0.413159,
+      "max_actual_shrinkage": 0.133673,
+      "share_of_information_retained": 0.10515,
+      "effective_separable_players_actual": 11.001579,
+      "effective_separable_players_best_case": 104.627973,
+      "most_used_player": {
+        "player": "Diogo Costa",
+        "minutes": 8822.0,
+        "best_case_shrinkage": 0.323961,
+        "actual_shrinkage": 0.027661
+      }
+    },
+    "rating_vs_club_defence_spec_b": {
+      "n_players": 786,
+      "n_clubs": 23,
+      "corr_theta_mean_vs_club_goals_conceded": 0.512994,
+      "corr_def_sar_p90_vs_club_goals_conceded": -0.512477,
+      "club_level_corr": -0.98468,
+      "club_table": [
+        {
+          "primary_team": "Porto",
+          "club_gc": 0.7282,
+          "mean_rating": 0.1317
+        },
+        {
+          "primary_team": "Benfica",
+          "club_gc": 0.8058,
+          "mean_rating": 0.1281
+        },
+        {
+          "primary_team": "Sporting CP",
+          "club_gc": 0.7961,
+          "mean_rating": 0.128
+        },
+        {
+          "primary_team": "Famalicao",
+          "club_gc": 1.068,
+          "mean_rating": 0.1145
+        },
+        {
+          "primary_team": "Santa Clara",
+          "club_gc": 1.087,
+          "mean_rating": 0.1119
+        },
+        {
+          "primary_team": "SC Braga",
+          "club_gc": 1.1456,
+          "mean_rating": 0.108
+        },
+        {
+          "primary_team": "Vitoria SC",
+          "club_gc": 1.233,
+          "mean_rating": 0.1047
+        },
+        {
+          "primary_team": "Moreirense",
+          "club_gc": 1.3204,
+          "mean_rating": 0.0998
+        },
+        {
+          "primary_team": "Gil Vicente",
+          "club_gc": 1.3301,
+          "mean_rating": 0.0997
+        },
+        {
+          "primary_team": "Nacional",
+          "club_gc": 1.4058,
+          "mean_rating": 0.0963
+        },
+        {
+          "primary_team": "Farense",
+          "club_gc": 1.4265,
+          "mean_rating": 0.0952
+        },
+        {
+          "primary_team": "Rio Ave",
+          "club_gc": 1.5146,
+          "mean_rating": 0.0946
+        },
+        {
+          "primary_team": "Alverca",
+          "club_gc": 1.5429,
+          "mean_rating": 0.0942
+        },
+        {
+          "primary_team": "Estrela Amadora",
+          "club_gc": 1.5631,
+          "mean_rating": 0.0933
+        },
+        {
+          "primary_team": "Casa Pia",
+          "club_gc": 1.4757,
+          "mean_rating": 0.0928
+        },
+        {
+          "primary_team": "Tondela",
+          "club_gc": 1.6176,
+          "mean_rating": 0.0918
+        },
+        {
+          "primary_team": "Arouca",
+          "club_gc": 1.5825,
+          "mean_rating": 0.0898
+        },
+        {
+          "primary_team": "Estoril",
+          "club_gc": 1.6408,
+          "mean_rating": 0.0852
+        },
+        {
+          "primary_team": "Boavista",
+          "club_gc": 1.7794,
+          "mean_rating": 0.0845
+        },
+        {
+          "primary_team": "AVS",
+          "club_gc": 1.8676,
+          "mean_rating": 0.0822
+        },
+        {
+          "primary_team": "Vizela",
+          "club_gc": 1.9412,
+          "mean_rating": 0.0788
+        },
+        {
+          "primary_team": "Chaves",
+          "club_gc": 2.1176,
+          "mean_rating": 0.0765
+        },
+        {
+          "primary_team": "Portimonense",
+          "club_gc": 2.1176,
+          "mean_rating": 0.0697
+        }
+      ]
+    },
+    "rating_vs_club_defence_spec_a_no_team_effect": {
+      "n_players": 786,
+      "n_clubs": 23,
+      "corr_theta_mean_vs_club_goals_conceded": 0.519918,
+      "corr_def_sar_p90_vs_club_goals_conceded": -0.519229,
+      "club_level_corr": -0.987572
+    },
+    "team_vs_player_tradeoff": {
+      "median_corr": -0.089342,
+      "posterior_mean_sigmas": {
+        "sigma_def": 0.065586,
+        "sigma_player": 0.074023,
+        "sigma_att": 0.316578
+      }
+    },
+    "within_club_contrast": {
+      "median_posterior_sd": 0.071184,
+      "median_shrinkage": 0.067068,
+      "n_ci_excludes_zero": 0,
+      "n_players": 786,
+      "expected_by_chance_at_90pct": 78.6
+    }
+  },
+  "walk_forward": {
+    "train_seasons": [
+      "2023-24",
+      "2024-25"
+    ],
+    "test_season": "2025-26",
+    "n_test_rows": 612,
+    "n_train_players": 588,
+    "n_unseen_players": 189,
+    "mean_unseen_slot_share": 4.43881,
+    "logscore_with_players": -849.459646,
+    "logscore_team_only": -851.799331,
+    "gain_total": 2.339685,
+    "gain_per_obs": 0.003823,
+    "gain_se": 0.002251,
+    "gain_t": 1.698603,
+    "convergence": {
+      "full": {
+        "label": "walkforward-full",
+        "max_rhat": 1.01,
+        "min_ess_bulk": 732.0,
+        "divergences": 0,
+        "n_draws": 4000
+      },
+      "team_only": {
+        "label": "walkforward-teamonly",
+        "max_rhat": 1.0,
+        "min_ess_bulk": 881.0,
+        "divergences": 0,
+        "n_draws": 4000
+      }
+    }
+  },
+  "placebo": {
+    "sigma_player_real": 0.074023,
+    "sigma_player_placebo": 0.065078,
+    "sigma_def_real": 0.065586,
+    "sigma_def_placebo": 0.096268,
+    "theta_sd_real": 0.020364,
+    "theta_sd_placebo": 0.016493,
+    "n_separable_real": 0,
+    "n_separable_placebo": 0,
+    "convergence": {
+      "label": "placebo",
+      "max_rhat": 1.01,
+      "min_ess_bulk": 309.0,
+      "divergences": 0,
+      "n_draws": 4000
+    }
+  },
+  "convergence": {
+    "spec_b": {
+      "label": "specB",
+      "max_rhat": 1.01,
+      "min_ess_bulk": 765.0,
+      "divergences": 0,
+      "n_draws": 4000
+    },
+    "spec_a": {
+      "label": "specA",
+      "max_rhat": 1.01,
+      "min_ess_bulk": 1361.0,
+      "divergences": 0,
+      "n_draws": 4000
+    }
+  },
+  "descriptive_actions": {
+    "note": "Counts from the SofaScore line-ups payload, per 90 and possession-adjusted (rescaled to a neutral 50% share of the ball for the opponent). Descriptive exposure measures, NOT a skill estimate: a defender under constant pressure racks up clearances.",
+    "min_minutes": 450.0,
+    "by_position": {
+      "D": [
+        {
+          "player": "Kevyn Monteiro",
+          "team": "Moreirense",
+          "position": "D",
+          "minutes": 464.0,
+          "matches": 11,
+          "p90_def_actions": 14.353448,
+          "padj_def_actions": 13.157328,
+          "padj_totalTackle": 1.422414,
+          "padj_interceptionWon": 2.489224,
+          "padj_totalClearance": 6.756466,
+          "padj_blockedScoringAttempt": 0.177802,
+          "mean_opp_possession": 0.545455,
+          "duel_win_pct": 0.717391
+        },
+        {
+          "player": "Ferro",
+          "team": "Estoril",
+          "position": "D",
+          "minutes": 3135.0,
+          "matches": 46,
+          "p90_def_actions": 13.492823,
+          "padj_def_actions": 13.127535,
+          "padj_totalTackle": 2.374129,
+          "padj_interceptionWon": 1.759648,
+          "padj_totalClearance": 6.982731,
+          "padj_blockedScoringAttempt": 0.111724,
+          "mean_opp_possession": 0.513913,
+          "duel_win_pct": 0.615385
+        },
+        {
+          "player": "Henrique Silva",
+          "team": "Santa Clara",
+          "position": "D",
+          "minutes": 1031.0,
+          "matches": 13,
+          "p90_def_actions": 12.046557,
+          "padj_def_actions": 11.918207,
+          "padj_totalTackle": 1.727276,
+          "padj_interceptionWon": 1.209093,
+          "padj_totalClearance": 7.254561,
+          "padj_blockedScoringAttempt": 0.345455,
+          "mean_opp_possession": 0.505385,
+          "duel_win_pct": 0.528571
+        },
+        {
+          "player": "Omar Fayed",
+          "team": "Arouca",
+          "position": "D",
+          "minutes": 558.0,
+          "matches": 8,
+          "p90_def_actions": 12.419355,
+          "padj_def_actions": 11.856186,
+          "padj_totalTackle": 3.079529,
+          "padj_interceptionWon": 1.693741,
+          "padj_totalClearance": 4.157364,
+          "padj_blockedScoringAttempt": 0.153976,
+          "mean_opp_possession": 0.52375,
+          "duel_win_pct": 0.625
+        },
+        {
+          "player": "Paulo Oliveira",
+          "team": "SC Braga",
+          "position": "D",
+          "minutes": 4206.0,
+          "matches": 58,
+          "p90_def_actions": 9.778887,
+          "padj_def_actions": 11.718501,
+          "padj_totalTackle": 1.641103,
+          "padj_interceptionWon": 1.974452,
+          "padj_totalClearance": 6.487485,
+          "padj_blockedScoringAttempt": 0.025642,
+          "mean_opp_possession": 0.417241,
+          "duel_win_pct": 0.547112
+        },
+        {
+          "player": "Ze Vitor",
+          "team": "Nacional",
+          "position": "D",
+          "minutes": 5506.0,
+          "matches": 62,
+          "p90_def_actions": 12.471849,
+          "padj_def_actions": 11.613918,
+          "padj_totalTackle": 1.659131,
+          "padj_interceptionWon": 1.293818,
+          "padj_totalClearance": 6.392982,
+          "padj_blockedScoringAttempt": 0.258764,
+          "mean_opp_possession": 0.536935,
+          "duel_win_pct": 0.60885
+        },
+        {
+          "player": "Aderllan Santos",
+          "team": "AVS",
+          "position": "D",
+          "minutes": 6061.0,
+          "matches": 77,
+          "p90_def_actions": 12.591982,
+          "padj_def_actions": 11.531667,
+          "padj_totalTackle": 1.822221,
+          "padj_interceptionWon": 1.142288,
+          "padj_totalClearance": 6.377773,
+          "padj_blockedScoringAttempt": 0.122388,
+          "mean_opp_possession": 0.545974,
+          "duel_win_pct": 0.645485
+        },
+        {
+          "player": "Jo\u00e3o Afonso",
+          "team": "Tondela",
+          "position": "D",
+          "minutes": 624.0,
+          "matches": 13,
+          "p90_def_actions": 14.278846,
+          "padj_def_actions": 11.374081,
+          "padj_totalTackle": 1.493566,
+          "padj_interceptionWon": 2.297794,
+          "padj_totalClearance": 5.629596,
+          "padj_blockedScoringAttempt": 0.11489,
+          "mean_opp_possession": 0.627692,
+          "duel_win_pct": 0.626866
+        },
+        {
+          "player": "Felix Bacher",
+          "team": "Estoril",
+          "position": "D",
+          "minutes": 5130.0,
+          "matches": 57,
+          "p90_def_actions": 10.736842,
+          "padj_def_actions": 11.308204,
+          "padj_totalTackle": 1.607539,
+          "padj_interceptionWon": 1.515152,
+          "padj_totalClearance": 6.485588,
+          "padj_blockedScoringAttempt": 0.129342,
+          "mean_opp_possession": 0.474737,
+          "duel_win_pct": 0.577132
+        },
+        {
+          "player": "Sidoine Fogning",
+          "team": "Boavista",
+          "position": "D",
+          "minutes": 1170.0,
+          "matches": 13,
+          "p90_def_actions": 13.230769,
+          "padj_def_actions": 11.30092,
+          "padj_totalTackle": 2.102497,
+          "padj_interceptionWon": 0.919842,
+          "padj_totalClearance": 6.110381,
+          "padj_blockedScoringAttempt": 0.197109,
+          "mean_opp_possession": 0.585385,
+          "duel_win_pct": 0.606299
+        },
+        {
+          "player": "Bernardo Schappo",
+          "team": "Estrela Amadora",
+          "position": "D",
+          "minutes": 2152.0,
+          "matches": 27,
+          "p90_def_actions": 11.877323,
+          "padj_def_actions": 11.134991,
+          "padj_totalTackle": 1.725139,
+          "padj_interceptionWon": 1.137024,
+          "padj_totalClearance": 6.390857,
+          "padj_blockedScoringAttempt": 0.039208,
+          "mean_opp_possession": 0.533333,
+          "duel_win_pct": 0.635294
+        },
+        {
+          "player": "Vitaliy Lystsov",
+          "team": "Boavista",
+          "position": "D",
+          "minutes": 486.0,
+          "matches": 8,
+          "p90_def_actions": 13.518519,
+          "padj_def_actions": 10.968372,
+          "padj_totalTackle": 2.70453,
+          "padj_interceptionWon": 1.202013,
+          "padj_totalClearance": 4.657802,
+          "padj_blockedScoringAttempt": 0.150252,
+          "mean_opp_possession": 0.61625,
+          "duel_win_pct": 0.578947
+        },
+        {
+          "player": "Jonathan Panzo",
+          "team": "Rio Ave",
+          "position": "D",
+          "minutes": 2392.0,
+          "matches": 32,
+          "p90_def_actions": 11.776756,
+          "padj_def_actions": 10.967875,
+          "padj_totalTackle": 1.506769,
+          "padj_interceptionWon": 1.156357,
+          "padj_totalClearance": 6.48261,
+          "padj_blockedScoringAttempt": 0.140165,
+          "mean_opp_possession": 0.536875,
+          "duel_win_pct": 0.560209
+        },
+        {
+          "player": "Michel Augusto",
+          "team": "Moreirense",
+          "position": "D",
+          "minutes": 550.0,
+          "matches": 9,
+          "p90_def_actions": 10.963636,
+          "padj_def_actions": 10.963636,
+          "padj_totalTackle": 0.818182,
+          "padj_interceptionWon": 1.145455,
+          "padj_totalClearance": 7.690909,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.5,
+          "duel_win_pct": 0.536585
+        },
+        {
+          "player": "Nicol\u00e1s Otamendi",
+          "team": "Benfica",
+          "position": "D",
+          "minutes": 8068.0,
+          "matches": 92,
+          "p90_def_actions": 8.979921,
+          "padj_def_actions": 10.816349,
+          "padj_totalTackle": 1.988596,
+          "padj_interceptionWon": 2.055778,
+          "padj_totalClearance": 4.649014,
+          "padj_blockedScoringAttempt": 0.201547,
+          "mean_opp_possession": 0.415109,
+          "duel_win_pct": 0.682409
+        }
+      ],
+      "M": [
+        {
+          "player": "Florentino Lu\u00eds",
+          "team": "Benfica",
+          "position": "M",
+          "minutes": 3724.0,
+          "matches": 59,
+          "p90_def_actions": 10.126208,
+          "padj_def_actions": 12.040433,
+          "padj_totalTackle": 4.712723,
+          "padj_interceptionWon": 2.902348,
+          "padj_totalClearance": 1.293125,
+          "padj_blockedScoringAttempt": 0.172417,
+          "mean_opp_possession": 0.420508,
+          "duel_win_pct": 0.537832
+        },
+        {
+          "player": "Mamadou Loum",
+          "team": "Arouca",
+          "position": "M",
+          "minutes": 734.0,
+          "matches": 21,
+          "p90_def_actions": 9.93188,
+          "padj_def_actions": 10.544463,
+          "padj_totalTackle": 2.082857,
+          "padj_interceptionWon": 1.301786,
+          "padj_totalClearance": 5.076964,
+          "padj_blockedScoringAttempt": 0.260357,
+          "mean_opp_possession": 0.470952,
+          "duel_win_pct": 0.470588
+        },
+        {
+          "player": "Claudio Falc\u00e3o",
+          "team": "Farense",
+          "position": "M",
+          "minutes": 5458.0,
+          "matches": 63,
+          "p90_def_actions": 12.152803,
+          "padj_def_actions": 10.282388,
+          "padj_totalTackle": 2.539206,
+          "padj_interceptionWon": 1.213796,
+          "padj_totalClearance": 4.213407,
+          "padj_blockedScoringAttempt": 0.16742,
+          "mean_opp_possession": 0.590952,
+          "duel_win_pct": 0.493094
+        },
+        {
+          "player": "Manuel Keliano",
+          "team": "Estrela Amadora",
+          "position": "M",
+          "minutes": 1122.0,
+          "matches": 30,
+          "p90_def_actions": 11.390374,
+          "padj_def_actions": 10.27394,
+          "padj_totalTackle": 4.051694,
+          "padj_interceptionWon": 1.30233,
+          "padj_totalClearance": 1.881144,
+          "padj_blockedScoringAttempt": 0.289407,
+          "mean_opp_possession": 0.554333,
+          "duel_win_pct": 0.511905
+        },
+        {
+          "player": "Giorgi Kochorashvili",
+          "team": "Sporting CP",
+          "position": "M",
+          "minutes": 613.0,
+          "matches": 18,
+          "p90_def_actions": 7.634584,
+          "padj_def_actions": 10.016218,
+          "padj_totalTackle": 3.081913,
+          "padj_interceptionWon": 2.311435,
+          "padj_totalClearance": 1.540957,
+          "padj_blockedScoringAttempt": 0.963098,
+          "mean_opp_possession": 0.381111,
+          "duel_win_pct": 0.569231
+        },
+        {
+          "player": "Jo\u00e3o Neves",
+          "team": "Benfica",
+          "position": "M",
+          "minutes": 2320.0,
+          "matches": 33,
+          "p90_def_actions": 8.146552,
+          "padj_def_actions": 9.993911,
+          "padj_totalTackle": 3.093353,
+          "padj_interceptionWon": 1.665652,
+          "padj_totalClearance": 1.618062,
+          "padj_blockedScoringAttempt": 0.523491,
+          "mean_opp_possession": 0.407576,
+          "duel_win_pct": 0.567335
+        },
+        {
+          "player": "Uro\u0161 Ra\u010di\u0107",
+          "team": "SC Braga",
+          "position": "M",
+          "minutes": 722.0,
+          "matches": 14,
+          "p90_def_actions": 8.601108,
+          "padj_def_actions": 9.85397,
+          "padj_totalTackle": 2.856223,
+          "padj_interceptionWon": 0.999678,
+          "padj_totalClearance": 2.856223,
+          "padj_blockedScoringAttempt": 0.714056,
+          "mean_opp_possession": 0.436429,
+          "duel_win_pct": 0.589041
+        },
+        {
+          "player": "Gabriel Moscardo",
+          "team": "SC Braga",
+          "position": "M",
+          "minutes": 960.0,
+          "matches": 23,
+          "p90_def_actions": 7.40625,
+          "padj_def_actions": 9.835089,
+          "padj_totalTackle": 3.11237,
+          "padj_interceptionWon": 0.497979,
+          "padj_totalClearance": 3.734844,
+          "padj_blockedScoringAttempt": 0.497979,
+          "mean_opp_possession": 0.376522,
+          "duel_win_pct": 0.564103
+        },
+        {
+          "player": "Mory Gbane",
+          "team": "Gil Vicente",
+          "position": "M",
+          "minutes": 3386.0,
+          "matches": 47,
+          "p90_def_actions": 9.834613,
+          "padj_def_actions": 9.834613,
+          "padj_totalTackle": 2.711164,
+          "padj_interceptionWon": 1.727702,
+          "padj_totalClearance": 3.003544,
+          "padj_blockedScoringAttempt": 0.18606,
+          "mean_opp_possession": 0.5,
+          "duel_win_pct": 0.588652
+        },
+        {
+          "player": "Manu Silva",
+          "team": "Benfica",
+          "position": "M",
+          "minutes": 2759.0,
+          "matches": 50,
+          "p90_def_actions": 9.557811,
+          "padj_def_actions": 9.833139,
+          "padj_totalTackle": 2.751936,
+          "padj_interceptionWon": 1.409528,
+          "padj_totalClearance": 3.121099,
+          "padj_blockedScoringAttempt": 0.335602,
+          "mean_opp_possession": 0.486,
+          "duel_win_pct": 0.57027
+        },
+        {
+          "player": "Marios Vrousai",
+          "team": "Rio Ave",
+          "position": "M",
+          "minutes": 5753.0,
+          "matches": 77,
+          "p90_def_actions": 10.0591,
+          "padj_def_actions": 9.538801,
+          "padj_totalTackle": 2.566427,
+          "padj_interceptionWon": 1.468649,
+          "padj_totalClearance": 2.981803,
+          "padj_blockedScoringAttempt": 0.48955,
+          "mean_opp_possession": 0.527273,
+          "duel_win_pct": 0.548638
+        },
+        {
+          "player": "Demir Ege T\u0131knaz",
+          "team": "SC Braga",
+          "position": "M",
+          "minutes": 2546.0,
+          "matches": 39,
+          "p90_def_actions": 9.084839,
+          "padj_def_actions": 9.383176,
+          "padj_totalTackle": 2.811302,
+          "padj_interceptionWon": 2.044583,
+          "padj_totalClearance": 2.154114,
+          "padj_blockedScoringAttempt": 0.073021,
+          "mean_opp_possession": 0.484103,
+          "duel_win_pct": 0.544554
+        },
+        {
+          "player": "Pedro Ferreira",
+          "team": "Santa Clara",
+          "position": "M",
+          "minutes": 3885.0,
+          "matches": 64,
+          "p90_def_actions": 10.007722,
+          "padj_def_actions": 9.372172,
+          "padj_totalTackle": 3.167447,
+          "padj_interceptionWon": 1.475249,
+          "padj_totalClearance": 2.256264,
+          "padj_blockedScoringAttempt": 0.282033,
+          "mean_opp_possession": 0.533906,
+          "duel_win_pct": 0.579775
+        },
+        {
+          "player": "Nodar Lominadze",
+          "team": "Estoril",
+          "position": "M",
+          "minutes": 645.0,
+          "matches": 16,
+          "p90_def_actions": 9.209302,
+          "padj_def_actions": 9.325876,
+          "padj_totalTackle": 2.967324,
+          "padj_interceptionWon": 2.543421,
+          "padj_totalClearance": 1.836915,
+          "padj_blockedScoringAttempt": 0.141301,
+          "mean_opp_possession": 0.49375,
+          "duel_win_pct": 0.516667
+        },
+        {
+          "player": "Stephen Eustaquio",
+          "team": "Porto",
+          "position": "M",
+          "minutes": 3653.0,
+          "matches": 66,
+          "p90_def_actions": 7.070901,
+          "padj_def_actions": 9.186603,
+          "padj_totalTackle": 3.232916,
+          "padj_interceptionWon": 1.312372,
+          "padj_totalClearance": 2.08059,
+          "padj_blockedScoringAttempt": 0.416118,
+          "mean_opp_possession": 0.384848,
+          "duel_win_pct": 0.496368
+        }
+      ],
+      "F": [
+        {
+          "player": "Gabriel Mart\u00ednez",
+          "team": "SC Braga",
+          "position": "F",
+          "minutes": 2870.0,
+          "matches": 58,
+          "p90_def_actions": 6.209059,
+          "padj_def_actions": 7.75798,
+          "padj_totalTackle": 3.095356,
+          "padj_interceptionWon": 0.666089,
+          "padj_totalClearance": 1.253815,
+          "padj_blockedScoringAttempt": 0.744453,
+          "mean_opp_possession": 0.400172,
+          "duel_win_pct": 0.465479
+        },
+        {
+          "player": "Lu\u00eds Santos",
+          "team": "Boavista",
+          "position": "F",
+          "minutes": 671.0,
+          "matches": 19,
+          "p90_def_actions": 8.04769,
+          "padj_def_actions": 7.75386,
+          "padj_totalTackle": 2.196927,
+          "padj_interceptionWon": 1.421541,
+          "padj_totalClearance": 2.58462,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.518947,
+          "duel_win_pct": 0.513889
+        },
+        {
+          "player": "Petar Musa",
+          "team": "Benfica",
+          "position": "F",
+          "minutes": 532.0,
+          "matches": 14,
+          "p90_def_actions": 6.259398,
+          "padj_def_actions": 7.567494,
+          "padj_totalTackle": 2.454322,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.227161,
+          "padj_blockedScoringAttempt": 1.840742,
+          "mean_opp_possession": 0.413571,
+          "duel_win_pct": 0.453333
+        },
+        {
+          "player": "William Gomes",
+          "team": "Porto",
+          "position": "F",
+          "minutes": 1387.0,
+          "matches": 37,
+          "p90_def_actions": 5.710166,
+          "padj_def_actions": 6.537009,
+          "padj_totalTackle": 2.674231,
+          "padj_interceptionWon": 0.445705,
+          "padj_totalClearance": 0.519989,
+          "padj_blockedScoringAttempt": 1.039979,
+          "mean_opp_possession": 0.436757,
+          "duel_win_pct": 0.397436
+        },
+        {
+          "player": "Jeremy Antonisse",
+          "team": "Moreirense",
+          "position": "F",
+          "minutes": 1376.0,
+          "matches": 53,
+          "p90_def_actions": 6.736919,
+          "padj_def_actions": 6.231356,
+          "padj_totalTackle": 2.359445,
+          "padj_interceptionWon": 0.544487,
+          "padj_totalClearance": 1.512465,
+          "padj_blockedScoringAttempt": 0.665485,
+          "mean_opp_possession": 0.540566,
+          "duel_win_pct": 0.470339
+        },
+        {
+          "player": "Antoine Joujou",
+          "team": "Famalicao",
+          "position": "F",
+          "minutes": 594.0,
+          "matches": 23,
+          "p90_def_actions": 5.757576,
+          "padj_def_actions": 6.002912,
+          "padj_totalTackle": 2.369571,
+          "padj_interceptionWon": 0.947828,
+          "padj_totalClearance": 0.473914,
+          "padj_blockedScoringAttempt": 0.631885,
+          "mean_opp_possession": 0.479565,
+          "duel_win_pct": 0.413043
+        },
+        {
+          "player": "Mehdi Taremi",
+          "team": "Porto",
+          "position": "F",
+          "minutes": 1479.0,
+          "matches": 23,
+          "p90_def_actions": 4.442191,
+          "padj_def_actions": 5.926356,
+          "padj_totalTackle": 1.948391,
+          "padj_interceptionWon": 0.568281,
+          "padj_totalClearance": 1.623659,
+          "padj_blockedScoringAttempt": 0.324732,
+          "mean_opp_possession": 0.374783,
+          "duel_win_pct": 0.5
+        },
+        {
+          "player": "Guilherme Neiva",
+          "team": "AVS",
+          "position": "F",
+          "minutes": 930.0,
+          "matches": 24,
+          "p90_def_actions": 7.354839,
+          "padj_def_actions": 5.91542,
+          "padj_totalTackle": 2.101531,
+          "padj_interceptionWon": 0.934014,
+          "padj_totalClearance": 1.40102,
+          "padj_blockedScoringAttempt": 0.389172,
+          "mean_opp_possession": 0.621667,
+          "duel_win_pct": 0.440994
+        },
+        {
+          "player": "Welinton Torrao",
+          "team": "Santa Clara",
+          "position": "F",
+          "minutes": 706.0,
+          "matches": 19,
+          "p90_def_actions": 5.736544,
+          "padj_def_actions": 5.7608,
+          "padj_totalTackle": 1.792249,
+          "padj_interceptionWon": 0.384053,
+          "padj_totalClearance": 1.664231,
+          "padj_blockedScoringAttempt": 0.256036,
+          "mean_opp_possession": 0.497895,
+          "duel_win_pct": 0.448276
+        },
+        {
+          "player": "Vando F\u00e9lix",
+          "team": "Vitoria SC",
+          "position": "F",
+          "minutes": 898.0,
+          "matches": 24,
+          "p90_def_actions": 5.011136,
+          "padj_def_actions": 5.710696,
+          "padj_totalTackle": 2.512706,
+          "padj_interceptionWon": 1.027925,
+          "padj_totalClearance": 1.027925,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.43875,
+          "duel_win_pct": 0.465839
+        },
+        {
+          "player": "Arvin Appiah",
+          "team": "Nacional",
+          "position": "F",
+          "minutes": 1384.0,
+          "matches": 26,
+          "p90_def_actions": 5.852601,
+          "padj_def_actions": 5.627501,
+          "padj_totalTackle": 1.375611,
+          "padj_interceptionWon": 1.062972,
+          "padj_totalClearance": 1.813306,
+          "padj_blockedScoringAttempt": 0.375167,
+          "mean_opp_possession": 0.52,
+          "duel_win_pct": 0.514925
+        },
+        {
+          "player": "Zeki Amdouni",
+          "team": "Benfica",
+          "position": "F",
+          "minutes": 851.0,
+          "matches": 24,
+          "p90_def_actions": 4.441833,
+          "padj_def_actions": 5.450102,
+          "padj_totalTackle": 1.946465,
+          "padj_interceptionWon": 0.389293,
+          "padj_totalClearance": 0.389293,
+          "padj_blockedScoringAttempt": 1.297643,
+          "mean_opp_possession": 0.4075,
+          "duel_win_pct": 0.444444
+        },
+        {
+          "player": "Brian Mansilla",
+          "team": "Arouca",
+          "position": "F",
+          "minutes": 719.0,
+          "matches": 32,
+          "p90_def_actions": 5.132128,
+          "padj_def_actions": 5.434417,
+          "padj_totalTackle": 2.518389,
+          "padj_interceptionWon": 0.530187,
+          "padj_totalClearance": 0.927827,
+          "padj_blockedScoringAttempt": 0.265094,
+          "mean_opp_possession": 0.472188,
+          "duel_win_pct": 0.391608
+        },
+        {
+          "player": "Conrad Harder",
+          "team": "Sporting CP",
+          "position": "F",
+          "minutes": 862.0,
+          "matches": 32,
+          "p90_def_actions": 4.280742,
+          "padj_def_actions": 5.431553,
+          "padj_totalTackle": 1.192292,
+          "padj_interceptionWon": 0.529908,
+          "padj_totalClearance": 1.059815,
+          "padj_blockedScoringAttempt": 1.854677,
+          "mean_opp_possession": 0.394062,
+          "duel_win_pct": 0.462025
+        },
+        {
+          "player": "Mehdi Merghem",
+          "team": "Farense",
+          "position": "F",
+          "minutes": 467.0,
+          "matches": 12,
+          "p90_def_actions": 6.745182,
+          "padj_def_actions": 5.318146,
+          "padj_totalTackle": 2.5831,
+          "padj_interceptionWon": 0.607788,
+          "padj_totalClearance": 0.0,
+          "padj_blockedScoringAttempt": 0.455841,
+          "mean_opp_possession": 0.634167,
+          "duel_win_pct": 0.472973
+        }
+      ],
+      "G": [
+        {
+          "player": "Kosuke Nakamura",
+          "team": "Portimonense",
+          "position": "G",
+          "minutes": 1800.0,
+          "matches": 20,
+          "p90_def_actions": 1.95,
+          "padj_def_actions": 1.792279,
+          "padj_totalTackle": 0.0,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.792279,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.544,
+          "duel_win_pct": 0.888889
+        },
+        {
+          "player": "Luk\u00e1\u0161 Horn\u00ed\u010dek",
+          "team": "SC Braga",
+          "position": "G",
+          "minutes": 4490.0,
+          "matches": 50,
+          "p90_def_actions": 1.363029,
+          "padj_def_actions": 1.759201,
+          "padj_totalTackle": 0.0,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.759201,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.3874,
+          "duel_win_pct": 0.846154
+        },
+        {
+          "player": "Jo\u00e3o Valido",
+          "team": "Arouca",
+          "position": "G",
+          "minutes": 1350.0,
+          "matches": 15,
+          "p90_def_actions": 1.6,
+          "padj_def_actions": 1.702128,
+          "padj_totalTackle": 0.283688,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.347518,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.47,
+          "duel_win_pct": 0.933333
+        },
+        {
+          "player": "Kaique",
+          "team": "Nacional",
+          "position": "G",
+          "minutes": 3060.0,
+          "matches": 34,
+          "p90_def_actions": 1.617647,
+          "padj_def_actions": 1.515987,
+          "padj_totalTackle": 0.0,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.515987,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.533529,
+          "duel_win_pct": 0.925926
+        },
+        {
+          "player": "Joel Robles",
+          "team": "Estoril",
+          "position": "G",
+          "minutes": 5490.0,
+          "matches": 61,
+          "p90_def_actions": 1.459016,
+          "padj_def_actions": 1.482839,
+          "padj_totalTackle": 0.033322,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.449517,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.491967,
+          "duel_win_pct": 0.793103
+        },
+        {
+          "player": "Adriel",
+          "team": "AVS",
+          "position": "G",
+          "minutes": 1440.0,
+          "matches": 16,
+          "p90_def_actions": 1.875,
+          "padj_def_actions": 1.476378,
+          "padj_totalTackle": 0.049213,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.32874,
+          "padj_blockedScoringAttempt": 0.049213,
+          "mean_opp_possession": 0.635,
+          "duel_win_pct": 0.8
+        },
+        {
+          "player": "Kewin",
+          "team": "Moreirense",
+          "position": "G",
+          "minutes": 5297.0,
+          "matches": 59,
+          "p90_def_actions": 1.563149,
+          "padj_def_actions": 1.469968,
+          "padj_totalTackle": 0.031956,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.422034,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.531695,
+          "duel_win_pct": 0.9
+        },
+        {
+          "player": "Ivan Zlobin",
+          "team": "Famalicao",
+          "position": "G",
+          "minutes": 1440.0,
+          "matches": 16,
+          "p90_def_actions": 1.375,
+          "padj_def_actions": 1.430429,
+          "padj_totalTackle": 0.0,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.430429,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.480625,
+          "duel_win_pct": 1.0
+        },
+        {
+          "player": "Luiz J\u00fanior",
+          "team": "Famalicao",
+          "position": "G",
+          "minutes": 3060.0,
+          "matches": 34,
+          "p90_def_actions": 1.5,
+          "padj_def_actions": 1.401099,
+          "padj_totalTackle": 0.027473,
+          "padj_interceptionWon": 0.027473,
+          "padj_totalClearance": 1.346154,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.535294,
+          "duel_win_pct": 0.782609
+        },
+        {
+          "player": "Vinicius Silvestre",
+          "team": "Portimonense",
+          "position": "G",
+          "minutes": 1260.0,
+          "matches": 14,
+          "p90_def_actions": 1.571429,
+          "padj_def_actions": 1.390645,
+          "padj_totalTackle": 0.0,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.390645,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.565,
+          "duel_win_pct": 0.769231
+        },
+        {
+          "player": "Cezary Miszta",
+          "team": "Rio Ave",
+          "position": "G",
+          "minutes": 4306.0,
+          "matches": 48,
+          "p90_def_actions": 1.442174,
+          "padj_def_actions": 1.358939,
+          "padj_totalTackle": 0.0,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.358939,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.530625,
+          "duel_win_pct": 0.8
+        },
+        {
+          "player": "Matheus Mendes",
+          "team": "Alverca",
+          "position": "G",
+          "minutes": 900.0,
+          "matches": 10,
+          "p90_def_actions": 1.4,
+          "padj_def_actions": 1.296296,
+          "padj_totalTackle": 0.0,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.296296,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.54,
+          "duel_win_pct": 0.727273
+        },
+        {
+          "player": "Ignacio de Arruabarrena",
+          "team": "Arouca",
+          "position": "G",
+          "minutes": 4320.0,
+          "matches": 48,
+          "p90_def_actions": 1.229167,
+          "padj_def_actions": 1.292726,
+          "padj_totalTackle": 0.065732,
+          "padj_interceptionWon": 0.021911,
+          "padj_totalClearance": 1.161262,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.475417,
+          "duel_win_pct": 0.666667
+        },
+        {
+          "player": "Nico Mantl",
+          "team": "Arouca",
+          "position": "G",
+          "minutes": 3330.0,
+          "matches": 37,
+          "p90_def_actions": 1.243243,
+          "padj_def_actions": 1.284199,
+          "padj_totalTackle": 0.0,
+          "padj_interceptionWon": 0.027917,
+          "padj_totalClearance": 1.256281,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.484054,
+          "duel_win_pct": 0.769231
+        },
+        {
+          "player": "Lucas Fran\u00e7a",
+          "team": "Santa Clara",
+          "position": "G",
+          "minutes": 3555.0,
+          "matches": 40,
+          "p90_def_actions": 1.316456,
+          "padj_def_actions": 1.237852,
+          "padj_totalTackle": 0.0,
+          "padj_interceptionWon": 0.0,
+          "padj_totalClearance": 1.237852,
+          "padj_blockedScoringAttempt": 0.0,
+          "mean_opp_possession": 0.53175,
+          "duel_win_pct": 0.925926
+        }
+      ]
+    }
+  },
+  "caveats": [
+    "NO RANKING IS PUBLISHED. Individual players could not be separated from their team by the pre-registered criterion: >= 20 players with shrinkage >= 0.2 AND positive walk-forward log-score gain. Only 0 of 786 players had a posterior meaningfully narrower than the population prior.",
+    "Substitution timing is not in the source data. Exposure is minutes-weighted, so a substitute is credited with a fraction of the whole match rather than the specific minutes they were on the pitch.",
+    "One static effect per player across the whole panel: 34 matches a season is too thin for a per-season defensive effect.",
+    "Goals conceded is a team outcome. Every on-pitch player is in the model, not only defenders, because forwards pressing also matter.",
+    "Players below the minutes threshold are pooled into a single replacement bucket pinned at zero.",
+    "27% of the spread in the point estimates is between clubs rather than between club-mates, and the ratings correlate at r=-0.51 with their club's goals conceded per match: what is being measured is mostly the club, with player names attached.",
+    "Averaged to club level the ratings reproduce club goals conceded at r=-0.985 across 23 clubs. The model is a club defence model that distributes its answer over whoever was on the pitch.",
+    "Collinearity retains only 11% of the information the line-ups nominally carry: summed over players the model resolves 11 effective parameters against 105 if every other effect were known. The most-used player in the panel, Diogo Costa (8822 minutes), reaches shrinkage 0.028 where 0.324 was attainable.",
+    "With the shared hierarchical mean removed, frequent team-mates have a median posterior correlation of -0.04 (players who never shared a pitch: -0.00); the data pins their combined effect better than the split between them.",
+    "Walk-forward (fit 2023-24+2024-25, score 2025-26): adding player effects changed the out-of-sample log score by +2.34 nats over 612 team-matches (t = +1.70)."
+  ],
+  "what_the_model_could_distinguish": {
+    "note": "Club-level defensive quality is identified; individual players inside a club are not. The club column below is the mean of that club's player ratings, which tracks the club's actual goals conceded almost perfectly -- the model is measuring the club.",
+    "club_level_corr": -0.98468,
+    "clubs": [
+      {
+        "primary_team": "Porto",
+        "club_gc": 0.7282,
+        "mean_rating": 0.1317
+      },
+      {
+        "primary_team": "Benfica",
+        "club_gc": 0.8058,
+        "mean_rating": 0.1281
+      },
+      {
+        "primary_team": "Sporting CP",
+        "club_gc": 0.7961,
+        "mean_rating": 0.128
+      },
+      {
+        "primary_team": "Famalicao",
+        "club_gc": 1.068,
+        "mean_rating": 0.1145
+      },
+      {
+        "primary_team": "Santa Clara",
+        "club_gc": 1.087,
+        "mean_rating": 0.1119
+      },
+      {
+        "primary_team": "SC Braga",
+        "club_gc": 1.1456,
+        "mean_rating": 0.108
+      },
+      {
+        "primary_team": "Vitoria SC",
+        "club_gc": 1.233,
+        "mean_rating": 0.1047
+      },
+      {
+        "primary_team": "Moreirense",
+        "club_gc": 1.3204,
+        "mean_rating": 0.0998
+      },
+      {
+        "primary_team": "Gil Vicente",
+        "club_gc": 1.3301,
+        "mean_rating": 0.0997
+      },
+      {
+        "primary_team": "Nacional",
+        "club_gc": 1.4058,
+        "mean_rating": 0.0963
+      },
+      {
+        "primary_team": "Farense",
+        "club_gc": 1.4265,
+        "mean_rating": 0.0952
+      },
+      {
+        "primary_team": "Rio Ave",
+        "club_gc": 1.5146,
+        "mean_rating": 0.0946
+      },
+      {
+        "primary_team": "Alverca",
+        "club_gc": 1.5429,
+        "mean_rating": 0.0942
+      },
+      {
+        "primary_team": "Estrela Amadora",
+        "club_gc": 1.5631,
+        "mean_rating": 0.0933
+      },
+      {
+        "primary_team": "Casa Pia",
+        "club_gc": 1.4757,
+        "mean_rating": 0.0928
+      },
+      {
+        "primary_team": "Tondela",
+        "club_gc": 1.6176,
+        "mean_rating": 0.0918
+      },
+      {
+        "primary_team": "Arouca",
+        "club_gc": 1.5825,
+        "mean_rating": 0.0898
+      },
+      {
+        "primary_team": "Estoril",
+        "club_gc": 1.6408,
+        "mean_rating": 0.0852
+      },
+      {
+        "primary_team": "Boavista",
+        "club_gc": 1.7794,
+        "mean_rating": 0.0845
+      },
+      {
+        "primary_team": "AVS",
+        "club_gc": 1.8676,
+        "mean_rating": 0.0822
+      },
+      {
+        "primary_team": "Vizela",
+        "club_gc": 1.9412,
+        "mean_rating": 0.0788
+      },
+      {
+        "primary_team": "Chaves",
+        "club_gc": 2.1176,
+        "mean_rating": 0.0765
+      },
+      {
+        "primary_team": "Portimonense",
+        "club_gc": 2.1176,
+        "mean_rating": 0.0697
+      }
+    ]
+  }
+}

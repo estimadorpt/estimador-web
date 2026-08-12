@@ -9,6 +9,7 @@ import type {
   NextMatchdayScenarioMatch,
 } from '@/types/football';
 import { assignFixtureSlugs } from '@/lib/config/fixtures';
+import { normaliseRatings, type RatingKind } from '@/lib/utils/player-ratings';
 import {
   fixtureKey,
   matchOutcome,
@@ -116,6 +117,44 @@ export async function loadLigaPlayersDetail() {
   } catch {
     return null;
   }
+}
+
+/* --------------------------------------------- position-specific ratings */
+
+/**
+ * The three position-specific rating feeds, each written by its own model in
+ * the model repo and each optional. One number cannot rank a goalkeeper
+ * against a striker (ADR-019), so these are deliberately separate files with
+ * separate scales — and any of them can be missing on any given build.
+ *
+ * Every loader returns null on absence, unparseable JSON or an unrecognised
+ * shape. The hub page renders whichever ones came back.
+ */
+async function loadRatings(filename: string, kind: RatingKind) {
+  try {
+    const raw = await loadFootballJson<unknown>(filename);
+    return normaliseRatings(raw, kind);
+  } catch {
+    return null;
+  }
+}
+
+/** Goalkeepers: goals prevented above expectation. */
+export async function loadGkRatings() {
+  return loadRatings('gk_ratings.json', 'gk');
+}
+
+/**
+ * Defenders: adjusted plus-minus. May legitimately carry no ranking at all —
+ * `separable: false` with diagnostics is a result, not a failure.
+ */
+export async function loadDefRatings() {
+  return loadRatings('def_ratings.json', 'def');
+}
+
+/** Outfield players: goals + assists contribution. */
+export async function loadContribRatings() {
+  return loadRatings('contrib_ratings.json', 'contrib');
 }
 
 /**

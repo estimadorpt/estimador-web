@@ -50,3 +50,6 @@ dist/
 # scripts/publish_cards.py. They must stay tracked.
 !public/images/cards/*.png
 snapshot-*.md
+
+# Vendored DuckDB WASM (75 MB, unreferenced by src/ — kept locally, never committed)
+public/duckdb/

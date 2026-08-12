@@ -46,6 +46,8 @@ export interface PlayerSkillData {
   model: string;
   metric: string;
   metric_label: string;
+  /** Posterior interval mass as a fraction (0.9). Older feeds omit it. */
+  interval_mass?: number;
   generated_from: {
     n_players: number;
     n_observations: number;
@@ -103,6 +105,10 @@ export function PlayerSkillRanking({
     });
   const int = (v: number) => v.toLocaleString(pt ? "pt-PT" : "en-GB");
 
+  // Read the interval mass from the feed. This was hardcoded to 94% while the
+  // model published 90%, so never reintroduce a literal here.
+  const ivPct = Math.round((data.interval_mass ?? 0.9) * 100);
+
   const t = {
     title: pt
       ? "Os melhores finalizadores da Liga, segundo o modelo"
@@ -116,8 +122,8 @@ export function PlayerSkillRanking({
         )} individual appearances since ${data.generated_from.seasons[0]}. For each player it estimates scoring skill after adjusting for minutes played, opponent, home advantage and position — extra goals per 90 minutes over a replacement-level player. It measures finishing only: goalkeepers and defenders all sit at the same floor, so this is in practice a list of forwards.`,
     metric: pt ? "Golos por 90' acima do substituto" : "Goals per 90 above replacement",
     rangeHint: pt
-      ? "A barra é a estimativa central; a linha fina é o intervalo de 94% de credibilidade. Quantos menos minutos, mais larga é a linha."
-      : "The bar is the central estimate; the thin line is the 94% credible interval. Fewer minutes, wider line.",
+      ? `A barra é a estimativa central; a linha fina é o intervalo de ${ivPct}% de credibilidade. Quantos menos minutos, mais larga é a linha.`
+      : `The bar is the central estimate; the thin line is the ${ivPct}% credible interval. Fewer minutes, wider line.`,
     showAll: pt
       ? `Ver a lista completa (${players.length})`
       : `Show the full list (${players.length})`,
@@ -126,7 +132,7 @@ export function PlayerSkillRanking({
     goals: pt ? "golos" : "goals",
     matches: pt ? "jogos" : "matches",
     perNinety: pt ? "golos/90 reais" : "actual goals/90",
-    interval: pt ? "intervalo 94%" : "94% interval",
+    interval: pt ? `intervalo ${ivPct}%` : `${ivPct}% interval`,
     playerPage: pt ? "Página do jogador" : "Player page",
     legendPage: pt
       ? "Seta à direita: página do jogador, com o intervalo e o histórico época a época"
@@ -149,6 +155,12 @@ export function PlayerSkillRanking({
         }); recent transfers may not be reflected. Minimum ${int(
           data.generated_from.min_minutes
         )} minutes to qualify (${int(data.generated_from.n_players)} eligible players).`,
+    hubLink: pt
+      ? "Guarda-redes, defesas e criadores: as outras métricas"
+      : "Goalkeepers, defenders and creators: the other metrics",
+    hubHint: pt
+      ? "Esta lista mede finalização e mais nada. Cada posição tem a sua própria métrica, na sua própria escala."
+      : "This list measures finishing and nothing else. Each position has its own metric, on its own scale.",
     moversTitle: pt ? "Ninguém melhorou (nem piorou)" : "Nobody improved (or got worse)",
     moversBody: pt
       ? "O modelo também mediu quanto o talento de cada jogador mudou de época para época. A maior variação encontrada é cerca de cinco vezes menor do que a própria margem de erro: em três épocas de Liga Portugal não há sinal de que alguém tenha mesmo melhorado a finalizar. As boas fases existem — mas são sobretudo sorte na quantidade de golos, não talento novo."
@@ -163,7 +175,21 @@ export function PlayerSkillRanking({
   return (
     <div>
       <h2 className="text-xl font-bold tracking-tight mb-1">{t.title}</h2>
-      <p className="text-sm text-stone-500 mb-6 max-w-3xl leading-relaxed">{t.intro}</p>
+      <p className="text-sm text-stone-500 mb-3 max-w-3xl leading-relaxed">{t.intro}</p>
+
+      {/* One number cannot rank a keeper against a striker; the hub carries
+          the position-specific metrics and the reason there are several. */}
+      <div className="mb-6 max-w-3xl">
+        <Link
+          href="/desporto/liga/jogadores"
+          locale={locale}
+          className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:text-blue-800"
+        >
+          {t.hubLink}
+          <ChevronRight className="w-3 h-3" />
+        </Link>
+        <p className="text-[11px] text-stone-400 mt-1 leading-relaxed">{t.hubHint}</p>
+      </div>
 
       {/* Column header */}
       <div className="flex items-center gap-2 mb-2 pb-2 border-b border-stone-200">

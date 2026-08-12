@@ -3,9 +3,10 @@
   "model": "soccer_factor_model",
   "metric": "sar",
   "metric_label": "Skill Above Replacement (winsorized goals per 90)",
+  "interval_mass": 0.9,
   "generated_from": {
-    "n_players": 716,
-    "n_observations": 28892,
+    "n_players": 718,
+    "n_observations": 29019,
     "min_minutes": 600,
     "seasons": [
       "2023-24",
@@ -16,7 +17,7 @@
     "time_variation": "season_re",
     "include_own_att": false,
     "ratings_source": "joint_sot",
-    "max_rhat": 1.02,
+    "max_rhat": 1.03,
     "divergences": 0
   },
   "skill_change_note": "Season-to-season deltas are within posterior noise (sigma_season HDI includes 0). Each season estimate carries its own posterior sd; when the delta is smaller than that sd the change is indistinguishable from zero. Treat the per-season series as descriptive, not as evidence that a player's finishing skill changed.",
@@ -33,11 +34,11 @@
       "matches": 33,
       "goals": 28,
       "goals_per_90": 0.924,
-      "sar": 0.5275,
-      "sar_sd": 0.1108,
-      "skill_lo": 0.3465,
-      "skill_hi": 0.7102,
-      "xg_skill_per_90": 0.6258,
+      "sar": 0.5225,
+      "sar_sd": 0.1123,
+      "skill_lo": 0.339,
+      "skill_hi": 0.705,
+      "xg_skill_per_90": 0.6222,
       "p_above_replacement": 1.0,
       "last_season": "2026-27",
       "seasons": [
@@ -48,8 +49,8 @@
           "matches": 32,
           "goals": 28,
           "goals_per_90": 0.934,
-          "sar_season": 0.5574,
-          "sar_season_sd": 0.1039
+          "sar_season": 0.5543,
+          "sar_season_sd": 0.1043
         },
         {
           "season": "2026-27",
@@ -58,15 +59,15 @@
           "matches": 1,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.5242,
-          "sar_season_sd": 0.1206
+          "sar_season": 0.5219,
+          "sar_season_sd": 0.1216
         }
       ],
       "skill_change": {
         "from_season": "2025-26",
         "to_season": "2026-27",
-        "delta": -0.0332,
-        "delta_ref_sd": 0.1592,
+        "delta": -0.0324,
+        "delta_ref_sd": 0.1602,
         "within_noise": true
       },
       "recent": [
@@ -179,11 +180,11 @@
       "matches": 50,
       "goals": 32,
       "goals_per_90": 0.783,
-      "sar": 0.437,
-      "sar_sd": 0.0882,
-      "skill_lo": 0.2921,
+      "sar": 0.4345,
+      "sar_sd": 0.0905,
+      "skill_lo": 0.285,
       "skill_hi": 0.5854,
-      "xg_skill_per_90": 0.5353,
+      "xg_skill_per_90": 0.5343,
       "p_above_replacement": 1.0,
       "last_season": "2025-26",
       "seasons": [
@@ -194,8 +195,8 @@
           "matches": 30,
           "goals": 19,
           "goals_per_90": 0.756,
-          "sar_season": 0.4457,
-          "sar_season_sd": 0.0863
+          "sar_season": 0.4446,
+          "sar_season_sd": 0.0904
         },
         {
           "season": "2025-26",
@@ -204,15 +205,15 @@
           "matches": 20,
           "goals": 13,
           "goals_per_90": 0.827,
-          "sar_season": 0.4514,
-          "sar_season_sd": 0.0906
+          "sar_season": 0.4493,
+          "sar_season_sd": 0.0925
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0057,
-        "delta_ref_sd": 0.1251,
+        "delta": 0.0047,
+        "delta_ref_sd": 0.1293,
         "within_noise": true
       },
       "recent": [
@@ -321,17 +322,17 @@
       "player_id": 795236,
       "team": "Benfica",
       "position": "F",
-      "minutes": 4942,
-      "matches": 67,
-      "goals": 41,
-      "goals_per_90": 0.747,
-      "sar": 0.3863,
-      "sar_sd": 0.0785,
-      "skill_lo": 0.2594,
-      "skill_hi": 0.5182,
-      "xg_skill_per_90": 0.4846,
+      "minutes": 5032,
+      "matches": 68,
+      "goals": 42,
+      "goals_per_90": 0.751,
+      "sar": 0.3906,
+      "sar_sd": 0.0807,
+      "skill_lo": 0.2604,
+      "skill_hi": 0.5264,
+      "xg_skill_per_90": 0.4903,
       "p_above_replacement": 1.0,
-      "last_season": "2025-26",
+      "last_season": "2026-27",
       "seasons": [
         {
           "season": "2024-25",
@@ -340,8 +341,8 @@
           "matches": 34,
           "goals": 19,
           "goals_per_90": 0.752,
-          "sar_season": 0.3974,
-          "sar_season_sd": 0.0776
+          "sar_season": 0.4021,
+          "sar_season_sd": 0.0786
         },
         {
           "season": "2025-26",
@@ -350,15 +351,25 @@
           "matches": 33,
           "goals": 22,
           "goals_per_90": 0.742,
-          "sar_season": 0.3928,
-          "sar_season_sd": 0.0783
+          "sar_season": 0.3985,
+          "sar_season_sd": 0.0812
+        },
+        {
+          "season": "2026-27",
+          "team": "Benfica",
+          "minutes": 90,
+          "matches": 1,
+          "goals": 1,
+          "goals_per_90": 1.0,
+          "sar_season": 0.3937,
+          "sar_season_sd": 0.091
         }
       ],
       "skill_change": {
-        "from_season": "2024-25",
-        "to_season": "2025-26",
-        "delta": -0.0046,
-        "delta_ref_sd": 0.1102,
+        "from_season": "2025-26",
+        "to_season": "2026-27",
+        "delta": -0.0048,
+        "delta_ref_sd": 0.122,
         "within_noise": true
       },
       "recent": [
@@ -471,11 +482,11 @@
       "matches": 73,
       "goals": 29,
       "goals_per_90": 0.477,
-      "sar": 0.3486,
-      "sar_sd": 0.0744,
-      "skill_lo": 0.2291,
-      "skill_hi": 0.4749,
-      "xg_skill_per_90": 0.4469,
+      "sar": 0.3458,
+      "sar_sd": 0.0734,
+      "skill_lo": 0.2317,
+      "skill_hi": 0.4708,
+      "xg_skill_per_90": 0.4456,
       "p_above_replacement": 1.0,
       "last_season": "2025-26",
       "seasons": [
@@ -486,8 +497,8 @@
           "matches": 32,
           "goals": 11,
           "goals_per_90": 0.382,
-          "sar_season": 0.3425,
-          "sar_season_sd": 0.0752
+          "sar_season": 0.34,
+          "sar_season_sd": 0.0738
         },
         {
           "season": "2024-25",
@@ -496,8 +507,8 @@
           "matches": 14,
           "goals": 5,
           "goals_per_90": 0.51,
-          "sar_season": 0.3484,
-          "sar_season_sd": 0.0821
+          "sar_season": 0.3454,
+          "sar_season_sd": 0.08
         },
         {
           "season": "2025-26",
@@ -506,15 +517,15 @@
           "matches": 27,
           "goals": 13,
           "goals_per_90": 0.587,
-          "sar_season": 0.3725,
-          "sar_season_sd": 0.0822
+          "sar_season": 0.3723,
+          "sar_season_sd": 0.0807
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0241,
-        "delta_ref_sd": 0.1162,
+        "delta": 0.0269,
+        "delta_ref_sd": 0.1136,
         "within_noise": true
       },
       "recent": [
@@ -627,11 +638,11 @@
       "matches": 41,
       "goals": 15,
       "goals_per_90": 0.686,
-      "sar": 0.3226,
-      "sar_sd": 0.0975,
-      "skill_lo": 0.1673,
-      "skill_hi": 0.4906,
-      "xg_skill_per_90": 0.4209,
+      "sar": 0.3202,
+      "sar_sd": 0.0937,
+      "skill_lo": 0.1738,
+      "skill_hi": 0.4821,
+      "xg_skill_per_90": 0.4199,
       "p_above_replacement": 1.0,
       "last_season": "2025-26",
       "seasons": [
@@ -642,8 +653,8 @@
           "matches": 8,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.3214,
-          "sar_season_sd": 0.105
+          "sar_season": 0.3173,
+          "sar_season_sd": 0.1007
         },
         {
           "season": "2024-25",
@@ -652,8 +663,8 @@
           "matches": 20,
           "goals": 5,
           "goals_per_90": 0.557,
-          "sar_season": 0.3176,
-          "sar_season_sd": 0.0994
+          "sar_season": 0.3148,
+          "sar_season_sd": 0.0958
         },
         {
           "season": "2025-26",
@@ -662,15 +673,15 @@
           "matches": 13,
           "goals": 10,
           "goals_per_90": 0.942,
-          "sar_season": 0.3471,
-          "sar_season_sd": 0.1037
+          "sar_season": 0.3465,
+          "sar_season_sd": 0.0998
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0295,
-        "delta_ref_sd": 0.1436,
+        "delta": 0.0317,
+        "delta_ref_sd": 0.1383,
         "within_noise": true
       },
       "recent": [
@@ -773,138 +784,8 @@
       ]
     },
     {
-      "slug": "jalen-blesa",
-      "rank": 6,
-      "player": "Jalen Blesa",
-      "player_id": 1499082,
-      "team": "Rio Ave",
-      "position": "F",
-      "minutes": 1077,
-      "matches": 13,
-      "goals": 7,
-      "goals_per_90": 0.585,
-      "sar": 0.2951,
-      "sar_sd": 0.1218,
-      "skill_lo": 0.1111,
-      "skill_hi": 0.5102,
-      "xg_skill_per_90": 0.3934,
-      "p_above_replacement": 0.9992,
-      "last_season": "2025-26",
-      "seasons": [
-        {
-          "season": "2025-26",
-          "team": "Rio Ave",
-          "minutes": 1077,
-          "matches": 13,
-          "goals": 7,
-          "goals_per_90": 0.585,
-          "sar_season": 0.3067,
-          "sar_season_sd": 0.1247
-        }
-      ],
-      "skill_change": null,
-      "recent": [
-        {
-          "season": "2026-27",
-          "matchday": 1,
-          "date": "2026-08-09",
-          "opponent": "Gil Vicente",
-          "is_home": false,
-          "started": true,
-          "minutes": 82,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.4
-        },
-        {
-          "season": "2025-26",
-          "matchday": 34,
-          "date": "2026-05-16",
-          "opponent": "Casa Pia",
-          "is_home": false,
-          "started": true,
-          "minutes": 90,
-          "goals": 1,
-          "assists": 0,
-          "rating": 6.6
-        },
-        {
-          "season": "2025-26",
-          "matchday": 33,
-          "date": "2026-05-11",
-          "opponent": "Sporting CP",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 0,
-          "rating": 7.1
-        },
-        {
-          "season": "2025-26",
-          "matchday": 32,
-          "date": "2026-05-03",
-          "opponent": "Gil Vicente",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 0,
-          "rating": 7.1
-        },
-        {
-          "season": "2025-26",
-          "matchday": 31,
-          "date": "2026-04-25",
-          "opponent": "Vitoria SC",
-          "is_home": false,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.7
-        },
-        {
-          "season": "2025-26",
-          "matchday": 30,
-          "date": "2026-04-17",
-          "opponent": "AVS",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 0,
-          "rating": 7.3
-        },
-        {
-          "season": "2025-26",
-          "matchday": 28,
-          "date": "2026-04-04",
-          "opponent": "Alverca",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 1,
-          "assists": 0,
-          "rating": 8.9
-        },
-        {
-          "season": "2025-26",
-          "matchday": 27,
-          "date": "2026-03-22",
-          "opponent": "Estoril",
-          "is_home": false,
-          "started": true,
-          "minutes": 89,
-          "goals": 1,
-          "assists": 0,
-          "rating": 6.8
-        }
-      ]
-    },
-    {
       "slug": "yanis-begraoui",
-      "rank": 7,
+      "rank": 6,
       "player": "Yanis Begraoui",
       "player_id": 930246,
       "team": "Estoril",
@@ -913,11 +794,11 @@
       "matches": 69,
       "goals": 32,
       "goals_per_90": 0.607,
-      "sar": 0.2917,
-      "sar_sd": 0.0728,
-      "skill_lo": 0.1761,
-      "skill_hi": 0.4167,
-      "xg_skill_per_90": 0.39,
+      "sar": 0.2883,
+      "sar_sd": 0.0715,
+      "skill_lo": 0.1748,
+      "skill_hi": 0.4079,
+      "xg_skill_per_90": 0.388,
       "p_above_replacement": 1.0,
       "last_season": "2026-27",
       "seasons": [
@@ -928,8 +809,8 @@
           "matches": 34,
           "goals": 11,
           "goals_per_90": 0.513,
-          "sar_season": 0.2882,
-          "sar_season_sd": 0.0737
+          "sar_season": 0.2859,
+          "sar_season_sd": 0.0725
         },
         {
           "season": "2025-26",
@@ -938,8 +819,8 @@
           "matches": 34,
           "goals": 20,
           "goals_per_90": 0.66,
-          "sar_season": 0.3035,
-          "sar_season_sd": 0.0743
+          "sar_season": 0.3015,
+          "sar_season_sd": 0.0738
         },
         {
           "season": "2026-27",
@@ -948,15 +829,15 @@
           "matches": 1,
           "goals": 1,
           "goals_per_90": 1.0,
-          "sar_season": 0.2956,
-          "sar_season_sd": 0.0829
+          "sar_season": 0.2923,
+          "sar_season_sd": 0.0811
         }
       ],
       "skill_change": {
         "from_season": "2025-26",
         "to_season": "2026-27",
-        "delta": -0.0079,
-        "delta_ref_sd": 0.1113,
+        "delta": -0.0092,
+        "delta_ref_sd": 0.1097,
         "within_noise": true
       },
       "recent": [
@@ -1060,7 +941,7 @@
     },
     {
       "slug": "alejandro-marques",
-      "rank": 8,
+      "rank": 7,
       "player": "Alejandro Marqués",
       "player_id": 929894,
       "team": "Estoril",
@@ -1069,11 +950,11 @@
       "matches": 90,
       "goals": 24,
       "goals_per_90": 0.514,
-      "sar": 0.2843,
-      "sar_sd": 0.0662,
-      "skill_lo": 0.1812,
-      "skill_hi": 0.3977,
-      "xg_skill_per_90": 0.3826,
+      "sar": 0.2831,
+      "sar_sd": 0.0676,
+      "skill_lo": 0.1779,
+      "skill_hi": 0.3993,
+      "xg_skill_per_90": 0.3829,
       "p_above_replacement": 1.0,
       "last_season": "2025-26",
       "seasons": [
@@ -1084,8 +965,8 @@
           "matches": 31,
           "goals": 9,
           "goals_per_90": 0.598,
-          "sar_season": 0.2957,
-          "sar_season_sd": 0.0695
+          "sar_season": 0.2949,
+          "sar_season_sd": 0.0718
         },
         {
           "season": "2024-25",
@@ -1095,7 +976,7 @@
           "goals": 11,
           "goals_per_90": 0.587,
           "sar_season": 0.2965,
-          "sar_season_sd": 0.0689
+          "sar_season_sd": 0.07
         },
         {
           "season": "2025-26",
@@ -1104,15 +985,15 @@
           "matches": 26,
           "goals": 4,
           "goals_per_90": 0.31,
-          "sar_season": 0.2745,
-          "sar_season_sd": 0.072
+          "sar_season": 0.2733,
+          "sar_season_sd": 0.0737
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": -0.022,
-        "delta_ref_sd": 0.0997,
+        "delta": -0.0232,
+        "delta_ref_sd": 0.1016,
         "within_noise": true
       },
       "recent": [
@@ -1215,6 +1096,152 @@
       ]
     },
     {
+      "slug": "jalen-blesa",
+      "rank": 8,
+      "player": "Jalen Blesa",
+      "player_id": 1499082,
+      "team": "Rio Ave",
+      "position": "F",
+      "minutes": 1159,
+      "matches": 14,
+      "goals": 7,
+      "goals_per_90": 0.544,
+      "sar": 0.2757,
+      "sar_sd": 0.1157,
+      "skill_lo": 0.0985,
+      "skill_hi": 0.4765,
+      "xg_skill_per_90": 0.3754,
+      "p_above_replacement": 0.999,
+      "last_season": "2026-27",
+      "seasons": [
+        {
+          "season": "2025-26",
+          "team": "Rio Ave",
+          "minutes": 1077,
+          "matches": 13,
+          "goals": 7,
+          "goals_per_90": 0.585,
+          "sar_season": 0.2892,
+          "sar_season_sd": 0.1167
+        },
+        {
+          "season": "2026-27",
+          "team": "Rio Ave",
+          "minutes": 82,
+          "matches": 1,
+          "goals": 0,
+          "goals_per_90": 0.0,
+          "sar_season": 0.2752,
+          "sar_season_sd": 0.1218
+        }
+      ],
+      "skill_change": {
+        "from_season": "2025-26",
+        "to_season": "2026-27",
+        "delta": -0.014,
+        "delta_ref_sd": 0.1687,
+        "within_noise": true
+      },
+      "recent": [
+        {
+          "season": "2026-27",
+          "matchday": 1,
+          "date": "2026-08-09",
+          "opponent": "Gil Vicente",
+          "is_home": false,
+          "started": true,
+          "minutes": 82,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.4
+        },
+        {
+          "season": "2025-26",
+          "matchday": 34,
+          "date": "2026-05-16",
+          "opponent": "Casa Pia",
+          "is_home": false,
+          "started": true,
+          "minutes": 90,
+          "goals": 1,
+          "assists": 0,
+          "rating": 6.6
+        },
+        {
+          "season": "2025-26",
+          "matchday": 33,
+          "date": "2026-05-11",
+          "opponent": "Sporting CP",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 0,
+          "rating": 7.1
+        },
+        {
+          "season": "2025-26",
+          "matchday": 32,
+          "date": "2026-05-03",
+          "opponent": "Gil Vicente",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 0,
+          "rating": 7.1
+        },
+        {
+          "season": "2025-26",
+          "matchday": 31,
+          "date": "2026-04-25",
+          "opponent": "Vitoria SC",
+          "is_home": false,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.7
+        },
+        {
+          "season": "2025-26",
+          "matchday": 30,
+          "date": "2026-04-17",
+          "opponent": "AVS",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 0,
+          "rating": 7.3
+        },
+        {
+          "season": "2025-26",
+          "matchday": 28,
+          "date": "2026-04-04",
+          "opponent": "Alverca",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 1,
+          "assists": 0,
+          "rating": 8.9
+        },
+        {
+          "season": "2025-26",
+          "matchday": 27,
+          "date": "2026-03-22",
+          "opponent": "Estoril",
+          "is_home": false,
+          "started": true,
+          "minutes": 89,
+          "goals": 1,
+          "assists": 0,
+          "rating": 6.8
+        }
+      ]
+    },
+    {
       "slug": "clayton",
       "rank": 9,
       "player": "Clayton",
@@ -1225,11 +1252,11 @@
       "matches": 74,
       "goals": 32,
       "goals_per_90": 0.478,
-      "sar": 0.2743,
-      "sar_sd": 0.0649,
-      "skill_lo": 0.1725,
-      "skill_hi": 0.3841,
-      "xg_skill_per_90": 0.3726,
+      "sar": 0.2726,
+      "sar_sd": 0.0654,
+      "skill_lo": 0.1664,
+      "skill_hi": 0.3849,
+      "xg_skill_per_90": 0.3723,
       "p_above_replacement": 1.0,
       "last_season": "2025-26",
       "seasons": [
@@ -1240,8 +1267,8 @@
           "matches": 24,
           "goals": 8,
           "goals_per_90": 0.422,
-          "sar_season": 0.2742,
-          "sar_season_sd": 0.0681
+          "sar_season": 0.2724,
+          "sar_season_sd": 0.0695
         },
         {
           "season": "2024-25",
@@ -1250,8 +1277,8 @@
           "matches": 31,
           "goals": 14,
           "goals_per_90": 0.465,
-          "sar_season": 0.2814,
-          "sar_season_sd": 0.0664
+          "sar_season": 0.2798,
+          "sar_season_sd": 0.0658
         },
         {
           "season": "2025-26",
@@ -1260,15 +1287,15 @@
           "matches": 19,
           "goals": 10,
           "goals_per_90": 0.562,
-          "sar_season": 0.2802,
-          "sar_season_sd": 0.0706
+          "sar_season": 0.2785,
+          "sar_season_sd": 0.0702
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": -0.0012,
-        "delta_ref_sd": 0.0969,
+        "delta": -0.0013,
+        "delta_ref_sd": 0.0962,
         "within_noise": true
       },
       "recent": [
@@ -1381,11 +1408,11 @@
       "matches": 45,
       "goals": 12,
       "goals_per_90": 0.446,
-      "sar": 0.2667,
-      "sar_sd": 0.0879,
-      "skill_lo": 0.1315,
-      "skill_hi": 0.42,
-      "xg_skill_per_90": 0.365,
+      "sar": 0.2631,
+      "sar_sd": 0.0869,
+      "skill_lo": 0.1295,
+      "skill_hi": 0.4121,
+      "xg_skill_per_90": 0.3628,
       "p_above_replacement": 1.0,
       "last_season": "2026-27",
       "seasons": [
@@ -1396,8 +1423,8 @@
           "matches": 21,
           "goals": 7,
           "goals_per_90": 0.728,
-          "sar_season": 0.2808,
-          "sar_season_sd": 0.093
+          "sar_season": 0.2782,
+          "sar_season_sd": 0.0923
         },
         {
           "season": "2025-26",
@@ -1406,8 +1433,8 @@
           "matches": 23,
           "goals": 5,
           "goals_per_90": 0.307,
-          "sar_season": 0.2651,
-          "sar_season_sd": 0.0881
+          "sar_season": 0.2613,
+          "sar_season_sd": 0.0875
         },
         {
           "season": "2026-27",
@@ -1416,15 +1443,15 @@
           "matches": 1,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.2666,
-          "sar_season_sd": 0.0947
+          "sar_season": 0.2634,
+          "sar_season_sd": 0.0931
         }
       ],
       "skill_change": {
         "from_season": "2025-26",
         "to_season": "2026-27",
-        "delta": 0.0015,
-        "delta_ref_sd": 0.1293,
+        "delta": 0.0021,
+        "delta_ref_sd": 0.1278,
         "within_noise": true
       },
       "recent": [
@@ -1527,8 +1554,164 @@
       ]
     },
     {
-      "slug": "jesus-ramirez",
+      "slug": "hector-hernandez",
       "rank": 11,
+      "player": "Héctor Hernández",
+      "player_id": 352448,
+      "team": "Gil Vicente",
+      "position": "F",
+      "minutes": 2973,
+      "matches": 42,
+      "goals": 17,
+      "goals_per_90": 0.515,
+      "sar": 0.2576,
+      "sar_sd": 0.081,
+      "skill_lo": 0.1317,
+      "skill_hi": 0.4004,
+      "xg_skill_per_90": 0.3573,
+      "p_above_replacement": 1.0,
+      "last_season": "2026-27",
+      "seasons": [
+        {
+          "season": "2023-24",
+          "team": "Chaves",
+          "minutes": 2608,
+          "matches": 32,
+          "goals": 14,
+          "goals_per_90": 0.483,
+          "sar_season": 0.2606,
+          "sar_season_sd": 0.0789
+        },
+        {
+          "season": "2025-26",
+          "team": "Gil Vicente",
+          "minutes": 351,
+          "matches": 9,
+          "goals": 2,
+          "goals_per_90": 0.513,
+          "sar_season": 0.2604,
+          "sar_season_sd": 0.087
+        },
+        {
+          "season": "2026-27",
+          "team": "Gil Vicente",
+          "minutes": 14,
+          "matches": 1,
+          "goals": 1,
+          "goals_per_90": 6.429,
+          "sar_season": 0.2638,
+          "sar_season_sd": 0.0902
+        }
+      ],
+      "skill_change": {
+        "from_season": "2025-26",
+        "to_season": "2026-27",
+        "delta": 0.0034,
+        "delta_ref_sd": 0.1253,
+        "within_noise": true
+      },
+      "recent": [
+        {
+          "season": "2026-27",
+          "matchday": 1,
+          "date": "2026-08-09",
+          "opponent": "Rio Ave",
+          "is_home": true,
+          "started": false,
+          "minutes": 14,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.0
+        },
+        {
+          "season": "2025-26",
+          "matchday": 34,
+          "date": "2026-05-16",
+          "opponent": "Sporting CP",
+          "is_home": false,
+          "started": false,
+          "minutes": 17,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.4
+        },
+        {
+          "season": "2025-26",
+          "matchday": 33,
+          "date": "2026-05-11",
+          "opponent": "Arouca",
+          "is_home": true,
+          "started": false,
+          "minutes": 26,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.4
+        },
+        {
+          "season": "2025-26",
+          "matchday": 32,
+          "date": "2026-05-03",
+          "opponent": "Rio Ave",
+          "is_home": false,
+          "started": true,
+          "minutes": 58,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.6
+        },
+        {
+          "season": "2025-26",
+          "matchday": 31,
+          "date": "2026-04-27",
+          "opponent": "Casa Pia",
+          "is_home": true,
+          "started": true,
+          "minutes": 61,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.5
+        },
+        {
+          "season": "2025-26",
+          "matchday": 30,
+          "date": "2026-04-18",
+          "opponent": "Vitoria SC",
+          "is_home": true,
+          "started": false,
+          "minutes": 11,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.4
+        },
+        {
+          "season": "2025-26",
+          "matchday": 25,
+          "date": "2026-03-08",
+          "opponent": "Estrela Amadora",
+          "is_home": false,
+          "started": true,
+          "minutes": 78,
+          "goals": 0,
+          "assists": 1,
+          "rating": 7.3
+        },
+        {
+          "season": "2025-26",
+          "matchday": 24,
+          "date": "2026-03-02",
+          "opponent": "Benfica",
+          "is_home": true,
+          "started": true,
+          "minutes": 68,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.4
+        }
+      ]
+    },
+    {
+      "slug": "jesus-ramirez",
+      "rank": 12,
       "player": "Jesús Ramírez",
       "player_id": 987597,
       "team": "Nacional",
@@ -1537,11 +1720,11 @@
       "matches": 58,
       "goals": 21,
       "goals_per_90": 0.518,
-      "sar": 0.2585,
-      "sar_sd": 0.0768,
-      "skill_lo": 0.1412,
-      "skill_hi": 0.3942,
-      "xg_skill_per_90": 0.3568,
+      "sar": 0.2561,
+      "sar_sd": 0.0744,
+      "skill_lo": 0.14,
+      "skill_hi": 0.383,
+      "xg_skill_per_90": 0.3558,
       "p_above_replacement": 1.0,
       "last_season": "2025-26",
       "seasons": [
@@ -1552,8 +1735,8 @@
           "matches": 25,
           "goals": 3,
           "goals_per_90": 0.358,
-          "sar_season": 0.2554,
-          "sar_season_sd": 0.0799
+          "sar_season": 0.2521,
+          "sar_season_sd": 0.078
         },
         {
           "season": "2025-26",
@@ -1562,15 +1745,15 @@
           "matches": 33,
           "goals": 18,
           "goals_per_90": 0.56,
-          "sar_season": 0.2725,
-          "sar_season_sd": 0.077
+          "sar_season": 0.2712,
+          "sar_season_sd": 0.0748
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0171,
-        "delta_ref_sd": 0.111,
+        "delta": 0.0191,
+        "delta_ref_sd": 0.1081,
         "within_noise": true
       },
       "recent": [
@@ -1674,7 +1857,7 @@
     },
     {
       "slug": "marko-milovanovic",
-      "rank": 12,
+      "rank": 13,
       "player": "Marko Milovanović",
       "player_id": 1100957,
       "team": "Alverca",
@@ -1683,12 +1866,12 @@
       "matches": 31,
       "goals": 9,
       "goals_per_90": 0.528,
-      "sar": 0.2531,
-      "sar_sd": 0.0942,
-      "skill_lo": 0.1096,
-      "skill_hi": 0.4223,
-      "xg_skill_per_90": 0.3514,
-      "p_above_replacement": 0.9998,
+      "sar": 0.2505,
+      "sar_sd": 0.0931,
+      "skill_lo": 0.1104,
+      "skill_hi": 0.4105,
+      "xg_skill_per_90": 0.3502,
+      "p_above_replacement": 1.0,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -1698,8 +1881,8 @@
           "matches": 31,
           "goals": 9,
           "goals_per_90": 0.528,
-          "sar_season": 0.2618,
-          "sar_season_sd": 0.092
+          "sar_season": 0.2599,
+          "sar_season_sd": 0.0921
         }
       ],
       "skill_change": null,
@@ -1803,300 +1986,8 @@
       ]
     },
     {
-      "slug": "hector-hernandez",
-      "rank": 13,
-      "player": "Héctor Hernández",
-      "player_id": 352448,
-      "team": "Gil Vicente",
-      "position": "F",
-      "minutes": 2959,
-      "matches": 41,
-      "goals": 16,
-      "goals_per_90": 0.487,
-      "sar": 0.2371,
-      "sar_sd": 0.0778,
-      "skill_lo": 0.1164,
-      "skill_hi": 0.3742,
-      "xg_skill_per_90": 0.3354,
-      "p_above_replacement": 1.0,
-      "last_season": "2025-26",
-      "seasons": [
-        {
-          "season": "2023-24",
-          "team": "Chaves",
-          "minutes": 2608,
-          "matches": 32,
-          "goals": 14,
-          "goals_per_90": 0.483,
-          "sar_season": 0.2438,
-          "sar_season_sd": 0.0777
-        },
-        {
-          "season": "2025-26",
-          "team": "Gil Vicente",
-          "minutes": 351,
-          "matches": 9,
-          "goals": 2,
-          "goals_per_90": 0.513,
-          "sar_season": 0.2399,
-          "sar_season_sd": 0.0824
-        }
-      ],
-      "skill_change": {
-        "from_season": "2023-24",
-        "to_season": "2025-26",
-        "delta": -0.0039,
-        "delta_ref_sd": 0.1133,
-        "within_noise": true
-      },
-      "recent": [
-        {
-          "season": "2026-27",
-          "matchday": 1,
-          "date": "2026-08-09",
-          "opponent": "Rio Ave",
-          "is_home": true,
-          "started": false,
-          "minutes": 14,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.0
-        },
-        {
-          "season": "2025-26",
-          "matchday": 34,
-          "date": "2026-05-16",
-          "opponent": "Sporting CP",
-          "is_home": false,
-          "started": false,
-          "minutes": 17,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.4
-        },
-        {
-          "season": "2025-26",
-          "matchday": 33,
-          "date": "2026-05-11",
-          "opponent": "Arouca",
-          "is_home": true,
-          "started": false,
-          "minutes": 26,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.4
-        },
-        {
-          "season": "2025-26",
-          "matchday": 32,
-          "date": "2026-05-03",
-          "opponent": "Rio Ave",
-          "is_home": false,
-          "started": true,
-          "minutes": 58,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.6
-        },
-        {
-          "season": "2025-26",
-          "matchday": 31,
-          "date": "2026-04-27",
-          "opponent": "Casa Pia",
-          "is_home": true,
-          "started": true,
-          "minutes": 61,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.5
-        },
-        {
-          "season": "2025-26",
-          "matchday": 30,
-          "date": "2026-04-18",
-          "opponent": "Vitoria SC",
-          "is_home": true,
-          "started": false,
-          "minutes": 11,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.4
-        },
-        {
-          "season": "2025-26",
-          "matchday": 25,
-          "date": "2026-03-08",
-          "opponent": "Estrela Amadora",
-          "is_home": false,
-          "started": true,
-          "minutes": 78,
-          "goals": 0,
-          "assists": 1,
-          "rating": 7.3
-        },
-        {
-          "season": "2025-26",
-          "matchday": 24,
-          "date": "2026-03-02",
-          "opponent": "Benfica",
-          "is_home": true,
-          "started": true,
-          "minutes": 68,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.4
-        }
-      ]
-    },
-    {
-      "slug": "yassir-zabiri",
-      "rank": 14,
-      "player": "Yassir Zabiri",
-      "player_id": 1606013,
-      "team": "Famalicao",
-      "position": "F",
-      "minutes": 715,
-      "matches": 17,
-      "goals": 5,
-      "goals_per_90": 0.629,
-      "sar": 0.226,
-      "sar_sd": 0.1138,
-      "skill_lo": 0.0618,
-      "skill_hi": 0.433,
-      "xg_skill_per_90": 0.3243,
-      "p_above_replacement": 0.9965,
-      "last_season": "2025-26",
-      "seasons": [
-        {
-          "season": "2024-25",
-          "team": "Famalicao",
-          "minutes": 54,
-          "matches": 5,
-          "goals": 1,
-          "goals_per_90": 1.667,
-          "sar_season": 0.2301,
-          "sar_season_sd": 0.1177
-        },
-        {
-          "season": "2025-26",
-          "team": "Famalicao",
-          "minutes": 661,
-          "matches": 12,
-          "goals": 4,
-          "goals_per_90": 0.545,
-          "sar_season": 0.2301,
-          "sar_season_sd": 0.1157
-        }
-      ],
-      "skill_change": {
-        "from_season": "2024-25",
-        "to_season": "2025-26",
-        "delta": 0.0,
-        "delta_ref_sd": 0.165,
-        "within_noise": true
-      },
-      "recent": [
-        {
-          "season": "2025-26",
-          "matchday": 18,
-          "date": "2026-01-18",
-          "opponent": "Santa Clara",
-          "is_home": false,
-          "started": false,
-          "minutes": 23,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.4
-        },
-        {
-          "season": "2025-26",
-          "matchday": 17,
-          "date": "2026-01-04",
-          "opponent": "Alverca",
-          "is_home": false,
-          "started": true,
-          "minutes": 77,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.3
-        },
-        {
-          "season": "2025-26",
-          "matchday": 16,
-          "date": "2025-12-27",
-          "opponent": "Estrela Amadora",
-          "is_home": true,
-          "started": true,
-          "minutes": 79,
-          "goals": 0,
-          "assists": 0,
-          "rating": 7.3
-        },
-        {
-          "season": "2025-26",
-          "matchday": 15,
-          "date": "2025-12-22",
-          "opponent": "Benfica",
-          "is_home": false,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.4
-        },
-        {
-          "season": "2025-26",
-          "matchday": 14,
-          "date": "2025-12-14",
-          "opponent": "Estoril",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 2,
-          "assists": 0,
-          "rating": 8.9
-        },
-        {
-          "season": "2025-26",
-          "matchday": 13,
-          "date": "2025-12-06",
-          "opponent": "SC Braga",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.5
-        },
-        {
-          "season": "2025-26",
-          "matchday": 12,
-          "date": "2025-11-29",
-          "opponent": "Moreirense",
-          "is_home": false,
-          "started": true,
-          "minutes": 81,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.1
-        },
-        {
-          "season": "2025-26",
-          "matchday": 11,
-          "date": "2025-11-09",
-          "opponent": "Porto",
-          "is_home": true,
-          "started": true,
-          "minutes": 68,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.9
-        }
-      ]
-    },
-    {
       "slug": "guilherme-schettine",
-      "rank": 15,
+      "rank": 14,
       "player": "Guilherme Schettine",
       "player_id": 856119,
       "team": "Moreirense",
@@ -2105,11 +1996,11 @@
       "matches": 45,
       "goals": 14,
       "goals_per_90": 0.468,
-      "sar": 0.2252,
-      "sar_sd": 0.076,
-      "skill_lo": 0.1085,
-      "skill_hi": 0.3599,
-      "xg_skill_per_90": 0.3235,
+      "sar": 0.2236,
+      "sar_sd": 0.0765,
+      "skill_lo": 0.1055,
+      "skill_hi": 0.3592,
+      "xg_skill_per_90": 0.3233,
       "p_above_replacement": 1.0,
       "last_season": "2025-26",
       "seasons": [
@@ -2120,8 +2011,8 @@
           "matches": 30,
           "goals": 5,
           "goals_per_90": 0.265,
-          "sar_season": 0.2175,
-          "sar_season_sd": 0.0755
+          "sar_season": 0.2153,
+          "sar_season_sd": 0.0769
         },
         {
           "season": "2025-26",
@@ -2130,15 +2021,15 @@
           "matches": 15,
           "goals": 9,
           "goals_per_90": 0.815,
-          "sar_season": 0.2421,
-          "sar_season_sd": 0.0834
+          "sar_season": 0.2417,
+          "sar_season_sd": 0.0848
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0246,
-        "delta_ref_sd": 0.1125,
+        "delta": 0.0264,
+        "delta_ref_sd": 0.1145,
         "within_noise": true
       },
       "recent": [
@@ -2241,8 +2132,300 @@
       ]
     },
     {
-      "slug": "william-gomes",
+      "slug": "yassir-zabiri",
+      "rank": 15,
+      "player": "Yassir Zabiri",
+      "player_id": 1606013,
+      "team": "Famalicao",
+      "position": "F",
+      "minutes": 715,
+      "matches": 17,
+      "goals": 5,
+      "goals_per_90": 0.629,
+      "sar": 0.2229,
+      "sar_sd": 0.1116,
+      "skill_lo": 0.0617,
+      "skill_hi": 0.4223,
+      "xg_skill_per_90": 0.3226,
+      "p_above_replacement": 0.9958,
+      "last_season": "2025-26",
+      "seasons": [
+        {
+          "season": "2024-25",
+          "team": "Famalicao",
+          "minutes": 54,
+          "matches": 5,
+          "goals": 1,
+          "goals_per_90": 1.667,
+          "sar_season": 0.2272,
+          "sar_season_sd": 0.1146
+        },
+        {
+          "season": "2025-26",
+          "team": "Famalicao",
+          "minutes": 661,
+          "matches": 12,
+          "goals": 4,
+          "goals_per_90": 0.545,
+          "sar_season": 0.2277,
+          "sar_season_sd": 0.1128
+        }
+      ],
+      "skill_change": {
+        "from_season": "2024-25",
+        "to_season": "2025-26",
+        "delta": 0.0005,
+        "delta_ref_sd": 0.1608,
+        "within_noise": true
+      },
+      "recent": [
+        {
+          "season": "2025-26",
+          "matchday": 18,
+          "date": "2026-01-18",
+          "opponent": "Santa Clara",
+          "is_home": false,
+          "started": false,
+          "minutes": 23,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.4
+        },
+        {
+          "season": "2025-26",
+          "matchday": 17,
+          "date": "2026-01-04",
+          "opponent": "Alverca",
+          "is_home": false,
+          "started": true,
+          "minutes": 77,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.3
+        },
+        {
+          "season": "2025-26",
+          "matchday": 16,
+          "date": "2025-12-27",
+          "opponent": "Estrela Amadora",
+          "is_home": true,
+          "started": true,
+          "minutes": 79,
+          "goals": 0,
+          "assists": 0,
+          "rating": 7.3
+        },
+        {
+          "season": "2025-26",
+          "matchday": 15,
+          "date": "2025-12-22",
+          "opponent": "Benfica",
+          "is_home": false,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.4
+        },
+        {
+          "season": "2025-26",
+          "matchday": 14,
+          "date": "2025-12-14",
+          "opponent": "Estoril",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 2,
+          "assists": 0,
+          "rating": 8.9
+        },
+        {
+          "season": "2025-26",
+          "matchday": 13,
+          "date": "2025-12-06",
+          "opponent": "SC Braga",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.5
+        },
+        {
+          "season": "2025-26",
+          "matchday": 12,
+          "date": "2025-11-29",
+          "opponent": "Moreirense",
+          "is_home": false,
+          "started": true,
+          "minutes": 81,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.1
+        },
+        {
+          "season": "2025-26",
+          "matchday": 11,
+          "date": "2025-11-09",
+          "opponent": "Porto",
+          "is_home": true,
+          "started": true,
+          "minutes": 68,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.9
+        }
+      ]
+    },
+    {
+      "slug": "pau-victor",
       "rank": 16,
+      "player": "Pau Víctor",
+      "player_id": 1031567,
+      "team": "SC Braga",
+      "position": "F",
+      "minutes": 2302,
+      "matches": 33,
+      "goals": 11,
+      "goals_per_90": 0.43,
+      "sar": 0.2212,
+      "sar_sd": 0.0846,
+      "skill_lo": 0.0952,
+      "skill_hi": 0.3712,
+      "xg_skill_per_90": 0.321,
+      "p_above_replacement": 0.9998,
+      "last_season": "2026-27",
+      "seasons": [
+        {
+          "season": "2025-26",
+          "team": "SC Braga",
+          "minutes": 2269,
+          "matches": 32,
+          "goals": 10,
+          "goals_per_90": 0.397,
+          "sar_season": 0.2248,
+          "sar_season_sd": 0.0818
+        },
+        {
+          "season": "2026-27",
+          "team": "SC Braga",
+          "minutes": 33,
+          "matches": 1,
+          "goals": 1,
+          "goals_per_90": 2.727,
+          "sar_season": 0.2276,
+          "sar_season_sd": 0.092
+        }
+      ],
+      "skill_change": {
+        "from_season": "2025-26",
+        "to_season": "2026-27",
+        "delta": 0.0028,
+        "delta_ref_sd": 0.1231,
+        "within_noise": true
+      },
+      "recent": [
+        {
+          "season": "2026-27",
+          "matchday": 1,
+          "date": "2026-08-09",
+          "opponent": "Moreirense",
+          "is_home": false,
+          "started": false,
+          "minutes": 33,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.1
+        },
+        {
+          "season": "2025-26",
+          "matchday": 34,
+          "date": "2026-05-16",
+          "opponent": "Estrela Amadora",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.3
+        },
+        {
+          "season": "2025-26",
+          "matchday": 33,
+          "date": "2026-05-11",
+          "opponent": "Benfica",
+          "is_home": false,
+          "started": true,
+          "minutes": 90,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.9
+        },
+        {
+          "season": "2025-26",
+          "matchday": 32,
+          "date": "2026-05-03",
+          "opponent": "Estoril",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.9
+        },
+        {
+          "season": "2025-26",
+          "matchday": 26,
+          "date": "2026-04-23",
+          "opponent": "Casa Pia",
+          "is_home": false,
+          "started": true,
+          "minutes": 62,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.0
+        },
+        {
+          "season": "2025-26",
+          "matchday": 30,
+          "date": "2026-04-19",
+          "opponent": "Famalicao",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.7
+        },
+        {
+          "season": "2025-26",
+          "matchday": 29,
+          "date": "2026-04-12",
+          "opponent": "Arouca",
+          "is_home": true,
+          "started": false,
+          "minutes": 27,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.6
+        },
+        {
+          "season": "2025-26",
+          "matchday": 28,
+          "date": "2026-04-04",
+          "opponent": "Moreirense",
+          "is_home": false,
+          "started": true,
+          "minutes": 86,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.6
+        }
+      ]
+    },
+    {
+      "slug": "william-gomes",
+      "rank": 17,
       "player": "William Gomes",
       "player_id": 1639250,
       "team": "Porto",
@@ -2251,11 +2434,11 @@
       "matches": 37,
       "goals": 8,
       "goals_per_90": 0.519,
-      "sar": 0.2248,
-      "sar_sd": 0.0878,
-      "skill_lo": 0.09,
-      "skill_hi": 0.3811,
-      "xg_skill_per_90": 0.3231,
+      "sar": 0.221,
+      "sar_sd": 0.09,
+      "skill_lo": 0.0825,
+      "skill_hi": 0.3792,
+      "xg_skill_per_90": 0.3208,
       "p_above_replacement": 0.9995,
       "last_season": "2026-27",
       "seasons": [
@@ -2266,8 +2449,8 @@
           "matches": 8,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.222,
-          "sar_season_sd": 0.0916
+          "sar_season": 0.218,
+          "sar_season_sd": 0.0946
         },
         {
           "season": "2025-26",
@@ -2276,8 +2459,8 @@
           "matches": 28,
           "goals": 8,
           "goals_per_90": 0.616,
-          "sar_season": 0.2377,
-          "sar_season_sd": 0.0885
+          "sar_season": 0.2337,
+          "sar_season_sd": 0.0914
         },
         {
           "season": "2026-27",
@@ -2286,15 +2469,15 @@
           "matches": 1,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.225,
-          "sar_season_sd": 0.0935
+          "sar_season": 0.2206,
+          "sar_season_sd": 0.0954
         }
       ],
       "skill_change": {
         "from_season": "2025-26",
         "to_season": "2026-27",
-        "delta": -0.0127,
-        "delta_ref_sd": 0.1287,
+        "delta": -0.0131,
+        "delta_ref_sd": 0.1321,
         "within_noise": true
       },
       "recent": [
@@ -2397,152 +2580,6 @@
       ]
     },
     {
-      "slug": "rafa-silva",
-      "rank": 17,
-      "player": "Rafa Silva",
-      "player_id": 252577,
-      "team": "Benfica",
-      "position": "M",
-      "minutes": 3424,
-      "matches": 46,
-      "goals": 19,
-      "goals_per_90": 0.499,
-      "sar": 0.2188,
-      "sar_sd": 0.0728,
-      "skill_lo": 0.1069,
-      "skill_hi": 0.3466,
-      "xg_skill_per_90": 0.3171,
-      "p_above_replacement": 1.0,
-      "last_season": "2025-26",
-      "seasons": [
-        {
-          "season": "2023-24",
-          "team": "Benfica",
-          "minutes": 2488,
-          "matches": 30,
-          "goals": 14,
-          "goals_per_90": 0.506,
-          "sar_season": 0.2301,
-          "sar_season_sd": 0.071
-        },
-        {
-          "season": "2025-26",
-          "team": "Benfica",
-          "minutes": 936,
-          "matches": 16,
-          "goals": 5,
-          "goals_per_90": 0.481,
-          "sar_season": 0.2246,
-          "sar_season_sd": 0.076
-        }
-      ],
-      "skill_change": {
-        "from_season": "2023-24",
-        "to_season": "2025-26",
-        "delta": -0.0055,
-        "delta_ref_sd": 0.104,
-        "within_noise": true
-      },
-      "recent": [
-        {
-          "season": "2026-27",
-          "matchday": 1,
-          "date": "2026-08-09",
-          "opponent": "Academico Viseu",
-          "is_home": true,
-          "started": true,
-          "minutes": 76,
-          "goals": 0,
-          "assists": 0,
-          "rating": 7.1
-        },
-        {
-          "season": "2025-26",
-          "matchday": 34,
-          "date": "2026-05-16",
-          "opponent": "Estoril",
-          "is_home": false,
-          "started": true,
-          "minutes": 68,
-          "goals": 1,
-          "assists": 0,
-          "rating": 6.7
-        },
-        {
-          "season": "2025-26",
-          "matchday": 33,
-          "date": "2026-05-11",
-          "opponent": "SC Braga",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.7
-        },
-        {
-          "season": "2025-26",
-          "matchday": 32,
-          "date": "2026-05-02",
-          "opponent": "Famalicao",
-          "is_home": false,
-          "started": false,
-          "minutes": 22,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.5
-        },
-        {
-          "season": "2025-26",
-          "matchday": 31,
-          "date": "2026-04-25",
-          "opponent": "Moreirense",
-          "is_home": true,
-          "started": true,
-          "minutes": 58,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.7
-        },
-        {
-          "season": "2025-26",
-          "matchday": 30,
-          "date": "2026-04-19",
-          "opponent": "Sporting CP",
-          "is_home": false,
-          "started": false,
-          "minutes": 12,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.9
-        },
-        {
-          "season": "2025-26",
-          "matchday": 29,
-          "date": "2026-04-12",
-          "opponent": "Nacional",
-          "is_home": true,
-          "started": true,
-          "minutes": 78,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.7
-        },
-        {
-          "season": "2025-26",
-          "matchday": 28,
-          "date": "2026-04-06",
-          "opponent": "Casa Pia",
-          "is_home": false,
-          "started": true,
-          "minutes": 70,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.9
-        }
-      ]
-    },
-    {
       "slug": "bruma",
       "rank": 18,
       "player": "Bruma",
@@ -2553,12 +2590,12 @@
       "matches": 56,
       "goals": 14,
       "goals_per_90": 0.362,
-      "sar": 0.217,
-      "sar_sd": 0.0765,
-      "skill_lo": 0.0976,
-      "skill_hi": 0.3489,
-      "xg_skill_per_90": 0.3153,
-      "p_above_replacement": 0.9998,
+      "sar": 0.2146,
+      "sar_sd": 0.0782,
+      "skill_lo": 0.0923,
+      "skill_hi": 0.3486,
+      "xg_skill_per_90": 0.3143,
+      "p_above_replacement": 0.9995,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -2568,8 +2605,8 @@
           "matches": 26,
           "goals": 6,
           "goals_per_90": 0.311,
-          "sar_season": 0.2222,
-          "sar_season_sd": 0.0802
+          "sar_season": 0.2209,
+          "sar_season_sd": 0.0798
         },
         {
           "season": "2024-25",
@@ -2578,8 +2615,8 @@
           "matches": 27,
           "goals": 8,
           "goals_per_90": 0.419,
-          "sar_season": 0.2195,
-          "sar_season_sd": 0.0792
+          "sar_season": 0.2178,
+          "sar_season_sd": 0.0801
         },
         {
           "season": "2025-26",
@@ -2588,15 +2625,15 @@
           "matches": 3,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.2175,
-          "sar_season_sd": 0.0817
+          "sar_season": 0.2157,
+          "sar_season_sd": 0.086
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": -0.002,
-        "delta_ref_sd": 0.1138,
+        "delta": -0.0021,
+        "delta_ref_sd": 0.1175,
         "within_noise": true
       },
       "recent": [
@@ -2709,12 +2746,12 @@
       "matches": 32,
       "goals": 9,
       "goals_per_90": 0.41,
-      "sar": 0.2163,
-      "sar_sd": 0.0882,
-      "skill_lo": 0.0834,
-      "skill_hi": 0.3704,
-      "xg_skill_per_90": 0.3146,
-      "p_above_replacement": 0.9995,
+      "sar": 0.214,
+      "sar_sd": 0.0839,
+      "skill_lo": 0.0897,
+      "skill_hi": 0.3665,
+      "xg_skill_per_90": 0.3137,
+      "p_above_replacement": 0.9998,
       "last_season": "2026-27",
       "seasons": [
         {
@@ -2724,8 +2761,8 @@
           "matches": 31,
           "goals": 8,
           "goals_per_90": 0.377,
-          "sar_season": 0.2192,
-          "sar_season_sd": 0.0868
+          "sar_season": 0.2175,
+          "sar_season_sd": 0.0822
         },
         {
           "season": "2026-27",
@@ -2734,15 +2771,15 @@
           "matches": 1,
           "goals": 1,
           "goals_per_90": 1.385,
-          "sar_season": 0.2217,
-          "sar_season_sd": 0.0956
+          "sar_season": 0.219,
+          "sar_season_sd": 0.0921
         }
       ],
       "skill_change": {
         "from_season": "2025-26",
         "to_season": "2026-27",
-        "delta": 0.0025,
-        "delta_ref_sd": 0.1291,
+        "delta": 0.0015,
+        "delta_ref_sd": 0.1234,
         "within_noise": true
       },
       "recent": [
@@ -2845,154 +2882,8 @@
       ]
     },
     {
-      "slug": "andreas-schjelderup",
-      "rank": 20,
-      "player": "Andreas Schjelderup",
-      "player_id": 1100952,
-      "team": "Benfica",
-      "position": "F",
-      "minutes": 2260,
-      "matches": 48,
-      "goals": 8,
-      "goals_per_90": 0.319,
-      "sar": 0.2156,
-      "sar_sd": 0.0872,
-      "skill_lo": 0.081,
-      "skill_hi": 0.3655,
-      "xg_skill_per_90": 0.3139,
-      "p_above_replacement": 0.999,
-      "last_season": "2025-26",
-      "seasons": [
-        {
-          "season": "2024-25",
-          "team": "Benfica",
-          "minutes": 527,
-          "matches": 20,
-          "goals": 1,
-          "goals_per_90": 0.171,
-          "sar_season": 0.2101,
-          "sar_season_sd": 0.0882
-        },
-        {
-          "season": "2025-26",
-          "team": "Benfica",
-          "minutes": 1733,
-          "matches": 28,
-          "goals": 7,
-          "goals_per_90": 0.364,
-          "sar_season": 0.2277,
-          "sar_season_sd": 0.0874
-        }
-      ],
-      "skill_change": {
-        "from_season": "2024-25",
-        "to_season": "2025-26",
-        "delta": 0.0176,
-        "delta_ref_sd": 0.1242,
-        "within_noise": true
-      },
-      "recent": [
-        {
-          "season": "2026-27",
-          "matchday": 1,
-          "date": "2026-08-09",
-          "opponent": "Academico Viseu",
-          "is_home": true,
-          "started": false,
-          "minutes": 26,
-          "goals": 0,
-          "assists": 0,
-          "rating": 7.4
-        },
-        {
-          "season": "2025-26",
-          "matchday": 34,
-          "date": "2026-05-16",
-          "opponent": "Estoril",
-          "is_home": false,
-          "started": true,
-          "minutes": 84,
-          "goals": 0,
-          "assists": 0,
-          "rating": 7.6
-        },
-        {
-          "season": "2025-26",
-          "matchday": 33,
-          "date": "2026-05-11",
-          "opponent": "SC Braga",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 0,
-          "rating": 8.4
-        },
-        {
-          "season": "2025-26",
-          "matchday": 32,
-          "date": "2026-05-02",
-          "opponent": "Famalicao",
-          "is_home": false,
-          "started": true,
-          "minutes": 72,
-          "goals": 1,
-          "assists": 1,
-          "rating": 7.7
-        },
-        {
-          "season": "2025-26",
-          "matchday": 31,
-          "date": "2026-04-25",
-          "opponent": "Moreirense",
-          "is_home": true,
-          "started": false,
-          "minutes": 32,
-          "goals": 0,
-          "assists": 0,
-          "rating": 7.1
-        },
-        {
-          "season": "2025-26",
-          "matchday": 30,
-          "date": "2026-04-19",
-          "opponent": "Sporting CP",
-          "is_home": false,
-          "started": true,
-          "minutes": 78,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.0
-        },
-        {
-          "season": "2025-26",
-          "matchday": 29,
-          "date": "2026-04-12",
-          "opponent": "Nacional",
-          "is_home": true,
-          "started": true,
-          "minutes": 89,
-          "goals": 1,
-          "assists": 0,
-          "rating": 8.9
-        },
-        {
-          "season": "2025-26",
-          "matchday": 28,
-          "date": "2026-04-06",
-          "opponent": "Casa Pia",
-          "is_home": false,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 1,
-          "rating": 7.6
-        }
-      ]
-    },
-    {
       "slug": "kerem-akturkoglu",
-      "rank": 21,
+      "rank": 20,
       "player": "Kerem Aktürkoğlu",
       "player_id": 903324,
       "team": "Benfica",
@@ -3001,12 +2892,12 @@
       "matches": 31,
       "goals": 11,
       "goals_per_90": 0.484,
-      "sar": 0.2138,
-      "sar_sd": 0.0857,
-      "skill_lo": 0.0821,
-      "skill_hi": 0.3628,
-      "xg_skill_per_90": 0.3121,
-      "p_above_replacement": 0.9995,
+      "sar": 0.2116,
+      "sar_sd": 0.0869,
+      "skill_lo": 0.0781,
+      "skill_hi": 0.3603,
+      "xg_skill_per_90": 0.3114,
+      "p_above_replacement": 0.9982,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -3016,8 +2907,8 @@
           "matches": 30,
           "goals": 11,
           "goals_per_90": 0.49,
-          "sar_season": 0.2216,
-          "sar_season_sd": 0.0864
+          "sar_season": 0.2197,
+          "sar_season_sd": 0.088
         },
         {
           "season": "2025-26",
@@ -3026,15 +2917,15 @@
           "matches": 1,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.2138,
-          "sar_season_sd": 0.0917
+          "sar_season": 0.2122,
+          "sar_season_sd": 0.0938
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": -0.0078,
-        "delta_ref_sd": 0.126,
+        "delta": -0.0075,
+        "delta_ref_sd": 0.1286,
         "within_noise": true
       },
       "recent": [
@@ -3138,7 +3029,7 @@
     },
     {
       "slug": "franjo-ivanovic",
-      "rank": 22,
+      "rank": 21,
       "player": "Franjo Ivanović",
       "player_id": 1103333,
       "team": "Benfica",
@@ -3147,12 +3038,12 @@
       "matches": 25,
       "goals": 6,
       "goals_per_90": 0.61,
-      "sar": 0.2114,
-      "sar_sd": 0.1014,
-      "skill_lo": 0.0642,
-      "skill_hi": 0.3946,
-      "xg_skill_per_90": 0.3097,
-      "p_above_replacement": 0.9982,
+      "sar": 0.2089,
+      "sar_sd": 0.1032,
+      "skill_lo": 0.0551,
+      "skill_hi": 0.3966,
+      "xg_skill_per_90": 0.3086,
+      "p_above_replacement": 0.995,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -3162,8 +3053,8 @@
           "matches": 25,
           "goals": 6,
           "goals_per_90": 0.61,
-          "sar_season": 0.2185,
-          "sar_season_sd": 0.1031
+          "sar_season": 0.2157,
+          "sar_season_sd": 0.1039
         }
       ],
       "skill_change": null,
@@ -3267,6 +3158,162 @@
       ]
     },
     {
+      "slug": "rafa-silva",
+      "rank": 22,
+      "player": "Rafa Silva",
+      "player_id": 252577,
+      "team": "Benfica",
+      "position": "M",
+      "minutes": 3500,
+      "matches": 47,
+      "goals": 19,
+      "goals_per_90": 0.489,
+      "sar": 0.2083,
+      "sar_sd": 0.0728,
+      "skill_lo": 0.0968,
+      "skill_hi": 0.3327,
+      "xg_skill_per_90": 0.3081,
+      "p_above_replacement": 0.9998,
+      "last_season": "2026-27",
+      "seasons": [
+        {
+          "season": "2023-24",
+          "team": "Benfica",
+          "minutes": 2488,
+          "matches": 30,
+          "goals": 14,
+          "goals_per_90": 0.506,
+          "sar_season": 0.2222,
+          "sar_season_sd": 0.0728
+        },
+        {
+          "season": "2025-26",
+          "team": "Benfica",
+          "minutes": 936,
+          "matches": 16,
+          "goals": 5,
+          "goals_per_90": 0.481,
+          "sar_season": 0.2156,
+          "sar_season_sd": 0.0761
+        },
+        {
+          "season": "2026-27",
+          "team": "Benfica",
+          "minutes": 76,
+          "matches": 1,
+          "goals": 0,
+          "goals_per_90": 0.0,
+          "sar_season": 0.2082,
+          "sar_season_sd": 0.0803
+        }
+      ],
+      "skill_change": {
+        "from_season": "2025-26",
+        "to_season": "2026-27",
+        "delta": -0.0074,
+        "delta_ref_sd": 0.1106,
+        "within_noise": true
+      },
+      "recent": [
+        {
+          "season": "2026-27",
+          "matchday": 1,
+          "date": "2026-08-09",
+          "opponent": "Academico Viseu",
+          "is_home": true,
+          "started": true,
+          "minutes": 76,
+          "goals": 0,
+          "assists": 0,
+          "rating": 7.1
+        },
+        {
+          "season": "2025-26",
+          "matchday": 34,
+          "date": "2026-05-16",
+          "opponent": "Estoril",
+          "is_home": false,
+          "started": true,
+          "minutes": 68,
+          "goals": 1,
+          "assists": 0,
+          "rating": 6.7
+        },
+        {
+          "season": "2025-26",
+          "matchday": 33,
+          "date": "2026-05-11",
+          "opponent": "SC Braga",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.7
+        },
+        {
+          "season": "2025-26",
+          "matchday": 32,
+          "date": "2026-05-02",
+          "opponent": "Famalicao",
+          "is_home": false,
+          "started": false,
+          "minutes": 22,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.5
+        },
+        {
+          "season": "2025-26",
+          "matchday": 31,
+          "date": "2026-04-25",
+          "opponent": "Moreirense",
+          "is_home": true,
+          "started": true,
+          "minutes": 58,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.7
+        },
+        {
+          "season": "2025-26",
+          "matchday": 30,
+          "date": "2026-04-19",
+          "opponent": "Sporting CP",
+          "is_home": false,
+          "started": false,
+          "minutes": 12,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.9
+        },
+        {
+          "season": "2025-26",
+          "matchday": 29,
+          "date": "2026-04-12",
+          "opponent": "Nacional",
+          "is_home": true,
+          "started": true,
+          "minutes": 78,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.7
+        },
+        {
+          "season": "2025-26",
+          "matchday": 28,
+          "date": "2026-04-06",
+          "opponent": "Casa Pia",
+          "is_home": false,
+          "started": true,
+          "minutes": 70,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.9
+        }
+      ]
+    },
+    {
       "slug": "nene",
       "rank": 23,
       "player": "Nenê",
@@ -3277,12 +3324,12 @@
       "matches": 39,
       "goals": 8,
       "goals_per_90": 0.571,
-      "sar": 0.2095,
-      "sar_sd": 0.089,
-      "skill_lo": 0.0758,
-      "skill_hi": 0.3692,
-      "xg_skill_per_90": 0.3078,
-      "p_above_replacement": 0.9992,
+      "sar": 0.2082,
+      "sar_sd": 0.0892,
+      "skill_lo": 0.0727,
+      "skill_hi": 0.364,
+      "xg_skill_per_90": 0.308,
+      "p_above_replacement": 0.9985,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -3292,8 +3339,8 @@
           "matches": 18,
           "goals": 4,
           "goals_per_90": 0.417,
-          "sar_season": 0.2108,
-          "sar_season_sd": 0.0891
+          "sar_season": 0.2102,
+          "sar_season_sd": 0.0902
         },
         {
           "season": "2025-26",
@@ -3302,15 +3349,15 @@
           "matches": 21,
           "goals": 4,
           "goals_per_90": 0.907,
-          "sar_season": 0.2162,
-          "sar_season_sd": 0.0936
+          "sar_season": 0.2149,
+          "sar_season_sd": 0.0945
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0054,
-        "delta_ref_sd": 0.1292,
+        "delta": 0.0047,
+        "delta_ref_sd": 0.1306,
         "within_noise": true
       },
       "recent": [
@@ -3413,8 +3460,164 @@
       ]
     },
     {
-      "slug": "conrad-harder",
+      "slug": "andreas-schjelderup",
       "rank": 24,
+      "player": "Andreas Schjelderup",
+      "player_id": 1100952,
+      "team": "Benfica",
+      "position": "F",
+      "minutes": 2286,
+      "matches": 49,
+      "goals": 8,
+      "goals_per_90": 0.315,
+      "sar": 0.2069,
+      "sar_sd": 0.082,
+      "skill_lo": 0.0817,
+      "skill_hi": 0.3496,
+      "xg_skill_per_90": 0.3067,
+      "p_above_replacement": 0.9985,
+      "last_season": "2026-27",
+      "seasons": [
+        {
+          "season": "2024-25",
+          "team": "Benfica",
+          "minutes": 527,
+          "matches": 20,
+          "goals": 1,
+          "goals_per_90": 0.171,
+          "sar_season": 0.2018,
+          "sar_season_sd": 0.0844
+        },
+        {
+          "season": "2025-26",
+          "team": "Benfica",
+          "minutes": 1733,
+          "matches": 28,
+          "goals": 7,
+          "goals_per_90": 0.364,
+          "sar_season": 0.2211,
+          "sar_season_sd": 0.0858
+        },
+        {
+          "season": "2026-27",
+          "team": "Benfica",
+          "minutes": 26,
+          "matches": 1,
+          "goals": 0,
+          "goals_per_90": 0.0,
+          "sar_season": 0.2083,
+          "sar_season_sd": 0.0891
+        }
+      ],
+      "skill_change": {
+        "from_season": "2025-26",
+        "to_season": "2026-27",
+        "delta": -0.0128,
+        "delta_ref_sd": 0.1237,
+        "within_noise": true
+      },
+      "recent": [
+        {
+          "season": "2026-27",
+          "matchday": 1,
+          "date": "2026-08-09",
+          "opponent": "Academico Viseu",
+          "is_home": true,
+          "started": false,
+          "minutes": 26,
+          "goals": 0,
+          "assists": 0,
+          "rating": 7.4
+        },
+        {
+          "season": "2025-26",
+          "matchday": 34,
+          "date": "2026-05-16",
+          "opponent": "Estoril",
+          "is_home": false,
+          "started": true,
+          "minutes": 84,
+          "goals": 0,
+          "assists": 0,
+          "rating": 7.6
+        },
+        {
+          "season": "2025-26",
+          "matchday": 33,
+          "date": "2026-05-11",
+          "opponent": "SC Braga",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 0,
+          "rating": 8.4
+        },
+        {
+          "season": "2025-26",
+          "matchday": 32,
+          "date": "2026-05-02",
+          "opponent": "Famalicao",
+          "is_home": false,
+          "started": true,
+          "minutes": 72,
+          "goals": 1,
+          "assists": 1,
+          "rating": 7.7
+        },
+        {
+          "season": "2025-26",
+          "matchday": 31,
+          "date": "2026-04-25",
+          "opponent": "Moreirense",
+          "is_home": true,
+          "started": false,
+          "minutes": 32,
+          "goals": 0,
+          "assists": 0,
+          "rating": 7.1
+        },
+        {
+          "season": "2025-26",
+          "matchday": 30,
+          "date": "2026-04-19",
+          "opponent": "Sporting CP",
+          "is_home": false,
+          "started": true,
+          "minutes": 78,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.0
+        },
+        {
+          "season": "2025-26",
+          "matchday": 29,
+          "date": "2026-04-12",
+          "opponent": "Nacional",
+          "is_home": true,
+          "started": true,
+          "minutes": 89,
+          "goals": 1,
+          "assists": 0,
+          "rating": 8.9
+        },
+        {
+          "season": "2025-26",
+          "matchday": 28,
+          "date": "2026-04-06",
+          "opponent": "Casa Pia",
+          "is_home": false,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 1,
+          "rating": 7.6
+        }
+      ]
+    },
+    {
+      "slug": "conrad-harder",
+      "rank": 25,
       "player": "Conrad Harder",
       "player_id": 1494826,
       "team": "Sporting CP",
@@ -3423,12 +3626,12 @@
       "matches": 32,
       "goals": 6,
       "goals_per_90": 0.626,
-      "sar": 0.2061,
-      "sar_sd": 0.0978,
-      "skill_lo": 0.0619,
-      "skill_hi": 0.3828,
-      "xg_skill_per_90": 0.3044,
-      "p_above_replacement": 0.996,
+      "sar": 0.2052,
+      "sar_sd": 0.0995,
+      "skill_lo": 0.0585,
+      "skill_hi": 0.3848,
+      "xg_skill_per_90": 0.3049,
+      "p_above_replacement": 0.9975,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -3438,8 +3641,8 @@
           "matches": 28,
           "goals": 5,
           "goals_per_90": 0.565,
-          "sar_season": 0.2097,
-          "sar_season_sd": 0.099
+          "sar_season": 0.2084,
+          "sar_season_sd": 0.1007
         },
         {
           "season": "2025-26",
@@ -3448,15 +3651,15 @@
           "matches": 4,
           "goals": 1,
           "goals_per_90": 1.364,
-          "sar_season": 0.2105,
-          "sar_season_sd": 0.1043
+          "sar_season": 0.2109,
+          "sar_season_sd": 0.106
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0008,
-        "delta_ref_sd": 0.1438,
+        "delta": 0.0025,
+        "delta_ref_sd": 0.1462,
         "within_noise": true
       },
       "recent": [
@@ -3559,8 +3762,174 @@
       ]
     },
     {
+      "slug": "fran-navarro",
+      "rank": 26,
+      "player": "Fran Navarro",
+      "player_id": 914772,
+      "team": "SC Braga",
+      "position": "F",
+      "minutes": 2335,
+      "matches": 50,
+      "goals": 11,
+      "goals_per_90": 0.424,
+      "sar": 0.2002,
+      "sar_sd": 0.0787,
+      "skill_lo": 0.0808,
+      "skill_hi": 0.3376,
+      "xg_skill_per_90": 0.2999,
+      "p_above_replacement": 0.9992,
+      "last_season": "2026-27",
+      "seasons": [
+        {
+          "season": "2023-24",
+          "team": "Porto",
+          "minutes": 178,
+          "matches": 6,
+          "goals": 0,
+          "goals_per_90": 0.0,
+          "sar_season": 0.198,
+          "sar_season_sd": 0.0834
+        },
+        {
+          "season": "2024-25",
+          "team": "SC Braga",
+          "minutes": 772,
+          "matches": 14,
+          "goals": 4,
+          "goals_per_90": 0.466,
+          "sar_season": 0.2031,
+          "sar_season_sd": 0.0816
+        },
+        {
+          "season": "2025-26",
+          "team": "SC Braga",
+          "minutes": 1295,
+          "matches": 29,
+          "goals": 6,
+          "goals_per_90": 0.417,
+          "sar_season": 0.2046,
+          "sar_season_sd": 0.0792
+        },
+        {
+          "season": "2026-27",
+          "team": "SC Braga",
+          "minutes": 90,
+          "matches": 1,
+          "goals": 1,
+          "goals_per_90": 1.0,
+          "sar_season": 0.2046,
+          "sar_season_sd": 0.0851
+        }
+      ],
+      "skill_change": {
+        "from_season": "2025-26",
+        "to_season": "2026-27",
+        "delta": 0.0,
+        "delta_ref_sd": 0.1163,
+        "within_noise": true
+      },
+      "recent": [
+        {
+          "season": "2026-27",
+          "matchday": 1,
+          "date": "2026-08-09",
+          "opponent": "Moreirense",
+          "is_home": false,
+          "started": true,
+          "minutes": 90,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.6
+        },
+        {
+          "season": "2025-26",
+          "matchday": 34,
+          "date": "2026-05-16",
+          "opponent": "Estrela Amadora",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.8
+        },
+        {
+          "season": "2025-26",
+          "matchday": 33,
+          "date": "2026-05-11",
+          "opponent": "Benfica",
+          "is_home": false,
+          "started": true,
+          "minutes": 74,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.2
+        },
+        {
+          "season": "2025-26",
+          "matchday": 32,
+          "date": "2026-05-03",
+          "opponent": "Estoril",
+          "is_home": true,
+          "started": false,
+          "minutes": 29,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.3
+        },
+        {
+          "season": "2025-26",
+          "matchday": 31,
+          "date": "2026-04-26",
+          "opponent": "Santa Clara",
+          "is_home": false,
+          "started": true,
+          "minutes": 90,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.3
+        },
+        {
+          "season": "2025-26",
+          "matchday": 26,
+          "date": "2026-04-23",
+          "opponent": "Casa Pia",
+          "is_home": false,
+          "started": false,
+          "minutes": 19,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.4
+        },
+        {
+          "season": "2025-26",
+          "matchday": 30,
+          "date": "2026-04-19",
+          "opponent": "Famalicao",
+          "is_home": true,
+          "started": true,
+          "minutes": 78,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.7
+        },
+        {
+          "season": "2025-26",
+          "matchday": 29,
+          "date": "2026-04-12",
+          "opponent": "Arouca",
+          "is_home": true,
+          "started": true,
+          "minutes": 89,
+          "goals": 0,
+          "assists": 1,
+          "rating": 6.3
+        }
+      ]
+    },
+    {
       "slug": "cassiano",
-      "rank": 25,
+      "rank": 27,
       "player": "Cassiano",
       "player_id": 157023,
       "team": "Casa Pia",
@@ -3569,11 +3938,11 @@
       "matches": 86,
       "goals": 23,
       "goals_per_90": 0.377,
-      "sar": 0.1997,
-      "sar_sd": 0.0594,
-      "skill_lo": 0.1078,
-      "skill_hi": 0.3013,
-      "xg_skill_per_90": 0.298,
+      "sar": 0.198,
+      "sar_sd": 0.0576,
+      "skill_lo": 0.1073,
+      "skill_hi": 0.2937,
+      "xg_skill_per_90": 0.2978,
       "p_above_replacement": 1.0,
       "last_season": "2025-26",
       "seasons": [
@@ -3584,8 +3953,8 @@
           "matches": 29,
           "goals": 7,
           "goals_per_90": 0.388,
-          "sar_season": 0.2017,
-          "sar_season_sd": 0.062
+          "sar_season": 0.1992,
+          "sar_season_sd": 0.0594
         },
         {
           "season": "2024-25",
@@ -3594,8 +3963,8 @@
           "matches": 26,
           "goals": 10,
           "goals_per_90": 0.453,
-          "sar_season": 0.2111,
-          "sar_season_sd": 0.0666
+          "sar_season": 0.2091,
+          "sar_season_sd": 0.0616
         },
         {
           "season": "2025-26",
@@ -3604,15 +3973,15 @@
           "matches": 31,
           "goals": 6,
           "goals_per_90": 0.287,
-          "sar_season": 0.1944,
-          "sar_season_sd": 0.0614
+          "sar_season": 0.1921,
+          "sar_season_sd": 0.0582
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": -0.0167,
-        "delta_ref_sd": 0.0906,
+        "delta": -0.017,
+        "delta_ref_sd": 0.0847,
         "within_noise": true
       },
       "recent": [
@@ -3715,153 +4084,23 @@
       ]
     },
     {
-      "slug": "pau-victor",
-      "rank": 26,
-      "player": "Pau Víctor",
-      "player_id": 1031567,
-      "team": "SC Braga",
-      "position": "F",
-      "minutes": 2269,
-      "matches": 32,
-      "goals": 10,
-      "goals_per_90": 0.397,
-      "sar": 0.1985,
-      "sar_sd": 0.08,
-      "skill_lo": 0.0769,
-      "skill_hi": 0.3403,
-      "xg_skill_per_90": 0.2968,
-      "p_above_replacement": 0.9995,
-      "last_season": "2025-26",
-      "seasons": [
-        {
-          "season": "2025-26",
-          "team": "SC Braga",
-          "minutes": 2269,
-          "matches": 32,
-          "goals": 10,
-          "goals_per_90": 0.397,
-          "sar_season": 0.2046,
-          "sar_season_sd": 0.0801
-        }
-      ],
-      "skill_change": null,
-      "recent": [
-        {
-          "season": "2026-27",
-          "matchday": 1,
-          "date": "2026-08-09",
-          "opponent": "Moreirense",
-          "is_home": false,
-          "started": false,
-          "minutes": 33,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.1
-        },
-        {
-          "season": "2025-26",
-          "matchday": 34,
-          "date": "2026-05-16",
-          "opponent": "Estrela Amadora",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.3
-        },
-        {
-          "season": "2025-26",
-          "matchday": 33,
-          "date": "2026-05-11",
-          "opponent": "Benfica",
-          "is_home": false,
-          "started": true,
-          "minutes": 90,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.9
-        },
-        {
-          "season": "2025-26",
-          "matchday": 32,
-          "date": "2026-05-03",
-          "opponent": "Estoril",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.9
-        },
-        {
-          "season": "2025-26",
-          "matchday": 26,
-          "date": "2026-04-23",
-          "opponent": "Casa Pia",
-          "is_home": false,
-          "started": true,
-          "minutes": 62,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.0
-        },
-        {
-          "season": "2025-26",
-          "matchday": 30,
-          "date": "2026-04-19",
-          "opponent": "Famalicao",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.7
-        },
-        {
-          "season": "2025-26",
-          "matchday": 29,
-          "date": "2026-04-12",
-          "opponent": "Arouca",
-          "is_home": true,
-          "started": false,
-          "minutes": 27,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.6
-        },
-        {
-          "season": "2025-26",
-          "matchday": 28,
-          "date": "2026-04-04",
-          "opponent": "Moreirense",
-          "is_home": false,
-          "started": true,
-          "minutes": 86,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.6
-        }
-      ]
-    },
-    {
       "slug": "vinicius-lopes",
-      "rank": 27,
+      "rank": 28,
       "player": "Vinícius Lopes",
       "player_id": 1001753,
       "team": "Santa Clara",
       "position": "F",
-      "minutes": 3794,
-      "matches": 61,
+      "minutes": 3862,
+      "matches": 62,
       "goals": 14,
-      "goals_per_90": 0.332,
-      "sar": 0.1889,
-      "sar_sd": 0.0637,
-      "skill_lo": 0.0894,
-      "skill_hi": 0.2963,
-      "xg_skill_per_90": 0.2872,
-      "p_above_replacement": 0.9998,
-      "last_season": "2025-26",
+      "goals_per_90": 0.326,
+      "sar": 0.1851,
+      "sar_sd": 0.0645,
+      "skill_lo": 0.0872,
+      "skill_hi": 0.2968,
+      "xg_skill_per_90": 0.2849,
+      "p_above_replacement": 0.9995,
+      "last_season": "2026-27",
       "seasons": [
         {
           "season": "2024-25",
@@ -3870,8 +4109,8 @@
           "matches": 33,
           "goals": 8,
           "goals_per_90": 0.319,
-          "sar_season": 0.1902,
-          "sar_season_sd": 0.065
+          "sar_season": 0.1864,
+          "sar_season_sd": 0.0642
         },
         {
           "season": "2025-26",
@@ -3880,15 +4119,25 @@
           "matches": 28,
           "goals": 6,
           "goals_per_90": 0.351,
-          "sar_season": 0.1936,
-          "sar_season_sd": 0.0673
+          "sar_season": 0.1894,
+          "sar_season_sd": 0.0664
+        },
+        {
+          "season": "2026-27",
+          "team": "Santa Clara",
+          "minutes": 68,
+          "matches": 1,
+          "goals": 0,
+          "goals_per_90": 0.0,
+          "sar_season": 0.1853,
+          "sar_season_sd": 0.0714
         }
       ],
       "skill_change": {
-        "from_season": "2024-25",
-        "to_season": "2025-26",
-        "delta": 0.0034,
-        "delta_ref_sd": 0.0936,
+        "from_season": "2025-26",
+        "to_season": "2026-27",
+        "delta": -0.0041,
+        "delta_ref_sd": 0.0975,
         "within_noise": true
       },
       "recent": [
@@ -3992,7 +4241,7 @@
     },
     {
       "slug": "kikas",
-      "rank": 28,
+      "rank": 29,
       "player": "Kikas",
       "player_id": 869875,
       "team": "Estrela Amadora",
@@ -4001,12 +4250,12 @@
       "matches": 80,
       "goals": 20,
       "goals_per_90": 0.368,
-      "sar": 0.188,
-      "sar_sd": 0.0615,
-      "skill_lo": 0.0938,
-      "skill_hi": 0.2961,
-      "xg_skill_per_90": 0.2863,
-      "p_above_replacement": 1.0,
+      "sar": 0.1851,
+      "sar_sd": 0.0588,
+      "skill_lo": 0.0936,
+      "skill_hi": 0.2867,
+      "xg_skill_per_90": 0.2849,
+      "p_above_replacement": 0.9998,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -4016,8 +4265,8 @@
           "matches": 31,
           "goals": 8,
           "goals_per_90": 0.458,
-          "sar_season": 0.1945,
-          "sar_season_sd": 0.0647
+          "sar_season": 0.1927,
+          "sar_season_sd": 0.064
         },
         {
           "season": "2024-25",
@@ -4026,8 +4275,8 @@
           "matches": 32,
           "goals": 6,
           "goals_per_90": 0.257,
-          "sar_season": 0.1832,
-          "sar_season_sd": 0.0621
+          "sar_season": 0.1802,
+          "sar_season_sd": 0.0595
         },
         {
           "season": "2025-26",
@@ -4036,15 +4285,15 @@
           "matches": 17,
           "goals": 6,
           "goals_per_90": 0.446,
-          "sar_season": 0.1924,
-          "sar_season_sd": 0.064
+          "sar_season": 0.1906,
+          "sar_season_sd": 0.0637
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0092,
-        "delta_ref_sd": 0.0892,
+        "delta": 0.0104,
+        "delta_ref_sd": 0.0872,
         "within_noise": true
       },
       "recent": [
@@ -4147,162 +4396,6 @@
       ]
     },
     {
-      "slug": "fran-navarro",
-      "rank": 29,
-      "player": "Fran Navarro",
-      "player_id": 914772,
-      "team": "SC Braga",
-      "position": "F",
-      "minutes": 2245,
-      "matches": 49,
-      "goals": 10,
-      "goals_per_90": 0.401,
-      "sar": 0.1851,
-      "sar_sd": 0.0754,
-      "skill_lo": 0.0697,
-      "skill_hi": 0.3209,
-      "xg_skill_per_90": 0.2834,
-      "p_above_replacement": 0.9982,
-      "last_season": "2025-26",
-      "seasons": [
-        {
-          "season": "2023-24",
-          "team": "Porto",
-          "minutes": 178,
-          "matches": 6,
-          "goals": 0,
-          "goals_per_90": 0.0,
-          "sar_season": 0.1834,
-          "sar_season_sd": 0.0801
-        },
-        {
-          "season": "2024-25",
-          "team": "SC Braga",
-          "minutes": 772,
-          "matches": 14,
-          "goals": 4,
-          "goals_per_90": 0.466,
-          "sar_season": 0.1891,
-          "sar_season_sd": 0.0791
-        },
-        {
-          "season": "2025-26",
-          "team": "SC Braga",
-          "minutes": 1295,
-          "matches": 29,
-          "goals": 6,
-          "goals_per_90": 0.417,
-          "sar_season": 0.1912,
-          "sar_season_sd": 0.0784
-        }
-      ],
-      "skill_change": {
-        "from_season": "2024-25",
-        "to_season": "2025-26",
-        "delta": 0.0021,
-        "delta_ref_sd": 0.1114,
-        "within_noise": true
-      },
-      "recent": [
-        {
-          "season": "2026-27",
-          "matchday": 1,
-          "date": "2026-08-09",
-          "opponent": "Moreirense",
-          "is_home": false,
-          "started": true,
-          "minutes": 90,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.6
-        },
-        {
-          "season": "2025-26",
-          "matchday": 34,
-          "date": "2026-05-16",
-          "opponent": "Estrela Amadora",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.8
-        },
-        {
-          "season": "2025-26",
-          "matchday": 33,
-          "date": "2026-05-11",
-          "opponent": "Benfica",
-          "is_home": false,
-          "started": true,
-          "minutes": 74,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.2
-        },
-        {
-          "season": "2025-26",
-          "matchday": 32,
-          "date": "2026-05-03",
-          "opponent": "Estoril",
-          "is_home": true,
-          "started": false,
-          "minutes": 29,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.3
-        },
-        {
-          "season": "2025-26",
-          "matchday": 31,
-          "date": "2026-04-26",
-          "opponent": "Santa Clara",
-          "is_home": false,
-          "started": true,
-          "minutes": 90,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.3
-        },
-        {
-          "season": "2025-26",
-          "matchday": 26,
-          "date": "2026-04-23",
-          "opponent": "Casa Pia",
-          "is_home": false,
-          "started": false,
-          "minutes": 19,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.4
-        },
-        {
-          "season": "2025-26",
-          "matchday": 30,
-          "date": "2026-04-19",
-          "opponent": "Famalicao",
-          "is_home": true,
-          "started": true,
-          "minutes": 78,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.7
-        },
-        {
-          "season": "2025-26",
-          "matchday": 29,
-          "date": "2026-04-12",
-          "opponent": "Arouca",
-          "is_home": true,
-          "started": true,
-          "minutes": 89,
-          "goals": 0,
-          "assists": 1,
-          "rating": 6.3
-        }
-      ]
-    },
-    {
       "slug": "tiago-gouveia",
       "rank": 30,
       "player": "Tiago Gouveia",
@@ -4313,12 +4406,12 @@
       "matches": 18,
       "goals": 3,
       "goals_per_90": 0.418,
-      "sar": 0.1837,
-      "sar_sd": 0.1035,
-      "skill_lo": 0.0359,
-      "skill_hi": 0.374,
-      "xg_skill_per_90": 0.282,
-      "p_above_replacement": 0.9882,
+      "sar": 0.1796,
+      "sar_sd": 0.1026,
+      "skill_lo": 0.0322,
+      "skill_hi": 0.3625,
+      "xg_skill_per_90": 0.2794,
+      "p_above_replacement": 0.9865,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -4328,8 +4421,8 @@
           "matches": 13,
           "goals": 2,
           "goals_per_90": 0.335,
-          "sar_season": 0.1866,
-          "sar_season_sd": 0.1059
+          "sar_season": 0.1824,
+          "sar_season_sd": 0.1043
         },
         {
           "season": "2024-25",
@@ -4338,8 +4431,8 @@
           "matches": 4,
           "goals": 1,
           "goals_per_90": 0.841,
-          "sar_season": 0.1863,
-          "sar_season_sd": 0.1074
+          "sar_season": 0.1827,
+          "sar_season_sd": 0.1066
         },
         {
           "season": "2025-26",
@@ -4348,15 +4441,15 @@
           "matches": 1,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.1845,
-          "sar_season_sd": 0.1089
+          "sar_season": 0.1808,
+          "sar_season_sd": 0.1073
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": -0.0018,
-        "delta_ref_sd": 0.153,
+        "delta": -0.0019,
+        "delta_ref_sd": 0.1513,
         "within_noise": true
       },
       "recent": [
@@ -4469,12 +4562,12 @@
       "matches": 99,
       "goals": 25,
       "goals_per_90": 0.298,
-      "sar": 0.1794,
-      "sar_sd": 0.056,
-      "skill_lo": 0.0935,
-      "skill_hi": 0.276,
-      "xg_skill_per_90": 0.2777,
-      "p_above_replacement": 1.0,
+      "sar": 0.176,
+      "sar_sd": 0.057,
+      "skill_lo": 0.0871,
+      "skill_hi": 0.2761,
+      "xg_skill_per_90": 0.2758,
+      "p_above_replacement": 0.9992,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -4484,8 +4577,8 @@
           "matches": 31,
           "goals": 9,
           "goals_per_90": 0.466,
-          "sar_season": 0.1856,
-          "sar_season_sd": 0.061
+          "sar_season": 0.1827,
+          "sar_season_sd": 0.0607
         },
         {
           "season": "2024-25",
@@ -4494,8 +4587,8 @@
           "matches": 34,
           "goals": 9,
           "goals_per_90": 0.274,
-          "sar_season": 0.1741,
-          "sar_season_sd": 0.0568
+          "sar_season": 0.1703,
+          "sar_season_sd": 0.0577
         },
         {
           "season": "2025-26",
@@ -4504,15 +4597,15 @@
           "matches": 34,
           "goals": 7,
           "goals_per_90": 0.221,
-          "sar_season": 0.1848,
-          "sar_season_sd": 0.0595
+          "sar_season": 0.1817,
+          "sar_season_sd": 0.0598
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0107,
-        "delta_ref_sd": 0.0823,
+        "delta": 0.0114,
+        "delta_ref_sd": 0.0831,
         "within_noise": true
       },
       "recent": [
@@ -4625,12 +4718,12 @@
       "matches": 56,
       "goals": 10,
       "goals_per_90": 0.265,
-      "sar": 0.1756,
-      "sar_sd": 0.0717,
-      "skill_lo": 0.0674,
-      "skill_hi": 0.3035,
+      "sar": 0.1741,
+      "sar_sd": 0.0713,
+      "skill_lo": 0.0638,
+      "skill_hi": 0.2986,
       "xg_skill_per_90": 0.2739,
-      "p_above_replacement": 0.999,
+      "p_above_replacement": 0.9992,
       "last_season": "2026-27",
       "seasons": [
         {
@@ -4640,8 +4733,8 @@
           "matches": 21,
           "goals": 1,
           "goals_per_90": 0.12,
-          "sar_season": 0.1723,
-          "sar_season_sd": 0.0754
+          "sar_season": 0.1709,
+          "sar_season_sd": 0.0755
         },
         {
           "season": "2024-25",
@@ -4650,8 +4743,8 @@
           "matches": 33,
           "goals": 9,
           "goals_per_90": 0.309,
-          "sar_season": 0.1851,
-          "sar_season_sd": 0.0724
+          "sar_season": 0.1846,
+          "sar_season_sd": 0.072
         },
         {
           "season": "2025-26",
@@ -4660,8 +4753,8 @@
           "matches": 1,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.1765,
-          "sar_season_sd": 0.0775
+          "sar_season": 0.1758,
+          "sar_season_sd": 0.0785
         },
         {
           "season": "2026-27",
@@ -4670,15 +4763,15 @@
           "matches": 1,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.1762,
-          "sar_season_sd": 0.0773
+          "sar_season": 0.1753,
+          "sar_season_sd": 0.0776
         }
       ],
       "skill_change": {
         "from_season": "2025-26",
         "to_season": "2026-27",
-        "delta": -0.0003,
-        "delta_ref_sd": 0.1095,
+        "delta": -0.0005,
+        "delta_ref_sd": 0.1104,
         "within_noise": true
       },
       "recent": [
@@ -4791,12 +4884,12 @@
       "matches": 46,
       "goals": 9,
       "goals_per_90": 0.35,
-      "sar": 0.1627,
-      "sar_sd": 0.0706,
-      "skill_lo": 0.0561,
-      "skill_hi": 0.2892,
-      "xg_skill_per_90": 0.261,
-      "p_above_replacement": 0.9975,
+      "sar": 0.1603,
+      "sar_sd": 0.0709,
+      "skill_lo": 0.0545,
+      "skill_hi": 0.2875,
+      "xg_skill_per_90": 0.26,
+      "p_above_replacement": 0.9988,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -4806,8 +4899,8 @@
           "matches": 33,
           "goals": 7,
           "goals_per_90": 0.394,
-          "sar_season": 0.1692,
-          "sar_season_sd": 0.0725
+          "sar_season": 0.166,
+          "sar_season_sd": 0.0709
         },
         {
           "season": "2025-26",
@@ -4816,15 +4909,15 @@
           "matches": 13,
           "goals": 2,
           "goals_per_90": 0.251,
-          "sar_season": 0.1613,
-          "sar_season_sd": 0.0732
+          "sar_season": 0.1584,
+          "sar_season_sd": 0.0742
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": -0.0079,
-        "delta_ref_sd": 0.103,
+        "delta": -0.0076,
+        "delta_ref_sd": 0.1026,
         "within_noise": true
       },
       "recent": [
@@ -4937,11 +5030,11 @@
       "matches": 80,
       "goals": 27,
       "goals_per_90": 0.462,
-      "sar": 0.1603,
-      "sar_sd": 0.0539,
-      "skill_lo": 0.0759,
-      "skill_hi": 0.2539,
-      "xg_skill_per_90": 0.2586,
+      "sar": 0.1587,
+      "sar_sd": 0.0555,
+      "skill_lo": 0.0728,
+      "skill_hi": 0.2537,
+      "xg_skill_per_90": 0.2585,
       "p_above_replacement": 0.9998,
       "last_season": "2026-27",
       "seasons": [
@@ -4952,8 +5045,8 @@
           "matches": 32,
           "goals": 6,
           "goals_per_90": 0.296,
-          "sar_season": 0.1585,
-          "sar_season_sd": 0.0558
+          "sar_season": 0.157,
+          "sar_season_sd": 0.0581
         },
         {
           "season": "2024-25",
@@ -4962,8 +5055,8 @@
           "matches": 19,
           "goals": 4,
           "goals_per_90": 0.258,
-          "sar_season": 0.1563,
-          "sar_season_sd": 0.0575
+          "sar_season": 0.1547,
+          "sar_season_sd": 0.059
         },
         {
           "season": "2025-26",
@@ -4972,8 +5065,8 @@
           "matches": 28,
           "goals": 16,
           "goals_per_90": 0.741,
-          "sar_season": 0.1785,
-          "sar_season_sd": 0.0589
+          "sar_season": 0.1779,
+          "sar_season_sd": 0.0582
         },
         {
           "season": "2026-27",
@@ -4982,15 +5075,15 @@
           "matches": 1,
           "goals": 1,
           "goals_per_90": 1.0,
-          "sar_season": 0.1642,
-          "sar_season_sd": 0.0606
+          "sar_season": 0.1633,
+          "sar_season_sd": 0.063
         }
       ],
       "skill_change": {
         "from_season": "2025-26",
         "to_season": "2026-27",
-        "delta": -0.0143,
-        "delta_ref_sd": 0.0845,
+        "delta": -0.0146,
+        "delta_ref_sd": 0.0858,
         "within_noise": true
       },
       "recent": [
@@ -5103,11 +5196,11 @@
       "matches": 31,
       "goals": 5,
       "goals_per_90": 0.284,
-      "sar": 0.1595,
-      "sar_sd": 0.0847,
-      "skill_lo": 0.0348,
-      "skill_hi": 0.3131,
-      "xg_skill_per_90": 0.2578,
+      "sar": 0.1587,
+      "sar_sd": 0.0855,
+      "skill_lo": 0.0353,
+      "skill_hi": 0.3134,
+      "xg_skill_per_90": 0.2584,
       "p_above_replacement": 0.9898,
       "last_season": "2026-27",
       "seasons": [
@@ -5118,8 +5211,8 @@
           "matches": 30,
           "goals": 5,
           "goals_per_90": 0.297,
-          "sar_season": 0.1631,
-          "sar_season_sd": 0.0843
+          "sar_season": 0.1635,
+          "sar_season_sd": 0.087
         },
         {
           "season": "2026-27",
@@ -5128,15 +5221,15 @@
           "matches": 1,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.16,
-          "sar_season_sd": 0.0896
+          "sar_season": 0.159,
+          "sar_season_sd": 0.0898
         }
       ],
       "skill_change": {
         "from_season": "2025-26",
         "to_season": "2026-27",
-        "delta": -0.0031,
-        "delta_ref_sd": 0.123,
+        "delta": -0.0045,
+        "delta_ref_sd": 0.125,
         "within_noise": true
       },
       "recent": [
@@ -5249,12 +5342,12 @@
       "matches": 53,
       "goals": 7,
       "goals_per_90": 0.244,
-      "sar": 0.1586,
-      "sar_sd": 0.0727,
+      "sar": 0.158,
+      "sar_sd": 0.0755,
       "skill_lo": 0.0465,
-      "skill_hi": 0.289,
-      "xg_skill_per_90": 0.2569,
-      "p_above_replacement": 0.996,
+      "skill_hi": 0.2949,
+      "xg_skill_per_90": 0.2577,
+      "p_above_replacement": 0.994,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -5264,8 +5357,8 @@
           "matches": 23,
           "goals": 2,
           "goals_per_90": 0.447,
-          "sar_season": 0.162,
-          "sar_season_sd": 0.0767
+          "sar_season": 0.1622,
+          "sar_season_sd": 0.0797
         },
         {
           "season": "2024-25",
@@ -5274,8 +5367,8 @@
           "matches": 14,
           "goals": 1,
           "goals_per_90": 0.079,
-          "sar_season": 0.154,
-          "sar_season_sd": 0.0744
+          "sar_season": 0.1531,
+          "sar_season_sd": 0.0772
         },
         {
           "season": "2025-26",
@@ -5284,15 +5377,15 @@
           "matches": 16,
           "goals": 4,
           "goals_per_90": 0.344,
-          "sar_season": 0.1648,
-          "sar_season_sd": 0.0775
+          "sar_season": 0.1638,
+          "sar_season_sd": 0.0779
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0108,
-        "delta_ref_sd": 0.1074,
+        "delta": 0.0107,
+        "delta_ref_sd": 0.1097,
         "within_noise": true
       },
       "recent": [
@@ -5405,12 +5498,12 @@
       "matches": 53,
       "goals": 9,
       "goals_per_90": 0.285,
-      "sar": 0.1562,
-      "sar_sd": 0.0719,
-      "skill_lo": 0.0469,
-      "skill_hi": 0.2835,
-      "xg_skill_per_90": 0.2545,
-      "p_above_replacement": 0.9965,
+      "sar": 0.1574,
+      "sar_sd": 0.0725,
+      "skill_lo": 0.0492,
+      "skill_hi": 0.2848,
+      "xg_skill_per_90": 0.2572,
+      "p_above_replacement": 0.9958,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -5420,8 +5513,8 @@
           "matches": 26,
           "goals": 2,
           "goals_per_90": 0.155,
-          "sar_season": 0.1509,
-          "sar_season_sd": 0.0719
+          "sar_season": 0.1519,
+          "sar_season_sd": 0.0727
         },
         {
           "season": "2025-26",
@@ -5430,15 +5523,15 @@
           "matches": 27,
           "goals": 7,
           "goals_per_90": 0.375,
-          "sar_season": 0.1654,
+          "sar_season": 0.1678,
           "sar_season_sd": 0.0758
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": 0.0145,
-        "delta_ref_sd": 0.1045,
+        "delta": 0.0159,
+        "delta_ref_sd": 0.105,
         "within_noise": true
       },
       "recent": [
@@ -5547,17 +5640,17 @@
       "player_id": 1188685,
       "team": "Moreirense",
       "position": "F",
-      "minutes": 1005,
-      "matches": 29,
+      "minutes": 1020,
+      "matches": 30,
       "goals": 4,
-      "goals_per_90": 0.358,
-      "sar": 0.1525,
-      "sar_sd": 0.0862,
-      "skill_lo": 0.0262,
-      "skill_hi": 0.3109,
-      "xg_skill_per_90": 0.2508,
-      "p_above_replacement": 0.986,
-      "last_season": "2025-26",
+      "goals_per_90": 0.353,
+      "sar": 0.1515,
+      "sar_sd": 0.0867,
+      "skill_lo": 0.0254,
+      "skill_hi": 0.308,
+      "xg_skill_per_90": 0.2513,
+      "p_above_replacement": 0.9838,
+      "last_season": "2026-27",
       "seasons": [
         {
           "season": "2024-25",
@@ -5566,8 +5659,8 @@
           "matches": 8,
           "goals": 3,
           "goals_per_90": 1.019,
-          "sar_season": 0.1625,
-          "sar_season_sd": 0.0923
+          "sar_season": 0.1619,
+          "sar_season_sd": 0.0933
         },
         {
           "season": "2025-26",
@@ -5576,15 +5669,25 @@
           "matches": 21,
           "goals": 1,
           "goals_per_90": 0.122,
-          "sar_season": 0.1478,
-          "sar_season_sd": 0.0858
+          "sar_season": 0.146,
+          "sar_season_sd": 0.0854
+        },
+        {
+          "season": "2026-27",
+          "team": "Moreirense",
+          "minutes": 15,
+          "matches": 1,
+          "goals": 0,
+          "goals_per_90": 0.0,
+          "sar_season": 0.1527,
+          "sar_season_sd": 0.0917
         }
       ],
       "skill_change": {
-        "from_season": "2024-25",
-        "to_season": "2025-26",
-        "delta": -0.0147,
-        "delta_ref_sd": 0.126,
+        "from_season": "2025-26",
+        "to_season": "2026-27",
+        "delta": 0.0067,
+        "delta_ref_sd": 0.1253,
         "within_noise": true
       },
       "recent": [
@@ -5687,164 +5790,8 @@
       ]
     },
     {
-      "slug": "daniel-braganca",
-      "rank": 39,
-      "player": "Daniel Bragança",
-      "player_id": 861979,
-      "team": "Sporting CP",
-      "position": "M",
-      "minutes": 2678,
-      "matches": 60,
-      "goals": 12,
-      "goals_per_90": 0.403,
-      "sar": 0.1471,
-      "sar_sd": 0.0637,
-      "skill_lo": 0.0494,
-      "skill_hi": 0.2578,
-      "xg_skill_per_90": 0.2454,
-      "p_above_replacement": 0.9995,
-      "last_season": "2025-26",
-      "seasons": [
-        {
-          "season": "2023-24",
-          "team": "Sporting CP",
-          "minutes": 1054,
-          "matches": 28,
-          "goals": 3,
-          "goals_per_90": 0.256,
-          "sar_season": 0.1456,
-          "sar_season_sd": 0.0655
-        },
-        {
-          "season": "2024-25",
-          "team": "Sporting CP",
-          "minutes": 1086,
-          "matches": 18,
-          "goals": 3,
-          "goals_per_90": 0.249,
-          "sar_season": 0.1454,
-          "sar_season_sd": 0.0658
-        },
-        {
-          "season": "2025-26",
-          "team": "Sporting CP",
-          "minutes": 538,
-          "matches": 14,
-          "goals": 6,
-          "goals_per_90": 1.004,
-          "sar_season": 0.1636,
-          "sar_season_sd": 0.0717
-        }
-      ],
-      "skill_change": {
-        "from_season": "2024-25",
-        "to_season": "2025-26",
-        "delta": 0.0182,
-        "delta_ref_sd": 0.0973,
-        "within_noise": true
-      },
-      "recent": [
-        {
-          "season": "2025-26",
-          "matchday": 34,
-          "date": "2026-05-16",
-          "opponent": "Gil Vicente",
-          "is_home": true,
-          "started": false,
-          "minutes": 17,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.8
-        },
-        {
-          "season": "2025-26",
-          "matchday": 33,
-          "date": "2026-05-11",
-          "opponent": "Rio Ave",
-          "is_home": false,
-          "started": true,
-          "minutes": 82,
-          "goals": 0,
-          "assists": 0,
-          "rating": 7.1
-        },
-        {
-          "season": "2025-26",
-          "matchday": 32,
-          "date": "2026-05-04",
-          "opponent": "Vitoria SC",
-          "is_home": true,
-          "started": true,
-          "minutes": 90,
-          "goals": 1,
-          "assists": 0,
-          "rating": 8.6
-        },
-        {
-          "season": "2025-26",
-          "matchday": 26,
-          "date": "2026-04-29",
-          "opponent": "Tondela",
-          "is_home": true,
-          "started": true,
-          "minutes": 86,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.9
-        },
-        {
-          "season": "2025-26",
-          "matchday": 31,
-          "date": "2026-04-26",
-          "opponent": "AVS",
-          "is_home": false,
-          "started": false,
-          "minutes": 16,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.9
-        },
-        {
-          "season": "2025-26",
-          "matchday": 30,
-          "date": "2026-04-19",
-          "opponent": "Benfica",
-          "is_home": true,
-          "started": false,
-          "minutes": 9,
-          "goals": 0,
-          "assists": 0,
-          "rating": 6.4
-        },
-        {
-          "season": "2025-26",
-          "matchday": 29,
-          "date": "2026-04-11",
-          "opponent": "Estrela Amadora",
-          "is_home": false,
-          "started": true,
-          "minutes": 67,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.8
-        },
-        {
-          "season": "2025-26",
-          "matchday": 28,
-          "date": "2026-04-03",
-          "opponent": "Santa Clara",
-          "is_home": true,
-          "started": true,
-          "minutes": 60,
-          "goals": 1,
-          "assists": 0,
-          "rating": 7.8
-        }
-      ]
-    },
-    {
       "slug": "tiago-morais",
-      "rank": 40,
+      "rank": 39,
       "player": "Tiago Morais",
       "player_id": 1067284,
       "team": "Casa Pia",
@@ -5853,12 +5800,12 @@
       "matches": 67,
       "goals": 10,
       "goals_per_90": 0.248,
-      "sar": 0.1469,
-      "sar_sd": 0.0642,
-      "skill_lo": 0.0488,
-      "skill_hi": 0.2596,
-      "xg_skill_per_90": 0.2452,
-      "p_above_replacement": 0.9978,
+      "sar": 0.1468,
+      "sar_sd": 0.0635,
+      "skill_lo": 0.0506,
+      "skill_hi": 0.256,
+      "xg_skill_per_90": 0.2466,
+      "p_above_replacement": 0.997,
       "last_season": "2025-26",
       "seasons": [
         {
@@ -5868,8 +5815,8 @@
           "matches": 17,
           "goals": 6,
           "goals_per_90": 0.39,
-          "sar_season": 0.1596,
-          "sar_season_sd": 0.0697
+          "sar_season": 0.1611,
+          "sar_season_sd": 0.0693
         },
         {
           "season": "2024-25",
@@ -5878,8 +5825,8 @@
           "matches": 31,
           "goals": 4,
           "goals_per_90": 0.23,
-          "sar_season": 0.1469,
-          "sar_season_sd": 0.0657
+          "sar_season": 0.1462,
+          "sar_season_sd": 0.0645
         },
         {
           "season": "2025-26",
@@ -5888,15 +5835,15 @@
           "matches": 19,
           "goals": 0,
           "goals_per_90": 0.0,
-          "sar_season": 0.1401,
-          "sar_season_sd": 0.0671
+          "sar_season": 0.1388,
+          "sar_season_sd": 0.0658
         }
       ],
       "skill_change": {
         "from_season": "2024-25",
         "to_season": "2025-26",
-        "delta": -0.0068,
-        "delta_ref_sd": 0.0939,
+        "delta": -0.0074,
+        "delta_ref_sd": 0.0921,
         "within_noise": true
       },
       "recent": [
@@ -5995,6 +5942,162 @@
           "goals": 0,
           "assists": 0,
           "rating": 6.7
+        }
+      ]
+    },
+    {
+      "slug": "daniel-braganca",
+      "rank": 40,
+      "player": "Daniel Bragança",
+      "player_id": 861979,
+      "team": "Sporting CP",
+      "position": "M",
+      "minutes": 2678,
+      "matches": 60,
+      "goals": 12,
+      "goals_per_90": 0.403,
+      "sar": 0.1461,
+      "sar_sd": 0.065,
+      "skill_lo": 0.0487,
+      "skill_hi": 0.2584,
+      "xg_skill_per_90": 0.2458,
+      "p_above_replacement": 0.997,
+      "last_season": "2025-26",
+      "seasons": [
+        {
+          "season": "2023-24",
+          "team": "Sporting CP",
+          "minutes": 1054,
+          "matches": 28,
+          "goals": 3,
+          "goals_per_90": 0.256,
+          "sar_season": 0.144,
+          "sar_season_sd": 0.0668
+        },
+        {
+          "season": "2024-25",
+          "team": "Sporting CP",
+          "minutes": 1086,
+          "matches": 18,
+          "goals": 3,
+          "goals_per_90": 0.249,
+          "sar_season": 0.1441,
+          "sar_season_sd": 0.0672
+        },
+        {
+          "season": "2025-26",
+          "team": "Sporting CP",
+          "minutes": 538,
+          "matches": 14,
+          "goals": 6,
+          "goals_per_90": 1.004,
+          "sar_season": 0.1647,
+          "sar_season_sd": 0.0731
+        }
+      ],
+      "skill_change": {
+        "from_season": "2024-25",
+        "to_season": "2025-26",
+        "delta": 0.0206,
+        "delta_ref_sd": 0.0993,
+        "within_noise": true
+      },
+      "recent": [
+        {
+          "season": "2025-26",
+          "matchday": 34,
+          "date": "2026-05-16",
+          "opponent": "Gil Vicente",
+          "is_home": true,
+          "started": false,
+          "minutes": 17,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.8
+        },
+        {
+          "season": "2025-26",
+          "matchday": 33,
+          "date": "2026-05-11",
+          "opponent": "Rio Ave",
+          "is_home": false,
+          "started": true,
+          "minutes": 82,
+          "goals": 0,
+          "assists": 0,
+          "rating": 7.1
+        },
+        {
+          "season": "2025-26",
+          "matchday": 32,
+          "date": "2026-05-04",
+          "opponent": "Vitoria SC",
+          "is_home": true,
+          "started": true,
+          "minutes": 90,
+          "goals": 1,
+          "assists": 0,
+          "rating": 8.6
+        },
+        {
+          "season": "2025-26",
+          "matchday": 26,
+          "date": "2026-04-29",
+          "opponent": "Tondela",
+          "is_home": true,
+          "started": true,
+          "minutes": 86,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.9
+        },
+        {
+          "season": "2025-26",
+          "matchday": 31,
+          "date": "2026-04-26",
+          "opponent": "AVS",
+          "is_home": false,
+          "started": false,
+          "minutes": 16,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.9
+        },
+        {
+          "season": "2025-26",
+          "matchday": 30,
+          "date": "2026-04-19",
+          "opponent": "Benfica",
+          "is_home": true,
+          "started": false,
+          "minutes": 9,
+          "goals": 0,
+          "assists": 0,
+          "rating": 6.4
+        },
+        {
+          "season": "2025-26",
+          "matchday": 29,
+          "date": "2026-04-11",
+          "opponent": "Estrela Amadora",
+          "is_home": false,
+          "started": true,
+          "minutes": 67,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.8
+        },
+        {
+          "season": "2025-26",
+          "matchday": 28,
+          "date": "2026-04-03",
+          "opponent": "Santa Clara",
+          "is_home": true,
+          "started": true,
+          "minutes": 60,
+          "goals": 1,
+          "assists": 0,
+          "rating": 7.8
         }
       ]
     }

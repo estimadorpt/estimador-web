@@ -122,6 +122,30 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
     },
   },
   {
+    match: /^contrib_ratings\.json$/,
+    label: "contrib_ratings.json",
+    doc: {
+      pt: "Contribuição ofensiva: golos mais assistências por 90 acima do substituto, com intervalo, a variação face ao ranking só de golos e a distribuição da métrica por posição.",
+      en: "Attacking contribution: goals plus assists per 90 above replacement, with interval, the move against the goals-only ranking, and the metric's distribution by position.",
+    },
+  },
+  {
+    match: /^gk_ratings\.json$/,
+    label: "gk_ratings.json",
+    doc: {
+      pt: "Guarda-redes: golos evitados face ao xGOT dos remates enfrentados, em bruto e modelado, por 90 minutos e com intervalo. Traz também a validação fora da amostra e as regras de exclusão de remates.",
+      en: "Goalkeepers: goals prevented against the xGOT of the shots faced, raw and modelled, per 90 minutes and with an interval. Also carries the out-of-sample validation and the shot-exclusion rules.",
+    },
+  },
+  {
+    match: /^def_ratings\.json$/,
+    label: "def_ratings.json",
+    doc: {
+      pt: "Defesas: mais-valia ajustada sobre golos sofridos. Pode trazer apenas diagnósticos, se o modelo concluir que os jogadores não são separáveis dos colegas de equipa.",
+      en: "Defenders: adjusted plus-minus on goals conceded. May carry diagnostics only, if the model finds the players are not separable from their team-mates.",
+    },
+  },
+  {
     match: /^injuries\.json$/,
     label: "injuries.json",
     doc: {

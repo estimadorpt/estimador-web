@@ -5,17 +5,50 @@ import { ArrowLeft } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Link } from "@/i18n/routing";
 import {
+  loadContribRatings,
+  loadDefRatings,
+  loadGkRatings,
   loadLigaInjuries,
   loadLigaPlayersDetail,
   loadPlayerBySlug,
   NO_PLAYERS_SLUG,
 } from "@/lib/utils/football-data-loader";
+import { findRating, goalsSarIsMeaningful } from "@/lib/utils/player-ratings";
+import type { RatingsBlock, RatingKind } from "@/lib/utils/player-ratings";
 import { PlayerProfile } from "@/components/charts/football/PlayerProfile";
-import type { PlayerInjury } from "@/components/charts/football/PlayerProfile";
+import type {
+  PlayerDetailEntry,
+  PlayerInjury,
+  PlayerPositionRating,
+} from "@/components/charts/football/PlayerProfile";
 import { injuryReasonLabel } from "@/lib/i18n/football-labels";
 import { teamDisplayName } from "@/lib/config/football";
 
 const SITE = "https://estimador.pt";
+
+/* ------------------------------------------------------- position metric */
+
+/**
+ * Pick the metric that actually applies to this player.
+ *
+ * Goalkeepers get goals prevented, defenders get the plus-minus estimate and
+ * everyone else gets attacking contribution alongside the goals number. Any
+ * of the three feeds can be absent, and a player can be missing from a feed
+ * that is present; both cases return null, and the profile then explains the
+ * absence rather than printing a number that does not apply (ADR-019).
+ */
+function resolvePositionRating(
+  player: PlayerDetailEntry,
+  blocks: { gk: RatingsBlock | null; def: RatingsBlock | null; contrib: RatingsBlock | null },
+): PlayerPositionRating | null {
+  const position = (player.position ?? "").toUpperCase();
+  const kind: RatingKind =
+    position === "G" ? "gk" : position === "D" ? "def" : "contrib";
+  const block = blocks[kind];
+  const entry = findRating(block, player.player, player.team);
+  if (!block || !entry) return null;
+  return { kind, entry, peers: block.players, meta: block.meta };
+}
 
 /* ------------------------------------------------------------- static params */
 
@@ -50,13 +83,19 @@ export async function generateMetadata({
   const title = pt
     ? `${player.player}: o que o modelo sabe`
     : `${player.player}: what the model knows`;
-  const description = pt
-    ? `${player.player} (${teamDisplayName(player.team)}) é o número ${player.rank} da Liga Portugal segundo o modelo de jogadores: ${sar.toFixed(
-        2,
-      )} golos por 90 minutos acima de um jogador de nível de substituição, com intervalo de credibilidade, minutos, golos e histórico época a época.`
-    : `${player.player} (${teamDisplayName(player.team)}) ranks number ${player.rank} in Liga Portugal on the player model: ${sar.toFixed(
-        2,
-      )} goals per 90 minutes above a replacement-level player, with credible interval, minutes, goals and season-by-season history.`;
+  // The goals-only claim is only made where it means something: a keeper or a
+  // defender sits at the floor of that scale by construction (ADR-019).
+  const description = !goalsSarIsMeaningful(player.position)
+    ? pt
+      ? `${player.player} (${teamDisplayName(player.team)}): minutos, jogos e histórico época a época, com a métrica que se aplica à posição — e a explicação de por que razão o ranking de finalização não diz nada sobre ele.`
+      : `${player.player} (${teamDisplayName(player.team)}): minutes, matches and season-by-season history, with the metric that applies to the position — and why the finishing ranking says nothing about him.`
+    : pt
+      ? `${player.player} (${teamDisplayName(player.team)}) é o número ${player.rank} da Liga Portugal segundo o modelo de jogadores: ${sar.toFixed(
+          2,
+        )} golos por 90 minutos acima de um jogador de nível de substituição, com intervalo de credibilidade, minutos, golos e histórico época a época.`
+      : `${player.player} (${teamDisplayName(player.team)}) ranks number ${player.rank} in Liga Portugal on the player model: ${sar.toFixed(
+          2,
+        )} goals per 90 minutes above a replacement-level player, with credible interval, minutes, goals and season-by-season history.`;
   const url = `${SITE}/${locale}/desporto/liga/jogador/${slug}`;
 
   return {
@@ -85,9 +124,12 @@ export default async function PlayerPage({
   const { locale, slug } = await params;
   const pt = locale !== "en";
 
-  const [found, injuries] = await Promise.all([
+  const [found, injuries, gk, def, contrib] = await Promise.all([
     loadPlayerBySlug(slug),
     loadLigaInjuries(),
+    loadGkRatings(),
+    loadDefRatings(),
+    loadContribRatings(),
   ]);
 
   if (!found) {
@@ -152,6 +194,7 @@ export default async function PlayerPage({
           locale={locale}
           injury={injury}
           injuryReason={injuryReasonLabel(injury?.reason ?? null, locale)}
+          positionRating={resolvePositionRating(player, { gk, def, contrib })}
         />
 
         <div className="mt-10 pt-5 border-t border-stone-200 text-xs">

@@ -9,6 +9,27 @@ import {
   teamLogoSrc,
 } from "@/lib/config/football";
 import { positionCodeEn, positionCodePt } from "@/lib/i18n/football-labels";
+import {
+  goalsSarIsMeaningful,
+  ratingDomain,
+  ratingPct,
+  type RatingEntry,
+  type RatingKind,
+  type RatingsMeta,
+} from "@/lib/utils/player-ratings";
+
+/**
+ * The position-specific metric for this player, resolved by the page.
+ *
+ * `peers` is every published row on the same metric, so the bar can be drawn
+ * on the metric's own scale rather than on the goals-only one.
+ */
+export interface PlayerPositionRating {
+  kind: RatingKind;
+  entry: RatingEntry;
+  peers: RatingEntry[];
+  meta: RatingsMeta;
+}
 
 export interface PlayerSeasonEntry {
   season: string;
@@ -70,6 +91,8 @@ export interface PlayerDetailData {
   model: string;
   metric: string;
   metric_label: string;
+  /** Posterior interval mass as a fraction (0.9). Older feeds omit it. */
+  interval_mass?: number;
   generated_from: {
     n_players?: number;
     n_observations?: number;
@@ -96,6 +119,12 @@ interface PlayerProfileProps {
   injury?: PlayerInjury | null;
   /** Localised injury reason, resolved by the page (data value, not UI copy). */
   injuryReason?: string;
+  /**
+   * The metric that actually applies to this player's position, when one is
+   * published. Goalkeepers and defenders get this instead of the goals-only
+   * number, never as well as.
+   */
+  positionRating?: PlayerPositionRating | null;
 }
 
 const TRACK = "#e7e5e4"; // stone-200
@@ -108,6 +137,7 @@ export function PlayerProfile({
   locale = "pt",
   injury,
   injuryReason,
+  positionRating = null,
 }: PlayerProfileProps) {
   const pt = locale !== "en";
   const nf = (v: number, d = 2) =>
@@ -134,6 +164,8 @@ export function PlayerProfile({
   const sar = player.sar ?? 0;
   const lo = player.skill_lo ?? sar;
   const hi = player.skill_hi ?? sar;
+  // From the feed. Hardcoding this stated 94% probability over a 90% interval.
+  const goalsIvPct = Math.round((data.interval_mass ?? 0.9) * 100);
 
   const seasons = player.seasons;
   const withSkill = seasons.filter(s => s.sar_season !== null);
@@ -141,6 +173,62 @@ export function PlayerProfile({
   const firstSeason = data.generated_from.seasons?.[0];
   const lastSeason =
     data.generated_from.seasons?.[data.generated_from.seasons.length - 1];
+
+  /* ------------------------------------------------- position-aware metric */
+
+  // ADR-019: goals-per-90 above replacement says nothing about a goalkeeper —
+  // every keeper in the fit lands on the same floor value — and almost
+  // nothing about a defender. Those pages suppress it rather than print a
+  // number whose only content is the player's position.
+  const showGoalsSar = goalsSarIsMeaningful(player.position);
+  const pr = positionRating;
+  const prEntry = pr?.entry ?? null;
+  const prDomain = pr ? ratingDomain(pr.peers.length ? pr.peers : [pr.entry]) : null;
+  const prPct = (v: number) => (prDomain ? ratingPct(v, prDomain) : 0);
+  const prZero = prDomain ? ratingPct(0, prDomain) : 0;
+  const isKeeper = (player.position ?? "").toUpperCase() === "G";
+
+  const posCopy: Record<
+    RatingKind,
+    { title: string; unit: string; meaning: string; caveat: string }
+  > = {
+    gk: {
+      title: pt ? "Golos evitados" : "Goals prevented",
+      unit: pt
+        ? "golos evitados por 90 minutos, face ao esperado"
+        : "goals prevented per 90 minutes, against expectation",
+      meaning: pt
+        ? `Cada remate à baliza que ${player.player} enfrentou tem um xGOT: a probabilidade de acabar em golo, dado o sítio exato onde foi colocado. Somando os xGOT sofridos e subtraindo os golos sofridos fica o que ele poupou à equipa. Positivo é melhor do que o esperado; negativo é pior.`
+        : `Every shot on target ${player.player} faced carries an xGOT: the probability it ends in a goal, given exactly where it was placed. Adding up the xGOT faced and subtracting the goals conceded leaves what he saved his team. Positive is better than expected; negative is worse.`,
+      caveat: pt
+        ? "Uma época de guarda-redes são poucas centenas de remates, e a soma bruta é ruidosa. O modelo puxa cada guarda-redes para a média na proporção da incerteza. Se o intervalo atravessa o zero, não sabemos se ele está acima ou abaixo da média."
+        : "A keeper's season is a few hundred shots, and the raw sum is noisy. The model pulls each keeper toward the average in proportion to the uncertainty. If the interval crosses zero, we do not know whether he is above or below average.",
+    },
+    def: {
+      title: pt ? "Golos evitados pela equipa" : "Goals prevented by the team",
+      unit: pt
+        ? "golos sofridos a menos por 90 minutos em campo"
+        : "fewer goals conceded per 90 minutes on the pitch",
+      meaning: pt
+        ? `Quanto muda o que a equipa sofre consoante ${player.player} esteja ou não em campo, com encolhimento forte. Mede o contributo para o resultado, não desarmes contados.`
+        : `How much what the team concedes changes depending on whether ${player.player} is on the pitch, heavily shrunk. It measures contribution to the outcome, not counted tackles.`,
+      caveat: pt
+        ? "Colegas que jogam sempre juntos são difíceis de separar, e o campeonato tem 34 jornadas. Leia o intervalo antes do valor: diferenças pequenas entre defesas não são diferenças."
+        : "Team-mates who always play together are hard to tell apart, and the league is 34 matches long. Read the interval before the value: small differences between defenders are not differences.",
+    },
+    contrib: {
+      title: pt ? "Contribuição ofensiva" : "Attacking contribution",
+      unit: pt
+        ? "golos e assistências por 90 minutos acima do substituto"
+        : "goals and assists per 90 minutes above replacement",
+      meaning: pt
+        ? "A mesma estrutura da métrica de finalização, mas somando golos e assistências. Vê o que a métrica só de golos não conseguia ver: quem cria."
+        : "The same structure as the finishing metric, but adding goals and assists together. It sees what the goals-only metric could not: who creates.",
+      caveat: pt
+        ? "Poucos minutos puxam a estimativa para o nível de substituição e alargam o intervalo."
+        : "Few minutes pull the estimate toward replacement level and widen the interval.",
+    },
+  };
 
   const t = {
     rank: pt ? `#${player.rank} da Liga` : `#${player.rank} in the league`,
@@ -159,12 +247,14 @@ export function PlayerProfile({
       : `What the number means: if ${player.player} plays 90 minutes at a neutral venue against an average Liga defence, the model expects ${nf(
           sar,
         )} more goals than if that place were taken by a replacement-level player — the kind of signing any club can make for free. Goals are capped (winsorized) before the estimate, so one four-goal afternoon is not read as permanent skill.`,
-    interval: pt ? "Intervalo de credibilidade 94%" : "94% credible interval",
+    interval: pt
+      ? `Intervalo de credibilidade ${goalsIvPct}%`
+      : `${goalsIvPct}% credible interval`,
     intervalMeaning: pt
-      ? `O modelo dá 94% de probabilidade a que o valor verdadeiro esteja entre ${nf(
+      ? `O modelo dá ${goalsIvPct}% de probabilidade a que o valor verdadeiro esteja entre ${nf(
           lo,
         )} e ${nf(hi)}. Quantos menos minutos, mais largo o intervalo.`
-      : `The model puts 94% probability on the true value lying between ${nf(
+      : `The model puts ${goalsIvPct}% probability on the true value lying between ${nf(
           lo,
         )} and ${nf(hi)}. Fewer minutes, wider interval.`,
     others: pt ? "outros do top 40" : "others in the top 40",
@@ -176,9 +266,13 @@ export function PlayerProfile({
     xgSkill: pt ? "Talento em xG/90" : "xG skill per 90",
     pAbove: pt ? "Prob. acima do substituto" : "P(above replacement)",
     trajTitle: pt ? "Época a época" : "Season by season",
-    trajBody: pt
-      ? "Os golos sobem e descem; a estimativa de talento quase não se mexe. É assim de propósito: o modelo só admite uma mudança de talento quando os dados a exigem, e em três épocas de Liga Portugal nunca exigiram."
-      : "Goals go up and down; the skill estimate barely moves. That is by design: the model only admits a change in skill when the data demand one, and across three Liga Portugal seasons they never have.",
+    trajBody: !showGoalsSar
+      ? pt
+        ? "Minutos e golos, época a época. A coluna de talento a marcar não aparece aqui: para esta posição não mede nada."
+        : "Minutes and goals, season by season. The scoring-skill column is absent here: for this position it measures nothing."
+      : pt
+        ? "Os golos sobem e descem; a estimativa de talento quase não se mexe. É assim de propósito: o modelo só admite uma mudança de talento quando os dados a exigem, e em três épocas de Liga Portugal nunca exigiram."
+        : "Goals go up and down; the skill estimate barely moves. That is by design: the model only admits a change in skill when the data demand one, and across three Liga Portugal seasons they never have.",
     nullTitle: pt ? "Melhorou? Não dá para dizer" : "Did he improve? Can't say",
     nullBody: (c: PlayerSkillChange) => {
       // Ratio of noise to signal. It can be enormous when the delta is ~0,
@@ -222,7 +316,44 @@ export function PlayerProfile({
     starter: pt ? "titular" : "started",
     sub: pt ? "suplente" : "sub",
     ranking: pt ? "Ranking completo" : "Full ranking",
+    hub: pt ? "Todas as métricas de jogadores" : "All player metrics",
     teamPage: pt ? "Página do clube" : "Club page",
+    suppressedTitle: pt
+      ? "Aqui não há número de finalização"
+      : "There is no finishing number here",
+    suppressedBody: isKeeper
+      ? pt
+        ? "O ranking de jogadores deste site mede golos por 90 minutos acima de um substituto. Aplicado a um guarda-redes, devolve exatamente o mesmo valor que devolve a todos os outros guarda-redes: o mínimo da escala. Não é uma avaliação baixa — é a ausência de avaliação, e mostrá-la aqui seria fingir que medimos alguma coisa."
+        : "This site's player ranking measures goals per 90 minutes above a replacement player. Applied to a goalkeeper, it returns exactly the same value it returns for every other goalkeeper: the floor of the scale. That is not a low rating — it is the absence of a rating, and showing it here would be pretending we measured something."
+      : pt
+        ? "O ranking de jogadores deste site mede golos por 90 minutos acima de um substituto. Aplicado a um defesa, devolve um valor no fundo da escala que diz apenas isso: que é defesa. Não o mostramos por isso."
+        : "This site's player ranking measures goals per 90 minutes above a replacement player. Applied to a defender, it returns a value at the bottom of the scale which says only that: that he is a defender. So we do not show it.",
+    suppressedNoMetric: isKeeper
+      ? pt
+        ? "A métrica de guarda-redes — golos evitados face ao xGOT dos remates sofridos — ainda não está publicada para este jogador."
+        : "The goalkeeper metric — goals prevented against the xGOT of the shots faced — is not published for this player yet."
+      : pt
+        ? "A métrica de defesas ainda não está publicada para este jogador. Pode nunca vir a estar: separar um central do seu parceiro habitual em 34 jornadas pode simplesmente não ser possível com estes dados."
+        : "The defender metric is not published for this player yet. It may never be: telling a centre-back apart from his usual partner over 34 matches may simply not be possible with these data.",
+    // Read from the feed: the position models publish a 90% interval where
+    // the goals model publishes 94%.
+    posInterval:
+      pr?.meta.intervalPct == null
+        ? pt
+          ? "Intervalo de credibilidade"
+          : "Credible interval"
+        : pt
+          ? `Intervalo de credibilidade ${nf(pr.meta.intervalPct, 0)}%`
+          : `${nf(pr.meta.intervalPct, 0)}% credible interval`,
+    posNoInterval: pt
+      ? "Este valor foi publicado sem intervalo de credibilidade, por isso não sabemos quão firme é. Leia-o com desconfiança."
+      : "This value was published without a credible interval, so we do not know how firm it is. Read it with suspicion.",
+    posOthers: pt ? "outros jogadores na mesma métrica" : "other players on the same metric",
+    posRank: (r: number, n: number) =>
+      pt ? `#${r} de ${int(n)} publicados` : `#${r} of ${int(n)} published`,
+    posRaw: pt ? "Soma bruta, sem modelo" : "Raw sum, unmodelled",
+    posShots: pt ? "Remates enfrentados" : "Shots faced",
+    posSample: pt ? "Amostra" : "Sample",
     prev: pt ? "Anterior" : "Previous",
     next: pt ? "Seguinte" : "Next",
     footnote: pt
@@ -242,6 +373,159 @@ export function PlayerProfile({
         )}-minute minimum to qualify. Club = the player's most recent club in the data (${firstSeason} to ${lastSeason}); recent transfers may not be reflected.`,
   };
 
+  /**
+   * The section that replaces (for keepers and defenders) or supplements
+   * (for everyone else) the goals-only number. Renders the published metric
+   * when there is one, and the honest explanation when there is not.
+   */
+  const positionSection =
+    pr && prEntry ? (
+      <section className="mb-10">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
+          {posCopy[pr.kind].title}
+        </h2>
+        <div className="flex items-baseline gap-2 mb-1 flex-wrap">
+          <span className="text-4xl font-bold tabular-nums text-stone-900">
+            {prEntry.value === null
+              ? "—"
+              : `${prEntry.value > 0 ? "+" : ""}${nf(prEntry.value)}`}
+          </span>
+          <span className="text-sm text-stone-500">{posCopy[pr.kind].unit}</span>
+        </div>
+        {prEntry.rank !== null && pr.peers.length > 0 && (
+          <p className="text-[11px] uppercase tracking-wider text-stone-400">
+            {t.posRank(prEntry.rank, pr.peers.length)}
+          </p>
+        )}
+
+        {/* Point estimate and interval, on this metric's own scale, with the
+            other published players as faint ticks. */}
+        {prEntry.value !== null && prDomain && (
+          <div className="mt-4 mb-2">
+            <div className="relative h-10">
+              <div
+                className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-6"
+                style={{ backgroundColor: "#fafaf9" }}
+              />
+              {pr.peers.map((p, i) =>
+                p.value !== null && p.key !== prEntry.key ? (
+                  <div
+                    key={`${p.key}-${i}`}
+                    className="absolute top-1/2 -translate-y-1/2 w-px h-6"
+                    style={{ left: `${prPct(p.value)}%`, backgroundColor: TRACK }}
+                  />
+                ) : null,
+              )}
+              {/* Zero: the reference level this metric is measured against */}
+              <div
+                className="absolute top-1/2 -translate-y-1/2 w-px h-8"
+                style={{ left: `${prZero}%`, backgroundColor: "#d6d3d1" }}
+              />
+              {prEntry.lo !== null && prEntry.hi !== null && (
+                <>
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 h-px"
+                    style={{
+                      left: `${prPct(prEntry.lo)}%`,
+                      width: `${Math.max(
+                        prPct(prEntry.hi) - prPct(prEntry.lo),
+                        0.4,
+                      )}%`,
+                      backgroundColor: SOFT,
+                    }}
+                  />
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 w-px h-4"
+                    style={{ left: `${prPct(prEntry.lo)}%`, backgroundColor: SOFT }}
+                  />
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 w-px h-4"
+                    style={{ left: `${prPct(prEntry.hi)}%`, backgroundColor: SOFT }}
+                  />
+                </>
+              )}
+              <div
+                className="absolute top-1/2 -translate-y-1/2 w-1 h-8"
+                style={{ left: `${prPct(prEntry.value)}%`, backgroundColor: color }}
+              />
+            </div>
+            <div className="flex justify-between text-[10px] tabular-nums text-stone-400">
+              <span>{nf(prDomain.min)}</span>
+              <span>
+                {prEntry.lo !== null && prEntry.hi !== null
+                  ? `${nf(prEntry.lo)} – ${nf(prEntry.hi)} · ${t.posInterval}`
+                  : t.posInterval}
+              </span>
+              <span>{nf(prDomain.max)}</span>
+            </div>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="w-px h-3" style={{ backgroundColor: TRACK }} />
+              <span className="text-[10px] text-stone-400">{t.posOthers}</span>
+            </div>
+          </div>
+        )}
+
+        <p className="text-sm text-stone-600 leading-relaxed max-w-2xl mt-4">
+          {posCopy[pr.kind].meaning}
+        </p>
+        <p className="text-xs text-stone-400 leading-relaxed max-w-2xl mt-2">
+          {prEntry.lo === null || prEntry.hi === null
+            ? `${t.posNoInterval} ${posCopy[pr.kind].caveat}`
+            : posCopy[pr.kind].caveat}
+          {pr.meta.note ? ` ${pr.meta.note}` : ""}
+        </p>
+
+        {(prEntry.shots !== null || prEntry.raw !== null) && (
+          <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2">
+            {prEntry.shots !== null && (
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                  {t.posShots}
+                </div>
+                <div className="text-lg font-bold tabular-nums text-stone-900">
+                  {int(prEntry.shots)}
+                </div>
+              </div>
+            )}
+            {prEntry.raw !== null && (
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                  {t.posRaw}
+                </div>
+                <div className="text-lg font-bold tabular-nums text-stone-900">
+                  {prEntry.raw > 0 ? "+" : ""}
+                  {nf(prEntry.raw, 1)}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+    ) : null;
+
+  /** Shown to keepers and defenders when no position metric is published. */
+  const suppressedSection = (
+    <section className="mb-10">
+      <h2 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
+        {t.suppressedTitle}
+      </h2>
+      <p className="text-sm text-stone-600 leading-relaxed max-w-2xl">
+        {t.suppressedBody}
+      </p>
+      <p className="text-sm text-stone-500 leading-relaxed max-w-2xl mt-2">
+        {t.suppressedNoMetric}
+      </p>
+      <Link
+        href="/desporto/liga/jogadores"
+        locale={locale}
+        className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:text-blue-800"
+      >
+        {t.hub}
+        <ArrowRight className="w-3 h-3" />
+      </Link>
+    </section>
+  );
+
   return (
     <div>
       {/* Identity */}
@@ -249,12 +533,19 @@ export function PlayerProfile({
         <div className="w-1.5 self-stretch min-h-[3.5rem]" style={{ backgroundColor: color }} />
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 bg-stone-100 px-1.5 py-0.5">
-              {t.rank}
-            </span>
-            <span className="text-[10px] uppercase tracking-wider text-stone-400">
-              {t.ofN}
-            </span>
+            {/* The headline rank is a goals rank. For a keeper or a defender
+                it ranks them on something they are not paid to do, so it is
+                suppressed along with the number itself. */}
+            {showGoalsSar && (
+              <>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 bg-stone-100 px-1.5 py-0.5">
+                  {t.rank}
+                </span>
+                <span className="text-[10px] uppercase tracking-wider text-stone-400">
+                  {t.ofN}
+                </span>
+              </>
+            )}
             {injury && (
               <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5">
                 {t.out}
@@ -292,7 +583,12 @@ export function PlayerProfile({
         </div>
       )}
 
-      {/* The metric */}
+      {/* The metric that applies to this position. For keepers and defenders
+          it stands alone; for everyone else it sits under the goals number. */}
+      {!showGoalsSar && (positionSection ?? suppressedSection)}
+
+      {/* The goals-only metric — suppressed where it is degenerate */}
+      {showGoalsSar && (
       <section className="mb-10">
         <h2 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
           {t.metricTitle}
@@ -364,8 +660,14 @@ export function PlayerProfile({
           {t.intervalMeaning}
         </p>
       </section>
+      )}
 
-      {/* Raw record */}
+      {/* A published position metric, alongside the goals number when both
+          apply (a midfielder's contribution, for instance). */}
+      {showGoalsSar && positionSection}
+
+      {/* Raw record. The two derived columns are goals-model outputs, so they
+          go with it when it is suppressed. */}
       <section className="mb-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-4 border-t border-stone-200 pt-5">
         {[
           { label: t.minutes, value: int(player.minutes) },
@@ -375,18 +677,24 @@ export function PlayerProfile({
             label: t.perNinety,
             value: player.goals_per_90 === null ? "—" : nf(player.goals_per_90),
           },
-          {
-            label: t.xgSkill,
-            value:
-              player.xg_skill_per_90 === null ? "—" : nf(player.xg_skill_per_90),
-          },
-          {
-            label: t.pAbove,
-            value:
-              player.p_above_replacement === null
-                ? "—"
-                : `${Math.round(player.p_above_replacement * 100)}%`,
-          },
+          ...(showGoalsSar
+            ? [
+                {
+                  label: t.xgSkill,
+                  value:
+                    player.xg_skill_per_90 === null
+                      ? "—"
+                      : nf(player.xg_skill_per_90),
+                },
+                {
+                  label: t.pAbove,
+                  value:
+                    player.p_above_replacement === null
+                      ? "—"
+                      : `${Math.round(player.p_above_replacement * 100)}%`,
+                },
+              ]
+            : []),
         ].map(cell => (
           <div key={cell.label}>
             <div className="text-[10px] uppercase tracking-wider text-stone-400">
@@ -426,9 +734,11 @@ export function PlayerProfile({
                   <th className="py-2 px-2 text-right font-medium text-[10px] uppercase tracking-wider text-stone-400 hidden sm:table-cell">
                     {t.perNinety}
                   </th>
-                  <th className="py-2 pl-2 font-medium text-[10px] uppercase tracking-wider text-stone-400 w-[38%]">
-                    {t.skillCol}
-                  </th>
+                  {showGoalsSar && (
+                    <th className="py-2 pl-2 font-medium text-[10px] uppercase tracking-wider text-stone-400 w-[38%]">
+                      {t.skillCol}
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -452,6 +762,7 @@ export function PlayerProfile({
                       <td className="py-2 px-2 text-right tabular-nums text-stone-500 hidden sm:table-cell">
                         {s.goals_per_90 === null ? "—" : nf(s.goals_per_90)}
                       </td>
+                      {showGoalsSar && (
                       <td className="py-2 pl-2">
                         {v === null ? (
                           <span className="text-stone-300">—</span>
@@ -484,6 +795,7 @@ export function PlayerProfile({
                           </div>
                         )}
                       </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -492,12 +804,14 @@ export function PlayerProfile({
           </div>
 
           {/* The null result, shipped as content */}
-          <div className="mt-5 border-l-2 border-stone-300 pl-4 py-1 max-w-2xl">
-            <h3 className="text-sm font-bold text-stone-900 mb-1">{t.nullTitle}</h3>
-            <p className="text-sm text-stone-600 leading-relaxed">
-              {change && withSkill.length > 1 ? t.nullBody(change) : t.nullSingle}
-            </p>
-          </div>
+          {showGoalsSar && (
+            <div className="mt-5 border-l-2 border-stone-300 pl-4 py-1 max-w-2xl">
+              <h3 className="text-sm font-bold text-stone-900 mb-1">{t.nullTitle}</h3>
+              <p className="text-sm text-stone-600 leading-relaxed">
+                {change && withSkill.length > 1 ? t.nullBody(change) : t.nullSingle}
+              </p>
+            </div>
+          )}
         </section>
       )}
 
@@ -546,6 +860,14 @@ export function PlayerProfile({
 
       {/* Neighbours in the ranking + club page */}
       <section className="border-t border-stone-200 pt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
+        <Link
+          href="/desporto/liga/jogadores"
+          locale={locale}
+          className="text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+        >
+          {t.hub}
+          <ArrowRight className="w-3 h-3" />
+        </Link>
         {prev && (
           <Link
             href={`/desporto/liga/jogador/${prev.slug}`}

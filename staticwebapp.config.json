@@ -180,6 +180,14 @@
       "serve": "/en/desporto/liga/dados/index.html"
     },
     {
+      "route": "/pt/desporto/liga/jogadores",
+      "serve": "/pt/desporto/liga/jogadores/index.html"
+    },
+    {
+      "route": "/en/desporto/liga/jogadores",
+      "serve": "/en/desporto/liga/jogadores/index.html"
+    },
+    {
       "route": "/pt/desporto/liga/jogo-previsoes",
       "serve": "/pt/desporto/liga/jogo-previsoes/index.html"
     },
