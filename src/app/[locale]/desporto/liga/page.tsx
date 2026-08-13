@@ -2,11 +2,7 @@ import {
   loadLigaWithDeltas,
   loadLigaHistorical,
   loadLigaSamples,
-  loadLigaPlayers,
-  loadLigaInjuries,
-  loadLigaCards,
   loadUpcomingFixtures,
-  loadPlayerSlugs,
 } from "@/lib/utils/football-data-loader";
 import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import { Header } from "@/components/Header";
@@ -15,25 +11,23 @@ import type { PointsInterval } from "@/components/charts/football/LeagueTable";
 import { MatchdayPredictions } from "@/components/charts/football/MatchdayPredictions";
 import { TitleRaceChart } from "@/components/charts/football/TitleRaceChart";
 import { RelegationChart } from "@/components/charts/football/RelegationChart";
-import { PositionHeatmap } from "@/components/charts/football/PositionHeatmap";
-import { SeasonDraw } from "@/components/charts/football/SeasonDraw";
-import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
-import { PathsToVictory } from "@/components/charts/football/PathsToVictory";
-import { ScheduleDifficulty } from "@/components/charts/football/ScheduleDifficulty";
-import type { ScheduleDifficultyEntry } from "@/components/charts/football/ScheduleDifficulty";
 import { TeamStrengthRatings } from "@/components/charts/football/TeamStrengthRatings";
 import { LuckIndex } from "@/components/charts/football/LuckIndex";
 import type { LuckEntry } from "@/components/charts/football/LuckIndex";
-import { ShareCards } from "@/components/charts/football/ShareCards";
-import { PlayerSkillRanking } from "@/components/charts/football/PlayerSkillRanking";
-import { InjuriesPanel } from "@/components/charts/football/InjuriesPanel";
-import { injuryReasonLabel } from "@/lib/i18n/football-labels";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ligaTeamSlugs } from "@/lib/config/football";
-import { Trophy, ArrowRight, SlidersHorizontal, Scale, History, Layers } from "lucide-react";
+import {
+  Trophy,
+  ArrowRight,
+  SlidersHorizontal,
+  Scale,
+  History,
+  Layers,
+  Users,
+  Gamepad2,
+} from "lucide-react";
 import type { Metadata } from "next";
-import type { CriticalPath, TeamStrength } from "@/types/football";
 
 export async function generateMetadata({
   params,
@@ -64,25 +58,15 @@ export default async function LigaPage({
   const { locale } = await params;
   const t = await getTranslations({ locale });
 
-  const [
-    { prediction, scenarios, deltas },
-    historical,
-    seasonSamples,
-    playerSkill,
-    injuries,
-    shareCards,
-    upcomingFixtures,
-    playerSlugs,
-  ] = await Promise.all([
-    loadLigaWithDeltas(),
-    loadLigaHistorical(),
-    loadLigaSamples(),
-    loadLigaPlayers(),
-    loadLigaInjuries(),
-    loadLigaCards(),
-    loadUpcomingFixtures(),
-    loadPlayerSlugs(),
-  ]);
+  // seasonSamples stays for the table's final-points intervals; the
+  // draw-a-season widget that also read it was cut in the 2026-08 trim.
+  const [{ prediction, scenarios, deltas }, historical, seasonSamples, upcomingFixtures] =
+    await Promise.all([
+      loadLigaWithDeltas(),
+      loadLigaHistorical(),
+      loadLigaSamples(),
+      loadUpcomingFixtures(),
+    ]);
 
   // Fixture row → match page. Rows without a generated page stay unlinked.
   const matchHrefs: Record<string, string> = Object.fromEntries(
@@ -114,47 +98,6 @@ export default async function LigaPage({
     );
   }
 
-  // Compute schedule difficulty from critical_paths + team_strengths
-  let scheduleDifficultyData: ScheduleDifficultyEntry[] = [];
-  if (scenarios?.critical_paths && prediction.team_strengths) {
-    const strengths = prediction.team_strengths;
-    const rawEntries: { team: string; avgStrength: number; toughest: string[]; remaining: number }[] = [];
-
-    for (const [team, path] of Object.entries(scenarios.critical_paths)) {
-      const matches = (path as CriticalPath).matches;
-      if (!matches || matches.length === 0) continue;
-      const opponentStrengths = matches.map(m => {
-        const s = strengths[m.opponent];
-        return s ? s.attack - s.defense : 0;
-      });
-      const avg = opponentStrengths.reduce((a, b) => a + b, 0) / opponentStrengths.length;
-      // Top 3 toughest opponents
-      const toughest = [...matches]
-        .sort((a, b) => {
-          const sa = strengths[a.opponent];
-          const sb = strengths[b.opponent];
-          return ((sb?.attack ?? 0) - (sb?.defense ?? 0)) - ((sa?.attack ?? 0) - (sa?.defense ?? 0));
-        })
-        .slice(0, 3)
-        .map(m => m.opponent);
-      rawEntries.push({ team, avgStrength: avg, toughest, remaining: matches.length });
-    }
-
-    if (rawEntries.length > 0) {
-      const minS = Math.min(...rawEntries.map(e => e.avgStrength));
-      const maxS = Math.max(...rawEntries.map(e => e.avgStrength));
-      const range = maxS - minS || 1;
-      scheduleDifficultyData = rawEntries
-        .sort((a, b) => b.avgStrength - a.avgStrength)
-        .map(e => ({
-          team: e.team,
-          difficulty: (e.avgStrength - minS) / range,
-          toughestOpponents: e.toughest,
-          remainingGames: e.remaining,
-        }));
-    }
-  }
-
   // Final-points intervals for the league table. samples.json carries the
   // quantiles index-aligned with its own teams array; a feed without the
   // quartiles simply leaves the table as it was.
@@ -177,30 +120,6 @@ export default async function LigaPage({
       }
       pointsIntervals[team] = { q05, q25, q50, q75, q95 };
     });
-  }
-
-  // Cross-links between the player ranking and the availability snapshot
-  const currentTeams = prediction.table.map((row) => row.team);
-  const skillRanks: Record<string, number> = {};
-  for (const p of playerSkill?.players ?? []) {
-    skillRanks[p.player] = p.rank;
-  }
-  const unavailableByPlayer: Record<string, string> = {};
-  for (const p of injuries?.players ?? []) {
-    const reason = injuryReasonLabel(p.reason, locale);
-    const back = p.expected_return
-      ? new Date(p.expected_return).toLocaleDateString(
-          locale === "pt" ? "pt-PT" : "en-GB",
-          { day: "numeric", month: "long" }
-        )
-      : null;
-    const suffix = back
-      ? locale === "pt"
-        ? ` · regresso previsto ${back}`
-        : ` · expected back ${back}`
-      : "";
-    unavailableByPlayer[p.player] =
-      (reason || (locale === "pt" ? "Indisponível" : "Unavailable")) + suffix;
   }
 
   const leader = prediction.table[0];
@@ -358,15 +277,6 @@ export default async function LigaPage({
         </div>
       </section>
 
-      {/* Share cards — PNGs rendered by the model repo, absent without a fuss */}
-      {shareCards && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <ShareCards manifest={shareCards} locale={locale} />
-          </div>
-        </section>
-      )}
-
       {/* Simulator CTA — only when current matchday is complete */}
       {matchdayComplete && scenarios?.next_matchday_scenarios && (
         <section className="border-b border-stone-200">
@@ -400,6 +310,36 @@ export default async function LigaPage({
           </div>
         </section>
       )}
+
+      {/* Contra o Modelo — the season-long game. Before the 2026-08 trim
+          this page never linked it at all. */}
+      <section className="border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <Link
+            href="/desporto/liga/jogo-previsoes"
+            locale={locale}
+            className="block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+          >
+            <div className="flex items-start gap-3">
+              <Gamepad2 className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-stone-900">
+                  {locale === "en" ? "Beat the model" : "Contra o Modelo"}
+                </h3>
+                <p className="text-sm text-stone-500 mt-0.5">
+                  {locale === "en"
+                    ? "Call the next matchday before it kicks off and get scored against the model, all season long."
+                    : "Preveja a próxima jornada antes de começar e compare-se com o modelo, época inteira."}
+                </p>
+              </div>
+              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+                {locale === "en" ? "Play" : "Jogar"}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </div>
+          </Link>
+        </div>
+      </section>
 
       {/* Title Race */}
       {historical.length > 1 && (
@@ -483,143 +423,6 @@ export default async function LigaPage({
         </section>
       )}
 
-      {/* Player skill ranking — Soccer Factor Model */}
-      {playerSkill && playerSkill.players?.length > 0 && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <PlayerSkillRanking
-              data={playerSkill}
-              locale={locale}
-              currentTeams={currentTeams}
-              unavailable={unavailableByPlayer}
-              playerSlugs={playerSlugs}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* Injuries / suspensions snapshot */}
-      {injuries && injuries.players?.length > 0 && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <InjuriesPanel data={injuries} locale={locale} skillRanks={skillRanks} />
-          </div>
-        </section>
-      )}
-
-      {/* Paths to Victory */}
-      {scenarios?.victory_paths && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
-              {t("football.pathsToVictory")}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.pathsToVictoryDescription")}
-            </p>
-            <PathsToVictory
-              paths={scenarios.victory_paths}
-              locale={locale}
-              labels={{
-                freqFrame: t("football.pathFreqFrame"),
-                subtitleOwn: t("football.pathSubtitleOwn"),
-                subtitleHelp: t("football.pathSubtitleHelp"),
-                subtitleMiracle: t("football.pathSubtitleMiracle"),
-                gateKeepWinning: t("football.pathGateKeepWinning"),
-                gateKeepWinningDetail: t("football.pathGateKeepWinningDetail"),
-                gateWinKeyMatches: t("football.pathGateWinKeyMatches"),
-                gateWinEverything: t("football.pathGateWinEverything"),
-                gateMustStumble: t("football.pathGateMustStumble"),
-                and: t("football.pathAnd"),
-                matchdayPrefix: t("football.matchdayPrefix"),
-                homeAbbr: t("football.homeAbbr"),
-                awayAbbr: t("football.awayAbbr"),
-              }}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* Survival Paths */}
-      {scenarios?.survival_paths && (() => {
-        // Only show teams with meaningful survival analysis
-        // Filter out teams where the model finds no decisive matches (uplift too low)
-        const atRiskPaths = Object.fromEntries(
-          Object.entries(scenarios.survival_paths).filter(
-            ([, p]) => {
-              if (p.p_current <= 0.20) return true; // Always show danger teams
-              const mustWins = (p.funnel || []).filter(s => s.win_uplift >= 0.20).length;
-              if (mustWins >= 4) return true; // Must win everything
-              const keyMatches = (p.funnel || []).filter(s => s.win_uplift >= 0.04).length;
-              return keyMatches > 0; // Has decisive matches
-            }
-          )
-        );
-        if (Object.keys(atRiskPaths).length === 0) return null;
-        return (
-          <section className="border-b border-stone-200">
-            <div className="max-w-7xl mx-auto px-4 py-10">
-              <h2 className="text-xl font-bold tracking-tight mb-1">
-                {t("football.survivalSection")}
-              </h2>
-              <p className="text-sm text-stone-500 mb-6">
-                {t("football.survivalPathsDescription")}
-              </p>
-              <PathsToVictory
-                paths={atRiskPaths}
-                locale={locale}
-                labels={{
-                  freqFrame: t("football.survivalFreqFrame"),
-                  subtitleOwn: t("football.survivalSubtitleSafe"),
-                  subtitleHelp: t("football.survivalSubtitleRisk"),
-                  subtitleMiracle: t("football.survivalSubtitleDanger"),
-                  gateKeepWinning: t("football.pathGateKeepWinning"),
-                  gateKeepWinningDetail: t("football.survivalGateDetail"),
-                  gateWinKeyMatches: t("football.pathGateWinKeyMatches"),
-                  gateWinEverything: t("football.pathGateWinEverything"),
-                  gateMustStumble: t("football.pathGateMustStumble"),
-                  and: t("football.pathAnd"),
-                  matchdayPrefix: t("football.matchdayPrefix"),
-                  homeAbbr: t("football.homeAbbr"),
-                  awayAbbr: t("football.awayAbbr"),
-                }}
-              />
-            </div>
-          </section>
-        );
-      })()}
-
-      {/* Season Outlook — all remaining decisive matches */}
-      {scenarios && scenarios.decisive_matches.length > 0 && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
-              {t("football.seasonOutlook")}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.seasonOutlookDescription")}
-            </p>
-            <DecisiveMatches
-              matches={scenarios.decisive_matches}
-              labels={{
-                matchday: t("football.matchday"),
-                championProb: t("football.championProb"),
-                baseline: t("football.baseline"),
-                draw: t("football.draw"),
-                ifWins: t("football.ifWinsTemplate"),
-                ifWin: t("football.ifWin"),
-                ifLose: t("football.ifLose"),
-                current: t("football.current"),
-                relegationProb: t("football.relegationProb"),
-                titleRaceSection: t("football.titleRaceSection"),
-                relegationSection: t("football.relegationSection"),
-                matchdayPrefix: t("football.matchdayPrefix"),
-              }}
-            />
-          </div>
-        </section>
-      )}
-
       {/* Relegation Battle */}
       {historical.length > 1 && (
         <section className="border-b border-stone-200">
@@ -632,55 +435,6 @@ export default async function LigaPage({
             </p>
             <RelegationChart historical={historical} yAxisLabel={t("football.relegationPercent")} />
           </div>
-        </section>
-      )}
-
-      {/* Schedule Difficulty */}
-      {scheduleDifficultyData.length > 0 && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
-              {t("football.scheduleDifficulty")}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.scheduleDifficultyDescription")}
-            </p>
-            <ScheduleDifficulty
-              data={scheduleDifficultyData}
-              labels={{
-                hardest: t("football.hardestSchedule"),
-                easiest: t("football.easiestSchedule"),
-                toughOpponents: t("football.toughOpponents"),
-              }}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* Position Heatmap */}
-      <section className="border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 py-10">
-          <h2 className="text-xl font-bold tracking-tight mb-1">
-            {t("football.positionProbabilities")}
-          </h2>
-          <p className="text-sm text-stone-500 mb-6">
-            {t("football.positionProbabilitiesDescription")}
-          </p>
-          <PositionHeatmap
-            positionProbs={prediction.position_probs}
-            table={prediction.table}
-            labels={{
-              team: t("football.team"),
-              position: t("football.position"),
-            }}
-          />
-        </div>
-      </section>
-
-      {/* Draw-a-season widget (real samples from the Monte Carlo) */}
-      {seasonSamples && (
-        <section className="max-w-7xl mx-auto px-4 py-6">
-          <SeasonDraw samples={seasonSamples} locale={locale} />
         </section>
       )}
 
@@ -766,6 +520,31 @@ export default async function LigaPage({
               </div>
               <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
                 {locale === "en" ? "Read the review" : "Ver a revisão"}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </div>
+          </Link>
+
+          {/* Players — the per-position ratings hub */}
+          <Link
+            href="/desporto/liga/jogadores"
+            locale={locale}
+            className="mt-4 block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+          >
+            <div className="flex items-start gap-3">
+              <Users className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-stone-900">
+                  {locale === "en" ? "The players, measured honestly" : "Os jogadores, medidos com honestidade"}
+                </h3>
+                <p className="text-sm text-stone-500 mt-0.5">
+                  {locale === "en"
+                    ? "Finishing, attacking contribution, contested possession, goalkeeping — one metric per dimension, each with its own scale and its own uncertainty, and no fake overall score."
+                    : "Finalização, contribuição ofensiva, posse disputada, guarda-redes — uma métrica por dimensão, cada uma com a sua escala e a sua incerteza, sem nota global inventada."}
+                </p>
+              </div>
+              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+                {locale === "en" ? "See the players" : "Ver os jogadores"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </div>
