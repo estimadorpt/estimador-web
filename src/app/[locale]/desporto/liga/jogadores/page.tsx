@@ -5,8 +5,10 @@ import { Header } from "@/components/Header";
 import { Link } from "@/i18n/routing";
 import { PlayerRatingsHub } from "@/components/charts/football/PlayerRatingsHub";
 import {
+  loadContestedRatings,
   loadContribRatings,
   loadDefRatings,
+  loadGkChannels,
   loadGkRatings,
   loadLigaPlayers,
   loadPlayerSlugs,
@@ -23,11 +25,11 @@ export async function generateMetadata({
   const pt = locale !== "en";
 
   const title = pt
-    ? "Jogadores da Liga Portugal: quatro métricas, não uma"
-    : "Liga Portugal players: four metrics, not one";
+    ? "Jogadores da Liga Portugal: uma métrica por dimensão"
+    : "Liga Portugal players: one metric per dimension";
   const description = pt
-    ? "Não há forma honesta de pôr um guarda-redes e um ponta de lança na mesma tabela. Finalização, contribuição ofensiva, golos evitados e defesas — cada métrica com a sua escala, o seu intervalo de credibilidade e a sua amostra."
-    : "There is no honest way to put a goalkeeper and a centre-forward in the same table. Finishing, attacking contribution, goals prevented and defending — each metric with its own scale, credible interval and sample.";
+    ? "Não há forma honesta de pôr um guarda-redes e um ponta de lança na mesma tabela. Finalização, contribuição ofensiva, posse disputada, intervenção em cruzamentos — cada métrica com a sua escala, o seu intervalo de credibilidade e a sua amostra."
+    : "There is no honest way to put a goalkeeper and a centre-forward in the same table. Finishing, attacking contribution, contested possession, cross intervention — each metric with its own scale, credible interval and sample.";
   const url = `${SITE}/${locale}/desporto/liga/jogadores`;
 
   return {
@@ -57,13 +59,16 @@ export default async function PlayerRatingsPage({
   // Every feed is optional and loaded independently: three of these are
   // written by separate models in the model repo and any of them can be
   // absent on any given build. A missing feed renders no section.
-  const [finishers, contrib, gk, def, playerSlugs] = await Promise.all([
-    loadLigaPlayers(),
-    loadContribRatings(),
-    loadGkRatings(),
-    loadDefRatings(),
-    loadPlayerSlugs(),
-  ]);
+  const [finishers, contrib, gk, def, contested, gkChannels, playerSlugs] =
+    await Promise.all([
+      loadLigaPlayers(),
+      loadContribRatings(),
+      loadGkRatings(),
+      loadDefRatings(),
+      loadContestedRatings(),
+      loadGkChannels(),
+      loadPlayerSlugs(),
+    ]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -86,6 +91,8 @@ export default async function PlayerRatingsPage({
           contrib={contrib}
           gk={gk}
           def={def}
+          contested={contested}
+          gkChannels={gkChannels}
           playerSlugs={playerSlugs}
           locale={locale}
         />

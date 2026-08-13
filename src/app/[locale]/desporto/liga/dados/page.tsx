@@ -146,6 +146,22 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
     },
   },
   {
+    match: /^contested_ratings\.json$/,
+    label: "contested_ratings.json",
+    doc: {
+      pt: "Posse disputada: probabilidade de ganhar duelos aéreos e no chão, defesas e médios, agregada sobre três épocas de carreira. Células que falharam uma porta pré-registada trazem ranking: null.",
+      en: "Contested possession: probability of winning aerial and ground duels, defenders and midfielders, pooled over a three-season career. Cells that failed a pre-registered gate carry ranking: null.",
+    },
+  },
+  {
+    match: /^gk_channels\.json$/,
+    label: "gk_channels.json",
+    doc: {
+      pt: "Os três eixos de guarda-redes, publicados separados e nunca combinados: intervenção em cruzamentos (separável), saídas da área (estilo) e defesa de remates (nulo com potência adequada em três épocas).",
+      en: "The three goalkeeper axes, published separately and never combined: cross intervention (separable), sweeping (a style), and shot-stopping (a properly-powered null over three seasons).",
+    },
+  },
+  {
     match: /^injuries\.json$/,
     label: "injuries.json",
     doc: {

@@ -157,6 +157,129 @@ export async function loadContribRatings() {
   return loadRatings('contrib_ratings.json', 'contrib');
 }
 
+/* ------------------------------------------- ADR-021 channels (2026-08) */
+
+/**
+ * Contested-possession ability: empirical-Bayes beta-binomial on aerial and
+ * ground duels, defenders and midfielders, career-pooled. Cells that failed
+ * a pre-registered gate carry `ranking: null` — the refusal is enforced in
+ * the export, so the raw feed cannot be used to reconstruct a suppressed
+ * ranking.
+ */
+export interface ContestedCell {
+  channel: 'aerial' | 'ground';
+  position: 'D' | 'M';
+  n_players: number;
+  positional_mean: number;
+  separable: number;
+  permutation_null: number;
+  club_corr_raw: number | null;
+  split_half: number | null;
+  ships: boolean;
+  ranking:
+    | {
+        rank: number;
+        player: string;
+        player_id: number;
+        team: string | null;
+        duels: number;
+        won: number;
+        rate_raw: number;
+        theta: number;
+        theta_lo: number;
+        theta_hi: number;
+        above_positional_mean: boolean;
+        matches: number;
+        role_cluster?: string;
+      }[]
+    | null;
+}
+
+export interface ContestedRatings {
+  metric: string;
+  interval_mass: number;
+  seasons: string[];
+  career_pooled: boolean;
+  new_signing_note: string;
+  not_a_defensive_rating: string;
+  cells: ContestedCell[];
+}
+
+export async function loadContestedRatings(): Promise<ContestedRatings | null> {
+  try {
+    const raw = await loadFootballJson<ContestedRatings>('contested_ratings.json');
+    return Array.isArray(raw?.cells) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The three goalkeeper channels, published separately and never averaged:
+ * cross intervention (separable), sweeping volume (a style axis — a third
+ * of its persistence is the defensive line, and the feed says so) and
+ * shot-stopping (a properly-powered null on three seasons of data).
+ */
+export interface GkChannelRow {
+  rank: number;
+  keeper: string;
+  keeper_id: number;
+  team: string | null;
+  minutes: number;
+  y: number;
+  n: number;
+  theta: number;
+  theta_lo: number;
+  theta_hi: number;
+  p_above_average: number;
+  separable: boolean;
+}
+
+export interface GkChannels {
+  interval_mass: number;
+  seasons: string[];
+  no_composite_note: string;
+  channels: {
+    cross_intervention: {
+      metric: string;
+      what: string;
+      separable: number;
+      expected_false_positives: number;
+      split_half: number;
+      teammate_r: number;
+      season_to_season: number;
+      travels_note: string;
+      ships: boolean;
+      ranking: GkChannelRow[] | null;
+    };
+    sweeping: {
+      metric: string;
+      style_axis: boolean;
+      what: string;
+      ships: boolean;
+      ranking: GkChannelRow[] | null;
+    };
+    shot_stopping: {
+      metric: string;
+      separable: number;
+      expected_separators_precomputed: number;
+      season_to_season_theta: number;
+      ships: boolean;
+      null_statement: string | null;
+      ranking: GkChannelRow[] | null;
+    };
+  };
+}
+
+export async function loadGkChannels(): Promise<GkChannels | null> {
+  try {
+    const raw = await loadFootballJson<GkChannels>('gk_channels.json');
+    return raw?.channels ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Slug used when no player detail is published at all. Static export refuses
  * to build a dynamic route whose generateStaticParams() returns an empty

@@ -3,6 +3,14 @@
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
 import { PlayerRatingList } from "@/components/charts/football/PlayerRatingList";
+import {
+  ContestedSection,
+  GkChannelsSection,
+} from "@/components/charts/football/Adr021Sections";
+import type {
+  ContestedRatings,
+  GkChannels,
+} from "@/lib/utils/football-data-loader";
 import type { PlayerSkillData } from "@/components/charts/football/PlayerSkillRanking";
 import { countSeparated } from "@/lib/utils/player-ratings";
 import type {
@@ -32,6 +40,8 @@ interface PlayerRatingsHubProps {
   contrib: RatingsBlock | null;
   gk: RatingsBlock | null;
   def: RatingsBlock | null;
+  contested?: ContestedRatings | null;
+  gkChannels?: GkChannels | null;
   playerSlugs?: Record<string, string>;
   locale?: string;
 }
@@ -66,6 +76,8 @@ export function PlayerRatingsHub({
   contrib,
   gk,
   def,
+  contested = null,
+  gkChannels = null,
   playerSlugs,
   locale = "pt",
 }: PlayerRatingsHubProps) {
@@ -330,7 +342,20 @@ export function PlayerRatingsHub({
   if (finishers?.players?.length) published.push(pt ? "finalização" : "finishing");
   else missing.push(pt ? "finalização" : "finishing");
   bucket(contrib, pt ? "contribuição" : "contribution");
-  bucket(gk, pt ? "guarda-redes" : "goalkeepers");
+  if (contested?.cells.some((c) => c.ships && c.ranking?.length))
+    published.push(pt ? "posse disputada" : "contested possession");
+  const crossShips = gkChannels?.channels.cross_intervention.ships ?? false;
+  if (crossShips)
+    published.push(
+      pt ? "intervenção em cruzamentos" : "cross intervention",
+    );
+  if (gkChannels && !gkChannels.channels.shot_stopping.ships)
+    inconclusive.push(
+      pt ? "defesa de remates (3 épocas)" : "shot-stopping (3 seasons)",
+    );
+  // The xGOT feed is superseded by the three-axis section when that feed
+  // exists; listing an unrendered section as ranked would be a lie.
+  if (!gkChannels) bucket(gk, pt ? "guarda-redes (xGOT)" : "goalkeepers (xGOT)");
   bucket(def, pt ? "defesas" : "defenders");
 
   return (
@@ -342,8 +367,8 @@ export function PlayerRatingsHub({
         </p>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-stone-900 mb-4">
           {pt
-            ? "Quatro métricas, porque um número só não chega"
-            : "Four metrics, because one number is not enough"}
+            ? "Uma métrica por dimensão, porque um número só não chega"
+            : "One metric per dimension, because one number is not enough"}
         </h1>
         <p className="text-base text-stone-600 leading-relaxed mb-4">
           {pt
@@ -551,8 +576,22 @@ export function PlayerRatingsHub({
         </section>
       )}
 
-      {/* ------------------------------------------------------ 3. goalkeepers */}
-      {gk && gk.players.length > 0 && (
+      {/* ------------------------------------- 3. contested possession (ADR-021) */}
+      {contested && contested.cells.some((c) => c.ships && c.ranking?.length) && (
+        <ContestedSection
+          data={contested}
+          playerSlugs={playerSlugs}
+          locale={locale}
+        />
+      )}
+
+      {/* --------------------------------- 4. goalkeeper channels (ADR-021) */}
+      {gkChannels && <GkChannelsSection data={gkChannels} locale={locale} />}
+
+      {/* The pre-ADR-021 goalkeeper section (shotmap xGOT, one season).
+          Superseded by the three-axis section above when its feed exists —
+          rendering both would present two shot-stopping verdicts. */}
+      {!gkChannels && gk && gk.players.length > 0 && (
         <section className="mb-12 border-t border-stone-200 pt-8">
           <h2 className="text-xl font-bold tracking-tight mb-1">
             {pt ? "Guarda-redes" : "Goalkeepers"}
