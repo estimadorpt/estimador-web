@@ -263,6 +263,10 @@ export interface GkChannels {
     };
     shot_stopping: {
       metric: string;
+      /** Keepers in the fitted panel and their mean SoT faced — the null
+       *  statement's denominators, published so no count is hardcoded. */
+      n_fitted?: number;
+      mean_sot_faced?: number;
       separable: number;
       expected_separators_precomputed: number;
       season_to_season_theta: number;

@@ -395,9 +395,11 @@ export function GkChannelsSection({
         ) : (
           <div className="max-w-3xl border-l-2 border-amber-300 bg-amber-50 pl-3 py-2">
             <p className="text-xs text-amber-800 leading-relaxed">
+              {/* Counts come from the feed — the fitted panel grows as
+                  seasons accumulate, and a hardcoded 47 would silently rot. */}
               {pt
-                ? `Zero de ${int(47)} guarda-redes se separam da média em três épocas completas de remates (~370 por guarda-redes). Já não é falta de dados: com o triplo dos remates da tentativa anterior, a resposta continua a ser que as diferenças entre guarda-redes da Liga a parar remates são reais mas demasiado pequenas para ordenar com confiança. Publicamos o nulo em vez de uma lista que fingiria sabê-lo.`
-                : `Zero of ${int(47)} keepers separate from the average over three full seasons of shots (~370 per keeper). This is no longer a data shortage: with three times the shots of the previous attempt, the answer is still that Liga keepers' shot-stopping differences are real but too small to rank confidently. We publish the null rather than a list that would pretend to know.`}
+                ? `${int(stop.separable)} de ${int(stop.n_fitted ?? 0)} guarda-redes se separam da média em ${data.seasons.length} épocas de remates (~${int(stop.mean_sot_faced ?? 0)} por guarda-redes). Já não é falta de dados: a resposta continua a ser que as diferenças entre guarda-redes da Liga a parar remates são reais mas demasiado pequenas para ordenar com confiança. Publicamos o nulo em vez de uma lista que fingiria sabê-lo.`
+                : `${int(stop.separable)} of ${int(stop.n_fitted ?? 0)} keepers separate from the average over ${data.seasons.length} seasons of shots (~${int(stop.mean_sot_faced ?? 0)} per keeper). This is no longer a data shortage: the answer is still that Liga keepers' shot-stopping differences are real but too small to rank confidently. We publish the null rather than a list that would pretend to know.`}
             </p>
           </div>
         )}

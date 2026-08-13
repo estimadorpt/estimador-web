@@ -34,7 +34,7 @@
     "max_rhat": 1.02,
     "min_ess_bulk": 284.0,
     "divergences": 0,
-    "draws": 1000,
+    "draws": 2000,
     "chains": 4,
     "compared_against": "player_skill.parquet (goals-only SAR)"
   },
