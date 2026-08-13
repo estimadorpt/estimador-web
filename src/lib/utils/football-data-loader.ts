@@ -242,6 +242,8 @@ export interface GkChannels {
   channels: {
     cross_intervention: {
       metric: string;
+      /** Keepers in the fitted panel; the ranking lists the current subset. */
+      n_fitted?: number;
       what: string;
       separable: number;
       expected_false_positives: number;

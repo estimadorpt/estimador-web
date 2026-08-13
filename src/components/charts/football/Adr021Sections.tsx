@@ -137,8 +137,8 @@ export function ContestedSection({
           </h3>
           <p className="text-[11px] text-stone-400 mb-3">
             {pt
-              ? `${cell.separable} de ${int(cell.n_players)} jogadores separam-se da média da posição (${cell.permutation_null} esperados por acaso).`
-              : `${cell.separable} of ${int(cell.n_players)} players separate from the positional average (${cell.permutation_null} expected by chance).`}
+              ? `${cell.separable} de ${int(cell.n_players)} jogadores ajustados separam-se da média da posição (${cell.permutation_null} esperados por acaso). A lista mostra só quem está na Liga esta época.`
+              : `${cell.separable} of ${int(cell.n_players)} fitted players separate from the positional average (${cell.permutation_null} expected by chance). The list shows only players in the league this season.`}
           </p>
           <PlayerRatingList
             entries={contestedEntries(cell).slice(0, 8)}
@@ -283,8 +283,8 @@ export function GkChannelsSection({
           </h3>
           <p className="text-xs text-stone-500 mb-1 max-w-3xl leading-relaxed">
             {pt
-              ? `A percentagem de cruzamentos sofridos em que o guarda-redes sai — alívio de punhos ou bola agarrada. É o primeiro eixo de guarda-redes deste site em que os jogadores realmente se separam: ${cross.separable} de ${int(cross.ranking.length)} para além do acaso (~5 esperados). E é do guarda-redes, não do clube: dois guarda-redes da mesma equipa não se parecem um com o outro (correlação ${cross.teammate_r.toFixed(2).replace(".", pt ? "," : ".")}).`
-              : `The share of crosses faced where the keeper comes for the ball — a punch or a claim. It is the first goalkeeper axis on this site where players genuinely separate: ${cross.separable} of ${int(cross.ranking.length)} beyond chance (~5 expected). And it belongs to the keeper, not the club: two keepers at the same club do not resemble each other (correlation ${cross.teammate_r.toFixed(2)}).`}
+              ? `A percentagem de cruzamentos sofridos em que o guarda-redes sai — alívio de punhos ou bola agarrada. É o primeiro eixo de guarda-redes deste site em que os jogadores realmente se separam: ${cross.separable} de ${int(cross.n_fitted ?? cross.ranking.length)} no painel ajustado, para além do acaso (~5 esperados). E é do guarda-redes, não do clube: dois guarda-redes da mesma equipa não se parecem um com o outro (correlação ${cross.teammate_r.toFixed(2).replace(".", pt ? "," : ".")}). A lista mostra só quem está na Liga esta época.`
+              : `The share of crosses faced where the keeper comes for the ball — a punch or a claim. It is the first goalkeeper axis on this site where players genuinely separate: ${cross.separable} of ${int(cross.n_fitted ?? cross.ranking.length)} in the fitted panel, beyond chance (~5 expected). And it belongs to the keeper, not the club: two keepers at the same club do not resemble each other (correlation ${cross.teammate_r.toFixed(2)}). The list shows only keepers in the league this season.`}
           </p>
           <p className="text-[11px] text-stone-400 mb-3 max-w-3xl">
             {pt
