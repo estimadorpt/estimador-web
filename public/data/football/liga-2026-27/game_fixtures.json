@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "generated_at": "2026-08-11T14:55:50Z",
+  "generated_at": "2026-08-13T12:54:40Z",
   "n_matchdays": 34,
   "matchdays": [
     {
@@ -124,14 +124,14 @@
           "id": "md01-santa-clara-vs-nacional",
           "home": "Santa Clara",
           "away": "Nacional",
-          "kickoff": "2026-08-10T19:15:00Z",
+          "kickoff": "2026-08-10T00:00:00Z",
           "kickoff_confirmed": true,
-          "locks_at": "2026-08-10T19:15:00Z",
+          "locks_at": "2026-08-10T00:00:00Z",
           "p_home": 0.4675,
           "p_draw": 0.278,
           "p_away": 0.2545,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 2,
+          "away_goals": 2,
           "published_at": "2026-08-10T07:36:05.103728+00:00"
         }
       ]
