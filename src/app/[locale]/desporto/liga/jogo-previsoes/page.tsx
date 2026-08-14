@@ -1,6 +1,7 @@
 import { loadPredictionGameData } from "@/lib/utils/football-data-loader";
 import { Header } from "@/components/Header";
 import { ContraOModelo } from "@/components/charts/football/ContraOModelo";
+import { GameAuthProvider } from "@/components/GameAuthProvider";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, Swords } from "lucide-react";
@@ -71,7 +72,11 @@ export default async function JogoPrevisoesPage({
       <section>
         <div className="max-w-3xl mx-auto px-4 py-10">
           {data ? (
-            <ContraOModelo data={data} locale={locale} />
+            // Auth wraps this page only: readers of forecast pages never
+            // download an auth bundle they have no use for.
+            <GameAuthProvider>
+              <ContraOModelo data={data} locale={locale} />
+            </GameAuthProvider>
           ) : (
             <p className="text-stone-500 text-sm">
               {pt

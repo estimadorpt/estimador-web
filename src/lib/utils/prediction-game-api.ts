@@ -172,6 +172,12 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     headers['x-game-player-id'] = options.credentials.playerId;
     headers['x-game-secret'] = options.credentials.secret;
   }
+  // Clerk session token, when a Clerk provider is mounted. Supplied by a
+  // getter the provider registers, so this module keeps no dependency on
+  // Clerk and behaves identically when Clerk is not configured — in which
+  // case Static Web Apps' own session cookie authenticates the request.
+  const token = await getAuthToken();
+  if (token) headers['authorization'] = `Bearer ${token}`;
 
   try {
     const response = await fetch(`${BASE}${path}`, {
@@ -380,7 +386,42 @@ export async function claimSeason(input: {
   });
 }
 
-/** Where the sign-in button points. Static Web Apps handles the rest. */
+/* -------------------------------------------------------------- sign-in */
+
+/**
+ * How the app authenticates, decided at build time.
+ *
+ * Clerk when a publishable key is baked into the bundle, otherwise Static Web
+ * Apps' built-in GitHub login. Two mechanisms exist only because they are
+ * being swapped: SWA's free tier offers GitHub and Microsoft and nothing
+ * else, which is a poor fit for a Portuguese football audience, while Clerk
+ * brings Google and Apple at no cost. Until the Clerk application exists the
+ * old path keeps working, so this ships without a flag day.
+ */
+export const CLERK_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
+export const usesClerk = (): boolean => CLERK_KEY.length > 0;
+
+/**
+ * Token getter, registered by the Clerk provider when it mounts. Kept as a
+ * module-level hook so this file — imported by non-React code — never has to
+ * import Clerk, and so the whole mechanism vanishes when Clerk is absent.
+ */
+let authTokenGetter: (() => Promise<string | null>) | null = null;
+
+export function setAuthTokenGetter(getter: (() => Promise<string | null>) | null): void {
+  authTokenGetter = getter;
+}
+
+async function getAuthToken(): Promise<string | null> {
+  if (!authTokenGetter) return null;
+  try {
+    return await authTokenGetter();
+  } catch {
+    return null; // an expired session is not a reason to fail the request
+  }
+}
+
+/** Where the sign-in button points, when the host handles sign-in by URL. */
 export function signInHref(returnTo?: string): string {
   const target =
     returnTo ?? (typeof window !== 'undefined' ? window.location.pathname : '/');

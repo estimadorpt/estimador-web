@@ -32,7 +32,7 @@ import {
   createPlayer,
   findPlayerByAuth,
   loadPlayer,
-  readPrincipal,
+  readAnyPrincipal,
   renamePlayer,
   secretsMatch,
   sha256,
@@ -48,7 +48,7 @@ export const run = handle(async (_context: Context, req: HttpRequest) => {
   if ((req.method || 'POST').toUpperCase() !== 'POST') return methodNotAllowed();
 
   const headers = headerMap(req);
-  const principal = readPrincipal(headers['x-ms-client-principal']);
+  const principal = await readAnyPrincipal(headers);
   if (!principal) return unauthorized('not_signed_in');
 
   const body = readJsonBody(req) ?? {};

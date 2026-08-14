@@ -6,9 +6,11 @@
  *  - **Anonymous.** The first POST mints `{playerId, secret}`. The browser
  *    keeps both; the server keeps the id and a sha256 of the secret. A
  *    first-timer plays without an account and without handing us anything.
- *  - **Signed in.** Static Web Apps' built-in auth puts a base64 principal in
- *    `x-ms-client-principal`. We take the opaque provider user id, hash it, and
- *    store only the hash — never the GitHub login, never an email address.
+ *  - **Signed in.** Either a Clerk session token in `Authorization: Bearer`,
+ *    verified against Clerk's JWKS (see `clerk.ts`), or — while Clerk is
+ *    unconfigured — Static Web Apps' built-in auth via a base64 principal in
+ *    `x-ms-client-principal`. Either way we take the opaque provider user id,
+ *    hash it, and store only the hash — never a login, never an email.
  *
  * `POST /api/claim` welds the two together, which is how a player carries an
  * anonymous season onto a second device.
@@ -19,6 +21,7 @@
  */
 
 import { createHash, randomBytes, timingSafeEqual } from 'crypto';
+import { bearerToken, clerkEnabled, verifyClerkToken } from './clerk';
 import type { GameStore, PlayerEntity } from './storage';
 import { safeKey, seasonKey, tryGetEntity } from './storage';
 
@@ -120,6 +123,26 @@ export function readPrincipal(header: string | undefined | null): ClientPrincipa
   }
 }
 
+/**
+ * The signed-in caller, from whichever mechanism is in play.
+ *
+ * A verified Clerk bearer token wins; otherwise the Static Web Apps principal
+ * is used. Both collapse to the same `{provider, userId}` pair, and the store
+ * only ever sees `sha256(provider|userId)` — so a player who signed in with
+ * GitHub before the switch keeps a different hash from the same human signing
+ * in through Clerk. That is correct rather than convenient: they are different
+ * credentials, and `POST /api/claim` is how a season moves between them.
+ */
+export async function readAnyPrincipal(
+  headers: Record<string, string | undefined>,
+): Promise<ClientPrincipal | null> {
+  if (clerkEnabled()) {
+    const viaClerk = await verifyClerkToken(bearerToken(headers['authorization']));
+    if (viaClerk) return viaClerk;
+  }
+  return readPrincipal(headers['x-ms-client-principal']);
+}
+
 /* ------------------------------------------------------------- persistence */
 
 function toPlayer(entity: PlayerEntity): Player {
@@ -219,7 +242,7 @@ export async function resolvePlayer(
   headers: Record<string, string | undefined>,
   options: { createWith?: unknown } = {},
 ): Promise<Resolution> {
-  const principal = readPrincipal(headers['x-ms-client-principal']);
+  const principal = await readAnyPrincipal(headers);
 
   if (principal) {
     const linked = await findPlayerByAuth(

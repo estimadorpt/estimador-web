@@ -14,6 +14,8 @@
 import { useEffect, useState } from "react";
 import { Cloud, CloudOff, Check, LogIn, UserRound, AlertTriangle } from "lucide-react";
 import type { ApiPlayer, RejectedPick } from "@/lib/utils/prediction-game-api";
+import { usesClerk } from "@/lib/utils/prediction-game-api";
+import { GameSignIn } from "@/components/GameAuthProvider";
 import type { SyncState } from "@/hooks/useSeasonGame";
 
 interface SeasonAccountProps {
@@ -182,7 +184,15 @@ export function SeasonAccount({
       )}
 
       <div className="px-4 sm:px-5 py-2.5 bg-stone-50 border-t border-stone-200 text-[11px]">
-        {authenticated ? (
+        {usesClerk() ? (
+          // Clerk owns its signed-in / signed-out states and the provider
+          // buttons; the only copy left to us is the hint about why anyone
+          // would bother.
+          <span className="text-stone-500 inline-flex flex-wrap items-center gap-1.5">
+            <GameSignIn signInLabel={t.signIn} signedInLabel={t.signedIn} />
+            {!authenticated && <>{"— "}{t.signInHint}</>}
+          </span>
+        ) : authenticated ? (
           <span className="inline-flex items-center gap-1.5 text-emerald-800">
             <Check className="w-3.5 h-3.5" />
             {t.signedIn}
