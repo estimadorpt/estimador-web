@@ -295,9 +295,12 @@ export default async function SeasonReviewPage({
 
           <LuckIndex
             entries={luckEntries}
+            locale={pt ? "pt" : "en"}
             labels={{
               overperforming: pt ? "Acima do esperado" : "Above expectation",
               underperforming: pt ? "Abaixo do esperado" : "Below expectation",
+              pointsShort: pt ? "pts reais" : "real pts",
+              expectedShort: pt ? "esperados" : "expected",
             }}
           />
           <p className="text-xs text-stone-500 mt-4 max-w-3xl border-l-2 border-stone-200 pl-4">

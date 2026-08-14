@@ -263,9 +263,12 @@ export default async function LigaPage({
                 </p>
                 <LuckIndex
                   entries={luckEntries}
+                  locale={locale}
                   labels={{
                     overperforming: t("football.overperforming"),
                     underperforming: t("football.underperforming"),
+                    pointsShort: t("football.luckRealPtsShort"),
+                    expectedShort: t("football.luckExpectedShort"),
                   }}
                 />
                 <p className="text-[10px] text-stone-400 mt-2 text-right">

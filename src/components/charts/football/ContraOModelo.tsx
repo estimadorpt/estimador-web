@@ -129,16 +129,22 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
 
   const season = useMemo(() => scoreSeason(data, picks), [data, picks]);
 
+  // Only rounds this player actually took part in. Including rounds they
+  // missed showed someone who joined at matchday 5 a wall of "9 you didn't
+  // predict" for matches that never counted against them anyway — the score
+  // is a mean over rounds played, so an absent round is not a bad round. The
+  // game is joinable at any point and the history should say so.
   const playedRounds = useMemo(
     () =>
       season.rounds
-        .filter(r => r.scored.length > 0 || r.missed > 0)
+        .filter(r => r.scored.length > 0)
         .sort((a, b) => b.matchday - a.matchday),
     [season.rounds],
   );
 
   const t = {
     title: pt ? "Contra o Modelo" : "Beat the Model",
+    howItWorks: pt ? "Como funciona" : "How it works",
     intro: pt
       ? "Diz o que achas que vai acontecer na próxima jornada. Quando os resultados chegarem, as tuas probabilidades são comparadas com as do modelo pela mesma medida que usamos para avaliar o modelo: o Ranked Probability Score."
       : "Say what you think will happen next matchday. When the results land, your probabilities are scored against the model's using the same measure we grade the model with: the Ranked Probability Score.",
@@ -180,6 +186,13 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
     noScore: pt
       ? "Ainda não há nada avaliado. Faz as tuas escolhas e volta depois dos jogos."
       : "Nothing scored yet. Make your picks and come back after the games.",
+    // Says the quiet part out loud: joining late costs nothing. The ranking
+    // is a mean over the rounds you played, so somebody arriving at matchday
+    // 20 starts level with somebody who has been here since matchday 1.
+    joinAnytime: pt
+      ? "Entras quando quiseres: contam as jornadas que jogares, e a classificação é pela média — quem entra hoje não fica atrás de quem começou na primeira jornada."
+      : "Join whenever: only the matchdays you play count, and the table ranks on the average — joining today does not put you behind someone who started on matchday 1.",
+    provisional: pt ? "provisório" : "provisional",
     picked: (n: number, total: number) =>
       pt ? `${n} de ${total} escolhidos` : `${n} of ${total} picked`,
     inProgress: pt ? "Em curso" : "In progress",
@@ -240,9 +253,14 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
   if (!mounted) {
     return (
       <div className="border border-stone-200 rounded-xl p-4 sm:p-6 bg-stone-50">
-        <div className="flex items-center gap-2 mb-1">
-          <Swords className="w-5 h-5 text-emerald-700" />
-          <h2 className="font-bold text-stone-900">{t.title}</h2>
+        {/* Not the game's name: the page hero already carries it, and
+            printing it twice made the card read as a second page header.
+            This card's job is explaining how the scoring works. */}
+        <div className="flex items-center gap-2 mb-2">
+          <Swords className="w-4 h-4 text-emerald-700" />
+          <h2 className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            {t.howItWorks}
+          </h2>
         </div>
         <p className="text-sm text-stone-500">{t.intro}</p>
         <div className="mt-6 h-40 rounded-lg bg-stone-100 animate-pulse" />
@@ -254,12 +272,18 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
     <div className="space-y-8">
       {/* ----------------------------------------------------------- intro */}
       <div className="border border-stone-200 rounded-xl p-4 sm:p-6 bg-stone-50">
-        <div className="flex items-center gap-2 mb-1">
-          <Swords className="w-5 h-5 text-emerald-700" />
-          <h2 className="font-bold text-stone-900">{t.title}</h2>
+        {/* Not the game's name: the page hero already carries it, and
+            printing it twice made the card read as a second page header.
+            This card's job is explaining how the scoring works. */}
+        <div className="flex items-center gap-2 mb-2">
+          <Swords className="w-4 h-4 text-emerald-700" />
+          <h2 className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            {t.howItWorks}
+          </h2>
         </div>
         <p className="text-sm text-stone-600 mb-3">{t.intro}</p>
-        <p className="text-xs text-stone-500">{t.rpsNote}</p>
+        <p className="text-xs text-stone-500 mb-2">{t.rpsNote}</p>
+        <p className="text-xs text-stone-500">{t.joinAnytime}</p>
       </div>
 
       {/* ------------------------------------------------- season identity */}
@@ -317,6 +341,14 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
               <span className="text-stone-500">
                 {t.beatLine(season.roundsWon, season.roundsCounted)} ·{" "}
                 <span className="tabular-nums">{season.matchesScored}</span> {t.matches}
+                {/* Flag a thin sample rather than hiding the player: one
+                    lucky round can top the table, and saying so is better
+                    than a minimum-rounds rule that empties it. */}
+                {season.roundsCounted < 3 && (
+                  <span className="ml-1.5 text-[10px] uppercase tracking-wider bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">
+                    {t.provisional}
+                  </span>
+                )}
               </span>
             </div>
           </div>
@@ -747,14 +779,9 @@ function RoundReview({
 
       <div className="px-4 py-2 bg-stone-50 border-t border-stone-100 text-[11px] text-stone-400">
         {lock.reason === "kickoff" ? t.lockedKickoff : t.lockedResults}
-        {score.missed > 0 && (
-          <>
-            {" · "}
-            {pt
-              ? `${score.missed} sem previsão tua`
-              : `${score.missed} you didn't predict`}
-          </>
-        )}
+        {/* No "N you didn't predict" tally. Unpredicted matches do not enter
+            the mean, so counting them only tells a late joiner they were
+            late. */}
       </div>
     </div>
   );

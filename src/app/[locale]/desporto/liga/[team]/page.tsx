@@ -163,10 +163,23 @@ export default async function TeamDetailPage({
 
   const actualStanding = prediction.actual_standings?.find(s => s.team === teamName);
 
-  // Magic numbers: compute for this team
+  // Magic numbers: compute for this team, from the run-in only.
+  //
+  // A magic number is the points that *mathematically guarantee* a zone
+  // whatever anyone else does. While rivals can still reach nearly every
+  // remaining point, that answer is "win essentially all of them" — the same
+  // number for every team, carrying no information (at matchday 2 it read
+  // "99 of 99 available"). It becomes a real device once rivals have dropped
+  // enough points for the target to be reachable without a perfect run,
+  // which is also when clinching and elimination first become possible.
   const TOTAL_MATCHES = 34;
+  const MAGIC_FROM_MATCHDAY = 23; // the final 12 matchdays
   let magicNumbers: { label: string; pointsNeeded: number; maxRemaining: number; clinched: boolean; eliminated: boolean }[] = [];
-  if (actualStanding && prediction.actual_standings) {
+  if (
+    actualStanding
+    && actualStanding.played >= MAGIC_FROM_MATCHDAY
+    && prediction.actual_standings
+  ) {
     const allTeams = prediction.actual_standings.map(s => ({
       team: s.team,
       currentPoints: s.points,
@@ -372,7 +385,12 @@ export default async function TeamDetailPage({
                               </span>
                             </span>
                             <div className="text-[10px] text-stone-400 mt-0.5">
-                              {t("football.magicNeedsOf", { needed: mn.pointsNeeded, available: mn.maxRemaining })}
+                              {/* When the number equals everything still on
+                                  offer, say so — "96 of 96 available" is a
+                                  riddle where "win every match" is a fact. */}
+                              {mn.pointsNeeded >= mn.maxRemaining
+                                ? t("football.magicWinEverything")
+                                : t("football.magicNeedsOf", { available: mn.maxRemaining })}
                             </div>
                           </div>
                         )}
@@ -405,8 +423,10 @@ export default async function TeamDetailPage({
         </section>
       )}
 
-      {/* Probability timeline — only for title/relegation contenders */}
-      {timelineData.length > 1 && (
+      {/* Probability timeline — title/relegation contenders, once there is
+          actually a line to read. Two points are a segment, not a trend, and
+          the axis has nothing to say about a season two matchdays old. */}
+      {timelineData.length >= 5 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
             <h2 className="text-xl font-bold tracking-tight mb-1">
@@ -419,6 +439,7 @@ export default async function TeamDetailPage({
               data={timelineData}
               teamColor={teamColor}
               yAxisLabel={timelineLabel}
+              xAxisLabel={t("football.matchday")}
             />
           </div>
         </section>

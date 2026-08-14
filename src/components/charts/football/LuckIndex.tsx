@@ -14,10 +14,15 @@ interface LuckIndexProps {
   labels: {
     overperforming?: string;
     underperforming?: string;
+    /** Suffix for the real points, e.g. "pts". */
+    pointsShort?: string;
+    /** Suffix for the modelled points, e.g. "esperados". */
+    expectedShort?: string;
   };
+  locale?: string;
 }
 
-export function LuckIndex({ entries, labels }: LuckIndexProps) {
+export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
   if (!entries || entries.length === 0) return null;
 
   const maxAbsDelta = Math.max(...entries.map(e => Math.abs(e.delta)), 0.5);
@@ -102,16 +107,23 @@ export function LuckIndex({ entries, labels }: LuckIndexProps) {
                 )}
               </div>
 
-              {/* Actual vs expected annotation */}
-              <div className="w-16 sm:w-36 text-right flex-shrink-0">
-                <span className="text-xs tabular-nums font-semibold text-stone-700">
-                  {entry.actualPts}
-                </span>
-                <span className="text-[10px] text-stone-400 mx-0.5">vs</span>
-                <span className="text-xs tabular-nums text-stone-400">
-                  {entry.expectedPts.toFixed(0)}
-                </span>
-                <span className="text-[10px] text-stone-300 ml-0.5 hidden sm:inline">xPts</span>
+              {/* Real points against modelled ones. Written out rather than
+                  "12 vs 9 xPts": the bare form reads as a scoreline, and on
+                  mobile the xPts suffix used to be hidden entirely, leaving
+                  "1 vs 2" with nothing to say what either number was. One
+                  decimal on the expected value — it is a continuous quantity
+                  and rounding 2.4 to 2 hides the very gap being measured. */}
+              <div className="w-20 sm:w-36 text-right flex-shrink-0 leading-tight">
+                <div className="text-xs tabular-nums font-semibold text-stone-700">
+                  {entry.actualPts} {labels.pointsShort ?? "pts"}
+                </div>
+                <div className="text-[10px] tabular-nums text-stone-400">
+                  {entry.expectedPts.toLocaleString(locale === "en" ? "en-GB" : "pt-PT", {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })}{" "}
+                  {labels.expectedShort ?? "esperados"}
+                </div>
               </div>
             </div>
           );

@@ -30,9 +30,17 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLea
 
   const t = {
     title: pt ? "Classificação da época" : "Season standings",
-    empty: pt
-      ? "Ainda ninguém foi avaliado esta época. A classificação aparece assim que a primeira jornada com previsões terminar."
-      : "Nobody has been scored yet this season. The table appears once the first matchday with entries is complete.",
+    // An empty table is a dead end; the model's own score is a target. It is
+    // also the honest framing — the model has already played every match, so
+    // there is something to beat even with nobody else here yet.
+    emptyTitle: pt ? "Sê o primeiro" : "Be the first",
+    emptyBody: pt
+      ? "Ainda ninguém entrou esta época. Escolhe a próxima jornada e entras na tabela assim que os jogos terminarem."
+      : "Nobody has joined yet this season. Pick the next matchday and you are on the table as soon as the games finish.",
+    emptyTarget: (rps: string) =>
+      pt
+        ? `O modelo leva ${rps} de RPS médio. É esse o número a bater.`
+        : `The model is on ${rps} mean RPS. That is the number to beat.`,
     rank: "#",
     player: pt ? "Jogador" : "Player",
     mean: pt ? "RPS médio" : "Mean RPS",
@@ -80,9 +88,19 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLea
       </div>
 
       {humanCount === 0 ? (
-        <p className="text-sm text-stone-500 border border-stone-200 rounded-xl p-4 sm:p-6">
-          {t.empty}
-        </p>
+        <div className="border border-stone-200 rounded-xl p-4 sm:p-6 bg-stone-50">
+          <div className="flex items-center gap-2 mb-1">
+            <Trophy className="w-4 h-4" style={{ color: USER_COLOR }} />
+            <h4 className="font-bold text-stone-900">{t.emptyTitle}</h4>
+          </div>
+          <p className="text-sm text-stone-600">{t.emptyBody}</p>
+          {board?.model?.meanRps != null && (
+            <p className="mt-3 text-sm text-stone-500 border-l-2 pl-3" style={{ borderColor: MODEL_COLOR }}>
+              <Bot className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5" style={{ color: MODEL_COLOR }} />
+              {t.emptyTarget(board.model.meanRps.toFixed(3))}
+            </p>
+          )}
+        </div>
       ) : (
         <div className="border border-stone-200 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">

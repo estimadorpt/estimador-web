@@ -13,9 +13,16 @@ interface TeamTimelineProps {
   data: TimelinePoint[];
   teamColor: string;
   yAxisLabel: string;
+  /** Localised x-axis label; matchdays are integers, never dates. */
+  xAxisLabel?: string;
 }
 
-export function TeamTimeline({ data, teamColor, yAxisLabel }: TeamTimelineProps) {
+export function TeamTimeline({
+  data,
+  teamColor,
+  yAxisLabel,
+  xAxisLabel = "Jornada",
+}: TeamTimelineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -33,6 +40,12 @@ export function TeamTimeline({ data, teamColor, yAxisLabel }: TeamTimelineProps)
       const maxVal = Math.max(...data.map(d => d.hi), ...data.map(d => d.value));
       const yMax = Math.min(100, Math.ceil(maxVal / 10) * 10 + 5);
 
+      // One tick per matchday, thinned to roughly one per 60px so a full
+      // 34-matchday season does not collide.
+      const matchdays = data.map(d => d.matchday);
+      const step = Math.max(1, Math.ceil(matchdays.length / Math.max(2, width / 60)));
+      const tickValues = matchdays.filter((_, i) => i % step === 0);
+
       const plot = Plot.plot({
         width,
         height,
@@ -40,8 +53,14 @@ export function TeamTimeline({ data, teamColor, yAxisLabel }: TeamTimelineProps)
         marginRight: 20,
         marginBottom: 35,
         x: {
-          label: "Matchday",
-          tickFormat: (d: number) => `${d}`,
+          label: xAxisLabel,
+          // Matchdays are whole numbers. Left to its own devices Plot fits a
+          // continuous scale to the domain and, with only a handful of
+          // points, emits 1, 1.2, 1.4 … — which reads as fractional days on
+          // a chart whose axis is labelled "Jornada". Pin the ticks to the
+          // matchdays actually present, thinned so they never overlap.
+          ticks: tickValues,
+          tickFormat: (d: number) => `${Math.round(d)}`,
         },
         y: {
           label: yAxisLabel,
