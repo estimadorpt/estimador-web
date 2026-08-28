@@ -1,61 +1,52 @@
 {
   "season": "2026-27",
-  "matchday": 1,
-  "generated": "2026-08-11T17:48:52.793968+00:00",
+  "matchday": 3,
+  "generated": "2026-08-28T11:12:06.518885+00:00",
   "cards": [
     {
       "id": "movers",
-      "file": "movers_md01.png",
-      "matchday": 1,
-      "title_pt": "Movimentos da jornada 1",
-      "title_en": "Matchday 1 movers",
+      "file": "movers_md03.png",
+      "matchday": 3,
+      "title_pt": "Movimentos da jornada 3",
+      "title_en": "Matchday 3 movers",
       "description_pt": "As maiores variações de probabilidade de título, top 3 e descida desde a jornada anterior.",
       "description_en": "The biggest swings in title, top-three and relegation probability since the previous matchday."
     },
     {
       "id": "luck",
-      "file": "luck_md01.png",
-      "matchday": 1,
-      "title_pt": "Sorte da época até à jornada 1",
-      "title_en": "Season luck through matchday 1",
+      "file": "luck_md03.png",
+      "matchday": 3,
+      "title_pt": "Sorte da época até à jornada 3",
+      "title_en": "Season luck through matchday 3",
       "description_pt": "Pontos conquistados menos pontos esperados a partir do xG, acumulados na época.",
       "description_en": "Points won minus expected points from xG, accumulated over the season."
     },
     {
       "id": "title_race",
-      "file": "title_race_md01.png",
-      "matchday": 1,
-      "title_pt": "Corrida ao título — jornada 1",
-      "title_en": "Title race — matchday 1",
+      "file": "title_race_md03.png",
+      "matchday": 3,
+      "title_pt": "Corrida ao título — jornada 3",
+      "title_en": "Title race — matchday 3",
       "description_pt": "Probabilidade de cada candidato ser campeão, com a variação desde a jornada anterior.",
       "description_en": "Each contender's probability of winning the league, with the move since the previous matchday."
     },
     {
       "id": "relegation_race",
-      "file": "relegation_race_md01.png",
-      "matchday": 1,
-      "title_pt": "Luta pela manutenção — jornada 1",
-      "title_en": "Relegation race — matchday 1",
+      "file": "relegation_race_md03.png",
+      "matchday": 3,
+      "title_pt": "Luta pela manutenção — jornada 3",
+      "title_en": "Relegation race — matchday 3",
       "description_pt": "Probabilidade de descida das equipas em risco, com a variação desde a jornada anterior.",
       "description_en": "Relegation probability for the teams at risk, with the move since the previous matchday."
     },
     {
       "id": "upset",
-      "file": "upset_md01.png",
-      "matchday": 1,
-      "title_pt": "A maior surpresa da jornada 1",
-      "title_en": "Biggest upset of matchday 1",
+      "file": "upset_md03.png",
+      "matchday": 3,
+      "title_pt": "A maior surpresa da jornada 3",
+      "title_en": "Biggest upset of matchday 3",
       "description_pt": "O resultado a que o modelo tinha dado menos probabilidade antes de a jornada começar.",
       "description_en": "The result the model rated least likely before the matchday kicked off."
-    },
-    {
-      "id": "preview",
-      "file": "preview_md01.png",
-      "matchday": 1,
-      "title_pt": "O jogo que mais mexe na próxima jornada",
-      "title_en": "The fixture that moves the league most",
-      "description_pt": "O próximo jogo com maior impacto na tabela e o que cada resultado faz às duas equipas.",
-      "description_en": "The next fixture with the largest impact on the table, and what each outcome does to both teams."
     }
   ]
 }
