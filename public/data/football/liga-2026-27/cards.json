@@ -1,7 +1,7 @@
 {
   "season": "2026-27",
   "matchday": 5,
-  "generated": "2026-09-05T19:03:49.127730+00:00",
+  "generated": "2026-09-05T21:33:35.808595+00:00",
   "cards": [
     {
       "id": "movers",
@@ -47,6 +47,15 @@
       "title_en": "Biggest upset of matchday 5",
       "description_pt": "O resultado a que o modelo tinha dado menos probabilidade antes de a jornada começar.",
       "description_en": "The result the model rated least likely before the matchday kicked off."
+    },
+    {
+      "id": "preview",
+      "file": "preview_md05.png",
+      "matchday": 5,
+      "title_pt": "O jogo que mais mexe na próxima jornada",
+      "title_en": "The fixture that moves the league most",
+      "description_pt": "O próximo jogo com maior impacto na tabela e o que cada resultado faz às duas equipas.",
+      "description_en": "The next fixture with the largest impact on the table, and what each outcome does to both teams."
     }
   ]
 }
