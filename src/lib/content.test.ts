@@ -218,6 +218,10 @@ describe('article sections', () => {
     const files = slugs.map(slug => path.join(process.cwd(), 'src/content/articles/pt', `${slug}.mdx`));
 
     beforeAll(() => {
+
+      // The directory is empty in a fresh checkout; git does not track it.
+
+      fs.mkdirSync(path.join(process.cwd(), 'src/content/articles/pt'), { recursive: true });
       files.forEach((file, index) => {
         expect(fs.existsSync(file), 'fixture would overwrite a real article').toBe(false);
         fs.writeFileSync(file, `export const metadata = ${JSON.stringify({
@@ -260,6 +264,10 @@ describe('drafts', () => {
   const listed = (locale: string) => getMDXArticlesByLocale(locale).map(article => article.slug);
 
   beforeAll(() => {
+
+    // The directory is empty in a fresh checkout; git does not track it.
+
+    fs.mkdirSync(path.join(process.cwd(), 'src/content/articles/pt'), { recursive: true });
     expect(fs.existsSync(file), 'fixture would overwrite a real article').toBe(false);
     const metadata = {
       title: 'Rascunho por acabar',
