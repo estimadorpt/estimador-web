@@ -1,55 +1,30 @@
-# estimador.pt Brand Assets
+# Kit de redes e de marca
 
-## Available Assets
+Tudo aqui é gerado por `npm run brand` a partir de `src/lib/brand/geometry.json` e do mesmo renderizador dos cartões Open Graph (`scripts/generate-social-kit.mjs`), para que a linha do tempo mostre uma só publicação. O guia da identidade, com as regras e os ficheiros do símbolo, está em `/marca`.
 
-### Icon Only (no text)
-- `logo-icon-large.svg` - Scalable vector (1024x1024 viewBox)
-- `logo-icon-large-256w.png` - 256px PNG
-- `logo-icon-large-512w.png` - 512px PNG
-- `logo-icon-large-1024w.png` - 1024px PNG
-- `logo-icon-large-2048w.png` - 2048px PNG (high-res)
+## Perfis
 
-### Stacked Logo (icon + text below)
-Light version (for white/light backgrounds):
-- `logo-stacked.svg` - Scalable vector
-- `logo-stacked-400w.png` - Small
-- `logo-stacked-800w.png` - Medium
-- `logo-stacked-1200w.png` - Large
+| Ficheiro | Tamanho | Onde |
+| --- | --- | --- |
+| `avatar-1024-forest.png`, `../images/brand/profile-400.png` | 1024 e 400 | Avatar em todas as redes: símbolo em papel sobre floresta |
+| `avatar-1024-paper.png` | 1024 | Avatar claro, para fundos escuros da própria rede |
+| `../images/brand/banner-1500x500.png` | 1500 × 500 | Cabeçalho do X e do Bluesky, claro |
+| `banner-1500x500-dark.png` | 1500 × 500 | O mesmo, sobre floresta |
+| `linkedin-cover-light.png`, `linkedin-cover-dark.png` | 1584 × 396 | Capa do LinkedIn; o canto inferior esquerdo fica livre para a fotografia |
 
-Dark version (for dark backgrounds):
-- `logo-stacked-dark.svg` - Scalable vector
-- `logo-stacked-dark-400w.png` - Small
-- `logo-stacked-dark-800w.png` - Medium
-- `logo-stacked-dark-1200w.png` - Large
+## Publicações
 
-### Horizontal Logo (icon + text side by side)
-- `logo-horizontal.svg` - Scalable vector
-- `logo-horizontal-300w.png` - Small
-- `logo-horizontal-600w.png` - Medium
-- `logo-horizontal-1200w.png` - Large
+| Ficheiro | Tamanho | Onde |
+| --- | --- | --- |
+| `linkedin-post-light.png`, `linkedin-post-dark.png` | 1200 × 1200 | Modelo quadrado para anúncios |
+| `post-1600x900-light.png` | 1600 × 900 | Modelo 16:9 |
+| `story-1080x1920-light.png`, `story-1080x1920-dark.png` | 1080 × 1920 | Stories |
+| `../data/football/liga-*/social/mdNN.png` | 1200 × 675 | Cartão de jornada, por `node scripts/generate-social-images.mjs` |
 
-### Social Media Optimized
-- `linkedin-post-light.png` - 1200x1200 square (light background)
-- `linkedin-post-dark.png` - 1200x1200 square (dark background)
-- `linkedin-cover-dark.png` - 1584x396 banner (dark background, for profile cover)
+## Logótipos (compatibilidade)
 
-## Brand Colors
+`logo-horizontal`, `logo-icon-large` e `logo-stacked` mantêm os nomes históricos. Os ficheiros `logo-stacked` contêm a assinatura horizontal centrada num quadrado, não um logótipo empilhado: a marca não se recompõe. Os ficheiros de referência estão em `../brand/`.
 
-| Color | Hex | Usage |
-|-------|-----|-------|
-| Navy | `#1E3A5F` | Primary text, small circle |
-| Teal | `#0F766E` | Medium circle |
-| Gold | `#D4A000` | Large circle |
-| Light Navy | `#4A6FA5` | Small circle on dark backgrounds |
-| Light Teal | `#14B8A6` | Medium circle on dark backgrounds |
-| Light Gold | `#FBBF24` | Large circle on dark backgrounds |
+## Voz
 
-## Regenerating Assets
-
-Run from project root:
-```bash
-node scripts/generate-branding.mjs
-```
-
-Requires: `sharp` package (already in devDependencies)
-
+Frase: **Dados para compreender Portugal.** Descrição: *Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.* Escreve-se em frases, em caixa baixa; perguntas como títulos; a incerteza diz-se, não se esconde; cada publicação com data e fonte; uma ação por peça.

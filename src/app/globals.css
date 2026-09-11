@@ -1,20 +1,169 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=PT+Serif:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* ---------------------------------------------------------------------------
+   Palette. The site takes its visual language from the population atlas:
+   warm paper surfaces, deep green ink, serif headlines, a handful of warm
+   pastel accents. Everything below is derived from the atlas's own colours.
+
+   The Tailwind ramps for stone, amber, emerald, green, red and blue are
+   re-tuned here rather than replaced at every call site: `text-stone-600`,
+   `bg-amber-50` or `text-red-600` keep their meaning (a muted grey, a soft
+   warning tint, a negative delta) but resolve to hues that sit on paper.
+   Party and team colours are hex constants and are deliberately untouched.
+   --------------------------------------------------------------------------- */
+@theme {
+  --font-sans: 'Manrope', system-ui, sans-serif;
+  --font-display: 'Manrope', system-ui, sans-serif;
+  /* The reading face: only inside the body of long-form pieces. */
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Surfaces and ink */
+  --color-paper: #f5f3ea;       /* page ground */
+  --color-cream: #fcfbf5;       /* raised panels, cards, table rows */
+  --color-parchment: #ece9dc;   /* sunken areas, hover states */
+  --color-line: #dadccf;        /* hairline borders and grid gaps */
+  --color-moss: #e7ecdc;        /* green-tinted highlight surface */
+  --color-ink: #234c40;         /* text and primary actions */
+  --color-ink-dark: #16362e;
+  --color-ink-muted: #5f7062;   /* secondary text, 4.5:1 on paper */
+  --color-forest: #122f2c;      /* the atlas world; dark surfaces */
+  --color-forest-deep: #0d2927;
+
+  /* Accents */
+  --color-gold: #c49536;
+  --color-mustard: #e5b958;
+  --color-mint: #72c8b4;
+  --color-periwinkle: #a9b9ed;
+  --color-coral: #e29a83;
+  /* Surface versions of the four pastels: the same hues a step quieter, for mosaic, covers and backgrounds. Never for data. */
+  --color-mint-soft: #9dcec1;
+  --color-mustard-soft: #e3c994;
+  --color-coral-soft: #dcafa1;
+  --color-periwinkle-soft: #bdc7e7;
+  --color-terracotta: #a3543a;
+  --color-rust: #bd714e;
+  --color-tree: #4e8056;
+  --color-teal: #245c68;
+  /* Chart series, validated on cream (light) and on forest (dark): fixed
+     order, never cycled, never on text; a fifth series folds into "other".
+     Mirrors src/components/viz/theme.ts. */
+  --color-series-1: #159881;
+  --color-series-2: #a27d27;
+  --color-series-3: #697fc5;
+  --color-series-4: #ba6b4f;
+  --color-series-dark-1: #0d957e;
+  --color-series-dark-2: #9f7a23;
+  --color-series-dark-3: #677cc2;
+  --color-series-dark-4: #b7684c;
+  --color-deemphasis: #c3c8bb;   /* context series and "other" */
+
+  /* Semantic aliases */
+  --color-positive: #4e8056;
+  --color-negative: #a3543a;
+
+  /* Compatibility with the pre-atlas brand names. */
+  --color-navy: #234c40;
+  --color-navy-light: #5f7062;
+  --color-navy-dark: #16362e;
+  --color-brand-teal: #245c68;
+  --color-brand-gold: #c49536;
+
+  /* Neutrals: a warm green-grey ramp anchored on cream, the hairline and ink. */
+  --color-stone-50: #fcfbf5;
+  --color-stone-100: #f5f4ed;
+  --color-stone-200: #dadccf;
+  --color-stone-300: #cbccbb;
+  --color-stone-400: #7f9284;
+  --color-stone-500: #5f7062;
+  --color-stone-600: #4f5f57;
+  --color-stone-700: #434d48;
+  --color-stone-800: #234c40;
+  --color-stone-900: #16362e;
+  --color-stone-950: #0d2723;
+
+  /* Warnings and provisional flags: gold instead of stock amber. */
+  --color-amber-50: #fffaef;
+  --color-amber-100: #fff1d7;
+  --color-amber-200: #fde2b3;
+  --color-amber-300: #f9d187;
+  --color-amber-400: #e5b958;
+  --color-amber-500: #c49536;
+  --color-amber-600: #a67d2c;
+  --color-amber-700: #8a6a26;
+  --color-amber-800: #6e5520;
+  --color-amber-900: #553f1a;
+  --color-amber-950: #2f2410;
+  --color-yellow-50: #fffaef;
+  --color-yellow-100: #fff1d7;
+  --color-yellow-200: #fde2b3;
+  --color-yellow-300: #f9d187;
+  --color-yellow-400: #e5b958;
+  --color-yellow-500: #c49536;
+  --color-yellow-600: #a67d2c;
+  --color-yellow-700: #8a6a26;
+  --color-yellow-800: #6e5520;
+  --color-yellow-900: #553f1a;
+  --color-yellow-950: #2f2410;
+
+  /* Positive movement and "live" badges. */
+  --color-emerald-50: #f1fbf5;
+  --color-emerald-100: #def5e7;
+  --color-emerald-200: #c1ecd1;
+  --color-emerald-300: #9ddcb8;
+  --color-emerald-400: #74c899;
+  --color-emerald-500: #5eb184;
+  --color-emerald-600: #3f8461;
+  --color-emerald-700: #3a6b50;
+  --color-emerald-800: #345343;
+  --color-emerald-900: #2c4238;
+  --color-emerald-950: #1a2a22;
+  --color-green-50: #f2fbf4;
+  --color-green-100: #e0f5e4;
+  --color-green-200: #c4ebcd;
+  --color-green-300: #a1ddb0;
+  --color-green-400: #7cc691;
+  --color-green-500: #67b07c;
+  --color-green-600: #4e8056;
+  --color-green-700: #426b4a;
+  --color-green-800: #3a553f;
+  --color-green-900: #304434;
+  --color-green-950: #1b2a1f;
+
+  /* Negative movement and errors: terracotta instead of stock red. */
+  --color-red-50: #fff2ee;
+  --color-red-100: #ffe2d9;
+  --color-red-200: #ffcab9;
+  --color-red-300: #e29a83;
+  --color-red-400: #d4886a;
+  --color-red-500: #bd714e;
+  --color-red-600: #ad624b;
+  --color-red-700: #a3543a;
+  --color-red-800: #7d4230;
+  --color-red-900: #5f3526;
+  --color-red-950: #3a2017;
+
+  /* Informational tints: the atlas's deep teal. */
+  --color-blue-50: #eef7fb;
+  --color-blue-100: #d9ecf7;
+  --color-blue-200: #badef2;
+  --color-blue-300: #92c9e7;
+  --color-blue-400: #65aace;
+  --color-blue-500: #4a90b3;
+  --color-blue-600: #427893;
+  --color-blue-700: #245c68;
+  --color-blue-800: #1f4b55;
+  --color-blue-900: #1a3b43;
+  --color-blue-950: #10262b;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  /* Logo brand colors */
-  --color-navy: #1E3A5F;
-  --color-navy-light: #4A6FA5;
-  --color-navy-dark: #152a45;
-  --color-brand-teal: #0F766E;
-  --color-brand-gold: #D4A000;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -52,52 +201,39 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #f5f3ea;
+  --foreground: #234c40;
+  --card: #fcfbf5;
+  --card-foreground: #234c40;
+  --popover: #fcfbf5;
+  --popover-foreground: #234c40;
+  --primary: #234c40;
+  --primary-foreground: #f5f3ea;
+  --secondary: #ece9dc;
+  --secondary-foreground: #234c40;
+  --muted: #ece9dc;
+  --muted-foreground: #5f7062;
+  --accent: #e7ecdc;
+  --accent-foreground: #234c40;
+  --destructive: #a3543a;
+  --border: #dadccf;
+  --input: #dadccf;
+  --ring: #234c40;
+  --chart-1: #e5b958;
+  --chart-2: #72c8b4;
+  --chart-3: #a9b9ed;
+  --chart-4: #e29a83;
+  --chart-5: #4e8056;
+  --sidebar: #fcfbf5;
+  --sidebar-foreground: #234c40;
+  --sidebar-primary: #234c40;
+  --sidebar-primary-foreground: #f5f3ea;
+  --sidebar-accent: #e7ecdc;
+  --sidebar-accent-foreground: #234c40;
+  --sidebar-border: #dadccf;
+  --sidebar-ring: #234c40;
 
-  /* estimador.pt Brand Colors - Logo Palette */
-  --primary-brand: #1E3A5F;    /* Navy from logo */
-  --primary-light: #4A6FA5;    /* Lighter navy */
-  --primary-dark: #152a45;     /* Darker navy */
-  --brand-teal: #0F766E;       /* Teal from logo */
-  --brand-gold: #D4A000;       /* Gold from logo */
-  
-  /* Dark Green Accents */
-  --green-dark: #064e3b;
-  --green-medium: #059669;
-  --green-light: #10b981;
-  --green-pale: #fafafa;
-  
-  /* Political Party Colors (Portugal) */
+  /* Political party colours (Portugal). Semantic; not part of the palette. */
   --ps-color: #e91e63;
   --ad-color: #ff6f00;
   --ch-color: #1976d2;
@@ -106,12 +242,18 @@
   --cdu-color: #f44336;
   --livre-color: #4caf50;
   --pan-color: #689f38;
-  
-  /* Semantic Colors */
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
+
+  /* Legacy accent names still referenced by a few election components. */
+  --green-dark: #234c40;
+  --green-medium: #4e8056;
+  --green-light: #5eb184;
+  --green-pale: #f5f3ea;
+
+  /* Semantic colours */
+  --success: #4e8056;
+  --warning: #c49536;
+  --error: #a3543a;
+  --info: #245c68;
 }
 
 .dark {
@@ -152,88 +294,129 @@
   * {
     @apply border-border outline-ring/50;
   }
-  
+
+  /* Keyboard focus: a paper separation ring and a pine outer ring, readable on
+     dark and pastel surfaces alike. Components no longer need their own. */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 2px var(--color-paper);
+  }
+
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-paper text-ink antialiased;
+    font-family: var(--font-sans);
     line-height: 1.6;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', system-ui, sans-serif;
+
+  /* One family. Titles are Manrope at heavy weights; uppercase kicker
+     headings marked up as h2/h3 keep the label weight. */
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+  }
+
+  h1 { font-weight: 800; }
+  h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
+
+  :is(h1, h2, h3).uppercase {
+    font-weight: 700;
+    letter-spacing: inherit;
+    line-height: 1.3;
+  }
+
+  h4, h5, h6 {
+    font-family: var(--font-display);
     font-weight: 600;
     line-height: 1.3;
-    letter-spacing: -0.025em;
   }
-  
+
   h1 {
-    @apply text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight;
+    @apply text-4xl md:text-5xl;
   }
-  
+
   h2 {
-    @apply text-2xl md:text-3xl lg:text-4xl font-semibold;
+    @apply text-2xl md:text-3xl;
   }
-  
+
   h3 {
-    @apply text-xl md:text-2xl font-semibold;
-  }
-  
-  .headline-serif {
-    font-family: 'PT Serif', serif;
-    font-weight: 700;
+    @apply text-xl md:text-2xl;
   }
 }
 
 @layer components {
-  /* Hero Section Styles */
-  .hero-section {
-    background: linear-gradient(135deg, var(--primary-brand) 0%, var(--primary-light) 100%);
-    position: relative;
-    overflow: hidden;
+  /* Long-form reading surface: the body of notas, explicadores, methodology
+     and about. Set in Newsreader at a wider measure than the dashboards:
+     a piece of writing should not be typeset like a chart legend. Headings,
+     captions, tables and figures inside it keep the interface face. */
+  .article-body {
+    font-family: var(--font-serif);
+    font-optical-sizing: auto;
+    font-size: 1.125rem;
+    line-height: 1.65;
+    color: var(--color-ink);
   }
-  
-  .hero-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(30, 64, 175, 0.9) 0%, rgba(59, 130, 246, 0.8) 100%);
-    z-index: 1;
+
+  /* About 60 to 70 characters a line. */
+  .article-body :is(p, li, blockquote) {
+    max-width: 70ch;
   }
-  
-  .hero-content {
-    position: relative;
-    z-index: 2;
+
+  .article-body :is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
   }
-  
-  /* Chart Container Styles */
-  .chart-container {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
-    min-height: 400px;
+
+  .article-body :is(figure, figcaption, table, aside, pre, code, kbd, button, nav, .kicker) {
+    font-family: var(--font-sans);
+    letter-spacing: normal;
   }
-  
-  .chart-container h3 {
-    @apply text-lg font-semibold text-gray-900 mb-2;
+
+  @media (min-width: 768px) {
+    .article-body {
+      font-size: 1.1875rem;
+    }
   }
-  
-  .chart-container .chart-subtitle {
-    @apply text-sm text-gray-600 mb-4;
+
+  /* The mark. On a hover or focus of the wrapping link the interval opens
+     by two units and closes again; while something loads, the counter travels
+     the band. Both stop under prefers-reduced-motion. */
+  .brand-mark-left, .brand-mark-right {
+    transition: transform 0.26s cubic-bezier(0.2, 0.75, 0.2, 1);
   }
-  
-  /* Probability Displays */
-  .probability-large {
-    @apply text-5xl md:text-6xl font-bold leading-none;
-    font-variant-numeric: tabular-nums;
+  .brand-link:hover .brand-mark-left, .brand-link:focus-visible .brand-mark-left { transform: translateX(-2px); }
+  .brand-link:hover .brand-mark-right, .brand-link:focus-visible .brand-mark-right { transform: translateX(2px); }
+
+  @keyframes brand-estimating {
+    from { transform: translateX(-3px); }
+    to { transform: translateX(7px); }
   }
-  
-  .probability-medium {
-    @apply text-3xl md:text-4xl font-semibold leading-none;
-    font-variant-numeric: tabular-nums;
+  .brand-mark-loading-dot {
+    animation: brand-estimating 1.1s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
   }
-  
-  /* Party Color Classes */
+
+  @media (prefers-reduced-motion: reduce) {
+    .brand-mark-left, .brand-mark-right { transition: none; }
+    .brand-link:hover .brand-mark-left, .brand-link:hover .brand-mark-right { transform: none; }
+    .brand-mark-loading-dot { animation: none; }
+  }
+
+  /* A raised surface on the paper ground: the atlas workspace, at panel scale. */
+  .panel {
+    background: var(--color-cream);
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+  }
+
+  /* Soft fields: one leading decorative colour per page, mixed towards paper so
+     text stays pine and the field never competes with data. */
+  .field-mint { background: color-mix(in oklab, var(--color-mint-soft) 42%, var(--color-paper)); }
+  .field-periwinkle { background: color-mix(in oklab, var(--color-periwinkle-soft) 48%, var(--color-paper)); }
+  .field-coral { background: color-mix(in oklab, var(--color-coral-soft) 42%, var(--color-paper)); }
+  .field-mustard { background: color-mix(in oklab, var(--color-mustard-soft) 42%, var(--color-paper)); }
+
+  /* Party colour classes */
   .text-ps { color: var(--ps-color); }
   .text-ad { color: var(--ad-color); }
   .text-ch { color: var(--ch-color); }
@@ -242,7 +425,7 @@
   .text-cdu { color: var(--cdu-color); }
   .text-livre { color: var(--livre-color); }
   .text-pan { color: var(--pan-color); }
-  
+
   .bg-ps { background-color: var(--ps-color); }
   .bg-ad { background-color: var(--ad-color); }
   .bg-ch { background-color: var(--ch-color); }
@@ -251,8 +434,8 @@
   .bg-cdu { background-color: var(--cdu-color); }
   .bg-livre { background-color: var(--livre-color); }
   .bg-pan { background-color: var(--pan-color); }
-  
-  /* Green Accent Classes */
+
+  /* Legacy accent classes */
   .text-green-dark { color: var(--green-dark); }
   .text-green-medium { color: var(--green-medium); }
   .text-green-light { color: var(--green-light); }
@@ -262,35 +445,4 @@
   .bg-green-pale { background-color: var(--green-pale); }
   .border-green-dark { border-color: var(--green-dark); }
   .border-green-medium { border-color: var(--green-medium); }
-  
-  /* Navigation Styles */
-  .nav-primary {
-    @apply bg-white/95 backdrop-blur-sm border-b;
-    border-color: var(--green-medium);
-    box-shadow: 0 1px 3px 0 rgba(6, 78, 59, 0.1);
-  }
-  
-  /* Card Styles */
-  .card-elevated {
-    @apply bg-white rounded-xl shadow-lg border border-gray-100;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-  
-  .card-hover {
-    @apply transition-all duration-200 hover:shadow-xl hover:scale-[1.01];
-  }
-  
-  /* Interactive Elements */
-  .interactive-chart {
-    @apply cursor-pointer transition-colors duration-200;
-  }
-  
-  .interactive-chart:hover {
-    @apply bg-gray-50;
-  }
-  
-  /* Loading States */
-  .skeleton {
-    @apply bg-gray-200 animate-pulse rounded;
-  }
 }

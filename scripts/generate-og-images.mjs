@@ -1,296 +1,300 @@
 #!/usr/bin/env node
 /**
- * Generate static Open Graph images for social media sharing.
- * Run this script before build to create static PNG files.
+ * Generates every Open Graph card the site serves, plus the manifest that maps
+ * a page to its card.
+ *
+ * Run it by hand after a content or data update: the site is a static export,
+ * so there is no runtime image route and the PNGs are committed like any other
+ * asset.
+ *
+ *   node scripts/generate-og-images.mjs
+ *
+ * Three kinds of card come out of here:
+ *   - one per article per locale, carrying the headline, register and date;
+ *   - one per section that publishes a live headline number;
+ *   - a fallback per locale for everything else.
  */
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import sharp from 'sharp';
+import fs from 'node:fs';
+import path from 'node:path';
+import {
+  ROOT_DIR, COLOR, renderCard, contentHash,
+  formatPercent, formatDate, formatQuarter,
+} from './lib/og-render.mjs';
+import { articleCard, figureCard, brandCard, CARD_WIDTH, CARD_HEIGHT } from './lib/og-cards.mjs';
+import { teamName, teamColor } from './lib/football-brand.mjs';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.join(__dirname, '..');
+const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
+const ARTICLES_DIR = path.join(ROOT_DIR, 'src', 'content', 'articles');
+const LOCALES = ['pt', 'en'];
 
-// Load data
-function loadJsonData(filename) {
-  const filePath = path.join(rootDir, 'public', 'data', filename);
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+/**
+ * Card copy lives here rather than in messages/{pt,en}.json because these
+ * strings are never rendered by the app — next-intl is not available to a node
+ * script, and adding build-only keys to the message catalogues would put
+ * strings in front of translators that no page can ever show.
+ */
+const COPY = {
+  pt: {
+    brandHeadline: 'Dados para compreender Portugal.',
+    brandStandfirst: 'Previsões e análises com a incerteza à vista. Modelos abertos, dados datados.',
+    columns: [
+      { name: 'Economia', blurb: 'Estado da economia e risco de recessão' },
+      { name: 'Liga Portugal', blurb: 'Probabilidades de título e despromoção' },
+      { name: 'Eleições', blurb: 'Sondagens, previsões e arquivo' },
+      { name: 'População', blurb: 'Um atlas humano, do país à porta de casa' },
+    ],
+    brandFooter: 'Metodologia aberta · Bernardo Caldas',
+    readSuffix: 'de leitura',
+    updated: 'atualizado a',
+    ligaSection: 'Liga Portugal',
+    ligaLabel: 'Probabilidade de título',
+    ligaCaption: (sims) => `${sims} simulações da época a partir da classificação atual.`,
+    ligaFooter: (matchday, season) => `Jornada ${matchday} · Liga Portugal ${season}`,
+    economySection: 'Economia',
+    economyLabel: 'Risco de recessão',
+    economySubject: (quarter) => `este trimestre · ${quarter}`,
+    economyCaption: 'Onde está o risco de recessão agora — uma leitura calibrada, disponível antes da divulgação do PIB.',
+    economySpark: 'Probabilidade por trimestre',
+    economyFooter: (date) => `Dados de ${date}`,
+  },
+  en: {
+    brandHeadline: 'Data to understand Portugal.',
+    brandStandfirst: 'Forecasts and analysis with the uncertainty in plain sight. Open models, dated data.',
+    columns: [
+      { name: 'Economy', blurb: 'State of the economy and recession risk' },
+      { name: 'Liga Portugal', blurb: 'Title and relegation probabilities' },
+      { name: 'Elections', blurb: 'Polling, forecasts and the archive' },
+      { name: 'Population', blurb: 'A human atlas, from the country to the front door' },
+    ],
+    brandFooter: 'Open methodology · Bernardo Caldas',
+    readSuffix: 'read',
+    updated: 'updated',
+    ligaSection: 'Liga Portugal',
+    ligaLabel: 'Title probability',
+    ligaCaption: (sims) => `${sims} simulations of the season from the current table.`,
+    ligaFooter: (matchday, season) => `Matchday ${matchday} · Liga Portugal ${season}`,
+    economySection: 'Economy',
+    economyLabel: 'Recession risk',
+    economySubject: (quarter) => `this quarter · ${quarter}`,
+    economyCaption: 'Where recession risk stands now — a calibrated read available before the GDP print.',
+    economySpark: 'Probability by quarter',
+    economyFooter: (date) => `Data as of ${date}`,
+  },
+};
+
+const SITE_PATH = {
+  home: '/',
+  liga: '/desporto/liga',
+  economy: '/economia',
+};
+
+/* ------------------------------------------------------------- sources ---- */
+
+const metadataPattern = /^export const metadata = (\{[\s\S]*?\n\});?\s*/;
+
+/**
+ * A deliberately small re-read of the article front matter. `src/lib/mdx-articles.ts`
+ * owns the real parser but is TypeScript; what a card needs is the header, and
+ * the header is plain JSON inside the MDX export.
+ */
+function readArticles(locale) {
+  const dir = path.join(ARTICLES_DIR, locale);
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir)
+    .filter(file => file.endsWith('.mdx'))
+    .map(file => {
+      const source = fs.readFileSync(path.join(dir, file), 'utf8');
+      const match = source.match(metadataPattern);
+      if (!match) throw new Error(`Missing article metadata: ${locale}/${file}`);
+      const meta = JSON.parse(match[1]);
+      const body = source.slice(match[0].length);
+      const words = body.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').split(/\s+/).filter(Boolean).length;
+      return { ...meta, readMinutes: Math.max(1, Math.ceil(words / 200)) };
+    })
+    // A draft has no published URL, so a card for it would be a card nothing links to.
+    .filter(article => !article.draft)
+    .sort((a, b) => b.date.localeCompare(a.date));
 }
 
-// Get probabilities from snapshot data (computed from joint posterior)
-function getLeadingProbabilitiesAtCutoff(snapshotProbabilities, cutoffDate) {
-  if (!snapshotProbabilities?.dates || !cutoffDate) {
-    // Fallback to election day probabilities
-    return Object.entries(snapshotProbabilities?.candidates || {})
-      .filter(([name]) => name !== 'Others')
-      .map(([name, data]) => ({
-        name,
-        probability: data.leading_probability?.[data.leading_probability.length - 1] ?? 0,
-        color: data.color,
-      }))
-      .sort((a, b) => b.probability - a.probability);
+/** The newest first-tier season directory that actually holds matchday files. */
+function latestLigaMatchday() {
+  const footballDir = path.join(PUBLIC_DIR, 'data', 'football');
+  if (!fs.existsSync(footballDir)) return null;
+  const seasons = fs.readdirSync(footballDir).filter(name => /^liga-\d{4}-\d{2}$/.test(name)).sort();
+  for (const season of seasons.reverse()) {
+    const dir = path.join(footballDir, season);
+    const files = fs.readdirSync(dir).filter(name => /^md\d+\.json$/.test(name)).sort();
+    for (const file of files.reverse()) {
+      const data = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
+      if (data.table?.length) return data;
+    }
   }
-
-  const cutoff = new Date(cutoffDate);
-  const idx = snapshotProbabilities.dates.findIndex(d => new Date(d) > cutoff);
-  const cutoffIndex = idx === -1 ? snapshotProbabilities.dates.length - 1 : Math.max(0, idx - 1);
-
-  return Object.entries(snapshotProbabilities.candidates)
-    .filter(([name]) => name !== 'Others')
-    .map(([name, data]) => ({
-      name,
-      probability: data.leading_probability[cutoffIndex],
-      color: data.color,
-    }))
-    .sort((a, b) => b.probability - a.probability);
+  return null;
 }
 
-function formatProbability(value) {
-  const pct = value * 100;
-  if (pct >= 99.5) return '>99%';
-  if (pct < 1) return '<1%';
-  return `${Math.round(pct)}%`;
+function economyDashboard() {
+  const file = path.join(PUBLIC_DIR, 'data', 'economics', 'dashboard.json');
+  if (!fs.existsSync(file)) return null;
+  return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
-// Generate generic SVG for OG image (no forecast data)
-function generateGenericOgSvg(locale) {
-  const tagline = locale === 'pt'
-    ? 'Previsões Eleitorais para Portugal'
-    : 'Portuguese Election Forecast';
+/* --------------------------------------------------------------- cards ---- */
 
-  return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <style>
-      text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    </style>
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1e293b"/>
-      <stop offset="50%" style="stop-color:#334155"/>
-      <stop offset="100%" style="stop-color:#1e293b"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Background -->
-  <rect width="1200" height="630" fill="url(#bgGradient)"/>
-
-  <!-- Logo circles - centered and larger -->
-  <g transform="translate(600, 240)">
-    <circle cx="-120" cy="0" r="45" fill="#4A6FA5"/>
-    <circle cx="0" cy="0" r="60" fill="#0F766E"/>
-    <circle cx="140" cy="0" r="75" fill="#D4A000"/>
-  </g>
-
-  <!-- Logo text -->
-  <text x="600" y="400" fill="#fafafa" font-size="72" font-weight="700" text-anchor="middle">estimador</text>
-
-  <!-- Tagline -->
-  <text x="600" y="470" fill="#94a3b8" font-size="32" font-weight="400" text-anchor="middle">${tagline}</text>
-
-  <!-- URL -->
-  <text x="600" y="570" fill="#64748b" font-size="24" font-weight="500" text-anchor="middle">estimador.pt</text>
-</svg>`;
+function defaultCard(locale) {
+  const copy = COPY[locale];
+  return brandCard({
+    headline: copy.brandHeadline,
+    standfirst: copy.brandStandfirst,
+    columns: copy.columns,
+    footerLeft: copy.brandFooter,
+    footerRight: 'estimador.pt',
+  });
 }
 
-// Generate SVG for OG image with logo
-function generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRoundProb) {
-  const chanceLabel = locale === 'pt' ? 'probabilidade de ganhar a 1ª volta' : 'chance of winning 1st round';
-  const secondRoundLabel = locale === 'pt' ? '2ª volta' : '2nd round';
+function articleCardFor(article, locale) {
+  const copy = COPY[locale];
+  const date = formatDate(article.date, locale);
+  return articleCard({
+    locale,
+    title: article.title,
+    excerpt: article.excerpt,
+    kind: article.kind ?? 'explicador',
+    dateLabel: article.updated ? `${date} · ${copy.updated} ${formatDate(article.updated, locale)}` : date,
+    byline: article.author,
+    readTime: `${article.readMinutes} min ${copy.readSuffix}`,
+  });
+}
 
-  const top3 = candidatesWithSupport.slice(0, 3);
+function ligaCard(data, locale) {
+  const copy = COPY[locale];
+  const contenders = [...data.table]
+    .filter(team => team.p_champion > 0)
+    .sort((a, b) => b.p_champion - a.p_champion)
+    .slice(0, 3);
+  if (!contenders.length) return null;
 
-  // Ensure readable colors on dark backgrounds
-  function getReadableColor(color, name) {
-    if (name === 'André Ventura') return '#ff6b6b';
-    if (name === 'Gouveia e Melo') return '#60a5fa';
-    return color;
+  const leader = contenders[0];
+  const groupedSims = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB').format(data.n_sims ?? 0);
+  return figureCard({
+    sectionLabel: copy.ligaSection,
+    label: copy.ligaLabel,
+    value: formatPercent(leader.p_champion),
+    unit: '%',
+    subject: teamName(leader.team),
+    caption: data.n_sims ? copy.ligaCaption(groupedSims) : null,
+    rows: contenders.map(team => ({
+      name: teamName(team.team),
+      value: `${formatPercent(team.p_champion)}%`,
+      fraction: team.p_champion / leader.p_champion,
+      color: teamColor(team.team),
+    })),
+    footerLeft: copy.ligaFooter(data.matchday, data.season),
+    footerRight: 'estimador.pt/desporto/liga',
+  });
+}
+
+function economyCard(dashboard, locale) {
+  const copy = COPY[locale];
+  const tile = dashboard?.tiles?.recession;
+  const current = tile?.recession_probability;
+  if (tile?.status !== 'ok' || !current?.available || typeof current.probability !== 'number') return null;
+
+  const history = (current.probability_history ?? []).slice(-48);
+  const quarterRange = history.length > 1
+    ? `${formatQuarter(history[0].quarter, locale)} – ${formatQuarter(history[history.length - 1].quarter, locale)}`
+    : '';
+
+  return figureCard({
+    sectionLabel: copy.economySection,
+    label: copy.economyLabel,
+    value: formatPercent(current.probability),
+    unit: '%',
+    subject: copy.economySubject(formatQuarter(current.as_of_quarter ?? tile.as_of_quarter, locale)),
+    caption: copy.economyCaption,
+    spark: {
+      label: copy.economySpark,
+      values: history.map(point => point.p),
+      caption: quarterRange,
+      color: COLOR.navy,
+    },
+    footerLeft: copy.economyFooter(formatDate(dashboard.vintage_date, locale)),
+    footerRight: 'estimador.pt/economia',
+  });
+}
+
+/* --------------------------------------------------------------- output --- */
+
+async function emit(node, basename) {
+  const png = await renderCard(node, { width: CARD_WIDTH, height: CARD_HEIGHT });
+  const filename = `${basename}-${contentHash(png)}.png`;
+  fs.writeFileSync(path.join(PUBLIC_DIR, filename), png);
+  return filename;
+}
+
+/**
+ * Anything matching the generated pattern that the new manifest does not claim
+ * is a card for an article that was renamed or a data vintage that has moved
+ * on. Leaving them behind is how public/ accumulated twelve orphaned PNGs.
+ */
+function pruneOrphans(keep) {
+  const kept = new Set(keep);
+  let removed = 0;
+  for (const file of fs.readdirSync(PUBLIC_DIR)) {
+    if (!/^og-image-.+\.png$/.test(file) || kept.has(file)) continue;
+    fs.unlinkSync(path.join(PUBLIC_DIR, file));
+    removed += 1;
   }
-
-  return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <style>
-      text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    </style>
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#18181b"/>
-      <stop offset="50%" style="stop-color:#27272a"/>
-      <stop offset="100%" style="stop-color:#18181b"/>
-    </linearGradient>
-    <radialGradient id="accentGlow" cx="50%" cy="40%" r="50%">
-      <stop offset="0%" style="stop-color:${leadingCandidate.color};stop-opacity:0.15"/>
-      <stop offset="100%" style="stop-color:${leadingCandidate.color};stop-opacity:0"/>
-    </radialGradient>
-  </defs>
-
-  <!-- Background -->
-  <rect width="1200" height="630" fill="url(#bgGradient)"/>
-  <rect width="1200" height="630" fill="url(#accentGlow)"/>
-
-  <!-- Header with logo -->
-  <g transform="translate(480, 35)">
-    <!-- Logo circles -->
-    <circle cx="15" cy="25" r="8" fill="#4A6FA5"/>
-    <circle cx="42" cy="25" r="12" fill="#0F766E"/>
-    <circle cx="78" cy="25" r="16" fill="#D4A000"/>
-    <!-- Logo text -->
-    <text x="105" y="33" fill="#fafafa" font-size="28" font-weight="700">estimador</text>
-  </g>
-
-  <!-- Candidate name -->
-  <text x="600" y="140" fill="#fafafa" font-size="60" font-weight="700" text-anchor="middle">${leadingCandidate.name}</text>
-
-  <!-- Big probability -->
-  <text x="600" y="340" fill="${leadingCandidate.color}" font-size="180" font-weight="900" text-anchor="middle">${formatProbability(leadingCandidate.probability)}</text>
-
-  <!-- Label -->
-  <text x="600" y="400" fill="#a1a1aa" font-size="32" text-anchor="middle">${chanceLabel}</text>
-
-  <!-- Second round pill -->
-  <rect x="470" y="430" width="260" height="50" rx="25" fill="#3f3f46"/>
-  <text x="600" y="463" fill="#e4e4e7" font-size="24" font-weight="600" text-anchor="middle">${secondRoundLabel}: ${formatProbability(secondRoundProb)}</text>
-
-  <!-- Bottom bar with key stats -->
-  <rect x="0" y="505" width="1200" height="125" fill="#18181b" opacity="0.85"/>
-
-  <!-- Three candidates -->
-  ${top3.map((c, i) => {
-    const xPos = 200 + i * 400;
-    const readableColor = getReadableColor(c.color, c.name);
-    const supportPct = `${(c.support * 100).toFixed(0)}%`;
-    let displayName = c.name;
-    if (c.name === 'André Ventura') displayName = 'Ventura';
-    return `
-    <text x="${xPos}" y="555" fill="#e4e4e7" font-size="26" font-weight="500" text-anchor="middle">${displayName}</text>
-    <text x="${xPos}" y="600" fill="${readableColor}" font-size="40" font-weight="800" text-anchor="middle">${supportPct}</text>`;
-  }).join('')}
-</svg>`;
+  return removed;
 }
 
 async function main() {
-  const isGeneric = process.argv.includes('--generic');
+  const liga = latestLigaMatchday();
+  const economy = economyDashboard();
+  const manifest = { generatedAt: new Date().toISOString(), files: {}, cards: {} };
+  const written = [];
 
-  if (isGeneric) {
-    console.log('🖼️  Generating generic Open Graph images...');
+  for (const locale of LOCALES) {
+    const cards = {};
 
-    // Generate short hash for cache busting
-    const version = Date.now().toString(36).slice(-6);
+    const fallback = await emit(defaultCard(locale), `og-image-${locale}`);
+    manifest.files[locale] = fallback;
+    cards[SITE_PATH.home] = fallback;
+    written.push(fallback);
 
-    // Generate for each locale with versioned filename
-    for (const locale of ['pt', 'en']) {
-      const svg = generateGenericOgSvg(locale);
+    // The unversioned copy is the last resort in src/lib/metadata.ts, for a
+    // build that ships without a manifest.
+    fs.copyFileSync(path.join(PUBLIC_DIR, fallback), path.join(PUBLIC_DIR, `og-image-${locale}.png`));
 
-      // Convert to PNG using sharp with versioned filename
-      const filename = `og-image-${locale}-${version}.png`;
-      const pngPath = path.join(rootDir, 'public', filename);
-      await sharp(Buffer.from(svg))
-        .resize(1200, 630)
-        .png()
-        .toFile(pngPath);
-      console.log(`   ✅ Generated: ${filename}`);
+    const sections = [
+      liga ? [SITE_PATH.liga, ligaCard(liga, locale), `og-image-liga-${locale}`] : null,
+      economy ? [SITE_PATH.economy, economyCard(economy, locale), `og-image-economia-${locale}`] : null,
+    ].filter(Boolean);
 
-      // Also create unversioned copy for backwards compatibility
-      const unversionedPath = path.join(rootDir, 'public', `og-image-${locale}.png`);
-      fs.copyFileSync(pngPath, unversionedPath);
+    for (const [route, node, basename] of sections) {
+      if (!node) continue;
+      const filename = await emit(node, basename);
+      cards[route] = filename;
+      written.push(filename);
     }
 
-    // Write manifest with version for filename-based cache busting
-    const manifest = {
-      generatedAt: new Date().toISOString(),
-      version: version,
-      files: {
-        pt: `og-image-pt-${version}.png`,
-        en: `og-image-en-${version}.png`
-      }
-    };
-    const manifestPath = path.join(rootDir, 'public', 'og-manifest.json');
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-    console.log(`   ✅ Manifest: og-manifest.json (version: ${version})`);
-
-    console.log('✅ Generic Open Graph images generated!');
-    return;
-  }
-
-  console.log('🖼️  Generating Open Graph images...');
-
-  // Load data
-  const winProbabilities = loadJsonData('presidential_win_probabilities.json');
-  const trends = loadJsonData('presidential_trends.json');
-  const polls = loadJsonData('presidential_polls.json');
-  const snapshotProbabilities = loadJsonData('presidential_snapshot_probabilities.json');
-
-  // Calculate last poll date
-  let lastPollDate = null;
-  if (polls.polls.length > 0) {
-    lastPollDate = polls.polls[0].date;
-    for (const poll of polls.polls) {
-      if (poll.date > lastPollDate) {
-        lastPollDate = poll.date;
-      }
+    for (const article of readArticles(locale)) {
+      const filename = await emit(articleCardFor(article, locale), `og-image-artigo-${article.slug}-${locale}`);
+      cards[`/artigos/${article.slug}`] = filename;
+      written.push(filename);
     }
+
+    manifest.cards[locale] = cards;
+    console.log(`${locale}: ${Object.keys(cards).length} cards`);
   }
 
-  // Get probabilities from snapshot data (computed from joint posterior)
-  const cutoffProbabilities = getLeadingProbabilitiesAtCutoff(snapshotProbabilities, lastPollDate);
-  const leadingCandidate = cutoffProbabilities[0];
-  const secondRoundProb = winProbabilities.second_round_probability;
+  fs.writeFileSync(path.join(PUBLIC_DIR, 'og-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
 
-  // Get voting intentions (mean support) at cutoff date for bottom section
-  const cutoffDate = lastPollDate ? new Date(lastPollDate) : null;
-  const cutoffIndex = cutoffDate
-    ? trends.dates.findIndex(d => new Date(d) > cutoffDate) - 1
-    : trends.dates.length - 1;
-  const safeIndex = Math.max(0, cutoffIndex === -1 ? trends.dates.length - 1 : cutoffIndex);
-
-  // Combine probabilities with voting intentions
-  const candidatesWithSupport = cutoffProbabilities.map(c => {
-    const trendData = trends.candidates[c.name];
-    const support = trendData ? trendData.mean[safeIndex] : 0;
-    return { ...c, support };
-  });
-
-  console.log(`   Leading: ${leadingCandidate.name} (${formatProbability(leadingCandidate.probability)})`);
-  console.log(`   Second round: ${formatProbability(secondRoundProb)}`);
-  console.log(`   Voting intentions:`, candidatesWithSupport.slice(0, 3).map(c => `${c.name}: ${(c.support * 100).toFixed(1)}%`).join(', '));
-
-  // Generate short hash for cache busting
-  const version = Date.now().toString(36).slice(-6);
-
-  // Generate for each locale with versioned filename
-  for (const locale of ['pt', 'en']) {
-    const svg = generateOgSvg(locale, leadingCandidate, candidatesWithSupport, secondRoundProb);
-
-    // Convert to PNG using sharp with versioned filename
-    const filename = `og-image-${locale}-${version}.png`;
-    const pngPath = path.join(rootDir, 'public', filename);
-    await sharp(Buffer.from(svg))
-      .resize(1200, 630)
-      .png()
-      .toFile(pngPath);
-    console.log(`   ✅ Generated: ${filename}`);
-
-    // Also create unversioned copy for backwards compatibility
-    const unversionedPath = path.join(rootDir, 'public', `og-image-${locale}.png`);
-    fs.copyFileSync(pngPath, unversionedPath);
-  }
-
-  // Write manifest with version for filename-based cache busting
-  const manifest = {
-    generatedAt: new Date().toISOString(),
-    version: version,
-    files: {
-      pt: `og-image-pt-${version}.png`,
-      en: `og-image-en-${version}.png`
-    }
-  };
-  const manifestPath = path.join(rootDir, 'public', 'og-manifest.json');
-  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-  console.log(`   ✅ Manifest: og-manifest.json (version: ${version})`);
-
-  console.log('✅ Open Graph images generated!');
-  console.log(`\n📋 To force social media refresh after deploy:`);
-  console.log(`   Facebook: https://developers.facebook.com/tools/debug/?q=https://estimador.pt/pt`);
-  console.log(`   Twitter:  https://cards-dev.twitter.com/validator`);
-  console.log(`   LinkedIn: https://www.linkedin.com/post-inspector/`);
+  const removed = pruneOrphans([...written, ...LOCALES.map(locale => `og-image-${locale}.png`)]);
+  console.log(`${written.length} cards written, ${removed} orphaned files removed`);
 }
 
-main().catch(console.error);
+main().catch(error => {
+  console.error(error);
+  process.exit(1);
+});

@@ -1,8 +1,19 @@
 {
-  "generatedAt": "2026-02-03T13:00:02.966Z",
-  "version": "6lw1bp",
+  "generatedAt": "2026-09-11T18:41:39.342Z",
   "files": {
-    "pt": "og-image-pt-6lw1bp.png",
-    "en": "og-image-en-6lw1bp.png"
+    "pt": "og-image-pt-98c61d68.png",
+    "en": "og-image-en-791edd88.png"
+  },
+  "cards": {
+    "pt": {
+      "/": "og-image-pt-98c61d68.png",
+      "/desporto/liga": "og-image-liga-pt-915c7248.png",
+      "/economia": "og-image-economia-pt-4e3d3bf7.png"
+    },
+    "en": {
+      "/": "og-image-en-791edd88.png",
+      "/desporto/liga": "og-image-liga-en-bca1bfdb.png",
+      "/economia": "og-image-economia-en-a63fc5ab.png"
+    }
   }
 }
