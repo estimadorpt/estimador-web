@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
+import { ChartTable } from "@/components/viz/ChartTable";
 import { ligaTeamColors, teamDisplayName } from "@/lib/config/football";
 import type { LigaHistorical } from "@/types/football";
 
@@ -12,12 +14,25 @@ interface TitleRaceChartProps {
 export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: TitleRaceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [, setDimensions] = useState({ width: 0, height: 0 });
+  const locale = useLocale();
+  const pt = locale !== "en";
+
+  // The table twin: one row per team on the chart, one column per matchday.
+  const table = useMemo(() => {
+    const teams = new Set<string>();
+    for (const md of historical) for (const t of md.table) if (t.p_champion > 0.01) teams.add(t.team);
+    const last = historical[historical.length - 1];
+    const rows = Array.from(teams)
+      .sort((a, b) => (last?.table.find(t => t.team === b)?.p_champion ?? 0) - (last?.table.find(t => t.team === a)?.p_champion ?? 0))
+      .map(team => [teamDisplayName(team), ...historical.map(md => { const t = md.table.find(x => x.team === team); if (!t) return ""; const v = Math.round(t.p_champion * 100); const lo = t.p_champion_lo, hi = t.p_champion_hi; return lo != null && hi != null ? `${v}% (${Math.round(lo * 100)}–${Math.round(hi * 100)}%)` : `${v}%`; })]);
+    return { columns: [pt ? "Equipa" : "Team", ...historical.map(md => `${pt ? "J" : "MD"}${md.matchday}`)], rows };
+  }, [historical, pt]);
 
   useEffect(() => {
     if (!containerRef.current || historical.length === 0) return;
 
     const render = async () => {
-      const Plot = (await import("@observablehq/plot")).default || await import("@observablehq/plot");
+      const Plot = await import("@observablehq/plot");
       const container = containerRef.current;
       if (!container) return;
 
@@ -73,8 +88,11 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
         marginLeft: 45,
         marginRight: 100,
         marginBottom: 35,
+        style: { fontFamily: "Manrope, system-ui, sans-serif", fontSize: "12px", background: "transparent", overflow: "visible" },
         x: {
-          label: "Matchday",
+          label: pt ? "Jornada" : "Matchday",
+          // Whole matchdays only, thinned to roughly one per 60px.
+          ticks: Array.from(new Set(lineData.map(d => d.matchday))).sort((a, b) => a - b).filter((_, i, arr) => i % Math.max(1, Math.ceil(arr.length / Math.max(2, width / 60))) === 0),
           tickFormat: (d: number) => `${d}`,
         },
         y: {
@@ -84,7 +102,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
         },
         color: {
           domain: Array.from(teamsWithChance),
-          range: Array.from(teamsWithChance).map(t => ligaTeamColors[t] || '#78716c'),
+          range: Array.from(teamsWithChance).map(t => ligaTeamColors[t] || '#5f7062'),
         },
         marks: [
           Plot.ruleY([0]),
@@ -96,7 +114,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
                 x: "matchday",
                 y1: "p_champion_lo",
                 y2: "p_champion_hi",
-                fill: ligaTeamColors[team] || '#78716c',
+                fill: ligaTeamColors[team] || '#5f7062',
                 fillOpacity: 0.12,
                 curve: "monotone-x",
               }
@@ -109,6 +127,11 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
             strokeWidth: 2.5,
             curve: "monotone-x",
           }),
+          Plot.tip(lineData, Plot.pointer({
+            x: "matchday",
+            y: "p_champion",
+            title: (d: { team: string; matchday: number; p_champion: number }) => `${teamDisplayName(d.team)} · ${pt ? "J" : "MD"}${d.matchday}: ${Math.round(d.p_champion)}%`,
+          })),
           // End labels with adjusted positions
           Plot.text(
             endLabels,
@@ -139,7 +162,12 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [historical, yAxisLabel]);
+  }, [historical, yAxisLabel, pt]);
 
-  return <div ref={containerRef} className="w-full min-h-[300px]" />;
+  return (
+    <div className="w-full">
+      <div ref={containerRef} className="w-full min-h-[300px]" />
+      <ChartTable caption={`${yAxisLabel} · ${pt ? "valor e intervalo" : "value and interval"}`} columns={table.columns} rows={table.rows} />
+    </div>
+  );
 }

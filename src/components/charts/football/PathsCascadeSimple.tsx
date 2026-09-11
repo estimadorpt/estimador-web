@@ -61,7 +61,7 @@ function StepSimple({ step, teamColor }: { step: CascadeStep; teamColor: string 
       {/* Left: probability + match */}
       <div className="w-20 shrink-0">
         <div
-          className="text-xl font-black tabular-nums leading-tight"
+          className="text-xl font-display font-extrabold tabular-nums leading-tight"
           style={{ color: teamColor }}
         >
           {pct(step.titleBefore)}
@@ -78,7 +78,7 @@ function StepSimple({ step, teamColor }: { step: CascadeStep; teamColor: string 
             vs {step.opponent}
           </span>
           {step.isKeyMatch && (
-            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-amber-100 text-amber-800">
+            <span className="text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-amber-100 text-amber-800">
               Decisivo
             </span>
           )}
@@ -123,7 +123,7 @@ function StepSimple({ step, teamColor }: { step: CascadeStep; teamColor: string 
         <div className="text-sm font-bold tabular-nums text-green-700">
           {pct(step.titleAfterWin)}
         </div>
-        <div className="text-[10px] text-stone-400">se vence</div>
+        <div className="text-[11px] text-stone-400">se vence</div>
       </div>
     </div>
   );
@@ -150,7 +150,7 @@ function TeamSimple({ data }: { data: TeamCascade }) {
         <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
           Se vencer todos os jogos-chave
         </div>
-        <div className="text-3xl font-black tabular-nums" style={{ color: data.teamColor }}>
+        <div className="text-3xl font-display font-extrabold tabular-nums" style={{ color: data.teamColor }}>
           {pct(data.steps[data.steps.length - 1].titleAfterWin)}
         </div>
       </div>
@@ -165,7 +165,7 @@ export default function PathsCascadeSimple() {
         <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
           Variante C1
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-stone-900 mb-1">
+        <h3 className="text-xl tracking-tight text-stone-900 mb-1">
           Barra Simples
         </h3>
         <p className="text-sm text-stone-500">

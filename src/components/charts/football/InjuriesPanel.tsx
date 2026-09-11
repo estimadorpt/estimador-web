@@ -101,11 +101,11 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
     <div>
       <div className="flex items-center gap-2 mb-1">
         <Stethoscope className="w-4 h-4 text-stone-400" />
-        <h2 className="text-xl font-bold tracking-tight">{t.title}</h2>
+        <h2 className="text-2xl tracking-tight">{t.title}</h2>
       </div>
       <p className="text-sm text-stone-500 mb-1 max-w-3xl leading-relaxed">{t.intro}</p>
       {snapshot && (
-        <p className="text-[10px] uppercase tracking-wider text-stone-400 mb-6">
+        <p className="text-[11px] uppercase tracking-wider text-stone-400 mb-6">
           {t.snapshot(snapshot)}
         </p>
       )}
@@ -132,7 +132,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                   </span>
                   <span className="hidden sm:inline">{teamDisplayName(team.team)}</span>
                 </span>
-                <span className="ml-auto text-lg font-black tabular-nums text-stone-900">
+                <span className="ml-auto text-lg font-display font-extrabold tabular-nums text-stone-900">
                   {sharePct.toLocaleString(pt ? "pt-PT" : "en-GB", {
                     maximumFractionDigits: sharePct < 10 ? 1 : 0,
                   })}
@@ -143,10 +143,10 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
               <div className="h-1.5 relative bg-stone-100 mb-1">
                 <div
                   className="absolute inset-y-0 left-0 rounded-r-[3px]"
-                  style={{ width: `${barPct}%`, backgroundColor: "#dc2626", opacity: 0.75 }}
+                  style={{ width: `${barPct}%`, backgroundColor: "#a3543a", opacity: 0.75 }}
                 />
               </div>
-              <div className="text-[10px] text-stone-400 mb-2 tabular-nums">
+              <div className="text-[11px] text-stone-400 mb-2 tabular-nums">
                 {t.outOfSquad} · {formatValue(team.value_out_eur, pt)}
               </div>
 
@@ -166,7 +166,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                           <div className="flex items-baseline gap-1.5 flex-wrap">
                             <span className="font-semibold text-stone-800">{p.player}</span>
                             {rank !== undefined && (
-                              <span className="text-[9px] uppercase tracking-wide bg-stone-800 text-white px-1 py-px">
+                              <span className="text-[11px] uppercase tracking-wide bg-stone-800 text-white px-1 py-px">
                                 {t.modelRank(rank)}
                               </span>
                             )}
@@ -181,12 +181,12 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                             )}
                           </div>
                           {back && (
-                            <div className="text-[10px] text-stone-400">
+                            <div className="text-[11px] text-stone-400">
                               {t.back}: {back}
                             </div>
                           )}
                         </div>
-                        <span className="text-[10px] tabular-nums text-stone-400 flex-shrink-0">
+                        <span className="text-[11px] tabular-nums text-stone-400 flex-shrink-0">
                           {formatValue(p.market_value_eur, pt)}
                         </span>
                       </li>
@@ -198,7 +198,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
         })}
       </div>
 
-      <p className="text-[10px] text-stone-400 mt-6 max-w-3xl">
+      <p className="text-[11px] text-stone-400 mt-6 max-w-3xl">
         {t.valueNote}
         {data.n_suspensions === 0 && ` ${t.noSuspensions}`}
       </p>

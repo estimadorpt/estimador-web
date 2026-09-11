@@ -24,11 +24,11 @@ export function RemainingSchedule({ matches, teamColor, labels }: RemainingSched
   return (
     <div className="space-y-1">
       {/* Header */}
-      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-400 pb-1 border-b border-stone-200">
+      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-stone-400 pb-1 border-b border-stone-200">
         <div className="w-8 text-center">{labels.matchdayAbbr}</div>
         <div className="w-36 md:w-44" />
         <div className="flex-1" />
-        <div className="w-28 md:w-40 flex justify-between text-[10px]">
+        <div className="w-28 md:w-40 flex justify-between text-[11px]">
           <span>{labels.win}</span>
           <span>{labels.draw}</span>
           <span>{labels.loss}</span>
@@ -59,7 +59,7 @@ export function RemainingSchedule({ matches, teamColor, labels }: RemainingSched
               <span className="text-sm font-medium text-stone-800 truncate">
                 {teamDisplayName(m.opponent)}
               </span>
-              <span className="text-[10px] text-stone-400 shrink-0">
+              <span className="text-[11px] text-stone-400 shrink-0">
                 ({m.venue === "H" ? labels.home : labels.away})
               </span>
             </div>

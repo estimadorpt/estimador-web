@@ -134,7 +134,7 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
       {/* Left: Match picker */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
             {labels.whatIfDescription}
           </div>
           {hasSelections && (
@@ -150,8 +150,8 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
         <div className="space-y-1">
           {data.matches.map((match, idx) => {
             const selected = selections[idx] ?? null;
-            const homeColor = ligaTeamColors[match.home_team] || "#78716c";
-            const awayColor = ligaTeamColors[match.away_team] || "#78716c";
+            const homeColor = ligaTeamColors[match.home_team] || "#5f7062";
+            const awayColor = ligaTeamColors[match.away_team] || "#5f7062";
 
             return (
               <div
@@ -179,45 +179,45 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
                 <div className="flex gap-1">
                   <button
                     onClick={() => toggleSelection(idx, "H")}
-                    className="w-8 h-8 rounded text-[11px] font-bold transition-all"
+                    className="w-11 h-11 rounded-md text-[12px] font-bold transition-colors duration-150"
                     style={{
                       backgroundColor:
                         selected === "H" ? homeColor : "transparent",
-                      color: selected === "H" ? "#fff" : "#a8a29e",
+                      color: selected === "H" ? "#fff" : "#7f9284",
                       border:
                         selected === "H"
                           ? `2px solid ${homeColor}`
-                          : "2px solid #e7e5e4",
+                          : "2px solid #dadccf",
                     }}
                   >
                     {labels.home.charAt(0)}
                   </button>
                   <button
                     onClick={() => toggleSelection(idx, "D")}
-                    className="w-8 h-8 rounded text-[11px] font-bold transition-all"
+                    className="w-11 h-11 rounded-md text-[12px] font-bold transition-colors duration-150"
                     style={{
                       backgroundColor:
-                        selected === "D" ? "#78716c" : "transparent",
-                      color: selected === "D" ? "#fff" : "#a8a29e",
+                        selected === "D" ? "#5f7062" : "transparent",
+                      color: selected === "D" ? "#fff" : "#7f9284",
                       border:
                         selected === "D"
-                          ? "2px solid #78716c"
-                          : "2px solid #e7e5e4",
+                          ? "2px solid #5f7062"
+                          : "2px solid #dadccf",
                     }}
                   >
                     {labels.draw.charAt(0)}
                   </button>
                   <button
                     onClick={() => toggleSelection(idx, "A")}
-                    className="w-8 h-8 rounded text-[11px] font-bold transition-all"
+                    className="w-11 h-11 rounded-md text-[12px] font-bold transition-colors duration-150"
                     style={{
                       backgroundColor:
                         selected === "A" ? awayColor : "transparent",
-                      color: selected === "A" ? "#fff" : "#a8a29e",
+                      color: selected === "A" ? "#fff" : "#7f9284",
                       border:
                         selected === "A"
                           ? `2px solid ${awayColor}`
-                          : "2px solid #e7e5e4",
+                          : "2px solid #dadccf",
                     }}
                   >
                     {labels.away.charAt(0)}
@@ -251,7 +251,7 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
         {/* Title race */}
         {titleTeams.length > 0 && (
           <div className="mb-6">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-3">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-3">
               {labels.impactOnTitle}
             </div>
             <div className="space-y-2">
@@ -259,7 +259,7 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
                 const base = data.baseline[team];
                 const current = probabilities[team];
                 const delta = current.p_champion - base.p_champion;
-                const teamColor = ligaTeamColors[team] || "#78716c";
+                const teamColor = ligaTeamColors[team] || "#5f7062";
 
                 return (
                   <div key={team} className="flex items-center gap-3">
@@ -328,7 +328,7 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
         {/* Relegation */}
         {relegationTeams.length > 0 && (
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-3">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-3">
               {labels.impactOnRelegation}
             </div>
             <div className="space-y-2">
@@ -336,7 +336,7 @@ export function MatchdayPicker({ data, labels }: MatchdayPickerProps) {
                 const base = data.baseline[team];
                 const current = probabilities[team];
                 const delta = current.p_relegation - base.p_relegation;
-                const teamColor = ligaTeamColors[team] || "#78716c";
+                const teamColor = ligaTeamColors[team] || "#5f7062";
 
                 return (
                   <div key={team} className="flex items-center gap-3">
@@ -436,7 +436,7 @@ function SimulatedTable({
 
   return (
     <div className="col-span-1 lg:col-span-2 mt-8 border-t border-stone-200 pt-8">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-4">
+      <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-4">
         {labels.simulatedStandings}
       </div>
       <div className="overflow-x-auto">
@@ -457,7 +457,7 @@ function SimulatedTable({
               const relegDelta = probs.p_relegation - base.p_relegation;
               const isRelegationZone = i >= sorted.length - 3;
               const isChampionZone = i < 3;
-              const teamColor = ligaTeamColors[team] || "#78716c";
+              const teamColor = ligaTeamColors[team] || "#5f7062";
 
               return (
                 <motion.tr
@@ -522,7 +522,7 @@ function DeltaCell({
         {formatPct(value)}
       </span>
       {showDelta && (
-        <span className={`text-[10px] font-bold ${deltaColor}`}>
+        <span className={`text-[11px] font-bold ${deltaColor}`}>
           {formatDelta(delta)}
         </span>
       )}

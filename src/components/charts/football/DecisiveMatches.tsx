@@ -39,8 +39,8 @@ interface MatchRowProps {
 }
 
 function MatchRow({ match, affectedTeam, baseline, probs, labels, isTitle }: MatchRowProps) {
-  const homeColor = ligaTeamColors[match.home_team] || "#78716c";
-  const awayColor = ligaTeamColors[match.away_team] || "#78716c";
+  const homeColor = ligaTeamColors[match.home_team] || "#5f7062";
+  const awayColor = ligaTeamColors[match.away_team] || "#5f7062";
 
   const currentLabel = labels.current ?? "Current";
   const ifWinLabel = labels.ifWin ?? "If they win";
@@ -104,7 +104,7 @@ function TeamSection({
   getProbs,
   isTitle,
 }: TeamSectionProps) {
-  const teamColor = ligaTeamColors[team] || "#78716c";
+  const teamColor = ligaTeamColors[team] || "#5f7062";
 
   return (
     <div>

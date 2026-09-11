@@ -10,14 +10,16 @@
 // caveat next to each headline number, and the verbatim collapsible notes.
 // All fields are optional — every access is null-safe with "—" fallbacks.
 
+import { ChartTable } from '@/components/viz/ChartTable';
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
 import { Gauge } from './Gauge';
 import { LabelBadge } from './LabelBadge';
 import { HonestyNote } from './HonestyNote';
+import { StatusBadge } from './StatusBadge';
 import { toneForLabel } from './LabelBadge';
 import { fmtProbPct, fmtNum, COLORS } from '@/lib/utils/economy-format';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { RecessionTileData, RecessionProbPoint } from '@/types/economy-dashboard';
 
 // Past Portuguese recession spans (GFC, Troika, COVID). Matched to the history
@@ -106,18 +108,18 @@ function ProbSparkline({
         <circle cx={xAt(n - 1)} cy={yAt(last.p)} r={3} fill={color} />
       )}
       {/* axis hints */}
-      <text x={padX} y={yAt(1) - 2} fontSize="8" fill={COLORS.stone}>
+      <text x={padX} y={yAt(1) - 2} fontSize="11" fill={COLORS.stone}>
         100%
       </text>
-      <text x={padX} y={H - 3} fontSize="8" fill={COLORS.stone}>
+      <text x={padX} y={H - 3} fontSize="11" fill={COLORS.stone}>
         {pts[0]?.quarter ?? ''}
       </text>
-      <text x={W - padX} y={H - 3} textAnchor="end" fontSize="8" fill={COLORS.stone}>
+      <text x={W - padX} y={H - 3} textAnchor="end" fontSize="11" fill={COLORS.stone}>
         {last?.quarter ?? ''}
       </text>
       {/* bands legend */}
       {bands.length > 0 && (
-        <text x={W - padX} y={yAt(1) - 2} textAnchor="end" fontSize="8" fill={COLORS.stone}>
+        <text x={W - padX} y={yAt(1) - 2} textAnchor="end" fontSize="11" fill={COLORS.stone}>
           {bandsLabel}
         </text>
       )}
@@ -129,7 +131,7 @@ function ProbSparkline({
 function ScoreChip({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded border border-stone-200 px-2 py-1.5">
-      <div className="text-[9px] font-semibold uppercase tracking-wide text-stone-400 leading-tight">
+      <div className="text-[11px] font-semibold uppercase tracking-wide text-stone-400 leading-tight">
         {label}
       </div>
       <div className="text-sm font-bold tabular-nums leading-tight mt-0.5 text-stone-700">
@@ -171,7 +173,10 @@ export async function RecessionTile({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* ---- A) CURRENT recession risk ---- */}
         <div className="md:border-r md:border-stone-100 md:pr-6">
-          <h3 className="text-sm font-bold text-stone-900">{t('recessionCurrentTitle')}</h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-sm text-stone-900">{t('recessionCurrentTitle')}</h3>
+            <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
+          </div>
           <p className="text-[11px] text-stone-500 mt-0.5">
             {t('recessionCurrentSub', { quarter: current?.as_of_quarter ?? '—' })}
           </p>
@@ -203,12 +208,17 @@ export async function RecessionTile({
               bandsLabel={t('recessionBands')}
               ariaLabel={t('recessionChartAria')}
             />
-            <p className="mt-1 text-[10px] text-stone-400">{t('recessionHistory')}</p>
+            <ChartTable
+              caption={t('recessionChartAria')}
+              columns={[t('tableQuarter'), t('tableProbability')]}
+              rows={(current?.probability_history ?? []).filter((d) => d && typeof d.p === 'number' && Number.isFinite(d.p)).map((d) => [d.quarter, fmtProbPct(d.p)])}
+            />
+            <p className="mt-1 text-[11px] text-stone-400">{t('recessionHistory')}</p>
           </div>
 
           {/* track record — calibration & skill stats, shown plainly */}
           <div className="mt-4">
-            <h4 className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-2">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">
               {t('scTitle')}
             </h4>
             <div className="grid grid-cols-2 gap-2">
@@ -222,13 +232,22 @@ export async function RecessionTile({
             </div>
           </div>
 
-          <HonestyNote note={current?.honesty_note ?? t('recessionCurrentHonesty')} />
+          <HonestyNote
+            note={
+              pickNote(
+                locale,
+                current?.honesty_note_i18n,
+                current?.honesty_note,
+                current?.honesty_note_pt
+              ) ?? t('recessionCurrentHonesty')
+            }
+          />
         </div>
 
         {/* ---- B) 2-QUARTER OUTLOOK ---- */}
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-stone-900">{t('recessionLeadingTitle')}</h3>
+            <h3 className="text-sm text-stone-900">{t('recessionLeadingTitle')}</h3>
             <LabelBadge tone="amber">{t('recessionOutlookBadge')}</LabelBadge>
           </div>
           <p className="text-[11px] text-stone-500 mt-0.5">
@@ -254,16 +273,25 @@ export async function RecessionTile({
             {t('recessionLeadingCaveat')}
           </p>
 
-          <HonestyNote note={leading?.honesty_note ?? t('recessionLeadingHonesty')} />
+          <HonestyNote
+            note={
+              pickNote(
+                locale,
+                leading?.honesty_note_i18n,
+                leading?.honesty_note,
+                leading?.honesty_note_pt
+              ) ?? t('recessionLeadingHonesty')
+            }
+          />
         </div>
       </div>
 
       {/* ---- Sahm labour-market tripwire (full width) ---- */}
       <div className="mt-6 border-t border-stone-100 pt-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-bold text-stone-900">{t('sahmTitle')}</h3>
+          <h3 className="text-sm text-stone-900">{t('sahmTitle')}</h3>
           <span
-            className={`inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+            className={`inline-block text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
               sahmTriggered ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'
             }`}
           >
@@ -276,7 +304,12 @@ export async function RecessionTile({
             threshold: fmtNum(sahm?.threshold_pp),
           })}
         </p>
-        <HonestyNote note={sahm?.honesty_note ?? t('sahmHonesty')} />
+        <HonestyNote
+          note={
+            pickNote(locale, sahm?.honesty_note_i18n, sahm?.honesty_note, sahm?.honesty_note_pt) ??
+            t('sahmHonesty')
+          }
+        />
       </div>
     </TileCard>
   );

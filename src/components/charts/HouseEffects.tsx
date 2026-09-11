@@ -1,13 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { partyColors } from "@/lib/config/colors";
 
-interface HouseEffect {
-  pollster: string;
-  party: string;
-  effect: number;
-  n_polls: number;
-}
+import type { HouseEffect } from '@/types';
 
 interface HouseEffectsProps {
   data: HouseEffect[];
@@ -38,10 +34,11 @@ function getHeatmapColor(value: number): string {
 }
 
 export function HouseEffects({ data }: HouseEffectsProps) {
+  const t = useTranslations("forecast");
   if (!data || data.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        <p>House effects analysis loading...</p>
+      <div className="text-center py-8 text-stone-500">
+        <p>{t("houseEffectsLoading")}</p>
       </div>
     );
   }
@@ -50,8 +47,7 @@ export function HouseEffects({ data }: HouseEffectsProps) {
   const transformedData = data.map(d => ({
     pollster: d.pollster,
     party: d.party,
-    effect: (d as any).house_effect || d.effect || 0,
-    n_polls: d.n_polls || 5
+    effect: d.house_effect ?? d.effect ?? 0
   }));
 
   // Get unique pollsters and parties
@@ -69,12 +65,12 @@ export function HouseEffects({ data }: HouseEffectsProps) {
 
   return (
     <div className="w-full">
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="bg-cream border border-stone-200 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-stone-50">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 w-40">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-stone-700 w-40">
                   Pollster
                 </th>
                 {parties.map(party => (
@@ -88,10 +84,10 @@ export function HouseEffects({ data }: HouseEffectsProps) {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-stone-200">
               {pollsters.map(pollster => (
                 <tr key={pollster}>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900 bg-gray-50">
+                  <td className="px-4 py-3 text-sm font-medium text-stone-900 bg-stone-50">
                     {pollster}
                   </td>
                   {parties.map(party => {
@@ -104,7 +100,7 @@ export function HouseEffects({ data }: HouseEffectsProps) {
                         className="px-3 py-3 text-center text-xs font-semibold relative group cursor-help"
                         style={{ 
                           backgroundColor: getHeatmapColor(effect),
-                          color: Math.abs(effect) > 0.25 ? "white" : "#374151"
+                          color: Math.abs(effect) > 0.25 ? "white" : "#434d48"
                         }}
                         title={`${pollster} → ${party}: ${effect.toFixed(3)} logit`}
                       >
@@ -115,7 +111,7 @@ export function HouseEffects({ data }: HouseEffectsProps) {
                         )}
                         
                         {/* Tooltip */}
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-stone-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
                           {pollster} → {party}: {effect.toFixed(3)} logit
                         </div>
                       </td>
@@ -128,14 +124,11 @@ export function HouseEffects({ data }: HouseEffectsProps) {
         </div>
       </div>
       
-      <div className="mt-4 text-sm text-gray-600 space-y-2">
+      <div className="mt-4 text-sm text-stone-600 space-y-2">
         <p>
-          <strong>House effects</strong> show how each pollster systematically differs from the polling average in logit space. 
-          Red cells indicate the pollster tends to show higher support for that party, blue cells show lower support.
+          <strong>{t("houseEffectsTerm")}</strong> {t("houseEffectsExplainer")}
         </p>
-        <p className="text-xs">
-          Values are logit deviations. Larger absolute values indicate stronger systematic bias. Hover over cells for exact values.
-        </p>
+        <p className="text-xs">{t("houseEffectsValuesNote")}</p>
       </div>
     </div>
   );

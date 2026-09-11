@@ -84,9 +84,9 @@ function StepRow({
           <span className="text-sm text-stone-700 truncate hidden sm:inline">
             {teamDisplayName(step.opponent)}
           </span>
-          <span className="text-[10px] text-stone-400 shrink-0">({venueLabel})</span>
+          <span className="text-[11px] text-stone-400 shrink-0">({venueLabel})</span>
           <span
-            className={`text-[10px] font-bold px-1 py-0.5 shrink-0 ${
+            className={`text-[11px] font-bold px-1 py-0.5 shrink-0 ${
               step.result === "L"
                 ? "bg-red-50 text-red-600"
                 : step.result === "D"
@@ -124,7 +124,7 @@ function StepRow({
               style={{
                 left: cssPct(step.p_target_after),
                 width: cssPct(-delta),
-                backgroundColor: "#dc2626",
+                backgroundColor: "#a3543a",
                 opacity: 0.4,
               }}
             />
@@ -140,7 +140,7 @@ function StepRow({
         <span className="text-stone-300 mx-0.5">&rarr;</span>
         <span
           className="text-sm font-bold tabular-nums"
-          style={{ color: isPositive ? teamColor : "#dc2626" }}
+          style={{ color: isPositive ? teamColor : "#a3543a" }}
         >
           {pct(step.p_target_after)}
         </span>
@@ -164,12 +164,12 @@ function RivalConditions({
 
   return (
     <div className="px-3 md:px-4 py-2 border-t border-stone-100 bg-stone-50/50">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+      <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
         {labels.thisWorksBecause}
       </div>
       <div className="space-y-1">
         {conditions.map((rc, i) => {
-          const rivalColor = ligaTeamColors[rc.rival] || "#78716c";
+          const rivalColor = ligaTeamColors[rc.rival] || "#5f7062";
           return (
             <div key={i} className="text-xs text-stone-600">
               <span className="font-medium" style={{ color: rivalColor }}>
@@ -240,7 +240,7 @@ function ScenarioCard({
           <h4 className="text-base font-bold text-stone-900">
             {summary}
           </h4>
-          <div className="text-[10px] text-stone-400 mt-0.5">
+          <div className="text-[11px] text-stone-400 mt-0.5">
             <span className="tabular-nums font-medium">{pct(scenario.frequency)}</span>{" "}
             {labels.ofChampionSims}
           </div>
@@ -251,7 +251,7 @@ function ScenarioCard({
           </div>
           <div className="text-stone-300">&darr;</div>
           <div
-            className="text-lg font-black tabular-nums"
+            className="text-lg font-display font-extrabold tabular-nums"
             style={{ color: teamColor }}
           >
             {pct(finalP)}
@@ -314,7 +314,7 @@ export function NarrativeScenarios({
     lossAbbrPlural: string;
   };
 }) {
-  const teamColor = ligaTeamColors[data.team] || "#78716c";
+  const teamColor = ligaTeamColors[data.team] || "#5f7062";
 
   // Use the right frequency label based on target
   const adjustedLabels = {

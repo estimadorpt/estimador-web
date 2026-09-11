@@ -119,7 +119,7 @@ export function FinalTable({
   const luck = new Map(data.luck.map((r) => [r.team, r]));
   const relegated = new Set(data.relegated);
 
-  const th = "text-[10px] font-bold uppercase tracking-wider text-stone-400 py-2";
+  const th = "text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2";
 
   return (
     <div className="overflow-x-auto">
@@ -170,7 +170,7 @@ export function FinalTable({
           {data.table.map((row) => {
             const x = xpts.get(row.team);
             const l = luck.get(row.team);
-            const color = ligaTeamColors[row.team] || "#78716c";
+            const color = ligaTeamColors[row.team] || "#5f7062";
             const isChampion = row.pos === 1;
             const isRelegated = relegated.has(row.team);
             return (
@@ -202,7 +202,7 @@ export function FinalTable({
                       {teamDisplayName(row.team)}
                     </span>
                     {row.lost === 0 && (
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 border border-emerald-200 px-1 py-px flex-shrink-0">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 border border-emerald-200 px-1 py-px flex-shrink-0">
                         {pt ? "invicto" : "unbeaten"}
                       </span>
                     )}
@@ -331,7 +331,7 @@ export function TitleRaceEvolution({
               x2={padL + innerW}
               y1={y(tk)}
               y2={y(tk)}
-              stroke="#e7e5e4"
+              stroke="#dadccf"
               strokeWidth="1"
             />
             <text
@@ -339,7 +339,7 @@ export function TitleRaceEvolution({
               y={y(tk) + 3}
               textAnchor="end"
               className="fill-stone-400"
-              fontSize="10"
+              fontSize="11"
             >
               {Math.round(tk * 100)}%
             </text>
@@ -352,7 +352,7 @@ export function TitleRaceEvolution({
           y={padT}
           width={Math.max(0, x(lastMd) - x(lastForecastMd))}
           height={plotH}
-          fill="#f5f5f4"
+          fill="#f5f4ed"
           opacity={0.8}
         />
         <line
@@ -360,7 +360,7 @@ export function TitleRaceEvolution({
           x2={x(lastForecastMd)}
           y1={padT}
           y2={padT + plotH}
-          stroke="#a8a29e"
+          stroke="#7f9284"
           strokeWidth="1"
           strokeDasharray="3 3"
         />
@@ -369,7 +369,7 @@ export function TitleRaceEvolution({
             x={x(lastForecastMd) + 5}
             y={padT + 11}
             className="fill-stone-400"
-            fontSize="9"
+            fontSize="11"
           >
             {pt ? "sem previsão" : "no forecast"}
           </text>
@@ -377,7 +377,7 @@ export function TitleRaceEvolution({
 
         {/* series */}
         {race.series.map((s) => {
-          const color = ligaTeamColors[s.team] || "#78716c";
+          const color = ligaTeamColors[s.team] || "#5f7062";
           const lastIdx = s.values.length - 1;
           const lastVal = s.values[lastIdx];
           return (
@@ -392,7 +392,7 @@ export function TitleRaceEvolution({
                 <text
                   x={x(lastForecastMd) + 8}
                   y={y(lastVal) + 3}
-                  fontSize="10"
+                  fontSize="11"
                   fontWeight="600"
                   fill={color}
                 >
@@ -409,7 +409,7 @@ export function TitleRaceEvolution({
           x2={padL + innerW}
           y1={padT + plotH}
           y2={padT + plotH}
-          stroke="#d6d3d1"
+          stroke="#cbccbb"
           strokeWidth="1"
         />
         {xTicks.map((tk) => (
@@ -419,7 +419,7 @@ export function TitleRaceEvolution({
             y={padT + plotH + 15}
             textAnchor="middle"
             className="fill-stone-400"
-            fontSize="10"
+            fontSize="11"
           >
             {tk}
           </text>
@@ -428,7 +428,7 @@ export function TitleRaceEvolution({
           x={padL}
           y={padT + plotH + 28}
           className="fill-stone-400"
-          fontSize="9"
+          fontSize="11"
         >
           {pt ? "jornada" : "matchday"}
         </text>
@@ -440,7 +440,7 @@ export function TitleRaceEvolution({
             <span key={s.team} className="inline-flex items-center gap-1.5">
               <span
                 className="inline-block w-3 h-0.5"
-                style={{ backgroundColor: ligaTeamColors[s.team] || "#78716c" }}
+                style={{ backgroundColor: ligaTeamColors[s.team] || "#5f7062" }}
               />
               <span className="text-stone-600">{teamDisplayName(s.team)}</span>
             </span>
@@ -498,8 +498,8 @@ export function ReportCard({
               : "average error on predicted final points in the last published forecast",
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-white p-4">
-            <div className="text-2xl font-black text-stone-900 tabular-nums">
+          <div key={kpi.label} className="bg-cream p-4">
+            <div className="text-2xl font-display font-extrabold text-stone-900 tabular-nums">
               {kpi.value}
             </div>
             <div className="text-xs text-stone-500 mt-1 leading-snug">{kpi.label}</div>
@@ -518,13 +518,13 @@ export function ReportCard({
             <tr className="border-b border-stone-300">
               <th
                 scope="col"
-                className="text-[10px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
               >
                 {pt ? "Jornada" : "Matchday"}
               </th>
               <th
                 scope="col"
-                className="text-[10px] font-bold uppercase tracking-wider text-stone-400 py-2 text-right w-20"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-right w-20"
               >
                 {pt
                   ? `${teamDisplayName(rc.champion)} campeão`
@@ -532,7 +532,7 @@ export function ReportCard({
               </th>
               <th
                 scope="col"
-                className="text-[10px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left pl-4"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left pl-4"
               >
                 {pt ? "Erro médio nos pontos finais" : "Mean error on final points"}
               </th>

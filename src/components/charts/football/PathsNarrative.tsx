@@ -167,7 +167,7 @@ function StepRow({
             ({step.venue === "H" ? "C" : "F"})
           </span>
           {step.isKeyMatch && (
-            <span className="text-[10px] font-bold uppercase tracking-wider px-1 py-0.5 bg-amber-100 text-amber-800">
+            <span className="text-[11px] font-bold uppercase tracking-wider px-1 py-0.5 bg-amber-100 text-amber-800">
               Decisivo
             </span>
           )}
@@ -201,7 +201,7 @@ function StepRow({
               style={{
                 left: pct(step.titleAfter),
                 width: pct(-delta),
-                backgroundColor: "#dc2626",
+                backgroundColor: "#a3543a",
                 opacity: 0.3,
               }}
             />
@@ -213,11 +213,11 @@ function StepRow({
       <div className="w-12 shrink-0 text-right">
         <div
           className="text-sm font-bold tabular-nums"
-          style={{ color: isPositive ? teamColor : "#dc2626" }}
+          style={{ color: isPositive ? teamColor : "#a3543a" }}
         >
           {pct(step.titleAfter)}
         </div>
-        <div className="text-[10px] tabular-nums text-stone-400">
+        <div className="text-[11px] tabular-nums text-stone-400">
           {isPositive ? "+" : ""}{Math.round(delta * 100)}pp
         </div>
       </div>
@@ -256,10 +256,10 @@ function PathCard({
           <p className="text-sm text-stone-500">{path.summary}</p>
         </div>
         <div className="text-right shrink-0">
-          <div className="text-lg font-black tabular-nums text-stone-700">
+          <div className="text-lg font-display font-extrabold tabular-nums text-stone-700">
             {pct(path.frequency)}
           </div>
-          <div className="text-[10px] text-stone-400">das simulações</div>
+          <div className="text-[11px] text-stone-400">das simulações</div>
         </div>
       </div>
 
@@ -277,7 +277,7 @@ function PathCard({
       >
         <span className="text-xs text-stone-400">Probabilidade final neste cenário</span>
         <span
-          className="text-base font-black tabular-nums"
+          className="text-base font-display font-extrabold tabular-nums"
           style={{ color: teamColor }}
         >
           {pct(finalProb)}
@@ -327,7 +327,7 @@ export default function PathsNarrative() {
         <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
           Caminhos para o Título
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-stone-900 mb-1">
+        <h3 className="text-xl tracking-tight text-stone-900 mb-1">
           Cenários de Vitória
         </h3>
         <p className="text-sm text-stone-500 max-w-2xl">

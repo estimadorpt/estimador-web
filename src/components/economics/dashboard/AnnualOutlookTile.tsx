@@ -12,8 +12,10 @@
 // Units: all values here are ALREADY percent (annual average real GDP growth).
 // Pure server component; dependency-free inline SVG.
 
+import { ProducerNote } from './ProducerNote';
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
+import { StatusBadge } from './StatusBadge';
 import {
   COLORS,
   fmtSignedPctValue,
@@ -21,7 +23,7 @@ import {
   fmtNum,
   fmtDate,
 } from '@/lib/utils/economy-format';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type {
   AnnualOutlookTileData,
   ConsensusForecast,
@@ -132,7 +134,9 @@ export async function AnnualOutlookTile({
           : 0,
       })
     : '';
-  const honesty = `${data?.honesty_note ?? ''}${validationLine}`.trim() || undefined;
+  const note =
+    pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt) ?? '';
+  const honesty = `${note}${validationLine}`.trim() || undefined;
 
   return (
     <TileCard
@@ -147,12 +151,13 @@ export async function AnnualOutlookTile({
       {/* ---- headline: median annual growth ---------------------------------- */}
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span
-          className="text-4xl md:text-5xl font-black tabular-nums tracking-tighter leading-none"
+          className="text-4xl md:text-5xl font-display font-extrabold tabular-nums tracking-tighter leading-none"
           style={{ color: isNum(data?.median) && (data.median as number) < 0 ? COLORS.red : COLORS.teal }}
         >
           {fmtSignedPctValue(data?.median, 1)}
         </span>
         <span className="text-sm text-stone-500">{t('annualMedianLabel')}</span>
+        <StatusBadge kind="forecast" label={t('badgeForecast')} title={t('badgeForecastDef')} />
       </div>
       <p className="mt-1.5 text-xs leading-relaxed text-stone-500 max-w-prose">
         {t('annualCaveat', {
@@ -166,10 +171,10 @@ export async function AnnualOutlookTile({
       {haveStrip && (
         <div className="mt-5">
           <div className="flex items-baseline justify-between mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
               {t('annualStripTitle')}
             </span>
-            <span className="text-[10px] text-stone-400">{t('annualStripUnits')}</span>
+            <span className="text-[11px] text-stone-400">{t('annualStripUnits')}</span>
           </div>
           <svg
             viewBox={`0 0 ${W} ${H}`}
@@ -204,7 +209,7 @@ export async function AnnualOutlookTile({
                     x={x}
                     y={rowY - 6}
                     textAnchor="middle"
-                    fontSize="10"
+                    fontSize="11"
                     fontWeight="700"
                     fill={COLORS.stoneDark}
                   >
@@ -214,7 +219,7 @@ export async function AnnualOutlookTile({
                     x={x}
                     y={rowY + 4}
                     textAnchor="middle"
-                    fontSize="9"
+                    fontSize="11"
                     fill={COLORS.stone}
                     className="tabular-nums"
                   >
@@ -269,7 +274,7 @@ export async function AnnualOutlookTile({
                   x={xAt(floorPct)}
                   y={stripY + stripH + 16}
                   textAnchor="middle"
-                  fontSize="9"
+                  fontSize="11"
                   fill={COLORS.amber}
                   className="tabular-nums"
                 >
@@ -303,7 +308,7 @@ export async function AnnualOutlookTile({
                     x={xAt(pct)}
                     y={stripY + stripH + 28}
                     textAnchor="middle"
-                    fontSize="9"
+                    fontSize="11"
                     fill={COLORS.stone}
                     className="tabular-nums"
                   >
@@ -313,7 +318,7 @@ export async function AnnualOutlookTile({
                     x={xAt(pct)}
                     y={stripY + stripH + 38}
                     textAnchor="middle"
-                    fontSize="8"
+                    fontSize="11"
                     fill={COLORS.stone}
                   >
                     p{pct}
@@ -327,7 +332,7 @@ export async function AnnualOutlookTile({
       {/* ---- consensus inline list (accessible, exact values + dates) --------- */}
       {dots.length > 0 && (
         <div className="mt-2">
-          <h3 className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
             {t('annualConsensusTitle')}
           </h3>
           <ul className="flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-stone-500">
@@ -346,22 +351,18 @@ export async function AnnualOutlookTile({
               </li>
             ))}
           </ul>
-          {data?.consensus?.note && (
-            <p className="mt-1.5 text-[10px] leading-snug text-stone-400 max-w-prose">
-              {data.consensus.note}
-            </p>
-          )}
+          <ProducerNote locale={locale} text={data?.consensus?.note} i18n={data?.consensus?.note_i18n} className="mt-1.5" />
         </div>
       )}
 
       {/* ---- probability ladder ------------------------------------------------ */}
       <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-px bg-stone-200 border border-stone-200">
         {ladderItems.map((item, i) => (
-          <div key={`l-${i}`} className="bg-white p-3">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+          <div key={`l-${i}`} className="bg-cream p-3">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
               {item.label}
             </div>
-            <div className="text-2xl font-black tabular-nums text-stone-800 mt-0.5">
+            <div className="text-2xl font-display font-extrabold tabular-nums text-stone-800 mt-0.5">
               {fmtProbPct(item.p, 0)}
             </div>
           </div>
@@ -370,7 +371,7 @@ export async function AnnualOutlookTile({
 
       {/* provenance footnote: what seeds the in-year part of the simulation */}
       {data?.nowcast_seed?.source && (
-        <p className="mt-3 text-[10px] text-stone-400">
+        <p className="mt-3 text-[11px] text-stone-400">
           {t('annualSeedNote')}: {data.nowcast_seed.source}
           {data?.nowcast_source ? ` (${data.nowcast_source})` : ''}
         </p>

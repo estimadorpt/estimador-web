@@ -55,17 +55,17 @@ export function SecondRoundForecastBars({
                   className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                   style={{ backgroundColor: candidate.color }}
                 />
-                <span className="text-sm font-medium text-gray-800">
+                <span className="text-sm font-medium text-stone-800">
                   {candidate.name}
                 </span>
                 {index === 0 && (
-                  <span className="text-[10px] text-gray-400 uppercase tracking-wide">
+                  <span className="text-[11px] text-stone-400 uppercase tracking-wide">
                     Leader
                   </span>
                 )}
               </div>
               <div className="text-right">
-                <span className="text-sm font-semibold text-gray-900 tabular-nums">
+                <span className="text-sm font-semibold text-stone-900 tabular-nums">
                   {formatPercent(candidate.mean)}
                 </span>
               </div>
@@ -74,7 +74,7 @@ export function SecondRoundForecastBars({
             {/* Clean lollipop chart - error bar with dot at mean */}
             <div className="relative h-5 flex items-center">
               {/* Background track */}
-              <div className="absolute inset-0 bg-gray-100 rounded-full" />
+              <div className="absolute inset-0 bg-stone-100 rounded-full" />
 
               {/* Error bar - horizontal line spanning CI */}
               {showUncertainty && (
@@ -114,7 +114,7 @@ export function SecondRoundForecastBars({
 
             {/* CI text below bar */}
             {showUncertainty && (
-              <div className="text-[11px] text-gray-400 mt-1 tabular-nums">
+              <div className="text-[11px] text-stone-400 mt-1 tabular-nums">
                 95% CI: {formatPercent(candidate.ci_lower)} - {formatPercent(candidate.ci_upper)}
               </div>
             )}
@@ -123,8 +123,8 @@ export function SecondRoundForecastBars({
       })}
 
       {/* Scale markers */}
-      <div className="relative h-4 mt-3 border-t border-gray-200 pt-2">
-        <div className="absolute inset-x-0 flex justify-between text-xs text-gray-400">
+      <div className="relative h-4 mt-3 border-t border-stone-200 pt-2">
+        <div className="absolute inset-x-0 flex justify-between text-xs text-stone-400">
           <span>0%</span>
           {fiftyPercentPos <= 100 && (
             <span className="text-red-500 font-medium" style={{ marginLeft: `${fiftyPercentPos}%`, transform: 'translateX(-50%)', position: 'absolute' }}>

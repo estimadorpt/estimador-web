@@ -1,8 +1,10 @@
 "use client";
 
 import * as Plot from "@observablehq/plot";
+import { useLocale, useTranslations } from "next-intl";
+import { ChartTable } from "@/components/viz/ChartTable";
 import * as d3 from "d3";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { leftBlocParties, rightBlocParties, majorityThreshold } from "@/lib/config/blocs";
 
 interface SeatData {
@@ -20,14 +22,30 @@ interface CoalitionDotPlotProps {
 
 export function CoalitionDotPlot({ 
   data, 
-  leftCoalitionLabel = "Left coalition", 
-  rightCoalitionLabel = "Right coalition",
+  leftCoalitionLabel: leftLabelProp,
+  rightCoalitionLabel: rightLabelProp,
   projectedSeatsLabel = "Projected seats",
   majorityLabel = "Majority",
   showingOutcomesLabel = "Showing {count} simulation outcomes"
 }: CoalitionDotPlotProps) {
+  const t = useTranslations("forecast");
+  const leftCoalitionLabel = leftLabelProp ?? t("leftCoalition");
+  const rightCoalitionLabel = rightLabelProp ?? t("rightCoalition");
   const containerRef = useRef<HTMLDivElement>(null);
   const [isClient, setIsClient] = useState(false);
+  const locale = useLocale();
+  const pt = locale !== "en";
+
+  // The table twin: the distribution of each bloc's seats and its majority odds.
+  const summary = useMemo(() => {
+    const blocs: Array<[string, readonly string[]]> = [[leftCoalitionLabel, leftBlocParties], [rightCoalitionLabel, rightBlocParties]];
+    return blocs.map(([label, parties]) => {
+      const seats = (data ?? []).map(sim => parties.reduce((sum, p) => sum + (sim[p] || 0), 0)).sort((a, b) => a - b);
+      const q = (p: number) => seats[Math.min(seats.length - 1, Math.floor(seats.length * p))] ?? 0;
+      const majority = seats.length ? seats.filter(s => s >= majorityThreshold).length / seats.length : 0;
+      return { label, p5: q(0.05), p25: q(0.25), median: q(0.5), p75: q(0.75), p95: q(0.95), majority };
+    });
+  }, [data, leftCoalitionLabel, rightCoalitionLabel]);
 
   // Ensure client-side only rendering to prevent hydration issues
   useEffect(() => {
@@ -77,7 +95,7 @@ export function CoalitionDotPlot({
       style: {
         backgroundColor: "transparent",
         fontSize: "12px",
-        fontFamily: "Inter, system-ui, sans-serif"
+        fontFamily: "Manrope, system-ui, sans-serif"
       },
       x: {
         label: projectedSeatsLabel,
@@ -93,12 +111,12 @@ export function CoalitionDotPlot({
       },
       color: {
         domain: [leftCoalitionLabel, rightCoalitionLabel],
-        range: ["#10b981", "#f59e0b"]
+        range: ["#5eb184", "#c49536"]
       },
       marks: [
         // Majority line (spans across facets)
         Plot.ruleX([majorityThreshold], { 
-          stroke: "#dc2626", 
+          stroke: "#a3543a", 
           strokeWidth: 2, 
           strokeDasharray: "4,2",
           facet: "exclude"
@@ -145,7 +163,7 @@ export function CoalitionDotPlot({
           dx: 5,
           dy: -10,
           fontSize: 11,
-          fill: "#dc2626",
+          fill: "#a3543a",
           fontWeight: "600"
         })
       ]
@@ -172,9 +190,9 @@ export function CoalitionDotPlot({
           setTimeout(() => {
             if (containerRef.current) {
               containerRef.current.innerHTML = `
-                <div style="padding: 20px; text-align: center; background: #f9fafb; border-radius: 8px;">
-                  <p style="margin: 0; color: #6b7280;">Coalition visualization temporarily unavailable on this device.</p>
-                  <p style="margin: 8px 0 0 0; font-size: 14px; color: #9ca3af;">Please try viewing on desktop for full chart functionality.</p>
+                <div style="padding: 20px; text-align: center; background: #fcfbf5; border-radius: 8px;">
+                  <p style="margin: 0; color: #5f7062;">${pt ? 'Gráfico das coligações indisponível neste dispositivo.' : 'Coalition chart unavailable on this device.'}</p>
+                  <p style="margin: 8px 0 0 0; font-size: 14px; color: #7f9284;">${pt ? 'A tabela abaixo tem os mesmos números.' : 'The table below carries the same numbers.'}</p>
                 </div>
               `;
             }
@@ -183,8 +201,8 @@ export function CoalitionDotPlot({
       } catch (error) {
         console.error('CoalitionDotPlot: Error rendering plot:', error);
         containerRef.current.innerHTML = `
-          <div style="padding: 20px; text-align: center; background: #fef2f2; border-radius: 8px;">
-            <p style="margin: 0; color: #dc2626;">Error loading coalition chart</p>
+          <div style="padding: 20px; text-align: center; background: #fff2ee; border-radius: 8px;">
+            <p style="margin: 0; color: #a3543a;">${pt ? 'Não foi possível desenhar o gráfico das coligações.' : 'The coalition chart could not be drawn.'}</p>
           </div>
         `;
       }
@@ -202,8 +220,8 @@ export function CoalitionDotPlot({
 
   if (!data || data.length === 0) {
     return (
-      <div className="w-full h-64 flex items-center justify-center text-gray-500">
-        <p>Loading coalition data...</p>
+      <div className="w-full h-64 flex items-center justify-center text-stone-500">
+        <p>{pt ? 'A carregar as coligações…' : 'Loading coalition data…'}</p>
       </div>
     );
   }
@@ -211,9 +229,10 @@ export function CoalitionDotPlot({
   return (
     <div className="w-full">
       <div ref={containerRef} className="overflow-x-auto" />
-      <div className="text-xs text-gray-500 mt-2">
+      <div className="text-xs text-stone-500 mt-2">
         {showingOutcomesLabel.replace('{count}', data.length.toString())}
       </div>
+      <ChartTable caption={projectedSeatsLabel} columns={[pt ? "Bloco" : "Bloc", "P5", "P25", pt ? "Mediana" : "Median", "P75", "P95", pt ? "Prob. de maioria" : "Majority odds"]} rows={summary.map(s => [s.label, s.p5, s.p25, s.median, s.p75, s.p95, `${Math.round(s.majority * 100)}%`])} />
     </div>
   );
 }

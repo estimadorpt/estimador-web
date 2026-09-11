@@ -155,9 +155,47 @@ export function PlayerRatingsHub({
       ? n.toLocaleString(pt ? "pt-PT" : "en-GB", { maximumFractionDigits: 3 })
       : v;
   };
+  // The producer's diagnostic keys arrive in English snake_case; known ones
+  // read in the page's language, unknown ones keep the prettified key.
+  const DIAG_LABELS: Record<string, [string, string]> = {
+    "Out of sample": ["Fora da amostra", "Out of sample"],
+    "Separable": ["Separável", "Separable"],
+    "Criterion": ["Critério pré-registado", "Pre-registered criterion"],
+    "Convergence": ["Convergência", "Convergence"],
+    "Divergences": ["Divergências", "Divergences"],
+    "Max rhat": ["R̂ máximo", "Max R̂"],
+    "Min ess bulk": ["ESS mínimo", "Min ESS"],
+    "N draws": ["Amostras", "Draws"],
+    "Gain total": ["Ganho total de log-score", "Total log-score gain"],
+    "Gain per obs": ["Ganho por observação", "Gain per observation"],
+    "Gain se": ["Erro-padrão do ganho", "Gain s.e."],
+    "Gain t": ["Estatística t do ganho", "Gain t-statistic"],
+    "Reading": ["Leitura", "Reading"],
+    "Label": ["Etiqueta", "Label"],
+    "Metric": ["Métrica", "Metric"],
+    "Test season": ["Época de teste", "Test season"],
+    "Train seasons": ["Épocas de treino", "Training seasons"],
+    "N test rows": ["Observações de teste", "Test rows"],
+    "N train players": ["Jogadores no treino", "Training players"],
+    "N unseen players": ["Jogadores não vistos", "Unseen players"],
+    "Mean unseen slot share": ["Quota média de posições não vistas", "Mean unseen slot share"],
+    "Logscore team only": ["Log-score só com equipas", "Log-score, teams only"],
+    "Logscore with players": ["Log-score com jogadores", "Log-score with players"],
+    "Full": ["Completo", "Full"],
+    "Team only": ["Só equipas", "Teams only"],
+    "Validation": ["Validação", "Validation"],
+    "Walk forward": ["Walk-forward", "Walk-forward"],
+  };
+  const DIAG_VALUES: Record<string, [string, string]> = {
+    ">= 20 players with shrinkage >= 0.2 AND positive walk-forward log-score gain": [
+      "≥ 20 jogadores com encolhimento ≥ 0,2 e ganho positivo de log-score em walk-forward",
+      "≥ 20 players with shrinkage ≥ 0.2 and a positive walk-forward log-score gain",
+    ],
+  };
   const defDiagnostics = (def?.diagnostics ?? []).map((d) => ({
     ...d,
-    value: tidyValue(d.value),
+    label: DIAG_LABELS[d.label] ? DIAG_LABELS[d.label][pt ? 0 : 1] : d.label,
+    value: DIAG_VALUES[d.value] ? DIAG_VALUES[d.value][pt ? 0 : 1] : tidyValue(d.value),
   }));
   const defNumbers = defDiagnostics.filter((d) => d.value.length <= 12);
   const defText = defDiagnostics.filter((d) => d.value.length > 12);
@@ -210,7 +248,7 @@ export function PlayerRatingsHub({
     const line = metaLine(block);
     return (
       <div className="mt-3 max-w-3xl">
-        <p className="text-[10px] text-stone-400 leading-relaxed">
+        <p className="text-[11px] text-stone-400 leading-relaxed">
           {caveat}
           {block.meta.note ? ` ${block.meta.note}` : ""}
           {line ? ` ${line}.` : ""}
@@ -220,14 +258,14 @@ export function PlayerRatingsHub({
             say on its behalf. */}
         {block.meta.caveats.length > 0 && (
           <details className="mt-2 group">
-            <summary className="text-[10px] text-stone-500 cursor-pointer hover:text-stone-800 list-none">
+            <summary className="text-[11px] text-stone-500 cursor-pointer hover:text-stone-800 list-none">
               {pt
                 ? `O que esta métrica não mede (${block.meta.caveats.length}, em inglês tal como o modelo os publica)`
                 : `What this metric does not measure (${block.meta.caveats.length})`}
             </summary>
             <ul className="mt-2 space-y-1.5 border-l border-stone-200 pl-3">
               {block.meta.caveats.map((c, i) => (
-                <li key={i} className="text-[10px] text-stone-400 leading-relaxed">
+                <li key={i} className="text-[11px] text-stone-400 leading-relaxed">
                   {c}
                 </li>
               ))}
@@ -262,19 +300,19 @@ export function PlayerRatingsHub({
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-stone-300 text-left">
-              <th className="py-1.5 pr-3 font-medium text-[10px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-400">
                 {pt ? "Posição" : "Position"}
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[10px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
                 n
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[10px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
                 {pt ? "mediana" : "median"}
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[10px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
                 {pt ? "amplitude" : "range"}
               </th>
-              <th className="py-1.5 pl-2 text-right font-medium text-[10px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 pl-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
                 {pt ? "valores distintos" : "distinct values"}
               </th>
             </tr>
@@ -292,7 +330,7 @@ export function PlayerRatingsHub({
                     {(pt ? positionCodePt[r.position] : positionCodeEn[r.position]) ??
                       r.position}
                     {flat && (
-                      <span className="ml-2 text-[9px] uppercase tracking-wide bg-amber-50 text-amber-700 px-1 py-px">
+                      <span className="ml-2 text-[11px] uppercase tracking-wide bg-amber-50 text-amber-700 px-1 py-px">
                         {pt ? "não medido" : "not measured"}
                       </span>
                     )}
@@ -365,7 +403,7 @@ export function PlayerRatingsHub({
         <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">
           {pt ? "Jogadores" : "Players"}
         </p>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-stone-900 mb-4">
+        <h1 className="text-3xl sm:text-4xl tracking-tight text-stone-900 mb-4">
           {pt
             ? "Uma métrica por dimensão, porque um número só não chega"
             : "One metric per dimension, because one number is not enough"}
@@ -417,7 +455,7 @@ export function PlayerRatingsHub({
       {/* ------------------------------------------------------- 1. finishers */}
       {finisherRows.length > 0 && finishers && (
         <section className="mb-12 border-t border-stone-200 pt-8">
-          <h2 className="text-xl font-bold tracking-tight mb-1">
+          <h2 className="text-2xl tracking-tight mb-1">
             {pt ? "Finalização" : "Finishing"}
           </h2>
           <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
@@ -467,7 +505,7 @@ export function PlayerRatingsHub({
             ]}
           />
 
-          <p className="text-[10px] text-stone-400 mt-3 leading-relaxed max-w-3xl">
+          <p className="text-[11px] text-stone-400 mt-3 leading-relaxed max-w-3xl">
             {pt
               ? `Top 10 de ${int(finisherRows.length)} publicados. Mínimo de ${int(
                   finishers.generated_from.min_minutes,
@@ -493,7 +531,7 @@ export function PlayerRatingsHub({
           <Link
             href="/desporto/liga"
             locale={locale}
-            className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:text-blue-800"
+            className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-ink-dark"
           >
             {pt ? "Ranking completo de finalização" : "Full finishing ranking"}
             <ArrowRight className="w-3 h-3" />
@@ -504,7 +542,7 @@ export function PlayerRatingsHub({
       {/* ----------------------------------------------------- 2. contribution */}
       {contrib && contrib.players.length > 0 && (
         <section className="mb-12 border-t border-stone-200 pt-8">
-          <h2 className="text-xl font-bold tracking-tight mb-1">
+          <h2 className="text-2xl tracking-tight mb-1">
             {pt ? "Contribuição ofensiva" : "Attacking contribution"}
           </h2>
           <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
@@ -593,7 +631,7 @@ export function PlayerRatingsHub({
           rendering both would present two shot-stopping verdicts. */}
       {!gkChannels && gk && gk.players.length > 0 && (
         <section className="mb-12 border-t border-stone-200 pt-8">
-          <h2 className="text-xl font-bold tracking-tight mb-1">
+          <h2 className="text-2xl tracking-tight mb-1">
             {pt ? "Guarda-redes" : "Goalkeepers"}
           </h2>
           <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
@@ -612,7 +650,7 @@ export function PlayerRatingsHub({
               not a finding. */}
           {gkSeparated === 0 && (
             <div className="mb-5 max-w-3xl border-l-2 border-amber-300 bg-amber-50 pl-3 py-2">
-              <h3 className="text-sm font-bold text-amber-900 mb-1">
+              <h3 className="text-sm text-amber-900 mb-1">
                 {pt
                   ? "Nenhum guarda-redes se separa da média"
                   : "No goalkeeper separates from the average"}
@@ -688,7 +726,7 @@ export function PlayerRatingsHub({
       {/* -------------------------------------------------------- 4. defenders */}
       {def && (
         <section className="mb-12 border-t border-stone-200 pt-8">
-          <h2 className="text-xl font-bold tracking-tight mb-1">
+          <h2 className="text-2xl tracking-tight mb-1">
             {pt ? "Defesas" : "Defenders"}
           </h2>
 
@@ -765,7 +803,7 @@ export function PlayerRatingsHub({
                 <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 border-t border-stone-200 pt-4 max-w-3xl">
                   {defNumbers.map((d) => (
                     <div key={d.label}>
-                      <dt className="text-[10px] uppercase tracking-wider text-stone-400">
+                      <dt className="text-[11px] uppercase tracking-wider text-stone-400">
                         {d.label}
                       </dt>
                       <dd className="text-sm font-semibold tabular-nums text-stone-800">
@@ -779,7 +817,7 @@ export function PlayerRatingsHub({
                 <dl className="mt-4 space-y-2 max-w-3xl">
                   {defText.map((d) => (
                     <div key={d.label}>
-                      <dt className="text-[10px] uppercase tracking-wider text-stone-400">
+                      <dt className="text-[11px] uppercase tracking-wider text-stone-400">
                         {d.label}
                       </dt>
                       <dd className="text-xs text-stone-600 leading-relaxed">

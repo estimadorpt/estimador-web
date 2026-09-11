@@ -35,8 +35,8 @@ interface ContraOModeloProps {
 const OUTCOME_ORDER: Outcome[] = ["H", "D", "A"];
 
 /** Emerald for the user, stone for the model — consistent everywhere below. */
-const USER_COLOR = "#047857";
-const MODEL_COLOR = "#78716c";
+const USER_COLOR = "#4e8056";
+const MODEL_COLOR = "#5f7062";
 
 export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
   const pt = locale !== "en";
@@ -192,7 +192,6 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
     joinAnytime: pt
       ? "Entras quando quiseres: contam as jornadas que jogares, e a classificação é pela média — quem entra hoje não fica atrás de quem começou na primeira jornada."
       : "Join whenever: only the matchdays you play count, and the table ranks on the average — joining today does not put you behind someone who started on matchday 1.",
-    provisional: pt ? "provisório" : "provisional",
     picked: (n: number, total: number) =>
       pt ? `${n} de ${total} escolhidos` : `${n} of ${total} picked`,
     inProgress: pt ? "Em curso" : "In progress",
@@ -252,7 +251,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
   // Stable pre-hydration shell: no picks, no clock, no lock decisions.
   if (!mounted) {
     return (
-      <div className="border border-stone-200 rounded-xl p-4 sm:p-6 bg-stone-50">
+      <div className="border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
         {/* Not the game's name: the page hero already carries it, and
             printing it twice made the card read as a second page header.
             This card's job is explaining how the scoring works. */}
@@ -271,7 +270,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
   return (
     <div className="space-y-8">
       {/* ----------------------------------------------------------- intro */}
-      <div className="border border-stone-200 rounded-xl p-4 sm:p-6 bg-stone-50">
+      <div className="border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
         {/* Not the game's name: the page hero already carries it, and
             printing it twice made the card read as a second page header.
             This card's job is explaining how the scoring works. */}
@@ -308,7 +307,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
           <div className="border border-stone-200 rounded-xl overflow-hidden">
             <div className="grid grid-cols-2 divide-x divide-stone-200">
               <div className="p-4 sm:p-6">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                   {t.yourScore}
                 </div>
                 <div
@@ -319,7 +318,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
                 </div>
               </div>
               <div className="p-4 sm:p-6">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                   {t.modelScore}
                 </div>
                 <div
@@ -345,7 +344,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
                     lucky round can top the table, and saying so is better
                     than a minimum-rounds rule that empties it. */}
                 {season.roundsCounted < 3 && (
-                  <span className="ml-1.5 text-[10px] uppercase tracking-wider bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">
+                  <span className="ml-1.5 text-[11px] uppercase tracking-wider bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">
                     {t.provisional}
                   </span>
                 )}
@@ -376,7 +375,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
           outcomeLabel={outcomeLabel}
         />
       ) : (
-        <p className="text-sm text-stone-500 border border-stone-200 rounded-xl p-4 sm:p-6">
+        <p className="text-sm text-stone-500 border border-stone-200 rounded-2xl p-4 sm:p-6">
           {t.noOpen}
         </p>
       )}
@@ -403,19 +402,19 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
       {season.matchesScored > 0 && (
         <section>
           <div
-            className="border-2 border-stone-900 rounded-xl p-5 sm:p-6 bg-white"
+            className="border-2 border-stone-900 rounded-2xl p-5 sm:p-6 bg-cream"
             aria-label={t.share}
           >
             <div className="flex items-center gap-2 mb-3">
               <Swords className="w-4 h-4 text-emerald-700" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
                 {t.title} · Liga Portugal {data.season}
               </span>
             </div>
 
             <div className="flex items-end gap-6 mb-4">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
                   {t.you}
                 </div>
                 <div className="text-4xl font-bold tabular-nums" style={{ color: USER_COLOR }}>
@@ -424,7 +423,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
               </div>
               <div className="text-xl font-bold text-stone-300 pb-2">vs</div>
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
                   {t.model}
                 </div>
                 <div className="text-4xl font-bold tabular-nums" style={{ color: MODEL_COLOR }}>
@@ -507,7 +506,7 @@ function RoundPicker({
   return (
     <section>
       <div className="flex items-baseline justify-between mb-1">
-        <h3 className="font-bold text-stone-900">
+        <h3 className="text-stone-900">
           {t.matchday} {round.matchday}
         </h3>
         <span className="text-xs text-stone-500 tabular-nums">
@@ -526,7 +525,7 @@ function RoundPicker({
           return (
             <div
               key={fixture.key}
-              className="border border-stone-200 rounded-xl p-3 sm:p-4 bg-white"
+              className="border border-stone-200 rounded-2xl p-3 sm:p-4 bg-cream"
             >
               {/* fixture line */}
               <div className="flex items-center gap-2 mb-3 text-sm font-semibold text-stone-900">
@@ -559,7 +558,7 @@ function RoundPicker({
                       className={`px-2 py-2 rounded-lg text-xs sm:text-sm font-semibold border transition-colors truncate ${
                         active
                           ? "bg-emerald-700 border-emerald-700 text-white"
-                          : "bg-white border-stone-300 text-stone-700 hover:border-stone-400"
+                          : "bg-cream border-stone-300 text-stone-700 hover:border-stone-400"
                       }`}
                     >
                       {outcomeLabel(o, fixture)}
@@ -571,7 +570,7 @@ function RoundPicker({
               {/* confidence */}
               {stored?.pick && (
                 <div className="mt-3">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
                     {t.confidence}
                   </div>
                   <div className="grid grid-cols-3 gap-2">
@@ -591,7 +590,7 @@ function RoundPicker({
                           className={`px-2 py-1.5 rounded-lg text-[11px] font-medium border transition-colors truncate ${
                             active
                               ? "bg-stone-900 border-stone-900 text-white"
-                              : "bg-white border-stone-200 text-stone-600 hover:border-stone-400"
+                              : "bg-cream border-stone-200 text-stone-600 hover:border-stone-400"
                           }`}
                         >
                           {t.confLabels[c]}
@@ -666,9 +665,9 @@ function RoundPicker({
 
 function ProbBar({ pct }: { pct: [number, number, number] }) {
   const segments = [
-    { v: pct[0], color: "#047857" },
-    { v: pct[1], color: "#d6d3d1" },
-    { v: pct[2], color: "#1c1917" },
+    { v: pct[0], color: "#4e8056" },
+    { v: pct[1], color: "#cbccbb" },
+    { v: pct[2], color: "#16362e" },
   ];
   return (
     <div className="flex h-2 rounded-full overflow-hidden bg-stone-100">
@@ -701,7 +700,7 @@ function RoundReview({
             {t.matchday} {round.matchday}
           </span>
           {!score.complete && (
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
               {t.inProgress}
             </span>
           )}

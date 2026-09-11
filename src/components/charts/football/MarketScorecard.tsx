@@ -91,10 +91,10 @@ interface Props {
    surface contrast floor. Emerald carries the model, stone the market
    benchmark; marker shape and direct labels repeat the identity so it is
    never colour alone. */
-const MODEL_COLOR = "#059669"; // emerald-600
-const MARKET_COLOR = "#57534e"; // stone-600
-const GRID = "#e7e5e4"; // stone-200
-const AXIS_TEXT = "#78716c"; // stone-500
+const MODEL_COLOR = "#4e8056"; // emerald-600
+const MARKET_COLOR = "#4f5f57"; // stone-600
+const GRID = "#dadccf"; // stone-200
+const AXIS_TEXT = "#5f7062"; // stone-500
 const SURFACE = "#ffffff";
 
 /* ------------------------------------------------------------- formatting */
@@ -221,7 +221,7 @@ function CheckpointChart({
           y={padT}
           width={boundaryX - padL}
           height={plotH}
-          fill="#fafaf9"
+          fill="#fcfbf5"
         />
 
         {/* gridlines + y ticks */}
@@ -254,7 +254,7 @@ function CheckpointChart({
           x2={boundaryX}
           y1={padT}
           y2={padT + plotH}
-          stroke="#d6d3d1"
+          stroke="#cbccbb"
           strokeWidth="1"
         />
 
@@ -265,7 +265,7 @@ function CheckpointChart({
             x2={hoverX}
             y1={padT}
             y2={stripTop + stripH}
-            stroke="#d6d3d1"
+            stroke="#cbccbb"
             strokeWidth="1"
           />
         )}
@@ -306,7 +306,7 @@ function CheckpointChart({
               y={y(cps[0].model_rps) - 8}
               fontSize="11"
               fontWeight={600}
-              fill="#44403c"
+              fill="#434d48"
             >
               {pt ? "Modelo" : "Model"}
             </text>
@@ -315,7 +315,7 @@ function CheckpointChart({
               y={y(cps[0].market_rps) + 16}
               fontSize="11"
               fontWeight={600}
-              fill="#44403c"
+              fill="#434d48"
             >
               {pt ? "Mercado" : "Market"}
             </text>
@@ -350,7 +350,7 @@ function CheckpointChart({
           x2={padL + innerW}
           y1={padT + plotH}
           y2={padT + plotH}
-          stroke="#d6d3d1"
+          stroke="#cbccbb"
           strokeWidth="1"
         />
         {cps.map((c, i) => (
@@ -371,7 +371,7 @@ function CheckpointChart({
           y={padT + plotH + 30}
           textAnchor="middle"
           fontSize={narrow ? 8 : 9}
-          fill="#a8a29e"
+          fill="#7f9284"
           className="uppercase"
           letterSpacing="0.06em"
         >
@@ -384,7 +384,7 @@ function CheckpointChart({
           y={stripTop - 26}
           fontSize={narrow ? 9 : 10}
           fontWeight={600}
-          fill="#57534e"
+          fill="#4f5f57"
         >
           {pt
             ? "Diferença (modelo − mercado), com ±1 erro padrão"
@@ -417,7 +417,7 @@ function CheckpointChart({
           x2={padL + innerW}
           y1={dy(0)}
           y2={dy(0)}
-          stroke="#a8a29e"
+          stroke="#7f9284"
           strokeWidth="1"
         />
         <text
@@ -446,7 +446,7 @@ function CheckpointChart({
                 x2={xs[i]}
                 y1={dy(c.delta - c.se)}
                 y2={dy(c.delta + c.se)}
-                stroke="#44403c"
+                stroke="#434d48"
                 strokeWidth="1"
               />
               <line
@@ -454,7 +454,7 @@ function CheckpointChart({
                 x2={xs[i] + 3}
                 y1={dy(c.delta + c.se)}
                 y2={dy(c.delta + c.se)}
-                stroke="#44403c"
+                stroke="#434d48"
                 strokeWidth="1"
               />
               <line
@@ -462,7 +462,7 @@ function CheckpointChart({
                 x2={xs[i] + 3}
                 y1={dy(c.delta - c.se)}
                 y2={dy(c.delta - c.se)}
-                stroke="#44403c"
+                stroke="#434d48"
                 strokeWidth="1"
               />
             </g>
@@ -494,7 +494,7 @@ function CheckpointChart({
       {/* Tooltip — enhances; every value is also in the table below */}
       {h && (
         <div
-          className="pointer-events-none absolute z-10 rounded-md border border-stone-200 bg-white/95 px-3 py-2 text-xs shadow-sm"
+          className="pointer-events-none absolute z-10 rounded-md border border-stone-200 bg-paper/95 px-3 py-2 text-xs shadow-sm"
           style={{
             left: Math.min(Math.max(hoverX - 92, 0), Math.max(0, width - 184)),
             top: padT + 4,
@@ -604,7 +604,7 @@ function PhaseTile({
 }) {
   const { num, signed } = makeFmt(pt);
   const color =
-    tone === "model" ? MODEL_COLOR : tone === "market" ? MARKET_COLOR : "#d6d3d1";
+    tone === "model" ? MODEL_COLOR : tone === "market" ? MARKET_COLOR : "#cbccbb";
   return (
     <div className="border border-stone-200 p-4">
       <div className="flex items-baseline gap-2">
@@ -613,7 +613,7 @@ function PhaseTile({
           style={{ backgroundColor: color }}
           aria-hidden="true"
         />
-        <h3 className="text-sm font-bold text-stone-900">{label}</h3>
+        <h3 className="text-sm text-stone-900">{label}</h3>
       </div>
       <p className="text-xs text-stone-400 mt-0.5">{sub}</p>
       <p className="mt-3 text-2xl font-semibold text-stone-900">
@@ -655,12 +655,12 @@ function Disagreements({ data, pt }: { data: MarketScorecardData; pt: boolean })
       },
       neither: {
         text: pt ? "Nenhum" : "Neither",
-        cls: "bg-white text-stone-500 border-stone-200",
+        cls: "bg-cream text-stone-500 border-stone-200",
       },
     } as const;
     const m = map[v];
     return (
-      <span className={`text-[10px] font-semibold uppercase tracking-wide border px-1.5 py-0.5 ${m.cls}`}>
+      <span className={`text-[11px] font-semibold uppercase tracking-wide border px-1.5 py-0.5 ${m.cls}`}>
         {m.text}
       </span>
     );
@@ -745,7 +745,7 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
     <div className="space-y-12">
       {/* Headline numbers */}
       <section>
-        <h2 className="text-xl font-bold tracking-tight mb-1">
+        <h2 className="text-2xl tracking-tight mb-1">
           {pt ? "O resultado, em três números" : "The result, in three numbers"}
         </h2>
         <p className="text-sm text-stone-500 mb-5 max-w-3xl">
@@ -795,7 +795,7 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
 
       {/* The chart */}
       <section>
-        <h2 className="text-xl font-bold tracking-tight mb-1">
+        <h2 className="text-2xl tracking-tight mb-1">
           {pt
             ? "Onde a desvantagem começa e onde acaba"
             : "Where the deficit starts and where it ends"}
@@ -810,7 +810,7 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
 
       {/* Explainer */}
       <section className="border border-stone-200 bg-stone-50 p-5 sm:p-6">
-        <h2 className="text-base font-bold tracking-tight mb-3">
+        <h2 className="text-base tracking-tight mb-3">
           {pt ? "Como lemos isto" : "How to read this"}
         </h2>
         <dl className="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
@@ -854,7 +854,7 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
 
       {/* Disagreements */}
       <section>
-        <h2 className="text-xl font-bold tracking-tight mb-1">
+        <h2 className="text-2xl tracking-tight mb-1">
           {pt ? "Quando discordámos do mercado" : "When we disagreed with the market"}
         </h2>
         <p className="text-sm text-stone-500 mb-4 max-w-3xl">

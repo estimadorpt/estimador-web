@@ -28,10 +28,10 @@ import {
  * copy of its own.
  */
 
-const BAR = "#1c1917"; // stone-900
-const BAR_NEG = "#a8a29e"; // stone-400 — below the reference level
-const SOFT = "#a8a29e"; // stone-400 — interval whisker
-const ZERO = "#d6d3d1"; // stone-300 — the reference line
+const BAR = "#16362e"; // stone-900
+const BAR_NEG = "#7f9284"; // stone-400 — below the reference level
+const SOFT = "#7f9284"; // stone-400 — interval whisker
+const ZERO = "#cbccbb"; // stone-300 — the reference line
 
 export interface PlayerRatingListProps {
   entries: RatingEntry[];
@@ -102,22 +102,22 @@ export function PlayerRatingList({
       {/* Column header */}
       <div className="flex items-center gap-2 mb-2 pb-2 border-b border-stone-200">
         <div className="w-6 flex-shrink-0" />
-        <div className="w-32 sm:w-52 flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="w-32 sm:w-52 flex-shrink-0 text-[11px] font-bold uppercase tracking-wider text-stone-400">
           {labels.player}
         </div>
-        <div className="flex-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="flex-1 text-[11px] font-bold uppercase tracking-wider text-stone-400">
           {metricHeader}
         </div>
         {showMovement && (
-          <div className="w-10 flex-shrink-0 text-right text-[10px] font-bold uppercase tracking-wider text-stone-400 hidden sm:block">
+          <div className="w-10 flex-shrink-0 text-right text-[11px] font-bold uppercase tracking-wider text-stone-400 hidden sm:block">
             {labels.movement}
           </div>
         )}
         <div className="w-20 sm:w-28 flex-shrink-0 text-right">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
             {valueHeader}
           </div>
-          <div className="text-[9px] uppercase tracking-wider text-stone-300 leading-tight">
+          <div className="text-[11px] uppercase tracking-wider text-stone-300 leading-tight">
             {labels.interval}
           </div>
         </div>
@@ -128,7 +128,7 @@ export function PlayerRatingList({
         {visible.map((e) => {
           const isOpen = openKey === e.key;
           const slug = playerSlugs?.[e.player];
-          const chip = (e.team && ligaTeamColors[e.team]) || "#78716c";
+          const chip = (e.team && ligaTeamColors[e.team]) || "#5f7062";
           const hasInterval = e.lo !== null && e.hi !== null;
           const move = showMovement ? rankMovement(e, goalsRankByPlayer) : null;
 
@@ -146,7 +146,7 @@ export function PlayerRatingList({
                   type="button"
                   onClick={() => setOpenKey(isOpen ? null : e.key)}
                   aria-expanded={isOpen}
-                  className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left hover:bg-stone-50 transition-colors"
+                  className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left hover:bg-stone-100 transition-colors"
                 >
                   <div className="w-6 flex-shrink-0 text-right text-xs font-bold tabular-nums text-stone-400">
                     {e.rank ?? ""}
@@ -171,26 +171,26 @@ export function PlayerRatingList({
                       )}
                       {e.team && (
                         <>
-                          <span className="text-[10px] text-stone-400 truncate sm:hidden">
+                          <span className="text-[11px] text-stone-400 truncate sm:hidden">
                             {ligaTeamShortNames[e.team] || e.team}
                           </span>
-                          <span className="text-[10px] text-stone-400 truncate hidden sm:inline">
+                          <span className="text-[11px] text-stone-400 truncate hidden sm:inline">
                             {teamDisplayName(e.team)}
                           </span>
                         </>
                       )}
                       {e.position && (
-                        <span className="text-[10px] text-stone-300 hidden sm:inline">
+                        <span className="text-[11px] text-stone-300 hidden sm:inline">
                           · {posLabel(e.position)}
                         </span>
                       )}
                       {e.minutes !== null && (
-                        <span className="text-[10px] text-stone-300">
+                        <span className="text-[11px] text-stone-300">
                           · {int(e.minutes)} min
                         </span>
                       )}
                       {e.minutes === null && e.shots !== null && (
-                        <span className="text-[10px] text-stone-300">
+                        <span className="text-[11px] text-stone-300">
                           · {int(e.shots)} {pt ? "remates" : "shots"}
                         </span>
                       )}
@@ -241,7 +241,7 @@ export function PlayerRatingList({
                   {showMovement && (
                     <div className="w-10 flex-shrink-0 text-right hidden sm:block">
                       {move === null ? (
-                        <span className="text-[10px] text-stone-300">
+                        <span className="text-[11px] text-stone-300">
                           {labels.newEntry}
                         </span>
                       ) : move === 0 ? (
@@ -266,7 +266,7 @@ export function PlayerRatingList({
                     <span className="text-xs sm:text-sm font-bold tabular-nums text-stone-900">
                       {e.value === null ? "—" : signed(e.value)}
                     </span>
-                    <div className="text-[9px] sm:text-[10px] tabular-nums text-stone-400 leading-tight">
+                    <div className="text-[11px] sm:text-[11px] tabular-nums text-stone-400 leading-tight">
                       {hasInterval ? (
                         `${signed(e.lo!)} … ${signed(e.hi!)}`
                       ) : (
@@ -281,7 +281,7 @@ export function PlayerRatingList({
                     href={`/desporto/liga/jogador/${slug}`}
                     locale={locale}
                     aria-label={labels.openPlayer(e.player)}
-                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-300 hover:text-stone-800 hover:bg-stone-50 transition-colors"
+                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-300 hover:text-stone-800 hover:bg-stone-100 transition-colors"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
@@ -294,7 +294,7 @@ export function PlayerRatingList({
                 <div className="pl-8 pr-2 pb-3 pt-1 bg-stone-50/60">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-xs">
                     <div>
-                      <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
                         {labels.interval}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -309,7 +309,7 @@ export function PlayerRatingList({
                     </div>
                     {cells.map((cell) => (
                       <div key={cell.label}>
-                        <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                        <div className="text-[11px] uppercase tracking-wider text-stone-400">
                           {cell.label}
                         </div>
                         <div className="font-semibold tabular-nums text-stone-800">
@@ -322,7 +322,7 @@ export function PlayerRatingList({
                     <Link
                       href={`/desporto/liga/jogador/${slug}`}
                       locale={locale}
-                      className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-blue-700 hover:text-blue-800"
+                      className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-ink hover:text-ink-dark"
                     >
                       {labels.playerPage}
                       <ChevronRight className="w-3 h-3" />
@@ -339,7 +339,7 @@ export function PlayerRatingList({
         <button
           type="button"
           onClick={() => setShowAll(!showAll)}
-          className="mt-3 text-xs font-medium text-blue-700 hover:text-blue-800"
+          className="mt-3 text-xs font-medium text-ink hover:text-ink-dark"
         >
           {showAll ? labels.showLess : labels.showAll(entries.length)}
         </button>

@@ -11,8 +11,9 @@
 
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
+import { StatusBadge } from './StatusBadge';
 import { toneForLabel } from './LabelBadge';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { GrowthAtRiskTileData, GarQuantiles } from '@/types/economy-dashboard';
 import { fmtSignedPct, COLORS } from '@/lib/utils/economy-format';
 
@@ -87,7 +88,10 @@ export async function GrowthAtRiskTile({
       label={lblKey ? t(lblKey) : data?.label}
       labelTone={toneForLabel(data?.label)}
       labelTitle={lblKey ? t(lblKey) : data?.label}
-      honesty={data?.honesty_note ?? t('garHonesty')}
+      honesty={
+        pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt) ??
+        t('garHonesty')
+      }
       accent={COLORS.teal}
     >
       <p className="text-sm text-stone-500 mb-4">{t('garSubtitle')}</p>
@@ -95,7 +99,7 @@ export async function GrowthAtRiskTile({
       {/* LEAD WITH THE DOWNSIDE: headline = q05, with an always-visible caveat */}
       <div className="mb-1 flex items-baseline gap-2 flex-wrap">
         <span
-          className="text-3xl md:text-4xl font-black tabular-nums leading-none"
+          className="text-3xl md:text-4xl font-display font-extrabold tabular-nums leading-none"
           style={{ color: COLORS.red }}
         >
           {fmtSignedPct(q05)}
@@ -103,6 +107,7 @@ export async function GrowthAtRiskTile({
         <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">
           {t('garDownsideRange')}
         </span>
+        <StatusBadge kind="risk" label={t('badgeRisk')} title={t('badgeRiskDef')} />
       </div>
       <p className="text-xs text-stone-500 leading-relaxed mb-5 max-w-2xl">
         {t('garCaveat')}
@@ -159,7 +164,7 @@ export async function GrowthAtRiskTile({
               x={xAt(base.q05 as number)}
               y={baselineY + bandH / 2 + 18}
               textAnchor="middle"
-              fontSize="9"
+              fontSize="11"
               fill={COLORS.stone}
             >
               {t('garBaseline')}
@@ -183,7 +188,7 @@ export async function GrowthAtRiskTile({
               x={xAt(q95 as number)}
               y={baselineY - bandH / 2 - 7}
               textAnchor="middle"
-              fontSize="10"
+              fontSize="11"
               fill={COLORS.stone}
             >
               {t('garUpside')}
@@ -192,7 +197,7 @@ export async function GrowthAtRiskTile({
               x={xAt(q95 as number)}
               y={baselineY - bandH / 2 - 19}
               textAnchor="middle"
-              fontSize="10"
+              fontSize="11"
               fontWeight="600"
               fill={COLORS.stoneDark}
               className="tabular-nums"
@@ -217,7 +222,7 @@ export async function GrowthAtRiskTile({
               x={xAt(q50 as number)}
               y={baselineY + bandH / 2 + 18}
               textAnchor="middle"
-              fontSize="9"
+              fontSize="11"
               fill={COLORS.stone}
             >
               {t('garMedian')} {fmtSignedPct(q50)}
@@ -294,7 +299,7 @@ export async function GrowthAtRiskTile({
               x={xAt(tv)}
               y={H - 2}
               textAnchor="middle"
-              fontSize="9"
+              fontSize="11"
               fill={COLORS.stone}
               className="tabular-nums"
             >
@@ -307,18 +312,18 @@ export async function GrowthAtRiskTile({
       {/* compact downside / median / upside read-out (tabular, null-safe) */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
         <div className="rounded-lg border border-stone-200 p-3">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
             {t('garDownsideRange')}
           </div>
           <div
-            className="text-lg font-black tabular-nums"
+            className="text-lg font-display font-extrabold tabular-nums"
             style={{ color: COLORS.red }}
           >
             {fmtSignedPct(q05)} {DASH} {fmtSignedPct(q10)}
           </div>
         </div>
         <div className="rounded-lg border border-stone-200 p-3">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
             {t('garMedian')}
           </div>
           <div className="text-lg font-bold tabular-nums text-stone-500">
@@ -326,7 +331,7 @@ export async function GrowthAtRiskTile({
           </div>
         </div>
         <div className="rounded-lg border border-stone-200 p-3">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
             {t('garUpsideRange')}
           </div>
           <div className="text-lg font-bold tabular-nums text-stone-500">

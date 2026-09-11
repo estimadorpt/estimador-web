@@ -143,7 +143,7 @@ export function PresidentialCandidateCards({
       {candidateData.map((candidate, index) => (
         <div
           key={candidate.name}
-          className={`p-4 ${index === 0 ? 'bg-stone-50' : 'bg-white'}`}
+          className={`p-4 ${index === 0 ? 'bg-stone-50' : 'bg-cream'}`}
         >
           {/* Color indicator + name */}
           <div className="flex items-start gap-2 mb-3">
@@ -152,7 +152,7 @@ export function PresidentialCandidateCards({
               style={{ backgroundColor: candidate.color }}
             />
             <div className="min-w-0">
-              <h3 className="font-semibold text-stone-900 text-sm leading-tight truncate">
+              <h3 className="text-stone-900 text-sm leading-tight truncate">
                 {candidate.name}
               </h3>
               <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export function PresidentialCandidateCards({
                   <span className="text-xs text-stone-400">Ind.</span>
                 )}
                 {index === 0 && (
-                  <span className="text-[10px] font-bold text-stone-500 uppercase">
+                  <span className="text-[11px] font-bold text-stone-500 uppercase">
                     · Leader
                   </span>
                 )}
@@ -174,7 +174,7 @@ export function PresidentialCandidateCards({
           <div className="mb-2">
             <div className="flex items-baseline gap-2">
               <div 
-                className="text-4xl font-black tabular-nums tracking-tighter"
+                className="text-4xl font-display font-extrabold tabular-nums tracking-tighter"
                 style={{ color: candidate.color }}
               >
                 {formatPercentRounded(candidate.displayRunoffProb)}
@@ -191,7 +191,7 @@ export function PresidentialCandidateCards({
                 </div>
               )}
             </div>
-            <div className="text-[10px] text-stone-400 uppercase tracking-wide">
+            <div className="text-[11px] text-stone-400 uppercase tracking-wide">
               {translations.chanceOfRunoff}
             </div>
           </div>
@@ -207,7 +207,7 @@ export function PresidentialCandidateCards({
                   ±{formatPercent(candidate.displayCI)}
                 </span>
               </div>
-              <div className="text-[10px] text-stone-400 uppercase tracking-wide">
+              <div className="text-[11px] text-stone-400 uppercase tracking-wide">
                 {translations.voteShare}
               </div>
             </div>
@@ -259,7 +259,7 @@ export function SecondRoundIndicator({
         </div>
       </div>
       <div 
-        className={`text-5xl font-black tabular-nums tracking-tighter ${
+        className={`text-5xl font-display font-extrabold tabular-nums tracking-tighter ${
           isHighProbability ? 'text-amber-600' : 'text-emerald-600'
         }`}
       >

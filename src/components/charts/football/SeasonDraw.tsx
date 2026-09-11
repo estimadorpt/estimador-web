@@ -75,10 +75,10 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
   const relegated = rows.slice(-2);
 
   return (
-    <div className="border border-stone-200 rounded-xl p-4 sm:p-6 bg-stone-50">
+    <div className="border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
       <div className="flex items-center gap-2 mb-1">
         <Dices className="w-5 h-5 text-emerald-700" />
-        <h3 className="font-bold text-stone-900">{t.title}</h3>
+        <h3 className="text-stone-900">{t.title}</h3>
       </div>
       <p className="text-sm text-stone-500 mb-4">{t.intro}</p>
 

@@ -71,7 +71,7 @@ function PaceBar({ entry, threshold, thresholdLabel, teamColor }: PointsPaceProp
         <span className={`text-xs tabular-nums font-semibold ${isAboveThreshold ? 'text-stone-700' : 'text-red-700'}`}>
           {Math.round(entry.projected)}
         </span>
-        <span className="text-[10px] text-stone-400 ml-0.5">pts</span>
+        <span className="text-[11px] text-stone-400 ml-0.5">pts</span>
       </div>
     </div>
   );
@@ -94,12 +94,12 @@ export function PointsPace({ data, threshold, labels }: PointsPaceSectionProps) 
   return (
     <div>
       <div className="relative mb-3">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
           {labels.sectionLabel}
         </div>
         {/* Threshold label aligned with line */}
         <div
-          className="absolute text-[10px] font-bold text-stone-500 -translate-x-1/2"
+          className="absolute text-[11px] font-bold text-stone-500 -translate-x-1/2"
           style={{ left: `calc(${thresholdPct}% + 5.5rem)`, top: 0 }}
         >
           <span className="hidden sm:inline">{labels.thresholdLabel ?? `~${threshold} pts`}</span>
@@ -112,7 +112,7 @@ export function PointsPace({ data, threshold, labels }: PointsPaceSectionProps) 
             entry={entry}
             threshold={threshold}
             thresholdLabel={labels.thresholdLabel ?? `~${threshold} pts`}
-            teamColor={ligaTeamColors[entry.team] || '#78716c'}
+            teamColor={ligaTeamColors[entry.team] || '#5f7062'}
           />
         ))}
       </div>

@@ -39,7 +39,7 @@ function DeltaBadge({ value, label }: { value: number; label: string }) {
 }
 
 function TeamName({ team, bold }: { team: string; bold?: boolean }) {
-  const color = ligaTeamColors[team] || "#78716c";
+  const color = ligaTeamColors[team] || "#5f7062";
   const logo = teamLogoSrc(team);
   return (
     <>
@@ -61,13 +61,13 @@ function ProbBar({ home, draw, away }: { home: number; draw: number; away: numbe
   const aPct = Math.round(away * 100);
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-[10px] tabular-nums text-stone-500 w-7 text-right">{hPct}%</span>
+      <span className="text-[11px] tabular-nums text-stone-500 w-7 text-right">{hPct}%</span>
       <div className="flex h-1.5 flex-1 min-w-[60px] max-w-[100px] overflow-hidden bg-stone-100">
         <div className="bg-stone-700" style={{ width: `${hPct}%` }} />
         <div className="bg-stone-300" style={{ width: `${dPct}%` }} />
         <div className="bg-stone-400" style={{ width: `${aPct}%` }} />
       </div>
-      <span className="text-[10px] tabular-nums text-stone-500 w-7">{aPct}%</span>
+      <span className="text-[11px] tabular-nums text-stone-500 w-7">{aPct}%</span>
     </div>
   );
 }
@@ -106,7 +106,7 @@ export function MatchdayLive({
       {/* LEFT: Results */}
       <div>
         <div className="flex items-baseline justify-between mb-3">
-          <h3 className="text-base font-bold text-stone-900">
+          <h3 className="text-base text-stone-900">
             {labels.matchdayLive}
           </h3>
           <span className="text-xs text-stone-400 tabular-nums">
@@ -131,7 +131,7 @@ export function MatchdayLive({
                     {teamLogoSrc(r.home) ? (
                       <img src={teamLogoSrc(r.home)} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
                     ) : (
-                      <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: ligaTeamColors[r.home] || "#78716c" }} />
+                      <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: ligaTeamColors[r.home] || "#5f7062" }} />
                     )}
                   </div>
 
@@ -145,7 +145,7 @@ export function MatchdayLive({
                     {teamLogoSrc(r.away) ? (
                       <img src={teamLogoSrc(r.away)} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
                     ) : (
-                      <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: ligaTeamColors[r.away] || "#78716c" }} />
+                      <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: ligaTeamColors[r.away] || "#5f7062" }} />
                     )}
                     <span className={`text-sm truncate ${awayWin ? "font-semibold text-stone-900" : "text-stone-500"}`}>
                       {teamDisplayName(r.away)}
@@ -160,7 +160,7 @@ export function MatchdayLive({
         {/* Impact */}
         {movers.length > 0 && (
           <div className="mt-3 pt-3 border-t border-stone-100 flex flex-wrap items-center gap-x-4 gap-y-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
               {labels.impact}
             </span>
             {movers.map(([team, d]) => (
@@ -179,7 +179,7 @@ export function MatchdayLive({
       {remaining.length > 0 ? (
         <div>
           <div className="flex items-baseline justify-between mb-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
               {labels.remainingLabel}
             </span>
           </div>
@@ -211,7 +211,7 @@ export function MatchdayLive({
                     {teamLogoSrc(m.home) ? (
                       <img src={teamLogoSrc(m.home)} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
                     ) : (
-                      <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: ligaTeamColors[m.home] || "#78716c" }} />
+                      <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: ligaTeamColors[m.home] || "#5f7062" }} />
                     )}
                   </div>
 
@@ -223,7 +223,7 @@ export function MatchdayLive({
                     {teamLogoSrc(m.away) ? (
                       <img src={teamLogoSrc(m.away)} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
                     ) : (
-                      <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: ligaTeamColors[m.away] || "#78716c" }} />
+                      <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: ligaTeamColors[m.away] || "#5f7062" }} />
                     )}
                     <span className="text-sm text-stone-700 truncate">
                       {teamDisplayName(m.away)}

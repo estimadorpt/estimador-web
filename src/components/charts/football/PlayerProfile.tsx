@@ -127,9 +127,9 @@ interface PlayerProfileProps {
   positionRating?: PlayerPositionRating | null;
 }
 
-const TRACK = "#e7e5e4"; // stone-200
-const INK = "#1c1917"; // stone-900
-const SOFT = "#a8a29e"; // stone-400
+const TRACK = "#dadccf"; // stone-200
+const INK = "#16362e"; // stone-900
+const SOFT = "#7f9284"; // stone-400
 
 export function PlayerProfile({
   player,
@@ -147,7 +147,7 @@ export function PlayerProfile({
     });
   const int = (v: number) => v.toLocaleString(pt ? "pt-PT" : "en-GB");
 
-  const color = ligaTeamColors[player.team] ?? "#78716c";
+  const color = ligaTeamColors[player.team] ?? "#5f7062";
   const teamSlug = ligaTeamSlugs[player.team];
   const posLabel =
     (pt ? positionCodePt[player.position] : positionCodeEn[player.position]) ??
@@ -405,7 +405,7 @@ export function PlayerProfile({
             <div className="relative h-10">
               <div
                 className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-6"
-                style={{ backgroundColor: "#fafaf9" }}
+                style={{ backgroundColor: "#fcfbf5" }}
               />
               {pr.peers.map((p, i) =>
                 p.value !== null && p.key !== prEntry.key ? (
@@ -419,7 +419,7 @@ export function PlayerProfile({
               {/* Zero: the reference level this metric is measured against */}
               <div
                 className="absolute top-1/2 -translate-y-1/2 w-px h-8"
-                style={{ left: `${prZero}%`, backgroundColor: "#d6d3d1" }}
+                style={{ left: `${prZero}%`, backgroundColor: "#cbccbb" }}
               />
               {prEntry.lo !== null && prEntry.hi !== null && (
                 <>
@@ -449,7 +449,7 @@ export function PlayerProfile({
                 style={{ left: `${prPct(prEntry.value)}%`, backgroundColor: color }}
               />
             </div>
-            <div className="flex justify-between text-[10px] tabular-nums text-stone-400">
+            <div className="flex justify-between text-[11px] tabular-nums text-stone-400">
               <span>{nf(prDomain.min)}</span>
               <span>
                 {prEntry.lo !== null && prEntry.hi !== null
@@ -460,7 +460,7 @@ export function PlayerProfile({
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="w-px h-3" style={{ backgroundColor: TRACK }} />
-              <span className="text-[10px] text-stone-400">{t.posOthers}</span>
+              <span className="text-[11px] text-stone-400">{t.posOthers}</span>
             </div>
           </div>
         )}
@@ -479,7 +479,7 @@ export function PlayerProfile({
           <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2">
             {prEntry.shots !== null && (
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] uppercase tracking-wider text-stone-400">
                   {t.posShots}
                 </div>
                 <div className="text-lg font-bold tabular-nums text-stone-900">
@@ -489,7 +489,7 @@ export function PlayerProfile({
             )}
             {prEntry.raw !== null && (
               <div>
-                <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] uppercase tracking-wider text-stone-400">
                   {t.posRaw}
                 </div>
                 <div className="text-lg font-bold tabular-nums text-stone-900">
@@ -518,7 +518,7 @@ export function PlayerProfile({
       <Link
         href="/desporto/liga/jogadores"
         locale={locale}
-        className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:text-blue-800"
+        className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-ink-dark"
       >
         {t.hub}
         <ArrowRight className="w-3 h-3" />
@@ -538,21 +538,21 @@ export function PlayerProfile({
                 suppressed along with the number itself. */}
             {showGoalsSar && (
               <>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 bg-stone-100 px-1.5 py-0.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 bg-stone-100 px-1.5 py-0.5">
                   {t.rank}
                 </span>
-                <span className="text-[10px] uppercase tracking-wider text-stone-400">
+                <span className="text-[11px] uppercase tracking-wider text-stone-400">
                   {t.ofN}
                 </span>
               </>
             )}
             {injury && (
-              <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5">
                 {t.out}
               </span>
             )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900">
+          <h1 className="text-2xl sm:text-3xl tracking-tight text-stone-900">
             {player.player}
           </h1>
           <div className="flex items-center gap-1.5 mt-1 text-sm text-stone-500">
@@ -606,7 +606,7 @@ export function PlayerProfile({
           <div className="relative h-10">
             <div
               className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-6"
-              style={{ backgroundColor: "#fafaf9" }}
+              style={{ backgroundColor: "#fcfbf5" }}
             />
             {ranked.map(p =>
               p.sar !== null && p.slug !== player.slug ? (
@@ -640,7 +640,7 @@ export function PlayerProfile({
               style={{ left: `${pct(sar)}%`, backgroundColor: color }}
             />
           </div>
-          <div className="flex justify-between text-[10px] tabular-nums text-stone-400">
+          <div className="flex justify-between text-[11px] tabular-nums text-stone-400">
             <span>0</span>
             <span>
               {nf(lo)} – {nf(hi)} · {t.interval}
@@ -649,7 +649,7 @@ export function PlayerProfile({
           </div>
           <div className="flex items-center gap-1.5 mt-1">
             <span className="w-px h-3" style={{ backgroundColor: TRACK }} />
-            <span className="text-[10px] text-stone-400">{t.others}</span>
+            <span className="text-[11px] text-stone-400">{t.others}</span>
           </div>
         </div>
 
@@ -697,7 +697,7 @@ export function PlayerProfile({
             : []),
         ].map(cell => (
           <div key={cell.label}>
-            <div className="text-[10px] uppercase tracking-wider text-stone-400">
+            <div className="text-[11px] uppercase tracking-wider text-stone-400">
               {cell.label}
             </div>
             <div className="text-lg font-bold tabular-nums text-stone-900">
@@ -710,7 +710,7 @@ export function PlayerProfile({
       {/* Trajectory — the flat skill line next to the noisy goal counts */}
       {seasons.length > 0 && (
         <section className="mb-10 border-t border-stone-200 pt-5">
-          <h2 className="text-xl font-bold tracking-tight mb-1">{t.trajTitle}</h2>
+          <h2 className="text-2xl tracking-tight mb-1">{t.trajTitle}</h2>
           <p className="text-sm text-stone-500 mb-4 max-w-2xl leading-relaxed">
             {t.trajBody}
           </p>
@@ -719,23 +719,23 @@ export function PlayerProfile({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-300 text-left">
-                  <th className="py-2 pr-3 font-medium text-[10px] uppercase tracking-wider text-stone-400">
+                  <th className="py-2 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-400">
                     {t.season}
                   </th>
-                  <th className="py-2 pr-3 font-medium text-[10px] uppercase tracking-wider text-stone-400 hidden sm:table-cell">
+                  <th className="py-2 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-400 hidden sm:table-cell">
                     {t.club}
                   </th>
-                  <th className="py-2 px-2 text-right font-medium text-[10px] uppercase tracking-wider text-stone-400">
+                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
                     {t.minutes}
                   </th>
-                  <th className="py-2 px-2 text-right font-medium text-[10px] uppercase tracking-wider text-stone-400">
+                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
                     {t.goals}
                   </th>
-                  <th className="py-2 px-2 text-right font-medium text-[10px] uppercase tracking-wider text-stone-400 hidden sm:table-cell">
+                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400 hidden sm:table-cell">
                     {t.perNinety}
                   </th>
                   {showGoalsSar && (
-                    <th className="py-2 pl-2 font-medium text-[10px] uppercase tracking-wider text-stone-400 w-[38%]">
+                    <th className="py-2 pl-2 font-medium text-[11px] uppercase tracking-wider text-stone-400 w-[38%]">
                       {t.skillCol}
                     </th>
                   )}
@@ -806,7 +806,7 @@ export function PlayerProfile({
           {/* The null result, shipped as content */}
           {showGoalsSar && (
             <div className="mt-5 border-l-2 border-stone-300 pl-4 py-1 max-w-2xl">
-              <h3 className="text-sm font-bold text-stone-900 mb-1">{t.nullTitle}</h3>
+              <h3 className="text-sm text-stone-900 mb-1">{t.nullTitle}</h3>
               <p className="text-sm text-stone-600 leading-relaxed">
                 {change && withSkill.length > 1 ? t.nullBody(change) : t.nullSingle}
               </p>
@@ -818,7 +818,7 @@ export function PlayerProfile({
       {/* Recent appearances */}
       {player.recent.length > 0 && (
         <section className="mb-10 border-t border-stone-200 pt-5">
-          <h2 className="text-xl font-bold tracking-tight mb-3">{t.recentTitle}</h2>
+          <h2 className="text-2xl tracking-tight mb-3">{t.recentTitle}</h2>
           <div className="divide-y divide-stone-100">
             {player.recent.map((m, i) => (
               <div
@@ -852,7 +852,7 @@ export function PlayerProfile({
               </div>
             ))}
           </div>
-          <p className="text-[10px] text-stone-400 mt-3 max-w-2xl leading-relaxed">
+          <p className="text-[11px] text-stone-400 mt-3 max-w-2xl leading-relaxed">
             {t.recentNote}
           </p>
         </section>
@@ -900,7 +900,7 @@ export function PlayerProfile({
         )}
       </section>
 
-      <p className="text-[10px] text-stone-400 mt-6 leading-relaxed max-w-2xl">
+      <p className="text-[11px] text-stone-400 mt-6 leading-relaxed max-w-2xl">
         {t.footnote}
       </p>
     </div>

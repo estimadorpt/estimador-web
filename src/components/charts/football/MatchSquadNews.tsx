@@ -70,11 +70,11 @@ function SideCard({
       <div className="px-4 py-3 border-b border-stone-100">
         <div className="flex items-center gap-1.5 mb-2">
           <Stethoscope className="w-3.5 h-3.5 text-stone-400" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
             {pt ? "Indisponíveis" : "Unavailable"}
           </span>
           {side.injurySummary?.share_of_squad != null && (
-            <span className="text-[10px] text-stone-400">
+            <span className="text-[11px] text-stone-400">
               ·{" "}
               {pt
                 ? `${Math.round(side.injurySummary.share_of_squad * 100)}% do valor do plantel`
@@ -92,11 +92,11 @@ function SideCard({
               <li key={p.player} className="flex items-baseline gap-2 text-xs">
                 <span className="font-medium text-stone-800">{p.player}</span>
                 {p.position && (
-                  <span className="text-[10px] text-stone-400">
+                  <span className="text-[11px] text-stone-400">
                     {positionLabel(p.position, locale)}
                   </span>
                 )}
-                <span className="ml-auto text-[10px] text-stone-500 text-right">
+                <span className="ml-auto text-[11px] text-stone-500 text-right">
                   {injuryReasonLabel(p.reason, locale) ||
                     (p.kind === "suspension"
                       ? pt
@@ -106,7 +106,7 @@ function SideCard({
                         ? "Lesão"
                         : "Injury")}
                 </span>
-                <span className="text-[10px] tabular-nums text-stone-400 w-14 text-right">
+                <span className="text-[11px] tabular-nums text-stone-400 w-14 text-right">
                   {formatValue(p.market_value_eur, pt)}
                 </span>
               </li>
@@ -117,7 +117,7 @@ function SideCard({
 
       {/* Top players by SAR */}
       <div className="px-4 py-3">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-2">
+        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">
           {pt ? "Jogadores decisivos (SAR)" : "Key players (SAR)"}
         </div>
         {side.topPlayers.length === 0 ? (
@@ -136,11 +136,11 @@ function SideCard({
                     >
                       {p.player}
                     </span>
-                    <span className="text-[10px] text-stone-400">
+                    <span className="text-[11px] text-stone-400">
                       {codes[p.position] ?? p.position}
                     </span>
                     {out && (
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-red-500">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-red-500">
                         {pt ? "fora" : "out"}
                       </span>
                     )}
@@ -178,7 +178,7 @@ export function MatchSquadNews({
   const pt = locale !== "en";
   return (
     <div>
-      <h2 className="text-xl font-bold tracking-tight mb-1">
+      <h2 className="text-2xl tracking-tight mb-1">
         {pt ? "Plantéis" : "Squads"}
       </h2>
       <p className="text-sm text-stone-500 mb-6">

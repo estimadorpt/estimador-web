@@ -95,7 +95,7 @@ export function MatchOutcomeImpact({
   };
   const outcomeColor: Record<Outcome, string> = {
     H: homeColor,
-    D: "#a8a29e",
+    D: "#7f9284",
     A: awayColor,
   };
 
@@ -132,7 +132,7 @@ export function MatchOutcomeImpact({
 
     return (
       <div>
-        <h2 className="text-xl font-bold tracking-tight mb-1">{L.title}</h2>
+        <h2 className="text-2xl tracking-tight mb-1">{L.title}</h2>
         <p className="text-sm text-stone-500 mb-6">{L.withData}</p>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -216,7 +216,7 @@ export function MatchOutcomeImpact({
 
   return (
     <div>
-      <h2 className="text-xl font-bold tracking-tight mb-1">{L.title}</h2>
+      <h2 className="text-2xl tracking-tight mb-1">{L.title}</h2>
       <p className="text-sm text-stone-500 mb-6">{L.noData}</p>
 
       {cards.length > 0 && (
@@ -232,10 +232,10 @@ export function MatchOutcomeImpact({
               <div className="grid grid-cols-3 gap-3">
                 {metrics.map(m => (
                   <div key={m.key}>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
                       {m.label}
                     </div>
-                    <div className="text-2xl font-black tabular-nums text-stone-900">
+                    <div className="text-2xl font-display font-extrabold tabular-nums text-stone-900">
                       {pctLabel(c.standing![m.key])}
                     </div>
                   </div>

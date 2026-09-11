@@ -74,7 +74,7 @@ export function SecondRoundVoteSplit({ validVotes, translations }: SecondRoundVo
 
         {/* 50% marker */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full flex flex-col items-center">
-          <div className="h-full w-0.5 bg-white opacity-80" />
+          <div className="h-full w-0.5 bg-cream opacity-80" />
         </div>
       </div>
 

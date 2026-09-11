@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useMemo } from 'react';
+import { useLocale } from 'next-intl';
+import { ChartTable } from '@/components/viz/ChartTable';
 import { PresidentialHeadToHeadData } from '@/types';
 
 interface PresidentialHeadToHeadProps {
@@ -25,6 +27,8 @@ export function PresidentialHeadToHead({
   },
 }: PresidentialHeadToHeadProps) {
   const { dates, probability_a_leads, candidate_a, candidate_b, color_a, color_b } = data;
+  const locale = useLocale();
+  const pt = locale !== 'en';
 
   // Filter dates and probabilities up to cutoff date
   const { filteredDates, filteredProbs } = useMemo(() => {
@@ -138,7 +142,7 @@ export function PresidentialHeadToHead({
   }, [chartConfig]);
 
   if (!chartConfig || !pathData) {
-    return <div className="text-gray-500 text-center py-8">No head-to-head data available</div>;
+    return <div className="text-stone-500 text-center py-8">No head-to-head data available</div>;
   }
 
   const currentLeader = pathData.currentProb >= 0.5 ? candidate_a : candidate_b;
@@ -171,7 +175,7 @@ export function PresidentialHeadToHead({
           y1={chartConfig.yScale(0.5)}
           x2={chartConfig.width - chartConfig.margin.right}
           y2={chartConfig.yScale(0.5)}
-          stroke="#9ca3af"
+          stroke="#7f9284"
           strokeWidth={1}
           strokeDasharray="4,4"
         />
@@ -180,7 +184,7 @@ export function PresidentialHeadToHead({
           y={chartConfig.yScale(0.5)}
           textAnchor="end"
           dominantBaseline="middle"
-          className="text-xs fill-gray-500"
+          className="text-xs fill-stone-500"
         >
           50%
         </text>
@@ -193,7 +197,7 @@ export function PresidentialHeadToHead({
             y={chartConfig.yScale(tick)}
             textAnchor="end"
             dominantBaseline="middle"
-            className="text-xs fill-gray-400"
+            className="text-xs fill-stone-400"
           >
             {(tick * 100).toFixed(0)}%
           </text>
@@ -207,14 +211,14 @@ export function PresidentialHeadToHead({
               y1={chartConfig.height - chartConfig.margin.bottom}
               x2={chartConfig.xScale(date)}
               y2={chartConfig.height - chartConfig.margin.bottom + 5}
-              stroke="#9ca3af"
+              stroke="#7f9284"
               strokeWidth={1}
             />
             <text
               x={chartConfig.xScale(date)}
               y={chartConfig.height - chartConfig.margin.bottom + 18}
               textAnchor="middle"
-              className="text-xs fill-gray-500"
+              className="text-xs fill-stone-500"
             >
               {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </text>
@@ -227,7 +231,7 @@ export function PresidentialHeadToHead({
           y1={chartConfig.margin.top}
           x2={chartConfig.xScale(chartConfig.lastDataDate)}
           y2={chartConfig.height - chartConfig.margin.bottom}
-          stroke="#d1d5db"
+          stroke="#cbccbb"
           strokeWidth={1}
           strokeDasharray="2,2"
         />
@@ -236,7 +240,7 @@ export function PresidentialHeadToHead({
         <path
           d={pathData.linePath}
           fill="none"
-          stroke="#374151"
+          stroke="#434d48"
           strokeWidth={2.5}
         />
 
@@ -255,10 +259,10 @@ export function PresidentialHeadToHead({
           {/* Candidate A */}
           <g>
             <rect x={0} y={0} width={12} height={12} rx={2} fill={color_a} />
-            <text x={18} y={10} className="text-xs fill-gray-700 font-medium">
+            <text x={18} y={10} className="text-xs fill-stone-700 font-medium">
               {candidate_a}
             </text>
-            <text x={18} y={24} className="text-[10px] fill-gray-500">
+            <text x={18} y={24} className="text-[11px] fill-stone-500">
               {translations.probability}
             </text>
           </g>
@@ -266,21 +270,21 @@ export function PresidentialHeadToHead({
           {/* Candidate B */}
           <g transform="translate(0, 45)">
             <rect x={0} y={0} width={12} height={12} rx={2} fill={color_b} />
-            <text x={18} y={10} className="text-xs fill-gray-700 font-medium">
+            <text x={18} y={10} className="text-xs fill-stone-700 font-medium">
               {candidate_b}
             </text>
-            <text x={18} y={24} className="text-[10px] fill-gray-500">
+            <text x={18} y={24} className="text-[11px] fill-stone-500">
               {translations.probability}
             </text>
           </g>
 
           {/* Current probability */}
           <g transform="translate(0, 100)">
-            <text className="text-xs fill-gray-500 font-medium">Currently:</text>
+            <text className="text-xs fill-stone-500 font-medium">{pt ? 'Atualmente:' : 'Currently:'}</text>
             <text y={18} className="text-sm font-bold" fill={pathData.currentProb >= 0.5 ? color_a : color_b}>
               {currentLeader}
             </text>
-            <text y={34} className="text-lg font-black tabular-nums" fill={pathData.currentProb >= 0.5 ? color_a : color_b}>
+            <text y={34} className="text-lg font-display font-extrabold tabular-nums" fill={pathData.currentProb >= 0.5 ? color_a : color_b}>
               {currentProbPct}%
             </text>
           </g>
@@ -291,11 +295,16 @@ export function PresidentialHeadToHead({
           x={chartConfig.margin.left + chartConfig.innerWidth / 2}
           y={chartConfig.height - 5}
           textAnchor="middle"
-          className="text-xs fill-gray-500"
+          className="text-xs fill-stone-500"
         >
-          Date
+          {pt ? 'Data' : 'Date'}
         </text>
       </svg>
+      <ChartTable
+        caption={translations.title}
+        columns={[pt ? 'Data' : 'Date', `${candidate_a} ${translations.probability}`]}
+        rows={filteredDates.map((d, i) => [new Date(d).toLocaleDateString(pt ? 'pt-PT' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }), `${Math.round((filteredProbs[i] ?? 0) * 100)}%`])}
+      />
     </div>
   );
 }

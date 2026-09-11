@@ -143,7 +143,7 @@ export function NationalTrends({ data, width = 800, height = 400 }: NationalTren
   return (
     <div className="w-full">
       <div ref={containerRef} className="w-full overflow-x-auto" />
-      <p className="text-sm text-slate-600 mt-2">
+      <p className="text-sm text-stone-600 mt-2">
         Lines show polling averages with confidence intervals (shaded areas). 
         Data filtered from March 2024 onwards.
       </p>

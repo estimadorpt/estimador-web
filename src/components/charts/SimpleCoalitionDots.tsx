@@ -43,7 +43,7 @@ export function SimpleCoalitionDots({ data, width = 600, height = 300 }: SimpleC
       style: {
         backgroundColor: "transparent",
         fontSize: "12px",
-        fontFamily: "Inter, system-ui, sans-serif"
+        fontFamily: "Manrope, system-ui, sans-serif"
       },
       x: {
         label: "Coalition seats",
@@ -57,12 +57,12 @@ export function SimpleCoalitionDots({ data, width = 600, height = 300 }: SimpleC
       },
       color: {
         domain: ["Left", "Right"],
-        range: ["#10b981", "#f59e0b"]
+        range: ["#5eb184", "#c49536"]
       },
       marks: [
         // Majority line
         Plot.ruleX([majorityThreshold], { 
-          stroke: "#dc2626", 
+          stroke: "#a3543a", 
           strokeWidth: 2, 
           strokeDasharray: "4,2"
         }),
@@ -86,7 +86,7 @@ export function SimpleCoalitionDots({ data, width = 600, height = 300 }: SimpleC
           text: "text",
           fontSize: 12,
           fontWeight: "bold",
-          fill: "#374151"
+          fill: "#434d48"
         })
       ]
     });

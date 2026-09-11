@@ -24,13 +24,13 @@ export function ScheduleDifficulty({ data, labels }: ScheduleDifficultyProps) {
 
   return (
     <div>
-      <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-3">
+      <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-3">
         <span>{labels.easiest ?? "Mais fácil"}</span>
         <span>{labels.hardest ?? "Mais difícil"}</span>
       </div>
       <div className="space-y-1.5">
         {data.map((entry) => {
-          const color = ligaTeamColors[entry.team] || '#78716c';
+          const color = ligaTeamColors[entry.team] || '#5f7062';
           return (
             <div key={entry.team} className="flex items-center gap-2">
               <div className="w-16 sm:w-32 flex items-center gap-1.5 flex-shrink-0">
@@ -56,7 +56,7 @@ export function ScheduleDifficulty({ data, labels }: ScheduleDifficultyProps) {
                   }}
                 />
               </div>
-              <div className="w-20 sm:w-40 flex-shrink-0 text-[10px] text-stone-500 truncate text-right">
+              <div className="w-20 sm:w-40 flex-shrink-0 text-[11px] text-stone-500 truncate text-right">
                 {entry.toughestOpponents.map(op => ligaTeamShortNames[op] || op).join(", ")}
               </div>
             </div>

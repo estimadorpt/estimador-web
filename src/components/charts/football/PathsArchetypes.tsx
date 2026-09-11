@@ -248,7 +248,7 @@ export default function PathsArchetypes() {
         <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
           Abordagem B
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-stone-900 mb-1">
+        <h3 className="text-xl tracking-tight text-stone-900 mb-1">
           Arquétipos de Vitória
         </h3>
         <p className="text-sm text-stone-500">

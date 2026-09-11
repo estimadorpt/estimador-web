@@ -1,7 +1,9 @@
 "use client";
 
 import * as Plot from "@observablehq/plot";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { ChartTable } from "@/components/viz/ChartTable";
 import { partyColors } from "@/lib/config/colors";
 
 interface TrendData {
@@ -18,21 +20,37 @@ interface PollingChartProps {
 
 const MOBILE_BREAKPOINT = 640;
 
-export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: PollingChartProps) {
+export function PollingChart({ data, voteShareLabel: voteShareLabelProp }: PollingChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [latestValues, setLatestValues] = useState<Array<{ party: string; value: number }>>([])
+  const t = useTranslations("forecast");
+  const voteShareLabel = voteShareLabelProp ?? t("voteShareLabel");
+  const locale = useLocale();
+  const fmtPct = (v: number) => `${(v * 100).toLocaleString(locale === "en" ? "en-GB" : "pt-PT", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
-  // Detect mobile viewport
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+  // The table twin: every estimate in the chart's window, with its band.
+  const table = useMemo(() => {
+    const all = (data ?? []).filter(d => d.metric === "vote_share_mean" || d.metric === "vote_share_low" || d.metric === "vote_share_high");
+    if (all.length === 0) return { columns: [], rows: [] };
+    const cutoff = new Date(Math.max(...all.map(d => new Date(d.date).getTime())));
+    cutoff.setFullYear(cutoff.getFullYear() - 2);
+    const byDate = new Map<string, Map<string, { mean?: number; low?: number; high?: number }>>();
+    for (const d of all) {
+      if (new Date(d.date) < cutoff) continue;
+      const m = byDate.get(d.date) ?? new Map<string, { mean?: number; low?: number; high?: number }>();
+      const rec = m.get(d.party) ?? {};
+      rec[d.metric.replace("vote_share_", "") as "mean" | "low" | "high"] = d.value;
+      m.set(d.party, rec); byDate.set(d.date, m);
+    }
+    const dates = Array.from(byDate.keys()).sort();
+    const lastDay = byDate.get(dates[dates.length - 1]);
+    const parties = Array.from(new Set(all.map(d => d.party))).sort((a, b) => (lastDay?.get(b)?.mean ?? 0) - (lastDay?.get(a)?.mean ?? 0));
+    const pct = (v?: number) => v == null ? "" : fmtPct(v);
+    return {
+      columns: [locale === "en" ? "Date" : "Data", ...parties],
+      rows: dates.map(dt => [new Date(dt).toLocaleDateString(locale === "en" ? "en-GB" : "pt-PT", { day: "numeric", month: "short", year: "numeric" }), ...parties.map(p => { const r = byDate.get(dt)?.get(p); if (!r || r.mean == null) return ""; return r.low != null && r.high != null ? `${pct(r.mean)} (${pct(r.low)}–${pct(r.high)})` : pct(r.mean); })]),
     };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  }, [data, locale]);
+  const [latestValues, setLatestValues] = useState<Array<{ party: string; value: number }>>([])
 
   useEffect(() => {
     if (!data || data.length === 0 || !containerRef.current) return;
@@ -53,8 +71,9 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
     const voteShareData = data.filter(d => d.metric === 'vote_share_mean');
 
     // Filter to recent time period - show all parties
-    const cutoffDate = new Date();
-    cutoffDate.setFullYear(cutoffDate.getFullYear() - 2); // Last 2 years only
+    // The two years up to the last estimate, so the window is stable for an archive.
+    const cutoffDate = new Date(Math.max(...voteShareData.map(d => new Date(d.date).getTime())));
+    cutoffDate.setFullYear(cutoffDate.getFullYear() - 2);
 
     const filteredData = voteShareData.filter(d => new Date(d.date) >= cutoffDate);
 
@@ -72,8 +91,13 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
     // Build marks array - conditionally include labels for desktop only
     const marks: Plot.Markish[] = [
       // Background grid
-      Plot.gridY({ stroke: "#f3f4f6", strokeWidth: 1 }),
-      Plot.gridX({ stroke: "#f3f4f6", strokeWidth: 1 }),
+      Plot.gridY({ stroke: "#f5f4ed", strokeWidth: 1 }),
+      Plot.gridX({ stroke: "#f5f4ed", strokeWidth: 1 }),
+      Plot.tip(filteredData, Plot.pointer({
+        x: (d: TrendData) => new Date(d.date),
+        y: "value",
+        title: (d: TrendData) => `${d.party} ${fmtPct(d.value)} · ${new Date(d.date).toLocaleDateString(locale === "en" ? "en-GB" : "pt-PT", { day: "numeric", month: "short", year: "numeric" })}`,
+      })),
 
       // Lines for each party
       Plot.line(filteredData, {
@@ -102,7 +126,7 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
         Plot.text(latestData.filter(d => d.value > 0.1), {
           x: d => new Date(d.date),
           y: "value",
-          text: d => `${d.party} ${(d.value * 100).toFixed(1)}%`,
+          text: d => `${d.party} ${fmtPct(d.value)}`,
           fill: "party",
           dx: 8,
           fontSize: 11,
@@ -114,11 +138,11 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
         Plot.text(latestData.filter(d => d.value <= 0.1).sort((a, b) => a.value - b.value), Plot.dodgeY({
           x: d => new Date(d.date),
           y: "value",
-          text: d => `${d.party} ${(d.value * 100).toFixed(1)}%`,
+          text: d => `${d.party} ${fmtPct(d.value)}`,
           fill: "party",
           dx: 8,
           dy: -3,
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: "500",
           textAnchor: "start",
           padding: 4
@@ -136,7 +160,7 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
       style: {
         backgroundColor: "transparent",
         fontSize,
-        fontFamily: "Inter, system-ui, sans-serif"
+        fontFamily: "Manrope, system-ui, sans-serif"
       },
       x: {
         type: "time",
@@ -164,7 +188,7 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
     }
 
     return () => plot.remove();
-  }, [data, voteShareLabel]);
+  }, [data, voteShareLabel, locale]);
 
   // Add resize observer for responsive behavior
   useEffect(() => {
@@ -192,7 +216,7 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
           const voteShareData = data.filter(d => d.metric === 'vote_share_mean');
 
           // Filter to recent time period - show all parties
-          const cutoffDate = new Date();
+          const cutoffDate = new Date(Math.max(...voteShareData.map(d => new Date(d.date).getTime())));
           cutoffDate.setFullYear(cutoffDate.getFullYear() - 2);
 
           const filteredData = voteShareData.filter(d => new Date(d.date) >= cutoffDate);
@@ -210,8 +234,13 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
 
           // Build marks array
           const marks: Plot.Markish[] = [
-            Plot.gridY({ stroke: "#f3f4f6", strokeWidth: 1 }),
-            Plot.gridX({ stroke: "#f3f4f6", strokeWidth: 1 }),
+            Plot.gridY({ stroke: "#f5f4ed", strokeWidth: 1 }),
+            Plot.gridX({ stroke: "#f5f4ed", strokeWidth: 1 }),
+            Plot.tip(filteredData, Plot.pointer({
+              x: (d: TrendData) => new Date(d.date),
+              y: "value",
+              title: (d: TrendData) => `${d.party} ${fmtPct(d.value)} · ${new Date(d.date).toLocaleDateString(locale === "en" ? "en-GB" : "pt-PT", { day: "numeric", month: "short", year: "numeric" })}`,
+            })),
 
             Plot.line(filteredData, {
               x: d => new Date(d.date),
@@ -237,7 +266,7 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
               Plot.text(latestData.filter(d => d.value > 0.1), {
                 x: d => new Date(d.date),
                 y: "value",
-                text: d => `${d.party} ${(d.value * 100).toFixed(1)}%`,
+                text: d => `${d.party} ${fmtPct(d.value)}`,
                 fill: "party",
                 dx: 8,
                 fontSize: 11,
@@ -248,11 +277,11 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
               Plot.text(latestData.filter(d => d.value <= 0.1).sort((a, b) => a.value - b.value), Plot.dodgeY({
                 x: d => new Date(d.date),
                 y: "value",
-                text: d => `${d.party} ${(d.value * 100).toFixed(1)}%`,
+                text: d => `${d.party} ${fmtPct(d.value)}`,
                 fill: "party",
                 dx: 8,
                 dy: -3,
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: "500",
                 textAnchor: "start",
                 padding: 4
@@ -270,7 +299,7 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
             style: {
               backgroundColor: "transparent",
               fontSize,
-              fontFamily: "Inter, system-ui, sans-serif"
+              fontFamily: "Manrope, system-ui, sans-serif"
             },
             x: {
               type: "time",
@@ -301,13 +330,13 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
     resizeObserver.observe(containerRef.current);
 
     return () => resizeObserver.disconnect();
-  }, [data, voteShareLabel]);
+  }, [data, voteShareLabel, locale]);
 
   return (
     <div className="w-full">
       <div ref={containerRef} />
-      {/* Mobile legend - shown below chart on small screens */}
-      {isMobile && latestValues.length > 0 && (
+      {/* Legend: always present, and the only labels on small screens */}
+      {latestValues.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 justify-center px-2">
           {latestValues.map(({ party, value }) => (
             <div key={party} className="flex items-center gap-1.5 text-xs">
@@ -316,11 +345,12 @@ export function PollingChart({ data, voteShareLabel = "Vote share (%)" }: Pollin
                 style={{ backgroundColor: partyColors[party as keyof typeof partyColors] || '#888' }}
               />
               <span className="font-medium">{party}</span>
-              <span className="text-gray-600">{(value * 100).toFixed(1)}%</span>
+              <span className="text-stone-600">{fmtPct(value)}</span>
             </div>
           ))}
         </div>
       )}
+      <ChartTable caption={`${voteShareLabel} · ${locale === "en" ? "estimate and band" : "estimativa e banda"}`} columns={table.columns} rows={table.rows} />
     </div>
   );
 }

@@ -193,7 +193,7 @@ export function PathBuilder({
   return (
     <div>
       {/* Header row */}
-      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-400 pb-1 border-b border-stone-200">
+      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-stone-400 pb-1 border-b border-stone-200">
         <div className="w-8 text-center">{labels.matchdayAbbr}</div>
         <div className="w-36 md:w-44" />
         <div className="flex gap-1 w-[6.5rem]">
@@ -238,7 +238,7 @@ export function PathBuilder({
                 <span className="text-sm font-medium text-stone-800 truncate">
                   {teamDisplayName(m.opponent)}
                 </span>
-                <span className="text-[10px] text-stone-400 shrink-0">
+                <span className="text-[11px] text-stone-400 shrink-0">
                   ({m.venue === "H" ? labels.home : labels.away})
                 </span>
               </div>
@@ -254,21 +254,21 @@ export function PathBuilder({
                       ? labels.draw.charAt(0)
                       : labels.loss.charAt(0);
                   let bg = "transparent";
-                  let color = "#a8a29e";
-                  let border = "2px solid #e7e5e4";
+                  let color = "#7f9284";
+                  let border = "2px solid #dadccf";
                   if (isSelected) {
                     if (o === "W") {
                       bg = teamColor;
                       color = "#fff";
                       border = `2px solid ${teamColor}`;
                     } else if (o === "D") {
-                      bg = "#78716c";
+                      bg = "#5f7062";
                       color = "#fff";
-                      border = "2px solid #78716c";
+                      border = "2px solid #5f7062";
                     } else {
-                      bg = "#ef4444";
+                      bg = "#bd714e";
                       color = "#fff";
-                      border = "2px solid #ef4444";
+                      border = "2px solid #bd714e";
                     }
                   }
                   return (
@@ -288,7 +288,7 @@ export function PathBuilder({
               <div className="flex-1 flex items-center justify-end gap-1.5 tabular-nums">
                 <span
                   className="text-sm font-bold"
-                  style={{ color: rp.selected ? teamColor : "#a8a29e" }}
+                  style={{ color: rp.selected ? teamColor : "#7f9284" }}
                 >
                   {probPct}%
                 </span>
@@ -327,12 +327,12 @@ export function PathBuilder({
 
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
                 {labels.yourScenario}
               </div>
               <div className="flex items-baseline gap-1.5">
                 <span
-                  className="text-2xl font-black tabular-nums"
+                  className="text-2xl font-display font-extrabold tabular-nums"
                   style={{ color: teamColor }}
                 >
                   {Math.round(finalProb * 100)}%
