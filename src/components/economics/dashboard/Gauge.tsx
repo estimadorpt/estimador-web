@@ -114,7 +114,7 @@ export function Gauge({
 
       {/* end labels */}
       {minLabel && (
-        <text x={pad} y={cy + 18} textAnchor="middle" fontSize={10} fill={COLORS.stone}>
+        <text x={pad} y={cy + 18} textAnchor="middle" fontSize={11} fill={COLORS.stone}>
           {minLabel}
         </text>
       )}
@@ -123,7 +123,7 @@ export function Gauge({
           x={W - pad}
           y={cy + 18}
           textAnchor="middle"
-          fontSize={10}
+          fontSize={11}
           fill={COLORS.stone}
         >
           {maxLabel}

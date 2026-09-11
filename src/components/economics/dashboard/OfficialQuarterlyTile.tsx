@@ -15,7 +15,9 @@
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
 import { LabelBadge } from './LabelBadge';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { StatusBadge } from './StatusBadge';
+import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
+import { ProducerNote } from './ProducerNote';
 import type { OfficialQuarterlyTileData } from '@/types/economy-dashboard';
 import { fmtSignedPct, fmtSignedNum, COLORS } from '@/lib/utils/economy-format';
 
@@ -35,10 +37,10 @@ function isNum(v: number | null | undefined): v is number {
 // Combo member display: fixed order + i18n key + a muted editorial palette.
 // The raw model id is kept as the HTML `title` so the provenance stays visible.
 const COMBO_MEMBERS: Array<{ id: string; nameKey: string; color: string }> = [
-  { id: 'ar1', nameKey: 'comboAr1', color: '#a8a29e' },
-  { id: 'supply_side_bridge', nameKey: 'comboBridge', color: '#1B4D5E' },
-  { id: 'factor_dfm', nameKey: 'comboFactorDfm', color: '#3a7d92' },
-  { id: 'esi_momentum', nameKey: 'comboEsiMomentum', color: '#b45309' },
+  { id: 'ar1', nameKey: 'comboAr1', color: '#7f9284' },
+  { id: 'supply_side_bridge', nameKey: 'comboBridge', color: '#245c68' },
+  { id: 'factor_dfm', nameKey: 'comboFactorDfm', color: '#427893' },
+  { id: 'esi_momentum', nameKey: 'comboEsiMomentum', color: '#8a6a26' },
 ];
 
 export async function OfficialQuarterlyTile({
@@ -98,7 +100,10 @@ export async function OfficialQuarterlyTile({
       eyebrow={t('officialEyebrow')}
       label={lblKey ? t(lblKey) : data?.label}
       labelTone="amber"
-      honesty={data?.honesty_note ?? t('officialHonesty')}
+      honesty={
+        pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt) ??
+        t('officialHonesty')
+      }
       className="opacity-95"
     >
       {/* Headline: deliberately SMALLER than a hero tile, muted stone tone. */}
@@ -113,6 +118,11 @@ export async function OfficialQuarterlyTile({
           {fmtSignedPct(point)}
         </span>
         <span className="text-xs text-stone-400">{t('qoq')}</span>
+        <StatusBadge
+          kind="indicative"
+          label={t('badgeIndicative')}
+          title={t('badgeIndicativeDef')}
+        />
         {isEarly && (
           <LabelBadge tone="red" title={t('officialCaveat')}>
             {t('officialEarly')}
@@ -148,14 +158,14 @@ export async function OfficialQuarterlyTile({
       {haveBand && (
         <div className="mt-4">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
               {t('officialBand95')}
             </span>
             {calibrated && (
               <LabelBadge tone="teal">{t('officialCalibrated')}</LabelBadge>
             )}
             {data?.band_shape === 'asymmetric' && (
-              <span className="text-[10px] text-stone-400">
+              <span className="text-[11px] text-stone-400">
                 {t('officialAsymmetric')}
               </span>
             )}
@@ -222,7 +232,7 @@ export async function OfficialQuarterlyTile({
               x={xAt(ci95lo!)}
               y={trackY + 26}
               textAnchor="middle"
-              fontSize="10"
+              fontSize="11"
               fill={COLORS.stone}
               className="tabular-nums"
             >
@@ -232,7 +242,7 @@ export async function OfficialQuarterlyTile({
               x={xAt(ci95hi!)}
               y={trackY + 26}
               textAnchor="middle"
-              fontSize="10"
+              fontSize="11"
               fill={COLORS.stone}
               className="tabular-nums"
             >
@@ -277,7 +287,7 @@ export async function OfficialQuarterlyTile({
             // Include any unexpected member keys so nothing is silently dropped.
             const extras = Object.keys(data.combo_weights!)
               .filter((k) => !COMBO_MEMBERS.some((m) => m.id === k))
-              .map((k) => ({ id: k, nameKey: '', color: '#78716c' }));
+              .map((k) => ({ id: k, nameKey: '', color: '#5f7062' }));
             const all = [...members, ...extras];
             const total = all.reduce(
               (s, m) => s + (data.combo_weights?.[m.id] ?? 0),
@@ -325,7 +335,7 @@ export async function OfficialQuarterlyTile({
                     );
                   })}
                 </ul>
-                <p className="mt-1.5 text-[10px] text-stone-400">
+                <p className="mt-1.5 text-[11px] text-stone-400">
                   {t('officialWeightsNote', { model: data?.model ?? '—' })}
                 </p>
               </>
@@ -342,12 +352,25 @@ export async function OfficialQuarterlyTile({
         })}
       </p>
 
+      {/* Post-selection tracking of the provisional M2 combo (pre-committed
+          demotion trigger) — rendered verbatim when the producer ships it. */}
+      {data?.post_selection_tracking &&
+        (isNum(data.post_selection_tracking.scored) ||
+          data.post_selection_tracking.status) && (
+          <p
+            className="mt-1.5 text-[11px] text-stone-400"
+            title={data.post_selection_tracking.detail}
+          >
+            {t('officialPostSelection', {
+              scored: data.post_selection_tracking.scored ?? 0,
+              of: data.post_selection_tracking.of ?? 4,
+              status: data.post_selection_tracking.status ?? '—',
+            })}
+          </p>
+        )}
+
       {/* First-release footnote (verbatim payload string). */}
-      {data?.first_release_note && (
-        <p className="mt-2 text-[10px] leading-snug text-stone-400 max-w-prose border-t border-stone-100 pt-2">
-          {data.first_release_note}
-        </p>
-      )}
+      <ProducerNote locale={locale} text={data?.first_release_note} i18n={data?.first_release_note_i18n} className="mt-2 border-t border-stone-100 pt-2" />
 
       {/* Sector composites: small diverging bars (z-scores). */}
       {Array.isArray(data?.sector_composites) &&

@@ -1,11 +1,13 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import { useMDXComponents } from '@/mdx-components';
+import { getMDXComponents } from '@/mdx-components';
 
 export async function generateMetadata({
   params
@@ -15,18 +17,12 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
 
-  return {
+  return createPageMetadata({
+    locale,
+    path: '/sobre',
     title: t('meta.aboutTitle'),
     description: t('about.subtitle'),
-    openGraph: {
-      title: t('meta.aboutTitle'),
-      description: t('about.subtitle'),
-      url: `https://estimador.pt/${locale}/sobre`,
-    },
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/sobre`,
-    },
-  };
+  });
 }
 
 function getAboutPath(locale: string): string {
@@ -76,10 +72,10 @@ export default async function AboutPage({
   const t = await getTranslations({ locale });
 
   const { content: mdxContent, actualLocale } = getAboutContent(locale);
-  const components = useMDXComponents({});
+  const components = getMDXComponents();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       <main className="max-w-3xl mx-auto px-4 py-10 md:py-16">
@@ -95,29 +91,12 @@ export default async function AboutPage({
           </div>
         )}
 
-        <article className="prose prose-stone prose-lg max-w-none">
+        <article className="article-body max-w-none">
           <MDXRemote source={mdxContent} components={components} />
         </article>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-stone-200 bg-white mt-16">
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <div className="flex flex-col items-center gap-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="estimador.pt" className="h-8 w-auto opacity-60" />
-            <div className="text-center text-sm text-stone-500">
-              <p>{t('about.footerCopyright')}</p>
-              <p className="mt-2">
-                {t('about.footerDeveloper')} •
-                <Link href="mailto:info@estimador.pt" locale={locale} className="text-stone-600 hover:text-stone-800 hover:underline ml-1">
-                  info@estimador.pt
-                </Link>
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

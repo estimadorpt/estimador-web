@@ -213,7 +213,7 @@ export function SecondRoundTrendChart({
             y1={chartConfig.yScale(tick)}
             x2={chartConfig.width - chartConfig.margin.right}
             y2={chartConfig.yScale(tick)}
-            stroke="#f0f0f0"
+            stroke="#f5f4ed"
             strokeWidth={1}
           />
         ))}
@@ -224,7 +224,7 @@ export function SecondRoundTrendChart({
           y1={fiftyPercentY}
           x2={chartConfig.width - chartConfig.margin.right}
           y2={fiftyPercentY}
-          stroke="#dc2626"
+          stroke="#a3543a"
           strokeWidth={2}
           strokeDasharray="6,3"
         />
@@ -244,7 +244,7 @@ export function SecondRoundTrendChart({
             y={chartConfig.yScale(tick)}
             textAnchor="end"
             dominantBaseline="middle"
-            className="text-xs fill-gray-500"
+            className="text-xs fill-stone-500"
           >
             {(tick * 100).toFixed(0)}%
           </text>
@@ -258,14 +258,14 @@ export function SecondRoundTrendChart({
               y1={chartConfig.height - chartConfig.margin.bottom}
               x2={chartConfig.xScale(date)}
               y2={chartConfig.height - chartConfig.margin.bottom + 5}
-              stroke="#9ca3af"
+              stroke="#7f9284"
               strokeWidth={1}
             />
             <text
               x={chartConfig.xScale(date)}
               y={chartConfig.height - chartConfig.margin.bottom + 20}
               textAnchor="middle"
-              className="text-xs fill-gray-500"
+              className="text-xs fill-stone-500"
             >
               {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </text>
@@ -340,7 +340,7 @@ export function SecondRoundTrendChart({
                   x={10}
                   y={-5}
                   className="text-[11px]"
-                  fill={isHovered ? '#111827' : '#4b5563'}
+                  fill={isHovered ? '#16362e' : '#4f5f57'}
                   fontWeight={isHovered ? 600 : 500}
                 >
                   {pos.name.length > 15 ? pos.name.substring(0, 15) + '...' : pos.name}
@@ -364,7 +364,7 @@ export function SecondRoundTrendChart({
           x={chartConfig.margin.left + chartConfig.innerWidth / 2}
           y={chartConfig.height - 5}
           textAnchor="middle"
-          className="text-xs fill-gray-500"
+          className="text-xs fill-stone-500"
         >
           Date
         </text>
@@ -373,7 +373,7 @@ export function SecondRoundTrendChart({
           y={chartConfig.margin.top + chartConfig.innerHeight / 2}
           textAnchor="middle"
           transform={`rotate(-90, 15, ${chartConfig.margin.top + chartConfig.innerHeight / 2})`}
-          className="text-xs fill-gray-500"
+          className="text-xs fill-stone-500"
         >
           Estimated Support
         </text>
@@ -394,8 +394,8 @@ export function SecondRoundTrendChart({
                 className={`
                   flex items-center gap-2 p-2 rounded-lg text-left transition-all
                   ${isSelected
-                    ? 'bg-gray-100 ring-2 ring-gray-300'
-                    : 'bg-gray-50 hover:bg-gray-100'
+                    ? 'bg-stone-100 ring-2 ring-stone-300'
+                    : 'bg-stone-50 hover:bg-stone-100'
                   }
                   ${isOtherSelected ? 'opacity-40' : 'opacity-100'}
                 `}
@@ -405,7 +405,7 @@ export function SecondRoundTrendChart({
                   style={{ backgroundColor: data.color }}
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs font-medium text-gray-700 truncate">
+                  <div className="text-xs font-medium text-stone-700 truncate">
                     {name}
                   </div>
                   <div
@@ -422,17 +422,17 @@ export function SecondRoundTrendChart({
       )}
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-3 md:gap-4 mt-4 justify-center text-[10px] md:text-xs text-gray-500">
+      <div className="flex flex-wrap gap-3 md:gap-4 mt-4 justify-center text-[11px] md:text-xs text-stone-500">
         <div className="flex items-center gap-1.5 md:gap-2">
-          <div className="w-4 md:w-6 h-0.5 bg-gray-400 rounded" />
+          <div className="w-4 md:w-6 h-0.5 bg-stone-400 rounded" />
           <span>Mean estimate</span>
         </div>
         <div className="flex items-center gap-1.5 md:gap-2">
-          <div className="w-4 md:w-6 h-2 md:h-3 bg-gray-400/30 rounded" />
+          <div className="w-4 md:w-6 h-2 md:h-3 bg-stone-400/30 rounded" />
           <span>50% CI</span>
         </div>
         <div className="flex items-center gap-1.5 md:gap-2">
-          <div className="w-4 md:w-6 h-2 md:h-3 bg-gray-400/15 rounded" />
+          <div className="w-4 md:w-6 h-2 md:h-3 bg-stone-400/15 rounded" />
           <span>90% CI</span>
         </div>
       </div>

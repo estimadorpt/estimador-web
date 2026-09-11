@@ -46,7 +46,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex flex-col items-center justify-center p-8 bg-red-50 border border-red-200 rounded-lg">
           <AlertTriangle className="w-8 h-8 text-red-500 mb-4" />
-          <h3 className="text-lg font-semibold text-red-800 mb-2">
+          <h3 className="text-lg text-red-800 mb-2">
             Something went wrong
           </h3>
           <p className="text-red-600 text-center mb-4">
@@ -72,7 +72,7 @@ export class ErrorBoundary extends Component<Props, State> {
 /**
  * Higher-order component to wrap components with error boundary
  */
-export function withErrorBoundary<T extends {}>(
+export function withErrorBoundary<T extends object>(
   Component: React.ComponentType<T>,
   componentName?: string,
   fallback?: ReactNode
@@ -96,15 +96,15 @@ export function MapErrorBoundary({ children }: { children: ReactNode }) {
     <ErrorBoundary
       componentName="Interactive Map"
       fallback={
-        <div className="flex flex-col items-center justify-center p-8 bg-gray-50 border border-gray-200 rounded-lg min-h-[400px]">
-          <AlertTriangle className="w-12 h-12 text-gray-400 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+        <div className="flex flex-col items-center justify-center p-8 bg-stone-50 border border-stone-200 rounded-lg min-h-[400px]">
+          <AlertTriangle className="w-12 h-12 text-stone-400 mb-4" />
+          <h3 className="text-xl text-stone-700 mb-2">
             Map Loading Error
           </h3>
-          <p className="text-gray-600 text-center mb-4 max-w-md">
+          <p className="text-stone-600 text-center mb-4 max-w-md">
             Unable to load the interactive district map. This might be due to a network issue or browser compatibility problem.
           </p>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-stone-500">
             Please try refreshing the page or use a different browser.
           </div>
         </div>

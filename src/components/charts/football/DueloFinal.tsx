@@ -60,8 +60,8 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
 
   const nameA = teamDisplayName(samples.teams[iA]);
   const nameB = teamDisplayName(samples.teams[iB]);
-  const colorA = ligaTeamColors[samples.teams[iA]] ?? "#57534e";
-  const colorB = ligaTeamColors[samples.teams[iB]] ?? "#a8a29e";
+  const colorA = ligaTeamColors[samples.teams[iA]] ?? "#4f5f57";
+  const colorB = ligaTeamColors[samples.teams[iB]] ?? "#7f9284";
   const pctAhead = Math.round((100 * stats.ahead) / stats.n);
   const pctTie = Math.round((100 * stats.ptsTie) / stats.n);
   const maxCount = Math.max(1, ...stats.counts);
@@ -88,7 +88,7 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
     <div className="flex items-center gap-2 text-xs text-stone-600">
       <span
         className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-        style={{ backgroundColor: ligaTeamColors[samples.teams[idx]] ?? "#57534e" }}
+        style={{ backgroundColor: ligaTeamColors[samples.teams[idx]] ?? "#4f5f57" }}
       />
       <span>
         {t.champion}: <span className="font-semibold text-stone-900 tabular-nums">{Math.round(samples.p_champion[idx] * 100)}%</span>
@@ -109,7 +109,7 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
         <select
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full border border-stone-300 rounded-lg px-2 py-1.5 text-sm bg-white font-medium"
+          className="w-full border border-stone-300 rounded-lg px-2 py-1.5 text-sm bg-cream font-medium"
         >
           {teamOptions
             .filter((o) => o.i !== other)
@@ -125,10 +125,10 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
   );
 
   return (
-    <div className="border border-stone-200 rounded-xl p-4 sm:p-6 bg-stone-50">
+    <div className="border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
       <div className="flex items-center gap-2 mb-1">
         <Swords className="w-5 h-5 text-emerald-700" />
-        <h3 className="font-bold text-stone-900">{t.title}</h3>
+        <h3 className="text-stone-900">{t.title}</h3>
       </div>
       <p className="text-sm text-stone-500 mb-4">{t.subtitle}</p>
 
@@ -159,7 +159,7 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
                   className="w-full max-w-[24px] mx-auto rounded-t-[4px]"
                   style={{
                     height: `${Math.max(c > 0 ? 3 : 0, (100 * c) / maxCount)}%`,
-                    backgroundColor: k > 0 ? colorA : k < 0 ? colorB : "#d6d3d1",
+                    backgroundColor: k > 0 ? colorA : k < 0 ? colorB : "#cbccbb",
                   }}
                 />
               </div>
@@ -170,7 +170,7 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
           {stats.counts.map((_, bi) => {
             const center = (bi - HALF_BINS) * stats.binWidth;
             return (
-              <span key={bi} className="flex-1 text-center text-[10px] text-stone-400 tabular-nums">
+              <span key={bi} className="flex-1 text-center text-[11px] text-stone-400 tabular-nums">
                 {center > 0 ? `+${center}` : center}
               </span>
             );

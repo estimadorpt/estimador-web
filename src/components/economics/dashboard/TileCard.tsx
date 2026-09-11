@@ -34,7 +34,7 @@ export function TileCard({
 }) {
   return (
     <section
-      className={`relative overflow-hidden rounded-lg border border-stone-200 bg-white ${
+      className={`relative overflow-hidden rounded-2xl border border-stone-200 bg-cream ${
         hero ? 'p-6 md:p-8' : 'p-5 md:p-6'
       } ${className}`}
     >
@@ -48,7 +48,7 @@ export function TileCard({
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0">
           {eyebrow && (
-            <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
               {eyebrow}
             </div>
           )}

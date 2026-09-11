@@ -46,7 +46,7 @@ export function CriticalPaths({ paths, nSims, labels, maxMatchesPerTeam = 5, max
   if (survivalOnly && survivalPaths.length === 0) return null;
 
   const renderTeamPath = (team: string, path: CriticalPath) => {
-    const teamColor = ligaTeamColors[team] || '#78716c';
+    const teamColor = ligaTeamColors[team] || '#5f7062';
     const topMatches = path.matches
       .sort((a, b) => b.win_uplift - a.win_uplift)
       .slice(0, maxMatchesPerTeam);
@@ -92,7 +92,7 @@ export function CriticalPaths({ paths, nSims, labels, maxMatchesPerTeam = 5, max
                 <div className="flex items-center gap-1 w-28 sm:w-40 shrink-0">
                   <span className="text-xs text-stone-400 tabular-nums w-6">J{m.matchday}</span>
                   <span className="text-sm font-medium text-stone-800 truncate">{teamDisplayName(m.opponent)}</span>
-                  <span className="text-[10px] text-stone-400 shrink-0">({m.venue === 'H' ? 'C' : 'F'})</span>
+                  <span className="text-[11px] text-stone-400 shrink-0">({m.venue === 'H' ? 'C' : 'F'})</span>
                 </div>
 
                 {/* Two-tone bar: light = normal win rate, dark = extra needed */}
@@ -132,7 +132,7 @@ export function CriticalPaths({ paths, nSims, labels, maxMatchesPerTeam = 5, max
     if (entries.length === 0) return null;
     return (
       <div className="space-y-5">
-        <h4 className="text-[10px] font-bold uppercase tracking-wider text-stone-500 border-b border-stone-200 pb-1">
+        <h4 className="text-[11px] font-bold uppercase tracking-wider text-stone-500 border-b border-stone-200 pb-1">
           {sectionLabel}
         </h4>
         {entries.map(([team, path]) => renderTeamPath(team, path))}

@@ -1,3 +1,4 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { loadLigaData, loadLigaHistorical } from "@/lib/utils/football-data-loader";
 import {
   ligaTeamColors,
@@ -7,6 +8,7 @@ import {
   teamDisplayName,
 } from "@/lib/config/football";
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { NarrativeScenarios } from "@/components/charts/football/NarrativeScenarios";
 import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
 import { TeamTimeline } from "@/components/charts/football/TeamTimeline";
@@ -45,16 +47,15 @@ export async function generateMetadata({
   const t = await getTranslations({ locale });
   const { prediction } = await loadLigaData();
 
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga/${slug}`,
     title: t("football.teamPageTitle", { team: teamDisplayName(teamName) }),
     description: t("football.teamPageDescription", {
       team: teamDisplayName(teamName),
       season: prediction?.season ?? "",
     }),
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/desporto/liga/${slug}`,
-    },
-  };
+  });
 }
 
 export default async function TeamDetailPage({
@@ -74,7 +75,7 @@ export default async function TeamDetailPage({
 
   if (!prediction) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-paper">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-20 text-center text-stone-500">
           <p>Data not available.</p>
@@ -83,7 +84,7 @@ export default async function TeamDetailPage({
     );
   }
 
-  const teamColor = ligaTeamColors[teamName] || "#78716c";
+  const teamColor = ligaTeamColors[teamName] || "#5f7062";
   const standing = prediction.table.find((t) => t.team === teamName);
   const narrativeData = scenarios?.narrative_scenarios?.[teamName];
   const isSurvival = narrativeData?.target === "survival";
@@ -228,7 +229,7 @@ export default async function TeamDetailPage({
     : undefined;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       {/* Hero */}
@@ -250,7 +251,7 @@ export default async function TeamDetailPage({
                 className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
               />
             )}
-            <h1 className="text-3xl md:text-4xl font-bold text-white">
+            <h1 className="text-3xl md:text-4xl text-white">
               {teamDisplayName(teamName)}
             </h1>
           </div>
@@ -267,28 +268,28 @@ export default async function TeamDetailPage({
           <div className="max-w-7xl mx-auto px-4 py-8">
             <div className="grid grid-cols-3 gap-6 md:gap-8">
               <div className="border-t-2 pt-3" style={{ borderColor: teamColor }}>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                   {t("football.championship")}
                 </div>
-                <div className="text-3xl md:text-4xl font-black tabular-nums text-stone-900">
+                <div className="text-3xl md:text-4xl font-display font-extrabold tabular-nums text-stone-900">
                   {Math.round(pChampion)}
                   <span className="text-lg md:text-xl font-bold text-stone-400">%</span>
                 </div>
               </div>
               <div className="border-t-2 border-stone-200 pt-3">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                   {t("football.top3")}
                 </div>
-                <div className="text-3xl md:text-4xl font-black tabular-nums text-stone-900">
+                <div className="text-3xl md:text-4xl font-display font-extrabold tabular-nums text-stone-900">
                   {Math.round(standing.p_top3 * 100)}
                   <span className="text-lg md:text-xl font-bold text-stone-400">%</span>
                 </div>
               </div>
               <div className="border-t-2 border-stone-200 pt-3">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                   {t("football.relegation")}
                 </div>
-                <div className="text-3xl md:text-4xl font-black tabular-nums text-stone-900">
+                <div className="text-3xl md:text-4xl font-display font-extrabold tabular-nums text-stone-900">
                   {Math.round(pRelegation)}
                   <span className="text-lg md:text-xl font-bold text-stone-400">%</span>
                 </div>
@@ -350,7 +351,7 @@ export default async function TeamDetailPage({
             {/* Magic Numbers */}
             {magicNumbers.length > 0 && (
               <div className="mt-4 pt-4 border-t border-stone-100">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
                   {t("football.magicNumbers")}
                 </div>
                 <div className="text-[11px] text-stone-400 mb-2">
@@ -361,7 +362,7 @@ export default async function TeamDetailPage({
                     const impossible = mn.pointsNeeded > mn.maxRemaining;
                     return (
                       <div key={mn.label} className="bg-stone-50 border border-stone-200 px-3 py-2 min-w-[120px]">
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                           {t(`football.${mn.label}`)}
                         </div>
                         {mn.clinched ? (
@@ -378,13 +379,13 @@ export default async function TeamDetailPage({
                           </span>
                         ) : (
                           <div>
-                            <span className="text-lg font-black tabular-nums" style={{ color: teamColor }}>
+                            <span className="text-lg font-display font-extrabold tabular-nums" style={{ color: teamColor }}>
                               {mn.pointsNeeded}
                               <span className="text-xs text-stone-400 font-normal ml-0.5">
                                 {t("football.magicPtsAbbr")}
                               </span>
                             </span>
-                            <div className="text-[10px] text-stone-400 mt-0.5">
+                            <div className="text-[11px] text-stone-400 mt-0.5">
                               {/* When the number equals everything still on
                                   offer, say so — "96 of 96 available" is a
                                   riddle where "win every match" is a fact. */}
@@ -408,7 +409,7 @@ export default async function TeamDetailPage({
       {positionProbs && positionProbs.length > 0 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {t("football.positionDistribution")}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
@@ -429,7 +430,7 @@ export default async function TeamDetailPage({
       {timelineData.length >= 5 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {t("football.probabilityOverTime")}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
@@ -449,7 +450,7 @@ export default async function TeamDetailPage({
       {narrativeData && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {isSurvival
                 ? t("football.survivalScenariosTitle")
                 : t("football.scenariosTitle")}
@@ -493,7 +494,7 @@ export default async function TeamDetailPage({
           <div className="max-w-7xl mx-auto px-4 py-10">
             {scenarios?.critical_paths?.[teamName] ? (
               <>
-                <h2 className="text-xl font-bold tracking-tight mb-1">
+                <h2 className="text-2xl tracking-tight mb-1">
                   {t("football.buildYourPath")}
                 </h2>
                 <p className="text-sm text-stone-500 mb-6">
@@ -523,7 +524,7 @@ export default async function TeamDetailPage({
               </>
             ) : (
               <>
-                <h2 className="text-xl font-bold tracking-tight mb-1">
+                <h2 className="text-2xl tracking-tight mb-1">
                   {t("football.remainingSchedule")}
                 </h2>
                 <p className="text-sm text-stone-500 mb-6">
@@ -551,7 +552,7 @@ export default async function TeamDetailPage({
       {hasDirectDecisive && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {t("football.decisiveMatchesFor", { team: teamName })}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
@@ -585,7 +586,7 @@ export default async function TeamDetailPage({
       {teamFeaturedMatches && teamFeaturedMatches.length > 0 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {t("football.featuredMatchesFor", { team: teamName })}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
@@ -612,6 +613,8 @@ export default async function TeamDetailPage({
           </div>
         </section>
       )}
+
+      <SiteFooter locale={locale} />
 
     </div>
   );

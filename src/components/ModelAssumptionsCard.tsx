@@ -11,7 +11,7 @@ export function ModelAssumptionsCard() {
 
   return (
     <div className="rounded border-l-4 border-stone-600 bg-stone-50 p-4">
-      <h3 className="font-bold text-stone-900">{t('assumptions.title')}</h3>
+      <h3 className="text-stone-900">{t('assumptions.title')}</h3>
       <ul className="mt-2 space-y-1 text-sm text-stone-700">
         <li>• {t('assumptions.declared_voters')}</li>
         <li>• {t('assumptions.undecided')}</li>

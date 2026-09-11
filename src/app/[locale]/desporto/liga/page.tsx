@@ -1,3 +1,4 @@
+import { createPageMetadata } from '@/lib/metadata';
 import {
   loadLigaWithDeltas,
   loadLigaHistorical,
@@ -6,6 +7,10 @@ import {
 } from "@/lib/utils/football-data-loader";
 import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
+import { Mosaic } from '@/components/brand/Mosaic';
+import { Action } from '@/components/brand/Action';
+import { SiteFooter } from '@/components/SiteFooter';
 import { LeagueTable } from "@/components/charts/football/LeagueTable";
 import type { PointsInterval } from "@/components/charts/football/LeagueTable";
 import { MatchdayPredictions } from "@/components/charts/football/MatchdayPredictions";
@@ -14,19 +19,11 @@ import { RelegationChart } from "@/components/charts/football/RelegationChart";
 import { TeamStrengthRatings } from "@/components/charts/football/TeamStrengthRatings";
 import { LuckIndex } from "@/components/charts/football/LuckIndex";
 import type { LuckEntry } from "@/components/charts/football/LuckIndex";
+import { SectionNotes } from "@/components/articles/SectionNotes";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ligaTeamSlugs } from "@/lib/config/football";
-import {
-  Trophy,
-  ArrowRight,
-  SlidersHorizontal,
-  Scale,
-  History,
-  Layers,
-  Users,
-  Gamepad2,
-} from "lucide-react";
+import { Trophy, ArrowRight, SlidersHorizontal, Scale, History, Layers, Users, Gamepad2 } from "lucide-react";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -36,18 +33,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga`,
     title: t("meta.ligaTitle"),
     description: t("meta.ligaDescription"),
-    openGraph: {
-      title: t("meta.ligaTitle"),
-      description: t("meta.ligaDescription"),
-      type: "website",
-    },
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/desporto/liga`,
-    },
-  };
+  });
 }
 
 export default async function LigaPage({
@@ -89,7 +80,7 @@ export default async function LigaPage({
 
   if (!prediction) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-paper">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-20 text-center text-stone-500">
           <p>Liga Portugal data not available.</p>
@@ -132,36 +123,36 @@ export default async function LigaPage({
   );
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
-      {/* Hero section */}
-      <section className="bg-stone-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-          <div className="flex items-center gap-2 mb-2">
-            <Trophy className="w-5 h-5 text-stone-400" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-              {t("football.title")} — {t("football.season")} {prediction.season}
-            </span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            {t("football.subtitle")}
-          </h1>
-          <p className="text-stone-400 text-sm">
-            {t("football.matchday")} {prediction.matchday} · {t("football.updated")} {updatedDate}
-          </p>
-        </div>
-      </section>
+      <PageHero
+        field="periwinkle"
+        art={<Mosaic variant="corner" className="h-full w-full" ground="transparent" colors={['mintSoft', 'mustardSoft', 'coralSoft']} />}
+        icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
+        eyebrow={`${t("football.title")} — ${t("football.season")} ${prediction.season}`}
+        title={t("football.subtitle")}
+        lede={locale === "pt"
+          ? "Explora os dados, simula cenários e acompanha o que ainda pode acontecer."
+          : "Explore the data, simulate scenarios and follow what can still happen."}
+        actions={
+          <>
+            <Action href="/desporto/liga/simulador" locale={locale} arrow>{locale === "pt" ? "Experimentar cenários" : "Try scenarios"}</Action>
+            <Action href="/desporto/liga/jogo-previsoes" locale={locale} variant="secondary">{locale === "pt" ? "Contra o Modelo" : "Beat the Model"}</Action>
+          </>
+        }
+        meta={<span>{t("football.matchday")} {prediction.matchday} · {t("football.updated")} {updatedDate}</span>}
+      />
 
       {/* Key stats — top 3 championship probabilities */}
       <section className="border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-4">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-4">
             {t("football.championshipProbability")}
           </div>
           <div className="grid grid-cols-3 gap-6 md:gap-8">
             {[leader, second, third].map((team) => {
-              const teamColor = ligaTeamColors[team.team] || "#78716c";
+              const teamColor = ligaTeamColors[team.team] || "#5f7062";
               const teamSlug = ligaTeamSlugs[team.team];
               const delta = deltas?.[team.team]?.p_champion_delta;
               const showDelta = delta !== undefined && Math.abs(delta) >= 1;
@@ -171,12 +162,12 @@ export default async function LigaPage({
                     {teamLogoSrc(team.team) && (
                       <img src={teamLogoSrc(team.team)} alt="" className="w-4 h-4 object-contain" />
                     )}
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
                       {team.team}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <div className="text-4xl md:text-5xl font-black tabular-nums text-stone-900">
+                    <div className="text-4xl md:text-5xl font-display font-extrabold tabular-nums text-stone-900">
                       {Math.round(team.p_champion * 100)}
                       <span className="text-xl md:text-2xl font-bold text-stone-400">%</span>
                     </div>
@@ -190,7 +181,7 @@ export default async function LigaPage({
                     <Link
                       href={`/desporto/liga/${teamSlug}`}
                       locale={locale}
-                      className="text-xs text-stone-400 hover:text-blue-700 inline-flex items-center gap-1 mt-2 transition-colors"
+                      className="text-xs text-stone-400 hover:text-ink inline-flex items-center gap-1 mt-2 transition-colors"
                     >
                       {t("football.viewScenarios")}
                       <ArrowRight className="w-3 h-3" />
@@ -208,7 +199,7 @@ export default async function LigaPage({
       {/* League Table */}
       <section className="border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 py-10">
-          <h2 className="text-xl font-bold tracking-tight mb-1">
+          <h2 className="text-2xl tracking-tight mb-1">
             {t("football.predictedStandings")}
           </h2>
           <p className="text-sm text-stone-500 mb-6">
@@ -255,7 +246,7 @@ export default async function LigaPage({
             if (luckEntries.length === 0) return null;
             return (
               <div className="mt-10">
-                <h3 className="text-base font-bold text-stone-900 mb-1">
+                <h3 className="text-base text-stone-900 mb-1">
                   {t("football.luckIndex")}
                 </h3>
                 <p className="text-sm text-stone-500 mb-4">
@@ -271,7 +262,7 @@ export default async function LigaPage({
                     expectedShort: t("football.luckExpectedShort"),
                   }}
                 />
-                <p className="text-[10px] text-stone-400 mt-2 text-right">
+                <p className="text-[11px] text-stone-400 mt-2 text-right">
                   {t("football.xgAttribution")}
                 </p>
               </div>
@@ -293,7 +284,7 @@ export default async function LigaPage({
                 <SlidersHorizontal className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2">
-                    <h3 className="font-bold text-stone-900">
+                    <h3 className="text-stone-900">
                       {t("football.simulator")}
                     </h3>
                     <span className="text-xs text-stone-400">
@@ -326,7 +317,7 @@ export default async function LigaPage({
             <div className="flex items-start gap-3">
               <Gamepad2 className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-stone-900">
+                <h3 className="text-stone-900">
                   {locale === "en" ? "Beat the model" : "Contra o Modelo"}
                 </h3>
                 <p className="text-sm text-stone-500 mt-0.5">
@@ -348,7 +339,7 @@ export default async function LigaPage({
       {historical.length > 1 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {t("football.titleRace")}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
@@ -364,7 +355,7 @@ export default async function LigaPage({
       {!matchdayComplete && upcomingWithProbs.length > 0 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {locale === "en" ? "Fixtures to come" : "Jogos por disputar"}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
@@ -395,7 +386,7 @@ export default async function LigaPage({
       {matchdayComplete && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {t("football.nextMatchday")} — {t("football.matchday")}{" "}
               {prediction.next_matchday.matchday}
             </h2>
@@ -430,7 +421,7 @@ export default async function LigaPage({
       {historical.length > 1 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {t("football.relegationBattle")}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
@@ -445,7 +436,7 @@ export default async function LigaPage({
       {prediction.team_strengths && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {t("football.teamStrengths")}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
@@ -464,10 +455,19 @@ export default async function LigaPage({
         </section>
       )}
 
+      {/* Written analysis about the league. Above the model block, which is this
+          page's closing furniture — an about paragraph and five links out. */}
+      <SectionNotes
+        section="football"
+        locale={locale}
+        className="border-b border-stone-200"
+        containerClassName="max-w-7xl mx-auto px-4 py-10"
+      />
+
       {/* Model Info */}
       <section className="border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 py-10">
-          <h2 className="text-xl font-bold tracking-tight mb-3">
+          <h2 className="text-2xl tracking-tight mb-3">
             {t("football.modelInfo")}
           </h2>
           <p className="text-sm text-stone-600 leading-relaxed max-w-3xl">
@@ -485,7 +485,7 @@ export default async function LigaPage({
             <div className="flex items-start gap-3">
               <Scale className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-stone-900">
+                <h3 className="text-stone-900">
                   {locale === "en" ? "Model vs Market" : "Modelo vs Mercado"}
                 </h3>
                 <p className="text-sm text-stone-500 mt-0.5">
@@ -510,7 +510,7 @@ export default async function LigaPage({
             <div className="flex items-start gap-3">
               <History className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-stone-900">
+                <h3 className="text-stone-900">
                   {locale === "en"
                     ? "The 2025-26 season, reviewed"
                     : "A época 2025-26 em revista"}
@@ -537,7 +537,7 @@ export default async function LigaPage({
             <div className="flex items-start gap-3">
               <Users className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-stone-900">
+                <h3 className="text-stone-900">
                   {locale === "en" ? "The players, measured honestly" : "Os jogadores, medidos com honestidade"}
                 </h3>
                 <p className="text-sm text-stone-500 mt-0.5">
@@ -562,7 +562,7 @@ export default async function LigaPage({
             <div className="flex items-start gap-3">
               <Layers className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-stone-900">
+                <h3 className="text-stone-900">
                   {locale === "en" ? "Liga 2 in probabilities" : "A Liga 2 em probabilidades"}
                 </h3>
                 <p className="text-sm text-stone-500 mt-0.5">
@@ -582,7 +582,7 @@ export default async function LigaPage({
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
             >
               {t("football.methodology")}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -590,7 +590,7 @@ export default async function LigaPage({
             <Link
               href="/desporto/liga/dados"
               locale={locale}
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
             >
               {locale === "en" ? "Open forecast data" : "Dados abertos das previsões"}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -598,6 +598,7 @@ export default async function LigaPage({
           </div>
         </div>
       </section>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

@@ -14,19 +14,19 @@ interface PositionHeatmapProps {
 
 function getCellColor(value: number): string {
   if (value === 0) return "transparent";
-  if (value < 0.01) return "#f5f5f4"; // stone-100
-  if (value < 0.05) return "#e7e5e4"; // stone-200
-  if (value < 0.10) return "#d6d3d1"; // stone-300
-  if (value < 0.20) return "#a8a29e"; // stone-400
-  if (value < 0.40) return "#78716c"; // stone-500
-  if (value < 0.60) return "#57534e"; // stone-600
-  if (value < 0.80) return "#44403c"; // stone-700
-  return "#292524"; // stone-800
+  if (value < 0.01) return "#f5f4ed"; // stone-100
+  if (value < 0.05) return "#dadccf"; // stone-200
+  if (value < 0.10) return "#cbccbb"; // stone-300
+  if (value < 0.20) return "#7f9284"; // stone-400
+  if (value < 0.40) return "#5f7062"; // stone-500
+  if (value < 0.60) return "#4f5f57"; // stone-600
+  if (value < 0.80) return "#434d48"; // stone-700
+  return "#234c40"; // stone-800
 }
 
 function getTextColor(value: number): string {
   if (value >= 0.20) return "#fff";
-  return "#44403c";
+  return "#434d48";
 }
 
 export function PositionHeatmap({ positionProbs, table, labels }: PositionHeatmapProps) {
@@ -41,7 +41,7 @@ export function PositionHeatmap({ positionProbs, table, labels }: PositionHeatma
       <table className="text-xs w-full" style={{ minWidth: `${teams.length * 32 + 120}px` }}>
         <thead>
           <tr className="border-b border-stone-300">
-            <th className="py-1.5 pr-2 text-left font-medium text-stone-600 sticky left-0 bg-white z-10">
+            <th className="py-1.5 pr-2 text-left font-medium text-stone-600 sticky left-0 bg-cream z-10">
               {labels.team}
             </th>
             {positions.map(pos => (
@@ -54,10 +54,10 @@ export function PositionHeatmap({ positionProbs, table, labels }: PositionHeatma
         <tbody>
           {teams.map(team => {
             const probs = positionProbs[team] || [];
-            const teamColor = ligaTeamColors[team] || '#78716c';
+            const teamColor = ligaTeamColors[team] || '#5f7062';
             return (
               <tr key={team} className="border-b border-stone-100">
-                <td className="py-1 pr-2 sticky left-0 bg-white z-10">
+                <td className="py-1 pr-2 sticky left-0 bg-cream z-10">
                   <div className="flex items-center gap-1.5">
                     <div className="w-1 h-4" style={{ backgroundColor: teamColor }} />
                     <span className="font-medium text-stone-800 whitespace-nowrap">{teamDisplayName(team)}</span>

@@ -1,0 +1,92 @@
+# Privacidade
+
+**Última revisão: 8 de setembro de 2026**
+
+Esta página descreve o que o estimador.pt regista sobre quem o visita. Descreve o comportamento real do site, não intenções.
+
+---
+
+## Resumo
+
+- O site **não usa cookies** para medição de audiência.
+- Não há perfis de visitante, nem identificadores que persistam entre visitas ou entre dispositivos.
+- A única medição recolhida é a **contagem de visualizações por categoria de página** — e, nos artigos, por artigo.
+- **Não gravamos sessões**, não capturamos cliques automaticamente e não registamos o texto que escreve.
+- **O endereço de e-mail nunca é pedido para ler o site.** A subscrição por e-mail é opcional, e está descrita abaixo.
+
+---
+
+## Medição de audiência
+
+Usamos o [PostHog](https://posthog.com/) alojado na União Europeia, configurado no modo sem cookies. Em concreto:
+
+- **Um único tipo de evento** é enviado: a visualização de página. Todos os outros eventos são descartados antes de saírem do navegador.
+- **O endereço da página é reduzido a uma categoria fixa** antes do envio. Por exemplo, `/pt/desporto/liga/jogador/joao-silva/` é enviado como `/pt/desporto/liga/jogador/`. Endereços que não correspondam a uma categoria conhecida são enviados como `/pt/other/`.
+- **Os artigos são a exceção: o endereço segue por inteiro.** `/pt/artigos/como-ler-sondagens/` é enviado tal como está. O título de um artigo é uma coisa que publicámos, não uma coisa sobre quem o lê — ao contrário do que escolheu num explorador de dados ou da geografia que selecionou, que continuam a ser descartados. Saber que análises são lidas é a razão de haver medição de todo. Passam apenas os endereços de artigos que existem: a lista é fixada quando o site é compilado, e qualquer outro endereço sob `/artigos/` é enviado como `/pt/artigos/artigo/`, para que um endereço inventado não consiga introduzir texto arbitrário na medição.
+- **Nenhuma query string é enviada.** O que escolheu num explorador de dados, a geografia que selecionou ou qualquer parâmetro depois do `?` nunca saem do seu navegador.
+- **Sem armazenamento persistente:** a biblioteca corre em memória, sem cookies e sem `localStorage`. Fechar o separador apaga o estado.
+- **Sem perfis de pessoa,** sem gravação de sessão, sem captura automática de interações, sem mapas de calor, sem inquéritos, sem captura de exceções.
+- **O endereço IP não é registado** pela biblioteca nem usado para geolocalização.
+- Não são enviados o site de origem (*referrer*), parâmetros de campanha, nem propriedades do navegador para além da identificação da versão da biblioteca.
+
+Estas restrições estão implementadas no código do site: um filtro no ponto de saída descarta qualquer evento ou propriedade que não esteja explicitamente na lista acima. Se a biblioteca acrescentar campos novos numa versão futura, o filtro rejeita-os por omissão.
+
+Se a chave de medição não estiver configurada num ambiente, nada é enviado.
+
+---
+
+## Registos do servidor
+
+O site é servido pelo **Azure Static Web Apps** (Microsoft). Como qualquer servidor web, a Microsoft mantém registos de acesso próprios, que podem incluir o endereço IP e o agente do navegador. Não temos controlo editorial sobre esses registos nem os usamos para análise.
+
+---
+
+## Jogo de previsões
+
+O [jogo de previsões](/pt/desporto/liga/jogo-previsoes/) é a única parte do site com estado guardado por pessoa. Pode jogar **sem conta**.
+
+Guardamos, por jogador, exatamente isto:
+
+- um identificador aleatório gerado no primeiro palpite;
+- o nome de exibição que escolheu (aparece na tabela classificativa);
+- o resumo criptográfico (SHA-256) de um segredo aleatório guardado no seu navegador;
+- se ligou o jogo a uma conta, o resumo criptográfico (SHA-256) do identificador dessa conta, e o nome do fornecedor de autenticação;
+- duas datas: criação e última atualização.
+
+**Não guardamos o e-mail nem o nome de utilizador da conta.** O identificador da conta é transformado num resumo antes de ser gravado, e o token de sessão nunca é armazenado.
+
+Se optar por entrar com uma conta, essa autenticação é feita pelo [Clerk](https://clerk.com/) ou pelo serviço de autenticação do Azure Static Web Apps. Esses fornecedores tratam os seus dados de conta segundo as respetivas políticas.
+
+O seu navegador guarda localmente o identificador de jogador e o segredo, para que os palpites persistam entre visitas. Limpar os dados do site apaga-os.
+
+---
+
+## Subscrição por e-mail
+
+Ler o site não exige um endereço. A subscrição existe apenas para avisar quando sai uma análise nova, e é opcional.
+
+A lista é gerida pelo [Buttondown](https://buttondown.com/), ao abrigo da sua [política de privacidade](https://buttondown.com/legal/privacy) e do [compromisso de conformidade com o RGPD](https://buttondown.com/legal/gdpr-eu-compliance). É o único subcontratante envolvido.
+
+Quando subscreve:
+
+- O formulário abre uma página do Buttondown, e é aí que o endereço é introduzido e guardado. O estimador.pt não mantém uma lista própria e nunca chega a ver o endereço.
+- **O endereço só é usado depois de confirmar a subscrição** na mensagem que recebe. Sem essa confirmação, é descartado. O Buttondown exige esta confirmação em todas as subscrições.
+- Cada mensagem leva uma ligação para cancelar, com efeito imediato.
+- O endereço não é partilhado, não é vendido, e não é cruzado com a medição de audiência. A medição não regista quem é ninguém, por isso não há nada para cruzar: não sabemos que páginas leu antes de subscrever, nem depois.
+- **Nada é carregado do Buttondown enquanto lê.** Não há formulário incorporado nem script de terceiros nesta página: só um botão que aponta para lá. Quem nunca subscreve nunca contacta o Buttondown.
+
+Para acompanhar o site sem dar um endereço, o [feed RSS](/pt/feed.xml) publica as mesmas análises e não identifica quem o lê.
+
+---
+
+## Os dados que publicamos
+
+Os números publicados no estimador.pt são de dois tipos: **dados oficiais públicos** (resultados eleitorais, séries estatísticas, resultados desportivos) e **resultados de modelos** que produzimos a partir deles. Nenhum deles contém registos de pessoas identificáveis, e nenhum é derivado do comportamento de quem visita o site.
+
+Esta secção descreve o site. As propriedades de privacidade de cada conjunto de dados publicado são descritas na metodologia desse produto, não aqui.
+
+---
+
+## Contacto
+
+Para questões sobre esta página, ou para pedir a remoção de um registo de jogador, contacte [info@estimador.pt](mailto:info@estimador.pt).

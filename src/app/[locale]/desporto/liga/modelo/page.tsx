@@ -1,4 +1,6 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { loadLigaMarketScorecard } from "@/lib/utils/football-data-loader";
@@ -51,18 +53,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const c = locale === "en" ? copy.en : copy.pt;
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga/modelo`,
     title: `${c.title} — Liga Portugal | Estimador`,
     description: c.description,
-    openGraph: {
-      title: c.title,
-      description: c.description,
-      type: "article",
-    },
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/desporto/liga/modelo`,
-    },
-  };
+  });
 }
 
 export default async function LigaModelPage({
@@ -75,14 +71,14 @@ export default async function LigaModelPage({
   const scorecard = await loadLigaMarketScorecard();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
         <Link
           href="/desporto/liga"
           locale={locale}
-          className="text-sm text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 mb-6 group"
+          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           {c.back}
@@ -91,7 +87,7 @@ export default async function LigaModelPage({
         <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
           {c.kicker}
         </p>
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+        <h1 className="text-3xl md:text-4xl tracking-tight mb-4">
           {c.title}
         </h1>
         <div className="max-w-3xl space-y-4 mb-10">
@@ -121,7 +117,7 @@ export default async function LigaModelPage({
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
             >
               {c.methodology}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -129,6 +125,7 @@ export default async function LigaModelPage({
           </div>
         </section>
       </div>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

@@ -39,7 +39,7 @@ export function PresidentialRunoffPairs({
   };
 
   if (topPairs.length === 0) {
-    return <div className="text-gray-500 text-center py-8">No runoff data available</div>;
+    return <div className="text-stone-500 text-center py-8">No runoff data available</div>;
   }
 
   return (
@@ -57,24 +57,24 @@ export function PresidentialRunoffPairs({
                     className="w-2 h-2 rounded-full flex-shrink-0"
                     style={{ backgroundColor: pair.color_a }}
                   />
-                  <span className="font-medium text-gray-800">{pair.candidate_a}</span>
+                  <span className="font-medium text-stone-800">{pair.candidate_a}</span>
                 </div>
-                <span className="text-gray-400 text-xs">{translations.vs}</span>
+                <span className="text-stone-400 text-xs">{translations.vs}</span>
                 <div className="flex items-center gap-1">
                   <span 
                     className="w-2 h-2 rounded-full flex-shrink-0"
                     style={{ backgroundColor: pair.color_b }}
                   />
-                  <span className="font-medium text-gray-800">{pair.candidate_b}</span>
+                  <span className="font-medium text-stone-800">{pair.candidate_b}</span>
                 </div>
               </div>
-              <span className="text-sm font-bold text-gray-900 tabular-nums">
+              <span className="text-sm font-bold text-stone-900 tabular-nums">
                 {formatPercent(pair.probability)}
               </span>
             </div>
 
             {/* Bar */}
-            <div className="relative h-4 bg-gray-100 rounded overflow-hidden">
+            <div className="relative h-4 bg-stone-100 rounded overflow-hidden">
               {/* Neutral color bar */}
               <div
                 className="absolute h-full rounded bg-stone-400"
@@ -89,7 +89,7 @@ export function PresidentialRunoffPairs({
 
       {/* Scale markers */}
       <div className="relative h-3 mt-3">
-        <div className="absolute inset-x-0 flex justify-between text-[10px] text-gray-400">
+        <div className="absolute inset-x-0 flex justify-between text-[11px] text-stone-400">
           <span>0%</span>
           <span>{(scaleMax * 50).toFixed(0)}%</span>
           <span>{(scaleMax * 100).toFixed(0)}%</span>

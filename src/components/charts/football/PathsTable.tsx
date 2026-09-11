@@ -186,7 +186,7 @@ function TeamTableView({ data }: { data: TeamTable }) {
                   style={{ minWidth: 100 }}
                 >
                   <div className="text-xs font-bold text-stone-900">{name}</div>
-                  <div className="text-[10px] text-stone-400 tabular-nums">
+                  <div className="text-[11px] text-stone-400 tabular-nums">
                     {data.pathFrequencyLabels[i]}
                   </div>
                 </th>
@@ -228,7 +228,7 @@ function TeamTableView({ data }: { data: TeamTable }) {
                       <span className="text-sm text-stone-700 truncate">{row.opponent}</span>
                     </div>
                     {row.isKeyMatch && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-1 py-0.5 bg-amber-100 text-amber-800 inline-block mt-0.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider px-1 py-0.5 bg-amber-100 text-amber-800 inline-block mt-0.5">
                         Decisivo
                       </span>
                     )}
@@ -251,12 +251,12 @@ function TeamTableView({ data }: { data: TeamTable }) {
                           </span>
                           <span
                             className="text-sm font-bold tabular-nums"
-                            style={{ color: p.result === "lose" ? "#dc2626" : p.result === "draw" ? "#b45309" : data.teamColor }}
+                            style={{ color: p.result === "lose" ? "#a3543a" : p.result === "draw" ? "#8a6a26" : data.teamColor }}
                           >
                             {pct(p.titleAfter)}
                           </span>
                         </div>
-                        <div className={`text-[10px] tabular-nums ${delta >= 0 ? "text-stone-400" : "text-red-400"}`}>
+                        <div className={`text-[11px] tabular-nums ${delta >= 0 ? "text-stone-400" : "text-red-400"}`}>
                           {delta >= 0 ? "+" : ""}{Math.round(delta * 100)}pp
                         </div>
                       </td>
@@ -284,7 +284,7 @@ export default function PathsTable() {
         <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
           Abordagem E — Tabela
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-stone-900 mb-1">
+        <h3 className="text-xl tracking-tight text-stone-900 mb-1">
           Cenários de Vitória
         </h3>
         <p className="text-sm text-stone-500 max-w-2xl">

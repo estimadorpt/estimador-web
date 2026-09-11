@@ -1,5 +1,5 @@
 import { ElectionConfig, ContestantData } from '@/types';
-import { presidentialCandidateColors, presidentialCandidateNames, presidentialCandidateParties, presidentialCandidateOrder } from './colors';
+import { getParliamentaryContestants, presidentialCandidateColors, presidentialCandidateNames, presidentialCandidateParties, presidentialCandidateOrder } from './colors';
 
 // Presidential election 2026 (next election - homepage)
 export const PRESIDENTIAL_2026: ElectionConfig = {
@@ -8,7 +8,7 @@ export const PRESIDENTIAL_2026: ElectionConfig = {
   name: 'Eleições Presidenciais 2026',
   date: '2026-01-18',
   description: 'Eleição do Presidente da República',
-  isActive: true,
+  isActive: false,
   rounds: 2,
   geographicLevel: 'national'
 };
@@ -67,7 +67,6 @@ export function getElectionContestants(electionId: string): ContestantData[] {
   // For parliamentary elections, convert parties to contestants
   if (election.type === 'parliamentary') {
     // Import and convert party data from the colors config
-    const { getParliamentaryContestants } = require('@/lib/config/colors');
     return getParliamentaryContestants();
   }
   

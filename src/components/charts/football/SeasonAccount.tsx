@@ -94,7 +94,7 @@ export function SeasonAccount({
   const named = !!player?.displayName && !renaming;
 
   return (
-    <div className="border border-stone-200 rounded-xl bg-white overflow-hidden">
+    <div className="border border-stone-200 rounded-xl bg-cream overflow-hidden">
       <div className="p-4 sm:p-5">
         {!named ? (
           <>

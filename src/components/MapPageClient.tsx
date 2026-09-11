@@ -60,8 +60,8 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
                             variant="outline" 
                             className="text-xs font-medium"
                             style={{ 
-                              backgroundColor: `${partyColors[party] || '#e5e7eb'}20`,
-                              borderColor: partyColors[party] || '#e5e7eb'
+                              backgroundColor: `${partyColors[party] || '#dadccf'}20`,
+                              borderColor: partyColors[party] || '#dadccf'
                             }}
                           >
                             {party}
@@ -70,12 +70,12 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
                             {percentage.toFixed(1)}%
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-stone-200 rounded-full h-2">
                           <div 
                             className="h-2 rounded-full transition-all duration-300"
                             style={{ 
                               width: `${percentage}%`,
-                              backgroundColor: partyColors[party] || '#e5e7eb'
+                              backgroundColor: partyColors[party] || '#dadccf'
                             }}
                           />
                         </div>
@@ -83,7 +83,7 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
                     );
                   })}
               </div>
-              <div className="pt-2 border-t text-xs text-gray-600">
+              <div className="pt-2 border-t text-xs text-stone-600">
                 <p>Percentagem de votos prevista para cada partido neste distrito</p>
               </div>
             </div>

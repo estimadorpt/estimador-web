@@ -49,7 +49,15 @@ dist/
 # ...but the share cards are published assets, written here by the model repo's
 # scripts/publish_cards.py. They must stay tracked.
 !public/images/cards/*.png
+# ...and so are the Open Graph cards, written by scripts/generate-og-images.mjs
+# and named in public/og-manifest.json. An ignored card is a 404 on every
+# share of that page.
+!public/og-image-*.png
 snapshot-*.md
 
 # Vendored DuckDB WASM (75 MB, unreferenced by src/ — kept locally, never committed)
 public/duckdb/
+
+# Local tool state and verification artefacts
+.claude/
+output/

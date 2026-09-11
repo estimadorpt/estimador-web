@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { partyColors, partyNames } from "@/lib/config/colors";
 
 interface DistrictForecast {
@@ -22,10 +23,11 @@ interface DistrictSummaryProps {
 }
 
 export function DistrictSummary({ districtData, contestedData }: DistrictSummaryProps) {
+  const t = useTranslations("forecast");
   if (!districtData || districtData.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        <p>District analysis loading...</p>
+      <div className="text-center py-8 text-stone-500">
+        <p>{t("districtsLoading")}</p>
       </div>
     );
   }
@@ -58,11 +60,11 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
       {/* Contested Districts */}
       {contestedDistricts.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Seats in Play ({contestedDistricts.length} districts)
+          <h3 className="text-lg text-stone-900 mb-4">
+            {t("seatsInPlayTitle", { count: contestedDistricts.length })}
           </h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Districts where seat allocation is uncertain - small changes in vote share could flip seats between parties.
+          <p className="text-sm text-stone-600 mb-4">
+            {t("seatsInPlayLede")}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {contestedDistricts.slice(0, 9).map(district => {
@@ -88,7 +90,7 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
               return (
                 <div key={district.district_name} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium text-gray-900">{district.district_name}</h4>
+                    <h4 className="font-medium text-stone-900">{district.district_name}</h4>
                     <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">
                       ENSC: {district.competitiveness.toFixed(2)}
                     </span>
@@ -105,18 +107,18 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
                             {partyNames[party as keyof typeof partyNames] || party}
                           </span>
                         </div>
-                        <div className="ml-5 text-xs text-gray-600">
+                        <div className="ml-5 text-xs text-stone-600">
                           {gainProb > 0.05 && (
-                            <span className="text-green-700">+1 seat: {(gainProb * 100).toFixed(0)}%</span>
+                            <span className="text-green-700">{t("seatGain", { pct: (gainProb * 100).toFixed(0) })}</span>
                           )}
                           {gainProb > 0.05 && loseProb > 0.05 && <span className="mx-1">•</span>}
                           {loseProb > 0.05 && (
-                            <span className="text-red-700">-1 seat: {(loseProb * 100).toFixed(0)}%</span>
+                            <span className="text-red-700">{t("seatLoss", { pct: (loseProb * 100).toFixed(0) })}</span>
                           )}
                         </div>
                       </div>
                     )) : (
-                      <div className="text-xs text-gray-500">Close race for seat allocation</div>
+                      <div className="text-xs text-stone-500">{t("closeRace")}</div>
                     )}
                   </div>
                 </div>
@@ -128,10 +130,10 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
 
       {/* Safe Districts Summary */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Likely Winners by District
+        <h3 className="text-lg text-stone-900 mb-4">
+          {t("likelyWinners")}
         </h3>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="bg-cream border border-stone-200 rounded-2xl p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {Object.values(partyColors).map((color, index) => {
               const party = Object.keys(partyColors)[index];
@@ -147,10 +149,10 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
                   >
                     {wins}
                   </div>
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-sm font-medium text-stone-900">
                     {partyNames[party as keyof typeof partyNames] || party}
                   </div>
-                  <div className="text-xs text-gray-500">districts</div>
+                  <div className="text-xs text-stone-500">{t("districtsUnit")}</div>
                 </div>
               );
             })}
@@ -159,27 +161,25 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
       </div>
 
       {/* Summary Stats */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+      <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4">
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-2xl font-bold text-gray-900">{districtData.length}</div>
-            <div className="text-sm text-gray-600">Total districts</div>
+            <div className="text-2xl font-bold text-stone-900">{districtData.length}</div>
+            <div className="text-sm text-stone-600">{t("totalDistricts")}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-yellow-600">{contestedDistricts.length}</div>
-            <div className="text-sm text-gray-600">Seats in play</div>
+            <div className="text-sm text-stone-600">{t("seatsInPlay")}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-green-600">{safeDistricts.length}</div>
-            <div className="text-sm text-gray-600">Stable allocation</div>
+            <div className="text-sm text-stone-600">{t("stableAllocation")}</div>
           </div>
         </div>
         
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <p className="text-xs text-gray-500">
-            <strong>ENSC (Effective Number of Seat Changes)</strong> measures seat allocation uncertainty. 
-            Districts with ENSC &gt; 0.8 are classified as having "seats in play" where small vote share changes 
-            could flip seats between parties under the D'Hondt proportional system.
+        <div className="mt-4 pt-4 border-t border-stone-200">
+          <p className="text-xs text-stone-500">
+            <strong>{t("enscTerm")}</strong> {t("enscExplainer")}
           </p>
         </div>
       </div>

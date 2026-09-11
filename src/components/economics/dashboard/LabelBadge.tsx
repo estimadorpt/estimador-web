@@ -8,7 +8,7 @@ const TONE_CLASSES: Record<Tone, string> = {
   amber: 'bg-amber-100 text-amber-800',
   red: 'bg-red-100 text-red-800',
   emerald: 'bg-emerald-100 text-emerald-800',
-  teal: 'bg-[#1B4D5E]/10 text-[#1B4D5E]',
+  teal: 'bg-[#245c68]/10 text-[#245c68]',
 };
 
 export function LabelBadge({
@@ -24,7 +24,7 @@ export function LabelBadge({
   return (
     <span
       title={title}
-      className={`inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${TONE_CLASSES[tone]}`}
+      className={`inline-block text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${TONE_CLASSES[tone]}`}
     >
       {children}
     </span>

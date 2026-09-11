@@ -35,9 +35,9 @@ export function ElectionTypeIndicator() {
   };
   
   return (
-    <div className="mb-4 text-sm text-green-dark/70">
+    <div className="mb-4 text-sm text-stone-500">
       📊 {typeLabels[currentElection.type]} - {currentElection.name}
-      <span className="ml-2 text-xs text-blue-600">[Context: ✓]</span>
+      <span className="ml-2 text-xs text-ink">[Context: ✓]</span>
     </div>
   );
 }

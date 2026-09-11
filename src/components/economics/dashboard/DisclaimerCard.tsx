@@ -11,20 +11,26 @@ import { ReadMore } from './ReadMore';
 export async function DisclaimerCard({
   vintageDate,
   vintage,
+  expectedNextUpdate,
   locale,
 }: {
   vintageDate?: string;
   vintage?: DashboardVintage;
+  expectedNextUpdate?: string;
   locale: string;
 }) {
   const t = await getTranslations({ locale, namespace: 'economics' });
 
-  const fmtVintage = vintageDate
-    ? new Date(vintageDate + 'T00:00:00').toLocaleDateString(
-        locale === 'pt' ? 'pt-PT' : 'en-US',
-        { day: 'numeric', month: 'long', year: 'numeric' }
-      )
-    : null;
+  const fmtLong = (iso?: string) =>
+    iso
+      ? new Date(iso + 'T00:00:00').toLocaleDateString(locale === 'pt' ? 'pt-PT' : 'en-US', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+      : null;
+  const fmtVintage = fmtLong(vintageDate);
+  const fmtNextUpdate = fmtLong(expectedNextUpdate);
 
   const coverage =
     vintage?.position &&
@@ -35,9 +41,9 @@ export async function DisclaimerCard({
     }`;
 
   return (
-    <section className="rounded-lg border-l-4 border-l-[#1B4D5E] border-y border-r border-stone-200 bg-stone-50 p-4 md:p-5">
+    <section className="rounded-lg border-l-4 border-l-[#245c68] border-y border-r border-stone-200 bg-stone-50 p-4 md:p-5">
       <div className="flex items-center gap-2 mb-1.5">
-        <Info className="w-4 h-4 text-[#1B4D5E]" />
+        <Info className="w-4 h-4 text-[#245c68]" />
         <h2 className="text-xs font-bold uppercase tracking-wide text-stone-700">
           {t('aboutTitle')}
         </h2>
@@ -66,6 +72,12 @@ export async function DisclaimerCard({
               {t('quarterCoverage')}:
             </span>{' '}
             {coverage}
+          </span>
+        )}
+        {fmtNextUpdate && (
+          <span>
+            <span className="font-semibold text-stone-600">{t('nextUpdate')}:</span>{' '}
+            {fmtNextUpdate}
           </span>
         )}
       </div>

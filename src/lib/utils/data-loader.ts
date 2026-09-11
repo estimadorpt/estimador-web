@@ -4,7 +4,8 @@ import {
   SeatData,
   TrendData,
   DistrictForecast,
-  ContestedSeat,
+  ContestedSummary,
+  HouseEffect,
   PresidentialForecastData,
   PresidentialWinProbabilitiesData,
   PresidentialTrendsData,
@@ -25,6 +26,7 @@ import {
 } from '@/types';
 
 import type { EconomyDashboard } from '@/types/economy-dashboard';
+import type { EconomyStories } from '@/types/economy-stories';
 
 // Load data from the public directory
 export async function loadJsonData<T>(filename: string, subdirectory?: string): Promise<T> {
@@ -38,6 +40,15 @@ export async function loadJsonData<T>(filename: string, subdirectory?: string): 
 const PRESIDENTIAL_DIR = 'elections/presidential-2026';
 const PARLIAMENTARY_DIR = 'elections/parliamentary-2025';
 const ECONOMICS_DIR = 'economics';
+
+export async function loadEconomyStories(): Promise<EconomyStories | null> {
+  try {
+    return await loadJsonData<EconomyStories>('stories.json', ECONOMICS_DIR);
+  } catch (error) {
+    console.error('Error loading economy stories data:', error);
+    return null;
+  }
+}
 
 // "State of the economy" dashboard loader (schema estimador-economy-dashboard/v1).
 // Returns null on any failure so the page renders an honest "unavailable" state
@@ -57,9 +68,9 @@ export async function loadForecastData() {
     const [seatData, nationalTrends, districtForecast, contestedSeats, houseEffects] = await Promise.all([
       loadJsonData<SeatData[]>('seat_forecast_simulations.json', PARLIAMENTARY_DIR),
       loadJsonData<TrendData[]>('national_trends.json', PARLIAMENTARY_DIR),
-      loadJsonData<any[]>('district_forecast.json', PARLIAMENTARY_DIR),
-      loadJsonData<any>('contested_summary.json', PARLIAMENTARY_DIR),
-      loadJsonData<any[]>('house_effects.json', PARLIAMENTARY_DIR).catch(() => [])
+      loadJsonData<DistrictForecast[]>('district_forecast.json', PARLIAMENTARY_DIR),
+      loadJsonData<ContestedSummary>('contested_summary.json', PARLIAMENTARY_DIR),
+      loadJsonData<HouseEffect[]>('house_effects.json', PARLIAMENTARY_DIR).catch(() => [])
     ]);
 
     return {
@@ -74,9 +85,9 @@ export async function loadForecastData() {
     return {
       seatData: [] as SeatData[],
       nationalTrends: [] as TrendData[],
-      districtForecast: [] as any[],
-      contestedSeats: {} as any,
-      houseEffects: [] as any[]
+      districtForecast: [] as DistrictForecast[],
+      contestedSeats: { districts: {} } as ContestedSummary,
+      houseEffects: [] as HouseEffect[]
     };
   }
 }

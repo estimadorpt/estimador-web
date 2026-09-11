@@ -137,8 +137,8 @@ function TeamBadge({ team }: { team: string }) {
   const [broken, setBroken] = useState(false);
 
   if (logo && !broken) {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={logo}
         alt=""
@@ -149,7 +149,7 @@ function TeamBadge({ team }: { team: string }) {
   }
   return (
     <span
-      className="w-5 h-5 flex-shrink-0 flex items-center justify-center text-[8px] font-bold text-white tabular-nums"
+      className="w-5 h-5 flex-shrink-0 flex items-center justify-center text-[11px] font-bold text-white tabular-nums"
       style={{ backgroundColor: liga2TeamColor(team) }}
       aria-hidden
     >
@@ -168,7 +168,7 @@ function TeamCell({ team, muted = false }: { team: string; muted?: boolean }) {
         {liga2DisplayName(team)}
       </span>
       {isReserveSide(team) && (
-        <span className="text-[9px] uppercase tracking-wider text-stone-400 font-bold flex-shrink-0">
+        <span className="text-[11px] uppercase tracking-wider text-stone-400 font-bold flex-shrink-0">
           B
         </span>
       )}
@@ -197,7 +197,7 @@ export function Liga2FinalTable({
     <div className="overflow-x-auto border border-stone-200">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-stone-50 border-b border-stone-200 text-[10px] uppercase tracking-wider text-stone-500">
+          <tr className="bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500">
             <th className="py-2 pl-3 pr-1 text-left font-bold w-8">#</th>
             <th className="py-2 px-2 text-left font-bold">
               {pt ? "Clube" : "Club"}
@@ -249,9 +249,9 @@ export function Liga2FinalTable({
                       className="w-0.5 h-4"
                       style={{
                         backgroundColor: up
-                          ? "#047857"
+                          ? "#4e8056"
                           : down
-                            ? "#dc2626"
+                            ? "#a3543a"
                             : "transparent",
                       }}
                     />
@@ -326,7 +326,7 @@ export function Liga2ProbabilityTable({
     <div className="overflow-x-auto border border-stone-200">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-stone-50 border-b border-stone-200 text-[10px] uppercase tracking-wider text-stone-500">
+          <tr className="bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500">
             <th className="py-2 pl-3 pr-2 text-left font-bold">
               {pt ? "Clube" : "Club"}
             </th>
@@ -484,7 +484,7 @@ export function Liga2PromotionRace({
     last.teams.find(t => t.team === team)?.final_rank;
 
   return (
-    <div className="border border-stone-200 bg-white p-4">
+    <div className="border border-stone-200 bg-cream p-4">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full h-auto"
@@ -502,7 +502,7 @@ export function Liga2PromotionRace({
               x2={W - padR}
               y1={y(g)}
               y2={y(g)}
-              stroke="#e7e5e4"
+              stroke="#dadccf"
               strokeWidth={1}
             />
             <text
@@ -510,7 +510,7 @@ export function Liga2PromotionRace({
               y={y(g) + 3}
               textAnchor="end"
               className="fill-stone-400"
-              fontSize={10}
+              fontSize={11}
             >
               {Math.round(g * 100)}%
             </text>
@@ -524,7 +524,7 @@ export function Liga2PromotionRace({
             y={H - 10}
             textAnchor="middle"
             className="fill-stone-500"
-            fontSize={10}
+            fontSize={11}
           >
             {pt ? `J${cp.matchday}` : `MD${cp.matchday}`}
           </text>
@@ -541,7 +541,7 @@ export function Liga2PromotionRace({
           const d = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
           const rank = finalRank(team);
           const wentUp = rank !== undefined && rank <= 2;
-          const colour = wentUp ? "#047857" : liga2TeamColor(team);
+          const colour = wentUp ? "#4e8056" : liga2TeamColor(team);
           const end = pts[pts.length - 1];
           return (
             <g key={team}>
@@ -565,7 +565,7 @@ export function Liga2PromotionRace({
               <text
                 x={end.x + 8}
                 y={end.y + 3}
-                fontSize={10}
+                fontSize={11}
                 className={wentUp ? "fill-emerald-800" : "fill-stone-500"}
                 fontWeight={wentUp ? 700 : 400}
               >
@@ -603,7 +603,7 @@ export function Liga2Strengths({
 
   return (
     <div className="border border-stone-200">
-      <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-3 py-2 bg-stone-50 border-b border-stone-200 text-[10px] uppercase tracking-wider text-stone-500 font-bold">
+      <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-3 py-2 bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500 font-bold">
         <span>{pt ? "Clube" : "Club"}</span>
         <span className="w-28 text-center">{pt ? "Ataque" : "Attack"}</span>
         <span className="w-28 text-center">{pt ? "Defesa" : "Defence"}</span>

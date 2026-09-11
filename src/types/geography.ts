@@ -1,3 +1,6 @@
+import type { Feature, FeatureCollection, Geometry } from 'geojson';
+import type { Topology, GeometryCollection } from 'topojson-specification';
+
 // TypeScript types for Portuguese geographic data structures
 
 export interface DistrictProperties {
@@ -11,42 +14,10 @@ export interface DistrictProperties {
   VARNAME_1?: string;
 }
 
-export interface DistrictGeometry {
-  type: 'Polygon' | 'MultiPolygon';
-  coordinates: number[][][] | number[][][][];
-}
-
-export interface DistrictFeature {
-  type: 'Feature';
-  properties: DistrictProperties;
-  geometry: DistrictGeometry;
-  id?: string | number;
-}
-
-export interface DistrictFeatureCollection {
-  type: 'FeatureCollection';
-  features: DistrictFeature[];
-}
-
-export interface PortugalTopoJSON {
-  type: 'Topology';
-  objects: {
-    ilhasGeo2: {
-      type: 'GeometryCollection';
-      geometries: Array<{
-        type: 'Polygon' | 'MultiPolygon';
-        properties: DistrictProperties;
-        arcs: number[][] | number[][][];
-      }>;
-    };
-  };
-  arcs: number[][][];
-  transform?: {
-    scale: [number, number];
-    translate: [number, number];
-  };
-  bbox?: [number, number, number, number];
-}
+export type DistrictGeometry = Geometry;
+export type DistrictFeature = Feature<Geometry, DistrictProperties>;
+export type DistrictFeatureCollection = FeatureCollection<Geometry, DistrictProperties>;
+export type PortugalTopoJSON = Topology<{ ilhasGeo2: GeometryCollection<DistrictProperties> }>;
 
 export interface DistrictForecast {
   district_name: string;

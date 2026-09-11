@@ -156,7 +156,7 @@ export function PresidentialSpaghettiPlot({
               y1={chartConfig.yScale(tick)}
               x2={chartConfig.width - chartConfig.margin.right}
               y2={chartConfig.yScale(tick)}
-              stroke="#e5e7eb"
+              stroke="#dadccf"
               strokeWidth={1}
             />
             <text
@@ -164,7 +164,7 @@ export function PresidentialSpaghettiPlot({
               y={chartConfig.yScale(tick)}
               textAnchor="end"
               dominantBaseline="middle"
-              className="text-xs fill-gray-500"
+              className="text-xs fill-stone-500"
             >
               {(tick * 100).toFixed(0)}%
             </text>
@@ -179,14 +179,14 @@ export function PresidentialSpaghettiPlot({
               y1={chartConfig.height - chartConfig.margin.bottom}
               x2={chartConfig.xScale(date)}
               y2={chartConfig.height - chartConfig.margin.bottom + 5}
-              stroke="#9ca3af"
+              stroke="#7f9284"
               strokeWidth={1}
             />
             <text
               x={chartConfig.xScale(date)}
               y={chartConfig.height - chartConfig.margin.bottom + 18}
               textAnchor="middle"
-              className="text-xs fill-gray-500"
+              className="text-xs fill-stone-500"
             >
               {date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
             </text>
@@ -207,7 +207,7 @@ export function PresidentialSpaghettiPlot({
           x={chartConfig.xScale(chartConfig.electionDateParsed)}
           y={chartConfig.margin.top - 5}
           textAnchor="middle"
-          className="text-xs fill-gray-700 font-medium"
+          className="text-xs fill-stone-700 font-medium"
         >
           Election Day
         </text>
@@ -218,7 +218,7 @@ export function PresidentialSpaghettiPlot({
           y1={chartConfig.yScale(0.5)}
           x2={chartConfig.width - chartConfig.margin.right}
           y2={chartConfig.yScale(0.5)}
-          stroke="#ef4444"
+          stroke="#bd714e"
           strokeWidth={1}
           strokeDasharray="2,2"
           opacity={0.5}
@@ -303,7 +303,7 @@ export function PresidentialSpaghettiPlot({
                   y={2}
                   dominantBaseline="middle"
                   className="text-xs"
-                  fill={isHovered ? '#111827' : '#6b7280'}
+                  fill={isHovered ? '#16362e' : '#5f7062'}
                   fontWeight={isHovered ? 500 : 400}
                 >
                   {name.length > 12 ? name.substring(0, 12) + '…' : name}

@@ -74,9 +74,9 @@ interface PlayerSkillRankingProps {
 
 // Single-hue magnitude ramp — identity is carried by the logo + club chip,
 // so the bar stays one colour and lengths stay comparable across rows.
-const BAR = "#1c1917"; // stone-900
-const BAR_SOFT = "#a8a29e"; // stone-400 — interval, over the light surface
-const BAR_INSIDE = "#d6d3d1"; // stone-300 — interval, over the dark bar
+const BAR = "#16362e"; // stone-900
+const BAR_SOFT = "#7f9284"; // stone-400 — interval, over the light surface
+const BAR_INSIDE = "#cbccbb"; // stone-300 — interval, over the dark bar
 
 export function PlayerSkillRanking({
   data,
@@ -174,7 +174,7 @@ export function PlayerSkillRanking({
 
   return (
     <div>
-      <h2 className="text-xl font-bold tracking-tight mb-1">{t.title}</h2>
+      <h2 className="text-2xl tracking-tight mb-1">{t.title}</h2>
       <p className="text-sm text-stone-500 mb-3 max-w-3xl leading-relaxed">{t.intro}</p>
 
       {/* One number cannot rank a keeper against a striker; the hub carries
@@ -183,7 +183,7 @@ export function PlayerSkillRanking({
         <Link
           href="/desporto/liga/jogadores"
           locale={locale}
-          className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:text-blue-800"
+          className="inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-ink-dark"
         >
           {t.hubLink}
           <ChevronRight className="w-3 h-3" />
@@ -194,13 +194,13 @@ export function PlayerSkillRanking({
       {/* Column header */}
       <div className="flex items-center gap-2 mb-2 pb-2 border-b border-stone-200">
         <div className="w-6 flex-shrink-0" />
-        <div className="w-32 sm:w-52 flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="w-32 sm:w-52 flex-shrink-0 text-[11px] font-bold uppercase tracking-wider text-stone-400">
           {pt ? "Jogador" : "Player"}
         </div>
-        <div className="flex-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="flex-1 text-[11px] font-bold uppercase tracking-wider text-stone-400">
           {t.metric}
         </div>
-        <div className="w-12 sm:w-16 flex-shrink-0 text-right text-[10px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="w-12 sm:w-16 flex-shrink-0 text-right text-[11px] font-bold uppercase tracking-wider text-stone-400">
           SAR
         </div>
         {/* Keeps the header aligned with the per-row link column */}
@@ -210,14 +210,14 @@ export function PlayerSkillRanking({
       {hasUnavailable && (
         <div className="flex items-center gap-1.5 mb-1 mt-1">
           <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-          <span className="text-[10px] text-stone-400">{t.legendOut}</span>
+          <span className="text-[11px] text-stone-400">{t.legendOut}</span>
         </div>
       )}
 
       {hasPages && (
         <div className="flex items-center gap-1.5 mb-1 mt-1">
           <ChevronRight className="w-3 h-3 text-stone-300 flex-shrink-0" />
-          <span className="text-[10px] text-stone-400">{t.legendPage}</span>
+          <span className="text-[11px] text-stone-400">{t.legendPage}</span>
         </div>
       )}
 
@@ -229,7 +229,7 @@ export function PlayerSkillRanking({
           const stale = teamSet ? !teamSet.has(p.team) : false;
           const outReason = unavailable?.[p.player];
           const isOpen = openRank === p.rank;
-          const chip = ligaTeamColors[p.team] || "#78716c";
+          const chip = ligaTeamColors[p.team] || "#5f7062";
           const slug = playerSlugs?.[p.player];
 
           return (
@@ -241,7 +241,7 @@ export function PlayerSkillRanking({
                 type="button"
                 onClick={() => setOpenRank(isOpen ? null : p.rank)}
                 aria-expanded={isOpen}
-                className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left hover:bg-stone-50 transition-colors"
+                className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left hover:bg-stone-100 transition-colors"
               >
                 {/* Rank */}
                 <div className="w-6 flex-shrink-0 text-right text-xs font-bold tabular-nums text-stone-400">
@@ -279,20 +279,20 @@ export function PlayerSkillRanking({
                         style={{ backgroundColor: chip }}
                       />
                     )}
-                    <span className="text-[10px] text-stone-400 truncate sm:hidden">
+                    <span className="text-[11px] text-stone-400 truncate sm:hidden">
                       {ligaTeamShortNames[p.team] || p.team}
                     </span>
-                    <span className="text-[10px] text-stone-400 truncate hidden sm:inline">
+                    <span className="text-[11px] text-stone-400 truncate hidden sm:inline">
                       {teamDisplayName(p.team)}
                     </span>
-                    <span className="text-[10px] text-stone-300 hidden sm:inline">
+                    <span className="text-[11px] text-stone-300 hidden sm:inline">
                       · {posLabel(p.position)} · {int(p.minutes)} min
                     </span>
-                    <span className="text-[10px] text-stone-300 sm:hidden">
+                    <span className="text-[11px] text-stone-300 sm:hidden">
                       · {int(p.minutes)}&apos;
                     </span>
                     {stale && (
-                      <span className="text-[9px] uppercase tracking-wide text-amber-600 bg-amber-50 px-1 py-px flex-shrink-0">
+                      <span className="text-[11px] uppercase tracking-wide text-amber-600 bg-amber-50 px-1 py-px flex-shrink-0">
                         {t.notInLeague}
                       </span>
                     )}
@@ -354,7 +354,7 @@ export function PlayerSkillRanking({
                     href={`/desporto/liga/jogador/${slug}`}
                     locale={locale}
                     aria-label={t.openPlayer(p.player)}
-                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-300 hover:text-stone-800 hover:bg-stone-50 transition-colors"
+                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-300 hover:text-stone-800 hover:bg-stone-100 transition-colors"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
@@ -367,7 +367,7 @@ export function PlayerSkillRanking({
                 <div className="pl-8 pr-2 pb-3 pt-1 bg-stone-50/60">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-xs">
                     <div>
-                      <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
                         {t.minutes}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -375,7 +375,7 @@ export function PlayerSkillRanking({
                       </div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
                         {t.goals} / {t.matches}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -383,7 +383,7 @@ export function PlayerSkillRanking({
                       </div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
                         {t.perNinety}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -391,7 +391,7 @@ export function PlayerSkillRanking({
                       </div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
                         {t.interval}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -406,7 +406,7 @@ export function PlayerSkillRanking({
                     <Link
                       href={`/desporto/liga/jogador/${slug}`}
                       locale={locale}
-                      className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-blue-700 hover:text-blue-800"
+                      className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-ink hover:text-ink-dark"
                     >
                       {t.playerPage}
                       <ChevronRight className="w-3 h-3" />
@@ -423,20 +423,20 @@ export function PlayerSkillRanking({
         <button
           type="button"
           onClick={() => setShowAll(!showAll)}
-          className="mt-3 text-xs font-medium text-blue-700 hover:text-blue-800"
+          className="mt-3 text-xs font-medium text-ink hover:text-ink-dark"
         >
           {showAll ? t.showLess : t.showAll}
         </button>
       )}
 
-      <p className="text-[10px] text-stone-400 mt-4 leading-relaxed max-w-3xl">
+      <p className="text-[11px] text-stone-400 mt-4 leading-relaxed max-w-3xl">
         {t.rangeHint} {t.footnote}
       </p>
 
       {/* The null result, shipped as content */}
       {topMover && (
         <div className="mt-8 border-l-2 border-stone-300 pl-4 py-1 max-w-3xl">
-          <h3 className="text-sm font-bold text-stone-900 mb-1">{t.moversTitle}</h3>
+          <h3 className="text-sm text-stone-900 mb-1">{t.moversTitle}</h3>
           <p className="text-sm text-stone-600 leading-relaxed">{t.moversBody}</p>
           <p className="text-xs text-stone-500 mt-2 tabular-nums">
             {t.biggest}: <span className="font-semibold">{topMover.player}</span>{" "}

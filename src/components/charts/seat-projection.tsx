@@ -84,7 +84,7 @@ export function SeatProjection({ data, width = 800, height = 500 }: SeatProjecti
           y: "party",
           fill: "party",
           fillOpacity: 0.2,
-          height: 20
+          insetTop: 3, insetBottom: 3
         }),
 
         // Interquartile range (P10 to P90)
@@ -94,7 +94,7 @@ export function SeatProjection({ data, width = 800, height = 500 }: SeatProjecti
           y: "party", 
           fill: "party",
           fillOpacity: 0.6,
-          height: 15
+          insetTop: 6, insetBottom: 6
         }),
 
         // Median line
@@ -127,7 +127,7 @@ export function SeatProjection({ data, width = 800, height = 500 }: SeatProjecti
 
         // Majority line
         Plot.ruleX([116], {
-          stroke: "#ef4444",
+          stroke: "#bd714e",
           strokeWidth: 2,
           strokeDasharray: "5,5"
         }),
@@ -139,8 +139,8 @@ export function SeatProjection({ data, width = 800, height = 500 }: SeatProjecti
           text: "Majority (116)",
           dx: 5,
           dy: -10,
-          fontSize: 10,
-          fill: "#ef4444",
+          fontSize: 11,
+          fill: "#bd714e",
           fontWeight: "bold"
         })
       ]
@@ -158,7 +158,7 @@ export function SeatProjection({ data, width = 800, height = 500 }: SeatProjecti
   return (
     <div className="w-full">
       <div ref={containerRef} className="w-full overflow-x-auto" />
-      <p className="text-sm text-slate-600 mt-2">
+      <p className="text-sm text-stone-600 mt-2">
         Bars show seat projection ranges: light bars = full range, dark bars = 80% confidence interval (P10-P90). 
         White lines = median, dots = mean. Numbers show mean (P10-P90 range).
       </p>

@@ -12,9 +12,12 @@
 // Payload honesty strings (honesty_note, anchor_honesty.*) are rendered as-is.
 // All values here are already in percent units (yoy %); NO ×100 scaling.
 
+import { ChartTable } from '@/components/viz/ChartTable';
+import { ProducerNote } from './ProducerNote';
 import { getTranslations } from 'next-intl/server';
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { TileCard } from './TileCard';
+import { StatusBadge } from './StatusBadge';
 import {
   COLORS,
   fmtSignedPctValue,
@@ -23,7 +26,7 @@ import {
   fmtDate,
   fmtDateShort,
 } from '@/lib/utils/economy-format';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote, pickOwnLanguage } from '@/lib/i18n/economy-labels';
 import type { PulseTileData, PulsePoint } from '@/types/economy-dashboard';
 
 function isNum(v: number | null | undefined): v is number {
@@ -85,17 +88,17 @@ function WeeklySparkline({
       <text
         x={W - padR + 6}
         y={yAt(last.value) + 3.5}
-        fontSize="10"
+        fontSize="11"
         fontWeight="600"
         fill={COLORS.stoneDark}
         className="tabular-nums"
       >
         {fmtSignedPctValue(last.value, 1)}
       </text>
-      <text x={padL} y={H - 3} fontSize="9" fill={COLORS.stone}>
+      <text x={padL} y={H - 3} fontSize="11" fill={COLORS.stone}>
         {fmtDateShort(pts[0]?.date, locale)}
       </text>
-      <text x={W - padR} y={H - 3} textAnchor="end" fontSize="9" fill={COLORS.stone}>
+      <text x={W - padR} y={H - 3} textAnchor="end" fontSize="11" fill={COLORS.stone}>
         {fmtDateShort(last?.date, locale)}
       </text>
     </svg>
@@ -105,9 +108,12 @@ function WeeklySparkline({
 export async function PulseTile({
   data,
   locale,
+  asOf,
 }: {
   data: PulseTileData;
   locale: string;
+  /** Payload as_of (ISO) — used to drop any future-dated sparkline points. */
+  asOf?: string;
 }) {
   const t = await getTranslations({ locale, namespace: 'economics' });
   const lblKey = labelKey(data?.label);
@@ -115,7 +121,13 @@ export async function PulseTile({
   const anchor = data?.anchor;
   const tilt = data?.tilt;
   const weekly = data?.components?.weekly_index;
-  const history = Array.isArray(weekly?.history_recent) ? weekly.history_recent : [];
+  // Defense in depth: never draw points dated AFTER the payload's as_of (the
+  // producer also clips, but a future-dated point must not survive rendering).
+  // Dates are ISO strings, so a lexicographic prefix compare is exact.
+  const asOfDay = typeof asOf === 'string' && asOf.length >= 10 ? asOf.slice(0, 10) : null;
+  const history = (Array.isArray(weekly?.history_recent) ? weekly.history_recent : []).filter(
+    (p) => p && (!asOfDay || (typeof p.date === 'string' && p.date.slice(0, 10) <= asOfDay))
+  );
 
   // Tilt direction chip: payload `direction` is authoritative; value is in pp.
   const dir = (tilt?.direction ?? '').toLowerCase();
@@ -133,19 +145,22 @@ export async function PulseTile({
       eyebrow={t('pulseEyebrow')}
       label={lblKey ? t(lblKey) : data?.label}
       labelTone="amber"
-      honesty={data?.honesty_note ?? t('pulseHonesty')}
+      honesty={
+        pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt) ??
+        t('pulseHonesty')
+      }
     >
       <p className="text-sm text-stone-500">{t('pulseSubtitle')}</p>
 
       {/* ---- LEAD: the ANCHOR level (BdP Coincident Activity) ---------------- */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-5 md:gap-8">
         <div className="md:col-span-3">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
             {t('pulseAnchorTitle')}
           </div>
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span
-              className="text-4xl md:text-5xl font-black tabular-nums tracking-tighter leading-none"
+              className="text-4xl md:text-5xl font-display font-extrabold tabular-nums tracking-tighter leading-none"
               style={{ color: anchorColor }}
             >
               {fmtSignedPctValue(anchor?.value, 1)}
@@ -154,6 +169,7 @@ export async function PulseTile({
               {t('yoy')}
               {anchor?.date ? ` · ${fmtDate(anchor.date, locale)}` : ''}
             </span>
+            <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
           </div>
           {/* source + the anchor's measured correlation */}
           <p className="mt-1.5 text-[11px] text-stone-500">
@@ -169,17 +185,13 @@ export async function PulseTile({
               </>
             )}
           </p>
-          {/* verbatim payload claim for the anchor */}
-          {data?.anchor_honesty?.anchor_claim && (
-            <p className="mt-1 text-[10px] leading-snug text-stone-400 max-w-prose">
-              {data.anchor_honesty.anchor_claim}
-            </p>
-          )}
+          {/* the producer's claim for the anchor, verbatim */}
+          <ProducerNote locale={locale} text={data?.anchor_honesty?.anchor_claim} i18n={data?.anchor_honesty?.anchor_claim_i18n} className="mt-1" />
         </div>
 
         {/* ---- TILT: small directional chip + combined read (secondary) ------ */}
         <div className="md:col-span-2 mt-4 md:mt-0 md:border-l md:border-stone-100 md:pl-6">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
             {t('pulseTiltTitle')}
           </div>
           <div
@@ -196,19 +208,23 @@ export async function PulseTile({
             )}
           </div>
           {/* verbatim payload claim for the tilt */}
-          <p className="mt-1 text-[10px] leading-snug text-stone-400">
-            {data?.anchor_honesty?.tilt_claim ?? t('pulseTiltNote')}
+          <p className="mt-1 text-[11px] leading-snug text-stone-400">
+            {pickOwnLanguage(locale, data?.anchor_honesty?.tilt_claim_i18n, data?.anchor_honesty?.tilt_claim) ?? t('pulseTiltNote')}
           </p>
 
           {isNum(data?.combined_read) && (
             <div className="mt-3">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
                 {t('pulseCombinedTitle')}
               </div>
+              {/* When the producer marks render_as='direction', the combined
+                  number is NOT a validated level — show the direction word only. */}
               <span className="text-lg font-bold tabular-nums text-stone-500">
-                {fmtSignedPctValue(data.combined_read, 1)}
+                {data?.render_as === 'direction'
+                  ? tiltWord
+                  : fmtSignedPctValue(data.combined_read, 1)}
               </span>
-              <span className="ml-2 text-[10px] text-stone-400">{t('pulseCombinedNote')}</span>
+              <span className="ml-2 text-[11px] text-stone-400">{t('pulseCombinedNote')}</span>
             </div>
           )}
         </div>
@@ -218,12 +234,17 @@ export async function PulseTile({
       {history.length >= 2 && (
         <div className="mt-5 border-t border-stone-100 pt-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
-            <h3 className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+            <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
               {t('pulseWeeklyTitle')}
             </h3>
-            <span className="text-[10px] text-stone-400">{t('pulseWeeklyNote')}</span>
+            <span className="text-[11px] text-stone-400">{t('pulseWeeklyNote')}</span>
           </div>
           <WeeklySparkline history={history} ariaLabel={t('pulseChartAria')} locale={locale} />
+          <ChartTable
+            caption={t('pulseChartAria')}
+            columns={[t('tableDate'), t('tableValue')]}
+            rows={history.filter((p) => p && isNum(p.value)).map((p) => [fmtDate(p.date, locale), `${new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(p.value)}%`])}
+          />
         </div>
       )}
     </TileCard>

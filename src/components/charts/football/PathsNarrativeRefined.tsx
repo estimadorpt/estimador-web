@@ -161,7 +161,7 @@ function StepRow({
             {step.opponent}
           </span>
           {step.isKeyMatch && !muted && (
-            <span className="text-[10px] font-bold uppercase tracking-wider px-1 py-0.5 bg-amber-100 text-amber-800 shrink-0">
+            <span className="text-[11px] font-bold uppercase tracking-wider px-1 py-0.5 bg-amber-100 text-amber-800 shrink-0">
               Decisivo
             </span>
           )}
@@ -193,7 +193,7 @@ function StepRow({
               style={{
                 left: pct(step.titleAfter),
                 width: pct(-delta),
-                backgroundColor: "#dc2626",
+                backgroundColor: "#a3543a",
                 opacity: 0.35,
               }}
             />
@@ -205,12 +205,12 @@ function StepRow({
       <div className="w-14 shrink-0 text-right">
         <div
           className="text-sm font-bold tabular-nums"
-          style={{ color: isPositive ? teamColor : "#dc2626" }}
+          style={{ color: isPositive ? teamColor : "#a3543a" }}
         >
           {pct(step.titleAfter)}
         </div>
         <div
-          className={`text-[10px] tabular-nums ${isPositive ? "text-stone-400" : "text-red-400"}`}
+          className={`text-[11px] tabular-nums ${isPositive ? "text-stone-400" : "text-red-400"}`}
         >
           {isPositive ? "+" : ""}{Math.round(delta * 100)}pp
         </div>
@@ -249,7 +249,7 @@ function PathCard({
           <p className="text-sm text-stone-500 mt-0.5">{path.summary}</p>
         </div>
         <div className="text-right shrink-0">
-          <div className="text-lg font-black tabular-nums text-stone-700">
+          <div className="text-lg font-display font-extrabold tabular-nums text-stone-700">
             {pct(path.frequency)}
           </div>
         </div>
@@ -260,7 +260,7 @@ function PathCard({
         {path.steps[0]?.isDivergence && (
           <div className="flex items-center gap-2 pt-2 pb-1">
             <div className="flex-1 h-px bg-stone-200" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
               Ponto de divergência
             </span>
             <div className="flex-1 h-px bg-stone-200" />
@@ -277,7 +277,7 @@ function PathCard({
       >
         Prob. final →{" "}
         <span
-          className="text-sm font-black tabular-nums"
+          className="text-sm font-display font-extrabold tabular-nums"
           style={{ color: teamColor }}
         >
           {pct(finalProb)}
@@ -372,7 +372,7 @@ export default function PathsNarrativeRefined() {
         <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
           Abordagem D — Refinada
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-stone-900 mb-1">
+        <h3 className="text-xl tracking-tight text-stone-900 mb-1">
           Cenários de Vitória
         </h3>
         <p className="text-sm text-stone-500 max-w-2xl">

@@ -1,0 +1,1941 @@
+{
+  "schema": "estimador-stories/v1",
+  "as_of": "2026-07-03",
+  "generated_at": "2026-07-03T09:00:28+00:00",
+  "disclaimer": {
+    "pt": "Histórias construídas exclusivamente com números oficiais (INE, BdP, BCE, Eurostat, DGO) e aritmética explícita — nenhum valor nesta secção vem de um modelo. Cada módulo indica a data dos dados e o selo aplicável: 'Dado oficial' (número republicado), 'Dado oficial, cálculo nosso' (números oficiais recombinados com fórmulas publicadas) ou 'Cenário' (hipótese explícita, não previsão).",
+    "en": "Stories built exclusively from official numbers (INE, BdP, ECB, Eurostat, DGO) and explicit arithmetic — nothing in this section comes from a model. Each module states its data as-of date and badge: 'Official data' (republished), 'Official data, our calculation' (official numbers recombined with published formulas) or 'Scenario' (explicit what-if, not a forecast)."
+  },
+  "badges_legend": {
+    "official": {
+      "pt": "Dado oficial",
+      "en": "Official data"
+    },
+    "official_calc": {
+      "pt": "Dado oficial, cálculo nosso",
+      "en": "Official data, our calculation"
+    },
+    "scenario": {
+      "pt": "Cenário",
+      "en": "Scenario"
+    }
+  },
+  "modules": {
+    "real_wages": {
+      "status": "ok",
+      "id": "real_wages",
+      "title": {
+        "pt": "Os salários estão a ganhar à inflação?",
+        "en": "Are wages beating inflation?"
+      },
+      "badge": {
+        "kind": "official_calc",
+        "label": {
+          "pt": "Dado oficial, cálculo nosso",
+          "en": "Official data, our calculation"
+        }
+      },
+      "as_of": "2025-09",
+      "headline": {
+        "pt": "Em setembro de 2025, o salário médio subiu +6,1% em termos homólogos; descontando a inflação (1,9%), ganhou 4,1% em termos reais.",
+        "en": "In September 2025, the average wage rose +6.1% year-on-year; net of inflation (1.9%), it gained 4.1% in real terms."
+      },
+      "nominal_yoy": {
+        "value_pct": 6.1,
+        "period": "2025-09",
+        "source": "bpstat_declared_wage",
+        "source_description": "BdP/BPstat, crescimento homólogo do salário médio declarado",
+        "stale": true
+      },
+      "all_wage_readings": [
+        {
+          "source": "bpstat_declared_wage",
+          "period": "2025-09",
+          "value_pct": 6.1,
+          "description": "BdP/BPstat, crescimento homólogo do salário médio declarado"
+        }
+      ],
+      "deflator": {
+        "hicp_yoy_pct": 1.9,
+        "period": "2025-09"
+      },
+      "real_yoy_pct": 4.1,
+      "purchasing_power_since_2021": {
+        "index_jan2021_100": null,
+        "note": "requires the INE Social-Security wage LEVEL series back to 2021-01 (collection pending); no chained approximation is published instead"
+      },
+      "formula": "real = ((1 + w/100)/(1 + hicp_yoy/100) - 1)*100, same-month HICP deflator",
+      "honesty_note_i18n": {
+        "pt": "Números oficiais (INE/BdP), cálculo nosso. O salário médio da Segurança Social/declarações é sensível à composição do emprego: a média pode mexer sem que nenhum salário individual mude (entradas/saídas, setores, horas). Meses recentes são provisórios. Deflator: IHPC homólogo do mesmo mês. A leitura do BdP/BPstat pode estar desatualizada — a data de cada leitura está indicada.",
+        "en": "Official numbers (INE/BdP), our arithmetic. The Social-Security/declared mean wage is composition-sensitive: the mean can move with no individual raise (hiring mix, sectors, hours). Recent months are provisional. Deflator: same-month HICP y/y. The BdP/BPstat reading may lag — each reading carries its own as-of date."
+      },
+      "sources": [
+        "ine_wage_avg",
+        "ine_wage_avg_rev3",
+        "wage_growth_yoy_bpstat",
+        "hicp_yoy",
+        "hicp_index"
+      ]
+    },
+    "mortgage_reset": {
+      "status": "ok",
+      "id": "mortgage_reset",
+      "title": {
+        "pt": "Quanto vai mudar a prestação da casa?",
+        "en": "How much will the mortgage instalment change?"
+      },
+      "badge": {
+        "kind": "official_calc",
+        "label": {
+          "pt": "Dado oficial, cálculo nosso",
+          "en": "Official data, our calculation"
+        }
+      },
+      "as_of": "2026-06",
+      "headline": {
+        "pt": "Revisões de julho de 2026: no crédito-tipo (150 mil €, 30 anos), a prestação sobe ~38 €/mês (Euribor 6M) e ~60 €/mês (Euribor 12M) — já decidido pelas médias Euribor observadas.",
+        "en": "July 2026 resets: on the standard loan (EUR 150k, 30 years), the instalment rises ~EUR 38/month (Euribor 6M) and ~EUR 60/month (Euribor 12M) — already fixed by observed Euribor monthly averages."
+      },
+      "decided": {
+        "badge": {
+          "kind": "official_calc",
+          "label": {
+            "pt": "Dado oficial, cálculo nosso",
+            "en": "Official data, our calculation"
+          }
+        },
+        "label": {
+          "pt": "Já decidido",
+          "en": "Already decided"
+        },
+        "reset_month": "2026-07",
+        "tenors": {
+          "euribor_3m": {
+            "label": "Euribor 3M",
+            "reset_month": "2026-07",
+            "fixing_old": {
+              "month": "2026-03",
+              "value_pct": 2.109
+            },
+            "fixing_new": {
+              "month": "2026-06",
+              "value_pct": 2.339
+            },
+            "rate_old_pct": 3.109,
+            "rate_new_pct": 3.339,
+            "instalment_old_eur": 641.29,
+            "instalment_new_eur": 660.16,
+            "delta_eur_month": 18.87,
+            "delta_pct": 2.9
+          },
+          "euribor_6m": {
+            "label": "Euribor 6M",
+            "reset_month": "2026-07",
+            "fixing_old": {
+              "month": "2025-12",
+              "value_pct": 2.139
+            },
+            "fixing_new": {
+              "month": "2026-06",
+              "value_pct": 2.595
+            },
+            "rate_old_pct": 3.139,
+            "rate_new_pct": 3.595,
+            "instalment_old_eur": 643.75,
+            "instalment_new_eur": 681.59,
+            "delta_eur_month": 37.84,
+            "delta_pct": 5.9
+          },
+          "euribor_12m": {
+            "label": "Euribor 12M",
+            "reset_month": "2026-07",
+            "fixing_old": {
+              "month": "2025-06",
+              "value_pct": 2.081
+            },
+            "fixing_new": {
+              "month": "2026-06",
+              "value_pct": 2.798
+            },
+            "rate_old_pct": 3.081,
+            "rate_new_pct": 3.798,
+            "instalment_old_eur": 638.97,
+            "instalment_new_eur": 698.73,
+            "delta_eur_month": 59.76,
+            "delta_pct": 9.4
+          }
+        },
+        "note": {
+          "pt": "Para quem tem revisão neste mês, ambos os indexantes (antigo e novo) já são médias mensais observadas — isto é aritmética, não previsão.",
+          "en": "For resets this month, both the old and the new index are already observed monthly averages — this is arithmetic, not a forecast."
+        }
+      },
+      "open": {
+        "badge": {
+          "kind": "scenario",
+          "label": {
+            "pt": "Cenário",
+            "en": "Scenario"
+          }
+        },
+        "label": {
+          "pt": "Ainda em aberto",
+          "en": "Still open"
+        },
+        "tenors": {
+          "euribor_3m": {
+            "label": "Euribor 3M",
+            "next_reset_month": "2026-10",
+            "unknown_fixing_month": "2026-09",
+            "scenarios": {
+              "flat": {
+                "euribor_pct": 2.339,
+                "instalment_eur": 660.16,
+                "delta_vs_decided_eur": 0.0
+              },
+              "up_50bp": {
+                "euribor_pct": 2.839,
+                "instalment_eur": 702.27,
+                "delta_vs_decided_eur": 42.11
+              },
+              "down_50bp": {
+                "euribor_pct": 1.839,
+                "instalment_eur": 619.46,
+                "delta_vs_decided_eur": -40.7
+              }
+            }
+          },
+          "euribor_6m": {
+            "label": "Euribor 6M",
+            "next_reset_month": "2027-01",
+            "unknown_fixing_month": "2026-12",
+            "scenarios": {
+              "flat": {
+                "euribor_pct": 2.595,
+                "instalment_eur": 681.59,
+                "delta_vs_decided_eur": 0.0
+              },
+              "up_50bp": {
+                "euribor_pct": 3.095,
+                "instalment_eur": 724.41,
+                "delta_vs_decided_eur": 42.82
+              },
+              "down_50bp": {
+                "euribor_pct": 2.095,
+                "instalment_eur": 640.16,
+                "delta_vs_decided_eur": -41.43
+              }
+            }
+          },
+          "euribor_12m": {
+            "label": "Euribor 12M",
+            "next_reset_month": "2027-07",
+            "unknown_fixing_month": "2027-06",
+            "scenarios": {
+              "flat": {
+                "euribor_pct": 2.798,
+                "instalment_eur": 698.73,
+                "delta_vs_decided_eur": 0.0
+              },
+              "up_50bp": {
+                "euribor_pct": 3.298,
+                "instalment_eur": 742.09,
+                "delta_vs_decided_eur": 43.36
+              },
+              "down_50bp": {
+                "euribor_pct": 2.298,
+                "instalment_eur": 656.73,
+                "delta_vs_decided_eur": -42.0
+              }
+            }
+          }
+        },
+        "note": {
+          "pt": "Para revisões seguintes, o indexante ainda não existe: cenários com a Euribor no nível atual e ±50 pontos base. Não é uma previsão nossa.",
+          "en": "For later resets the index does not exist yet: scenarios hold Euribor at its current level and ±50 basis points. Not our forecast."
+        }
+      },
+      "context": {
+        "new_loan_rate_variable_pct": {
+          "value": 2.96,
+          "period": "2026-04",
+          "as_of": "2026-04-30",
+          "stale": false
+        },
+        "new_loan_rate_fixed_pct": {
+          "value": 3.7,
+          "period": "2026-04",
+          "as_of": "2026-04-30",
+          "stale": false
+        },
+        "new_loan_rate_mixed_pct": {
+          "value": 2.74,
+          "period": "2026-04",
+          "as_of": "2026-04-30",
+          "stale": false
+        },
+        "instalment_median_eur": {
+          "value": 346.0,
+          "period": "2026-04",
+          "as_of": "2026-04-30",
+          "stale": false
+        },
+        "instalment_average_eur": {
+          "value": 428.0,
+          "period": "2026-04",
+          "as_of": "2026-04-30",
+          "stale": false
+        }
+      },
+      "assumptions": {
+        "principal_eur": 150000.0,
+        "term_months": 360,
+        "spread_pp": 1.0,
+        "amortization": "french/constant instalment on the FULL principal and term",
+        "fixing_rule": "new rate of a reset in month m = monthly-average Euribor of month m-1 + spread; the previous reset of a T-month tenor used month m-1-T (most common PT contract convention; specific contracts may differ)",
+        "caveat": "euro deltas scale roughly with loan size and shrink with remaining term; an older/smaller loan sees a smaller euro change"
+      },
+      "honesty_note_i18n": {
+        "pt": "Cálculo aritmético sobre médias mensais Euribor observadas (BCE) para um crédito-tipo de 150 mil € a 30 anos com spread de 1,0 p.p. — os pressupostos estão publicados ao lado. O BCE subiu as taxas diretoras em 25 p.b. a 12/06/2026 (primeira subida desde setembro de 2023); esse efeito já está nas médias observadas. A parte 'ainda em aberto' são cenários, não previsões. Isto descreve o mecanismo — não é aconselhamento financeiro.",
+        "en": "Arithmetic on observed monthly-average Euribor fixings (ECB) for a standard EUR 150k, 30-year loan with a 1.0pp spread — assumptions published alongside. The ECB raised policy rates by 25bp on 2026-06-12 (first hike since Sep 2023); that effect is already in the observed averages. The 'still open' part is scenarios, not forecasts. This describes the mechanism — it is not financial advice."
+      },
+      "sources": [
+        "euribor_3m",
+        "euribor_6m",
+        "euribor_12m",
+        "new_loan_rate_variable",
+        "new_loan_rate_fixed",
+        "new_loan_rate_mixed",
+        "mortgage_instalment_median",
+        "mortgage_instalment_average"
+      ]
+    },
+    "housing_affordability": {
+      "status": "ok",
+      "id": "housing_affordability",
+      "title": {
+        "pt": "Casas e rendas vs salários",
+        "en": "Housing and rents vs wages"
+      },
+      "badge": {
+        "kind": "official_calc",
+        "label": {
+          "pt": "Dado oficial, cálculo nosso",
+          "en": "Official data, our calculation"
+        }
+      },
+      "as_of": "2026-01-01",
+      "headline": {
+        "pt": "As rendas medianas de novos contratos chegaram a 9,46 €/m² no 1.º trimestre de 2026 (+9,1% homólogo); os preços das casas subiam 18,9% homólogos no fim de 2025.",
+        "en": "Median new-lease rents reached EUR 9.46/m2 in Q1 2026 (+9.1% y/y); house prices were up 18.9% y/y at end-2025."
+      },
+      "house_prices": {
+        "yoy_pct": 18.9,
+        "period": "2025Q4",
+        "as_of": "2025-12-31",
+        "age_days": 184,
+        "stale": true,
+        "source": "INE House Price Index (BdP/BPstat mirror, quarterly)"
+      },
+      "new_lease_rents": {
+        "median_eur_m2": 9.46,
+        "period": "2026Q1",
+        "yoy_pct": 9.1,
+        "cumulative_since_2020q1_pct": 68.0,
+        "as_of": "2026-01-01",
+        "source": "INE, rendas medianas de novos contratos de arrendamento (EUR/m2)"
+      },
+      "growth_comparison": {
+        "window": "2020Q1 .. 2026Q1",
+        "new_lease_rents_pct": 68.0,
+        "hicp_pct": 21.6,
+        "wages_pct": null,
+        "wages_window": null
+      },
+      "hpi_vs_wages_2015_100": {
+        "base": "2015 = 100, annual averages",
+        "method": "HPI index chained from official quarterly y/y rates (exact for same-quarter comparisons); wages = INE SS mean wage level; HICP = official index",
+        "rows": [
+          {
+            "year": 2015,
+            "hpi": 100.0,
+            "wages": null,
+            "hicp": 100.0
+          },
+          {
+            "year": 2016,
+            "hpi": 107.1,
+            "wages": null,
+            "hicp": 100.6
+          },
+          {
+            "year": 2017,
+            "hpi": 117.0,
+            "wages": null,
+            "hicp": 102.2
+          },
+          {
+            "year": 2018,
+            "hpi": 129.0,
+            "wages": null,
+            "hicp": 103.4
+          },
+          {
+            "year": 2019,
+            "hpi": 141.8,
+            "wages": null,
+            "hicp": 103.7
+          },
+          {
+            "year": 2020,
+            "hpi": 154.3,
+            "wages": null,
+            "hicp": 103.6
+          },
+          {
+            "year": 2021,
+            "hpi": 168.8,
+            "wages": null,
+            "hicp": 104.6
+          },
+          {
+            "year": 2022,
+            "hpi": 190.1,
+            "wages": null,
+            "hicp": 113.0
+          },
+          {
+            "year": 2023,
+            "hpi": 205.6,
+            "wages": null,
+            "hicp": 119.0
+          },
+          {
+            "year": 2024,
+            "hpi": 224.3,
+            "wages": null,
+            "hicp": 122.2
+          },
+          {
+            "year": 2025,
+            "hpi": 263.6,
+            "wages": null,
+            "hicp": 124.8
+          }
+        ]
+      },
+      "honesty_note_i18n": {
+        "pt": "Números oficiais (INE, via BdP para o IPHab), cálculo nosso. As rendas medianas referem-se APENAS a novos contratos — não medem o que os inquilinos atuais pagam. O índice de preços 2015=100 é reconstruído por encadeamento das variações homólogas oficiais (exato em comparações do mesmo trimestre). O salário médio da Segurança Social é sensível à composição do emprego. As datas de cada série estão indicadas — o espelho BdP do IPHab publica com desfasamento.",
+        "en": "Official numbers (INE; HPI via the BdP mirror), our arithmetic. Median rents cover NEW leases only — not what sitting tenants pay. The 2015=100 price index is chained from official y/y rates (exact for same-quarter comparisons). The SS mean wage is composition-sensitive. Each series carries its own as-of date — the BdP HPI mirror lags the INE release."
+      },
+      "sources": [
+        "hpi_total_yoy",
+        "ine_rent_median",
+        "ine_wage_avg_rev3",
+        "hicp_index"
+      ]
+    },
+    "savings_gap": {
+      "status": "ok",
+      "id": "savings_gap",
+      "title": {
+        "pt": "Depósitos, Euribor e inflação",
+        "en": "Deposits, Euribor and inflation"
+      },
+      "badge": {
+        "kind": "official",
+        "label": {
+          "pt": "Dado oficial",
+          "en": "Official data"
+        }
+      },
+      "as_of": "2026-04",
+      "headline": {
+        "pt": "Um novo depósito a prazo típico rende 1,44% ao ano (abril de 2026); os preços sobem 3,1% (junho de 2026) — em termos reais, o dinheiro em depósitos perde 1,6% por ano.",
+        "en": "A typical new time deposit pays 1.44% a year (April 2026); prices are rising 3.1% (June 2026) — in real terms money in deposits loses 1.6% a year."
+      },
+      "deposit_rate_new_time": {
+        "value_pct": 1.44,
+        "period": "2026-04",
+        "stale": false
+      },
+      "deposit_rate_overnight": {
+        "value_pct": 0.03,
+        "period": "2026-04"
+      },
+      "euribor_6m": {
+        "value_pct": 2.6,
+        "period": "2026-06"
+      },
+      "hicp_yoy": {
+        "value_pct": 3.1,
+        "period": "2026-06"
+      },
+      "real_deposit_return_pct": -1.6,
+      "chart_monthly": [
+        {
+          "month": "2015-01",
+          "deposit_new_time_pct": 1.24,
+          "overnight_pct": 0.09,
+          "euribor_6m_pct": 0.15,
+          "hicp_yoy_pct": -0.4
+        },
+        {
+          "month": "2015-02",
+          "deposit_new_time_pct": 1.11,
+          "overnight_pct": 0.07,
+          "euribor_6m_pct": 0.13,
+          "hicp_yoy_pct": -0.1
+        },
+        {
+          "month": "2015-03",
+          "deposit_new_time_pct": 0.86,
+          "overnight_pct": 0.05,
+          "euribor_6m_pct": 0.1,
+          "hicp_yoy_pct": 0.4
+        },
+        {
+          "month": "2015-04",
+          "deposit_new_time_pct": 0.85,
+          "overnight_pct": 0.04,
+          "euribor_6m_pct": 0.07,
+          "hicp_yoy_pct": 0.5
+        },
+        {
+          "month": "2015-05",
+          "deposit_new_time_pct": 0.7,
+          "overnight_pct": 0.04,
+          "euribor_6m_pct": 0.06,
+          "hicp_yoy_pct": 0.9
+        },
+        {
+          "month": "2015-06",
+          "deposit_new_time_pct": 0.68,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": 0.05,
+          "hicp_yoy_pct": 0.8
+        },
+        {
+          "month": "2015-07",
+          "deposit_new_time_pct": 0.67,
+          "overnight_pct": 0.04,
+          "euribor_6m_pct": 0.05,
+          "hicp_yoy_pct": 0.7
+        },
+        {
+          "month": "2015-08",
+          "deposit_new_time_pct": 0.62,
+          "overnight_pct": 0.04,
+          "euribor_6m_pct": 0.04,
+          "hicp_yoy_pct": 0.7
+        },
+        {
+          "month": "2015-09",
+          "deposit_new_time_pct": 0.56,
+          "overnight_pct": 0.04,
+          "euribor_6m_pct": 0.04,
+          "hicp_yoy_pct": 0.9
+        },
+        {
+          "month": "2015-10",
+          "deposit_new_time_pct": 0.61,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": 0.02,
+          "hicp_yoy_pct": 0.7
+        },
+        {
+          "month": "2015-11",
+          "deposit_new_time_pct": 0.55,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.02,
+          "hicp_yoy_pct": 0.6
+        },
+        {
+          "month": "2015-12",
+          "deposit_new_time_pct": 0.5,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.04,
+          "hicp_yoy_pct": 0.3
+        },
+        {
+          "month": "2016-01",
+          "deposit_new_time_pct": 0.49,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.06,
+          "hicp_yoy_pct": 0.7
+        },
+        {
+          "month": "2016-02",
+          "deposit_new_time_pct": 0.43,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.12,
+          "hicp_yoy_pct": 0.2
+        },
+        {
+          "month": "2016-03",
+          "deposit_new_time_pct": 0.41,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.13,
+          "hicp_yoy_pct": 0.5
+        },
+        {
+          "month": "2016-04",
+          "deposit_new_time_pct": 0.43,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.14,
+          "hicp_yoy_pct": 0.5
+        },
+        {
+          "month": "2016-05",
+          "deposit_new_time_pct": 0.4,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.14,
+          "hicp_yoy_pct": 0.4
+        },
+        {
+          "month": "2016-06",
+          "deposit_new_time_pct": 0.41,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.16,
+          "hicp_yoy_pct": 0.7
+        },
+        {
+          "month": "2016-07",
+          "deposit_new_time_pct": 0.4,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.19,
+          "hicp_yoy_pct": 0.7
+        },
+        {
+          "month": "2016-08",
+          "deposit_new_time_pct": 0.38,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.19,
+          "hicp_yoy_pct": 0.8
+        },
+        {
+          "month": "2016-09",
+          "deposit_new_time_pct": 0.35,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.2,
+          "hicp_yoy_pct": 0.7
+        },
+        {
+          "month": "2016-10",
+          "deposit_new_time_pct": 0.34,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.21,
+          "hicp_yoy_pct": 1.1
+        },
+        {
+          "month": "2016-11",
+          "deposit_new_time_pct": 0.35,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.21,
+          "hicp_yoy_pct": 0.5
+        },
+        {
+          "month": "2016-12",
+          "deposit_new_time_pct": 0.34,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.22,
+          "hicp_yoy_pct": 0.9
+        },
+        {
+          "month": "2017-01",
+          "deposit_new_time_pct": 0.33,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.24,
+          "hicp_yoy_pct": 1.3
+        },
+        {
+          "month": "2017-02",
+          "deposit_new_time_pct": 0.33,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.24,
+          "hicp_yoy_pct": 1.6
+        },
+        {
+          "month": "2017-03",
+          "deposit_new_time_pct": 0.31,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.24,
+          "hicp_yoy_pct": 1.4
+        },
+        {
+          "month": "2017-04",
+          "deposit_new_time_pct": 0.32,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.25,
+          "hicp_yoy_pct": 2.4
+        },
+        {
+          "month": "2017-05",
+          "deposit_new_time_pct": 0.31,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.25,
+          "hicp_yoy_pct": 1.7
+        },
+        {
+          "month": "2017-06",
+          "deposit_new_time_pct": 0.32,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.0
+        },
+        {
+          "month": "2017-07",
+          "deposit_new_time_pct": 0.27,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.0
+        },
+        {
+          "month": "2017-08",
+          "deposit_new_time_pct": 0.24,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.3
+        },
+        {
+          "month": "2017-09",
+          "deposit_new_time_pct": 0.25,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.6
+        },
+        {
+          "month": "2017-10",
+          "deposit_new_time_pct": 0.26,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.9
+        },
+        {
+          "month": "2017-11",
+          "deposit_new_time_pct": 0.22,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.8
+        },
+        {
+          "month": "2017-12",
+          "deposit_new_time_pct": 0.19,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.6
+        },
+        {
+          "month": "2018-01",
+          "deposit_new_time_pct": 0.2,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.1
+        },
+        {
+          "month": "2018-02",
+          "deposit_new_time_pct": 0.19,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 0.7
+        },
+        {
+          "month": "2018-03",
+          "deposit_new_time_pct": 0.19,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 0.8
+        },
+        {
+          "month": "2018-04",
+          "deposit_new_time_pct": 0.18,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 0.3
+        },
+        {
+          "month": "2018-05",
+          "deposit_new_time_pct": 0.17,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.4
+        },
+        {
+          "month": "2018-06",
+          "deposit_new_time_pct": 0.16,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 2.0
+        },
+        {
+          "month": "2018-07",
+          "deposit_new_time_pct": 0.15,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 2.2
+        },
+        {
+          "month": "2018-08",
+          "deposit_new_time_pct": 0.15,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.3
+        },
+        {
+          "month": "2018-09",
+          "deposit_new_time_pct": 0.16,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.27,
+          "hicp_yoy_pct": 1.8
+        },
+        {
+          "month": "2018-10",
+          "deposit_new_time_pct": 0.16,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.26,
+          "hicp_yoy_pct": 0.8
+        },
+        {
+          "month": "2018-11",
+          "deposit_new_time_pct": 0.15,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.26,
+          "hicp_yoy_pct": 0.9
+        },
+        {
+          "month": "2018-12",
+          "deposit_new_time_pct": 0.15,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.24,
+          "hicp_yoy_pct": 0.6
+        },
+        {
+          "month": "2019-01",
+          "deposit_new_time_pct": 0.14,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.24,
+          "hicp_yoy_pct": 0.6
+        },
+        {
+          "month": "2019-02",
+          "deposit_new_time_pct": 0.13,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.23,
+          "hicp_yoy_pct": 0.9
+        },
+        {
+          "month": "2019-03",
+          "deposit_new_time_pct": 0.13,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.23,
+          "hicp_yoy_pct": 0.8
+        },
+        {
+          "month": "2019-04",
+          "deposit_new_time_pct": 0.14,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.23,
+          "hicp_yoy_pct": 0.9
+        },
+        {
+          "month": "2019-05",
+          "deposit_new_time_pct": 0.13,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.24,
+          "hicp_yoy_pct": 0.3
+        },
+        {
+          "month": "2019-06",
+          "deposit_new_time_pct": 0.12,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.28,
+          "hicp_yoy_pct": 0.7
+        },
+        {
+          "month": "2019-07",
+          "deposit_new_time_pct": 0.12,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.35,
+          "hicp_yoy_pct": -0.7
+        },
+        {
+          "month": "2019-08",
+          "deposit_new_time_pct": 0.1,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.4,
+          "hicp_yoy_pct": -0.1
+        },
+        {
+          "month": "2019-09",
+          "deposit_new_time_pct": 0.09,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.39,
+          "hicp_yoy_pct": -0.3
+        },
+        {
+          "month": "2019-10",
+          "deposit_new_time_pct": 0.09,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.36,
+          "hicp_yoy_pct": -0.1
+        },
+        {
+          "month": "2019-11",
+          "deposit_new_time_pct": 0.09,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.34,
+          "hicp_yoy_pct": 0.2
+        },
+        {
+          "month": "2019-12",
+          "deposit_new_time_pct": 0.08,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": -0.34,
+          "hicp_yoy_pct": 0.4
+        },
+        {
+          "month": "2020-01",
+          "deposit_new_time_pct": 0.11,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.33,
+          "hicp_yoy_pct": 0.8
+        },
+        {
+          "month": "2020-02",
+          "deposit_new_time_pct": 0.1,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.36,
+          "hicp_yoy_pct": 0.5
+        },
+        {
+          "month": "2020-03",
+          "deposit_new_time_pct": 0.09,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.36,
+          "hicp_yoy_pct": 0.1
+        },
+        {
+          "month": "2020-04",
+          "deposit_new_time_pct": 0.09,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.19,
+          "hicp_yoy_pct": -0.1
+        },
+        {
+          "month": "2020-05",
+          "deposit_new_time_pct": 0.09,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.14,
+          "hicp_yoy_pct": -0.6
+        },
+        {
+          "month": "2020-06",
+          "deposit_new_time_pct": 0.08,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.22,
+          "hicp_yoy_pct": 0.2
+        },
+        {
+          "month": "2020-07",
+          "deposit_new_time_pct": 0.09,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.35,
+          "hicp_yoy_pct": -0.1
+        },
+        {
+          "month": "2020-08",
+          "deposit_new_time_pct": 0.08,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.43,
+          "hicp_yoy_pct": -0.2
+        },
+        {
+          "month": "2020-09",
+          "deposit_new_time_pct": 0.08,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.46,
+          "hicp_yoy_pct": -0.8
+        },
+        {
+          "month": "2020-10",
+          "deposit_new_time_pct": 0.09,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.49,
+          "hicp_yoy_pct": -0.6
+        },
+        {
+          "month": "2020-11",
+          "deposit_new_time_pct": 0.08,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.51,
+          "hicp_yoy_pct": -0.4
+        },
+        {
+          "month": "2020-12",
+          "deposit_new_time_pct": 0.07,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": -0.52,
+          "hicp_yoy_pct": -0.3
+        },
+        {
+          "month": "2021-01",
+          "deposit_new_time_pct": 0.07,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.53,
+          "hicp_yoy_pct": 0.2
+        },
+        {
+          "month": "2021-02",
+          "deposit_new_time_pct": 0.07,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.52,
+          "hicp_yoy_pct": 0.3
+        },
+        {
+          "month": "2021-03",
+          "deposit_new_time_pct": 0.06,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.52,
+          "hicp_yoy_pct": 0.1
+        },
+        {
+          "month": "2021-04",
+          "deposit_new_time_pct": 0.06,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.52,
+          "hicp_yoy_pct": -0.1
+        },
+        {
+          "month": "2021-05",
+          "deposit_new_time_pct": 0.05,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.51,
+          "hicp_yoy_pct": 0.5
+        },
+        {
+          "month": "2021-06",
+          "deposit_new_time_pct": 0.05,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.51,
+          "hicp_yoy_pct": -0.6
+        },
+        {
+          "month": "2021-07",
+          "deposit_new_time_pct": 0.05,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.52,
+          "hicp_yoy_pct": 1.1
+        },
+        {
+          "month": "2021-08",
+          "deposit_new_time_pct": 0.05,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.53,
+          "hicp_yoy_pct": 1.2
+        },
+        {
+          "month": "2021-09",
+          "deposit_new_time_pct": 0.05,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.52,
+          "hicp_yoy_pct": 1.3
+        },
+        {
+          "month": "2021-10",
+          "deposit_new_time_pct": 0.05,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.53,
+          "hicp_yoy_pct": 1.8
+        },
+        {
+          "month": "2021-11",
+          "deposit_new_time_pct": 0.04,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.53,
+          "hicp_yoy_pct": 2.6
+        },
+        {
+          "month": "2021-12",
+          "deposit_new_time_pct": 0.04,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.54,
+          "hicp_yoy_pct": 2.8
+        },
+        {
+          "month": "2022-01",
+          "deposit_new_time_pct": 0.04,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.53,
+          "hicp_yoy_pct": 3.4
+        },
+        {
+          "month": "2022-02",
+          "deposit_new_time_pct": 0.04,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.48,
+          "hicp_yoy_pct": 4.4
+        },
+        {
+          "month": "2022-03",
+          "deposit_new_time_pct": 0.04,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.42,
+          "hicp_yoy_pct": 5.5
+        },
+        {
+          "month": "2022-04",
+          "deposit_new_time_pct": 0.04,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.31,
+          "hicp_yoy_pct": 7.4
+        },
+        {
+          "month": "2022-05",
+          "deposit_new_time_pct": 0.04,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": -0.14,
+          "hicp_yoy_pct": 8.1
+        },
+        {
+          "month": "2022-06",
+          "deposit_new_time_pct": 0.08,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": 0.16,
+          "hicp_yoy_pct": 9.0
+        },
+        {
+          "month": "2022-07",
+          "deposit_new_time_pct": 0.11,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": 0.47,
+          "hicp_yoy_pct": 9.4
+        },
+        {
+          "month": "2022-08",
+          "deposit_new_time_pct": 0.09,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 0.84,
+          "hicp_yoy_pct": 9.3
+        },
+        {
+          "month": "2022-09",
+          "deposit_new_time_pct": 0.06,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 1.6,
+          "hicp_yoy_pct": 9.8
+        },
+        {
+          "month": "2022-10",
+          "deposit_new_time_pct": 0.29,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.0,
+          "hicp_yoy_pct": 10.6
+        },
+        {
+          "month": "2022-11",
+          "deposit_new_time_pct": 0.41,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.32,
+          "hicp_yoy_pct": 10.2
+        },
+        {
+          "month": "2022-12",
+          "deposit_new_time_pct": 0.41,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.56,
+          "hicp_yoy_pct": 9.8
+        },
+        {
+          "month": "2023-01",
+          "deposit_new_time_pct": 0.65,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.86,
+          "hicp_yoy_pct": 8.7
+        },
+        {
+          "month": "2023-02",
+          "deposit_new_time_pct": 0.73,
+          "overnight_pct": 0.0,
+          "euribor_6m_pct": 3.14,
+          "hicp_yoy_pct": 8.6
+        },
+        {
+          "month": "2023-03",
+          "deposit_new_time_pct": 1.01,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.27,
+          "hicp_yoy_pct": 8.0
+        },
+        {
+          "month": "2023-04",
+          "deposit_new_time_pct": 1.14,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.52,
+          "hicp_yoy_pct": 6.9
+        },
+        {
+          "month": "2023-05",
+          "deposit_new_time_pct": 1.39,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.68,
+          "hicp_yoy_pct": 5.4
+        },
+        {
+          "month": "2023-06",
+          "deposit_new_time_pct": 1.72,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.83,
+          "hicp_yoy_pct": 4.7
+        },
+        {
+          "month": "2023-07",
+          "deposit_new_time_pct": 1.81,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.94,
+          "hicp_yoy_pct": 4.3
+        },
+        {
+          "month": "2023-08",
+          "deposit_new_time_pct": 1.92,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.94,
+          "hicp_yoy_pct": 5.3
+        },
+        {
+          "month": "2023-09",
+          "deposit_new_time_pct": 2.29,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": 4.03,
+          "hicp_yoy_pct": 4.8
+        },
+        {
+          "month": "2023-10",
+          "deposit_new_time_pct": 2.93,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": 4.11,
+          "hicp_yoy_pct": 3.2
+        },
+        {
+          "month": "2023-11",
+          "deposit_new_time_pct": 2.98,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": 4.06,
+          "hicp_yoy_pct": 2.2
+        },
+        {
+          "month": "2023-12",
+          "deposit_new_time_pct": 3.08,
+          "overnight_pct": 0.02,
+          "euribor_6m_pct": 3.93,
+          "hicp_yoy_pct": 1.9
+        },
+        {
+          "month": "2024-01",
+          "deposit_new_time_pct": 2.91,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.89,
+          "hicp_yoy_pct": 2.5
+        },
+        {
+          "month": "2024-02",
+          "deposit_new_time_pct": 2.81,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.9,
+          "hicp_yoy_pct": 2.3
+        },
+        {
+          "month": "2024-03",
+          "deposit_new_time_pct": 2.77,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.89,
+          "hicp_yoy_pct": 2.6
+        },
+        {
+          "month": "2024-04",
+          "deposit_new_time_pct": 2.75,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.84,
+          "hicp_yoy_pct": 2.3
+        },
+        {
+          "month": "2024-05",
+          "deposit_new_time_pct": 2.72,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.79,
+          "hicp_yoy_pct": 3.8
+        },
+        {
+          "month": "2024-06",
+          "deposit_new_time_pct": 2.66,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.71,
+          "hicp_yoy_pct": 3.1
+        },
+        {
+          "month": "2024-07",
+          "deposit_new_time_pct": 2.63,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.64,
+          "hicp_yoy_pct": 2.7
+        },
+        {
+          "month": "2024-08",
+          "deposit_new_time_pct": 2.56,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.42,
+          "hicp_yoy_pct": 1.8
+        },
+        {
+          "month": "2024-09",
+          "deposit_new_time_pct": 2.54,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.26,
+          "hicp_yoy_pct": 2.6
+        },
+        {
+          "month": "2024-10",
+          "deposit_new_time_pct": 2.39,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 3.0,
+          "hicp_yoy_pct": 2.6
+        },
+        {
+          "month": "2024-11",
+          "deposit_new_time_pct": 2.28,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.79,
+          "hicp_yoy_pct": 2.7
+        },
+        {
+          "month": "2024-12",
+          "deposit_new_time_pct": 2.16,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.63,
+          "hicp_yoy_pct": 3.1
+        },
+        {
+          "month": "2025-01",
+          "deposit_new_time_pct": 1.98,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.61,
+          "hicp_yoy_pct": 2.7
+        },
+        {
+          "month": "2025-02",
+          "deposit_new_time_pct": 1.83,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.46,
+          "hicp_yoy_pct": 2.5
+        },
+        {
+          "month": "2025-03",
+          "deposit_new_time_pct": 1.69,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.39,
+          "hicp_yoy_pct": 1.9
+        },
+        {
+          "month": "2025-04",
+          "deposit_new_time_pct": 1.64,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.2,
+          "hicp_yoy_pct": 2.1
+        },
+        {
+          "month": "2025-05",
+          "deposit_new_time_pct": 1.49,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.12,
+          "hicp_yoy_pct": 1.7
+        },
+        {
+          "month": "2025-06",
+          "deposit_new_time_pct": 1.43,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.05,
+          "hicp_yoy_pct": 2.1
+        },
+        {
+          "month": "2025-07",
+          "deposit_new_time_pct": 1.39,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.06,
+          "hicp_yoy_pct": 2.5
+        },
+        {
+          "month": "2025-08",
+          "deposit_new_time_pct": 1.34,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.08,
+          "hicp_yoy_pct": 2.5
+        },
+        {
+          "month": "2025-09",
+          "deposit_new_time_pct": 1.34,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.1,
+          "hicp_yoy_pct": 1.9
+        },
+        {
+          "month": "2025-10",
+          "deposit_new_time_pct": 1.37,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.11,
+          "hicp_yoy_pct": 2.0
+        },
+        {
+          "month": "2025-11",
+          "deposit_new_time_pct": 1.37,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.13,
+          "hicp_yoy_pct": 2.1
+        },
+        {
+          "month": "2025-12",
+          "deposit_new_time_pct": 1.36,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.14,
+          "hicp_yoy_pct": 2.4
+        },
+        {
+          "month": "2026-01",
+          "deposit_new_time_pct": 1.34,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.14,
+          "hicp_yoy_pct": 1.9
+        },
+        {
+          "month": "2026-02",
+          "deposit_new_time_pct": 1.36,
+          "overnight_pct": 0.01,
+          "euribor_6m_pct": 2.14,
+          "hicp_yoy_pct": 2.1
+        },
+        {
+          "month": "2026-03",
+          "deposit_new_time_pct": 1.42,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": 2.32,
+          "hicp_yoy_pct": 2.7
+        },
+        {
+          "month": "2026-04",
+          "deposit_new_time_pct": 1.44,
+          "overnight_pct": 0.03,
+          "euribor_6m_pct": 2.45,
+          "hicp_yoy_pct": 3.3
+        },
+        {
+          "month": "2026-05",
+          "deposit_new_time_pct": null,
+          "overnight_pct": null,
+          "euribor_6m_pct": 2.54,
+          "hicp_yoy_pct": 3.1
+        },
+        {
+          "month": "2026-06",
+          "deposit_new_time_pct": null,
+          "overnight_pct": null,
+          "euribor_6m_pct": 2.6,
+          "hicp_yoy_pct": 3.1
+        }
+      ],
+      "honesty_note_i18n": {
+        "pt": "Taxas oficiais do BdP (novos depósitos a prazo de particulares; depósitos à ordem) e Euribor (BCE), lado a lado com o IHPC homólogo. As taxas de depósito publicam com ~2 meses de desfasamento, pelo que os meses comparados podem diferir — estão indicados. O retorno real é o cálculo aritmético indicado; não é aconselhamento financeiro.",
+        "en": "Official BdP rates (new household time deposits; overnight deposits) and ECB Euribor, shown against HICP y/y. Deposit rates publish with a ~2-month lag, so compared months can differ — both are shown. The real return is the stated arithmetic; not financial advice."
+      },
+      "sources": [
+        "deposit_rate_new_time",
+        "deposit_rate_overnight",
+        "euribor_6m",
+        "hicp_yoy"
+      ]
+    },
+    "food_basket": {
+      "status": "ok",
+      "id": "food_basket",
+      "title": {
+        "pt": "O que está a encarecer",
+        "en": "What is getting more expensive"
+      },
+      "badge": {
+        "kind": "official",
+        "label": {
+          "pt": "Dado oficial",
+          "en": "Official data"
+        }
+      },
+      "as_of": "2026-06",
+      "headline": {
+        "pt": "Nos itens acompanhados, a maior subida em maio de 2026 foi nas rendas de casa (+5,2% homólogo); a alimentação sobe 3,0% e a inflação total 3,1% (junho de 2026).",
+        "en": "Among tracked items, actual rents rose most in May 2026 (+5.2% y/y); food is up 3.0% and headline inflation 3.1% (June 2026)."
+      },
+      "aggregates": {
+        "hicp_yoy": {
+          "label": {
+            "pt": "Inflação total",
+            "en": "Headline inflation"
+          },
+          "yoy_pct": 3.1,
+          "period": "2026-06"
+        },
+        "hicp_food_yoy": {
+          "label": {
+            "pt": "Alimentação",
+            "en": "Food"
+          },
+          "yoy_pct": 3.0,
+          "period": "2026-06"
+        },
+        "hicp_energy_yoy": {
+          "label": {
+            "pt": "Energia",
+            "en": "Energy"
+          },
+          "yoy_pct": 9.9,
+          "period": "2026-06"
+        },
+        "hicp_core_yoy": {
+          "label": {
+            "pt": "Subjacente (sem energia e alimentação)",
+            "en": "Core (ex energy, food)"
+          },
+          "yoy_pct": 2.6,
+          "period": "2026-06"
+        }
+      },
+      "items_ranked": [
+        {
+          "id": "hicp_actual_rents_yoy",
+          "label": {
+            "pt": "Rendas de casa",
+            "en": "Actual rents"
+          },
+          "yoy_pct": 5.2,
+          "period": "2026-05",
+          "cumulative_5y_pct": 27.0
+        },
+        {
+          "id": "hicp_bread_yoy",
+          "label": {
+            "pt": "Pão e cereais",
+            "en": "Bread and cereals"
+          },
+          "yoy_pct": 3.1,
+          "period": "2026-05",
+          "cumulative_5y_pct": 36.1
+        },
+        {
+          "id": "hicp_milk_yoy",
+          "label": {
+            "pt": "Leite",
+            "en": "Milk"
+          },
+          "yoy_pct": 1.9,
+          "period": "2026-05",
+          "cumulative_5y_pct": 52.4
+        },
+        {
+          "id": "hicp_electricity_yoy",
+          "label": {
+            "pt": "Eletricidade",
+            "en": "Electricity"
+          },
+          "yoy_pct": 0.8,
+          "period": "2026-05",
+          "cumulative_5y_pct": 19.5
+        },
+        {
+          "id": "hicp_veg_oils_yoy",
+          "label": {
+            "pt": "Óleos alimentares",
+            "en": "Edible oils"
+          },
+          "yoy_pct": -2.8,
+          "period": "2026-05",
+          "cumulative_5y_pct": 19.0
+        }
+      ],
+      "cumulative_since_5y": {
+        "window_years": 5,
+        "badge": {
+          "kind": "official_calc",
+          "label": {
+            "pt": "Dado oficial, cálculo nosso",
+            "en": "Official data, our calculation"
+          }
+        },
+        "rows": [
+          {
+            "id": "food",
+            "label": {
+              "pt": "Alimentação",
+              "en": "Food"
+            },
+            "cumulative_pct": 31.6,
+            "window": "2021-06 .. 2026-06"
+          },
+          {
+            "id": "hicp_all",
+            "label": {
+              "pt": "Todos os preços (IHPC)",
+              "en": "All prices"
+            },
+            "cumulative_pct": 23.9,
+            "window": "2021-06 .. 2026-06"
+          }
+        ]
+      },
+      "honesty_note_i18n": {
+        "pt": "Variações homólogas oficiais do IHPC (Eurostat/INE). O detalhe por item publica ~1 mês depois do índice-flash — os períodos estão indicados e o mês mais recente do total é provisório (flash). Os acumulados de 5 anos são o produto das variações homólogas oficiais do mesmo mês (aritmética exata, cálculo nosso). O salário médio (SS) é sensível à composição do emprego. O azeite não é publicado isoladamente para Portugal no IHPC — usamos os óleos alimentares.",
+        "en": "Official HICP y/y rates (Eurostat/INE). Item detail publishes ~1 month after the flash headline — periods are shown, and the latest headline month is a provisional flash. The 5-year cumulatives are exact products of the official same-month y/y rates (our arithmetic). The SS mean wage is composition-sensitive. Olive oil is not published separately for PT in the HICP — edible oils are used."
+      },
+      "sources": [
+        "hicp_yoy",
+        "hicp_food_yoy",
+        "hicp_energy_yoy",
+        "hicp_core_yoy",
+        "hicp_index",
+        "hicp_bread_yoy",
+        "hicp_milk_yoy",
+        "hicp_veg_oils_yoy",
+        "hicp_electricity_yoy",
+        "hicp_actual_rents_yoy",
+        "ine_wage_avg_rev3"
+      ]
+    },
+    "tourism_pulse": {
+      "status": "ok",
+      "id": "tourism_pulse",
+      "title": {
+        "pt": "Turismo: dormidas",
+        "en": "Tourism: overnight stays"
+      },
+      "badge": {
+        "kind": "official",
+        "label": {
+          "pt": "Dado oficial",
+          "en": "Official data"
+        }
+      },
+      "as_of": "2026-05-31",
+      "headline": {
+        "pt": "Maio de 2026: 8,0 milhões de dormidas, +2,8% homólogo — o melhor maio da série (desde 2013).",
+        "en": "May 2026: 8.0 million overnight stays, +2.8% y/y — the best May on record (series since 2013)."
+      },
+      "total": {
+        "value": 8017760,
+        "period": "2026-05",
+        "yoy_pct": 2.8
+      },
+      "non_residents": {
+        "value": 5875335,
+        "period": "2026-05",
+        "yoy_pct": 1.1,
+        "share_of_total_pct": 73.3
+      },
+      "same_month_record": {
+        "rank": 1,
+        "n_years": 14,
+        "first_year": 2013,
+        "prev_best_year": 2025,
+        "prev_best_value": 7801025.0
+      },
+      "honesty_note_i18n": {
+        "pt": "Dormidas em alojamentos turísticos (INE, via BdP/BPstat). A comparação de recordes é feita SÓ contra o mesmo mês do calendário (a série não é ajustada de sazonalidade) e apenas dentro da janela da série indicada — não afirmamos 'de sempre'. Variações homólogas: cálculo nosso sobre os níveis oficiais.",
+        "en": "Overnight stays in tourist accommodation (INE, via BdP/BPstat). Record framing compares ONLY the same calendar month (the series is not seasonally adjusted) and only within the stated series window — no 'ever' claims. Y/y changes: our arithmetic on the official levels."
+      },
+      "sources": [
+        "tourism_nights_total",
+        "tourism_nights_nonresidents"
+      ]
+    },
+    "public_accounts": {
+      "status": "ok",
+      "id": "public_accounts",
+      "title": {
+        "pt": "Contas públicas: impostos e dívida",
+        "en": "Public accounts: taxes and debt"
+      },
+      "badge": {
+        "kind": "official_calc",
+        "label": {
+          "pt": "Dado oficial, cálculo nosso",
+          "en": "Official data, our calculation"
+        }
+      },
+      "as_of": "2026-05-31",
+      "headline": {
+        "pt": "Receita de IVA dos últimos 12 meses (até maio de 2026): +5,6% em termos reais; dívida pública em maio de 2026: 288,7 mil milhões €.",
+        "en": "VAT receipts over the last 12 months (to May 2026): +5.6% in real terms; public debt in May 2026: EUR 288.7bn."
+      },
+      "taxes_rolling_12m": {
+        "vat_monthly": {
+          "label": {
+            "pt": "IVA",
+            "en": "VAT"
+          },
+          "rolling_12m_sum_meur": 27172.0,
+          "rolling_12m_nominal_growth_pct": 8.1,
+          "rolling_12m_real_growth_pct": 5.6,
+          "period": "2026-05",
+          "as_of": "2026-05-31"
+        },
+        "irs_monthly": {
+          "label": {
+            "pt": "IRS",
+            "en": "Personal income tax (IRS)"
+          },
+          "rolling_12m_sum_meur": 18591.0,
+          "rolling_12m_nominal_growth_pct": 3.2,
+          "rolling_12m_real_growth_pct": 0.8,
+          "period": "2026-05",
+          "as_of": "2026-05-31"
+        },
+        "irc_monthly": {
+          "label": {
+            "pt": "IRC",
+            "en": "Corporate income tax (IRC)"
+          },
+          "rolling_12m_sum_meur": 9900.0,
+          "rolling_12m_nominal_growth_pct": -5.6,
+          "rolling_12m_real_growth_pct": -7.8,
+          "period": "2026-05",
+          "as_of": "2026-05-31"
+        },
+        "isp_monthly": {
+          "label": {
+            "pt": "ISP",
+            "en": "Fuel tax (ISP)"
+          },
+          "rolling_12m_sum_meur": 3738.0,
+          "rolling_12m_nominal_growth_pct": 2.9,
+          "rolling_12m_real_growth_pct": 0.5,
+          "period": "2026-05",
+          "as_of": "2026-05-31"
+        }
+      },
+      "debt": {
+        "level_meur": 288659.1,
+        "period": "2026-05",
+        "as_of": "2026-05-31",
+        "change_12m_meur": 4045.4,
+        "change_12m_pct": 1.4,
+        "path_last_24m": [
+          {
+            "month": "2024-05",
+            "value_meur": 275873.5
+          },
+          {
+            "month": "2024-06",
+            "value_meur": 276856.1
+          },
+          {
+            "month": "2024-07",
+            "value_meur": 274739.1
+          },
+          {
+            "month": "2024-08",
+            "value_meur": 273807.7
+          },
+          {
+            "month": "2024-09",
+            "value_meur": 272350.8
+          },
+          {
+            "month": "2024-10",
+            "value_meur": 269927.9
+          },
+          {
+            "month": "2024-11",
+            "value_meur": 269337.0
+          },
+          {
+            "month": "2024-12",
+            "value_meur": 270901.9
+          },
+          {
+            "month": "2025-01",
+            "value_meur": 274367.5
+          },
+          {
+            "month": "2025-02",
+            "value_meur": 277265.7
+          },
+          {
+            "month": "2025-03",
+            "value_meur": 278244.4
+          },
+          {
+            "month": "2025-04",
+            "value_meur": 280842.5
+          },
+          {
+            "month": "2025-05",
+            "value_meur": 284613.8
+          },
+          {
+            "month": "2025-06",
+            "value_meur": 287135.8
+          },
+          {
+            "month": "2025-07",
+            "value_meur": 288146.2
+          },
+          {
+            "month": "2025-08",
+            "value_meur": 288479.7
+          },
+          {
+            "month": "2025-09",
+            "value_meur": 294507.6
+          },
+          {
+            "month": "2025-10",
+            "value_meur": 283334.1
+          },
+          {
+            "month": "2025-11",
+            "value_meur": 281471.1
+          },
+          {
+            "month": "2025-12",
+            "value_meur": 275062.8
+          },
+          {
+            "month": "2026-01",
+            "value_meur": 281151.0
+          },
+          {
+            "month": "2026-02",
+            "value_meur": 282681.4
+          },
+          {
+            "month": "2026-03",
+            "value_meur": 283106.5
+          },
+          {
+            "month": "2026-04",
+            "value_meur": 287003.1
+          },
+          {
+            "month": "2026-05",
+            "value_meur": 288659.1
+          }
+        ],
+        "ratio_note": {
+          "pt": "O rácio dívida/PIB (limiar dos 90%) exige o PIB nominal, que não está nas nossas fontes recolhidas — publicamos apenas o nível em milhões de euros; o rácio oficial é divulgado pelo BdP/INE.",
+          "en": "The debt-to-GDP ratio (90% threshold) needs nominal GDP, which is not among our collected sources — only the EUR-million level is published here; the official ratio comes from BdP/INE."
+        }
+      },
+      "honesty_note_i18n": {
+        "pt": "Execução orçamental do Estado (DGO, republicada pelo BdP) em ótica de CAIXA e apenas do subsetor Estado — NÃO é comparável com o défice/dívida de Maastricht das administrações públicas. Fluxos mensais derivados por nós dos acumulados do ano (com reinício em janeiro); crescimentos reais deflacionados pelo IHPC médio de cada janela de 12 meses. Reembolsos de IRS/IRC criam forte sazonalidade — daí usarmos somas móveis de 12 meses.",
+        "en": "State budget execution (DGO, republished by BdP) on a CASH basis for the State subsector only — NOT comparable with the Maastricht general-government deficit/debt. Monthly flows are our derivation from year-to-date cumulatives (January restart); real growth deflated by the mean HICP index of each 12-month window. IRS/IRC refunds create strong seasonality — hence rolling 12-month sums."
+      },
+      "sources": [
+        "vat_monthly",
+        "irs_monthly",
+        "irc_monthly",
+        "isp_monthly",
+        "gg_debt_maastricht",
+        "hicp_index"
+      ]
+    },
+    "release_calendar": {
+      "status": "ok",
+      "id": "release_calendar",
+      "title": {
+        "pt": "Próximas divulgações",
+        "en": "Upcoming releases"
+      },
+      "badge": null,
+      "as_of": "2026-07-03",
+      "headline": {
+        "pt": "Próxima divulgação relevante: Indicadores coincidentes do BdP (julho de 2026) — por volta de 2026-07-15 (data estimada).",
+        "en": "Next relevant release: BdP coincident indicators (July 2026) — around 2026-07-15 (estimated date)."
+      },
+      "entries": [
+        {
+          "id": "bdp_coincident",
+          "source": "Banco de Portugal",
+          "name": {
+            "pt": "Indicadores coincidentes do BdP (julho de 2026)",
+            "en": "BdP coincident indicators (July 2026)"
+          },
+          "date_estimated": "2026-07-15",
+          "estimated": true,
+          "rule": "around mid-month (first business day on/after the 15th)",
+          "updates": {
+            "pt": "âncora do pulso da economia",
+            "en": "economic-pulse anchor"
+          }
+        },
+        {
+          "id": "ine_unemployment_monthly",
+          "source": "INE",
+          "name": {
+            "pt": "Estimativas mensais de desemprego, junho de 2026",
+            "en": "Monthly unemployment estimates, June 2026"
+          },
+          "date_estimated": "2026-07-29",
+          "estimated": true,
+          "rule": "two business days before the last business day of the month",
+          "updates": {
+            "pt": "mercado de trabalho",
+            "en": "labour market"
+          }
+        },
+        {
+          "id": "dgecfin_esi",
+          "source": "DG-ECFIN",
+          "name": {
+            "pt": "Indicador de sentimento económico (ESI), julho de 2026",
+            "en": "Economic Sentiment Indicator (ESI), July 2026"
+          },
+          "date_estimated": "2026-07-30",
+          "estimated": true,
+          "rule": "one business day before the last business day of the month",
+          "updates": {
+            "pt": "pulso da economia e estimativa do PIB",
+            "en": "economic pulse and GDP nowcast"
+          }
+        },
+        {
+          "id": "ine_gdp_flash",
+          "source": "INE",
+          "name": {
+            "pt": "PIB — estimativa rápida, 2.º trimestre de 2026",
+            "en": "GDP flash estimate, Q2 2026"
+          },
+          "date_estimated": "2026-07-31",
+          "estimated": true,
+          "rule": "last business day of the first month after the quarter (t+30)",
+          "updates": {
+            "pt": "estimativa trimestral do PIB e registo de acertos",
+            "en": "quarterly GDP nowcast and track record"
+          }
+        },
+        {
+          "id": "ine_hicp_flash",
+          "source": "INE",
+          "name": {
+            "pt": "IHPC/IPC — estimativa rápida de julho de 2026",
+            "en": "HICP/CPI flash estimate, July 2026"
+          },
+          "date_estimated": "2026-07-31",
+          "estimated": true,
+          "rule": "last business day of the reference month",
+          "updates": {
+            "pt": "inflação, salários reais, cabaz alimentar",
+            "en": "inflation, real wages, food basket"
+          }
+        }
+      ],
+      "honesty_note_i18n": {
+        "pt": "Datas ESTIMADAS por regras de calendário (dias úteis, padrões habituais de cada instituição) — não são datas confirmadas pelas fontes; podem falhar por um ou mais dias.",
+        "en": "Dates are ESTIMATED from calendar rules (business days, each institution's usual pattern) — not source-confirmed; they can be off by a day or more."
+      },
+      "sources": []
+    }
+  }
+}

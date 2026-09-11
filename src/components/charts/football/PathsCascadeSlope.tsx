@@ -123,14 +123,14 @@ function SlopeChart({ data }: { data: TeamCascade }) {
               x2={W - PAD_R}
               y1={yScale(v)}
               y2={yScale(v)}
-              stroke="#e7e5e4"
+              stroke="#dadccf"
               strokeWidth={0.5}
             />
             <text
               x={W - PAD_R + 4}
               y={yScale(v) + 3}
-              className="text-[9px]"
-              fill="#a8a29e"
+              className="text-[11px]"
+              fill="#7f9284"
             >
               {Math.round(v * 100)}%
             </text>
@@ -138,7 +138,7 @@ function SlopeChart({ data }: { data: TeamCascade }) {
         ))}
 
         {/* Lose path (faded) */}
-        <path d={losePath} fill="none" stroke="#ef4444" strokeWidth={1.5} opacity={0.25} strokeDasharray="4 3" />
+        <path d={losePath} fill="none" stroke="#bd714e" strokeWidth={1.5} opacity={0.25} strokeDasharray="4 3" />
 
         {/* Win path (main) */}
         <path d={winPath} fill="none" stroke={data.teamColor} strokeWidth={2.5} opacity={0.8} />
@@ -177,8 +177,8 @@ function SlopeChart({ data }: { data: TeamCascade }) {
                 x={cx}
                 y={H - PAD_B + 16}
                 textAnchor="middle"
-                fill={isKey ? "#92400e" : "#78716c"}
-                className="text-[9px] font-bold"
+                fill={isKey ? "#6e5520" : "#5f7062"}
+                className="text-[11px] font-bold"
                 style={{ textTransform: "uppercase", letterSpacing: "0.05em" }}
               >
                 {p.matchday || "Atual"}
@@ -188,8 +188,8 @@ function SlopeChart({ data }: { data: TeamCascade }) {
                   x={cx}
                   y={H - PAD_B + 28}
                   textAnchor="middle"
-                  fill="#a8a29e"
-                  className="text-[8px]"
+                  fill="#7f9284"
+                  className="text-[11px]"
                 >
                   {"step" in p ? p.label : ""}
                 </text>
@@ -202,7 +202,7 @@ function SlopeChart({ data }: { data: TeamCascade }) {
                   y={H - PAD_B + 34}
                   width={4}
                   height={4}
-                  fill="#f59e0b"
+                  fill="#c49536"
                   rx={1}
                 />
               )}
@@ -213,7 +213,7 @@ function SlopeChart({ data }: { data: TeamCascade }) {
                   cx={cx}
                   cy={yScale(losePoints[i].y)}
                   r={2}
-                  fill="#ef4444"
+                  fill="#bd714e"
                   opacity={0.3}
                 />
               )}
@@ -248,7 +248,7 @@ export default function PathsCascadeSlope() {
         <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
           Variante C2
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-stone-900 mb-1">
+        <h3 className="text-xl tracking-tight text-stone-900 mb-1">
           Slope Chart
         </h3>
         <p className="text-sm text-stone-500">

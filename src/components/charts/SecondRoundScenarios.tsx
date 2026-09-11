@@ -92,13 +92,13 @@ export function SecondRoundScenarios({
 
   return (
     <div className="space-y-4" data-testid="scenarios">
-      <h3 className="text-lg font-bold text-stone-900">
+      <h3 className="text-lg text-stone-900">
         {translations.keyScenarios}
       </h3>
 
       <div className="space-y-4">
         {scenarios.map((scenario) => (
-          <div key={scenario.key} className="bg-white rounded-lg border border-stone-200 p-4">
+          <div key={scenario.key} className="bg-cream rounded-2xl border border-stone-200 p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-stone-700">{scenario.label}</span>
               <span className="text-sm font-bold text-stone-900 tabular-nums">
@@ -110,7 +110,7 @@ export function SecondRoundScenarios({
                 className="absolute left-0 top-0 h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${Math.min(100, scenario.probability * 100)}%`,
-                  backgroundColor: scenario.probability > 0.5 ? '#dc2626' : '#6b7280',
+                  backgroundColor: scenario.probability > 0.5 ? '#a3543a' : '#5f7062',
                 }}
               />
             </div>

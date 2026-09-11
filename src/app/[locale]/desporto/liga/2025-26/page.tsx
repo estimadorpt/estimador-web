@@ -1,4 +1,6 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { loadSeasonReview } from "@/lib/utils/football-data-loader";
@@ -88,18 +90,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const c = locale === "en" ? copy.en : copy.pt;
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga/2025-26`,
     title: `${c.title} | Estimador`,
     description: c.description,
-    openGraph: {
-      title: c.title,
-      description: c.description,
-      type: "article",
-    },
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/desporto/liga/${SEASON}`,
-    },
-  };
+  });
 }
 
 export default async function SeasonReviewPage({
@@ -114,7 +110,7 @@ export default async function SeasonReviewPage({
 
   if (!review) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-paper">
         <Header />
         <div className="max-w-5xl mx-auto px-4 py-20 text-center text-stone-500">
           <p>{c.unavailable}</p>
@@ -146,14 +142,14 @@ export default async function SeasonReviewPage({
     });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
         <Link
           href="/desporto/liga"
           locale={locale}
-          className="text-sm text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 mb-6 group"
+          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           {c.back}
@@ -162,7 +158,7 @@ export default async function SeasonReviewPage({
         <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
           {c.kicker}
         </p>
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{c.title}</h1>
+        <h1 className="text-3xl md:text-4xl tracking-tight mb-4">{c.title}</h1>
         <div className="max-w-3xl space-y-4 mb-10">
           <p className="text-lg text-stone-600 leading-relaxed">{c.standfirstA}</p>
           <p className="text-lg text-stone-800 leading-relaxed font-medium">
@@ -198,8 +194,8 @@ export default async function SeasonReviewPage({
                 : `points below expectation for relegated ${teamDisplayName(unluckiest.team)}`,
             },
           ].map((kpi) => (
-            <div key={kpi.label} className="bg-white p-4">
-              <div className="text-3xl font-black text-stone-900 tabular-nums">
+            <div key={kpi.label} className="bg-cream p-4">
+              <div className="text-3xl font-display font-extrabold text-stone-900 tabular-nums">
                 {kpi.value}
               </div>
               <div className="text-xs text-stone-500 mt-1 leading-snug">{kpi.label}</div>
@@ -209,19 +205,19 @@ export default async function SeasonReviewPage({
 
         {/* Final table */}
         <section className="mb-14">
-          <h2 className="text-xl font-bold tracking-tight mb-1">{c.tableTitle}</h2>
+          <h2 className="text-2xl tracking-tight mb-1">{c.tableTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.tableIntro}</p>
           <FinalTable data={review} locale={locale} />
         </section>
 
         {/* Luck index */}
         <section className="mb-14">
-          <h2 className="text-xl font-bold tracking-tight mb-1">{c.luckTitle}</h2>
+          <h2 className="text-2xl tracking-tight mb-1">{c.luckTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.luckIntro}</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="border-t-2 border-emerald-700 pt-3">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                 {pt ? "O mais afortunado" : "The luckiest"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
@@ -244,7 +240,7 @@ export default async function SeasonReviewPage({
               </p>
             </div>
             <div className="border-t-2 border-red-600 pt-3">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                 {pt ? "O mais castigado" : "The unluckiest"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
@@ -268,7 +264,7 @@ export default async function SeasonReviewPage({
               </p>
             </div>
             <div className="border-t-2 border-stone-400 pt-3">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
                 {pt ? "A melhor finalização" : "The best finishing"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
@@ -310,7 +306,7 @@ export default async function SeasonReviewPage({
 
         {/* Title race evolution */}
         <section className="mb-14">
-          <h2 className="text-xl font-bold tracking-tight mb-1">{c.raceTitle}</h2>
+          <h2 className="text-2xl tracking-tight mb-1">{c.raceTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.raceIntro}</p>
           <TitleRaceEvolution
             race={review.title_race}
@@ -327,7 +323,7 @@ export default async function SeasonReviewPage({
         {/* Report card */}
         {rc && (
           <section className="mb-14">
-            <h2 className="text-xl font-bold tracking-tight mb-1">{c.reportTitle}</h2>
+            <h2 className="text-2xl tracking-tight mb-1">{c.reportTitle}</h2>
             <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.reportIntro}</p>
             <ReportCard data={review} locale={locale} />
 
@@ -399,7 +395,7 @@ export default async function SeasonReviewPage({
             <Link
               href="/desporto/liga"
               locale={locale}
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
             >
               {c.current}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -407,7 +403,7 @@ export default async function SeasonReviewPage({
             <Link
               href="/desporto/liga/dados"
               locale={locale}
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
             >
               {c.data}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -415,7 +411,7 @@ export default async function SeasonReviewPage({
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
             >
               {c.methodology}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -423,6 +419,7 @@ export default async function SeasonReviewPage({
           </div>
         </section>
       </div>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

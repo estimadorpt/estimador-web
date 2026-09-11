@@ -13,7 +13,7 @@ interface PresidentialRunoffMatrixProps {
 
 // Color scale from light to dark (probability 0 to max)
 function getHeatmapColor(value: number, maxValue: number): string {
-  if (value === 0) return '#f5f5f5';
+  if (value === 0) return '#f5f4ed';
   
   const intensity = value / maxValue;
   // Interpolate from light purple to dark purple
@@ -54,7 +54,7 @@ export function PresidentialRunoffMatrix({
   };
 
   if (candidates.length === 0) {
-    return <div className="text-gray-500 text-center py-8">No matrix data available</div>;
+    return <div className="text-stone-500 text-center py-8">No matrix data available</div>;
   }
 
   const cellSize = 56;
@@ -73,7 +73,7 @@ export function PresidentialRunoffMatrix({
               <text
                 textAnchor="start"
                 dominantBaseline="middle"
-                className="text-[10px] fill-gray-700 font-medium"
+                className="text-[11px] fill-stone-700 font-medium"
               >
                 {candidate.length > 12 ? candidate.substring(0, 12) + '…' : candidate}
               </text>
@@ -96,7 +96,7 @@ export function PresidentialRunoffMatrix({
               <text
                 textAnchor="end"
                 dominantBaseline="middle"
-                className="text-[10px] fill-gray-700 font-medium"
+                className="text-[11px] fill-stone-700 font-medium"
               >
                 {rowCandidate.length > 12 ? rowCandidate.substring(0, 12) + '…' : rowCandidate}
               </text>
@@ -112,7 +112,7 @@ export function PresidentialRunoffMatrix({
             {candidates.map((colCandidate, colIdx) => {
               const value = probabilities[rowIdx][colIdx];
               const bgColor = getHeatmapColor(value, maxProb);
-              const textColor = value > maxProb * 0.5 ? 'white' : '#374151';
+              const textColor = value > maxProb * 0.5 ? 'white' : '#434d48';
 
               return (
                 <g key={`cell-${rowIdx}-${colIdx}`} transform={`translate(${labelWidth + colIdx * cellSize}, 0)`}>
@@ -147,7 +147,7 @@ export function PresidentialRunoffMatrix({
         <g transform={`translate(${labelWidth}, ${svgHeight - 20})`}>
           <defs>
             <linearGradient id="heatmapGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#f5f5f5" />
+              <stop offset="0%" stopColor="#f5f4ed" />
               <stop offset="100%" stopColor={getHeatmapColor(maxProb, maxProb)} />
             </linearGradient>
           </defs>
@@ -159,8 +159,8 @@ export function PresidentialRunoffMatrix({
             fill="url(#heatmapGradient)"
             rx={2}
           />
-          <text x={0} y={-3} className="text-[9px] fill-gray-400">0%</text>
-          <text x={100} y={-3} textAnchor="end" className="text-[9px] fill-gray-400">
+          <text x={0} y={-3} className="text-[11px] fill-stone-400">0%</text>
+          <text x={100} y={-3} textAnchor="end" className="text-[11px] fill-stone-400">
             {(maxProb * 100).toFixed(0)}%
           </text>
         </g>

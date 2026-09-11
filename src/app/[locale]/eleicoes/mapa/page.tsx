@@ -1,6 +1,8 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Header } from '@/components/Header';
+import { SiteFooter } from '@/components/SiteFooter';
 import MapPageClient from '@/components/MapPageClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,13 +34,12 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/eleicoes/mapa`,
     title: `${t('map.title')} - estimador.pt`,
     description: t('map.selectDistrict'),
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/eleicoes/mapa`,
-    },
-  };
+  });
 }
 
 export default async function MapPage({
@@ -51,17 +52,17 @@ export default async function MapPage({
   const districtForecast = await getDistrictForecast();
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-paper">
       <Header />
       
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-slate-900 mb-4">
+            <h1 className="text-4xl text-stone-900 mb-4">
               {t('map.subtitle')}
             </h1>
-            <p className="text-lg text-slate-600 max-w-3xl">
+            <p className="text-lg text-stone-600 max-w-3xl">
               {t('map.selectDistrict')}
             </p>
           </div>
@@ -89,19 +90,19 @@ export default async function MapPage({
                 <CardContent className="space-y-4">
                   <div>
                     <h4 className="font-medium mb-2">{t('map.colors')}</h4>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-stone-600">
                       {t('map.colorsDescription')}
                     </p>
                   </div>
                   <div>
                     <h4 className="font-medium mb-2">{t('map.interaction')}</h4>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-stone-600">
                       {t('map.interactionDescription')}
                     </p>
                   </div>
                   <div>
                     <h4 className="font-medium mb-2">{t('map.islands')}</h4>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-stone-600">
                       {t('map.islandsDescription')}
                     </p>
                   </div>
@@ -121,12 +122,13 @@ export default async function MapPage({
           </div>
         </div>
       </main>
+      <SiteFooter locale={locale} />
     </div>
   );
 }
 
 // Component for map statistics
-function MapStats({ districtForecast, t }: { districtForecast: DistrictForecast[], t: any }) {
+function MapStats({ districtForecast, t }: { districtForecast: DistrictForecast[]; t: (key: string) => string }) {
   const partyWins = districtForecast.reduce((acc, district) => {
     acc[district.winning_party] = (acc[district.winning_party] || 0) + 1;
     return acc;
@@ -147,7 +149,7 @@ function MapStats({ districtForecast, t }: { districtForecast: DistrictForecast[
         ))}
       </div>
       <div className="pt-3 border-t">
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-stone-600">
           {t('map.totalDistricts')} {districtForecast.length}
         </p>
       </div>

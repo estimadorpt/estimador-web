@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { useLocale } from "next-intl";
+import { ChartTable } from "@/components/viz/ChartTable";
 
 interface TimelinePoint {
   matchday: number;
@@ -25,12 +27,14 @@ export function TeamTimeline({
 }: TeamTimelineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [, setDimensions] = useState({ width: 0, height: 0 });
+  const locale = useLocale();
+  const pt = locale !== "en";
 
   useEffect(() => {
     if (!containerRef.current || data.length === 0) return;
 
     const render = async () => {
-      const Plot = (await import("@observablehq/plot")).default || await import("@observablehq/plot");
+      const Plot = await import("@observablehq/plot");
       const container = containerRef.current;
       if (!container) return;
 
@@ -52,6 +56,7 @@ export function TeamTimeline({
         marginLeft: 45,
         marginRight: 20,
         marginBottom: 35,
+        style: { fontFamily: "Manrope, system-ui, sans-serif", fontSize: "12px", background: "transparent", overflow: "visible" },
         x: {
           label: xAxisLabel,
           // Matchdays are whole numbers. Left to its own devices Plot fits a
@@ -84,6 +89,11 @@ export function TeamTimeline({
             strokeWidth: 2.5,
             curve: "monotone-x",
           }),
+          Plot.tip(data, Plot.pointerX({
+            x: "matchday",
+            y: "value",
+            title: (d: TimelinePoint) => `${xAxisLabel} ${d.matchday}: ${Math.round(d.value)}% (${Math.round(d.lo)}–${Math.round(d.hi)}%)`,
+          })),
           Plot.dot(data.filter((_, i) => i === data.length - 1), {
             x: "matchday",
             y: "value",
@@ -115,7 +125,12 @@ export function TeamTimeline({
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [data, teamColor, yAxisLabel]);
+  }, [data, teamColor, yAxisLabel, xAxisLabel]);
 
-  return <div ref={containerRef} className="w-full min-h-[280px]" />;
+  return (
+    <div className="w-full">
+      <div ref={containerRef} className="w-full min-h-[280px]" />
+      <ChartTable caption={yAxisLabel} columns={[xAxisLabel, yAxisLabel, pt ? "Intervalo" : "Interval"]} rows={data.map(d => [d.matchday, `${Math.round(d.value)}%`, `${Math.round(d.lo)}–${Math.round(d.hi)}%`])} />
+    </div>
+  );
 }

@@ -14,8 +14,8 @@ interface TeamStrengthRatingsProps {
 }
 
 // Consistent color palette — no team colors to avoid the white/red problem
-const GOOD_COLOR = '#166534';   // green-800 — strong attack or strong defense
-const WEAK_COLOR = '#dc2626';   // red-600  — weak attack or weak defense
+const GOOD_COLOR = '#3a6b50';   // green-800 — strong attack or strong defense
+const WEAK_COLOR = '#a3543a';   // red-600  — weak attack or weak defense
 
 export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsProps) {
   if (!strengths || Object.keys(strengths).length === 0) return null;
@@ -36,12 +36,12 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
       {/* Column headers */}
       <div className="flex items-center gap-2 mb-3">
         <div className="w-16 sm:w-32 flex-shrink-0" />
-        <div className="flex-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-stone-400 px-1">
+        <div className="flex-1 flex justify-between text-[11px] font-bold uppercase tracking-wider text-stone-400 px-1">
           <span className="text-red-400 hidden sm:inline">&larr; {labels.worse ?? "worse"}</span>
           <span>{labels.defense ?? "Defense"}</span>
           <span className="text-emerald-600 hidden sm:inline">{labels.better ?? "better"} &rarr;</span>
         </div>
-        <div className="flex-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-stone-400 px-1">
+        <div className="flex-1 flex justify-between text-[11px] font-bold uppercase tracking-wider text-stone-400 px-1">
           <span className="text-red-400 hidden sm:inline">&larr; {labels.worse ?? "worse"}</span>
           <span>{labels.attack ?? "Attack"}</span>
           <span className="text-emerald-600 hidden sm:inline">{labels.better ?? "better"} &rarr;</span>

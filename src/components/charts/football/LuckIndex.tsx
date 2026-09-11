@@ -32,7 +32,7 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
       {/* Scale labels */}
       <div className="flex items-center gap-2 mb-3">
         <div className="w-16 sm:w-28 flex-shrink-0" />
-        <div className="flex-1 flex justify-between text-[10px] font-bold uppercase tracking-wider px-1">
+        <div className="flex-1 flex justify-between text-[11px] font-bold uppercase tracking-wider px-1">
           <span className="text-red-400">{labels.underperforming ?? "Abaixo do esperado"}</span>
           <span className="text-emerald-600">{labels.overperforming ?? "Acima do esperado"}</span>
         </div>
@@ -74,7 +74,7 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
                     style={{
                       left: '50%',
                       width: `${barPct}%`,
-                      backgroundColor: '#166534',
+                      backgroundColor: '#3a6b50',
                       opacity: 0.45,
                     }}
                   />
@@ -85,7 +85,7 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
                     style={{
                       left: `${50 - barPct}%`,
                       width: `${barPct}%`,
-                      backgroundColor: '#dc2626',
+                      backgroundColor: '#a3543a',
                       opacity: 0.35,
                     }}
                   />
@@ -94,12 +94,12 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
                 {/* Delta label on bar */}
                 {Math.abs(entry.delta) >= 0.5 && (
                   <div
-                    className="absolute top-0 h-full flex items-center text-[10px] font-bold tabular-nums"
+                    className="absolute top-0 h-full flex items-center text-[11px] font-bold tabular-nums"
                     style={{
                       ...(isPositive
                         ? { left: `${50 + barPct + 1}%` }
                         : { right: `${50 + barPct + 1}%` }),
-                      color: isPositive ? '#166534' : '#dc2626',
+                      color: isPositive ? '#3a6b50' : '#a3543a',
                     }}
                   >
                     {isPositive ? '+' : ''}{entry.delta.toFixed(1)}
@@ -117,7 +117,7 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
                 <div className="text-xs tabular-nums font-semibold text-stone-700">
                   {entry.actualPts} {labels.pointsShort ?? "pts"}
                 </div>
-                <div className="text-[10px] tabular-nums text-stone-400">
+                <div className="text-[11px] tabular-nums text-stone-400">
                   {entry.expectedPts.toLocaleString(locale === "en" ? "en-GB" : "pt-PT", {
                     minimumFractionDigits: 1,
                     maximumFractionDigits: 1,

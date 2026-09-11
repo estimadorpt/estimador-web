@@ -55,13 +55,13 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
   return (
     <>
       {/* Second Round Hero Section */}
-      <section className="bg-white border-b border-stone-200">
+      <section className="bg-paper border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-10">
           <div className="max-w-3xl">
             <div className="inline-block bg-pink-100 text-pink-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
               {translations.title}
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4 leading-tight">
+            <h1 className="text-3xl md:text-4xl text-stone-900 mb-4 leading-tight">
               {translations.headline}
             </h1>
             <p className="text-lg text-stone-600 mb-5 leading-relaxed">
@@ -70,7 +70,7 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
             <div className="flex items-center gap-3 text-sm">
               <span className="text-stone-500">{translations.basedOnPolls}</span>
               <span className="text-stone-300">·</span>
-              <Link href="/metodologia" className="text-navy hover:text-navy-light font-medium">
+              <Link href="/metodologia" className="text-ink hover:text-ink-muted font-medium">
                 {translations.methodology}
               </Link>
             </div>
@@ -96,7 +96,7 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
       </section>
 
       {/* Valid Votes Split */}
-      <section className="py-8 bg-white border-b border-stone-200">
+      <section className="py-8 bg-cream border-b border-stone-200">
         <div className="max-w-3xl mx-auto px-4">
           <ErrorBoundary componentName="Vote Split">
             <SecondRoundVoteSplit
@@ -112,7 +112,7 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
       {/* Beeswarm Distribution */}
       <section className="py-10 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
+          <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">
             {translations.simulationDistribution}
           </h2>
           <p className="text-sm text-stone-500 mb-8 max-w-xl">
@@ -131,7 +131,7 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
       </section>
 
       {/* Key Scenarios */}
-      <section className="py-10 bg-white border-b border-stone-300">
+      <section className="py-10 bg-cream border-b border-stone-300">
         <div className="max-w-3xl mx-auto px-4">
           <ErrorBoundary componentName="Scenarios">
             <SecondRoundScenarios
@@ -151,7 +151,7 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
       {/* Forecast Bars */}
       <section className="py-10 border-b border-stone-300">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-xl font-bold text-stone-900 mb-6 tracking-tight">
+          <h2 className="text-2xl text-stone-900 mb-6 tracking-tight">
             {translations.projectedVoteShare}
           </h2>
           <ErrorBoundary componentName="Forecast Bars">

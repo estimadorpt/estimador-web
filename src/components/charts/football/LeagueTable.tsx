@@ -45,7 +45,7 @@ function DeltaIndicator({ value, invert = false }: { value: number; invert?: boo
   // For relegation (invert): up=bad (red), down=good (green)
   const isGood = invert ? !isUp : isUp;
   return (
-    <span className={`inline-flex items-center gap-0.5 text-[10px] tabular-nums ml-0.5 ${isGood ? "text-emerald-600" : "text-red-500"}`}>
+    <span className={`inline-flex items-center gap-0.5 text-[11px] tabular-nums ml-0.5 ${isGood ? "text-emerald-600" : "text-red-500"}`}>
       {isUp ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
       {rounded}
     </span>
@@ -247,7 +247,7 @@ export function LeagueTable({
         </thead>
         <tbody>
           {data.map((team, i) => {
-            const color = ligaTeamColors[team.team] || '#78716c';
+            const color = ligaTeamColors[team.team] || '#5f7062';
             const interval = intervals?.[team.team];
             const isRelegationZone = i >= data.length - 3;
             const isChampionZone = i < 3;
@@ -276,10 +276,10 @@ export function LeagueTable({
                         style={{ backgroundColor: color }}
                       />
                     )}
-                    <span className="font-medium text-stone-900 group-hover:text-blue-700 transition-colors sm:hidden">
+                    <span className="font-medium text-stone-900 group-hover:text-ink transition-colors sm:hidden">
                       {ligaTeamShortNames[team.team] || team.team}
                     </span>
-                    <span className="font-medium text-stone-900 group-hover:text-blue-700 transition-colors hidden sm:inline">
+                    <span className="font-medium text-stone-900 group-hover:text-ink transition-colors hidden sm:inline">
                       {teamDisplayName(team.team)}
                     </span>
                     <ChevronRight className="w-3.5 h-3.5 text-stone-300 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
@@ -322,7 +322,7 @@ export function LeagueTable({
                   {/* The band has no room on phones, so the range travels
                       under the point estimate instead. */}
                   {interval && (
-                    <div className="md:hidden text-[10px] font-normal text-stone-400 tabular-nums">
+                    <div className="md:hidden text-[11px] font-normal text-stone-400 tabular-nums">
                       {bandRange(interval)}
                     </div>
                   )}
@@ -337,7 +337,7 @@ export function LeagueTable({
                           max={bandMax}
                           color={color}
                         />
-                        <span className="text-[10px] tabular-nums text-stone-400 w-11 text-right flex-shrink-0">
+                        <span className="text-[11px] tabular-nums text-stone-400 w-11 text-right flex-shrink-0">
                           {bandRange(interval)}
                         </span>
                       </div>
@@ -376,7 +376,7 @@ export function LeagueTable({
           is a claim about. */}
       {hasBands && (
         <div className="mt-3 max-w-3xl">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-stone-400">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-stone-400">
             <span className="inline-flex items-center gap-1.5">
               <span className="w-6 h-px bg-stone-300 relative inline-block" />
               {pt ? "90% das simulações" : "90% of simulations"}

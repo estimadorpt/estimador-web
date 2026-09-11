@@ -11,8 +11,10 @@
 
 import { getTranslations } from 'next-intl/server';
 import { TileCard } from './TileCard';
+import { StatusBadge } from './StatusBadge';
 import { fmtSignedPct, fmtNum, fmtDate } from '@/lib/utils/economy-format';
-import { labelKey } from '@/lib/i18n/economy-labels';
+import { labelKey, pickNote, pickOwnLanguage } from '@/lib/i18n/economy-labels';
+import { ProducerNote } from './ProducerNote';
 import type { TrackRecordTileData } from '@/types/economy-dashboard';
 
 function isNum(v: number | null | undefined): v is number {
@@ -45,42 +47,47 @@ export async function TrackRecordTile({
       eyebrow={t('trackEyebrow')}
       label={lblKey ? t(lblKey) : data?.label}
       labelTone="neutral"
-      honesty={data?.honesty_note ?? undefined}
+      honesty={pickNote(locale, data?.honesty_note_i18n, data?.honesty_note, data?.honesty_note_pt)}
     >
+      <div className="mb-2">
+        <StatusBadge
+          kind="officialCalls"
+          label={t('badgeOfficialCalls')}
+          title={t('badgeOfficialCallsDef')}
+        />
+      </div>
+
       {/* the producer's verbatim two-era framing — the key honesty line */}
-      {data?.framing && (
-        <p className="text-sm leading-relaxed text-stone-700 max-w-prose border-l-2 border-stone-300 pl-3">
-          {data.framing}
-        </p>
-      )}
+      <ProducerNote locale={locale} text={data?.framing} i18n={data?.framing_i18n} tone="body" />
 
       {/* ---- era 1: backtest ---------------------------------------------------- */}
       <div className="mt-5">
         <h3 className="text-[11px] font-semibold uppercase tracking-wide text-stone-600">
           {t('trackBacktestTitle')}
         </h3>
-        {backtest?.label && (
-          <p className="text-[11px] text-stone-400 mt-0.5">{backtest.label}</p>
-        )}
+        {(() => {
+          const label = pickOwnLanguage(locale, backtest?.label_i18n, backtest?.label);
+          return label ? <p className="text-[11px] text-stone-400 mt-0.5">{label}</p> : null;
+        })()}
 
         {horizons.length > 0 && (
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b-2 border-stone-300 text-left">
-                  <th className="py-1.5 pr-3 text-[10px] font-bold uppercase tracking-wider text-stone-500">
+                  <th className="py-1.5 pr-3 text-[11px] font-bold uppercase tracking-wider text-stone-500">
                     {t('trackHorizon')}
                   </th>
-                  <th className="py-1.5 pr-3 text-[10px] font-bold uppercase tracking-wider text-stone-500 text-right">
+                  <th className="py-1.5 pr-3 text-[11px] font-bold uppercase tracking-wider text-stone-500 text-right">
                     {t('trackN')}
                   </th>
-                  <th className="py-1.5 pr-3 text-[10px] font-bold uppercase tracking-wider text-stone-500 text-right">
+                  <th className="py-1.5 pr-3 text-[11px] font-bold uppercase tracking-wider text-stone-500 text-right">
                     {t('trackRelFirst')}
                   </th>
-                  <th className="py-1.5 pr-3 text-[10px] font-bold uppercase tracking-wider text-stone-500 text-right">
+                  <th className="py-1.5 pr-3 text-[11px] font-bold uppercase tracking-wider text-stone-500 text-right">
                     {t('trackRelRevised')}
                   </th>
-                  <th className="py-1.5 text-[10px] font-bold uppercase tracking-wider text-stone-500 text-right">
+                  <th className="py-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500 text-right">
                     {t('trackHit80')}
                   </th>
                 </tr>
@@ -111,22 +118,25 @@ export async function TrackRecordTile({
                 })}
               </tbody>
             </table>
-            <p className="mt-1.5 text-[10px] text-stone-400 max-w-prose">
+            <p className="mt-1.5 text-[11px] text-stone-400 max-w-prose">
               {t('trackTableNote')}
             </p>
           </div>
         )}
 
+        {/* selection caveat for the backtest-era numbers (the M2 combo was the
+            best of ~19 pre-registered candidates) — verbatim when the producer
+            ships it, bilingual when available. */}
+        <ProducerNote locale={locale} text={backtest?.selection_caveat} i18n={backtest?.selection_caveat_i18n} tone="caveat" className="mt-2" />
+
+        {/* model naming reflects the 2026-06-11 M2 promotion — older rows keep
+            their pre-promotion label (supply_side_bridge at M2). */}
+        <p className="mt-2 text-[11px] leading-snug text-stone-400 max-w-prose">
+          {t('trackModelNamingNote')}
+        </p>
+
         {/* the producer's own methodological notes, verbatim */}
-        {Array.isArray(backtest?.notes) && backtest.notes.length > 0 && (
-          <ul className="mt-2 space-y-1">
-            {backtest.notes.map((n, i) => (
-              <li key={`bn-${i}`} className="text-[10px] leading-snug text-stone-400 max-w-prose">
-                {n}
-              </li>
-            ))}
-          </ul>
-        )}
+        <ProducerNote locale={locale} text={backtest?.notes} className="mt-2" />
       </div>
 
       {/* ---- era 2: live --------------------------------------------------------- */}
@@ -134,9 +144,10 @@ export async function TrackRecordTile({
         <h3 className="text-[11px] font-semibold uppercase tracking-wide text-stone-600">
           {t('trackLiveTitle')}
         </h3>
-        {live?.label && (
-          <p className="text-[11px] text-stone-400 mt-0.5">{live.label}</p>
-        )}
+        {(() => {
+          const label = pickOwnLanguage(locale, live?.label_i18n, live?.label);
+          return label ? <p className="text-[11px] text-stone-400 mt-0.5">{label}</p> : null;
+        })()}
 
         {liveRows.length > 0 ? (
           <ul className="mt-2.5 space-y-1.5">
@@ -165,15 +176,21 @@ export async function TrackRecordTile({
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-xs text-stone-400">—</p>
+          // Emptiness as integrity: no live quarter has been scored yet — say
+          // so plainly instead of leaving a bare dash.
+          <p className="mt-2 text-xs text-stone-500">{t('trackLiveEmpty')}</p>
+        )}
+
+        {/* "every dot is a call we actually published" — honest only while it
+            stays paired with the fact that nothing has been scored yet. */}
+        {liveRows.length > 0 && !liveRows.some((r) => isNum(r?.outturn)) && (
+          <p className="mt-1.5 text-[11px] leading-snug text-stone-400 max-w-prose">
+            {t('trackLivePending')}
+          </p>
         )}
 
         {/* the live-era summary note, verbatim */}
-        {live?.summary?.note && (
-          <p className="mt-2 text-[10px] leading-snug text-stone-400 max-w-prose">
-            {live.summary.note}
-          </p>
-        )}
+        <ProducerNote locale={locale} text={live?.summary?.note} className="mt-2" />
       </div>
     </TileCard>
   );

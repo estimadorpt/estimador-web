@@ -56,19 +56,30 @@ export interface ElectionTrendData {
   round?: number; // For multi-round elections
 }
 
-// Geographic forecast data
+// Geographic forecast data, as published in district_forecast.json
 export interface DistrictForecast {
-  NAME_1: string;
-  district_id: string;
-  electionId: string;
-  [key: string]: any;
+  district_name: string;
+  winning_party: string;
+  probs: Record<string, number>;
 }
 
-export interface ContestedSeat {
-  district: string;
-  margin: number;
-  electionId: string;
-  [key: string]: any;
+// Per-district contested-seat summary, as published in contested_summary.json
+export interface ContestedDistrict {
+  ENSC: number;
+  delta2024?: Record<string, number>;
+  parties?: Record<string, Record<string, number>>;
+}
+
+export interface ContestedSummary {
+  districts: Record<string, ContestedDistrict>;
+}
+
+// Pollster house effects, as published in house_effects.json
+export interface HouseEffect {
+  pollster: string;
+  party: string;
+  effect?: number;
+  house_effect?: number;
 }
 
 // Presidential election specific types

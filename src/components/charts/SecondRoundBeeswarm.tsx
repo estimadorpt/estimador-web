@@ -2,7 +2,9 @@
 
 import * as Plot from "@observablehq/plot";
 import * as d3 from "d3";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { ChartTable } from "@/components/viz/ChartTable";
 import { SecondRoundTrajectoriesData } from "@/types";
 
 interface SecondRoundBeeswarmProps {
@@ -19,6 +21,16 @@ export function SecondRoundBeeswarm({
 }: SecondRoundBeeswarmProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isClient, setIsClient] = useState(false);
+  const t = useTranslations("forecast");
+  const voteShareLabel = t("voteShareLabel");
+  const locale = useLocale();
+  const pt = locale !== "en";
+
+  // The table twin: the spread of each candidate's final-day share across the simulations.
+  const summary = useMemo(() => Object.entries(trajectories?.candidates ?? {})
+    .filter(([name]) => name !== 'Blank/Null')
+    .map(([name, c]) => { const finals = c.trajectories.map(tr => tr[tr.length - 1]).filter(v => typeof v === 'number').sort((a, b) => a - b); const q = (p: number) => finals[Math.min(finals.length - 1, Math.floor(finals.length * p))] ?? 0; return { name, p5: q(0.05), p25: q(0.25), median: q(0.5), p75: q(0.75), p95: q(0.95) }; })
+    .sort((a, b) => b.median - a.median), [trajectories]);
 
   useEffect(() => {
     setIsClient(true);
@@ -80,10 +92,10 @@ export function SecondRoundBeeswarm({
         style: {
           backgroundColor: "transparent",
           fontSize: "12px",
-          fontFamily: "Inter, system-ui, sans-serif"
+          fontFamily: "Manrope, system-ui, sans-serif"
         },
         x: {
-          label: "Vote share (%)",
+          label: voteShareLabel,
           domain: [0.15, 0.85],
           tickFormat: (d: number) => `${(d * 100).toFixed(0)}%`,
           grid: true,
@@ -102,7 +114,7 @@ export function SecondRoundBeeswarm({
         marks: [
           // 50% majority line
           Plot.ruleX([0.5], {
-            stroke: "#dc2626",
+            stroke: "#a3543a",
             strokeWidth: 2,
             strokeDasharray: "4,2",
             facet: "exclude"
@@ -149,7 +161,7 @@ export function SecondRoundBeeswarm({
             dx: 5,
             dy: -12,
             fontSize: 11,
-            fill: "#dc2626",
+            fill: "#a3543a",
             fontWeight: "600"
           })
         ]
@@ -167,8 +179,8 @@ export function SecondRoundBeeswarm({
       } catch (error) {
         console.error('SecondRoundBeeswarm: Error rendering plot:', error);
         containerRef.current.innerHTML = `
-          <div style="padding: 20px; text-align: center; background: #fef2f2; border-radius: 8px;">
-            <p style="margin: 0; color: #dc2626;">Error loading distribution chart</p>
+          <div style="padding: 20px; text-align: center; background: #fff2ee; border-radius: 8px;">
+            <p style="margin: 0; color: #a3543a;">Error loading distribution chart</p>
           </div>
         `;
       }
@@ -185,8 +197,8 @@ export function SecondRoundBeeswarm({
 
   if (!trajectories || Object.keys(trajectories.candidates).length === 0) {
     return (
-      <div className="w-full h-64 flex items-center justify-center text-gray-500">
-        <p>Loading simulation data...</p>
+      <div className="w-full h-64 flex items-center justify-center text-stone-500">
+        <p>{pt ? 'A carregar as simulações…' : 'Loading simulation data…'}</p>
       </div>
     );
   }
@@ -194,9 +206,10 @@ export function SecondRoundBeeswarm({
   return (
     <div className="w-full" data-testid="beeswarm">
       <div ref={containerRef} className="overflow-x-auto" />
-      <div className="text-xs text-gray-500 mt-2">
+      <div className="text-xs text-stone-500 mt-2">
         {translations.showingOutcomes}
       </div>
+      <ChartTable caption={voteShareLabel} columns={[pt ? 'Candidato' : 'Candidate', 'P5', 'P25', pt ? 'Mediana' : 'Median', 'P75', 'P95']} rows={summary.map(c => [c.name, ...[c.p5, c.p25, c.median, c.p75, c.p95].map(v => `${(v * 100).toLocaleString(pt ? 'pt-PT' : 'en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`)])} />
     </div>
   );
 }

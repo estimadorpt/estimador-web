@@ -149,7 +149,7 @@ export function PathsToVictory({ paths, labels, locale }: PathsToVictoryProps) {
   return (
     <div className="space-y-10">
       {teams.map(([team, path]) => {
-        const teamColor = ligaTeamColors[team] || "#78716c";
+        const teamColor = ligaTeamColors[team] || "#5f7062";
         const keyMatches = getKeyMatches(path);
         const mustWinCount = (path.funnel || []).filter(s => s.win_uplift >= 0.20).length;
         // If no key matches found, treat as comfortable even if threshold says otherwise
@@ -187,7 +187,7 @@ export function PathsToVictory({ paths, labels, locale }: PathsToVictoryProps) {
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span
-                    className="text-3xl font-black tabular-nums"
+                    className="text-3xl font-display font-extrabold tabular-nums"
                     style={{ color: teamColor }}
                   >
                     {formatPct(path.p_current)}
@@ -221,7 +221,7 @@ export function PathsToVictory({ paths, labels, locale }: PathsToVictoryProps) {
 
               {/* Rival gates — one per rival */}
               {rivalNames.map((rival) => {
-                const rivalColor = ligaTeamColors[rival] || "#78716c";
+                const rivalColor = ligaTeamColors[rival] || "#5f7062";
                 const rivalMatches = rivalGroups[rival].map(rc => ({
                   opponent: rc.opponent,
                   venue: "",

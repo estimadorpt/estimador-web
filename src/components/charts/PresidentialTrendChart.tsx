@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
+import { ChartTable } from '@/components/viz/ChartTable';
 import { PresidentialTrendsData, PresidentialPollsData } from '@/types';
 
 interface PresidentialTrendChartProps {
@@ -26,6 +28,8 @@ export function PresidentialTrendChart({
   maxCandidates = 5,
 }: PresidentialTrendChartProps) {
   const { dates, candidates } = trends;
+  const locale = useLocale();
+  const pt = locale !== 'en';
   const [selectedCandidate, setSelectedCandidate] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -79,6 +83,26 @@ export function PresidentialTrendChart({
     });
     return candidateEntries.slice(0, maxCandidates);
   }, [candidates, maxCandidates, cutoffIndex]);
+
+  // The table twins: every date the chart draws, per candidate, with both bands;
+  // and the polls it dots, at their raw values.
+  const fmtDay = (d: string | Date) => new Date(d).toLocaleDateString(pt ? 'pt-PT' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const pct = (v?: number) => (typeof v === 'number' ? `${(v * 100).toLocaleString(pt ? 'pt-PT' : 'en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%` : '');
+  const table = useMemo(() => ({
+    columns: [pt ? 'Data' : 'Date', pt ? 'Candidato' : 'Candidate', pt ? 'Média' : 'Mean', 'P25–P75', 'P5–P95'],
+    rows: Array.from({ length: cutoffIndex }, (_, i) => i).flatMap(i => topCandidates.map(([name, c]) => [fmtDay(dates[i]), name, pct(c.mean[i]), c.ci_25?.[i] != null && c.ci_75?.[i] != null ? `${pct(c.ci_25[i])}–${pct(c.ci_75[i])}` : '', c.ci_05?.[i] != null && c.ci_95?.[i] != null ? `${pct(c.ci_05[i])}–${pct(c.ci_95[i])}` : ''])),
+  }), [dates, cutoffIndex, topCandidates, pt]); // eslint-disable-line react-hooks/exhaustive-deps
+  const pollsTable = useMemo(() => {
+    if (!polls || !showPolls || cutoffIndex === 0) return null;
+    const minTime = new Date(filteredDates[0]).getTime();
+    const maxTime = new Date(dates[cutoffIndex - 1]).getTime();
+    const shown = polls.polls.filter(p => { const t = new Date(p.date).getTime(); return t >= minTime && t <= maxTime; }).sort((a, b) => a.date.localeCompare(b.date));
+    if (shown.length === 0) return null;
+    return {
+      columns: [pt ? 'Data' : 'Date', pt ? 'Empresa' : 'Pollster', pt ? 'Amostra' : 'Sample', ...topCandidates.map(([name]) => name)],
+      rows: shown.map(p => [fmtDay(p.date), p.pollster, p.sample_size ?? '', ...topCandidates.map(([name]) => (typeof p[name] === 'number' ? pct(p[name] as number) : ''))]),
+    };
+  }, [polls, showPolls, filteredDates, dates, cutoffIndex, topCandidates, pt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Chart configuration - responsive margins
   const chartConfig = useMemo(() => {
@@ -309,7 +333,7 @@ export function PresidentialTrendChart({
             y1={chartConfig.yScale(tick)}
             x2={chartConfig.width - chartConfig.margin.right}
             y2={chartConfig.yScale(tick)}
-            stroke="#f0f0f0"
+            stroke="#f5f4ed"
             strokeWidth={1}
           />
         ))}
@@ -322,7 +346,7 @@ export function PresidentialTrendChart({
             y={chartConfig.yScale(tick)}
             textAnchor="end"
             dominantBaseline="middle"
-            className="text-xs fill-gray-500"
+            className="text-xs fill-stone-500"
           >
             {(tick * 100).toFixed(0)}%
           </text>
@@ -336,14 +360,14 @@ export function PresidentialTrendChart({
               y1={chartConfig.height - chartConfig.margin.bottom}
               x2={chartConfig.xScale(date)}
               y2={chartConfig.height - chartConfig.margin.bottom + 5}
-              stroke="#9ca3af"
+              stroke="#7f9284"
               strokeWidth={1}
             />
             <text
               x={chartConfig.xScale(date)}
               y={chartConfig.height - chartConfig.margin.bottom + 20}
               textAnchor="middle"
-              className="text-xs fill-gray-500"
+              className="text-xs fill-stone-500"
             >
               {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </text>
@@ -358,7 +382,7 @@ export function PresidentialTrendChart({
               y1={chartConfig.margin.top}
               x2={todayX}
               y2={chartConfig.height - chartConfig.margin.bottom}
-              stroke="#6b7280"
+              stroke="#5f7062"
               strokeWidth={1}
               strokeDasharray="4,4"
             />
@@ -366,7 +390,7 @@ export function PresidentialTrendChart({
               x={todayX}
               y={chartConfig.height - chartConfig.margin.bottom + 35}
               textAnchor="middle"
-              className="text-[10px] fill-gray-500 font-medium"
+              className="text-[11px] fill-stone-500 font-medium"
             >
               Today
             </text>
@@ -380,7 +404,7 @@ export function PresidentialTrendChart({
             y1={chartConfig.margin.top}
             x2={lastDataX}
             y2={chartConfig.height - chartConfig.margin.bottom}
-            stroke="#d1d5db"
+            stroke="#cbccbb"
             strokeWidth={1}
             strokeDasharray="2,2"
           />
@@ -388,7 +412,7 @@ export function PresidentialTrendChart({
             x={lastDataX}
             y={chartConfig.margin.top - 8}
             textAnchor="middle"
-            className="text-[10px] fill-gray-400"
+            className="text-[11px] fill-stone-400"
           >
             Last poll
           </text>
@@ -482,7 +506,7 @@ export function PresidentialTrendChart({
                   x={10}
                   y={-5}
                   className="text-[11px]"
-                  fill={isHovered ? '#111827' : '#4b5563'}
+                  fill={isHovered ? '#16362e' : '#4f5f57'}
                   fontWeight={isHovered ? 600 : 500}
                 >
                   {pos.name.length > 15 ? pos.name.substring(0, 15) + '…' : pos.name}
@@ -494,7 +518,7 @@ export function PresidentialTrendChart({
                   fill={color}
                   fontWeight={600}
                 >
-                  {(lastMean * 100).toFixed(1)}%
+                  {pct(lastMean)}
                 </text>
               </g>
             </g>
@@ -506,7 +530,7 @@ export function PresidentialTrendChart({
           x={chartConfig.margin.left + chartConfig.innerWidth / 2}
           y={chartConfig.height - 5}
           textAnchor="middle"
-          className="text-xs fill-gray-500"
+          className="text-xs fill-stone-500"
         >
           Date
         </text>
@@ -515,7 +539,7 @@ export function PresidentialTrendChart({
           y={chartConfig.margin.top + chartConfig.innerHeight / 2}
           textAnchor="middle"
           transform={`rotate(-90, 15, ${chartConfig.margin.top + chartConfig.innerHeight / 2})`}
-          className="text-xs fill-gray-500"
+          className="text-xs fill-stone-500"
         >
           Estimated Support
         </text>
@@ -536,8 +560,8 @@ export function PresidentialTrendChart({
                 className={`
                   flex items-center gap-2 p-2 rounded-lg text-left transition-all
                   ${isSelected 
-                    ? 'bg-gray-100 ring-2 ring-gray-300' 
-                    : 'bg-gray-50 hover:bg-gray-100'
+                    ? 'bg-stone-100 ring-2 ring-stone-300' 
+                    : 'bg-stone-50 hover:bg-stone-100'
                   }
                   ${isOtherSelected ? 'opacity-40' : 'opacity-100'}
                 `}
@@ -547,14 +571,14 @@ export function PresidentialTrendChart({
                   style={{ backgroundColor: data.color }} 
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs font-medium text-gray-700 truncate">
+                  <div className="text-xs font-medium text-stone-700 truncate">
                     {name}
                   </div>
                   <div 
                     className="text-sm font-semibold tabular-nums"
                     style={{ color: data.color }}
                   >
-                    {(lastMean * 100).toFixed(1)}%
+                    {pct(lastMean)}
                   </div>
                 </div>
               </button>
@@ -564,24 +588,26 @@ export function PresidentialTrendChart({
       )}
 
       {/* Legend - always show, more compact on mobile */}
-      <div className="flex flex-wrap gap-3 md:gap-4 mt-4 justify-center text-[10px] md:text-xs text-gray-500">
+      <div className="flex flex-wrap gap-3 md:gap-4 mt-4 justify-center text-[11px] md:text-xs text-stone-500">
         <div className="flex items-center gap-1.5 md:gap-2">
-          <div className="w-4 md:w-6 h-0.5 bg-gray-400 rounded" />
-          <span>Mean estimate</span>
+          <div className="w-4 md:w-6 h-0.5 bg-stone-400 rounded" />
+          <span>{pt ? 'Estimativa média' : 'Mean estimate'}</span>
         </div>
         <div className="flex items-center gap-1.5 md:gap-2">
-          <div className="w-4 md:w-6 h-2 md:h-3 bg-gray-400/30 rounded" />
-          <span>50% CI</span>
+          <div className="w-4 md:w-6 h-2 md:h-3 bg-stone-400/30 rounded" />
+          <span>{pt ? 'Intervalo de 50% (P25–P75)' : '50% interval (P25–P75)'}</span>
         </div>
         <div className="flex items-center gap-1.5 md:gap-2">
-          <div className="w-4 md:w-6 h-2 md:h-3 bg-gray-400/15 rounded" />
-          <span>95% CI</span>
+          <div className="w-4 md:w-6 h-2 md:h-3 bg-stone-400/15 rounded" />
+          <span>{pt ? 'Intervalo de 90% (P5–P95)' : '90% interval (P5–P95)'}</span>
         </div>
         <div className="flex items-center gap-1.5 md:gap-2">
-          <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-gray-400" />
-          <span>Poll result</span>
+          <div className="w-2 md:w-3 h-2 md:h-3 rounded-full bg-stone-400" />
+          <span>{pt ? 'Sondagem' : 'Poll result'}</span>
         </div>
       </div>
+      <ChartTable caption={pt ? 'Intenção de voto estimada, com bandas' : 'Estimated vote intention, with bands'} columns={table.columns} rows={table.rows} />
+      {pollsTable && <ChartTable caption={pt ? 'Sondagens no gráfico' : 'Polls on the chart'} columns={pollsTable.columns} rows={pollsTable.rows} summaryLabel={pt ? 'Ver as sondagens como tabela' : 'View the polls as a table'} />}
     </div>
   );
 }

@@ -45,16 +45,16 @@ export function SecondRoundWinnerCards({
   return (
     <div className="flex flex-col md:flex-row items-stretch justify-center gap-4 md:gap-8" data-testid="winner-cards">
       {/* Candidate A Card */}
-      <div className="flex-1 max-w-md bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+      <div className="flex-1 max-w-md bg-cream rounded-2xl border border-stone-200 overflow-hidden">
         <div
           className="h-2"
           style={{ backgroundColor: candidateA.color }}
         />
         <div className="p-6">
-          <h3 className="text-lg font-bold text-stone-900 mb-1">
+          <h3 className="text-lg text-stone-900 mb-1">
             {candidateA.name}
           </h3>
-          <div className="text-4xl font-black mb-2" style={{ color: candidateA.color }}>
+          <div className="text-4xl font-display font-extrabold mb-2" style={{ color: candidateA.color }}>
             {formatPercent(candidateA.win_probability)}
           </div>
           <div className="text-xs uppercase tracking-wide text-stone-500 mb-4">
@@ -82,16 +82,16 @@ export function SecondRoundWinnerCards({
       </div>
 
       {/* Candidate B Card */}
-      <div className="flex-1 max-w-md bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+      <div className="flex-1 max-w-md bg-cream rounded-2xl border border-stone-200 overflow-hidden">
         <div
           className="h-2"
           style={{ backgroundColor: candidateB.color }}
         />
         <div className="p-6">
-          <h3 className="text-lg font-bold text-stone-900 mb-1">
+          <h3 className="text-lg text-stone-900 mb-1">
             {candidateB.name}
           </h3>
-          <div className="text-4xl font-black mb-2" style={{ color: candidateB.color }}>
+          <div className="text-4xl font-display font-extrabold mb-2" style={{ color: candidateB.color }}>
             {formatPercent(candidateB.win_probability)}
           </div>
           <div className="text-xs uppercase tracking-wide text-stone-500 mb-4">

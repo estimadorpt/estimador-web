@@ -34,19 +34,19 @@ function ProbabilityBar({ pHome, pDraw, pAway }: {
   return (
     <div className="flex h-5 w-full overflow-hidden">
       <div
-        className="flex items-center justify-center text-[10px] font-bold text-white bg-stone-700"
+        className="flex items-center justify-center text-[11px] font-bold text-white bg-stone-700"
         style={{ width: `${pHome * 100}%`, minWidth: pHome > 0.05 ? '28px' : 0 }}
       >
         {pHome >= 0.05 ? `${Math.round(pHome * 100)}%` : ''}
       </div>
       <div
-        className="flex items-center justify-center text-[10px] font-bold text-stone-600 bg-stone-200"
+        className="flex items-center justify-center text-[11px] font-bold text-stone-600 bg-stone-200"
         style={{ width: `${pDraw * 100}%`, minWidth: pDraw > 0.05 ? '28px' : 0 }}
       >
         {pDraw >= 0.05 ? `${Math.round(pDraw * 100)}%` : ''}
       </div>
       <div
-        className="flex items-center justify-center text-[10px] font-bold text-white bg-stone-500"
+        className="flex items-center justify-center text-[11px] font-bold text-white bg-stone-500"
         style={{ width: `${pAway * 100}%`, minWidth: pAway > 0.05 ? '28px' : 0 }}
       >
         {pAway >= 0.05 ? `${Math.round(pAway * 100)}%` : ''}
@@ -92,15 +92,15 @@ export function MatchdayPredictions({
   return (
     <div className="space-y-3">
       {/* Legend */}
-      <div className="flex gap-4 text-[10px] uppercase tracking-wider text-stone-500 font-bold">
+      <div className="flex gap-4 text-[11px] uppercase tracking-wider text-stone-500 font-bold">
         <span>{labels.home}</span>
         <span>{labels.draw}</span>
         <span>{labels.away}</span>
       </div>
 
       {sortedMatches.map((match, i) => {
-        const homeColor = ligaTeamColors[match.home] || '#78716c';
-        const awayColor = ligaTeamColors[match.away] || '#78716c';
+        const homeColor = ligaTeamColors[match.home] || '#5f7062';
+        const awayColor = ligaTeamColors[match.away] || '#5f7062';
         const dm = decisiveLookup.get(`${match.home}|${match.away}`);
         const hasTitleImpact = dm && dm.title_swing > 0.05;
         const hasRelegImpact = dm && (dm.relegation_swing ?? 0) > 0.05;
@@ -132,19 +132,19 @@ export function MatchdayPredictions({
             {(hasTitleImpact || hasRelegImpact) && (
               <div className="flex gap-2 mt-1.5">
                 {hasTitleImpact && dm && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200">
                     {labels.titleImpact ?? "Title impact"} {Math.round(dm.title_swing * 100)}pp
                   </span>
                 )}
                 {hasRelegImpact && dm && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 bg-red-50 text-red-700 border border-red-200">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 bg-red-50 text-red-700 border border-red-200">
                     {labels.relegationImpact ?? "Relegation impact"} {Math.round((dm.relegation_swing ?? 0) * 100)}pp
                   </span>
                 )}
               </div>
             )}
             {href && (
-              <span className="mt-1.5 inline-block text-[10px] font-bold uppercase tracking-wider text-stone-400 group-hover:text-stone-700 transition-colors">
+              <span className="mt-1.5 inline-block text-[11px] font-bold uppercase tracking-wider text-stone-400 group-hover:text-stone-700 transition-colors">
                 {labels.matchPage ?? "Análise do jogo"}
               </span>
             )}
@@ -154,7 +154,7 @@ export function MatchdayPredictions({
         return (
           <div key={i} className={`border-b border-stone-100 pb-3 last:border-0 ${isMatchOfWeek ? 'pt-1' : ''}`}>
             {isMatchOfWeek && (
-              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 inline-flex items-center px-2 py-0.5 mb-2">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 inline-flex items-center px-2 py-0.5 mb-2">
                 {labels.matchOfTheWeek ?? "Jogo da Jornada"}
               </div>
             )}
@@ -162,7 +162,7 @@ export function MatchdayPredictions({
               <Link
                 href={href}
                 locale={locale}
-                className="group block -mx-2 px-2 py-1 hover:bg-stone-50 transition-colors"
+                className="group block -mx-2 px-2 py-1 hover:bg-stone-100 transition-colors"
                 aria-label={`${teamDisplayName(match.home)} - ${teamDisplayName(match.away)}`}
               >
                 {rowBody}

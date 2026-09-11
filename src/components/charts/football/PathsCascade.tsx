@@ -152,7 +152,7 @@ function CascadeStep({
         {/* Before probability */}
         <div className="flex items-center gap-2 mb-2">
           <div
-            className="text-2xl font-black tabular-nums"
+            className="text-2xl font-display font-extrabold tabular-nums"
             style={{ color: teamColor }}
           >
             {pct(step.titleBefore)}
@@ -315,7 +315,7 @@ function TeamCascadeSection({ data }: { data: TeamCascade }) {
           Se vencer todos os jogos-chave
         </div>
         <div
-          className="text-3xl font-black tabular-nums"
+          className="text-3xl font-display font-extrabold tabular-nums"
           style={{ color: data.teamColor }}
         >
           {pct(data.steps[data.steps.length - 1].titleAfterWin)}
@@ -333,7 +333,7 @@ export default function PathsCascade() {
         <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
           Abordagem C
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-stone-900 mb-1">
+        <h3 className="text-xl tracking-tight text-stone-900 mb-1">
           Cascata Condicional
         </h3>
         <p className="text-sm text-stone-500">

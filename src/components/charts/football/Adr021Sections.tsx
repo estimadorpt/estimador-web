@@ -111,7 +111,7 @@ export function ContestedSection({
 
   return (
     <section className="mb-12 border-t border-stone-200 pt-8">
-      <h2 className="text-xl font-bold tracking-tight mb-1">
+      <h2 className="text-2xl tracking-tight mb-1">
         {pt ? "Posse disputada" : "Contested possession"}
       </h2>
       <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
@@ -132,7 +132,7 @@ export function ContestedSection({
 
       {shipped.map((cell) => (
         <div key={`${cell.channel}-${cell.position}`} className="mb-8">
-          <h3 className="text-sm font-bold text-stone-800 mb-1">
+          <h3 className="text-sm text-stone-800 mb-1">
             {cellTitle(cell)}
           </h3>
           <p className="text-[11px] text-stone-400 mb-3">
@@ -194,7 +194,7 @@ export function ContestedSection({
         </div>
       ))}
 
-      <p className="text-[10px] text-stone-400 mt-2 leading-relaxed max-w-3xl">
+      <p className="text-[11px] text-stone-400 mt-2 leading-relaxed max-w-3xl">
         {pt
           ? `Épocas ${data.seasons[0]}–${data.seasons[data.seasons.length - 1]}. Cada célula passou três portas pré-registadas: separabilidade acima de 3× o acaso, correlação com a qualidade do clube abaixo de 0,3 e estabilidade em jogadores que mudaram de clube. A taxa média da liga é exatamente 50% por construção — cada duelo ganho é o duelo perdido de outro jogador.`
           : `Seasons ${data.seasons[0]}–${data.seasons[data.seasons.length - 1]}. Every cell passed three pre-registered gates: separability above 3× chance, club-quality correlation under 0.3, and stability across players who changed clubs. The league-average rate is exactly 50% by construction — every duel won is another player's duel lost.`}
@@ -264,7 +264,7 @@ export function GkChannelsSection({
 
   return (
     <section className="mb-12 border-t border-stone-200 pt-8">
-      <h2 className="text-xl font-bold tracking-tight mb-1">
+      <h2 className="text-2xl tracking-tight mb-1">
         {pt
           ? "Guarda-redes: três eixos, publicados separados"
           : "Goalkeepers: three axes, published separately"}
@@ -278,7 +278,7 @@ export function GkChannelsSection({
       {/* Axis 1: cross intervention — the separable one */}
       {cross.ships && cross.ranking && (
         <div className="mb-8">
-          <h3 className="text-sm font-bold text-stone-800 mb-1">
+          <h3 className="text-sm text-stone-800 mb-1">
             {pt ? "Intervenção em cruzamentos" : "Cross intervention"}
           </h3>
           <p className="text-xs text-stone-500 mb-1 max-w-3xl leading-relaxed">
@@ -328,7 +328,7 @@ export function GkChannelsSection({
                 : []),
             ]}
           />
-          <p className="text-[10px] text-stone-400 mt-2 max-w-3xl leading-relaxed">
+          <p className="text-[11px] text-stone-400 mt-2 max-w-3xl leading-relaxed">
             {pt
               ? "Nenhum guarda-redes mudou de clube entre épocas consecutivas com jogos suficientes, por isso ainda não sabemos se esta característica viaja com o jogador."
               : "No keeper changed clubs between consecutive seasons with enough matches, so whether this trait travels with the player is still untested."}
@@ -339,7 +339,7 @@ export function GkChannelsSection({
       {/* Axis 2: sweeping — a style, not a quality */}
       {sweep.ranking && (
         <div className="mb-8">
-          <h3 className="text-sm font-bold text-stone-800 mb-1">
+          <h3 className="text-sm text-stone-800 mb-1">
             {pt ? "Saídas da área (estilo)" : "Sweeping (a style)"}
           </h3>
           <p className="text-xs text-stone-500 mb-3 max-w-3xl leading-relaxed">
@@ -380,7 +380,7 @@ export function GkChannelsSection({
 
       {/* Axis 3: shot-stopping — the properly-powered null */}
       <div className="mb-2">
-        <h3 className="text-sm font-bold text-stone-800 mb-1">
+        <h3 className="text-sm text-stone-800 mb-1">
           {pt ? "Defesa de remates" : "Shot-stopping"}
         </h3>
         {stop.ships && stop.ranking ? (

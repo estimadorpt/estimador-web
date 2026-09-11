@@ -43,29 +43,29 @@ export function ElectionSummaryStats({
   // For now, only parliamentary elections are supported - show parliamentary stats for all
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-      <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-        <div className="text-2xl font-bold text-gray-900 mb-1">
+      <div className="bg-cream p-4 rounded-2xl border border-stone-200 text-center">
+        <div className="text-3xl font-display font-extrabold tabular-nums text-stone-900 mb-1">
           {formatProbabilityPercent(probAdMostSeats)}
         </div>
-        <div className="text-sm text-gray-600">AD {translations.mostSeats}</div>
+        <div className="text-sm text-stone-600">AD {translations.mostSeats}</div>
       </div>
-      <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-        <div className="text-2xl font-bold text-gray-900 mb-1">
+      <div className="bg-cream p-4 rounded-2xl border border-stone-200 text-center">
+        <div className="text-3xl font-display font-extrabold tabular-nums text-stone-900 mb-1">
           {formatProbabilityPercent(probPsMostSeats)}
         </div>
-        <div className="text-sm text-gray-600">PS {translations.mostSeats}</div>
+        <div className="text-sm text-stone-600">PS {translations.mostSeats}</div>
       </div>
-      <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-        <div className="text-2xl font-bold text-gray-900 mb-1">
+      <div className="bg-cream p-4 rounded-2xl border border-stone-200 text-center">
+        <div className="text-3xl font-display font-extrabold tabular-nums text-stone-900 mb-1">
           {formatProbabilityPercent(probRightMajority)}
         </div>
-        <div className="text-sm text-gray-600">{translations.rightMajority}</div>
+        <div className="text-sm text-stone-600">{translations.rightMajority}</div>
       </div>
-      <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
-        <div className="text-2xl font-bold text-gray-900 mb-1">
+      <div className="bg-cream p-4 rounded-2xl border border-stone-200 text-center">
+        <div className="text-3xl font-display font-extrabold tabular-nums text-stone-900 mb-1">
           {formatProbabilityPercent(probLeftMajority)}
         </div>
-        <div className="text-sm text-gray-600">{translations.leftMajority}</div>
+        <div className="text-sm text-stone-600">{translations.leftMajority}</div>
       </div>
     </div>
   );

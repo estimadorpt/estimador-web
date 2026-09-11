@@ -67,7 +67,7 @@ export function MatchProbabilityHero({
   const outcomes = hasProbs
     ? ([
         { key: "H", p: pHome!, label: labels.homeWin, team: home, color: homeColor },
-        { key: "D", p: pDraw!, label: labels.draw, team: null, color: "#d6d3d1" },
+        { key: "D", p: pDraw!, label: labels.draw, team: null, color: "#cbccbb" },
         { key: "A", p: pAway!, label: labels.awayWin, team: away, color: awayColor },
       ] as const)
     : [];
@@ -78,8 +78,8 @@ export function MatchProbabilityHero({
 
   return (
     <div>
-      {/* Fixture line */}
-      <div className="flex items-center justify-between gap-3 mb-5">
+      {/* Fixture line: the page's heading */}
+      <h1 className="flex items-center justify-between gap-3 mb-5 text-base font-normal tracking-normal">
         <div className="flex items-center gap-3 min-w-0">
           {teamLogoSrc(home) && (
             <img
@@ -88,15 +88,17 @@ export function MatchProbabilityHero({
               className="w-10 h-10 md:w-14 md:h-14 object-contain"
             />
           )}
-          <span className="text-xl md:text-3xl font-black tracking-tight text-stone-900 truncate">
+          <span className="text-xl md:text-3xl font-display font-extrabold tracking-tight text-stone-900 truncate">
             {teamDisplayName(home)}
           </span>
         </div>
+        {" "}
         <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-stone-400 shrink-0">
           vs
         </span>
+        {" "}
         <div className="flex items-center gap-3 min-w-0 justify-end">
-          <span className="text-xl md:text-3xl font-black tracking-tight text-stone-900 truncate text-right">
+          <span className="text-xl md:text-3xl font-display font-extrabold tracking-tight text-stone-900 truncate text-right">
             {teamDisplayName(away)}
           </span>
           {teamLogoSrc(away) && (
@@ -107,7 +109,7 @@ export function MatchProbabilityHero({
             />
           )}
         </div>
-      </div>
+      </h1>
 
       <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-4">
         {labels.matchday}
@@ -116,10 +118,10 @@ export function MatchProbabilityHero({
 
       {played && (
         <div className="mb-4">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
             {labels.finalScore}
           </div>
-          <div className="text-4xl md:text-5xl font-black tabular-nums text-stone-900">
+          <div className="text-4xl md:text-5xl font-display font-extrabold tabular-nums text-stone-900">
             {played.home_goals}
             <span className="text-stone-300 mx-2">:</span>
             {played.away_goals}
@@ -139,10 +141,10 @@ export function MatchProbabilityHero({
           <div className="grid grid-cols-3 gap-2 md:gap-4 mb-3">
             {outcomes.map(o => (
               <div key={o.key} className="border-t-4 pt-3" style={{ borderColor: o.color }}>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-1 truncate">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1 truncate">
                   {o.team ? teamDisplayName(o.team) : labels.draw}
                 </div>
-                <div className="text-4xl md:text-6xl font-black tabular-nums text-stone-900 leading-none">
+                <div className="text-4xl md:text-6xl font-display font-extrabold tabular-nums text-stone-900 leading-none">
                   {pct(o.p)}
                   <span className="text-lg md:text-2xl font-bold text-stone-400">%</span>
                 </div>

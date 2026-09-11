@@ -124,7 +124,7 @@ function TreeNodeCard({
   return (
     <div className={depth > 0 ? "mt-3" : ""}>
       {/* Node card */}
-      <div className="border border-stone-200 bg-white p-3 md:p-4">
+      <div className="border border-stone-200 bg-cream p-3 md:p-4">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-xs font-bold uppercase tracking-wider text-stone-400">
             {node.matchday}
@@ -243,7 +243,7 @@ function TeamTree({
   currentProb: number;
   tree: TreeNode;
 }) {
-  const teamColor = TEAM_COLORS[teamName] || "#78716c";
+  const teamColor = TEAM_COLORS[teamName] || "#5f7062";
 
   return (
     <div className="space-y-4">
@@ -280,7 +280,7 @@ export default function PathsDecisionTree() {
         <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
           Abordagem A
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-stone-900 mb-1">
+        <h3 className="text-xl tracking-tight text-stone-900 mb-1">
           Árvore de Decisão
         </h3>
         <p className="text-sm text-stone-500">

@@ -40,7 +40,7 @@ export function ShareCards({
     <div>
       <div className="flex items-baseline gap-2 mb-1">
         <Share2 className="w-4 h-4 text-stone-400 self-center" />
-        <h2 className="text-xl font-bold tracking-tight">
+        <h2 className="text-2xl tracking-tight">
           {pt ? "Partilhar" : "Share"}
         </h2>
         <span className="text-xs text-stone-400">
@@ -80,7 +80,7 @@ export function ShareCards({
                   <a
                     href={href}
                     download
-                    className="text-xs font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 flex-shrink-0 whitespace-nowrap"
+                    className="text-xs font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 flex-shrink-0 whitespace-nowrap"
                   >
                     <Download className="w-3.5 h-3.5" />
                     {pt ? "Descarregar" : "Download"}

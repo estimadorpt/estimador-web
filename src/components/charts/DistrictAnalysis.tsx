@@ -75,7 +75,7 @@ export function DistrictAnalysis({ districtData, contestedData, height = 400 }: 
       style: {
         backgroundColor: "transparent",
         fontSize: "11px",
-        fontFamily: "Inter, system-ui, sans-serif"
+        fontFamily: "Manrope, system-ui, sans-serif"
       },
       color: {
         type: "categorical",
@@ -99,7 +99,7 @@ export function DistrictAnalysis({ districtData, contestedData, height = 400 }: 
           y: "district",
           fill: "#fef3c7",
           fillOpacity: 0.3,
-          height: 15
+          insetTop: 6, insetBottom: 6
         }),
         
         // Main dots for seat projections
@@ -118,7 +118,7 @@ export function DistrictAnalysis({ districtData, contestedData, height = 400 }: 
           y: "district",
           text: d => `${d.party} ${d.meanSeats.toFixed(1)}`,
           dx: 15,
-          fontSize: 10,
+          fontSize: 11,
           fill: "party",
           fontWeight: "500"
         }),
@@ -128,7 +128,7 @@ export function DistrictAnalysis({ districtData, contestedData, height = 400 }: 
           x: "x",
           y: "y",
           text: "text",
-          fontSize: 10,
+          fontSize: 11,
           fill: "#d97706",
           fontWeight: "600"
         })
@@ -145,7 +145,7 @@ export function DistrictAnalysis({ districtData, contestedData, height = 400 }: 
   return (
     <div className="w-full">
       <div ref={containerRef} />
-      <div className="mt-2 text-xs text-gray-500">
+      <div className="mt-2 text-xs text-stone-500">
         <span className="inline-block w-3 h-3 bg-yellow-200 mr-1"></span>
         Highlighted districts are highly contested (ENSC &gt; 1.5)
       </div>

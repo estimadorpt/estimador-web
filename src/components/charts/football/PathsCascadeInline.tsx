@@ -137,7 +137,7 @@ function MiniCascade({ steps, teamColor }: { steps: CascadeStep[]; teamColor: st
         >
           {pct(steps[0].titleBefore)}
         </div>
-        <div className="text-[9px] text-stone-400">Início</div>
+        <div className="text-[11px] text-stone-400">Início</div>
       </div>
 
       {steps.map((step, i) => {
@@ -170,10 +170,10 @@ function MiniCascade({ steps, teamColor }: { steps: CascadeStep[]; teamColor: st
                 {pct(step.titleAfterWin)}
               </div>
               {/* Match label */}
-              <div className="text-[9px] text-stone-400 truncate">
+              <div className="text-[11px] text-stone-400 truncate">
                 {step.matchday}
               </div>
-              <div className="text-[8px] text-stone-400 truncate">
+              <div className="text-[11px] text-stone-400 truncate">
                 {step.opponent}
               </div>
             </div>
@@ -241,7 +241,7 @@ export default function PathsCascadeInline() {
         <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
           Variante C3
         </div>
-        <h3 className="text-xl font-bold tracking-tight text-stone-900 mb-1">
+        <h3 className="text-xl tracking-tight text-stone-900 mb-1">
           Arquétipos + Cascata
         </h3>
         <p className="text-sm text-stone-500">

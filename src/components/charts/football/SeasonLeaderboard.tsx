@@ -15,8 +15,8 @@ import { Trophy, Bot, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import type { LeaderboardResponse, LeaderboardRow } from "@/lib/utils/prediction-game-api";
 
-const USER_COLOR = "#047857";
-const MODEL_COLOR = "#78716c";
+const USER_COLOR = "#4e8056";
+const MODEL_COLOR = "#5f7062";
 
 interface SeasonLeaderboardProps {
   board: LeaderboardResponse | null;
@@ -72,7 +72,7 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLea
   return (
     <section>
       <div className="flex items-baseline justify-between mb-2 gap-3">
-        <h3 className="font-bold text-stone-900 flex items-center gap-2">
+        <h3 className="text-stone-900 flex items-center gap-2">
           <Trophy className="w-4 h-4 text-emerald-700" />
           {t.title}
         </h3>
@@ -88,7 +88,7 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLea
       </div>
 
       {humanCount === 0 ? (
-        <div className="border border-stone-200 rounded-xl p-4 sm:p-6 bg-stone-50">
+        <div className="border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
           <div className="flex items-center gap-2 mb-1">
             <Trophy className="w-4 h-4" style={{ color: USER_COLOR }} />
             <h4 className="font-bold text-stone-900">{t.emptyTitle}</h4>
@@ -106,7 +106,7 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLea
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-stone-50 border-b border-stone-200 text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                <tr className="bg-stone-50 border-b border-stone-200 text-[11px] font-bold uppercase tracking-wider text-stone-400">
                   <th className="text-left px-3 py-2 w-10">{t.rank}</th>
                   <th className="text-left px-3 py-2">{t.player}</th>
                   <th className="text-right px-3 py-2">{t.mean}</th>
@@ -169,7 +169,7 @@ function Row({
           {row.isModel ? modelLabel : row.displayName}
         </span>
         {isYou && !row.isModel && (
-          <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+          <span className="ml-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700">
             {youLabel}
           </span>
         )}

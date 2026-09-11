@@ -1,10 +1,13 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { loadPredictionGameData } from "@/lib/utils/football-data-loader";
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
+import { SiteFooter } from '@/components/SiteFooter';
 import { ContraOModelo } from "@/components/charts/football/ContraOModelo";
 import { GameAuthProvider } from "@/components/GameAuthProvider";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, Swords } from "lucide-react";
+import { Swords } from "lucide-react";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -14,17 +17,16 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const pt = locale !== "en";
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga/jogo-previsoes`,
     title: pt
       ? "Contra o Modelo — Liga Portugal - estimador.pt"
       : "Beat the Model — Liga Portugal - estimador.pt",
     description: pt
       ? "Faz as tuas previsões para a próxima jornada da Liga Portugal e vê se bates o modelo. Avaliação por Ranked Probability Score, a mesma medida com que avaliamos o modelo."
       : "Forecast the next Liga Portugal matchday and see if you can beat the model. Scored with the Ranked Probability Score, the same measure we grade the model with.",
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/desporto/liga/jogo-previsoes`,
-    },
-  };
+  });
 }
 
 export default async function JogoPrevisoesPage({
@@ -39,35 +41,19 @@ export default async function JogoPrevisoesPage({
   const data = await loadPredictionGameData();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
-      <section className="bg-stone-800 text-white">
-        <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
-          <Link
-            href="/desporto/liga"
-            locale={locale}
-            className="text-sm text-stone-400 hover:text-white inline-flex items-center gap-1 mb-4 group transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-            {t("football.backToLeague")}
-          </Link>
-          <div className="flex items-center gap-2 mb-2">
-            <Swords className="w-5 h-5 text-stone-400" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-              {t("football.title")}
-            </span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            {pt ? "Contra o Modelo" : "Beat the Model"}
-          </h1>
-          <p className="text-stone-400 text-sm">
-            {pt
-              ? "Consegues prever melhor do que o modelo? Escolhe as tuas probabilidades antes da jornada e compara-te com ele, semana após semana."
-              : "Can you forecast better than the model? Set your own probabilities before the matchday and go head to head, week after week."}
-          </p>
-        </div>
-      </section>
+      <PageHero
+        width="3xl"
+        back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
+        icon={<Swords aria-hidden="true" className="w-4 h-4" />}
+        eyebrow={t("football.title")}
+        title={pt ? "Contra o Modelo" : "Beat the Model"}
+        lede={pt
+          ? "Consegues prever melhor do que o modelo? Escolhe as tuas probabilidades antes da jornada e compara-te com ele, semana após semana."
+          : "Can you forecast better than the model? Set your own probabilities before the matchday and go head to head, week after week."}
+      />
 
       <section>
         <div className="max-w-3xl mx-auto px-4 py-10">
@@ -126,6 +112,7 @@ export default async function JogoPrevisoesPage({
           </p>
         </div>
       </section>
+      <SiteFooter locale={locale} />
     </div>
   );
 }
