@@ -2,10 +2,12 @@ import { createPageMetadata } from '@/lib/metadata';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Header } from '@/components/Header';
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import MapPageClient from '@/components/MapPageClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Vote } from 'lucide-react';
 import fs from 'fs';
 import path from 'path';
 
@@ -36,8 +38,8 @@ export async function generateMetadata({
   
   return createPageMetadata({
     locale,
-    path: `/eleicoes/mapa`,
-    title: `${t('map.title')} - estimador.pt`,
+    path: `/eleicoes/legislativas/mapa`,
+    title: `${t('nav.parliamentary')}: ${t('map.title')} - estimador.pt`,
     description: t('map.selectDistrict'),
   });
 }
@@ -54,19 +56,19 @@ export default async function MapPage({
   return (
     <div className="min-h-screen bg-paper">
       <Header />
-      
+
+      {/* The map reads one election's district forecast, so it opens as a
+          page of that election, not as a general elections surface. */}
+      <PageHero
+        icon={<Vote aria-hidden="true" className="w-4 h-4" />}
+        eyebrow={t('nav.parliamentary')}
+        title={t('map.title')}
+        lede={t('map.selectDistrict')}
+        back={{ href: '/eleicoes/legislativas', label: t('map.backToForecast'), locale }}
+      />
+
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl text-stone-900 mb-4">
-              {t('map.subtitle')}
-            </h1>
-            <p className="text-lg text-stone-600 max-w-3xl">
-              {t('map.selectDistrict')}
-            </p>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Map */}
             <div className="lg:col-span-2">

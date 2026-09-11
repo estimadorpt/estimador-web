@@ -74,17 +74,27 @@
     },
     {
       "route": "/map",
-      "redirect": "/pt/eleicoes/mapa/",
+      "redirect": "/pt/eleicoes/legislativas/mapa/",
       "statusCode": 301
     },
     {
       "route": "/pt/map",
-      "redirect": "/pt/eleicoes/mapa/",
+      "redirect": "/pt/eleicoes/legislativas/mapa/",
       "statusCode": 301
     },
     {
       "route": "/en/map",
-      "redirect": "/en/eleicoes/mapa/",
+      "redirect": "/en/eleicoes/legislativas/mapa/",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/eleicoes/mapa",
+      "redirect": "/pt/eleicoes/legislativas/mapa/",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/eleicoes/mapa",
+      "redirect": "/en/eleicoes/legislativas/mapa/",
       "statusCode": 301
     },
     {

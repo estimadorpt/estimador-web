@@ -64,7 +64,7 @@ src/
 │   ├── desporto/liga/              # Liga Portugal forecast
 │   ├── eleicoes/presidenciais/     # Presidential election
 │   ├── eleicoes/legislativas/      # Parliamentary election
-│   ├── eleicoes/mapa/              # District map
+│   ├── eleicoes/legislativas/mapa/ # District map (parliamentary 2025)
 │   ├── artigos/                    # Articles
 │   ├── sobre/                      # About
 │   └── metodologia/                # Methodology

@@ -78,11 +78,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const c = locale === "en" ? copy.en : copy.pt;
+  // Unpublished for now: reachable by URL, but linked from nowhere, out of the
+  // sitemap and not indexed. Flip `index` and the sitemap's HIDDEN_ROUTES when
+  // the second tier earns its place.
   return createPageMetadata({
     locale,
     path: `/desporto/liga2`,
     title: `${c.title} | Estimador`,
     description: c.description,
+    index: false,
   });
 }
 

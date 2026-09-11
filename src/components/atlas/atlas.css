@@ -47,3 +47,7 @@
 /* Narrow screens: the toolbar may wrap to two rows, so the breadcrumb flows
    under it as a second toolbar row instead of floating at a fixed offset. */
 @media(max-width:720px){.atlas-immersive .atlas-breadcrumb,.atlas-immersive[data-panel-open=true] .atlas-breadcrumb{position:relative;top:auto;left:auto;max-width:none;min-height:36px;padding:2px 12px 8px;background:#102c27cc;z-index:4}.atlas-immersive .atlas-world-top{padding-bottom:4px}.atlas-immersive .atlas-map,.atlas-immersive .atlas-map-stack>.atlas-national-layer>.atlas-map{margin-top:6px}.atlas-immersive .atlas-panel{top:112px}}
+/* The profile drawer must not cover the journey controls on wide screens. */
+@media(min-width:721px){.atlas-immersive[data-panel-open=true] .atlas-cinematic .atlas-living-controls{right:330px}}
+/* Phones: the drawer ends above the journey controls and the legend strip below the map. */
+@media(max-width:720px){.atlas-immersive[data-panel-open=true] .atlas-panel{bottom:140px}}

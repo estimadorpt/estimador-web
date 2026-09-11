@@ -23,7 +23,7 @@ import { SectionNotes } from "@/components/articles/SectionNotes";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ligaTeamSlugs } from "@/lib/config/football";
-import { Trophy, ArrowRight, SlidersHorizontal, Scale, History, Layers, Users, Gamepad2 } from "lucide-react";
+import { Trophy, ArrowRight, SlidersHorizontal, Scale, History, Users, Gamepad2 } from "lucide-react";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -548,31 +548,6 @@ export default async function LigaPage({
               </div>
               <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
                 {locale === "en" ? "See the players" : "Ver os jogadores"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </span>
-            </div>
-          </Link>
-
-          {/* Liga 2 — the second tier, on the lighter goals-only model */}
-          <Link
-            href="/desporto/liga2"
-            locale={locale}
-            className="mt-4 block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
-          >
-            <div className="flex items-start gap-3">
-              <Layers className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-stone-900">
-                  {locale === "en" ? "Liga 2 in probabilities" : "A Liga 2 em probabilidades"}
-                </h3>
-                <p className="text-sm text-stone-500 mt-0.5">
-                  {locale === "en"
-                    ? "Promotion and relegation probabilities for the second tier, from 1,836 matches over six seasons. A deliberately lighter model: goals only, no xG and no squad values."
-                    : "Probabilidades de subida e de descida no segundo escalão, a partir de 1836 jogos em seis épocas. Um modelo assumidamente mais leve: só golos, sem xG nem valores de plantel."}
-                </p>
-              </div>
-              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
-                {locale === "en" ? "See Liga 2" : "Ver a Liga 2"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </div>

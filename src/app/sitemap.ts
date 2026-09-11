@@ -24,7 +24,6 @@ const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number
   '/economia': { changeFrequency: 'daily', priority: 0.9 },
   '/economia/metodologia': { changeFrequency: 'monthly', priority: 0.5 },
   '/desporto/liga': { changeFrequency: 'daily', priority: 0.9 },
-  '/desporto/liga2': { changeFrequency: 'weekly', priority: 0.7 },
   '/desporto/liga/jogadores': { changeFrequency: 'weekly', priority: 0.7 },
   '/desporto/liga/jogo-previsoes': { changeFrequency: 'weekly', priority: 0.7 },
   '/desporto/liga/simulador': { changeFrequency: 'weekly', priority: 0.7 },
@@ -34,12 +33,20 @@ const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number
   '/desporto/liga/2025-26': { changeFrequency: 'yearly', priority: 0.6 },
   '/eleicoes/presidenciais': { changeFrequency: 'monthly', priority: 0.7 },
   '/eleicoes/legislativas': { changeFrequency: 'monthly', priority: 0.7 },
-  '/eleicoes/mapa': { changeFrequency: 'monthly', priority: 0.6 },
+  '/eleicoes/legislativas/mapa': { changeFrequency: 'monthly', priority: 0.6 },
   '/artigos': { changeFrequency: 'weekly', priority: 0.7 },
   '/sobre': { changeFrequency: 'monthly', priority: 0.5 },
   '/metodologia': { changeFrequency: 'monthly', priority: 0.5 },
   '/privacidade': { changeFrequency: 'yearly', priority: 0.3 },
 }
+
+/**
+ * Routes that exist on disk but are not published: they carry `index: false`
+ * in their metadata, are linked from nowhere, and a sitemap entry would
+ * contradict the noindex. The brand guide is reference for the site itself;
+ * Liga 2 waits until the second tier earns a place in the navigation.
+ */
+const HIDDEN_ROUTES = new Set(['/marca', '/desporto/liga2'])
 
 /** Every localized route template with no dynamic segment, read from the app directory. */
 function staticRoutes(): string[] {
@@ -49,7 +56,8 @@ function staticRoutes(): string[] {
   function walk(directory: string, route: string) {
     const entries = fs.readdirSync(directory, { withFileTypes: true })
     if (entries.some(entry => entry.isFile() && /^page\.(tsx|ts|jsx|js|mdx)$/.test(entry.name))) {
-      found.push(route === '' ? '/' : route)
+      const normalized = route === '' ? '/' : route
+      if (!HIDDEN_ROUTES.has(normalized)) found.push(normalized)
     }
     for (const entry of entries) {
       // Dynamic segments are expanded from published records further down.

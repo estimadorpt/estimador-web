@@ -431,14 +431,6 @@ export default async function Home({
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
-              href="/eleicoes/mapa"
-              locale={locale}
-              className="group inline-flex items-center gap-2 text-stone-700 hover:text-ink transition-colors"
-            >
-              <span className="font-semibold">{t('map.title')}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
               href="/metodologia"
               locale={locale}
               className="group inline-flex items-center gap-2 text-stone-700 hover:text-ink transition-colors"

@@ -190,7 +190,7 @@ export default async function ForecastPage({
                 <h2 className="text-2xl text-stone-900">{t('forecast.districtAnalysis')}</h2>
               </div>
               <Link
-                href="/eleicoes/mapa"
+                href="/eleicoes/legislativas/mapa"
                 locale={locale}
                 className="text-sm text-ink hover:text-ink-muted font-medium flex items-center gap-1"
               >

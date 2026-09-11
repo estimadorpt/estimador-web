@@ -3,7 +3,7 @@ import { PUBLISHED_ARTICLE_SLUGS } from './published-articles.generated';
 
 const PUBLIC_ROUTES = new Set([
   '', 'economia', 'economia/metodologia', 'sobre', 'metodologia', 'artigos', 'privacidade',
-  'eleicoes/presidenciais', 'eleicoes/legislativas', 'eleicoes/mapa',
+  'eleicoes/presidenciais', 'eleicoes/legislativas', 'eleicoes/legislativas/mapa',
   'desporto/liga', 'desporto/liga2', 'desporto/liga/jogadores', 'desporto/liga/modelo',
   'desporto/liga/metodologia', 'desporto/liga/dados', 'desporto/liga/2025-26',
   'desporto/liga/simulador', 'desporto/liga/jogo-previsoes',

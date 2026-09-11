@@ -92,14 +92,27 @@ export function LocalMap({locale,region,municipality,parish,onRegion,onMunicipal
   frame=requestAnimationFrame(tick);return()=>cancelAnimationFrame(frame);
  },[target,manualView]);
  const transform=camera?cameraTransform(camera):null;
- const choose=(code:string)=>{if(level==='country')onRegion(country!.features.find(f=>f.properties.code===code)!.properties.name);else if(level==='district')onMunicipality(code);else onParish(code);};
+ // While a level's shapes are still loading the map shows the coarser ones, so
+ // a chosen shape is dispatched by the collection it belongs to, not by the level.
+ const choose=(code:string)=>{
+  const inCountry=country?.features.find(f=>f.properties.code===code);
+  if(inCountry){onRegion(inCountry.properties.name);return;}
+  if(districts?.features.some(f=>f.properties.code===code)){onMunicipality(code);return;}
+  onParish(code);
+ };
+ // The next level's shapes (or the parish's scene) must be here before "+" can step into them.
+ const ready=level==='country'?!!country:level==='district'?!!districts:level==='municipality'?!!parishes:!!selectedScene;
+ const pendingStep=useRef(false);
  const closer=()=>{
   setManualView(null);
   if(selectedHouse!==null){setZoom(z=>Math.min(4,z*1.5));return;}
+  if(!ready){pendingStep.current=true;return;} // a press during loading steps as soon as the level arrives
   if(parish&&selectedScene){onHouse(parish,selectedScene.homes[0].id);return;}
-  const central=[...features].sort((a,b)=>{const ac=worldPath.centroid(a),bc=worldPath.centroid(b);return Math.hypot(ac[0]-(camera?.x??0),ac[1]-(camera?.y??0))-Math.hypot(bc[0]-(camera?.x??0),bc[1]-(camera?.y??0));})[0];
+  const at=cameraRef.current??camera; // where the camera actually is, even mid-flight
+  const central=[...features].sort((a,b)=>{const ac=worldPath.centroid(a),bc=worldPath.centroid(b);return Math.hypot(ac[0]-(at?.x??0),ac[1]-(at?.y??0))-Math.hypot(bc[0]-(at?.x??0),bc[1]-(at?.y??0));})[0];
   if(central)choose(central.properties.code);
  };
+ useEffect(()=>{if(pendingStep.current&&ready&&!loading){pendingStep.current=false;closer();}},[ready,loading]); // eslint-disable-line react-hooks/exhaustive-deps
  const title=parish?selectedScene?.name:town?.name??region;
  return <div className="atlas-local-map atlas-living-map atlas-cinematic atlas-continuous-world" data-paused={paused} data-house={selectedHouse!==null} data-flying={flying} data-depth={level} data-scenery={profile?.kind}>
  <div className="atlas-local-caption"><span>{pt?'UM PAÍS. DO TERRITÓRIO À PORTA DE CASA.':'ONE COUNTRY. FROM THE MAP TO THE FRONT DOOR.'}</span><strong>{title}</strong>{profile&&<small className="atlas-scenery-label">{sceneryLabel(profile,pt)}</small>}<p>{pt?(selectedHouse!==null?'A mesma casa. As pessoas que lá vivem.':parish?'Entra numa casa. Conhece quem lá vive.':municipality?'Escolhe uma freguesia para te aproximares.':region==='Portugal'?'Escolhe um distrito ou uma ilha.':'Escolhe um município. Continua a viagem.'):(selectedHouse!==null?'The same home. The people living here.':parish?'Enter a home. Meet the people inside.':municipality?'Choose a parish to move closer.':region==='Portugal'?'Choose a district or an island.':'Choose a municipality. Continue the journey.')}</p>{hover&&!parish&&<small>{hover}</small>}</div>
@@ -123,6 +136,6 @@ export function LocalMap({locale,region,municipality,parish,onRegion,onMunicipal
  {estuaryPaths&&<a className="atlas-map-attribution" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors · ODbL</a>}
  {profile&&<details className="atlas-scenery-source"><summary>{pt?'Porque é esta paisagem?':'Why this landscape?'}</summary><p>{pt?'Cenário ilustrativo escolhido pela densidade e pelos tipos de edifícios da freguesia nos Censos 2021. Ruas e vegetação ilustradas; costa e estuários aproximados.':'Illustrative scenery chosen from the parish’s 2021 density and building types. Streets and vegetation are illustrated; coast and estuaries are approximate.'}</p><p><a href="https://mapas.ine.pt/download/index2021.phtml" target="_blank" rel="noreferrer">INE · Censos 2021</a> · <a href="https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-land/" target="_blank" rel="noreferrer">Natural Earth</a></p></details>}
  <div className="atlas-voyage-progress" aria-label={pt?'Escala da viagem':'Journey scale'}>{(pt?['País','Distrito','Município','Freguesia','Casa']:['Country','District','Municipality','Parish','Home']).map((label,i)=><span key={label} data-active={i===(selectedHouse!==null?4:parish?3:municipality?2:region==='Portugal'?0:1)}><i/>{label}</span>)}</div>
- <div className="atlas-living-controls"><span>{pt?'Geografia real · casas e pessoas ilustrativas':'Real geography · illustrative homes and people'}</span><button aria-label={pt?'Repor aproximação':'Reset zoom'} onClick={()=>{setManualView(null);setZoom(1);setReset(n=>n+1);}}><RotateCcw size={15}/></button><button aria-label={pt?'Reduzir':'Zoom out'} disabled={region==='Portugal'&&zoom<=1&&!manualView} onClick={()=>{setManualView(null);if(zoom>1)setZoom(z=>Math.max(1,z/1.5));else onBack();}}><Minus size={16}/></button><span>{pt?'Aproximar':'Explore'}</span><button aria-label={pt?'Ampliar':'Zoom in'} disabled={zoom>=4||loading} onClick={closer}><Plus size={16}/></button></div>
+ <div className="atlas-living-controls"><span>{pt?'Geografia real · casas e pessoas ilustrativas':'Real geography · illustrative homes and people'}</span><button aria-label={pt?'Repor aproximação':'Reset zoom'} onClick={()=>{setManualView(null);setZoom(1);setReset(n=>n+1);}}><RotateCcw size={15}/></button><button aria-label={pt?'Reduzir':'Zoom out'} disabled={region==='Portugal'&&zoom<=1&&!manualView} onClick={()=>{setManualView(null);if(zoom>1)setZoom(z=>Math.max(1,z/1.5));else onBack();}}><Minus size={16}/></button><span>{pt?'Aproximar':'Explore'}</span><button aria-label={pt?'Ampliar':'Zoom in'} disabled={zoom>=4} onClick={closer}><Plus size={16}/></button></div>
  </div>;
 }

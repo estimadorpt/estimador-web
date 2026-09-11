@@ -38,7 +38,6 @@ export function Header() {
       id: 'sport', label: t('nav.sport'),
       dropdown: [
         { href: '/desporto/liga', label: t('nav.liga') },
-        { href: '/desporto/liga2', label: 'Liga Portugal 2' },
         { href: '/desporto/liga/jogadores', label: isPortuguese ? 'Jogadores' : 'Players' },
         { href: '/desporto/liga/simulador', label: isPortuguese ? 'Simulador' : 'Simulator' },
         { href: '/desporto/liga/jogo-previsoes', label: isPortuguese ? 'Jogo de previsões' : 'Prediction game' },
@@ -49,7 +48,6 @@ export function Header() {
       dropdown: [
         { href: '/eleicoes/presidenciais', label: t('nav.presidential') },
         { href: '/eleicoes/legislativas', label: t('nav.parliamentary') },
-        { href: '/eleicoes/mapa', label: t('nav.map') },
       ],
     },
     { id: 'articles', href: '/artigos', label: t('articles.title') },

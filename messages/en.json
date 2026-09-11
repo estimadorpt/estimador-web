@@ -8,7 +8,6 @@
     "analysis": "Analysis",
     "about": "About",
     "methodology": "Methodology",
-    "map": "Map",
     "elections": "Elections",
     "presidential": "Presidential 2026",
     "parliamentary": "Parliamentary 2025",
@@ -48,10 +47,10 @@
     "heroLead": "Probabilistic models and open data on the Portuguese economy, Liga Portugal and elections. Every number carries its date, its source and its uncertainty."
   },
   "map": {
-    "title": "District Map",
-    "subtitle": "Interactive District Map",
+    "title": "District map",
+    "backToForecast": "Back to the 2025 parliamentary forecast",
     "voteShareByParty": "Vote Share by Party",
-    "selectDistrict": "Explore election forecasts by district. Click on any district to see the predicted vote percentage for each party.",
+    "selectDistrict": "The 2025 parliamentary forecast by district. Click a district to see the predicted vote share for each party.",
     "portugalForecasts": "Portugal - District Forecasts",
     "howToInterpret": "How to Interpret",
     "colors": "Colors",

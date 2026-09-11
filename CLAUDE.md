@@ -37,7 +37,7 @@ The project deploys automatically to Azure Static Web Apps via GitHub Actions wh
 /desporto/liga/metodologia/        → Liga Portugal methodology
 /eleicoes/presidenciais/           → Presidential 2026 forecast
 /eleicoes/legislativas/            → Parliamentary 2025 forecast
-/eleicoes/mapa/                    → District map
+/eleicoes/legislativas/mapa/       → District map (parliamentary 2025)
 /artigos/                          → Articles
 /sobre/                            → About
 /metodologia/                      → Methodology overview

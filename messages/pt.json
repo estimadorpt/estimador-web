@@ -8,7 +8,6 @@
     "analysis": "Análise",
     "about": "Sobre",
     "methodology": "Metodologia",
-    "map": "Mapa",
     "elections": "Eleições",
     "presidential": "Presidenciais 2026",
     "parliamentary": "Legislativas 2025",
@@ -48,10 +47,10 @@
     "heroLead": "Modelos probabilísticos e dados abertos sobre a economia portuguesa, a Liga Portugal e as eleições. Cada número traz a sua data, a sua fonte e a sua incerteza."
   },
   "map": {
-    "title": "Mapa Distrital",
-    "subtitle": "Mapa Distrital Interativo",
+    "title": "Mapa distrital",
+    "backToForecast": "Voltar às Legislativas 2025",
     "voteShareByParty": "Previsão de Votos por Partido",
-    "selectDistrict": "Explore as previsões eleitorais por distrito. Clique em qualquer distrito para ver a percentagem de votos prevista para cada partido.",
+    "selectDistrict": "A previsão das legislativas de 2025 por distrito. Clique num distrito para ver a percentagem de votos prevista para cada partido.",
     "portugalForecasts": "Portugal - Previsões por Distrito",
     "howToInterpret": "Como Interpretar",
     "colors": "Cores",
