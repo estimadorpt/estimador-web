@@ -56,6 +56,7 @@ dist/
 # ...and the brand kit files the guide links to.
 !public/brand/*.png
 !public/images/brand/*.png
+!public/branding/*.png
 snapshot-*.md
 
 # Vendored DuckDB WASM (75 MB, unreferenced by src/ — kept locally, never committed)

@@ -116,10 +116,10 @@ async function runAll(checks) {
         const statusOk = check.expect === 404 ? status === 404 : status === check.expect;
         const typeOk = !check.type || type.toLowerCase().includes(check.type);
         if (!statusOk || !typeOk) {
-          failures.push(`${status} ${check.route}${check.type && !typeOk ? ` (content-type "${type}", expected ${check.type})` : ''}`);
+          failures.push({ check, message: `${status} ${check.route}${check.type && !typeOk ? ` (content-type "${type}", expected ${check.type})` : ''}` });
         }
       } catch (error) {
-        failures.push(`ERR ${check.route} — ${error.message}`);
+        failures.push({ check, message: `ERR ${check.route} — ${error.message}` });
       }
     }
   });
@@ -156,12 +156,20 @@ const checks = [
   ...MUST_404.map(route => ({ route, expect: 404 })),
 ];
 
+const RETRIES = Number(readFlag('retry', '2'));
 console.log(`Checking ${checks.length} URLs against ${BASE} …`);
-const failures = await runAll(checks);
+let failures = await runAll(checks);
+// A fresh deployment can lag behind the host's edge for a moment, so the
+// URLs that did not answer get a couple more chances before this fails.
+for (let attempt = 1; failures.length && attempt <= RETRIES; attempt++) {
+  console.log(`${failures.length} not answering as expected yet; retrying in 15s (${attempt}/${RETRIES}) …`);
+  await new Promise(resolve => setTimeout(resolve, 15000));
+  failures = await runAll(failures.map(failure => failure.check));
+}
 
 if (failures.length) {
   console.error(`\n${failures.length} failed:`);
-  for (const failure of failures.sort()) console.error(`  ${failure}`);
+  for (const message of failures.map(failure => failure.message).sort()) console.error(`  ${message}`);
   process.exit(1);
 }
 console.log(`All ${checks.length} URLs answered as expected.`);
