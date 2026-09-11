@@ -53,6 +53,9 @@ dist/
 # and named in public/og-manifest.json. An ignored card is a 404 on every
 # share of that page.
 !public/og-image-*.png
+# ...and the brand kit files the guide links to.
+!public/brand/*.png
+!public/images/brand/*.png
 snapshot-*.md
 
 # Vendored DuckDB WASM (75 MB, unreferenced by src/ — kept locally, never committed)

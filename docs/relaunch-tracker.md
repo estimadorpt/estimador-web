@@ -14,7 +14,7 @@ No repaired item is considered verified merely because the source was edited. Lo
 - [Product audit](relaunch-product-audit.md): expanded route-by-route review and election, football and economics defects (being prepared).
 - [Navigation repair notes](relaunch-navigation-notes.md) and [editorial repair notes](relaunch-editorial-notes.md): implementation and verification records (being prepared).
 - Local review artifacts: `output/playwright/launch-review-2026-09-07/`.
-- Working branch: `codex/september-relaunch`. No deployment has been made from this work. Pre-existing `scripts/update-and-deploy.sh` changes belong to the earlier updater repair and must be preserved.
+- Working branch: `codex/september-relaunch`. Merged to `main` and deployed on 11 September 2026; see "State on 11 September 2026" at the end of this document. Pre-existing `scripts/update-and-deploy.sh` changes belong to the earlier updater repair and must be preserved.
 
 ## Defect and improvement register
 
@@ -92,3 +92,24 @@ The audit work before this goal turn made progress: it produced reproducible evi
 Economics work from the two unpublished commits on `economia-unpushed-jul3` has been recovered selectively (economics components, routes, content, feed and translations). It has not yet passed integration review or browser checks. This is not proof the data are current. Other branch changes and current football/game work are preserved.
 
 Removing `src/i18n/routing.ts` exposed previously skipped errors throughout the site. These are being repaired rather than hidden by the production build. The unused `ChartEmbed` component had no callers and attempted to load nonexistent default exports without data; it was removed rather than leave a broken public abstraction available for future use.
+
+
+## State on 11 September 2026 — after the merge to main
+
+**Deployed.** `codex/september-relaunch` was merged into `main` through [PR #26](https://github.com/estimadorpt/estimador-web/pull/26) at 20:01 UTC (three area commits: design language, visualisation system, relaunch readiness). The first deploy failed at `npm ci` (a lock file written by npm 11, read by Node 22's npm 10) and the second at the test step (the empty `src/content/articles/pt` directory was not in the checkout). Both are fixed on `main`; the third run built, deployed and only failed its post-deploy smoke check on two host behaviours (`/` is a 301 to `/pt/` on Azure; `/404.html` is the not-found override, not a public URL). The smoke script now follows one redirect and skips the override page.
+
+**Verified live** (11 September, 20:15 UTC): `/pt/`, `/en/`, `/pt/marca/`, `/pt/populacao/`, `/pt/economia/`, `/pt/economia/metodologia/`, `/pt/artigos/`, `/pt/privacidade/`, `/pt/feed.xml`, `/pt/desporto/liga/`, a match page and `/api/health` all answer 200 with the new title "estimador.pt — Dados para compreender Portugal".
+
+**Hidden as stale.** The economy dashboard's last run is from 3 July 2026 (`as_of`; the producer expected the next on 6 July). A new rule in `src/lib/utils/economy-time.ts` pauses the dashboard after 20 business days without a run: `/economia` keeps its hero and shows a "paused" card with the last date and the methodology link instead of the tiles; the home card shows "Em pausa desde …" instead of numbers. The staleness banner still covers the days before that. Nothing has to be flipped back: the next `./scripts/sync-data.sh economics` with a fresh `as_of` lifts the pause at the next build.
+
+**Labelled, not hidden.** `/populacao` is a preview on a fictional population and says so in its kicker; the real population waits for the microsynthesis release. `/eleicoes/presidenciais` and `/eleicoes/legislativas` are archives and carry the archive label. `/artigos` starts empty; the feeds and the subscribe card work.
+
+**Fresh.** Liga Portugal 2026-27 predictions run to matchday 5 (6 September); the match pages, simulator, players and team pages are current.
+
+**Open follow-ups.**
+- Producer side: bilingual `framing_i18n`, `first_release_note_i18n`, `anchor_claim_i18n`, `tilt_claim_i18n`, `consensus.note_i18n` and era `label_i18n` in the economy feed; Portuguese display names for model variables (`top_drivers[].variable`, `official_quarterly.model`, `nowcast_seed.source`).
+- Repository: `public/duckdb/` (75 MB) is ignored and unreferenced by the app; the local smoke sample lists it, production never had it. Older PRs #25 (populacao launch surfaces) and #23 (Playwright e2e) are still open and will conflict with `main`.
+- Hosting: `/api/health` answers only on Azure, so any static preview logs a 404 for the season game's probe (it stays in local mode by design).
+- Design: the review document `design/brand-implementation-audit-2026-09-11.md` records what was fixed after the external review.
+
+**How to re-verify.** `npm run check`, `npm run build`, `node scripts/smoke-check.mjs --base https://estimador.pt --sample 10`; the full-route crawl and the 390px browser pass live in the session scratchpad and are described in the review document.

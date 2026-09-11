@@ -91,11 +91,17 @@ function sampleTree(name, limit) {
   return found;
 }
 
-async function head(url) {
+async function head(url, hops = 0) {
   // Some CDNs treat HEAD differently from GET; use GET and drop the body.
   const response = await fetch(url, { redirect: 'manual' });
   const type = response.headers.get('content-type') ?? '';
   if (response.body) await response.arrayBuffer().catch(() => {});
+  // The host may answer a route with a redirect (Azure sends / to /pt/);
+  // what matters is where it lands, so follow one hop.
+  const location = response.headers.get('location');
+  if ([301, 302, 307, 308].includes(response.status) && location && hops < 1) {
+    return head(new URL(location, url).toString(), hops + 1);
+  }
   return { status: response.status, type };
 }
 
@@ -139,7 +145,8 @@ const sampledRoutes = routes.filter(route => {
 });
 
 const checks = [
-  ...sampledRoutes.map(route => ({ route, expect: 200, type: 'text/html' })),
+  // 404.html is the host's not-found override, never served at its own path.
+  ...sampledRoutes.filter(route => route !== '/404.html').map(route => ({ route, expect: 200, type: 'text/html' })),
   ...assets.files.map(route => ({ route, expect: 200, type: EXPECTED_TYPES[path.extname(route)] })),
   ...assets.sampleDirs.flatMap(name => sampleTree(name, 5).map(route => ({
     route,

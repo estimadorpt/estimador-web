@@ -3,6 +3,8 @@ import { loadEconomyDashboard, loadEconomyStories } from "@/lib/utils/data-loade
 import { isTileAvailable, type EconomyDashboardTiles } from "@/types/economy-dashboard";
 import { isModuleAvailable } from "@/types/economy-stories";
 import { fmtDate } from "@/lib/utils/economy-format";
+import { economyPaused } from "@/lib/utils/economy-time";
+import { Action } from "@/components/brand/Action";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { Mosaic } from '@/components/brand/Mosaic';
@@ -75,6 +77,37 @@ export default async function EconomiaPage({
 
   const tiles: EconomyDashboardTiles = data.tiles ?? {};
   const updatedDate = fmtDate(data.vintage_date, locale);
+
+  // Stale beyond the banner's reach: keep the page, drop the numbers.
+  if (economyPaused(data.as_of ?? data.vintage_date)) {
+    return (
+      <div className="min-h-screen bg-paper">
+        <Header />
+        <PageHero
+          width="5xl"
+          field="mint"
+          art={<Mosaic variant="corner" className="h-full w-full" ground="transparent" colors={['mustardSoft', 'periwinkleSoft', 'coralSoft']} />}
+          icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          lede={t("pageIntro")}
+          meta={<span>{t("updated")} {updatedDate}</span>}
+        />
+        <main className="max-w-5xl mx-auto px-4 py-8">
+          <section className="rounded-2xl border border-line bg-cream p-6 md:p-8">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{t("pausedKicker")}</p>
+            <h2 className="mt-2 text-2xl">{t("pausedTitle")}</h2>
+            <p className="mt-3 max-w-prose text-stone-600 leading-relaxed">{t("pausedBody", { date: updatedDate })}</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Action href="/economia/metodologia" locale={locale} variant="secondary">{t("methodologyLink")}</Action>
+              <Action href="/" locale={locale} variant="text" arrow>{t("pausedBack")}</Action>
+            </div>
+          </section>
+        </main>
+        <SiteFooter locale={locale} />
+      </div>
+    );
+  }
 
   // Top-level narrative lede — fixed-rule template over the published tiles
   // (the payload is bilingual; pick the locale, fall back to the other).

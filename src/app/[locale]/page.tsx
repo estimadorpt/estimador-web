@@ -11,10 +11,12 @@ import { loadEconomyDashboard } from "@/lib/utils/data-loader";
 import { getMDXArticlesByLocale } from "@/lib/mdx-articles";
 import { ligaTeamColors } from "@/lib/config/football";
 import { HomeEconomyFreshness } from "@/components/economics/HomeEconomyFreshness";
+import { economyPaused } from "@/lib/utils/economy-time";
 import {
   fmtScore,
   fmtSignedPctValue,
   fmtProbPct,
+  fmtDate,
 } from "@/lib/utils/economy-format";
 
 export async function generateMetadata({
@@ -43,7 +45,8 @@ export default async function HomePage({
 
   const ligaSummary = await loadLigaSummary();
   const economy = await loadEconomyDashboard();
-  const economyTiles = economy?.tiles;
+  const economyPausedNow = economyPaused(economy?.as_of ?? economy?.vintage_date);
+  const economyTiles = economyPausedNow ? undefined : economy?.tiles;
 
   // The homepage is otherwise entirely models and numbers, so nothing on it
   // says the site also writes. Two pieces is enough to establish that without
@@ -126,8 +129,8 @@ export default async function HomePage({
               <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
                 {t("sections.economics")}
               </span>
-              <span className="text-[11px] bg-green-100 text-green-800 font-bold px-2 py-0.5">
-                {t("sections.activeSection")}
+              <span className={economyPausedNow ? "text-[11px] bg-parchment text-stone-600 font-bold px-2 py-0.5" : "text-[11px] bg-green-100 text-green-800 font-bold px-2 py-0.5"}>
+                {economyPausedNow ? t("sections.pausedSection") : t("sections.activeSection")}
               </span>
             </div>
 
@@ -184,7 +187,7 @@ export default async function HomePage({
               <div className="grid grid-cols-1 gap-px bg-stone-200 border border-stone-200">
                 <div className="bg-cream p-5">
                   <div className="text-xs text-stone-500">
-                    {t("sections.economicsDescription")}
+                    {economyPausedNow ? t("economics.pausedHome", { date: fmtDate(economy?.vintage_date, locale) }) : t("sections.economicsDescription")}
                   </div>
                 </div>
               </div>

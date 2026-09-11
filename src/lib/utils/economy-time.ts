@@ -76,3 +76,15 @@ export function positionForDate(targetQuarter?: string | null, now: Date = new D
   const position = (['M1', 'M2', 'M3'] as const)[monthInQuarter];
   return { position, currentQuarter };
 }
+
+/**
+ * Beyond this many business days without a new run the dashboard stops
+ * showing numbers altogether (the staleness banner covers the days before).
+ * Fresh data lifts the pause on the next build; nothing has to be flipped.
+ */
+export const ECONOMY_PAUSE_BUSINESS_DAYS = 20;
+
+export function economyPaused(asOf?: string | null, now: Date = new Date()): boolean {
+  const days = businessDaysSince(asOf ?? null, now);
+  return days !== null && days > ECONOMY_PAUSE_BUSINESS_DAYS;
+}
