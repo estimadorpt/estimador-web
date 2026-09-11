@@ -1,16 +1,21 @@
 import type { ReactNode } from 'react';
 
-/** A cream panel: 16px corners, a hairline, no shadow. Labelled by its own heading. */
+/** A cream panel: 16px corners, a hairline, no shadow, and it clips what bleeds to its edges. */
 export function HomePanel({ children, labelledBy, className = '' }: { children: ReactNode; labelledBy: string; className?: string }) {
   return (
-    <section aria-labelledby={labelledBy} className={`rounded-2xl border border-line bg-cream ${className}`}>
+    <section aria-labelledby={labelledBy} className={`overflow-hidden rounded-2xl border border-line bg-cream ${className}`}>
       {children}
     </section>
   );
 }
 
-export function Kicker({ children, id }: { children: ReactNode; id?: string }) {
-  return <p id={id} className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{children}</p>;
+export function Kicker({ children, pill }: { children: ReactNode; pill?: ReactNode }) {
+  return (
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">
+      <span>{children}</span>
+      {pill && <span className="rounded-md bg-parchment px-2 py-0.5 tracking-wider text-stone-600">{pill}</span>}
+    </p>
+  );
 }
 
 /** A small status line: a dot and a short sentence in the 600 step, never faint. */

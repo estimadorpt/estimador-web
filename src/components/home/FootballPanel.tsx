@@ -37,7 +37,7 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
       <p className="text-[11px] font-bold uppercase tracking-wider text-stone-600">{t('footballChampionLabel')}</p>
       <ul className="mt-2 grid grid-cols-3 gap-2">
         {chips.map(chip => (
-          <li key={chip.team} className="rounded-xl border border-line bg-paper px-2 py-2 text-center" style={{ borderTopWidth: 3, borderTopColor: chip.color }}>
+          <li key={chip.team} className="rounded-xl border border-line px-2 py-2 text-center" style={{ borderTopWidth: 3, borderTopColor: chip.color, backgroundColor: `color-mix(in oklab, ${chip.color} 8%, var(--color-paper))` }}>
             <span className="block truncate text-[12px] font-semibold text-stone-700">{chip.name}</span>
             <span className="block font-display text-2xl font-extrabold tabular-nums leading-tight text-ink">{chip.p}<span className="text-sm font-bold text-stone-500">%</span></span>
             {chip.delta != null && Math.abs(chip.delta) >= 1 && (
@@ -52,7 +52,7 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
   const copy = (
     <>
       <Kicker>{t('footballKicker')}</Kicker>
-      <h2 id="home-football-title" className={`mt-2 ${rail ? 'text-2xl' : 'text-xl md:text-2xl'}`}>{t('footballTitle')}</h2>
+      <h2 id="home-football-title" className={`mt-2 ${rail ? 'text-2xl md:text-[1.75rem] md:leading-[1.15]' : 'text-xl md:text-[1.5rem] md:leading-[1.2]'}`}>{t('footballTitle')}</h2>
       {snapshot ? (
         <p className="mt-1.5 text-[13px] font-semibold text-stone-600">{t('footballDate', { matchday: snapshot.matchday, date })}</p>
       ) : (
@@ -74,16 +74,16 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
 
   if (rail) {
     return (
-      <HomePanel labelledBy="home-football-title" className="flex flex-col p-5 md:p-6">
-        <HomeArt name="football" priority sizes="(min-width: 1100px) 30vw, (min-width: 768px) 50vw, 100vw" className="mx-auto h-[130px] w-full max-w-[240px] md:h-[150px]" />
-        <div className="mt-4">{copy}</div>
+      <HomePanel labelledBy="home-football-title" className="flex flex-col">
+        <HomeArt name="football" shape="wide" priority sizes="(min-width: 1100px) 32vw, 100vw" className="h-[190px] w-full md:h-[230px]" />
+        <div className="flex flex-1 flex-col p-5 md:p-6">{copy}</div>
       </HomePanel>
     );
   }
   return (
-    <HomePanel labelledBy="home-football-title" className="grid gap-4 p-5 md:grid-cols-[minmax(120px,38%)_1fr] md:items-center md:gap-6 md:p-6">
-      <HomeArt name="football" sizes="(min-width: 768px) 22vw, 100vw" className="mx-auto h-[120px] w-full max-w-[220px] md:h-[150px]" />
-      <div className="min-w-0">{copy}</div>
+    <HomePanel labelledBy="home-football-title" className="grid md:grid-cols-[minmax(200px,42%)_1fr]">
+      <HomeArt name="football" shape="square" sizes="(min-width: 1100px) 22vw, (min-width: 768px) 40vw, 100vw" className="h-[200px] w-full md:h-full md:min-h-[260px]" />
+      <div className="min-w-0 p-5 md:p-6">{copy}</div>
     </HomePanel>
   );
 }

@@ -33,28 +33,30 @@ export async function PopulationPanel({ locale, variant }: { locale: string; var
 
   if (!lead) {
     return (
-      <HomePanel labelledBy="home-population-title" className="flex flex-col p-5 md:p-6">
-        <HomeArt name="population" sizes="(min-width: 1100px) 30vw, (min-width: 768px) 50vw, 100vw" className="mx-auto h-[150px] w-full max-w-[260px]" />
-        <Kicker>{t('populationKicker')}</Kicker>
-        <Heading id="home-population-title" className="mt-2 text-xl md:text-2xl">{t('populationTitle')}</Heading>
-        <p className="mt-2 text-[15px] leading-relaxed text-stone-600">{t('populationText')}</p>
-        <div className="mt-4"><Action href="/populacao" locale={locale} arrow>{t('populationAction')}</Action></div>
-        {methods}
-        <Status>{t('populationStatus')}</Status>
+      <HomePanel labelledBy="home-population-title" className="flex flex-col">
+        <HomeArt name="population" shape="square" sizes="(min-width: 1100px) 32vw, 100vw" className="h-[220px] w-full" />
+        <div className="flex flex-1 flex-col p-5 md:p-6">
+          <Kicker>{t('populationKicker')}</Kicker>
+          <Heading id="home-population-title" className="mt-2 text-2xl md:text-[1.75rem] md:leading-[1.15]">{t('populationTitle')}</Heading>
+          <p className="mt-2 text-[15px] leading-relaxed text-stone-600">{t('populationText')}</p>
+          <div className="mt-4"><Action href="/populacao" locale={locale} arrow>{t('populationAction')}</Action></div>
+          {methods}
+          <Status>{t('populationStatus')}</Status>
+        </div>
       </HomePanel>
     );
   }
 
   return (
-    <HomePanel labelledBy="home-population-title" className="grid gap-5 p-5 md:p-7 min-[1100px]:grid-cols-[52fr_48fr] min-[1100px]:grid-rows-[auto_auto] min-[1100px]:gap-x-8 min-[1100px]:gap-y-0">
-      <div className="min-w-0 min-[1100px]:col-start-1 min-[1100px]:self-end">
+    <HomePanel labelledBy="home-population-title" className="relative min-[1100px]:pr-[45%]">
+      <div className="min-w-0 px-5 pt-5 md:px-7 md:pt-6">
         <Kicker>{t('populationKicker')}</Kicker>
-        <Heading id="home-population-title" className="mt-3 max-w-xl text-3xl leading-[1.08] md:text-4xl">{t('populationTitle')}</Heading>
+        <Heading id="home-population-title" className="mt-3 max-w-xl text-[2rem] leading-[1.06] md:text-[2.4rem]">{t('populationTitle')}</Heading>
         <p className="mt-3 max-w-lg text-base leading-relaxed text-stone-600 md:text-[17px]">{t('populationText')}</p>
       </div>
-      <HomeArt name="population" priority sizes="(min-width: 1100px) 40vw, (min-width: 768px) 60vw, 100vw" className="mx-auto h-[170px] w-full max-w-[300px] min-[1100px]:col-start-2 min-[1100px]:row-start-1 min-[1100px]:row-span-2 min-[1100px]:h-auto min-[1100px]:max-h-[460px] min-[1100px]:max-w-none min-[1100px]:self-center" />
-      <div className="min-w-0 min-[1100px]:col-start-1 min-[1100px]:self-start">
-        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-3 min-[1100px]:mt-6">
+      <HomeArt name="population" shape="lead" priority sizes="(min-width: 1100px) 40vw, 100vw" className="mx-5 mt-5 h-[240px] rounded-xl md:mx-7 min-[1100px]:absolute min-[1100px]:inset-y-0 min-[1100px]:right-0 min-[1100px]:m-0 min-[1100px]:h-auto min-[1100px]:w-[43%] min-[1100px]:rounded-none" />
+      <div className="min-w-0 px-5 pb-5 pt-4 md:px-7 md:pb-6 min-[1100px]:pt-5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
           <Action href="/populacao" locale={locale} arrow>{t('populationAction')}</Action>
         </div>
         {methods}
