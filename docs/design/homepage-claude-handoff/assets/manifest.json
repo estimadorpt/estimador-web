@@ -1,0 +1,42 @@
+[
+  {
+    "section": "population",
+    "file": "population.png",
+    "width": 1448,
+    "height": 1086,
+    "bytes": 1326326,
+    "role": "Decorative section illustration; not data or UI",
+    "fit": "contain",
+    "alt": "Use empty alt when adjacent section text supplies its meaning."
+  },
+  {
+    "section": "football",
+    "file": "football.png",
+    "width": 1448,
+    "height": 1086,
+    "bytes": 1181849,
+    "role": "Decorative section illustration; not data or UI",
+    "fit": "contain",
+    "alt": "Use empty alt when adjacent section text supplies its meaning."
+  },
+  {
+    "section": "economy",
+    "file": "economy.png",
+    "width": 1448,
+    "height": 1086,
+    "bytes": 1413462,
+    "role": "Decorative section illustration; not data or UI",
+    "fit": "contain",
+    "alt": "Use empty alt when adjacent section text supplies its meaning."
+  },
+  {
+    "section": "elections",
+    "file": "elections.png",
+    "width": 1448,
+    "height": 1086,
+    "bytes": 1146358,
+    "role": "Decorative section illustration; not data or UI",
+    "fit": "contain",
+    "alt": "Use empty alt when adjacent section text supplies its meaning."
+  }
+]
