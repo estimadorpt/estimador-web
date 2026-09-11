@@ -20,22 +20,41 @@ jobs:
           submodules: true
           lfs: false
           persist-credentials: false
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          # Matches the Azure Static Web Apps apiRuntime in
+          # staticwebapp.config.json. Node 20 left support in April 2026.
+          node-version: '22'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
+      # These are the checks the production build used to skip. They run before
+      # the build so a type error, a lint error, a failing test or a missing
+      # required feed stops the deployment instead of shipping quietly.
+      - name: Required data, types, lint and tests
+        run: npm run check
+
       - name: Build application
         run: npm run build
         env:
           NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
           NEXT_PUBLIC_POSTHOG_HOST: https://eu.i.posthog.com
-        
+          # Where the subscribe form posts. Unset, the card on the article
+          # pages renders the feed link only and no email field.
+          NEXT_PUBLIC_NEWSLETTER_ENDPOINT: ${{ secrets.NEWSLETTER_ENDPOINT }}
+
+      - name: Install API dependencies
+        working-directory: api
+        run: npm ci
+
+      - name: Build and test API
+        working-directory: api
+        run: npm run build
+
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -53,7 +72,15 @@ jobs:
           api_location: "api"
           api_build_command: "npm run build"
           output_location: "out"
-          
+
+      # A local preview does not apply staticwebapp.config.json. This asks the
+      # deployed host for every exported route and asset, and fails the run if
+      # one is missing, has the wrong content type, or if an unknown URL stops
+      # returning 404.
+      - name: Smoke check the deployed site
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: node scripts/smoke-check.mjs --base https://estimador.pt --sample 10
+
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
@@ -65,4 +92,3 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_DEPLOYMENT_TOKEN }}
           action: "close"
-          app_location: "/"

@@ -111,17 +111,17 @@ export function fmtDateShort(iso: string | null | undefined, locale: string): st
 // ---- shared palette (brand teal + stone + semantic) -------------------------
 
 export const COLORS = {
-  teal: '#1B4D5E', // brand accent
-  tealLight: '#3a7d92',
-  stone: '#a8a29e',
-  stoneDark: '#57534e',
-  stoneFaint: '#e7e5e4',
-  grid: '#e7e5e4',
-  red: '#b91c1c',
-  redSoft: '#ef4444',
-  amber: '#b45309',
+  teal: '#245c68', // brand accent
+  tealLight: '#427893',
+  stone: '#7f9284',
+  stoneDark: '#4f5f57',
+  stoneFaint: '#dadccf',
+  grid: '#dadccf',
+  red: '#8f4530',
+  redSoft: '#bd714e',
+  amber: '#8a6a26',
   green: '#15803d',
-  emerald: '#047857',
+  emerald: '#4e8056',
 } as const;
 
 // ---- health verdict scale ---------------------------------------------------

@@ -1,4 +1,6 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { loadPublishedFootballData } from "@/lib/utils/football-data-loader";
@@ -302,12 +304,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const c = locale === "en" ? copy.en : copy.pt;
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga/dados`,
     title: `${c.title} | Estimador`,
     description: c.description,
-    openGraph: { title: c.title, description: c.description, type: "article" },
-    alternates: { canonical: `${SITE}/${locale}/desporto/liga/dados` },
-  };
+  });
 }
 
 export default async function LigaDataPage({
@@ -321,14 +323,14 @@ export default async function LigaDataPage({
   const seasons: PublishedSeason[] = await loadPublishedFootballData();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
         <Link
           href="/desporto/liga"
           locale={locale}
-          className="text-sm text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 mb-6 group"
+          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           {c.back}
@@ -337,7 +339,7 @@ export default async function LigaDataPage({
         <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
           {c.kicker}
         </p>
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{c.title}</h1>
+        <h1 className="text-3xl md:text-4xl tracking-tight mb-4">{c.title}</h1>
         <div className="max-w-3xl space-y-4 mb-10">
           <p className="text-lg text-stone-600 leading-relaxed">{c.standfirstA}</p>
           <p className="text-lg text-stone-800 leading-relaxed font-medium">
@@ -347,7 +349,7 @@ export default async function LigaDataPage({
 
         {/* Published files */}
         <section className="mb-14">
-          <h2 className="text-xl font-bold tracking-tight mb-1">{c.filesTitle}</h2>
+          <h2 className="text-2xl tracking-tight mb-1">{c.filesTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.filesIntro}</p>
 
           {seasons.length === 0 ? (
@@ -358,10 +360,10 @@ export default async function LigaDataPage({
               return (
                 <div key={season.season} className="mb-10">
                   <div className="flex items-baseline gap-3 mb-1">
-                    <h3 className="text-base font-bold text-stone-900">
+                    <h3 className="text-base text-stone-900">
                       {pt ? "Época" : "Season"} {season.season}
                     </h3>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
                       {season.current ? c.currentSeason : c.archived}
                     </span>
                   </div>
@@ -376,19 +378,19 @@ export default async function LigaDataPage({
                         <tr className="border-b border-stone-300">
                           <th
                             scope="col"
-                            className="text-[10px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left w-52"
+                            className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left w-52"
                           >
                             {c.file}
                           </th>
                           <th
                             scope="col"
-                            className="text-[10px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
+                            className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
                           >
                             {c.meaning}
                           </th>
                           <th
                             scope="col"
-                            className="text-[10px] font-bold uppercase tracking-wider text-stone-400 py-2 text-right w-20"
+                            className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-right w-20"
                           >
                             {c.size}
                           </th>
@@ -402,12 +404,12 @@ export default async function LigaDataPage({
                               <td className="py-3 pr-3">
                                 <a
                                   href={`${season.basePath}/${sample}`}
-                                  className="font-mono text-xs text-blue-700 hover:text-blue-800 break-all"
+                                  className="font-mono text-xs text-ink hover:text-ink-dark break-all"
                                 >
                                   {g.label}
                                 </a>
                                 {g.names.length > 1 && (
-                                  <div className="text-[10px] text-stone-400 mt-0.5">
+                                  <div className="text-[11px] text-stone-400 mt-0.5">
                                     {g.names.length} {c.files} ({g.names[0]} …{" "}
                                     {g.names[g.names.length - 1]})
                                   </div>
@@ -433,7 +435,7 @@ export default async function LigaDataPage({
 
         {/* Schema */}
         <section className="mb-14">
-          <h2 className="text-xl font-bold tracking-tight mb-1">{c.schemaTitle}</h2>
+          <h2 className="text-2xl tracking-tight mb-1">{c.schemaTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.schemaIntro}</p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -441,13 +443,13 @@ export default async function LigaDataPage({
                 <tr className="border-b border-stone-300">
                   <th
                     scope="col"
-                    className="text-[10px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left w-64"
+                    className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left w-64"
                   >
                     {c.field}
                   </th>
                   <th
                     scope="col"
-                    className="text-[10px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
+                    className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
                   >
                     {c.meaning}
                   </th>
@@ -471,7 +473,7 @@ export default async function LigaDataPage({
 
         {/* Usage */}
         <section className="mb-14">
-          <h2 className="text-xl font-bold tracking-tight mb-1">{c.usageTitle}</h2>
+          <h2 className="text-2xl tracking-tight mb-1">{c.usageTitle}</h2>
           <p className="text-sm text-stone-500 mb-4 max-w-3xl">{c.usageIntro}</p>
           <pre className="bg-stone-900 text-stone-100 text-xs overflow-x-auto p-4 leading-relaxed">
             <code>{pt
@@ -506,7 +508,7 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
             >
               {c.methodology}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -514,7 +516,7 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
             <Link
               href="/desporto/liga/2025-26"
               locale={locale}
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
             >
               {c.review}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -522,6 +524,7 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
           </div>
         </section>
       </div>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

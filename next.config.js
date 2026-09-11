@@ -26,12 +26,14 @@ const nextConfig = {
     esmExternals: true,
   },
   
+  // Type and lint errors fail the build: a production export is a public
+  // release, and these checks were previously skipped rather than passing.
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
-  
+
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   
   // Configure MDX file extensions

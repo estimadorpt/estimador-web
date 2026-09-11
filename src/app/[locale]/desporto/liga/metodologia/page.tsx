@@ -1,4 +1,6 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft } from "lucide-react";
@@ -11,13 +13,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga/metodologia`,
     title: t("football.methodologyTitle"),
     description: t("football.methodologyDescription"),
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/desporto/liga/metodologia`,
-    },
-  };
+  });
 }
 
 export default async function LigaMethodologyPage({
@@ -30,20 +31,20 @@ export default async function LigaMethodologyPage({
   const isPt = locale === "pt";
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       <div className="max-w-3xl mx-auto px-4 py-10">
         <Link
           href="/desporto/liga"
           locale={locale}
-          className="text-sm text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 mb-6 group"
+          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           {t("football.title")}
         </Link>
 
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">
+        <h1 className="text-3xl md:text-4xl mb-2">
           {t("football.methodologyTitle")}
         </h1>
         <p className="text-stone-500 mb-8">
@@ -124,6 +125,7 @@ export default async function LigaMethodologyPage({
           </p>
         </div>
       </div>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

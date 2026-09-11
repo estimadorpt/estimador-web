@@ -1,4 +1,6 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, ArrowRight, TriangleAlert } from "lucide-react";
 import { loadLiga2 } from "@/lib/utils/football-data-loader";
@@ -76,12 +78,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const c = locale === "en" ? copy.en : copy.pt;
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga2`,
     title: `${c.title} | Estimador`,
     description: c.description,
-    openGraph: { title: c.title, description: c.description, type: "article" },
-    alternates: { canonical: `https://estimador.pt/${locale}/desporto/liga2` },
-  };
+  });
 }
 
 export default async function Liga2Page({
@@ -96,7 +98,7 @@ export default async function Liga2Page({
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-paper">
         <Header />
         <div className="max-w-5xl mx-auto px-4 py-20 text-center text-stone-500">
           <p>{c.unavailable}</p>
@@ -130,14 +132,14 @@ export default async function Liga2Page({
     !!runnerUp && !!third && runnerUp.points === third.points;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
         <Link
           href="/desporto/liga"
           locale={locale}
-          className="text-sm text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 mb-6 group"
+          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           {c.back}
@@ -146,7 +148,7 @@ export default async function Liga2Page({
         <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
           {c.kicker}
         </p>
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+        <h1 className="text-3xl md:text-4xl tracking-tight mb-4">
           {c.title}
         </h1>
 
@@ -263,8 +265,8 @@ export default async function Liga2Page({
               label: pt ? "descidas à Liga 3" : "clubs relegated to Liga 3",
             },
           ].map(kpi => (
-            <div key={kpi.label} className="bg-white p-4">
-              <div className="text-3xl font-black text-stone-900 tabular-nums">
+            <div key={kpi.label} className="bg-cream p-4">
+              <div className="text-3xl font-display font-extrabold text-stone-900 tabular-nums">
                 {kpi.value}
               </div>
               <div className="text-xs text-stone-500 mt-1 leading-snug">
@@ -277,7 +279,7 @@ export default async function Liga2Page({
         {/* Live season, when the data has one */}
         {live && (
           <section className="mb-14">
-            <h2 className="text-xl font-bold tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-1">
               {c.liveTitle} — {live.season}
             </h2>
             <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -286,7 +288,7 @@ export default async function Liga2Page({
                 : `Matchday ${live.matchday}, with ${live.matches_remaining} matches left. Fitted on ${live.training_matches} matches from ${live.seasons_fitted.join(", ")}.`}
             </p>
             <Liga2ProbabilityTable rows={live.teams} locale={locale} />
-            <h3 className="text-lg font-bold tracking-tight mt-10 mb-4">
+            <h3 className="text-lg tracking-tight mt-10 mb-4">
               {c.strengthsTitle}
             </h3>
             <Liga2Strengths rows={live.team_strengths} locale={locale} />
@@ -297,7 +299,7 @@ export default async function Liga2Page({
           <>
             {/* Final table */}
             <section className="mb-14">
-              <h2 className="text-xl font-bold tracking-tight mb-1">
+              <h2 className="text-2xl tracking-tight mb-1">
                 {c.tableTitle} — {review.season}
               </h2>
               <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -316,7 +318,7 @@ export default async function Liga2Page({
             {/* Promotion race across checkpoints */}
             {review.checkpoints.length > 1 && (
               <section className="mb-14">
-                <h2 className="text-xl font-bold tracking-tight mb-1">
+                <h2 className="text-2xl tracking-tight mb-1">
                   {c.raceTitle}
                 </h2>
                 <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -355,7 +357,7 @@ export default async function Liga2Page({
 
             {/* Checkpoint tables */}
             <section className="mb-14">
-              <h2 className="text-xl font-bold tracking-tight mb-1">
+              <h2 className="text-2xl tracking-tight mb-1">
                 {c.checkpointTitle}
               </h2>
               <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -365,7 +367,7 @@ export default async function Liga2Page({
                 {review.checkpoints.map(cp => (
                   <div key={cp.matchday}>
                     <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-                      <h3 className="text-base font-bold text-stone-900">
+                      <h3 className="text-base text-stone-900">
                         {c.matchdayLabel(cp.matchday)}
                       </h3>
                       <span className="text-xs text-stone-400 tabular-nums">
@@ -386,7 +388,7 @@ export default async function Liga2Page({
 
             {/* Team strengths */}
             <section className="mb-14">
-              <h2 className="text-xl font-bold tracking-tight mb-1">
+              <h2 className="text-2xl tracking-tight mb-1">
                 {c.strengthsTitle}
               </h2>
               <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -399,7 +401,7 @@ export default async function Liga2Page({
 
         {/* Caveats */}
         <section className="mb-14">
-          <h2 className="text-xl font-bold tracking-tight mb-1">
+          <h2 className="text-2xl tracking-tight mb-1">
             {c.caveatsTitle}
           </h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -442,7 +444,7 @@ export default async function Liga2Page({
             <Link
               href="/desporto/liga"
               locale={locale}
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
             >
               {c.primeira}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -450,7 +452,7 @@ export default async function Liga2Page({
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
             >
               {c.methodology}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -458,6 +460,7 @@ export default async function Liga2Page({
           </div>
         </section>
       </div>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

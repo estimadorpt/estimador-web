@@ -1,10 +1,23 @@
-import { loadEconomyDashboard } from "@/lib/utils/data-loader";
+import { createPageMetadata } from '@/lib/metadata';
+import { loadEconomyDashboard, loadEconomyStories } from "@/lib/utils/data-loader";
 import { isTileAvailable, type EconomyDashboardTiles } from "@/types/economy-dashboard";
+import { isModuleAvailable } from "@/types/economy-stories";
 import { fmtDate } from "@/lib/utils/economy-format";
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
+import { Mosaic } from '@/components/brand/Mosaic';
+import { TeaserBand } from '@/components/brand/TeaserBand';
+import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from "next-intl/server";
-import { TrendingUp } from "lucide-react";
+import { generatedByKey } from "@/lib/i18n/economy-labels";
+import { Link } from "@/i18n/routing";
+import { TrendingUp, BookOpen } from "lucide-react";
 import type { Metadata } from "next";
+
+import {
+  StalenessBanner,
+  StaleAwareNarrative,
+} from "@/components/economics/dashboard/StalenessBanner";
 
 import { DisclaimerCard } from "@/components/economics/dashboard/DisclaimerCard";
 import { UnavailableTile } from "@/components/economics/dashboard/UnavailableTile";
@@ -17,6 +30,10 @@ import { GrowthAtRiskTile } from "@/components/economics/dashboard/GrowthAtRiskT
 import { OfficialQuarterlyTile } from "@/components/economics/dashboard/OfficialQuarterlyTile";
 import { TrackRecordTile } from "@/components/economics/dashboard/TrackRecordTile";
 import { LabourTile } from "@/components/economics/dashboard/LabourTile";
+import { InflationTile } from "@/components/economics/dashboard/InflationTile";
+import { SectionNotes } from "@/components/articles/SectionNotes";
+import { StoriesSection } from "@/components/economics/stories/StoriesSection";
+import { NextReleaseLine } from "@/components/economics/stories/ReleaseCalendar";
 
 export async function generateMetadata({
   params,
@@ -25,18 +42,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  return {
+  return createPageMetadata({
+    locale,
+    path: '/economia',
     title: t("meta.economicsTitle"),
     description: t("meta.economicsDescription"),
-    openGraph: {
-      title: t("meta.economicsTitle"),
-      description: t("meta.economicsDescription"),
-      type: "website",
-    },
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/economia`,
-    },
-  };
+  });
 }
 
 export default async function EconomiaPage({
@@ -48,11 +59,12 @@ export default async function EconomiaPage({
   const t = await getTranslations({ locale, namespace: "economics" });
 
   const data = await loadEconomyDashboard();
+  const stories = await loadEconomyStories();
 
   // Whole-feed failure → honest, non-crashing fallback.
   if (!data) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-paper">
         <Header />
         <div className="max-w-5xl mx-auto px-4 py-20 text-center text-stone-500">
           <p>{t("unavailable")}</p>
@@ -72,48 +84,71 @@ export default async function EconomiaPage({
       : data.narrative?.en ?? data.narrative?.pt;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
-      {/* Hero */}
-      <section className="bg-stone-800 text-white">
-        <div className="max-w-5xl mx-auto px-4 py-8 md:py-12">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5 text-stone-400" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-              {t("eyebrow")}
-            </span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{t("title")}</h1>
-          <p className="text-stone-300 text-sm md:text-base max-w-2xl">
-            {t("pageIntro")}
-          </p>
-          <p className="text-stone-400 text-xs mt-3">
-            {t("updated")} {updatedDate}
-          </p>
-        </div>
-      </section>
+      <PageHero
+        width="5xl"
+        field="mint"
+        art={<Mosaic variant="corner" className="h-full w-full" ground="transparent" colors={['mustardSoft', 'periwinkleSoft', 'coralSoft']} />}
+        icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        lede={t("pageIntro")}
+        meta={
+          <>
+            <span>{t("updated")} {updatedDate}</span>
+            <Link
+              href="/economia/metodologia"
+              className="inline-flex items-center gap-1 font-semibold text-ink hover:underline"
+            >
+              <BookOpen aria-hidden="true" className="w-3.5 h-3.5" />
+              {t("methodologyLink")}
+            </Link>
+            {/* next official release (estimated date, from the stories feed) */}
+            {stories?.modules?.release_calendar &&
+              isModuleAvailable(stories.modules.release_calendar) && (
+                <NextReleaseLine
+                  data={stories.modules.release_calendar}
+                  locale={locale}
+                />
+              )}
+          </>
+        }
+      />
 
       {/* Tiles */}
       <main className="max-w-5xl mx-auto px-4 py-8 space-y-5">
+        {/* Staleness guard (client-side): banner when the payload is older than
+            5 business days + a calendar-derived quarter position, so a stale
+            payload can never claim "mid-quarter" after the quarter has ended. */}
+        <StalenessBanner
+          asOf={data.as_of}
+          vintageDate={data.vintage_date}
+          targetQuarter={data.vintage?.target_quarter}
+          payloadPosition={data.vintage?.position}
+          locale={locale}
+        />
+
         {/* Narrative lede — the page's plain-language summary, straight from the
-            feed (locale-aware). A presentation feature: no model, no new claim. */}
-        {narrative && (
-          <section className="border-l-2 border-stone-300 pl-4">
-            <p className="text-base md:text-lg leading-relaxed text-stone-700 max-w-4xl">
-              {narrative}
-            </p>
-            {data.narrative?.generated_by && (
-              <p className="mt-1.5 text-[10px] text-stone-400">
-                {t("narrativeBy")}: {data.narrative.generated_by}
-              </p>
-            )}
-          </section>
-        )}
+            feed (locale-aware). A presentation feature: no model, no new claim.
+            Present-tense claims are demoted once the payload is stale. */}
+        <StaleAwareNarrative
+          text={narrative}
+          generatedBy={(() => {
+            const key = generatedByKey(data.narrative?.generated_by);
+            return key ? t(key) : data.narrative?.generated_by;
+          })()}
+          byLabel={t("narrativeBy")}
+          asOf={data.as_of}
+          vintageDate={data.vintage_date}
+          locale={locale}
+        />
 
         <DisclaimerCard
           vintageDate={data.vintage_date}
           vintage={data.vintage}
+          expectedNextUpdate={data.expected_next_update}
           locale={locale}
         />
 
@@ -134,7 +169,7 @@ export default async function EconomiaPage({
           {/* 2 · pulse (anchored) */}
           <div className="lg:col-span-2">
             {isTileAvailable(tiles.pulse) ? (
-              <PulseTile data={tiles.pulse} locale={locale} />
+              <PulseTile data={tiles.pulse} locale={locale} asOf={data.as_of ?? data.vintage_date} />
             ) : (
               <UnavailableTile
                 title={t("pulseTitle")}
@@ -181,6 +216,19 @@ export default async function EconomiaPage({
                 locale={locale}
               />
             )}
+          </div>
+
+          {/* 5b · inflation (PR-1 gated official-data tracker) */}
+          <div className="lg:col-span-2">
+            {isTileAvailable(tiles.inflation) ? (
+              <InflationTile data={tiles.inflation} locale={locale} />
+            ) : tiles.inflation ? (
+              <UnavailableTile
+                title={t("inflationTitle")}
+                reason={tiles.inflation?.reason}
+                locale={locale}
+              />
+            ) : null}
           </div>
 
           {/* 6 · recession */}
@@ -235,7 +283,34 @@ export default async function EconomiaPage({
             )}
           </div>
         </div>
+
+        {/* Data stories — official numbers + explicit arithmetic, no models. */}
+        {stories && <StoriesSection stories={stories} locale={locale} />}
+
+        {/* The explainer teaser comes after the useful data, never above it. */}
+        <TeaserBand
+          field="mint"
+          title={locale === "pt" ? "O que significam estes números?" : "What do these numbers mean?"}
+          href="/economia/metodologia"
+          locale={locale}
+          action={locale === "pt" ? "Ler a metodologia" : "Read the methodology"}
+          className="mt-4"
+        >
+          {locale === "pt"
+            ? "De onde vêm os dados, o que é oficial e o que é estimativa nossa, e porque é que cada painel diz a data a que se refere."
+            : "Where the data comes from, what is official and what is our estimate, and why every panel says the date it refers to."}
+        </TeaserBand>
+
+        {/* Written analysis, framed like the stories block above it: the tiles
+            are the dashboard, and prose is what follows the dashboard. */}
+        <SectionNotes
+          section="economics"
+          locale={locale}
+          className="pt-4"
+          containerClassName="border-t border-stone-200 pt-8"
+        />
       </main>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

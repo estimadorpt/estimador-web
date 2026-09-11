@@ -201,7 +201,7 @@ describe('signInHref', () => {
 describe('probeGame — degrades on anything short of a configured backend', () => {
   const original = globalThis.fetch;
 
-  function stub(impl: () => Promise<Response> | never) {
+  function stub(impl: () => Promise<Response> | Response) {
     globalThis.fetch = (async () => impl()) as unknown as typeof fetch;
   }
 

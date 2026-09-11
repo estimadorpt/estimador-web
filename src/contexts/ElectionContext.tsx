@@ -120,12 +120,12 @@ export function useElectionDataPaths() {
 export function useElectionFiltering() {
   const { currentElection, contestants } = useElection();
   
-  const filterDataByContestants = <T extends Record<string, any>>(
+  const filterDataByContestants = <T extends Record<string, unknown>>(
     data: T[], 
     contestantKey: string = 'party'
   ): T[] => {
     const validContestantIds = new Set(contestants.map(c => c.id));
-    return data.filter(item => validContestantIds.has(item[contestantKey]));
+    return data.filter(item => typeof item[contestantKey] === 'string' && validContestantIds.has(item[contestantKey]));
   };
   
   const getValidContestantIds = (): string[] => {

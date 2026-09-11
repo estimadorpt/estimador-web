@@ -1,7 +1,9 @@
+import { createPageMetadata } from '@/lib/metadata';
 import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { PlayerRatingsHub } from "@/components/charts/football/PlayerRatingsHub";
 import {
@@ -32,20 +34,12 @@ export async function generateMetadata({
     : "There is no honest way to put a goalkeeper and a centre-forward in the same table. Finishing, attacking contribution, contested possession, cross intervention — each metric with its own scale, credible interval and sample.";
   const url = `${SITE}/${locale}/desporto/liga/jogadores`;
 
-  return {
-    title,
-    description,
-    alternates: { canonical: url },
-    openGraph: {
-      title,
-      description,
-      url,
-      siteName: "estimador.pt",
-      locale,
-      type: "website",
-    },
-    twitter: { card: "summary_large_image", title, description },
-  };
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga/jogadores`,
+    title: title,
+    description: description,
+  });
 }
 
 export default async function PlayerRatingsPage({
@@ -71,7 +65,7 @@ export default async function PlayerRatingsPage({
     ]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       <div className="max-w-4xl mx-auto px-4 py-8 md:py-10">
@@ -114,6 +108,7 @@ export default async function PlayerRatingsPage({
           </Link>
         </div>
       </div>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

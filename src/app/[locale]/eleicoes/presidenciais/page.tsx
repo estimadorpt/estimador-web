@@ -1,3 +1,4 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { loadPresidentialData, loadSecondRoundData } from "@/lib/utils/data-loader";
 import { ArrowRight, Calendar, Users } from "lucide-react";
 import { PresidentialCandidateCards, SecondRoundIndicator } from "@/components/charts/PresidentialCandidateCards";
@@ -7,6 +8,8 @@ import { PresidentialHeadToHead } from "@/components/charts/PresidentialHeadToHe
 import { PresidentialRunoffPairs } from "@/components/charts/PresidentialRunoffPairs";
 import { SecondRoundView, BannerToggle } from "@/components/SecondRoundView";
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
+import { SectionNotes } from "@/components/articles/SectionNotes";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ModelAssumptionsCard } from "@/components/ModelAssumptionsCard";
 import { UncertaintyExplainer } from "@/components/UncertaintyExplainer";
@@ -23,18 +26,12 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/eleicoes/presidenciais`,
     title: t('meta.presidentialTitle'),
     description: t('meta.presidentialDescription'),
-    openGraph: {
-      title: t('meta.presidentialTitle'),
-      description: t('meta.presidentialDescription'),
-      url: `https://estimador.pt/${locale}/eleicoes/presidenciais`,
-    },
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/eleicoes/presidenciais`,
-    },
-  };
+  });
 }
 
 export default async function Home({
@@ -94,11 +91,6 @@ export default async function Home({
   const leadingCandidate = runoffProbabilitiesForHeadline[0];
   const secondRoundProbability = winProbabilities.second_round_probability;
   
-  // Calculate days until election
-  const electionDate = new Date(PRESIDENTIAL_2026.date);
-  const today = new Date();
-  const daysUntilElection = Math.ceil((electionDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
   // Get the last update date
   const lastUpdate = forecast.updated_at 
     ? new Date(forecast.updated_at).toLocaleDateString(locale === 'pt' ? 'pt-PT' : 'en-US', {
@@ -117,16 +109,16 @@ export default async function Home({
   };
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       {/* Presidential Election Banner */}
       <div className="bg-stone-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between text-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap gap-3 items-center justify-between text-sm">
           <div className="flex items-center gap-3">
             <span className="font-semibold tracking-wide">{t('presidential.electionName')}</span>
             <span className="text-stone-500">·</span>
-            <span className="text-stone-300">{t('presidential.electionDate', { date: 'January 18, 2026' })}</span>
+            <span className="text-stone-300">{t('presidential.electionDate', { date: locale === 'pt' ? '18 de janeiro de 2026' : '18 January 2026' })}</span>
           </div>
           <div className="flex items-center gap-4">
             <BannerToggle
@@ -137,7 +129,7 @@ export default async function Home({
             />
             <div className="flex items-center gap-2 text-stone-300 bg-stone-700/50 px-3 py-1 rounded-full text-xs">
               <Calendar className="w-3.5 h-3.5" />
-              <span className="font-medium">{daysUntilElection} days</span>
+              <span className="font-medium">{locale === 'pt' ? 'Arquivo da previsão' : 'Forecast archive'}</span>
             </div>
           </div>
         </div>
@@ -181,13 +173,13 @@ export default async function Home({
         firstRoundContent={
           <>
             {/* Hero Section - First Round */}
-            <section className="bg-white border-b border-stone-200">
+            <section className="bg-paper border-b border-line">
               <div className="max-w-7xl mx-auto px-4 py-10">
                 <div className="max-w-3xl">
                   <div className="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
                     {t('presidential.snapshotNote')}
                   </div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-stone-900 mb-4 leading-tight">
+                  <h1 className="text-3xl md:text-4xl text-stone-900 mb-4 leading-tight">
                     {leadingCandidate ? (
                       t('presidential.snapshotHeadline', {
                         candidate: leadingCandidate.name,
@@ -205,7 +197,7 @@ export default async function Home({
                   <div className="flex items-center gap-3 text-sm">
                     <span className="text-stone-500">{t('presidential.basedOnPolls')}</span>
                     <span className="text-stone-300">·</span>
-                    <Link href="/metodologia" locale={locale} className="text-navy hover:text-navy-light font-medium">
+                    <Link href="/metodologia" locale={locale} className="text-ink hover:text-ink-muted font-medium">
                       {t('common.methodology')}
                     </Link>
                   </div>
@@ -227,10 +219,10 @@ export default async function Home({
             </section>
 
             {/* Win Probability Cards */}
-            <section className="py-8 bg-white border-b border-stone-200">
+            <section className="py-8 bg-cream border-b border-stone-200">
               <div className="max-w-7xl mx-auto px-4">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-stone-900">
+                  <h2 className="text-2xl text-stone-900">
                     {t('presidential.winProbabilitiesToday')}
                   </h2>
                   {lastUpdate && (
@@ -260,7 +252,7 @@ export default async function Home({
                 </ErrorBoundary>
                 {/* Warning box about metric change */}
                 <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-xs text-blue-800">
+                  <p className="text-xs text-ink-dark">
                     <span className="font-semibold">&#x2139;&#xfe0f; {t('presidential.metricChangeTitle')}</span>{' '}
                     {t('presidential.metricChangeDescription')}
                   </p>
@@ -271,7 +263,7 @@ export default async function Home({
             {/* Support Trends Chart */}
             <section className="py-10 border-b border-stone-300">
               <div className="max-w-7xl mx-auto px-4">
-                <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
+                <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">
                   {t('presidential.supportTrajectory')}
                 </h2>
                 <p className="text-sm text-stone-500 mb-8 max-w-xl">
@@ -293,9 +285,9 @@ export default async function Home({
 
             {/* Head-to-Head Probability */}
             {headToHead.dates.length > 0 && (
-              <section className="py-10 bg-white border-b border-stone-300">
+              <section className="py-10 bg-cream border-b border-stone-300">
                 <div className="max-w-7xl mx-auto px-4">
-                  <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
+                  <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">
                     {t('presidential.headToHeadTitle')}
                   </h2>
                   <p className="text-sm text-stone-500 mb-8 max-w-xl">
@@ -327,7 +319,7 @@ export default async function Home({
             {runoffPairs.pairs.length > 0 && (
               <section className="py-10 border-b border-stone-300">
                 <div className="max-w-7xl mx-auto px-4">
-                  <h2 className="text-xl font-bold text-stone-900 mb-1 tracking-tight">
+                  <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">
                     {t('presidential.runoffScenariosTitle')}
                   </h2>
                   <p className="text-sm text-stone-500 mb-8 max-w-xl">
@@ -357,7 +349,7 @@ export default async function Home({
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
                   {/* Forecast Bars - takes 3 columns */}
                   <div className="lg:col-span-3">
-                    <h3 className="text-xl font-bold text-stone-900 mb-6 tracking-tight">
+                    <h3 className="text-xl text-stone-900 mb-6 tracking-tight">
                       {t('presidential.projectedVoteShare')}
                     </h3>
                     <ErrorBoundary componentName="Forecast Bars">
@@ -404,7 +396,7 @@ export default async function Home({
                       </div>
 
                       {/* Uncertainty Explainer */}
-                      <UncertaintyExplainer numPolls={polls?.length || 8} />
+                      <UncertaintyExplainer numPolls={polls?.polls.length ?? 0} />
                     </div>
                   </div>
                 </div>
@@ -414,17 +406,26 @@ export default async function Home({
         }
       />
 
+      {/* Written analysis — content, so it goes above the cross-links and the
+          dark about-footer rather than between them. */}
+      <SectionNotes
+        section="elections"
+        locale={locale}
+        className="py-8 border-b border-stone-300"
+        containerClassName="max-w-7xl mx-auto px-4"
+      />
+
       {/* Navigation to Other Pages */}
       <section className="py-8 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">
-            More from estimador.pt
+            {t('nav.moreFrom')}
           </div>
           <div className="flex flex-wrap gap-6">
             <Link
               href="/eleicoes/legislativas"
               locale={locale}
-              className="group inline-flex items-center gap-2 text-stone-700 hover:text-navy transition-colors"
+              className="group inline-flex items-center gap-2 text-stone-700 hover:text-ink transition-colors"
             >
               <span className="font-semibold">{t('nav.parliamentaryForecast')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -432,7 +433,7 @@ export default async function Home({
             <Link
               href="/eleicoes/mapa"
               locale={locale}
-              className="group inline-flex items-center gap-2 text-stone-700 hover:text-navy transition-colors"
+              className="group inline-flex items-center gap-2 text-stone-700 hover:text-ink transition-colors"
             >
               <span className="font-semibold">{t('map.title')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -440,7 +441,7 @@ export default async function Home({
             <Link
               href="/metodologia"
               locale={locale}
-              className="group inline-flex items-center gap-2 text-stone-700 hover:text-navy transition-colors"
+              className="group inline-flex items-center gap-2 text-stone-700 hover:text-ink transition-colors"
             >
               <span className="font-semibold">{t('common.methodology')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -449,34 +450,31 @@ export default async function Home({
         </div>
       </section>
 
-      {/* Footer Info */}
-      <section className="bg-stone-800 text-stone-300 py-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8">
-            <div className="max-w-2xl">
-              <h2 className="text-lg font-semibold text-white mb-3">
-                {t('presidential.aboutForecast')}
-              </h2>
-              <p className="text-sm leading-relaxed mb-5">
-                {t('presidential.aboutDescription')}
-              </p>
-              <div className="flex items-center gap-4 text-sm text-stone-400">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  <span>{forecast.candidates.length} {t('presidential.candidatesModeled')}</span>
-                </div>
-                <span>·</span>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>{t('presidential.electionDate', { date: 'Jan 18, 2026' })}</span>
-                </div>
+      {/* About the forecast */}
+      <section className="border-t border-line">
+        <div className="max-w-7xl mx-auto px-4 py-10">
+          <div className="max-w-2xl">
+            <h2 className="text-2xl mb-3">
+              {t('presidential.aboutForecast')}
+            </h2>
+            <p className="text-sm leading-relaxed text-stone-600 mb-5">
+              {t('presidential.aboutDescription')}
+            </p>
+            <div className="flex items-center gap-4 text-sm text-stone-500">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span>{forecast.candidates.length} {t('presidential.candidatesModeled')}</span>
+              </div>
+              <span>·</span>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>{t('presidential.electionDate', { date: 'Jan 18, 2026' })}</span>
               </div>
             </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-light.svg" alt="estimador.pt" className="h-10 w-auto opacity-80 hidden md:block" />
           </div>
         </div>
       </section>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

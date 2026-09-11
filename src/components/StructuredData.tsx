@@ -1,50 +1,50 @@
 import { MDXArticleMetadata } from "@/lib/mdx-articles";
+import { localizedUrl } from "@/lib/metadata";
+
+const PUBLISHER = {
+  "@type": "Organization",
+  name: "estimador.pt",
+  url: "https://estimador.pt",
+  logo: {
+    "@type": "ImageObject",
+    url: "https://estimador.pt/logo.png",
+    width: 60,
+    height: 60,
+  },
+} as const;
+
+/** BCP 47 tag for a site locale. */
+function language(locale: string): string {
+  return locale === "pt" ? "pt-PT" : "en-GB";
+}
 
 interface ArticleStructuredDataProps {
   article: MDXArticleMetadata;
+  /** The locale the article is actually being served in. */
+  locale: string;
 }
 
-export function ArticleStructuredData({ article }: ArticleStructuredDataProps) {
+export function ArticleStructuredData({ article, locale }: ArticleStructuredDataProps) {
+  const url = localizedUrl(locale, `/artigos/${article.slug}`);
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": article.title,
-    "description": article.excerpt,
-    "author": {
+    headline: article.title,
+    description: article.excerpt,
+    author: {
       "@type": "Person",
-      "name": article.author,
-      "url": "https://estimador.pt",
+      name: article.author,
+      url: "https://estimador.pt",
     },
-    "publisher": {
-      "@type": "Organization",
-      "name": "estimador.pt",
-      "url": "https://estimador.pt",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://estimador.pt/logo.png",
-        "width": 60,
-        "height": 60
-      }
-    },
-    "datePublished": article.date,
-    "dateModified": article.date,
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `https://estimador.pt/articles/${article.slug}`
-    },
-    "keywords": article.tags.join(", "),
-    "articleSection": "Politics",
-    "inLanguage": "en-US",
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Portuguese Politics"
-      },
-      {
-        "@type": "Thing", 
-        "name": "Election Forecasting"
-      }
-    ]
+    publisher: PUBLISHER,
+    datePublished: article.date,
+    // A revised piece that still reports its publication date as the last
+    // change is telling search engines the revision never happened.
+    dateModified: article.updated ?? article.date,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url,
+    keywords: article.tags.join(", "),
+    inLanguage: language(locale),
   };
 
   return (
@@ -57,38 +57,32 @@ export function ArticleStructuredData({ article }: ArticleStructuredDataProps) {
 
 interface ArticleListStructuredDataProps {
   articles: Array<{
-    id: string;
     title: string;
     excerpt: string;
     author: string;
     date: string;
     slug: string;
   }>;
+  locale: string;
 }
 
-export function ArticleListStructuredData({ articles }: ArticleListStructuredDataProps) {
+export function ArticleListStructuredData({ articles, locale }: ArticleListStructuredDataProps) {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    "name": "estimador.pt Analysis & Articles",
-    "description": "In-depth analysis of Portuguese politics, election trends, and forecasting methodology",
-    "url": "https://estimador.pt/articles",
-    "publisher": {
-      "@type": "Organization",
-      "name": "estimador.pt",
-      "url": "https://estimador.pt"
-    },
-    "blogPost": articles.map(article => ({
+    name: "estimador.pt",
+    url: localizedUrl(locale, "/artigos"),
+    inLanguage: language(locale),
+    publisher: PUBLISHER,
+    blogPost: articles.map(article => ({
       "@type": "BlogPosting",
-      "headline": article.title,
-      "description": article.excerpt,
-      "author": {
-        "@type": "Person",
-        "name": article.author
-      },
-      "datePublished": article.date,
-      "url": `https://estimador.pt/articles/${article.slug}`
-    }))
+      headline: article.title,
+      description: article.excerpt,
+      author: { "@type": "Person", name: article.author },
+      datePublished: article.date,
+      inLanguage: language(locale),
+      url: localizedUrl(locale, `/artigos/${article.slug}`),
+    })),
   };
 
   return (

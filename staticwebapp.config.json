@@ -1,6 +1,6 @@
 {
   "platform": {
-    "apiRuntime": "node:20"
+    "apiRuntime": "node:22"
   },
   "routes": [
     {
@@ -17,7 +17,6 @@
     },
     {
       "route": "/favicon.ico",
-      "serve": "/favicon.ico",
       "headers": {
         "cache-control": "public, max-age=86400"
       }
@@ -30,251 +29,96 @@
     },
     {
       "route": "/forecast",
-      "redirect": "/pt/eleicoes/legislativas",
+      "redirect": "/pt/eleicoes/legislativas/",
       "statusCode": 301
     },
     {
       "route": "/pt/forecast",
-      "redirect": "/pt/eleicoes/legislativas",
+      "redirect": "/pt/eleicoes/legislativas/",
       "statusCode": 301
     },
     {
       "route": "/en/forecast",
-      "redirect": "/en/eleicoes/legislativas",
+      "redirect": "/en/eleicoes/legislativas/",
       "statusCode": 301
     },
     {
       "route": "/about",
-      "redirect": "/pt/sobre",
+      "redirect": "/pt/sobre/",
       "statusCode": 301
     },
     {
       "route": "/pt/about",
-      "redirect": "/pt/sobre",
+      "redirect": "/pt/sobre/",
       "statusCode": 301
     },
     {
       "route": "/en/about",
-      "redirect": "/en/sobre",
+      "redirect": "/en/sobre/",
       "statusCode": 301
     },
     {
       "route": "/methodology",
-      "redirect": "/pt/metodologia",
+      "redirect": "/pt/metodologia/",
       "statusCode": 301
     },
     {
       "route": "/pt/methodology",
-      "redirect": "/pt/metodologia",
+      "redirect": "/pt/metodologia/",
       "statusCode": 301
     },
     {
       "route": "/en/methodology",
-      "redirect": "/en/metodologia",
+      "redirect": "/en/metodologia/",
       "statusCode": 301
     },
     {
       "route": "/map",
-      "redirect": "/pt/eleicoes/mapa",
+      "redirect": "/pt/eleicoes/mapa/",
       "statusCode": 301
     },
     {
       "route": "/pt/map",
-      "redirect": "/pt/eleicoes/mapa",
+      "redirect": "/pt/eleicoes/mapa/",
       "statusCode": 301
     },
     {
       "route": "/en/map",
-      "redirect": "/en/eleicoes/mapa",
+      "redirect": "/en/eleicoes/mapa/",
       "statusCode": 301
     },
     {
       "route": "/articles",
-      "redirect": "/pt/artigos",
+      "redirect": "/pt/artigos/",
       "statusCode": 301
     },
     {
       "route": "/pt/articles",
-      "redirect": "/pt/artigos",
+      "redirect": "/pt/artigos/",
       "statusCode": 301
     },
     {
       "route": "/en/articles",
-      "redirect": "/en/artigos",
+      "redirect": "/en/artigos/",
+      "statusCode": 301
+    },
+    {
+      "route": "/feed.xml",
+      "redirect": "/pt/feed.xml",
       "statusCode": 301
     },
     {
       "route": "/",
-      "serve": "/pt/index.html"
-    },
-    {
-      "route": "/pt",
-      "serve": "/pt/index.html"
-    },
-    {
-      "route": "/en",
-      "serve": "/en/index.html"
-    },
-    {
-      "route": "/pt/economia",
-      "serve": "/pt/economia/index.html"
-    },
-    {
-      "route": "/en/economia",
-      "serve": "/en/economia/index.html"
-    },
-    {
-      "route": "/pt/eleicoes/presidenciais",
-      "serve": "/pt/eleicoes/presidenciais/index.html"
-    },
-    {
-      "route": "/en/eleicoes/presidenciais",
-      "serve": "/en/eleicoes/presidenciais/index.html"
-    },
-    {
-      "route": "/pt/eleicoes/legislativas",
-      "serve": "/pt/eleicoes/legislativas/index.html"
-    },
-    {
-      "route": "/en/eleicoes/legislativas",
-      "serve": "/en/eleicoes/legislativas/index.html"
-    },
-    {
-      "route": "/pt/eleicoes/mapa",
-      "serve": "/pt/eleicoes/mapa/index.html"
-    },
-    {
-      "route": "/en/eleicoes/mapa",
-      "serve": "/en/eleicoes/mapa/index.html"
-    },
-    {
-      "route": "/pt/desporto/liga",
-      "serve": "/pt/desporto/liga/index.html"
-    },
-    {
-      "route": "/en/desporto/liga",
-      "serve": "/en/desporto/liga/index.html"
-    },
-    {
-      "route": "/pt/desporto/liga/metodologia",
-      "serve": "/pt/desporto/liga/metodologia/index.html"
-    },
-    {
-      "route": "/en/desporto/liga/metodologia",
-      "serve": "/en/desporto/liga/metodologia/index.html"
-    },
-    {
-      "route": "/pt/desporto/liga/modelo",
-      "serve": "/pt/desporto/liga/modelo/index.html"
-    },
-    {
-      "route": "/en/desporto/liga/modelo",
-      "serve": "/en/desporto/liga/modelo/index.html"
-    },
-    {
-      "route": "/pt/desporto/liga/dados",
-      "serve": "/pt/desporto/liga/dados/index.html"
-    },
-    {
-      "route": "/en/desporto/liga/dados",
-      "serve": "/en/desporto/liga/dados/index.html"
-    },
-    {
-      "route": "/pt/desporto/liga/jogadores",
-      "serve": "/pt/desporto/liga/jogadores/index.html"
-    },
-    {
-      "route": "/en/desporto/liga/jogadores",
-      "serve": "/en/desporto/liga/jogadores/index.html"
-    },
-    {
-      "route": "/pt/desporto/liga/jogo-previsoes",
-      "serve": "/pt/desporto/liga/jogo-previsoes/index.html"
-    },
-    {
-      "route": "/en/desporto/liga/jogo-previsoes",
-      "serve": "/en/desporto/liga/jogo-previsoes/index.html"
-    },
-    {
-      "route": "/pt/desporto/liga/2025-26",
-      "serve": "/pt/desporto/liga/2025-26/index.html"
-    },
-    {
-      "route": "/en/desporto/liga/2025-26",
-      "serve": "/en/desporto/liga/2025-26/index.html"
-    },
-    {
-      "route": "/pt/desporto/liga2",
-      "serve": "/pt/desporto/liga2/index.html"
-    },
-    {
-      "route": "/en/desporto/liga2",
-      "serve": "/en/desporto/liga2/index.html"
-    },
-    {
-      "route": "/pt/metodologia",
-      "serve": "/pt/metodologia/index.html"
-    },
-    {
-      "route": "/en/metodologia",
-      "serve": "/en/metodologia/index.html"
-    },
-    {
-      "route": "/pt/sobre",
-      "serve": "/pt/sobre/index.html"
-    },
-    {
-      "route": "/en/sobre",
-      "serve": "/en/sobre/index.html"
-    },
-    {
-      "route": "/pt/artigos",
-      "serve": "/pt/artigos/index.html"
-    },
-    {
-      "route": "/en/artigos",
-      "serve": "/en/artigos/index.html"
-    },
-    {
-      "route": "/data/*"
-    },
-    {
-      "route": "/pt/desporto/liga/jogo/*"
-    },
-    {
-      "route": "/en/desporto/liga/jogo/*"
-    },
-    {
-      "route": "/pt/desporto/liga/jogador/*"
-    },
-    {
-      "route": "/en/desporto/liga/jogador/*"
-    },
-    {
-      "route": "/pt/desporto/liga/*"
-    },
-    {
-      "route": "/en/desporto/liga/*"
-    },
-    {
-      "route": "/*",
-      "serve": "/404.html",
-      "statusCode": 404
+      "redirect": "/pt/",
+      "statusCode": 301
     }
   ],
-  "navigationFallback": {
-    "rewrite": "/pt/index.html",
-    "exclude": [
-      "/api/*",
-      "/data/*",
-      "/_next/*",
-      "/*.{css,scss,js,png,gif,ico,jpg,svg,woff,woff2,json,txt}",
-      "/og-image-*.png"
-    ]
-  },
   "mimeTypes": {
     ".json": "application/json",
-    ".txt": "text/plain"
+    ".txt": "text/plain",
+    ".wasm": "application/wasm",
+    ".parquet": "application/vnd.apache.parquet",
+    ".xml": "application/xml"
   },
   "globalHeaders": {
     "cache-control": "public, max-age=0, must-revalidate"
@@ -283,5 +127,6 @@
     "404": {
       "rewrite": "/404.html"
     }
-  }
+  },
+  "trailingSlash": "auto"
 }

@@ -1,0 +1,92 @@
+# Privacy
+
+**Last reviewed: 8 September 2026**
+
+This page describes what estimador.pt records about its visitors. It describes what the site actually does, not what it intends to do.
+
+---
+
+## Summary
+
+- The site uses **no cookies** for audience measurement.
+- There are no visitor profiles, and no identifiers that persist between visits or across devices.
+- The only measurement collected is a **page-view count per page category** — and, for articles, per article.
+- **No session recording**, no automatic click capture, and no recording of what you type.
+- **An email address is never required to read the site.** Email subscription is optional, and described below.
+
+---
+
+## Audience measurement
+
+We use [PostHog](https://posthog.com/), hosted in the European Union, configured in cookieless mode. Specifically:
+
+- **A single event type** is sent: the page view. Every other event is discarded before it leaves the browser.
+- **The page address is reduced to a fixed category** before sending. For example, `/en/desporto/liga/jogador/joao-silva/` is sent as `/en/desporto/liga/jogador/`. Addresses that match no known category are sent as `/en/other/`.
+- **Articles are the exception: the address is sent whole.** `/en/artigos/como-ler-sondagens/` is sent exactly as it stands. An article's title is something we published, not something about the person reading it — unlike what you chose in a data explorer or the geography you selected, which are still discarded. Knowing which pieces are read is the reason there is any measurement at all. Only the addresses of articles that exist get through: the list is fixed when the site is built, and any other address under `/artigos/` is sent as `/en/artigos/artigo/`, so an invented address cannot push arbitrary text into the measurement.
+- **No query string is ever sent.** What you chose in a data explorer, the geography you selected, or any parameter after the `?` never leaves your browser.
+- **No persistent storage:** the library runs in memory, with no cookies and no `localStorage`. Closing the tab clears the state.
+- **No person profiles,** no session recording, no automatic interaction capture, no heatmaps, no surveys, no exception capture.
+- **The IP address is not recorded** by the library and is not used for geolocation.
+- Referrers, campaign parameters and browser properties beyond the library version are not sent.
+
+These restrictions are implemented in the site's code: a filter at the outgoing boundary drops any event or property not explicitly listed above. If a future version of the library adds new fields, the filter rejects them by default.
+
+Where the measurement key is not configured for an environment, nothing is sent at all.
+
+---
+
+## Server logs
+
+The site is served by **Azure Static Web Apps** (Microsoft). Like any web server, Microsoft keeps its own access logs, which may include the IP address and browser agent. We have no editorial control over those logs and do not use them for analysis.
+
+---
+
+## Prediction game
+
+The [prediction game](/en/desporto/liga/jogo-previsoes/) is the only part of the site that keeps per-person state. You can play **without an account**.
+
+Per player, we store exactly this:
+
+- a random identifier minted on the first prediction;
+- the display name you chose (it appears on the leaderboard);
+- the SHA-256 digest of a random secret held in your browser;
+- if you linked the game to an account, the SHA-256 digest of that account's identifier, and the name of the authentication provider;
+- two timestamps: creation and last update.
+
+**We do not store the account's email address or username.** The account identifier is hashed before it is written, and the session token is never stored.
+
+If you choose to sign in, authentication is handled by [Clerk](https://clerk.com/) or by the Azure Static Web Apps authentication service. Those providers handle your account data under their own policies.
+
+Your browser stores the player identifier and secret locally so that predictions survive between visits. Clearing site data removes them.
+
+---
+
+## Email subscription
+
+Reading the site requires no address. Subscription exists only to say when a new piece is out, and it is optional.
+
+The list is run by [Buttondown](https://buttondown.com/), under its [privacy policy](https://buttondown.com/legal/privacy) and [GDPR compliance commitment](https://buttondown.com/legal/gdpr-eu-compliance). It is the only processor involved.
+
+When you subscribe:
+
+- The form opens a Buttondown page, and that is where the address is entered and stored. estimador.pt keeps no list of its own and never sees the address.
+- **The address is only used after you confirm the subscription** in the message you receive. Without that confirmation it is discarded. Buttondown requires this confirmation on every subscription.
+- Every message carries an unsubscribe link that takes effect immediately.
+- The address is not shared, not sold, and not joined to audience measurement. Measurement records nobody's identity, so there is nothing to join: we do not know which pages you read before subscribing, or after.
+- **Nothing loads from Buttondown while you read.** There is no embedded form and no third-party script on this page — only a button pointing there. Someone who never subscribes never contacts Buttondown.
+
+To follow the site without giving an address, the [RSS feed](/en/feed.xml) carries the same pieces and identifies no one.
+
+---
+
+## The data we publish
+
+The figures published on estimador.pt are of two kinds: **official public data** (election results, statistical series, sports results) and **model outputs** we produce from them. Neither contains records about identifiable people, and neither is derived from the behaviour of the site's visitors.
+
+This page describes the site. The privacy properties of each published dataset are described in that product's methodology, not here.
+
+---
+
+## Contact
+
+For questions about this page, or to request removal of a player record, contact [info@estimador.pt](mailto:info@estimador.pt).

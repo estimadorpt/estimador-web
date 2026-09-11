@@ -16,7 +16,13 @@ const eslintConfig = [
       "node_modules/**",
       ".next/**",
       "out/**",
+      // Vendored DuckDB-WASM worker bundles, shipped verbatim.
+      "public/duckdb/**",
       "build/**",
+      "api/dist/**",
+      "output/**",
+      ".playwright-cli/**",
+      "coverage/**",
       "next-env.d.ts",
     ],
   },

@@ -6,19 +6,9 @@ import { locales } from '@/i18n/routing';
 import { PostHogProvider } from '../providers';
 import '../globals.css';
 import type { Metadata } from 'next';
-import fs from 'fs';
-import path from 'path';
-
-// Read OG image filename at build time (versioned filename for cache busting)
-function getOgImageFilename(locale: string): string {
-  try {
-    const manifestPath = path.join(process.cwd(), 'public', 'og-manifest.json');
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    return manifest.files?.[locale] || `og-image-${locale}.png`;
-  } catch {
-    return `og-image-${locale}.png`;
-  }
-}
+import { createPageMetadata } from '@/lib/metadata';
+import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
+import { ArticleLocalesProvider, type ArticleLocales } from '@/lib/article-navigation';
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -36,15 +26,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  const ogImageFilename = getOgImageFilename(locale);
-  const ogImageUrl = `https://estimador.pt/${ogImageFilename}`;
-  
   return {
-    metadataBase: new URL('https://estimador.pt'),
-    title: t('meta.defaultTitle'),
-    description: t('meta.defaultDescription'),
-    keywords: ['portugal', 'previsões', 'dados', 'futebol', 'liga portugal', 'eleições', 'sondagens', 'forecasting', 'data analysis'],
-    authors: [{ name: 'Bernardo Caldas' }],
+    ...createPageMetadata({
+      locale,
+      path: '/',
+      title: t('meta.defaultTitle'),
+      description: t('meta.defaultDescription'),
+      keywords: ['portugal', 'previsões', 'dados', 'futebol', 'economia', 'população', 'eleições', 'forecasting'],
+      authors: ['Bernardo Caldas'],
+    }),
     creator: 'Bernardo Caldas',
     publisher: 'estimador.pt',
     icons: {
@@ -56,36 +46,6 @@ export async function generateMetadata({
       apple: [
         { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
       ],
-    },
-    openGraph: {
-      title: t('meta.defaultTitle'),
-      description: t('meta.defaultDescription'),
-      url: `https://estimador.pt/${locale}`,
-      siteName: 'estimador.pt',
-      locale: locale,
-      type: 'website',
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: t('meta.defaultTitle'),
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: t('meta.defaultTitle'),
-      description: t('meta.defaultDescription'),
-      creator: '@estimadorpt',
-      images: [ogImageUrl],
-    },
-    alternates: {
-      canonical: `https://estimador.pt/${locale}`,
-      languages: {
-        'en': 'https://estimador.pt/en',
-        'pt': 'https://estimador.pt/pt',
-      },
     },
     robots: {
       index: true,
@@ -107,20 +67,24 @@ export default async function RootLayout({
 }: RootLayoutProps) {
   const { locale } = await params;
   // Ensure that the incoming `locale` is valid
-  if (!locales.includes(locale as any)) {
+  if (!locales.some(supportedLocale => supportedLocale === locale)) {
     notFound();
   }
 
-  // Providing all messages to the client
-  // side is the easiest way to get started
   const messages = await getMessages({ locale });
+  const articles: ArticleLocales = {};
+  for (const articleLocale of locales) {
+    for (const article of getMDXArticlesByLocale(articleLocale)) {
+      (articles[article.slug] ??= []).push(articleLocale);
+    }
+  }
   
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
         <PostHogProvider>
           <NextIntlClientProvider messages={messages} locale={locale}>
-            {children}
+            <ArticleLocalesProvider articles={articles}>{children}</ArticleLocalesProvider>
           </NextIntlClientProvider>
         </PostHogProvider>
       </body>

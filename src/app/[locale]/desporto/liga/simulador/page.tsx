@@ -1,10 +1,13 @@
+import { createPageMetadata } from '@/lib/metadata';
 import { loadLigaData, loadLigaSamples } from "@/lib/utils/football-data-loader";
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
+import { SiteFooter } from '@/components/SiteFooter';
 import { MatchdayPicker } from "@/components/charts/football/MatchdayPicker";
 import { DueloFinal } from "@/components/charts/football/DueloFinal";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -14,15 +17,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  return {
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga/simulador`,
     title: locale === "pt"
       ? "Simulador — Liga Portugal - estimador.pt"
       : "Simulator — Liga Portugal - estimador.pt",
     description: t("football.whatIfDescription"),
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/desporto/liga/simulador`,
-    },
-  };
+  });
 }
 
 export default async function SimuladorPage({
@@ -40,7 +42,7 @@ export default async function SimuladorPage({
 
   if (!prediction || !scenarios?.next_matchday_scenarios) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-paper">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-20 text-center text-stone-500">
           <p>{locale === "pt" ? "Dados do simulador não disponíveis." : "Simulator data not available."}</p>
@@ -50,34 +52,16 @@ export default async function SimuladorPage({
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
-      {/* Hero section */}
-      <section className="bg-stone-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-          <Link
-            href="/desporto/liga"
-            locale={locale}
-            className="text-sm text-stone-400 hover:text-white inline-flex items-center gap-1 mb-4 group transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-            {t("football.backToLeague")}
-          </Link>
-          <div className="flex items-center gap-2 mb-2">
-            <Trophy className="w-5 h-5 text-stone-400" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-              {t("football.title")} — {t("football.matchday")} {prediction.next_matchday.matchday}
-            </span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            {t("football.simulator")}
-          </h1>
-          <p className="text-stone-400 text-sm">
-            {t("football.simulatorCta")}
-          </p>
-        </div>
-      </section>
+      <PageHero
+        back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
+        icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
+        eyebrow={`${t("football.title")} — ${t("football.matchday")} ${prediction.next_matchday.matchday}`}
+        title={t("football.simulator")}
+        lede={t("football.simulatorCta")}
+      />
 
       {/* Simulator */}
       <section className="border-b border-stone-200">
@@ -113,6 +97,7 @@ export default async function SimuladorPage({
           </div>
         </section>
       )}
+      <SiteFooter locale={locale} />
     </div>
   );
 }

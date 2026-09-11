@@ -1,51 +1,37 @@
 #!/bin/bash
-# Automated pipeline: fetch results → re-run model → sync → build → deploy
-# Run via cron on matchday weekends:
-#   */30 14-23 * * 6,0 ~/code/estimador-web/scripts/update-and-deploy.sh >> /tmp/liga-update.log 2>&1
+# RETIRED 2026-08-28. Do not schedule this, and do not resurrect it as-is.
+#
+# This ran from a crontab entry (*/30 14-23 * * 6,0) and published exactly
+# nothing in the time it was scheduled. Two independent faults, both silent:
+#
+#   1. cron never fired it. The entry's `>> /tmp/liga-update.log` redirect
+#      creates that file on the first run, before this script executes. The
+#      file had never existed, on a machine whose /tmp still held files from
+#      five weeks earlier.
+#   2. Firing would not have helped. cron hands a job
+#      PATH=/usr/bin:/bin:/usr/sbin:/sbin. `uv` lives in ~/.local/bin, `npm`
+#      and `node` in /opt/homebrew/bin — none are on that path. Step 1 was
+#      `if ! uv run liga-predict ...; then echo "failed or no new results";
+#      exit 0; fi`, so "command not found" exited 0 every 30 minutes.
+#
+# The tell was in git: this repo carries no commit with the message this
+# script would have written, ever. Every data commit here was made by hand.
+#
+# It was also a lossy duplicate of `liga-predict --update --scenarios --sync`,
+# which already syncs, commits and pushes — and does it better: it refuses to
+# commit off main, and it stages with `git add` + `git diff --cached` rather
+# than this script's `git diff --quiet`, which cannot see new files and so
+# would have skipped any weekend that produced only a new md##.json.
+#
+# The schedule now lives in estimador-football/docs/com.estimador.publish.plist
+# (launchd, the mechanism that demonstrably works on this Mac). See
+# estimador-football/docs/COLLECTORS.md.
+#
+# Two steps here are not in the launchd job, because neither ever ran and
+# neither is needed to deploy: `generate-social-content.py` (needs Azure
+# OpenAI; liga-predict writes social.json itself) and `npm run build` (Azure
+# SWA builds on push). Run them by hand if you want them.
 
-set -e
-
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-FOOTBALL_DIR="$HOME/code/estimador-football"
-
-echo "$(date '+%Y-%m-%d %H:%M:%S') — Starting update pipeline"
-
-# Step 1: Run model update (fetches results, re-fits if new data)
-cd "$FOOTBALL_DIR"
-if ! uv run liga-predict --update --scenarios; then
-  echo "$(date '+%Y-%m-%d %H:%M:%S') — liga-predict --update failed or no new results"
-  exit 0
-fi
-
-# Step 2: Sync data to web project
-cd "$PROJECT_DIR"
-./scripts/sync-data.sh football
-
-# Step 3: Check if data actually changed
-if git diff --quiet public/data/football/; then
-  echo "$(date '+%Y-%m-%d %H:%M:%S') — No data changes after sync"
-  exit 0
-fi
-
-# Step 4: Generate social media content (non-blocking)
-echo "$(date '+%Y-%m-%d %H:%M:%S') — Generating social media content..."
-python3 "$SCRIPT_DIR/generate-social-content.py" || echo "$(date '+%Y-%m-%d %H:%M:%S') — Warning: social content generation failed (non-blocking)"
-
-# Step 4b: Generate social media image (non-blocking)
-echo "$(date '+%Y-%m-%d %H:%M:%S') — Generating social media image..."
-node "$SCRIPT_DIR/generate-social-images.mjs" || echo "$(date '+%Y-%m-%d %H:%M:%S') — Warning: social image generation failed (non-blocking)"
-
-# Step 5: Build
-echo "$(date '+%Y-%m-%d %H:%M:%S') — Building..."
-npm run build
-
-# Step 6: Commit and push
-git add public/data/football/
-git commit -m "$(cat <<'EOF'
-data: update predictions after matchday results
-EOF
-)"
-git push
-
-echo "$(date '+%Y-%m-%d %H:%M:%S') — Deploy triggered (Azure SWA auto-deploys on push)"
+echo "update-and-deploy.sh is retired — it never worked. See the comments above." >&2
+echo "Use: cd ~/code/estimador-football && uv run liga-predict --update --scenarios --sync" >&2
+exit 1

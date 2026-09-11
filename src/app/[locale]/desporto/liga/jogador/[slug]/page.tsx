@@ -1,8 +1,10 @@
+import { createPageMetadata } from '@/lib/metadata';
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import {
   loadContribRatings,
@@ -98,20 +100,12 @@ export async function generateMetadata({
         )} goals per 90 minutes above a replacement-level player, with credible interval, minutes, goals and season-by-season history.`;
   const url = `${SITE}/${locale}/desporto/liga/jogador/${slug}`;
 
-  return {
-    title,
-    description,
-    alternates: { canonical: url },
-    openGraph: {
-      title,
-      description,
-      url,
-      siteName: "estimador.pt",
-      locale,
-      type: "profile",
-    },
-    twitter: { card: "summary_large_image", title, description },
-  };
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga/jogador/${slug}`,
+    title: title,
+    description: description,
+  });
 }
 
 /* -------------------------------------------------------------------- page */
@@ -135,7 +129,7 @@ export default async function PlayerPage({
   if (!found) {
     if (slug !== NO_PLAYERS_SLUG) notFound();
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-paper">
         <Header />
         <div className="max-w-3xl mx-auto px-4 py-20">
           <p className="text-stone-500 mb-4">
@@ -173,7 +167,7 @@ export default async function PlayerPage({
     : null;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       <div className="max-w-4xl mx-auto px-4 py-8 md:py-10">
@@ -207,6 +201,7 @@ export default async function PlayerPage({
           </Link>
         </div>
       </div>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

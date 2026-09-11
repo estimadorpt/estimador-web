@@ -1,12 +1,13 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import { useMDXComponents } from '@/mdx-components';
+import { getMDXComponents } from '@/mdx-components';
 
 export async function generateMetadata({ 
   params 
@@ -16,18 +17,12 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale });
   
-  return {
+  return createPageMetadata({
+    locale,
+    path: '/metodologia',
     title: t('meta.methodologyTitle'),
     description: t('methodology.subtitle'),
-    openGraph: {
-      title: t('meta.methodologyTitle'),
-      description: t('methodology.subtitle'),
-      url: `https://estimador.pt/${locale}/metodologia`,
-    },
-    alternates: {
-      canonical: `https://estimador.pt/${locale}/metodologia`,
-    },
-  };
+  });
 }
 
 function getMethodologyPath(locale: string): string {
@@ -77,13 +72,13 @@ export default async function MethodologyPage({
   const t = await getTranslations({ locale });
   
   const { content: mdxContent, actualLocale } = getMethodologyContent(locale);
-  const components = useMDXComponents({});
+  const components = getMDXComponents();
 
   return (
-    <div className="min-h-screen bg-green-pale">
+    <div className="min-h-screen bg-paper">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="max-w-3xl mx-auto px-4 py-10 md:py-16">
         {/* Locale Notice (if fallback) */}
         {actualLocale !== locale && (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -96,33 +91,12 @@ export default async function MethodologyPage({
           </div>
         )}
 
-        <Card>
-          <CardContent className="p-8">
-            <article className="prose prose-lg max-w-none mdx-content">
-              <MDXRemote source={mdxContent} components={components} />
-            </article>
-          </CardContent>
-        </Card>
+        <article className="article-body max-w-none">
+          <MDXRemote source={mdxContent} components={components} />
+        </article>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-green-medium/30 bg-white mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col items-center gap-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="estimador.pt" className="h-8 w-auto opacity-60" />
-            <div className="text-center text-sm text-slate-600">
-              <p>{t('about.footerCopyright')}</p>
-              <p className="mt-2">
-                {t('about.footerDeveloper')} •
-                <Link href="mailto:info@estimador.pt" locale={locale} className="text-green-medium hover:text-green-dark hover:underline ml-1">
-                  info@estimador.pt
-                </Link>
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

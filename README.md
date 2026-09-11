@@ -1,8 +1,10 @@
-# estimador.pt - Data Analysis for Portugal
+# estimador.pt — Dados para compreender Portugal
 
-**Data-driven analysis and forecasts for Portugal**
+**Forecasts and analysis on Portugal, with the uncertainty in plain sight.**
 
-estimador.pt is a multi-domain data analysis platform for Portugal, providing rigorous statistical analysis across different domains — from football league forecasts to election predictions. We combine sophisticated Bayesian modeling with clear, engaging editorial design.
+estimador.pt publishes probabilistic forecasts and analysis for Portugal: the state of the economy, Liga Portugal, elections and a human atlas of the country's population. Every number carries its date and its interval; the models and the methodology are open.
+
+The visual identity is the interval mark on paper: see `/marca` on the site for the living guide and the downloadable files, `docs/design/design-system-proposal.md` for the design-system rationale, and `npm run brand` to regenerate every logo, icon and social asset from `src/lib/brand/geometry.json`.
 
 ## Our Vision
 

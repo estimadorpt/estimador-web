@@ -1,3 +1,4 @@
+import { createPageMetadata } from '@/lib/metadata';
 import fs from "fs";
 import path from "path";
 import type { Metadata } from "next";
@@ -5,6 +6,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { Header } from "@/components/Header";
+import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import {
   loadFixtureBySlug,
@@ -92,26 +94,12 @@ export async function generateMetadata({
   const url = `${SITE}/${locale}/desporto/liga/jogo/${slug}`;
   const image = `${SITE}/${ogImageFilename(locale)}`;
 
-  return {
-    title,
-    description,
-    alternates: { canonical: url },
-    openGraph: {
-      title,
-      description,
-      url,
-      siteName: "estimador.pt",
-      locale,
-      type: "article",
-      images: [{ url: image, width: 1200, height: 630, alt: title }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [image],
-    },
-  };
+  return createPageMetadata({
+    locale,
+    path: `/desporto/liga/jogo/${slug}`,
+    title: title,
+    description: description,
+  });
 }
 
 /* --------------------------------------------------------------- form helper */
@@ -177,7 +165,7 @@ export default async function MatchPage({
   if (!fixture) {
     if (slug !== NO_FIXTURES_SLUG) notFound();
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-paper">
         <Header />
         <div className="max-w-3xl mx-auto px-4 py-20">
           <p className="text-stone-500 mb-4">
@@ -199,8 +187,8 @@ export default async function MatchPage({
   }
 
   const { home, away } = fixture;
-  const homeColor = ligaTeamColors[home] ?? "#78716c";
-  const awayColor = ligaTeamColors[away] ?? "#57534e";
+  const homeColor = ligaTeamColors[home] ?? "#5f7062";
+  const awayColor = ligaTeamColors[away] ?? "#4f5f57";
 
   const L = {
     back: pt ? "Liga Portugal" : "Liga Portugal",
@@ -271,7 +259,7 @@ export default async function MatchPage({
   const otherFixtures = fixtures.filter(f => f.slug !== fixture.slug).slice(0, 8);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       {/* Hero */}
@@ -287,7 +275,7 @@ export default async function MatchPage({
               {L.back}
             </Link>
             {fixture.inProgressMatchday && (
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5">
                 {L.live}
               </span>
             )}
@@ -373,7 +361,7 @@ export default async function MatchPage({
       {otherFixtures.length > 0 && (
         <section className="border-b border-stone-200">
           <div className="max-w-5xl mx-auto px-4 py-10">
-            <h2 className="text-xl font-bold tracking-tight mb-4">{L.otherMatches}</h2>
+            <h2 className="text-2xl tracking-tight mb-4">{L.otherMatches}</h2>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {otherFixtures.map(f => (
                 <Link
@@ -415,6 +403,7 @@ export default async function MatchPage({
           {prediction?.timestamp ? ` · ${prediction.timestamp.slice(0, 10)}` : ""}
         </div>
       </section>
+      <SiteFooter locale={locale} />
     </div>
   );
 }

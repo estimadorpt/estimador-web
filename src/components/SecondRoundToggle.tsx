@@ -33,7 +33,7 @@ export function SecondRoundToggle({ currentRound, translations }: SecondRoundTog
         onClick={() => handleRoundChange(1)}
         className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
           currentRound === 1
-            ? 'bg-white text-stone-900'
+            ? 'bg-cream text-stone-900'
             : 'text-stone-300 hover:text-white'
         }`}
       >
@@ -43,7 +43,7 @@ export function SecondRoundToggle({ currentRound, translations }: SecondRoundTog
         onClick={() => handleRoundChange(2)}
         className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
           currentRound === 2
-            ? 'bg-white text-stone-900'
+            ? 'bg-cream text-stone-900'
             : 'text-stone-300 hover:text-white'
         }`}
       >
