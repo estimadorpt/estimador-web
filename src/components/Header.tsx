@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Globe, Menu, X, ChevronDown } from 'lucide-react';
-import { LogoHorizontal, LogoIconOnly } from './Logo';
+import { LogoHorizontal } from './Logo';
 import { useArticleLanguagePath } from '@/lib/article-navigation';
 
 interface NavItem {
@@ -135,7 +135,7 @@ export function Header() {
         <Link href="/" aria-label={isPortuguese ? 'estimador — página inicial' : 'estimador — home'}
           onClick={closeNavigation} className={`brand-link shrink-0 block rounded-sm ${focusStyle}`}>
           <span className="hidden sm:block" aria-hidden="true"><LogoHorizontal size={22} /></span>
-          <span className="sm:hidden" aria-hidden="true"><LogoIconOnly size={30} /></span>
+          <span className="sm:hidden" aria-hidden="true"><LogoHorizontal size={18} /></span>
         </Link>
         <div className="flex items-center gap-3">
           <nav aria-label={isPortuguese ? 'Navegação principal' : 'Main navigation'} className="hidden lg:flex gap-0.5">

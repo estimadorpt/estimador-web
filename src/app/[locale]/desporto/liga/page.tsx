@@ -8,7 +8,6 @@ import {
 import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
-import { Mosaic } from '@/components/brand/Mosaic';
 import { Action } from '@/components/brand/Action';
 import { SiteFooter } from '@/components/SiteFooter';
 import { LeagueTable } from "@/components/charts/football/LeagueTable";
@@ -128,7 +127,7 @@ export default async function LigaPage({
 
       <PageHero
         field="periwinkle"
-        art={<Mosaic variant="corner" className="h-full w-full" ground="transparent" colors={['mintSoft', 'mustardSoft', 'coralSoft']} />}
+        compact
         icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
         eyebrow={`${t("football.title")} — ${t("football.season")} ${prediction.season}`}
         title={t("football.subtitle")}
@@ -138,7 +137,7 @@ export default async function LigaPage({
         actions={
           <>
             <Action href="/desporto/liga/simulador" locale={locale} arrow>{locale === "pt" ? "Experimentar cenários" : "Try scenarios"}</Action>
-            <Action href="/desporto/liga/jogo-previsoes" locale={locale} variant="secondary">{locale === "pt" ? "Contra o Modelo" : "Beat the Model"}</Action>
+            <Action href="/desporto/liga/jogo-previsoes" locale={locale} variant="text" arrow>{locale === "pt" ? "Contra o Modelo" : "Beat the Model"}</Action>
           </>
         }
         meta={<span>{t("football.matchday")} {prediction.matchday} · {t("football.updated")} {updatedDate}</span>}

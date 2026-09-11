@@ -7,7 +7,6 @@ import { economyPaused } from "@/lib/utils/economy-time";
 import { Action } from "@/components/brand/Action";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
-import { Mosaic } from '@/components/brand/Mosaic';
 import { TeaserBand } from '@/components/brand/TeaserBand';
 import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from "next-intl/server";
@@ -86,7 +85,7 @@ export default async function EconomiaPage({
         <PageHero
           width="5xl"
           field="mint"
-          art={<Mosaic variant="corner" className="h-full w-full" ground="transparent" colors={['mustardSoft', 'periwinkleSoft', 'coralSoft']} />}
+          compact
           icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
           eyebrow={t("eyebrow")}
           title={t("title")}
@@ -123,7 +122,7 @@ export default async function EconomiaPage({
       <PageHero
         width="5xl"
         field="mint"
-        art={<Mosaic variant="corner" className="h-full w-full" ground="transparent" colors={['mustardSoft', 'periwinkleSoft', 'coralSoft']} />}
+        compact
         icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t("eyebrow")}
         title={t("title")}

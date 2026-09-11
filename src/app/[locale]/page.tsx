@@ -6,10 +6,11 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ArrowRight, Trophy, Vote, TrendingUp, Newspaper } from "lucide-react";
 import type { Metadata } from "next";
-import { loadLigaSummary } from "@/lib/utils/football-data-loader";
+import { loadLigaSummary, loadLigaWithDeltas } from "@/lib/utils/football-data-loader";
 import { loadEconomyDashboard } from "@/lib/utils/data-loader";
 import { getMDXArticlesByLocale } from "@/lib/mdx-articles";
-import { ligaTeamColors } from "@/lib/config/football";
+import { ligaTeamColors, teamDisplayName } from "@/lib/config/football";
+import { Action } from "@/components/brand/Action";
 import { HomeEconomyFreshness } from "@/components/economics/HomeEconomyFreshness";
 import { economyPaused } from "@/lib/utils/economy-time";
 import {
@@ -44,6 +45,27 @@ export default async function HomePage({
   const t = await getTranslations({ locale });
 
   const ligaSummary = await loadLigaSummary();
+  // The lead: one dated finding from the latest matchday, written by a fixed
+  // rule over the published numbers (no model, no new claim), with the route in.
+  const ligaDeltas = ligaSummary ? (await loadLigaWithDeltas()).deltas : {};
+  const pct = (p: number) => Math.round(p * 100);
+  const lead = (() => {
+    if (!ligaSummary || ligaSummary.top3.length < 3) return null;
+    const [first, second, third] = ligaSummary.top3;
+    const tied = pct(second.p_champion) === pct(third.p_champion);
+    const mover = Object.values(ligaDeltas).sort((a, b) => Math.abs(b.p_champion_delta) - Math.abs(a.p_champion_delta))[0];
+    const date = ligaSummary.timestamp ? new Intl.DateTimeFormat(locale === "pt" ? "pt-PT" : "en-GB", { day: "numeric", month: "long", year: "numeric" }).format(new Date(ligaSummary.timestamp)) : "";
+    return {
+      kicker: t("home.leadKicker", { matchday: ligaSummary.matchday, date }),
+      sentence: `${t("home.leadLeader", { team: teamDisplayName(first.team), p: pct(first.p_champion) })} ${tied
+        ? t("home.leadTied", { a: teamDisplayName(second.team), b: teamDisplayName(third.team), p: pct(second.p_champion) })
+        : t("home.leadFollow", { a: teamDisplayName(second.team), pa: pct(second.p_champion), b: teamDisplayName(third.team), pb: pct(third.p_champion) })}`,
+      mover: mover && Math.abs(mover.p_champion_delta) >= 1
+        ? t("home.leadMover", { team: teamDisplayName(mover.team), delta: new Intl.NumberFormat(locale === "pt" ? "pt-PT" : "en-GB", { maximumFractionDigits: 1, signDisplay: "always" }).format(mover.p_champion_delta).replace("-", "\u2212") })
+        : null,
+      matches: ligaSummary.nextMatchday?.matches?.length ?? 0,
+    };
+  })();
   const economy = await loadEconomyDashboard();
   const economyPausedNow = economyPaused(economy?.as_of ?? economy?.vintage_date);
   const economyTiles = economyPausedNow ? undefined : economy?.tiles;
@@ -61,6 +83,20 @@ export default async function HomePage({
       <Header />
 
       <HomeMiniature locale={locale === 'en' ? 'en' : 'pt'} />
+      {/* The second act: a real, dated finding and the way in. */}
+      {lead && (
+        <section className="border-b border-line bg-cream">
+          <div className="max-w-7xl mx-auto px-4 py-8 md:py-10">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{lead.kicker}</p>
+            <h2 className="mt-2 max-w-3xl text-2xl leading-tight md:text-3xl">{lead.sentence}</h2>
+            {lead.mover && <p className="mt-2 max-w-2xl text-base leading-relaxed text-stone-600">{lead.mover}</p>}
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
+              <Action href="/desporto/liga" locale={locale} arrow>{t("home.leadAction")}</Action>
+              {lead.matches > 0 && <Action href="/desporto/liga/jogo-previsoes" locale={locale} variant="text" arrow>{t("home.leadMatches", { count: lead.matches })}</Action>}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Active Sections */}
       <section className="border-b border-stone-200">
@@ -123,7 +159,7 @@ export default async function HomePage({
           )}
 
           {/* Economia card */}
-          <div className="mb-10">
+          <div className={economyPausedNow ? "mb-8" : "mb-10"}>
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="w-5 h-5 text-stone-400" />
               <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
@@ -184,21 +220,18 @@ export default async function HomePage({
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-px bg-stone-200 border border-stone-200">
-                <div className="bg-cream p-5">
-                  <div className="text-xs text-stone-500">
-                    {economyPausedNow ? t("economics.pausedHome", { date: fmtDate(economy?.vintage_date, locale) }) : t("sections.economicsDescription")}
-                  </div>
-                </div>
-              </div>
+              <p className="max-w-2xl text-sm leading-relaxed text-stone-600">
+                {economyPausedNow ? t("economics.pausedHome", { date: fmtDate(economy?.vintage_date, locale) }) : t("sections.economicsDescription")}
+              </p>
             )}
-
             <div className="mt-3 flex items-center justify-between gap-4">
-              <HomeEconomyFreshness
-                asOf={economy?.as_of}
-                vintageDate={economy?.vintage_date}
-                locale={locale}
-              />
+              {economyPausedNow ? <span /> : (
+                <HomeEconomyFreshness
+                  asOf={economy?.as_of}
+                  vintageDate={economy?.vintage_date}
+                  locale={locale}
+                />
+              )}
               <Link
                 href="/economia"
                 locale={locale}

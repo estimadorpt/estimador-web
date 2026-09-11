@@ -51,3 +51,10 @@
 @media(min-width:721px){.atlas-immersive[data-panel-open=true] .atlas-cinematic .atlas-living-controls{right:330px}}
 /* Phones: the drawer ends above the journey controls and the legend strip below the map. */
 @media(max-width:720px){.atlas-immersive[data-panel-open=true] .atlas-panel{bottom:140px}}
+
+/* Phones: one toolbar row, no redundant breadcrumb at the top level, a small
+   caption and a compact island dock, so mainland Portugal owns the frame. */
+@media(max-width:720px){.atlas-profile-toggle span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.atlas-profile-toggle{padding:8px 10px;gap:0}.atlas-immersive .atlas-world-top{flex-wrap:nowrap}.atlas-breadcrumb[data-root=true]{display:none}.atlas-cinematic .atlas-local-caption{top:14px;left:14px;max-width:200px}.atlas-cinematic .atlas-local-caption>span{display:none}.atlas-cinematic .atlas-local-caption strong{font-size:22px}.atlas-cinematic .atlas-local-caption p{font-size:11px;max-width:180px;margin-top:3px}.atlas-island-shortcuts{display:flex;align-items:center;gap:4px;right:10px;bottom:96px;padding:5px 6px;background:#153a32d9}.atlas-island-shortcuts>span{display:none}.atlas-island-shortcuts button{display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 6px}.atlas-island-shortcuts button svg{width:30px;height:18px;margin:0}.atlas-island-shortcuts .atlas-all-territory{display:none}}
+/* Phones: the island dock sits in the empty top-right corner and the journey
+   scale gets its own ground, so neither hides the south of the map. */
+@media(max-width:720px){.atlas-island-shortcuts{top:14px;right:10px;bottom:auto}.atlas-voyage-progress{background:#102c27b8;padding:5px 8px;border-radius:6px;left:12px;bottom:82px}}

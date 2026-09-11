@@ -78,9 +78,9 @@
   --color-stone-100: #f5f4ed;
   --color-stone-200: #dadccf;
   --color-stone-300: #cbccbb;
-  --color-stone-400: #7f9284;
-  --color-stone-500: #5f7062;
-  --color-stone-600: #4f5f57;
+  --color-stone-400: #607265;   /* 4.6:1 on paper; supporting text must read as live */
+  --color-stone-500: #546457;
+  --color-stone-600: #485750;
   --color-stone-700: #434d48;
   --color-stone-800: #234c40;
   --color-stone-900: #16362e;

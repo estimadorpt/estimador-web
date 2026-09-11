@@ -29,6 +29,8 @@ interface PageHeroProps {
   actions?: ReactNode;
   /** Matches the page's own container width so the hero lines up with the content below. */
   width?: keyof typeof widths;
+  /** Dashboards and listings: a shallower header, so the data arrives sooner. Large art stays on entrances and explainers. */
+  compact?: boolean;
   className?: string;
 }
 
@@ -38,7 +40,7 @@ interface PageHeroProps {
  * bands the sections used to open with, so a page now starts the way the
  * atlas does.
  */
-export function PageHero({ eyebrow, icon, title, lede, back, meta, art, field, actions, width = '7xl', className = '' }: PageHeroProps) {
+export function PageHero({ eyebrow, icon, title, lede, back, meta, art, field, actions, width = '7xl', compact = false, className = '' }: PageHeroProps) {
   return (
     <section className={`relative overflow-hidden border-b border-line ${field ? `field-${field}` : 'bg-paper'} ${className}`}>
       {art && (
@@ -46,7 +48,7 @@ export function PageHero({ eyebrow, icon, title, lede, back, meta, art, field, a
           {art}
         </div>
       )}
-      <div className={`relative ${widths[width]} mx-auto px-4 pt-8 pb-8 md:pt-10 md:pb-10`}>
+      <div className={`relative ${widths[width]} mx-auto px-4 ${compact ? 'pt-6 pb-6 md:pt-7 md:pb-7' : 'pt-8 pb-8 md:pt-10 md:pb-10'}`}>
         {back && (
           <Link
             href={back.href}
@@ -63,10 +65,10 @@ export function PageHero({ eyebrow, icon, title, lede, back, meta, art, field, a
             <span>{eyebrow}</span>
           </div>
         )}
-        <h1 className="max-w-3xl text-3xl leading-[1.08] text-ink md:text-[2.75rem]">{title}</h1>
-        {lede && <p className="mt-3 max-w-2xl text-base leading-relaxed text-stone-600 md:text-lg">{lede}</p>}
-        {actions && <div className="mt-6 flex flex-wrap items-center gap-3">{actions}</div>}
-        {meta && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-stone-500">{meta}</div>}
+        <h1 className={`max-w-3xl leading-[1.08] text-ink ${compact ? 'text-2xl md:text-4xl' : 'text-3xl md:text-[2.75rem]'}`}>{title}</h1>
+        {lede && <p className={`max-w-2xl leading-relaxed text-stone-600 ${compact ? 'mt-2 text-base' : 'mt-3 text-base md:text-lg'}`}>{lede}</p>}
+        {actions && <div className={`flex flex-wrap items-center gap-x-4 gap-y-3 ${compact ? 'mt-5' : 'mt-6'}`}>{actions}</div>}
+        {meta && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-stone-600">{meta}</div>}
       </div>
     </section>
   );

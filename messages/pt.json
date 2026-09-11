@@ -305,6 +305,15 @@
       "undecided_note": "~35% de eleitores indecisos adicionam incerteza adicional não mostrada"
     }
   },
+  "home": {
+    "leadKicker": "Jornada {matchday} · atualizado {date}",
+    "leadLeader": "{team} tem {p}% de hipóteses de ser campeão.",
+    "leadTied": "{a} e {b} seguem empatados com {p}%.",
+    "leadFollow": "{a} segue com {pa}% e {b} com {pb}%.",
+    "leadMover": "Maior variação da jornada: {team}, {delta} pontos percentuais no título.",
+    "leadAction": "Ver a corrida pelo título",
+    "leadMatches": "{count} jogos na próxima jornada"
+  },
   "sections": {
     "ligaPortugal": "Liga Portugal",
     "ligaPortugalDescription": "Previsões para a Liga Portugal com base em simulações Bayesianas",

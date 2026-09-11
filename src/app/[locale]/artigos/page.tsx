@@ -1,7 +1,6 @@
 import { createPageMetadata, SITE_LOCALES } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
-import { Mosaic } from '@/components/brand/Mosaic';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Subscribe } from "@/components/Subscribe";
 import { getTranslations } from 'next-intl/server';
@@ -74,6 +73,8 @@ export default async function ArticlesPage({
 
       <PageHero
         width="4xl"
+        compact
+        field="mustard"
         eyebrow={t('articles.title')}
         title={t('articles.title')}
         lede={t('articles.subtitle')}
@@ -86,7 +87,6 @@ export default async function ArticlesPage({
             {t('articles.feedLink')}
           </a>
         }
-        art={<Mosaic variant="corner" className="h-full w-full" />}
       />
 
       <main className="max-w-4xl mx-auto px-4 py-10">

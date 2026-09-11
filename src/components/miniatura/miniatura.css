@@ -27,3 +27,12 @@
 .mini-home[data-live=true] .mini-home-world .mini-stroll{animation:mini-stroll 7s ease-in-out infinite}
 .mini-home[data-live=true] .mini-home-world .mini-water{animation:mini-water 4s ease-out infinite}
 @media(prefers-reduced-motion:reduce){.mini-home[data-live=true] .mini-home-world .mini-stroll,.mini-home[data-live=true] .mini-home-world .mini-water{animation:none}}
+
+/* The animation control belongs to the scene, not to the copy. */
+.mini-home-world{position:relative}
+.mini-home-world>div{pointer-events:none}
+/* The hero already says the village is imagined; the scene captions would sit under the control. */
+.mini-home-world .mini-scene text{display:none}
+.mini-home-world .mini-live{position:absolute;left:14px;bottom:14px;margin:0;pointer-events:auto;background:color-mix(in oklab,var(--color-cream) 90%,transparent);backdrop-filter:blur(4px)}
+/* Phones: a deliberate close crop, so houses and people stay legible. */
+@media(max-width:720px){.mini-home-world{transform:none;height:330px;overflow:hidden;border-radius:12px;margin:22px -8px 0}.mini-home-world .mini-scene{transform:scale(1.75);transform-origin:52% 46%}.mini-home-world .mini-live{left:12px;bottom:12px}}

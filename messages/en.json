@@ -305,6 +305,15 @@
       "undecided_note": "~35% undecided voters add additional uncertainty not shown"
     }
   },
+  "home": {
+    "leadKicker": "Matchday {matchday} · updated {date}",
+    "leadLeader": "{team} has a {p}% chance of the title.",
+    "leadTied": "{a} and {b} follow, level on {p}%.",
+    "leadFollow": "{a} follows on {pa}% and {b} on {pb}%.",
+    "leadMover": "Biggest move of the matchday: {team}, {delta} percentage points on the title.",
+    "leadAction": "See the title race",
+    "leadMatches": "{count} matches next matchday"
+  },
   "sections": {
     "ligaPortugal": "Liga Portugal",
     "ligaPortugalDescription": "Bayesian simulation-based forecasts for Liga Portugal",
