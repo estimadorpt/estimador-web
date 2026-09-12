@@ -1,142 +1,143 @@
 {
-  "platform": {
-    "apiRuntime": "node:22"
-  },
-  "routes": [
-    {
-      "route": "/api/*",
-      "headers": {
-        "cache-control": "no-store"
-      }
+    "platform": {
+        "apiRuntime": "node:22"
     },
-    {
-      "route": "/_next/static/*",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable"
-      }
+    "routes": [
+        {
+            "route": "/api/*",
+            "headers": {
+                "cache-control": "no-store"
+            }
+        },
+        {
+            "route": "/_next/static/*",
+            "headers": {
+                "cache-control": "public, max-age=31536000, immutable"
+            }
+        },
+        {
+            "route": "/favicon.ico",
+            "headers": {
+                "cache-control": "public, max-age=86400"
+            }
+        },
+        {
+            "route": "/og-image-*.png",
+            "headers": {
+                "cache-control": "public, max-age=31536000, immutable"
+            }
+        },
+        {
+            "route": "/forecast",
+            "redirect": "/pt/eleicoes/legislativas/",
+            "statusCode": 301
+        },
+        {
+            "route": "/pt/forecast",
+            "redirect": "/pt/eleicoes/legislativas/",
+            "statusCode": 301
+        },
+        {
+            "route": "/en/forecast",
+            "redirect": "/en/eleicoes/legislativas/",
+            "statusCode": 301
+        },
+        {
+            "route": "/about",
+            "redirect": "/pt/sobre/",
+            "statusCode": 301
+        },
+        {
+            "route": "/pt/about",
+            "redirect": "/pt/sobre/",
+            "statusCode": 301
+        },
+        {
+            "route": "/en/about",
+            "redirect": "/en/sobre/",
+            "statusCode": 301
+        },
+        {
+            "route": "/methodology",
+            "redirect": "/pt/metodologia/",
+            "statusCode": 301
+        },
+        {
+            "route": "/pt/methodology",
+            "redirect": "/pt/metodologia/",
+            "statusCode": 301
+        },
+        {
+            "route": "/en/methodology",
+            "redirect": "/en/metodologia/",
+            "statusCode": 301
+        },
+        {
+            "route": "/map",
+            "redirect": "/pt/eleicoes/legislativas/mapa/",
+            "statusCode": 301
+        },
+        {
+            "route": "/pt/map",
+            "redirect": "/pt/eleicoes/legislativas/mapa/",
+            "statusCode": 301
+        },
+        {
+            "route": "/en/map",
+            "redirect": "/en/eleicoes/legislativas/mapa/",
+            "statusCode": 301
+        },
+        {
+            "route": "/pt/eleicoes/mapa",
+            "redirect": "/pt/eleicoes/legislativas/mapa/",
+            "statusCode": 301
+        },
+        {
+            "route": "/en/eleicoes/mapa",
+            "redirect": "/en/eleicoes/legislativas/mapa/",
+            "statusCode": 301
+        },
+        {
+            "route": "/articles",
+            "redirect": "/pt/artigos/",
+            "statusCode": 301
+        },
+        {
+            "route": "/pt/articles",
+            "redirect": "/pt/artigos/",
+            "statusCode": 301
+        },
+        {
+            "route": "/en/articles",
+            "redirect": "/en/artigos/",
+            "statusCode": 301
+        },
+        {
+            "route": "/feed.xml",
+            "redirect": "/pt/feed.xml",
+            "statusCode": 301
+        },
+        {
+            "route": "/",
+            "redirect": "/pt/",
+            "statusCode": 301
+        }
+    ],
+    "mimeTypes": {
+        ".json": "application/json",
+        ".txt": "text/plain",
+        ".wasm": "application/wasm",
+        ".parquet": "application/vnd.apache.parquet",
+        ".xml": "application/xml",
+        ".avif": "image/avif"
     },
-    {
-      "route": "/favicon.ico",
-      "headers": {
-        "cache-control": "public, max-age=86400"
-      }
+    "globalHeaders": {
+        "cache-control": "public, max-age=0, must-revalidate"
     },
-    {
-      "route": "/og-image-*.png",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable"
-      }
+    "responseOverrides": {
+        "404": {
+            "rewrite": "/404.html"
+        }
     },
-    {
-      "route": "/forecast",
-      "redirect": "/pt/eleicoes/legislativas/",
-      "statusCode": 301
-    },
-    {
-      "route": "/pt/forecast",
-      "redirect": "/pt/eleicoes/legislativas/",
-      "statusCode": 301
-    },
-    {
-      "route": "/en/forecast",
-      "redirect": "/en/eleicoes/legislativas/",
-      "statusCode": 301
-    },
-    {
-      "route": "/about",
-      "redirect": "/pt/sobre/",
-      "statusCode": 301
-    },
-    {
-      "route": "/pt/about",
-      "redirect": "/pt/sobre/",
-      "statusCode": 301
-    },
-    {
-      "route": "/en/about",
-      "redirect": "/en/sobre/",
-      "statusCode": 301
-    },
-    {
-      "route": "/methodology",
-      "redirect": "/pt/metodologia/",
-      "statusCode": 301
-    },
-    {
-      "route": "/pt/methodology",
-      "redirect": "/pt/metodologia/",
-      "statusCode": 301
-    },
-    {
-      "route": "/en/methodology",
-      "redirect": "/en/metodologia/",
-      "statusCode": 301
-    },
-    {
-      "route": "/map",
-      "redirect": "/pt/eleicoes/legislativas/mapa/",
-      "statusCode": 301
-    },
-    {
-      "route": "/pt/map",
-      "redirect": "/pt/eleicoes/legislativas/mapa/",
-      "statusCode": 301
-    },
-    {
-      "route": "/en/map",
-      "redirect": "/en/eleicoes/legislativas/mapa/",
-      "statusCode": 301
-    },
-    {
-      "route": "/pt/eleicoes/mapa",
-      "redirect": "/pt/eleicoes/legislativas/mapa/",
-      "statusCode": 301
-    },
-    {
-      "route": "/en/eleicoes/mapa",
-      "redirect": "/en/eleicoes/legislativas/mapa/",
-      "statusCode": 301
-    },
-    {
-      "route": "/articles",
-      "redirect": "/pt/artigos/",
-      "statusCode": 301
-    },
-    {
-      "route": "/pt/articles",
-      "redirect": "/pt/artigos/",
-      "statusCode": 301
-    },
-    {
-      "route": "/en/articles",
-      "redirect": "/en/artigos/",
-      "statusCode": 301
-    },
-    {
-      "route": "/feed.xml",
-      "redirect": "/pt/feed.xml",
-      "statusCode": 301
-    },
-    {
-      "route": "/",
-      "redirect": "/pt/",
-      "statusCode": 301
-    }
-  ],
-  "mimeTypes": {
-    ".json": "application/json",
-    ".txt": "text/plain",
-    ".wasm": "application/wasm",
-    ".parquet": "application/vnd.apache.parquet",
-    ".xml": "application/xml"
-  },
-  "globalHeaders": {
-    "cache-control": "public, max-age=0, must-revalidate"
-  },
-  "responseOverrides": {
-    "404": {
-      "rewrite": "/404.html"
-    }
-  },
-  "trailingSlash": "auto"
+    "trailingSlash": "auto"
 }
