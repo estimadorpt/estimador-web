@@ -15,6 +15,7 @@ import { PopulationSectionNav } from '@/components/population/SectionNav';
 import { BRAND } from '@/lib/brand';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 import { fetchMeta, fetchParish, fetchPlaces } from '@/lib/population/client';
+import { formatCount } from '@/lib/population/format';
 import { GUESS_RECIPES } from '@/lib/population/guess';
 import { HONESTY, RECIPE_COPY, TIER_COPY, type Locale } from '@/lib/population/labels';
 import { indexPlaces, normaliseParishCode, regionSlug, regionTitle, type Parish, type PlaceIndex } from '@/lib/population/places';
@@ -93,7 +94,7 @@ export function ParishPage({ locale }: { locale: Locale }) {
   const pt = locale === 'pt';
   if (state.kind === 'unknown') {
     return (
-      <>
+      <main id="main-content" tabIndex={-1}>
         <PageHero
           compact
           field="periwinkle"
@@ -105,7 +106,7 @@ export function ParishPage({ locale }: { locale: Locale }) {
             : (pt ? 'Este endereço não tem um código de freguesia válido. Procura-a pelo nome.' : 'This address does not carry a valid parish code. Search for it by name.')}
         />
         <PopulationSectionNav current="parish" locale={locale} />
-        <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-10">
+        <div className="mx-auto max-w-5xl px-4 py-10">
           <div className="flex flex-col gap-6 rounded-2xl border border-line bg-cream p-5 md:flex-row md:items-start md:p-8">
             <Mosaic variant="corner" className="h-16 w-16 shrink-0" />
             <div className="min-w-0 flex-1">
@@ -118,13 +119,13 @@ export function ParishPage({ locale }: { locale: Locale }) {
               </Action>
             </div>
           </div>
-        </main>
-      </>
+        </div>
+      </main>
     );
   }
 
   return (
-    <>
+    <main id="main-content" tabIndex={-1}>
       <PageHero
         compact
         field="periwinkle"
@@ -139,16 +140,15 @@ export function ParishPage({ locale }: { locale: Locale }) {
         actions={state.kind === 'error' ? <Action onClick={() => void load(state.code)}>{pt ? 'Tentar de novo' : 'Try again'}</Action> : undefined}
       />
       <PopulationSectionNav current="parish" locale={locale} />
-      <main id="main-content" tabIndex={-1} className="mx-auto flex min-h-[50vh] max-w-5xl items-start justify-center px-4 py-16 text-ink">
+      <div className="mx-auto flex min-h-[50vh] max-w-5xl items-start justify-center px-4 py-16 text-ink">
         {state.kind === 'loading' && <MarkLoading height={28} color={BRAND.ink} ground={BRAND.paper} label={pt ? 'A carregar' : 'Loading'} />}
-      </main>
-    </>
+      </div>
+    </main>
   );
 }
 
 function Ready({ code, place, record, meta, index, locale }: Extract<State, { kind: 'ready' }> & { locale: Locale }) {
   const pt = locale === 'pt';
-  const number = new Intl.NumberFormat(pt ? 'pt-PT' : 'en-GB');
   const region = index.regionById.get(place.region);
   const regionName = region?.name ?? place.regionName;
   const regionHeading = regionTitle(place.region, regionName, locale);
@@ -179,7 +179,7 @@ function Ready({ code, place, record, meta, index, locale }: Extract<State, { ki
     ? (pt
       ? `Os números desta página são valores do concelho de ${fallbackName ?? place.municipalityName}, que inclui esta freguesia: os da própria freguesia não atingem a qualidade necessária para publicar.`
       : `The figures on this page are those of ${fallbackName ?? place.municipalityName} municipality, which includes this parish: the parish's own figures do not reach the quality needed to publish.`)
-    : (pt ? `Os números desta página são da própria freguesia. ${tier.meaning.pt}` : `The figures on this page are the parish’s own. ${tier.meaning.en}`);
+    : (pt ? 'Todas as respostas desta página usam os números da própria freguesia.' : 'Every answer on this page uses the parish’s own figures.');
 
   const toc = [
     { href: '#cem', label: pt ? 'Se fosse 100' : 'If it were 100' },
@@ -207,7 +207,7 @@ function Ready({ code, place, record, meta, index, locale }: Extract<State, { ki
   );
 
   return (
-    <>
+    <main id="main-content" tabIndex={-1}>
       <PageHero
         compact
         field="periwinkle"
@@ -218,8 +218,8 @@ function Ready({ code, place, record, meta, index, locale }: Extract<State, { ki
         lede={
           <>
             {pt
-              ? `${Subject} fica no concelho de ${place.municipalityName} (${regionInline}). Os Censos 2021 contaram ${number.format(place.censusPopulation)} residentes em ${number.format(place.households)} agregados (INE).`
-              : `${Subject} is in ${place.municipalityName} municipality (${regionInline}). The 2021 Census counted ${number.format(place.censusPopulation)} residents in ${number.format(place.households)} households (INE).`}
+              ? `${Subject} fica no concelho de ${place.municipalityName} (${regionInline}). Os Censos 2021 contaram ${formatCount(place.censusPopulation, locale)} residentes em ${formatCount(place.households, locale)} agregados (INE).`
+              : `${Subject} is in ${place.municipalityName} municipality (${regionInline}). The 2021 Census counted ${formatCount(place.censusPopulation, locale)} residents in ${formatCount(place.households, locale)} households (INE).`}
             {' '}
             <strong className="font-semibold text-ink">{HONESTY.synthetic[locale]}</strong>
           </>
@@ -240,7 +240,7 @@ function Ready({ code, place, record, meta, index, locale }: Extract<State, { ki
       />
       <PopulationSectionNav current="parish" locale={locale} />
 
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl px-4 pb-16 pt-8">
+      <div className="mx-auto max-w-5xl px-4 pb-16 pt-8">
         <div className="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
           <nav aria-label={pt ? 'Nesta página' : 'On this page'} className="hidden lg:block">
             <div className="sticky top-24">
@@ -337,8 +337,8 @@ function Ready({ code, place, record, meta, index, locale }: Extract<State, { ki
             </section>
           </div>
         </div>
-      </main>
-    </>
+      </div>
+    </main>
   );
 }
 

@@ -24,6 +24,7 @@ import { Legend } from '@/components/viz/Legend';
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { parishHref } from '@/components/population/ParishLink';
 import { fetchPlaces } from '@/lib/population/client';
+import { formatCount } from '@/lib/population/format';
 import { TIER_COPY } from '@/lib/population/labels';
 import { indexPlaces, normaliseParishCode, regionTitle, type Parish, type PlaceIndex } from '@/lib/population/places';
 import {
@@ -79,10 +80,10 @@ const copy = {
     reset: 'Repor o enquadramento',
     random: 'Uma freguesia ao acaso',
     region: (id: string) => (id === 'azores' || id === 'madeira' ? 'Região autónoma' : 'Distrito'),
-    municipality: 'Município',
+    municipality: 'Concelho',
     parish: 'Freguesia',
     regions: (n: number) => `${n} distritos e regiões autónomas`,
-    municipalities: (n: number) => `${n} ${n === 1 ? 'município' : 'municípios'}`,
+    municipalities: (n: number) => `${n} ${n === 1 ? 'concelho' : 'concelhos'}`,
     parishes: (n: number) => `${n} ${n === 1 ? 'freguesia' : 'freguesias'}`,
     concelho: (name: string) => `Concelho de ${name}`,
     residents: 'Residentes',
@@ -95,12 +96,12 @@ const copy = {
     choose: 'Escolher esta freguesia',
     tapAgain: 'Toca outra vez na freguesia, ou usa o botão, para a abrir.',
     hintCountry: 'Escolhe um distrito ou uma região autónoma.',
-    hintRegion: 'Escolhe um município para ver as suas freguesias.',
+    hintRegion: 'Escolhe um concelho para ver as suas freguesias.',
     hintMunicipality: 'Escolhe uma freguesia para ver o seu retrato.',
     legendTitle: 'Qualidade do ajuste: A / B / C',
     list: 'Ver como lista',
     listCountry: 'Distritos e regiões autónomas',
-    listRegion: (name: string) => `Municípios: ${name}`,
+    listRegion: (name: string) => `Concelhos: ${name}`,
     listMunicipality: (name: string) => `Freguesias de ${name}`,
     source: 'Limites: CAOP 2021 (DGT, CC BY 4.0). Residentes: INE, Censos 2021.',
     insets: 'Açores e Madeira em caixa; os Açores a uma escala menor.',
@@ -160,7 +161,6 @@ const prefersReducedMotion = () => typeof window !== 'undefined' && window.match
 export function PopulationMap({ locale, initialRegion, focusParish, onSelectParish, height = 560, className = '' }: PopulationMapProps) {
   const t = copy[locale];
   const uid = useId().replace(/:/g, '');
-  const numbers = useMemo(() => new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB'), [locale]);
 
   // ---- state ---------------------------------------------------------------
   const [view, setView] = useState<MapView>(() => resolveInitialView({ initialRegion, focusParish }));
@@ -737,7 +737,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                     <>
                       <p className="mt-1 text-sm text-stone-600">{t.concelho(readout.parish.municipalityName)}</p>
                       <p className="mt-2 text-sm text-ink">
-                        {t.residents}: <span className="font-display font-extrabold tabular-nums">{numbers.format(readout.parish.censusPopulation)}</span>
+                        {t.residents}: <span className="font-display font-extrabold tabular-nums">{formatCount(readout.parish.censusPopulation, locale)}</span>
                         <span className="text-stone-500"> · {t.ine}</span>
                       </p>
                       <TierLine parish={readout.parish} t={t} locale={locale} />
@@ -795,7 +795,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                         : <a href={parishHref(parish.code, locale)} className="inline-flex min-h-11 items-center text-ink underline underline-offset-4">{parish.name}</a>}
                       <span className="shrink-0 text-right text-xs text-stone-500">
                         {t.tier(parish.tier)}{parish.level === 'municipality' ? ` · ${t.fallback}` : ''}
-                        <span className="block tabular-nums">{t.residents}: {numbers.format(parish.censusPopulation)}</span>
+                        <span className="block tabular-nums">{t.residents}: {formatCount(parish.censusPopulation, locale)}</span>
                       </span>
                     </li>
                   ))

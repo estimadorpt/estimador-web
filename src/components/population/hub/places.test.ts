@@ -3,7 +3,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR } from '@/lib/config/population';
 import type { PopulationMeta, PopulationPlaces } from '@/types/population';
-import { formatCount, regionBySlug, regionEntries, regionListing } from './places';
+import { formatCount, regionBySlug, regionEntries, regionListing, regionTables } from './places';
 
 const DIR = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR);
 const places = JSON.parse(readFileSync(path.join(DIR, 'places.json'), 'utf8')) as PopulationPlaces;
@@ -41,6 +41,18 @@ describe('population hub places', () => {
     expect([...names].sort((a, b) => a.localeCompare(b, 'pt'))).toEqual(names);
   });
 
+  it('cuts a region listing to the table’s compact rows, in the same order and with INE’s counts untouched', () => {
+    const listing = regionListing(places, '04');
+    const tables = regionTables(listing);
+    expect(tables.map(t => t.code)).toEqual(listing.map(m => m.code));
+    const rows = tables.flatMap(t => t.rows);
+    expect(rows).toHaveLength(226);
+    const first = listing[0].parishes[0];
+    expect(tables[0].rows[0]).toEqual([first.code, first.name, first.censusPopulation, first.tier, 0]);
+    // Five fields a row, no coordinates or households.
+    expect(rows.every(row => row.length === 5)).toBe(true);
+  });
+
   it('gives every parish its own figures and a tier, matching the release counts the hub shows', () => {
     expect(places.parishes).toHaveLength(meta.counts.parishes);
     expect(places.parishes.every(row => row[4] === 'p')).toBe(true);
@@ -51,8 +63,8 @@ describe('population hub places', () => {
   });
 
   it('groups whole numbers in each locale', () => {
-    expect(formatCount(3092, 'pt')).toBe('3 092');
-    expect(formatCount(10340441, 'pt')).toBe('10 340 441');
+    expect(formatCount(3092, 'pt')).toBe('3\u00A0092');
+    expect(formatCount(10340441, 'pt')).toBe('10\u00A0340\u00A0441');
     expect(formatCount(3092, 'en')).toBe('3,092');
     expect(formatCount(987, 'pt')).toBe('987');
   });

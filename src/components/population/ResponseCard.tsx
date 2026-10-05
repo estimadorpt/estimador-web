@@ -5,9 +5,10 @@ import { Link2 } from 'lucide-react';
 import { DataCard } from '@/components/viz/DataCard';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { Mosaic } from '@/components/brand/Mosaic';
+import { Link } from '@/i18n/routing';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 import { isWhole, readCells } from '@/lib/population/compact';
-import { DIMENSION_LABEL, HONESTY, RECIPE_COPY, REASON_COPY, TIER_COPY, type Locale } from '@/lib/population/labels';
+import { DIMENSION_LABEL, HONESTY, RECIPE_COPY, REASON_COPY, type Locale } from '@/lib/population/labels';
 import type { CompactResponse, PopulationRecipe, PortraitRecipe } from '@/types/population';
 import { AgeColumns, HundredPeople, ShareBars } from './charts';
 import { QualityBadge } from './QualityBadge';
@@ -45,25 +46,20 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
 
   return (
     <div id={anchor} className={`scroll-mt-24 ${className}`}>
-      <DataCard
-        title={title}
-        subtitle={copy.population[locale]}
-        source={HONESTY.source[locale]}
-        methodologyHref={POPULATION_ROUTES.methodology}
-        methodologyLabel={locale === 'pt' ? 'Como foi feito' : 'How it was made'}
-        locale={locale}
-        controls={bare ? undefined : <CopyAnchor anchor={anchor} locale={locale} />}
-      >
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          {status.badge}
-          {status.text && <p className="text-sm text-stone-600">{status.text}</p>}
-        </div>
+      {/* The footer is drawn here rather than by DataCard so the copy-link action can sit in it, out of the way of the question. */}
+      <DataCard title={title} subtitle={copy.population[locale]} locale={locale}>
+        {(status.badge || status.text) && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            {status.badge}
+            {status.text && <p className="text-sm text-stone-600">{status.text}</p>}
+          </div>
+        )}
         {record.decision === 'refuse' ? (
           <Refused locale={locale} />
         ) : (
           <>
             {before}
-            {revealed && <Chart recipeName={recipeName} recipe={recipe} record={record} cells={cells} locale={locale} />}
+            {revealed && <ResponseChart recipeName={recipeName} recipe={recipe} record={record} cells={cells} locale={locale} />}
             {revealed && (
               <ChartTable
                 caption={`${copy.question[locale]} ${status.where}`}
@@ -73,6 +69,13 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
             )}
           </>
         )}
+        <footer className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line pt-3 text-xs text-stone-500">
+          <span>{HONESTY.source[locale]}</span>
+          <Link href={POPULATION_ROUTES.methodology} locale={locale} className="font-semibold text-ink underline-offset-4 hover:underline">
+            {locale === 'pt' ? 'Como foi feito' : 'How it was made'}
+          </Link>
+          {!bare && <CopyAnchor anchor={anchor} locale={locale} />}
+        </footer>
       </DataCard>
     </div>
   );
@@ -96,16 +99,13 @@ function statusLine(record: CompactResponse, locale: Locale, placeName: string, 
       where: locale === 'pt' ? `(concelho de ${name})` : `(${name} municipality)`,
     };
   }
-  // Every v1.0.1 answer is the parish's own, with the parish's measured tier (A, B or C).
-  const tier = record.resolved_tier === 'A' || record.resolved_tier === 'B' || record.resolved_tier === 'C' ? record.resolved_tier : null;
-  return {
-    badge: tier ? <QualityBadge kind={tier} locale={locale} title={TIER_COPY[tier].meaning[locale]} /> : null,
-    text: locale === 'pt' ? `Valores da freguesia de ${placeName}.` : `Figures for ${placeName}.`,
-    where: `(${placeName})`,
-  };
+  // Every v1.0.1 answer is the parish's own: the page states that and the tier
+  // once, at the top, so a published card carries no status line of its own.
+  return { badge: null, text: null, where: `(${placeName})` };
 }
 
-function Chart({ recipeName, recipe, record, cells, locale }: {
+/** The chart a response gets: the same choice on the parish page and in the game's clues. */
+export function ResponseChart({ recipeName, recipe, record, cells, locale }: {
   recipeName: PortraitRecipe;
   recipe: PopulationRecipe;
   record: CompactResponse;
@@ -122,7 +122,7 @@ function Chart({ recipeName, recipe, record, cells, locale }: {
         {[...bands.entries()].map(([band, rows]) => (
           <div key={band}>
             <h4 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{band}</h4>
-            <ShareBars cells={rows} locale={locale} labelWidth="sm:grid-cols-[minmax(0,1fr)_auto]" />
+            <ShareBars cells={rows} locale={locale} stacked />
           </div>
         ))}
       </div>
@@ -163,7 +163,7 @@ function CopyAnchor({ anchor, locale }: { anchor: string; locale: Locale }) {
           window.location.hash = anchor;
         }
       }}
-      className="inline-flex min-h-11 items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-ink"
+      className="ml-auto inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-ink"
     >
       <Link2 aria-hidden="true" className="h-3.5 w-3.5" />
       {copied ? (locale === 'pt' ? 'Ligação copiada' : 'Link copied') : (locale === 'pt' ? 'Copiar ligação' : 'Copy link')}

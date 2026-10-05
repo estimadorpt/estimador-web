@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Share2 } from 'lucide-react';
 import { Action } from '@/components/brand/Action';
 import { ACCENT, FURNITURE } from '@/components/viz/theme';
+import { formatCount } from '@/lib/population/format';
 import { MAX_GUESSES, formatCountdown, msUntilNextLisbonMidnight, type GameRecord, type GameStats } from '@/lib/population/game';
 import { regionTitle, type Parish } from '@/lib/population/places';
 import { TIER_COPY, type Locale } from '@/lib/population/labels';
@@ -32,7 +33,6 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
   const t = GAME_COPY[locale];
   const won = record.status === 'won';
   const [shareState, setShareState] = useState<'idle' | 'copied' | 'failed'>('idle');
-  const numbers = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB');
   const geography = index.geography as { source_license_url?: string; source_url?: string };
 
   const onShare = async () => {
@@ -66,7 +66,7 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-600">
         <QualityBadge kind={tier} locale={locale} />
-        <span>{t.residents}: <strong className="tabular-nums text-ink">{numbers.format(answer.censusPopulation)}</strong></span>
+        <span>{t.residents}: <strong className="tabular-nums text-ink">{formatCount(answer.censusPopulation, locale)}</strong></span>
       </div>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600">{TIER_COPY[tier].meaning[locale]}</p>
 

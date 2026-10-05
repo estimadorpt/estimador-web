@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
 import { Link } from '@/i18n/routing';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 
@@ -13,14 +16,26 @@ const ITEMS: Array<{ key: PopulationPage; href: string; pt: string; en: string }
 
 /**
  * The population section's own row of links, under the page hero. Parish and
- * region pages count as "Freguesias".
+ * region pages count as "Freguesias". On a phone the row scrolls sideways; it
+ * opens scrolled to the current page, so "Dados" or "Metodologia" is not
+ * hidden past the edge.
  */
 export function PopulationSectionNav({ current, locale }: { current: PopulationPage; locale: string }) {
   const active = current === 'parish' || current === 'region' ? 'hub' : current;
   const pt = locale === 'pt';
+  const list = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    const row = list.current;
+    const item = row?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!row || !item || row.scrollWidth <= row.clientWidth) return;
+    const left = item.offsetLeft - (row.clientWidth - item.offsetWidth) / 2;
+    row.scrollLeft = Math.max(0, Math.min(left, row.scrollWidth - row.clientWidth));
+  }, [active]);
+
   return (
     <nav aria-label={pt ? 'Secções da população' : 'Population sections'} className="border-b border-line bg-paper">
-      <ul className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4">
+      <ul ref={list} className="relative mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4">
         {ITEMS.map(item => (
           <li key={item.key} className="shrink-0">
             <Link

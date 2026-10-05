@@ -40,6 +40,7 @@ export default async function MysteryParishPage({ params }: { params: Promise<{ 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         width="7xl"
         field="periwinkle"
@@ -50,11 +51,12 @@ export default async function MysteryParishPage({ params }: { params: Promise<{ 
         art={<Mosaic variant="people" className="h-full w-full" colors={['mintSoft', 'mustardSoft', 'coralSoft', 'mintSoft']} />}
       />
       <PopulationSectionNav current="game" locale={locale} />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-4 py-6 md:py-10">
+      <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">
         <div className="mb-6 max-w-3xl">
           <HowToPlay locale={locale} honesty={honesty} />
         </div>
         <MysteryGame locale={locale} meta={meta} />
+      </div>
       </main>
       <SiteFooter locale={locale} />
     </div>

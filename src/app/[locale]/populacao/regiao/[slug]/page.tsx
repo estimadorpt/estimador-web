@@ -7,7 +7,7 @@ import { PageHero } from '@/components/PageHero';
 import { PopulationSectionNav } from '@/components/population/SectionNav';
 import { PopulationMap } from '@/components/population/map/PopulationMap';
 import { RegionParishes } from '@/components/population/hub/RegionParishes';
-import { formatCount, regionBySlug, regionListing } from '@/components/population/hub/places';
+import { formatCount, regionBySlug, regionListing, regionTables } from '@/components/population/hub/places';
 import { POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { createPageMetadata, SITE_LOCALES } from '@/lib/metadata';
 import { regionSlug, regionTitle } from '@/lib/population/places';
@@ -64,6 +64,7 @@ export default async function RegionPage({ params }: { params: Params }) {
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         compact
         back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
@@ -76,13 +77,14 @@ export default async function RegionPage({ params }: { params: Params }) {
       />
       <PopulationSectionNav current="region" locale={locale} />
 
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-4 py-8 md:py-10">
+      <div className="mx-auto max-w-7xl px-4 py-8 md:py-10">
         <PopulationMap locale={locale} initialRegion={region.id} height={480} />
         <div className="mt-10">
-          <RegionParishes municipalities={municipalities} locale={locale} />
+          <RegionParishes municipalities={regionTables(municipalities)} locale={locale} />
         </div>
-      </main>
+      </div>
 
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

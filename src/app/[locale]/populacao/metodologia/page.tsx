@@ -41,11 +41,12 @@ export default async function PopulationMethodology({ params }: { params: Promis
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         width="3xl"
         compact
-        back={{ href: POPULATION_ROUTES.hub, label: pt ? 'POPULAÇÃO' : 'POPULATION', locale }}
-        eyebrow={pt ? `POPULAÇÃO SINTÉTICA · VERSÃO ${POPULATION_RELEASE}` : `SYNTHETIC POPULATION · RELEASE ${POPULATION_RELEASE}`}
+        back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
+        eyebrow={pt ? `População sintética · versão ${POPULATION_RELEASE}` : `Synthetic population · release ${POPULATION_RELEASE}`}
         title={pt ? 'Como foi feita a população sintética?' : 'How was the synthetic population made?'}
         lede={pt
           ? 'Um processo generativo com restrições, calibrado nas tabelas dos Censos 2021 de cada freguesia, e o que quer dizer o nível de qualidade de cada uma.'
@@ -53,7 +54,7 @@ export default async function PopulationMethodology({ params }: { params: Promis
         meta={<><span>{pt ? 'Censos 2021 (INE)' : '2021 Census (INE)'}</span><span>{pt ? `Publicada a ${formatDay(POPULATION_PUBLISHED, locale)}` : `Published ${formatDay(POPULATION_PUBLISHED, locale)}`}</span></>}
       />
       <PopulationSectionNav current="methodology" locale={locale} />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-10 md:py-14">
+      <div className="mx-auto max-w-3xl px-4 py-10 md:py-14">
         {!meta || !release || !scorecard ? (
           <PopulationUnavailable locale={locale} />
         ) : (
@@ -69,6 +70,7 @@ export default async function PopulationMethodology({ params }: { params: Promis
             />
           </article>
         )}
+      </div>
       </main>
       <SiteFooter locale={locale} />
     </div>

@@ -80,7 +80,7 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
         who: 'Em cada 100 pessoas com 65 ou mais anos. Quem vive num lar conta como vivendo com outras pessoas.',
       },
       multigenerational: {
-        label: 'Gerações em casa',
+        label: 'Gerações',
         heading: `Se os agregados ${ofScope(scope, locale)} fossem 100`,
         title: 'Quantos juntam uma criança e uma pessoa com 65 ou mais anos?',
         who: 'Em cada 100 agregados privados: pelo menos uma pessoa com menos de 15 anos e outra com 65 ou mais. Não são necessariamente avós e netos.',
@@ -100,7 +100,7 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
         who: 'Out of every 100 people aged 65 or over. Care-home residents count as living with others.',
       },
       multigenerational: {
-        label: 'Generations at home',
+        label: 'Generations',
         heading: `If the households ${inScope(scope, locale)} were 100`,
         title: 'How many bring together a child and someone aged 65 or over?',
         who: 'Out of every 100 private households: at least one person under 15 and another aged 65 or over. Not necessarily grandparents and grandchildren.',
@@ -108,9 +108,10 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
     };
   const segment = segments[option.recipe];
   const heading = segment.heading;
+  // The page says once, at the top, that its figures are the parish's own; only município figures need a line here.
   const whose = option.fallback
     ? (pt ? `Valores do concelho de ${scope.name}, que inclui ${name}.` : `Figures for ${scope.name} municipality, which includes ${name}.`)
-    : (pt ? `Valores da freguesia de ${name}.` : `Figures for ${name}.`);
+    : null;
   const readout = active === null ? null : option.cells[active];
 
   return (
@@ -130,15 +131,19 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
         methodologyLabel={pt ? 'Como foi feito' : 'How it was made'}
         locale={locale}
         controls={options.length > 1 ? (
-          <Segmented
-            label={pt ? 'Pergunta' : 'Question'}
-            value={option.recipe}
-            onChange={value => { setSelected(value as PortraitRecipe); setActive(null); }}
-            options={options.map(item => ({ value: item.recipe, label: segments[item.recipe].label }))}
-          />
+          // One row on a phone: the labels never wrap inside their buttons; a narrow screen scrolls the row instead.
+          <div className="-m-1 max-w-full overflow-x-auto p-1">
+            <Segmented
+              className="whitespace-nowrap"
+              label={pt ? 'Pergunta' : 'Question'}
+              value={option.recipe}
+              onChange={value => { setSelected(value as PortraitRecipe); setActive(null); }}
+              options={options.map(item => ({ value: item.recipe, label: segments[item.recipe].label }))}
+            />
+          </div>
         ) : undefined}
       >
-        <p className="mb-4 text-sm text-stone-600">{whose} {HONESTY.synthetic[locale]}</p>
+        {whose && <p className="mb-4 text-sm text-stone-600">{whose}</p>}
         <div className="grid gap-6 sm:grid-cols-[minmax(0,320px)_minmax(0,1fr)] sm:items-center">
           <div
             role="img"

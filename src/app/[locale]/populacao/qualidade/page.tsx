@@ -40,8 +40,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 const TIER_PAGE: Record<'A' | 'B' | 'C', { pt: string; en: string }> = {
   A: {
-    pt: 'Na página da freguesia, todas as perguntas são respondidas com os números da própria freguesia, com este nível ao lado.',
-    en: 'On the parish page, every question is answered with the parish’s own figures, with this tier beside them.',
+    pt: 'Na página da freguesia, todas as perguntas são respondidas com os números da própria freguesia, e o nível aparece no topo.',
+    en: 'On the parish page, every question is answered with the parish’s own figures, and the tier is shown at the top.',
   },
   B: {
     pt: 'Os números são os da própria freguesia, mas os cruzamentos mais finos são recusados:',
@@ -82,11 +82,12 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         width="5xl"
         compact
-        back={{ href: POPULATION_ROUTES.hub, label: pt ? 'POPULAÇÃO' : 'POPULATION', locale }}
-        eyebrow={pt ? `POPULAÇÃO SINTÉTICA · VERSÃO ${POPULATION_RELEASE}` : `SYNTHETIC POPULATION · RELEASE ${POPULATION_RELEASE}`}
+        back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
+        eyebrow={pt ? `População sintética · versão ${POPULATION_RELEASE}` : `Synthetic population · release ${POPULATION_RELEASE}`}
         title={pt ? 'Como sabemos que funciona?' : 'How do we know it works?'}
         lede={pt
           ? 'O que verificámos antes de publicar, quão perto a população gerada fica das tabelas dos Censos, o que fizemos pela privacidade e onde os dados são mais fracos.'
@@ -95,7 +96,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
       />
       <PopulationSectionNav current="quality" locale={locale} />
 
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl space-y-12 px-4 py-8 md:py-12">
+      <div className="mx-auto max-w-5xl space-y-12 px-4 py-8 md:py-12">
         {!scorecard || !meta ? (
           <PopulationUnavailable locale={locale} />
         ) : (
@@ -109,9 +110,20 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               <aside className="max-w-3xl border-l-2 border-amber-500 bg-amber-50 py-4 pl-5 pr-4 text-sm leading-relaxed text-stone-700">
                 <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Antes de ler qualquer número' : 'Before reading any figure'}</p>
                 <p className="font-semibold text-ink">{scorecard.honesty_notes[2]?.[locale]}</p>
-                <ul className="mt-2 list-disc space-y-1 pl-5">
-                  {scorecard.honesty_notes.slice(0, 2).map(note => <li key={note.en}>{note[locale]}</li>)}
-                </ul>
+                <p className="mt-1.5">
+                  {pt
+                    ? 'Na prática: lê cada número por si, sem o ordenar nem o comparar com outro como se a diferença fosse certa.'
+                    : 'In practice: read each figure on its own, without ranking it or comparing it with another as if the difference were certain.'}
+                </p>
+                {/* The scorecard's other notes, verbatim; they are written for the producer's general format (intervals, status codes). */}
+                <details className="mt-2">
+                  <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-ink">
+                    {pt ? 'Notas da ficha de avaliação (texto original)' : 'Scorecard notes (original wording)'}
+                  </summary>
+                  <ul className="mb-1 list-disc space-y-1 pl-5">
+                    {scorecard.honesty_notes.slice(0, 2).map(note => <li key={note.en}>{note[locale]}</li>)}
+                  </ul>
+                </details>
               </aside>
               <div className="grid gap-4 md:grid-cols-3">
                 <StatusItem
@@ -203,8 +215,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               </div>
               <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
                 {pt
-                  ? 'Com poucas pessoas, cada uma pesa mais em cada tabela: por isso cada freguesia tem um nível de qualidade, mostrado ao lado de cada resultado.'
-                  : 'With few people, each one weighs more in every table: that is why every parish carries a quality tier, shown beside every result.'}
+                  ? 'Com poucas pessoas, cada uma pesa mais em cada tabela: por isso cada freguesia tem um nível de qualidade, mostrado no topo da sua página.'
+                  : 'With few people, each one weighs more in every table: that is why every parish carries a quality tier, shown at the top of its page.'}
               </p>
             </Section>
 
@@ -312,6 +324,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
             </section>
           </>
         )}
+      </div>
       </main>
       <SiteFooter locale={locale} />
     </div>

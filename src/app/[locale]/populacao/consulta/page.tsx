@@ -29,15 +29,17 @@ export default async function PopulationPermalink({ params }: { params: Promise<
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         width="4xl"
         compact
-        back={{ href: '/populacao', label: pt ? 'POPULAÇÃO' : 'POPULATION', locale }}
-        eyebrow={pt ? 'POPULAÇÃO · LIGAÇÃO PERMANENTE' : 'POPULATION · PERMANENT LINK'}
-        title={pt ? 'A abrir o resultado' : 'Opening the result'}
+        back={{ href: '/populacao', label: pt ? 'População sintética' : 'Synthetic population', locale }}
+        eyebrow={pt ? 'População sintética · ligação permanente' : 'Synthetic population · permanent link'}
+        title={pt ? 'Ligação para um resultado' : 'Link to a result'}
       />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-8 md:py-12">
+      <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
         <PermalinkResolver locale={pt ? 'pt' : 'en'} />
+      </div>
       </main>
       <SiteFooter locale={locale} />
     </div>
