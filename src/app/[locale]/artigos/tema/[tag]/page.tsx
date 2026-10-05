@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
+import { setRequestLocale } from '@/i18n/request-locale';
 import type { Metadata } from 'next';
 
 import { Header } from '@/components/Header';

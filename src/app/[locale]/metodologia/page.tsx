@@ -1,7 +1,8 @@
 import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { SiteFooter } from '@/components/SiteFooter';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
+import { setRequestLocale } from '@/i18n/request-locale';
 import { PageHero } from '@/components/PageHero';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';

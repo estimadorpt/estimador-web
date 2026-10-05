@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
+import { setRequestLocale } from '@/i18n/request-locale';
 import { getMDXArticlesByLocale, getArticleWithFallback, getArticlePath, articleExistsInLocale } from '@/lib/mdx-articles';
 import { createPageMetadata, getOgImageUrl, SITE_LOCALES } from '@/lib/metadata';
 import { paramsOrPlaceholder } from '@/lib/static-params';

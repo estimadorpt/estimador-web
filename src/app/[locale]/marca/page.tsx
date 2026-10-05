@@ -14,7 +14,7 @@ import { Action } from '@/components/brand/Action';
 import { VizShowcase } from '@/components/viz/Showcase';
 import { BRAND } from '@/lib/brand';
 import { BRAND_BIO, BRAND_DESCRIPTOR, BRAND_LINE } from '@/lib/brand/descriptor';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
