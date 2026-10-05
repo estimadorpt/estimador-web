@@ -13,6 +13,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 const WARN_ONLY = process.argv.includes('--warn');
 const DATA = path.join(process.cwd(), 'public/data');
@@ -97,6 +98,32 @@ for (const name of ['presidential_forecast.json', 'presidential_trends.json', 'p
   feed(`elections/presidential-2026/${name}`, value =>
     nonEmptyArray(value) || isObject(value) ? null : 'empty');
 }
+
+// ---- population (synthetic population release) ----------------------------
+// The compact files from scripts/sync-population.py. Every file must match the
+// hash the sync recorded, so a hand edit or a half-finished sync fails here;
+// fixture or draft data can never reach a release build.
+
+const POPULATION_RELEASE = '1.0.0';
+const populationDir = `population/v${POPULATION_RELEASE}`;
+feed(`${populationDir}/manifest.json`, manifest => {
+  if (!isObject(manifest) || !isObject(manifest.files)) return 'no file list';
+  if (manifest.release_version !== POPULATION_RELEASE) return `release ${manifest.release_version}, site expects ${POPULATION_RELEASE}`;
+  if (manifest.data_status !== 'release') return `data_status "${manifest.data_status}" cannot be published`;
+  if (!String(manifest.contract_version).startsWith('1.')) return `unsupported contract ${manifest.contract_version}`;
+  let bad = 0;
+  for (const [relative, digest] of Object.entries(manifest.files)) {
+    const file = path.join(DATA, populationDir, relative);
+    if (!fs.existsSync(file) || createHash('sha256').update(fs.readFileSync(file)).digest('hex') !== digest) bad += 1;
+  }
+  return bad ? `${bad} file(s) missing or changed since the sync` : null;
+});
+feed(`${populationDir}/meta.json`, meta => {
+  if (!isObject(meta) || !isObject(meta.counts)) return 'no counts';
+  if (meta.counts.parishes !== 3092) return `${meta.counts.parishes} parishes, expected 3092`;
+  return null;
+});
+feed(`${populationDir}/scorecard.json`, card => (isObject(card) && card.status === 'ok' ? null : 'scorecard status is not ok'));
 
 // ---- report ----------------------------------------------------------------
 

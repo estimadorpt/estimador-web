@@ -79,6 +79,20 @@ sync_economics() {
   fi
 }
 
+sync_population() {
+  # The synthetic population release (estimador-microsynthesis, doc 206 handoff).
+  # The script verifies the handoff hashes, validates contract v1, writes the
+  # compact files under public/data/population/v<release>/ and proves an exact
+  # round trip. It needs pyarrow, which the microsynthesis virtualenv has.
+  local MS_DIR="${MICROSYNTHESIS_DIR:-$HOME/code/estimador-microsynthesis}"
+  local PYTHON="$MS_DIR/.venv/bin/python"
+  if [ ! -x "$PYTHON" ]; then
+    echo "Warning: no microsynthesis virtualenv at $MS_DIR/.venv"
+    return 1
+  fi
+  "$PYTHON" "$SCRIPT_DIR/sync-population.py" --source "$MS_DIR"
+}
+
 case "$SECTION" in
   football)
     sync_football
@@ -89,14 +103,18 @@ case "$SECTION" in
   economics)
     sync_economics
     ;;
+  population)
+    sync_population
+    ;;
   all)
     sync_football
     sync_elections
     sync_economics
+    sync_population
     ;;
   *)
     echo "Unknown section: $SECTION"
-    echo "Usage: $0 [football|elections|economics|all]"
+    echo "Usage: $0 [football|elections|economics|population|all]"
     exit 1
     ;;
 esac

@@ -28,6 +28,24 @@
       }
     },
     {
+      "route": "/data/population/*",
+      "headers": {
+        "cache-control": "public, max-age=86400"
+      }
+    },
+    {
+      "route": "/pt/populacao/freguesia/*",
+      "rewrite": "/pt/populacao/freguesia/_/index.html"
+    },
+    {
+      "route": "/en/populacao/freguesia/*",
+      "rewrite": "/en/populacao/freguesia/_/index.html"
+    },
+    {
+      "route": "/populacao/v/*",
+      "rewrite": "/pt/populacao/consulta/index.html"
+    },
+    {
       "route": "/forecast",
       "redirect": "/pt/eleicoes/legislativas/",
       "statusCode": 301
