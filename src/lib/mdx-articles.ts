@@ -130,8 +130,8 @@ function readArticle(slug: string, locale: string): MDXArticle {
     throw new Error(`Invalid article metadata: ${locale}/${slug}`);
   }
 
-  // Omitted means the original register: the four pieces written before notes
-  // existed stay explainers without being edited.
+  // Omitted means the original register (explicador), so a piece written
+  // before notes existed needs no edit to keep its place.
   const kind = metadata.kind === undefined ? DEFAULT_KIND : metadata.kind;
   if (!ARTICLE_KINDS.includes(kind as ArticleKind)) {
     throw new Error(`Invalid article kind: ${locale}/${slug} (${String(kind)})`);

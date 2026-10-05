@@ -46,16 +46,6 @@ export interface TrendData {
   value: number;
 }
 
-// Enhanced trend data with election context (for future use)
-export interface ElectionTrendData {
-  date: string;
-  electionId: string;
-  contestant: string; // Can be party or candidate ID
-  metric: string;
-  value: number;
-  round?: number; // For multi-round elections
-}
-
 // Geographic forecast data, as published in district_forecast.json
 export interface DistrictForecast {
   district_name: string;
@@ -162,19 +152,6 @@ export interface PresidentialSnapshotProbabilitiesData {
   dates: string[];
   metric: string;
   candidates: Record<string, PresidentialCandidateSnapshotProbabilities>;
-}
-
-// Presidential trajectories for spaghetti plot (from presidential_trajectories.json)
-export interface PresidentialCandidateTrajectories {
-  color: string;
-  trajectories: number[][];
-}
-
-export interface PresidentialTrajectoriesData {
-  election_date: string;
-  dates: string[];
-  n_samples: number;
-  candidates: Record<string, PresidentialCandidateTrajectories>;
 }
 
 // Presidential polls (from presidential_polls.json)
