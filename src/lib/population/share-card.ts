@@ -137,14 +137,6 @@ export function wrapLines(text: string, maxWidth: number, measure: (text: string
   return kept;
 }
 
-/** The largest size from `sizes` at which the text wraps into `maxLines` or fewer. */
-export function fitFontSize(text: string, maxWidth: number, maxLines: number, sizes: number[], measureAt: (text: string, size: number) => number): number {
-  for (const size of sizes) {
-    if (wrapLines(text, maxWidth, t => measureAt(t, size)).length <= maxLines) return size;
-  }
-  return sizes[sizes.length - 1];
-}
-
 const FONT = 'Manrope, system-ui, sans-serif';
 const font = (weight: number, size: number) => `${weight} ${size}px ${FONT}`;
 
@@ -188,38 +180,48 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
   ctx.font = font(700, 20);
   ctx.fillText(model.eyebrow.toUpperCase(), pad, 172);
 
-  const measureAt = (text: string, size: number) => { ctx.font = font(800, size); return ctx.measureText(text).width; };
-  const titleSize = fitFontSize(model.title, leftWidth, 4, [56, 50, 44, 40, 36], measureAt);
-  ctx.font = font(800, titleSize);
+  // The title takes the largest size at which the whole left column (question,
+  // place, município note) ends above the bottom rule; long União names step down.
+  const divider = height - 102;
+  const leftBottom = divider - 28;
+  const titleTop = 172 + 22;
+  ctx.font = font(500, 26);
+  const placeLines = wrapLines(model.place, leftWidth, t => ctx.measureText(t).width, 2);
+  ctx.font = font(600, 21);
+  const noteLines = model.scopeNote ? wrapLines(model.scopeNote, leftWidth, t => ctx.measureText(t).width, 2) : [];
+  const layoutAt = (size: number) => {
+    ctx.font = font(800, size);
+    const lines = wrapLines(model.title, leftWidth, t => ctx.measureText(t).width, 5);
+    const lineHeight = Math.round(size * 1.12);
+    const titleBaselines = lines.map((_, i) => titleTop + lineHeight * (i + 1));
+    let y = titleBaselines[titleBaselines.length - 1] + 42;
+    const placeBaselines = placeLines.map((_, i) => y + i * 32);
+    y = placeBaselines[placeBaselines.length - 1] + (noteLines.length ? 40 : 0);
+    const noteBaselines = noteLines.map((_, i) => y + i * 27);
+    return { size, lines, titleBaselines, placeBaselines, noteBaselines, bottom: noteBaselines.at(-1) ?? placeBaselines.at(-1) ?? y };
+  };
+  const sizes = [56, 50, 44, 40, 36, 32, 28, 24];
+  let left = layoutAt(sizes[sizes.length - 1]);
+  for (const size of sizes) {
+    const candidate = layoutAt(size);
+    if (candidate.bottom <= leftBottom && candidate.lines.every(line => !line.endsWith('…'))) { left = candidate; break; }
+  }
+  ctx.font = font(800, left.size);
   ctx.fillStyle = BRAND.ink;
-  const titleLines = wrapLines(model.title, leftWidth, t => ctx.measureText(t).width, 4);
-  const lineHeight = Math.round(titleSize * 1.12);
-  let y = 172 + 22 + lineHeight;
-  for (const line of titleLines) { ctx.fillText(line, pad, y); y += lineHeight; }
-
+  left.lines.forEach((line, i) => ctx.fillText(line, pad, left.titleBaselines[i]));
   ctx.font = font(500, 26);
   ctx.fillStyle = BRAND.muted;
-  for (const line of wrapLines(model.place, leftWidth, t => ctx.measureText(t).width, 2)) {
-    y += 6;
-    ctx.fillText(line, pad, y);
-    y += 30;
-  }
-  if (model.scopeNote) {
-    ctx.font = font(600, 21);
-    ctx.fillStyle = BRAND.ink;
-    y += 14;
-    for (const line of wrapLines(model.scopeNote, leftWidth, t => ctx.measureText(t).width, 2)) {
-      ctx.fillText(line, pad, y);
-      y += 27;
-    }
-  }
+  placeLines.forEach((line, i) => ctx.fillText(line, pad, left.placeBaselines[i]));
+  ctx.font = font(600, 21);
+  ctx.fillStyle = BRAND.ink;
+  noteLines.forEach((line, i) => ctx.fillText(line, pad, left.noteBaselines[i]));
 
   // Right column: the facts in a cream panel with a hairline.
   if (hasFacts) {
     const panelX = 620;
     const panelY = 112;
     const panelW = width - pad - panelX;
-    const panelH = 384;
+    const panelH = divider - 32 - panelY;
     ctx.fillStyle = BRAND.cream;
     ctx.strokeStyle = BRAND.line;
     ctx.lineWidth = 2;
@@ -243,11 +245,11 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
       }
       ctx.fillStyle = BRAND.ink;
       ctx.font = font(800, 48);
-      ctx.fillText(fact.value, panelX + 32, top + 62);
+      ctx.fillText(fact.value, panelX + 32, top + 58);
       ctx.font = font(500, 21);
       ctx.fillStyle = BRAND.ink;
       wrapLines(fact.label, inner, t => ctx.measureText(t).width, 2).forEach((line, j) => {
-        ctx.fillText(line, panelX + 32, top + 94 + j * 25);
+        ctx.fillText(line, panelX + 32, top + 90 + j * 25);
       });
     });
   }
@@ -256,8 +258,8 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
   ctx.strokeStyle = BRAND.line;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(pad, height - 102);
-  ctx.lineTo(width - pad, height - 102);
+  ctx.moveTo(pad, divider);
+  ctx.lineTo(width - pad, divider);
   ctx.stroke();
   ctx.font = font(500, 20);
   ctx.fillStyle = BRAND.muted;

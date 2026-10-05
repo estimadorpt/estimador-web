@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR } from '@/lib/config/population';
 import type { ParishRecord, PopulationMeta } from '@/types/population';
 import { HONESTY } from './labels';
-import { drawShareCard, fitFontSize, parishQuestion, SHARE_CARD, shareCardModel, wrapLines } from './share-card';
+import { drawShareCard, parishQuestion, SHARE_CARD, shareCardModel, wrapLines } from './share-card';
 
 const DIR = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR);
 const json = <T,>(file: string): T => JSON.parse(fs.readFileSync(path.join(DIR, file), 'utf8')) as T;
@@ -89,15 +89,10 @@ describe('text fitting', () => {
     expect(two[1].endsWith('…')).toBe(true);
   });
 
-  it('picks the largest size that fits the line budget', () => {
-    const at = (text: string, size: number) => measure(size)(text);
-    expect(fitFontSize('a b c d e f g h', 100, 1, [40, 20, 10], at)).toBe(10);
-    expect(fitFontSize('ab', 100, 1, [40, 20, 10], at)).toBe(40);
-  });
 });
 
 describe('drawShareCard', () => {
-  const calls: Array<{ text: string; font: string }> = [];
+  const calls: Array<{ text: string; font: string; x: number; y: number }> = [];
   const original = (globalThis as { Path2D?: unknown }).Path2D;
   beforeEach(() => {
     calls.length = 0;
@@ -111,7 +106,7 @@ describe('drawShareCard', () => {
       save() {}, restore() {}, translate() {}, scale() {}, fill() {}, fillRect() {}, beginPath() {}, roundRect() {}, rect() {},
       moveTo() {}, lineTo() {}, stroke() {},
       measureText(text: string) { const size = Number(/(\d+)px/.exec(ctx.font)?.[1] ?? 10); return { width: text.length * size * 0.55 }; },
-      fillText(text: string) { calls.push({ text, font: ctx.font }); },
+      fillText(text: string, x: number, y: number) { calls.push({ text, font: ctx.font, x, y }); },
     };
     return ctx;
   }
@@ -128,5 +123,22 @@ describe('drawShareCard', () => {
     // No emoji anywhere on the card.
     expect(all).not.toMatch(/\p{Extended_Pictographic}/u);
     expect(SHARE_CARD).toEqual({ width: 1200, height: 630 });
+  });
+
+  it('keeps a long União name, the place and the município note above the bottom rule', () => {
+    const names = [
+      'União das freguesias de Milhazes, Vilar de Figos e Faria',
+      // The longest name in places.json (070107).
+      'União das freguesias de Alandroal (Nossa Senhora da Conceição), São Brás dos Matos (Mina do Bugalho) e Juromenha (Nossa Senhora do Loreto)',
+    ];
+    for (const [name, locale] of names.flatMap(n => (['pt', 'en'] as const).map(l => [n, l] as const))) {
+      calls.length = 0;
+      const model = shareCardModel({ record: parish('010122'), recipes: meta.recipes, name, municipalityName: 'Barcelos', regionName: 'Braga', locale });
+      drawShareCard(fakeContext() as unknown as CanvasRenderingContext2D, model);
+      const leftColumn = calls.filter(c => c.x === 72 && c.text !== model.honesty && c.text !== model.footer);
+      expect(leftColumn.length).toBeGreaterThan(3);
+      for (const call of leftColumn) expect(call.y).toBeLessThanOrEqual(SHARE_CARD.height - 102 - 28);
+      expect(leftColumn.some(c => c.text.endsWith('…'))).toBe(false);
+    }
   });
 });

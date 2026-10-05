@@ -21,7 +21,7 @@ import { indexPlaces, normaliseParishCode, regionSlug, regionTitle, type Parish,
 import { parishQuestion, shareCardModel } from '@/lib/population/share-card';
 import type { ParishRecord, PopulationMeta, PortraitRecipe } from '@/types/population';
 import { GuessFirstCard } from './GuessFirst';
-import { parishUrl, setParishHead, setUnknownHead } from './head';
+import { parishHead, parishUrl, unknownHead, watchHead } from './head';
 import { HundredSection } from './HundredSection';
 import { inScope, scopeSubject, type Scope } from './place-words';
 import { ShareTools } from './ShareTools';
@@ -72,17 +72,19 @@ export function ParishPage({ locale }: { locale: Locale }) {
     if (state.kind === 'ready') {
       const { place, code } = state;
       const question = parishQuestion(place.name, locale);
-      setParishHead({
+      return watchHead(parishHead({
         locale,
         code,
         title: `${question} · ${locale === 'pt' ? 'População sintética' : 'Synthetic population'} · estimador.pt`,
         description: locale === 'pt'
           ? `Idades, trabalho, escolaridade e agregados em ${place.name} (${place.municipalityName}), numa população sintética gerada a partir dos Censos 2021.${place.level === 'municipality' ? ' Valores do concelho.' : ''}`
           : `Ages, work, education and households in ${place.name} (${place.municipalityName}), from a synthetic population generated from the 2021 Census.${place.level === 'municipality' ? ' Municipality figures.' : ''}`,
-      });
-    } else if (state.kind === 'unknown') {
-      setUnknownHead({ title: locale === 'pt' ? 'Freguesia não encontrada · estimador.pt' : 'Parish not found · estimador.pt' });
+      }));
     }
+    if (state.kind === 'unknown') {
+      return watchHead(unknownHead(locale === 'pt' ? 'Freguesia não encontrada · estimador.pt' : 'Parish not found · estimador.pt'));
+    }
+    return undefined;
   }, [state, locale]);
 
   if (state.kind === 'ready') return <Ready {...state} locale={locale} />;
