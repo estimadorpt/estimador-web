@@ -43,8 +43,8 @@ const SURFACES: readonly (readonly [Copy, string, string, Copy])[] = [
 const INKS: readonly (readonly [Copy, string, string, Copy])[] = [
   [['Pinho', 'Pine'], 'ink', BRAND.ink, ['Texto, botões, o símbolo.', 'Text, buttons, the mark.']],
   [['Pinho escuro', 'Dark pine'], 'ink-dark', BRAND.inkDark, ['Hover de ligações e botões.', 'Link and button hover.']],
-  [['Cinza-verde', 'Green-grey'], 'stone-500', BRAND.muted, ['Texto secundário, 4,5:1 sobre papel.', 'Secondary text, 4.5:1 on paper.']],
-  [['Cinza claro', 'Light grey'], 'stone-400', BRAND.faint, ['Etiquetas pequenas e o .pt da assinatura.', 'Small labels and the .pt of the signature.']],
+  [['Cinza-verde', 'Green-grey'], 'stone-500', BRAND.muted, ['Texto secundário e o .pt da assinatura, 4,5:1 sobre papel.', 'Secondary text and the .pt of the signature, 4.5:1 on paper.']],
+  [['Cinza claro', 'Light grey'], 'stone-400', BRAND.faint, ['Etiquetas pequenas e decoração; nunca o .pt, que ficaria abaixo de 3:1.', 'Small labels and decoration; never the .pt, which would fall below 3:1.']],
   [['Floresta', 'Forest'], 'forest', BRAND.forest, ['Superfícies escuras: o mundo do atlas, cartões sociais.', 'Dark surfaces: the atlas world, social cards.']],
 ];
 const DATA: readonly (readonly [Copy, string, string, string, string])[] = [

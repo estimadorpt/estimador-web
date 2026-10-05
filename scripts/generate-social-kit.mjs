@@ -34,7 +34,7 @@ function mark(height, color) {
 }
 
 function lockup(size, dark) {
-  const ink = dark ? COLOR.ground : COLOR.ink, muted = dark ? '#b7c2b9' : COLOR.faint;
+  const ink = dark ? COLOR.ground : COLOR.ink, muted = dark ? '#b7c2b9' : COLOR.muted;
   return h('div', { display: 'flex', alignItems: 'center' },
     mark(size, ink),
     h('div', { display: 'flex', marginLeft: Math.round(size * 0.42), fontSize: Math.round(size * 1.1), fontWeight: 800, color: ink, letterSpacing: -Math.round(size * 0.04) },
