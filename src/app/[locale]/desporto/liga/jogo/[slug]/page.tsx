@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';

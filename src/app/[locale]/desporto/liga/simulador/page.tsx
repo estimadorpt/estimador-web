@@ -45,9 +45,18 @@ export default async function SimuladorPage({
     return (
       <div className="football-page min-h-screen bg-paper">
         <Header />
-        <main id="main-content" tabIndex={-1} className="max-w-7xl mx-auto px-4 py-20 text-center text-stone-500">
-          <p>{locale === "pt" ? "Dados do simulador não disponíveis." : "Simulator data not available."}</p>
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            compact
+            back={{ href: "/desporto/liga", label: "Liga Portugal", locale }}
+            eyebrow="Liga Portugal"
+            title={locale === "pt" ? "Simulador" : "Simulator"}
+            lede={locale === "pt"
+              ? "Os cenários da próxima jornada não estão publicados de momento. A previsão da época continua na página da Liga."
+              : "The next matchday's scenarios are not published right now. The season forecast is on the Liga page."}
+          />
         </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }

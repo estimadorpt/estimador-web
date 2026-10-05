@@ -21,8 +21,8 @@ export async function generateMetadata({
     locale,
     path: `/desporto/liga/jogo-previsoes`,
     title: pt
-      ? "Contra o Modelo — Liga Portugal - estimador.pt"
-      : "Beat the Model — Liga Portugal - estimador.pt",
+      ? "Contra o Modelo · Liga Portugal | estimador.pt"
+      : "Beat the Model · Liga Portugal | estimador.pt",
     description: pt
       ? "Faz as tuas previsões para a próxima jornada da Liga Portugal e vê se bates o modelo. Avaliação por Ranked Probability Score, a mesma medida com que avaliamos o modelo."
       : "Forecast the next Liga Portugal matchday and see if you can beat the model. Scored with the Ranked Probability Score, the same measure we grade the model with.",
@@ -43,7 +43,7 @@ export default async function JogoPrevisoesPage({
   return (
     <div className="min-h-screen bg-paper">
       <Header />
-
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         width="3xl"
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
@@ -90,9 +90,9 @@ export default async function JogoPrevisoesPage({
                 <Link
                   href="/desporto/liga/modelo"
                   locale={locale}
-                  className="text-emerald-700 hover:underline"
+                  className="text-ink underline underline-offset-4"
                 >
-                  ficha do modelo
+                  modelo vs mercado
                 </Link>
                 .
               </>
@@ -102,9 +102,9 @@ export default async function JogoPrevisoesPage({
                 <Link
                   href="/desporto/liga/modelo"
                   locale={locale}
-                  className="text-emerald-700 hover:underline"
+                  className="text-ink underline underline-offset-4"
                 >
-                  model report card
+                  model vs market
                 </Link>
                 .
               </>
@@ -112,6 +112,7 @@ export default async function JogoPrevisoesPage({
           </p>
         </div>
       </section>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

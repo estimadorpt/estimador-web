@@ -1,8 +1,8 @@
 import { createPageMetadata } from '@/lib/metadata';
 import type { Metadata } from "next";
-import { ArrowLeft } from "lucide-react";
 
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { PlayerRatingsHub } from "@/components/charts/football/PlayerRatingsHub";
@@ -67,20 +67,20 @@ export default async function PlayerRatingsPage({
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
+      <PageHero
+        width="4xl"
+        compact
+        back={{ href: "/desporto/liga", label: "Liga Portugal", locale }}
+        eyebrow={pt ? "Liga Portugal · Jogadores" : "Liga Portugal · Players"}
+        title={pt
+          ? "Uma métrica por dimensão, porque um número só não chega"
+          : "One metric per dimension, because one number is not enough"}
+      />
 
       <div className="max-w-4xl mx-auto px-4 py-8 md:py-10">
-        <div className="mb-6">
-          <Link
-            href="/desporto/liga"
-            locale={locale}
-            className="text-stone-400 hover:text-stone-700 text-xs font-medium uppercase tracking-wider inline-flex items-center gap-1 transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Liga Portugal
-          </Link>
-        </div>
-
         <PlayerRatingsHub
+          showHeading={false}
           finishers={finishers}
           contrib={contrib}
           gk={gk}
@@ -95,19 +95,20 @@ export default async function PlayerRatingsPage({
           <Link
             href="/desporto/liga/dados"
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 underline underline-offset-2"
+            className="text-ink underline underline-offset-4"
           >
             {pt ? "Dados abertos" : "Open data"}
           </Link>
           <Link
             href="/desporto/liga/metodologia"
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 underline underline-offset-2"
+            className="text-ink underline underline-offset-4"
           >
             {pt ? "Como funciona o modelo" : "How the model works"}
           </Link>
         </div>
       </div>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );
