@@ -1,4 +1,5 @@
 import { teamDisplayName, teamLogoSrc } from "@/lib/config/football";
+import { formatDecimal } from "@/lib/football-format";
 import type { ActualStanding, TeamStrength, XptsEntry } from "@/types/football";
 
 export interface FormEntry {
@@ -46,8 +47,7 @@ const RESULT_STYLE: Record<FormEntry["result"], string> = {
 };
 
 function num(v: number, pt: boolean, digits = 1): string {
-  const fixed = v.toFixed(digits);
-  return pt ? fixed.replace(".", ",") : fixed;
+  return formatDecimal(v, pt ? "pt" : "en", digits);
 }
 
 function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) {

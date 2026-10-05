@@ -328,6 +328,7 @@
     "footballTitle": "Who takes the title?",
     "footballDate": "Matchday {matchday} · {date}",
     "footballChampionLabel": "Probability of being champion",
+    "footballChangeCaption": "change since matchday {matchday}",
     "footballAction": "Try results",
     "footballLink": "See Liga Portugal",
     "footballUnavailable": "Liga forecasts arrive with the next published matchday.",

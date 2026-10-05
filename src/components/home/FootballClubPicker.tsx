@@ -29,11 +29,14 @@ export function FootballClubPicker({
   outlooks,
   top3,
   deltas,
+  generalLabels,
 }: {
   locale: string;
   outlooks: ClubOutlookEntry[];
   top3: Array<{ team: string; p_champion: number }>;
   deltas?: Record<string, TeamDelta>;
+  /** The general outlook's visible caption and its link to the Liga page. */
+  generalLabels?: { champion: string; change: string | null; link: string };
 }) {
   const pt = locale === "pt";
   const validSlugs = useMemo(() => outlooks.map((o) => o.slug), [outlooks]);
@@ -132,22 +135,30 @@ export function FootballClubPicker({
         ) : (
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
-              {pt ? "Panorama geral" : "General outlook"}
+              {generalLabels?.champion ?? (pt ? "Panorama geral" : "General outlook")}
+              {generalLabels?.change ? ` · ${generalLabels.change}` : ""}
             </p>
             <div className="mt-2">
-              <TitleProbabilities teams={top3} deltas={deltas} locale={locale} compact />
+              <TitleProbabilities teams={top3} deltas={generalLabels?.change ? deltas : undefined} locale={locale} compact />
             </div>
+            {generalLabels && (
+              <div className="mt-4">
+                <Action href="/desporto/liga" locale={locale} variant="secondary" arrow>
+                  {generalLabels.link}
+                </Action>
+              </div>
+            )}
           </div>
         )}
       </div>
 
       <form id="escolher-equipa" className="mt-4 flex min-w-0 scroll-mt-24 items-end gap-2" onSubmit={(event) => event.preventDefault()}>
-        <label className="min-w-0 flex-1 text-xs font-semibold text-ink-muted">
+        <label className="min-w-0 flex-1 text-sm font-semibold text-ink-muted">
           {pt ? "Acompanha a tua equipa" : "Follow your club"}
           <select
             value={selectedSlug ?? ""}
             onChange={(event) => handleSelect(event.target.value)}
-            className="mt-1 block min-h-10 w-full rounded-lg border border-line bg-paper px-2 text-sm font-medium text-ink"
+            className="mt-1 block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-sm font-medium text-ink"
           >
             <option value="">{pt ? "Escolhe a tua equipa" : "Choose your club"}</option>
             {outlooks.map((club) => (

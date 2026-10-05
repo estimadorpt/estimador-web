@@ -1,5 +1,8 @@
 "use client";
 
+import { ChartTable } from "@/components/viz/ChartTable";
+import { formatDecimal } from "@/lib/football-format";
+
 interface PositionDistributionProps {
   probs: number[];
   teamColor: string;
@@ -27,15 +30,22 @@ export function PositionDistribution({ probs, teamColor, locale }: PositionDistr
   if (positions.length === 0) return null;
 
   const maxProb = Math.max(...positions.map(d => d.prob));
+  const pt = locale !== "en";
+  const pctLabel = (prob: number) => (prob < 1 ? "<1%" : `${Math.round(prob)}%`);
 
   return (
+    <div>
     <div className="space-y-1">
       {positions.map(({ position, prob }) => {
         const opacity = 0.3 + (prob / maxProb) * 0.7;
         const widthPct = Math.max((prob / maxProb) * 100, 2);
 
         return (
-          <div key={position} className="flex items-center gap-2">
+          <div
+            key={position}
+            className="flex items-center gap-2"
+            title={pt ? `${ordinal(position, locale)} lugar: ${pctLabel(prob)} das simulações` : `${ordinal(position, locale)} place: ${pctLabel(prob)} of simulations`}
+          >
             {/* Position label */}
             <div className="w-10 text-right text-xs font-medium text-stone-500 tabular-nums">
               {ordinal(position, locale)}
@@ -55,11 +65,21 @@ export function PositionDistribution({ probs, teamColor, locale }: PositionDistr
 
             {/* Percentage */}
             <div className="w-12 text-right text-xs font-semibold tabular-nums text-stone-700">
-              {prob < 1 ? "<1%" : `${Math.round(prob)}%`}
+              {pctLabel(prob)}
             </div>
           </div>
         );
       })}
+    </div>
+    {/* The twin lists every position, including those under 0,5% the bars leave out. */}
+    <ChartTable
+      caption={pt ? "Probabilidade de terminar em cada posição" : "Probability of finishing in each position"}
+      columns={[pt ? "Posição" : "Position", pt ? "Probabilidade" : "Probability"]}
+      rows={probs.map((p, i) => [
+        ordinal(i + 1, locale),
+        p === 0 ? "0%" : p * 100 < 0.1 ? (pt ? "<0,1%" : "<0.1%") : `${formatDecimal(p * 100, locale, 1)}%`,
+      ])}
+    />
     </div>
   );
 }

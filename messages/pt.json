@@ -328,6 +328,7 @@
     "footballTitle": "Quem fica com o título?",
     "footballDate": "Jornada {matchday} · {date}",
     "footballChampionLabel": "Probabilidade de ser campeão",
+    "footballChangeCaption": "variação face à jornada {matchday}",
     "footballAction": "Experimentar resultados",
     "footballLink": "Ver a Liga Portugal",
     "footballUnavailable": "As previsões da Liga chegam com a próxima jornada publicada.",

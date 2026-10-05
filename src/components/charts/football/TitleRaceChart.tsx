@@ -144,7 +144,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
               textAnchor: "start",
               dx: 6,
               fill: "#234c40",
-              fontSize: width < 500 ? 10 : 12,
+              fontSize: width < 500 ? 11 : 12,
               fontWeight: "bold",
             }
           ),

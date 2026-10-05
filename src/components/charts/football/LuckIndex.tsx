@@ -1,6 +1,8 @@
 "use client";
 
 import { ligaTeamShortNames, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
+import { ChartTable } from "@/components/viz/ChartTable";
+import { formatDecimal, formatSigned } from "@/lib/football-format";
 
 export interface LuckEntry {
   team: string;
@@ -26,6 +28,9 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
   if (!entries || entries.length === 0) return null;
 
   const maxAbsDelta = Math.max(...entries.map(e => Math.abs(e.delta)), 0.5);
+  const pt = locale !== "en";
+  const pts = labels.pointsShort ?? "pts";
+  const exp = labels.expectedShort ?? (pt ? "esperados" : "expected");
 
   return (
     <div>
@@ -45,7 +50,11 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
           const isPositive = entry.delta >= 0;
 
           return (
-            <div key={entry.team} className="flex items-center gap-2">
+            <div
+              key={entry.team}
+              className="flex items-center gap-2"
+              title={`${teamDisplayName(entry.team)}: ${entry.actualPts} ${pts}, ${formatDecimal(entry.expectedPts, locale, 1)} ${exp} (${formatSigned(entry.delta, locale, 1)})`}
+            >
               {/* Team name */}
               <div className="w-16 sm:w-28 flex items-center gap-1.5 flex-shrink-0">
                 {teamLogoSrc(entry.team) ? (
@@ -102,7 +111,7 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
                       color: isPositive ? '#3a6b50' : '#a3543a',
                     }}
                   >
-                    {isPositive ? '+' : ''}{entry.delta.toFixed(1)}
+                    {formatSigned(entry.delta, locale, 1)}
                   </div>
                 )}
               </div>
@@ -118,10 +127,7 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
                   {entry.actualPts} {labels.pointsShort ?? "pts"}
                 </div>
                 <div className="text-[11px] tabular-nums text-stone-400">
-                  {entry.expectedPts.toLocaleString(locale === "en" ? "en-GB" : "pt-PT", {
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
-                  })}{" "}
+                  {formatDecimal(entry.expectedPts, locale, 1)}{" "}
                   {labels.expectedShort ?? "esperados"}
                 </div>
               </div>
@@ -129,6 +135,16 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
           );
         })}
       </div>
+      <ChartTable
+        caption={pt ? "Pontos reais e pontos esperados a partir do xG, por equipa" : "Actual points and expected points from xG, by team"}
+        columns={[pt ? "Equipa" : "Team", pt ? "Pontos" : "Points", pt ? "Esperados (xPts)" : "Expected (xPts)", pt ? "Diferença" : "Difference"]}
+        rows={entries.map(e => [
+          teamDisplayName(e.team),
+          e.actualPts,
+          formatDecimal(e.expectedPts, locale, 1),
+          formatSigned(e.delta, locale, 1),
+        ])}
+      />
     </div>
   );
 }
