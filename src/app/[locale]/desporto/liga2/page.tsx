@@ -1,4 +1,4 @@
-import { createPageMetadata } from '@/lib/metadata';
+import { createPageMetadata, siteTitle } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -85,7 +85,7 @@ export async function generateMetadata({
   return createPageMetadata({
     locale,
     path: `/desporto/liga2`,
-    title: `${c.title} | Estimador`,
+    title: siteTitle(c.title),
     description: c.description,
     index: false,
   });

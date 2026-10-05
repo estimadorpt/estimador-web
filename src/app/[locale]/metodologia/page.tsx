@@ -1,4 +1,4 @@
-import { createPageMetadata } from '@/lib/metadata';
+import { createPageMetadata, siteTitle } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from 'next-intl/server';
@@ -23,9 +23,7 @@ export async function generateMetadata({
   return createPageMetadata({
     locale,
     path: '/metodologia',
-    // Sentence case and the site's one suffix (meta.methodologyTitle still
-    // carries the old Title Case string and is no longer read).
-    title: `${t('methodology.title')} | estimador.pt`,
+    title: siteTitle(t('methodology.title')),
     description: t('methodology.subtitle'),
   });
 }

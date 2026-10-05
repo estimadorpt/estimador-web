@@ -1,4 +1,4 @@
-import { createPageMetadata } from '@/lib/metadata';
+import { createPageMetadata, siteTitle } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -107,7 +107,7 @@ export async function generateMetadata({
   return createPageMetadata({
     locale,
     path: `/desporto/liga/modelo`,
-    title: `${c.title} · Liga Portugal | estimador.pt`,
+    title: siteTitle(`${c.title} · Liga Portugal`),
     description: scorecard
       ? summary(scorecard, prediction?.model ?? null, locale).description
       : c.fallbackDescription,

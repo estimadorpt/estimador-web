@@ -2,7 +2,7 @@ import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PageHero } from '@/components/PageHero';
 import { Action } from '@/components/brand/Action';
-import { createPageMetadata } from '@/lib/metadata';
+import { createPageMetadata, siteTitle } from '@/lib/metadata';
 import { OFFICIAL_RESULTS, PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE, PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from '@/lib/config/elections';
 import { formatElectionLongDate } from '@/lib/election-display';
 import { loadSecondRoundData, loadPresidentialData } from '@/lib/utils/data-loader';
@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return createPageMetadata({
     locale,
     path: '/eleicoes/arquivo',
-    title: locale === 'pt' ? 'Como ler uma previsão arquivada | estimador.pt' : 'How to read an archived forecast | estimador.pt',
+    title: siteTitle(locale === 'pt' ? 'Como ler uma previsão arquivada' : 'How to read an archived forecast'),
     description: locale === 'pt'
       ? 'As previsões das presidenciais de 2026 e das legislativas de 2025, guardadas com a informação disponível à data, e como lê-las sem as confundir com resultados.'
       : 'The 2026 presidential and 2025 parliamentary forecasts, kept with the information available at the time, and how to read them without mistaking them for results.',

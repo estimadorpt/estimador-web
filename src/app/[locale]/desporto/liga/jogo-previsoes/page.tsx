@@ -23,8 +23,8 @@ export async function generateMetadata({
     locale,
     path: `/desporto/liga/jogo-previsoes`,
     title: pt
-      ? "Contra o Modelo · Liga Portugal | estimador.pt"
-      : "Beat the Model · Liga Portugal | estimador.pt",
+      ? "Contra o Modelo · Liga Portugal"
+      : "Beat the Model · Liga Portugal",
     description: pt
       ? "Faz as tuas previsões para a próxima jornada da Liga Portugal e vê se bates o modelo. Avaliação por Ranked Probability Score, a mesma medida com que avaliamos o modelo."
       : "Forecast the next Liga Portugal matchday and see if you can beat the model. Scored with the Ranked Probability Score, the same measure we grade the model with.",

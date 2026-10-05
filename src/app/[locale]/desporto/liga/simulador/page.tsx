@@ -21,8 +21,8 @@ export async function generateMetadata({
     locale,
     path: `/desporto/liga/simulador`,
     title: locale === "pt"
-      ? "Simulador — Liga Portugal - estimador.pt"
-      : "Simulator — Liga Portugal - estimador.pt",
+      ? "Simulador · Liga Portugal"
+      : "Simulator · Liga Portugal",
     description: t("football.whatIfDescription"),
   });
 }

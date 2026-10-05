@@ -154,7 +154,7 @@ export default async function ArticlesPage({
           to subscribe to yet in this language. */}
       {articles.length > 0 && (
         <div className="max-w-4xl mx-auto px-4 pb-16">
-          <Subscribe variant="inline" />
+          <Subscribe variant="inline" locale={locale} />
         </div>
       )}
 

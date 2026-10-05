@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { ParishPage } from '@/components/population/parish/ParishPage';
-import { feedUrl, getOgImageUrl, SITE_URL } from '@/lib/metadata';
+import { feedAlternates, getOgImageUrl, siteTitle, SITE_URL } from '@/lib/metadata';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 /**
  * The parish page: one exported shell for all 3,092 parishes. Azure rewrites
@@ -24,7 +25,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const pt = locale === 'pt';
-  const title = pt ? 'Freguesia · População sintética · estimador.pt' : 'Parish · Synthetic population · estimador.pt';
+  setRequestLocale(locale);
+  const title = siteTitle(pt ? 'Freguesia · População sintética' : 'Parish · Synthetic population');
   const description = pt
     ? 'Quem vive em cada freguesia de Portugal: idades, trabalho, escolaridade e agregados numa população sintética gerada a partir dos Censos 2021.'
     : 'Who lives in each parish of Portugal: ages, work, education and households in a synthetic population generated from the 2021 Census.';
@@ -32,11 +34,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     metadataBase: new URL(SITE_URL),
     title,
     description,
-    alternates: {
-      types: {
-        'application/rss+xml': [{ url: feedUrl(locale), title: pt ? 'estimador.pt — notas e explicadores' : 'estimador.pt — notes and explainers' }],
-      },
-    },
+    // No canonical and no hreflang (see above); the feed link only once this
+    // locale has an article, the same rule createPageMetadata applies.
+    alternates: { types: feedAlternates(locale) },
     openGraph: {
       title,
       description,
@@ -51,6 +51,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function ParishRoute({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   return (
     <div className="min-h-screen bg-paper">
       <Header />

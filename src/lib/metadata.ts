@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import fs from 'node:fs';
 import path from 'node:path';
+import { getMDXArticlesByLocale } from './mdx-articles';
+import { siteTitle } from './site-title';
+
+export { siteTitle, TITLE_SUFFIX } from './site-title';
 
 export const SITE_URL = 'https://estimador.pt';
 export const SITE_LOCALES = ['pt', 'en'] as const;
@@ -20,27 +24,29 @@ const FEED_TITLE: Record<string, string> = {
   en: 'estimador.pt — notes and explainers',
 };
 
-/** The one site suffix every page title carries. */
-export const TITLE_SUFFIX = ' | estimador.pt';
-
-// The variants the catalogue and older pages still type by hand:
-// " - estimador.pt", " | estimador.pt", " | Estimador", " — estimador.pt".
-const TYPED_SUFFIX = /\s*[|·—–-]\s*estimador(?:\.pt)?\s*$/i;
-
 /**
- * A page title with exactly one " | estimador.pt" at the end. Idempotent, so a
- * page that still types a suffix of its own gets the same result. A title that
- * already names the site ("estimador.pt — Dados para compreender Portugal",
- * "Sobre o estimador.pt") is left as written rather than naming it twice.
+ * hreflang for every locale the page exists in, plus x-default for a reader
+ * whose language is neither: the Portuguese page, the site's own language.
+ * A page that exists only in English (a translation-only article) points
+ * x-default at the locale it has, never at a page that was not exported.
  */
-export function siteTitle(title: string): string {
-  const bare = title.replace(TYPED_SUFFIX, '').trim();
-  if (/estimador\.pt/i.test(bare)) return bare;
-  return `${bare}${TITLE_SUFFIX}`;
+export function languageAlternates(pathname: string, availableLocales: readonly string[] = SITE_LOCALES) {
+  const languages: Record<string, string> = Object.fromEntries(
+    availableLocales.map(locale => [locale, localizedUrl(locale, pathname)]));
+  const fallback = availableLocales.includes('pt') ? 'pt' : availableLocales[0];
+  if (fallback) languages['x-default'] = localizedUrl(fallback, pathname);
+  return languages;
 }
 
-export function languageAlternates(pathname: string, availableLocales: readonly string[] = SITE_LOCALES) {
-  return Object.fromEntries(availableLocales.map(locale => [locale, localizedUrl(locale, pathname)]));
+/**
+ * The RSS autodiscovery link, only once this locale has published an article:
+ * the chrome hides the articles nav item, footer link and feed until then
+ * (the /feed.xml routes keep working). Same list as the footer's, so drafts
+ * count only under `npm run dev`. Every hand-built head uses this too.
+ */
+export function feedAlternates(locale: string): { 'application/rss+xml': { url: string; title: string }[] } | undefined {
+  if (getMDXArticlesByLocale(locale).length === 0) return undefined;
+  return { 'application/rss+xml': [{ url: feedUrl(locale), title: FEED_TITLE[locale] ?? FEED_TITLE.pt }] };
 }
 
 export interface OgManifest {
@@ -114,6 +120,7 @@ export function createPageMetadata({
 }: PageMetadataOptions): Metadata {
   const title = siteTitle(typedTitle);
   const url = localizedUrl(locale, pathname);
+  const feedTypes = feedAlternates(locale);
   const socialImage = {
     // A page gets its own card by route, so a section page needs no wiring here
     // beyond the `path` it already passes.
@@ -132,10 +139,9 @@ export function createPageMetadata({
       canonical: url,
       languages: languageAlternates(pathname, availableLocales),
       // Page metadata replaces the layout's rather than merging, so the feed
-      // link has to be issued from here to appear on every page.
-      types: {
-        'application/rss+xml': [{ url: feedUrl(locale), title: FEED_TITLE[locale] ?? FEED_TITLE.pt }],
-      },
+      // link has to be issued from here to appear on every page; and only
+      // when the locale has an article to offer (feedAlternates).
+      ...(feedTypes ? { types: feedTypes } : {}),
     },
     openGraph: {
       title, description, url, siteName: 'estimador.pt',

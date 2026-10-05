@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { siteTitle } from '@/lib/site-title';
 import { MapPinned } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { PageHero } from '@/components/PageHero';
@@ -77,14 +78,14 @@ export function ParishPage({ locale }: { locale: Locale }) {
       return watchHead(parishHead({
         locale,
         code,
-        title: `${question} · ${locale === 'pt' ? 'População sintética' : 'Synthetic population'} · estimador.pt`,
+        title: siteTitle(`${question} · ${locale === 'pt' ? 'População sintética' : 'Synthetic population'}`),
         description: locale === 'pt'
           ? `Idades, trabalho, escolaridade e agregados em ${place.name} (${place.municipalityName}), numa população sintética gerada a partir dos Censos 2021.${place.level === 'municipality' ? ' Valores do concelho.' : ''}`
           : `Ages, work, education and households in ${place.name} (${place.municipalityName}), from a synthetic population generated from the 2021 Census.${place.level === 'municipality' ? ' Municipality figures.' : ''}`,
       }));
     }
     if (state.kind === 'unknown') {
-      return watchHead(unknownHead(locale === 'pt' ? 'Freguesia não encontrada · estimador.pt' : 'Parish not found · estimador.pt'));
+      return watchHead(unknownHead(siteTitle(locale === 'pt' ? 'Freguesia não encontrada' : 'Parish not found')));
     }
     return undefined;
   }, [state, locale]);

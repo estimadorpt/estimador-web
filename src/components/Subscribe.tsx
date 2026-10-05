@@ -1,4 +1,4 @@
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import { Rss } from 'lucide-react';
 import { Action } from '@/components/brand/Action';
@@ -16,12 +16,12 @@ interface SubscribeProps {
   /** `page` sits at the end of a piece; `inline` is the denser index footer. */
   variant?: 'page' | 'inline';
   /**
-   * The page's locale. Pass it: in the static export an implicit getLocale()
+   * The page's locale. Required: in the static export an implicit getLocale()
    * only knows the locale when the page called setRequestLocale, and an
    * English page that forgot would end with a Portuguese card pointing at the
    * Portuguese feed.
    */
-  locale?: string;
+  locale: string;
 }
 
 /**
@@ -38,9 +38,8 @@ interface SubscribeProps {
  * every article view, handing over the IP and referrer of readers who never
  * subscribed, which is precisely what /privacidade promises does not happen.
  */
-export async function Subscribe({ variant = 'page', locale: localeProp }: SubscribeProps) {
+export async function Subscribe({ variant = 'page', locale }: SubscribeProps) {
   // The feeds are per locale; /feed.xml only redirects to the Portuguese one.
-  const locale = localeProp ?? (await getLocale());
   const t = await getTranslations({ locale, namespace: 'subscribe' });
   const compact = variant === 'inline';
 

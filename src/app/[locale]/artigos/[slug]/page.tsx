@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { setRequestLocale } from '@/i18n/request-locale';
 import { getMDXArticlesByLocale, getArticleWithFallback, getArticlePath, articleExistsInLocale } from '@/lib/mdx-articles';
-import { createPageMetadata, getOgImageUrl, SITE_LOCALES } from '@/lib/metadata';
+import { createPageMetadata, getOgImageUrl, siteTitle, SITE_LOCALES } from '@/lib/metadata';
 import { paramsOrPlaceholder } from '@/lib/static-params';
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: MDXArticlePageProps): Promise
 
   if (!article) {
     const t = await getTranslations({ locale });
-    return { title: t('notFound.title'), robots: { index: false, follow: false } };
+    return { title: siteTitle(t('notFound.title')), robots: { index: false, follow: false } };
   }
 
   // Only name the translations that exist: an alternate pointing at a page we
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: MDXArticlePageProps): Promise
   return createPageMetadata({
     locale: actualLocale,
     path: `/artigos/${slug}`,
-    title: `${article.title} | estimador.pt`,
+    title: siteTitle(article.title),
     description: article.excerpt,
     keywords: article.tags.join(', '),
     type: 'article',
