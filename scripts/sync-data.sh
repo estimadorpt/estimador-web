@@ -31,6 +31,16 @@ sync_football() {
 
   mkdir -p "$FOOTBALL_DEST"
   cp "$FOOTBALL_SRC"/*.json "$FOOTBALL_DEST/"
+  # cards.json is the social-card input the model writes beside its outputs;
+  # no page reads it, so it is not published.
+  rm -f "$FOOTBALL_DEST/cards.json"
+  # The game server reads its own copy of the fixture manifest, and
+  # validate-data requires it to be byte-identical to the published one.
+  if [ -f "$FOOTBALL_DEST/game_fixtures.json" ]; then
+    mkdir -p "$PROJECT_DIR/api/data"
+    cp "$FOOTBALL_DEST/game_fixtures.json" "$PROJECT_DIR/api/data/game_fixtures.json"
+    echo "  Copied game_fixtures.json to api/data/ for the game server"
+  fi
   echo "Synced football data from $FOOTBALL_SRC"
   echo "  Files: $(ls "$FOOTBALL_DEST" | wc -l | tr -d ' ')"
 

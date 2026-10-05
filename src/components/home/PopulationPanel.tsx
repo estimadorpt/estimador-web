@@ -3,6 +3,7 @@ import { Action } from '@/components/brand/Action';
 import { Link } from '@/i18n/routing';
 import { ParishSearch } from '@/components/population/ParishSearch';
 import { HONESTY } from '@/lib/population/labels';
+import { formatCount } from '@/lib/population/format';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 import type { PopulationMeta } from '@/types/population';
 import { HomeArt } from './HomeArt';
@@ -27,15 +28,16 @@ export async function PopulationPanel({ locale, variant, meta }: { locale: strin
   const lang = locale === 'en' ? 'en' : 'pt';
   const lead = variant === 'lead';
   const Heading = lead ? 'h1' : 'h2';
-  const number = new Intl.NumberFormat(lang === 'pt' ? 'pt-PT' : 'en-GB');
 
   const figures = meta && (
     <>
       <p className={lead ? 'mt-3 max-w-lg text-base leading-relaxed text-stone-600 md:text-[17px]' : 'mt-2 text-[15px] leading-relaxed text-stone-600'}>
         {t('populationText', {
-          persons: number.format(meta.counts.persons),
-          households: number.format(meta.counts.households),
-          parishes: number.format(meta.counts.parishes),
+          // The one population count formatter: "3 092" in Portuguese, where
+          // Intl's pt-PT would leave a four-digit count ungrouped.
+          persons: formatCount(meta.counts.persons, lang),
+          households: formatCount(meta.counts.households, lang),
+          parishes: formatCount(meta.counts.parishes, lang),
         })}
       </p>
       <p className="mt-1.5 text-[13px] leading-snug text-stone-500">{HONESTY.synthetic[lang]}</p>

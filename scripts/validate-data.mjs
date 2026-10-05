@@ -159,6 +159,11 @@ if (matchdays.length > 0 && !isObject(manifest)) {
   }
 }
 
+// The model's social-card input is not a published feed (sync-data.sh drops it).
+if (fs.existsSync(path.join(DATA, 'football/liga-2026-27/cards.json'))) {
+  problems.push('football/liga-2026-27/cards.json: not a published feed — remove it (scripts/sync-data.sh does)');
+}
+
 // The player pages read players_detail.json and /jogadores reads players.json;
 // from different model runs they contradict each other (ranks, clubs, form).
 {
