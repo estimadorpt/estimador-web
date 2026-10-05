@@ -6,14 +6,14 @@ import type { GameFixturesData } from '@/lib/football-fixtures';
 import { buildClubOutlooks, formatClubPercent, positionSpread } from './club-outlook';
 
 async function loadBundle() {
-  const dir = path.join(process.cwd(), 'public', 'data', 'football', 'liga-2026-27');
+  const dir = path.join(process.cwd(), 'src', 'test-fixtures', 'liga-2026-27');
   const prediction: LigaPrediction = JSON.parse(await fs.readFile(path.join(dir, 'md06.json'), 'utf8'));
   const scenarios: ScenarioData = JSON.parse(await fs.readFile(path.join(dir, 'md06_scenarios.json'), 'utf8'));
   const gameFixtures: GameFixturesData = JSON.parse(await fs.readFile(path.join(dir, 'game_fixtures.json'), 'utf8'));
   return { prediction, scenarios, gameFixtures };
 }
 
-describe('buildClubOutlooks (real published bundle)', () => {
+describe('buildClubOutlooks (frozen md06 bundle)', () => {
   it("builds Sporting's title stakes against Arouca, matching the diagnosis's worked example", async () => {
     const { prediction, scenarios, gameFixtures } = await loadBundle();
     const entries = buildClubOutlooks('pt', prediction, scenarios, gameFixtures);

@@ -315,9 +315,9 @@ describe('fixtureStatus', () => {
 
 /* ------------------------------------------------------------- real data */
 
-describe('real published bundle (public/data/football/liga-2026-27/md06*)', () => {
+describe('frozen md06 bundle (src/test-fixtures/liga-2026-27, published 2026-09-13)', () => {
   it("matches the diagnosis's Sporting CP–Arouca stakes exactly, from the real files", async () => {
-    const dir = path.join(process.cwd(), 'public', 'data', 'football', 'liga-2026-27');
+    const dir = path.join(process.cwd(), 'src', 'test-fixtures', 'liga-2026-27');
     const prediction: LigaPrediction = JSON.parse(await fs.readFile(path.join(dir, 'md06.json'), 'utf8'));
     const scenarios: ScenarioData = JSON.parse(await fs.readFile(path.join(dir, 'md06_scenarios.json'), 'utf8'));
     const gameFixtures: GameFixturesData = JSON.parse(await fs.readFile(path.join(dir, 'game_fixtures.json'), 'utf8'));
@@ -364,7 +364,7 @@ describe('real published bundle (public/data/football/liga-2026-27/md06*)', () =
   });
 
   it('marks the matchday-2 leftover as postponed with no resolvable match page, for every club still owing it', async () => {
-    const dir = path.join(process.cwd(), 'public', 'data', 'football', 'liga-2026-27');
+    const dir = path.join(process.cwd(), 'src', 'test-fixtures', 'liga-2026-27');
     const prediction: LigaPrediction = JSON.parse(await fs.readFile(path.join(dir, 'md06.json'), 'utf8'));
     const scenarios: ScenarioData = JSON.parse(await fs.readFile(path.join(dir, 'md06_scenarios.json'), 'utf8'));
     const gameFixtures: GameFixturesData = JSON.parse(await fs.readFile(path.join(dir, 'game_fixtures.json'), 'utf8'));
@@ -381,7 +381,7 @@ describe('real published bundle (public/data/football/liga-2026-27/md06*)', () =
   });
 
   it('resolves an ordinary next-round fixture to the same slug the match page uses', async () => {
-    const dir = path.join(process.cwd(), 'public', 'data', 'football', 'liga-2026-27');
+    const dir = path.join(process.cwd(), 'src', 'test-fixtures', 'liga-2026-27');
     const prediction: LigaPrediction = JSON.parse(await fs.readFile(path.join(dir, 'md06.json'), 'utf8'));
     const scenarios: ScenarioData = JSON.parse(await fs.readFile(path.join(dir, 'md06_scenarios.json'), 'utf8'));
     const gameFixtures: GameFixturesData = JSON.parse(await fs.readFile(path.join(dir, 'game_fixtures.json'), 'utf8'));
