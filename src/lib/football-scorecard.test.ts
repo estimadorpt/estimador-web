@@ -58,8 +58,8 @@ describe('scorecard wording', () => {
   });
 
   it('names the market sources and the season span from the file', () => {
-    expect(marketSourcesPhrase({ b365: 37, pinnacle: 773 }, 'pt')).toBe('Pinnacle (773 jogos) e Bet365 (37)');
-    expect(marketSourcesPhrase({ pinnacle: 1773, b365: 37 }, 'en')).toBe('Pinnacle (1,773 matches) and Bet365 (37)');
+    expect(marketSourcesPhrase({ b365: 37, pinnacle: 773 }, 'pt')).toBe('Pinnacle em 773 jogos, Bet365 em 37');
+    expect(marketSourcesPhrase({ pinnacle: 1773, b365: 37 }, 'en')).toBe('Pinnacle for 1,773 matches, Bet365 for 37');
     expect(marketSourcesPhrase({ pinnacle: 810 }, 'en')).toBe('Pinnacle');
     expect(marketSourcesPhrase(undefined, 'pt')).toBeNull();
     expect(scorecardSeasonRange({ first_season: '2020-21', last_season: '2025-26', seasons: ['x'] }, 'pt')).toBe('2020-21 a 2025-26');

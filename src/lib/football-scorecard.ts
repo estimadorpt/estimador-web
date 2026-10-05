@@ -101,8 +101,9 @@ const BOOKMAKERS: Record<string, string> = {
 };
 
 /**
- * "Pinnacle (773 jogos) e Bet365 (37)" — the market's sources with their match
- * counts, largest first, read from market_sources. Null when the file has none.
+ * "Pinnacle em 773 jogos, Bet365 em 37" — the market's sources with their
+ * match counts, largest first, read from market_sources. Null when the file
+ * has none; a single source is just its name.
  */
 export function marketSourcesPhrase(sources: Record<string, number> | null | undefined, locale: string): string | null {
   const entries = Object.entries(sources ?? {}).filter(([, n]) => Number.isFinite(n) && n > 0).sort((a, b) => b[1] - a[1]);
@@ -110,11 +111,9 @@ export function marketSourcesPhrase(sources: Record<string, number> | null | und
   const pt = locale !== 'en';
   const name = (key: string) => BOOKMAKERS[key] ?? key;
   if (entries.length === 1) return name(entries[0][0]);
-  const parts = entries.map(([key, n], i) => (i === 0
-    ? `${name(key)} (${formatInteger(n, locale)} ${pt ? 'jogos' : 'matches'})`
-    : `${name(key)} (${formatInteger(n, locale)})`));
-  const last = parts.pop();
-  return `${parts.join(', ')} ${pt ? 'e' : 'and'} ${last}`;
+  return entries.map(([key, n], i) => (pt
+    ? `${name(key)} em ${formatInteger(n, locale)}${i === 0 ? ' jogos' : ''}`
+    : `${name(key)} for ${formatInteger(n, locale)}${i === 0 ? ' matches' : ''}`)).join(', ');
 }
 
 /** The scorecard's own season span: first_season/last_season, else the season list. */
