@@ -75,10 +75,23 @@ if (!CLUB_SLUGS.size) throw new Error('ligaTeamSlugs not found in src/lib/config
  * staticwebapp.config.json, so a new redirect is checked without listing it
  * twice.
  */
-const MUST_REDIRECT = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'staticwebapp.config.json'), 'utf8'))
-  .routes
+const HOST_ROUTES = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'staticwebapp.config.json'), 'utf8')).routes;
+const MUST_REDIRECT = HOST_ROUTES
   .filter(route => route.redirect && !route.route.includes('*'))
   .map(route => ({ route: route.route, expect: route.statusCode ?? 302, location: route.redirect }));
+
+/**
+ * Pages the export writes but the host answers 404 for (a bare
+ * `"statusCode": 404` rule): the placeholders /artigos/sem-artigos/ and
+ * /artigos/tema/sem-temas/ that a static export needs while nothing is
+ * published, and /404/, which only exists as the not-found override. They
+ * are probed for that 404 and left out of the 200 walk below.
+ */
+const HOST_404 = HOST_ROUTES.filter(route => route.statusCode === 404 && !route.redirect && !route.rewrite);
+const answersNotFound = urlPath => HOST_404.some(({ route }) => {
+  const strip = value => (value.length > 1 ? value.replace(/\/$/, '') : value);
+  return route.endsWith('/*') ? urlPath.startsWith(route.slice(0, -1)) || strip(urlPath) === route.slice(0, -2) : strip(urlPath) === strip(route);
+});
 
 /** Routes that must answer 404 even after the routing repair. */
 const MUST_404 = [
@@ -87,6 +100,8 @@ const MUST_404 = [
   '/data/definitely-not-a-file.json',
   // The parish page tells an unknown code apart by this 404.
   `${POPULATION_DATA}/parish/ZZZZZZ.json`,
+  // Every exact host 404 rule, with the trailing slash the export uses.
+  ...HOST_404.filter(({ route }) => !route.includes('*')).map(({ route }) => `${route}/`),
 ];
 
 /**
@@ -225,7 +240,7 @@ const sampledRoutes = routes.filter(route => {
   return key === 'core' || seen <= SAMPLE;
 });
 
-const pageRoutes = sampledRoutes.filter(route => route !== '/404.html');
+const pageRoutes = sampledRoutes.filter(route => route !== '/404.html' && !answersNotFound(route));
 const checks = [
   // 404.html is the host's not-found override, never served at its own path.
   ...pageRoutes.map(route => ({ route, expect: 200, type: 'text/html' })),
@@ -233,7 +248,8 @@ const checks = [
   ...pageRoutes
     .filter(route => route !== '/' && fs.existsSync(path.join(OUT_DIR, route, 'index.txt')))
     .map(route => ({ route: `${route}index.txt`, expect: 200, type: 'text/plain' })),
-  ...assets.files.map(route => ({ route, expect: 200, type: EXPECTED_TYPES[path.extname(route)] })),
+  ...assets.files.filter(route => !answersNotFound(route))
+    .map(route => ({ route, expect: 200, type: EXPECTED_TYPES[path.extname(route)] })),
   ...assets.sampleDirs.flatMap(name => sampleTree(name, 2).map(route => ({
     route,
     expect: 200,

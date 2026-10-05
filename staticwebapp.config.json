@@ -58,6 +58,46 @@
       "rewrite": "/pt/populacao/consulta/index.html"
     },
     {
+      "route": "/pt/artigos/sem-artigos",
+      "statusCode": 404
+    },
+    {
+      "route": "/pt/artigos/sem-artigos/*",
+      "statusCode": 404
+    },
+    {
+      "route": "/en/artigos/sem-artigos",
+      "statusCode": 404
+    },
+    {
+      "route": "/en/artigos/sem-artigos/*",
+      "statusCode": 404
+    },
+    {
+      "route": "/pt/artigos/tema/sem-temas",
+      "statusCode": 404
+    },
+    {
+      "route": "/pt/artigos/tema/sem-temas/*",
+      "statusCode": 404
+    },
+    {
+      "route": "/en/artigos/tema/sem-temas",
+      "statusCode": 404
+    },
+    {
+      "route": "/en/artigos/tema/sem-temas/*",
+      "statusCode": 404
+    },
+    {
+      "route": "/404",
+      "statusCode": 404
+    },
+    {
+      "route": "/404/*",
+      "statusCode": 404
+    },
+    {
       "route": "/forecast",
       "redirect": "/pt/eleicoes/legislativas/",
       "statusCode": 301
