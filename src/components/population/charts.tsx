@@ -74,7 +74,7 @@ export function AgeColumns({ cells, locale, height = 200 }: { cells: ReadCell[];
       <p className="mb-1 min-h-5 text-sm text-stone-600" aria-live="polite">
         {readout
           ? <><span className="font-semibold text-ink">{readout.labels[0]}</span>{locale === 'pt' ? ' anos: ' : ': '}<span className="font-bold tabular-nums text-ink">{readout.display}</span></>
-          : <span className="text-stone-500">{locale === 'pt' ? 'Passe sobre uma coluna para ler o valor.' : 'Point at a column to read its value.'}</span>}
+          : <span className="text-stone-500">{locale === 'pt' ? 'Passa o cursor ou o foco sobre uma coluna para ler o valor.' : 'Hover over or focus a column to read its value.'}</span>}
       </p>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="block" role="img" aria-label={cells.map(cell => `${cell.labels[0]}: ${cell.display}`).join('; ')} onMouseLeave={() => setActive(null)}>
         {ticks.map(tick => {
