@@ -13,6 +13,8 @@ import { MarkLoading } from '@/components/brand/MarkLoading';
 import { Action } from '@/components/brand/Action';
 import { VizShowcase } from '@/components/viz/Showcase';
 import { BRAND } from '@/lib/brand';
+import { BRAND_BIO, BRAND_DESCRIPTOR, BRAND_LINE } from '@/lib/brand/descriptor';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -27,55 +29,59 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   });
 }
 
-const SURFACES = [
-  ['Papel', 'paper', BRAND.paper, 'O chão de todas as páginas.'],
-  ['Creme', 'cream', BRAND.cream, 'Painéis, cartões, linhas de tabela.'],
-  ['Pergaminho', 'parchment', BRAND.parchment, 'Zonas afundadas e estados de hover.'],
-  ['Linha', 'line', BRAND.line, 'Filetes e separadores.'],
-] as const;
-const INKS = [
-  ['Pinho', 'ink', BRAND.ink, 'Texto, botões, o símbolo.'],
-  ['Pinho escuro', 'ink-dark', BRAND.inkDark, 'Hover de ligações e botões.'],
-  ['Cinza-verde', 'stone-500', BRAND.muted, 'Texto secundário, 4,5:1 sobre papel.'],
-  ['Cinza claro', 'stone-400', BRAND.faint, 'Etiquetas pequenas e o .pt da assinatura.'],
-  ['Floresta', 'forest', BRAND.forest, 'Superfícies escuras: o mundo do atlas, cartões sociais.'],
-] as const;
-const DATA = [
-  ['Menta', 'mint', BRAND.mint, BRAND.mintSoft, 'mint-soft'],
-  ['Mostarda', 'mustard', BRAND.mustard, BRAND.mustardSoft, 'mustard-soft'],
-  ['Coral', 'coral', BRAND.coral, BRAND.coralSoft, 'coral-soft'],
-  ['Pervinca', 'periwinkle', BRAND.periwinkle, BRAND.periwinkleSoft, 'periwinkle-soft'],
-] as const;
-const SEMANTIC = [
-  ['Positivo', 'positive', BRAND.tree, 'Subidas, sinal positivo.'],
-  ['Negativo', 'negative', BRAND.terracotta, 'Descidas, sinal negativo, erros.'],
-  ['Aviso', 'gold', BRAND.gold, 'Dados desatualizados, provisórios. Nunca na marca.'],
-  ['Teal', 'teal', BRAND.teal, 'A cor da secção Economia.'],
-] as const;
-const KIT = [
-  ['branding/avatar-1024-forest.png', '1024 × 1024', 'Avatar em todas as redes'],
-  ['branding/avatar-1024-paper.png', '1024 × 1024', 'Avatar claro'],
-  ['images/brand/banner-1500x500.png', '1500 × 500', 'Cabeçalho do X e do Bluesky'],
-  ['branding/banner-1500x500-dark.png', '1500 × 500', 'Cabeçalho, sobre floresta'],
-  ['branding/linkedin-cover-light.png', '1584 × 396', 'Capa do LinkedIn, clara'],
-  ['branding/linkedin-cover-dark.png', '1584 × 396', 'Capa do LinkedIn, sobre floresta'],
-  ['branding/linkedin-post-light.png', '1200 × 1200', 'Publicação quadrada, clara'],
-  ['branding/linkedin-post-dark.png', '1200 × 1200', 'Publicação quadrada, sobre floresta'],
-  ['branding/post-1600x900-light.png', '1600 × 900', 'Publicação 16:9'],
-  ['branding/story-1080x1920-light.png', '1080 × 1920', 'Story, clara'],
-  ['branding/story-1080x1920-dark.png', '1080 × 1920', 'Story, sobre floresta'],
-] as const;
-const FILES = [
-  ['estimador-logo.svg', 'Assinatura, pinho sobre transparente'],
-  ['estimador-logo-paper.svg', 'Assinatura, papel sobre transparente, para fundos escuros'],
-  ['estimador-logo@4x.png', 'Assinatura em PNG, 880 px'],
-  ['estimador-logo-paper@4x.png', 'Assinatura em PNG sobre floresta'],
-  ['estimador-mark.svg', 'Símbolo completo, 48 × 24'],
-  ['estimador-mark-paper.svg', 'Símbolo completo, papel'],
-  ['estimador-mark-small.svg', 'Símbolo reduzido, 32 × 32, para menos de 24 px'],
-  ['estimador-app-icon.svg', 'Ícone de app, papel sobre floresta'],
-  ['estimador-app-icon-512.png', 'Ícone de app em PNG, 512 px'],
-] as const;
+/** Copy for the guide's lists: Portuguese first, English second. */
+type Copy = readonly [pt: string, en: string];
+const tr = (pt: boolean, [ptText, enText]: Copy) => (pt ? ptText : enText);
+
+const SURFACES: readonly (readonly [Copy, string, string, Copy])[] = [
+  [['Papel', 'Paper'], 'paper', BRAND.paper, ['O chão de todas as páginas.', 'The ground of every page.']],
+  [['Creme', 'Cream'], 'cream', BRAND.cream, ['Painéis, cartões, linhas de tabela.', 'Panels, cards, table rows.']],
+  [['Pergaminho', 'Parchment'], 'parchment', BRAND.parchment, ['Zonas afundadas e estados de hover.', 'Sunken areas and hover states.']],
+  [['Linha', 'Line'], 'line', BRAND.line, ['Filetes e separadores.', 'Hairlines and dividers.']],
+];
+const INKS: readonly (readonly [Copy, string, string, Copy])[] = [
+  [['Pinho', 'Pine'], 'ink', BRAND.ink, ['Texto, botões, o símbolo.', 'Text, buttons, the mark.']],
+  [['Pinho escuro', 'Dark pine'], 'ink-dark', BRAND.inkDark, ['Hover de ligações e botões.', 'Link and button hover.']],
+  [['Cinza-verde', 'Green-grey'], 'stone-500', BRAND.muted, ['Texto secundário, 4,5:1 sobre papel.', 'Secondary text, 4.5:1 on paper.']],
+  [['Cinza claro', 'Light grey'], 'stone-400', BRAND.faint, ['Etiquetas pequenas e o .pt da assinatura.', 'Small labels and the .pt of the signature.']],
+  [['Floresta', 'Forest'], 'forest', BRAND.forest, ['Superfícies escuras: o mundo do atlas, cartões sociais.', 'Dark surfaces: the atlas world, social cards.']],
+];
+const DATA: readonly (readonly [Copy, string, string, string, string])[] = [
+  [['Menta', 'Mint'], 'mint', BRAND.mint, BRAND.mintSoft, 'mint-soft'],
+  [['Mostarda', 'Mustard'], 'mustard', BRAND.mustard, BRAND.mustardSoft, 'mustard-soft'],
+  [['Coral', 'Coral'], 'coral', BRAND.coral, BRAND.coralSoft, 'coral-soft'],
+  [['Pervinca', 'Periwinkle'], 'periwinkle', BRAND.periwinkle, BRAND.periwinkleSoft, 'periwinkle-soft'],
+];
+const SEMANTIC: readonly (readonly [Copy, string, string, Copy])[] = [
+  [['Positivo', 'Positive'], 'positive', BRAND.tree, ['Subidas, sinal positivo.', 'Rises, a positive sign.']],
+  [['Negativo', 'Negative'], 'negative', BRAND.terracotta, ['Descidas, sinal negativo, erros.', 'Falls, a negative sign, errors.']],
+  [['Aviso', 'Caveat'], 'gold', BRAND.gold, ['Dados desatualizados, provisórios. Nunca na marca.', 'Stale or provisional data. Never in the brand.']],
+  [['Teal', 'Teal'], 'teal', BRAND.teal, ['A cor da secção Economia.', 'The economy section colour.']],
+];
+const KIT: readonly (readonly [string, string, Copy])[] = [
+  ['branding/avatar-1024-forest.png', '1024 × 1024', ['Avatar em todas as redes', 'Avatar on every network']],
+  ['branding/avatar-1024-paper.png', '1024 × 1024', ['Avatar claro', 'Light avatar']],
+  ['images/brand/banner-1500x500.png', '1500 × 500', ['Cabeçalho do X e do Bluesky', 'X and Bluesky header']],
+  ['branding/banner-1500x500-dark.png', '1500 × 500', ['Cabeçalho, sobre floresta', 'Header, on forest']],
+  ['branding/linkedin-cover-light.png', '1584 × 396', ['Capa do LinkedIn, clara', 'LinkedIn cover, light']],
+  ['branding/linkedin-cover-dark.png', '1584 × 396', ['Capa do LinkedIn, sobre floresta', 'LinkedIn cover, on forest']],
+  ['branding/linkedin-post-light.png', '1200 × 1200', ['Publicação quadrada, clara', 'Square post, light']],
+  ['branding/linkedin-post-dark.png', '1200 × 1200', ['Publicação quadrada, sobre floresta', 'Square post, on forest']],
+  ['branding/post-1600x900-light.png', '1600 × 900', ['Publicação 16:9', '16:9 post']],
+  ['branding/story-1080x1920-light.png', '1080 × 1920', ['Story, clara', 'Story, light']],
+  ['branding/story-1080x1920-dark.png', '1080 × 1920', ['Story, sobre floresta', 'Story, on forest']],
+];
+const FILES: readonly (readonly [string, Copy])[] = [
+  ['estimador-logo.svg', ['Assinatura, pinho sobre transparente', 'Signature, pine on transparent']],
+  ['estimador-logo-paper.svg', ['Assinatura, papel sobre transparente, para fundos escuros', 'Signature, paper on transparent, for dark grounds']],
+  ['estimador-logo@4x.png', ['Assinatura em PNG, 880 px', 'Signature as PNG, 880px']],
+  ['estimador-logo-paper@4x.png', ['Assinatura em PNG sobre floresta', 'Signature as PNG on forest']],
+  ['estimador-mark.svg', ['Símbolo completo, 48 × 24', 'Full mark, 48 × 24']],
+  ['estimador-mark-paper.svg', ['Símbolo completo, papel', 'Full mark, paper']],
+  ['estimador-mark-small.svg', ['Símbolo reduzido, 32 × 32, para menos de 24 px', 'Small mark, 32 × 32, for under 24px']],
+  ['estimador-app-icon.svg', ['Ícone de app, papel sobre floresta', 'App icon, paper on forest']],
+  ['estimador-app-icon-512.png', ['Ícone de app em PNG, 512 px', 'App icon as PNG, 512px']],
+];
 
 function Section({ id, kicker, title, lede, children }: { id: string; kicker: string; title: string; lede?: string; children: React.ReactNode }) {
   return (
@@ -112,10 +118,12 @@ function Rule({ yes, children }: { yes: boolean; children: React.ReactNode }) {
 
 export default async function BrandPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== 'en';
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         width="5xl"
         eyebrow={pt ? 'Marca · guia de identidade' : 'Brand · identity guide'}
@@ -129,8 +137,8 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
 
       <Section id="simbolo" kicker="01" title={pt ? 'O símbolo' : 'The mark'} lede={pt ? 'Um intervalo: duas extremidades quadradas, uma faixa, um ponto vazado ligeiramente à esquerda do centro. Um só caminho, uma só cor. Os bigodes mantêm-se em todos os tamanhos; abaixo de 24 px ficam mais curtos, com extremidades mais espessas.' : 'An interval: two square caps, a band, a punched counter slightly left of centre. One path, one colour. Whiskers stay at every size; below 24px they become shorter, with thicker caps.'}>
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="flex h-44 items-center justify-center rounded-xl border border-line bg-cream"><Mark height={64} color={BRAND.ink} title="Símbolo sobre creme" /></div>
-          <div className="flex h-44 items-center justify-center rounded-xl bg-forest"><Mark height={64} color={BRAND.paper} title="Símbolo sobre floresta" /></div>
+          <div className="flex h-44 items-center justify-center rounded-xl border border-line bg-cream"><Mark height={64} color={BRAND.ink} title={pt ? 'Símbolo sobre creme' : 'Mark on cream'} /></div>
+          <div className="flex h-44 items-center justify-center rounded-xl bg-forest"><Mark height={64} color={BRAND.paper} title={pt ? 'Símbolo sobre floresta' : 'Mark on forest'} /></div>
         </div>
         <div className="mt-6 flex flex-wrap items-end gap-8">
           {[48, 32, 24].map(h => (
@@ -172,15 +180,15 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
 
       <Section id="cor" kicker="03" title={pt ? 'A cor' : 'Colour'} lede={pt ? 'A marca tem um tom, não um matiz: pinho sobre papel. Os quatro pastéis existem em duas forças, uma para dados e outra para superfícies, e as cores dos partidos e dos clubes são deles.' : 'The brand owns a tone, not a hue: pine on paper. The four pastels come in two strengths, one for data and one for surfaces, and party and club colours belong to them.'}>
         <h3 className="text-base font-bold uppercase tracking-wider text-stone-500">{pt ? 'Superfícies' : 'Surfaces'}</h3>
-        <div className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-4">{SURFACES.map(([n, t, h, note]) => <Swatch key={t} name={n} token={t} hex={h} note={note} />)}</div>
+        <div className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-4">{SURFACES.map(([n, t, h, note]) => <Swatch key={t} name={tr(pt, n)} token={t} hex={h} note={tr(pt, note)} />)}</div>
         <h3 className="mt-10 text-base font-bold uppercase tracking-wider text-stone-500">{pt ? 'Tinta' : 'Ink'}</h3>
-        <div className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-5">{INKS.map(([n, t, h, note]) => <Swatch key={t} name={n} token={t} hex={h} note={note} />)}</div>
+        <div className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-5">{INKS.map(([n, t, h, note]) => <Swatch key={t} name={tr(pt, n)} token={t} hex={h} note={tr(pt, note)} />)}</div>
         <h3 className="mt-10 text-base font-bold uppercase tracking-wider text-stone-500">{pt ? 'Pastéis: dados e superfícies' : 'Pastels: data and surfaces'}</h3>
         <div className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-4">
           {DATA.map(([n, t, h, soft, softToken]) => (
             <div key={t} className="flex flex-col gap-2">
               <div className="flex h-16 overflow-hidden rounded-lg border border-line"><div className="flex-1" style={{ backgroundColor: h }} /><div className="flex-1" style={{ backgroundColor: soft }} /></div>
-              <div className="text-sm font-semibold text-ink">{n}</div>
+              <div className="text-sm font-semibold text-ink">{tr(pt, n)}</div>
               <div className="font-mono text-[11px] text-stone-500">{h} · {t}</div>
               <div className="font-mono text-[11px] text-stone-500">{soft} · {softToken}</div>
             </div>
@@ -188,7 +196,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         </div>
         <p className="mt-3 max-w-2xl text-xs leading-relaxed text-stone-500">{pt ? 'À esquerda de cada par, a versão de dados: categorias nos gráficos e as pessoas do atlas. À direita, a versão de superfície: mosaico, capas, fundos. Uma nunca faz o trabalho da outra.' : 'Left of each pair, the data version: chart categories and the atlas\'s people. Right, the surface version: mosaic, covers, backgrounds. Neither ever does the other\'s job.'}</p>
         <h3 className="mt-10 text-base font-bold uppercase tracking-wider text-stone-500">{pt ? 'Semânticas' : 'Semantic'}</h3>
-        <div className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-4">{SEMANTIC.map(([n, t, h, note]) => <Swatch key={t} name={n} token={t} hex={h} note={note} />)}</div>
+        <div className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-4">{SEMANTIC.map(([n, t, h, note]) => <Swatch key={t} name={tr(pt, n)} token={t} hex={h} note={tr(pt, note)} />)}</div>
         <ul className="mt-8 grid gap-2 md:grid-cols-2">
           <Rule yes>{pt ? 'Separar por croma: os dados são saturados, o cromo fica abaixo de 15% de saturação.' : 'Separate by chroma: data is saturated, chrome stays under 15% saturation.'}</Rule>
           <Rule yes>{pt ? 'Um número é tinta, salvo se o assunto tem cor própria: clube, partido, sinal.' : 'A number is ink, unless its subject has a colour of its own: club, party, sign.'}</Rule>
@@ -277,9 +285,9 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
               <Action href="/populacao" locale={locale} arrow>{pt ? 'Explorar' : 'Explore'}</Action>
               <Action href="/economia" locale={locale} variant="secondary" arrow>{pt ? 'Comparar' : 'Compare'}</Action>
               <Action href="/metodologia" locale={locale} variant="tint" arrow>{pt ? 'Saber mais' : 'Learn more'}</Action>
-              <Action href="/sobre" locale={locale} variant="text">{pt ? 'Ver metodologia' : 'See methodology'}</Action>
+              <Action href="/metodologia" locale={locale} variant="text">{pt ? 'Ver metodologia' : 'See methodology'}</Action>
             </div>
-            <p className="mt-4 text-xs leading-relaxed text-stone-500">{pt ? 'Pinho para a ação principal, uma por vista; creme com contorno para a secundária; tinta pervinca para entradas suaves; texto sublinhado ao passar. 48 px de altura, cantos de 10 px, seta só quando a ação leva a algum lado. O foco de teclado é um anel duplo, papel por dentro e pinho por fora, igual em todos os elementos.' : 'Pine for the main action, one per view; bordered cream for the secondary; periwinkle tint for soft entrances; underlined text on hover. 48px tall, 10px corners, an arrow only when the action leads somewhere. Keyboard focus is a double ring, paper inside and pine outside, the same on every element.'}</p>
+            <p className="mt-4 text-xs leading-relaxed text-stone-500">{pt ? 'Pinho para a ação principal, uma por vista; creme com contorno para a secundária; tinta pervinca para entradas suaves; texto em tinta, sempre sublinhado. 48 px de altura, cantos de 10 px, seta só quando a ação leva a algum lado. O foco de teclado é um anel duplo, papel por dentro e pinho por fora, igual em todos os elementos.' : 'Pine for the main action, one per view; bordered cream for the secondary; periwinkle tint for soft entrances; ink text, always underlined. 48px tall, 10px corners, an arrow only when the action leads somewhere. Keyboard focus is a double ring, paper inside and pine outside, the same on every element.'}</p>
           </div>
           <div className="rounded-2xl border border-line bg-cream p-6">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Campos e seletores' : 'Fields and selectors'}</p>
@@ -318,11 +326,12 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-line bg-cream p-6">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Frase e descrição' : 'Line and description'}</p>
-            <p className="mt-4 text-2xl font-extrabold tracking-[-0.03em] text-ink">Dados para compreender Portugal.</p>
-            <p className="mt-3 text-base leading-relaxed text-ink">Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.</p>
+            <p className="mt-4 text-2xl font-extrabold tracking-[-0.03em] text-ink">{BRAND_LINE.pt}</p>
+            <p className="mt-3 text-base leading-relaxed text-ink">{BRAND_DESCRIPTOR.pt}</p>
+            <p lang="en" className="mt-2 text-sm leading-relaxed text-stone-600">{BRAND_LINE.en} {BRAND_DESCRIPTOR.en}</p>
             <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Biografia · 160 caracteres' : 'Bio · 160 characters'}</p>
-            <p className="mt-2 text-sm leading-relaxed text-ink">Previsões e análises sobre Portugal, com a incerteza à vista. Economia, Liga Portugal, eleições e um atlas humano do país. Metodologia aberta.</p>
-            <p className="mt-2 text-sm leading-relaxed text-stone-600">Forecasts and analysis on Portugal, uncertainty in plain sight. Economy, Liga Portugal, elections and a human atlas of the country. Open methodology.</p>
+            <p className="mt-2 text-sm leading-relaxed text-ink">{BRAND_BIO.pt}</p>
+            <p lang="en" className="mt-2 text-sm leading-relaxed text-stone-600">{BRAND_BIO.en}</p>
           </div>
           <div className="rounded-2xl border border-line bg-cream p-6">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Como se escreve' : 'How it is written'}</p>
@@ -347,7 +356,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         <ul className="mt-6 divide-y divide-line rounded-2xl border border-line bg-cream">
           {KIT.map(([file, size, note]) => (
             <li key={file} className="flex items-center justify-between gap-4 px-4 py-3">
-              <div><div className="font-mono text-sm text-ink">{file.split('/').pop()}</div><div className="text-xs text-stone-500">{size} · {note}</div></div>
+              <div><div className="font-mono text-sm text-ink">{file.split('/').pop()}</div><div className="text-xs text-stone-500">{size} · {tr(pt, note)}</div></div>
               <a href={`/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />{pt ? 'Descarregar' : 'Download'}</a>
             </li>
           ))}
@@ -359,12 +368,13 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         <ul className="divide-y divide-line rounded-xl border border-line bg-cream">
           {FILES.map(([file, note]) => (
             <li key={file} className="flex items-center justify-between gap-4 px-4 py-3">
-              <div><div className="font-mono text-sm text-ink">{file}</div><div className="text-xs text-stone-500">{note}</div></div>
+              <div><div className="font-mono text-sm text-ink">{file}</div><div className="text-xs text-stone-500">{tr(pt, note)}</div></div>
               <a href={`/brand/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />{pt ? 'Descarregar' : 'Download'}</a>
             </li>
           ))}
         </ul>
       </Section>
+      </main>
 
       <SiteFooter locale={locale} />
     </div>

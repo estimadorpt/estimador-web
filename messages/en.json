@@ -148,7 +148,8 @@
     "topicsIntro": "Every piece is tagged by subject. Follow a topic to see everything published on it.",
     "topicsAll": "All topics",
     "topicEyebrow": "Topic",
-    "topicCount": "{count, plural, =1 {1 piece} other {# pieces}}"
+    "topicCount": "{count, plural, =1 {1 piece} other {# pieces}}",
+    "onlyInPortugueseNotice": "This article is only available in Portuguese. Showing the Portuguese version."
   },
   "subscribe": {
     "eyebrow": "Get it by email",
@@ -166,7 +167,7 @@
   },
   "about": {
     "title": "About estimador.pt",
-    "subtitle": "Independent data analysis for Portugal: economy, sport and elections",
+    "subtitle": "Forecasts and analysis with the uncertainty in plain sight: the economy, Liga Portugal, elections and population.",
     "mission": "Our Mission",
     "whatWeDo": "What We Do",
     "approach": "Our Approach",
@@ -935,5 +936,12 @@
     "products": "Products",
     "project": "The project",
     "privacy": "Privacy"
+  },
+  "notFound": {
+    "title": "Page not found | estimador.pt",
+    "heading": "This path leads nowhere.",
+    "lede": "The page you are looking for does not exist, has moved, or was never estimated.",
+    "home": "Back to the start",
+    "atlas": "Explore the atlas"
   }
 }

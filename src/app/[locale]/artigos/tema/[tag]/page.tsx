@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import { setRequestLocale } from '@/i18n/request-locale';
 import type { Metadata } from 'next';
 
 import { Header } from '@/components/Header';
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { ArticleRow } from '@/components/articles/ArticleRow';
 import { Link } from '@/i18n/routing';
@@ -37,7 +39,7 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   const group = findTagGroup(getMDXArticlesByLocale(locale), tag);
 
   if (!group) {
-    return { title: 'estimador.pt', robots: { index: false, follow: false } };
+    return { title: t('notFound.title'), robots: { index: false, follow: false } };
   }
 
   const availableLocales = SITE_LOCALES.filter(candidate =>
@@ -55,6 +57,7 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
 
 export default async function TagPage({ params }: TagPageProps) {
   const { locale, tag } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const group = findTagGroup(getMDXArticlesByLocale(locale), tag);
 
@@ -66,42 +69,29 @@ export default async function TagPage({ params }: TagPageProps) {
     <div className="min-h-screen bg-paper">
       <Header />
 
-      <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-4 py-12">
-        <nav className="mb-8">
-          <Link
-            href="/artigos/tema"
-            locale={locale}
-            className="text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-stone-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-          >
-            ← {t('articles.topicsHeading')}
-          </Link>
-        </nav>
+      <main id="main-content" tabIndex={-1}>
+        <PageHero
+          width="4xl"
+          compact
+          back={{ href: '/artigos/tema', label: t('articles.topicsHeading'), locale }}
+          eyebrow={t('articles.topicEyebrow')}
+          title={group.label}
+          meta={<span>{t('articles.topicCount', { count: group.articles.length })}</span>}
+        />
 
-        <header className="mb-8">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
-            {t('articles.topicEyebrow')}
+        <div className="max-w-4xl mx-auto px-4 pt-8 pb-12">
+          <ul className="border-t-2 border-stone-800">
+            {group.articles.map(article => (
+              <ArticleRow key={article.slug} article={article} locale={locale} />
+            ))}
+          </ul>
+
+          <p className="mt-10 text-sm">
+            <Link href="/artigos" locale={locale} className="font-semibold text-ink underline underline-offset-4">
+              {t('articles.backToArticles')}
+            </Link>
           </p>
-          <h1 className="mt-2 text-3xl text-stone-900">{group.label}</h1>
-          <p className="mt-3 text-sm text-stone-500">
-            {t('articles.topicCount', { count: group.articles.length })}
-          </p>
-        </header>
-
-        <ul className="border-t-2 border-stone-800">
-          {group.articles.map(article => (
-            <ArticleRow key={article.slug} article={article} locale={locale} />
-          ))}
-        </ul>
-
-        <p className="mt-10">
-          <Link
-            href="/artigos"
-            locale={locale}
-            className="text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-stone-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-          >
-            ← {t('articles.backToArticles')}
-          </Link>
-        </p>
+        </div>
       </main>
       <SiteFooter locale={locale} />
     </div>

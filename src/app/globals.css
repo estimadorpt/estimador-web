@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -19,7 +18,9 @@
   --font-sans: 'Manrope', system-ui, sans-serif;
   --font-display: 'Manrope', system-ui, sans-serif;
   /* The reading face: only inside the body of long-form pieces. */
-  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  /* Self-hosted (src/app/fonts.ts): Manrope by family name from @fontsource,
+     Newsreader through the variable next/font sets on <html>. */
+  --font-serif: var(--font-newsreader), Georgia, 'Times New Roman', serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 
   /* Surfaces and ink */
@@ -301,6 +302,18 @@
     outline: 2px solid var(--color-ink);
     outline-offset: 3px;
     box-shadow: 0 0 0 2px var(--color-paper);
+  }
+
+  /* Links are ink with an underline at rest, never only on hover. A text
+     link that asks for an underline on hover (`hover:underline`) gets it all
+     the time; an anchor with no classes at all, inside running text, is
+     underlined too. Navigation, actions and cards style their anchors with
+     their own classes and are left alone; `no-underline` still wins, since
+     utilities sit above this layer. */
+  a[class~="hover:underline"],
+  :where(p, li, dd, figcaption, td, blockquote) > a:not([class]) {
+    text-decoration-line: underline;
+    text-underline-offset: 4px;
   }
 
   body {
