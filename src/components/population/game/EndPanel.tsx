@@ -137,9 +137,9 @@ function Stats({ stats, locale, highlight }: { stats: GameStats; locale: Locale;
     <div className="mt-5">
       <h3 className="text-base font-bold text-ink">{t.statsTitle}</h3>
       <p className="text-xs text-stone-500">{t.statsNote}</p>
-      <dl className="mt-3 grid grid-cols-4 gap-2">
+      <dl className="mt-3 grid grid-cols-2 gap-2 min-[420px]:grid-cols-4">
         {tiles.map(([label, value]) => (
-          <div key={label} className="flex flex-col-reverse rounded-xl border border-line bg-paper px-2 py-2.5 text-center">
+          <div key={label} className="flex min-w-0 flex-col-reverse rounded-xl border border-line bg-paper px-2 py-2.5 text-center">
             <dt className="mt-0.5 text-[11px] font-semibold leading-tight text-stone-500">{label}</dt>
             <dd className="font-display text-2xl font-extrabold tabular-nums text-ink">{value}</dd>
           </div>

@@ -134,7 +134,7 @@ sha256sum checksums.sha256`;
             <Section id="versao" title={pt ? 'Que versão é esta?' : 'Which release is this?'}>
               <Facts rows={[
                 [pt ? 'Versão' : 'Release', <>{release.name} {release.version}, {pt ? 'publicada a' : 'published'} {formatDay(release.published, locale)}</>],
-                [pt ? 'Ano de referência' : 'Reference year', pt ? `2021: calibrada nos Censos 2021 do INE (${release.census_vintage}).` : `2021: calibrated to INE’s 2021 Census (${release.census_vintage}).`],
+                [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: calibrada nos Censos 2021 do INE.' : '2021: calibrated to INE’s 2021 Census.'],
                 [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span><span className="break-all font-mono text-[13px]">sha256 {release.model_sha256}</span></>],
                 [pt ? 'Código' : 'Code', <span key="c" className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>],
                 [pt ? 'Versão anterior' : 'Previous release', <>
