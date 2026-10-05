@@ -97,12 +97,12 @@ export default async function MethodologyPage({
           {(pt ? [
             ['População', 'Como é gerada uma população sintética?', `Dados de partida, níveis de qualidade e privacidade da versão ${POPULATION_RELEASE}.`, '/populacao/metodologia'],
             ['Futebol', 'O que sustenta estas probabilidades?', 'Modelo, simulações e pressupostos.', '/desporto/liga/metodologia'],
-            ['Economia', 'De onde vem esta leitura?', 'Fontes, atualização, avaliação e limites.', '/economia/metodologia'],
+            ['Economia', 'Como vamos ler a economia?', 'Fontes, atualização, avaliação e limites.', '/economia/metodologia'],
             ['Eleições', 'Como são combinadas as sondagens?', 'Modelos eleitorais e incerteza, nesta página.', '#eleicoes'],
           ] : [
             ['Population', 'How is a synthetic population generated?', `Inputs, quality tiers and privacy of release ${POPULATION_RELEASE}.`, '/populacao/metodologia'],
             ['Football', 'What supports these probabilities?', 'Model, simulations and assumptions.', '/desporto/liga/metodologia'],
-            ['Economy', 'Where does this reading come from?', 'Sources, updates, evaluation and limitations.', '/economia/metodologia'],
+            ['Economy', 'How will we read the economy?', 'Sources, updates, evaluation and limitations.', '/economia/metodologia'],
             ['Elections', 'How are polls combined?', 'Election models and uncertainty, on this page.', '#eleicoes'],
           ]).map(([label,question,description,href]) => <div key={label} className="py-5">
             <p className="text-xs font-bold uppercase tracking-wider text-ink-muted">{label}</p>
