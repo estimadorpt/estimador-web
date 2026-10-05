@@ -6,8 +6,8 @@ import { createPageMetadata } from '@/lib/metadata';
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   return createPageMetadata({ locale, path: '/populacao/miniatura',
-    title: locale === 'pt' ? 'Portugal em miniatura — demonstração interativa' : 'Portugal in miniature — interactive demo',
-    description: locale === 'pt' ? 'Explora um bairro imaginado: 100 pessoas, 30 agregados e três perspetivas. Demonstração com dados fictícios.' : 'Explore an imagined neighbourhood: 100 people, 30 households and three perspectives. A demo with fictional data.',
+    title: locale === 'pt' ? 'Pessoas imaginadas: como se constrói uma população sintética' : 'Imagined people: how a synthetic population is built',
+    description: locale === 'pt' ? 'Um explicador com pessoas inventadas: 100 pessoas e 30 agregados num bairro imaginado, para mostrar como se constrói uma população sintética. Nenhum número é de Portugal.' : 'An explainer with invented people: 100 people and 30 households in an imagined neighbourhood, to show how a synthetic population is built. No number is about Portugal.',
     index: false,
   });
 }

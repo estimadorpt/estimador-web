@@ -33,21 +33,38 @@ function slugsOnDisk(): string[] {
 
 describe('analytics publication boundary', () => {
   it('removes reversible queries and selected geography from page categories', () => {
-    expect(analyticsPath('/pt/populacao/explorar/?q=household#income')).toBe('/pt/populacao/explorar/');
-    expect(analyticsPath('/en/populacao/retrato/010200/?income=3500')).toBe('/en/populacao/retrato/');
+    expect(analyticsPath('/pt/populacao/dados/?q=household#income')).toBe('/pt/populacao/dados/');
     expect(analyticsPath('/pt/populacao/v/release/q/secret')).toBe('/pt/populacao/consulta/');
     expect(analyticsPath('/pt/unknown/private-name')).toBe('/pt/other/');
   });
+
+  it('keeps the kind of population page and drops the place', () => {
+    // A parish is public geography, but the one a reader opens is often where
+    // they live (or where "use my location" put them): the code never leaves.
+    expect(analyticsPath('/pt/populacao/freguesia/010103/')).toBe('/pt/populacao/freguesia/');
+    expect(analyticsPath('/en/populacao/freguesia/0302FA/#idade')).toBe('/en/populacao/freguesia/');
+    expect(analyticsPath('/pt/populacao/freguesia/_/')).toBe('/pt/populacao/freguesia/');
+    expect(analyticsPath('/pt/populacao/regiao/viana-do-castelo/')).toBe('/pt/populacao/regiao/');
+    expect(analyticsPath('/populacao/v/1.0.0/q/q1_d35d135a32106a5bcf61')).toBe('/other/');
+    expect(analyticsPath('/pt/populacao/v/1.0.0/q/q1_d35d135a32106a5bcf61')).toBe('/pt/populacao/consulta/');
+    for (const surface of ['misteriosa', 'qualidade', 'dados', 'metodologia', 'consulta', 'miniatura']) {
+      expect(analyticsPath(`/pt/populacao/${surface}/?dia=12`)).toBe(`/pt/populacao/${surface}/`);
+    }
+    expect(analyticsPath('/pt/populacao/')).toBe('/pt/populacao/');
+    // Pages of the retired fictional atlas, and anything invented, fold into the hub.
+    expect(analyticsPath('/pt/populacao/retrato/010200/')).toBe('/pt/populacao/');
+    expect(analyticsPath('/pt/populacao/0302FA/')).toBe('/pt/populacao/');
+  });
   it('filters SDK-enriched automatic properties and person updates too', () => {
     const cleaned = sanitizeAnalyticsEvent({ uuid: 'test', event: '$pageview',
-      properties: { $current_url: 'https://estimador.pt/pt/populacao/retrato/010200/?q=secret',
+      properties: { $current_url: 'https://estimador.pt/pt/populacao/freguesia/010200/?q=secret',
         $referrer: 'https://example.com/?email=person', $initial_current_url: '?q=secret',
         answers: { income: 3500 }, token: 'public-project-key', distinct_id: '$posthog_cookieless' },
       $set: { email: 'private' }, $set_once: { geography: '010200' },
     });
     const payload = JSON.stringify(cleaned);
     for (const value of ['010200', 'secret', 'income', 'email', '$referrer', '$set']) expect(payload).not.toContain(value);
-    expect(cleaned?.properties.$current_url).toBe('https://estimador.pt/pt/populacao/retrato/');
+    expect(cleaned?.properties.$current_url).toBe('https://estimador.pt/pt/populacao/freguesia/');
     expect(cleaned?.properties.$process_person_profile).toBe(false);
   });
   it('rejects replay, automatic interactions and undeclared events', () => {
@@ -95,7 +112,7 @@ describe('analytics publication boundary', () => {
     expect(analyticsPath('/en/artigos/<script>x</script>')).toBe('/en/artigos/artigo/');
     // Traversal resolves before the segments are read, so it cannot smuggle a
     // segment into the article branch — nor carry the geography out of the other.
-    expect(analyticsPath('/pt/artigos/../populacao/retrato/010200/')).toBe('/pt/populacao/retrato/');
+    expect(analyticsPath('/pt/artigos/../populacao/freguesia/010200/')).toBe('/pt/populacao/freguesia/');
     // The bucket name must not double as a real article, or the two rows merge.
     expect(PUBLISHED_ARTICLE_SLUGS).not.toContain('artigo');
     const cleaned = sanitizeAnalyticsEvent({ uuid: 'test', event: '$pageview',

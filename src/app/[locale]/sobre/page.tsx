@@ -70,7 +70,7 @@ function getAboutContent(locale: string): { content: string; actualLocale: strin
  * economy line is derived from a loader (`economyPaused`, the same guard the
  * economy page itself uses) so that line cannot drift from what /economia
  * actually shows. Population, football and elections status is stable
- * editorial fact — see CLAUDE.md's "Active Sections" and /populacao/dados —
+ * editorial fact — see CLAUDE.md's "Active Sections" and "Population section" —
  * not something a loader in this file's scope can safely compute.
  */
 function EstadoAtual({
@@ -96,8 +96,8 @@ function EstadoAtual({
     {
       label: pt ? 'População' : 'Population',
       status: pt
-        ? 'Demonstração com população fictícia — ainda sem lançamento nacional de investigação.'
-        : 'Demonstration with a fictional population — no national research release yet.',
+        ? 'Publicada — população sintética v1.0.0 (Censos 2021), lançada a 5 de outubro de 2026. Pessoas e agregados gerados, não pessoas reais.'
+        : 'Released — synthetic population v1.0.0 (2021 Census), published 5 October 2026. Generated people and households, not real people.',
     },
     {
       label: pt ? 'Liga Portugal' : 'Liga Portugal',

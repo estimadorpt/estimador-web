@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing";
 import { loadLigaSummary, loadLigaWithDeltas } from "@/lib/utils/football-data-loader";
 import { loadEconomyDashboard, loadPresidentialData, loadForecastData } from "@/lib/utils/data-loader";
 import { economyPaused } from "@/lib/utils/economy-time";
+import { loadPopulationMeta } from "@/lib/utils/population-data-loader";
 import { getArticlesBySection, getMDXArticlesByLocale } from "@/lib/mdx-articles";
 import { ALL_ELECTIONS } from "@/lib/config/elections";
 import { homepageConfig, resolveHomepageLayout, type HomeSection } from "@/lib/config/homepage";
@@ -64,7 +65,7 @@ export default async function HomePage({
   const t = await getTranslations({ locale, namespace: 'home' });
   const config = homepageConfig();
 
-  const [ligaSummary, economy] = await Promise.all([loadLigaSummary(), loadEconomyDashboard()]);
+  const [ligaSummary, economy, populationMeta] = await Promise.all([loadLigaSummary(), loadEconomyDashboard(), loadPopulationMeta()]);
   const ligaDeltas = ligaSummary ? (await loadLigaWithDeltas()).deltas : {};
   const economyPausedNow = economyPaused(economy?.as_of ?? economy?.vintage_date);
 
@@ -80,7 +81,7 @@ export default async function HomePage({
   const panel = (section: HomeSection, place: 'lead' | 'secondary' | 'support') => {
     switch (section) {
       case 'population':
-        return <PopulationPanel key={section} locale={locale} variant={place === 'lead' ? 'lead' : 'secondary'} />;
+        return <PopulationPanel key={section} locale={locale} variant={place === 'lead' ? 'lead' : 'secondary'} meta={populationMeta} />;
       case 'football':
         return <FootballPanel key={section} locale={locale} variant={place === 'support' ? 'support' : 'secondary'} snapshot={ligaSummary} deltas={ligaDeltas} />;
       case 'economy':

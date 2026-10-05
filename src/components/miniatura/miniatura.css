@@ -17,7 +17,7 @@
 @media(prefers-reduced-motion:reduce){.mini-scene *{animation:none!important;transition:none!important}}
 @media(max-width:720px){.mini-neighbourhoods{grid-template-columns:repeat(4,1fr)}.mini-neighbourhoods button{font-size:11px;min-height:44px}}
 
-.mini-atlas-origin{font-size:12px;color:#6e7d68;margin:-8px 0 20px;line-height:1.6}
+.mini-intro{max-width:1440px;margin:-8px auto 20px;font-size:14px;line-height:1.6;color:var(--mini-muted)}.mini-intro a{color:var(--mini-ink);font-weight:600;text-decoration:underline;text-underline-offset:4px}
 
 /* The homepage village is still by default and wakes up on request; the page
    respects reduced-motion regardless of the toggle. */

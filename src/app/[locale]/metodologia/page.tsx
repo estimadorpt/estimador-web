@@ -86,12 +86,12 @@ export default async function MethodologyPage({
         </header>
         <nav aria-label={pt ? 'Métodos por área' : 'Methods by area'} className="my-8 divide-y divide-line border-y border-line">
           {(pt ? [
-            ['População', 'Posso usar estes dados na minha investigação?', 'Disponibilidade, campos e limites da demonstração.', '/populacao/dados'],
+            ['População', 'Como é gerada uma população sintética?', 'Dados de partida, decisões de publicação, qualidade e privacidade da versão 1.0.0.', '/populacao/metodologia'],
             ['Futebol', 'O que sustenta estas probabilidades?', 'Modelo, simulações e pressupostos.', '/desporto/liga/metodologia'],
             ['Economia', 'De onde vem esta leitura?', 'Fontes, atualização, avaliação e limites.', '/economia/metodologia'],
             ['Eleições', 'Como são combinadas as sondagens?', 'Modelos eleitorais e incerteza, nesta página.', '#eleicoes'],
           ] : [
-            ['Population', 'Can I use these data in my research?', 'Availability, fields and demonstration limits.', '/populacao/dados'],
+            ['Population', 'How is a synthetic population generated?', 'Inputs, publication decisions, quality and privacy of release 1.0.0.', '/populacao/metodologia'],
             ['Football', 'What supports these probabilities?', 'Model, simulations and assumptions.', '/desporto/liga/metodologia'],
             ['Economy', 'Where does this reading come from?', 'Sources, updates, evaluation and limitations.', '/economia/metodologia'],
             ['Elections', 'How are polls combined?', 'Election models and uncertainty, on this page.', '#eleicoes'],

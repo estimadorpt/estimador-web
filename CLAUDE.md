@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **estimador.pt** is a multi-domain data analysis platform for Portugal, built with Next.js. It provides data-driven forecasts and analysis across different domains (football, elections, and more), with a professional editorial-style interface and interactive visualizations.
 
 ### Active Sections
+- **População** (`/populacao/`) — open synthetic population v1.0.0 (Censos 2021), parish by parish (see "Population section")
 - **Liga Portugal** (`/desporto/liga/`) — Bayesian football league forecasts
 - **Presidential Elections 2026** (`/eleicoes/presidenciais/`) — Presidential election forecast
 - **Parliamentary Elections 2025** (`/eleicoes/legislativas/`) — Parliamentary election results (archive)
@@ -21,6 +22,7 @@ npm run start        # Start production server
 npm run lint         # Run ESLint
 ./scripts/sync-data.sh           # Sync all data from model projects
 ./scripts/sync-data.sh football  # Sync football data only
+./scripts/sync-data.sh population  # Publish the synthetic population release
 ```
 
 ### Deployment
@@ -67,7 +69,53 @@ The site's identity is the interval mark and the atlas palette. Everything lives
 
 ## Homepage
 
-Four subjects, one hierarchy (`src/app/[locale]/page.tsx`, panels in `src/components/home/`). Standard mode leads with the population atlas (2fr), football is the rail (1fr), economy and elections support in a second row; below 1100px the rows stack. The hierarchy is an editorial setting in `src/lib/config/homepage.ts`: set `HOMEPAGE` to `{ mode: 'election', election: '<id from elections.ts>' }` and rebuild to lead with an election; an id without published data falls back to the standard layout with a build-log warning, and a past election is labelled an archived forecast, never live. Preview without editing: `HOMEPAGE_MODE=election HOMEPAGE_ELECTION=presidential-2026 npm run build`. Every number on the page comes from the loaders (`loadLigaSummary` + `loadLigaWithDeltas`, `loadEconomyDashboard` with the pause rule, the election loaders in election mode only); the copy lives under `home` in `messages/*.json`. Illustrations are the four masters in `docs/design/homepage-claude-handoff/assets`; `node scripts/generate-home-art.mjs` writes their AVIF/WebP sizes to `public/images/home` and `<HomeArt>` picks between them. `HomeMiniature` (the village hero) is no longer on the homepage but stays available.
+Four subjects, one hierarchy (`src/app/[locale]/page.tsx`, panels in `src/components/home/`). Standard mode leads with the synthetic population (2fr: parish search, today's Freguesia misteriosa), football is the rail (1fr), economy and elections support in a second row; below 1100px the rows stack. The hierarchy is an editorial setting in `src/lib/config/homepage.ts`: set `HOMEPAGE` to `{ mode: 'election', election: '<id from elections.ts>' }` and rebuild to lead with an election; an id without published data falls back to the standard layout with a build-log warning, and a past election is labelled an archived forecast, never live. Preview without editing: `HOMEPAGE_MODE=election HOMEPAGE_ELECTION=presidential-2026 npm run build`. Every number on the page comes from the loaders (`loadPopulationMeta` counts, `loadLigaSummary` + `loadLigaWithDeltas`, `loadEconomyDashboard` with the pause rule, the election loaders in election mode only); the copy lives under `home` in `messages/*.json`. Illustrations are the four masters in `docs/design/homepage-claude-handoff/assets`; `node scripts/generate-home-art.mjs` writes their AVIF/WebP sizes to `public/images/home` and `<HomeArt>` picks between them. `HomeMiniature` (the village hero) is no longer on the homepage but stays available.
+
+## Population section
+
+The synthetic population release (`pt-synthpop` v1.0.0, published 2026-10-05; microdata on
+GitHub releases, `POPULATION_DOWNLOADS`). Config, routes and the release number live in
+`src/lib/config/population.ts`.
+
+- **Routes** (`src/app/[locale]/populacao/`): hub `/populacao`, parish pages
+  `/populacao/freguesia/{CODE}` (6-char DICOFRE, e.g. `0302FA`), regions
+  `/populacao/regiao/{slug}` (`regionSlug`), `/misteriosa` (daily game), `/qualidade`,
+  `/dados`, `/metodologia`, shared query links `/populacao/v/{release}/q/{id}` (served
+  by `/populacao/consulta`), and `/miniatura` (an imagined explainer with invented
+  people, noindex, not the release).
+- **Data**: `./scripts/sync-data.sh population` (`scripts/sync-population.py`) writes
+  `public/data/population/v{release}/` (meta, places, parish/<code>, national, game,
+  q, scorecard, release). Server code reads it through
+  `src/lib/utils/population-data-loader.ts`, browser code through
+  `src/lib/population/client.ts`. To bump: re-sync, change `POPULATION_RELEASE`.
+- **Data rules** (producer handoff doc 206 §3, enforced in review): every number comes
+  from a published response, the scorecard, release/meta counts or the INE counts in
+  places.json (labelled "INE, Censos 2021"); never compute new numbers from cells.
+  Single model run: no intervals, rankings, superlatives, "more/less than" or sorting by
+  value; no choropleth of a statistic (a map may colour by publication level only).
+  `publish`/`fallback`/`refuse` stay visible (fallback figures are the município's;
+  refusals show the reason, never a number); suppressed reads "Suprimido", absent "—".
+  No narrated synthetic individuals. `HONESTY.synthetic` sits near the first number on
+  every page; `HONESTY.positioning` is quoted verbatim. Copy helpers in
+  `src/lib/population/labels.ts`.
+- **Parish shell + rewrite**: one exported shell per locale
+  (`generateStaticParams` → `[{ code: '_' }]`); `staticwebapp.config.json` rewrites
+  every `/{locale}/populacao/freguesia/*` to it and `/populacao/v/*` to the consultation
+  page. The client reads the code from `window.location.pathname` after mount; the shell
+  emits no canonical or noindex in its static HTML (title, canonical and, for an unknown
+  code, noindex are set client-side). Never `useSearchParams`.
+- **Plain links**: link to parish pages with `ParishLink`/`parishHref` (a plain `<a>`),
+  never `next/link` — there is no RSC payload behind the rewrite.
+- **Site wiring**: `PopulationPanel` on the homepage (search, game, data link; counts from
+  `meta.json`), the `population` entry in `sections.ts`, the header item
+  (`nav.population`), the sitemap (hub pages discovered on disk, plus 20 regions and
+  3,092 parishes per locale from places.json; `miniatura` and `consulta` hidden), and
+  analytics (`analytics-privacy.ts` keeps the page kind, never the parish code or region).
+- **Copy**: page copy is inline (`locale === 'pt' ? … : …`) or in the section's copy
+  modules; the homepage panel's strings are `home.population*` in `messages/*.json`; the
+  About, privacy and site methodology pages carry one paragraph or row each.
+- **Smoke check**: `scripts/smoke-check.mjs` probes the rewritten parish and query URLs
+  and keeps a missing parish file a 404.
 
 ### Data Organization
 ```

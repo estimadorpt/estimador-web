@@ -8,7 +8,18 @@ const PUBLIC_ROUTES = new Set([
   'desporto/liga/metodologia', 'desporto/liga/dados', 'desporto/liga/2025-26',
   'desporto/liga/simulador', 'desporto/liga/jogo-previsoes',
 ]);
-const POPULATION_SURFACES = new Set(['casas', 'explorar', 'incerteza', 'metodologia', 'misteriosa', 'retrato']);
+/**
+ * The population section's page categories. A parish code or a region slug is
+ * public geography, not personal data, but here it is the reader's choice:
+ * people look up the parish they live in, and "use my location" lands them on
+ * the nearest one. Reporting /populacao/freguesia/0302FA/ would turn that into
+ * a location trail, and the privacy page promises the location never leaves
+ * the device and that selected geography is dropped. So the page kind is kept
+ * and the place never is.
+ */
+const POPULATION_SURFACES = new Set([
+  'freguesia', 'regiao', 'misteriosa', 'qualidade', 'dados', 'metodologia', 'consulta', 'miniatura',
+]);
 
 /**
  * An article slug names a thing the site published; it says nothing about who

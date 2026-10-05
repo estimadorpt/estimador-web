@@ -45,6 +45,23 @@ const MUST_404 = [
   '/pt/esta-pagina-nao-existe/',
   '/en/this-page-does-not-exist/',
   '/data/definitely-not-a-file.json',
+  // The parish page tells an unknown code apart by this 404.
+  '/data/population/v1.0.0/parish/ZZZZZZ.json',
+];
+
+/**
+ * URLs that exist only through a host rewrite, so the export has no file at
+ * that path and the walk below would never ask for them: the 3,092 parish
+ * pages share one shell (/{locale}/populacao/freguesia/_/), and a shared query
+ * link (/populacao/v/…) lands on the consultation page. A routing rule that
+ * stops matching would 404 every one of them.
+ */
+const MUST_200 = [
+  { route: '/pt/populacao/', type: 'text/html' },
+  { route: '/pt/populacao/freguesia/010103/', type: 'text/html' },
+  { route: '/en/populacao/freguesia/0302FA/', type: 'text/html' },
+  { route: '/populacao/v/1.0.0/q/q1_d35d135a32106a5bcf61', type: 'text/html' },
+  { route: '/data/population/v1.0.0/meta.json', type: 'application/json' },
 ];
 
 /** Group a route so `--sample` can cap the long dynamic families. */
@@ -54,6 +71,7 @@ function group(route) {
   if (parts[1] === 'desporto' && parts[3] === 'jogo') return 'jogo';
   if (parts[1] === 'desporto' && parts[3] === 'jogador') return 'jogador';
   if (parts[1] === 'desporto' && parts.length === 4) return 'equipa';
+  if (parts[1] === 'populacao' && (parts[2] === 'regiao' || parts[2] === 'freguesia') && parts[3]) return 'populacao';
   return 'core';
 }
 
@@ -153,6 +171,7 @@ const checks = [
     expect: 200,
     type: EXPECTED_TYPES[path.extname(route)],
   }))),
+  ...MUST_200.map(check => ({ ...check, expect: 200 })),
   ...MUST_404.map(route => ({ route, expect: 404 })),
 ];
 
