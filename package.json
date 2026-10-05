@@ -17,7 +17,8 @@
     "brand": "node scripts/generate-brand-identity.mjs && node scripts/generate-social-kit.mjs",
     "smoke": "node scripts/smoke-check.mjs",
     "check": "npm run validate:data && npm run typecheck && npm run lint && npm run test",
-    "note": "node scripts/new-note.mjs"
+    "note": "node scripts/new-note.mjs",
+    "messages:unused": "node scripts/lib/unused-messages.mjs"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.9",

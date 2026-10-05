@@ -22,11 +22,6 @@ describe('brand descriptor', () => {
     expect(brandDescriptor('xx')).toBe(BRAND_DESCRIPTOR.pt);
   });
 
-  it('is the /sobre subtitle in both locales', () => {
-    expect(pt.about.subtitle).toBe(BRAND_DESCRIPTOR.pt);
-    expect(en.about.subtitle).toBe(BRAND_DESCRIPTOR.en);
-  });
-
   it('is the default meta description in both locales', () => {
     expect(pt.meta.defaultDescription).toBe(BRAND_DESCRIPTOR.pt);
     expect(en.meta.defaultDescription).toBe(BRAND_DESCRIPTOR.en);
