@@ -1,0 +1,35 @@
+/* Motion for the parish map: feedback 140–200 ms, a panel-length settle for
+   parishes arriving after a choice. Nothing moves under reduced motion. */
+
+.labels {
+  transition: opacity 180ms ease-out;
+}
+
+.moving .labels {
+  opacity: 0;
+  transition: none;
+}
+
+.parish {
+  animation: parish-in 260ms ease-out both;
+}
+
+@keyframes parish-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.shape {
+  transition: fill 140ms ease-out;
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .labels,
+  .shape {
+    transition: none;
+  }
+  .parish {
+    animation: none;
+  }
+}
