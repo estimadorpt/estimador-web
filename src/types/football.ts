@@ -58,6 +58,9 @@ export interface MatchdayResult {
   away: string;
   home_goals: number;
   away_goals: number;
+  /** The round the game belongs to, which can differ from the file it was
+   * published in (a postponed game, a late backfill). */
+  matchday?: number;
 }
 
 // Remaining match in current matchday (not yet played)

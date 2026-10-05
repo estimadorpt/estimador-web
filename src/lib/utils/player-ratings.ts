@@ -16,6 +16,12 @@
  * and `diagnostics` is where it lands.
  */
 
+import type {
+  PlayerDetailData,
+  PlayerDetailEntry,
+} from '@/components/charts/football/PlayerProfile';
+import type { PlayerSkillData } from '@/components/charts/football/PlayerSkillRanking';
+
 /* ------------------------------------------------------------- primitives */
 
 type Json = Record<string, unknown>;
@@ -706,4 +712,63 @@ export function rankMovement(
   const before = entry.goalsRank ?? goalsRankByPlayer?.[entry.player] ?? null;
   if (before !== null && entry.rank !== null) return before - entry.rank;
   return entry.rankChange;
+}
+
+/* ------------------------------------------------------ player page set */
+
+/**
+ * The player pages, reconciled with the ranking /jogadores shows.
+ *
+ * players.json (the ranking, current squads only) and players_detail.json
+ * (history and recent form behind each page) are written by separate export
+ * steps and have come from different model runs: in October 2026 a page said
+ * "#1" for a player the ranking did not list, and another said "#2" for the
+ * ranking's number one. So a page exists only for a player the ranking lists,
+ * at the ranking's rank and with the ranking's headline numbers; the detail
+ * file contributes only the season-by-season history and recent matches.
+ * Players whose club is not in the current league table get no page (their
+ * club link would lead nowhere).
+ *
+ * With no ranking published, the detail file stands alone, still limited to
+ * current clubs. Pure; the loader passes the parsed feeds in.
+ */
+export function reconcilePlayerPages(
+  detail: PlayerDetailData | null,
+  ranking: PlayerSkillData | null,
+  currentTeams: ReadonlySet<string>,
+): PlayerDetailData | null {
+  if (!detail?.players?.length) return null;
+  const inLeague = (team: string) => currentTeams.size === 0 || currentTeams.has(team);
+
+  let players: PlayerDetailEntry[];
+  let total: number;
+  if (ranking?.players?.length) {
+    const ranked = new Map(ranking.players.map((p) => [p.player, p]));
+    players = detail.players.flatMap((p) => {
+      const r = ranked.get(p.player);
+      if (!r) return [];
+      return [{
+        ...p,
+        rank: r.rank,
+        team: r.team,
+        minutes: r.minutes,
+        matches: r.matches,
+        goals: r.goals,
+        goals_per_90: r.goals_per_90,
+        sar: r.sar,
+        skill_lo: r.skill_lo,
+        skill_hi: r.skill_hi,
+        xg_skill_per_90: r.xg_skill_per_90 ?? p.xg_skill_per_90,
+        p_above_replacement: r.p_above_replacement ?? p.p_above_replacement,
+      }];
+    });
+    total = ranking.players.length;
+  } else {
+    players = [...detail.players];
+    total = detail.n_players;
+  }
+
+  players = players.filter((p) => inLeague(p.team)).sort((a, b) => a.rank - b.rank);
+  if (players.length === 0) return null;
+  return { ...detail, n_players: total, players };
 }

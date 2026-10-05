@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatDecimal } from "@/lib/football-format";
 import { ligaTeamColors, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
 import { Dices } from "lucide-react";
 
@@ -41,8 +42,8 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
     champion: pt ? "Campeão" : "Champion",
     inSims: (p: number) =>
       pt
-        ? `acontece em ${(p * 100).toFixed(p < 0.01 ? 1 : 0)}% das simulações`
-        : `happens in ${(p * 100).toFixed(p < 0.01 ? 1 : 0)}% of simulations`,
+        ? `acontece em ${formatDecimal(p * 100, "pt", p < 0.01 ? 1 : 0)}% das simulações`
+        : `happens in ${formatDecimal(p * 100, "en", p < 0.01 ? 1 : 0)}% of simulations`,
     relegated: pt ? "Despromovidos" : "Relegated",
     ptsLabel: pt ? "Pts" : "Pts",
     disclaimer: pt

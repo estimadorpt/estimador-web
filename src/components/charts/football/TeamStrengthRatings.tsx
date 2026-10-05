@@ -2,6 +2,9 @@
 
 import { ligaTeamShortNames, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { TeamStrength } from "@/types/football";
+import { useLocale } from "next-intl";
+import { ChartTable } from "@/components/viz/ChartTable";
+import { formatSigned } from "@/lib/football-format";
 
 interface TeamStrengthRatingsProps {
   strengths: Record<string, TeamStrength>;
@@ -18,7 +21,11 @@ const GOOD_COLOR = '#3a6b50';   // green-800 — strong attack or strong defense
 const WEAK_COLOR = '#a3543a';   // red-600  — weak attack or weak defense
 
 export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsProps) {
+  const locale = useLocale();
   if (!strengths || Object.keys(strengths).length === 0) return null;
+  const pt = locale !== "en";
+  const attackLabel = labels.attack ?? (pt ? "Ataque" : "Attack");
+  const defenseLabel = labels.defense ?? (pt ? "Defesa" : "Defence");
 
   const entries = Object.entries(strengths)
     .map(([team, s]) => ({ team, attack: s.attack, defense: s.defense, composite: s.attack - s.defense }))
@@ -61,7 +68,11 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
           const attPos = 50 + attPct;
 
           return (
-            <div key={entry.team} className="flex items-center gap-2">
+            <div
+              key={entry.team}
+              className="flex items-center gap-2"
+              title={`${teamDisplayName(entry.team)}: ${attackLabel.toLowerCase()} ${formatSigned(entry.attack, locale, 2)}, ${defenseLabel.toLowerCase()} ${formatSigned(-entry.defense, locale, 2)}`}
+            >
               <div className="w-16 sm:w-32 flex items-center gap-1.5 flex-shrink-0">
                 {teamLogoSrc(entry.team) ? (
                   <img src={teamLogoSrc(entry.team)} alt="" className="w-4 h-4 object-contain flex-shrink-0" />
@@ -139,6 +150,17 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
           );
         })}
       </div>
+      <ChartTable
+        caption={pt
+          ? "Forças de ataque e de defesa por equipa, em escala logarítmica centrada na média da Liga; positivo é melhor nas duas colunas"
+          : "Attack and defence strengths by team, on a log scale centred on the league average; positive is better in both columns"}
+        columns={[pt ? "Equipa" : "Team", attackLabel, defenseLabel]}
+        rows={entries.map(e => [
+          teamDisplayName(e.team),
+          formatSigned(e.attack, locale, 2),
+          formatSigned(-e.defense, locale, 2),
+        ])}
+      />
     </div>
   );
 }

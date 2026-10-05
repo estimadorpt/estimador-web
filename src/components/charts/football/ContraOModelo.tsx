@@ -4,6 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { teamDisplayName, teamLogoSrc } from "@/lib/config/football";
 import { Swords, Lock, Trash2, SlidersHorizontal, Check, Share2 } from "lucide-react";
 import { useSeasonGame } from "@/hooks/useSeasonGame";
+import { formatDecimal, formatKickoff, formatLongDate } from "@/lib/football-format";
+
+/** RPS values: three decimals in the page's number format. */
+const rpsFmt = (v: number, pt: boolean) => formatDecimal(v, pt ? "pt" : "en", 3);
 import { SeasonAccount } from "./SeasonAccount";
 import { SeasonLeaderboard } from "./SeasonLeaderboard";
 import {
@@ -161,6 +165,16 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
     fine: pt ? "Ajuste fino" : "Fine tune",
     matchday: pt ? "Jornada" : "Matchday",
     locked: pt ? "Jornada fechada" : "Matchday locked",
+    // The round locks as a unit at its first lock time (game_fixtures.json
+    // locks_at), shown in Lisbon time.
+    closes: (when: string) =>
+      pt
+        ? `Fecha ${when} (hora de Lisboa), no primeiro jogo da jornada.`
+        : `Closes ${when} (Lisbon time), at the round's first game.`,
+    closesUnconfirmed: pt
+      ? "Há horários por confirmar: a jornada fecha no primeiro jogo."
+      : "Some kickoffs are still to be confirmed: the round closes at its first game.",
+    toBeConfirmed: pt ? "horário por confirmar" : "kickoff to be confirmed",
     lockedKickoff: pt
       ? "Fechou ao primeiro pontapé de saída."
       : "Locked at the first kickoff.",
@@ -228,8 +242,8 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
 
   const shareText = useMemo(() => {
     if (season.matchesScored === 0) return "";
-    const u = season.userMean?.toFixed(3) ?? "-";
-    const m = season.modelMean?.toFixed(3) ?? "-";
+    const u = season.userMean != null ? rpsFmt(season.userMean, pt) : "-";
+    const m = season.modelMean != null ? rpsFmt(season.modelMean, pt) : "-";
     return pt
       ? `Contra o Modelo — Liga Portugal ${data.season}\nEu ${u} vs Modelo ${m} (RPS médio, ${season.matchesScored} jogos)\n${t.beatLine(season.roundsWon, season.roundsCounted)}\nestimador.pt/pt/desporto/liga/jogo-previsoes`
       : `Beat the Model — Liga Portugal ${data.season}\nMe ${u} vs Model ${m} (mean RPS, ${season.matchesScored} matches)\n${t.beatLine(season.roundsWon, season.roundsCounted)}\nestimador.pt/en/desporto/liga/jogo-previsoes`;
@@ -314,7 +328,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
                   className="text-3xl sm:text-4xl font-bold tabular-nums"
                   style={{ color: USER_COLOR }}
                 >
-                  {season.userMean!.toFixed(3)}
+                  {rpsFmt(season.userMean!, pt)}
                 </div>
               </div>
               <div className="p-4 sm:p-6">
@@ -325,7 +339,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
                   className="text-3xl sm:text-4xl font-bold tabular-nums"
                   style={{ color: MODEL_COLOR }}
                 >
-                  {season.modelMean!.toFixed(3)}
+                  {rpsFmt(season.modelMean!, pt)}
                 </div>
               </div>
             </div>
@@ -372,6 +386,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
           onToggleFine={key => setOpenFine(prev => ({ ...prev, [key]: !prev[key] }))}
           onPick={updatePick}
           t={t}
+          pt={pt}
           outcomeLabel={outcomeLabel}
         />
       ) : (
@@ -418,7 +433,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
                   {t.you}
                 </div>
                 <div className="text-4xl font-bold tabular-nums" style={{ color: USER_COLOR }}>
-                  {season.userMean!.toFixed(3)}
+                  {rpsFmt(season.userMean!, pt)}
                 </div>
               </div>
               <div className="text-xl font-bold text-stone-300 pb-2">vs</div>
@@ -427,7 +442,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
                   {t.model}
                 </div>
                 <div className="text-4xl font-bold tabular-nums" style={{ color: MODEL_COLOR }}>
-                  {season.modelMean!.toFixed(3)}
+                  {rpsFmt(season.modelMean!, pt)}
                 </div>
               </div>
             </div>
@@ -478,6 +493,7 @@ type Labels = {
   inProgress: string; provisional: string; notPlayed: string; result: string;
   yourRps: string; modelRps: string; won: string; lost: string;
   you: string; model: string; confLabels: Record<Confidence, string>;
+  closes: (when: string) => string; closesUnconfirmed: string; toBeConfirmed: string;
   [k: string]: unknown;
 };
 
@@ -488,9 +504,11 @@ function RoundPicker({
   onToggleFine,
   onPick,
   t,
+  pt,
   outcomeLabel,
 }: {
   round: GameRound;
+  pt: boolean;
   picks: PickMap;
   openFine: Record<string, boolean>;
   onToggleFine: (key: string) => void;
@@ -502,6 +520,8 @@ function RoundPicker({
   outcomeLabel: (o: Outcome, f: GameFixture) => string;
 }) {
   const pickedCount = round.fixtures.filter(f => picks[f.key]).length;
+  const lock = roundLockState(round, Date.now());
+  const allConfirmed = round.fixtures.every(f => f.kickoffConfirmed !== false);
 
   return (
     <section>
@@ -513,7 +533,14 @@ function RoundPicker({
           {t.picked(pickedCount, round.fixtures.length)}
         </span>
       </div>
-      <p className="text-xs text-stone-400 mb-4">{t.hidden}</p>
+      {lock.lockAt !== null && (
+        <p className="text-xs text-stone-600 mb-1">
+          {allConfirmed
+            ? t.closes(formatKickoff(new Date(lock.lockAt).toISOString(), pt ? "pt" : "en"))
+            : t.closesUnconfirmed}
+        </p>
+      )}
+      <p className="text-xs text-stone-500 mb-4">{t.hidden}</p>
 
       <div className="space-y-3">
         {round.fixtures.map(fixture => {
@@ -539,6 +566,13 @@ function RoundPicker({
                   <img src={teamLogoSrc(fixture.away)} alt="" className="w-5 h-5 object-contain" />
                 )}
               </div>
+              {fixture.kickoff && (
+                <p className="-mt-2 mb-3 text-[11px] text-stone-500">
+                  {fixture.kickoffConfirmed === false
+                    ? `${formatLongDate(fixture.kickoff, pt ? "pt" : "en", { year: false })} · ${t.toBeConfirmed}`
+                    : formatKickoff(fixture.kickoff, pt ? "pt" : "en")}
+                </p>
+              )}
 
               {/* quick pick */}
               <div className="grid grid-cols-3 gap-2">
@@ -724,13 +758,13 @@ function RoundReview({
             <span className="text-stone-500">
               {t.you}{" "}
               <span className="font-bold tabular-nums" style={{ color: USER_COLOR }}>
-                {score.userMean!.toFixed(3)}
+                {rpsFmt(score.userMean!, pt)}
               </span>
             </span>
             <span className="text-stone-500">
               {t.model}{" "}
               <span className="font-bold tabular-nums" style={{ color: MODEL_COLOR }}>
-                {score.modelMean!.toFixed(3)}
+                {rpsFmt(score.modelMean!, pt)}
               </span>
             </span>
             {!score.complete && (
@@ -758,15 +792,15 @@ function RoundReview({
                       }`}
                     >
                       {s.edge > 0 ? "+" : ""}
-                      {s.edge.toFixed(3)}
+                      {rpsFmt(s.edge, pt)}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-stone-500 tabular-nums">
                     <span>
-                      {t.you} {userPct[oi]}% → {t.yourRps} {s.userRps.toFixed(3)}
+                      {t.you} {userPct[oi]}% → {t.yourRps} {rpsFmt(s.userRps, pt)}
                     </span>
                     <span>
-                      {t.model} {modelPct[oi]}% → {t.modelRps} {s.modelRps.toFixed(3)}
+                      {t.model} {modelPct[oi]}% → {t.modelRps} {rpsFmt(s.modelRps, pt)}
                     </span>
                   </div>
                 </div>

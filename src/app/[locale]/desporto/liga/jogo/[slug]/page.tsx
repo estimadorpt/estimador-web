@@ -3,9 +3,10 @@ import fs from "fs";
 import path from "path";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import {
@@ -21,13 +22,12 @@ import { ligaTeamColors, teamDisplayName, ligaTeamSlugs } from "@/lib/config/foo
 import { MatchProbabilityHero } from "@/components/charts/football/MatchProbabilityHero";
 import { MatchOutcomeImpact } from "@/components/charts/football/MatchOutcomeImpact";
 import { MatchTeamCompare } from "@/components/charts/football/MatchTeamCompare";
-import type {
-  FormEntry,
-  MatchTeamPanel,
-} from "@/components/charts/football/MatchTeamCompare";
+import type { MatchTeamPanel } from "@/components/charts/football/MatchTeamCompare";
 import { MatchSquadNews } from "@/components/charts/football/MatchSquadNews";
 import type { MatchSquadSide } from "@/components/charts/football/MatchSquadNews";
-import type { LigaHistorical, LigaPrediction } from "@/types/football";
+import { formFor } from "@/lib/football-form";
+import { currentAbsences } from "@/lib/football-injuries";
+import { formatInteger, formatLongDate, formatProbability } from "@/lib/football-format";
 
 const SITE = "https://estimador.pt";
 
@@ -102,45 +102,6 @@ export async function generateMetadata({
   });
 }
 
-/* --------------------------------------------------------------- form helper */
-
-function formFor(
-  team: string,
-  historical: LigaHistorical,
-  latest: LigaPrediction | null,
-  limit = 5,
-): FormEntry[] {
-  const seen = new Set<number>();
-  const sources: LigaPrediction[] = [];
-  for (const md of historical ?? []) {
-    if (md && !seen.has(md.matchday)) {
-      seen.add(md.matchday);
-      sources.push(md);
-    }
-  }
-  if (latest && !seen.has(latest.matchday)) sources.push(latest);
-
-  const entries: FormEntry[] = [];
-  for (const md of sources) {
-    for (const r of md.matchday_results ?? []) {
-      if (r.home !== team && r.away !== team) continue;
-      const isHome = r.home === team;
-      const gf = isHome ? r.home_goals : r.away_goals;
-      const ga = isHome ? r.away_goals : r.home_goals;
-      if (typeof gf !== "number" || typeof ga !== "number") continue;
-      entries.push({
-        matchday: md.matchday,
-        opponent: isHome ? r.away : r.home,
-        venue: isHome ? "H" : "A",
-        gf,
-        ga,
-        result: gf > ga ? "W" : gf === ga ? "D" : "L",
-      });
-    }
-  }
-  entries.sort((a, b) => a.matchday - b.matchday);
-  return entries.slice(-limit).reverse();
-}
 
 /* -------------------------------------------------------------------- page */
 
@@ -167,21 +128,19 @@ export default async function MatchPage({
     return (
       <div className="min-h-screen bg-paper">
         <Header />
-        <div className="max-w-3xl mx-auto px-4 py-20">
-          <p className="text-stone-500 mb-4">
-            {pt
-              ? "Não há jogos publicados de momento."
-              : "There are no published fixtures right now."}
-          </p>
-          <Link
-            href="/desporto/liga"
-            locale={locale}
-            className="text-sm text-stone-700 hover:text-stone-900 inline-flex items-center gap-1"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Liga Portugal
-          </Link>
-        </div>
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            width="5xl"
+            compact
+            back={{ href: "/desporto/liga", label: "Liga Portugal", locale }}
+            eyebrow="Liga Portugal"
+            title={pt ? "Sem jogos publicados" : "No fixtures published"}
+            lede={pt
+              ? "Não há jogos publicados de momento. A previsão da época continua na página da Liga."
+              : "There are no published fixtures right now. The season forecast is on the Liga page."}
+          />
+        </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }
@@ -196,9 +155,10 @@ export default async function MatchPage({
     otherMatches: pt ? "Outros jogos" : "Other fixtures",
     teamPage: pt ? "Página da equipa" : "Team page",
     noData: pt ? "Dados indisponíveis." : "Data not available.",
-    method: pt
-      ? "Probabilidades de um modelo bayesiano hierárquico de Poisson, a partir de 50 mil simulações da época."
-      : "Probabilities from a hierarchical Bayesian Poisson model, over 50k simulated seasons.",
+    method: (sims: string) =>
+      pt
+        ? `Probabilidades de um modelo bayesiano de Poisson bivariado, ajustado aos golos e aos remates à baliza das últimas quatro épocas da Primeira Liga e da Liga 2 (os jogos mais antigos pesam menos), com o valor de cada plantel como ponto de partida; ${sims} épocas simuladas.`
+        : `Probabilities from a bivariate Poisson Bayesian model, fitted to goals and shots on target from the last four seasons of the Primeira Liga and Liga 2 (older games count for less), with each squad's value as the starting point; ${sims} simulated seasons.`,
     methodLink: pt ? "Como funciona o modelo" : "How the model works",
   };
 
@@ -231,8 +191,11 @@ export default async function MatchPage({
     form: formFor(team, historical, prediction),
   });
 
+  // Absences only when the list is recent enough to be squad news for this
+  // forecast; entries whose expected return has passed are dropped.
+  const absences = currentAbsences(injuries, prediction?.timestamp);
   const injuriesFor = (team: string) =>
-    (injuries?.players ?? [])
+    absences.players
       .filter(p => p.team === team)
       .sort((a, b) => (b.market_value_eur ?? 0) - (a.market_value_eur ?? 0));
 
@@ -246,12 +209,12 @@ export default async function MatchPage({
     team,
     color,
     injuries: injuriesFor(team),
-    injurySummary: injuries?.teams?.find(t => t.team === team),
+    injurySummary: absences.teams.find(t => t.team === team),
     topPlayers: playersFor(team),
   });
 
   const unavailable = new Set(
-    (injuries?.players ?? [])
+    absences.players
       .filter(p => p.team === home || p.team === away)
       .map(p => p.player),
   );
@@ -261,26 +224,21 @@ export default async function MatchPage({
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
+      <PageHero
+        width="5xl"
+        compact
+        back={{ href: "/desporto/liga", label: L.back, locale }}
+        eyebrow={`Liga Portugal · ${pt ? "Jornada" : "Matchday"} ${fixture.matchday}${fixture.inProgressMatchday ? ` · ${L.live}` : ""}`}
+        title={`${teamDisplayName(home)} ${pt ? "x" : "vs"} ${teamDisplayName(away)}`}
+        lede={pt
+          ? "O que o modelo espera deste jogo e o que cada resultado muda para os dois clubes."
+          : "What the model expects from this match, and what each result changes for both clubs."}
+      />
 
-      {/* Hero */}
+      {/* Probabilities */}
       <section className="border-b border-stone-200">
         <div className="max-w-5xl mx-auto px-4 py-8 md:py-10">
-          <div className="flex items-center gap-3 mb-5">
-            <Link
-              href="/desporto/liga"
-              locale={locale}
-              className="text-stone-400 hover:text-stone-700 text-xs font-medium uppercase tracking-wider inline-flex items-center gap-1 transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              {L.back}
-            </Link>
-            {fixture.inProgressMatchday && (
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5">
-                {L.live}
-              </span>
-            )}
-          </div>
-
           <MatchProbabilityHero
             home={home}
             away={away}
@@ -291,6 +249,7 @@ export default async function MatchPage({
             pAway={fixture.p_away}
             matchday={fixture.matchday}
             kickoff={fixture.kickoff}
+            kickoffConfirmed={fixture.kickoffConfirmed}
             locale={locale}
             played={fixture.played}
           />
@@ -330,7 +289,7 @@ export default async function MatchPage({
                   key={team}
                   href={`/desporto/liga/${ligaTeamSlugs[team]}`}
                   locale={locale}
-                  className="text-xs font-medium text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+                  className="text-xs font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1"
                 >
                   {L.teamPage}: {teamDisplayName(team)}
                   <ArrowRight className="w-3 h-3" />
@@ -350,8 +309,8 @@ export default async function MatchPage({
               away={squadSide(away, awayColor)}
               locale={locale}
               unavailable={unavailable}
-              snapshotDate={injuries?.snapshot_date ?? null}
-              metricLabel={players?.metric_label}
+              absencesStatus={absences.status}
+              snapshotDate={absences.snapshotDate}
             />
           </div>
         </section>
@@ -373,11 +332,12 @@ export default async function MatchPage({
                   <div className="text-sm font-medium text-stone-800 truncate">
                     {teamDisplayName(f.home)} — {teamDisplayName(f.away)}
                   </div>
-                  <div className="text-[11px] text-stone-400 tabular-nums">
+                  <div className="text-[11px] text-stone-500 tabular-nums">
                     {f.p_home != null && f.p_draw != null && f.p_away != null
-                      ? `${Math.round(f.p_home * 100)}% · ${Math.round(
-                          f.p_draw * 100,
-                        )}% · ${Math.round(f.p_away * 100)}%`
+                      ? `${formatProbability(f.p_home, locale)} · ${formatProbability(
+                          f.p_draw,
+                          locale,
+                        )} · ${formatProbability(f.p_away, locale)}`
                       : pt
                         ? `Jornada ${f.matchday}`
                         : `Matchday ${f.matchday}`}
@@ -391,18 +351,21 @@ export default async function MatchPage({
 
       {/* Method footnote */}
       <section>
-        <div className="max-w-5xl mx-auto px-4 py-8 text-xs text-stone-400">
-          {L.method}{" "}
+        <div className="max-w-5xl mx-auto px-4 py-8 text-xs text-stone-500">
+          {L.method(formatInteger(prediction?.n_sims ?? 50000, locale))}{" "}
           <Link
             href="/desporto/liga/metodologia"
             locale={locale}
-            className="text-stone-600 hover:text-stone-900 underline underline-offset-2"
+            className="text-ink underline underline-offset-4"
           >
             {L.methodLink}
           </Link>
-          {prediction?.timestamp ? ` · ${prediction.timestamp.slice(0, 10)}` : ""}
+          {prediction?.timestamp
+            ? ` · ${pt ? "previsão de" : "forecast of"} ${formatLongDate(prediction.timestamp, locale)}`
+            : ""}
         </div>
       </section>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

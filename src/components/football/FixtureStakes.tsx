@@ -30,9 +30,12 @@ export function FixtureStakes({ locale, entry }: { locale: Locale; entry: ClubOu
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-wider text-stone-500">
         <span>{entry.objectiveLabel}</span>
         {entry.fixtureStatusLabel && (
-          <span className="font-medium normal-case tracking-normal text-stone-400">· {entry.fixtureStatusLabel}</span>
+          <span className="font-medium normal-case tracking-normal text-stone-500">· {entry.fixtureStatusLabel}</span>
         )}
       </p>
+      {entry.postponedLabel && (
+        <p className="text-xs text-stone-500">{entry.postponedLabel}</p>
+      )}
 
       {stakesReady ? (
         <>

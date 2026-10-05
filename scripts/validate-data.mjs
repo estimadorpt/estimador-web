@@ -78,6 +78,97 @@ if (matchdays.length === 0) {
   });
 }
 
+// ---- football: content checks ----------------------------------------------
+// The per-matchday publish refreshes the md files; the game manifest, the
+// server's copy of it and the player feeds are refreshed by separate steps
+// that have fallen behind before (site review, 5 October 2026). These checks
+// fail the build when the feeds disagree, instead of publishing the
+// disagreement.
+
+const readLiga = name => read(`football/liga-2026-27/${name}`).value;
+const manifest = readLiga('game_fixtures.json');
+
+if (matchdays.length > 0 && !isObject(manifest)) {
+  problems.push('football/liga-2026-27/game_fixtures.json: missing or not valid JSON — the prediction game and the kickoff dates read it');
+} else if (matchdays.length > 0) {
+  const where = 'football/liga-2026-27/game_fixtures.json';
+  const pair = (home, away) => `${home}|${away}`;
+  const manifestFixtures = new Map();
+  for (const md of manifest.matchdays ?? []) {
+    for (const fx of md.fixtures ?? []) manifestFixtures.set(pair(fx.home, fx.away), { ...fx, matchday: md.matchday });
+  }
+
+  // 1. Every published result is in the manifest, with the same score.
+  const mdFiles = matchdays.map(name => ({ name, value: readLiga(name) })).filter(f => isObject(f.value));
+  const missing = [];
+  const differing = [];
+  for (const { name, value } of mdFiles) {
+    for (const r of value.matchday_results ?? []) {
+      if (typeof r.home_goals !== 'number' || typeof r.away_goals !== 'number') continue;
+      const fx = manifestFixtures.get(pair(r.home, r.away));
+      if (!fx) missing.push(`${r.home}–${r.away} (${name})`);
+      else if (fx.home_goals !== r.home_goals || fx.away_goals !== r.away_goals) {
+        differing.push(`${r.home}–${r.away} ${r.home_goals}-${r.away_goals} in ${name}, ${fx.home_goals}-${fx.away_goals} in the manifest`);
+      }
+    }
+  }
+  if (missing.length) problems.push(`${where}: ${missing.length} published result(s) not in the manifest: ${missing.slice(0, 5).join(', ')}`);
+  if (differing.length) problems.push(`${where}: ${differing.length} result(s) with a different score: ${differing.slice(0, 5).join('; ')}`);
+
+  // 2. Per club, the manifest holds one result per game played. A postponed
+  //    game is neither played nor scored, so it drops out of both sides.
+  const latest = mdFiles[mdFiles.length - 1]?.value;
+  const resultsPerTeam = new Map();
+  for (const fx of manifestFixtures.values()) {
+    if (typeof fx.home_goals !== 'number' || typeof fx.away_goals !== 'number') continue;
+    for (const team of [fx.home, fx.away]) resultsPerTeam.set(team, (resultsPerTeam.get(team) ?? 0) + 1);
+  }
+  const countMismatch = (latest?.actual_standings ?? [])
+    .filter(s => (resultsPerTeam.get(s.team) ?? 0) !== s.played)
+    .map(s => `${s.team} ${resultsPerTeam.get(s.team) ?? 0} results for ${s.played} played`);
+  if (countMismatch.length) problems.push(`${where}: result counts disagree with actual_standings in ${mdFiles[mdFiles.length - 1].name}: ${countMismatch.join('; ')}`);
+
+  // 3. The open round (the first one with no result at all) is priced, so
+  //    the server can accept picks for it.
+  const rounds = [...(manifest.matchdays ?? [])].sort((a, b) => a.matchday - b.matchday);
+  const open = rounds.find(md => (md.fixtures ?? []).every(fx => typeof fx.home_goals !== 'number'));
+  const priced = fx => [fx.p_home, fx.p_draw, fx.p_away].every(p => typeof p === 'number' && Number.isFinite(p));
+  if (open && latest && open.matchday <= (latest.next_matchday?.matchday ?? latest.matchday + 1)) {
+    const unpriced = (open.fixtures ?? []).filter(fx => !priced(fx));
+    if (unpriced.length) problems.push(`${where}: open matchday ${open.matchday} has ${unpriced.length} fixture(s) without model probabilities — every pick would be refused as not_priced`);
+  }
+
+  // 4. The manifest is at least as new as the newest forecast.
+  const newest = latest?.timestamp ? Date.parse(latest.timestamp) : NaN;
+  const generated = Date.parse(manifest.generated_at ?? '');
+  if (Number.isFinite(newest) && (!Number.isFinite(generated) || generated < newest)) {
+    problems.push(`${where}: generated_at ${manifest.generated_at ?? '(none)'} is older than ${mdFiles[mdFiles.length - 1].name} (${latest.timestamp}) — re-export the manifest with the forecast`);
+  }
+
+  // 5. The game server scores against its own copy, which must be the same file.
+  const apiCopy = path.join(process.cwd(), 'api/data/game_fixtures.json');
+  const publicCopy = path.join(DATA, 'football/liga-2026-27/game_fixtures.json');
+  if (!fs.existsSync(apiCopy)) {
+    problems.push('api/data/game_fixtures.json: missing — the game server has no manifest');
+  } else if (!fs.readFileSync(apiCopy).equals(fs.readFileSync(publicCopy))) {
+    problems.push('api/data/game_fixtures.json: differs from public/data/football/liga-2026-27/game_fixtures.json — copy the published manifest to the API');
+  }
+}
+
+// The player pages read players_detail.json and /jogadores reads players.json;
+// from different model runs they contradict each other (ranks, clubs, form).
+{
+  const ranking = readLiga('players.json');
+  const detail = readLiga('players_detail.json');
+  if (isObject(ranking) && isObject(detail)) {
+    const a = JSON.stringify(ranking.generated_from ?? null);
+    const b = JSON.stringify(detail.generated_from ?? null);
+    if (a !== b) {
+      problems.push(`football/liga-2026-27/players_detail.json: generated_from differs from players.json (${b} vs ${a}) — export both player files from the same run`);
+    }
+  }
+}
+
 feed('football/liga-2026-27/ask.json', value => (isObject(value) ? null : 'expected an object'), { required: false });
 feed('football/liga-2026-27/market_scorecard.json', value => {
   if (!isObject(value)) return 'expected an object';

@@ -4,8 +4,12 @@ import {
   loadLigaWithDeltas,
   loadLigaHistorical,
   loadLigaSamples,
+  loadLigaMarketScorecard,
   loadUpcomingFixtures,
 } from "@/lib/utils/football-data-loader";
+import { teamDisplayName } from "@/lib/config/football";
+import { formatInteger, formatLongDate, formatSigned } from "@/lib/football-format";
+import { evaluatesCurrentModel } from "@/lib/football-scorecard";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -48,12 +52,13 @@ export default async function LigaPage({
 
   // seasonSamples stays for the table's final-points intervals; the
   // draw-a-season widget that also read it was cut in the 2026-08 trim.
-  const [{ prediction, scenarios, deltas }, historical, seasonSamples, upcomingFixtures] =
+  const [{ prediction, scenarios, deltas }, historical, seasonSamples, upcomingFixtures, scorecard] =
     await Promise.all([
       loadLigaWithDeltas(),
       loadLigaHistorical(),
       loadLigaSamples(),
       loadUpcomingFixtures(),
+      loadLigaMarketScorecard(),
     ]);
 
   // Fixture row → match page. Rows without a generated page stay unlinked.
@@ -79,9 +84,18 @@ export default async function LigaPage({
     return (
       <div className="football-page min-h-screen bg-paper">
         <Header />
-        <main id="main-content" tabIndex={-1} className="max-w-7xl mx-auto px-4 py-20 text-center text-stone-500">
-          <p>Liga Portugal data not available.</p>
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            compact
+            icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
+            eyebrow={t("football.title")}
+            title={t("football.subtitle")}
+            lede={locale === "pt"
+              ? "A previsão da Liga não está disponível de momento."
+              : "The Liga forecast is not available right now."}
+          />
         </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }
@@ -114,10 +128,8 @@ export default async function LigaPage({
   const second = prediction.table[1];
   const third = prediction.table[2];
   const matchdayComplete = !prediction.matches_remaining?.length;
-  const updatedDate = new Date(prediction.timestamp).toLocaleDateString(
-    locale === "pt" ? "pt-PT" : "en-US",
-    { day: "numeric", month: "long", year: "numeric" }
-  );
+  const updatedDate = formatLongDate(prediction.timestamp, locale);
+  const simsLabel = formatInteger(prediction.n_sims, locale);
 
   // A concise factual change beside the forecast date (diagnosis §5 "League
   // page" — "a concise factual change"): the club whose title probability
@@ -131,11 +143,25 @@ export default async function LigaPage({
   const factualChange =
     biggestMover && Math.abs(biggestMover.p_champion_delta) >= 1
       ? locale === "pt"
-        ? `${biggestMover.team} ${biggestMover.p_champion_delta > 0 ? "+" : ""}${Math.round(biggestMover.p_champion_delta)}pp no título desde a última jornada`
-        : `${biggestMover.team} ${biggestMover.p_champion_delta > 0 ? "+" : ""}${Math.round(biggestMover.p_champion_delta)}pp on the title since last matchday`
+        ? `${teamDisplayName(biggestMover.team)} ${formatSigned(Math.round(biggestMover.p_champion_delta), locale, 0)} pp no título desde a última jornada`
+        : `${teamDisplayName(biggestMover.team)} ${formatSigned(Math.round(biggestMover.p_champion_delta), locale, 0)} pp on the title since last matchday`
       : null;
 
   const allTeams = prediction.table.map(t => t.team);
+
+  // The scorecard card names the model it evaluated, read from the file: it
+  // is not always the model behind this page's forecast (FB-05).
+  const scorecardCard = scorecard
+    ? evaluatesCurrentModel(scorecard.model, prediction.model)
+      ? locale === "pt"
+        ? `Testámos o modelo destas previsões contra a linha de fecho da Pinnacle em ${formatInteger(scorecard.n, locale)} jogos e ${scorecard.n_seasons} épocas.`
+        : `We tested the model behind these forecasts against Pinnacle's closing line over ${formatInteger(scorecard.n, locale)} matches and ${scorecard.n_seasons} seasons.`
+      : locale === "pt"
+        ? `Testámos o modelo anterior (${scorecard.model}) contra a linha de fecho da Pinnacle em ${formatInteger(scorecard.n, locale)} jogos e ${scorecard.n_seasons} épocas. O modelo atual (${prediction.model}) ainda não foi avaliado contra o mercado.`
+        : `We tested the previous model (${scorecard.model}) against Pinnacle's closing line over ${formatInteger(scorecard.n, locale)} matches and ${scorecard.n_seasons} seasons. The current model (${prediction.model}) has not been evaluated against the market yet.`
+    : locale === "pt"
+      ? "O modelo comparado com a linha de fecho do mercado."
+      : "The model compared with the market's closing line.";
 
   return (
     <div className="football-page min-h-screen bg-paper">
@@ -176,9 +202,9 @@ export default async function LigaPage({
           <Link
             href="/desporto/liga/modelo"
             locale={locale}
-            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-ink hover:text-ink-dark"
+            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-ink underline underline-offset-4"
           >
-            {locale === "pt" ? "Como se comportou o modelo até agora" : "How the model has performed so far"}
+            {locale === "pt" ? "Como se compara o modelo com o mercado?" : "How does the model compare with the market?"}
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -196,7 +222,7 @@ export default async function LigaPage({
             <p className="text-sm text-stone-500 mb-6">
               {locale === "en"
                 ? "What is left of this matchday, then the next one. Open a fixture for the full preview."
-                : "O que falta desta jornada e a jornada seguinte. Abra um jogo para a análise completa."}
+                : "O que falta desta jornada e a jornada seguinte. Abre um jogo para a análise completa."}
             </p>
             <MatchdayPredictions
               matches={upcomingWithProbs}
@@ -259,7 +285,7 @@ export default async function LigaPage({
           </h2>
           <p className="text-sm text-stone-500 mb-6">
             {t("football.standingsDescription", {
-              count: prediction.n_sims.toLocaleString(),
+              count: simsLabel,
             })}
           </p>
           <LeagueTable
@@ -269,6 +295,8 @@ export default async function LigaPage({
             intervals={
               Object.keys(pointsIntervals).length ? pointsIntervals : undefined
             }
+            nSims={prediction.n_sims}
+            model={prediction.model}
             labels={{
               team: t("football.team"),
               meanPoints: t("football.meanPoints"),
@@ -425,7 +453,7 @@ export default async function LigaPage({
                 <p className="text-sm text-stone-500 mt-0.5">
                   {locale === "en"
                     ? "Call the next matchday before it kicks off and get scored against the model, all season long."
-                    : "Preveja a próxima jornada antes de começar e compare-se com o modelo, época inteira."}
+                    : "Prevê a próxima jornada antes de começar e compara-te com o modelo, a época inteira."}
                 </p>
               </div>
               <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
@@ -454,7 +482,7 @@ export default async function LigaPage({
           </h2>
           <p className="text-sm text-stone-600 leading-relaxed max-w-3xl">
             {t("football.modelDescription", {
-              count: prediction.n_sims.toLocaleString(),
+              count: simsLabel,
             })}
           </p>
 
@@ -468,12 +496,10 @@ export default async function LigaPage({
               <Scale className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <h3 className="text-stone-900">
-                  {locale === "en" ? "Model vs Market" : "Modelo vs Mercado"}
+                  {locale === "en" ? "Model vs market" : "Modelo vs mercado"}
                 </h3>
                 <p className="text-sm text-stone-500 mt-0.5">
-                  {locale === "en"
-                    ? "We tested the model against Pinnacle's closing line over 504 matches and eight seasons. From matchday 14 it matches the market — the whole deficit is early season."
-                    : "Testámos o modelo contra a linha de fecho da Pinnacle em 504 jogos e oito épocas. A partir da jornada 14 iguala o mercado — toda a desvantagem está no início da época."}
+                  {scorecardCard}
                 </p>
               </div>
               <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
@@ -539,7 +565,7 @@ export default async function LigaPage({
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {t("football.methodology")}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -547,7 +573,7 @@ export default async function LigaPage({
             <Link
               href="/desporto/liga/dados"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {locale === "en" ? "Open forecast data" : "Dados abertos das previsões"}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />

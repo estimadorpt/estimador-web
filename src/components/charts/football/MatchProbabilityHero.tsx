@@ -1,5 +1,6 @@
 import { teamDisplayName, teamLogoSrc } from "@/lib/config/football";
 import { readableTextOn } from "@/lib/utils/football-contrast";
+import { formatKickoff, formatLongDate, formatInteger } from "@/lib/football-format";
 
 interface MatchProbabilityHeroProps {
   home: string;
@@ -11,28 +12,28 @@ interface MatchProbabilityHeroProps {
   pAway: number | null;
   matchday: number;
   kickoff: string | null;
+  /** False while the kickoff is a placeholder: the day is shown, not the hour. */
+  kickoffConfirmed?: boolean;
   locale: string;
   /** Final score, when the fixture has already been played. */
   played?: { home_goals: number; away_goals: number } | null;
 }
 
-function pct(p: number): string {
+function pct(p: number, locale: string): string {
   if (p >= 0.995) return ">99";
   if (p > 0 && p < 0.005) return "<1";
-  return String(Math.round(p * 100));
+  return formatInteger(Math.round(p * 100), locale);
 }
 
-function kickoffLabel(iso: string | null, locale: string): string | null {
+/** Kickoff in Lisbon time; a placeholder kickoff shows its day only. */
+function kickoffLabel(iso: string | null, confirmed: boolean, locale: string): string | null {
   if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleString(locale === "en" ? "en-GB" : "pt-PT", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  if (!confirmed) {
+    const day = formatLongDate(iso, locale, { year: false });
+    if (!day) return null;
+    return locale === "en" ? `${day} (kickoff to be confirmed)` : `${day} (horário por confirmar)`;
+  }
+  return formatKickoff(iso, locale) || null;
 }
 
 export function MatchProbabilityHero({
@@ -45,18 +46,23 @@ export function MatchProbabilityHero({
   pAway,
   matchday,
   kickoff,
+  kickoffConfirmed = true,
   locale,
   played,
 }: MatchProbabilityHeroProps) {
   const pt = locale !== "en";
   const hasProbs = pHome != null && pDraw != null && pAway != null;
-  const when = kickoffLabel(kickoff, locale);
+  const when = kickoffLabel(kickoff, kickoffConfirmed, locale);
 
   const labels = {
     matchday: pt ? `Jornada ${matchday}` : `Matchday ${matchday}`,
-    homeWin: pt ? "Vitória em casa" : "Home win",
+    // "Vitória em casa" read as a club name beside Vitória SC; name the
+    // winner instead.
+    homeWin: pt ? `Ganha o ${teamDisplayName(home)}` : `${teamDisplayName(home)} win`,
     draw: pt ? "Empate" : "Draw",
-    awayWin: pt ? "Vitória fora" : "Away win",
+    awayWin: pt ? `Ganha o ${teamDisplayName(away)}` : `${teamDisplayName(away)} win`,
+    venueHome: pt ? "em casa" : "at home",
+    venueAway: pt ? "fora" : "away",
     noProbs: pt
       ? "Probabilidades ainda não publicadas para este jogo."
       : "Probabilities not published for this fixture yet.",
@@ -70,9 +76,9 @@ export function MatchProbabilityHero({
 
   const outcomes = hasProbs
     ? ([
-        { key: "H", p: pHome!, label: labels.homeWin, team: home, color: homeColor },
-        { key: "D", p: pDraw!, label: labels.draw, team: null, color: "#cbccbb" },
-        { key: "A", p: pAway!, label: labels.awayWin, team: away, color: awayColor },
+        { key: "H", p: pHome!, label: labels.homeWin, venue: labels.venueHome, team: home, color: homeColor },
+        { key: "D", p: pDraw!, label: labels.draw, venue: "", team: null, color: "#cbccbb" },
+        { key: "A", p: pAway!, label: labels.awayWin, venue: labels.venueAway, team: away, color: awayColor },
       ] as const)
     : [];
 
@@ -82,8 +88,8 @@ export function MatchProbabilityHero({
 
   return (
     <div>
-      {/* Fixture line: the page's heading */}
-      <h1 className="flex items-center justify-between gap-3 mb-5 text-base font-normal tracking-normal">
+      {/* Fixture line with the crests. The page's h1 is in its PageHero. */}
+      <div className="flex items-center justify-between gap-3 mb-5 text-base font-normal tracking-normal">
         <div className="flex items-center gap-3 min-w-0">
           {teamLogoSrc(home) && (
             <img
@@ -113,7 +119,7 @@ export function MatchProbabilityHero({
             />
           )}
         </div>
-      </h1>
+      </div>
 
       <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-4">
         {labels.matchday}
@@ -145,14 +151,14 @@ export function MatchProbabilityHero({
           <div className="grid grid-cols-3 gap-2 md:gap-4 mb-3">
             {outcomes.map(o => (
               <div key={o.key} className="border-t-4 pt-3" style={{ borderColor: o.color }}>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1 truncate">
-                  {o.team ? teamDisplayName(o.team) : labels.draw}
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1 truncate">
+                  {o.label}
                 </div>
                 <div className="text-4xl md:text-6xl font-display font-extrabold tabular-nums text-stone-900 leading-none">
-                  {pct(o.p)}
+                  {pct(o.p, locale)}
                   <span className="text-lg md:text-2xl font-bold text-stone-400">%</span>
                 </div>
-                <div className="text-[11px] text-stone-500 mt-1">{o.label}</div>
+                {o.venue && <div className="text-[11px] text-stone-500 mt-1">{o.venue}</div>}
               </div>
             ))}
           </div>
@@ -169,7 +175,7 @@ export function MatchProbabilityHero({
                   color: readableTextOn(o.color),
                 }}
               >
-                {o.p >= 0.08 ? `${Math.round(o.p * 100)}%` : ""}
+                {o.p >= 0.08 ? `${pct(o.p, locale)}%` : ""}
               </div>
             ))}
           </div>
@@ -180,7 +186,7 @@ export function MatchProbabilityHero({
               <strong className="text-stone-800">
                 {top.team ? teamDisplayName(top.team) : labels.draw}
               </strong>{" "}
-              ({Math.round(top.p * 100)}%)
+              ({pct(top.p, locale)}%)
             </div>
           )}
 

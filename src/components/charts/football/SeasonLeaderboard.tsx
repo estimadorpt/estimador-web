@@ -12,6 +12,7 @@
  */
 
 import { Trophy, Bot, RefreshCw } from "lucide-react";
+import { formatDecimal } from "@/lib/football-format";
 import { useState } from "react";
 import type { LeaderboardResponse, LeaderboardRow } from "@/lib/utils/prediction-game-api";
 
@@ -97,7 +98,7 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLea
           {board?.model?.meanRps != null && (
             <p className="mt-3 text-sm text-stone-500 border-l-2 pl-3" style={{ borderColor: MODEL_COLOR }}>
               <Bot className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5" style={{ color: MODEL_COLOR }} />
-              {t.emptyTarget(board.model.meanRps.toFixed(3))}
+              {t.emptyTarget(formatDecimal(board.model.meanRps, locale, 3))}
             </p>
           )}
         </div>
@@ -118,6 +119,7 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLea
               <tbody className="divide-y divide-stone-100">
                 {rows.map(row => (
                   <Row
+                    locale={locale}
                     key={row.playerId}
                     row={row}
                     isYou={board?.you === row.playerId}
@@ -149,11 +151,13 @@ function Row({
   isYou,
   youLabel,
   modelLabel,
+  locale,
 }: {
   row: LeaderboardRow;
   isYou: boolean;
   youLabel: string;
   modelLabel: string;
+  locale: string;
 }) {
   const background = row.isModel ? "bg-stone-50" : isYou ? "bg-emerald-50" : "";
 
@@ -178,10 +182,10 @@ function Row({
         className="px-3 py-2 text-right font-bold tabular-nums"
         style={{ color: row.isModel ? MODEL_COLOR : USER_COLOR }}
       >
-        {row.meanRps === null ? "—" : row.meanRps.toFixed(3)}
+        {row.meanRps === null ? "—" : formatDecimal(row.meanRps, locale, 3)}
       </td>
       <td className="px-3 py-2 text-right tabular-nums text-stone-500 hidden sm:table-cell">
-        {row.totalRps.toFixed(2)}
+        {formatDecimal(row.totalRps, locale, 2)}
       </td>
       <td className="px-3 py-2 text-right tabular-nums text-stone-500 hidden sm:table-cell">
         {row.matchdays}

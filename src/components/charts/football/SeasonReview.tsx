@@ -7,6 +7,7 @@ import {
   teamDisplayName,
   teamLogoSrc,
 } from "@/lib/config/football";
+import { ChartTable } from "@/components/viz/ChartTable";
 
 /* ------------------------------------------------------------------ types */
 
@@ -259,6 +260,7 @@ export function TitleRaceEvolution({
   const pt = locale !== "en";
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(760);
+  const [hover, setHover] = useState<number | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -272,6 +274,8 @@ export function TitleRaceEvolution({
 
   const mds = race.matchdays;
   if (mds.length === 0 || race.series.length === 0) return null;
+  const pctText = (v: number | null | undefined) =>
+    v === null || v === undefined ? "—" : v > 0 && v < 0.005 ? "<1%" : `${Math.round(v * 100)}%`;
 
   const narrow = width < 520;
   const padL = narrow ? 30 : 38;
@@ -312,11 +316,12 @@ export function TitleRaceEvolution({
     .join("; ");
 
   return (
-    <div ref={containerRef} className="w-full">
+    <div ref={containerRef} className="relative w-full">
       <svg
         width={width}
         height={H}
         role="img"
+        onMouseLeave={() => setHover(null)}
         aria-label={
           pt
             ? `Probabilidade de título atribuída pelo modelo em cada jornada publicada, da jornada ${mds[0]} à ${lastForecastMd}. ${described}.`
@@ -432,7 +437,53 @@ export function TitleRaceEvolution({
         >
           {pt ? "jornada" : "matchday"}
         </text>
+
+        {/* Hover: one invisible column per published matchday. */}
+        {hover !== null && (
+          <line
+            x1={x(mds[hover])}
+            x2={x(mds[hover])}
+            y1={padT}
+            y2={padT + plotH}
+            stroke="#5f7062"
+            strokeWidth="1"
+          />
+        )}
+        {mds.map((md, i) => {
+          const left = i === 0 ? padL : (x(mds[i - 1]) + x(md)) / 2;
+          const right = i === mds.length - 1 ? x(md) + 6 : (x(md) + x(mds[i + 1])) / 2;
+          return (
+            <rect
+              key={md}
+              x={left}
+              y={padT}
+              width={Math.max(1, right - left)}
+              height={plotH}
+              fill="transparent"
+              onMouseEnter={() => setHover(i)}
+            />
+          );
+        })}
       </svg>
+
+      {hover !== null && (
+        <div
+          className="pointer-events-none absolute top-2 rounded-lg border border-line bg-cream px-3 py-2 text-xs shadow-none"
+          style={{
+            left: Math.min(Math.max(0, x(mds[hover]) + 10), Math.max(0, width - 170)),
+          }}
+        >
+          <div className="mb-1 font-bold text-ink">
+            {pt ? "Jornada" : "Matchday"} {mds[hover]}
+          </div>
+          {race.series.map((s) => (
+            <div key={s.team} className="flex justify-between gap-4 tabular-nums">
+              <span className="text-stone-600">{teamDisplayName(s.team)}</span>
+              <span className="font-semibold text-ink">{pctText(s.values[hover])}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {narrow && (
         <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-[11px]">
@@ -451,6 +502,12 @@ export function TitleRaceEvolution({
       {outcomeLabel && (
         <p className="text-xs text-stone-500 mt-2">{outcomeLabel}</p>
       )}
+
+      <ChartTable
+        caption={pt ? "Probabilidade de título por jornada publicada" : "Title probability by published matchday"}
+        columns={[pt ? "Jornada" : "Matchday", ...race.series.map((s) => teamDisplayName(s.team))]}
+        rows={mds.map((md, i) => [md, ...race.series.map((s) => pctText(s.values[i]))])}
+      />
     </div>
   );
 }

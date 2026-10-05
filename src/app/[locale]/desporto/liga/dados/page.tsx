@@ -1,8 +1,9 @@
 import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { loadPublishedFootballData } from "@/lib/utils/football-data-loader";
 import type { PublishedFile, PublishedSeason } from "@/lib/utils/football-data-loader";
 import type { Metadata } from "next";
@@ -19,9 +20,9 @@ const copy = {
     back: "Liga Portugal",
     kicker: "Dados abertos",
     standfirstA:
-      "Tudo o que aparece nas páginas da Liga Portugal vem de ficheiros JSON estáticos servidos deste site. Não há API a proteger, chave a pedir nem limite de pedidos: são ficheiros, e estão aqui.",
+      "As previsões das páginas da Liga Portugal vêm de ficheiros JSON estáticos servidos deste site, sem chave a pedir nem limite de pedidos. Só o jogo Contra o Modelo usa uma API própria, para guardar as previsões de quem joga; os dados do modelo estão todos aqui.",
     standfirstB:
-      "Se construir alguma coisa com eles, use-os à vontade — só pedimos atribuição a estimador.pt e uma ligação para a página de origem. E se publicar, diga-nos: gostamos de ver.",
+      "Se construíres alguma coisa com eles, usa-os à vontade: só pedimos atribuição a estimador.pt e uma ligação para a página de origem. E se publicares, diz-nos: gostamos de ver.",
     filesTitle: "Ficheiros publicados",
     filesIntro:
       "A lista abaixo é gerada a partir do que está realmente no servidor no momento em que a página foi construída.",
@@ -38,7 +39,7 @@ const copy = {
       "Livres de usar, redistribuir e transformar, incluindo para fins comerciais, desde que a fonte seja atribuída: «estimador.pt» com ligação para a página correspondente. Os dados são fornecidos como estão, sem garantias — são previsões probabilísticas de um modelo estatístico, e por definição vão estar erradas parte do tempo.",
     provenanceTitle: "Proveniência",
     provenance:
-      "Resultados e estatísticas de jogo (incluindo xG) da SofaScore; cotações de fecho da Pinnacle via football-data.co.uk; lesões e valores de mercado do Transfermarkt. As probabilidades vêm de um modelo hierárquico bayesiano de Poisson ajustado com PyMC e de 50 mil simulações de Monte Carlo por publicação.",
+      "Resultados e estatísticas de jogo (incluindo xG e remates à baliza) da SofaScore; cotações de fecho da Pinnacle via football-data.co.uk; lesões e valores de mercado do Transfermarkt. As probabilidades vêm de um modelo bayesiano de Poisson bivariado (bivcross), ajustado aos golos e aos remates à baliza das últimas quatro épocas da Primeira Liga e da Liga 2, com os jogos mais antigos a pesar menos e o valor de cada plantel como ponto de partida, e de 50 000 simulações de Monte Carlo por publicação. A pré-época (md00) foi publicada pelo modelo anterior, joint_sot.",
     unavailable: "Não foi possível listar os ficheiros publicados.",
     methodology: "Como funciona o modelo",
     review: "A época 2025-26 em revista",
@@ -55,7 +56,7 @@ const copy = {
     back: "Liga Portugal",
     kicker: "Open data",
     standfirstA:
-      "Everything on the Liga Portugal pages comes from static JSON files served from this site. There is no API to protect, no key to request and no rate limit: they are files, and they are here.",
+      "The forecasts on the Liga Portugal pages come from static JSON files served from this site, with no key to request and no rate limit. Only the Beat the Model game uses an API of its own, to store players' picks; the model's data is all here.",
     standfirstB:
       "If you build something with them, go ahead — all we ask is attribution to estimador.pt and a link back to the source page. And if you publish, tell us: we like seeing it.",
     filesTitle: "Published files",
@@ -74,7 +75,7 @@ const copy = {
       "Free to use, redistribute and transform, commercial use included, as long as the source is credited: “estimador.pt”, with a link to the corresponding page. The data is provided as is, with no warranty — these are probabilistic forecasts from a statistical model, and by definition they will be wrong some of the time.",
     provenanceTitle: "Provenance",
     provenance:
-      "Results and match statistics (xG included) from SofaScore; Pinnacle closing odds via football-data.co.uk; injuries and market values from Transfermarkt. The probabilities come from a hierarchical Bayesian Poisson model fitted with PyMC and 50,000 Monte Carlo season simulations per publication.",
+      "Results and match statistics (xG and shots on target included) from SofaScore; Pinnacle closing odds via football-data.co.uk; injuries and market values from Transfermarkt. The probabilities come from a bivariate Poisson Bayesian model (bivcross), fitted to goals and shots on target from the last four seasons of the Primeira Liga and Liga 2, with older games counting for less and each squad's value as the starting point, and from 50,000 Monte Carlo season simulations per publication. The pre-season file (md00) was published by the previous model, joint_sot.",
     unavailable: "Could not list the published files.",
     methodology: "How the model works",
     review: "The 2025-26 season reviewed",
@@ -175,16 +176,40 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
     match: /^market_scorecard\.json$/,
     label: "market_scorecard.json",
     doc: {
-      pt: "A avaliação do modelo contra a linha de fecho da Pinnacle em 504 jogos e oito épocas, com erro padrão emparelhado em cada bloco.",
-      en: "The model evaluated against Pinnacle's closing line over 504 matches and eight seasons, with the paired standard error on every block.",
+      pt: "Uma avaliação do modelo contra a linha de fecho da Pinnacle, com o número de jogos e de épocas, o erro padrão emparelhado em cada bloco e, no campo model, o modelo avaliado (que pode não ser o que publica as previsões).",
+      en: "An evaluation of the model against Pinnacle's closing line, with the number of matches and seasons, the paired standard error on every block and, in the model field, the model evaluated (which may not be the one publishing the forecasts).",
     },
   },
   {
-    match: /^cards\.json$/,
-    label: "cards.json",
+    match: /^game_fixtures\.json$/,
+    label: "game_fixtures.json",
     doc: {
-      pt: "Manifesto dos cartões de partilha da jornada: que imagens existem, para que jornada e como se chamam.",
-      en: "Manifest for the matchday share cards: which images exist, for which matchday, and what they are called.",
+      pt: "O calendário da época para o jogo Contra o Modelo: cada jogo com hora de início (UTC; kickoff_confirmed diz se já é a oficial), a hora a que fecha para previsões (locks_at), as probabilidades do modelo congeladas antes da jornada (probs_source diz de que ficheiro vieram) e o resultado.",
+      en: "The season calendar for the Beat the Model game: every fixture with its kickoff (UTC; kickoff_confirmed says whether it is official yet), when it closes for picks (locks_at), the model's probabilities frozen before the round (probs_source names the file they came from) and the result.",
+    },
+  },
+  {
+    match: /^players_detail\.json$/,
+    label: "players_detail.json",
+    doc: {
+      pt: "O detalhe por jogador por trás das páginas de jogador: histórico época a época e jogos recentes. As páginas mostram só os jogadores do ranking de players.json, com a posição e os números desse ranking.",
+      en: "The per-player detail behind the player pages: season-by-season history and recent matches. The pages show only the players ranked in players.json, with that ranking's position and numbers.",
+    },
+  },
+  {
+    match: /^ask\.json$/,
+    label: "ask.json",
+    doc: {
+      pt: "Ponto de partida para perguntas condicionais sobre a época: as probabilidades de cada equipa (título, top 3, Europa, descida) e os jogos em aberto cobertos. Nenhuma página o usa ainda.",
+      en: "The starting point for conditional questions about the season: each team's probabilities (title, top three, Europe, relegation) and the open fixtures covered. No page uses it yet.",
+    },
+  },
+  {
+    match: /^ask_samples\.json$/,
+    label: "ask_samples.json",
+    doc: {
+      pt: "Uma amostra das épocas simuladas, compactada: em cada uma, o resultado de cada jogo em aberto e a posição final de cada equipa (a codificação está descrita no próprio ficheiro). Nenhuma página o usa ainda.",
+      en: "A compact sample of the simulated seasons: in each, the result of every open fixture and every team's final position (the encoding is described in the file itself). No page uses it yet.",
     },
   },
   {
@@ -250,8 +275,8 @@ const MD_FIELDS: { name: string; doc: Doc }[] = [
   {
     name: "season, matchday, model, n_sims, timestamp",
     doc: {
-      pt: "Metadados: que época, que jornada, que modelo, quantas simulações e quando foi gerado (UTC, ISO 8601).",
-      en: "Metadata: which season, which matchday, which model, how many simulations, and when it was generated (UTC, ISO 8601).",
+      pt: "Metadados: que época, que jornada, que modelo, quantas simulações e quando foi gerado (UTC, ISO 8601). Em 2026-27, model é joint_sot na pré-época (md00) e bivcross da jornada 1 em diante: a mudança de modelo está no próprio ficheiro.",
+      en: "Metadata: which season, which matchday, which model, how many simulations, and when it was generated (UTC, ISO 8601). In 2026-27, model is joint_sot for the pre-season file (md00) and bivcross from matchday 1 on: the model change is recorded in the file itself.",
     },
   },
 ];
@@ -265,8 +290,8 @@ function docFor(name: string) {
 function formatBytes(bytes: number, pt: boolean) {
   const loc = pt ? "pt-PT" : "en-GB";
   if (bytes >= 1024 * 1024)
-    return `${(bytes / (1024 * 1024)).toLocaleString(loc, { maximumFractionDigits: 1 })} MB`;
-  return `${Math.round(bytes / 1024).toLocaleString(loc)} KB`;
+    return `${new Intl.NumberFormat(loc, { maximumFractionDigits: 1 }).format(bytes / (1024 * 1024))} MB`;
+  return `${new Intl.NumberFormat(loc).format(Math.round(bytes / 1024))} KB`;
 }
 
 /** Collapse repeated patterns (28 matchday files) into one documented row. */
@@ -307,7 +332,7 @@ export async function generateMetadata({
   return createPageMetadata({
     locale,
     path: `/desporto/liga/dados`,
-    title: `${c.title} | Estimador`,
+    title: `${c.title} | estimador.pt`,
     description: c.description,
   });
 }
@@ -325,27 +350,20 @@ export default async function LigaDataPage({
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
+      <PageHero
+        width="5xl"
+        compact
+        back={{ href: "/desporto/liga", label: c.back, locale }}
+        eyebrow={c.kicker}
+        title={c.title}
+        lede={c.standfirstA}
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
-        <Link
-          href="/desporto/liga"
-          locale={locale}
-          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          {c.back}
-        </Link>
-
-        <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
-          {c.kicker}
+        <p className="max-w-3xl mb-10 text-base text-stone-700 leading-relaxed">
+          {c.standfirstB}
         </p>
-        <h1 className="text-3xl md:text-4xl tracking-tight mb-4">{c.title}</h1>
-        <div className="max-w-3xl space-y-4 mb-10">
-          <p className="text-lg text-stone-600 leading-relaxed">{c.standfirstA}</p>
-          <p className="text-lg text-stone-800 leading-relaxed font-medium">
-            {c.standfirstB}
-          </p>
-        </div>
 
         {/* Published files */}
         <section className="mb-14">
@@ -404,7 +422,7 @@ export default async function LigaDataPage({
                               <td className="py-3 pr-3">
                                 <a
                                   href={`${season.basePath}/${sample}`}
-                                  className="font-mono text-xs text-ink hover:text-ink-dark break-all"
+                                  className="font-mono text-xs text-ink underline underline-offset-4 break-all"
                                 >
                                   {g.label}
                                 </a>
@@ -508,7 +526,7 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {c.methodology}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -516,7 +534,7 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
             <Link
               href="/desporto/liga/2025-26"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {c.review}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -524,6 +542,7 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
           </div>
         </section>
       </div>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

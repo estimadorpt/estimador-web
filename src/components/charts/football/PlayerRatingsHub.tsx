@@ -80,7 +80,8 @@ export function PlayerRatingsHub({
   gkChannels = null,
   playerSlugs,
   locale = "pt",
-}: PlayerRatingsHubProps) {
+  showHeading = true,
+}: PlayerRatingsHubProps & { showHeading?: boolean }) {
   const pt = locale !== "en";
   const nf = (v: number, d = 2) =>
     v.toLocaleString(pt ? "pt-PT" : "en-GB", {
@@ -400,14 +401,18 @@ export function PlayerRatingsHub({
     <div>
       {/* ------------------------------------------------------- the argument */}
       <section className="mb-12 max-w-3xl">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">
-          {pt ? "Jogadores" : "Players"}
-        </p>
-        <h1 className="text-3xl sm:text-4xl tracking-tight text-stone-900 mb-4">
-          {pt
-            ? "Uma métrica por dimensão, porque um número só não chega"
-            : "One metric per dimension, because one number is not enough"}
-        </h1>
+        {showHeading && (
+          <>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">
+              {pt ? "Jogadores" : "Players"}
+            </p>
+            <h1 className="text-3xl sm:text-4xl tracking-tight text-stone-900 mb-4">
+              {pt
+                ? "Uma métrica por dimensão, porque um número só não chega"
+                : "One metric per dimension, because one number is not enough"}
+            </h1>
+          </>
+        )}
         <p className="text-base text-stone-600 leading-relaxed mb-4">
           {pt
             ? "Não existe forma honesta de pôr um guarda-redes e um ponta de lança na mesma tabela. São trabalhos diferentes, medidos por dados diferentes, e qualquer número único que os junte está a dizer sobretudo em que posição joga cada um."

@@ -7,6 +7,8 @@ import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import type { TeamDelta } from '@/types/football';
 import { HomePanel, Kicker } from './HomePanel';
 import { FootballClubPicker } from './FootballClubPicker';
+import { TitleProbabilities } from '@/components/football/TitleProbabilities';
+import { formatLongDate } from '@/lib/football-format';
 
 export interface FootballSnapshot {
   matchday: number;
@@ -30,13 +32,19 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
     snapshot ? loadLigaData() : Promise.resolve({ prediction: null, scenarios: null }),
     snapshot ? loadGameFixtures() : Promise.resolve(null),
   ]);
-  const date = snapshot?.timestamp
-    ? new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(snapshot.timestamp))
-    : '';
+  const date = snapshot?.timestamp ? formatLongDate(snapshot.timestamp, locale) : '';
   const rail = variant === 'secondary';
   const outlooks = latest.prediction
     ? buildClubOutlooks(locale === 'pt' ? 'pt' : 'en', latest.prediction, latest.scenarios, gameFixtures)
     : [];
+  // The deltas compare with the previous published matchday; say so in
+  // words a sighted reader sees, not only in an sr-only span.
+  const hasDeltas = Boolean(deltas && Object.keys(deltas).length && snapshot && snapshot.matchday > 1);
+  const generalLabels = {
+    champion: t('footballChampionLabel'),
+    change: hasDeltas && snapshot ? t('footballChangeCaption', { matchday: snapshot.matchday - 1 }) : null,
+    link: t('footballLink'),
+  };
 
   const copy = (
     <>
@@ -45,7 +53,7 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
         <div className="min-w-0">
           <Kicker>{t('footballKicker')}</Kicker>
           <h2 id="home-football-title" className={`mt-1 ${rail ? 'text-xl md:text-[1.5rem] md:leading-[1.15]' : 'text-lg md:text-[1.35rem] md:leading-[1.2]'}`}>
-            {snapshot && outlooks.length ? (locale === 'pt' ? 'Quem fica com o título?' : 'Who takes the title?') : (locale === 'pt' ? 'Começa pela tua equipa' : 'Start with your club')}
+            {t('footballTitle')}
           </h2>
           {snapshot ? (
             <p className="mt-1 text-[13px] font-semibold text-stone-600">{t('footballDate', { matchday: snapshot.matchday, date })}</p>
@@ -55,7 +63,21 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
         </div>
       </div>
       {snapshot && outlooks.length ? (
-        <FootballClubPicker locale={locale} outlooks={outlooks} top3={snapshot.top3} deltas={deltas} />
+        <FootballClubPicker locale={locale} outlooks={outlooks} top3={snapshot.top3} deltas={deltas} generalLabels={generalLabels} />
+      ) : snapshot ? (
+        // A forecast without per-club outlooks (no scenarios published):
+        // the general title race, labelled, and the way into the Liga page.
+        <div className="mt-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            {generalLabels.champion}{generalLabels.change ? ` · ${generalLabels.change}` : ''}
+          </p>
+          <div className="mt-2">
+            <TitleProbabilities teams={snapshot.top3} deltas={hasDeltas ? deltas : undefined} locale={locale} compact />
+          </div>
+          <div className="mt-4">
+            <Action href="/desporto/liga" locale={locale} variant="secondary" arrow>{generalLabels.link}</Action>
+          </div>
+        </div>
       ) : !snapshot ? (
         <div className="mt-4">
           <Action href="/desporto/liga/metodologia" locale={locale} variant="secondary" arrow>{t('footballMethod')}</Action>

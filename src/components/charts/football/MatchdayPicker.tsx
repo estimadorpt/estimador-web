@@ -548,7 +548,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                         />
                       )}
                       <span className="text-xs font-medium text-stone-700 truncate">
-                        {team}
+                        {teamDisplayName(team)}
                       </span>
                     </div>
 
@@ -621,7 +621,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                         />
                       )}
                       <span className="text-xs font-medium text-stone-700 truncate">
-                        {team}
+                        {teamDisplayName(team)}
                       </span>
                     </div>
 
@@ -744,7 +744,7 @@ function SimulatedTable({
                       ) : (
                         <div className="w-1 h-5 flex-shrink-0" style={{ backgroundColor: teamColor }} />
                       )}
-                      <span className="font-medium text-stone-900">{team}</span>
+                      <span className="font-medium text-stone-900">{teamDisplayName(team)}</span>
                     </div>
                   </td>
                   <td className="py-2 px-3 text-right tabular-nums">

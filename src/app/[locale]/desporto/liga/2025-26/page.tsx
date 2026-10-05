@@ -1,8 +1,9 @@
 import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { loadSeasonReview } from "@/lib/utils/football-data-loader";
 import {
   FinalTable,
@@ -112,9 +113,17 @@ export default async function SeasonReviewPage({
     return (
       <div className="min-h-screen bg-paper">
         <Header />
-        <div className="max-w-5xl mx-auto px-4 py-20 text-center text-stone-500">
-          <p>{c.unavailable}</p>
-        </div>
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            width="5xl"
+            compact
+            back={{ href: "/desporto/liga", label: c.back, locale }}
+            eyebrow={c.kicker}
+            title={c.title}
+            lede={c.unavailable}
+          />
+        </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }
@@ -144,27 +153,20 @@ export default async function SeasonReviewPage({
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
+      <PageHero
+        width="5xl"
+        compact
+        back={{ href: "/desporto/liga", label: c.back, locale }}
+        eyebrow={c.kicker}
+        title={c.title}
+        lede={c.standfirstA}
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
-        <Link
-          href="/desporto/liga"
-          locale={locale}
-          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          {c.back}
-        </Link>
-
-        <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
-          {c.kicker}
+        <p className="max-w-3xl mb-10 text-lg text-stone-800 leading-relaxed font-medium">
+          {c.standfirstB}
         </p>
-        <h1 className="text-3xl md:text-4xl tracking-tight mb-4">{c.title}</h1>
-        <div className="max-w-3xl space-y-4 mb-10">
-          <p className="text-lg text-stone-600 leading-relaxed">{c.standfirstA}</p>
-          <p className="text-lg text-stone-800 leading-relaxed font-medium">
-            {c.standfirstB}
-          </p>
-        </div>
 
         {/* Headline numbers */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-stone-200 border border-stone-200 mb-12">
@@ -395,7 +397,7 @@ export default async function SeasonReviewPage({
             <Link
               href="/desporto/liga"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {c.current}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -403,7 +405,7 @@ export default async function SeasonReviewPage({
             <Link
               href="/desporto/liga/dados"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {c.data}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -411,7 +413,7 @@ export default async function SeasonReviewPage({
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {c.methodology}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -419,6 +421,7 @@ export default async function SeasonReviewPage({
           </div>
         </section>
       </div>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

@@ -230,6 +230,21 @@ describe('roundLockState', () => {
     expect(lock.reason).toBe('results');
   });
 
+  it("prefers the manifest's lock time over the kickoff", () => {
+    // An unconfirmed midnight placeholder locks at the earliest plausible
+    // slot of its round, which is earlier than the placeholder itself.
+    const r = round(9, [
+      {
+        ...fixture('Porto', 'Benfica', [0.5, 0.25, 0.25], { kickoff: '2026-10-18T23:00:00Z' }),
+        locksAt: '2026-10-16T23:00:00Z',
+        kickoffConfirmed: false,
+      },
+    ]);
+    const lockMs = Date.parse('2026-10-16T23:00:00Z');
+    expect(roundLockState(r, lockMs - 1).locked).toBe(false);
+    expect(roundLockState(r, lockMs)).toMatchObject({ locked: true, reason: 'kickoff', lockAt: lockMs });
+  });
+
   it('never unlocks a started round just because the clock is early', () => {
     const r = round(1, [fixture('Estoril', 'Famalicao', [0.37, 0.27, 0.36], { goals: [1, 1] })]);
     expect(roundLockState(r, 0).locked).toBe(true);

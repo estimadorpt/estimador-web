@@ -76,7 +76,9 @@ export function buildFixtureIdIndex(data: PredictionGameData): FixtureIdIndex {
 
   for (const round of data.rounds) {
     for (const fixture of round.fixtures) {
-      const id = gameFixtureId(round.matchday, fixture.home, fixture.away);
+      // The manifest's own id when the page was built from it; the derived
+      // one otherwise (both follow the same convention).
+      const id = fixture.id ?? gameFixtureId(round.matchday, fixture.home, fixture.away);
       toServer.set(`${round.matchday}|${fixture.key}`, id);
       toLocal.set(id, fixture.key);
       matchdayOf.set(id, round.matchday);

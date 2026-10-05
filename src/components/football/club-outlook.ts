@@ -16,6 +16,7 @@ import {
   formatObjectiveLabel,
   listSupportedFixtures,
   nextSupportedFixtureFor,
+  postponedLeftoverFor,
   relevantObjective,
   type ClubObjective,
   type FixtureStatus,
@@ -59,6 +60,10 @@ export interface ClubOutlookEntry {
   hasFixture: boolean;
   fixtureStatusKind: FixtureStatus['kind'] | null;
   fixtureStatusLabel: string | null;
+  /** A second outstanding game from an earlier round, when the next match is
+   * in the current round: "Jogo em atraso da jornada 2, marcado para 19 de
+   * outubro". Null when there is none. */
+  postponedLabel: string | null;
   /** `/desporto/liga/jogo/<slug>`, or null when the fixture has no resolvable
    * match page (e.g. an unresolved postponed leftover). */
   matchHref: string | null;
@@ -105,6 +110,13 @@ export function buildClubOutlooks(
     const baseline = objective ? (objectiveSource[objective] ?? null) : null;
 
     const fixture = nextSupportedFixtureFor(team, fixtures);
+    const leftover = postponedLeftoverFor(team, fixtures);
+    let postponedLabel: string | null = null;
+    if (leftover) {
+      const other = leftover.home === team ? leftover.away : leftover.home;
+      const status = fixtureStatus(leftover, prediction.timestamp, locale);
+      postponedLabel = `${status.label} (${locale === 'pt' ? 'contra' : 'against'} ${teamDisplayName(other)})`;
+    }
     let win: number | null = null;
     let draw: number | null = null;
     let loss: number | null = null;
@@ -159,6 +171,7 @@ export function buildClubOutlooks(
       hasFixture: Boolean(fixture),
       fixtureStatusKind,
       fixtureStatusLabel,
+      postponedLabel,
       matchHref,
       simulatorHref: `/desporto/liga/simulador?${simParams.toString()}`,
     });

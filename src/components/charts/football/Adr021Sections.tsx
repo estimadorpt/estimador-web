@@ -1,6 +1,7 @@
 "use client";
 
 import { PlayerRatingList } from "@/components/charts/football/PlayerRatingList";
+import { formatDecimal } from "@/lib/football-format";
 import type { RatingEntry } from "@/lib/utils/player-ratings";
 import type {
   ContestedCell,
@@ -159,10 +160,10 @@ export function ContestedSection({
                 return row
                   ? [{
                       label: pt ? "P(ganhar o duelo)" : "P(win the duel)",
-                      value: `${(row.theta * 100).toFixed(1)}%`,
+                      value: `${formatDecimal(row.theta * 100, pt ? "pt" : "en", 1)}%`,
                     }, {
                       label: pt ? "Taxa bruta" : "Raw rate",
-                      value: `${(row.rate_raw * 100).toFixed(1)}%`,
+                      value: `${formatDecimal(row.rate_raw * 100, pt ? "pt" : "en", 1)}%`,
                     }]
                   : [];
               })(),
@@ -283,8 +284,8 @@ export function GkChannelsSection({
           </h3>
           <p className="text-xs text-stone-500 mb-1 max-w-3xl leading-relaxed">
             {pt
-              ? `A percentagem de cruzamentos sofridos em que o guarda-redes sai — alívio de punhos ou bola agarrada. É o primeiro eixo de guarda-redes deste site em que os jogadores realmente se separam: ${cross.separable} de ${int(cross.n_fitted ?? cross.ranking.length)} no painel ajustado, para além do acaso (~5 esperados). E é do guarda-redes, não do clube: dois guarda-redes da mesma equipa não se parecem um com o outro (correlação ${cross.teammate_r.toFixed(2).replace(".", pt ? "," : ".")}). A lista mostra só quem está na Liga esta época.`
-              : `The share of crosses faced where the keeper comes for the ball — a punch or a claim. It is the first goalkeeper axis on this site where players genuinely separate: ${cross.separable} of ${int(cross.n_fitted ?? cross.ranking.length)} in the fitted panel, beyond chance (~5 expected). And it belongs to the keeper, not the club: two keepers at the same club do not resemble each other (correlation ${cross.teammate_r.toFixed(2)}). The list shows only keepers in the league this season.`}
+              ? `A percentagem de cruzamentos sofridos em que o guarda-redes sai — alívio de punhos ou bola agarrada. É o primeiro eixo de guarda-redes deste site em que os jogadores realmente se separam: ${cross.separable} de ${int(cross.n_fitted ?? cross.ranking.length)} no painel ajustado, para além do acaso (~5 esperados). E é do guarda-redes, não do clube: dois guarda-redes da mesma equipa não se parecem um com o outro (correlação ${formatDecimal(cross.teammate_r, "pt", 2)}). A lista mostra só quem está na Liga esta época.`
+              : `The share of crosses faced where the keeper comes for the ball — a punch or a claim. It is the first goalkeeper axis on this site where players genuinely separate: ${cross.separable} of ${int(cross.n_fitted ?? cross.ranking.length)} in the fitted panel, beyond chance (~5 expected). And it belongs to the keeper, not the club: two keepers at the same club do not resemble each other (correlation ${formatDecimal(cross.teammate_r, "en", 2)}). The list shows only keepers in the league this season.`}
           </p>
           <p className="text-[11px] text-stone-400 mb-3 max-w-3xl">
             {pt
@@ -313,7 +314,7 @@ export function GkChannelsSection({
                 return row?.implied !== undefined
                   ? [{
                       label: pt ? "Taxa de intervenção" : "Intervention rate",
-                      value: `${(row.implied * 100).toFixed(1)}%`,
+                      value: `${formatDecimal(row.implied * 100, pt ? "pt" : "en", 1)}%`,
                     }]
                   : [];
               })(),
@@ -366,7 +367,7 @@ export function GkChannelsSection({
                 return row?.implied !== undefined
                   ? [{
                       label: pt ? "Saídas por 90'" : "Sweeps per 90",
-                      value: row.implied.toFixed(2),
+                      value: formatDecimal(row.implied, pt ? "pt" : "en", 2),
                     }]
                   : [];
               })(),

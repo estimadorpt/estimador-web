@@ -117,6 +117,25 @@ export function teamLogoSrc(team: string): string {
 // Current season
 export const CURRENT_LIGA_SEASON = '2026-27';
 
+/**
+ * How often the 90% final-points interval held the real total, as measured
+ * for the model that publishes the forecasts. Not yet exported by the model
+ * repo, so it lives here with its provenance: estimador-football
+ * docs/MODEL-REVIEW-2026-09.md (season gate, x_bivcross, nine seasons,
+ * coverage 0.890). The table quotes it only while the published forecasts
+ * name the same model (prediction.model); replace with the exported field
+ * once the model writes one.
+ */
+export const LIGA_POINTS_CALIBRATION = {
+  model: 'bivcross',
+  nominal: 0.9,
+  observed: 0.89,
+  firstSeason: '2017-18',
+  lastSeason: '2025-26',
+  nSeasons: 9,
+  checked: { pt: 'setembro de 2026', en: 'September 2026' },
+} as const;
+
 /* ------------------------------------------------------------- Liga 2 ---- */
 //
 // The second tier passes ~39 clubs through six seasons, most of which have

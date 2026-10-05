@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatDecimal } from "@/lib/football-format";
 import { teamDisplayName } from "@/lib/config/football";
 import { readableTextOn } from "@/lib/utils/football-contrast";
 import { relevantObjective, formatObjectiveLabel, type ClubObjective } from "@/lib/football-fixtures";
@@ -36,11 +37,10 @@ function pctLabel(p: number): string {
 
 function deltaLabel(delta: number, pt: boolean): string {
   const pp = delta * 100;
-  const zero = pt ? "0,0" : "0.0";
-  if (Math.abs(pp) < 0.05) return zero;
-  const abs =
-    Math.abs(pp) < 10 ? Math.abs(pp).toFixed(1) : Math.round(Math.abs(pp)).toString();
-  return `${pp > 0 ? "+" : "−"}${pt ? abs.replace(".", ",") : abs}`;
+  const loc = pt ? "pt" : "en";
+  if (Math.abs(pp) < 0.05) return formatDecimal(0, loc, 1);
+  const abs = formatDecimal(Math.abs(pp), loc, Math.abs(pp) < 10 ? 1 : 0);
+  return `${pp > 0 ? "+" : "−"}${abs}`;
 }
 
 /** Local mirror of football-fixtures.ts's clubStakes: that helper takes a

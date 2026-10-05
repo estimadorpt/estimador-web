@@ -1,8 +1,9 @@
 import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, ArrowRight, TriangleAlert } from "lucide-react";
+import { ArrowRight, TriangleAlert } from "lucide-react";
 import { loadLiga2 } from "@/lib/utils/football-data-loader";
 import {
   Liga2Caveats,
@@ -104,9 +105,17 @@ export default async function Liga2Page({
     return (
       <div className="min-h-screen bg-paper">
         <Header />
-        <div className="max-w-5xl mx-auto px-4 py-20 text-center text-stone-500">
-          <p>{c.unavailable}</p>
-        </div>
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            width="5xl"
+            compact
+            back={{ href: "/desporto/liga", label: c.back, locale }}
+            eyebrow={c.kicker}
+            title={c.title}
+            lede={c.unavailable}
+          />
+        </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }
@@ -138,23 +147,16 @@ export default async function Liga2Page({
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
+      <PageHero
+        width="5xl"
+        compact
+        back={{ href: "/desporto/liga", label: c.back, locale }}
+        eyebrow={c.kicker}
+        title={c.title}
+      />
 
       <div className="max-w-5xl mx-auto px-4 py-10">
-        <Link
-          href="/desporto/liga"
-          locale={locale}
-          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          {c.back}
-        </Link>
-
-        <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
-          {c.kicker}
-        </p>
-        <h1 className="text-3xl md:text-4xl tracking-tight mb-4">
-          {c.title}
-        </h1>
 
         {/* Lighter-model label, stated before any number is shown */}
         <div className="border border-amber-200 bg-amber-50 p-4 mb-8 max-w-3xl">
@@ -448,7 +450,7 @@ export default async function Liga2Page({
             <Link
               href="/desporto/liga"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {c.primeira}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -456,7 +458,7 @@ export default async function Liga2Page({
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {c.methodology}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -464,6 +466,7 @@ export default async function Liga2Page({
           </div>
         </section>
       </div>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );
