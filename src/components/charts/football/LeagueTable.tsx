@@ -8,7 +8,7 @@ import { useLocale } from "next-intl";
 import { ChevronRight } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { formatDecimal, formatInteger, formatSigned } from "@/lib/football-format";
-import { calibrationSentence } from "@/lib/football-scorecard";
+import { calibrationSentence, type PointsCalibration } from "@/lib/football-scorecard";
 
 /**
  * The league page's club chooser: a plain select that navigates straight to
@@ -73,6 +73,8 @@ interface LeagueTableProps {
   /** The model that produced the forecast (prediction.model): the
    * calibration figure is only quoted for the model it was measured on. */
   model?: string;
+  /** The final-points interval check (market_scorecard.json → calibration). */
+  calibration?: PointsCalibration | null;
   labels: {
     team: string;
     meanPoints: string;
@@ -177,6 +179,7 @@ export function LeagueTable({
   labels,
   nSims = 50000,
   model,
+  calibration,
 }: LeagueTableProps) {
   const locale = useLocale();
   const router = useRouter();
@@ -470,7 +473,7 @@ export function LeagueTable({
             {pt
               ? `Os pontos finais são uma distribuição, não um número: a barra mostra onde caem as ${formatInteger(nSims, locale)} épocas simuladas.`
               : `Final points are a distribution, not a number: the bar shows where the ${formatInteger(nSims, locale)} simulated seasons fall.`}{" "}
-            {calibrationSentence(model, locale)}
+            {calibrationSentence(calibration, model, locale)}
           </p>
         </div>
       )}

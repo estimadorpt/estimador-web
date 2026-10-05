@@ -157,11 +157,11 @@ export default async function LigaPage({
   const scorecardCard = scorecard
     ? evaluatesCurrentModel(scorecard.model, prediction.model)
       ? locale === "pt"
-        ? `Testámos o modelo destas previsões contra a linha de fecho da Pinnacle em ${formatInteger(scorecard.n, locale)} jogos e ${scorecard.n_seasons} épocas.`
-        : `We tested the model behind these forecasts against Pinnacle's closing line over ${formatInteger(scorecard.n, locale)} matches and ${scorecard.n_seasons} seasons.`
+        ? `Testámos o modelo destas previsões contra a linha de fecho do mercado em ${formatInteger(scorecard.n, locale)} jogos e ${scorecard.n_seasons} épocas.`
+        : `We tested the model behind these forecasts against the market's closing line over ${formatInteger(scorecard.n, locale)} matches and ${scorecard.n_seasons} seasons.`
       : locale === "pt"
-        ? `Testámos o modelo anterior (${scorecard.model}) contra a linha de fecho da Pinnacle em ${formatInteger(scorecard.n, locale)} jogos e ${scorecard.n_seasons} épocas. O modelo atual (${prediction.model}) ainda não foi avaliado contra o mercado.`
-        : `We tested the previous model (${scorecard.model}) against Pinnacle's closing line over ${formatInteger(scorecard.n, locale)} matches and ${scorecard.n_seasons} seasons. The current model (${prediction.model}) has not been evaluated against the market yet.`
+        ? `Testámos o modelo anterior (${scorecard.model}) contra a linha de fecho do mercado em ${formatInteger(scorecard.n, locale)} jogos e ${scorecard.n_seasons} épocas. O modelo atual (${prediction.model}) ainda não foi avaliado contra o mercado.`
+        : `We tested the previous model (${scorecard.model}) against the market's closing line over ${formatInteger(scorecard.n, locale)} matches and ${scorecard.n_seasons} seasons. The current model (${prediction.model}) has not been evaluated against the market yet.`
     : locale === "pt"
       ? "O modelo comparado com a linha de fecho do mercado."
       : "The model compared with the market's closing line.";
@@ -300,6 +300,7 @@ export default async function LigaPage({
             }
             nSims={prediction.n_sims}
             model={prediction.model}
+            calibration={scorecard?.calibration ?? null}
             labels={{
               team: t("football.team"),
               meanPoints: t("football.meanPoints"),

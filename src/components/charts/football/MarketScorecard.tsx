@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { teamDisplayName } from "@/lib/config/football";
-import { blockVerdict, crossoverMatchday, verdictSentence } from "@/lib/football-scorecard";
+import { blockVerdict, crossoverMatchday, verdictSentence, type PointsCalibration } from "@/lib/football-scorecard";
 
 /* ------------------------------------------------------------------ types */
 
@@ -55,6 +55,12 @@ export interface MarketScorecardData {
   n: number;
   seasons: string[];
   n_seasons: number;
+  first_season?: string;
+  last_season?: string;
+  /** Matches priced by each bookmaker's closing line ({ pinnacle: 773, b365: 37 }). */
+  market_sources?: Record<string, number>;
+  /** The final-points interval check quoted under the league table. */
+  calibration?: PointsCalibration & { metric?: string };
   overall: MarketBlock;
   overall_vs_open: MarketBlock;
   close_vs_open: {
@@ -162,11 +168,17 @@ function CheckpointChart({
   const xs = cps.map((_, i) => padL + (innerW * (i + 0.5)) / cps.length);
   const bandW = innerW / cps.length;
 
-  // RPS scale — truncated axis (values live in a narrow band); flagged in the note.
-  const yLo = 0.165;
-  const yHi = 0.205;
+  // RPS scale — a truncated axis read from the data (the values live in a
+  // narrow band), rounded out to the hundredth; the note states its range.
+  const rpsValues = cps.flatMap((c) => [c.model_rps, c.market_rps]).filter(Number.isFinite);
+  const yLo = rpsValues.length ? Math.floor(Math.min(...rpsValues) * 100) / 100 : 0;
+  const yHi = rpsValues.length ? Math.max(Math.ceil(Math.max(...rpsValues) * 100) / 100, yLo + 0.01) : 0.01;
   const y = (v: number) => padT + plotH - ((v - yLo) / (yHi - yLo)) * plotH;
-  const ticks = [0.17, 0.18, 0.19, 0.2];
+  const tickStep = (yHi - yLo) / 0.01 > (narrow ? 4 : 8) ? 0.02 : 0.01;
+  const ticks = Array.from(
+    { length: Math.floor((yHi - yLo) / tickStep + 1e-9) + 1 },
+    (_, i) => Math.round((yLo + i * tickStep) * 1000) / 1000,
+  );
 
   // Delta strip scale
   const maxAbs = Math.max(
@@ -184,7 +196,13 @@ function CheckpointChart({
     boundaryIdx > 0 ? (xs[boundaryIdx - 1] + xs[boundaryIdx]) / 2 : padL;
 
   const lateFrom = data.phases.mid_late.checkpoints?.[0] ?? null;
-  const perPoint = cps[0]?.n ?? null;
+  // Matches behind each point, from each checkpoint's own n.
+  const pointNs = cps.map((c) => c.n).filter((n) => Number.isFinite(n));
+  const nMin = pointNs.length ? Math.min(...pointNs) : null;
+  const nMax = pointNs.length ? Math.max(...pointNs) : null;
+  const perPoint = nMin === null || nMax === null
+    ? null
+    : nMin === nMax ? `${nMin}` : pt ? `${nMin} a ${nMax}` : `${nMin} to ${nMax}`;
 
   const h = hover !== null ? cps[hover] : null;
   const hoverX = hover !== null ? xs[hover] : 0;
@@ -529,8 +547,8 @@ function CheckpointChart({
 
       <p className="mt-2 text-[11px] leading-relaxed text-stone-400">
         {pt
-          ? `Eixo vertical truncado (0,165 a 0,205) para tornar visíveis as diferenças; as diferenças reais são as da faixa inferior. Cada ponto é uma jornada prevista em cada uma das ${data.n_seasons} épocas${perPoint ? ` (n = ${perPoint} jogos por ponto)` : ""}.`
-          : `Vertical axis truncated (0.165 to 0.205) so the differences are visible; the real differences are the ones in the lower strip. Each point is one predicted matchday in each of the ${data.n_seasons} seasons${perPoint ? ` (n = ${perPoint} matches per point)` : ""}.`}
+          ? `Eixo vertical truncado (${num(yLo, 2)} a ${num(yHi, 2)}) para tornar visíveis as diferenças; as diferenças reais são as da faixa inferior. Cada ponto é uma jornada prevista em cada uma das ${data.n_seasons} épocas${perPoint ? ` (n = ${perPoint} jogos por ponto)` : ""}.`
+          : `Vertical axis truncated (${num(yLo, 2)} to ${num(yHi, 2)}) so the differences are visible; the real differences are the ones in the lower strip. Each point is one predicted matchday in each of the ${data.n_seasons} seasons${perPoint ? ` (n = ${perPoint} matches per point)` : ""}.`}
       </p>
 
       {/* Table view twin */}
@@ -559,8 +577,11 @@ function CheckpointChart({
                 <th scope="col" className="py-1 px-3 font-medium text-right">
                   {pt ? "Diferença" : "Difference"}
                 </th>
-                <th scope="col" className="py-1 pl-3 font-medium text-right">
+                <th scope="col" className="py-1 px-3 font-medium text-right">
                   {pt ? "Erro padrão" : "Std. error"}
+                </th>
+                <th scope="col" className="py-1 pl-3 font-medium text-right">
+                  {pt ? "Jogos" : "Matches"}
                 </th>
               </tr>
             </thead>
@@ -578,7 +599,8 @@ function CheckpointChart({
                   >
                     {signed(c.delta, 4)}
                   </td>
-                  <td className="py-1 pl-3 text-right text-stone-400">{num(c.se, 4)}</td>
+                  <td className="py-1 px-3 text-right text-stone-400">{num(c.se, 4)}</td>
+                  <td className="py-1 pl-3 text-right text-stone-500">{c.n}</td>
                 </tr>
               ))}
             </tbody>

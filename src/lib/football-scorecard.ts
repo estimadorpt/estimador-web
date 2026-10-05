@@ -1,4 +1,4 @@
-import { LIGA_POINTS_CALIBRATION } from '@/lib/config/football';
+import { formatDecimal, formatInteger } from '@/lib/football-format';
 
 // Words for the model-vs-market scorecard, derived from the file rather than
 // typed in. The scorecard is re-run whenever the production model changes, so
@@ -79,6 +79,53 @@ export function verdictSentence(block: ScorecardBlock, locale: string, tLabel: s
   }
 }
 
+/**
+ * The final-points interval check the model export carries under
+ * market_scorecard.json → calibration: how often the published interval of
+ * `interval_mass` contained the real final points total, over `n_seasons`
+ * seasons. Every figure in the sentence under the league table comes from here.
+ */
+export interface PointsCalibration {
+  model?: string;
+  interval_mass: number;
+  coverage: number;
+  n_seasons: number;
+  first_season: string;
+  last_season: string;
+}
+
+/** The bookmakers whose closing prices the comparison used, in words. */
+const BOOKMAKERS: Record<string, string> = {
+  pinnacle: 'Pinnacle',
+  b365: 'Bet365',
+};
+
+/**
+ * "Pinnacle (773 jogos) e Bet365 (37)" — the market's sources with their match
+ * counts, largest first, read from market_sources. Null when the file has none.
+ */
+export function marketSourcesPhrase(sources: Record<string, number> | null | undefined, locale: string): string | null {
+  const entries = Object.entries(sources ?? {}).filter(([, n]) => Number.isFinite(n) && n > 0).sort((a, b) => b[1] - a[1]);
+  if (!entries.length) return null;
+  const pt = locale !== 'en';
+  const name = (key: string) => BOOKMAKERS[key] ?? key;
+  if (entries.length === 1) return name(entries[0][0]);
+  const parts = entries.map(([key, n], i) => (i === 0
+    ? `${name(key)} (${formatInteger(n, locale)} ${pt ? 'jogos' : 'matches'})`
+    : `${name(key)} (${formatInteger(n, locale)})`));
+  const last = parts.pop();
+  return `${parts.join(', ')} ${pt ? 'e' : 'and'} ${last}`;
+}
+
+/** The scorecard's own season span: first_season/last_season, else the season list. */
+export function scorecardSeasonRange(
+  sc: { seasons?: string[]; first_season?: string; last_season?: string },
+  locale: string,
+): string {
+  if (sc.first_season && sc.last_season) return seasonRange([sc.first_season, sc.last_season], locale);
+  return seasonRange(sc.seasons ?? [], locale);
+}
+
 /** "2017-18 a 2024-25" / "2017-18 to 2024-25". */
 export function seasonRange(seasons: string[], locale: string): string {
   if (!seasons.length) return '';
@@ -101,21 +148,26 @@ export function crossoverMatchday(
 }
 
 /**
- * The final-points calibration line under the league table. The measured
- * coverage is quoted only for the model it was measured on; for any other
- * model the sentence says the check has not been run, rather than borrowing
- * another model's figure (FB-MISS-02: the table quoted the retired model's
- * 92,7% under bivcross forecasts).
+ * The final-points calibration line under the league table, read from the
+ * export's calibration block (market_scorecard.json). The measured coverage is
+ * quoted only for the model it was measured on; for any other model, or when
+ * the file carries no check, the sentence says the check has not been run,
+ * rather than borrowing another model's figure (FB-MISS-02).
  */
-export function calibrationSentence(model: string | null | undefined, locale: string): string {
+export function calibrationSentence(
+  calibration: PointsCalibration | null | undefined,
+  model: string | null | undefined,
+  locale: string,
+): string {
   const pt = locale !== 'en';
-  const c = LIGA_POINTS_CALIBRATION;
-  if (model && model === c.model) {
-    const nominal = Math.round(c.nominal * 100);
-    const observed = Math.round(c.observed * 100);
+  const c = calibration;
+  if (c && model && c.model === model && Number.isFinite(c.coverage) && Number.isFinite(c.interval_mass)) {
+    const nominal = formatInteger(Math.round(c.interval_mass * 100), locale);
+    const observed = formatDecimal(c.coverage * 100, locale, 1);
+    const range = seasonRange([c.first_season, c.last_season], locale);
     return pt
-      ? `Numa verificação de ${c.checked.pt}, em ${c.nSeasons} épocas (${c.firstSeason} a ${c.lastSeason}), o intervalo de ${nominal}% conteve o total real de pontos em ${observed}% dos casos.`
-      : `In a ${c.checked.en} check over ${c.nSeasons} seasons (${c.firstSeason} to ${c.lastSeason}), the ${nominal}% interval contained the real points total ${observed}% of the time.`;
+      ? `Em ${c.n_seasons} épocas (${range}), o intervalo de ${nominal}% conteve o total final de pontos em ${observed}% dos casos.`
+      : `Over ${c.n_seasons} seasons (${range}), the ${nominal}% interval contained the final points total ${observed}% of the time.`;
   }
   return pt
     ? 'A calibração destes intervalos ainda não foi medida para o modelo que produz esta previsão.'

@@ -46,9 +46,6 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
         : `happens in ${formatDecimal(p * 100, "en", p < 0.01 ? 1 : 0)}% of simulations`,
     relegated: pt ? "Despromovidos" : "Relegated",
     ptsLabel: pt ? "Pts" : "Pts",
-    disclaimer: pt
-      ? "Intervalos de pontos finais verificados como calibrados em 8 épocas históricas."
-      : "Final-points intervals verified as calibrated over 8 historical seasons.",
   };
 
   const draw = () => {
@@ -125,7 +122,7 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
           </div>
 
           <div className="mt-2 text-xs text-stone-400">
-            {t.relegated}: {relegated.map((r) => teamDisplayName(r.team)).join(", ")} · {t.disclaimer}
+            {t.relegated}: {relegated.map((r) => teamDisplayName(r.team)).join(", ")}
           </div>
         </div>
       )}

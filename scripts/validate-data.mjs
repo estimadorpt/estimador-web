@@ -182,6 +182,18 @@ feed('football/liga-2026-27/ask.json', value => (isObject(value) ? null : 'expec
 feed('football/liga-2026-27/market_scorecard.json', value => {
   if (!isObject(value)) return 'expected an object';
   if (typeof value.model !== 'string') return 'no model identifier — the evaluated model must be named';
+  // /desporto/liga/modelo and the league table read every figure from here.
+  if (!nonEmptyArray(value.checkpoints) || !value.checkpoints.every(c => isObject(c) && Number.isInteger(c.n) && c.n > 0)) {
+    return 'checkpoints without a match count (n) — the chart states n per point';
+  }
+  if (!isObject(value.market_sources) || !Object.values(value.market_sources).every(n => Number.isInteger(n))) {
+    return 'no market_sources — the page names the bookmakers whose prices were used';
+  }
+  const c = value.calibration;
+  if (!isObject(c) || typeof c.coverage !== 'number' || typeof c.interval_mass !== 'number'
+    || !Number.isInteger(c.n_seasons) || typeof c.first_season !== 'string' || typeof c.last_season !== 'string') {
+    return 'no calibration block (coverage, interval_mass, n_seasons, first_season, last_season) — the league table quotes it';
+  }
   return null;
 }, { required: false });
 

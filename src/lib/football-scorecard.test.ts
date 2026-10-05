@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   blockVerdict,
   calibrationSentence,
+  marketSourcesPhrase,
+  scorecardSeasonRange,
   crossoverMatchday,
   describeModel,
   evaluatesCurrentModel,
@@ -40,12 +42,36 @@ describe('scorecard wording', () => {
     expect(crossoverMatchday([{ checkpoint: 6, delta: 0.009 }])).toBeNull();
   });
 
-  it('quotes the interval calibration only for the model it was measured on', () => {
-    expect(calibrationSentence('bivcross', 'pt')).toBe(
-      'Numa verificação de setembro de 2026, em 9 épocas (2017-18 a 2025-26), o intervalo de 90% conteve o total real de pontos em 89% dos casos.',
+  it('quotes the interval calibration from the file, only for the model it was measured on', () => {
+    const calibration = {
+      model: 'bivcross', interval_mass: 0.9, coverage: 0.893, n_seasons: 9, first_season: '2017-18', last_season: '2025-26',
+    };
+    expect(calibrationSentence(calibration, 'bivcross', 'pt')).toBe(
+      'Em 9 épocas (2017-18 a 2025-26), o intervalo de 90% conteve o total final de pontos em 89,3% dos casos.',
     );
-    expect(calibrationSentence('joint_sot', 'pt')).not.toMatch(/\d+%/);
-    expect(calibrationSentence(undefined, 'en')).toMatch(/not been measured/);
+    expect(calibrationSentence(calibration, 'bivcross', 'en')).toBe(
+      'Over 9 seasons (2017-18 to 2025-26), the 90% interval contained the final points total 89.3% of the time.',
+    );
+    expect(calibrationSentence(calibration, 'joint_sot', 'pt')).not.toMatch(/\d+%/);
+    expect(calibrationSentence(null, 'bivcross', 'en')).toMatch(/not been measured/);
+    expect(calibrationSentence(calibration, undefined, 'en')).toMatch(/not been measured/);
+  });
+
+  it('names the market sources and the season span from the file', () => {
+    expect(marketSourcesPhrase({ b365: 37, pinnacle: 773 }, 'pt')).toBe('Pinnacle (773 jogos) e Bet365 (37)');
+    expect(marketSourcesPhrase({ pinnacle: 1773, b365: 37 }, 'en')).toBe('Pinnacle (1,773 matches) and Bet365 (37)');
+    expect(marketSourcesPhrase({ pinnacle: 810 }, 'en')).toBe('Pinnacle');
+    expect(marketSourcesPhrase(undefined, 'pt')).toBeNull();
+    expect(scorecardSeasonRange({ first_season: '2020-21', last_season: '2025-26', seasons: ['x'] }, 'pt')).toBe('2020-21 a 2025-26');
+    expect(scorecardSeasonRange({ seasons: ['2020-21', '2021-22'] }, 'en')).toBe('2020-21 to 2021-22');
+  });
+
+  it('reads every figure the published scorecard needs', async () => {
+    const scorecard = await loadLigaMarketScorecard();
+    if (!scorecard) return;
+    expect(scorecard.calibration && Number.isFinite(scorecard.calibration.coverage)).toBe(true);
+    expect(scorecard.checkpoints.every(c => Number.isInteger(c.n) && c.n > 0)).toBe(true);
+    expect(Object.values(scorecard.market_sources ?? {}).reduce((a, b) => a + b, 0)).toBe(scorecard.n);
   });
 
   it('knows every model the published files name', async () => {

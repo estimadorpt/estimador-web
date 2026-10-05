@@ -10,7 +10,8 @@ import type { MarketScorecardData } from "@/components/charts/football/MarketSco
 import {
   describeModel,
   evaluatesCurrentModel,
-  seasonRange,
+  marketSourcesPhrase,
+  scorecardSeasonRange,
   verdictSentence,
 } from "@/lib/football-scorecard";
 import { formatDecimal, formatInteger, formatLongDate, formatSigned } from "@/lib/football-format";
@@ -28,7 +29,9 @@ function summary(
   locale: string,
 ) {
   const pt = locale !== "en";
-  const range = seasonRange(sc.seasons, locale);
+  const range = scorecardSeasonRange(sc, locale);
+  const sources = marketSourcesPhrase(sc.market_sources, locale);
+  const shin = /shin/i.test(sc.market);
   const cps = sc.checkpoints.map((c) => c.checkpoint);
   const same = evaluatesCurrentModel(sc.model, forecastModel);
   const evaluated = describeModel(sc.model, locale);
@@ -61,8 +64,8 @@ function summary(
       ? `O resultado, em ${formatInteger(sc.n, locale)} jogos ao longo de ${sc.n_seasons} épocas (${range}). ${phaseLine} ${overallLine}`
       : `The result, over ${formatInteger(sc.n, locale)} matches across ${sc.n_seasons} seasons (${range}). ${phaseLine} ${overallLine}`,
     footnote: pt
-      ? `Avaliação em ${formatInteger(sc.n, locale)} jogos: ${sc.n_seasons} épocas (${range}) × ${cps.length} jornadas de referência (${cps.join(", ")}). Em cada ponto o modelo é ajustado apenas com os jogos disputados até essa jornada e prevê a jornada seguinte, sem ver o futuro. As probabilidades do mercado derivam das cotações de fecho publicadas pela football-data.co.uk (Pinnacle), com a margem retirada pelo método de Shin. Avaliação gerada a ${formatLongDate(sc.generated_at, locale)}.`
-      : `Evaluated on ${formatInteger(sc.n, locale)} matches: ${sc.n_seasons} seasons (${range}) × ${cps.length} reference matchdays (${cps.join(", ")}). At each point the model is fitted only on matches played up to that matchday and forecasts the next one, without seeing the future. Market probabilities are derived from closing odds published by football-data.co.uk (Pinnacle), with the margin removed using Shin's method. Evaluation generated on ${formatLongDate(sc.generated_at, locale)}.`,
+      ? `Avaliação em ${formatInteger(sc.n, locale)} jogos: ${sc.n_seasons} épocas (${range}) × ${cps.length} jornadas de referência (${cps.join(", ")}). Em cada ponto o modelo é ajustado apenas com os jogos disputados até essa jornada e prevê a jornada seguinte, sem ver o futuro. As probabilidades do mercado derivam das cotações de fecho publicadas pela football-data.co.uk${sources ? ` (${sources})` : ""}${shin ? ", com a margem retirada pelo método de Shin" : ""}. Avaliação gerada a ${formatLongDate(sc.generated_at, locale)}.`
+      : `Evaluated on ${formatInteger(sc.n, locale)} matches: ${sc.n_seasons} seasons (${range}) × ${cps.length} reference matchdays (${cps.join(", ")}). At each point the model is fitted only on matches played up to that matchday and forecasts the next one, without seeing the future. Market probabilities are derived from closing odds published by football-data.co.uk${sources ? ` (${sources})` : ""}${shin ? ", with the margin removed using Shin's method" : ""}. Evaluation generated on ${formatLongDate(sc.generated_at, locale)}.`,
   };
 }
 

@@ -40,7 +40,7 @@ const copy = {
       "Livres de usar, redistribuir e transformar, incluindo para fins comerciais, desde que a fonte seja atribuída: «estimador.pt» com ligação para a página correspondente. Os dados são fornecidos como estão, sem garantias — são previsões probabilísticas de um modelo estatístico, e por definição vão estar erradas parte do tempo.",
     provenanceTitle: "Proveniência",
     provenance:
-      "Resultados e estatísticas de jogo (incluindo xG e remates à baliza) da SofaScore; cotações de fecho da Pinnacle via football-data.co.uk; lesões e valores de mercado do Transfermarkt. As probabilidades vêm de um modelo bayesiano de Poisson bivariado (bivcross), ajustado aos golos e aos remates à baliza das últimas quatro épocas da Primeira Liga e da Liga 2, com os jogos mais antigos a pesar menos e o valor de cada plantel como ponto de partida, e de 50 000 simulações de Monte Carlo por publicação. A pré-época (md00) foi publicada pelo modelo anterior, joint_sot.",
+      "Resultados e estatísticas de jogo (incluindo xG e remates à baliza) da SofaScore; cotações de fecho (Pinnacle e Bet365) via football-data.co.uk; lesões e valores de mercado do Transfermarkt. As probabilidades vêm de um modelo bayesiano de Poisson bivariado (bivcross), ajustado aos golos e aos remates à baliza das últimas quatro épocas da Primeira Liga e da Liga 2, com os jogos mais antigos a pesar menos e o valor de cada plantel como ponto de partida, e de 50 000 simulações de Monte Carlo por publicação. A pré-época (md00) foi publicada pelo modelo anterior, joint_sot.",
     unavailable: "Não foi possível listar os ficheiros publicados.",
     methodology: "Como funciona o modelo",
     review: "A época 2025-26 em revista",
@@ -76,7 +76,7 @@ const copy = {
       "Free to use, redistribute and transform, commercial use included, as long as the source is credited: “estimador.pt”, with a link to the corresponding page. The data is provided as is, with no warranty — these are probabilistic forecasts from a statistical model, and by definition they will be wrong some of the time.",
     provenanceTitle: "Provenance",
     provenance:
-      "Results and match statistics (xG and shots on target included) from SofaScore; Pinnacle closing odds via football-data.co.uk; injuries and market values from Transfermarkt. The probabilities come from a bivariate Poisson Bayesian model (bivcross), fitted to goals and shots on target from the last four seasons of the Primeira Liga and Liga 2, with older games counting for less and each squad's value as the starting point, and from 50,000 Monte Carlo season simulations per publication. The pre-season file (md00) was published by the previous model, joint_sot.",
+      "Results and match statistics (xG and shots on target included) from SofaScore; closing odds (Pinnacle and Bet365) via football-data.co.uk; injuries and market values from Transfermarkt. The probabilities come from a bivariate Poisson Bayesian model (bivcross), fitted to goals and shots on target from the last four seasons of the Primeira Liga and Liga 2, with older games counting for less and each squad's value as the starting point, and from 50,000 Monte Carlo season simulations per publication. The pre-season file (md00) was published by the previous model, joint_sot.",
     unavailable: "Could not list the published files.",
     methodology: "How the model works",
     review: "The 2025-26 season reviewed",
@@ -177,8 +177,8 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
     match: /^market_scorecard\.json$/,
     label: "market_scorecard.json",
     doc: {
-      pt: "Uma avaliação do modelo contra a linha de fecho da Pinnacle, com o número de jogos e de épocas, o erro padrão emparelhado em cada bloco e, no campo model, o modelo avaliado (que pode não ser o que publica as previsões).",
-      en: "An evaluation of the model against Pinnacle's closing line, with the number of matches and seasons, the paired standard error on every block and, in the model field, the model evaluated (which may not be the one publishing the forecasts).",
+      pt: "Uma avaliação do modelo contra a linha de fecho do mercado, com o número de jogos e de épocas, o erro padrão emparelhado em cada bloco, as casas de apostas cujas cotações foram usadas (market_sources), a verificação dos intervalos de pontos finais (calibration) e, no campo model, o modelo avaliado (que pode não ser o que publica as previsões).",
+      en: "An evaluation of the model against the market's closing line, with the number of matches and seasons, the paired standard error on every block, the bookmakers whose prices were used (market_sources), the final-points interval check (calibration) and, in the model field, the model evaluated (which may not be the one publishing the forecasts).",
     },
   },
   {
