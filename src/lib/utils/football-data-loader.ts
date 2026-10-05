@@ -9,7 +9,7 @@ import type {
   NextMatchdayScenarioMatch,
 } from '@/types/football';
 import { assignFixtureSlugs } from '@/lib/config/fixtures';
-import { normaliseRatings, type RatingKind } from '@/lib/utils/player-ratings';
+import { normaliseRatings, reconcilePlayerPages, type RatingKind } from '@/lib/utils/player-ratings';
 import {
   fixtureKey,
   matchOutcome,
@@ -112,12 +112,22 @@ export async function loadLigaPlayers() {
 // Load the per-player detail payload behind the player pages (null if absent).
 // Written by the model repo's scripts/export_players_detail.py; players.json
 // stays the ranking, this file carries history and recent form.
+//
+// Returned reconciled with the ranking (reconcilePlayerPages): only players
+// /jogadores lists, at its rank, from clubs in the current table. Every page,
+// link and sitemap entry built from this loader therefore agrees with
+// /jogadores even when the two files come from different model runs.
 export async function loadLigaPlayersDetail() {
   try {
-    const data = await loadFootballJson<
-      import('@/components/charts/football/PlayerProfile').PlayerDetailData
-    >('players_detail.json');
-    return data?.players?.length ? data : null;
+    const [data, ranking, { prediction }] = await Promise.all([
+      loadFootballJson<
+        import('@/components/charts/football/PlayerProfile').PlayerDetailData
+      >('players_detail.json'),
+      loadLigaPlayers(),
+      loadLigaData(),
+    ]);
+    const currentTeams = new Set((prediction?.table ?? []).map(row => row.team));
+    return reconcilePlayerPages(data, ranking, currentTeams);
   } catch {
     return null;
   }
@@ -658,38 +668,6 @@ export async function loadLiga2(season = '2026-27') {
 export async function loadLigaInjuries() {
   try {
     return await loadFootballJson<import('@/components/charts/football/InjuriesPanel').InjuriesData>('injuries.json');
-  } catch {
-    return null;
-  }
-}
-
-// Load the shareable matchday cards (null if absent).
-//
-// The manifest is written by the model repo (scripts/publish_cards.py) and the
-// PNGs are copied into public/images/cards/. The two can drift — a manifest
-// entry whose image never arrived is dropped here rather than published as a
-// broken image.
-export async function loadLigaCards() {
-  try {
-    const manifest = await loadFootballJson<
-      import('@/components/charts/football/ShareCards').CardsManifest
-    >('cards.json');
-    if (!manifest?.cards?.length) return null;
-
-    const present = await Promise.all(
-      manifest.cards.map(async card => {
-        try {
-          await fs.access(
-            path.join(process.cwd(), 'public', 'images', 'cards', card.file)
-          );
-          return card;
-        } catch {
-          return null;
-        }
-      })
-    );
-    const cards = present.filter((c): c is NonNullable<typeof c> => c !== null);
-    return cards.length > 0 ? { ...manifest, cards } : null;
   } catch {
     return null;
   }

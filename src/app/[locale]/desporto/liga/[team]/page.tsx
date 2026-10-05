@@ -8,6 +8,7 @@ import {
   teamDisplayName,
 } from "@/lib/config/football";
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { NarrativeScenarios } from "@/components/charts/football/NarrativeScenarios";
 import { DecisiveMatches } from "@/components/charts/football/DecisiveMatches";
@@ -16,8 +17,7 @@ import { RemainingSchedule } from "@/components/charts/football/RemainingSchedul
 import { PathBuilder } from "@/components/charts/football/PathBuilder";
 import { PositionDistribution } from "@/components/charts/football/PositionDistribution";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/routing";
-import { ArrowLeft } from "lucide-react";
+import { formatInteger, formatLongDate } from "@/lib/football-format";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { buildClubOutlooks, positionSpread } from "@/components/football/club-outlook";
@@ -34,8 +34,18 @@ function ordinal(n: number, locale: string): string {
   return `${n}th`;
 }
 
-export function generateStaticParams() {
-  return Object.values(ligaTeamSlugs).map((slug) => ({ team: slug }));
+// Only the clubs in the current forecast table get a page. ligaTeamSlugs
+// stays whole (logos and the 2025-26 archive use it), but a club that left
+// the league would otherwise get an indexed page with nothing on it, and
+// notFound() cannot remove a URL from a static export.
+export async function generateStaticParams() {
+  const { prediction } = await loadLigaData();
+  const slugs = (prediction?.table ?? [])
+    .map((row) => ligaTeamSlugs[row.team])
+    .filter((slug): slug is string => Boolean(slug));
+  // Static export rejects a dynamic route with no params; without a forecast
+  // every current-season club still resolves to its fallback page.
+  return (slugs.length ? slugs : Object.values(ligaTeamSlugs)).map((slug) => ({ team: slug }));
 }
 
 export async function generateMetadata({
@@ -81,9 +91,18 @@ export default async function TeamDetailPage({
     return (
       <div className="min-h-screen bg-paper">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 py-20 text-center text-stone-500">
-          <p>Data not available.</p>
-        </div>
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            compact
+            back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
+            eyebrow="Liga Portugal"
+            title={teamDisplayName(teamName)}
+            lede={locale === "pt"
+              ? "A previsão da Liga não está disponível de momento."
+              : "The Liga forecast is not available right now."}
+          />
+        </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }
@@ -100,11 +119,7 @@ export default async function TeamDetailPage({
   const isRelegationCandidate = pRelegation >= 1;
   const isMidTable = !isTitleContender && !isRelegationCandidate;
 
-  const forecastDate = new Intl.DateTimeFormat(locale === "pt" ? "pt-PT" : "en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(prediction.timestamp));
+  const forecastDate = formatLongDate(prediction.timestamp, locale);
 
   // Which of the three fixed cards (title / top 3 / relegation) carry
   // information worth their own card — below 1% they fold into one line
@@ -260,45 +275,27 @@ export default async function TeamDetailPage({
     <div className="min-h-screen bg-paper">
       <Header />
 
+      <main id="main-content" tabIndex={-1}>
       {/* Hero: the club colour is an accent (stripe + crest), never the
           background — a readable neutral surface works for all 18 clubs,
-          including a bright yellow one like Arouca that white text on a
-          solid fill would fail (diagnosis §10). */}
-      <section className="bg-cream border-b border-line">
-        <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-          <Link
-            href="/desporto/liga"
-            locale={locale}
-            className="text-stone-500 hover:text-ink text-xs font-medium uppercase tracking-wider inline-flex items-center gap-1 mb-4 transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            {t("football.backToLeague")}
-          </Link>
-          <div className="flex items-center gap-3 mb-2">
+          including a bright yellow one like Arouca (diagnosis §10). The intro
+          recognises a deep arrival: the club, the forecast date and what the
+          page answers. */}
+      <PageHero
+        compact
+        back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
+        eyebrow={`Liga Portugal · ${t("football.season")} ${prediction.season} · ${t("football.matchday")} ${prediction.matchday}`}
+        title={
+          <span className="flex items-center gap-3">
             <span aria-hidden="true" className="h-9 w-1.5 shrink-0 rounded-full md:h-11" style={{ backgroundColor: teamColor }} />
             {teamLogoSrc(teamName) && (
-              <img
-                src={teamLogoSrc(teamName)}
-                alt=""
-                className="w-12 h-12 md:w-16 md:h-16 object-contain"
-              />
+              <img src={teamLogoSrc(teamName)} alt="" className="w-12 h-12 md:w-16 md:h-16 object-contain" />
             )}
-            <h1 className="text-3xl md:text-4xl text-ink">
-              {teamDisplayName(teamName)}
-            </h1>
-          </div>
-          <p className="text-stone-500 text-sm">
-            {t("football.season")} {prediction.season} ·{" "}
-            {t("football.matchday")} {prediction.matchday}
-          </p>
-          {/* Recognises a deep arrival: names the club, the forecast date and
-              what the page answers, without assuming the visitor saw the
-              homepage (diagnosis §10, "navigation" paragraph). */}
-          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-stone-600">
-            {t("football.clubPageIntro", { team: teamDisplayName(teamName), date: forecastDate })}
-          </p>
-        </div>
-      </section>
+            <span>{teamDisplayName(teamName)}</span>
+          </span>
+        }
+        lede={t("football.clubPageIntro", { team: teamDisplayName(teamName), date: forecastDate })}
+      />
 
       {/* Key stats + season projection */}
       {standing && (
@@ -338,7 +335,7 @@ export default async function TeamDetailPage({
               <span>
                 {t("football.expectedPoints")}:{" "}
                 <strong className="text-stone-800">
-                  {Math.round(standing.mean_pts)} ± {Math.round(standing.std_pts)}
+                  {formatInteger(Math.round(standing.mean_pts), locale)} ± {formatInteger(Math.round(standing.std_pts), locale)}
                 </strong>
               </span>
               {projectedPosition > 0 && (
@@ -624,12 +621,12 @@ export default async function TeamDetailPage({
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
             <h2 className="text-2xl tracking-tight mb-1">
-              {t("football.decisiveMatchesFor", { team: teamName })}
+              {t("football.decisiveMatchesFor", { team: teamDisplayName(teamName) })}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
               {isSurvival
-                ? t("football.decisiveMatchesForDescriptionSurvival", { team: teamName })
-                : t("football.decisiveMatchesForDescription", { team: teamName })}
+                ? t("football.decisiveMatchesForDescriptionSurvival", { team: teamDisplayName(teamName) })
+                : t("football.decisiveMatchesForDescription", { team: teamDisplayName(teamName) })}
             </p>
             <DecisiveMatches
               matches={teamDecisiveMatches!}
@@ -664,10 +661,10 @@ export default async function TeamDetailPage({
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
             <h2 className="text-2xl tracking-tight mb-1">
-              {t("football.otherClubsImpactFor", { team: teamName })}
+              {t("football.otherClubsImpactFor", { team: teamDisplayName(teamName) })}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
-              {t("football.otherClubsImpactForDescription", { team: teamName })}
+              {t("football.otherClubsImpactForDescription", { team: teamDisplayName(teamName) })}
             </p>
             <DecisiveMatches
               matches={teamFeaturedMatches}
@@ -691,8 +688,8 @@ export default async function TeamDetailPage({
         </section>
       )}
 
+      </main>
       <SiteFooter locale={locale} />
-
     </div>
   );
 }

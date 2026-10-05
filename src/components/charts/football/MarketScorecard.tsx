@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { teamDisplayName } from "@/lib/config/football";
+import { blockVerdict, crossoverMatchday, verdictSentence } from "@/lib/football-scorecard";
 
 /* ------------------------------------------------------------------ types */
 
@@ -182,6 +183,9 @@ function CheckpointChart({
   const boundaryX =
     boundaryIdx > 0 ? (xs[boundaryIdx - 1] + xs[boundaryIdx]) / 2 : padL;
 
+  const lateFrom = data.phases.mid_late.checkpoints?.[0] ?? null;
+  const perPoint = cps[0]?.n ?? null;
+
   const h = hover !== null ? cps[hover] : null;
   const hoverX = hover !== null ? xs[hover] : 0;
 
@@ -211,8 +215,8 @@ function CheckpointChart({
         role="img"
         aria-label={
           pt
-            ? "Erro de previsão (RPS) do modelo e da linha de fecho do mercado, por jornada de referência, de 8 épocas históricas. O modelo está pior nas jornadas 6 e 10 e iguala o mercado da jornada 14 em diante."
-            : "Forecast error (RPS) for the model and the market closing line by reference matchday across 8 historical seasons. The model is worse at matchdays 6 and 10 and matches the market from matchday 14 onward."
+            ? `Erro de previsão (RPS) do modelo e da linha de fecho do mercado, por jornada de referência, em ${data.n_seasons} épocas históricas. Os valores estão na tabela abaixo.`
+            : `Forecast error (RPS) for the model and the market closing line by reference matchday across ${data.n_seasons} historical seasons. The values are in the table below.`
         }
       >
         {/* early-season wash */}
@@ -239,7 +243,7 @@ function CheckpointChart({
               x={padL - 6}
               y={y(tk) + 3}
               textAnchor="end"
-              fontSize={narrow ? 9 : 10}
+              fontSize={11}
               fill={AXIS_TEXT}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
@@ -326,7 +330,7 @@ function CheckpointChart({
         <text
           x={padL + 4}
           y={padT + 12}
-          fontSize={narrow ? 8 : 9}
+          fontSize={11}
           fill={AXIS_TEXT}
           className="uppercase"
           letterSpacing="0.06em"
@@ -336,12 +340,12 @@ function CheckpointChart({
         <text
           x={boundaryX + 6}
           y={padT + 12}
-          fontSize={narrow ? 8 : 9}
+          fontSize={11}
           fill={AXIS_TEXT}
           className="uppercase"
           letterSpacing="0.06em"
         >
-          {pt ? "Jornada 14 em diante" : "Matchday 14 onward"}
+          {lateFrom != null ? (pt ? `Jornada ${lateFrom} em diante` : `Matchday ${lateFrom} onward`) : ""}
         </text>
 
         {/* x axis */}
@@ -359,7 +363,7 @@ function CheckpointChart({
             x={xs[i]}
             y={padT + plotH + 15}
             textAnchor="middle"
-            fontSize={narrow ? 9 : 10}
+            fontSize={11}
             fill={AXIS_TEXT}
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
@@ -370,7 +374,7 @@ function CheckpointChart({
           x={padL + innerW / 2}
           y={padT + plotH + 30}
           textAnchor="middle"
-          fontSize={narrow ? 8 : 9}
+          fontSize={11}
           fill="#7f9284"
           className="uppercase"
           letterSpacing="0.06em"
@@ -382,7 +386,7 @@ function CheckpointChart({
         <text
           x={padL}
           y={stripTop - 26}
-          fontSize={narrow ? 9 : 10}
+          fontSize={11}
           fontWeight={600}
           fill="#4f5f57"
         >
@@ -404,7 +408,7 @@ function CheckpointChart({
               x={padL - 6}
               y={dy(v) + 3}
               textAnchor="end"
-              fontSize={narrow ? 8 : 9}
+              fontSize={11}
               fill={AXIS_TEXT}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
@@ -424,7 +428,7 @@ function CheckpointChart({
           x={padL - 6}
           y={dy(0) + 3}
           textAnchor="end"
-          fontSize={narrow ? 8 : 9}
+          fontSize={11}
           fill={AXIS_TEXT}
           style={{ fontVariantNumeric: "tabular-nums" }}
         >
@@ -468,10 +472,10 @@ function CheckpointChart({
             </g>
           );
         })}
-        <text x={padL} y={stripTop - 8} fontSize={narrow ? 8 : 9} fill={AXIS_TEXT}>
+        <text x={padL} y={stripTop - 8} fontSize={11} fill={AXIS_TEXT}>
           {pt ? "▲ mercado erra menos" : "▲ market errs less"}
         </text>
-        <text x={padL} y={stripTop + stripH + 12} fontSize={narrow ? 8 : 9} fill={AXIS_TEXT}>
+        <text x={padL} y={stripTop + stripH + 12} fontSize={11} fill={AXIS_TEXT}>
           {pt ? "▼ modelo erra menos" : "▼ model errs less"}
         </text>
 
@@ -525,8 +529,8 @@ function CheckpointChart({
 
       <p className="mt-2 text-[11px] leading-relaxed text-stone-400">
         {pt
-          ? "Eixo vertical truncado (0,165–0,205) para tornar visível o cruzamento; as diferenças reais são as da faixa inferior. Cada ponto é uma jornada prevista em cada uma das 8 épocas (n = 72 jogos por ponto)."
-          : "Vertical axis truncated (0.165–0.205) so the crossover is visible; the real differences are the ones in the lower strip. Each point is one predicted matchday in each of the 8 seasons (n = 72 matches per point)."}
+          ? `Eixo vertical truncado (0,165 a 0,205) para tornar visíveis as diferenças; as diferenças reais são as da faixa inferior. Cada ponto é uma jornada prevista em cada uma das ${data.n_seasons} épocas${perPoint ? ` (n = ${perPoint} jogos por ponto)` : ""}.`
+          : `Vertical axis truncated (0.165 to 0.205) so the differences are visible; the real differences are the ones in the lower strip. Each point is one predicted matchday in each of the ${data.n_seasons} seasons${perPoint ? ` (n = ${perPoint} matches per point)` : ""}.`}
       </p>
 
       {/* Table view twin */}
@@ -725,8 +729,8 @@ function Disagreements({ data, pt }: { data: MarketScorecardData; pt: boolean })
       </ul>
       <p className="mt-3 text-[11px] text-stone-400">
         {pt
-          ? "Os oito jogos em que os dois favoritos mais se afastaram um do outro. “Nenhum” significa que saiu o terceiro resultado."
-          : "The eight matches where the two favourites were furthest apart. “Neither” means the third result came in."}
+          ? `Os ${data.disagreements.length} jogos em que os dois favoritos mais se afastaram um do outro. «Nenhum» significa que saiu o terceiro resultado.`
+          : `The ${data.disagreements.length} matches where the two favourites were furthest apart. “Neither” means the third result came in.`}
       </p>
     </div>
   );
@@ -740,6 +744,16 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
   const o = data.overall;
   const early = data.phases.early;
   const late = data.phases.mid_late;
+  // Every verdict, range and crossover below is read from the file: the
+  // scorecard is re-run when the production model changes.
+  const allCps = data.checkpoints.map((c) => c.checkpoint);
+  const firstCp = allCps.length ? Math.min(...allCps) : null;
+  const lastCp = allCps.length ? Math.max(...allCps) : null;
+  const crossover = crossoverMatchday(data.checkpoints);
+  const tone = (b: MarketBlock): "model" | "market" | "neutral" => {
+    const v = blockVerdict(b);
+    return v === "market_ahead" ? "market" : v === "model_ahead" || v === "tie_model_sign" ? "model" : "neutral";
+  };
 
   return (
     <div className="space-y-12">
@@ -757,38 +771,26 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
           <PhaseTile
             pt={pt}
             label={pt ? "Toda a época" : "Whole season"}
-            sub={pt ? "Jornadas 6 a 30" : "Matchdays 6 to 30"}
+            sub={firstCp != null && lastCp != null ? (pt ? `Jornadas ${firstCp} a ${lastCp}` : `Matchdays ${firstCp} to ${lastCp}`) : ""}
             block={o}
-            tone="neutral"
-            verdict={
-              pt
-                ? "A diferença é menor do que metade do seu próprio erro padrão: indistinguível de zero."
-                : "The gap is smaller than half its own standard error: indistinguishable from zero."
-            }
+            tone={tone(o)}
+            verdict={verdictSentence(o, pt ? "pt" : "en", num(o.t, 2))}
           />
           <PhaseTile
             pt={pt}
             label={pt ? "Início da época" : "Early season"}
             sub={pt ? early.label_pt : early.label_en}
             block={early}
-            tone="market"
-            verdict={
-              pt
-                ? `O mercado está à frente, e aqui a diferença sobrevive ao erro padrão (t = ${num(early.t, 2)}).`
-                : `The market is ahead, and here the gap survives its standard error (t = ${num(early.t, 2)}).`
-            }
+            tone={tone(early)}
+            verdict={verdictSentence(early, pt ? "pt" : "en", num(early.t, 2))}
           />
           <PhaseTile
             pt={pt}
             label={pt ? "Resto da época" : "Rest of the season"}
             sub={pt ? late.label_pt : late.label_en}
             block={late}
-            tone="model"
-            verdict={
-              pt
-                ? "O modelo iguala a linha de fecho. O sinal é favorável, mas dentro do ruído."
-                : "The model matches the closing line. The sign favours it, but stays inside the noise."
-            }
+            tone={tone(late)}
+            verdict={verdictSentence(late, pt ? "pt" : "en", num(late.t, 2))}
           />
         </div>
       </section>
@@ -797,13 +799,18 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
       <section>
         <h2 className="text-2xl tracking-tight mb-1">
           {pt
-            ? "Onde a desvantagem começa e onde acaba"
-            : "Where the deficit starts and where it ends"}
+            ? "Como muda a diferença ao longo da época?"
+            : "How does the gap change through the season?"}
         </h2>
         <p className="text-sm text-stone-500 mb-5 max-w-3xl">
           {pt
-            ? "Erro de previsão (RPS) do modelo e da linha de fecho, para cada jornada de referência. Mais baixo é melhor. As duas linhas cruzam-se entre a jornada 10 e a jornada 14."
-            : "Forecast error (RPS) for the model and the closing line at each reference matchday. Lower is better. The two lines cross between matchday 10 and matchday 14."}
+            ? "Erro de previsão (RPS) do modelo e da linha de fecho, para cada jornada de referência. Mais baixo é melhor."
+            : "Forecast error (RPS) for the model and the closing line at each reference matchday. Lower is better."}
+          {crossover
+            ? pt
+              ? ` As duas linhas cruzam-se entre a jornada ${crossover.before} e a jornada ${crossover.after}.`
+              : ` The two lines cross between matchday ${crossover.before} and matchday ${crossover.after}.`
+            : ""}
         </p>
         <CheckpointChart data={data} pt={pt} />
       </section>

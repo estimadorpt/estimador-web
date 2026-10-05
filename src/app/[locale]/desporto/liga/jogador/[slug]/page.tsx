@@ -1,15 +1,16 @@
 import { createPageMetadata } from '@/lib/metadata';
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import {
   loadContribRatings,
   loadDefRatings,
   loadGkRatings,
+  loadLigaData,
   loadLigaInjuries,
   loadLigaPlayersDetail,
   loadPlayerBySlug,
@@ -25,6 +26,8 @@ import type {
 } from "@/components/charts/football/PlayerProfile";
 import { injuryReasonLabel } from "@/lib/i18n/football-labels";
 import { teamDisplayName } from "@/lib/config/football";
+import { currentAbsences } from "@/lib/football-injuries";
+import { formatDecimal } from "@/lib/football-format";
 
 const SITE = "https://estimador.pt";
 
@@ -55,6 +58,8 @@ function resolvePositionRating(
 /* ------------------------------------------------------------- static params */
 
 export async function generateStaticParams() {
+  // The reconciled set: players /jogadores ranks (current squads), from
+  // clubs in the current table (see loadLigaPlayersDetail).
   const data = await loadLigaPlayersDetail();
   // Static export rejects a dynamic route with zero params, so a placeholder
   // page stands in whenever no player detail is published.
@@ -80,7 +85,7 @@ export async function generateMetadata({
     };
   }
 
-  const { player } = found;
+  const { player, data } = found;
   const sar = player.sar ?? 0;
   const title = pt
     ? `${player.player}: o que o modelo sabe`
@@ -92,10 +97,14 @@ export async function generateMetadata({
       ? `${player.player} (${teamDisplayName(player.team)}): minutos, jogos e histórico época a época, com a métrica que se aplica à posição — e a explicação de por que razão o ranking de finalização não diz nada sobre ele.`
       : `${player.player} (${teamDisplayName(player.team)}): minutes, matches and season-by-season history, with the metric that applies to the position — and why the finishing ranking says nothing about him.`
     : pt
-      ? `${player.player} (${teamDisplayName(player.team)}) é o número ${player.rank} da Liga Portugal segundo o modelo de jogadores: ${sar.toFixed(
+      ? `${player.player} (${teamDisplayName(player.team)}) é o n.º ${player.rank} em finalização entre os ${data.n_players} jogadores publicados: ${formatDecimal(
+          sar,
+          locale,
           2,
         )} golos por 90 minutos acima de um jogador de nível de substituição, com intervalo de credibilidade, minutos, golos e histórico época a época.`
-      : `${player.player} (${teamDisplayName(player.team)}) ranks number ${player.rank} in Liga Portugal on the player model: ${sar.toFixed(
+      : `${player.player} (${teamDisplayName(player.team)}) is number ${player.rank} for finishing among the ${data.n_players} players published: ${formatDecimal(
+          sar,
+          locale,
           2,
         )} goals per 90 minutes above a replacement-level player, with credible interval, minutes, goals and season-by-season history.`;
   const url = `${SITE}/${locale}/desporto/liga/jogador/${slug}`;
@@ -118,9 +127,10 @@ export default async function PlayerPage({
   const { locale, slug } = await params;
   const pt = locale !== "en";
 
-  const [found, injuries, gk, def, contrib] = await Promise.all([
+  const [found, injuries, { prediction }, gk, def, contrib] = await Promise.all([
     loadPlayerBySlug(slug),
     loadLigaInjuries(),
+    loadLigaData(),
     loadGkRatings(),
     loadDefRatings(),
     loadContribRatings(),
@@ -131,21 +141,19 @@ export default async function PlayerPage({
     return (
       <div className="min-h-screen bg-paper">
         <Header />
-        <div className="max-w-3xl mx-auto px-4 py-20">
-          <p className="text-stone-500 mb-4">
-            {pt
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            width="4xl"
+            compact
+            back={{ href: "/desporto/liga/jogadores", label: pt ? "Jogadores" : "Players", locale }}
+            eyebrow="Liga Portugal"
+            title={pt ? "Sem jogadores publicados" : "No players published"}
+            lede={pt
               ? "Não há jogadores publicados de momento."
               : "There are no published players right now."}
-          </p>
-          <Link
-            href="/desporto/liga"
-            locale={locale}
-            className="text-sm text-stone-700 hover:text-stone-900 inline-flex items-center gap-1"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Liga Portugal
-          </Link>
-        </div>
+          />
+        </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }
@@ -153,10 +161,13 @@ export default async function PlayerPage({
   const { player, data } = found;
 
   // Exact name + club match, the same convention the liga page uses. A miss
-  // simply means no injury banner.
+  // simply means no injury banner — and so does a list too old to be current
+  // for this forecast, or an entry whose expected return has passed.
+  const absences = currentAbsences(injuries, prediction?.timestamp);
   const entry =
-    injuries?.players?.find(p => p.player === player.player && p.team === player.team) ??
+    absences.players.find(p => p.player === player.player && p.team === player.team) ??
     null;
+  const clubInLeague = (prediction?.table ?? []).some(row => row.team === player.team);
   const injury: PlayerInjury | null = entry
     ? {
         kind: entry.kind,
@@ -169,20 +180,19 @@ export default async function PlayerPage({
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
+      <PageHero
+        width="4xl"
+        compact
+        back={{ href: "/desporto/liga/jogadores", label: pt ? "Jogadores" : "Players", locale }}
+        eyebrow={`Liga Portugal · ${pt ? "Jogadores" : "Players"}`}
+        title={player.player}
+      />
 
       <div className="max-w-4xl mx-auto px-4 py-8 md:py-10">
-        <div className="mb-6">
-          <Link
-            href="/desporto/liga"
-            locale={locale}
-            className="text-stone-400 hover:text-stone-700 text-xs font-medium uppercase tracking-wider inline-flex items-center gap-1 transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            {pt ? "Liga Portugal" : "Liga Portugal"}
-          </Link>
-        </div>
-
         <PlayerProfile
+          showName={false}
+          clubInLeague={clubInLeague}
           player={player}
           data={data}
           locale={locale}
@@ -195,12 +205,13 @@ export default async function PlayerPage({
           <Link
             href="/desporto/liga/metodologia"
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 underline underline-offset-2"
+            className="text-ink underline underline-offset-4"
           >
             {pt ? "Como funciona o modelo" : "How the model works"}
           </Link>
         </div>
       </div>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

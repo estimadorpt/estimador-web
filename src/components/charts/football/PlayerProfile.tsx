@@ -9,6 +9,7 @@ import {
   teamLogoSrc,
 } from "@/lib/config/football";
 import { positionCodeEn, positionCodePt } from "@/lib/i18n/football-labels";
+import { formatLongDate } from "@/lib/football-format";
 import {
   goalsSarIsMeaningful,
   ratingDomain,
@@ -119,6 +120,10 @@ interface PlayerProfileProps {
   injury?: PlayerInjury | null;
   /** Localised injury reason, resolved by the page (data value, not UI copy). */
   injuryReason?: string;
+  /** False when the player's club is not in the current league: no club link. */
+  clubInLeague?: boolean;
+  /** False when the page's hero already carries the name as its h1. */
+  showName?: boolean;
   /**
    * The metric that actually applies to this player's position, when one is
    * published. Goalkeepers and defenders get this instead of the goals-only
@@ -137,6 +142,8 @@ export function PlayerProfile({
   locale = "pt",
   injury,
   injuryReason,
+  clubInLeague = true,
+  showName = true,
   positionRating = null,
 }: PlayerProfileProps) {
   const pt = locale !== "en";
@@ -231,10 +238,12 @@ export function PlayerProfile({
   };
 
   const t = {
-    rank: pt ? `#${player.rank} da Liga` : `#${player.rank} in the league`,
+    // The /jogadores framing: a finishing rank among the players published,
+    // never a league-wide rank (ADR-019).
+    rank: pt ? `#${player.rank} em finalização` : `#${player.rank} for finishing`,
     ofN: pt
-      ? `entre os ${int(data.n_players)} melhores`
-      : `of the top ${int(data.n_players)}`,
+      ? `entre os ${int(data.n_players)} publicados`
+      : `of the ${int(data.n_players)} published`,
     out: pt ? "Indisponível" : "Unavailable",
     metricTitle: pt ? "Talento a marcar" : "Scoring skill",
     metricName: pt
@@ -552,9 +561,11 @@ export function PlayerProfile({
               </span>
             )}
           </div>
-          <h1 className="text-2xl sm:text-3xl tracking-tight text-stone-900">
-            {player.player}
-          </h1>
+          {showName && (
+            <h1 className="text-2xl sm:text-3xl tracking-tight text-stone-900">
+              {player.player}
+            </h1>
+          )}
           <div className="flex items-center gap-1.5 mt-1 text-sm text-stone-500">
             {teamLogoSrc(player.team) && (
               <img
@@ -577,7 +588,7 @@ export function PlayerProfile({
           {injury.expected_return ? (
             <span className="text-stone-400">
               {" "}
-              ({pt ? "regresso previsto" : "expected back"} {injury.expected_return})
+              ({pt ? "regresso previsto a" : "expected back"} {formatLongDate(injury.expected_return, locale)})
             </span>
           ) : null}
         </div>
@@ -888,7 +899,7 @@ export function PlayerProfile({
             <ArrowRight className="w-3 h-3" />
           </Link>
         )}
-        {teamSlug && (
+        {teamSlug && clubInLeague && (
           <Link
             href={`/desporto/liga/${teamSlug}`}
             locale={locale}

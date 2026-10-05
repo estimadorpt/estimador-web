@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { ChevronRight } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import { formatDecimal, formatInteger, formatSigned } from "@/lib/football-format";
+import { calibrationSentence } from "@/lib/football-scorecard";
 
 /**
  * The league page's club chooser: a plain select that navigates straight to
@@ -66,6 +68,11 @@ interface LeagueTableProps {
   deltas?: Record<string, TeamDelta>;
   /** Keyed by team name. When absent the table renders exactly as before. */
   intervals?: Record<string, PointsInterval>;
+  /** Simulated seasons behind the intervals (prediction.n_sims). */
+  nSims?: number;
+  /** The model that produced the forecast (prediction.model): the
+   * calibration figure is only quoted for the model it was measured on. */
+  model?: string;
   labels: {
     team: string;
     meanPoints: string;
@@ -101,36 +108,6 @@ function formatProb(value: number): string {
   if (pct === 0) return "—";
   if (pct === 100) return "100%";
   return `${Math.round(pct)}%`;
-}
-
-/**
- * Largest remainder method: round probabilities so they sum to 100%.
- * Returns a map from index to display string.
- */
-function roundToSum100(values: number[]): string[] {
-  const pcts = values.map(v => v * 100);
-  const floors = pcts.map(p => Math.floor(p));
-  let remainder = 100 - floors.reduce((s, f) => s + f, 0);
-
-  // Sort by fractional part descending, allocate +1 to largest remainders
-  const indices = values.map((_, i) => i);
-  indices.sort((a, b) => (pcts[b] - floors[b]) - (pcts[a] - floors[a]));
-
-  const result = [...floors];
-  for (const idx of indices) {
-    if (remainder <= 0) break;
-    result[idx] += 1;
-    remainder -= 1;
-  }
-
-  return result.map((r, i) => {
-    const raw = pcts[i];
-    if (raw > 99 && raw < 100) return ">99%";
-    if (raw < 1 && raw > 0) return "<1%";
-    if (raw === 0) return "—";
-    if (raw === 100) return "100%";
-    return `${r}%`;
-  });
 }
 
 /**
@@ -198,6 +175,8 @@ export function LeagueTable({
   deltas,
   intervals,
   labels,
+  nSims = 50000,
+  model,
 }: LeagueTableProps) {
   const locale = useLocale();
   const router = useRouter();
@@ -227,9 +206,10 @@ export function LeagueTable({
   }
   const hasActual = actualLookup.size > 0;
 
-  // Pre-compute consistent rounded probabilities (sum to 100%)
-  const champRounded = roundToSum100(data.map(t => t.p_champion));
-  const relegRounded = roundToSum100(data.map(t => t.p_relegation));
+  // Plain rounding, the same as the hero, the homepage and the share card:
+  // forcing each column to sum to 100% moved Porto's 51,5% to "52%", and on
+  // relegation (two places, so the column sums to 200%) it floored every
+  // value (site review LIVE-11).
 
   const dismissHint = useCallback(() => {
     setShowHint(false);
@@ -296,7 +276,7 @@ export function LeagueTable({
       <table className="w-full text-sm">
         <thead>
           {hasActual && (
-            <tr className="text-left text-[10px] uppercase tracking-wider text-stone-400">
+            <tr className="text-left text-[11px] uppercase tracking-wider text-stone-500">
               <th className="py-1 pr-2" colSpan={2} />
               <th className="py-1 px-2 text-center" colSpan={2}>
                 {pt ? "Atual" : "Current"}
@@ -395,7 +375,7 @@ export function LeagueTable({
                   );
                 })()}
                 <td className="py-2.5 px-3 text-right tabular-nums font-semibold">
-                  {team.mean_pts.toFixed(1)}
+                  {formatDecimal(team.mean_pts, locale, 1)}
                   {/* The band has no room on phones, so the range travels
                       under the point estimate instead. */}
                   {interval && (
@@ -422,11 +402,11 @@ export function LeagueTable({
                   </td>
                 )}
                 <td className="py-2.5 px-3 text-right tabular-nums text-stone-500 hidden sm:table-cell">
-                  {team.mean_gd > 0 ? '+' : ''}{team.mean_gd.toFixed(0)}
+                  {formatSigned(Math.round(team.mean_gd), locale, 0)}
                 </td>
                 <td className="py-2.5 px-3 text-right tabular-nums">
                   <span className={team.p_champion > 0.01 ? 'font-semibold' : 'text-stone-400'}>
-                    {champRounded[i]}
+                    {formatProb(team.p_champion)}
                   </span>
                   {deltas?.[team.team] && (
                     <DeltaIndicator value={deltas[team.team].p_champion_delta} />
@@ -437,7 +417,7 @@ export function LeagueTable({
                 </td>
                 <td className="py-2.5 px-3 text-right tabular-nums">
                   <span className={team.p_relegation > 0.1 ? 'font-semibold text-red-700' : team.p_relegation > 0 ? 'text-red-600' : 'text-stone-400'}>
-                    {relegRounded[i]}
+                    {formatProb(team.p_relegation)}
                   </span>
                   {deltas?.[team.team] && (
                     <DeltaIndicator value={deltas[team.team].p_relegation_delta} invert />
@@ -488,8 +468,9 @@ export function LeagueTable({
           </div>
           <p className="mt-1.5 text-[11px] text-stone-500 leading-relaxed">
             {pt
-              ? "Os pontos finais são uma distribuição, não um número: a barra mostra onde caem as 50 mil épocas simuladas. Estes intervalos foram verificados como calibrados em 8 épocas históricas — um intervalo anunciado como 90% conteve o resultado real em 92,7% dos casos."
-              : "Final points are a distribution, not a number: the bar shows where the 50k simulated seasons fall. These intervals were verified as calibrated over 8 historical seasons — an interval quoted as 90% contained the real outcome 92.7% of the time."}
+              ? `Os pontos finais são uma distribuição, não um número: a barra mostra onde caem as ${formatInteger(nSims, locale)} épocas simuladas.`
+              : `Final points are a distribution, not a number: the bar shows where the ${formatInteger(nSims, locale)} simulated seasons fall.`}{" "}
+            {calibrationSentence(model, locale)}
           </p>
         </div>
       )}
