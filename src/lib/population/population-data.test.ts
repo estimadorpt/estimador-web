@@ -15,7 +15,7 @@ import type {
 import { canonicalQuery, formatDisplay, isWhole, readCells, rebuildResponse } from './compact';
 import { parsePublicResponse } from './contract';
 import { RECIPE_COPY, VALUES } from './labels';
-import { indexPlaces, searchParishes } from './places';
+import { indexPlaces, regionSlug, searchParishes } from './places';
 
 const DIR = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR);
 const json = <T,>(file: string): T => JSON.parse(fs.readFileSync(path.join(DIR, file), 'utf8')) as T;
@@ -157,5 +157,15 @@ describe('parish search', () => {
 
   it('finds the Barcelos parishes with letter codes', () => {
     expect(index.byCode.get('0302FA')?.municipalityName).toBe('Barcelos');
+  });
+});
+
+describe('region slugs', () => {
+  it('are unique and URL-safe', () => {
+    const slugs = places.regions.map(([, name]) => regionSlug(name));
+    expect(new Set(slugs).size).toBe(20);
+    expect(slugs).toContain('viana-do-castelo');
+    expect(slugs).toContain('acores');
+    expect(slugs.every(slug => /^[a-z-]+$/.test(slug))).toBe(true);
   });
 });

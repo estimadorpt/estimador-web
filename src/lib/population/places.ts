@@ -151,3 +151,15 @@ export function normaliseParishCode(raw: string | null | undefined): string | nu
   const code = raw.trim().toUpperCase();
   return /^[0-9A-Z]{6}$/.test(code) ? code : null;
 }
+
+/** URL slug for a region page: "Viana do Castelo" → "viana-do-castelo", "Açores" → "acores". */
+export function regionSlug(name: string): string {
+  return fold(name).replace(/\s+/g, '-');
+}
+
+/** How a region is named in a heading. */
+export function regionTitle(id: string, name: string, locale: 'pt' | 'en'): string {
+  if (id === 'azores') return locale === 'pt' ? 'Região Autónoma dos Açores' : 'Autonomous Region of the Azores';
+  if (id === 'madeira') return locale === 'pt' ? 'Região Autónoma da Madeira' : 'Autonomous Region of Madeira';
+  return locale === 'pt' ? `Distrito de ${name}` : `${name} district`;
+}
