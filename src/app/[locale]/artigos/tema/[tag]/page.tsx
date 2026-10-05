@@ -35,6 +35,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
   const { locale, tag } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const group = findTagGroup(getMDXArticlesByLocale(locale), tag);
 

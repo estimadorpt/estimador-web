@@ -15,6 +15,7 @@ import {
   loadLigaPlayers,
   loadPlayerSlugs,
 } from "@/lib/utils/football-data-loader";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 const SITE = "https://estimador.pt";
 
@@ -24,6 +25,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
 
   const title = pt
@@ -48,6 +50,7 @@ export default async function PlayerRatingsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
 
   // Every feed is optional and loaded independently: three of these are

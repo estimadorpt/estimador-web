@@ -1,3 +1,4 @@
+import { setRequestLocale } from '@/i18n/request-locale';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
@@ -17,6 +18,7 @@ import { createPageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   return createPageMetadata({
     locale,
@@ -35,6 +37,7 @@ function readMethodology(locale: Locale): string {
 export default async function PopulationMethodology({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale: Locale = raw === 'en' ? 'en' : 'pt';
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   const [meta, release, scorecard] = await Promise.all([loadPopulationMeta(), loadPopulationRelease(), loadPopulationScorecard()]);
 

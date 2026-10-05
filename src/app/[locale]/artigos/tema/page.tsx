@@ -8,6 +8,7 @@ import { buildTagIndex } from '@/lib/article-discovery';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { createPageMetadata, SITE_LOCALES } from '@/lib/metadata';
 import { Mosaic } from '@/components/brand/Mosaic';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params,
@@ -15,6 +16,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   return createPageMetadata({
@@ -45,6 +47,7 @@ export default async function TopicsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const groups = buildTagIndex(getMDXArticlesByLocale(locale));
 

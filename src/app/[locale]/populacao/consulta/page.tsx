@@ -3,6 +3,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { PageHero } from '@/components/PageHero';
 import { PermalinkResolver } from '@/components/population/consulta/PermalinkResolver';
 import { createPageMetadata } from '@/lib/metadata';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 /**
  * The shell the host serves for every canonical response link
@@ -11,6 +12,7 @@ import { createPageMetadata } from '@/lib/metadata';
  */
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   return createPageMetadata({
     locale,
@@ -25,6 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function PopulationPermalink({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   return (
     <div className="min-h-screen bg-paper">

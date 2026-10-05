@@ -20,6 +20,7 @@ import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import type { TrendData } from '@/types';
 import { ElectionSummaryStats } from '@/components/ElectionSummaryStats';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params
@@ -27,6 +28,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   return createPageMetadata({
@@ -45,6 +47,7 @@ export default async function ParliamentaryArchivePage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const archive = await loadParliamentaryArchive();
   const { probabilities, blocs, seats, trends, trendDates, districtForecast, contestedSeats, houseEffects } = archive;

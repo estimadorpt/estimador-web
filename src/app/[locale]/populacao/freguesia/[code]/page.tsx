@@ -24,8 +24,8 @@ export function generateStaticParams() {
  */
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const pt = locale === 'pt';
   setRequestLocale(locale);
+  const pt = locale === 'pt';
   const title = siteTitle(pt ? 'Freguesia · População sintética' : 'Parish · Synthetic population');
   const description = pt
     ? 'Quem vive em cada freguesia de Portugal: idades, trabalho, escolaridade e agregados numa população sintética gerada a partir dos Censos 2021.'

@@ -39,6 +39,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: MDXArticlePageProps): Promise<Metadata> {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const { article, locale: actualLocale } = getArticleWithFallback(slug, locale);
 
   if (!article) {

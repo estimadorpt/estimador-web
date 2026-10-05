@@ -36,6 +36,7 @@ import { LabourTile } from "@/components/economics/dashboard/LabourTile";
 import { InflationTile } from "@/components/economics/dashboard/InflationTile";
 import { SectionNotes } from "@/components/articles/SectionNotes";
 import { StoriesSection } from "@/components/economics/stories/StoriesSection";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params,
@@ -43,6 +44,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   // While the section is in preparation (src/lib/config/economy-status.json)
   // the page stays online as an explainer but out of search, with a title and
@@ -62,6 +64,7 @@ export default async function EconomiaPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "economics" });
 
   const data = await loadEconomyDashboard();
@@ -85,6 +88,7 @@ export default async function EconomiaPage({
     return (
       <div className="min-h-screen bg-paper">
         <Header />
+        <main id="main-content" tabIndex={-1}>
         <PageHero
           width="5xl"
           field="mint"
@@ -94,7 +98,7 @@ export default async function EconomiaPage({
           title={t("preparingTitle")}
           lede={t("explainerLede")}
         />
-        <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-6">
+        <div className="max-w-5xl mx-auto px-4 py-6">
           <EconomyReading
             locale={locale}
             showIllustration
@@ -110,6 +114,7 @@ export default async function EconomiaPage({
             <Action href="/economia/metodologia" locale={locale} variant="text" arrow>{t("methodologyLink")}</Action>
           </details>
           {notes}
+        </div>
         </main>
         <SiteFooter locale={locale} />
       </div>
@@ -123,6 +128,7 @@ export default async function EconomiaPage({
     return (
       <div className="min-h-screen bg-paper">
         <Header />
+        <main id="main-content" tabIndex={-1}>
         <PageHero
           width="5xl"
           field="mint"
@@ -132,7 +138,7 @@ export default async function EconomiaPage({
           title={t("title")}
           lede={t("explainerLede")}
         />
-        <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-6">
+        <div className="max-w-5xl mx-auto px-4 py-6">
           <EconomyReading
             locale={locale}
             showIllustration
@@ -146,6 +152,7 @@ export default async function EconomiaPage({
             {t("unavailableBody")}
           </p>
           {notes}
+        </div>
         </main>
         <SiteFooter locale={locale} />
       </div>
@@ -162,6 +169,7 @@ export default async function EconomiaPage({
     return (
       <div className="min-h-screen bg-paper">
         <Header />
+        <main id="main-content" tabIndex={-1}>
         <PageHero
           width="5xl"
           field="mint"
@@ -171,7 +179,7 @@ export default async function EconomiaPage({
           title={t("title")}
           lede={t("explainerLede")}
         />
-        <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-6">
+        <div className="max-w-5xl mx-auto px-4 py-6">
           <EconomyReading
             locale={locale}
             showIllustration
@@ -187,6 +195,7 @@ export default async function EconomiaPage({
             <Action href="/economia/metodologia" locale={locale} variant="text" arrow>{t("methodologyLink")}</Action>
           </details>
           {notes}
+        </div>
         </main>
         <SiteFooter locale={locale} />
       </div>
@@ -209,6 +218,7 @@ export default async function EconomiaPage({
     <div className="min-h-screen bg-paper">
       <Header />
 
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         width="5xl"
         field="mint"
@@ -230,9 +240,9 @@ export default async function EconomiaPage({
           </>
         }
       />
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-5">
 
       {/* Tiles */}
-      <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-8 space-y-5">
         {/* Staleness guard (client-side): banner when the payload is older than
             5 business days + a calendar-derived quarter position, so a stale
             payload can never claim "mid-quarter" after the quarter has ended. */}
@@ -441,6 +451,7 @@ export default async function EconomiaPage({
           className="pt-4"
           containerClassName="border-t border-stone-200 pt-8"
         />
+      </div>
       </main>
       <SiteFooter locale={locale} />
     </div>

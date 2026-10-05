@@ -6,9 +6,11 @@ import { createPageMetadata, siteTitle } from '@/lib/metadata';
 import { OFFICIAL_RESULTS, PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE, PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from '@/lib/config/elections';
 import { formatElectionLongDate } from '@/lib/election-display';
 import { loadSecondRoundData, loadPresidentialData } from '@/lib/utils/data-loader';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   return createPageMetadata({
     locale,
     path: '/eleicoes/arquivo',
@@ -23,6 +25,7 @@ const linkClass = 'text-ink underline underline-offset-4 hover:text-ink-muted';
 
 export default async function Archive({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   const date = (value: string) => formatElectionLongDate(value, locale);
   const [first, second] = await Promise.all([loadPresidentialData(), loadSecondRoundData()]);
@@ -68,6 +71,7 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
 
   return <div className="min-h-screen bg-paper">
     <Header />
+    <main id="main-content" tabIndex={-1}>
     <PageHero
       width="5xl"
       compact
@@ -76,7 +80,7 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
       title={pt ? 'A eleição passou. O que dizia a previsão?' : 'The election is over. What did the forecast say?'}
       lede={pt ? 'Um arquivo permite voltar à informação disponível na altura. Não é uma página de resultados oficiais.' : 'An archive lets you revisit the information available at the time. It is not a page of official results.'}
     />
-    <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto max-w-5xl px-4 py-10">
       <section aria-labelledby="archive-choice-title" className="border-y border-line py-7">
         <p className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">{pt ? 'Começar por aqui' : 'Start here'}</p>
         <h2 id="archive-choice-title" className="mt-2 text-2xl">{pt ? 'Escolhe uma previsão' : 'Choose a forecast'}</h2>
@@ -125,6 +129,7 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
           <Action href="/desporto/liga/modelo" locale={locale} variant="text" arrow>{pt ? 'A avaliação do modelo de futebol' : 'The football model’s evaluation'}</Action>
         </div>
       </section>
+    </div>
     </main>
     <SiteFooter locale={locale} />
   </div>;

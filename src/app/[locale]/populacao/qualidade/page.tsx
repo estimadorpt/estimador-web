@@ -1,3 +1,4 @@
+import { setRequestLocale } from '@/i18n/request-locale';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PageHero } from '@/components/PageHero';
@@ -27,6 +28,7 @@ import type { PortraitRecipe } from '@/types/population';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   return createPageMetadata({
     locale,
@@ -56,6 +58,7 @@ const TIER_PAGE: Record<'A' | 'B' | 'C', { pt: string; en: string }> = {
 export default async function PopulationQuality({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale: Locale = raw === 'en' ? 'en' : 'pt';
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   const [scorecard, meta] = await Promise.all([loadPopulationScorecard(), loadPopulationMeta()]);
 

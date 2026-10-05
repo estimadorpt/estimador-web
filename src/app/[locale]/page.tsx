@@ -15,6 +15,7 @@ import { PopulationPanel } from "@/components/home/PopulationPanel";
 import { FootballPanel } from "@/components/home/FootballPanel";
 import { EconomyPanel } from "@/components/home/EconomyPanel";
 import { ElectionsPanel, type ElectionSnapshot } from "@/components/home/ElectionsPanel";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params,
@@ -22,6 +23,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   return createPageMetadata({
     locale,
@@ -62,6 +64,7 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'home' });
   const config = homepageConfig();
 

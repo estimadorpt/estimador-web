@@ -16,6 +16,7 @@ import { Mosaic } from '@/components/brand/Mosaic';
 import { buildTagIndex } from '@/lib/article-discovery';
 import { ArticleRow } from '@/components/articles/ArticleRow';
 import { ArticleListStructuredData } from '@/components/StructuredData';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params
@@ -23,6 +24,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   return createPageMetadata({
@@ -46,6 +48,7 @@ export default async function ArticlesPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   // Only what this locale publishes. An article listed here but exported in
@@ -77,6 +80,7 @@ export default async function ArticlesPage({
       {articles.length > 0 && <ArticleListStructuredData articles={articles} locale={locale} />}
       <Header />
 
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         width="4xl"
         compact
@@ -94,8 +98,8 @@ export default async function ArticlesPage({
           </a>
         ) : undefined}
       />
+      <div className="max-w-4xl mx-auto px-4 py-10">
 
-      <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-4 py-10">
 
         {articles.length === 0 ? (
           <div className="flex items-center gap-6 py-6">
@@ -148,6 +152,7 @@ export default async function ArticlesPage({
             )}
           </>
         )}
+      </div>
       </main>
 
       {/* No decorative subscription box on an honestly empty index — nothing

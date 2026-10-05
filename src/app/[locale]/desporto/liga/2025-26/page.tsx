@@ -14,6 +14,7 @@ import { LuckIndex } from "@/components/charts/football/LuckIndex";
 import type { LuckEntry } from "@/components/charts/football/LuckIndex";
 import { teamDisplayName } from "@/lib/config/football";
 import type { Metadata } from "next";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 const SEASON = "2025-26";
 
@@ -90,6 +91,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const c = locale === "en" ? copy.en : copy.pt;
   return createPageMetadata({
     locale,
@@ -105,6 +107,7 @@ export default async function SeasonReviewPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
   const c = pt ? copy.pt : copy.en;
   const review = await loadSeasonReview(SEASON);

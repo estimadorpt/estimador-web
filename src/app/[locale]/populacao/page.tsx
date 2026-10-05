@@ -1,3 +1,4 @@
+import { setRequestLocale } from '@/i18n/request-locale';
 import { Users } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -21,6 +22,7 @@ import type { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== 'en';
   return createPageMetadata({
     locale,
@@ -38,6 +40,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function PopulationHub({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale: Locale = raw === 'en' ? 'en' : 'pt';
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   const [meta, places, national] = await Promise.all([loadPopulationMeta(), loadPopulationPlaces(), loadPopulationNational()]);
   const regions = places ? regionEntries(places, locale) : [];

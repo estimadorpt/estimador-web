@@ -21,6 +21,7 @@ import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { OFFICIAL_RESULTS, PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from "@/lib/config/elections";
 import { credibleIntervalLabel, formatElectionDayMonth, formatElectionLongDate, formatElectionNumber, formatElectionProbability } from "@/lib/election-display";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params
@@ -28,6 +29,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   return createPageMetadata({
@@ -49,6 +51,7 @@ export default async function PresidentialArchivePage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   const first = await loadPresidentialData();

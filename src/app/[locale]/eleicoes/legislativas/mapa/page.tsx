@@ -13,6 +13,7 @@ import { PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from '@/lib/co
 import { formatElectionLongDate } from '@/lib/election-display';
 import fs from 'fs';
 import path from 'path';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 interface DistrictForecast {
   district_name: string;
@@ -37,6 +38,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   
   return createPageMetadata({
@@ -56,6 +58,7 @@ export default async function MapPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const districtForecast = await getDistrictForecast();
 
@@ -65,6 +68,7 @@ export default async function MapPage({
 
       {/* The map reads one election's district forecast, so it opens as a
           page of that election, not as a general elections surface. */}
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         icon={<Vote aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t('forecast.mapEyebrow')}
@@ -75,8 +79,8 @@ export default async function MapPage({
         })}
         back={{ href: '/eleicoes/legislativas', label: t('map.backToForecast'), locale }}
       />
+      <div className="container mx-auto px-4 py-8">
 
-      <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Map */}
@@ -152,6 +156,7 @@ export default async function MapPage({
             </div>
           </div>
         </div>
+      </div>
       </main>
       <SiteFooter locale={locale} />
     </div>

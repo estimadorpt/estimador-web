@@ -28,6 +28,7 @@ import { injuryReasonLabel } from "@/lib/i18n/football-labels";
 import { teamDisplayName } from "@/lib/config/football";
 import { currentAbsences } from "@/lib/football-injuries";
 import { formatDecimal } from "@/lib/football-format";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 const SITE = "https://estimador.pt";
 
@@ -75,6 +76,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
   const found = await loadPlayerBySlug(slug);
 
@@ -125,6 +127,7 @@ export default async function PlayerPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
 
   const [found, injuries, { prediction }, gk, def, contrib] = await Promise.all([

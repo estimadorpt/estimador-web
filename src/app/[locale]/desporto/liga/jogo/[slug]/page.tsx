@@ -28,6 +28,7 @@ import type { MatchSquadSide } from "@/components/charts/football/MatchSquadNews
 import { formFor } from "@/lib/football-form";
 import { currentAbsences } from "@/lib/football-injuries";
 import { formatInteger, formatLongDate, formatProbability } from "@/lib/football-format";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 const SITE = "https://estimador.pt";
 
@@ -60,6 +61,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const fixture = await loadFixtureBySlug(slug);
   if (!fixture) {
     const pt = locale !== "en";
@@ -111,6 +113,7 @@ export default async function MatchPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
 
   const [fixture, { prediction, scenarios }, historical, injuries, players, fixtures] =

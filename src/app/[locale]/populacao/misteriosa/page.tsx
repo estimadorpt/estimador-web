@@ -1,3 +1,4 @@
+import { setRequestLocale } from '@/i18n/request-locale';
 import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { PageHero } from '@/components/PageHero';
@@ -15,6 +16,7 @@ const asLocale = (locale: string) => (locale === 'en' ? 'en' : 'pt');
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = GAME_COPY[asLocale(locale)];
   return createPageMetadata({
     locale,
@@ -32,6 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function MysteryParishPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = asLocale(raw);
+  setRequestLocale(locale);
   const t = GAME_COPY[locale];
   const meta = await loadPopulationMeta();
   if (!meta) throw new Error('Freguesia misteriosa needs public/data/population meta.json');

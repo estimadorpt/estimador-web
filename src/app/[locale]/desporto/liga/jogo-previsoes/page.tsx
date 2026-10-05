@@ -11,6 +11,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { Swords } from "lucide-react";
 import type { Metadata } from "next";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params,
@@ -18,6 +19,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
   return createPageMetadata({
     locale,
@@ -37,6 +39,7 @@ export default async function JogoPrevisoesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
   const t = await getTranslations({ locale });
 

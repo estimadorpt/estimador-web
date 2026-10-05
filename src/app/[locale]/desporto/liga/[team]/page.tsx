@@ -23,6 +23,7 @@ import type { Metadata } from "next";
 import { buildClubOutlooks, positionSpread } from "@/components/football/club-outlook";
 import { loadGameFixtures } from "@/components/football/load-game-fixtures";
 import { FixtureStakes } from "@/components/football/FixtureStakes";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 function ordinal(n: number, locale: string): string {
   if (locale === "pt") return `${n}º`;
@@ -57,6 +58,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; team: string }>;
 }): Promise<Metadata> {
   const { locale, team: slug } = await params;
+  setRequestLocale(locale);
   const teamName = ligaSlugToTeam[slug];
   if (!teamName) return {};
 
@@ -80,6 +82,7 @@ export default async function TeamDetailPage({
   params: Promise<{ locale: string; team: string }>;
 }) {
   const { locale, team: slug } = await params;
+  setRequestLocale(locale);
   const teamName = ligaSlugToTeam[slug];
   if (!teamName) notFound();
 

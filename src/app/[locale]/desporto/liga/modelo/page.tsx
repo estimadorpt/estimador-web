@@ -15,6 +15,7 @@ import {
 } from "@/lib/football-scorecard";
 import { formatDecimal, formatInteger, formatLongDate, formatSigned } from "@/lib/football-format";
 import type { Metadata } from "next";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 // Every count, range and verdict on this page is read from
 // market_scorecard.json, and the evaluated model is named from its `model`
@@ -102,6 +103,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const c = locale === "en" ? copy.en : copy.pt;
   const [scorecard, { prediction }] = await Promise.all([loadLigaMarketScorecard(), loadLigaData()]);
   return createPageMetadata({
@@ -120,6 +122,7 @@ export default async function LigaModelPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const c = locale === "en" ? copy.en : copy.pt;
   const [scorecard, { prediction }] = await Promise.all([loadLigaMarketScorecard(), loadLigaData()]);
   const s = scorecard ? summary(scorecard, prediction?.model ?? null, locale) : null;

@@ -14,6 +14,7 @@ import {
 } from "@/components/charts/football/Liga2Table";
 import { liga2DisplayName } from "@/lib/config/football";
 import type { Metadata } from "next";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 const copy = {
   pt: {
@@ -78,6 +79,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const c = locale === "en" ? copy.en : copy.pt;
   // Unpublished for now: reachable by URL, but linked from nowhere, out of the
   // sitemap and not indexed. Flip `index` and the sitemap's HIDDEN_ROUTES when
@@ -97,6 +99,7 @@ export default async function Liga2Page({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
   const c = pt ? copy.pt : copy.en;
   const data = await loadLiga2();

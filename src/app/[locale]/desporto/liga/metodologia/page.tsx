@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing";
 import { loadLigaData } from "@/lib/utils/football-data-loader";
 import { formatInteger } from "@/lib/football-format";
 import type { Metadata } from "next";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params,
@@ -14,6 +15,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   return createPageMetadata({
     locale,
@@ -33,6 +35,7 @@ export default async function LigaMethodologyPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const isPt = locale === "pt";
   const { prediction } = await loadLigaData();

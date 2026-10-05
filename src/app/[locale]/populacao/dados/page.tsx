@@ -1,3 +1,4 @@
+import { setRequestLocale } from '@/i18n/request-locale';
 import type { ReactNode } from 'react';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -17,6 +18,7 @@ import { createPageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   return createPageMetadata({
     locale,
@@ -71,6 +73,7 @@ const link = 'font-semibold text-ink underline underline-offset-4';
 export default async function PopulationData({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale: Locale = raw === 'en' ? 'en' : 'pt';
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   const [release, meta] = await Promise.all([loadPopulationRelease(), loadPopulationMeta()]);
   const pkg = POPULATION_DOWNLOADS.files.find(file => file.key === 'package');

@@ -9,6 +9,7 @@ import { DueloFinal } from "@/components/charts/football/DueloFinal";
 import { getTranslations } from "next-intl/server";
 import { Trophy, Swords } from "lucide-react";
 import type { Metadata } from "next";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params,
@@ -16,6 +17,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   return createPageMetadata({
     locale,
@@ -33,6 +35,7 @@ export default async function SimuladorPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   const [{ prediction, scenarios }, seasonSamples, upcomingFixtures] = await Promise.all([

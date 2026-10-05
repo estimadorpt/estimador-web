@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { loadPublishedFootballData } from "@/lib/utils/football-data-loader";
 import type { PublishedFile, PublishedSeason } from "@/lib/utils/football-data-loader";
 import type { Metadata } from "next";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 const SITE = "https://estimador.pt";
 
@@ -328,6 +329,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const c = locale === "en" ? copy.en : copy.pt;
   return createPageMetadata({
     locale,
@@ -343,6 +345,7 @@ export default async function LigaDataPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
   const c = pt ? copy.pt : copy.en;
   const seasons: PublishedSeason[] = await loadPublishedFootballData();

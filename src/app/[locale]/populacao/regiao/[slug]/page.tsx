@@ -1,3 +1,4 @@
+import { setRequestLocale } from '@/i18n/request-locale';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { MapPinned } from 'lucide-react';
@@ -31,6 +32,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { locale: raw, slug } = await params;
   const locale: Locale = raw === 'en' ? 'en' : 'pt';
+  setRequestLocale(locale);
   const places = await loadPopulationPlaces();
   const region = places ? regionBySlug(places, slug) : null;
   if (!region) return {};
@@ -49,6 +51,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function RegionPage({ params }: { params: Params }) {
   const { locale: raw, slug } = await params;
   const locale: Locale = raw === 'en' ? 'en' : 'pt';
+  setRequestLocale(locale);
   const pt = locale === 'pt';
   const places = await loadPopulationPlaces();
   const region = places ? regionBySlug(places, slug) : null;

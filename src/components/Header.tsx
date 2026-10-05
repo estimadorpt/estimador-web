@@ -128,18 +128,10 @@ export function Header() {
   }
 
   return (
-    <>
     <header ref={headerRef} onKeyDown={handleEscape} className="border-b border-line bg-paper/95 backdrop-blur-sm sticky top-0 z-50">
-      <a href="#content-start" className={`sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-cream focus:px-4 focus:py-3 focus:text-ink ${focusStyle}`}
-        onClick={(event) => {
-          const main = document.querySelector<HTMLElement>('main');
-          if (main) {
-            event.preventDefault();
-            if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
-            main.focus({ preventScroll: true });
-            main.scrollIntoView({ block: 'start' });
-          }
-        }}>
+      {/* Every page has exactly one main#main-content (tabIndex -1, so the
+          jump moves focus) that opens with its hero; landmarks.test.ts. */}
+      <a href="#main-content" className={`sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-cream focus:px-4 focus:py-3 focus:text-ink ${focusStyle}`}>
         {isPortuguese ? 'Saltar para o conteúdo' : 'Skip to content'}
       </a>
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
@@ -221,9 +213,5 @@ export function Header() {
         </nav>
       </div>
     </header>
-    {/* No-JavaScript fallback for legacy pages without a main landmark.
-        Page-owned main-content IDs remain unique. */}
-    <div id="content-start" tabIndex={-1} className="outline-none" />
-    </>
   );
 }

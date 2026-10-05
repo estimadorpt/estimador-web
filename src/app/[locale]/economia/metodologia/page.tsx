@@ -25,6 +25,7 @@ import remarkGfm from 'remark-gfm';
 import type { MDXComponents } from 'mdx/types';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 import { loadEconomyDashboard } from '@/lib/utils/data-loader';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params,
@@ -32,6 +33,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   return createPageMetadata({
     locale,
@@ -113,6 +115,7 @@ export default async function EconomicsMethodologyPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'economics' });
 
   const { content: mdxContent, actualLocale } = getContent(locale);
@@ -129,6 +132,7 @@ export default async function EconomicsMethodologyPage({
     <div className="min-h-screen bg-paper">
       <Header />
 
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         width="4xl"
         back={{ href: "/economia", label: t('title') }}
@@ -136,8 +140,8 @@ export default async function EconomicsMethodologyPage({
         eyebrow={t('eyebrow')}
         title={t('methodologyLink')}
       />
+      <div className="max-w-4xl mx-auto px-4 py-8">
 
-      <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-4 py-8">
         {!ECONOMY_PUBLISHED && (
           <p className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-800">
             {testedUntil
@@ -172,6 +176,7 @@ export default async function EconomicsMethodologyPage({
             {t('title')}
           </Link>
         </div>
+      </div>
       </main>
       <SiteFooter locale={locale} />
     </div>
