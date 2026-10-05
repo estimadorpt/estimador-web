@@ -46,6 +46,14 @@
       }
     },
     {
+      "route": "/pt/populacao/freguesia/_/index.txt",
+      "rewrite": "/pt/populacao/freguesia/_/index.txt"
+    },
+    {
+      "route": "/en/populacao/freguesia/_/index.txt",
+      "rewrite": "/en/populacao/freguesia/_/index.txt"
+    },
+    {
       "route": "/pt/populacao/freguesia/*",
       "rewrite": "/pt/populacao/freguesia/_/index.html"
     },
