@@ -25,6 +25,8 @@ export interface InjuryTeam {
 export interface InjuriesData {
   season: string;
   snapshot_date: string | null;
+  /** Set by the collector when it could not refresh the list. */
+  stale?: boolean;
   source: string;
   n_out: number;
   n_injuries: number;

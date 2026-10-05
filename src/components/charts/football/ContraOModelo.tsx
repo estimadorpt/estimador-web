@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { teamDisplayName, teamLogoSrc } from "@/lib/config/football";
 import { Swords, Lock, Trash2, SlidersHorizontal, Check, Share2 } from "lucide-react";
 import { useSeasonGame } from "@/hooks/useSeasonGame";
+import { formatKickoff, formatLongDate } from "@/lib/football-format";
 import { SeasonAccount } from "./SeasonAccount";
 import { SeasonLeaderboard } from "./SeasonLeaderboard";
 import {
@@ -161,6 +162,16 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
     fine: pt ? "Ajuste fino" : "Fine tune",
     matchday: pt ? "Jornada" : "Matchday",
     locked: pt ? "Jornada fechada" : "Matchday locked",
+    // The round locks as a unit at its first lock time (game_fixtures.json
+    // locks_at), shown in Lisbon time.
+    closes: (when: string) =>
+      pt
+        ? `Fecha ${when} (hora de Lisboa), no primeiro jogo da jornada.`
+        : `Closes ${when} (Lisbon time), at the round's first game.`,
+    closesUnconfirmed: pt
+      ? "Há horários por confirmar: a jornada fecha no primeiro jogo."
+      : "Some kickoffs are still to be confirmed: the round closes at its first game.",
+    toBeConfirmed: pt ? "horário por confirmar" : "kickoff to be confirmed",
     lockedKickoff: pt
       ? "Fechou ao primeiro pontapé de saída."
       : "Locked at the first kickoff.",
@@ -372,6 +383,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
           onToggleFine={key => setOpenFine(prev => ({ ...prev, [key]: !prev[key] }))}
           onPick={updatePick}
           t={t}
+          pt={pt}
           outcomeLabel={outcomeLabel}
         />
       ) : (
@@ -478,6 +490,7 @@ type Labels = {
   inProgress: string; provisional: string; notPlayed: string; result: string;
   yourRps: string; modelRps: string; won: string; lost: string;
   you: string; model: string; confLabels: Record<Confidence, string>;
+  closes: (when: string) => string; closesUnconfirmed: string; toBeConfirmed: string;
   [k: string]: unknown;
 };
 
@@ -488,9 +501,11 @@ function RoundPicker({
   onToggleFine,
   onPick,
   t,
+  pt,
   outcomeLabel,
 }: {
   round: GameRound;
+  pt: boolean;
   picks: PickMap;
   openFine: Record<string, boolean>;
   onToggleFine: (key: string) => void;
@@ -502,6 +517,8 @@ function RoundPicker({
   outcomeLabel: (o: Outcome, f: GameFixture) => string;
 }) {
   const pickedCount = round.fixtures.filter(f => picks[f.key]).length;
+  const lock = roundLockState(round, Date.now());
+  const allConfirmed = round.fixtures.every(f => f.kickoffConfirmed !== false);
 
   return (
     <section>
@@ -513,7 +530,14 @@ function RoundPicker({
           {t.picked(pickedCount, round.fixtures.length)}
         </span>
       </div>
-      <p className="text-xs text-stone-400 mb-4">{t.hidden}</p>
+      {lock.lockAt !== null && (
+        <p className="text-xs text-stone-600 mb-1">
+          {allConfirmed
+            ? t.closes(formatKickoff(new Date(lock.lockAt).toISOString(), pt ? "pt" : "en"))
+            : t.closesUnconfirmed}
+        </p>
+      )}
+      <p className="text-xs text-stone-500 mb-4">{t.hidden}</p>
 
       <div className="space-y-3">
         {round.fixtures.map(fixture => {
@@ -539,6 +563,13 @@ function RoundPicker({
                   <img src={teamLogoSrc(fixture.away)} alt="" className="w-5 h-5 object-contain" />
                 )}
               </div>
+              {fixture.kickoff && (
+                <p className="-mt-2 mb-3 text-[11px] text-stone-500">
+                  {fixture.kickoffConfirmed === false
+                    ? `${formatLongDate(fixture.kickoff, pt ? "pt" : "en", { year: false })} · ${t.toBeConfirmed}`
+                    : formatKickoff(fixture.kickoff, pt ? "pt" : "en")}
+                </p>
+              )}
 
               {/* quick pick */}
               <div className="grid grid-cols-3 gap-2">

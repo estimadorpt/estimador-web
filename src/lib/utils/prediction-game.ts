@@ -210,6 +210,19 @@ export interface GameFixture {
   model: ProbVector;
   /** Naive ISO timestamp as published, or null when unknown. */
   kickoff: string | null;
+  /**
+   * When the server stops accepting picks for this fixture (game_fixtures.json
+   * `locks_at`). Equal to the kickoff once it is confirmed; an unconfirmed
+   * kickoff locks at the earliest plausible slot of its round. Optional: the
+   * fallback built from the md files has no lock times.
+   */
+  locksAt?: string | null;
+  /** False while the kickoff is a placeholder ("horário por confirmar"). */
+  kickoffConfirmed?: boolean;
+  /** The server's fixture id (`md08-moreirense-vs-gil-vicente`), when known. */
+  id?: string;
+  /** Which publication froze these probabilities (`md07.json@10877c9`). */
+  probsSource?: string | null;
   result: FixtureResult | null;
 }
 
@@ -259,12 +272,15 @@ export function parseKickoff(kickoff: string | null | undefined): number | null 
  * 1. Any published result means the round has demonstrably started — lock,
  *    whatever the clock says. This is the fallback the brief asks for and the
  *    only signal available for a next matchday, which carries no timestamps.
- * 2. Otherwise lock at the earliest known kickoff.
+ * 2. Otherwise lock at the earliest known lock time (or kickoff).
  * 3. With neither signal the round is open.
  */
 export function roundLockState(round: GameRound, nowMs: number): RoundLock {
+  // The published lock time wins over the kickoff: for an unconfirmed kickoff
+  // the lock sits at the earliest plausible slot of the round, which is the
+  // safe side of a placeholder.
   const kickoffs = round.fixtures
-    .map(f => parseKickoff(f.kickoff))
+    .map(f => parseKickoff(f.locksAt ?? f.kickoff))
     .filter((ms): ms is number => ms !== null);
   const lockAt = kickoffs.length > 0 ? Math.min(...kickoffs) : null;
 

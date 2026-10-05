@@ -11,6 +11,8 @@ import type {
 } from "@/components/charts/football/InjuriesPanel";
 import type { PlayerSkillEntry } from "@/components/charts/football/PlayerSkillRanking";
 import { Stethoscope } from "lucide-react";
+import type { AbsencesStatus } from "@/lib/football-injuries";
+import { formatDecimal, formatLongDate } from "@/lib/football-format";
 
 export interface MatchSquadSide {
   team: string;
@@ -26,8 +28,10 @@ interface MatchSquadNewsProps {
   locale: string;
   /** Player names currently listed as unavailable, to flag in the skill list. */
   unavailable: Set<string>;
+  /** 'current' only when the absences list is recent enough for this forecast
+   * (see currentAbsences); anything else hides the lists and says so. */
+  absencesStatus: AbsencesStatus;
   snapshotDate?: string | null;
-  metricLabel?: string;
 }
 
 function formatValue(v: number | null | undefined, pt: boolean): string {
@@ -45,10 +49,12 @@ function SideCard({
   side,
   locale,
   unavailable,
+  absencesStatus,
 }: {
   side: MatchSquadSide;
   locale: string;
   unavailable: Set<string>;
+  absencesStatus: AbsencesStatus;
 }) {
   const pt = locale !== "en";
   const codes = pt ? positionCodePt : positionCodeEn;
@@ -73,7 +79,7 @@ function SideCard({
           <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
             {pt ? "Indisponíveis" : "Unavailable"}
           </span>
-          {side.injurySummary?.share_of_squad != null && (
+          {absencesStatus === "current" && side.injurySummary?.share_of_squad != null && (
             <span className="text-[11px] text-stone-400">
               ·{" "}
               {pt
@@ -82,8 +88,12 @@ function SideCard({
             </span>
           )}
         </div>
-        {side.injuries.length === 0 ? (
-          <div className="text-xs text-stone-400">
+        {absencesStatus !== "current" ? (
+          <div className="text-xs text-stone-500">
+            {pt ? "Sem dados recentes de baixas." : "No recent absence data."}
+          </div>
+        ) : side.injuries.length === 0 ? (
+          <div className="text-xs text-stone-500">
             {pt
               ? "Sem baixas registadas. Isto não garante que o plantel esteja totalmente disponível."
               : "No absences on record. This is not proof of a fully available squad."}
@@ -152,7 +162,7 @@ function SideCard({
                       </span>
                     )}
                     <span className="ml-auto text-[11px] font-bold tabular-nums text-stone-700">
-                      {pt ? p.sar.toFixed(2).replace(".", ",") : p.sar.toFixed(2)}
+                      {formatDecimal(p.sar, locale, 2)}
                     </span>
                   </div>
                   <span className="block h-1 bg-stone-100 overflow-hidden">
@@ -179,10 +189,12 @@ export function MatchSquadNews({
   away,
   locale,
   unavailable,
+  absencesStatus,
   snapshotDate,
-  metricLabel,
 }: MatchSquadNewsProps) {
   const pt = locale !== "en";
+  const current = absencesStatus === "current";
+  const snapshot = snapshotDate ? formatLongDate(snapshotDate, locale) : "";
   return (
     <div>
       <h2 className="text-2xl tracking-tight mb-1">
@@ -190,17 +202,28 @@ export function MatchSquadNews({
       </h2>
       <p className="text-sm text-stone-500 mb-6">
         {pt
-          ? "Baixas conhecidas e os jogadores com maior valor acima do substituto (SAR) em cada equipa. Baixas e jogadores individuais não entram nesta previsão — o modelo usa resultados e o valor global do plantel."
-          : "Known absentees and each side's highest skill-above-replacement (SAR) players. Neither absences nor individual players feed this forecast — the model uses match results and overall squad value."}
-        {snapshotDate ? ` ${pt ? "Baixas registadas a" : "Absences recorded as of"} ${snapshotDate}.` : ""}
+          ? "Baixas conhecidas e os jogadores com maior valor acima do substituto (SAR) em cada equipa. Baixas e jogadores individuais não entram nesta previsão: o modelo usa golos, remates à baliza e o valor de cada plantel."
+          : "Known absentees and each side's highest skill-above-replacement (SAR) players. Neither absences nor individual players feed this forecast: the model uses goals, shots on target and each squad's value."}
+        {current && snapshot
+          ? ` ${pt ? "Baixas registadas a" : "Absences recorded as of"} ${snapshot}.`
+          : !current
+            ? ` ${
+                pt
+                  ? `Não mostramos baixas: a lista publicada${snapshot ? `, de ${snapshot},` : ""} não é recente o suficiente para esta previsão.`
+                  : `Absences are not shown: the published list${snapshot ? `, from ${snapshot},` : ""} is not recent enough for this forecast.`
+              }`
+            : ""}
       </p>
       <div className="grid gap-4 md:grid-cols-2">
-        <SideCard side={home} locale={locale} unavailable={unavailable} />
-        <SideCard side={away} locale={locale} unavailable={unavailable} />
+        <SideCard side={home} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} />
+        <SideCard side={away} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} />
       </div>
-      {metricLabel && (
-        <p className="text-[11px] text-stone-400 mt-3">SAR — {metricLabel}</p>
-      )}
+      {/* The feed's metric_label is English; the definition is ours to write. */}
+      <p className="text-[11px] text-stone-500 mt-3">
+        {pt
+          ? "SAR: golos por 90 minutos acima de um jogador de nível de substituição, com os valores extremos limitados."
+          : "SAR: goals per 90 minutes above a replacement-level player, with extreme values capped."}
+      </p>
     </div>
   );
 }

@@ -49,13 +49,16 @@ describe('buildClubOutlooks (frozen md06 bundle)', () => {
     expect(arouca?.simulatorHref).toContain('goal=p_relegation');
   });
 
-  it('marks a club with a postponed leftover fixture accordingly, with no resolvable match href', async () => {
+  it('leads with the current-round game and carries the postponed leftover as a secondary line', async () => {
     const { prediction, scenarios, gameFixtures } = await loadBundle();
     const entries = buildClubOutlooks('pt', prediction, scenarios, gameFixtures);
     const braga = entries.find(e => e.team === 'SC Braga');
     expect(braga?.hasFixture).toBe(true);
-    expect(braga?.fixtureStatusKind).toBe('postponed');
-    expect(braga?.matchHref).toBeNull();
+    expect(braga?.fixtureStatusKind).not.toBe('postponed');
+    expect(braga?.matchHref).not.toBeNull();
+    expect(braga?.postponedLabel).toBe('Jogo em atraso da jornada 2 (contra Gil Vicente)');
+    const sporting = entries.find(e => e.team === 'Sporting CP');
+    expect(sporting?.postponedLabel).toBeNull();
   });
 
   it('never substitutes a rival fixture for a club with none supported', async () => {

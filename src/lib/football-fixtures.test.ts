@@ -8,6 +8,7 @@ import {
   formatObjectiveLabel,
   listSupportedFixtures,
   nextSupportedFixtureFor,
+  postponedLeftoverFor,
   relevantObjective,
   type GameFixturesData,
   type SupportedFixture,
@@ -101,7 +102,7 @@ describe('listSupportedFixtures / nextSupportedFixtureFor: eligibility', () => {
     expect(fixtures[2].slug).not.toBeNull();
   });
 
-  it("picks a club's lowest-matchday entry as its supported fixture, even when it also appears later", () => {
+  it("picks the club's current-round game over an undated leftover, and keeps the leftover as secondary", () => {
     const scenarios = minimalScenarios({
       matchday: 6,
       next_matchday_scenarios: {
@@ -116,8 +117,59 @@ describe('listSupportedFixtures / nextSupportedFixtureFor: eligibility', () => {
     });
     const fixtures = listSupportedFixtures(minimalPrediction({ matchday: 6 }), scenarios);
     const supported = nextSupportedFixtureFor('SC Braga', fixtures);
-    expect(supported?.matchday).toBe(2);
-    expect(supported?.postponed).toBe(true);
+    expect(supported?.matchday).toBe(6);
+    expect(supported?.postponed).toBe(false);
+    const leftover = postponedLeftoverFor('SC Braga', fixtures);
+    expect(leftover).toMatchObject({ matchday: 2, postponed: true, away: 'Gil Vicente' });
+  });
+
+  it('lets a leftover lead only when it is rescheduled before the current-round game', () => {
+    const scenarios = minimalScenarios({
+      matchday: 7,
+      next_matchday_scenarios: {
+        matchday: 2,
+        baseline: {},
+        matches: [
+          scenarioMatch('SC Braga', 'Gil Vicente', 2, { 'SC Braga': { H: 0.1, D: 0.1, A: 0.1 } }),
+          scenarioMatch('SC Braga', 'Sporting CP', 8, { 'SC Braga': { H: 0.1, D: 0.1, A: 0.1 } }),
+        ],
+      },
+    });
+    const manifest = (leftoverKickoff: string): GameFixturesData => ({
+      season: '2026-27',
+      generated_at: '2026-10-05T19:03:29Z',
+      n_matchdays: 34,
+      matchdays: [
+        { matchday: 2, kickoff_confirmed: true, fixtures: [
+          { id: 'md02-sc-braga-vs-gil-vicente', home: 'SC Braga', away: 'Gil Vicente', kickoff: leftoverKickoff, kickoff_confirmed: true },
+        ] },
+        { matchday: 8, kickoff_confirmed: true, fixtures: [
+          { id: 'md08-sc-braga-vs-sporting-cp', home: 'SC Braga', away: 'Sporting CP', kickoff: '2026-10-09T19:15:00Z', kickoff_confirmed: true },
+        ] },
+      ],
+    });
+    const prediction = minimalPrediction({ matchday: 7, timestamp: '2026-09-25T14:50:48+00:00' });
+
+    // Rescheduled to 19 October, after the 9 October round game.
+    const later = listSupportedFixtures(prediction, scenarios, manifest('2026-10-19T19:15:00Z'));
+    expect(nextSupportedFixtureFor('SC Braga', later)).toMatchObject({ matchday: 8, away: 'Sporting CP' });
+    const leftover = postponedLeftoverFor('SC Braga', later)!;
+    expect(fixtureStatus(leftover, prediction.timestamp, 'pt').label).toBe(
+      'Jogo em atraso da jornada 2, marcado para 19 de outubro',
+    );
+    expect(fixtureStatus(leftover, prediction.timestamp, 'en').label).toBe(
+      'Postponed round 2 match, now on 19 October',
+    );
+
+    // Rescheduled to 1 October, before it: the leftover is the next match.
+    const earlier = listSupportedFixtures(prediction, scenarios, manifest('2026-10-01T19:15:00Z'));
+    expect(nextSupportedFixtureFor('SC Braga', earlier)).toMatchObject({ matchday: 2, postponed: true });
+    expect(postponedLeftoverFor('SC Braga', earlier)).toBeNull();
+
+    // The original, already-passed slot is not a new date.
+    const stale = listSupportedFixtures(prediction, scenarios, manifest('2026-08-16T19:30:00Z'));
+    expect(nextSupportedFixtureFor('SC Braga', stale)).toMatchObject({ matchday: 8 });
+    expect(postponedLeftoverFor('SC Braga', stale)?.kickoff).toBeUndefined();
   });
 
   it('returns null for a club with no entry at all, rather than substituting a rival match', () => {
@@ -269,7 +321,7 @@ describe('fixtureStatus', () => {
       matchday: 6,
       home: 'SC Braga',
       away: 'Estoril',
-      kickoff: '2026-09-12T23:00:00Z',
+      kickoff: '2026-09-12T19:15:00Z',
       kickoffConfirmed: true,
       postponed: false,
       slug: 'braga-estoril',
@@ -278,6 +330,25 @@ describe('fixtureStatus', () => {
     expect(status.kind).toBe('next');
     expect(status.label).not.toMatch(/hoje|esta noite/i);
     expect(status.label).toContain('12 de setembro');
+  });
+
+  it('dates a kickoff by the Lisbon calendar, not UTC', () => {
+    // 23:00Z on 12 September is 00:00 on 13 September in Lisbon (UTC+1).
+    const fixture: SupportedFixture = {
+      index: 0,
+      matchday: 6,
+      home: 'SC Braga',
+      away: 'Estoril',
+      kickoff: '2026-09-12T23:00:00Z',
+      kickoffConfirmed: true,
+      postponed: false,
+      slug: 'braga-estoril',
+    };
+    expect(fixtureStatus(fixture, forecastTimestamp, 'pt').label).toBe('Próximo jogo · 13 de setembro');
+    // In winter Lisbon is on UTC: 23:30Z on 20 December stays the 20th.
+    expect(
+      fixtureStatus({ ...fixture, kickoff: '2026-12-20T23:30:00Z' }, forecastTimestamp, 'en').label,
+    ).toBe('Next match · 20 December');
   });
 
   it('flags an unconfirmed kickoff instead of asserting it', () => {
@@ -370,12 +441,17 @@ describe('frozen md06 bundle (src/test-fixtures/liga-2026-27, published 2026-09-
     const gameFixtures: GameFixturesData = JSON.parse(await fs.readFile(path.join(dir, 'game_fixtures.json'), 'utf8'));
 
     const fixtures = listSupportedFixtures(prediction, scenarios, gameFixtures);
-    const braga = nextSupportedFixtureFor('SC Braga', fixtures);
+    // Each club's next match is its current-round game; the leftover is kept
+    // as the secondary fixture for both clubs owing it.
+    expect(nextSupportedFixtureFor('SC Braga', fixtures)).toMatchObject({ matchday: 6, away: 'Estoril' });
+    expect(nextSupportedFixtureFor('Gil Vicente', fixtures)).toMatchObject({ matchday: 7, away: 'Maritimo' });
+
+    const braga = postponedLeftoverFor('SC Braga', fixtures);
     expect(braga).toMatchObject({ matchday: 2, postponed: true, slug: null, away: 'Gil Vicente' });
+    expect(postponedLeftoverFor('Gil Vicente', fixtures)?.index).toBe(braga?.index);
 
-    const gilVicente = nextSupportedFixtureFor('Gil Vicente', fixtures);
-    expect(gilVicente?.index).toBe(braga?.index);
-
+    // The frozen manifest still carries the original 16 August slot, which
+    // predates the forecast: no date is claimed.
     const status = fixtureStatus(braga!, prediction.timestamp, 'pt');
     expect(status).toEqual({ kind: 'postponed', label: 'Jogo em atraso da jornada 2' });
   });

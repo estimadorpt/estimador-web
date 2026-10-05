@@ -25,6 +25,7 @@ import type {
   ScenarioData,
 } from '@/types/football';
 import { assignFixtureSlugs, fixtureSlug } from '@/lib/config/fixtures';
+import { formatLongDate } from '@/lib/football-format';
 
 /* --------------------------------------------------------- game_fixtures */
 
@@ -35,14 +36,27 @@ export interface GameFixtureEntry {
   id: string;
   home: string;
   away: string;
+  /** UTC ISO timestamp. A placeholder until `kickoff_confirmed` is true. */
   kickoff: string;
   kickoff_confirmed: boolean;
+  /** When the game server stops taking picks for this fixture. */
+  locks_at?: string | null;
+  /** The model's pre-round 1X2, frozen when the round opened; null until priced. */
+  p_home?: number | null;
+  p_draw?: number | null;
+  p_away?: number | null;
+  home_goals?: number | null;
+  away_goals?: number | null;
+  /** Which publication the probabilities came from (`md07.json@10877c9`). */
+  probs_source?: string | null;
+  published_at?: string | null;
   [key: string]: unknown;
 }
 
 export interface GameFixturesMatchday {
   matchday: number;
   kickoff_confirmed: boolean;
+  opens_at?: string | null;
   fixtures: GameFixtureEntry[];
 }
 
@@ -178,14 +192,22 @@ export function listSupportedFixtures(
     const matchday = match.matchday ?? scenarios.matchday;
     const key = matchdayFixtureKey(match.home_team, match.away_team, matchday);
     const gameFixture = gameFixtureByKey.get(key);
-    const kickoff = gameFixture?.kickoff ?? remainingKickoffByKey.get(key);
+    const postponed = matchday < scenarios.matchday;
+    let kickoff = gameFixture?.kickoff ?? remainingKickoffByKey.get(key);
+    // A leftover's kickoff is only its new date when it lies after this
+    // forecast; an earlier one is the original slot it was postponed from.
+    if (postponed && kickoff) {
+      const ms = Date.parse(kickoff);
+      const forecastMs = Date.parse(prediction.timestamp);
+      if (Number.isNaN(ms) || Number.isNaN(forecastMs) || ms <= forecastMs) kickoff = undefined;
+    }
     const fixture: SupportedFixture = {
       index,
       matchday,
       home: match.home_team,
       away: match.away_team,
-      kickoffConfirmed: gameFixture?.kickoff_confirmed ?? false,
-      postponed: matchday < scenarios.matchday,
+      kickoffConfirmed: kickoff ? (gameFixture?.kickoff_confirmed ?? false) : false,
+      postponed,
       slug: slugByKey.get(key) ?? null,
     };
     if (kickoff) fixture.kickoff = kickoff;
@@ -195,10 +217,21 @@ export function listSupportedFixtures(
   });
 }
 
+function kickoffMs(fixture: SupportedFixture): number | null {
+  if (!fixture.kickoff) return null;
+  const ms = Date.parse(fixture.kickoff);
+  return Number.isNaN(ms) ? null : ms;
+}
+
 /**
- * The fixture eligibility rule: among every entry that involves this club,
- * the one with the lowest matchday — a postponed leftover from an earlier
- * round outranks a later, on-schedule game, since it is still outstanding.
+ * The fixture eligibility rule: a club's next match is its entry in the
+ * current round (the lowest non-postponed matchday). A postponed leftover
+ * from an earlier round only takes that place when it is genuinely played
+ * first — it has a rescheduled kickoff earlier than the current-round game —
+ * or when the club has nothing else outstanding. An undated leftover never
+ * outranks a scheduled current-round game (Braga's postponed matchday 2 game,
+ * moved to 19 October, is not its next match on 9 October).
+ *
  * Returns null when the club has no entry at all: callers must then show the
  * dated baseline and say so, never substitute a rival's match.
  */
@@ -206,12 +239,40 @@ export function nextSupportedFixtureFor(
   team: string,
   fixtures: SupportedFixture[],
 ): SupportedFixture | null {
-  let best: SupportedFixture | null = null;
-  for (const fixture of fixtures) {
-    if (fixture.home !== team && fixture.away !== team) continue;
-    if (!best || fixture.matchday < best.matchday) best = fixture;
-  }
-  return best;
+  const mine = fixtures.filter(f => f.home === team || f.away === team);
+  if (mine.length === 0) return null;
+  const lowest = (list: SupportedFixture[]) =>
+    list.reduce<SupportedFixture | null>((best, f) => (!best || f.matchday < best.matchday ? f : best), null);
+
+  const current = lowest(mine.filter(f => !f.postponed));
+  const leftover = lowest(mine.filter(f => f.postponed));
+  if (!current) return leftover;
+  if (!leftover) return current;
+
+  const leftoverMs = kickoffMs(leftover);
+  const currentMs = kickoffMs(current);
+  if (leftoverMs !== null && currentMs !== null && leftoverMs < currentMs) return leftover;
+  return current;
+}
+
+/**
+ * The club's other outstanding fixture when its next match is in the current
+ * round but an earlier round's game is still to be played: shown as a
+ * secondary "jogo em atraso" line. Null when there is none, or when the
+ * leftover is itself the next match.
+ */
+export function postponedLeftoverFor(
+  team: string,
+  fixtures: SupportedFixture[],
+): SupportedFixture | null {
+  const next = nextSupportedFixtureFor(team, fixtures);
+  const leftovers = fixtures.filter(
+    f => f.postponed && f !== next && (f.home === team || f.away === team),
+  );
+  return leftovers.reduce<SupportedFixture | null>(
+    (best, f) => (!best || f.matchday < best.matchday ? f : best),
+    null,
+  );
 }
 
 /**
@@ -314,12 +375,21 @@ export function formatObjectiveLabel(objective: ClubObjective, locale: 'pt' | 'e
   return OBJECTIVE_LABELS[objective][locale];
 }
 
+// Kickoffs are published in UTC; the calendar day a reader needs is the
+// Lisbon one (a 23:00Z kickoff in summer is the next day in Portugal).
 function formatDate(iso: string, locale: 'pt' | 'en'): string {
-  return new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
-    day: 'numeric',
-    month: 'long',
-    timeZone: 'UTC',
-  }).format(new Date(iso));
+  return formatLongDate(iso, locale, { year: false });
+}
+
+/** A postponed fixture's kickoff counts as its new date only when it falls
+ * after the forecast it is published with; anything earlier is the original,
+ * already-passed slot the manifest has not caught up with. */
+function rescheduledKickoff(fixture: SupportedFixture, forecastTimestamp: string): string | null {
+  if (!fixture.kickoff) return null;
+  const kickoff = Date.parse(fixture.kickoff);
+  const forecast = Date.parse(forecastTimestamp);
+  if (Number.isNaN(kickoff) || Number.isNaN(forecast)) return null;
+  return kickoff > forecast ? fixture.kickoff : null;
 }
 
 export interface FixtureStatus {
@@ -340,12 +410,16 @@ export function fixtureStatus(
   locale: 'pt' | 'en',
 ): FixtureStatus {
   if (fixture.postponed) {
+    const newDate = rescheduledKickoff(fixture, forecastTimestamp);
+    const base =
+      locale === 'pt'
+        ? `Jogo em atraso da jornada ${fixture.matchday}`
+        : `Postponed round ${fixture.matchday} match`;
     return {
       kind: 'postponed',
-      label:
-        locale === 'pt'
-          ? `Jogo em atraso da jornada ${fixture.matchday}`
-          : `Postponed round ${fixture.matchday} match`,
+      label: newDate
+        ? `${base}${locale === 'pt' ? ', marcado para ' : ', now on '}${formatDate(newDate, locale)}`
+        : base,
     };
   }
 
