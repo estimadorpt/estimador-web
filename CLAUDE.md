@@ -6,11 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **estimador.pt** is a multi-domain data analysis platform for Portugal, built with Next.js. It provides data-driven forecasts and analysis across different domains (football, elections, and more), with a professional editorial-style interface and interactive visualizations.
 
-### Active Sections
+### Sections
 - **População** (`/populacao/`) — open synthetic population v1.0.1 (Censos 2021), parish by parish (see "Population section")
-- **Liga Portugal** (`/desporto/liga/`) — Bayesian football league forecasts
-- **Presidential Elections 2026** (`/eleicoes/presidenciais/`) — Presidential election forecast
-- **Parliamentary Elections 2025** (`/eleicoes/legislativas/`) — Parliamentary election results (archive)
+- **Liga Portugal** (`/desporto/liga/`) — Bayesian football league forecasts, updated every matchday
+- **Economia** (`/economia/`) — **in preparation** (see "Economy section"): explainers online, no figures published
+- **Presidential Elections 2026** (`/eleicoes/presidenciais/`) — archived forecast (both rounds)
+- **Parliamentary Elections 2025** (`/eleicoes/legislativas/`) — archived forecast; `/eleicoes/arquivo/` explains how to read both
 
 ## Commands
 
@@ -20,9 +21,13 @@ npm run dev          # Start development server with Turbopack
 npm run build        # Build for production (static export)
 npm run start        # Start production server
 npm run lint         # Run ESLint
-./scripts/sync-data.sh           # Sync all data from model projects
+./scripts/sync-data.sh           # Sync football, elections and population (never economics)
 ./scripts/sync-data.sh football  # Sync football data only
 ./scripts/sync-data.sh population  # Publish the synthetic population release
+./scripts/sync-data.sh economics # Economy feeds, only ever on their own (see "Economy section")
+npm run check        # validate:data + typecheck + lint + tests (CI runs it before the build)
+npm run og           # Regenerate the OG cards + public/og-manifest.json (also run by prebuild)
+npm run smoke -- --base <url>  # Probe a deployed export: every route, asset and redirect
 ```
 
 ### Deployment
@@ -33,19 +38,34 @@ The project deploys automatically to Azure Static Web Apps via GitHub Actions wh
 
 ## Route Structure
 
+Every page lives under a locale prefix (`/pt/…`, `/en/…`, routes in `src/app/[locale]/`);
+the paths below omit it.
+
 ```
 /                                  → Hub homepage (section summaries)
-/desporto/liga/                    → Liga Portugal forecast
+/populacao/                        → Synthetic population (see "Population section")
+/desporto/liga/                    → Liga Portugal forecast (+ /jogadores, /simulador, /jogo-previsoes, /{club}, /jogo/{slug}, /jogador/{slug})
 /desporto/liga/metodologia/        → Liga Portugal methodology
-/eleicoes/presidenciais/           → Presidential 2026 forecast
-/eleicoes/legislativas/            → Parliamentary 2025 forecast
+/economia/                         → Economy (in preparation; noindex while unpublished)
+/economia/metodologia/             → Economy methodology
+/eleicoes/arquivo/                 → How to read the archived election forecasts
+/eleicoes/presidenciais/           → Presidential 2026 forecast (archive)
+/eleicoes/legislativas/            → Parliamentary 2025 forecast (archive)
 /eleicoes/legislativas/mapa/       → District map (parliamentary 2025)
-/artigos/                          → Articles
+/artigos/                          → Articles (hidden from the chrome until a locale publishes one)
 /sobre/                            → About
 /metodologia/                      → Methodology overview
+/privacidade/                      → Privacy
+/marca/                            → Brand guide (noindex)
 ```
 
-Old URLs (`/forecast`, `/about`, `/methodology`, `/map`, `/articles`) redirect via 301 in `staticwebapp.config.json`.
+`staticwebapp.config.json` answers with a 301 for the old URLs (`/forecast`, `/about`,
+`/methodology`, `/map`, `/articles`, `/feed.xml`), for each section path typed without a
+locale (`/economia` → `/pt/economia/`, `/desporto/liga`, `/eleicoes/…`, `/sobre`,
+`/artigos`, `/metodologia`, `/privacidade`, `/populacao`), and for `/{pt,en}/desporto` →
+liga and `/{pt,en}/eleicoes` → arquivo. SWA redirects cannot reuse a wildcard capture, so
+a new top-level section needs its own line; `scripts/smoke-check.mjs` checks every
+redirect in the file.
 
 ## Architecture
 
@@ -65,11 +85,34 @@ The site's identity is the interval mark and the atlas palette. Everything lives
 - **Primitives**: actions are `<Action>` (`src/components/brand/Action.tsx`: primary pine, secondary bordered cream, tint, text; 48px, 10px corners, one main action per view); keyboard focus is the global double ring in globals.css, so components do not declare their own; inputs and selectors are 44 to 48px with a visible label; cards use `rounded-2xl`, a thin border and no shadow; motion is 140 to 200ms feedback and 200 to 300ms panels. `<TeaserBand>` is the explainer teaser that follows a dashboard's data. Empty states get a small mosaic and a specific next step, and missing data is never shown as zero.
 - **Visualisations** (`src/components/viz`, showcased as section 08 of `/marca`): `<DataCard>` (title, source, date, methodology link) frames every chart; `<StatTile>`/`<KpiRow>` for headline numbers with optional sparkline and delta; `<TrendChart>` (2px line, 80% band wash, dashed projected segment, end labels, crosshair tip); `<ColumnChart>` (24px caps, one highlighted column); `<RankedBars>`; `<OutcomeBar>` for 1X2; `<PeopleGrid>` (100 dots); `<Segmented>` filters; `<Legend>`; `<ChartTable>` (the table twin every chart carries). Series colours live in `theme.ts` (`SERIES`/`SERIES_DARK`, mirrored as `--color-series-1..4` and `--color-series-dark-1..4` tokens): fixed order teal, gold, periwinkle, coral; never cycled, never on text, at most four (the fifth folds into "other"). `STATUS` colours are reserved for state and always ship with an icon and a word. Team and party colours keep their own maps. The data pastels are for the atlas's people and categorical fills, not for line series. Chart text is Manrope (`FURNITURE.font`), never Inter. The same contract applies to the older Plot and SVG charts: the title race, relegation, team timeline, polling, seat, coalition, presidential trend and head-to-head charts and the economy sparklines carry a `<ChartTable>` twin and a hover tip, so a new chart must too. A table twin is a complete alternative: every point the chart draws at the chart's own resolution, with its bands or quantiles in their own columns, in the page's number format; long tables scroll inside the disclosure. Nothing in an SVG is below 11px.
 - **Chrome**: every page opens with `<PageHero>` and closes with `<SiteFooter locale={locale} />`. OG cards come from `scripts/lib/og-cards.mjs` (Manrope via `@fontsource/manrope`; the mosaic only on the brand card and explainer covers).
-- **Communications**: one line ("Dados para compreender Portugal."), one descriptor ("Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.") and two bios, used identically in `messages/*.json` meta, the OG brand card, the feed, the READMEs and the social kit. `npm run brand` regenerates every logo, icon and social asset (`scripts/generate-brand-identity.mjs` + `scripts/generate-social-kit.mjs`, outputs under `public/brand`, `public/branding`, `public/images/brand`); the Liga matchday card is `scripts/generate-social-images.mjs`. Voice: sentence case, questions as headings, uncertainty stated with interval, date and source, one action per piece, no emoji or exclamation marks. The kit and the voice rules are on `/marca`.
+- **Communications**: one line ("Dados para compreender Portugal."), one descriptor ("Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.") and two bios, used identically in `messages/*.json` meta, the OG brand card, the feed, the READMEs and the social kit. `npm run brand` regenerates every logo, icon and social asset (`scripts/generate-brand-identity.mjs` + `scripts/generate-social-kit.mjs`, outputs under `public/brand`, `public/branding`, `public/images/brand`); the Liga matchday card is `scripts/generate-social-images.mjs`. Voice: sentence case, questions as headings, uncertainty stated with interval, date and source, one action per piece, no emoji or exclamation marks. Portuguese copy addresses the reader as **tu** ("Escolhe a tua equipa", "Explora", "Segue o feed"), never você, including meta descriptions and buttons; English is en-GB. Page titles go through `createPageMetadata`, which appends the one suffix " | estimador.pt" (do not type a suffix in a title). The kit and the voice rules are on `/marca`.
 
 ## Homepage
 
-Four subjects, one hierarchy (`src/app/[locale]/page.tsx`, panels in `src/components/home/`). Standard mode leads with the synthetic population (2fr: parish search, today's Freguesia misteriosa), football is the rail (1fr), economy and elections support in a second row; below 1100px the rows stack. The hierarchy is an editorial setting in `src/lib/config/homepage.ts`: set `HOMEPAGE` to `{ mode: 'election', election: '<id from elections.ts>' }` and rebuild to lead with an election; an id without published data falls back to the standard layout with a build-log warning, and a past election is labelled an archived forecast, never live. Preview without editing: `HOMEPAGE_MODE=election HOMEPAGE_ELECTION=presidential-2026 npm run build`. Every number on the page comes from the loaders (`loadPopulationMeta` counts, `loadLigaSummary` + `loadLigaWithDeltas`, `loadEconomyDashboard` with the pause rule, the election loaders in election mode only); the copy lives under `home` in `messages/*.json`. Illustrations are the four masters in `docs/design/homepage-claude-handoff/assets`; `node scripts/generate-home-art.mjs` writes their AVIF/WebP sizes to `public/images/home` and `<HomeArt>` picks between them. `HomeMiniature` (the village hero) is no longer on the homepage but stays available.
+Four subjects, one hierarchy (`src/app/[locale]/page.tsx`, panels in `src/components/home/`). Standard mode leads with the synthetic population (2fr: parish search, today's Freguesia misteriosa), football is the rail (1fr), economy and elections support in a second row; below 1100px the rows stack. The hierarchy is an editorial setting in `src/lib/config/homepage.ts`: set `HOMEPAGE` to `{ mode: 'election', election: '<id from elections.ts>' }` and rebuild to lead with an election; an id without published data falls back to the standard layout with a build-log warning, and a past election is labelled an archived forecast, never live. Preview without editing: `HOMEPAGE_MODE=election HOMEPAGE_ELECTION=presidential-2026 npm run build`. Every number on the page comes from the loaders (`loadPopulationMeta` counts, `loadLigaSummary` + `loadLigaWithDeltas`, `loadEconomyDashboard` behind `economyState` — the editorial flag, then the pause rule — the election loaders in election mode only); the economy stays in the support row in both modes while it is in preparation (a test pins this); the copy lives under `home` in `messages/*.json`. Illustrations are the four masters in `docs/design/homepage-claude-handoff/assets`; `node scripts/generate-home-art.mjs` writes their AVIF/WebP sizes to `public/images/home` and `<HomeArt>` picks between them. `HomeMiniature` (the village hero) is no longer on the homepage but stays available.
+
+## Economy section
+
+In preparation. One editorial flag, `src/lib/config/economy-status.json`
+(`{ "published": false }`), read by `src/lib/config/economy-status.ts` (`ECONOMY_PUBLISHED`,
+`economyState(asOf)` → `preparing` | `paused` | `live`) and by
+`scripts/generate-og-images.mjs`. Data age never publishes the section; it can only pause
+a published one (the 20-business-day guard in `economy-time.ts`). While the flag is off:
+
+- `/economia` is the explainer ("Compreender a economia", status "Em preparação · sem
+  números publicados", no number, no date, no promise of a return) and
+  `/economia/metodologia` opens with a dated in-preparation notice; both are noindex and
+  out of the sitemap, and have no share card of their own (they use the brand card);
+- the header, mobile menu and footer say "Economia · em preparação"
+  (`nav.economicsPreparing`), the homepage panel carries the "Em preparação" pill and
+  status, and `/sobre`'s status list says the same;
+- `./scripts/sync-data.sh all` does not touch economics: an economy sync is always
+  `./scripts/sync-data.sh economics` on its own.
+
+Launch checklist: table twins for the seven charts without one, the methodology in
+`.article-body` with ink links, the copy moved into messages, en-GB dates, then set
+`published: true` — that single change restores indexing, the sitemap entries, the share
+card and the plain nav label together.
 
 ## Population section
 
@@ -129,18 +172,25 @@ deck holds all 3,092 parishes. Tiers are reading guides, not gates.
 ### Data Organization
 ```
 public/data/
+  economics/
+    dashboard.json              # Economy dashboard feed (unpublished while in preparation)
+    stories.json                # Economy data stories (optional)
   elections/
-    presidential-2026/          # Presidential forecast data (18 files)
-    parliamentary-2025/         # Parliamentary forecast data (8 files)
+    presidential-2026/          # Presidential forecast data (archive)
+    parliamentary-2025/         # Parliamentary forecast data (archive)
   football/
-    liga-2025-26/               # Liga Portugal predictions (matchday JSONs + scenarios)
+    liga-2026-27/               # Current season: md*.json + md*_scenarios.json, players, game fixtures, injuries
+    liga-2025-26/               # Last season: matchday files + review.json (archive)
+    liga2-2026-27/              # Liga 2 (page noindex)
+  population/v{release}/        # Synthetic population release (see "Population section")
+  population-geography/         # Country, municipality and parish geometry
 ```
 
 ### Data Flow
 - **Static Data**: Lives in `public/data/{section}/{subsection}/` as JSON files
-- **Data Loaders**: `src/lib/utils/data-loader.ts` (elections), `src/lib/utils/football-data-loader.ts` (football)
+- **Data Loaders**: `src/lib/utils/data-loader.ts` (elections, economy), `src/lib/utils/football-data-loader.ts` (football), `src/lib/utils/population-data-loader.ts` (population)
 - **Chart Components**: Observable Plot + D3 in `src/components/charts/` (elections) and `src/components/charts/football/` (football)
-- **Section Config**: `src/lib/config/sections.ts` — drives homepage and navigation
+- **Section Config**: `src/lib/config/sections.ts` — the section registry; today it only types an article's `section`. Navigation is hand-written in `Header.tsx` and `SiteFooter.tsx`, the homepage in `src/app/[locale]/page.tsx`.
 
 ### Section System
 Sections are defined in `src/lib/config/sections.ts`:
@@ -158,7 +208,9 @@ interface SectionConfig {
 ```
 
 ### Key Config Files
-- **Section registry**: `src/lib/config/sections.ts` — defines all platform sections
+- **Section registry**: `src/lib/config/sections.ts` — defines all platform sections (`isActive: false` marks an archive, not an unpublished section)
+- **Economy flag**: `src/lib/config/economy-status.json` — whether the economy section is published
+- **Homepage hierarchy**: `src/lib/config/homepage.ts`
 - **Election config**: `src/lib/config/elections.ts` — election types and contestants
 - **Party colors**: `src/lib/config/colors.ts` — political party styling
 - **Team colors**: `src/lib/config/football.ts` — Liga Portugal team styling
@@ -179,9 +231,8 @@ All chart components follow a consistent pattern:
 - **MatchdayPredictions.tsx** — Next matchday probability bars
 - **TitleRaceChart.tsx** — Championship probability time series
 - **RelegationChart.tsx** — Relegation probability time series
-- **PositionHeatmap.tsx** — 18×18 position probability matrix (custom HTML/CSS)
 - **DecisiveMatches.tsx** — Title-swinging upcoming matches
-- **CriticalPaths.tsx** — Key remaining fixtures per team
+- Several older components in that folder (PositionHeatmap, CriticalPaths, PathsToVictory, PointsPace, MatchdayLive, ScheduleDifficulty) are imported by no page; do not build on them without checking.
 
 ### Election Chart Components (`src/components/charts/`)
 - **HouseEffects.tsx**: Custom HTML/CSS matrix
@@ -192,11 +243,12 @@ All chart components follow a consistent pattern:
 ## Azure Static Web Apps Configuration
 
 ### staticwebapp.config.json
-- 301 redirects for old URLs (`/forecast` → `/eleicoes/legislativas`, etc.)
-- Explicit serve rules for all new routes
-- MIME types for `.json` and `.txt` (RSC files)
-- Navigation fallback excludes static assets
-- Cache headers for optimal performance
+- 301 redirects: old URLs, locale-less section paths and the bare root (see "Route Structure")
+- Rewrites: `/{locale}/populacao/freguesia/*` to the parish shell, `/populacao/v/*` to the consultation page
+- Cache headers: `/_next/static/*` and the hashed `og-image-*-{hash}.png` cards immutable for a year (the unversioned `og-image-{pt,en}.png` are matched first and revalidate); everything else `max-age=0, must-revalidate`
+- MIME types for `.json`, `.txt` (RSC payloads), `.wasm`, `.parquet`, `.xml`, `.avif`
+- 404s rewrite to `/404.html`; there is no navigation fallback
+- The OG generator keeps the previous build's hashed cards one more run, because they are served immutable
 
 ## Development Workflow
 
@@ -282,20 +334,27 @@ are available, alongside the election chart components, which take inline data:
 
 Optional `updated: "YYYY-MM-DD"` renders an "atualizado a" line and sets `modifiedTime`.
 
+**Until a locale publishes:** the chrome offers articles only once that locale has at
+least one published piece (`getMDXArticlesByLocale(locale).length > 0`; in the client
+Header, `useHasArticles` from `src/lib/article-navigation.tsx`). Before that the header
+nav item, the footer's articles link and RSS link, and the `/artigos` hero's RSS link are
+hidden; `/artigos` and `/artigos/tema` render an empty state (mosaic, next step), are
+noindex, carry no Blog JSON-LD and are left out of the sitemap. The feed routes keep
+working and the `rel=alternate` feed link stays in every page's head.
+
 **Feeds:** `/pt/feed.xml` and `/en/feed.xml` are generated by
 `src/app/[locale]/feed.xml/route.ts`; every page advertises its locale feed via
 `createPageMetadata`. `/feed.xml` redirects to the Portuguese one.
 
 **Email:** the subscribe card reads `NEXT_PUBLIC_NEWSLETTER_ENDPOINT` (a
 `NEWSLETTER_ENDPOINT` GitHub secret in CI). Unset, it renders the feed link
-only and no email field. Before setting it, name the sending service in
-`src/content/privacy/{pt,en}.mdx` — the section is written but the processor is
-left blank on purpose.
+only and no email field. The privacy page (`src/content/privacy/{pt,en}.mdx`) names
+Buttondown as the processor; keep that section true to what the card actually does.
 
 ### Data Updates
 - **Football**: Run `./scripts/sync-data.sh football` to copy from `~/code/estimador-football/output/`
 - **Elections**: Manually update JSON files in `public/data/elections/`
-- **Economics**: Run `./scripts/sync-data.sh economics` to copy from `~/code/estimador-economics/output/`
+- **Economics**: Run `./scripts/sync-data.sh economics` to copy `dashboard_latest.json` (and `stories_latest.json`) from `~/code/estimador-economics/output/`. Not part of `all`; publishing is the flag in `economy-status.json`, not the sync.
 
 ### Ecosystem Architecture
 All data acquisition is centralized in `estimador-data`. Model repos (`estimador-football`, `estimador-elections`, `estimador-economics`, `estimador-microsynthesis`) are pure modeling — they consume data from `estimador-data`, run models, and output JSONs that `estimador-web` displays.

@@ -57,7 +57,6 @@ feed('economics/dashboard.json', value => {
 });
 
 feed('economics/stories.json', value => (isObject(value) && isObject(value.modules) ? null : 'no modules'), { required: false });
-feed('economics/nowcast.json', value => (isObject(value) ? null : 'expected an object'), { required: false });
 
 // ---- football --------------------------------------------------------------
 

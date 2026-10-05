@@ -2,9 +2,10 @@
 # Sync data from sibling model projects into public/data/
 # Usage: ./scripts/sync-data.sh [section]
 # Examples:
-#   ./scripts/sync-data.sh          # sync all
+#   ./scripts/sync-data.sh          # sync all (football, elections, population)
 #   ./scripts/sync-data.sh football # sync football only
 #   ./scripts/sync-data.sh elections # sync elections only
+#   ./scripts/sync-data.sh economics # the economy, only ever on its own (see below)
 
 set -e
 
@@ -77,6 +78,15 @@ sync_economics() {
     echo "No economics dashboard at $ECONOMICS_SRC/dashboard_latest.json (run the daily pipeline first)"
     return 1
   fi
+  # The data stories feed (official numbers + explicit arithmetic), when the
+  # pipeline wrote one. Optional: the page renders without it.
+  if [ -f "$ECONOMICS_SRC/stories_latest.json" ]; then
+    cp "$ECONOMICS_SRC/stories_latest.json" "$ECONOMICS_DEST/stories.json"
+    echo "Synced economics stories -> $ECONOMICS_DEST/stories.json"
+  fi
+  # Fresh data does not publish the section: the editorial flag in
+  # src/lib/config/economy-status.json does.
+  echo "Economy published flag: $(grep -o '"published": *[a-z]*' "$PROJECT_DIR/src/lib/config/economy-status.json" || echo unknown)"
 }
 
 sync_population() {
@@ -107,9 +117,11 @@ case "$SECTION" in
     sync_population
     ;;
   all)
+    # Economics is deliberately not part of "all": an economy sync is always
+    # its own decision (./scripts/sync-data.sh economics), reviewed before a
+    # build, never a side effect of refreshing everything else.
     sync_football
     sync_elections
-    sync_economics
     sync_population
     ;;
   *)

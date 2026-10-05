@@ -2,7 +2,7 @@
 
 **Forecasts and analysis on Portugal, with the uncertainty in plain sight.**
 
-estimador.pt publishes probabilistic forecasts and analysis for Portugal: the state of the economy, Liga Portugal, elections and a human atlas of the country's population. Every number carries its date and its interval; the models and the methodology are open.
+estimador.pt publishes probabilistic forecasts and analysis for Portugal: Liga Portugal, elections, a human atlas of the country's population and an economy section in preparation. Every number carries its date and its interval; the models and the methodology are open.
 
 The visual identity is the interval mark on paper: see `/marca` on the site for the living guide and the downloadable files, `docs/design/design-system-proposal.md` for the design-system rationale, and `npm run brand` to regenerate every logo, icon and social asset from `src/lib/brand/geometry.json`.
 
@@ -196,7 +196,7 @@ Automatically deploys to Azure Static Web Apps on push to `main`:
 - [x] Dropdown navigation with section grouping
 
 ### Phase 3: Future Domains
-- [ ] Economics section (GDP, inflation, employment forecasts)
+- [ ] Economics section: in preparation at `/economia` (explainers online, no figures published); launch is `published: true` in `src/lib/config/economy-status.json`
 - [ ] Demographics section (population, migration trends)
 - [ ] Additional sports (Champions League, national team)
 
