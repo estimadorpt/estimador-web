@@ -57,7 +57,7 @@ export function PageHero({ eyebrow, icon, title, lede, back, meta, art, illustra
           <Link
             href={back.href}
             locale={back.locale}
-            className="mb-5 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-stone-500 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className="mb-5 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-stone-500 transition-colors hover:text-ink"
           >
             <ArrowLeft aria-hidden="true" className="h-3.5 w-3.5" />
             {back.label}

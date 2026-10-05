@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { getMDXArticlesByLocale, getArticleWithFallback, getArticlePath, articleExistsInLocale } from '@/lib/mdx-articles';
 import { createPageMetadata, getOgImageUrl, SITE_LOCALES } from '@/lib/metadata';
 import { paramsOrPlaceholder } from '@/lib/static-params';
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Subscribe } from "@/components/Subscribe";
 import { Link } from '@/i18n/routing';
@@ -38,9 +39,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: MDXArticlePageProps): Promise<Metadata> {
   const { locale, slug } = await params;
   const { article, locale: actualLocale } = getArticleWithFallback(slug, locale);
-  
+
   if (!article) {
-    return { title: 'Article Not Found | estimador.pt', robots: { index: false, follow: false } };
+    const t = await getTranslations({ locale });
+    return { title: t('notFound.title'), robots: { index: false, follow: false } };
   }
 
   // Only name the translations that exist: an alternate pointing at a page we
@@ -70,9 +72,10 @@ export async function generateMetadata({ params }: MDXArticlePageProps): Promise
 
 export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const { article, locale: actualLocale } = getArticleWithFallback(slug, locale);
-  
+
   if (!article) {
     notFound();
   }
@@ -106,86 +109,71 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
       <div className="min-h-screen bg-paper">
         <Header />
 
-        <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-4 py-10">
-          <nav className="mb-8">
-            <Link href="/artigos" locale={locale} className="text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-stone-800">
-              ← {t('articles.backToArticles')}
-            </Link>
-          </nav>
-
-          {actualLocale !== locale && (
-            <p className="mb-8 border-l-2 border-stone-400 bg-stone-50 py-3 pl-4 text-sm text-stone-600">
-              {locale === 'en'
-                ? 'This article is only available in Portuguese. Showing the Portuguese version.'
-                : 'Este artigo apenas está disponível em português.'}
-            </p>
-          )}
-
-          <header className="mb-10 border-b border-stone-200 pb-8">
-            <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-wider">
-              <span className="text-stone-800">
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            width="3xl"
+            compact
+            back={{ href: '/artigos', label: t('articles.backToArticles'), locale }}
+            eyebrow={
+              <>
                 {t(article.kind === 'nota' ? 'articles.kindNota' : 'articles.kindExplicador')}
-              </span>
-              <time dateTime={article.date} className="text-stone-500">
-                {dateFormat.format(new Date(article.date))}
-              </time>
-              <TagLinks tags={article.tags} locale={actualLocale} />
+                {' · '}
+                <time dateTime={article.date}>{dateFormat.format(new Date(article.date))}</time>
+              </>
+            }
+            title={article.title}
+            lede={article.excerpt}
+            meta={
+              <>
+                <span>
+                  {t('articles.by')} {article.author} · {article.readTime} {t('articles.readTimeSuffix')}
+                  {/* A revised piece says so on its face. Silent edits are how a
+                      dated archive quietly stops being an archive. */}
+                  {article.updated && (
+                    <>
+                      {' · '}
+                      {t('articles.updated')} <time dateTime={article.updated}>{dateFormat.format(new Date(article.updated))}</time>
+                    </>
+                  )}
+                </span>
+                {article.tags.length > 0 && (
+                  <span className="flex flex-wrap gap-x-3 gap-y-1">
+                    <TagLinks tags={article.tags} locale={actualLocale} />
+                  </span>
+                )}
+              </>
+            }
+          />
+
+          <div className="max-w-3xl mx-auto px-4 pt-8 pb-16">
+            {actualLocale !== locale && (
+              <p lang={locale} className="mb-8 border-l-2 border-stone-400 bg-stone-50 py-3 pl-4 text-sm text-stone-600">
+                {t('articles.onlyInPortugueseNotice')}
+              </p>
+            )}
+
+            <article className="article-body" lang={actualLocale}>
+              <MDXRemote source={mdxContent} components={components} />
+            </article>
+
+            {/* Onward reading before the email ask: a reader who just finished a
+                piece is readier to open another one than to hand over an address. */}
+            <KeepReading articles={onward} locale={actualLocale} />
+
+            <div className="mt-12">
+              <Subscribe locale={locale} />
             </div>
 
-            <h1 className="mb-4 text-3xl md:text-4xl leading-tight tracking-tight text-stone-900">
-              {article.title}
-            </h1>
-
-            <p className="mb-6 text-lg leading-relaxed text-stone-600">
-              {article.excerpt}
+            <p className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-center text-sm">
+              <Link href="/artigos" locale={locale} className="font-semibold text-ink underline underline-offset-4">
+                {t('articles.backToArticles')}
+              </Link>
+              <Link href="/artigos/tema" locale={locale} className="font-semibold text-ink underline underline-offset-4">
+                {t('articles.topicsAll')}
+              </Link>
             </p>
-
-            <p className="text-sm text-stone-500">
-              {t('articles.by')} {article.author} · {article.readTime} {t('articles.readTimeSuffix')}
-              {/* A revised piece says so on its face. Silent edits are how a
-                  dated archive quietly stops being an archive. */}
-              {article.updated && (
-                <>
-                  {' · '}
-                  <span className="text-stone-600">
-                    {t('articles.updated')} <time dateTime={article.updated}>{dateFormat.format(new Date(article.updated))}</time>
-                  </span>
-                </>
-              )}
-            </p>
-          </header>
-
-          <article className="article-body">
-            <MDXRemote source={mdxContent} components={components} />
-          </article>
-        </main>
-
-        <div className="max-w-3xl mx-auto px-4 pb-16">
-          {/* Onward reading before the email ask: a reader who just finished a
-              piece is readier to open another one than to hand over an address. */}
-          <KeepReading articles={onward} locale={actualLocale} />
-
-          <div className="mt-12">
-            <Subscribe />
           </div>
-
-          <p className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-center">
-            <Link
-              href="/artigos"
-              locale={locale}
-              className="text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-stone-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-            >
-              ← {t('articles.backToArticles')}
-            </Link>
-            <Link
-              href="/artigos/tema"
-              locale={locale}
-              className="text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-stone-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-            >
-              {t('articles.topicsAll')}
-            </Link>
-          </p>
-        </div>
+        </main>
         <SiteFooter locale={locale} />
       </div>
     </>

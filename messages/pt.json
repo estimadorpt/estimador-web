@@ -121,12 +121,13 @@
     "politicalGroups": "Grupos políticos"
   },
   "articles": {
-    "title": "Análise e Artigos",
+    "title": "Análise e artigos",
     "subtitle": "Notas datadas sobre o que aparece nos dados — futebol, economia e eleições — e explicadores sobre como ler os números.",
     "readTime": "leitura",
     "by": "Por",
-    "backToArticles": "Voltar aos Artigos",
+    "backToArticles": "Voltar aos artigos",
     "onlyInPortuguese": "Apenas em português",
+    "onlyInPortugueseNotice": "Este artigo só está disponível em português.",
     "empty": "Ainda não há artigos publicados nesta língua.",
     "emptyNextStep": "Ler a metodologia →",
     "readTimeSuffix": "de leitura",
@@ -143,7 +144,7 @@
     "keepReading": "Continuar a ler",
     "viewAll": "Ver todos os artigos",
     "topicsHeading": "Temas",
-    "topicsIntro": "Cada texto é etiquetado por assunto. Siga um tema para ver tudo o que foi publicado sobre ele.",
+    "topicsIntro": "Cada texto é etiquetado por assunto. Segue um tema para veres tudo o que foi publicado sobre ele.",
     "topicsAll": "Todos os temas",
     "topicEyebrow": "Tema",
     "topicCount": "{count, plural, =1 {1 texto} other {# textos}}"
@@ -156,15 +157,22 @@
     "titleFeed": "Notas novas, por RSS",
     "bodyFeed": "Ainda não há um envio por e-mail configurado. Segue o feed para saberes quando sai uma análise nova.",
     "emailLabel": "Endereço de e-mail",
-    "placeholder": "o.seu@email.pt",
+    "placeholder": "o.teu@email.pt",
     "cta": "Subscrever",
-    "confirm": "Abre numa janela nova. Recebe um pedido de confirmação antes de qualquer envio.",
+    "confirm": "Abre numa janela nova. Recebes um pedido de confirmação antes de qualquer envio.",
     "rss": "Seguir por RSS",
     "privacy": "O que fazemos com o endereço"
   },
+  "notFound": {
+    "title": "Página não encontrada | estimador.pt",
+    "heading": "Este caminho não leva a lado nenhum.",
+    "lede": "A página que procuras não existe, mudou de sítio ou nunca foi estimada.",
+    "home": "Voltar ao início",
+    "atlas": "Explorar o atlas"
+  },
   "about": {
     "title": "Sobre o estimador.pt",
-    "subtitle": "Análise de dados independente para Portugal: economia, desporto e eleições",
+    "subtitle": "Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.",
     "mission": "A Nossa Missão",
     "whatWeDo": "O Que Fazemos",
     "approach": "A Nossa Abordagem",

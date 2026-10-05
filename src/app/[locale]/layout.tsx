@@ -1,10 +1,11 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, getTranslations } from 'next-intl/server';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/routing';
 
 import { PostHogProvider } from '../providers';
 import '../globals.css';
+import { fontVariables } from '../fonts';
 import type { Metadata } from 'next';
 import { createPageMetadata } from '@/lib/metadata';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
@@ -26,15 +27,24 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
+  const page = createPageMetadata({
+    locale,
+    path: '/',
+    title: t('meta.defaultTitle'),
+    description: t('meta.defaultDescription'),
+    keywords: ['portugal', 'previsões', 'dados', 'futebol', 'economia', 'população', 'eleições', 'forecasting'],
+    authors: ['Bernardo Caldas'],
+  });
+  // Defaults only. No canonical, no hreflang and no robots here: every page
+  // states its own, and a layout default leaks into the pages that state none
+  // on purpose — a not-found placeholder would otherwise carry "index, follow"
+  // and a canonical pointing at the homepage.
+  const { robots: _robots, alternates, openGraph, ...defaults } = page;
+  void _robots;
   return {
-    ...createPageMetadata({
-      locale,
-      path: '/',
-      title: t('meta.defaultTitle'),
-      description: t('meta.defaultDescription'),
-      keywords: ['portugal', 'previsões', 'dados', 'futebol', 'economia', 'população', 'eleições', 'forecasting'],
-      authors: ['Bernardo Caldas'],
-    }),
+    ...defaults,
+    alternates: { types: alternates?.types },
+    openGraph: openGraph ? { ...openGraph, url: undefined } : undefined,
     creator: 'Bernardo Caldas',
     publisher: 'estimador.pt',
     icons: {
@@ -46,17 +56,6 @@ export async function generateMetadata({
       apple: [
         { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
       ],
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
     },
   };
 }
@@ -70,6 +69,10 @@ export default async function RootLayout({
   if (!locales.some(supportedLocale => supportedLocale === locale)) {
     notFound();
   }
+  // The static export has no middleware: this is what tells implicit
+  // getTranslations()/getLocale() calls below this layout which locale they
+  // render. Pages call it too, since Next may render them separately.
+  setRequestLocale(locale);
 
   const messages = await getMessages({ locale });
   const articles: ArticleLocales = {};
@@ -80,7 +83,7 @@ export default async function RootLayout({
   }
   
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
         <PostHogProvider>
           <NextIntlClientProvider messages={messages} locale={locale}>

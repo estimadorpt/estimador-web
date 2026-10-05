@@ -121,12 +121,13 @@
     "politicalGroups": "Political groups"
   },
   "articles": {
-    "title": "Analysis & Articles",
+    "title": "Analysis and articles",
     "subtitle": "Dated notes on what shows up in the data — football, the economy and elections — and explainers on how to read the numbers.",
     "readTime": "read",
     "by": "By",
-    "backToArticles": "Back to Articles",
+    "backToArticles": "Back to articles",
     "onlyInPortuguese": "Portuguese only",
+    "onlyInPortugueseNotice": "This article is only available in Portuguese. Showing the Portuguese version.",
     "empty": "No articles published in this language yet.",
     "emptyNextStep": "Read the methodology →",
     "readTimeSuffix": "read",
@@ -162,9 +163,16 @@
     "rss": "Follow by RSS",
     "privacy": "What happens to the address"
   },
+  "notFound": {
+    "title": "Page not found | estimador.pt",
+    "heading": "This path leads nowhere.",
+    "lede": "The page you are looking for does not exist, has moved, or was never estimated.",
+    "home": "Back to the start",
+    "atlas": "Explore the atlas"
+  },
   "about": {
     "title": "About estimador.pt",
-    "subtitle": "Independent data analysis for Portugal: economy, sport and elections",
+    "subtitle": "Forecasts and analysis with the uncertainty in plain sight: the economy, Liga Portugal, elections and population.",
     "mission": "Our Mission",
     "whatWeDo": "What We Do",
     "approach": "Our Approach",

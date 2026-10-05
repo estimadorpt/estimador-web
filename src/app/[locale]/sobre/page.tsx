@@ -1,7 +1,9 @@
 import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { SiteFooter } from '@/components/SiteFooter';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { PageHero } from '@/components/PageHero';
+import { brandDescriptor } from '@/lib/brand/descriptor';
 import type { Metadata } from 'next';
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
@@ -24,7 +26,7 @@ export async function generateMetadata({
     locale,
     path: '/sobre',
     title: t('meta.aboutTitle'),
-    description: t('about.subtitle'),
+    description: brandDescriptor(locale),
   });
 }
 
@@ -107,11 +109,11 @@ function EstadoAtual({
         : 'Published on a continuing basis — forecasts updated every matchday of the current season.',
     },
     {
-      label: pt ? 'Eleições Presidenciais 2026' : 'Presidential Elections 2026',
+      label: pt ? 'Eleições presidenciais 2026' : 'Presidential elections 2026',
       status: pt ? 'Arquivo — previsão preservada tal como foi publicada.' : 'Archive — forecast preserved as published.',
     },
     {
-      label: pt ? 'Eleições Legislativas 2025' : 'Parliamentary Elections 2025',
+      label: pt ? 'Eleições legislativas 2025' : 'Parliamentary elections 2025',
       status: pt ? 'Arquivo — não é atualizado com novos resultados.' : 'Archive — not updated with new results.',
     },
   ];
@@ -134,6 +136,8 @@ export default async function AboutPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale });
 
   const { content: mdxContent, actualLocale } = getAboutContent(locale);
 
@@ -155,11 +159,14 @@ export default async function AboutPage({
     <div className="min-h-screen bg-paper">
       <Header />
 
-      <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-4 py-10 md:py-16">
+      <main id="main-content" tabIndex={-1}>
+        <PageHero width="3xl" compact title={t('about.title')} lede={brandDescriptor(locale)} />
+
+        <div className="max-w-3xl mx-auto px-4 py-10 md:py-12">
         {/* Locale Notice (if fallback) */}
         {actualLocale !== locale && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-700">
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm text-amber-800">
               {locale === 'en'
                 ? `This page is only available in Portuguese. Showing Portuguese version.`
                 : `Esta página apenas está disponível em português.`
@@ -168,9 +175,10 @@ export default async function AboutPage({
           </div>
         )}
 
-        <article className="article-body max-w-none">
+        <article className="article-body max-w-none" lang={actualLocale}>
           <MDXRemote source={mdxContent} components={components} />
         </article>
+        </div>
       </main>
 
       <SiteFooter locale={locale} />

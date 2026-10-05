@@ -1,8 +1,4 @@
-# Privacy
-
 **Last reviewed: 5 October 2026**
-
-This page describes what estimador.pt records about its visitors. It describes what the site actually does, not what it intends to do.
 
 ---
 
@@ -10,9 +6,11 @@ This page describes what estimador.pt records about its visitors. It describes w
 
 - The site uses **no cookies** for audience measurement.
 - There are no visitor profiles, and no identifiers that persist between visits or across devices.
-- The only measurement collected is a **page-view count per page category** — and, for articles, per article.
+- The only measurement collected is a **page-view count per page category** and, for articles, per article.
 - **No session recording**, no automatic click capture, and no recording of what you type.
-- **An email address is never required to read the site.** Email subscription is optional, and described below.
+- **Fonts, images and data come from estimador.pt itself.** Reading a page makes no request to Google or to any other font service.
+- A few preferences and the games are **kept only in your browser**. The full list is further down.
+- **An email address is never required to read the site.**
 
 ---
 
@@ -22,9 +20,9 @@ We use [PostHog](https://posthog.com/), hosted in the European Union, configured
 
 - **A single event type** is sent: the page view. Every other event is discarded before it leaves the browser.
 - **The page address is reduced to a fixed category** before sending. For example, `/en/desporto/liga/jogador/joao-silva/` is sent as `/en/desporto/liga/jogador/`. Addresses that match no known category are sent as `/en/other/`.
-- **Articles are the exception: the address is sent whole.** `/en/artigos/como-ler-sondagens/` is sent exactly as it stands. An article's title is something we published, not something about the person reading it — unlike what you chose in a data explorer or the geography you selected, which are still discarded. Knowing which pieces are read is the reason there is any measurement at all. Only the addresses of articles that exist get through: the list is fixed when the site is built, and any other address under `/artigos/` is sent as `/en/artigos/artigo/`, so an invented address cannot push arbitrary text into the measurement.
+- **Articles are the exception: the address is sent whole.** An address such as `/en/artigos/article-name/` is sent exactly as it stands. An article's title is something we published, not something about the person reading it, unlike what you chose in a data explorer or the geography you selected, which are still discarded. Knowing which pieces are read is the reason there is any measurement at all. Only the addresses of articles that exist get through: the list is fixed when the site is built, and any other address under `/artigos/` is sent as `/en/artigos/artigo/`, so an invented address cannot push arbitrary text into the measurement.
 - **No query string is ever sent.** What you chose in a data explorer, the geography you selected, or any parameter after the `?` never leaves your browser.
-- **No persistent storage:** the library runs in memory, with no cookies and no `localStorage`. Closing the tab clears the state.
+- **No persistent storage:** the measurement library runs in memory, with no cookies and no `localStorage`. Closing the tab clears the state.
 - **No person profiles,** no session recording, no automatic interaction capture, no heatmaps, no surveys, no exception capture.
 - **The IP address is not recorded** by the library and is not used for geolocation.
 - Referrers, campaign parameters and browser properties beyond the library version are not sent.
@@ -39,11 +37,29 @@ Where the measurement key is not configured for an environment, nothing is sent 
 
 The site is served by **Azure Static Web Apps** (Microsoft). Like any web server, Microsoft keeps its own access logs, which may include the IP address and browser agent. We have no editorial control over those logs and do not use them for analysis.
 
+The fonts (Manrope and Newsreader) are served from estimador.pt, like the rest of the site, so they add no other recipient.
+
+---
+
+## Kept only in your browser
+
+Some parts of the site remember you without sending anything anywhere: they keep a value in your browser's local storage (`localStorage`). It stays on this device and in this browser, and clearing the site's data removes it. These are the keys, and the only ones:
+
+| Key | What it keeps | Where |
+| --- | --- | --- |
+| `estimador.club` | The club you picked, to show it first on your next visit | Homepage |
+| `liga-team-hint-seen` | That you have seen the hint about the table, so it is not repeated | Liga Portugal |
+| `estimador:misteriosa:v1` | Your guesses and your record in the Mystery parish | Mystery parish |
+| `estimador:contra-o-modelo:v1` | Your picks in the prediction game | Prediction game |
+| `estimador:contra-o-modelo:player:v1` | Your player identifier and the secret that protects it | Prediction game |
+
+The first three never leave the browser. The two prediction-game keys go with the picks you send to the leaderboard, as the next section explains.
+
 ---
 
 ## Prediction game
 
-The [prediction game](/en/desporto/liga/jogo-previsoes/) is the only part of the site that keeps per-person state. You can play **without an account**.
+The [prediction game](/en/desporto/liga/jogo-previsoes/) is the only part of the site that keeps per-person state on our server. You can play **without an account**.
 
 Per player, we store exactly this:
 
@@ -55,9 +71,7 @@ Per player, we store exactly this:
 
 **We do not store the account's email address or username.** The account identifier is hashed before it is written, and the session token is never stored.
 
-If you choose to sign in, authentication is handled by [Clerk](https://clerk.com/) or by the Azure Static Web Apps authentication service. Those providers handle your account data under their own policies.
-
-Your browser stores the player identifier and secret locally so that predictions survive between visits. Clearing site data removes them.
+If you choose to sign in, authentication is handled by [Clerk](https://clerk.com/) or by the Azure Static Web Apps authentication service. Those providers handle your account data under their own policies and keep their own session in your browser. When Clerk sign-in is enabled, the game page loads Clerk's code from Clerk's servers; no other page on the site loads it.
 
 ---
 
@@ -65,15 +79,17 @@ Your browser stores the player identifier and secret locally so that predictions
 
 Reading the site requires no address. Subscription exists only to say when a new piece is out, and it is optional.
 
+<NewsletterStatus />
+
 The list is run by [Buttondown](https://buttondown.com/), under its [privacy policy](https://buttondown.com/legal/privacy) and [GDPR compliance commitment](https://buttondown.com/legal/gdpr-eu-compliance). It is the only processor involved.
 
-When you subscribe:
+How it works, when it is active:
 
-- The form opens a Buttondown page, and that is where the address is entered and stored. estimador.pt keeps no list of its own and never sees the address.
+- The end of each article and the article index show an email field. It is a plain form on this page, with no third-party script. **When you press "Subscribe", your browser sends the address straight to Buttondown**, in a new window, where Buttondown may ask for a check. estimador.pt has no server that receives the address and keeps no list of its own.
 - **The address is only used after you confirm the subscription** in the message you receive. Without that confirmation it is discarded. Buttondown requires this confirmation on every subscription.
 - Every message carries an unsubscribe link that takes effect immediately.
 - The address is not shared, not sold, and not joined to audience measurement. Measurement records nobody's identity, so there is nothing to join: we do not know which pages you read before subscribing, or after.
-- **Nothing loads from Buttondown while you read.** There is no embedded form and no third-party script on this page — only a button pointing there. Someone who never subscribes never contacts Buttondown.
+- **Nothing loads from Buttondown while you read.** The field contacts no one until you send it. Someone who never subscribes never contacts Buttondown.
 
 To follow the site without giving an address, the [RSS feed](/en/feed.xml) carries the same pieces and identifies no one.
 
@@ -93,4 +109,4 @@ This page describes the site. The privacy properties of each published dataset a
 
 ## Contact
 
-For questions about this page, or to request removal of a player record, contact [info@estimador.pt](mailto:info@estimador.pt).
+For questions about this page, or to request removal of a player record, write to [info@estimador.pt](mailto:info@estimador.pt).

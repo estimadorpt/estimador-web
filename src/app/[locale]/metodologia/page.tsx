@@ -1,7 +1,8 @@
 import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { SiteFooter } from '@/components/SiteFooter';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { PageHero } from '@/components/PageHero';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { readFileSync, existsSync } from 'fs';
@@ -21,7 +22,9 @@ export async function generateMetadata({
   return createPageMetadata({
     locale,
     path: '/metodologia',
-    title: t('meta.methodologyTitle'),
+    // Sentence case and the site's one suffix (meta.methodologyTitle still
+    // carries the old Title Case string and is no longer read).
+    title: `${t('methodology.title')} | estimador.pt`,
     description: t('methodology.subtitle'),
   });
 }
@@ -70,8 +73,9 @@ export default async function MethodologyPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale === 'pt';
-  
+
   const { content: mdxContent, actualLocale } = getMethodologyContent(locale);
   const components = getMDXComponents();
 
@@ -79,12 +83,15 @@ export default async function MethodologyPage({
     <div className="min-h-screen bg-paper">
       <Header />
 
-      <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-4 py-10 md:py-16">
-        <header>
-          <p className="text-xs font-bold uppercase tracking-widest text-ink-muted">{pt ? 'DADOS, MODELOS E LIMITES' : 'DATA, MODELS AND LIMITS'}</p>
-          <h1 className="mt-3 text-3xl md:text-4xl">{pt ? 'Como chegamos a cada resposta' : 'How we arrive at each answer'}</h1>
-          <p className="mt-4 text-lg leading-relaxed text-ink-muted">{pt ? 'Escolhe a área que estás a explorar. Cada uma tem fontes, pressupostos e formas de verificar os resultados diferentes.' : 'Choose the area you are exploring. Each has its own sources, assumptions and ways to check results.'}</p>
-        </header>
+      <main id="main-content" tabIndex={-1}>
+        <PageHero
+          width="3xl"
+          compact
+          eyebrow={pt ? 'Dados, modelos e limites' : 'Data, models and limits'}
+          title={pt ? 'Como chegamos a cada resposta' : 'How we arrive at each answer'}
+          lede={pt ? 'Escolhe a área que estás a explorar. Cada uma tem fontes, pressupostos e formas de verificar os resultados diferentes.' : 'Choose the area you are exploring. Each has its own sources, assumptions and ways to check results.'}
+        />
+        <div className="max-w-3xl mx-auto px-4 pb-10 md:pb-16">
         <nav aria-label={pt ? 'Métodos por área' : 'Methods by area'} className="my-8 divide-y divide-line border-y border-line">
           {(pt ? [
             ['População', 'Como é gerada uma população sintética?', `Dados de partida, níveis de qualidade e privacidade da versão ${POPULATION_RELEASE}.`, '/populacao/metodologia'],
@@ -98,15 +105,15 @@ export default async function MethodologyPage({
             ['Elections', 'How are polls combined?', 'Election models and uncertainty, on this page.', '#eleicoes'],
           ]).map(([label,question,description,href]) => <div key={label} className="py-5">
             <p className="text-xs font-bold uppercase tracking-wider text-ink-muted">{label}</p>
-            {href.startsWith('#') ? <a href={href} className="mt-2 inline-block min-h-8 text-lg font-bold text-ink underline-offset-4 hover:underline">{question} →</a> : <Link href={href} locale={locale} className="mt-2 inline-block min-h-8 text-lg font-bold text-ink underline-offset-4 hover:underline">{question} →</Link>}
+            {href.startsWith('#') ? <a href={href} className="mt-2 inline-block min-h-8 text-lg font-bold text-ink underline underline-offset-4 hover:text-ink-dark">{question} →</a> : <Link href={href} locale={locale} className="mt-2 inline-block min-h-8 text-lg font-bold text-ink underline underline-offset-4 hover:text-ink-dark">{question} →</Link>}
             <p className="mt-1 text-sm leading-relaxed text-ink-muted">{description}</p>
           </div>)}
         </nav>
         <p className="mb-10 text-sm text-ink-muted">{pt ? 'Queres verificar o modelo do futebol? ' : 'Want to check the football model? '}<Link href="/desporto/liga/modelo" locale={locale} className="font-semibold text-ink underline underline-offset-4">{pt ? 'Ver a avaliação publicada' : 'See the published evaluation'}</Link></p>
         {/* Locale Notice (if fallback) */}
         {actualLocale !== locale && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-700">
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm text-amber-800">
               {locale === 'en' 
                 ? `This page is only available in Portuguese. Showing Portuguese version.`
                 : `Esta página apenas está disponível em português.`
@@ -115,9 +122,10 @@ export default async function MethodologyPage({
           </div>
         )}
 
-        <article id="eleicoes" className="article-body max-w-none scroll-mt-24">
+        <article id="eleicoes" className="article-body max-w-none scroll-mt-24" lang={actualLocale}>
           <MDXRemote source={mdxContent} components={components} />
         </article>
+        </div>
       </main>
 
       <SiteFooter locale={locale} />

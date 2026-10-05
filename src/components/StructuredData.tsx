@@ -8,8 +8,9 @@ const PUBLISHER = {
   logo: {
     "@type": "ImageObject",
     url: "https://estimador.pt/logo.png",
-    width: 60,
-    height: 60,
+    // The file's real size (public/logo.png); structured-data.test.ts checks it.
+    width: 512,
+    height: 512,
   },
 } as const;
 

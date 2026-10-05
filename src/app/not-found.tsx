@@ -1,38 +1,40 @@
 import './globals.css';
-import Link from 'next/link';
+import { NextIntlClientProvider } from 'next-intl';
 import { LogoHorizontal } from '@/components/Logo';
-import { Mosaic } from '@/components/brand/Mosaic';
+import { NotFoundBody } from '@/components/NotFoundBody';
+import { NotFoundByPath } from '@/components/NotFoundSwitch';
+import { SiteFooter } from '@/components/SiteFooter';
+import { fontVariables } from './fonts';
+
+function Page({ locale }: { locale: 'pt' | 'en' }) {
+  // The footer's links read the locale from a provider; they need no messages.
+  return (
+    <NextIntlClientProvider locale={locale} messages={{}}>
+      <header className="border-b border-line">
+        <div className="mx-auto flex h-16 max-w-7xl items-center px-4">
+          <a href={`/${locale}/`} className="brand-link inline-block rounded-sm" aria-label={locale === 'pt' ? 'estimador.pt — página inicial' : 'estimador.pt — home'}>
+            <LogoHorizontal size={22} />
+          </a>
+        </div>
+      </header>
+      <NotFoundBody locale={locale} withTitle />
+      <SiteFooter locale={locale} />
+    </NextIntlClientProvider>
+  );
+}
 
 /**
- * The 404. It renders outside the locale layout, so it carries its own html
- * and body and speaks both languages at once. The one place on the site
- * where the mosaic is allowed the broadest humour.
+ * The 404 for every address the export does not have, under /pt, /en or
+ * neither: Azure serves this one file (/404.html) for all of them. It renders
+ * outside the locale layout, so it carries its own document, and it holds both
+ * languages, showing the one the address asks for (NotFoundByPath).
  */
 export default function NotFound() {
   return (
-    <html lang="pt">
+    <html lang="pt" className={fontVariables} suppressHydrationWarning>
       <body className="antialiased">
         <div className="min-h-screen bg-paper text-ink">
-          <header className="border-b border-line">
-            <div className="mx-auto flex h-16 max-w-7xl items-center px-4">
-              <Link href="/pt" className="brand-link inline-block rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink" aria-label="estimador.pt">
-                <LogoHorizontal size={22} />
-              </Link>
-            </div>
-          </header>
-          <main className="mx-auto grid max-w-5xl gap-10 px-4 py-16 md:grid-cols-[1.2fr_1fr] md:items-center md:py-24">
-            <div>
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">404</p>
-              <h1 className="max-w-xl text-4xl md:text-5xl">Este caminho não leva a lado nenhum.</h1>
-              <p className="mt-4 max-w-md text-lg text-stone-600">A página que procuras não existe, mudou de sítio ou nunca foi estimada.</p>
-              <p className="mt-1 max-w-md text-sm text-stone-500">This page does not exist. It may have moved, or it was never estimated.</p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/pt" className="inline-flex items-center rounded-md bg-ink px-4 py-2.5 text-sm font-semibold text-paper hover:bg-ink-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Voltar ao início</Link>
-                <Link href="/pt/populacao" className="inline-flex items-center rounded-md border border-line bg-cream px-4 py-2.5 text-sm font-semibold text-ink hover:bg-parchment focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Explorar o atlas</Link>
-              </div>
-            </div>
-            <Mosaic variant="quarters" className="mx-auto w-full max-w-[320px]" />
-          </main>
+          <NotFoundByPath pt={<Page locale="pt" />} en={<Page locale="en" />} />
         </div>
       </body>
     </html>

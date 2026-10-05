@@ -1,5 +1,7 @@
 # Section illustrations
 
+The files are in `public/images/sections/` (this note lived there and moved out so it is not published with the site).
+
 Added 13 September 2026 from the reviewed browser-reference prototype in docs/design/browser-reference/assets. Generated illustration assets, not photos of actual people or locations. These depict generic section contexts and must not be presented as geographical or documentary evidence.
 
 - economy.webp: frontal neighbourhood shop.
