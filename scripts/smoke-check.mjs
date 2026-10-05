@@ -46,10 +46,39 @@ const EXPECTED_TYPES = {
   '.xml': 'xml',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.avif': 'image/avif',
+  '.webp': 'image/webp',
   '.ico': 'image/',
+  '.js': 'javascript',
+  '.css': 'text/css',
   '.wasm': 'application/wasm',
   '.parquet': 'application/vnd.apache.parquet',
 };
+
+/**
+ * The Liga club slugs, read from the config so only real clubs are grouped as
+ * club pages (and capped by --sample); /desporto/liga/simulador, /jogadores
+ * and the other section pages stay in the always-checked core.
+ */
+const CLUB_SLUGS = new Set(
+  [...(/ligaTeamSlugs[^=]*=\s*\{([\s\S]*?)\};/.exec(
+    fs.readFileSync(path.join(process.cwd(), 'src/lib/config/football.ts'), 'utf8'),
+  )?.[1] ?? '').matchAll(/:\s*'([a-z0-9-]+)'/g)].map(match => match[1]),
+);
+if (!CLUB_SLUGS.size) throw new Error('ligaTeamSlugs not found in src/lib/config/football.ts');
+
+/**
+ * Every redirect the host config declares must answer with that status and
+ * that Location, in one hop: the legacy URLs, the section URLs without a
+ * locale (the share cards used to print them) and the bare root. Read from
+ * staticwebapp.config.json, so a new redirect is checked without listing it
+ * twice.
+ */
+const MUST_REDIRECT = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'staticwebapp.config.json'), 'utf8'))
+  .routes
+  .filter(route => route.redirect && !route.route.includes('*'))
+  .map(route => ({ route: route.route, expect: route.statusCode ?? 302, location: route.redirect }));
 
 /** Routes that must answer 404 even after the routing repair. */
 const MUST_404 = [
@@ -75,14 +104,20 @@ const MUST_200 = [
   { route: `${POPULATION_DATA}/meta.json`, type: 'application/json' },
 ];
 
-/** Group a route so `--sample` can cap the long dynamic families. */
+/**
+ * Group a route so `--sample` can cap the long dynamic families. The cap is
+ * per locale (a family's PT pages are not used up by its EN ones), and only
+ * the families that really are long are grouped; everything else is core and
+ * always checked.
+ */
 function group(route) {
   const parts = route.split('/').filter(Boolean);
-  if (parts[1] === 'artigos' && parts[2]) return 'artigos';
-  if (parts[1] === 'desporto' && parts[3] === 'jogo') return 'jogo';
-  if (parts[1] === 'desporto' && parts[3] === 'jogador') return 'jogador';
-  if (parts[1] === 'desporto' && parts.length === 4) return 'equipa';
-  if (parts[1] === 'populacao' && (parts[2] === 'regiao' || parts[2] === 'freguesia') && parts[3]) return 'populacao';
+  const locale = parts[0] ?? '';
+  if (parts[1] === 'artigos' && parts[2]) return `${locale}:artigos`;
+  if (parts[1] === 'desporto' && parts[2] === 'liga' && parts[3] === 'jogo' && parts[4]) return `${locale}:jogo`;
+  if (parts[1] === 'desporto' && parts[2] === 'liga' && parts[3] === 'jogador' && parts[4]) return `${locale}:jogador`;
+  if (parts[1] === 'desporto' && parts[2] === 'liga' && parts.length === 4 && CLUB_SLUGS.has(parts[3])) return `${locale}:equipa`;
+  if (parts[1] === 'populacao' && (parts[2] === 'regiao' || parts[2] === 'freguesia') && parts[3]) return `${locale}:populacao`;
   return 'core';
 }
 
@@ -90,8 +125,8 @@ function collect(dir, prefix, routes, assets) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      // Vendored binaries and the data tree are checked through a sample below.
-      if (prefix === '' && (entry.name === '_next' || entry.name === 'data' || entry.name === 'duckdb')) {
+      // The build's chunks and the data tree are checked through a sample below.
+      if (prefix === '' && (entry.name === '_next' || entry.name === 'data')) {
         assets.sampleDirs.push(entry.name);
         continue;
       }
@@ -104,15 +139,23 @@ function collect(dir, prefix, routes, assets) {
   }
 }
 
-function sampleTree(name, limit) {
+/**
+ * A few files from every directory of a tree, not the first few of the whole
+ * walk: the data tree holds football, elections, economics and population
+ * side by side, and a routing rule can hide any one of them.
+ */
+function sampleTree(name, perDirectory) {
   const found = [];
   const walk = dir => {
-    if (found.length >= limit) return;
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      if (found.length >= limit) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    let taken = 0;
+    for (const entry of entries) {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) walk(full);
-      else found.push('/' + path.relative(OUT_DIR, full).split(path.sep).join('/'));
+      else if (taken < perDirectory) {
+        found.push('/' + path.relative(OUT_DIR, full).split(path.sep).join('/'));
+        taken += 1;
+      }
     }
   };
   const root = path.join(OUT_DIR, name);
@@ -120,7 +163,7 @@ function sampleTree(name, limit) {
   return found;
 }
 
-async function head(url, hops = 0) {
+async function head(url, { follow = true, hops = 0 } = {}) {
   // Some CDNs treat HEAD differently from GET; use GET and drop the body.
   const response = await fetch(url, { redirect: 'manual' });
   const type = response.headers.get('content-type') ?? '';
@@ -128,10 +171,10 @@ async function head(url, hops = 0) {
   // The host may answer a route with a redirect (Azure sends / to /pt/);
   // what matters is where it lands, so follow one hop.
   const location = response.headers.get('location');
-  if ([301, 302, 307, 308].includes(response.status) && location && hops < 1) {
-    return head(new URL(location, url).toString(), hops + 1);
+  if (follow && [301, 302, 307, 308].includes(response.status) && location && hops < 1) {
+    return head(new URL(location, url).toString(), { follow, hops: hops + 1 });
   }
-  return { status: response.status, type };
+  return { status: response.status, type, location };
 }
 
 async function runAll(checks) {
@@ -141,11 +184,20 @@ async function runAll(checks) {
     while (index < checks.length) {
       const check = checks[index++];
       try {
-        const { status, type } = await head(`${BASE}${check.route}`);
+        const isRedirect = Boolean(check.location);
+        const { status, type, location } = await head(`${BASE}${check.route}`, { follow: !isRedirect });
         const statusOk = check.expect === 404 ? status === 404 : status === check.expect;
         const typeOk = !check.type || type.toLowerCase().includes(check.type);
-        if (!statusOk || !typeOk) {
-          failures.push({ check, message: `${status} ${check.route}${check.type && !typeOk ? ` (content-type "${type}", expected ${check.type})` : ''}` });
+        // Compare the path only: the host may answer with an absolute URL.
+        const landed = location ? new URL(location, BASE).pathname : null;
+        const locationOk = !isRedirect || landed === check.location;
+        if (!statusOk || !typeOk || !locationOk) {
+          const detail = [
+            check.type && !typeOk ? `content-type "${type}", expected ${check.type}` : null,
+            isRedirect && !locationOk ? `Location ${landed ?? 'none'}, expected ${check.location}` : null,
+            isRedirect && !statusOk ? `expected ${check.expect}` : null,
+          ].filter(Boolean).join('; ');
+          failures.push({ check, message: `${status} ${check.route}${detail ? ` (${detail})` : ''}` });
         }
       } catch (error) {
         failures.push({ check, message: `ERR ${check.route} — ${error.message}` });
@@ -173,17 +225,23 @@ const sampledRoutes = routes.filter(route => {
   return key === 'core' || seen <= SAMPLE;
 });
 
+const pageRoutes = sampledRoutes.filter(route => route !== '/404.html');
 const checks = [
   // 404.html is the host's not-found override, never served at its own path.
-  ...sampledRoutes.filter(route => route !== '/404.html').map(route => ({ route, expect: 200, type: 'text/html' })),
+  ...pageRoutes.map(route => ({ route, expect: 200, type: 'text/html' })),
+  // The RSC payload a client-side navigation fetches instead of the HTML.
+  ...pageRoutes
+    .filter(route => route !== '/' && fs.existsSync(path.join(OUT_DIR, route, 'index.txt')))
+    .map(route => ({ route: `${route}index.txt`, expect: 200, type: 'text/plain' })),
   ...assets.files.map(route => ({ route, expect: 200, type: EXPECTED_TYPES[path.extname(route)] })),
-  ...assets.sampleDirs.flatMap(name => sampleTree(name, 5).map(route => ({
+  ...assets.sampleDirs.flatMap(name => sampleTree(name, 2).map(route => ({
     route,
     expect: 200,
     type: EXPECTED_TYPES[path.extname(route)],
   }))),
   ...MUST_200.map(check => ({ ...check, expect: 200 })),
   ...MUST_404.map(route => ({ route, expect: 404 })),
+  ...MUST_REDIRECT,
 ];
 
 const RETRIES = Number(readFlag('retry', '2'));

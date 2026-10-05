@@ -22,6 +22,18 @@
       }
     },
     {
+      "route": "/og-image-pt.png",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "route": "/og-image-en.png",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
       "route": "/og-image-*.png",
       "headers": {
         "cache-control": "public, max-age=31536000, immutable"
@@ -128,6 +140,91 @@
     {
       "route": "/en/articles",
       "redirect": "/en/artigos/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto",
+      "redirect": "/pt/desporto/liga/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga",
+      "redirect": "/pt/desporto/liga/",
+      "statusCode": 301
+    },
+    {
+      "route": "/economia",
+      "redirect": "/pt/economia/",
+      "statusCode": 301
+    },
+    {
+      "route": "/eleicoes",
+      "redirect": "/pt/eleicoes/arquivo/",
+      "statusCode": 301
+    },
+    {
+      "route": "/eleicoes/arquivo",
+      "redirect": "/pt/eleicoes/arquivo/",
+      "statusCode": 301
+    },
+    {
+      "route": "/eleicoes/presidenciais",
+      "redirect": "/pt/eleicoes/presidenciais/",
+      "statusCode": 301
+    },
+    {
+      "route": "/eleicoes/legislativas",
+      "redirect": "/pt/eleicoes/legislativas/",
+      "statusCode": 301
+    },
+    {
+      "route": "/eleicoes/legislativas/mapa",
+      "redirect": "/pt/eleicoes/legislativas/mapa/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao",
+      "redirect": "/pt/populacao/",
+      "statusCode": 301
+    },
+    {
+      "route": "/sobre",
+      "redirect": "/pt/sobre/",
+      "statusCode": 301
+    },
+    {
+      "route": "/artigos",
+      "redirect": "/pt/artigos/",
+      "statusCode": 301
+    },
+    {
+      "route": "/metodologia",
+      "redirect": "/pt/metodologia/",
+      "statusCode": 301
+    },
+    {
+      "route": "/privacidade",
+      "redirect": "/pt/privacidade/",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/desporto",
+      "redirect": "/pt/desporto/liga/",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/desporto",
+      "redirect": "/en/desporto/liga/",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/eleicoes",
+      "redirect": "/pt/eleicoes/arquivo/",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/eleicoes",
+      "redirect": "/en/eleicoes/arquivo/",
       "statusCode": 301
     },
     {
