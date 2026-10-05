@@ -32,7 +32,7 @@ export function Header() {
 
   const navigationItems: NavItem[] = [
     { id: 'home', href: '/', label: t('nav.home') },
-    { id: 'miniature', href: '/populacao', label: isPortuguese ? 'População' : 'Population' },
+    { id: 'population', href: '/populacao', label: t('nav.population') },
     { id: 'economics', href: '/economia', label: t('nav.economics') },
     {
       id: 'sport', label: t('nav.sport'),

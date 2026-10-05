@@ -1,4 +1,6 @@
 // Section configuration for the multi-domain platform
+import { BRAND } from '@/lib/brand';
+import { POPULATION_DATA_PATH, POPULATION_ROUTES } from '@/lib/config/population';
 
 export interface SectionConfig {
   id: string;
@@ -13,6 +15,19 @@ export interface SectionConfig {
 }
 
 export const SECTIONS: SectionConfig[] = [
+  {
+    id: 'population',
+    type: 'demographics',
+    slug: 'populacao',
+    nameKey: 'sections.population',
+    descriptionKey: 'sections.populationDescription',
+    isActive: true,
+    // The data pastel for the atlas's people (see Design Language in CLAUDE.md).
+    accentColor: BRAND.mint,
+    // The versioned release directory: /data/population/v1.0.0.
+    dataPath: POPULATION_DATA_PATH,
+    href: POPULATION_ROUTES.hub,
+  },
   {
     id: 'gdp-nowcast',
     type: 'economics',

@@ -14,7 +14,8 @@
     "sport": "Desporto",
     "liga": "Liga Portugal",
     "economics": "Economia",
-    "privacy": "Privacidade"
+    "privacy": "Privacidade",
+    "population": "População"
   },
   "common": {
     "updated": "Atualizado",
@@ -317,16 +318,12 @@
   },
   "home": {
     "populationKicker": "População",
-    "populationTitle": "De que pessoas é feito um país?",
-    "populationText": "Entre 1.004 pessoas fictícias deste exemplo, 20 têm 65 ou mais anos e vivem sozinhas — uma demonstração, não um retrato de Portugal.",
-    "populationAction": "Ver este exemplo",
-    "populationMethods": "Posso usar estes dados?",
-    "populationResearchNote": "Uma versão nacional aprovada para investigação ainda não está disponível.",
-    "populationStatus": "Demonstração · microssimulação em desenvolvimento",
-    "populationScope": "O atlas atual usa pessoas inventadas para demonstrar a experiência. Não representa a população portuguesa nem permite comparar estatisticamente os lugares.",
-    "populationIntent": "Serve para investigação e ensino. A microssimulação de políticas, um conjunto de dados representativo à escala nacional e a descarga de microdados ainda não estão disponíveis.",
-    "populationAtlasNote": "Nota metodológica do atlas",
-    "populationMethodology": "Metodologia geral",
+    "populationTitle": "Quem vive na tua freguesia?",
+    "populationText": "Uma população sintética aberta: {persons} pessoas e {households} agregados gerados para as {parishes} freguesias do país, a partir dos Censos 2021.",
+    "populationSearchLabel": "Procura a tua freguesia",
+    "populationGame": "Jogar a Freguesia misteriosa de hoje",
+    "populationData": "Dados abertos e descarga",
+    "populationStatus": "Versão {version} publicada · Censos 2021",
     "footballKicker": "Futebol",
     "footballTitle": "Quem fica com o título?",
     "footballDate": "Jornada {matchday} · {date}",
@@ -372,7 +369,9 @@
     "archiveSection": "Arquivo",
     "pausedSection": "Em pausa",
     "economics": "Economia",
-    "economicsDescription": "Uma leitura consolidada e centrada na incerteza do estado atual da economia portuguesa — atividade, risco de recessão e risco em baixa. Não é uma previsão."
+    "economicsDescription": "Uma leitura consolidada e centrada na incerteza do estado atual da economia portuguesa — atividade, risco de recessão e risco em baixa. Não é uma previsão.",
+    "population": "População",
+    "populationDescription": "Uma população sintética aberta de Portugal, freguesia a freguesia, calibrada nos Censos 2021."
   },
   "football": {
     "title": "Liga Portugal",

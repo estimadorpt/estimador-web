@@ -9,6 +9,9 @@ import { ligaTeamSlugs } from '@/lib/config/football'
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles'
 import { buildTagIndex } from '@/lib/article-discovery'
 import { SITE_URL, SITE_LOCALES, localizedUrl } from '@/lib/metadata'
+import { loadPopulationPlaces } from '@/lib/utils/population-data-loader'
+import { POPULATION_PUBLISHED, POPULATION_ROUTES } from '@/lib/config/population'
+import { regionSlug } from '@/lib/population/places'
 
 export const dynamic = 'force-static'
 
@@ -38,6 +41,11 @@ const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number
   '/sobre': { changeFrequency: 'monthly', priority: 0.5 },
   '/metodologia': { changeFrequency: 'monthly', priority: 0.5 },
   '/privacidade': { changeFrequency: 'yearly', priority: 0.3 },
+  '/populacao': { changeFrequency: 'monthly', priority: 0.9 },
+  '/populacao/misteriosa': { changeFrequency: 'daily', priority: 0.7 },
+  '/populacao/qualidade': { changeFrequency: 'monthly', priority: 0.6 },
+  '/populacao/dados': { changeFrequency: 'monthly', priority: 0.6 },
+  '/populacao/metodologia': { changeFrequency: 'monthly', priority: 0.5 },
 }
 
 /**
@@ -46,7 +54,15 @@ const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number
  * contradict the noindex. The brand guide is reference for the site itself;
  * Liga 2 waits until the second tier earns a place in the navigation.
  */
-const HIDDEN_ROUTES = new Set(['/marca', '/desporto/liga2'])
+const HIDDEN_ROUTES = new Set([
+  '/marca',
+  '/desporto/liga2',
+  // An imagined explainer with invented people, not the published population.
+  '/populacao/miniatura',
+  // The shared-query landing: every /populacao/v/… link is rewritten to it,
+  // and on its own it answers nothing.
+  '/populacao/consulta',
+])
 
 /** Every localized route template with no dynamic segment, read from the app directory. */
 function staticRoutes(): string[] {
@@ -130,6 +146,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const slug of Object.values(ligaTeamSlugs)) {
       add(locale, `/desporto/liga/${slug}`, { changeFrequency: 'daily', priority: 0.7 })
     }
+  }
+
+  // The synthetic population: the region pages and one page per parish, read
+  // from the release's own place list. The parish pages share one exported
+  // shell (/populacao/freguesia/_/) behind a host rewrite; the shell itself is
+  // never listed, every real code is. A release is dated, not rebuilt, so the
+  // publication date is their last modification.
+  // Like the static routes, a family is listed only when its route exists.
+  try {
+    const places = await loadPopulationPlaces()
+    const published = { lastModified: new Date(`${POPULATION_PUBLISHED}T00:00:00Z`) }
+    const hasRoute = (segment: string) => fs.existsSync(path.join(process.cwd(), 'src/app/[locale]/populacao', segment))
+    const regions = hasRoute('regiao') ? places?.regions ?? [] : []
+    const parishes = hasRoute('freguesia') ? places?.parishes ?? [] : []
+    for (const locale of SITE_LOCALES) {
+      for (const [, name] of regions) {
+        add(locale, POPULATION_ROUTES.region(regionSlug(name)), { changeFrequency: 'monthly', priority: 0.6, ...published })
+      }
+      for (const [code] of parishes) {
+        add(locale, POPULATION_ROUTES.parish(code), { changeFrequency: 'monthly', priority: 0.5, ...published })
+      }
+    }
+  } catch {
+    // no population place pages in the sitemap this build
   }
 
   // Per-match pages for the fixtures currently published (fail soft: skip on error)

@@ -8,7 +8,18 @@ const PUBLIC_ROUTES = new Set([
   'desporto/liga/metodologia', 'desporto/liga/dados', 'desporto/liga/2025-26',
   'desporto/liga/simulador', 'desporto/liga/jogo-previsoes',
 ]);
-const POPULATION_SURFACES = new Set(['casas', 'explorar', 'incerteza', 'metodologia', 'misteriosa', 'retrato']);
+/**
+ * The population section's page categories. A parish code or a region slug is
+ * public geography, not personal data, but here it is the reader's choice:
+ * people look up the parish they live in, and "use my location" lands them on
+ * the nearest one. Reporting /populacao/freguesia/0302FA/ would turn that into
+ * a location trail, and the privacy page promises the location never leaves
+ * the device and that selected geography is dropped. So the page kind is kept
+ * and the place never is.
+ */
+const POPULATION_SURFACES = new Set([
+  'freguesia', 'regiao', 'misteriosa', 'qualidade', 'dados', 'metodologia', 'consulta', 'miniatura',
+]);
 
 /**
  * An article slug names a thing the site published; it says nothing about who
@@ -36,6 +47,10 @@ export function analyticsPath(value: string): string {
   try { pathname = new URL(value, 'https://estimador.pt').pathname; }
   catch { return '/other/'; }
   const parts = pathname.split('/').filter(Boolean);
+  // A shared query link has no locale (/populacao/v/<release>/q/<id>); the host
+  // serves it the Portuguese consultation page. The id names a parish and a
+  // question, so only the page kind is kept.
+  if (parts[0] === 'populacao' && parts[1] === 'v') return '/pt/populacao/consulta/';
   const locale = parts.shift();
   if (locale !== 'pt' && locale !== 'en') return '/other/';
   const route = parts.join('/');

@@ -14,7 +14,8 @@
     "sport": "Sports",
     "liga": "Liga Portugal",
     "economics": "Economy",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "population": "Population"
   },
   "common": {
     "updated": "Updated",
@@ -317,16 +318,12 @@
   },
   "home": {
     "populationKicker": "Population",
-    "populationTitle": "Who makes up a country?",
-    "populationText": "Among 1,004 fictional people in this example, 20 are 65 or older and live alone — a demonstration, not a picture of Portugal.",
-    "populationAction": "See this example",
-    "populationMethods": "Can I use these data?",
-    "populationResearchNote": "A national release approved for research is not available yet.",
-    "populationStatus": "Demo · microsimulation in development",
-    "populationScope": "The current atlas uses invented people to demonstrate the experience. It does not represent Portugal’s population or support statistical comparisons of places.",
-    "populationIntent": "It serves research and teaching. Policy microsimulation, a nationally representative dataset and downloadable microdata are not available yet.",
-    "populationAtlasNote": "The atlas's method note",
-    "populationMethodology": "General methodology",
+    "populationTitle": "Who lives in your parish?",
+    "populationText": "An open synthetic population: {persons} people and {households} households generated for all {parishes} parishes in the country, from the 2021 Census.",
+    "populationSearchLabel": "Find your parish",
+    "populationGame": "Play today's Mystery parish",
+    "populationData": "Open data and downloads",
+    "populationStatus": "Version {version} released · 2021 Census",
     "footballKicker": "Football",
     "footballTitle": "Who takes the title?",
     "footballDate": "Matchday {matchday} · {date}",
@@ -372,7 +369,9 @@
     "archiveSection": "Archive",
     "pausedSection": "Paused",
     "economics": "Economy",
-    "economicsDescription": "A consolidated, uncertainty-first read-out of the current state of the Portuguese economy — activity, recession risk and downside risk. Not a forecast."
+    "economicsDescription": "A consolidated, uncertainty-first read-out of the current state of the Portuguese economy — activity, recession risk and downside risk. Not a forecast.",
+    "population": "Population",
+    "populationDescription": "An open synthetic population of Portugal, parish by parish, calibrated to the 2021 Census."
   },
   "football": {
     "title": "Liga Portugal",

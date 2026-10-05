@@ -11,7 +11,8 @@
  *
  * Three kinds of card come out of here:
  *   - one per article per locale, carrying the headline, register and date;
- *   - one per section that publishes a live headline number;
+ *   - one per section that publishes a live headline number (the population
+ *     card's figures are the release's own counts, read from meta.json);
  *   - a fallback per locale for everything else.
  */
 
@@ -42,7 +43,7 @@ const COPY = {
       { name: 'Economia', blurb: 'Estado da economia e risco de recessão' },
       { name: 'Liga Portugal', blurb: 'Probabilidades de título e despromoção' },
       { name: 'Eleições', blurb: 'Sondagens, previsões e arquivo' },
-      { name: 'População', blurb: 'Um atlas humano, do país à porta de casa' },
+      { name: 'População', blurb: 'Uma população sintética aberta, freguesia a freguesia' },
     ],
     brandFooter: 'Metodologia aberta · Bernardo Caldas',
     readSuffix: 'de leitura',
@@ -57,6 +58,11 @@ const COPY = {
     economyCaption: 'Onde está o risco de recessão agora — uma leitura calibrada, disponível antes da divulgação do PIB.',
     economySpark: 'Probabilidade por trimestre',
     economyFooter: (date) => `Dados de ${date}`,
+    populationSection: 'População',
+    populationLabel: 'População sintética aberta',
+    populationSubject: 'freguesias · Censos 2021',
+    populationCaption: (persons, households) => `${persons} pessoas e ${households} agregados gerados para todas as freguesias do país.`,
+    populationFooter: (version, date) => `Versão ${version} · publicada a ${date}`,
   },
   en: {
     brandHeadline: 'Data to understand Portugal.',
@@ -65,7 +71,7 @@ const COPY = {
       { name: 'Economy', blurb: 'State of the economy and recession risk' },
       { name: 'Liga Portugal', blurb: 'Title and relegation probabilities' },
       { name: 'Elections', blurb: 'Polling, forecasts and the archive' },
-      { name: 'Population', blurb: 'A human atlas, from the country to the front door' },
+      { name: 'Population', blurb: 'An open synthetic population, parish by parish' },
     ],
     brandFooter: 'Open methodology · Bernardo Caldas',
     readSuffix: 'read',
@@ -80,6 +86,11 @@ const COPY = {
     economyCaption: 'Where recession risk stands now — a calibrated read available before the GDP print.',
     economySpark: 'Probability by quarter',
     economyFooter: (date) => `Data as of ${date}`,
+    populationSection: 'Population',
+    populationLabel: 'Open synthetic population',
+    populationSubject: 'parishes · 2021 Census',
+    populationCaption: (persons, households) => `${persons} people and ${households} households generated for every parish in the country.`,
+    populationFooter: (version, date) => `Version ${version} · released ${date}`,
   },
 };
 
@@ -87,6 +98,7 @@ const SITE_PATH = {
   home: '/',
   liga: '/desporto/liga',
   economy: '/economia',
+  population: '/populacao',
 };
 
 /* ------------------------------------------------------------- sources ---- */
@@ -137,6 +149,17 @@ function economyDashboard() {
   const file = path.join(PUBLIC_DIR, 'data', 'economics', 'dashboard.json');
   if (!fs.existsSync(file)) return null;
   return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+/** The published synthetic population release's meta.json (counts, honesty copy). */
+function populationMeta() {
+  const dir = path.join(PUBLIC_DIR, 'data', 'population');
+  if (!fs.existsSync(dir)) return null;
+  const releases = fs.readdirSync(dir).filter(name => /^v\d+\.\d+\.\d+$/.test(name))
+    .sort((a, b) => a.slice(1).localeCompare(b.slice(1), undefined, { numeric: true }));
+  const latest = releases.at(-1);
+  const file = latest && path.join(dir, latest, 'meta.json');
+  return file && fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
 }
 
 /* --------------------------------------------------------------- cards ---- */
@@ -223,6 +246,28 @@ function economyCard(dashboard, locale) {
   });
 }
 
+/**
+ * Every figure is one of the release's own counts and the caveat is the
+ * release's own sentence: nothing here is computed from the data, and the
+ * synthetic people are never shown as anyone in particular.
+ */
+function populationCard(meta, locale) {
+  const copy = COPY[locale];
+  const counts = meta?.counts;
+  const honesty = meta?.honesty?.portrait?.[locale];
+  if (!counts?.parishes || !counts.persons || !counts.households || !honesty) return null;
+  const number = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB');
+  return figureCard({
+    sectionLabel: copy.populationSection,
+    label: copy.populationLabel,
+    value: number.format(counts.parishes),
+    subject: copy.populationSubject,
+    caption: `${copy.populationCaption(number.format(counts.persons), number.format(counts.households))} ${honesty}`,
+    footerLeft: copy.populationFooter(meta.release_version, formatDate(meta.published, locale)),
+    footerRight: 'estimador.pt/populacao',
+  });
+}
+
 /* --------------------------------------------------------------- output --- */
 
 async function emit(node, basename) {
@@ -251,6 +296,7 @@ function pruneOrphans(keep) {
 async function main() {
   const liga = latestLigaMatchday();
   const economy = economyDashboard();
+  const population = populationMeta();
   const manifest = { generatedAt: new Date().toISOString(), files: {}, cards: {} };
   const written = [];
 
@@ -269,6 +315,7 @@ async function main() {
     const sections = [
       liga ? [SITE_PATH.liga, ligaCard(liga, locale), `og-image-liga-${locale}`] : null,
       economy ? [SITE_PATH.economy, economyCard(economy, locale), `og-image-economia-${locale}`] : null,
+      population ? [SITE_PATH.population, populationCard(population, locale), `og-image-populacao-${locale}`] : null,
     ].filter(Boolean);
 
     for (const [route, node, basename] of sections) {
