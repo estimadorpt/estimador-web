@@ -33,20 +33,20 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-RELEASE = "1.0.1"
+RELEASE = "1.0.3"
 PUBLISHED = "2026-10-05"
 CONTRACT = "1.0"
 
-# doc 206 §5 (v1.0.1, supersedes v1.0.0's public answers; full hashes where the handoff
+# doc 206 §7 (v1.0.3, supersedes v1.0.1 and v1.0.2; full hashes where the handoff
 # gives them, prefixes where it abbreviates).
 PINNED = {
-    "bundle": "bb3f453ec176e164ffd2edc287c6c7c3584ed3aee3209f0ef6283db56802cf56",
-    "scorecard": "57af11327f3764b0f032cc16a566334b08f4fee8fdb18a7e7b42cc55deb12057",
-    "checksums": "5145f8158afd99684ef118f3f95e03396a17276a2ffbe7c8573981ac87a46305",
-    "portrait_index": "1f55660f",
-    "mystery_deck": "996151ce",
-    "responses_index": "5ed0f8b8",
-    "bindings": "febecdba",
+    "bundle": "3a55f0a06de2ba26e5eaf615504d7afc4b2955846d4d2cd4b77f4b61a4800589",
+    "scorecard": "f1c590aed8b47e7aa8cc94c13e5799869c5db0a4eed48b9650dbb93d073fade1",
+    "checksums": "c5a009679c9037e48156b3d89d4ffd6a66f1968098ab7792b0159054a195c36e",
+    "portrait_index": "556d71e5",
+    "mystery_deck": "fc1e7c8a",
+    "responses_index": "72460ec7",
+    "bindings": "b239c637",
 }
 MODEL_SHA256 = "062e2ad784886b7287536233f853db151c57615d2b1a952fb2e12368581e76d3"
 

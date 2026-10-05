@@ -6,7 +6,7 @@
  * here, and update the download links. Old versioned data stays readable until
  * it is deleted, so shared links can say which release they used.
  */
-export const POPULATION_RELEASE = '1.0.1';
+export const POPULATION_RELEASE = '1.0.3';
 
 /** Publication date of the release (also day 0 of Freguesia Misteriosa). */
 export const POPULATION_PUBLISHED = '2026-10-05';

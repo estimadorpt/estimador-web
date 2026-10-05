@@ -245,7 +245,7 @@ feed('elections/presidential-2026/second_round_blank_null.json', value =>
 // hash the sync recorded, so a hand edit or a half-finished sync fails here;
 // fixture or draft data can never reach a release build.
 
-const POPULATION_RELEASE = '1.0.1';
+const POPULATION_RELEASE = '1.0.3';
 const populationDir = `population/v${POPULATION_RELEASE}`;
 feed(`${populationDir}/manifest.json`, manifest => {
   if (!isObject(manifest) || !isObject(manifest.files)) return 'no file list';

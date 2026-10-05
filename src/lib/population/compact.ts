@@ -97,7 +97,11 @@ function stableStringify(value: unknown): string {
  */
 export function formatDisplay(display: string, locale: Locale): string {
   if (display === 'Suprimido') return SUPPRESSED[locale];
-  return locale === 'pt' ? display.replace('.', ',') : display;
+  // The producer writes pt-PT decimals from v1.0.2 ("17,2%") and wrote a dot
+  // before; only the decimal mark of a share changes, never its digits.
+  const share = /^(\d+)[.,](\d+)%$/.exec(display);
+  if (!share) return display;
+  return `${share[1]}${locale === 'pt' ? ',' : '.'}${share[2]}%`;
 }
 
 export type CellState = 'published' | 'suppressed' | 'absent';

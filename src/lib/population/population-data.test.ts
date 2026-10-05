@@ -157,6 +157,10 @@ describe('reading cells', () => {
   it('formats the producer’s display value without re-rounding', () => {
     expect(formatDisplay('17.2%', 'pt')).toBe('17,2%');
     expect(formatDisplay('17.2%', 'en')).toBe('17.2%');
+    // v1.0.2 onwards: the producer writes pt-PT decimals.
+    expect(formatDisplay('17,2%', 'pt')).toBe('17,2%');
+    expect(formatDisplay('17,2%', 'en')).toBe('17.2%');
+    expect(formatDisplay('100,0%', 'en')).toBe('100.0%');
     expect(formatDisplay('Suprimido', 'en')).toBe('Suppressed');
   });
 });
