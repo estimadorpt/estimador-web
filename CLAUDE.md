@@ -116,6 +116,9 @@ GitHub releases, `POPULATION_DOWNLOADS`). Config, routes and the release number 
   About, privacy and site methodology pages carry one paragraph or row each.
 - **Smoke check**: `scripts/smoke-check.mjs` probes the rewritten parish and query URLs
   and keeps a missing parish file a 404.
+- **OG card**: `node scripts/generate-og-images.mjs` writes `/populacao`'s card from the
+  newest `meta.json` (parish, person and household counts, the release's own honesty
+  line); rerun it after a release bump.
 
 ### Data Organization
 ```

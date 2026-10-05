@@ -47,6 +47,10 @@ export function analyticsPath(value: string): string {
   try { pathname = new URL(value, 'https://estimador.pt').pathname; }
   catch { return '/other/'; }
   const parts = pathname.split('/').filter(Boolean);
+  // A shared query link has no locale (/populacao/v/<release>/q/<id>); the host
+  // serves it the Portuguese consultation page. The id names a parish and a
+  // question, so only the page kind is kept.
+  if (parts[0] === 'populacao' && parts[1] === 'v') return '/pt/populacao/consulta/';
   const locale = parts.shift();
   if (locale !== 'pt' && locale !== 'en') return '/other/';
   const route = parts.join('/');
