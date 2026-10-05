@@ -17,11 +17,14 @@ import { createHash } from 'node:crypto';
 
 const WARN_ONLY = process.argv.includes('--warn');
 const DATA = path.join(process.cwd(), 'public/data');
+// Inputs the build reads and the export must not ship (raw simulation draws
+// the pages reduce on the server). See loadBuildOnlyJson in data-loader.ts.
+const BUILD_ONLY = path.join(process.cwd(), 'data/build-only');
 const problems = [];
 const notes = [];
 
-function read(relative) {
-  const file = path.join(DATA, relative);
+function read(relative, root = DATA) {
+  const file = path.join(root, relative);
   if (!fs.existsSync(file)) return { missing: true };
   try {
     return { value: JSON.parse(fs.readFileSync(file, 'utf8')) };
@@ -35,9 +38,10 @@ function read(relative) {
  * @param {(value: unknown) => string | null} check returns a problem, or null
  * @param {{ required?: boolean }} options
  */
-function feed(relative, check, { required = true } = {}) {
-  const result = read(relative);
-  const report = message => (required ? problems : notes).push(`${relative}: ${message}`);
+function feed(relative, check, { required = true, buildOnly = false } = {}) {
+  const result = read(relative, buildOnly ? BUILD_ONLY : DATA);
+  const label = buildOnly ? `data/build-only/${relative}` : relative;
+  const report = message => (required ? problems : notes).push(`${label}: ${message}`);
   if (result.missing) return report('missing');
   if (result.invalid) return report(`not valid JSON — ${result.invalid}`);
   const problem = check(result.value);
@@ -178,9 +182,11 @@ feed('football/liga-2026-27/market_scorecard.json', value => {
 
 // ---- elections (archives; they must keep resolving) ------------------------
 
-for (const name of ['seat_forecast_simulations.json', 'national_trends.json', 'district_forecast.json']) {
+for (const name of ['national_trends.json', 'district_forecast.json']) {
   feed(`elections/parliamentary-2025/${name}`, value => (nonEmptyArray(value) ? null : 'empty'));
 }
+feed('elections/parliamentary-2025/seat_forecast_simulations.json', value => (nonEmptyArray(value) ? null : 'empty'),
+  { buildOnly: true });
 feed('elections/parliamentary-2025/contested_summary.json', value =>
   isObject(value) && isObject(value.districts) ? null : 'no districts');
 
@@ -208,7 +214,12 @@ feed('elections/presidential-2026/second_round_trajectories.json', value => {
   const runoff = Object.keys(value.candidates).filter(name => name !== 'Blank/Null');
   if (runoff.length !== 2) return `expected two runoff candidates, found ${runoff.length}`;
   return runoff.every(name => nonEmptyArray(value.candidates[name].trajectories)) ? null : 'empty trajectories';
-});
+}, { buildOnly: true });
+// The raw draws must not drift back into the export (BL-12: 8.6 MB of the
+// Azure size budget, read only at build time).
+for (const relative of ['elections/presidential-2026/second_round_trajectories.json', 'elections/parliamentary-2025/seat_forecast_simulations.json']) {
+  if (fs.existsSync(path.join(DATA, relative))) problems.push(`${relative}: build-only input is under public/data — keep it in data/build-only/`);
+}
 feed('elections/presidential-2026/second_round_blank_null.json', value =>
   isObject(value) && typeof value.mean === 'number' ? null : 'no mean');
 

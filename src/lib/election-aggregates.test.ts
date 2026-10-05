@@ -12,7 +12,11 @@ import {
 } from './election-aggregates';
 
 const ELECTIONS = path.join(process.cwd(), 'public/data/elections');
+// Raw simulation draws are build-only inputs, kept outside public/.
+const BUILD_ONLY_ELECTIONS = path.join(process.cwd(), 'data/build-only/elections');
 const readJson = <T,>(relative: string): T => JSON.parse(readFileSync(path.join(ELECTIONS, relative), 'utf8')) as T;
+const readBuildOnlyJson = <T,>(relative: string): T =>
+  JSON.parse(readFileSync(path.join(BUILD_ONLY_ELECTIONS, relative), 'utf8')) as T;
 
 describe('quantiles and subsamples', () => {
   it('uses the exports’ own index convention, ⌊n·p⌋', () => {
@@ -76,7 +80,7 @@ describe('runoff simulations', () => {
   });
 
   it('matches the published valid-vote summary on the archived file', () => {
-    const traj = readJson<Parameters<typeof summariseRunoff>[0]>('presidential-2026/second_round_trajectories.json');
+    const traj = readBuildOnlyJson<Parameters<typeof summariseRunoff>[0]>('presidential-2026/second_round_trajectories.json');
     const valid = readJson<{ candidates: Array<{ name: string; median: number; ci_lower: number; ci_upper: number }> }>('presidential-2026/second_round_valid_votes.json');
     const r = summariseRunoff(traj)!;
     expect(r.total).toBe(8000);
@@ -120,7 +124,7 @@ describe('parliamentary seats', () => {
   });
 
   it('agrees with the published archive: 9000 draws, 230 seats each', () => {
-    const sims = readJson<Array<Record<string, number | string>>>('parliamentary-2025/seat_forecast_simulations.json');
+    const sims = readBuildOnlyJson<Array<Record<string, number | string>>>('parliamentary-2025/seat_forecast_simulations.json');
     const parties = ['PS', 'CH', 'IL', 'BE', 'CDU', 'PAN', 'L', 'AD'];
     const blocs = summariseBlocs(sims, [{ key: 'all', parties }], 116);
     expect(blocs.total).toBe(9000);

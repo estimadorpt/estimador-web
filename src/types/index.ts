@@ -290,6 +290,8 @@ export interface SecondRoundCandidateTrajectories {
   trajectories: number[][];
 }
 
+// Raw runoff draws: a build-only input (data/build-only/elections/presidential-2026/),
+// reduced on the server by summariseRunoff and never shipped to the browser.
 export interface SecondRoundTrajectoriesData {
   election_type: string;
   election_date: string;

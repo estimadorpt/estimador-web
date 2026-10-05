@@ -53,6 +53,7 @@ sync_football() {
 
 sync_elections() {
   echo "Election data is managed manually in public/data/elections/"
+  echo "  (raw simulation draws read only at build time live in data/build-only/elections/)"
   echo "  Presidential: $(ls "$DATA_DIR/elections/presidential-2026/" 2>/dev/null | wc -l | tr -d ' ') files"
   echo "  Parliamentary: $(ls "$DATA_DIR/elections/parliamentary-2025/" 2>/dev/null | wc -l | tr -d ' ') files"
 }

@@ -40,6 +40,16 @@ export async function loadJsonData<T>(filename: string, subdirectory?: string): 
   return JSON.parse(fileContents);
 }
 
+/**
+ * Build-only inputs: raw simulation draws the pages reduce on the server
+ * (summariseRunoff, summariseSeats). They live outside public/ so the static
+ * export never ships them; no page fetches them at runtime.
+ */
+export async function loadBuildOnlyJson<T>(filename: string, subdirectory: string): Promise<T> {
+  const filePath = path.join(process.cwd(), 'data', 'build-only', subdirectory, filename);
+  return JSON.parse(await fs.readFile(filePath, 'utf8'));
+}
+
 const PRESIDENTIAL_DIR = 'elections/presidential-2026';
 const PARLIAMENTARY_DIR = 'elections/parliamentary-2025';
 const ECONOMICS_DIR = 'economics';
@@ -71,7 +81,7 @@ export async function loadEconomyDashboard(): Promise<EconomyDashboard | null> {
 export async function loadForecastData() {
   try {
     const [seatData, nationalTrends, districtForecast, contestedSeats, houseEffects] = await Promise.all([
-      loadJsonData<SeatData[]>('seat_forecast_simulations.json', PARLIAMENTARY_DIR),
+      loadBuildOnlyJson<SeatData[]>('seat_forecast_simulations.json', PARLIAMENTARY_DIR),
       loadJsonData<TrendData[]>('national_trends.json', PARLIAMENTARY_DIR),
       loadJsonData<DistrictForecast[]>('district_forecast.json', PARLIAMENTARY_DIR),
       loadJsonData<ContestedSummary>('contested_summary.json', PARLIAMENTARY_DIR),
@@ -231,7 +241,7 @@ export async function loadSecondRoundData() {
       await Promise.all([
         loadJsonData<SecondRoundForecastData>('second_round_forecast.json', PRESIDENTIAL_DIR),
         loadJsonData<SecondRoundTrendsData>('second_round_trends.json', PRESIDENTIAL_DIR),
-        loadJsonData<SecondRoundTrajectoriesData>('second_round_trajectories.json', PRESIDENTIAL_DIR),
+        loadBuildOnlyJson<SecondRoundTrajectoriesData>('second_round_trajectories.json', PRESIDENTIAL_DIR),
         loadJsonData<SecondRoundValidVotesData>('second_round_valid_votes.json', PRESIDENTIAL_DIR),
         loadJsonData<SecondRoundWinProbabilityData>('second_round_win_probability.json', PRESIDENTIAL_DIR),
         loadJsonData<SecondRoundBlankNullData>('second_round_blank_null.json', PRESIDENTIAL_DIR),
