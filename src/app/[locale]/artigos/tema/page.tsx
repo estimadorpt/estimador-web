@@ -7,6 +7,7 @@ import { Link } from '@/i18n/routing';
 import { buildTagIndex } from '@/lib/article-discovery';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { createPageMetadata, SITE_LOCALES } from '@/lib/metadata';
+import { Mosaic } from '@/components/brand/Mosaic';
 
 export async function generateMetadata({
   params,
@@ -21,6 +22,8 @@ export async function generateMetadata({
     path: '/artigos/tema',
     title: t('meta.topicsTitle'),
     description: t('articles.topicsIntro'),
+    // Out of search while this locale has nothing to group (see /artigos).
+    index: getMDXArticlesByLocale(locale).length > 0,
   });
 }
 
@@ -66,7 +69,21 @@ export default async function TopicsPage({
         </header>
 
         {groups.length === 0 ? (
-          <p className="border-l-2 border-stone-300 py-6 pl-6 text-stone-600">{t('articles.empty')}</p>
+          <div className="flex items-center gap-6 py-6">
+            <Mosaic variant="quarters" className="hidden h-20 w-20 shrink-0 sm:block" />
+            <div>
+              <p className="text-stone-600">{t('articles.empty')}</p>
+              <p className="mt-4">
+                <Link
+                  href="/metodologia"
+                  locale={locale}
+                  className="inline-flex items-center gap-1.5 font-semibold text-ink underline underline-offset-4 hover:no-underline"
+                >
+                  {t('articles.emptyNextStep')}
+                </Link>
+              </p>
+            </div>
+          </div>
         ) : (
           <ul className="border-t-2 border-stone-800">
             {groups.map(group => (

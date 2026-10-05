@@ -44,4 +44,19 @@ describe('homepage mode', () => {
   it('ships in standard mode', () => {
     expect(HOMEPAGE.mode).toBe('standard');
   });
+
+  // The economy is in preparation (economy-status.json): its panel is the
+  // explainer entry, never the lead or the rail, in either mode.
+  it('keeps the economy out of the lead positions in every layout', () => {
+    const layouts = [
+      resolveHomepageLayout({ mode: 'standard' }, withData),
+      resolveHomepageLayout({ mode: 'election', election: 'presidential-2026' }, withData),
+      resolveHomepageLayout({ mode: 'election', election: 'presidential-2026' }, withoutData),
+    ];
+    for (const layout of layouts) {
+      expect(layout.lead).not.toBe('economy');
+      expect(layout.secondary).not.toBe('economy');
+      expect(layout.support).toContain('economy');
+    }
+  });
 });

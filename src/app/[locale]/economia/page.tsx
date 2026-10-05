@@ -3,7 +3,7 @@ import { loadEconomyDashboard, loadEconomyStories } from "@/lib/utils/data-loade
 import { isTileAvailable, type EconomyDashboardTiles } from "@/types/economy-dashboard";
 import { isModuleAvailable } from "@/types/economy-stories";
 import { fmtDate } from "@/lib/utils/economy-format";
-import { economyPaused } from "@/lib/utils/economy-time";
+import { ECONOMY_PUBLISHED, economyState } from "@/lib/config/economy-status";
 import { Action } from "@/components/brand/Action";
 import { Header } from "@/components/Header";
 import { EconomyReading } from '@/components/economics/EconomyReading';
@@ -44,11 +44,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
+  // While the section is in preparation (src/lib/config/economy-status.json)
+  // the page stays online as an explainer but out of search, with a title and
+  // description that promise only what it shows.
   return createPageMetadata({
     locale,
     path: '/economia',
-    title: t("meta.economicsTitle"),
-    description: t("meta.economicsDescription"),
+    title: t(ECONOMY_PUBLISHED ? "meta.economicsTitle" : "meta.economicsPreparingTitle"),
+    description: t(ECONOMY_PUBLISHED ? "meta.economicsDescription" : "meta.economicsPreparingDescription"),
+    index: ECONOMY_PUBLISHED,
   });
 }
 
@@ -62,6 +66,55 @@ export default async function EconomiaPage({
 
   const data = await loadEconomyDashboard();
   const stories = await loadEconomyStories();
+  const state = economyState(data?.as_of ?? data?.vintage_date);
+
+  // Written analysis filed under the economy, on every branch of the page; it
+  // renders nothing while the section has published nothing.
+  const notes = (
+    <SectionNotes
+      section="economics"
+      locale={locale}
+      className="pt-4"
+      containerClassName="mt-8 border-t border-stone-200 pt-8"
+    />
+  );
+
+  // In preparation: the editorial flag is off. The explainers are the page; no
+  // number, no date and no promise of when the read-out arrives.
+  if (state === 'preparing') {
+    return (
+      <div className="min-h-screen bg-paper">
+        <Header />
+        <PageHero
+          width="5xl"
+          field="mint"
+          compact
+          icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
+          eyebrow={t("preparingEyebrow")}
+          title={t("preparingTitle")}
+          lede={t("explainerLede")}
+        />
+        <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-6">
+          <EconomyReading
+            locale={locale}
+            showIllustration
+            status={
+              <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-800">
+                {t("statusPreparing")}
+              </span>
+            }
+          />
+          <details className="mt-8 border-t border-line pt-4 text-sm text-ink-muted">
+            <summary className="cursor-pointer py-3 font-semibold text-ink">{t("preparingQuestion")}</summary>
+            <p className="my-3 leading-relaxed">{t("preparingBody")}</p>
+            <Action href="/economia/metodologia" locale={locale} variant="text" arrow>{t("methodologyLink")}</Action>
+          </details>
+          {notes}
+        </main>
+        <SiteFooter locale={locale} />
+      </div>
+    );
+  }
 
   // Whole-feed failure → the same explainer/question areas as the paused
   // branch, with an "unavailable" status instead of a thinner page. The
@@ -77,7 +130,7 @@ export default async function EconomiaPage({
           icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
           eyebrow={t("eyebrow")}
           title={t("title")}
-          lede={locale === "pt" ? "Perceber o que os indicadores medem — e o que deixam de fora." : "Understand what the indicators measure — and what they leave out."}
+          lede={t("explainerLede")}
         />
         <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-6">
           <EconomyReading
@@ -92,6 +145,7 @@ export default async function EconomiaPage({
           <p className="mt-6 max-w-prose border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-muted">
             {t("unavailableBody")}
           </p>
+          {notes}
         </main>
         <SiteFooter locale={locale} />
       </div>
@@ -101,10 +155,10 @@ export default async function EconomiaPage({
   const tiles: EconomyDashboardTiles = data.tiles ?? {};
   const updatedDate = fmtDate(data.vintage_date, locale);
 
-  // Stale beyond the banner's reach: keep the page, drop the numbers. The
-  // question and its answer come first — right after a minimal hero — with
-  // the paused status inline beside them, not in a separate section above.
-  if (economyPaused(data.as_of ?? data.vintage_date)) {
+  // Published but stale beyond the banner's reach: keep the page, drop the
+  // numbers. The question and its answer come first — right after a minimal
+  // hero — with the paused status inline beside them, not in a section above.
+  if (state === 'paused') {
     return (
       <div className="min-h-screen bg-paper">
         <Header />
@@ -115,7 +169,7 @@ export default async function EconomiaPage({
           icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
           eyebrow={t("eyebrow")}
           title={t("title")}
-          lede={locale === "pt" ? "Perceber o que os indicadores medem — e o que deixam de fora." : "Understand what the indicators measure — and what they leave out."}
+          lede={t("explainerLede")}
         />
         <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-6">
           <EconomyReading
@@ -128,10 +182,11 @@ export default async function EconomiaPage({
             }
           />
           <details className="mt-8 border-t border-line pt-4 text-sm text-ink-muted">
-            <summary className="cursor-pointer py-3 font-semibold text-ink">{locale === 'pt' ? 'Porque não aparecem números atuais?' : 'Why are current figures unavailable?'}</summary>
+            <summary className="cursor-pointer py-3 font-semibold text-ink">{t("pausedQuestion")}</summary>
             <p className="my-3 leading-relaxed">{t("pausedBody", { date: updatedDate })}</p>
             <Action href="/economia/metodologia" locale={locale} variant="text" arrow>{t("methodologyLink")}</Action>
           </details>
+          {notes}
         </main>
         <SiteFooter locale={locale} />
       </div>

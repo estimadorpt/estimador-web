@@ -5,7 +5,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Globe, Menu, X, ChevronDown } from 'lucide-react';
 import { LogoHorizontal } from './Logo';
-import { useArticleLanguagePath } from '@/lib/article-navigation';
+import { useArticleLanguagePath, useHasArticles } from '@/lib/article-navigation';
+import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 
 interface NavItem {
   id: string;
@@ -29,11 +30,13 @@ export function Header() {
   const ptPath = useArticleLanguagePath(pathname, 'pt');
   const enPath = useArticleLanguagePath(pathname, 'en');
   const isPortuguese = locale === 'pt';
+  const hasArticles = useHasArticles(locale);
 
   const navigationItems: NavItem[] = [
     { id: 'home', href: '/', label: t('nav.home') },
     { id: 'population', href: '/populacao', label: t('nav.population') },
-    { id: 'economics', href: '/economia', label: t('nav.economics') },
+    // The editorial flag in src/lib/config/economy-status.json, not data age.
+    { id: 'economics', href: '/economia', label: t(ECONOMY_PUBLISHED ? 'nav.economics' : 'nav.economicsPreparing') },
     {
       id: 'sport', label: t('nav.sport'),
       dropdown: [
@@ -50,7 +53,8 @@ export function Header() {
         { href: '/eleicoes/legislativas', label: t('nav.parliamentary') },
       ],
     },
-    { id: 'articles', href: '/artigos', label: t('articles.title') },
+    // No nav item for an index with nothing in it in this language.
+    ...(hasArticles ? [{ id: 'articles', href: '/artigos', label: t('articles.title') }] : []),
     {
       id: 'about', label: t('nav.about'),
       dropdown: [

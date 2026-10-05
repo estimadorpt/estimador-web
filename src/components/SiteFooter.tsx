@@ -2,6 +2,8 @@ import { getTranslations } from 'next-intl/server';
 import { Rss } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { LogoHorizontal } from './Logo';
+import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
+import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 
 const focusStyle = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
 
@@ -36,9 +38,13 @@ export async function SiteFooter({ locale }: { locale: string }) {
   const pt = locale === 'pt';
   const year = new Date().getFullYear();
 
+  // The articles link and the feed are offered only once this locale has
+  // published something; the feed routes keep working either way.
+  const hasArticles = getMDXArticlesByLocale(locale).length > 0;
+
   const products: FooterItem[] = [
     { href: '/populacao', label: pt ? 'População' : 'Population' },
-    { href: '/economia', label: t('sections.economics') },
+    { href: '/economia', label: t(ECONOMY_PUBLISHED ? 'sections.economics' : 'nav.economicsPreparing') },
     { href: '/desporto/liga', label: t('football.title') },
     { href: '/eleicoes/presidenciais', label: t('sections.presidential2026') },
     { href: '/eleicoes/legislativas', label: t('sections.parliamentary2025') },
@@ -46,7 +52,7 @@ export async function SiteFooter({ locale }: { locale: string }) {
   const project: FooterItem[] = [
     { href: '/sobre', label: t('nav.about') },
     { href: '/metodologia', label: t('nav.methodology') },
-    { href: '/artigos', label: t('articles.title') },
+    ...(hasArticles ? [{ href: '/artigos', label: t('articles.title') }] : []),
     { href: '/privacidade', label: t('footer.privacy') },
     { href: '/marca', label: pt ? 'Marca' : 'Brand' },
   ];
@@ -71,12 +77,14 @@ export async function SiteFooter({ locale }: { locale: string }) {
             <div>
               <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Seguir' : 'Follow'}</h2>
               <ul className="space-y-1.5">
-                <li>
-                  <a href={`/${locale}/feed.xml`} className={`inline-flex items-center gap-1.5 text-stone-600 transition-colors hover:text-ink ${focusStyle}`}>
-                    <Rss aria-hidden="true" className="h-3.5 w-3.5" />
-                    RSS
-                  </a>
-                </li>
+                {hasArticles && (
+                  <li>
+                    <a href={`/${locale}/feed.xml`} className={`inline-flex items-center gap-1.5 text-stone-600 transition-colors hover:text-ink ${focusStyle}`}>
+                      <Rss aria-hidden="true" className="h-3.5 w-3.5" />
+                      RSS
+                    </a>
+                  </li>
+                )}
                 <li>
                   <a href="mailto:info@estimador.pt" className={`text-stone-600 transition-colors hover:text-ink ${focusStyle}`}>
                     {pt ? 'Contacto' : 'Contact'}

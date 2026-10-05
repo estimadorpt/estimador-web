@@ -8,7 +8,7 @@ import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/mdx-components';
 import { loadEconomyDashboard } from '@/lib/utils/data-loader';
-import { economyPaused } from '@/lib/utils/economy-time';
+import { economyState, type EconomyState } from '@/lib/config/economy-status';
 import { fmtDate } from '@/lib/utils/economy-format';
 import { POPULATION_RELEASE } from '@/lib/config/population';
 
@@ -68,23 +68,27 @@ function getAboutContent(locale: string): { content: string; actualLocale: strin
 
 /**
  * "Estado atual" list embedded in the About MDX (`<EstadoAtual />`). Only the
- * economy line is derived from a loader (`economyPaused`, the same guard the
- * economy page itself uses) so that line cannot drift from what /economia
- * actually shows. Population, football and elections status is stable
+ * economy line is derived (`economyState`: the editorial flag, then the same
+ * staleness guard the economy page itself uses) so that line cannot drift from
+ * what /economia actually shows. Population, football and elections status is stable
  * editorial fact — see CLAUDE.md's "Active Sections" and "Population section" —
  * not something a loader in this file's scope can safely compute.
  */
 function EstadoAtual({
-  economyIsPaused,
+  economyNow,
   economyDateLabel,
   locale,
 }: {
-  economyIsPaused: boolean;
+  economyNow: EconomyState;
   economyDateLabel: string | null;
   locale: string;
 }) {
   const pt = locale !== 'en';
-  const economyStatus = economyIsPaused
+  const economyStatus = economyNow === 'preparing'
+    ? (pt
+        ? 'Em preparação — sem números publicados; as explicações sobre como ler os indicadores estão disponíveis.'
+        : 'In preparation — no figures published; the explanations of how to read the indicators are available.')
+    : economyNow === 'paused'
     ? (pt
         ? `Painel em pausa${economyDateLabel ? ` — última leitura: ${economyDateLabel}` : ''}. As explicações continuam disponíveis.`
         : `Dashboard paused${economyDateLabel ? ` — last reading: ${economyDateLabel}` : ''}. The explanations remain available.`)
@@ -142,12 +146,12 @@ export default async function AboutPage({
   // /economia uses. Everything else is stable editorial fact (see EstadoAtual).
   const economyData = await loadEconomyDashboard();
   const economyDateIso = economyData?.as_of ?? economyData?.vintage_date;
-  const economyIsPaused = economyPaused(economyDateIso);
+  const economyNow = economyState(economyDateIso);
   const economyDateLabel = economyData?.vintage_date ? fmtDate(economyData.vintage_date, locale) : null;
 
   const components = getMDXComponents({
     EstadoAtual: () => (
-      <EstadoAtual economyIsPaused={economyIsPaused} economyDateLabel={economyDateLabel} locale={locale} />
+      <EstadoAtual economyNow={economyNow} economyDateLabel={economyDateLabel} locale={locale} />
     ),
   });
 

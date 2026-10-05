@@ -23,6 +23,8 @@ import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import type { MDXComponents } from 'mdx/types';
+import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
+import { loadEconomyDashboard } from '@/lib/utils/data-loader';
 
 export async function generateMetadata({
   params,
@@ -36,6 +38,8 @@ export async function generateMetadata({
     path: '/economia/metodologia',
     title: t('meta.economicsMethodologyTitle'),
     description: t('meta.economicsMethodologyDescription'),
+    // Out of search while the section is in preparation (economy-status.json).
+    index: ECONOMY_PUBLISHED,
   });
 }
 
@@ -113,6 +117,14 @@ export default async function EconomicsMethodologyPage({
 
   const { content: mdxContent, actualLocale } = getContent(locale);
 
+  // In preparation, the page says so before anything else, dated by the last
+  // run the methodology was tested on (month and year of its vintage).
+  const vintage = ECONOMY_PUBLISHED ? null : (await loadEconomyDashboard())?.vintage_date;
+  const testedUntil = vintage
+    ? new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+        .format(new Date(`${vintage.slice(0, 10)}T00:00:00Z`))
+    : null;
+
   return (
     <div className="min-h-screen bg-paper">
       <Header />
@@ -125,7 +137,14 @@ export default async function EconomicsMethodologyPage({
         title={t('methodologyLink')}
       />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-4 py-8">
+        {!ECONOMY_PUBLISHED && (
+          <p className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-800">
+            {testedUntil
+              ? t('methodologyPreparingNotice', { date: testedUntil })
+              : t('preparingBody')}
+          </p>
+        )}
         {actualLocale !== locale && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-800">

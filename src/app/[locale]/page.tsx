@@ -6,7 +6,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { loadLigaSummary, loadLigaWithDeltas } from "@/lib/utils/football-data-loader";
 import { loadEconomyDashboard, loadPresidentialData, loadForecastData } from "@/lib/utils/data-loader";
-import { economyPaused } from "@/lib/utils/economy-time";
+import { economyState } from "@/lib/config/economy-status";
 import { loadPopulationMeta } from "@/lib/utils/population-data-loader";
 import { getArticlesBySection, getMDXArticlesByLocale } from "@/lib/mdx-articles";
 import { ALL_ELECTIONS } from "@/lib/config/elections";
@@ -67,7 +67,9 @@ export default async function HomePage({
 
   const [ligaSummary, economy, populationMeta] = await Promise.all([loadLigaSummary(), loadEconomyDashboard(), loadPopulationMeta()]);
   const ligaDeltas = ligaSummary ? (await loadLigaWithDeltas()).deltas : {};
-  const economyPausedNow = economyPaused(economy?.as_of ?? economy?.vintage_date);
+  // The editorial flag first (src/lib/config/economy-status.json), then the
+  // staleness guard: fresh data alone never puts a number on the homepage.
+  const economyNow = economyState(economy?.as_of ?? economy?.vintage_date);
 
   const snapshot = config.mode === 'election' && config.election ? await electionSnapshot(config.election) : null;
   const layout = resolveHomepageLayout(config, { electionHasData: id => snapshot?.id === id });
@@ -85,21 +87,23 @@ export default async function HomePage({
       case 'football':
         return <FootballPanel key={section} locale={locale} variant={place === 'support' ? 'support' : 'secondary'} snapshot={ligaSummary} deltas={ligaDeltas} />;
       case 'economy':
-        return <EconomyPanel key={section} locale={locale} economy={economy} paused={economyPausedNow} article={economyArticle} />;
+        return <EconomyPanel key={section} locale={locale} economy={economy} state={economyNow} article={economyArticle} />;
       case 'elections':
         return <ElectionsPanel key={section} locale={locale} variant={place === 'lead' ? 'lead' : 'support'} elections={ALL_ELECTIONS} current={current} />;
     }
   };
+  // The mobile shortcuts follow the page's hierarchy: the club first, and the
+  // economy explainer last while the section is in preparation.
   const quickTasks = locale === 'pt'
     ? [
-        { href: '/economia#compreender', label: 'Inflação' },
         { href: '/#escolher-equipa', label: 'O meu clube' },
         { href: '/eleicoes/arquivo', label: 'Eleições' },
+        { href: '/economia#compreender', label: 'Inflação' },
       ]
     : [
-        { href: '/economia#compreender', label: 'Inflation' },
         { href: '/#escolher-equipa', label: 'My club' },
         { href: '/eleicoes/arquivo', label: 'Elections' },
+        { href: '/economia#compreender', label: 'Inflation' },
       ];
 
   return (

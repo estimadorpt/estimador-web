@@ -45,6 +45,12 @@ export interface HomepageLayout {
   fallback?: 'unknown-election' | 'no-data';
 }
 
+/**
+ * The economy sits in the support row in both modes: while the section is in
+ * preparation (src/lib/config/economy-status.json) its panel is the explainer
+ * entry, labelled as such, and it must not move up to the lead or the rail
+ * before the section launches.
+ */
 export const STANDARD_LAYOUT: HomepageLayout = {
   lead: 'population',
   secondary: 'football',

@@ -4,28 +4,32 @@ import { Action } from '@/components/brand/Action';
 import { HomeEconomyFreshness } from '@/components/economics/HomeEconomyFreshness';
 import { fmtDate, fmtProbPct, fmtSignedPctValue } from '@/lib/utils/economy-format';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
+import type { EconomyState } from '@/lib/config/economy-status';
 import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import { HomePanel, Kicker, Status } from './HomePanel';
 
 /**
- * The economy support panel. With fresh data: one current read-out, its date
- * and the client-side freshness guard. Paused (see economy-time.ts): the
- * section keeps its educational purpose, states the pause honestly and routes
- * to how the indicators are read. Never a loud error, never a stale number.
+ * The economy support panel. Live (published and fresh): one current read-out,
+ * its date and the client-side freshness guard. In preparation (the editorial
+ * flag in economy-status.json is off) or paused (published but stale, see
+ * economy-time.ts): the section keeps its educational purpose, says which of
+ * the two it is and routes to how the indicators are read. Never a loud error,
+ * never a stale number.
  */
-export async function EconomyPanel({ locale, economy, paused, article }: { locale: string; economy: EconomyDashboard | null; paused: boolean; article?: { slug: string; title: string } | null }) {
+export async function EconomyPanel({ locale, economy, state, article }: { locale: string; economy: EconomyDashboard | null; state: EconomyState; article?: { slug: string; title: string } | null }) {
   const t = await getTranslations({ locale, namespace: 'home' });
   const tSections = await getTranslations({ locale, namespace: 'sections' });
-  const tiles = paused ? undefined : economy?.tiles;
+  const tiles = state === 'live' ? economy?.tiles : undefined;
   const pulse = tiles?.pulse?.anchor?.value;
   const recession = tiles?.recession?.probability;
-  const live = !paused && economy && typeof pulse === 'number' && typeof recession === 'number';
+  const live = state === 'live' && economy && typeof pulse === 'number' && typeof recession === 'number';
+  const preparing = state === 'preparing';
   return (
     <HomePanel labelledBy="home-economy-title">
       <div className="min-w-0 p-5 md:p-6">
         <div className="md:grid md:grid-cols-[minmax(0,1fr)_110px] md:items-center md:gap-4">
           <div>
-            <Kicker pill={live ? undefined : tSections('pausedSection')}>{t('economyKicker')}</Kicker>
+            <Kicker pill={live ? undefined : tSections(preparing ? 'preparingSection' : 'pausedSection')}>{t('economyKicker')}</Kicker>
             <h2 id="home-economy-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{live ? t('economyTitleLive') : t('economyTitlePaused')}</h2>
           </div>
           <SectionIllustration scene="economy" className="home-support-scene hidden md:block md:!h-[100px] md:!w-[110px] md:!p-0 md:[&_img]:h-full" />
@@ -40,7 +44,9 @@ export async function EconomyPanel({ locale, economy, paused, article }: { local
           <>
             <p className="mt-2 text-[14px] leading-relaxed text-stone-600">{t('economyPausedText')}</p>
             <div className="mt-3"><Action href="/economia#compreender" locale={locale} variant="secondary" arrow>{t('economyMethodsAction')}</Action></div>
-            {economy?.vintage_date && <Status tone="paused">{t('economyPausedStatus', { date: fmtDate(economy.vintage_date, locale) })}</Status>}
+            {preparing
+              ? <Status tone="paused">{t('economyPreparingStatus')}</Status>
+              : economy?.vintage_date && <Status tone="paused">{t('economyPausedStatus', { date: fmtDate(economy.vintage_date, locale) })}</Status>}
           </>
         )}
         {article && (

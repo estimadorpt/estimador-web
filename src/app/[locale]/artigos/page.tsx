@@ -9,8 +9,10 @@ import { Rss } from 'lucide-react';
 import type { Metadata } from 'next';
 import {
   getArticlesByKind,
+  getMDXArticlesByLocale,
   type ArticleKind,
 } from '@/lib/mdx-articles';
+import { Mosaic } from '@/components/brand/Mosaic';
 import { buildTagIndex } from '@/lib/article-discovery';
 import { ArticleRow } from '@/components/articles/ArticleRow';
 import { ArticleListStructuredData } from '@/components/StructuredData';
@@ -28,6 +30,9 @@ export async function generateMetadata({
     path: '/artigos',
     title: t('meta.articlesTitle'),
     description: t('articles.subtitle'),
+    // An empty index stays reachable by URL but out of search (and out of the
+    // sitemap and the site's navigation) until this locale publishes a piece.
+    index: getMDXArticlesByLocale(locale).length > 0,
   });
 }
 
@@ -68,17 +73,18 @@ export default async function ArticlesPage({
 
   return (
     <div className="min-h-screen bg-paper">
-      <ArticleListStructuredData articles={articles} locale={locale} />
+      {/* No Blog structured data for an empty list. */}
+      {articles.length > 0 && <ArticleListStructuredData articles={articles} locale={locale} />}
       <Header />
 
       <PageHero
         width="4xl"
         compact
         field="mustard"
-        eyebrow={t('articles.title')}
+        eyebrow={t('articles.eyebrow')}
         title={t('articles.title')}
         lede={t('articles.subtitle')}
-        meta={
+        meta={articles.length > 0 ? (
           <a
             href={`/${locale}/feed.xml`}
             className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
@@ -86,23 +92,26 @@ export default async function ArticlesPage({
             <Rss aria-hidden="true" className="w-3.5 h-3.5" />
             {t('articles.feedLink')}
           </a>
-        }
+        ) : undefined}
       />
 
       <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-4 py-10">
 
         {articles.length === 0 ? (
-          <div className="border-l-2 border-stone-300 pl-6 py-6">
-            <p className="text-stone-600">{t('articles.empty')}</p>
-            <p className="mt-4">
-              <Link
-                href="/metodologia"
-                locale={locale}
-                className="inline-flex items-center gap-1.5 font-semibold text-ink underline underline-offset-4 hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-              >
-                {t('articles.emptyNextStep')}
-              </Link>
-            </p>
+          <div className="flex items-center gap-6 py-6">
+            <Mosaic variant="quarters" className="hidden h-20 w-20 shrink-0 sm:block" />
+            <div>
+              <p className="text-stone-600">{t('articles.empty')}</p>
+              <p className="mt-4">
+                <Link
+                  href="/metodologia"
+                  locale={locale}
+                  className="inline-flex items-center gap-1.5 font-semibold text-ink underline underline-offset-4 hover:no-underline"
+                >
+                  {t('articles.emptyNextStep')}
+                </Link>
+              </p>
+            </div>
           </div>
         ) : (
           <>
