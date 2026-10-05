@@ -955,49 +955,64 @@
       "home": "Porto",
       "away": "Benfica",
       "home_goals": 3,
-      "away_goals": 1
+      "away_goals": 1,
+      "matchday": 7
     },
     {
       "home": "Vitoria SC",
       "away": "Moreirense",
       "home_goals": 1,
-      "away_goals": 1
+      "away_goals": 1,
+      "matchday": 7
     },
     {
       "home": "Estrela Amadora",
       "away": "Academico Viseu",
       "home_goals": 0,
-      "away_goals": 2
+      "away_goals": 2,
+      "matchday": 7
     },
     {
       "home": "Santa Clara",
       "away": "SC Braga",
       "home_goals": 0,
-      "away_goals": 0
+      "away_goals": 0,
+      "matchday": 7
     },
     {
       "home": "Alverca",
       "away": "Rio Ave",
       "home_goals": 1,
-      "away_goals": 0
+      "away_goals": 0,
+      "matchday": 7
     },
     {
       "home": "Gil Vicente",
       "away": "Maritimo",
       "home_goals": 1,
-      "away_goals": 1
+      "away_goals": 1,
+      "matchday": 7
     },
     {
       "home": "Nacional",
       "away": "Famalicao",
       "home_goals": 0,
-      "away_goals": 4
+      "away_goals": 4,
+      "matchday": 7
     },
     {
       "home": "Estoril",
       "away": "Casa Pia",
       "home_goals": 1,
-      "away_goals": 2
+      "away_goals": 2,
+      "matchday": 7
+    },
+    {
+      "home": "Sporting CP",
+      "away": "Arouca",
+      "home_goals": 2,
+      "away_goals": 2,
+      "matchday": 7
     }
   ],
   "matches_remaining": [],

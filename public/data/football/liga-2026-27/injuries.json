@@ -1,31 +1,39 @@
 {
   "season": "2026-27",
-  "snapshot_date": "2026-08-10",
+  "snapshot_date": "2026-10-05",
+  "stale": false,
   "source": "transfermarkt",
-  "n_out": 14,
-  "n_injuries": 14,
+  "n_out": 19,
+  "n_injuries": 19,
   "n_suspensions": 0,
   "teams": [
     {
+      "team": "Benfica",
+      "n_out": 2,
+      "value_out_eur": 42000000,
+      "squad_value_eur": 385550000,
+      "share_of_squad": 0.1089
+    },
+    {
       "team": "Porto",
-      "n_out": 3,
-      "value_out_eur": 72000000,
+      "n_out": 5,
+      "value_out_eur": 33500000,
       "squad_value_eur": 467100000,
-      "share_of_squad": 0.1541
+      "share_of_squad": 0.0717
     },
     {
       "team": "SC Braga",
-      "n_out": 3,
-      "value_out_eur": 19000000,
+      "n_out": 2,
+      "value_out_eur": 14000000,
       "squad_value_eur": 155000000,
-      "share_of_squad": 0.1226
+      "share_of_squad": 0.0903
     },
     {
-      "team": "Sporting CP",
-      "n_out": 2,
-      "value_out_eur": 17500000,
-      "squad_value_eur": 446700000,
-      "share_of_squad": 0.0392
+      "team": "Estrela Amadora",
+      "n_out": 1,
+      "value_out_eur": 7000000,
+      "squad_value_eur": 19300000,
+      "share_of_squad": 0.3627
     },
     {
       "team": "Rio Ave",
@@ -35,11 +43,32 @@
       "share_of_squad": 0.1856
     },
     {
+      "team": "Sporting CP",
+      "n_out": 1,
+      "value_out_eur": 6000000,
+      "squad_value_eur": 446700000,
+      "share_of_squad": 0.0134
+    },
+    {
+      "team": "Nacional",
+      "n_out": 3,
+      "value_out_eur": 3000000,
+      "squad_value_eur": 17330000,
+      "share_of_squad": 0.1731
+    },
+    {
       "team": "Santa Clara",
       "n_out": 1,
-      "value_out_eur": 3500000,
+      "value_out_eur": 3000000,
       "squad_value_eur": 28680000,
-      "share_of_squad": 0.122
+      "share_of_squad": 0.1046
+    },
+    {
+      "team": "Casa Pia",
+      "n_out": 1,
+      "value_out_eur": 2500000,
+      "squad_value_eur": 22150000,
+      "share_of_squad": 0.1129
     },
     {
       "team": "Gil Vicente",
@@ -47,16 +76,45 @@
       "value_out_eur": 1500000,
       "squad_value_eur": 28300000,
       "share_of_squad": 0.053
-    },
-    {
-      "team": "Nacional",
-      "n_out": 2,
-      "value_out_eur": 1200000,
-      "squad_value_eur": 17330000,
-      "share_of_squad": 0.0692
     }
   ],
   "players": [
+    {
+      "player": "Georgiy Sudakov",
+      "team": "Benfica",
+      "kind": "injury",
+      "position": "Attacking Midfield",
+      "reason": "unknown injury",
+      "expected_return": null,
+      "market_value_eur": 25000000
+    },
+    {
+      "player": "Jakub Kamiński",
+      "team": "Benfica",
+      "kind": "injury",
+      "position": "Left Winger",
+      "reason": "Muscle injury",
+      "expected_return": null,
+      "market_value_eur": 17000000
+    },
+    {
+      "player": "André Gomes",
+      "team": "Casa Pia",
+      "kind": "injury",
+      "position": "Goalkeeper",
+      "reason": "Muscle injury",
+      "expected_return": null,
+      "market_value_eur": 2500000
+    },
+    {
+      "player": "Jeremy Arévalo",
+      "team": "Estrela Amadora",
+      "kind": "injury",
+      "position": "Centre-Forward",
+      "reason": "Back problems",
+      "expected_return": null,
+      "market_value_eur": 7000000
+    },
     {
       "player": "Mohamed Bamba",
       "team": "Gil Vicente",
@@ -67,40 +125,58 @@
       "market_value_eur": 1500000
     },
     {
-      "player": "Ivanildo Fernandes",
+      "player": "Filipe Soares",
+      "team": "Nacional",
+      "kind": "injury",
+      "position": "Attacking Midfield",
+      "reason": "Muscle injury",
+      "expected_return": "2026-10-21",
+      "market_value_eur": 500000
+    },
+    {
+      "player": "Léo Santos",
       "team": "Nacional",
       "kind": "injury",
       "position": "Centre-Back",
-      "reason": "unknown injury",
-      "expected_return": null,
-      "market_value_eur": 200000
+      "reason": "Torn lateral knee ligament",
+      "expected_return": "2027-09-06",
+      "market_value_eur": 1500000
     },
     {
       "player": "Ulisses",
       "team": "Nacional",
       "kind": "injury",
       "position": "Centre-Back",
-      "reason": "unknown injury",
+      "reason": "Broken ankle",
       "expected_return": null,
       "market_value_eur": 1000000
     },
     {
-      "player": "Oskar Pietuszewski",
+      "player": "Gabriel Mec",
       "team": "Porto",
       "kind": "injury",
-      "position": "Left Winger",
-      "reason": "Muscle injury",
+      "position": "Right Winger",
+      "reason": "Pubic bone bruise",
       "expected_return": null,
-      "market_value_eur": 25000000
+      "market_value_eur": 16000000
     },
     {
-      "player": "Samu Aghehowa",
+      "player": "João Costa",
       "team": "Porto",
       "kind": "injury",
-      "position": "Centre-Forward",
-      "reason": "Cruciate ligament tear",
-      "expected_return": "2026-10-31",
-      "market_value_eur": 45000000
+      "position": "Goalkeeper",
+      "reason": "Meniscus injury",
+      "expected_return": "2027-03-31",
+      "market_value_eur": 500000
+    },
+    {
+      "player": "Martim Fernandes",
+      "team": "Porto",
+      "kind": "injury",
+      "position": "Right-Back",
+      "reason": "unknown injury",
+      "expected_return": null,
+      "market_value_eur": 12000000
     },
     {
       "player": "Vasco Sousa",
@@ -110,6 +186,15 @@
       "reason": "Broken fibula",
       "expected_return": null,
       "market_value_eur": 2000000
+    },
+    {
+      "player": "Zaidu Sanusi",
+      "team": "Porto",
+      "kind": "injury",
+      "position": "Left-Back",
+      "reason": "Adductor injury",
+      "expected_return": null,
+      "market_value_eur": 3000000
     },
     {
       "player": "Brandon Aguilera",
@@ -130,15 +215,6 @@
       "market_value_eur": 5000000
     },
     {
-      "player": "Adrian Barisic",
-      "team": "SC Braga",
-      "kind": "injury",
-      "position": "Centre-Back",
-      "reason": "Adductor injury",
-      "expected_return": null,
-      "market_value_eur": 4000000
-    },
-    {
       "player": "Bright Arrey-Mbi",
       "team": "SC Braga",
       "kind": "injury",
@@ -154,7 +230,7 @@
       "position": "Centre-Back",
       "reason": "Achilles tendon rupture",
       "expected_return": null,
-      "market_value_eur": 6000000
+      "market_value_eur": 5000000
     },
     {
       "player": "MT",
@@ -163,25 +239,16 @@
       "position": "Centre-Back",
       "reason": "Cruciate ligament tear",
       "expected_return": null,
-      "market_value_eur": 3500000
+      "market_value_eur": 3000000
     },
     {
-      "player": "João Simões",
-      "team": "Sporting CP",
-      "kind": "injury",
-      "position": "Central Midfield",
-      "reason": "Metatarsal fracture",
-      "expected_return": "2026-08-31",
-      "market_value_eur": 15000000
-    },
-    {
-      "player": "Salvador Blopa",
+      "player": "Georgios Vagiannidis",
       "team": "Sporting CP",
       "kind": "injury",
       "position": "Right-Back",
-      "reason": "Muscle injury",
-      "expected_return": "2026-08-31",
-      "market_value_eur": 2500000
+      "reason": "unknown injury",
+      "expected_return": null,
+      "market_value_eur": 6000000
     }
   ]
 }
