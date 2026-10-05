@@ -57,7 +57,7 @@ const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number
  * Routes that exist on disk but always carry `index: false` in their metadata:
  * a sitemap entry would contradict the noindex. The brand guide is reference
  * for the site itself (the footer links it, search does not need it); Liga 2
- * waits until the second tier earns a place in the navigation. sitemap.test.ts
+ * waits until the second tier earns a place in the navigation. src/lib/sitemap.test.ts
  * fails when a static page declares `index: false` and is missing here.
  */
 const HIDDEN_ROUTES = new Set([

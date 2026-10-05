@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import sitemap from './sitemap';
+import sitemap from '@/app/sitemap';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { SITE_LOCALES } from '@/lib/metadata';
