@@ -2,13 +2,16 @@ import { MetadataRoute } from 'next'
 import fs from 'node:fs'
 import path from 'node:path'
 import {
+  loadLigaData,
   loadLigaPlayersDetail,
   loadUpcomingFixtures,
 } from '@/lib/utils/football-data-loader'
 import { ligaTeamSlugs } from '@/lib/config/football'
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles'
 import { buildTagIndex } from '@/lib/article-discovery'
-import { SITE_URL, SITE_LOCALES, localizedUrl } from '@/lib/metadata'
+import { SITE_LOCALES, localizedUrl } from '@/lib/metadata'
+import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status'
+import { PARLIAMENTARY_2025, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections'
 import { loadPopulationPlaces } from '@/lib/utils/population-data-loader'
 import { POPULATION_PUBLISHED, POPULATION_ROUTES } from '@/lib/config/population'
 import { regionSlug } from '@/lib/population/places'
@@ -23,7 +26,8 @@ type Frequency = MetadataRoute.Sitemap[number]['changeFrequency']
  * rather than a hand-maintained list that silently falls behind them.
  */
 const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number }> = {
-  '/': { changeFrequency: 'daily', priority: 0.9 },
+  // The locale homepages stand in for the bare root, which only redirects.
+  '/': { changeFrequency: 'daily', priority: 1 },
   '/economia': { changeFrequency: 'daily', priority: 0.9 },
   '/economia/metodologia': { changeFrequency: 'monthly', priority: 0.5 },
   '/desporto/liga': { changeFrequency: 'daily', priority: 0.9 },
@@ -34,9 +38,10 @@ const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number
   '/desporto/liga/dados': { changeFrequency: 'monthly', priority: 0.6 },
   '/desporto/liga/metodologia': { changeFrequency: 'monthly', priority: 0.5 },
   '/desporto/liga/2025-26': { changeFrequency: 'yearly', priority: 0.6 },
-  '/eleicoes/presidenciais': { changeFrequency: 'monthly', priority: 0.7 },
-  '/eleicoes/legislativas': { changeFrequency: 'monthly', priority: 0.7 },
-  '/eleicoes/legislativas/mapa': { changeFrequency: 'monthly', priority: 0.6 },
+  '/eleicoes/presidenciais': { changeFrequency: 'yearly', priority: 0.7 },
+  '/eleicoes/legislativas': { changeFrequency: 'yearly', priority: 0.7 },
+  '/eleicoes/legislativas/mapa': { changeFrequency: 'yearly', priority: 0.6 },
+  '/eleicoes/arquivo': { changeFrequency: 'yearly', priority: 0.6 },
   '/artigos': { changeFrequency: 'weekly', priority: 0.7 },
   '/sobre': { changeFrequency: 'monthly', priority: 0.5 },
   '/metodologia': { changeFrequency: 'monthly', priority: 0.5 },
@@ -49,10 +54,11 @@ const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number
 }
 
 /**
- * Routes that exist on disk but are not published: they carry `index: false`
- * in their metadata, are linked from nowhere, and a sitemap entry would
- * contradict the noindex. The brand guide is reference for the site itself;
- * Liga 2 waits until the second tier earns a place in the navigation.
+ * Routes that exist on disk but always carry `index: false` in their metadata:
+ * a sitemap entry would contradict the noindex. The brand guide is reference
+ * for the site itself (the footer links it, search does not need it); Liga 2
+ * waits until the second tier earns a place in the navigation. sitemap.test.ts
+ * fails when a static page declares `index: false` and is missing here.
  */
 const HIDDEN_ROUTES = new Set([
   '/marca',
@@ -64,6 +70,42 @@ const HIDDEN_ROUTES = new Set([
   '/populacao/consulta',
 ])
 
+/**
+ * The economy is noindexed while its editorial flag is off
+ * (src/lib/config/economy-status.json); setting it restores these entries.
+ */
+const ECONOMY_ROUTES = ['/economia', '/economia/metodologia']
+
+/**
+ * Frozen pages: dated by what they archive, not by the build. The elections
+ * by their (last) election day; the 2025-26 Liga review by its generation.
+ */
+function archiveDates(): Record<string, Date> {
+  const day = (iso: string) => new Date(`${iso.slice(0, 10)}T00:00:00Z`)
+  const dates: Record<string, Date> = {
+    '/eleicoes/presidenciais': day(PRESIDENTIAL_2026_SECOND_ROUND_DATE),
+    '/eleicoes/legislativas': day(PARLIAMENTARY_2025.date),
+    '/eleicoes/legislativas/mapa': day(PARLIAMENTARY_2025.date),
+    '/eleicoes/arquivo': day(PRESIDENTIAL_2026_SECOND_ROUND_DATE),
+  }
+  try {
+    const review = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data/football/liga-2025-26/review.json'), 'utf8'))
+    if (typeof review.generated === 'string') dates['/desporto/liga/2025-26'] = day(review.generated)
+  } catch {
+    // no review file: the route falls back to the build date
+  }
+  return dates
+}
+
+/** Whether a route is published in this locale's sitemap for this build. */
+function listedRoute(route: string, { hasArticles }: { hasArticles: boolean }): boolean {
+  if (HIDDEN_ROUTES.has(route)) return false
+  if (!ECONOMY_PUBLISHED && ECONOMY_ROUTES.includes(route)) return false
+  // An empty index is noindexed (artigos/page.tsx, artigos/tema/page.tsx).
+  if (!hasArticles && (route === '/artigos' || route.startsWith('/artigos/'))) return false
+  return true
+}
+
 /** Every localized route template with no dynamic segment, read from the app directory. */
 function staticRoutes(): string[] {
   const root = path.join(process.cwd(), 'src/app/[locale]')
@@ -72,8 +114,7 @@ function staticRoutes(): string[] {
   function walk(directory: string, route: string) {
     const entries = fs.readdirSync(directory, { withFileTypes: true })
     if (entries.some(entry => entry.isFile() && /^page\.(tsx|ts|jsx|js|mdx)$/.test(entry.name))) {
-      const normalized = route === '' ? '/' : route
-      if (!HIDDEN_ROUTES.has(normalized)) found.push(normalized)
+      found.push(route === '' ? '/' : route)
     }
     for (const entry of entries) {
       // Dynamic segments are expanded from published records further down.
@@ -109,11 +150,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   }
 
-  urls.push({ url: `${SITE_URL}/`, lastModified, changeFrequency: 'daily', priority: 1 })
+  // No entry for the bare root: it answers 301 to /pt/, which is listed below.
+  const archived = archiveDates()
+
+  // Clubs in this season's prediction table only. ligaTeamSlugs also carries
+  // relegated clubs (logos, the 2025-26 archive), whose pages would be empty.
+  const { prediction } = await loadLigaData()
+  const clubSlugs = [...new Set(
+    (prediction?.table ?? []).map(row => ligaTeamSlugs[row.team]).filter((slug): slug is string => Boolean(slug)),
+  )]
 
   for (const locale of SITE_LOCALES) {
+    const hasArticles = getMDXArticlesByLocale(locale).length > 0
     for (const route of staticRoutes()) {
-      add(locale, route, ROUTE_HINTS[route])
+      if (!listedRoute(route, { hasArticles })) continue
+      const hint = ROUTE_HINTS[route]
+      add(locale, route, archived[route] && hint ? { ...hint, lastModified: archived[route] } : hint)
     }
 
     // Articles exist per locale: only list the translations that were published.
@@ -143,7 +195,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
     }
 
-    for (const slug of Object.values(ligaTeamSlugs)) {
+    for (const slug of clubSlugs) {
       add(locale, `/desporto/liga/${slug}`, { changeFrequency: 'daily', priority: 0.7 })
     }
   }

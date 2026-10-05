@@ -20,6 +20,25 @@ const FEED_TITLE: Record<string, string> = {
   en: 'estimador.pt — notes and explainers',
 };
 
+/** The one site suffix every page title carries. */
+export const TITLE_SUFFIX = ' | estimador.pt';
+
+// The variants the catalogue and older pages still type by hand:
+// " - estimador.pt", " | estimador.pt", " | Estimador", " — estimador.pt".
+const TYPED_SUFFIX = /\s*[|·—–-]\s*estimador(?:\.pt)?\s*$/i;
+
+/**
+ * A page title with exactly one " | estimador.pt" at the end. Idempotent, so a
+ * page that still types a suffix of its own gets the same result. A title that
+ * already names the site ("estimador.pt — Dados para compreender Portugal",
+ * "Sobre o estimador.pt") is left as written rather than naming it twice.
+ */
+export function siteTitle(title: string): string {
+  const bare = title.replace(TYPED_SUFFIX, '').trim();
+  if (/estimador\.pt/i.test(bare)) return bare;
+  return `${bare}${TITLE_SUFFIX}`;
+}
+
 export function languageAlternates(pathname: string, availableLocales: readonly string[] = SITE_LOCALES) {
   return Object.fromEntries(availableLocales.map(locale => [locale, localizedUrl(locale, pathname)]));
 }
@@ -89,10 +108,11 @@ interface PageMetadataOptions {
 
 /** Use for each page: Next replaces nested metadata instead of merging it. */
 export function createPageMetadata({
-  locale, path: pathname, title, description, keywords, type = 'website',
+  locale, path: pathname, title: typedTitle, description, keywords, type = 'website',
   publishedTime, modifiedTime, authors, tags, availableLocales = SITE_LOCALES,
   image, index = true,
 }: PageMetadataOptions): Metadata {
+  const title = siteTitle(typedTitle);
   const url = localizedUrl(locale, pathname);
   const socialImage = {
     // A page gets its own card by route, so a section page needs no wiring here
