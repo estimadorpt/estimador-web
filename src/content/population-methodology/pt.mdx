@@ -1,0 +1,81 @@
+# Como foi feita a população sintética
+
+Esta página explica, para quem não é especialista, como foi gerada a População Sintética de Portugal (versão 1.0.0), o que se pode e não se pode fazer com ela, e onde estão os seus limites. A versão técnica completa é a <ModelCardLink>ficha do modelo</ModelCardLink>, em inglês.
+
+## O que é uma população sintética?
+
+É um conjunto de pessoas e agregados gerados por computador, com um registo por pessoa, cujas contagens somadas seguem as tabelas que o INE publicou nos Censos 2021 para cada freguesia. Nenhum registo é uma pessoa real.
+
+<Synthetic />
+
+Para que serve, então? As tabelas publicadas dão, para cada freguesia, quantas pessoas há por idade, por escolaridade ou por tipo de agregado, mas raramente cruzam essas variáveis entre si a uma escala tão pequena. Uma população sintética permite fazer esses cruzamentos, dentro das regras de qualidade que esta página descreve. Pode servir de camada de base para análises demográficas, mas não substitui as estatísticas oficiais.
+
+<Positioning />
+
+## Como foi gerada, em cinco passos
+
+O resultado não é a saída direta de uma rede neuronal. É um processo generativo com restrições, em cinco passos:
+
+1. **Aprender como os atributos se combinam.** Um gerador autorregressivo aprende, a partir da amostra pública dos Censos 2021 (o Ficheiro de Uso Público), como os atributos de uma pessoa e do seu agregado costumam aparecer juntos. É treinado uma vez e depois fica fixo. As idades ano a ano e o tipo de local de trabalho são gerados por ele, não deduzidos depois.
+2. **Ajustar cada freguesia às suas tabelas.** Para cada freguesia, o gerador produz um conjunto de candidatos, que é depois reponderado para bater com as tabelas publicadas pelo INE para essa freguesia (um ajuste de máxima entropia). Antes disso, uma verificação recusa qualquer freguesia cujas tabelas impliquem totais incoerentes entre si.
+3. **Escolher agregados inteiros.** Uma alocação inteira tira dos candidatos o número exato de agregados e de pessoas da freguesia.
+4. **Acrescentar quem vive em alojamentos coletivos.** As pessoas que vivem em lares e noutros alojamentos coletivos são acrescentadas a partir das contagens publicadas pelo INE, como registos parciais. Os códigos finos de profissão são derivados nesta fase.
+5. **Publicar um esquema declarado.** Cada coluna publicada tem um significado e um mapa de etiquetas declarados; tudo o resto é retirado, com a razão registada. A versão não inclui ligações entre cônjuges.
+
+## O que é calibrado e o que é derivado?
+
+Os números que o site mostra usam nove campos. Uns são calibrados diretamente nas tabelas dos Censos; outros são derivados deles (por exemplo, «vive sozinho» deduz-se do tamanho do agregado).
+
+<ProvenanceFields />
+
+Nos microdados descarregáveis, cada coluna traz também a sua origem: gerada pelo modelo, derivada de outra coluna, tornada coerente depois de gerada, ou atribuída a partir do código geográfico. O [dicionário de colunas](/pt/populacao/dados/#dicionario) explica cada uma.
+
+## Quando é que um número aparece?
+
+Todas as 3 092 freguesias são publicadas. Cada uma tem um nível de qualidade, que descreve quão perto a população gerada fica das tabelas do INE e que decide o que a página da freguesia mostra:
+
+<Tiers />
+
+<PublicationRules />
+
+## Uma única execução
+
+<SingleRun />
+
+Por isso, não há intervalos nos números do site, nem ordenações de freguesias, nem comparações do tipo «mais do que» entre resultados. Uma segunda execução será feita depois da publicação, como medição; a partir de duas execuções, a variação entre elas volta a poder ser mostrada. Mesmo então, só lhe chamaremos intervalo de confiança se a sua cobertura for demonstrada.
+
+## Privacidade
+
+Os registos são gerados e não pretendem representar pessoas identificáveis: não têm nomes nem moradas, e as ligações internas aos registos da amostra foram retiradas.
+
+<Novelty />
+
+Os pormenores estão na [página de qualidade](/pt/populacao/qualidade/#privacidade).
+
+## Para que serve, e para que não serve
+
+<Uses />
+
+## Limitações conhecidas
+
+São limitações da versão 1.0.0, declaradas em vez de escondidas:
+
+<Limitations />
+
+## Versões e correções
+
+- Cada versão estável continua disponível e citável. As ligações permanentes do site indicam a versão a que se referem.
+- As correções ficam registadas numa <ErrataLink>lista pública de erratas</ErrataLink>.
+- Uma revisão das fontes do INE leva a uma correção documentada ou a uma nova avaliação.
+- A próxima versão dirá que campos foram atualizados para 2025, quais foram mantidos de 2021 e quais são novos modelos.
+- Os pesos do modelo não são publicados: isso exigiria uma revisão própria de memorização, privacidade e licença.
+
+## Atribuição e citação
+
+A população é publicada com a licença CC BY 4.0. Quem a usar deve incluir esta atribuição:
+
+<Attribution />
+
+Citar como: <CiteAs />
+
+Os ficheiros, o dicionário de colunas, as somas de verificação e o ficheiro de citação estão na [página de dados](/pt/populacao/dados/).

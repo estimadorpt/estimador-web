@@ -1,0 +1,115 @@
+import type { Locale } from '@/lib/population/labels';
+import type { ReleaseColumn } from '@/types/population';
+
+type Text = Record<Locale, string>;
+
+/**
+ * The provenance classes the release's column dictionary uses (the producer's
+ * release spec, §B.0). `G/C` is a generated column made consistent afterwards.
+ */
+export const PROVENANCE_CODES: Array<{ code: string; name: Text; meaning: Text }> = [
+  {
+    code: 'G',
+    name: { pt: 'Gerado', en: 'Generated' },
+    meaning: {
+      pt: 'Produzido pelo modelo. Pode estar ajustado a uma tabela do INE por freguesia ou não; a descrição da coluna diz qual é o caso.',
+      en: 'Produced by the model. It may or may not be fitted to an INE parish table; the column’s description says which.',
+    },
+  },
+  {
+    code: 'D',
+    name: { pt: 'Derivado', en: 'Derived' },
+    meaning: {
+      pt: 'Calculado a partir de outra coluna por uma regra fixa (um agrupamento, uma etiqueta). Tão fiável como a coluna de origem.',
+      en: 'Computed from another column by a fixed rule (a grouping, a label). As reliable as its parent column.',
+    },
+  },
+  {
+    code: 'C',
+    name: { pt: 'Tornado coerente', en: 'Consistency-enforced' },
+    meaning: {
+      pt: 'Recalculado depois de gerado para ser coerente com o resto do registo; por exemplo, o tamanho do agregado é o número das suas pessoas.',
+      en: 'Recomputed after generation to agree with the rest of the record; for example, household size is the number of its persons.',
+    },
+  },
+  {
+    code: 'X',
+    name: { pt: 'Geográfico', en: 'Geographic' },
+    meaning: {
+      pt: 'Atribuído a partir do código da freguesia (CAOP 2021). Um identificador, não um resultado do modelo.',
+      en: 'Assigned from the parish code (CAOP 2021). An identifier, not a model output.',
+    },
+  },
+  {
+    code: 'key',
+    name: { pt: 'Chave', en: 'Key' },
+    meaning: { pt: 'Liga pessoas a agregados.', en: 'Links persons to households.' },
+  },
+  {
+    code: 'flag',
+    name: { pt: 'Indicador', en: 'Flag' },
+    meaning: { pt: 'Um indicador 0/1.', en: 'A 0/1 indicator.' },
+  },
+];
+
+function Table({ columns, locale }: { columns: Record<string, ReleaseColumn>; locale: Locale }) {
+  const pt = locale === 'pt';
+  return (
+    <div className="max-h-[36rem] overflow-auto">
+      <table className="min-w-full border-collapse text-sm">
+        <thead>
+          <tr>
+            {[pt ? 'Coluna' : 'Column', pt ? 'Origem' : 'Provenance', pt ? 'Descrição (em inglês)' : 'Description'].map(header => (
+              <th key={header} scope="col" className="sticky top-0 border-b-2 border-ink bg-cream px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{header}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(columns).map(([name, column]) => (
+            <tr key={name} className="align-top">
+              <th scope="row" className="whitespace-nowrap border-b border-line px-3 py-2 text-left font-mono text-[13px] font-normal text-ink">{name}</th>
+              <td className="whitespace-nowrap border-b border-line px-3 py-2 font-mono text-[13px] text-ink">{column.provenance}</td>
+              <td className="min-w-[18rem] border-b border-line px-3 py-2 leading-relaxed text-stone-700">
+                {column.description}
+                {column.label_map && (
+                  <span className="mt-1 block text-xs text-stone-500">
+                    {pt ? 'Etiquetas: ' : 'Labels: '}<code className="font-mono">label_maps.{column.label_map}</code>
+                  </span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** The release's own column dictionary, persons and households, behind disclosures. */
+export function ColumnDictionary({ dictionary, locale }: {
+  dictionary: { persons: Record<string, ReleaseColumn>; households: Record<string, ReleaseColumn> };
+  locale: Locale;
+}) {
+  const pt = locale === 'pt';
+  const groups = [
+    { key: 'persons', title: pt ? 'Pessoas' : 'Persons', columns: dictionary.persons },
+    { key: 'households', title: pt ? 'Agregados' : 'Households', columns: dictionary.households },
+  ];
+  return (
+    <div className="space-y-4">
+      {groups.map(group => (
+        <details key={group.key} className="group rounded-2xl border border-line bg-cream">
+          <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-4 px-5 py-3 font-semibold text-ink hover:bg-parchment group-open:border-b group-open:border-line">
+            <span>{group.title}</span>
+            <span className="text-sm font-normal text-stone-500">
+              {Object.keys(group.columns).length} {pt ? 'colunas' : 'columns'}
+            </span>
+          </summary>
+          <div className="p-2 md:p-3">
+            <Table columns={group.columns} locale={locale} />
+          </div>
+        </details>
+      ))}
+    </div>
+  );
+}
