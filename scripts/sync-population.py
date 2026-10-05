@@ -202,7 +202,7 @@ def main() -> int:
     print(f"contract v1 valid: {len(responses)} responses, decisions {dict(decisions)}")
 
     # ---- geography: names, municípios, anchor points -----------------------------
-    atlas = json.loads((WEB / "src/lib/atlas/places.json").read_text(encoding="utf-8"))
+    atlas = json.loads((WEB / "scripts/data/caop-2021-places.json").read_text(encoding="utf-8"))
     quality_rows = {}
     with (package / "quality/quality.csv").open(encoding="utf-8") as handle:
         for row in csv.DictReader(handle):

@@ -6,7 +6,7 @@ from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 root=Path(__file__).resolve().parents[1]
 base=root/'public/data/population-geography'
-places=json.loads((root/'src/lib/atlas/places.json').read_text())
+places=json.loads((root/'scripts/data/caop-2021-places.json').read_text())
 names={m['regionId']:m['region'] for m in places['municipalities']}
 features=[]
 for p in sorted((base/'municipalities').glob('*.json')):
