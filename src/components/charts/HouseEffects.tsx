@@ -1,6 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { formatElectionNumber } from "@/lib/election-display";
 import { partyColors } from "@/lib/config/colors";
 
 import type { HouseEffect } from '@/types';
@@ -35,6 +36,8 @@ function getHeatmapColor(value: number): string {
 
 export function HouseEffects({ data }: HouseEffectsProps) {
   const t = useTranslations("forecast");
+  const locale = useLocale();
+  const signed = (value: number, digits: number) => `${value > 0 ? '+' : ''}${formatElectionNumber(value, locale, digits)}`;
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8 text-stone-500">
@@ -71,14 +74,11 @@ export function HouseEffects({ data }: HouseEffectsProps) {
             <thead className="bg-stone-50">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-stone-700 w-40">
-                  Pollster
+                  {t("pollsterHeader")}
                 </th>
                 {parties.map(party => (
-                  <th
-                    key={party}
-                    className="px-3 py-3 text-center text-sm font-semibold w-20"
-                    style={{ color: partyColors[party as keyof typeof partyColors] }}
-                  >
+                  <th key={party} scope="col" className="px-3 py-3 text-center text-sm font-semibold text-ink w-20">
+                    <span className="mr-1 inline-block size-2 rounded-full" aria-hidden="true" style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }} />
                     {party}
                   </th>
                 ))}
@@ -102,17 +102,17 @@ export function HouseEffects({ data }: HouseEffectsProps) {
                           backgroundColor: getHeatmapColor(effect),
                           color: Math.abs(effect) > 0.25 ? "white" : "#434d48"
                         }}
-                        title={`${pollster} → ${party}: ${effect.toFixed(3)} logit`}
+                        title={`${pollster} → ${party}: ${signed(effect, 3)} logit`}
                       >
                         {showValue && (
                           <span>
-                            {effect > 0 ? '+' : ''}{effect.toFixed(2)}
+                            {signed(effect, 2)}
                           </span>
                         )}
                         
                         {/* Tooltip */}
                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-stone-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                          {pollster} → {party}: {effect.toFixed(3)} logit
+                          {pollster} → {party}: {signed(effect, 3)} logit
                         </div>
                       </td>
                     );

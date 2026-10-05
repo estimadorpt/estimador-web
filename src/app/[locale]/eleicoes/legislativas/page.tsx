@@ -1,12 +1,10 @@
 import { createPageMetadata } from '@/lib/metadata';
-import { 
-  calculateBlocMajorityProbability, 
-  calculatePartyMostSeatsProbability,
-  formatProbabilityPercent 
-} from "@/lib/utils/probability-calculator";
+import { formatProbabilityPercent } from "@/lib/utils/probability-calculator";
 import { leftBlocParties, rightBlocParties, majorityThreshold } from "@/lib/config/blocs";
-import { partyColors, partyNames } from "@/lib/config/colors";
-import { loadForecastData } from "@/lib/utils/data-loader";
+import { partyColors } from "@/lib/config/colors";
+import { OFFICIAL_RESULTS, PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from "@/lib/config/elections";
+import { loadParliamentaryArchive } from "@/lib/utils/data-loader";
+import { formatElectionLongDate, formatElectionNumber, formatElectionPercent } from "@/lib/election-display";
 import { Calendar, BarChart3, TrendingUp, Users, Map, Vote } from "lucide-react";
 import { PollingChart } from "@/components/charts/PollingChart";
 import { SeatChart } from "@/components/charts/SeatChart";
@@ -21,57 +19,80 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import type { TrendData } from '@/types';
-import { ElectionAwareContent } from '@/components/ElectionAwareContent';
 import { ElectionSummaryStats } from '@/components/ElectionSummaryStats';
 
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: Promise<{ locale: string }> 
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  
+
   return createPageMetadata({
     locale,
     path: `/eleicoes/legislativas`,
-    title: t('meta.forecastTitle'),
+    title: t('meta.parliamentaryTitle'),
     description: t('sections.parliamentary2025Description'),
   });
 }
 
-export default async function ForecastPage({
+const linkClass = 'text-ink underline underline-offset-4 hover:text-ink-muted';
+
+export default async function ParliamentaryArchivePage({
   params
 }: {
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  const { seatData, nationalTrends, districtForecast, contestedSeats, houseEffects } = await loadForecastData();
-  
-  // Calculate probabilities
-  const probLeftMajority = calculateBlocMajorityProbability(seatData, leftBlocParties, majorityThreshold);
-  const probRightMajority = calculateBlocMajorityProbability(seatData, rightBlocParties, majorityThreshold);
-  const probAdMostSeats = calculatePartyMostSeatsProbability(seatData, 'AD', ['PS', 'CH']);
-  const probPsMostSeats = calculatePartyMostSeatsProbability(seatData, 'PS', ['AD', 'CH']);
-  
-  // Get latest polling data
-  const latest = nationalTrends
-    .filter(d => d.metric === 'vote_share_mean')
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .reduce<Record<string, TrendData>>((acc, d) => {
-      if (!acc[d.party]) acc[d.party] = d;
+  const archive = await loadParliamentaryArchive();
+  const { probabilities, blocs, seats, trends, trendDates, districtForecast, contestedSeats, houseEffects } = archive;
+
+  const forecastDate = formatElectionLongDate(PARLIAMENTARY_2025_FORECAST_CUTOFF, locale);
+  const electionDate = formatElectionLongDate(PARLIAMENTARY_2025.date, locale);
+  const pct = (v: number) => formatElectionPercent(v, locale);
+
+  // Election-day projection per party: mean and the 94% HDI band, read from
+  // the last date of the trend file (the election day itself).
+  const latestDate = trends.reduce<string | null>((max, d) => (!max || d.date > max ? d.date : max), null);
+  const projection = trends
+    .filter(d => d.date === latestDate)
+    .reduce<Record<string, { mean?: number; low?: number; high?: number }>>((acc, d: TrendData) => {
+      const key = d.metric.replace('vote_share_', '') as 'mean' | 'low' | 'high';
+      (acc[d.party] ??= {})[key] = d.value;
       return acc;
     }, {});
+  const projectionText = (party: string) => {
+    const p = projection[party];
+    if (!p || p.mean == null) return '—';
+    return p.low != null && p.high != null ? `${pct(p.mean)} (${pct(p.low)}–${pct(p.high)})` : pct(p.mean);
+  };
+  const officialResults = OFFICIAL_RESULTS['parliamentary-2025'][0];
 
-  const parties = Object.values(latest).sort((a, b) => b.value - a.value);
-  const lastUpdate = parties[0]
-    ? new Date(parties[0].date).toLocaleDateString(locale === 'pt' ? 'pt-PT' : 'en-GB', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
-    : null;
+  const blocCard = (title: string, parties: string[], majority: number) => (
+    <div className="bg-cream border border-stone-200 rounded-2xl p-6">
+      <h3 className="text-lg text-stone-900 mb-1">{title} <span className="text-sm font-normal text-stone-500">({parties.join(' + ')})</span></h3>
+      <p className="text-xs text-stone-500 mb-4">{t('forecast.blocProjectionCaption', { election: electionDate, date: forecastDate })}</p>
+      <div className="space-y-3">
+        {parties.map(party => (
+          <div key={party} className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded" style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }} />
+              <span className="text-sm font-medium text-stone-900">{t(`parties.${party}`)}</span>
+            </div>
+            <span className="text-sm font-bold text-stone-900 tabular-nums">{projectionText(party)}</span>
+          </div>
+        ))}
+        <div className="border-t border-line pt-3 mt-3">
+          <div className="flex items-center justify-between font-semibold">
+            <span className="text-sm text-stone-900">{t('forecast.majorityChance')}</span>
+            <span className="text-lg text-stone-900 tabular-nums">{formatProbabilityPercent(majority)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="election-page min-h-screen bg-paper">
@@ -79,35 +100,46 @@ export default async function ForecastPage({
 
       <main id="main-content" tabIndex={-1}>
       <PageHero
+        compact
         illustration="elections"
         icon={<Vote aria-hidden="true" className="w-4 h-4" />}
-        eyebrow={locale === "pt" ? "Eleições · Arquivo 2025" : "Elections · 2025 archive"}
-        lede={locale === "pt" ? "Previsões preservadas com a informação disponível à data. Não são resultados eleitorais." : "Forecasts preserved with the information available at the time. These are not election results."}
+        eyebrow={t('forecast.archiveEyebrow')}
+        lede={t('forecast.archiveLede')}
         title={t('forecast.subtitle')}
         meta={
-          <span className="inline-flex items-center gap-1">
-            <Calendar aria-hidden="true" className="w-3 h-3" />
-            {lastUpdate ? `${t('common.updated')} ${lastUpdate}` : t('common.noData')}
-          </span>
+          <>
+            <span className="inline-flex items-center gap-1">
+              <Calendar aria-hidden="true" className="w-3 h-3" />
+              {t('forecast.forecastDateLine', { forecast: forecastDate, election: electionDate })}
+            </span>
+            <a href={officialResults.href} className={linkClass} rel="noopener noreferrer">{t('forecast.officialResults')} ↗</a>
+          </>
         }
       />
 
-      <nav aria-label={locale === 'pt' ? 'Neste arquivo' : 'In this archive'} className="border-b border-line bg-paper">
-        <div className="mx-auto flex max-w-7xl flex-wrap gap-x-5 gap-y-2 px-4 py-3 text-sm text-ink-muted">
-          <a href="#overview" className="hover:text-ink">{locale === 'pt' ? 'O que a previsão dizia' : 'What the forecast said'}</a>
-          <a href="#polling" className="hover:text-ink">{locale === 'pt' ? 'Onde havia incerteza' : 'Where uncertainty was'}</a>
-          <a href="#evidence" className="hover:text-ink">{locale === 'pt' ? 'Dados e método' : 'Data and method'}</a>
+      <nav aria-label={t('presidential.inThisArchive')} className="border-b border-line bg-paper">
+        <div className="mx-auto flex max-w-7xl flex-wrap gap-x-5 gap-y-2 px-4 py-3 text-sm">
+          <a href="#overview" className={linkClass}>{t('presidential.navForecast')}</a>
+          <a href="#polling" className={linkClass}>{t('presidential.navUncertainty')}</a>
+          <a href="#evidence" className={linkClass}>{t('presidential.navEvidence')}</a>
         </div>
       </nav>
 
-      {/* Summary Stats */}
+      {!archive.available ? (
+        <section id="overview" className="scroll-mt-24">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <p className="max-w-2xl text-stone-600">{t('forecast.unavailable')}</p>
+          </div>
+        </section>
+      ) : (
+      <>
       <section id="overview" className="scroll-mt-24 border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <ElectionSummaryStats
-            probAdMostSeats={probAdMostSeats}
-            probPsMostSeats={probPsMostSeats}
-            probRightMajority={probRightMajority}
-            probLeftMajority={probLeftMajority}
+            probAdMostSeats={probabilities.adMostSeats}
+            probPsMostSeats={probabilities.psMostSeats}
+            probRightMajority={probabilities.rightMajority}
+            probLeftMajority={probabilities.leftMajority}
             rightCoalitionMembers={rightBlocParties.join(' + ')}
             leftCoalitionMembers={leftBlocParties.join(' + ')}
             translations={{
@@ -127,219 +159,120 @@ export default async function ForecastPage({
         </div>
       </section>
 
-      {/* Main Charts Grid */}
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4 space-y-8">
-          
-          {/* Election-Aware Polling Trends */}
-          <div id="polling" className="scroll-mt-24">
-          <ElectionAwareContent
-            fallback={
-              <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <TrendingUp className="w-5 h-5 text-stone-400" />
-                  <h2 className="text-2xl text-stone-900">{t('forecast.pollingTrends')}</h2>
-                </div>
-                <PollingChart data={nationalTrends} voteShareLabel={t('forecast.voteShareLabel')} />
-                <p className="text-sm text-stone-600 mt-4">
-                  {t('forecast.pollingTrendsDescription', { count: nationalTrends.length })}
-                </p>
-              </div>
-            }
-          >
-            <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <TrendingUp className="w-5 h-5 text-stone-400" />
-                <h2 className="text-2xl text-stone-900">{t('forecast.pollingTrends')}</h2>
-              </div>
-              <PollingChart data={nationalTrends} voteShareLabel={t('forecast.voteShareLabel')} />
-              <p className="text-sm text-stone-600 mt-4">
-                {t('forecast.pollingTrendsDescription', { count: nationalTrends.length })}
-              </p>
+
+          <div id="polling" className="scroll-mt-24 bg-cream border border-stone-200 rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <TrendingUp aria-hidden="true" className="w-5 h-5 text-stone-500" />
+              <h2 className="text-2xl text-stone-900">{t('forecast.pollingTrends')}</h2>
             </div>
-          </ElectionAwareContent>
+            <PollingChart data={trends} voteShareLabel={t('forecast.voteShareLabel')} />
+            <p className="text-sm text-stone-600 mt-4">
+              {t('forecast.pollingTrendsDescription', { count: formatElectionNumber(trendDates, locale) })}
+            </p>
           </div>
 
-          {/* Coalition Outcomes */}
           <div className="bg-cream border border-stone-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
-              <BarChart3 className="w-5 h-5 text-stone-400" />
+              <BarChart3 aria-hidden="true" className="w-5 h-5 text-stone-500" />
               <h2 className="text-2xl text-stone-900">{t('forecast.coalitionSeats')}</h2>
             </div>
             <CoalitionDotPlot
-              data={seatData}
+              simulations={blocs}
               leftCoalitionLabel={t('forecast.leftCoalition')}
               rightCoalitionLabel={t('forecast.rightCoalition')}
               projectedSeatsLabel={t('forecast.projectedSeats')}
               majorityLabel={t('forecast.majorityThresholdLabel', { seats: majorityThreshold, total: 230 })}
-              showingOutcomesLabel={t('forecast.showingOutcomes', { count: seatData.length })}
+              showingOutcomesLabel={t.raw('forecast.drawnSimulations') as string}
             />
-            <p className="text-sm text-stone-600 mt-4">
-              {t('forecast.coalitionDescription')}
-            </p>
+            <p className="text-sm text-stone-600 mt-4">{t('forecast.coalitionDescription')}</p>
             <p className="text-xs text-stone-500 mt-2">
               {t('forecast.rightCoalition')} = {rightBlocParties.join(' + ')} · {t('forecast.leftCoalition')} = {leftBlocParties.join(' + ')}. {t('forecast.coalitionArithmeticNote')}
             </p>
           </div>
 
-          {/* Seat Projections */}
           <div className="bg-cream border border-stone-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
-              <Users className="w-5 h-5 text-stone-400" />
+              <Users aria-hidden="true" className="w-5 h-5 text-stone-500" />
               <h2 className="text-2xl text-stone-900">{t('forecast.individualParties')}</h2>
             </div>
-            <SeatChart data={seatData.flatMap((simulation, index) => 
-              Object.entries(simulation)
-                .filter(([party, seats]) => partyColors.hasOwnProperty(party))
-                .map(([party, seats]) => ({
-                  party,
-                  seats: seats || 0
-                }))
-            )} />
+            <SeatChart stats={seats} />
             <p className="text-sm text-stone-600 mt-4">
-              {t('forecast.simulationDescription', { count: seatData.length.toLocaleString() })}
+              {t('forecast.simulationDescription', { count: formatElectionNumber(archive.simulations, locale) })}
             </p>
           </div>
 
-          {/* District Analysis */}
           <div id="district-analysis" className="scroll-mt-24 bg-cream border border-stone-200 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-3">
-                <Map className="w-5 h-5 text-stone-400" />
+                <Map aria-hidden="true" className="w-5 h-5 text-stone-500" />
                 <h2 className="text-2xl text-stone-900">{t('forecast.districtAnalysis')}</h2>
               </div>
-              <Link
-                href="/eleicoes/legislativas/mapa"
-                locale={locale}
-                className="text-sm text-ink hover:text-ink-muted font-medium flex items-center gap-1"
-              >
+              <Link href="/eleicoes/legislativas/mapa" locale={locale} className={`text-sm font-medium ${linkClass}`}>
                 {t('map.title')} →
               </Link>
             </div>
             <DistrictSummary districtData={districtForecast} contestedData={contestedSeats} />
           </div>
 
-          {/* Coalition Analysis */}
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-              <h3 className="text-lg text-stone-900 mb-4">{t('forecast.leftCoalition')} <span className="text-sm font-normal text-stone-400">({leftBlocParties.join(' + ')})</span></h3>
-              <div className="space-y-3">
-                {leftBlocParties.map(party => {
-                  const partyData = parties.find(p => p.party === party);
-                  return (
-                    <div key={party} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-3 h-3 rounded"
-                          style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }}
-                        />
-                        <span className="text-sm font-medium text-stone-900">
-                          {t(`parties.${party}`)}
-                        </span>
-                      </div>
-                      <span className="text-sm font-bold text-stone-900">
-                        {partyData ? `${(partyData.value * 100).toFixed(1)}%` : '—'}
-                      </span>
-                    </div>
-                  );
-                })}
-                <div className="border-t pt-3 mt-3">
-                  <div className="flex items-center justify-between font-semibold">
-                    <span className="text-sm text-stone-900">{t('forecast.majorityChance')}</span>
-                    <span className="text-lg text-stone-900">
-                      {formatProbabilityPercent(probLeftMajority)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-              <h3 className="text-lg text-stone-900 mb-4">{t('forecast.rightCoalition')} <span className="text-sm font-normal text-stone-400">({rightBlocParties.join(' + ')})</span></h3>
-              <div className="space-y-3">
-                {rightBlocParties.map(party => {
-                  const partyData = parties.find(p => p.party === party);
-                  return (
-                    <div key={party} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-3 h-3 rounded"
-                          style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }}
-                        />
-                        <span className="text-sm font-medium text-stone-900">
-                          {t(`parties.${party}`)}
-                        </span>
-                      </div>
-                      <span className="text-sm font-bold text-stone-900">
-                        {partyData ? `${(partyData.value * 100).toFixed(1)}%` : '—'}
-                      </span>
-                    </div>
-                  );
-                })}
-                <div className="border-t pt-3 mt-3">
-                  <div className="flex items-center justify-between font-semibold">
-                    <span className="text-sm text-stone-900">{t('forecast.majorityChance')}</span>
-                    <span className="text-lg text-stone-900">
-                      {formatProbabilityPercent(probRightMajority)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {blocCard(t('forecast.leftCoalition'), leftBlocParties, probabilities.leftMajority)}
+            {blocCard(t('forecast.rightCoalition'), rightBlocParties, probabilities.rightMajority)}
           </div>
 
-          {/* Polling Analysis — a specialist method/evidence view, not a
+          {/* Polling analysis — a specialist method/evidence view, not a
               main-path answer, so it sits behind a disclosure. */}
           <details className="group bg-cream border border-stone-200 rounded-2xl p-6">
-            <summary className="flex cursor-pointer list-none items-center gap-3">
-              <Users className="w-5 h-5 text-stone-400" />
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3">
+              <Users aria-hidden="true" className="w-5 h-5 text-stone-500" />
               <h2 className="text-2xl text-stone-900">{t('forecast.pollingHouseEffects')}</h2>
               <span className="ml-auto text-xs font-bold uppercase tracking-wider text-stone-500 group-open:hidden">
-                {locale === 'pt' ? 'Mostrar' : 'Show'}
+                {t('forecast.show')}
               </span>
             </summary>
             <div className="mt-6">
               <HouseEffects data={houseEffects} />
             </div>
           </details>
+        </div>
+      </section>
+      </>
+      )}
 
-          {/* Model Details */}
+      <section className="pb-8">
+        <div className="max-w-7xl mx-auto px-4 space-y-8">
           <div id="evidence" className="scroll-mt-24 bg-paper border border-line rounded-2xl p-6">
-            <h3 className="text-lg text-stone-900 mb-4">{t('forecast.aboutModel')}</h3>
+            <h2 className="text-lg text-stone-900 mb-4">{t('forecast.aboutModel')}</h2>
             <div className="grid md:grid-cols-3 gap-6 text-sm text-stone-600">
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="w-4 h-4" />
-                  <span className="font-medium">{t('forecast.dataSources')}</span>
-                </div>
-                <p>
-                  {t('forecast.dataSourcesDescription')}
-                </p>
+                <h3 className="flex items-center gap-2 mb-2 font-medium">
+                  <Users aria-hidden="true" className="w-4 h-4" />
+                  {t('forecast.dataSources')}
+                </h3>
+                <p>{t('forecast.dataSourcesDescription')}</p>
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <BarChart3 className="w-4 h-4" />
-                  <span className="font-medium">{t('forecast.methodology')}</span>
-                </div>
-                <p>
-                  {t('forecast.methodologyDescription')}
-                </p>
+                <h3 className="flex items-center gap-2 mb-2 font-medium">
+                  <BarChart3 aria-hidden="true" className="w-4 h-4" />
+                  {t('forecast.methodology')}
+                </h3>
+                <p>{t('forecast.methodologyDescription')}</p>
+                <Link href="/metodologia#eleicoes" locale={locale} className={`mt-2 inline-block ${linkClass}`}>{t('common.methodology')} →</Link>
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="font-medium">{t('forecast.updates')}</span>
-                </div>
-                <p>
-                  {t('forecast.updatesDescription')}
-                </p>
+                <h3 className="flex items-center gap-2 mb-2 font-medium">
+                  <TrendingUp aria-hidden="true" className="w-4 h-4" />
+                  {t('forecast.updates')}
+                </h3>
+                <p>{t('forecast.updatesDescription', { date: forecastDate })}</p>
+                <a href={officialResults.href} className={`mt-2 inline-block ${linkClass}`} rel="noopener noreferrer">{t('forecast.officialResults')} ↗</a>
               </div>
             </div>
           </div>
 
           {/* Written analysis, last in the stack: a hairline rule rather than
-              another card, since this page's cards are the 2025 archive's own
-              older styling and the notes are not part of that archive. */}
+              another card, since the notes are not part of the archive. */}
           <SectionNotes
             section="elections"
             locale={locale}

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
 import { ChartTable } from '@/components/viz/ChartTable';
+import { FURNITURE } from '@/components/viz/theme';
 import { PresidentialPollsData } from '@/types';
-import { credibleIntervalLabel, formatElectionDate, formatElectionPercent } from '@/lib/election-display';
+import { credibleIntervalLabel, formatElectionDate, formatElectionNumber, formatElectionPercent } from '@/lib/election-display';
 
 /** Structural shape shared by presidential_trends.json and second_round_trends.json,
  * so this chart can render either without a second, near-duplicate component. */
@@ -16,10 +16,13 @@ interface PresidentialTrendChartProps {
   trends: TrendsLike;
   polls?: PresidentialPollsData;
   electionDate?: string;
-  cutoffDate?: string;
+  /** The forecast's date: later dates in the file are projections and are not drawn. */
+  cutoffDate?: string | null;
   height?: number;
   showPolls?: boolean;
   maxCandidates?: number;
+  /** Series that are not candidates and are never offered in the chooser. */
+  exclude?: string[];
   /** Query-string key used to encode the selected candidate, so the same
    * page can host two focused charts (e.g. first and second round) without
    * their selections colliding in the URL. */
@@ -29,26 +32,36 @@ type Point = { x: number; y: number };
 const linePath = (points: Point[]) => points.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
 const areaPath = (upper: Point[], lower: Point[]) => `${linePath(upper)} ${[...lower].reverse().map(point => `L ${point.x} ${point.y}`).join(' ')} Z`;
 
-export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400, showPolls = true, maxCandidates = 5, candidateParam = 'candidate' }: PresidentialTrendChartProps) {
+/**
+ * Estimated support over time for one chosen candidate, with its 50% and 90%
+ * bands, the others as faint lines and, in the first round, the polls. The
+ * SVG is drawn at the container's own pixel width, so its 11–12px labels are
+ * never scaled down on a phone.
+ */
+export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400, showPolls = true, maxCandidates = 5, exclude = ['Others'], candidateParam = 'candidate' }: PresidentialTrendChartProps) {
   const locale = useLocale();
   const pt = locale !== 'en';
-  const router = useRouter();
-  const pathname = usePathname();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(820);
+  const [hover, setHover] = useState<number | null>(null);
   const dates = useMemo(() => {
-    const firstAfterCutoff = cutoffDate ? trends.dates.findIndex(date => new Date(date) > new Date(cutoffDate)) : -1;
+    const firstAfterCutoff = cutoffDate ? trends.dates.findIndex(date => date.slice(0, 10) > cutoffDate.slice(0, 10)) : -1;
     return trends.dates.slice(0, firstAfterCutoff === -1 ? trends.dates.length : firstAfterCutoff);
   }, [trends.dates, cutoffDate]);
   const candidates = useMemo(() => Object.entries(trends.candidates)
-    .filter(([name]) => name !== 'Others')
+    .filter(([name]) => !exclude.includes(name))
     .sort((a, b) => b[1].mean[dates.length - 1] - a[1].mean[dates.length - 1])
-    .slice(0, maxCandidates), [trends.candidates, dates.length, maxCandidates]);
+    .slice(0, maxCandidates), [trends.candidates, dates.length, maxCandidates, exclude]);
   // Read the candidate from the URL after mount: useSearchParams would force a Suspense boundary in the static export.
   const [chosen, setChosen] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const update = () => setIsMobile(window.innerWidth < 640);
-    update(); window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    const el = containerRef.current;
+    if (!el) return;
+    const measure = () => setWidth(Math.max(280, Math.round(el.clientWidth)));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
   // Keep the local selection in sync with the URL (initial load and Back/Forward navigation).
   useEffect(() => {
@@ -60,24 +73,53 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
   const selectedName = candidates.some(([name]) => name === chosen) ? chosen! : candidates[0]?.[0];
   const selectCandidate = (name: string) => {
     setChosen(name);
-    const params = new URLSearchParams(window.location.search);
-    params.set(candidateParam, name);
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    const url = new URL(window.location.href);
+    url.searchParams.set(candidateParam, name);
+    window.history.pushState(null, '', url);
   };
   const selected = selectedName ? trends.candidates[selectedName] : undefined;
+
+  const fmt = (v: number) => formatElectionPercent(v, locale);
+  const visiblePolls = useMemo(() => {
+    if (!showPolls || dates.length === 0) return [];
+    const first = dates[0];
+    const last = dates[dates.length - 1];
+    return (polls?.polls ?? []).filter(poll => poll.date >= first && poll.date <= last).sort((a, b) => (a.date < b.date ? 1 : -1));
+  }, [polls, showPolls, dates]);
+
   if (!selected || dates.length === 0) return null;
 
-  const width = isMobile ? 430 : 820; const margin = isMobile ? { top: 24, right: 14, bottom: 48, left: 46 } : { top: 28, right: 24, bottom: 54, left: 56 };
+  const phone = width < 640;
+  const margin = phone ? { top: 20, right: 12, bottom: 44, left: 44 } : { top: 24, right: 24, bottom: 50, left: 56 };
   const innerWidth = width - margin.left - margin.right; const innerHeight = height - margin.top - margin.bottom;
-  const parsedDates = dates.map(date => new Date(date)); const minDate = parsedDates[0].getTime(); const maxDate = parsedDates[parsedDates.length - 1].getTime();
+  const parsedDates = dates.map(date => new Date(`${date.slice(0, 10)}T12:00:00Z`)); const minDate = parsedDates[0].getTime(); const maxDate = parsedDates[parsedDates.length - 1].getTime();
   const yMax = Math.ceil(Math.max(...candidates.flatMap(([, candidate]) => candidate.ci_95.slice(0, dates.length)), .1) * 20) / 20 + .05;
   const x = (date: Date) => margin.left + ((date.getTime() - minDate) / Math.max(1, maxDate - minDate)) * innerWidth;
   const y = (value: number) => margin.top + (1 - value / yMax) * innerHeight;
   const points = (values: number[]) => parsedDates.map((date, index) => ({ x: x(date), y: y(values[index]) }));
   const latest = dates.length - 1;
-  const selectedPolls = showPolls ? (polls?.polls ?? []).filter(poll => { const date = new Date(poll.date).getTime(); return date >= minDate && date <= maxDate && typeof poll[selectedName] === 'number'; }) : [];
-  const rows = [...dates.keys()].reverse().map(index => [formatElectionDate(dates[index], locale), formatElectionPercent(selected.mean[index], locale), `${formatElectionPercent(selected.ci_25[index], locale)}–${formatElectionPercent(selected.ci_75[index], locale)}`, `${formatElectionPercent(selected.ci_05[index], locale)}–${formatElectionPercent(selected.ci_95[index], locale)}`]);
-  const tickDates = isMobile ? [parsedDates[0], parsedDates[latest]] : [parsedDates[0], parsedDates[Math.floor(latest / 2)], parsedDates[latest]];
+  const selectedPolls = visiblePolls.filter(poll => typeof poll[selectedName] === 'number');
+  const tickDates = phone ? [parsedDates[0], parsedDates[latest]] : [parsedDates[0], parsedDates[Math.floor(latest / 2)], parsedDates[latest]];
+  const band50 = credibleIntervalLabel(.25, .75, locale);
+  const band90 = credibleIntervalLabel(.05, .95, locale);
+
+  // Table twin: every candidate the chooser offers, every date drawn, with
+  // the mean and both bands' quantiles in their own columns.
+  const rows = [...dates.keys()].reverse().flatMap(index => candidates.map(([name, c]) => [
+    formatElectionDate(dates[index], locale), name, fmt(c.mean[index]), fmt(c.ci_25[index]), fmt(c.ci_75[index]), fmt(c.ci_05[index]), fmt(c.ci_95[index]),
+  ]));
+  const pollColumns = candidates.map(([name]) => name);
+
+  const onPointer = (event: React.PointerEvent<SVGSVGElement>) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    const px = event.clientX - box.left;
+    const t = minDate + ((px - margin.left) / Math.max(1, innerWidth)) * (maxDate - minDate);
+    let best = 0;
+    for (let i = 1; i < parsedDates.length; i++) if (Math.abs(parsedDates[i].getTime() - t) < Math.abs(parsedDates[best].getTime() - t)) best = i;
+    setHover(best);
+  };
+  const tipIndex = hover;
+  const tipX = tipIndex != null ? x(parsedDates[tipIndex]) : 0;
 
   return <div className="w-full">
     <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label={pt ? 'Escolher candidato' : 'Choose candidate'}>
@@ -85,16 +127,32 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
     </div>
     <div className="mb-4 border-l-2 pl-4" style={{ borderColor: selected.color }}>
       <h3 className="text-lg font-semibold text-ink">{selectedName}</h3>
-      <p className="mt-1 text-sm text-ink-muted">{pt ? 'Última estimativa' : 'Latest estimate'}: <strong className="text-ink tabular-nums">{formatElectionPercent(selected.mean[latest], locale)}</strong>{' · '}{credibleIntervalLabel(.25, .75, locale)}: {formatElectionPercent(selected.ci_25[latest], locale)}–{formatElectionPercent(selected.ci_75[latest], locale)}{' · '}{credibleIntervalLabel(.05, .95, locale)}: {formatElectionPercent(selected.ci_05[latest], locale)}–{formatElectionPercent(selected.ci_95[latest], locale)}</p>
+      <p className="mt-1 text-sm text-ink-muted">{pt ? `Estimativa a ${formatElectionDate(dates[latest], locale)}` : `Estimate on ${formatElectionDate(dates[latest], locale)}`}: <strong className="text-ink tabular-nums">{fmt(selected.mean[latest])}</strong>{' · '}{band50}: {fmt(selected.ci_25[latest])}–{fmt(selected.ci_75[latest])}{' · '}{band90}: {fmt(selected.ci_05[latest])}–{fmt(selected.ci_95[latest])}</p>
     </div>
-    <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label={`${selectedName}: ${pt ? 'apoio estimado ao longo do tempo' : 'estimated support over time'}`}>
-      {Array.from({ length: Math.floor(yMax / .1) + 1 }, (_, index) => index * .1).map(tick => <g key={tick}><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} stroke="#dadccf" /><text x={margin.left - 8} y={y(tick)} textAnchor="end" dominantBaseline="middle" className="text-[11px] fill-stone-500">{formatElectionPercent(tick, locale, 0)}</text></g>)}
-      {tickDates.map((date, index) => <g key={date.toISOString()}><line x1={x(date)} x2={x(date)} y1={height - margin.bottom} y2={height - margin.bottom + 5} stroke="#7f9284" /><text x={x(date)} y={height - margin.bottom + 22} textAnchor={index === 0 ? 'start' : index === tickDates.length - 1 ? 'end' : 'middle'} className="text-xs fill-stone-500">{formatElectionDate(date, locale)}</text></g>)}
-      {candidates.filter(([name]) => name !== selectedName).map(([name, candidate]) => <path key={name} d={linePath(points(candidate.mean))} fill="none" stroke={candidate.color} strokeWidth="1.5" opacity=".32" strokeLinecap="round"><title>{name}</title></path>)}
-      <path d={areaPath(points(selected.ci_95), points(selected.ci_05))} fill={selected.color} opacity=".12" /><path d={areaPath(points(selected.ci_75), points(selected.ci_25))} fill={selected.color} opacity=".28" /><path d={linePath(points(selected.mean))} fill="none" stroke={selected.color} strokeWidth="3" strokeLinecap="round" />
-      {selectedPolls.map((poll, index) => <circle key={`${poll.date}-${index}`} cx={x(new Date(poll.date))} cy={y(poll[selectedName] as number)} r="4" fill={selected.color} opacity=".75" stroke="#fcfbf5" strokeWidth="1.5"><title>{`${poll.pollster}: ${formatElectionPercent(poll[selectedName] as number, locale)} · ${formatElectionDate(poll.date, locale)}`}</title></circle>)}
-    </svg>
-    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-ink-muted"><span>{pt ? 'Linha: estimativa média' : 'Line: mean estimate'}</span><span>{credibleIntervalLabel(.25, .75, locale)}</span><span>{credibleIntervalLabel(.05, .95, locale)}</span>{showPolls && <span>{pt ? 'Pontos: sondagens' : 'Dots: polls'}</span>}</div>
-    <ChartTable caption={pt ? `Série temporal de ${selectedName}` : `${selectedName} time series`} summaryLabel={pt ? 'Ver a série por data, mais recente primeiro' : 'View the series by date, latest first'} columns={[pt ? 'Data' : 'Date', pt ? 'Estimativa média' : 'Mean estimate', 'P25–P75', 'P5–P95']} rows={rows} />
+    <div ref={containerRef} className="relative w-full">
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="block max-w-full" role="img" aria-label={`${selectedName}: ${pt ? 'apoio estimado ao longo do tempo' : 'estimated support over time'}`}
+        onPointerMove={onPointer} onPointerLeave={() => setHover(null)}>
+        {Array.from({ length: Math.floor(yMax / .1) + 1 }, (_, index) => index * .1).map(tick => <g key={tick}><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} stroke={FURNITURE.grid} /><text x={margin.left - 8} y={y(tick)} textAnchor="end" dominantBaseline="middle" fontSize={11} fill={FURNITURE.textMuted}>{formatElectionPercent(tick, locale, 0)}</text></g>)}
+        {tickDates.map((date, index) => <g key={date.toISOString()}><line x1={x(date)} x2={x(date)} y1={height - margin.bottom} y2={height - margin.bottom + 5} stroke={FURNITURE.axis} /><text x={x(date)} y={height - margin.bottom + 22} textAnchor={index === 0 ? 'start' : index === tickDates.length - 1 ? 'end' : 'middle'} fontSize={12} fill={FURNITURE.textMuted}>{formatElectionDate(date, locale)}</text></g>)}
+        {candidates.filter(([name]) => name !== selectedName).map(([name, candidate]) => <path key={name} d={linePath(points(candidate.mean.slice(0, dates.length)))} fill="none" stroke={candidate.color} strokeWidth="1.5" opacity=".32" strokeLinecap="round"><title>{name}</title></path>)}
+        <path d={areaPath(points(selected.ci_95), points(selected.ci_05))} fill={selected.color} opacity=".12" /><path d={areaPath(points(selected.ci_75), points(selected.ci_25))} fill={selected.color} opacity=".28" /><path d={linePath(points(selected.mean.slice(0, dates.length)))} fill="none" stroke={selected.color} strokeWidth="3" strokeLinecap="round" />
+        {selectedPolls.map((poll, index) => <circle key={`${poll.date}-${index}`} cx={x(new Date(`${poll.date}T12:00:00Z`))} cy={y(poll[selectedName] as number)} r="4" fill={selected.color} opacity=".75" stroke={FURNITURE.surface} strokeWidth="1.5"><title>{`${poll.pollster}: ${fmt(poll[selectedName] as number)} · ${formatElectionDate(poll.date, locale)}`}</title></circle>)}
+        {tipIndex != null && <g pointerEvents="none"><line x1={tipX} x2={tipX} y1={margin.top} y2={height - margin.bottom} stroke={FURNITURE.text} strokeDasharray="3,3" /><circle cx={tipX} cy={y(selected.mean[tipIndex])} r="4.5" fill={selected.color} stroke={FURNITURE.surface} strokeWidth="2" /></g>}
+      </svg>
+      {tipIndex != null && (
+        <div aria-hidden="true" className="pointer-events-none absolute top-2 z-10 max-w-[16rem] rounded-lg border border-line bg-cream px-3 py-2 text-xs text-ink shadow-none"
+          style={tipX > width / 2 ? { right: width - tipX + 8 } : { left: tipX + 8 }}>
+          <div className="font-bold">{formatElectionDate(dates[tipIndex], locale)}</div>
+          <div className="tabular-nums">{selectedName}: <strong>{fmt(selected.mean[tipIndex])}</strong></div>
+          <div className="tabular-nums text-stone-600">P25–P75: {fmt(selected.ci_25[tipIndex])}–{fmt(selected.ci_75[tipIndex])}</div>
+          <div className="tabular-nums text-stone-600">P5–P95: {fmt(selected.ci_05[tipIndex])}–{fmt(selected.ci_95[tipIndex])}</div>
+        </div>
+      )}
+    </div>
+    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-ink-muted"><span>{pt ? 'Linha: estimativa média' : 'Line: mean estimate'}</span><span>{band50}</span><span>{band90}</span>{showPolls && <span>{pt ? 'Pontos: sondagens' : 'Dots: polls'}</span>}</div>
+    <ChartTable caption={pt ? 'Apoio estimado por candidato e data' : 'Estimated support by candidate and date'} summaryLabel={pt ? 'Ver a série de todos os candidatos, mais recente primeiro' : 'View every candidate’s series, latest first'} columns={[pt ? 'Data' : 'Date', pt ? 'Candidato' : 'Candidate', pt ? 'Média' : 'Mean', 'P25', 'P75', 'P5', 'P95']} rows={rows} />
+    {showPolls && visiblePolls.length > 0 && (
+      <ChartTable caption={pt ? 'Sondagens desenhadas no gráfico' : 'Polls drawn on the chart'} summaryLabel={pt ? `Ver as ${formatElectionNumber(visiblePolls.length, locale)} sondagens` : `View the ${formatElectionNumber(visiblePolls.length, locale)} polls`} columns={[pt ? 'Data' : 'Date', pt ? 'Empresa' : 'Pollster', pt ? 'Amostra' : 'Sample', ...pollColumns]} rows={visiblePolls.map(poll => [formatElectionDate(poll.date, locale), poll.pollster, typeof poll.sample_size === 'number' ? formatElectionNumber(poll.sample_size, locale) : '—', ...pollColumns.map(name => typeof poll[name] === 'number' ? fmt(poll[name] as number) : '—')])} />
+    )}
   </div>;
 }

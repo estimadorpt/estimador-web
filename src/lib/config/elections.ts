@@ -1,7 +1,7 @@
 import { ElectionConfig, ContestantData } from '@/types';
 import { getParliamentaryContestants, presidentialCandidateColors, presidentialCandidateNames, presidentialCandidateParties, presidentialCandidateOrder } from './colors';
 
-// Presidential election 2026 (next election - homepage)
+// Presidential election 2026 (archived forecast: both rounds have taken place)
 export const PRESIDENTIAL_2026: ElectionConfig = {
   type: 'presidential',
   id: 'presidential-2026',
@@ -29,6 +29,28 @@ export const PARLIAMENTARY_2025: ElectionConfig = {
   geographicLevel: 'district'
 };
 
+/**
+ * The day the archived parliamentary forecast was made. The published files
+ * carry the election-day projection (national_trends.json ends on 18 May), not
+ * the run date; the final model run is `dynamic_gp_run_20250516_090447`, and
+ * the comparison exported with it was stamped 2025-05-16T14:06. Owner to
+ * confirm if a later run was ever published.
+ */
+export const PARLIAMENTARY_2025_FORECAST_CUTOFF = '2025-05-16';
+
+/**
+ * Official results, linked from each archive without figures: the archives do
+ * not restate results the site has not verified. SGMAI publishes each
+ * election, and each presidential round, at its own address.
+ */
+export const OFFICIAL_RESULTS: Record<string, ReadonlyArray<{ round: 1 | 2 | null; href: string }>> = {
+  'parliamentary-2025': [{ round: null, href: 'https://www.eleicoes.mai.gov.pt/legislativas2025/' }],
+  'presidential-2026': [
+    { round: 1, href: 'https://www.eleicoes.mai.gov.pt/presidenciais2026_1S/' },
+    { round: 2, href: 'https://www.eleicoes.mai.gov.pt/presidenciais2026_2S/' },
+  ],
+};
+
 // All available elections
 export const ALL_ELECTIONS = [
   PRESIDENTIAL_2026,
@@ -48,19 +70,19 @@ export function getElectionsByType(type: string): ElectionConfig[] {
   return ALL_ELECTIONS.filter(election => election.type === type);
 }
 
-// Get current active election (for default views)
+// The election the elections context opens on. Every configured election is
+// an archive: this is the most recent one, not an upcoming election.
 export function getCurrentElection(): ElectionConfig {
-  // Presidential 2026 is the next election and should be the default
   return PRESIDENTIAL_2026;
 }
 
-// Get the next upcoming election
-export function getNextElection(): ElectionConfig {
-  const now = new Date();
-  const upcoming = ALL_ELECTIONS
+// The next election after `now`, or undefined when none is configured. It
+// never falls back to a past election, so nothing can present an archive as
+// upcoming.
+export function getNextElection(now: Date = new Date()): ElectionConfig | undefined {
+  return ALL_ELECTIONS
     .filter(e => new Date(e.date) > now)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  return upcoming[0] || PRESIDENTIAL_2026;
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
 }
 
 // Get contestants for an election (works for both parties and candidates)

@@ -3,7 +3,7 @@
 import React from 'react';
 import { useLocale } from 'next-intl';
 import { SecondRoundWinProbabilityData, SecondRoundValidVotesData } from '@/types';
-import { formatElectionPercent } from '@/lib/election-display';
+import { formatElectionPercent, formatElectionProbability } from '@/lib/election-display';
 
 interface SecondRoundWinnerCardsProps {
   winProbability: SecondRoundWinProbabilityData;
@@ -13,6 +13,8 @@ interface SecondRoundWinnerCardsProps {
     validVoteShare: string;
     validVotesNote: string;
     versus: string;
+    /** Names the interval printed in brackets, e.g. a 95% credible interval. */
+    intervalLabel: string;
   };
 }
 
@@ -22,16 +24,13 @@ export function SecondRoundWinnerCards({
   translations,
 }: SecondRoundWinnerCardsProps) {
   const locale = useLocale();
-  const formatPercent = (value: number) => {
-    const pct = value * 100;
-    if (pct > 99) return '>99%';
-    if (pct < 0.01) return '<0.01%';
-    if (pct < 1) return formatElectionPercent(value, locale, 2);
-    return formatElectionPercent(value, locale);
-  };
+  // Win probabilities are whole percentages bounded by <1% and >99%: 8000
+  // simulations cannot support more precision, or a claim of certainty.
+  const formatProbability = (value: number) => formatElectionProbability(value, locale);
+  const formatPercent = (value: number) => formatElectionPercent(value, locale);
 
   const formatCI = (lower: number, upper: number) => {
-    return `${formatElectionPercent(lower, locale)} – ${formatElectionPercent(upper, locale)}`;
+    return `${formatElectionPercent(lower, locale)}–${formatElectionPercent(upper, locale)}`;
   };
 
   // Get candidates
@@ -59,7 +58,7 @@ export function SecondRoundWinnerCards({
             {candidateA.name}
           </h3>
           <div className="text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2">
-            {formatPercent(candidateA.win_probability)}
+            {formatProbability(candidateA.win_probability)}
           </div>
           <div className="text-xs uppercase tracking-wide text-stone-500 mb-4">
             {translations.winProbability}
@@ -68,13 +67,13 @@ export function SecondRoundWinnerCards({
             <div className="pt-4 border-t border-stone-100">
               <div className="text-sm text-stone-600">
                 <span className="font-semibold">{formatPercent(validVotesA.mean)}</span>
-                <span className="text-stone-400 ml-1">({formatCI(validVotesA.ci_lower, validVotesA.ci_upper)})</span>
+                <span className="text-stone-500 ml-1">({formatCI(validVotesA.ci_lower, validVotesA.ci_upper)})</span>
               </div>
-              <div className="text-xs text-stone-400 uppercase tracking-wide">
+              <div className="text-xs text-stone-500 uppercase tracking-wide">
                 {translations.validVoteShare}
               </div>
-              <div className="text-[11px] text-stone-400">
-                {translations.validVotesNote}
+              <div className="text-[11px] text-stone-500">
+                {translations.intervalLabel} · {translations.validVotesNote}
               </div>
             </div>
           )}
@@ -92,7 +91,7 @@ export function SecondRoundWinnerCards({
             {candidateB.name}
           </h3>
           <div className="text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2">
-            {formatPercent(candidateB.win_probability)}
+            {formatProbability(candidateB.win_probability)}
           </div>
           <div className="text-xs uppercase tracking-wide text-stone-500 mb-4">
             {translations.winProbability}
@@ -101,13 +100,13 @@ export function SecondRoundWinnerCards({
             <div className="pt-4 border-t border-stone-100">
               <div className="text-sm text-stone-600">
                 <span className="font-semibold">{formatPercent(validVotesB.mean)}</span>
-                <span className="text-stone-400 ml-1">({formatCI(validVotesB.ci_lower, validVotesB.ci_upper)})</span>
+                <span className="text-stone-500 ml-1">({formatCI(validVotesB.ci_lower, validVotesB.ci_upper)})</span>
               </div>
-              <div className="text-xs text-stone-400 uppercase tracking-wide">
+              <div className="text-xs text-stone-500 uppercase tracking-wide">
                 {translations.validVoteShare}
               </div>
-              <div className="text-[11px] text-stone-400">
-                {translations.validVotesNote}
+              <div className="text-[11px] text-stone-500">
+                {translations.intervalLabel} · {translations.validVotesNote}
               </div>
             </div>
           )}

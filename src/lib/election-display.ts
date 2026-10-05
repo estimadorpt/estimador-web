@@ -4,12 +4,56 @@ export function electionLocale(locale: string): ElectionLocale {
   return locale === 'en' ? 'en' : 'pt';
 }
 
+/** The Intl locale of the page: pt-PT or en-GB, never the runtime default. */
+export function electionIntlLocale(locale: string): 'pt-PT' | 'en-GB' {
+  return electionLocale(locale) === 'pt' ? 'pt-PT' : 'en-GB';
+}
+
 export function formatElectionPercent(value: number, locale: string, digits = 1): string {
-  return (value * 100).toLocaleString(electionLocale(locale) === 'pt' ? 'pt-PT' : 'en-GB', { minimumFractionDigits: digits, maximumFractionDigits: digits }) + '%';
+  return (value * 100).toLocaleString(electionIntlLocale(locale), { minimumFractionDigits: digits, maximumFractionDigits: digits }) + '%';
+}
+
+/** Whole numbers (simulation counts, seats) with the page's grouping: "9000" in pt-PT, "9,000" in en-GB. */
+export function formatElectionNumber(value: number, locale: string, digits = 0): string {
+  return value.toLocaleString(electionIntlLocale(locale), { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+/**
+ * A probability as a whole percentage. Values that round to 0 or 100 are shown
+ * as "<1%" and ">99%": a few thousand simulations cannot support a claim of
+ * certainty, or more precision than one point.
+ */
+export function formatElectionProbability(probability: number, locale: string): string {
+  const pct = probability * 100;
+  if (pct > 99) return '>99%';
+  if (pct < 1) return '<1%';
+  return `${Math.round(pct).toLocaleString(electionIntlLocale(locale))}%`;
+}
+
+/**
+ * The calendar date an ISO string names. The archives store plain dates
+ * ("2026-01-18") and local timestamps without a zone ("2026-01-16T21:21:29");
+ * both are read as the date written, so a server in another time zone never
+ * shifts a forecast to the previous day.
+ */
+function calendarDate(value: string | Date): Date {
+  if (value instanceof Date) return value;
+  const day = /^\d{4}-\d{2}-\d{2}/.exec(value)?.[0];
+  return day ? new Date(`${day}T12:00:00Z`) : new Date(value);
 }
 
 export function formatElectionDate(value: string | Date, locale: string): string {
-  return new Date(value).toLocaleDateString(electionLocale(locale) === 'pt' ? 'pt-PT' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return calendarDate(value).toLocaleDateString(electionIntlLocale(locale), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
+/** "16 de janeiro de 2026" / "16 January 2026". */
+export function formatElectionLongDate(value: string | Date, locale: string): string {
+  return calendarDate(value).toLocaleDateString(electionIntlLocale(locale), { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+}
+
+/** "16 de janeiro" / "16 January", for a second date in the same year. */
+export function formatElectionDayMonth(value: string | Date, locale: string): string {
+  return calendarDate(value).toLocaleDateString(electionIntlLocale(locale), { day: 'numeric', month: 'long', timeZone: 'UTC' });
 }
 
 /** The data files publish quantiles, so labels must describe those exact spans. */
@@ -34,12 +78,14 @@ export function voteShareScopeLabel(scope: 'validVotes' | 'allBallots', locale: 
 
 /**
  * Two panels can also disagree because they answer different questions in
- * time: a current snapshot versus a projection to election day. Name the
- * horizon beside the number rather than letting the ranges look comparable.
+ * time: a snapshot at the last poll versus a projection to election day. Name
+ * the horizon beside the number rather than letting the ranges look comparable.
+ * The archives are past forecasts, so the snapshot is named by its date
+ * ("at the last poll"), never as "current".
  */
 export function estimateHorizonLabel(kind: 'current' | 'electionDay', locale: string): string {
   const pt = electionLocale(locale) === 'pt';
   return kind === 'current'
-    ? (pt ? 'estimativa atual' : 'current estimate')
+    ? (pt ? 'estimativa à data da última sondagem' : 'estimate at the last poll')
     : (pt ? 'previsão para o dia da eleição' : 'forecast for election day');
 }

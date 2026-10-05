@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { useLocale } from 'next-intl';
 import { PresidentialWinProbabilitiesData, PresidentialForecastData, PresidentialTrendsData, PresidentialSnapshotProbabilitiesData, PresidentialChangesData, PresidentialRunoffPairsData, PresidentialRunoffChangesData } from '@/types';
 import { presidentialCandidateParties, partyColors } from '@/lib/config/colors';
-import { credibleIntervalLabel, estimateHorizonLabel, formatElectionPercent } from '@/lib/election-display';
+import { credibleIntervalLabel, estimateHorizonLabel, formatElectionPercent, formatElectionProbability } from '@/lib/election-display';
 
 interface PresidentialCandidateCardsProps {
   winProbabilities: PresidentialWinProbabilitiesData;
@@ -52,7 +52,6 @@ export function PresidentialCandidateCards({
   snapshotProbabilities,
   runoffPairs,
   runoffChanges,
-  changes,
   cutoffDate,
   maxCandidates = 5,
   translations = {
@@ -140,12 +139,7 @@ export function PresidentialCandidateCards({
     // Sort by runoff probability
     .sort((a, b) => b.displayRunoffProb - a.displayRunoffProb);
 
-  const formatPercentRounded = (value: number) => {
-    const pct = value * 100;
-    if (pct > 99) return '>99%';
-    if (pct < 1) return '<1%';
-    return `${Math.round(pct).toLocaleString(locale === 'en' ? 'en-GB' : 'pt-PT')}%`;
-  };
+  const formatPercentRounded = (value: number) => formatElectionProbability(value, locale);
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-0 divide-x divide-stone-200 border-y border-stone-200">
@@ -168,7 +162,7 @@ export function PresidentialCandidateCards({
                 {candidate.party ? (
                   <span className="text-xs text-stone-500">{candidate.party}</span>
                 ) : (
-                  <span className="text-xs text-stone-400">{pt ? 'Indep.' : 'Ind.'}</span>
+                  <span className="text-xs text-stone-500">{pt ? 'Indep.' : 'Ind.'}</span>
                 )}
                 {index === 0 && (
                   <span className="text-[11px] font-bold text-stone-500 uppercase">
@@ -182,10 +176,10 @@ export function PresidentialCandidateCards({
           {/* Runoff probability - big number */}
           <div className="mb-2">
             <div className="flex items-baseline gap-2">
-              <div 
-                className="text-4xl font-display font-extrabold tabular-nums tracking-tighter"
-                style={{ color: candidate.color }}
-              >
+              {/* Ink, not the candidate colour: several candidate colours
+                  (pink, cyan, orange) fail contrast on cream. The colour stays
+                  on the bar beside the name. */}
+              <div className="text-4xl font-display font-extrabold tabular-nums tracking-tighter text-ink">
                 {formatPercentRounded(candidate.displayRunoffProb)}
               </div>
               {/* Change indicator */}
@@ -200,7 +194,7 @@ export function PresidentialCandidateCards({
                 </div>
               )}
             </div>
-            <div className="text-[11px] text-stone-400 uppercase tracking-wide">
+            <div className="text-[11px] text-stone-500 uppercase tracking-wide">
               {translations.chanceOfRunoff}
             </div>
           </div>
@@ -212,14 +206,14 @@ export function PresidentialCandidateCards({
                 <span className="font-semibold text-stone-800">
                   {formatElectionPercent(candidate.displayMean, locale)}
                 </span>
-                <span className="text-stone-400 text-xs ml-1">
+                <span className="text-stone-500 text-xs ml-1">
                   ±{formatElectionPercent(candidate.displayCI, locale)}
                 </span>
               </div>
-              <div className="text-[11px] text-stone-400 uppercase tracking-wide">
+              <div className="text-[11px] text-stone-500 uppercase tracking-wide">
                 {translations.voteShare}
               </div>
-              <div className="text-[10px] text-stone-400">
+              <div className="text-[11px] text-stone-500">
                 {estimateHorizonLabel(candidate.horizon, locale)} · {candidate.intervalLabel}
               </div>
             </div>
@@ -233,49 +227,29 @@ export function PresidentialCandidateCards({
 // Second round indicator component
 interface SecondRoundIndicatorProps {
   probability: number;
-  translations?: {
+  locale: string;
+  translations: {
     secondRoundNeeded: string;
     probabilityLabel: string;
   };
 }
 
-export function SecondRoundIndicator({
-  probability,
-  translations = {
-    secondRoundNeeded: 'Second round needed',
-    probabilityLabel: 'Probability',
-  },
-}: SecondRoundIndicatorProps) {
-  const formatPercent = (value: number) => {
-    const pct = value * 100;
-    if (pct > 99) return '>99%';
-    if (pct < 1) return '<1%';
-    return `${Math.round(pct)}%`;
-  };
-
-  const isHighProbability = probability > 0.9;
-
+/**
+ * The first-round archive's headline: how likely a runoff was. Neutral ink
+ * throughout; amber is reserved for caveats, not for a high value.
+ */
+export function SecondRoundIndicator({ probability, locale, translations }: SecondRoundIndicatorProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
-        <div 
-          className={`w-2 h-12 ${isHighProbability ? 'bg-amber-500' : 'bg-emerald-500'}`}
-        />
+        <div className="w-1 h-12 bg-ink" aria-hidden="true" />
         <div>
-          <div className="text-lg font-bold text-stone-900">
-            {translations.secondRoundNeeded}
-          </div>
-          <div className="text-sm text-stone-500">
-            {translations.probabilityLabel}
-          </div>
+          <div className="text-lg font-bold text-stone-900">{translations.secondRoundNeeded}</div>
+          <div className="text-sm text-stone-500">{translations.probabilityLabel}</div>
         </div>
       </div>
-      <div 
-        className={`text-5xl font-display font-extrabold tabular-nums tracking-tighter ${
-          isHighProbability ? 'text-amber-600' : 'text-emerald-600'
-        }`}
-      >
-        {formatPercent(probability)}
+      <div className="text-5xl font-display font-extrabold tabular-nums tracking-tighter text-ink">
+        {formatElectionProbability(probability, locale)}
       </div>
     </div>
   );

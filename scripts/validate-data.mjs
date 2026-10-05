@@ -98,6 +98,29 @@ for (const name of ['presidential_forecast.json', 'presidential_trends.json', 'p
   feed(`elections/presidential-2026/${name}`, value =>
     nonEmptyArray(value) || isObject(value) ? null : 'empty');
 }
+// The first-round archive dates itself by its last poll, so the polls file is
+// required: without it the page could not say what the forecast had seen.
+feed('elections/presidential-2026/presidential_polls.json', value =>
+  isObject(value) && nonEmptyArray(value.polls) ? null : 'no polls');
+// The runoff archive (the page's default view). The page summarises the
+// trajectories on the server; a missing or empty file must fail the release
+// rather than render a runoff with no simulations.
+for (const name of ['second_round_forecast.json', 'second_round_valid_votes.json']) {
+  feed(`elections/presidential-2026/${name}`, value =>
+    isObject(value) && nonEmptyArray(value.candidates) && typeof value.updated_at === 'string' ? null : 'no candidates or no updated_at');
+}
+feed('elections/presidential-2026/second_round_win_probability.json', value =>
+  isObject(value) && nonEmptyArray(value.candidates) ? null : 'no candidates');
+feed('elections/presidential-2026/second_round_trends.json', value =>
+  isObject(value) && nonEmptyArray(value.dates) && isObject(value.candidates) ? null : 'no dates');
+feed('elections/presidential-2026/second_round_trajectories.json', value => {
+  if (!isObject(value) || !isObject(value.candidates)) return 'no candidates';
+  const runoff = Object.keys(value.candidates).filter(name => name !== 'Blank/Null');
+  if (runoff.length !== 2) return `expected two runoff candidates, found ${runoff.length}`;
+  return runoff.every(name => nonEmptyArray(value.candidates[name].trajectories)) ? null : 'empty trajectories';
+});
+feed('elections/presidential-2026/second_round_blank_null.json', value =>
+  isObject(value) && typeof value.mean === 'number' ? null : 'no mean');
 
 // ---- population (synthetic population release) ----------------------------
 // The compact files from scripts/sync-population.py. Every file must match the

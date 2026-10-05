@@ -7,6 +7,7 @@ import { feature } from 'topojson-client';
 import { partyColors } from '@/lib/config/colors';
 import { getRegionForIsland } from '@/lib/geography/regionMapping';
 import { useTopoJsonData } from '@/hooks/useTopoJsonData';
+import { ChartTable } from '@/components/viz/ChartTable';
 import type { DistrictForecast, SelectedDistrict } from '@/types/geography';
 
 interface DistrictMapProps {
@@ -43,6 +44,12 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
     setInspected(name);
     if (data) onDistrictClick?.({ id: name, probs: data.probs });
   };
+  // Table twin columns: every party in the file, largest national presence first.
+  const tableParties = useMemo(() => {
+    const totals = new Map<string, number>();
+    for (const d of districtForecast) for (const [party, v] of Object.entries(d.probs)) totals.set(party, (totals.get(party) ?? 0) + v);
+    return [...totals.entries()].sort((a, b) => b[1] - a[1]).map(([party]) => party);
+  }, [districtForecast]);
   const format = (n: number) => new Intl.NumberFormat(pt ? 'pt-PT' : 'en-GB', { style: 'percent', maximumFractionDigits: 1 }).format(n);
 
   return (
@@ -50,16 +57,16 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
       {onDistrictClick && (
         <label className="mb-3 block text-sm font-medium text-stone-700">
           {pt ? 'Escolher distrito ou região' : 'Choose a district or region'}
-          <select className="mt-1 block w-full rounded border border-stone-300 bg-cream p-2" value={selectedDistrict ?? ''}
+          <select className="mt-1 block min-h-11 w-full rounded border border-stone-300 bg-cream p-2" value={selectedDistrict ?? ''}
             onChange={e => choose(e.target.value)}>
-            <option value="" disabled>{pt ? 'Selecione uma região' : 'Select a region'}</option>
+            <option value="" disabled>{pt ? 'Escolhe uma região' : 'Select a region'}</option>
             {[...regions.keys()].sort((a, b) => a.localeCompare(b, pt ? 'pt' : 'en')).map(name => <option key={name}>{name}</option>)}
           </select>
         </label>
       )}
       {isLoading ? <p role="status" className="py-10 text-center text-stone-500">{pt ? 'A carregar mapa…' : 'Loading map…'}</p>
         : error || !geometry ? <div role="alert" className="py-6 text-center">
-          <p>{pt ? 'Não foi possível carregar o mapa. Pode continuar a escolher uma região na lista.' : 'The map could not load. You can still choose a region from the list.'}</p>
+          <p>{pt ? 'Não foi possível carregar o mapa. Podes continuar a escolher uma região na lista.' : 'The map could not load. You can still choose a region from the list.'}</p>
           <button type="button" onClick={retry} className="mt-3 underline">{pt ? 'Tentar novamente' : 'Try again'}</button>
         </div> : (
           <svg viewBox={`0 0 640 ${height}`} className="block w-full" style={{ maxHeight: height }}
@@ -89,6 +96,12 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
           {pt ? `Diferença entre os dois primeiros: ${format(activeGap)} dos votos previstos.` : `Gap between the top two: ${format(activeGap)} of the predicted vote.`}
         </p>
       )}
+      <ChartTable
+        caption={pt ? 'Percentagem de votos prevista por distrito e região' : 'Predicted vote share by district and region'}
+        summaryLabel={pt ? 'Ver os distritos e regiões como tabela' : 'View districts and regions as a table'}
+        columns={[pt ? 'Distrito ou região' : 'District or region', pt ? 'À frente' : 'Leading', ...tableParties]}
+        rows={[...districtForecast].sort((a, b) => a.district_name.localeCompare(b.district_name, pt ? 'pt' : 'en')).map(d => [d.district_name, d.winning_party, ...tableParties.map(p => d.probs[p] != null ? format(d.probs[p]) : '—')])}
+      />
       <p className="mt-2 text-xs text-stone-500">{pt ? 'A cor indica o partido com maior percentagem de votos prevista (estimativa), não uma probabilidade de vitória. Arquivo da previsão, não resultados oficiais.' : 'Colour shows the party with the highest estimated vote share, not a probability of winning. Archived forecast, not official results.'}</p>
     </div>
   );

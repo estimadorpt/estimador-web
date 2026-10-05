@@ -109,8 +109,8 @@ export function PresidentialForecastBars({
 
             {/* CI text below bar */}
             {showUncertainty && (
-              <div className="text-[11px] text-stone-400 mt-1 tabular-nums">
-                {translations.confidenceInterval}: {formatPercent(candidate.ci_lower)} – {formatPercent(candidate.ci_upper)}
+              <div className="text-[11px] text-stone-500 mt-1 tabular-nums">
+                {translations.confidenceInterval}: {formatPercent(candidate.ci_lower)}–{formatPercent(candidate.ci_upper)}
               </div>
             )}
           </div>
@@ -119,8 +119,8 @@ export function PresidentialForecastBars({
 
       {/* Scale markers */}
       <div className="relative h-4 mt-3 border-t border-stone-200 pt-2">
-        <div className="absolute inset-x-0 flex justify-between text-xs text-stone-400">
-          <span>0%</span>
+        <div className="absolute inset-x-0 flex justify-between text-xs text-stone-500">
+          <span>{formatElectionPercent(0, locale, 0)}</span>
           <span>{formatElectionPercent(scaleMax * .5, locale)}</span>
           <span>{formatElectionPercent(scaleMax, locale, 0)}</span>
         </div>
