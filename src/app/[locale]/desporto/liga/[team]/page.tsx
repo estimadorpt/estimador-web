@@ -34,6 +34,9 @@ function ordinal(n: number, locale: string): string {
   return `${n}th`;
 }
 
+// Any other slug is a 404, in development as in the export.
+export const dynamicParams = false;
+
 // Only the clubs in the current forecast table get a page. ligaTeamSlugs
 // stays whole (logos and the 2025-26 archive use it), but a club that left
 // the league would otherwise get an indexed page with nothing on it, and

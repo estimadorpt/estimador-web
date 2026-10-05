@@ -1,5 +1,7 @@
 import { createPageMetadata } from '@/lib/metadata';
 import { loadPredictionGameData } from "@/lib/utils/football-data-loader";
+import { findOpenRound, roundLockState } from "@/lib/utils/prediction-game";
+import { formatKickoff } from "@/lib/football-format";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -40,6 +42,22 @@ export default async function JogoPrevisoesPage({
 
   const data = await loadPredictionGameData();
 
+  // The deadline of the round open when the page was built, from the game
+  // manifest's locks_at. Worded as a deadline, not as "open now", so it stays
+  // true after it passes; the game itself re-checks the clock in the browser.
+  const openRound = data ? findOpenRound(data, Date.now()) : null;
+  const openLock = openRound ? roundLockState(openRound, Date.now()) : null;
+  const deadline =
+    openRound && openLock?.lockAt != null
+      ? openRound.fixtures.every(f => f.kickoffConfirmed !== false)
+        ? pt
+          ? `Prazo da jornada ${openRound.matchday}: ${formatKickoff(new Date(openLock.lockAt).toISOString(), locale)} (hora de Lisboa), no primeiro jogo.`
+          : `Matchday ${openRound.matchday} deadline: ${formatKickoff(new Date(openLock.lockAt).toISOString(), locale)} (Lisbon time), at the first game.`
+        : pt
+          ? `Jornada ${openRound.matchday}: há horários por confirmar; fecha no primeiro jogo.`
+          : `Matchday ${openRound.matchday}: some kickoffs are still to be confirmed; it closes at the first game.`
+      : null;
+
   return (
     <div className="min-h-screen bg-paper">
       <Header />
@@ -53,6 +71,7 @@ export default async function JogoPrevisoesPage({
         lede={pt
           ? "Consegues prever melhor do que o modelo? Escolhe as tuas probabilidades antes da jornada e compara-te com ele, semana após semana."
           : "Can you forecast better than the model? Set your own probabilities before the matchday and go head to head, week after week."}
+        meta={deadline ? <span>{deadline}</span> : undefined}
       />
 
       <section>

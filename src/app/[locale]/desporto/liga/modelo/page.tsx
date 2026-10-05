@@ -137,9 +137,7 @@ export default async function LigaModelPage({
           lede={c.standfirstA}
           meta={scorecard ? (
             <span>
-              {c.evaluated}: <strong className="font-semibold text-ink">{scorecard.model}</strong>
-              {" · "}
-              {describeModel(scorecard.model, locale)}
+              {c.evaluated}: <strong className="font-semibold text-ink">{describeModel(scorecard.model, locale)}</strong>
             </span>
           ) : undefined}
         />
