@@ -161,5 +161,7 @@ export function regionSlug(name: string): string {
 export function regionTitle(id: string, name: string, locale: 'pt' | 'en'): string {
   if (id === 'azores') return locale === 'pt' ? 'Região Autónoma dos Açores' : 'Autonomous Region of the Azores';
   if (id === 'madeira') return locale === 'pt' ? 'Região Autónoma da Madeira' : 'Autonomous Region of Madeira';
-  return locale === 'pt' ? `Distrito de ${name}` : `${name} district`;
+  // Two district names take an article in Portuguese: "da Guarda", "do Porto".
+  const of = name === 'Guarda' ? 'da' : name === 'Porto' ? 'do' : 'de';
+  return locale === 'pt' ? `Distrito ${of} ${name}` : `${name} district`;
 }
