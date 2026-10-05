@@ -27,6 +27,37 @@ describe('brand descriptor', () => {
     expect(en.about.subtitle).toBe(BRAND_DESCRIPTOR.en);
   });
 
+  it('is the default meta description in both locales', () => {
+    expect(pt.meta.defaultDescription).toBe(BRAND_DESCRIPTOR.pt);
+    expect(en.meta.defaultDescription).toBe(BRAND_DESCRIPTOR.en);
+  });
+
+  it('is what the footer, the feed and the generators read, not a retyped copy', () => {
+    const surfaces = {
+      'src/components/SiteFooter.tsx': /brandDescriptor\(locale\)/,
+      'src/app/[locale]/feed.xml/route.ts': /brandDescriptor\(locale\)/,
+      'scripts/generate-og-images.mjs': /descriptor\.json/,
+      'scripts/generate-social-kit.mjs': /descriptor\.json/,
+    };
+    for (const [file, reference] of Object.entries(surfaces)) {
+      const source = read(file);
+      expect(source, file).toMatch(reference);
+      for (const copy of [BRAND_DESCRIPTOR.pt, BRAND_DESCRIPTOR.en, BRAND_LINE.pt, BRAND_LINE.en]) {
+        expect(source, `${file} retypes "${copy}"`).not.toContain(copy);
+      }
+    }
+    expect(read('scripts/generate-og-images.mjs')).toMatch(/brandStandfirst: BRAND_COPY\.descriptor\.pt/);
+    expect(read('scripts/generate-og-images.mjs')).toMatch(/brandStandfirst: BRAND_COPY\.descriptor\.en/);
+    expect(read('scripts/generate-social-kit.mjs')).toMatch(/descriptor: BRAND_COPY\.descriptor\.pt/);
+    expect(read('scripts/generate-social-kit.mjs')).toMatch(/tagline: BRAND_COPY\.line\.pt/);
+  });
+
+  it('is printed verbatim in the README, in both locales', () => {
+    const readme = read('README.md');
+    expect(readme).toContain(BRAND_DESCRIPTOR.en);
+    expect(readme).toContain(BRAND_DESCRIPTOR.pt);
+  });
+
   it('is not retyped on /marca', () => {
     const marca = read('src/app/[locale]/marca/page.tsx');
     expect(marca).not.toContain(BRAND_DESCRIPTOR.pt);

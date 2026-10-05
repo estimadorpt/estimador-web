@@ -20,9 +20,12 @@ const geometry = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'src', 'lib', 'b
 const MARK_D = [geometry.MARK_LEFT, geometry.MARK_BAND, geometry.MARK_RIGHT].join(' ');
 const PASTEL = { mint: '#72c8b4', mustard: '#e5b958', coral: '#e29a83', periwinkle: '#a9b9ed' };
 
+// The line and the descriptor are written once, in src/lib/brand/descriptor.json,
+// and read here the same way the app imports them (descriptor.test.ts holds it).
+const BRAND_COPY = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'src', 'lib', 'brand', 'descriptor.json'), 'utf8'));
 const COPY = {
-  tagline: 'Dados para compreender Portugal.',
-  descriptor: 'Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.',
+  tagline: BRAND_COPY.line.pt,
+  descriptor: BRAND_COPY.descriptor.pt,
   url: 'estimador.pt',
 };
 

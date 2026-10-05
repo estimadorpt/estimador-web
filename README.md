@@ -1,6 +1,8 @@
 # estimador.pt — Dados para compreender Portugal
 
-**Forecasts and analysis on Portugal, with the uncertainty in plain sight.**
+**Forecasts and analysis with the uncertainty in plain sight: the economy, Liga Portugal, elections and population.**
+
+*Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.*
 
 estimador.pt publishes probabilistic forecasts and analysis for Portugal: Liga Portugal, elections, a human atlas of the country's population and an economy section in preparation. Every number carries its date and its interval; the models and the methodology are open.
 

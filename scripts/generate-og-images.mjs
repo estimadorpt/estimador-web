@@ -29,6 +29,10 @@ const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 const ARTICLES_DIR = path.join(ROOT_DIR, 'src', 'content', 'articles');
 const LOCALES = ['pt', 'en'];
 
+// The brand line and descriptor are written once, in src/lib/brand/descriptor.json,
+// shared with the app (descriptor.test.ts holds every surface to it).
+const BRAND_COPY = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'src', 'lib', 'brand', 'descriptor.json'), 'utf8'));
+
 /**
  * Card copy lives here rather than in messages/{pt,en}.json because these
  * strings are never rendered by the app — next-intl is not available to a node
@@ -37,8 +41,8 @@ const LOCALES = ['pt', 'en'];
  */
 const COPY = {
   pt: {
-    brandHeadline: 'Dados para compreender Portugal.',
-    brandStandfirst: 'Previsões e análises com a incerteza à vista. Modelos abertos, dados datados.',
+    brandHeadline: BRAND_COPY.line.pt,
+    brandStandfirst: BRAND_COPY.descriptor.pt,
     columns: (economyPublished) => [
       { name: 'Economia', blurb: economyPublished ? 'Estado da economia e risco de recessão' : 'Como ler os indicadores (em preparação)' },
       { name: 'Liga Portugal', blurb: 'Probabilidades de título e despromoção' },
@@ -65,8 +69,8 @@ const COPY = {
     populationFooter: (version, date) => `Versão ${version} · publicada a ${date}`,
   },
   en: {
-    brandHeadline: 'Data to understand Portugal.',
-    brandStandfirst: 'Forecasts and analysis with the uncertainty in plain sight. Open models, dated data.',
+    brandHeadline: BRAND_COPY.line.en,
+    brandStandfirst: BRAND_COPY.descriptor.en,
     columns: (economyPublished) => [
       { name: 'Economy', blurb: economyPublished ? 'State of the economy and recession risk' : 'Reading the indicators (in preparation)' },
       { name: 'Liga Portugal', blurb: 'Title and relegation probabilities' },

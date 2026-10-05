@@ -1,5 +1,6 @@
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { SITE_LOCALES, localizedUrl, feedUrl } from '@/lib/metadata';
+import { brandDescriptor } from '@/lib/brand/descriptor';
 
 /**
  * One RSS feed per locale, exported as a static file at /pt/feed.xml.
@@ -18,11 +19,6 @@ export function generateStaticParams() {
 const FEED_TITLE: Record<string, string> = {
   pt: 'estimador.pt — notas e explicadores',
   en: 'estimador.pt — notes and explainers',
-};
-
-const FEED_DESCRIPTION: Record<string, string> = {
-  pt: 'Previsões e análises sobre Portugal, com a incerteza à vista: economia, Liga Portugal, eleições e população.',
-  en: 'Forecasts and analysis on Portugal, with the uncertainty in plain sight: the economy, Liga Portugal, elections and population.',
 };
 
 function escapeXml(value: string): string {
@@ -59,7 +55,7 @@ ${article.tags.map(tag => `      <category>${escapeXml(tag)}</category>`).join('
   <channel>
     <title>${escapeXml(FEED_TITLE[locale] ?? FEED_TITLE.pt)}</title>
     <link>${escapeXml(localizedUrl(locale, '/artigos'))}</link>
-    <description>${escapeXml(FEED_DESCRIPTION[locale] ?? FEED_DESCRIPTION.pt)}</description>
+    <description>${escapeXml(brandDescriptor(locale))}</description>
     <language>${locale === 'pt' ? 'pt-PT' : 'en-GB'}</language>
     <atom:link href="${escapeXml(self)}" rel="self" type="application/rss+xml" />
 ${newest ? `    <lastBuildDate>${new Date(`${newest}T00:00:00Z`).toUTCString()}</lastBuildDate>\n` : ''}${items}

@@ -4,8 +4,11 @@ import { Link } from '@/i18n/routing';
 import { LogoHorizontal } from './Logo';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
+import { brandDescriptor, brandLine } from '@/lib/brand/descriptor';
 
-const focusStyle = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
+// Links are ink with an underline at rest (CLAUDE.md); keyboard focus is the
+// global double ring in globals.css, so nothing here declares its own.
+const linkStyle = 'text-ink underline underline-offset-4 decoration-ink/40 transition-colors hover:decoration-ink';
 
 interface FooterItem {
   href: string;
@@ -19,7 +22,7 @@ function FooterColumn({ heading, items, locale }: { heading: string; items: Foot
       <ul className="space-y-1.5">
         {items.map(item => (
           <li key={item.href}>
-            <Link href={item.href} locale={locale} className={`text-stone-600 transition-colors hover:text-ink ${focusStyle}`}>
+            <Link href={item.href} locale={locale} className={linkStyle}>
               {item.label}
             </Link>
           </li>
@@ -46,8 +49,9 @@ export async function SiteFooter({ locale }: { locale: string }) {
     { href: '/populacao', label: pt ? 'População' : 'Population' },
     { href: '/economia', label: t(ECONOMY_PUBLISHED ? 'sections.economics' : 'nav.economicsPreparing') },
     { href: '/desporto/liga', label: t('football.title') },
-    { href: '/eleicoes/presidenciais', label: t('sections.presidential2026') },
-    { href: '/eleicoes/legislativas', label: t('sections.parliamentary2025') },
+    // Both forecasts are archives; the label says so wherever they are listed.
+    { href: '/eleicoes/presidenciais', label: t('elections.navPresidential') },
+    { href: '/eleicoes/legislativas', label: t('elections.navParliamentary') },
   ];
   const project: FooterItem[] = [
     { href: '/sobre', label: t('nav.about') },
@@ -62,13 +66,11 @@ export async function SiteFooter({ locale }: { locale: string }) {
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
-            <Link href="/" locale={locale} className={`brand-link inline-block rounded-sm ${focusStyle}`} aria-label={pt ? 'estimador — página inicial' : 'estimador — home'}>
+            <Link href="/" locale={locale} className="brand-link inline-block rounded-sm" aria-label={pt ? 'estimador — página inicial' : 'estimador — home'}>
               <LogoHorizontal size={20} />
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-stone-500">
-              {pt
-                ? 'Dados para compreender Portugal. Modelos probabilísticos, dados datados e metodologia aberta.'
-                : 'Data to understand Portugal. Probabilistic models, dated data and open methodology.'}
+              {brandLine(locale)} {brandDescriptor(locale)}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-x-10 gap-y-6 text-sm sm:grid-cols-3">
@@ -79,14 +81,14 @@ export async function SiteFooter({ locale }: { locale: string }) {
               <ul className="space-y-1.5">
                 {hasArticles && (
                   <li>
-                    <a href={`/${locale}/feed.xml`} className={`inline-flex items-center gap-1.5 text-stone-600 transition-colors hover:text-ink ${focusStyle}`}>
+                    <a href={`/${locale}/feed.xml`} className={`inline-flex items-center gap-1.5 ${linkStyle}`}>
                       <Rss aria-hidden="true" className="h-3.5 w-3.5" />
                       RSS
                     </a>
                   </li>
                 )}
                 <li>
-                  <a href="mailto:info@estimador.pt" className={`text-stone-600 transition-colors hover:text-ink ${focusStyle}`}>
+                  <a href="mailto:info@estimador.pt" className={linkStyle}>
                     {pt ? 'Contacto' : 'Contact'}
                   </a>
                 </li>
