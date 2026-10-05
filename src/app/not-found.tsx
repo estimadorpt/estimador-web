@@ -1,5 +1,5 @@
 import './globals.css';
-import { NextIntlClientProvider } from 'next-intl';
+import { LocaleOnlyProvider } from '@/components/LocaleOnlyProvider';
 import { LogoHorizontal } from '@/components/Logo';
 import { NotFoundBody } from '@/components/NotFoundBody';
 import { NotFoundByPath } from '@/components/NotFoundSwitch';
@@ -9,7 +9,7 @@ import { fontVariables } from './fonts';
 function Page({ locale }: { locale: 'pt' | 'en' }) {
   // The footer's links read the locale from a provider; they need no messages.
   return (
-    <NextIntlClientProvider locale={locale} messages={{}}>
+    <LocaleOnlyProvider locale={locale}>
       <header className="border-b border-line">
         <div className="mx-auto flex h-16 max-w-7xl items-center px-4">
           <a href={`/${locale}/`} className="brand-link inline-block rounded-sm" aria-label={locale === 'pt' ? 'estimador.pt — página inicial' : 'estimador.pt — home'}>
@@ -19,7 +19,7 @@ function Page({ locale }: { locale: 'pt' | 'en' }) {
       </header>
       <NotFoundBody locale={locale} withTitle />
       <SiteFooter locale={locale} />
-    </NextIntlClientProvider>
+    </LocaleOnlyProvider>
   );
 }
 
