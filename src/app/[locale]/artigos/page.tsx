@@ -89,12 +89,21 @@ export default async function ArticlesPage({
         }
       />
 
-      <main className="max-w-4xl mx-auto px-4 py-10">
+      <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-4 py-10">
 
         {articles.length === 0 ? (
-          <p className="border-l-2 border-stone-300 pl-6 py-6 text-stone-600">
-            {t('articles.empty')}
-          </p>
+          <div className="border-l-2 border-stone-300 pl-6 py-6">
+            <p className="text-stone-600">{t('articles.empty')}</p>
+            <p className="mt-4">
+              <Link
+                href="/metodologia"
+                locale={locale}
+                className="inline-flex items-center gap-1.5 font-semibold text-ink underline underline-offset-4 hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              >
+                {t('articles.emptyNextStep')}
+              </Link>
+            </p>
+          </div>
         ) : (
           <>
             <Section kind="nota" heading={t('articles.notesHeading')} intro={t('articles.notesIntro')} />
@@ -132,9 +141,13 @@ export default async function ArticlesPage({
         )}
       </main>
 
-      <div className="max-w-4xl mx-auto px-4 pb-16">
-        <Subscribe variant="inline" />
-      </div>
+      {/* No decorative subscription box on an honestly empty index — nothing
+          to subscribe to yet in this language. */}
+      {articles.length > 0 && (
+        <div className="max-w-4xl mx-auto px-4 pb-16">
+          <Subscribe variant="inline" />
+        </div>
+      )}
 
       <SiteFooter locale={locale} />
     </div>

@@ -1,7 +1,9 @@
 "use client";
 
 import React from 'react';
+import { useLocale } from 'next-intl';
 import { SecondRoundForecastData } from '@/types';
+import { formatElectionPercent } from '@/lib/election-display';
 
 interface SecondRoundForecastBarsProps {
   forecast: SecondRoundForecastData;
@@ -21,6 +23,8 @@ export function SecondRoundForecastBars({
     confidenceInterval: '95% CI',
   },
 }: SecondRoundForecastBarsProps) {
+  const locale = useLocale();
+  const pt = locale !== 'en';
   // Translate candidate names if needed
   const candidates = forecast.candidates.map(c => ({
     ...c,
@@ -33,7 +37,7 @@ export function SecondRoundForecastBars({
   );
   const scaleMax = Math.min(0.8, Math.ceil(maxValue * 10) / 10 + 0.05);
 
-  const formatPercent = (value: number) => `${(value * 100).toFixed(1)}%`;
+  const formatPercent = (value: number) => formatElectionPercent(value, locale);
 
   // 50% threshold position
   const fiftyPercentPos = (0.5 / scaleMax) * 100;
@@ -60,7 +64,7 @@ export function SecondRoundForecastBars({
                 </span>
                 {index === 0 && (
                   <span className="text-[11px] text-stone-400 uppercase tracking-wide">
-                    Leader
+                    {pt ? 'À frente' : 'Leading'}
                   </span>
                 )}
               </div>
@@ -115,7 +119,7 @@ export function SecondRoundForecastBars({
             {/* CI text below bar */}
             {showUncertainty && (
               <div className="text-[11px] text-stone-400 mt-1 tabular-nums">
-                95% CI: {formatPercent(candidate.ci_lower)} - {formatPercent(candidate.ci_upper)}
+                {translations.confidenceInterval}: {formatPercent(candidate.ci_lower)} – {formatPercent(candidate.ci_upper)}
               </div>
             )}
           </div>
@@ -131,7 +135,7 @@ export function SecondRoundForecastBars({
               50%
             </span>
           )}
-          <span>{(scaleMax * 100).toFixed(0)}%</span>
+          <span>{formatElectionPercent(scaleMax, locale, 0)}</span>
         </div>
       </div>
     </div>

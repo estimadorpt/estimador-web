@@ -1,8 +1,11 @@
+import { TileCard } from '@/components/economics/dashboard/TileCard';
+import { StoryLineChart, StoryChartLegend } from '@/components/economics/stories/StoryLineChart';
 import type { Metadata } from 'next';
 import { Download } from 'lucide-react';
 import { createPageMetadata } from '@/lib/metadata';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
+import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import { PageHero } from '@/components/PageHero';
 import { LogoHorizontal, Mark, MarkSmall } from '@/components/Logo';
 import { Mosaic } from '@/components/brand/Mosaic';
@@ -230,6 +233,29 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           <Rule yes={false}>{pt ? 'Nunca ao lado de um número de clube ou de partido, nem em painéis de previsão.' : 'Never beside a club or party number, never on a forecast panel.'}</Rule>
           <Rule yes={false}>{pt ? 'Nunca a codificar informação: o mosaico decora, não explica.' : 'Never encoding information: the mosaic decorates, it does not explain.'}</Rule>
         </ul>
+      </Section>
+
+      <Section id="ilustracao" kicker="05.1" title={pt ? 'Lugares reconhecíveis' : 'Recognisable places'} lede={pt ? 'A ilustração dá contexto à entrada. O conteúdo e os dados ocupam o centro da página.' : 'Illustration provides context at the entrance. Content and data take the centre of the page.'}>
+        <div className="grid gap-6 md:grid-cols-3">
+          {(['economy', 'football', 'elections'] as const).map((scene, index) => <div key={scene} className="rounded-2xl border border-line bg-cream p-4">
+            <SectionIllustration scene={scene} />
+            <h3 className="mt-4 text-lg">{(pt ? ['Economia: a loja', 'Futebol: o campo', 'Eleições: a mesa de voto'] : ['Economy: the shop', 'Football: the ground', 'Elections: the polling place'])[index]}</h3>
+            <a href={`/images/sections/${scene}.webp`} download className="mt-2 inline-flex min-h-11 items-center text-sm font-bold underline underline-offset-4">{pt ? 'Descarregar ilustração' : 'Download illustration'}</a>
+          </div>)}
+        </div>
+        <ul className="mt-8 grid gap-2 md:grid-cols-2">
+          <Rule yes>{pt ? 'Cenas frontais e concretas, com arquitetura, materiais e pequenos gestos humanos.' : 'Concrete, frontal scenes with architecture, materials and small human gestures.'}</Rule>
+          <Rule yes>{pt ? 'Cabeçalhos compactos: imagem até 295 px no desktop. Em ferramentas, o controlo vem primeiro.' : 'Compact headers: artwork up to 295 px on desktop. In tools, controls come first.'}</Rule>
+          <Rule yes>{pt ? 'Páginas de análise e metodologia podem dispensar a imagem. Fragmentos só quando acrescentam contexto.' : 'Analysis and methodology pages can omit imagery. Fragments only when they add context.'}</Rule>
+          <Rule yes={false}>{pt ? 'Sem imagens atrás de dados, símbolos indecifráveis, cores de partidos decorativas ou personagens genéricas como assinatura.' : 'No imagery behind data, unreadable symbols, decorative party colours or generic characters as the signature.'}</Rule>
+        </ul>
+      </Section>
+
+      <Section id="economia-componentes" kicker="05.2" title={pt ? 'Contexto, depois evidência' : 'Context, then evidence'} lede={pt ? 'Um exemplo de componente económico. Dados fictícios para mostrar hierarquia e legibilidade; não descrevem a economia portuguesa.' : 'An economy component example. Fictional data demonstrate hierarchy and readability; they do not describe the Portuguese economy.'}>
+        <TileCard title={pt ? 'Uma série ao longo do tempo' : 'A series over time'} eyebrow={pt ? 'Exemplo visual · índice' : 'Visual example · index'} label={pt ? 'Dados fictícios' : 'Fictional data'} honesty={pt ? 'A mesma escala e os mesmos valores no telemóvel e no desktop. A composição adapta-se para manter as etiquetas legíveis.' : 'The same scale and values on phone and desktop. The composition adapts to keep labels readable.'}>
+          <StoryLineChart ariaLabel={pt ? 'Série fictícia de exemplo' : 'Fictional example series'} series={[{ label: pt ? 'Exemplo' : 'Example', color: '#245c68', values: [8, 12, 10, 16, 18, 15, 20] }]} xStartLabel={pt ? 'Início' : 'Start'} xEndLabel={pt ? 'Fim' : 'End'} />
+          <StoryChartLegend items={[{label: pt ? 'Série fictícia' : 'Fictional series', color: '#245c68'}]} />
+        </TileCard>
       </Section>
 
       <Section id="movimento" kicker="06" title={pt ? 'O movimento' : 'Motion'} lede={pt ? 'Um só gesto, sempre na mesma tinta: a incerteza mexe-se. Enquanto algo carrega, o ponto percorre a faixa; ao passar o rato pela assinatura, o intervalo abre e fecha. Nada disto acontece sobre uma previsão já publicada.' : 'One gesture, always in the same ink: the uncertainty moves. While something loads, the counter travels the band; on hover, the interval opens and closes. None of it happens over a published forecast.'}>

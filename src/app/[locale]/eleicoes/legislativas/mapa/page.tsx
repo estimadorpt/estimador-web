@@ -8,6 +8,7 @@ import MapPageClient from '@/components/MapPageClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Vote } from 'lucide-react';
+import { Link } from '@/i18n/routing';
 import fs from 'fs';
 import path from 'path';
 
@@ -67,7 +68,7 @@ export default async function MapPage({
         back={{ href: '/eleicoes/legislativas', label: t('map.backToForecast'), locale }}
       />
 
-      <main className="container mx-auto px-4 py-8">
+      <main id="main-content" tabIndex={-1} className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Map */}
@@ -117,7 +118,27 @@ export default async function MapPage({
                   <CardTitle>{t('map.generalStats')}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <MapStats districtForecast={districtForecast} t={t} />
+                  <MapStats districtForecast={districtForecast} t={t} locale={locale} />
+                </CardContent>
+              </Card>
+
+              {/* District seat uncertainty is a better answer to "where could
+                  the outcome change?" than land coloured by leading party —
+                  link to it instead of inventing leader-change odds here. */}
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-sm text-stone-600 mb-3">
+                    {locale === 'pt'
+                      ? 'Esta cor mostra apenas a percentagem de votos prevista. Para saber onde os mandatos podem realmente mudar de partido, ver a análise distrital com o índice ENSC.'
+                      : 'This colour only shows the predicted vote share. For where seats could actually change party, see the district analysis with the ENSC index.'}
+                  </p>
+                  <Link
+                    href="/eleicoes/legislativas#district-analysis"
+                    locale={locale}
+                    className="text-sm font-medium text-ink hover:text-ink-muted"
+                  >
+                    {locale === 'pt' ? 'Ver mandatos em disputa →' : 'See seats in play →'}
+                  </Link>
                 </CardContent>
               </Card>
             </div>
@@ -130,7 +151,7 @@ export default async function MapPage({
 }
 
 // Component for map statistics
-function MapStats({ districtForecast, t }: { districtForecast: DistrictForecast[]; t: (key: string) => string }) {
+function MapStats({ districtForecast, t, locale }: { districtForecast: DistrictForecast[]; t: (key: string) => string; locale: string }) {
   const partyWins = districtForecast.reduce((acc, district) => {
     acc[district.winning_party] = (acc[district.winning_party] || 0) + 1;
     return acc;
@@ -141,6 +162,10 @@ function MapStats({ districtForecast, t }: { districtForecast: DistrictForecast[
 
   return (
     <div className="space-y-3">
+      {/* Leading by predicted vote share, over all districts — the main
+          forecast page separately shows likely winners among only the
+          "stable allocation" subset, which is a smaller, different count
+          (product-audit-2026-09-17-elections-economy.md, "8/4/1 vs 14/5/1"). */}
       <h4 className="font-medium">{t('map.districtsLed')}</h4>
       <div className="space-y-2">
         {sortedParties.map(([party, count]) => (
@@ -153,6 +178,11 @@ function MapStats({ districtForecast, t }: { districtForecast: DistrictForecast[
       <div className="pt-3 border-t">
         <p className="text-sm text-stone-600">
           {t('map.totalDistricts')} {districtForecast.length}
+        </p>
+        <p className="text-xs text-stone-500 mt-1">
+          {locale === 'pt'
+            ? `Todos os ${districtForecast.length} distritos, pelo partido com maior percentagem de votos prevista — não é o número de mandatos prováveis.`
+            : `All ${districtForecast.length} districts, by the party with the highest predicted vote share — not the count of likely seats.`}
         </p>
       </div>
     </div>

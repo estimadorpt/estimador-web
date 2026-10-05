@@ -7,7 +7,49 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { ChevronRight } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+
+/**
+ * The league page's club chooser: a plain select that navigates straight to
+ * the team page. This is the hero's main action (diagnosis §5/9/12 — reading
+ * the outlook is the first task, so the simulator is no longer it), kept in
+ * this file because it is the one football component in scope that is
+ * already a client boundary with router + team-name plumbing.
+ */
+export function ClubChooser({
+  teams,
+  label,
+  placeholder,
+}: {
+  teams: string[];
+  label: string;
+  placeholder: string;
+}) {
+  const router = useRouter();
+  const locale = useLocale();
+  const sorted = [...teams].sort((a, b) => teamDisplayName(a).localeCompare(teamDisplayName(b), "pt"));
+  return (
+    <label className="inline-flex min-w-0 flex-col gap-1 text-left">
+      <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{label}</span>
+      <select
+        defaultValue=""
+        onChange={e => {
+          const slug = ligaTeamSlugs[e.target.value];
+          if (slug) router.push(`/${locale}/desporto/liga/${slug}`);
+        }}
+        className="min-h-11 min-w-[220px] rounded-lg border border-line bg-paper px-3 text-sm text-ink"
+      >
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {sorted.map(team => (
+          <option key={team} value={team}>
+            {teamDisplayName(team)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 /** Final-points quantiles from the season simulation, per team. */
 export interface PointsInterval {
@@ -159,7 +201,22 @@ export function LeagueTable({
 }: LeagueTableProps) {
   const locale = useLocale();
   const router = useRouter();
+  // Read ?club= after mount: useSearchParams would force a Suspense boundary in the static export.
+  const [clubParam, setClubParam] = useState<string | null>(null);
+  useEffect(() => {
+    setClubParam(new URLSearchParams(window.location.search).get("club"));
+  }, []);
   const [showHint, setShowHint] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [isNarrow, setIsNarrow] = useState(false);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsNarrow(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
 
   // Build lookup for actual standings
   const actualLookup = new Map<string, ActualStanding>();
@@ -212,6 +269,19 @@ export function LeagueTable({
 
   if (!data || data.length === 0) return null;
 
+  // ?club= (a slug) drives the phone-compact view: selected row + neighbours,
+  // with a disclosure back to the full table (diagnosis §5 "League page").
+  const selectedIndex = clubParam
+    ? data.findIndex(t => ligaTeamSlugs[t.team] === clubParam)
+    : -1;
+  const compact = selectedIndex >= 0 && isNarrow && !expanded;
+  const NEIGHBOURS = 2;
+  const visibleData = compact
+    ? data.filter((_, i) => Math.abs(i - selectedIndex) <= NEIGHBOURS)
+    : data;
+  const skippedBefore = compact ? Math.max(0, selectedIndex - NEIGHBOURS) : 0;
+  const skippedAfter = compact ? Math.max(0, data.length - 1 - (selectedIndex + NEIGHBOURS)) : 0;
+
   const handleTeamClick = (teamName: string) => {
     const slug = ligaTeamSlugs[teamName];
     if (slug) {
@@ -222,9 +292,24 @@ export function LeagueTable({
 
   return (
     <div className="overflow-x-auto">
+      {showHint && labels.teamClickHint && <p className="mb-4 text-xs text-ink-muted">{labels.teamClickHint} <span aria-hidden="true">↗</span></p>}
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b-2 border-stone-800 text-left">
+          {hasActual && (
+            <tr className="text-left text-[10px] uppercase tracking-wider text-stone-400">
+              <th className="py-1 pr-2" colSpan={2} />
+              <th className="py-1 px-2 text-center" colSpan={2}>
+                {pt ? "Atual" : "Current"}
+              </th>
+              <th
+                className="py-1 px-3 border-l border-stone-200 text-center"
+                colSpan={hasBands ? 5 : 4}
+              >
+                {pt ? "Previsão do modelo" : "Model forecast"}
+              </th>
+            </tr>
+          )}
+          <tr className="border-b border-ink/40 bg-cream text-left">
             <th className="py-2 pr-2 w-8 text-stone-500 font-medium">#</th>
             <th className="py-2 pr-4 font-medium">{labels.team}</th>
             {hasActual && (
@@ -233,7 +318,7 @@ export function LeagueTable({
                 <th className="py-2 px-2 text-right font-medium text-xs">{labels.actualPoints ?? "Pts"}</th>
               </>
             )}
-            <th className="py-2 px-3 text-right font-medium">{labels.meanPoints}</th>
+            <th className={`py-2 px-3 text-right font-medium ${hasActual ? "border-l border-stone-200" : ""}`}>{labels.meanPoints}</th>
             {hasBands && (
               <th className="py-2 px-3 font-medium hidden md:table-cell text-xs text-stone-500 w-[20%]">
                 {bandLabel} <span className="text-stone-400">90%</span>
@@ -246,16 +331,25 @@ export function LeagueTable({
           </tr>
         </thead>
         <tbody>
-          {data.map((team, i) => {
+          {compact && skippedBefore > 0 && (
+            <tr aria-hidden="true">
+              <td colSpan={99} className="py-1 text-center text-[11px] text-stone-400">
+                {pt ? `⋯ ${skippedBefore} equipa(s) acima` : `⋯ ${skippedBefore} team(s) above`}
+              </td>
+            </tr>
+          )}
+          {visibleData.map(team => {
+            const i = data.indexOf(team);
             const color = ligaTeamColors[team.team] || '#5f7062';
             const interval = intervals?.[team.team];
             const isRelegationZone = i >= data.length - 3;
             const isChampionZone = i < 3;
+            const isSelected = i === selectedIndex;
             return (
               <tr
                 key={team.team}
                 className={`border-b border-stone-200 ${
-                  isRelegationZone ? 'bg-red-50/40' : isChampionZone ? 'bg-stone-50' : ''
+                  isSelected ? 'bg-parchment' : isRelegationZone ? 'bg-red-50/40' : isChampionZone ? 'bg-stone-50' : ''
                 }`}
               >
                 <td className="py-2.5 pr-2 text-stone-400 tabular-nums">{i + 1}</td>
@@ -282,25 +376,8 @@ export function LeagueTable({
                     <span className="font-medium text-stone-900 group-hover:text-ink transition-colors hidden sm:inline">
                       {teamDisplayName(team.team)}
                     </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-stone-300 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                    {/* Tooltip on first row */}
-                    <AnimatePresence>
-                      {i === 0 && showHint && labels.teamClickHint && (
-                        <motion.div
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -8 }}
-                          transition={{ duration: 0.3 }}
-                          className="pointer-events-none flex-shrink-0 ml-1"
-                        >
-                          <div className="relative bg-stone-800 text-white text-[11px] px-2.5 py-1 whitespace-nowrap shadow-lg flex items-center">
-                            {/* Arrow pointing left */}
-                            <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-stone-800 rotate-45" />
-                            <span className="relative">{labels.teamClickHint}</span>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    <ChevronRight className="w-3.5 h-3.5 text-ink-muted opacity-60 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+
                   </div>
                 </td>
                 {hasActual && (() => {
@@ -369,8 +446,27 @@ export function LeagueTable({
               </tr>
             );
           })}
+          {compact && skippedAfter > 0 && (
+            <tr aria-hidden="true">
+              <td colSpan={99} className="py-1 text-center text-[11px] text-stone-400">
+                {pt ? `⋯ ${skippedAfter} equipa(s) abaixo` : `⋯ ${skippedAfter} team(s) below`}
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+
+      {selectedIndex >= 0 && isNarrow && (
+        <button
+          type="button"
+          onClick={() => setExpanded(e => !e)}
+          className="mt-3 min-h-11 text-sm font-semibold text-ink underline underline-offset-4"
+        >
+          {expanded
+            ? (pt ? "Mostrar só a minha equipa" : "Show only my club")
+            : (pt ? "Ver tabela completa" : "See the full table")}
+        </button>
+      )}
 
       {/* Legend + the calibration claim. Stated once, next to the thing it
           is a claim about. */}

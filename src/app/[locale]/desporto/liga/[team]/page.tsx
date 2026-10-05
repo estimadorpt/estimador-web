@@ -20,6 +20,9 @@ import { Link } from "@/i18n/routing";
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { buildClubOutlooks, positionSpread } from "@/components/football/club-outlook";
+import { loadGameFixtures } from "@/components/football/load-game-fixtures";
+import { FixtureStakes } from "@/components/football/FixtureStakes";
 
 function ordinal(n: number, locale: string): string {
   if (locale === "pt") return `${n}º`;
@@ -68,9 +71,10 @@ export default async function TeamDetailPage({
   if (!teamName) notFound();
 
   const t = await getTranslations({ locale });
-  const [{ prediction, scenarios }, historical] = await Promise.all([
+  const [{ prediction, scenarios }, historical, gameFixtures] = await Promise.all([
     loadLigaData(),
     loadLigaHistorical(),
+    loadGameFixtures(),
   ]);
 
   if (!prediction) {
@@ -95,6 +99,29 @@ export default async function TeamDetailPage({
   const isTitleContender = pChampion >= 1;
   const isRelegationCandidate = pRelegation >= 1;
   const isMidTable = !isTitleContender && !isRelegationCandidate;
+
+  const forecastDate = new Intl.DateTimeFormat(locale === "pt" ? "pt-PT" : "en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(prediction.timestamp));
+
+  // Which of the three fixed cards (title / top 3 / relegation) carry
+  // information worth their own card — below 1% they fold into one line
+  // instead of three confident-looking 0% headlines (diagnosis §5).
+  const metricCards = [
+    { key: "championship", label: t("football.championship"), value: pChampion },
+    { key: "top3", label: t("football.top3"), value: standing ? standing.p_top3 * 100 : 0 },
+    { key: "relegation", label: t("football.relegation"), value: pRelegation },
+  ];
+  const shownMetrics = standing ? metricCards.filter((m) => m.value >= 1) : [];
+  const foldedMetrics = standing ? metricCards.filter((m) => m.value < 1) : [];
+
+  // This club's own supported fixture and three-outcome stakes, from the
+  // same helper the homepage module uses (diagnosis §5's "a stronger answer
+  // format exists in the product and should be promoted/reused").
+  const clubOutlook = buildClubOutlooks(locale === "pt" ? "pt" : "en", prediction, scenarios, gameFixtures)
+    .find((entry) => entry.team === teamName) ?? null;
 
   // Timeline data: show champion, relegation, or hide for mid-table
   let timelineData: { matchday: number; value: number; lo: number; hi: number }[] = [];
@@ -135,6 +162,7 @@ export default async function TeamDetailPage({
 
   // Position distribution
   const positionProbs = prediction.position_probs?.[teamName];
+  const spread = positionProbs ? positionSpread(positionProbs) : null;
 
   // Projected finish: modal position from position_probs
   let projectedPosition = 0;
@@ -232,32 +260,42 @@ export default async function TeamDetailPage({
     <div className="min-h-screen bg-paper">
       <Header />
 
-      {/* Hero */}
-      <section style={{ backgroundColor: teamColor }}>
+      {/* Hero: the club colour is an accent (stripe + crest), never the
+          background — a readable neutral surface works for all 18 clubs,
+          including a bright yellow one like Arouca that white text on a
+          solid fill would fail (diagnosis §10). */}
+      <section className="bg-cream border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
           <Link
             href="/desporto/liga"
             locale={locale}
-            className="text-white/60 hover:text-white/90 text-xs font-medium uppercase tracking-wider inline-flex items-center gap-1 mb-4 transition-colors"
+            className="text-stone-500 hover:text-ink text-xs font-medium uppercase tracking-wider inline-flex items-center gap-1 mb-4 transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             {t("football.backToLeague")}
           </Link>
-          <div className="flex items-center gap-4 mb-2">
+          <div className="flex items-center gap-3 mb-2">
+            <span aria-hidden="true" className="h-9 w-1.5 shrink-0 rounded-full md:h-11" style={{ backgroundColor: teamColor }} />
             {teamLogoSrc(teamName) && (
               <img
                 src={teamLogoSrc(teamName)}
                 alt=""
-                className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
+                className="w-12 h-12 md:w-16 md:h-16 object-contain"
               />
             )}
-            <h1 className="text-3xl md:text-4xl text-white">
+            <h1 className="text-3xl md:text-4xl text-ink">
               {teamDisplayName(teamName)}
             </h1>
           </div>
-          <p className="text-white/60 text-sm">
+          <p className="text-stone-500 text-sm">
             {t("football.season")} {prediction.season} ·{" "}
             {t("football.matchday")} {prediction.matchday}
+          </p>
+          {/* Recognises a deep arrival: names the club, the forecast date and
+              what the page answers, without assuming the visitor saw the
+              homepage (diagnosis §10, "navigation" paragraph). */}
+          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-stone-600">
+            {t("football.clubPageIntro", { team: teamDisplayName(teamName), date: forecastDate })}
           </p>
         </div>
       </section>
@@ -266,35 +304,35 @@ export default async function TeamDetailPage({
       {standing && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="grid grid-cols-3 gap-6 md:gap-8">
-              <div className="border-t-2 pt-3" style={{ borderColor: teamColor }}>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                  {t("football.championship")}
-                </div>
-                <div className="text-3xl md:text-4xl font-display font-extrabold tabular-nums text-stone-900">
-                  {Math.round(pChampion)}
-                  <span className="text-lg md:text-xl font-bold text-stone-400">%</span>
-                </div>
+            {shownMetrics.length > 0 && (
+              <div className="grid gap-6 md:gap-8" style={{ gridTemplateColumns: `repeat(${shownMetrics.length}, minmax(0, 1fr))` }}>
+                {shownMetrics.map((metric, index) => (
+                  <div
+                    key={metric.key}
+                    className="border-t-2 pt-3"
+                    style={{ borderColor: index === 0 ? teamColor : "var(--color-line)" }}
+                  >
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                      {metric.label}
+                    </div>
+                    <div className="text-3xl md:text-4xl font-display font-extrabold tabular-nums text-stone-900">
+                      {Math.round(metric.value)}
+                      <span className="text-lg md:text-xl font-bold text-stone-400">%</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="border-t-2 border-stone-200 pt-3">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                  {t("football.top3")}
-                </div>
-                <div className="text-3xl md:text-4xl font-display font-extrabold tabular-nums text-stone-900">
-                  {Math.round(standing.p_top3 * 100)}
-                  <span className="text-lg md:text-xl font-bold text-stone-400">%</span>
-                </div>
-              </div>
-              <div className="border-t-2 border-stone-200 pt-3">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                  {t("football.relegation")}
-                </div>
-                <div className="text-3xl md:text-4xl font-display font-extrabold tabular-nums text-stone-900">
-                  {Math.round(pRelegation)}
-                  <span className="text-lg md:text-xl font-bold text-stone-400">%</span>
-                </div>
-              </div>
-            </div>
+            )}
+            {/* Two 0% headline cards waste prime space and can overstate a
+                narrow distinction (diagnosis §5) — fold anything below 1%
+                into one factual line instead of three confident zeros. */}
+            {foldedMetrics.length > 0 && (
+              <p className={`text-sm text-stone-500 ${shownMetrics.length > 0 ? "mt-4" : ""}`}>
+                {t("football.belowOnePercentFold", {
+                  labels: foldedMetrics.map((m) => m.label.toLowerCase()).join(locale === "pt" ? " e " : " and "),
+                })}
+              </p>
+            )}
             {/* Season projection summary */}
             <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-500">
               <span>
@@ -420,6 +458,39 @@ export default async function TeamDetailPage({
               teamColor={teamColor}
               locale={locale}
             />
+            {/* "6th is most likely, at 12%" can overstate a narrow distinction
+                in a broad finish distribution (diagnosis §5) — say so when
+                neighbouring positions carry comparable support. */}
+            {spread?.broad && (
+              <p className="mt-4 text-sm text-stone-600">
+                {t("football.positionSpreadSentence", {
+                  position: ordinal(spread.modalPosition, locale),
+                  range:
+                    locale === "pt"
+                      ? `${ordinal(spread.rangeStart, locale)} a ${ordinal(spread.rangeEnd, locale)}`
+                      : `${ordinal(spread.rangeStart, locale)}–${ordinal(spread.rangeEnd, locale)}`,
+                })}
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* This club's own supported fixture: its relevant objective, dated
+          baseline and the three-outcome stakes, oriented from its own
+          perspective (diagnosis §5's club page, second step). */}
+      {clubOutlook && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              {t("football.fixtureStakesSectionTitle")}
+            </p>
+            <h2 className="text-2xl tracking-tight mb-6">
+              {clubOutlook.opponentLabel
+                ? t("football.fixtureStakesHeading", { team: clubOutlook.label, opponent: clubOutlook.opponentLabel })
+                : t("football.fixtureStakesHeadingNoOpponent", { team: clubOutlook.label })}
+            </h2>
+            <FixtureStakes locale={locale === "pt" ? "pt" : "en"} entry={clubOutlook} />
           </div>
         </section>
       )}
@@ -582,15 +653,21 @@ export default async function TeamDetailPage({
         </section>
       )}
 
-      {/* Featured Matches — for mid-table teams, show how their results affect the race */}
+      {/* Featured matches — this club has no direct stake of its own in these
+          (hasDirectDecisive is false), so every probability shown belongs to
+          the OTHER, named club, not this page's team. The heading and
+          description say so explicitly: a reader must never have to infer
+          whose number is on screen (diagnosis §5/§9, the Casa Pia panel on
+          Arouca's page). Each row's own team badge/name (in DecisiveMatches)
+          still names that club again. */}
       {teamFeaturedMatches && teamFeaturedMatches.length > 0 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
             <h2 className="text-2xl tracking-tight mb-1">
-              {t("football.featuredMatchesFor", { team: teamName })}
+              {t("football.otherClubsImpactFor", { team: teamName })}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
-              {t("football.featuredMatchesForDescription", { team: teamName })}
+              {t("football.otherClubsImpactForDescription", { team: teamName })}
             </p>
             <DecisiveMatches
               matches={teamFeaturedMatches}

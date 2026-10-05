@@ -1,7 +1,9 @@
 "use client";
 
 import React from 'react';
+import { useLocale } from 'next-intl';
 import { SecondRoundWinProbabilityData, SecondRoundValidVotesData } from '@/types';
+import { formatElectionPercent } from '@/lib/election-display';
 
 interface SecondRoundWinnerCardsProps {
   winProbability: SecondRoundWinProbabilityData;
@@ -9,6 +11,7 @@ interface SecondRoundWinnerCardsProps {
   translations: {
     winProbability: string;
     validVoteShare: string;
+    validVotesNote: string;
     versus: string;
   };
 }
@@ -18,16 +21,17 @@ export function SecondRoundWinnerCards({
   validVotes,
   translations,
 }: SecondRoundWinnerCardsProps) {
+  const locale = useLocale();
   const formatPercent = (value: number) => {
     const pct = value * 100;
     if (pct > 99) return '>99%';
     if (pct < 0.01) return '<0.01%';
-    if (pct < 1) return `${pct.toFixed(2)}%`;
-    return `${pct.toFixed(1)}%`;
+    if (pct < 1) return formatElectionPercent(value, locale, 2);
+    return formatElectionPercent(value, locale);
   };
 
   const formatCI = (lower: number, upper: number) => {
-    return `${(lower * 100).toFixed(1)}% - ${(upper * 100).toFixed(1)}%`;
+    return `${formatElectionPercent(lower, locale)} – ${formatElectionPercent(upper, locale)}`;
   };
 
   // Get candidates
@@ -43,18 +47,18 @@ export function SecondRoundWinnerCards({
   const validVotesB = validVotesCandidates.find(c => c.name === candidateB.name);
 
   return (
-    <div className="flex flex-col md:flex-row items-stretch justify-center gap-4 md:gap-8" data-testid="winner-cards">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12" data-testid="winner-cards">
       {/* Candidate A Card */}
-      <div className="flex-1 max-w-md bg-cream rounded-2xl border border-stone-200 overflow-hidden">
+      <div className="min-w-0 border-t border-line">
         <div
-          className="h-2"
+          className="mt-5 h-1 w-8 rounded"
           style={{ backgroundColor: candidateA.color }}
         />
-        <div className="p-6">
+        <div className="py-4">
           <h3 className="text-lg text-stone-900 mb-1">
             {candidateA.name}
           </h3>
-          <div className="text-4xl font-display font-extrabold mb-2" style={{ color: candidateA.color }}>
+          <div className="text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2">
             {formatPercent(candidateA.win_probability)}
           </div>
           <div className="text-xs uppercase tracking-wide text-stone-500 mb-4">
@@ -69,29 +73,25 @@ export function SecondRoundWinnerCards({
               <div className="text-xs text-stone-400 uppercase tracking-wide">
                 {translations.validVoteShare}
               </div>
+              <div className="text-[11px] text-stone-400">
+                {translations.validVotesNote}
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* VS Divider */}
-      <div className="flex items-center justify-center">
-        <span className="text-xl font-bold text-stone-400">
-          {translations.versus}
-        </span>
-      </div>
-
       {/* Candidate B Card */}
-      <div className="flex-1 max-w-md bg-cream rounded-2xl border border-stone-200 overflow-hidden">
+      <div className="min-w-0 border-t border-line">
         <div
-          className="h-2"
+          className="mt-5 h-1 w-8 rounded"
           style={{ backgroundColor: candidateB.color }}
         />
-        <div className="p-6">
+        <div className="py-4">
           <h3 className="text-lg text-stone-900 mb-1">
             {candidateB.name}
           </h3>
-          <div className="text-4xl font-display font-extrabold mb-2" style={{ color: candidateB.color }}>
+          <div className="text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2">
             {formatPercent(candidateB.win_probability)}
           </div>
           <div className="text-xs uppercase tracking-wide text-stone-500 mb-4">
@@ -105,6 +105,9 @@ export function SecondRoundWinnerCards({
               </div>
               <div className="text-xs text-stone-400 uppercase tracking-wide">
                 {translations.validVoteShare}
+              </div>
+              <div className="text-[11px] text-stone-400">
+                {translations.validVotesNote}
               </div>
             </div>
           )}

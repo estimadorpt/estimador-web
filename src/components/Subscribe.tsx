@@ -43,12 +43,14 @@ export async function Subscribe({ variant = 'page' }: SubscribeProps) {
     >
       <div className="max-w-2xl">
         <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">
-          {t('eyebrow')}
+          {ENDPOINT ? t('eyebrow') : t('eyebrowFeed')}
         </p>
         <h2 id="subscribe-heading" className={`font-semibold text-stone-900 ${compact ? 'text-lg' : 'text-xl'} mb-2`}>
-          {t('title')}
+          {ENDPOINT ? t('title') : t('titleFeed')}
         </h2>
-        <p className="text-stone-600 leading-relaxed mb-5">{t('body')}</p>
+        {/* The promise has to match the capability: only offer email delivery
+            when NEXT_PUBLIC_NEWSLETTER_ENDPOINT is actually configured. */}
+        <p className="text-stone-600 leading-relaxed mb-5">{ENDPOINT ? t('body') : t('bodyFeed')}</p>
 
         {ENDPOINT && (
           <form action={ENDPOINT} method="post" target="_blank" rel="noopener" className="mb-4 flex flex-col gap-2 sm:flex-row">

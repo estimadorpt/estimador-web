@@ -106,7 +106,7 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
       <div className="min-h-screen bg-paper">
         <Header />
 
-        <main className="max-w-3xl mx-auto px-4 py-10">
+        <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-4 py-10">
           <nav className="mb-8">
             <Link href="/artigos" locale={locale} className="text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-stone-800">
               ← {t('articles.backToArticles')}

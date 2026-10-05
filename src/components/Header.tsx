@@ -124,10 +124,15 @@ export function Header() {
   return (
     <>
     <header ref={headerRef} onKeyDown={handleEscape} className="border-b border-line bg-paper/95 backdrop-blur-sm sticky top-0 z-50">
-      <a href="#main-content" className={`sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-cream focus:px-4 focus:py-3 focus:text-ink ${focusStyle}`}
-        onClick={() => {
-          const main = document.getElementById('main-content');
-          main?.focus();
+      <a href="#content-start" className={`sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-cream focus:px-4 focus:py-3 focus:text-ink ${focusStyle}`}
+        onClick={(event) => {
+          const main = document.querySelector<HTMLElement>('main');
+          if (main) {
+            event.preventDefault();
+            if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+            main.focus({ preventScroll: true });
+            main.scrollIntoView({ block: 'start' });
+          }
         }}>
         {isPortuguese ? 'Saltar para o conteúdo' : 'Skip to content'}
       </a>
@@ -210,9 +215,9 @@ export function Header() {
         </nav>
       </div>
     </header>
-    {/* Skip-link target. Kept here, immediately after the navigation, so every
-        page has one: the pages own their <main> and not all of them carry an id. */}
-    <div id="main-content" tabIndex={-1} className="outline-none" />
+    {/* No-JavaScript fallback for legacy pages without a main landmark.
+        Page-owned main-content IDs remain unique. */}
+    <div id="content-start" tabIndex={-1} className="outline-none" />
     </>
   );
 }

@@ -17,13 +17,14 @@ function isNum(v: number | null | undefined): v is number {
   return typeof v === 'number' && Number.isFinite(v);
 }
 
-export function StoryLineChart({
+function StoryLinePlot({
   series,
   xStartLabel,
   xEndLabel,
   ariaLabel,
   yFmt = (v: number) => String(Math.round(v)),
   height = 190,
+  width = 640,
 }: {
   series: StorySeries[];
   xStartLabel?: string;
@@ -31,8 +32,9 @@ export function StoryLineChart({
   ariaLabel: string;
   yFmt?: (v: number) => string;
   height?: number;
+  width?: number;
 }) {
-  const W = 640;
+  const W = width;
   const H = height;
   const padL = 34;
   const padR = 10;
@@ -114,7 +116,7 @@ export function StoryLineChart({
             points={pts}
             fill="none"
             stroke={s.color}
-            strokeWidth={1.8}
+            strokeWidth={2}
             strokeDasharray={s.dashed ? '4 3' : undefined}
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -134,6 +136,14 @@ export function StoryLineChart({
       )}
     </svg>
   );
+}
+
+/** Keep labels at a readable size instead of shrinking a 640px drawing onto a phone. */
+export function StoryLineChart(props: Omit<Parameters<typeof StoryLinePlot>[0], 'width'>) {
+  return <>
+    <div className="sm:hidden"><StoryLinePlot {...props} width={320} /></div>
+    <div className="hidden sm:block"><StoryLinePlot {...props} width={640} /></div>
+  </>;
 }
 
 /** Legend chips shared by the story charts: color swatch + label (+ last value). */

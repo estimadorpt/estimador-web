@@ -7,7 +7,6 @@ interface SecondRoundScenariosProps {
   trajectories: SecondRoundTrajectoriesData;
   translations: {
     keyScenarios: string;
-    scenarioVenturaBeatsAD: string;
     scenarioCloseRace: string;
     scenarioVentura40: string;
     scenarioDescription: string;
@@ -50,22 +49,18 @@ export function SecondRoundScenarios({
 
     const n = validVotes.length;
 
-    // Scenario 1: Ventura surpasses AD's 2024 legislative result (32.7%)
-    const adBenchmark = 0.327;
-    const probVenturaBeatsAD = validVotes.filter(v => v.ventura > adBenchmark).length / n;
-
-    // Scenario 2: Close race (margin within 10 points)
+    // Scenario: close race (margin within 10 points) — an intelligible
+    // question about this runoff on its own terms.
     const probCloseRace = validVotes.filter(v => Math.abs(v.seguro - v.ventura) < 0.10).length / n;
 
-    // Scenario 3: Ventura exceeds 40%
+    // Scenario: Ventura exceeds 40% of the valid runoff vote.
     const probVentura40 = validVotes.filter(v => v.ventura > 0.40).length / n;
 
+    // A scenario comparing Ventura's runoff share with AD's 2024 legislative
+    // result was removed: it compared two different elections without a
+    // stated basis for the comparison (see product-audit-2026-09-17).
+
     return [
-      {
-        key: 'venturaBeatsAD',
-        label: translations.scenarioVenturaBeatsAD,
-        probability: probVenturaBeatsAD,
-      },
       {
         key: 'closeRace',
         label: translations.scenarioCloseRace,

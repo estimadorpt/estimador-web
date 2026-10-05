@@ -2,12 +2,14 @@ import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/mdx-components';
+import { loadEconomyDashboard } from '@/lib/utils/data-loader';
+import { economyPaused } from '@/lib/utils/economy-time';
+import { fmtDate } from '@/lib/utils/economy-format';
 
 export async function generateMetadata({
   params
@@ -63,22 +65,96 @@ function getAboutContent(locale: string): { content: string; actualLocale: strin
   throw new Error('No about content found');
 }
 
+/**
+ * "Estado atual" list embedded in the About MDX (`<EstadoAtual />`). Only the
+ * economy line is derived from a loader (`economyPaused`, the same guard the
+ * economy page itself uses) so that line cannot drift from what /economia
+ * actually shows. Population, football and elections status is stable
+ * editorial fact — see CLAUDE.md's "Active Sections" and /populacao/dados —
+ * not something a loader in this file's scope can safely compute.
+ */
+function EstadoAtual({
+  economyIsPaused,
+  economyDateLabel,
+  locale,
+}: {
+  economyIsPaused: boolean;
+  economyDateLabel: string | null;
+  locale: string;
+}) {
+  const pt = locale !== 'en';
+  const economyStatus = economyIsPaused
+    ? (pt
+        ? `Painel em pausa${economyDateLabel ? ` — última leitura: ${economyDateLabel}` : ''}. As explicações continuam disponíveis.`
+        : `Dashboard paused${economyDateLabel ? ` — last reading: ${economyDateLabel}` : ''}. The explanations remain available.`)
+    : (pt
+        ? `Leitura ativa${economyDateLabel ? ` — atualizada a ${economyDateLabel}` : ''}.`
+        : `Active reading${economyDateLabel ? ` — updated ${economyDateLabel}` : ''}.`);
+
+  const items: { label: string; status: string }[] = [
+    { label: pt ? 'Economia' : 'Economy', status: economyStatus },
+    {
+      label: pt ? 'População' : 'Population',
+      status: pt
+        ? 'Demonstração com população fictícia — ainda sem lançamento nacional de investigação.'
+        : 'Demonstration with a fictional population — no national research release yet.',
+    },
+    {
+      label: pt ? 'Liga Portugal' : 'Liga Portugal',
+      status: pt
+        ? 'Em publicação contínua — previsões atualizadas a cada jornada da época em curso.'
+        : 'Published on a continuing basis — forecasts updated every matchday of the current season.',
+    },
+    {
+      label: pt ? 'Eleições Presidenciais 2026' : 'Presidential Elections 2026',
+      status: pt ? 'Arquivo — previsão preservada tal como foi publicada.' : 'Archive — forecast preserved as published.',
+    },
+    {
+      label: pt ? 'Eleições Legislativas 2025' : 'Parliamentary Elections 2025',
+      status: pt ? 'Arquivo — não é atualizado com novos resultados.' : 'Archive — not updated with new results.',
+    },
+  ];
+
+  return (
+    <ul className="mb-5 list-none space-y-3 pl-0">
+      {items.map(item => (
+        <li key={item.label} className="flex flex-col gap-0.5 border-b border-stone-100 pb-3 sm:flex-row sm:items-baseline sm:gap-3">
+          <span className="shrink-0 font-bold text-stone-900 sm:w-56">{item.label}</span>
+          <span className="text-stone-600">{item.status}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default async function AboutPage({
   params
 }: {
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale });
 
   const { content: mdxContent, actualLocale } = getAboutContent(locale);
-  const components = getMDXComponents();
+
+  // The one status this page can derive rather than restate: whether the
+  // economy dashboard is currently paused, using the exact same guard
+  // /economia uses. Everything else is stable editorial fact (see EstadoAtual).
+  const economyData = await loadEconomyDashboard();
+  const economyDateIso = economyData?.as_of ?? economyData?.vintage_date;
+  const economyIsPaused = economyPaused(economyDateIso);
+  const economyDateLabel = economyData?.vintage_date ? fmtDate(economyData.vintage_date, locale) : null;
+
+  const components = getMDXComponents({
+    EstadoAtual: () => (
+      <EstadoAtual economyIsPaused={economyIsPaused} economyDateLabel={economyDateLabel} locale={locale} />
+    ),
+  });
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
 
-      <main className="max-w-3xl mx-auto px-4 py-10 md:py-16">
+      <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-4 py-10 md:py-16">
         {/* Locale Notice (if fallback) */}
         {actualLocale !== locale && (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">

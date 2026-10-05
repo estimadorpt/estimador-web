@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { SectionIllustration, type IllustrationScene } from '@/components/brand/SectionIllustration';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
@@ -23,6 +24,8 @@ interface PageHeroProps {
   meta?: ReactNode;
   /** Decorative mosaic or illustration, placed on the right on wide screens. Never over data. */
   art?: ReactNode;
+  /** Recognisable section scene, in its own column rather than behind text. */
+  illustration?: IllustrationScene;
   /** One soft field per page at most: the entrance colour of a section. */
   field?: 'mint' | 'periwinkle' | 'coral' | 'mustard';
   /** One main action and, at most, one secondary. */
@@ -35,20 +38,21 @@ interface PageHeroProps {
 }
 
 /**
- * The opening of every forecast and dashboard page: kicker, serif title and
+ * The opening of every forecast and dashboard page: kicker, title and
  * lede on the paper ground, closed by a hairline. It replaces the charcoal
  * bands the sections used to open with, so a page now starts the way the
  * atlas does.
  */
-export function PageHero({ eyebrow, icon, title, lede, back, meta, art, field, actions, width = '7xl', compact = false, className = '' }: PageHeroProps) {
+export function PageHero({ eyebrow, icon, title, lede, back, meta, art, illustration, field, actions, width = '7xl', compact = false, className = '' }: PageHeroProps) {
   return (
-    <section className={`relative overflow-hidden border-b border-line ${field ? `field-${field}` : 'bg-paper'} ${className}`}>
-      {art && (
+    <section className={`relative overflow-hidden border-b border-line ${field && !illustration ? `field-${field}` : 'bg-paper'} ${className}`}>
+      {art && !illustration && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 hidden w-[38%] max-w-[520px] lg:block">
           {art}
         </div>
       )}
-      <div className={`relative ${widths[width]} mx-auto px-4 ${compact ? 'pt-6 pb-6 md:pt-7 md:pb-7' : 'pt-8 pb-8 md:pt-10 md:pb-10'}`}>
+      <div className={`relative ${widths[width]} mx-auto px-4 ${illustration ? 'illustrated-hero' : ''} ${compact ? 'pt-6 pb-6 md:pt-7 md:pb-7' : 'pt-8 pb-8 md:pt-10 md:pb-10'}`}>
+        <div className="min-w-0">
         {back && (
           <Link
             href={back.href}
@@ -69,6 +73,8 @@ export function PageHero({ eyebrow, icon, title, lede, back, meta, art, field, a
         {lede && <p className={`max-w-2xl leading-relaxed text-stone-600 ${compact ? 'mt-2 text-base' : 'mt-3 text-base md:text-lg'}`}>{lede}</p>}
         {actions && <div className={`flex flex-wrap items-center gap-x-4 gap-y-3 ${compact ? 'mt-5' : 'mt-6'}`}>{actions}</div>}
         {meta && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-stone-600">{meta}</div>}
+        </div>
+        {illustration && <SectionIllustration scene={illustration} />}
       </div>
     </section>
   );

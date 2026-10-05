@@ -74,7 +74,7 @@ export function Miniature({ locale }: { locale: 'pt' | 'en' }) {
     finally{setExporting(false);}
   }
   async function copyLink(){try{await navigator.clipboard.writeText(window.location.href);setNotice(pt?'Ligação copiada com esta perspetiva.':'Link copied with this perspective.');}catch{setNotice(pt?'Copia a ligação na barra de endereços do navegador.':'Copy the link from your browser address bar.');}}
-  return <main id="main-content" className="miniature" data-motion={paused||reduced?'off':'on'}>
+  return <main id="main-content" tabIndex={-1} className="miniature" data-motion={paused||reduced?'off':'on'}>
     <div className="mini-top"><Link href={atlasReturn} locale={locale} className="mini-back"><ArrowLeft size={15}/>{pt?'Voltar ao atlas':'Back to the atlas'}</Link><span className="mini-edition"><span/> {pt?'LABORATÓRIO · DEMONSTRAÇÃO':'LAB · DEMONSTRATION'}</span></div>
     <div className="mini-heading"><div><p className="mini-eyebrow">{pt?'PORTUGAL EM MINIATURA':'PORTUGAL IN MINIATURE'}</p><h1>{pt?'Um país feito de pessoas.':'A country made of people.'}</h1></div><button className="mini-postcard-button" onClick={openPostcard} disabled={exporting}><ArrowDownToLine size={17}/>{exporting?(pt?'A preparar…':'Preparing…'):(pt?'Criar um postal':'Create a postcard')}</button></div>
     {atlasRegion&&<p className="mini-atlas-origin">{pt?`Agregado do exemplo fictício de ${atlasRegion}. A paisagem é ilustrativa; não representa uma morada real.`:`Household from the fictional ${atlasRegion} example. The landscape is illustrative; it does not represent a real address.`}</p>}

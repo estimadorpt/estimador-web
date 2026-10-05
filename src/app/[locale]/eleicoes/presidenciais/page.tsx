@@ -1,3 +1,4 @@
+import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import { createPageMetadata } from '@/lib/metadata';
 import { loadPresidentialData, loadSecondRoundData } from "@/lib/utils/data-loader";
 import { ArrowRight, Calendar, Users } from "lucide-react";
@@ -6,7 +7,7 @@ import { PresidentialTrendChart } from "@/components/charts/PresidentialTrendCha
 import { PresidentialForecastBars } from "@/components/charts/PresidentialForecastBars";
 import { PresidentialHeadToHead } from "@/components/charts/PresidentialHeadToHead";
 import { PresidentialRunoffPairs } from "@/components/charts/PresidentialRunoffPairs";
-import { SecondRoundView, BannerToggle } from "@/components/SecondRoundView";
+import { SecondRoundView, BannerToggle, RoundDate } from "@/components/SecondRoundView";
 import { Header } from "@/components/Header";
 import { SiteFooter } from '@/components/SiteFooter';
 import { SectionNotes } from "@/components/articles/SectionNotes";
@@ -16,7 +17,8 @@ import { UncertaintyExplainer } from "@/components/UncertaintyExplainer";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
-import { PRESIDENTIAL_2026 } from "@/lib/config/elections";
+import { PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from "@/lib/config/elections";
+import { credibleIntervalLabel } from "@/lib/election-display";
 
 export async function generateMetadata({ 
   params 
@@ -64,31 +66,6 @@ export default async function Home({
   const safeIndex = Math.max(0, cutoffIndex === -1 ? snapshotDates.length - 1 : cutoffIndex);
 
   // Compute runoff probability for each candidate (sum of all pairs where they appear)
-  const computeRunoffProbability = (candidateName: string, pairs: typeof runoffPairs.pairs) => {
-    return pairs.reduce((sum, pair) => {
-      if (pair.candidate_a === candidateName || pair.candidate_b === candidateName) {
-        return sum + pair.probability;
-      }
-      return sum;
-    }, 0);
-  };
-
-  // Get runoff probabilities for headline
-  const runoffProbabilitiesForHeadline = runoffPairs.pairs.length > 0
-    ? Array.from(new Set([
-        ...runoffPairs.pairs.map(p => p.candidate_a),
-        ...runoffPairs.pairs.map(p => p.candidate_b)
-      ])).map(name => ({
-        name,
-        probability: computeRunoffProbability(name, runoffPairs.pairs),
-        color: runoffPairs.pairs.find(p => p.candidate_a === name)?.color_a 
-            || runoffPairs.pairs.find(p => p.candidate_b === name)?.color_b 
-            || '#888',
-      })).sort((a, b) => b.probability - a.probability)
-    : [];
-
-  // Get the leading candidate based on runoff probability
-  const leadingCandidate = runoffProbabilitiesForHeadline[0];
   const secondRoundProbability = winProbabilities.second_round_probability;
   
   // Get the last update date
@@ -108,17 +85,45 @@ export default async function Home({
     return `${Math.round(pct)}%`;
   };
 
+  // Round-specific event date and forecast cutoff, kept as two distinct
+  // pieces of text so neither round shares an ambiguous date with the other.
+  const formatFullDate = (value: string) => new Date(value).toLocaleDateString(
+    locale === 'pt' ? 'pt-PT' : 'en-US',
+    { year: 'numeric', month: 'long', day: 'numeric' }
+  );
+  const firstRoundEventDate = formatFullDate(PRESIDENTIAL_2026.date);
+  const secondRoundEventDate = formatFullDate(PRESIDENTIAL_2026_SECOND_ROUND_DATE);
+  const firstRoundCutoffLabel = lastPollDate
+    ? (locale === 'pt' ? `previsão de ${formatFullDate(lastPollDate)}` : `forecast of ${formatFullDate(lastPollDate)}`)
+    : '';
+  const secondRoundCutoffDate = secondRoundData.forecast.updated_at;
+  const secondRoundCutoffLabel = secondRoundCutoffDate
+    ? (locale === 'pt' ? `previsão de ${formatFullDate(secondRoundCutoffDate)}` : `forecast of ${formatFullDate(secondRoundCutoffDate)}`)
+    : '';
+  // Both forecast bars publish a 95% interval (ci_lower/ci_upper), distinct
+  // from the trend chart's own 50%/90% quantiles — name the exact bounds so
+  // the two visualizations are never read as directly comparable ranges.
+  const forecastConfidenceInterval = credibleIntervalLabel(.025, .975, locale);
+
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="election-page min-h-screen bg-paper">
       <Header />
 
+      <main id="main-content" tabIndex={-1}>
       {/* Presidential Election Banner */}
-      <div className="bg-stone-800 text-white">
+      <div className="border-b border-line bg-cream text-ink">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap gap-3 items-center justify-between text-sm">
           <div className="flex items-center gap-3">
             <span className="font-semibold tracking-wide">{t('presidential.electionName')}</span>
             <span className="text-stone-500">·</span>
-            <span className="text-stone-300">{t('presidential.electionDate', { date: locale === 'pt' ? '18 de janeiro de 2026' : '18 January 2026' })}</span>
+            <span className="text-ink-muted">
+              <RoundDate
+                firstRoundEventDate={firstRoundEventDate}
+                secondRoundEventDate={secondRoundEventDate}
+                firstRoundCutoffLabel={firstRoundCutoffLabel}
+                secondRoundCutoffLabel={secondRoundCutoffLabel}
+              />
+            </span>
           </div>
           <div className="flex items-center gap-4">
             <BannerToggle
@@ -127,13 +132,21 @@ export default async function Home({
                 secondRound: t('secondRound.secondRoundTab'),
               }}
             />
-            <div className="flex items-center gap-2 text-stone-300 bg-stone-700/50 px-3 py-1 rounded-full text-xs">
+            <div className="flex items-center gap-2 text-ink-muted bg-parchment px-3 py-1 rounded-full text-xs">
               <Calendar className="w-3.5 h-3.5" />
               <span className="font-medium">{locale === 'pt' ? 'Arquivo da previsão' : 'Forecast archive'}</span>
             </div>
           </div>
         </div>
       </div>
+
+      <nav aria-label={locale === 'pt' ? 'Neste arquivo' : 'In this archive'} className="border-b border-line bg-paper">
+        <div className="mx-auto flex max-w-7xl flex-wrap gap-x-5 gap-y-2 px-4 py-3 text-sm text-ink-muted">
+          <a href="#forecast" className="hover:text-ink">{locale === 'pt' ? 'O que a previsão dizia' : 'What the forecast said'}</a>
+          <a href="#trajectory" className="hover:text-ink">{locale === 'pt' ? 'Onde havia incerteza' : 'Where uncertainty was'}</a>
+          <a href="#evidence" className="hover:text-ink">{locale === 'pt' ? 'Dados e método' : 'Data and method'}</a>
+        </div>
+      </nav>
 
       <SecondRoundView
         secondRoundData={secondRoundData}
@@ -143,15 +156,12 @@ export default async function Home({
         }}
         translations={{
           title: t('secondRound.title'),
-          headline: t('secondRound.headline', {
-            candidate: secondRoundData.winProbability.candidates[0]?.name || '',
-            probability: formatProbability(secondRoundData.winProbability.candidates[0]?.win_probability || 0)
-          }),
+          headline: locale === 'pt' ? 'Presidenciais 2026: a previsão à data.' : 'Presidential election 2026: the forecast at the time.',
           headlineDescription: t('secondRound.headlineDescription', {
             candidateA: secondRoundData.winProbability.candidates[0]?.name || '',
             candidateB: secondRoundData.winProbability.candidates[1]?.name || ''
           }),
-          basedOnPolls: t('presidential.basedOnPolls'),
+          basedOnPolls: locale === 'pt' ? 'Informação disponível à data' : 'Information available at the time',
           methodology: t('common.methodology'),
           winProbability: t('secondRound.winProbability'),
           validVoteShare: t('secondRound.validVoteShare'),
@@ -162,46 +172,45 @@ export default async function Home({
           fiftyPercentLine: t('secondRound.fiftyPercentLine'),
           showingOutcomes: t('secondRound.showingOutcomes', { count: secondRoundData.trajectories.n_samples }),
           keyScenarios: t('secondRound.keyScenarios'),
-          scenarioVenturaBeatsAD: t('secondRound.scenarioVenturaBeatsAD'),
           scenarioCloseRace: t('secondRound.scenarioCloseRace'),
           scenarioVentura40: t('secondRound.scenarioVentura40'),
           scenarioDescription: t('secondRound.scenarioDescription'),
           projectedVoteShare: t('secondRound.projectedVoteShare'),
-          confidenceInterval: t('presidential.confidenceInterval'),
+          projectedVoteShareNote: t('secondRound.projectedVoteShareNote'),
+          confidenceInterval: forecastConfidenceInterval,
           blankNull: t('secondRound.blankNull'),
+          trajectoryTitle: t('secondRound.supportTrends'),
+          trajectoryDescription: t('secondRound.trendDescription'),
+          noRunoffPollsNote: secondRoundCutoffDate
+            ? t('secondRound.noRunoffPollsNote', { date: formatFullDate(secondRoundCutoffDate) })
+            : '',
         }}
         firstRoundContent={
           <>
             {/* Hero Section - First Round */}
-            <section className="bg-paper border-b border-line">
-              <div className="max-w-7xl mx-auto px-4 py-10">
+            <section id="forecast" className="scroll-mt-24 bg-paper border-b border-line">
+              <div className="illustrated-hero max-w-7xl mx-auto px-4 py-7">
                 <div className="max-w-3xl">
                   <div className="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                    {t('presidential.snapshotNote')}
+                    {locale === 'pt' ? '1.ª volta · previsão arquivada' : 'First round · archived forecast'}
                   </div>
                   <h1 className="text-3xl md:text-4xl text-stone-900 mb-4 leading-tight">
-                    {leadingCandidate ? (
-                      t('presidential.snapshotHeadline', {
-                        candidate: leadingCandidate.name,
-                        probability: formatProbability(leadingCandidate.probability)
-                      })
-                    ) : (
-                      t('presidential.forecastTitle')
-                    )}
+                    {locale === 'pt' ? 'Primeira volta: o que prevíamos.' : 'First round: what we forecast.'}
                   </h1>
                   <p className="text-lg text-stone-600 mb-5 leading-relaxed">
-                    {t('presidential.snapshotDescription', {
-                      secondRoundProbability: formatProbability(secondRoundProbability)
-                    })}
+                    {locale === 'pt'
+                      ? `Na previsão arquivada, a probabilidade de ser necessária uma segunda volta era de ${formatProbability(secondRoundProbability)}.`
+                      : `In the archived forecast, the probability of a second round being required was ${formatProbability(secondRoundProbability)}.`}
                   </p>
                   <div className="flex items-center gap-3 text-sm">
-                    <span className="text-stone-500">{t('presidential.basedOnPolls')}</span>
-                    <span className="text-stone-300">·</span>
+                    <span className="text-stone-500">{locale === 'pt' ? 'Informação disponível à data' : 'Information available at the time'}</span>
+                    <span className="text-ink-muted">·</span>
                     <Link href="/metodologia" locale={locale} className="text-ink hover:text-ink-muted font-medium">
                       {t('common.methodology')}
                     </Link>
                   </div>
                 </div>
+                <SectionIllustration scene="elections" />
               </div>
             </section>
 
@@ -250,18 +259,11 @@ export default async function Home({
                     }}
                   />
                 </ErrorBoundary>
-                {/* Warning box about metric change */}
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-xs text-ink-dark">
-                    <span className="font-semibold">&#x2139;&#xfe0f; {t('presidential.metricChangeTitle')}</span>{' '}
-                    {t('presidential.metricChangeDescription')}
-                  </p>
-                </div>
               </div>
             </section>
 
             {/* Support Trends Chart */}
-            <section className="py-10 border-b border-stone-300">
+            <section id="trajectory" className="scroll-mt-24 py-10 border-b border-stone-300">
               <div className="max-w-7xl mx-auto px-4">
                 <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">
                   {t('presidential.supportTrajectory')}
@@ -349,9 +351,12 @@ export default async function Home({
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
                   {/* Forecast Bars - takes 3 columns */}
                   <div className="lg:col-span-3">
-                    <h3 className="text-xl text-stone-900 mb-6 tracking-tight">
+                    <h3 className="text-xl text-stone-900 mb-1 tracking-tight">
                       {t('presidential.projectedVoteShare')}
                     </h3>
+                    <p className="text-xs text-stone-500 mb-6">
+                      {locale === 'pt' ? 'Previsão para o dia da eleição' : 'Forecast for election day'}
+                    </p>
                     <ErrorBoundary componentName="Forecast Bars">
                       <PresidentialForecastBars
                         forecast={forecast}
@@ -359,7 +364,7 @@ export default async function Home({
                         maxCandidates={8}
                         translations={{
                           projectedVoteShare: t('presidential.projectedVoteShare'),
-                          confidenceInterval: t('presidential.confidenceInterval'),
+                          confidenceInterval: forecastConfidenceInterval,
                         }}
                       />
                     </ErrorBoundary>
@@ -376,7 +381,7 @@ export default async function Home({
                       </p>
                       <div className="border-l-2 border-amber-500 pl-4 py-2 bg-amber-50/50">
                         <p className="text-amber-800 text-sm">
-                          <strong>Note:</strong> {t('presidential.undecidedWarning')}
+                          <strong>{locale === 'pt' ? 'Nota:' : 'Note:'}</strong> {t('presidential.undecidedWarning')}
                         </p>
                       </div>
                       <div className="pt-2">
@@ -443,7 +448,7 @@ export default async function Home({
       </section>
 
       {/* About the forecast */}
-      <section className="border-t border-line">
+      <section id="evidence" className="scroll-mt-24 border-t border-line">
         <div className="max-w-7xl mx-auto px-4 py-10">
           <div className="max-w-2xl">
             <h2 className="text-2xl mb-3">
@@ -460,12 +465,20 @@ export default async function Home({
               <span>·</span>
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                <span>{t('presidential.electionDate', { date: 'Jan 18, 2026' })}</span>
+                <span>
+                  <RoundDate
+                    firstRoundEventDate={firstRoundEventDate}
+                    secondRoundEventDate={secondRoundEventDate}
+                    firstRoundCutoffLabel={firstRoundCutoffLabel}
+                    secondRoundCutoffLabel={secondRoundCutoffLabel}
+                  />
+                </span>
               </div>
             </div>
           </div>
         </div>
       </section>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

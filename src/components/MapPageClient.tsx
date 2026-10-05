@@ -83,8 +83,17 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
                     );
                   })}
               </div>
+              {(() => {
+                const sorted = Object.entries(selectedData.probs).sort(([, a], [, b]) => b - a);
+                const gap = sorted.length >= 2 ? (sorted[0][1] - sorted[1][1]) * 100 : null;
+                return gap != null ? (
+                  <p className="text-xs text-stone-600">
+                    {t('topTwoGap', { gap: gap.toFixed(1) })}
+                  </p>
+                ) : null;
+              })()}
               <div className="pt-2 border-t text-xs text-stone-600">
-                <p>Percentagem de votos prevista para cada partido neste distrito</p>
+                <p>{t('voteShareCaption')}</p>
               </div>
             </div>
           </CardContent>

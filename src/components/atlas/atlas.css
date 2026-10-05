@@ -58,3 +58,22 @@
 /* Phones: the island dock sits in the empty top-right corner and the journey
    scale gets its own ground, so neither hides the south of the map. */
 @media(max-width:720px){.atlas-island-shortcuts{top:14px;right:10px;bottom:auto}.atlas-voyage-progress{background:#102c27b8;padding:5px 8px;border-radius:6px;left:12px;bottom:82px}}
+
+/* The map is illustrative; this compact companion makes the same selection
+   inspectable without relying on colour, point placement or animation. */
+.atlas-accessible-summary{margin:0 28px 28px;padding:18px;border:1px solid #557264;border-radius:8px;background:#173a32;color:#e8eadb}.atlas-accessible-summary h2{font:700 20px var(--font-display)}.atlas-accessible-summary>p,.atlas-accessible-summary caption{margin-top:7px;color:#b9cbb9;font-size:11px;line-height:1.55;text-align:left}.atlas-accessible-summary table{width:100%;margin-top:14px;border-collapse:collapse;font-size:12px}.atlas-accessible-summary th,.atlas-accessible-summary td{padding:9px 6px;border-top:1px solid #557264;text-align:left}.atlas-accessible-summary thead th{color:#cbdac9;font-size:11px}.atlas-accessible-summary tbody th{font-weight:600}@media(max-width:720px){.atlas-accessible-summary{margin:0 16px 20px;padding:14px}.atlas-accessible-summary th,.atlas-accessible-summary td{padding:8px 4px}}
+
+/* Non-tautological evidence for the older/alone journey: alone vs with others,
+   never a single filtered-to-100% bar. */
+.atlas-alone-chart{display:flex;flex-direction:column;gap:10px;max-width:420px}.atlas-alone-bar{display:grid;grid-template-columns:130px 1fr auto;gap:10px;align-items:center;font-size:11px;color:#d7e0cd}.atlas-alone-track{background:#2c4a3d;border-radius:3px;height:6px;overflow:hidden}.atlas-alone-track i{display:block;height:100%;background:#e6c778;transition:width .5s}.atlas-alone-bar strong{font-weight:700;color:#f2eddb;white-space:nowrap}
+@media(max-width:720px){.atlas-alone-bar{grid-template-columns:1fr;gap:4px}}
+
+/* Scope vs camera: the household example note lives in the drawer, next to the
+   inspector, so opening it never looks like the answer above has changed. */
+.atlas-example-note{border-bottom:1px solid #e1e3d7;padding-bottom:16px;margin-bottom:4px;display:flex;flex-direction:column;gap:8px}.atlas-example-note>span{font-size:11px;letter-spacing:1.5px;color:#7c8474}.atlas-example-note>p{font-size:12px;line-height:1.55;color:#5c6a58}.atlas-scope-action{align-self:flex-start;font-size:12px;font-weight:600;text-decoration:underline;text-underline-offset:3px;color:var(--ink)}
+
+/* Filter versus lens: the lens only changes colour/grouping; filters change who is counted. */
+.atlas-lens-hint{font-size:11px;color:#7a8477;margin-top:-13px;line-height:1.5}.atlas-lens-note{font-size:11px;color:#8a6a2f;line-height:1.5}.atlas-active-filter{font-size:13px;font-weight:700;color:var(--ink);margin:2px 0 -6px}
+
+/* Motion is decorative, never a claim about simulated routines. */
+.atlas-motion-note{color:#9fb59f!important;font-style:italic}

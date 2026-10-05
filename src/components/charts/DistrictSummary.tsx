@@ -63,8 +63,13 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
           <h3 className="text-lg text-stone-900 mb-4">
             {t("seatsInPlayTitle", { count: contestedDistricts.length })}
           </h3>
-          <p className="text-sm text-stone-600 mb-4">
+          <p className="text-sm text-stone-600 mb-2">
             {t("seatsInPlayLede")}
+          </p>
+          {/* Named and explained before the ENSC badges below use it, so the
+              term is never seen before its definition. */}
+          <p className="text-xs text-stone-500 mb-4">
+            <strong>{t("enscTerm")}</strong> {t("enscExplainer")}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {contestedDistricts.slice(0, 9).map(district => {
@@ -128,11 +133,17 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
         </div>
       )}
 
-      {/* Safe Districts Summary */}
+      {/* Safe Districts Summary — the per-party tally below counts only the
+          stable-allocation subset, so the subset size is stated at the same
+          point, not just in the totals row further down
+          (product-audit-2026-09-17-elections-economy.md, "8/4/1 vs 14/5/1"). */}
       <div>
-        <h3 className="text-lg text-stone-900 mb-4">
+        <h3 className="text-lg text-stone-900 mb-1">
           {t("likelyWinners")}
         </h3>
+        <p className="text-xs text-stone-500 mb-4">
+          {t("likelyWinnersSubtitle", { count: safeDistricts.length, total: districtData.length })}
+        </p>
         <div className="bg-cream border border-stone-200 rounded-2xl p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {Object.values(partyColors).map((color, index) => {
@@ -175,12 +186,6 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
             <div className="text-2xl font-bold text-green-600">{safeDistricts.length}</div>
             <div className="text-sm text-stone-600">{t("stableAllocation")}</div>
           </div>
-        </div>
-        
-        <div className="mt-4 pt-4 border-t border-stone-200">
-          <p className="text-xs text-stone-500">
-            <strong>{t("enscTerm")}</strong> {t("enscExplainer")}
-          </p>
         </div>
       </div>
     </div>

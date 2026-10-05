@@ -1,6 +1,8 @@
 "use client";
 
+import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import { useSearchParams } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { Suspense } from 'react';
 import { SecondRoundToggle } from './SecondRoundToggle';
 import { SecondRoundWinnerCards } from './charts/SecondRoundWinnerCards';
@@ -8,6 +10,7 @@ import { SecondRoundVoteSplit } from './charts/SecondRoundVoteSplit';
 import { SecondRoundForecastBars } from './charts/SecondRoundForecastBars';
 import { SecondRoundBeeswarm } from './charts/SecondRoundBeeswarm';
 import { SecondRoundScenarios } from './charts/SecondRoundScenarios';
+import { PresidentialTrendChart } from './charts/PresidentialTrendChart';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Link } from '@/i18n/routing';
 import type {
@@ -34,31 +37,39 @@ interface SecondRoundContentProps {
     methodology: string;
     winProbability: string;
     validVoteShare: string;
-    versus: string;
     validVotesNote: string;
+    versus: string;
     simulationDistribution: string;
     simulationDescription: string;
     fiftyPercentLine: string;
     showingOutcomes: string;
     keyScenarios: string;
-    scenarioVenturaBeatsAD: string;
     scenarioCloseRace: string;
     scenarioVentura40: string;
     scenarioDescription: string;
     projectedVoteShare: string;
+    projectedVoteShareNote: string;
     confidenceInterval: string;
     blankNull: string;
+    trajectoryTitle: string;
+    trajectoryDescription: string;
+    noRunoffPollsNote: string;
   };
 }
 
 function SecondRoundContent({ secondRoundData, translations }: SecondRoundContentProps) {
+  const locale = useLocale();
+  const pt = locale !== 'en';
+  const hasTrend = Object.keys(secondRoundData.trends.candidates || {}).length > 0
+    && secondRoundData.trends.dates.length > 0;
   return (
     <>
-      {/* Second Round Hero Section */}
-      <section className="bg-paper border-b border-line">
-        <div className="max-w-7xl mx-auto px-4 py-10">
+      {/* Second Round Hero Section — id="forecast" so the in-page nav's
+          "O que a previsão dizia" link resolves in this round too. */}
+      <section id="forecast" className="scroll-mt-24 bg-paper border-b border-line">
+        <div className="illustrated-hero max-w-7xl mx-auto px-4 py-7">
           <div className="max-w-3xl">
-            <div className="inline-block bg-pink-100 text-pink-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
+            <div className="inline-block bg-moss text-ink text-xs font-semibold px-3 py-1 rounded-full mb-3">
               {translations.title}
             </div>
             <h1 className="text-3xl md:text-4xl text-stone-900 mb-4 leading-tight">
@@ -75,11 +86,12 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
               </Link>
             </div>
           </div>
+          <SectionIllustration scene="elections" />
         </div>
       </section>
 
-      {/* Winner Cards */}
-      <section className="py-8 bg-stone-50 border-b border-stone-200">
+      {/* Winner Cards — central answer and winning probability first */}
+      <section className="py-8 bg-paper border-b border-line">
         <div className="max-w-7xl mx-auto px-4">
           <ErrorBoundary componentName="Winner Cards">
             <SecondRoundWinnerCards
@@ -88,6 +100,7 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
               translations={{
                 winProbability: translations.winProbability,
                 validVoteShare: translations.validVoteShare,
+                validVotesNote: translations.validVotesNote,
                 versus: translations.versus,
               }}
             />
@@ -95,7 +108,7 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
         </div>
       </section>
 
-      {/* Valid Votes Split */}
+      {/* Valid Votes Split — expected vote share, denominator stated */}
       <section className="py-8 bg-cream border-b border-stone-200">
         <div className="max-w-3xl mx-auto px-4">
           <ErrorBoundary componentName="Vote Split">
@@ -106,6 +119,40 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
               }}
             />
           </ErrorBoundary>
+        </div>
+      </section>
+
+      {/* Support trends — the change-over-time/evidence step that was
+          missing in this round (id="trajectory" matches the in-page nav's
+          "Onde havia incerteza" link, which previously had no target here). */}
+      <section id="trajectory" className="scroll-mt-24 py-10 border-b border-stone-300">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">
+            {translations.trajectoryTitle}
+          </h2>
+          <p className="text-sm text-stone-500 mb-3 max-w-xl">
+            {translations.trajectoryDescription}
+          </p>
+          <p className="text-xs text-stone-500 mb-8 max-w-xl border-l-2 border-amber-400 pl-3">
+            {translations.noRunoffPollsNote}
+          </p>
+          {hasTrend ? (
+            <ErrorBoundary componentName="Second Round Trend">
+              <PresidentialTrendChart
+                trends={secondRoundData.trends}
+                showPolls={false}
+                maxCandidates={3}
+                height={380}
+                candidateParam="candidate2"
+              />
+            </ErrorBoundary>
+          ) : (
+            <p className="text-sm text-stone-500">
+              {pt
+                ? 'Não existe uma série temporal para a segunda volta nesta previsão arquivada.'
+                : 'No time series exists for the runoff in this archived forecast.'}
+            </p>
+          )}
         </div>
       </section>
 
@@ -131,14 +178,13 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
       </section>
 
       {/* Key Scenarios */}
-      <section className="py-10 bg-cream border-b border-stone-300">
+      <section className="py-10 bg-paper border-b border-line">
         <div className="max-w-3xl mx-auto px-4">
           <ErrorBoundary componentName="Scenarios">
             <SecondRoundScenarios
               trajectories={secondRoundData.trajectories}
               translations={{
                 keyScenarios: translations.keyScenarios,
-                scenarioVenturaBeatsAD: translations.scenarioVenturaBeatsAD,
                 scenarioCloseRace: translations.scenarioCloseRace,
                 scenarioVentura40: translations.scenarioVentura40,
                 scenarioDescription: translations.scenarioDescription,
@@ -148,12 +194,15 @@ function SecondRoundContent({ secondRoundData, translations }: SecondRoundConten
         </div>
       </section>
 
-      {/* Forecast Bars */}
+      {/* Forecast Bars — includes blank/null, denominator stated */}
       <section className="py-10 border-b border-stone-300">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-2xl text-stone-900 mb-6 tracking-tight">
+          <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">
             {translations.projectedVoteShare}
           </h2>
+          <p className="text-xs text-stone-500 mb-6 max-w-xl">
+            {translations.projectedVoteShareNote}
+          </p>
           <ErrorBoundary componentName="Forecast Bars">
             <SecondRoundForecastBars
               forecast={secondRoundData.forecast}
@@ -251,16 +300,19 @@ export function BannerToggle({ toggleTranslations }: BannerToggleProps) {
   );
 }
 
-// Helper to get current round from searchParams on client
+// Helper to get current round from searchParams on client.
+// Default is round 2 (no `round` param) — this must match SecondRoundViewInner
+// and BannerToggleInner above, or a round-aware label could show the wrong
+// round on first paint.
 function useCurrentRoundInner(): 1 | 2 {
   const searchParams = useSearchParams();
   const roundParam = searchParams.get('round');
-  return roundParam === '2' ? 2 : 1;
+  return roundParam === '1' ? 1 : 2;
 }
 
 export function CurrentRoundProvider({ children }: { children: (round: 1 | 2) => React.ReactNode }) {
   return (
-    <Suspense fallback={children(1)}>
+    <Suspense fallback={children(2)}>
       <CurrentRoundProviderInner>{children}</CurrentRoundProviderInner>
     </Suspense>
   );
@@ -269,4 +321,38 @@ export function CurrentRoundProvider({ children }: { children: (round: 1 | 2) =>
 function CurrentRoundProviderInner({ children }: { children: (round: 1 | 2) => React.ReactNode }) {
   const currentRound = useCurrentRoundInner();
   return <>{children(currentRound)}</>;
+}
+
+/**
+ * Round-aware event date + forecast cutoff, so the banner never shows the
+ * first-round date while second-round content is active (and vice versa).
+ * Event date and cutoff are rendered as two distinct pieces of text — never
+ * merged into a single ambiguous label.
+ */
+export interface RoundDateLabels {
+  firstRoundEventDate: string;
+  secondRoundEventDate: string;
+  firstRoundCutoffLabel: string;
+  secondRoundCutoffLabel: string;
+}
+
+export function RoundDate(props: RoundDateLabels) {
+  return (
+    <Suspense fallback={<>{props.firstRoundEventDate}</>}>
+      <RoundDateInner {...props} />
+    </Suspense>
+  );
+}
+
+function RoundDateInner({ firstRoundEventDate, secondRoundEventDate, firstRoundCutoffLabel, secondRoundCutoffLabel }: RoundDateLabels) {
+  const currentRound = useCurrentRoundInner();
+  const eventDate = currentRound === 1 ? firstRoundEventDate : secondRoundEventDate;
+  const cutoffLabel = currentRound === 1 ? firstRoundCutoffLabel : secondRoundCutoffLabel;
+  return (
+    <>
+      <span>{eventDate}</span>
+      <span className="text-stone-300 mx-2">·</span>
+      <span>{cutoffLabel}</span>
+    </>
+  );
 }

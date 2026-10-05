@@ -5,7 +5,6 @@
 
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { Mosaic } from '@/components/brand/Mosaic';
 
 export async function UnavailableTile({
   title,
@@ -21,9 +20,8 @@ export async function UnavailableTile({
   const t = await getTranslations({ locale, namespace: 'economics' });
   return (
     <section
-      className={`flex gap-5 rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-5 md:p-6 ${className}`}
+      className={`flex gap-5 rounded-2xl border border-line bg-stone-50 p-5 md:p-6 ${className}`}
     >
-      <Mosaic variant="quarters" className="hidden h-16 w-16 flex-none sm:block" ground="#fcfbf5" />
       <div className="min-w-0 flex-1">
         <div className="mb-2 flex items-start justify-between gap-3">
           <h2 className="text-base tracking-tight text-stone-500 md:text-lg">

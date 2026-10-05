@@ -13,6 +13,11 @@ export const PRESIDENTIAL_2026: ElectionConfig = {
   geographicLevel: 'national'
 };
 
+// Second-round (runoff) date, confirmed against second_round_trends.json /
+// second_round_forecast.json ("election_date": "2026-02-08"). The first-round
+// date above (PRESIDENTIAL_2026.date) must never be reused to label the runoff.
+export const PRESIDENTIAL_2026_SECOND_ROUND_DATE = '2026-02-08';
+
 // Parliamentary election 2025
 export const PARLIAMENTARY_2025: ElectionConfig = {
   type: 'parliamentary',

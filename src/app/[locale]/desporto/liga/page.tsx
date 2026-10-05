@@ -1,3 +1,4 @@
+import { TitleProbabilities } from '@/components/football/TitleProbabilities';
 import { createPageMetadata } from '@/lib/metadata';
 import {
   loadLigaWithDeltas,
@@ -5,12 +6,10 @@ import {
   loadLigaSamples,
   loadUpcomingFixtures,
 } from "@/lib/utils/football-data-loader";
-import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
-import { Action } from '@/components/brand/Action';
 import { SiteFooter } from '@/components/SiteFooter';
-import { LeagueTable } from "@/components/charts/football/LeagueTable";
+import { LeagueTable, ClubChooser } from "@/components/charts/football/LeagueTable";
 import type { PointsInterval } from "@/components/charts/football/LeagueTable";
 import { MatchdayPredictions } from "@/components/charts/football/MatchdayPredictions";
 import { TitleRaceChart } from "@/components/charts/football/TitleRaceChart";
@@ -21,7 +20,6 @@ import type { LuckEntry } from "@/components/charts/football/LuckIndex";
 import { SectionNotes } from "@/components/articles/SectionNotes";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { ligaTeamSlugs } from "@/lib/config/football";
 import { Trophy, ArrowRight, SlidersHorizontal, Scale, History, Users, Gamepad2 } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -79,11 +77,11 @@ export default async function LigaPage({
 
   if (!prediction) {
     return (
-      <div className="min-h-screen bg-paper">
+      <div className="football-page min-h-screen bg-paper">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 py-20 text-center text-stone-500">
+        <main id="main-content" tabIndex={-1} className="max-w-7xl mx-auto px-4 py-20 text-center text-stone-500">
           <p>Liga Portugal data not available.</p>
-        </div>
+        </main>
       </div>
     );
   }
@@ -121,11 +119,30 @@ export default async function LigaPage({
     { day: "numeric", month: "long", year: "numeric" }
   );
 
-  return (
-    <div className="min-h-screen bg-paper">
-      <Header />
+  // A concise factual change beside the forecast date (diagnosis §5 "League
+  // page" — "a concise factual change"): the club whose title probability
+  // moved most since the previous published matchday.
+  const biggestMover = prediction.matchday_results?.length && deltas
+    ? Object.values(deltas).reduce<typeof deltas[string] | null>(
+        (best, d) => (!best || Math.abs(d.p_champion_delta) > Math.abs(best.p_champion_delta) ? d : best),
+        null,
+      )
+    : null;
+  const factualChange =
+    biggestMover && Math.abs(biggestMover.p_champion_delta) >= 1
+      ? locale === "pt"
+        ? `${biggestMover.team} ${biggestMover.p_champion_delta > 0 ? "+" : ""}${Math.round(biggestMover.p_champion_delta)}pp no título desde a última jornada`
+        : `${biggestMover.team} ${biggestMover.p_champion_delta > 0 ? "+" : ""}${Math.round(biggestMover.p_champion_delta)}pp on the title since last matchday`
+      : null;
 
+  const allTeams = prediction.table.map(t => t.team);
+
+  return (
+    <div className="football-page min-h-screen bg-paper">
+      <Header />
+      <main id="main-content" tabIndex={-1}>
       <PageHero
+        illustration="football"
         field="periwinkle"
         compact
         icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
@@ -135,12 +152,18 @@ export default async function LigaPage({
           ? "Explora os dados, simula cenários e acompanha o que ainda pode acontecer."
           : "Explore the data, simulate scenarios and follow what can still happen."}
         actions={
-          <>
-            <Action href="/desporto/liga/simulador" locale={locale} arrow>{locale === "pt" ? "Experimentar cenários" : "Try scenarios"}</Action>
-            <Action href="/desporto/liga/jogo-previsoes" locale={locale} variant="text" arrow>{locale === "pt" ? "Contra o Modelo" : "Beat the Model"}</Action>
-          </>
+          <ClubChooser
+            teams={allTeams}
+            label={locale === "pt" ? "A tua equipa" : "Your club"}
+            placeholder={locale === "pt" ? "Escolhe um clube" : "Choose a club"}
+          />
         }
-        meta={<span>{t("football.matchday")} {prediction.matchday} · {t("football.updated")} {updatedDate}</span>}
+        meta={
+          <span>
+            {t("football.matchday")} {prediction.matchday} · {t("football.updated")} {updatedDate}
+            {factualChange ? ` · ${factualChange}` : ""}
+          </span>
+        }
       />
 
       {/* Key stats — top 3 championship probabilities */}
@@ -149,51 +172,84 @@ export default async function LigaPage({
           <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-4">
             {t("football.championshipProbability")}
           </div>
-          <div className="grid grid-cols-3 gap-6 md:gap-8">
-            {[leader, second, third].map((team) => {
-              const teamColor = ligaTeamColors[team.team] || "#5f7062";
-              const teamSlug = ligaTeamSlugs[team.team];
-              const delta = deltas?.[team.team]?.p_champion_delta;
-              const showDelta = delta !== undefined && Math.abs(delta) >= 1;
-              return (
-                <div key={team.team} className="border-t-2 pt-3" style={{ borderColor: teamColor }}>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    {teamLogoSrc(team.team) && (
-                      <img src={teamLogoSrc(team.team)} alt="" className="w-4 h-4 object-contain" />
-                    )}
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
-                      {team.team}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <div className="text-4xl md:text-5xl font-display font-extrabold tabular-nums text-stone-900">
-                      {Math.round(team.p_champion * 100)}
-                      <span className="text-xl md:text-2xl font-bold text-stone-400">%</span>
-                    </div>
-                    {showDelta && (
-                      <span className={`text-sm font-semibold tabular-nums ${delta! > 0 ? "text-emerald-600" : "text-red-500"}`}>
-                        {delta! > 0 ? "\u25B2" : "\u25BC"}{Math.abs(Math.round(delta!))}
-                      </span>
-                    )}
-                  </div>
-                  {teamSlug && (
-                    <Link
-                      href={`/desporto/liga/${teamSlug}`}
-                      locale={locale}
-                      className="text-xs text-stone-400 hover:text-ink inline-flex items-center gap-1 mt-2 transition-colors"
-                    >
-                      {t("football.viewScenarios")}
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <TitleProbabilities teams={[leader, second, third]} deltas={deltas} locale={locale} />
+          <Link
+            href="/desporto/liga/modelo"
+            locale={locale}
+            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-ink hover:text-ink-dark"
+          >
+            {locale === "pt" ? "Como se comportou o modelo até agora" : "How the model has performed so far"}
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </section>
 
-      {/* MatchdayLive section removed — deltas shown inline on cards + table */}
+      {/* Next relevant fixtures and their stakes — moved up ahead of the
+          table (diagnosis §5/9/12: "reading the outlook" and finding what's
+          next are the first tasks, not specialist analyses). */}
+      {!matchdayComplete && upcomingWithProbs.length > 0 && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <h2 className="text-2xl tracking-tight mb-1">
+              {locale === "en" ? "Fixtures to come" : "Jogos por disputar"}
+            </h2>
+            <p className="text-sm text-stone-500 mb-6">
+              {locale === "en"
+                ? "What is left of this matchday, then the next one. Open a fixture for the full preview."
+                : "O que falta desta jornada e a jornada seguinte. Abra um jogo para a análise completa."}
+            </p>
+            <MatchdayPredictions
+              matches={upcomingWithProbs}
+              matchday={prediction.matchday}
+              labels={{
+                home: t("football.home"),
+                draw: t("football.draw"),
+                away: t("football.away"),
+                titleImpact: t("football.titleImpact"),
+                relegationImpact: t("football.relegationImpact"),
+                matchPage: locale === "en" ? "Match preview" : "Análise do jogo",
+              }}
+              decisiveMatches={scenarios?.decisive_matches}
+              matchHrefs={matchHrefs}
+              locale={locale}
+            />
+          </div>
+        </section>
+      )}
+
+      {matchdayComplete && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <h2 className="text-2xl tracking-tight mb-1">
+              {t("football.nextMatchday")} — {t("football.matchday")}{" "}
+              {prediction.next_matchday.matchday}
+            </h2>
+            <p className="text-sm text-stone-500 mb-6">
+              {t("football.nextMatchdayDescription", {
+                matchday: prediction.next_matchday.matchday,
+              })}
+            </p>
+            <MatchdayPredictions
+              matches={prediction.next_matchday.matches}
+              matchday={prediction.next_matchday.matchday}
+              labels={{
+                home: t("football.home"),
+                draw: t("football.draw"),
+                away: t("football.away"),
+                titleImpact: t("football.titleImpact"),
+                relegationImpact: t("football.relegationImpact"),
+                matchOfTheWeek: t("football.matchOfTheWeek"),
+                matchPage: locale === "en" ? "Match preview" : "Análise do jogo",
+              }}
+              decisiveMatches={scenarios?.decisive_matches?.filter(
+                (m) => m.matchday === prediction.next_matchday.matchday
+              )}
+              matchHrefs={matchHrefs}
+              locale={locale}
+            />
+          </div>
+        </section>
+      )}
 
       {/* League Table */}
       <section className="border-b border-stone-200">
@@ -270,70 +326,6 @@ export default async function LigaPage({
         </div>
       </section>
 
-      {/* Simulator CTA — only when current matchday is complete */}
-      {matchdayComplete && scenarios?.next_matchday_scenarios && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <Link
-              href="/desporto/liga/simulador"
-              locale={locale}
-              className="block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
-            >
-              <div className="flex items-start gap-3">
-                <SlidersHorizontal className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2">
-                    <h3 className="text-stone-900">
-                      {t("football.simulator")}
-                    </h3>
-                    <span className="text-xs text-stone-400">
-                      {t("football.matchday")} {prediction.next_matchday.matchday}
-                    </span>
-                  </div>
-                  <p className="text-sm text-stone-500 mt-0.5">
-                    {t("football.simulatorCta")}
-                  </p>
-                </div>
-                <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
-                  {t("football.trySimulator")}
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </span>
-              </div>
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {/* Contra o Modelo — the season-long game. Before the 2026-08 trim
-          this page never linked it at all. */}
-      <section className="border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <Link
-            href="/desporto/liga/jogo-previsoes"
-            locale={locale}
-            className="block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
-          >
-            <div className="flex items-start gap-3">
-              <Gamepad2 className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-stone-900">
-                  {locale === "en" ? "Beat the model" : "Contra o Modelo"}
-                </h3>
-                <p className="text-sm text-stone-500 mt-0.5">
-                  {locale === "en"
-                    ? "Call the next matchday before it kicks off and get scored against the model, all season long."
-                    : "Preveja a próxima jornada antes de começar e compare-se com o modelo, época inteira."}
-                </p>
-              </div>
-              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
-                {locale === "en" ? "Play" : "Jogar"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </span>
-            </div>
-          </Link>
-        </div>
-      </section>
-
       {/* Title Race */}
       {historical.length > 1 && (
         <section className="border-b border-stone-200">
@@ -349,74 +341,8 @@ export default async function LigaPage({
         </section>
       )}
 
-      {/* Fixtures still to play — shown while the matchday is in progress, so
-          there is always a way into the match pages */}
-      {!matchdayComplete && upcomingWithProbs.length > 0 && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
-              {locale === "en" ? "Fixtures to come" : "Jogos por disputar"}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {locale === "en"
-                ? "What is left of this matchday, then the next one. Open a fixture for the full preview."
-                : "O que falta desta jornada e a jornada seguinte. Abra um jogo para a análise completa."}
-            </p>
-            <MatchdayPredictions
-              matches={upcomingWithProbs}
-              matchday={prediction.matchday}
-              labels={{
-                home: t("football.home"),
-                draw: t("football.draw"),
-                away: t("football.away"),
-                titleImpact: t("football.titleImpact"),
-                relegationImpact: t("football.relegationImpact"),
-                matchPage: locale === "en" ? "Match preview" : "Análise do jogo",
-              }}
-              decisiveMatches={scenarios?.decisive_matches}
-              matchHrefs={matchHrefs}
-              locale={locale}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* Next Matchday — only when current matchday is complete */}
-      {matchdayComplete && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
-              {t("football.nextMatchday")} — {t("football.matchday")}{" "}
-              {prediction.next_matchday.matchday}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.nextMatchdayDescription", {
-                matchday: prediction.next_matchday.matchday,
-              })}
-            </p>
-            <MatchdayPredictions
-              matches={prediction.next_matchday.matches}
-              matchday={prediction.next_matchday.matchday}
-              labels={{
-                home: t("football.home"),
-                draw: t("football.draw"),
-                away: t("football.away"),
-                titleImpact: t("football.titleImpact"),
-                relegationImpact: t("football.relegationImpact"),
-                matchOfTheWeek: t("football.matchOfTheWeek"),
-                matchPage: locale === "en" ? "Match preview" : "Análise do jogo",
-              }}
-              decisiveMatches={scenarios?.decisive_matches?.filter(
-                (m) => m.matchday === prediction.next_matchday.matchday
-              )}
-              matchHrefs={matchHrefs}
-              locale={locale}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* Relegation Battle */}
+      {/* Relegation Battle — defaults to the highest-risk club plus a few
+          comparisons; "todas as equipas" stays one click away. */}
       {historical.length > 1 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
@@ -453,6 +379,63 @@ export default async function LigaPage({
           </div>
         </section>
       )}
+
+      {/* Specialist follow-ups — the simulator is a follow-up question, not
+          the primary task (diagnosis §5/9/12: the hero's main action is the
+          club chooser; reading the outlook comes first). */}
+      {scenarios?.next_matchday_scenarios && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <Link
+              href="/desporto/liga/simulador"
+              locale={locale}
+              className="block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+            >
+              <div className="flex items-start gap-3">
+                <SlidersHorizontal className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-stone-900">{t("football.simulator")}</h3>
+                  <p className="text-sm text-stone-500 mt-0.5">
+                    {t("football.simulatorCta")}
+                  </p>
+                </div>
+                <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+                  {t("football.trySimulator")}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </div>
+            </Link>
+          </div>
+        </section>
+      )}
+
+      <section className="border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <Link
+            href="/desporto/liga/jogo-previsoes"
+            locale={locale}
+            className="block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+          >
+            <div className="flex items-start gap-3">
+              <Gamepad2 className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-stone-900">
+                  {locale === "en" ? "Beat the model" : "Contra o Modelo"}
+                </h3>
+                <p className="text-sm text-stone-500 mt-0.5">
+                  {locale === "en"
+                    ? "Call the next matchday before it kicks off and get scored against the model, all season long."
+                    : "Preveja a próxima jornada antes de começar e compare-se com o modelo, época inteira."}
+                </p>
+              </div>
+              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+                {locale === "en" ? "Play" : "Jogar"}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
+            </div>
+          </Link>
+        </div>
+      </section>
 
       {/* Written analysis about the league. Above the model block, which is this
           page's closing furniture — an about paragraph and five links out. */}
@@ -572,6 +555,7 @@ export default async function LigaPage({
           </div>
         </div>
       </section>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

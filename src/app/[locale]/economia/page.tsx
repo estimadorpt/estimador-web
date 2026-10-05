@@ -6,6 +6,7 @@ import { fmtDate } from "@/lib/utils/economy-format";
 import { economyPaused } from "@/lib/utils/economy-time";
 import { Action } from "@/components/brand/Action";
 import { Header } from "@/components/Header";
+import { EconomyReading } from '@/components/economics/EconomyReading';
 import { PageHero } from '@/components/PageHero';
 import { TeaserBand } from '@/components/brand/TeaserBand';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -20,6 +21,7 @@ import {
   StaleAwareNarrative,
 } from "@/components/economics/dashboard/StalenessBanner";
 
+import { WhatChanged } from "@/components/economics/dashboard/WhatChanged";
 import { DisclaimerCard } from "@/components/economics/dashboard/DisclaimerCard";
 import { UnavailableTile } from "@/components/economics/dashboard/UnavailableTile";
 import { HealthScoreTile } from "@/components/economics/dashboard/HealthScoreTile";
@@ -34,7 +36,6 @@ import { LabourTile } from "@/components/economics/dashboard/LabourTile";
 import { InflationTile } from "@/components/economics/dashboard/InflationTile";
 import { SectionNotes } from "@/components/articles/SectionNotes";
 import { StoriesSection } from "@/components/economics/stories/StoriesSection";
-import { NextReleaseLine } from "@/components/economics/stories/ReleaseCalendar";
 
 export async function generateMetadata({
   params,
@@ -62,14 +63,37 @@ export default async function EconomiaPage({
   const data = await loadEconomyDashboard();
   const stories = await loadEconomyStories();
 
-  // Whole-feed failure → honest, non-crashing fallback.
+  // Whole-feed failure → the same explainer/question areas as the paused
+  // branch, with an "unavailable" status instead of a thinner page. The
+  // shared EconomyReading component is the single source of truth for both.
   if (!data) {
     return (
       <div className="min-h-screen bg-paper">
         <Header />
-        <div className="max-w-5xl mx-auto px-4 py-20 text-center text-stone-500">
-          <p>{t("unavailable")}</p>
-        </div>
+        <PageHero
+          width="5xl"
+          field="mint"
+          compact
+          icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          lede={locale === "pt" ? "Perceber o que os indicadores medem — e o que deixam de fora." : "Understand what the indicators measure — and what they leave out."}
+        />
+        <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-6">
+          <EconomyReading
+            locale={locale}
+            showIllustration
+            status={
+              <span className="rounded-full bg-stone-200 px-2.5 py-1 text-stone-700">
+                {t("statusUnavailable")}
+              </span>
+            }
+          />
+          <p className="mt-6 max-w-prose border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-muted">
+            {t("unavailableBody")}
+          </p>
+        </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }
@@ -77,7 +101,9 @@ export default async function EconomiaPage({
   const tiles: EconomyDashboardTiles = data.tiles ?? {};
   const updatedDate = fmtDate(data.vintage_date, locale);
 
-  // Stale beyond the banner's reach: keep the page, drop the numbers.
+  // Stale beyond the banner's reach: keep the page, drop the numbers. The
+  // question and its answer come first — right after a minimal hero — with
+  // the paused status inline beside them, not in a separate section above.
   if (economyPaused(data.as_of ?? data.vintage_date)) {
     return (
       <div className="min-h-screen bg-paper">
@@ -89,19 +115,23 @@ export default async function EconomiaPage({
           icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
           eyebrow={t("eyebrow")}
           title={t("title")}
-          lede={t("pageIntro")}
-          meta={<span>{t("updated")} {updatedDate}</span>}
+          lede={locale === "pt" ? "Perceber o que os indicadores medem — e o que deixam de fora." : "Understand what the indicators measure — and what they leave out."}
         />
-        <main className="max-w-5xl mx-auto px-4 py-8">
-          <section className="rounded-2xl border border-line bg-cream p-6 md:p-8">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{t("pausedKicker")}</p>
-            <h2 className="mt-2 text-2xl">{t("pausedTitle")}</h2>
-            <p className="mt-3 max-w-prose text-stone-600 leading-relaxed">{t("pausedBody", { date: updatedDate })}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Action href="/economia/metodologia" locale={locale} variant="secondary">{t("methodologyLink")}</Action>
-              <Action href="/" locale={locale} variant="text" arrow>{t("pausedBack")}</Action>
-            </div>
-          </section>
+        <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-6">
+          <EconomyReading
+            locale={locale}
+            showIllustration
+            status={
+              <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-800">
+                {t("statusPaused", { date: updatedDate })}
+              </span>
+            }
+          />
+          <details className="mt-8 border-t border-line pt-4 text-sm text-ink-muted">
+            <summary className="cursor-pointer py-3 font-semibold text-ink">{locale === 'pt' ? 'Porque não aparecem números atuais?' : 'Why are current figures unavailable?'}</summary>
+            <p className="my-3 leading-relaxed">{t("pausedBody", { date: updatedDate })}</p>
+            <Action href="/economia/metodologia" locale={locale} variant="text" arrow>{t("methodologyLink")}</Action>
+          </details>
         </main>
         <SiteFooter locale={locale} />
       </div>
@@ -114,6 +144,11 @@ export default async function EconomiaPage({
     locale === "pt"
       ? data.narrative?.pt ?? data.narrative?.en
       : data.narrative?.en ?? data.narrative?.pt;
+
+  const releaseCalendar =
+    stories?.modules?.release_calendar && isModuleAvailable(stories.modules.release_calendar)
+      ? stories.modules.release_calendar
+      : undefined;
 
   return (
     <div className="min-h-screen bg-paper">
@@ -137,20 +172,12 @@ export default async function EconomiaPage({
               <BookOpen aria-hidden="true" className="w-3.5 h-3.5" />
               {t("methodologyLink")}
             </Link>
-            {/* next official release (estimated date, from the stories feed) */}
-            {stories?.modules?.release_calendar &&
-              isModuleAvailable(stories.modules.release_calendar) && (
-                <NextReleaseLine
-                  data={stories.modules.release_calendar}
-                  locale={locale}
-                />
-              )}
           </>
         }
       />
 
       {/* Tiles */}
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-5">
+      <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-8 space-y-5">
         {/* Staleness guard (client-side): banner when the payload is older than
             5 business days + a calendar-derived quarter position, so a stale
             payload can never claim "mid-quarter" after the quarter has ended. */}
@@ -164,7 +191,8 @@ export default async function EconomiaPage({
 
         {/* Narrative lede — the page's plain-language summary, straight from the
             feed (locale-aware). A presentation feature: no model, no new claim.
-            Present-tense claims are demoted once the payload is stale. */}
+            Present-tense claims are demoted once the payload is stale. This is
+            the page's "one dated conclusion + main evidence". */}
         <StaleAwareNarrative
           text={narrative}
           generatedBy={(() => {
@@ -177,6 +205,20 @@ export default async function EconomiaPage({
           locale={locale}
         />
 
+        {/* "What changed since the last reading" + the next relevant release —
+            read from existing payload fields only (contributions.revision_decomposition,
+            the release calendar). Comes before the tile inventory, not after it. */}
+        <WhatChanged
+          revision={tiles.contributions?.revision_decomposition}
+          targetQuarter={tiles.contributions?.target_quarter ?? data.vintage?.target_quarter}
+          nextRelease={releaseCalendar}
+          locale={locale}
+        />
+
+        {/* Question-led paths (prices, work/income, activity) — moved up,
+            ahead of the ten-tile inventory, per the usability diagnosis. */}
+        <EconomyReading locale={locale} />
+
         <DisclaimerCard
           vintageDate={data.vintage_date}
           vintage={data.vintage}
@@ -184,8 +226,11 @@ export default async function EconomiaPage({
           locale={locale}
         />
 
+        {/* The ten-tile instrument inventory, demoted below the dated
+            conclusion and the question-led paths above. The health score is
+            not visually promoted above the facts it summarises. */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* 1 · health score (hero) */}
+          {/* 1 · health score */}
           <div className="lg:col-span-2">
             {isTileAvailable(tiles.health_score) ? (
               <HealthScoreTile data={tiles.health_score} locale={locale} />

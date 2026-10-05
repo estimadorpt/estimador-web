@@ -37,7 +37,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
       if (!container) return;
 
       const width = container.offsetWidth;
-      const height = Math.min(400, width * 0.5);
+      const height = Math.max(280, Math.min(360, width * 0.45));
 
       // Find teams with meaningful championship probability at any point
       const teamsWithChance = new Set<string>();
@@ -86,9 +86,9 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
         width,
         height,
         marginLeft: 45,
-        marginRight: 100,
+        marginRight: width < 500 ? 82 : 120,
         marginBottom: 35,
-        style: { fontFamily: "Manrope, system-ui, sans-serif", fontSize: "12px", background: "transparent", overflow: "visible" },
+        style: { fontFamily: "Manrope, system-ui, sans-serif", fontSize: "12px", background: "transparent", color: "#5f7062", overflow: "visible" },
         x: {
           label: pt ? "Jornada" : "Matchday",
           // Whole matchdays only, thinned to roughly one per 60px.
@@ -99,13 +99,15 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
           label: yAxisLabel,
           domain: [0, 100],
           grid: true,
+          ticks: 5,
+          tickFormat: (d: number) => `${d}%`,
         },
         color: {
           domain: Array.from(teamsWithChance),
           range: Array.from(teamsWithChance).map(t => ligaTeamColors[t] || '#5f7062'),
         },
         marks: [
-          Plot.ruleY([0]),
+          Plot.ruleY([0], { stroke: "#dadccf" }),
           // HDI bands
           ...Array.from(teamsWithChance).map(team =>
             Plot.areaY(
@@ -141,8 +143,8 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
               text: (d: { team: string; p_champion: number }) => `${teamDisplayName(d.team)} ${Math.round(d.p_champion)}%`,
               textAnchor: "start",
               dx: 6,
-              fill: "team",
-              fontSize: 11,
+              fill: "#234c40",
+              fontSize: width < 500 ? 10 : 12,
               fontWeight: "bold",
             }
           ),
@@ -165,8 +167,8 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
   }, [historical, yAxisLabel, pt]);
 
   return (
-    <div className="w-full">
-      <div ref={containerRef} className="w-full min-h-[300px]" />
+    <div className="football-history-chart w-full">
+      <div ref={containerRef} className="w-full min-h-[280px]" />
       <ChartTable caption={`${yAxisLabel} · ${pt ? "valor e intervalo" : "value and interval"}`} columns={table.columns} rows={table.rows} />
     </div>
   );

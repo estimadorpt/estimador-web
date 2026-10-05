@@ -74,12 +74,15 @@ export default async function ForecastPage({
     : null;
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="election-page min-h-screen bg-paper">
       <Header />
 
+      <main id="main-content" tabIndex={-1}>
       <PageHero
+        illustration="elections"
         icon={<Vote aria-hidden="true" className="w-4 h-4" />}
-        eyebrow={t('nav.elections')}
+        eyebrow={locale === "pt" ? "Eleições · Arquivo 2025" : "Elections · 2025 archive"}
+        lede={locale === "pt" ? "Previsões preservadas com a informação disponível à data. Não são resultados eleitorais." : "Forecasts preserved with the information available at the time. These are not election results."}
         title={t('forecast.subtitle')}
         meta={
           <span className="inline-flex items-center gap-1">
@@ -89,14 +92,24 @@ export default async function ForecastPage({
         }
       />
 
+      <nav aria-label={locale === 'pt' ? 'Neste arquivo' : 'In this archive'} className="border-b border-line bg-paper">
+        <div className="mx-auto flex max-w-7xl flex-wrap gap-x-5 gap-y-2 px-4 py-3 text-sm text-ink-muted">
+          <a href="#overview" className="hover:text-ink">{locale === 'pt' ? 'O que a previsão dizia' : 'What the forecast said'}</a>
+          <a href="#polling" className="hover:text-ink">{locale === 'pt' ? 'Onde havia incerteza' : 'Where uncertainty was'}</a>
+          <a href="#evidence" className="hover:text-ink">{locale === 'pt' ? 'Dados e método' : 'Data and method'}</a>
+        </div>
+      </nav>
+
       {/* Summary Stats */}
-      <section className="border-b border-line">
+      <section id="overview" className="scroll-mt-24 border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <ElectionSummaryStats
             probAdMostSeats={probAdMostSeats}
             probPsMostSeats={probPsMostSeats}
             probRightMajority={probRightMajority}
             probLeftMajority={probLeftMajority}
+            rightCoalitionMembers={rightBlocParties.join(' + ')}
+            leftCoalitionMembers={leftBlocParties.join(' + ')}
             translations={{
               mostSeats: t('forecast.mostSeats'),
               rightMajority: t('homepage.rightMajority'),
@@ -107,7 +120,8 @@ export default async function ForecastPage({
               mayoralRaces: t('forecast.mayoralRaces'),
               municipalCouncils: t('forecast.municipalCouncils'),
               mepAllocation: t('forecast.mepAllocation'),
-              politicalGroups: t('forecast.politicalGroups')
+              politicalGroups: t('forecast.politicalGroups'),
+              coalitionArithmeticNote: t('forecast.coalitionArithmeticNote'),
             }}
           />
         </div>
@@ -118,6 +132,7 @@ export default async function ForecastPage({
         <div className="max-w-7xl mx-auto px-4 space-y-8">
           
           {/* Election-Aware Polling Trends */}
+          <div id="polling" className="scroll-mt-24">
           <ElectionAwareContent
             fallback={
               <div className="bg-cream border border-stone-200 rounded-2xl p-6">
@@ -143,6 +158,7 @@ export default async function ForecastPage({
               </p>
             </div>
           </ElectionAwareContent>
+          </div>
 
           {/* Coalition Outcomes */}
           <div className="bg-cream border border-stone-200 rounded-2xl p-6">
@@ -150,16 +166,19 @@ export default async function ForecastPage({
               <BarChart3 className="w-5 h-5 text-stone-400" />
               <h2 className="text-2xl text-stone-900">{t('forecast.coalitionSeats')}</h2>
             </div>
-            <CoalitionDotPlot 
-              data={seatData} 
+            <CoalitionDotPlot
+              data={seatData}
               leftCoalitionLabel={t('forecast.leftCoalition')}
               rightCoalitionLabel={t('forecast.rightCoalition')}
               projectedSeatsLabel={t('forecast.projectedSeats')}
-              majorityLabel={t('forecast.majority')}
+              majorityLabel={t('forecast.majorityThresholdLabel', { seats: majorityThreshold, total: 230 })}
               showingOutcomesLabel={t('forecast.showingOutcomes', { count: seatData.length })}
             />
             <p className="text-sm text-stone-600 mt-4">
               {t('forecast.coalitionDescription')}
+            </p>
+            <p className="text-xs text-stone-500 mt-2">
+              {t('forecast.rightCoalition')} = {rightBlocParties.join(' + ')} · {t('forecast.leftCoalition')} = {leftBlocParties.join(' + ')}. {t('forecast.coalitionArithmeticNote')}
             </p>
           </div>
 
@@ -183,7 +202,7 @@ export default async function ForecastPage({
           </div>
 
           {/* District Analysis */}
-          <div className="bg-cream border border-stone-200 rounded-2xl p-6">
+          <div id="district-analysis" className="scroll-mt-24 bg-cream border border-stone-200 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <Map className="w-5 h-5 text-stone-400" />
@@ -203,7 +222,7 @@ export default async function ForecastPage({
           {/* Coalition Analysis */}
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-              <h3 className="text-lg text-stone-900 mb-4">{t('forecast.leftCoalition')}</h3>
+              <h3 className="text-lg text-stone-900 mb-4">{t('forecast.leftCoalition')} <span className="text-sm font-normal text-stone-400">({leftBlocParties.join(' + ')})</span></h3>
               <div className="space-y-3">
                 {leftBlocParties.map(party => {
                   const partyData = parties.find(p => p.party === party);
@@ -236,7 +255,7 @@ export default async function ForecastPage({
             </div>
 
             <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-              <h3 className="text-lg text-stone-900 mb-4">{t('forecast.rightCoalition')}</h3>
+              <h3 className="text-lg text-stone-900 mb-4">{t('forecast.rightCoalition')} <span className="text-sm font-normal text-stone-400">({rightBlocParties.join(' + ')})</span></h3>
               <div className="space-y-3">
                 {rightBlocParties.map(party => {
                   const partyData = parties.find(p => p.party === party);
@@ -269,17 +288,23 @@ export default async function ForecastPage({
             </div>
           </div>
 
-          {/* Polling Analysis */}
-          <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-6">
+          {/* Polling Analysis — a specialist method/evidence view, not a
+              main-path answer, so it sits behind a disclosure. */}
+          <details className="group bg-cream border border-stone-200 rounded-2xl p-6">
+            <summary className="flex cursor-pointer list-none items-center gap-3">
               <Users className="w-5 h-5 text-stone-400" />
               <h2 className="text-2xl text-stone-900">{t('forecast.pollingHouseEffects')}</h2>
+              <span className="ml-auto text-xs font-bold uppercase tracking-wider text-stone-500 group-open:hidden">
+                {locale === 'pt' ? 'Mostrar' : 'Show'}
+              </span>
+            </summary>
+            <div className="mt-6">
+              <HouseEffects data={houseEffects} />
             </div>
-            <HouseEffects data={houseEffects} />
-          </div>
+          </details>
 
           {/* Model Details */}
-          <div className="bg-paper border border-line rounded-2xl p-6">
+          <div id="evidence" className="scroll-mt-24 bg-paper border border-line rounded-2xl p-6">
             <h3 className="text-lg text-stone-900 mb-4">{t('forecast.aboutModel')}</h3>
             <div className="grid md:grid-cols-3 gap-6 text-sm text-stone-600">
               <div>
@@ -322,6 +347,7 @@ export default async function ForecastPage({
           />
         </div>
       </section>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

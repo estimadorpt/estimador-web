@@ -88,8 +88,8 @@ export async function generateMetadata({
       : "";
 
   const description = pt
-    ? `Previsão do modelo para ${home}-${away}, jornada ${fixture.matchday} da Liga Portugal. ${probLine} O que cada resultado muda no título, na Europa e na descida.`.trim()
-    : `Model forecast for ${home}-${away}, matchday ${fixture.matchday} of Liga Portugal. ${probLine} What each result changes for the title, Europe and relegation.`.trim();
+    ? `Previsão do modelo para ${home}-${away}, jornada ${fixture.matchday} da Liga Portugal. ${probLine} O que cada resultado muda no título, no top 3 e na descida.`.trim()
+    : `Model forecast for ${home}-${away}, matchday ${fixture.matchday} of Liga Portugal. ${probLine} What each result changes for the title, top 3 and relegation.`.trim();
 
   const url = `${SITE}/${locale}/desporto/liga/jogo/${slug}`;
   const image = `${SITE}/${ogImageFilename(locale)}`;

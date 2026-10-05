@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useMemo } from 'react';
+import { useLocale } from 'next-intl';
 import { PresidentialWinProbabilitiesData, PresidentialForecastData, PresidentialTrendsData, PresidentialSnapshotProbabilitiesData, PresidentialChangesData, PresidentialRunoffPairsData, PresidentialRunoffChangesData } from '@/types';
 import { presidentialCandidateParties, partyColors } from '@/lib/config/colors';
+import { credibleIntervalLabel, estimateHorizonLabel, formatElectionPercent } from '@/lib/election-display';
 
 interface PresidentialCandidateCardsProps {
   winProbabilities: PresidentialWinProbabilitiesData;
@@ -60,6 +62,8 @@ export function PresidentialCandidateCards({
     sinceLastPoll: 'since last poll',
   },
 }: PresidentialCandidateCardsProps) {
+  const locale = useLocale();
+  const pt = locale !== 'en';
   // Calculate cutoff index for trends/snapshot data
   const cutoffIndex = useMemo(() => {
     if (!cutoffDate) return -1;
@@ -96,7 +100,12 @@ export function PresidentialCandidateCards({
       // Get values at cutoff date from trends if available
       let displayMean = forecastData?.mean || 0;
       let displayCI = forecastData ? (forecastData.ci_upper - forecastData.ci_lower) / 2 : 0;
-      
+      // Which horizon/quantile the displayed vote share actually reflects,
+      // so the card can say so instead of leaving two differently-scoped
+      // numbers looking equivalent (product-usability-diagnosis-2026-09-17 §7).
+      let horizon: 'current' | 'electionDay' = 'electionDay';
+      let intervalLabel = credibleIntervalLabel(.025, .975, locale);
+
       if (trends && cutoffIndex >= 0 && trends.candidates[wp.name]) {
         const trendData = trends.candidates[wp.name];
         displayMean = trendData.mean[cutoffIndex];
@@ -104,8 +113,10 @@ export function PresidentialCandidateCards({
         const ciLow = trendData.ci_25[cutoffIndex];
         const ciHigh = trendData.ci_75[cutoffIndex];
         displayCI = (ciHigh - ciLow) / 2;
+        horizon = 'current';
+        intervalLabel = credibleIntervalLabel(.25, .75, locale);
       }
-      
+
       // Use runoff probability if available, otherwise fall back to leading probability
       const runoffProb = runoffProbabilities?.[wp.name]?.probability ?? 0;
       const displayRunoffProb = runoffProb > 0 ? runoffProb : wp.leading_probability;
@@ -118,6 +129,8 @@ export function PresidentialCandidateCards({
         forecastData,
         displayMean,
         displayCI,
+        horizon,
+        intervalLabel,
         displayRunoffProb,
         party,
         partyColor: party ? partyColors[party as keyof typeof partyColors] : null,
@@ -127,15 +140,11 @@ export function PresidentialCandidateCards({
     // Sort by runoff probability
     .sort((a, b) => b.displayRunoffProb - a.displayRunoffProb);
 
-  const formatPercent = (value: number) => {
-    return `${(value * 100).toFixed(1)}%`;
-  };
-
   const formatPercentRounded = (value: number) => {
     const pct = value * 100;
     if (pct > 99) return '>99%';
     if (pct < 1) return '<1%';
-    return `${Math.round(pct)}%`;
+    return `${Math.round(pct).toLocaleString(locale === 'en' ? 'en-GB' : 'pt-PT')}%`;
   };
 
   return (
@@ -152,18 +161,18 @@ export function PresidentialCandidateCards({
               style={{ backgroundColor: candidate.color }}
             />
             <div className="min-w-0">
-              <h3 className="text-stone-900 text-sm leading-tight truncate">
+              <h3 className="text-stone-900 text-sm leading-tight">
                 {candidate.name}
               </h3>
               <div className="flex items-center gap-2">
                 {candidate.party ? (
                   <span className="text-xs text-stone-500">{candidate.party}</span>
                 ) : (
-                  <span className="text-xs text-stone-400">Ind.</span>
+                  <span className="text-xs text-stone-400">{pt ? 'Indep.' : 'Ind.'}</span>
                 )}
                 {index === 0 && (
                   <span className="text-[11px] font-bold text-stone-500 uppercase">
-                    · Leader
+                    · {pt ? 'À frente' : 'Leading'}
                   </span>
                 )}
               </div>
@@ -201,14 +210,17 @@ export function PresidentialCandidateCards({
             <div className="pt-2 mt-2 border-t border-stone-100">
               <div className="text-sm tabular-nums">
                 <span className="font-semibold text-stone-800">
-                  {formatPercent(candidate.displayMean)}
+                  {formatElectionPercent(candidate.displayMean, locale)}
                 </span>
                 <span className="text-stone-400 text-xs ml-1">
-                  ±{formatPercent(candidate.displayCI)}
+                  ±{formatElectionPercent(candidate.displayCI, locale)}
                 </span>
               </div>
               <div className="text-[11px] text-stone-400 uppercase tracking-wide">
                 {translations.voteShare}
+              </div>
+              <div className="text-[10px] text-stone-400">
+                {estimateHorizonLabel(candidate.horizon, locale)} · {candidate.intervalLabel}
               </div>
             </div>
           )}

@@ -247,6 +247,12 @@ export interface NextMatchdayScenarioConditional {
 export interface NextMatchdayScenarioMatch {
   home_team: string;
   away_team: string;
+  // Present on disk for every match (next_matchday_scenarios can span
+  // several rounds at once: a postponed leftover, the round in progress and
+  // the next full round), but omitted from this type until football-fixtures.ts
+  // needed it — hence optional, so existing object literals built without it
+  // (e.g. in tests) still satisfy the type.
+  matchday?: number;
   conditionals: Record<'H' | 'D' | 'A', NextMatchdayScenarioConditional>;
 }
 

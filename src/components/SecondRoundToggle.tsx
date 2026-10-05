@@ -28,23 +28,25 @@ export function SecondRoundToggle({ currentRound, translations }: SecondRoundTog
   };
 
   return (
-    <div className="flex items-center gap-1 bg-stone-700/50 rounded-full p-0.5">
+    <div className="flex items-center gap-1 bg-parchment rounded-lg p-1">
       <button
         onClick={() => handleRoundChange(1)}
-        className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
+        aria-pressed={currentRound === 1}
+        className={`min-h-11 px-4 py-2 text-xs font-bold rounded-md transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
           currentRound === 1
-            ? 'bg-cream text-stone-900'
-            : 'text-stone-300 hover:text-white'
+            ? 'bg-ink text-cream'
+            : 'text-ink-muted hover:text-ink'
         }`}
       >
         {translations.firstRound}
       </button>
       <button
         onClick={() => handleRoundChange(2)}
-        className={`px-3 py-1 text-xs font-medium rounded-full transition-all ${
+        aria-pressed={currentRound === 2}
+        className={`min-h-11 px-4 py-2 text-xs font-bold rounded-md transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
           currentRound === 2
-            ? 'bg-cream text-stone-900'
-            : 'text-stone-300 hover:text-white'
+            ? 'bg-ink text-cream'
+            : 'text-ink-muted hover:text-ink'
         }`}
       >
         {translations.secondRound}

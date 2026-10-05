@@ -41,20 +41,20 @@ export function TileCard({
       {accent && (
         <span
           aria-hidden
-          className="absolute inset-x-0 top-0 h-1"
+          className="absolute left-6 top-0 h-0.5 w-12"
           style={{ backgroundColor: accent }}
         />
       )}
-      <div className="flex items-start justify-between gap-3 mb-4">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
         <div className="min-w-0">
           {eyebrow && (
-            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-ink-muted mb-2">
               {eyebrow}
             </div>
           )}
           <h2
             className={`font-bold tracking-tight text-stone-900 ${
-              hero ? 'text-xl md:text-2xl' : 'text-base md:text-lg'
+              hero ? 'text-2xl' : 'text-xl'
             }`}
           >
             {title}

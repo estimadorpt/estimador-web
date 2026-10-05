@@ -66,7 +66,7 @@ export default async function TagPage({ params }: TagPageProps) {
     <div className="min-h-screen bg-paper">
       <Header />
 
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-4 py-12">
         <nav className="mb-8">
           <Link
             href="/artigos/tema"

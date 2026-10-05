@@ -25,7 +25,7 @@ export function CoalitionDotPlot({
   leftCoalitionLabel: leftLabelProp,
   rightCoalitionLabel: rightLabelProp,
   projectedSeatsLabel = "Projected seats",
-  majorityLabel = "Majority",
+  majorityLabel = `Majority (${majorityThreshold} of 230)`,
   showingOutcomesLabel = "Showing {count} simulation outcomes"
 }: CoalitionDotPlotProps) {
   const t = useTranslations("forecast");
@@ -155,11 +155,15 @@ export function CoalitionDotPlot({
           fill: "black"
         }),
         
-        // Majority label
+        // Majority label — `majorityLabel` already names the seat count
+        // (e.g. "Maioria (116 de 230)"); do not append the threshold again.
+        // `text` must be a function: Plot treats a bare string as a column
+        // name to look up in the datum, not literal text, so a plain string
+        // here silently renders as empty (verified against the rendered DOM).
         Plot.text([{ x: majorityThreshold, fy: leftCoalitionLabel }], {
           x: "x",
           fy: "fy",
-          text: `${majorityLabel} (${majorityThreshold})`,
+          text: () => majorityLabel,
           dx: 5,
           dy: -10,
           fontSize: 11,

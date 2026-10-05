@@ -89,16 +89,34 @@ export default async function HomePage({
         return <ElectionsPanel key={section} locale={locale} variant={place === 'lead' ? 'lead' : 'support'} elections={ALL_ELECTIONS} current={current} />;
     }
   };
+  const quickTasks = locale === 'pt'
+    ? [
+        { href: '/economia#compreender', label: 'Inflação' },
+        { href: '/#escolher-equipa', label: 'O meu clube' },
+        { href: '/eleicoes/arquivo', label: 'Eleições' },
+      ]
+    : [
+        { href: '/economia#compreender', label: 'Inflation' },
+        { href: '/#escolher-equipa', label: 'My club' },
+        { href: '/eleicoes/arquivo', label: 'Elections' },
+      ];
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1280px] px-4 py-6 outline-none md:px-6 md:py-8">
+        <nav aria-label={locale === 'pt' ? 'Outras perguntas' : 'Other questions'} className="mb-4 grid grid-cols-3 gap-2 min-[1100px]:hidden">
+          {quickTasks.map(task => (
+            <Link key={task.href} href={task.href} locale={locale} className="inline-flex min-h-11 items-center justify-center rounded-lg border border-line bg-cream px-2 text-sm font-semibold text-ink transition-colors hover:bg-parchment">
+              {task.label}
+            </Link>
+          ))}
+        </nav>
         <div className="grid gap-4 md:gap-6 min-[1100px]:grid-cols-[2fr_1fr]">
           {panel(layout.lead, 'lead')}
           {panel(layout.secondary, 'secondary')}
         </div>
-        <div className="mt-4 grid gap-4 md:mt-6 md:gap-6 min-[1100px]:grid-cols-2">
+        <div className="mt-4 grid gap-4 md:mt-6 md:gap-6 min-[900px]:grid-cols-2">
           {panel(layout.support[0], 'support')}
           {panel(layout.support[1], 'support')}
         </div>

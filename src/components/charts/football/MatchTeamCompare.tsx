@@ -66,7 +66,10 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
     xpts: "xPts",
     xgf: "xGF",
     xga: "xGA",
-    luck: pt ? "Sorte" : "Luck",
+    luck: "Pts − xPts",
+    luckTitle: pt
+      ? "Diferença entre os pontos conquistados e os pontos que a qualidade dos remates (xG) sugeriria — não é uma medida de sorte."
+      : "The gap between points won and the points shot quality (xG) would suggest — not a measure of luck.",
     noXpts: pt ? "Sem xG registado ainda" : "No xG recorded yet",
     resultLetters: pt
       ? { W: "V", D: "E", L: "D" }
@@ -212,7 +215,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
                 {L.xga}: <strong className="text-stone-800">{num(panel.xpts.xga, pt)}</strong>
               </span>
               {luck !== null && (
-                <span>
+                <span title={L.luckTitle}>
                   {L.luck}:{" "}
                   <strong
                     className={

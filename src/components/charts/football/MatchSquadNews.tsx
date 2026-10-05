@@ -84,7 +84,9 @@ function SideCard({
         </div>
         {side.injuries.length === 0 ? (
           <div className="text-xs text-stone-400">
-            {pt ? "Sem baixas registadas." : "No absences on record."}
+            {pt
+              ? "Sem baixas registadas. Isto não garante que o plantel esteja totalmente disponível."
+              : "No absences on record. This is not proof of a fully available squad."}
           </div>
         ) : (
           <ul className="space-y-1.5">
@@ -118,8 +120,13 @@ function SideCard({
       {/* Top players by SAR */}
       <div className="px-4 py-3">
         <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">
-          {pt ? "Jogadores decisivos (SAR)" : "Key players (SAR)"}
+          {pt ? "Finalização (SAR)" : "Finishing (SAR)"}
         </div>
+        <p className="text-[11px] text-stone-400 mb-2 leading-relaxed">
+          {pt
+            ? "Só golos por 90 minutos acima do substituto — uma métrica de avançados, não uma classificação geral de qualidade."
+            : "Goals/90 above replacement only — a forwards metric, not a general quality ranking."}
+        </p>
         {side.topPlayers.length === 0 ? (
           <div className="text-xs text-stone-400">
             {pt ? "Sem jogadores com minutos suficientes." : "No players with enough minutes."}
@@ -183,9 +190,9 @@ export function MatchSquadNews({
       </h2>
       <p className="text-sm text-stone-500 mb-6">
         {pt
-          ? "Baixas conhecidas e os jogadores com maior valor acima do substituto (SAR) em cada equipa."
-          : "Known absentees and each side's highest skill-above-replacement (SAR) players."}
-        {snapshotDate ? ` ${pt ? "Baixas a" : "Absences as of"} ${snapshotDate}.` : ""}
+          ? "Baixas conhecidas e os jogadores com maior valor acima do substituto (SAR) em cada equipa. Baixas e jogadores individuais não entram nesta previsão — o modelo usa resultados e o valor global do plantel."
+          : "Known absentees and each side's highest skill-above-replacement (SAR) players. Neither absences nor individual players feed this forecast — the model uses match results and overall squad value."}
+        {snapshotDate ? ` ${pt ? "Baixas registadas a" : "Absences recorded as of"} ${snapshotDate}.` : ""}
       </p>
       <div className="grid gap-4 md:grid-cols-2">
         <SideCard side={home} locale={locale} unavailable={unavailable} />

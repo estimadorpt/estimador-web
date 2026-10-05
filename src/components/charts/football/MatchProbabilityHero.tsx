@@ -62,6 +62,10 @@ export function MatchProbabilityHero({
       : "Probabilities not published for this fixture yet.",
     favourite: pt ? "Resultado mais provável" : "Most likely outcome",
     finalScore: pt ? "Resultado final" : "Final score",
+    notMajority: (name: string, pct: string) =>
+      pt
+        ? `Favorito entre três resultados — não é o mesmo que ser mais provável do que todas as alternativas juntas: ${name} vence em ${pct}% dos cenários, mas não vence em ${100 - Number(pct)}%.`
+        : `Favourite among three outcomes — not the same as being more likely than all alternatives combined: ${name} wins in ${pct}% of scenarios, but doesn't in ${100 - Number(pct)}%.`,
   };
 
   const outcomes = hasProbs
@@ -178,6 +182,15 @@ export function MatchProbabilityHero({
               </strong>{" "}
               ({Math.round(top.p * 100)}%)
             </div>
+          )}
+
+          {/* "Porto 42% is a favourite among three outcomes, not more likely
+              to win than not" (diagnosis §5/12 "Match page"). Only needed
+              when the top outcome is a plurality, not an outright majority. */}
+          {top && top.p < 0.5 && (
+            <p className="mt-1.5 text-xs text-stone-500 leading-relaxed max-w-xl">
+              {labels.notMajority(top.team ? teamDisplayName(top.team) : labels.draw, String(Math.round(top.p * 100)))}
+            </p>
           )}
         </>
       )}

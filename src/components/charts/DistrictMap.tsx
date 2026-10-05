@@ -33,6 +33,11 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
     } catch { return null; }
   }, [portugalTopoJson, height]);
   const active = regions.get(inspected ?? selectedDistrict ?? '');
+  // "Where was it close?": the descriptive gap between the two highest
+  // estimated vote shares. This is not a probability of a different leader —
+  // that would need simulation draws this dataset does not provide.
+  const activeSorted = active ? Object.entries(active.probs).sort(([, a], [, b]) => b - a) : null;
+  const activeGap = activeSorted && activeSorted.length >= 2 ? activeSorted[0][1] - activeSorted[1][1] : null;
   const choose = (name: string) => {
     const data = regions.get(name);
     setInspected(name);
@@ -62,7 +67,7 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
             {geometry.map(({ name, d }, index) => {
               const region = getRegionForIsland(name);
               const data = regions.get(region);
-              const description = data ? `${region}: ${Object.entries(data.probs).sort(([, a], [, b]) => b - a).map(([party, value]) => `${party} ${format(value)}`).join(', ')}` : region;
+              const description = data ? `${region}: ${Object.entries(data.probs).sort(([, a], [, b]) => b - a).map(([party, value]) => `${party} ${format(value)} ${pt ? 'dos votos (estimativa)' : 'of the vote (estimate)'}`).join(', ')}` : region;
               return <path key={`${name}-${index}`} d={d} fill={partyColors[data?.winning_party] ?? '#dadccf'}
                 stroke={selectedDistrict === region ? '#16362e' : 'white'} strokeWidth={selectedDistrict === region ? 2.5 : 0.8}
                 role={onDistrictClick ? 'button' : 'img'} tabIndex={0} aria-label={description}
@@ -77,9 +82,14 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
         )}
       {active && <p className="mt-2 text-sm text-stone-700" aria-live="polite">
         <strong>{active.district_name}</strong>{' · '}
-        {Object.entries(active.probs).sort(([, a], [, b]) => b - a).map(([party, value]) => `${party} ${format(value)}`).join(' · ')}
+        {activeSorted!.map(([party, value]) => `${party} ${format(value)} ${pt ? 'dos votos (estimativa)' : 'of the vote (estimate)'}`).join(' · ')}
       </p>}
-      <p className="mt-2 text-xs text-stone-500">{pt ? 'A cor indica o partido com maior percentagem de votos prevista. Arquivo da previsão, não resultados oficiais.' : 'Colour shows the party with the highest forecast vote share. Archived forecast, not official results.'}</p>
+      {activeGap != null && (
+        <p className="mt-1 text-xs text-stone-500">
+          {pt ? `Diferença entre os dois primeiros: ${format(activeGap)} dos votos previstos.` : `Gap between the top two: ${format(activeGap)} of the predicted vote.`}
+        </p>
+      )}
+      <p className="mt-2 text-xs text-stone-500">{pt ? 'A cor indica o partido com maior percentagem de votos prevista (estimativa), não uma probabilidade de vitória. Arquivo da previsão, não resultados oficiais.' : 'Colour shows the party with the highest estimated vote share, not a probability of winning. Archived forecast, not official results.'}</p>
     </div>
   );
 }

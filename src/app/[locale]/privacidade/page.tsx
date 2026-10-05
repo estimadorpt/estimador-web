@@ -51,7 +51,7 @@ export default async function PrivacyPage({
     <div className="min-h-screen bg-paper">
       <Header />
 
-      <main className="max-w-3xl mx-auto px-4 py-10 md:py-16">
+      <main id="main-content" tabIndex={-1} className="max-w-3xl mx-auto px-4 py-10 md:py-16">
         {actualLocale !== locale && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-800">

@@ -4,7 +4,7 @@ import { Action } from '@/components/brand/Action';
 import { HomeEconomyFreshness } from '@/components/economics/HomeEconomyFreshness';
 import { fmtDate, fmtProbPct, fmtSignedPctValue } from '@/lib/utils/economy-format';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
-import { HomeArt } from './HomeArt';
+import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import { HomePanel, Kicker, Status } from './HomePanel';
 
 /**
@@ -21,22 +21,25 @@ export async function EconomyPanel({ locale, economy, paused, article }: { local
   const recession = tiles?.recession?.probability;
   const live = !paused && economy && typeof pulse === 'number' && typeof recession === 'number';
   return (
-    <HomePanel labelledBy="home-economy-title" className="grid md:grid-cols-[minmax(200px,42%)_1fr]">
-      <HomeArt name="economy" shape="square" sizes="(min-width: 1100px) 22vw, (min-width: 768px) 40vw, 100vw" className="h-[200px] w-full md:h-full md:min-h-[260px]" />
+    <HomePanel labelledBy="home-economy-title">
       <div className="min-w-0 p-5 md:p-6">
-        <Kicker pill={live ? undefined : tSections('pausedSection')}>{t('economyKicker')}</Kicker>
+        <div className="md:grid md:grid-cols-[minmax(0,1fr)_110px] md:items-center md:gap-4">
+          <div>
+            <Kicker pill={live ? undefined : tSections('pausedSection')}>{t('economyKicker')}</Kicker>
+            <h2 id="home-economy-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{live ? t('economyTitleLive') : t('economyTitlePaused')}</h2>
+          </div>
+          <SectionIllustration scene="economy" className="home-support-scene hidden md:block md:!h-[100px] md:!w-[110px] md:!p-0 md:[&_img]:h-full" />
+        </div>
         {live ? (
           <>
-            <h2 id="home-economy-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{t('economyTitleLive')}</h2>
             <p className="mt-2 text-[15px] font-semibold text-ink">{t('economyFinding', { pulse: fmtSignedPctValue(pulse, 1), recession: fmtProbPct(recession, 0) })}</p>
             <div className="mt-1.5"><HomeEconomyFreshness asOf={economy?.as_of} vintageDate={economy?.vintage_date} locale={locale} /></div>
             <div className="mt-4"><Action href="/economia" locale={locale} variant="secondary" arrow>{t('economyAction')}</Action></div>
           </>
         ) : (
           <>
-            <h2 id="home-economy-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{t('economyTitlePaused')}</h2>
             <p className="mt-2 text-[14px] leading-relaxed text-stone-600">{t('economyPausedText')}</p>
-            <div className="mt-3"><Action href="/economia/metodologia" locale={locale} variant="secondary" arrow>{t('economyMethodsAction')}</Action></div>
+            <div className="mt-3"><Action href="/economia#compreender" locale={locale} variant="secondary" arrow>{t('economyMethodsAction')}</Action></div>
             {economy?.vintage_date && <Status tone="paused">{t('economyPausedStatus', { date: fmtDate(economy.vintage_date, locale) })}</Status>}
           </>
         )}
