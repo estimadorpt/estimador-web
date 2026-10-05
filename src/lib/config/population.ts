@@ -6,7 +6,7 @@
  * here, and update the download links. Old versioned data stays readable until
  * it is deleted, so shared links can say which release they used.
  */
-export const POPULATION_RELEASE = '1.0.0';
+export const POPULATION_RELEASE = '1.0.1';
 
 /** Publication date of the release (also day 0 of Freguesia Misteriosa). */
 export const POPULATION_PUBLISHED = '2026-10-05';
@@ -27,11 +27,14 @@ const ASSET = (name: string) => `${REPO}/releases/download/v${POPULATION_RELEASE
 export const POPULATION_DOWNLOADS = {
   repository: REPO,
   release: `${REPO}/releases/tag/v${POPULATION_RELEASE}`,
-  modelCard: `${REPO}/blob/main/MODEL_CARD.md`,
-  errata: `${REPO}/blob/main/ERRATA.md`,
+  // Pinned to the release's tag, so the documents match the data the site serves.
+  modelCard: `${REPO}/blob/v${POPULATION_RELEASE}/MODEL_CARD.md`,
+  errata: `${REPO}/blob/v${POPULATION_RELEASE}/ERRATA.md`,
+  /** v1.0.0, published and superseded on 2026-10-05 (same microdata; its public answers applied launch thresholds). */
+  superseded: `${REPO}/releases/tag/v1.0.0`,
   issues: `${REPO}/issues`,
   files: [
-    { key: 'package', name: `pt-synthpop-v${POPULATION_RELEASE}.zip`, bytes: 181_795_845 },
+    { key: 'package', name: `pt-synthpop-v${POPULATION_RELEASE}.zip`, bytes: 181_763_298 },
     { key: 'persons', name: `pt-synthpop-v${POPULATION_RELEASE}-persons.parquet`, bytes: 78_216_680 },
     { key: 'households', name: `pt-synthpop-v${POPULATION_RELEASE}-households.parquet`, bytes: 6_766_126 },
     { key: 'quality', name: `pt-synthpop-v${POPULATION_RELEASE}-quality.csv`, bytes: 667_983 },

@@ -5,8 +5,9 @@ import { formatCount, type MunicipalityListing } from './places';
 
 /**
  * A region's parishes, município by município (both alphabetical), each with
- * its INE resident count and whether its page shows the parish's own figures
- * or its município's. Residents are INE's Census 2021 counts, never summed.
+ * its INE resident count and its quality tier (every parish page shows the
+ * parish's own figures; a município fallback, which the contract can still
+ * express, is flagged). Residents are INE's Census 2021 counts, never summed.
  */
 export function RegionParishes({ municipalities, locale }: { municipalities: MunicipalityListing[]; locale: Locale }) {
   const pt = locale === 'pt';
@@ -29,8 +30,8 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Mun
       <div className="mb-6 max-w-3xl space-y-2 text-sm leading-relaxed text-stone-600">
         <p>
           {pt
-            ? 'Cada freguesia abre a sua página com as respostas da população sintética. As marcadas com a qualidade A ou B mostram os seus próprios valores; as marcadas com «Valores do concelho» mostram os do concelho a que pertencem, e a página di-lo.'
-            : 'Each parish opens its own page with the synthetic population’s answers. Those marked quality A or B show their own figures; those marked “Municipality figures” show their municipality’s, and the page says so.'}
+            ? 'Cada freguesia abre a sua página com as respostas da população sintética, com os seus próprios números. A qualidade diz quão perto a população gerada fica das tabelas do INE: A e B de perto; C numa freguesia pequena ou com um ajuste mais fraco, a ler com mais cuidado.'
+            : 'Each parish opens its own page with the synthetic population’s answers, in its own figures. The quality tier says how close the generated population sits to INE’s tables: A and B closely; C in a small parish or one with a weaker fit, to read with more care.'}
         </p>
         <p>
           {pt
@@ -60,7 +61,7 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Mun
                   <tr>
                     <th scope="col" className="border-b-2 border-ink px-2 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{pt ? 'Freguesia' : 'Parish'}</th>
                     <th scope="col" className="border-b-2 border-ink px-2 py-2 text-right text-[11px] font-bold uppercase tracking-wider text-stone-600">{residents}</th>
-                    <th scope="col" className="border-b-2 border-ink px-2 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{pt ? 'Valores mostrados' : 'Figures shown'}</th>
+                    <th scope="col" className="border-b-2 border-ink px-2 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{pt ? 'Qualidade do ajuste' : 'Quality of fit'}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -73,9 +74,10 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Mun
                       </th>
                       <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums text-ink">{formatCount(parish.censusPopulation, locale)}</td>
                       <td className="px-2 py-2">
-                        {parish.level === 'parish'
-                          ? <QualityBadge kind={parish.tier} locale={locale} title={TIER_COPY[parish.tier].meaning[locale]} className="whitespace-nowrap" />
-                          : <QualityBadge kind="municipality" locale={locale} title={TIER_COPY.C.meaning[locale]} className="whitespace-nowrap" />}
+                        <span className="flex flex-wrap gap-1.5">
+                          <QualityBadge kind={parish.tier} locale={locale} title={TIER_COPY[parish.tier].meaning[locale]} className="whitespace-nowrap" />
+                          {parish.level === 'municipality' && <QualityBadge kind="municipality" locale={locale} className="whitespace-nowrap" />}
+                        </span>
                       </td>
                     </tr>
                   ))}

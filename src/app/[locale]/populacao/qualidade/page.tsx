@@ -14,6 +14,7 @@ import {
   PRIVACY_FINDINGS,
   RELEASE_GATES,
   SIZE_BAND,
+  SUPERSEDED,
   formatCount,
   formatDay,
   formatFit,
@@ -32,15 +33,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: POPULATION_ROUTES.quality,
     title: pt ? 'Como sabemos que a população sintética funciona?' : 'How do we know the synthetic population works?',
     description: pt
-      ? 'Critérios de publicação, ajuste às tabelas do INE por tamanho de freguesia, níveis de qualidade, privacidade e limitações conhecidas da versão 1.0.0.'
-      : 'Release gates, fit to INE’s tables by parish size, quality tiers, privacy and the known limitations of release 1.0.0.',
+      ? `Critérios de publicação, ajuste às tabelas do INE por tamanho de freguesia, níveis de qualidade, privacidade e limitações conhecidas da versão ${POPULATION_RELEASE}.`
+      : `Release gates, fit to INE’s tables by parish size, quality tiers, privacy and the known limitations of release ${POPULATION_RELEASE}.`,
   });
 }
 
 const TIER_PAGE: Record<'A' | 'B' | 'C', { pt: string; en: string }> = {
   A: {
-    pt: 'Na página da freguesia, todas as perguntas são respondidas com os números da própria freguesia.',
-    en: 'On the parish page, every question is answered with the parish’s own figures.',
+    pt: 'Na página da freguesia, todas as perguntas são respondidas com os números da própria freguesia, com este nível ao lado.',
+    en: 'On the parish page, every question is answered with the parish’s own figures, with this tier beside them.',
   },
   B: {
     pt: 'Os números são os da própria freguesia, mas os cruzamentos mais finos são recusados:',
@@ -64,7 +65,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
     : [];
 
   // What a tier means for its parish page, from this release's own decisions:
-  // a fallback or a refusal is only described when the release takes one.
+  // a fallback or a refusal is only described when the release takes one
+  // (v1.0.1 takes neither: every parish answers with its own figures).
   const takesFallback = (meta?.counts.decisions.fallback ?? 0) > 0;
   const tierOnPage = (tier: 'A' | 'B' | 'C'): string => {
     if (tier === 'B' && aOnly.length > 0) return `${TIER_PAGE.B[locale]} ${aOnly.join(', ').toLowerCase()}.`;
@@ -131,12 +133,14 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   label={pt ? 'Auditoria de privacidade' : 'Privacy audit'}
                   value={scorecard.privacy.status === 'pass' ? (pt ? 'Aprovada' : 'Passed') : (pt ? 'Por confirmar' : 'Not confirmed')}
                 >
-                  {pt ? 'Auditoria nacional, feita sobre a população da versão 1.0.0.' : 'A national audit, run on the release 1.0.0 population.'}
+                  {pt
+                    ? `Auditoria nacional, feita sobre a população da versão 1.0.0, a mesma da versão ${POPULATION_RELEASE}.`
+                    : `A national audit, run on the release 1.0.0 population, which release ${POPULATION_RELEASE} keeps unchanged.`}
                 </StatusItem>
               </div>
               <div className="rounded-2xl border border-line bg-cream p-5 md:p-6">
                 <h3 className="text-lg font-bold text-ink">{pt ? 'Os critérios que decidem a publicação' : 'The gates the release depends on'}</h3>
-                <p className="mt-1 text-sm text-stone-500">{pt ? 'Da ficha do modelo, versão 1.0.0' : 'From the model card, release 1.0.0'}</p>
+                <p className="mt-1 text-sm text-stone-500">{pt ? `Da ficha do modelo, versão ${POPULATION_RELEASE}` : `From the model card, release ${POPULATION_RELEASE}`}</p>
                 <ul className="mt-4 space-y-2.5">
                   {RELEASE_GATES.map(gate => (
                     <li key={gate.en} className="flex gap-2.5 text-[15px] leading-relaxed text-ink">
@@ -208,8 +212,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               id="niveis"
               title={pt ? 'O que quer dizer qualidade A, B ou C?' : 'What do quality A, B and C mean?'}
               lede={<p>{pt
-                ? 'Todas as freguesias são publicadas. Cada uma tem um nível de qualidade, e o nível decide o que a página da freguesia mostra. As contagens são as da versão publicada.'
-                : 'Every parish is published. Each carries a quality tier, and the tier decides what its parish page shows. The counts are the published release’s.'}</p>}
+                ? 'Todas as freguesias são publicadas, e todas respondem com os seus próprios números. Cada uma tem um nível de qualidade: diz quão perto a população gerada fica das tabelas do INE e com que cuidado ler os números, mas não esconde nada. As contagens são as da versão publicada.'
+                : 'Every parish is published, and every parish answers with its own figures. Each carries a quality tier: it says how close the generated population sits to INE’s tables and how carefully to read the numbers, but it hides nothing. The counts are the published release’s.'}</p>}
             >
               <div className="grid gap-4 md:grid-cols-3">
                 {(['A', 'B', 'C'] as const).map(tier => (
@@ -224,11 +228,25 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   </div>
                 ))}
               </div>
-              {meta.counts.suppressed_cells > 0 && <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
+              <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
+                {pt ? 'Os limiares de cada nível: ' : 'Each tier’s thresholds: '}
                 {pt
-                  ? `Em qualquer nível, uma categoria com menos de ${meta.minimum_cell} pessoas ou agregados gerados aparece como «Suprimido», nunca como zero.`
-                  : `At any tier, a category with fewer than ${meta.minimum_cell} generated people or households shows as “Suppressed”, never as zero.`}
-              </p>}
+                  ? 'A, erro típico até 0,10, a pior tabela até 0,18 e 2 000 ou mais residentes; B, até 0,15 e 0,26 com 500 ou mais residentes; C, as restantes. Uma freguesia com menos de 500 residentes fica no nível C.'
+                  : 'A, typical error up to 0.10, worst table up to 0.18 and 2,000 or more residents; B, up to 0.15 and 0.26 with 500 or more residents; C, the rest. A parish under 500 residents sits in tier C.'}
+              </p>
+              {meta.counts.suppressed_cells > 0 ? (
+                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-stone-600">
+                  {pt
+                    ? `Em qualquer nível, uma categoria com menos de ${meta.minimum_cell} pessoas ou agregados gerados aparece como «Suprimido», nunca como zero.`
+                    : `At any tier, a category with fewer than ${meta.minimum_cell} generated people or households shows as “Suppressed”, never as zero.`}
+                </p>
+              ) : (
+                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-stone-600">{HONESTY.zero[locale]}</p>
+              )}
+              <div className="mt-6 max-w-3xl rounded-2xl border border-line bg-cream p-5">
+                <h3 className="text-base font-bold text-ink">{pt ? 'Porque é que a versão 1.0.1 substituiu a 1.0.0?' : 'Why did release 1.0.1 replace 1.0.0?'}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-stone-700">{SUPERSEDED[locale]}</p>
+              </div>
             </Section>
 
             <Section
@@ -257,7 +275,9 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
             <Section
               id="limitacoes"
               title={pt ? 'Onde é que os dados são mais fracos?' : 'Where are the data weakest?'}
-              lede={<p>{pt ? 'Limitações conhecidas da versão 1.0.0, declaradas em vez de escondidas. A próxima versão tem um plano para cada uma.' : 'Known limitations of release 1.0.0, declared rather than hidden. The next release has a plan for each.'}</p>}
+              lede={<p>{pt
+                ? `Limitações conhecidas da população gerada (a mesma nas versões 1.0.0 e ${POPULATION_RELEASE}), declaradas em vez de escondidas. A próxima versão tem um plano para cada uma.`
+                : `Known limitations of the generated population (the same in releases 1.0.0 and ${POPULATION_RELEASE}), declared rather than hidden. The next release has a plan for each.`}</p>}
             >
               <ol className="grid gap-4 md:grid-cols-2">
                 {LIMITATIONS.map(limitation => (

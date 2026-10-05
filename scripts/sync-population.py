@@ -33,19 +33,20 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-RELEASE = "1.0.0"
+RELEASE = "1.0.1"
 PUBLISHED = "2026-10-05"
 CONTRACT = "1.0"
 
-# doc 206 §1 (full hashes where the handoff gives them, prefixes where it abbreviates).
+# doc 206 §5 (v1.0.1, supersedes v1.0.0's public answers; full hashes where the handoff
+# gives them, prefixes where it abbreviates).
 PINNED = {
-    "bundle": "a7e40fe1851ff88eb71a55fb1418dbdf5ac488554fbf330ca077227e4bfc0b63",
-    "scorecard": "6906619617043bc37242be919fb2773e59edb402bd2a6adb6188f12e15db8dda",
-    "checksums": "e85bc2da93cc0b745ca2b4aa4e81317241bf39c1d13402d7b2552130dac2c2f1",
-    "portrait_index": "bb2b4d1a",
-    "mystery_deck": "9abac645",
-    "responses_index": "d4aece3b",
-    "bindings": "91d58671",
+    "bundle": "bb3f453ec176e164ffd2edc287c6c7c3584ed3aee3209f0ef6283db56802cf56",
+    "scorecard": "57af11327f3764b0f032cc16a566334b08f4fee8fdb18a7e7b42cc55deb12057",
+    "checksums": "5145f8158afd99684ef118f3f95e03396a17276a2ffbe7c8573981ac87a46305",
+    "portrait_index": "1f55660f",
+    "mystery_deck": "996151ce",
+    "responses_index": "5ed0f8b8",
+    "bindings": "febecdba",
 }
 MODEL_SHA256 = "062e2ad784886b7287536233f853db151c57615d2b1a952fb2e12368581e76d3"
 
@@ -109,8 +110,8 @@ def main() -> int:
         "checksums": package / "checksums.sha256",
         "portrait_index": public / f"experiences_v{RELEASE}/portrait_index.json",
         "mystery_deck": public / f"experiences_v{RELEASE}/mystery_deck.json",
-        "responses_index": public / "responses/index.json",
-        "bindings": public / "responses/bindings.json",
+        "responses_index": public / f"responses_v{RELEASE}/index.json",
+        "bindings": public / f"responses_v{RELEASE}/bindings.json",
     }
     problems = Problems()
 
@@ -323,19 +324,30 @@ def main() -> int:
             "links": {"canonical_path": f"/populacao/v/{RELEASE}/q/{record['id']}", **constant_links},
         }
 
+    # Each template's query comes from the pinned bundle itself, never from the
+    # manifest in the producer's working tree (which may already describe the
+    # next release). The manifest only supplies the order and the minimum tier.
+    queries_of: dict[str, list] = defaultdict(list)
+    for r in responses:
+        queries_of[recipe_of[r["query_id"]]].append(r["query"])
+    surfaces_of = defaultdict(set)
+    for surface, ids in surfaces.items():
+        for qid in ids:
+            surfaces_of[recipe_of[qid]].add(surface)
     recipes = {}
-    for key, template in templates.items():
-        name = key.removeprefix("portrait_")
-        recipes[name] = {
-            "unit": template["query"]["unit"],
-            "dimensions": template["query"]["dimensions"],
-            "filters": template["query"]["filters"],
-            "measure": template["query"]["measure"],
-            "normalization": template["query"]["normalization"],
-            "minimum_tier": template["minimum_tier"],
-            "surfaces": template["surfaces"],
-        }
+    for name, queries in sorted(queries_of.items()):
+        shape = {k: queries[0][k] for k in ("unit", "dimensions", "filters", "measure", "normalization")}
+        if any({k: q[k] for k in shape} != shape for q in queries):
+            print(f"template {name}: responses disagree on the query shape", file=sys.stderr)
+            return 1
+        template = templates.get(name if name == "national_age" else f"portrait_{name}", {})
+        if template and template["query"]["filters"] != shape["filters"]:
+            print(f"  note: the producer's working-tree manifest has changed template {name} since this release; the bundle is used")
+        recipes[name] = {**shape, "minimum_tier": template.get("minimum_tier"), "surfaces": sorted(surfaces_of[name])}
     recipe_order = [k.removeprefix("portrait_") for k in portrait_keys]
+    if sorted(recipe_order) != sorted(n for n in recipes if n != "national_age"):
+        print("the manifest's portrait templates differ from the bundle's", file=sys.stderr)
+        return 1
 
     per_parish: dict[str, dict] = defaultdict(dict)
     caop_name = {}
@@ -360,10 +372,9 @@ def main() -> int:
         tier_counts[row["quality_tier"]] += 1
         derived = "publish" if any(r["decision"] == "publish" for r in recs.values()) else "fallback"
         problems.check(status_of.get(code) == derived, f"{code}: portrait index status differs from the responses")
-        fallback_code = row["fallback_geography"] or None
         for rec in recs.values():
             if rec["decision"] == "fallback":
-                problems.check(rec["resolved"] == fallback_code, f"{code}: fallback município differs from quality.csv")
+                problems.check(rec["resolved"] == row["fallback_geography"], f"{code}: fallback município differs from quality.csv")
     if problems:
         print("\n".join(problems[:40]), file=sys.stderr)
         return 1
@@ -378,7 +389,9 @@ def main() -> int:
 
     for code in sorted(per_parish):
         row = quality_rows[code]
-        fallback_code = row["fallback_geography"] or None
+        # The município whose figures the portrait shows: only when a response
+        # actually fell back (v1.0.0). From v1.0.1 every parish answers itself.
+        fallback_code = next((r["resolved"] for r in per_parish[code].values() if r["decision"] == "fallback"), None)
         write(f"parish/{code}.json", {
             "code": code,
             "caop_name": caop_name[code],
@@ -396,7 +409,13 @@ def main() -> int:
         record = json.loads((dest / f"parish/{code}.json").read_text(encoding="utf-8"))
         geography = {"level": "freguesia", "code": code, "name": record["caop_name"]}
         for name, rec in record["responses"].items():
-            if rebuild(rec, recipes[name], geography) != by_id[rec["id"]]:
+            rebuilt = rebuild(rec, recipes[name], geography)
+            if rebuilt != by_id[rec["id"]]:
+                if mismatches < 3:
+                    original = by_id[rec["id"]]
+                    for key in original:
+                        if rebuilt.get(key) != original[key]:
+                            print(f"  round trip differs: {code} {name} .{key}: {json.dumps(rebuilt.get(key), ensure_ascii=False)[:300]} != {json.dumps(original[key], ensure_ascii=False)[:300]}", file=sys.stderr)
                 mismatches += 1
     nat = json.loads((dest / "national.json").read_text(encoding="utf-8"))
     if rebuild(nat["response"], recipes[nat["recipe"]], {"level": "national", "code": "PT", "name": nat["name"]}) != by_id[nat["response"]["id"]]:

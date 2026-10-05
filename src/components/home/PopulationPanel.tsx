@@ -9,7 +9,7 @@ import { HomeArt } from './HomeArt';
 import { HomePanel, Kicker, Status } from './HomePanel';
 
 /**
- * The synthetic population, v1.0.0. Lead in standard mode, secondary in
+ * The synthetic population (the release in POPULATION_RELEASE). Lead in standard mode, secondary in
  * election mode.
  *
  * One question and one thing to do about it: find your parish. The search is

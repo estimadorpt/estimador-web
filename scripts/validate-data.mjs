@@ -104,7 +104,7 @@ for (const name of ['presidential_forecast.json', 'presidential_trends.json', 'p
 // hash the sync recorded, so a hand edit or a half-finished sync fails here;
 // fixture or draft data can never reach a release build.
 
-const POPULATION_RELEASE = '1.0.0';
+const POPULATION_RELEASE = '1.0.1';
 const populationDir = `population/v${POPULATION_RELEASE}`;
 feed(`${populationDir}/manifest.json`, manifest => {
   if (!isObject(manifest) || !isObject(manifest.files)) return 'no file list';

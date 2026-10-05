@@ -5,24 +5,27 @@ import { POPULATION_DATA_DIR, POPULATION_RELEASE } from '@/lib/config/population
 import { isQueryId, parseCanonicalPath, queryBucket, targetFor } from './resolve';
 
 const ID = 'q1_a003203a0ac9a3446835';
+const R = POPULATION_RELEASE;
 
 describe('parseCanonicalPath', () => {
   it('reads the producer canonical path, with or without a trailing slash or locale', () => {
-    expect(parseCanonicalPath(`/populacao/v/1.0.0/q/${ID}`)).toEqual({ release: '1.0.0', id: ID });
-    expect(parseCanonicalPath(`/populacao/v/1.0.0/q/${ID}/`)).toEqual({ release: '1.0.0', id: ID });
-    expect(parseCanonicalPath(`/pt/populacao/v/1.0.0/q/${ID}`)).toEqual({ release: '1.0.0', id: ID });
-    expect(parseCanonicalPath(`/populacao/v/v1.0.0/q/${ID}`)).toEqual({ release: '1.0.0', id: ID });
+    expect(parseCanonicalPath(`/populacao/v/${R}/q/${ID}`)).toEqual({ release: `${R}`, id: ID });
+    expect(parseCanonicalPath(`/populacao/v/${R}/q/${ID}/`)).toEqual({ release: `${R}`, id: ID });
+    expect(parseCanonicalPath(`/pt/populacao/v/${R}/q/${ID}`)).toEqual({ release: `${R}`, id: ID });
+    expect(parseCanonicalPath(`/populacao/v/v${R}/q/${ID}`)).toEqual({ release: `${R}`, id: ID });
   });
 
   it('returns null for anything else, including the shell itself', () => {
     expect(parseCanonicalPath('/pt/populacao/consulta/')).toBeNull();
-    expect(parseCanonicalPath('/populacao/v/1.0.0/')).toBeNull();
-    expect(parseCanonicalPath(`/populacao/v/1.0.0/q/${ID}/extra`)).toBeNull();
+    expect(parseCanonicalPath(`/populacao/v/${R}/`)).toBeNull();
+    expect(parseCanonicalPath(`/populacao/v/${R}/q/${ID}/extra`)).toBeNull();
     expect(parseCanonicalPath('/populacao/v/%E0%A4%A/q/x')).toBeNull();
   });
 
   it('keeps another release so the page can say so', () => {
     expect(parseCanonicalPath(`/populacao/v/0.9.0/q/${ID}`)?.release).toBe('0.9.0');
+    // A link shared from the superseded v1.0.0 still parses, so the page can name its release.
+    expect(parseCanonicalPath(`/populacao/v/1.0.0/q/${ID}`)?.release).toBe('1.0.0');
   });
 });
 

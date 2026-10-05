@@ -7,7 +7,7 @@ import { ChartTable } from '@/components/viz/ChartTable';
 import { Mosaic } from '@/components/brand/Mosaic';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 import { isWhole, readCells } from '@/lib/population/compact';
-import { DIMENSION_LABEL, HONESTY, RECIPE_COPY, REASON_COPY, type Locale } from '@/lib/population/labels';
+import { DIMENSION_LABEL, HONESTY, RECIPE_COPY, REASON_COPY, TIER_COPY, type Locale } from '@/lib/population/labels';
 import type { CompactResponse, PopulationRecipe, PortraitRecipe } from '@/types/population';
 import { AgeColumns, HundredPeople, ShareBars } from './charts';
 import { QualityBadge } from './QualityBadge';
@@ -96,9 +96,10 @@ function statusLine(record: CompactResponse, locale: Locale, placeName: string, 
       where: locale === 'pt' ? `(concelho de ${name})` : `(${name} municipality)`,
     };
   }
-  const tier = record.resolved_tier === 'A' || record.resolved_tier === 'B' ? record.resolved_tier : 'B';
+  // Every v1.0.1 answer is the parish's own, with the parish's measured tier (A, B or C).
+  const tier = record.resolved_tier === 'A' || record.resolved_tier === 'B' || record.resolved_tier === 'C' ? record.resolved_tier : null;
   return {
-    badge: <QualityBadge kind={tier} locale={locale} />,
+    badge: tier ? <QualityBadge kind={tier} locale={locale} title={TIER_COPY[tier].meaning[locale]} /> : null,
     text: locale === 'pt' ? `Valores da freguesia de ${placeName}.` : `Figures for ${placeName}.`,
     where: `(${placeName})`,
   };

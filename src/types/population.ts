@@ -208,7 +208,8 @@ export interface PopulationMeta {
     parishes: number;
     municipalities: number;
     tiers: Record<'A' | 'B' | 'C', number>;
-    decisions: Record<PublicationDecision, number>;
+    /** Only the decisions the release takes (v1.0.1: publish only). */
+    decisions: Partial<Record<PublicationDecision, number>>;
     responses: number;
     suppressed_cells: number;
   };
@@ -263,7 +264,7 @@ export interface GameIndex {
 export interface GameEntry {
   order: number;
   code: string;
-  tier: 'A' | 'B';
+  tier: 'A' | 'B' | 'C';
   responses: Record<PortraitRecipe, CompactResponse>;
 }
 

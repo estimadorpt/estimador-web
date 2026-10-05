@@ -8,6 +8,7 @@
  * population in full. Categories are listed in their natural order, never by
  * size: with a single model run nothing here may rank (handoff §3).
  */
+import { POPULATION_RELEASE } from '@/lib/config/population';
 import type { PortraitRecipe, QualityTier, ReasonCode } from '@/types/population';
 
 export type Locale = 'pt' | 'en';
@@ -179,6 +180,13 @@ export function valueLabel(dimension: string, value: string, locale: Locale): st
   return VALUES[dimension]?.find(entry => entry.value === value)?.label[locale] ?? value;
 }
 
+/**
+ * The quality tiers are reading guides, not publication gates: since v1.0.1
+ * every parish answers every question with its own numbers and its tier.
+ * Thresholds from release.json `quality_tier_policy` (doc 27 §7.2): A has a
+ * median SRMSE of at most 0.10, a worst table of at most 0.18 and 2,000 or more
+ * residents; B at most 0.15 / 0.26 and 500 or more residents; C is the rest.
+ */
 export const TIER_COPY: Record<'A' | 'B' | 'C', { label: Text; meaning: Text }> = {
   A: {
     label: { pt: 'Qualidade A', en: 'Quality A' },
@@ -190,15 +198,15 @@ export const TIER_COPY: Record<'A' | 'B' | 'C', { label: Text; meaning: Text }> 
   B: {
     label: { pt: 'Qualidade B', en: 'Quality B' },
     meaning: {
-      pt: 'Freguesia com 500 ou mais residentes e um ajuste próximo às tabelas do INE. Os cruzamentos mais finos não são publicados.',
-      en: 'A parish of 500 or more residents with a close fit to INE’s tables. The finest cross-tabulations are not published.',
+      pt: 'Freguesia com 500 ou mais residentes e um ajuste próximo às tabelas do INE, um pouco menos apertado do que no nível A.',
+      en: 'A parish of 500 or more residents with a close fit to INE’s tables, a little looser than tier A.',
     },
   },
   C: {
     label: { pt: 'Qualidade C', en: 'Quality C' },
     meaning: {
-      pt: 'Freguesia pequena, ou com um ajuste mais fraco às tabelas do INE. Os resultados mostrados são os do concelho.',
-      en: 'A small parish, or one with a weaker fit to INE’s tables. The results shown are the municipality’s.',
+      pt: 'Freguesia pequena (menos de 500 residentes) ou com um ajuste mais fraco às tabelas do INE. Os números são os da própria freguesia: lê-os com mais cuidado.',
+      en: 'A small parish (under 500 residents) or one with a weaker fit to INE’s tables. The numbers are the parish’s own: read them with more care.',
     },
   },
 };
@@ -212,8 +220,10 @@ export function tierLabel(tier: QualityTier | null, locale: Locale): string {
  * The producer's glossary, adapted where its wording would mislead on this
  * site (the contract allows rewording, never changing the code):
  * - `joint_not_publication_grade` says "cruzamento" even for one variable;
- * - `use_municipio_or_wait_for_v1_1` offers a municipal result that v1.0.0
- *   does not ship for the only refused question.
+ * - `use_municipio_or_wait_for_v1_1` offers a municipal result that no
+ *   release ships for a refused question.
+ * No v1.0.1 answer is a fallback or a refusal and no cell is suppressed; the
+ * copy stays because the contract can still express them.
  */
 export const REASON_COPY: Record<ReasonCode, Text> = {
   population_below_500: {
@@ -260,7 +270,11 @@ export const HONESTY = {
     en: 'To the best of our knowledge, the first open-access synthetic population to cover every parish in Portugal, generated from the 2021 Census.',
   },
   source: {
-    pt: 'População sintética v1.0.0 · calibrada nos Censos 2021 (INE)',
-    en: 'Synthetic population v1.0.0 · calibrated to the 2021 Census (INE)',
+    pt: `População sintética v${POPULATION_RELEASE} · calibrada nos Censos 2021 (INE)`,
+    en: `Synthetic population v${POPULATION_RELEASE} · calibrated to the 2021 Census (INE)`,
+  },
+  zero: {
+    pt: '«0,0%»: nenhuma pessoa ou agregado gerado nessa categoria, ou tão poucos que a percentagem arredonda para zero.',
+    en: '“0.0%”: no generated person or household in that category, or so few that the share rounds to zero.',
   },
 } satisfies Record<string, Text>;

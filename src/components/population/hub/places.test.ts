@@ -1,12 +1,13 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { PopulationPlaces } from '@/types/population';
-import { formatCount, levelCounts, regionBySlug, regionEntries, regionListing } from './places';
+import { POPULATION_DATA_DIR } from '@/lib/config/population';
+import type { PopulationMeta, PopulationPlaces } from '@/types/population';
+import { formatCount, regionBySlug, regionEntries, regionListing } from './places';
 
-const places = JSON.parse(
-  readFileSync(path.join(process.cwd(), 'public/data/population/v1.0.0/places.json'), 'utf8'),
-) as PopulationPlaces;
+const DIR = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR);
+const places = JSON.parse(readFileSync(path.join(DIR, 'places.json'), 'utf8')) as PopulationPlaces;
+const meta = JSON.parse(readFileSync(path.join(DIR, 'meta.json'), 'utf8')) as PopulationMeta;
 
 describe('population hub places', () => {
   it('lists 20 regions with unique slugs: districts, then autonomous regions, alphabetical', () => {
@@ -40,10 +41,13 @@ describe('population hub places', () => {
     expect([...names].sort((a, b) => a.localeCompare(b, 'pt'))).toEqual(names);
   });
 
-  it('counts places by publication level', () => {
-    const counts = levelCounts(places);
-    expect(counts.total).toBe(3092);
-    expect(counts.parish + counts.municipality).toBe(3092);
+  it('gives every parish its own figures and a tier, matching the release counts the hub shows', () => {
+    expect(places.parishes).toHaveLength(meta.counts.parishes);
+    expect(places.parishes.every(row => row[4] === 'p')).toBe(true);
+    const tiers = { A: 0, B: 0, C: 0 } as Record<string, number>;
+    for (const row of places.parishes) tiers[row[3]] += 1;
+    expect(tiers).toEqual(meta.counts.tiers);
+    expect(meta.counts.tiers).toEqual({ A: 776, B: 705, C: 1611 });
   });
 
   it('groups whole numbers in each locale', () => {

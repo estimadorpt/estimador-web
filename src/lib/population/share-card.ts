@@ -5,14 +5,16 @@
  * `shareCardModel` decides every word on the card and is pure (tested);
  * `drawShareCard` only lays those words out on a 2D context it is given. The
  * facts are published cells quoted with the producer's display string and the
- * population each one is a share of; a município fallback says so in the line
- * itself, because a card travels without the page around it.
+ * population each one is a share of. The card names the parish's quality tier
+ * (every v1.0.1 answer is the parish's own); a município fallback, which the
+ * contract can still express, says so in the line itself, because a card
+ * travels without the page around it.
  */
 import { BRAND, MARK_FULL } from '@/lib/brand';
 import { POPULATION_RELEASE } from '@/lib/config/population';
 import type { ParishRecord, PopulationRecipe, PortraitRecipe, RecipeName } from '@/types/population';
 import { headlineCell, formatDisplay } from './compact';
-import { HONESTY, RECIPE_COPY, type Locale } from './labels';
+import { HONESTY, RECIPE_COPY, TIER_COPY, type Locale } from './labels';
 
 export const SHARE_CARD = { width: 1200, height: 630 } as const;
 
@@ -50,6 +52,8 @@ export interface ShareCardModel {
   facts: ShareFact[];
   /** "Valores do concelho de Águeda" when any fact is the município's. */
   scopeNote: string | null;
+  /** "Qualidade A · números da própria freguesia", when the facts are the parish's own. */
+  tierNote: string | null;
   honesty: string;
   footer: string;
   fileName: string;
@@ -98,6 +102,12 @@ export function shareCardModel({ record, recipes, name, municipalityName, region
     facts.push({ label, value, text: `${label}: ${value}`, fallback });
   }
   const anyFallback = facts.some(fact => fact.fallback);
+  const tier = record.tier === 'A' || record.tier === 'B' || record.tier === 'C' ? record.tier : null;
+  const tierNote = tier && !anyFallback
+    ? (locale === 'pt'
+      ? `${TIER_COPY[tier].label.pt} · números da própria freguesia${tier === 'C' ? ', a ler com mais cuidado' : ''}.`
+      : `${TIER_COPY[tier].label.en} · the parish’s own figures${tier === 'C' ? ', to read with more care' : ''}.`)
+    : null;
   return {
     eyebrow: locale === 'pt' ? 'População sintética · Censos 2021' : 'Synthetic population · 2021 Census',
     title: parishQuestion(name, locale),
@@ -106,6 +116,7 @@ export function shareCardModel({ record, recipes, name, municipalityName, region
     scopeNote: anyFallback
       ? (locale === 'pt' ? `Valores do concelho de ${fallbackName}, que inclui esta freguesia.` : `Figures for ${fallbackName} municipality, which includes this parish.`)
       : null,
+    tierNote,
     honesty: HONESTY.synthetic[locale],
     footer: locale === 'pt'
       ? `estimador.pt · População sintética v${POPULATION_RELEASE} · Censos 2021`
@@ -181,14 +192,15 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
   ctx.fillText(model.eyebrow.toUpperCase(), pad, 172);
 
   // The title takes the largest size at which the whole left column (question,
-  // place, município note) ends above the bottom rule; long União names step down.
+  // place, tier or município note) ends above the bottom rule; long União names step down.
   const divider = height - 102;
   const leftBottom = divider - 28;
   const titleTop = 172 + 22;
   ctx.font = font(500, 26);
   const placeLines = wrapLines(model.place, leftWidth, t => ctx.measureText(t).width, 2);
   ctx.font = font(600, 21);
-  const noteLines = model.scopeNote ? wrapLines(model.scopeNote, leftWidth, t => ctx.measureText(t).width, 2) : [];
+  const note = model.scopeNote ?? model.tierNote;
+  const noteLines = note ? wrapLines(note, leftWidth, t => ctx.measureText(t).width, 2) : [];
   const layoutAt = (size: number) => {
     ctx.font = font(800, size);
     const lines = wrapLines(model.title, leftWidth, t => ctx.measureText(t).width, 5);

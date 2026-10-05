@@ -67,10 +67,17 @@ describe('guessTarget', () => {
     expect(guessTarget('multigenerational', record.responses.multigenerational, meta.recipes.multigenerational)?.display).toBe('2.5%');
   });
 
-  it('still offers a guess on município figures (the card names them)', () => {
+  it('offers a guess on a tier C parish’s own figures', () => {
     const record = parish('010122');
-    expect(record.responses.elders_alone.decision).toBe('fallback');
-    expect(guessTarget('elders_alone', record.responses.elders_alone, meta.recipes.elders_alone)?.display).toBe('16.3%');
+    expect(record.tier).toBe('C');
+    expect(record.responses.elders_alone.decision).toBe('publish');
+    const yes = record.responses.elders_alone.cells.find(c => c[0][0] === 'yes')!;
+    expect(guessTarget('elders_alone', record.responses.elders_alone, meta.recipes.elders_alone)?.display).toBe(yes[2]);
+  });
+
+  it('still offers a guess on município figures (synthetic fallback; the card names them)', () => {
+    const fallback: CompactResponse = { ...parish('010122').responses.elders_alone, decision: 'fallback', resolved: '010100' };
+    expect(guessTarget('elders_alone', fallback, meta.recipes.elders_alone)?.display).toMatch(/^\d+\.\d%$/);
   });
 
   it('is not offered for a refused response, a suppressed headline, or another recipe', () => {

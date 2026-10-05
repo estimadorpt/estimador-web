@@ -23,8 +23,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: POPULATION_ROUTES.methodology,
     title: pt ? 'Como foi feita a população sintética de Portugal' : 'How the synthetic population of Portugal was made',
     description: pt
-      ? 'O que é uma população sintética, como foi gerada em cinco passos, quando um número é publicado, privacidade, usos adequados, limitações e como citar.'
-      : 'What a synthetic population is, how it was generated in five steps, when a figure is published, privacy, suitable uses, limitations and how to cite it.',
+      ? 'O que é uma população sintética, como foi gerada em cinco passos, o que quer dizer cada nível de qualidade, privacidade, usos adequados, limitações e como citar.'
+      : 'What a synthetic population is, how it was generated in five steps, what each quality tier means, privacy, suitable uses, limitations and how to cite it.',
   });
 }
 
@@ -48,8 +48,8 @@ export default async function PopulationMethodology({ params }: { params: Promis
         eyebrow={pt ? `POPULAÇÃO SINTÉTICA · VERSÃO ${POPULATION_RELEASE}` : `SYNTHETIC POPULATION · RELEASE ${POPULATION_RELEASE}`}
         title={pt ? 'Como foi feita a população sintética?' : 'How was the synthetic population made?'}
         lede={pt
-          ? 'Um processo generativo com restrições, calibrado nas tabelas dos Censos 2021 de cada freguesia, e as regras que decidem quando um número é publicado.'
-          : 'A constrained generative pipeline, calibrated to each parish’s 2021 Census tables, and the rules that decide when a figure is published.'}
+          ? 'Um processo generativo com restrições, calibrado nas tabelas dos Censos 2021 de cada freguesia, e o que quer dizer o nível de qualidade de cada uma.'
+          : 'A constrained generative pipeline, calibrated to each parish’s 2021 Census tables, and what each parish’s quality tier means.'}
         meta={<><span>{pt ? 'Censos 2021 (INE)' : '2021 Census (INE)'}</span><span>{pt ? `Publicada a ${formatDay(POPULATION_PUBLISHED, locale)}` : `Published ${formatDay(POPULATION_PUBLISHED, locale)}`}</span></>}
       />
       <PopulationSectionNav current="methodology" locale={locale} />

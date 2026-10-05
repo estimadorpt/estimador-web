@@ -10,6 +10,7 @@ import { getMDXComponents } from '@/mdx-components';
 import { loadEconomyDashboard } from '@/lib/utils/data-loader';
 import { economyPaused } from '@/lib/utils/economy-time';
 import { fmtDate } from '@/lib/utils/economy-format';
+import { POPULATION_RELEASE } from '@/lib/config/population';
 
 export async function generateMetadata({
   params
@@ -96,8 +97,8 @@ function EstadoAtual({
     {
       label: pt ? 'População' : 'Population',
       status: pt
-        ? 'Publicada — população sintética v1.0.0 (Censos 2021), lançada a 5 de outubro de 2026. Pessoas e agregados gerados, não pessoas reais.'
-        : 'Released — synthetic population v1.0.0 (2021 Census), published 5 October 2026. Generated people and households, not real people.',
+        ? `Publicada — população sintética v${POPULATION_RELEASE} (Censos 2021), lançada a 5 de outubro de 2026: cada freguesia com os seus próprios números e o seu nível de qualidade. Pessoas e agregados gerados, não pessoas reais.`
+        : `Released — synthetic population v${POPULATION_RELEASE} (2021 Census), published 5 October 2026: every parish with its own figures and its quality tier. Generated people and households, not real people.`,
     },
     {
       label: pt ? 'Liga Portugal' : 'Liga Portugal',

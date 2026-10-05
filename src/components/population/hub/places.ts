@@ -1,7 +1,6 @@
 /**
  * Place listings for the population hub and the region pages: regions,
- * municípios and parishes in alphabetical order, and counts of places by
- * publication level. Counting places is metadata; nothing here adds up
+ * municípios and parishes in alphabetical order. Nothing here adds up
  * residents or any generated figure.
  */
 import { indexPlaces, regionSlug, regionTitle, type Parish } from '@/lib/population/places';
@@ -53,17 +52,6 @@ export function regionListing(places: PopulationPlaces, regionId: string): Munic
         .sort((a, b) => byName(a.name, b.name)),
     }))
     .sort((a, b) => byName(a.name, b.name));
-}
-
-/** How many parishes show their own figures, and how many show their município's. */
-export function levelCounts(places: PopulationPlaces): { parish: number; municipality: number; total: number } {
-  let parish = 0;
-  let municipality = 0;
-  for (const row of places.parishes) {
-    if (row[4] === 'p') parish += 1;
-    else municipality += 1;
-  }
-  return { parish, municipality, total: places.parishes.length };
 }
 
 /**

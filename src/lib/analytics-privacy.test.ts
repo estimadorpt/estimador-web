@@ -45,13 +45,13 @@ describe('analytics publication boundary', () => {
     expect(analyticsPath('/en/populacao/freguesia/0302FA/#idade')).toBe('/en/populacao/freguesia/');
     expect(analyticsPath('/pt/populacao/freguesia/_/')).toBe('/pt/populacao/freguesia/');
     expect(analyticsPath('/pt/populacao/regiao/viana-do-castelo/')).toBe('/pt/populacao/regiao/');
-    expect(analyticsPath('/populacao/v/1.0.0/q/q1_d35d135a32106a5bcf61')).toBe('/pt/populacao/consulta/');
+    expect(analyticsPath('/populacao/v/1.0.1/q/q1_402e2d1cf720842a2b20')).toBe('/pt/populacao/consulta/');
     const shared = sanitizeAnalyticsEvent({ uuid: 'test', event: '$pageview',
-      properties: { $current_url: 'https://estimador.pt/populacao/v/1.0.0/q/q1_d35d135a32106a5bcf61' },
+      properties: { $current_url: 'https://estimador.pt/populacao/v/1.0.1/q/q1_402e2d1cf720842a2b20' },
     });
     expect(shared?.properties.$current_url).toBe('https://estimador.pt/pt/populacao/consulta/');
-    expect(JSON.stringify(shared)).not.toContain('q1_d35d135a32106a5bcf61');
-    expect(analyticsPath('/pt/populacao/v/1.0.0/q/q1_d35d135a32106a5bcf61')).toBe('/pt/populacao/consulta/');
+    expect(JSON.stringify(shared)).not.toContain('q1_402e2d1cf720842a2b20');
+    expect(analyticsPath('/pt/populacao/v/1.0.1/q/q1_402e2d1cf720842a2b20')).toBe('/pt/populacao/consulta/');
     for (const surface of ['misteriosa', 'qualidade', 'dados', 'metodologia', 'consulta', 'miniatura']) {
       expect(analyticsPath(`/pt/populacao/${surface}/?dia=12`)).toBe(`/pt/populacao/${surface}/`);
     }

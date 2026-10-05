@@ -1,6 +1,6 @@
 # How the synthetic population was made
 
-This page explains, for a general reader, how the Synthetic Population of Portugal (release 1.0.0) was generated, what it can and cannot be used for, and where its limits are. The full technical account is the <ModelCardLink>model card</ModelCardLink>.
+This page explains, for a general reader, how the Synthetic Population of Portugal (release <Release />) was generated, what it can and cannot be used for, and where its limits are. The full technical account is the <ModelCardLink>model card</ModelCardLink>.
 
 ## What is a synthetic population?
 
@@ -32,11 +32,15 @@ In the downloadable microdata, each column also carries its provenance: generate
 
 ## When does a figure appear?
 
-All 3,092 parishes are published. Each has a quality tier, which describes how close the generated population comes to INE's tables and decides what the parish page shows:
+Always. All 3,092 parishes are published, and every one answers every question with its own figures. Each has a quality tier, which describes how close the generated population comes to INE's tables. The tier is a reading guide, not a filter: it hides no figure, it says how carefully to read it. A small parish has few people in each table, and each person weighs more.
+
+Parishes with fewer than 500 residents always sit in tier C.
 
 <Tiers />
 
 <PublicationRules />
+
+<Superseded />
 
 ## A single run
 
@@ -58,7 +62,7 @@ The details are on the [quality page](/en/populacao/qualidade/#privacidade).
 
 ## Known limitations
 
-These are the limitations of release 1.0.0, declared rather than hidden:
+These are the limitations of the generated population, the same in releases 1.0.0 and <Release />, declared rather than hidden:
 
 <Limitations />
 

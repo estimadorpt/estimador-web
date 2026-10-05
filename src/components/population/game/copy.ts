@@ -19,7 +19,7 @@ const pt = {
     'Cada tentativa falhada abre a pista seguinte: pessoas por agregado, núcleos familiares, escolaridade, condição perante o trabalho e, por fim, quem tem 65 ou mais anos e vive só, a par das casas que juntam crianças e pessoas de 65+.',
     'Tens seis tentativas. À meia-noite de Lisboa chega uma freguesia nova.',
   ],
-  howPool: 'Só entram no jogo freguesias com resultados próprios publicados (qualidade A ou B). Podes tentar qualquer uma das 3 092 freguesias.',
+  howPool: 'Qualquer uma das 3 092 freguesias pode ser a misteriosa, seja qual for o seu nível de qualidade (A, B ou C); no fim, mostramos o nível e o que quer dizer. Podes tentar qualquer uma.',
   howProximity: 'A proximidade compara a tua distância com a maior distância entre duas freguesias de Portugal: 100% é acertar, 0% é estar no extremo oposto do país.',
   howStorage: 'Os teus resultados ficam guardados só neste dispositivo.',
 
@@ -107,7 +107,7 @@ const en: Copy = {
     'Each miss opens the next clue: people per household, family nuclei, education, employment status and, last, who is 65 or over and lives alone, alongside the homes that bring together children and people aged 65+.',
     'You have six guesses. A new parish arrives at midnight, Lisbon time.',
   ],
-  howPool: 'Only parishes with their own published results (quality A or B) are drawn. You can guess any of the 3,092 parishes.',
+  howPool: 'Any of the 3,092 parishes can be the mystery one, whatever its quality tier (A, B or C); at the end we show the tier and what it means. You can guess any of them.',
   howProximity: 'Proximity compares your distance with the widest distance between two parishes in Portugal: 100% is a hit, 0% is the far side of the country.',
   howStorage: 'Your results are kept on this device only.',
 

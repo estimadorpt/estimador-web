@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **estimador.pt** is a multi-domain data analysis platform for Portugal, built with Next.js. It provides data-driven forecasts and analysis across different domains (football, elections, and more), with a professional editorial-style interface and interactive visualizations.
 
 ### Active Sections
-- **População** (`/populacao/`) — open synthetic population v1.0.0 (Censos 2021), parish by parish (see "Population section")
+- **População** (`/populacao/`) — open synthetic population v1.0.1 (Censos 2021), parish by parish (see "Population section")
 - **Liga Portugal** (`/desporto/liga/`) — Bayesian football league forecasts
 - **Presidential Elections 2026** (`/eleicoes/presidenciais/`) — Presidential election forecast
 - **Parliamentary Elections 2025** (`/eleicoes/legislativas/`) — Parliamentary election results (archive)
@@ -73,9 +73,13 @@ Four subjects, one hierarchy (`src/app/[locale]/page.tsx`, panels in `src/compon
 
 ## Population section
 
-The synthetic population release (`pt-synthpop` v1.0.0, published 2026-10-05; microdata on
+The synthetic population release (`pt-synthpop` v1.0.1, published 2026-10-05; microdata on
 GitHub releases, `POPULATION_DOWNLOADS`). Config, routes and the release number live in
-`src/lib/config/population.ts`.
+`src/lib/config/population.ts`; code reads `POPULATION_RELEASE`, never a typed version.
+v1.0.1 superseded v1.0.0 the same day (doc 206 §5): same microdata, but every parish now
+answers every question with its own numbers and its measured tier (A 776 / B 705 /
+C 1,611), no cell is suppressed, a category with no one in it shows "0,0%", and the game
+deck holds all 3,092 parishes. Tiers are reading guides, not gates.
 
 - **Routes** (`src/app/[locale]/populacao/`): hub `/populacao`, parish pages
   `/populacao/freguesia/{CODE}` (6-char DICOFRE, e.g. `0302FA`), regions
@@ -92,9 +96,11 @@ GitHub releases, `POPULATION_DOWNLOADS`). Config, routes and the release number 
   from a published response, the scorecard, release/meta counts or the INE counts in
   places.json (labelled "INE, Censos 2021"); never compute new numbers from cells.
   Single model run: no intervals, rankings, superlatives, "more/less than" or sorting by
-  value; no choropleth of a statistic (a map may colour by publication level only).
-  `publish`/`fallback`/`refuse` stay visible (fallback figures are the município's;
-  refusals show the reason, never a number); suppressed reads "Suprimido", absent "—".
+  value; no choropleth of a statistic (the map colours parishes by quality tier only:
+  metadata). The code keeps handling `fallback`/`refuse`/suppressed responses (part of
+  the contract: fallback figures name the município, refusals show the reason, suppressed
+  reads "Suprimido", absent "—"), but copy describes them only when `meta.counts` or the
+  record says they happen; v1.0.1 has none.
   No narrated synthetic individuals. `HONESTY.synthetic` sits near the first number on
   every page; `HONESTY.positioning` is quoted verbatim. Copy helpers in
   `src/lib/population/labels.ts`.

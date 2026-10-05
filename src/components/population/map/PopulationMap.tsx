@@ -4,10 +4,12 @@
  * The parish map: Portugal → region → município → parish, one continuous
  * camera over the CAOP 2021 boundaries.
  *
- * What it shows is geography and one piece of metadata: whether a parish's
- * portrait carries its own figures or its município's (the publication level
- * in places.json). No statistic is mapped, nothing is ranked, and no person or
- * home is drawn. The only number is a parish's resident count, labelled as
+ * What it shows is geography and one piece of metadata: a parish's quality
+ * tier (A, B or C in places.json), which says how closely the generated
+ * population follows INE's tables. Since v1.0.1 every parish shows its own
+ * figures; a município fallback, which the contract can still express, is
+ * named in the readout. No statistic is mapped, nothing is ranked, and no
+ * person or home is drawn. The only number is a parish's resident count, labelled as
  * INE's (Censos 2021).
  *
  * Geometry is fetched per level (country, then the region's municípios, then
@@ -22,6 +24,7 @@ import { Legend } from '@/components/viz/Legend';
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { parishHref } from '@/components/population/ParishLink';
 import { fetchPlaces } from '@/lib/population/client';
+import { TIER_COPY } from '@/lib/population/labels';
 import { indexPlaces, normaliseParishCode, regionTitle, type Parish, type PlaceIndex } from '@/lib/population/places';
 import {
   cameraTransform, clampZoom, easeInOut, fitCamera, flightDuration, fromZoomView, sameCamera, toZoomView, zoomCamera,
@@ -52,8 +55,15 @@ export interface PopulationMapProps {
 type Kind = 'region' | 'municipality' | 'parish';
 interface Subject { kind: Kind; code: string }
 
-/** Publication level: the parish's own figures, or its município's (a caveat, amber). */
-const LEVEL_FILL = { parish: 'var(--color-mint)', municipality: 'var(--color-amber-200)' } as const;
+/**
+ * Quality tier, as calm fills: A and B in two mint shades, C in the caveat
+ * tint (amber means caveat on this site). The tier is metadata, not a statistic.
+ */
+const TIER_FILL = {
+  A: 'var(--color-mint-soft)',
+  B: 'color-mix(in srgb, var(--color-mint-soft) 45%, var(--color-cream))',
+  C: 'var(--color-amber-200)',
+} as const;
 const MAX_ZOOM = 10;
 
 const copy = {
@@ -77,9 +87,9 @@ const copy = {
     concelho: (name: string) => `Concelho de ${name}`,
     residents: 'Residentes',
     ine: 'INE, Censos 2021',
-    own: 'Valores da freguesia',
+    tier: (tier: 'A' | 'B' | 'C') => `Qualidade ${tier}`,
+    tierLegend: { A: 'A · ajuste próximo, 2 000 ou mais residentes', B: 'B · ajuste próximo, 500 ou mais residentes', C: 'C · freguesia pequena ou ajuste mais fraco' },
     fallback: 'Valores do concelho',
-    ownLong: 'O retrato mostra os números da própria freguesia.',
     fallbackLong: (name: string) => `O retrato mostra os números do concelho de ${name}: os da freguesia não têm qualidade para publicar.`,
     open: 'Ver a freguesia',
     choose: 'Escolher esta freguesia',
@@ -87,7 +97,7 @@ const copy = {
     hintCountry: 'Escolhe um distrito ou uma região autónoma.',
     hintRegion: 'Escolhe um município para ver as suas freguesias.',
     hintMunicipality: 'Escolhe uma freguesia para ver o seu retrato.',
-    legendTitle: 'Cor das freguesias',
+    legendTitle: 'Qualidade do ajuste: A / B / C',
     list: 'Ver como lista',
     listCountry: 'Distritos e regiões autónomas',
     listRegion: (name: string) => `Municípios: ${name}`,
@@ -120,9 +130,9 @@ const copy = {
     concelho: (name: string) => `Municipality of ${name}`,
     residents: 'Residents',
     ine: 'INE, 2021 Census',
-    own: 'Parish figures',
+    tier: (tier: 'A' | 'B' | 'C') => `Quality ${tier}`,
+    tierLegend: { A: 'A · close fit, 2,000 or more residents', B: 'B · close fit, 500 or more residents', C: 'C · small parish or weaker fit' },
     fallback: 'Municipality figures',
-    ownLong: 'The portrait shows the parish’s own figures.',
     fallbackLong: (name: string) => `The portrait shows the figures for the municipality of ${name}: the parish’s own did not reach publication quality.`,
     open: 'See the parish',
     choose: 'Choose this parish',
@@ -130,7 +140,7 @@ const copy = {
     hintCountry: 'Choose a district or an autonomous region.',
     hintRegion: 'Choose a municipality to see its parishes.',
     hintMunicipality: 'Choose a parish to see its portrait.',
-    legendTitle: 'Parish colour',
+    legendTitle: 'Quality of fit: A / B / C',
     list: 'View as a list',
     listCountry: 'Districts and autonomous regions',
     listRegion: (name: string) => `Municipalities: ${name}`,
@@ -481,8 +491,8 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
     const reach = Math.max(...parishShapes.map(s => Math.hypot(s.label[0] - centre[0], s.label[1] - centre[1])), 1e-6);
     return byName(parishShapes, s => s.name).map(shape => {
       const parish = parishByCode?.get(shape.code);
-      const level = parish?.level;
-      const fill = level ? LEVEL_FILL[level] : 'var(--color-cream)';
+      const tier = parish?.tier;
+      const fill = tier ? TIER_FILL[tier] : 'var(--color-cream)';
       // Parishes arrive as a ripple from the middle of the município (decorative, 0–220 ms).
       const delay = Math.round((Math.hypot(shape.label[0] - centre[0], shape.label[1] - centre[1]) / reach) * 220);
       return (
@@ -497,7 +507,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
           vectorEffect="non-scaling-stroke"
           tabIndex={0}
           role={onSelectParish ? 'button' : 'link'}
-          aria-label={`${shape.name}${level ? ` — ${level === 'parish' ? t.own : t.fallback}` : ''}`}
+          aria-label={`${shape.name}${tier ? ` — ${t.tier(tier)}` : ''}${parish?.level === 'municipality' ? `, ${t.fallback.toLowerCase()}` : ''}`}
         />
       );
     });
@@ -730,7 +740,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                         {t.residents}: <span className="font-display font-extrabold tabular-nums">{numbers.format(readout.parish.censusPopulation)}</span>
                         <span className="text-stone-500"> · {t.ine}</span>
                       </p>
-                      <LevelLine parish={readout.parish} t={t} locale={locale} />
+                      <TierLine parish={readout.parish} t={t} locale={locale} />
                     </>
                   )}
                   <div className="mt-1">{parishAction(readout.code, onSelectParish ? t.choose : t.open)}</div>
@@ -756,7 +766,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
 
             <div>
               <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.legendTitle}</p>
-              <Legend items={[{ label: t.own, color: LEVEL_FILL.parish, kind: 'rect' }, { label: t.fallback, color: LEVEL_FILL.municipality, kind: 'rect' }]} />
+              <Legend items={(['A', 'B', 'C'] as const).map(tier => ({ label: t.tierLegend[tier], color: TIER_FILL[tier], kind: 'rect' as const }))} />
             </div>
 
             <p className="mt-auto text-xs leading-relaxed text-stone-500">
@@ -784,7 +794,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                         ? <button type="button" onClick={() => chooseParish(parish.code)} className="min-h-11 text-left text-ink underline underline-offset-4">{parish.name}</button>
                         : <a href={parishHref(parish.code, locale)} className="inline-flex min-h-11 items-center text-ink underline underline-offset-4">{parish.name}</a>}
                       <span className="shrink-0 text-right text-xs text-stone-500">
-                        {parish.level === 'parish' ? t.own : t.fallback}
+                        {t.tier(parish.tier)}{parish.level === 'municipality' ? ` · ${t.fallback}` : ''}
                         <span className="block tabular-nums">{t.residents}: {numbers.format(parish.censusPopulation)}</span>
                       </span>
                     </li>
@@ -809,12 +819,17 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   );
 }
 
-function LevelLine({ parish, t, locale }: { parish: Parish; t: (typeof copy)['pt'] | (typeof copy)['en']; locale: 'pt' | 'en' }) {
-  const own = parish.level === 'parish';
+/** The parish's tier and what it means; município figures are named only when the parish actually falls back. */
+function TierLine({ parish, t, locale }: { parish: Parish; t: (typeof copy)['pt'] | (typeof copy)['en']; locale: 'pt' | 'en' }) {
+  const fallback = parish.level === 'municipality';
   return (
     <div className="mt-2 space-y-1">
-      <QualityBadge kind={own ? parish.tier : 'municipality'} locale={locale} label={own ? t.own : t.fallback} />
-      <p className="text-xs leading-relaxed text-stone-600">{own ? t.ownLong : t.fallbackLong(parish.municipalityName)}</p>
+      <div className="flex flex-wrap gap-1.5">
+        <QualityBadge kind={parish.tier} locale={locale} />
+        {fallback && <QualityBadge kind="municipality" locale={locale} label={t.fallback} />}
+      </div>
+      <p className="text-xs leading-relaxed text-stone-600">{TIER_COPY[parish.tier].meaning[locale]}</p>
+      {fallback && <p className="text-xs leading-relaxed text-stone-600">{t.fallbackLong(parish.municipalityName)}</p>}
     </div>
   );
 }

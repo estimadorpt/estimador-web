@@ -55,7 +55,7 @@ describe('formatting', () => {
     expect(formatFit(0.00812632, 'en')).toBe('0.008');
   });
   it('prints download sizes', () => {
-    expect(formatBytes(181_795_845, 'pt')).toBe('181,8 MB');
+    expect(formatBytes(181_763_298, 'pt')).toBe('181,8 MB');
     expect(formatBytes(667_983, 'pt')).toBe('668 kB');
     expect(formatBytes(573, 'en')).toBe('573 B');
   });

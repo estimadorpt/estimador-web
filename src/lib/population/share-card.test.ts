@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { POPULATION_DATA_DIR } from '@/lib/config/population';
+import { POPULATION_DATA_DIR, POPULATION_RELEASE } from '@/lib/config/population';
 import type { ParishRecord, PopulationMeta } from '@/types/population';
 import { HONESTY } from './labels';
 import { drawShareCard, parishQuestion, SHARE_CARD, shareCardModel, wrapLines } from './share-card';
@@ -10,6 +10,19 @@ const DIR = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR);
 const json = <T,>(file: string): T => JSON.parse(fs.readFileSync(path.join(DIR, file), 'utf8')) as T;
 const meta = json<PopulationMeta>('meta.json');
 const parish = (code: string) => json<ParishRecord>(`parish/${code}.json`);
+
+/**
+ * No v1.0.1 answer falls back to the município; the contract can still say so,
+ * so the fallback wording is tested on a synthetic edit of a real record.
+ */
+function asFallback(record: ParishRecord, name: string): ParishRecord {
+  return {
+    ...record,
+    status: 'fallback',
+    fallback: { code: `${record.code.slice(0, 4)}00`, name },
+    responses: Object.fromEntries(Object.entries(record.responses).map(([recipe, response]) => [recipe, { ...response, decision: 'fallback', resolved: `${record.code.slice(0, 4)}00` }])) as ParishRecord['responses'],
+  };
+}
 
 describe('parishQuestion', () => {
   it('asks the page question, with the contraction a União needs', () => {
@@ -30,15 +43,32 @@ describe('shareCardModel', () => {
       expect.stringMatching(/^Agregados de uma só pessoa: \d+,\d%$/),
     ]);
     expect(model.scopeNote).toBeNull();
+    expect(model.tierNote).toBe('Qualidade A · números da própria freguesia.');
     expect(model.honesty).toBe(HONESTY.synthetic.pt);
-    expect(model.footer).toBe('estimador.pt · População sintética v1.0.0 · Censos 2021');
+    expect(model.footer).toBe(`estimador.pt · População sintética v${POPULATION_RELEASE} · Censos 2021`);
     expect(model.fileName).toBe('estimador-010103-aguada-de-cima.png');
   });
 
-  it('names the município on every fact of a fallback parish (tier C)', () => {
-    const model = shareCardModel({ record: parish('010122'), recipes: meta.recipes, name: 'União das freguesias de Barrô e Aguada de Baixo', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'pt' });
+  it('quotes a tier C parish’s own figures and says to read them with more care', () => {
+    const record = parish('010122');
+    expect(record.tier).toBe('C');
+    const model = shareCardModel({ record, recipes: meta.recipes, name: 'União das freguesias de Barrô e Aguada de Baixo', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'pt' });
     expect(model.facts).toHaveLength(3);
-    expect(model.facts[0].text).toBe('Pessoas com 65+ que vivem sozinhas (concelho de Águeda): 16,3%');
+    for (const fact of model.facts) {
+      expect(fact.fallback).toBe(false);
+      expect(fact.label).not.toContain('concelho');
+    }
+    expect(model.scopeNote).toBeNull();
+    expect(model.tierNote).toBe('Qualidade C · números da própria freguesia, a ler com mais cuidado.');
+    const en = shareCardModel({ record, recipes: meta.recipes, name: 'X', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en' });
+    expect(en.tierNote).toBe('Quality C · the parish’s own figures, to read with more care.');
+  });
+
+  it('names the município on every fact of a fallback record (synthetic)', () => {
+    const model = shareCardModel({ record: asFallback(parish('010122'), 'Águeda'), recipes: meta.recipes, name: 'União das freguesias de Barrô e Aguada de Baixo', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'pt' });
+    expect(model.facts).toHaveLength(3);
+    expect(model.facts[0].text).toMatch(/^Pessoas com 65\+ que vivem sozinhas \(concelho de Águeda\): \d+,\d%$/);
+    expect(model.tierNote).toBeNull();
     for (const fact of model.facts) {
       expect(fact.fallback).toBe(true);
       expect(fact.label).toContain('(concelho de Águeda)');
@@ -49,7 +79,7 @@ describe('shareCardModel', () => {
   it('writes English with the producer’s own decimal point', () => {
     const model = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en' });
     expect(model.facts[0].text).toBe('People aged 65+ living alone: 17.2%');
-    expect(model.footer).toBe('estimador.pt · Synthetic population v1.0.0 · 2021 Census');
+    expect(model.footer).toBe(`estimador.pt · Synthetic population v${POPULATION_RELEASE} · 2021 Census`);
   });
 
   it('skips suppressed, absent and refused cells instead of showing a zero', () => {
@@ -133,12 +163,15 @@ describe('drawShareCard', () => {
     ];
     for (const [name, locale] of names.flatMap(n => (['pt', 'en'] as const).map(l => [n, l] as const))) {
       calls.length = 0;
-      const model = shareCardModel({ record: parish('010122'), recipes: meta.recipes, name, municipalityName: 'Barcelos', regionName: 'Braga', locale });
+      for (const record of [parish('010122'), asFallback(parish('010122'), 'Barcelos')]) {
+      const model = shareCardModel({ record, recipes: meta.recipes, name, municipalityName: 'Barcelos', regionName: 'Braga', locale });
+      calls.length = 0;
       drawShareCard(fakeContext() as unknown as CanvasRenderingContext2D, model);
       const leftColumn = calls.filter(c => c.x === 72 && c.text !== model.honesty && c.text !== model.footer);
       expect(leftColumn.length).toBeGreaterThan(3);
       for (const call of leftColumn) expect(call.y).toBeLessThanOrEqual(SHARE_CARD.height - 102 - 28);
       expect(leftColumn.some(c => c.text.endsWith('…'))).toBe(false);
+      }
     }
   });
 });

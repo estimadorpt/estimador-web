@@ -28,6 +28,17 @@ const SAMPLE = Number(readFlag('sample', '0')) || Infinity;
 const CONCURRENCY = Number(readFlag('concurrency', '8'));
 const OUT_DIR = path.join(process.cwd(), readFlag('out', 'out'));
 
+// The population release the site serves, read from its config so the probes
+// follow a release bump, and the national query id read from that release.
+const POPULATION_RELEASE = /POPULATION_RELEASE = '([^']+)'/.exec(
+  fs.readFileSync(path.join(process.cwd(), 'src/lib/config/population.ts'), 'utf8'),
+)?.[1];
+if (!POPULATION_RELEASE) throw new Error('POPULATION_RELEASE not found in src/lib/config/population.ts');
+const POPULATION_DATA = `/data/population/v${POPULATION_RELEASE}`;
+const NATIONAL_QUERY = JSON.parse(
+  fs.readFileSync(path.join(process.cwd(), 'public', POPULATION_DATA, 'national.json'), 'utf8'),
+).response.id;
+
 const EXPECTED_TYPES = {
   '.html': 'text/html',
   '.json': 'application/json',
@@ -46,7 +57,7 @@ const MUST_404 = [
   '/en/this-page-does-not-exist/',
   '/data/definitely-not-a-file.json',
   // The parish page tells an unknown code apart by this 404.
-  '/data/population/v1.0.0/parish/ZZZZZZ.json',
+  `${POPULATION_DATA}/parish/ZZZZZZ.json`,
 ];
 
 /**
@@ -60,8 +71,8 @@ const MUST_200 = [
   { route: '/pt/populacao/', type: 'text/html' },
   { route: '/pt/populacao/freguesia/010103/', type: 'text/html' },
   { route: '/en/populacao/freguesia/0302FA/', type: 'text/html' },
-  { route: '/populacao/v/1.0.0/q/q1_d35d135a32106a5bcf61', type: 'text/html' },
-  { route: '/data/population/v1.0.0/meta.json', type: 'application/json' },
+  { route: `/populacao/v/${POPULATION_RELEASE}/q/${NATIONAL_QUERY}`, type: 'text/html' },
+  { route: `${POPULATION_DATA}/meta.json`, type: 'application/json' },
 ];
 
 /** Group a route so `--sample` can cap the long dynamic families. */

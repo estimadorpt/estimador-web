@@ -34,9 +34,10 @@ import {
   type GameStore,
 } from './game';
 import { haversineKm, indexPlaces } from './places';
+import { POPULATION_DATA_DIR } from '@/lib/config/population';
 import type { GameEntry, GameIndex, PopulationPlaces } from '@/types/population';
 
-const DATA = path.resolve(import.meta.dirname, '../../../public/data/population/v1.0.0');
+const DATA = path.resolve(import.meta.dirname, '../../../public/data', POPULATION_DATA_DIR);
 const index = JSON.parse(readFileSync(path.join(DATA, 'game/index.json'), 'utf8')) as GameIndex;
 const places = indexPlaces(JSON.parse(readFileSync(path.join(DATA, 'places.json'), 'utf8')) as PopulationPlaces);
 
@@ -121,6 +122,30 @@ describe('the day’s parish', () => {
       expect(places.byCode.has(entry!.code)).toBe(true);
       for (const recipes of CLUE_ORDER) for (const recipe of recipes) expect(entry!.responses[recipe]).toBeDefined();
     }
+  });
+
+  it('draws from every parish, of any tier, each answering with its own figures', () => {
+    expect(index.candidates).toBe(places.parishes.length);
+    expect(index.chunks).toBe(Math.ceil(index.candidates / index.chunk_size));
+    expect([...index.eligible_tiers].sort()).toEqual(['A', 'B', 'C']);
+    const read = (chunk: number) => JSON.parse(readFileSync(path.join(DATA, `game/chunk-${String(chunk).padStart(3, '0')}.json`), 'utf8')) as GameEntry[];
+    const entries = Array.from({ length: index.chunks }, (_, chunk) => read(chunk)).flat();
+    expect(new Set(entries.map(e => e.code)).size).toBe(index.candidates);
+    const tiers = { A: 0, B: 0, C: 0 };
+    for (const entry of entries) {
+      tiers[entry.tier] += 1;
+      expect(entry.tier).toBe(places.byCode.get(entry.code)!.tier);
+      for (const response of Object.values(entry.responses)) {
+        expect(response.decision).toBe('publish');
+        expect(response.resolved_tier).toBe(entry.tier);
+        expect(response.cells.every(cell => cell.length === 3)).toBe(true);
+      }
+    }
+    expect(tiers).toEqual({ A: 776, B: 705, C: 1611 });
+    // Day 0 (the publication date) is a tier C parish.
+    const first = read(0).find(e => e.order === answerOrder(0, index.candidates))!;
+    expect(first.code).toBe('030857');
+    expect(first.tier).toBe('C');
   });
 });
 

@@ -5,7 +5,7 @@ import { QualityBadge } from '@/components/population/QualityBadge';
 import { POPULATION_DOWNLOADS } from '@/lib/config/population';
 import { DIMENSION_LABEL, HONESTY, TIER_COPY, type Locale } from '@/lib/population/labels';
 import type { PopulationMeta, PopulationReleaseInfo, PopulationScorecard } from '@/types/population';
-import { ACCIDENTAL_MATCHES, INTENDED_USES, LIMITATIONS, NON_USES, NOVELTY, formatCount } from './copy';
+import { ACCIDENTAL_MATCHES, INTENDED_USES, LIMITATIONS, NON_USES, NOVELTY, SUPERSEDED, formatCount } from './copy';
 
 const FIELD_LABEL: Record<string, Record<Locale, string>> = {
   ...DIMENSION_LABEL,
@@ -33,6 +33,9 @@ export function methodologyBlocks({ locale, meta, release, scorecard }: {
 }): MDXComponents {
   const pt = locale === 'pt';
   return {
+    // The release the page describes, from the data it serves.
+    Release: () => <>{meta.release_version}</>,
+    Superseded: () => <Callout kind="context">{SUPERSEDED[locale]}</Callout>,
     Positioning: () => (
       <blockquote className="my-6 border-l-2 border-ink pl-5 text-ink">
         <p className="mb-0">{HONESTY.positioning[locale]}</p>
@@ -119,11 +122,18 @@ export function methodologyBlocks({ locale, meta, release, scorecard }: {
           <ul className="mb-5 list-disc space-y-1.5 pl-6">
             {rules.map(rule => <li key={rule.title}><strong className="font-bold">{rule.title}</strong> {rule.body}</li>)}
           </ul>
-          {suppressed > 0 && (
+          {suppressed > 0 ? (
             <p className="mb-5">
               {pt
                 ? `Dentro de um resultado publicado, uma categoria com menos de ${meta.minimum_cell} pessoas ou agregados gerados aparece como «Suprimido», nunca como zero.`
                 : `Within a published result, a category with fewer than ${meta.minimum_cell} generated people or households shows as “Suppressed”, never as zero.`}
+            </p>
+          ) : (
+            <p className="mb-5">
+              {pt
+                ? 'Nenhuma célula é suprimida. Todas as categorias de uma pergunta aparecem; '
+                : 'No cell is suppressed. Every category of a question appears; '}
+              {HONESTY.zero[locale]}
             </p>
           )}
         </>

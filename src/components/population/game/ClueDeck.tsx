@@ -169,7 +169,7 @@ function Clue({ recipe, record, meta, locale, revealed, tier }: {
   meta: PopulationMeta;
   locale: Locale;
   revealed: ClueDeckProps['revealed'];
-  tier: 'A' | 'B';
+  tier: 'A' | 'B' | 'C';
 }) {
   const t = GAME_COPY[locale];
   const definition = meta.recipes[recipe];
@@ -190,7 +190,7 @@ function Clue({ recipe, record, meta, locale, revealed, tier }: {
     <>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {record.decision === 'fallback' && <QualityBadge kind="municipality" locale={locale} />}
-        {record.decision === 'publish' && revealed && <QualityBadge kind={record.resolved_tier === 'A' || record.resolved_tier === 'B' ? record.resolved_tier : tier} locale={locale} />}
+        {record.decision === 'publish' && revealed && <QualityBadge kind={record.resolved_tier === 'A' || record.resolved_tier === 'B' || record.resolved_tier === 'C' ? record.resolved_tier : tier} locale={locale} />}
         <p className="text-sm text-stone-600">{status}</p>
       </div>
       <ClueChart recipe={recipe} record={record} cells={cells} locale={locale} unit={definition.unit} />

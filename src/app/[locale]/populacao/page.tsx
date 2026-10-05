@@ -11,7 +11,8 @@ import { KeyFacts } from '@/components/population/hub/KeyFacts';
 import { NationalAgeCard } from '@/components/population/hub/NationalAgeCard';
 import { EntryCards } from '@/components/population/hub/EntryCards';
 import { RegionsIndex } from '@/components/population/hub/RegionsIndex';
-import { levelCounts, regionEntries } from '@/components/population/hub/places';
+import { regionEntries } from '@/components/population/hub/places';
+import { POPULATION_RELEASE } from '@/lib/config/population';
 import { createPageMetadata } from '@/lib/metadata';
 import { readCells } from '@/lib/population/compact';
 import { HONESTY, type Locale } from '@/lib/population/labels';
@@ -25,8 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     locale,
     path: '/populacao',
     title: pt
-      ? 'Quem vive em Portugal, freguesia a freguesia? População sintética v1.0.0'
-      : 'Who lives in Portugal, parish by parish? Synthetic population v1.0.0',
+      ? `Quem vive em Portugal, freguesia a freguesia? População sintética v${POPULATION_RELEASE}`
+      : `Who lives in Portugal, parish by parish? Synthetic population v${POPULATION_RELEASE}`,
     description: pt
       ? 'Uma população sintética de acesso aberto para as 3 092 freguesias de Portugal, gerada a partir dos Censos 2021: procura a tua freguesia, explora o mapa e descarrega os dados.'
       : 'An open-access synthetic population for all 3,092 parishes in Portugal, generated from the 2021 Census: find your parish, explore the map and download the data.',
@@ -39,7 +40,6 @@ export default async function PopulationHub({ params }: { params: Promise<{ loca
   const locale: Locale = raw === 'en' ? 'en' : 'pt';
   const pt = locale === 'pt';
   const [meta, places, national] = await Promise.all([loadPopulationMeta(), loadPopulationPlaces(), loadPopulationNational()]);
-  const levels = places ? levelCounts(places) : null;
   const regions = places ? regionEntries(places, locale) : [];
   const ageCells = meta && national && national.response.decision !== 'refuse'
     ? readCells(national.response, meta.recipes.national_age, locale)
@@ -53,7 +53,7 @@ export default async function PopulationHub({ params }: { params: Promise<{ loca
         // The search's suggestion list opens below the hero; the art stays inside its own box.
         className="overflow-visible!"
         icon={<Users aria-hidden="true" className="h-4 w-4" />}
-        eyebrow={pt ? 'População sintética · v1.0.0 · Censos 2021' : 'Synthetic population · v1.0.0 · 2021 Census'}
+        eyebrow={pt ? `População sintética · v${POPULATION_RELEASE} · Censos 2021` : `Synthetic population · v${POPULATION_RELEASE} · 2021 Census`}
         title={pt ? 'Quem vive em Portugal, freguesia a freguesia?' : 'Who lives in Portugal, parish by parish?'}
         lede={
           <>
@@ -76,15 +76,14 @@ export default async function PopulationHub({ params }: { params: Promise<{ loca
       <PopulationSectionNav current="hub" locale={locale} />
 
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-4 py-8 md:py-10">
-        {meta && levels ? (
+        {meta ? (
           <KeyFacts
             locale={locale}
             persons={meta.counts.persons}
             households={meta.counts.households}
-            parishes={levels.total}
+            parishes={meta.counts.parishes}
             municipalities={meta.counts.municipalities}
-            parishLevel={levels.parish}
-            municipalityLevel={levels.municipality}
+            tiers={meta.counts.tiers}
           />
         ) : (
           <p className="rounded-2xl border border-line bg-cream p-5 text-sm text-stone-600">
@@ -98,8 +97,8 @@ export default async function PopulationHub({ params }: { params: Promise<{ loca
           <h2 id="mapa" className="text-2xl md:text-3xl">{pt ? 'Explora o mapa' : 'Explore the map'}</h2>
           <p className="mb-4 mt-2 max-w-3xl text-[15px] leading-relaxed text-stone-600">
             {pt
-              ? 'Aproxima um distrito, depois um concelho, e escolhe uma freguesia. A cor de cada freguesia diz só se a sua página mostra valores próprios ou os do concelho; não mede nada sobre quem lá vive.'
-              : 'Zoom into a district, then a municipality, and pick a parish. A parish’s colour says only whether its page shows its own figures or its municipality’s; it measures nothing about who lives there.'}
+              ? 'Aproxima um distrito, depois um concelho, e escolhe uma freguesia. A cor de cada freguesia diz só o nível de qualidade do ajuste às tabelas do INE (A, B ou C); não mede nada sobre quem lá vive.'
+              : 'Zoom into a district, then a municipality, and pick a parish. A parish’s colour says only its quality-of-fit tier against INE’s tables (A, B or C); it measures nothing about who lives there.'}
           </p>
           <PopulationMap locale={locale} />
         </section>

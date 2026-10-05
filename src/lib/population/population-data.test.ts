@@ -39,7 +39,8 @@ describe('population release files', () => {
 
   it('rebuilds every parish response as a valid contract-v1 response whose query hashes to its id', () => {
     let checked = 0;
-    const decisions = { publish: 0, fallback: 0, refuse: 0 };
+    const decisions: Record<string, number> = {};
+    let zeros = 0;
     for (const file of parishFiles) {
       const record = json<ParishRecord>(`parish/${file}`);
       expect(Object.keys(record.responses)).toEqual(meta.recipe_order);
@@ -52,7 +53,11 @@ describe('population release files', () => {
         parsePublicResponse(response, context);
         expect(hashQuery(response.query)).toBe(compact.id);
         if (compact.decision === 'fallback') expect(compact.resolved).toBe(record.fallback?.code);
-        decisions[compact.decision] += 1;
+        decisions[compact.decision] = (decisions[compact.decision] ?? 0) + 1;
+        // v1.0.1: every category of a question is present; nobody in it reads 0.0%, not a dash.
+        const cells = readCells(compact, meta.recipes[name as PortraitRecipe], 'pt');
+        expect(cells.filter(cell => cell.state !== 'published'), `${record.code} ${name}`).toEqual([]);
+        zeros += compact.cells.filter(cell => cell[1] === 0).length;
         checked += 1;
       }
     }
@@ -60,9 +65,13 @@ describe('population release files', () => {
     const nationalResponse = rebuildResponse(national.response, meta.recipes.national_age, { level: 'national', code: 'PT', name: national.name }, meta);
     parsePublicResponse(nationalResponse, context);
     expect(hashQuery(nationalResponse.query)).toBe(national.response.id);
-    decisions[national.response.decision] += 1;
+    decisions[national.response.decision] = (decisions[national.response.decision] ?? 0) + 1;
     expect(checked + 1).toBe(meta.counts.responses);
     expect(decisions).toEqual(meta.counts.decisions);
+    // v1.0.1 (doc 206 §5): every answer is the parish's own, nothing suppressed, zeros shown.
+    expect(meta.counts.decisions).toEqual({ publish: 24737 });
+    expect(meta.counts.suppressed_cells).toBe(0);
+    expect(zeros).toBe(10130);
   });
 
   it('has words for every category value in the release', () => {
@@ -81,21 +90,27 @@ describe('population release files', () => {
       expect(parish, record.code).toBeDefined();
       expect(parish!.tier).toBe(record.tier);
       expect(parish!.level).toBe(record.status === 'publish' ? 'parish' : 'municipality');
-      expect(record.fallback === null).toBe(record.tier !== 'C');
+      expect(record.fallback === null).toBe(record.status === 'publish');
+      // v1.0.1: every parish answers with its own figures, tier C included.
+      expect(record.status).toBe('publish');
+      for (const response of Object.values(record.responses)) expect(response.resolved_tier).toBe(record.tier);
     }
   });
 
-  it('offers only published A/B parishes to the daily game, in curated order', () => {
+  it('offers every parish, of any tier, to the daily game, in curated order', () => {
     const game = json<GameIndex>('game/index.json');
     const entries: GameEntry[] = [];
     for (let n = 0; n < game.chunks; n += 1) entries.push(...json<GameEntry[]>(`game/chunk-${String(n).padStart(3, '0')}.json`));
     expect(entries).toHaveLength(game.candidates);
     expect(entries.map(entry => entry.order)).toEqual(entries.map((_, i) => i));
     const index = indexPlaces(places);
+    expect(game.candidates).toBe(places.parishes.length);
+    expect(new Set(entries.map(entry => entry.code)).size).toBe(places.parishes.length);
     for (const entry of entries) {
-      expect(['A', 'B']).toContain(entry.tier);
+      expect(entry.tier).toBe(index.byCode.get(entry.code)?.tier);
       expect(index.byCode.get(entry.code)?.level).toBe('parish');
     }
+    expect(entries.filter(entry => entry.tier === 'C')).toHaveLength(meta.counts.tiers.C);
     expect(game.epoch).toBe(meta.published);
   });
 

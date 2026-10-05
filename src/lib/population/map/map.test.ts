@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { FeatureCollection, Geometry } from 'geojson';
+import { POPULATION_DATA_DIR } from '@/lib/config/population';
 import type { PopulationPlaces } from '@/types/population';
 import { fitCamera, flightDuration, toScreen, zoomCamera, clampZoom, sameCamera } from './camera';
 import { countryBounds, INSETS, mainBounds, mercator, project, shapesOf, unionBounds, type Bounds } from './geometry';
@@ -13,7 +14,7 @@ import { placeLabels, textWidth } from './placement';
 import { regionForFile, shapeOptionsForFile } from './load';
 
 const GEO = path.resolve(import.meta.dirname, '../../../../public/data/population-geography');
-const PLACES = path.resolve(import.meta.dirname, '../../../../public/data/population/v1.0.0/places.json');
+const PLACES = path.resolve(import.meta.dirname, '../../../../public/data', POPULATION_DATA_DIR, 'places.json');
 const read = <T,>(file: string): T => JSON.parse(readFileSync(file, 'utf8')) as T;
 type Collection = FeatureCollection<Geometry, { code: string; name: string }>;
 

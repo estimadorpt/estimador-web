@@ -8,6 +8,7 @@ import { readFileSync, existsSync } from 'fs';
 import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/mdx-components';
+import { POPULATION_RELEASE } from '@/lib/config/population';
 
 export async function generateMetadata({ 
   params 
@@ -86,12 +87,12 @@ export default async function MethodologyPage({
         </header>
         <nav aria-label={pt ? 'Métodos por área' : 'Methods by area'} className="my-8 divide-y divide-line border-y border-line">
           {(pt ? [
-            ['População', 'Como é gerada uma população sintética?', 'Dados de partida, decisões de publicação, qualidade e privacidade da versão 1.0.0.', '/populacao/metodologia'],
+            ['População', 'Como é gerada uma população sintética?', `Dados de partida, níveis de qualidade e privacidade da versão ${POPULATION_RELEASE}.`, '/populacao/metodologia'],
             ['Futebol', 'O que sustenta estas probabilidades?', 'Modelo, simulações e pressupostos.', '/desporto/liga/metodologia'],
             ['Economia', 'De onde vem esta leitura?', 'Fontes, atualização, avaliação e limites.', '/economia/metodologia'],
             ['Eleições', 'Como são combinadas as sondagens?', 'Modelos eleitorais e incerteza, nesta página.', '#eleicoes'],
           ] : [
-            ['Population', 'How is a synthetic population generated?', 'Inputs, publication decisions, quality and privacy of release 1.0.0.', '/populacao/metodologia'],
+            ['Population', 'How is a synthetic population generated?', `Inputs, quality tiers and privacy of release ${POPULATION_RELEASE}.`, '/populacao/metodologia'],
             ['Football', 'What supports these probabilities?', 'Model, simulations and assumptions.', '/desporto/liga/metodologia'],
             ['Economy', 'Where does this reading come from?', 'Sources, updates, evaluation and limitations.', '/economia/metodologia'],
             ['Elections', 'How are polls combined?', 'Election models and uncertainty, on this page.', '#eleicoes'],

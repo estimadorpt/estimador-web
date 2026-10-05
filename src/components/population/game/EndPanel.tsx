@@ -6,7 +6,7 @@ import { Action } from '@/components/brand/Action';
 import { ACCENT, FURNITURE } from '@/components/viz/theme';
 import { MAX_GUESSES, formatCountdown, msUntilNextLisbonMidnight, type GameRecord, type GameStats } from '@/lib/population/game';
 import { regionTitle, type Parish } from '@/lib/population/places';
-import type { Locale } from '@/lib/population/labels';
+import { TIER_COPY, type Locale } from '@/lib/population/labels';
 import type { GameIndex } from '@/types/population';
 import { ParishLink } from '../ParishLink';
 import { QualityBadge } from '../QualityBadge';
@@ -22,7 +22,7 @@ const SECONDARY = 'inline-flex min-h-12 items-center justify-center gap-2 rounde
 export function EndPanel({ record, answer, tier, stats, share, index, locale, practice }: {
   record: GameRecord;
   answer: Parish;
-  tier: 'A' | 'B';
+  tier: 'A' | 'B' | 'C';
   stats: GameStats;
   share: string;
   index: GameIndex;
@@ -68,6 +68,7 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
         <QualityBadge kind={tier} locale={locale} />
         <span>{t.residents}: <strong className="tabular-nums text-ink">{numbers.format(answer.censusPopulation)}</strong></span>
       </div>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600">{TIER_COPY[tier].meaning[locale]}</p>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Action onClick={onShare}>

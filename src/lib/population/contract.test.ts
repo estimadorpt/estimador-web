@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { POPULATION_RELEASE } from '@/lib/config/population';
 import type { PublicResponseV1 } from '@/types/population';
 import { assertPublishable, parsePublicResponse } from './contract';
 
-const context = { releaseVersion: '1.0.0', dataVintage: 'INE Censos 2021', dataStatus: 'release' as const };
+const context = { releaseVersion: POPULATION_RELEASE, dataVintage: 'INE Censos 2021', dataStatus: 'release' as const };
 
 function response(overrides: Partial<PublicResponseV1> = {}, code = '010103'): PublicResponseV1 {
   return {
@@ -10,7 +11,7 @@ function response(overrides: Partial<PublicResponseV1> = {}, code = '010103'): P
     data_status: 'release',
     query: {
       contract_version: '1.0',
-      release_version: '1.0.0',
+      release_version: POPULATION_RELEASE,
       geography: { level: 'freguesia', code, name: 'X' },
       unit: 'person',
       dimensions: ['living_alone'],
@@ -36,7 +37,7 @@ function response(overrides: Partial<PublicResponseV1> = {}, code = '010103'): P
       fields: { living_alone: 'derived', age_story_band: 'derived' },
     },
     links: {
-      canonical_path: '/populacao/v/1.0.0/q/q1_0123456789abcdef0123',
+      canonical_path: `/populacao/v/${POPULATION_RELEASE}/q/q1_0123456789abcdef0123`,
       methodology_path: '/populacao/metodologia',
       quality_path: '/populacao/qualidade',
       download_path: null,

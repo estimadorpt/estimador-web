@@ -4,7 +4,8 @@
  * Population charts. They draw a response's own cells — the producer's shares
  * and display strings — in each category's natural order. They never sort by
  * value, never draw a remainder, and show suppressed or absent categories as
- * words, never as zero. Bars are on an absolute 0–100% scale, so a bar's length
+ * words, never as zero. A published zero ("0.0%" with a share of 0) is drawn
+ * as no bar at all, so an empty category never looks like a sliver of people. Bars are on an absolute 0–100% scale, so a bar's length
  * is its share, not its rank among the others.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -28,7 +29,7 @@ export function ShareBars({ cells, locale, color = ACCENT, labelWidth = 'sm:grid
         <li key={cell.values.join('|')} className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 ${labelWidth}`}>
           <span className="text-sm text-ink">{cell.labels[cell.labels.length - 1]}</span>
           <span className="order-3 col-span-2 h-2.5 overflow-hidden rounded-r-[4px] sm:order-none sm:col-span-1" style={{ backgroundColor: FURNITURE.track }} aria-hidden="true">
-            {cell.share !== null && (
+            {cell.share !== null && cell.share > 0 && (
               <span className="block h-full rounded-r-[4px]" style={{ width: `${Math.max(0.8, cell.share * 100)}%`, backgroundColor: color }} />
             )}
           </span>
@@ -96,7 +97,7 @@ export function AgeColumns({ cells, locale, height = 200 }: { cells: ReadCell[];
               <rect x={left + i * band} y={0} width={band} height={height - bottom} fill="transparent" />
               {cell.share === null
                 ? <line x1={x + 2} x2={x + bar - 2} y1={8 + plotHeight - 3} y2={8 + plotHeight - 3} stroke={DEEMPHASIS} strokeWidth={2} strokeDasharray="2 2" />
-                : <rect x={x} y={8 + plotHeight - h} width={bar} height={Math.max(1, h)} rx={3} fill={active === null || active === i ? ACCENT : DEEMPHASIS} />}
+                : cell.share === 0 ? null : <rect x={x} y={8 + plotHeight - h} width={bar} height={Math.max(1, h)} rx={3} fill={active === null || active === i ? ACCENT : DEEMPHASIS} />}
               {showLabel && <text x={x + bar / 2} y={height - 8} textAnchor="middle" fontSize="11" fill={FURNITURE.axis} fontFamily={FURNITURE.font}>{cell.labels[0].split('–')[0]}</text>}
             </g>
           );

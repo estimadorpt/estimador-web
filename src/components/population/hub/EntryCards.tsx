@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { BookOpen, Download, Puzzle, ShieldCheck, Shapes } from 'lucide-react';
 import { Action } from '@/components/brand/Action';
-import { POPULATION_DOWNLOADS, POPULATION_ROUTES } from '@/lib/config/population';
+import { POPULATION_DOWNLOADS, POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import type { Locale } from '@/lib/population/labels';
 
 interface Entry {
@@ -38,8 +38,8 @@ function entries(locale: Locale): Entry[] {
       kicker: pt ? 'Qualidade' : 'Quality',
       title: pt ? 'Como sabemos que funciona?' : 'How do we know it works?',
       text: pt
-        ? 'A população gerada comparada com as tabelas que o INE publica, e as regras que decidem o que fica por publicar.'
-        : 'The generated population set against the tables INE publishes, and the rules that decide what is left unpublished.',
+        ? 'A população gerada comparada com as tabelas que o INE publica, e o que quer dizer cada nível de qualidade.'
+        : 'The generated population set against the tables INE publishes, and what each quality tier means.',
       action: pt ? 'Ver a qualidade' : 'See the quality',
       href: POPULATION_ROUTES.quality,
     },
@@ -51,7 +51,7 @@ function entries(locale: Locale): Entry[] {
       text: pt
         ? 'Os ficheiros de pessoas e agregados, com o dicionário de variáveis e as somas de verificação, publicados no GitHub com licença CC BY 4.0.'
         : 'The person and household files, with the variable dictionary and checksums, published on GitHub under a CC BY 4.0 licence.',
-      action: pt ? 'Abrir a versão 1.0.0' : 'Open release 1.0.0',
+      action: pt ? `Abrir a versão ${POPULATION_RELEASE}` : `Open release ${POPULATION_RELEASE}`,
       href: POPULATION_DOWNLOADS.release,
       external: true,
     },

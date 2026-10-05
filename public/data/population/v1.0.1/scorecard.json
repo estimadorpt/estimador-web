@@ -1,0 +1,409 @@
+{
+  "constraints": [
+    {
+      "key": "p_age5",
+      "label": "Idade (grupos de 5 anos)",
+      "label_en": "Age (5-year bands)",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.01695502,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_marital",
+      "label": "Estado civil",
+      "label_en": "Marital status",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.06323949,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_educ",
+      "label": "Escolaridade",
+      "label_en": "Education",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.08624796,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_labour",
+      "label": "Situação perante o trabalho",
+      "label_en": "Labour-force status",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.04940131,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_income",
+      "label": "Principal meio de vida",
+      "label_en": "Main source of income",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.07740396,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_labour3_educ5",
+      "label": "Trabalho × escolaridade",
+      "label_en": "Labour × education",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.08580451,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_labour3_income",
+      "label": "Trabalho × rendimento",
+      "label_en": "Labour × income",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.03450957,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_nat",
+      "label": "Nacionalidade",
+      "label_en": "Nationality",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.00119913,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_religion",
+      "label": "Religião",
+      "label_en": "Religion",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.00233482,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_sitprof",
+      "label": "Situação na profissão",
+      "label_en": "Employment situation",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.0465898,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_sector",
+      "label": "Setor de atividade",
+      "label_en": "Activity sector",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.03537383,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    },
+    {
+      "key": "p_union",
+      "label": "União de facto",
+      "label_en": "De facto union",
+      "srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.0172637,
+        "variation_type": "model_run"
+      },
+      "was_constrained": true
+    }
+  ],
+  "external_checks": [],
+  "generated_at": "2026-09-27T20:05:36+01:00",
+  "headline": {
+    "child_deficit": {
+      "calibrated": false,
+      "hi": null,
+      "lo": null,
+      "measured": false,
+      "n_replicates": 1,
+      "value": 0.00012691,
+      "variation_type": "model_run"
+    },
+    "coverage_in_band": 0.0,
+    "marital_srmse": {
+      "calibrated": false,
+      "hi": null,
+      "lo": null,
+      "measured": false,
+      "n_replicates": 1,
+      "value": 0.06323949,
+      "variation_type": "model_run"
+    },
+    "n_failures": 0,
+    "passes_gate": true,
+    "person_srmse_common": {
+      "calibrated": false,
+      "hi": null,
+      "lo": null,
+      "measured": false,
+      "n_replicates": 1,
+      "value": 0.04532185,
+      "variation_type": "model_run"
+    },
+    "person_srmse_own": {
+      "calibrated": false,
+      "hi": null,
+      "lo": null,
+      "measured": false,
+      "n_replicates": 1,
+      "value": 0.04532185,
+      "variation_type": "model_run"
+    }
+  },
+  "honesty_notes": [
+    {
+      "en": "Intervals show variation across model runs, not calibrated confidence intervals.",
+      "pt": "Os intervalos mostram variação entre execuções do modelo, não intervalos de confiança calibrados."
+    },
+    {
+      "en": "Status changes to ok only after both the R=1 evaluation and national privacy audit pass.",
+      "pt": "O estado só muda para ok quando a avaliação R=1 e a auditoria de privacidade nacional aprovam."
+    },
+    {
+      "en": "This version publishes a single model run: there is no across-run range, and no directional comparison between cells is permitted.",
+      "pt": "Esta versão publica uma única execução do modelo: não há amplitude entre execuções e nenhuma comparação direcional entre células é permitida."
+    }
+  ],
+  "novelty": {
+    "household_novel_pct": 99.1674,
+    "person_verbatim_pct": 10.506
+  },
+  "privacy": {
+    "attribute_inference_excess": -0.00219248,
+    "person_dcr": {
+      "attributes": [
+        "sex",
+        "age_5y",
+        "education_level_code",
+        "employment_status_code",
+        "income_source_code",
+        "sitprof_code",
+        "union_de_facto",
+        "marital_status_code",
+        "occupation_code",
+        "industry_cae_code",
+        "nationality_group",
+        "religion_group",
+        "activity_sector_code"
+      ],
+      "mean_difference": 1.4046,
+      "seed_leave_one_out": {
+        "exact_match_rate": 0.7426,
+        "mean": 0.3108,
+        "median": 0.0,
+        "p95": 1.0,
+        "records": 5000
+      },
+      "status": "pass",
+      "synthetic_to_seed": {
+        "exact_match_rate": 0.1082,
+        "mean": 1.7154,
+        "median": 2.0,
+        "p95": 3.0,
+        "records": 5000
+      },
+      "threshold": {
+        "minimum_difference": -0.02,
+        "rule": "synthetic mean DCR must not be more than 0.02 below real LOO DCR"
+      }
+    },
+    "person_membership_excess_auc": -0.00242,
+    "status": "pass"
+  },
+  "provenance": {
+    "census_vintage": "INE Censos 2021",
+    "code_commit": "710d731070a13485b0dba8c967776023bb133b87",
+    "engine": "v10",
+    "model_sha256": "062e2ad784886b7287536233f853db151c57615d2b1a952fb2e12368581e76d3",
+    "model_version": "a-prime-v10:c1c_cond_ht_natseed@step10500",
+    "n_households": 4154571,
+    "n_parishes": 3092,
+    "n_persons": 10340441,
+    "n_replicates": 1,
+    "run": "pt-synthpop"
+  },
+  "retrodiction": {
+    "reason": "aguarda apuramento separado",
+    "status": "unavailable"
+  },
+  "schema": "estimador-populacao-scorecard/v1",
+  "scope": "Portugal — 3 092 freguesias",
+  "scope_en": "Portugal — 3,092 parishes",
+  "status": "ok",
+  "strata": [
+    {
+      "acceptance": {
+        "center": 0.483,
+        "lower": 0.335,
+        "source": "pre_registered_heldout_finalization_2026-07-23",
+        "status": "informational (doc 190 §3, 2026-09-19)",
+        "upper": 0.73
+      },
+      "in_band": false,
+      "key": "lt_500",
+      "kind": "size_band",
+      "label": "<500",
+      "label_en": "<500",
+      "n_parishes": 882,
+      "note_pt": "suppress_or_municipio_fallback",
+      "person_srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.10410202,
+        "variation_type": "model_run"
+      }
+    },
+    {
+      "acceptance": {
+        "center": 0.162,
+        "lower": 0.105,
+        "source": "pre_registered_heldout_finalization_2026-07-23",
+        "status": "informational (doc 190 §3, 2026-09-19)",
+        "upper": 0.256
+      },
+      "in_band": false,
+      "key": "500_2k",
+      "kind": "size_band",
+      "label": "500–2k",
+      "label_en": "500–2k",
+      "n_parishes": 1215,
+      "note_pt": "stop_and_investigate",
+      "person_srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.05644843,
+        "variation_type": "model_run"
+      }
+    },
+    {
+      "acceptance": {
+        "center": 0.074,
+        "lower": 0.046,
+        "source": "pre_registered_heldout_finalization_2026-07-23",
+        "status": "informational (doc 190 §3, 2026-09-19)",
+        "upper": 0.112
+      },
+      "in_band": false,
+      "key": "2k_10k",
+      "kind": "size_band",
+      "label": "2k–10k",
+      "label_en": "2k–10k",
+      "n_parishes": 755,
+      "note_pt": "stop_and_investigate",
+      "person_srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.01673279,
+        "variation_type": "model_run"
+      }
+    },
+    {
+      "acceptance": {
+        "center": 0.045,
+        "lower": 0.023,
+        "source": "pre_registered_heldout_finalization_2026-07-23",
+        "status": "informational (doc 190 §3, 2026-09-19)",
+        "upper": 0.078
+      },
+      "in_band": false,
+      "key": "gt_10k",
+      "kind": "size_band",
+      "label": ">10k",
+      "label_en": ">10k",
+      "n_parishes": 240,
+      "note_pt": "stop_and_investigate",
+      "person_srmse_median": {
+        "calibrated": false,
+        "hi": null,
+        "lo": null,
+        "measured": false,
+        "n_replicates": 1,
+        "value": 0.00812632,
+        "variation_type": "model_run"
+      }
+    }
+  ]
+}

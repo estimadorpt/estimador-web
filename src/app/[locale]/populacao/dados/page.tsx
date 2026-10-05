@@ -6,7 +6,7 @@ import { Action } from '@/components/brand/Action';
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { PopulationSectionNav } from '@/components/population/SectionNav';
 import { PopulationUnavailable, Section } from '@/components/population/quality/parts';
-import { INTENDED_USES, NON_USES, formatCount, formatDay } from '@/components/population/quality/copy';
+import { INTENDED_USES, NON_USES, SUPERSEDED, formatCount, formatDay } from '@/components/population/quality/copy';
 import { ColumnDictionary, PROVENANCE_CODES } from '@/components/population/data/ColumnDictionary';
 import { CopyButton } from '@/components/population/data/CopyButton';
 import { formatBytes } from '@/components/population/data/format';
@@ -23,8 +23,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: POPULATION_ROUTES.data,
     title: pt ? 'Posso usar os dados da população sintética?' : 'Can I use the synthetic population data?',
     description: pt
-      ? 'Descarregar a População Sintética de Portugal v1.0.0: licença CC BY 4.0, unidades, geografia, dicionário de colunas, qualidade, verificação e citação.'
-      : 'Download the Synthetic Population of Portugal v1.0.0: CC BY 4.0 licence, units, geography, column dictionary, quality, verification and citation.',
+      ? `Descarregar a População Sintética de Portugal v${POPULATION_RELEASE}: licença CC BY 4.0, unidades, geografia, dicionário de colunas, qualidade, verificação e citação.`
+      : `Download the Synthetic Population of Portugal v${POPULATION_RELEASE}: CC BY 4.0 licence, units, geography, column dictionary, quality, verification and citation.`,
   });
 }
 
@@ -135,6 +135,12 @@ sha256sum checksums.sha256`;
                 [pt ? 'Ano de referência' : 'Reference year', pt ? `2021: calibrada nos Censos 2021 do INE (${release.census_vintage}).` : `2021: calibrated to INE’s 2021 Census (${release.census_vintage}).`],
                 [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span><span className="break-all font-mono text-[13px]">sha256 {release.model_sha256}</span></>],
                 [pt ? 'Código' : 'Code', <span key="c" className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>],
+                [pt ? 'Versão anterior' : 'Previous release', <>
+                  {pt
+                    ? <>A <a className={link} href={POPULATION_DOWNLOADS.superseded}>versão 1.0.0</a>, publicada no mesmo dia, foi substituída por esta e continua no GitHub como registo. </>
+                    : <><a className={link} href={POPULATION_DOWNLOADS.superseded}>Release 1.0.0</a>, published the same day, is superseded by this one and stays on GitHub as a record. </>}
+                  {SUPERSEDED[locale]}
+                </>],
               ]} />
             </Section>
 
@@ -225,12 +231,8 @@ sha256sum checksums.sha256`;
               <h3 className="mt-8 text-lg font-bold text-ink">{pt ? 'Primeiros passos' : 'First steps'}</h3>
               <p className="mt-2 max-w-3xl leading-relaxed text-stone-600">
                 {pt
-                  ? 'Dois exemplos que ligam pessoas a agregados. Se publicares tabelas feitas com estes dados, segue as regras do site: o nível de qualidade da freguesia, categorias com menos de '
-                  : 'Two examples that join persons to households. If you publish tables made from these data, follow the site’s rules: the parish quality tier, categories under '}
-                {meta.minimum_cell}
-                {pt
-                  ? ' pessoas suprimidas, e nenhuma ordenação nem comparação «mais do que» a partir de uma única execução.'
-                  : ' people suppressed, and no rankings or “more than” comparisons from a single run.'}
+                  ? 'Dois exemplos que ligam pessoas a agregados. Se publicares tabelas feitas com estes dados, segue as regras do site: diz o nível de qualidade de cada freguesia, lê com mais cuidado as categorias com poucas pessoas e as freguesias de nível C, e não faças ordenações nem comparações «mais do que» a partir de uma única execução.'
+                  : 'Two examples that join persons to households. If you publish tables made from these data, follow the site’s rules: state each parish’s quality tier, read categories with few people and tier C parishes with more care, and make no rankings or “more than” comparisons from a single run.'}
               </p>
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 <Code label="DuckDB">{duckdb}</Code>

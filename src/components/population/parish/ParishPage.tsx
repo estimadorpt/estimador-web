@@ -21,6 +21,7 @@ import { indexPlaces, normaliseParishCode, regionSlug, regionTitle, type Parish,
 import { parishQuestion, shareCardModel } from '@/lib/population/share-card';
 import type { ParishRecord, PopulationMeta, PortraitRecipe } from '@/types/population';
 import { GuessFirstCard } from './GuessFirst';
+import { howToReadItems, type HowToReadInput } from './how-to-read';
 import { parishHead, parishUrl, unknownHead, watchHead } from './head';
 import { HundredSection } from './HundredSection';
 import { inScope, scopeSubject, type Scope } from './place-words';
@@ -173,11 +174,12 @@ function Ready({ code, place, record, meta, index, locale }: Extract<State, { ki
   const order = meta.recipe_order;
   const groups = GROUPS.map(group => ({ ...group, recipes: order.filter(recipe => group.recipes.includes(recipe)) }));
 
+  const tier = TIER_COPY[place.tier];
   const publication = municipalityFigures
     ? (pt
       ? `Os números desta página são valores do concelho de ${fallbackName ?? place.municipalityName}, que inclui esta freguesia: os da própria freguesia não atingem a qualidade necessária para publicar.`
       : `The figures on this page are those of ${fallbackName ?? place.municipalityName} municipality, which includes this parish: the parish's own figures do not reach the quality needed to publish.`)
-    : (pt ? 'Os números desta página são da própria freguesia.' : 'The figures on this page are the parish’s own.');
+    : (pt ? `Os números desta página são da própria freguesia. ${tier.meaning.pt}` : `The figures on this page are the parish’s own. ${tier.meaning.en}`);
 
   const toc = [
     { href: '#cem', label: pt ? 'Se fosse 100' : 'If it were 100' },
@@ -224,7 +226,7 @@ function Ready({ code, place, record, meta, index, locale }: Extract<State, { ki
         }
         meta={
           <>
-            <QualityBadge kind={place.tier} locale={locale} title={TIER_COPY[place.tier].meaning[locale]} />
+            <QualityBadge kind={place.tier} locale={locale} title={tier.meaning[locale]} />
             {municipalityFigures && (
               <QualityBadge
                 kind="municipality"
@@ -255,7 +257,7 @@ function Ready({ code, place, record, meta, index, locale }: Extract<State, { ki
               {renderToc('px-2 pb-3')}
             </details>
 
-            <HowToRead place={place} locale={locale} fallbackName={fallbackName} municipalityFigures={municipalityFigures} />
+            <HowToRead place={place} record={record} meta={meta} locale={locale} fallbackName={fallbackName} municipalityFigures={municipalityFigures} />
 
             <HundredSection record={record} meta={meta} locale={locale} name={place.name} fallbackName={fallbackName ?? place.municipalityName} />
 
@@ -340,30 +342,10 @@ function Ready({ code, place, record, meta, index, locale }: Extract<State, { ki
   );
 }
 
-function HowToRead({ place, locale, fallbackName, municipalityFigures }: { place: Parish; locale: Locale; fallbackName: string | null; municipalityFigures: boolean }) {
+function HowToRead(props: HowToReadInput) {
+  const { locale } = props;
   const pt = locale === 'pt';
-  const tier = TIER_COPY[place.tier];
-  const municipality = fallbackName ?? place.municipalityName;
-  const items: Array<{ term: string; body: string }> = [
-    { term: tier.label[locale], body: tier.meaning[locale] },
-    {
-      term: pt ? 'Freguesia ou concelho' : 'Parish or municipality',
-      body: municipalityFigures
-        ? (pt
-          ? `Aqui, os cartões mostram os valores do concelho de ${municipality}, que inclui esta freguesia. Cada cartão diz de onde vêm os seus números.`
-          : `Here the cards show the figures for ${municipality} municipality, which includes this parish. Every card says where its numbers come from.`)
-        : (pt
-          ? 'Aqui, os cartões mostram os valores da própria freguesia. Cada cartão diz de onde vêm os seus números.'
-          : 'Here the cards show the parish’s own figures. Every card says where its numbers come from.'),
-    },
-    {
-      term: pt ? '«Suprimido» e «—»' : '“Suppressed” and “—”',
-      body: pt
-        ? '«Suprimido»: menos de 10 pessoas geradas nessa categoria, por isso o valor não é publicado. «—»: a resposta não traz essa categoria. Nenhum dos dois quer dizer zero.'
-        : '“Suppressed”: fewer than 10 generated people in that category, so the value is not published. “—”: the answer does not carry that category. Neither means zero.',
-    },
-    { term: pt ? 'Uma só execução' : 'A single run', body: HONESTY.singleRun[locale] },
-  ];
+  const items = howToReadItems(props);
   return (
     <section aria-labelledby="ler-title" className="rounded-2xl border border-line bg-cream p-5 md:p-6">
       <h2 id="ler-title" className="text-lg font-bold tracking-[-0.02em] text-ink">{pt ? 'Como ler esta página' : 'How to read this page'}</h2>

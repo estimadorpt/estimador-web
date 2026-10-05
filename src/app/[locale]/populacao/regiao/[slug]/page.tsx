@@ -8,7 +8,7 @@ import { PopulationSectionNav } from '@/components/population/SectionNav';
 import { PopulationMap } from '@/components/population/map/PopulationMap';
 import { RegionParishes } from '@/components/population/hub/RegionParishes';
 import { formatCount, regionBySlug, regionListing } from '@/components/population/hub/places';
-import { POPULATION_ROUTES } from '@/lib/config/population';
+import { POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { createPageMetadata, SITE_LOCALES } from '@/lib/metadata';
 import { regionSlug, regionTitle } from '@/lib/population/places';
 import type { Locale } from '@/lib/population/labels';
@@ -68,7 +68,7 @@ export default async function RegionPage({ params }: { params: Params }) {
         compact
         back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
         icon={<MapPinned aria-hidden="true" className="h-4 w-4" />}
-        eyebrow={pt ? 'População sintética · v1.0.0 · Censos 2021' : 'Synthetic population · v1.0.0 · 2021 Census'}
+        eyebrow={pt ? `População sintética · v${POPULATION_RELEASE} · Censos 2021` : `Synthetic population · v${POPULATION_RELEASE} · 2021 Census`}
         title={pt ? `População sintética: ${title}` : `Synthetic population: ${title}`}
         lede={pt
           ? `${counts} Escolhe uma no mapa ou na lista para ver as respostas da população gerada.`
