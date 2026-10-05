@@ -3,7 +3,8 @@ import { PUBLISHED_ARTICLE_SLUGS } from './published-articles.generated';
 
 const PUBLIC_ROUTES = new Set([
   '', 'economia', 'economia/metodologia', 'sobre', 'metodologia', 'artigos', 'privacidade',
-  'eleicoes/presidenciais', 'eleicoes/legislativas', 'eleicoes/legislativas/mapa',
+  'eleicoes/presidenciais', 'eleicoes/legislativas', 'eleicoes/legislativas/mapa', 'eleicoes/arquivo',
+  'marca', 'artigos/tema',
   'desporto/liga', 'desporto/liga2', 'desporto/liga/jogadores', 'desporto/liga/modelo',
   'desporto/liga/metodologia', 'desporto/liga/dados', 'desporto/liga/2025-26',
   'desporto/liga/simulador', 'desporto/liga/jogo-previsoes',
@@ -59,6 +60,9 @@ export function analyticsPath(value: string): string {
     const surface = POPULATION_SURFACES.has(parts[1]) ? parts[1] : parts[1] === 'v' ? 'consulta' : '';
     return `/${locale}/populacao/${surface ? `${surface}/` : ''}`;
   }
+  // A tag page is a listing, not a piece: keep the kind and drop the tag, so
+  // /artigos/tema/<tag>/ never falls into the article-slug branch below.
+  if (parts[0] === 'artigos' && parts[1] === 'tema') return `/${locale}/artigos/tema/`;
   if (parts[0] === 'artigos') {
     // Length two exactly: a deeper path is not a page this site serves.
     const slug = parts.length === 2 && ARTICLE_SLUGS.has(parts[1]) ? parts[1] : 'artigo';

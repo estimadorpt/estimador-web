@@ -137,6 +137,16 @@ describe('analytics publication boundary', () => {
     expect(analyticsPath('::not a url::')).toBe('/other/');
   });
 
+  it('keeps the archive guide, the brand guide and the tag pages as their own routes', () => {
+    expect(analyticsPath('/pt/eleicoes/arquivo/')).toBe('/pt/eleicoes/arquivo/');
+    expect(analyticsPath('/en/eleicoes/arquivo')).toBe('/en/eleicoes/arquivo/');
+    expect(analyticsPath('/en/marca/')).toBe('/en/marca/');
+    expect(analyticsPath('/pt/artigos/tema/')).toBe('/pt/artigos/tema/');
+    // The tag itself is dropped, and a tag page never counts as an article.
+    expect(analyticsPath('/pt/artigos/tema/liga-portugal/')).toBe('/pt/artigos/tema/');
+    expect(analyticsPath('/en/artigos/tema/visitante@example.pt/?utm_source=x')).toBe('/en/artigos/tema/');
+  });
+
   it('ships a slug list that matches what is actually published', () => {
     // The browser cannot read src/content, so the list is generated. When this
     // fails, run: node scripts/generate-article-slugs.mjs

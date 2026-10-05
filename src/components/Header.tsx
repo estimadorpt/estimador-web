@@ -49,8 +49,10 @@ export function Header() {
     {
       id: 'elections', label: t('nav.elections'),
       dropdown: [
-        { href: '/eleicoes/presidenciais', label: t('nav.presidential') },
-        { href: '/eleicoes/legislativas', label: t('nav.parliamentary') },
+        // Both forecasts are archives: the label says so before the click.
+        { href: '/eleicoes/presidenciais', label: t('elections.navPresidential') },
+        { href: '/eleicoes/legislativas', label: t('elections.navParliamentary') },
+        { href: '/eleicoes/arquivo', label: t('elections.navArchiveGuide') },
       ],
     },
     // No nav item for an index with nothing in it in this language.
