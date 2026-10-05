@@ -78,14 +78,14 @@ The site's identity is the interval mark and the atlas palette. Everything lives
 - **Ink**: `text-ink` for text and primary actions, `text-stone-500` for secondary text. Links are ink with an underline, never blue.
 - **Pastels in two strengths**: data (`mint`, `mustard`, `coral`, `periwinkle`) for chart categoricals and the atlas's people; surface (`mint-soft`, `mustard-soft`, `coral-soft`, `periwinkle-soft`) for the mosaic, covers and backgrounds. Neither does the other's job. Party and team colours stay as they are; gold/amber means "caveat", never emphasis.
 - **Retuned Tailwind ramps**: `stone`, `amber`/`yellow`, `emerald`/`green`, `red` and `blue` are redefined in `@theme`, so existing utilities keep their meaning but sit on paper. Do not use `gray`, `slate` or `bg-white`.
-- **Type**: one family, Manrope (`--font-sans`, `--font-display`): h1 800, h2/h3 700, text 400/500, uppercase kickers 700, headline numbers `font-display font-extrabold tabular-nums`. Newsreader (`--font-serif`) is the reading face and appears only inside `.article-body` (articles, methodology, about, privacy). No italics as decoration. Nothing below 11px.
+- **Type**: one family, Manrope (`--font-sans`, `--font-display`): h1 800, h2/h3 700, text 400/500, uppercase kickers 700, headline numbers `font-display font-extrabold tabular-nums`. Newsreader (`--font-serif`) is the reading face and appears only inside `.article-body` (articles, methodology, about, privacy). No italics as decoration. Nothing below 11px. Both faces are self-hosted (`src/app/fonts.ts`): Manrope from `@fontsource/manrope` (it keeps the family name `Manrope`, which Plot, SVG and canvas code name directly), Newsreader through `next/font/google`, downloaded at build time and served from `/_next/static`; no page view contacts a font host.
 - **Mosaic** (`src/components/brand/Mosaic.tsx`): quarter-circles are shares, circles people, dot grids populations, rounded blocks places; bands stay in the mark. Allowed on brand and explainer covers, hero art of pages without data (`<PageHero art>`), empty states, the 404 and avatars. Never beside a club or party number, never encoding information.
 - **Motion**: the interval opens on hover of a `.brand-link`; `<MarkLoading>` only where something is genuinely loading. Both stop under prefers-reduced-motion. A published forecast never animates.
 - **Three levels of expression** (docs/design/design-system-proposal.md): entrances, explainers and empty states are the most playful (a soft field, a mosaic, one invitation); dashboards and forecasts are restrained (a compact tinted introduction via `<PageHero field>`, then cream tables and plots, decoration outside the plotting areas); articles and methodology are editorial. One colour field per page at most.
 - **Primitives**: actions are `<Action>` (`src/components/brand/Action.tsx`: primary pine, secondary bordered cream, tint, text; 48px, 10px corners, one main action per view); keyboard focus is the global double ring in globals.css, so components do not declare their own; inputs and selectors are 44 to 48px with a visible label; cards use `rounded-2xl`, a thin border and no shadow; motion is 140 to 200ms feedback and 200 to 300ms panels. `<TeaserBand>` is the explainer teaser that follows a dashboard's data. Empty states get a small mosaic and a specific next step, and missing data is never shown as zero.
 - **Visualisations** (`src/components/viz`, showcased as section 08 of `/marca`): `<DataCard>` (title, source, date, methodology link) frames every chart; `<StatTile>`/`<KpiRow>` for headline numbers with optional sparkline and delta; `<TrendChart>` (2px line, 80% band wash, dashed projected segment, end labels, crosshair tip); `<ColumnChart>` (24px caps, one highlighted column); `<RankedBars>`; `<OutcomeBar>` for 1X2; `<PeopleGrid>` (100 dots); `<Segmented>` filters; `<Legend>`; `<ChartTable>` (the table twin every chart carries). Series colours live in `theme.ts` (`SERIES`/`SERIES_DARK`, mirrored as `--color-series-1..4` and `--color-series-dark-1..4` tokens): fixed order teal, gold, periwinkle, coral; never cycled, never on text, at most four (the fifth folds into "other"). `STATUS` colours are reserved for state and always ship with an icon and a word. Team and party colours keep their own maps. The data pastels are for the atlas's people and categorical fills, not for line series. Chart text is Manrope (`FURNITURE.font`), never Inter. The same contract applies to the older Plot and SVG charts: the title race, relegation, team timeline, polling, seat, coalition, presidential trend and head-to-head charts and the economy sparklines carry a `<ChartTable>` twin and a hover tip, so a new chart must too. A table twin is a complete alternative: every point the chart draws at the chart's own resolution, with its bands or quantiles in their own columns, in the page's number format; long tables scroll inside the disclosure. Nothing in an SVG is below 11px.
 - **Chrome**: every page opens with `<PageHero>` and closes with `<SiteFooter locale={locale} />`. OG cards come from `scripts/lib/og-cards.mjs` (Manrope via `@fontsource/manrope`; the mosaic only on the brand card and explainer covers).
-- **Communications**: one line ("Dados para compreender Portugal."), one descriptor ("Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.") and two bios, used identically in `messages/*.json` meta, the OG brand card, the feed, the READMEs and the social kit. `npm run brand` regenerates every logo, icon and social asset (`scripts/generate-brand-identity.mjs` + `scripts/generate-social-kit.mjs`, outputs under `public/brand`, `public/branding`, `public/images/brand`); the Liga matchday card is `scripts/generate-social-images.mjs`. Voice: sentence case, questions as headings, uncertainty stated with interval, date and source, one action per piece, no emoji or exclamation marks. Portuguese copy addresses the reader as **tu** ("Escolhe a tua equipa", "Explora", "Segue o feed"), never você, including meta descriptions and buttons; English is en-GB. Page titles go through `createPageMetadata`, which appends the one suffix " | estimador.pt" (do not type a suffix in a title). The kit and the voice rules are on `/marca`.
+- **Communications**: one line ("Dados para compreender Portugal."), one descriptor ("Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.") and two bios, written once in `src/lib/brand/descriptor.json` (`src/lib/brand/descriptor.ts` for the app) and read by `meta.defaultDescription`, the footer blurb, the feed description, the OG brand card (`scripts/generate-og-images.mjs`), the social kit and the README; `descriptor.test.ts` fails on a retyped copy. The brand notes live in `docs/brand/` (`social-kit.md`, `section-illustrations.md`). `npm run brand` regenerates every logo, icon and social asset (`scripts/generate-brand-identity.mjs` + `scripts/generate-social-kit.mjs`, outputs under `public/brand`, `public/branding`, `public/images/brand`); the Liga matchday card is `scripts/generate-social-images.mjs`. Voice: sentence case, questions as headings, uncertainty stated with interval, date and source, one action per piece, no emoji or exclamation marks. Portuguese copy addresses the reader as **tu** ("Escolhe a tua equipa", "Explora", "Segue o feed"), never você, including meta descriptions and buttons; English is en-GB. Page titles go through `siteTitle()` (`src/lib/site-title.ts`, re-exported by `src/lib/metadata.ts`; `createPageMetadata` applies it), which appends the one suffix " | estimador.pt": pass a bare, sentence-case title and never type a suffix, in code or in `meta.*` messages. The `.pt` of the signature is `BRAND.muted`, never `BRAND.faint`. The kit and the voice rules are on `/marca`.
 
 ## Homepage
 
@@ -169,6 +169,8 @@ deck holds all 3,092 parishes. Tiers are reading guides, not gates.
   newest `meta.json` (parish, person and household counts, the release's own honesty
   line); rerun it after a release bump.
 
+- **Formats**: `src/lib/population/format.ts` (`formatCount`) is the one count formatter for every INE and release count, the homepage panel included ("3 092" with a no-break space in Portuguese, where Intl's pt-PT leaves four digits ungrouped). Each page states the parish's quality tier once, in the hero; cards carry no repeated status line.
+
 ### Data Organization
 ```
 public/data/
@@ -176,15 +178,25 @@ public/data/
     dashboard.json              # Economy dashboard feed (unpublished while in preparation)
     stories.json                # Economy data stories (optional)
   elections/
-    presidential-2026/          # Presidential forecast data (archive)
-    parliamentary-2025/         # Parliamentary forecast data (archive)
+    presidential-2026/          # Presidential archive: 16 files the pages read
+    parliamentary-2025/         # Parliamentary archive: 5 files the pages read
   football/
     liga-2026-27/               # Current season: md*.json + md*_scenarios.json, players, game fixtures, injuries
     liga-2025-26/               # Last season: matchday files + review.json (archive)
     liga2-2026-27/              # Liga 2 (page noindex)
   population/v{release}/        # Synthetic population release (see "Population section")
   population-geography/         # Country, municipality and parish geometry
+data/build-only/elections/      # Raw simulation draws read only at build time, never exported:
+  presidential-2026/second_round_trajectories.json   (8.6 MB, 8000 runoff trajectories)
+  parliamentary-2025/seat_forecast_simulations.json  (9000 seat draws)
 ```
+
+Election pages pass no raw draws to the browser: `loadBuildOnlyJson` (in `data-loader.ts`)
+reads the two build-only files and `src/lib/election-aggregates.ts` reduces them on the
+server (every quantile from all draws, an evenly spaced 800-draw subsample for the dots).
+`SecondRoundArchive` (server) renders the runoff half of the presidential archive from
+those summaries. `validate-data` checks the build-only files where they are and fails if
+either reappears under `public/data`.
 
 ### Data Flow
 - **Static Data**: Lives in `public/data/{section}/{subsection}/` as JSON files
@@ -216,8 +228,12 @@ interface SectionConfig {
 - **Team colors**: `src/lib/config/football.ts` — Liga Portugal team styling
 - **Types**: `src/types/index.ts` (elections), `src/types/football.ts` (football)
 
-### ElectionContext Scoping
-`ElectionProvider` is scoped to `/eleicoes/` routes via `src/app/[locale]/eleicoes/layout.tsx`. It is NOT in the root layout.
+### Locale and landmarks
+- Every `[locale]` page and `generateMetadata` calls `setRequestLocale(locale)` from `@/i18n/request-locale` (not next-intl's own): the static export has no middleware, and server components that read the locale implicitly (`useLocale` in `ChartTable`, `OutcomeBar` and the other viz pieces, `getTranslations()` without a locale) otherwise fall back to Portuguese. Server components that can take `locale` as a prop should (`<Subscribe locale={locale} />` requires it).
+- Every page has exactly one `<main id="main-content" tabIndex={-1}>`, opened before `<PageHero>` so the hero is inside it; the header's skip link targets `#main-content`. Put page width on an inner wrapper, not on `<main>`. `src/lib/landmarks.test.ts` enforces this.
+- Metadata: `languageAlternates` adds `x-default` (the pt URL, or the only locale a page exists in); the RSS autodiscovery link is emitted only once that locale has a published article (`feedAlternates`), the same rule as the nav, footer and sitemap. The parish shell builds its head by hand and keeps no canonical or robots.
+- Message keys: `npm run messages:unused` lists keys nothing reads, and `messages-unused.test.ts` (part of `npm run check`) keeps the count at zero and pt/en in parity. Delete a key in both locales when its last reader goes.
+- The election context, selector and provider (`ElectionContext`, `ElectionSelector`, `ElectionAwareContent`, the `/eleicoes` layout) and `EditorialPage` were deleted: nothing used them.
 
 ### Chart Architecture
 All chart components follow a consistent pattern:
@@ -232,6 +248,9 @@ All chart components follow a consistent pattern:
 - **TitleRaceChart.tsx** — Championship probability time series
 - **RelegationChart.tsx** — Relegation probability time series
 - **DecisiveMatches.tsx** — Title-swinging upcoming matches
+- **MarketScorecard.tsx** — model vs closing line (`/desporto/liga/modelo`); every figure, the RPS axis range, n per point, the season span and the bookmakers (`market_sources`) are read from `market_scorecard.json`
+- Helpers: `src/lib/football-format.ts` (pt-PT/en-GB numbers, Lisbon dates), `src/lib/football-injuries.ts` (when an injury list is recent enough to show), `src/lib/football-scorecard.ts` (verdicts, model names, market sources, and the league table's calibration sentence from `market_scorecard.json` → `calibration`, quoted only for the model it was measured on)
+- The published forecasts come from `bivcross` (bivariate Poisson with shots on target; the `x_bivcross` arm in estimador-football) since matchday 1 of 2026-27; md00 was `joint_sot`. Each md file names its model in `model`.
 - Several older components in that folder (PositionHeatmap, CriticalPaths, PathsToVictory, PointsPace, MatchdayLive, ScheduleDifficulty) are imported by no page; do not build on them without checking.
 
 ### Election Chart Components (`src/components/charts/`)
@@ -248,6 +267,7 @@ All chart components follow a consistent pattern:
 - Cache headers: `/_next/static/*` and the hashed `og-image-*-{hash}.png` cards immutable for a year (the unversioned `og-image-{pt,en}.png` are matched first and revalidate); everything else `max-age=0, must-revalidate`
 - MIME types for `.json`, `.txt` (RSC payloads), `.wasm`, `.parquet`, `.xml`, `.avif`
 - 404s rewrite to `/404.html`; there is no navigation fallback
+- Bare `"statusCode": 404` rules for the pages the export must write but nobody should reach: `/{pt,en}/artigos/sem-artigos/` and `/{pt,en}/artigos/tema/sem-temas/` (placeholders while nothing is published) and `/404/`. `scripts/smoke-check.mjs` reads these rules, probes each for a 404 and leaves them out of its 200 walk.
 - The OG generator keeps the previous build's hashed cards one more run, because they are served immutable
 
 ## Development Workflow
@@ -352,7 +372,7 @@ only and no email field. The privacy page (`src/content/privacy/{pt,en}.mdx`) na
 Buttondown as the processor; keep that section true to what the card actually does.
 
 ### Data Updates
-- **Football**: Run `./scripts/sync-data.sh football` to copy from `~/code/estimador-football/output/`
+- **Football**: Run `./scripts/sync-data.sh football` to copy from `~/code/estimador-football/output/`; it also copies `game_fixtures.json` to `api/data/` (the game server's copy, which `validate-data` requires to be byte-identical) and drops the model's `cards.json`, which is not a published feed
 - **Elections**: Manually update JSON files in `public/data/elections/`
 - **Economics**: Run `./scripts/sync-data.sh economics` to copy `dashboard_latest.json` (and `stories_latest.json`) from `~/code/estimador-economics/output/`. Not part of `all`; publishing is the flag in `economy-status.json`, not the sync.
 
