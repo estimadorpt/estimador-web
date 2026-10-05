@@ -39,8 +39,8 @@ const COPY = {
   pt: {
     brandHeadline: 'Dados para compreender Portugal.',
     brandStandfirst: 'Previsões e análises com a incerteza à vista. Modelos abertos, dados datados.',
-    columns: [
-      { name: 'Economia', blurb: 'Estado da economia e risco de recessão' },
+    columns: (economyPublished) => [
+      { name: 'Economia', blurb: economyPublished ? 'Estado da economia e risco de recessão' : 'Como ler os indicadores (em preparação)' },
       { name: 'Liga Portugal', blurb: 'Probabilidades de título e despromoção' },
       { name: 'Eleições', blurb: 'Sondagens, previsões e arquivo' },
       { name: 'População', blurb: 'Uma população sintética aberta, freguesia a freguesia' },
@@ -67,8 +67,8 @@ const COPY = {
   en: {
     brandHeadline: 'Data to understand Portugal.',
     brandStandfirst: 'Forecasts and analysis with the uncertainty in plain sight. Open models, dated data.',
-    columns: [
-      { name: 'Economy', blurb: 'State of the economy and recession risk' },
+    columns: (economyPublished) => [
+      { name: 'Economy', blurb: economyPublished ? 'State of the economy and recession risk' : 'Reading the indicators (in preparation)' },
       { name: 'Liga Portugal', blurb: 'Title and relegation probabilities' },
       { name: 'Elections', blurb: 'Polling, forecasts and the archive' },
       { name: 'Population', blurb: 'An open synthetic population, parish by parish' },
@@ -101,7 +101,48 @@ const SITE_PATH = {
   population: '/populacao',
 };
 
+/**
+ * The address a card prints: with the locale, because the bare section path
+ * is not a page on the host (it only redirects since the 301s were added).
+ */
+const printedUrl = (locale, route) => `estimador.pt/${locale}${route}`;
+
 /* ------------------------------------------------------------- sources ---- */
+
+/**
+ * The economy's editorial flag, the same file src/lib/config/economy-status.ts
+ * reads. Off means the section is in preparation: no card of its own.
+ */
+function economyPublished() {
+  const file = path.join(ROOT_DIR, 'src', 'lib', 'config', 'economy-status.json');
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8')).published === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Business days (Mon–Fri) after `fromIso` up to `now`, as economy-time.ts
+ * counts them (that module is TypeScript; a node script cannot import it).
+ */
+function businessDaysSince(fromIso, now = new Date()) {
+  if (!fromIso) return null;
+  const from = new Date(fromIso.length <= 10 ? `${fromIso}T00:00:00` : fromIso);
+  if (Number.isNaN(from.getTime())) return null;
+  const cursor = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let count = 0;
+  while (cursor < end) {
+    cursor.setDate(cursor.getDate() + 1);
+    const day = cursor.getDay();
+    if (day !== 0 && day !== 6) count += 1;
+  }
+  return count;
+}
+
+/** economy-time.ts ECONOMY_PAUSE_BUSINESS_DAYS: past this, no number anywhere. */
+const ECONOMY_PAUSE_BUSINESS_DAYS = 20;
 
 const metadataPattern = /^export const metadata = (\{[\s\S]*?\n\});?\s*/;
 
@@ -164,12 +205,12 @@ function populationMeta() {
 
 /* --------------------------------------------------------------- cards ---- */
 
-function defaultCard(locale) {
+function defaultCard(locale, economyIsPublished) {
   const copy = COPY[locale];
   return brandCard({
     headline: copy.brandHeadline,
     standfirst: copy.brandStandfirst,
-    columns: copy.columns,
+    columns: copy.columns(economyIsPublished),
     footerLeft: copy.brandFooter,
     footerRight: 'estimador.pt',
   });
@@ -199,12 +240,17 @@ function ligaCard(data, locale) {
 
   const leader = contenders[0];
   const groupedSims = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB').format(data.n_sims ?? 0);
+  // The interval the table and the title-race chart print beside the same
+  // number (p_champion_lo/hi), so a screenshot of the card carries it too.
+  const interval = typeof leader.p_champion_lo === 'number' && typeof leader.p_champion_hi === 'number'
+    ? ` (${formatPercent(leader.p_champion_lo)}–${formatPercent(leader.p_champion_hi)}%)`
+    : '';
   return figureCard({
     sectionLabel: copy.ligaSection,
     label: copy.ligaLabel,
     value: formatPercent(leader.p_champion),
     unit: '%',
-    subject: teamName(leader.team),
+    subject: `${teamName(leader.team)}${interval}`,
     caption: data.n_sims ? copy.ligaCaption(groupedSims) : null,
     rows: contenders.map(team => ({
       name: teamName(team.team),
@@ -213,11 +259,19 @@ function ligaCard(data, locale) {
       color: teamColor(team.team),
     })),
     footerLeft: copy.ligaFooter(data.matchday, data.season),
-    footerRight: 'estimador.pt/desporto/liga',
+    footerRight: printedUrl(locale, SITE_PATH.liga),
   });
 }
 
-function economyCard(dashboard, locale) {
+/**
+ * The economy card, or null — and /economia then shares the brand card. Null
+ * while the section is in preparation, and null when the data is past the
+ * staleness guard, so a share card never carries a number the page does not.
+ */
+function economyCard(dashboard, locale, isPublished) {
+  if (!isPublished) return null;
+  const age = businessDaysSince(dashboard?.as_of ?? dashboard?.vintage_date);
+  if (age === null || age > ECONOMY_PAUSE_BUSINESS_DAYS) return null;
   const copy = COPY[locale];
   const tile = dashboard?.tiles?.recession;
   const current = tile?.recession_probability;
@@ -242,7 +296,7 @@ function economyCard(dashboard, locale) {
       color: COLOR.navy,
     },
     footerLeft: copy.economyFooter(formatDate(dashboard.vintage_date, locale)),
-    footerRight: 'estimador.pt/economia',
+    footerRight: printedUrl(locale, SITE_PATH.economy),
   });
 }
 
@@ -264,7 +318,7 @@ function populationCard(meta, locale) {
     subject: copy.populationSubject,
     caption: `${copy.populationCaption(number.format(counts.persons), number.format(counts.households))} ${honesty}`,
     footerLeft: copy.populationFooter(meta.release_version, formatDate(meta.published, locale)),
-    footerRight: 'estimador.pt/populacao',
+    footerRight: printedUrl(locale, SITE_PATH.population),
   });
 }
 
@@ -278,9 +332,28 @@ async function emit(node, basename) {
 }
 
 /**
- * Anything matching the generated pattern that the new manifest does not claim
- * is a card for an article that was renamed or a data vintage that has moved
- * on. Leaving them behind is how public/ accumulated twelve orphaned PNGs.
+ * Every file a manifest names. Read before the new manifest replaces it: the
+ * cards the previous build served stay one more build, because they are cached
+ * as immutable and a platform that scraped one shortly before a deploy would
+ * otherwise get a 404 on the next fetch.
+ */
+function manifestFiles(file) {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(file, 'utf8'));
+    return [...new Set([
+      ...Object.values(manifest.files ?? {}),
+      ...Object.values(manifest.cards ?? {}).flatMap(cards => Object.values(cards)),
+    ])].filter(name => typeof name === 'string' && /^og-image-.+-[0-9a-f]{8}\.png$/.test(name));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Anything matching the generated pattern that neither the new manifest nor
+ * the previous one claims is a card for an article that was renamed or a data
+ * vintage that has moved on two builds ago. Leaving them behind is how public/
+ * accumulated twelve orphaned PNGs.
  */
 function pruneOrphans(keep) {
   const kept = new Set(keep);
@@ -297,13 +370,16 @@ async function main() {
   const liga = latestLigaMatchday();
   const economy = economyDashboard();
   const population = populationMeta();
+  const economyIsPublished = economyPublished();
+  const manifestPath = path.join(PUBLIC_DIR, 'og-manifest.json');
+  const previous = manifestFiles(manifestPath);
   const manifest = { generatedAt: new Date().toISOString(), files: {}, cards: {} };
   const written = [];
 
   for (const locale of LOCALES) {
     const cards = {};
 
-    const fallback = await emit(defaultCard(locale), `og-image-${locale}`);
+    const fallback = await emit(defaultCard(locale, economyIsPublished), `og-image-${locale}`);
     manifest.files[locale] = fallback;
     cards[SITE_PATH.home] = fallback;
     written.push(fallback);
@@ -314,7 +390,7 @@ async function main() {
 
     const sections = [
       liga ? [SITE_PATH.liga, ligaCard(liga, locale), `og-image-liga-${locale}`] : null,
-      economy ? [SITE_PATH.economy, economyCard(economy, locale), `og-image-economia-${locale}`] : null,
+      economy ? [SITE_PATH.economy, economyCard(economy, locale, economyIsPublished), `og-image-economia-${locale}`] : null,
       population ? [SITE_PATH.population, populationCard(population, locale), `og-image-populacao-${locale}`] : null,
     ].filter(Boolean);
 
@@ -335,10 +411,11 @@ async function main() {
     console.log(`${locale}: ${Object.keys(cards).length} cards`);
   }
 
-  fs.writeFileSync(path.join(PUBLIC_DIR, 'og-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
-  const removed = pruneOrphans([...written, ...LOCALES.map(locale => `og-image-${locale}.png`)]);
-  console.log(`${written.length} cards written, ${removed} orphaned files removed`);
+  const removed = pruneOrphans([...written, ...previous, ...LOCALES.map(locale => `og-image-${locale}.png`)]);
+  const retained = previous.filter(file => !written.includes(file)).length;
+  console.log(`${written.length} cards written, ${retained} from the previous build kept, ${removed} orphaned files removed`);
 }
 
 main().catch(error => {

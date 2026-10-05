@@ -3,6 +3,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { createPageMetadata, resolveOgImageFile, SITE_LOCALES, type OgManifest } from './metadata';
 import { getMDXArticlesByLocale } from './mdx-articles';
+import { ECONOMY_PUBLISHED } from './config/economy-status';
 
 const manifest: OgManifest = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), 'public/og-manifest.json'), 'utf8'),
@@ -81,13 +82,26 @@ describe('page metadata', () => {
   // Resolution itself is covered above against a stub manifest. What this adds
   // is that createPageMetadata reads the real generated one, so it uses a route
   // the generator always emits rather than an article — the archive can be
-  // empty, and this assertion should not depend on editorial state.
+  // empty, and this assertion should not depend on editorial state. The Liga
+  // card is emitted whenever a matchday file exists, which the site requires.
   it('points a page at the card generated for it', () => {
-    const route = '/economia';
+    const route = '/desporto/liga';
     const card = manifest.cards?.pt?.[route];
-    expect(card, 'the generator always emits an /economia card').toBeTruthy();
+    expect(card, 'the generator always emits a /desporto/liga card').toBeTruthy();
     const metadata = createPageMetadata({ locale: 'pt', path: route, title: 'x', description: 'y' });
     expect(socialImage(metadata)).toBe(`https://estimador.pt/${card}`);
+  });
+
+  // While the economy is in preparation its page shares the brand card: a
+  // number on the share card that the page does not show is the bug this
+  // flag exists to prevent.
+  it('emits no economy card while the section is unpublished', () => {
+    if (ECONOMY_PUBLISHED) return;
+    for (const locale of SITE_LOCALES) {
+      expect(manifest.cards?.[locale]?.['/economia'], locale).toBeUndefined();
+      expect(socialImage(createPageMetadata({ locale, path: '/economia', title: 'x', description: 'y' })))
+        .toBe(`https://estimador.pt/${manifest.files![locale]}`);
+    }
   });
 
   it('gives a page without a card the locale default', () => {

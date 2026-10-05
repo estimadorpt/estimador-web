@@ -33,7 +33,7 @@ function logotype() {
     mark(26, COLOR.ink),
     h('div', { display: 'flex', marginLeft: 12, fontSize: 29, fontWeight: 800, color: COLOR.ink, letterSpacing: -1 },
       h('div', {}, 'estimador'),
-      h('div', { color: COLOR.faint }, '.pt')));
+      h('div', { color: COLOR.muted }, '.pt')));
 }
 
 /**

@@ -1,21 +1,19 @@
 {
-  "generatedAt": "2026-10-05T19:23:25.612Z",
+  "generatedAt": "2026-10-05T21:02:39.192Z",
   "files": {
-    "pt": "og-image-pt-850b3de3.png",
-    "en": "og-image-en-6e3df6e9.png"
+    "pt": "og-image-pt-500c4412.png",
+    "en": "og-image-en-ce679e39.png"
   },
   "cards": {
     "pt": {
-      "/": "og-image-pt-850b3de3.png",
-      "/desporto/liga": "og-image-liga-pt-3c459aab.png",
-      "/economia": "og-image-economia-pt-4e3d3bf7.png",
-      "/populacao": "og-image-populacao-pt-e2669f56.png"
+      "/": "og-image-pt-500c4412.png",
+      "/desporto/liga": "og-image-liga-pt-93530abc.png",
+      "/populacao": "og-image-populacao-pt-f015be82.png"
     },
     "en": {
-      "/": "og-image-en-6e3df6e9.png",
-      "/desporto/liga": "og-image-liga-en-d1b51d8a.png",
-      "/economia": "og-image-economia-en-a63fc5ab.png",
-      "/populacao": "og-image-populacao-en-4e77faff.png"
+      "/": "og-image-en-ce679e39.png",
+      "/desporto/liga": "og-image-liga-en-db623667.png",
+      "/populacao": "og-image-populacao-en-2b1ee4fc.png"
     }
   }
 }
