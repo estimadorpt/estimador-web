@@ -4,6 +4,7 @@ import React from 'react';
 import { useLocale } from 'next-intl';
 import { SecondRoundForecastData } from '@/types';
 import { formatElectionPercent } from '@/lib/election-display';
+import { BLANK_NULL } from '@/lib/election-aggregates';
 
 interface SecondRoundForecastBarsProps {
   forecast: SecondRoundForecastData;
@@ -11,36 +12,33 @@ interface SecondRoundForecastBarsProps {
   translations: {
     projectedVoteShare: string;
     confidenceInterval: string;
-    blankNull?: string;
+    blankNull: string;
+    leading: string;
   };
 }
 
+/**
+ * Election-day shares of all ballots, blank and null included. Because the
+ * denominator includes blank and null ballots, no 50% "majority" marker is
+ * drawn here: a majority is a majority of the valid vote, which the cards
+ * and the simulation chart above show.
+ */
 export function SecondRoundForecastBars({
   forecast,
   showUncertainty = true,
-  translations = {
-    projectedVoteShare: 'Projected vote share',
-    confidenceInterval: '95% CI',
-  },
+  translations,
 }: SecondRoundForecastBarsProps) {
   const locale = useLocale();
-  const pt = locale !== 'en';
-  // Translate candidate names if needed
+  // The data key is tested untranslated; only the label is translated.
   const candidates = forecast.candidates.map(c => ({
     ...c,
-    name: c.name === 'Blank/Null' && translations.blankNull ? translations.blankNull : c.name
+    isBlankNull: c.name === BLANK_NULL,
+    label: c.name === BLANK_NULL ? translations.blankNull : c.name,
   }));
 
-  // Find the max value for scaling (cap at 80%)
-  const maxValue = Math.max(
-    ...candidates.map(c => showUncertainty ? c.ci_upper : c.mean)
-  );
+  const maxValue = Math.max(...candidates.map(c => showUncertainty ? c.ci_upper : c.mean));
   const scaleMax = Math.min(0.8, Math.ceil(maxValue * 10) / 10 + 0.05);
-
   const formatPercent = (value: number) => formatElectionPercent(value, locale);
-
-  // 50% threshold position
-  const fiftyPercentPos = (0.5 / scaleMax) * 100;
 
   return (
     <div className="space-y-4">
@@ -48,39 +46,22 @@ export function SecondRoundForecastBars({
         const meanPos = (candidate.mean / scaleMax) * 100;
         const ciLowerPos = (candidate.ci_lower / scaleMax) * 100;
         const ciUpperPos = (candidate.ci_upper / scaleMax) * 100;
-        const isBlankNull = candidate.name === 'Blank/Null';
 
         return (
           <div key={candidate.name}>
-            {/* Candidate name and value */}
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
-                <div
-                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: candidate.color }}
-                />
-                <span className="text-sm font-medium text-stone-800">
-                  {candidate.name}
-                </span>
-                {index === 0 && (
-                  <span className="text-[11px] text-stone-400 uppercase tracking-wide">
-                    {pt ? 'À frente' : 'Leading'}
-                  </span>
+                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: candidate.color }} />
+                <span className="text-sm font-medium text-stone-800">{candidate.label}</span>
+                {index === 0 && !candidate.isBlankNull && (
+                  <span className="text-[11px] text-stone-500 uppercase tracking-wide">{translations.leading}</span>
                 )}
               </div>
-              <div className="text-right">
-                <span className="text-sm font-semibold text-stone-900 tabular-nums">
-                  {formatPercent(candidate.mean)}
-                </span>
-              </div>
+              <span className="text-sm font-semibold text-stone-900 tabular-nums">{formatPercent(candidate.mean)}</span>
             </div>
 
-            {/* Clean lollipop chart - error bar with dot at mean */}
-            <div className="relative h-5 flex items-center">
-              {/* Background track */}
-              <div className="absolute inset-0 bg-stone-100 rounded-full" />
-
-              {/* Error bar - horizontal line spanning CI */}
+            <div className="relative h-5 flex items-center" aria-hidden="true">
+              <div className="absolute inset-x-0 top-1/2 h-px bg-line" />
               {showUncertainty && (
                 <div
                   className="absolute h-1 rounded-full"
@@ -94,47 +75,30 @@ export function SecondRoundForecastBars({
                   }}
                 />
               )}
-
-              {/* Mean marker - larger dot */}
               <div
-                className="absolute w-4 h-4 rounded-full shadow-sm"
+                className="absolute w-3.5 h-3.5 rounded-full"
                 style={{
                   left: `${meanPos}%`,
                   backgroundColor: candidate.color,
                   top: '50%',
                   transform: 'translate(-50%, -50%)',
-                  border: '2px solid white',
+                  border: '2px solid #fcfbf5',
                 }}
               />
-
-              {/* 50% threshold marker (only show for non-blank/null) */}
-              {!isBlankNull && fiftyPercentPos <= 100 && (
-                <div
-                  className="absolute h-full w-px bg-red-400 opacity-70"
-                  style={{ left: `${fiftyPercentPos}%` }}
-                />
-              )}
             </div>
 
-            {/* CI text below bar */}
             {showUncertainty && (
-              <div className="text-[11px] text-stone-400 mt-1 tabular-nums">
-                {translations.confidenceInterval}: {formatPercent(candidate.ci_lower)} – {formatPercent(candidate.ci_upper)}
+              <div className="text-[11px] text-stone-500 mt-1 tabular-nums">
+                {translations.confidenceInterval}: {formatPercent(candidate.ci_lower)}–{formatPercent(candidate.ci_upper)}
               </div>
             )}
           </div>
         );
       })}
 
-      {/* Scale markers */}
-      <div className="relative h-4 mt-3 border-t border-stone-200 pt-2">
-        <div className="absolute inset-x-0 flex justify-between text-xs text-stone-400">
-          <span>0%</span>
-          {fiftyPercentPos <= 100 && (
-            <span className="text-red-500 font-medium" style={{ marginLeft: `${fiftyPercentPos}%`, transform: 'translateX(-50%)', position: 'absolute' }}>
-              50%
-            </span>
-          )}
+      <div className="relative h-4 mt-3 border-t border-stone-200 pt-2" aria-hidden="true">
+        <div className="absolute inset-x-0 flex justify-between text-xs text-stone-500">
+          <span>{formatElectionPercent(0, locale, 0)}</span>
           <span>{formatElectionPercent(scaleMax, locale, 0)}</span>
         </div>
       </div>

@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Vote } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from '@/lib/config/elections';
+import { formatElectionLongDate } from '@/lib/election-display';
 import fs from 'fs';
 import path from 'path';
 
@@ -40,8 +42,11 @@ export async function generateMetadata({
   return createPageMetadata({
     locale,
     path: `/eleicoes/legislativas/mapa`,
-    title: `${t('nav.parliamentary')}: ${t('map.title')} - estimador.pt`,
-    description: t('map.selectDistrict'),
+    title: t('meta.parliamentaryMapTitle'),
+    description: t('forecast.mapLede', {
+      forecast: formatElectionLongDate(PARLIAMENTARY_2025_FORECAST_CUTOFF, locale),
+      election: formatElectionLongDate(PARLIAMENTARY_2025.date, locale),
+    }),
   });
 }
 
@@ -62,9 +67,12 @@ export default async function MapPage({
           page of that election, not as a general elections surface. */}
       <PageHero
         icon={<Vote aria-hidden="true" className="w-4 h-4" />}
-        eyebrow={t('nav.parliamentary')}
+        eyebrow={t('forecast.mapEyebrow')}
         title={t('map.title')}
-        lede={t('map.selectDistrict')}
+        lede={t('forecast.mapLede', {
+          forecast: formatElectionLongDate(PARLIAMENTARY_2025_FORECAST_CUTOFF, locale),
+          election: formatElectionLongDate(PARLIAMENTARY_2025.date, locale),
+        })}
         back={{ href: '/eleicoes/legislativas', label: t('map.backToForecast'), locale }}
       />
 
@@ -129,13 +137,13 @@ export default async function MapPage({
                 <CardContent className="pt-6">
                   <p className="text-sm text-stone-600 mb-3">
                     {locale === 'pt'
-                      ? 'Esta cor mostra apenas a percentagem de votos prevista. Para saber onde os mandatos podem realmente mudar de partido, ver a análise distrital com o índice ENSC.'
+                      ? 'Esta cor mostra apenas a percentagem de votos prevista. Para saber onde os mandatos podiam realmente mudar de partido, vê a análise distrital com o índice ENSC.'
                       : 'This colour only shows the predicted vote share. For where seats could actually change party, see the district analysis with the ENSC index.'}
                   </p>
                   <Link
                     href="/eleicoes/legislativas#district-analysis"
                     locale={locale}
-                    className="text-sm font-medium text-ink hover:text-ink-muted"
+                    className="text-sm font-medium text-ink underline underline-offset-4 hover:text-ink-muted"
                   >
                     {locale === 'pt' ? 'Ver mandatos em disputa →' : 'See seats in play →'}
                   </Link>

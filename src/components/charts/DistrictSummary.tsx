@@ -1,6 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { formatElectionNumber } from "@/lib/election-display";
 import { partyColors, partyNames } from "@/lib/config/colors";
 
 interface DistrictForecast {
@@ -24,6 +25,7 @@ interface DistrictSummaryProps {
 
 export function DistrictSummary({ districtData, contestedData }: DistrictSummaryProps) {
   const t = useTranslations("forecast");
+  const locale = useLocale();
   if (!districtData || districtData.length === 0) {
     return (
       <div className="text-center py-8 text-stone-500">
@@ -97,7 +99,7 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-medium text-stone-900">{district.district_name}</h4>
                     <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">
-                      ENSC: {district.competitiveness.toFixed(2)}
+                      ENSC: {formatElectionNumber(district.competitiveness, locale, 2)}
                     </span>
                   </div>
                   <div className="space-y-2">
@@ -114,11 +116,11 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
                         </div>
                         <div className="ml-5 text-xs text-stone-600">
                           {gainProb > 0.05 && (
-                            <span className="text-green-700">{t("seatGain", { pct: (gainProb * 100).toFixed(0) })}</span>
+                            <span className="text-green-700">{t("seatGain", { pct: formatElectionNumber(gainProb * 100, locale) })}</span>
                           )}
                           {gainProb > 0.05 && loseProb > 0.05 && <span className="mx-1">•</span>}
                           {loseProb > 0.05 && (
-                            <span className="text-red-700">{t("seatLoss", { pct: (loseProb * 100).toFixed(0) })}</span>
+                            <span className="text-red-700">{t("seatLoss", { pct: formatElectionNumber(loseProb * 100, locale) })}</span>
                           )}
                         </div>
                       </div>
@@ -155,7 +157,7 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
               return (
                 <div key={party} className="text-center">
                   <div 
-                    className="w-12 h-12 mx-auto mb-2 rounded-lg flex items-center justify-center text-white font-bold shadow-md"
+                    className="w-12 h-12 mx-auto mb-2 rounded-lg flex items-center justify-center text-white font-bold"
                     style={{ backgroundColor: color }}
                   >
                     {wins}

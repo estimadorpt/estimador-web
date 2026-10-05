@@ -10,23 +10,23 @@ Our models are implemented in [PyMC](https://www.pymc.io/), a probabilistic prog
 
 ---
 
-## Parliamentary Elections
+## Parliamentary elections
 
-### Model Structure
+### Model structure
 
 The parliamentary election model combines polling data with historical election results to estimate the evolution of party support over time. The core structure uses three overlapping **Gaussian Processes (GPs)** that capture dynamics at different time scales:
 
-**1. Baseline GP (Long-Term Trend)**
+**1. Baseline GP (long-term trend)**
 - Time scale: ~4 years
 - Captures structural changes in the party system
 - Uses an ExpQuad (Exponential Quadratic) kernel
 
-**2. Medium-Term GP**
+**2. Medium-term GP**
 - Time scale: ~1 year
 - Captures political cycles and gradual shifts in public opinion
 - Uses a Matern 5/2 kernel
 
-**3. Short-Term GP**
+**3. Short-term GP**
 - Time scale: ~14 days
 - Captures campaign dynamics and reactions to events
 - Uses a Matern 3/2 kernel to allow faster variations
@@ -34,7 +34,7 @@ The parliamentary election model combines polling data with historical election 
 The combination of these three processes separates long-term signal from short-term noise while still capturing real movements during the campaign.
 
 <details>
-<summary>**Technical Details: Gaussian Processes**</summary>
+<summary>**Technical details: Gaussian processes**</summary>
 
 Gaussian Processes are a non-parametric way to model unknown functions. We define priors over functions rather than fixed parameters, which allows the model to learn the shape of trends from the data.
 
@@ -53,7 +53,7 @@ k(t, t') = σ² × exp(-|t-t'|² / (2ℓ²))
 
 </details>
 
-### Pollster House Effects
+### Pollster house effects
 
 Each polling organization has systematic tendencies to over- or under-estimate certain parties. Our model estimates these "house effects" from historical data.
 
@@ -61,7 +61,7 @@ For example, if a pollster consistently overestimates PS by 2 percentage points,
 
 House effects are modeled with a zero-sum constraint: if a pollster overestimates one party, they must underestimate other(s) to compensate. The prior for house effect standard deviation is HalfNormal(σ=0.05) per party, allowing typical biases of ~2-3 percentage points.
 
-### District Effects
+### District effects
 
 Portugal uses a proportional representation system with seat allocation at the district level. The model includes **static district offsets** that capture regional differences in party support.
 
@@ -72,7 +72,7 @@ These offsets are estimated from previous election results and allow predicting 
 Poll observations follow a **Dirichlet-Multinomial** distribution, which is the natural choice for compositional data (percentages that sum to 100%).
 
 <details>
-<summary>**Technical Details: Dirichlet-Multinomial**</summary>
+<summary>**Technical details: Dirichlet-Multinomial**</summary>
 
 The Dirichlet-Multinomial is parameterized by:
 - `n`: poll sample size
@@ -86,36 +86,36 @@ This distribution has two sources of variation: sampling error (which depends on
 
 </details>
 
-### D'Hondt Method and Seat Allocation
+### D'Hondt method and seat allocation
 
 To convert vote forecasts into seat forecasts, we simulate the Portuguese electoral system:
 
-1. **22 electoral districts**: 18 mainland districts + 2 autonomous regions + Europe + Outside Europe
-2. **D'Hondt method**: Sequential divisor system (1, 2, 3, ...) for proportional seat allocation
-3. **230 total seats** (excluding the 4 emigration seats in the 2024 elections)
+1. **Domestic territory**: we simulate the 226 seats of the 20 domestic constituencies (18 mainland districts, the Azores and Madeira) with the **D'Hondt method**, a sequential divisor system (1, 2, 3, …) for proportional seat allocation.
+2. **Emigration**: the 4 seats of the Europe and Outside Europe constituencies come from one of the historical scenarios of 2019, 2022 or 2024, one per simulation, in equal shares.
+3. **Total**: each simulation therefore adds up to **230 seats**.
 
-The model runs thousands of **Monte Carlo simulations**:
+The model runs thousands of **Monte Carlo simulations** (9,000 in the archived 2025 forecast):
 1. For each simulation, draw a sample from the posterior distribution of national vote shares
 2. Apply district offsets to obtain district-level votes
-3. Run the D'Hondt algorithm in each district
+3. Run the D'Hondt algorithm in each domestic constituency and add the emigration scenario
 4. Sum each party's seats
 
 The result is a complete distribution of possible parliamentary compositions.
 
-### Metrics of Interest
+### Metrics of interest
 
 From the simulations, we calculate:
 
 - **Probability of each party winning the most seats**
 - **Majority probabilities**: right-wing, left-wing, or hung parliament
-- **Expected seats**: mean and credibility intervals (50% and 80%)
+- **Expected seats**: mean and 50% (P25–P75) and 80% (P10–P90) credible intervals
 - **Contested districts**: using ENSC (Effective Number of Seat Changes) with a threshold of 0.8
 
 ---
 
-## Presidential Elections
+## Presidential elections
 
-### Model Structure
+### Model structure
 
 The presidential model differs from the parliamentary one because:
 - Candidates are individuals, not parties with long track records
@@ -125,7 +125,7 @@ The presidential model differs from the parliamentary one because:
 We use a **random walk** model in log-odds space to capture the evolution of candidate support.
 
 <details>
-<summary>**Technical Details: Random Walk**</summary>
+<summary>**Technical details: random walk**</summary>
 
 The random walk is defined as:
 ```
@@ -141,24 +141,37 @@ The innovation standard deviation (σ ≈ 0.05 log-odds/day) is calibrated to al
 
 </details>
 
-### Candidate-Specific Priors
+### Candidate-specific priors
 
 For candidates with known party affiliation, we use informative priors based on those parties' historical support. This helps stabilize estimates when few polls are available.
 
-### Pollster House Effects
+### Pollster house effects
 
 When available, we use house effects estimated from the parliamentary model as **informative priors** for the presidential model. This transfers information about each pollster's systematic biases.
 
-### Second Round Modeling
+### Who reaches the runoff (first-round forecast)
 
 For each simulation:
-1. We check if any candidate reaches >50% in the first round
+1. We check if any candidate wins more than 50% of the valid vote in the first round
 2. If not, we identify the top two candidates
 3. We record the probability of each pair of candidates facing off in the runoff
 
+<span id="segunda-volta-2026"></span>
+
+### The runoff forecast (February 2026)
+
+After the first round on 18 January 2026, the runoff between António José Seguro and André Ventura was forecast with its own model. This is the forecast the archived page shows by default.
+
+- **Inputs**: the runoff polls available up to the forecast date, 6 February 2026, and a prior built from the first-round shares and a vote-transfer survey (ICS/ISCTE, January 2026), which estimates where each eliminated candidate's voters were going.
+- **Model**: a daily random walk on the logistic scale over four responses: Seguro, Ventura, blank and null, and undecided. Abstention is removed from the polls before fitting.
+- **Undecided voters**: on election day, the undecided are split between the two candidates in proportion to their valid votes.
+- **Blank and null ballots**: they are a response of their own in the model. That is why the page uses two bases: the share of **all ballots** (blank and null included, in the bars and the trend chart) and the share of the **valid vote** (without blank and null), which is the base of the 50% majority and of the win probability.
+- **Simulations**: 8,000 daily trajectories from 21 January to 8 February. The win probability is the share of simulations in which the candidate passes 50% of the valid vote on election day. With 8,000 simulations, values that round to 0% or 100% are shown as "\<1%" and ">99%".
+- **Intervals**: the cards and bars show 95% credible intervals (P2.5–P97.5); the trend chart shows 50% (P25–P75) and 90% (P5–P95) bands. The dot chart draws 800 of the 8,000 simulations, chosen at regular intervals; the medians and the table use all of them.
+
 ---
 
-## Uncertainty Quantification
+## Quantifying uncertainty
 
 Our models incorporate multiple sources of uncertainty:
 
@@ -167,36 +180,36 @@ Our models incorporate multiple sources of uncertainty:
 - **Model uncertainty** — GP parameters and other model components
 - **Campaign effects** — Potential for late shifts not captured in polls
 
-### Communicating Uncertainty
+### Communicating uncertainty
 
-We present uncertainty through:
-- **Credibility intervals**: 50% and 80% bands in trend charts
-- **Probabilities**: "70% probability of X winning the most seats"
-- **Simulation distributions**: visualizations showing the full range of possible outcomes
+We present uncertainty through credible intervals, probabilities ("70% probability of X winning the most seats") and simulation distributions. Each chart says which interval it draws:
 
----
-
-## Model Validation
-
-We validate our models through:
-
-1. **Backtesting**: Apply the model to past elections using only data available before each election
-2. **Calibration**: Verify that credibility intervals contain actual results at the expected frequency
-3. **Error metrics**: Calculate MAE, RMSE, and log-scores
-4. **Post-election comparison**: Analyze performance after each election
+- **Parliamentary 2025**: the polling-trend band is a 94% credible interval (HDI); the seats-by-party chart shows 50% (P25–P75) and 80% (P10–P90) intervals; the bloc chart draws individual simulations and its table gives the P5 to P95 percentiles.
+- **Presidential 2026, first round**: the trend chart shows 50% (P25–P75) and 90% (P5–P95) bands; the "±" on the cards is half the 50% interval at the last poll; the election-day forecast bars show 95% intervals (P2.5–P97.5).
+- **Presidential 2026, runoff**: see [the runoff forecast](#segunda-volta-2026).
 
 ---
 
-## Data Sources
+## Evaluating the model
+
+We have not yet published an evaluation of the election forecasts. The 2025 parliamentary and 2026 presidential forecasts are archived as they were published, with links to the official results, but without a calculated comparison against those results.
+
+When we publish one, it will measure the error of each estimate, whether the credible intervals held the result as often as they should, and the probabilities' log-score. A single election is not enough to show that probabilities are well calibrated.
+
+The only evaluation published on the site is the [football model's](/en/desporto/liga/modelo/).
+
+---
+
+## Data sources
 
 ### Polls
 - Aximage, CESOP, Pitagórica, Intercampus, Eurosondagem, and other ERC-registered polling firms
 
-### Election Results
+### Election results
 - National Elections Commission (CNE)
 - SGMAI (General Secretariat of the Ministry of Internal Administration)
 
-### Demographic Data
+### Demographic data
 - National Statistics Institute (INE)
 
 ---
@@ -214,11 +227,11 @@ Our forecasts should be interpreted as **informed probabilistic estimates**, not
 
 ---
 
-## References and Inspiration
+## References and inspiration
 
 Our methodology is inspired by:
 - [The Economist Election Forecast](https://www.economist.com/interactive/us-2024-election/prediction-model/president)
-- [FiveThirtyEight](https://fivethirtyeight.com/)
+- [FiveThirtyEight](https://web.archive.org/web/20221231234624/https://fivethirtyeight.com/) (closed in March 2025; archived copy)
 - [Andrew Gelman - Bayesian Data Analysis](http://www.stat.columbia.edu/~gelman/book/)
 - [PyMC Documentation](https://www.pymc.io/projects/docs/en/stable/)
 

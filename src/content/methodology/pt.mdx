@@ -2,7 +2,7 @@
 
 ---
 
-## Visão Geral
+## Visão geral
 
 O estimador.pt utiliza modelos estatísticos Bayesianos para prever eleições portuguesas. A nossa abordagem é fundamentalmente probabilística: em vez de prever um único resultado, estimamos distribuições de probabilidade que refletem a incerteza inerente ao processo eleitoral.
 
@@ -10,23 +10,23 @@ Os nossos modelos são implementados em [PyMC](https://www.pymc.io/), uma biblio
 
 ---
 
-## Eleições Legislativas
+## Eleições legislativas
 
-### Estrutura do Modelo
+### Estrutura do modelo
 
 O modelo de eleições legislativas combina dados de sondagens com resultados eleitorais históricos para estimar a evolução do apoio a cada partido ao longo do tempo. A estrutura central utiliza três **Processos Gaussianos (GPs)** sobrepostos que capturam dinâmicas em diferentes escalas temporais:
 
-**1. GP de Baseline (Tendência de Longo Prazo)**
+**1. GP de baseline (tendência de longo prazo)**
 - Escala temporal: ~4 anos
 - Captura mudanças estruturais no sistema partidário
 - Utiliza um kernel ExpQuad (Exponencial Quadrático)
 
-**2. GP de Médio Prazo**
+**2. GP de médio prazo**
 - Escala temporal: ~1 ano
 - Captura ciclos políticos e mudanças graduais na opinião pública
 - Utiliza um kernel Matern 5/2
 
-**3. GP de Curto Prazo**
+**3. GP de curto prazo**
 - Escala temporal: ~14 dias
 - Captura dinâmicas de campanha e reações a eventos
 - Utiliza um kernel Matern 3/2 para permitir variações mais rápidas
@@ -34,7 +34,7 @@ O modelo de eleições legislativas combina dados de sondagens com resultados el
 A combinação destes três processos permite separar o sinal de longo prazo do ruído de curto prazo, enquanto ainda captura movimentos reais durante a campanha.
 
 <details>
-<summary>**Detalhes Técnicos: Processos Gaussianos**</summary>
+<summary>**Detalhes técnicos: processos gaussianos**</summary>
 
 Os Processos Gaussianos são uma forma não-paramétrica de modelar funções desconhecidas. Definimos priors sobre funções em vez de parâmetros fixos, o que permite que o modelo aprenda a forma das tendências a partir dos dados.
 
@@ -53,7 +53,7 @@ k(t, t') = σ² × exp(-|t-t'|² / (2ℓ²))
 
 </details>
 
-### Efeitos das Empresas de Sondagens (House Effects)
+### Efeitos das empresas de sondagens (house effects)
 
 Cada instituto de sondagens tem tendências sistemáticas para sobre ou subestimar certos partidos. O nosso modelo estima estes "efeitos de casa" (house effects) a partir dos dados históricos.
 
@@ -61,7 +61,7 @@ Por exemplo, se uma empresa consistentemente sobrestima o PS em 2 pontos percent
 
 Os house effects são modelados com uma restrição de soma zero: se uma empresa sobrestima um partido, tem de subestimar outro(s) para compensar. O prior para o desvio padrão dos house effects é HalfNormal(σ=0.05) por partido, permitindo vieses típicos de ~2-3 pontos percentuais.
 
-### Efeitos Distritais
+### Efeitos distritais
 
 Portugal utiliza um sistema de representação proporcional com alocação de mandatos ao nível distrital. O modelo inclui **offsets distritais estáticos** que capturam as diferenças regionais no apoio partidário.
 
@@ -72,7 +72,7 @@ Estes offsets são estimados a partir de resultados eleitorais anteriores e perm
 As observações de sondagens seguem uma distribuição **Dirichlet-Multinomial**, que é a escolha natural para dados composicionais (percentagens que somam 100%).
 
 <details>
-<summary>**Detalhes Técnicos: Dirichlet-Multinomial**</summary>
+<summary>**Detalhes técnicos: Dirichlet-Multinomial**</summary>
 
 A Dirichlet-Multinomial é parametrizada por:
 - `n`: tamanho da amostra da sondagem
@@ -86,36 +86,36 @@ Esta distribuição tem duas fontes de variação: o erro de amostragem (que dep
 
 </details>
 
-### Método D'Hondt e Alocação de Mandatos
+### Método D'Hondt e atribuição de mandatos
 
 Para converter previsões de votos em previsões de mandatos, simulamos o sistema eleitoral português:
 
-1. **22 círculos eleitorais**: 18 distritos continentais + 2 regiões autónomas + Europa + Fora da Europa
-2. **Método D'Hondt**: Sistema de divisores sequenciais (1, 2, 3, ...) para alocação proporcional de mandatos
-3. **230 mandatos no total** (excluindo os 4 da emigração nas eleições de 2024)
+1. **Território nacional**: simulamos os 226 mandatos dos 20 círculos do território nacional (18 distritos do continente, Açores e Madeira) pelo **método D'Hondt**, um sistema de divisores sucessivos (1, 2, 3, …) para a atribuição proporcional de mandatos.
+2. **Emigração**: os 4 mandatos dos círculos da Europa e de Fora da Europa vêm de um dos cenários históricos de 2019, 2022 ou 2024, um por simulação, em partes iguais.
+3. **Total**: cada simulação soma assim **230 mandatos**.
 
-O modelo executa milhares de **simulações de Monte Carlo**:
+O modelo executa milhares de **simulações de Monte Carlo** (9000 na previsão arquivada de 2025):
 1. Para cada simulação, extrai-se uma amostra da distribuição posterior dos votos nacionais
-2. Aplica-se os offsets distritais para obter votos por distrito
-3. Executa-se o algoritmo D'Hondt em cada distrito
-4. Soma-se os mandatos de cada partido
+2. Aplicam-se os offsets distritais para obter votos por distrito
+3. Executa-se o algoritmo D'Hondt em cada círculo do território nacional e junta-se o cenário da emigração
+4. Somam-se os mandatos de cada partido
 
 O resultado é uma distribuição completa de possíveis composições parlamentares.
 
-### Métricas de Interesse
+### Métricas de interesse
 
 A partir das simulações, calculamos:
 
 - **Probabilidade de cada partido ganhar mais mandatos**
 - **Probabilidade de maiorias**: direita, esquerda, ou parlamento sem maioria clara
-- **Mandatos esperados**: média e intervalos de credibilidade (50% e 80%)
-- **Distritos contestados**: usando o ENSC (Effective Number of Seat Changes) com limiar de 0.8
+- **Mandatos esperados**: média e intervalos de credibilidade de 50% (P25–P75) e de 80% (P10–P90)
+- **Distritos contestados**: usando o ENSC (Effective Number of Seat Changes) com limiar de 0,8
 
 ---
 
-## Eleições Presidenciais
+## Eleições presidenciais
 
-### Estrutura do Modelo
+### Estrutura do modelo
 
 O modelo presidencial é diferente do legislativo porque:
 - Os candidatos são indivíduos, não partidos com histórico longo
@@ -125,7 +125,7 @@ O modelo presidencial é diferente do legislativo porque:
 Utilizamos um modelo de **random walk** no espaço log-odds para capturar a evolução do apoio aos candidatos.
 
 <details>
-<summary>**Detalhes Técnicos: Random Walk**</summary>
+<summary>**Detalhes técnicos: random walk**</summary>
 
 O random walk é definido como:
 ```
@@ -141,24 +141,37 @@ O desvio padrão das inovações (σ ≈ 0.05 log-odds/dia) é calibrado para pe
 
 </details>
 
-### Priors Específicos por Candidato
+### Priors específicos por candidato
 
 Para candidatos com afiliação partidária conhecida, utilizamos priors informativos baseados no apoio histórico desses partidos. Isto ajuda a estabilizar as estimativas quando há poucas sondagens disponíveis.
 
-### Efeitos das Empresas de Sondagens
+### Efeitos das empresas de sondagens
 
 Quando disponíveis, utilizamos os house effects estimados no modelo legislativo como **priors informativos** para o modelo presidencial. Isto permite transferir informação sobre os vieses sistemáticos de cada instituto.
 
-### Modelação da Segunda Volta
+### Quem chega à segunda volta (previsão da primeira volta)
 
 Para cada simulação:
-1. Verificamos se algum candidato atinge >50% na primeira volta
+1. Verificamos se algum candidato atinge mais de 50% dos votos válidos na primeira volta
 2. Se não, identificamos os dois candidatos mais votados
 3. Registamos a probabilidade de cada par de candidatos disputar a segunda volta
 
+<span id="segunda-volta-2026"></span>
+
+### Previsão da segunda volta (fevereiro de 2026)
+
+Depois da primeira volta, a 18 de janeiro de 2026, a segunda volta entre António José Seguro e André Ventura foi prevista com um modelo próprio. É esta a previsão que a página arquivada mostra por omissão.
+
+- **Dados de entrada**: as sondagens da segunda volta disponíveis até ao dia da previsão, 6 de fevereiro de 2026, e uma estimativa prévia construída a partir das percentagens da primeira volta e de um inquérito de transferência de votos (ICS/ISCTE, janeiro de 2026), que estima para onde iam os votos de cada candidato eliminado.
+- **Modelo**: um passeio aleatório diário em escala logística sobre quatro respostas: Seguro, Ventura, brancos e nulos, e indecisos. A abstenção é retirada das sondagens antes do ajuste.
+- **Indecisos**: no dia da eleição, os indecisos são repartidos entre os dois candidatos na proporção dos seus votos válidos.
+- **Brancos e nulos**: entram no modelo como uma resposta própria. Por isso há duas bases na página: a percentagem de **todos os boletins** (brancos e nulos incluídos, nas barras e no gráfico de evolução) e a percentagem dos **votos válidos** (sem brancos e nulos), que é a base da maioria de 50% e da probabilidade de vitória.
+- **Simulações**: 8000 trajetórias diárias, de 21 de janeiro a 8 de fevereiro. A probabilidade de vitória é a percentagem de simulações em que o candidato passa os 50% dos votos válidos no dia da eleição. Com 8000 simulações, valores que arredondam a 0% ou 100% aparecem como «\<1%» e «>99%».
+- **Intervalos**: os cartões e as barras mostram intervalos de credibilidade de 95% (P2.5–P97.5); o gráfico de evolução mostra bandas de 50% (P25–P75) e de 90% (P5–P95). O gráfico de pontos desenha 800 das 8000 simulações, escolhidas a intervalos regulares; as medianas e a tabela usam todas.
+
 ---
 
-## Quantificação de Incerteza
+## Quantificação da incerteza
 
 Os nossos modelos incorporam múltiplas fontes de incerteza:
 
@@ -167,36 +180,36 @@ Os nossos modelos incorporam múltiplas fontes de incerteza:
 - **Incerteza do modelo** — Parâmetros dos GPs e outros componentes
 - **Efeitos de campanha** — Potencial para mudanças tardias não captadas
 
-### Comunicação da Incerteza
+### Comunicação da incerteza
 
-Apresentamos a incerteza através de:
-- **Intervalos de credibilidade**: bandas de 50% e 80% nos gráficos de tendências
-- **Probabilidades**: "70% de probabilidade de X ganhar mais mandatos"
-- **Distribuições de simulações**: visualizações que mostram a gama completa de resultados possíveis
+Apresentamos a incerteza através de intervalos de credibilidade, probabilidades («70% de probabilidade de X ganhar mais mandatos») e distribuições de simulações. Cada gráfico diz que intervalo desenha:
 
----
-
-## Validação do Modelo
-
-Validamos os nossos modelos através de:
-
-1. **Backtesting**: Aplicamos o modelo a eleições passadas, usando apenas dados disponíveis antes de cada eleição
-2. **Calibração**: Verificamos se os intervalos de credibilidade contêm os resultados reais com a frequência esperada
-3. **Métricas de erro**: Calculamos MAE, RMSE e log-scores
-4. **Comparação com resultados**: Analisamos o desempenho após cada eleição
+- **Legislativas 2025**: a banda das tendências das sondagens é um intervalo de credibilidade de 94% (HDI); o gráfico de mandatos por partido mostra intervalos de 50% (P25–P75) e de 80% (P10–P90); o gráfico dos blocos desenha simulações individuais e a sua tabela dá os percentis P5 a P95.
+- **Presidenciais 2026, 1.ª volta**: o gráfico de evolução mostra bandas de 50% (P25–P75) e de 90% (P5–P95); o «±» dos cartões é metade do intervalo de 50% à data da última sondagem; as barras da previsão para o dia da eleição mostram intervalos de 95% (P2.5–P97.5).
+- **Presidenciais 2026, 2.ª volta**: ver a [previsão da segunda volta](#segunda-volta-2026).
 
 ---
 
-## Fontes de Dados
+## Avaliação do modelo
+
+Ainda não publicámos uma avaliação das previsões eleitorais. As previsões das legislativas de 2025 e das presidenciais de 2026 estão arquivadas tal como foram publicadas, com ligações para os resultados oficiais, mas sem uma comparação calculada com esses resultados.
+
+Quando a publicarmos, vai medir o erro de cada estimativa, se os intervalos de credibilidade continham o resultado com a frequência esperada e a pontuação das probabilidades (log-score). Uma só eleição não basta para mostrar que as probabilidades estão bem calibradas.
+
+A única avaliação publicada no site é a do [modelo de futebol](/pt/desporto/liga/modelo/).
+
+---
+
+## Fontes de dados
 
 ### Sondagens
 - Aximage, CESOP, Pitagórica, Intercampus, Eurosondagem, e outras empresas registadas na ERC
 
-### Resultados Eleitorais
+### Resultados eleitorais
 - Comissão Nacional de Eleições (CNE)
 - SGMAI (Secretaria-Geral do Ministério da Administração Interna)
 
-### Dados Demográficos
+### Dados demográficos
 - Instituto Nacional de Estatística (INE)
 
 ---
@@ -214,11 +227,11 @@ As nossas previsões devem ser interpretadas como **estimativas probabilísticas
 
 ---
 
-## Referências e Inspiração
+## Referências e inspiração
 
 A nossa metodologia é inspirada por:
 - [The Economist Election Forecast](https://www.economist.com/interactive/us-2024-election/prediction-model/president)
-- [FiveThirtyEight](https://fivethirtyeight.com/)
+- [FiveThirtyEight](https://web.archive.org/web/20221231234624/https://fivethirtyeight.com/) (encerrado em março de 2025; cópia arquivada)
 - [Andrew Gelman - Bayesian Data Analysis](http://www.stat.columbia.edu/~gelman/book/)
 - [PyMC Documentation](https://www.pymc.io/projects/docs/en/stable/)
 
