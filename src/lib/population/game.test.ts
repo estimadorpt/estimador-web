@@ -303,6 +303,7 @@ describe('share text', () => {
     expect(formatGameDate('2026-05-31', 'en')).toBe('31 May 2026');
     expect(formatKm(0.4, 'pt')).toBe('0 km');
     expect(formatKm(1500.6, 'en')).toBe('1,501 km');
+    expect(formatKm(1234.2, 'pt')).toBe('1\u00A0234 km');
   });
 });
 

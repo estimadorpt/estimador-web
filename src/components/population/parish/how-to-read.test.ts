@@ -3,7 +3,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR } from '@/lib/config/population';
 import { indexPlaces } from '@/lib/population/places';
-import { TIER_COPY } from '@/lib/population/labels';
+import { HONESTY, TIER_COPY } from '@/lib/population/labels';
 import type { CompactResponse, ParishRecord, PopulationMeta, PopulationPlaces } from '@/types/population';
 import { howToReadItems } from './how-to-read';
 
@@ -28,6 +28,17 @@ describe('how to read a parish page', () => {
       expect(text).not.toMatch(/concelho|municipality|Suprimido|Suppressed/i);
       expect(text).toContain(locale === 'pt' ? '«0,0%»' : '“0.0%”');
     }
+  });
+
+  it('prints «0,0%» once, as the term, and says the tier meaning without repeating itself', () => {
+    for (const locale of ['pt', 'en'] as const) {
+      const list = items('030857', undefined, locale);
+      const zero = list.find(item => item.term === (locale === 'pt' ? '«0,0%»' : '“0.0%”'))!;
+      expect(zero.body).not.toContain(zero.term);
+      expect(zero.body).toBe(HONESTY.zeroMeaning[locale]);
+    }
+    expect(TIER_COPY.C.meaning.pt).not.toMatch(/própria freguesia/);
+    expect(TIER_COPY.C.meaning.en).not.toMatch(/parish’s own/);
   });
 
   it('holds for every tier', () => {

@@ -12,6 +12,7 @@
  * Nothing here reads a population cell: the game's own numbers are distances
  * and the player's record, never a statistic about a place.
  */
+import { formatCount } from './format';
 import { haversineKm } from './places';
 import type { Locale } from './labels';
 import type { PortraitRecipe } from '@/types/population';
@@ -284,7 +285,7 @@ export function formatGameDate(date: string, locale: Locale): string {
 
 export function formatKm(distanceKm: number, locale: Locale): string {
   const km = Math.round(distanceKm);
-  return `${new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { maximumFractionDigits: 0 }).format(km)} km`;
+  return `${formatCount(km, locale)} km`;
 }
 
 export const GAME_NAME: Record<Locale, string> = { pt: 'Freguesia misteriosa', en: 'Mystery parish' };

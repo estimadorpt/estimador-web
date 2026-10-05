@@ -41,7 +41,7 @@ export function howToReadItems({ place, record, meta, locale, fallbackName, muni
         : `Here the cards show the figures for ${municipality} municipality, which includes this parish. Every card says where its numbers come from.`,
     });
   }
-  items.push({ term: pt ? '«0,0%»' : '“0.0%”', body: HONESTY.zero[locale] });
+  items.push({ term: pt ? '«0,0%»' : '“0.0%”', body: HONESTY.zeroMeaning[locale] });
   if (suppressed) {
     items.push({
       term: pt ? '«Suprimido»' : '“Suppressed”',
@@ -56,7 +56,13 @@ export function howToReadItems({ place, record, meta, locale, fallbackName, muni
       body: pt ? 'A resposta não traz essa categoria. Não quer dizer zero.' : 'The answer does not carry that category. It does not mean zero.',
     });
   }
-  items.push({ term: pt ? 'Uma só execução' : 'A single run', body: HONESTY.singleRun[locale] });
+  // HONESTY.singleRun in words a first-time reader can act on.
+  items.push({
+    term: pt ? 'Uma só execução' : 'A single run',
+    body: pt
+      ? 'Os números vêm de uma única execução do modelo, por isso não têm uma margem de erro calculada. Lê cada valor por si: esta versão não permite dizer que uma categoria é maior do que outra.'
+      : 'The figures come from a single run of the model, so no margin of error is computed for them. Read each value on its own: this release does not support saying that one category is larger than another.',
+  });
   return items;
 }
 

@@ -22,8 +22,8 @@ async function renderCard(model: ShareCardModel, canvas: HTMLCanvasElement) {
 /**
  * Share the page (the system share sheet, or a copied link) and download the
  * 1200×630 card. The card is drawn here, in the browser, from the same
- * published cells the page shows; a preview sits beside the buttons so the
- * reader sees what they are about to post.
+ * published cells the page shows. Its words are listed as text and the
+ * preview, full width under the buttons, is the picture of them.
  */
 export function ShareTools({ model, url, title, locale }: { model: ShareCardModel; url: string; title: string; locale: Locale }) {
   const preview = useRef<HTMLCanvasElement>(null);
@@ -88,13 +88,25 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
       : '';
 
   return (
-    <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:items-center">
+    <div className="flex flex-col gap-5">
       <div>
-        <p className="max-w-md text-[15px] leading-relaxed text-stone-600">
+        <p className="max-w-2xl text-[15px] leading-relaxed text-stone-600">
           {pt
-            ? 'O cartão leva até três valores publicados, cada um com a população a que se refere, e a nota de que as pessoas são geradas.'
-            : 'The card carries up to three published values, each with the population it refers to, and the note that the people are generated.'}
+            ? 'Partilha a ligação desta página ou descarrega um cartão (1200 × 630 px) para publicar. O cartão diz:'
+            : 'Share this page’s link or download a card (1200 × 630 px) to post. The card says:'}
         </p>
+        {/* The card's own words, readable at any width; the preview below is the picture of them. */}
+        <ul className="mt-3 flex flex-col gap-1.5 text-[15px] text-ink">
+          <li className="font-semibold">{model.title} <span className="font-normal text-stone-600">({model.place})</span></li>
+          {model.facts.map(fact => (
+            <li key={fact.label} className="flex flex-wrap gap-x-2">
+              <span>{fact.label}:</span>
+              <strong className="font-display font-extrabold tabular-nums">{fact.value}</strong>
+            </li>
+          ))}
+          {(model.scopeNote ?? model.tierNote) && <li className="text-sm text-stone-600">{model.scopeNote ?? model.tierNote}</li>}
+          <li className="text-sm text-stone-600">{model.honesty}</li>
+        </ul>
         <div className="mt-4 flex flex-wrap gap-3">
           <Action variant="secondary" onClick={() => void share()}>
             {canShare ? <Share2 aria-hidden="true" className="h-4 w-4" /> : <Link2 aria-hidden="true" className="h-4 w-4" />}
@@ -107,17 +119,17 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
         </div>
         <p className="mt-2 min-h-5 text-sm text-stone-600" role="status">{message}</p>
       </div>
+      {/* Full width of the panel: at desktop widths the card's smallest text (20 px of 1200) renders at 11 px or more. */}
       <figure>
         <canvas
           ref={preview}
           width={SHARE_CARD.width}
           height={SHARE_CARD.height}
           className="block h-auto w-full rounded-xl border border-line bg-paper"
-          role="img"
-          aria-label={[model.title, ...model.facts.map(fact => fact.text), model.honesty].join(' ')}
+          aria-hidden="true"
         />
         <figcaption className="mt-2 text-xs text-stone-500">
-          {pt ? 'Pré-visualização do cartão (1200 × 630 px).' : 'Card preview (1200 × 630 px).'}
+          {pt ? 'Pré-visualização do cartão. O texto que leva está na lista acima.' : 'Card preview. The text it carries is listed above.'}
         </figcaption>
       </figure>
     </div>

@@ -278,7 +278,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
         </Reveal>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
         <ClueDeck
           entry={entry}
           meta={meta}

@@ -6,11 +6,11 @@ import { DataCard } from '@/components/viz/DataCard';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { Mosaic } from '@/components/brand/Mosaic';
 import { POPULATION_ROUTES } from '@/lib/config/population';
-import { isWhole, readCells } from '@/lib/population/compact';
+import { readCells } from '@/lib/population/compact';
 import { CLUE_ORDER } from '@/lib/population/game';
 import { DIMENSION_LABEL, HONESTY, RECIPE_COPY, type Locale } from '@/lib/population/labels';
 import type { CompactResponse, GameEntry, PopulationMeta, PortraitRecipe } from '@/types/population';
-import { AgeColumns, HundredPeople, ShareBars } from '../charts';
+import { ResponseChart } from '../ResponseCard';
 import { QualityBadge } from '../QualityBadge';
 import { GAME_COPY } from './copy';
 import { Reveal } from './Reveal';
@@ -56,6 +56,11 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
     previous.current = open;
   }, [open, revealed]);
 
+  // Once the game is over nothing is "new": the badge from the last miss goes.
+  useEffect(() => {
+    if (revealed) setFresh(null);
+  }, [revealed]);
+
   useEffect(() => {
     setSelected(open - 1);
     setFresh(null);
@@ -68,10 +73,13 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
   const recipes = CLUE_ORDER[selected] ?? CLUE_ORDER[0];
 
   return (
-    <div ref={deck} className="scroll-mt-24">
+    <div ref={deck} className="min-w-0 scroll-mt-24">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="text-xl text-ink md:text-2xl">{t.cluesTitle}</h2>
-        <p className="text-xs text-stone-500">{HONESTY.synthetic[locale]} · {t.sourceStamp}</p>
+        {/* Said once for the deck: every published clue is the parish's own figures. A município fallback says so on its own clue. */}
+        <p className="text-xs text-stone-500 sm:text-right">
+          {revealed ? t.answerFigures(revealed.name) : t.mysteryFigures} {HONESTY.synthetic[locale]} · {t.sourceStamp}
+        </p>
       </div>
 
       <div role="tablist" aria-label={t.cluesTitle} className="mb-4 grid grid-cols-6 gap-1.5 sm:gap-2">
@@ -135,7 +143,11 @@ function ClueCard({ number, recipes, entry, meta, locale, revealed, fresh }: {
 }) {
   const t = GAME_COPY[locale];
   const single = recipes.length === 1;
-  const title = `${t.clue(number)} · ${recipes.map(r => RECIPE_COPY[r].short[locale]).join(locale === 'pt' ? ' e ' : ' and ')}`;
+  // "Pista 6 · Pessoas com 65+ que vivem sozinhas e agregados com…": one sentence, so only its first label keeps the capital.
+  const title = `${t.clue(number)} · ${recipes.map((r, i) => {
+    const label = RECIPE_COPY[r].short[locale];
+    return i === 0 ? label : label.charAt(0).toLowerCase() + label.slice(1);
+  }).join(locale === 'pt' ? ' e ' : ' and ')}`;
   return (
     <DataCard
       title={title}
@@ -155,7 +167,7 @@ function ClueCard({ number, recipes, entry, meta, locale, revealed, fresh }: {
                 <p className="mb-3 mt-0.5 text-sm text-stone-500">{RECIPE_COPY[recipe].population[locale]}</p>
               </>
             )}
-            <Clue recipe={recipe} record={entry.responses[recipe]} meta={meta} locale={locale} revealed={revealed} tier={entry.tier} />
+            <Clue recipe={recipe} record={entry.responses[recipe]} meta={meta} locale={locale} revealed={revealed} />
           </div>
         ))}
       </div>
@@ -163,13 +175,12 @@ function ClueCard({ number, recipes, entry, meta, locale, revealed, fresh }: {
   );
 }
 
-function Clue({ recipe, record, meta, locale, revealed, tier }: {
+function Clue({ recipe, record, meta, locale, revealed }: {
   recipe: PortraitRecipe;
   record: CompactResponse | undefined;
   meta: PopulationMeta;
   locale: Locale;
   revealed: ClueDeckProps['revealed'];
-  tier: 'A' | 'B' | 'C';
 }) {
   const t = GAME_COPY[locale];
   const definition = meta.recipes[recipe];
@@ -182,18 +193,16 @@ function Clue({ recipe, record, meta, locale, revealed, tier }: {
     );
   }
   const cells = readCells(record, definition, locale);
-  const status = record.decision === 'fallback'
-    ? (revealed ? t.fallbackNamed(revealed.municipalityName) : t.fallbackHidden)
-    : (revealed ? t.answerFigures(revealed.name) : t.mysteryFigures);
   const where = revealed ? revealed.name : t.locatorAnswer;
   return (
     <>
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        {record.decision === 'fallback' && <QualityBadge kind="municipality" locale={locale} />}
-        {record.decision === 'publish' && revealed && <QualityBadge kind={record.resolved_tier === 'A' || record.resolved_tier === 'B' || record.resolved_tier === 'C' ? record.resolved_tier : tier} locale={locale} />}
-        <p className="text-sm text-stone-600">{status}</p>
-      </div>
-      <ClueChart recipe={recipe} record={record} cells={cells} locale={locale} unit={definition.unit} />
+      {record.decision === 'fallback' && (
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <QualityBadge kind="municipality" locale={locale} />
+          <p className="text-sm text-stone-600">{revealed ? t.fallbackNamed(revealed.municipalityName) : t.fallbackHidden}</p>
+        </div>
+      )}
+      <ResponseChart recipeName={recipe} recipe={definition} record={record} cells={cells} locale={locale} />
       <ChartTable
         caption={`${RECIPE_COPY[recipe].question[locale]} (${where})`}
         columns={[...definition.dimensions.map(d => DIMENSION_LABEL[d]?.[locale] ?? d), locale === 'pt' ? 'Percentagem' : 'Share']}
@@ -201,20 +210,4 @@ function Clue({ recipe, record, meta, locale, revealed, tier }: {
       />
     </>
   );
-}
-
-/** The same chart choice as the parish page's ResponseCard. */
-function ClueChart({ recipe, record, cells, locale, unit }: {
-  recipe: PortraitRecipe;
-  record: CompactResponse;
-  cells: ReturnType<typeof readCells>;
-  locale: Locale;
-  unit: 'person' | 'household';
-}) {
-  if (recipe === 'age') return <AgeColumns cells={cells} locale={locale} />;
-  const whole = isWhole(record) && cells.filter(cell => cell.state === 'published').length <= 4;
-  if (whole && (recipe === 'elders_alone' || recipe === 'multigenerational' || recipe === 'employment')) {
-    return <HundredPeople cells={cells.filter(cell => cell.state !== 'absent')} locale={locale} unit={unit === 'household' ? 'households' : 'people'} />;
-  }
-  return <ShareBars cells={cells} locale={locale} />;
 }

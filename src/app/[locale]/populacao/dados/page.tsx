@@ -46,7 +46,8 @@ const FILE_COPY: Record<string, { pt: string; en: string }> = {
 
 function Code({ children, label }: { children: string; label: string }) {
   return (
-    <pre aria-label={label} className="overflow-x-auto rounded-xl border border-line bg-parchment p-4 font-mono text-[13px] leading-relaxed text-ink">
+    // A scrollable region: focusable so a keyboard can scroll it, and named so a screen reader says what it holds.
+    <pre role="region" aria-label={label} tabIndex={0} className="overflow-x-auto rounded-xl border border-line bg-parchment p-4 font-mono text-[13px] leading-relaxed text-ink">
       <code>{children}</code>
     </pre>
   );
@@ -110,11 +111,12 @@ sha256sum checksums.sha256`;
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
       <PageHero
         width="5xl"
         compact
-        back={{ href: POPULATION_ROUTES.hub, label: pt ? 'POPULAÇÃO' : 'POPULATION', locale }}
-        eyebrow={pt ? `POPULAÇÃO SINTÉTICA · DADOS · VERSÃO ${POPULATION_RELEASE}` : `SYNTHETIC POPULATION · DATA · RELEASE ${POPULATION_RELEASE}`}
+        back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
+        eyebrow={pt ? `População sintética · dados · versão ${POPULATION_RELEASE}` : `Synthetic population · data · release ${POPULATION_RELEASE}`}
         title={pt ? 'Posso usar estes dados?' : 'Can I use these data?'}
         lede={pt
           ? 'Os microdados completos estão publicados, com licença aberta. Esta página diz o que contêm, para que servem e para que não servem, como verificar os ficheiros e como citar.'
@@ -124,7 +126,7 @@ sha256sum checksums.sha256`;
       />
       <PopulationSectionNav current="data" locale={locale} />
 
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl space-y-12 px-4 py-8 md:py-12">
+      <div className="mx-auto max-w-5xl space-y-12 px-4 py-8 md:py-12">
         {!release || !meta ? (
           <PopulationUnavailable locale={locale} />
         ) : (
@@ -132,13 +134,13 @@ sha256sum checksums.sha256`;
             <Section id="versao" title={pt ? 'Que versão é esta?' : 'Which release is this?'}>
               <Facts rows={[
                 [pt ? 'Versão' : 'Release', <>{release.name} {release.version}, {pt ? 'publicada a' : 'published'} {formatDay(release.published, locale)}</>],
-                [pt ? 'Ano de referência' : 'Reference year', pt ? `2021: calibrada nos Censos 2021 do INE (${release.census_vintage}).` : `2021: calibrated to INE’s 2021 Census (${release.census_vintage}).`],
+                [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: calibrada nos Censos 2021 do INE.' : '2021: calibrated to INE’s 2021 Census.'],
                 [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span><span className="break-all font-mono text-[13px]">sha256 {release.model_sha256}</span></>],
                 [pt ? 'Código' : 'Code', <span key="c" className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>],
                 [pt ? 'Versão anterior' : 'Previous release', <>
                   {pt
-                    ? <>A <a className={link} href={POPULATION_DOWNLOADS.superseded}>versão 1.0.0</a>, publicada no mesmo dia, foi substituída por esta e continua no GitHub como registo. </>
-                    : <><a className={link} href={POPULATION_DOWNLOADS.superseded}>Release 1.0.0</a>, published the same day, is superseded by this one and stays on GitHub as a record. </>}
+                    ? <>Os ficheiros da <a className={link} href={POPULATION_DOWNLOADS.superseded}>versão 1.0.0</a> continuam no GitHub, como registo. </>
+                    : <>The files of <a className={link} href={POPULATION_DOWNLOADS.superseded}>release 1.0.0</a> stay on GitHub, as a record. </>}
                   {SUPERSEDED[locale]}
                 </>],
               ]} />
@@ -210,18 +212,17 @@ sha256sum checksums.sha256`;
                   <caption className="sr-only">{pt ? 'Ficheiros da versão' : 'Release files'}</caption>
                   <thead>
                     <tr>
-                      {[pt ? 'Ficheiro' : 'File', pt ? 'Conteúdo' : 'Contents', pt ? 'Tamanho' : 'Size'].map(header => (
-                        <th key={header} scope="col" className="border-b-2 border-ink px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{header}</th>
-                      ))}
+                      <th scope="col" className="border-b-2 border-ink px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{pt ? 'Ficheiro e conteúdo' : 'File and contents'}</th>
+                      <th scope="col" className="border-b-2 border-ink px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-stone-600">{pt ? 'Tamanho' : 'Size'}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {POPULATION_DOWNLOADS.files.map(file => (
                       <tr key={file.key} className="align-top">
                         <th scope="row" className="border-b border-line px-4 py-3 text-left font-normal">
-                          <a href={file.url} className="break-all font-mono text-[13px] font-semibold text-ink underline underline-offset-4">{file.name}</a>
+                          <a href={file.url} className="font-mono text-[13px] font-semibold text-ink underline underline-offset-4 [overflow-wrap:anywhere]">{file.name}</a>
+                          <span className="mt-1 block leading-relaxed text-stone-700">{FILE_COPY[file.key]?.[locale]}</span>
                         </th>
-                        <td className="min-w-[14rem] border-b border-line px-4 py-3 leading-relaxed text-stone-700">{FILE_COPY[file.key]?.[locale]}</td>
                         <td className="whitespace-nowrap border-b border-line px-4 py-3 text-right tabular-nums text-ink">{formatBytes(file.bytes, locale)}</td>
                       </tr>
                     ))}
@@ -332,6 +333,7 @@ sha256sum checksums.sha256`;
             </Section>
           </>
         )}
+      </div>
       </main>
       <SiteFooter locale={locale} />
     </div>

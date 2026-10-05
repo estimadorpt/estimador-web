@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Share2 } from 'lucide-react';
 import { Action } from '@/components/brand/Action';
 import { ACCENT, FURNITURE } from '@/components/viz/theme';
+import { formatCount } from '@/lib/population/format';
 import { MAX_GUESSES, formatCountdown, msUntilNextLisbonMidnight, type GameRecord, type GameStats } from '@/lib/population/game';
 import { regionTitle, type Parish } from '@/lib/population/places';
 import { TIER_COPY, type Locale } from '@/lib/population/labels';
@@ -32,7 +33,6 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
   const t = GAME_COPY[locale];
   const won = record.status === 'won';
   const [shareState, setShareState] = useState<'idle' | 'copied' | 'failed'>('idle');
-  const numbers = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB');
   const geography = index.geography as { source_license_url?: string; source_url?: string };
 
   const onShare = async () => {
@@ -66,7 +66,7 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-600">
         <QualityBadge kind={tier} locale={locale} />
-        <span>{t.residents}: <strong className="tabular-nums text-ink">{numbers.format(answer.censusPopulation)}</strong></span>
+        <span>{t.residents}: <strong className="tabular-nums text-ink">{formatCount(answer.censusPopulation, locale)}</strong></span>
       </div>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600">{TIER_COPY[tier].meaning[locale]}</p>
 
@@ -137,9 +137,9 @@ function Stats({ stats, locale, highlight }: { stats: GameStats; locale: Locale;
     <div className="mt-5">
       <h3 className="text-base font-bold text-ink">{t.statsTitle}</h3>
       <p className="text-xs text-stone-500">{t.statsNote}</p>
-      <dl className="mt-3 grid grid-cols-4 gap-2">
+      <dl className="mt-3 grid grid-cols-2 gap-2 min-[420px]:grid-cols-4">
         {tiles.map(([label, value]) => (
-          <div key={label} className="flex flex-col-reverse rounded-xl border border-line bg-paper px-2 py-2.5 text-center">
+          <div key={label} className="flex min-w-0 flex-col-reverse rounded-xl border border-line bg-paper px-2 py-2.5 text-center">
             <dt className="mt-0.5 text-[11px] font-semibold leading-tight text-stone-500">{label}</dt>
             <dd className="font-display text-2xl font-extrabold tabular-nums text-ink">{value}</dd>
           </div>

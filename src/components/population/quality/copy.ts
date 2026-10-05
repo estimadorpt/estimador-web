@@ -88,8 +88,8 @@ export const LIMITATIONS: Array<{ title: Text; body: Text }> = [
  * counts are written out, not read from the current release's metadata.
  */
 export const SUPERSEDED: Text = {
-  pt: 'A versão 1.0.0, publicada a 5 de outubro de 2026, aplicava às respostas do site limiares de lançamento definidos em julho: as 1 611 freguesias de qualidade C mostravam os números do concelho, e as categorias com menos de 10 pessoas geradas ficavam escondidas. No mesmo dia, a versão 1.0.1 substituiu esses limiares: cada freguesia responde com os seus próprios números e o seu nível de qualidade, nada é suprimido, e uma categoria sem ninguém aparece como 0,0%. As pessoas e os agregados gerados são os mesmos nas duas versões.',
-  en: 'Release 1.0.0, published on 5 October 2026, applied launch thresholds written in July to the site’s answers: the 1,611 quality C parishes showed their municipality’s figures, and categories with fewer than 10 generated people were hidden. The same day, release 1.0.1 replaced those thresholds: every parish answers with its own figures and its quality tier, nothing is suppressed, and a category with no one in it shows 0.0%. The generated people and households are the same in both releases.',
+  pt: 'A versão 1.0.0, publicada a 5 de outubro de 2026, aplicava às respostas do site limiares de lançamento definidos em julho: as 1 611 freguesias de qualidade C mostravam os números do concelho, e as categorias com menos de 10 pessoas geradas ficavam escondidas. A versão 1.0.1, do mesmo dia, retirou esses limiares: cada freguesia responde com os seus próprios números e o seu nível de qualidade, nada é suprimido, e uma categoria sem ninguém aparece como 0,0%. As pessoas e os agregados gerados são os mesmos nas duas versões.',
+  en: 'Release 1.0.0, published on 5 October 2026, applied launch thresholds written in July to the site’s answers: the 1,611 quality C parishes showed their municipality’s figures, and categories with fewer than 10 generated people were hidden. Release 1.0.1, the same day, removed those thresholds: every parish answers with its own figures and its quality tier, nothing is suppressed, and a category with no one in it shows 0.0%. The generated people and households are the same in both releases.',
 };
 
 /** Novelty, verbatim from the handoff (scorecard.novelty, rounded by the producer). */
@@ -203,11 +203,7 @@ export function formatFit(value: number, locale: Locale): string {
   }).format(value);
 }
 
-export function formatCount(value: number, locale: Locale): string {
-  // pt-PT leaves four-digit numbers ungrouped by default ("1215"); the site
-  // and the model card write "1 215", so grouping is forced.
-  return new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { useGrouping: 'always' }).format(value);
-}
+export { formatCount } from '@/lib/population/format';
 
 /** A calendar date (YYYY-MM-DD) in words, e.g. "5 de outubro de 2026". */
 export function formatDay(iso: string, locale: Locale): string {

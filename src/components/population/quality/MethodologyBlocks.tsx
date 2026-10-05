@@ -114,14 +114,21 @@ export function methodologyBlocks({ locale, meta, release, scorecard }: {
       ].filter(rule => rule.show);
       return (
         <>
-          <p className="mb-5">
-            {rules.length > 1
-              ? (pt ? 'Para cada pergunta, há uma de três decisões:' : 'For each question, one of these decisions is taken:')
-              : (pt ? 'Nesta versão, todas as perguntas são respondidas com os números da própria freguesia:' : 'In this release, every question is answered with the parish’s own figures:')}
-          </p>
-          <ul className="mb-5 list-disc space-y-1.5 pl-6">
-            {rules.map(rule => <li key={rule.title}><strong className="font-bold">{rule.title}</strong> {rule.body}</li>)}
-          </ul>
+          {rules.length > 1 ? (
+            <>
+              <p className="mb-5">{pt ? 'Para cada pergunta, há uma de três decisões:' : 'For each question, one of these decisions is taken:'}</p>
+              <ul className="mb-5 list-disc space-y-1.5 pl-6">
+                {rules.map(rule => <li key={rule.title}><strong className="font-bold">{rule.title}</strong> {rule.body}</li>)}
+              </ul>
+            </>
+          ) : (
+            // One decision only (v1.0.1): a sentence, not a one-item list.
+            <p className="mb-5">
+              {pt
+                ? 'Nesta versão, todas as perguntas são respondidas com os números da própria freguesia, e a página de cada freguesia diz o seu nível de qualidade.'
+                : 'In this release, every question is answered with the parish’s own figures, and each parish page states its quality tier.'}
+            </p>
+          )}
           {suppressed > 0 ? (
             <p className="mb-5">
               {pt
@@ -131,8 +138,8 @@ export function methodologyBlocks({ locale, meta, release, scorecard }: {
           ) : (
             <p className="mb-5">
               {pt
-                ? 'Nenhuma célula é suprimida. Todas as categorias de uma pergunta aparecem; '
-                : 'No cell is suppressed. Every category of a question appears; '}
+                ? 'Nenhuma célula é suprimida: todas as categorias de uma pergunta aparecem, mesmo as vazias. '
+                : 'No cell is suppressed: every category of a question appears, empty ones included. '}
               {HONESTY.zero[locale]}
             </p>
           )}

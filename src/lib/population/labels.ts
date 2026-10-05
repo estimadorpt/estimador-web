@@ -205,8 +205,8 @@ export const TIER_COPY: Record<'A' | 'B' | 'C', { label: Text; meaning: Text }> 
   C: {
     label: { pt: 'Qualidade C', en: 'Quality C' },
     meaning: {
-      pt: 'Freguesia pequena (menos de 500 residentes) ou com um ajuste mais fraco às tabelas do INE. Os números são os da própria freguesia: lê-os com mais cuidado.',
-      en: 'A small parish (under 500 residents) or one with a weaker fit to INE’s tables. The numbers are the parish’s own: read them with more care.',
+      pt: 'Freguesia pequena (menos de 500 residentes) ou com um ajuste mais fraco às tabelas do INE: lê os números com mais cuidado.',
+      en: 'A small parish (under 500 residents) or one with a weaker fit to INE’s tables: read the numbers with more care.',
     },
   },
 };
@@ -276,5 +276,10 @@ export const HONESTY = {
   zero: {
     pt: '«0,0%»: nenhuma pessoa ou agregado gerado nessa categoria, ou tão poucos que a percentagem arredonda para zero.',
     en: '“0.0%”: no generated person or household in that category, or so few that the share rounds to zero.',
+  },
+  /** The same, for a list that already prints «0,0%» as its term. */
+  zeroMeaning: {
+    pt: 'Nenhuma pessoa ou agregado gerado nessa categoria, ou tão poucos que a percentagem arredonda para zero.',
+    en: 'No generated person or household in that category, or so few that the share rounds to zero.',
   },
 } satisfies Record<string, Text>;

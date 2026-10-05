@@ -54,14 +54,28 @@ export function regionListing(places: PopulationPlaces, regionId: string): Munic
     .sort((a, b) => byName(a.name, b.name));
 }
 
+/** Counts use the section's one format helper. */
+export { formatCount } from '@/lib/population/format';
+
+/** One parish row of a region table: code, name, INE residents, tier, and 1 when its figures are the município's. */
+export type RegionRow = [code: string, name: string, residents: number, tier: 'A' | 'B' | 'C', municipalityFigures: 0 | 1];
+
+export interface RegionTable {
+  code: string;
+  name: string;
+  rows: RegionRow[];
+}
+
 /**
- * Whole numbers in the page's format, grouped from the thousands up:
- * "3 092" in Portuguese (narrow no-break space), "3,092" in English.
- * Formatting only; the value is the one given.
+ * The region listing cut to the fields its tables print, so a region page
+ * hands its table a compact array rather than every parish object
+ * (coordinates, households, region names), and rendered rows, twice over in
+ * the page's payload. Order is the listing's: alphabetical.
  */
-export function formatCount(value: number, locale: Locale): string {
-  const digits = String(Math.trunc(Math.abs(value)));
-  const separator = locale === 'pt' ? ' ' : ',';
-  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
-  return value < 0 ? `-${grouped}` : grouped;
+export function regionTables(listing: MunicipalityListing[]): RegionTable[] {
+  return listing.map(m => ({
+    code: m.code,
+    name: m.name,
+    rows: m.parishes.map((parish): RegionRow => [parish.code, parish.name, parish.censusPopulation, parish.tier, parish.level === 'municipality' ? 1 : 0]),
+  }));
 }
