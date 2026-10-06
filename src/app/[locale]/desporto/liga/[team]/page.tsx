@@ -388,6 +388,12 @@ export default async function TeamDetailPage({
                 })}
               </p>
             )}
+            {/* What "despromoção" counts, wherever the club's own figure is (M-07). */}
+            <p className="mt-3 text-[11px] leading-relaxed text-stone-500">
+              {locale === "pt"
+                ? "Despromoção = 17.º ou 18.º lugar; o 16.º joga o play-off e não conta."
+                : "Relegation = 17th or 18th; 16th plays off and is not counted."}
+            </p>
             {/* Season projection summary */}
             <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-500">
               <span>

@@ -101,7 +101,7 @@ export default async function SimuladorPage({
       />
 
       {/* Simulator */}
-      <section className="border-b border-stone-200">
+      <section className="border-b border-stone-200 last:border-b-0">
         <div className="max-w-7xl mx-auto px-4 py-10">
           <MatchdayPicker
             data={scenarios.next_matchday_scenarios}
@@ -136,7 +136,7 @@ export default async function SimuladorPage({
           heading and disclaimer already; this wrapper just gives the section
           its own identity in the page furniture. */}
       {seasonSamples && (
-        <section aria-labelledby="duelo-final-heading" className="border-b border-stone-200">
+        <section aria-labelledby="duelo-final-heading" className="border-b border-stone-200 last:border-b-0">
           <div className="max-w-7xl mx-auto px-4 py-10">
             <p className="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">
               <Swords className="w-3.5 h-3.5" aria-hidden="true" />

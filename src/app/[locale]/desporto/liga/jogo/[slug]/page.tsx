@@ -13,6 +13,7 @@ import {
   loadLigaHistorical,
   loadLigaInjuries,
   loadLigaPlayers,
+  loadLigaPlayersDetail,
   loadPlayedFixtures,
   loadUpcomingFixtures,
   NO_FIXTURES_SLUG,
@@ -27,6 +28,7 @@ import { MatchSquadNews } from "@/components/charts/football/MatchSquadNews";
 import type { MatchSquadSide } from "@/components/charts/football/MatchSquadNews";
 import { formFor } from "@/lib/football-form";
 import { currentAbsences } from "@/lib/football-injuries";
+import { playerDataCutoffLabel } from "@/lib/utils/player-pages";
 import { formatInteger, formatKickoffShort, formatLongDate, formatPercent, matchLabel } from "@/lib/football-format";
 import { setRequestLocale } from '@/i18n/request-locale';
 
@@ -112,7 +114,7 @@ export default async function MatchPage({
   setRequestLocale(locale);
   const pt = locale !== "en";
 
-  const [fixture, { prediction, scenarios }, historical, injuries, players, fixtures] =
+  const [fixture, { prediction, scenarios }, historical, injuries, players, fixtures, playersDetail] =
     await Promise.all([
       loadFixtureBySlug(slug),
       loadLigaData(),
@@ -120,6 +122,7 @@ export default async function MatchPage({
       loadLigaInjuries(),
       loadLigaPlayers(),
       loadUpcomingFixtures(),
+      loadLigaPlayersDetail(),
     ]);
 
   if (!fixture) {
@@ -343,6 +346,11 @@ export default async function MatchPage({
               unavailable={unavailable}
               absencesStatus={absences.status}
               snapshotDate={absences.snapshotDate}
+              sarCutoffLabel={playerDataCutoffLabel(
+                playersDetail?.appearances_through,
+                playersDetail?.generated_from?.seasons ?? players?.generated_from?.seasons ?? null,
+                locale,
+              )}
             />
           </div>
         </section>

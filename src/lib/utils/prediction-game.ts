@@ -139,26 +139,35 @@ const CONFIDENCE_WEIGHT: Record<Confidence, number> = {
 };
 
 /**
- * Long-run Liga Portugal 1X2 base rates. Used only to split the leftover
- * probability between the two outcomes the user did NOT pick, so that
- * "home win, slight favourite" doesn't imply an absurd draw/away split.
+ * Long-run Liga Portugal 1X2 base rates. Used only when the user picks the
+ * draw, to split the leftover between a home and an away win.
  */
 const NEUTRAL_PRIOR: ProbVector = [0.45, 0.27, 0.28];
+
+/**
+ * Share of the leftover that goes to the draw when the user picks a side.
+ * Splitting by the base rates instead left an away pick with home at 0.45
+ * of the rest against a draw at 0.27 (F19): someone who backs the visitors
+ * is not saying the hosts are the likelier alternative. The draw gets at
+ * least the unpicked side's share.
+ */
+const DRAW_SHARE_OF_REST = 0.55;
 
 /** Turn a (pick, confidence) pair into a full probability vector. */
 export function probsFromPick(pick: Outcome, confidence: Confidence): ProbVector {
   const idx = OUTCOME_INDEX[pick];
   const p = CONFIDENCE_WEIGHT[confidence];
-
-  const otherIdx = [0, 1, 2].filter(i => i !== idx) as [number, number];
-  const priorSum = NEUTRAL_PRIOR[otherIdx[0]] + NEUTRAL_PRIOR[otherIdx[1]];
+  const rest = 1 - p;
 
   const out: number[] = [0, 0, 0];
   out[idx] = p;
-  for (const i of otherIdx) {
-    out[i] = priorSum > EPS
-      ? (1 - p) * (NEUTRAL_PRIOR[i] / priorSum)
-      : (1 - p) / 2;
+  if (pick === 'D') {
+    const sides = NEUTRAL_PRIOR[0] + NEUTRAL_PRIOR[2];
+    out[0] = rest * (NEUTRAL_PRIOR[0] / sides);
+    out[2] = rest * (NEUTRAL_PRIOR[2] / sides);
+  } else {
+    out[1] = rest * DRAW_SHARE_OF_REST;
+    out[idx === 0 ? 2 : 0] = rest * (1 - DRAW_SHARE_OF_REST);
   }
   return normalizeProbs(out);
 }

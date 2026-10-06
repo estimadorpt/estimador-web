@@ -367,6 +367,13 @@ export function LeagueTable({
           : "On a wider screen the table also shows predicted points, goal difference and top 3; each club's page has everything."}
       </p>
 
+      {/* What the relegation column counts (audit M-07): the play-off place is not in it. */}
+      <p className="mt-2 text-[11px] leading-relaxed text-stone-500">
+        {pt
+          ? "Despromoção = 17.º ou 18.º lugar; o 16.º joga o play-off e não conta."
+          : "Relegation = 17th or 18th; 16th plays off and is not counted."}
+      </p>
+
       {/* Legend + the calibration claim, next to the thing it is a claim about. */}
       {hasBands && (
         <div className="mt-3 hidden max-w-3xl md:block">

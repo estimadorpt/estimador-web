@@ -8,6 +8,7 @@ import {
   teamLogoSrc,
 } from "@/lib/config/football";
 import { ChartTable } from "@/components/viz/ChartTable";
+import { formatPercent } from "@/lib/football-format";
 
 /* ------------------------------------------------------------------ types */
 
@@ -280,16 +281,10 @@ export function TitleRaceEvolution({
 
   const mds = race.matchdays;
   if (mds.length === 0 || race.series.length === 0) return null;
-  // Never "0%" for a non-zero value nor "100%" short of certain (F17: Porto's
-  // 99.78% at matchday 31 printed as 100%).
+  // The football percentage rule: never "0%" for a non-zero value nor "100%"
+  // short of certain (F17: Porto's 99.78% at matchday 31 printed as 100%).
   const pctText = (v: number | null | undefined) =>
-    v === null || v === undefined
-      ? "—"
-      : v > 0 && v < 0.005
-        ? "<1%"
-        : v < 1 && v >= 0.995
-          ? ">99%"
-          : `${Math.round(v * 100)}%`;
+    v === null || v === undefined ? "—" : formatPercent(v, locale);
   const rebuilt = new Set(reconstructed);
 
   const narrow = width < 520;
@@ -324,9 +319,10 @@ export function TitleRaceEvolution({
   const described = race.series
     .map(
       (s) =>
-        `${teamDisplayName(s.team)} ${Math.round((s.values[0] ?? 0) * 100)}% → ${Math.round(
-          (s.values[s.values.length - 1] ?? 0) * 100
-        )}%`
+        `${teamDisplayName(s.team)} ${formatPercent(s.values[0] ?? 0, locale)} → ${formatPercent(
+          s.values[s.values.length - 1] ?? 0,
+          locale
+        )}`
     )
     .join("; ");
 
@@ -658,7 +654,7 @@ export function ReportCard({
                   )}
                 </td>
                 <td className="py-1.5 tabular-nums text-right text-stone-700 font-medium">
-                  {c.champion_p === null ? "—" : c.champion_p < 1 && c.champion_p >= 0.995 ? ">99%" : c.champion_p > 0 && c.champion_p < 0.005 ? "<1%" : `${Math.round(c.champion_p * 100)}%`}
+                  {c.champion_p === null ? "—" : formatPercent(c.champion_p, locale)}
                 </td>
                 <td className="py-1.5 pl-4">
                   <div className="flex items-center gap-2">

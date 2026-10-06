@@ -146,6 +146,24 @@ describe('probsFromPick', () => {
     expect(v[2]).toBeGreaterThan(v[0]);
     expect(v[2]).toBeGreaterThan(v[1]);
   });
+
+  it('gives the draw at least the unpicked side when a side is picked (F19)', () => {
+    for (const conf of ['leve', 'media', 'alta'] as const) {
+      const away = probsFromPick('A', conf);
+      expect(away[1]).toBeGreaterThanOrEqual(away[0]);
+      const home = probsFromPick('H', conf);
+      expect(home[1]).toBeGreaterThanOrEqual(home[2]);
+    }
+    const v = probsFromPick('A', 'leve');
+    expect(v[1]).toBeCloseTo(0.6 * 0.55, 9);
+    expect(v[0]).toBeCloseTo(0.6 * 0.45, 9);
+  });
+
+  it('splits a draw pick between the sides by the base rates', () => {
+    const v = probsFromPick('D', 'media');
+    expect(v[0]).toBeGreaterThan(v[2]);
+    expect(v[0] + v[2]).toBeCloseTo(0.45, 9);
+  });
 });
 
 describe('setSliderValue', () => {

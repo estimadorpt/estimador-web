@@ -363,7 +363,22 @@ export default async function LigaPage({
               methodologyLabel={methodLabel}
               locale={locale}
             >
-              <TitleRaceChart historical={historical} yAxisLabel={t("football.championPercent")} />
+              <TitleRaceChart
+                historical={historical}
+                yAxisLabel={t("football.championPercent")}
+                caveat={<>
+                  {t("football.titleCalibrationCaveat")}{" "}
+                  <Link
+                    href={locale === "pt"
+                      ? "/desporto/liga/metodologia#as-probabilidades-de-titulo-estao-calibradas"
+                      : "/desporto/liga/metodologia#are-the-title-probabilities-calibrated"}
+                    locale={locale}
+                    className="font-medium text-ink underline underline-offset-4"
+                  >
+                    {locale === "pt" ? "Como o verificámos" : "How we checked"}
+                  </Link>
+                </>}
+              />
             </DataCard>
           </div>
         </section>
@@ -496,7 +511,8 @@ export default async function LigaPage({
       />
 
       {/* Model Info */}
-      <section className="border-b border-stone-200">
+      {/* The last section: the footer draws the rule (UXD-10). */}
+      <section>
         <div className="max-w-7xl mx-auto px-4 py-10">
           <h2 className="text-2xl tracking-tight mb-3">
             {t("football.modelInfo")}

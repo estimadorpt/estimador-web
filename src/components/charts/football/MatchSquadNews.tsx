@@ -32,6 +32,9 @@ interface MatchSquadNewsProps {
    * (see currentAbsences); anything else hides the lists and says so. */
   absencesStatus: AbsencesStatus;
   snapshotDate?: string | null;
+  /** "Dados até 16 mai. 2026 (fim da época 2025-26)": the SAR fit's last
+   * appearance (playerDataCutoffLabel), shown next to the SAR lists (F-H6). */
+  sarCutoffLabel?: string | null;
 }
 
 function formatValue(v: number | null | undefined, pt: boolean): string {
@@ -50,11 +53,13 @@ function SideCard({
   locale,
   unavailable,
   absencesStatus,
+  sarCutoffLabel,
 }: {
   side: MatchSquadSide;
   locale: string;
   unavailable: Set<string>;
   absencesStatus: AbsencesStatus;
+  sarCutoffLabel?: string | null;
 }) {
   const pt = locale !== "en";
   const codes = pt ? positionCodePt : positionCodeEn;
@@ -136,6 +141,7 @@ function SideCard({
           {pt
             ? "Só golos por 90 minutos acima do substituto — uma métrica de avançados, não uma classificação geral de qualidade."
             : "Goals/90 above replacement only — a forwards metric, not a general quality ranking."}
+          {sarCutoffLabel ? ` ${sarCutoffLabel}.` : ""}
         </p>
         {side.topPlayers.length === 0 ? (
           <div className="text-xs text-stone-400">
@@ -191,6 +197,7 @@ export function MatchSquadNews({
   unavailable,
   absencesStatus,
   snapshotDate,
+  sarCutoffLabel,
 }: MatchSquadNewsProps) {
   const pt = locale !== "en";
   const current = absencesStatus === "current";
@@ -215,8 +222,8 @@ export function MatchSquadNews({
             : ""}
       </p>
       <div className="grid gap-4 md:grid-cols-2">
-        <SideCard side={home} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} />
-        <SideCard side={away} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} />
+        <SideCard side={home} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} />
+        <SideCard side={away} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} />
       </div>
       {/* The feed's metric_label is English; the definition is ours to write. */}
       <p className="text-[11px] text-stone-500 mt-3">

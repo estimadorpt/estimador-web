@@ -86,7 +86,7 @@ const FILES: readonly (readonly [string, Copy])[] = [
 
 function Section({ id, kicker, title, lede, children }: { id: string; kicker: string; title: string; lede?: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="border-b border-line py-12 md:py-16">
+    <section id={id} className="border-b border-line py-12 last:border-b-0 md:py-16">
       <div className="mx-auto max-w-5xl px-4">
         <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{kicker}</p>
         <h2 className="text-2xl md:text-3xl">{title}</h2>

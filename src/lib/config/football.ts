@@ -96,6 +96,8 @@ export const ligaDisplayNames: Record<string, string> = {
   'Alverca': 'Alverca',
   'Maritimo': 'Marítimo',
   'Academico Viseu': 'Ac. Viseu',
+  // Not in the 2026-27 Primeira, but the market scorecard's past seasons name it.
+  'Pacos Ferreira': 'Paços de Ferreira',
 };
 
 /** Get the Portuguese display name for a team (with accents, abbreviated). */

@@ -350,7 +350,7 @@ export function Liga2ProbabilityTable({
               {pt ? "Subida" : "Promotion"}
             </th>
             <th className="py-2 px-2 text-right font-bold">
-              {pt ? "Descida" : "Relegation"}
+              {pt ? "Despromoção" : "Relegation"}
             </th>
             {showFinalRank && (
               <th className="py-2 pr-3 pl-2 text-right font-bold">
