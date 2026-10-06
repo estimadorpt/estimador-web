@@ -1,7 +1,11 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { createPageMetadata } from '@/lib/metadata';
 import { loadPredictionGameData } from "@/lib/utils/football-data-loader";
 import { findOpenRound, roundLockState } from "@/lib/utils/prediction-game";
-import { formatKickoff } from "@/lib/football-format";
+import { formatLongDate } from "@/lib/football-format";
+import { latePublications, type ManifestRoundLike } from "@/lib/utils/prediction-game-record";
+import { DeadlineLine } from "./DeadlineLine";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -21,16 +25,27 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const pt = locale !== "en";
+  const t = await getTranslations({ locale });
   return createPageMetadata({
     locale,
     path: `/desporto/liga/jogo-previsoes`,
-    title: pt
-      ? "Contra o Modelo · Liga Portugal"
-      : "Beat the Model · Liga Portugal",
+    // One name for the game everywhere, from nav.game (audit pub-PP-15).
+    title: `${t("nav.game")} · Liga Portugal`,
     description: pt
       ? "Faz as tuas previsões para a próxima jornada da Liga Portugal e vê se bates o modelo. Avaliação por Ranked Probability Score, a mesma medida com que avaliamos o modelo."
       : "Forecast the next Liga Portugal matchday and see if you can beat the model. Scored with the Ranked Probability Score, the same measure we grade the model with.",
   });
+}
+
+/** The raw game manifest's rounds, for the notes the scoring server does not carry. */
+async function loadManifestRounds(): Promise<ManifestRoundLike[]> {
+  try {
+    const file = path.join(process.cwd(), "public", "data", "football", "liga-2026-27", "game_fixtures.json");
+    const raw = JSON.parse(await readFile(file, "utf8"));
+    return Array.isArray(raw?.matchdays) ? raw.matchdays : [];
+  } catch {
+    return [];
+  }
 }
 
 export default async function JogoPrevisoesPage({
@@ -43,23 +58,30 @@ export default async function JogoPrevisoesPage({
   const pt = locale !== "en";
   const t = await getTranslations({ locale });
 
-  const data = await loadPredictionGameData();
+  const [data, manifestRounds] = await Promise.all([loadPredictionGameData(), loadManifestRounds()]);
 
   // The deadline of the round open when the page was built, from the game
-  // manifest's locks_at. Worded as a deadline, not as "open now", so it stays
-  // true after it passes; the game itself re-checks the clock in the browser.
+  // manifest's locks_at. The line re-reads the clock in the browser and says
+  // the round has closed once the deadline passes (audit FR-11).
   const openRound = data ? findOpenRound(data, Date.now()) : null;
   const openLock = openRound ? roundLockState(openRound, Date.now()) : null;
   const deadline =
-    openRound && openLock?.lockAt != null
-      ? openRound.fixtures.every(f => f.kickoffConfirmed !== false)
-        ? pt
-          ? `Prazo da jornada ${openRound.matchday}: ${formatKickoff(new Date(openLock.lockAt).toISOString(), locale)} (hora de Lisboa), no primeiro jogo.`
-          : `Matchday ${openRound.matchday} deadline: ${formatKickoff(new Date(openLock.lockAt).toISOString(), locale)} (Lisbon time), at the first game.`
-        : pt
-          ? `Jornada ${openRound.matchday}: há horários por confirmar; fecha no primeiro jogo.`
-          : `Matchday ${openRound.matchday}: some kickoffs are still to be confirmed; it closes at the first game.`
-      : null;
+    openRound && openLock?.lockAt != null ? (
+      <DeadlineLine
+        matchday={openRound.matchday}
+        lockAt={new Date(openLock.lockAt).toISOString()}
+        confirmed={openRound.fixtures.every(f => f.kickoffConfirmed !== false)}
+        locale={locale}
+      />
+    ) : null;
+
+  // The model's season record counts rounds it published after kickoff
+  // (2026-27 matchday 1); the table says so (audit M2).
+  const recordNote = latePublications(manifestRounds)
+    .map(l => pt
+      ? `O registo do modelo inclui a jornada ${l.matchday}, cujas probabilidades foram publicadas a ${formatLongDate(l.publishedAt, locale)}, depois de ${l.startedBefore} dos ${l.total} jogos terem começado.`
+      : `The model's record includes matchday ${l.matchday}, whose probabilities were published on ${formatLongDate(l.publishedAt, locale)}, after ${l.startedBefore} of its ${l.total} games had started.`)
+    .join(" ") || null;
 
   return (
     <div className="min-h-screen bg-paper">
@@ -70,11 +92,11 @@ export default async function JogoPrevisoesPage({
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
         icon={<Swords aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t("football.title")}
-        title={pt ? "Contra o Modelo" : "Beat the Model"}
+        title={t("nav.game")}
         lede={pt
           ? "Consegues prever melhor do que o modelo? Escolhe as tuas probabilidades antes da jornada e compara-te com ele, semana após semana."
           : "Can you forecast better than the model? Set your own probabilities before the matchday and go head to head, week after week."}
-        meta={deadline ? <span>{deadline}</span> : undefined}
+        meta={deadline ?? undefined}
       />
 
       <section>
@@ -83,7 +105,7 @@ export default async function JogoPrevisoesPage({
             // Auth wraps this page only: readers of forecast pages never
             // download an auth bundle they have no use for.
             <GameAuthProvider>
-              <ContraOModelo data={data} locale={locale} />
+              <ContraOModelo data={data} locale={locale} recordNote={recordNote} />
             </GameAuthProvider>
           ) : (
             <p className="text-stone-500 text-sm">
@@ -97,14 +119,10 @@ export default async function JogoPrevisoesPage({
 
       <section className="border-t border-stone-200">
         <div className="max-w-3xl mx-auto px-4 py-8 text-xs text-stone-500 space-y-2">
-          {/* Where a season is stored depends on whether the season backend is
-              configured, which only the browser can know — this page is
-              rendered at build time. The component states the accurate version. */}
-          <p>
-            {pt
-              ? "Jogar é anónimo: escolhes um nome e as previsões contam para a classificação da época. Nunca guardamos email nem perfil."
-              : "Playing is anonymous: pick a name and your forecasts count towards the season standings. We never store an email or a profile."}
-          </p>
+          {/* Where a season is stored, and what is kept, depends on whether
+              the season backend answers, which only the browser can know: the
+              game states it once, in its own storage note (audit pub-PP-10,
+              F21). */}
           <p>
             {pt ? (
               <>

@@ -701,6 +701,27 @@ export function goalsSarIsMeaningful(position: string | null | undefined): boole
 }
 
 /**
+ * Re-anchor a list's goals ranks on the goals ranking the page publishes.
+ *
+ * The contribution feed carries `rank_goals_only` and a delta measured in the
+ * model's full universe (715 players), while /jogadores prints a 40-player
+ * goals list right above it; the arrows must count places in that list
+ * (audit F5: Pedro Gonçalves read ▲3 against a list that has him 3rd, one
+ * place below his contribution rank of 1, so ▲2). A player missing from the
+ * published list gets no movement (null), never a universe rank.
+ */
+export function withPublishedGoalsRanks(
+  entries: readonly RatingEntry[],
+  goalsRankByPlayer: Record<string, number>,
+): RatingEntry[] {
+  return entries.map((e) => ({
+    ...e,
+    goalsRank: goalsRankByPlayer[e.player] ?? null,
+    rankChange: null,
+  }));
+}
+
+/**
  * Movement between the goals-only ranking and this one, positive when the
  * player climbs. Prefers a rank pair (unambiguous) over a published delta
  * whose sign convention we cannot verify.

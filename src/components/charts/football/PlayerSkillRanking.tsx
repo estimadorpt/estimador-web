@@ -145,14 +145,14 @@ export function PlayerSkillRanking({
       ? "Indisponível neste momento — toque no jogador para saber porquê"
       : "Currently unavailable — tap the player to see why",
     footnote: pt
-      ? `Clube = último clube onde o jogador atuou nos dados (épocas ${data.generated_from.seasons[0]} a ${
+      ? `Clube = plantel atual (${data.season}); os números vêm das épocas ${data.generated_from.seasons[0]} a ${
           data.generated_from.seasons[data.generated_from.seasons.length - 1]
-        }); transferências recentes podem não estar refletidas. Mínimo ${int(
+        }. Mínimo ${int(
           data.generated_from.min_minutes
         )} minutos para entrar no ranking (${int(data.generated_from.n_players)} jogadores elegíveis).`
-      : `Club = the player's most recent club in the data (seasons ${data.generated_from.seasons[0]} to ${
+      : `Club = current squad (${data.season}); the numbers come from the ${data.generated_from.seasons[0]} to ${
           data.generated_from.seasons[data.generated_from.seasons.length - 1]
-        }); recent transfers may not be reflected. Minimum ${int(
+        } seasons. Minimum ${int(
           data.generated_from.min_minutes
         )} minutes to qualify (${int(data.generated_from.n_players)} eligible players).`,
     hubLink: pt

@@ -13,11 +13,10 @@ import {
   loadGkChannels,
   loadGkRatings,
   loadLigaPlayers,
+  loadLigaPlayersDetail,
   loadPlayerSlugs,
 } from "@/lib/utils/football-data-loader";
 import { setRequestLocale } from '@/i18n/request-locale';
-
-const SITE = "https://estimador.pt";
 
 export async function generateMetadata({
   params,
@@ -31,10 +30,12 @@ export async function generateMetadata({
   const title = pt
     ? "Jogadores da Liga Portugal: uma métrica por dimensão"
     : "Liga Portugal players: one metric per dimension";
+  // Finishing, contribution, contested possession and goalkeepers, each
+  // with its own scale and interval; the description no longer opens on the
+  // argument against a single ranking (audit CL-M2).
   const description = pt
-    ? "Não há forma honesta de pôr um guarda-redes e um ponta de lança na mesma tabela. Finalização, contribuição ofensiva, posse disputada, intervenção em cruzamentos — cada métrica com a sua escala, o seu intervalo de credibilidade e a sua amostra."
-    : "There is no honest way to put a goalkeeper and a centre-forward in the same table. Finishing, attacking contribution, contested possession, cross intervention — each metric with its own scale, credible interval and sample.";
-  const url = `${SITE}/${locale}/desporto/liga/jogadores`;
+    ? "Os jogadores da Liga Portugal em métricas separadas: finalização, contribuição ofensiva, posse disputada e guarda-redes, cada uma com a sua escala, o seu intervalo de credibilidade e a data dos dados."
+    : "Liga Portugal players on separate metrics: finishing, attacking contribution, contested possession and goalkeeping, each with its own scale, credible interval and data date.";
 
   return createPageMetadata({
     locale,
@@ -56,7 +57,7 @@ export default async function PlayerRatingsPage({
   // Every feed is optional and loaded independently: three of these are
   // written by separate models in the model repo and any of them can be
   // absent on any given build. A missing feed renders no section.
-  const [finishers, contrib, gk, def, contested, gkChannels, playerSlugs] =
+  const [finishers, contrib, gk, def, contested, gkChannels, playerSlugs, detail] =
     await Promise.all([
       loadLigaPlayers(),
       loadContribRatings(),
@@ -65,6 +66,7 @@ export default async function PlayerRatingsPage({
       loadContestedRatings(),
       loadGkChannels(),
       loadPlayerSlugs(),
+      loadLigaPlayersDetail(),
     ]);
 
   return (
@@ -76,9 +78,10 @@ export default async function PlayerRatingsPage({
         compact
         back={{ href: "/desporto/liga", label: "Liga Portugal", locale }}
         eyebrow={pt ? "Liga Portugal · Jogadores" : "Liga Portugal · Players"}
-        title={pt
-          ? "Uma métrica por dimensão, porque um número só não chega"
-          : "One metric per dimension, because one number is not enough"}
+        title={pt ? "Jogadores da Liga Portugal" : "Liga Portugal players"}
+        lede={pt
+          ? "Métricas separadas — finalização, contribuição ofensiva, posse disputada e guarda-redes —, cada uma com o seu intervalo. Não há um ranking geral: um número só não chega para comparar um guarda-redes com um ponta de lança."
+          : "Separate metrics — finishing, attacking contribution, contested possession and goalkeeping — each with its own interval. There is no overall ranking: one number cannot compare a goalkeeper with a centre-forward."}
       />
 
       <div className="max-w-4xl mx-auto px-4 py-8 md:py-10">
@@ -91,10 +94,11 @@ export default async function PlayerRatingsPage({
           contested={contested}
           gkChannels={gkChannels}
           playerSlugs={playerSlugs}
+          dataThrough={detail?.appearances_through ?? null}
           locale={locale}
         />
 
-        <div className="mt-10 pt-5 border-t border-stone-200 text-xs flex flex-wrap gap-x-6 gap-y-2">
+        <div className="mt-10 pt-3 border-t border-stone-200 text-xs flex flex-wrap items-center gap-x-6 [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center">
           <Link
             href="/desporto/liga/dados"
             locale={locale}
@@ -103,11 +107,13 @@ export default async function PlayerRatingsPage({
             {pt ? "Dados abertos" : "Open data"}
           </Link>
           <Link
-            href="/desporto/liga/metodologia"
+            href={pt
+              ? "/desporto/liga/metodologia#como-medimos-os-jogadores"
+              : "/desporto/liga/metodologia#how-do-we-measure-players"}
             locale={locale}
             className="text-ink underline underline-offset-4"
           >
-            {pt ? "Como funciona o modelo" : "How the model works"}
+            {pt ? "Como medimos os jogadores" : "How we measure players"}
           </Link>
         </div>
       </div>

@@ -10,7 +10,8 @@
     "liga": "Liga Portugal",
     "economics": "Economy",
     "economicsPreparing": "Economy · in preparation",
-    "population": "Population"
+    "population": "Population",
+    "game": "Beat the Model"
   },
   "common": {
     "methodology": "Methodology"
@@ -423,6 +424,10 @@
     "season": "Season",
     "viewScenarios": "View scenarios",
     "teamPageTitle": "{team}: Liga Portugal forecast",
+<<<<<<< HEAD
+=======
+    "titleCalibrationCaveat": "Read with care: in past seasons the model underrated teams leading by 3 or more points (it gave them 56% on average, and they won the title 74% of the time).",
+>>>>>>> worktree-wf_7788cb80-c97-2
     "teamPageDescription": "Title scenarios and decisive matches for {team} in Liga Portugal {season}.",
     "scenariosTitle": "Victory scenarios",
     "scenariosDescription": "Three possible paths to the title, from most likely to least likely. Each scenario shows what needs to happen — and what rivals must do.",

@@ -120,7 +120,10 @@ export function FinalTable({
   const luck = new Map(data.luck.map((r) => [r.team, r]));
   const relegated = new Set(data.relegated);
 
-  const th = "text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2";
+  const th = "text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2";
+  // Numbers need air between them on a phone: at 360 px "13 11 10" ran
+  // together as "131110" (audit UXM-V01). Draws and defeats drop below sm.
+  const num = "py-2 pl-2 text-right tabular-nums";
 
   return (
     <div className="overflow-x-auto">
@@ -138,32 +141,32 @@ export function FinalTable({
             <th scope="col" className={`${th} text-left`}>
               {pt ? "Equipa" : "Team"}
             </th>
-            <th scope="col" className={`${th} text-right w-9`}>
-              {pt ? "V" : "W"}
+            <th scope="col" className={`${th} pl-2 text-right w-9`}>
+              <abbr title={pt ? "Vitórias" : "Won"} className="no-underline">{pt ? "V" : "W"}</abbr>
             </th>
-            <th scope="col" className={`${th} text-right w-9`}>
-              {pt ? "E" : "D"}
+            <th scope="col" className={`${th} pl-2 text-right w-9 hidden sm:table-cell`}>
+              <abbr title={pt ? "Empates" : "Drawn"} className="no-underline">{pt ? "E" : "D"}</abbr>
             </th>
-            <th scope="col" className={`${th} text-right w-9`}>
-              {pt ? "D" : "L"}
+            <th scope="col" className={`${th} pl-2 text-right w-9 hidden sm:table-cell`}>
+              <abbr title={pt ? "Derrotas" : "Lost"} className="no-underline">{pt ? "D" : "L"}</abbr>
             </th>
-            <th scope="col" className={`${th} text-right w-10 hidden sm:table-cell`}>
+            <th scope="col" className={`${th} pl-2 text-right w-10 hidden sm:table-cell`}>
               {pt ? "MM" : "GF"}
             </th>
-            <th scope="col" className={`${th} text-right w-10 hidden sm:table-cell`}>
+            <th scope="col" className={`${th} pl-2 text-right w-10 hidden sm:table-cell`}>
               {pt ? "MS" : "GA"}
             </th>
-            <th scope="col" className={`${th} text-right w-11`}>
+            <th scope="col" className={`${th} pl-2 text-right w-11`}>
               {pt ? "DG" : "GD"}
             </th>
-            <th scope="col" className={`${th} text-right w-11`}>
+            <th scope="col" className={`${th} pl-2 text-right w-11`}>
               Pts
             </th>
-            <th scope="col" className={`${th} text-right w-12`}>
+            <th scope="col" className={`${th} pl-2 text-right w-12`}>
               xPts
             </th>
-            <th scope="col" className={`${th} text-right w-14`}>
-              {pt ? "Sorte" : "Luck"}
+            <th scope="col" className={`${th} pl-2 text-right w-16`}>
+              Pts − xPts
             </th>
           </tr>
         </thead>
@@ -181,7 +184,7 @@ export function FinalTable({
                   isChampion ? "bg-emerald-50/60" : isRelegated ? "bg-red-50/50" : ""
                 }`}
               >
-                <td className="py-2 tabular-nums text-stone-400 text-xs">{row.pos}</td>
+                <td className="py-2 tabular-nums text-stone-500 text-xs">{row.pos}</td>
                 <td className="py-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <span
@@ -209,27 +212,27 @@ export function FinalTable({
                     )}
                   </div>
                 </td>
-                <td className="py-2 text-right tabular-nums text-stone-600">{row.won}</td>
-                <td className="py-2 text-right tabular-nums text-stone-600">{row.drawn}</td>
-                <td className="py-2 text-right tabular-nums text-stone-600">{row.lost}</td>
-                <td className="py-2 text-right tabular-nums text-stone-600 hidden sm:table-cell">
+                <td className={`${num} text-stone-600`}>{row.won}</td>
+                <td className={`${num} text-stone-600 hidden sm:table-cell`}>{row.drawn}</td>
+                <td className={`${num} text-stone-600 hidden sm:table-cell`}>{row.lost}</td>
+                <td className={`${num} text-stone-600 hidden sm:table-cell`}>
                   {row.gf}
                 </td>
-                <td className="py-2 text-right tabular-nums text-stone-600 hidden sm:table-cell">
+                <td className={`${num} text-stone-600 hidden sm:table-cell`}>
                   {row.ga}
                 </td>
-                <td className="py-2 text-right tabular-nums text-stone-500">
-                  {row.gd > 0 ? `+${row.gd}` : row.gd}
+                <td className={`${num} text-stone-500`}>
+                  {row.gd > 0 ? `+${row.gd}` : row.gd < 0 ? `−${Math.abs(row.gd)}` : row.gd}
                 </td>
-                <td className="py-2 text-right tabular-nums font-bold text-stone-900">
+                <td className={`${num} font-bold text-stone-900`}>
                   {row.points}
                 </td>
-                <td className="py-2 text-right tabular-nums text-stone-500">
+                <td className={`${num} text-stone-500`}>
                   {x ? fmt(x.xpts, 1, pt) : "—"}
                 </td>
                 <td
-                  className={`py-2 text-right tabular-nums font-semibold ${
-                    !l ? "text-stone-300" : l.delta >= 0 ? "text-emerald-700" : "text-red-600"
+                  className={`${num} font-semibold ${
+                    !l ? "text-stone-500" : l.delta >= 0 ? "text-emerald-700" : "text-red-700"
                   }`}
                 >
                   {l ? signed(l.delta, 1, pt) : "—"}
@@ -250,12 +253,15 @@ export function TitleRaceEvolution({
   totalMatchdays,
   locale = "pt",
   outcomeLabel,
+  reconstructed = [],
 }: {
   race: SeasonReviewRace;
   totalMatchdays: number;
   locale?: string;
   /** Short note pinned to the right edge, e.g. who actually won. */
   outcomeLabel?: string;
+  /** Matchdays whose forecast was generated afterwards: drawn hollow. */
+  reconstructed?: number[];
 }) {
   const pt = locale !== "en";
   const containerRef = useRef<HTMLDivElement>(null);
@@ -274,8 +280,17 @@ export function TitleRaceEvolution({
 
   const mds = race.matchdays;
   if (mds.length === 0 || race.series.length === 0) return null;
+  // Never "0%" for a non-zero value nor "100%" short of certain (F17: Porto's
+  // 99.78% at matchday 31 printed as 100%).
   const pctText = (v: number | null | undefined) =>
-    v === null || v === undefined ? "—" : v > 0 && v < 0.005 ? "<1%" : `${Math.round(v * 100)}%`;
+    v === null || v === undefined
+      ? "—"
+      : v > 0 && v < 0.005
+        ? "<1%"
+        : v < 1 && v >= 0.995
+          ? ">99%"
+          : `${Math.round(v * 100)}%`;
+  const rebuilt = new Set(reconstructed);
 
   const narrow = width < 520;
   const padL = narrow ? 30 : 38;
@@ -324,8 +339,8 @@ export function TitleRaceEvolution({
         onMouseLeave={() => setHover(null)}
         aria-label={
           pt
-            ? `Probabilidade de título atribuída pelo modelo em cada jornada publicada, da jornada ${mds[0]} à ${lastForecastMd}. ${described}.`
-            : `Model championship probability at each published matchday, from matchday ${mds[0]} to ${lastForecastMd}. ${described}.`
+            ? `Probabilidade de título atribuída pelo modelo em cada previsão, da jornada ${mds[0]} à ${lastForecastMd}. ${described}. Os valores estão na tabela abaixo.`
+            : `Model championship probability at each forecast, from matchday ${mds[0]} to ${lastForecastMd}. ${described}. The values are in the table below.`
         }
       >
         {/* gridlines + y ticks */}
@@ -389,8 +404,10 @@ export function TitleRaceEvolution({
             <g key={s.team}>
               <path d={lineFor(s.values)} fill="none" stroke={color} strokeWidth="2" />
               {s.values.map((v, i) =>
-                v === null ? null : (
-                  <circle key={i} cx={x(mds[i])} cy={y(v)} r="2.5" fill={color} />
+                v === null ? null : rebuilt.has(mds[i]) ? (
+                  <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill="#fcfbf5" stroke={color} strokeWidth="1.5" />
+                ) : (
+                  <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill={color} />
                 )
               )}
               {!narrow && lastVal !== null && lastVal !== undefined && (
@@ -401,7 +418,7 @@ export function TitleRaceEvolution({
                   fontWeight="600"
                   fill={color}
                 >
-                  {ligaTeamShortNames[s.team] || s.team} {Math.round(lastVal * 100)}%
+                  {ligaTeamShortNames[s.team] || s.team} {pctText(lastVal)}
                 </text>
               )}
             </g>
@@ -475,6 +492,11 @@ export function TitleRaceEvolution({
         >
           <div className="mb-1 font-bold text-ink">
             {pt ? "Jornada" : "Matchday"} {mds[hover]}
+            {rebuilt.has(mds[hover]) && (
+              <span className="ml-1 font-normal text-stone-500">
+                · {pt ? "reconstituída" : "reconstructed"}
+              </span>
+            )}
           </div>
           {race.series.map((s) => (
             <div key={s.team} className="flex justify-between gap-4 tabular-nums">
@@ -499,14 +521,37 @@ export function TitleRaceEvolution({
         </div>
       )}
 
+      {rebuilt.size > 0 && (
+        <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2 text-[11px] text-stone-600">
+          <span className="inline-flex items-center gap-1.5">
+            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#4f5f57" /></svg>
+            {pt ? "Publicada na altura" : "Published at the time"}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#fcfbf5" stroke="#4f5f57" strokeWidth="1.5" /></svg>
+            {pt ? "Reconstituída depois" : "Reconstructed afterwards"}
+          </span>
+        </div>
+      )}
+
       {outcomeLabel && (
         <p className="text-xs text-stone-500 mt-2">{outcomeLabel}</p>
       )}
 
       <ChartTable
-        caption={pt ? "Probabilidade de título por jornada publicada" : "Title probability by published matchday"}
-        columns={[pt ? "Jornada" : "Matchday", ...race.series.map((s) => teamDisplayName(s.team))]}
-        rows={mds.map((md, i) => [md, ...race.series.map((s) => pctText(s.values[i]))])}
+        caption={pt ? "Probabilidade de título por jornada" : "Title probability by matchday"}
+        columns={[
+          pt ? "Jornada" : "Matchday",
+          ...(rebuilt.size > 0 ? [pt ? "Previsão" : "Forecast"] : []),
+          ...race.series.map((s) => teamDisplayName(s.team)),
+        ]}
+        rows={mds.map((md, i) => [
+          md,
+          ...(rebuilt.size > 0
+            ? [rebuilt.has(md) ? (pt ? "reconstituída" : "reconstructed") : (pt ? "publicada" : "published")]
+            : []),
+          ...race.series.map((s) => pctText(s.values[i])),
+        ])}
       />
     </div>
   );
@@ -517,13 +562,19 @@ export function TitleRaceEvolution({
 export function ReportCard({
   data,
   locale = "pt",
+  reconstructed = [],
 }: {
   data: SeasonReviewData;
   locale?: string;
+  /** Matchdays whose forecast was generated afterwards. */
+  reconstructed?: number[];
 }) {
   const pt = locale !== "en";
   const rc = data.report_card;
   if (!rc || rc.checkpoints.length === 0) return null;
+  const rebuilt = new Set(reconstructed);
+  const nRebuilt = rc.checkpoints.filter((c) => rebuilt.has(c.matchday)).length;
+  const nPublished = rc.checkpoints.length - nRebuilt;
 
   const maxMae = Math.max(...rc.checkpoints.map((c) => c.points_mae ?? 0), 1);
 
@@ -534,8 +585,8 @@ export function ReportCard({
           {
             value: `${rc.checkpoints.filter((c) => c.favourite_correct).length}/${rc.n_forecasts}`,
             label: pt
-              ? "previsões com o campeão certo como favorito"
-              : "forecasts with the eventual champion as favourite",
+              ? `previsões com o campeão certo como favorito${nRebuilt ? ` (${nPublished} publicadas, ${nRebuilt} reconstituídas)` : ""}`
+              : `forecasts with the eventual champion as favourite${nRebuilt ? ` (${nPublished} published, ${nRebuilt} reconstructed)` : ""}`,
           },
           {
             value:
@@ -545,8 +596,8 @@ export function ReportCard({
                   : `matchday ${rc.relegation_correct_from}`
                 : "—",
             label: pt
-              ? "a partir da qual os dois despromovidos foram sempre os dois últimos do modelo"
-              : "from which the two relegated clubs were always the model's bottom two",
+              ? `a partir da qual os dois despromovidos foram sempre os dois últimos do modelo${rc.relegation_correct_from !== null && rebuilt.has(rc.relegation_correct_from) ? " (a começar numa previsão reconstituída)" : ""}`
+              : `from which the two relegated clubs were always the model's bottom two${rc.relegation_correct_from !== null && rebuilt.has(rc.relegation_correct_from) ? " (starting from a reconstructed forecast)" : ""}`,
           },
           {
             value: `${fmt(rc.checkpoints[rc.checkpoints.length - 1].points_mae ?? 0, 1, pt)} ${pt ? "pts" : "pts"}`,
@@ -568,14 +619,14 @@ export function ReportCard({
         <table className="w-full text-sm">
           <caption className="sr-only">
             {pt
-              ? "Erro médio absoluto dos pontos finais previstos, por jornada publicada"
-              : "Mean absolute error of predicted final points, by published matchday"}
+              ? "Erro médio absoluto dos pontos finais previstos, por previsão"
+              : "Mean absolute error of predicted final points, by forecast"}
           </caption>
           <thead>
             <tr className="border-b border-stone-300">
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left"
               >
                 {pt ? "Jornada" : "Matchday"}
               </th>
@@ -598,9 +649,16 @@ export function ReportCard({
           <tbody>
             {rc.checkpoints.map((c) => (
               <tr key={c.matchday} className="border-b border-stone-100">
-                <td className="py-1.5 tabular-nums text-stone-600">{c.matchday}</td>
+                <td className="py-1.5 tabular-nums text-stone-600">
+                  {c.matchday}
+                  {rebuilt.has(c.matchday) && (
+                    <span className="ml-2 text-[11px] text-stone-500">
+                      {pt ? "reconstituída" : "reconstructed"}
+                    </span>
+                  )}
+                </td>
                 <td className="py-1.5 tabular-nums text-right text-stone-700 font-medium">
-                  {c.champion_p !== null ? `${Math.round(c.champion_p * 100)}%` : "—"}
+                  {c.champion_p === null ? "—" : c.champion_p < 1 && c.champion_p >= 0.995 ? ">99%" : c.champion_p > 0 && c.champion_p < 0.005 ? "<1%" : `${Math.round(c.champion_p * 100)}%`}
                 </td>
                 <td className="py-1.5 pl-4">
                   <div className="flex items-center gap-2">

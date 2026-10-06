@@ -34,6 +34,8 @@ import {
 interface ContraOModeloProps {
   data: PredictionGameData;
   locale?: string;
+  /** A caveat on the model's season record, shown under the season table. */
+  recordNote?: string | null;
 }
 
 const OUTCOME_ORDER: Outcome[] = ["H", "D", "A"];
@@ -42,7 +44,7 @@ const OUTCOME_ORDER: Outcome[] = ["H", "D", "A"];
 const USER_COLOR = "#4e8056";
 const MODEL_COLOR = "#5f7062";
 
-export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
+export function ContraOModelo({ data, locale = "pt", recordNote = null }: ContraOModeloProps) {
   const pt = locale !== "en";
 
   // Static export ships HTML with no picks and a build-time clock. Everything
@@ -155,9 +157,11 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
     rpsNote: pt
       ? "No RPS, menos é melhor. Zero é uma previsão perfeita. A regra castiga o excesso de confiança: dar 90% a uma vitória que não acontece custa muito mais do que dar 50%."
       : "In RPS, lower is better. Zero is a perfect forecast. The rule punishes overconfidence: giving 90% to a win that doesn't happen costs far more than giving 50%.",
+    // True of this page only: the same 1X2 is on the Liga page and the match
+    // pages (audit F20, pub-PP-M2).
     hidden: pt
-      ? "As probabilidades do modelo ficam escondidas até a jornada fechar — para não influenciarem a tua escolha."
-      : "The model's probabilities stay hidden until the matchday locks, so they can't sway your picks.",
+      ? "Aqui não mostramos as probabilidades do modelo até a jornada fechar. Estão na página da Liga, se quiseres espreitar antes de escolher."
+      : "We don't show the model's probabilities here until the matchday locks. They are on the Liga page if you want a look before you pick.",
     home: pt ? "Casa" : "Home",
     draw: pt ? "Empate" : "Draw",
     away: pt ? "Fora" : "Away",
@@ -198,8 +202,8 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
     behindNow: pt ? "O modelo está à frente." : "The model is ahead.",
     levelNow: pt ? "Estás empatado com o modelo." : "You're level with the model.",
     noScore: pt
-      ? "Ainda não há nada avaliado. Faz as tuas escolhas e volta depois dos jogos."
-      : "Nothing scored yet. Make your picks and come back after the games.",
+      ? "Ainda não tens previsões avaliadas. Faz as tuas escolhas e volta depois dos jogos."
+      : "You have no scored predictions yet. Make your picks and come back after the games.",
     // Says the quiet part out loud: joining late costs nothing. The ranking
     // is a mean over the rounds you played, so somebody arriving at matchday
     // 20 starts level with somebody who has been here since matchday 1.
@@ -226,13 +230,15 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
       media: pt ? "Favorito" : "Favourite",
       alta: pt ? "Muito confiante" : "Very confident",
     } as Record<Confidence, string>,
+    // The one privacy line on the page, and the only one that knows whether
+    // the season table is reachable (audit pub-PP-10, F21).
     storageNote: online
       ? pt
-        ? "As tuas previsões ficam guardadas neste navegador e na classificação da época. Guardamos apenas o nome que escolheste, as tuas probabilidades e a pontuação — nunca o teu email nem o teu perfil."
-        : "Your predictions are stored in this browser and in the season standings. We keep only the name you chose, your probabilities and your score — never your email or your profile."
+        ? "Jogar é anónimo. As tuas previsões ficam guardadas neste dispositivo e na classificação da época; guardamos apenas o nome que escolheste, as tuas probabilidades e a pontuação, nunca o teu email nem o teu perfil."
+        : "Playing is anonymous. Your predictions are kept on this device and in the season standings; we keep only the name you chose, your probabilities and your score, never your email or your profile."
       : pt
-        ? "As tuas previsões ficam guardadas apenas neste navegador (localStorage). Se limpares os dados do navegador, perdes o histórico."
-        : "Your predictions are stored only in this browser (localStorage). Clearing your browser data wipes your history.",
+        ? "A classificação da época não está disponível agora: as tuas escolhas ficam guardadas só neste dispositivo e contam para a tua pontuação aqui. Se limpares os dados do navegador, perdes o histórico."
+        : "The season standings are not available right now: your picks are kept on this device only and count towards your score here. Clearing your browser data wipes your history.",
   };
 
   const outcomeLabel = (o: Outcome, fixture: GameFixture) => {
@@ -374,6 +380,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
           board={game.leaderboard}
           locale={locale}
           onRefresh={game.refreshLeaderboard}
+          recordNote={recordNote}
         />
       )}
 
@@ -436,7 +443,7 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
                   {rpsFmt(season.userMean!, pt)}
                 </div>
               </div>
-              <div className="text-xl font-bold text-stone-300 pb-2">vs</div>
+              <div className="text-xl font-bold text-stone-500 pb-2" aria-hidden="true">vs</div>
               <div>
                 <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
                   {t.model}
@@ -457,28 +464,30 @@ export function ContraOModelo({ data, locale = "pt" }: ContraOModeloProps) {
 
           <div className="flex flex-wrap items-center gap-3 mt-3">
             <button
+              type="button"
               onClick={copyShare}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 transition-colors"
+              className="inline-flex min-h-11 items-center gap-1.5 px-4 rounded-[10px] bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 transition-colors"
             >
-              {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+              {copied ? <Check aria-hidden="true" className="w-4 h-4" /> : <Share2 aria-hidden="true" className="w-4 h-4" />}
               {copied ? t.shareDone : t.share}
             </button>
-            <span className="text-xs text-stone-400">{t.shareHint}</span>
+            <span className="text-xs text-stone-500" role="status">{copied ? t.shareDone : t.shareHint}</span>
           </div>
         </section>
       )}
 
       <section className="pt-2 space-y-2">
         <button
+          type="button"
           onClick={reset}
-          className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-red-700 transition-colors"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm text-stone-600 hover:text-red-700 transition-colors"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 aria-hidden="true" className="w-4 h-4" />
           {t.reset}
         </button>
         {/* The honest version of where a season lives, which only the client
             knows — the page is rendered at build time. */}
-        <p className="text-[11px] text-stone-400 max-w-xl">{t.storageNote}</p>
+        <p className="text-xs text-stone-500 max-w-xl">{t.storageNote}</p>
       </section>
     </div>
   );
@@ -529,7 +538,7 @@ function RoundPicker({
         <h3 className="text-stone-900">
           {t.matchday} {round.matchday}
         </h3>
-        <span className="text-xs text-stone-500 tabular-nums">
+        <span className="text-xs text-stone-500 tabular-nums" role="status">
           {t.picked(pickedCount, round.fixtures.length)}
         </span>
       </div>
@@ -548,10 +557,14 @@ function RoundPicker({
           const probs = stored?.p ?? null;
           const pct = probs ? toPercents(probs) : null;
           const fineOpen = !!openFine[fixture.key];
+          const fixtureName = `${teamDisplayName(fixture.home)} – ${teamDisplayName(fixture.away)}`;
+          const finePanelId = `fine-${fixture.key.replace(/[^a-z0-9]+/gi, "-")}`;
 
           return (
             <div
               key={fixture.key}
+              role="group"
+              aria-label={fixtureName}
               className="border border-stone-200 rounded-2xl p-3 sm:p-4 bg-cream"
             >
               {/* fixture line */}
@@ -560,7 +573,7 @@ function RoundPicker({
                   <img src={teamLogoSrc(fixture.home)} alt="" className="w-5 h-5 object-contain" />
                 )}
                 <span className="truncate">{teamDisplayName(fixture.home)}</span>
-                <span className="text-stone-300 font-normal">vs</span>
+                <span className="text-stone-500 font-normal" aria-hidden="true">vs</span>
                 <span className="truncate">{teamDisplayName(fixture.away)}</span>
                 {teamLogoSrc(fixture.away) && (
                   <img src={teamLogoSrc(fixture.away)} alt="" className="w-5 h-5 object-contain" />
@@ -581,6 +594,8 @@ function RoundPicker({
                   return (
                     <button
                       key={o}
+                      type="button"
+                      aria-pressed={active}
                       onClick={() =>
                         onPick(fixture.key, {
                           p: probsFromPick(o, stored?.conf ?? "media"),
@@ -589,12 +604,13 @@ function RoundPicker({
                           mode: "quick",
                         })
                       }
-                      className={`px-2 py-2 rounded-lg text-xs sm:text-sm font-semibold border transition-colors truncate ${
+                      className={`min-h-11 px-2 py-2 rounded-[10px] text-xs sm:text-sm font-semibold border transition-colors leading-tight break-words ${
                         active
                           ? "bg-emerald-700 border-emerald-700 text-white"
                           : "bg-cream border-stone-300 text-stone-700 hover:border-stone-400"
                       }`}
                     >
+                      {active && <Check aria-hidden="true" className="mr-1 inline-block h-3.5 w-3.5 -mt-0.5" />}
                       {outcomeLabel(o, fixture)}
                     </button>
                   );
@@ -603,8 +619,8 @@ function RoundPicker({
 
               {/* confidence */}
               {stored?.pick && (
-                <div className="mt-3">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+                <div className="mt-3" role="group" aria-labelledby={`${finePanelId}-conf`}>
+                  <div id={`${finePanelId}-conf`} className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
                     {t.confidence}
                   </div>
                   <div className="grid grid-cols-3 gap-2">
@@ -613,6 +629,8 @@ function RoundPicker({
                       return (
                         <button
                           key={c}
+                          type="button"
+                          aria-pressed={active}
                           onClick={() =>
                             onPick(fixture.key, {
                               p: probsFromPick(stored.pick!, c),
@@ -621,10 +639,10 @@ function RoundPicker({
                               mode: "quick",
                             })
                           }
-                          className={`px-2 py-1.5 rounded-lg text-[11px] font-medium border transition-colors truncate ${
+                          className={`min-h-11 px-1.5 py-1.5 rounded-[10px] text-xs font-medium border transition-colors leading-tight ${
                             active
                               ? "bg-stone-900 border-stone-900 text-white"
-                              : "bg-cream border-stone-200 text-stone-600 hover:border-stone-400"
+                              : "bg-cream border-stone-300 text-stone-700 hover:border-stone-400"
                           }`}
                         >
                           {t.confLabels[c]}
@@ -639,28 +657,31 @@ function RoundPicker({
               {probs && pct && (
                 <div className="mt-3">
                   <ProbBar pct={pct} />
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex gap-3 text-[11px] text-stone-500 tabular-nums">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 mt-1">
+                    <div className="flex gap-3 text-[11px] text-stone-600 tabular-nums" aria-live="polite">
                       <span>{t.home} {pct[0]}%</span>
                       <span>{t.draw} {pct[1]}%</span>
                       <span>{t.away} {pct[2]}%</span>
                     </div>
                     <button
+                      type="button"
                       onClick={() => onToggleFine(fixture.key)}
-                      className={`inline-flex items-center gap-1 text-[11px] font-medium transition-colors ${
-                        fineOpen ? "text-emerald-700" : "text-stone-400 hover:text-stone-600"
+                      aria-expanded={fineOpen}
+                      aria-controls={finePanelId}
+                      className={`inline-flex min-h-11 items-center gap-1 text-xs font-medium transition-colors ${
+                        fineOpen ? "text-emerald-700" : "text-stone-600 hover:text-stone-900"
                       }`}
                     >
-                      <SlidersHorizontal className="w-3.5 h-3.5" />
+                      <SlidersHorizontal aria-hidden="true" className="w-3.5 h-3.5" />
                       {t.fine}
                     </button>
                   </div>
 
                   {fineOpen && (
-                    <div className="mt-3 space-y-2 border-t border-stone-100 pt-3">
+                    <div id={finePanelId} className="mt-1 space-y-2 border-t border-stone-100 pt-3">
                       {OUTCOME_ORDER.map((o, i) => (
                         <div key={o} className="flex items-center gap-3">
-                          <span className="w-20 sm:w-28 shrink-0 truncate text-[11px] text-stone-600">
+                          <span className="w-20 sm:w-28 shrink-0 truncate text-[11px] text-stone-600" aria-hidden="true">
                             {outcomeLabel(o, fixture)}
                           </span>
                           <input
@@ -677,8 +698,9 @@ function RoundPicker({
                                 mode: "fine",
                               })
                             }
-                            className="flex-1 accent-emerald-700"
-                            aria-label={outcomeLabel(o, fixture)}
+                            className="flex-1 min-h-11 accent-emerald-700"
+                            aria-label={`${o === "D" ? t.draw : `${outcomeLabel(o, fixture)} ${pt ? "vence" : "wins"}`}, ${fixtureName}`}
+                            aria-valuetext={`${pct[i]}%`}
                           />
                           <span className="w-10 text-right text-[11px] tabular-nums text-stone-700">
                             {pct[i]}%
