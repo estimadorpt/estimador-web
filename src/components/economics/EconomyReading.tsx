@@ -80,9 +80,9 @@ export function EconomyReading({
     window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
     try {
       await navigator.clipboard.writeText(url.toString());
-      setNotice(lang === 0 ? 'Ligação para esta pergunta copiada.' : 'Link to this question copied.');
+      setNotice(lang === 0 ? 'Link para esta pergunta copiado.' : 'Link to this question copied.');
     } catch {
-      setNotice(lang === 0 ? 'A ligação desta pergunta está na barra de endereços.' : 'This question’s link is in the address bar.');
+      setNotice(lang === 0 ? 'O link desta pergunta está na barra de endereços.' : 'This question’s link is in the address bar.');
     }
   }
 

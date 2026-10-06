@@ -459,8 +459,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 </p>
                 <p className="mt-2">
                   {pt
-                    ? 'Antes de gerar esta população, o produtor registou intervalos de erro para essa verificação fora do ajuste, com o motor anterior. Os erros desta página são medidos nas tabelas do ajuste, por isso não se comparam com esses intervalos, e a página não diz se ficaram «dentro» ou «abaixo» deles.'
-                    : 'Before generating this population, the producer registered error ranges for that out-of-fit check, with the earlier engine. The errors on this page are measured on the fitted tables, so they do not compare with those ranges, and the page does not say whether they landed “inside” or “below” them.'}
+                    ? 'Antes de gerar esta população, registámos intervalos de erro para essa verificação fora do ajuste, com o motor anterior. Os erros desta página são medidos nas tabelas do ajuste, por isso não se comparam com esses intervalos, e a página não diz se ficaram «dentro» ou «abaixo» deles.'
+                    : 'Before generating this population, we registered error ranges for that out-of-fit check, with the earlier engine. The errors on this page are measured on the fitted tables, so they do not compare with those ranges, and the page does not say whether they landed “inside” or “below” them.'}
                 </p>
               </div>
             </Section>
@@ -469,7 +469,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
             <section aria-label={pt ? 'Para saber mais' : 'Further reading'} className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-8">
               <Action href={POPULATION_ROUTES.methodology} locale={locale} arrow>{pt ? 'Como foi feita a população' : 'How the population was made'}</Action>
               <Action external href={POPULATION_DOWNLOADS.modelCard} variant="text" arrow>{pt ? 'Ficha do modelo (GitHub, em inglês)' : 'Model card (GitHub)'}</Action>
-              <Action href={POPULATION_ROUTES.data} locale={locale} variant="text" arrow>{pt ? 'Descarregar os dados' : 'Download the data'}</Action>
+              <Action href={POPULATION_ROUTES.data} locale={locale} variant="text" arrow>{pt ? 'Download dos dados' : 'Download the data'}</Action>
             </section>
           </>
         )}

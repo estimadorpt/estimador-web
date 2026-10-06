@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: '/marca',
     title: locale === 'pt' ? 'A marca estimador.pt' : 'The estimador.pt brand',
     description: locale === 'pt'
-      ? 'Símbolo, cor, tipo, pinturas, mosaico e movimento: o guia da identidade do estimador.pt, com os ficheiros para descarregar.'
+      ? 'Símbolo, cor, tipo, pinturas, mosaico e movimento: o guia da identidade do estimador.pt, com os ficheiros para download.'
       : 'Mark, colour, type, paintings, mosaic and motion: the estimador.pt identity guide, with the files to download.',
     index: false,
   });
@@ -45,7 +45,7 @@ const SURFACES: readonly (readonly [Copy, string, string, Copy])[] = [
 ];
 const INKS: readonly (readonly [Copy, string, string, Copy])[] = [
   [['Pinho', 'Pine'], 'ink', BRAND.ink, ['Texto, botões, o símbolo.', 'Text, buttons, the mark.']],
-  [['Pinho escuro', 'Dark pine'], 'ink-dark', BRAND.inkDark, ['Hover de ligações e botões.', 'Link and button hover.']],
+  [['Pinho escuro', 'Dark pine'], 'ink-dark', BRAND.inkDark, ['Hover de links e botões.', 'Link and button hover.']],
   [['Cinza-verde', 'Green-grey'], 'stone-500', BRAND.muted, ['Texto secundário e o .pt da assinatura, 4,5:1 sobre papel.', 'Secondary text and the .pt of the signature, 4.5:1 on paper.']],
   [['Cinza claro', 'Light grey'], 'stone-400', BRAND.faint, ['Etiquetas pequenas e decoração; nunca o .pt, que ficaria abaixo de 3:1.', 'Small labels and decoration; never the .pt, which would fall below 3:1.']],
   [['Floresta', 'Forest'], 'forest', BRAND.forest, ['Superfícies escuras: o ícone de app e os cartões sociais escuros.', 'Dark surfaces: the app icon and the dark social cards.']],
@@ -116,7 +116,7 @@ const HEADERS: readonly (readonly [kind: Copy, header: Copy, pages: Copy])[] = [
   [
     ['Vazio, erro, 404', 'Empty, error, 404'],
     ['Um pequeno mosaico quarters e um passo seguinte.', 'A small quarters mosaic and one next step.'],
-    ['Freguesia desconhecida, ligação desconhecida, arquivo vazio, artigos vazios, estados recusados ou indisponíveis, 404.', 'Unknown parish, unknown permalink, empty archive, empty articles, refused or unavailable states, 404.'],
+    ['Freguesia desconhecida, link desconhecido, arquivo vazio, artigos vazios, estados recusados ou indisponíveis, 404.', 'Unknown parish, unknown permalink, empty archive, empty articles, refused or unavailable states, 404.'],
   ],
   [
     ['Material de marca', 'Brand material'],
@@ -223,7 +223,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           <div className="flex h-40 items-center justify-center rounded-xl border border-line bg-cream"><span className="brand-link inline-block"><LogoHorizontal size={34} /></span></div>
           <div className="flex h-40 items-center justify-center rounded-xl bg-forest"><span className="brand-link inline-block"><LogoHorizontal size={34} tone="paper" /></span></div>
         </div>
-        <p className="mt-3 text-xs text-stone-500">{pt ? 'Passa o cursor por cima ou foca a ligação com o teclado: o intervalo abre dois pontos e volta a fechar. É o único movimento da assinatura.' : 'Hover over it or focus the link with the keyboard: the interval opens by two units and closes again. It is the signature\'s only movement.'}</p>
+        <p className="mt-3 text-xs text-stone-500">{pt ? 'Passa o cursor por cima ou foca o link com o teclado: o intervalo abre dois pontos e volta a fechar. É o único movimento da assinatura.' : 'Hover over it or focus the link with the keyboard: the interval opens by two units and closes again. It is the signature\'s only movement.'}</p>
         <ul className="mt-6 grid gap-2 md:grid-cols-2">
           <Rule yes>{pt ? 'Espaço livre à volta: metade da altura do símbolo, no mínimo.' : 'Clear space around it: at least half the mark\'s height.'}</Rule>
           <Rule yes>{pt ? 'No cabeçalho, 22 px de símbolo; em rodapés, 20 px; em cartões sociais, 26 a 34 px.' : 'In the header, a 22px mark; in footers, 20px; on social cards, 26 to 34px.'}</Rule>
@@ -326,7 +326,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
               </div>
               <h3 className="mt-4 text-lg">{tr(pt, name)}</h3>
               <p className="mt-1 text-sm leading-relaxed text-stone-600">{tr(pt, use)}</p>
-              <a href={file} download className="mt-auto inline-flex min-h-11 items-center pt-2 text-sm font-bold underline underline-offset-4">{pt ? 'Descarregar pintura' : 'Download painting'}<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
+              <a href={file} download className="mt-auto inline-flex min-h-11 items-center pt-2 text-sm font-bold underline underline-offset-4">{pt ? 'Download da pintura' : 'Download painting'}<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
             </div>
           ))}
         </div>
@@ -470,7 +470,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           {KIT.map(([file, size, note]) => (
             <li key={file} className="flex items-center justify-between gap-4 px-4 py-3">
               <div><div className="font-mono text-sm text-ink">{file.split('/').pop()}</div><div className="text-xs text-stone-500">{size} · {tr(pt, note)}</div></div>
-              <a href={`/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />{pt ? 'Descarregar' : 'Download'}<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
+              <a href={`/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />Download<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
             </li>
           ))}
         </ul>
@@ -482,7 +482,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           {FILES.map(([file, note]) => (
             <li key={file} className="flex items-center justify-between gap-4 px-4 py-3">
               <div><div className="font-mono text-sm text-ink">{file}</div><div className="text-xs text-stone-500">{tr(pt, note)}</div></div>
-              <a href={`/brand/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />{pt ? 'Descarregar' : 'Download'}<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
+              <a href={`/brand/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />Download<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
             </li>
           ))}
         </ul>

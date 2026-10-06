@@ -157,14 +157,14 @@ export function FixtureStakes({
       ) : entry.hasFixture ? (
         <p className="text-sm leading-relaxed text-stone-600">
           {pt
-            ? `Agora ${formatClubPercent(entry.baseline, locale)}. Este conjunto não publica o efeito deste jogo em ${entry.objectiveLabel}.`
-            : `Now ${formatClubPercent(entry.baseline, locale)}. This bundle does not publish this match's effect on ${entry.objectiveLabel}.`}
+            ? `Agora ${formatClubPercent(entry.baseline, locale)}. Esta previsão não publica o efeito deste jogo em ${entry.objectiveLabel}.`
+            : `Now ${formatClubPercent(entry.baseline, locale)}. This forecast does not publish this match's effect on ${entry.objectiveLabel}.`}
         </p>
       ) : (
         <p className="text-sm leading-relaxed text-stone-600">
           {pt
-            ? `Agora ${formatClubPercent(entry.baseline, locale)}. O conjunto publicado não inclui um jogo em aberto ${clubFor}.`
-            : `Now ${formatClubPercent(entry.baseline, locale)}. The published bundle includes no outstanding match for ${entry.label}.`}
+            ? `Agora ${formatClubPercent(entry.baseline, locale)}. A previsão publicada não inclui um jogo em aberto ${clubFor}.`
+            : `Now ${formatClubPercent(entry.baseline, locale)}. The published forecast includes no outstanding match for ${entry.label}.`}
         </p>
       )}
       {link}

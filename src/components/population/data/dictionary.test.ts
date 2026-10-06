@@ -73,13 +73,13 @@ describe('collective quarters and the household-type answer (round 3: PRO3-10, M
     expect(tenure).not.toMatch(/\d+\.\d+%/);
   });
 
-  it('notes, in both languages, that the household-type answer predates the final packaging', () => {
+  it('notes, in both languages, that the household-type answer can differ from the microdata', () => {
     for (const key of Object.keys(SITE_NOTES)) {
       const [table, name] = key.split('.') as ['persons' | 'households', string];
       expect(release.column_dictionary[table][name], key).toBeDefined();
     }
-    expect(SITE_NOTES['households.hh_type_top'].pt).toContain('empacotamento final dos microdados');
-    expect(SITE_NOTES['households.hh_type_top'].en).toContain('final packaging');
+    expect(SITE_NOTES['households.hh_type_top'].pt).toContain('microdados para download');
+    expect(SITE_NOTES['households.hh_type_top'].en).toContain('downloadable microdata');
     // No figure of the site's own measuring (handoff §3).
     expect(SITE_NOTES['households.hh_type_top'].pt).not.toMatch(/\d/);
   });

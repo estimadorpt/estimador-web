@@ -150,7 +150,10 @@ describe('source lines (round 4: POP3-ACC-01, POP3-ACC-V02)', () => {
       expect(sourceLine('household_type', locale, { withCaveat: false })).not.toContain(caveat);
       expect(caveat).not.toMatch(/\d/);
     }
-    expect(RECIPE_CAVEAT.household_type!.pt).toBe('Esta resposta foi calculada antes do empacotamento final dos microdados e pode diferir ligeiramente do que se obtém deles; o produtor vai corrigi-la.');
+    expect(RECIPE_CAVEAT.household_type!.pt).toBe('Estes valores podem diferir ligeiramente dos que se obtêm a partir dos microdados para download. Vamos corrigi-los na próxima versão.');
+    expect(RECIPE_CAVEAT.household_type!.en).toBe('These figures can differ slightly from what you get from the downloadable microdata. We will correct them in the next release.');
+    // Plain words for the reader: no production jargon, no third-party "producer".
+    for (const locale of ['pt', 'en'] as const) expect(RECIPE_CAVEAT.household_type![locale]).not.toMatch(/empacot|packaging|produtor|producer/i);
     expect(Object.keys(RECIPE_CAVEAT)).toEqual(['household_type']);
   });
 

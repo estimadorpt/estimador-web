@@ -462,8 +462,8 @@ export const RECIPE_PROVENANCE: Record<PortraitRecipe, 'fitted' | 'derived'> = {
  */
 export const RECIPE_CAVEAT: Partial<Record<PortraitRecipe, Text>> = {
   household_type: {
-    pt: 'Esta resposta foi calculada antes do empacotamento final dos microdados e pode diferir ligeiramente do que se obtém deles; o produtor vai corrigi-la.',
-    en: 'This answer was computed before the microdata’s final packaging and may differ slightly from what they give; the producer will correct it.',
+    pt: 'Estes valores podem diferir ligeiramente dos que se obtêm a partir dos microdados para download. Vamos corrigi-los na próxima versão.',
+    en: 'These figures can differ slightly from what you get from the downloadable microdata. We will correct them in the next release.',
   },
 };
 

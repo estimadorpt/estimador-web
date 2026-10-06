@@ -29,14 +29,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: POPULATION_ROUTES.data,
     title: pt ? 'Posso usar os dados da população sintética?' : 'Can I use the synthetic population data?',
     description: pt
-      ? `Descarregar a População Sintética de Portugal v${POPULATION_RELEASE}: licença CC BY-NC 4.0, unidades, geografia, dicionário de colunas, qualidade, verificação e citação.`
+      ? `Download da População Sintética de Portugal v${POPULATION_RELEASE}: licença CC BY-NC 4.0, unidades, geografia, dicionário de colunas, qualidade, verificação e citação.`
       : `Download the Synthetic Population of Portugal v${POPULATION_RELEASE}: CC BY-NC 4.0 licence, units, geography, column dictionary, quality, verification and citation.`,
   });
 }
 
 const FILE_COPY: Record<string, { pt: string; en: string }> = {
   package: {
-    pt: 'Pacote completo: microdados por distrito e nacionais, qualidade, metadados, documentação e somas de verificação.',
+    pt: 'Pacote completo: microdados por distrito e nacionais, qualidade, metadados, documentação e checksums.',
     en: 'Full package: district and national microdata, quality, metadata, documentation and checksums.',
   },
   persons: { pt: 'Pessoas, ficheiro nacional (Parquet).', en: 'Persons, national file (Parquet).' },
@@ -46,8 +46,8 @@ const FILE_COPY: Record<string, { pt: string; en: string }> = {
     pt: 'Metadados: dicionário de colunas, mapas de códigos e proveniência (JSON).',
     en: 'Metadata: column dictionary, code label maps and provenance (JSON).',
   },
-  checksums: { pt: 'Somas SHA-256 de cada ficheiro do pacote.', en: 'SHA-256 sums of every file in the package.' },
-  sums: { pt: 'Somas SHA-256 dos ficheiros publicados na versão.', en: 'SHA-256 sums of the files published with the release.' },
+  checksums: { pt: 'Checksums SHA-256 de cada ficheiro do pacote.', en: 'SHA-256 sums of every file in the package.' },
+  sums: { pt: 'Checksums SHA-256 dos ficheiros publicados na versão.', en: 'SHA-256 sums of the files published with the release.' },
 };
 
 type QualitySource = 'ine' | 'generated' | 'evaluation' | 'geographic' | 'release';
@@ -168,13 +168,13 @@ merged = persons.merge(
 # ${pt ? 'só agregados privados, como no site (os alojamentos coletivos têm is_institutional = 1)' : 'private households only, as on the site (collective quarters have is_institutional = 1)'}
 private = merged[merged["is_institutional_hh"] == 0]`;
 
-  const verify = `# ${pt ? '1. Os ficheiros descarregados, contra SHA256SUMS' : '1. The downloaded files, against SHA256SUMS'}
+  const verify = `# ${pt ? '1. Os ficheiros do download, contra SHA256SUMS' : '1. The downloaded files, against SHA256SUMS'}
 sha256sum -c SHA256SUMS --ignore-missing
 
 # ${pt ? '2. O conteúdo do pacote, na pasta que contém checksums.sha256' : '2. The package contents, in the folder holding checksums.sha256'}
 sha256sum -c checksums.sha256
 
-# ${pt ? '3. A lista de somas é a publicada: deve imprimir' : '3. The list of sums is the published one: it should print'}
+# ${pt ? '3. A lista de checksums é a publicada: deve imprimir' : '3. The list of sums is the published one: it should print'}
 # ${release?.checksums_sha256 ?? ''}
 sha256sum checksums.sha256`;
 
@@ -191,7 +191,7 @@ sha256sum checksums.sha256`;
         lede={pt
           ? 'Os microdados completos estão publicados, com a licença CC BY-NC 4.0. Esta página diz o que contêm, para que servem e para que não servem, como verificar os ficheiros e como citar.'
           : 'The full microdata are published under the CC BY-NC 4.0 licence. This page says what they contain, what they are and are not for, how to verify the files and how to cite them.'}
-        actions={pkg && <Action external href={pkg.url} arrow>{pt ? 'Descarregar o pacote completo' : 'Download the full package'}</Action>}
+        actions={pkg && <Action external href={pkg.url} arrow>{pt ? 'Fazer download do pacote completo' : 'Download the full package'}</Action>}
         meta={pkg && <span>{pkg.name} · {formatBytes(pkg.bytes, locale)} · GitHub</span>}
       />
       <PopulationSectionNav current="data" locale={locale} />
@@ -216,7 +216,7 @@ sha256sum checksums.sha256`;
                 [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: gerada a partir dos Censos 2021 do INE.' : '2021: generated from INE’s 2021 Census.'],
                 [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span>{/* The 64-digit hash on its own lines, two rows of 32, never one orphan digit (VUXD-08). */}<span className="mt-1 block font-mono text-[13px]">sha256 <span className="block max-w-[32ch] break-all">{release.model_sha256}</span></span></>],
                 // What the hash identifies, and that it cannot be looked up yet (PRO3-11).
-                [pt ? 'Código' : 'Code', <span key="c">Commit <span className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>{pt ? ' do código de empacotamento; o repositório ainda não é público.' : ' of the packaging code; the repository is not public yet.'}</span>],
+                [pt ? 'Código' : 'Code', <span key="c">{pt ? 'Versão do código que gerou os ficheiros: ' : 'Version of the code that produced the files: '}<span className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>{pt ? ' (o repositório ainda não é público).' : ' (the repository is not public yet).'}</span>],
                 [pt ? 'Versões anteriores' : 'Previous releases', <>
                   {pt ? 'A 1.0.3 substituiu três versões datadas de 5 de outubro (a 1.0.2 nunca chegou ao GitHub); a população gerada é a mesma em todas. ' : '1.0.3 replaced three releases dated 5 October (1.0.2 never reached GitHub); the generated population is the same in all of them. '}
                   {/* The history, said once on the site (UXD-24): the other trust pages link here. */}
@@ -297,7 +297,7 @@ sha256sum checksums.sha256`;
               ]} />
             </Section>
 
-            <Section id="descarregar" title={pt ? 'Onde descarrego?' : 'Where do I download them?'} lede={<p>{pt
+            <Section id="descarregar" title={pt ? 'Onde faço o download?' : 'Where do I download them?'} lede={<p>{pt
               ? <>Os ficheiros estão numa <a className={link} href={POPULATION_DOWNLOADS.release}>versão publicada no GitHub</a>, num repositório público de dados.</>
               : <>The files are in a <a className={link} href={POPULATION_DOWNLOADS.release}>release published on GitHub</a>, in a public data repository.</>}</p>}>
               <div tabIndex={0} role="region" aria-label={pt ? 'Ficheiros da versão' : 'Release files'} className="scroll-cue overflow-x-auto rounded-2xl border border-line">
@@ -340,8 +340,8 @@ sha256sum checksums.sha256`;
               id="dicionario"
               title={pt ? 'Que colunas tem?' : 'What columns does it have?'}
               lede={<p>{pt
-                ? <>O dicionário de colunas do ficheiro de metadados, em inglês, como lá está, com duas diferenças. Em {formatCount(revisedColumns, locale)} colunas, marcadas «texto revisto pelo site», a descrição foi reescrita: ou remetia para documentos internos do produtor, ou dizia o contrário da ficha do modelo e dos dados (por exemplo, que o ramo de atividade e a profissão são ajustados por freguesia, quando não são); onde os dois diferem, vale a do site, e o texto original continua no ficheiro. E três colunas de códigos (setor de atividade, escolaridade em cinco níveis e nuts2) não têm mapa de etiquetas em <code className="font-mono text-[13px]">label_maps</code>: o site dá-o aqui. As restantes etiquetas estão nesse mesmo ficheiro, em <code className="font-mono text-[13px]">label_maps</code>.</>
-                : <>The metadata file’s column dictionary, as it stands there, with two differences. In {formatCount(revisedColumns, locale)} columns, marked “wording revised by the site”, the description was rewritten: it either pointed to the producer’s internal documents or said the opposite of the model card and the data (for example, that industry and occupation are fitted per parish, when they are not); where the two differ, the site’s holds, and the original text stays in the file. And three code columns (activity sector, five-level education and nuts2) have no map in <code className="font-mono text-[13px]">label_maps</code>: the site gives it here. The other labels are in that same file, under <code className="font-mono text-[13px]">label_maps</code>.</>}</p>}
+                ? <>O dicionário de colunas do ficheiro de metadados, em inglês, como lá está, com duas diferenças. Em {formatCount(revisedColumns, locale)} colunas, marcadas «texto revisto pelo site», a descrição foi reescrita: ou remetia para documentos internos, ou dizia o contrário da ficha do modelo e dos dados (por exemplo, que o ramo de atividade e a profissão são ajustados por freguesia, quando não são); onde os dois diferem, vale a do site, e o texto original continua no ficheiro. E três colunas de códigos (setor de atividade, escolaridade em cinco níveis e nuts2) não têm mapa de etiquetas em <code className="font-mono text-[13px]">label_maps</code>: o site dá-o aqui. As restantes etiquetas estão nesse mesmo ficheiro, em <code className="font-mono text-[13px]">label_maps</code>.</>
+                : <>The metadata file’s column dictionary, as it stands there, with two differences. In {formatCount(revisedColumns, locale)} columns, marked “wording revised by the site”, the description was rewritten: it either pointed to internal documents or said the opposite of the model card and the data (for example, that industry and occupation are fitted per parish, when they are not); where the two differ, the site’s holds, and the original text stays in the file. And three code columns (activity sector, five-level education and nuts2) have no map in <code className="font-mono text-[13px]">label_maps</code>: the site gives it here. The other labels are in that same file, under <code className="font-mono text-[13px]">label_maps</code>.</>}</p>}
             >
               <h3 className="text-base font-bold text-ink">{pt ? 'De onde vem cada coluna' : 'Where each column comes from'}</h3>
               <dl className="mt-3 grid gap-x-6 gap-y-3 md:grid-cols-2">
@@ -434,7 +434,7 @@ sha256sum checksums.sha256`;
               id="verificar"
               title={pt ? 'Como verifico os ficheiros?' : 'How do I verify the files?'}
               lede={<p>{pt
-                ? <>A soma SHA-256 da lista de somas do pacote (<code className="font-mono text-[13px]">checksums.sha256</code>) é <code className="break-all font-mono text-[13px] text-ink">{release.checksums_sha256}</code>. Se coincidir, cada ficheiro do pacote pode ser verificado contra essa lista.</>
+                ? <>O checksum SHA-256 da lista de checksums do pacote (<code className="font-mono text-[13px]">checksums.sha256</code>) é <code className="break-all font-mono text-[13px] text-ink">{release.checksums_sha256}</code>. Se coincidir, cada ficheiro do pacote pode ser verificado contra essa lista.</>
                 : <>The SHA-256 of the package’s list of sums (<code className="font-mono text-[13px]">checksums.sha256</code>) is <code className="break-all font-mono text-[13px] text-ink">{release.checksums_sha256}</code>. If it matches, every file in the package can be checked against that list.</>}</p>}
             >
               <Code label={pt ? 'Comandos de verificação' : 'Verification commands'}>{verify}</Code>
@@ -445,7 +445,7 @@ sha256sum checksums.sha256`;
 
             <Section id="citar" title={pt ? 'Como cito?' : 'How do I cite them?'} lede={<>
               <p>{pt
-                ? 'A licença CC BY-NC 4.0 pede atribuição em qualquer uso. Ao redistribuir os dados (os ficheiros, ou tabelas tiradas deles), inclui a atribuição completa abaixo. Numa notícia, num gráfico ou num cartão, basta a forma curta, com uma ligação para esta página:'
+                ? 'A licença CC BY-NC 4.0 pede atribuição em qualquer uso. Ao redistribuir os dados (os ficheiros, ou tabelas tiradas deles), inclui a atribuição completa abaixo. Numa notícia, num gráfico ou num cartão, basta a forma curta, com um link para esta página:'
                 : 'The CC BY-NC 4.0 licence asks for attribution in any use. When you redistribute the data (the files, or tables taken from them), include the full attribution below. In a news story, a chart or a card, the short form is enough, with a link to this page:'}</p>
               <p className="mt-2 font-semibold text-ink">{SHORT_ATTRIBUTION[locale]}</p>
             </>}>
@@ -470,7 +470,7 @@ sha256sum checksums.sha256`;
                   </div>
                   <p className="mt-3 text-xs text-stone-500">
                     {pt
-                      ? 'A ligação da citação é a página da versão no GitHub, que não muda. Ainda não há DOI.'
+                      ? 'O link da citação é a página da versão no GitHub, que não muda. Ainda não há DOI.'
                       : 'The citation’s link is the release page on GitHub, which does not change. There is no DOI yet.'}
                   </p>
                 </div>

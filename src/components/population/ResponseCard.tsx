@@ -93,7 +93,7 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
             )}
           </>
         )}
-        {/* A caveat the producer owes a correction for (POP3-ACC-01): set apart from the source line, in the caveat colour. */}
+        {/* A caveat we owe a correction for (POP3-ACC-01): set apart from the source line, in the caveat colour. */}
         {caveat && record.decision !== 'refuse' && (
           <p role="note" className="mt-4 border-l-2 border-amber-500 pl-3 text-xs leading-relaxed text-stone-700">{caveat}</p>
         )}
@@ -109,7 +109,7 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
  * which opens the methodology at the row of the field this card groups or
  * derives and names the card's question to a screen reader (MR2-10,
  * PRO2-11), on the left, and the release with the full result id (the one a
- * permalink resolves, PRO2-01) and "Copiar ligação" on the right.
+ * permalink resolves, PRO2-01) and "Copiar link" on the right.
  */
 export function CardFooter({ source, id, question, recipe, locale }: { source: string; id: string | null; question: string; recipe: string; locale: Locale }) {
   return (
@@ -226,7 +226,7 @@ function CopyPermalink({ id, question, locale }: { id: string; question: string;
   return (
     <span className="inline-flex flex-wrap items-center gap-x-2">
       <span role="status" className="text-xs text-stone-600">
-        {state === 'copied' ? (pt ? 'Ligação copiada.' : 'Link copied.') : state === 'failed' ? url() : ''}
+        {state === 'copied' ? (pt ? 'Link copiado.' : 'Link copied.') : state === 'failed' ? url() : ''}
       </span>
       <button
         type="button"
@@ -242,7 +242,7 @@ function CopyPermalink({ id, question, locale }: { id: string; question: string;
         className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-ink"
       >
         <Link2 aria-hidden="true" className="h-3.5 w-3.5" />
-        {pt ? 'Copiar ligação' : 'Copy link'}
+        {pt ? 'Copiar link' : 'Copy link'}
         <span className="sr-only">{pt ? ` para «${question}»` : ` to “${question}”`}</span>
       </button>
     </span>

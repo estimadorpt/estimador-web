@@ -42,11 +42,11 @@ export function ShareLink({ title, locale }: { title: string; locale: "pt" | "en
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
       <Action variant="secondary" onClick={() => void share()}>
         {canShare ? <Share2 aria-hidden="true" className="h-4 w-4" /> : <Link2 aria-hidden="true" className="h-4 w-4" />}
-        {canShare ? (pt ? "Partilhar" : "Share") : (pt ? "Copiar ligação" : "Copy link")}
+        {canShare ? (pt ? "Partilhar" : "Share") : (pt ? "Copiar link" : "Copy link")}
       </Action>
       <span role="status" className="text-sm text-stone-600">
         {status === "copied"
-          ? pt ? "Ligação copiada." : "Link copied."
+          ? pt ? "Link copiado." : "Link copied."
           : status === "failed"
             ? pt ? "Não foi possível copiar. Copia o endereço da barra." : "That did not work. Copy the address bar."
             : ""}

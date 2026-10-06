@@ -18,10 +18,10 @@ type Locale = 'pt' | 'en';
 export function otherReleaseText(release: string, locale: Locale): string {
   const pt = locale === 'pt';
   const where = pt
-    ? `A ligação aponta para a versão ${release}; o site mostra a ${POPULATION_RELEASE}.`
+    ? `O link aponta para a versão ${release}; o site mostra a ${POPULATION_RELEASE}.`
     : `The link points to release ${release}; the site shows ${POPULATION_RELEASE}.`;
   const find = pt
-    ? 'A ligação não diz de que freguesia é a resposta: procura-a na versão atual.'
+    ? 'O link não diz de que freguesia é a resposta: procura-a na versão atual.'
     : 'The link does not say which parish the answer is for: look it up in the current release.';
   if (release === '1.0.1') {
     return pt

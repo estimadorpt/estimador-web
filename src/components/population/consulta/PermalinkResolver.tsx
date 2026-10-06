@@ -92,7 +92,7 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
   // Kept while the page is open: streamed metadata can write its <title> after this runs.
   useEffect(() => {
     const title = state.kind === 'other-release'
-      ? siteTitle(pt ? 'Ligação de outra versão da população' : 'Link from another release of the population')
+      ? siteTitle(pt ? 'Link de outra versão da população' : 'Link from another release of the population')
       : state.kind === 'unknown' ? siteTitle(pt ? 'Resultado não encontrado' : 'Result not found') : null;
     if (!title) return undefined;
     const apply = () => {
@@ -112,7 +112,7 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
       <div role="status" aria-live="polite" className="flex flex-col items-start gap-4 py-6">
         <MarkLoading height={36} color={BRAND.ink} ground={BRAND.paper} />
         <p className="text-base text-stone-600">
-          {pt ? 'A abrir o resultado desta ligação…' : 'Opening the result this link points to…'}
+          {pt ? 'A abrir o resultado deste link…' : 'Opening the result this link points to…'}
         </p>
         {state.kind === 'redirecting' && (
           <a href={state.href} className="text-sm font-semibold text-ink underline underline-offset-4">
@@ -132,7 +132,7 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
       <div className="min-w-0 flex-1">
         <h2 className="text-xl font-bold text-ink md:text-2xl">
           {otherRelease
-            ? (pt ? 'Esta ligação é de outra versão da população' : 'This link is from another release of the population')
+            ? (pt ? 'Este link é de outra versão da população' : 'This link is from another release of the population')
             : (pt ? 'Não encontrámos este resultado' : 'We could not find this result')}
         </h2>
         <p className="mt-3 max-w-xl leading-relaxed text-stone-600">

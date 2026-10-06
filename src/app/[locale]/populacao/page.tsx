@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       ? 'Quem vive em Portugal, freguesia a freguesia?'
       : 'Who lives in Portugal, parish by parish?',
     description: pt
-      ? 'Uma população sintética aberta para as 3 092 freguesias dos Censos 2021: procura a tua freguesia, explora o mapa e descarrega os dados.'
+      ? 'Uma população sintética aberta para as 3 092 freguesias dos Censos 2021: procura a tua freguesia, explora o mapa e faz download dos dados.'
       : 'An open synthetic population for the 3,092 parishes of the 2021 Census: find your parish, explore the map and download the data.',
     index: true,
   });
@@ -126,7 +126,7 @@ export default async function PopulationHub({ params }: { params: Promise<{ loca
             <h2 id="regioes" className="text-2xl md:text-3xl">{pt ? 'Freguesias por distrito e região autónoma' : 'Parishes by district and autonomous region'}</h2>
             <p className="mb-4 mt-2 max-w-3xl text-[15px] leading-relaxed text-stone-600">
               {pt
-                ? 'Cada página lista os concelhos e as freguesias, por ordem alfabética, com a ligação para cada uma.'
+                ? 'Cada página lista os concelhos e as freguesias, por ordem alfabética, com o link para cada uma.'
                 : 'Each page lists the municipalities and parishes in alphabetical order, with a link to each one.'}
             </p>
             <RegionsIndex regions={regions} locale={locale} />
