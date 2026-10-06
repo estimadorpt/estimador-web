@@ -53,11 +53,12 @@ describe('shareCardModel', () => {
     const model = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'pt', url: 'https://estimador.pt/pt/populacao/freguesia/010103/' });
     expect(model.attribution).toContain('Fonte: INE, Censos 2021');
     expect(model.attribution).toContain('informação modificada por estimador.pt');
-    expect(model.attribution).toContain('CC BY 4.0');
+    expect(model.attribution).toContain('Censos 2021 (CC BY 4.0)');
+    expect(model.attribution).toContain('estimador.pt (CC BY-NC 4.0)');
     expect(model.attribution).toContain('estimador.pt/pt/populacao/dados');
     expect(model.footer).toBe(`População sintética v${POPULATION_RELEASE} de 5 out. 2026 · estimador.pt/pt/populacao/freguesia/010103`);
     const en = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en', url: 'https://estimador.pt/en/populacao/freguesia/010103/' });
-    expect(en.attribution).toMatch(/^Source: INE, 2021 Census · information modified by estimador\.pt · CC BY 4\.0/);
+    expect(en.attribution).toMatch(/^Source: INE, 2021 Census \(CC BY 4\.0\) · information modified by estimador\.pt \(CC BY-NC 4\.0\) · full attribution at estimador\.pt\/en\/populacao\/dados$/);
     expect(en.footer).toContain('of 5 Oct 2026 · estimador.pt/en/populacao/freguesia/010103');
   });
 
@@ -186,6 +187,8 @@ describe('drawShareCard', () => {
     expect(calls.some(c => c.text === model.footer)).toBe(true);
     expect(all).toContain('Fonte: INE, Censos 2021');
     expect(all).toContain('CC BY 4.0');
+    expect(all).toContain('CC BY-NC 4.0');
+    expect(all).toContain('estimador.pt/pt/populacao/dados');
     // Everything sits on the 630 px canvas.
     for (const call of calls) expect(call.y).toBeLessThanOrEqual(SHARE_CARD.height - 20);
     for (const call of calls) expect(Number(/(\d+)px/.exec(call.font)?.[1])).toBeGreaterThanOrEqual(20);

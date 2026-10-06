@@ -183,7 +183,7 @@ export function populationDatasetJsonLd(locale: string, release?: PopulationRele
     datePublished: POPULATION_PUBLISHED,
     inLanguage: languageTag(lang),
     isAccessibleForFree: true,
-    license: 'https://creativecommons.org/licenses/by/4.0/',
+    license: 'https://creativecommons.org/licenses/by-nc/4.0/',
     keywords: [...copy.keywords],
     creator: { '@id': ORGANIZATION_ID, '@type': 'Organization', name: 'estimador.pt', url: SITE_URL },
     publisher: { '@id': ORGANIZATION_ID, '@type': 'Organization', name: 'estimador.pt', url: SITE_URL },

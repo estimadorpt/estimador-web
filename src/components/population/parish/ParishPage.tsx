@@ -583,7 +583,8 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                   </dd>
                   <dt className="font-bold text-ink">{pt ? 'Licença' : 'Licence'}</dt>
                   <dd className="text-stone-700">
-                    <a href={pt ? 'https://creativecommons.org/licenses/by/4.0/deed.pt' : 'https://creativecommons.org/licenses/by/4.0/'} className="tap-target font-semibold text-ink underline underline-offset-4">CC BY 4.0</a>
+                    <a href={pt ? 'https://creativecommons.org/licenses/by-nc/4.0/deed.pt' : 'https://creativecommons.org/licenses/by-nc/4.0/'} className="tap-target font-semibold text-ink underline underline-offset-4">CC BY-NC 4.0</a>
+                    {pt ? ' (população sintética); dados do INE: CC BY 4.0' : ' (synthetic population); INE data: CC BY 4.0'}
                   </dd>
                   <dt className="font-bold text-ink">{pt ? 'Atribuição' : 'Attribution'}</dt>
                   <dd className="text-stone-700">{SHORT_ATTRIBUTION[locale]}</dd>

@@ -90,7 +90,9 @@ describe('Dataset JSON-LD for /populacao/dados', () => {
     const data = populationDatasetJsonLd('pt', release);
     expect(data['@type']).toBe('Dataset');
     expect(data.version).toBe(POPULATION_RELEASE);
-    expect(data.license).toBe('https://creativecommons.org/licenses/by/4.0/');
+    // The synthetic population is CC BY-NC 4.0 (relabelled 2026-10-06); INE's source data stay CC BY 4.0.
+    expect(release.license).toBe('CC BY-NC 4.0');
+    expect(data.license).toBe('https://creativecommons.org/licenses/by-nc/4.0/');
     expect(data.citation).toBe(release.attribution.cite_as);
     expect((data.distribution as unknown[]).length).toBeGreaterThanOrEqual(4);
     expect(data.creditText).toBe(release.attribution.pt);
