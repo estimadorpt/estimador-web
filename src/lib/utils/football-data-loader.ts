@@ -352,6 +352,19 @@ export interface UpcomingFixture {
    * published after it kicked off: those are not shown as a forecast.
    */
   probsPublishedAt?: string | null;
+  /**
+   * For a played fixture whose probabilities were published only after it
+   * kicked off: when they were (matchday 1's md00 came out on 10 August, after
+   * eight of its nine games). The page says why it shows no forecast (audit
+   * FRESH-03).
+   */
+  probsLatePublishedAt?: string | null;
+  /**
+   * For a played fixture: the previous matchday, when its odds were frozen
+   * before that round's last game ("quando a jornada 6 ainda decorria",
+   * audit FRESH-02 / FA2-04). Null otherwise.
+   */
+  probsFrozenDuringRound?: number | null;
 }
 
 /**
@@ -499,7 +512,22 @@ export async function loadPlayedFixtures(): Promise<UpcomingFixture[]> {
     if (!manifest) return [];
     const taken = new Set(upcoming.map(f => f.slug));
     const raw: Omit<UpcomingFixture, 'slug'>[] = [];
-    for (const md of manifest.matchdays ?? []) {
+    const rounds = manifest.matchdays ?? [];
+    for (const md of rounds) {
+      // The previous round's last game played before this round began (a
+      // postponed leftover weeks later does not count).
+      const firstKickoff = Math.min(
+        ...(md.fixtures ?? []).map(f => (f.kickoff ? Date.parse(f.kickoff) : Infinity)),
+      );
+      const previous = rounds.find(r => r.matchday === md.matchday - 1);
+      const previousEnds = previous
+        ? Math.max(
+            -Infinity,
+            ...(previous.fixtures ?? [])
+              .map(f => (f.kickoff ? Date.parse(f.kickoff) : NaN))
+              .filter(ms => !Number.isNaN(ms) && ms < firstKickoff),
+          )
+        : -Infinity;
       for (const fx of md.fixtures ?? []) {
         if (!isNum(fx.home_goals) || !isNum(fx.away_goals)) continue;
         const priced = isNum(fx.p_home) && isNum(fx.p_draw) && isNum(fx.p_away);
@@ -522,6 +550,11 @@ export async function loadPlayedFixtures(): Promise<UpcomingFixture[]> {
           decisive: null,
           played: { home_goals: fx.home_goals as number, away_goals: fx.away_goals as number },
           probsPublishedAt: beforeKickoff ? publishedAt : null,
+          probsLatePublishedAt: priced && !beforeKickoff && publishedAt ? publishedAt : null,
+          probsFrozenDuringRound:
+            beforeKickoff && previous && Number.isFinite(previousEnds) && publishedMs < previousEnds
+              ? previous.matchday
+              : null,
         });
       }
     }

@@ -10,7 +10,14 @@ import {
 } from "@/lib/utils/football-data-loader";
 import { teamDisplayName } from "@/lib/config/football";
 import { formatDateSpan, formatInteger, formatLongDate, formatPp } from "@/lib/football-format";
-import { forecastStatusLine } from "@/lib/football-status";
+import {
+  forecastStatusLine,
+  forecastStatusLinePlayed,
+  roundPlayedAt,
+  roundPlayedLine,
+  roundStartsAt,
+} from "@/lib/football-status";
+import { ClockSwitch } from "@/components/football/ClockSwitch";
 import { evaluatesCurrentModel } from "@/lib/football-scorecard";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
@@ -160,16 +167,19 @@ export default async function LigaPage({
   // "Depois da jornada 7 · atualizado a 25 set. · próxima atualização após a
   // jornada 8 (9–12 out.)", every part from the data (audit CL-11, CL-M4).
   const nextRound = matchdayComplete ? (prediction.next_matchday?.matchday ?? null) : prediction.matchday;
-  const statusLine = forecastStatusLine(
-    {
-      matchday: prediction.matchday,
-      timestamp: prediction.timestamp,
-      inProgress: !matchdayComplete,
-      nextRound,
-      nextRoundKickoffs: upcomingFixtures.filter(f => f.matchday === nextRound).map(f => f.kickoff),
-    },
-    locale,
-  );
+  const nextRoundKickoffs = upcomingFixtures.filter(f => f.matchday === nextRound).map(f => f.kickoff);
+  const statusInput = {
+    matchday: prediction.matchday,
+    timestamp: prediction.timestamp,
+    inProgress: !matchdayComplete,
+    nextRound,
+    nextRoundKickoffs,
+  };
+  const statusLine = forecastStatusLine(statusInput, locale);
+  // Once the round the next update waits for is over, the line says the new
+  // forecast is in preparation instead of promising it (audit FRESH-01).
+  const nextRoundPlayedAt = roundPlayedAt(nextRoundKickoffs);
+  const nextRoundStartsAt = roundStartsAt(nextRoundKickoffs);
   const sourceLine = locale === "pt"
     ? `Fonte: modelo estimador.pt, ${simsLabel} simulações do resto da época`
     : `Source: estimador.pt model, ${simsLabel} simulations of the rest of the season`;
@@ -215,7 +225,10 @@ export default async function LigaPage({
         }
         meta={
           <span>
-            {statusLine}
+            <ClockSwitch
+              initial={statusLine}
+              steps={[{ at: nextRoundPlayedAt, value: forecastStatusLinePlayed(statusInput, locale) }]}
+            />
             {factualChange ? ` · ${factualChange}` : ""}
           </span>
         }
@@ -247,7 +260,13 @@ export default async function LigaPage({
         <section className="border-b border-stone-200" aria-labelledby="liga-next-round">
           <div className="max-w-7xl mx-auto px-4 py-10">
             <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
-              {matchdayComplete ? t("football.nextMatchday") : (locale === "en" ? "Fixtures to come" : "Jogos por disputar")}
+              <ClockSwitch
+                initial={matchdayComplete ? t("football.nextMatchday") : (locale === "en" ? "Fixtures to come" : "Jogos por disputar")}
+                steps={nextRound != null ? [
+                  { at: nextRoundStartsAt, value: locale === "en" ? `Matchday ${nextRound} under way` : `Jornada ${nextRound} a decorrer` },
+                  { at: nextRoundPlayedAt, value: roundPlayedLine(nextRound, locale) },
+                ] : []}
+              />
             </p>
             <h2 id="liga-next-round" className="text-2xl tracking-tight mb-1">
               {cardRounds.length === 1
@@ -262,7 +281,7 @@ export default async function LigaPage({
                 ? "In kickoff order, Lisbon time. Under each match, the club whose title or relegation chances its result moves most, and the gap between that club's best and worst of the three results, in percentage points."
                 : "Por ordem de início, hora de Lisboa. Em cada jogo, o clube cujas hipóteses de título ou de despromoção o resultado mais mexe, e a distância entre o melhor e o pior dos três resultados para esse clube, em pontos percentuais."}
             </p>
-            <MatchdayPredictions fixtures={fixtureCards} locale={locale} />
+            <MatchdayPredictions fixtures={fixtureCards} locale={locale} forecastTimestamp={prediction.timestamp} />
           </div>
         </section>
       )}

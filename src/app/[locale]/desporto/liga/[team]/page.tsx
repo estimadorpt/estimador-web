@@ -6,6 +6,7 @@ import {
   teamColorOnPaper,
   teamLogoSrc,
   teamDisplayName,
+  teamWithArticle,
 } from "@/lib/config/football";
 import { Link } from "@/i18n/routing";
 import { DataCard } from "@/components/viz/DataCard";
@@ -39,6 +40,22 @@ function ordinal(n: number, locale: string): string {
   return `${n}th`;
 }
 
+/**
+ * The race a club's page is about, for its meta description (audit FA2-09):
+ * a relegation club is not described by "cenários de título".
+ */
+function clubRace(
+  team: string,
+  prediction: Awaited<ReturnType<typeof loadLigaData>>["prediction"],
+  scenarios: Awaited<ReturnType<typeof loadLigaData>>["scenarios"],
+): "title" | "relegation" | "other" {
+  const row = prediction?.table.find((r) => r.team === team);
+  if (scenarios?.narrative_scenarios?.[team]?.target === "survival") return "relegation";
+  if (row && row.p_champion >= 0.01) return "title";
+  if (row && row.p_relegation >= 0.01) return "relegation";
+  return "other";
+}
+
 // Any other slug is a 404, in development as in the export.
 export const dynamicParams = false;
 
@@ -67,14 +84,17 @@ export async function generateMetadata({
   if (!teamName) return {};
 
   const t = await getTranslations({ locale });
-  const { prediction } = await loadLigaData();
+  const { prediction, scenarios } = await loadLigaData();
 
   return createPageMetadata({
     locale,
     path: `/desporto/liga/${slug}`,
     title: t("football.teamPageTitle", { team: teamDisplayName(teamName) }),
     description: t("football.teamPageDescription", {
+      race: clubRace(teamName, prediction, scenarios),
       team: teamDisplayName(teamName),
+      teamFor: teamWithArticle(teamName, "para"),
+      teamOf: teamWithArticle(teamName, "de"),
       season: prediction?.season ?? "",
     }),
   });
@@ -353,7 +373,12 @@ export default async function TeamDetailPage({
             <span>{teamDisplayName(teamName)}</span>
           </span>
         }
-        lede={t("football.clubPageIntro", { team: teamDisplayName(teamName), date: forecastDate })}
+        lede={t("football.clubPageIntro", {
+          team: teamDisplayName(teamName),
+          teamFor: teamWithArticle(teamName, "para"),
+          teamOf: teamWithArticle(teamName, "de"),
+          date: forecastDate,
+        })}
       />
 
       {/* Key stats + season projection */}
@@ -556,10 +581,14 @@ export default async function TeamDetailPage({
             </p>
             <h2 className="text-2xl tracking-tight mb-6">
               {clubOutlook.opponentLabel
-                ? t("football.fixtureStakesHeading", { team: clubOutlook.label, opponent: clubOutlook.opponentLabel })
+                ? t("football.fixtureStakesHeading", {
+                    team: clubOutlook.label,
+                    opponent: clubOutlook.opponentLabel,
+                    opponentAgainst: clubOutlook.opponent ? teamWithArticle(clubOutlook.opponent, "contra") : clubOutlook.opponentLabel,
+                  })
                 : t("football.fixtureStakesHeadingNoOpponent", { team: clubOutlook.label })}
             </h2>
-            <FixtureStakes locale={locale === "pt" ? "pt" : "en"} entry={clubOutlook} />
+            <FixtureStakes locale={locale === "pt" ? "pt" : "en"} entry={clubOutlook} matchLink />
           </div>
         </section>
       )}

@@ -8,7 +8,8 @@ import type { TeamDelta } from '@/types/football';
 import { HomePanel, Kicker } from './HomePanel';
 import { FootballClubPicker } from './FootballClubPicker';
 import { TitleProbabilities } from '@/components/football/TitleProbabilities';
-import { forecastStatusLine } from '@/lib/football-status';
+import { forecastStatusLine, forecastStatusLinePlayed, roundPlayedAt } from '@/lib/football-status';
+import { ClockSwitch } from '@/components/football/ClockSwitch';
 
 export interface FootballSnapshot {
   matchday: number;
@@ -39,20 +40,25 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
   const prediction = latest.prediction;
   const inProgress = Boolean(prediction?.matches_remaining?.length);
   const nextRound = prediction ? (inProgress ? prediction.matchday : (prediction.next_matchday?.matchday ?? null)) : null;
-  const statusLine = snapshot?.timestamp
-    ? forecastStatusLine(
-        {
-          matchday: snapshot.matchday,
-          timestamp: snapshot.timestamp,
-          inProgress,
-          nextRound,
-          nextRoundKickoffs: (gameFixtures?.matchdays ?? [])
-            .filter((md) => md.matchday === nextRound)
-            .flatMap((md) => md.fixtures.filter((f) => f.home_goals == null).map((f) => f.kickoff)),
-        },
-        locale,
-      )
-    : '';
+  const statusInput = snapshot?.timestamp
+    ? {
+        matchday: snapshot.matchday,
+        timestamp: snapshot.timestamp,
+        inProgress,
+        nextRound,
+        nextRoundKickoffs: (gameFixtures?.matchdays ?? [])
+          .filter((md) => md.matchday === nextRound)
+          .flatMap((md) => md.fixtures.filter((f) => f.home_goals == null).map((f) => f.kickoff)),
+      }
+    : null;
+  // After the round the next update waits for, the rail says a new forecast
+  // is in preparation rather than promising it (audit FRESH-01).
+  const statusLine = statusInput ? (
+    <ClockSwitch
+      initial={forecastStatusLine(statusInput, locale)}
+      steps={[{ at: roundPlayedAt(statusInput.nextRoundKickoffs), value: forecastStatusLinePlayed(statusInput, locale) }]}
+    />
+  ) : '';
   const outlooks = latest.prediction
     ? buildClubOutlooks(locale === 'pt' ? 'pt' : 'en', latest.prediction, latest.scenarios, gameFixtures)
     : [];

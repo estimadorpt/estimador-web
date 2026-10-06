@@ -106,6 +106,35 @@ export function teamDisplayName(team: string): string {
 }
 
 /**
+ * Clubs that take the feminine article in Portuguese ("a Oliveirense"). None
+ * of the 2026-27 Primeira Liga does: every club there is "o Porto", "o Sp.
+ * Braga", "o Casa Pia".
+ */
+const FEMININE_CLUBS = new Set(['Oliveirense', 'Sanjoanense', 'Academica', 'Ovarense']);
+
+export type PtClubForm = 'o' | 'de' | 'a' | 'para' | 'contra' | 'em';
+
+/**
+ * A club's display name with the Portuguese article a sentence needs:
+ * "o Porto", "do Benfica", "ao Sporting", "para o Sp. Braga", "contra o
+ * Vitória", "no Casa Pia". A bare name after a preposition ("para Porto",
+ * "de Benfica vencer") reads as machine-filled (audit CL2-01, UXD2-06).
+ */
+export function teamWithArticle(team: string, form: PtClubForm = 'o'): string {
+  const name = teamDisplayName(team);
+  const fem = FEMININE_CLUBS.has(team);
+  const article = {
+    o: fem ? 'a' : 'o',
+    de: fem ? 'da' : 'do',
+    a: fem ? 'à' : 'ao',
+    para: fem ? 'para a' : 'para o',
+    contra: fem ? 'contra a' : 'contra o',
+    em: fem ? 'na' : 'no',
+  }[form];
+  return `${article} ${name}`;
+}
+
+/**
  * Names for the narrowest columns (the league table on a phone): a word a
  * reader recognises, never a three-letter code like "STC" or "EAM".
  */
@@ -122,6 +151,14 @@ export function teamPhoneName(team: string): string {
 }
 
 /* ------------------------------------------------- colours on the page --- */
+
+/**
+ * The one 1X2 encoding (audit UXD2-V06): home dark, draw pale, away mid, the
+ * same on the hub cards and the match page. Club colours stay on the rule
+ * above each club's number, never in the split bar (a black or white kit
+ * would match the ink or the paper).
+ */
+export const OUTCOME_TONES = { home: '#434d48', draw: '#d6d8cc', away: '#8b9a8e' } as const;
 
 /** The page ground the team colours are drawn on (globals.css --color-paper). */
 const PAPER = '#f5f3ea';

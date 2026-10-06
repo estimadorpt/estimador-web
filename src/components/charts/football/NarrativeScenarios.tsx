@@ -4,8 +4,9 @@ import type {
   ScenarioStep,
   ScenarioRivalCondition,
 } from "@/types/football";
-import { teamColorOnPaper, teamDisplayName, teamPhoneName } from "@/lib/config/football";
+import { teamColorOnPaper, teamDisplayName } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
+import { rivalConditionsWithoutOwnMatches } from "@/lib/football-scenarios";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -27,20 +28,6 @@ function scenarioSummary(
   if (draws > 0) parts.push(`${draws} ${draws === 1 ? labels.draw : labels.drawPlural}`);
   if (losses > 0) parts.push(`${losses} ${losses === 1 ? labels.loss : labels.lossPlural}`);
   return parts.join(", ");
-}
-
-/**
- * The rival results a scenario also needs, without the ones that only
- * restate one of the club's own steps: "Nacional perde pontos contra o
- * Moreirense (J32)" is the club's own win in J32 seen from the other side
- * (audit pub-PP-11).
- */
-export function rivalConditionsWithoutOwnMatches(
-  team: string,
-  scenario: NarrativeScenario,
-): ScenarioRivalCondition[] {
-  const ownMatchdays = new Set(scenario.steps.map(s => s.matchday));
-  return (scenario.rival_conditions ?? []).filter(rc => !(rc.opponent === team && ownMatchdays.has(rc.matchday)));
 }
 
 // ── Components ──────────────────────────────────────────────────────────────
@@ -72,8 +59,7 @@ function StepRow({ step, teamColor, prevP, labels, locale }: { step: ScenarioSte
           <span className="w-7 shrink-0 text-xs font-bold tabular-nums text-stone-500">
             {labels.matchdayPrefix}{step.matchday}
           </span>
-          <span className="truncate text-sm text-stone-700 sm:hidden">{teamPhoneName(step.opponent)}</span>
-          <span className="hidden truncate text-sm text-stone-700 sm:inline">{teamDisplayName(step.opponent)}</span>
+          <span className="truncate text-sm text-stone-700">{teamDisplayName(step.opponent)}</span>
           <span className="shrink-0 text-[11px] text-stone-500">({venueLabel})</span>
           <span className={`shrink-0 rounded px-1 py-0.5 text-[11px] font-bold ${RESULT_STYLE[step.result]}`}>{resultLabel}</span>
         </div>
@@ -96,20 +82,26 @@ function StepRow({ step, teamColor, prevP, labels, locale }: { step: ScenarioSte
   );
 }
 
-function RivalConditions({ conditions, labels }: { conditions: ScenarioRivalCondition[]; labels: { thisWorksBecause: string; dropsPointsVs: string; matchdayPrefix: string } }) {
+function RivalConditions({ conditions, labels, locale }: { conditions: ScenarioRivalCondition[]; labels: { thisWorksBecause: string; dropsPointsVs: string; matchdayPrefix: string }; locale: string }) {
   if (conditions.length === 0) return null;
+  const pt = locale !== "en";
   return (
     <div className="border-t border-line bg-paper px-3 py-2 md:px-4">
       <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{labels.thisWorksBecause}</p>
       <ul className="space-y-1">
         {conditions.map((rc, i) => (
-          <li key={i} className="flex items-center gap-1.5 text-xs text-stone-600">
-            <i aria-hidden="true" className="h-3 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(rc.rival) }} />
+          <li key={i} className="flex items-start gap-1.5 text-xs text-stone-600">
+            <i aria-hidden="true" className="mt-0.5 h-3 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(rc.rival) }} />
             <span>
               <span className="font-semibold text-ink">{teamDisplayName(rc.rival)}</span> {labels.dropsPointsVs}{" "}
-              <span className="sm:hidden">{teamPhoneName(rc.opponent)}</span>
-              <span className="hidden sm:inline">{teamDisplayName(rc.opponent)}</span>
+              {teamDisplayName(rc.opponent)}
               <span className="text-stone-500"> ({labels.matchdayPrefix}{rc.matchday})</span>
+              <span className="text-stone-500">
+                {": "}
+                {pt
+                  ? `${formatPercent(rc.p_rival_drops_in_scenario, locale)} neste cenário, ${formatPercent(rc.p_rival_drops_baseline, locale)} em geral`
+                  : `${formatPercent(rc.p_rival_drops_in_scenario, locale)} in this scenario, ${formatPercent(rc.p_rival_drops_baseline, locale)} overall`}
+              </span>
             </span>
           </li>
         ))}
@@ -132,9 +124,11 @@ function ScenarioCard({
   labels,
   summary,
   locale,
+  survival,
 }: {
   scenario: NarrativeScenario;
   team: string;
+  survival: boolean;
   teamColor: string;
   pCurrent: number;
   labels: ScenarioCardLabels;
@@ -156,7 +150,9 @@ function ScenarioCard({
         {/* "22% → 47%", read left to right: now, then in this scenario (audit UXD-19). */}
         <p className="shrink-0 text-right">
           <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500">
-            {pt ? "Agora → neste cenário" : "Now → in this scenario"}
+            {survival
+              ? pt ? "Permanência: agora → neste cenário" : "Staying up: now → in this scenario"
+              : pt ? "Título: agora → neste cenário" : "Title: now → in this scenario"}
           </span>
           <span className="font-display text-lg font-extrabold tabular-nums text-ink">
             <span className="text-stone-500">{formatPercent(pCurrent, locale)}</span>
@@ -178,7 +174,7 @@ function ScenarioCard({
           />
         ))}
       </ol>
-      <RivalConditions conditions={rivalConditionsWithoutOwnMatches(team, scenario)} labels={labels} />
+      <RivalConditions conditions={rivalConditionsWithoutOwnMatches(team, scenario)} labels={labels} locale={locale} />
     </li>
   );
 }
@@ -244,6 +240,7 @@ export function NarrativeScenarios({
             pCurrent={data.p_current}
             labels={adjustedLabels}
             locale={locale}
+            survival={data.target === "survival"}
             summary={scenarioSummary(scenario, {
               win: adjustedLabels.winAbbr,
               winPlural: adjustedLabels.winAbbrPlural,

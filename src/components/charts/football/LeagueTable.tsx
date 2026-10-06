@@ -28,6 +28,7 @@ export function ClubChooser({
   const locale = useLocale();
   const id = useId();
   const [value, setValue] = useState("");
+  const [hint, setHint] = useState(false);
   const sorted = [...teams].sort((a, b) => teamDisplayName(a).localeCompare(teamDisplayName(b), "pt"));
   return (
     <form
@@ -35,7 +36,14 @@ export function ClubChooser({
       onSubmit={e => {
         e.preventDefault();
         const slug = ligaTeamSlugs[value];
-        if (slug) router.push(`/${locale}/desporto/liga/${slug}`);
+        // Never a disabled button that looks broken (audit CL2-04): with no
+        // club chosen, the select gets focus and a hint says why.
+        if (!slug) {
+          setHint(true);
+          document.getElementById(id)?.focus();
+          return;
+        }
+        router.push(`/${locale}/desporto/liga/${slug}`);
       }}
     >
       <span className="flex min-w-0 flex-col gap-1">
@@ -43,7 +51,11 @@ export function ClubChooser({
         <select
           id={id}
           value={value}
-          onChange={e => setValue(e.target.value)}
+          aria-describedby={hint ? `${id}-hint` : undefined}
+          onChange={e => {
+            setValue(e.target.value);
+            setHint(false);
+          }}
           className="min-h-11 min-w-[200px] rounded-[10px] border border-line bg-paper px-3 text-base text-ink sm:text-sm"
         >
           <option value="" disabled>
@@ -58,11 +70,15 @@ export function ClubChooser({
       </span>
       <button
         type="submit"
-        disabled={!value}
-        className="min-h-11 rounded-[10px] bg-ink px-4 text-sm font-semibold text-paper transition-opacity duration-150 disabled:opacity-50"
+        className="min-h-11 rounded-[10px] bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-forest"
       >
         {locale === "en" ? "See club" : "Ver equipa"}
       </button>
+      {hint && (
+        <p id={`${id}-hint`} role="status" className="w-full text-sm text-stone-600">
+          {locale === "en" ? "Choose a club from the list first." : "Escolhe primeiro um clube na lista."}
+        </p>
+      )}
     </form>
   );
 }
@@ -213,9 +229,21 @@ export function LeagueTable({
           title, relegation) so nothing sits off screen at 320 px; the
           predicted points, goal difference and top 3 join from `sm` up
           (audit UXM-10). */}
+      {/* On a phone the rows' order has to be readable from what is on
+          screen: the visible points column is the predicted one, and the
+          caption says so before the first row (audit PUB2-01). */}
+      <p className="mb-2 text-xs leading-relaxed text-stone-600 sm:hidden">
+        {pt
+          ? "Ordenada pelos pontos previstos no fim da época (Prev.). Os pontos atuais estão na página de cada clube e num ecrã maior."
+          : "Ordered by predicted end-of-season points (Pred.). Current points are on each club's page and on a wider screen."}
+      </p>
       <div tabIndex={0} role="region" aria-label={pt ? "Classificação prevista" : "Predicted standings"} className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
+            <tr className="text-left text-[11px] uppercase tracking-wider text-stone-500 sm:hidden">
+              <th className="py-1 pr-2" colSpan={2}><span className="sr-only">{labels.team}</span></th>
+              <th className="px-2 py-1 text-center" colSpan={3}>{pt ? "Previsão do modelo" : "Model forecast"}</th>
+            </tr>
             {hasActual && (
               <tr className="hidden text-left text-[11px] uppercase tracking-wider text-stone-500 sm:table-row">
                 <th className="py-1 pr-2" colSpan={2}><span className="sr-only">{labels.team}</span></th>
@@ -231,12 +259,15 @@ export function LeagueTable({
               {hasActual && (
                 <>
                   <th scope="col" className="hidden px-2 py-2 text-right text-xs font-medium text-stone-500 sm:table-cell">{labels.played ?? "J"}</th>
-                  <th scope="col" className="px-2 py-2 text-right text-xs font-medium">
+                  <th scope="col" className="hidden px-2 py-2 text-right text-xs font-medium sm:table-cell">
                     <abbr title={pt ? "Pontos" : "Points"} className="no-underline">{labels.actualPoints ?? "Pts"}</abbr>
                   </th>
                 </>
               )}
-              <th scope="col" className={`hidden px-3 py-2 text-right font-medium sm:table-cell ${hasActual ? "border-l border-stone-200" : ""}`}>{labels.meanPoints}</th>
+              <th scope="col" className={`px-2 py-2 text-right font-medium sm:px-3 ${hasActual ? "sm:border-l sm:border-stone-200" : ""}`}>
+                <abbr aria-hidden="true" title={labels.meanPoints} className="no-underline sm:hidden">{pt ? "Prev." : "Pred."}</abbr>
+                <span className="sr-only sm:not-sr-only">{labels.meanPoints}</span>
+              </th>
               {hasBands && (
                 <th scope="col" className="hidden w-[20%] px-3 py-2 text-xs font-medium text-stone-500 md:table-cell">
                   {bandLabel} <span className="text-stone-500">90%</span>
@@ -301,10 +332,10 @@ export function LeagueTable({
                   {hasActual && (
                     <>
                       <td className="hidden px-2 py-2.5 text-right text-xs tabular-nums text-stone-500 sm:table-cell">{actual?.played ?? ""}</td>
-                      <td className="px-2 py-2.5 text-right font-semibold tabular-nums">{actual ? formatInteger(actual.points, locale) : ""}</td>
+                      <td className="hidden px-2 py-2.5 text-right font-semibold tabular-nums sm:table-cell">{actual ? formatInteger(actual.points, locale) : ""}</td>
                     </>
                   )}
-                  <td className={`hidden px-3 py-2.5 text-right font-semibold tabular-nums sm:table-cell ${hasActual ? "border-l border-stone-200" : ""}`}>
+                  <td className={`px-2 py-2.5 text-right font-semibold tabular-nums sm:px-3 ${hasActual ? "sm:border-l sm:border-stone-200" : ""}`}>
                     {formatDecimal(team.mean_pts, locale, 1)}
                     {interval && (
                       <div className="text-[11px] font-normal tabular-nums text-stone-500 md:hidden">{bandRange(interval)}</div>
@@ -363,8 +394,8 @@ export function LeagueTable({
 
       <p className="mt-3 text-[11px] leading-relaxed text-stone-500 sm:hidden">
         {pt
-          ? "Num ecrã maior, a tabela mostra também os pontos previstos, a diferença de golos e o top 3; cada equipa tem tudo na sua página."
-          : "On a wider screen the table also shows predicted points, goal difference and top 3; each club's page has everything."}
+          ? "Num ecrã maior, a tabela mostra também os pontos atuais, a diferença de golos e o top 3; cada equipa tem tudo na sua página."
+          : "On a wider screen the table also shows current points, goal difference and top 3; each club's page has everything."}
       </p>
 
       {/* What the relegation column counts (audit M-07): the play-off place is not in it. */}

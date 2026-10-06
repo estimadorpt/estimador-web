@@ -7,6 +7,7 @@ import { FixtureStakes } from "@/components/football/FixtureStakes";
 import type { ClubOutlookEntry } from "@/components/football/club-outlook";
 import { readStoredClub, resolveInitialClub, writeStoredClub } from "@/components/football/club-preference";
 import type { TeamDelta } from "@/types/football";
+import { teamWithArticle } from "@/lib/config/football";
 
 export interface FootballClubOption {
   label: string;
@@ -48,6 +49,7 @@ export function FootballClubPicker({
   // The select only proposes; "Ver" commits. Arrowing through the list with
   // a keyboard never swaps the panel under the reader (audit A11Y-14).
   const [pending, setPending] = useState("");
+  const [hint, setHint] = useState(false);
   const selectId = useId();
 
   useEffect(() => {
@@ -109,7 +111,7 @@ export function FootballClubPicker({
             <h3 className="text-lg font-bold leading-snug text-ink md:text-xl">
               {selected.opponentLabel
                 ? pt
-                  ? `${selected.label}: o que muda contra ${selected.opponentLabel}?`
+                  ? `${selected.label}: o que muda ${selected.opponent ? teamWithArticle(selected.opponent, "contra") : `contra ${selected.opponentLabel}`}?`
                   : `${selected.label}: what changes against ${selected.opponentLabel}?`
                 : pt
                   ? `${selected.label}: qual é o panorama?`
@@ -160,9 +162,17 @@ export function FootballClubPicker({
 
       <form
         id="escolher-equipa"
-        className="mt-4 flex min-w-0 items-end gap-2"
+        className="mt-4 flex min-w-0 flex-wrap items-end gap-2"
         onSubmit={(event) => {
           event.preventDefault();
+          // The button is never disabled (it looked broken, audit CL2-04):
+          // with no club chosen it points at the select instead.
+          if (!pending) {
+            setHint(true);
+            document.getElementById(selectId)?.focus();
+            return;
+          }
+          setHint(false);
           handleSelect(pending);
         }}
       >
@@ -173,7 +183,11 @@ export function FootballClubPicker({
           <select
             id={selectId}
             value={pending}
-            onChange={(event) => setPending(event.target.value)}
+            aria-describedby={hint ? `${selectId}-hint` : undefined}
+            onChange={(event) => {
+              setPending(event.target.value);
+              if (event.target.value) setHint(false);
+            }}
             className="mt-1 block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base font-medium text-ink sm:text-sm"
           >
             <option value="">{pt ? "Escolhe a tua equipa" : "Choose your club"}</option>
@@ -182,13 +196,18 @@ export function FootballClubPicker({
             ))}
           </select>
         </span>
+        {/* Secondary: the card keeps one primary action (CL2-04). */}
         <button
           type="submit"
-          disabled={pending === (selectedSlug ?? "")}
-          className="min-h-11 shrink-0 rounded-[10px] bg-ink px-4 text-sm font-semibold text-paper disabled:opacity-50"
+          className="min-h-11 shrink-0 rounded-[10px] border border-line bg-cream px-4 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-parchment"
         >
           {pt ? "Ver" : "Show"}
         </button>
+        {hint && (
+          <p id={`${selectId}-hint`} role="status" className="w-full text-sm text-stone-600">
+            {pt ? "Escolhe primeiro um clube na lista." : "Choose a club from the list first."}
+          </p>
+        )}
       </form>
     </div>
   );

@@ -10,7 +10,7 @@
 // only switches between pre-rounded, pre-linked answers.
 
 import type { LigaPrediction, ScenarioData } from '@/types/football';
-import { formatPercent } from '@/lib/football-format';
+import { formatKickoffShort, formatPercent } from '@/lib/football-format';
 import {
   clubStakes,
   fixtureStatus,
@@ -58,6 +58,14 @@ export interface ClubOutlookEntry {
    * outcome), kept separate from the season-objective stakes above — never
    * to be mixed with them (diagnosis §4). Null when unavailable. */
   matchWinProbability: number | null;
+  /** The supported fixture's whole 1X2 from this club's side, for a club
+   * whose season objectives all sit below 1% (Santa Clara, audit FA2-14). */
+  matchOutcome: { win: number; draw: number; loss: number } | null;
+  /** The supported fixture's kickoff (UTC ISO) when confirmed, so the line
+   * can say "Jogo começou" after it (audit FRESH-01). */
+  fixtureKickoff: string | null;
+  /** The forecast's own timestamp. */
+  forecastTimestamp: string;
   hasFixture: boolean;
   fixtureStatusKind: FixtureStatus['kind'] | null;
   fixtureStatusLabel: string | null;
@@ -124,6 +132,8 @@ export function buildClubOutlooks(
     let opponent: string | null = null;
     let venue: 'home' | 'away' | null = null;
     let matchWinProbability: number | null = null;
+    let matchOutcome: ClubOutlookEntry['matchOutcome'] = null;
+    let fixtureKickoff: string | null = null;
     let fixtureStatusKind: FixtureStatus['kind'] | null = null;
     let fixtureStatusLabel: string | null = null;
     let matchHref: string | null = null;
@@ -132,6 +142,15 @@ export function buildClubOutlooks(
       const status = fixtureStatus(fixture, prediction.timestamp, locale);
       fixtureStatusKind = status.kind;
       fixtureStatusLabel = status.label;
+      // A confirmed next game gets its weekday, Lisbon time and venue:
+      // "Próximo jogo · dom. 11 out. · 18:00 · em casa" (audit PUB2-04).
+      if (status.kind === 'next' && fixture.kickoff && fixture.kickoffConfirmed) {
+        const venueWord = fixture.home === team
+          ? (locale === 'pt' ? 'em casa' : 'at home')
+          : (locale === 'pt' ? 'fora' : 'away');
+        fixtureStatusLabel = `${locale === 'pt' ? 'Próximo jogo' : 'Next match'} · ${formatKickoffShort(fixture.kickoff, locale)} · ${venueWord}`;
+      }
+      if (fixture.kickoff && fixture.kickoffConfirmed) fixtureKickoff = fixture.kickoff;
       matchHref = fixture.slug ? `/desporto/liga/jogo/${fixture.slug}` : null;
 
       if (objective) {
@@ -147,8 +166,14 @@ export function buildClubOutlooks(
       if (fixture.matchProbabilities) {
         const isHome = fixture.home === team;
         const isAway = fixture.away === team;
-        if (isHome) matchWinProbability = fixture.matchProbabilities.p_home;
-        else if (isAway) matchWinProbability = fixture.matchProbabilities.p_away;
+        const mp = fixture.matchProbabilities;
+        if (isHome) {
+          matchWinProbability = mp.p_home;
+          matchOutcome = { win: mp.p_home, draw: mp.p_draw, loss: mp.p_away };
+        } else if (isAway) {
+          matchWinProbability = mp.p_away;
+          matchOutcome = { win: mp.p_away, draw: mp.p_draw, loss: mp.p_home };
+        }
       }
     }
 
@@ -169,6 +194,9 @@ export function buildClubOutlooks(
       opponentLabel: opponent ? teamDisplayName(opponent) : null,
       venue,
       matchWinProbability,
+      matchOutcome,
+      fixtureKickoff,
+      forecastTimestamp: prediction.timestamp,
       hasFixture: Boolean(fixture),
       fixtureStatusKind,
       fixtureStatusLabel,

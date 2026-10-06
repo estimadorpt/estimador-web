@@ -309,13 +309,93 @@ export function titleCalibrationParagraphs(locale: string): string[] {
   return pt
     ? [
         `Verificámos o que acontece às equipas que lideram. Nas épocas de ${c.firstSeason} a ${c.lastSeason}, houve ${c.cells} momentos avaliados (em ${c.cellsSeasons} épocas) em que uma equipa liderava com ${c.leadPoints} ou mais pontos de vantagem. O modelo deu-lhes, em média, ${pct(c.modelMean)} de probabilidade de serem campeãs; foram campeãs em ${pct(c.leadersWon)} desses casos. Sem dois casos da primeira jornada que resultam de um erro nos dados, os números são ${pct(c.modelMeanClean)} e ${pct(c.leadersWonClean)}.`,
-        `Ou seja: o modelo tende a subestimar quem lidera. A amostra é pequena (${c.cells} casos), por isso o tamanho exato da diferença é incerto, mas o sentido repete-se. Também não sabemos ainda corrigi-lo: nenhuma das alternativas testadas passou nos nossos testes, e por isso o modelo publicado não mudou. Algumas dessas alternativas, que os testes não conseguem distinguir do modelo atual, dariam ao Porto, na previsão da jornada 7 de 2026-27, entre ${pct(c.livePortoAltLow)} e ${pct(c.livePortoAltHigh)}, em vez de ${pct(c.livePorto)}.`,
+        `Ou seja: o modelo tende a subestimar quem lidera. A amostra é pequena: ${c.cells} momentos de ${c.cellsSeasons} épocas, que não são independentes (a mesma época e o mesmo líder contam várias vezes), por isso a amostra efetiva é ainda menor e o tamanho exato da diferença é incerto, mas o sentido repete-se. Também não sabemos ainda corrigi-lo: nenhuma das alternativas testadas passou nos nossos testes, e por isso o modelo publicado não mudou. Algumas dessas alternativas, que os testes não conseguem distinguir do modelo atual, dariam ao Porto, na previsão da jornada 7 de 2026-27, entre ${pct(c.livePortoAltLow)} e ${pct(c.livePortoAltHigh)}, em vez de ${pct(c.livePorto)}.`,
         `Lê as probabilidades de título como uma estimativa provavelmente conservadora para quem vai à frente. As probabilidades de despromoção não foram verificadas desta forma. (Avaliação interna de ${assessed}.)`,
       ]
     : [
         `We checked what happens to the teams in front. Across the ${c.firstSeason} to ${c.lastSeason} seasons there were ${c.cells} evaluated moments (in ${c.cellsSeasons} seasons) when a team led by ${c.leadPoints} or more points. The model gave them, on average, a ${pct(c.modelMean)} chance of winning the title; they won it ${pct(c.leadersWon)} of the time. Leaving out two matchday-one cases caused by a data error, the figures are ${pct(c.modelMeanClean)} and ${pct(c.leadersWonClean)}.`,
-        `In other words: the model tends to underrate the leader. The sample is small (${c.cells} cases), so the exact size of the gap is uncertain, but the direction holds. Nor do we know how to fix it yet: none of the alternatives tested passed our checks, so the published model has not changed. Some of those alternatives, which the checks cannot tell apart from the current model, would have given Porto between ${pct(c.livePortoAltLow)} and ${pct(c.livePortoAltHigh)} in the 2026-27 matchday 7 forecast, instead of ${pct(c.livePorto)}.`,
+        `In other words: the model tends to underrate the leader. The sample is small: ${c.cells} moments from ${c.cellsSeasons} seasons, which are not independent (the same season and the same leader count several times), so the effective sample is smaller still and the exact size of the gap is uncertain, but the direction holds. Nor do we know how to fix it yet: none of the alternatives tested passed our checks, so the published model has not changed. Some of those alternatives, which the checks cannot tell apart from the current model, would have given Porto between ${pct(c.livePortoAltLow)} and ${pct(c.livePortoAltHigh)} in the 2026-27 matchday 7 forecast, instead of ${pct(c.livePorto)}.`,
         `Read the title probabilities as a probably conservative estimate for whoever is in front. Relegation probabilities have not been checked this way. (Internal assessment of ${assessed}.)`,
       ];
 }
 
+
+/* --------------------------------------------------------- disagreements */
+
+export interface DisagreementSummary {
+  n_disagree: number;
+  pct_of_matches: number;
+  model_pick_won: number;
+  market_pick_won: number;
+  neither_won: number;
+  delta: number;
+  se: number;
+}
+
+/**
+ * "Quando discordámos do mercado", in words, with its verdict from the same
+ * 2 SE rule as the cards (audit MR2-01: a hard-coded "demasiado ruidosa" sat
+ * beside t = 2,50). The subset is defined on the predictions (the two
+ * favourites differ), so it is a fair question, but a subset all the same:
+ * the headline answer is the whole sample's.
+ */
+export function disagreementSentence(s: DisagreementSummary, nMatches: number, locale: string): string {
+  const p = pt(locale);
+  const t = s.se > 0 ? s.delta / s.se : 0;
+  const block: ScorecardBlock = { n: s.n_disagree, delta: s.delta, se: s.se, t };
+  const num = (v: number, d: number) => formatDecimal(v, locale, d);
+  const sig = (v: number, d: number) => formatSigned(v, locale, d);
+  const opening = p
+    ? `Em ${formatInteger(s.n_disagree, locale)} dos ${formatInteger(nMatches, locale)} jogos (${num(s.pct_of_matches, 1)}%) o modelo e o mercado apontaram favoritos diferentes. Nesses jogos o favorito do mercado ganhou ${s.market_pick_won} vezes e o do modelo ${s.model_pick_won}, com ${s.neither_won} a acabar num terceiro resultado.`
+    : `In ${formatInteger(s.n_disagree, locale)} of the ${formatInteger(nMatches, locale)} matches (${num(s.pct_of_matches, 1)}%) model and market named different favourites. In those, the market's pick won ${s.market_pick_won} times and the model's ${s.model_pick_won}, with ${s.neither_won} landing on a third result.`;
+  const gap = p
+    ? `A diferença de erro nesse subconjunto é ${sig(s.delta, 4)}, com erro padrão ${num(s.se, 4)} (t = ${tStat(t, locale)}):`
+    : `The error gap on that subset is ${sig(s.delta, 4)}, with a standard error of ${num(s.se, 4)} (t = ${tStat(t, locale)}):`;
+  const verdict = verdictShort(block, locale);
+  const scope = p
+    ? `É um subconjunto de ${formatInteger(s.n_disagree, locale)} jogos, escolhido pelas previsões e não pelos resultados; a resposta principal é a do conjunto, acima.`
+    : `It is a subset of ${formatInteger(s.n_disagree, locale)} matches, picked by the predictions rather than the results; the main answer is the whole sample's, above.`;
+  return `${opening} ${gap} ${verdict}. ${scope}`;
+}
+
+/**
+ * The evaluation is not independent of the model's choice (audit MR2-V01):
+ * the current model was picked among variants backtested on these same
+ * seasons, which favours it. The first clean test is the season in course.
+ */
+export function selectionCaveat(currentSeason: string, locale: string): string {
+  return pt(locale)
+    ? `O modelo atual foi escolhido entre variantes testadas nestas mesmas épocas; por isso esta avaliação não é independente dessa escolha e tende a favorecê-lo (pesa sobretudo nos dois empates técnicos, não na diferença do conjunto). A primeira avaliação limpa será a da época ${currentSeason}, cujas previsões ainda não estão avaliadas aqui.`
+    : `The current model was picked among variants backtested on these same seasons, so this evaluation is not independent of that choice and tends to favour it (this matters mostly for the two statistical ties, not the overall gap). The first clean test will be the ${currentSeason} season, whose forecasts are not yet scored here.`;
+}
+
+/**
+ * The page's verdict in one sentence (audit MR2-18: the three results were
+ * stated three times before the chart). Built from the same verdicts as the
+ * cards: "No conjunto e no início da época, o mercado está à frente; no resto
+ * da época, é um empate técnico."
+ */
+export function leadVerdictSentence(sc: ScorecardForCopy, locale: string): string {
+  const p = pt(locale);
+  const parts: Array<{ name: string; verdict: string }> = [
+    { name: p ? 'no conjunto' : 'overall', verdict: verdictShort(sc.overall, locale) },
+    { name: p ? 'no início da época' : 'early in the season', verdict: verdictShort(sc.phases.early, locale) },
+    { name: p ? 'no resto da época' : 'in the rest of the season', verdict: verdictShort(sc.phases.mid_late, locale) },
+  ];
+  const groups: Array<{ names: string[]; verdict: string }> = [];
+  for (const part of parts) {
+    const g = groups.find(x => x.verdict === part.verdict);
+    if (g) g.names.push(part.name);
+    else groups.push({ names: [part.name], verdict: part.verdict });
+  }
+  const and = p ? ' e ' : ' and ';
+  const text = groups.map(g => `${g.names.join(and)}, ${g.verdict}`).join('; ');
+  return `${text.charAt(0).toUpperCase()}${text.slice(1)}.`;
+}
+
+/** The reading rule alone, for the explainer under the chart (MR2-18). */
+export function readingRule(locale: string): string {
+  return pt(locale)
+    ? `Uma nota sobre incerteza, porque aqui ela decide tudo: lemos uma diferença como real só quando passa de ${ruleWords(locale)} o seu erro padrão; abaixo disso, é um empate técnico. Os três cartões acima aplicam esta regra.`
+    : `A note on uncertainty, because here it decides everything: we read a gap as real only when it is more than ${ruleWords(locale)} its standard error; below that, it is a statistical tie. The three cards above apply this rule.`;
+}
