@@ -10,6 +10,7 @@ import {
   formatElectionPoints,
   formatElectionProbability,
   formatElectionRange,
+  formatElectionSigned,
   pollsterDisplayName,
   voteShareScopeLabel,
 } from './election-display';
@@ -27,7 +28,8 @@ describe('election display', () => {
     expect(formatElectionPercent(.1234, 'pt')).toBe('12,3%');
     expect(formatElectionPercent(.1234, 'en')).toBe('12.3%');
     expect(formatElectionDate('2026-01-18', 'pt')).toMatch(/18/);
-    expect(formatElectionNumber(9000, 'pt')).toBe('9000');
+    expect(formatElectionNumber(9000, 'pt')).toBe('9\u00a0000');
+    expect(formatElectionNumber(0.07, 'pt', 2)).toBe('0,07');
     expect(formatElectionNumber(9000, 'en')).toBe('9,000');
   });
   it('reads a date as written, whatever the server time zone', () => {
@@ -37,9 +39,10 @@ describe('election display', () => {
     expect(formatElectionDayMonth('2026-01-15', 'pt')).toBe('15 de janeiro');
   });
   it('never prints certainty a few thousand simulations cannot support', () => {
-    expect(formatElectionProbability(1, 'pt')).toBe('>99%');
-    expect(formatElectionProbability(0, 'en')).toBe('<1%');
-    expect(formatElectionProbability(0.00012, 'pt')).toBe('<1%');
+    expect(formatElectionProbability(1, 'pt')).toBe('mais de 99%');
+    expect(formatElectionProbability(0, 'en')).toBe('under 1%');
+    expect(formatElectionProbability(0.00012, 'pt')).toBe('menos de 1%');
+    expect(formatElectionProbability(0.995, 'en')).toBe('over 99%');
     expect(formatElectionProbability(0.4477, 'pt')).toBe('45%');
   });
   it('states the vote-share denominator instead of leaving two numbers to disagree silently', () => {
@@ -62,5 +65,12 @@ describe('election display', () => {
     expect(pollsterDisplayName('Pitagorica')).toBe('Pitagórica');
     expect(pollsterDisplayName('ICS')).toBe('ICS/ISCTE');
     expect(pollsterDisplayName('Intercampus')).toBe('Intercampus');
+    expect(pollsterDisplayName('ICS/ISCTE/GFK Metris')).toBe('ICS/ISCTE/GfK Metris');
+  });
+  it('signs values with a true minus and never signs a rounded zero', () => {
+    expect(formatElectionSigned(0.22, 'pt')).toBe('+0,22');
+    expect(formatElectionSigned(-0.04, 'pt')).toBe('\u22120,04');
+    expect(formatElectionSigned(-0.0004, 'en', 3)).toBe('0.000');
+    expect(formatElectionSigned(-0.123, 'en', 3)).toBe('\u22120.123');
   });
 });

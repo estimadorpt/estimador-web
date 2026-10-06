@@ -339,6 +339,28 @@ export function seatSumArithmetic(draws: readonly SeatDraw[], parties: readonly 
   return { median: quantileSorted(totals, 0.5), reach: totals.filter(v => v >= threshold).length / totals.length };
 }
 
+export interface CloseLead {
+  district: string;
+  first: { party: string; share: number };
+  second: { party: string; share: number };
+}
+
+/**
+ * Districts whose two leading parties are within `margin` of each other in
+ * predicted vote share (default 1 percentage point). The map and the
+ * "party ahead" count colour such a district as a win for the leader; the
+ * pages name these so a near-tie is not read as a clear lead.
+ */
+export function closeLeads(districts: readonly { district_name: string; probs: Record<string, number> }[], margin = 0.01): CloseLead[] {
+  const out: CloseLead[] = [];
+  for (const d of districts) {
+    const [first, second] = Object.entries(d.probs).sort(([, a], [, b]) => b - a);
+    if (!first || !second || first[1] - second[1] >= margin) continue;
+    out.push({ district: d.district_name, first: { party: first[0], share: first[1] }, second: { party: second[0], share: second[1] } });
+  }
+  return out;
+}
+
 function round4(value: number): number {
   return Math.round(value * 10000) / 10000;
 }

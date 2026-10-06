@@ -25,16 +25,20 @@ export function PresidentialForecastBars({
   },
 }: PresidentialForecastBarsProps) {
   const locale = useLocale();
-  // Filter out "Others" and take top candidates
+  const pt = locale !== 'en';
+  // "Others" is not a candidate: it gets a line under the bars, not a bar.
   const candidates = forecast.candidates
     .filter(c => c.name !== 'Others')
     .slice(0, maxCandidates);
-  
-  // Find the max value for scaling
+  const others = forecast.candidates.find(c => c.name === 'Others');
+
+  // The axis runs to the next round ten above the widest interval, with a
+  // tick every ten points (0, 10, 20, 30%), never a "17,5%" midpoint.
   const maxValue = Math.max(
     ...candidates.map(c => showUncertainty ? c.ci_upper : c.mean)
   );
-  const scaleMax = Math.min(1, Math.max(0.1, Math.ceil(maxValue * 10) / 10 + 0.05));
+  const scaleMax = Math.min(1, Math.max(0.1, Math.ceil(maxValue * 10 + 1e-9) / 10));
+  const ticks = Array.from({ length: Math.round(scaleMax * 10) + 1 }, (_, i) => i / 10);
 
   const formatPercent = (value: number) => formatElectionPercent(value, locale);
 
@@ -117,14 +121,25 @@ export function PresidentialForecastBars({
         );
       })}
 
-      {/* Scale markers */}
-      <div className="relative h-4 mt-3 border-t border-stone-200 pt-2">
-        <div className="absolute inset-x-0 flex justify-between text-xs text-stone-500">
-          <span>{formatElectionPercent(0, locale, 0)}</span>
-          <span>{formatElectionPercent(scaleMax * .5, locale)}</span>
-          <span>{formatElectionPercent(scaleMax, locale, 0)}</span>
-        </div>
+      {/* Scale markers, at their true positions */}
+      <div className="relative h-5 mt-3 border-t border-stone-200" aria-hidden="true">
+        {ticks.map((tick, i) => (
+          <span
+            key={tick}
+            className="absolute top-1.5 text-xs text-stone-500 tabular-nums"
+            style={i === 0 ? { left: 0 } : i === ticks.length - 1 ? { right: 0 } : { left: `${(tick / scaleMax) * 100}%`, transform: 'translateX(-50%)' }}
+          >
+            {formatElectionPercent(tick, locale, 0)}
+          </span>
+        ))}
       </div>
+
+      {others && (
+        <p className="text-xs text-stone-600 tabular-nums">
+          {pt ? 'Outros candidatos, em conjunto (sem barra)' : 'Other candidates, together (not drawn)'}: {formatPercent(others.mean)}
+          {showUncertainty && ` (${formatPercent(others.ci_lower)}–${formatPercent(others.ci_upper)})`}
+        </p>
+      )}
     </div>
   );
 }

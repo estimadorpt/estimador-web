@@ -36,8 +36,12 @@ export function SecondRoundForecastBars({
     label: c.name === BLANK_NULL ? translations.blankNull : c.name,
   }));
 
+  // Round ticks every 25 points (0, 25, 50, 75%). The 50% tick is a scale
+  // mark only: on this denominator (all ballots) it is not the majority line,
+  // which the simulation chart above draws on the valid vote.
   const maxValue = Math.max(...candidates.map(c => showUncertainty ? c.ci_upper : c.mean));
-  const scaleMax = Math.min(0.8, Math.ceil(maxValue * 10) / 10 + 0.05);
+  const scaleMax = Math.min(1, Math.max(0.5, Math.ceil(maxValue * 4 + 1e-9) / 4));
+  const ticks = Array.from({ length: Math.round(scaleMax * 4) + 1 }, (_, i) => i / 4);
   const formatPercent = (value: number) => formatElectionPercent(value, locale);
 
   return (
@@ -96,11 +100,16 @@ export function SecondRoundForecastBars({
         );
       })}
 
-      <div className="relative h-4 mt-3 border-t border-stone-200 pt-2" aria-hidden="true">
-        <div className="absolute inset-x-0 flex justify-between text-xs text-stone-500">
-          <span>{formatElectionPercent(0, locale, 0)}</span>
-          <span>{formatElectionPercent(scaleMax, locale, 0)}</span>
-        </div>
+      <div className="relative h-5 mt-3 border-t border-stone-200" aria-hidden="true">
+        {ticks.map((tick, i) => (
+          <span
+            key={tick}
+            className="absolute top-1.5 text-xs text-stone-500 tabular-nums"
+            style={i === 0 ? { left: 0 } : i === ticks.length - 1 ? { right: 0 } : { left: `${(tick / scaleMax) * 100}%`, transform: 'translateX(-50%)' }}
+          >
+            {formatElectionPercent(tick, locale, 0)}
+          </span>
+        ))}
       </div>
     </div>
   );

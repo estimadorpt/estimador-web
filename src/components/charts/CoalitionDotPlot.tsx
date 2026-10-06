@@ -21,6 +21,8 @@ interface CoalitionDotPlotProps {
   majorityLabel?: string;
   /** "{drawn} of the {total} simulations drawn …", with both placeholders. */
   showingOutcomesLabel?: string;
+  /** Name of the table twin; distinct from the party chart's, so two regions on one page never share a name. */
+  tableCaption?: string;
 }
 
 const BLOC_COLOURS: Record<string, string> = { left: "#5eb184", right: "#c49536" };
@@ -46,6 +48,7 @@ export function CoalitionDotPlot({
   projectedSeatsLabel: seatsLabelProp,
   majorityLabel: majorityLabelProp,
   showingOutcomesLabel: showingProp,
+  tableCaption,
 }: CoalitionDotPlotProps) {
   const t = useTranslations("forecast");
   const locale = useLocale();
@@ -164,7 +167,7 @@ export function CoalitionDotPlot({
           .replaceAll("{count}", formatElectionNumber(simulations.total, locale))}
       </p>
       <ChartTable
-        caption={projectedSeatsLabel}
+        caption={tableCaption ?? `${projectedSeatsLabel} · ${pt ? "por bloco" : "by bloc"}`}
         columns={[pt ? "Bloco" : "Bloc", "P5", "P25", pt ? "Mediana" : "Median", "P75", "P95", pt ? "Prob. de maioria" : "Majority odds"]}
         rows={simulations.blocs.map(b => [labels[b.key] ?? b.key, b.summary.p5, b.summary.p25, b.summary.median, b.summary.p75, b.summary.p95, formatElectionProbability(b.majority, locale)])}
       />

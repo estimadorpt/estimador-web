@@ -13,21 +13,32 @@ export function formatElectionPercent(value: number, locale: string, digits = 1)
   return (value * 100).toLocaleString(electionIntlLocale(locale), { minimumFractionDigits: digits, maximumFractionDigits: digits }) + '%';
 }
 
-/** Whole numbers (simulation counts, seats) with the page's grouping: "9000" in pt-PT, "9,000" in en-GB. */
+/**
+ * Numbers with the page's grouping: "9 000" in pt-PT, "9,000" in en-GB.
+ * Grouping is forced from four digits, as formatInteger does elsewhere on the
+ * site: pt-PT alone would print "9000" beside "50 000".
+ */
 export function formatElectionNumber(value: number, locale: string, digits = 0): string {
-  return value.toLocaleString(electionIntlLocale(locale), { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  return value.toLocaleString(electionIntlLocale(locale), { minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: 'always' });
+}
+
+/** A signed value with a true minus and an explicit plus: "+0,22", "−0,04", "0,00". */
+export function formatElectionSigned(value: number, locale: string, digits = 2): string {
+  const magnitude = formatElectionNumber(Math.abs(value), locale, digits);
+  // Zero after rounding carries no sign ("0,00", never "−0,00").
+  if (Number(Math.abs(value).toFixed(digits)) === 0) return magnitude;
+  return `${value > 0 ? '+' : '−'}${magnitude}`;
 }
 
 /**
  * A probability as a whole percentage. Values that round to 0 or 100 are shown
- * as "<1%" and ">99%": a few thousand simulations cannot support a claim of
- * certainty, or more precision than one point.
+ * as "menos de 1%" and "mais de 99%" ("under 1%" / "over 99%"): a few thousand
+ * simulations cannot support a claim of certainty, or more precision than one
+ * point. Words, not "<" and ">", in tables as in headlines, so one quantity
+ * has one notation and the methodology's promise holds.
  */
 export function formatElectionProbability(probability: number, locale: string): string {
-  const pct = probability * 100;
-  if (pct > 99) return '>99%';
-  if (pct < 1) return '<1%';
-  return `${Math.round(pct).toLocaleString(electionIntlLocale(locale))}%`;
+  return formatElectionProbabilityText(probability, locale);
 }
 
 /**
@@ -69,6 +80,8 @@ export function formatElectionPoints(difference: number, locale: string, digits 
 const POLLSTER_NAMES: Record<string, string> = {
   Pitagorica: 'Pitagórica',
   ICS: 'ICS/ISCTE',
+  // The 2025 file writes the firm "GFK"; its own name, and the prose, say "GfK".
+  'ICS/ISCTE/GFK Metris': 'ICS/ISCTE/GfK Metris',
   'CESOP-U.Católica': 'CESOP–Católica',
   'CESOP-UCP': 'CESOP–Católica',
 };

@@ -86,13 +86,14 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
         <h2 id="archive-choice-title" className="mt-2 text-2xl">{pt ? 'Escolhe uma previsão' : 'Choose a forecast'}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">{pt ? 'Abre a previsão que queres situar no tempo. Encontrarás a data, a volta e as estimativas então publicadas.' : 'Open the forecast you want to place in time. It contains the date, election round and estimates published then.'}</p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          {entries.map((entry, index) => (
+          {entries.map(entry => (
             <div key={entry.href} className="rounded-2xl border border-line bg-cream p-5">
               <h3 className="text-lg font-semibold text-ink">{entry.name}</h3>
               {entry.rounds.map(line => <p key={line} className="mt-1 text-sm text-ink-muted">{line}</p>)}
               <p className="mt-3 text-sm leading-relaxed text-ink-muted">{entry.question}</p>
               <div className="mt-4">
-                <Action href={entry.href} locale={locale} variant={index === 0 ? 'primary' : 'secondary'} arrow>
+                {/* Two equal choices, one style: a primary on the first card read as a recommendation. */}
+                <Action href={entry.href} locale={locale} variant="secondary" arrow>
                   {pt ? 'Ver a previsão' : 'View the forecast'}
                 </Action>
               </div>
@@ -100,7 +101,9 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
                 <span>{pt ? 'Resultados oficiais (SGMAI)' : 'Official results (SGMAI)'}:</span>
                 {entry.results.map(r => (
                   <a key={r.href} href={r.href} className={linkClass} rel="noopener noreferrer">
-                    {r.round === 1 ? (pt ? '1.ª volta' : '1st round') : r.round === 2 ? (pt ? '2.ª volta' : '2nd round') : (pt ? 'resultados' : 'results')} ↗
+                    <span className="sr-only">{entry.name}, {pt ? 'resultados oficiais' : 'official results'}: </span>
+                    {r.round === 1 ? (pt ? '1.ª volta' : '1st round') : r.round === 2 ? (pt ? '2.ª volta' : '2nd round') : (pt ? 'resultados' : 'results')}
+                    <span aria-hidden="true"> ↗</span>
                   </a>
                 ))}
               </p>

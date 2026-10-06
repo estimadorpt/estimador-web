@@ -83,9 +83,13 @@ export default async function PresidentialArchivePage({
   const officialResults = (
     <span className="inline-flex flex-wrap items-center gap-x-2">
       <span>{t('presidential.officialResults')}:</span>
+      {/* The link names carry their context ("Resultados oficiais (SGMAI): 1.ª volta");
+          the arrow is decoration. */}
       {results.map(r => (
         <a key={r.href} href={r.href} className={linkClass} rel="noopener noreferrer">
-          {r.round === 1 ? t('secondRound.firstRoundTab') : t('secondRound.secondRoundTab')} ↗
+          <span className="sr-only">{t('presidential.officialResults')}: </span>
+          {r.round === 1 ? t('secondRound.firstRoundTab') : t('secondRound.secondRoundTab')}
+          <span aria-hidden="true"> ↗</span>
         </a>
       ))}
     </span>
@@ -208,7 +212,7 @@ export default async function PresidentialArchivePage({
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
             <div className="lg:col-span-3">
-              <h3 className="text-xl text-stone-900 mb-1 tracking-tight">{t('presidential.projectedVoteShare')}</h3>
+              <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('presidential.projectedVoteShare')}</h2>
               <p className="text-xs text-stone-500 mb-6">
                 {t('presidential.forecastForElectionDay', { forecast: firstForecast ?? '', election: firstElection })}
               </p>
@@ -235,9 +239,9 @@ export default async function PresidentialArchivePage({
                 <div className="pt-2">
                   <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">{t('presidential.keyFactors')}</h4>
                   <ul className="space-y-1 text-stone-600 text-sm">
-                    <li>→ {t('presidential.factor1')}</li>
-                    <li>→ {t('presidential.factor2')}</li>
-                    <li>→ {t('presidential.factor3')}</li>
+                    {[t('presidential.factor1'), t('presidential.factor2'), t('presidential.factor3')].map(factor => (
+                      <li key={factor}><span aria-hidden="true">→ </span>{factor}</li>
+                    ))}
                   </ul>
                 </div>
                 <div className="pt-4">
@@ -311,7 +315,8 @@ export default async function PresidentialArchivePage({
 
         <section className="py-8 border-b border-stone-300">
           <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">{t('nav.moreFrom')}</h2>
+            {/* A kicker, not a heading: the links below are navigation, not a section. */}
+            <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">{t('nav.moreFrom')}</p>
             <div className="flex flex-wrap gap-6">
               {[
                 { href: '/eleicoes/legislativas', label: t('nav.parliamentaryForecast') },

@@ -4,6 +4,7 @@ import { partyColors } from "@/lib/config/colors";
 import { OFFICIAL_RESULTS, PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from "@/lib/config/elections";
 import { loadParliamentaryArchive } from "@/lib/utils/data-loader";
 import { formatElectionLongDate, formatElectionNumber, formatElectionPercent, formatElectionProbabilityText } from "@/lib/election-display";
+import { closeLeads } from "@/lib/election-aggregates";
 import { ProbabilityFigure } from "@/components/charts/ProbabilityFigure";
 import { Calendar, BarChart3, TrendingUp, Users, Map, Vote } from "lucide-react";
 import { PollingChart } from "@/components/charts/PollingChart";
@@ -58,34 +59,49 @@ export default async function ParliamentaryArchivePage({
   // Election-day projection per party: mean and the 94% HDI band, read from
   // the last date of the trend window (the election day itself).
   const last = trends.dates.length - 1;
-  const projectionText = (party: string) => {
+  // The share, then its interval kept on one line: on a narrow card the
+  // interval drops below the share instead of breaking inside the range.
+  const projection = (party: string) => {
     const p = trends.parties[party];
     const mean = p?.mean[last];
-    if (mean == null) return '—';
+    if (mean == null) return <span className="font-bold">—</span>;
     const low = p.low[last];
     const high = p.high[last];
-    return low != null && high != null ? `${pct(mean)} (${pct(low)}–${pct(high)})` : pct(mean);
+    return (
+      <>
+        <span className="font-bold">{pct(mean)}</span>
+        {low != null && high != null && <> <span className="whitespace-nowrap font-normal text-stone-600">({pct(low)}–{pct(high)})</span></>}
+      </>
+    );
   };
   const rightName = rightBlocParties.join(' + ');
   const leftName = leftBlocParties.join(' + ');
   const otherParties = ['CH', 'PAN'];
   const officialResults = OFFICIAL_RESULTS['parliamentary-2025'][0];
+  // Districts the map and the count give to a party that led by under a point.
+  const close = closeLeads(districtForecast);
+  const closeLeadNote = close.length > 0
+    ? t('forecast.closeLeadNote', {
+      list: close.map(c => `${c.district} (${c.first.party} ${pct(c.first.share)}, ${c.second.party} ${pct(c.second.share)})`).join('; '),
+    })
+    : undefined;
+  const external = <span aria-hidden="true"> ↗</span>;
+  const arrow = <span aria-hidden="true"> →</span>;
 
   // One card per group of parties: the two blocs with their majority odds,
   // and the parties in neither bloc (CH, PAN), so every modelled party's
   // projected share is on the page.
   const blocCard = (title: string, parties: string[], majority: number | null) => (
     <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-      <h3 className="text-lg text-stone-900 mb-1">{title}</h3>
-      <p className="text-xs text-stone-500 mb-4">{t('forecast.blocProjectionCaption', { election: electionDate, date: forecastDate })}</p>
+      <h3 className="text-lg text-stone-900 mb-4">{title}</h3>
       <div className="space-y-3">
         {parties.map(party => (
-          <div key={party} className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded" style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }} />
+          <div key={party} className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3 pt-0.5">
+              <div aria-hidden="true" className="w-3 h-3 shrink-0 rounded" style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }} />
               <span className="text-sm font-medium text-stone-900">{t(`parties.${party}`)}</span>
             </div>
-            <span className="text-sm font-bold text-stone-900 tabular-nums">{projectionText(party)}</span>
+            <span className="text-right text-sm text-stone-900 tabular-nums">{projection(party)}</span>
           </div>
         ))}
         {majority != null && (
@@ -118,7 +134,7 @@ export default async function ParliamentaryArchivePage({
               <Calendar aria-hidden="true" className="w-3 h-3" />
               {t('forecast.forecastDateLine', { forecast: forecastDate, election: electionDate })}
             </span>
-            <a href={officialResults.href} className={linkClass} rel="noopener noreferrer">{t('forecast.officialResults')} ↗</a>
+            <a href={officialResults.href} className={linkClass} rel="noopener noreferrer">{t('forecast.officialResults')}{external}</a>
           </>
         }
       />
@@ -168,7 +184,7 @@ export default async function ParliamentaryArchivePage({
 
           <div id="polling" className="bg-cream border border-stone-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
-              <TrendingUp aria-hidden="true" className="w-5 h-5 text-stone-500" />
+              <TrendingUp aria-hidden="true" className="hidden sm:block w-5 h-5 shrink-0 text-stone-500" />
               <h2 className="text-2xl text-stone-900">{t('forecast.pollingTrends')}</h2>
             </div>
             <PollingChart series={trends} voteShareLabel={t('forecast.voteShareLabel')} />
@@ -179,7 +195,7 @@ export default async function ParliamentaryArchivePage({
 
           <div className="bg-cream border border-stone-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
-              <BarChart3 aria-hidden="true" className="w-5 h-5 text-stone-500" />
+              <BarChart3 aria-hidden="true" className="hidden sm:block w-5 h-5 shrink-0 text-stone-500" />
               <h2 className="text-2xl text-stone-900">{t('forecast.coalitionSeats')}</h2>
             </div>
             <CoalitionDotPlot
@@ -189,6 +205,7 @@ export default async function ParliamentaryArchivePage({
               projectedSeatsLabel={t('forecast.projectedSeats')}
               majorityLabel={t('forecast.majorityThresholdLabel', { seats: majorityThreshold, total: 230 })}
               showingOutcomesLabel={t.raw('forecast.drawnSimulations') as string}
+              tableCaption={t('forecast.projectedSeatsByBloc')}
             />
             <p className="text-sm text-stone-600 mt-4">{t('forecast.coalitionDescription')}</p>
             <p className="text-xs text-stone-500 mt-2">{t('forecast.coalitionArithmeticNote')}</p>
@@ -196,10 +213,10 @@ export default async function ParliamentaryArchivePage({
 
           <div className="bg-cream border border-stone-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
-              <Users aria-hidden="true" className="w-5 h-5 text-stone-500" />
+              <Users aria-hidden="true" className="hidden sm:block w-5 h-5 shrink-0 text-stone-500" />
               <h2 className="text-2xl text-stone-900">{t('forecast.individualParties')}</h2>
             </div>
-            <SeatChart stats={seats} />
+            <SeatChart stats={seats} tableCaption={t('forecast.projectedSeatsByParty')} />
             <p className="text-sm text-stone-600 mt-4">
               {t('forecast.simulationDescription', { count: formatElectionNumber(archive.simulations, locale) })}
             </p>
@@ -208,29 +225,34 @@ export default async function ParliamentaryArchivePage({
           <div id="district-analysis" className="bg-cream border border-stone-200 rounded-2xl p-6">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-3">
-                <Map aria-hidden="true" className="w-5 h-5 text-stone-500" />
+                <Map aria-hidden="true" className="hidden sm:block w-5 h-5 shrink-0 text-stone-500" />
                 <h2 className="text-2xl text-stone-900">{t('forecast.districtAnalysis')}</h2>
               </div>
               <Link href="/eleicoes/legislativas/mapa" locale={locale} className={`text-sm font-medium ${linkClass}`}>
-                {t('map.title')} →
+                {t('map.title')}{arrow}
               </Link>
             </div>
-            <DistrictSummary districtData={districtForecast} contestedData={contestedSeats} />
+            <DistrictSummary districtData={districtForecast} contestedData={contestedSeats} closeLeadNote={closeLeadNote} />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blocCard(leftName, leftBlocParties, probabilities.leftMajority)}
-            {blocCard(rightName, rightBlocParties, probabilities.rightMajority)}
-            {blocCard(t('forecast.otherParties'), otherParties, null)}
+          {/* One caption for the three cards: it was repeated in each. */}
+          <div>
+            <p className="mb-4 max-w-3xl text-sm text-stone-600">{t('forecast.blocProjectionCaption', { election: electionDate, date: forecastDate })}</p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {blocCard(leftName, leftBlocParties, probabilities.leftMajority)}
+              {blocCard(rightName, rightBlocParties, probabilities.rightMajority)}
+              {blocCard(t('forecast.otherParties'), otherParties, null)}
+            </div>
           </div>
 
           {/* Polling analysis — a specialist method/evidence view, not a
               main-path answer, so it sits behind a disclosure. */}
           <details className="group bg-cream border border-stone-200 rounded-2xl p-6">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3">
-              <Users aria-hidden="true" className="w-5 h-5 text-stone-500" />
+            {/* The heading wraps on a phone, so the "Mostrar" cue drops below it there. */}
+            <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1">
+              <Users aria-hidden="true" className="hidden sm:block w-5 h-5 shrink-0 text-stone-500" />
               <h2 className="text-2xl text-stone-900">{t('forecast.pollingHouseEffects')}</h2>
-              <span className="ml-auto text-xs font-bold uppercase tracking-wider text-stone-500 group-open:hidden">
+              <span className="basis-full text-xs font-bold uppercase tracking-wider text-stone-500 group-open:hidden sm:ml-auto sm:basis-auto">
                 {t('forecast.show')}
               </span>
             </summary>
@@ -246,30 +268,30 @@ export default async function ParliamentaryArchivePage({
       <section className="pb-8">
         <div className="max-w-7xl mx-auto px-4 space-y-8">
           <div id="evidence" className="bg-paper border border-line rounded-2xl p-6">
-            <h2 className="text-lg text-stone-900 mb-4">{t('forecast.aboutModel')}</h2>
+            <h2 className="text-2xl text-stone-900 mb-4">{t('forecast.aboutModel')}</h2>
             <div className="grid md:grid-cols-3 gap-6 text-sm text-stone-600">
               <div>
-                <h3 className="flex items-center gap-2 mb-2 font-medium">
+                <h3 className="flex items-center gap-2 mb-2 text-base font-bold text-ink">
                   <Users aria-hidden="true" className="w-4 h-4" />
                   {t('forecast.dataSources')}
                 </h3>
                 <p>{t('forecast.dataSourcesDescription')}</p>
               </div>
               <div>
-                <h3 className="flex items-center gap-2 mb-2 font-medium">
+                <h3 className="flex items-center gap-2 mb-2 text-base font-bold text-ink">
                   <BarChart3 aria-hidden="true" className="w-4 h-4" />
                   {t('forecast.methodology')}
                 </h3>
                 <p>{t('forecast.methodologyDescription')}</p>
-                <Link href="/eleicoes/metodologia#legislativas" locale={locale} className={`mt-2 inline-block ${linkClass}`}>{t('common.methodology')} →</Link>
+                <Link href="/eleicoes/metodologia#legislativas" locale={locale} className={`mt-2 inline-block ${linkClass}`}>{t('common.methodology')}{arrow}</Link>
               </div>
               <div>
-                <h3 className="flex items-center gap-2 mb-2 font-medium">
+                <h3 className="flex items-center gap-2 mb-2 text-base font-bold text-ink">
                   <TrendingUp aria-hidden="true" className="w-4 h-4" />
                   {t('forecast.updates')}
                 </h3>
                 <p>{t('forecast.updatesDescription', { date: forecastDate })}</p>
-                <a href={officialResults.href} className={`mt-2 inline-block ${linkClass}`} rel="noopener noreferrer">{t('forecast.officialResults')} ↗</a>
+                <a href={officialResults.href} className={`mt-2 inline-block ${linkClass}`} rel="noopener noreferrer">{t('forecast.officialResults')}{external}</a>
               </div>
             </div>
           </div>
