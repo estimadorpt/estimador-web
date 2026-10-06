@@ -97,7 +97,12 @@ export function FixtureStakes({ locale, entry, matchLink = false }: { locale: Lo
         <>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
             <div>
-              <dt className="text-xs text-stone-500">{pt ? 'Agora' : 'Now'}</dt>
+              <dt className="text-xs text-stone-500">
+                <ClockSwitch
+                  initial={pt ? 'Agora' : 'Now'}
+                  steps={entry.fixtureKickoff ? [{ at: entry.fixtureKickoff, value: pt ? 'Antes do jogo' : 'Before the match' }] : []}
+                />
+              </dt>
               <dd className="font-display text-2xl font-extrabold tabular-nums text-ink">{formatClubPercent(entry.baseline, locale)}</dd>
             </div>
             <div>

@@ -117,8 +117,8 @@ export function ContestedSection({
       </h2>
       <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
         {pt
-          ? "A probabilidade de ganhar um duelo — aéreo ou no chão — estimada sobre a carreira de três épocas de cada jogador. É a primeira métrica desta página em que defesas e médios se separam de facto uns dos outros, porque o resultado é atribuído ao jogador que disputou o lance, não à equipa inteira."
-          : "The probability of winning a duel — aerial or on the ground — estimated over each player's three-season career. It is the first metric on this page where defenders and midfielders genuinely separate from one another, because the outcome is attributed to the player who contested it, not to the whole team."}
+          ? `A probabilidade de ganhar um duelo — aéreo ou no chão — estimada sobre a carreira de cada jogador nas ${data.seasons.length} épocas do ficheiro. É a primeira métrica desta página em que defesas e médios se separam de facto uns dos outros, porque o resultado é atribuído ao jogador que disputou o lance, não à equipa inteira.`
+          : `The probability of winning a duel — aerial or on the ground — estimated over each player's career in the file's ${data.seasons.length} seasons. It is the first metric on this page where defenders and midfielders genuinely separate from one another, because the outcome is attributed to the player who contested it, not to the whole team.`}
       </p>
       <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-2 max-w-3xl leading-relaxed">
         {pt

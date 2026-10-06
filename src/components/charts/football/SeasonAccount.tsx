@@ -228,7 +228,7 @@ function SyncBadge({
   if (state === "saving") {
     return (
       <span className="inline-flex items-center gap-1 text-stone-400">
-        <Cloud className="w-3.5 h-3.5 animate-pulse" />
+        <Cloud className="w-3.5 h-3.5 motion-safe:animate-pulse" />
         {labels.saving}
       </span>
     );

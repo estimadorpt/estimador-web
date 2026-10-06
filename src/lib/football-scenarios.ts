@@ -70,3 +70,39 @@ export function initialImpactSide(
   };
   return swing(away) > swing(home) ? 'away' : 'home';
 }
+
+/* ------------------------------------------------------------ the duel */
+
+export interface DuelBin {
+  /** Inclusive range of the points difference (A − B). */
+  lo: number;
+  hi: number;
+  count: number;
+  side: 'a' | 'b' | 'tie';
+}
+
+/**
+ * The head-to-head histogram's bins (audit PUB2-09): a bar of its own for a
+ * tie on points, then `half` equal ranges on each side ("1 a 7", "8 a 14"…),
+ * so the middle bar is exactly "empate em pontos" and never a −3..+3 bin
+ * that mixes both clubs ahead with real ties.
+ */
+export function duelBins(diffs: number[], half = 4): DuelBin[] {
+  const maxAbs = Math.max(1, ...diffs.map(d => Math.abs(d)));
+  const w = Math.max(1, Math.ceil(maxAbs / half));
+  const bins: DuelBin[] = [];
+  for (let k = half; k >= 1; k--) bins.push({ lo: -k * w, hi: -(k - 1) * w - 1, count: 0, side: 'b' });
+  bins.push({ lo: 0, hi: 0, count: 0, side: 'tie' });
+  for (let k = 1; k <= half; k++) bins.push({ lo: (k - 1) * w + 1, hi: k * w, count: 0, side: 'a' });
+  for (const d of diffs) {
+    const bin = bins.find(b => d >= b.lo && d <= b.hi) ?? (d > 0 ? bins[bins.length - 1] : bins[0]);
+    bin.count++;
+  }
+  return bins;
+}
+
+/** Half-width of a 95% interval for a share p estimated from n draws. */
+export function samplingMargin(p: number, n: number): number {
+  if (n <= 0) return 0;
+  return 1.96 * Math.sqrt((p * (1 - p)) / n);
+}

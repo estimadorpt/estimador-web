@@ -4,7 +4,7 @@ import type {
   ScenarioStep,
   ScenarioRivalCondition,
 } from "@/types/football";
-import { teamColorOnPaper, teamDisplayName } from "@/lib/config/football";
+import { teamColorOnPaper, teamDisplayName, teamWithArticle } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
 import { rivalConditionsWithoutOwnMatches } from "@/lib/football-scenarios";
 
@@ -94,7 +94,7 @@ function RivalConditions({ conditions, labels, locale }: { conditions: ScenarioR
             <i aria-hidden="true" className="mt-0.5 h-3 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(rc.rival) }} />
             <span>
               <span className="font-semibold text-ink">{teamDisplayName(rc.rival)}</span> {labels.dropsPointsVs}{" "}
-              {teamDisplayName(rc.opponent)}
+              {pt ? teamWithArticle(rc.opponent) : teamDisplayName(rc.opponent)}
               <span className="text-stone-500"> ({labels.matchdayPrefix}{rc.matchday})</span>
               <span className="text-stone-500">
                 {": "}

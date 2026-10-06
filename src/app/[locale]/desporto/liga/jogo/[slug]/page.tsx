@@ -241,7 +241,7 @@ export default async function MatchPage({
         measure="wide"
         compact
         back={{ href: "/desporto/liga", label: L.back, locale }}
-        eyebrow={`Liga Portugal · ${pt ? "Jornada" : "Matchday"} ${fixture.matchday}${fixture.inProgressMatchday ? ` · ${L.live}` : ""}${isPlayed ? (pt ? " · jogo disputado" : " · played") : ""}`}
+        eyebrow={`Liga Portugal · ${pt ? "Jornada" : "Matchday"} ${fixture.matchday}${fixture.inProgressMatchday ? ` · ${L.live}` : ""}${fixture.postponed ? (pt ? " · jogo em atraso" : " · postponed") : ""}${isPlayed ? (pt ? " · jogo disputado" : " · played") : ""}`}
         title={matchLabel(teamDisplayName(home), teamDisplayName(away))}
         lede={isPlayed
           ? fixture.p_home != null

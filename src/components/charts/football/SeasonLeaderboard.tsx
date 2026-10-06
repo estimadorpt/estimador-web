@@ -16,7 +16,8 @@ import { formatDecimal, formatLongDate } from "@/lib/football-format";
 import { useState } from "react";
 import type { LeaderboardResponse, LeaderboardRow } from "@/lib/utils/prediction-game-api";
 
-const USER_COLOR = "#4e8056";
+// Text-strength green on paper (audit A11Y2-08).
+const USER_COLOR = "#377455";
 const MODEL_COLOR = "#5f7062";
 
 interface SeasonLeaderboardProps {

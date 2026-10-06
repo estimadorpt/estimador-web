@@ -68,8 +68,8 @@ function summary(
     // What the page finds, not a claim the model is "à frente" anywhere
     // (audit FA2-09): the verdicts come from the file.
     description: pt
-      ? `O modelo da Liga Portugal contra a linha de fecho do mercado, ${formatInteger(sc.n, locale)} jogos (${range}). ${lead}`
-      : `The Liga Portugal model against the market's closing line, ${formatInteger(sc.n, locale)} matches (${range}). ${lead}`,
+      ? `Modelo vs linha de fecho do mercado, ${formatInteger(sc.n, locale)} jogos: ${lead.charAt(0).toLowerCase()}${lead.slice(1)}`
+      : `Model vs the market's closing line, ${formatInteger(sc.n, locale)} matches: ${lead.charAt(0).toLowerCase()}${lead.slice(1)}`,
     footnote: pt
       ? `Avaliação em ${formatInteger(sc.n, locale)} jogos: ${sc.n_seasons} épocas (${range}) × ${mds.length} jornadas (${gamesOfMatchdays(mds, locale)}). Para prever cada jornada, o modelo é ajustado apenas com os jogos disputados até à jornada anterior, sem ver o futuro. As probabilidades do mercado derivam das cotações de fecho publicadas pela football-data.co.uk${sources ? ` (${sources})` : ""}${shin ? ", com a margem retirada pelo método de Shin" : ""}. Avaliação gerada a ${formatLongDate(sc.generated_at, locale)}.`
       : `Evaluated on ${formatInteger(sc.n, locale)} matches: ${sc.n_seasons} seasons (${range}) × ${mds.length} matchdays (${gamesOfMatchdays(mds, locale)}). To forecast each matchday, the model is fitted only on the matches played up to the one before, without seeing the future. Market probabilities are derived from closing odds published by football-data.co.uk${sources ? ` (${sources})` : ""}${shin ? ", with the margin removed using Shin's method" : ""}. Evaluation generated on ${formatLongDate(sc.generated_at, locale)}.`,

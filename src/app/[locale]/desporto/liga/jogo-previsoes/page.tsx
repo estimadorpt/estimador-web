@@ -4,7 +4,7 @@ import { createPageMetadata } from '@/lib/metadata';
 import { loadPredictionGameData } from "@/lib/utils/football-data-loader";
 import { findOpenRound, roundLockState } from "@/lib/utils/prediction-game";
 import { formatLongDate } from "@/lib/football-format";
-import { latePublications, type ManifestRoundLike } from "@/lib/utils/prediction-game-record";
+import { frozenBeforePreviousRoundEnded, latePublications, type ManifestRoundLike } from "@/lib/utils/prediction-game-record";
 import { DeadlineLine } from "./DeadlineLine";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
@@ -77,11 +77,20 @@ export default async function JogoPrevisoesPage({
 
   // The model's season record counts rounds it published after kickoff
   // (2026-27 matchday 1); the table says so (audit M2).
-  const recordNote = latePublications(manifestRounds)
-    .map(l => pt
+  // It also counts rounds whose odds were frozen while the previous round
+  // was still being played (audit FA2-04, FRESH-02).
+  const frozen = frozenBeforePreviousRoundEnded(manifestRounds).map(f => f.matchday);
+  const frozenNote = frozen.length
+    ? pt
+      ? `As probabilidades ${frozen.length > 1 ? `das jornadas ${frozen.slice(0, -1).join(", ")} e ${frozen[frozen.length - 1]}` : `da jornada ${frozen[0]}`} foram congeladas antes do fim da jornada anterior, sem os resultados que faltavam; o modelo é avaliado com elas tal como foram congeladas.`
+      : `The probabilities for ${frozen.length > 1 ? `matchdays ${frozen.slice(0, -1).join(", ")} and ${frozen[frozen.length - 1]}` : `matchday ${frozen[0]}`} were frozen before the previous round ended, without the results still to come; the model is scored on them as frozen.`
+    : null;
+  const recordNote = [
+    ...latePublications(manifestRounds).map(l => pt
       ? `O registo do modelo inclui a jornada ${l.matchday}, cujas probabilidades foram publicadas a ${formatLongDate(l.publishedAt, locale)}, depois de ${l.startedBefore} dos ${l.total} jogos terem começado.`
-      : `The model's record includes matchday ${l.matchday}, whose probabilities were published on ${formatLongDate(l.publishedAt, locale)}, after ${l.startedBefore} of its ${l.total} games had started.`)
-    .join(" ") || null;
+      : `The model's record includes matchday ${l.matchday}, whose probabilities were published on ${formatLongDate(l.publishedAt, locale)}, after ${l.startedBefore} of its ${l.total} games had started.`),
+    ...(frozenNote ? [frozenNote] : []),
+  ].join(" ") || null;
 
   return (
     <div className="min-h-screen bg-paper">

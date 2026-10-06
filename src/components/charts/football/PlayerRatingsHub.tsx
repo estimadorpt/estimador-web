@@ -438,7 +438,9 @@ export function PlayerRatingsHub({
     );
   if (gkChannels && !gkChannels.channels.shot_stopping.ships)
     inconclusive.push(
-      pt ? "defesa de remates (3 épocas)" : "shot-stopping (3 seasons)",
+      pt
+        ? `defesa de remates (${gkChannels.seasons.length} épocas)`
+        : `shot-stopping (${gkChannels.seasons.length} seasons)`,
     );
   // The xGOT feed is superseded by the three-axis section when that feed
   // exists; listing an unrendered section as ranked would be a lie.

@@ -71,6 +71,8 @@ export interface EarlyLock {
   away: string;
   kickoff: string;
   locksAt: string;
+  /** When its round closed (the round's earliest lock): the game's real lock. */
+  roundLocksAt: string;
 }
 
 /**
@@ -95,9 +97,72 @@ export function earlyLocks(rounds: readonly ManifestRoundLike[], minDays = 1): E
           away: f.away,
           kickoff: f.kickoff as string,
           locksAt: f.locks_at as string,
+          roundLocksAt: roundLockAt(r) ?? (f.locks_at as string),
         });
       }
     }
   }
   return out;
+}
+
+export interface FrozenMidRound {
+  matchday: number;
+  /** When this round's probabilities were frozen (earliest published_at). */
+  publishedAt: string;
+  /** The previous round, still being played at that moment. */
+  previous: number;
+  /** Kickoff of the previous round's last game played before this round. */
+  previousLastKickoff: string;
+}
+
+/**
+ * Rounds whose probabilities were frozen before the previous round's last
+ * game (audit FA2-04, FRESH-02): in 2026-27, matchdays 3, 5, 6 and 7, so
+ * their odds miss up to half of the round before. A postponed leftover
+ * played weeks later does not count as the previous round's end: only its
+ * games that kicked off before this round began do.
+ */
+export function frozenBeforePreviousRoundEnded(rounds: readonly ManifestRoundLike[]): FrozenMidRound[] {
+  const out: FrozenMidRound[] = [];
+  for (const r of rounds) {
+    const fixtures = r.fixtures ?? [];
+    const published = fixtures
+      .map(f => (f.published_at ? Date.parse(f.published_at) : NaN))
+      .filter(Number.isFinite);
+    if (!published.length) continue;
+    const publishedMs = Math.min(...published);
+    const firstKickoff = Math.min(...fixtures.map(f => parseKickoff(f.kickoff ?? null) ?? Infinity));
+    const previous = rounds.find(x => x.matchday === r.matchday - 1);
+    if (!previous) continue;
+    const before = (previous.fixtures ?? [])
+      .map(f => parseKickoff(f.kickoff ?? null))
+      .filter((ms): ms is number => ms !== null && ms < firstKickoff);
+    if (!before.length) continue;
+    const lastMs = Math.max(...before);
+    if (publishedMs < lastMs) {
+      out.push({
+        matchday: r.matchday,
+        publishedAt: new Date(publishedMs).toISOString(),
+        previous: previous.matchday,
+        previousLastKickoff: new Date(lastMs).toISOString(),
+      });
+    }
+  }
+  return out.sort((a, b) => a.matchday - b.matchday);
+}
+
+/** Rounds with published probabilities but no probs_source on any game. */
+export function roundsWithoutSource(rounds: readonly ManifestRoundLike[]): number[] {
+  return rounds
+    .filter(r => (r.fixtures ?? []).some(f => f.published_at) && !(r.fixtures ?? []).some(f => f.probs_source))
+    .map(r => r.matchday)
+    .sort((a, b) => a - b);
+}
+
+/** The instant a round closes in the game: its earliest lock (audit FA2-05). */
+export function roundLockAt(round: ManifestRoundLike): string | null {
+  const locks = (round.fixtures ?? [])
+    .map(f => parseKickoff(f.locks_at ?? null))
+    .filter((ms): ms is number => ms !== null);
+  return locks.length ? new Date(Math.min(...locks)).toISOString() : null;
 }
