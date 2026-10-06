@@ -7,11 +7,11 @@ the website does meanwhile and what would let it stop.
    game, only the club whose title chances swing most (the loop in
    `src/liga_predict/analysis/scenarios.py`, about lines 128–144, computes H/D/A
    conditionals for every contender and keeps the best). Emit them for each contender, so a
-   club page can list its own decisive games: Sporting's J12 and J29 at Porto are missing
-   from Sporting's page today (FA2-02). *Web:* a club page lists only the games whose
-   `most_affected_team` is that club (`titleDecisive` / `relegationDecisive` in
-   `src/components/charts/football/DecisiveMatches.tsx`), else its own games that swing
-   another club's race.
+   club page can list its own decisive games: Sporting's two games with Porto (J12 away,
+   J29 at home) are missing from Sporting's page today (FA2-02). *Web:* a club page lists
+   only the games whose `most_affected_team` is that club (`titleDecisive` /
+   `relegationDecisive` in `src/components/charts/football/DecisiveMatches.tsx`), else its
+   own games that swing another club's race.
 2. **Immutable matchday snapshots, and a `probs_source` that resolves to one.** An
    `mdNN.json` is regenerated in place, so its `timestamp` is the last regeneration, not the
    first publication, and `probs_source` (`md07.json@10877c9`) names a commit, not a file a
