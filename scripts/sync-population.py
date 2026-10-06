@@ -231,8 +231,9 @@ def main() -> int:
     problems.check(len(parish_meta) == PARISH_COUNT, f"atlas places has {len(parish_meta)} parishes")
     problems.check(set(parish_meta) == set(quality_rows), "atlas places and quality.csv disagree on parish codes")
     problems.check(set(parish_meta) == set(anchors), "atlas places and anchor points disagree on parish codes")
-    # The release names municípios from CAOP 2024.1; the site keeps the CAOP 2021 atlas
-    # names, which also tell the two Calhetas and the two Lagoas apart. Codes must agree.
+    # The release names municípios from INE's 2021 geography (CAOP 2024.1 before v1.0.2);
+    # the site keeps the CAOP 2021 atlas names, which also tell the two Calhetas and the
+    # two Lagoas apart. Codes must agree.
     name_notes = set()
     for code, row in quality_rows.items():
         problems.check(row["municipio"] == parish_meta[code]["municipality"] + "00", f"{code}: município code differs from the atlas")

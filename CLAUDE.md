@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **estimador.pt** is a multi-domain data analysis platform for Portugal, built with Next.js. It provides data-driven forecasts and analysis across different domains (football, elections, and more), with a professional editorial-style interface and interactive visualizations.
 
 ### Sections
-- **População** (`/populacao/`) — open synthetic population v1.0.1 (Censos 2021), parish by parish (see "Population section")
+- **População** (`/populacao/`) — open synthetic population v1.0.3 (Censos 2021), parish by parish (see "Population section")
 - **Liga Portugal** (`/desporto/liga/`) — Bayesian football league forecasts, updated every matchday
 - **Economia** (`/economia/`) — **in preparation** (see "Economy section"): explainers online, no figures published
 - **Presidential Elections 2026** (`/eleicoes/presidenciais/`) — archived forecast (both rounds)
@@ -116,13 +116,22 @@ card and the plain nav label together.
 
 ## Population section
 
-The synthetic population release (`pt-synthpop` v1.0.1, published 2026-10-05; microdata on
+The synthetic population release (`pt-synthpop` v1.0.3, published 2026-10-05; microdata on
 GitHub releases, `POPULATION_DOWNLOADS`). Config, routes and the release number live in
 `src/lib/config/population.ts`; code reads `POPULATION_RELEASE`, never a typed version.
-v1.0.1 superseded v1.0.0 the same day (doc 206 §5): same microdata, but every parish now
-answers every question with its own numbers and its measured tier (A 776 / B 705 /
-C 1,611), no cell is suppressed, a category with no one in it shows "0,0%", and the game
-deck holds all 3,092 parishes. Tiers are reading guides, not gates.
+v1.0.3 superseded v1.0.0, v1.0.1 and v1.0.2, all of the same day (doc 206 §5–§7; v1.0.2
+was never served nor released on GitHub). The generated population is v1.0.0's
+throughout. Every parish answers every question with its own numbers and its measured
+tier (A 776 / B 705 / C 1,611), no cell is suppressed, a category with no one in it shows
+"0,0%" (8,723 of them), and the game deck holds all 3,092 parishes with v1.0.1's calendar
+(day 0 = 030857). Household size, household type, "who lives alone" and "elders alone"
+(like multigenerational) count private households only (`is_institutional = 0`); the
+producer writes pt-PT display values ("18,0%") and `formatDisplay` sets the decimal mark
+per locale. The package's `nuts2` is NUTS-2013 from v1.0.3 and its município names are
+INE 2021's; the site keeps CAOP 2021 names. The history sentence lives once, in
+`SUPERSEDED` (`src/components/population/quality/copy.ts`). The quality page quotes the
+scorecard's `band_reading` and band notes (`band-reading.ts`) and never renders `in_band`
+or `coverage_in_band`. Tiers are reading guides, not gates.
 
 - **Routes** (`src/app/[locale]/populacao/`): hub `/populacao`, parish pages
   `/populacao/freguesia/{CODE}` (6-char DICOFRE, e.g. `0302FA`), regions
@@ -134,7 +143,9 @@ deck holds all 3,092 parishes. Tiers are reading guides, not gates.
   `public/data/population/v{release}/` (meta, places, parish/<code>, national, game,
   q, scorecard, release). Server code reads it through
   `src/lib/utils/population-data-loader.ts`, browser code through
-  `src/lib/population/client.ts`. To bump: re-sync, change `POPULATION_RELEASE`.
+  `src/lib/population/client.ts`. To bump: re-sync, change `POPULATION_RELEASE` (config and
+  `scripts/validate-data.mjs`), the asset sizes in `POPULATION_DOWNLOADS` (tested against
+  release.json), `SUPERSEDED` if the history changes, and rerun `npm run og`.
 - **Data rules** (producer handoff doc 206 §3, enforced in review): every number comes
   from a published response, the scorecard, release/meta counts or the INE counts in
   places.json (labelled "INE, Censos 2021"); never compute new numbers from cells.
@@ -143,7 +154,7 @@ deck holds all 3,092 parishes. Tiers are reading guides, not gates.
   metadata). The code keeps handling `fallback`/`refuse`/suppressed responses (part of
   the contract: fallback figures name the município, refusals show the reason, suppressed
   reads "Suprimido", absent "—"), but copy describes them only when `meta.counts` or the
-  record says they happen; v1.0.1 has none.
+  record says they happen; no release since v1.0.1 has any.
   No narrated synthetic individuals. `HONESTY.synthetic` sits near the first number on
   every page; `HONESTY.positioning` is quoted verbatim. Copy helpers in
   `src/lib/population/labels.ts`.

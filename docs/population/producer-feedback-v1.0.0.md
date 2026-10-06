@@ -4,6 +4,27 @@ Found while integrating the doc 206 handoff into the website. None of these bloc
 publication; each lists what the website does today and what would let it stop.
 Evidence scripts from the integration are summarised inline.
 
+## Status at v1.0.3 (2026-10-05, handoff doc 206 §5–§7)
+
+The site serves v1.0.3, which supersedes v1.0.1 and v1.0.2 (v1.0.2 was never served).
+
+- **Moot since v1.0.1** (every parish answers with its own numbers, 0 suppressed, zeros
+  shown): 1 (nothing suppressed), 2 (every category present, 0 where empty), 3–5 (no
+  fallbacks or refusals remain).
+- **Resolved in v1.0.2, carried into v1.0.3:** 6 (pt-PT decimals; `formatDisplay` now sets
+  the mark per locale in both directions), 7 (numeric `age_5y` order; `<NA>` gone; the
+  producer still ships no EN labels, so `VALUES` stays), 8 (titles name their
+  population), 9 (household size, type, who lives alone and elders alone on private
+  households; the card copy says so), 11 (deck reads a missing feature as the average),
+  14 (package município names from INE 2021; the site keeps CAOP 2021), 16 (in-package
+  `CITATION.cff` has url, repository and date; DOI still waits for Zenodo).
+- **Resolved in v1.0.3:** 13 (`nuts2` is NUTS-2013, in ERRATA as resolved; the site
+  still does not use the column).
+- **Settled:** 12 (day 0 is the publication date; v1.0.3's deck carries v1.0.1's calendar
+  day for day, so day 0 is 030857, not the 150912 of item 12) and 15 (public repository
+  copy).
+- **Open:** 10 (more national and district templates, v1.1 public layer).
+
 ## Contract and bundle
 
 1. **Suppressed cells are recoverable by subtraction.** In 3,298 groups exactly one cell is
