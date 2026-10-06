@@ -132,12 +132,15 @@
   .mini-stage .mini-scene{max-height:min(720px,100%)}
   /* The sidebar is not a box of its own (no ground; the workspace's shows through it), only its right
      hairline. It runs the card's full height, so where the stage is the taller column (from 1200px,
-     ~850px against 781-807px, by step) the hairline does not stop short above the tools; and the
-     distribution, the sidebar's last block, sits at its foot, so both columns end together (the bars
-     beside the tools row) instead of the bars stopping 42-68px above the card's edge. Where the sidebar
-     is the taller column the auto margin is zero and nothing moves. */
+     ~850px against 781-807px, by step) the hairline does not stop short above the tools. The slack
+     (0 to 84px, by width and step) goes inside the distribution, its last block: the bars stay right
+     under the sentence that introduces them, each row grows by the same share (four rows, about 15-21px
+     each from 1280px) with its label and bar centred in it, and the last bar ends beside the tools row.
+     A pushed-down block (margin-top:auto) only moved the blank from the foot to between the story and
+     the bars. Where the sidebar is the taller column there is no slack and nothing moves. */
   .mini-sidebar{align-self:stretch}
-  .mini-sidebar>.mini-distribution{margin-top:auto}
+  .mini-sidebar>.mini-distribution{flex:1 1 auto;min-height:0;grid-auto-rows:1fr}
+  .mini-sidebar>.mini-distribution button{display:flex;flex-direction:column;justify-content:center}
 }
 @media(min-width:721px) and (max-width:1199px) and (min-height:560px){
   .mini-stage{max-height:calc(100vh - 92px);max-height:calc(100svh - 92px)}
