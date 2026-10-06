@@ -5,10 +5,14 @@
 export type HomeArtName = 'population';
 export type HomeArtShape = 'lead' | 'square';
 
-/** Mirrors scripts/generate-home-art.mjs: the crop's pixel size and the widths shipped. */
+/**
+ * Mirrors scripts/generate-home-art.mjs: the cut's pixel size and the widths
+ * shipped. The lead is the house alone (its neighbours veiled to cream), the
+ * square the whole scene (tree, house, cypress), padded to a square.
+ */
 const SHAPES: Record<HomeArtShape, { width: number; height: number; widths: number[] }> = {
-  lead: { width: 850, height: 1086, widths: [600, 1000] },
-  square: { width: 1086, height: 1086, widths: [400, 800] },
+  lead: { width: 880, height: 1086, widths: [600, 880] },
+  square: { width: 1160, height: 1160, widths: [400, 800] },
 };
 
 /**
