@@ -62,8 +62,9 @@
 @media(min-width:721px){.mini-workspace{overflow:clip}.mini-stage{position:sticky;top:76px;align-self:start}}
 .mini-caption{position:relative;z-index:1;background:#f4f2e9;padding-bottom:4px}
 
-/* Round 3 (UXD2-08): the stage runs the full height of the controls, so no blank band sits under the scene; the canvas stays sticky inside it. The data note sits beside the line it explains, not at the far edge. */
-@media(min-width:721px){.mini-stage{position:relative;top:auto;align-self:stretch}.mini-under{justify-content:flex-start;gap:32px}}
+/* Round 3 (UXD2-08): the data note sits beside the line it explains, not at the far edge. (Round 3 also stretched
+   the stage to the controls' height here, align-self:stretch; round 5 below replaced it, and the rule is gone.) */
+@media(min-width:721px){.mini-under{justify-content:flex-start;gap:32px}}
 /* Round 3 (UXM2V-05): on phones the houses are small tap targets, so the "go to a household" menu comes before the scene. */
 @media(max-width:720px){.mini-house-picker{order:3;margin:0 16px 12px}}
 
@@ -129,6 +130,14 @@
   .mini-stage-view{position:relative;top:auto;flex:none;min-height:0;max-height:none;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto}
   .mini-stage .mini-canvas{min-height:0}
   .mini-stage .mini-scene{max-height:min(720px,100%)}
+  /* The sidebar is not a box of its own (no ground; the workspace's shows through it), only its right
+     hairline. It runs the card's full height, so where the stage is the taller column (from 1200px,
+     ~850px against 781-807px, by step) the hairline does not stop short above the tools; and the
+     distribution, the sidebar's last block, sits at its foot, so both columns end together (the bars
+     beside the tools row) instead of the bars stopping 42-68px above the card's edge. Where the sidebar
+     is the taller column the auto margin is zero and nothing moves. */
+  .mini-sidebar{align-self:stretch}
+  .mini-sidebar>.mini-distribution{margin-top:auto}
 }
 @media(min-width:721px) and (max-width:1199px) and (min-height:560px){
   .mini-stage{max-height:calc(100vh - 92px);max-height:calc(100svh - 92px)}

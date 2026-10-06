@@ -52,13 +52,18 @@ function formatValue(v: number | null | undefined, pt: boolean): string {
   return `${Math.round(v / 1000)} ${pt ? "mil €" : "k€"}`;
 }
 
-function SideCard({
+/** One team's column of the shared squads card: its name, its absences and its
+ * finishing list, read top-down. From md the two columns sit on one subgrid, so
+ * the name, "Indisponíveis" and "Finalização" rows start at the same height in
+ * both and the hairlines between them line up across the card. */
+function SideColumn({
   side,
   locale,
   unavailable,
   absencesStatus,
   sarCutoffLabel,
   publishedCount = 0,
+  className = "",
 }: {
   side: MatchSquadSide;
   locale: string;
@@ -66,6 +71,7 @@ function SideCard({
   absencesStatus: AbsencesStatus;
   sarCutoffLabel?: string | null;
   publishedCount?: number;
+  className?: string;
 }) {
   const pt = locale !== "en";
   const codes = pt ? positionCodePt : positionCodeEn;
@@ -73,7 +79,7 @@ function SideCard({
   const maxSar = Math.max(0.0001, ...side.topPlayers.map(p => p.sar));
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-cream">
+    <div className={`md:row-span-3 md:grid md:grid-rows-subgrid ${className}`}>
       <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100">
         {/* The club colour as the identity rule; the bars are ink (UXD3-07). */}
         <i aria-hidden="true" className="h-5 w-1 shrink-0 rounded-full" style={{ backgroundColor: side.color }} />
@@ -242,9 +248,12 @@ export function MatchSquadNews({
               }`
             : ""}
       </p>
-      <div className="grid gap-4 md:grid-cols-2">
-        <SideCard side={home} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} publishedCount={publishedCount} />
-        <SideCard side={away} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} publishedCount={publishedCount} />
+      {/* The two teams are compared, so they share one card: two columns split by
+          a hairline (stacked below md, with the hairline between them), not two
+          cards where the shorter one is stretched to the taller one's height. */}
+      <div className="overflow-hidden rounded-2xl border border-line bg-cream md:grid md:grid-cols-2 md:grid-rows-[auto_auto_auto]">
+        <SideColumn side={home} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} publishedCount={publishedCount} />
+        <SideColumn side={away} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} publishedCount={publishedCount} className="border-t border-line md:border-t-0 md:border-l" />
       </div>
       {/* The feed's metric_label is English; the definition is ours to write. */}
       <p className="text-[11px] text-stone-500 mt-3">
