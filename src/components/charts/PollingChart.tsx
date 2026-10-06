@@ -144,6 +144,12 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         acc.push({ ...d, ly: above ? Math.min(d.mean, above.ly - gap) : d.mean });
         return acc;
       }, []);
+      // Then from the bottom up, so the smallest parties' labels never fall
+      // below the 0% axis ("Todos os partidos" puts five near the floor).
+      for (let i = labels.length - 1; i >= 0; i--) {
+        const below = labels[i + 1];
+        labels[i].ly = Math.max(labels[i].ly, below ? below.ly + gap : gap / 2);
+      }
 
       const marks: Plot.Markish[] = [
         Plot.gridY({ stroke: FURNITURE.grid, strokeWidth: 1 }),
