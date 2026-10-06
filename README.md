@@ -1,38 +1,28 @@
 # estimador.pt — Dados para compreender Portugal
 
-**Forecasts and analysis on Portugal, with the uncertainty in plain sight.**
+**Data and models about Portugal, with the uncertainty in view: who lives in each parish, how the Liga could end, and what the election forecasts said.**
 
-estimador.pt publishes probabilistic forecasts and analysis for Portugal: the state of the economy, Liga Portugal, elections and a human atlas of the country's population. Every number carries its date and its interval; the models and the methodology are open.
+*Dados e modelos sobre Portugal, com a incerteza à vista: quem vive em cada freguesia, como pode acabar a Liga e o que diziam as previsões eleitorais.*
+
+estimador.pt publishes data and models about Portugal: an open synthetic population of every parish (2021 Census), Liga Portugal forecasts updated every matchday, and the archived forecasts for the 2026 presidential and 2025 parliamentary elections. An economy section is in preparation and publishes no figures yet. Every number carries its date and source, and its interval where one was calculated; the methodology of each section is on the site.
 
 The visual identity is the interval mark on paper: see `/marca` on the site for the living guide and the downloadable files, `docs/design/design-system-proposal.md` for the design-system rationale, and `npm run brand` to regenerate every logo, icon and social asset from `src/lib/brand/geometry.json`.
 
-## Our Vision
+## What the site publishes
 
-We're building a credible data platform that makes complex analysis accessible to everyone. Our goal is to elevate public discourse through:
+In the order the site lists them, by what is live:
 
-- **Transparent methodology** - Open about our assumptions and limitations
-- **Accessible analysis** - Complex statistics explained for general audiences  
-- **Professional presentation** - Media-quality visualizations and design
-- **Timely updates** - Regular forecasts throughout election cycles
-- **Independent voice** - Non-partisan analysis focused on data, not opinions
+- **População** (`/populacao`): an open synthetic population of Portugal, parish by parish, generated from the 2021 Census. Look up a parish, play the daily Mystery parish, download the microdata, and read the quality tier and methodology of the release.
+- **Liga Portugal** (`/desporto/liga`): a Bayesian model that simulates the rest of the season after every matchday: title, top-three and relegation probabilities, points ranges, club pages, a simulator and a prediction game against the model. Its next-matchday forecasts are scored against the closing market on `/desporto/liga/modelo`.
+- **Eleições** (`/eleicoes/arquivo`): the presidential 2026 and parliamentary 2025 forecasts, kept as they were published, with how to read them.
+- **Economia** (`/economia`): in preparation. Explainers on how to read prices, work and activity; no figures until the section is published.
 
-## What We Provide
+## Principles
 
-### 🎯 Election Forecasts
-Real-time probabilistic forecasts for Portuguese parliamentary elections, updated as new polling data becomes available. Our models account for polling uncertainty, historical patterns, and Portugal's proportional representation system.
-
-### 📊 Data Visualization
-Interactive charts and maps that make electoral trends immediately understandable:
-- **Polling trends** - How party support evolves over time
-- **Seat projections** - Monte Carlo simulations of likely outcomes
-- **District analysis** - Where elections will be won and lost
-- **Coalition scenarios** - Paths to parliamentary majorities
-
-### 📝 Electoral Analysis
-In-depth articles examining Portuguese political trends, polling methodology, and electoral dynamics. Written for engaged citizens who want to understand the data behind the headlines.
-
-### 🔍 Methodology Transparency
-Complete documentation of our forecasting approach, data sources, and model assumptions. We believe transparency builds trust in democratic institutions.
+- **Uncertainty in view**: probabilities and intervals, never a bare point; where no margin of error was calculated, the page says so.
+- **Dated and sourced**: every figure states the date it refers to and where it comes from.
+- **Archives stay archives**: past forecasts are not rewritten with the outcome.
+- **Independent**: a project by Bernardo Caldas, with no external funding.
 
 ## Technology & Design
 
@@ -61,13 +51,16 @@ Built as a modern media website with professional news-style design:
 src/
 ├── app/[locale]/
 │   ├── page.tsx                    # Hub homepage
+│   ├── populacao/                  # Synthetic population (parish pages, game, data)
 │   ├── desporto/liga/              # Liga Portugal forecast
-│   ├── eleicoes/presidenciais/     # Presidential election
-│   ├── eleicoes/legislativas/      # Parliamentary election
+│   ├── eleicoes/arquivo/           # How to read the election archive
+│   ├── eleicoes/presidenciais/     # Presidential election (archive)
+│   ├── eleicoes/legislativas/      # Parliamentary election (archive)
+│   ├── economia/                   # Economy (in preparation)
 │   ├── eleicoes/legislativas/mapa/ # District map (parliamentary 2025)
 │   ├── artigos/                    # Articles
 │   ├── sobre/                      # About
-│   └── metodologia/                # Methodology
+│   └── metodologia/                # Methodology hub (links each section's method)
 ├── components/
 │   ├── charts/                     # Election chart components
 │   ├── charts/football/            # Football chart components
@@ -196,7 +189,7 @@ Automatically deploys to Azure Static Web Apps on push to `main`:
 - [x] Dropdown navigation with section grouping
 
 ### Phase 3: Future Domains
-- [ ] Economics section (GDP, inflation, employment forecasts)
+- [ ] Economics section: in preparation at `/economia` (explainers online, no figures published); launch is `published: true` in `src/lib/config/economy-status.json`
 - [ ] Demographics section (population, migration trends)
 - [ ] Additional sports (Champions League, national team)
 

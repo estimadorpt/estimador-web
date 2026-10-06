@@ -1,8 +1,10 @@
-import { createPageMetadata } from '@/lib/metadata';
+import { createPageMetadata, siteTitle } from '@/lib/metadata';
+import { formatInteger, formatLongDate, formatSigned } from "@/lib/football-format";
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, ArrowRight, TriangleAlert } from "lucide-react";
+import { ArrowRight, TriangleAlert } from "lucide-react";
 import { loadLiga2 } from "@/lib/utils/football-data-loader";
 import {
   Liga2Caveats,
@@ -13,13 +15,14 @@ import {
 } from "@/components/charts/football/Liga2Table";
 import { liga2DisplayName } from "@/lib/config/football";
 import type { Metadata } from "next";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 const copy = {
   pt: {
     kicker: "Liga Portugal 2",
     title: "A Liga 2 em probabilidades",
     description:
-      "Uma tabela probabilística da Liga Portugal 2: probabilidades de subida, de descida e de posição final, a partir de um modelo Poisson hierárquico ajustado a seis épocas do segundo escalão. Modelo mais leve do que o da Primeira Liga — só golos, sem xG nem valores de mercado.",
+      "A Liga Portugal 2 em probabilidades de subida, despromoção e posição final, de um modelo Poisson hierárquico mais leve que o da Primeira Liga: só golos.",
     back: "Liga Portugal",
     unavailable: "Dados da Liga 2 indisponíveis de momento.",
     lighterLabel: "Modelo ligeiro",
@@ -46,7 +49,7 @@ const copy = {
     kicker: "Liga Portugal 2",
     title: "Liga 2 in probabilities",
     description:
-      "A probabilistic table for Liga Portugal 2: promotion, relegation and final-position probabilities from a hierarchical Poisson model fitted to six seasons of the second tier. A lighter model than the Primeira Liga one — goals only, no xG and no squad values.",
+      "Liga Portugal 2 in promotion, relegation and final-position probabilities, from a hierarchical Poisson model lighter than the Primeira Liga one: goals only.",
     back: "Liga Portugal",
     unavailable: "Liga 2 data unavailable right now.",
     lighterLabel: "Lighter model",
@@ -77,6 +80,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const c = locale === "en" ? copy.en : copy.pt;
   // Unpublished for now: reachable by URL, but linked from nowhere, out of the
   // sitemap and not indexed. Flip `index` and the sitemap's HIDDEN_ROUTES when
@@ -84,7 +88,7 @@ export async function generateMetadata({
   return createPageMetadata({
     locale,
     path: `/desporto/liga2`,
-    title: `${c.title} | Estimador`,
+    title: siteTitle(c.title),
     description: c.description,
     index: false,
   });
@@ -96,6 +100,7 @@ export default async function Liga2Page({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
   const c = pt ? copy.pt : copy.en;
   const data = await loadLiga2();
@@ -104,16 +109,24 @@ export default async function Liga2Page({
     return (
       <div className="min-h-screen bg-paper">
         <Header />
-        <div className="max-w-5xl mx-auto px-4 py-20 text-center text-stone-500">
-          <p>{c.unavailable}</p>
-        </div>
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            measure="wide"
+            compact
+            back={{ href: "/desporto/liga", label: c.back, locale }}
+            eyebrow={c.kicker}
+            title={c.title}
+            lede={c.unavailable}
+          />
+        </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }
 
   const review = data.review;
   const live = data.live;
-  const nSims = data.n_sims.toLocaleString(pt ? "pt-PT" : "en-GB");
+  const nSims = formatInteger(data.n_sims, locale);
   const totalMatches = data.history.reduce(
     (acc, h) => acc + h.final_table.reduce((a, r) => a + r.played, 0) / 2,
     0
@@ -138,28 +151,21 @@ export default async function Liga2Page({
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
+      <PageHero
+        measure="wide"
+        compact
+        back={{ href: "/desporto/liga", label: c.back, locale }}
+        eyebrow={c.kicker}
+        title={c.title}
+      />
 
-      <div className="max-w-5xl mx-auto px-4 py-10">
-        <Link
-          href="/desporto/liga"
-          locale={locale}
-          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          {c.back}
-        </Link>
-
-        <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
-          {c.kicker}
-        </p>
-        <h1 className="text-3xl md:text-4xl tracking-tight mb-4">
-          {c.title}
-        </h1>
+      <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
 
         {/* Lighter-model label, stated before any number is shown */}
-        <div className="border border-amber-200 bg-amber-50 p-4 mb-8 max-w-3xl">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 mb-8 max-w-3xl">
           <div className="flex items-start gap-3">
-            <TriangleAlert className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <TriangleAlert aria-hidden="true" className="w-5 h-5 text-amber-700 mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm font-bold text-stone-900 mb-1">
                 {c.lighterLabel} — {pt ? data.model_label.pt : data.model_label.en}
@@ -177,19 +183,19 @@ export default async function Liga2Page({
             <p className="text-lg text-stone-600 leading-relaxed">
               {pt ? (
                 <>
-                  A época {data.target_season} da Liga 2 ainda não tem jogos nos
-                  nossos dados, por isso esta página mostra a época{" "}
-                  {review.season}, que terminou — e o que este modelo teria dito
-                  enquanto ela decorria. Assim que as primeiras jornadas
-                  entrarem, a tabela ao vivo aparece aqui, no mesmo formato.
+                  Esta página não acompanha a época {data.target_season} da Liga 2:
+                  os dados que a alimentam são de{" "}
+                  {formatLongDate(data.generated_at, locale)}, antes de a época
+                  começar. Mostra a época {review.season}, que terminou, e o que
+                  este modelo teria dito enquanto ela decorria.
                 </>
               ) : (
                 <>
-                  The {data.target_season} Liga 2 season has no matches in our
-                  data yet, so this page shows {review.season}, which is
-                  finished — and what this model would have been saying while it
-                  ran. As soon as the first matchdays land, the live table
-                  appears here in the same format.
+                  This page does not follow the {data.target_season} Liga 2
+                  season: its data are from{" "}
+                  {formatLongDate(data.generated_at, locale)}, before the season
+                  began. It shows {review.season}, which is finished, and what
+                  this model would have been saying while it ran.
                 </>
               )}
             </p>
@@ -205,9 +211,8 @@ export default async function Liga2Page({
                         {liga2DisplayName(runnerUp.team)} e o{" "}
                         {liga2DisplayName(third.team)} fecharam ambos com{" "}
                         {runnerUp.points} pontos, e a subida ficou para quem
-                        tinha {runnerUp.gd > 0 ? "+" : ""}
-                        {runnerUp.gd} contra {third.gd > 0 ? "+" : ""}
-                        {third.gd}.
+                        tinha {formatSigned(runnerUp.gd, locale, 0)} contra{" "}
+                        {formatSigned(third.gd, locale, 0)}.
                       </>
                     ) : (
                       <>
@@ -226,9 +231,8 @@ export default async function Liga2Page({
                         {liga2DisplayName(runnerUp.team)} and{" "}
                         {liga2DisplayName(third.team)} both finished on{" "}
                         {runnerUp.points} points, and promotion went to the one
-                        with {runnerUp.gd > 0 ? "+" : ""}
-                        {runnerUp.gd} against {third.gd > 0 ? "+" : ""}
-                        {third.gd}.
+                        with {formatSigned(runnerUp.gd, locale, 0)} against{" "}
+                        {formatSigned(third.gd, locale, 0)}.
                       </>
                     ) : (
                       <>
@@ -244,10 +248,10 @@ export default async function Liga2Page({
         )}
 
         {/* Headline numbers */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-stone-200 border border-stone-200 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden rounded-2xl bg-line border border-line mb-12">
           {[
             {
-              value: totalMatches.toLocaleString(pt ? "pt-PT" : "en-GB"),
+              value: formatInteger(totalMatches, locale),
               label: pt
                 ? `jogos da Liga 2 no modelo, em ${data.history.length} épocas`
                 : `Liga 2 matches in the model, across ${data.history.length} seasons`,
@@ -291,7 +295,7 @@ export default async function Liga2Page({
                 ? `Jornada ${live.matchday}, com ${live.matches_remaining} jogos por disputar. Ajuste em ${live.training_matches} jogos das épocas ${live.seasons_fitted.join(", ")}.`
                 : `Matchday ${live.matchday}, with ${live.matches_remaining} matches left. Fitted on ${live.training_matches} matches from ${live.seasons_fitted.join(", ")}.`}
             </p>
-            <Liga2ProbabilityTable rows={live.teams} locale={locale} />
+            <Liga2ProbabilityTable rows={live.teams} locale={locale} label={`${c.liveTitle} ${live.season}`} />
             <h3 className="text-lg tracking-tight mt-10 mb-4">
               {c.strengthsTitle}
             </h3>
@@ -314,6 +318,7 @@ export default async function Liga2Page({
               <Liga2FinalTable
                 rows={review.final_table}
                 locale={locale}
+                label={pt ? `Classificação final ${review.season}` : `Final table ${review.season}`}
                 promotionSlots={data.rules.promotion_slots}
                 relegationSlots={data.rules.relegation_slots}
               />
@@ -355,6 +360,8 @@ export default async function Liga2Page({
                 <Liga2PromotionRace
                   checkpoints={review.checkpoints}
                   locale={locale}
+                  generatedAt={data.generated_at}
+                  nSims={data.n_sims}
                 />
               </section>
             )}
@@ -374,7 +381,7 @@ export default async function Liga2Page({
                       <h3 className="text-base text-stone-900">
                         {c.matchdayLabel(cp.matchday)}
                       </h3>
-                      <span className="text-xs text-stone-400 tabular-nums">
+                      <span className="text-xs text-stone-500 tabular-nums">
                         {pt
                           ? `${cp.matches_played} jogos vistos, ${cp.matches_remaining} simulados`
                           : `${cp.matches_played} matches seen, ${cp.matches_remaining} simulated`}
@@ -384,6 +391,7 @@ export default async function Liga2Page({
                       rows={cp.teams}
                       locale={locale}
                       showFinalRank
+                      label={c.matchdayLabel(cp.matchday)}
                     />
                   </div>
                 ))}
@@ -416,7 +424,7 @@ export default async function Liga2Page({
 
         {/* Small print */}
         <section className="border-t border-stone-200 pt-6">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-3">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3">
             {c.footnote}
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">
@@ -448,22 +456,23 @@ export default async function Liga2Page({
             <Link
               href="/desporto/liga"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.primeira}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.methodology}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </section>
-      </div>
+      </div></div>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

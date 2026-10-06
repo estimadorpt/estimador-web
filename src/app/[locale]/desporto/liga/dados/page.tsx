@@ -1,11 +1,30 @@
-import { createPageMetadata } from '@/lib/metadata';
+import { readdir, readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { createPageMetadata, siteTitle } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { loadPublishedFootballData } from "@/lib/utils/football-data-loader";
 import type { PublishedFile, PublishedSeason } from "@/lib/utils/football-data-loader";
 import type { Metadata } from "next";
+import { teamDisplayName } from "@/lib/config/football";
+import { formatKickoff, formatLongDate } from "@/lib/football-format";
+import {
+  earlyLocks,
+  frozenBeforePreviousRoundEnded,
+  latePublications,
+  roundsWithoutSource,
+  type ManifestRoundLike,
+} from "@/lib/utils/prediction-game-record";
+import { setRequestLocale } from '@/i18n/request-locale';
+import {
+  compareNextMatchdays,
+  nextMatchdayDriftSentence,
+  nextMatchdayPartialSentence,
+  type MatchdayFileNext,
+} from "@/lib/football-next-matchday";
 
 const SITE = "https://estimador.pt";
 
@@ -13,15 +32,15 @@ const SITE = "https://estimador.pt";
 
 const copy = {
   pt: {
-    title: "Dados abertos — Liga Portugal",
+    title: "Dados abertos da Liga Portugal",
     description:
-      "Todas as previsões da Liga Portugal publicadas em estimador.pt estão disponíveis como JSON estático, sem chave nem registo. Esta página documenta cada ficheiro e os seus campos principais.",
+      "Todas as previsões da Liga Portugal do estimador.pt em JSON estático, sem chave nem registo: cada ficheiro e os seus campos principais.",
     back: "Liga Portugal",
     kicker: "Dados abertos",
     standfirstA:
-      "Tudo o que aparece nas páginas da Liga Portugal vem de ficheiros JSON estáticos servidos deste site. Não há API a proteger, chave a pedir nem limite de pedidos: são ficheiros, e estão aqui.",
+      "As previsões das páginas da Liga Portugal vêm de ficheiros JSON estáticos servidos deste site, sem chave a pedir nem limite de pedidos. Só o jogo Contra o Modelo usa uma API própria, para guardar as previsões de quem joga; os dados do modelo estão todos aqui.",
     standfirstB:
-      "Se construir alguma coisa com eles, use-os à vontade — só pedimos atribuição a estimador.pt e uma ligação para a página de origem. E se publicar, diga-nos: gostamos de ver.",
+      "Se construíres alguma coisa com eles, podes usar as saídas do modelo nos termos da licença CC BY-NC 4.0: uso não comercial, com atribuição a estimador.pt e uma ligação para a página de origem. Os dados de terceiros que alguns ficheiros trazem ficam fora dessa licença (vê abaixo). E se publicares, diz-nos: gostamos de ver.",
     filesTitle: "Ficheiros publicados",
     filesIntro:
       "A lista abaixo é gerada a partir do que está realmente no servidor no momento em que a página foi construída.",
@@ -34,11 +53,19 @@ const copy = {
     usageIntro:
       "Não há índice: os ficheiros de jornada seguem o padrão mdNN.json com dois dígitos, e o mais recente é o do número mais alto. A jornada em curso está sempre no ficheiro com o NN mais elevado da época atual.",
     licenceTitle: "Licença e atribuição",
-    licence:
-      "Livres de usar, redistribuir e transformar, incluindo para fins comerciais, desde que a fonte seja atribuída: «estimador.pt» com ligação para a página correspondente. Os dados são fornecidos como estão, sem garantias — são previsões probabilísticas de um modelo estatístico, e por definição vão estar erradas parte do tempo.",
+    licenceOwn:
+      "As saídas do modelo do estimador.pt (probabilidades, simulações, cenários, avaliações de jogadores e a avaliação do modelo) estão sob a licença Creative Commons Atribuição 4.0 Internacional",
+    licenceOwnAfter:
+      ": podes usá-las, redistribuí-las e transformá-las, incluindo para fins comerciais, desde que atribuas a fonte («estimador.pt», com ligação para a página correspondente).",
+    licenceThirdParty:
+      "A licença não abrange os dados de terceiros que alguns ficheiros trazem, marcados na lista acima como «Fora da licença»: resultados e estatísticas de jogo (SofaScore), xG (FotMob), cotações de casas de apostas (Pinnacle e Bet365, via football-data.co.uk) e lesões e valores de mercado (Transfermarkt). Esses dados vêm da fonte original e não são redistribuíveis por nós: para os reutilizar, segue os termos de cada fonte.",
+    licenceWarranty:
+      "Os dados são fornecidos como estão, sem garantias — são previsões probabilísticas de um modelo estatístico, e por definição vão estar erradas parte do tempo.",
+    licenceUrl: "https://creativecommons.org/licenses/by-nc/4.0/deed.pt",
+    thirdPartyLabel: "Fora da licença:",
     provenanceTitle: "Proveniência",
     provenance:
-      "Resultados e estatísticas de jogo (incluindo xG) da SofaScore; cotações de fecho da Pinnacle via football-data.co.uk; lesões e valores de mercado do Transfermarkt. As probabilidades vêm de um modelo hierárquico bayesiano de Poisson ajustado com PyMC e de 50 mil simulações de Monte Carlo por publicação.",
+      "Resultados e estatísticas de jogo (incluindo remates à baliza) da SofaScore; xG da FotMob; cotações de fecho (Pinnacle e Bet365) via football-data.co.uk; lesões e valores de mercado do Transfermarkt. As probabilidades vêm de um modelo bayesiano de Poisson bivariado (bivcross), ajustado aos golos e aos remates à baliza das últimas quatro épocas da Primeira Liga e da Liga 2, com os jogos mais antigos a pesar menos e o valor de cada plantel como ponto de partida, e de 50 000 simulações de Monte Carlo por publicação. A pré-época (md00) foi publicada pelo modelo anterior, joint_sot.",
     unavailable: "Não foi possível listar os ficheiros publicados.",
     methodology: "Como funciona o modelo",
     review: "A época 2025-26 em revista",
@@ -49,15 +76,15 @@ const copy = {
     size: "Tamanho",
   },
   en: {
-    title: "Open data — Liga Portugal",
+    title: "Liga Portugal open data",
     description:
-      "Every Liga Portugal forecast published on estimador.pt is available as static JSON, with no key and no sign-up. This page documents each file and its main fields.",
+      "Every Liga Portugal forecast on estimador.pt as static JSON, with no key and no sign-up: each file and its main fields.",
     back: "Liga Portugal",
     kicker: "Open data",
     standfirstA:
-      "Everything on the Liga Portugal pages comes from static JSON files served from this site. There is no API to protect, no key to request and no rate limit: they are files, and they are here.",
+      "The forecasts on the Liga Portugal pages come from static JSON files served from this site, with no key to request and no rate limit. Only the Beat the Model game uses an API of its own, to store players' picks; the model's data is all here.",
     standfirstB:
-      "If you build something with them, go ahead — all we ask is attribution to estimador.pt and a link back to the source page. And if you publish, tell us: we like seeing it.",
+      "If you build something with them, you may use the model's outputs under the CC BY-NC 4.0 licence: non-commercial use, with attribution to estimador.pt and a link back to the source page. The third-party data some files carry are outside that licence (see below). And if you publish, tell us: we like seeing it.",
     filesTitle: "Published files",
     filesIntro:
       "The list below is generated from what is actually on the server at the moment this page was built.",
@@ -70,11 +97,19 @@ const copy = {
     usageIntro:
       "There is no index: matchday files follow the mdNN.json pattern with two digits, and the most recent is the highest number. The current matchday is always the highest NN in the current season's directory.",
     licenceTitle: "Licence and attribution",
-    licence:
-      "Free to use, redistribute and transform, commercial use included, as long as the source is credited: “estimador.pt”, with a link to the corresponding page. The data is provided as is, with no warranty — these are probabilistic forecasts from a statistical model, and by definition they will be wrong some of the time.",
+    licenceOwn:
+      "The estimador.pt model's outputs (probabilities, simulations, scenarios, player ratings and the model evaluation) are under the Creative Commons Attribution 4.0 International licence",
+    licenceOwnAfter:
+      ": you may use, redistribute and transform them, commercial use included, as long as you credit the source (“estimador.pt”, with a link to the corresponding page).",
+    licenceThirdParty:
+      "The licence does not cover the third-party data some files carry, marked “Not under the licence” in the list above: results and match statistics (SofaScore), xG (FotMob), bookmaker odds (Pinnacle and Bet365, via football-data.co.uk), and injuries and market values (Transfermarkt). Those data come from their original sources and are not ours to redistribute: to reuse them, follow each source's terms.",
+    licenceWarranty:
+      "The data is provided as is, with no warranty — these are probabilistic forecasts from a statistical model, and by definition they will be wrong some of the time.",
+    licenceUrl: "https://creativecommons.org/licenses/by-nc/4.0/",
+    thirdPartyLabel: "Not under the licence:",
     provenanceTitle: "Provenance",
     provenance:
-      "Results and match statistics (xG included) from SofaScore; Pinnacle closing odds via football-data.co.uk; injuries and market values from Transfermarkt. The probabilities come from a hierarchical Bayesian Poisson model fitted with PyMC and 50,000 Monte Carlo season simulations per publication.",
+      "Results and match statistics (shots on target included) from SofaScore; xG from FotMob; closing odds (Pinnacle and Bet365) via football-data.co.uk; injuries and market values from Transfermarkt. The probabilities come from a bivariate Poisson Bayesian model (bivcross), fitted to goals and shots on target from the last four seasons of the Primeira Liga and Liga 2, with older games counting for less and each squad's value as the starting point, and from 50,000 Monte Carlo season simulations per publication. The pre-season file (md00) was published by the previous model, joint_sot.",
     unavailable: "Could not list the published files.",
     methodology: "How the model works",
     review: "The 2025-26 season reviewed",
@@ -90,13 +125,22 @@ const copy = {
 
 type Doc = { pt: string; en: string };
 
-const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
+/**
+ * `thirdParty` names the fields a file reproduces from another source, which
+ * the CC BY-NC 4.0 grant does not cover (audit PRO3-03): the page marks them
+ * "Fora da licença" rather than grant what is not ours to grant.
+ */
+const FILE_DOCS: { match: RegExp; label: string; doc: Doc; thirdParty?: Doc }[] = [
   {
     match: /^md\d+\.json$/,
     label: "mdNN.json",
     doc: {
-      pt: "A previsão de uma jornada: classificação simulada com probabilidades de título, top 3 e descida, forças de ataque e defesa, xPts e a classificação real nessa altura.",
-      en: "One matchday's forecast: simulated standings with title, top-three and relegation probabilities, attack and defence strengths, xPts, and the real table at that moment.",
+      pt: "A previsão publicada depois de uma jornada: classificação simulada com probabilidades de título, top 3 e despromoção (17.º ou 18.º lugar), forças de ataque e defesa, xPts e a classificação real nessa altura.",
+      en: "The forecast published after a matchday: simulated standings with title, top-three and relegation (17th or 18th place) probabilities, attack and defence strengths, xPts, and the real table at that moment.",
+    },
+    thirdParty: {
+      pt: "os resultados (actual_standings, matchday_results), da SofaScore, e o xG de xpts_table (xgf, xga, e os xPts calculados a partir dele), da FotMob.",
+      en: "the results (actual_standings, matchday_results), from SofaScore, and the xG in xpts_table (xgf, xga, and the xPts computed from it), from FotMob.",
     },
   },
   {
@@ -119,16 +163,24 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
     match: /^players\.json$/,
     label: "players.json",
     doc: {
-      pt: "Ranking de jogadores pelo Soccer Factor Model: golos acima do nível de substituto por 90 minutos, com intervalo de credibilidade e a variação face à época anterior.",
-      en: "Player ranking from the Soccer Factor Model: goals above replacement per 90 minutes, with a credible interval and the change from last season.",
+      pt: "A lista de finalização: golos por 90 minutos acima do nível de substituição (SAR), com intervalo de credibilidade de 90% e a variação face à época anterior. generated_from.seasons diz as épocas usadas.",
+      en: "The finishing list: goals per 90 minutes above replacement level (SAR), with a 90% credible interval and the change from last season. generated_from.seasons names the seasons used.",
+    },
+    thirdParty: {
+      pt: "os minutos, jogos e golos de cada jogador (SofaScore).",
+      en: "each player's minutes, matches and goals (SofaScore).",
     },
   },
   {
     match: /^contrib_ratings\.json$/,
     label: "contrib_ratings.json",
     doc: {
-      pt: "Contribuição ofensiva: golos mais assistências por 90 acima do substituto, com intervalo, a variação face ao ranking só de golos e a distribuição da métrica por posição.",
-      en: "Attacking contribution: goals plus assists per 90 above replacement, with interval, the move against the goals-only ranking, and the metric's distribution by position.",
+      pt: "Contribuição ofensiva: golos mais assistências por 90 acima do substituto, com intervalo e a distribuição da métrica por posição. rank_goals_only e rank_change_vs_goals_only contam posições entre todos os jogadores do modelo, não na lista de finalização publicada; /jogadores compara com essa lista.",
+      en: "Attacking contribution: goals plus assists per 90 above replacement, with interval and the metric's distribution by position. rank_goals_only and rank_change_vs_goals_only count places among every player in the model, not in the published finishing list; /jogadores compares against that list.",
+    },
+    thirdParty: {
+      pt: "os minutos, golos e assistências de cada jogador (SofaScore).",
+      en: "each player's minutes, goals and assists (SofaScore).",
     },
   },
   {
@@ -138,6 +190,10 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
       pt: "Guarda-redes: golos evitados face ao xGOT dos remates enfrentados, em bruto e modelado, por 90 minutos e com intervalo. Traz também a validação fora da amostra e as regras de exclusão de remates.",
       en: "Goalkeepers: goals prevented against the xGOT of the shots faced, raw and modelled, per 90 minutes and with an interval. Also carries the out-of-sample validation and the shot-exclusion rules.",
     },
+    thirdParty: {
+      pt: "os remates enfrentados, o seu xGOT e os golos sofridos (SofaScore).",
+      en: "the shots faced, their xGOT and the goals conceded (SofaScore).",
+    },
   },
   {
     match: /^def_ratings\.json$/,
@@ -146,21 +202,33 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
       pt: "Defesas: mais-valia ajustada sobre golos sofridos. Pode trazer apenas diagnósticos, se o modelo concluir que os jogadores não são separáveis dos colegas de equipa.",
       en: "Defenders: adjusted plus-minus on goals conceded. May carry diagnostics only, if the model finds the players are not separable from their team-mates.",
     },
+    thirdParty: {
+      pt: "as contagens de ações em descriptive_actions (SofaScore).",
+      en: "the action counts in descriptive_actions (SofaScore).",
+    },
   },
   {
     match: /^contested_ratings\.json$/,
     label: "contested_ratings.json",
     doc: {
-      pt: "Posse disputada: probabilidade de ganhar duelos aéreos e no chão, defesas e médios, agregada sobre três épocas de carreira. Células que falharam uma porta pré-registada trazem ranking: null.",
-      en: "Contested possession: probability of winning aerial and ground duels, defenders and midfielders, pooled over a three-season career. Cells that failed a pre-registered gate carry ranking: null.",
+      pt: "Posse disputada: probabilidade de ganhar duelos aéreos e no chão, defesas e médios, agregada sobre as épocas que o próprio ficheiro lista (seasons; quatro nesta versão, 2023-24 a 2026-27). Células que falharam uma porta pré-registada trazem ranking: null.",
+      en: "Contested possession: probability of winning aerial and ground duels, defenders and midfielders, pooled over the seasons the file itself lists (seasons; four in this version, 2023-24 to 2026-27). Cells that failed a pre-registered gate carry ranking: null.",
+    },
+    thirdParty: {
+      pt: "as contagens de duelos (duels, won, rate_raw), da SofaScore.",
+      en: "the duel counts (duels, won, rate_raw), from SofaScore.",
     },
   },
   {
     match: /^gk_channels\.json$/,
     label: "gk_channels.json",
     doc: {
-      pt: "Os três eixos de guarda-redes, publicados separados e nunca combinados: intervenção em cruzamentos (separável), saídas da área (estilo) e defesa de remates (nulo com potência adequada em três épocas).",
-      en: "The three goalkeeper axes, published separately and never combined: cross intervention (separable), sweeping (a style), and shot-stopping (a properly-powered null over three seasons).",
+      pt: "Os três eixos de guarda-redes, publicados separados e nunca combinados: intervenção em cruzamentos (separável), saídas da área (estilo) e defesa de remates (nulo com potência adequada). As épocas usadas estão no campo seasons (quatro nesta versão, 2023-24 a 2026-27).",
+      en: "The three goalkeeper axes, published separately and never combined: cross intervention (separable), sweeping (a style), and shot-stopping (a properly-powered null). The seasons used are in the seasons field (four in this version, 2023-24 to 2026-27).",
+    },
+    thirdParty: {
+      pt: "as contagens de cada guarda-redes (y, n), da SofaScore.",
+      en: "each keeper's counts (y, n), from SofaScore.",
     },
   },
   {
@@ -170,29 +238,73 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
       pt: "Lesionados e suspensos por clube, com motivo, regresso previsto quando conhecido e valor de mercado. Instantâneo com data.",
       en: "Injuries and suspensions by club, with reason, expected return where known, and market value. A dated snapshot.",
     },
+    thirdParty: {
+      pt: "o ficheiro inteiro: lesões, castigos e valores de mercado do Transfermarkt.",
+      en: "the whole file: injuries, suspensions and market values from Transfermarkt.",
+    },
   },
   {
     match: /^market_scorecard\.json$/,
     label: "market_scorecard.json",
     doc: {
-      pt: "A avaliação do modelo contra a linha de fecho da Pinnacle em 504 jogos e oito épocas, com erro padrão emparelhado em cada bloco.",
-      en: "The model evaluated against Pinnacle's closing line over 504 matches and eight seasons, with the paired standard error on every block.",
+      pt: "Uma avaliação do modelo contra a linha de fecho do mercado, com o número de jogos e de épocas, o erro padrão emparelhado em cada bloco, as casas de apostas cujas cotações foram usadas (market_sources), a verificação dos intervalos de pontos finais (calibration) e, no campo model, o modelo avaliado (que pode não ser o que publica as previsões).",
+      en: "An evaluation of the model against the market's closing line, with the number of matches and seasons, the paired standard error on every block, the bookmakers whose prices were used (market_sources), the final-points interval check (calibration) and, in the model field, the model evaluated (which may not be the one publishing the forecasts).",
+    },
+    thirdParty: {
+      pt: "as probabilidades e os erros do mercado (os campos market_*), derivados das cotações de fecho da Pinnacle e da Bet365 via football-data.co.uk.",
+      en: "the market's probabilities and errors (the market_* fields), derived from Pinnacle and Bet365 closing odds via football-data.co.uk.",
     },
   },
   {
-    match: /^cards\.json$/,
-    label: "cards.json",
+    match: /^game_fixtures\.json$/,
+    label: "game_fixtures.json",
     doc: {
-      pt: "Manifesto dos cartões de partilha da jornada: que imagens existem, para que jornada e como se chamam.",
-      en: "Manifest for the matchday share cards: which images exist, for which matchday, and what they are called.",
+      pt: "O calendário da época para o jogo Contra o Modelo: cada jogo com hora de início (UTC; kickoff_confirmed diz se já é a oficial), a sua hora de fecho (locks_at), as probabilidades do modelo e quando foram publicadas (published_at; probs_source diz de que ficheiro vieram) e o resultado. No jogo, uma jornada fecha inteira no locks_at mais cedo dos seus jogos. As notas abaixo dizem onde estas regras se afastam do calendário.",
+      en: "The season calendar for the Beat the Model game: every fixture with its kickoff (UTC; kickoff_confirmed says whether it is official yet), its lock time (locks_at), the model's probabilities and when they were published (published_at; probs_source names the file they came from) and the result. In the game, a round closes as a whole at the earliest locks_at of its games. The notes below say where these rules part from the calendar.",
+    },
+    thirdParty: {
+      pt: "os resultados (home_goals, away_goals), da SofaScore.",
+      en: "the results (home_goals, away_goals), from SofaScore.",
+    },
+  },
+  {
+    match: /^players_detail\.json$/,
+    label: "players_detail.json",
+    doc: {
+      pt: "O detalhe por jogador por trás das páginas de jogador: histórico época a época e jogos recentes. appearances_through é a data do último jogo incluído. As páginas mostram só os jogadores da lista de players.json, com a posição e os números dessa lista; team é o plantel atual.",
+      en: "The per-player detail behind the player pages: season-by-season history and recent matches. appearances_through is the date of the last match included. The pages show only the players in players.json's list, with that list's position and numbers; team is the current squad.",
+    },
+    thirdParty: {
+      pt: "os minutos, jogos, golos e assistências por época e por jogo, e a nota de cada jogo (rating), da SofaScore.",
+      en: "the minutes, matches, goals and assists by season and by match, and each match's rating, from SofaScore.",
+    },
+  },
+  {
+    match: /^ask\.json$/,
+    label: "ask.json",
+    doc: {
+      pt: "Para perguntas condicionais sobre a época («e se o Porto perder em Braga?»): as probabilidades de cada equipa (título, top 3, Europa, despromoção) e os jogos em aberto cobertos. Ainda sem página própria no site.",
+      en: "For conditional questions about the season (“what if Porto lose at Braga?”): each team's probabilities (title, top three, Europe, relegation) and the open fixtures covered. No page of its own on the site yet.",
+    },
+  },
+  {
+    match: /^ask_samples\.json$/,
+    label: "ask_samples.json",
+    doc: {
+      pt: "Uma amostra das épocas simuladas, compactada, para responder a essas perguntas: em cada uma, o resultado de cada jogo em aberto e a posição final de cada equipa (a codificação está descrita no próprio ficheiro).",
+      en: "A compact sample of the simulated seasons, for answering those questions: in each, the result of every open fixture and every team's final position (the encoding is described in the file itself).",
     },
   },
   {
     match: /^review\.json$/,
     label: "review.json",
     doc: {
-      pt: "A revisão de uma época terminada: classificação final, xPts por equipa, índice de sorte e a evolução das probabilidades que o modelo publicou durante o ano.",
-      en: "The review of a finished season: final table, per-team xPts, luck index, and how the probabilities the model published moved through the year.",
+      pt: "A revisão de uma época terminada: classificação final, xPts por equipa, a diferença entre pontos e xPts (luck; não é uma separação limpa entre sorte e talento) e a evolução das probabilidades de título e de despromoção ao longo do ano. Em 2025-26, as previsões das jornadas 4 a 22 foram reconstituídas depois, a 4 de março de 2026; o timestamp de cada mdNN.json mostra-o.",
+      en: "The review of a finished season: final table, per-team xPts, the gap between points and xPts (luck; not a clean split between luck and skill) and how the title and relegation probabilities moved through the year. In 2025-26, the matchday 4 to 22 forecasts were reconstructed afterwards, on 4 March 2026; each mdNN.json's timestamp shows it.",
+    },
+    thirdParty: {
+      pt: "a classificação final (SofaScore) e o xG por trás dos xPts (FotMob).",
+      en: "the final table (SofaScore) and the xG behind the xPts (FotMob).",
     },
   },
 ];
@@ -201,8 +313,8 @@ const MD_FIELDS: { name: string; doc: Doc }[] = [
   {
     name: "table[]",
     doc: {
-      pt: "Uma entrada por equipa: mean_pts, std_pts, mean_gd e as probabilidades p_champion, p_top3, p_relegation, cada uma com intervalo _lo/_hi (erro de Monte Carlo).",
-      en: "One entry per team: mean_pts, std_pts, mean_gd and the probabilities p_champion, p_top3, p_relegation, each with a _lo/_hi interval (Monte Carlo error).",
+      pt: "Uma entrada por equipa: mean_pts, std_pts, mean_gd e as probabilidades p_champion, p_top3 e p_relegation (despromoção = terminar em 17.º ou 18.º; o 16.º, que vai ao play-off, não conta). p_champion e p_relegation trazem ainda _lo/_hi: os percentis 3 e 97 da mesma probabilidade calculada em 100 blocos de 500 simulações. É a dispersão de uma estimativa com 500 simulações, cerca de dez vezes a margem de erro de Monte Carlo do número publicado (±0,4 pontos percentuais com 50 000 simulações), e não é a incerteza do modelo. O site não os mostra. p_top3 não tem _lo/_hi.",
+      en: "One entry per team: mean_pts, std_pts, mean_gd and the probabilities p_champion, p_top3 and p_relegation (relegation = finishing 17th or 18th; 16th, which goes to the play-off, does not count). p_champion and p_relegation also carry _lo/_hi: the 3rd and 97th percentiles of the same probability computed over 100 blocks of 500 simulations. That is the spread of a 500-simulation estimate, about ten times the Monte Carlo error of the published number (±0.4 percentage points with 50,000 simulations), and it is not the model's uncertainty. The site does not show them. p_top3 has no _lo/_hi.",
     },
   },
   {
@@ -236,27 +348,91 @@ const MD_FIELDS: { name: string; doc: Doc }[] = [
   {
     name: "next_matchday{}",
     doc: {
-      pt: "A jornada seguinte com p_home, p_draw e p_away por jogo.",
-      en: "The next matchday with p_home, p_draw and p_away for each fixture.",
+      pt: "A jornada seguinte com p_home, p_draw e p_away por jogo. Pode incluir jogos adiados de jornadas anteriores.",
+      en: "The next matchday with p_home, p_draw and p_away for each fixture. It can include postponed games from earlier matchdays.",
     },
   },
   {
     name: "matchday_results[] / matches_remaining[]",
     doc: {
-      pt: "Jogos já disputados da jornada em curso, e os que ainda faltam (com kickoff quando conhecido).",
-      en: "Matches already played in the current matchday, and those still to come (with kickoff where known).",
+      pt: "matchday_results: os resultados que entraram desde a publicação anterior, que podem ser de mais do que uma jornada (jogos adiados ou antecipados). matches_remaining: jogos da jornada em curso ainda por disputar quando o ficheiro foi gerado (com kickoff quando conhecido); fica vazio quando a jornada acabou, mesmo que haja jogos adiados. Um mdNN.json não é cortado exatamente na jornada NN: actual_standings diz quantos jogos cada equipa já tinha.",
+      en: "matchday_results: the results that came in since the previous publication, which can span more than one matchday (postponed or brought-forward games). matches_remaining: games of the current matchday still to play when the file was generated (with kickoff where known); empty once the matchday is over, even with postponed games outstanding. An mdNN.json is not cut exactly at matchday NN: actual_standings says how many games each team had played.",
     },
   },
   {
     name: "season, matchday, model, n_sims, timestamp",
     doc: {
-      pt: "Metadados: que época, que jornada, que modelo, quantas simulações e quando foi gerado (UTC, ISO 8601).",
-      en: "Metadata: which season, which matchday, which model, how many simulations, and when it was generated (UTC, ISO 8601).",
+      pt: "Metadados: que época, que jornada, que modelo, quantas simulações e quando foi gerado pela última vez (UTC, ISO 8601). Um mdNN.json é regenerado no mesmo endereço enquanto a sua jornada decorre, à medida que entram resultados, por isso timestamp é a última regeneração e não a primeira publicação. Em 2026-27, model é joint_sot (o modelo anterior) na pré-época (md00) e bivcross (o modelo atual, Poisson bivariado com remates à baliza) da jornada 1 em diante; toda a época 2025-26 é joint_sot.",
+      en: "Metadata: which season, which matchday, which model, how many simulations, and when it was last generated (UTC, ISO 8601). An mdNN.json is regenerated at the same address while its matchday is played, as results come in, so timestamp is the last regeneration, not the first publication. In 2026-27, model is joint_sot (the previous model) for the pre-season file (md00) and bivcross (the current model, bivariate Poisson with shots on target) from matchday 1 on; all of 2025-26 is joint_sot.",
     },
   },
 ];
 
 /* ---------------------------------------------------------------- helpers */
+
+/** The current season's game manifest, raw (null when absent). */
+async function loadGameManifest(): Promise<{ season?: string; matchdays?: ManifestRoundLike[] } | null> {
+  try {
+    const file = path.join(process.cwd(), "public", "data", "football", "liga-2026-27", "game_fixtures.json");
+    return JSON.parse(await readFile(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Where the game's lock and scoring rules part from the calendar, from the
+ * manifest itself (audit M2, F18): a round published after its games began,
+ * and a postponed game scored on its original round's forecast.
+ */
+function gameNotes(rounds: ManifestRoundLike[], locale: string): string[] {
+  const pt = locale !== "en";
+  const notes: string[] = [];
+  for (const l of latePublications(rounds)) {
+    notes.push(pt
+      ? `Jornada ${l.matchday}: as probabilidades do modelo foram publicadas a ${formatLongDate(l.publishedAt, locale)}, depois de ${l.startedBefore} dos ${l.total} jogos terem começado. Ninguém podia jogar essa jornada, mas ela conta no registo do modelo na classificação da época. A partir da jornada ${l.matchday + 1}, as probabilidades são publicadas antes do primeiro jogo.`
+      : `Matchday ${l.matchday}: the model's probabilities were published on ${formatLongDate(l.publishedAt, locale)}, after ${l.startedBefore} of its ${l.total} games had started. Nobody could play that round, but it counts in the model's record in the season table. From matchday ${l.matchday + 1} on, the probabilities are published before the first game.`);
+  }
+  for (const e of earlyLocks(rounds)) {
+    // The round's lock, the earliest of its games, is when the game closed
+    // (audit FA2-05); its own locks_at is the original kickoff.
+    notes.push(pt
+      ? `${teamDisplayName(e.home)} – ${teamDisplayName(e.away)} (jornada ${e.matchday}) foi adiado para ${formatKickoff(e.kickoff, locale)}, mas fechou com a jornada ${e.matchday}, a ${formatLongDate(e.roundLocksAt, locale)} (a hora original do jogo era ${formatLongDate(e.locksAt, locale)}): é avaliado com as probabilidades que o modelo publicou para essa jornada.`
+      : `${teamDisplayName(e.home)} – ${teamDisplayName(e.away)} (matchday ${e.matchday}) was postponed to ${formatKickoff(e.kickoff, locale)}, but it closed with matchday ${e.matchday}, on ${formatLongDate(e.roundLocksAt, locale)} (its original kickoff was ${formatLongDate(e.locksAt, locale)}): it is scored on the probabilities the model published for that round.`);
+  }
+  // Odds frozen while the previous round was still being played (audit
+  // FA2-04, FRESH-02): they miss the results still to come.
+  const frozen = frozenBeforePreviousRoundEnded(rounds);
+  if (frozen.length) {
+    const list = frozen.map(f => f.matchday);
+    const last = frozen[frozen.length - 1];
+    const join = (xs: number[]) => xs.length > 1 ? `${xs.slice(0, -1).join(", ")}${pt ? " e " : " and "}${xs[xs.length - 1]}` : `${xs[0]}`;
+    notes.push(pt
+      ? `As probabilidades ${list.length > 1 ? "das jornadas" : "da jornada"} ${join(list)} foram congeladas antes do fim da jornada anterior (por exemplo, as da jornada ${last.matchday} a ${formatLongDate(last.publishedAt, locale)}, com a jornada ${last.previous} ainda a decorrer até ${formatLongDate(last.previousLastKickoff, locale)}): não incluem os resultados que faltavam. O modelo é avaliado no jogo com essas probabilidades, tal como foram congeladas.`
+      : `The probabilities for matchday${list.length > 1 ? "s" : ""} ${join(list)} were frozen before the previous round ended (for example, matchday ${last.matchday}'s on ${formatLongDate(last.publishedAt, locale)}, with matchday ${last.previous} still being played until ${formatLongDate(last.previousLastKickoff, locale)}): they do not include the results still to come. The model is scored in the game on those probabilities, as frozen.`);
+  }
+  const noSource = roundsWithoutSource(rounds);
+  notes.push(pt
+    ? `O registo de cada jogo é o game_fixtures.json: published_at diz quando as probabilidades foram congeladas e probs_source de que publicação vieram (ficheiro e commit). O mdNN.json com esse nome pode ter sido regenerado depois, por isso o seu timestamp e os seus números podem não coincidir com os do jogo.${noSource.length ? ` ${noSource.length > 1 ? "As jornadas" : "A jornada"} ${noSource.join(pt ? " e " : " and ")} não ${noSource.length > 1 ? "têm" : "tem"} probs_source.` : ""}`
+    : `Each game's record is game_fixtures.json: published_at says when the probabilities were frozen and probs_source which publication they came from (file and commit). The mdNN.json of that name may have been regenerated since, so its timestamp and numbers may not match the game's.${noSource.length ? ` Matchday${noSource.length > 1 ? "s" : ""} ${noSource.join(" and ")} ${noSource.length > 1 ? "have" : "has"} no probs_source.` : ""}`);
+  return notes;
+}
+
+/** Every mdNN.json's next_matchday in the current season (empty when unreadable). */
+async function loadNextMatchdays(): Promise<MatchdayFileNext[]> {
+  const dir = path.join(process.cwd(), "public", "data", "football", "liga-2026-27");
+  try {
+    const names = (await readdir(dir)).filter(n => /^md\d+\.json$/.test(n)).sort();
+    return await Promise.all(
+      names.map(async file => ({
+        file,
+        next_matchday: (JSON.parse(await readFile(path.join(dir, file), "utf8")) as MatchdayFileNext).next_matchday ?? null,
+      })),
+    );
+  } catch {
+    return [];
+  }
+}
 
 function docFor(name: string) {
   return FILE_DOCS.find(d => d.match.test(name));
@@ -265,15 +441,15 @@ function docFor(name: string) {
 function formatBytes(bytes: number, pt: boolean) {
   const loc = pt ? "pt-PT" : "en-GB";
   if (bytes >= 1024 * 1024)
-    return `${(bytes / (1024 * 1024)).toLocaleString(loc, { maximumFractionDigits: 1 })} MB`;
-  return `${Math.round(bytes / 1024).toLocaleString(loc)} KB`;
+    return `${new Intl.NumberFormat(loc, { maximumFractionDigits: 1 }).format(bytes / (1024 * 1024))} MB`;
+  return `${new Intl.NumberFormat(loc).format(Math.round(bytes / 1024))} KB`;
 }
 
 /** Collapse repeated patterns (28 matchday files) into one documented row. */
 function groupFiles(files: PublishedFile[]) {
   const groups = new Map<
     string,
-    { label: string; doc: Doc | null; names: string[]; bytes: number }
+    { label: string; doc: Doc | null; thirdParty: Doc | null; names: string[]; bytes: number }
   >();
 
   for (const f of files) {
@@ -287,6 +463,7 @@ function groupFiles(files: PublishedFile[]) {
       groups.set(key, {
         label: key,
         doc: d?.doc ?? null,
+        thirdParty: d?.thirdParty ?? null,
         names: [f.name],
         bytes: f.bytes,
       });
@@ -303,11 +480,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const c = locale === "en" ? copy.en : copy.pt;
   return createPageMetadata({
     locale,
     path: `/desporto/liga/dados`,
-    title: `${c.title} | Estimador`,
+    title: siteTitle(c.title),
     description: c.description,
   });
 }
@@ -318,34 +496,43 @@ export default async function LigaDataPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
   const c = pt ? copy.pt : copy.en;
-  const seasons: PublishedSeason[] = await loadPublishedFootballData();
+  const [seasons, manifest, nextMatchdays]: [
+    PublishedSeason[],
+    Awaited<ReturnType<typeof loadGameManifest>>,
+    MatchdayFileNext[],
+  ] = await Promise.all([
+    loadPublishedFootballData(),
+    loadGameManifest(),
+    loadNextMatchdays(),
+  ]);
+  const notes = gameNotes(manifest?.matchdays ?? [], locale);
+  // Read from the files (audit FA3-06), beside the two field rows they qualify.
+  const comparison = compareNextMatchdays(nextMatchdays, manifest?.matchdays ?? []);
+  const fieldExtra: Record<string, string | null> = {
+    "next_matchday{}": nextMatchdayPartialSentence(comparison, locale),
+    "season, matchday, model, n_sims, timestamp": nextMatchdayDriftSentence(comparison, locale),
+  };
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
+      <PageHero
+        measure="wide"
+        compact
+        back={{ href: "/desporto/liga", label: c.back, locale }}
+        eyebrow={c.kicker}
+        title={c.title}
+        lede={c.standfirstA}
+      />
 
-      <div className="max-w-5xl mx-auto px-4 py-10">
-        <Link
-          href="/desporto/liga"
-          locale={locale}
-          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          {c.back}
-        </Link>
-
-        <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
-          {c.kicker}
+      <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
+        <p className="max-w-3xl mb-10 text-base text-stone-700 leading-relaxed">
+          {c.standfirstB}
         </p>
-        <h1 className="text-3xl md:text-4xl tracking-tight mb-4">{c.title}</h1>
-        <div className="max-w-3xl space-y-4 mb-10">
-          <p className="text-lg text-stone-600 leading-relaxed">{c.standfirstA}</p>
-          <p className="text-lg text-stone-800 leading-relaxed font-medium">
-            {c.standfirstB}
-          </p>
-        </div>
 
         {/* Published files */}
         <section className="mb-14">
@@ -363,34 +550,34 @@ export default async function LigaDataPage({
                     <h3 className="text-base text-stone-900">
                       {pt ? "Época" : "Season"} {season.season}
                     </h3>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
                       {season.current ? c.currentSeason : c.archived}
                     </span>
                   </div>
-                  <p className="text-xs text-stone-400 mb-4 font-mono break-all">
+                  <p className="text-xs text-stone-500 mb-4 font-mono break-all">
                     {SITE}
                     {season.basePath}/
                   </p>
 
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={`${c.filesTitle} · ${season.season}`}>
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-stone-300">
                           <th
                             scope="col"
-                            className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left w-52"
+                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left w-28 sm:w-52"
                           >
                             {c.file}
                           </th>
                           <th
                             scope="col"
-                            className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
+                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left"
                           >
                             {c.meaning}
                           </th>
                           <th
                             scope="col"
-                            className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-right w-20"
+                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-right w-20"
                           >
                             {c.size}
                           </th>
@@ -404,21 +591,27 @@ export default async function LigaDataPage({
                               <td className="py-3 pr-3">
                                 <a
                                   href={`${season.basePath}/${sample}`}
-                                  className="font-mono text-xs text-ink hover:text-ink-dark break-all"
+                                  className="inline-flex min-h-11 items-center font-mono text-xs text-ink underline underline-offset-4 break-all"
                                 >
                                   {g.label}
                                 </a>
                                 {g.names.length > 1 && (
-                                  <div className="text-[11px] text-stone-400 mt-0.5">
+                                  <div className="text-[11px] text-stone-500 mt-0.5">
                                     {g.names.length} {c.files} ({g.names[0]} …{" "}
                                     {g.names[g.names.length - 1]})
                                   </div>
                                 )}
                               </td>
-                              <td className="py-3 pr-3 text-stone-600 leading-relaxed">
+                              <td className="py-3 pr-3 text-stone-600 leading-relaxed [overflow-wrap:anywhere]">
                                 {g.doc ? (pt ? g.doc.pt : g.doc.en) : "—"}
+                                {g.thirdParty && (
+                                  <span className="mt-1 block text-xs text-stone-500">
+                                    <strong className="font-semibold text-stone-700">{c.thirdPartyLabel}</strong>{" "}
+                                    {pt ? g.thirdParty.pt : g.thirdParty.en}
+                                  </span>
+                                )}
                               </td>
-                              <td className="py-3 text-right tabular-nums text-stone-400 text-xs whitespace-nowrap">
+                              <td className="py-3 text-right tabular-nums text-stone-500 text-xs whitespace-nowrap">
                                 {formatBytes(g.bytes, pt)}
                               </td>
                             </tr>
@@ -437,19 +630,19 @@ export default async function LigaDataPage({
         <section className="mb-14">
           <h2 className="text-2xl tracking-tight mb-1">{c.schemaTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.schemaIntro}</p>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={c.schemaTitle}>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-300">
                   <th
                     scope="col"
-                    className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left w-64"
+                    className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left w-64"
                   >
                     {c.field}
                   </th>
                   <th
                     scope="col"
-                    className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
+                    className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left"
                   >
                     {c.meaning}
                   </th>
@@ -463,6 +656,7 @@ export default async function LigaDataPage({
                     </td>
                     <td className="py-3 text-stone-600 leading-relaxed">
                       {pt ? f.doc.pt : f.doc.en}
+                      {fieldExtra[f.name] ? ` ${fieldExtra[f.name]}` : ""}
                     </td>
                   </tr>
                 ))}
@@ -471,33 +665,60 @@ export default async function LigaDataPage({
           </div>
         </section>
 
+        {/* Game manifest notes */}
+        {notes.length > 0 && (
+          <section className="mb-14" aria-labelledby="notas-jogo">
+            <h2 id="notas-jogo" className="text-2xl tracking-tight mb-1">
+              {pt ? "Notas sobre o jogo Contra o Modelo" : "Notes on the Beat the Model game"}
+            </h2>
+            <p className="text-sm text-stone-500 mb-4 max-w-3xl">
+              {pt
+                ? "Lidas do próprio game_fixtures.json: onde as regras de fecho e de avaliação se afastam do calendário."
+                : "Read from game_fixtures.json itself: where the lock and scoring rules part from the calendar."}
+            </p>
+            <ul className="max-w-3xl list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-700">
+              {notes.map((n) => <li key={n.slice(0, 40)}>{n}</li>)}
+            </ul>
+          </section>
+        )}
+
         {/* Usage */}
         <section className="mb-14">
           <h2 className="text-2xl tracking-tight mb-1">{c.usageTitle}</h2>
           <p className="text-sm text-stone-500 mb-4 max-w-3xl">{c.usageIntro}</p>
-          <pre className="bg-stone-900 text-stone-100 text-xs overflow-x-auto p-4 leading-relaxed">
+          <pre tabIndex={0} role="region" aria-label={c.usageTitle} className="rounded-2xl bg-forest text-paper text-xs overflow-x-auto p-4 leading-relaxed max-sm:whitespace-pre-wrap max-sm:[overflow-wrap:anywhere]">
             <code>{pt
               ? `# um ficheiro de jornada (o mais recente é o NN mais alto)
 curl -s ${SITE}/data/football/liga-2026-27/md01.json | jq '.table[0]'
 
-# a classificação final e o índice de sorte de 2025-26
+# a classificação final e a diferença pontos − xPts de 2025-26
 curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`
               : `# one matchday file (the latest is the highest NN)
 curl -s ${SITE}/data/football/liga-2026-27/md01.json | jq '.table[0]'
 
-# the 2025-26 final table and luck index
+# the 2025-26 final table and the points − xPts gap
 curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
           </pre>
         </section>
 
         {/* Licence + provenance */}
         <section className="pt-8 border-t border-stone-200">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400 mb-3">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3">
             {c.licenceTitle}
           </h2>
-          <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">{c.licence}</p>
+          <div className="space-y-3 text-sm text-stone-500 leading-relaxed max-w-3xl">
+            <p>
+              {c.licenceOwn} (
+              <a href={c.licenceUrl} className="font-semibold text-ink underline underline-offset-4">
+                CC BY-NC 4.0
+              </a>
+              ){c.licenceOwnAfter}
+            </p>
+            <p>{c.licenceThirdParty}</p>
+            <p>{c.licenceWarranty}</p>
+          </div>
 
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400 mb-3 mt-8">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3 mt-8">
             {c.provenanceTitle}
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">
@@ -508,22 +729,23 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.methodology}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
               href="/desporto/liga/2025-26"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.review}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </section>
-      </div>
+      </div></div>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

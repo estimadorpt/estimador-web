@@ -1,13 +1,87 @@
 "use client";
 
-import { ligaTeamColors, ligaTeamShortNames, ligaTeamSlugs, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
+import { ligaTeamSlugs, teamColorOnPaper, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { ActualStanding, TeamStanding, TeamDelta } from "@/types/football";
-import { ArrowUp, ArrowDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { ChevronRight } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { Link } from "@/i18n/routing";
+import { useState, useEffect, useId } from "react";
+import { describePp, formatDecimal, formatInteger, formatPercent, formatPp, formatSigned } from "@/lib/football-format";
+import { calibrationSentence, type PointsCalibration } from "@/lib/football-scorecard";
+
+/**
+ * The league page's club chooser: a labelled select and an explicit "Ver"
+ * button. Choosing in the select changes nothing until the button (or
+ * Enter) submits, so arrowing through the list with a keyboard never
+ * navigates away (audit A11Y-14).
+ */
+export function ClubChooser({
+  teams,
+  label,
+  placeholder,
+}: {
+  teams: string[];
+  label: string;
+  placeholder: string;
+}) {
+  const router = useRouter();
+  const locale = useLocale();
+  const id = useId();
+  const [value, setValue] = useState("");
+  const [hint, setHint] = useState(false);
+  const sorted = [...teams].sort((a, b) => teamDisplayName(a).localeCompare(teamDisplayName(b), "pt"));
+  return (
+    <form
+      className="flex min-w-0 flex-wrap items-end gap-2 text-left"
+      onSubmit={e => {
+        e.preventDefault();
+        const slug = ligaTeamSlugs[value];
+        // Never a disabled button that looks broken (audit CL2-04): with no
+        // club chosen, the select gets focus and a hint says why.
+        if (!slug) {
+          setHint(true);
+          document.getElementById(id)?.focus();
+          return;
+        }
+        router.push(`/${locale}/desporto/liga/${slug}`);
+      }}
+    >
+      <span className="flex min-w-0 flex-col gap-1">
+        <label htmlFor={id} className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{label}</label>
+        <select
+          id={id}
+          value={value}
+          aria-describedby={hint ? `${id}-hint` : undefined}
+          onChange={e => {
+            setValue(e.target.value);
+            setHint(false);
+          }}
+          className="min-h-11 min-w-[200px] rounded-[10px] border border-line bg-paper px-3 text-base text-ink sm:text-sm"
+        >
+          <option value="" disabled>
+            {placeholder}
+          </option>
+          {sorted.map(team => (
+            <option key={team} value={team}>
+              {teamDisplayName(team)}
+            </option>
+          ))}
+        </select>
+      </span>
+      <button
+        type="submit"
+        className="min-h-11 rounded-[10px] bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-forest"
+      >
+        {locale === "en" ? "See club" : "Ver equipa"}
+      </button>
+      {hint && (
+        <p id={`${id}-hint`} role="status" className="w-full text-sm text-stone-600">
+          {locale === "en" ? "Choose a club from the list first." : "Escolhe primeiro um clube na lista."}
+        </p>
+      )}
+    </form>
+  );
+}
 
 /** Final-points quantiles from the season simulation, per team. */
 export interface PointsInterval {
@@ -24,6 +98,18 @@ interface LeagueTableProps {
   deltas?: Record<string, TeamDelta>;
   /** Keyed by team name. When absent the table renders exactly as before. */
   intervals?: Record<string, PointsInterval>;
+  /** Simulated seasons behind the intervals (prediction.n_sims). */
+  nSims?: number;
+  /** The model that produced the forecast (prediction.model): the
+   * calibration figure is only quoted for the model it was measured on. */
+  model?: string;
+  /** The final-points interval check (market_scorecard.json → calibration). */
+  calibration?: PointsCalibration | null;
+  /** The matchday the deltas compare with, for their words. */
+  previousMatchday?: number;
+  /** The matchday the forecast follows (prediction.matchday): the played
+   * and points columns are the table after it, not "now" (audit FR3-07). */
+  matchday?: number;
   labels: {
     team: string;
     meanPoints: string;
@@ -37,115 +123,45 @@ interface LeagueTableProps {
   };
 }
 
-function DeltaIndicator({ value, invert = false }: { value: number; invert?: boolean }) {
-  const rounded = Math.round(Math.abs(value));
-  if (rounded < 1) return null;
-  const isUp = value > 0;
-  // For championship: up=good (green), down=bad (red)
-  // For relegation (invert): up=bad (red), down=good (green)
-  const isGood = invert ? !isUp : isUp;
+/**
+ * A change since the previous forecast: signed in text ("+26 pp", U+2212),
+ * coloured only as a repeat, and said in words for screen readers
+ * (audit A11Y-V03: "51% 26" was all an arrow and a colour left).
+ */
+function Delta({ value, invert = false, since, locale }: { value: number; invert?: boolean; since: string; locale: string }) {
+  // value is in percentage points (TeamDelta); formatPp takes 0–1.
+  if (Math.abs(value) < 1) return null;
+  const good = invert ? value < 0 : value > 0;
   return (
-    <span className={`inline-flex items-center gap-0.5 text-[11px] tabular-nums ml-0.5 ${isGood ? "text-emerald-600" : "text-red-500"}`}>
-      {isUp ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
-      {rounded}
+    <span className={`ml-1 block text-[11px] font-semibold tabular-nums sm:inline ${good ? "text-emerald-700" : "text-red-700"}`}>
+      <span aria-hidden="true">{formatPp(value / 100, locale)}</span>
+      <span className="sr-only">, {describePp(value / 100, locale, since)}</span>
     </span>
   );
 }
 
-function formatProb(value: number): string {
-  const pct = value * 100;
-  if (pct > 99 && pct < 100) return ">99%";
-  if (pct < 1 && pct > 0) return "<1%";
-  if (pct === 0) return "—";
-  if (pct === 100) return "100%";
-  return `${Math.round(pct)}%`;
-}
-
 /**
- * Largest remainder method: round probabilities so they sum to 100%.
- * Returns a map from index to display string.
+ * Final-points distribution as a horizontal range: the thin rule spans the
+ * 90% interval (q05–q95), the block the middle half (q25–q75), the tick the
+ * median. All teams share one scale, so positions compare down the column.
  */
-function roundToSum100(values: number[]): string[] {
-  const pcts = values.map(v => v * 100);
-  const floors = pcts.map(p => Math.floor(p));
-  let remainder = 100 - floors.reduce((s, f) => s + f, 0);
-
-  // Sort by fractional part descending, allocate +1 to largest remainders
-  const indices = values.map((_, i) => i);
-  indices.sort((a, b) => (pcts[b] - floors[b]) - (pcts[a] - floors[a]));
-
-  const result = [...floors];
-  for (const idx of indices) {
-    if (remainder <= 0) break;
-    result[idx] += 1;
-    remainder -= 1;
-  }
-
-  return result.map((r, i) => {
-    const raw = pcts[i];
-    if (raw > 99 && raw < 100) return ">99%";
-    if (raw < 1 && raw > 0) return "<1%";
-    if (raw === 0) return "—";
-    if (raw === 100) return "100%";
-    return `${r}%`;
-  });
-}
-
-/**
- * Final-points distribution as a horizontal range: the light rule spans the
- * 90% interval (q05–q95), the solid block the middle half (q25–q75), and the
- * tick marks the median. All teams share one scale, so bar positions and
- * widths are comparable down the column.
- */
-function PointsBand({
-  interval,
-  min,
-  max,
-  color,
-}: {
-  interval: PointsInterval;
-  min: number;
-  max: number;
-  color: string;
-}) {
+function PointsBand({ interval, min, max, color }: { interval: PointsInterval; min: number; max: number; color: string }) {
   const span = Math.max(max - min, 1);
   const pos = (v: number) => ((v - min) / span) * 100;
   const left = pos(interval.q05);
   const right = pos(interval.q95);
   const iqrLeft = pos(interval.q25);
   const iqrRight = pos(interval.q75);
-
   return (
-    <div className="relative h-4 w-full min-w-[120px]">
-      <div className="absolute inset-y-0 left-0 right-0" />
-      {/* 90% interval */}
+    <div aria-hidden="true" className="relative h-4 w-full min-w-[120px]">
+      <div className="absolute top-1/2 h-px -translate-y-1/2 bg-stone-500" style={{ left: `${left}%`, width: `${Math.max(right - left, 0.5)}%` }} />
+      <div className="absolute top-1/2 h-2 w-px -translate-y-1/2 bg-stone-500" style={{ left: `${left}%` }} />
+      <div className="absolute top-1/2 h-2 w-px -translate-y-1/2 bg-stone-500" style={{ left: `${right}%` }} />
       <div
-        className="absolute top-1/2 -translate-y-1/2 h-px bg-stone-300"
-        style={{ left: `${left}%`, width: `${Math.max(right - left, 0.5)}%` }}
+        className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-sm"
+        style={{ left: `${iqrLeft}%`, width: `${Math.max(iqrRight - iqrLeft, 0.8)}%`, backgroundColor: color, opacity: 0.6 }}
       />
-      <div
-        className="absolute top-1/2 -translate-y-1/2 w-px h-2 bg-stone-300"
-        style={{ left: `${left}%` }}
-      />
-      <div
-        className="absolute top-1/2 -translate-y-1/2 w-px h-2 bg-stone-300"
-        style={{ left: `${right}%` }}
-      />
-      {/* middle half */}
-      <div
-        className="absolute top-1/2 -translate-y-1/2 h-1.5 rounded-sm"
-        style={{
-          left: `${iqrLeft}%`,
-          width: `${Math.max(iqrRight - iqrLeft, 0.8)}%`,
-          backgroundColor: color,
-          opacity: 0.5,
-        }}
-      />
-      {/* median */}
-      <div
-        className="absolute top-1/2 -translate-y-1/2 w-[2px] h-3 bg-stone-900"
-        style={{ left: `${pos(interval.q50)}%` }}
-      />
+      <div className="absolute top-1/2 h-3 w-[2px] -translate-y-1/2 bg-stone-900" style={{ left: `${pos(interval.q50)}%` }} />
     </div>
   );
 }
@@ -156,53 +172,42 @@ export function LeagueTable({
   deltas,
   intervals,
   labels,
+  nSims = 50000,
+  model,
+  calibration,
+  previousMatchday,
+  matchday,
 }: LeagueTableProps) {
   const locale = useLocale();
-  const router = useRouter();
-  const [showHint, setShowHint] = useState(false);
-
-  // Build lookup for actual standings
-  const actualLookup = new Map<string, ActualStanding>();
-  if (actualStandings) {
-    for (const s of actualStandings) {
-      actualLookup.set(s.team, s);
-    }
-  }
-  const hasActual = actualLookup.size > 0;
-
-  // Pre-compute consistent rounded probabilities (sum to 100%)
-  const champRounded = roundToSum100(data.map(t => t.p_champion));
-  const relegRounded = roundToSum100(data.map(t => t.p_relegation));
-
-  const dismissHint = useCallback(() => {
-    setShowHint(false);
-    try { localStorage.setItem("liga-team-hint-seen", "1"); } catch {}
+  const pt = locale !== "en";
+  // Read ?club= after mount: useSearchParams would force a Suspense boundary in the static export.
+  const [clubParam, setClubParam] = useState<string | null>(null);
+  useEffect(() => {
+    setClubParam(new URLSearchParams(window.location.search).get("club"));
   }, []);
+  const [expanded, setExpanded] = useState(false);
+  const [isNarrow, setIsNarrow] = useState(false);
 
   useEffect(() => {
-    try {
-      if (!localStorage.getItem("liga-team-hint-seen")) {
-        setShowHint(true);
-        const timer = setTimeout(dismissHint, 8000);
-        return () => clearTimeout(timer);
-      }
-    } catch {}
-  }, [dismissHint]);
+    const mql = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsNarrow(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
 
-  // Shared scale for the points bands, padded a point either side so the
-  // extreme teams' whiskers do not sit flush against the column edge.
-  const bandTeams = intervals
-    ? data.filter(t => intervals[t.team])
-    : [];
+  const actualLookup = new Map<string, ActualStanding>();
+  for (const s of actualStandings ?? []) actualLookup.set(s.team, s);
+  const hasActual = actualLookup.size > 0;
+
+  const bandTeams = intervals ? data.filter(t => intervals[t.team]) : [];
   const hasBands = bandTeams.length > 0;
-  const bandMin = hasBands
-    ? Math.min(...bandTeams.map(t => intervals![t.team].q05)) - 1
-    : 0;
-  const bandMax = hasBands
-    ? Math.max(...bandTeams.map(t => intervals![t.team].q95)) + 1
-    : 1;
+  const bandMin = hasBands ? Math.min(...bandTeams.map(t => intervals![t.team].q05)) - 1 : 0;
+  const bandMax = hasBands ? Math.max(...bandTeams.map(t => intervals![t.team].q95)) + 1 : 1;
 
-  const pt = locale !== "en";
+  const since = previousMatchday
+    ? pt ? `face à previsão depois da jornada ${previousMatchday}` : `since the forecast after matchday ${previousMatchday}`
+    : pt ? "face à previsão anterior" : "since the previous forecast";
   const bandLabel = pt ? "Pontos finais" : "Final points";
   const bandRange = (v: PointsInterval) => `${v.q05}–${v.q95}`;
   const bandTitle = (v: PointsInterval) =>
@@ -212,190 +217,232 @@ export function LeagueTable({
 
   if (!data || data.length === 0) return null;
 
-  const handleTeamClick = (teamName: string) => {
-    const slug = ligaTeamSlugs[teamName];
-    if (slug) {
-      dismissHint();
-      router.push(`/${locale}/desporto/liga/${slug}`);
-    }
-  };
+  // ?club= (a slug) drives the phone-compact view: selected row + neighbours,
+  // with a disclosure back to the full table.
+  const selectedIndex = clubParam ? data.findIndex(t => ligaTeamSlugs[t.team] === clubParam) : -1;
+  const compact = selectedIndex >= 0 && isNarrow && !expanded;
+  const NEIGHBOURS = 2;
+  const visibleData = compact ? data.filter((_, i) => Math.abs(i - selectedIndex) <= NEIGHBOURS) : data;
+  const skippedBefore = compact ? Math.max(0, selectedIndex - NEIGHBOURS) : 0;
+  const skippedAfter = compact ? Math.max(0, data.length - 1 - (selectedIndex + NEIGHBOURS)) : 0;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b-2 border-stone-800 text-left">
-            <th className="py-2 pr-2 w-8 text-stone-500 font-medium">#</th>
-            <th className="py-2 pr-4 font-medium">{labels.team}</th>
+    <div>
+      {labels.teamClickHint && <p className="mb-3 text-xs text-stone-500">{labels.teamClickHint}</p>}
+      {/* Below `sm` the table keeps five columns (position, club, points,
+          title, relegation) so nothing sits off screen at 320 px; the
+          predicted points, goal difference and top 3 join from `sm` up
+          (audit UXM-10). */}
+      {/* On a phone the rows' order has to be readable from what is on
+          screen: the visible points column is the predicted one, and the
+          caption says so before the first row (audit PUB2-01). */}
+      <p className="mb-2 text-xs leading-relaxed text-stone-600 sm:hidden">
+        {pt
+          ? "Ordenada pelos pontos previstos no fim da época (Prev.). Os pontos atuais estão na página de cada clube e num ecrã maior."
+          : "Ordered by predicted end-of-season points (Pred.). Current points are on each club's page and on a wider screen."}
+      </p>
+      <div tabIndex={0} role="region" aria-label={pt ? "Classificação prevista" : "Predicted standings"} className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-[11px] uppercase tracking-wider text-stone-500 sm:hidden">
+              <th className="py-1 pr-2" colSpan={2}><span className="sr-only">{labels.team}</span></th>
+              <th className="px-2 py-1 text-center" colSpan={3}>{pt ? "Previsão do modelo" : "Model forecast"}</th>
+            </tr>
             {hasActual && (
-              <>
-                <th className="py-2 px-2 text-right font-medium hidden sm:table-cell text-stone-500 text-xs">{labels.played ?? "J"}</th>
-                <th className="py-2 px-2 text-right font-medium text-xs">{labels.actualPoints ?? "Pts"}</th>
-              </>
+              <tr className="hidden text-left text-[11px] uppercase tracking-wider text-stone-500 sm:table-row">
+                <th className="py-1 pr-2" colSpan={2}><span className="sr-only">{labels.team}</span></th>
+                {/* True at any instant, also once the next round is played (FR3-07). */}
+                <th className="px-2 py-1 text-center" colSpan={2}>
+                  {matchday != null
+                    ? pt ? `Depois da jornada ${matchday}` : `After matchday ${matchday}`
+                    : pt ? "Classificação" : "Standings"}
+                </th>
+                <th className="border-l border-stone-200 px-3 py-1 text-center" colSpan={hasBands ? 5 : 4}>
+                  {pt ? "Previsão do modelo" : "Model forecast"}
+                </th>
+              </tr>
             )}
-            <th className="py-2 px-3 text-right font-medium">{labels.meanPoints}</th>
-            {hasBands && (
-              <th className="py-2 px-3 font-medium hidden md:table-cell text-xs text-stone-500 w-[20%]">
-                {bandLabel} <span className="text-stone-400">90%</span>
+            <tr className="border-b border-ink/40 bg-cream text-left">
+              <th scope="col" className="w-7 py-2 pr-1 font-medium text-stone-500">#</th>
+              <th scope="col" className="py-2 pr-2 font-medium">{labels.team}</th>
+              {hasActual && (
+                <>
+                  <th scope="col" className="hidden px-2 py-2 text-right text-xs font-medium text-stone-500 sm:table-cell">{labels.played ?? "J"}</th>
+                  <th scope="col" className="hidden px-2 py-2 text-right text-xs font-medium sm:table-cell">
+                    <abbr title={pt ? "Pontos" : "Points"} className="no-underline">{labels.actualPoints ?? "Pts"}</abbr>
+                  </th>
+                </>
+              )}
+              <th scope="col" className={`px-2 py-2 text-right font-medium sm:px-3 ${hasActual ? "sm:border-l sm:border-stone-200" : ""}`}>
+                <abbr aria-hidden="true" title={labels.meanPoints} className="no-underline sm:hidden">{pt ? "Prev." : "Pred."}</abbr>
+                <span className="sr-only sm:not-sr-only">{labels.meanPoints}</span>
               </th>
-            )}
-            <th className="py-2 px-3 text-right font-medium hidden sm:table-cell">{labels.goalDifference}</th>
-            <th className="py-2 px-3 text-right font-medium">{labels.championship}</th>
-            <th className="py-2 px-3 text-right font-medium hidden sm:table-cell">{labels.top3}</th>
-            <th className="py-2 px-3 text-right font-medium">{labels.relegation}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((team, i) => {
-            const color = ligaTeamColors[team.team] || '#5f7062';
-            const interval = intervals?.[team.team];
-            const isRelegationZone = i >= data.length - 3;
-            const isChampionZone = i < 3;
-            return (
-              <tr
-                key={team.team}
-                className={`border-b border-stone-200 ${
-                  isRelegationZone ? 'bg-red-50/40' : isChampionZone ? 'bg-stone-50' : ''
-                }`}
-              >
-                <td className="py-2.5 pr-2 text-stone-400 tabular-nums">{i + 1}</td>
-                <td className="py-2.5 pr-4">
-                  <div
-                    className="flex items-center gap-2 cursor-pointer group relative"
-                    onClick={() => handleTeamClick(team.team)}
-                  >
-                    {teamLogoSrc(team.team) ? (
-                      <img
-                        src={teamLogoSrc(team.team)}
-                        alt=""
-                        className="w-5 h-5 flex-shrink-0 object-contain"
-                      />
-                    ) : (
-                      <div
-                        className="w-1 h-5 flex-shrink-0"
-                        style={{ backgroundColor: color }}
-                      />
-                    )}
-                    <span className="font-medium text-stone-900 group-hover:text-ink transition-colors sm:hidden">
-                      {ligaTeamShortNames[team.team] || team.team}
-                    </span>
-                    <span className="font-medium text-stone-900 group-hover:text-ink transition-colors hidden sm:inline">
-                      {teamDisplayName(team.team)}
-                    </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-stone-300 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                    {/* Tooltip on first row */}
-                    <AnimatePresence>
-                      {i === 0 && showHint && labels.teamClickHint && (
-                        <motion.div
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -8 }}
-                          transition={{ duration: 0.3 }}
-                          className="pointer-events-none flex-shrink-0 ml-1"
-                        >
-                          <div className="relative bg-stone-800 text-white text-[11px] px-2.5 py-1 whitespace-nowrap shadow-lg flex items-center">
-                            {/* Arrow pointing left */}
-                            <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-stone-800 rotate-45" />
-                            <span className="relative">{labels.teamClickHint}</span>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </td>
-                {hasActual && (() => {
-                  const actual = actualLookup.get(team.team);
-                  if (!actual) return <><td className="py-2.5 px-2 text-right hidden sm:table-cell" /><td className="py-2.5 px-2 text-right" /></>;
-                  return (
-                    <>
-                      <td className="py-2.5 px-2 text-right tabular-nums text-stone-400 text-xs hidden sm:table-cell">
-                        {actual.played}
-                      </td>
-                      <td className="py-2.5 px-2 text-right tabular-nums font-semibold">
-                        {actual.points}
-                      </td>
-                    </>
-                  );
-                })()}
-                <td className="py-2.5 px-3 text-right tabular-nums font-semibold">
-                  {team.mean_pts.toFixed(1)}
-                  {/* The band has no room on phones, so the range travels
-                      under the point estimate instead. */}
-                  {interval && (
-                    <div className="md:hidden text-[11px] font-normal text-stone-400 tabular-nums">
-                      {bandRange(interval)}
-                    </div>
-                  )}
-                </td>
-                {hasBands && (
-                  <td className="py-2.5 px-3 hidden md:table-cell" title={interval ? bandTitle(interval) : undefined}>
-                    {interval ? (
-                      <div className="flex items-center gap-2">
-                        <PointsBand
-                          interval={interval}
-                          min={bandMin}
-                          max={bandMax}
-                          color={color}
-                        />
-                        <span className="text-[11px] tabular-nums text-stone-400 w-11 text-right flex-shrink-0">
-                          {bandRange(interval)}
-                        </span>
-                      </div>
-                    ) : null}
-                  </td>
-                )}
-                <td className="py-2.5 px-3 text-right tabular-nums text-stone-500 hidden sm:table-cell">
-                  {team.mean_gd > 0 ? '+' : ''}{team.mean_gd.toFixed(0)}
-                </td>
-                <td className="py-2.5 px-3 text-right tabular-nums">
-                  <span className={team.p_champion > 0.01 ? 'font-semibold' : 'text-stone-400'}>
-                    {champRounded[i]}
-                  </span>
-                  {deltas?.[team.team] && (
-                    <DeltaIndicator value={deltas[team.team].p_champion_delta} />
-                  )}
-                </td>
-                <td className="py-2.5 px-3 text-right tabular-nums hidden sm:table-cell">
-                  {formatProb(team.p_top3)}
-                </td>
-                <td className="py-2.5 px-3 text-right tabular-nums">
-                  <span className={team.p_relegation > 0.1 ? 'font-semibold text-red-700' : team.p_relegation > 0 ? 'text-red-600' : 'text-stone-400'}>
-                    {relegRounded[i]}
-                  </span>
-                  {deltas?.[team.team] && (
-                    <DeltaIndicator value={deltas[team.team].p_relegation_delta} invert />
-                  )}
+              {hasBands && (
+                <th scope="col" className="hidden w-[20%] px-3 py-2 text-xs font-medium text-stone-500 md:table-cell">
+                  {bandLabel} <span className="text-stone-500">90%</span>
+                </th>
+              )}
+              <th scope="col" className="hidden px-3 py-2 text-right font-medium sm:table-cell">{labels.goalDifference}</th>
+              <th scope="col" className="px-2 py-2 text-right font-medium sm:px-3">{labels.championship}</th>
+              <th scope="col" className="hidden px-3 py-2 text-right font-medium sm:table-cell">{labels.top3}</th>
+              <th scope="col" className="px-2 py-2 text-right font-medium sm:px-3">
+                <span aria-hidden="true" className="sm:hidden">{pt ? "Desp." : "Rel."}</span>
+                <span className="sr-only sm:not-sr-only">{labels.relegation}</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {compact && skippedBefore > 0 && (
+              <tr aria-hidden="true">
+                <td colSpan={99} className="py-1 text-center text-[11px] text-stone-500">
+                  {pt ? `${skippedBefore} equipa(s) acima` : `${skippedBefore} team(s) above`}
                 </td>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            )}
+            {visibleData.map(team => {
+              const i = data.indexOf(team);
+              const color = teamColorOnPaper(team.team);
+              const interval = intervals?.[team.team];
+              // Despromoção is 17th or 18th: the 16th plays off and is not
+              // tinted, as the footnote says (audit VUXD-01).
+              const isRelegationZone = i >= data.length - 2;
+              const isChampionZone = i < 3;
+              const isSelected = i === selectedIndex;
+              const slug = ligaTeamSlugs[team.team];
+              const actual = actualLookup.get(team.team);
+              // One name per club on the page, the cards' and the picker's
+              // ("Sp. Braga", "Santa Clara"), wrapping when it must (PUB3-11).
+              const name = (
+                <>
+                  {teamLogoSrc(team.team) ? (
+                    <img src={teamLogoSrc(team.team)} alt="" width={20} height={20} loading="lazy" decoding="async" className="h-5 w-5 shrink-0 object-contain" />
+                  ) : (
+                    <i aria-hidden="true" className="h-5 w-1 shrink-0" style={{ backgroundColor: color }} />
+                  )}
+                  <span className="font-medium leading-tight text-ink">{teamDisplayName(team.team)}</span>
+                </>
+              );
+              return (
+                <tr
+                  key={team.team}
+                  className={`border-b border-stone-200 ${isSelected ? "bg-parchment" : isRelegationZone ? "bg-red-50/40" : isChampionZone ? "bg-stone-50" : ""}`}
+                >
+                  <td className="py-2.5 pr-1 tabular-nums text-stone-500">{i + 1}</td>
+                  <td className="py-1 pr-2">
+                    {slug ? (
+                      <Link
+                        href={`/desporto/liga/${slug}`}
+                        locale={locale}
+                        className="inline-flex min-h-11 items-center gap-2 underline-offset-4 hover:underline"
+                      >
+                        {name}
+                      </Link>
+                    ) : (
+                      <span className="inline-flex min-h-11 items-center gap-2">{name}</span>
+                    )}
+                  </td>
+                  {hasActual && (
+                    <>
+                      <td className="hidden px-2 py-2.5 text-right text-xs tabular-nums text-stone-500 sm:table-cell">{actual?.played ?? ""}</td>
+                      <td className="hidden px-2 py-2.5 text-right font-semibold tabular-nums sm:table-cell">{actual ? formatInteger(actual.points, locale) : ""}</td>
+                    </>
+                  )}
+                  <td className={`px-2 py-2.5 text-right font-semibold tabular-nums sm:px-3 ${hasActual ? "sm:border-l sm:border-stone-200" : ""}`}>
+                    {formatDecimal(team.mean_pts, locale, 1)}
+                    {interval && (
+                      <div className="text-[11px] font-normal tabular-nums text-stone-500 md:hidden">{bandRange(interval)}</div>
+                    )}
+                  </td>
+                  {hasBands && (
+                    <td className="hidden px-3 py-2.5 md:table-cell" title={interval ? bandTitle(interval) : undefined}>
+                      {interval ? (
+                        <div className="flex items-center gap-2">
+                          <PointsBand interval={interval} min={bandMin} max={bandMax} color={color} />
+                          <span className="w-11 shrink-0 text-right text-[11px] tabular-nums text-stone-500">
+                            <span className="sr-only">{pt ? "90% das simulações entre " : "90% of simulations between "}</span>
+                            {bandRange(interval)}
+                          </span>
+                        </div>
+                      ) : null}
+                    </td>
+                  )}
+                  <td className="hidden px-3 py-2.5 text-right tabular-nums text-stone-500 sm:table-cell">
+                    {formatSigned(Math.round(team.mean_gd), locale, 0)}
+                  </td>
+                  <td className="px-2 py-2.5 text-right tabular-nums sm:px-3">
+                    <span className={team.p_champion > 0.01 ? "font-semibold text-ink" : "text-stone-500"}>{formatPercent(team.p_champion, locale)}</span>
+                    {deltas?.[team.team] && <Delta value={deltas[team.team].p_champion_delta} since={since} locale={locale} />}
+                  </td>
+                  <td className="hidden px-3 py-2.5 text-right tabular-nums sm:table-cell">{formatPercent(team.p_top3, locale)}</td>
+                  <td className="px-2 py-2.5 text-right tabular-nums sm:px-3">
+                    <span className={team.p_relegation > 0.1 ? "font-semibold text-red-700" : team.p_relegation > 0 ? "text-ink" : "text-stone-500"}>
+                      {formatPercent(team.p_relegation, locale)}
+                    </span>
+                    {deltas?.[team.team] && <Delta value={deltas[team.team].p_relegation_delta} invert since={since} locale={locale} />}
+                  </td>
+                </tr>
+              );
+            })}
+            {compact && skippedAfter > 0 && (
+              <tr aria-hidden="true">
+                <td colSpan={99} className="py-1 text-center text-[11px] text-stone-500">
+                  {pt ? `${skippedAfter} equipa(s) abaixo` : `${skippedAfter} team(s) below`}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {/* Legend + the calibration claim. Stated once, next to the thing it
-          is a claim about. */}
+      {selectedIndex >= 0 && isNarrow && (
+        <button
+          type="button"
+          onClick={() => setExpanded(e => !e)}
+          className="mt-3 min-h-11 text-sm font-semibold text-ink underline underline-offset-4"
+        >
+          {expanded ? (pt ? "Mostrar só a minha equipa" : "Show only my club") : (pt ? "Ver tabela completa" : "See the full table")}
+        </button>
+      )}
+
+      <p className="mt-3 text-[11px] leading-relaxed text-stone-500 sm:hidden">
+        {pt
+          ? "Num ecrã maior, a tabela mostra também os pontos atuais, a diferença de golos e o top 3; cada equipa tem tudo na sua página."
+          : "On a wider screen the table also shows current points, goal difference and top 3; each club's page has everything."}
+      </p>
+
+      {/* What the relegation column counts (audit M-07): the play-off place is not in it. */}
+      <p className="mt-2 text-[11px] leading-relaxed text-stone-500">
+        {pt
+          ? "Despromoção = 17.º ou 18.º lugar; o 16.º joga o play-off e não conta."
+          : "Relegation = 17th or 18th; 16th plays off and is not counted."}
+      </p>
+
+      {/* Legend + the calibration claim, next to the thing it is a claim about. */}
       {hasBands && (
-        <div className="mt-3 max-w-3xl">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-stone-400">
+        <div className="mt-3 hidden max-w-3xl md:block">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-stone-500">
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-6 h-px bg-stone-300 relative inline-block" />
+              <span aria-hidden="true" className="relative inline-block h-px w-6 bg-stone-500" />
               {pt ? "90% das simulações" : "90% of simulations"}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-4 h-1.5 rounded-sm bg-stone-400/50 inline-block" />
+              <span aria-hidden="true" className="inline-block h-1.5 w-4 rounded-sm bg-stone-500/60" />
               {pt ? "metade das simulações" : "half of simulations"}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-[2px] h-3 bg-stone-900 inline-block" />
+              <span aria-hidden="true" className="inline-block h-3 w-[2px] bg-stone-900" />
               {pt ? "mediana" : "median"}
             </span>
           </div>
-          <p className="mt-1.5 text-[11px] text-stone-500 leading-relaxed">
-            {pt
-              ? "Os pontos finais são uma distribuição, não um número: a barra mostra onde caem as 50 mil épocas simuladas. Estes intervalos foram verificados como calibrados em 8 épocas históricas — um intervalo anunciado como 90% conteve o resultado real em 92,7% dos casos."
-              : "Final points are a distribution, not a number: the bar shows where the 50k simulated seasons fall. These intervals were verified as calibrated over 8 historical seasons — an interval quoted as 90% contained the real outcome 92.7% of the time."}
-          </p>
         </div>
+      )}
+      {hasBands && (
+        <p className="mt-1.5 hidden max-w-3xl text-[11px] leading-relaxed text-stone-500 sm:block">
+          {pt
+            ? `Os pontos finais são uma distribuição, não um número: o intervalo mostra onde caem 90% das ${formatInteger(nSims, locale)} épocas simuladas.`
+            : `Final points are a distribution, not a number: the range shows where 90% of the ${formatInteger(nSims, locale)} simulated seasons fall.`}{" "}
+          {calibrationSentence(calibration, model, locale)}
+        </p>
       )}
     </div>
   );

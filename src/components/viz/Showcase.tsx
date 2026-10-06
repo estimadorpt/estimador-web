@@ -21,8 +21,14 @@ export function VizShowcase({ pt }: { pt: boolean }) {
     precos: { name: pt ? 'Inflação homóloga (%)' : 'Year-on-year inflation (%)', subtitle: pt ? 'IPC, variação homóloga, com banda de 80%' : 'CPI, year-on-year change, with an 80% band', points: [...observed([2.6, 2.5, 2.3, 2.4, 2.2, 2.1, 2.2, 2, 2.1, 2.1, 2, 2.1], 0.2, 0.01), ...projected([2.1, 2], 0.5)], format: v => `${one(v)}%`, yMin: 0, yMax: 4 },
   };
   const current = scopes[scope] ?? scopes.geral;
+  // The footer of an example card names what its numbers are and links to no
+  // section's methodology: invented figures credited to INE, with a link to the
+  // economy method, read as the economy figures the site does not publish
+  // (AEE3-05). The first card's link shows the footer's place for one, here.
+  const invented = pt ? 'Fonte: valores inventados para exemplo' : 'Source: made-up values for the example';
+  const approximate = pt ? 'Fonte: valores aproximados para exemplo, na ordem de grandeza dos Censos 2021' : 'Source: approximate values for the example, of the order of the 2021 Census';
   return (
-    <div className="grid gap-4">
+    <div className="grid min-w-0 grid-cols-1 gap-4">
       <KpiRow>
         <StatTile label={pt ? 'Crescimento homólogo' : 'Year-on-year growth'} value="+1,8" unit="%" delta={{ text: '+0,3 pp', direction: 'up', good: true, period: pt ? 'vs. trimestre anterior' : 'vs. previous quarter' }} trend={[1.1, 1.3, 1.2, 1.5, 1.4, 1.6, 1.5, 1.7, 1.8]} note={example} />
         <StatTile label={pt ? 'Desemprego' : 'Unemployment'} value="6,2" unit="%" delta={{ text: '−0,1 pp', direction: 'down', good: false, period: pt ? 'em 3 meses' : 'over 3 months' }} note={example} />
@@ -32,12 +38,16 @@ export function VizShowcase({ pt }: { pt: boolean }) {
 
       <DataCard title={pt ? 'Evolução ao longo do tempo' : 'Change over time'} subtitle={current.subtitle} badge={example}
         controls={<Segmented label={pt ? 'Âmbito' : 'Scope'} value={scope} onChange={setScope} options={[{ value: 'geral', label: pt ? 'Visão geral' : 'Overview' }, { value: 'trabalho', label: pt ? 'Trabalho' : 'Labour' }, { value: 'precos', label: pt ? 'Preços' : 'Prices' }]} />}
-        source="Fonte: INE" updated={pt ? 'Atualização: 15 de março de 2026' : 'Updated: 15 March 2026'} methodologyHref="/economia/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        source={invented} updated={pt ? 'Atualização: data de exemplo' : 'Updated: example date'} methodologyHref="/marca#visualizacoes" methodologyLabel={pt ? 'Sobre este exemplo' : 'About this example'}>
         <TrendChart key={scope} series={[{ name: current.name, points: current.points }]} format={current.format} yMin={current.yMin} yMax={current.yMax} locale={pt ? 'pt' : 'en'} tableCaption={current.name} />
       </DataCard>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <DataCard title={pt ? 'Probabilidade de ser campeão' : 'Title probability'} badge={example} source={pt ? 'Fonte: modelo estimador' : 'Source: estimador model'} updated={pt ? 'Jornada 5' : 'Matchday 5'} methodologyHref="/desporto/liga/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+      {/* The rule this guide models: a DataCard is as tall as its chart. Five
+          ranked bars and one three-outcome bar are not the same height, so they
+          stack, each at its own height, instead of sharing a row where the
+          shorter card would stretch around blank cream. */}
+      <div className="grid min-w-0 grid-cols-1 gap-4">
+        <DataCard title={pt ? 'Probabilidade de ser campeão' : 'Title probability'} badge={example} source={invented} updated={pt ? 'Jornada de exemplo' : 'Example matchday'}>
           <RankedBars rows={[
             { label: 'Equipa A', value: 0.42, display: '42%', color: '#234c40' },
             { label: 'Equipa B', value: 0.28, display: '28%', color: '#697fc5' },
@@ -47,32 +57,32 @@ export function VizShowcase({ pt }: { pt: boolean }) {
           ]} max={0.42} tableCaption={pt ? 'Probabilidade de ser campeão' : 'Title probability'} />
           <p className="mt-3 text-xs text-stone-500">{pt ? 'As cores são as das equipas; num ranking sem entidades com cor própria, uma só tinta.' : 'Colours belong to the teams; a ranking without owned colours uses one ink.'}</p>
         </DataCard>
-        <DataCard title={pt ? 'Próximo jogo' : 'Next match'} subtitle="Equipa A · Equipa B" badge={example} source={pt ? 'Fonte: modelo estimador' : 'Source: estimador model'} updated={pt ? 'Jornada 5' : 'Matchday 5'} methodologyHref="/desporto/liga/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        <DataCard title={pt ? 'Próximo jogo' : 'Next match'} subtitle="Equipa A · Equipa B" badge={example} source={invented} updated={pt ? 'Jornada de exemplo' : 'Example matchday'}>
           <OutcomeBar segments={[{ label: '1', value: 0.45, display: '45%' }, { label: 'X', value: 0.28, display: '28%' }, { label: '2', value: 0.27, display: '27%' }]} tableCaption={pt ? 'Próximo jogo' : 'Next match'} />
           <p className="mt-4 text-xs text-stone-500">{pt ? 'Três resultados, uma barra: cada segmento com o seu valor por baixo, para que nada dependa da cor.' : 'Three outcomes, one bar: each segment with its value below it, so nothing depends on colour.'}</p>
         </DataCard>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <DataCard title={pt ? 'População residente por grupo etário' : 'Resident population by age group'} badge={example} source="Fonte: INE, Censos 2021" methodologyHref="/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
+        <DataCard title={pt ? 'População residente por grupo etário' : 'Resident population by age group'} badge={example} source={approximate}>
           <ColumnChart data={[{ label: '0–14', value: 1.3 }, { label: '15–24', value: 1.1 }, { label: '25–64', value: 5.6, highlight: true }, { label: '65+', value: 2.4 }]} emphasis tableCaption={pt ? 'População residente por grupo etário' : 'Resident population by age group'} xLabel={pt ? 'Grupo etário' : 'Age group'} format={v => `${v.toFixed(1).replace('.', ',')} M`} yLabel={pt ? 'milhões' : 'millions'} height={220} locale={pt ? 'pt' : 'en'} />
         </DataCard>
-        <DataCard title={pt ? 'Cem pessoas' : 'One hundred people'} subtitle={pt ? 'Cada ponto é 1% do grupo' : 'Each dot is 1% of the group'} badge={example} source="Fonte: INE, Censos 2021" updated={pt ? 'Atualização: 15 de março de 2026' : 'Updated: 15 March 2026'} methodologyHref="/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        <DataCard title={pt ? 'Cem pessoas' : 'One hundred people'} subtitle={pt ? 'Cada ponto é 1% do grupo' : 'Each dot is 1% of the group'} badge={example} source={approximate} updated={pt ? 'Atualização: data de exemplo' : 'Updated: example date'}>
           <PeopleGrid shares={[{ label: '0–17', value: 0.16 }, { label: '18–39', value: 0.27 }, { label: '40–64', value: 0.35 }, { label: '65+', value: 0.22 }]} tableCaption={pt ? 'População por grupo etário' : 'Population by age group'} />
         </DataCard>
       </div>
 
       <DataCard title={pt ? 'Cores de série e de estado' : 'Series and status colours'} subtitle={pt ? 'Validadas sobre creme e sobre floresta: banda de luminosidade, croma, separação para daltonismo e contraste' : 'Validated on cream and on forest: lightness band, chroma, colour-vision separation and contrast'}>
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Séries, por esta ordem, sobre creme' : 'Series, in this order, on cream'}</p>
-            <div className="flex gap-2">{SERIES.map((c, i) => <div key={c} className="flex flex-col items-center gap-1"><span className="h-10 w-14 rounded-md" style={{ backgroundColor: c }} /><span className="text-[11px] text-stone-500">{i + 1} · {SERIES_NAMES[i]}</span><span className="font-mono text-[11px] text-stone-500">{c}</span></div>)}</div>
+            <div className="flex flex-wrap gap-2">{SERIES.map((c, i) => <div key={c} className="flex flex-col items-center gap-1"><span className="h-10 w-14 rounded-md" style={{ backgroundColor: c }} /><span className="text-[11px] text-stone-500">{i + 1} · {SERIES_NAMES[i]}</span><span className="font-mono text-[11px] text-stone-500">{c}</span></div>)}</div>
             <p className="mt-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Sobre floresta' : 'On forest'}</p>
             <div className="mt-1 flex gap-2 rounded-md bg-forest p-2">{SERIES_DARK.map(c => <span key={c} className="h-8 w-14 rounded-md" style={{ backgroundColor: c }} />)}</div>
           </div>
           <div>
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Estados, sempre com ícone e palavra' : 'Status, always with an icon and a word'}</p>
-            <div className="flex gap-2">{Object.entries(STATUS).map(([k, c]) => <div key={k} className="flex flex-col items-center gap-1"><span className="h-10 w-14 rounded-md" style={{ backgroundColor: c }} /><span className="text-[11px] text-stone-500">{k}</span></div>)}</div>
+            <div className="flex flex-wrap gap-2">{Object.entries(STATUS).map(([k, c]) => <div key={k} className="flex flex-col items-center gap-1"><span className="h-10 w-14 rounded-md" style={{ backgroundColor: c }} /><span className="text-[11px] text-stone-500">{k}</span></div>)}</div>
             <p className="mt-3 text-xs leading-relaxed text-stone-600">{pt ? 'Nunca mais de quatro séries: a quinta dobra-se em "Outras" ou o gráfico divide-se. A cor segue a entidade, nunca a posição. O texto nunca usa a cor da série.' : 'Never more than four series: the fifth folds into "Others" or the chart is faceted. Colour follows the entity, never its rank. Text never wears the series colour.'}</p>
           </div>
         </div>

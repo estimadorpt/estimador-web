@@ -1,4 +1,6 @@
 // Section configuration for the multi-domain platform
+import { BRAND } from '@/lib/brand';
+import { POPULATION_DATA_PATH, POPULATION_ROUTES } from '@/lib/config/population';
 
 export interface SectionConfig {
   id: string;
@@ -14,13 +16,26 @@ export interface SectionConfig {
 
 export const SECTIONS: SectionConfig[] = [
   {
+    id: 'population',
+    type: 'demographics',
+    slug: 'populacao',
+    nameKey: 'sections.population',
+    descriptionKey: 'sections.populationDescription',
+    isActive: true,
+    // The data pastel for the atlas's people (see Design Language in CLAUDE.md).
+    accentColor: BRAND.mint,
+    // The versioned release directory: /data/population/v<POPULATION_RELEASE>.
+    dataPath: POPULATION_DATA_PATH,
+    href: POPULATION_ROUTES.hub,
+  },
+  {
     id: 'gdp-nowcast',
     type: 'economics',
     slug: 'economia',
     nameKey: 'sections.economics',
     descriptionKey: 'sections.economicsDescription',
     isActive: true,
-    accentColor: '#245c68',
+    accentColor: BRAND.teal,
     dataPath: 'economics',
     href: '/economia',
   },
@@ -31,7 +46,8 @@ export const SECTIONS: SectionConfig[] = [
     nameKey: 'sections.ligaPortugal',
     descriptionKey: 'sections.ligaPortugalDescription',
     isActive: true,
-    accentColor: '#4e8056',
+    // The token, not #4e8056 (4.16:1 on paper; audit A11Y2-08).
+    accentColor: BRAND.tree,
     dataPath: 'football/liga-2026-27',
     href: '/desporto/liga',
   },
@@ -42,7 +58,7 @@ export const SECTIONS: SectionConfig[] = [
     nameKey: 'sections.presidential2026',
     descriptionKey: 'sections.presidential2026Description',
     isActive: false,
-    accentColor: '#234c40',
+    accentColor: BRAND.ink,
     dataPath: 'elections/presidential-2026',
     href: '/eleicoes/presidenciais',
   },
@@ -53,7 +69,7 @@ export const SECTIONS: SectionConfig[] = [
     nameKey: 'sections.parliamentary2025',
     descriptionKey: 'sections.parliamentary2025Description',
     isActive: false,
-    accentColor: '#234c40',
+    accentColor: BRAND.ink,
     dataPath: 'elections/parliamentary-2025',
     href: '/eleicoes/legislativas',
   },

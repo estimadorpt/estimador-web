@@ -1,6 +1,8 @@
 "use client";
 
 import { PlayerRatingList } from "@/components/charts/football/PlayerRatingList";
+import { formatDecimal, formatPosterior } from "@/lib/football-format";
+import { withMinus } from "@/lib/typography";
 import type { RatingEntry } from "@/lib/utils/player-ratings";
 import type {
   ContestedCell,
@@ -31,6 +33,10 @@ interface Labels {
   newEntry: string;
   playerPage: string;
   openPlayer: (name: string) => string;
+  movedUp: (n: number) => string;
+  movedDown: (n: number) => string;
+  unmoved: string;
+  valueWords: (value: string, lo: string | null, hi: string | null) => string;
 }
 
 function makeLabels(pt: boolean, intervalPct: number): Labels {
@@ -46,6 +52,18 @@ function makeLabels(pt: boolean, intervalPct: number): Labels {
     playerPage: pt ? "Página do jogador" : "Player page",
     openPlayer: (name: string) =>
       pt ? `Abrir a página de ${name}` : `Open ${name}'s page`,
+    // These lists show no movement column; the words are here for the type.
+    movedUp: (n: number) => (pt ? `sobe ${n}` : `up ${n}`),
+    movedDown: (n: number) => (pt ? `desce ${n}` : `down ${n}`),
+    unmoved: pt ? "sem mudança" : "no change",
+    valueWords: (value: string, lo: string | null, hi: string | null) =>
+      lo !== null && hi !== null
+        ? pt
+          ? `${value}; intervalo de ${intervalPct}% de ${lo} a ${hi}`
+          : `${value}; ${intervalPct}% interval from ${lo} to ${hi}`
+        : pt
+          ? `${value}; sem intervalo`
+          : `${value}; no interval`,
   };
 }
 
@@ -116,8 +134,8 @@ export function ContestedSection({
       </h2>
       <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
         {pt
-          ? "A probabilidade de ganhar um duelo — aéreo ou no chão — estimada sobre a carreira de três épocas de cada jogador. É a primeira métrica desta página em que defesas e médios se separam de facto uns dos outros, porque o resultado é atribuído ao jogador que disputou o lance, não à equipa inteira."
-          : "The probability of winning a duel — aerial or on the ground — estimated over each player's three-season career. It is the first metric on this page where defenders and midfielders genuinely separate from one another, because the outcome is attributed to the player who contested it, not to the whole team."}
+          ? `A probabilidade de ganhar um duelo — aéreo ou no chão — estimada sobre a carreira de cada jogador nas ${data.seasons.length} épocas do ficheiro. É a primeira métrica desta página em que defesas e médios se separam de facto uns dos outros, porque o resultado é atribuído ao jogador que disputou o lance, não à equipa inteira.`
+          : `The probability of winning a duel — aerial or on the ground — estimated over each player's career in the file's ${data.seasons.length} seasons. It is the first metric on this page where defenders and midfielders genuinely separate from one another, because the outcome is attributed to the player who contested it, not to the whole team.`}
       </p>
       <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-2 max-w-3xl leading-relaxed">
         {pt
@@ -126,7 +144,7 @@ export function ContestedSection({
       </p>
       <p className="text-xs text-stone-500 mb-5 max-w-3xl leading-relaxed">
         {pt
-          ? "Os valores são agregados de carreira por necessidade: uma época sozinha não chega para separar jogadores. Um reforço acabado de chegar não pode ser avaliado durante cerca de duas épocas. Nos duelos aéreos dos defesas, a etiqueta de perfil (mais ou menos solicitação aérea) distingue centrais de laterais — compare dentro do mesmo perfil."
+          ? "Os valores são agregados de carreira por necessidade: uma época sozinha não chega para separar jogadores. Um reforço acabado de chegar não pode ser avaliado durante cerca de duas épocas. Nos duelos aéreos dos defesas, a etiqueta de perfil (mais ou menos solicitação aérea) distingue centrais de laterais — compara dentro do mesmo perfil."
           : "Values are career-pooled by necessity: a single season is not enough to separate players. A newly arrived signing cannot be rated for roughly two seasons. In defenders' aerial duels, the profile tag (higher or lower aerial involvement) distinguishes centre-backs from full-backs — compare within the same profile."}
       </p>
 
@@ -135,10 +153,10 @@ export function ContestedSection({
           <h3 className="text-sm text-stone-800 mb-1">
             {cellTitle(cell)}
           </h3>
-          <p className="text-[11px] text-stone-400 mb-3">
+          <p className="text-[11px] text-stone-500 mb-3">
             {pt
-              ? `${cell.separable} de ${int(cell.n_players)} jogadores ajustados separam-se da média da posição (${cell.permutation_null} esperados por acaso). A lista mostra só quem está na Liga esta época.`
-              : `${cell.separable} of ${int(cell.n_players)} fitted players separate from the positional average (${cell.permutation_null} expected by chance). The list shows only players in the league this season.`}
+              ? `${cell.separable} de ${int(cell.n_players)} jogadores ajustados separam-se da média da posição. Com os duelos baralhados entre colegas do mesmo clube, época e posição (um teste de permutação), separam-se ${cell.permutation_null.toLocaleString("pt-PT", { maximumFractionDigits: 2 })} em média: é esse o acaso. A lista mostra só quem está na Liga esta época.`
+              : `${cell.separable} of ${int(cell.n_players)} fitted players separate from the positional average. With the duels shuffled among team-mates of the same club, season and position (a permutation test), ${cell.permutation_null.toLocaleString("en-GB", { maximumFractionDigits: 2 })} separate on average: that is chance. The list shows only players in the league this season.`}
           </p>
           <PlayerRatingList
             entries={contestedEntries(cell).slice(0, 8)}
@@ -159,10 +177,10 @@ export function ContestedSection({
                 return row
                   ? [{
                       label: pt ? "P(ganhar o duelo)" : "P(win the duel)",
-                      value: `${(row.theta * 100).toFixed(1)}%`,
+                      value: `${formatDecimal(row.theta * 100, pt ? "pt" : "en", 1)}%`,
                     }, {
                       label: pt ? "Taxa bruta" : "Raw rate",
-                      value: `${(row.rate_raw * 100).toFixed(1)}%`,
+                      value: `${formatDecimal(row.rate_raw * 100, pt ? "pt" : "en", 1)}%`,
                     }]
                   : [];
               })(),
@@ -194,7 +212,7 @@ export function ContestedSection({
         </div>
       ))}
 
-      <p className="text-[11px] text-stone-400 mt-2 leading-relaxed max-w-3xl">
+      <p className="text-[11px] text-stone-500 mt-2 leading-relaxed max-w-3xl">
         {pt
           ? `Épocas ${data.seasons[0]}–${data.seasons[data.seasons.length - 1]}. Cada célula passou três portas pré-registadas: separabilidade acima de 3× o acaso, correlação com a qualidade do clube abaixo de 0,3 e estabilidade em jogadores que mudaram de clube. A taxa média da liga é exatamente 50% por construção — cada duelo ganho é o duelo perdido de outro jogador.`
           : `Seasons ${data.seasons[0]}–${data.seasons[data.seasons.length - 1]}. Every cell passed three pre-registered gates: separability above 3× chance, club-quality correlation under 0.3, and stability across players who changed clubs. The league-average rate is exactly 50% by construction — every duel won is another player's duel lost.`}
@@ -283,13 +301,21 @@ export function GkChannelsSection({
           </h3>
           <p className="text-xs text-stone-500 mb-1 max-w-3xl leading-relaxed">
             {pt
-              ? `A percentagem de cruzamentos sofridos em que o guarda-redes sai — alívio de punhos ou bola agarrada. É o primeiro eixo de guarda-redes deste site em que os jogadores realmente se separam: ${cross.separable} de ${int(cross.n_fitted ?? cross.ranking.length)} no painel ajustado, para além do acaso (~5 esperados). E é do guarda-redes, não do clube: dois guarda-redes da mesma equipa não se parecem um com o outro (correlação ${cross.teammate_r.toFixed(2).replace(".", pt ? "," : ".")}). A lista mostra só quem está na Liga esta época.`
-              : `The share of crosses faced where the keeper comes for the ball — a punch or a claim. It is the first goalkeeper axis on this site where players genuinely separate: ${cross.separable} of ${int(cross.n_fitted ?? cross.ranking.length)} in the fitted panel, beyond chance (~5 expected). And it belongs to the keeper, not the club: two keepers at the same club do not resemble each other (correlation ${cross.teammate_r.toFixed(2)}). The list shows only keepers in the league this season.`}
+              ? `A percentagem de cruzamentos sofridos em que o guarda-redes sai — alívio de punhos ou bola agarrada. É o primeiro eixo de guarda-redes deste site em que os jogadores realmente se separam: ${cross.separable} de ${int(cross.n_fitted ?? cross.ranking.length)} no painel ajustado, contra ${formatDecimal(cross.expected_false_positives, "pt", 1)} que a taxa nominal de um intervalo de 90% (um em cada dez fica de fora) daria só por acaso. E é do guarda-redes, não do clube: dois guarda-redes da mesma equipa não se parecem um com o outro (correlação ${withMinus(formatDecimal(cross.teammate_r, "pt", 2))}). A lista mostra só quem está na Liga esta época.`
+              : `The share of crosses faced where the keeper comes for the ball — a punch or a claim. It is the first goalkeeper axis on this site where players genuinely separate: ${cross.separable} of ${int(cross.n_fitted ?? cross.ranking.length)} in the fitted panel, against ${formatDecimal(cross.expected_false_positives, "en", 1)} that the nominal rate of a 90% interval (one in ten falls outside) would give by chance alone. And it belongs to the keeper, not the club: two keepers at the same club do not resemble each other (correlation ${withMinus(formatDecimal(cross.teammate_r, "en", 2))}). The list shows only keepers in the league this season.`}
           </p>
-          <p className="text-[11px] text-stone-400 mb-3 max-w-3xl">
+          <p className="text-[11px] text-stone-500 mb-2 max-w-3xl">
             {pt
               ? "Não lhe chamamos “domínio da área”: a métrica não distingue um guarda-redes que agarra de um que soca tudo."
               : "We do not call this “command of the area”: the metric cannot tell a commanding catcher from a punch-happy keeper."}
+          </p>
+          {/* The ranked axis's own reliability, beside its list (audit
+              VFA-M6): it separates within the sample but does not repeat
+              from one season to the next. */}
+          <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-3 max-w-3xl leading-relaxed">
+            {pt
+              ? `Dentro da amostra, a ordem repete-se (metade dos jogos contra a outra metade: correlação ${withMinus(formatDecimal(cross.split_half, "pt", 2))}), mas de uma época para a outra não (correlação ${withMinus(formatDecimal(cross.season_to_season, "pt", 2))}). Lê a lista como o que aconteceu nestas épocas, não como uma característica estável de cada guarda-redes.`
+              : `Within the sample the order holds (one half of the matches against the other: correlation ${withMinus(formatDecimal(cross.split_half, "en", 2))}), but not from one season to the next (correlation ${withMinus(formatDecimal(cross.season_to_season, "en", 2))}). Read the list as what happened in these seasons, not as a stable trait of each keeper.`}
           </p>
           <PlayerRatingList
             entries={gkEntries(
@@ -313,7 +339,7 @@ export function GkChannelsSection({
                 return row?.implied !== undefined
                   ? [{
                       label: pt ? "Taxa de intervenção" : "Intervention rate",
-                      value: `${(row.implied * 100).toFixed(1)}%`,
+                      value: `${formatDecimal(row.implied * 100, pt ? "pt" : "en", 1)}%`,
                     }]
                   : [];
               })(),
@@ -323,12 +349,12 @@ export function GkChannelsSection({
               ...(e.pAbove !== null
                 ? [{
                     label: pt ? "Prob. acima da média" : "P(above average)",
-                    value: `${Math.round(e.pAbove * 100)}%`,
+                    value: formatPosterior(e.pAbove, pt ? "pt" : "en"),
                   }]
                 : []),
             ]}
           />
-          <p className="text-[11px] text-stone-400 mt-2 max-w-3xl leading-relaxed">
+          <p className="text-[11px] text-stone-500 mt-2 max-w-3xl leading-relaxed">
             {pt
               ? "Nenhum guarda-redes mudou de clube entre épocas consecutivas com jogos suficientes, por isso ainda não sabemos se esta característica viaja com o jogador."
               : "No keeper changed clubs between consecutive seasons with enough matches, so whether this trait travels with the player is still untested."}
@@ -366,7 +392,7 @@ export function GkChannelsSection({
                 return row?.implied !== undefined
                   ? [{
                       label: pt ? "Saídas por 90'" : "Sweeps per 90",
-                      value: row.implied.toFixed(2),
+                      value: formatDecimal(row.implied, pt ? "pt" : "en", 2),
                     }]
                   : [];
               })(),

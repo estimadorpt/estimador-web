@@ -91,11 +91,11 @@ export function findTagGroup(articles: MDXArticleMetadata[], slug: string): TagG
 /**
  * What to offer at the end of a piece, best first.
  *
- * Shared tags rank first, then the same register, then recency. With four
- * pieces published this is close to "everything else, most relevant first",
- * which is why the section is headed "keep reading" and not "related": the
- * archive is too small to promise a real relationship, and claiming one we
- * cannot support is the kind of thing that stops being true silently.
+ * Shared tags rank first, then the same register, then recency. While the
+ * archive holds a handful of pieces this is close to "everything else, most
+ * relevant first", which is why the section is headed "keep reading" and not
+ * "related": a small archive cannot promise a real relationship, and claiming
+ * one we cannot support is the kind of thing that stops being true silently.
  *
  * `pool` should be the same locale as `current` — a link to a piece that was
  * never exported in the language being read is a 404.

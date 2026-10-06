@@ -1,8 +1,11 @@
-import { createPageMetadata } from '@/lib/metadata';
+import { readFile, readdir } from 'node:fs/promises';
+import path from 'node:path';
+import { createPageMetadata, siteTitle } from '@/lib/metadata';
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { loadSeasonReview } from "@/lib/utils/football-data-loader";
 import {
   FinalTable,
@@ -11,38 +14,63 @@ import {
 } from "@/components/charts/football/SeasonReview";
 import { LuckIndex } from "@/components/charts/football/LuckIndex";
 import type { LuckEntry } from "@/components/charts/football/LuckIndex";
+import { DataCard } from "@/components/viz/DataCard";
 import { teamDisplayName } from "@/lib/config/football";
+import { formatDecimal, formatInteger, formatLongDate, formatSigned } from "@/lib/football-format";
+import { matchdayListPhrase, modelPlainName } from "@/lib/football-model-evaluation";
+import { forecastProvenance, type ForecastStamp } from "@/lib/season-review-provenance";
 import type { Metadata } from "next";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 const SEASON = "2025-26";
+
+/** Each archived forecast file's matchday, timestamp, model and simulation count. */
+async function loadForecastStamps(season: string): Promise<Array<ForecastStamp & { nSims: number | null }>> {
+  try {
+    const dir = path.join(process.cwd(), "public", "data", "football", `liga-${season}`);
+    const files = (await readdir(dir)).filter((f) => /^md\d+\.json$/.test(f));
+    return await Promise.all(
+      files.map(async (f) => {
+        const d = JSON.parse(await readFile(path.join(dir, f), "utf8"));
+        return {
+          matchday: typeof d.matchday === "number" ? d.matchday : Number(f.slice(2, -5)),
+          timestamp: typeof d.timestamp === "string" ? d.timestamp : null,
+          model: typeof d.model === "string" ? d.model : null,
+          nSims: typeof d.n_sims === "number" ? d.n_sims : null,
+        };
+      }),
+    );
+  } catch {
+    return [];
+  }
+}
 
 const copy = {
   pt: {
     title: "Liga Portugal 2025-26: a época em revista",
     shortTitle: "Época 2025-26",
     description:
-      "O FC Porto foi campeão com 88 pontos. O Sporting marcou 89 golos e teve a melhor diferença de golos da liga — e ficou em segundo. O Benfica não perdeu um jogo e ficou em terceiro. A época 2025-26 revista com os pontos esperados a partir do xG e com as previsões que o nosso modelo publicou ao longo do ano.",
+      "O FC Porto foi campeão com 88 pontos, o Sporting marcou 89 golos e o Benfica não perdeu. A época 2025-26 revista com o xG e as previsões do modelo.",
     back: "Liga Portugal",
     kicker: "Revisão da época",
     unavailable: "Dados da época 2025-26 indisponíveis.",
     standfirstA:
       "O FC Porto foi campeão da Liga Portugal 2025-26 com 88 pontos: 28 vitórias, quatro empates, duas derrotas. Atrás dele ficaram duas equipas com histórias estranhas. O Sporting marcou 89 golos — mais 23 do que o campeão — e fechou a época com a melhor diferença de golos da liga, +65, para terminar a seis pontos. O Benfica atravessou 34 jornadas sem perder um único jogo e ficou em terceiro, com 11 empates a pesar mais do que qualquer derrota.",
     standfirstB:
-      "Em baixo, o Tondela e o AVS desceram. Esta página junta três coisas: a classificação final, o que o xG diz sobre quem mereceu o que teve, e o que o nosso modelo foi dizendo enquanto a época decorria — incluindo o que disse mal.",
+      "Em baixo, o Tondela e o AVS desceram. Esta página junta três coisas: a classificação final, o que o xG diz sobre a qualidade das oportunidades de cada equipa, e o que o modelo anterior dizia ao longo da época — incluindo o que disse mal.",
     tableTitle: "Classificação final",
     tableIntro:
-      "Os 306 jogos da época, com os pontos esperados (xPts) calculados a partir do xG de cada jogo. A coluna «Sorte» é a diferença entre os pontos reais e os esperados.",
-    luckTitle: "Quem teve sorte",
+      "Os 306 jogos da época, com os pontos esperados (xPts) calculados a partir do xG de cada jogo. A última coluna é a diferença entre os pontos reais e os esperados.",
+    luckTitle: "Quem fez mais pontos do que o xG dizia?",
     luckIntro:
-      "Para cada jogo, o xG das duas equipas é convertido em probabilidades de vitória, empate e derrota, e daí em pontos esperados. Somando a época inteira, fica claro quem converteu melhor do que as suas oportunidades sugeriam — e quem foi castigado.",
+      "Para cada jogo, o xG das duas equipas é convertido em probabilidades de vitória, empate e derrota, e daí em pontos esperados. Somando a época inteira, mostra quem fez mais ou menos pontos do que as oportunidades sugeriam, uma diferença que mistura finalização, guarda-redes e acaso.",
     luckNote:
-      "O xG é uma medida da qualidade das oportunidades, não um veredicto moral. Finalizar bem é uma competência; a questão é quanto dela se repete no ano seguinte.",
+      "Pts − xPts não é uma separação limpa entre sorte e talento: mistura a eficácia de quem remata, as defesas do guarda-redes e o acaso. Finalizar bem é uma competência; a questão é quanto dela se repete no ano seguinte.",
     raceTitle: "A corrida ao título, jornada a jornada",
     raceIntro:
-      "A probabilidade de título que o modelo atribuiu em cada previsão publicada. Cada ponto é uma simulação de 50 mil épocas feita nessa altura, sem conhecimento do futuro.",
+      "A probabilidade de título que o modelo anterior atribuiu em cada previsão, cada uma com 50 mil épocas simuladas.",
     reportTitle: "O boletim do modelo",
-    reportIntro:
-      "A parte que interessa: o modelo acertou no quê, e falhou no quê. Foram 19 previsões publicadas entre a jornada 4 e a 31.",
+    reportIntro: "A parte que interessa: o modelo acertou no quê, e falhou no quê.",
     wrongTitle: "Onde falhámos",
     creditsTitle: "A letra pequena",
     methodology: "Como funciona o modelo",
@@ -53,28 +81,27 @@ const copy = {
     title: "Liga Portugal 2025-26: the season reviewed",
     shortTitle: "2025-26 season",
     description:
-      "FC Porto won the title with 88 points. Sporting scored 89 goals and had the best goal difference in the league — and finished second. Benfica did not lose a match and finished third. The 2025-26 season reviewed with expected points from xG and with the forecasts our model published as it happened.",
+      "FC Porto won with 88 points, Sporting scored 89 goals and Benfica never lost. The 2025-26 season reviewed with xG and the model's forecasts.",
     back: "Liga Portugal",
     kicker: "Season review",
     unavailable: "2025-26 season data unavailable.",
     standfirstA:
       "FC Porto won Liga Portugal 2025-26 with 88 points: 28 wins, four draws, two defeats. Behind them sat two teams with strange seasons. Sporting scored 89 goals — 23 more than the champions — and finished with the best goal difference in the league, +65, six points back. Benfica went all 34 matchdays without losing once and finished third, 11 draws costing them more than any defeat could have.",
     standfirstB:
-      "At the bottom, Tondela and AVS went down. This page puts together three things: the final table, what xG says about who deserved what they got, and what our model was saying while the season ran — including what it got wrong.",
+      "At the bottom, Tondela and AVS went down. This page puts together three things: the final table, what xG says about the quality of each side's chances, and what the previous model was saying through the season — including what it got wrong.",
     tableTitle: "Final table",
     tableIntro:
-      "All 306 matches, with expected points (xPts) computed from each match's xG. The “Luck” column is the gap between real and expected points.",
-    luckTitle: "Who got lucky",
+      "All 306 matches, with expected points (xPts) computed from each match's xG. The last column is the gap between real and expected points.",
+    luckTitle: "Who took more points than their xG said?",
     luckIntro:
-      "For every match, both teams' xG is turned into win, draw and loss probabilities, and from there into expected points. Summed over the season, it shows who converted better than their chances suggested — and who was punished.",
+      "For every match, both teams' xG is turned into win, draw and loss probabilities, and from there into expected points. Summed over the season, it shows who took more or fewer points than their chances suggested, a gap that mixes finishing, goalkeeping and chance.",
     luckNote:
-      "xG measures chance quality, not moral desert. Finishing well is a skill; the open question is how much of it repeats next year.",
+      "Pts − xPts is not a clean split between luck and skill: it mixes finishing, goalkeeping and chance. Finishing well is a skill; the open question is how much of it repeats next year.",
     raceTitle: "The title race, matchday by matchday",
     raceIntro:
-      "The championship probability the model assigned at each published forecast. Every point is a 50,000-season simulation run at that moment, with no knowledge of the future.",
+      "The championship probability the previous model assigned at each forecast, each one 50,000 simulated seasons.",
     reportTitle: "The model's report card",
-    reportIntro:
-      "The part that matters: what the model got right, and what it got wrong. Nineteen forecasts were published between matchday 4 and matchday 31.",
+    reportIntro: "The part that matters: what the model got right, and what it got wrong.",
     wrongTitle: "Where we were wrong",
     creditsTitle: "The small print",
     methodology: "How the model works",
@@ -89,11 +116,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const c = locale === "en" ? copy.en : copy.pt;
   return createPageMetadata({
     locale,
     path: `/desporto/liga/2025-26`,
-    title: `${c.title} | Estimador`,
+    title: siteTitle(c.title),
     description: c.description,
   });
 }
@@ -104,17 +132,27 @@ export default async function SeasonReviewPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
   const c = pt ? copy.pt : copy.en;
-  const review = await loadSeasonReview(SEASON);
+  const [review, stamps] = await Promise.all([loadSeasonReview(SEASON), loadForecastStamps(SEASON)]);
+  const prov = forecastProvenance(stamps);
 
   if (!review) {
     return (
       <div className="min-h-screen bg-paper">
         <Header />
-        <div className="max-w-5xl mx-auto px-4 py-20 text-center text-stone-500">
-          <p>{c.unavailable}</p>
-        </div>
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            measure="wide"
+            compact
+            back={{ href: "/desporto/liga", label: c.back, locale }}
+            eyebrow={c.kicker}
+            title={c.title}
+            lede={c.unavailable}
+          />
+        </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }
@@ -129,45 +167,87 @@ export default async function SeasonReviewPage({
   const luckiest = review.overperformers[0];
   const unluckiest = review.underperformers[0];
   const bestFinishing = [...review.luck].sort((a, b) => b.finishing - a.finishing)[0];
+  // The two best by xPts: a 1,2-point gap is a tie, not a ranking (MR2-V03).
+  const xgLeaders = [...review.luck].sort((a, b) => b.xpts - a.xpts).slice(0, 2);
   const rc = review.report_card;
   const lastForecast = review.forecast_matchdays[review.forecast_matchdays.length - 1];
-  const firstForecast = review.forecast_matchdays[0];
+  // Which forecasts were published at the time and which were generated
+  // afterwards in one batch, read from the files' own timestamps (F-H3).
+  const inReview = new Set(review.forecast_matchdays);
+  const published = prov.published.filter((md) => inReview.has(md));
+  const reconstructed = prov.reconstructed.filter((md) => inReview.has(md));
+  const batchDate = prov.reconstructedOn ? formatLongDate(prov.reconstructedOn, locale) : null;
+  const model = prov.models.length === 1 ? modelPlainName(prov.models[0], locale) : null;
+  const mdPhrase = (mds: number[]) =>
+    pt
+      ? `${mds.length === 1 ? "jornada" : "jornadas"} ${matchdayListPhrase(mds, locale)}`
+      : `matchday${mds.length === 1 ? "" : "s"} ${matchdayListPhrase(mds, locale)}`;
+  const provenance = pt
+    ? [
+        `Foram ${review.forecast_matchdays.length} previsões, todas d${model ?? "o modelo anterior"}.`,
+        published.length
+          ? `As ${published.length} das ${mdPhrase(published)} foram publicadas na altura, depois de cada jornada.`
+          : "",
+        reconstructed.length
+          ? `As ${reconstructed.length} das ${mdPhrase(reconstructed)} nunca foram publicadas na altura: foram geradas depois, num só lote${batchDate ? `, a ${batchDate}` : ""}. Os ficheiros não registam com que jogos cada uma foi ajustada, por isso lê-as como reconstituições, não como previsões feitas na altura.`
+          : "",
+      ].filter(Boolean)
+    : [
+        `There were ${review.forecast_matchdays.length} forecasts, all from ${model ?? "the previous model"}.`,
+        published.length
+          ? `The ${published.length} for ${mdPhrase(published)} were published at the time, after each matchday.`
+          : "",
+        reconstructed.length
+          ? `The ${reconstructed.length} for ${mdPhrase(reconstructed)} were never published at the time: they were generated afterwards, in one batch${batchDate ? `, on ${batchDate}` : ""}. The files do not record which matches each one was fitted on, so read them as reconstructions, not as forecasts made at the time.`
+          : "",
+      ].filter(Boolean);
 
-  // Biggest final-points miss at the last published forecast, computed from
-  // the same numbers the report card uses — no hand-written claims.
-  const nf = (v: number, d = 1) =>
-    v.toLocaleString(pt ? "pt-PT" : "en-GB", {
-      minimumFractionDigits: d,
-      maximumFractionDigits: d,
-    });
+  // The two charts' frames (CLAUDE.md "Chart frame", audit UXD2-07): the
+  // archived run named in the footer, its simulation count and the date of
+  // its last forecast, all read from the files.
+  const reviewStamps = stamps.filter((s) => inReview.has(s.matchday));
+  const simCounts = Array.from(new Set(reviewStamps.map((s) => s.nSims).filter((n): n is number => n != null)));
+  const lastStamp = reviewStamps.find((s) => s.matchday === lastForecast) ?? null;
+  const raceSource = simCounts.length === 1
+    ? pt
+      ? `Fonte: modelo anterior do estimador.pt, ${formatInteger(simCounts[0], locale)} simulações por previsão`
+      : `Source: estimador.pt's previous model, ${formatInteger(simCounts[0], locale)} simulations per forecast`
+    : pt
+      ? "Fonte: modelo anterior do estimador.pt"
+      : "Source: estimador.pt's previous model";
+  const raceUpdated = lastStamp?.timestamp
+    ? pt
+      ? `Última previsão: jornada ${lastForecast}, ${formatLongDate(lastStamp.timestamp, locale)}`
+      : `Last forecast: matchday ${lastForecast}, ${formatLongDate(lastStamp.timestamp, locale)}`
+    : undefined;
+  const reviewUpdated = pt
+    ? `Revisão gerada a ${formatLongDate(review.generated, locale)}`
+    : `Review generated on ${formatLongDate(review.generated, locale)}`;
+
+  // One decimal in the page's format, negatives with U+2212 (formatDecimal).
+  const nf = (v: number, d = 1) => formatDecimal(v, locale, d);
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
+      <PageHero
+        measure="wide"
+        compact
+        back={{ href: "/desporto/liga", label: c.back, locale }}
+        eyebrow={c.kicker}
+        title={c.title}
+        lede={c.standfirstA}
+      />
 
-      <div className="max-w-5xl mx-auto px-4 py-10">
-        <Link
-          href="/desporto/liga"
-          locale={locale}
-          className="text-sm text-ink hover:text-ink-dark inline-flex items-center gap-1 mb-6 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          {c.back}
-        </Link>
-
-        <p className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
-          {c.kicker}
+      <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
+        <p className="max-w-3xl mb-10 text-lg text-stone-800 leading-relaxed font-medium">
+          {c.standfirstB}
         </p>
-        <h1 className="text-3xl md:text-4xl tracking-tight mb-4">{c.title}</h1>
-        <div className="max-w-3xl space-y-4 mb-10">
-          <p className="text-lg text-stone-600 leading-relaxed">{c.standfirstA}</p>
-          <p className="text-lg text-stone-800 leading-relaxed font-medium">
-            {c.standfirstB}
-          </p>
-        </div>
 
         {/* Headline numbers */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-stone-200 border border-stone-200 mb-12">
+        {/* Rounded tiles, like the rest of the site (audit UXD2-09). */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
           {[
             {
               value: `${review.table[0].points}`,
@@ -190,11 +270,11 @@ export default async function SeasonReviewPage({
             {
               value: `${nf(Math.abs(unluckiest.delta))}`,
               label: pt
-                ? `pontos abaixo do esperado para o ${teamDisplayName(unluckiest.team)}, despromovido`
-                : `points below expectation for relegated ${teamDisplayName(unluckiest.team)}`,
+                ? `pontos abaixo do que o xG sugeria para o ${teamDisplayName(unluckiest.team)}, despromovido (finalização, guarda-redes e acaso juntos)`
+                : `points below what xG suggested for relegated ${teamDisplayName(unluckiest.team)} (finishing, goalkeeping and chance together)`,
             },
           ].map((kpi) => (
-            <div key={kpi.label} className="bg-cream p-4">
+            <div key={kpi.label} className="rounded-2xl border border-line bg-cream p-4">
               <div className="text-3xl font-display font-extrabold text-stone-900 tabular-nums">
                 {kpi.value}
               </div>
@@ -217,8 +297,8 @@ export default async function SeasonReviewPage({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="border-t-2 border-emerald-700 pt-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                {pt ? "O mais afortunado" : "The luckiest"}
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+                {pt ? "Mais acima do xG" : "Furthest above xG"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
                 {pt ? (
@@ -226,22 +306,29 @@ export default async function SeasonReviewPage({
                     O <strong>{teamDisplayName(luckiest.team)}</strong> fez{" "}
                     {luckiest.points} pontos com um xG que valia{" "}
                     {nf(luckiest.xpts)} — <strong>{nf(luckiest.delta)}</strong> acima do
-                    esperado, a maior diferença da liga. A tabela do xG punha o Sporting
-                    em primeiro.
+                    esperado, a maior diferença da liga.{" "}
+                    {xgLeaders.length === 2 && Math.abs(xgLeaders[0].xpts - xgLeaders[1].xpts) < 3
+                      ? <>Pelo xG, o {teamDisplayName(xgLeaders[0].team)} e o {teamDisplayName(xgLeaders[1].team)} ficavam praticamente empatados ({nf(xgLeaders[0].xpts)} e {nf(xgLeaders[1].xpts)}).</>
+                      : xgLeaders[0] ? <>A tabela do xG punha o {teamDisplayName(xgLeaders[0].team)} em primeiro.</> : null}{" "}
+                    <Link href="/desporto/liga/metodologia#pontos-esperados-xpts" locale={locale} className="font-medium text-ink underline underline-offset-4">O que o xPts mede</Link>
                   </>
                 ) : (
                   <>
                     <strong>{teamDisplayName(luckiest.team)}</strong> took{" "}
                     {luckiest.points} points from an xG worth {nf(luckiest.xpts)} —{" "}
                     <strong>{nf(luckiest.delta)}</strong> above expectation, the largest
-                    gap in the league. The xG table had Sporting first.
+                    gap in the league.{" "}
+                    {xgLeaders.length === 2 && Math.abs(xgLeaders[0].xpts - xgLeaders[1].xpts) < 3
+                      ? <>By xG, {teamDisplayName(xgLeaders[0].team)} and {teamDisplayName(xgLeaders[1].team)} were practically level ({nf(xgLeaders[0].xpts)} and {nf(xgLeaders[1].xpts)}).</>
+                      : xgLeaders[0] ? <>The xG table had {teamDisplayName(xgLeaders[0].team)} first.</> : null}{" "}
+                    <Link href="/desporto/liga/metodologia#expected-points-xpts" locale={locale} className="font-medium text-ink underline underline-offset-4">What xPts measures</Link>
                   </>
                 )}
               </p>
             </div>
             <div className="border-t-2 border-red-600 pt-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
-                {pt ? "O mais castigado" : "The unluckiest"}
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+                {pt ? "Mais abaixo do xG" : "Furthest below xG"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
                 {pt ? (
@@ -264,7 +351,7 @@ export default async function SeasonReviewPage({
               </p>
             </div>
             <div className="border-t-2 border-stone-400 pt-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                 {pt ? "A melhor finalização" : "The best finishing"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
@@ -272,16 +359,14 @@ export default async function SeasonReviewPage({
                   <>
                     O <strong>{teamDisplayName(bestFinishing.team)}</strong> marcou{" "}
                     {bestFinishing.gf} golos a partir de {nf(bestFinishing.xgf)} de xG —{" "}
-                    <strong>{bestFinishing.finishing > 0 ? "+" : ""}
-                    {nf(bestFinishing.finishing)}</strong> golos acima do esperado. Não
+                    <strong>{formatSigned(bestFinishing.finishing, locale)}</strong> golos acima do esperado. Não
                     chegou: o título decidiu-se em vitórias, e o Porto ganhou mais três.
                   </>
                 ) : (
                   <>
                     <strong>{teamDisplayName(bestFinishing.team)}</strong> scored{" "}
                     {bestFinishing.gf} goals from {nf(bestFinishing.xgf)} xG —{" "}
-                    <strong>{bestFinishing.finishing > 0 ? "+" : ""}
-                    {nf(bestFinishing.finishing)}</strong> goals above expectation. It was
+                    <strong>{formatSigned(bestFinishing.finishing, locale)}</strong> goals above expectation. It was
                     not enough: the title turned on wins, and Porto took three more.
                   </>
                 )}
@@ -289,16 +374,27 @@ export default async function SeasonReviewPage({
             </div>
           </div>
 
-          <LuckIndex
-            entries={luckEntries}
-            locale={pt ? "pt" : "en"}
-            labels={{
-              overperforming: pt ? "Acima do esperado" : "Above expectation",
-              underperforming: pt ? "Abaixo do esperado" : "Below expectation",
-              pointsShort: pt ? "pts reais" : "real pts",
-              expectedShort: pt ? "esperados" : "expected",
-            }}
-          />
+          <DataCard
+            title={pt ? "Pontos reais e pontos esperados (xPts) por clube" : "Real and expected points (xPts) by club"}
+            source={pt
+              ? `Fonte: xG da FotMob, ${review.matches_played} jogos; xPts calculados pelo estimador.pt`
+              : `Source: FotMob xG, ${review.matches_played} matches; xPts computed by estimador.pt`}
+            updated={reviewUpdated}
+            methodologyHref={pt ? "/desporto/liga/metodologia#pontos-esperados-xpts" : "/desporto/liga/metodologia#expected-points-xpts"}
+            methodologyLabel={pt ? "O que o xPts mede" : "What xPts measures"}
+            locale={locale}
+          >
+            <LuckIndex
+              entries={luckEntries}
+              locale={pt ? "pt" : "en"}
+              labels={{
+                overperforming: pt ? "Acima do esperado" : "Above expectation",
+                underperforming: pt ? "Abaixo do esperado" : "Below expectation",
+                pointsShort: pt ? "pts reais" : "real pts",
+                expectedShort: pt ? "esperados" : "expected",
+              }}
+            />
+          </DataCard>
           <p className="text-xs text-stone-500 mt-4 max-w-3xl border-l-2 border-stone-200 pl-4">
             {c.luckNote}
           </p>
@@ -308,24 +404,44 @@ export default async function SeasonReviewPage({
         <section className="mb-14">
           <h2 className="text-2xl tracking-tight mb-1">{c.raceTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.raceIntro}</p>
-          <TitleRaceEvolution
-            race={review.title_race}
-            totalMatchdays={review.matchdays}
+          <DataCard
+            title={pt ? "Probabilidade de ser campeão, previsão a previsão" : "Chance of the title, forecast by forecast"}
+            source={raceSource}
+            updated={raceUpdated}
+            methodologyHref="/desporto/liga/metodologia"
+            methodologyLabel={c.methodology}
             locale={locale}
-            outcomeLabel={
-              pt
-                ? `As previsões publicadas param na jornada ${lastForecast} — as últimas três jornadas nunca foram simuladas. O ${teamDisplayName(review.champion)} foi campeão.`
-                : `Published forecasts stop at matchday ${lastForecast} — the last three rounds were never simulated. ${teamDisplayName(review.champion)} won the title.`
-            }
-          />
+          >
+            <TitleRaceEvolution
+              race={review.title_race}
+              totalMatchdays={review.matchdays}
+              locale={locale}
+              reconstructed={reconstructed}
+              outcomeLabel={
+                pt
+                  ? `As previsões param na jornada ${lastForecast}: as últimas ${review.matchdays - lastForecast} jornadas nunca foram simuladas. O ${teamDisplayName(review.champion)} foi campeão.`
+                  : `The forecasts stop at matchday ${lastForecast}: the last ${review.matchdays - lastForecast} rounds were never simulated. ${teamDisplayName(review.champion)} won the title.`
+              }
+            />
+          </DataCard>
         </section>
 
         {/* Report card */}
         {rc && (
           <section className="mb-14">
             <h2 className="text-2xl tracking-tight mb-1">{c.reportTitle}</h2>
-            <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.reportIntro}</p>
-            <ReportCard data={review} locale={locale} />
+            <p className="text-sm text-stone-500 mb-3 max-w-3xl">{c.reportIntro}</p>
+            <div className="mb-6 max-w-3xl space-y-2 rounded-2xl border border-line bg-cream px-4 py-3 text-sm leading-relaxed text-stone-700">
+              {provenance.map((line) => <p key={line.slice(0, 32)}>{line}</p>)}
+              <p>
+                {pt ? "O modelo que publica as previsões de 2026-27 é outro, e é avaliado em " : "The model publishing the 2026-27 forecasts is a different one, evaluated on "}
+                <Link href="/desporto/liga/modelo" locale={locale} className="text-ink underline underline-offset-4">
+                  {pt ? "modelo vs mercado" : "model vs market"}
+                </Link>
+                .
+              </p>
+            </div>
+            <ReportCard data={review} locale={locale} reconstructed={reconstructed} />
 
             <div className="mt-8 border-l-2 border-stone-300 pl-4 max-w-3xl">
               <h3 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-2">
@@ -335,8 +451,8 @@ export default async function SeasonReviewPage({
                 {pt ? (
                   <>
                     <p>
-                      O erro mais consistente foi o Arouca. Na jornada 16 o modelo
-                      projetava-o para 29,6 pontos finais e dava-lhe 33% de probabilidade
+                      O erro mais consistente foi o Arouca. Na previsão reconstituída
+                      da jornada 16, o modelo projetava-o para 29,6 pontos finais e dava-lhe 33% de probabilidade
                       de descer; acabou com 42 pontos, em nono. Doze pontos de erro numa
                       única equipa — o maior da época — e um alarme de descida que nunca
                       se justificou.
@@ -344,8 +460,8 @@ export default async function SeasonReviewPage({
                     <p>
                       O modelo também foi sistematicamente pessimista com o AVS: mesmo na
                       última previsão dava-lhe 15,6 pontos, e o AVS fez 21. Descer, desceu
-                      — mas o modelo tinha-o como praticamente certo desde a jornada 8,
-                      uma confiança que uma só época não chega para justificar.
+                      — mas o modelo tinha-o como praticamente certo desde a previsão
+                      reconstituída da jornada 8, uma confiança que uma só época não chega para justificar.
                     </p>
                     <p>
                       E há a tensão que esta página não resolve: o modelo lê resultados, e
@@ -357,8 +473,8 @@ export default async function SeasonReviewPage({
                 ) : (
                   <>
                     <p>
-                      The most persistent error was Arouca. At matchday 16 the model
-                      projected them to finish on 29.6 points and gave them a 33% chance
+                      The most persistent error was Arouca. In the reconstructed
+                      matchday 16 forecast, the model projected them to finish on 29.6 points and gave them a 33% chance
                       of relegation; they finished on 42, in ninth. Twelve points of error
                       on a single club — the largest of the season — and a relegation
                       alarm that never had grounds.
@@ -366,8 +482,8 @@ export default async function SeasonReviewPage({
                     <p>
                       The model was also steadily too harsh on AVS: even in the final
                       forecast it had them on 15.6 points, and they made 21. Down they
-                      went — but the model had treated it as settled since matchday 8, a
-                      confidence one season is not enough to justify.
+                      went — but the model had treated it as settled since the
+                      reconstructed matchday 8 forecast, a confidence one season is not enough to justify.
                     </p>
                     <p>
                       And there is a tension this page does not resolve: the model reads
@@ -383,42 +499,43 @@ export default async function SeasonReviewPage({
 
         {/* Small print */}
         <section className="pt-8 border-t border-stone-200">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400 mb-3">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3">
             {c.creditsTitle}
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">
             {pt
-              ? `Classificação final a partir dos ${review.matches_played} jogos da época. Os xPts são calculados jogo a jogo com o método de Poisson agregado sobre o xG de cada equipa (${review.xg_matches_per_team} jogos por equipa, cobertura total), e não usam os parâmetros do modelo bayesiano — é uma leitura independente. As probabilidades vêm dos ficheiros que publicámos entre as jornadas ${firstForecast} e ${lastForecast}, tal como estavam nessa altura, sem qualquer recálculo posterior. xG da SofaScore.`
-              : `Final standings from the season's ${review.matches_played} matches. xPts are computed match by match with the aggregate Poisson method over each team's xG (${review.xg_matches_per_team} matches per team, full coverage), and do not use the Bayesian model's parameters — it is an independent read. The probabilities come from the files we published between matchdays ${firstForecast} and ${lastForecast}, exactly as they stood then, with no later recalculation. xG from SofaScore.`}
+              ? `Classificação final a partir dos ${review.matches_played} jogos da época. Os xPts são calculados jogo a jogo com o método de Poisson agregado sobre o xG de cada equipa (${review.xg_matches_per_team} jogos por equipa, cobertura total), e não usam os parâmetros do modelo bayesiano — é uma leitura independente. ${published.length ? `As probabilidades das ${mdPhrase(published)} vêm dos ficheiros publicados na altura, tal como estavam, sem recálculo posterior.` : ""} ${reconstructed.length ? `As das ${mdPhrase(reconstructed)} foram geradas depois${batchDate ? `, a ${batchDate}` : ""}.` : ""} Todas vêm do modelo anterior. xG da FotMob.`
+              : `Final standings from the season's ${review.matches_played} matches. xPts are computed match by match with the aggregate Poisson method over each team's xG (${review.xg_matches_per_team} matches per team, full coverage), and do not use the Bayesian model's parameters — it is an independent read. ${published.length ? `The probabilities for ${mdPhrase(published)} come from the files published at the time, exactly as they stood, with no later recalculation.` : ""} ${reconstructed.length ? `Those for ${mdPhrase(reconstructed)} were generated afterwards${batchDate ? `, on ${batchDate}` : ""}.` : ""} All come from the previous model. xG from FotMob.`}
           </p>
           <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
             <Link
               href="/desporto/liga"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.current}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
               href="/desporto/liga/dados"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.data}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.methodology}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </section>
-      </div>
+      </div></div>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

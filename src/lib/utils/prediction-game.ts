@@ -139,26 +139,35 @@ const CONFIDENCE_WEIGHT: Record<Confidence, number> = {
 };
 
 /**
- * Long-run Liga Portugal 1X2 base rates. Used only to split the leftover
- * probability between the two outcomes the user did NOT pick, so that
- * "home win, slight favourite" doesn't imply an absurd draw/away split.
+ * Long-run Liga Portugal 1X2 base rates. Used only when the user picks the
+ * draw, to split the leftover between a home and an away win.
  */
 const NEUTRAL_PRIOR: ProbVector = [0.45, 0.27, 0.28];
+
+/**
+ * Share of the leftover that goes to the draw when the user picks a side.
+ * Splitting by the base rates instead left an away pick with home at 0.45
+ * of the rest against a draw at 0.27 (F19): someone who backs the visitors
+ * is not saying the hosts are the likelier alternative. The draw gets at
+ * least the unpicked side's share.
+ */
+const DRAW_SHARE_OF_REST = 0.55;
 
 /** Turn a (pick, confidence) pair into a full probability vector. */
 export function probsFromPick(pick: Outcome, confidence: Confidence): ProbVector {
   const idx = OUTCOME_INDEX[pick];
   const p = CONFIDENCE_WEIGHT[confidence];
-
-  const otherIdx = [0, 1, 2].filter(i => i !== idx) as [number, number];
-  const priorSum = NEUTRAL_PRIOR[otherIdx[0]] + NEUTRAL_PRIOR[otherIdx[1]];
+  const rest = 1 - p;
 
   const out: number[] = [0, 0, 0];
   out[idx] = p;
-  for (const i of otherIdx) {
-    out[i] = priorSum > EPS
-      ? (1 - p) * (NEUTRAL_PRIOR[i] / priorSum)
-      : (1 - p) / 2;
+  if (pick === 'D') {
+    const sides = NEUTRAL_PRIOR[0] + NEUTRAL_PRIOR[2];
+    out[0] = rest * (NEUTRAL_PRIOR[0] / sides);
+    out[2] = rest * (NEUTRAL_PRIOR[2] / sides);
+  } else {
+    out[1] = rest * DRAW_SHARE_OF_REST;
+    out[idx === 0 ? 2 : 0] = rest * (1 - DRAW_SHARE_OF_REST);
   }
   return normalizeProbs(out);
 }
@@ -210,6 +219,19 @@ export interface GameFixture {
   model: ProbVector;
   /** Naive ISO timestamp as published, or null when unknown. */
   kickoff: string | null;
+  /**
+   * When the server stops accepting picks for this fixture (game_fixtures.json
+   * `locks_at`). Equal to the kickoff once it is confirmed; an unconfirmed
+   * kickoff locks at the earliest plausible slot of its round. Optional: the
+   * fallback built from the md files has no lock times.
+   */
+  locksAt?: string | null;
+  /** False while the kickoff is a placeholder ("horário por confirmar"). */
+  kickoffConfirmed?: boolean;
+  /** The server's fixture id (`md08-moreirense-vs-gil-vicente`), when known. */
+  id?: string;
+  /** Which publication froze these probabilities (`md07.json@10877c9`). */
+  probsSource?: string | null;
   result: FixtureResult | null;
 }
 
@@ -259,12 +281,15 @@ export function parseKickoff(kickoff: string | null | undefined): number | null 
  * 1. Any published result means the round has demonstrably started — lock,
  *    whatever the clock says. This is the fallback the brief asks for and the
  *    only signal available for a next matchday, which carries no timestamps.
- * 2. Otherwise lock at the earliest known kickoff.
+ * 2. Otherwise lock at the earliest known lock time (or kickoff).
  * 3. With neither signal the round is open.
  */
 export function roundLockState(round: GameRound, nowMs: number): RoundLock {
+  // The published lock time wins over the kickoff: for an unconfirmed kickoff
+  // the lock sits at the earliest plausible slot of the round, which is the
+  // safe side of a placeholder.
   const kickoffs = round.fixtures
-    .map(f => parseKickoff(f.kickoff))
+    .map(f => parseKickoff(f.locksAt ?? f.kickoff))
     .filter((ms): ms is number => ms !== null);
   const lockAt = kickoffs.length > 0 ? Math.min(...kickoffs) : null;
 

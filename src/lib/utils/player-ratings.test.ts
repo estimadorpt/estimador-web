@@ -7,6 +7,7 @@ import {
   rankMovement,
   ratingDomain,
   ratingPct,
+  stripInternalRefs,
   type RatingsBlock,
 } from '@/lib/utils/player-ratings';
 import {
@@ -635,5 +636,28 @@ describe('rating loaders (real published data)', () => {
 
   it('loads or skips the contribution feed without throwing', async () => {
     assertUsable(await loadContribRatings());
+  });
+});
+
+describe('stripInternalRefs (audit FA2-M6)', () => {
+  it('drops decision-record numbers and file names, keeping the sentence', () => {
+    expect(stripInternalRefs('Shot-stopping needs its own model (ADR-019).')).toBe('Shot-stopping needs its own model.');
+    expect(stripInternalRefs('Any predictive use must go through the walk-forward panel (contrib_skill_walkforward.parquet), per ADR-017.')).toBe('Any predictive use must go through the walk-forward panel.');
+    expect(stripInternalRefs('which remains unmeasurable at this league size (ADR-020/021).')).toBe('which remains unmeasurable at this league size.');
+    expect(stripInternalRefs('No reference here.')).toBe('No reference here.');
+  });
+
+  it('reads a field name as words (audit FA3-10)', () => {
+    expect(stripInternalRefs('positional_distribution covers the whole fitted universe.')).toBe('The distribution by position covers the whole fitted universe.');
+    expect(stripInternalRefs('Note that positional_distribution is wider.')).toBe('Note that the distribution by position is wider.');
+  });
+
+  it('leaves no snake_case key or file name in the published caveats', async () => {
+    const blocks = await Promise.all([loadContribRatings(), loadDefRatings(), loadGkRatings()]);
+    for (const block of blocks) {
+      for (const caveat of block?.meta.caveats ?? []) {
+        expect(caveat).not.toMatch(/\b[a-z]+_[a-z_]+\b|\.parquet|ADR-\d/);
+      }
+    }
   });
 });

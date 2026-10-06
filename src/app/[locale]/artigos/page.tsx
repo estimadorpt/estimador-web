@@ -9,11 +9,14 @@ import { Rss } from 'lucide-react';
 import type { Metadata } from 'next';
 import {
   getArticlesByKind,
+  getMDXArticlesByLocale,
   type ArticleKind,
 } from '@/lib/mdx-articles';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { buildTagIndex } from '@/lib/article-discovery';
 import { ArticleRow } from '@/components/articles/ArticleRow';
 import { ArticleListStructuredData } from '@/components/StructuredData';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params
@@ -21,6 +24,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   return createPageMetadata({
@@ -28,6 +32,9 @@ export async function generateMetadata({
     path: '/artigos',
     title: t('meta.articlesTitle'),
     description: t('articles.subtitle'),
+    // An empty index stays reachable by URL but out of search (and out of the
+    // sitemap and the site's navigation) until this locale publishes a piece.
+    index: getMDXArticlesByLocale(locale).length > 0,
   });
 }
 
@@ -41,6 +48,7 @@ export default async function ArticlesPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   // Only what this locale publishes. An article listed here but exported in
@@ -68,17 +76,19 @@ export default async function ArticlesPage({
 
   return (
     <div className="min-h-screen bg-paper">
-      <ArticleListStructuredData articles={articles} locale={locale} />
+      {/* No Blog structured data for an empty list. */}
+      {articles.length > 0 && <ArticleListStructuredData articles={articles} locale={locale} />}
       <Header />
 
+      <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="4xl"
+        measure="wide"
         compact
         field="mustard"
-        eyebrow={t('articles.title')}
+        eyebrow={t('articles.eyebrow')}
         title={t('articles.title')}
         lede={t('articles.subtitle')}
-        meta={
+        meta={articles.length > 0 ? (
           <a
             href={`/${locale}/feed.xml`}
             className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
@@ -86,15 +96,28 @@ export default async function ArticlesPage({
             <Rss aria-hidden="true" className="w-3.5 h-3.5" />
             {t('articles.feedLink')}
           </a>
-        }
+        ) : undefined}
       />
+      <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-4xl">
 
-      <main className="max-w-4xl mx-auto px-4 py-10">
 
         {articles.length === 0 ? (
-          <p className="border-l-2 border-stone-300 pl-6 py-6 text-stone-600">
-            {t('articles.empty')}
-          </p>
+          <div className="flex items-center gap-6 py-6">
+            <EmptyStateMark surface="paper" />
+            <div>
+              <p className="text-stone-600">{t('articles.empty')}</p>
+              <p className="mt-4">
+                <Link
+                  href="/populacao"
+                  locale={locale}
+                  className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-ink underline underline-offset-4 hover:no-underline"
+                >
+                  {t('articles.emptyNextStep')}
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </p>
+            </div>
+          </div>
         ) : (
           <>
             <Section kind="nota" heading={t('articles.notesHeading')} intro={t('articles.notesIntro')} />
@@ -130,11 +153,16 @@ export default async function ArticlesPage({
             )}
           </>
         )}
+      </div></div>
       </main>
 
-      <div className="max-w-4xl mx-auto px-4 pb-16">
-        <Subscribe variant="inline" />
-      </div>
+      {/* No decorative subscription box on an honestly empty index — nothing
+          to subscribe to yet in this language. */}
+      {articles.length > 0 && (
+        <div className="mx-auto w-full max-w-7xl px-4 pb-16"><div className="max-w-4xl">
+          <Subscribe variant="inline" locale={locale} />
+        </div></div>
+      )}
 
       <SiteFooter locale={locale} />
     </div>

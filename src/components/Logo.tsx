@@ -66,7 +66,9 @@ interface LogoHorizontalProps {
 /** The signature: mark plus "estimador.pt" in Manrope 800. There is no serif version. */
 export function LogoHorizontal({ size = 24, tone = 'ink', className = '' }: LogoHorizontalProps) {
   const color = tone === 'paper' ? BRAND.paper : BRAND.ink;
-  const muted = tone === 'paper' ? 'rgba(245,243,234,0.55)' : BRAND.faint;
+  // The ".pt" steps back from the name but stays readable: BRAND.muted is
+  // 4.75:1 on paper (BRAND.faint was 2.98:1); the paper tone is 4.96:1 on forest.
+  const muted = tone === 'paper' ? 'rgba(245,243,234,0.55)' : BRAND.muted;
   return (
     <span className={`inline-flex items-center ${className}`} style={{ gap: Math.round(size * 0.42), color }}>
       <Mark height={size} />

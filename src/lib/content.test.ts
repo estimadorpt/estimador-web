@@ -321,7 +321,7 @@ describe('drafts', () => {
 });
 
 describe('page metadata', () => {
-  it('pins a canonical URL and one alternate per locale', () => {
+  it('pins a canonical URL, one alternate per locale and an x-default', () => {
     const metadata = createPageMetadata({
       locale: 'pt',
       path: '/economia',
@@ -331,14 +331,20 @@ describe('page metadata', () => {
 
     expect(metadata.alternates?.canonical).toBe('https://estimador.pt/pt/economia/');
     expect(metadata.alternates?.languages).toEqual(languageAlternates('/economia'));
-    expect(Object.keys(metadata.alternates?.languages ?? {}).sort()).toEqual([...SITE_LOCALES].sort());
+    expect(Object.keys(metadata.alternates?.languages ?? {}).sort()).toEqual([...SITE_LOCALES, 'x-default'].sort());
+    // x-default is the Portuguese page, the site's own language.
+    expect((metadata.alternates?.languages as Record<string, string>)['x-default']).toBe('https://estimador.pt/pt/economia/');
   });
 
-  it('advertises the locale feed for autodiscovery', () => {
+  it('advertises the locale feed only once that locale has published an article', () => {
     for (const locale of SITE_LOCALES) {
       const metadata = createPageMetadata({ locale, path: '/artigos', title: 'x', description: 'y' });
       const feeds = metadata.alternates?.types?.['application/rss+xml'];
-      expect(Array.isArray(feeds) && feeds[0].url, locale).toBe(`https://estimador.pt/${locale}/feed.xml`);
+      if (getMDXArticlesByLocale(locale).length > 0) {
+        expect(Array.isArray(feeds) && feeds[0].url, locale).toBe(`https://estimador.pt/${locale}/feed.xml`);
+      } else {
+        expect(feeds, locale).toBeUndefined();
+      }
     }
   });
 
@@ -359,7 +365,7 @@ describe('page metadata', () => {
       description: 'y',
       availableLocales: ['pt'],
     });
-    expect(Object.keys(metadata.alternates?.languages ?? {})).toEqual(['pt']);
+    expect(Object.keys(metadata.alternates?.languages ?? {})).toEqual(['pt', 'x-default']);
   });
 
   it('builds localized URLs with the trailing slash the export uses', () => {

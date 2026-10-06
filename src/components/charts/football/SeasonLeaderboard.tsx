@@ -12,19 +12,24 @@
  */
 
 import { Trophy, Bot, RefreshCw } from "lucide-react";
+import { formatDecimal, formatLongDate } from "@/lib/football-format";
 import { useState } from "react";
 import type { LeaderboardResponse, LeaderboardRow } from "@/lib/utils/prediction-game-api";
 
-const USER_COLOR = "#4e8056";
-const MODEL_COLOR = "#5f7062";
+// The tokens, not literals: the text-strength green (#377455, audit A11Y2-08)
+// and the muted ink. Both are only ever used in inline styles.
+const USER_COLOR = "var(--color-positive)";
+const MODEL_COLOR = "var(--color-ink-muted)";
 
 interface SeasonLeaderboardProps {
   board: LeaderboardResponse | null;
   locale?: string;
   onRefresh?: () => Promise<void> | void;
+  /** A caveat on the model's own record (a round published after kickoff). */
+  recordNote?: string | null;
 }
 
-export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLeaderboardProps) {
+export function SeasonLeaderboard({ board, locale = "pt", onRefresh, recordNote = null }: SeasonLeaderboardProps) {
   const pt = locale !== "en";
   const [refreshing, setRefreshing] = useState(false);
 
@@ -78,10 +83,12 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLea
         </h3>
         {onRefresh && (
           <button
+            type="button"
             onClick={refresh}
-            className="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-stone-700 transition-colors"
+            aria-busy={refreshing}
+            className="inline-flex min-h-11 items-center gap-1 text-xs text-stone-600 hover:text-stone-900 transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw aria-hidden="true" className={`w-3.5 h-3.5 ${refreshing ? "animate-spin motion-reduce:animate-none" : ""}`} />
             {t.refresh}
           </button>
         )}
@@ -96,28 +103,30 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLea
           <p className="text-sm text-stone-600">{t.emptyBody}</p>
           {board?.model?.meanRps != null && (
             <p className="mt-3 text-sm text-stone-500 border-l-2 pl-3" style={{ borderColor: MODEL_COLOR }}>
-              <Bot className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5" style={{ color: MODEL_COLOR }} />
-              {t.emptyTarget(board.model.meanRps.toFixed(3))}
+              <Bot aria-hidden="true" className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5" style={{ color: MODEL_COLOR }} />
+              {t.emptyTarget(formatDecimal(board.model.meanRps, locale, 3))}
+              {recordNote ? ` ${recordNote}` : ""}
             </p>
           )}
         </div>
       ) : (
         <div className="border border-stone-200 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t.title}>
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-stone-50 border-b border-stone-200 text-[11px] font-bold uppercase tracking-wider text-stone-400">
-                  <th className="text-left px-3 py-2 w-10">{t.rank}</th>
-                  <th className="text-left px-3 py-2">{t.player}</th>
-                  <th className="text-right px-3 py-2">{t.mean}</th>
-                  <th className="text-right px-3 py-2 hidden sm:table-cell">{t.total}</th>
-                  <th className="text-right px-3 py-2 hidden sm:table-cell">{t.rounds}</th>
-                  <th className="text-right px-3 py-2">{t.beat}</th>
+                <tr className="bg-stone-50 border-b border-stone-200 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                  <th scope="col" className="text-left px-3 py-2 w-10">{t.rank}</th>
+                  <th scope="col" className="text-left px-3 py-2">{t.player}</th>
+                  <th scope="col" className="text-right px-3 py-2">{t.mean}</th>
+                  <th scope="col" className="text-right px-3 py-2 hidden sm:table-cell">{t.total}</th>
+                  <th scope="col" className="text-right px-3 py-2 hidden sm:table-cell">{t.rounds}</th>
+                  <th scope="col" className="text-right px-3 py-2">{t.beat}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
                 {rows.map(row => (
                   <Row
+                    locale={locale}
                     key={row.playerId}
                     row={row}
                     isYou={board?.you === row.playerId}
@@ -129,12 +138,13 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh }: SeasonLea
             </table>
           </div>
 
-          <div className="px-3 py-2 bg-stone-50 border-t border-stone-100 text-[11px] text-stone-400">
+          <div className="px-3 py-2 bg-stone-50 border-t border-stone-100 text-[11px] text-stone-500">
             {t.note}
+            {recordNote ? ` ${recordNote}` : ""}
             {board?.updatedAt && (
               <>
                 {" · "}
-                {t.updated} {new Date(board.updatedAt).toLocaleDateString(pt ? "pt-PT" : "en-GB")}
+                {t.updated} {formatLongDate(board.updatedAt, locale)}
               </>
             )}
           </div>
@@ -149,17 +159,19 @@ function Row({
   isYou,
   youLabel,
   modelLabel,
+  locale,
 }: {
   row: LeaderboardRow;
   isYou: boolean;
   youLabel: string;
   modelLabel: string;
+  locale: string;
 }) {
   const background = row.isModel ? "bg-stone-50" : isYou ? "bg-emerald-50" : "";
 
   return (
     <tr className={background}>
-      <td className="px-3 py-2 tabular-nums text-stone-400 text-xs">
+      <td className="px-3 py-2 tabular-nums text-stone-500 text-xs">
         {row.isModel ? <Bot className="w-3.5 h-3.5" /> : row.rank}
       </td>
       <td className="px-3 py-2">
@@ -178,10 +190,10 @@ function Row({
         className="px-3 py-2 text-right font-bold tabular-nums"
         style={{ color: row.isModel ? MODEL_COLOR : USER_COLOR }}
       >
-        {row.meanRps === null ? "—" : row.meanRps.toFixed(3)}
+        {row.meanRps === null ? "—" : formatDecimal(row.meanRps, locale, 3)}
       </td>
       <td className="px-3 py-2 text-right tabular-nums text-stone-500 hidden sm:table-cell">
-        {row.totalRps.toFixed(2)}
+        {formatDecimal(row.totalRps, locale, 2)}
       </td>
       <td className="px-3 py-2 text-right tabular-nums text-stone-500 hidden sm:table-cell">
         {row.matchdays}

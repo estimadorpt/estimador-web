@@ -2,13 +2,16 @@ import { useId, useEffect, useRef, useState, type CSSProperties, type Ref } from
 import { FIELD_LABELS, HOUSEHOLDS, PEOPLE, neighbourhoodPosition, exploredPosition, distribution, groupFor, type Lens, type Neighbourhood, type View } from '@/lib/miniatura/population';
 
 import { Landscape } from './Landscape';
+import { houseShape, nearestHouse } from './hit-test';
+
+/** How far from a house a finger may land and still choose it, in CSS pixels. */
+const TAP_RADIUS_PX = 44;
 
 export const COLOURS = ['#d79749', '#347c79', '#b96349', '#7875a0'];
 function House({ id, neighbourhood, selected, onSelect, locale }: { id: number; neighbourhood: Neighbourhood; selected: boolean; onSelect?: () => void; locale: 'pt' | 'en' }) {
   const { x, y } = neighbourhoodPosition(id, neighbourhood);
   const urban=neighbourhood==='city',stone=neighbourhood==='hills',coast=neighbourhood==='town';
-  const floors=urban?3+id%3:coast?1+id%2:1;
-  const height=urban?28+floors*16:coast?29+(id%2)*14:stone?32:24;
+  const { floors, height } = houseShape(id, neighbourhood);
   const wall=urban?['#d7dcd5','#d2b88f','#b6c6c5','#d3b2a6'][id%4]:stone?['#a8a89c','#bab5a4','#999e96'][id%3]:coast?['#f9f3dc','#d5e2dd','#ece5c7'][id%3]:'#f5ecd6';
   return <g className={`mini-house ${selected ? 'mini-house-selected' : ''}`} style={{ transform: `translate(${x}px, ${y}px)` }} role={onSelect ? 'button' : undefined} tabIndex={onSelect ? 0 : undefined} aria-label={onSelect ? `${locale === 'pt' ? 'Entrar no agregado' : 'Enter household'} ${id + 1}` : undefined} aria-pressed={onSelect ? selected : undefined} onClick={onSelect} onKeyDown={e => { if (onSelect && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onSelect(); } }}>
     <ellipse className="mini-house-target" cx="6" cy="5" rx="40" ry="34" fill="transparent" />
@@ -41,6 +44,8 @@ export function Scene({ view, alone, paused, locale, svgRef, neighbourhood = 'to
   const localRef = useRef<SVGSVGElement>(null);
   const [compact, setCompact] = useState(false);
   const drag = useRef<{ x: number; y: number; camera: Camera; moved: boolean } | null>(null);
+  // The input behind the latest press: only a finger gets nearest-house matching.
+  const pointerType = useRef('');
   const [dragging, setDragging] = useState(false);
   useEffect(() => {
     const observer = new ResizeObserver(entries => setCompact(entries[0].contentRect.width < 500));
@@ -49,7 +54,20 @@ export function Scene({ view, alone, paused, locale, svgRef, neighbourhood = 'to
   }, []);
   const grouped = view !== 'village';
   const count = PEOPLE.filter(p => (!alone || p.size === 1) && (selectedGroup === null || groupFor(p,lens) === selectedGroup) && (selectedHouse === null || p.household === selectedHouse)).length;
-  return <svg ref={node => { localRef.current = node; if (typeof svgRef === 'function') svgRef(node); else if (svgRef) svgRef.current = node; }} className="mini-scene" data-paused={paused} data-view={view} data-lens={lens} data-neighbourhood={neighbourhood} data-selected-house={selectedHouse ?? undefined} data-selected-group={selectedGroup ?? undefined} data-compact={compact} viewBox={compact && grouped ? `0 0 400 ${view === 'ages' ? 500 : 745}` : '0 0 1000 600'} role={onHouseSelect ? 'group' : 'img'} onPointerDown={event => { if (!onCameraChange || view !== 'village') return; drag.current = {x:event.clientX,y:event.clientY,camera,moved:false}; }} onPointerMove={event => { if (!drag.current || !onCameraChange || view !== 'village') return; const dx = event.clientX-drag.current.x, dy=event.clientY-drag.current.y; if(Math.abs(dx)+Math.abs(dy)>5){drag.current.moved=true;setDragging(true);event.currentTarget.setPointerCapture(event.pointerId);const ratio=1000/event.currentTarget.getBoundingClientRect().width;onCameraChange({...camera,x:drag.current.camera.x+dx*ratio,y:drag.current.camera.y+dy*ratio});} }} onPointerUp={() => {setDragging(false);setTimeout(()=>{drag.current=null;},0);}} onPointerCancel={() => {drag.current=null;setDragging(false);}} style={{touchAction: camera.scale > 1 ? 'none' : 'pan-y'}} aria-labelledby={`${id}-title ${id}-desc`} xmlns="http://www.w3.org/2000/svg">
+  // Drags convert screen pixels to scene units through the screen matrix, not the box width: on a short screen the
+  // block fits the viewport (P206) and the drawing is letterboxed inside a wider box.
+  return <svg ref={node => { localRef.current = node; if (typeof svgRef === 'function') svgRef(node); else if (svgRef) svgRef.current = node; }} className="mini-scene" data-paused={paused} data-view={view} data-lens={lens} data-neighbourhood={neighbourhood} data-selected-house={selectedHouse ?? undefined} data-selected-group={selectedGroup ?? undefined} data-compact={compact} viewBox={compact && grouped ? `0 0 400 ${view === 'ages' ? 500 : 745}` : '0 0 1000 600'} role={onHouseSelect ? 'group' : 'img'} onPointerDown={event => { pointerType.current = event.pointerType; if (!onCameraChange || view !== 'village') return; drag.current = {x:event.clientX,y:event.clientY,camera,moved:false}; }} onPointerMove={event => { if (!drag.current || !onCameraChange || view !== 'village') return; const dx = event.clientX-drag.current.x, dy=event.clientY-drag.current.y; if(Math.abs(dx)+Math.abs(dy)>5){drag.current.moved=true;setDragging(true);event.currentTarget.setPointerCapture(event.pointerId);const matrix=event.currentTarget.getScreenCTM();const ratio=matrix?1/matrix.a:1000/event.currentTarget.getBoundingClientRect().width;onCameraChange({...camera,x:drag.current.camera.x+dx*ratio,y:drag.current.camera.y+dy*ratio});} }} onPointerUp={() => {setDragging(false);setTimeout(()=>{drag.current=null;},0);}} onPointerCancel={() => {drag.current=null;setDragging(false);}} onClick={event => {
+      // A tap that lands between the houses (UXM2V-05): houses are about 29×28px on a phone, so a finger
+      // chooses the nearest one within TAP_RADIUS_PX instead. A house's own click has already been handled.
+      if (!onHouseSelect || view !== 'village' || pointerType.current !== 'touch' || drag.current?.moved) return;
+      if ((event.target as Element).closest('.mini-house')) return;
+      const matrix = event.currentTarget.getScreenCTM();
+      if (!matrix) return;
+      const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+      const world = { x: (point.x - camera.x) / camera.scale, y: (point.y - camera.y) / camera.scale };
+      const house = nearestHouse(world, neighbourhood, TAP_RADIUS_PX / (matrix.a * camera.scale));
+      if (house !== null) onHouseSelect(house);
+    }} style={{touchAction: camera.scale > 1 ? 'none' : 'pan-y'}} aria-labelledby={`${id}-title ${id}-desc`} xmlns="http://www.w3.org/2000/svg">
     <title id={`${id}-title`}>{pt ? 'Um bairro imaginado em movimento' : 'An imagined neighbourhood in motion'}</title>
     <desc id={`${id}-desc`}>{pt ? `${count} pessoas em destaque. Dados fictícios: 100 pessoas em 30 agregados. O movimento e os edifícios são ilustrativos.` : `${count} highlighted people. Fictional data: 100 people in 30 households. Motion and buildings are illustrative.`}</desc>
     <defs><radialGradient id={`${id}-ground`}><stop stopColor="#e3e9d4" /><stop offset="1" stopColor="#f4f2e9" /></radialGradient><pattern id={`${id}-paving`} width="14" height="8" patternUnits="userSpaceOnUse"><path d="M0 4h14 M7 0v8" stroke="#d5d1be" strokeWidth=".6" /></pattern></defs>
@@ -83,6 +101,6 @@ export function Scene({ view, alone, paused, locale, svgRef, neighbourhood = 'to
       </g>;
     })}
     </g>
-    <g opacity={compact && grouped ? 0 : 1} fill="#67776a" fontSize="12" fontFamily="Manrope, system-ui, sans-serif"><text x="36" y="565">{pt?'BAIRRO IMAGINADO · SEM LOCALIZAÇÃO REAL':'IMAGINED NEIGHBOURHOOD · NO REAL LOCATION'}</text><text x="965" y="565" textAnchor="end">{count} / 100</text></g>
+    <g className="mini-scene-caption" opacity={compact && grouped ? 0 : 1} fill="#67776a" fontSize="12" fontFamily="Manrope, system-ui, sans-serif"><text x="36" y="565">{pt?'BAIRRO IMAGINADO · SEM LOCALIZAÇÃO REAL':'IMAGINED NEIGHBOURHOOD · NO REAL LOCATION'}</text><text x="965" y="565" textAnchor="end">{count} / 100</text></g>
   </svg>;
 }

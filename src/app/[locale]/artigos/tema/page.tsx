@@ -7,6 +7,8 @@ import { Link } from '@/i18n/routing';
 import { buildTagIndex } from '@/lib/article-discovery';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { createPageMetadata, SITE_LOCALES } from '@/lib/metadata';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params,
@@ -14,6 +16,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   return createPageMetadata({
@@ -21,6 +24,8 @@ export async function generateMetadata({
     path: '/artigos/tema',
     title: t('meta.topicsTitle'),
     description: t('articles.topicsIntro'),
+    // Out of search while this locale has nothing to group (see /artigos).
+    index: getMDXArticlesByLocale(locale).length > 0,
   });
 }
 
@@ -42,6 +47,7 @@ export default async function TopicsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const groups = buildTagIndex(getMDXArticlesByLocale(locale));
 
@@ -49,7 +55,7 @@ export default async function TopicsPage({
     <div className="min-h-screen bg-paper">
       <Header />
 
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-7xl px-4 py-12"><div className="max-w-4xl">
         <nav className="mb-8">
           <Link
             href="/artigos"
@@ -66,7 +72,22 @@ export default async function TopicsPage({
         </header>
 
         {groups.length === 0 ? (
-          <p className="border-l-2 border-stone-300 py-6 pl-6 text-stone-600">{t('articles.empty')}</p>
+          <div className="flex items-center gap-6 py-6">
+            <EmptyStateMark surface="paper" />
+            <div>
+              <p className="text-stone-600">{t('articles.empty')}</p>
+              <p className="mt-4">
+                <Link
+                  href="/populacao"
+                  locale={locale}
+                  className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-ink underline underline-offset-4 hover:no-underline"
+                >
+                  {t('articles.emptyNextStep')}
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </p>
+            </div>
+          </div>
         ) : (
           <ul className="border-t-2 border-stone-800">
             {groups.map(group => (
@@ -87,7 +108,7 @@ export default async function TopicsPage({
             ))}
           </ul>
         )}
-      </main>
+      </div></main>
       <SiteFooter locale={locale} />
     </div>
   );

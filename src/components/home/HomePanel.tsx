@@ -18,10 +18,14 @@ export function Kicker({ children, pill }: { children: ReactNode; pill?: ReactNo
   );
 }
 
-/** A small status line: a dot and a short sentence in the 600 step, never faint. */
-export function Status({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'paused' }) {
+/**
+ * A small status line: a dot and a short sentence in the 600 step, never
+ * faint. In a panel laid out as a column (`bottom`), it sits on the panel's
+ * last line, so cards that share a row end on the same baseline.
+ */
+export function Status({ children, tone = 'neutral', bottom = false }: { children: ReactNode; tone?: 'neutral' | 'paused'; bottom?: boolean }) {
   return (
-    <p className="mt-4 flex items-start gap-2 text-[13px] leading-snug text-stone-600">
+    <p className={`flex items-start gap-2 text-[13px] leading-snug text-stone-600 ${bottom ? 'mt-auto pt-4' : 'mt-4'}`}>
       <span aria-hidden="true" className={`mt-[7px] inline-block h-1.5 w-1.5 shrink-0 rounded-full ${tone === 'paused' ? 'bg-gold' : 'bg-tree'}`} />
       <span>{children}</span>
     </p>

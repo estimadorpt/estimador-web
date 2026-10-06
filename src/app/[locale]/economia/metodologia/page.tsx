@@ -1,28 +1,28 @@
 import { createPageMetadata } from '@/lib/metadata';
-// Methodology page for the state-of-the-economy dashboard.
-//
-// Mirrors the site's methodology culture (/metodologia for elections) but is
-// themed like /economia (stone palette) and rendered from its own bilingual
-// MDX content in src/content/economics-methodology/{locale}.mdx: data sources,
-// the horizon-aware model roster, the pseudo-real-time caveat, conformal bands
-// built from our own past misses, first-release scoring, the four-badge
-// taxonomy, the pre-committed demotion trigger and the revision-floor argument.
-//
-// Every HonestyNote "read more" and every StatusBadge on the dashboard links
-// here — keep this page in sync with what the tiles actually claim.
+// Methodology page for the economy section, from its bilingual MDX in
+// src/content/economics-methodology/{locale}.mdx. While the section is in
+// preparation it describes the prototype tested up to July 2026, in the past
+// or conditional tense: the sources, the four labels, how it was evaluated and
+// what the internal backtest showed. Every HonestyNote "read more" and every
+// StatusBadge on the dashboard links here — at launch, bring it back in step
+// with what the tiles claim.
 
 import { Header } from '@/components/Header';
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { RevisedDate } from '@/components/brand/RevisedDate';
 import type { Metadata } from 'next';
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
-import type { MDXComponents } from 'mdx/types';
+import { getMDXComponents } from '@/mdx-components';
+import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
+import { setRequestLocale } from '@/i18n/request-locale';
+import { headingSlug, headingText } from '@/lib/election-methodology';
 
 export async function generateMetadata({
   params,
@@ -30,12 +30,15 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   return createPageMetadata({
     locale,
     path: '/economia/metodologia',
     title: t('meta.economicsMethodologyTitle'),
     description: t('meta.economicsMethodologyDescription'),
+    // Out of search while the section is in preparation (economy-status.json).
+    index: ECONOMY_PUBLISHED,
   });
 }
 
@@ -53,55 +56,11 @@ function getContent(locale: string): { content: string; actualLocale: string } {
   throw new Error('No economics methodology content found');
 }
 
-// Stone-toned MDX components (the shared mdx-components.tsx carries the
-// election-green theme; the economy surface uses its own palette).
-const components: MDXComponents = {
-  // The PageHero already carries the page title; the file's own "# " line
-  // would be a second h1.
-  h1: () => null,
-  h2: ({ children }) => (
-    <h2 className="text-2xl md:text-2xl text-stone-900 mt-8 mb-3">{children}</h2>
-  ),
-  h3: ({ children }) => (
-    <h3 className="text-lg text-stone-800 mt-5 mb-2">{children}</h3>
-  ),
-  p: ({ children }) => <p className="mb-4 text-stone-700 leading-relaxed">{children}</p>,
-  ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1.5">{children}</ul>,
-  ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1.5">{children}</ol>,
-  li: ({ children }) => <li className="text-stone-700 leading-relaxed">{children}</li>,
-  strong: ({ children }) => <strong className="font-semibold text-stone-900">{children}</strong>,
-  em: ({ children }) => <em className="italic">{children}</em>,
-  hr: () => <hr className="my-8 border-stone-200" />,
-  a: ({ href, children }) => (
-    <a href={href} className="text-[#245c68] font-medium hover:underline">
-      {children}
-    </a>
-  ),
-  blockquote: ({ children }) => (
-    <blockquote className="border-l-4 border-stone-300 pl-4 my-4 text-stone-600 italic">
-      {children}
-    </blockquote>
-  ),
-  table: ({ children }) => (
-    <div className="overflow-x-auto mb-4">
-      <table className="min-w-full border border-stone-200 text-sm">{children}</table>
-    </div>
-  ),
-  thead: ({ children }) => <thead className="bg-stone-50">{children}</thead>,
-  th: ({ children }) => (
-    <th className="border border-stone-200 px-3 py-2 text-left font-semibold text-stone-800">
-      {children}
-    </th>
-  ),
-  td: ({ children }) => (
-    <td className="border border-stone-200 px-3 py-2 text-stone-700 align-top">{children}</td>
-  ),
-  code: ({ children }) => (
-    <code className="bg-stone-100 rounded px-1 py-0.5 text-[0.9em] text-stone-800">
-      {children}
-    </code>
-  ),
-};
+/** The month the prototype the page describes was last tested (no feed is shipped until launch). */
+const PROTOTYPE_TESTED = '2026-07';
+
+/** When this page's text was last checked (a day, like every methodology page). */
+const REVISED = '2026-10-06';
 
 export default async function EconomicsMethodologyPage({
   params,
@@ -109,23 +68,47 @@ export default async function EconomicsMethodologyPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'economics' });
 
   const { content: mdxContent, actualLocale } = getContent(locale);
+
+  // In preparation, the page says so before anything else, dated by the month
+  // the prototype it describes was last tested.
+  const testedUntil = new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+    .format(new Date(`${PROTOTYPE_TESTED}-01T00:00:00Z`));
+  // Set as reading prose like every methodology page, with the shared MDX
+  // components (ink links); the PageHero carries the title, so the file's own
+  // "# " line is dropped. Each h2 and h3 carries an id from its text, as on the
+  // other methodologies, so a section can be linked to (METH3-16).
+  const components = getMDXComponents({
+    h1: () => null,
+    h2: ({ children }) => (
+      <h2 id={headingSlug(headingText(children))} className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight">{children}</h2>
+    ),
+    h3: ({ children }) => (
+      <h3 id={headingSlug(headingText(children))} className="text-lg text-stone-900 mt-8 mb-2">{children}</h3>
+    ),
+  });
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
 
+      <main id="main-content" tabIndex={-1}>
+      {/* One kicker (the way back to the section) and one statement of the
+          status, the lede (M-5): the body does not repeat it. */}
       <PageHero
-        width="4xl"
-        back={{ href: "/economia", label: t('title') }}
-        icon={<BookOpen aria-hidden="true" className="w-4 h-4" />}
-        eyebrow={t('eyebrow')}
-        title={t('methodologyLink')}
+        measure="wide"
+        // Compact like every other methodology page's hero (UXD3-09).
+        compact
+        back={{ href: "/economia", label: t(ECONOMY_PUBLISHED ? 'title' : 'preparingTitle') }}
+        title={t('methodologyTitle')}
+        lede={ECONOMY_PUBLISHED ? undefined : t('methodologyPreparingNotice', { date: testedUntil })}
+        meta={<RevisedDate date={REVISED} locale={locale} />}
       />
+      <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-4xl">
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
         {actualLocale !== locale && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-800">
@@ -136,7 +119,7 @@ export default async function EconomicsMethodologyPage({
           </div>
         )}
 
-        <article className="max-w-none">
+        <article className="article-body max-w-none" lang={actualLocale}>
           <MDXRemote
             source={mdxContent}
             components={components}
@@ -144,15 +127,16 @@ export default async function EconomicsMethodologyPage({
           />
         </article>
 
-        <div className="mt-10 border-t border-stone-200 pt-6">
+        <div className="mt-10 border-t border-line pt-6">
           <Link
             href="/economia"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-[#245c68] hover:underline"
+            className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink"
           >
-            <ArrowLeft className="w-4 h-4" />
-            {t('title')}
+            <ArrowLeft aria-hidden="true" className="w-4 h-4" />
+            {t(ECONOMY_PUBLISHED ? 'title' : 'preparingTitle')}
           </Link>
         </div>
+      </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

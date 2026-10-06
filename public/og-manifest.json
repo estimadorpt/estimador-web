@@ -1,19 +1,39 @@
 {
-  "generatedAt": "2026-09-11T23:21:46.635Z",
+  "generatedAt": "2026-10-06T12:30:55.337Z",
   "files": {
-    "pt": "og-image-pt-98c61d68.png",
-    "en": "og-image-en-791edd88.png"
+    "pt": "og-image-pt-25f86d84.png",
+    "en": "og-image-en-37c8bc43.png"
   },
   "cards": {
     "pt": {
-      "/": "og-image-pt-98c61d68.png",
-      "/desporto/liga": "og-image-liga-pt-915c7248.png",
-      "/economia": "og-image-economia-pt-4e3d3bf7.png"
+      "/": "og-image-pt-25f86d84.png",
+      "/desporto/liga": "og-image-liga-pt-70c60f14.png",
+      "/populacao": "og-image-populacao-pt-c09f0644.png"
     },
     "en": {
-      "/": "og-image-en-791edd88.png",
-      "/desporto/liga": "og-image-liga-en-bca1bfdb.png",
-      "/economia": "og-image-economia-en-a63fc5ab.png"
+      "/": "og-image-en-37c8bc43.png",
+      "/desporto/liga": "og-image-liga-en-c22709bb.png",
+      "/populacao": "og-image-populacao-en-c70973df.png"
     }
-  }
+  },
+  "alt": {
+    "og-image-pt-25f86d84.png": "estimador.pt. Dados para compreender Portugal. Dados e modelos sobre Portugal, com a incerteza à vista: quem vive em cada freguesia, como pode acabar a Liga e o que diziam as previsões eleitorais.",
+    "og-image-liga-pt-70c60f14.png": "Liga Portugal 2026-27 depois da jornada 7 (atualizado a 25 set. 2026): probabilidade de título, Porto 51%, Sporting 26%, Benfica 22%.",
+    "og-image-populacao-pt-c09f0644.png": "População sintética aberta: 3 092 freguesias dos Censos 2021, versão 1.0.3 de 5 de outubro de 2026.",
+    "og-image-en-37c8bc43.png": "estimador.pt. Data to understand Portugal. Data and models about Portugal, with the uncertainty in view: who lives in each parish, how the Liga could end, and what the election forecasts said.",
+    "og-image-liga-en-c22709bb.png": "Liga Portugal 2026-27 after matchday 7 (updated 25 Sept 2026): title probability, Porto 51%, Sporting 26%, Benfica 22%.",
+    "og-image-populacao-en-c70973df.png": "Open synthetic population: 3,092 parishes of the 2021 Census, version 1.0.3 dated 5 October 2026."
+  },
+  "size": {
+    "width": 2400,
+    "height": 1260
+  },
+  "retained": [
+    "og-image-pt-98c61d68.png",
+    "og-image-en-791edd88.png",
+    "og-image-liga-pt-3c459aab.png",
+    "og-image-economia-pt-4e3d3bf7.png",
+    "og-image-liga-en-d1b51d8a.png",
+    "og-image-economia-en-a63fc5ab.png"
+  ]
 }

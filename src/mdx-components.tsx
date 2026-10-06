@@ -1,11 +1,7 @@
 import type { MDXComponents } from 'mdx/types';
-import { CoalitionDotPlot } from '@/components/charts/CoalitionDotPlot';
-import { PollingChart } from '@/components/charts/PollingChart';
-import { SeatChart } from '@/components/charts/SeatChart';
-import { HouseEffects } from '@/components/charts/HouseEffects';
-import { DistrictSummary } from '@/components/charts/DistrictSummary';
 import { Figure } from '@/components/mdx/Figure';
 import { Callout } from '@/components/mdx/Callout';
+import { MdxPre, MdxTable } from '@/components/mdx/ScrollBlocks';
 
 /**
  * Element styling for long-form pages. The reading face, measure and rhythm
@@ -21,13 +17,8 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
     Figure,
     Callout,
 
-    // Chart components, callable from MDX with inline data:
-    //   <Figure caption="…" source="…"><SeatChart data={[…]} /></Figure>
-    CoalitionDotPlot,
-    PollingChart,
-    SeatChart,
-    HouseEffects,
-    DistrictSummary,
+    // The chart components are added by the article page only
+    // (src/components/mdx/article-charts.ts), so the prose pages skip Plot and d3.
 
     // Articles put the title in the page header, but the standalone pages
     // (about, methodology, privacy) open their MDX with one.
@@ -66,17 +57,17 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
     code: ({ children, className }) => {
       // Inside a <pre> the highlighter owns the styling; only inline code needs it.
       if (className?.includes('language-')) return <code className={className}>{children}</code>;
+      // A long path ("/pt/desporto/liga/jogador/joao-silva/") breaks where it
+      // must, so the page never scrolls sideways at 320px (A11Y3-06, WCAG 1.4.10).
+      // break-word, not anywhere: a table cell keeps its code whole and the
+      // table scrolls in its own region instead of splitting every key.
       return (
-        <code className="bg-stone-100 px-1.5 py-0.5 font-mono text-[0.85em] text-stone-800">
+        <code className="bg-stone-100 px-1.5 py-0.5 font-mono text-[0.85em] text-stone-800 break-words">
           {children}
         </code>
       );
     },
-    pre: ({ children }) => (
-      <pre className="mb-6 overflow-x-auto bg-stone-800 p-4 font-mono text-sm text-stone-100 [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-inherit">
-        {children}
-      </pre>
-    ),
+    pre: ({ children }) => <MdxPre>{children}</MdxPre>,
     a: ({ href, children }) => (
       <a
         href={href}
@@ -87,11 +78,7 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
         {children}
       </a>
     ),
-    table: ({ children }) => (
-      <div className="my-8 overflow-x-auto">
-        <table className="min-w-full border-collapse font-sans text-sm tabular-nums">{children}</table>
-      </div>
-    ),
+    table: ({ children }) => <MdxTable>{children}</MdxTable>,
     th: ({ children }) => (
       <th className="border-b-2 border-stone-800 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">
         {children}
@@ -100,16 +87,14 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
     td: ({ children }) => (
       <td className="border-b border-stone-200 px-3 py-2 text-stone-800">{children}</td>
     ),
-    details: ({ children }) => (
-      <details className="my-6 border border-stone-200 font-sans text-sm [&[open]>summary]:border-b [&[open]>summary]:border-stone-200">
-        {children}
-      </details>
-    ),
-    summary: ({ children }) => (
-      <summary className="cursor-pointer bg-stone-50 px-4 py-3 font-medium text-stone-800 hover:bg-stone-100">
-        {children}
-      </summary>
-    ),
+
+    // No `details` or `summary` here. Markdown has no syntax for them, and MDX 3
+    // does not pass a hand-written <details> or <summary> through this map (it
+    // compiles them to the plain element), so entries here never ran and only
+    // contradicted the real look. That look lives once, in `.article-body
+    // details` in globals.css: the <Disclosure> control (viz/Disclosure.tsx) on
+    // a cream panel, with a 44px summary in ink, a left chevron that turns when
+    // open and no native marker.
 
     ...components,
   }

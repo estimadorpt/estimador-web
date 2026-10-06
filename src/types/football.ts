@@ -58,6 +58,9 @@ export interface MatchdayResult {
   away: string;
   home_goals: number;
   away_goals: number;
+  /** The round the game belongs to, which can differ from the file it was
+   * published in (a postponed game, a late backfill). */
+  matchday?: number;
 }
 
 // Remaining match in current matchday (not yet played)
@@ -247,6 +250,12 @@ export interface NextMatchdayScenarioConditional {
 export interface NextMatchdayScenarioMatch {
   home_team: string;
   away_team: string;
+  // Present on disk for every match (next_matchday_scenarios can span
+  // several rounds at once: a postponed leftover, the round in progress and
+  // the next full round), but omitted from this type until football-fixtures.ts
+  // needed it — hence optional, so existing object literals built without it
+  // (e.g. in tests) still satisfy the type.
+  matchday?: number;
   conditionals: Record<'H' | 'D' | 'A', NextMatchdayScenarioConditional>;
 }
 
@@ -258,3 +267,19 @@ export interface NextMatchdayScenarios {
 
 // Historical data: array of predictions per matchday for time-series charts
 export type LigaHistorical = LigaPrediction[];
+
+/**
+ * What the title-race and relegation charts read from the history: the
+ * matchday and each club's two probabilities. The page passes this trimmed
+ * copy to the client charts rather than every published prediction in full
+ * (audit SP-08: the Liga page shipped all of them in its payload).
+ */
+export type LigaProbabilityHistory = Array<{
+  matchday: number;
+  /** The publication's timestamp, so a point can be dated (audit FA2-03). */
+  timestamp?: string;
+  /** The model that published it: the pre-season point came from the
+   * previous one, and the charts mark it (audit VFA-M4). */
+  model?: string;
+  table: Array<Pick<TeamStanding, 'team' | 'p_champion' | 'p_relegation'>>;
+}>;

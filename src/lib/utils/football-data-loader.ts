@@ -4,21 +4,27 @@ import type {
   LigaPrediction,
   ScenarioData,
   LigaHistorical,
+  LigaProbabilityHistory,
   TeamDelta,
   DecisiveMatch,
   NextMatchdayScenarioMatch,
 } from '@/types/football';
-import { assignFixtureSlugs } from '@/lib/config/fixtures';
-import { normaliseRatings, type RatingKind } from '@/lib/utils/player-ratings';
+import { assignFixtureSlugs, teamSlug } from '@/lib/config/fixtures';
+import { normaliseRatings, reconcilePlayerPages, type RatingKind } from '@/lib/utils/player-ratings';
 import {
   fixtureKey,
   matchOutcome,
   normalizeProbs,
+  type GameFixture,
   type GameRound,
   type PredictionGameData,
 } from '@/lib/utils/prediction-game';
+import type { GameFixturesData, GameFixtureEntry } from '@/lib/football-fixtures';
+import { frozenBeforePreviousRoundEnded } from '@/lib/utils/prediction-game-record';
 
-const FOOTBALL_DIR = 'football/liga-2026-27';
+/** The current season's data directory under public/data. One constant for
+ * every football loader, so the season rollover is a one-line change. */
+export const FOOTBALL_DIR = 'football/liga-2026-27';
 
 async function loadFootballJson<T>(filename: string): Promise<T> {
   const filePath = path.join(process.cwd(), 'public', 'data', FOOTBALL_DIR, filename);
@@ -108,12 +114,22 @@ export async function loadLigaPlayers() {
 // Load the per-player detail payload behind the player pages (null if absent).
 // Written by the model repo's scripts/export_players_detail.py; players.json
 // stays the ranking, this file carries history and recent form.
+//
+// Returned reconciled with the ranking (reconcilePlayerPages): only players
+// /jogadores lists, at its rank, from clubs in the current table. Every page,
+// link and sitemap entry built from this loader therefore agrees with
+// /jogadores even when the two files come from different model runs.
 export async function loadLigaPlayersDetail() {
   try {
-    const data = await loadFootballJson<
-      import('@/components/charts/football/PlayerProfile').PlayerDetailData
-    >('players_detail.json');
-    return data?.players?.length ? data : null;
+    const [data, ranking, { prediction }] = await Promise.all([
+      loadFootballJson<
+        import('@/components/charts/football/PlayerProfile').PlayerDetailData
+      >('players_detail.json'),
+      loadLigaPlayers(),
+      loadLigaData(),
+    ]);
+    const currentTeams = new Set((prediction?.table ?? []).map(row => row.team));
+    return reconcilePlayerPages(data, ranking, currentTeams);
   } catch {
     return null;
   }
@@ -318,8 +334,12 @@ export interface UpcomingFixture {
   away: string;
   matchday: number;
   kickoff: string | null;
+  /** False while `kickoff` is a placeholder (or unknown): show the day, not the hour. */
+  kickoffConfirmed: boolean;
   /** True when the fixture is a leftover of the matchday already in progress. */
   inProgressMatchday: boolean;
+  /** True for a game postponed from an earlier, finished round. */
+  postponed?: boolean;
   p_home: number | null;
   p_draw: number | null;
   p_away: number | null;
@@ -329,6 +349,25 @@ export interface UpcomingFixture {
   decisive: DecisiveMatch | null;
   /** Final score, when the fixture has already been played. */
   played: { home_goals: number; away_goals: number } | null;
+  /**
+   * For a played fixture, when its 1X2 above was frozen (game_fixtures.json →
+   * published_at). Null for a played fixture whose probabilities were
+   * published after it kicked off: those are not shown as a forecast.
+   */
+  probsPublishedAt?: string | null;
+  /**
+   * For a played fixture whose probabilities were published only after it
+   * kicked off: when they were (matchday 1's md00 came out on 10 August, after
+   * eight of its nine games). The page says why it shows no forecast (audit
+   * FRESH-03).
+   */
+  probsLatePublishedAt?: string | null;
+  /**
+   * For a played fixture: the previous matchday, when its odds were frozen
+   * before that round's last game ("quando a jornada 6 ainda decorria",
+   * audit FRESH-02 / FA2-04). Null otherwise.
+   */
+  probsFrozenDuringRound?: number | null;
 }
 
 /**
@@ -360,8 +399,28 @@ function probsFromConditionals(
  */
 export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
   try {
-    const { prediction, scenarios } = await loadLigaData();
+    const [{ prediction, scenarios }, manifest] = await Promise.all([
+      loadLigaData(),
+      loadGameFixtures(),
+    ]);
     if (!prediction) return [];
+
+    // Kickoffs live in the game manifest; the md files carry them only for
+    // the round in progress, and never say whether they are confirmed. The
+    // join goes through the team slugs, so a spelling difference between
+    // the manifest and the model files ("Sporting CP" / "Sporting") cannot
+    // silently drop a kickoff.
+    const manifestByKey = new Map<string, GameFixtureEntry>();
+    for (const md of manifest?.matchdays ?? []) {
+      for (const fx of md.fixtures ?? []) {
+        manifestByKey.set(manifestKey(md.matchday, fx.home, fx.away), fx);
+      }
+    }
+    const kickoffFor = (md: number, home: string, away: string, fallback: string | null) => {
+      const fx = manifestByKey.get(manifestKey(md, home, away));
+      if (fx?.kickoff) return { kickoff: fx.kickoff, kickoffConfirmed: fx.kickoff_confirmed === true };
+      return { kickoff: fallback, kickoffConfirmed: false };
+    };
 
     const scenarioMatches = scenarios?.next_matchday_scenarios?.matches ?? [];
     const findScenario = (home: string, away: string) =>
@@ -379,7 +438,7 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
         home: m.home,
         away: m.away,
         matchday: prediction.matchday,
-        kickoff: m.kickoff ?? null,
+        ...kickoffFor(prediction.matchday, m.home, m.away, m.kickoff ?? null),
         inProgressMatchday: true,
         ...probsFromConditionals(scenario),
         scenario,
@@ -394,7 +453,7 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
         home: m.home,
         away: m.away,
         matchday: nextMd,
-        kickoff: null,
+        ...kickoffFor(nextMd, m.home, m.away, null),
         inProgressMatchday: false,
         p_home: m.p_home ?? null,
         p_draw: m.p_draw ?? null,
@@ -405,6 +464,32 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
       });
     }
 
+    // A postponed leftover from an earlier round that the conditionals still
+    // cover (Sp. Braga–Gil Vicente, jornada 2, 19 October): it gets its match
+    // page like any game to come (audit FA2-06), with the 1X2 of the current
+    // forecast read from its conditionals.
+    const listed = new Set(raw.map(f => `${f.home}|${f.away}`));
+    if (raw.length > 0) {
+      for (const m of scenarioMatches) {
+        if (listed.has(`${m.home_team}|${m.away_team}`)) continue;
+        if (typeof m.matchday !== 'number' || m.matchday >= prediction.matchday) continue;
+        const fx = manifestByKey.get(manifestKey(m.matchday, m.home_team, m.away_team));
+        if (fx && isNum(fx.home_goals) && isNum(fx.away_goals)) continue;
+        raw.push({
+          home: m.home_team,
+          away: m.away_team,
+          matchday: m.matchday,
+          ...kickoffFor(m.matchday, m.home_team, m.away_team, null),
+          inProgressMatchday: false,
+          postponed: true,
+          ...probsFromConditionals(m),
+          scenario: m,
+          decisive: findDecisive(m.home_team, m.away_team, m.matchday),
+          played: null,
+        });
+      }
+    }
+
     // End of season: nothing left to play. Fall back to the fixtures of the
     // matchday just finished so the route still has pages to generate.
     if (raw.length === 0) {
@@ -413,7 +498,7 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
           home: r.home,
           away: r.away,
           matchday: prediction.matchday,
-          kickoff: null,
+          ...kickoffFor(prediction.matchday, r.home, r.away, null),
           inProgressMatchday: false,
           p_home: null,
           p_draw: null,
@@ -436,28 +521,204 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
 }
 
 /** Resolve one fixture page by slug (null when the slug is unknown). */
+/** Matchday + both clubs, by team slug: the join key between the manifest and the model files. */
+function manifestKey(matchday: number, home: string, away: string): string {
+  return `${matchday}|${teamSlug(home)}|${teamSlug(away)}`;
+}
+
+/**
+ * This season's fixtures that have been played, from game_fixtures.json,
+ * so a match page stays online after its round instead of disappearing
+ * the week it is played (audit SP-13). Each keeps its final score and the
+ * model's 1X2 frozen when its round opened, when that happened before
+ * kickoff. Slugs are the same `home-away` form the upcoming pages use (a
+ * pairing meets at one ground once a season); one that an upcoming fixture
+ * already holds is left to it. Returns [] on any failure.
+ */
+export async function loadPlayedFixtures(): Promise<UpcomingFixture[]> {
+  try {
+    const [manifest, upcoming] = await Promise.all([loadGameFixtures(), loadUpcomingFixtures()]);
+    if (!manifest) return [];
+    const taken = new Set(upcoming.map(f => f.slug));
+    const raw: Omit<UpcomingFixture, 'slug'>[] = [];
+    const rounds = manifest.matchdays ?? [];
+    // Rounds whose odds were frozen while the previous round was still
+    // being played (audit FRESH-02, FA2-04).
+    const frozenMidRound = new Map(frozenBeforePreviousRoundEnded(rounds).map(f => [f.matchday, f.previous]));
+    for (const md of rounds) {
+      for (const fx of md.fixtures ?? []) {
+        if (!isNum(fx.home_goals) || !isNum(fx.away_goals)) continue;
+        const priced = isNum(fx.p_home) && isNum(fx.p_draw) && isNum(fx.p_away);
+        const publishedAt = typeof fx.published_at === 'string' ? fx.published_at : null;
+        const kickoffMs = fx.kickoff ? Date.parse(fx.kickoff) : NaN;
+        const publishedMs = publishedAt ? Date.parse(publishedAt) : NaN;
+        // Probabilities published after kickoff are not a forecast of the game.
+        const beforeKickoff = priced && !Number.isNaN(kickoffMs) && !Number.isNaN(publishedMs) && publishedMs <= kickoffMs;
+        raw.push({
+          home: fx.home,
+          away: fx.away,
+          matchday: md.matchday,
+          kickoff: fx.kickoff ?? null,
+          kickoffConfirmed: fx.kickoff_confirmed === true,
+          inProgressMatchday: false,
+          p_home: beforeKickoff ? (fx.p_home as number) : null,
+          p_draw: beforeKickoff ? (fx.p_draw as number) : null,
+          p_away: beforeKickoff ? (fx.p_away as number) : null,
+          scenario: null,
+          decisive: null,
+          played: { home_goals: fx.home_goals as number, away_goals: fx.away_goals as number },
+          probsPublishedAt: beforeKickoff ? publishedAt : null,
+          probsLatePublishedAt: priced && !beforeKickoff && publishedAt ? publishedAt : null,
+          probsFrozenDuringRound: beforeKickoff ? (frozenMidRound.get(md.matchday) ?? null) : null,
+        });
+      }
+    }
+    return assignFixtureSlugs(raw).filter(f => !taken.has(f.slug));
+  } catch (error) {
+    console.error('Error loading played fixtures:', error);
+    return [];
+  }
+}
+
+/** An upcoming fixture first, then a played one from this season. */
 export async function loadFixtureBySlug(slug: string): Promise<UpcomingFixture | null> {
   const fixtures = await loadUpcomingFixtures();
-  return fixtures.find(f => f.slug === slug) ?? null;
+  const upcoming = fixtures.find(f => f.slug === slug);
+  if (upcoming) return upcoming;
+  const played = await loadPlayedFixtures();
+  return played.find(f => f.slug === slug) ?? null;
 }
 
 /* ------------------------------------------------- "Contra o Modelo" game */
 
 /**
- * Everything the prediction game needs, assembled from the published matchday
- * files.
- *
- * Three indexes are built by scanning *every* mdNN.json rather than trusting a
- * single file:
+ * game_fixtures.json: the game's manifest, and the only file carrying every
+ * fixture of the season with its real kickoff, its lock time, the model's
+ * frozen pre-round probabilities and the result. The server scores against a
+ * byte-identical copy (api/data/game_fixtures.json). Absence is a normal
+ * outcome (an older season, a broken sync), so this returns null.
+ */
+export async function loadGameFixtures(): Promise<GameFixturesData | null> {
+  try {
+    const data = await loadFootballJson<GameFixturesData>('game_fixtures.json');
+    return Array.isArray(data?.matchdays) ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+
+/** One manifest fixture as a game fixture, or null when it was never priced. */
+function gameFixtureFromManifest(fx: GameFixtureEntry): GameFixture | null {
+  if (!isNum(fx.p_home) || !isNum(fx.p_draw) || !isNum(fx.p_away)) return null;
+  const played = isNum(fx.home_goals) && isNum(fx.away_goals);
+  return {
+    key: fixtureKey(fx.home, fx.away),
+    home: fx.home,
+    away: fx.away,
+    model: normalizeProbs([fx.p_home, fx.p_draw, fx.p_away]),
+    kickoff: fx.kickoff ?? null,
+    locksAt: fx.locks_at ?? null,
+    kickoffConfirmed: fx.kickoff_confirmed === true,
+    id: typeof fx.id === 'string' ? fx.id : undefined,
+    probsSource: typeof fx.probs_source === 'string' ? fx.probs_source : null,
+    result: played
+      ? {
+          homeGoals: fx.home_goals as number,
+          awayGoals: fx.away_goals as number,
+          outcome: matchOutcome(fx.home_goals as number, fx.away_goals as number),
+        }
+      : null,
+  };
+}
+
+/**
+ * Rounds straight from the manifest: every matchday with at least one priced
+ * fixture, each fixture carrying the probabilities frozen when its round
+ * opened (`probs_source`), its own lock time and its result. Past rounds
+ * therefore show what the model said before the round, never what a later
+ * md file says. Pure, exported for tests.
+ */
+export function roundsFromGameFixtures(manifest: GameFixturesData): GameRound[] {
+  const rounds: GameRound[] = [];
+  for (const md of manifest.matchdays ?? []) {
+    const fixtures = (md.fixtures ?? [])
+      .map(gameFixtureFromManifest)
+      .filter((f): f is GameFixture => f !== null);
+    if (fixtures.length === 0) continue;
+    rounds.push({ matchday: md.matchday, fixtures });
+  }
+  return rounds.sort((a, b) => a.matchday - b.matchday);
+}
+
+/**
+ * Fallback when the manifest is missing: rounds rebuilt from the md files.
  *
  *  - forecasts: md(M-1).json `next_matchday` is the model's pre-round call for
  *    matchday M. The earliest publication carrying a given matchday wins, so
  *    the opponent forecast can never have seen that round's results.
  *  - results:  keyed by the ordered (home, away) pair across every
- *    `matchday_results` array. In a double round-robin an ordered pair occurs
- *    once per season, so this is unambiguous and survives a late backfill
- *    landing in a different file than expected.
- *  - kickoffs: from `matches_remaining`, the only place timestamps appear.
+ *    `matchday_results` array (an ordered pair occurs once per season).
+ *  - kickoffs: from `matches_remaining`, the only place md files carry them.
+ */
+function roundsFromMatchdayFiles(predictions: LigaPrediction[]): GameRound[] {
+  const results = new Map<string, { home_goals: number; away_goals: number }>();
+  const kickoffs = new Map<string, string>();
+
+  for (const p of predictions) {
+    for (const r of p.matchday_results ?? []) {
+      if (typeof r.home_goals !== 'number' || typeof r.away_goals !== 'number') continue;
+      results.set(fixtureKey(r.home, r.away), {
+        home_goals: r.home_goals,
+        away_goals: r.away_goals,
+      });
+    }
+    for (const m of p.matches_remaining ?? []) {
+      if (m.kickoff) kickoffs.set(fixtureKey(m.home, m.away), m.kickoff);
+    }
+  }
+
+  // Earliest publication wins; `predictions` is already ascending by matchday.
+  const roundsByMd = new Map<number, GameRound>();
+  for (const p of predictions) {
+    const md = p.next_matchday?.matchday;
+    const matches = p.next_matchday?.matches ?? [];
+    if (typeof md !== 'number' || matches.length === 0) continue;
+    if (roundsByMd.has(md)) continue;
+
+    roundsByMd.set(md, {
+      matchday: md,
+      fixtures: matches.map(m => {
+        const key = fixtureKey(m.home, m.away);
+        const played = results.get(key) ?? null;
+        return {
+          key,
+          home: m.home,
+          away: m.away,
+          model: normalizeProbs([m.p_home ?? 0, m.p_draw ?? 0, m.p_away ?? 0]),
+          kickoff: kickoffs.get(key) ?? null,
+          result: played
+            ? {
+                homeGoals: played.home_goals,
+                awayGoals: played.away_goals,
+                outcome: matchOutcome(played.home_goals, played.away_goals),
+              }
+            : null,
+        };
+      }),
+    });
+  }
+  return [...roundsByMd.values()].sort((a, b) => a.matchday - b.matchday);
+}
+
+/**
+ * Everything the prediction game needs.
+ *
+ * The manifest (game_fixtures.json) is the source: it is what the server
+ * scores against, and the only file with each round's real deadline and the
+ * model's frozen pre-round probabilities. The md files are only a fallback
+ * for a build without the manifest.
  *
  * Returns null on any failure, like every other loader here.
  */
@@ -470,66 +731,19 @@ export async function loadPredictionGameData(): Promise<PredictionGameData | nul
       .map(f => parseInt(f.match(/^md(\d+)\.json$/)![1], 10))
       .sort((a, b) => a - b);
 
-    if (matchdayNumbers.length === 0) return null;
+    const [predictions, manifest] = await Promise.all([
+      Promise.all(matchdayNumbers.map(md => loadFootballJson<LigaPrediction>(mdFile(md)))),
+      loadGameFixtures(),
+    ]);
+    const latest = predictions[predictions.length - 1] ?? null;
 
-    const predictions = await Promise.all(
-      matchdayNumbers.map(md => loadFootballJson<LigaPrediction>(mdFile(md)))
-    );
-
-    const results = new Map<string, { home_goals: number; away_goals: number }>();
-    const kickoffs = new Map<string, string>();
-
-    for (const p of predictions) {
-      for (const r of p.matchday_results ?? []) {
-        if (typeof r.home_goals !== 'number' || typeof r.away_goals !== 'number') continue;
-        results.set(fixtureKey(r.home, r.away), {
-          home_goals: r.home_goals,
-          away_goals: r.away_goals,
-        });
-      }
-      for (const m of p.matches_remaining ?? []) {
-        if (m.kickoff) kickoffs.set(fixtureKey(m.home, m.away), m.kickoff);
-      }
-    }
-
-    // Earliest publication wins; `predictions` is already ascending by matchday.
-    const roundsByMd = new Map<number, GameRound>();
-    for (const p of predictions) {
-      const md = p.next_matchday?.matchday;
-      const matches = p.next_matchday?.matches ?? [];
-      if (typeof md !== 'number' || matches.length === 0) continue;
-      if (roundsByMd.has(md)) continue;
-
-      roundsByMd.set(md, {
-        matchday: md,
-        fixtures: matches.map(m => {
-          const key = fixtureKey(m.home, m.away);
-          const played = results.get(key) ?? null;
-          return {
-            key,
-            home: m.home,
-            away: m.away,
-            model: normalizeProbs([m.p_home ?? 0, m.p_draw ?? 0, m.p_away ?? 0]),
-            kickoff: kickoffs.get(key) ?? null,
-            result: played
-              ? {
-                  homeGoals: played.home_goals,
-                  awayGoals: played.away_goals,
-                  outcome: matchOutcome(played.home_goals, played.away_goals),
-                }
-              : null,
-          };
-        }),
-      });
-    }
-
-    const rounds = [...roundsByMd.values()].sort((a, b) => a.matchday - b.matchday);
+    const fromManifest = manifest ? roundsFromGameFixtures(manifest) : [];
+    const rounds = fromManifest.length > 0 ? fromManifest : roundsFromMatchdayFiles(predictions);
     if (rounds.length === 0) return null;
 
-    const latest = predictions[predictions.length - 1];
     return {
-      season: latest.season,
-      generatedAt: latest.timestamp,
+      season: manifest?.season ?? latest?.season ?? '',
+      generatedAt: latest?.timestamp ?? manifest?.generated_at ?? '',
       rounds,
     };
   } catch (error) {
@@ -569,38 +783,6 @@ export async function loadLiga2(season = '2026-27') {
 export async function loadLigaInjuries() {
   try {
     return await loadFootballJson<import('@/components/charts/football/InjuriesPanel').InjuriesData>('injuries.json');
-  } catch {
-    return null;
-  }
-}
-
-// Load the shareable matchday cards (null if absent).
-//
-// The manifest is written by the model repo (scripts/publish_cards.py) and the
-// PNGs are copied into public/images/cards/. The two can drift — a manifest
-// entry whose image never arrived is dropped here rather than published as a
-// broken image.
-export async function loadLigaCards() {
-  try {
-    const manifest = await loadFootballJson<
-      import('@/components/charts/football/ShareCards').CardsManifest
-    >('cards.json');
-    if (!manifest?.cards?.length) return null;
-
-    const present = await Promise.all(
-      manifest.cards.map(async card => {
-        try {
-          await fs.access(
-            path.join(process.cwd(), 'public', 'images', 'cards', card.file)
-          );
-          return card;
-        } catch {
-          return null;
-        }
-      })
-    );
-    const cards = present.filter((c): c is NonNullable<typeof c> => c !== null);
-    return cards.length > 0 ? { ...manifest, cards } : null;
   } catch {
     return null;
   }
@@ -759,4 +941,14 @@ export async function loadLigaSummary() {
     console.error('Error loading liga summary:', error);
     return null;
   }
+}
+
+/** The trimmed history the title-race and relegation charts read (SP-08). */
+export function probabilityHistory(historical: LigaHistorical): LigaProbabilityHistory {
+  return historical.map(md => ({
+    matchday: md.matchday,
+    timestamp: md.timestamp,
+    model: md.model,
+    table: md.table.map(({ team, p_champion, p_relegation }) => ({ team, p_champion, p_relegation })),
+  }));
 }

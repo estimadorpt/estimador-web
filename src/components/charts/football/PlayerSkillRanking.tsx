@@ -1,5 +1,8 @@
 "use client";
 
+import { formatInteger } from "@/lib/football-format";
+import { PLAYER_MARKS } from "@/components/charts/football/player-marks";
+
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -74,8 +77,9 @@ interface PlayerSkillRankingProps {
 
 // Single-hue magnitude ramp — identity is carried by the logo + club chip,
 // so the bar stays one colour and lengths stay comparable across rows.
-const BAR = "#16362e"; // stone-900
-const BAR_SOFT = "#7f9284"; // stone-400 — interval, over the light surface
+const BAR = PLAYER_MARKS.bar; // stone-900
+// The interval carries the uncertainty: stone-400, 3:1 on paper (A11Y3-10).
+const BAR_SOFT = PLAYER_MARKS.whisker;
 const BAR_INSIDE = "#cbccbb"; // stone-300 — interval, over the dark bar
 
 export function PlayerSkillRanking({
@@ -102,8 +106,9 @@ export function PlayerSkillRanking({
     v.toLocaleString(pt ? "pt-PT" : "en-GB", {
       minimumFractionDigits: d,
       maximumFractionDigits: d,
-    });
-  const int = (v: number) => v.toLocaleString(pt ? "pt-PT" : "en-GB");
+    }).replace(/^-/, "\u2212");
+  // Grouped like every other count on the site ("3 677", audit FA2-12).
+  const int = (v: number) => formatInteger(Math.round(v), pt ? "pt" : "en");
 
   // Read the interval mass from the feed. This was hardcoded to 94% while the
   // model published 90%, so never reintroduce a literal here.
@@ -145,14 +150,14 @@ export function PlayerSkillRanking({
       ? "Indisponível neste momento — toque no jogador para saber porquê"
       : "Currently unavailable — tap the player to see why",
     footnote: pt
-      ? `Clube = último clube onde o jogador atuou nos dados (épocas ${data.generated_from.seasons[0]} a ${
+      ? `Clube = plantel atual (${data.season}); os números vêm das épocas ${data.generated_from.seasons[0]} a ${
           data.generated_from.seasons[data.generated_from.seasons.length - 1]
-        }); transferências recentes podem não estar refletidas. Mínimo ${int(
+        }. Mínimo ${int(
           data.generated_from.min_minutes
         )} minutos para entrar no ranking (${int(data.generated_from.n_players)} jogadores elegíveis).`
-      : `Club = the player's most recent club in the data (seasons ${data.generated_from.seasons[0]} to ${
+      : `Club = current squad (${data.season}); the numbers come from the ${data.generated_from.seasons[0]} to ${
           data.generated_from.seasons[data.generated_from.seasons.length - 1]
-        }); recent transfers may not be reflected. Minimum ${int(
+        } seasons. Minimum ${int(
           data.generated_from.min_minutes
         )} minutes to qualify (${int(data.generated_from.n_players)} eligible players).`,
     hubLink: pt
@@ -188,36 +193,36 @@ export function PlayerSkillRanking({
           {t.hubLink}
           <ChevronRight className="w-3 h-3" />
         </Link>
-        <p className="text-[11px] text-stone-400 mt-1 leading-relaxed">{t.hubHint}</p>
+        <p className="text-[11px] text-stone-500 mt-1 leading-relaxed">{t.hubHint}</p>
       </div>
 
       {/* Column header */}
       <div className="flex items-center gap-2 mb-2 pb-2 border-b border-stone-200">
         <div className="w-6 flex-shrink-0" />
-        <div className="w-32 sm:w-52 flex-shrink-0 text-[11px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="w-32 sm:w-52 flex-shrink-0 text-[11px] font-bold uppercase tracking-wider text-stone-500">
           {pt ? "Jogador" : "Player"}
         </div>
-        <div className="flex-1 text-[11px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="flex-1 text-[11px] font-bold uppercase tracking-wider text-stone-500">
           {t.metric}
         </div>
-        <div className="w-12 sm:w-16 flex-shrink-0 text-right text-[11px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="w-12 sm:w-16 flex-shrink-0 text-right text-[11px] font-bold uppercase tracking-wider text-stone-500">
           SAR
         </div>
         {/* Keeps the header aligned with the per-row link column */}
-        <div className="w-6 flex-shrink-0" />
+        <div className="w-11 flex-shrink-0" />
       </div>
 
       {hasUnavailable && (
         <div className="flex items-center gap-1.5 mb-1 mt-1">
           <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-          <span className="text-[11px] text-stone-400">{t.legendOut}</span>
+          <span className="text-[11px] text-stone-500">{t.legendOut}</span>
         </div>
       )}
 
       {hasPages && (
         <div className="flex items-center gap-1.5 mb-1 mt-1">
-          <ChevronRight className="w-3 h-3 text-stone-300 flex-shrink-0" />
-          <span className="text-[11px] text-stone-400">{t.legendPage}</span>
+          <ChevronRight className="w-3 h-3 text-stone-500 flex-shrink-0" />
+          <span className="text-[11px] text-stone-500">{t.legendPage}</span>
         </div>
       )}
 
@@ -244,7 +249,7 @@ export function PlayerSkillRanking({
                 className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left hover:bg-stone-100 transition-colors"
               >
                 {/* Rank */}
-                <div className="w-6 flex-shrink-0 text-right text-xs font-bold tabular-nums text-stone-400">
+                <div className="w-6 flex-shrink-0 text-right text-xs font-bold tabular-nums text-stone-500">
                   {p.rank}
                 </div>
 
@@ -253,7 +258,7 @@ export function PlayerSkillRanking({
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span
                       className={`text-xs sm:text-sm font-semibold truncate ${
-                        stale ? "text-stone-400" : "text-stone-900"
+                        stale ? "text-stone-500" : "text-stone-900"
                       }`}
                     >
                       {p.player}
@@ -271,6 +276,10 @@ export function PlayerSkillRanking({
                       <img
                         src={teamLogoSrc(p.team)}
                         alt=""
+                        width={12}
+                        height={12}
+                        loading="lazy"
+                        decoding="async"
                         className={`w-3 h-3 object-contain flex-shrink-0 ${stale ? "opacity-40" : ""}`}
                       />
                     ) : (
@@ -279,16 +288,16 @@ export function PlayerSkillRanking({
                         style={{ backgroundColor: chip }}
                       />
                     )}
-                    <span className="text-[11px] text-stone-400 truncate sm:hidden">
+                    <span className="text-[11px] text-stone-500 truncate sm:hidden">
                       {ligaTeamShortNames[p.team] || p.team}
                     </span>
-                    <span className="text-[11px] text-stone-400 truncate hidden sm:inline">
+                    <span className="text-[11px] text-stone-500 truncate hidden sm:inline">
                       {teamDisplayName(p.team)}
                     </span>
-                    <span className="text-[11px] text-stone-300 hidden sm:inline">
+                    <span className="text-[11px] text-stone-500 hidden sm:inline">
                       · {posLabel(p.position)} · {int(p.minutes)} min
                     </span>
-                    <span className="text-[11px] text-stone-300 sm:hidden">
+                    <span className="text-[11px] text-stone-500 sm:hidden">
                       · {int(p.minutes)}&apos;
                     </span>
                     {stale && (
@@ -354,12 +363,12 @@ export function PlayerSkillRanking({
                     href={`/desporto/liga/jogador/${slug}`}
                     locale={locale}
                     aria-label={t.openPlayer(p.player)}
-                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-300 hover:text-stone-800 hover:bg-stone-100 transition-colors"
+                    className="w-11 min-h-11 flex-shrink-0 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
                 ) : (
-                  <span className="w-6 flex-shrink-0" />
+                  <span className="w-11 flex-shrink-0" />
                 )}
               </div>
 
@@ -367,7 +376,7 @@ export function PlayerSkillRanking({
                 <div className="pl-8 pr-2 pb-3 pt-1 bg-stone-50/60">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-xs">
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
                         {t.minutes}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -375,7 +384,7 @@ export function PlayerSkillRanking({
                       </div>
                     </div>
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
                         {t.goals} / {t.matches}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -383,7 +392,7 @@ export function PlayerSkillRanking({
                       </div>
                     </div>
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
                         {t.perNinety}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -391,7 +400,7 @@ export function PlayerSkillRanking({
                       </div>
                     </div>
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
                         {t.interval}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -429,7 +438,7 @@ export function PlayerSkillRanking({
         </button>
       )}
 
-      <p className="text-[11px] text-stone-400 mt-4 leading-relaxed max-w-3xl">
+      <p className="text-[11px] text-stone-500 mt-4 leading-relaxed max-w-3xl">
         {t.rangeHint} {t.footnote}
       </p>
 
@@ -445,7 +454,7 @@ export function PlayerSkillRanking({
               {topMover.delta > 0 ? "+" : ""}
               {nf(topMover.delta, 3)}
             </span>{" "}
-            <span className="text-stone-400">
+            <span className="text-stone-500">
               ({t.vsError} ±{nf(topMover.delta_ref_sd, 3)})
             </span>
           </p>

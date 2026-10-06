@@ -1,61 +1,52 @@
-# Sobre o estimador.pt
+## A nossa missão
 
-**Análise de dados independente para Portugal — economia, desporto e eleições**
+Cada secção responde a uma pergunta sobre Portugal com dados e um modelo explicado; [a lista abaixo](#o-que-esta-publicado) diz o que está publicado hoje e em que estado.
 
----
-
-## A Nossa Missão
-
-O estimador.pt é uma plataforma de análise de dados que fornece previsões transparentes e probabilísticas para Portugal. Acreditamos que o público beneficia quando tem acesso a análises rigorosas e imparciais — não apenas comentários e especulação.
-
-O nosso objetivo é trazer os padrões da modelação estatística moderna ao contexto português, combinando métodos Bayesianos com dados reais para responder a perguntas relevantes.
+Acreditamos que perceber o país pede mais do que comentário: pede números com data, fonte e grau de incerteza, e modelos explicados o suficiente para poderem ser verificados.
 
 ---
 
-## O Que Fazemos
+## Quem faz o estimador.pt
 
-**Economia** — em publicação contínua
-Leitura consolidada de indicadores económicos portugueses: atividade, mercado de trabalho, inflação, risco de recessão e contas públicas. Cada indicador identifica se é um valor oficial ou uma estimativa do nosso modelo, o período a que se refere e a data de publicação. Ver a [metodologia da economia](/pt/economia/metodologia/).
+O estimador.pt é feito por **Bernardo Caldas**. As versões publicadas dos dados ficam na organização do projeto no GitHub, [github.com/estimadorpt](https://github.com/estimadorpt).
 
-**Liga Portugal** — em publicação contínua
-Modelo Bayesiano que simula milhares de épocas possíveis para prever classificações, probabilidades de título e despromoção, e o impacto de cada jornada nos destinos da liga. Ver a [metodologia do futebol](/pt/desporto/liga/metodologia/).
-
-**Eleições Presidenciais 2026** — arquivo
-As previsões que publicámos para as presidenciais de 2026, preservadas tal como foram feitas. Não são atualizadas nem reescritas com o resultado.
-
-**Eleições Legislativas 2025** — arquivo
-Arquivo do modelo de previsão para as legislativas de 2025, com projeções de mandatos ao nível distrital usando o método de Hondt.
-
-**Análise de Sondagens**
-Estimação sistemática dos efeitos das empresas de sondagens — os vieses consistentes que cada instituto mostra em relação a certos partidos ou candidatos.
+Para questões, sugestões ou pedidos dos media, escreve para [info@estimador.pt](mailto:info@estimador.pt). A [política de privacidade](/pt/privacidade/) descreve o que o site regista sobre quem o visita.
 
 ---
 
-## A Nossa Abordagem
+## O que está publicado hoje
 
-Utilizamos métodos estatísticos Bayesianos que quantificam explicitamente a incerteza. As nossas previsões produzem distribuições de probabilidade que refletem o que realmente sabemos — e não sabemos — sobre os resultados.
-
-**Princípios fundamentais:**
-
-- **Transparência:** Metodologia aberta com documentação detalhada dos nossos modelos e pressupostos
-- **Independência:** Sem financiamento externo nem pressão editorial — os modelos são transparentes e os dados falam por si
-- **Rigor:** Validação contínua contra resultados reais, com avaliação honesta dos erros
-- **Acessibilidade:** Apresentar previsões probabilísticas de forma compreensível para o público em geral
+<EstadoAtual />
 
 ---
 
-## Sobre o Projeto
+## A nossa abordagem
 
-O estimador.pt foi criado por **Bernardo Caldas** como um projeto independente que combina estatística Bayesiana, métodos computacionais e análise de dados portugueses.
+Cada secção usa o método que a pergunta pede: modelos estatísticos bayesianos para a Liga e para as eleições, e uma população sintética ajustada às tabelas dos Censos 2021 para a população. Em todas, os números dizem a data, a fonte e o grau de incerteza que têm, ou dizem que não têm margem de erro calculada.
 
-Para questões, sugestões ou consultas dos media, por favor contacte-nos em [info@estimador.pt](mailto:info@estimador.pt).
+**Princípios:**
 
-A [política de privacidade](/pt/privacidade/) descreve o que o site regista sobre quem o visita.
+- **Transparência:** metodologia aberta, com documentação dos modelos, dos dados e dos pressupostos.
+- **Independência:** sem financiamento externo nem pressão editorial.
+- **Rigor:** dizemos como cada resultado é avaliado e só afirmamos o que está publicado. O modelo da Liga Portugal é comparado com os resultados reais e com as cotações de fecho das casas de apostas em [Modelo vs mercado](/pt/desporto/liga/modelo/); como medimos a qualidade da população sintética está em [Qualidade](/pt/populacao/qualidade/), e o nível de cada freguesia (A, B ou C) está na página da freguesia. A avaliação das previsões eleitorais contra os resultados não está publicada.
+- **Acessibilidade:** números e probabilidades apresentados de forma que qualquer leitor os consiga acompanhar.
 
 ---
 
-## Limitações e Advertências
+## Limitações e advertências
 
-A previsão probabilística é inerentemente incerta — por isso apresentamos probabilidades, não certezas. Os nossos modelos consideram várias fontes de incerteza, mas existem sempre fatores imprevisíveis.
+Uma previsão probabilística é incerta por natureza, e é por isso que apresentamos probabilidades e não certezas. Uma previsão de 70% também quer dizer 30% de probabilidade do contrário. Os modelos consideram várias fontes de incerteza, mas há sempre fatores imprevisíveis.
 
-Uma previsão mostrando 70% de probabilidade também significa 30% de probabilidade do contrário. As nossas previsões devem ser interpretadas como avaliações probabilísticas informadas, não como factos.
+A população sintética não é uma previsão: são pessoas e agregados gerados para reproduzir as tabelas dos Censos, numa única execução e sem margem de erro calculada. Lê os números como uma estimativa do retrato de 2021, não como uma contagem de pessoas reais.
+
+---
+
+<span id="reutilizar" />
+
+## Posso reutilizar os números e os gráficos?
+
+Sim, para fins não comerciais e com atribuição. Os números, as tabelas e os gráficos que os modelos do estimador.pt produzem (as previsões da Liga Portugal, as previsões eleitorais arquivadas e a população sintética) podem ser reutilizados nos termos da licença [Creative Commons Atribuição-NãoComercial 4.0 Internacional (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/deed.pt): diz que a fonte é o estimador.pt e põe a ligação para a página de onde vêm. Para um uso comercial, escreve-nos.
+
+A licença não abrange os dados de terceiros que o site mostra ao lado desses números: as sondagens, os resultados oficiais, as cotações das casas de apostas, os valores de mercado dos jogadores e as estatísticas dos jogos ficam sob os termos das suas fontes, que cada página indica. Também não abrange o nome, o logótipo e o símbolo do estimador.pt.
+
+Para citar uma página: estimador.pt, «título da página», endereço da página, consultado a (data). A população sintética tem a sua própria forma de citar, com a versão, em [Dados abertos](/pt/populacao/dados/#citar), e cada freguesia acaba com um bloco «Como citar»; os ficheiros da Liga Portugal e os seus termos estão em [Dados da Liga Portugal](/pt/desporto/liga/dados/).

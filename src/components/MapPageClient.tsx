@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { formatElectionNumber, formatElectionPercent } from '@/lib/election-display';
 import DistrictMap from '@/components/charts/DistrictMap';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +23,7 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedData, setSelectedData] = useState<{ id: string; probs: Record<string, number> } | null>(null);
   const t = useTranslations('map');
+  const locale = useLocale();
 
   const handleDistrictClick = (district: { id: string; probs: Record<string, number> }) => {
     setSelectedDistrict(district.id);
@@ -35,7 +37,7 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
           districtForecast={districtForecast}
           onDistrictClick={handleDistrictClick}
           selectedDistrict={selectedDistrict}
-          className="border rounded-lg"
+          className="sm:border sm:border-line sm:rounded-lg"
         />
       </MapErrorBoundary>
       
@@ -47,7 +49,7 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <h4 className="font-medium">{t('voteShareByParty')}:</h4>
+              <h2 className="text-base font-medium">{t('voteShareByParty')}</h2>
               <div className="space-y-3">
                 {Object.entries(selectedData.probs)
                   .sort(([,a], [,b]) => b - a)
@@ -67,7 +69,7 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
                             {party}
                           </Badge>
                           <span className="text-sm font-medium">
-                            {percentage.toFixed(1)}%
+                            {formatElectionPercent(share, locale)}
                           </span>
                         </div>
                         <div className="w-full bg-stone-200 rounded-full h-2">
@@ -83,8 +85,17 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
                     );
                   })}
               </div>
+              {(() => {
+                const sorted = Object.entries(selectedData.probs).sort(([, a], [, b]) => b - a);
+                const gap = sorted.length >= 2 ? (sorted[0][1] - sorted[1][1]) * 100 : null;
+                return gap != null ? (
+                  <p className="text-xs text-stone-600">
+                    {t('topTwoGap', { gap: formatElectionNumber(gap, locale, 1) })}
+                  </p>
+                ) : null;
+              })()}
               <div className="pt-2 border-t text-xs text-stone-600">
-                <p>Percentagem de votos prevista para cada partido neste distrito</p>
+                <p>{t('voteShareCaption')}</p>
               </div>
             </div>
           </CardContent>

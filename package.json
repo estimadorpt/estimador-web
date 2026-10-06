@@ -8,6 +8,8 @@
     "predev": "node scripts/generate-article-slugs.mjs",
     "prebuild": "node scripts/generate-article-slugs.mjs && npm run og",
     "build": "next build",
+    "postbuild": "npm run check:export",
+    "check:export": "node scripts/check-export-budget.mjs out",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
@@ -17,7 +19,8 @@
     "brand": "node scripts/generate-brand-identity.mjs && node scripts/generate-social-kit.mjs",
     "smoke": "node scripts/smoke-check.mjs",
     "check": "npm run validate:data && npm run typecheck && npm run lint && npm run test",
-    "note": "node scripts/new-note.mjs"
+    "note": "node scripts/new-note.mjs",
+    "messages:unused": "node scripts/lib/unused-messages.mjs"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.9",

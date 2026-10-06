@@ -1,5 +1,11 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { createPageMetadata } from '@/lib/metadata';
 import { loadPredictionGameData } from "@/lib/utils/football-data-loader";
+import { findOpenRound, roundLockState } from "@/lib/utils/prediction-game";
+import { formatLongDate } from "@/lib/football-format";
+import { frozenBeforePreviousRoundEnded, latePublications, type ManifestRoundLike } from "@/lib/utils/prediction-game-record";
+import { DeadlineLine } from "./DeadlineLine";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -9,6 +15,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { Swords } from "lucide-react";
 import type { Metadata } from "next";
+import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
   params,
@@ -16,17 +23,30 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
+  const t = await getTranslations({ locale });
   return createPageMetadata({
     locale,
     path: `/desporto/liga/jogo-previsoes`,
-    title: pt
-      ? "Contra o Modelo — Liga Portugal - estimador.pt"
-      : "Beat the Model — Liga Portugal - estimador.pt",
+    // One name for the game everywhere, from nav.game (audit pub-PP-15);
+    // a colon, not a second separator before the site suffix (SP2-11).
+    title: `${t("nav.game")}: Liga Portugal`,
     description: pt
-      ? "Faz as tuas previsões para a próxima jornada da Liga Portugal e vê se bates o modelo. Avaliação por Ranked Probability Score, a mesma medida com que avaliamos o modelo."
+      ? "Faz as tuas previsões para a próxima jornada da Liga Portugal e vê se bates o modelo, avaliado pela mesma medida que tu: o Ranked Probability Score."
       : "Forecast the next Liga Portugal matchday and see if you can beat the model. Scored with the Ranked Probability Score, the same measure we grade the model with.",
   });
+}
+
+/** The raw game manifest's rounds, for the notes the scoring server does not carry. */
+async function loadManifestRounds(): Promise<ManifestRoundLike[]> {
+  try {
+    const file = path.join(process.cwd(), "public", "data", "football", "liga-2026-27", "game_fixtures.json");
+    const raw = JSON.parse(await readFile(file, "utf8"));
+    return Array.isArray(raw?.matchdays) ? raw.matchdays : [];
+  } catch {
+    return [];
+  }
 }
 
 export default async function JogoPrevisoesPage({
@@ -35,33 +55,71 @@ export default async function JogoPrevisoesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
   const t = await getTranslations({ locale });
 
-  const data = await loadPredictionGameData();
+  const [data, manifestRounds] = await Promise.all([loadPredictionGameData(), loadManifestRounds()]);
+
+  // The deadline of the round open when the page was built, from the game
+  // manifest's locks_at. The line re-reads the clock in the browser and says
+  // the round has closed once the deadline passes (audit FR-11).
+  const buildNow = Date.now();
+  const openRound = data ? findOpenRound(data, buildNow) : null;
+  const openLock = openRound ? roundLockState(openRound, buildNow) : null;
+  const deadline =
+    openRound && openLock?.lockAt != null ? (
+      <DeadlineLine
+        matchday={openRound.matchday}
+        lockAt={new Date(openLock.lockAt).toISOString()}
+        confirmed={openRound.fixtures.every(f => f.kickoffConfirmed !== false)}
+        locale={locale}
+      />
+    ) : null;
+
+  // The model's season record counts rounds it published after kickoff
+  // (2026-27 matchday 1); the table says so (audit M2).
+  // It also counts rounds whose odds were frozen while the previous round
+  // was still being played (audit FA2-04, FRESH-02).
+  const frozen = frozenBeforePreviousRoundEnded(manifestRounds).map(f => f.matchday);
+  const frozenNote = frozen.length
+    ? pt
+      ? `As probabilidades ${frozen.length > 1 ? `das jornadas ${frozen.slice(0, -1).join(", ")} e ${frozen[frozen.length - 1]}` : `da jornada ${frozen[0]}`} foram congeladas antes do fim da jornada anterior, sem os resultados que faltavam; o modelo é avaliado com elas tal como foram congeladas.`
+      : `The probabilities for ${frozen.length > 1 ? `matchdays ${frozen.slice(0, -1).join(", ")} and ${frozen[frozen.length - 1]}` : `matchday ${frozen[0]}`} were frozen before the previous round ended, without the results still to come; the model is scored on them as frozen.`
+    : null;
+  const recordNote = [
+    ...latePublications(manifestRounds).map(l => pt
+      ? `O registo do modelo inclui a jornada ${l.matchday}, cujas probabilidades foram publicadas a ${formatLongDate(l.publishedAt, locale)}, depois de ${l.startedBefore} dos ${l.total} jogos terem começado.`
+      : `The model's record includes matchday ${l.matchday}, whose probabilities were published on ${formatLongDate(l.publishedAt, locale)}, after ${l.startedBefore} of its ${l.total} games had started.`),
+    ...(frozenNote ? [frozenNote] : []),
+  ].join(" ") || null;
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
-
+      <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="3xl"
+        measure="reading"
+        compact
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
         icon={<Swords aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t("football.title")}
-        title={pt ? "Contra o Modelo" : "Beat the Model"}
+        title={t("nav.game")}
         lede={pt
           ? "Consegues prever melhor do que o modelo? Escolhe as tuas probabilidades antes da jornada e compara-te com ele, semana após semana."
           : "Can you forecast better than the model? Set your own probabilities before the matchday and go head to head, week after week."}
+        meta={deadline ?? undefined}
       />
 
       <section>
-        <div className="max-w-3xl mx-auto px-4 py-10">
+        {/* A wider measure: the round's cards go two to a row from lg; the
+            text inside keeps its reading width (audit UXD3-10). */}
+        <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
           {data ? (
             // Auth wraps this page only: readers of forecast pages never
             // download an auth bundle they have no use for.
             <GameAuthProvider>
-              <ContraOModelo data={data} locale={locale} />
+              <ContraOModelo data={data} locale={locale} recordNote={recordNote} builtAt={buildNow} />
             </GameAuthProvider>
           ) : (
             <p className="text-stone-500 text-sm">
@@ -70,19 +128,15 @@ export default async function JogoPrevisoesPage({
                 : "Game data is not available right now."}
             </p>
           )}
-        </div>
+        </div></div>
       </section>
 
       <section className="border-t border-stone-200">
-        <div className="max-w-3xl mx-auto px-4 py-8 text-xs text-stone-500 space-y-2">
-          {/* Where a season is stored depends on whether the season backend is
-              configured, which only the browser can know — this page is
-              rendered at build time. The component states the accurate version. */}
-          <p>
-            {pt
-              ? "Jogar é anónimo: escolhes um nome e as previsões contam para a classificação da época. Nunca guardamos email nem perfil."
-              : "Playing is anonymous: pick a name and your forecasts count towards the season standings. We never store an email or a profile."}
-          </p>
+        <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-3xl text-xs text-stone-500 space-y-2">
+          {/* Where a season is stored, and what is kept, depends on whether
+              the season backend answers, which only the browser can know: the
+              game states it once, in its own storage note (audit pub-PP-10,
+              F21). */}
           <p>
             {pt ? (
               <>
@@ -90,9 +144,9 @@ export default async function JogoPrevisoesPage({
                 <Link
                   href="/desporto/liga/modelo"
                   locale={locale}
-                  className="text-emerald-700 hover:underline"
+                  className="text-ink underline underline-offset-4"
                 >
-                  ficha do modelo
+                  modelo vs mercado
                 </Link>
                 .
               </>
@@ -102,16 +156,17 @@ export default async function JogoPrevisoesPage({
                 <Link
                   href="/desporto/liga/modelo"
                   locale={locale}
-                  className="text-emerald-700 hover:underline"
+                  className="text-ink underline underline-offset-4"
                 >
-                  model report card
+                  model vs market
                 </Link>
                 .
               </>
             )}
           </p>
-        </div>
+        </div></div>
       </section>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

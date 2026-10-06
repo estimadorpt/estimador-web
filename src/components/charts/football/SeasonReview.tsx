@@ -7,6 +7,8 @@ import {
   teamDisplayName,
   teamLogoSrc,
 } from "@/lib/config/football";
+import { ChartTable } from "@/components/viz/ChartTable";
+import { formatPercent } from "@/lib/football-format";
 
 /* ------------------------------------------------------------------ types */
 
@@ -119,10 +121,13 @@ export function FinalTable({
   const luck = new Map(data.luck.map((r) => [r.team, r]));
   const relegated = new Set(data.relegated);
 
-  const th = "text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2";
+  const th = "text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2";
+  // Numbers need air between them on a phone: at 360 px "13 11 10" ran
+  // together as "131110" (audit UXM-V01). Draws and defeats drop below sm.
+  const num = "py-2 pl-2 text-right tabular-nums";
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? `Classificação final da Liga Portugal ${data.season}` : `Final Liga Portugal ${data.season} standings`}>
       <table className="w-full text-sm">
         <caption className="sr-only">
           {pt
@@ -137,32 +142,32 @@ export function FinalTable({
             <th scope="col" className={`${th} text-left`}>
               {pt ? "Equipa" : "Team"}
             </th>
-            <th scope="col" className={`${th} text-right w-9`}>
-              {pt ? "V" : "W"}
+            <th scope="col" className={`${th} pl-2 text-right w-9`}>
+              <abbr title={pt ? "Vitórias" : "Won"} className="no-underline">{pt ? "V" : "W"}</abbr>
             </th>
-            <th scope="col" className={`${th} text-right w-9`}>
-              {pt ? "E" : "D"}
+            <th scope="col" className={`${th} pl-2 text-right w-9 hidden sm:table-cell`}>
+              <abbr title={pt ? "Empates" : "Drawn"} className="no-underline">{pt ? "E" : "D"}</abbr>
             </th>
-            <th scope="col" className={`${th} text-right w-9`}>
-              {pt ? "D" : "L"}
+            <th scope="col" className={`${th} pl-2 text-right w-9 hidden sm:table-cell`}>
+              <abbr title={pt ? "Derrotas" : "Lost"} className="no-underline">{pt ? "D" : "L"}</abbr>
             </th>
-            <th scope="col" className={`${th} text-right w-10 hidden sm:table-cell`}>
+            <th scope="col" className={`${th} pl-2 text-right w-10 hidden sm:table-cell`}>
               {pt ? "MM" : "GF"}
             </th>
-            <th scope="col" className={`${th} text-right w-10 hidden sm:table-cell`}>
+            <th scope="col" className={`${th} pl-2 text-right w-10 hidden sm:table-cell`}>
               {pt ? "MS" : "GA"}
             </th>
-            <th scope="col" className={`${th} text-right w-11`}>
+            <th scope="col" className={`${th} pl-2 text-right w-11`}>
               {pt ? "DG" : "GD"}
             </th>
-            <th scope="col" className={`${th} text-right w-11`}>
+            <th scope="col" className={`${th} pl-2 text-right w-11`}>
               Pts
             </th>
-            <th scope="col" className={`${th} text-right w-12`}>
+            <th scope="col" className={`${th} pl-2 text-right w-12`}>
               xPts
             </th>
-            <th scope="col" className={`${th} text-right w-14`}>
-              {pt ? "Sorte" : "Luck"}
+            <th scope="col" className={`${th} pl-2 text-right w-16`}>
+              Pts − xPts
             </th>
           </tr>
         </thead>
@@ -180,7 +185,7 @@ export function FinalTable({
                   isChampion ? "bg-emerald-50/60" : isRelegated ? "bg-red-50/50" : ""
                 }`}
               >
-                <td className="py-2 tabular-nums text-stone-400 text-xs">{row.pos}</td>
+                <td className="py-2 tabular-nums text-stone-500 text-xs">{row.pos}</td>
                 <td className="py-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <span
@@ -192,6 +197,10 @@ export function FinalTable({
                       <img
                         src={teamLogoSrc(row.team)}
                         alt=""
+                        width={16}
+                        height={16}
+                        loading="lazy"
+                        decoding="async"
                         className="w-4 h-4 object-contain flex-shrink-0"
                       />
                     )}
@@ -202,33 +211,33 @@ export function FinalTable({
                       {teamDisplayName(row.team)}
                     </span>
                     {row.lost === 0 && (
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 border border-emerald-200 px-1 py-px flex-shrink-0">
+                      <span className="flex-shrink-0 rounded-full border border-line bg-parchment px-2 py-px text-[11px] font-semibold text-emerald-700">
                         {pt ? "invicto" : "unbeaten"}
                       </span>
                     )}
                   </div>
                 </td>
-                <td className="py-2 text-right tabular-nums text-stone-600">{row.won}</td>
-                <td className="py-2 text-right tabular-nums text-stone-600">{row.drawn}</td>
-                <td className="py-2 text-right tabular-nums text-stone-600">{row.lost}</td>
-                <td className="py-2 text-right tabular-nums text-stone-600 hidden sm:table-cell">
+                <td className={`${num} text-stone-600`}>{row.won}</td>
+                <td className={`${num} text-stone-600 hidden sm:table-cell`}>{row.drawn}</td>
+                <td className={`${num} text-stone-600 hidden sm:table-cell`}>{row.lost}</td>
+                <td className={`${num} text-stone-600 hidden sm:table-cell`}>
                   {row.gf}
                 </td>
-                <td className="py-2 text-right tabular-nums text-stone-600 hidden sm:table-cell">
+                <td className={`${num} text-stone-600 hidden sm:table-cell`}>
                   {row.ga}
                 </td>
-                <td className="py-2 text-right tabular-nums text-stone-500">
-                  {row.gd > 0 ? `+${row.gd}` : row.gd}
+                <td className={`${num} text-stone-500`}>
+                  {row.gd > 0 ? `+${row.gd}` : row.gd < 0 ? `−${Math.abs(row.gd)}` : row.gd}
                 </td>
-                <td className="py-2 text-right tabular-nums font-bold text-stone-900">
+                <td className={`${num} font-bold text-stone-900`}>
                   {row.points}
                 </td>
-                <td className="py-2 text-right tabular-nums text-stone-500">
+                <td className={`${num} text-stone-500`}>
                   {x ? fmt(x.xpts, 1, pt) : "—"}
                 </td>
                 <td
-                  className={`py-2 text-right tabular-nums font-semibold ${
-                    !l ? "text-stone-300" : l.delta >= 0 ? "text-emerald-700" : "text-red-600"
+                  className={`${num} font-semibold ${
+                    !l ? "text-stone-500" : l.delta >= 0 ? "text-emerald-700" : "text-red-700"
                   }`}
                 >
                   {l ? signed(l.delta, 1, pt) : "—"}
@@ -249,16 +258,20 @@ export function TitleRaceEvolution({
   totalMatchdays,
   locale = "pt",
   outcomeLabel,
+  reconstructed = [],
 }: {
   race: SeasonReviewRace;
   totalMatchdays: number;
   locale?: string;
   /** Short note pinned to the right edge, e.g. who actually won. */
   outcomeLabel?: string;
+  /** Matchdays whose forecast was generated afterwards: drawn hollow. */
+  reconstructed?: number[];
 }) {
   const pt = locale !== "en";
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(760);
+  const [hover, setHover] = useState<number | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -272,10 +285,17 @@ export function TitleRaceEvolution({
 
   const mds = race.matchdays;
   if (mds.length === 0 || race.series.length === 0) return null;
+  // The football percentage rule: never "0%" for a non-zero value nor "100%"
+  // short of certain (F17: Porto's 99.78% at matchday 31 printed as 100%).
+  const pctText = (v: number | null | undefined) =>
+    v === null || v === undefined ? "—" : formatPercent(v, locale);
+  const rebuilt = new Set(reconstructed);
 
   const narrow = width < 520;
-  const padL = narrow ? 30 : 38;
-  const padR = narrow ? 12 : 74;
+  // Room for "100%" at 11px on a phone (audit UXM2-13) and for the end
+  // labels' full club names on a wide screen (UXD2-01).
+  const padL = 40;
+  const padR = narrow ? 12 : 110;
   const padT = 14;
   const plotH = narrow ? 190 : 240;
   const axisH = 30;
@@ -294,6 +314,22 @@ export function TitleRaceEvolution({
     (v, i, a) => v <= lastMd && a.indexOf(v) === i
   );
   const lastForecastMd = mds[mds.length - 1];
+  // End labels sorted by height and pushed at least 13px apart.
+  const endY = new Map<string, number>();
+  {
+    const ends = race.series
+      .map(s => ({ team: s.team, v: s.values[s.values.length - 1] }))
+      .filter((e): e is { team: string; v: number } => e.v !== null && e.v !== undefined)
+      .map(e => ({ team: e.team, y: y(e.v) + 4 }))
+      .sort((a, b) => b.y - a.y);
+    // From the bottom up, so no label drops under the axis.
+    const floor = padT + plotH - 2;
+    for (let i = 0; i < ends.length; i++) {
+      const limit = i === 0 ? floor : ends[i - 1].y - 13;
+      if (ends[i].y > limit) ends[i].y = limit;
+      endY.set(ends[i].team, ends[i].y);
+    }
+  }
 
   const lineFor = (values: (number | null)[]) =>
     values
@@ -305,22 +341,24 @@ export function TitleRaceEvolution({
   const described = race.series
     .map(
       (s) =>
-        `${teamDisplayName(s.team)} ${Math.round((s.values[0] ?? 0) * 100)}% → ${Math.round(
-          (s.values[s.values.length - 1] ?? 0) * 100
-        )}%`
+        `${teamDisplayName(s.team)} ${formatPercent(s.values[0] ?? 0, locale)} → ${formatPercent(
+          s.values[s.values.length - 1] ?? 0,
+          locale
+        )}`
     )
     .join("; ");
 
   return (
-    <div ref={containerRef} className="w-full">
+    <div ref={containerRef} className="relative w-full">
       <svg
         width={width}
         height={H}
         role="img"
+        onMouseLeave={() => setHover(null)}
         aria-label={
           pt
-            ? `Probabilidade de título atribuída pelo modelo em cada jornada publicada, da jornada ${mds[0]} à ${lastForecastMd}. ${described}.`
-            : `Model championship probability at each published matchday, from matchday ${mds[0]} to ${lastForecastMd}. ${described}.`
+            ? `Probabilidade de título atribuída pelo modelo em cada previsão, da jornada ${mds[0]} à ${lastForecastMd}. ${described}. Os valores estão na tabela abaixo.`
+            : `Model championship probability at each forecast, from matchday ${mds[0]} to ${lastForecastMd}. ${described}. The values are in the table below.`
         }
       >
         {/* gridlines + y ticks */}
@@ -338,7 +376,7 @@ export function TitleRaceEvolution({
               x={padL - 6}
               y={y(tk) + 3}
               textAnchor="end"
-              className="fill-stone-400"
+              className="fill-stone-500"
               fontSize="11"
             >
               {Math.round(tk * 100)}%
@@ -364,16 +402,8 @@ export function TitleRaceEvolution({
           strokeWidth="1"
           strokeDasharray="3 3"
         />
-        {!narrow && (
-          <text
-            x={x(lastForecastMd) + 5}
-            y={padT + 11}
-            className="fill-stone-400"
-            fontSize="11"
-          >
-            {pt ? "sem previsão" : "no forecast"}
-          </text>
-        )}
+        {/* The note under the chart says the forecasts stop here; a label
+            inside the band ran over the end labels (audit UXD2-01). */}
 
         {/* series */}
         {race.series.map((s) => {
@@ -384,20 +414,28 @@ export function TitleRaceEvolution({
             <g key={s.team}>
               <path d={lineFor(s.values)} fill="none" stroke={color} strokeWidth="2" />
               {s.values.map((v, i) =>
-                v === null ? null : (
-                  <circle key={i} cx={x(mds[i])} cy={y(v)} r="2.5" fill={color} />
+                v === null ? null : rebuilt.has(mds[i]) ? (
+                  <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill="#fcfbf5" stroke={color} strokeWidth="1.5" />
+                ) : (
+                  <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill={color} />
                 )
               )}
-              {!narrow && lastVal !== null && lastVal !== undefined && (
-                <text
-                  x={x(lastForecastMd) + 8}
-                  y={y(lastVal) + 3}
-                  fontSize="11"
-                  fontWeight="600"
-                  fill={color}
-                >
-                  {ligaTeamShortNames[s.team] || s.team} {Math.round(lastVal * 100)}%
-                </text>
+              {!narrow && lastVal !== null && lastVal !== undefined && endY.has(s.team) && (
+                // Ink text with a colour swatch, dodged apart, with the hub's
+                // club names (audit UXD2-01, A11Y2-10).
+                <g>
+                  <line x1={x(lastForecastMd) + 3} x2={x(lastForecastMd) + 7} y1={y(lastVal)} y2={endY.get(s.team)! - 4} stroke={color} strokeWidth="1" />
+                  <rect x={x(lastForecastMd) + 8} y={endY.get(s.team)! - 9} width="6" height="6" fill={color} />
+                  <text
+                    x={x(lastForecastMd) + 17}
+                    y={endY.get(s.team)!}
+                    fontSize="11"
+                    fontWeight="600"
+                    fill="#234c40"
+                  >
+                    {teamDisplayName(s.team)} {pctText(lastVal)}
+                  </text>
+                </g>
               )}
             </g>
           );
@@ -418,7 +456,7 @@ export function TitleRaceEvolution({
             x={x(tk)}
             y={padT + plotH + 15}
             textAnchor="middle"
-            className="fill-stone-400"
+            className="fill-stone-500"
             fontSize="11"
           >
             {tk}
@@ -427,12 +465,63 @@ export function TitleRaceEvolution({
         <text
           x={padL}
           y={padT + plotH + 28}
-          className="fill-stone-400"
+          className="fill-stone-500"
           fontSize="11"
         >
           {pt ? "jornada" : "matchday"}
         </text>
+
+        {/* Hover: one invisible column per published matchday. */}
+        {hover !== null && (
+          <line
+            x1={x(mds[hover])}
+            x2={x(mds[hover])}
+            y1={padT}
+            y2={padT + plotH}
+            stroke="#5f7062"
+            strokeWidth="1"
+          />
+        )}
+        {mds.map((md, i) => {
+          const left = i === 0 ? padL : (x(mds[i - 1]) + x(md)) / 2;
+          const right = i === mds.length - 1 ? x(md) + 6 : (x(md) + x(mds[i + 1])) / 2;
+          return (
+            <rect
+              key={md}
+              x={left}
+              y={padT}
+              width={Math.max(1, right - left)}
+              height={plotH}
+              fill="transparent"
+              onMouseEnter={() => setHover(i)}
+            />
+          );
+        })}
       </svg>
+
+      {hover !== null && (
+        <div
+          className="pointer-events-none absolute top-2 rounded-lg border border-line bg-cream px-3 py-2 text-xs shadow-none"
+          style={{
+            left: Math.min(Math.max(0, x(mds[hover]) + 10), Math.max(0, width - 170)),
+          }}
+        >
+          <div className="mb-1 font-bold text-ink">
+            {pt ? "Jornada" : "Matchday"} {mds[hover]}
+            {rebuilt.has(mds[hover]) && (
+              <span className="ml-1 font-normal text-stone-500">
+                · {pt ? "reconstituída" : "reconstructed"}
+              </span>
+            )}
+          </div>
+          {race.series.map((s) => (
+            <div key={s.team} className="flex justify-between gap-4 tabular-nums">
+              <span className="text-stone-600">{teamDisplayName(s.team)}</span>
+              <span className="font-semibold text-ink">{pctText(s.values[hover])}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {narrow && (
         <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-[11px]">
@@ -448,9 +537,38 @@ export function TitleRaceEvolution({
         </div>
       )}
 
+      {rebuilt.size > 0 && (
+        <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2 text-[11px] text-stone-600">
+          <span className="inline-flex items-center gap-1.5">
+            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#4f5f57" /></svg>
+            {pt ? "Publicada na altura" : "Published at the time"}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#fcfbf5" stroke="#4f5f57" strokeWidth="1.5" /></svg>
+            {pt ? "Reconstituída depois" : "Reconstructed afterwards"}
+          </span>
+        </div>
+      )}
+
       {outcomeLabel && (
         <p className="text-xs text-stone-500 mt-2">{outcomeLabel}</p>
       )}
+
+      <ChartTable
+        caption={pt ? "Probabilidade de título por jornada" : "Title probability by matchday"}
+        columns={[
+          pt ? "Jornada" : "Matchday",
+          ...(rebuilt.size > 0 ? [pt ? "Previsão" : "Forecast"] : []),
+          ...race.series.map((s) => teamDisplayName(s.team)),
+        ]}
+        rows={mds.map((md, i) => [
+          md,
+          ...(rebuilt.size > 0
+            ? [rebuilt.has(md) ? (pt ? "reconstituída" : "reconstructed") : (pt ? "publicada" : "published")]
+            : []),
+          ...race.series.map((s) => pctText(s.values[i])),
+        ])}
+      />
     </div>
   );
 }
@@ -460,25 +578,31 @@ export function TitleRaceEvolution({
 export function ReportCard({
   data,
   locale = "pt",
+  reconstructed = [],
 }: {
   data: SeasonReviewData;
   locale?: string;
+  /** Matchdays whose forecast was generated afterwards. */
+  reconstructed?: number[];
 }) {
   const pt = locale !== "en";
   const rc = data.report_card;
   if (!rc || rc.checkpoints.length === 0) return null;
+  const rebuilt = new Set(reconstructed);
+  const nRebuilt = rc.checkpoints.filter((c) => rebuilt.has(c.matchday)).length;
+  const nPublished = rc.checkpoints.length - nRebuilt;
 
   const maxMae = Math.max(...rc.checkpoints.map((c) => c.points_mae ?? 0), 1);
 
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-stone-200 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         {[
           {
             value: `${rc.checkpoints.filter((c) => c.favourite_correct).length}/${rc.n_forecasts}`,
             label: pt
-              ? "previsões com o campeão certo como favorito"
-              : "forecasts with the eventual champion as favourite",
+              ? `previsões com o campeão certo como favorito${nRebuilt ? ` (${nPublished} publicadas, ${nRebuilt} reconstituídas)` : ""}`
+              : `forecasts with the eventual champion as favourite${nRebuilt ? ` (${nPublished} published, ${nRebuilt} reconstructed)` : ""}`,
           },
           {
             value:
@@ -488,8 +612,8 @@ export function ReportCard({
                   : `matchday ${rc.relegation_correct_from}`
                 : "—",
             label: pt
-              ? "a partir da qual os dois despromovidos foram sempre os dois últimos do modelo"
-              : "from which the two relegated clubs were always the model's bottom two",
+              ? `a partir da qual os dois despromovidos foram sempre os dois últimos do modelo${rc.relegation_correct_from !== null && rebuilt.has(rc.relegation_correct_from) ? " (a começar numa previsão reconstituída)" : ""}`
+              : `from which the two relegated clubs were always the model's bottom two${rc.relegation_correct_from !== null && rebuilt.has(rc.relegation_correct_from) ? " (starting from a reconstructed forecast)" : ""}`,
           },
           {
             value: `${fmt(rc.checkpoints[rc.checkpoints.length - 1].points_mae ?? 0, 1, pt)} ${pt ? "pts" : "pts"}`,
@@ -498,7 +622,7 @@ export function ReportCard({
               : "average error on predicted final points in the last published forecast",
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-cream p-4">
+          <div key={kpi.label} className="rounded-2xl border border-line bg-cream p-4">
             <div className="text-2xl font-display font-extrabold text-stone-900 tabular-nums">
               {kpi.value}
             </div>
@@ -507,24 +631,24 @@ export function ReportCard({
         ))}
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? "Erro médio absoluto dos pontos finais previstos" : "Mean absolute error of predicted final points"}>
         <table className="w-full text-sm">
           <caption className="sr-only">
             {pt
-              ? "Erro médio absoluto dos pontos finais previstos, por jornada publicada"
-              : "Mean absolute error of predicted final points, by published matchday"}
+              ? "Erro médio absoluto dos pontos finais previstos, por previsão"
+              : "Mean absolute error of predicted final points, by forecast"}
           </caption>
           <thead>
             <tr className="border-b border-stone-300">
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left"
               >
                 {pt ? "Jornada" : "Matchday"}
               </th>
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-right w-20"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-right w-20"
               >
                 {pt
                   ? `${teamDisplayName(rc.champion)} campeão`
@@ -532,7 +656,7 @@ export function ReportCard({
               </th>
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left pl-4"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left pl-4"
               >
                 {pt ? "Erro médio nos pontos finais" : "Mean error on final points"}
               </th>
@@ -541,9 +665,16 @@ export function ReportCard({
           <tbody>
             {rc.checkpoints.map((c) => (
               <tr key={c.matchday} className="border-b border-stone-100">
-                <td className="py-1.5 tabular-nums text-stone-600">{c.matchday}</td>
+                <td className="py-1.5 tabular-nums text-stone-600">
+                  {c.matchday}
+                  {rebuilt.has(c.matchday) && (
+                    <span className="ml-2 text-[11px] text-stone-500">
+                      {pt ? "reconstituída" : "reconstructed"}
+                    </span>
+                  )}
+                </td>
                 <td className="py-1.5 tabular-nums text-right text-stone-700 font-medium">
-                  {c.champion_p !== null ? `${Math.round(c.champion_p * 100)}%` : "—"}
+                  {c.champion_p === null ? "—" : formatPercent(c.champion_p, locale)}
                 </td>
                 <td className="py-1.5 pl-4">
                   <div className="flex items-center gap-2">

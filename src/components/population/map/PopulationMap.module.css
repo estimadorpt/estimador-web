@@ -1,0 +1,50 @@
+/* The map's frame: its height lives here, not in JavaScript, so the server
+   render reserves the same box the drawn map fills (UXM3-03, SEO3-03). Wide
+   frames take the page's height (--map-height); narrow ones, under 640px of
+   section width, are a little taller than wide (1.08 × the width) between
+   360px and that height. The section around the map is the size container. */
+.frame {
+  height: var(--map-height, 560px);
+}
+
+@container (max-width: 639.98px) {
+  .frame {
+    height: min(var(--map-height, 560px), max(360px, 108cqw));
+  }
+}
+
+/* Motion for the parish map: feedback 140–200 ms, a panel-length settle for
+   parishes arriving after a choice. Nothing moves under reduced motion. */
+
+.labels {
+  transition: opacity 180ms ease-out;
+}
+
+.moving .labels {
+  opacity: 0;
+  transition: none;
+}
+
+.parish {
+  animation: parish-in 260ms ease-out both;
+}
+
+@keyframes parish-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.shape {
+  transition: fill 140ms ease-out;
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .labels,
+  .shape {
+    transition: none;
+  }
+  .parish {
+    animation: none;
+  }
+}

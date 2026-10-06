@@ -1,8 +1,8 @@
 import { createPageMetadata } from '@/lib/metadata';
 import type { Metadata } from "next";
-import { ArrowLeft } from "lucide-react";
 
 import { Header } from "@/components/Header";
+import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { PlayerRatingsHub } from "@/components/charts/football/PlayerRatingsHub";
@@ -13,10 +13,15 @@ import {
   loadGkChannels,
   loadGkRatings,
   loadLigaPlayers,
+  loadLigaPlayersDetail,
   loadPlayerSlugs,
 } from "@/lib/utils/football-data-loader";
-
-const SITE = "https://estimador.pt";
+import { setRequestLocale } from '@/i18n/request-locale';
+import {
+  playerCutoffMeta,
+  playerInventory,
+  playerInventorySentence,
+} from "@/lib/utils/player-inventory";
 
 export async function generateMetadata({
   params,
@@ -24,15 +29,18 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
 
   const title = pt
     ? "Jogadores da Liga Portugal: uma métrica por dimensão"
     : "Liga Portugal players: one metric per dimension";
+  // Finishing, contribution, contested possession and goalkeepers, each
+  // with its own scale and interval; the description no longer opens on the
+  // argument against a single ranking (audit CL-M2).
   const description = pt
-    ? "Não há forma honesta de pôr um guarda-redes e um ponta de lança na mesma tabela. Finalização, contribuição ofensiva, posse disputada, intervenção em cruzamentos — cada métrica com a sua escala, o seu intervalo de credibilidade e a sua amostra."
-    : "There is no honest way to put a goalkeeper and a centre-forward in the same table. Finishing, attacking contribution, contested possession, cross intervention — each metric with its own scale, credible interval and sample.";
-  const url = `${SITE}/${locale}/desporto/liga/jogadores`;
+    ? "Os jogadores da Liga Portugal em métricas separadas (finalização, contribuição ofensiva, posse disputada, guarda-redes), com intervalo de credibilidade e data."
+    : "Liga Portugal players on separate metrics (finishing, attacking contribution, contested possession, goalkeeping), each with a credible interval and a data date.";
 
   return createPageMetadata({
     locale,
@@ -48,12 +56,13 @@ export default async function PlayerRatingsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const pt = locale !== "en";
 
   // Every feed is optional and loaded independently: three of these are
   // written by separate models in the model repo and any of them can be
   // absent on any given build. A missing feed renders no section.
-  const [finishers, contrib, gk, def, contested, gkChannels, playerSlugs] =
+  const [finishers, contrib, gk, def, contested, gkChannels, playerSlugs, detail] =
     await Promise.all([
       loadLigaPlayers(),
       loadContribRatings(),
@@ -62,25 +71,54 @@ export default async function PlayerRatingsPage({
       loadContestedRatings(),
       loadGkChannels(),
       loadPlayerSlugs(),
+      loadLigaPlayersDetail(),
     ]);
+
+  // The premise, what is ranked and the data cut-off, each said once, in the
+  // hero, before the first list (audit UXD2-29, CL3-12); what is ranked from
+  // 640px up only (see the lede).
+  const inventory = playerInventorySentence(
+    playerInventory(
+      { finishers: (finishers?.players?.length ?? 0) > 0, contrib, gk, def, contested, gkChannels },
+      locale,
+    ),
+    locale,
+  );
+  const cutoff = playerCutoffMeta(
+    detail?.appearances_through ?? null,
+    finishers?.generated_from?.seasons ?? null,
+    locale,
+  );
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
+      <main id="main-content" tabIndex={-1}>
+      <PageHero
+        measure="wide"
+        compact
+        back={{ href: "/desporto/liga", label: "Liga Portugal", locale }}
+        // The back link already names the section (audit CL3-07, /modelo's pattern).
+        eyebrow={pt ? "Jogadores" : "Players"}
+        title={pt ? "Jogadores da Liga Portugal" : "Liga Portugal players"}
+        // On a phone the inventory would push the first ranked row below the
+        // fold (about 914px at 390); each section states its own status
+        // (ranked, null or diagnostics only), so the summary shows from 640px
+        // up (audit UXD2-29, round 4).
+        lede={
+          <>
+            {pt
+              ? "Uma métrica por dimensão, cada uma com o seu intervalo, e nenhuma nota global: um número só não chega para comparar um guarda-redes com um ponta de lança."
+              : "One metric per dimension, each with its own interval, and no overall score: one number cannot compare a goalkeeper with a centre-forward."}
+            <span className="hidden sm:inline"> {inventory}</span>
+          </>
+        }
+        meta={cutoff ? <span>{cutoff}</span> : undefined}
+      />
 
-      <div className="max-w-4xl mx-auto px-4 py-8 md:py-10">
-        <div className="mb-6">
-          <Link
-            href="/desporto/liga"
-            locale={locale}
-            className="text-stone-400 hover:text-stone-700 text-xs font-medium uppercase tracking-wider inline-flex items-center gap-1 transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Liga Portugal
-          </Link>
-        </div>
-
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:py-10"><div className="max-w-4xl">
         <PlayerRatingsHub
+          showHeading={false}
           finishers={finishers}
           contrib={contrib}
           gk={gk}
@@ -88,26 +126,30 @@ export default async function PlayerRatingsPage({
           contested={contested}
           gkChannels={gkChannels}
           playerSlugs={playerSlugs}
+          dataThrough={detail?.appearances_through ?? null}
           locale={locale}
         />
 
-        <div className="mt-10 pt-5 border-t border-stone-200 text-xs flex flex-wrap gap-x-6 gap-y-2">
+        <div className="mt-10 pt-3 border-t border-stone-200 text-xs flex flex-wrap items-center gap-x-6 [&>a]:inline-flex [&>a]:min-h-11 [&>a]:items-center">
           <Link
             href="/desporto/liga/dados"
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 underline underline-offset-2"
+            className="text-ink underline underline-offset-4"
           >
             {pt ? "Dados abertos" : "Open data"}
           </Link>
           <Link
-            href="/desporto/liga/metodologia"
+            href={pt
+              ? "/desporto/liga/metodologia#como-medimos-os-jogadores"
+              : "/desporto/liga/metodologia#how-do-we-measure-players"}
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 underline underline-offset-2"
+            className="text-ink underline underline-offset-4"
           >
-            {pt ? "Como funciona o modelo" : "How the model works"}
+            {pt ? "Como medimos os jogadores" : "How we measure players"}
           </Link>
         </div>
-      </div>
+      </div></div>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

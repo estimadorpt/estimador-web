@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import fs from 'node:fs';
 import path from 'node:path';
+import { getMDXArticlesByLocale } from './mdx-articles';
+import { siteTitle } from './site-title';
+
+export { siteTitle, TITLE_SUFFIX } from './site-title';
 
 export const SITE_URL = 'https://estimador.pt';
 export const SITE_LOCALES = ['pt', 'en'] as const;
@@ -20,8 +24,29 @@ const FEED_TITLE: Record<string, string> = {
   en: 'estimador.pt — notes and explainers',
 };
 
+/**
+ * hreflang for every locale the page exists in, plus x-default for a reader
+ * whose language is neither: the Portuguese page, the site's own language.
+ * A page that exists only in English (a translation-only article) points
+ * x-default at the locale it has, never at a page that was not exported.
+ */
 export function languageAlternates(pathname: string, availableLocales: readonly string[] = SITE_LOCALES) {
-  return Object.fromEntries(availableLocales.map(locale => [locale, localizedUrl(locale, pathname)]));
+  const languages: Record<string, string> = Object.fromEntries(
+    availableLocales.map(locale => [locale, localizedUrl(locale, pathname)]));
+  const fallback = availableLocales.includes('pt') ? 'pt' : availableLocales[0];
+  if (fallback) languages['x-default'] = localizedUrl(fallback, pathname);
+  return languages;
+}
+
+/**
+ * The RSS autodiscovery link, only once this locale has published an article:
+ * the chrome hides the articles nav item, footer link and feed until then
+ * (the /feed.xml routes keep working). Same list as the footer's, so drafts
+ * count only under `npm run dev`. Every hand-built head uses this too.
+ */
+export function feedAlternates(locale: string): { 'application/rss+xml': { url: string; title: string }[] } | undefined {
+  if (getMDXArticlesByLocale(locale).length === 0) return undefined;
+  return { 'application/rss+xml': [{ url: feedUrl(locale), title: FEED_TITLE[locale] ?? FEED_TITLE.pt }] };
 }
 
 export interface OgManifest {
@@ -29,7 +54,21 @@ export interface OgManifest {
   files?: Record<string, string>;
   /** Route path → card filename, per locale. Written by scripts/generate-og-images.mjs. */
   cards?: Record<string, Record<string, string>>;
+  /** The pixel size every card was rendered at, read from the PNGs themselves. */
+  size?: { width: number; height: number };
+  /** Card filename → what the card shows, for og:image:alt (written with the card). */
+  alt?: Record<string, string>;
 }
+
+/** What a page declares as og:image:width/height when the manifest says nothing. */
+export const OG_IMAGE_SIZE = { width: 1200, height: 630 } as const;
+
+/**
+ * Pages under a section that must not inherit the section's card: the card
+ * carries the live headline number (this season's title odds), which would be
+ * wrong on an archived season, and the imagined miniature is not the release.
+ */
+const NO_SECTION_CARD = [/^\/desporto\/liga\/\d{4}-\d{2}(\/|$)/, /^\/populacao\/miniatura(\/|$)/];
 
 /** One leading slash, no trailing one — the shape the generator writes. */
 function cardKey(pathname: string): string {
@@ -38,16 +77,35 @@ function cardKey(pathname: string): string {
 }
 
 /**
+ * The card for a route: its own, else the nearest section above it that has
+ * one (longest prefix, by whole segments: /desporto/liga/jogo/x takes the
+ * /desporto/liga card, /desporto/liga2 does not). The root's card is the
+ * locale default and is reached through the fallback, not inherited.
+ */
+function sectionCard(cards: Record<string, string> | undefined, pathname: string): string | undefined {
+  if (!cards) return undefined;
+  const key = cardKey(pathname);
+  if (cards[key]) return cards[key];
+  if (NO_SECTION_CARD.some(pattern => pattern.test(key))) return undefined;
+  const segments = key.split('/').filter(Boolean);
+  for (let length = segments.length - 1; length > 0; length -= 1) {
+    const card = cards[`/${segments.slice(0, length).join('/')}`];
+    if (card) return card;
+  }
+  return undefined;
+}
+
+/**
  * Kept pure so the fallback chain can be tested without a manifest on disk:
- * a page's own card, then the locale default, then the unversioned file that
- * ships even when nobody has run the generator.
+ * a page's own card, then its section's, then the locale default, then the
+ * unversioned file that ships even when nobody has run the generator.
  */
 export function resolveOgImageFile(
   manifest: OgManifest | null,
   locale: string,
   pathname?: string,
 ): string {
-  const specific = pathname ? manifest?.cards?.[locale]?.[cardKey(pathname)] : undefined;
+  const specific = pathname ? sectionCard(manifest?.cards?.[locale], pathname) : undefined;
   const fallback = manifest?.files?.[locale];
   return specific ?? fallback ?? `og-image-${locale}.png`;
 }
@@ -71,6 +129,56 @@ export function getOgImageUrl(locale: string, pathname?: string): string {
   return new URL(resolveOgImageFile(readOgManifest(), locale, pathname), `${SITE_URL}/`).href;
 }
 
+/**
+ * What a page's card shows, for og:image:alt: the card's own description from
+ * the manifest, else the fallback (the page title). The alt describes the
+ * image, which for most pages is a section's card, not the page (SPV-04).
+ */
+export function resolveOgImageAlt(manifest: OgManifest | null, locale: string, pathname: string | undefined, fallback: string): string {
+  return manifest?.alt?.[resolveOgImageFile(manifest, locale, pathname)] ?? fallback;
+}
+
+/** The og:image:alt for a page's card, from the generated manifest. */
+export function getOgImageAlt(locale: string, pathname: string | undefined, fallback: string): string {
+  return resolveOgImageAlt(readOgManifest(), locale, pathname, fallback);
+}
+
+/**
+ * The size the cards really are, for og:image:width/height (a declared size
+ * that differs from the file makes some platforms crop or refetch). Pages that
+ * build their own head use this rather than typing 1200 × 630.
+ */
+export function getOgImageSize(): { width: number; height: number } {
+  const size = readOgManifest()?.size;
+  return size && size.width > 0 && size.height > 0 ? { width: size.width, height: size.height } : { ...OG_IMAGE_SIZE };
+}
+
+/** Lengths past which search results cut a title or a description. */
+export const META_LIMITS = { title: 70, description: 160 } as const;
+
+/** What is too long in a page's title (with its suffix) and description, if anything. */
+export function metaLengthIssues(title: string, description: string): string[] {
+  const issues: string[] = [];
+  if (title.length > META_LIMITS.title) issues.push(`title is ${title.length} characters (keep to about 60, at most ${META_LIMITS.title})`);
+  if (description.length > META_LIMITS.description) issues.push(`description is ${description.length} characters (keep to about 155, at most ${META_LIMITS.description})`);
+  return issues;
+}
+
+const reportedLengths = new Set<string>();
+
+/**
+ * A build-log warning, once per page, for a title or description that search
+ * results will truncate. A warning, not an error: the page is still correct,
+ * and scripts/check-export-budget.mjs lists the same pages after an export.
+ */
+function warnMetaLength(url: string, title: string, description: string) {
+  if (process.env.VITEST || reportedLengths.has(url)) return;
+  const issues = metaLengthIssues(title, description);
+  if (!issues.length) return;
+  reportedLengths.add(url);
+  console.warn(`[metadata] ${url}: ${issues.join('; ')}`);
+}
+
 interface PageMetadataOptions {
   locale: string;
   path: string;
@@ -89,18 +197,22 @@ interface PageMetadataOptions {
 
 /** Use for each page: Next replaces nested metadata instead of merging it. */
 export function createPageMetadata({
-  locale, path: pathname, title, description, keywords, type = 'website',
+  locale, path: pathname, title: typedTitle, description, keywords, type = 'website',
   publishedTime, modifiedTime, authors, tags, availableLocales = SITE_LOCALES,
   image, index = true,
 }: PageMetadataOptions): Metadata {
+  const title = siteTitle(typedTitle);
   const url = localizedUrl(locale, pathname);
+  const feedTypes = feedAlternates(locale);
+  warnMetaLength(url, title, description);
+  const cardSize = getOgImageSize();
   const socialImage = {
-    // A page gets its own card by route, so a section page needs no wiring here
-    // beyond the `path` it already passes.
+    // A page gets its own card by route (or its section's), so a section page
+    // needs no wiring here beyond the `path` it already passes.
     url: image?.url ?? getOgImageUrl(locale, pathname),
-    width: image?.width ?? 1200,
-    height: image?.height ?? 630,
-    alt: image?.alt ?? title,
+    width: image?.width ?? cardSize.width,
+    height: image?.height ?? cardSize.height,
+    alt: image?.alt ?? (image?.url ? title : getOgImageAlt(locale, pathname, title)),
   };
   return {
     metadataBase: new URL(SITE_URL),
@@ -112,10 +224,9 @@ export function createPageMetadata({
       canonical: url,
       languages: languageAlternates(pathname, availableLocales),
       // Page metadata replaces the layout's rather than merging, so the feed
-      // link has to be issued from here to appear on every page.
-      types: {
-        'application/rss+xml': [{ url: feedUrl(locale), title: FEED_TITLE[locale] ?? FEED_TITLE.pt }],
-      },
+      // link has to be issued from here to appear on every page; and only
+      // when the locale has an article to offer (feedAlternates).
+      ...(feedTypes ? { types: feedTypes } : {}),
     },
     openGraph: {
       title, description, url, siteName: 'estimador.pt',
@@ -124,9 +235,11 @@ export function createPageMetadata({
       images: [socialImage],
       ...(type === 'article' ? { type, publishedTime, modifiedTime, authors, tags } : { type }),
     },
+    // No twitter:creator or twitter:site until the owner confirms the
+    // account (SEO3-07); add it then, with the footer link.
     twitter: {
       card: 'summary_large_image', title, description,
-      creator: '@estimadorpt', images: [socialImage.url],
+      images: [{ url: socialImage.url, alt: socialImage.alt }],
     },
     robots: { index, follow: true },
   };

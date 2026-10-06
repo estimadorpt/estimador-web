@@ -1,0 +1,195 @@
+/**
+ * Words for Freguesia misteriosa, in European Portuguese ("tu") and English.
+ * Sentence case, questions as headings, no emoji, no exclamation marks. The
+ * other three parishes are named and placed, never described: no ranking,
+ * "mais/menos" or comparison words anywhere in the game.
+ */
+import type { Locale } from '@/lib/population/labels';
+import { clueOrdinal, errorsPhrase } from '@/lib/population/game';
+import { formatCount } from '@/lib/population/format';
+
+const pt = {
+  heroEyebrow: 'População · jogo diário',
+  heroTitle: 'Qual destas é a freguesia misteriosa?',
+  heroLede: 'Todos os dias, quatro freguesias e as pistas de uma delas: os números da sua população sintética. Descobre qual é com o menor número de pistas.',
+  heroMeta: 'Quatro freguesias novas à meia-noite, hora de Lisboa',
+  metaTitle: 'Freguesia misteriosa: qual destas quatro é?',
+  metaDescription: 'O jogo diário da população sintética: quatro freguesias, as idades, os agregados, a escolaridade e o trabalho de uma delas. Descobre qual é.',
+
+  howTitle: 'Como se joga?',
+  howSummary: 'Quatro freguesias, as pistas de uma delas. Acerta com o menor número de pistas.',
+  howSteps: [
+    'Tens quatro freguesias no ecrã e no mapa. Uma delas é a freguesia misteriosa.',
+    'As pistas são a população dessa freguesia: começa pelas idades; cada erro, ou «Ver a próxima pista», abre a seguinte.',
+    'Escolhe-a com o menor número de pistas que conseguires. À meia-noite de Lisboa há quatro novas.',
+  ],
+  howStorage: 'Os teus resultados ficam guardados só neste dispositivo.',
+
+  loading: 'A preparar as freguesias de hoje…',
+  loadError: 'Não foi possível carregar o jogo. Verifica a ligação e tenta outra vez.',
+  retry: 'Tentar outra vez',
+
+  dayLabel: (n: number) => `N.º ${n}`,
+  clueProgress: (n: number, max: number) => `Pista ${n} de ${max}`,
+  errorsShort: (n: number) => (n === 1 ? '1 erro' : `${n} erros`),
+  practiceBanner: 'Dia anterior, em modo treino: não conta para as estatísticas.',
+  backToToday: 'Voltar ao jogo de hoje',
+  replay: 'Jogar outra vez, em treino',
+  replayBanner: 'Em treino: esta partida não conta para as estatísticas nem fica guardada.',
+  replayStop: 'Voltar ao resultado',
+  replayStarted: 'Nova partida em treino. Está aberta a pista 1.',
+
+  choicesTitle: 'Qual destas é?',
+  choicesLede: 'Escolhe a freguesia que achas que as pistas descrevem.',
+  choose: (name: string, municipality: string) => `Escolher ${name} (${municipality})`,
+  ruledOutName: (name: string, municipality: string) => `${name} (${municipality}): não é a freguesia misteriosa`,
+  ruledOut: 'não é esta',
+  nextClue: 'Ver a próxima pista',
+  allClues: 'As seis pistas estão abertas. Escolhe entre as que restam.',
+  announceWrong: (name: string, clue: number | null) => `${name} não é a freguesia misteriosa.${clue ? ` Abriu a pista ${clue}.` : ''}`,
+  announceClue: (n: number) => `Abriu a pista ${n}.`,
+  announceWon: (clue: number, errors: number, name: string, municipality: string) => `Acertaste ${clueOrdinal(clue, 'pt')}, ${errorsPhrase(errors, 'pt')}: é ${name}, concelho ${municipality}.`,
+
+  cluesTitle: 'Pistas',
+  clue: (n: number) => `Pista ${n}`,
+  clueLocked: 'Ainda fechada',
+  newClue: 'Nova pista',
+  mysteryFigures: 'Valores da freguesia misteriosa.',
+  answerFigures: (name: string) => `Valores de ${name}.`,
+  fallbackHidden: 'Valores do concelho a que a freguesia pertence: este resultado não foi publicado para a própria freguesia.',
+  fallbackNamed: (name: string) => `Valores do concelho de ${name}: este resultado não foi publicado para a própria freguesia.`,
+  refused: 'Sem resposta publicada para esta freguesia na versão 1.0. Não mostramos um número que não passou o controlo de qualidade.',
+  sourceStamp: 'Censos 2021',
+
+  locatorTitle: 'As quatro no mapa',
+  locatorAnswer: 'Freguesia misteriosa',
+  locatorRuledOut: 'Não é esta',
+  locatorKey: 'Os números seguem a lista.',
+
+  wonKicker: (clue: number, errors: number) => `Acertaste ${clueOrdinal(clue, 'pt')} · ${errorsPhrase(errors, 'pt')}`,
+  revealHeading: 'Que freguesia era?',
+  residents: 'Residentes (INE, Censos 2021)',
+  seePortrait: 'Ver o retrato da freguesia',
+  share: 'Partilhar resultado',
+  copied: 'Resultado copiado',
+  shareFailed: 'Não foi possível partilhar. Copia o texto abaixo.',
+  // After the badge, which names the tier: what it means in one line (the full reading is under «Porquê?»).
+  tierShort: {
+    A: `Ajuste próximo às tabelas do INE, numa freguesia com ${formatCount(2000, 'pt')} residentes ou mais.`,
+    B: `Ajuste próximo às tabelas do INE; a qualidade A pede ${formatCount(2000, 'pt')} residentes ou mais e limiares mais apertados.`,
+    C: 'Lê estes números com mais cuidado.',
+  },
+  tierWhy: 'Porquê?',
+  next: 'Novas freguesias daqui a',
+  statsTitle: 'As tuas estatísticas',
+  statsNote: 'Contam só os jogos feitos no próprio dia.',
+  played: 'Jogos',
+  currentStreak: 'Dias seguidos',
+  distributionTitle: 'Pista em que acertaste',
+  distributionRow: (n: number) => `${n}.ª pista`,
+  attribution: 'Localização das freguesias: Direção-Geral do Território (DGT), CAOP 2021, licença',
+
+  archiveTitle: 'Dias anteriores',
+  archiveLede: 'Joga as quatro freguesias de um dia que já passou. É treino: não conta para as estatísticas.',
+  archiveEmpty: 'Ainda não há dias anteriores: o primeiro jogo é o de hoje. Amanhã, este passa para aqui.',
+  archiveSelect: 'Escolher um dia',
+  archivePlay: 'Jogar este dia',
+  archiveWon: (clue: number) => `acertada ${clueOrdinal(clue, 'pt')}`,
+  archivePlaying: 'em curso',
+  archiveNew: 'por jogar',
+};
+
+type Copy = typeof pt;
+
+const en: Copy = {
+  heroEyebrow: 'Population · daily game',
+  heroTitle: 'Which of these is the mystery parish?',
+  heroLede: 'Every day, four parishes and the clues to one of them: the figures of its synthetic population. Work out which it is with as few clues as you can.',
+  heroMeta: 'Four new parishes at midnight, Lisbon time',
+  metaTitle: 'Mystery parish: which of these four is it?',
+  metaDescription: 'The synthetic population’s daily game: four parishes, and the ages, households, education and work of one of them. Work out which it is.',
+
+  howTitle: 'How do you play?',
+  howSummary: 'Four parishes, the clues to one of them. Find it with as few clues as you can.',
+  howSteps: [
+    'You have four parishes, on screen and on the map. One of them is the mystery parish.',
+    'The clues are that parish’s population: you start with its ages; each wrong pick, or “See the next clue”, opens the next one.',
+    'Pick it with as few clues as you can. At midnight, Lisbon time, there are four new ones.',
+  ],
+  howStorage: 'Your results are kept on this device only.',
+
+  loading: 'Getting today’s parishes ready…',
+  loadError: 'The game could not be loaded. Check your connection and try again.',
+  retry: 'Try again',
+
+  dayLabel: (n: number) => `No. ${n}`,
+  clueProgress: (n: number, max: number) => `Clue ${n} of ${max}`,
+  errorsShort: (n: number) => (n === 1 ? '1 wrong pick' : `${n} wrong picks`),
+  practiceBanner: 'An earlier day, in practice mode: it does not count towards your stats.',
+  backToToday: 'Back to today’s game',
+  replay: 'Play again, as practice',
+  replayBanner: 'Practice: this game does not count towards your stats and is not saved.',
+  replayStop: 'Back to your result',
+  replayStarted: 'New practice game. Clue 1 is open.',
+
+  choicesTitle: 'Which one is it?',
+  choicesLede: 'Pick the parish you think the clues describe.',
+  choose: (name: string, municipality: string) => `Pick ${name} (${municipality})`,
+  ruledOutName: (name: string, municipality: string) => `${name} (${municipality}): not the mystery parish`,
+  ruledOut: 'not this one',
+  nextClue: 'See the next clue',
+  allClues: 'All six clues are open. Pick from the ones left.',
+  announceWrong: (name: string, clue: number | null) => `${name} is not the mystery parish.${clue ? ` Clue ${clue} is open.` : ''}`,
+  announceClue: (n: number) => `Clue ${n} is open.`,
+  announceWon: (clue: number, errors: number, name: string, municipality: string) => `You got it ${clueOrdinal(clue, 'en')}, ${errorsPhrase(errors, 'en')}: it is ${name}, ${municipality} municipality.`,
+
+  cluesTitle: 'Clues',
+  clue: (n: number) => `Clue ${n}`,
+  clueLocked: 'Not open yet',
+  newClue: 'New clue',
+  mysteryFigures: 'Figures for the mystery parish.',
+  answerFigures: (name: string) => `Figures for ${name}.`,
+  fallbackHidden: 'Figures for the municipality the parish belongs to: this result was not published for the parish itself.',
+  fallbackNamed: (name: string) => `Figures for ${name} municipality: this result was not published for the parish itself.`,
+  refused: 'No published answer for this parish in release 1.0. We do not show a number that did not pass the quality check.',
+  sourceStamp: '2021 Census',
+
+  locatorTitle: 'The four on the map',
+  locatorAnswer: 'Mystery parish',
+  locatorRuledOut: 'Not this one',
+  locatorKey: 'The numbers follow the list.',
+
+  wonKicker: (clue: number, errors: number) => `Got it ${clueOrdinal(clue, 'en')} · ${errorsPhrase(errors, 'en')}`,
+  revealHeading: 'Which parish was it?',
+  residents: 'Residents (INE, 2021 Census)',
+  seePortrait: 'See the parish portrait',
+  share: 'Share result',
+  copied: 'Result copied',
+  shareFailed: 'Sharing did not work. Copy the text below.',
+  tierShort: {
+    A: `A close fit to INE’s tables, in a parish of ${formatCount(2000, 'en')} residents or more.`,
+    B: `A close fit to INE’s tables; quality A needs ${formatCount(2000, 'en')} residents or more and tighter thresholds.`,
+    C: 'Read these numbers with more care.',
+  },
+  tierWhy: 'Why?',
+  next: 'New parishes in',
+  statsTitle: 'Your stats',
+  statsNote: 'Only games played on their own day count.',
+  played: 'Played',
+  currentStreak: 'Days in a row',
+  distributionTitle: 'Clue you got it on',
+  distributionRow: (n: number) => `Clue ${n}`,
+  attribution: 'Parish locations: Direção-Geral do Território (DGT), CAOP 2021, licence',
+
+  archiveTitle: 'Earlier days',
+  archiveLede: 'Play the four parishes of a day that has gone. It is practice: it does not count towards your stats.',
+  archiveEmpty: 'No earlier days yet: today’s is the first game. Tomorrow, it moves here.',
+  archiveSelect: 'Choose a day',
+  archivePlay: 'Play this day',
+  archiveWon: (clue: number) => `got ${clueOrdinal(clue, 'en')}`,
+  archivePlaying: 'in progress',
+  archiveNew: 'not played',
+};
+
+export const GAME_COPY: Record<Locale, Copy> = { pt, en };
+export type GameCopy = Copy;

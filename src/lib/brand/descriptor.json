@@ -1,0 +1,14 @@
+{
+  "line": {
+    "pt": "Dados para compreender Portugal.",
+    "en": "Data to understand Portugal."
+  },
+  "descriptor": {
+    "pt": "Dados e modelos sobre Portugal, com a incerteza à vista: quem vive em cada freguesia, como pode acabar a Liga e o que diziam as previsões eleitorais.",
+    "en": "Data and models about Portugal, with the uncertainty in view: who lives in each parish, how the Liga could end, and what the election forecasts said."
+  },
+  "bio": {
+    "pt": "Dados e modelos sobre Portugal: quem vive em cada freguesia, a Liga Portugal jornada a jornada e o arquivo das previsões eleitorais. A incerteza à vista.",
+    "en": "Data and models about Portugal: who lives in each parish, Liga Portugal matchday by matchday and the archive of election forecasts. Uncertainty in view."
+  }
+}

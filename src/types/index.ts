@@ -46,16 +46,6 @@ export interface TrendData {
   value: number;
 }
 
-// Enhanced trend data with election context (for future use)
-export interface ElectionTrendData {
-  date: string;
-  electionId: string;
-  contestant: string; // Can be party or candidate ID
-  metric: string;
-  value: number;
-  round?: number; // For multi-round elections
-}
-
 // Geographic forecast data, as published in district_forecast.json
 export interface DistrictForecast {
   district_name: string;
@@ -164,19 +154,6 @@ export interface PresidentialSnapshotProbabilitiesData {
   candidates: Record<string, PresidentialCandidateSnapshotProbabilities>;
 }
 
-// Presidential trajectories for spaghetti plot (from presidential_trajectories.json)
-export interface PresidentialCandidateTrajectories {
-  color: string;
-  trajectories: number[][];
-}
-
-export interface PresidentialTrajectoriesData {
-  election_date: string;
-  dates: string[];
-  n_samples: number;
-  candidates: Record<string, PresidentialCandidateTrajectories>;
-}
-
 // Presidential polls (from presidential_polls.json)
 export interface PresidentialPoll {
   date: string;
@@ -235,32 +212,6 @@ export interface PresidentialRunoffPairsData {
   matrix: PresidentialRunoffMatrix;
 }
 
-// Presidential changes since last poll (from presidential_changes.json)
-export interface PresidentialCandidateChange {
-  name: string;
-  color: string;
-  current: number;
-  previous: number;
-  change: number;
-  change_pp: number;
-}
-
-export interface PresidentialChangesData {
-  current_date: string;
-  previous_date: string;
-  n_polls_current: number;
-  n_polls_previous: number;
-  total_polls: number;
-  candidates: PresidentialCandidateChange[];
-}
-
-// Presidential runoff probability changes (from presidential_runoff_changes.json)
-export interface PresidentialRunoffChangesData {
-  current_date: string;
-  previous_date: string;
-  candidates: PresidentialCandidateChange[];
-}
-
 // Municipal election types
 export interface MunicipalElection extends ElectionConfig {
   type: 'municipal';
@@ -313,6 +264,8 @@ export interface SecondRoundCandidateTrajectories {
   trajectories: number[][];
 }
 
+// Raw runoff draws: a build-only input (data/build-only/elections/presidential-2026/),
+// reduced on the server by summariseRunoff and never shipped to the browser.
 export interface SecondRoundTrajectoriesData {
   election_type: string;
   election_date: string;

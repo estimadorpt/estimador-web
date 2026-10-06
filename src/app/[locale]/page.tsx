@@ -6,7 +6,8 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { loadLigaSummary, loadLigaWithDeltas } from "@/lib/utils/football-data-loader";
 import { loadEconomyDashboard, loadPresidentialData, loadForecastData } from "@/lib/utils/data-loader";
-import { economyPaused } from "@/lib/utils/economy-time";
+import { ECONOMY_PUBLISHED, economyState } from "@/lib/config/economy-status";
+import { loadPopulationMeta } from "@/lib/utils/population-data-loader";
 import { getArticlesBySection, getMDXArticlesByLocale } from "@/lib/mdx-articles";
 import { ALL_ELECTIONS } from "@/lib/config/elections";
 import { homepageConfig, resolveHomepageLayout, type HomeSection } from "@/lib/config/homepage";
@@ -14,6 +15,10 @@ import { PopulationPanel } from "@/components/home/PopulationPanel";
 import { FootballPanel } from "@/components/home/FootballPanel";
 import { EconomyPanel } from "@/components/home/EconomyPanel";
 import { ElectionsPanel, type ElectionSnapshot } from "@/components/home/ElectionsPanel";
+import { setRequestLocale } from '@/i18n/request-locale';
+import { CONTAINER_CLASS } from '@/components/brand/Container';
+import { SearchShortcut } from "@/components/home/SearchShortcut";
+import { brandDescriptor, brandLine } from '@/lib/brand/descriptor';
 
 export async function generateMetadata({
   params,
@@ -21,6 +26,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
   return createPageMetadata({
     locale,
@@ -61,12 +67,21 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'home' });
   const config = homepageConfig();
 
-  const [ligaSummary, economy] = await Promise.all([loadLigaSummary(), loadEconomyDashboard()]);
+  // The economy feed is not shipped while the section is in preparation, so it
+  // is only read once the flag is on.
+  const [ligaSummary, economy, populationMeta] = await Promise.all([
+    loadLigaSummary(),
+    ECONOMY_PUBLISHED ? loadEconomyDashboard() : Promise.resolve(null),
+    loadPopulationMeta(),
+  ]);
   const ligaDeltas = ligaSummary ? (await loadLigaWithDeltas()).deltas : {};
-  const economyPausedNow = economyPaused(economy?.as_of ?? economy?.vintage_date);
+  // The editorial flag first (src/lib/config/economy-status.json), then the
+  // staleness guard: fresh data alone never puts a number on the homepage.
+  const economyNow = economyState(economy?.as_of ?? economy?.vintage_date);
 
   const snapshot = config.mode === 'election' && config.election ? await electionSnapshot(config.election) : null;
   const layout = resolveHomepageLayout(config, { electionHasData: id => snapshot?.id === id });
@@ -80,34 +95,89 @@ export default async function HomePage({
   const panel = (section: HomeSection, place: 'lead' | 'secondary' | 'support') => {
     switch (section) {
       case 'population':
-        return <PopulationPanel key={section} locale={locale} variant={place === 'lead' ? 'lead' : 'secondary'} />;
+        return <PopulationPanel key={section} locale={locale} variant={place === 'lead' ? 'lead' : 'secondary'} meta={populationMeta} />;
       case 'football':
         return <FootballPanel key={section} locale={locale} variant={place === 'support' ? 'support' : 'secondary'} snapshot={ligaSummary} deltas={ligaDeltas} />;
       case 'economy':
-        return <EconomyPanel key={section} locale={locale} economy={economy} paused={economyPausedNow} article={economyArticle} />;
+        return <EconomyPanel key={section} locale={locale} economy={economy} state={economyNow} article={economyArticle} />;
       case 'elections':
         return <ElectionsPanel key={section} locale={locale} variant={place === 'lead' ? 'lead' : 'support'} elections={ALL_ELECTIONS} current={current} />;
     }
   };
+  // The support row reads in the order of what is live, as the nav does: the
+  // economy, while it is in preparation, comes after the election archive.
+  const support = ECONOMY_PUBLISHED ? layout.support : [...layout.support].sort((a, b) => Number(a === 'economy') - Number(b === 'economy'));
+
+  // The shortcuts stand in for the nav below 1024px, where it sits behind the
+  // menu button: labelled, each with its status, in the order of what is live.
+  // The economy has none while it is in preparation. "A minha freguesia" goes
+  // to the search already on this page (PUB2-20), dated by its source rather
+  // than a version number a newcomer cannot read (CL2-06).
+  const shortcuts = [
+    { href: '#home-population-title', inPage: true, label: t('shortcutPopulation'), status: populationMeta ? t('shortcutPopulationStatus') : null },
+    { href: '/#escolher-equipa', inPage: false, label: t('shortcutClub'), status: ligaSummary ? t('shortcutClubStatus', { matchday: ligaSummary.matchday }) : null },
+    { href: '/eleicoes/arquivo', inPage: false, label: t('shortcutElections'), status: t('shortcutElectionsStatus') },
+  ];
+  // One alignment for every line of every chip, wrapped titles included (UXM3-19).
+  const chipClass = 'flex h-full min-h-14 flex-col items-start justify-center rounded-lg border border-line bg-cream px-2.5 py-2 text-left text-ink transition-colors hover:bg-parchment';
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1280px] px-4 py-6 outline-none md:px-6 md:py-8">
-        <div className="grid gap-4 md:gap-6 min-[1100px]:grid-cols-[2fr_1fr]">
+      {/* The shared container (UXD2-14): the line, the cards and the header's
+          logo start at the same x. */}
+      <main id="main-content" tabIndex={-1} className={`${CONTAINER_CLASS} pt-6 outline-none md:pt-8`}>
+        {/* What the site is, before any one subject: the line is the page's
+            h1, kept small so the population lead stays above the fold. */}
+        <div className="mb-5 max-w-4xl md:mb-6">
+          <h1 className="text-lg leading-snug text-ink md:text-xl">{brandLine(locale)}</h1>
+          {/* Who stands behind it, next to the way to find out more (CL3-10). */}
+          <p className="mt-1 text-sm leading-relaxed text-stone-600 md:text-[15px]">
+            {brandDescriptor(locale)}{' '}
+            {t('identityByline')}{' · '}
+            <Link href="/sobre" locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{t('aboutLink')}</Link>
+          </p>
+        </div>
+        <nav aria-labelledby="home-shortcuts-label" className="mb-5 lg:hidden">
+          <p id="home-shortcuts-label" className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{t('shortcutsLabel')}</p>
+          <ul className="grid grid-cols-3 gap-2">
+            {shortcuts.map(task => (
+              <li key={task.href} className="min-w-0">
+                {task.inPage ? (
+                  <SearchShortcut targetId="home-population-title" className={chipClass}>
+                    <span className="text-sm font-semibold leading-tight">{task.label}</span>
+                    {task.status && <span className="mt-0.5 text-[12px] leading-tight text-stone-600">{task.status}</span>}
+                  </SearchShortcut>
+                ) : (
+                  <Link href={task.href} locale={locale} className={chipClass}>
+                    <span className="text-sm font-semibold leading-tight">{task.label}</span>
+                    {task.status && <span className="mt-0.5 text-[12px] leading-tight text-stone-600">{task.status}</span>}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
+        {/* The lead row shares its height (UXD2-V02): the rail is as tall as
+            the population card, and fills it with the outlook's two ends, the
+            title and the drop, then the club picker (CL3-02). The support row
+            is two media objects, text and a full-height painting
+            (.home-media in globals.css): stacked below 1280px, side by side
+            and of one height from there, where each card's painting column
+            is sized so neither text column ends over empty cream. */}
+        <div className="grid items-stretch gap-4 md:gap-6 min-[1100px]:grid-cols-[2fr_1fr]">
           {panel(layout.lead, 'lead')}
           {panel(layout.secondary, 'secondary')}
         </div>
-        <div className="mt-4 grid gap-4 md:mt-6 md:gap-6 min-[1100px]:grid-cols-2">
-          {panel(layout.support[0], 'support')}
-          {panel(layout.support[1], 'support')}
+        <div className="home-support mt-4 grid items-stretch gap-4 md:mt-6 md:gap-6 min-[1280px]:grid-cols-[3fr_2fr]">
+          {support.map(section => panel(section, 'support'))}
         </div>
         <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-stone-600 md:mt-8">
           <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{t('moreKicker')}</span>
-          <Link href="/metodologia" locale={locale} className="font-semibold text-ink underline-offset-4 hover:underline">{t('moreMethodology')}</Link>
+          <Link href="/metodologia" locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{t('moreMethodology')}</Link>
           {latestArticle && (
             <span>
-              {t('moreArticle')}: <Link href={`/artigos/${latestArticle.slug}`} locale={locale} className="font-semibold text-ink underline-offset-4 hover:underline">{latestArticle.title}</Link>
+              {t('moreArticle')}: <Link href={`/artigos/${latestArticle.slug}`} locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{latestArticle.title}</Link>
               {latestArticle.date && <span> · {articleDate.format(new Date(latestArticle.date))}</span>}
             </span>
           )}

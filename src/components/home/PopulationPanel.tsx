@@ -1,67 +1,107 @@
 import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/routing';
 import { Action } from '@/components/brand/Action';
+import { Link } from '@/i18n/routing';
+import { ParishSearch } from '@/components/population/ParishSearch';
+import { HONESTY } from '@/lib/population/labels';
+import { formatCount } from '@/lib/population/format';
+import { POPULATION_ROUTES } from '@/lib/config/population';
+import { formatDay } from '@/components/population/quality/copy';
+import type { PopulationMeta } from '@/types/population';
 import { HomeArt } from './HomeArt';
 import { HomePanel, Kicker, Status } from './HomePanel';
 
 /**
- * The population atlas: a synthetic population as a base for research and
- * future microsimulation. Lead in standard mode, secondary in election mode.
- * "Dados e métodos" is an inline disclosure because there is no population
- * methods page yet; it links the atlas's own note and the general methodology.
+ * The synthetic population (the release in POPULATION_RELEASE). Lead in standard mode, secondary in
+ * election mode.
+ *
+ * One question and one thing to do about it: find your parish. The search is
+ * the main action and goes straight to the parish page; today's Freguesia
+ * misteriosa is the second, as a text action; the open data are a quiet link.
+ * The one line of figures is read from the release's own counts (meta.json,
+ * through the loader), never typed in, and the synthetic caveat sits right
+ * under it.
+ *
+ * The panel lets its content overflow (the search's list of matches must not
+ * be clipped by the card), so the illustration carries its own corners.
  */
-export async function PopulationPanel({ locale, variant }: { locale: string; variant: 'lead' | 'secondary' }) {
+export async function PopulationPanel({ locale, variant, meta }: { locale: string; variant: 'lead' | 'secondary'; meta: PopulationMeta | null }) {
   const t = await getTranslations({ locale, namespace: 'home' });
+  const lang = locale === 'en' ? 'en' : 'pt';
   const lead = variant === 'lead';
-  const Heading = lead ? 'h1' : 'h2';
-  const methods = (
-    <details className="group mt-4 max-w-xl">
-      <summary className="inline-flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-[10px] border border-line bg-cream px-5 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-parchment [&::-webkit-details-marker]:hidden">
-        {t('populationMethods')}
-        <span aria-hidden="true" className="text-stone-500 transition-transform duration-150 group-open:rotate-180">⌄</span>
-      </summary>
-      <div className="mt-3 space-y-2 rounded-xl border border-line bg-paper p-4 text-sm leading-relaxed text-stone-700">
-        <p>{t('populationScope')}</p>
-        <p>{t('populationIntent')}</p>
-        <p className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-[13px] font-semibold">
-          <Link href="/populacao#metodo" locale={locale} className="text-ink underline-offset-4 hover:underline">{t('populationAtlasNote')}</Link>
-          <Link href="/metodologia" locale={locale} className="text-ink underline-offset-4 hover:underline">{t('populationMethodology')}</Link>
-        </p>
+  // The homepage's h1 is the site line above the grid; every panel title is an h2.
+  const Heading = 'h2';
+  // The same status slot as the other three panels (CL2-05): the release's
+  // state and version in the kicker's pill, its date in the status line, both
+  // read from meta.json. The version keeps its lower-case "v" in the
+  // upper-case kicker.
+  const released = meta?.data_status === 'release';
+  const pill = released
+    ? t.rich('populationPill', { version: meta.release_version, v: chunks => <span className="normal-case">{chunks}</span> })
+    : undefined;
+
+  const figures = meta && (
+    <>
+      <p className={lead ? 'mt-3 max-w-lg text-base leading-relaxed text-stone-600 md:text-[17px]' : 'mt-2 text-[15px] leading-relaxed text-stone-600'}>
+        {t('populationText', {
+          // The one population count formatter: "3 092" in Portuguese, where
+          // Intl's pt-PT would leave a four-digit count ungrouped.
+          persons: formatCount(meta.counts.persons, lang),
+          households: formatCount(meta.counts.households, lang),
+          parishes: formatCount(meta.counts.parishes, lang),
+        })}
+      </p>
+      <p className="mt-1.5 text-[13px] leading-snug text-stone-500">{HONESTY.synthetic[lang]}</p>
+    </>
+  );
+
+  const actions = (
+    <>
+      <ParishSearch
+        locale={lang}
+        label={t('populationSearchLabel')}
+        withLocation={lead}
+        className={lead ? 'mt-5 max-w-xl' : 'mt-4'}
+      />
+      <div className="mt-2 flex flex-wrap items-center gap-x-6">
+        <Action href={POPULATION_ROUTES.game} locale={locale} variant="text" arrow>{t('populationGame')}</Action>
+        <Link href={POPULATION_ROUTES.data} locale={locale} className="inline-flex min-h-11 items-center text-[13px] font-medium text-stone-600 underline underline-offset-4 hover:text-ink">{t('populationData')}</Link>
       </div>
-    </details>
+      {released && <Status>{t('populationStatus', { date: formatDay(meta.published, lang) })}</Status>}
+    </>
   );
 
   if (!lead) {
     return (
-      <HomePanel labelledBy="home-population-title" className="flex flex-col">
-        <HomeArt name="population" shape="square" sizes="(min-width: 1100px) 32vw, 100vw" className="h-[220px] w-full" />
-        <div className="flex flex-1 flex-col p-5 md:p-6">
-          <Kicker>{t('populationKicker')}</Kicker>
-          <Heading id="home-population-title" className="mt-2 text-2xl md:text-[1.75rem] md:leading-[1.15]">{t('populationTitle')}</Heading>
-          <p className="mt-2 text-[15px] leading-relaxed text-stone-600">{t('populationText')}</p>
-          <div className="mt-4"><Action href="/populacao" locale={locale} arrow>{t('populationAction')}</Action></div>
-          {methods}
-          <Status>{t('populationStatus')}</Status>
+      <HomePanel labelledBy="home-population-title" className="!overflow-visible flex flex-col md:flex-row md:items-stretch">
+        <div className="flex min-w-0 flex-1 flex-col p-5 md:p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <Kicker pill={pill}>{t('populationKicker')}</Kicker>
+              <Heading id="home-population-title" className="mt-2 text-2xl md:text-[1.75rem] md:leading-[1.15]">{t('populationTitle')}</Heading>
+            </div>
+            <HomeArt name="population" shape="square" sizes="72px" className="h-[72px] w-[72px] shrink-0 rounded-xl md:hidden" />
+          </div>
+          {figures}
+          {actions}
         </div>
+        <HomeArt name="population" shape="square" sizes="200px" className="hidden h-auto w-[200px] shrink-0 self-stretch rounded-r-2xl md:block" />
       </HomePanel>
     );
   }
 
   return (
-    <HomePanel labelledBy="home-population-title" className="relative min-[1100px]:pr-[45%]">
-      <div className="min-w-0 px-5 pt-5 md:px-7 md:pt-6">
-        <Kicker>{t('populationKicker')}</Kicker>
-        <Heading id="home-population-title" className="mt-3 max-w-xl text-[2rem] leading-[1.06] md:text-[2.4rem]">{t('populationTitle')}</Heading>
-        <p className="mt-3 max-w-lg text-base leading-relaxed text-stone-600 md:text-[17px]">{t('populationText')}</p>
-      </div>
-      <HomeArt name="population" shape="lead" priority sizes="(min-width: 1100px) 40vw, 100vw" className="mx-5 mt-5 h-[240px] rounded-xl md:mx-7 min-[1100px]:absolute min-[1100px]:inset-y-0 min-[1100px]:right-0 min-[1100px]:m-0 min-[1100px]:h-auto min-[1100px]:w-[43%] min-[1100px]:rounded-none" />
-      <div className="min-w-0 px-5 pb-5 pt-4 md:px-7 md:pb-6 min-[1100px]:pt-5">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-          <Action href="/populacao" locale={locale} arrow>{t('populationAction')}</Action>
+    <HomePanel labelledBy="home-population-title" className="!overflow-visible md:grid md:grid-cols-[minmax(0,1.1fr)_minmax(220px,.9fr)] min-[1100px]:grid-cols-[minmax(0,1.25fr)_minmax(270px,1fr)]">
+      <div className="min-w-0 px-5 pb-5 pt-5 md:flex md:flex-col md:justify-center md:px-6 md:py-6 min-[1100px]:px-7">
+        <Kicker pill={pill}>{t('populationKicker')}</Kicker>
+        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_90px] items-center gap-3 md:block">
+          <Heading id="home-population-title" className="max-w-xl text-[1.75rem] leading-[1.1] md:text-[2.4rem]">{t('populationTitle')}</Heading>
+          {/* Phones only: the media query keeps desktop from fetching it eagerly behind md:hidden (UXM2V-04). */}
+          <HomeArt name="population" shape="lead" priority media="(max-width: 767.98px)" sizes="90px" className="h-[90px] w-[90px] rounded-xl md:hidden" />
         </div>
-        {methods}
-        <Status>{t('populationStatus')}</Status>
+        {figures}
+        {actions}
       </div>
+      <HomeArt name="population" shape="lead" priority media="(min-width: 768px)" sizes="(min-width: 1100px) 40vw, 42vw" className="hidden md:block md:col-start-2 md:!m-0 md:h-full md:max-h-[430px] md:self-center md:w-full md:rounded-r-2xl md:py-4 md:[&_img]:object-center" />
     </HomePanel>
   );
 }

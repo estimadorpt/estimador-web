@@ -114,20 +114,22 @@ export function SeasonAccount({
                 }}
                 maxLength={24}
                 placeholder={t.placeholder}
-                className="flex-1 min-w-[10rem] px-3 py-1.5 rounded-lg border border-stone-300 text-sm focus:outline-none focus:border-emerald-700"
+                className="flex-1 min-w-[10rem] min-h-11 px-3 py-1.5 rounded-[10px] border border-stone-300 bg-paper text-base sm:text-sm focus:border-emerald-700"
                 aria-label={t.placeholder}
               />
               <button
+                type="button"
                 onClick={submit}
                 disabled={!draft.trim() || saving}
-                className="px-3 py-1.5 rounded-lg bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 disabled:opacity-40 disabled:hover:bg-stone-900 transition-colors"
+                className="min-h-11 px-4 py-1.5 rounded-[10px] bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 disabled:opacity-40 disabled:hover:bg-stone-900 transition-colors"
               >
                 {renaming ? t.confirm : t.save}
               </button>
               {renaming && (
                 <button
+                  type="button"
                   onClick={() => setRenaming(false)}
-                  className="px-3 py-1.5 rounded-lg text-sm text-stone-500 hover:text-stone-900 transition-colors"
+                  className="min-h-11 px-3 py-1.5 rounded-[10px] text-sm text-stone-500 hover:text-stone-900 transition-colors"
                 >
                   {t.cancel}
                 </button>
@@ -143,8 +145,9 @@ export function SeasonAccount({
                 {player!.displayName}
               </span>
               <button
+                type="button"
                 onClick={() => setRenaming(true)}
-                className="text-[11px] text-stone-400 hover:text-stone-700 underline underline-offset-2 shrink-0"
+                className="inline-flex min-h-11 items-center text-xs text-stone-600 hover:text-stone-900 underline underline-offset-2 shrink-0"
               >
                 {t.rename}
               </button>
@@ -152,7 +155,7 @@ export function SeasonAccount({
             <div className="flex items-center gap-3 text-xs">
               <SyncBadge state={syncState} labels={t} />
               {deadline && (
-                <span className="text-stone-400 tabular-nums hidden sm:inline">
+                <span className="text-stone-500 tabular-nums hidden sm:inline">
                   {t.deadline}{" "}
                   {new Date(deadline).toLocaleString(pt ? "pt-PT" : "en-GB", {
                     day: "2-digit",
@@ -224,8 +227,8 @@ function SyncBadge({
 }) {
   if (state === "saving") {
     return (
-      <span className="inline-flex items-center gap-1 text-stone-400">
-        <Cloud className="w-3.5 h-3.5 animate-pulse" />
+      <span className="inline-flex items-center gap-1 text-stone-500">
+        <Cloud className="w-3.5 h-3.5 motion-safe:animate-pulse" />
         {labels.saving}
       </span>
     );

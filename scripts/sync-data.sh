@@ -2,9 +2,10 @@
 # Sync data from sibling model projects into public/data/
 # Usage: ./scripts/sync-data.sh [section]
 # Examples:
-#   ./scripts/sync-data.sh          # sync all
+#   ./scripts/sync-data.sh          # sync all (football, elections, population)
 #   ./scripts/sync-data.sh football # sync football only
 #   ./scripts/sync-data.sh elections # sync elections only
+#   ./scripts/sync-data.sh economics # the economy, only ever on its own (see below)
 
 set -e
 
@@ -30,6 +31,16 @@ sync_football() {
 
   mkdir -p "$FOOTBALL_DEST"
   cp "$FOOTBALL_SRC"/*.json "$FOOTBALL_DEST/"
+  # cards.json is the social-card input the model writes beside its outputs;
+  # no page reads it, so it is not published.
+  rm -f "$FOOTBALL_DEST/cards.json"
+  # The game server reads its own copy of the fixture manifest, and
+  # validate-data requires it to be byte-identical to the published one.
+  if [ -f "$FOOTBALL_DEST/game_fixtures.json" ]; then
+    mkdir -p "$PROJECT_DIR/api/data"
+    cp "$FOOTBALL_DEST/game_fixtures.json" "$PROJECT_DIR/api/data/game_fixtures.json"
+    echo "  Copied game_fixtures.json to api/data/ for the game server"
+  fi
   echo "Synced football data from $FOOTBALL_SRC"
   echo "  Files: $(ls "$FOOTBALL_DEST" | wc -l | tr -d ' ')"
 
@@ -52,6 +63,7 @@ sync_football() {
 
 sync_elections() {
   echo "Election data is managed manually in public/data/elections/"
+  echo "  (raw simulation draws read only at build time live in data/build-only/elections/)"
   echo "  Presidential: $(ls "$DATA_DIR/elections/presidential-2026/" 2>/dev/null | wc -l | tr -d ' ') files"
   echo "  Parliamentary: $(ls "$DATA_DIR/elections/parliamentary-2025/" 2>/dev/null | wc -l | tr -d ' ') files"
 }
@@ -63,6 +75,14 @@ sync_economics() {
   if [ ! -d "$ECONOMICS_SRC" ]; then
     echo "Warning: Economics source not found at $ECONOMICS_SRC"
     return 1
+  fi
+
+  # Nothing reaches public/data while the section is in preparation: the files
+  # would be served (and committed) although every page says "sem números
+  # publicados". Set "published": true in economy-status.json first.
+  if ! grep -q '"published": *true' "$PROJECT_DIR/src/lib/config/economy-status.json"; then
+    echo "Economy is in preparation (src/lib/config/economy-status.json): not syncing economics data."
+    return 0
   fi
 
   mkdir -p "$ECONOMICS_DEST"
@@ -77,6 +97,29 @@ sync_economics() {
     echo "No economics dashboard at $ECONOMICS_SRC/dashboard_latest.json (run the daily pipeline first)"
     return 1
   fi
+  # The data stories feed (official numbers + explicit arithmetic), when the
+  # pipeline wrote one. Optional: the page renders without it.
+  if [ -f "$ECONOMICS_SRC/stories_latest.json" ]; then
+    cp "$ECONOMICS_SRC/stories_latest.json" "$ECONOMICS_DEST/stories.json"
+    echo "Synced economics stories -> $ECONOMICS_DEST/stories.json"
+  fi
+  # Fresh data does not publish the section: the editorial flag in
+  # src/lib/config/economy-status.json does.
+  echo "Economy published flag: $(grep -o '"published": *[a-z]*' "$PROJECT_DIR/src/lib/config/economy-status.json" || echo unknown)"
+}
+
+sync_population() {
+  # The synthetic population release (estimador-microsynthesis, doc 206 handoff).
+  # The script verifies the handoff hashes, validates contract v1, writes the
+  # compact files under public/data/population/v<release>/ and proves an exact
+  # round trip. It needs pyarrow, which the microsynthesis virtualenv has.
+  local MS_DIR="${MICROSYNTHESIS_DIR:-$HOME/code/estimador-microsynthesis}"
+  local PYTHON="$MS_DIR/.venv/bin/python"
+  if [ ! -x "$PYTHON" ]; then
+    echo "Warning: no microsynthesis virtualenv at $MS_DIR/.venv"
+    return 1
+  fi
+  "$PYTHON" "$SCRIPT_DIR/sync-population.py" --source "$MS_DIR"
 }
 
 case "$SECTION" in
@@ -89,14 +132,20 @@ case "$SECTION" in
   economics)
     sync_economics
     ;;
+  population)
+    sync_population
+    ;;
   all)
+    # Economics is deliberately not part of "all": an economy sync is always
+    # its own decision (./scripts/sync-data.sh economics), reviewed before a
+    # build, never a side effect of refreshing everything else.
     sync_football
     sync_elections
-    sync_economics
+    sync_population
     ;;
   *)
     echo "Unknown section: $SECTION"
-    echo "Usage: $0 [football|elections|economics|all]"
+    echo "Usage: $0 [football|elections|economics|population|all]"
     exit 1
     ;;
 esac

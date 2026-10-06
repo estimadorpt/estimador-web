@@ -10,13 +10,10 @@ import {
   PresidentialWinProbabilitiesData,
   PresidentialTrendsData,
   PresidentialSnapshotProbabilitiesData,
-  PresidentialTrajectoriesData,
   PresidentialPollsData,
   PresidentialHouseEffectsData,
   PresidentialHeadToHeadData,
   PresidentialRunoffPairsData,
-  PresidentialChangesData,
-  PresidentialRunoffChangesData,
   SecondRoundForecastData,
   SecondRoundTrendsData,
   SecondRoundTrajectoriesData,
@@ -25,6 +22,11 @@ import {
   SecondRoundBlankNullData
 } from '@/types';
 
+import { PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections';
+import { leftBlocParties, rightBlocParties, majorityThreshold } from '@/lib/config/blocs';
+import { calculateBlocMajorityProbability, calculatePartyMostSeatsProbability } from '@/lib/utils/probability-calculator';
+import { compactTrendSeries, noBlocMajorityShare, recentTrendRows, seatSumArithmetic, summariseBlocs, summariseRunoff, summariseSeats, type RunoffSimulations } from '@/lib/election-aggregates';
+import { PARLIAMENTARY_PARTY_ORDER } from '@/lib/election-display';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyStories } from '@/types/economy-stories';
 
@@ -35,6 +37,17 @@ export async function loadJsonData<T>(filename: string, subdirectory?: string): 
     : path.join(process.cwd(), 'public', 'data', filename);
   const fileContents = await fs.readFile(filePath, 'utf8');
   return JSON.parse(fileContents);
+}
+
+/**
+ * Build-only inputs: raw simulation draws and long trend rows the pages reduce
+ * on the server (summariseRunoff, summariseSeats, compactTrendSeries). They
+ * live outside public/ so the static export never ships them; no page fetches
+ * them at runtime.
+ */
+export async function loadBuildOnlyJson<T>(filename: string, subdirectory: string): Promise<T> {
+  const filePath = path.join(process.cwd(), 'data', 'build-only', subdirectory, filename);
+  return JSON.parse(await fs.readFile(filePath, 'utf8'));
 }
 
 const PRESIDENTIAL_DIR = 'elections/presidential-2026';
@@ -62,12 +75,16 @@ export async function loadEconomyDashboard(): Promise<EconomyDashboard | null> {
   }
 }
 
-// Parliamentary forecast data loader
+// Parliamentary forecast data loader. Returns the raw draws: the homepage only
+// asks whether the archive has data. The archive page reads the aggregated
+// loadParliamentaryArchive below instead, so no draw reaches a browser.
 export async function loadForecastData() {
   try {
     const [seatData, nationalTrends, districtForecast, contestedSeats, houseEffects] = await Promise.all([
-      loadJsonData<SeatData[]>('seat_forecast_simulations.json', PARLIAMENTARY_DIR),
-      loadJsonData<TrendData[]>('national_trends.json', PARLIAMENTARY_DIR),
+      loadBuildOnlyJson<SeatData[]>('seat_forecast_simulations.json', PARLIAMENTARY_DIR),
+      // 1.4 MB of long rows back to 2009; the page receives the two-year
+      // window in columns (compactTrendSeries), so the file is build-only (SEO3-10).
+      loadBuildOnlyJson<TrendData[]>('national_trends.json', PARLIAMENTARY_DIR),
       loadJsonData<DistrictForecast[]>('district_forecast.json', PARLIAMENTARY_DIR),
       loadJsonData<ContestedSummary>('contested_summary.json', PARLIAMENTARY_DIR),
       loadJsonData<HouseEffect[]>('house_effects.json', PARLIAMENTARY_DIR).catch(() => [])
@@ -75,7 +92,7 @@ export async function loadForecastData() {
 
     return {
       seatData,
-      nationalTrends, 
+      nationalTrends,
       districtForecast,
       contestedSeats,
       houseEffects
@@ -92,191 +109,164 @@ export async function loadForecastData() {
   }
 }
 
-// Presidential forecast data loader
+/** Parties drawn by the archive's seat chart, in the archive's one order (AEE3-06). */
+const PARLIAMENTARY_PARTIES = [...PARLIAMENTARY_PARTY_ORDER];
+
+/**
+ * The parliamentary 2025 archive, summarised on the server: probabilities,
+ * bloc and party seat distributions from all 9000 draws, a fixed 800-draw
+ * subsample for the dot plot, and the two-year trend window the chart shows,
+ * in columns (compactTrendSeries) rather than the file's long rows.
+ * `available` is false when a required file is missing, and the page then
+ * says so instead of drawing zeros.
+ */
+export async function loadParliamentaryArchive() {
+  const { seatData, nationalTrends, districtForecast, contestedSeats, houseEffects } = await loadForecastData();
+  const trends = compactTrendSeries(recentTrendRows(nationalTrends));
+  return {
+    available: seatData.length > 0 && nationalTrends.length > 0,
+    simulations: seatData.length,
+    probabilities: {
+      adMostSeats: calculatePartyMostSeatsProbability(seatData, 'AD', ['PS', 'CH']),
+      psMostSeats: calculatePartyMostSeatsProbability(seatData, 'PS', ['AD', 'CH']),
+      rightMajority: calculateBlocMajorityProbability(seatData, rightBlocParties, majorityThreshold),
+      leftMajority: calculateBlocMajorityProbability(seatData, leftBlocParties, majorityThreshold),
+      /** Neither bloc the page shows reaches 116: the methodology's "parlamento sem maioria". */
+      noBlocMajority: noBlocMajorityShare(seatData, [rightBlocParties, leftBlocParties], majorityThreshold),
+    },
+    /** AD + CH, stated as seat arithmetic beside the blocs (not a government forecast). */
+    adChArithmetic: seatSumArithmetic(seatData, ['AD', 'CH'], majorityThreshold),
+    blocs: summariseBlocs(seatData, [
+      { key: 'left', parties: leftBlocParties },
+      { key: 'right', parties: rightBlocParties },
+    ], majorityThreshold),
+    seats: summariseSeats(seatData, PARLIAMENTARY_PARTIES),
+    trends,
+    /** Estimate dates inside the trend window (what the chart's caption counts). */
+    trendDates: trends.dates.length,
+    districtForecast,
+    contestedSeats,
+    houseEffects,
+  };
+}
+
+export type ParliamentaryArchive = Awaited<ReturnType<typeof loadParliamentaryArchive>>;
+
+const EMPTY_PRESIDENTIAL_TRENDS = { election_date: PRESIDENTIAL_2026.date, dates: [] as string[], candidates: {} };
+
+/**
+ * Presidential 2026 first-round archive. `available` is false when a required
+ * file is missing: the fallbacks carry no date and no probability, so nothing
+ * can be shown as "updated" on the build date or as ">99%" by accident.
+ */
 export async function loadPresidentialData() {
   try {
-    const [forecast, winProbabilities, trends, snapshotProbabilities, trajectories, polls, houseEffects, headToHead, electionDayRunoffPairs, snapshotRunoffPairs, changes, runoffChanges] = await Promise.all([
+    const [forecast, winProbabilities, trends, snapshotProbabilities, polls, houseEffects, headToHead, runoffPairs] = await Promise.all([
       loadJsonData<PresidentialForecastData>('presidential_forecast.json', PRESIDENTIAL_DIR),
       loadJsonData<PresidentialWinProbabilitiesData>('presidential_win_probabilities.json', PRESIDENTIAL_DIR),
       loadJsonData<PresidentialTrendsData>('presidential_trends.json', PRESIDENTIAL_DIR),
       loadJsonData<PresidentialSnapshotProbabilitiesData>('presidential_snapshot_probabilities.json', PRESIDENTIAL_DIR).catch(() => ({
-        election_date: '2026-01-18',
-        dates: [],
+        ...EMPTY_PRESIDENTIAL_TRENDS,
         metric: 'first_round_leader_probability',
-        candidates: {}
-      })),
-      loadJsonData<PresidentialTrajectoriesData>('presidential_trajectories.json', PRESIDENTIAL_DIR),
-      loadJsonData<PresidentialPollsData>('presidential_polls.json', PRESIDENTIAL_DIR).catch(() => ({ polls: [] })),
+      }) as PresidentialSnapshotProbabilitiesData),
+      loadJsonData<PresidentialPollsData>('presidential_polls.json', PRESIDENTIAL_DIR),
       loadJsonData<PresidentialHouseEffectsData>('presidential_house_effects.json', PRESIDENTIAL_DIR).catch(() => ({
         pollsters: [],
         candidates: [],
         effects: {}
       })),
       loadJsonData<PresidentialHeadToHeadData>('presidential_head_to_head.json', PRESIDENTIAL_DIR).catch(() => ({
-        election_date: '2026-01-18',
+        election_date: PRESIDENTIAL_2026.date,
         candidate_a: '',
         candidate_b: '',
-        color_a: '#000000',
-        color_b: '#000000',
+        color_a: '',
+        color_b: '',
         dates: [],
         probability_a_leads: []
       })),
+      // Runoff pairs for election day, the horizon the section's date line
+      // names and the vote-share bars use. (The last-poll snapshot pairs and
+      // the changes since the previous poll answered a different date; they
+      // were never shown and their files were deleted.)
       loadJsonData<PresidentialRunoffPairsData>('presidential_runoff_pairs.json', PRESIDENTIAL_DIR).catch(() => ({
-        election_date: '2026-01-18',
+        election_date: PRESIDENTIAL_2026.date,
         pairs: [],
         matrix: { candidates: [], colors: [], probabilities: [] }
       })),
-      // Try to load snapshot runoff pairs (computed at last poll date from full posterior)
-      loadJsonData<PresidentialRunoffPairsData>('presidential_snapshot_runoff_pairs.json', PRESIDENTIAL_DIR).catch(() => null),
-      // Load leading probability changes since last poll
-      loadJsonData<PresidentialChangesData>('presidential_changes.json', PRESIDENTIAL_DIR).catch(() => null),
-      // Load runoff probability changes since last poll
-      loadJsonData<PresidentialRunoffChangesData>('presidential_runoff_changes.json', PRESIDENTIAL_DIR).catch(() => null)
     ]);
 
-    // Calculate last poll date
-    let lastPollDate = forecast.election_date;
-    if (polls.polls.length > 0) {
-      lastPollDate = polls.polls[0].date;
-      for (const poll of polls.polls) {
-        if (poll.date > lastPollDate) {
-          lastPollDate = poll.date;
-        }
-      }
-    }
-
-    // Use snapshot runoff pairs (computed at last poll date from full posterior)
-    // if available, otherwise fall back to election day runoff pairs
-    const runoffPairs = snapshotRunoffPairs || electionDayRunoffPairs;
+    // The last poll the forecast saw
+    const lastPollDate = polls.polls.reduce<string | null>((latest, poll) => (!latest || poll.date > latest ? poll.date : latest), null);
 
     return {
+      available: forecast.candidates.length > 0,
       forecast,
       winProbabilities,
       trends,
       snapshotProbabilities,
-      trajectories,
       polls,
       houseEffects,
       headToHead,
       runoffPairs,
-      changes,
-      runoffChanges,
       lastPollDate
     };
   } catch (error) {
     console.error('Error loading presidential forecast data:', error);
-    // Return empty default data
     return {
-      forecast: {
-        election_date: '2026-01-18',
-        updated_at: new Date().toISOString(),
-        candidates: []
-      } as PresidentialForecastData,
-      winProbabilities: {
-        election_date: '2026-01-18',
-        second_round_probability: 1.0,
-        candidates: []
-      } as PresidentialWinProbabilitiesData,
-      trends: {
-        election_date: '2026-01-18',
-        dates: [],
-        candidates: {}
-      } as PresidentialTrendsData,
-      snapshotProbabilities: {
-        election_date: '2026-01-18',
-        dates: [],
-        metric: 'first_round_leader_probability',
-        candidates: {}
-      } as PresidentialSnapshotProbabilitiesData,
-      trajectories: {
-        election_date: '2026-01-18',
-        dates: [],
-        n_samples: 0,
-        candidates: {}
-      } as PresidentialTrajectoriesData,
-      polls: {
-        polls: []
-      } as PresidentialPollsData,
-      houseEffects: {
-        pollsters: [],
-        candidates: [],
-        effects: {}
-      } as PresidentialHouseEffectsData,
-      headToHead: {
-        election_date: '2026-01-18',
-        candidate_a: '',
-        candidate_b: '',
-        color_a: '#000000',
-        color_b: '#000000',
-        dates: [],
-        probability_a_leads: []
-      } as PresidentialHeadToHeadData,
-      runoffPairs: {
-        election_date: '2026-01-18',
-        pairs: [],
-        matrix: { candidates: [], colors: [], probabilities: [] }
-      } as PresidentialRunoffPairsData,
-      changes: null as PresidentialChangesData | null,
-      runoffChanges: null as PresidentialRunoffChangesData | null,
-      lastPollDate: '2026-01-18'
+      available: false,
+      forecast: { election_date: PRESIDENTIAL_2026.date, updated_at: '', candidates: [] } as PresidentialForecastData,
+      winProbabilities: { election_date: PRESIDENTIAL_2026.date, second_round_probability: NaN, candidates: [] } as PresidentialWinProbabilitiesData,
+      trends: EMPTY_PRESIDENTIAL_TRENDS as PresidentialTrendsData,
+      snapshotProbabilities: { ...EMPTY_PRESIDENTIAL_TRENDS, metric: 'first_round_leader_probability' } as PresidentialSnapshotProbabilitiesData,
+      polls: { polls: [] } as PresidentialPollsData,
+      houseEffects: { pollsters: [], candidates: [], effects: {} } as PresidentialHouseEffectsData,
+      headToHead: { election_date: PRESIDENTIAL_2026.date, candidate_a: '', candidate_b: '', color_a: '', color_b: '', dates: [], probability_a_leads: [] } as PresidentialHeadToHeadData,
+      runoffPairs: { election_date: PRESIDENTIAL_2026.date, pairs: [], matrix: { candidates: [], colors: [], probabilities: [] } } as PresidentialRunoffPairsData,
+      lastPollDate: null as string | null
     };
   }
 }
 
-// Second round forecast data loader
+/**
+ * Presidential 2026 runoff archive. The 8000 simulated trajectories are read
+ * here and reduced to election-day valid-vote summaries plus an 800-draw
+ * subsample (summariseRunoff), so the page no longer ships the raw file.
+ */
 export async function loadSecondRoundData() {
   try {
     const [forecast, trends, trajectories, validVotes, winProbability, blankNull] =
       await Promise.all([
         loadJsonData<SecondRoundForecastData>('second_round_forecast.json', PRESIDENTIAL_DIR),
         loadJsonData<SecondRoundTrendsData>('second_round_trends.json', PRESIDENTIAL_DIR),
-        loadJsonData<SecondRoundTrajectoriesData>('second_round_trajectories.json', PRESIDENTIAL_DIR),
+        loadBuildOnlyJson<SecondRoundTrajectoriesData>('second_round_trajectories.json', PRESIDENTIAL_DIR),
         loadJsonData<SecondRoundValidVotesData>('second_round_valid_votes.json', PRESIDENTIAL_DIR),
         loadJsonData<SecondRoundWinProbabilityData>('second_round_win_probability.json', PRESIDENTIAL_DIR),
         loadJsonData<SecondRoundBlankNullData>('second_round_blank_null.json', PRESIDENTIAL_DIR),
       ]);
 
-    return { forecast, trends, trajectories, validVotes, winProbability, blankNull };
+    const simulations = summariseRunoff(trajectories);
+    return {
+      available: forecast.candidates.length > 0 && simulations !== null,
+      forecast,
+      trends,
+      simulations,
+      validVotes,
+      winProbability,
+      blankNull: blankNull as SecondRoundBlankNullData | null,
+    };
   } catch (error) {
     console.error('Error loading second round data:', error);
+    const date = PRESIDENTIAL_2026_SECOND_ROUND_DATE;
     return {
-      forecast: {
-        election_type: 'presidential',
-        election_date: '2026-02-08',
-        updated_at: new Date().toISOString(),
-        candidates: []
-      } as SecondRoundForecastData,
-      trends: {
-        election_type: 'presidential',
-        election_date: '2026-02-08',
-        dates: [],
-        candidates: {}
-      } as SecondRoundTrendsData,
-      trajectories: {
-        election_type: 'presidential',
-        election_date: '2026-02-08',
-        dates: [],
-        n_samples: 0,
-        candidates: {}
-      } as SecondRoundTrajectoriesData,
-      validVotes: {
-        election_type: 'presidential',
-        election_date: '2026-02-08',
-        updated_at: new Date().toISOString(),
-        candidates: []
-      } as SecondRoundValidVotesData,
-      winProbability: {
-        election_date: '2026-02-08',
-        candidates: []
-      } as SecondRoundWinProbabilityData,
-      blankNull: {
-        election_date: '2026-02-08',
-        name: 'Blank/Null',
-        color: '#A9A9A9',
-        mean: 0,
-        ci_lower: 0,
-        ci_upper: 0
-      } as SecondRoundBlankNullData
+      available: false,
+      forecast: { election_type: 'presidential', election_date: date, updated_at: '', candidates: [] } as SecondRoundForecastData,
+      trends: { election_type: 'presidential', election_date: date, dates: [], candidates: {} } as SecondRoundTrendsData,
+      simulations: null as RunoffSimulations | null,
+      validVotes: { election_type: 'presidential', election_date: date, updated_at: '', candidates: [] } as SecondRoundValidVotesData,
+      winProbability: { election_date: date, candidates: [] } as SecondRoundWinProbabilityData,
+      blankNull: null as SecondRoundBlankNullData | null,
     };
   }
 }
+
+export type SecondRoundArchive = Awaited<ReturnType<typeof loadSecondRoundData>>;

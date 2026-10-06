@@ -23,7 +23,9 @@ const CONTENDER_THRESHOLD = 0.001;
 
 /** Movement worth colouring. Below this, a swing is model noise between rounds. */
 const MEANINGFUL_SWING_PP = 1;
-const UP = '#4e8056';
+// The deltas are text: the text-strength green (--color-positive, BRAND.tree),
+// not #4e8056 (4.16:1 on paper; audit A11Y2-08).
+const UP = '#377455';
 const DOWN = '#a3543a';
 
 function seasonDir() {
@@ -102,7 +104,7 @@ function buildCard(current, previous, scenarios) {
       // September and two in April, and a table pinned to the top leaves the
       // card looking unfinished once the race narrows.
       h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center' },
-        eyebrow('Probabilidade de título', COLOR.faint, { marginTop: 22 }),
+        eyebrow('Probabilidade de título', COLOR.muted, { marginTop: 22 }),
         rule(COLOR.ink, { marginTop: 10 }),
         ...contenders.map((team, index) => rankedRow({
           name: team.name,
@@ -112,7 +114,7 @@ function buildCard(current, previous, scenarios) {
           color: team.color,
           trailing: team.delta === null ? null : {
             text: formatPp(team.delta),
-            color: Math.abs(team.delta) < MEANINGFUL_SWING_PP ? COLOR.faint : (team.delta > 0 ? UP : DOWN),
+            color: Math.abs(team.delta) < MEANINGFUL_SWING_PP ? COLOR.muted : (team.delta > 0 ? UP : DOWN),
           },
         }, index === 0)))));
 }

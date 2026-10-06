@@ -1,19 +1,35 @@
+import { TitleProbabilities } from '@/components/football/TitleProbabilities';
 import { createPageMetadata } from '@/lib/metadata';
 import {
+  loadLigaData,
   loadLigaWithDeltas,
   loadLigaHistorical,
+  probabilityHistory,
   loadLigaSamples,
+  loadLigaMarketScorecard,
+  loadLigaPlayers,
   loadUpcomingFixtures,
 } from "@/lib/utils/football-data-loader";
-import { ligaTeamColors, teamLogoSrc } from "@/lib/config/football";
+import { CURRENT_LIGA_SEASON, teamDisplayName } from "@/lib/config/football";
+import { formatDateSpan, formatInteger, formatLongDate, formatPp } from "@/lib/football-format";
+import {
+  forecastAsOf,
+  forecastStatusLine,
+  forecastStatusLinePlayed,
+  nextRoundTiming,
+  roundPlayedLine,
+} from "@/lib/football-status";
+import { ClockSwitch } from "@/components/football/ClockSwitch";
+import { evaluatesCurrentModel } from "@/lib/football-scorecard";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
-import { Action } from '@/components/brand/Action';
 import { SiteFooter } from '@/components/SiteFooter';
-import { LeagueTable } from "@/components/charts/football/LeagueTable";
+import { DataCard } from "@/components/viz/DataCard";
+import { LeagueTable, ClubChooser } from "@/components/charts/football/LeagueTable";
 import type { PointsInterval } from "@/components/charts/football/LeagueTable";
-import { MatchdayPredictions } from "@/components/charts/football/MatchdayPredictions";
+import { MatchdayPredictions, type MatchdayFixture } from "@/components/charts/football/MatchdayPredictions";
 import { TitleRaceChart } from "@/components/charts/football/TitleRaceChart";
+import { previousModelMatchdays } from "@/components/charts/football/probability-history-table";
 import { RelegationChart } from "@/components/charts/football/RelegationChart";
 import { TeamStrengthRatings } from "@/components/charts/football/TeamStrengthRatings";
 import { LuckIndex } from "@/components/charts/football/LuckIndex";
@@ -21,9 +37,15 @@ import type { LuckEntry } from "@/components/charts/football/LuckIndex";
 import { SectionNotes } from "@/components/articles/SectionNotes";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { ligaTeamSlugs } from "@/lib/config/football";
 import { Trophy, ArrowRight, SlidersHorizontal, Scale, History, Users, Gamepad2 } from "lucide-react";
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { setRequestLocale } from '@/i18n/request-locale';
+
+/** A sentence's full stop, unless it already ends on one ("25 set."). */
+function withStop(text: string): string {
+  return text.endsWith(".") ? text : `${text}.`;
+}
 
 export async function generateMetadata({
   params,
@@ -31,12 +53,15 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
+  // The description names the season the forecast is for (audit FA2-09, SP2-05).
+  const { prediction } = await loadLigaData();
   return createPageMetadata({
     locale,
     path: `/desporto/liga`,
     title: t("meta.ligaTitle"),
-    description: t("meta.ligaDescription"),
+    description: t("meta.ligaDescription", { season: prediction?.season ?? CURRENT_LIGA_SEASON }),
   });
 }
 
@@ -46,44 +71,75 @@ export default async function LigaPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
   // seasonSamples stays for the table's final-points intervals; the
   // draw-a-season widget that also read it was cut in the 2026-08 trim.
-  const [{ prediction, scenarios, deltas }, historical, seasonSamples, upcomingFixtures] =
+  const [{ prediction, scenarios, deltas }, historical, seasonSamples, upcomingFixtures, scorecard, players] =
     await Promise.all([
       loadLigaWithDeltas(),
       loadLigaHistorical(),
       loadLigaSamples(),
       loadUpcomingFixtures(),
+      loadLigaMarketScorecard(),
+      loadLigaPlayers(),
     ]);
+  // The player models' cut-off, read the way /sobre reads it: the last season
+  // in players.json's fit, never a typed year.
+  const playerSeason = players?.generated_from?.seasons?.at(-1) ?? null;
 
-  // Fixture row → match page. Rows without a generated page stay unlinked.
-  const matchHrefs: Record<string, string> = Object.fromEntries(
-    upcomingFixtures.map(f => [
-      `${f.home}|${f.away}`,
-      `/desporto/liga/jogo/${f.slug}`,
-    ]),
-  );
+  // The two probability charts get only what they draw (SP-08).
+  const probabilities = probabilityHistory(historical);
+  // Part of the first move on each line is a change of model, not of results:
+  // the pre-season point came from the previous model (audit VFA-M4). The
+  // tip and the table twin mark the point; the caption says it once.
+  const previousModelRounds = previousModelMatchdays(probabilities);
+  const preSeasonNote = previousModelRounds.length === 0
+    ? ""
+    : locale === "pt"
+      ? previousModelRounds.length === 1 && previousModelRounds[0] === 0
+        ? " O ponto da pré-época (J0) vem do modelo anterior."
+        : ` Os pontos ${previousModelRounds.map(m => `J${m}`).join(", ")} vêm do modelo anterior.`
+      : previousModelRounds.length === 1 && previousModelRounds[0] === 0
+        ? " The pre-season point (MD0) comes from the previous model."
+        : ` Points ${previousModelRounds.map(m => `MD${m}`).join(", ")} come from the previous model.`;
 
-  // Fixtures with published 1X2, for the in-progress-matchday list
-  const upcomingWithProbs = upcomingFixtures
+  // Every fixture still to play that carries a published 1X2, with its own
+  // kickoff (game_fixtures.json), conditionals and match page: the round in
+  // progress and the next one alike (audit F-H4).
+  const fixtureCards: MatchdayFixture[] = upcomingFixtures
     .filter(f => f.p_home != null && f.p_draw != null && f.p_away != null)
     .map(f => ({
       home: f.home,
       away: f.away,
+      matchday: f.matchday,
+      kickoff: f.kickoff,
+      kickoffConfirmed: f.kickoffConfirmed,
       p_home: f.p_home as number,
       p_draw: f.p_draw as number,
       p_away: f.p_away as number,
+      scenario: f.scenario,
+      postponed: f.postponed === true,
+      href: `/desporto/liga/jogo/${f.slug}`,
     }));
 
   if (!prediction) {
     return (
-      <div className="min-h-screen bg-paper">
+      <div className="football-page min-h-screen bg-paper">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 py-20 text-center text-stone-500">
-          <p>Liga Portugal data not available.</p>
-        </div>
+        <main id="main-content" tabIndex={-1}>
+          <PageHero
+            compact
+            icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
+            eyebrow={t("football.title")}
+            title={t("football.subtitle")}
+            lede={locale === "pt"
+              ? "A previsão da Liga não está disponível de momento."
+              : "The Liga forecast is not available right now."}
+          />
+        </main>
+        <SiteFooter locale={locale} />
       </div>
     );
   }
@@ -116,84 +172,241 @@ export default async function LigaPage({
   const second = prediction.table[1];
   const third = prediction.table[2];
   const matchdayComplete = !prediction.matches_remaining?.length;
-  const updatedDate = new Date(prediction.timestamp).toLocaleDateString(
-    locale === "pt" ? "pt-PT" : "en-US",
-    { day: "numeric", month: "long", year: "numeric" }
-  );
+  const updatedDate = formatLongDate(prediction.timestamp, locale);
+  const simsLabel = formatInteger(prediction.n_sims, locale);
+
+  // A concise factual change beside the forecast date (diagnosis §5 "League
+  // page" — "a concise factual change"): the club whose title probability
+  // moved most since the previous published matchday.
+  const biggestMover = prediction.matchday_results?.length && deltas
+    ? Object.values(deltas).reduce<typeof deltas[string] | null>(
+        (best, d) => (!best || Math.abs(d.p_champion_delta) > Math.abs(best.p_champion_delta) ? d : best),
+        null,
+      )
+    : null;
+  // Named against the forecast it compares with, not "the previous matchday":
+  // once jornada 8 is played, "desde a jornada anterior" read as a move
+  // caused by it (audit FR3V-M1). The table's own words (LeagueTable `since`).
+  const factualChange =
+    biggestMover && Math.abs(biggestMover.p_champion_delta) >= 1
+      ? locale === "pt"
+        ? `${teamDisplayName(biggestMover.team)} ${formatPp(biggestMover.p_champion_delta / 100, locale)} no título face à previsão depois da jornada ${prediction.matchday - 1}`
+        : `${teamDisplayName(biggestMover.team)} ${formatPp(biggestMover.p_champion_delta / 100, locale)} on the title since the forecast after matchday ${prediction.matchday - 1}`
+      : null;
+
+  // "Depois da jornada 7 · atualizado a 25 set. · próxima atualização após a
+  // jornada 8 (9–12 out.)", every part from the data (audit CL-11, CL-M4).
+  const timing = nextRoundTiming(prediction, upcomingFixtures);
+  const nextRound = timing.round;
+  const statusInput = {
+    matchday: prediction.matchday,
+    timestamp: prediction.timestamp,
+    inProgress: !matchdayComplete,
+    nextRound,
+    nextRoundKickoffs: timing.kickoffs,
+  };
+  const statusLine = forecastStatusLine(statusInput, locale);
+  // Once the round the next update waits for is over, the line says the new
+  // forecast is in preparation instead of promising it (audit FRESH-01).
+  const nextRoundPlayedAt = timing.playedAt;
+  const nextRoundStartsAt = timing.startsAt;
+
+  // The games to come are the next round plus any game left over from an
+  // earlier one: the heading names the round and counts the leftovers, which
+  // carry their own "jogo em atraso" badge (audit UXD3-02, CL3-01). The date
+  // span is the round's own: the leftover is dated on its card.
+  const postponedCards = fixtureCards.filter(f => f.postponed || (nextRound != null && f.matchday < nextRound));
+  const roundCards = fixtureCards.filter(f => !postponedCards.includes(f));
+  const cardRounds = Array.from(new Set(roundCards.map(f => f.matchday))).sort((a, b) => a - b);
+  const cardSpan = formatDateSpan(roundCards.map(f => f.kickoff), locale);
+  const postponedCount = postponedCards.length;
+  const postponedPhrase = postponedCount === 0
+    ? ""
+    : locale === "en"
+      ? `, plus ${postponedCount === 1 ? "one postponed match" : `${postponedCount} postponed matches`}`
+      : `, e ${postponedCount === 1 ? "um jogo em atraso" : postponedCount === 2 ? "dois jogos em atraso" : `${postponedCount} jogos em atraso`}`;
+  const roundsHeading = cardRounds.length === 0
+    ? (locale === "en" ? "Postponed matches" : "Jogos em atraso")
+    : cardRounds.length === 1
+      ? `${t("football.matchday")} ${cardRounds[0]}`
+      : locale === "en"
+        ? `Matchdays ${cardRounds.slice(0, -1).join(", ")} and ${cardRounds[cardRounds.length - 1]}`
+        : `Jornadas ${cardRounds.slice(0, -1).join(", ")} e ${cardRounds[cardRounds.length - 1]}`;
+  const asOf = forecastAsOf(prediction.timestamp, locale);
+  const sourceLine = locale === "pt"
+    ? `Fonte: modelo estimador.pt, ${simsLabel} simulações do resto da época`
+    : `Source: estimador.pt model, ${simsLabel} simulations of the rest of the season`;
+  const updatedLine = locale === "pt" ? `Atualizado a ${updatedDate}` : `Updated ${updatedDate}`;
+  const methodLabel = locale === "pt" ? "Como funciona o modelo" : "How the model works";
+
+  const allTeams = prediction.table.map(t => t.team);
+
+  // The scorecard card names the model it evaluated, read from the file: it
+  // is not always the model behind this page's forecast (FB-05).
+  const scorecardCard = scorecard
+    ? evaluatesCurrentModel(scorecard.model, prediction.model)
+      ? locale === "pt"
+        ? `Testámos o modelo destas previsões contra a linha de fecho do mercado em ${formatInteger(scorecard.n, locale)} jogos e ${scorecard.n_seasons} épocas.`
+        : `We tested the model behind these forecasts against the market's closing line over ${formatInteger(scorecard.n, locale)} matches and ${scorecard.n_seasons} seasons.`
+      : locale === "pt"
+        ? `Testámos o modelo anterior (${scorecard.model}) contra a linha de fecho do mercado em ${formatInteger(scorecard.n, locale)} jogos e ${scorecard.n_seasons} épocas. O modelo atual (${prediction.model}) ainda não foi avaliado contra o mercado.`
+        : `We tested the previous model (${scorecard.model}) against the market's closing line over ${formatInteger(scorecard.n, locale)} matches and ${scorecard.n_seasons} seasons. The current model (${prediction.model}) has not been evaluated against the market yet.`
+    : locale === "pt"
+      ? "O modelo comparado com a linha de fecho do mercado."
+      : "The model compared with the market's closing line.";
+
+  const pt = locale !== "en";
+  // Once the round is played, the two invitations stop offering it: the
+  // simulator shows what each result would have changed, and the game's
+  // next round opens with the next forecast (audit FR3V-M1).
+  const playedSteps = (value: ReactNode) => (nextRoundPlayedAt ? [{ at: nextRoundPlayedAt, value }] : []);
+  const teasers: Array<{ href: string; Icon: typeof Trophy; title: string; body: ReactNode; action: string }> = [
+    ...(scenarios?.next_matchday_scenarios ? [{
+      href: "/desporto/liga/simulador",
+      Icon: SlidersHorizontal,
+      title: t("football.simulator"),
+      body: (
+        <ClockSwitch
+          initial={t("football.simulatorCta")}
+          steps={playedSteps(pt
+            ? `Vê o que cada resultado da jornada ${nextRound} mudava, ${withStop(asOf)}`
+            : `See what each matchday ${nextRound} result would have changed, ${withStop(asOf)}`)}
+        />
+      ),
+      action: t("football.trySimulator"),
+    }] : []),
+    {
+      href: "/desporto/liga/jogo-previsoes",
+      Icon: Gamepad2,
+      // Marked as a game: the name alone does not say it (audit CL2-13).
+      title: pt ? "Contra o Modelo (jogo semanal)" : "Beat the model (weekly game)",
+      body: (
+        <ClockSwitch
+          initial={pt
+            ? "Prevê a próxima jornada antes de começar e compara-te com o modelo, a época inteira."
+            : "Call the next matchday before it kicks off and get scored against the model, all season long."}
+          steps={playedSteps(pt
+            ? "A próxima jornada abre com a nova previsão; até lá, vê como te saíste e compara-te com o modelo, a época inteira."
+            : "The next matchday opens with the new forecast; until then, see how you did and how you compare with the model, all season long.")}
+        />
+      ),
+      action: pt ? "Jogar" : "Play",
+    },
+    {
+      href: "/desporto/liga/modelo",
+      Icon: Scale,
+      title: pt ? "Modelo vs mercado" : "Model vs market",
+      body: scorecardCard,
+      action: pt ? "Ver a avaliação" : "See the scorecard",
+    },
+    {
+      href: "/desporto/liga/2025-26",
+      Icon: History,
+      title: pt ? "A época 2025-26 em revista" : "The 2025-26 season, reviewed",
+      body: pt
+        ? "O Porto foi campeão com 88 pontos, o Sporting marcou 89 golos e ficou em segundo, e o Benfica acabou invicto em terceiro. O que o xG diz sobre a qualidade das oportunidades de cada um, e como se portaram as nossas previsões."
+        : "Porto took the title on 88 points while Sporting scored 89 goals and finished second, and Benfica went unbeaten into third. What the xG says about the quality of each side's chances, and how our own forecasts held up.",
+      action: pt ? "Ver a revisão" : "Read the review",
+    },
+    {
+      href: "/desporto/liga/jogadores",
+      Icon: Users,
+      // Neutral title, and the data cut-off on the way in (UXD2-15, CL2-02).
+      title: pt ? "Jogadores: uma métrica por dimensão" : "Players: one metric per dimension",
+      body: pt
+        ? `Finalização, contribuição ofensiva, posse disputada e guarda-redes, cada uma com a sua escala e a sua incerteza.${playerSeason ? ` Finalização e contribuição vão até ao fim da época ${playerSeason}.` : ""}`
+        : `Finishing, attacking contribution, contested possession and goalkeeping, each with its own scale and its own uncertainty.${playerSeason ? ` Finishing and contribution run to the end of the ${playerSeason} season.` : ""}`,
+      action: pt ? "Ver os jogadores" : "See the players",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="football-page min-h-screen bg-paper">
       <Header />
-
+      <main id="main-content" tabIndex={-1}>
       <PageHero
-        field="periwinkle"
+        illustration="football"
         compact
         icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
         eyebrow={`${t("football.title")} — ${t("football.season")} ${prediction.season}`}
         title={t("football.subtitle")}
         lede={locale === "pt"
-          ? "Explora os dados, simula cenários e acompanha o que ainda pode acontecer."
-          : "Explore the data, simulate scenarios and follow what can still happen."}
+          ? `Quem fica com o título, quem acaba nos três primeiros e quem desce: as hipóteses de cada clube em ${simsLabel} simulações do resto da época, atualizadas depois de cada jornada.`
+          : `Who takes the title, who finishes in the top three and who goes down: each club's chances across ${simsLabel} simulations of the rest of the season, updated after every matchday.`}
         actions={
-          <>
-            <Action href="/desporto/liga/simulador" locale={locale} arrow>{locale === "pt" ? "Experimentar cenários" : "Try scenarios"}</Action>
-            <Action href="/desporto/liga/jogo-previsoes" locale={locale} variant="text" arrow>{locale === "pt" ? "Contra o Modelo" : "Beat the Model"}</Action>
-          </>
+          <ClubChooser
+            teams={allTeams}
+            label={locale === "pt" ? "A tua equipa" : "Your club"}
+            placeholder={locale === "pt" ? "Escolhe um clube" : "Choose a club"}
+          />
         }
-        meta={<span>{t("football.matchday")} {prediction.matchday} · {t("football.updated")} {updatedDate}</span>}
+        meta={
+          <span>
+            <ClockSwitch
+              initial={statusLine}
+              steps={[{ at: nextRoundPlayedAt, value: forecastStatusLinePlayed(statusInput, locale) }]}
+            />
+            {factualChange ? ` · ${factualChange}` : ""}
+          </span>
+        }
       />
 
       {/* Key stats — top 3 championship probabilities */}
       <section className="border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-4">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-4">
             {t("football.championshipProbability")}
           </div>
-          <div className="grid grid-cols-3 gap-6 md:gap-8">
-            {[leader, second, third].map((team) => {
-              const teamColor = ligaTeamColors[team.team] || "#5f7062";
-              const teamSlug = ligaTeamSlugs[team.team];
-              const delta = deltas?.[team.team]?.p_champion_delta;
-              const showDelta = delta !== undefined && Math.abs(delta) >= 1;
-              return (
-                <div key={team.team} className="border-t-2 pt-3" style={{ borderColor: teamColor }}>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    {teamLogoSrc(team.team) && (
-                      <img src={teamLogoSrc(team.team)} alt="" className="w-4 h-4 object-contain" />
-                    )}
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
-                      {team.team}
-                    </span>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <div className="text-4xl md:text-5xl font-display font-extrabold tabular-nums text-stone-900">
-                      {Math.round(team.p_champion * 100)}
-                      <span className="text-xl md:text-2xl font-bold text-stone-400">%</span>
-                    </div>
-                    {showDelta && (
-                      <span className={`text-sm font-semibold tabular-nums ${delta! > 0 ? "text-emerald-600" : "text-red-500"}`}>
-                        {delta! > 0 ? "\u25B2" : "\u25BC"}{Math.abs(Math.round(delta!))}
-                      </span>
-                    )}
-                  </div>
-                  {teamSlug && (
-                    <Link
-                      href={`/desporto/liga/${teamSlug}`}
-                      locale={locale}
-                      className="text-xs text-stone-400 hover:text-ink inline-flex items-center gap-1 mt-2 transition-colors"
-                    >
-                      {t("football.viewScenarios")}
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <TitleProbabilities teams={[leader, second, third]} deltas={deltas} locale={locale} />
+          <Link
+            href="/desporto/liga/modelo"
+            locale={locale}
+            className="mt-4 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-ink underline underline-offset-4"
+          >
+            {locale === "pt" ? "Como se compara o modelo com o mercado?" : "How does the model compare with the market?"}
+            <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </section>
 
-      {/* MatchdayLive section removed — deltas shown inline on cards + table */}
+      {/* The games to come, in kickoff order with Lisbon dates and times,
+          ahead of the table (reading the outlook and finding what's next are
+          the first tasks). Each card's stakes come from its own published
+          conditionals (audit F-H4). */}
+      {fixtureCards.length > 0 && (
+        <section className="border-b border-stone-200" aria-labelledby="liga-next-round">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+              <ClockSwitch
+                initial={matchdayComplete && cardRounds.length === 1 ? t("football.nextMatchday") : (locale === "en" ? "Fixtures to come" : "Jogos por disputar")}
+                steps={nextRound != null ? [
+                  { at: nextRoundStartsAt, value: locale === "en" ? `Matchday ${nextRound} under way` : `Jornada ${nextRound} a decorrer` },
+                  { at: nextRoundPlayedAt, value: roundPlayedLine(nextRound, locale) },
+                ] : []}
+              />
+            </p>
+            <h2 id="liga-next-round" className="text-2xl tracking-tight mb-1">
+              {roundsHeading}
+              {cardSpan ? ` · ${cardSpan}` : ""}
+              {postponedPhrase}
+            </h2>
+            <p className="text-sm text-stone-500 mb-6 max-w-3xl">
+              {locale === "en"
+                ? "In kickoff order, Lisbon time. Under each match, the club whose title or relegation chances its result moves most, and the gap between that club's best and worst of the three results, in percentage points."
+                : "Por ordem de início, hora de Lisboa. Em cada jogo, o clube cujas hipóteses de título ou de despromoção o resultado mais mexe, e a distância entre o melhor e o pior dos três resultados para esse clube, em pontos percentuais."}{" "}
+              {/* The method behind these swings, not the generic page (audit METH3-17). */}
+              <Link
+                href={locale === "pt" ? "/desporto/liga/metodologia#jogos-decisivos" : "/desporto/liga/metodologia#decisive-matches"}
+                locale={locale}
+                className="font-medium text-ink underline underline-offset-4"
+              >
+                {locale === "pt" ? "Como medimos o peso de cada jogo" : "How we measure each match's weight"}
+              </Link>
+            </p>
+            <MatchdayPredictions fixtures={fixtureCards} locale={locale} forecastTimestamp={prediction.timestamp} />
+          </div>
+        </section>
+      )}
 
       {/* League Table */}
       <section className="border-b border-stone-200">
@@ -203,7 +416,7 @@ export default async function LigaPage({
           </h2>
           <p className="text-sm text-stone-500 mb-6">
             {t("football.standingsDescription", {
-              count: prediction.n_sims.toLocaleString(),
+              count: simsLabel,
             })}
           </p>
           <LeagueTable
@@ -213,6 +426,11 @@ export default async function LigaPage({
             intervals={
               Object.keys(pointsIntervals).length ? pointsIntervals : undefined
             }
+            nSims={prediction.n_sims}
+            model={prediction.model}
+            calibration={scorecard?.calibration ?? null}
+            matchday={prediction.matchday}
+            previousMatchday={prediction.matchday > 1 ? prediction.matchday - 1 : undefined}
             labels={{
               team: t("football.team"),
               meanPoints: t("football.meanPoints"),
@@ -244,13 +462,16 @@ export default async function LigaPage({
               .sort((a, b) => b.delta - a.delta);
             if (luckEntries.length === 0) return null;
             return (
-              <div className="mt-10">
-                <h3 className="text-base text-stone-900 mb-1">
-                  {t("football.luckIndex")}
-                </h3>
-                <p className="text-sm text-stone-500 mb-4">
-                  {t("football.luckIndexDescription")}
-                </p>
+              <DataCard
+                className="mt-10"
+                title={t("football.luckIndex")}
+                subtitle={t("football.luckIndexDescription")}
+                source={t("football.xgAttribution")}
+                updated={updatedLine}
+                methodologyHref={locale === "pt" ? "/desporto/liga/metodologia#pontos-esperados-xpts" : "/desporto/liga/metodologia#expected-points-xpts"}
+                methodologyLabel={locale === "pt" ? "Como se calculam os xPts" : "How xPts are computed"}
+                locale={locale}
+              >
                 <LuckIndex
                   entries={luckEntries}
                   locale={locale}
@@ -261,76 +482,9 @@ export default async function LigaPage({
                     expectedShort: t("football.luckExpectedShort"),
                   }}
                 />
-                <p className="text-[11px] text-stone-400 mt-2 text-right">
-                  {t("football.xgAttribution")}
-                </p>
-              </div>
+              </DataCard>
             );
           })()}
-        </div>
-      </section>
-
-      {/* Simulator CTA — only when current matchday is complete */}
-      {matchdayComplete && scenarios?.next_matchday_scenarios && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <Link
-              href="/desporto/liga/simulador"
-              locale={locale}
-              className="block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
-            >
-              <div className="flex items-start gap-3">
-                <SlidersHorizontal className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2">
-                    <h3 className="text-stone-900">
-                      {t("football.simulator")}
-                    </h3>
-                    <span className="text-xs text-stone-400">
-                      {t("football.matchday")} {prediction.next_matchday.matchday}
-                    </span>
-                  </div>
-                  <p className="text-sm text-stone-500 mt-0.5">
-                    {t("football.simulatorCta")}
-                  </p>
-                </div>
-                <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
-                  {t("football.trySimulator")}
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </span>
-              </div>
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {/* Contra o Modelo — the season-long game. Before the 2026-08 trim
-          this page never linked it at all. */}
-      <section className="border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <Link
-            href="/desporto/liga/jogo-previsoes"
-            locale={locale}
-            className="block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
-          >
-            <div className="flex items-start gap-3">
-              <Gamepad2 className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-stone-900">
-                  {locale === "en" ? "Beat the model" : "Contra o Modelo"}
-                </h3>
-                <p className="text-sm text-stone-500 mt-0.5">
-                  {locale === "en"
-                    ? "Call the next matchday before it kicks off and get scored against the model, all season long."
-                    : "Preveja a próxima jornada antes de começar e compare-se com o modelo, época inteira."}
-                </p>
-              </div>
-              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
-                {locale === "en" ? "Play" : "Jogar"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </span>
-            </div>
-          </Link>
         </div>
       </section>
 
@@ -338,95 +492,64 @@ export default async function LigaPage({
       {historical.length > 1 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
+            {/* One title level per chart: the section's question, then the
+                card that names the plot (audit UXD3-11). */}
+            <h2 className="text-2xl tracking-tight mb-6">
               {t("football.titleRace")}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.titleRaceDescription")}
-            </p>
-            <TitleRaceChart historical={historical} yAxisLabel={t("football.championPercent")} />
-          </div>
-        </section>
-      )}
-
-      {/* Fixtures still to play — shown while the matchday is in progress, so
-          there is always a way into the match pages */}
-      {!matchdayComplete && upcomingWithProbs.length > 0 && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
-              {locale === "en" ? "Fixtures to come" : "Jogos por disputar"}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {locale === "en"
-                ? "What is left of this matchday, then the next one. Open a fixture for the full preview."
-                : "O que falta desta jornada e a jornada seguinte. Abra um jogo para a análise completa."}
-            </p>
-            <MatchdayPredictions
-              matches={upcomingWithProbs}
-              matchday={prediction.matchday}
-              labels={{
-                home: t("football.home"),
-                draw: t("football.draw"),
-                away: t("football.away"),
-                titleImpact: t("football.titleImpact"),
-                relegationImpact: t("football.relegationImpact"),
-                matchPage: locale === "en" ? "Match preview" : "Análise do jogo",
-              }}
-              decisiveMatches={scenarios?.decisive_matches}
-              matchHrefs={matchHrefs}
+            <DataCard
+              title={locale === "pt" ? "Probabilidade de ser campeão, jornada a jornada" : "Chance of the title, matchday by matchday"}
+              subtitle={`${locale === "pt"
+                ? "Uma linha por clube que já passou de 1%. Cada ponto é uma previsão publicada, com os jogos disputados até então; a data de cada uma está na dica e na tabela."
+                : "One line per club that has been above 1%. Each dot is a published forecast, with the matches played up to then; each one's date is in the tip and the table."}${preSeasonNote}`}
+              source={sourceLine}
+              updated={updatedLine}
+              methodologyHref="/desporto/liga/metodologia"
+              methodologyLabel={methodLabel}
               locale={locale}
-            />
+            >
+              <TitleRaceChart
+                historical={probabilities}
+                yAxisLabel={t("football.championPercent")}
+                caveat={<>
+                  {t("football.titleCalibrationCaveat")}{" "}
+                  <Link
+                    href={locale === "pt"
+                      ? "/desporto/liga/metodologia#as-probabilidades-de-titulo-estao-calibradas"
+                      : "/desporto/liga/metodologia#are-the-title-probabilities-calibrated"}
+                    locale={locale}
+                    className="font-medium text-ink underline underline-offset-4"
+                  >
+                    {locale === "pt" ? "Como o verificámos" : "How we checked"}
+                  </Link>
+                </>}
+              />
+            </DataCard>
           </div>
         </section>
       )}
 
-      {/* Next Matchday — only when current matchday is complete */}
-      {matchdayComplete && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
-              {t("football.nextMatchday")} — {t("football.matchday")}{" "}
-              {prediction.next_matchday.matchday}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.nextMatchdayDescription", {
-                matchday: prediction.next_matchday.matchday,
-              })}
-            </p>
-            <MatchdayPredictions
-              matches={prediction.next_matchday.matches}
-              matchday={prediction.next_matchday.matchday}
-              labels={{
-                home: t("football.home"),
-                draw: t("football.draw"),
-                away: t("football.away"),
-                titleImpact: t("football.titleImpact"),
-                relegationImpact: t("football.relegationImpact"),
-                matchOfTheWeek: t("football.matchOfTheWeek"),
-                matchPage: locale === "en" ? "Match preview" : "Análise do jogo",
-              }}
-              decisiveMatches={scenarios?.decisive_matches?.filter(
-                (m) => m.matchday === prediction.next_matchday.matchday
-              )}
-              matchHrefs={matchHrefs}
-              locale={locale}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* Relegation Battle */}
+      {/* Relegation Battle — defaults to the highest-risk club plus a few
+          comparisons; "todas as equipas" stays one click away. */}
       {historical.length > 1 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-6">
               {t("football.relegationBattle")}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.relegationBattleDescription")}
-            </p>
-            <RelegationChart historical={historical} yAxisLabel={t("football.relegationPercent")} />
+            <DataCard
+              title={locale === "pt" ? "Probabilidade de despromoção, jornada a jornada" : "Chance of relegation, matchday by matchday"}
+              subtitle={`${locale === "pt"
+                ? "Despromoção é acabar em 17.º ou 18.º; o 16.º vai ao play-off e não conta aqui."
+                : "Relegation means finishing 17th or 18th; 16th goes to a play-off and is not counted here."}${preSeasonNote}`}
+              source={sourceLine}
+              updated={updatedLine}
+              methodologyHref="/desporto/liga/metodologia"
+              methodologyLabel={methodLabel}
+              locale={locale}
+            >
+              <RelegationChart historical={probabilities} yAxisLabel={t("football.relegationPercent")} />
+            </DataCard>
           </div>
         </section>
       )}
@@ -435,27 +558,34 @@ export default async function LigaPage({
       {prediction.team_strengths && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
+            {/* Club pages link here for every club's rank (PUB3-12). */}
+            <h2 id="forca-das-equipas" className="text-2xl tracking-tight mb-6">
               {t("football.teamStrengths")}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.teamStrengthsDescription")}
-            </p>
-            <TeamStrengthRatings
-              strengths={prediction.team_strengths}
-              labels={{
-                attack: t("football.attack"),
-                defense: t("football.defense"),
-                worse: t("football.worse"),
-                better: t("football.better"),
-              }}
-            />
+            <DataCard
+              title={locale === "pt" ? "Ataque e defesa estimados" : "Estimated attack and defence"}
+              source={sourceLine}
+              updated={updatedLine}
+              methodologyHref="/desporto/liga/metodologia"
+              methodologyLabel={methodLabel}
+              locale={locale}
+            >
+              <TeamStrengthRatings
+                strengths={prediction.team_strengths}
+                labels={{
+                  attack: t("football.attack"),
+                  defense: t("football.defense"),
+                  worse: t("football.worse"),
+                  better: t("football.better"),
+                }}
+              />
+            </DataCard>
           </div>
         </section>
       )}
 
-      {/* Written analysis about the league. Above the model block, which is this
-          page's closing furniture — an about paragraph and five links out. */}
+      {/* Written analysis about the league, before the furniture that closes
+          the page. */}
       <SectionNotes
         section="football"
         locale={locale}
@@ -463,115 +593,65 @@ export default async function LigaPage({
         containerClassName="max-w-7xl mx-auto px-4 py-10"
       />
 
-      {/* Model Info */}
-      <section className="border-b border-stone-200">
+      {/* Everything else about the Liga, as one group of teasers in one
+          rhythm, two to a row from sm, the action under the text so a phone
+          never squeezes the copy into a column (audit UXM2-05, PUB2-23,
+          UXD2-15). The last section: the footer draws the rule (UXD-10). */}
+      <section aria-labelledby="liga-mais">
         <div className="max-w-7xl mx-auto px-4 py-10">
-          <h2 className="text-2xl tracking-tight mb-3">
-            {t("football.modelInfo")}
+          <h2 id="liga-mais" className="text-2xl tracking-tight mb-3">
+            {locale === "en" ? "More on the Liga" : "Mais sobre a Liga"}
           </h2>
           <p className="text-sm text-stone-600 leading-relaxed max-w-3xl">
             {t("football.modelDescription", {
-              count: prediction.n_sims.toLocaleString(),
+              count: simsLabel,
             })}
           </p>
+          <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+            {teasers.map(teaser => (
+              <li key={teaser.href} className="min-w-0">
+                <Link
+                  href={teaser.href}
+                  locale={locale}
+                  className="flex h-full flex-col rounded-2xl border border-line bg-cream p-4 transition-colors duration-150 hover:bg-parchment md:p-5"
+                >
+                  <div className="flex items-start gap-3">
+                    <teaser.Icon aria-hidden="true" className="mt-1 h-5 w-5 flex-shrink-0 text-stone-500" />
+                    <div className="min-w-0">
+                      <h3 className="text-xl font-bold leading-snug text-ink">{teaser.title}</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-stone-600">{teaser.body}</p>
+                    </div>
+                  </div>
+                  <span className="mt-3 inline-flex items-center gap-1 self-start pl-8 text-sm font-semibold text-ink underline underline-offset-4 md:mt-auto md:pt-3">
+                    {teaser.action}
+                    <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
 
-          {/* Model vs Market — evaluation against the closing line */}
-          <Link
-            href="/desporto/liga/modelo"
-            locale={locale}
-            className="mt-6 block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
-          >
-            <div className="flex items-start gap-3">
-              <Scale className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-stone-900">
-                  {locale === "en" ? "Model vs Market" : "Modelo vs Mercado"}
-                </h3>
-                <p className="text-sm text-stone-500 mt-0.5">
-                  {locale === "en"
-                    ? "We tested the model against Pinnacle's closing line over 504 matches and eight seasons. From matchday 14 it matches the market — the whole deficit is early season."
-                    : "Testámos o modelo contra a linha de fecho da Pinnacle em 504 jogos e oito épocas. A partir da jornada 14 iguala o mercado — toda a desvantagem está no início da época."}
-                </p>
-              </div>
-              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
-                {locale === "en" ? "See the scorecard" : "Ver a avaliação"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </span>
-            </div>
-          </Link>
-
-          {/* 2025-26 season review — the finished season, with xG hindsight */}
-          <Link
-            href="/desporto/liga/2025-26"
-            locale={locale}
-            className="mt-4 block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
-          >
-            <div className="flex items-start gap-3">
-              <History className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-stone-900">
-                  {locale === "en"
-                    ? "The 2025-26 season, reviewed"
-                    : "A época 2025-26 em revista"}
-                </h3>
-                <p className="text-sm text-stone-500 mt-0.5">
-                  {locale === "en"
-                    ? "Porto took the title on 88 points while Sporting scored 89 goals and finished second, and Benfica went unbeaten into third. What the xG says about who deserved it — and how our own forecasts held up."
-                    : "O Porto foi campeão com 88 pontos, o Sporting marcou 89 golos e ficou em segundo, e o Benfica acabou invicto em terceiro. O que o xG diz sobre quem mereceu — e como se portaram as nossas previsões."}
-                </p>
-              </div>
-              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
-                {locale === "en" ? "Read the review" : "Ver a revisão"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </span>
-            </div>
-          </Link>
-
-          {/* Players — the per-position ratings hub */}
-          <Link
-            href="/desporto/liga/jogadores"
-            locale={locale}
-            className="mt-4 block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
-          >
-            <div className="flex items-start gap-3">
-              <Users className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-stone-900">
-                  {locale === "en" ? "The players, measured honestly" : "Os jogadores, medidos com honestidade"}
-                </h3>
-                <p className="text-sm text-stone-500 mt-0.5">
-                  {locale === "en"
-                    ? "Finishing, attacking contribution, contested possession, goalkeeping — one metric per dimension, each with its own scale and its own uncertainty, and no fake overall score."
-                    : "Finalização, contribuição ofensiva, posse disputada, guarda-redes — uma métrica por dimensão, cada uma com a sua escala e a sua incerteza, sem nota global inventada."}
-                </p>
-              </div>
-              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
-                {locale === "en" ? "See the players" : "Ver os jogadores"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </span>
-            </div>
-          </Link>
-
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {t("football.methodology")}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4" />
             </Link>
             <Link
               href="/desporto/liga/dados"
               locale={locale}
-              className="text-sm font-medium text-ink hover:text-ink-dark inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {locale === "en" ? "Open forecast data" : "Dados abertos das previsões"}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4" />
             </Link>
           </div>
         </div>
       </section>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

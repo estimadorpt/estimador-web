@@ -1,29 +1,23 @@
-"use client";
-
-import React from "react";
 import type {
   TeamNarrativeScenarios,
   NarrativeScenario,
   ScenarioStep,
   ScenarioRivalCondition,
 } from "@/types/football";
-import { ligaTeamColors, ligaTeamShortNames, teamDisplayName } from "@/lib/config/football";
+import { teamColorOnPaper, teamDisplayName, teamWithArticle } from "@/lib/config/football";
+import { formatPercent } from "@/lib/football-format";
+import { rivalConditionsWithoutOwnMatches } from "@/lib/football-scenarios";
+import { forecastAsOf } from "@/lib/football-status";
+import { ClockSwitch } from "@/components/football/ClockSwitch";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function pct(v: number): string {
-  const rounded = Math.round(v * 100);
-  if (rounded >= 100) return ">99%";
-  if (rounded <= 0 && v > 0) return "<1%";
-  return `${rounded}%`;
-}
-
-/** Safe CSS percentage — never returns ">99%" or "<1%", always a clean number */
+/** Safe CSS percentage, clamped to the bar. */
 function cssPct(v: number): string {
-  return `${Math.min(Math.max(Math.round(v * 100), 0), 100)}%`;
+  return `${Math.min(Math.max(v * 100, 0), 100)}%`;
 }
 
-/** Generate a one-line summary of the scenario from its steps */
+/** A one-line summary of the scenario from its steps ("3 vitórias, 1 derrota"). */
 function scenarioSummary(
   scenario: NarrativeScenario,
   labels: { win: string; winPlural: string; draw: string; drawPlural: string; loss: string; lossPlural: string },
@@ -49,239 +43,159 @@ interface StepLabels {
   away: string;
 }
 
-function StepRow({
-  step,
-  teamColor,
-  prevP,
-  labels,
-}: {
-  step: ScenarioStep;
-  teamColor: string;
-  prevP: number;
-  labels: StepLabels;
-}) {
+const RESULT_STYLE: Record<ScenarioStep["result"], string> = {
+  W: "bg-emerald-50 text-emerald-700",
+  D: "bg-parchment text-stone-700",
+  L: "bg-red-50 text-red-700",
+};
+
+function StepRow({ step, teamColor, prevP, labels, locale }: { step: ScenarioStep; teamColor: string; prevP: number; labels: StepLabels; locale: string }) {
   const delta = step.p_target_after - prevP;
-  const isPositive = delta >= 0;
-
-  const resultLabel =
-    step.result === "W" ? labels.resultWin
-    : step.result === "D" ? labels.resultDraw
-    : labels.resultLoss;
-
+  const resultLabel = step.result === "W" ? labels.resultWin : step.result === "D" ? labels.resultDraw : labels.resultLoss;
+  // The path builder's letters (V/E/D, W/D/L): the word "Vitória" beside the
+  // club Vitória read as a name (audit UXD3-05). The word stays for readers.
+  const resultLetter = resultLabel.charAt(0).toUpperCase();
   const venueLabel = step.venue === "H" ? labels.home : labels.away;
 
   return (
-    <div className="flex items-center gap-2 py-2 border-b border-stone-100 last:border-0">
-      {/* Match info */}
-      <div className="flex-1 min-w-0">
+    <li className="flex items-center gap-2 border-b border-line py-2 last:border-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-bold text-stone-400 tabular-nums w-7 shrink-0">
+          <span className="w-9 shrink-0 text-xs font-bold tabular-nums text-stone-500">
             {labels.matchdayPrefix}{step.matchday}
           </span>
-          <span className="text-sm text-stone-700 truncate sm:hidden">
-            {ligaTeamShortNames[step.opponent] || step.opponent}
-          </span>
-          <span className="text-sm text-stone-700 truncate hidden sm:inline">
-            {teamDisplayName(step.opponent)}
-          </span>
-          <span className="text-[11px] text-stone-400 shrink-0">({venueLabel})</span>
-          <span
-            className={`text-[11px] font-bold px-1 py-0.5 shrink-0 ${
-              step.result === "L"
-                ? "bg-red-50 text-red-600"
-                : step.result === "D"
-                ? "bg-amber-50 text-amber-700"
-                : "bg-emerald-50 text-emerald-700"
-            }`}
-          >
-            {resultLabel}
+          <span className="truncate text-sm text-stone-700">{teamDisplayName(step.opponent)}</span>
+          <span className="shrink-0 text-[11px] text-stone-500">({venueLabel})</span>
+          <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[11px] font-bold ${RESULT_STYLE[step.result]}`}>
+            <span aria-hidden="true">{resultLetter}</span>
+            <span className="sr-only">{resultLabel}</span>
           </span>
         </div>
-
-        {/* Bar */}
-        <div className="h-5 bg-stone-100 relative overflow-hidden mt-1 w-full">
-          <div
-            className="absolute inset-y-0 left-0"
-            style={{
-              width: cssPct(Math.min(prevP, step.p_target_after)),
-              backgroundColor: teamColor,
-              opacity: 0.25,
-            }}
-          />
-          {isPositive ? (
-            <div
-              className="absolute inset-y-0"
-              style={{
-                left: cssPct(prevP),
-                width: cssPct(delta),
-                backgroundColor: teamColor,
-                opacity: 0.6,
-              }}
-            />
+        <div aria-hidden="true" className="relative mt-1 h-3 w-full overflow-hidden rounded-sm bg-parchment">
+          <div className="absolute inset-y-0 left-0" style={{ width: cssPct(Math.min(prevP, step.p_target_after)), backgroundColor: teamColor, opacity: 0.35 }} />
+          {delta >= 0 ? (
+            <div className="absolute inset-y-0" style={{ left: cssPct(prevP), width: cssPct(delta), backgroundColor: teamColor }} />
           ) : (
-            <div
-              className="absolute inset-y-0"
-              style={{
-                left: cssPct(step.p_target_after),
-                width: cssPct(-delta),
-                backgroundColor: "#a3543a",
-                opacity: 0.4,
-              }}
-            />
+            <div className="absolute inset-y-0" style={{ left: cssPct(step.p_target_after), width: cssPct(-delta), backgroundColor: "#a3543a", opacity: 0.6 }} />
           )}
         </div>
       </div>
-
-      {/* Probability: from → to */}
-      <div className="w-20 shrink-0 text-right">
-        <span className="text-xs tabular-nums text-stone-400">
-          {pct(prevP)}
-        </span>
-        <span className="text-stone-300 mx-0.5">&rarr;</span>
-        <span
-          className="text-sm font-bold tabular-nums"
-          style={{ color: isPositive ? teamColor : "#a3543a" }}
-        >
-          {pct(step.p_target_after)}
-        </span>
+      <div className="w-24 shrink-0 text-right tabular-nums">
+        <span className="text-xs text-stone-500">{formatPercent(prevP, locale)}</span>
+        <span aria-hidden="true" className="mx-0.5 text-stone-500">→</span>
+        <span className="sr-only">{locale === "en" ? " to " : " para "}</span>
+        <span className="text-sm font-bold text-ink">{formatPercent(step.p_target_after, locale)}</span>
       </div>
-    </div>
+    </li>
   );
 }
 
-function RivalConditions({
-  conditions,
-  labels,
-}: {
-  conditions: ScenarioRivalCondition[];
-  labels: {
-    thisWorksBecause: string;
-    dropsPointsVs: string;
-    matchdayPrefix: string;
-  };
-}) {
+function RivalConditions({ conditions, labels, locale }: { conditions: ScenarioRivalCondition[]; labels: { thisWorksBecause: string; dropsPointsVs: string; matchdayPrefix: string }; locale: string }) {
   if (conditions.length === 0) return null;
-
+  const pt = locale !== "en";
   return (
-    <div className="px-3 md:px-4 py-2 border-t border-stone-100 bg-stone-50/50">
-      <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
-        {labels.thisWorksBecause}
-      </div>
-      <div className="space-y-1">
-        {conditions.map((rc, i) => {
-          const rivalColor = ligaTeamColors[rc.rival] || "#5f7062";
-          return (
-            <div key={i} className="text-xs text-stone-600">
-              <span className="font-medium" style={{ color: rivalColor }}>
-                {teamDisplayName(rc.rival)}
+    <div className="border-t border-line bg-paper px-3 py-2 md:px-4">
+      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{labels.thisWorksBecause}</p>
+      <ul className="space-y-1">
+        {conditions.map((rc, i) => (
+          <li key={i} className="flex items-start gap-1.5 text-xs text-stone-600">
+            <i aria-hidden="true" className="mt-0.5 h-3 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(rc.rival) }} />
+            <span>
+              <span className="font-semibold text-ink">{teamDisplayName(rc.rival)}</span> {labels.dropsPointsVs}{" "}
+              {pt ? teamWithArticle(rc.opponent) : teamDisplayName(rc.opponent)}
+              <span className="text-stone-500"> ({labels.matchdayPrefix}{rc.matchday})</span>
+              <span className="text-stone-500">
+                {": "}
+                {pt
+                  ? `${formatPercent(rc.p_rival_drops_in_scenario, locale)} neste cenário, ${formatPercent(rc.p_rival_drops_baseline, locale)} em geral`
+                  : `${formatPercent(rc.p_rival_drops_in_scenario, locale)} in this scenario, ${formatPercent(rc.p_rival_drops_baseline, locale)} overall`}
               </span>
-              {" "}
-              {labels.dropsPointsVs}{" "}
-              <span className="sm:hidden">{ligaTeamShortNames[rc.opponent] || rc.opponent}</span>
-              <span className="hidden sm:inline">{teamDisplayName(rc.opponent)}</span>
-              <span className="text-stone-400"> ({labels.matchdayPrefix}{rc.matchday})</span>
-            </div>
-          );
-        })}
-      </div>
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-interface ScenarioCardLabels {
-  scenarioComfortable: string;
-  scenarioRealistic: string;
-  scenarioUnlikely: string;
+interface ScenarioCardLabels extends StepLabels {
   ofChampionSims: string;
   thisWorksBecause: string;
   dropsPointsVs: string;
-  resultWin: string;
-  resultDraw: string;
-  resultLoss: string;
-  matchdayPrefix: string;
-  home: string;
-  away: string;
-  winAbbr: string;
-  winAbbrPlural: string;
-  drawAbbr: string;
-  drawAbbrPlural: string;
-  lossAbbr: string;
-  lossAbbrPlural: string;
 }
 
 function ScenarioCard({
   scenario,
+  team,
   teamColor,
-  index,
   pCurrent,
   labels,
   summary,
+  locale,
+  survival,
+  staleAt,
+  forecastTimestamp,
 }: {
   scenario: NarrativeScenario;
+  team: string;
+  survival: boolean;
   teamColor: string;
-  index: number;
   pCurrent: number;
   labels: ScenarioCardLabels;
   summary: string;
+  locale: string;
+  staleAt?: string | null;
+  forecastTimestamp?: string | null;
 }) {
+  const pt = locale !== "en";
   const finalP = scenario.steps[scenario.steps.length - 1]?.p_target_after ?? pCurrent;
-
+  // "agora" until the round the next forecast waits for is played, then the
+  // forecast's date (audit FR3-01).
+  const target = survival ? (pt ? "Permanência" : "Staying up") : (pt ? "Título" : "Title");
+  const nowWord = pt ? "agora" : "now";
+  const scenarioWord = pt ? "neste cenário" : "in this scenario";
   return (
-    <div className="border border-stone-200">
-      {/* Accent bar */}
-      <div
-        className="h-1"
-        style={{ backgroundColor: teamColor }}
-      />
-
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3 p-3 md:p-4 border-b border-stone-100 bg-stone-50">
-        <div className="flex-1 min-w-0">
-          <h4 className="text-base font-bold text-stone-900">
-            {summary}
-          </h4>
-          <div className="text-[11px] text-stone-400 mt-0.5">
-            <span className="tabular-nums font-medium">{pct(scenario.frequency)}</span>{" "}
-            {labels.ofChampionSims}
-          </div>
+    <li className="overflow-hidden rounded-2xl border border-line bg-cream">
+      <div className="h-1" style={{ backgroundColor: teamColor }} aria-hidden="true" />
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line p-3 md:p-4">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base font-bold text-ink">{summary}</h3>
+          <p className="mt-0.5 text-[11px] text-stone-500">
+            <span className="font-medium tabular-nums">{formatPercent(scenario.frequency, locale)}</span> {labels.ofChampionSims}
+          </p>
         </div>
-        <div className="text-right shrink-0">
-          <div className="text-xs text-stone-400 tabular-nums">
-            {pct(pCurrent)}
-          </div>
-          <div className="text-stone-300">&darr;</div>
-          <div
-            className="text-lg font-display font-extrabold tabular-nums"
-            style={{ color: teamColor }}
-          >
-            {pct(finalP)}
-          </div>
-        </div>
-      </div>
-
-      {/* Steps */}
-      <div className="px-3 md:px-4">
-        {scenario.steps.map((step, i) => {
-          const prevP =
-            i === 0 ? pCurrent : scenario.steps[i - 1].p_target_after;
-          return (
-            <StepRow
-              key={i}
-              step={step}
-              teamColor={teamColor}
-              prevP={prevP}
-              labels={labels}
+        {/* "22% → 47%", read left to right: now, then in this scenario (audit UXD-19). */}
+        <p className="shrink-0 text-right">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            <ClockSwitch
+              initial={`${target}: ${nowWord} → ${scenarioWord}`}
+              steps={staleAt && forecastTimestamp
+                ? [{ at: staleAt, value: `${target}: ${forecastAsOf(forecastTimestamp, locale)} → ${scenarioWord}` }]
+                : []}
             />
-          );
-        })}
+          </span>
+          <span className="font-display text-lg font-extrabold tabular-nums text-ink">
+            <span className="text-stone-500">{formatPercent(pCurrent, locale)}</span>
+            <span aria-hidden="true"> → </span>
+            <span className="sr-only">{pt ? " para " : " to "}</span>
+            {formatPercent(finalP, locale)}
+          </span>
+        </p>
       </div>
-
-      {/* Rival conditions */}
-      <RivalConditions
-        conditions={scenario.rival_conditions}
-        labels={labels}
-      />
-    </div>
+      <ol className="px-3 md:px-4">
+        {scenario.steps.map((step, i) => (
+          <StepRow
+            key={i}
+            step={step}
+            teamColor={teamColor}
+            prevP={i === 0 ? pCurrent : scenario.steps[i - 1].p_target_after}
+            labels={labels}
+            locale={locale}
+          />
+        ))}
+      </ol>
+      <RivalConditions conditions={rivalConditionsWithoutOwnMatches(team, scenario)} labels={labels} locale={locale} />
+    </li>
   );
 }
 
@@ -290,8 +204,15 @@ function ScenarioCard({
 export function NarrativeScenarios({
   data,
   labels,
+  locale,
+  staleAt = null,
+  forecastTimestamp = null,
 }: {
   data: TeamNarrativeScenarios;
+  locale: string;
+  /** When the forecast's "agora" goes out of date (the next round played). */
+  staleAt?: string | null;
+  forecastTimestamp?: string | null;
   labels: {
     scenarioComfortable: string;
     scenarioRealistic: string;
@@ -314,28 +235,39 @@ export function NarrativeScenarios({
     lossAbbrPlural: string;
   };
 }) {
-  const teamColor = ligaTeamColors[data.team] || "#5f7062";
-
-  // Use the right frequency label based on target
+  const pt = locale !== "en";
+  const teamColor = teamColorOnPaper(data.team);
+  const name = teamDisplayName(data.team);
   const adjustedLabels = {
     ...labels,
-    ofChampionSims:
-      data.target === "survival" ? labels.ofSurvivalSims : labels.ofChampionSims,
+    ofChampionSims: data.target === "survival" ? labels.ofSurvivalSims : labels.ofChampionSims,
   };
-
-  // Sort by frequency descending (most common scenario first)
   const sorted = [...data.scenarios].sort((a, b) => b.frequency - a.frequency);
+  const nSteps = sorted[0]?.steps.length ?? 0;
+
+  // What these paths are, before any of them (audit pub-PP-11): each is one
+  // combination of results in the club's most telling games, and together
+  // they cover only a small share of the simulations.
+  const lead = pt
+    ? `Cada percurso fixa os resultados do ${name} em ${nSteps} jogos que mais separam as simulações em que ${data.target === "survival" ? "se salva" : "é campeão"} das outras. Os ${sorted.length} juntos cobrem ${formatPercent(data.scenario_coverage, locale)} dessas simulações: são exemplos do que pode acontecer, não o caminho previsto.`
+    : `Each path fixes ${name}'s results in the ${nSteps} games that most separate the simulations where they ${data.target === "survival" ? "stay up" : "win the title"} from the rest. Together the ${sorted.length} cover ${formatPercent(data.scenario_coverage, locale)} of those simulations: they are examples of what can happen, not the forecast path.`;
 
   return (
-    <div className="space-y-3">
-      {sorted.map((scenario, i) => (
+    <div>
+      <p className="mb-4 max-w-3xl text-sm leading-relaxed text-stone-600">{lead}</p>
+      <ul className="space-y-3">
+        {sorted.map((scenario, i) => (
           <ScenarioCard
             key={i}
             scenario={scenario}
+            team={data.team}
             teamColor={teamColor}
-            index={i}
             pCurrent={data.p_current}
             labels={adjustedLabels}
+            locale={locale}
+            survival={data.target === "survival"}
+            staleAt={staleAt}
+            forecastTimestamp={forecastTimestamp}
             summary={scenarioSummary(scenario, {
               win: adjustedLabels.winAbbr,
               winPlural: adjustedLabels.winAbbrPlural,
@@ -346,6 +278,7 @@ export function NarrativeScenarios({
             })}
           />
         ))}
+      </ul>
     </div>
   );
 }

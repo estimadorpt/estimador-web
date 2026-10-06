@@ -1,32 +1,42 @@
-"use client";
-
-import { ligaTeamColors, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
+import { teamColorOnPaper, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
+import { formatPercent, matchLabel } from "@/lib/football-format";
 import type { DecisiveMatch } from "@/types/football";
+import type { ReactNode } from "react";
+
+/** Which race a list is about. A club page passes its own race only. */
+export type DecisiveRace = "title" | "relegation" | "both";
+
+/** Below this spread a match is not "decisive" for a race (3 percentage points). */
+export const DECISIVE_THRESHOLD = 0.03;
 
 interface DecisiveMatchesProps {
   matches: DecisiveMatch[];
+  race?: DecisiveRace;
+  locale: string;
   labels: {
-    matchday: string;
-    championProb: string;
-    baseline: string;
-    draw: string;
-    ifWins: string;
-    ifWin?: string;
-    ifLose?: string;
-    current?: string;
-    relegationProb?: string;
-    titleRaceSection?: string;
-    relegationSection?: string;
-    matchdayPrefix?: string;
+    /** "Atual", or a ClockSwitch that dates it once the round is played. */
+    current: ReactNode;
+    /** "Se o __TEAM__ vencer" */
+    ifTeamWins: string;
+    /** "Se o __TEAM__ perder" */
+    ifTeamLoses: string;
+    titleRaceSection: string;
+    relegationSection: string;
+    matchdayPrefix: string;
   };
   maxItemsPerTeam?: number;
 }
 
-function formatPct(value: number): string {
-  const pct = value * 100;
-  if (pct > 99 && pct < 100) return ">99%";
-  if (pct < 1 && pct > 0) return "<1%";
-  return `${Math.round(pct)}%`;
+/** The title rows of a decisive list, filtered by the threshold. */
+export function titleDecisive(matches: DecisiveMatch[] | undefined, team?: string): DecisiveMatch[] {
+  return (matches ?? []).filter(m => m.title_swing > DECISIVE_THRESHOLD && (!team || m.most_affected_team === team));
+}
+
+/** The relegation rows of a decisive list, filtered by the threshold. */
+export function relegationDecisive(matches: DecisiveMatch[] | undefined, team?: string): DecisiveMatch[] {
+  return (matches ?? []).filter(
+    m => (m.relegation_swing ?? 0) > DECISIVE_THRESHOLD && !!m.most_affected_relegation_team && (!team || m.most_affected_relegation_team === team),
+  );
 }
 
 interface MatchRowProps {
@@ -36,98 +46,40 @@ interface MatchRowProps {
   probs: { H: number; D: number; A: number };
   labels: DecisiveMatchesProps["labels"];
   isTitle: boolean;
+  locale: string;
 }
 
-function MatchRow({ match, affectedTeam, baseline, probs, labels, isTitle }: MatchRowProps) {
-  const homeColor = ligaTeamColors[match.home_team] || "#5f7062";
-  const awayColor = ligaTeamColors[match.away_team] || "#5f7062";
-
-  const currentLabel = labels.current ?? "Current";
-  const ifWinLabel = labels.ifWin ?? "If they win";
-  const ifLoseLabel = labels.ifLose ?? "If they lose";
-
+function MatchRow({ match, affectedTeam, baseline, probs, labels, isTitle, locale }: MatchRowProps) {
   const affectedIsHome = affectedTeam === match.home_team;
   const winProb = affectedIsHome ? probs.H : probs.A;
   const loseProb = affectedIsHome ? probs.A : probs.H;
-
-  // For title: higher is better. For relegation: lower is better.
+  // For the title higher is better, for relegation lower is better. The
+  // words carry the meaning; the colour only repeats it.
   const winIsGood = isTitle ? winProb > loseProb : winProb < loseProb;
+  const name = teamDisplayName(affectedTeam);
 
   return (
-    <div className="flex items-baseline gap-x-3 py-2 border-b border-stone-100 last:border-0 flex-wrap">
-      {/* Match: home vs away · matchday */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        <div className="w-1 h-3.5" style={{ backgroundColor: homeColor }} />
-        <span className="text-sm font-medium text-stone-800">{teamDisplayName(match.home_team)}</span>
-        <span className="text-xs text-stone-400">vs</span>
-        <span className="text-sm font-medium text-stone-800">{teamDisplayName(match.away_team)}</span>
-        <div className="w-1 h-3.5" style={{ backgroundColor: awayColor }} />
-        <span className="text-xs text-stone-400 ml-1">{labels.matchdayPrefix ?? "J"}{match.matchday}</span>
-      </div>
-
-      {/* Separator */}
-      <span className="text-stone-300">—</span>
-
-      {/* Current · if win · if lose */}
-      <div className="flex items-baseline gap-x-3 text-xs flex-wrap">
+    <li className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-line py-2 last:border-0">
+      <span className="flex min-w-0 items-center gap-1.5">
+        <i aria-hidden="true" className="h-3.5 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(match.home_team) }} />
+        <span className="text-sm font-medium text-ink">{matchLabel(teamDisplayName(match.home_team), teamDisplayName(match.away_team))}</span>
+        <i aria-hidden="true" className="h-3.5 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(match.away_team) }} />
+        <span className="ml-1 text-xs text-stone-500">{labels.matchdayPrefix}{match.matchday}</span>
+      </span>
+      <span className="flex flex-wrap items-baseline gap-x-3 text-xs">
         <span className="text-stone-500">
-          {currentLabel}: <strong className="text-stone-700">{formatPct(baseline)}</strong>
+          {labels.current}: <strong className="text-ink">{formatPercent(baseline, locale)}</strong>
         </span>
-        <span className="text-stone-300">·</span>
-        <span className={winIsGood ? "text-green-700" : "text-red-600"}>
-          {ifWinLabel}: <strong className="font-bold">{formatPct(winProb)}</strong>
+        <span aria-hidden="true" className="text-stone-500">·</span>
+        <span className={winIsGood ? "text-emerald-700" : "text-red-700"}>
+          {labels.ifTeamWins.replace("__TEAM__", name)}: <strong className="font-bold">{formatPercent(winProb, locale)}</strong>
         </span>
-        <span className="text-stone-300">·</span>
-        <span className={!winIsGood ? "text-green-700" : "text-red-600"}>
-          {ifLoseLabel}: <strong className="font-bold">{formatPct(loseProb)}</strong>
+        <span aria-hidden="true" className="text-stone-500">·</span>
+        <span className={!winIsGood ? "text-emerald-700" : "text-red-700"}>
+          {labels.ifTeamLoses.replace("__TEAM__", name)}: <strong className="font-bold">{formatPercent(loseProb, locale)}</strong>
         </span>
-      </div>
-    </div>
-  );
-}
-
-interface TeamSectionProps {
-  team: string;
-  baseline: number;
-  teamMatches: DecisiveMatch[];
-  labels: DecisiveMatchesProps["labels"];
-  getProbs: (m: DecisiveMatch) => { H: number; D: number; A: number };
-  getSwing: (m: DecisiveMatch) => number;
-  isTitle: boolean;
-}
-
-function TeamSection({
-  team,
-  baseline,
-  teamMatches,
-  labels,
-  getProbs,
-  isTitle,
-}: TeamSectionProps) {
-  const teamColor = ligaTeamColors[team] || "#5f7062";
-
-  return (
-    <div>
-      <div className="flex items-center gap-2 py-1.5 border-b border-stone-200">
-        {teamLogoSrc(team) ? (
-          <img src={teamLogoSrc(team)} alt="" className="w-5 h-5 object-contain" />
-        ) : (
-          <div className="w-1 h-4 flex-shrink-0" style={{ backgroundColor: teamColor }} />
-        )}
-        <span className="font-semibold text-stone-800 text-sm">{teamDisplayName(team)}</span>
-      </div>
-      {teamMatches.map((match, i) => (
-        <MatchRow
-          key={i}
-          match={match}
-          affectedTeam={team}
-          baseline={baseline}
-          probs={getProbs(match)}
-          labels={labels}
-          isTitle={isTitle}
-        />
-      ))}
-    </div>
+      </span>
+    </li>
   );
 }
 
@@ -141,104 +93,116 @@ function groupByTeam(
   const grouped = new Map<string, DecisiveMatch[]>();
   for (const match of matches) {
     const team = getTeam(match);
+    if (!team) continue;
     if (!grouped.has(team)) grouped.set(team, []);
     grouped.get(team)!.push(match);
   }
-
   return Array.from(grouped.entries())
     .map(([team, teamMatches]) => ({
       team,
       baseline: getBaseline(teamMatches[0]),
-      matches: teamMatches
-        .sort((a, b) => getSwing(b) - getSwing(a))
-        .slice(0, maxItems),
+      matches: [...teamMatches].sort((a, b) => getSwing(b) - getSwing(a)).slice(0, maxItems),
     }))
     .sort((a, b) => b.baseline - a.baseline);
 }
 
-export function DecisiveMatches({ matches, labels, maxItemsPerTeam = 3 }: DecisiveMatchesProps) {
+function TeamSection({
+  team,
+  baseline,
+  teamMatches,
+  labels,
+  getProbs,
+  isTitle,
+  locale,
+}: {
+  team: string;
+  baseline: number;
+  teamMatches: DecisiveMatch[];
+  labels: DecisiveMatchesProps["labels"];
+  getProbs: (m: DecisiveMatch) => { H: number; D: number; A: number };
+  isTitle: boolean;
+  locale: string;
+}) {
+  return (
+    <div>
+      <p className="flex items-center gap-2 border-b border-stone-200 py-1.5">
+        {teamLogoSrc(team) ? (
+          <img src={teamLogoSrc(team)} alt="" width={20} height={20} loading="lazy" decoding="async" className="h-5 w-5 object-contain" />
+        ) : (
+          <i aria-hidden="true" className="h-4 w-1 shrink-0" style={{ backgroundColor: teamColorOnPaper(team) }} />
+        )}
+        <span className="text-sm font-semibold text-ink">{teamDisplayName(team)}</span>
+      </p>
+      <ul>
+        {teamMatches.map((match, i) => (
+          <MatchRow
+            key={`${match.matchday}-${match.home_team}-${i}`}
+            match={match}
+            affectedTeam={team}
+            baseline={baseline}
+            probs={getProbs(match)}
+            labels={labels}
+            isTitle={isTitle}
+            locale={locale}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * Remaining fixtures grouped by the club whose race they swing most, with
+ * that club named in every outcome ("Se o Nacional vencer"), so a number on
+ * a club page can never be read as that page's club's own. `race` limits
+ * the list to one race: a club page shows its own race only (audit F-H5).
+ */
+export function DecisiveMatches({ matches, race = "both", labels, maxItemsPerTeam = 3, locale }: DecisiveMatchesProps) {
   if (!matches || matches.length === 0) return null;
 
-  const titleMatches = matches.filter(m => m.title_swing > 0.03);
-  const relegMatches = matches.filter(m => (m.relegation_swing ?? 0) > 0.03);
-
-  const titleGroups = groupByTeam(
-    titleMatches, m => m.most_affected_team, m => m.p_champ_baseline, m => m.title_swing, maxItemsPerTeam,
+  const titleGroups = race === "relegation" ? [] : groupByTeam(
+    titleDecisive(matches), m => m.most_affected_team, m => m.p_champ_baseline, m => m.title_swing, maxItemsPerTeam,
   );
-
-  const relegGroups = groupByTeam(
-    relegMatches,
-    m => m.most_affected_relegation_team ?? '',
+  const relegGroups = race === "title" ? [] : groupByTeam(
+    relegationDecisive(matches),
+    m => m.most_affected_relegation_team ?? "",
     m => m.p_releg_baseline ?? 0,
     m => m.relegation_swing ?? 0,
     maxItemsPerTeam,
-  ).filter(g => g.team);
+  );
+  if (titleGroups.length === 0 && relegGroups.length === 0) return null;
+  const both = titleGroups.length > 0 && relegGroups.length > 0;
 
-  const hasTitle = titleGroups.length > 0;
-  const hasReleg = relegGroups.length > 0;
-
-  const titleColumn = hasTitle && (
+  const column = (isTitle: boolean, groups: typeof titleGroups) => (
     <div>
-      <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-3">
-        {labels.titleRaceSection ?? "Title race"}
-      </h3>
+      {both && (
+        <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-stone-500">
+          {isTitle ? labels.titleRaceSection : labels.relegationSection}
+        </h3>
+      )}
       <div className="space-y-5">
-        {titleGroups.map(({ team, baseline, matches: teamMatches }) => (
+        {groups.map(({ team, baseline, matches: teamMatches }) => (
           <TeamSection
             key={team}
             team={team}
             baseline={baseline}
             teamMatches={teamMatches}
             labels={labels}
-            getProbs={(m) => ({ H: m.p_champ_if_H, D: m.p_champ_if_D, A: m.p_champ_if_A })}
-            getSwing={(m) => m.title_swing}
-            isTitle={true}
+            getProbs={isTitle
+              ? m => ({ H: m.p_champ_if_H, D: m.p_champ_if_D, A: m.p_champ_if_A })
+              : m => ({ H: m.p_releg_if_H ?? 0, D: m.p_releg_if_D ?? 0, A: m.p_releg_if_A ?? 0 })}
+            isTitle={isTitle}
+            locale={locale}
           />
         ))}
       </div>
     </div>
   );
-
-  const relegColumn = hasReleg && (
-    <div>
-      <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-3">
-        {labels.relegationSection ?? "Relegation battle"}
-      </h3>
-      <div className="space-y-5">
-        {relegGroups.map(({ team, baseline, matches: teamMatches }) => (
-          <TeamSection
-            key={team}
-            team={team}
-            baseline={baseline}
-            teamMatches={teamMatches}
-            labels={labels}
-            getProbs={(m) => ({
-              H: m.p_releg_if_H ?? 0,
-              D: m.p_releg_if_D ?? 0,
-              A: m.p_releg_if_A ?? 0,
-            })}
-            getSwing={(m) => m.relegation_swing ?? 0}
-            isTitle={false}
-          />
-        ))}
-      </div>
-    </div>
-  );
-
-  // Two columns on desktop when both sections exist
-  if (hasTitle && hasReleg) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
-        {titleColumn}
-        {relegColumn}
-      </div>
-    );
-  }
 
   return (
-    <div>
-      {titleColumn}
-      {relegColumn}
+    <div className={both ? "grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-10" : ""}>
+      {titleGroups.length > 0 && column(true, titleGroups)}
+      {relegGroups.length > 0 && column(false, relegGroups)}
     </div>
   );
 }

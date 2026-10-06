@@ -21,6 +21,7 @@ import { toneForLabel } from './LabelBadge';
 import { fmtProbPct, fmtNum, COLORS } from '@/lib/utils/economy-format';
 import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import type { RecessionTileData, RecessionProbPoint } from '@/types/economy-dashboard';
+import { withMinus } from '@/lib/typography';
 
 // Past Portuguese recession spans (GFC, Troika, COVID). Matched to the history
 // by quarter string -> index and shaded as light grey bands on the sparkline.
@@ -142,7 +143,7 @@ function ScoreChip({ label, value }: { label: string; value: string }) {
 }
 
 const sgn = (v?: number) =>
-  typeof v === 'number' && Number.isFinite(v) ? `${v >= 0 ? '+' : ''}${v.toFixed(2)}` : '—';
+  typeof v === 'number' && Number.isFinite(v) ? withMinus(`${v >= 0 ? '+' : ''}${v.toFixed(2)}`) : '—';
 
 export async function RecessionTile({
   data,

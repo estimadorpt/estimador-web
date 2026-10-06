@@ -36,7 +36,7 @@ export const BRAND = {
   periwinkleSoft: '#bdc7e7',
   terracotta: '#a3543a',
   gold: '#c49536',
-  tree: '#4e8056',
+  tree: '#377455',
   teal: '#245c68',
 } as const;
 

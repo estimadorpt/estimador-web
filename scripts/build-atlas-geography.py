@@ -47,5 +47,5 @@ for region,group in mun.groupby('region'):
         index['municipalities'].append({'code':row.municipalityCode,'name':row.municipality,'region':region,'regionId':regionid,'parishes':[{'code':r.code,'name':r['name']} for _,r in children.iterrows()]})
         write_geo(children[['code','name','geometry']],out/'parishes'/f'{row.municipalityCode}.json')
 assert len(index['municipalities'])==308
-(root/'src/lib/atlas/places.json').write_text(json.dumps(index,ensure_ascii=False,separators=(',',':')))
+(root/'scripts/data/caop-2021-places.json').write_text(json.dumps(index,ensure_ascii=False,separators=(',',':')))
 print('Exported',len(mun),'municipalities,',len(df),'parishes')

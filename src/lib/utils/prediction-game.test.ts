@@ -146,6 +146,24 @@ describe('probsFromPick', () => {
     expect(v[2]).toBeGreaterThan(v[0]);
     expect(v[2]).toBeGreaterThan(v[1]);
   });
+
+  it('gives the draw at least the unpicked side when a side is picked (F19)', () => {
+    for (const conf of ['leve', 'media', 'alta'] as const) {
+      const away = probsFromPick('A', conf);
+      expect(away[1]).toBeGreaterThanOrEqual(away[0]);
+      const home = probsFromPick('H', conf);
+      expect(home[1]).toBeGreaterThanOrEqual(home[2]);
+    }
+    const v = probsFromPick('A', 'leve');
+    expect(v[1]).toBeCloseTo(0.6 * 0.55, 9);
+    expect(v[0]).toBeCloseTo(0.6 * 0.45, 9);
+  });
+
+  it('splits a draw pick between the sides by the base rates', () => {
+    const v = probsFromPick('D', 'media');
+    expect(v[0]).toBeGreaterThan(v[2]);
+    expect(v[0] + v[2]).toBeCloseTo(0.45, 9);
+  });
 });
 
 describe('setSliderValue', () => {
@@ -228,6 +246,21 @@ describe('roundLockState', () => {
     const lock = roundLockState(r, Date.parse('2026-08-10T12:00:00Z'));
     expect(lock.locked).toBe(true);
     expect(lock.reason).toBe('results');
+  });
+
+  it("prefers the manifest's lock time over the kickoff", () => {
+    // An unconfirmed midnight placeholder locks at the earliest plausible
+    // slot of its round, which is earlier than the placeholder itself.
+    const r = round(9, [
+      {
+        ...fixture('Porto', 'Benfica', [0.5, 0.25, 0.25], { kickoff: '2026-10-18T23:00:00Z' }),
+        locksAt: '2026-10-16T23:00:00Z',
+        kickoffConfirmed: false,
+      },
+    ]);
+    const lockMs = Date.parse('2026-10-16T23:00:00Z');
+    expect(roundLockState(r, lockMs - 1).locked).toBe(false);
+    expect(roundLockState(r, lockMs)).toMatchObject({ locked: true, reason: 'kickoff', lockAt: lockMs });
   });
 
   it('never unlocks a started round just because the clock is early', () => {

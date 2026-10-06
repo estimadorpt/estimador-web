@@ -4,6 +4,8 @@
 // x axis; null values create gaps instead of interpolating across them.
 
 import { COLORS } from '@/lib/utils/economy-format';
+import { FURNITURE } from '@/components/viz/theme';
+import { withMinus } from '@/lib/typography';
 
 export interface StorySeries {
   label: string;
@@ -17,7 +19,14 @@ function isNum(v: number | null | undefined): v is number {
   return typeof v === 'number' && Number.isFinite(v);
 }
 
-export function StoryLineChart({
+/**
+ * The plot stretches to the card's width while its text does not: the lines
+ * are an SVG drawn edge to edge (preserveAspectRatio="none", strokes that do
+ * not scale), and the tick and period labels are HTML at 11px in the chart
+ * text colour (FURNITURE.axis, 4.5:1 on cream). A 640px drawing shrunk onto a
+ * phone used to print them at about 5 to 10px in a faint grey (A11Y2-09).
+ */
+function StoryLinePlot({
   series,
   xStartLabel,
   xEndLabel,
@@ -32,14 +41,12 @@ export function StoryLineChart({
   yFmt?: (v: number) => string;
   height?: number;
 }) {
-  const W = 640;
   const H = height;
-  const padL = 34;
-  const padR = 10;
+  const gutter = 38; // px for the tick labels
   const padTop = 10;
-  const padBottom = 18;
-  const plotW = W - padL - padR;
+  const padBottom = 22; // px for the period labels
   const plotH = H - padTop - padBottom;
+  const plotW = 600; // user units; stretched to the available width
 
   const n = Math.max(...series.map((s) => s.values.length), 0);
   const finite = series.flatMap((s) => s.values.filter(isNum));
@@ -51,8 +58,8 @@ export function StoryLineChart({
   const yLo = rawMin - span * 0.05;
   const yHi = rawMax + span * 0.08;
 
-  const xAt = (i: number) => padL + (plotW * i) / Math.max(n - 1, 1);
-  const yAt = (v: number) => padTop + plotH * (1 - (v - yLo) / (yHi - yLo));
+  const xAt = (i: number) => (plotW * i) / Math.max(n - 1, 1);
+  const yAt = (v: number) => plotH * (1 - (v - yLo) / (yHi - yLo));
 
   // ~4 horizontal gridlines at "nice" steps.
   const step = (() => {
@@ -82,58 +89,67 @@ export function StoryLineChart({
     return segs.filter((s) => s.includes(' '));
   };
 
+  const label = { color: FURNITURE.axis };
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={ariaLabel} className="block w-full h-auto">
-      {ticks.map((v) => (
-        <g key={v}>
-          <line
-            x1={padL}
-            x2={W - padR}
-            y1={yAt(v)}
-            y2={yAt(v)}
-            stroke={Math.abs(v) < 1e-9 ? COLORS.stone : COLORS.grid}
-            strokeWidth={1}
-          />
-          <text
-            x={padL - 5}
-            y={yAt(v) + 3}
-            textAnchor="end"
-            fontSize="11"
-            fill={COLORS.stone}
-            className="tabular-nums"
+    <div role="img" aria-label={ariaLabel} className="relative w-full text-[11px] leading-none tabular-nums" style={{ height: H }}>
+      <div aria-hidden="true">
+        {ticks.map((v) => (
+          <span
+            key={v}
+            className="absolute left-0 -translate-y-1/2 pr-1.5 text-right"
+            style={{ ...label, top: padTop + yAt(v), width: gutter }}
           >
-            {yFmt(Math.abs(v) < 1e-9 ? 0 : v)}
-          </text>
-        </g>
-      ))}
-
-      {series.map((s, si) =>
-        segmentsOf(s.values).map((pts, gi) => (
-          <polyline
-            key={`${si}-${gi}`}
-            points={pts}
-            fill="none"
-            stroke={s.color}
-            strokeWidth={1.8}
-            strokeDasharray={s.dashed ? '4 3' : undefined}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-        ))
-      )}
-
-      {xStartLabel && (
-        <text x={padL} y={H - 4} fontSize="11" fill={COLORS.stone}>
-          {xStartLabel}
-        </text>
-      )}
-      {xEndLabel && (
-        <text x={W - padR} y={H - 4} textAnchor="end" fontSize="11" fill={COLORS.stone}>
-          {xEndLabel}
-        </text>
-      )}
-    </svg>
+            {withMinus(yFmt(Math.abs(v) < 1e-9 ? 0 : v))}
+          </span>
+        ))}
+        <svg
+          viewBox={`0 0 ${plotW} ${plotH}`}
+          preserveAspectRatio="none"
+          className="absolute overflow-visible"
+          style={{ left: gutter, right: 4, top: padTop, height: plotH, width: `calc(100% - ${gutter + 4}px)` }}
+        >
+          {ticks.map((v) => (
+            <line
+              key={v}
+              x1={0}
+              x2={plotW}
+              y1={yAt(v)}
+              y2={yAt(v)}
+              stroke={Math.abs(v) < 1e-9 ? COLORS.stone : COLORS.grid}
+              strokeWidth={1}
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+          {series.map((s, si) =>
+            segmentsOf(s.values).map((pts, gi) => (
+              <polyline
+                key={`${si}-${gi}`}
+                points={pts}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={2}
+                strokeDasharray={s.dashed ? '4 3' : undefined}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))
+          )}
+        </svg>
+        {xStartLabel && (
+          <span className="absolute bottom-0" style={{ ...label, left: gutter }}>{xStartLabel}</span>
+        )}
+        {xEndLabel && (
+          <span className="absolute bottom-0 right-1" style={label}>{xEndLabel}</span>
+        )}
+      </div>
+    </div>
   );
+}
+
+/** One drawing at every width: the plot stretches, the labels stay at 11px. */
+export function StoryLineChart(props: Parameters<typeof StoryLinePlot>[0]) {
+  return <StoryLinePlot {...props} />;
 }
 
 /** Legend chips shared by the story charts: color swatch + label (+ last value). */
@@ -143,7 +159,7 @@ export function StoryChartLegend({
   items: Array<{ label: string; color: string; value?: string; dashed?: boolean }>;
 }) {
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-[11px] text-stone-500">
+    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-[11px] text-stone-600">
       {items.map((it, i) => (
         <span key={i} className="inline-flex items-center gap-1.5">
           <span

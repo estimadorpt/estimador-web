@@ -1,40 +1,39 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { formatElectionNumber, formatElectionSigned, pollsterDisplayName, sortByPartyOrder } from "@/lib/election-display";
 import { partyColors } from "@/lib/config/colors";
+import { BRAND } from "@/lib/brand";
+import { getHeatmapColor, HOUSE_EFFECT_BLANK_BELOW } from "@/lib/election-heatmap";
+import { ChartTable } from "@/components/viz/ChartTable";
 
 import type { HouseEffect } from '@/types';
 
 interface HouseEffectsProps {
   data: HouseEffect[];
+  /** Overrides for the text below; by default it follows the page locale. */
+  labels?: {
+    /** Says that a blank cell is a deviation under the display threshold. */
+    blankCells?: string;
+    /** Caption of the table twin (every value to three decimals). */
+    tableCaption?: string;
+    /** Name of the matrix's scroll area, read by assistive technology. */
+    regionLabel?: string;
+  };
 }
 
-// Color interpolation for the heatmap
-function getHeatmapColor(value: number): string {
-  // Normalize value to [-1, 1] for color mapping
-  const normalized = Math.max(-1, Math.min(1, value / 0.4));
-  
-  if (Math.abs(normalized) < 0.05) return "#f8f9fa";
-  
-  if (normalized > 0) {
-    // Softer red tones for positive values
-    const intensity = Math.abs(normalized);
-    const r = Math.round(254 + (220 - 254) * intensity);
-    const g = Math.round(226 + (38 - 226) * intensity);
-    const b = Math.round(226 + (38 - 226) * intensity);
-    return `rgb(${r}, ${g}, ${b})`;
-  } else {
-    // Softer blue tones for negative values
-    const intensity = Math.abs(normalized);
-    const r = Math.round(219 + (69 - 219) * intensity);
-    const g = Math.round(234 + (123 - 234) * intensity);
-    const b = Math.round(254 + (157 - 254) * intensity);
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-}
-
-export function HouseEffects({ data }: HouseEffectsProps) {
+export function HouseEffects({ data, labels }: HouseEffectsProps) {
   const t = useTranslations("forecast");
+  const locale = useLocale();
+  const pt = locale !== 'en';
+  const threshold = formatElectionNumber(HOUSE_EFFECT_BLANK_BELOW, locale, 2);
+  const blankCells = labels?.blankCells ?? (pt
+    ? `Células vazias: desvio inferior a ${threshold} em valor absoluto. A tabela abaixo tem todos os valores, com três casas decimais.`
+    : `Blank cells: a deviation smaller than ${threshold} in absolute value. The table below has every value, to three decimal places.`);
+  const tableCaption = labels?.tableCaption ?? (pt
+    ? 'Efeito de cada empresa de sondagens em cada partido, em logit'
+    : 'Each polling firm’s effect on each party, in logit');
+  const regionLabel = labels?.regionLabel ?? (pt ? 'Efeitos das empresas de sondagens' : 'Polling house effects');
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8 text-stone-500">
@@ -43,20 +42,19 @@ export function HouseEffects({ data }: HouseEffectsProps) {
     );
   }
 
-  // Transform data format if needed
   const transformedData = data.map(d => ({
-    pollster: d.pollster,
+    // One firm, one spelling across both archives ("Pitagorica" → "Pitagórica").
+    pollster: pollsterDisplayName(d.pollster),
     party: d.party,
     effect: d.house_effect ?? d.effect ?? 0
   }));
 
-  // Get unique pollsters and parties
-  const pollsters = Array.from(new Set(transformedData.map(d => d.pollster))).sort();
-  const parties = Object.keys(partyColors).filter(party => 
+  const pollsters = Array.from(new Set(transformedData.map(d => d.pollster))).sort((a, b) => a.localeCompare(b, locale === 'en' ? 'en' : 'pt'));
+  // Columns in the archive's one party order, as in the trend chips and twins (AEE3-06).
+  const parties = sortByPartyOrder(Object.keys(partyColors).filter(party =>
     transformedData.some(d => d.party === party)
-  );
+  ));
 
-  // Create a matrix for easy lookup
   const matrix: Record<string, Record<string, number>> = {};
   transformedData.forEach(d => {
     if (!matrix[d.pollster]) matrix[d.pollster] = {};
@@ -65,71 +63,63 @@ export function HouseEffects({ data }: HouseEffectsProps) {
 
   return (
     <div className="w-full">
-      <div className="bg-cream border border-stone-200 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead className="bg-stone-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-stone-700 w-40">
-                  Pollster
+      {/* A scroll area: focusable, so a keyboard can scroll it, and named
+          (A11Y2-06); the edge shadow says there is more to the side. */}
+      <div tabIndex={0} role="region" aria-label={regionLabel} className="scroll-cue overflow-x-auto rounded-2xl border border-line">
+        <table className="min-w-full">
+          <thead className="bg-parchment">
+            <tr>
+              <th scope="col" className="px-4 py-3 text-left text-sm font-semibold text-stone-700 w-40">
+                {t("pollsterHeader")}
+              </th>
+              {parties.map(party => (
+                <th key={party} scope="col" className="px-3 py-3 text-center text-sm font-semibold text-ink w-20">
+                  <span className="mr-1 inline-block size-2 rounded-full" aria-hidden="true" style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }} />
+                  {party}
                 </th>
-                {parties.map(party => (
-                  <th
-                    key={party}
-                    className="px-3 py-3 text-center text-sm font-semibold w-20"
-                    style={{ color: partyColors[party as keyof typeof partyColors] }}
-                  >
-                    {party}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-200">
-              {pollsters.map(pollster => (
-                <tr key={pollster}>
-                  <td className="px-4 py-3 text-sm font-medium text-stone-900 bg-stone-50">
-                    {pollster}
-                  </td>
-                  {parties.map(party => {
-                    const effect = matrix[pollster]?.[party] || 0;
-                    const showValue = Math.abs(effect) > 0.02;
-                    
-                    return (
-                      <td
-                        key={`${pollster}-${party}`}
-                        className="px-3 py-3 text-center text-xs font-semibold relative group cursor-help"
-                        style={{ 
-                          backgroundColor: getHeatmapColor(effect),
-                          color: Math.abs(effect) > 0.25 ? "white" : "#434d48"
-                        }}
-                        title={`${pollster} → ${party}: ${effect.toFixed(3)} logit`}
-                      >
-                        {showValue && (
-                          <span>
-                            {effect > 0 ? '+' : ''}{effect.toFixed(2)}
-                          </span>
-                        )}
-                        
-                        {/* Tooltip */}
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-stone-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                          {pollster} → {party}: {effect.toFixed(3)} logit
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {pollsters.map(pollster => (
+              <tr key={pollster}>
+                <th scope="row" className="px-4 py-3 text-left text-sm font-medium text-ink bg-parchment">
+                  {pollster}
+                </th>
+                {parties.map(party => {
+                  const effect = matrix[pollster]?.[party] ?? 0;
+                  const showValue = Math.abs(effect) > HOUSE_EFFECT_BLANK_BELOW;
+                  // The exact value is the cell's title for a mouse and the
+                  // table twin below for everyone else: no hover tooltip.
+                  return (
+                    <td
+                      key={`${pollster}-${party}`}
+                      className="px-3 py-3 text-center text-xs font-semibold tabular-nums"
+                      style={{ backgroundColor: getHeatmapColor(effect), color: BRAND.forest }}
+                      title={`${pollster} → ${party}: ${formatElectionSigned(effect, locale, 3)} logit`}
+                    >
+                      {showValue ? formatElectionSigned(effect, locale, 2) : null}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      
+
       <div className="mt-4 text-sm text-stone-600 space-y-2">
         <p>
           <strong>{t("houseEffectsTerm")}</strong> {t("houseEffectsExplainer")}
         </p>
+        <p className="text-xs">{blankCells}</p>
         <p className="text-xs">{t("houseEffectsValuesNote")}</p>
       </div>
+      <ChartTable
+        caption={tableCaption}
+        columns={[t("pollsterHeader"), ...parties]}
+        rows={pollsters.map(pollster => [pollster, ...parties.map(party => matrix[pollster]?.[party] != null ? formatElectionSigned(matrix[pollster][party], locale, 3) : '—')])}
+      />
     </div>
   );
 }

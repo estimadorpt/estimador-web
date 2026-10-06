@@ -1,18 +1,12 @@
-# Privacidade
-
-**Última revisão: 8 de setembro de 2026**
-
-Esta página descreve o que o estimador.pt regista sobre quem o visita. Descreve o comportamento real do site, não intenções.
-
----
-
 ## Resumo
 
 - O site **não usa cookies** para medição de audiência.
 - Não há perfis de visitante, nem identificadores que persistam entre visitas ou entre dispositivos.
-- A única medição recolhida é a **contagem de visualizações por categoria de página** — e, nos artigos, por artigo.
-- **Não gravamos sessões**, não capturamos cliques automaticamente e não registamos o texto que escreve.
-- **O endereço de e-mail nunca é pedido para ler o site.** A subscrição por e-mail é opcional, e está descrita abaixo.
+- A única medição recolhida é a **contagem de visualizações por categoria de página** e, nos artigos, por artigo.
+- **Não gravamos sessões**, não capturamos cliques automaticamente e não registamos o texto que escreves.
+- **Os tipos de letra, as imagens e os dados vêm do próprio estimador.pt.** Ler uma página não faz pedidos ao Google nem a outro serviço de tipos de letra.
+- Algumas preferências e os jogos ficam **guardados apenas no teu navegador**. A lista completa está mais abaixo.
+- **O endereço de e-mail nunca é pedido para ler o site.**
 
 ---
 
@@ -22,9 +16,9 @@ Usamos o [PostHog](https://posthog.com/) alojado na União Europeia, configurado
 
 - **Um único tipo de evento** é enviado: a visualização de página. Todos os outros eventos são descartados antes de saírem do navegador.
 - **O endereço da página é reduzido a uma categoria fixa** antes do envio. Por exemplo, `/pt/desporto/liga/jogador/joao-silva/` é enviado como `/pt/desporto/liga/jogador/`. Endereços que não correspondam a uma categoria conhecida são enviados como `/pt/other/`.
-- **Os artigos são a exceção: o endereço segue por inteiro.** `/pt/artigos/como-ler-sondagens/` é enviado tal como está. O título de um artigo é uma coisa que publicámos, não uma coisa sobre quem o lê — ao contrário do que escolheu num explorador de dados ou da geografia que selecionou, que continuam a ser descartados. Saber que análises são lidas é a razão de haver medição de todo. Passam apenas os endereços de artigos que existem: a lista é fixada quando o site é compilado, e qualquer outro endereço sob `/artigos/` é enviado como `/pt/artigos/artigo/`, para que um endereço inventado não consiga introduzir texto arbitrário na medição.
-- **Nenhuma query string é enviada.** O que escolheu num explorador de dados, a geografia que selecionou ou qualquer parâmetro depois do `?` nunca saem do seu navegador.
-- **Sem armazenamento persistente:** a biblioteca corre em memória, sem cookies e sem `localStorage`. Fechar o separador apaga o estado.
+- **Os artigos são a exceção: o endereço segue por inteiro.** Um endereço como `/pt/artigos/nome-do-artigo/` é enviado tal como está. O título de um artigo é uma coisa que publicámos, não uma coisa sobre quem o lê, ao contrário do que escolheste num explorador de dados ou da geografia que selecionaste, que continuam a ser descartados. Saber que análises são lidas é a razão de haver medição de todo. Passam apenas os endereços de artigos que existem: a lista é fixada quando o site é compilado, e qualquer outro endereço sob `/artigos/` é enviado como `/pt/artigos/artigo/`, para que um endereço inventado não consiga introduzir texto arbitrário na medição.
+- **Nenhuma query string é enviada.** O que escolheste num explorador de dados, a geografia que selecionaste ou qualquer parâmetro depois do `?` nunca saem do teu navegador.
+- **Sem armazenamento persistente:** a biblioteca de medição corre em memória, sem cookies e sem `localStorage`. Fechar o separador apaga o estado.
 - **Sem perfis de pessoa,** sem gravação de sessão, sem captura automática de interações, sem mapas de calor, sem inquéritos, sem captura de exceções.
 - **O endereço IP não é registado** pela biblioteca nem usado para geolocalização.
 - Não são enviados o site de origem (*referrer*), parâmetros de campanha, nem propriedades do navegador para além da identificação da versão da biblioteca.
@@ -39,25 +33,41 @@ Se a chave de medição não estiver configurada num ambiente, nada é enviado.
 
 O site é servido pelo **Azure Static Web Apps** (Microsoft). Como qualquer servidor web, a Microsoft mantém registos de acesso próprios, que podem incluir o endereço IP e o agente do navegador. Não temos controlo editorial sobre esses registos nem os usamos para análise.
 
+Os tipos de letra (Manrope e Newsreader) são servidos a partir do estimador.pt, como o resto do site, e por isso não acrescentam nenhum destinatário.
+
+---
+
+## Guardado apenas no teu navegador
+
+Algumas partes do site lembram-se de ti sem enviar nada para lado nenhum: guardam um valor no armazenamento local do teu navegador (`localStorage`). Fica neste dispositivo e neste navegador, e limpar os dados do site apaga-o. São estas, e só estas:
+
+| Chave | O que guarda | Onde |
+| --- | --- | --- |
+| `estimador.club` | O clube que escolheste, para o mostrar primeiro na próxima visita | Página inicial |
+| `liga-team-hint-seen` | Que já viste a dica sobre a tabela, para não a repetir | Liga Portugal |
+| `estimador:misteriosa:v2` | As freguesias que escolheste, as pistas que abriste e o teu registo (jogos, dias seguidos, pista em que acertaste) na Freguesia misteriosa | Freguesia misteriosa |
+| `estimador:contra-o-modelo:v1` | Os teus palpites no jogo de previsões | Jogo de previsões |
+| `estimador:contra-o-modelo:player:v1` | O teu identificador de jogador e o segredo que o protege | Jogo de previsões |
+
+As três primeiras nunca saem do navegador. As duas do jogo de previsões acompanham os palpites que envias para a tabela classificativa, como se explica na secção seguinte.
+
 ---
 
 ## Jogo de previsões
 
-O [jogo de previsões](/pt/desporto/liga/jogo-previsoes/) é a única parte do site com estado guardado por pessoa. Pode jogar **sem conta**.
+O [jogo de previsões](/pt/desporto/liga/jogo-previsoes/) é a única parte do site com estado guardado por pessoa no nosso servidor. Podes jogar **sem conta**.
 
 Guardamos, por jogador, exatamente isto:
 
 - um identificador aleatório gerado no primeiro palpite;
-- o nome de exibição que escolheu (aparece na tabela classificativa);
-- o resumo criptográfico (SHA-256) de um segredo aleatório guardado no seu navegador;
-- se ligou o jogo a uma conta, o resumo criptográfico (SHA-256) do identificador dessa conta, e o nome do fornecedor de autenticação;
+- o nome de exibição que escolheste (aparece na tabela classificativa);
+- o resumo criptográfico (SHA-256) de um segredo aleatório guardado no teu navegador;
+- se ligaste o jogo a uma conta, o resumo criptográfico (SHA-256) do identificador dessa conta, e o nome do fornecedor de autenticação;
 - duas datas: criação e última atualização.
 
 **Não guardamos o e-mail nem o nome de utilizador da conta.** O identificador da conta é transformado num resumo antes de ser gravado, e o token de sessão nunca é armazenado.
 
-Se optar por entrar com uma conta, essa autenticação é feita pelo [Clerk](https://clerk.com/) ou pelo serviço de autenticação do Azure Static Web Apps. Esses fornecedores tratam os seus dados de conta segundo as respetivas políticas.
-
-O seu navegador guarda localmente o identificador de jogador e o segredo, para que os palpites persistam entre visitas. Limpar os dados do site apaga-os.
+Se optares por entrar com uma conta, essa autenticação é feita pelo [Clerk](https://clerk.com/) ou pelo serviço de autenticação do Azure Static Web Apps. Esses fornecedores tratam os teus dados de conta segundo as respetivas políticas e guardam a sua própria sessão no teu navegador. Quando o início de sessão pelo Clerk está ativo, a página do jogo carrega o código do Clerk a partir dos servidores do Clerk; as outras páginas do site não o carregam.
 
 ---
 
@@ -65,15 +75,17 @@ O seu navegador guarda localmente o identificador de jogador e o segredo, para q
 
 Ler o site não exige um endereço. A subscrição existe apenas para avisar quando sai uma análise nova, e é opcional.
 
+<NewsletterStatus />
+
 A lista é gerida pelo [Buttondown](https://buttondown.com/), ao abrigo da sua [política de privacidade](https://buttondown.com/legal/privacy) e do [compromisso de conformidade com o RGPD](https://buttondown.com/legal/gdpr-eu-compliance). É o único subcontratante envolvido.
 
-Quando subscreve:
+Como funciona, quando está ativa:
 
-- O formulário abre uma página do Buttondown, e é aí que o endereço é introduzido e guardado. O estimador.pt não mantém uma lista própria e nunca chega a ver o endereço.
-- **O endereço só é usado depois de confirmar a subscrição** na mensagem que recebe. Sem essa confirmação, é descartado. O Buttondown exige esta confirmação em todas as subscrições.
+- O fim de cada artigo e o índice de artigos mostram um campo de e-mail. É um formulário simples desta página, sem script de terceiros. **Ao carregares em «Subscrever», o teu navegador envia o endereço diretamente ao Buttondown**, numa janela nova, onde o Buttondown pode pedir uma verificação. O estimador.pt não tem servidor que receba o endereço e não mantém uma lista própria.
+- **O endereço só é usado depois de confirmares a subscrição** na mensagem que recebes. Sem essa confirmação, é descartado. O Buttondown exige esta confirmação em todas as subscrições.
 - Cada mensagem leva uma ligação para cancelar, com efeito imediato.
-- O endereço não é partilhado, não é vendido, e não é cruzado com a medição de audiência. A medição não regista quem é ninguém, por isso não há nada para cruzar: não sabemos que páginas leu antes de subscrever, nem depois.
-- **Nada é carregado do Buttondown enquanto lê.** Não há formulário incorporado nem script de terceiros nesta página: só um botão que aponta para lá. Quem nunca subscreve nunca contacta o Buttondown.
+- O endereço não é partilhado, não é vendido, e não é cruzado com a medição de audiência. A medição não regista quem é ninguém, por isso não há nada para cruzar: não sabemos que páginas leste antes de subscrever, nem depois.
+- **Nada é carregado do Buttondown enquanto lês.** O campo não contacta ninguém até o enviares. Quem nunca subscreve nunca contacta o Buttondown.
 
 Para acompanhar o site sem dar um endereço, o [feed RSS](/pt/feed.xml) publica as mesmas análises e não identifica quem o lê.
 
@@ -83,10 +95,14 @@ Para acompanhar o site sem dar um endereço, o [feed RSS](/pt/feed.xml) publica 
 
 Os números publicados no estimador.pt são de dois tipos: **dados oficiais públicos** (resultados eleitorais, séries estatísticas, resultados desportivos) e **resultados de modelos** que produzimos a partir deles. Nenhum deles contém registos de pessoas identificáveis, e nenhum é derivado do comportamento de quem visita o site.
 
+**A população sintética** ([/populacao](/pt/populacao/)) não é um registo de pessoas. As pessoas e os agregados foram gerados por um modelo calibrado nos Censos 2021: não são pessoas, famílias nem moradas reais, e não são dados pessoais de ninguém. A auditoria de privacidade do lançamento e os números de coincidência com a amostra estão na [página de qualidade](/pt/populacao/qualidade/).
+
+**«Usar a minha localização»**, na pesquisa de freguesias, corre só no teu dispositivo: o navegador pede a posição, a freguesia mais próxima é calculada ali mesmo a partir da lista pública de freguesias, e nada é enviado ao estimador.pt nem a terceiros. Na medição de audiência, uma página de freguesia ou de região conta apenas como `/pt/populacao/freguesia/` ou `/pt/populacao/regiao/`, sem o código do lugar.
+
 Esta secção descreve o site. As propriedades de privacidade de cada conjunto de dados publicado são descritas na metodologia desse produto, não aqui.
 
 ---
 
 ## Contacto
 
-Para questões sobre esta página, ou para pedir a remoção de um registo de jogador, contacte [info@estimador.pt](mailto:info@estimador.pt).
+Para questões sobre esta página, ou para pedir a remoção de um registo de jogador, escreve para [info@estimador.pt](mailto:info@estimador.pt).

@@ -96,11 +96,158 @@ export const ligaDisplayNames: Record<string, string> = {
   'Alverca': 'Alverca',
   'Maritimo': 'Marítimo',
   'Academico Viseu': 'Ac. Viseu',
+  // Not in the 2026-27 Primeira, but the market scorecard's past seasons name it.
+  'Pacos Ferreira': 'Paços de Ferreira',
 };
 
 /** Get the Portuguese display name for a team (with accents, abbreviated). */
 export function teamDisplayName(team: string): string {
   return ligaDisplayNames[team] ?? team;
+}
+
+/**
+ * Clubs that take the feminine article in Portuguese ("a Oliveirense"). None
+ * of the 2026-27 Primeira Liga does: every club there is "o Porto", "o Sp.
+ * Braga", "o Casa Pia".
+ */
+const FEMININE_CLUBS = new Set(['Oliveirense', 'Sanjoanense', 'Academica', 'Ovarense']);
+
+export type PtClubForm = 'o' | 'de' | 'a' | 'para' | 'contra' | 'em';
+
+/**
+ * A club's display name with the Portuguese article a sentence needs:
+ * "o Porto", "do Benfica", "ao Sporting", "para o Sp. Braga", "contra o
+ * Vitória", "no Casa Pia". A bare name after a preposition ("para Porto",
+ * "de Benfica vencer") reads as machine-filled (audit CL2-01, UXD2-06).
+ */
+export function teamWithArticle(team: string, form: PtClubForm = 'o'): string {
+  const name = teamDisplayName(team);
+  const fem = FEMININE_CLUBS.has(team);
+  const article = {
+    o: fem ? 'a' : 'o',
+    de: fem ? 'da' : 'do',
+    a: fem ? 'à' : 'ao',
+    para: fem ? 'para a' : 'para o',
+    contra: fem ? 'contra a' : 'contra o',
+    em: fem ? 'na' : 'no',
+  }[form];
+  return `${article} ${name}`;
+}
+
+/**
+ * Names for the narrowest columns (the league table on a phone): a word a
+ * reader recognises, never a three-letter code like "STC" or "EAM".
+ */
+const ligaPhoneNames: Record<string, string> = {
+  'SC Braga': 'Braga',
+  'Santa Clara': 'Sta. Clara',
+  'Academico Viseu': 'Ac. Viseu',
+  'Estrela Amadora': 'Estrela',
+  'Gil Vicente': 'Gil Vicente',
+};
+
+export function teamPhoneName(team: string): string {
+  return ligaPhoneNames[team] ?? teamDisplayName(team);
+}
+
+/* ------------------------------------------------- colours on the page --- */
+
+/**
+ * The one 1X2 encoding (audit UXD2-V06): home dark, draw pale, away mid, the
+ * same on the hub cards and the match page. Club colours stay on the rule
+ * above each club's number, never in the split bar (a black or white kit
+ * would match the ink or the paper).
+ */
+export const OUTCOME_TONES = { home: '#434d48', draw: '#d6d8cc', away: '#8b9a8e' } as const;
+
+/** The page ground the team colours are drawn on (globals.css --color-paper). */
+const PAPER = '#f5f3ea';
+const INK = '#234c40';
+
+function hexToRgb(hex: string): [number, number, number] | null {
+  const m = /^#?([a-f\d]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function rgbToHex([r, g, b]: [number, number, number]): string {
+  return `#${[r, g, b].map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('')}`;
+}
+
+function luminance(rgb: [number, number, number]): number {
+  const [r, g, b] = rgb.map(v => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** WCAG contrast ratio between two hex colours. */
+export function contrastRatio(a: string, b: string): number {
+  const ra = hexToRgb(a);
+  const rb = hexToRgb(b);
+  if (!ra || !rb) return 1;
+  const la = luminance(ra);
+  const lb = luminance(rb);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/**
+ * A club's colour as it may be drawn on the page ground: unchanged when it
+ * already reaches 3:1 against paper (the WCAG minimum for graphics), else
+ * darkened step by step until it does. Estoril and Arouca's yellows
+ * (1,3:1 as drawn) become a readable ochre; every other club keeps its own
+ * colour. For bars, swatches, lines and borders — numbers stay in ink.
+ */
+export function teamColorOnPaper(team: string): string {
+  const base = ligaTeamColors[team] ?? liga2TeamColors[team] ?? '#5f7062';
+  const rgb = hexToRgb(base);
+  if (!rgb) return '#5f7062';
+  let current: [number, number, number] = rgb;
+  for (let i = 0; i < 40 && contrastRatio(rgbToHex(current), PAPER) < 3; i++) {
+    current = [current[0] * 0.92, current[1] * 0.92, current[2] * 0.92];
+  }
+  return rgbToHex(current);
+}
+
+/** Distance between two colours, in a rough perceptual (redmean) RGB space. */
+function colourDistance(a: string, b: string): number {
+  const ra = hexToRgb(a);
+  const rb = hexToRgb(b);
+  if (!ra || !rb) return Infinity;
+  const rmean = (ra[0] + rb[0]) / 2;
+  const dr = ra[0] - rb[0];
+  const dg = ra[1] - rb[1];
+  const db = ra[2] - rb[2];
+  return Math.sqrt((2 + rmean / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rmean) / 256) * db * db);
+}
+
+/** Neutral line colours for a club whose own colour another line already uses (all ≥ 3:1 on paper). */
+const LINE_FALLBACKS = ['#434d48', '#8a5a2b', '#4d5b8c', '#7a4a6a', INK, '#5f7062'];
+
+/**
+ * Line colours for several clubs on one chart: each club keeps its on-paper
+ * colour unless an earlier club in the list already uses one too close to
+ * tell apart (Marítimo and Rio Ave are both dark green; Nacional and Vitória
+ * both black), in which case it takes a neutral fallback. The end labels
+ * still name every line.
+ */
+export function distinctTeamColors(teams: string[], minDistance = 150): Record<string, string> {
+  const out: Record<string, string> = {};
+  const used: string[] = [];
+  let fallback = 0;
+  for (const team of teams) {
+    let colour = teamColorOnPaper(team);
+    if (used.some(u => colourDistance(u, colour) < minDistance)) {
+      while (fallback < LINE_FALLBACKS.length && used.some(u => colourDistance(u, LINE_FALLBACKS[fallback]) < minDistance)) fallback++;
+      colour = LINE_FALLBACKS[Math.min(fallback, LINE_FALLBACKS.length - 1)];
+      fallback++;
+    }
+    out[team] = colour;
+    used.push(colour);
+  }
+  return out;
 }
 
 // Reverse lookup: slug → team name
@@ -176,12 +323,12 @@ export function liga2LogoSrc(team: string): string | null {
   return slug ? `/images/teams/${slug}.png` : null;
 }
 
-/** Short badge text: first three letters of a one-word name, else initials. */
+/** Short badge text, two letters so it fits the badge: "LE" for Leixões, "PF" for Paços de Ferreira. */
 export function liga2Initials(team: string): string {
   const name = liga2DisplayName(team);
-  const words = name.split(/[\s.]+/).filter(Boolean);
-  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
-  return words.map(w => w[0]).join('').slice(0, 3).toUpperCase();
+  const words = name.split(/[\s.]+/).filter(w => w && !/^(de|da|do|dos|das|e)$/i.test(w));
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return words.map(w => w[0]).join('').slice(0, 2).toUpperCase();
 }
 
 /** True for reserve sides, which play in Liga 2 but cannot be promoted. */

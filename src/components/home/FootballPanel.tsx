@@ -1,9 +1,16 @@
+import { loadLigaData } from '@/lib/utils/football-data-loader';
 import { getTranslations } from 'next-intl/server';
 import { Action } from '@/components/brand/Action';
-import { ligaTeamColors, teamDisplayName } from '@/lib/config/football';
+import { buildClubOutlooks } from '@/components/football/club-outlook';
+import { loadGameFixtures } from '@/components/football/load-game-fixtures';
+import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import type { TeamDelta } from '@/types/football';
-import { HomeArt } from './HomeArt';
 import { HomePanel, Kicker } from './HomePanel';
+import { FootballClubPicker } from './FootballClubPicker';
+import { TitleProbabilities } from '@/components/football/TitleProbabilities';
+import { forecastStatusLine, forecastStatusLinePlayed, roundPlayedAt } from '@/lib/football-status';
+import { ClockSwitch } from '@/components/football/ClockSwitch';
+import { splitForecastRound } from './football-status-pill';
 
 export interface FootballSnapshot {
   matchday: number;
@@ -12,78 +19,126 @@ export interface FootballSnapshot {
 }
 
 /**
- * The Liga rail: one dated finding from the latest published matchday, the
- * three title probabilities from that same snapshot, and the way into the
- * simulator. Club colours are a small accent, never the panel. Without data it
- * routes to the method instead of inventing a number.
+ * The Liga module: a labelled general outlook (dated title race) until a
+ * visitor picks a club, after which every figure, label and link follows
+ * that club — its relevant objective, dated baseline and its own supported
+ * fixture's three-outcome stakes (diagnosis §4/§12). The per-club payload is
+ * computed once here, server-side, for all 18 clubs; FootballClubPicker only
+ * switches between precomputed answers. The stadium comes after the answer,
+ * as the band that fills the rest of the panel (`.home-band`), never a
+ * banner ahead of it.
  */
 export async function FootballPanel({ locale, variant, snapshot, deltas }: { locale: string; variant: 'secondary' | 'support'; snapshot: FootballSnapshot | null; deltas?: Record<string, TeamDelta> }) {
-  const t = await getTranslations({ locale, namespace: 'home' });
-  const date = snapshot?.timestamp
-    ? new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(snapshot.timestamp))
-    : '';
-  const chips = snapshot?.top3.slice(0, 3).map(team => ({
-    team: team.team,
-    name: teamDisplayName(team.team),
-    p: Math.round(team.p_champion * 100),
-    delta: deltas?.[team.team]?.p_champion_delta,
-    color: ligaTeamColors[team.team] ?? '#5f7062',
-  })) ?? [];
+  const [t, latest, gameFixtures] = await Promise.all([
+    getTranslations({ locale, namespace: 'home' }),
+    snapshot ? loadLigaData() : Promise.resolve({ prediction: null, scenarios: null }),
+    snapshot ? loadGameFixtures() : Promise.resolve(null),
+  ]);
   const rail = variant === 'secondary';
-  const fmtDelta = (d: number) => new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { maximumFractionDigits: 1, signDisplay: 'always' }).format(d).replace('-', '−');
-
-  const numbers = snapshot && chips.length === 3 ? (
-    <div className="mt-4">
-      <p className="text-[11px] font-bold uppercase tracking-wider text-stone-600">{t('footballChampionLabel')}</p>
-      <ul className="mt-2 grid grid-cols-3 gap-2">
-        {chips.map(chip => (
-          <li key={chip.team} className="rounded-xl border border-line px-2 py-2 text-center" style={{ borderTopWidth: 3, borderTopColor: chip.color, backgroundColor: `color-mix(in oklab, ${chip.color} 8%, var(--color-paper))` }}>
-            <span className="block truncate text-[12px] font-semibold text-stone-700">{chip.name}</span>
-            <span className="block font-display text-2xl font-extrabold tabular-nums leading-tight text-ink">{chip.p}<span className="text-sm font-bold text-stone-500">%</span></span>
-            {chip.delta != null && Math.abs(chip.delta) >= 1 && (
-              <span className="block text-[11px] font-semibold tabular-nums text-stone-600">{fmtDelta(chip.delta)} pp</span>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
-  ) : null;
+  // "Depois da jornada 7 · atualizado a 25 set. · próxima atualização após a
+  // jornada 8 (9–12 out.)": the same dated line as the Liga page, so the
+  // forecast date never reads like a match date (audit CL-M4).
+  const prediction = latest.prediction;
+  const inProgress = Boolean(prediction?.matches_remaining?.length);
+  const nextRound = prediction ? (inProgress ? prediction.matchday : (prediction.next_matchday?.matchday ?? null)) : null;
+  const statusInput = snapshot?.timestamp
+    ? {
+        matchday: snapshot.matchday,
+        timestamp: snapshot.timestamp,
+        inProgress,
+        nextRound,
+        nextRoundKickoffs: (gameFixtures?.matchdays ?? [])
+          .filter((md) => md.matchday === nextRound)
+          .flatMap((md) => md.fixtures.filter((f) => f.home_goals == null).map((f) => f.kickoff)),
+      }
+    : null;
+  // After the round the next update waits for, the rail says a new forecast
+  // is in preparation rather than promising it (audit FRESH-01). The round
+  // the forecast follows is the kicker's pill, like "Arquivo" on the
+  // elections panel (CL2-05), so the line under the heading starts at the
+  // date instead of repeating it.
+  const initial = statusInput ? splitForecastRound(forecastStatusLine(statusInput, locale), locale) : null;
+  const pill = initial?.round;
+  const statusLine = statusInput && initial ? (
+    <ClockSwitch
+      initial={initial.rest}
+      steps={[{ at: roundPlayedAt(statusInput.nextRoundKickoffs), value: splitForecastRound(forecastStatusLinePlayed(statusInput, locale), locale).rest }]}
+    />
+  ) : '';
+  const outlooks = latest.prediction
+    ? buildClubOutlooks(locale === 'pt' ? 'pt' : 'en', latest.prediction, latest.scenarios, gameFixtures)
+    : [];
+  // The deltas compare with the previous published matchday; say so in
+  // words a sighted reader sees, not only in an sr-only span.
+  const hasDeltas = Boolean(deltas && Object.keys(deltas).length && snapshot && snapshot.matchday > 1);
+  const generalLabels = {
+    champion: t('footballChampionLabel'),
+    change: hasDeltas && snapshot ? t('footballChangeCaption', { matchday: snapshot.matchday - 1 }) : null,
+    link: t('footballLink'),
+  };
+  // The three clubs likeliest to finish 17th or 18th in the same forecast,
+  // the bottom of "como pode acabar" beside the title race (CL3-02).
+  const relegation = latest.prediction
+    ? {
+        label: t('footballRelegationLabel'),
+        teams: [...latest.prediction.table]
+          .sort((a, b) => b.p_relegation - a.p_relegation)
+          .slice(0, 3)
+          .map(({ team, p_relegation }) => ({ team, p_relegation })),
+      }
+    : undefined;
 
   const copy = (
     <>
-      <Kicker>{t('footballKicker')}</Kicker>
-      <h2 id="home-football-title" className={`mt-2 ${rail ? 'text-2xl md:text-[1.75rem] md:leading-[1.15]' : 'text-xl md:text-[1.5rem] md:leading-[1.2]'}`}>{t('footballTitle')}</h2>
-      {snapshot ? (
-        <p className="mt-1.5 text-[13px] font-semibold text-stone-600">{t('footballDate', { matchday: snapshot.matchday, date })}</p>
-      ) : (
-        <p className="mt-2 text-[15px] leading-relaxed text-stone-600">{t('footballUnavailable')}</p>
-      )}
-      {numbers}
-      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
-        {snapshot ? (
-          <>
-            <Action href="/desporto/liga/simulador" locale={locale} arrow>{t('footballAction')}</Action>
-            <Action href="/desporto/liga" locale={locale} variant="text" arrow>{t('footballLink')}</Action>
-          </>
-        ) : (
-          <Action href="/desporto/liga/metodologia" locale={locale} variant="secondary" arrow>{t('footballMethod')}</Action>
-        )}
+      <div>
+        <div className="min-w-0">
+          <Kicker pill={pill}>{t('footballKicker')}</Kicker>
+          <h2 id="home-football-title" className={`mt-1 ${rail ? 'text-xl md:text-[1.5rem] md:leading-[1.15]' : 'text-lg md:text-[1.35rem] md:leading-[1.2]'}`}>
+            {t('footballTitle')}
+          </h2>
+          {snapshot ? (
+            <p className="mt-1 text-[13px] font-semibold text-stone-600">{statusLine}</p>
+          ) : (
+            <p className="mt-2 text-[15px] leading-relaxed text-stone-600">{t('footballUnavailable')}</p>
+          )}
+        </div>
       </div>
+      {snapshot && outlooks.length ? (
+        <FootballClubPicker locale={locale} outlooks={outlooks} top3={snapshot.top3} deltas={deltas} generalLabels={generalLabels} relegation={relegation} />
+      ) : snapshot ? (
+        // A forecast without per-club outlooks (no scenarios published):
+        // the general title race, labelled, and the way into the Liga page.
+        <div className="mt-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            {generalLabels.champion}{generalLabels.change ? ` · ${generalLabels.change}` : ''}
+          </p>
+          <div className="mt-2">
+            <TitleProbabilities teams={snapshot.top3} deltas={hasDeltas ? deltas : undefined} locale={locale} compact />
+          </div>
+          <div className="mt-4">
+            <Action href="/desporto/liga" locale={locale} variant="secondary" arrow>{generalLabels.link}</Action>
+          </div>
+        </div>
+      ) : !snapshot ? (
+        <div className="mt-4">
+          <Action href="/desporto/liga/metodologia" locale={locale} variant="secondary" arrow>{t('footballMethod')}</Action>
+        </div>
+      ) : null}
     </>
   );
 
   if (rail) {
     return (
       <HomePanel labelledBy="home-football-title" className="flex flex-col">
-        <HomeArt name="football" shape="wide" priority sizes="(min-width: 1100px) 32vw, 100vw" className="h-[190px] w-full md:h-[230px]" />
-        <div className="flex flex-1 flex-col p-5 md:p-6">{copy}</div>
+        <div className="p-4 md:p-5">{copy}</div>
+        <SectionIllustration scene="football" sizes="(min-width: 1100px) 32vw, 100vw" className="home-band home-band--football" />
       </HomePanel>
     );
   }
   return (
-    <HomePanel labelledBy="home-football-title" className="grid md:grid-cols-[minmax(200px,42%)_1fr]">
-      <HomeArt name="football" shape="square" sizes="(min-width: 1100px) 22vw, (min-width: 768px) 40vw, 100vw" className="h-[200px] w-full md:h-full md:min-h-[260px]" />
+    <HomePanel labelledBy="home-football-title" className="flex flex-col">
       <div className="min-w-0 p-5 md:p-6">{copy}</div>
+      <SectionIllustration scene="football" sizes="(min-width: 900px) 50vw, 100vw" className="home-band home-band--football" />
     </HomePanel>
   );
 }
