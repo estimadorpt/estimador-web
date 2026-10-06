@@ -80,6 +80,14 @@ export default async function ParliamentaryArchivePage({
     ? `Fonte: modelo estimador.pt, ${formatElectionNumber(archive.simulations, locale)} simulações`
     : `Source: estimador.pt model, ${formatElectionNumber(archive.simulations, locale)} simulations`;
   const trendSource = pt ? 'Fonte: modelo estimador.pt, ajustado às sondagens' : 'Source: estimador.pt model, fitted to the polls';
+  // The house effects come from the polls the model read: the last of them is
+  // the last trend date before election day (15 May 2025, a day before the run).
+  const lastPollDate = trends.dates.filter(d => d < PARLIAMENTARY_2025.date).at(-1);
+  const pollsSource = lastPollDate
+    ? (pt
+      ? `Fonte: modelo estimador.pt, sondagens até ${formatElectionLongDate(lastPollDate, locale)}`
+      : `Source: estimador.pt model, polls up to ${formatElectionLongDate(lastPollDate, locale)}`)
+    : trendSource;
 
   // Election-day projection per party: mean and the 94% HDI band, read from
   // the last date of the trend window (the election day itself).
@@ -258,14 +266,20 @@ export default async function ParliamentaryArchivePage({
             </DataCard>
           </div>
 
-          <div id="district-analysis" className="bg-cream border border-line rounded-2xl p-6">
-            <div className="flex flex-wrap items-center justify-between gap-x-3 mb-6">
-              <h2 className="text-2xl text-stone-900">{t('forecast.districtAnalysis')}</h2>
+          <div id="district-analysis">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 mb-3">
+              <h2 className="text-2xl text-stone-900 tracking-tight">{t('forecast.districtAnalysis')}</h2>
               <Link href="/eleicoes/legislativas/mapa" locale={locale} className={`text-sm font-medium ${standaloneLinkClass}`}>
                 {t('map.title')}{arrow}
               </Link>
             </div>
-            <DistrictSummary districtData={districtForecast} contestedData={contestedSeats} closeLeadNote={closeLeadNote} />
+            <DataCard
+              title={pt ? 'Mandatos em disputa e partido à frente, por distrito' : 'Seats in play and the party ahead, by district'}
+              source={simulationsSource}
+              {...frame}
+            >
+              <DistrictSummary districtData={districtForecast} contestedData={contestedSeats} closeLeadNote={closeLeadNote} headingLevel={4} />
+            </DataCard>
           </div>
 
           {/* One caption for the three cards: it was repeated in each. */}
@@ -280,14 +294,20 @@ export default async function ParliamentaryArchivePage({
 
           {/* Polling analysis: a specialist method/evidence view, not a
               main-path answer, so the matrix sits behind the one show/hide
-              control. The heading stays outside the summary. */}
-          <div className="bg-cream border border-line rounded-2xl p-6">
-            <h2 className="text-2xl text-stone-900">{t('forecast.pollingHouseEffects')}</h2>
-            <Disclosure summary={t('forecast.show')} srSuffix={t('forecast.pollingHouseEffects')} className="mt-2">
-              <div className="mt-4">
-                <HouseEffects data={houseEffects} />
-              </div>
-            </Disclosure>
+              control inside its chart frame. The heading stays outside. */}
+          <div>
+            <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('forecast.pollingHouseEffects')}</h2>
+            <DataCard
+              title={pt ? 'Desvio de cada empresa de sondagens, por partido' : 'Each polling firm’s deviation, by party'}
+              source={pollsSource}
+              {...frame}
+            >
+              <Disclosure summary={t('forecast.show')} srSuffix={t('forecast.pollingHouseEffects')}>
+                <div className="mt-3">
+                  <HouseEffects data={houseEffects} />
+                </div>
+              </Disclosure>
+            </DataCard>
           </div>
         </div>
       </section>

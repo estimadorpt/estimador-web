@@ -5,6 +5,11 @@
 //
 // The dashboard's economy-format.ts keeps its original dot-decimal helpers for
 // the existing tiles; new surfaces use these.
+//
+// Negatives carry the minus sign U+2212 (CLAUDE.md, "Numbers and ordinals"):
+// the signed helpers pass their text through withMinus, as economy-format.ts does.
+
+import { withMinus } from '@/lib/typography';
 
 const DASH = '—';
 
@@ -28,17 +33,17 @@ export function fmtPctLoc(v: number | null | undefined, locale: string, dp = 1):
   return `${fmtNumLoc(v, locale, dp)}%`;
 }
 
-/** Signed percent (value already in % units). 6.1 → "+6,1%" (pt). */
+/** Signed percent (value already in % units). 6.1 → "+6,1%", -0.4 → "−0,4%" (pt). */
 export function fmtSignedPctLoc(v: number | null | undefined, locale: string, dp = 1): string {
   if (!ok(v)) return DASH;
-  return `${v >= 0 ? '+' : ''}${fmtNumLoc(v, locale, dp)}%`;
+  return withMinus(`${v >= 0 ? '+' : ''}${fmtNumLoc(v, locale, dp)}%`);
 }
 
-/** Signed percentage points (value already in pp units). 0.1 → "+0,10 p.p.". */
+/** Signed percentage points (value already in pp units). 0.1 → "+0,10 p.p.", -0.1 → "−0,10 p.p.". */
 export function fmtSignedPpLoc(v: number | null | undefined, locale: string, dp = 2): string {
   if (!ok(v)) return DASH;
   const unit = locale === 'pt' ? 'p.p.' : 'pp';
-  return `${v >= 0 ? '+' : ''}${fmtNumLoc(v, locale, dp)} ${unit}`;
+  return withMinus(`${v >= 0 ? '+' : ''}${fmtNumLoc(v, locale, dp)} ${unit}`);
 }
 
 /** Euro amount. 638.97 → "638,97 €" (pt) / "€638.97" (en). */

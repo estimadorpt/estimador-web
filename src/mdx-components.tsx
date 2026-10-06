@@ -90,16 +90,14 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
     td: ({ children }) => (
       <td className="border-b border-stone-200 px-3 py-2 text-stone-800">{children}</td>
     ),
-    details: ({ children }) => (
-      <details className="my-6 border border-stone-200 font-sans text-sm [&[open]>summary]:border-b [&[open]>summary]:border-stone-200">
-        {children}
-      </details>
-    ),
-    summary: ({ children }) => (
-      <summary className="flex min-h-11 cursor-pointer items-center bg-stone-50 px-4 py-2 font-medium text-stone-800 hover:bg-stone-100">
-        {children}
-      </summary>
-    ),
+
+    // No `details` or `summary` here. Markdown has no syntax for them, and MDX 3
+    // does not pass a hand-written <details> or <summary> through this map (it
+    // compiles them to the plain element), so entries here never ran and only
+    // contradicted the real look. That look lives once, in `.article-body
+    // details` in globals.css: the <Disclosure> control (viz/Disclosure.tsx) on
+    // a cream panel, with a 44px summary in ink, a left chevron that turns when
+    // open and no native marker.
 
     ...components,
   }
