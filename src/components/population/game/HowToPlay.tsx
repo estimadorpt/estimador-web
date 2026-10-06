@@ -5,15 +5,15 @@ import { ChevronDown } from 'lucide-react';
 import type { Locale } from '@/lib/population/labels';
 import { GAME_COPY } from './copy';
 
-/** Fired by the game on every guess; the instructions close on the first one. */
+/** Fired by the game on every pick and every clue opened; the instructions close on the first one. */
 export const GUESS_EVENT = 'misteriosa:guess';
 
 /**
  * "Como se joga?": a closed disclosure whose summary already says the rules in
- * one line (six guesses, a clue per miss, a new parish at midnight), so a
- * first visit lands on the guess box and the first clue, not on a page of
- * instructions (UXD2-02, PUB2-07). The full rules open on demand, and close
- * again at the next guess.
+ * one line (four parishes, the clues to one of them, as few clues as you
+ * can), so a first visit lands on the first clue and the four choices, not on
+ * a page of instructions (UXD2-02, PUB2-07). The full rules open on demand, and close
+ * again at the next pick.
  */
 export function HowToPlay({ locale, honesty }: { locale: Locale; honesty: string }) {
   const t = GAME_COPY[locale];
@@ -47,9 +47,7 @@ export function HowToPlay({ locale, honesty }: { locale: Locale; honesty: string
             </li>
           ))}
         </ol>
-        <p className="mt-4 text-sm">{t.howPool}</p>
-        <p className="mt-2 text-sm">{t.howProximity}</p>
-        <p className="mt-2 text-sm">{honesty}</p>
+        <p className="mt-4 text-sm">{honesty}</p>
         <p className="mt-2 text-sm text-stone-500">{t.howStorage}</p>
       </div>
     </details>

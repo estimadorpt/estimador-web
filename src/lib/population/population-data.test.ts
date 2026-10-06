@@ -15,7 +15,7 @@ import type {
 import { canonicalQuery, formatDisplay, isWhole, readCells, rebuildResponse } from './compact';
 import { parsePublicResponse } from './contract';
 import { RECIPE_COPY, VALUES } from './labels';
-import { exactParishOption, fold, indexPlaces, nearestParish, regionSlug, searchNames, searchParishes, searchPlaces } from './places';
+import { fold, indexPlaces, nearestParish, regionSlug, searchNames, searchParishes, searchPlaces } from './places';
 
 const DIR = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR);
 const json = <T,>(file: string): T => JSON.parse(fs.readFileSync(path.join(DIR, file), 'utf8')) as T;
@@ -302,21 +302,6 @@ describe('parish search', () => {
     }
   });
 
-  it('lets Enter guess only a parish named exactly like the query (MISS-01)', () => {
-    // "Viseu": one parish is called exactly that, so Enter may choose it.
-    const viseu = searchPlaces(index, 'viseu').hits;
-    const chosen = viseu[exactParishOption(viseu)];
-    expect(chosen.kind === 'parish' && chosen.parish.name).toBe('Viseu');
-    // "Mealhada": no parish is called exactly that (it is a union's member), so Enter chooses nothing.
-    expect(exactParishOption(searchPlaces(index, 'mealhada').hits)).toBe(-1);
-    // A partial name never picks for the player, nor does a name shared by several parishes.
-    expect(exactParishOption(searchPlaces(index, 'abrav').hits)).toBe(-1);
-    expect(exactParishOption(searchPlaces(index, 'santa maria maior').hits)).toBe(-1);
-    // A code is exact.
-    const code = searchPlaces(index, '030831').hits;
-    expect(code[exactParishOption(code)]).toMatchObject({ kind: 'parish', parish: { code: '030831' } });
-  });
-
   it('accepts a six-character code, digits or letters (030831, 0302fa)', () => {
     expect(searchParishes(index, '030831')[0].parish.code).toBe('030831');
     expect(searchParishes(index, '0302fa')[0].parish.code).toBe('0302FA');
@@ -342,15 +327,11 @@ describe('parish search', () => {
     expect(braganca.indexOf('Sendas')).toBeGreaterThan(0);
   });
 
-  it('lists a parish named exactly like the query first in the game, above the concelhos of that name (UXM3-20: lagoa)', () => {
-    const game = searchPlaces(index, 'Lagoa', 12, { exactFirst: true }).hits;
-    expect(game[0]).toMatchObject({ kind: 'parish', parish: { code: '040516', name: 'Lagoa' } });
-    expect(exactParishOption(game)).toBe(0);
-    expect(game.filter(hit => hit.kind === 'municipality').map(hit => hit.kind === 'municipality' && hit.municipality.name)).toEqual(['Lagoa', 'Lagoa']);
-    // Off the game, the concelhos still lead (choosing one opens its list).
-    expect(searchPlaces(index, 'Lagoa').hits[0].kind).toBe('municipality');
-    // With no parish named exactly like the concelho, nothing moves.
-    expect(searchPlaces(index, 'porto', 12, { exactFirst: true }).hits[0].kind).toBe('municipality');
+  it('leads with the concelhos named like the query, then a parish of that name outside them (lagoa)', () => {
+    const hits = searchPlaces(index, 'Lagoa').hits;
+    expect(hits[0].kind).toBe('municipality');
+    expect(hits.filter(hit => hit.kind === 'municipality').map(hit => hit.kind === 'municipality' && hit.municipality.name)).toEqual(['Lagoa', 'Lagoa']);
+    expect(hits.some(hit => hit.kind === 'parish' && hit.parish.code === '040516' && !hit.underMunicipality)).toBe(true);
   });
 
   it('counts the matches outside a named concelho apart from its own parishes (PUB3-V02)', () => {

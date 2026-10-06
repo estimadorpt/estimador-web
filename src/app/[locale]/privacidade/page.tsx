@@ -13,7 +13,7 @@ import remarkGfm from 'remark-gfm';
 import { getMDXComponents } from '@/mdx-components';
 
 /** When this page was last checked against what the site does (move it with the text). */
-const PRIVACY_REVISED = '2026-10-05';
+const PRIVACY_REVISED = '2026-10-06';
 
 export async function generateMetadata({
   params,

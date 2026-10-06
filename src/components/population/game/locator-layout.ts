@@ -1,10 +1,10 @@
 /**
- * Where the locator draws its numbered guess markers (PUB3-07). Close guesses
- * are the ones a player wants to see, and at the locator's scale (about 0.36
- * px per km on the mainland) a guess 13 km away sits under the answer's ring.
- * A marker that would overlap the answer or an earlier marker moves out along
- * a short leader line from its true point, which stays drawn as a dot, so the
- * map never claims a place the guess is not.
+ * Where the locator draws its numbered markers (PUB3-07): the day's four
+ * parishes. At the locator's scale (about 0.36 px per km on the mainland) two
+ * parishes 40 km apart would overlap. A marker that would overlap an earlier
+ * one (or a fixed ring, when one is given) moves out along a short leader line
+ * from its true point, which stays drawn as a dot, so the map never claims a
+ * place the parish is not.
  */
 
 export interface LocatorPoint {

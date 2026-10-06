@@ -20,7 +20,7 @@ export const COPY_REVISED: Readonly<Record<string, string>> = {
   '/metodologia': '2026-10-06',
   '/desporto/liga/metodologia': '2026-10-06',
   '/eleicoes/metodologia': ELECTION_METHODOLOGY_REVISED,
-  '/privacidade': '2026-10-05',
+  '/privacidade': '2026-10-06',
   '/sobre': '2026-10-06',
   // The reconstituted forecasts were labelled on 6 October; the review data is of 10 August.
   '/desporto/liga/2025-26': '2026-10-06',

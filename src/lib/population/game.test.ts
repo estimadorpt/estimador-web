@@ -2,46 +2,49 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  CHOICE_COUNT,
+  CLUE_COUNT,
   CLUE_ORDER,
-  COMPASS,
-  MAX_GUESSES,
+  GAME_STORAGE_KEY,
   answerOrder,
-  applyGuess,
+  applyPick,
   chunkOf,
   cluesOpen,
-  compass8,
   computeStats,
   dateOfDay,
   daysBetween,
   emptyStore,
   formatCountdown,
   formatGameDate,
-  formatKm,
-  guessFeedback,
-  initialBearing,
+  gameChoices,
   lisbonDate,
-  maxPairDistanceKm,
   msUntilNextLisbonMidnight,
   newRecord,
+  onIslands,
+  openNextClue,
+  orderChoices,
   parseStore,
-  proximity,
-  proximityScale,
   putRecord,
   recordFor,
   shareMessage,
   shareText,
+  sizeBand,
   todayIndex,
-  type GamePlace,
+  wrongPicks,
   type GameRecord,
   type GameStore,
 } from './game';
-import { haversineKm, indexPlaces } from './places';
+import { indexPlaces } from './places';
 import { POPULATION_DATA_DIR, POPULATION_GAME_EPOCH } from '@/lib/config/population';
 import type { GameEntry, GameIndex, PopulationPlaces } from '@/types/population';
 
 const DATA = path.resolve(import.meta.dirname, '../../../public/data', POPULATION_DATA_DIR);
 const index = JSON.parse(readFileSync(path.join(DATA, 'game/index.json'), 'utf8')) as GameIndex;
-const places = indexPlaces(JSON.parse(readFileSync(path.join(DATA, 'places.json'), 'utf8')) as PopulationPlaces);
+const placesJson = JSON.parse(readFileSync(path.join(DATA, 'places.json'), 'utf8')) as PopulationPlaces;
+const places = indexPlaces(placesJson);
+const readChunk = (chunk: number) => JSON.parse(readFileSync(path.join(DATA, `game/chunk-${String(chunk).padStart(3, '0')}.json`), 'utf8')) as GameEntry[];
+/** Every candidate, by its order in the deck. */
+const deck = Array.from({ length: index.chunks }, (_, chunk) => readChunk(chunk)).flat().sort((a, b) => a.order - b.order);
 
 const EMOJI = /\p{Extended_Pictographic}/u;
 
@@ -165,265 +168,221 @@ describe('the day’s parish', () => {
   });
 });
 
-describe('geography of a guess', () => {
-  it('measures bearings clockwise from north', () => {
-    const lisbon = { lat: 38.72, lon: -9.14 };
-    expect(initialBearing(lisbon, { lat: 41.15, lon: -9.14 })).toBeCloseTo(0, 5);
-    expect(initialBearing(lisbon, { lat: 36.0, lon: -9.14 })).toBeCloseTo(180, 5);
-    expect(initialBearing(lisbon, { lat: 38.72, lon: -7.0 })).toBeGreaterThan(85);
-    expect(initialBearing(lisbon, { lat: 38.72, lon: -7.0 })).toBeLessThan(95);
-    expect(initialBearing(lisbon, { lat: 38.72, lon: -11.0 })).toBeGreaterThan(265);
+describe('the four on the board', () => {
+  const answerOf = (day: number) => deck[answerOrder(day, index.candidates)].code;
+
+  it('bands INE residents as < 1 000, 1 000–4 999, 5 000–19 999 and 20 000 or more', () => {
+    expect([0, 999, 1_000, 4_999, 5_000, 19_999, 20_000, 200_000].map(sizeBand)).toEqual([0, 0, 1, 1, 2, 2, 3, 3]);
   });
 
-  it('rounds bearings to eight points', () => {
-    expect(compass8(0)).toBe('N');
-    expect(compass8(22.4)).toBe('N');
-    expect(compass8(22.6)).toBe('NE');
-    expect(compass8(90)).toBe('E');
-    expect(compass8(180)).toBe('S');
-    expect(compass8(200)).toBe('S');
-    expect(compass8(247)).toBe('SW');
-    expect(compass8(292)).toBe('W');
-    expect(compass8(293)).toBe('NW');
-    expect(compass8(337.4)).toBe('NW');
-    expect(compass8(337.6)).toBe('N');
-    expect(compass8(359.9)).toBe('N');
-    expect(compass8(-45)).toBe('NW');
-    for (const point of Object.values(COMPASS)) expect(compass8(point.deg)).toBe(Object.entries(COMPASS).find(([, v]) => v === point)![0]);
+  it('gives the same three every time, never the answer, all different', () => {
+    const answer = answerOf(0);
+    const first = gameChoices(0, answer, places.parishes);
+    expect(first).toHaveLength(CHOICE_COUNT - 1);
+    expect(gameChoices(0, answer, places.parishes)).toEqual(first);
+    expect(first).not.toContain(answer);
+    expect(new Set(first).size).toBe(3);
+    // A different day with the same answer draws differently (the seed has both).
+    expect(gameChoices(index.candidates, answer, places.parishes)).not.toEqual(first);
   });
 
-  it('finds the widest pair of parishes, as every pair would', () => {
-    const points = places.parishes;
-    const fast = maxPairDistanceKm(points);
-    let brute = 0;
-    for (let i = 0; i < points.length; i++) {
-      for (let j = i + 1; j < points.length; j++) {
-        const d = haversineKm(points[i], points[j]);
-        if (d > brute) brute = d;
-      }
+  it('holds every constraint on every day of the deck (all 3,092), without relaxing any', () => {
+    expect(deck).toHaveLength(index.candidates);
+    for (let day = 0; day < index.candidates; day++) {
+      const answer = answerOf(day);
+      const others = gameChoices(day, answer, places.parishes);
+      const four = [answer, ...others].map(code => places.byCode.get(code)!);
+      expect(four.every(Boolean), `day ${day}`).toBe(true);
+      expect(new Set(four.map(p => p.code)).size, `day ${day}: distinct`).toBe(4);
+      expect(new Set(four.map(p => p.region)).size, `day ${day}: regions`).toBe(4);
+      expect(new Set(four.map(p => sizeBand(p.censusPopulation))).size, `day ${day}: bands`).toBeGreaterThanOrEqual(3);
+      expect(four.filter(onIslands).length, `day ${day}: islands`).toBeLessThanOrEqual(1);
     }
-    expect(fast).toBeCloseTo(brute, 6);
-    expect(fast).toBeGreaterThan(1500); // Azores to the mainland
   });
 
-  it('scores proximity between 0 and 100', () => {
-    expect(proximity(0, 2000)).toBe(100);
-    expect(proximity(1000, 2000)).toBe(50);
-    expect(proximity(2000, 2000)).toBe(0);
-    expect(proximity(2500, 2000)).toBe(0);
-    expect(proximity(-1, 2000)).toBe(100);
+  it('is stable while places.json keeps its order, and depends on nothing but the places', () => {
+    const answer = answerOf(7);
+    const copy = indexPlaces(JSON.parse(JSON.stringify(placesJson)) as PopulationPlaces);
+    expect(gameChoices(7, answer, copy.parishes)).toEqual(gameChoices(7, answer, places.parishes));
+    // Only the place's code, name, region and INE count are read: nothing from a response.
+    const bare = places.parishes.map(({ code, name, region, censusPopulation }) => ({ code, name, region, censusPopulation }));
+    expect(gameChoices(7, answer, bare)).toEqual(gameChoices(7, answer, places.parishes));
   });
 
-  it('describes a guess against the answer', () => {
-    const answer: GamePlace = { code: '110601', municipality: '1106', region: '11', lat: 38.72, lon: -9.14 };
-    const neighbour: GamePlace = { code: '110602', municipality: '1106', region: '11', lat: 38.75, lon: -9.14 };
-    const porto: GamePlace = { code: '131201', municipality: '1312', region: '13', lat: 41.15, lon: -8.61 };
-    const near = guessFeedback(neighbour, answer, 2000);
-    expect(near.correct).toBe(false);
-    expect(Math.round(near.distanceKm)).toBe(3);
-    expect(near.compass).toBe('S');
-    expect(near.sameMunicipality).toBe(true);
-    expect(near.sameRegion).toBe(true);
-    const far = guessFeedback(porto, answer, 2000);
-    expect(far.compass).toBe('S');
-    expect(far.sameMunicipality).toBe(false);
-    expect(far.sameRegion).toBe(false);
-    expect(far.proximity).toBeLessThan(near.proximity);
-    const hit = guessFeedback(answer, answer, 2000);
-    expect(hit).toMatchObject({ correct: true, distanceKm: 0, bearing: null, compass: null, proximity: 100 });
+  it('lists the four alphabetically (Portuguese collation), then by code for twin names', () => {
+    const list = orderChoices([
+      { code: '2', name: 'Évora' },
+      { code: '1', name: 'Lagoa' },
+      { code: '0', name: 'Lagoa' },
+      { code: '3', name: 'Abiul' },
+      { code: '4', name: 'Égua' },
+    ]);
+    expect(list.map(p => `${p.name}${p.code}`)).toEqual(['Abiul3', 'Égua4', 'Évora2', 'Lagoa0', 'Lagoa1']);
   });
 
-  it('scales mainland guesses to the mainland (pub-PP-07: Sagres is not 76% close to Bragança)', () => {
-    const scale = proximityScale(places.parishes);
-    expect(scale.mainland).toBeLessThan(800);
-    expect(scale.all).toBeGreaterThan(1500);
-    const sagres: GamePlace = { code: '081501', municipality: '0815', region: '08', lat: 37.01, lon: -8.94 };
-    const braganca: GamePlace = { code: '040201', municipality: '0402', region: '04', lat: 41.81, lon: -6.76 };
-    const mainland = guessFeedback(sagres, braganca, scale);
-    expect(mainland.proximity).toBeLessThan(40);
-    // The scale follows the answer: for a mainland answer an island guess is past the mainland's widest pair (0%),
-    const azores: GamePlace = { code: '420101', municipality: '4201', region: 'azores', lat: 37.74, lon: -25.67 };
-    expect(guessFeedback(azores, braganca, scale).proximity).toBe(0);
-    // and for an island answer every guess, mainland or not, is measured against the whole country.
-    expect(guessFeedback(braganca, azores, scale).proximity).toBeCloseTo(proximity(haversineKm(azores, braganca), scale.all), 6);
-  });
-
-  it('never scores a farther guess higher within one game (PUB3-02: Funchal 1 236 km above Faro 491 km)', () => {
-    const scale = proximityScale(places.parishes);
-    const index = places;
-    const asGame = (code: string): GamePlace => {
-      const p = index.byCode.get(code)!;
-      return { code: p.code, municipality: p.municipality, region: p.region, lat: p.lat, lon: p.lon };
-    };
-    // Answers on the mainland, in Madeira and in the Azores; guesses from all three.
-    const answers = ['030857', '310310', '430105', '0302FA'];
-    const guesses = index.parishes.filter((_, i) => i % 37 === 0).map(p => p.code);
-    for (const code of answers) {
-      const answer = asGame(code);
-      const scored = guesses.map(guess => guessFeedback(asGame(guess), answer, scale)).sort((a, b) => a.distanceKm - b.distanceKm);
-      for (let i = 1; i < scored.length; i++) {
-        expect(scored[i].proximity, `${code}: ${scored[i].code} after ${scored[i - 1].code}`).toBeLessThanOrEqual(scored[i - 1].proximity);
-      }
-    }
-    // The audited game (N.º 1, Candoso (São Martinho), Guimarães): Funchal (Sé) no longer outscores Faro (Sé e São Pedro).
-    const answer = asGame('030857');
-    const funchal = guessFeedback(asGame('310310'), answer, scale);
-    const faro = guessFeedback(asGame('080508'), answer, scale);
-    expect(funchal.distanceKm).toBeGreaterThan(faro.distanceKm);
-    expect(funchal.proximity).toBeLessThanOrEqual(faro.proximity);
+  it('refuses an answer that is not a parish', () => {
+    expect(() => gameChoices(0, 'XXXXXX', places.parishes)).toThrow();
   });
 });
 
-describe('the guess state machine', () => {
-  const answer = 'ANSWER';
+describe('the game’s state', () => {
+  const ANSWER = 'A';
+  const BOARD = ['A', 'B', 'C', 'D'];
 
-  it('opens one clue at the start and one per miss', () => {
-    let record = newRecord(0, true);
-    expect(cluesOpen(record, answer)).toBe(1);
-    for (let i = 1; i <= 5; i++) {
-      record = applyGuess(record, `MISS${i}`, answer);
-      expect(record.status).toBe('playing');
-      expect(cluesOpen(record, answer)).toBe(1 + i);
-    }
-    expect(CLUE_ORDER).toHaveLength(6);
+  it('starts with one clue open', () => {
+    const record = newRecord(0, true);
+    expect(record).toEqual({ day: 0, picks: [], cluesOpened: 1, status: 'playing', live: true });
+    expect(cluesOpen(record)).toBe(1);
   });
 
-  it('loses on the sixth miss and then ignores guesses', () => {
-    let record = newRecord(0, true);
-    for (let i = 1; i <= MAX_GUESSES; i++) record = applyGuess(record, `MISS${i}`, answer);
-    expect(record.status).toBe('lost');
-    expect(record.guesses).toHaveLength(6);
-    expect(cluesOpen(record, answer)).toBe(6);
-    expect(applyGuess(record, answer, answer)).toBe(record);
+  it('wins on the clue that is open', () => {
+    const won = applyPick(newRecord(0, true), 'A', ANSWER, BOARD);
+    expect(won).toMatchObject({ status: 'won', picks: ['A'], cluesOpened: 1 });
+    expect(cluesOpen(won)).toBe(CLUE_COUNT);
   });
 
-  it('wins on the right parish, at any guess', () => {
-    let record = newRecord(3, false);
-    record = applyGuess(record, 'MISS1', answer);
-    record = applyGuess(record, answer, answer);
-    expect(record).toEqual({ day: 3, guesses: ['MISS1', answer], status: 'won', live: false });
-    expect(applyGuess(record, 'MISS2', answer)).toBe(record);
-    expect(applyGuess(newRecord(0, true), answer, answer).status).toBe('won');
+  it('opens the next clue on a wrong pick, and keeps the pick', () => {
+    let r = applyPick(newRecord(0, true), 'B', ANSWER, BOARD);
+    expect(r).toMatchObject({ status: 'playing', picks: ['B'], cluesOpened: 2 });
+    r = applyPick(r, 'C', ANSWER, BOARD);
+    r = applyPick(r, 'A', ANSWER, BOARD);
+    expect(r).toMatchObject({ status: 'won', picks: ['B', 'C', 'A'], cluesOpened: 3 });
+    expect(wrongPicks(r, ANSWER)).toBe(2);
   });
 
-  it('ignores repeated and empty guesses', () => {
-    const record = applyGuess(newRecord(0, true), 'MISS1', answer);
-    expect(applyGuess(record, 'MISS1', answer)).toBe(record);
-    expect(applyGuess(record, '', answer)).toBe(record);
+  it('opens a clue without a pick, and it counts', () => {
+    let r = openNextClue(newRecord(0, true));
+    expect(r.cluesOpened).toBe(2);
+    r = applyPick(r, 'A', ANSWER, BOARD);
+    expect(r).toMatchObject({ status: 'won', cluesOpened: 2, picks: ['A'] });
+    expect(wrongPicks(r, ANSWER)).toBe(0);
+  });
+
+  it('never opens more than six clues, and always ends by elimination at worst', () => {
+    let r = newRecord(0, true);
+    for (let i = 0; i < 10; i++) r = openNextClue(r);
+    expect(r.cluesOpened).toBe(CLUE_COUNT);
+    expect(openNextClue(r)).toBe(r);
+    for (const code of ['B', 'C', 'D']) r = applyPick(r, code, ANSWER, BOARD);
+    expect(r).toMatchObject({ status: 'playing', cluesOpened: CLUE_COUNT });
+    r = applyPick(r, 'A', ANSWER, BOARD);
+    expect(r).toMatchObject({ status: 'won', cluesOpened: CLUE_COUNT, picks: ['B', 'C', 'D', 'A'] });
+  });
+
+  it('ignores repeated, empty and off-board picks, and anything after the end', () => {
+    const r = applyPick(newRecord(0, true), 'B', ANSWER, BOARD);
+    expect(applyPick(r, 'B', ANSWER, BOARD)).toBe(r);
+    expect(applyPick(r, '', ANSWER, BOARD)).toBe(r);
+    expect(applyPick(r, 'Z', ANSWER, BOARD)).toBe(r);
+    const won = applyPick(r, 'A', ANSWER, BOARD);
+    expect(applyPick(won, 'C', ANSWER, BOARD)).toBe(won);
+    expect(openNextClue(won)).toBe(won);
   });
 });
 
 describe('share text', () => {
-  const feedback = [
-    { code: 'A', correct: false, distanceKm: 411.6, bearing: 40, compass: 'NE' as const, proximity: 80, sameMunicipality: false, sameRegion: false },
-    { code: 'B', correct: false, distanceKm: 37.2, bearing: 310, compass: 'NW' as const, proximity: 98, sameMunicipality: false, sameRegion: true },
-    { code: 'C', correct: true, distanceKm: 0, bearing: null, compass: null, proximity: 100, sameMunicipality: true, sameRegion: true },
-  ];
-  const won: GameRecord = { day: 0, guesses: ['A', 'B', 'C'], status: 'won', live: true };
+  const date = '2026-10-06';
+  const won = (picks: string[], cluesOpened: number): GameRecord => ({ day: 0, picks, cluesOpened, status: 'won', live: true });
 
-  it('says the date, the score and each miss, in Portuguese', () => {
-    expect(shareText({ date: '2026-10-07', day: 1, record: won, feedback, locale: 'pt' })).toBe(
-      'Freguesia misteriosa n.º 2 · 7 out. 2026\n3/6\n⇗ 412 km\n⇖ 37 km\nacertei\nhttps://estimador.pt/pt/populacao/misteriosa/',
-    );
+  it('says the number, the date, the clue and the wrong picks, in Portuguese', () => {
+    expect(shareText({ date, day: 0, record: won(['A'], 1), answer: 'A', locale: 'pt' }))
+      .toBe('Freguesia misteriosa n.º 1 (6 out. 2026): acertei à 1.ª pista, sem erros. https://estimador.pt/pt/populacao/misteriosa/');
+    expect(shareText({ date, day: 4, record: won(['B', 'A'], 3), answer: 'A', locale: 'pt' }))
+      .toBe('Freguesia misteriosa n.º 5 (6 out. 2026): acertei à 3.ª pista, com 1 erro. https://estimador.pt/pt/populacao/misteriosa/');
+    expect(shareMessage({ date, day: 0, record: won(['B', 'C', 'A'], 3), answer: 'A', locale: 'pt' }).text)
+      .toBe('Freguesia misteriosa n.º 1 (6 out. 2026): acertei à 3.ª pista, com 2 erros.');
+  });
+
+  it('says it in English', () => {
+    expect(shareText({ date, day: 0, record: won(['A'], 2), answer: 'A', locale: 'en' }))
+      .toBe('Mystery parish No. 1 (6 Oct 2026): got it on clue 2, no wrong picks. https://estimador.pt/en/populacao/misteriosa/');
+    expect(shareMessage({ date, day: 0, record: won(['B', 'A'], 2), answer: 'A', locale: 'en' }).text).toContain('1 wrong pick.');
+    expect(shareMessage({ date, day: 0, record: won(['B', 'C', 'D', 'A'], 6), answer: 'A', locale: 'en' }).text).toContain('on clue 6, 3 wrong picks.');
   });
 
   it('gives a share sheet the address as its own https link (PUB2-16)', () => {
-    const message = shareMessage({ date: '2026-10-06', day: 0, record: won, feedback, locale: 'pt' });
+    const message = shareMessage({ date, day: 0, record: won(['A'], 1), answer: 'A', locale: 'pt' });
     expect(message.url).toBe('https://estimador.pt/pt/populacao/misteriosa/');
+    expect(message.text).not.toContain('http');
     expect(message.title).toBe('Freguesia misteriosa');
-    expect(message.text.split('\n')[0]).toBe('Freguesia misteriosa n.º 1 · 6 out. 2026');
-    expect(message.text).not.toContain('estimador.pt');
   });
 
-  it('says it in English, and marks a loss', () => {
-    const lost: GameRecord = { day: 1, guesses: ['A', 'B', 'D', 'E', 'F', 'G'], status: 'lost', live: true };
-    const misses = Array.from({ length: 6 }, (_, i) => ({ ...feedback[0], code: String(i), distanceKm: 1234.4 }));
-    const text = shareText({ date: '2026-10-07', day: 1, record: lost, feedback: misses, locale: 'en' });
-    expect(text.split('\n')).toEqual([
-      'Mystery parish No. 2 · 7 Oct 2026', 'X/6',
-      ...Array(6).fill('⇗ 1,234 km'),
-      'missed it', 'https://estimador.pt/en/populacao/misteriosa/',
-    ]);
-  });
-
-  it('never contains an emoji, whatever the directions', () => {
+  it('never has an emoji, an exclamation mark or a parish name', () => {
+    const answer = deck[0].code;
+    const name = places.byCode.get(answer)!.name;
     for (const locale of ['pt', 'en'] as const) {
-      const all = Object.keys(COMPASS).map((compass, i) => ({ ...feedback[0], code: String(i), compass: compass as keyof typeof COMPASS }));
-      const text = shareText({ date: '2026-10-06', day: 0, record: { day: 0, guesses: all.map(a => a.code), status: 'lost', live: true }, feedback: all, locale });
-      expect(text).not.toMatch(EMOJI);
-      expect(text).not.toMatch(/\p{Emoji_Presentation}/u);
-      expect(text).not.toContain('️');
-      for (const { arrow } of Object.values(COMPASS)) expect(arrow).not.toMatch(EMOJI);
+      for (let k = 1; k <= 6; k++) {
+        const text = shareText({ date, day: 0, record: won(['X', answer], k), answer, locale });
+        expect(text).not.toMatch(EMOJI);
+        expect(text).not.toContain('!');
+        expect(text).not.toContain(name);
+      }
     }
   });
 
-  it('never names a guess', () => {
-    const text = shareText({ date: '2026-10-06', day: 0, record: won, feedback, locale: 'pt' });
-    for (const code of ['A', 'B', 'C']) expect(text).not.toMatch(new RegExp(`\\b${code}\\b`));
-  });
-
-  it('formats dates and distances per locale', () => {
-    expect(formatGameDate('2026-12-01', 'pt')).toBe('1 dez. 2026');
-    expect(formatGameDate('2026-05-31', 'en')).toBe('31 May 2026');
-    expect(formatKm(0.4, 'pt')).toBe('0 km');
-    expect(formatKm(1500.6, 'en')).toBe('1,501 km');
-    expect(formatKm(1234.2, 'pt')).toBe('1\u00A0234 km');
+  it('formats dates per locale', () => {
+    expect(formatGameDate('2026-10-05', 'pt')).toBe('5 out. 2026');
+    expect(formatGameDate('2026-10-05', 'en')).toBe('5 Oct 2026');
   });
 });
 
 describe('stored results and stats', () => {
-  const finished = (day: number, status: 'won' | 'lost', guesses = 3, live = true): GameRecord =>
-    ({ day, guesses: Array.from({ length: status === 'lost' ? 6 : guesses }, (_, i) => `G${i}`), status, live });
+  const finished = (day: number, cluesOpened = 2, live = true): GameRecord =>
+    ({ day, picks: ['A'], cluesOpened, status: 'won', live });
 
   const store = (...records: GameRecord[]): GameStore => records.reduce(putRecord, emptyStore());
 
-  it('reads back what it wrote and survives junk', () => {
-    const s = store(finished(0, 'won'), finished(1, 'lost'));
+  it('keeps its own key, the second version', () => {
+    expect(GAME_STORAGE_KEY).toBe('estimador:misteriosa:v2');
+  });
+
+  it('reads back what it wrote and survives junk, ignoring the first version’s records', () => {
+    const s = store(finished(0), { ...newRecord(1, true), picks: ['B'], cluesOpened: 2 });
     expect(parseStore(JSON.stringify(s))).toEqual(s);
     expect(parseStore(null)).toEqual(emptyStore());
     expect(parseStore('not json')).toEqual(emptyStore());
-    expect(parseStore('{"v":2,"records":{}}')).toEqual(emptyStore());
-    expect(parseStore('{"v":1,"records":{"4":{"day":5,"guesses":[],"status":"won","live":true},"6":{"day":6}}}')).toEqual(emptyStore());
+    // A v1 store (guesses, lost games) is not read.
+    expect(parseStore('{"v":1,"records":{"0":{"day":0,"guesses":["X"],"status":"lost","live":true}}}')).toEqual(emptyStore());
+    // Malformed records are dropped one by one.
+    expect(parseStore('{"v":2,"records":{"4":{"day":5,"picks":[],"cluesOpened":1,"status":"won","live":true},"6":{"day":6},"7":{"day":7,"picks":[],"cluesOpened":9,"status":"playing","live":true},"8":{"day":8,"picks":[],"cluesOpened":1,"status":"lost","live":true}}}')).toEqual(emptyStore());
   });
 
   it('keeps one record per day and never turns practice into a live game', () => {
     let s = putRecord(emptyStore(), newRecord(2, false));
-    s = putRecord(s, { ...finished(2, 'won'), live: true });
+    s = putRecord(s, { ...finished(2), live: true });
     expect(Object.keys(s.records)).toEqual(['2']);
     expect(s.records['2'].live).toBe(false);
     // A live game finished after midnight stays live.
     let t = putRecord(emptyStore(), newRecord(5, true));
-    t = putRecord(t, finished(5, 'won', 2, false));
+    t = putRecord(t, finished(5, 2, false));
     expect(t.records['5'].live).toBe(true);
   });
 
   it('makes today live and earlier days practice', () => {
     expect(recordFor(emptyStore(), 7, 7).live).toBe(true);
     expect(recordFor(emptyStore(), 6, 7).live).toBe(false);
-    const s = store(finished(6, 'won'));
+    const s = store(finished(6));
     expect(recordFor(s, 6, 7)).toBe(s.records['6']);
   });
 
-  it('counts played, won, streaks and the distribution from live games only', () => {
+  it('counts games played and the distribution by clue, from live games only', () => {
     const s = store(
-      finished(0, 'won', 1), finished(1, 'won', 2), finished(2, 'won', 2),
-      finished(3, 'lost'),
-      finished(4, 'won', 6), finished(5, 'won', 3),
-      finished(6, 'won', 1, false), // practice
+      finished(0, 1), finished(1, 2), finished(2, 2),
+      finished(4, 6), finished(5, 3),
+      finished(6, 1, false), // practice
+      { ...newRecord(3, true), cluesOpened: 4 }, // unfinished
     );
     const stats = computeStats(s, 6);
-    expect(stats).toMatchObject({ played: 6, won: 5, lost: 1, bestStreak: 3, currentStreak: 2 });
+    expect(stats).toMatchObject({ played: 5, currentStreak: 2 });
     expect(stats.distribution).toEqual([1, 2, 1, 0, 0, 1]);
   });
 
-  it('keeps the streak alive until today is finished, and breaks it on a loss or a gap', () => {
-    const base = store(finished(4, 'won'), finished(5, 'won'));
+  it('keeps the streak alive until today is finished, and breaks it on a missed day', () => {
+    const base = store(finished(4), finished(5));
     expect(computeStats(base, 6).currentStreak).toBe(2); // today not played yet
-    expect(computeStats(putRecord(base, applyGuess(newRecord(6, true), 'X', 'Y')), 6).currentStreak).toBe(2); // in progress
-    expect(computeStats(putRecord(base, finished(6, 'won')), 6).currentStreak).toBe(3);
-    expect(computeStats(putRecord(base, finished(6, 'lost')), 6).currentStreak).toBe(0);
+    expect(computeStats(putRecord(base, openNextClue(newRecord(6, true))), 6).currentStreak).toBe(2); // in progress
+    expect(computeStats(putRecord(base, finished(6)), 6).currentStreak).toBe(3);
     expect(computeStats(base, 7).currentStreak).toBe(0); // missed day 6
-    expect(computeStats(base, 7).bestStreak).toBe(2);
-    expect(computeStats(emptyStore(), 0)).toEqual({ played: 0, won: 0, currentStreak: 0, bestStreak: 0, distribution: [0, 0, 0, 0, 0, 0], lost: 0 });
+    expect(computeStats(emptyStore(), 0)).toEqual({ played: 0, currentStreak: 0, distribution: [0, 0, 0, 0, 0, 0] });
   });
 });

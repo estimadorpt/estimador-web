@@ -24,10 +24,10 @@ function entries(locale: Locale): Entry[] {
       key: 'game',
       icon: icon(Puzzle),
       kicker: pt ? 'Freguesia misteriosa' : 'Mystery parish',
-      title: pt ? 'Consegues adivinhar a freguesia de hoje?' : 'Can you guess today’s parish?',
+      title: pt ? 'Qual destas quatro é a freguesia de hoje?' : 'Which of these four is today’s parish?',
       text: pt
-        ? 'Uma freguesia por dia, escondida atrás das suas respostas. Cada palpite errado abre uma nova pista; tens seis tentativas. Amanhã há outra.'
-        : 'One parish a day, hidden behind its answers. Each wrong guess opens a new clue; you have six guesses. Tomorrow brings another.',
+        ? 'Quatro freguesias por dia e as pistas de uma delas: as idades, os agregados, a escolaridade e o trabalho da sua população. Descobre qual é com o menor número de pistas. Amanhã há outras quatro.'
+        : 'Four parishes a day and the clues to one of them: the ages, households, education and work of its population. Work out which it is with as few clues as you can. Tomorrow brings four more.',
       action: pt ? 'Joga a de hoje' : 'Play today’s',
       href: POPULATION_ROUTES.game,
       wide: true,

@@ -7,52 +7,42 @@ import { BRAND } from '@/lib/brand';
 import { POPULATION_GAME_EPOCH } from '@/lib/config/population';
 import { fetchGameChunk, fetchGameIndex, fetchPlaces } from '@/lib/population/client';
 import {
-  COMPASS,
+  CLUE_COUNT,
   GAME_STORAGE_KEY,
-  MAX_GUESSES,
   answerOrder,
-  applyGuess,
+  applyPick,
   chunkOf,
   cluesOpen,
   computeStats,
   dateOfDay,
   emptyStore,
   formatGameDate,
-  formatKm,
-  guessFeedback,
+  gameChoices,
   msUntilNextLisbonMidnight,
   newRecord,
+  openNextClue,
+  orderChoices,
   parseStore,
-  proximityScale,
   putRecord,
   recordFor,
   shareMessage,
   todayIndex,
-  type GamePlace,
+  wrongPicks,
   type GameRecord,
   type GameStore,
 } from '@/lib/population/game';
 import { indexPlaces, type Parish, type PlaceIndex } from '@/lib/population/places';
 import type { Locale } from '@/lib/population/labels';
 import type { GameEntry, GameIndex, PopulationMeta } from '@/types/population';
-import { ParishSearch } from '../ParishSearch';
 import { ArchivePicker } from './ArchivePicker';
+import { Choices } from './Choices';
 import { ClueDeck } from './ClueDeck';
 import { GAME_COPY } from './copy';
 import { EndPanel } from './EndPanel';
-import { GuessList } from './GuessList';
 import { GUESS_EVENT } from './HowToPlay';
 import { Locator } from './Locator';
 import { Reveal } from './Reveal';
 import { ofMunicipality } from '../parish/place-words';
-
-const asGamePlace = (parish: Parish): GamePlace => ({
-  code: parish.code,
-  lat: parish.lat,
-  lon: parish.lon,
-  municipality: parish.municipality,
-  region: parish.region,
-});
 
 function readStore(): GameStore {
   try {
@@ -94,14 +84,16 @@ const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)'
 
 /**
  * Freguesia misteriosa. Loads the game index, the place list and only the
- * chunk that holds the day's parish; keeps the player's games in
- * localStorage. Everything date-dependent is computed after mount, so the
+ * chunk that holds the day's parish; draws the day's four from the place list
+ * (`gameChoices`, seeded, the same on every device); keeps the player's games
+ * in localStorage. Everything date-dependent is computed after mount, so the
  * server render is the same for everyone.
  *
- * On a phone the guess box comes before the clues (it is the thing to do),
- * with the last guess's result beside it; at the end the result panel is
- * brought into view and takes focus. One polite live region reads each guess
- * and then the outcome.
+ * The open clue comes first and the four choices directly under it (on a
+ * phone too), then "Ver a próxima pista" and the map. A wrong pick or a new
+ * clue moves focus to the new clue's heading (ClueDeck); a right pick brings
+ * the result into view and gives its heading focus. One polite live region
+ * reads each pick and each clue opened.
  */
 export function MysteryGame({ locale, meta }: { locale: Locale; meta: PopulationMeta }) {
   const t = GAME_COPY[locale];
@@ -118,13 +110,13 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   const [announcement, setAnnouncement] = useState('');
   const top = useRef<HTMLDivElement>(null);
   const end = useRef<HTMLDivElement>(null);
-  /** Set when a guess ends the game in this session, so only then the end panel takes focus. */
+  /** Set when a pick ends the game in this session, so only then the end panel takes focus. */
   const justEnded = useRef(false);
   /**
    * Set when the reader starts or leaves a board with a control that then
-   * unmounts ("Jogar outra vez", "Voltar ao resultado", "Voltar à freguesia de
+   * unmounts ("Jogar outra vez", "Voltar ao resultado", "Voltar ao jogo de
    * hoje", a day from the archive): once the board is drawn, focus goes to the
-   * guess box, or to the result's heading, instead of falling to the page (A11Y3-01).
+   * first choice, or to the result's heading, instead of falling to the page (A11Y3-01).
    */
   const focusBoard = useRef(false);
 
@@ -164,7 +156,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     return () => { live = false; };
   }, [index, day]);
 
-  // At midnight in Lisbon a new parish arrives; a player on today's board moves with it.
+  // At midnight in Lisbon a new board arrives; a player on today's board moves with it.
   useEffect(() => {
     if (!index || today === null) return;
     const timer = window.setTimeout(() => {
@@ -175,7 +167,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     return () => window.clearTimeout(timer);
   }, [index, today]);
 
-  // Another tab finished a game: pick it up.
+  // Another tab played: pick it up.
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
       if (event.key === GAME_STORAGE_KEY) setStore(readStore());
@@ -184,56 +176,57 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const scale = useMemo(() => (places ? proximityScale(places.parishes) : { all: 0, mainland: 0 }), [places]);
-
   const ready = index && places && entry && today !== null && day !== null;
   const answer = ready ? places.byCode.get(entry.code) ?? null : null;
+  /** The day's four, alphabetical; the numbers on the map follow this order. */
+  const choices = useMemo(() => {
+    if (!places || !entry || day === null || !places.byCode.has(entry.code)) return [];
+    const codes = [entry.code, ...gameChoices(day, entry.code, places.parishes)];
+    return orderChoices(codes.map(code => places.byCode.get(code)).filter((p): p is Parish => Boolean(p)));
+  }, [places, entry, day]);
+  const board = useMemo(() => choices.map(p => p.code), [choices]);
   const stored = useMemo(
     () => (day !== null && today !== null ? recordFor(store, day, today) : null),
     [store, day, today],
   );
   const record = replay ?? stored;
-  const guesses = useMemo(
-    () => (record && places ? record.guesses.map(code => places.byCode.get(code)).filter((p): p is Parish => Boolean(p)) : []),
-    [record, places],
+  const ruledOut = useMemo(
+    () => new Set(record && entry ? record.picks.filter(code => code !== entry.code) : []),
+    [record, entry],
   );
-  const feedback = useMemo(
-    () => (answer ? guesses.map(guess => guessFeedback(asGamePlace(guess), asGamePlace(answer), scale)) : []),
-    [guesses, answer, scale],
-  );
-  const exclude = useMemo(() => new Set(record?.guesses ?? []), [record]);
 
-  const describe = useCallback((parish: Parish, after: GameRecord, answerParish: Parish): string => {
-    const n = after.guesses.length;
-    const item = guessFeedback(asGamePlace(parish), asGamePlace(answerParish), scale);
-    // "concelho do Funchal" in Portuguese; the bare name in English ("Funchal municipality").
-    const municipality = (place: Parish) => (locale === 'pt' ? ofMunicipality(place.municipalityName) : place.municipalityName);
-    if (after.status === 'won') return t.announceWon(n, answerParish.name, municipality(answerParish));
-    const miss = t.announceMiss(n, parish.name, municipality(parish), formatKm(item.distanceKm, locale), item.compass ? COMPASS[item.compass][locale] : '', Math.floor(item.proximity));
-    if (after.status === 'lost') return `${miss} ${t.announceLost(answerParish.name, municipality(answerParish))}`;
-    return `${miss} ${t.announceClue(Math.min(n + 1, MAX_GUESSES))}`;
-  }, [scale, t, locale]);
-
-  const onGuess = useCallback((parish: Parish) => {
-    if (!entry || today === null || day === null || !answer) return;
-    window.dispatchEvent(new Event(GUESS_EVENT));
-    if (replay) {
-      const after = applyGuess(replay, parish.code, entry.code);
-      if (after === replay) return;
-      if (after.status !== 'playing') justEnded.current = true;
-      setReplay(after);
-      setAnnouncement(describe(parish, after, answer));
-      return;
-    }
-    const before = recordFor(store, day, today);
-    const after = applyGuess(before, parish.code, entry.code);
-    if (after === before) return;
-    if (after.status !== 'playing') justEnded.current = true;
+  /** Store (or, in a replay, keep in memory) the next state of the board. */
+  const commit = useCallback((after: GameRecord) => {
+    if (replay) { setReplay(after); return; }
     const next = putRecord(store, after);
     writeStore(next);
     setStore(next);
-    setAnnouncement(describe(parish, after, answer));
-  }, [entry, today, day, answer, replay, store, describe]);
+  }, [replay, store]);
+
+  const onPick = useCallback((parish: Parish) => {
+    if (!entry || !record || !answer || record.status !== 'playing' || record.picks.includes(parish.code)) return;
+    const after = applyPick(record, parish.code, entry.code, board);
+    if (after === record) return;
+    window.dispatchEvent(new Event(GUESS_EVENT));
+    // "concelho do Porto" in Portuguese; the bare name in English ("Porto municipality").
+    const municipality = (place: Parish) => (locale === 'pt' ? ofMunicipality(place.municipalityName) : place.municipalityName);
+    if (after.status === 'won') {
+      justEnded.current = true;
+      setAnnouncement(t.announceWon(after.cluesOpened, wrongPicks(after, entry.code), answer.name, municipality(answer)));
+    } else {
+      setAnnouncement(t.announceWrong(parish.name, after.cluesOpened > record.cluesOpened ? after.cluesOpened : null));
+    }
+    commit(after);
+  }, [entry, record, answer, board, locale, t, commit]);
+
+  const onNextClue = useCallback(() => {
+    if (!record) return;
+    const after = openNextClue(record);
+    if (after === record) return;
+    window.dispatchEvent(new Event(GUESS_EVENT));
+    setAnnouncement(t.announceClue(after.cluesOpened));
+    commit(after);
+  }, [record, t, commit]);
 
   // The game just ended: bring the result into view and put focus on its heading.
   const finished = record ? record.status !== 'playing' : false;
@@ -248,14 +241,14 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   }, [finished]);
 
   // The board for a new game (or the result of a finished one) is drawn: put focus on it.
-  const boardReady = Boolean(ready && record && answer);
+  const boardReady = Boolean(ready && record && answer && choices.length > 0);
   useEffect(() => {
     if (!focusBoard.current || !boardReady || !record) return;
     const playingNow = record.status === 'playing';
     const frame = window.requestAnimationFrame(() => {
       focusBoard.current = false;
       const target = playingNow
-        ? top.current?.querySelector<HTMLElement>('input[role="combobox"]')
+        ? top.current?.querySelector<HTMLElement>('#misteriosa-choices + p + ol button:not([aria-disabled])')
         : top.current?.querySelector<HTMLElement>('#misteriosa-end');
       target?.focus({ preventScroll: true });
     });
@@ -304,11 +297,11 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     );
   }
 
-  if (!ready || !record) {
-    // The board's own height at each width (the guess box, the clue deck and
-    // the six guess slots), so the footer does not start in view and jump.
+  if (!ready || !record || (answer && choices.length === 0)) {
+    // About the board's own height at each width (the clue deck, the four
+    // choices and the map), so the footer does not start in view and jump.
     return (
-      <div role="status" className="flex min-h-[1180px] flex-col items-center justify-start gap-3 rounded-2xl border border-line bg-cream p-6 pt-24 text-sm text-stone-600 sm:min-h-[1080px] lg:min-h-[760px]">
+      <div role="status" className="flex min-h-[1240px] flex-col items-center justify-start gap-3 rounded-2xl border border-line bg-cream p-6 pt-24 text-sm text-stone-600 sm:min-h-[1150px] lg:min-h-[700px]">
         <MarkLoading height={28} color={BRAND.ink} ground={BRAND.cream} />
         {t.loading}
       </div>
@@ -321,13 +314,11 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
 
   const playing = record.status === 'playing';
   const practice = day !== today || replay !== null;
-  const open = cluesOpen(record, entry.code);
+  const open = cluesOpen(record);
   const date = dateOfDay(EPOCH, day);
   const stats = computeStats(store, today);
-  const share = shareMessage({ date, day, record, feedback, locale });
-  const used = record.guesses.length;
-  const last = feedback.length > 0 ? feedback[feedback.length - 1] : null;
-  const lastParish = guesses.length > 0 ? guesses[guesses.length - 1] : null;
+  const errors = wrongPicks(record, entry.code);
+  const share = shareMessage({ date, day, record, answer: entry.code, locale });
 
   return (
     <div ref={top}>
@@ -351,22 +342,23 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
         </div>
       )}
 
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">
           {t.dayLabel(day + 1)} · {formatGameDate(date, locale)}
         </p>
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-stone-600">
-            {playing ? t.attempt(Math.min(used + 1, MAX_GUESSES), MAX_GUESSES) : t.attemptsUsed(used, MAX_GUESSES)}
-          </span>
-          <span className="flex gap-1" aria-hidden="true">
-            {Array.from({ length: MAX_GUESSES }, (_, i) => {
-              const code = record.guesses[i];
-              const tone = !code ? 'border border-line bg-cream' : code === entry.code ? 'bg-ink' : 'bg-coral';
-              return <span key={i} className={`h-2.5 w-5 rounded-full ${tone}`} />;
-            })}
-          </span>
-        </div>
+        {playing && (
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-stone-600">
+              {t.clueProgress(record.cluesOpened, CLUE_COUNT)}{errors > 0 ? ` · ${t.errorsShort(errors)}` : ''}
+            </span>
+            {/* The clues opened, as pips: what the score will be. */}
+            <span className="flex gap-1" aria-hidden="true">
+              {Array.from({ length: CLUE_COUNT }, (_, i) => (
+                <span key={i} className={`h-2.5 w-5 rounded-full ${i < record.cluesOpened ? 'bg-ink' : 'border border-line bg-cream'}`} />
+              ))}
+            </span>
+          </div>
+        )}
       </div>
 
       {!playing && (
@@ -375,7 +367,10 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
             <EndPanel
               record={record}
               answer={answer}
+              choices={choices}
+              ruledOut={ruledOut}
               tier={entry.tier}
+              errors={errors}
               stats={stats}
               share={share}
               index={index}
@@ -388,32 +383,13 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
       )}
 
       {/*
-        One grid, three pieces. On a phone they stack in source order: the
-        guess box first (the thing to do), then the clues, then the guesses.
-        On a wide screen the clues take the left column and the guess box and
-        the guesses share the right one.
+        While playing: on a phone the clue, then the four choices directly
+        under it, then the map; on a wide screen the clue on the left and the
+        choices and the map on the right. Once the game is over the clues stay
+        below the result, on their own, for a second look.
       */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[auto_1fr] lg:items-start">
-        {playing && (
-          <div className="rounded-2xl border border-line bg-cream p-4 lg:col-start-2 lg:row-start-1">
-            <ParishSearch
-              key={`${day}-${replay ? 'replay' : 'live'}`}
-              locale={locale}
-              onSelect={onGuess}
-              exclude={exclude}
-              label={t.guessLabel}
-              placeholder={t.guessPlaceholder}
-            />
-            {last && lastParish && !last.correct && (
-              // The result of the last miss, beside the box, so a phone does not have to scroll to the list for it.
-              <p className="mt-3 rounded-xl bg-parchment px-3 py-2 text-sm text-stone-600 lg:hidden">
-                {t.lastGuess(lastParish.name, formatKm(last.distanceKm, locale), last.compass ? COMPASS[last.compass][locale] : '')}
-              </p>
-            )}
-          </div>
-        )}
-
-        <div className="min-w-0 lg:col-start-1 lg:row-span-2 lg:row-start-1">
+      <div className={playing ? 'grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start' : 'max-w-4xl'}>
+        <div className="min-w-0">
           <ClueDeck
             // A replay of the same day starts a fresh deck (its first clue, nothing selected from the finished game).
             key={`${day}-${replay ? 'replay' : 'live'}`}
@@ -425,13 +401,19 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
           />
         </div>
 
-        <div className={`flex flex-col gap-4 lg:col-start-2 ${playing ? 'lg:row-start-2' : 'lg:row-start-1'}`}>
-          <section aria-label={t.guessesTitle}>
-            <h2 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.guessesTitle}</h2>
-            <GuessList guesses={guesses} feedback={feedback} locale={locale} playing={playing} />
-          </section>
-          <Locator guesses={guesses} answer={playing ? null : answer} locale={locale} />
-        </div>
+        {playing && (
+          <div className="flex min-w-0 flex-col gap-4">
+            <Choices
+              choices={choices}
+              ruledOut={ruledOut}
+              locale={locale}
+              canOpenMore={record.cluesOpened < CLUE_COUNT}
+              onPick={onPick}
+              onNextClue={onNextClue}
+            />
+            <Locator choices={choices} ruledOut={ruledOut} answer={null} locale={locale} />
+          </div>
+        )}
       </div>
 
       <div className="mt-10">
