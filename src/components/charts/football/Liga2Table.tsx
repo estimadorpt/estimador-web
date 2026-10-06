@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChartTable } from "@/components/viz/ChartTable";
+import { DataCard } from "@/components/viz/DataCard";
+import { spreadLabels } from "@/components/charts/football/label-spread";
 import { BRAND } from "@/lib/brand";
-import { formatOrdinal, formatSigned } from "@/lib/football-format";
+import { formatInteger, formatLongDate, formatOrdinal, formatSigned } from "@/lib/football-format";
 import {
   isReserveSide,
   liga2DisplayName,
@@ -454,19 +456,32 @@ function ProbCell({
 
 /* ------------------------------------------------------- promotion race -- */
 
+/** The ink grey of a club that did not go up: green means only "subiu"
+ *  (audit UXD3-04). The faint step, which is for strokes and reaches 3:1 on
+ *  the card's cream. */
+const NOT_PROMOTED = BRAND.faint;
+
 /** How the promotion probability moved across the retrospective checkpoints.
  *  Drawn at the container's measured width, so every label is 11px on a phone
  *  too (it used to be a 720px viewBox scaled to 5px text, audit A11Y2-05,
- *  UXM2-02); below 520px the end labels give way to a legend. Every point is
- *  in the table twin, and each dot has its value as a tip. */
+ *  UXM2-02); below 520px the end labels give way to a legend (a swatch for
+ *  each club that went up, the grey ones as text). Every point is
+ *  in the table twin, and each dot has its value as a tip. Framed in the one
+ *  chart card, with its source, date and method (audit UXD2-07). */
 export function Liga2PromotionRace({
   checkpoints,
   locale = "pt",
   maxTeams = 6,
+  generatedAt,
+  nSims,
 }: {
   checkpoints: Liga2Checkpoint[];
   locale?: string;
   maxTeams?: number;
+  /** When the file behind the chart was generated (the card's date). */
+  generatedAt?: string;
+  /** Simulations behind each checkpoint (the card's source line). */
+  nSims?: number;
 }) {
   const pt = locale !== "en";
   const last = checkpoints[checkpoints.length - 1];
@@ -516,14 +531,15 @@ export function Liga2PromotionRace({
     last.teams.find(t => t.team === team)?.final_rank;
   const colourOf = (team: string) => {
     const rank = finalRank(team);
-    return rank !== undefined && rank <= 2 ? BRAND.tree : liga2TeamColor(team);
+    return rank !== undefined && rank <= 2 ? BRAND.tree : NOT_PROMOTED;
   };
   const wentUpOf = (team: string) => {
     const rank = finalRank(team);
     return rank !== undefined && rank <= 2;
   };
 
-  // End labels, pushed apart so none overprints another (13px apart).
+  // End labels, pushed apart both ways so none overprints another or the
+  // axis below it (audit UXD3-04).
   const ends = teams
     .map(team => {
       const vals = checkpoints.map(cp => valueFor(team, cp));
@@ -532,12 +548,24 @@ export function Liga2PromotionRace({
     })
     .filter((e): e is { team: string; x: number; v: number; y: number } => e !== null)
     .sort((a, b) => a.y - b.y);
-  for (let i = 1; i < ends.length; i++) {
-    if (ends[i].y - ends[i - 1].y < 13) ends[i].y = ends[i - 1].y + 13;
-  }
+  const spread = spreadLabels(ends.map(e => e.y), padT, y(0));
+  ends.forEach((e, i) => { e.y = spread[i]; });
 
   return (
-    <div className="rounded-2xl border border-line bg-cream p-4">
+    <DataCard
+      title={pt ? "Probabilidade de subida, jornada a jornada" : "Promotion probability, matchday by matchday"}
+      source={pt
+        ? `Fonte: modelo ligeiro do estimador.pt (Poisson hierárquico, só golos)${nSims ? `, ${formatInteger(nSims, locale)} simulações por ajuste` : ""}`
+        : `Source: estimador.pt lighter model (hierarchical Poisson, goals only)${nSims ? `, ${formatInteger(nSims, locale)} simulations per fit` : ""}`}
+      updated={generatedAt
+        ? pt
+          ? `Dados de ${formatLongDate(generatedAt, locale)}`
+          : `Data of ${formatLongDate(generatedAt, locale)}`
+        : undefined}
+      methodologyHref="/desporto/liga/metodologia"
+      methodologyLabel={pt ? "Como funciona o modelo" : "How the model works"}
+      locale={locale}
+    >
       <div ref={ref} className="w-full">
         <svg
           width={W}
@@ -577,9 +605,9 @@ export function Liga2PromotionRace({
             const colour = colourOf(team);
             return (
               <g key={team}>
-                <path d={d} fill="none" stroke={colour} strokeWidth={wentUp ? 2.5 : 1.5} strokeOpacity={wentUp ? 1 : 0.65} />
+                <path d={d} fill="none" stroke={colour} strokeWidth={wentUp ? 2.5 : 1.5} />
                 {pts.map(p => (
-                  <circle key={p.x} cx={p.x} cy={p.y} r={wentUp ? 4 : 3} fill={colour} fillOpacity={wentUp ? 1 : 0.7}>
+                  <circle key={p.x} cx={p.x} cy={p.y} r={wentUp ? 4 : 3} fill={colour}>
                     <title>{`${liga2DisplayName(team)} · ${pt ? "J" : "MD"}${p.md}: ${pct(p.v, pt)}`}</title>
                   </circle>
                 ))}
@@ -600,20 +628,36 @@ export function Liga2PromotionRace({
           ))}
         </svg>
       </div>
-      {narrow && (
-        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-stone-600">
-          {ends.slice().sort((a, b) => b.v - a.v).map(e => (
-            <li key={e.team} className="inline-flex items-center gap-1.5">
-              <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: colourOf(e.team) }} />
-              <span className={wentUpOf(e.team) ? "font-bold text-ink" : ""}>{liga2DisplayName(e.team)} {pct(e.v, pt)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {narrow && (() => {
+        // A swatch only where its colour picks out the line: the clubs that
+        // went up. The grey lines share one colour, so a grey swatch per club
+        // would promise an identity it cannot carry; they are listed as text
+        // (audit UXD3-04).
+        const byValue = ends.slice().sort((a, b) => b.v - a.v);
+        const up = byValue.filter(e => wentUpOf(e.team));
+        const rest = byValue.filter(e => !wentUpOf(e.team));
+        return (
+          <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-stone-600">
+            {up.map(e => (
+              <li key={e.team} className="inline-flex items-center gap-1.5">
+                <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: colourOf(e.team) }} />
+                <span className="font-bold text-ink">{liga2DisplayName(e.team)} {pct(e.v, pt)}</span>
+              </li>
+            ))}
+            {rest.length > 0 && (
+              <li className="basis-full">
+                {pt ? "A cinzento: " : "In grey: "}
+                {/* Each club and its value stay on one line (no-break spaces). */}
+                {rest.map(e => `${liga2DisplayName(e.team)} ${pct(e.v, pt)}`.replace(/ /g, "\u00a0")).join(", ")}
+              </li>
+            )}
+          </ul>
+        );
+      })()}
       <p className="text-[11px] text-stone-600 mt-2 leading-relaxed">
         {pt
-          ? "A verde, os dois clubes que acabaram por subir. Cada ponto é um ajuste independente que só viu os jogos disputados até essa jornada."
-          : "In green, the two clubs that actually went up. Each point is an independent refit that saw only the matches played up to that matchday."}
+          ? "A verde, os dois clubes que acabaram por subir; a cinzento, os outros. Cada ponto é um ajuste independente que só viu os jogos disputados até essa jornada."
+          : "In green, the two clubs that actually went up; in grey, the rest. Each point is an independent refit that saw only the matches played up to that matchday."}
       </p>
       <ChartTable
         caption={pt ? "Probabilidade de subida por jornada de referência" : "Promotion probability by checkpoint matchday"}
@@ -626,7 +670,7 @@ export function Liga2PromotionRace({
           }),
         ])}
       />
-    </div>
+    </DataCard>
   );
 }
 

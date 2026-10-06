@@ -219,7 +219,11 @@ export function crossings(checkpoints: EvaluatedCheckpoint[]): Array<{ before: n
   return out;
 }
 
-/** "As duas linhas cruzam-se três vezes: entre as jornadas 2 e 3, …" (M-05). */
+/**
+ * "A diferença muda de sinal três vezes: entre as jornadas 2 e 3, …" (M-05).
+ * Said of the difference, not of "the two lines": from matchday 15 the chart
+ * draws separate points, with no line between them (audit METH3-14).
+ */
 export function crossingSentence(checkpoints: EvaluatedCheckpoint[], locale: string): string | null {
   const list = crossings(checkpoints);
   if (!list.length) return null;
@@ -227,15 +231,17 @@ export function crossingSentence(checkpoints: EvaluatedCheckpoint[], locale: str
   const pair = (c: { before: number; after: number }) =>
     p ? `entre as jornadas ${c.before} e ${c.after}` : `between matchdays ${c.before} and ${c.after}`;
   if (list.length === 1) {
-    return p ? `As duas linhas cruzam-se uma vez, ${pair(list[0])}.` : `The two lines cross once, ${pair(list[0])}.`;
+    return p
+      ? `A diferença entre o modelo e o mercado muda de sinal uma vez, ${pair(list[0])}.`
+      : `The gap between model and market changes sign once, ${pair(list[0])}.`;
   }
   const words = p ? ['', '', 'duas', 'três', 'quatro', 'cinco'] : ['', '', 'twice', 'three times', 'four times', 'five times'];
   const count = words[list.length] ?? (p ? `${list.length}` : `${list.length} times`);
   const pairs = list.map(pair);
   const joined = `${pairs.slice(0, -1).join(', ')}${p ? ' e ' : ' and '}${pairs[pairs.length - 1]}`;
   return p
-    ? `As duas linhas cruzam-se ${count} vezes: ${joined}.`
-    : `The two lines cross ${count}: ${joined}.`;
+    ? `A diferença entre o modelo e o mercado muda de sinal ${count} vezes: ${joined}.`
+    : `The gap between model and market changes sign ${count}: ${joined}.`;
 }
 
 /* ------------------------------------------------------------ calibration */
@@ -288,8 +294,15 @@ export const TITLE_CALIBRATION = {
   leadPoints: 3,
   cells: 19,
   cellsSeasons: 8,
+  /** The 19 cells, the two matchday-one data artefacts included. */
   modelMean: 0.56,
   leadersWon: 0.74,
+  /**
+   * Without the two matchday-one cells (Famalicão 2019-20, Santa Clara
+   * 2020-21) that a data error put in front: the 17 the page leads with
+   * (audit METH3-15). The assessment calls the first pair "with artefacts".
+   */
+  cellsClean: 17,
   modelMeanClean: 0.63,
   leadersWonClean: 0.82,
   /** md07 2026-27, Porto: production and the range of untestable alternatives. */
@@ -308,13 +321,13 @@ export function titleCalibrationParagraphs(locale: string): string[] {
   const assessed = formatLongDate(c.assessedOn, locale);
   return pt
     ? [
-        `Verificámos o que acontece às equipas que lideram. Nas épocas de ${c.firstSeason} a ${c.lastSeason}, houve ${c.cells} momentos avaliados (em ${c.cellsSeasons} épocas) em que uma equipa liderava com ${c.leadPoints} ou mais pontos de vantagem. O modelo deu-lhes, em média, ${pct(c.modelMean)} de probabilidade de serem campeãs; foram campeãs em ${pct(c.leadersWon)} desses casos. Sem dois casos da primeira jornada que resultam de um erro nos dados, os números são ${pct(c.modelMeanClean)} e ${pct(c.leadersWonClean)}.`,
-        `Ou seja: o modelo tende a subestimar quem lidera. A amostra é pequena: ${c.cells} momentos de ${c.cellsSeasons} épocas, que não são independentes (a mesma época e o mesmo líder contam várias vezes), por isso a amostra efetiva é ainda menor e o tamanho exato da diferença é incerto, mas o sentido repete-se. Também não sabemos ainda corrigi-lo: nenhuma das alternativas testadas passou nos nossos testes, e por isso o modelo publicado não mudou. Algumas dessas alternativas, que os testes não conseguem distinguir do modelo atual, dariam ao Porto, na previsão da jornada 7 de 2026-27, entre ${pct(c.livePortoAltLow)} e ${pct(c.livePortoAltHigh)}, em vez de ${pct(c.livePorto)}.`,
+        `Verificámos o que acontece às equipas que lideram. Nas épocas de ${c.firstSeason} a ${c.lastSeason}, houve ${c.cells} momentos avaliados (em ${c.cellsSeasons} épocas) em que uma equipa liderava com ${c.leadPoints} ou mais pontos de vantagem. Dois são da primeira jornada e resultam de um erro nos dados (jornadas em que a mesma equipa aparece duas vezes), por isso deixamo-los de fora. Nos outros ${c.cellsClean}, o modelo deu a quem liderava, em média, ${pct(c.modelMeanClean)} de probabilidade de ser campeão; foi campeão em ${pct(c.leadersWonClean)} desses casos. Com os dois casos com erro, os números seriam ${pct(c.modelMean)} e ${pct(c.leadersWon)}.`,
+        `Ou seja: o modelo tende a subestimar quem lidera. A amostra é pequena: ${c.cellsClean} momentos, que não são independentes (a mesma época e o mesmo líder contam várias vezes), por isso a amostra efetiva é ainda menor e o tamanho exato da diferença é incerto, mas o sentido repete-se. Também não sabemos ainda corrigi-lo: nenhuma das alternativas testadas passou nos nossos testes, e por isso o modelo publicado não mudou. Algumas dessas alternativas, que os testes não conseguem distinguir do modelo atual, dariam ao Porto, na previsão da jornada 7 de 2026-27, entre ${pct(c.livePortoAltLow)} e ${pct(c.livePortoAltHigh)}, em vez de ${pct(c.livePorto)}.`,
         `Lê as probabilidades de título como uma estimativa provavelmente conservadora para quem vai à frente. As probabilidades de despromoção não foram verificadas desta forma. (Avaliação interna de ${assessed}.)`,
       ]
     : [
-        `We checked what happens to the teams in front. Across the ${c.firstSeason} to ${c.lastSeason} seasons there were ${c.cells} evaluated moments (in ${c.cellsSeasons} seasons) when a team led by ${c.leadPoints} or more points. The model gave them, on average, a ${pct(c.modelMean)} chance of winning the title; they won it ${pct(c.leadersWon)} of the time. Leaving out two matchday-one cases caused by a data error, the figures are ${pct(c.modelMeanClean)} and ${pct(c.leadersWonClean)}.`,
-        `In other words: the model tends to underrate the leader. The sample is small: ${c.cells} moments from ${c.cellsSeasons} seasons, which are not independent (the same season and the same leader count several times), so the effective sample is smaller still and the exact size of the gap is uncertain, but the direction holds. Nor do we know how to fix it yet: none of the alternatives tested passed our checks, so the published model has not changed. Some of those alternatives, which the checks cannot tell apart from the current model, would have given Porto between ${pct(c.livePortoAltLow)} and ${pct(c.livePortoAltHigh)} in the 2026-27 matchday 7 forecast, instead of ${pct(c.livePorto)}.`,
+        `We checked what happens to the teams in front. Across the ${c.firstSeason} to ${c.lastSeason} seasons there were ${c.cells} evaluated moments (in ${c.cellsSeasons} seasons) when a team led by ${c.leadPoints} or more points. Two are from matchday one and come from a data error (rounds in which the same team appears twice), so we leave them out. In the other ${c.cellsClean}, the model gave the leader, on average, a ${pct(c.modelMeanClean)} chance of winning the title; the leader won it ${pct(c.leadersWonClean)} of the time. With the two faulty cases, the figures would be ${pct(c.modelMean)} and ${pct(c.leadersWon)}.`,
+        `In other words: the model tends to underrate the leader. The sample is small: ${c.cellsClean} moments, which are not independent (the same season and the same leader count several times), so the effective sample is smaller still and the exact size of the gap is uncertain, but the direction holds. Nor do we know how to fix it yet: none of the alternatives tested passed our checks, so the published model has not changed. Some of those alternatives, which the checks cannot tell apart from the current model, would have given Porto between ${pct(c.livePortoAltLow)} and ${pct(c.livePortoAltHigh)} in the 2026-27 matchday 7 forecast, instead of ${pct(c.livePorto)}.`,
         `Read the title probabilities as a probably conservative estimate for whoever is in front. Relegation probabilities have not been checked this way. (Internal assessment of ${assessed}.)`,
       ];
 }
@@ -396,6 +409,6 @@ export function leadVerdictSentence(sc: ScorecardForCopy, locale: string): strin
 /** The reading rule alone, for the explainer under the chart (MR2-18). */
 export function readingRule(locale: string): string {
   return pt(locale)
-    ? `Uma nota sobre incerteza, porque aqui ela decide tudo: lemos uma diferença como real só quando passa de ${ruleWords(locale)} o seu erro padrão; abaixo disso, é um empate técnico. Os três cartões acima aplicam esta regra.`
-    : `A note on uncertainty, because here it decides everything: we read a gap as real only when it is more than ${ruleWords(locale)} its standard error; below that, it is a statistical tie. The three cards above apply this rule.`;
+    ? `Uma nota sobre incerteza, porque aqui ela decide tudo: lemos uma diferença como real só quando passa de ${ruleWords(locale)} o seu erro padrão; abaixo disso, é um empate técnico.`
+    : `A note on uncertainty, because here it decides everything: we read a gap as real only when it is more than ${ruleWords(locale)} its standard error; below that, it is a statistical tie.`;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatInteger, formatPercent } from "@/lib/football-format";
+import { formatInteger, formatPosterior } from "@/lib/football-format";
 
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
@@ -17,6 +17,7 @@ import type {
 import type { PlayerSkillData } from "@/components/charts/football/PlayerSkillRanking";
 import { countSeparated, withPublishedGoalsRanks } from "@/lib/utils/player-ratings";
 import { playerDataCutoffLabel } from "@/lib/utils/player-pages";
+import { playerInventory, playerInventorySentence } from "@/lib/utils/player-inventory";
 import type {
   PositionalRow,
   RatingEntry,
@@ -125,6 +126,23 @@ export function PlayerRatingsHub({
     playerPage: pt ? "Página do jogador" : "Player page",
     openPlayer: (name: string) =>
       pt ? `Abrir a página de ${name}` : `Open ${name}'s page`,
+    movedUp: (n: number) =>
+      pt
+        ? `sobe ${n} ${n === 1 ? "lugar" : "lugares"} face à finalização`
+        : `up ${n} ${n === 1 ? "place" : "places"} on finishing`,
+    movedDown: (n: number) =>
+      pt
+        ? `desce ${n} ${n === 1 ? "lugar" : "lugares"} face à finalização`
+        : `down ${n} ${n === 1 ? "place" : "places"} on finishing`,
+    unmoved: pt ? "mesmo lugar que na finalização" : "same place as on finishing",
+    valueWords: (value: string, lo: string | null, hi: string | null) =>
+      lo !== null && hi !== null
+        ? pt
+          ? `${value}; ${intervalLabel(pct).toLowerCase()} de ${lo} a ${hi}`
+          : `${value}; ${intervalLabel(pct).toLowerCase()} from ${lo} to ${hi}`
+        : pt
+          ? `${value}; sem intervalo`
+          : `${value}; no interval`,
   });
 
   /* ---------------------------------------- the finishing metric, in numbers */
@@ -239,13 +257,17 @@ export function PlayerRatingsHub({
   const defNumbers = defDiagnostics.filter((d) => d.main && d.value.length <= 12);
   const defText = defDiagnostics.filter((d) => d.main && d.value.length > 12);
   const defTechnical = defDiagnostics.filter((d) => !d.main && d.key !== "N ci excludes zero" && d.key !== "Expected false positives at 90pct");
-  // "12" never travels without the 79 expected by chance (audit MR2-15).
+  // "12" never travels without the 79 the nominal rate gives (audit MR2-15),
+  // and the null is named: it is the nominal 10% of a 90% interval, not a
+  // permutation test like the duels' (audit METH3-06). 12 is far below 79,
+  // so the sentence no longer says it is "what chance would give".
   const ciExcl = diagValue("N ci excludes zero");
   const falsePos = diagValue("Expected false positives at 90pct");
+  const nDef = diagValue("N players");
   const ciPair = ciExcl != null && falsePos != null
     ? pt
-      ? `Intervalos de 90% que excluem zero: ${tidyValue(ciExcl)} (esperados só por acaso: ${int(Math.round(Number(falsePos)))}). Com tantos jogadores, é o que o acaso daria: não é sinal de defesas melhores.`
-      : `90% intervals that exclude zero: ${tidyValue(ciExcl)} (expected by chance alone: ${int(Math.round(Number(falsePos)))}). With this many players, that is what chance would give: it is no sign of better defenders.`
+      ? `${tidyValue(ciExcl)}${nDef != null ? ` dos ${int(Number(nDef))}` : ""} intervalos de 90% excluem o zero. A taxa nominal de um intervalo de 90% (um em cada dez fica de fora só por acaso) daria ${int(Math.round(Number(falsePos)))}; com o encolhimento forte deste modelo, essa referência exagera o que o acaso daria, e os ${tidyValue(ciExcl)} também não indicam defesas que se separem dos colegas.`
+      : `${tidyValue(ciExcl)}${nDef != null ? ` of the ${int(Number(nDef))}` : ""} 90% intervals exclude zero. The nominal rate of a 90% interval (one in ten falls outside by chance alone) would give ${int(Math.round(Number(falsePos)))}; with this model's heavy shrinkage that benchmark overstates what chance would give, and the ${tidyValue(ciExcl)} do not point to defenders who separate from their team-mates either.`
     : null;
 
   /* ------------------------------------------------------ shared meta block */
@@ -319,19 +341,28 @@ export function PlayerRatingsHub({
   const MetaFootnote = ({
     block,
     caveat,
+    through = null,
+    checks = true,
   }: {
     block: RatingsBlock;
     caveat: string;
+    /** The data cut-off, beside the figures it dates (audit F-H6). */
+    through?: string | null;
+    /** False where the section already shows its fit's checks. */
+    checks?: boolean;
   }) => {
-    const line = metaLine(block);
+    // The meta line follows a sentence, so it starts with a capital.
+    const raw = metaLine(block);
+    const line = raw ? `${raw.charAt(0).toUpperCase()}${raw.slice(1)}` : "";
     return (
       <div className="mt-3 max-w-3xl">
         <p className="text-[11px] text-stone-500 leading-relaxed">
           {caveat}
           {block.meta.note ? ` ${block.meta.note}` : ""}
           {line ? ` ${line}.` : ""}
+          {through ? ` ${through}.` : ""}
         </p>
-        <Diagnostics maxRhat={block.meta.maxRhat} divergences={block.meta.divergences} />
+        {checks && <Diagnostics maxRhat={block.meta.maxRhat} divergences={block.meta.divergences} />}
         {/* The model's own caveats, verbatim. They are written by whoever
             fitted it and are more specific than anything this page could
             say on its behalf. */}
@@ -370,7 +401,7 @@ export function PlayerRatingsHub({
       (r.range !== null && r.range < 0.02);
     return (
       <div className="mt-6 border-t border-stone-200 pt-4 max-w-3xl">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">
+        <h3 className="text-xs font-bold uppercase tracking-wide sm:tracking-wider text-stone-500 mb-1">
           {pt ? "A distribuição por posição" : "The distribution by position"}
         </h3>
         <p className="text-[11px] text-stone-500 mb-3 leading-relaxed">
@@ -382,19 +413,19 @@ export function PlayerRatingsHub({
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-stone-300 text-left">
-              <th className="py-1.5 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-500">
+              <th className="py-1.5 pr-2 sm:pr-3 font-medium text-[11px] uppercase tracking-wide sm:tracking-wider text-stone-500">
                 {pt ? "Posição" : "Position"}
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
+              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[11px] uppercase tracking-wide sm:tracking-wider text-stone-500">
                 n
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
+              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[11px] uppercase tracking-wide sm:tracking-wider text-stone-500">
                 {pt ? "mediana" : "median"}
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
+              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[11px] uppercase tracking-wide sm:tracking-wider text-stone-500">
                 {pt ? "amplitude" : "range"}
               </th>
-              <th className="py-1.5 pl-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
+              <th className="py-1.5 pl-1.5 sm:pl-2 text-right font-medium text-[11px] uppercase tracking-wide sm:tracking-wider text-stone-500">
                 <span className="sm:hidden">{pt ? "distintos" : "distinct"}</span>
                 <span className="hidden sm:inline">{pt ? "valores distintos" : "distinct values"}</span>
               </th>
@@ -406,25 +437,27 @@ export function PlayerRatingsHub({
               return (
                 <tr key={r.position} className="border-b border-stone-100">
                   <td
-                    className={`py-1.5 pr-3 font-medium ${
+                    className={`py-1.5 pr-2 sm:pr-3 font-medium ${
                       flat ? "text-amber-700" : "text-stone-800"
                     }`}
                   >
                     {(pt ? positionCodePt[r.position] : positionCodeEn[r.position]) ??
                       r.position}
+                    {/* On its own line and unbroken, so "Guarda-redes" and the
+                        badge never split over three lines (audit UXM3-17). */}
                     {flat && (
-                      <span className="ml-2 text-[11px] uppercase tracking-wide bg-amber-50 text-amber-700 px-1 py-px">
+                      <span className="mt-0.5 block w-fit whitespace-nowrap text-[11px] uppercase tracking-wide bg-amber-50 text-amber-700 px-1 py-px">
                         {pt ? "não medido" : "not measured"}
                       </span>
                     )}
                   </td>
-                  <td className="py-1.5 px-2 text-right tabular-nums text-stone-600">
+                  <td className="py-1.5 px-1.5 sm:px-2 text-right tabular-nums text-stone-600">
                     {r.n === null ? "—" : int(r.n)}
                   </td>
-                  <td className="py-1.5 px-2 text-right tabular-nums text-stone-600">
+                  <td className="py-1.5 px-1.5 sm:px-2 text-right tabular-nums text-stone-600">
                     {r.median === null ? "—" : nf(r.median, 3)}
                   </td>
-                  <td className="py-1.5 px-2 text-right tabular-nums text-stone-600">
+                  <td className="py-1.5 px-1.5 sm:px-2 text-right tabular-nums text-stone-600">
                     {r.range === null
                       ? r.min === null || r.max === null
                         ? "—"
@@ -432,7 +465,7 @@ export function PlayerRatingsHub({
                       : nf(r.range, 3)}
                   </td>
                   <td
-                    className={`py-1.5 pl-2 text-right tabular-nums ${
+                    className={`py-1.5 pl-1.5 sm:pl-2 text-right tabular-nums ${
                       flat ? "font-semibold text-amber-700" : "text-stone-600"
                     }`}
                   >
@@ -450,41 +483,23 @@ export function PlayerRatingsHub({
 
   /* ------------------------------------------------------------ inventory */
 
-  // Three states, not two: a ranking, a fit that came back inconclusive, and
-  // nothing at all. Collapsing the middle one into either of the others would
-  // be the dishonesty this page is about.
-  const published: string[] = [];
-  const inconclusive: string[] = [];
-  const missing: string[] = [];
-  const bucket = (block: RatingsBlock | null, label: string) => {
-    if (block?.players.length) published.push(label);
-    else if (block) inconclusive.push(label);
-    else missing.push(label);
-  };
-  if (finishers?.players?.length) published.push(pt ? "finalização" : "finishing");
-  else missing.push(pt ? "finalização" : "finishing");
-  bucket(contrib, pt ? "contribuição" : "contribution");
-  if (contested?.cells.some((c) => c.ships && c.ranking?.length))
-    published.push(pt ? "posse disputada" : "contested possession");
-  const crossShips = gkChannels?.channels.cross_intervention.ships ?? false;
-  if (crossShips)
-    published.push(
-      pt ? "intervenção em cruzamentos" : "cross intervention",
-    );
-  if (gkChannels && !gkChannels.channels.shot_stopping.ships)
-    inconclusive.push(
-      pt
-        ? `defesa de remates (${gkChannels.seasons.length} épocas)`
-        : `shot-stopping (${gkChannels.seasons.length} seasons)`,
-    );
-  // The xGOT feed is superseded by the three-axis section when that feed
-  // exists; listing an unrendered section as ranked would be a lie.
-  if (!gkChannels) bucket(gk, pt ? "guarda-redes (xGOT)" : "goalkeepers (xGOT)");
-  bucket(def, pt ? "defesas" : "defenders");
+  // What is ranked, what is measured without a ranking and what is not
+  // measured yet: one helper, shared with the page's hero (audit UXD2-29).
+  const inventory = playerInventorySentence(
+    playerInventory(
+      { finishers: finisherRows.length > 0, contrib, gk, def, contested, gkChannels },
+      locale,
+    ),
+    locale,
+  );
 
   return (
     <div>
       {/* ------------------------------------------------------- the argument */}
+      {/* The cut-off and the inventory are said once (audit UXD2-29, CL3-12):
+          here when the hub carries its own heading, in the page's hero
+          otherwise. */}
+      {showHeading && (
       <section className="mb-12 max-w-3xl">
         {showHeading && (
           <>
@@ -514,38 +529,16 @@ export function PlayerRatingsHub({
               : `${cutoff}: finishing and contribution do not include 2026-27 matches yet. Contested possession and the goalkeeper axes state the seasons they cover in their own sections.`}
           </p>
         )}
-
-        <div className="mt-6 border-l-2 border-stone-300 pl-4 py-1">
-          <p className="text-xs text-stone-500 leading-relaxed">
-            <span>
-              {pt ? "Listas ordenadas nesta página: " : "Ordered lists on this page: "}
-              <span className="font-semibold text-stone-700">
-                {`${
-                  published.length ? published.join(", ") : pt ? "nada" : "nothing"
-                }.`}
-              </span>
-            </span>
-            {inconclusive.length > 0 && (
-              <span>
-                {pt
-                  ? ` Sem lista, porque o modelo ainda não distingue os jogadores uns dos outros: ${inconclusive.join(", ")}.`
-                  : ` No list, because the model cannot yet tell the players apart: ${inconclusive.join(", ")}.`}
-              </span>
-            )}
-            {missing.length > 0 && (
-              <span>
-                {pt
-                  ? ` Ainda sem métrica: ${missing.join(", ")}. Uma métrica que ainda não existe não aparece aqui como espaço vazio nem como estimativa provisória.`
-                  : ` No metric yet: ${missing.join(", ")}. A metric that does not exist yet appears here as neither an empty slot nor a provisional estimate.`}
-              </span>
-            )}
-          </p>
-        </div>
+        <p className="mt-6 border-l-2 border-stone-300 pl-4 py-1 text-xs text-stone-500 leading-relaxed">
+          {inventory}
+        </p>
       </section>
+      )}
 
       {/* ------------------------------------------------------- 1. finishers */}
       {finisherRows.length > 0 && finishers && (
-        <section className="mb-12 border-t border-stone-200 pt-8">
+        // The first section needs no rule of its own under the page's hero.
+        <section className="mb-12 border-t border-stone-200 pt-8 first:border-t-0 first:pt-0">
           <h2 className="text-2xl tracking-tight mb-1">
             {pt ? "Finalização" : "Finishing"}
           </h2>
@@ -554,7 +547,6 @@ export function PlayerRatingsHub({
               ? "Golos por 90 minutos acima de um jogador de nível de substituição (SAR, do inglês skill above replacement), depois de descontar minutos, adversário e fator casa. Os golos são limitados antes da conta, para que uma tarde de quatro golos não passe por talento permanente."
               : "Goals per 90 minutes above a replacement-level player (SAR, skill above replacement), after adjusting for minutes, opponent and home advantage. Goals are capped before the estimate, so one four-goal afternoon is not read as permanent skill."}
           </p>
-          {cutoff && <p className="text-xs text-stone-500 mb-2">{cutoff}</p>}
           <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-5 max-w-3xl leading-relaxed">
             {pt
               ? `Esta lista ordena avançados, não a Liga inteira. Os ${int(
@@ -565,8 +557,11 @@ export function PlayerRatingsHub({
                 )} published names are ${posBreakdown} — it is a forwards metric, and should be read as one.`}
           </p>
 
+          {/* Every published name, ten in view and the rest behind "Ver a
+              lista completa": the old "Ranking completo de finalização" link
+              went to the Liga page, which has no such ranking. */}
           <PlayerRatingList
-            entries={finisherEntries(finishers).slice(0, 10)}
+            entries={finisherEntries(finishers)}
             locale={locale}
             metricHeader={
               pt ? "Golos/90 acima do substituto" : "Goals/90 above replacement"
@@ -590,7 +585,7 @@ export function PlayerRatingsHub({
                 ? [
                     {
                       label: pt ? "Prob. acima do subst." : "P(above replacement)",
-                      value: formatPercent(e.pAbove, pt ? "pt" : "en"),
+                      value: formatPosterior(e.pAbove, pt ? "pt" : "en"),
                     },
                   ]
                 : []),
@@ -599,31 +594,21 @@ export function PlayerRatingsHub({
 
           <p className="text-[11px] text-stone-500 mt-3 leading-relaxed max-w-3xl">
             {pt
-              ? `Top 10 de ${int(finisherRows.length)} publicados. Mínimo de ${int(
+              ? `${int(finisherRows.length)} jogadores publicados, os 10 primeiros à vista. Mínimo de ${int(
                   finishers.generated_from.min_minutes,
                 )} minutos; ajustado a ${int(
                   finishers.generated_from.n_observations,
-                )} atuações individuais desde ${finishers.generated_from.seasons[0]}`
-              : `Top 10 of ${int(finisherRows.length)} published. ${int(
+                )} atuações individuais desde ${finishers.generated_from.seasons[0]}.${cutoff ? ` ${cutoff}.` : ""}`
+              : `${int(finisherRows.length)} players published, the first 10 in view. ${int(
                   finishers.generated_from.min_minutes,
                 )}-minute minimum; fitted on ${int(
                   finishers.generated_from.n_observations,
-                )} individual appearances since ${finishers.generated_from.seasons[0]}`}
-            .
+                )} individual appearances since ${finishers.generated_from.seasons[0]}.${cutoff ? ` ${cutoff}.` : ""}`}
           </p>
           <Diagnostics
             maxRhat={finishers.generated_from.max_rhat}
             divergences={finishers.generated_from.divergences}
           />
-
-          <Link
-            href="/desporto/liga"
-            locale={locale}
-            className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-ink-dark"
-          >
-            {pt ? "Ranking completo de finalização" : "Full finishing ranking"}
-            <ArrowRight className="w-3 h-3" />
-          </Link>
         </section>
       )}
 
@@ -643,8 +628,6 @@ export function PlayerRatingsHub({
               ? `A coluna «vs golos» (em ecrãs largos) mostra quantas posições cada jogador sobe ou desce face à lista de finalização publicada acima, com ${int(finisherRows.length)} nomes; «—» quer dizer que não está nessa lista. É aí que está a história: quem o número só de golos subestimava.`
               : `The “vs goals” column (on wide screens) shows how many places each player moves against the finishing list published above, with ${int(finisherRows.length)} names; “—” means he is not on that list. That is where the story is: who the goals-only number was underrating.`}
           </p>
-          {cutoff && <p className="text-xs text-stone-500 mb-2">{cutoff}</p>}
-
           <PlayerRatingList
             entries={withPublishedGoalsRanks(contrib.players, goalsRankByPlayer)}
             locale={locale}
@@ -675,7 +658,7 @@ export function PlayerRatingsHub({
                 ? [
                     {
                       label: pt ? "Prob. acima do subst." : "P(above replacement)",
-                      value: formatPercent(e.pAbove, pt ? "pt" : "en"),
+                      value: formatPosterior(e.pAbove, pt ? "pt" : "en"),
                     },
                   ]
                 : []),
@@ -684,6 +667,7 @@ export function PlayerRatingsHub({
 
           <MetaFootnote
             block={contrib}
+            through={cutoff}
             caveat={
               pt
                 ? "Estimativa bayesiana com encolhimento: poucos minutos puxam o valor para o nível de substituição e alargam o intervalo."
@@ -793,7 +777,7 @@ export function PlayerRatingsHub({
                 ? [
                     {
                       label: pt ? "Prob. acima da média" : "P(above average)",
-                      value: formatPercent(e.pAbove, pt ? "pt" : "en"),
+                      value: formatPosterior(e.pAbove, pt ? "pt" : "en"),
                     },
                   ]
                 : []),
@@ -853,7 +837,7 @@ export function PlayerRatingsHub({
                     ? [
                         {
                           label: pt ? "Prob. acima da média" : "P(above average)",
-                          value: formatPercent(e.pAbove, pt ? "pt" : "en"),
+                          value: formatPosterior(e.pAbove, pt ? "pt" : "en"),
                         },
                       ]
                     : []),
@@ -922,6 +906,16 @@ export function PlayerRatingsHub({
                   className="mt-2 max-w-3xl"
                   summary={pt ? "Verificações técnicas do ajuste" : "Technical checks on the fit"}
                 >
+                  {/* The fit's convergence, here rather than in a second
+                      disclosure of the same name under the footnote. */}
+                  {(def.meta.maxRhat != null || def.meta.divergences != null) && (
+                    <p className="mb-2 text-[11px] leading-relaxed text-stone-500">
+                      {[
+                        def.meta.maxRhat != null ? (pt ? `r̂ máximo ${nf(def.meta.maxRhat, 3)}` : `max r̂ ${nf(def.meta.maxRhat, 3)}`) : null,
+                        def.meta.divergences != null ? (pt ? `${int(def.meta.divergences)} divergências` : `${int(def.meta.divergences)} divergences`) : null,
+                      ].filter(Boolean).join(" · ")}.
+                    </p>
+                  )}
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
                     {defTechnical.map((d) => (
                       <div key={d.label}>
@@ -935,8 +929,11 @@ export function PlayerRatingsHub({
             </>
           )}
 
+          {/* The defenders' checks are already in their own disclosure above:
+              one "Verificações técnicas do ajuste" per section. */}
           <MetaFootnote
             block={def}
+            checks={!(def.players.length === 0 && defTechnical.length > 0)}
             caveat={
               pt
                 ? "Mais-valia ajustada sobre golos sofridos, com encolhimento hierárquico."

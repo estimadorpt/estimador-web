@@ -32,7 +32,7 @@ A 90% range is only honest if, looking back, it catches the real result about 90
 
 ## Expected points (xPts)
 
-Expected points come from each match's xG, from SofaScore. For every match, both teams' xG is turned, with a Poisson distribution, into win, draw and loss probabilities, and from there into expected points: three times the win probability plus the draw probability. Summed over the season, they give each team's xPts.
+Expected points come from each match's xG, from FotMob. For every match, both teams' xG is turned, with a Poisson distribution, into win, draw and loss probabilities, and from there into expected points: three times the win probability plus the draw probability. Summed over the season, they give each team's xPts.
 
 xPts do not use the forecasting model: they are an independent read. The gap between real points and xPts mixes finishing, goalkeeping and chance, so it is not a clean split between luck and skill.
 
@@ -61,6 +61,8 @@ The [players page](/en/desporto/liga/jogadores/) publishes several separate metr
 <PlayerMetrics />
 
 Each value comes with a 90% credible interval: the model puts a 90% probability on the true value lying inside it. With few minutes, the value is pulled toward replacement level and the interval widens. The page also shows each fit's technical checks (whether the algorithm converged); they sit in a separate box for anyone who wants them.
+
+A player "separates" from the average when their 90% interval leaves out the positional average (for defenders, zero). Beside each count, the page says how many would separate by chance alone, and by which test: for contested possession, a permutation test (the same fit with the duels shuffled among team-mates of the same club, season and position); for goalkeepers and defenders, the nominal rate of a 90% interval, which leaves one value in ten outside. When the model shrinks the values hard, as it does for defenders, that rate overstates what chance would give.
 
 <PlayersCutoff />
 

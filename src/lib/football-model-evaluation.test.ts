@@ -11,6 +11,9 @@ import {
   phaseMatchdays,
   pointsCalibrationSentence,
   predictedMatchday,
+  readingRule,
+  TITLE_CALIBRATION,
+  titleCalibrationParagraphs,
   uncertaintyNote,
   verdictLine,
   type ScorecardForCopy,
@@ -71,8 +74,10 @@ describe('crossings (audit M-05)', () => {
       { before: 23, after: 27 },
     ]);
     expect(crossingSentence(scorecard.checkpoints, 'pt')).toBe(
-      'As duas linhas cruzam-se três vezes: entre as jornadas 2 e 3, entre as jornadas 19 e 23 e entre as jornadas 23 e 27.',
+      'A diferença entre o modelo e o mercado muda de sinal três vezes: entre as jornadas 2 e 3, entre as jornadas 19 e 23 e entre as jornadas 23 e 27.',
     );
+    // No "lines" that cross: from matchday 15 the chart draws separate points (METH3-14).
+    expect(crossingSentence(scorecard.checkpoints, 'en')).toMatch(/^The gap between model and market changes sign three times/);
     expect(crossingSentence([{ checkpoint: 1, delta: 1 }, { checkpoint: 2, delta: 2 }], 'pt')).toBeNull();
   });
 });
@@ -93,5 +98,37 @@ describe('model names (audit M-10, SP-16)', () => {
         expect(modelPlainName(id, locale)).not.toMatch(/bivcross|joint_sot|unknown_model/);
       }
     }
+  });
+});
+
+describe('title calibration (audit METH3-15)', () => {
+  const messages = (locale: string) =>
+    JSON.parse(readFileSync(path.join(process.cwd(), `messages/${locale}.json`), 'utf8'));
+
+  it('leads with the 17 clean cases and gives the 19 with the data errors second', () => {
+    const [first] = titleCalibrationParagraphs('pt');
+    const clean = first.indexOf('63%');
+    const faulty = first.indexOf('56%');
+    expect(clean).toBeGreaterThan(-1);
+    expect(faulty).toBeGreaterThan(clean);
+    expect(first).toContain(`Nos outros ${TITLE_CALIBRATION.cellsClean}`);
+    expect(titleCalibrationParagraphs('en')[0]).toContain('In the other 17');
+  });
+
+  it('quotes the clean figures in the caveat every Liga page shows', () => {
+    const pct = (v: number) => `${Math.round(v * 100)}%`;
+    for (const locale of ['pt', 'en']) {
+      const caveat: string = messages(locale).football.titleCalibrationCaveat;
+      expect(caveat, locale).toContain(pct(TITLE_CALIBRATION.modelMeanClean));
+      expect(caveat, locale).toContain(pct(TITLE_CALIBRATION.leadersWonClean));
+      expect(caveat, locale).not.toContain(pct(TITLE_CALIBRATION.modelMean));
+    }
+  });
+});
+
+describe('the /modelo reading rule (audit UXD2-17)', () => {
+  it('no longer points back at the cards it sits under', () => {
+    expect(readingRule('pt')).not.toMatch(/cartões/);
+    expect(readingRule('en')).not.toMatch(/cards/);
   });
 });

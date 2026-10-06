@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
@@ -9,7 +10,8 @@ import {
   teamLogoSrc,
 } from "@/lib/config/football";
 import { positionCodeEn, positionCodePt } from "@/lib/i18n/football-labels";
-import { formatLongDate, formatInteger, formatPercent } from "@/lib/football-format";
+import { formatInteger, formatLongDate, formatPosterior, formatSigned } from "@/lib/football-format";
+import { PLAYER_MARKS } from "@/components/charts/football/player-marks";
 import {
   formatShortDate,
   playerDataCutoffLabel,
@@ -140,9 +142,11 @@ interface PlayerProfileProps {
   positionRating?: PlayerPositionRating | null;
 }
 
-const TRACK = "#dadccf"; // stone-200
-const INK = "#16362e"; // stone-900
-const SOFT = "#7f9284"; // stone-400
+// The interval line and caps carry the estimate's uncertainty, so they are
+// the stone-400 token, 3:1 on every ground (audit A11Y3-10).
+const TRACK = PLAYER_MARKS.peer;
+const INK = PLAYER_MARKS.bar;
+const SOFT = PLAYER_MARKS.whisker;
 
 export function PlayerProfile({
   player,
@@ -162,6 +166,10 @@ export function PlayerProfile({
     }).replace(/^-/, "\u2212");
   // Grouped like every other count on the site ("3 677", audit FA2-12).
   const int = (v: number) => formatInteger(Math.round(v), pt ? "pt" : "en");
+  // One signed formatter for every skill-above-replacement figure on the
+  // page, headline, interval, axis ends and season rows alike, with U+2212
+  // for a negative (audit VUXD-06): "+0,22", as on /jogadores.
+  const sar = (v: number, d = 2) => formatSigned(v, pt ? "pt" : "en", d);
   // A missing value: a dash for the eye, words for a screen reader
   // (audit A11Y2-17), never stone-300 and never zero.
   const noData = (
@@ -185,9 +193,9 @@ export function PlayerProfile({
   const maxHi = Math.max(...ranked.map(p => p.skill_hi ?? 0), 0.1);
   const pct = (v: number) => Math.max(0, Math.min(100, (v / maxHi) * 100));
 
-  const sar = player.sar ?? 0;
-  const lo = player.skill_lo ?? sar;
-  const hi = player.skill_hi ?? sar;
+  const sarValue = player.sar ?? 0;
+  const lo = player.skill_lo ?? sarValue;
+  const hi = player.skill_hi ?? sarValue;
   // From the feed. Hardcoding this stated 94% probability over a 90% interval.
   const goalsIvPct = Math.round((data.interval_mass ?? 0.9) * 100);
 
@@ -218,6 +226,7 @@ export function PlayerProfile({
     locale,
   );
   const recent = sortAppearancesNewestFirst(player.recent);
+  const spansSeasons = new Set(recent.map(m => m.season)).size > 1;
   // "em duas épocas", from this player's own season rows, never a typed count.
   const nSeasons = seasons.length;
   const seasonWords = pt
@@ -295,10 +304,10 @@ export function PlayerProfile({
       : "Goals per 90 minutes above replacement",
     meaning: pt
       ? `O que o número diz: se ${player.player} jogar 90 minutos em campo neutro contra uma defesa média da Liga, o modelo espera ${nf(
-          sar,
+          sarValue,
         )} golos a mais do que se aquele lugar fosse ocupado por um jogador de nível de substituição — o tipo de reforço que qualquer clube arranja sem custo. Os golos são limitados (winsorizados) antes da conta, para que uma tarde de quatro golos não seja tratada como talento permanente.`
       : `What the number means: if ${player.player} plays 90 minutes at a neutral venue against an average Liga defence, the model expects ${nf(
-          sar,
+          sarValue,
         )} more goals than if that place were taken by a replacement-level player — the kind of signing any club can make for free. Goals are capped (winsorized) before the estimate, so one four-goal afternoon is not read as permanent skill.`,
     interval: pt
       ? `Intervalo de credibilidade ${goalsIvPct}%`
@@ -310,7 +319,11 @@ export function PlayerProfile({
       : `The model puts ${goalsIvPct}% probability on the true value lying between ${nf(
           lo,
         )} and ${nf(hi)}. Fewer minutes, wider interval.`,
-    others: pt ? "outros do top 40" : "others in the top 40",
+    // One caption for both strips, with the count (audit VUXD-06).
+    others: (n: number) =>
+      pt
+        ? `os outros ${int(n)} jogadores publicados nesta métrica`
+        : `the other ${int(n)} players published on this metric`,
     minutes: pt ? "Minutos" : "Minutes",
     matches: pt ? "Jogos" : "Matches",
     goals: pt ? "Golos" : "Goals",
@@ -405,7 +418,6 @@ export function PlayerProfile({
     posNoInterval: pt
       ? "Este valor foi publicado sem intervalo de credibilidade, por isso não sabemos quão firme é. Lê-o com desconfiança."
       : "This value was published without a credible interval, so we do not know how firm it is. Read it with suspicion.",
-    posOthers: pt ? "outros jogadores na mesma métrica" : "other players on the same metric",
     posRank: (r: number, n: number) =>
       pt ? `#${r} de ${int(n)} publicados` : `#${r} of ${int(n)} published`,
     posRaw: pt ? "Soma bruta, sem modelo" : "Raw sum, unmodelled",
@@ -454,9 +466,7 @@ export function PlayerProfile({
         )}
         <div className="flex items-baseline gap-2 mb-1 flex-wrap">
           <span className="text-4xl font-bold tabular-nums text-stone-900">
-            {prEntry.value === null
-              ? noData
-              : `${prEntry.value > 0 ? "+" : ""}${nf(prEntry.value)}`}
+            {prEntry.value === null ? noData : sar(prEntry.value)}
           </span>
           <span className="text-sm text-stone-500">{posCopy[pr.kind].unit}</span>
         </div>
@@ -518,17 +528,19 @@ export function PlayerProfile({
               />
             </div>
             <div className="flex justify-between text-[11px] tabular-nums text-stone-500">
-              <span>{nf(prDomain.min)}</span>
+              <span>{sar(prDomain.min)}</span>
               <span>
                 {prEntry.lo !== null && prEntry.hi !== null
-                  ? `${nf(prEntry.lo)} – ${nf(prEntry.hi)} · ${t.posInterval}`
+                  ? `${sar(prEntry.lo)} ${pt ? "a" : "to"} ${sar(prEntry.hi)} · ${t.posInterval}`
                   : t.posInterval}
               </span>
-              <span>{nf(prDomain.max)}</span>
+              <span>{sar(prDomain.max)}</span>
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="w-px h-3" style={{ backgroundColor: TRACK }} />
-              <span className="text-[11px] text-stone-500">{t.posOthers}</span>
+              <span className="text-[11px] text-stone-500">
+                {t.others(pr.peers.filter((p) => p.value !== null && p.key !== prEntry.key).length)}
+              </span>
             </div>
           </div>
         )}
@@ -561,8 +573,7 @@ export function PlayerProfile({
                   {t.posRaw}
                 </div>
                 <div className="text-lg font-bold tabular-nums text-stone-900">
-                  {prEntry.raw > 0 ? "+" : ""}
-                  {nf(prEntry.raw, 1)}
+                  {sar(prEntry.raw, 1)}
                 </div>
               </div>
             )}
@@ -586,10 +597,10 @@ export function PlayerProfile({
       <Link
         href="/desporto/liga/jogadores"
         locale={locale}
-        className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-ink hover:text-ink-dark"
+        className="mt-1 inline-flex min-h-11 items-center gap-1 text-xs font-medium text-ink underline underline-offset-4 hover:text-ink-dark"
       >
         {t.hub}
-        <ArrowRight className="w-3 h-3" />
+        <ArrowRight aria-hidden="true" className="w-3 h-3" />
       </Link>
     </section>
   );
@@ -672,7 +683,7 @@ export function PlayerProfile({
         )}
         <div className="flex items-baseline gap-2 mb-1">
           <span className="text-4xl font-bold tabular-nums text-stone-900">
-            {nf(sar)}
+            {sar(sarValue)}
           </span>
           <span className="text-sm text-stone-500">{t.metricName}</span>
         </div>
@@ -694,7 +705,7 @@ export function PlayerProfile({
                 />
               ) : null,
             )}
-            {/* 94% interval */}
+            {/* The credible interval (its mass is read from the feed) */}
             <div
               className="absolute top-1/2 -translate-y-1/2 h-px"
               style={{
@@ -714,19 +725,21 @@ export function PlayerProfile({
             {/* Point estimate */}
             <div
               className="absolute top-1/2 -translate-y-1/2 w-1 h-8"
-              style={{ left: `${pct(sar)}%`, backgroundColor: color }}
+              style={{ left: `${pct(sarValue)}%`, backgroundColor: color }}
             />
           </div>
           <div className="flex justify-between text-[11px] tabular-nums text-stone-500">
-            <span>0</span>
+            <span>{sar(0)}</span>
             <span>
-              {nf(lo)} – {nf(hi)} · {t.interval}
+              {sar(lo)} {pt ? "a" : "to"} {sar(hi)} · {t.interval}
             </span>
-            <span>{nf(maxHi)}</span>
+            <span>{sar(maxHi)}</span>
           </div>
           <div className="flex items-center gap-1.5 mt-1">
             <span className="w-px h-3" style={{ backgroundColor: TRACK }} />
-            <span className="text-[11px] text-stone-500">{t.others}</span>
+            <span className="text-[11px] text-stone-500">
+              {t.others(ranked.filter(p => p.sar !== null && p.slug !== player.slug).length)}
+            </span>
           </div>
         </div>
 
@@ -776,7 +789,7 @@ export function PlayerProfile({
                   value:
                     player.p_above_replacement === null
                       ? noData
-                      : formatPercent(player.p_above_replacement, pt ? "pt" : "en"),
+                      : formatPosterior(player.p_above_replacement, pt ? "pt" : "en"),
                 },
               ]
             : []),
@@ -875,8 +888,8 @@ export function PlayerProfile({
                                 style={{ left: `${pct(v)}%`, backgroundColor: INK }}
                               />
                             </div>
-                            <span className="tabular-nums text-xs text-stone-500 w-10 text-right">
-                              {nf(v)}
+                            <span className="tabular-nums text-xs text-stone-500 w-12 text-right">
+                              {sar(v)}
                             </span>
                           </div>
                         )}
@@ -924,12 +937,20 @@ export function PlayerProfile({
             </div>
             <ul className="divide-y divide-stone-100">
               {recent.map((m, i) => (
+                <Fragment key={`${m.season}-${m.matchday}-${i}`}>
+                {/* A season row whenever the list crosses into another season,
+                    so "17 mai." after "1 fev." does not read as unsorted on a
+                    phone, where the year is dropped (audit UXM3-05). */}
+                {spansSeasons && (i === 0 || recent[i - 1].season !== m.season) && (
+                  <li className="pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                    {pt ? `Época ${m.season}` : `${m.season} season`}
+                  </li>
+                )}
                 <li
-                  key={`${m.season}-${m.matchday}-${i}`}
                   className="flex items-center gap-3 py-2 text-sm"
                 >
                   <span className="w-12 flex-shrink-0 whitespace-nowrap text-[11px] tabular-nums text-stone-600 sm:w-24">
-                    {/* Day and month on a phone; the year is in the cut-off line above. */}
+                    {/* Day and month on a phone; the season rows carry the year. */}
                     <span className="sm:hidden">{(formatShortDate(m.date, locale) ?? `J${m.matchday}`).replace(/\s\d{4}$/, "")}</span>
                     <span className="hidden sm:inline">{formatShortDate(m.date, locale) ?? `${m.season} J${m.matchday}`}</span>
                   </span>
@@ -960,6 +981,7 @@ export function PlayerProfile({
                     {m.rating === null ? "" : nf(m.rating, 1)}
                   </span>
                 </li>
+                </Fragment>
               ))}
             </ul>
           </div>

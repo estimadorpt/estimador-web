@@ -556,6 +556,9 @@ function normaliseDiagnostics(root: unknown): DiagnosticEntry[] {
  */
 export function stripInternalRefs(text: string): string {
   return text
+    // Field names read as words (audit FA3-10): the one the caveats use.
+    .replace(/(^|[.!?]\s+)positional_distribution\b/g, '$1The distribution by position')
+    .replace(/\bpositional_distribution\b/g, 'the distribution by position')
     .replace(/\s*\((?:see |per )?ADR-\d+(?:\/\d+)*\)/g, '')
     .replace(/,?\s*per ADR-\d+(?:\/\d+)*/g, '')
     .replace(/ADR-\d+(?:\/\d+)*'s\s*/g, 'the earlier ')

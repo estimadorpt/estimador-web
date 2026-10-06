@@ -377,8 +377,8 @@ export default async function SeasonReviewPage({
           <DataCard
             title={pt ? "Pontos reais e pontos esperados (xPts) por clube" : "Real and expected points (xPts) by club"}
             source={pt
-              ? `Fonte: xG da SofaScore, ${review.matches_played} jogos; xPts calculados pelo estimador.pt`
-              : `Source: SofaScore xG, ${review.matches_played} matches; xPts computed by estimador.pt`}
+              ? `Fonte: xG da FotMob, ${review.matches_played} jogos; xPts calculados pelo estimador.pt`
+              : `Source: FotMob xG, ${review.matches_played} matches; xPts computed by estimador.pt`}
             updated={reviewUpdated}
             methodologyHref={pt ? "/desporto/liga/metodologia#pontos-esperados-xpts" : "/desporto/liga/metodologia#expected-points-xpts"}
             methodologyLabel={pt ? "O que o xPts mede" : "What xPts measures"}
@@ -504,8 +504,8 @@ export default async function SeasonReviewPage({
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">
             {pt
-              ? `Classificação final a partir dos ${review.matches_played} jogos da época. Os xPts são calculados jogo a jogo com o método de Poisson agregado sobre o xG de cada equipa (${review.xg_matches_per_team} jogos por equipa, cobertura total), e não usam os parâmetros do modelo bayesiano — é uma leitura independente. ${published.length ? `As probabilidades das ${mdPhrase(published)} vêm dos ficheiros publicados na altura, tal como estavam, sem recálculo posterior.` : ""} ${reconstructed.length ? `As das ${mdPhrase(reconstructed)} foram geradas depois${batchDate ? `, a ${batchDate}` : ""}.` : ""} Todas vêm do modelo anterior. xG da SofaScore.`
-              : `Final standings from the season's ${review.matches_played} matches. xPts are computed match by match with the aggregate Poisson method over each team's xG (${review.xg_matches_per_team} matches per team, full coverage), and do not use the Bayesian model's parameters — it is an independent read. ${published.length ? `The probabilities for ${mdPhrase(published)} come from the files published at the time, exactly as they stood, with no later recalculation.` : ""} ${reconstructed.length ? `Those for ${mdPhrase(reconstructed)} were generated afterwards${batchDate ? `, on ${batchDate}` : ""}.` : ""} All come from the previous model. xG from SofaScore.`}
+              ? `Classificação final a partir dos ${review.matches_played} jogos da época. Os xPts são calculados jogo a jogo com o método de Poisson agregado sobre o xG de cada equipa (${review.xg_matches_per_team} jogos por equipa, cobertura total), e não usam os parâmetros do modelo bayesiano — é uma leitura independente. ${published.length ? `As probabilidades das ${mdPhrase(published)} vêm dos ficheiros publicados na altura, tal como estavam, sem recálculo posterior.` : ""} ${reconstructed.length ? `As das ${mdPhrase(reconstructed)} foram geradas depois${batchDate ? `, a ${batchDate}` : ""}.` : ""} Todas vêm do modelo anterior. xG da FotMob.`
+              : `Final standings from the season's ${review.matches_played} matches. xPts are computed match by match with the aggregate Poisson method over each team's xG (${review.xg_matches_per_team} matches per team, full coverage), and do not use the Bayesian model's parameters — it is an independent read. ${published.length ? `The probabilities for ${mdPhrase(published)} come from the files published at the time, exactly as they stood, with no later recalculation.` : ""} ${reconstructed.length ? `Those for ${mdPhrase(reconstructed)} were generated afterwards${batchDate ? `, on ${batchDate}` : ""}.` : ""} All come from the previous model. xG from FotMob.`}
           </p>
           <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
             <Link

@@ -8,6 +8,7 @@ import {
   formatKickoffShort,
   formatLongDate,
   formatPercent,
+  formatPosterior,
   formatPp,
   formatProbability,
   formatShortDate,
@@ -69,6 +70,16 @@ describe('football number formats', () => {
     expect(formatPercent(0.9978, 'pt')).toBe('>99%');
     expect(formatPercent(1, 'en')).toBe('100%');
     expect(formatProbability(0.0839, 'pt')).toBe(formatPercent(0.0839, 'pt'));
+  });
+
+  it('never prints a posterior as certain (FA3-04): 1.0 is ">99%", 0 is "<0,1%"', () => {
+    expect(formatPosterior(1, 'pt')).toBe('>99%');
+    expect(formatPosterior(1, 'en')).toBe('>99%');
+    expect(formatPosterior(0, 'pt')).toBe('<0,1%');
+    expect(formatPosterior(0, 'en')).toBe('<0.1%');
+    expect(formatPosterior(0.9995, 'pt')).toBe('>99%');
+    expect(formatPosterior(0.73, 'pt')).toBe(formatPercent(0.73, 'pt'));
+    expect(formatPosterior(Number.NaN, 'pt')).toBe('—');
   });
 
   it('formats percentage-point changes with the same digits rule and U+2212', () => {
