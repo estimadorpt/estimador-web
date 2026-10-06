@@ -4,6 +4,7 @@ import path from 'node:path'
 import {
   loadLigaData,
   loadLigaPlayersDetail,
+  loadPlayedFixtures,
   loadUpcomingFixtures,
 } from '@/lib/utils/football-data-loader'
 import { ligaTeamSlugs } from '@/lib/config/football'
@@ -287,6 +288,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch {
     // no fixture pages in the sitemap this build
+  }
+
+  // Played match pages stay online with the result and the pre-match odds
+  // (audit SP-13), so they are listed too: they no longer change, and their
+  // date is the kickoff (the result is the last thing they gained).
+  try {
+    const played = await loadPlayedFixtures()
+    for (const locale of SITE_LOCALES) {
+      for (const fixture of played) {
+        const kickoff = fixture.kickoff ? new Date(fixture.kickoff) : undefined
+        add(locale, `/desporto/liga/jogo/${fixture.slug}`, withDate(
+          { changeFrequency: 'yearly' as Frequency, priority: 0.4 },
+          kickoff && !Number.isNaN(kickoff.getTime()) ? kickoff : undefined,
+        ))
+      }
+    }
+  } catch {
+    // no played match pages in the sitemap this build
   }
 
   // Per-player pages for the published ranking (fail soft: skip on error).
