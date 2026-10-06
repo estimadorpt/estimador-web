@@ -10,6 +10,7 @@ import { FootballClubPicker } from './FootballClubPicker';
 import { TitleProbabilities } from '@/components/football/TitleProbabilities';
 import { forecastStatusLine, forecastStatusLinePlayed, roundPlayedAt } from '@/lib/football-status';
 import { ClockSwitch } from '@/components/football/ClockSwitch';
+import { splitForecastRound } from './football-status-pill';
 
 export interface FootballSnapshot {
   matchday: number;
@@ -52,11 +53,16 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
       }
     : null;
   // After the round the next update waits for, the rail says a new forecast
-  // is in preparation rather than promising it (audit FRESH-01).
-  const statusLine = statusInput ? (
+  // is in preparation rather than promising it (audit FRESH-01). The round
+  // the forecast follows is the kicker's pill, like "Arquivo" on the
+  // elections panel (CL2-05), so the line under the heading starts at the
+  // date instead of repeating it.
+  const initial = statusInput ? splitForecastRound(forecastStatusLine(statusInput, locale), locale) : null;
+  const pill = initial?.round;
+  const statusLine = statusInput && initial ? (
     <ClockSwitch
-      initial={forecastStatusLine(statusInput, locale)}
-      steps={[{ at: roundPlayedAt(statusInput.nextRoundKickoffs), value: forecastStatusLinePlayed(statusInput, locale) }]}
+      initial={initial.rest}
+      steps={[{ at: roundPlayedAt(statusInput.nextRoundKickoffs), value: splitForecastRound(forecastStatusLinePlayed(statusInput, locale), locale).rest }]}
     />
   ) : '';
   const outlooks = latest.prediction
@@ -74,9 +80,9 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
   const copy = (
     <>
       <div className="flex items-start gap-3">
-        <SectionIllustration scene="football" className="football-home-scene football-home-scene--accent shrink-0" />
+        <SectionIllustration scene="football" sizes="80px" className="football-home-scene football-home-scene--accent shrink-0" />
         <div className="min-w-0">
-          <Kicker>{t('footballKicker')}</Kicker>
+          <Kicker pill={pill}>{t('footballKicker')}</Kicker>
           <h2 id="home-football-title" className={`mt-1 ${rail ? 'text-xl md:text-[1.5rem] md:leading-[1.15]' : 'text-lg md:text-[1.35rem] md:leading-[1.2]'}`}>
             {t('footballTitle')}
           </h2>

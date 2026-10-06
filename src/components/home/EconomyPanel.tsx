@@ -32,7 +32,7 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
             <Kicker pill={live ? undefined : tSections(preparing ? 'preparingSection' : 'pausedSection')}>{t('economyKicker')}</Kicker>
             <h2 id="home-economy-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{live ? t('economyTitleLive') : t('economyTitlePaused')}</h2>
           </div>
-          <SectionIllustration scene="economy" className="home-support-scene hidden md:block md:!h-[100px] md:!w-[110px] md:!p-0 md:[&_img]:h-full" />
+          <SectionIllustration scene="economy" sizes="110px" className="home-support-scene hidden md:block md:!h-[100px] md:!w-[110px] md:!p-0 md:[&_img]:h-full" />
         </div>
         {live ? (
           <>
