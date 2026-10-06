@@ -6,6 +6,7 @@
  */
 import type { Locale } from '@/lib/population/labels';
 import { clueOrdinal, errorsPhrase } from '@/lib/population/game';
+import { formatCount } from '@/lib/population/format';
 
 const pt = {
   heroEyebrow: 'População · jogo diário',
@@ -43,7 +44,6 @@ const pt = {
   choose: (name: string, municipality: string) => `Escolher ${name} (${municipality})`,
   ruledOutName: (name: string, municipality: string) => `${name} (${municipality}): não é a freguesia misteriosa`,
   ruledOut: 'não é esta',
-  isThis: 'é esta',
   nextClue: 'Ver a próxima pista',
   allClues: 'As seis pistas estão abertas. Escolhe entre as que restam.',
   announceWrong: (name: string, clue: number | null) => `${name} não é a freguesia misteriosa.${clue ? ` Abriu a pista ${clue}.` : ''}`,
@@ -73,7 +73,12 @@ const pt = {
   share: 'Partilhar resultado',
   copied: 'Resultado copiado',
   shareFailed: 'Não foi possível partilhar. Copia o texto abaixo.',
-  tierShort: { A: 'Nível A: ajuste próximo às tabelas do INE.', B: 'Nível B: ajuste próximo às tabelas do INE.', C: 'Nível C: lê estes números com mais cuidado.' },
+  // After the badge, which names the tier: what it means in one line (the full reading is under «Porquê?»).
+  tierShort: {
+    A: `Ajuste próximo às tabelas do INE, numa freguesia com ${formatCount(2000, 'pt')} residentes ou mais.`,
+    B: `Ajuste próximo às tabelas do INE; a qualidade A pede ${formatCount(2000, 'pt')} residentes ou mais e limiares mais apertados.`,
+    C: 'Lê estes números com mais cuidado.',
+  },
   tierWhy: 'Porquê?',
   next: 'Novas freguesias daqui a',
   statsTitle: 'As tuas estatísticas',
@@ -132,7 +137,6 @@ const en: Copy = {
   choose: (name: string, municipality: string) => `Pick ${name} (${municipality})`,
   ruledOutName: (name: string, municipality: string) => `${name} (${municipality}): not the mystery parish`,
   ruledOut: 'not this one',
-  isThis: 'this one',
   nextClue: 'See the next clue',
   allClues: 'All six clues are open. Pick from the ones left.',
   announceWrong: (name: string, clue: number | null) => `${name} is not the mystery parish.${clue ? ` Clue ${clue} is open.` : ''}`,
@@ -162,7 +166,11 @@ const en: Copy = {
   share: 'Share result',
   copied: 'Result copied',
   shareFailed: 'Sharing did not work. Copy the text below.',
-  tierShort: { A: 'Tier A: a close fit to INE’s tables.', B: 'Tier B: a close fit to INE’s tables.', C: 'Tier C: read these numbers with more care.' },
+  tierShort: {
+    A: `A close fit to INE’s tables, in a parish of ${formatCount(2000, 'en')} residents or more.`,
+    B: `A close fit to INE’s tables; quality A needs ${formatCount(2000, 'en')} residents or more and tighter thresholds.`,
+    C: 'Read these numbers with more care.',
+  },
   tierWhy: 'Why?',
   next: 'New parishes in',
   statsTitle: 'Your stats',

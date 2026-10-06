@@ -6,7 +6,8 @@
  * - The four parishes on the board: the day's answer and three others drawn
  *   from places.json by a seeded generator, so every device and every reload
  *   shows the same four (`gameChoices`). They are chosen by place and by INE's
- *   resident count only, never by a published figure.
+ *   resident count only (so that size gives nothing away), never by a
+ *   published figure.
  * - The state machine (one clue open at the start; a wrong pick, or "Ver a
  *   próxima pista", opens the next; a right pick ends the game), the share
  *   text (no emoji) and the player's stats, which live only in their browser.
@@ -128,22 +129,16 @@ export interface ChoicePlace {
   name: string;
   /** District id ("01"…"18") or autonomous region ("azores", "madeira"). */
   region: string;
-  /** INE, Censos 2021: residents. Used only to spread the four across size bands. */
+  /** INE, Censos 2021: residents. Used only to place the answer among the four by size. */
   censusPopulation: number;
-}
-
-/** The INE resident bands the four are spread across: < 1 000, 1 000–4 999, 5 000–19 999, ≥ 20 000. */
-export function sizeBand(residents: number): 0 | 1 | 2 | 3 {
-  if (residents < 1_000) return 0;
-  if (residents < 5_000) return 1;
-  if (residents < 20_000) return 2;
-  return 3;
 }
 
 export const onIslands = (place: { region: string }) => place.region === 'azores' || place.region === 'madeira';
 
-/** Bands the four must cover, at least. */
-export const MIN_SIZE_BANDS = 3;
+/** INE residents, then code: a total order, so "smaller" and "larger" than the answer are always defined. */
+function bySize(a: ChoicePlace, b: ChoicePlace): number {
+  return a.censusPopulation - b.censusPopulation || (a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
+}
 
 /** FNV-1a over a string: a 32-bit seed. */
 function hash32(text: string): number {
@@ -172,14 +167,22 @@ export function mulberry32(seed: number): () => number {
  * Seeded by the day number and the answer's code, so the same day gives the
  * same four everywhere, every time.
  *
+ * Size is no clue: the answer's place among the four by INE residents
+ * (smallest, second, third, largest) is drawn first, each equally likely, and
+ * then that many of the others are drawn from the parishes with fewer
+ * residents than the answer and the rest from those with more. (A first
+ * draft spread the four across at least three INE resident bands; since 86%
+ * of the deck's answers have fewer than 5 000 residents, that kept putting a
+ * town beside them, and the largest of the four was the answer on 11% of days.)
+ *
  * Each slot is drawn from every parish still eligible (in places.json order),
- * under three constraints, in order of priority:
+ * under three rules, in order of priority:
  *   1. the four are in four different districts or autonomous regions;
- *   2. they cover at least three of the four INE resident bands (`sizeBand`);
- *   3. at most one of them is on the Azores or Madeira.
+ *   2. the slot comes from its side of the answer (fewer or more residents);
+ *   3. at most one of the four is on the Azores or Madeira.
  * If no parish satisfies all three for a slot, the last is relaxed, then the
- * second; the first always holds (there are 20 regions). Over the whole deck
- * none is ever relaxed (a test checks every day).
+ * second; the first always holds (there are 20 regions). `game.test.ts`
+ * checks the rules and the spread of the answer's size rank on every day.
  *
  * No published figure, share or statistic is read: the four differ by place
  * and by INE's count of residents, and are shown in alphabetical order.
@@ -188,27 +191,27 @@ export function gameChoices(day: number, answerCode: string, places: readonly Ch
   const answer = places.find(place => place.code === answerCode);
   if (!answer) throw new Error(`Unknown answer ${answerCode}`);
   const random = mulberry32(hash32(`${day}:${answerCode}`));
+  const smaller = places.filter(place => bySize(place, answer) < 0);
+  const larger = places.filter(place => bySize(place, answer) > 0);
+  // How many of the other three have fewer residents than the answer: 0–3, uniform.
+  let needSmaller = Math.floor(random() * CHOICE_COUNT);
   const chosen: ChoicePlace[] = [answer];
 
   while (chosen.length < CHOICE_COUNT) {
     const regions = new Set(chosen.map(p => p.region));
-    const bands = new Set(chosen.map(p => sizeBand(p.censusPopulation)));
     const island = chosen.some(onIslands);
-    // After this slot there are `left` more to draw, each able to add one band at most.
-    const left = CHOICE_COUNT - chosen.length - 1;
-    const fits = (candidate: ChoicePlace, level: number): boolean => {
-      // A region already on the board also rules out the answer and every parish already drawn.
-      if (regions.has(candidate.region)) return false;
-      if (level >= 2 && bands.size + (bands.has(sizeBand(candidate.censusPopulation)) ? 0 : 1) + left < MIN_SIZE_BANDS) return false;
-      if (level >= 3 && island && onIslands(candidate)) return false;
-      return true;
-    };
+    // A region already on the board also rules out the answer and every parish already drawn.
+    const fits = (candidate: ChoicePlace, strict: boolean) =>
+      !regions.has(candidate.region) && !(strict && island && onIslands(candidate));
+    const [side, other] = needSmaller > 0 ? [smaller, larger] : [larger, smaller];
     let eligible: ChoicePlace[] = [];
-    for (let level = 3; level >= 1 && eligible.length === 0; level--) {
-      eligible = places.filter(candidate => fits(candidate, level));
+    for (const [pool, strict] of [[side, true], [side, false], [other, true], [other, false]] as const) {
+      eligible = pool.filter(candidate => fits(candidate, strict));
+      if (eligible.length > 0) break;
     }
     if (eligible.length === 0) throw new Error('Not enough parishes for a board');
     chosen.push(eligible[Math.floor(random() * eligible.length)]);
+    if (needSmaller > 0) needSmaller--;
   }
   return chosen.slice(1).map(place => place.code);
 }

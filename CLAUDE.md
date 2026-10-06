@@ -227,10 +227,11 @@ esta") and opens the next clue, and "Ver a próxima pista" opens one without a p
 score is the clue the answer was picked on (1.ª–6.ª); there is no lost game. The other
 three come from `gameChoices(day, answerCode, places)` in `src/lib/population/game.ts`:
 mulberry32 seeded by the day and the answer's code, drawn from places.json in its own
-order, in four different districts or autonomous regions, across at least three INE
-resident bands (< 1 000, 1 000–4 999, 5 000–19 999, ≥ 20 000) and with at most one on the
-islands; it reads no response, share or statistic, and `game.test.ts` checks every
-constraint on all 3,092 days. Only the answer's figures are ever shown; the other three
+order, in four different districts or autonomous regions, with at most one on the islands;
+the answer's size rank among the four (INE residents) is drawn first and uniform, so size
+gives nothing away (a three-band spread made the largest of the four the answer on only 11%
+of days). It reads no response, share or statistic, and `game.test.ts` checks the rules and
+the rank spread (25% ± 3 at each place) on all 3,092 days. Only the answer's figures are ever shown; the other three
 are names and places. Stored under `estimador:misteriosa:v2` (`{ day, picks, cluesOpened,
 status, live }`; v1 records are ignored), listed on `/privacidade`. Share text: "Freguesia
 misteriosa n.º {n} ({date}): acertei à {k}.ª pista, {sem erros|com 1 erro|com {e} erros}."

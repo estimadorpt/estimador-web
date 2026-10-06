@@ -301,7 +301,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     // About the board's own height at each width (the clue deck, the four
     // choices and the map), so the footer does not start in view and jump.
     return (
-      <div role="status" className="flex min-h-[1760px] flex-col items-center justify-start gap-3 rounded-2xl border border-line bg-cream p-6 pt-24 text-sm text-stone-600 sm:min-h-[1640px] lg:min-h-[1060px]">
+      <div role="status" className="flex min-h-[1600px] flex-col items-center justify-start gap-3 rounded-2xl border border-line bg-cream p-6 pt-24 text-sm text-stone-600 sm:min-h-[1640px] lg:min-h-[1060px]">
         <MarkLoading height={28} color={BRAND.ink} ground={BRAND.cream} />
         {t.loading}
       </div>

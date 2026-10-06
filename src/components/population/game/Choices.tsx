@@ -27,7 +27,8 @@ export function Choices({ choices, ruledOut, locale, canOpenMore, onPick, onNext
   return (
     <section aria-labelledby="misteriosa-choices" className="rounded-2xl border border-line bg-cream p-4 sm:p-5">
       <h2 id="misteriosa-choices" className="text-xl text-ink">{t.choicesTitle}</h2>
-      <p className="mt-0.5 text-sm text-stone-600">{t.choicesLede}</p>
+      {/* On a phone the heading says it; the line would push the four further from the clue. */}
+      <p className="mt-0.5 hidden text-sm text-stone-600 sm:block">{t.choicesLede}</p>
       <ol className="mt-3 flex flex-col gap-2">
         {choices.map((parish, i) => {
           const out = ruledOut.has(parish.code);

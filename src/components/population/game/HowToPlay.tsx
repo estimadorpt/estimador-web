@@ -34,8 +34,8 @@ export function HowToPlay({ locale, honesty }: { locale: Locale; honesty: string
         <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-ink transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" />
         <span className="min-w-0">
           <span className="text-base font-bold text-ink">{t.howTitle}</span>{' '}
-          {/* The hero already says it on a phone; from sm the line stands in for the closed rules. */}
-          <span className="hidden text-sm text-stone-600 sm:inline">{t.howSummary}</span>
+          {/* The rules in one line, on every width: on a phone it stands in for the hero's lede, which is hidden there. */}
+          <span className="text-sm text-stone-600">{t.howSummary}</span>
         </span>
       </summary>
       <div className="border-t border-line px-5 pb-5 pt-4 text-[15px] leading-relaxed text-stone-600">

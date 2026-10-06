@@ -50,7 +50,8 @@ export default async function MysteryParishPage({ params }: { params: Promise<{ 
         measure="wide"
         eyebrow={t.heroEyebrow}
         title={t.heroTitle}
-        lede={t.heroLede}
+        // On a phone the closed "Como se joga?" line says the same in one line, so the board starts higher (GAME-V2-02).
+        lede={<span className="hidden sm:inline">{t.heroLede}</span>}
         meta={<span>{t.heroMeta}</span>}
       />
       <PopulationSectionNav current="game" locale={locale} />

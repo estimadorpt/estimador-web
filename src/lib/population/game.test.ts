@@ -28,7 +28,6 @@ import {
   recordFor,
   shareMessage,
   shareText,
-  sizeBand,
   todayIndex,
   wrongPicks,
   type GameRecord,
@@ -171,10 +170,6 @@ describe('the day’s parish', () => {
 describe('the four on the board', () => {
   const answerOf = (day: number) => deck[answerOrder(day, index.candidates)].code;
 
-  it('bands INE residents as < 1 000, 1 000–4 999, 5 000–19 999 and 20 000 or more', () => {
-    expect([0, 999, 1_000, 4_999, 5_000, 19_999, 20_000, 200_000].map(sizeBand)).toEqual([0, 0, 1, 1, 2, 2, 3, 3]);
-  });
-
   it('gives the same three every time, never the answer, all different', () => {
     const answer = answerOf(0);
     const first = gameChoices(0, answer, places.parishes);
@@ -195,8 +190,22 @@ describe('the four on the board', () => {
       expect(four.every(Boolean), `day ${day}`).toBe(true);
       expect(new Set(four.map(p => p.code)).size, `day ${day}: distinct`).toBe(4);
       expect(new Set(four.map(p => p.region)).size, `day ${day}: regions`).toBe(4);
-      expect(new Set(four.map(p => sizeBand(p.censusPopulation))).size, `day ${day}: bands`).toBeGreaterThanOrEqual(3);
       expect(four.filter(onIslands).length, `day ${day}: islands`).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('gives size away on no day: the answer is the smallest, second, third or largest of the four about equally often', () => {
+    // INE residents, then code, as gameChoices orders them. By chance alone each place is 25%.
+    const ranks = [0, 0, 0, 0];
+    for (let day = 0; day < index.candidates; day++) {
+      const answer = places.byCode.get(answerOf(day))!;
+      const others = gameChoices(day, answer.code, places.parishes).map(code => places.byCode.get(code)!);
+      const below = others.filter(p => p.censusPopulation < answer.censusPopulation
+        || (p.censusPopulation === answer.censusPopulation && p.code < answer.code)).length;
+      ranks[below]++;
+    }
+    for (const [position, count] of ranks.entries()) {
+      expect(Math.abs(100 * count / index.candidates - 25), `position ${position + 1}: ${count} days`).toBeLessThanOrEqual(3);
     }
   });
 

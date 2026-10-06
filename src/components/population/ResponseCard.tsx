@@ -175,7 +175,7 @@ function AloneByAge({ cells, locale }: { cells: ReturnType<typeof readCells>; lo
 }
 
 /** The chart a response gets: the same choice on the parish page and in the game's clues. */
-export function ResponseChart({ recipeName, recipe, record, cells, locale, bars = false, guess }: {
+export function ResponseChart({ recipeName, recipe, record, cells, locale, bars = false, guess, compact = false }: {
   recipeName: PortraitRecipe;
   recipe: PopulationRecipe;
   record: CompactResponse;
@@ -184,12 +184,14 @@ export function ResponseChart({ recipeName, recipe, record, cells, locale, bars 
   bars?: boolean;
   /** The reader's guess, outlined on the 100 dots (guess-first cards only). */
   guess?: number;
+  /** A shorter age chart with no hint line and a smaller dot grid: the game's clue on a phone, where the four choices must stay close. */
+  compact?: boolean;
 }) {
-  if (recipeName === 'age') return <AgeColumns cells={cells} locale={locale} />;
+  if (recipeName === 'age') return <AgeColumns cells={cells} locale={locale} height={compact ? 160 : 200} hint={!compact} />;
   if (recipeName === 'who_lives_alone') return <AloneByAge cells={cells} locale={locale} />;
   const whole = isWhole(record) && cells.filter(cell => cell.state === 'published').length <= 4;
   if (!bars && whole && (recipeName === 'elders_alone' || recipeName === 'multigenerational' || recipeName === 'employment')) {
-    return <HundredPeople cells={cells.filter(cell => cell.state !== 'absent')} locale={locale} unit={recipe.unit === 'household' ? 'households' : 'people'} guess={guess} />;
+    return <HundredPeople cells={cells.filter(cell => cell.state !== 'absent')} locale={locale} unit={recipe.unit === 'household' ? 'households' : 'people'} guess={guess} compact={compact} />;
   }
   return <ShareBars cells={cells} locale={locale} />;
 }

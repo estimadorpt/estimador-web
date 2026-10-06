@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { Lock } from 'lucide-react';
 import { DataCard } from '@/components/viz/DataCard';
 import { ChartTable } from '@/components/viz/ChartTable';
@@ -14,6 +14,15 @@ import { ResponseChart } from '../ResponseCard';
 import { QualityBadge } from '../QualityBadge';
 import { GAME_COPY } from './copy';
 import { Reveal } from './Reveal';
+
+/** Below Tailwind's sm: the phone layout, where the clue is kept short so the four choices follow it on one screen. */
+const NARROW = '(max-width: 639px)';
+const subscribeNarrow = (change: () => void) => {
+  const query = window.matchMedia(NARROW);
+  query.addEventListener('change', change);
+  return () => query.removeEventListener('change', change);
+};
+const useNarrow = () => useSyncExternalStore(subscribeNarrow, () => window.matchMedia(NARROW).matches, () => false);
 
 interface ClueDeckProps {
   entry: GameEntry;
@@ -43,6 +52,8 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
   const previous = useRef(open);
   /** Set when the player opened a clue (a wrong pick, or "next clue"): its heading takes focus once drawn. */
   const focusNew = useRef(false);
+  const panel = useRef<HTMLDivElement>(null);
+  const narrow = useNarrow();
 
   useEffect(() => {
     if (open > previous.current) {
@@ -84,13 +95,21 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
   const titleId = `${id}-clue-title`;
 
   // The clue just opened is drawn: its heading takes focus, so focus never
-  // falls to the page when a pick disables its button or "next clue" goes, and
-  // the browser brings the clue into view on a phone.
+  // falls to the page when a pick disables its button or "next clue" goes. The
+  // clue's card goes to the top of the screen (under the sticky header), so on
+  // a phone the new clue and the four choices under it are in view together,
+  // instead of the browser centring the heading and leaving the choices a
+  // scroll away (GAME-V2-02). Below lg only, where the four follow the clue.
   useEffect(() => {
     if (!focusNew.current || shown !== open - 1) return;
     const frame = window.requestAnimationFrame(() => {
       focusNew.current = false;
-      document.getElementById(titleId)?.focus();
+      const heading = document.getElementById(titleId);
+      // From lg the four sit beside the clue, and the browser's own scroll to the heading keeps both in view.
+      if (!window.matchMedia('(max-width: 1023px)').matches) { heading?.focus(); return; }
+      heading?.focus({ preventScroll: true });
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      panel.current?.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' });
     });
     return () => window.cancelAnimationFrame(frame);
   }, [shown, open, titleId]);
@@ -138,7 +157,7 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
         })}
       </div>
 
-      <div id={`${id}-panel`} role="region" aria-labelledby={`${id}-tab-${shown}`}>
+      <div ref={panel} id={`${id}-panel`} role="region" aria-labelledby={`${id}-tab-${shown}`}>
         <Reveal key={`${entry.code}-${shown}`} instant={!moved}>
           <ClueCard
             number={shown + 1}
@@ -149,6 +168,7 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
             revealed={revealed}
             fresh={fresh === shown}
             titleId={titleId}
+            compact={narrow}
           />
         </Reveal>
       </div>
@@ -156,7 +176,7 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
   );
 }
 
-function ClueCard({ number, recipes, entry, meta, locale, revealed, fresh, titleId }: {
+function ClueCard({ number, recipes, entry, meta, locale, revealed, fresh, titleId, compact }: {
   number: number;
   recipes: readonly PortraitRecipe[];
   entry: GameEntry;
@@ -165,6 +185,7 @@ function ClueCard({ number, recipes, entry, meta, locale, revealed, fresh, title
   revealed: ClueDeckProps['revealed'];
   fresh: boolean;
   titleId: string;
+  compact: boolean;
 }) {
   const t = GAME_COPY[locale];
   const single = recipes.length === 1;
@@ -193,7 +214,7 @@ function ClueCard({ number, recipes, entry, meta, locale, revealed, fresh, title
                 <p className="mb-3 mt-0.5 text-sm text-stone-500">{RECIPE_COPY[recipe].population[locale]}</p>
               </>
             )}
-            <Clue recipe={recipe} record={entry.responses[recipe]} meta={meta} locale={locale} revealed={revealed} />
+            <Clue recipe={recipe} record={entry.responses[recipe]} meta={meta} locale={locale} revealed={revealed} compact={compact} />
           </div>
         ))}
       </div>
@@ -201,12 +222,13 @@ function ClueCard({ number, recipes, entry, meta, locale, revealed, fresh, title
   );
 }
 
-function Clue({ recipe, record, meta, locale, revealed }: {
+function Clue({ recipe, record, meta, locale, revealed, compact }: {
   recipe: PortraitRecipe;
   record: CompactResponse | undefined;
   meta: PopulationMeta;
   locale: Locale;
   revealed: ClueDeckProps['revealed'];
+  compact: boolean;
 }) {
   const t = GAME_COPY[locale];
   const definition = meta.recipes[recipe];
@@ -228,7 +250,7 @@ function Clue({ recipe, record, meta, locale, revealed }: {
           <p className="text-sm text-stone-600">{revealed ? t.fallbackNamed(revealed.municipalityName) : t.fallbackHidden}</p>
         </div>
       )}
-      <ResponseChart recipeName={recipe} recipe={definition} record={record} cells={cells} locale={locale} />
+      <ResponseChart recipeName={recipe} recipe={definition} record={record} cells={cells} locale={locale} compact={compact} />
       <ChartTable
         caption={`${RECIPE_COPY[recipe].question[locale]} (${where})`}
         columns={[...definition.dimensions.map(d => DIMENSION_LABEL[d]?.[locale] ?? d), locale === 'pt' ? 'Percentagem' : 'Share']}
