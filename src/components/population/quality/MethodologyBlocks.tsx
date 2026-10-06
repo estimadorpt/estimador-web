@@ -6,7 +6,10 @@ import { Link } from '@/i18n/routing';
 import { POPULATION_DOWNLOADS, POPULATION_ROUTES } from '@/lib/config/population';
 import { DIMENSION_LABEL, HONESTY, TIER_COPY, type Locale } from '@/lib/population/labels';
 import type { PopulationMeta, PopulationReleaseInfo, PopulationScorecard } from '@/types/population';
-import { ACCIDENTAL_MATCHES, INTENDED_USES, LIMITATIONS, NON_USES, NOVELTY, formatCount } from './copy';
+import { SHORT_ATTRIBUTION } from '@/lib/population/cite';
+import { ACCIDENTAL_MATCHES, INTENDED_USES, LIMITATIONS, NON_USES, NOVELTY, REPLACED, formatCount, generatedGap } from './copy';
+
+import { headingSlug, methodologyFieldAnchor } from './anchors';
 
 const FIELD_LABEL: Record<string, Record<Locale, string>> = {
   ...DIMENSION_LABEL,
@@ -49,22 +52,39 @@ const KIND_LABEL: Record<Kind, Record<Locale, string>> = {
  * verbatim (the positioning sentence, the attribution, the novelty figures)
  * is rendered from its source rather than retyped in the prose.
  */
-export function methodologyBlocks({ locale, meta, release, scorecard }: {
+export function methodologyBlocks({ locale, meta, release, scorecard, ineResidents = null }: {
   locale: Locale;
   meta: PopulationMeta;
   release: PopulationReleaseInfo;
   scorecard: PopulationScorecard;
+  /** INE's residents summed over places.json, for the generated-vs-INE sentence. */
+  ineResidents?: number | null;
 }): MDXComponents {
   const pt = locale === 'pt';
+  const link = 'text-ink underline decoration-ink/30 underline-offset-2 hover:decoration-ink';
   return {
+    // Every h2 gets an anchor from its own text, so other pages can link to a section.
+    h2: ({ children }: { children?: ReactNode }) => (
+      <h2 id={headingSlug(children)} className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight">{children}</h2>
+    ),
+    // Step 3's gap between the generated total and INE's (MR2-V02), inline in the list item.
+    AllocationGap: () => (ineResidents === null ? null : (
+      <>
+        {generatedGap(release.counts.persons, ineResidents, locale)}{' '}
+        <Link href={`${POPULATION_ROUTES.data}#total-gerado`} locale={locale} className={link}>
+          {pt ? 'Freguesia a freguesia, no ficheiro de qualidade' : 'Parish by parish, in the quality file'}
+        </Link>.
+      </>
+    )),
+    ShortAttribution: () => <strong className="font-semibold text-ink">{SHORT_ATTRIBUTION[locale]}</strong>,
     // The release the page describes, from the data it serves.
     Release: () => <>{meta.release_version}</>,
     // The history paragraph lives once, on /dados (UXD-24); here, a pointer to it.
     Superseded: () => (
       <Callout kind="context">
         {pt
-          ? <>Esta é a versão {meta.release_version}, que substituiu três versões do mesmo dia; a população gerada é a mesma em todas. <Link href={`${POPULATION_ROUTES.data}#versao`} locale={locale} className="text-ink underline decoration-ink/30 underline-offset-2 hover:decoration-ink">O que mudou entre elas</Link>.</>
-          : <>This is release {meta.release_version}, which replaced three releases of the same day; the generated population is the same in all of them. <Link href={`${POPULATION_ROUTES.data}#versao`} locale={locale} className="text-ink underline decoration-ink/30 underline-offset-2 hover:decoration-ink">What changed between them</Link>.</>}
+          ? <>{REPLACED.pt} <Link href={`${POPULATION_ROUTES.data}#versao`} locale={locale} className={link}>O que mudou entre elas</Link>.</>
+          : <>{REPLACED.en} <Link href={`${POPULATION_ROUTES.data}#versao`} locale={locale} className={link}>What changed between them</Link>.</>}
       </Callout>
     ),
     Positioning: () => (
@@ -89,7 +109,7 @@ export function methodologyBlocks({ locale, meta, release, scorecard }: {
       return (
         <dl className="my-6 divide-y divide-line border-y border-line font-sans text-sm">
           {rows.map(row => (
-            <div key={row.field} className="grid gap-1 py-3 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
+            <div key={row.field} id={methodologyFieldAnchor(row.field)} className="grid gap-1 py-3 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
               <dt className="text-ink">
                 <span className="font-semibold">{FIELD_LABEL[row.field]?.[locale] ?? row.field}</span>
                 {row.kind && <span className="block text-xs text-stone-600">{KIND_LABEL[row.kind][locale]}</span>}

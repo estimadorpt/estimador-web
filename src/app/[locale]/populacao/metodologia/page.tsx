@@ -13,7 +13,7 @@ import { formatDay } from '@/components/population/quality/copy';
 import { getMDXComponents } from '@/mdx-components';
 import { POPULATION_PUBLISHED, POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import type { Locale } from '@/lib/population/labels';
-import { loadPopulationMeta, loadPopulationRelease, loadPopulationScorecard } from '@/lib/utils/population-data-loader';
+import { loadPopulationMeta, loadPopulationPlaces, loadPopulationRelease, loadPopulationScorecard } from '@/lib/utils/population-data-loader';
 import { createPageMetadata } from '@/lib/metadata';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -39,7 +39,8 @@ export default async function PopulationMethodology({ params }: { params: Promis
   const locale: Locale = raw === 'en' ? 'en' : 'pt';
   setRequestLocale(locale);
   const pt = locale === 'pt';
-  const [meta, release, scorecard] = await Promise.all([loadPopulationMeta(), loadPopulationRelease(), loadPopulationScorecard()]);
+  const [meta, release, scorecard, places] = await Promise.all([loadPopulationMeta(), loadPopulationRelease(), loadPopulationScorecard(), loadPopulationPlaces()]);
+  const ineResidents = places?.parishes.reduce((sum, row) => sum + row[5], 0) ?? null;
 
   return (
     <div className="min-h-screen bg-paper">
@@ -52,8 +53,8 @@ export default async function PopulationMethodology({ params }: { params: Promis
         eyebrow={pt ? `População sintética · versão ${POPULATION_RELEASE}` : `Synthetic population · release ${POPULATION_RELEASE}`}
         title={pt ? 'Como foi feita a população sintética?' : 'How was the synthetic population made?'}
         lede={pt
-          ? 'Um processo generativo com restrições, calibrado nas tabelas dos Censos 2021 de cada freguesia, e o que quer dizer o nível de qualidade de cada uma.'
-          : 'A constrained generative pipeline, calibrated to each parish’s 2021 Census tables, and what each parish’s quality tier means.'}
+          ? 'Pessoas e agregados inventados por um modelo e depois escolhidos para bater com as tabelas dos Censos 2021 de cada freguesia, e o que quer dizer o nível de qualidade de cada uma.'
+          : 'People and households invented by a model and then chosen to match each parish’s 2021 Census tables, and what each parish’s quality tier means.'}
         meta={<><span>{pt ? 'Censos 2021 (INE)' : '2021 Census (INE)'}</span><span>{pt ? `Publicada a ${formatDay(POPULATION_PUBLISHED, locale)}` : `Published ${formatDay(POPULATION_PUBLISHED, locale)}`}</span></>}
       />
       <PopulationSectionNav current="methodology" locale={locale} />
@@ -67,7 +68,7 @@ export default async function PopulationMethodology({ params }: { params: Promis
               components={getMDXComponents({
                 // The hero carries the title; the file's own "# " line would be a second h1.
                 h1: () => null,
-                ...methodologyBlocks({ locale, meta, release, scorecard }),
+                ...methodologyBlocks({ locale, meta, release, scorecard, ineResidents }),
               })}
               options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
             />

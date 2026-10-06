@@ -12,15 +12,15 @@ Para que serve, então? As tabelas publicadas dão, para cada freguesia, quantas
 
 <Positioning />
 
-## Como foi gerada, em cinco passos
+## Como foi gerada?
 
-O resultado não é a saída direta de uma rede neuronal. É um processo generativo com restrições, em cinco passos:
+O resultado não sai diretamente de uma rede neuronal: um modelo inventa pessoas e agregados possíveis, e depois escolhem-se os que, somados, batem com as tabelas do INE (um processo generativo com restrições). São cinco passos:
 
-1. **Aprender como os atributos se combinam.** Um gerador autorregressivo aprende, a partir da amostra pública dos Censos 2021 (o Ficheiro de Uso Público), como os atributos de uma pessoa e do seu agregado costumam aparecer juntos. É treinado uma vez e depois fica fixo. As idades ano a ano e o tipo de local de trabalho são gerados por ele, não deduzidos depois.
-2. **Ajustar cada freguesia às suas tabelas.** Para cada freguesia, o gerador produz um conjunto de candidatos, com uma máscara que lhe indica as combinações que o INE publica como zero nessa freguesia, para as evitar. Os candidatos são depois reponderados para bater com as tabelas publicadas pelo INE para a freguesia (um ajuste de máxima entropia: muda o menos possível o peso de cada um). Antes disso, uma verificação recusaria qualquer freguesia cujas tabelas impliquem totais incoerentes entre si; nenhuma das 3 092 foi recusada.
-3. **Escolher agregados inteiros.** Uma alocação inteira tira dos candidatos o número exato de agregados e de pessoas da freguesia. Nas freguesias com menos de 500 pessoas, essa escolha é uma seleção exata, em vez de uma aproximação.
+1. **Aprender como os atributos se combinam.** O computador aprende, com a amostra pública dos Censos 2021 (o Ficheiro de Uso Público), que combinações de idade, escolaridade, trabalho e família são comuns numa pessoa e no seu agregado. Esse modelo (um gerador autorregressivo) é treinado uma vez e depois fica fixo. As idades ano a ano e o tipo de local de trabalho são gerados por ele, não deduzidos depois.
+2. **Ajustar cada freguesia às suas tabelas.** Para cada freguesia, o modelo inventa muitos agregados possíveis (os candidatos), evitando as combinações que o INE publica como zero nessa freguesia (uma máscara). Depois, dá mais peso aos candidatos que fazem as somas bater com as tabelas do INE para a freguesia, mudando o peso de cada um o menos possível (um ajuste de máxima entropia). Antes disso, uma verificação recusaria qualquer freguesia cujas tabelas impliquem totais incoerentes entre si; nenhuma das 3 092 foi recusada.
+3. **Escolher agregados inteiros.** Uma pessoa não se divide: dos candidatos escolhem-se agregados inteiros, tão perto quanto possível das contagens que as tabelas da freguesia pedem (uma alocação inteira). Nas freguesias com menos de 500 pessoas, essa escolha é uma seleção exata, em vez de uma aproximação. <AllocationGap />
 4. **Acrescentar quem vive em alojamentos coletivos.** As pessoas que vivem em lares e noutros alojamentos coletivos são acrescentadas a partir das contagens publicadas pelo INE, como registos parciais. Os códigos finos de profissão são derivados nesta fase.
-5. **Publicar um esquema declarado.** Cada coluna publicada tem um significado e um mapa de etiquetas declarados; tudo o resto é retirado, com a razão registada. A versão não inclui ligações entre cônjuges.
+5. **Publicar um esquema declarado.** Cada coluna publicada tem um significado declarado e quase todas as colunas de códigos têm um mapa de etiquetas; três (setor de atividade, escolaridade em cinco níveis e nuts2) ainda não o têm no ficheiro, e o [dicionário de colunas](/pt/populacao/dados/#dicionario) dá-lhes etiquetas. Tudo o resto é retirado, com a razão registada. A versão não inclui ligações entre cônjuges.
 
 ## O que é ajustado e o que é derivado?
 
@@ -36,9 +36,9 @@ Para ver a ideia com pessoas inventadas, num bairro imaginado, há um [exemplo i
 
 ## Quando é que um número aparece?
 
-Sempre. Todas as 3 092 freguesias são publicadas e respondem a todas as perguntas com os seus próprios números. Cada uma tem um nível de qualidade, que descreve quão perto a população gerada fica das tabelas do INE. O nível é um guia de leitura, não um filtro: não esconde nenhum número, diz com que cuidado o ler. Uma freguesia pequena tem poucas pessoas em cada tabela, e cada pessoa pesa mais.
+Sempre. Todas as 3 092 freguesias são publicadas e respondem a todas as perguntas com os seus próprios números. Cada uma tem um nível de qualidade, que junta quão perto a população gerada fica das tabelas do INE e o número de residentes. O nível é um guia de leitura, não um filtro: não esconde nenhum número, diz com que cuidado o ler. Uma freguesia pequena tem poucas pessoas em cada tabela, e cada pessoa pesa mais.
 
-As freguesias com menos de 500 residentes ficam sempre no nível C. Os termos usados para medir o ajuste (erro típico, pior tabela) estão explicados, com um exemplo, no [glossário da página de qualidade](/pt/populacao/qualidade/#glossario).
+As freguesias com menos de 500 residentes ficam sempre no nível C. Entre as de nível C com 500 ou mais, a pior tabela é quase sempre a idade ano a ano, que é avaliada mas não é uma das tabelas de pessoas do ajuste. Os termos usados para medir o ajuste (erro típico, pior tabela) estão explicados, com um exemplo, no [glossário da página de qualidade](/pt/populacao/qualidade/#glossario).
 
 <Tiers />
 
@@ -46,13 +46,13 @@ As freguesias com menos de 500 residentes ficam sempre no nível C. Os termos us
 
 <Superseded />
 
-## Uma única execução
+## O que muda por haver uma só execução?
 
 <SingleRun />
 
 Por isso, não há intervalos nos números do site, nem ordenações de freguesias, nem comparações do tipo «mais do que» entre resultados. Uma segunda execução será feita depois da publicação, como medição; a partir de duas execuções, a variação entre elas volta a poder ser mostrada. Mesmo então, só lhe chamaremos intervalo de confiança se a sua cobertura for demonstrada.
 
-## Privacidade
+## Estes dados protegem quem respondeu aos Censos?
 
 Os registos são gerados e não pretendem representar pessoas identificáveis: não têm nomes nem moradas, e as ligações internas aos registos da amostra foram retiradas.
 
@@ -60,29 +60,31 @@ Os registos são gerados e não pretendem representar pessoas identificáveis: n
 
 Os pormenores estão na [página de qualidade](/pt/populacao/qualidade/#privacidade).
 
-## Para que serve, e para que não serve
+## Para que serve, e para que não serve?
 
 <Uses />
 
-## Limitações conhecidas
+## Onde é que os dados são mais fracos?
 
 São limitações da população gerada, a mesma da versão 1.0.0 à <Release />, declaradas em vez de escondidas:
 
 <Limitations />
 
-## Versões e correções
+## Como se corrige e se atualiza?
 
-- Cada versão estável continua disponível e citável. As ligações permanentes do site indicam a versão a que se referem.
+- As versões publicadas no GitHub (1.0.0, 1.0.1 e 1.0.3) continuam disponíveis e citáveis; a 1.0.2 não chegou a ser publicada. As ligações permanentes de cada resposta indicam a versão a que se referem; a página de uma freguesia mostra sempre a versão atual, por isso cita-a com a data da consulta.
 - As correções ficam registadas numa <ErrataLink>lista pública de erratas</ErrataLink>.
 - Uma revisão das fontes do INE leva a uma correção documentada ou a uma nova avaliação.
-- A próxima versão dirá que campos foram atualizados para 2025, quais foram mantidos de 2021 e quais são novos modelos.
+- A próxima versão (1.1) corrige a população dos Censos 2021. Uma versão posterior, com dados de 2025, dirá que campos foram atualizados para 2025, quais foram mantidos de 2021 e quais são novos modelos.
 - Os pesos do modelo não são publicados: isso exigiria uma revisão própria de memorização, privacidade e licença.
 
-## Atribuição e citação
+## Como cito?
 
-A população é publicada com a licença CC BY 4.0. Quem a usar deve incluir esta atribuição:
+A população é publicada com a licença CC BY 4.0. Ao redistribuir os dados (os ficheiros, ou tabelas tiradas deles), inclui esta atribuição:
 
 <Attribution />
+
+Numa notícia, num gráfico ou num cartão, basta a forma curta, com uma ligação para a [página de dados](/pt/populacao/dados/#citar): <ShortAttribution />
 
 Citar como: <CiteAs />
 

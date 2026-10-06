@@ -7,7 +7,7 @@ import { MarkLoading } from '@/components/brand/MarkLoading';
 import { BRAND } from '@/lib/brand';
 import { POPULATION_RELEASE, POPULATION_DOWNLOADS } from '@/lib/config/population';
 import { fetchQueryLookup } from '@/lib/population/client';
-import { isQueryId, parseCanonicalPath, queryBucket, targetFor } from './resolve';
+import { isQueryId, isQueryIdPrefix, lookupEntry, parseCanonicalPath, queryBucket, targetFor } from './resolve';
 
 type State =
   | { kind: 'resolving' }
@@ -37,7 +37,7 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
   useEffect(() => {
     let cancelled = false;
     const parsed = parseCanonicalPath(window.location.pathname);
-    if (!parsed || !isQueryId(parsed.id)) {
+    if (!parsed || !(isQueryId(parsed.id) || isQueryIdPrefix(parsed.id))) {
       addNoindex();
       setState({ kind: 'unknown' });
       return;
@@ -50,7 +50,8 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
     fetchQueryLookup(queryBucket(parsed.id))
       .then(lookup => {
         if (cancelled) return;
-        const entry = Object.prototype.hasOwnProperty.call(lookup, parsed.id) ? lookup[parsed.id] : undefined;
+        // A full id, or a shortened one that only one published id starts with (the id cards printed until round 3).
+        const entry = lookupEntry(lookup, parsed.id);
         // An /en/populacao/v/… link opens the English page, even if the host served the Portuguese shell.
         const href = targetFor(entry, parsed.locale ?? locale);
         if (!href) {
@@ -102,8 +103,8 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
               ? `A ligação aponta para a versão ${state.release}. O site mostra a versão ${POPULATION_RELEASE}, e os números de versões diferentes não se substituem uns aos outros. Procura a freguesia na versão atual, ou consulta o registo de alterações.`
               : `The link points to release ${state.release}. The site shows release ${POPULATION_RELEASE}, and figures from different releases do not stand in for one another. Look the parish up in the current release, or check the change log.`)
             : (pt
-              ? 'O endereço não corresponde a nenhum resultado publicado nesta versão. Pode ter sido copiado incompleto. Procura a freguesia diretamente.'
-              : 'The address does not match any result published in this release. It may have been copied incompletely. Look the parish up directly.')}
+              ? 'O endereço não corresponde a nenhum resultado publicado nesta versão. Pode ter sido copiado incompleto: um identificador encurtado precisa de pelo menos 8 caracteres depois de «q1_». Procura a freguesia diretamente.'
+              : 'The address does not match any result published in this release. It may have been copied incompletely: a shortened id needs at least 8 characters after “q1_”. Look the parish up directly.')}
         </p>
         <div className="mt-6 flex flex-wrap gap-4">
           <Action href="/populacao" locale={locale} arrow>

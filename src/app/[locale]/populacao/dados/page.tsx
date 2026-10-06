@@ -7,13 +7,16 @@ import { Action } from '@/components/brand/Action';
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { PopulationSectionNav } from '@/components/population/SectionNav';
 import { PopulationUnavailable, Section } from '@/components/population/quality/parts';
-import { INTENDED_USES, NON_USES, SUPERSEDED, formatCount, formatDay } from '@/components/population/quality/copy';
+import { CONSTRAINT_LABEL, GITHUB_PUBLISHED, INTENDED_USES, NON_USES, SUPERSEDED, formatCount, formatDay, generatedGap } from '@/components/population/quality/copy';
 import { ColumnDictionary, PROVENANCE_CODES } from '@/components/population/data/ColumnDictionary';
+import { DESCRIPTION_OVERRIDES } from '@/components/population/data/dictionary';
 import { CopyButton } from '@/components/population/data/CopyButton';
 import { formatBytes } from '@/components/population/data/format';
 import { POPULATION_DOWNLOADS, POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { HONESTY, type Locale } from '@/lib/population/labels';
-import { loadPopulationMeta, loadPopulationRelease } from '@/lib/utils/population-data-loader';
+import { SHORT_ATTRIBUTION } from '@/lib/population/cite';
+import { Disclosure } from '@/components/viz/Disclosure';
+import { loadPopulationMeta, loadPopulationPlaces, loadPopulationRelease } from '@/lib/utils/population-data-loader';
 import { createPageMetadata } from '@/lib/metadata';
 import { jsonLd, populationDatasetJsonLd } from '@/lib/structured-data';
 import { ChevronRight } from 'lucide-react';
@@ -66,13 +69,13 @@ const QUALITY_COLUMNS: Array<{ name: string; source: QualitySource; meaning: { p
   { name: 'district, nuts2', source: 'geographic', meaning: { pt: 'Distrito (2 dígitos) e região NUTS II de 2013 (corrigida na 1.0.3).', en: 'District (2 digits) and 2013 NUTS II region (corrected in 1.0.3).' } },
   { name: 'population', source: 'generated', meaning: { pt: 'Pessoas geradas na freguesia, incluindo quem vive em alojamentos coletivos. Somadas, dão as pessoas da versão.', en: 'People generated in the parish, residents of collective quarters included. Summed, they give the release’s persons.' } },
   { name: 'census_population', source: 'ine', meaning: { pt: 'Residentes segundo o INE (o total da tabela por sexo e idade dos Censos 2021). É a contagem que o site mostra como «residentes (INE)».', en: 'Residents according to INE (the total of the 2021 Census sex × age table). It is the count the site shows as “residents (INE)”.' } },
-  { name: 'publication_population', source: 'evaluation', meaning: { pt: 'A menor das duas contagens anteriores: é a que decide os limiares de 500 e 2 000 residentes dos níveis. population e census_population não coincidem em todas as freguesias (a população gerada não reproduz exatamente o total do INE); o pacote não regista a razão freguesia a freguesia.', en: 'The smaller of the two counts above: it decides the tiers’ 500 and 2,000-resident thresholds. population and census_population do not agree in every parish (the generated population does not reproduce INE’s total exactly); the package does not record the reason parish by parish.' } },
+  { name: 'publication_population', source: 'evaluation', meaning: { pt: 'A menor das duas contagens anteriores: é a que decide os limiares de 500 e 2 000 residentes dos níveis. population e census_population não coincidem em todas as freguesias (a população gerada não reproduz exatamente o total do INE; os números estão abaixo da tabela); o pacote não regista a razão freguesia a freguesia.', en: 'The smaller of the two counts above: it decides the tiers’ 500 and 2,000-resident thresholds. population and census_population do not agree in every parish (the generated population does not reproduce INE’s total exactly; the figures are under the table); the package does not record the reason parish by parish.' } },
   { name: 'n_households', source: 'generated', meaning: { pt: 'Agregados gerados, contando cada alojamento coletivo como um. Não é a contagem de agregados privados do INE.', en: 'Generated households, counting each collective living quarter as one. It is not INE’s count of private households.' } },
   { name: 'n_institutional_persons', source: 'generated', meaning: { pt: 'Pessoas em alojamentos coletivos, acrescentadas a partir das contagens do INE.', en: 'People in collective living quarters, appended from INE’s counts.' } },
   { name: 'pct_children_u15', source: 'generated', meaning: { pt: 'Proporção (de 0 a 1) de pessoas geradas com menos de 15 anos.', en: 'Share (from 0 to 1) of generated people under 15.' } },
   { name: 'quality_tier', source: 'evaluation', meaning: { pt: 'Nível de qualidade: A, B ou C.', en: 'Quality tier: A, B or C.' } },
-  { name: 'person_srmse_median', source: 'evaluation', meaning: { pt: 'Erro típico da freguesia: a mediana do SRMSE nas 12 tabelas de pessoas do ajuste (0 seria igual às tabelas).', en: 'The parish’s typical error: the median SRMSE over the 12 fitted person tables (0 would match the tables).' } },
-  { name: 'worst_constraint, worst_constraint_srmse', source: 'evaluation', meaning: { pt: 'A tabela de pessoas com o maior erro e esse erro (o segundo critério dos níveis). Na maior parte das freguesias é a idade ano a ano (srmse_p_age_single).', en: 'The person table with the largest error, and that error (the tiers’ second criterion). In most parishes it is single-year age (srmse_p_age_single).' } },
+  { name: 'person_srmse_median', source: 'evaluation', meaning: { pt: 'Erro típico da freguesia: a mediana dos 12 erros (SRMSE) das tabelas de pessoas do ajuste, um por tabela (0 seria igual às tabelas). É o primeiro critério dos níveis. Não é o «erro do ajuste» do gráfico por tamanho da página de qualidade, que junta todas as células das 12 tabelas: as medianas por classe dos dois não coincidem.', en: 'The parish’s typical error: the median of the 12 errors (SRMSE) of the fitted person tables, one per table (0 would match the tables). It is the tiers’ first criterion. It is not the “fit error” in the quality page’s chart by size, which pools all the cells of the 12 tables: the two give different medians per band.' } },
+  { name: 'worst_constraint, worst_constraint_srmse', source: 'evaluation', meaning: { pt: 'A tabela de pessoas com o maior erro e esse erro (o segundo critério dos níveis), contando também a idade ano a ano. Na maior parte das freguesias é a idade ano a ano (srmse_p_age_single). Que tabela é cada código: abaixo da tabela.', en: 'The person table with the largest error, and that error (the tiers’ second criterion), single-year age included. In most parishes it is single-year age (srmse_p_age_single). Which table each code is: under the table.' } },
   { name: 'suppression_reason', source: 'release', meaning: { pt: 'Vazio em todas as freguesias: nenhuma é suprimida.', en: 'Empty for every parish: none is suppressed.' } },
   { name: 'fallback_geography', source: 'release', meaning: { pt: 'Nas freguesias de nível C, o código do concelho, para quem preferir agregar ao concelho. O site não o usa: todas as freguesias respondem com os seus próprios números.', en: 'For tier C parishes, the municipality code, for readers who prefer to aggregate to it. The site does not use it: every parish answers with its own figures.' } },
   { name: 'engine, model_version, run_date', source: 'release', meaning: { pt: 'O motor, a versão do modelo e a data da execução.', en: 'The engine, the model version and the run date.' } },
@@ -107,7 +110,9 @@ export default async function PopulationData({ params }: { params: Promise<{ loc
   const locale: Locale = raw === 'en' ? 'en' : 'pt';
   setRequestLocale(locale);
   const pt = locale === 'pt';
-  const [release, meta] = await Promise.all([loadPopulationRelease(), loadPopulationMeta()]);
+  const [release, meta, places] = await Promise.all([loadPopulationRelease(), loadPopulationMeta(), loadPopulationPlaces()]);
+  // INE's residents, summed from places.json (census_population): the national side of the generated-vs-INE gap.
+  const ineResidents = places?.parishes.reduce((sum, row) => sum + row[5], 0) ?? null;
   const pkg = POPULATION_DOWNLOADS.files.find(file => file.key === 'package');
   const personsFile = `pt-synthpop-v${POPULATION_RELEASE}-persons.parquet`;
   const householdsFile = `pt-synthpop-v${POPULATION_RELEASE}-households.parquet`;
@@ -115,15 +120,35 @@ export default async function PopulationData({ params }: { params: Promise<{ loc
   const citationUrl = `${POPULATION_DOWNLOADS.repository}/blob/v${POPULATION_RELEASE}/CITATION.cff`;
   // The release's cite line with a versioned locator (the release tag page).
   const citeWithLocator = release ? `${release.attribution.cite_as} ${POPULATION_DOWNLOADS.release}` : '';
+  // How many dictionary rows carry the site's wording (both tables).
+  const revisedColumns = release
+    ? (['persons', 'households'] as const).reduce((sum, table) => sum + Object.keys(release.column_dictionary[table]).filter(name => DESCRIPTION_OVERRIDES[`${table}.${name}`]).length, 0)
+    : 0;
 
+  // Private households only, like the site's household questions: a collective
+  // living quarter (is_institutional = 1) is one "household" of up to hundreds
+  // of residents, and hh_size_bin files it under "5" (PRO2-02).
   const duckdb = `-- DuckDB: ${pt ? 'pessoas por tamanho do agregado, numa freguesia' : 'persons by household size, in one parish'}
 SELECT h.hh_size_bin, count(*) AS ${pt ? 'pessoas' : 'persons'}
 FROM '${personsFile}' AS p
 JOIN '${householdsFile}' AS h
   USING (freguesia, synthetic_hh_id)
 WHERE p.freguesia = '060318'
+  -- ${pt ? 'só agregados privados, como no site: os alojamentos coletivos' : 'private households only, as on the site: collective quarters'}
+  -- ${pt ? '(is_institutional = 1) contam como um agregado e caem em «5»' : '(is_institutional = 1) count as one household and fall under "5"'}
+  AND h.is_institutional = 0
 GROUP BY h.hh_size_bin
 ORDER BY h.hh_size_bin;`;
+
+  const card = `-- DuckDB: ${pt ? 'reproduz um cartão do site, «Quantas pessoas com 65 ou mais anos vivem sozinhas?»' : 'reproduces a card on the site, “How many people aged 65 or over live alone?”'}
+-- ${pt ? 'em Moreira de Cónegos (030831); deve dar 0,149, o 14,9% da página' : 'in Moreira de Cónegos (030831); it should return 0.149, the page’s 14.9%'}
+SELECT avg(CASE WHEN h.hh_size = 1 THEN 1 ELSE 0 END) AS ${pt ? 'vivem_sozinhas' : 'living_alone'}
+FROM '${personsFile}' AS p
+JOIN '${householdsFile}' AS h
+  USING (freguesia, synthetic_hh_id)
+WHERE p.freguesia = '030831'
+  AND p.age >= 65
+  AND h.is_institutional = 0;`;
 
   const python = `# Python (pandas + pyarrow)
 import pandas as pd
@@ -134,7 +159,10 @@ households = pd.read_parquet("${householdsFile}")
 # ${pt ? 'synthetic_hh_id só é único dentro de cada freguesia' : 'synthetic_hh_id is unique only within a parish'}
 merged = persons.merge(
     households, on=["freguesia", "synthetic_hh_id"], suffixes=("", "_hh")
-)`;
+)
+
+# ${pt ? 'só agregados privados, como no site (os alojamentos coletivos têm is_institutional = 1)' : 'private households only, as on the site (collective quarters have is_institutional = 1)'}
+private = merged[merged["is_institutional_hh"] == 0]`;
 
   const verify = `# ${pt ? '1. Os ficheiros descarregados, contra SHA256SUMS' : '1. The downloaded files, against SHA256SUMS'}
 sha256sum -c SHA256SUMS --ignore-missing
@@ -175,12 +203,17 @@ sha256sum checksums.sha256`;
           <>
             <Section id="versao" title={pt ? 'Que versão é esta?' : 'Which release is this?'}>
               <Facts rows={[
-                [pt ? 'Versão' : 'Release', <>{release.name} {release.version}, {pt ? 'publicada a' : 'published'} {formatDay(release.published, locale)}</>],
+                [pt ? 'Versão' : 'Release', <>
+                  {release.name} {release.version}, {pt ? 'datada de' : 'dated'} {formatDay(release.published, locale)}
+                  {GITHUB_PUBLISHED[release.version] && GITHUB_PUBLISHED[release.version] !== release.published && (
+                    pt ? ` (publicada no GitHub a ${formatDay(GITHUB_PUBLISHED[release.version], locale)})` : ` (published on GitHub on ${formatDay(GITHUB_PUBLISHED[release.version], locale)})`
+                  )}
+                </>],
                 [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: gerada a partir dos Censos 2021 do INE.' : '2021: generated from INE’s 2021 Census.'],
                 [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span><span className="break-all font-mono text-[13px]">sha256 {release.model_sha256}</span></>],
                 [pt ? 'Código' : 'Code', <span key="c" className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>],
                 [pt ? 'Versões anteriores' : 'Previous releases', <>
-                  {pt ? 'A 1.0.3 substituiu três versões do mesmo dia; a população gerada é a mesma em todas. ' : '1.0.3 replaced three releases of the same day; the generated population is the same in all of them. '}
+                  {pt ? 'A 1.0.3 substituiu três versões datadas de 5 de outubro (a 1.0.2 nunca chegou ao GitHub); a população gerada é a mesma em todas. ' : '1.0.3 replaced three releases dated 5 October (1.0.2 never reached GitHub); the generated population is the same in all of them. '}
                   {/* The history, said once on the site (UXD-24): the other trust pages link here. */}
                   <details className="group mt-2">
                     <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold text-ink [&::-webkit-details-marker]:hidden">
@@ -245,8 +278,11 @@ sha256sum checksums.sha256`;
                   ? `${formatCount(release.counts.parishes_published, locale)} freguesias publicadas, nenhuma suprimida pelo tamanho. As pequenas levam um nível de qualidade em vez de serem retiradas.`
                   : `${formatCount(release.counts.parishes_published, locale)} parishes published, none suppressed for size. Small ones carry a quality tier instead of being withheld.`],
                 [pt ? 'Códigos' : 'Codes', pt
-                  ? 'Códigos DICOFRE de 6 caracteres da CAOP 2021 (as freguesias dos Censos 2021). Oito códigos de Barcelos têm letras (0302FA a 0302FH): lê a coluna como texto, não como número. No pacote, os nomes dos concelhos vêm da geografia dos Censos 2021 do INE; o site usa os da CAOP 2021. Junta tabelas pelo código (municipio), nunca pelo nome: há nomes de concelho repetidos (Calheta, Lagoa).'
-                  : '6-character DICOFRE codes from CAOP 2021 (the 2021 Census parishes). Eight Barcelos codes contain letters (0302FA to 0302FH): read the column as text, not as a number. In the package, municipality names come from INE’s 2021 Census geography; the site uses CAOP 2021’s. Join tables on the code (municipio), never on the name: some municipality names repeat (Calheta, Lagoa).'],
+                  ? 'Códigos DICOFRE de 6 caracteres da CAOP 2021 (as freguesias dos Censos 2021). Oito códigos de Barcelos têm letras (0302FA a 0302FH): lê a coluna como texto, não como número. Junta tabelas pelo código (municipio), nunca pelo nome: os nomes do pacote vêm da geografia dos Censos 2021 do INE (por exemplo, «Calheta (R.A.M.)» e «Lagoa (R.A.A.)») e diferem dos do site (CAOP 2021), onde há dois concelhos chamados Lagoa.'
+                  : '6-character DICOFRE codes from CAOP 2021 (the 2021 Census parishes). Eight Barcelos codes contain letters (0302FA to 0302FH): read the column as text, not as a number. Join tables on the code (municipio), never on the name: the package’s names come from INE’s 2021 Census geography (for example “Calheta (R.A.M.)” and “Lagoa (R.A.A.)”) and differ from the site’s (CAOP 2021), where two municipalities are called Lagoa.'],
+                [pt ? 'Depois de 2025' : 'After 2025', pt
+                  ? 'Desde as eleições autárquicas de outubro de 2025 (Lei n.º 25-A/2025), 135 uniões de freguesias foram desagregadas em 302 freguesias. Esta versão usa as freguesias de 2021: para juntar dados posteriores (os resultados das autárquicas de 2025, a CAOP 2024 ou 2025), precisas de uma tabela de correspondência entre os códigos de 2021 e os atuais.'
+                  : 'Since the October 2025 local elections (Law 25-A/2025), 135 parish unions have been split into 302 parishes. This release uses the 2021 parishes: to join later data (the 2025 local election results, CAOP 2024 or 2025) you need a correspondence table between the 2021 codes and the current ones.'],
                 [pt ? 'Regiões' : 'Regions', pt
                   ? 'A coluna nuts2 é a região NUTS II (2013) da freguesia. Até à versão 1.0.2 era um agrupamento por distrito; a 1.0.3 corrigiu-a (ver as erratas).'
                   : 'The nuts2 column is the parish’s NUTS II (2013) region. Up to release 1.0.2 it was a district grouping; 1.0.3 corrected it (see the errata).'],
@@ -287,13 +323,14 @@ sha256sum checksums.sha256`;
               <h3 className="mt-8 text-lg font-bold text-ink">{pt ? 'Primeiros passos' : 'First steps'}</h3>
               <p className="mt-2 max-w-3xl leading-relaxed text-stone-600">
                 {pt
-                  ? 'Dois exemplos que ligam pessoas a agregados. Se publicares tabelas feitas com estes dados, segue as regras do site: diz o nível de qualidade de cada freguesia, lê com mais cuidado as categorias com poucas pessoas e as freguesias de nível C, e não faças ordenações nem comparações «mais do que» a partir de uma única execução.'
-                  : 'Two examples that join persons to households. If you publish tables made from these data, follow the site’s rules: state each parish’s quality tier, read categories with few people and tier C parishes with more care, and make no rankings or “more than” comparisons from a single run.'}
+                  ? 'Três exemplos que ligam pessoas a agregados; o último reproduz um cartão do site. Como nas perguntas do site sobre agregados, ficam só os agregados privados (is_institutional = 0). Se publicares tabelas feitas com estes dados, segue as regras do site: diz o nível de qualidade de cada freguesia, lê com mais cuidado as categorias com poucas pessoas e as freguesias de nível C, e não faças ordenações nem comparações «mais do que» a partir de uma única execução.'
+                  : 'Three examples that join persons to households; the last one reproduces a card on the site. As in the site’s household questions, they keep private households only (is_institutional = 0). If you publish tables made from these data, follow the site’s rules: state each parish’s quality tier, read categories with few people and tier C parishes with more care, and make no rankings or “more than” comparisons from a single run.'}
               </p>
               {/* Stacked, full width: side by side the longer lines were clipped with no cue that they scroll. */}
               <div className="mt-4 grid gap-4">
                 <Code label="DuckDB">{duckdb}</Code>
                 <Code label="Python">{python}</Code>
+                <Code label={pt ? 'DuckDB: reproduzir um cartão' : 'DuckDB: reproduce a card'}>{card}</Code>
               </div>
             </Section>
 
@@ -301,8 +338,8 @@ sha256sum checksums.sha256`;
               id="dicionario"
               title={pt ? 'Que colunas tem?' : 'What columns does it have?'}
               lede={<p>{pt
-                ? <>O dicionário da própria versão. As descrições estão em inglês, tal como no ficheiro de metadados; os mapas de códigos para etiquetas (por exemplo, o nível de escolaridade) estão no mesmo ficheiro, em <code className="font-mono text-[13px]">label_maps</code>.</>
-                : <>The release’s own dictionary. The code-to-label maps (education level, for example) are in the metadata file, under <code className="font-mono text-[13px]">label_maps</code>.</>}</p>}
+                ? <>O dicionário de colunas do ficheiro de metadados, em inglês, como lá está, com duas diferenças. Em {formatCount(revisedColumns, locale)} colunas, marcadas «texto revisto pelo site», a descrição foi reescrita: ou remetia para documentos internos do produtor, ou dizia o contrário da ficha do modelo e dos dados (por exemplo, que o ramo de atividade e a profissão são ajustados por freguesia, quando não são); onde os dois diferem, vale a do site, e o texto original continua no ficheiro. E três colunas de códigos (setor de atividade, escolaridade em cinco níveis e nuts2) não têm mapa de etiquetas em <code className="font-mono text-[13px]">label_maps</code>: o site dá-o aqui. As restantes etiquetas estão nesse mesmo ficheiro, em <code className="font-mono text-[13px]">label_maps</code>.</>
+                : <>The metadata file’s column dictionary, as it stands there, with two differences. In {formatCount(revisedColumns, locale)} columns, marked “wording revised by the site”, the description was rewritten: it either pointed to the producer’s internal documents or said the opposite of the model card and the data (for example, that industry and occupation are fitted per parish, when they are not); where the two differ, the site’s holds, and the original text stays in the file. And three code columns (activity sector, five-level education and nuts2) have no map in <code className="font-mono text-[13px]">label_maps</code>: the site gives it here. The other labels are in that same file, under <code className="font-mono text-[13px]">label_maps</code>.</>}</p>}
             >
               <h3 className="text-base font-bold text-ink">{pt ? 'De onde vem cada coluna' : 'Where each column comes from'}</h3>
               <dl className="mt-3 grid gap-x-6 gap-y-3 md:grid-cols-2">
@@ -360,6 +397,19 @@ sha256sum checksums.sha256`;
                   </tbody>
                 </table>
               </div>
+              {ineResidents !== null && (
+                <p id="total-gerado" className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-700">{generatedGap(release.counts.persons, ineResidents, locale)}</p>
+              )}
+              <Disclosure className="mt-3" summary={pt ? 'Que tabela é cada código de worst_constraint' : 'Which table each worst_constraint code is'}>
+                <dl className="mt-2 grid max-w-3xl gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[auto_1fr]">
+                  {Object.entries(CONSTRAINT_LABEL).map(([key, label]) => (
+                    <div key={key} className="contents">
+                      <dt className="font-mono text-[13px] text-ink [overflow-wrap:anywhere]">srmse_{key}</dt>
+                      <dd className="mb-1.5 text-stone-700 sm:mb-0">{label[locale]}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </Disclosure>
               <p className="mt-4">
                 <Action href={POPULATION_ROUTES.quality} locale={locale} variant="text" arrow>{pt ? 'Como sabemos que funciona?' : 'How do we know it works?'}</Action>
               </p>
@@ -378,9 +428,12 @@ sha256sum checksums.sha256`;
               </p>
             </Section>
 
-            <Section id="citar" title={pt ? 'Como cito?' : 'How do I cite them?'} lede={<p>{pt
-              ? 'A licença exige esta atribuição, tal como está, em qualquer uso ou redistribuição.'
-              : 'The licence requires this attribution, as it stands, in any use or redistribution.'}</p>}>
+            <Section id="citar" title={pt ? 'Como cito?' : 'How do I cite them?'} lede={<>
+              <p>{pt
+                ? 'A licença CC BY 4.0 pede atribuição em qualquer uso. Ao redistribuir os dados (os ficheiros, ou tabelas tiradas deles), inclui a atribuição completa abaixo. Numa notícia, num gráfico ou num cartão, basta a forma curta, com uma ligação para esta página:'
+                : 'The CC BY 4.0 licence asks for attribution in any use. When you redistribute the data (the files, or tables taken from them), include the full attribution below. In a news story, a chart or a card, the short form is enough, with a link to this page:'}</p>
+              <p className="mt-2 font-semibold text-ink">{SHORT_ATTRIBUTION[locale]}</p>
+            </>}>
               <div className="space-y-5">
                 {(locale === 'pt' ? (['pt', 'en'] as const) : (['en', 'pt'] as const)).map(language => (
                   <div key={language} className="rounded-2xl border border-line bg-cream p-5">

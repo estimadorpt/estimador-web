@@ -42,6 +42,29 @@ export function isQueryId(id: string): boolean {
   return QUERY_ID.test(id);
 }
 
+/**
+ * A shortened id: "q1_" and 8 to 19 hex digits. Cards printed the first
+ * eleven characters ("q1_3a8f5697") until round 3, and a quoted id may be cut
+ * further; eight digits keep a collision among ~25,000 ids unlikely, and a
+ * prefix only resolves when exactly one published id starts with it.
+ */
+const QUERY_ID_PREFIX = /^q1_[0-9a-f]{8,19}$/;
+
+export function isQueryIdPrefix(id: string): boolean {
+  return QUERY_ID_PREFIX.test(id);
+}
+
+/**
+ * The lookup entry for a full id, or for a prefix that exactly one id in the
+ * bucket starts with. Undefined when nothing matches or a prefix is ambiguous.
+ */
+export function lookupEntry(lookup: Record<string, readonly [string, string]>, id: string): readonly [string, string] | undefined {
+  if (isQueryId(id)) return Object.prototype.hasOwnProperty.call(lookup, id) ? lookup[id] : undefined;
+  if (!isQueryIdPrefix(id)) return undefined;
+  const matches = Object.keys(lookup).filter(key => key.startsWith(id));
+  return matches.length === 1 ? lookup[matches[0]] : undefined;
+}
+
 /** The lookup bucket a query id lives in (q/<bucket>.json). */
 export function queryBucket(id: string): string {
   return id[3];

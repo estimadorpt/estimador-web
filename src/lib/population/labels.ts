@@ -10,6 +10,7 @@
  * size: with a single model run nothing here may rank (handoff §3).
  */
 import { POPULATION_RELEASE } from '@/lib/config/population';
+import { formatCount } from './format';
 import type { PortraitRecipe, QualityTier, ReasonCode } from '@/types/population';
 
 export type Locale = 'pt' | 'en';
@@ -46,8 +47,8 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     question: { pt: 'Quem vive sozinho trabalha?', en: 'Do people who live alone work?' },
     short: { pt: 'Quem vive sozinho e o trabalho', en: 'Living alone and work' },
     population: {
-      pt: 'Pessoas que vivem sozinhas num agregado privado. Em cada faixa etária, como se dividem entre empregadas, desempregadas e inativas; cada linha tem as suas próprias percentagens.',
-      en: 'People who live alone in a private household. Within each age band, how they split between employed, unemployed and inactive; each row has its own percentages.',
+      pt: 'Pessoas que vivem sozinhas num agregado privado. Em cada faixa etária, como se dividem entre empregadas, desempregadas e inativas; cada faixa etária soma 100% por si.',
+      en: 'People who live alone in a private household. Within each age band, how they split between employed, unemployed and inactive; each age band adds up to 100% on its own.',
     },
     anchor: 'quem-vive-sozinho',
   },
@@ -204,21 +205,46 @@ export const TIER_COPY: Record<'A' | 'B' | 'C', { label: Text; meaning: Text }> 
   C: {
     label: { pt: 'Qualidade C', en: 'Quality C' },
     meaning: {
-      pt: 'Freguesia com menos de 500 residentes, ou com um ajuste às tabelas do INE abaixo dos limiares de A e B: lê os números com mais cuidado.',
-      en: 'A parish of under 500 residents, or one whose fit to INE’s tables falls short of the A and B thresholds: read the numbers with more care.',
+      pt: 'Freguesia com menos de 500 residentes, ou em que o erro típico ou a pior tabela (muitas vezes, a idade ano a ano) passa os limiares do nível B: lê os números com mais cuidado.',
+      en: 'A parish of under 500 residents, or one whose typical error or worst table (often single-year age) is past the tier B thresholds: read the numbers with more care.',
     },
   },
 };
 
 /**
+ * When INE's count and the count the tier uses sit on opposite sides of a
+ * size threshold (one parish in v1.0.3: 160707, INE 500, publication 499),
+ * the sentence names both, so the page does not say "500 residents" and
+ * "under 500 residents" at once.
+ */
+function acrossThreshold(threshold: number, residents: number, census: number | null | undefined): Text | null {
+  if (census == null || !(residents < threshold && census >= threshold)) return null;
+  const num = (value: number, locale: Locale) => formatCount(value, locale);
+  return {
+    pt: `O INE contou ${num(census, 'pt')} residentes, mas o nível usa a contagem de publicação (a menor entre a do INE e as pessoas geradas), que aqui é de ${num(residents, 'pt')}, abaixo de ${num(threshold, 'pt')}.`,
+    en: `INE counted ${num(census, 'en')} residents, but the tier uses the publication count (the smaller of INE’s and the generated people), which here is ${num(residents, 'en')}, under ${num(threshold, 'en')}.`,
+  };
+}
+
+/**
  * What a tier means for one parish, chosen from the count the tier was
  * decided on (quality.csv `publication_population`): a tier B parish under
  * 2,000 residents may fit as closely as an A, and a tier C parish of 500 or
- * more is C for its fit, not its size. Without the count, the generic words.
+ * more is C for its typical error or its worst table, not its size; in almost
+ * all of them (705 of 728 in quality.csv) the worst table is single-year age.
+ * Pass INE's count (`census`) as well, and a parish whose two counts sit on
+ * either side of a threshold says so. Without the count, the generic words.
  */
-export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null | undefined): Text {
+export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null | undefined, census?: number | null): Text {
   if (residents == null) return TIER_COPY[tier].meaning;
   if (tier === 'B') {
+    const across = acrossThreshold(2000, residents, census);
+    if (across) {
+      return {
+        pt: `${across.pt} Com menos de ${formatCount(2000, 'pt')} residentes nessa contagem, não pode ficar em A, por mais próximo que seja o ajuste às tabelas do INE.`,
+        en: `${across.en} Under ${formatCount(2000, 'en')} residents on that count it cannot be tier A, however close its fit to INE’s tables.`,
+      };
+    }
     return residents < 2000
       ? {
         pt: 'Freguesia com menos de 2 000 residentes e um ajuste próximo às tabelas do INE. Com menos de 2 000 residentes não pode ficar em A, por mais próximo que seja o ajuste.',
@@ -230,14 +256,21 @@ export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null |
       };
   }
   if (tier === 'C') {
+    const across = acrossThreshold(500, residents, census);
+    if (across) {
+      return {
+        pt: `${across.pt} Abaixo de 500, uma freguesia fica sempre no nível C, seja qual for o ajuste. Com poucas pessoas, cada uma pesa mais; lê os números com mais cuidado.`,
+        en: `${across.en} Under 500, a parish is always tier C, whatever its fit. With few people each one weighs more; read the numbers with more care.`,
+      };
+    }
     return residents < 500
       ? {
         pt: 'Freguesia com menos de 500 residentes: fica sempre no nível C, seja qual for o ajuste às tabelas do INE. Com poucas pessoas, cada uma pesa mais; lê os números com mais cuidado.',
         en: 'A parish of under 500 residents: it is always tier C, whatever its fit to INE’s tables. With few people each one weighs more; read the numbers with more care.',
       }
       : {
-        pt: 'Freguesia com 500 ou mais residentes cujo ajuste às tabelas do INE fica abaixo dos limiares de A e B: lê os números com mais cuidado.',
-        en: 'A parish of 500 or more residents whose fit to INE’s tables falls short of the A and B thresholds: read the numbers with more care.',
+        pt: 'Freguesia com 500 ou mais residentes cujo ajuste não chega aos limiares do nível B, no erro típico ou na pior tabela. Em quase todas estas freguesias, a pior tabela é a idade ano a ano, avaliada à parte das 12 tabelas de pessoas do ajuste e que as respostas não usam (mostram a idade em grupos de 5 anos), por isso as respostas podem estar perto das tabelas do INE. O ficheiro de qualidade diz qual é a pior tabela de cada freguesia.',
+        en: 'A parish of 500 or more residents whose fit misses the tier B thresholds, on its typical error or its worst table. In almost all such parishes the worst table is single-year age, scored apart from the 12 fitted person tables and not used by the answers (which show age in 5-year bands), so the answers can be close to INE’s tables. The quality file names each parish’s worst table.',
       };
   }
   return TIER_COPY.A.meaning;

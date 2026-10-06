@@ -1,6 +1,6 @@
 import type { Locale } from '@/lib/population/labels';
 import type { ReleaseColumn } from '@/types/population';
-import { columnDescription } from './dictionary';
+import { columnDescription, SITE_LABEL_MAPS } from './dictionary';
 
 type Text = Record<Locale, string>;
 
@@ -53,39 +53,73 @@ export const PROVENANCE_CODES: Array<{ code: string; name: Text; meaning: Text }
   },
 ];
 
+function Description({ table, name, column, locale }: { table: 'persons' | 'households'; name: string; column: ReleaseColumn; locale: Locale }) {
+  const pt = locale === 'pt';
+  const { text, edited } = columnDescription(table, name, column);
+  const siteMap = SITE_LABEL_MAPS[`${table}.${name}`];
+  return (
+    <>
+      {text}
+      {edited && <span className="ml-1 text-xs text-stone-500">{pt ? '(texto revisto pelo site)' : '(wording revised by the site)'}</span>}
+      {column.label_map && (
+        <span className="mt-1 block text-xs text-stone-500">
+          {pt ? 'Etiquetas: ' : 'Labels: '}<code className="font-mono">label_maps.{column.label_map}</code>
+        </span>
+      )}
+      {siteMap && (
+        <span className="mt-1 block text-xs leading-relaxed text-stone-600">
+          <span className="font-semibold text-ink">{pt ? 'Etiquetas (do site; o ficheiro ainda não as tem): ' : 'Labels (from the site; the file does not carry them yet): '}</span>
+          {siteMap.map((entry, i) => (
+            <span key={entry.code}>{i > 0 && ' · '}<code className="font-mono">{entry.code}</code> {entry.label[locale]}</span>
+          ))}
+        </span>
+      )}
+    </>
+  );
+}
+
 function Table({ table, columns, locale }: { table: 'persons' | 'households'; columns: Record<string, ReleaseColumn>; locale: Locale }) {
   const pt = locale === 'pt';
+  const entries = Object.entries(columns);
   return (
-    <div className="max-h-[36rem] overflow-auto">
-      <table className="min-w-full border-collapse text-sm">
-        <thead>
-          <tr>
-            {[pt ? 'Coluna' : 'Column', pt ? 'Origem' : 'Provenance', pt ? 'Descrição (em inglês)' : 'Description'].map(header => (
-              <th key={header} scope="col" className="sticky top-0 border-b-2 border-ink bg-cream px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{header}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Object.entries(columns).map(([name, column]) => (
-            <tr key={name} className="align-top">
-              <th scope="row" className="whitespace-nowrap border-b border-line px-3 py-2 text-left font-mono text-[13px] font-normal text-ink">{name}</th>
-              <td className="whitespace-nowrap border-b border-line px-3 py-2 font-mono text-[13px] text-ink">{column.provenance}</td>
-              <td className="min-w-[18rem] border-b border-line px-3 py-2 leading-relaxed text-stone-700">
-                {(() => {
-                  const { text, edited } = columnDescription(table, name, column);
-                  return <>{text}{edited && <span className="ml-1 text-xs text-stone-500">{pt ? '(texto revisto pelo site)' : '(wording edited by the site)'}</span>}</>;
-                })()}
-                {column.label_map && (
-                  <span className="mt-1 block text-xs text-stone-500">
-                    {pt ? 'Etiquetas: ' : 'Labels: '}<code className="font-mono">label_maps.{column.label_map}</code>
-                  </span>
-                )}
-              </td>
+    <>
+      {/* Phones: one stacked entry per column, so the description wraps under the name instead of hiding behind a sideways scroll (PRO2-V02). */}
+      <dl className="divide-y divide-line sm:hidden">
+        {entries.map(([name, column]) => (
+          <div key={name} className="px-3 py-3">
+            <dt className="flex flex-wrap items-baseline gap-x-2 font-mono text-[13px] text-ink">
+              <span className="font-semibold [overflow-wrap:anywhere]">{name}</span>
+              <span className="text-stone-500">{pt ? 'origem' : 'provenance'} {column.provenance}</span>
+            </dt>
+            <dd className="mt-1 text-sm leading-relaxed text-stone-700">
+              <Description table={table} name={name} column={column} locale={locale} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <div className="hidden max-h-[36rem] overflow-auto sm:block">
+        <table className="min-w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              {[pt ? 'Coluna' : 'Column', pt ? 'Origem' : 'Provenance', pt ? 'Descrição (em inglês)' : 'Description'].map(header => (
+                <th key={header} scope="col" className="sticky top-0 border-b-2 border-ink bg-cream px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{header}</th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {entries.map(([name, column]) => (
+              <tr key={name} className="align-top">
+                <th scope="row" className="whitespace-nowrap border-b border-line px-3 py-2 text-left font-mono text-[13px] font-normal text-ink">{name}</th>
+                <td className="whitespace-nowrap border-b border-line px-3 py-2 font-mono text-[13px] text-ink">{column.provenance}</td>
+                <td className="min-w-[18rem] border-b border-line px-3 py-2 leading-relaxed text-stone-700">
+                  <Description table={table} name={name} column={column} locale={locale} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR, POPULATION_RELEASE } from '@/lib/config/population';
-import { isQueryId, parseCanonicalPath, queryBucket, targetFor } from './resolve';
+import { isQueryId, isQueryIdPrefix, lookupEntry, parseCanonicalPath, queryBucket, targetFor } from './resolve';
 
 const ID = 'q1_a003203a0ac9a3446835';
 const R = POPULATION_RELEASE;
@@ -39,6 +39,45 @@ describe('isQueryId / queryBucket', () => {
   });
   it('buckets by the first hex digit, as the sync script writes q/<x>.json', () => {
     expect(queryBucket(ID)).toBe('a');
+  });
+});
+
+describe('shortened ids (PRO2-01)', () => {
+  const lookup = { q1_3a8f56971833b88b3704: ['030831', 'elders_alone'], q1_3a8f00001833b88b3704: ['010103', 'age'], q1_3b0000000000000000aa: ['010103', 'education'] } as const;
+
+  it('accepts q1_ and 8 to 19 hex digits as a prefix', () => {
+    expect(isQueryIdPrefix('q1_3a8f5697')).toBe(true);
+    expect(isQueryIdPrefix('q1_3a8f569')).toBe(false);
+    expect(isQueryIdPrefix(ID)).toBe(false);
+    expect(isQueryIdPrefix('q1_3A8F5697')).toBe(false);
+  });
+
+  it('resolves a prefix only when one id starts with it', () => {
+    expect(lookupEntry(lookup, 'q1_3a8f5697')).toEqual(['030831', 'elders_alone']);
+    expect(lookupEntry(lookup, 'q1_3a8f56971833b88b3704')).toEqual(['030831', 'elders_alone']);
+    // Two ids share "q1_3a8f": too short anyway, and ambiguous.
+    expect(lookupEntry(lookup, 'q1_3a8f')).toBeUndefined();
+    expect(lookupEntry(lookup, 'q1_3c000000')).toBeUndefined();
+    expect(lookupEntry(lookup, '../meta')).toBeUndefined();
+  });
+
+  it('resolves the 11-character id every card printed, for a real published response', () => {
+    const dir = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR, 'q');
+    const lookupFile = JSON.parse(readFileSync(path.join(dir, '3.json'), 'utf8')) as Record<string, [string, string]>;
+    const parsed = parseCanonicalPath(`/populacao/v/${POPULATION_RELEASE}/q/q1_3a8f5697`)!;
+    expect(queryBucket(parsed.id)).toBe('3');
+    expect(targetFor(lookupEntry(lookupFile, parsed.id), 'pt')).toBe('/pt/populacao/freguesia/030831/#vivem-sozinhas');
+  });
+
+  it('leaves every published id’s 11-character prefix unambiguous or unresolved, never wrong', () => {
+    const dir = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR, 'q');
+    for (const bucket of '0123456789abcdef') {
+      const lookupFile = JSON.parse(readFileSync(path.join(dir, `${bucket}.json`), 'utf8')) as Record<string, [string, string]>;
+      for (const [id, entry] of Object.entries(lookupFile)) {
+        const found = lookupEntry(lookupFile, id.slice(0, 11));
+        if (found) expect(found).toEqual(entry);
+      }
+    }
   });
 });
 

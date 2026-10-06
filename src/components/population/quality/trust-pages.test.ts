@@ -3,9 +3,10 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR } from '@/lib/config/population';
 import type { PopulationScorecard } from '@/types/population';
-import { LIMITATIONS, NOVELTY, PRIVACY_FINDINGS, RELEASE_GATES, formatFit } from './copy';
+import { CONSTRAINT_LABEL, FITTED_PERSON_KEYS, FITTED_TABLES, GLOSSARY, LIMITATIONS, NOVELTY, PRIVACY_FINDINGS, RELEASE_GATES, SCORED_ONLY_TABLES, constraintLabel, formatFit, generatedGap } from './copy';
 import { formatBytes } from '../data/format';
-import { bandReading } from './band-reading';
+import { METHODOLOGY_ANCHORS, headingSlug, methodologyFieldAnchor } from './anchors';
+import type { PopulationPlaces, PopulationReleaseInfo } from '@/types/population';
 
 const root = process.cwd();
 const scorecard = JSON.parse(
@@ -62,34 +63,105 @@ describe('formatting', () => {
   });
 });
 
-describe('size bands against their pre-registered ranges', () => {
-  it('quotes the producer’s reading and one shared note, in each locale', () => {
-    const pt = bandReading(scorecard, 'pt');
-    expect(pt.reading).toBe(scorecard.headline.band_reading?.pt);
-    expect(pt.reading).toMatch(/^100% das freguesias/);
-    expect(pt.notes).toEqual([{ key: 'all', label: null, note: scorecard.strata[0].note_pt }]);
-    expect(pt.notes[0].note).toContain('melhor do que o previsto');
-    const en = bandReading(scorecard, 'en');
-    expect(en.reading).toBe(scorecard.headline.band_reading?.en);
-    expect(en.notes[0].note).toContain('better than expected');
-  });
+const read = <T,>(file: string) => JSON.parse(readFileSync(path.join(root, 'public/data', POPULATION_DATA_DIR, file), 'utf8')) as T;
+// The page's code without its comments (which explain why the band reading is not rendered).
+const qualityPage = readFileSync(path.join(root, 'src/app/[locale]/populacao/qualidade/page.tsx'), 'utf8')
+  .replace(/\{?\/\*[\s\S]*?\*\/\}?/g, '')
+  .replace(/^\s*\/\/.*$/gm, '');
 
-  it('lists the notes per band when they differ', () => {
-    const mixed: PopulationScorecard = {
-      ...scorecard,
-      strata: scorecard.strata.map((stratum, i) => (i === 0 ? { ...stratum, band_position: 'inside', note_pt: 'Dentro do intervalo.', note_en: 'Inside the range.' } : stratum)),
-    };
-    const notes = bandReading(mixed, 'pt').notes;
-    expect(notes).toHaveLength(scorecard.strata.length);
-    expect(notes[0]).toEqual({ key: 'lt_500', label: 'Menos de 500 residentes', note: 'Dentro do intervalo.' });
-  });
-
-  it('reads nothing from a pre-v1.0.2 scorecard, whose note_pt was a status code', () => {
-    const old: PopulationScorecard = {
-      ...scorecard,
-      headline: { ...scorecard.headline, band_reading: undefined },
-      strata: scorecard.strata.map(stratum => ({ ...stratum, band_position: undefined, note_en: undefined, note_pt: 'stop_and_investigate' })),
-    };
-    expect(bandReading(old, 'pt')).toEqual({ reading: null, notes: [] });
+describe('no verdict against the pre-registered size-band ranges (MR2-02, round-1 M-15)', () => {
+  it('the quality page renders neither the producer’s band reading nor the strata notes', () => {
+    // The ranges were set for an out-of-fit check with the earlier engine; the page's errors are in-sample.
+    expect(qualityPage).not.toMatch(/band_reading|band_position|note_pt|note_en|bandReading|acceptance/);
+    expect(qualityPage).not.toMatch(/melhor do que o previsto|better than expected/);
   });
 });
+
+describe('the child-share release gate (POP2-ACC-01)', () => {
+  it('states the worst case on the side of the scorecard’s sign', () => {
+    const gate = RELEASE_GATES.find(item => item.pt.includes('crianças'))!;
+    const above = scorecard.headline.child_deficit.value > 0;
+    expect(gate.pt).toContain(above ? '0,01% acima' : '0,01% abaixo');
+    expect(gate.en).toContain(above ? '0.01% above' : '0.01% below');
+    expect(gate.pt).toContain('−10%');
+    expect((scorecard.headline.child_deficit.value * 100).toFixed(2)).toBe('0.01');
+  });
+});
+
+describe('one name per table (POP2-ACC-V03, MR2-09, PRO2-09)', () => {
+  it('labels every scorecard table site-side, with the INE words', () => {
+    for (const table of scorecard.constraints) {
+      expect(CONSTRAINT_LABEL[table.key], table.key).toBeDefined();
+    }
+    expect(constraintLabel('p_labour', { pt: 'x', en: 'x' }, 'pt')).toBe('Condição perante o trabalho');
+    expect(constraintLabel('p_labour3_income', { pt: 'x', en: 'x' }, 'pt')).toBe('Trabalho × principal meio de vida');
+    expect(constraintLabel('p_unknown', { pt: 'Nova', en: 'New' }, 'en')).toBe('New');
+    expect(JSON.stringify(Object.values(CONSTRAINT_LABEL))).not.toMatch(/rendimento|income\b/i);
+  });
+
+  it('lists the 12 fitted person tables of the chart, and the 21 coverage tables without single-year age', () => {
+    expect([...FITTED_PERSON_KEYS].sort()).toEqual(scorecard.constraints.filter(table => table.was_constrained).map(table => table.key).sort());
+    const fittedPersons = FITTED_TABLES[FITTED_TABLES.length - 1].pt;
+    for (const key of FITTED_PERSON_KEYS) expect(fittedPersons.toLowerCase()).toContain(CONSTRAINT_LABEL[key].pt.toLowerCase());
+    // 3 household tables (size, nuclei, accessibility) + 12 person + 6 scored only = the 21 of the coverage gate.
+    expect(FITTED_TABLES.some(item => item.pt.includes('cadeira de rodas'))).toBe(true);
+    expect(SCORED_ONLY_TABLES.some(item => item.pt.includes('ano a ano'))).toBe(false);
+    expect(SCORED_ONLY_TABLES).toHaveLength(5); // the two household-activity tables share an item
+  });
+});
+
+describe('the glossary names the chart’s statistic and the tier’s apart (MR2-04)', () => {
+  it('does not claim the charts summarise person_srmse_median', () => {
+    const text = JSON.stringify(GLOSSARY);
+    expect(text).not.toContain('o que os gráficos desta página resumem');
+    expect(text).toContain('raiz do desvio quadrático médio');
+    expect(text).toContain('Erro do ajuste (todas as células)');
+    expect(qualityPage).not.toContain('Mediana por freguesia');
+  });
+});
+
+describe('methodology headings (MR2-10, PRO2-11, PRO2-13, POP2-ACC-04)', () => {
+  for (const locale of ['pt', 'en'] as const) {
+    const text = mdx(locale);
+    const headings = [...text.matchAll(/^## (.+)$/gm)].map(match => match[1]);
+
+    it(`${locale}: every section heading is a question and has an anchor; the shared anchors exist`, () => {
+      expect(headings.length).toBeGreaterThan(6);
+      for (const heading of headings) expect(heading, heading).toMatch(/\?$/);
+      const slugs = headings.map(heading => headingSlug(heading));
+      for (const anchor of Object.values(METHODOLOGY_ANCHORS)) expect(slugs).toContain(anchor[locale]);
+      expect(new Set(slugs).size).toBe(slugs.length);
+    });
+
+    it(`${locale}: says which releases are citable and what the next one brings`, () => {
+      expect(text).toContain('1.0.3');
+      expect(text).not.toMatch(/Cada versão estável|Every stable release/);
+      expect(text).toMatch(locale === 'pt' ? /próxima versão \(1\.1\) corrige/ : /next release \(1\.1\) corrects/);
+      expect(text).not.toMatch(/«exato»|o número exato de agregados|the exact number of households/);
+      expect(text).toContain('<AllocationGap />');
+      expect(text).toContain('<ShortAttribution />');
+    });
+  }
+
+  it('gives field rows ids that are the same in both locales', () => {
+    expect(methodologyFieldAnchor('living_alone')).toBe('campo-living-alone');
+  });
+});
+
+describe('the generated total against INE’s (MR2-V02)', () => {
+  it('reads the national gap from the release and places.json', () => {
+    const release = read<PopulationReleaseInfo>('release.json');
+    const places = read<PopulationPlaces>('places.json');
+    const ine = places.parishes.reduce((sum, row) => sum + row[5], 0);
+    expect(ine - release.counts.persons).toBe(2625);
+    const pt = generatedGap(release.counts.persons, ine, 'pt');
+    expect(pt).toContain('2 625 pessoas a menos');
+    expect(pt).toContain('762 freguesias');
+    expect(generatedGap(release.counts.persons, ine, 'en')).toContain('2,625 people fewer');
+    // Parishes whose publication count is below INE's: a subset of the 762 that differ.
+    const below = places.parishes.filter(row => row[9] < row[5]).length;
+    expect(below).toBeGreaterThan(0);
+    expect(below).toBeLessThanOrEqual(762);
+  });
+});
+

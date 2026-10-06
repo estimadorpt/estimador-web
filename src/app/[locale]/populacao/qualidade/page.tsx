@@ -10,24 +10,25 @@ import { QualityBadge } from '@/components/population/QualityBadge';
 import { PopulationSectionNav } from '@/components/population/SectionNav';
 import { FitBars } from '@/components/population/quality/FitBars';
 import { PopulationUnavailable, Section, StatusItem } from '@/components/population/quality/parts';
-import { bandReading } from '@/components/population/quality/band-reading';
 import {
   ACCIDENTAL_MATCHES,
   FIT_EXPLAINED,
   FITTED_TABLES,
   GLOSSARY,
   LIMITATIONS,
+  REPLACED,
   PRIVACY_FINDINGS,
   RELEASE_GATES,
   SCORED_ONLY_TABLES,
   SIZE_BAND,
+  constraintLabel,
   formatCount,
   formatDay,
   formatFit,
 } from '@/components/population/quality/copy';
 import { POPULATION_DOWNLOADS, POPULATION_PUBLISHED, POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { HONESTY, RECIPE_COPY, TIER_COPY, type Locale } from '@/lib/population/labels';
-import { loadPopulationMeta, loadPopulationScorecard } from '@/lib/utils/population-data-loader';
+import { loadPopulationMeta, loadPopulationPlaces, loadPopulationScorecard } from '@/lib/utils/population-data-loader';
 import { createPageMetadata } from '@/lib/metadata';
 import type { PortraitRecipe } from '@/types/population';
 
@@ -61,6 +62,32 @@ const TIER_READING: Record<'A' | 'B' | 'C', { pt: string; en: string }> = {
   },
 };
 
+/**
+ * Tier C holds two kinds of parish (MR2-03): small ones, C for their size, and
+ * 500+ ones, C for their worst table, which in almost all of them is
+ * single-year age (705 of 728 in quality.csv `worst_constraint`). The counts
+ * shown are read from places.json (tier and the count the tier uses).
+ */
+function tierCReadings(small: number, large: number, locale: Locale): Array<{ key: string; lead: string; body: string }> {
+  const pt = locale === 'pt';
+  return [
+    {
+      key: 'small',
+      lead: pt ? `Menos de 500 residentes (${formatCount(small, locale)}):` : `Under 500 residents (${formatCount(small, locale)}):`,
+      body: pt
+        ? 'são C pelo tamanho. Uma ou duas pessoas mudam uma percentagem, e 100% pode ser uma ou duas: confere no topo da página quantos residentes e agregados tem a freguesia.'
+        : 'they are C for their size. One or two people shift a share, and 100% can be one or two: check at the top of the page how many residents and households the parish has.',
+    },
+    {
+      key: 'large',
+      lead: pt ? `500 ou mais residentes (${formatCount(large, locale)}):` : `500 or more residents (${formatCount(large, locale)}):`,
+      body: pt
+        ? 'são C pela pior tabela, quase sempre a idade ano a ano, que fica fora das 12 tabelas de pessoas do ajuste e que as respostas do site não usam. O ficheiro de qualidade diz a pior tabela de cada uma.'
+        : 'they are C for their worst table, almost always single-year age, which sits outside the 12 fitted person tables and which the site’s answers do not use. The quality file names each one’s worst table.',
+    },
+  ];
+}
+
 const TIER_PAGE: Record<'A' | 'B' | 'C', { pt: string; en: string }> = {
   A: {
     pt: 'Na página da freguesia, todas as perguntas são respondidas com os números da própria freguesia, e o nível aparece no topo.',
@@ -81,7 +108,11 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
   const locale: Locale = raw === 'en' ? 'en' : 'pt';
   setRequestLocale(locale);
   const pt = locale === 'pt';
-  const [scorecard, meta] = await Promise.all([loadPopulationScorecard(), loadPopulationMeta()]);
+  const [scorecard, meta, places] = await Promise.all([loadPopulationScorecard(), loadPopulationMeta(), loadPopulationPlaces()]);
+  // Tier C by the count the tier uses (places.json publication_population): the two readings of the C card.
+  const tierC = places?.parishes.filter(row => row[3] === 'C') ?? [];
+  const tierCLarge = tierC.filter(row => row[9] >= 500).length;
+  const tierCSmall = tierC.length - tierCLarge;
 
   // Only A-tier questions: the cross-tabulations a B parish does not get.
   const aOnly = meta
@@ -99,8 +130,10 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
     return TIER_READING[tier][locale];
   };
 
-  // The size bands against their pre-registered ranges, in the producer's words.
-  const bands = scorecard ? bandReading(scorecard, locale) : null;
+  // No band verdict (MR2-02, round-1 M-15): the scorecard's pre-registered
+  // ranges were set for an out-of-fit check with the earlier engine, and the
+  // errors on this page are in-sample, so `band_reading`, `band_position` and
+  // the strata notes are never rendered.
 
   const source = pt
     ? `Avaliação da versão ${POPULATION_RELEASE} · Censos 2021 (INE)`
@@ -203,10 +236,11 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               title={pt ? 'Quão perto ficam das tabelas do INE?' : 'How close do they come to INE’s tables?'}
               lede={<p>{FIT_EXPLAINED[locale]}</p>}
             >
-              <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+              <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
                 <DataCard
-                  title={pt ? 'Erro típico, por tamanho de freguesia' : 'Typical error, by parish size'}
-                  subtitle={pt ? 'Mediana por freguesia, 12 tabelas de pessoas' : 'Median per parish, 12 person tables'}
+                  className="lg:flex lg:h-full lg:flex-col lg:[&>footer]:mt-auto"
+                  title={pt ? 'Erro do ajuste, por tamanho de freguesia' : 'Fit error, by parish size'}
+                  subtitle={pt ? 'Mediana entre freguesias, todas as células das 12 tabelas de pessoas' : 'Median across parishes, all cells of the 12 person tables'}
                   source={source}
                   updated={updated}
                   methodologyHref={POPULATION_ROUTES.methodology}
@@ -214,8 +248,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   locale={locale}
                 >
                   <FitBars
-                    caption={pt ? 'Erro típico face às tabelas do INE, por tamanho de freguesia' : 'Typical error against INE’s tables, by parish size'}
-                    columns={[pt ? 'Tamanho' : 'Size', pt ? 'Erro típico' : 'Typical error']}
+                    caption={pt ? 'Erro do ajuste face às tabelas do INE, por tamanho de freguesia' : 'Fit error against INE’s tables, by parish size'}
+                    columns={[pt ? 'Tamanho' : 'Size', pt ? 'Erro do ajuste' : 'Fit error']}
                     noteColumn={pt ? 'Freguesias' : 'Parishes'}
                     rows={scorecard.strata.map(stratum => ({
                       key: stratum.key,
@@ -227,8 +261,9 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   />
                 </DataCard>
                 <DataCard
+                  className="lg:flex lg:h-full lg:flex-col lg:[&>footer]:mt-auto"
                   title={pt ? 'Erro típico, por tabela' : 'Typical error, by table'}
-                  subtitle={pt ? 'Mediana por freguesia, nas tabelas usadas para ajustar' : 'Median per parish, over the tables used for fitting'}
+                  subtitle={pt ? 'Mediana entre freguesias do erro de cada tabela usada no ajuste' : 'Median across parishes of each fitted table’s error'}
                   source={source}
                   updated={updated}
                   methodologyHref={POPULATION_ROUTES.methodology}
@@ -240,33 +275,13 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                     columns={[pt ? 'Tabela' : 'Table', pt ? 'Erro típico' : 'Typical error']}
                     rows={scorecard.constraints.map(table => ({
                       key: table.key,
-                      label: pt ? table.label : table.label_en,
+                      label: constraintLabel(table.key, { pt: table.label, en: table.label_en }, locale),
                       value: table.srmse_median.value,
                       display: formatFit(table.srmse_median.value, locale),
                     }))}
                   />
                 </DataCard>
               </div>
-              {bands && (bands.reading || bands.notes.length > 0) && (
-                <div className="mt-6 max-w-3xl rounded-2xl border border-line bg-cream p-5">
-                  <h3 className="text-base font-bold text-ink">{pt ? 'Ficou onde se esperava?' : 'Did it land where expected?'}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-700">
-                    {pt
-                      ? 'Antes da avaliação nacional, cada classe de tamanho de freguesia tinha um intervalo de erro pré-registado: o erro que se esperava ver. '
-                      : 'Before the national evaluation, each parish size band had a pre-registered error range: the error it was expected to show. '}
-                    {bands.reading}
-                  </p>
-                  {bands.notes.length === 1 && bands.notes[0].label === null ? (
-                    <p className="mt-2 text-sm leading-relaxed text-stone-700">
-                      {pt ? 'Em todas as classes: ' : 'In every band: '}{bands.notes[0].note}
-                    </p>
-                  ) : (
-                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-relaxed text-stone-700">
-                      {bands.notes.map(item => <li key={item.key}><span className="font-semibold text-ink">{item.label}:</span> {item.note}</li>)}
-                    </ul>
-                  )}
-                </div>
-              )}
               <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
                 {pt
                   ? 'Com poucas pessoas, cada uma pesa mais em cada tabela: por isso cada freguesia tem um nível de qualidade, mostrado no topo da sua página.'
@@ -290,13 +305,13 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 </div>
                 <p className="mt-4 text-sm leading-relaxed text-stone-700">
                   {pt
-                    ? 'A ficha de avaliação publica a mediana só das 12 tabelas de pessoas do gráfico. A «pior tabela» que decide o nível conta também a idade ano a ano, e na maior parte das freguesias é essa a pior: o ficheiro de qualidade traz, para cada freguesia, a pior tabela e o seu erro (worst_constraint).'
-                    : 'The scorecard publishes a median only for the 12 person tables in the chart. The “worst table” that decides the tier also counts single-year age, and in most parishes that is the worst one: the quality file gives, for each parish, its worst table and that table’s error (worst_constraint).'}
+                    ? 'A ficha de avaliação publica a mediana só das 12 tabelas de pessoas do gráfico. A idade ano a ano também é medida e entra na «pior tabela» que decide o nível (na maior parte das freguesias, é essa a pior), mas não é uma das 21 tabelas da cobertura nem das 12 tabelas de pessoas do ajuste. O ficheiro de qualidade traz, para cada freguesia, a pior tabela e o seu erro (worst_constraint); a página de dados diz que tabela é cada código.'
+                    : 'The scorecard publishes a median only for the 12 person tables in the chart. Single-year age is also measured and counts towards the “worst table” that decides the tier (in most parishes it is the worst one), but it is not one of the 21 coverage tables nor of the 12 fitted person tables. The quality file gives, for each parish, its worst table and that table’s error (worst_constraint); the data page says which table each code is.'}
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-stone-700">
                   {pt
-                    ? 'Os erros dos gráficos são medidos nas tabelas usadas no ajuste: dizem quão perto o ajuste chegou. A ficha do modelo refere uma verificação independente, com uma tabela de agregados deixada de fora do ajuste, mas não publica o seu erro; quando for publicado, aparece aqui.'
-                    : 'The errors in the charts are measured on the tables used in the fit: they say how close the fit came. The model card mentions an independent check, with a household table held out of the fit, but does not publish its error; when it is published, it appears here.'}
+                    ? <>Os erros dos gráficos são medidos nas tabelas usadas no ajuste: dizem quão perto o ajuste chegou. A ficha do modelo refere uma verificação independente, com uma tabela de agregados deixada de fora do ajuste, mas não publica o seu erro (ver <a href="#retrodicao" className="font-semibold text-ink underline underline-offset-4">«Acerta no que não viu?»</a>).</>
+                    : <>The errors in the charts are measured on the tables used in the fit: they say how close the fit came. The model card mentions an independent check, with a household table held out of the fit, but does not publish its error (see <a href="#retrodicao" className="font-semibold text-ink underline underline-offset-4">“Does it get right what it did not see?”</a>).</>}
                 </p>
               </div>
             </Section>
@@ -315,17 +330,25 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                     <p className="mt-4 font-display text-3xl font-extrabold tabular-nums text-ink">{formatCount(meta.counts.tiers[tier], locale)}</p>
                     <p className="text-sm text-stone-500">{pt ? 'freguesias' : 'parishes'}</p>
                     <p className="mt-4 text-sm leading-relaxed text-ink">{TIER_COPY[tier].meaning[locale]}</p>
-                    <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-stone-600">
-                      {tierOnPage(tier)}
-                    </p>
+                    {tier === 'C' && !takesFallback && places ? (
+                      <ul className="mt-3 space-y-2 border-t border-line pt-3 text-sm leading-relaxed text-stone-600">
+                        {tierCReadings(tierCSmall, tierCLarge, locale).map(reading => (
+                          <li key={reading.key}><span className="font-semibold text-ink">{reading.lead}</span> {reading.body}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-stone-600">
+                        {tierOnPage(tier)}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
               <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
                 {pt ? 'Os limiares de cada nível: ' : 'Each tier’s thresholds: '}
                 {pt
-                  ? 'A, erro típico até 0,10, a pior tabela até 0,18 e 2 000 ou mais residentes; B, até 0,15 e 0,26 com 500 ou mais residentes; C, as restantes. Uma freguesia com menos de 500 residentes fica no nível C.'
-                  : 'A, typical error up to 0.10, worst table up to 0.18 and 2,000 or more residents; B, up to 0.15 and 0.26 with 500 or more residents; C, the rest. A parish under 500 residents sits in tier C.'}
+                  ? 'A, erro típico até 0,10, a pior tabela até 0,18 e 2 000 ou mais residentes; B, até 0,15 e 0,26 com 500 ou mais residentes; C, as restantes. Uma freguesia com menos de 500 residentes fica no nível C. Os limiares de 500 e 2 000 usam a contagem de publicação, a menor entre os residentes do INE e as pessoas geradas: uma freguesia em que o INE contou 500 pessoas pode ficar abaixo de 500 nessa contagem.'
+                  : 'A, typical error up to 0.10, worst table up to 0.18 and 2,000 or more residents; B, up to 0.15 and 0.26 with 500 or more residents; C, the rest. A parish under 500 residents sits in tier C. The 500 and 2,000 thresholds use the publication count, the smaller of INE’s residents and the generated people: a parish where INE counted 500 people can fall below 500 on that count.'}
               </p>
               {meta.counts.suppressed_cells > 0 ? (
                 <p className="mt-3 max-w-3xl text-sm leading-relaxed text-stone-600">
@@ -337,7 +360,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 <p className="mt-3 max-w-3xl text-sm leading-relaxed text-stone-600">{HONESTY.zero[locale]}</p>
               )}
               <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
-                {pt ? 'Esta é a versão 1.0.3, que substituiu três versões do mesmo dia. ' : 'This is release 1.0.3, which replaced three releases of the same day. '}
+                {REPLACED[locale]}{' '}
                 <Link href={`${POPULATION_ROUTES.data}#versao`} locale={locale} className="font-semibold text-ink underline underline-offset-4">
                   {pt ? 'O que mudou entre elas' : 'What changed between them'}
                 </Link>
@@ -385,8 +408,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               id="limitacoes"
               title={pt ? 'Onde é que os dados são mais fracos?' : 'Where are the data weakest?'}
               lede={<p>{pt
-                ? `Limitações conhecidas da população gerada (a mesma da versão 1.0.0 à ${POPULATION_RELEASE}), declaradas em vez de escondidas. A próxima versão tem um plano para cada uma.`
-                : `Known limitations of the generated population (the same from release 1.0.0 to ${POPULATION_RELEASE}), declared rather than hidden. The next release has a plan for each.`}</p>}
+                ? <>Limitações conhecidas da população gerada (a mesma da versão 1.0.0 à {POPULATION_RELEASE}), declaradas em vez de escondidas. A <a href={POPULATION_DOWNLOADS.modelCard} className="font-semibold text-ink underline underline-offset-4">ficha do modelo</a> remete o plano para as resolver para a próxima versão (a 1.1, que corrige a população dos Censos 2021); cada correção fica registada nas <a href={POPULATION_DOWNLOADS.errata} className="font-semibold text-ink underline underline-offset-4">erratas</a>.</>
+                : <>Known limitations of the generated population (the same from release 1.0.0 to {POPULATION_RELEASE}), declared rather than hidden. The <a href={POPULATION_DOWNLOADS.modelCard} className="font-semibold text-ink underline underline-offset-4">model card</a> leaves the plan to remove them to the next release (1.1, which corrects the 2021 Census population); every correction is recorded in the <a href={POPULATION_DOWNLOADS.errata} className="font-semibold text-ink underline underline-offset-4">errata</a>.</>}</p>}
             >
               <ol className="grid gap-4 md:grid-cols-2">
                 {LIMITATIONS.map(limitation => (
@@ -396,23 +419,24 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   </li>
                 ))}
               </ol>
-            </Section>
-
-            <Section
-              id="retrodicao"
-              title={pt ? 'Acerta no que não viu?' : 'Does it get right what it did not see?'}
-            >
-              <div className="max-w-3xl rounded-2xl border border-line bg-cream p-5">
-                <p className="inline-flex items-center rounded-md bg-parchment px-2 py-1 text-xs font-bold uppercase tracking-wider text-stone-600">
-                  {scorecard.retrodiction.status === 'unavailable' ? (pt ? 'Ainda não disponível' : 'Not yet available') : scorecard.retrodiction.status}
+              {/* The out-of-fit check is not published yet: one paragraph here, not an empty section (FRESH-13). */}
+              <div id="retrodicao" className="mt-6 max-w-3xl text-sm leading-relaxed text-stone-700">
+                <h3 className="text-base font-bold text-ink">{pt ? 'Acerta no que não viu?' : 'Does it get right what it did not see?'}</h3>
+                <p className="mt-2">
+                  {scorecard.retrodiction.status === 'unavailable'
+                    ? (pt
+                      ? 'Ainda não se sabe: comparar a população gerada com números que o modelo não usou (a retrodição) aguarda um apuramento separado, e a ficha de avaliação marca-a como «ainda não disponível». Quando for feita, sai com uma versão nova da população.'
+                      : 'Not yet known: comparing the generated population with figures the model did not use (retrodiction) awaits a separate tabulation, and the scorecard marks it “not yet available”. When it is done, it comes with a new release of the population.')
+                    : (pt ? `Estado na ficha de avaliação: ${scorecard.retrodiction.status}.` : `Status in the scorecard: ${scorecard.retrodiction.status}.`)}
                 </p>
-                <p className="mt-3 leading-relaxed text-stone-700">
+                <p className="mt-2">
                   {pt
-                    ? 'Comparar a população gerada com números que o modelo não usou (a retrodição) aguarda um apuramento separado. Quando estiver feito, o resultado aparece aqui; até lá, não há número para mostrar.'
-                    : 'Comparing the generated population with figures the model did not use (retrodiction) awaits a separate tabulation. When it is done, the result appears here; until then there is no figure to show.'}
+                    ? 'Antes de gerar esta população, o produtor registou intervalos de erro para essa verificação fora do ajuste, com o motor anterior. Os erros desta página são medidos nas tabelas do ajuste, por isso não se comparam com esses intervalos, e a página não diz se ficaram «dentro» ou «abaixo» deles.'
+                    : 'Before generating this population, the producer registered error ranges for that out-of-fit check, with the earlier engine. The errors on this page are measured on the fitted tables, so they do not compare with those ranges, and the page does not say whether they landed “inside” or “below” them.'}
                 </p>
               </div>
             </Section>
+
 
             <section aria-label={pt ? 'Para saber mais' : 'Further reading'} className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-8">
               <Action href={POPULATION_ROUTES.methodology} locale={locale} arrow>{pt ? 'Como foi feita a população' : 'How the population was made'}</Action>
