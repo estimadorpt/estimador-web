@@ -103,7 +103,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
   const questionLine = (e: ElectionConfig) => e.type === 'presidential' ? t('electionsQuestionRunoff') : t('electionsQuestionSeats');
 
   return (
-    <HomePanel labelledBy="home-elections-title" className="flex flex-col">
+    <HomePanel labelledBy="home-elections-title" className="home-media home-media--elections">
       <div className="min-w-0 p-5 md:p-6">
         <div>
           <Kicker pill={tSections('archiveSection')}>{t('electionsKicker')}</Kicker>
@@ -131,7 +131,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
         </ul>
         <div className="mt-3"><Action href="/eleicoes/arquivo" locale={locale} variant="text" arrow>{t('electionsArchiveGuide')}</Action></div>
       </div>
-      <SectionIllustration scene="elections" sizes="(min-width: 900px) 50vw, 100vw" className="home-band hidden md:block" />
+      <SectionIllustration scene="elections" sizes="720px" className="home-media__art home-media__art--elections" />
     </HomePanel>
   );
 }

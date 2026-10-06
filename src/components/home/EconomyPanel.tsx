@@ -25,8 +25,8 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
   const live = state === 'live' && economy && typeof pulse === 'number' && typeof recession === 'number';
   const preparing = state === 'preparing';
   return (
-    <HomePanel labelledBy="home-economy-title" className="flex flex-col">
-      <div className="flex min-w-0 flex-col p-5 md:p-6">
+    <HomePanel labelledBy="home-economy-title" className="home-media home-media--economy">
+      <div className="min-w-0 p-5 md:p-6">
         <div>
           <Kicker pill={live ? undefined : tSections(preparing ? 'preparingSection' : 'pausedSection')}>{t('economyKicker')}</Kicker>
           <h2 id="home-economy-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{live ? t('economyTitleLive') : t('economyTitlePaused')}</h2>
@@ -40,10 +40,10 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
         ) : (
           <>
             <p className="mt-2 text-[14px] leading-relaxed text-stone-600">{t('economyPausedText')}</p>
-            <div className="mt-3"><Action href="/economia#compreender" locale={locale} variant="secondary" arrow>{t('economyMethodsAction')}</Action></div>
+            <div className="mt-3"><Action href="/economia#compreender" locale={locale} variant="secondary" arrow className="whitespace-nowrap">{t('economyMethodsAction')}</Action></div>
             {preparing
-              ? <Status tone="paused" bottom>{t('economyPreparingStatus')}</Status>
-              : economy?.vintage_date && <Status tone="paused" bottom>{t('economyPausedStatus', { date: fmtDate(economy.vintage_date, locale) })}</Status>}
+              ? <Status tone="paused">{t('economyPreparingStatus')}</Status>
+              : economy?.vintage_date && <Status tone="paused">{t('economyPausedStatus', { date: fmtDate(economy.vintage_date, locale) })}</Status>}
           </>
         )}
         {article && (
@@ -52,7 +52,7 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
           </p>
         )}
       </div>
-      <SectionIllustration scene="economy" sizes="(min-width: 900px) 40vw, 100vw" className="home-band hidden md:block" />
+      <SectionIllustration scene="economy" sizes="720px" className="home-media__art home-media__art--economy" />
     </HomePanel>
   );
 }

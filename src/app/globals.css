@@ -605,19 +605,40 @@
   .scenario-probability-row > div:first-child { width: 100%; }
 }
 
-/* Homepage panels end on their section's scene, as a band that takes the
-   height the panel has left: the cards in a row share one height, so a
-   shorter card shows more of its scene instead of a hole of empty cream
-   (owner, 6 Oct 2026). The stadium is a full-bleed scene and is cropped to
-   fill; the voting booth and the shop are vignettes on cream and are shown
-   whole, standing on the panel's bottom edge. After the answer, never before. */
+/* The Liga rail ends on its stadium as a band that takes the height the
+   panel has left (the rail shares the population card's height): the scene
+   is full-bleed and cropped to fill. After the answer, never before. */
 .home-band { position: relative; flex: 1 1 auto; min-height: 140px; margin: 0; overflow: hidden; border-radius: 0; background: var(--color-cream); }
-.home-band img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; object-fit: contain; object-position: center bottom; }
-.home-band--football img { object-fit: cover; object-position: center 62%; }
-/* The vignettes keep one size whatever the band's height, stand on the
-   bottom edge, and lose their pale ground into the card's cream. */
-.home-band:not(.home-band--football) img { top: auto; height: min(100%, 210px); mix-blend-mode: multiply; }
+.home-band img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; object-position: center 62%; }
 @media (min-width: 768px) { .home-band { min-height: 160px; } }
+
+/* The support row (elections, economy) is two media objects (owner, 6 Oct
+   2026): text on the left, the section's painting on the right as a column
+   the card's full height, bleeding to its top, right and bottom edges (the
+   card's corners clip it), like the population card's house. The painting
+   is cropped to fill (cover) at a per-scene focus, so the voter and the
+   ballot box, the shopkeeper and the customer, stay whole; a hairline
+   separates the painting's own pale ground from the card's cream. From
+   768px the cards stack, full width, with one column width so the two
+   paintings line up; from 1280px they sit side by side (3fr/2fr, one shared
+   height), and the economy card, whose text is shorter, gives its painting
+   a wider column so its text fills the height instead of leaving a hole.
+   Hidden on phones, where the cards stay text-only and compact. */
+.home-media { display: block; }
+.home-media__art { display: none; position: relative; margin: 0; overflow: hidden; border-radius: 0; background: #fdfdf9; border-left: 1px solid var(--color-line); }
+.home-media__art img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; }
+.home-media__art--elections img { object-position: 60% 50%; }
+.home-media__art--economy img { object-position: 50% 72%; }
+@media (min-width: 768px) {
+  .home-media { display: grid; grid-template-columns: minmax(0, 1fr) 40%; }
+  .home-media > :first-child { display: flex; flex-direction: column; justify-content: center; }
+  .home-media__art { display: block; min-height: 220px; }
+}
+@media (min-width: 1280px) {
+  .home-media--elections { grid-template-columns: minmax(0, 1fr) 38%; }
+  .home-media--economy { grid-template-columns: minmax(0, 1fr) 50%; }
+  .home-media__art--economy img { object-position: 50% 100%; }
+}
 /* Same container as the header and the body (no 1160px box): see above. */
 .election-page .illustrated-hero { gap: 36px; }
 .election-page h2 { letter-spacing: -.025em; }

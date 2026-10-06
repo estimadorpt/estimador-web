@@ -161,13 +161,15 @@ export default async function HomePage({
         {/* The lead row shares its height (UXD2-V02): the rail is as tall as
             the population card, and fills it with the outlook's two ends, the
             title and the drop, then the club picker (CL3-02). The support row
-            keeps each card's own height: stretched, the economy card's text
-            sat over about 180px of empty cream (CL2-10, CL3-02). */}
+            is two media objects, text and a full-height painting
+            (.home-media in globals.css): stacked below 1280px, side by side
+            and of one height from there, where each card's painting column
+            is sized so neither text column ends over empty cream. */}
         <div className="grid items-stretch gap-4 md:gap-6 min-[1100px]:grid-cols-[2fr_1fr]">
           {panel(layout.lead, 'lead')}
           {panel(layout.secondary, 'secondary')}
         </div>
-        <div className="mt-4 grid items-stretch gap-4 md:mt-6 md:gap-6 min-[900px]:grid-cols-[3fr_2fr]">
+        <div className="home-support mt-4 grid items-stretch gap-4 md:mt-6 md:gap-6 min-[1280px]:grid-cols-[3fr_2fr]">
           {support.map(section => panel(section, 'support'))}
         </div>
         <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-stone-600 md:mt-8">
