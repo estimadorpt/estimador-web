@@ -8,8 +8,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   setRequestLocale(locale);
   return createPageMetadata({ locale, path: '/populacao/miniatura',
-    title: locale === 'pt' ? 'Pessoas imaginadas: um exemplo de como se constrói uma população sintética' : 'Imagined people: an example of how a synthetic population is built',
-    description: locale === 'pt' ? 'Um explicador com pessoas inventadas: 100 pessoas e 30 agregados num bairro imaginado, para mostrar como se constrói uma população sintética. Nenhum número é de Portugal.' : 'An explainer with invented people: 100 people and 30 households in an imagined neighbourhood, to show how a synthetic population is built. No number is about Portugal.',
+    title: locale === 'pt' ? 'Como se lê uma população sintética? Um bairro imaginado' : 'How do you read a synthetic population? An imagined neighbourhood',
+    description: locale === 'pt' ? 'Um explicador com pessoas inventadas: 100 pessoas e 30 agregados num bairro imaginado, para mostrar como se lê e como se constrói uma população sintética. Nenhum número é de Portugal.' : 'An explainer with invented people: 100 people and 30 households in an imagined neighbourhood, to show how a synthetic population is read and built. No number is about Portugal.',
     index: false,
   });
 }

@@ -203,7 +203,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               title={pt ? 'Quão perto ficam das tabelas do INE?' : 'How close do they come to INE’s tables?'}
               lede={<p>{FIT_EXPLAINED[locale]}</p>}
             >
-              <div className="grid gap-6 lg:grid-cols-2">
+              <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
                 <DataCard
                   title={pt ? 'Erro típico, por tamanho de freguesia' : 'Typical error, by parish size'}
                   subtitle={pt ? 'Mediana por freguesia, 12 tabelas de pessoas' : 'Median per parish, 12 person tables'}

@@ -38,10 +38,10 @@ const pt = {
   replayStarted: 'Nova partida em treino. Tens seis tentativas.',
   lastGuess: (name: string, distance: string, direction: string) => `Última tentativa: ${name}, a ${distance}. A freguesia misteriosa fica ${direction}.`,
   announceMiss: (n: number, name: string, municipality: string, distance: string, direction: string, proximity: number) =>
-    `Tentativa ${n}: ${name}, concelho de ${municipality}. A ${distance}; a freguesia misteriosa fica ${direction}. Proximidade ${proximity}%.`,
+    `Tentativa ${n}: ${name}, concelho ${municipality}. A ${distance}; a freguesia misteriosa fica ${direction}. Proximidade ${proximity}%.`,
   announceClue: (n: number) => `Abriu a pista ${n}.`,
-  announceWon: (n: number, name: string, municipality: string) => `${n === 1 ? 'Acertaste à primeira' : `Acertaste em ${n} tentativas`}: era ${name}, concelho de ${municipality}.`,
-  announceLost: (name: string, municipality: string) => `Desta vez não foi: era ${name}, concelho de ${municipality}.`,
+  announceWon: (n: number, name: string, municipality: string) => `${n === 1 ? 'Acertaste à primeira' : `Acertaste em ${n} tentativas`}: era ${name}, concelho ${municipality}.`,
+  announceLost: (name: string, municipality: string) => `Desta vez não foi: era ${name}, concelho ${municipality}.`,
 
   cluesTitle: 'Pistas',
   clue: (n: number) => `Pista ${n}`,
@@ -55,7 +55,7 @@ const pt = {
   sourceStamp: 'Censos 2021',
 
   guessLabel: 'Que freguesia é?',
-  guessPlaceholder: 'Nome da freguesia ou do concelho',
+  guessPlaceholder: 'Freguesia ou concelho',
   guessesTitle: 'As tuas tentativas',
   emptySlot: (n: number) => `Tentativa ${n}`,
   correct: 'Acertaste',
@@ -153,7 +153,7 @@ const en: Copy = {
   sourceStamp: '2021 Census',
 
   guessLabel: 'Which parish is it?',
-  guessPlaceholder: 'Parish or municipality name',
+  guessPlaceholder: 'Parish or municipality',
   guessesTitle: 'Your guesses',
   emptySlot: (n: number) => `Guess ${n}`,
   correct: 'Got it',

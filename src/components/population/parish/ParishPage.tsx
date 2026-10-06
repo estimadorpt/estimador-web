@@ -496,8 +496,9 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                   <dt className="font-bold text-ink">{pt ? 'Licença' : 'Licence'}</dt>
                   <dd className="text-stone-700">
                     <a href={pt ? 'https://creativecommons.org/licenses/by/4.0/deed.pt' : 'https://creativecommons.org/licenses/by/4.0/'} className="font-semibold text-ink underline underline-offset-4">CC BY 4.0</a>
-                    {' · '}{SHORT_ATTRIBUTION[locale]}
                   </dd>
+                  <dt className="font-bold text-ink">{pt ? 'Atribuição' : 'Attribution'}</dt>
+                  <dd className="text-stone-700">{SHORT_ATTRIBUTION[locale]}</dd>
                 </dl>
                 <p className="mt-5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Citar como' : 'Cite as'}</p>
                 <p className="mt-1 break-words text-[15px] leading-relaxed text-ink">{citation}</p>
@@ -562,11 +563,9 @@ function HowToRead(props: HowToReadInput & { union: boolean }) {
   const { locale, union } = props;
   const pt = locale === 'pt';
   const items = howToReadItems(props);
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    const wide = window.matchMedia('(min-width: 1024px)');
-    setOpen(wide.matches);
-  }, []);
+  // Decided on the first render (this page only renders in the browser), so the
+  // layout does not move under a shared link's scroll to its card.
+  const [open, setOpen] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches);
   return (
     <details
       open={open}

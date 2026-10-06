@@ -41,8 +41,8 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
       <div className="mb-6 max-w-3xl space-y-3 text-sm leading-relaxed text-stone-600">
         <p>
           {pt
-            ? 'Cada freguesia abre a sua página, com as respostas da população sintética nos números da própria freguesia. A qualidade diz quão perto a população gerada fica das tabelas do INE:'
-            : 'Each parish opens its own page, with the synthetic population’s answers in the parish’s own figures. The quality tier says how close the generated population sits to INE’s tables:'}
+            ? 'Cada freguesia abre a sua página, com as respostas da população sintética nos números da própria freguesia. O nível de qualidade junta o ajuste às tabelas do INE e o número de residentes:'
+            : 'Each parish opens its own page, with the synthetic population’s answers in the parish’s own figures. The quality tier combines the fit to INE’s tables and the number of residents:'}
         </p>
         <ul className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-2">
           {(['A', 'B', 'C'] as const).map(tier => (

@@ -85,37 +85,24 @@ export function methodologyBlocks({ locale, meta, release, scorecard }: {
         ...FIELDS.filter(row => declared.includes(row.field)),
         ...declared.filter(field => !FIELDS.some(row => row.field === field)).map(field => ({ field, column: null, kind: null, rule: null })),
       ];
+      // A definition list, not a three-column table: on a phone a table hid the rule column behind a sideways scroll.
       return (
-        <div className="my-6 overflow-x-auto font-sans">
-          <table className="min-w-full border-collapse text-sm">
-            <caption className="sr-only">{pt ? 'Como é feito cada campo usado no site' : 'How each field used on the site is made'}</caption>
-            <thead>
-              <tr>
-                {[pt ? 'Campo' : 'Field', pt ? 'Nos microdados' : 'In the microdata', pt ? 'Como é feito' : 'How it is made'].map(header => (
-                  <th key={header} scope="col" className="border-b-2 border-ink px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{header}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(row => (
-                <tr key={row.field} className="align-top">
-                  <td className="border-b border-line px-3 py-2 text-ink">
-                    {FIELD_LABEL[row.field]?.[locale] ?? row.field}
-                    {row.kind && <span className="mt-0.5 block text-xs text-stone-500">{KIND_LABEL[row.kind][locale]}</span>}
-                  </td>
-                  <td className="border-b border-line px-3 py-2">
-                    {row.column
-                      ? <code className="text-xs text-ink">{row.column}</code>
-                      : <span className="text-xs text-stone-600">{pt ? 'Não é uma coluna: calcula-se assim' : 'Not a column: computed as follows'}</span>}
-                  </td>
-                  <td className="min-w-[16rem] border-b border-line px-3 py-2 leading-relaxed text-stone-700">
-                    {row.rule?.[locale] ?? String(meta.provenance.fields[row.field])}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <dl className="my-6 divide-y divide-line border-y border-line font-sans text-sm">
+          {rows.map(row => (
+            <div key={row.field} className="grid gap-1 py-3 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
+              <dt className="text-ink">
+                <span className="font-semibold">{FIELD_LABEL[row.field]?.[locale] ?? row.field}</span>
+                {row.kind && <span className="block text-xs text-stone-600">{KIND_LABEL[row.kind][locale]}</span>}
+              </dt>
+              <dd className="leading-relaxed text-stone-700">
+                {row.column
+                  ? <code className="mr-1.5 text-xs text-ink">{row.column}</code>
+                  : <span className="mr-1.5 text-xs font-semibold text-stone-600">{pt ? 'Não é uma coluna:' : 'Not a column:'}</span>}
+                {row.rule?.[locale] ?? String(meta.provenance.fields[row.field])}
+              </dd>
+            </div>
+          ))}
+        </dl>
       );
     },
     Tiers: () => (

@@ -43,6 +43,7 @@ import { GuessList } from './GuessList';
 import { GUESS_EVENT } from './HowToPlay';
 import { Locator } from './Locator';
 import { Reveal } from './Reveal';
+import { ofMunicipality } from '../parish/place-words';
 
 const asGamePlace = (parish: Parish): GamePlace => ({
   code: parish.code,
@@ -194,9 +195,11 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   const describe = useCallback((parish: Parish, after: GameRecord, answerParish: Parish): string => {
     const n = after.guesses.length;
     const item = guessFeedback(asGamePlace(parish), asGamePlace(answerParish), scale);
-    if (after.status === 'won') return t.announceWon(n, answerParish.name, answerParish.municipalityName);
-    const miss = t.announceMiss(n, parish.name, parish.municipalityName, formatKm(item.distanceKm, locale), item.compass ? COMPASS[item.compass][locale] : '', Math.floor(item.proximity));
-    if (after.status === 'lost') return `${miss} ${t.announceLost(answerParish.name, answerParish.municipalityName)}`;
+    // "concelho do Funchal" in Portuguese; the bare name in English ("Funchal municipality").
+    const municipality = (place: Parish) => (locale === 'pt' ? ofMunicipality(place.municipalityName) : place.municipalityName);
+    if (after.status === 'won') return t.announceWon(n, answerParish.name, municipality(answerParish));
+    const miss = t.announceMiss(n, parish.name, municipality(parish), formatKm(item.distanceKm, locale), item.compass ? COMPASS[item.compass][locale] : '', Math.floor(item.proximity));
+    if (after.status === 'lost') return `${miss} ${t.announceLost(answerParish.name, municipality(answerParish))}`;
     return `${miss} ${t.announceClue(Math.min(n + 1, MAX_GUESSES))}`;
   }, [scale, t, locale]);
 

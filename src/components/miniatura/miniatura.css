@@ -42,7 +42,7 @@
 .miniature{padding:0}
 .mini-body{max-width:80rem;margin:0 auto;padding:24px 16px 32px}
 .mini-workspace,.mini-under,.mini-data,.mini-notice{max-width:none}
-.mini-workspace{align-items:start}
+@media(min-width:721px){.mini-workspace{align-items:start}}
 /* The drawing's own caption is for the postcard; on the page it is the HTML line under the stage. */
 .mini-stage .mini-scene-caption{display:none}
 .mini-stage-caption{display:none!important}
@@ -56,3 +56,8 @@
 .miniature summary{min-height:44px;display:flex;align-items:center}
 .mini-under{font-size:13px}
 @media(max-width:720px){.mini-caption{margin:0 12px}}
+/* Contrast: the step numbers, the chapter and the inspector's kicker in the site's muted ink (the inspector's was amber, which here means a caveat). */
+.mini-tabs button>span,.mini-chapter,.mini-answer strong>span,.mini-inspector-top>span,.mini-members small,.mini-detail-note{color:var(--color-stone-600)}
+/* The scene follows the reader down the sidebar on wide screens, instead of leaving an empty band under it. overflow:clip keeps the rounded corners without making the workspace a scroll container (which would stop sticky). */
+@media(min-width:721px){.mini-workspace{overflow:clip}.mini-stage{position:sticky;top:76px;align-self:start}}
+.mini-caption{position:relative;z-index:1;background:#f4f2e9;padding-bottom:4px}
