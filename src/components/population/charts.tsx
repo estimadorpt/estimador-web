@@ -88,11 +88,32 @@ export function AgeColumns({ cells, locale, height = 200 }: { cells: ReadCell[];
       <p className="mb-1 min-h-5 text-sm text-stone-600" aria-live="polite">
         {readout
           ? <><span className="font-semibold text-ink">{readout.labels[0]}</span>{locale === 'pt' ? ' anos: ' : ': '}<span className="font-bold tabular-nums text-ink">{readout.display}</span></>
-          : <span className="text-stone-500">{locale === 'pt' ? 'Toca numa coluna, ou passa-lhe o cursor, para ler o valor.' : 'Tap or hover over a column to read its value.'}</span>}
+          : <span className="text-stone-500">{locale === 'pt' ? 'Toca numa coluna, passa-lhe o cursor ou usa as setas para ler o valor.' : 'Tap or hover over a column, or use the arrow keys, to read its value.'}</span>}
       </p>
-      <div ref={box} className="relative w-full overflow-hidden" style={{ height }}>
+      {/* One tab stop for the whole chart: the arrow keys move along the columns and the line above reads the value. The table twin below is the full alternative. */}
+      <div
+        ref={box}
+        className="relative w-full overflow-hidden rounded-md"
+        style={{ height }}
+        tabIndex={0}
+        role="group"
+        aria-label={locale === 'pt' ? 'Gráfico das idades: usa as setas para ler cada grupo' : 'Age chart: use the arrow keys to read each group'}
+        onKeyDown={event => {
+          const key = event.key;
+          if (key !== 'ArrowRight' && key !== 'ArrowLeft' && key !== 'Home' && key !== 'End') return;
+          event.preventDefault();
+          setActive(current => {
+            if (key === 'Home') return 0;
+            if (key === 'End') return cells.length - 1;
+            const step = key === 'ArrowRight' ? 1 : -1;
+            if (current === null) return step > 0 ? 0 : cells.length - 1;
+            return Math.min(cells.length - 1, Math.max(0, current + step));
+          });
+        }}
+        onBlur={() => setActive(null)}
+      >
       {measured !== null && (
-      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="absolute left-0 top-0 block" role="img" aria-label={cells.map(cell => `${cell.labels[0]}: ${cell.display}`).join('; ')} onMouseLeave={() => setActive(null)}>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="absolute left-0 top-0 block" aria-hidden="true" focusable="false" onMouseLeave={() => setActive(null)}>
         {ticks.map(tick => {
           const y = 8 + plotHeight - (tick / top) * plotHeight;
           return (
@@ -108,7 +129,7 @@ export function AgeColumns({ cells, locale, height = 200 }: { cells: ReadCell[];
           const every = band < 22 ? 3 : band < 34 ? 2 : 1;
           const showLabel = i % every === 0;
           return (
-            <g key={cell.values[0]} onMouseEnter={() => setActive(i)} onFocus={() => setActive(i)} tabIndex={0} aria-label={`${cell.labels[0]}: ${cell.display}`}>
+            <g key={cell.values[0]} onMouseEnter={() => setActive(i)} onClick={() => setActive(i)}>
               <rect x={left + i * band} y={0} width={band} height={height - bottom} fill="transparent" />
               {cell.share === null
                 ? <line x1={x + 2} x2={x + bar - 2} y1={8 + plotHeight - 3} y2={8 + plotHeight - 3} stroke={DEEMPHASIS} strokeWidth={2} strokeDasharray="2 2" />

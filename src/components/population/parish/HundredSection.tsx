@@ -7,12 +7,18 @@ import { Segmented } from '@/components/viz/Segmented';
 import { DEEMPHASIS, SERIES } from '@/components/viz/theme';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 import { isWhole, readCells, type ReadCell } from '@/lib/population/compact';
-import { DIMENSION_LABEL, HONESTY, type Locale } from '@/lib/population/labels';
+import { DIMENSION_LABEL, sourceLine, type Locale } from '@/lib/population/labels';
 import type { ParishRecord, PopulationMeta, PortraitRecipe } from '@/types/population';
-import { inScope, ofScope, scopeSubject, type Scope } from './place-words';
+import { inScope, isLongName, ofScope, scopeSubject, THIS_PARISH, type Scope } from './place-words';
 
-/** The responses that can be drawn as 100 dots, in the order the control offers them. */
-const CANDIDATES: PortraitRecipe[] = ['employment', 'elders_alone', 'multigenerational'];
+/**
+ * The responses that can be drawn as 100 dots, in the order the control
+ * offers them. Only questions the page does not ask the reader to guess: the
+ * "65+ alone" and "generations" answers stay behind their guess cards, so this
+ * section would give them away (and the work grid lives here, not twice: the
+ * employment card below draws bars).
+ */
+const CANDIDATES: PortraitRecipe[] = ['employment'];
 
 interface Option {
   recipe: PortraitRecipe;
@@ -64,24 +70,29 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
   const counts = dotCounts(option.cells);
   const dots = counts.flatMap((count, i) => Array.from({ length: count }, () => i));
   const unit = meta.recipes[option.recipe].unit;
+  // A union's name already fills the h1; below it the page says "esta freguesia".
+  const long = !option.fallback && isLongName(name);
+  const subjectWords = long ? THIS_PARISH.subject[locale] : scopeSubject(scope, locale);
+  const ofWords = long ? THIS_PARISH.of[locale] : ofScope(scope, locale);
+  const inWords = long ? THIS_PARISH.in[locale] : inScope(scope, locale);
 
   const segments: Record<string, { label: string; heading: string; title: string; who: string }> = pt
     ? {
       employment: {
         label: 'Trabalho',
-        heading: `Se ${scopeSubject(scope, locale)} fosse 100 pessoas`,
+        heading: `Se ${subjectWords} fosse 100 pessoas`,
         title: 'Condição perante o trabalho',
         who: 'Em cada 100 pessoas, de todas as idades. Crianças, estudantes e reformados contam como inativos.',
       },
       elders_alone: {
         label: '65+ sozinhos',
-        heading: `Se as pessoas com 65 ou mais anos ${ofScope(scope, locale)} fossem 100`,
+        heading: `Se as pessoas com 65 ou mais anos ${ofWords} fossem 100`,
         title: 'Quantas vivem sozinhas?',
         who: 'Em cada 100 pessoas com 65 ou mais anos em agregados privados. Quem vive num lar não entra nesta conta.',
       },
       multigenerational: {
         label: 'Gerações',
-        heading: `Se os agregados ${ofScope(scope, locale)} fossem 100`,
+        heading: `Se os agregados ${ofWords} fossem 100`,
         title: 'Quantos juntam uma criança e uma pessoa com 65 ou mais anos?',
         who: 'Em cada 100 agregados privados: pelo menos uma pessoa com menos de 15 anos e outra com 65 ou mais. Não são necessariamente avós e netos.',
       },
@@ -89,19 +100,19 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
     : {
       employment: {
         label: 'Work',
-        heading: `If ${scopeSubject(scope, locale)} were 100 people`,
+        heading: `If ${subjectWords} were 100 people`,
         title: 'Employment status',
         who: 'Out of every 100 people of all ages. Children, students and retired people count as inactive.',
       },
       elders_alone: {
         label: '65+ alone',
-        heading: `If the people aged 65 or over ${inScope(scope, locale)} were 100`,
+        heading: `If the people aged 65 or over ${inWords} were 100`,
         title: 'How many live alone?',
         who: 'Out of every 100 people aged 65 or over in private households. Care-home residents are not counted here.',
       },
       multigenerational: {
         label: 'Generations',
-        heading: `If the households ${inScope(scope, locale)} were 100`,
+        heading: `If the households ${inWords} were 100`,
         title: 'How many bring together a child and someone aged 65 or over?',
         who: 'Out of every 100 private households: at least one person under 15 and another aged 65 or over. Not necessarily grandparents and grandchildren.',
       },
@@ -119,14 +130,14 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
       <h2 id="cem-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">{heading}</h2>
       <p className="mt-1 max-w-2xl text-[15px] text-stone-600">
         {pt
-          ? 'Uma forma de ler as percentagens publicadas: cem pontos repartidos pelas categorias de cada resposta. Escolhe a pergunta.'
-          : 'One way to read the published shares: a hundred dots split across the categories of each answer. Pick the question.'}
+          ? `Uma forma de ler as percentagens publicadas: cem pontos repartidos pelas categorias da resposta.${options.length > 1 ? ' Escolhe a pergunta.' : ''}`
+          : `One way to read the published shares: a hundred dots split across the categories of the answer.${options.length > 1 ? ' Pick the question.' : ''}`}
       </p>
       <DataCard
         className="mt-4"
         title={segment.title}
         subtitle={segment.who}
-        source={HONESTY.source[locale]}
+        source={sourceLine(option.recipe, locale)}
         methodologyHref={POPULATION_ROUTES.methodology}
         methodologyLabel={pt ? 'Como foi feito' : 'How it was made'}
         locale={locale}
@@ -167,7 +178,7 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
             <p className="mb-3 min-h-6 text-sm text-stone-600" aria-live="polite">
               {readout
                 ? <><span className="font-semibold text-ink">{readout.labels.at(-1)}</span>: <span className="font-bold tabular-nums text-ink">{readout.display}</span></>
-                : (pt ? 'Passa ou foca uma categoria para a destacar.' : 'Point at or focus a category to pick it out.')}
+                : (pt ? 'Toca, passa o cursor ou foca uma categoria para a destacar.' : 'Tap, hover over or focus a category to pick it out.')}
             </p>
             <ul className="flex flex-col gap-1">
               {option.cells.map((cell, i) => (

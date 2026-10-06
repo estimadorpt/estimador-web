@@ -388,8 +388,10 @@ def main() -> int:
     def write(rel: str, value) -> None:
         files[rel] = dump(dest / rel, value)
 
+    region_name = {region_id: name for region_id, name in regions}
     for code in sorted(per_parish):
         row = quality_rows[code]
+        meta_p = parish_meta[code]
         # The município whose figures the portrait shows: only when a response
         # actually fell back (v1.0.0). From v1.0.1 every parish answers itself.
         fallback_code = next((r["resolved"] for r in per_parish[code].values() if r["decision"] == "fallback"), None)
@@ -399,6 +401,24 @@ def main() -> int:
             "tier": row["quality_tier"],
             "status": status_of[code],
             "fallback": None if not fallback_code else {"code": fallback_code, "name": muni_name[fallback_code[:4]]},
+            # Enough to draw the parish page's hero from this one file, before
+            # places.json (every parish) arrives. Names are the atlas's (CAOP
+            # 2021). census_population is INE's resident count;
+            # generated_households is the GENERATED population's household
+            # count (each collective living quarter counts as one), never INE's;
+            # publication_population is the count the quality tier was decided
+            # on (quality.csv: the smaller of the generated and INE counts).
+            "place": {
+                "name": meta_p["name"],
+                "municipality": meta_p["municipality"],
+                "municipality_name": muni_name[meta_p["municipality"]],
+                "region": meta_p["region"],
+                "region_name": region_name[meta_p["region"]],
+                "level": "p" if status_of[code] == "publish" else "f",
+                "census_population": int(row["census_population"]),
+                "generated_households": int(row["n_households"]),
+                "publication_population": int(row["publication_population"]),
+            },
             "responses": {name: per_parish[code][name] for name in recipe_order},
         })
 
@@ -440,6 +460,7 @@ def main() -> int:
             int(row["n_households"]),
             round(anchor["latitude"], 4),
             round(anchor["longitude"], 4),
+            int(row["publication_population"]),
         ])
     write("places.json", {
         "release_version": RELEASE,
@@ -452,7 +473,10 @@ def main() -> int:
             "points": "interior representative point (WGS84)",
         },
         "population_source": "INE, Censos 2021 (residentes)",
-        "columns": ["code", "name", "municipality", "tier", "level", "census_population", "households", "lat", "lon"],
+        # Not INE's: the generated population's households, each collective
+        # living quarter counted as one (quality.csv n_households).
+        "households_source": "generated (synthetic population; each collective living quarter counts as one household)",
+        "columns": ["code", "name", "municipality", "tier", "level", "census_population", "generated_households", "lat", "lon", "publication_population"],
         "regions": regions,
         "municipalities": municipalities,
         "parishes": parishes,

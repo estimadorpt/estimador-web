@@ -1,10 +1,17 @@
 import { readCells } from '@/lib/population/compact';
-import { HONESTY, TIER_COPY, type Locale } from '@/lib/population/labels';
-import type { Parish } from '@/lib/population/places';
+import { HONESTY, TIER_COPY, tierMeaningFor, type Locale } from '@/lib/population/labels';
 import type { ParishRecord, PopulationMeta, PortraitRecipe } from '@/types/population';
 
+/** The facts about a place this list needs (from the parish file's `place`, or places.json). */
+export interface HowToReadPlace {
+  tier: 'A' | 'B' | 'C';
+  municipalityName: string;
+  /** The count the tier was decided on; without it the tier gets its generic words. */
+  publicationPopulation?: number | null;
+}
+
 export interface HowToReadInput {
-  place: Parish;
+  place: HowToReadPlace;
   record: ParishRecord;
   meta: PopulationMeta;
   locale: Locale;
@@ -15,11 +22,14 @@ export interface HowToReadInput {
 /**
  * What a reader needs before the cards. It only describes what this parish's
  * record holds: município figures and «Suprimido» are explained when the
- * record has them (none do since v1.0.1), and «0,0%» always is.
+ * record has them (none do since v1.0.1), and «0,0%» always is. The tier's
+ * meaning is this parish's: a tier B parish under 2,000 residents is told it
+ * cannot be A whatever its fit.
  */
 export function howToReadItems({ place, record, meta, locale, fallbackName, municipalityFigures }: HowToReadInput): Array<{ term: string; body: string }> {
   const pt = locale === 'pt';
   const tier = TIER_COPY[place.tier];
+  const meaning = tierMeaningFor(place.tier, place.publicationPopulation)[locale];
   const municipality = fallbackName ?? place.municipalityName;
   const cells = Object.entries(record.responses).flatMap(([recipe, response]) =>
     response && meta.recipes[recipe as PortraitRecipe] ? readCells(response, meta.recipes[recipe as PortraitRecipe], locale) : []);
@@ -29,8 +39,8 @@ export function howToReadItems({ place, record, meta, locale, fallbackName, muni
     {
       term: tier.label[locale],
       body: pt
-        ? `${tier.meaning.pt} O nível descreve o quão perto a população gerada fica das tabelas do INE; não muda de onde vêm os números.`
-        : `${tier.meaning.en} The tier describes how close the generated population sits to INE’s tables; it does not change where the numbers come from.`,
+        ? `${meaning} O nível junta o ajuste às tabelas do INE e o número de residentes; não muda de onde vêm os números.`
+        : `${meaning} The tier combines the fit to INE’s tables and the number of residents; it does not change where the numbers come from.`,
     },
   ];
   if (municipalityFigures) {
@@ -60,9 +70,8 @@ export function howToReadItems({ place, record, meta, locale, fallbackName, muni
   items.push({
     term: pt ? 'Uma só execução' : 'A single run',
     body: pt
-      ? 'Os números vêm de uma única execução do modelo, por isso não têm uma margem de erro calculada. Lê cada valor por si: esta versão não permite dizer que uma categoria é maior do que outra.'
-      : 'The figures come from a single run of the model, so no margin of error is computed for them. Read each value on its own: this release does not support saying that one category is larger than another.',
+      ? 'Os números vêm de uma única execução do modelo e não têm margem de erro calculada; por isso esta página não compara categorias nem freguesias.'
+      : 'The figures come from a single run of the model and have no computed margin of error; that is why this page does not compare categories or parishes.',
   });
   return items;
 }
-

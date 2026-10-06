@@ -24,11 +24,13 @@ const PROMPT: Record<'elders_alone' | 'multigenerational', { pt: (where: string)
  * computed difference. Skippable, and never offered for a refused response or
  * a suppressed headline cell — then it is a plain card.
  */
-export function GuessFirstCard(props: ResponseCardProps & { where: string }) {
-  const { recipeName, record, recipe, locale, where, ...rest } = props;
+export function GuessFirstCard(props: ResponseCardProps & { where: string; initiallyRevealed?: boolean }) {
+  const { recipeName, record, recipe, locale, where, initiallyRevealed = false, ...rest } = props;
   const target = guessTarget(recipeName, record, recipe);
-  const [phase, setPhase] = useState<'guessing' | 'revealed' | 'skipped'>('guessing');
+  // A shared link to this card opens it with the answer showing: the reader came for the value.
+  const [phase, setPhase] = useState<'guessing' | 'revealed' | 'skipped'>(initiallyRevealed ? 'skipped' : 'guessing');
   const [guess, setGuess] = useState(GUESS_START);
+  const [touched, setTouched] = useState(false);
   const result = useRef<HTMLDivElement>(null);
   const id = useId();
 
@@ -62,13 +64,17 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string }) {
           max={100}
           step={1}
           value={guess}
-          aria-valuetext={`${formatGuess(guess)} ${unit}`}
-          onChange={event => setGuess(clampGuess(Number(event.target.value)))}
+          aria-valuetext={t.valueText(clampGuess(guess), unit)}
+          onChange={event => { setGuess(clampGuess(Number(event.target.value))); setTouched(true); }}
           className="guess-range h-11 min-w-0 flex-1 cursor-pointer accent-[var(--color-ink)]"
         />
-        <output htmlFor={`${id}-guess`} className="w-16 text-right font-display text-3xl font-extrabold tabular-nums text-ink" aria-hidden="true">
-          {formatGuess(guess)}
-        </output>
+        {/* The reader's number, not a published one: labelled, in a bordered field, and muted until they move the slider. */}
+        <div className="w-24 shrink-0 rounded-[10px] border border-dashed border-line px-2 py-1 text-right" aria-hidden="true">
+          <p className="text-[11px] font-semibold text-stone-500">{t.yours}</p>
+          <output htmlFor={`${id}-guess`} className={`block font-display text-2xl font-extrabold tabular-nums ${touched ? 'text-ink' : 'text-stone-500'}`}>
+            {formatGuess(guess)}
+          </output>
+        </div>
       </div>
       <GuessDots guess={guess} label={t.preview(formatGuess(guess), unit)} />
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1">
@@ -77,7 +83,8 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string }) {
       </div>
     </div>
   ) : (
-    <div ref={result} tabIndex={-1} aria-live="polite" className="mb-4 outline-none">
+    // Focus moves here after a reveal, so the result is read once; no live region on top of it.
+    <div ref={result} tabIndex={-1} className="mb-4 outline-none">
       {phase === 'revealed' && (
         <div className="flex flex-wrap items-stretch gap-3 rounded-xl border border-line bg-paper p-4">
           <div className="min-w-[8rem]">
@@ -137,6 +144,7 @@ function copy(locale: Locale) {
       people: 'pessoas',
       households: 'agregados',
       preview: (value: string, unit: string) => `O teu palpite: ${value} dos ${unit}.`,
+      valueText: (value: number, unit: string) => `${value} em cada 100 ${unit}`,
     }
     : {
       kicker: 'Guess before you look',
@@ -147,5 +155,6 @@ function copy(locale: Locale) {
       people: 'people',
       households: 'households',
       preview: (value: string, unit: string) => `Your guess: ${value} of ${unit}.`,
+      valueText: (value: number, unit: string) => `${value} in every 100 ${unit}`,
     };
 }

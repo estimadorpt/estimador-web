@@ -13,25 +13,29 @@ const QUERY_ID = /^q1_[0-9a-f]{20}$/;
 export interface CanonicalPath {
   release: string;
   id: string;
+  /** The locale prefix the link carried ("/en/populacao/v/…"), or null for the bare canonical path. */
+  locale: 'pt' | 'en' | null;
 }
 
 /**
  * Reads `/populacao/v/{release}/q/{id}` out of a pathname (with or without a
  * locale prefix or a trailing slash). Returns null when the path does not have
- * that shape; the id is returned as written, validated separately.
+ * that shape. The id is lower-cased (ids are lower-case hex; a link retyped in
+ * capitals still resolves) and validated separately.
  */
 export function parseCanonicalPath(pathname: string): CanonicalPath | null {
-  const match = /\/populacao\/v\/([^/]+)\/q\/([^/]+)\/?$/.exec(pathname);
+  const match = /^(?:\/(pt|en))?\/populacao\/v\/([^/]+)\/q\/([^/]+)\/?$/i.exec(pathname);
   if (!match) return null;
   let release: string;
   let id: string;
   try {
-    release = decodeURIComponent(match[1]);
-    id = decodeURIComponent(match[2]);
+    release = decodeURIComponent(match[2]);
+    id = decodeURIComponent(match[3]);
   } catch {
     return null;
   }
-  return { release: release.replace(/^v/, ''), id };
+  const locale = match[1] ? (match[1].toLowerCase() as 'pt' | 'en') : null;
+  return { release: release.replace(/^v/i, ''), id: id.trim().toLowerCase(), locale };
 }
 
 export function isQueryId(id: string): boolean {

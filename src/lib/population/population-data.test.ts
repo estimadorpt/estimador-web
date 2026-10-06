@@ -15,7 +15,7 @@ import type {
 import { canonicalQuery, formatDisplay, isWhole, readCells, rebuildResponse } from './compact';
 import { parsePublicResponse } from './contract';
 import { RECIPE_COPY, VALUES } from './labels';
-import { indexPlaces, regionSlug, searchParishes } from './places';
+import { fold, indexPlaces, nearestParish, regionSlug, searchNames, searchParishes, searchPlaces } from './places';
 
 const DIR = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR);
 const json = <T,>(file: string): T => JSON.parse(fs.readFileSync(path.join(DIR, file), 'utf8')) as T;
@@ -213,6 +213,55 @@ describe('parish search', () => {
 
   it('finds the Barcelos parishes with letter codes', () => {
     expect(index.byCode.get('0302FA')?.municipalityName).toBe('Barcelos');
+  });
+
+  it('lists a município typed by name first, then all of its parishes (P-H4: porto, lisboa)', () => {
+    for (const [query, name] of [['porto', 'Porto'], ['lisboa', 'Lisboa'], ['Braga', 'Braga']] as const) {
+      const { hits } = searchPlaces(index, query);
+      expect(hits[0].kind).toBe('municipality');
+      if (hits[0].kind !== 'municipality') continue;
+      expect(hits[0].municipality.name).toBe(name);
+      const own = index.parishes.filter(p => p.municipalityName === name);
+      expect(hits[0].municipality.parishCount).toBe(own.length);
+      const listed = hits.slice(1, 1 + own.length);
+      expect(listed.every(hit => hit.kind === 'parish' && hit.underMunicipality && hit.parish.municipalityName === name)).toBe(true);
+      // Every one of them, not a first page of twelve.
+      expect(listed).toHaveLength(own.length);
+    }
+    // Porto Covo and friends still come, after the city's parishes.
+    const porto = searchParishes(index, 'porto').map(hit => hit.parish.name);
+    expect(porto).toContain('Porto Covo');
+    expect(porto.indexOf('Porto Covo')).toBeGreaterThan(porto.indexOf('Bonfim'));
+    // "braga" lists Braga's parishes before anything in Bragança.
+    const braga = searchParishes(index, 'braga');
+    const firstBraganca = braga.findIndex(hit => hit.parish.municipalityName === 'Bragança');
+    const lastBraga = braga.map(hit => hit.parish.municipalityName).lastIndexOf('Braga');
+    expect(firstBraganca === -1 || firstBraganca > lastBraga).toBe(true);
+  });
+
+  it('ranks an exact union member above a name that only starts with the query (sé)', () => {
+    const first = searchParishes(index, 'sé')[0].parish;
+    expect(searchNames(first.name).slice(1)).toContain('se');
+    const seara = searchParishes(index, 'sé').findIndex(hit => fold(hit.parish.name).startsWith('seara'));
+    expect(seara === -1 || seara > 0).toBe(true);
+  });
+
+  it('accepts a six-character code, digits or letters (030831, 0302fa)', () => {
+    expect(searchParishes(index, '030831')[0].parish.code).toBe('030831');
+    expect(searchParishes(index, '0302fa')[0].parish.code).toBe('0302FA');
+  });
+
+  it('matches every word, leaving out de/da/do/e (moreira conegos)', () => {
+    const names = searchParishes(index, 'moreira conegos').map(hit => hit.parish.name);
+    expect(names.some(name => fold(name).includes('moreira de conegos'))).toBe(true);
+    // Across the parish and its município too.
+    const across = searchParishes(index, 'aguada agueda').map(hit => hit.parish.name);
+    expect(across.some(name => /Aguada/.test(name))).toBe(true);
+  });
+
+  it('finds no parish for a location far from Portugal (25 km cap)', () => {
+    expect(nearestParish(index, { lat: 48.8566, lon: 2.3522 })).toBeNull();
+    expect(nearestParish(index, { lat: 38.7223, lon: -9.1393 })?.municipalityName).toBe('Lisboa');
   });
 });
 

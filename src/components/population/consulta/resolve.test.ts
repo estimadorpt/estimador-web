@@ -9,10 +9,11 @@ const R = POPULATION_RELEASE;
 
 describe('parseCanonicalPath', () => {
   it('reads the producer canonical path, with or without a trailing slash or locale', () => {
-    expect(parseCanonicalPath(`/populacao/v/${R}/q/${ID}`)).toEqual({ release: `${R}`, id: ID });
-    expect(parseCanonicalPath(`/populacao/v/${R}/q/${ID}/`)).toEqual({ release: `${R}`, id: ID });
-    expect(parseCanonicalPath(`/pt/populacao/v/${R}/q/${ID}`)).toEqual({ release: `${R}`, id: ID });
-    expect(parseCanonicalPath(`/populacao/v/v${R}/q/${ID}`)).toEqual({ release: `${R}`, id: ID });
+    expect(parseCanonicalPath(`/populacao/v/${R}/q/${ID}`)).toEqual({ release: `${R}`, id: ID, locale: null });
+    expect(parseCanonicalPath(`/populacao/v/${R}/q/${ID}/`)).toEqual({ release: `${R}`, id: ID, locale: null });
+    expect(parseCanonicalPath(`/pt/populacao/v/${R}/q/${ID}`)).toEqual({ release: `${R}`, id: ID, locale: 'pt' });
+    expect(parseCanonicalPath(`/en/populacao/v/${R}/q/${ID.toUpperCase().replace('Q1_', 'q1_')}`)).toEqual({ release: `${R}`, id: ID, locale: 'en' });
+    expect(parseCanonicalPath(`/populacao/v/v${R}/q/${ID}`)).toEqual({ release: `${R}`, id: ID, locale: null });
   });
 
   it('returns null for anything else, including the shell itself', () => {
@@ -64,7 +65,7 @@ describe('targetFor', () => {
         expect(isQueryId(id)).toBe(true);
         expect(queryBucket(id)).toBe(bucket);
         const parsed = parseCanonicalPath(`/populacao/v/${POPULATION_RELEASE}/q/${id}`);
-        expect(parsed).toEqual({ release: POPULATION_RELEASE, id });
+        expect(parsed).toEqual({ release: POPULATION_RELEASE, id, locale: null });
         expect(targetFor(entry, 'pt')).not.toBeNull();
         checked += 1;
       }

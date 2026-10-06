@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR, POPULATION_RELEASE } from '@/lib/config/population';
 import type { ParishRecord, PopulationMeta } from '@/types/population';
 import { HONESTY } from './labels';
-import { drawShareCard, parishQuestion, SHARE_CARD, shareCardModel, wrapLines } from './share-card';
+import { drawShareCard, parishQuestion, SHARE_CARD, SHARE_CARD_DIVIDER, shareCardModel, wrapLines } from './share-card';
 
 const DIR = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR);
 const json = <T,>(file: string): T => JSON.parse(fs.readFileSync(path.join(DIR, file), 'utf8')) as T;
@@ -45,8 +45,20 @@ describe('shareCardModel', () => {
     expect(model.scopeNote).toBeNull();
     expect(model.tierNote).toBe('Qualidade A · números da própria freguesia.');
     expect(model.honesty).toBe(HONESTY.synthetic.pt);
-    expect(model.footer).toBe(`estimador.pt · População sintética v${POPULATION_RELEASE} · Censos 2021`);
+    expect(model.footer).toBe(`População sintética v${POPULATION_RELEASE} · 5 out. 2026 · estimador.pt`);
     expect(model.fileName).toBe('estimador-010103-aguada-de-cima.png');
+  });
+
+  it('carries the licence attribution, the publication date and the parish address (P-H3)', () => {
+    const model = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'pt', url: 'https://estimador.pt/pt/populacao/freguesia/010103/' });
+    expect(model.attribution).toContain('Fonte: INE, Censos 2021');
+    expect(model.attribution).toContain('informação modificada por estimador.pt');
+    expect(model.attribution).toContain('CC BY 4.0');
+    expect(model.attribution).toContain('estimador.pt/pt/populacao/dados');
+    expect(model.footer).toBe(`População sintética v${POPULATION_RELEASE} · 5 out. 2026 · estimador.pt/pt/populacao/freguesia/010103`);
+    const en = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en', url: 'https://estimador.pt/en/populacao/freguesia/010103/' });
+    expect(en.attribution).toMatch(/^Source: INE, 2021 Census · information modified by estimador\.pt · CC BY 4\.0/);
+    expect(en.footer).toContain('5 Oct 2026 · estimador.pt/en/populacao/freguesia/010103');
   });
 
   it('quotes a tier C parish’s own figures and says to read them with more care', () => {
@@ -79,7 +91,7 @@ describe('shareCardModel', () => {
   it('writes English with a decimal point (the producer writes pt-PT commas)', () => {
     const model = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en' });
     expect(model.facts[0].text).toBe('People aged 65+ in private households living alone: 18.0%');
-    expect(model.footer).toBe(`estimador.pt · Synthetic population v${POPULATION_RELEASE} · 2021 Census`);
+    expect(model.footer).toBe(`Synthetic population v${POPULATION_RELEASE} · 5 Oct 2026 · estimador.pt`);
   });
 
   it('skips suppressed, absent and refused cells instead of showing a zero', () => {
@@ -149,6 +161,10 @@ describe('drawShareCard', () => {
     for (const fact of model.facts) expect(all).toContain(fact.value);
     expect(calls.some(c => c.text === HONESTY.synthetic.pt)).toBe(true);
     expect(calls.some(c => c.text === model.footer)).toBe(true);
+    expect(all).toContain('Fonte: INE, Censos 2021');
+    expect(all).toContain('CC BY 4.0');
+    // Everything sits on the 630 px canvas.
+    for (const call of calls) expect(call.y).toBeLessThanOrEqual(SHARE_CARD.height - 20);
     for (const call of calls) expect(Number(/(\d+)px/.exec(call.font)?.[1])).toBeGreaterThanOrEqual(20);
     // No emoji anywhere on the card.
     expect(all).not.toMatch(/\p{Extended_Pictographic}/u);
@@ -167,9 +183,9 @@ describe('drawShareCard', () => {
       const model = shareCardModel({ record, recipes: meta.recipes, name, municipalityName: 'Barcelos', regionName: 'Braga', locale });
       calls.length = 0;
       drawShareCard(fakeContext() as unknown as CanvasRenderingContext2D, model);
-      const leftColumn = calls.filter(c => c.x === 72 && c.text !== model.honesty && c.text !== model.footer);
+      const leftColumn = calls.filter(c => c.x === 72 && c.y < SHARE_CARD_DIVIDER);
       expect(leftColumn.length).toBeGreaterThan(3);
-      for (const call of leftColumn) expect(call.y).toBeLessThanOrEqual(SHARE_CARD.height - 102 - 28);
+      for (const call of leftColumn) expect(call.y).toBeLessThanOrEqual(SHARE_CARD_DIVIDER - 28);
       expect(leftColumn.some(c => c.text.endsWith('…'))).toBe(false);
       }
     }

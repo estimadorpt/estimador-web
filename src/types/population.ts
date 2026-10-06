@@ -173,7 +173,30 @@ export interface ParishRecord {
   tier: 'A' | 'B' | 'C';
   status: 'publish' | 'fallback';
   fallback: { code: string; name: string } | null;
+  /**
+   * The parish's place facts, so its page can draw the hero from this one
+   * file before places.json arrives (written by the sync from v1.0.3 on).
+   */
+  place?: ParishPlace;
   responses: Record<PortraitRecipe, CompactResponse>;
+}
+
+export interface ParishPlace {
+  /** The CAOP 2021 display name ("Aguada de Cima"). */
+  name: string;
+  /** Município code (DDCC). */
+  municipality: string;
+  municipality_name: string;
+  /** Region id ("01"…"18", "azores", "madeira"). */
+  region: string;
+  region_name: string;
+  level: 'p' | 'f';
+  /** INE, Censos 2021: residents. */
+  census_population: number;
+  /** The generated population's households (each collective living quarter counts as one). Not INE's. */
+  generated_households: number;
+  /** quality.csv: the count the quality tier was decided on (the smaller of the generated and INE counts). */
+  publication_population: number;
 }
 
 export interface NationalRecord {
@@ -215,7 +238,13 @@ export interface PopulationMeta {
   };
 }
 
-/** [code, name, municipality (DDCC), tier, level ("p" parish figures, "f" município), INE residents, households, lat, lon] */
+/**
+ * [code, name, municipality (DDCC), tier, level ("p" parish figures, "f"
+ * município), INE residents, generated households, lat, lon, publication
+ * population]. The household
+ * count is the generated population's (each collective living quarter counts
+ * as one household), never INE's: only the residents carry "(INE)".
+ */
 export type PlaceRow = [
   code: string,
   name: string,
@@ -223,9 +252,11 @@ export type PlaceRow = [
   tier: 'A' | 'B' | 'C',
   level: 'p' | 'f',
   censusPopulation: number,
-  households: number,
+  generatedHouseholds: number,
   lat: number,
   lon: number,
+  /** quality.csv: the count the tier was decided on (the smaller of the generated and INE counts). */
+  publicationPopulation: number,
 ];
 
 export interface PopulationPlaces {
@@ -239,6 +270,8 @@ export interface PopulationPlaces {
     points: string;
   };
   population_source: string;
+  /** Where the household column comes from (the generated population, not INE). */
+  households_source?: string;
   columns: string[];
   /** [regionId ("01"…"18", "azores", "madeira"), name] */
   regions: Array<[string, string]>;
