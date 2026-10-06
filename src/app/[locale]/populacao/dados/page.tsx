@@ -214,7 +214,7 @@ sha256sum checksums.sha256`;
                   )}
                 </>],
                 [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: gerada a partir dos Censos 2021 do INE.' : '2021: generated from INE’s 2021 Census.'],
-                [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span><span className="break-all font-mono text-[13px]">sha256 {release.model_sha256}</span></>],
+                [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span>{/* The 64-digit hash on its own lines, two rows of 32, never one orphan digit (VUXD-08). */}<span className="mt-1 block font-mono text-[13px]">sha256 <span className="block max-w-[32ch] break-all">{release.model_sha256}</span></span></>],
                 [pt ? 'Código' : 'Code', <span key="c" className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>],
                 [pt ? 'Versões anteriores' : 'Previous releases', <>
                   {pt ? 'A 1.0.3 substituiu três versões datadas de 5 de outubro (a 1.0.2 nunca chegou ao GitHub); a população gerada é a mesma em todas. ' : '1.0.3 replaced three releases dated 5 October (1.0.2 never reached GitHub); the generated population is the same in all of them. '}

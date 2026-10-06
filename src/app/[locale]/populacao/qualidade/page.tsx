@@ -232,9 +232,9 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               title={pt ? 'Quão perto ficam das tabelas do INE?' : 'How close do they come to INE’s tables?'}
               lede={<p>{FIT_EXPLAINED[locale]}</p>}
             >
-              <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+              {/* Each card ends at its own content: the size card is 4 rows beside a 13-row one (VUXD-02). */}
+              <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
                 <DataCard
-                  className="lg:flex lg:h-full lg:flex-col lg:[&>footer]:mt-auto"
                   title={pt ? 'Erro do ajuste, por tamanho de freguesia' : 'Fit error, by parish size'}
                   subtitle={pt ? 'Mediana entre freguesias, todas as células das 12 tabelas de pessoas' : 'Median across parishes, all cells of the 12 person tables'}
                   source={source}
@@ -257,7 +257,6 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   />
                 </DataCard>
                 <DataCard
-                  className="lg:flex lg:h-full lg:flex-col lg:[&>footer]:mt-auto"
                   title={pt ? 'Erro típico, por tabela' : 'Typical error, by table'}
                   subtitle={pt ? 'Mediana entre freguesias do erro de cada tabela usada no ajuste' : 'Median across parishes of each fitted table’s error'}
                   source={source}
