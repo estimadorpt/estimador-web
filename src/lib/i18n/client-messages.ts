@@ -48,13 +48,19 @@ export const CLIENT_MESSAGE_KEYS = [
 
   // Presidential archive: model assumptions and the uncertainty explainer.
   'model.assumptions.title', 'model.assumptions.declared_voters', 'model.assumptions.house_effects',
-  'model.assumptions.random_walk', 'model.assumptions.undecided',
-  'model.uncertainty.title', 'model.uncertainty.description', 'model.uncertainty.based_on_polls',
+  'model.assumptions.random_walk',   'model.uncertainty.title', 'model.uncertainty.description', 'model.uncertainty.based_on_polls',
   'model.uncertainty.ci_explanation', 'model.uncertainty.note', 'model.uncertainty.undecided_note',
   'model.uncertainty.wider_bands',
 
   // Legislativas district map.
   'map.topTwoGap', 'map.voteShareByParty', 'map.voteShareCaption',
+  'about.title',
+  'nav.populationData',
+  'nav.populationGame',
+  'nav.populationMethodology',
+  'nav.populationQuality',
+  'nav.populationSearch',
+  'forecast.seatChangeBaseline',
 ] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
