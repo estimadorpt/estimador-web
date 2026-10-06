@@ -1,6 +1,6 @@
 "use client";
 
-import { formatPercent } from "@/lib/football-format";
+import { formatInteger, formatPercent } from "@/lib/football-format";
 
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
@@ -90,12 +90,14 @@ export function PlayerRatingsHub({
   dataThrough = null,
 }: PlayerRatingsHubProps & { showHeading?: boolean }) {
   const pt = locale !== "en";
+  // U+2212 for a negative median (audit FA2-17), and counts grouped like
+  // every other count on the site ("3 677", audit FA2-12).
   const nf = (v: number, d = 2) =>
     v.toLocaleString(pt ? "pt-PT" : "en-GB", {
       minimumFractionDigits: d,
       maximumFractionDigits: d,
-    });
-  const int = (v: number) => Math.round(v).toLocaleString(pt ? "pt-PT" : "en-GB");
+    }).replace(/^-/, "\u2212");
+  const int = (v: number) => formatInteger(Math.round(v), pt ? "pt" : "en");
 
   /**
    * Interval labels are read from the feed, never assumed. Every model
