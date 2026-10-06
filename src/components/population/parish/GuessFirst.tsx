@@ -9,12 +9,12 @@ import { RECIPE_COPY, valueLabel, type Locale } from '@/lib/population/labels';
 
 const PROMPT: Record<'elders_alone' | 'multigenerational', { pt: (where: string) => string; en: (where: string) => string }> = {
   elders_alone: {
-    pt: where => `Em cada 100 pessoas com 65 ou mais anos ${where}, quantas vivem sozinhas?`,
-    en: where => `Out of every 100 people aged 65 or over ${where}, how many live alone?`,
+    pt: where => `Em cada 100 pessoas com 65 ou mais anos em agregados privados ${where}, quantas vivem sozinhas?`,
+    en: where => `Out of every 100 people aged 65 or over in private households ${where}, how many live alone?`,
   },
   multigenerational: {
-    pt: where => `Em cada 100 agregados ${where}, quantos juntam uma criança e uma pessoa com 65 ou mais anos?`,
-    en: where => `Out of every 100 households ${where}, how many bring together a child and someone aged 65 or over?`,
+    pt: where => `Em cada 100 agregados privados ${where}, quantos juntam uma criança e uma pessoa com 65 ou mais anos?`,
+    en: where => `Out of every 100 private households ${where}, how many bring together a child and someone aged 65 or over?`,
   },
 };
 
