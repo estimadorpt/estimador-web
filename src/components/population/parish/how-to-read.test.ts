@@ -66,7 +66,7 @@ describe('how to read a parish page', () => {
           municipalityName: place.municipality_name,
           publicationPopulation: place.publication_population,
           censusPopulation: place.census_population,
-          worst: { key: place.worst_constraint!, srmse: place.worst_constraint_srmse! },
+          worst: { key: place.worst_constraint!, srmse: place.worst_constraint_srmse!, median: place.person_srmse_median! },
         },
         record, meta, locale: 'pt', fallbackName: null, municipalityFigures: false,
       })[0].body;
@@ -76,6 +76,9 @@ describe('how to read a parish page', () => {
     expect(page('160707')).not.toMatch(/^Freguesia com menos de 500 residentes/);
     // Fátima: tier C for single-year age, named with its error.
     expect(page('142106')).toContain('no nível C pela sua pior tabela, idade ano a ano, com um erro de 0,281.');
+    // Faia: single-year age and a typical error past tier B's limit; both named, no reassurance (P202).
+    expect(page('030408')).toContain('no nível C pelos dois critérios');
+    expect(page('030408')).not.toContain('podem estar perto');
   });
 
   it('holds for every tier', () => {

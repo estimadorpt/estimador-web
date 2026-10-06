@@ -152,17 +152,32 @@ describe('population release files', () => {
     expect(game.epoch).toBe(POPULATION_GAME_EPOCH);
   });
 
-  it('carries quality.csv’s worst table in every parish header (MR2-03)', () => {
+  it('carries quality.csv’s worst table and typical error in every parish header (MR2-03, P202)', () => {
     let ageSingleInC500 = 0;
     for (const file of parishFiles) {
       const record = json<ParishRecord>(`parish/${file}`);
-      const place = record.place as (NonNullable<ParishRecord['place']> & { worst_constraint?: string; worst_constraint_srmse?: number }) | undefined;
+      const place = record.place;
       expect(place?.worst_constraint).toMatch(/^srmse_[a-z0-9_]+$/);
       expect(place?.worst_constraint_srmse).toBeGreaterThanOrEqual(0);
+      expect(place?.person_srmse_median).toBeGreaterThanOrEqual(0);
       if (record.tier === 'C' && (place?.publication_population ?? 0) >= 500 && place?.worst_constraint === 'srmse_p_age_single') ageSingleInC500 += 1;
     }
     // The audit's count: 705 of the 728 tier C parishes of 500 or more have single-year age as their worst table.
     expect(ageSingleInC500).toBe(705);
+  });
+
+  it('decides every parish’s tier from its header with release.json’s policy, so the page can say why (P202)', () => {
+    type Limits = { max_person_srmse_median: number; max_worst_srmse: number; min_population: number };
+    const { A, B } = json<{ quality_tier_policy: { thresholds: { A: Limits; B: Limits } } }>('release.json').quality_tier_policy.thresholds;
+    const meets = (limits: Limits, place: NonNullable<ParishRecord['place']>) =>
+      place.person_srmse_median! <= limits.max_person_srmse_median
+      && place.worst_constraint_srmse! <= limits.max_worst_srmse
+      && place.publication_population >= limits.min_population;
+    for (const file of parishFiles) {
+      const record = json<ParishRecord>(`parish/${file}`);
+      const place = record.place!;
+      expect(meets(A, place) ? 'A' : meets(B, place) ? 'B' : 'C', record.code).toBe(record.tier);
+    }
   });
 
   it('maps every permalink query id to a parish response', () => {

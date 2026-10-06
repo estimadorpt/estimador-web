@@ -446,6 +446,11 @@ def main() -> int:
                 # (e.g. srmse_p_age_single), labelled by the site, never shown raw.
                 "worst_constraint": row["worst_constraint"],
                 "worst_constraint_srmse": float(row["worst_constraint_srmse"]),
+                # The typical error (median of the 12 fitted person tables' SRMSE),
+                # the tiers' first criterion: a tier C page whose worst table is
+                # single-year age only says the answers may be close to INE's tables
+                # when this one is within tier B's limit too (P202).
+                "person_srmse_median": float(row["person_srmse_median"]),
             },
             "responses": {name: per_parish[code][name] for name in recipe_order},
         })

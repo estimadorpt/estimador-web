@@ -246,12 +246,17 @@ export function formatFit(value: number, locale: Locale): string {
 /** release.json `quality_tier_policy.thresholds.B.max_worst_srmse` (labels.test.ts reads it back). */
 export const TIER_B_MAX_WORST_SRMSE = 0.26;
 
-/** quality.csv's one worst table for a parish, from the parish file's `place` header (MR2-03). */
+/** release.json `quality_tier_policy.thresholds.B.max_person_srmse_median` (labels.test.ts reads it back). */
+export const TIER_B_MAX_PERSON_SRMSE_MEDIAN = 0.15;
+
+/** quality.csv's fit for a parish, from the parish file's `place` header (MR2-03, P202). */
 export interface WorstTable {
   /** `worst_constraint`, e.g. `srmse_p_age_single`. */
   key: string;
   /** `worst_constraint_srmse`, as the producer wrote it. */
   srmse: number;
+  /** `person_srmse_median`, the typical error; null or absent when the file does not carry it (unknown, never "fine"). */
+  median?: number | null;
 }
 
 /** The site's name for a worst-table code, lower-cased to sit inside a sentence; null for a code it does not know. */
@@ -261,12 +266,18 @@ function worstTableName(key: string, locale: Locale): string | null {
 }
 
 /**
- * A tier C parish of 500 or more residents, told what put it there. Its worst
- * table past tier B's limit is enough on its own (726 of 728 in v1.0.3; 705 of
- * them single-year age, scored but outside the fit); otherwise it is the
- * typical error (the median of the 12 fitted tables), which the place header
- * does not carry, so the sentence names the criterion and the worst table
- * without a comparison. Null when the code is not one the site names.
+ * A tier C parish of 500 or more residents, told what put it there. In
+ * v1.0.3 (quality.csv, 728 such parishes): 2 are C on the typical error alone
+ * (the median of the 12 fitted tables; their worst table is within tier B's
+ * limit); 726 have a worst table past that limit, 704 of them single-year age
+ * (scored, but outside the fit and unused by the answers), and 16 of the 726
+ * miss the typical-error limit as well (10 single-year age, 6 a fitted table),
+ * so the sentence names both criteria. Only a single-year-age parish whose
+ * typical error is known to be within tier B's limit is told its answers may
+ * be close to INE's tables; without the median (a file synced before it was
+ * carried) the sentence makes no such claim. The median's value is not shown:
+ * at three decimals 0.1503 would read "0,150", as if on the limit. Null when
+ * the code is not one the site names.
  */
 function worstTableMeaning(worst: WorstTable): Text | null {
   const pt = worstTableName(worst.key, 'pt');
@@ -279,11 +290,27 @@ function worstTableMeaning(worst: WorstTable): Text | null {
       en: `A parish of 500 or more residents, in tier C because of its typical error, the median of the errors of the 12 fitted person tables: read the numbers with more care. Its worst table is ${en}, with an error of ${error.en}.`,
     };
   }
-  if (worst.key === 'srmse_p_age_single') {
+  const median = worst.median ?? null;
+  if (median != null && median > TIER_B_MAX_PERSON_SRMSE_MEDIAN) {
     return {
-      pt: `Freguesia com 500 ou mais residentes, no nível C pela sua pior tabela, ${pt}, com um erro de ${error.pt}. Essa tabela é avaliada à parte das 12 tabelas de pessoas do ajuste e as respostas não a usam (mostram a idade em grupos de 5 anos), por isso as respostas podem estar perto das tabelas do INE.`,
-      en: `A parish of 500 or more residents, in tier C because of its worst table, ${en}, with an error of ${error.en}. That table is scored apart from the 12 fitted person tables and the answers do not use it (they show age in 5-year bands), so the answers can be close to INE’s tables.`,
+      pt: `Freguesia com 500 ou mais residentes, no nível C pelos dois critérios: o erro típico, a mediana dos erros das 12 tabelas de pessoas do ajuste, e a pior tabela, ${pt}, com um erro de ${error.pt}. Lê os números com mais cuidado.`,
+      en: `A parish of 500 or more residents, in tier C on both criteria: its typical error, the median of the errors of the 12 fitted person tables, and its worst table, ${en}, with an error of ${error.en}. Read the numbers with more care.`,
     };
+  }
+  if (worst.key === 'srmse_p_age_single') {
+    const head = {
+      pt: `Freguesia com 500 ou mais residentes, no nível C pela sua pior tabela, ${pt}, com um erro de ${error.pt}. Essa tabela é avaliada à parte das 12 tabelas de pessoas do ajuste e as respostas não a usam (mostram a idade em grupos de 5 anos).`,
+      en: `A parish of 500 or more residents, in tier C because of its worst table, ${en}, with an error of ${error.en}. That table is scored apart from the 12 fitted person tables and the answers do not use it (they show age in 5-year bands).`,
+    };
+    return median != null
+      ? {
+        pt: `${head.pt} O erro típico, a mediana dos erros dessas 12 tabelas, fica dentro do limiar do nível B, por isso as respostas podem estar perto das tabelas do INE.`,
+        en: `${head.en} The typical error, the median of the errors of those 12 tables, is within tier B’s limit, so the answers can be close to INE’s tables.`,
+      }
+      : {
+        pt: `${head.pt} Lê os números com mais cuidado.`,
+        en: `${head.en} Read the numbers with more care.`,
+      };
   }
   return {
     pt: `Freguesia com 500 ou mais residentes, no nível C pela sua pior tabela, ${pt}, com um erro de ${error.pt}. É uma das 12 tabelas de pessoas do ajuste: lê os números com mais cuidado.`,
@@ -313,11 +340,12 @@ function acrossThreshold(threshold: number, residents: number, census: number | 
  * more is C for its typical error or its worst table, not its size; in almost
  * all of them (705 of 728 in quality.csv) the worst table is single-year age.
  * Pass INE's count (`census`) as well, and a parish whose two counts sit on
- * either side of a threshold says so; pass the parish's worst table (`worst`,
- * from its file's place header) and a tier C parish of 500 or more names the
- * table, or the criterion, that set its tier (MR2-03). Without them, the
- * generic words (the map and the game, which read places.json, have no worst
- * table).
+ * either side of a threshold says so; pass the parish's fit (`worst`, from its
+ * file's place header: worst table, its error and the typical error) and a
+ * tier C parish of 500 or more names the table, or the criteria, that set its
+ * tier (MR2-03, P202). Without them, the generic words (the map and the game,
+ * which read places.json, have no worst table), which say what is true of the
+ * class and claim nothing about this parish's answers.
  */
 export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null | undefined, census?: number | null, worst?: WorstTable | null): Text {
   if (residents == null) return TIER_COPY[tier].meaning;
@@ -357,8 +385,8 @@ export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null |
         en: 'A parish of under 500 residents: it is always tier C, whatever its fit to INE’s tables. With few people each one weighs more; read the numbers with more care.',
       }
       : {
-        pt: 'Freguesia com 500 ou mais residentes cujo ajuste não chega aos limiares do nível B, no erro típico ou na pior tabela. Em quase todas estas freguesias, a pior tabela é a idade ano a ano, avaliada à parte das 12 tabelas de pessoas do ajuste e que as respostas não usam (mostram a idade em grupos de 5 anos), por isso as respostas podem estar perto das tabelas do INE. O ficheiro de qualidade diz qual é a pior tabela de cada freguesia.',
-        en: 'A parish of 500 or more residents whose fit misses the tier B thresholds, on its typical error or its worst table. In almost all such parishes the worst table is single-year age, scored apart from the 12 fitted person tables and not used by the answers (which show age in 5-year bands), so the answers can be close to INE’s tables. The quality file names each parish’s worst table.',
+        pt: 'Freguesia com 500 ou mais residentes cujo ajuste não chega aos limiares do nível B, no erro típico ou na pior tabela: lê os números com mais cuidado. Em quase todas estas freguesias, a pior tabela é a idade ano a ano, avaliada à parte das 12 tabelas de pessoas do ajuste e que as respostas não usam (mostram a idade em grupos de 5 anos). O ficheiro de qualidade diz qual é a pior tabela de cada freguesia.',
+        en: 'A parish of 500 or more residents whose fit misses the tier B thresholds, on its typical error or its worst table: read the numbers with more care. In almost all such parishes the worst table is single-year age, scored apart from the 12 fitted person tables and not used by the answers (which show age in 5-year bands). The quality file names each parish’s worst table.',
       };
   }
   return TIER_COPY.A.meaning;

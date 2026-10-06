@@ -200,6 +200,8 @@ export interface ParishPlace {
   /** quality.csv's one worst table (code, e.g. `srmse_p_age_single`) and its SRMSE, verbatim (MR2-03). */
   worst_constraint?: string;
   worst_constraint_srmse?: number;
+  /** quality.csv's typical error: the median SRMSE of the 12 fitted person tables (the tiers' first criterion), verbatim. */
+  person_srmse_median?: number;
 }
 
 export interface NationalRecord {

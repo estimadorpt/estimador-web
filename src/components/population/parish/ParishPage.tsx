@@ -96,7 +96,11 @@ function fromRecord(record: ParishRecord): PagePlace | null {
     generatedHouseholds: place.generated_households,
     publicationPopulation: place.publication_population,
     worst: place.worst_constraint && typeof place.worst_constraint_srmse === 'number'
-      ? { key: place.worst_constraint, srmse: place.worst_constraint_srmse }
+      ? {
+        key: place.worst_constraint,
+        srmse: place.worst_constraint_srmse,
+        median: typeof place.person_srmse_median === 'number' ? place.person_srmse_median : null,
+      }
       : null,
   };
 }
