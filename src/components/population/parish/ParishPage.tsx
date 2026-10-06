@@ -7,6 +7,7 @@ import { ChevronDown, MapPinned } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { PageHero } from '@/components/PageHero';
 import { Action } from '@/components/brand/Action';
+import { Disclosure } from '@/components/viz/Disclosure';
 import { Mosaic } from '@/components/brand/Mosaic';
 import { ParishLink } from '@/components/population/ParishLink';
 import { ParishSearch } from '@/components/population/ParishSearch';
@@ -19,7 +20,7 @@ import { fetchMeta, fetchParish, fetchPlaces } from '@/lib/population/client';
 import { parishCitation, SHORT_ATTRIBUTION } from '@/lib/population/cite';
 import { formatCount } from '@/lib/population/format';
 import { GUESS_RECIPES } from '@/lib/population/guess';
-import { HONESTY, RECIPE_COPY, tierMeaningFor, type Locale } from '@/lib/population/labels';
+import { HONESTY, RECIPE_COPY, tierMeaningFor, type Locale, type WorstTable } from '@/lib/population/labels';
 import { breadcrumbJsonLd, jsonLd } from '@/lib/structured-data';
 import { indexPlaces, NEARBY_KEY, normaliseParishCode, regionSlug, regionTitle, type Parish, type PlaceIndex } from '@/lib/population/places';
 import { parishQuestion, shareCardModel } from '@/lib/population/share-card';
@@ -45,6 +46,8 @@ interface PagePlace {
   censusPopulation: number;
   generatedHouseholds: number;
   publicationPopulation: number;
+  /** quality.csv's worst table, from the parish file only (places.json does not carry it). */
+  worst?: WorstTable | null;
 }
 
 type State =
@@ -92,6 +95,13 @@ function fromRecord(record: ParishRecord): PagePlace | null {
     censusPopulation: place.census_population,
     generatedHouseholds: place.generated_households,
     publicationPopulation: place.publication_population,
+    worst: place.worst_constraint && typeof place.worst_constraint_srmse === 'number'
+      ? {
+        key: place.worst_constraint,
+        srmse: place.worst_constraint_srmse,
+        median: typeof place.person_srmse_median === 'number' ? place.person_srmse_median : null,
+      }
+      : null,
   };
 }
 
@@ -363,7 +373,8 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
   const order = meta.recipe_order;
   const groups = GROUPS.map(group => ({ ...group, recipes: order.filter(recipe => group.recipes.includes(recipe)) }));
 
-  const tierMeaning = tierMeaningFor(place.tier, place.publicationPopulation)[locale];
+  // INE's count and the worst table too: the page then never says "500 residentes" and "menos de 500" at once (160707), and a tier C parish of 500 or more names what set its tier (MR2-03).
+  const tierMeaning = tierMeaningFor(place.tier, place.publicationPopulation, place.censusPopulation, place.worst)[locale];
   const publication = municipalityFigures
     ? (pt
       ? `Os números desta página são valores do concelho de ${fallbackName ?? place.municipalityName}, que inclui esta freguesia: os da própria freguesia não atingem a qualidade necessária para publicar.`
@@ -381,6 +392,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
     { href: '#outras', label: pt ? 'Outras freguesias' : 'Other parishes' },
   ] as Array<{ href: string; label: string; group?: boolean; after?: boolean }>;
 
+  // 44px rows on phones and on any touch screen (UXM2-09); the desktop rail, under a mouse, keeps 36px so it stays short.
   const renderToc = (className = '', marker = false) => (
     <ol className={`flex flex-col text-sm ${className}`}>
       {toc.map(item => {
@@ -390,7 +402,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
             <a
               href={item.href}
               aria-current={here ? 'location' : undefined}
-              className={`flex min-h-9 items-center rounded-md border-l-2 px-2 py-1.5 leading-snug transition-colors duration-150 hover:bg-parchment hover:text-ink ${here ? 'border-ink font-semibold text-ink' : 'border-transparent'} ${item.group ? 'mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500' : here ? '' : 'text-stone-600'}`}
+              className={`flex min-h-11 items-center rounded-md border-l-2 px-2 py-1.5 leading-snug lg:pointer-fine:min-h-9 transition-colors duration-150 hover:bg-parchment hover:text-ink ${here ? 'border-ink font-semibold text-ink' : 'border-transparent'} ${item.group ? 'mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500' : here ? '' : 'text-stone-600'}`}
             >
               {item.label}
             </a>
@@ -470,15 +482,16 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
           </nav>
 
           <div className="flex min-w-0 flex-col gap-12">
-            <details className="rounded-2xl border border-line bg-cream lg:hidden">
-              <summary className="flex min-h-12 cursor-pointer items-center px-4 text-sm font-semibold text-ink">
-                {pt ? 'Nesta página: oito perguntas' : 'On this page: eight questions'}
-              </summary>
+            <Disclosure
+              className="rounded-2xl border border-line bg-cream lg:hidden"
+              summaryClassName="w-full px-4 py-0.5"
+              summary={pt ? 'Nesta página: oito perguntas' : 'On this page: eight questions'}
+            >
               {renderToc('px-2 pb-3')}
-            </details>
+            </Disclosure>
 
             <HowToRead
-              place={{ tier: place.tier, municipalityName: place.municipalityName, publicationPopulation: place.publicationPopulation }}
+              place={{ tier: place.tier, municipalityName: place.municipalityName, publicationPopulation: place.publicationPopulation, censusPopulation: place.censusPopulation, worst: place.worst }}
               record={record}
               meta={meta}
               locale={locale}
@@ -615,25 +628,21 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
 }
 
 /**
- * "Como ler esta página", as a disclosure, closed: the first answer follows the
- * hero on every screen (the hero already carries the tier and the honesty line).
+ * "Como ler esta página", as a disclosure, closed at every width: the hero
+ * already carries the tier and the honesty line, so the first answer is what
+ * follows it (UXD2-25). Its own <details> only because the summary holds the
+ * section's h2, which Disclosure's label span cannot; the look is the same
+ * (left chevron, 44px row, sentence case, UXD2-26).
  */
 function HowToRead(props: HowToReadInput & { union: boolean }) {
   const { locale, union } = props;
   const pt = locale === 'pt';
   const items = howToReadItems(props);
-  // Closed at every width: the hero already carries the tier and the honesty
-  // line, so the first answer is what follows it (UXD2-25).
-  const [open, setOpen] = useState(false);
   return (
-    <details
-      open={open}
-      onToggle={event => setOpen((event.currentTarget as HTMLDetailsElement).open)}
-      className="group rounded-2xl border border-line bg-cream"
-    >
-      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-5 py-3 [&::-webkit-details-marker]:hidden">
+    <details className="group rounded-2xl border border-line bg-cream">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center gap-1.5 px-5 py-3 [&::-webkit-details-marker]:hidden">
+        <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-ink transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" />
         <h2 id="ler-title" className="text-lg font-bold tracking-[-0.02em] text-ink">{pt ? 'Como ler esta página' : 'How to read this page'}</h2>
-        <ChevronDown aria-hidden="true" className="h-5 w-5 shrink-0 text-stone-500 transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
       </summary>
       <div className="border-t border-line px-5 pb-5 pt-4">
         <dl className="grid gap-x-8 gap-y-3 md:grid-cols-2">

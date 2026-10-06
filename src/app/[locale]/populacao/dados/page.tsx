@@ -19,7 +19,6 @@ import { Disclosure } from '@/components/viz/Disclosure';
 import { loadPopulationMeta, loadPopulationPlaces, loadPopulationRelease } from '@/lib/utils/population-data-loader';
 import { createPageMetadata } from '@/lib/metadata';
 import { jsonLd, populationDatasetJsonLd } from '@/lib/structured-data';
-import { ChevronRight } from 'lucide-react';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -90,9 +89,14 @@ function Code({ children, label }: { children: string; label: string }) {
   );
 }
 
+/**
+ * Rows divided by hairlines, with no rule above or below: the section's own
+ * top rule is the divider, so a rule closing the list here drew a second one
+ * with an empty band between them (UXD2-13, UXM2-22).
+ */
 function Facts({ rows }: { rows: Array<[string, ReactNode]> }) {
   return (
-    <dl className="divide-y divide-line border-y border-line">
+    <dl className="divide-y divide-line">
       {rows.map(([label, value]) => (
         <div key={label} className="grid gap-1 py-4 md:grid-cols-[220px_1fr] md:gap-4">
           <dt className="font-bold text-ink">{label}</dt>
@@ -215,18 +219,14 @@ sha256sum checksums.sha256`;
                 [pt ? 'Versões anteriores' : 'Previous releases', <>
                   {pt ? 'A 1.0.3 substituiu três versões datadas de 5 de outubro (a 1.0.2 nunca chegou ao GitHub); a população gerada é a mesma em todas. ' : '1.0.3 replaced three releases dated 5 October (1.0.2 never reached GitHub); the generated population is the same in all of them. '}
                   {/* The history, said once on the site (UXD-24): the other trust pages link here. */}
-                  <details className="group mt-2">
-                    <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold text-ink [&::-webkit-details-marker]:hidden">
-                      <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-90 motion-reduce:transition-none" />
-                      {pt ? 'O que mudou entre as versões' : 'What changed between releases'}
-                    </summary>
+                  <Disclosure className="mt-2" summary={pt ? 'O que mudou entre as versões' : 'What changed between releases'}>
                     <p className="mt-1">
                       {SUPERSEDED[locale]}{' '}
                       {pt
                         ? <>Os ficheiros das versões 1.0.0 e 1.0.1 continuam no GitHub, como registo, na <a className={link} href={POPULATION_DOWNLOADS.releases}>lista de versões</a>; a 1.0.2 não chegou a ser publicada lá.</>
                         : <>The files of releases 1.0.0 and 1.0.1 stay on GitHub, as a record, in the <a className={link} href={POPULATION_DOWNLOADS.releases}>list of releases</a>; 1.0.2 was never published there.</>}
                     </p>
-                  </details>
+                  </Disclosure>
                 </>],
               ]} />
             </Section>
@@ -298,7 +298,7 @@ sha256sum checksums.sha256`;
             <Section id="descarregar" title={pt ? 'Onde descarrego?' : 'Where do I download them?'} lede={<p>{pt
               ? <>Os ficheiros estão numa <a className={link} href={POPULATION_DOWNLOADS.release}>versão publicada no GitHub</a>, num repositório público de dados.</>
               : <>The files are in a <a className={link} href={POPULATION_DOWNLOADS.release}>release published on GitHub</a>, in a public data repository.</>}</p>}>
-              <div className="overflow-x-auto rounded-2xl border border-line bg-cream">
+              <div tabIndex={0} role="region" aria-label={pt ? 'Ficheiros da versão' : 'Release files'} className="scroll-cue overflow-x-auto rounded-2xl border border-line">
                 <table className="min-w-full border-collapse text-sm">
                   <caption className="sr-only">{pt ? 'Ficheiros da versão' : 'Release files'}</caption>
                   <thead>
@@ -388,7 +388,8 @@ sha256sum checksums.sha256`;
                   </div>
                 ))}
               </dl>
-              <div className="mt-4 hidden overflow-x-auto rounded-2xl border border-line bg-cream sm:block">
+              {/* A scroll area: focusable and named, with the edge shadow while there is more (A11Y2-06). */}
+              <div tabIndex={0} role="region" aria-label={pt ? 'Colunas do ficheiro de qualidade' : 'Columns of the quality file'} className="scroll-cue mt-4 hidden overflow-x-auto rounded-2xl border border-line sm:block">
                 <table className="min-w-full border-collapse text-sm">
                   <caption className="sr-only">{pt ? 'Colunas do ficheiro de qualidade' : 'Columns of the quality file'}</caption>
                   <thead>

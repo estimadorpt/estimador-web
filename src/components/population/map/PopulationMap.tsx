@@ -919,7 +919,7 @@ function TierLine({ parish, t, locale }: { parish: Parish; t: (typeof copy)['pt'
         <QualityBadge kind={parish.tier} locale={locale} />
         {fallback && <QualityBadge kind="municipality" locale={locale} label={t.fallback} />}
       </div>
-      <p className="text-xs leading-relaxed text-stone-600">{tierMeaningFor(parish.tier, parish.publicationPopulation)[locale]}</p>
+      <p className="text-xs leading-relaxed text-stone-600">{tierMeaningFor(parish.tier, parish.publicationPopulation, parish.censusPopulation)[locale]}</p>
       {fallback && <p className="text-xs leading-relaxed text-stone-600">{t.fallbackLong(parish.municipalityName)}</p>}
     </div>
   );

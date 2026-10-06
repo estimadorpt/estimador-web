@@ -1,11 +1,11 @@
 import { setRequestLocale } from '@/i18n/request-locale';
-import { ChevronRight } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Link } from '@/i18n/routing';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PageHero } from '@/components/PageHero';
 import { Action } from '@/components/brand/Action';
 import { DataCard } from '@/components/viz/DataCard';
+import { Disclosure } from '@/components/viz/Disclosure';
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { PopulationSectionNav } from '@/components/population/SectionNav';
 import { FitBars } from '@/components/population/quality/FitBars';
@@ -177,11 +177,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                     : 'In practice: read each figure on its own, without ranking it or comparing it with another as if the difference were certain.'}
                 </p>
                 {/* The scorecard's other notes, verbatim; they are written for the producer's general format (intervals, status codes). */}
-                <details className="group mt-2">
-                  <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold text-ink [&::-webkit-details-marker]:hidden">
-                    <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-90 motion-reduce:transition-none" />
-                    {pt ? 'Notas da ficha de avaliação (texto original)' : 'Scorecard notes (original wording)'}
-                  </summary>
+                <Disclosure className="mt-2" summary={pt ? 'Notas da ficha de avaliação (texto original)' : 'Scorecard notes (original wording)'}>
                   <p className="mb-2">
                     {pt
                       ? 'Escritas para o formato geral da ficha, que prevê várias execuções do modelo. Nesta versão, com uma só execução, não há intervalos; «R=1» quer dizer uma execução, e o estado «ok» quer dizer que a avaliação e a auditoria de privacidade foram aprovadas.'
@@ -190,7 +186,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   <ul className="mb-1 list-disc space-y-1 pl-5">
                     {scorecard.honesty_notes.slice(0, 2).map(note => <li key={note.en}>{note[locale]}</li>)}
                   </ul>
-                </details>
+                </Disclosure>
               </div>
               <div className="grid gap-4 md:grid-cols-3">
                 <StatusItem

@@ -29,13 +29,14 @@ export function HowToPlay({ locale, honesty }: { locale: Locale; honesty: string
       onToggle={event => setOpen((event.currentTarget as HTMLDetailsElement).open)}
       className="group rounded-2xl border border-line bg-cream"
     >
-      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-2.5 sm:px-5 [&::-webkit-details-marker]:hidden">
+      {/* The site's disclosure look (UXD2-26): a left chevron that turns, a 44px row; its own element because the page closes it after a guess. */}
+      <summary className="flex min-h-12 cursor-pointer list-none items-center gap-1.5 px-4 py-2.5 sm:px-5 [&::-webkit-details-marker]:hidden">
+        <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-ink transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" />
         <span className="min-w-0">
           <span className="text-base font-bold text-ink">{t.howTitle}</span>{' '}
           {/* The hero already says it on a phone; from sm the line stands in for the closed rules. */}
           <span className="hidden text-sm text-stone-600 sm:inline">{t.howSummary}</span>
         </span>
-        <ChevronDown aria-hidden="true" className="h-5 w-5 shrink-0 text-stone-500 transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
       </summary>
       <div className="border-t border-line px-5 pb-5 pt-4 text-[15px] leading-relaxed text-stone-600">
         <ol className="flex flex-col gap-2.5">

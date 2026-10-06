@@ -49,11 +49,36 @@ describe('how to read a parish page', () => {
     expect(b[0].body).not.toMatch(/menos apertado/);
     // A tier C parish of 500 or more residents is C for its fit, not its size.
     const bigC = index.parishes.find(p => p.tier === 'C' && p.publicationPopulation >= 500)!;
-    expect(items(bigC.code)[0].body).toMatch(/500 ou mais residentes cujo ajuste/);
+    expect(items(bigC.code)[0].body).toMatch(/500 ou mais residentes.*idade ano a ano/);
     const smallC = index.parishes.find(p => p.tier === 'C' && p.publicationPopulation < 500)!;
     expect(items(smallC.code)[0].body).toMatch(/fica sempre no nível C/);
     // The single-run line no longer forbids what the page plainly shows; it says the page does not compare.
     expect(JSON.stringify(b)).toMatch(/não compara categorias nem freguesias/);
+  });
+
+  it('says what the parish page passes: INE’s count and the worst table from the place header (P101, MR2-03)', () => {
+    const page = (code: string) => {
+      const record = json<ParishRecord>(`parish/${code}.json`);
+      const place = record.place!;
+      return howToReadItems({
+        place: {
+          tier: record.tier,
+          municipalityName: place.municipality_name,
+          publicationPopulation: place.publication_population,
+          censusPopulation: place.census_population,
+          worst: { key: place.worst_constraint!, srmse: place.worst_constraint_srmse!, median: place.person_srmse_median! },
+        },
+        record, meta, locale: 'pt', fallbackName: null, municipalityFigures: false,
+      })[0].body;
+    };
+    // Beiral do Lima: INE 500, the tier's count 499. The page no longer says "500 residentes" and "menos de 500" at once.
+    expect(page('160707')).toContain('O INE contou 500 residentes');
+    expect(page('160707')).not.toMatch(/^Freguesia com menos de 500 residentes/);
+    // Fátima: tier C for single-year age, named with its error.
+    expect(page('142106')).toContain('no nível C pela sua pior tabela, idade ano a ano, com um erro de 0,281.');
+    // Faia: single-year age and a typical error past tier B's limit; both named, no reassurance (P202).
+    expect(page('030408')).toContain('no nível C pelos dois critérios');
+    expect(page('030408')).not.toContain('podem estar perto');
   });
 
   it('holds for every tier', () => {

@@ -27,10 +27,13 @@ export function StatusItem({ tone, label, value, children }: {
   );
 }
 
-/** A section with a question as its heading. */
+/**
+ * A section with a question as its heading, under a hairline; the first one on
+ * a page sits under the section tabs' own rule, so it draws none (UXD2-13).
+ */
 export function Section({ id, title, lede, children }: { id: string; title: string; lede?: ReactNode; children: ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="border-t border-line pt-8 md:pt-10">
+    <section id={id} aria-labelledby={`${id}-title`} className="border-t border-line pt-8 first:border-t-0 first:pt-0 md:pt-10 md:first:pt-0">
       <h2 id={`${id}-title`} className="text-2xl text-ink md:text-[1.75rem]">{title}</h2>
       {lede && <div className="mt-3 max-w-3xl leading-relaxed text-stone-600">{lede}</div>}
       <div className="mt-6">{children}</div>

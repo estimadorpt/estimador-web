@@ -74,7 +74,7 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
         <QualityBadge kind={tier} locale={locale} />
         <span>{t.residents}: <strong className="tabular-nums text-ink">{formatCount(answer.censusPopulation, locale)}</strong></span>
       </div>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600">{tierMeaningFor(tier, answer.publicationPopulation)[locale]}</p>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600">{tierMeaningFor(tier, answer.publicationPopulation, answer.censusPopulation)[locale]}</p>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Action onClick={onShare}>

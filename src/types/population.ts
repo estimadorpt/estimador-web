@@ -197,6 +197,11 @@ export interface ParishPlace {
   generated_households: number;
   /** quality.csv: the count the quality tier was decided on (the smaller of the generated and INE counts). */
   publication_population: number;
+  /** quality.csv's one worst table (code, e.g. `srmse_p_age_single`) and its SRMSE, verbatim (MR2-03). */
+  worst_constraint?: string;
+  worst_constraint_srmse?: number;
+  /** quality.csv's typical error: the median SRMSE of the 12 fitted person tables (the tiers' first criterion), verbatim. */
+  person_srmse_median?: number;
 }
 
 export interface NationalRecord {
@@ -328,7 +333,8 @@ export interface PopulationScorecard {
     coverage_in_band: number;
     /**
      * From v1.0.2: the producer's own reading of the size bands against their
-     * pre-registered (informational) ranges, in words. Shown as written.
+     * pre-registered (informational) ranges, in words. Not rendered:
+     * informational ranges from an earlier engine and an out-of-fit check (MR2-02).
      */
     band_reading?: {
       pt: string;
