@@ -73,8 +73,11 @@ export default async function RegionPage({ params }: { params: Params }) {
       ])) }} />
       <Header />
       <main id="main-content" tabIndex={-1}>
+      {/* The parish pages' header: population data pages share one. */}
       <PageHero
         compact
+        field="periwinkle"
+        measure="wide"
         back={{ href: POPULATION_ROUTES.hub, label: pt ? 'Todas as regiões' : 'All regions', locale }}
         icon={<MapPinned aria-hidden="true" className="h-4 w-4" />}
         eyebrow={pt ? `População sintética · v${POPULATION_RELEASE} · Censos 2021` : `Synthetic population · v${POPULATION_RELEASE} · 2021 Census`}

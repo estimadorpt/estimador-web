@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Mosaic } from '@/components/brand/Mosaic';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { Action } from '@/components/brand/Action';
 import { MarkLoading } from '@/components/brand/MarkLoading';
 import { BRAND } from '@/lib/brand';
@@ -96,8 +96,9 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
 
   const otherRelease = state.kind === 'other-release';
   return (
-    <div className="grid items-center gap-8 rounded-2xl border border-line bg-cream p-6 md:grid-cols-[1fr_200px] md:p-8">
-      <div>
+    <div className="flex flex-col gap-6 rounded-2xl border border-line bg-cream p-6 md:flex-row md:items-start md:p-8">
+      <EmptyStateMark />
+      <div className="min-w-0 flex-1">
         <h2 className="text-xl font-bold text-ink md:text-2xl">
           {otherRelease
             ? (pt ? 'Esta ligação é de outra versão da população' : 'This link is from another release of the population')
@@ -122,9 +123,6 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
             </Action>
           )}
         </div>
-      </div>
-      <div aria-hidden="true" className="hidden md:block">
-        <Mosaic variant="quarters" className="w-full" ground={BRAND.cream} />
       </div>
     </div>
   );

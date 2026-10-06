@@ -3,7 +3,6 @@ import { Users } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PageHero } from '@/components/PageHero';
-import { Mosaic } from '@/components/brand/Mosaic';
 import { SectionNotes } from '@/components/articles/SectionNotes';
 import { ParishSearch } from '@/components/population/ParishSearch';
 import { PopulationSectionNav } from '@/components/population/SectionNav';
@@ -52,9 +51,13 @@ export default async function PopulationHub({ params }: { params: Promise<{ loca
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      {/* A data page: the compact periwinkle field every population data page
+          opens with, and no art (the header table in CLAUDE.md). */}
       <PageHero
+        compact
         field="periwinkle"
-        // The search's suggestion list opens below the hero; the art stays inside its own box.
+        measure="wide"
+        // The search's suggestion list opens below the hero: the hero must not clip it.
         className="overflow-visible!"
         icon={<Users aria-hidden="true" className="h-4 w-4" />}
         eyebrow={pt ? `População sintética · v${POPULATION_RELEASE} · Censos 2021` : `Synthetic population · v${POPULATION_RELEASE} · 2021 Census`}
@@ -67,7 +70,6 @@ export default async function PopulationHub({ params }: { params: Promise<{ loca
             <span className="mt-2 block text-[15px] text-stone-600">{HONESTY.positioning[locale]}</span>
           </>
         }
-        art={<Mosaic variant="cover" className="h-full w-full" ground="transparent" colors={['mintSoft', 'mustardSoft', 'coralSoft']} />}
         actions={
           <ParishSearch
             locale={locale}

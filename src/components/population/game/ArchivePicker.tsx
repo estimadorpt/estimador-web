@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useState } from 'react';
 import { Action } from '@/components/brand/Action';
-import { Mosaic } from '@/components/brand/Mosaic';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { dateOfDay, formatGameDate, type GameStore } from '@/lib/population/game';
 import type { Locale } from '@/lib/population/labels';
 import { GAME_COPY } from './copy';
@@ -41,7 +41,7 @@ export function ArchivePicker({ epoch, today, current, store, locale, onPlay }: 
       <h2 id={`${id}-title`} className="text-xl text-ink">{t.archiveTitle}</h2>
       {earlier.length === 0 ? (
         <div className="mt-3 flex items-center gap-4">
-          <Mosaic variant="quarters" className="h-14 w-14 shrink-0" />
+          <EmptyStateMark />
           <p className="text-sm text-stone-600">{t.archiveEmpty}</p>
         </div>
       ) : (

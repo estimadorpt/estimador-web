@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
 import { CircleCheck, Info } from 'lucide-react';
-import { Mosaic } from '@/components/brand/Mosaic';
 import { Action } from '@/components/brand/Action';
-import { BRAND } from '@/lib/brand';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 
 /**
  * A state, always as an icon and a word: `pass` on the plain moss surface,
@@ -45,8 +44,9 @@ export function Section({ id, title, lede, children }: { id: string; title: stri
 export function PopulationUnavailable({ locale }: { locale: string }) {
   const pt = locale === 'pt';
   return (
-    <div className="grid items-center gap-8 rounded-2xl border border-line bg-cream p-6 md:grid-cols-[1fr_200px] md:p-8">
-      <div>
+    <div className="flex flex-col gap-6 rounded-2xl border border-line bg-cream p-6 md:flex-row md:items-start md:p-8">
+      <EmptyStateMark />
+      <div className="min-w-0 flex-1">
         <h2 className="text-xl font-bold text-ink">{pt ? 'Os ficheiros desta versão não estão disponíveis' : 'This release’s files are not available'}</h2>
         <p className="mt-3 max-w-xl leading-relaxed text-stone-600">
           {pt
@@ -55,7 +55,6 @@ export function PopulationUnavailable({ locale }: { locale: string }) {
         </p>
         <div className="mt-6"><Action href="/populacao" locale={locale} arrow>{pt ? 'Voltar à população' : 'Back to population'}</Action></div>
       </div>
-      <div aria-hidden="true" className="hidden md:block"><Mosaic variant="quarters" className="w-full" ground={BRAND.cream} /></div>
     </div>
   );
 }

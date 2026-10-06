@@ -4,7 +4,7 @@ import { useState, type ReactNode } from 'react';
 import { Link2 } from 'lucide-react';
 import { DataCard } from '@/components/viz/DataCard';
 import { ChartTable } from '@/components/viz/ChartTable';
-import { Mosaic } from '@/components/brand/Mosaic';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { TextLink } from '@/components/brand/TextLink';
 import { methodologyAnchorForRecipe } from '@/components/population/quality/anchors';
 import { POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
@@ -192,7 +192,7 @@ export function ResponseChart({ recipeName, recipe, record, cells, locale, bars 
 function Refused({ locale }: { locale: Locale }) {
   return (
     <div className="flex items-center gap-4 rounded-xl bg-parchment p-4">
-      <Mosaic variant="corner" className="h-14 w-14 shrink-0" />
+      <EmptyStateMark surface="parchment" />
       <p className="text-sm text-stone-600">
         {locale === 'pt'
           ? 'Sem resposta publicada para esta freguesia na versão 1.0. Não mostramos um número que não passou o controlo de qualidade.'

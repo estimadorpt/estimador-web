@@ -12,7 +12,7 @@ import {
   getMDXArticlesByLocale,
   type ArticleKind,
 } from '@/lib/mdx-articles';
-import { Mosaic } from '@/components/brand/Mosaic';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { buildTagIndex } from '@/lib/article-discovery';
 import { ArticleRow } from '@/components/articles/ArticleRow';
 import { ArticleListStructuredData } from '@/components/StructuredData';
@@ -103,7 +103,7 @@ export default async function ArticlesPage({
 
         {articles.length === 0 ? (
           <div className="flex items-center gap-6 py-6">
-            <Mosaic variant="quarters" className="hidden h-20 w-20 shrink-0 sm:block" />
+            <EmptyStateMark surface="paper" />
             <div>
               <p className="text-stone-600">{t('articles.empty')}</p>
               <p className="mt-4">

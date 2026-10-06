@@ -7,7 +7,7 @@ import { Link } from '@/i18n/routing';
 import { buildTagIndex } from '@/lib/article-discovery';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { createPageMetadata, SITE_LOCALES } from '@/lib/metadata';
-import { Mosaic } from '@/components/brand/Mosaic';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
@@ -73,7 +73,7 @@ export default async function TopicsPage({
 
         {groups.length === 0 ? (
           <div className="flex items-center gap-6 py-6">
-            <Mosaic variant="quarters" className="hidden h-20 w-20 shrink-0 sm:block" />
+            <EmptyStateMark surface="paper" />
             <div>
               <p className="text-stone-600">{t('articles.empty')}</p>
               <p className="mt-4">

@@ -8,7 +8,7 @@ import { Link } from '@/i18n/routing';
 import { PageHero } from '@/components/PageHero';
 import { Action } from '@/components/brand/Action';
 import { Disclosure } from '@/components/viz/Disclosure';
-import { Mosaic } from '@/components/brand/Mosaic';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { ParishLink } from '@/components/population/ParishLink';
 import { ParishSearch } from '@/components/population/ParishSearch';
 import { QualityBadge } from '@/components/population/QualityBadge';
@@ -197,7 +197,7 @@ export function ParishPage({ locale }: { locale: Locale }) {
         <PopulationSectionNav current="parish" locale={locale} />
         <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
           <div className="flex flex-col gap-6 rounded-2xl border border-line bg-cream p-5 md:flex-row md:items-start md:p-8">
-            <Mosaic variant="corner" className="h-16 w-16 shrink-0" />
+            <EmptyStateMark />
             <div className="min-w-0 flex-1">
               <ParishSearch locale={locale} withLocation />
               <p className="mt-6 text-[15px] text-stone-600">

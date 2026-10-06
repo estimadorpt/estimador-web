@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
-import { Mosaic } from '@/components/brand/Mosaic';
 import { PopulationSectionNav } from '@/components/population/SectionNav';
 import { GAME_COPY } from '@/components/population/game/copy';
 import { HowToPlay } from '@/components/population/game/HowToPlay';
@@ -44,13 +43,15 @@ export default async function MysteryParishPage({ params }: { params: Promise<{ 
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      {/* A tool: the population section's compact periwinkle field, no art. */}
       <PageHero
+        compact
         field="periwinkle"
+        measure="wide"
         eyebrow={t.heroEyebrow}
         title={t.heroTitle}
         lede={t.heroLede}
         meta={<span>{t.heroMeta}</span>}
-        art={<Mosaic variant="people" className="h-full w-full" colors={['mintSoft', 'mustardSoft', 'coralSoft', 'mintSoft']} />}
       />
       <PopulationSectionNav current="game" locale={locale} />
       <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">

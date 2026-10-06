@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Lock } from 'lucide-react';
 import { DataCard } from '@/components/viz/DataCard';
 import { ChartTable } from '@/components/viz/ChartTable';
-import { Mosaic } from '@/components/brand/Mosaic';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 import { readCells } from '@/lib/population/compact';
 import { CLUE_ORDER } from '@/lib/population/game';
@@ -194,7 +194,7 @@ function Clue({ recipe, record, meta, locale, revealed }: {
   if (!record || !definition || record.decision === 'refuse') {
     return (
       <div className="flex items-center gap-4 rounded-xl bg-parchment p-4">
-        <Mosaic variant="corner" className="h-14 w-14 shrink-0" />
+        <EmptyStateMark surface="parchment" />
         <p className="text-sm text-stone-600">{t.refused}</p>
       </div>
     );
