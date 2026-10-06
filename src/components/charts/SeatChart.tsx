@@ -7,6 +7,7 @@ import { ChartTable } from "@/components/viz/ChartTable";
 import { FURNITURE } from "@/components/viz/theme";
 import { partyColors, partyNames } from "@/lib/config/colors";
 import { quantileSorted, type PartySeatStats } from "@/lib/election-aggregates";
+import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface SeatData {
   party: string;
@@ -80,8 +81,7 @@ export function SeatChart({ data, stats: provided, seatsLabel }: SeatChartProps)
         ],
       });
       // The table twin below is the accessible version; Plot labels role-less <g>s (A11Y-12).
-      plot.setAttribute("aria-hidden", "true");
-      container.replaceChildren(plot);
+      container.replaceChildren(quietPlot(plot));
     };
     render();
     const observer = new ResizeObserver(() => render());

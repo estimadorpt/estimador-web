@@ -4,6 +4,7 @@ import { useRef, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { formatPercent } from "@/lib/football-format";
+import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface TimelinePoint {
   matchday: number;
@@ -78,8 +79,7 @@ export function TeamTimeline({ data, teamColor, yAxisLabel, xAxisLabel = "Jornad
         ],
       });
 
-      plot.setAttribute("aria-hidden", "true");
-      container.replaceChildren(plot);
+      container.replaceChildren(quietPlot(plot));
     };
 
     render();

@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect, useMemo, type ReactNode } from "react";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
+import { quietPlot } from "@/components/viz/plot-a11y";
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
 import type { LigaHistorical } from "@/types/football";
@@ -10,6 +11,9 @@ import type { LigaHistorical } from "@/types/football";
 interface TitleRaceChartProps {
   historical: LigaHistorical;
   yAxisLabel?: string;
+  /** One line under the plot, above the table twin: what the lines are not
+   * (the title-calibration caveat on the Liga page, audit F-H2). */
+  caveat?: ReactNode;
 }
 
 // The title probability after each matchday, one line per club that ever
@@ -17,7 +21,7 @@ interface TitleRaceChartProps {
 // of 500-simulation blocks, about ten times the Monte Carlo error of the
 // 50 000-simulation figure, and read as a margin of error they mislead
 // (audit F-H1; owner decision to remove them).
-export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: TitleRaceChartProps) {
+export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat }: TitleRaceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const locale = useLocale();
   const pt = locale !== "en";
@@ -121,8 +125,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
         ],
       });
 
-      plot.setAttribute("aria-hidden", "true");
-      container.replaceChildren(plot);
+      container.replaceChildren(quietPlot(plot));
     };
 
     render();
@@ -134,6 +137,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)" }: Titl
   return (
     <div className="w-full">
       <div ref={containerRef} className="w-full min-h-[280px]" />
+      {caveat && <p className="mt-3 text-xs leading-relaxed text-stone-600">{caveat}</p>}
       <ChartTable caption={yAxisLabel} columns={table.columns} rows={table.rows} />
     </div>
   );

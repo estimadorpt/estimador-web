@@ -7,6 +7,7 @@ import { ChartTable } from "@/components/viz/ChartTable";
 import { FURNITURE } from "@/components/viz/theme";
 import { formatElectionNumber, formatElectionPercent, formatElectionProbability } from "@/lib/election-display";
 import { everyKthIndex, type RunoffSimulations } from "@/lib/election-aggregates";
+import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface SecondRoundBeeswarmProps {
   simulations: RunoffSimulations;
@@ -107,8 +108,7 @@ export function SecondRoundBeeswarm({ simulations, translations }: SecondRoundBe
         ],
       });
       // The table twin below is the accessible version; Plot labels role-less <g>s (A11Y-12).
-      plot.setAttribute("aria-hidden", "true");
-      container.replaceChildren(plot);
+      container.replaceChildren(quietPlot(plot));
     };
     render();
     const observer = new ResizeObserver(() => render());

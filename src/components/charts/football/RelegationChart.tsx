@@ -6,6 +6,7 @@ import { ChartTable } from "@/components/viz/ChartTable";
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
 import type { LigaHistorical } from "@/types/football";
+import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface RelegationChartProps {
   historical: LigaHistorical;
@@ -165,8 +166,7 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
         ],
       });
 
-      plot.setAttribute("aria-hidden", "true");
-      container.replaceChildren(plot);
+      container.replaceChildren(quietPlot(plot));
     };
 
     render();

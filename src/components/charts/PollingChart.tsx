@@ -8,6 +8,7 @@ import { FURNITURE } from "@/components/viz/theme";
 import { partyColors } from "@/lib/config/colors";
 import { compactTrendSeries, recentTrendRows, type TrendSeries } from "@/lib/election-aggregates";
 import { electionIntlLocale } from "@/lib/election-display";
+import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface TrendData {
   date: string;
@@ -209,8 +210,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
       });
 
       // The table twin below is the accessible version; Plot labels role-less <g>s (A11Y-12).
-      plot.setAttribute("aria-hidden", "true");
-      containerRef.current.replaceChildren(plot);
+      containerRef.current.replaceChildren(quietPlot(plot));
     };
 
     render();

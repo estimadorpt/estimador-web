@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { leftBlocParties, rightBlocParties, majorityThreshold } from "@/lib/config/blocs";
 import { dotsPerRowToFit, everyKthIndex, stackDots, summariseBlocs, type BlocSimulations, type SeatDraw } from "@/lib/election-aggregates";
 import { formatElectionNumber, formatElectionProbability } from "@/lib/election-display";
+import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface CoalitionDotPlotProps {
   /** Raw seat draws (MDX use, with inline data). Pages pass `simulations` instead. */
@@ -137,8 +138,7 @@ export function CoalitionDotPlot({
         ],
       });
       // The table twin below is the accessible version; Plot labels role-less <g>s (A11Y-12).
-      plot.setAttribute("aria-hidden", "true");
-      container.replaceChildren(plot);
+      container.replaceChildren(quietPlot(plot));
     };
     render();
     const observer = new ResizeObserver(() => render());
