@@ -22,11 +22,15 @@ describe('quoted privacy and novelty figures', () => {
     expect(NOVELTY.pt).toContain(`${pct(scorecard.novelty.person_verbatim_pct)}% das pessoas`);
     expect(NOVELTY.pt).toContain(`${pct(100 - scorecard.novelty.household_novel_pct)}% dos agregados`);
     const dcr = scorecard.privacy.person_dcr as { synthetic_to_seed: { exact_match_rate: number }; seed_leave_one_out: { exact_match_rate: number } };
-    const dcrText = PRIVACY_FINDINGS[1].body.pt;
+    const finding = (title: string) => PRIVACY_FINDINGS.find(row => row.title.en === title)!.body.pt;
+    const dcrText = finding('Distance to the closest record');
     expect(dcrText).toContain(`${pct(dcr.synthetic_to_seed.exact_match_rate * 100)}%`);
     expect(dcrText).toContain(`${pct(dcr.seed_leave_one_out.exact_match_rate * 100)}%`);
-    expect(PRIVACY_FINDINGS[2].body.pt).toContain(scorecard.privacy.person_membership_excess_auc.toFixed(3).replace('-', '−').replace('.', ','));
-    expect(PRIVACY_FINDINGS[3].body.pt).toContain(scorecard.privacy.attribute_inference_excess.toFixed(3).replace('-', '−').replace('.', ','));
+    expect(finding('Membership inference')).toContain(scorecard.privacy.person_membership_excess_auc.toFixed(3).replace('-', '−').replace('.', ','));
+    expect(finding('Attribute inference')).toContain(scorecard.privacy.attribute_inference_excess.toFixed(3).replace('-', '−').replace('.', ','));
+    // The model card's 11-attribute figure sits beside the 13-attribute one (METH3-04), in both places that quote the audit.
+    expect(PRIVACY_FINDINGS.map(row => row.title.en).slice(0, 2)).toEqual(['Exact matches', 'Common combinations']);
+    expect(finding('Common combinations')).toContain('80% das pessoas sintéticas');
     expect(scorecard.privacy.status).toBe('pass');
   });
 
@@ -136,7 +140,9 @@ describe('methodology headings (MR2-10, PRO2-11, PRO2-13, POP2-ACC-04)', () => {
     it(`${locale}: says which releases are citable and what the next one brings`, () => {
       expect(text).toContain('1.0.3');
       expect(text).not.toMatch(/Cada versão estável|Every stable release/);
-      expect(text).toMatch(locale === 'pt' ? /próxima versão \(1\.1\) corrige/ : /next release \(1\.1\) corrects/);
+      // A corrected synthetic population, not a correction of INE's census (METH3-10).
+      expect(text).toMatch(locale === 'pt' ? /próxima versão \(1\.1\) será uma versão corrigida da população sintética de 2021/ : /next release \(1\.1\) will be a corrected synthetic population for 2021/);
+      expect(text).not.toMatch(/corrige a população dos Censos|corrects the 2021 Census population/);
       expect(text).not.toMatch(/«exato»|o número exato de agregados|the exact number of households/);
       expect(text).toContain('<AllocationGap />');
       expect(text).toContain('<ShortAttribution />');

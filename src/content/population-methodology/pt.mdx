@@ -14,17 +14,17 @@ Para que serve, então? As tabelas publicadas dão, para cada freguesia, quantas
 
 ## Como foi gerada?
 
-O resultado não sai diretamente de uma rede neuronal: um modelo inventa pessoas e agregados possíveis, e depois escolhem-se os que, somados, batem com as tabelas do INE (um processo generativo com restrições). São cinco passos:
+O resultado não sai diretamente de uma rede neuronal: um modelo inventa pessoas e agregados possíveis, e depois escolhem-se os que, somados, ficam o mais perto possível das tabelas do INE (um processo generativo com restrições). São cinco passos:
 
 1. **Aprender como os atributos se combinam.** O computador aprende, com a amostra pública dos Censos 2021 (o Ficheiro de Uso Público), que combinações de idade, escolaridade, trabalho e família são comuns numa pessoa e no seu agregado. Esse modelo (um gerador autorregressivo) é treinado uma vez e depois fica fixo. As idades ano a ano e o tipo de local de trabalho são gerados por ele, não deduzidos depois.
-2. **Ajustar cada freguesia às suas tabelas.** Para cada freguesia, o modelo inventa muitos agregados possíveis (os candidatos), evitando as combinações que o INE publica como zero nessa freguesia (uma máscara). Depois, dá mais peso aos candidatos que fazem as somas bater com as tabelas do INE para a freguesia, mudando o peso de cada um o menos possível (um ajuste de máxima entropia). Antes disso, uma verificação recusaria qualquer freguesia cujas tabelas impliquem totais incoerentes entre si; nenhuma das 3 092 foi recusada.
-3. **Escolher agregados inteiros.** Uma pessoa não se divide: dos candidatos escolhem-se agregados inteiros, tão perto quanto possível das contagens que as tabelas da freguesia pedem (uma alocação inteira). Nas freguesias com menos de 500 pessoas, essa escolha é uma seleção exata, em vez de uma aproximação. <AllocationGap />
-4. **Acrescentar quem vive em alojamentos coletivos.** As pessoas que vivem em lares e noutros alojamentos coletivos são acrescentadas a partir das contagens publicadas pelo INE, como registos parciais. Os códigos finos de profissão são derivados nesta fase.
-5. **Publicar um esquema declarado.** Cada coluna publicada tem um significado declarado e quase todas as colunas de códigos têm um mapa de etiquetas; três (setor de atividade, escolaridade em cinco níveis e nuts2) ainda não o têm no ficheiro, e o [dicionário de colunas](/pt/populacao/dados/#dicionario) dá-lhes etiquetas. Tudo o resto é retirado, com a razão registada. A versão não inclui ligações entre cônjuges.
+2. **Ajustar cada freguesia às suas tabelas.** Para cada freguesia, o modelo inventa muitos agregados possíveis (os candidatos), evitando as combinações que o INE publica como zero nessa freguesia (uma máscara). A máscara restringe os candidatos, mas o resultado pode ainda deixar algumas pessoas nessas combinações: nas tabelas de pessoas do ajuste, cerca de 7 900 entradas (ver «Onde é que os dados são mais fracos?»). Depois, dá mais peso aos candidatos que aproximam as somas das tabelas do INE para a freguesia, mudando o peso de cada um o menos possível (um ajuste de máxima entropia). Antes disso, uma verificação recusaria qualquer freguesia cujas tabelas impliquem totais incoerentes entre si; nenhuma das 3 092 foi recusada.
+3. **Escolher agregados inteiros.** Uma pessoa não se divide: dos candidatos escolhem-se agregados inteiros, tão perto quanto possível das contagens que as tabelas da freguesia pedem (uma alocação inteira). Nas freguesias com menos de 500 pessoas, essa escolha é resolvida até ao ótimo (uma seleção exata, sem aproximação), o que ainda assim não garante o total do INE. <AllocationGap />
+4. **Acrescentar quem vive em alojamentos coletivos.** As pessoas que vivem em lares e noutros alojamentos coletivos são acrescentadas depois do ajuste, a partir das contagens publicadas pelo INE, como registos parciais: o sexo e a idade vêm dessas contagens, a escolaridade é imputada a partir de registos semelhantes, e o núcleo familiar e os campos de trabalho ficam vazios (o [dicionário de colunas](/pt/populacao/dados/#dicionario) diz quais). Os códigos finos de profissão são derivados nesta fase.
+5. **Publicar com um esquema declarado e o nível de qualidade.** Cada coluna publicada tem um significado declarado, e o [dicionário de colunas](/pt/populacao/dados/#dicionario) explica cada uma; tudo o resto é retirado, com a razão registada. A versão não inclui ligações entre cônjuges. Cada freguesia sai com um nível de qualidade, A, B ou C (ver «Quando é que um número aparece?»).
 
 ## O que é ajustado e o que é derivado?
 
-Os números que o site mostra usam nove campos. Cinco são agrupamentos de um campo gerado cuja tabela do INE entra no ajuste (a idade em grupos de 5 anos agrupa a idade gerada, ano a ano); três são derivados por uma regra fixa e nenhuma tabela do ajuste os verifica (por exemplo, «vive sozinho» quer dizer que o agregado tem uma só pessoa); e um é um indicador. A tabela diz, para cada um, a coluna dos microdados ou a regra que o calcula a partir delas, com as mesmas letras do dicionário de colunas.
+Os números que o site mostra usam nove campos. Seis são agrupamentos de um campo gerado cuja tabela do INE entra no ajuste (a idade em grupos de 5 anos agrupa a idade gerada, ano a ano, e as faixas etárias juntam esses grupos); dois são derivados por uma regra fixa e nenhuma tabela do ajuste os verifica (por exemplo, «vive sozinho» quer dizer que o agregado tem uma só pessoa); e um é um indicador. A tabela diz, para cada um, a coluna dos microdados ou a regra que o calcula a partir delas, com as mesmas letras do dicionário de colunas.
 
 <ProvenanceFields />
 
@@ -38,7 +38,7 @@ Para ver a ideia com pessoas inventadas, num bairro imaginado, há um [exemplo i
 
 Sempre. Todas as 3 092 freguesias são publicadas e respondem a todas as perguntas com os seus próprios números. Cada uma tem um nível de qualidade, que junta quão perto a população gerada fica das tabelas do INE e o número de residentes. O nível é um guia de leitura, não um filtro: não esconde nenhum número, diz com que cuidado o ler. Uma freguesia pequena tem poucas pessoas em cada tabela, e cada pessoa pesa mais.
 
-As freguesias com menos de 500 residentes ficam sempre no nível C. Entre as de nível C com 500 ou mais, a pior tabela é quase sempre a idade ano a ano, que é avaliada mas não é uma das tabelas de pessoas do ajuste. Os termos usados para medir o ajuste (erro típico, pior tabela) estão explicados, com um exemplo, no [glossário da página de qualidade](/pt/populacao/qualidade/#glossario).
+As freguesias com menos de 500 residentes ficam sempre no nível C. Entre as de nível C com 500 ou mais, a pior tabela é quase sempre a idade ano a ano, que é avaliada mas não é uma das tabelas de pessoas do ajuste, e que as respostas do site não usam: nessas freguesias, a cautela do nível C vale sobretudo para quem usar a idade ano a ano dos microdados. A página de cada freguesia diz o que a pôs no seu nível. Os termos usados para medir o ajuste (erro típico, pior tabela) estão explicados, com um exemplo, no [glossário da página de qualidade](/pt/populacao/qualidade/#glossario).
 
 <Tiers />
 
@@ -75,7 +75,7 @@ São limitações da população gerada, a mesma da versão 1.0.0 à <Release />
 - As versões publicadas no GitHub (1.0.0, 1.0.1 e 1.0.3) continuam disponíveis e citáveis; a 1.0.2 não chegou a ser publicada. As ligações permanentes de cada resposta indicam a versão a que se referem; a página de uma freguesia mostra sempre a versão atual, por isso cita-a com a data da consulta.
 - As correções ficam registadas numa <ErrataLink>lista pública de erratas</ErrataLink>.
 - Uma revisão das fontes do INE leva a uma correção documentada ou a uma nova avaliação.
-- A próxima versão (1.1) corrige a população dos Censos 2021. Uma versão posterior, com dados de 2025, dirá que campos foram atualizados para 2025, quais foram mantidos de 2021 e quais são novos modelos.
+- A próxima versão (1.1) será uma versão corrigida da população sintética de 2021. Uma versão posterior, com dados de 2025, dirá que campos foram atualizados para 2025, quais foram mantidos de 2021 e quais são novos modelos.
 - Os pesos do modelo não são publicados: isso exigiria uma revisão própria de memorização, privacidade e licença.
 
 ## Como cito?

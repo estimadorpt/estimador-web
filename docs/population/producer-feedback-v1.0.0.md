@@ -25,7 +25,7 @@ The site serves v1.0.3, which supersedes v1.0.1 and v1.0.2 (v1.0.2 was never ser
   the site's launch day, `POPULATION_GAME_EPOCH` = 2026-10-06 in
   `src/lib/config/population.ts`, which the sync writes into `game/index.json`) and 15
   (public repository copy).
-- **Open:** 10 (more national and district templates, v1.1 public layer), and 17–24 below.
+- **Open:** 10 (more national and district templates, v1.1 public layer), and 17–33 below.
 
 ## Asks after round 3 (2026-10-06)
 
@@ -70,6 +70,77 @@ against the v1.0.3 package. Each says what the site does meanwhile.
     it a tilt-only key, which reads either way: fitted a little, or not at all. *Web:* says
     single-year age is "not one of the 12 fitted person tables / 21 coverage tables", never
     "unfitted" (decision 3 below).
+
+## Asks after round 4 (2026-10-06)
+
+From the round 3 audit of the v1.0.3 site against the v1.0.3 package (the audit's own
+reproductions, quoted here for the producer; the site prints none of these counts).
+
+25. **`household_type` responses do not match the packaged microdata.** Rebuilt from the
+    SHA256SUMS-verified v1.0.3 parquet, seven recipes reproduce to 1e-9; `household_type`
+    differs from the private-household `hh_type_top` in 844 parishes, and the displayed value
+    in 729 (1,332 cells, up to 2.22 pp; e.g. 040219 «Sem núcleo» 34,2% in the bundle against
+    33,3% in the parquet). Inside the parquet `hh_type_top` equals `n_nuclei` and the count of
+    distinct non-'0' `nucleus_id`, so the column is right and the bundle answer was built from
+    a pre-packaging nucleus count. ERRATA.md says nothing. **Ask:** an ERRATA entry, then
+    rebuild the `household_type` responses from the packaged `hh_type_top` in a v1.0.4 that
+    keeps the deck calendar (or document which count the bundle used). *Web:* does not
+    recompute the card and prints no count of its own; it says, on the #familias card (a
+    caveat note), in the game clue's source line, in the methodology's `hh_type_top` row and
+    in the `/dados` dictionary row: «Esta resposta foi calculada antes do empacotamento final
+    dos microdados e pode diferir ligeiramente do que se obtém deles; o produtor vai
+    corrigi-la.» (`RECIPE_CAVEAT` in `src/lib/population/labels.ts`, `SITE_NOTES` in
+    `src/components/population/data/dictionary.ts`). Remove both when v1.0.4 ships.
+26. **Define "structural violations" in the model card.** The gate is listed ("structural
+    violations 0") but never defined, and it sits beside ~22,000 people in INE-zero cells.
+    *Web:* glosses it on `/populacao/qualidade#glossario` from `release_gates.py`
+    (`GATED_STRUCTURAL_CHECKS` + `GATED_RELATIONAL_CHECKS`: impossible records such as an
+    employed child under 15, a degree before 18, an age below 0 or above 115, a person
+    without a household, a household-size mismatch), and says the INE-zero cells are not
+    counted. Confirm or correct that reading; and explain how a masked cell still ends up
+    filled (ask 20), which methodology step 2 now admits ("a máscara restringe os candidatos,
+    mas o resultado pode ainda deixar algumas pessoas nessas combinações").
+27. **`metadata.json` `hh_tenure_code`: "0.16% of private households" is 0.18% in the
+    microdata** (7,287 null among 4,149,096 private households). *Web:* the revised dictionary
+    row drops the figure ("a small share of private households").
+28. **State how collective-quarters residents are filled.** The persons parquet has, for all
+    146,008 `is_institutional = 1` rows: education, employment status, nationality, union and
+    (with the usual age rules) marital status, religion and income source filled; `nucleus_id`
+    and the seven work columns (`sitprof_code`, `activity_sector_code`, `occupation_major`,
+    `occupation_code`, `industry_section`, `work_location_type`, `transport_mode`) null.
+    `metadata.json` says only "education hot-decked". **Ask:** say in the model card how each
+    filled attribute is assigned (employment included), and that `nucleus_id` is null for
+    them. *Web:* says one thing everywhere (`INSTITUTIONAL_RECORDS` in
+    `src/components/population/quality/copy.ts`, the `is_institutional` and `nucleus_id`
+    dictionary rows, methodology step 4), and the education and employment cards' source line
+    says these residents carry values assigned after the fit.
+29. **Should the tiers leave out single-year age?** 726 of the 728 tier C parishes of 500+
+    residents are C because their worst table passes 0.26, and in 705 of them that table is
+    single-year age, which no answer uses and which is not one of the 12 fitted person tables
+    (see ask 24). *Web:* keeps the tiers as published and says the tier C caution applies
+    mostly to anyone using single-year age from the microdata.
+30. **Confirm the wording for the integer allocation under 500 people.** The site said
+    "uma seleção exata"; 28 parishes under 500 still miss INE's total, and the model card says
+    the exact selection "stopped at its guard" in 050225. *Web:* now says "resolvida até ao
+    ótimo (uma seleção exata, sem aproximação), o que ainda assim não garante o total do INE"
+    (ties into ask 21).
+31. **Keep permalinks across releases.** `query_id` hashes the query including
+    `release_version`, so every release changes every id and every 1.0.0 or 1.0.1
+    `canonical_path` stops resolving on a site that serves 1.0.3. Either keep the id stable
+    when a response's query is unchanged, or ship an id map (old id → new id) with each
+    release. *Web:* an older id shows what changed between the releases (`consulta/other-release.ts`:
+    the people are the same; from 1.0.1, ages, education, employment and multigenerational
+    homes are unchanged, the private-household questions may have changed) and links to
+    `/dados#versao`, but cannot open the parish: the site ships only the current release's
+    lookup. A legacy lookup could be built from `public_bundle_v1.0.{0,1}.json`
+    (`canonical_path` + query geography and dimensions) if old links turn up.
+32. **The model card's non-use "claims based on fields marked unvalidated"** matches no
+    published column (the unvalidated class is withheld). *Web:* rewords the bullet to the
+    columns that are not fitted per parish (industry, occupation, place of work, means of
+    transport, tenure, rooms), which the dictionary marks.
+33. **`code_commit` (4bf0819) points at a private repository.** *Web:* labels it as the
+    packaging code's commit and says the repository is not public yet. Make it public, or
+    name the repository, when that changes.
 
 ## Site decisions taken without the producer (round 3 owner calls)
 

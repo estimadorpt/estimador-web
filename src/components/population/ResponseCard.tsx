@@ -9,10 +9,11 @@ import { TextLink } from '@/components/brand/TextLink';
 import { methodologyAnchorForRecipe } from '@/components/population/quality/anchors';
 import { POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { isWhole, readCells } from '@/lib/population/compact';
-import { DIMENSION_LABEL, RECIPE_COPY, REASON_COPY, sourceLine, type Locale } from '@/lib/population/labels';
+import { DIMENSION_LABEL, RECIPE_CAVEAT, RECIPE_COPY, REASON_COPY, sourceLine, type Locale } from '@/lib/population/labels';
 import { responsePermalink } from '@/lib/population/permalink';
 import type { CompactResponse, PopulationRecipe, PortraitRecipe } from '@/types/population';
 import { AgeColumns, HundredPeople, ShareBars } from './charts';
+import { emptyBand, groupByBand, NOBODY_ALONE, twinRows } from './twin-rows';
 import { QualityBadge } from './QualityBadge';
 
 export interface ResponseCardProps {
@@ -34,8 +35,13 @@ export interface ResponseCardProps {
   bars?: boolean;
   /** Briefly marks the card a shared link pointed to. */
   highlight?: boolean;
-  /** What the percentages are of, said on small (tier C) parishes' cards. */
-  base?: string;
+  /**
+   * The place the figures are for, as a line at the top of the card: a shared
+   * link lands on one card with the page's title scrolled away, and a
+   * screenshot of it must still say where the figures are from (PRO3-V01).
+   * Shown on the parish's own figures only.
+   */
+  place?: string;
   className?: string;
 }
 
@@ -46,12 +52,13 @@ export interface ResponseCardProps {
  * link to the response. A refused response is a designed empty state with the
  * reason and nothing that looks like a number.
  */
-export function ResponseCard({ recipeName, recipe, record, locale, placeName, fallbackName, bare, before, revealed = true, bars = false, highlight = false, base, className = '' }: ResponseCardProps) {
+export function ResponseCard({ recipeName, recipe, record, locale, placeName, fallbackName, bare, before, revealed = true, bars = false, highlight = false, place, className = '' }: ResponseCardProps) {
   const copy = RECIPE_COPY[recipeName];
   const cells = readCells(record, recipe, locale);
   const status = statusLine(record, locale, placeName, fallbackName);
   const anchor = copy.anchor;
   const title = bare ? copy.short[locale] : copy.question[locale];
+  const caveat = RECIPE_CAVEAT[recipeName]?.[locale];
 
   return (
     <div
@@ -61,8 +68,8 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
     >
       {/* The footer is drawn here rather than by DataCard so the copy-link action can sit in it, out of the way of the question. */}
       <DataCard title={title} subtitle={copy.population[locale]} locale={locale}>
-        {/* Only on the parish's own figures: a município fallback's base is not the parish's count. */}
-        {base && record.decision === 'publish' && <p className="-mt-1 mb-4 text-xs leading-relaxed text-stone-600">{base}</p>}
+        {/* Only on the parish's own figures: a município fallback names its município in the status line. */}
+        {place && record.decision === 'publish' && <p className="-mt-1 mb-4 text-xs font-semibold leading-relaxed text-stone-600">{place}</p>}
         {(status.badge || status.text) && (
           <div className="mb-4 flex flex-wrap items-center gap-2">
             {status.badge}
@@ -79,12 +86,16 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
               <ChartTable
                 caption={`${copy.question[locale]} ${status.where}`}
                 columns={[...recipe.dimensions.map(dimension => DIMENSION_LABEL[dimension]?.[locale] ?? dimension), locale === 'pt' ? 'Percentagem' : 'Share']}
-                rows={cells.map(cell => [...cell.labels, cell.display])}
+                rows={twinRows(recipeName, cells, locale)}
               />
             )}
           </>
         )}
-        <CardFooter source={sourceLine(recipeName, locale)} id={bare ? null : record.id} question={copy.question[locale]} recipe={recipeName} locale={locale} />
+        {/* A caveat the producer owes a correction for (POP3-ACC-01): set apart from the source line, in the caveat colour. */}
+        {caveat && record.decision !== 'refuse' && (
+          <p role="note" className="mt-4 border-l-2 border-amber-500 pl-3 text-xs leading-relaxed text-stone-700">{caveat}</p>
+        )}
+        <CardFooter source={sourceLine(recipeName, locale, { withCaveat: false })} id={bare ? null : record.id} question={copy.question[locale]} recipe={recipeName} locale={locale} />
       </DataCard>
     </div>
   );
@@ -143,24 +154,18 @@ function statusLine(record: CompactResponse, locale: Locale, placeName: string, 
 /**
  * "Quem vive sozinho trabalha?": each age band has its own percentages. A band
  * with nobody living alone in it has every share at zero: it gets a sentence
- * instead of three empty bars (the table twin keeps the producer's «0,0%»).
+ * instead of three empty bars, and one row in the table twin.
  */
 function AloneByAge({ cells, locale }: { cells: ReturnType<typeof readCells>; locale: Locale }) {
-  const bands = new Map<string, typeof cells>();
-  for (const cell of cells) bands.set(cell.labels[0], [...(bands.get(cell.labels[0]) ?? []), cell]);
   return (
     <div className="grid gap-5 sm:grid-cols-3">
-      {[...bands.entries()].map(([band, rows]) => {
-        const nobody = rows.every(row => row.state === 'published' && row.share === 0);
+      {[...groupByBand(cells).entries()].map(([band, rows]) => {
+        const nobody = emptyBand(rows);
         return (
           <div key={band}>
             <h4 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{band}</h4>
             {nobody ? (
-              <p className="rounded-xl bg-parchment px-3 py-2.5 text-sm text-stone-600">
-                {locale === 'pt'
-                  ? 'Ninguém desta faixa etária vive sozinho na população gerada.'
-                  : 'Nobody in this age band lives alone in the generated population.'}
-              </p>
+              <p className="rounded-xl bg-parchment px-3 py-2.5 text-sm text-stone-600">{NOBODY_ALONE[locale]}</p>
             ) : (
               <ShareBars cells={rows} locale={locale} stacked />
             )}

@@ -367,6 +367,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
   );
   const shareModel = useMemo(() => shareCardModel({
     record, recipes: meta.recipes, name: place.name, municipalityName: place.municipalityName, regionName: place.regionName, region: place.region, locale, url,
+    censusPopulation: place.censusPopulation, publicationPopulation: place.publicationPopulation,
   }), [record, meta, place, locale, url]);
 
   const regionHref = POPULATION_ROUTES.region(regionSlug(place.regionName));
@@ -413,13 +414,22 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
   );
 
   const where = (scope: Scope) => (long && !scope.municipality ? THIS_PARISH.in[locale] : inScope(scope, locale));
-  // Tier C: say on every card what its percentages are of, from the published counts (PRO2-08).
+  // Under 500 residents (the count the tier uses), said once, under the tier: a card's
+  // percentages are of its own group (people aged 65+, those who live alone), not of the
+  // parish's residents, and no release publishes that group's size (POP3-ACC-02, PRO3-01).
   const small = place.publicationPopulation < 500;
-  const base = place.tier === 'C'
+  const subsetNote = small
     ? (pt
-      ? `Base: ${formatCount(place.censusPopulation, locale)} residentes (INE, Censos 2021) · ${formatCount(place.generatedHouseholds, locale)} agregados gerados.${small ? ' Com poucas pessoas, cada uma pesa mais numa percentagem.' : ''}`
-      : `Base: ${formatCount(place.censusPopulation, locale)} residents (INE, 2021 Census) · ${formatCount(place.generatedHouseholds, locale)} generated households.${small ? ' With few people, each one weighs more in a percentage.' : ''}`)
-    : undefined;
+      ? 'Cada pergunta conta só o seu grupo (por exemplo, quem vive sozinho), que pode ser de poucas pessoas: uma percentagem pode assentar em uma ou duas.'
+      : 'Each question counts only its own group (for example, those who live alone), which can be a handful of people: a percentage can rest on one or two.')
+    : null;
+  // Every card names its place, so a shared link or a screenshot of one card still says
+  // where the figures are from (PRO3-V01); a small parish adds INE's count of residents.
+  const placeLine = [
+    `${place.name} (${code})`,
+    municipalityPhrase(place.municipalityName, locale),
+    small ? (pt ? `${formatCount(place.censusPopulation, locale)} residentes (INE)` : `${formatCount(place.censusPopulation, locale)} residents (INE)`) : null,
+  ].filter(Boolean).join(' · ');
   // The page shows the current release, so a citation says when it was read (PRO2-10).
   const citation = parishCitation({ name: place.name, code, url, accessed: formatDay(lisbonDate(new Date()), locale), locale });
   // Population › region › parish (SP-10). The shell is one page for every
@@ -451,7 +461,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
         }
         meta={
           <>
-            <QualityBadge kind={place.tier} locale={locale} title={tierMeaning} />
+            <QualityBadge kind={place.tier} locale={locale} />
             {municipalityFigures && (
               <QualityBadge
                 kind="municipality"
@@ -461,6 +471,10 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
             )}
             <span className="font-mono text-[13px] text-stone-600">{pt ? 'Código' : 'Code'} {code}</span>
             <span className="basis-full text-[13px] text-stone-600 sm:basis-auto">{publication}</span>
+            {/* What the tier means for this parish, on screen rather than in a tooltip (CL3-05). */}
+            <span className="basis-full max-w-3xl text-[13px] leading-relaxed text-stone-600">
+              {tierMeaning}{subsetNote && ` ${subsetNote}`}
+            </span>
             {nearby && (
               <span className="basis-full text-[13px] font-semibold text-ink">
                 {pt ? 'Freguesia mais próxima da tua localização (calculada no teu dispositivo).' : 'The parish nearest your location (worked out on your device).'}
@@ -523,7 +537,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                       where={where(scope)}
                       initiallyRevealed={target === anchor}
                       highlight={highlight === anchor}
-                      base={base}
+                      place={placeLine}
                     />
                   ) : (
                     <ResponseCard
@@ -536,7 +550,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                       fallbackName={fallbackName}
                       // Employment is drawn as 100 dots here, once (the page has no separate "Se fosse 100" block).
                       highlight={highlight === anchor}
-                      base={base}
+                      place={placeLine}
                     />
                   );
                 })}
@@ -562,13 +576,14 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                   <dd className="text-stone-700">{place.name} <span className="font-mono text-[13px]">({code})</span>, CAOP 2021</dd>
                   <dt className="font-bold text-ink">{pt ? 'Versão' : 'Release'}</dt>
                   <dd className="text-stone-700">
+                    {/* The release's own date; GitHub's upload day is on /dados (FR3-09). */}
                     {pt
-                      ? `População sintética v${POPULATION_RELEASE}, publicada a ${formatDay(POPULATION_PUBLISHED, locale)}`
-                      : `Synthetic population v${POPULATION_RELEASE}, published ${formatDay(POPULATION_PUBLISHED, locale)}`}
+                      ? `População sintética v${POPULATION_RELEASE}, datada de ${formatDay(POPULATION_PUBLISHED, locale)}`
+                      : `Synthetic population v${POPULATION_RELEASE}, dated ${formatDay(POPULATION_PUBLISHED, locale)}`}
                   </dd>
                   <dt className="font-bold text-ink">{pt ? 'Licença' : 'Licence'}</dt>
                   <dd className="text-stone-700">
-                    <a href={pt ? 'https://creativecommons.org/licenses/by/4.0/deed.pt' : 'https://creativecommons.org/licenses/by/4.0/'} className="font-semibold text-ink underline underline-offset-4">CC BY 4.0</a>
+                    <a href={pt ? 'https://creativecommons.org/licenses/by/4.0/deed.pt' : 'https://creativecommons.org/licenses/by/4.0/'} className="tap-target font-semibold text-ink underline underline-offset-4">CC BY 4.0</a>
                   </dd>
                   <dt className="font-bold text-ink">{pt ? 'Atribuição' : 'Attribution'}</dt>
                   <dd className="text-stone-700">{SHORT_ATTRIBUTION[locale]}</dd>
@@ -612,7 +627,8 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
               )}
               <div className="mt-5 flex flex-wrap gap-x-6 gap-y-1">
                 <Action href={regionHref} locale={locale} variant="text" arrow>
-                  {pt ? `Freguesias: ${regionHeading.charAt(0).toLowerCase()}${regionHeading.slice(1)}` : `Parishes: ${regionHeading}`}
+                  {/* "distrito de Braga" mid-sentence, but "Região Autónoma dos Açores" keeps its capitals (POP3-ACC-V01). */}
+                  {pt ? `Freguesias: ${regionInline}` : `Parishes: ${regionHeading}`}
                 </Action>
                 <Link href={POPULATION_ROUTES.hub} locale={locale} className="inline-flex min-h-12 items-center gap-1.5 text-[15px] font-semibold text-ink underline-offset-4 hover:underline">
                   <MapPinned aria-hidden="true" className="h-4 w-4" />

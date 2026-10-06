@@ -61,7 +61,7 @@ const COPY = {
     ligaFooter: (matchday, date, season) => [`Depois da jornada ${matchday}`, date ? `atualizado a ${date}` : null, `Liga Portugal ${season}`].filter(Boolean).join(' · '),
     ligaAlt: (season, matchday, date, rows) => `Liga Portugal ${season} depois da jornada ${matchday}${date ? ` (atualizado a ${date})` : ''}: probabilidade de título, ${rows}.`,
     brandAlt: (line, descriptor) => `estimador.pt. ${line} ${descriptor}`,
-    populationAlt: (parishes, version, date) => `População sintética aberta: ${parishes} freguesias dos Censos 2021, versão ${version} publicada a ${date}.`,
+    populationAlt: (parishes, version, date) => `População sintética aberta: ${parishes} freguesias dos Censos 2021, versão ${version} de ${date}.`,
     economyAlt: (value, quarter) => `Economia: risco de recessão de ${value}% em ${quarter}.`,
     articleAlt: (title, kind, date) => `${title} (${kind === 'nota' ? 'nota' : 'explicador'}, ${date}).`,
     economySection: 'Economia',
@@ -74,7 +74,7 @@ const COPY = {
     populationLabel: 'População sintética aberta',
     populationSubject: 'freguesias · Censos 2021',
     populationCaption: (persons, households, parishes) => `${persons} pessoas e ${households} agregados gerados para as ${parishes} freguesias dos Censos 2021 (CAOP\u00a02021).`,
-    populationFooter: (version, date) => `Versão ${version} · publicada a ${date}`,
+    populationFooter: (version, date) => `Versão ${version} · ${date}`,
   },
   en: {
     brandHeadline: BRAND_COPY.line.en,
@@ -94,7 +94,7 @@ const COPY = {
     ligaFooter: (matchday, date, season) => [`After matchday ${matchday}`, date ? `updated ${date}` : null, `Liga Portugal ${season}`].filter(Boolean).join(' · '),
     ligaAlt: (season, matchday, date, rows) => `Liga Portugal ${season} after matchday ${matchday}${date ? ` (updated ${date})` : ''}: title probability, ${rows}.`,
     brandAlt: (line, descriptor) => `estimador.pt. ${line} ${descriptor}`,
-    populationAlt: (parishes, version, date) => `Open synthetic population: ${parishes} parishes of the 2021 Census, version ${version} released ${date}.`,
+    populationAlt: (parishes, version, date) => `Open synthetic population: ${parishes} parishes of the 2021 Census, version ${version} dated ${date}.`,
     economyAlt: (value, quarter) => `Economy: recession risk of ${value}% in ${quarter}.`,
     articleAlt: (title, kind, date) => `${title} (${kind === 'nota' ? 'note' : 'explainer'}, ${date}).`,
     economySection: 'Economy',
@@ -107,7 +107,7 @@ const COPY = {
     populationLabel: 'Open synthetic population',
     populationSubject: 'parishes · 2021 Census',
     populationCaption: (persons, households, parishes) => `${persons} people and ${households} households generated for the ${parishes} parishes of the 2021 Census (CAOP\u00a02021).`,
-    populationFooter: (version, date) => `Version ${version} · released ${date}`,
+    populationFooter: (version, date) => `Version ${version} · ${date}`,
   },
 };
 

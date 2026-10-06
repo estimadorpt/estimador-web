@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR } from '@/lib/config/population';
 import type { ParishRecord, PopulationPlaces, PopulationReleaseInfo } from '@/types/population';
 import { parishCitation, releaseCitation } from './cite';
-import { RECIPE_COPY, TIER_B_MAX_PERSON_SRMSE_MEDIAN, TIER_B_MAX_WORST_SRMSE, TIER_COPY, tierMeaningFor } from './labels';
+import { RECIPE_CAVEAT, RECIPE_COPY, TIER_B_MAX_PERSON_SRMSE_MEDIAN, TIER_B_MAX_WORST_SRMSE, TIER_COPY, sourceLine, tierMeaningFor } from './labels';
 
 const places = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR, 'places.json'), 'utf8')) as PopulationPlaces;
 const row = (code: string) => places.parishes.find(parish => parish[0] === code)!;
@@ -138,5 +138,29 @@ describe('parish citation (PRO2-10)', () => {
   it('keeps the old form without a valid date', () => {
     expect(parishCitation(base)).toBe(`${releaseCitation()} Moreira de Cónegos (030831): ${base.url}`);
     expect(parishCitation({ ...base, accessed: 'ontem' })).toBe(`${releaseCitation()} Moreira de Cónegos (030831): ${base.url}`);
+  });
+});
+
+describe('source lines (round 4: POP3-ACC-01, POP3-ACC-V02)', () => {
+  it('carries the household-type caveat, without a figure of the site’s own', () => {
+    for (const locale of ['pt', 'en'] as const) {
+      const caveat = RECIPE_CAVEAT.household_type![locale];
+      expect(sourceLine('household_type', locale)).toContain(caveat);
+      // The parish card sets it apart as a note: the footer's line goes without it.
+      expect(sourceLine('household_type', locale, { withCaveat: false })).not.toContain(caveat);
+      expect(caveat).not.toMatch(/\d/);
+    }
+    expect(RECIPE_CAVEAT.household_type!.pt).toBe('Esta resposta foi calculada antes do empacotamento final dos microdados e pode diferir ligeiramente do que se obtém deles; o produtor vai corrigi-la.');
+    expect(Object.keys(RECIPE_CAVEAT)).toEqual(['household_type']);
+  });
+
+  it('says education and employment include collective-quarters residents filled in after the fit', () => {
+    for (const recipe of ['education', 'employment'] as const) {
+      expect(sourceLine(recipe, 'pt')).toContain('alojamentos coletivos');
+      expect(sourceLine(recipe, 'en')).toContain('collective quarters');
+    }
+    for (const recipe of ['age', 'household_size', 'elders_alone'] as const) {
+      expect(sourceLine(recipe, 'pt')).not.toContain('alojamentos coletivos');
+    }
   });
 });
