@@ -42,8 +42,8 @@ export const DESCRIPTION_OVERRIDES: Record<string, string> = {
  */
 export const SITE_NOTES: Record<string, { pt: string; en: string }> = {
   'households.hh_type_top': {
-    pt: 'Nota do site: a resposta «Que famílias formam?» foi calculada antes do empacotamento final dos microdados e pode diferir ligeiramente do que se obtém desta coluna; o produtor vai corrigi-la.',
-    en: 'Note from the site: the answer “What families do they form?” was computed before the microdata’s final packaging and may differ slightly from what this column gives; the producer will correct it.',
+    pt: 'Nota do site: os valores da resposta «Que famílias formam?» podem diferir ligeiramente dos que se obtêm a partir desta coluna nos microdados para download. Vamos corrigi-los na próxima versão.',
+    en: 'Note from the site: the figures in the answer “What families do they form?” can differ slightly from what you get from this column in the downloadable microdata. We will correct them in the next release.',
   },
 };
 

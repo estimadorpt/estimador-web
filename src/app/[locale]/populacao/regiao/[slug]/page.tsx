@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     path: POPULATION_ROUTES.region(slug),
     title: locale === 'pt' ? `Freguesias ${of}` : `Parishes of ${of}`,
     description: locale === 'pt'
-      ? `Os concelhos e as freguesias ${of}, com a ligação para a página de cada freguesia na população sintética de Portugal (Censos 2021).`
+      ? `Os concelhos e as freguesias ${of}, com o link para a página de cada freguesia na população sintética de Portugal (Censos 2021).`
       : `The municipalities and parishes of ${of}, each linked to its page in Portugal’s synthetic population (2021 Census).`,
     index: true,
   });

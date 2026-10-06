@@ -121,7 +121,7 @@ const MUST_200 = [
   { route: '/pt/populacao/freguesia/0302fa', type: 'text/html' },
   { route: '/en/populacao/freguesia/0302FA/', type: 'text/html' },
   { route: `/populacao/v/${POPULATION_RELEASE}/q/${NATIONAL_QUERY}`, type: 'text/html' },
-  // The localised share links ("Copiar ligação" copies the reader's locale).
+  // The localised share links ("Copiar link" copies the reader's locale).
   { route: `/pt/populacao/v/${POPULATION_RELEASE}/q/${NATIONAL_QUERY}`, type: 'text/html' },
   { route: `/en/populacao/v/${POPULATION_RELEASE}/q/q1_dc0bf3434c913975a9b6/`, type: 'text/html' },
   { route: `${POPULATION_DATA}/meta.json`, type: 'application/json' },

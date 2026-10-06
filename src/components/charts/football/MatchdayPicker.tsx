@@ -163,7 +163,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
     if (restored.state.objective) setObjective(restored.state.objective);
     if (restored.resetForVersion) {
       setStaleVersion(true);
-      setShareNotice(pt?'Esta ligação já não corresponde à previsão atual. A mostrar a previsão de base atual, sem as escolhas partilhadas.':'This link no longer matches the current forecast. Showing the current baseline forecast, without the shared choices.');
+      setShareNotice(pt?'Este link já não corresponde à previsão atual. A mostrar a previsão de base atual, sem as escolhas partilhadas.':'This link no longer matches the current forecast. Showing the current baseline forecast, without the shared choices.');
     }
     lastWritten.current = {
       team: restored.state.team ?? '',
@@ -187,7 +187,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
     else window.history.replaceState(null, '', url);
     lastWritten.current = { team: focusTeam, objective, pick: pickKey };
   },[ready,selections,focusTeam,objective,version]);
-  async function shareScenario(){try{await navigator.clipboard.writeText(window.location.href);setShareNotice(pt?'Ligação copiada com a equipa e os resultados escolhidos.':'Link copied with your team and selected results.');}catch{setShareNotice(pt?'Copia a ligação da barra de endereços; inclui as tuas escolhas.':'Copy the address-bar link; it includes your choices.');}}
+  async function shareScenario(){try{await navigator.clipboard.writeText(window.location.href);setShareNotice(pt?'Link copiado com a equipa e os resultados escolhidos.':'Link copied with your team and selected results.');}catch{setShareNotice(pt?'Copia o link da barra de endereços; inclui as tuas escolhas.':'Copy the address-bar link; it includes your choices.');}}
 
   const hasSelections = Object.values(selections).some((v) => v !== null);
 

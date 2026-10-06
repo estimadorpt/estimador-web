@@ -129,7 +129,7 @@ function EstadoAtual({
       // The producer's positioning sentence verbatim (HONESTY.positioning), then
       // which parishes "every parish" means, as a sentence of its own.
       text: pt
-        ? `${HONESTY.positioning.pt} São as 3 092 freguesias dos Censos 2021 (limites da CAOP 2021). Pessoas e agregados gerados, não pessoas, famílias ou moradas reais. Podes procurar a tua freguesia, jogar a Freguesia misteriosa do dia e descarregar os microdados.`
+        ? `${HONESTY.positioning.pt} São as 3 092 freguesias dos Censos 2021 (limites da CAOP 2021). Pessoas e agregados gerados, não pessoas, famílias ou moradas reais. Podes procurar a tua freguesia, jogar a Freguesia misteriosa do dia e fazer download dos microdados.`
         : `${HONESTY.positioning.en} That is the 3,092 parishes of the 2021 Census (CAOP 2021 boundaries). Generated people and households, not real people, families or addresses. You can look up your parish, play the daily Mystery parish and download the microdata.`,
       method: { href: '/populacao/metodologia', label: pt ? 'Metodologia da população' : 'Population methodology' },
     },

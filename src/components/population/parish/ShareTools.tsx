@@ -83,7 +83,7 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
   };
 
   const message = status === 'copied'
-    ? (pt ? 'Ligação copiada.' : 'Link copied.')
+    ? (pt ? 'Link copiado.' : 'Link copied.')
     : status === 'failed'
       ? (pt ? 'Não foi possível concluir. Tenta outra vez.' : 'That did not work. Try again.')
       : '';
@@ -93,17 +93,17 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
       <div>
         <p className="max-w-2xl text-[15px] leading-relaxed text-stone-600">
           {pt
-            ? 'Partilha a ligação desta página ou descarrega um cartão (1200 × 630 px) para publicar. O cartão leva a fonte, a licença e a ligação para esta página.'
+            ? 'Partilha o link desta página ou faz download de um cartão (1200 × 630 px) para publicar. O cartão leva a fonte, a licença e o link para esta página.'
             : 'Share this page’s link or download a card (1200 × 630 px) to post. The card carries the source, the licence and the link to this page.'}
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Action variant="secondary" onClick={() => void share()}>
             {canShare ? <Share2 aria-hidden="true" className="h-4 w-4" /> : <Link2 aria-hidden="true" className="h-4 w-4" />}
-            {canShare ? (pt ? 'Partilhar' : 'Share') : (pt ? 'Copiar ligação' : 'Copy link')}
+            {canShare ? (pt ? 'Partilhar' : 'Share') : (pt ? 'Copiar link' : 'Copy link')}
           </Action>
           <Action variant="secondary" onClick={() => { if (status !== 'busy') void download(); }}>
             <Download aria-hidden="true" className="h-4 w-4" />
-            {pt ? 'Descarregar cartão' : 'Download card'}
+            {pt ? 'Download do cartão' : 'Download card'}
           </Action>
         </div>
         <p className="mt-2 min-h-5 text-sm text-stone-600" role="status">{message}</p>

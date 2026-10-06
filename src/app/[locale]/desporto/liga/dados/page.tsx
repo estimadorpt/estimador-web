@@ -40,7 +40,7 @@ const copy = {
     standfirstA:
       "As previsões das páginas da Liga Portugal vêm de ficheiros JSON estáticos servidos deste site, sem chave a pedir nem limite de pedidos. Só o jogo Contra o Modelo usa uma API própria, para guardar as previsões de quem joga; os dados do modelo estão todos aqui.",
     standfirstB:
-      "Se construíres alguma coisa com eles, podes usar as saídas do modelo nos termos da licença CC BY-NC 4.0: uso não comercial, com atribuição a estimador.pt e uma ligação para a página de origem. Os dados de terceiros que alguns ficheiros trazem ficam fora dessa licença (vê abaixo). E se publicares, diz-nos: gostamos de ver.",
+      "Se construíres alguma coisa com eles, podes usar as saídas do modelo nos termos da licença CC BY-NC 4.0: uso não comercial, com atribuição a estimador.pt e um link para a página de origem. Os dados de terceiros que alguns ficheiros trazem ficam fora dessa licença (vê abaixo). E se publicares, diz-nos: gostamos de ver.",
     filesTitle: "Ficheiros publicados",
     filesIntro:
       "A lista abaixo é gerada a partir do que está realmente no servidor no momento em que a página foi construída.",
@@ -56,7 +56,7 @@ const copy = {
     licenceOwn:
       "As saídas do modelo do estimador.pt (probabilidades, simulações, cenários, avaliações de jogadores e a avaliação do modelo) estão sob a licença Creative Commons Atribuição 4.0 Internacional",
     licenceOwnAfter:
-      ": podes usá-las, redistribuí-las e transformá-las, incluindo para fins comerciais, desde que atribuas a fonte («estimador.pt», com ligação para a página correspondente).",
+      ": podes usá-las, redistribuí-las e transformá-las, incluindo para fins comerciais, desde que atribuas a fonte («estimador.pt», com link para a página correspondente).",
     licenceThirdParty:
       "A licença não abrange os dados de terceiros que alguns ficheiros trazem, marcados na lista acima como «Fora da licença»: resultados e estatísticas de jogo (SofaScore), xG (FotMob), cotações de casas de apostas (Pinnacle e Bet365, via football-data.co.uk) e lesões e valores de mercado (Transfermarkt). Esses dados vêm da fonte original e não são redistribuíveis por nós: para os reutilizar, segue os termos de cada fonte.",
     licenceWarranty:

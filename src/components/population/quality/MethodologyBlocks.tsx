@@ -124,7 +124,7 @@ export function methodologyBlocks({ locale, meta, release, scorecard, ineResiden
                 {row.rule?.[locale] ?? String(meta.provenance.fields[row.field])}
                 {'caveat' in row && row.caveat && (
                   <span role="note" className="mt-2 block border-l-2 border-amber-500 pl-3 text-[13px] text-stone-700">
-                    {pt ? 'A resposta do site («Que famílias formam?»): ' : 'The site’s answer (“What families do they form?”): '}{row.caveat[locale]}
+                    {pt ? 'Resposta «Que famílias formam?». ' : 'Answer “What families do they form?”. '}{row.caveat[locale]}
                   </span>
                 )}
               </dd>

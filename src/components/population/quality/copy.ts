@@ -89,8 +89,8 @@ export const LIMITATIONS: Array<{ title: Text; body: Text }> = [
   {
     title: { pt: 'Otimização com limite de tempo', en: 'Clock-bound optimisation' },
     body: {
-      pt: 'Em 116 freguesias grandes, a última fase de pesquisa parou no limite de tempo e não por ter convergido. Estes resultados dependem da velocidade da máquina; o registo interno do produtor diz como terminou cada uma (não faz parte dos ficheiros publicados).',
-      en: 'In 116 large parishes the final search stopped at its time budget rather than at convergence. These results depend on machine speed; the producer’s internal record names how each one ended (it is not part of the published files).',
+      pt: 'Em 116 freguesias grandes, a última fase de pesquisa parou no limite de tempo e não por ter convergido. Estes resultados dependem da velocidade da máquina; o nosso registo interno diz como terminou cada uma (não faz parte dos ficheiros publicados).',
+      en: 'In 116 large parishes the final search stopped at its time budget rather than at convergence. These results depend on machine speed; our internal record names how each one ended (it is not part of the published files).',
     },
   },
   {

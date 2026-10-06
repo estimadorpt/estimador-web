@@ -599,7 +599,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                 </div>
                 <p className="mt-3 text-xs text-stone-500">
                   {pt
-                    ? 'Cada resposta tem também a sua ligação permanente, com a versão: «Copiar ligação», no fundo de cada cartão.'
+                    ? 'Cada resposta tem também o seu link permanente, com a versão: «Copiar link», no fundo de cada cartão.'
                     : 'Each answer also has its own permanent link, with the release: “Copy link”, at the foot of each card.'}
                 </p>
               </div>

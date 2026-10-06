@@ -47,9 +47,9 @@ function entries(locale: Locale): Entry[] {
       key: 'data',
       icon: icon(Download),
       kicker: pt ? 'Dados' : 'Data',
-      title: pt ? 'Descarrega a população' : 'Download the population',
+      title: pt ? 'Faz download da população' : 'Download the population',
       text: pt
-        ? 'Os ficheiros de pessoas e agregados, com o dicionário de variáveis e as somas de verificação, publicados no GitHub com licença CC BY-NC 4.0 (uso não comercial).'
+        ? 'Os ficheiros de pessoas e agregados, com o dicionário de variáveis e os checksums, publicados no GitHub com licença CC BY-NC 4.0 (uso não comercial).'
         : 'The person and household files, with the variable dictionary and checksums, published on GitHub under a CC BY-NC 4.0 licence (non-commercial use).',
       action: pt ? `Abrir a versão ${POPULATION_RELEASE}` : `Open release ${POPULATION_RELEASE}`,
       href: POPULATION_DOWNLOADS.release,

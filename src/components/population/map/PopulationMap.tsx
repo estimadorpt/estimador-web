@@ -124,7 +124,7 @@ const copy = {
     insets: 'Açores e Madeira em caixa; os Açores a uma escala menor.',
     selvagens: 'As ilhas Selvagens (Sé, Funchal) ficam fora do enquadramento.',
     showing: (name: string, what: string) => `${name}: ${what} no mapa.`,
-    mapLabel: (name: string) => `Mapa: ${name}. Usa Tab para percorrer os lugares e Enter para escolher; Escape sobe um nível. Antes do mapa, uma ligação salta para a lista.`,
+    mapLabel: (name: string) => `Mapa: ${name}. Usa Tab para percorrer os lugares e Enter para escolher; Escape sobe um nível. Antes do mapa, um link salta para a lista.`,
     breadcrumb: 'Onde estás no mapa',
     controls: 'Controlos do mapa',
   },
