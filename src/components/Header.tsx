@@ -7,16 +7,10 @@ import { Globe, Menu, X, ChevronDown } from 'lucide-react';
 import { LogoHorizontal } from './Logo';
 import { useArticleLanguagePath, useHasArticles } from '@/lib/article-navigation';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
-import { POPULATION_ROUTES } from '@/lib/config/population';
+import { isExactPath, isNavItemActive, siteNavigation, type NavLabels } from '@/components/brand/site-navigation';
 
-interface NavItem {
-  id: string;
-  href?: string;
-  label: string;
-  dropdown?: { href: string; label: string }[];
-}
-
-const focusStyle = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
+// Keyboard focus is the global double ring in globals.css (CLAUDE.md,
+// "Primitives"); nothing here declares its own outline.
 
 export function Header() {
   const t = useTranslations();
@@ -41,57 +35,35 @@ export function Header() {
     setParishPath(match && match[1] !== '_' ? `/populacao/freguesia/${decodeURIComponent(match[1]).toUpperCase()}/` : null);
   }, [pathname]);
 
-  // Ordered by what is live: the population, the Liga, the election archive,
-  // then the economy while it is in preparation (src/lib/config/economy-status.json).
-  const navigationItems: NavItem[] = [
-    { id: 'home', href: '/', label: t('nav.home') },
-    {
-      id: 'population', label: t('nav.population'),
-      dropdown: [
-        { href: POPULATION_ROUTES.hub, label: t('nav.populationSearch') },
-        { href: POPULATION_ROUTES.game, label: t('nav.populationGame') },
-        { href: POPULATION_ROUTES.data, label: t('nav.populationData') },
-        { href: POPULATION_ROUTES.quality, label: t('nav.populationQuality') },
-        { href: POPULATION_ROUTES.methodology, label: t('nav.populationMethodology') },
-      ],
-    },
-    {
-      id: 'sport', label: t('nav.sport'),
-      dropdown: [
-        { href: '/desporto/liga', label: t('nav.liga') },
-        { href: '/desporto/liga/jogadores', label: isPortuguese ? 'Jogadores' : 'Players' },
-        { href: '/desporto/liga/simulador', label: isPortuguese ? 'Simulador' : 'Simulator' },
-        { href: '/desporto/liga/jogo-previsoes', label: t('nav.game') },
-      ],
-    },
-    {
-      id: 'elections', label: t('nav.elections'),
-      dropdown: [
-        // The overview of the archive first; both forecasts are archives and
-        // the labels say so before the click.
-        { href: '/eleicoes/arquivo', label: t('elections.navArchiveGuide') },
-        { href: '/eleicoes/presidenciais', label: t('elections.navPresidential') },
-        { href: '/eleicoes/legislativas', label: t('elections.navParliamentary') },
-        { href: '/eleicoes/metodologia', label: t('elections.navMethodology') },
-      ],
-    },
-    // The editorial flag in src/lib/config/economy-status.json, not data age.
-    { id: 'economics', href: '/economia', label: t(ECONOMY_PUBLISHED ? 'nav.economics' : 'nav.economicsPreparing') },
-    // No nav item for an index with nothing in it in this language.
-    ...(hasArticles ? [{ id: 'articles', href: '/artigos', label: t('articles.title') }] : []),
-    {
-      id: 'about', label: t('nav.about'),
-      dropdown: [
-        { href: '/sobre', label: t('about.title') },
-        { href: '/metodologia', label: t('methodology.title') },
-        { href: '/privacidade', label: isPortuguese ? 'Privacidade' : 'Privacy' },
-      ],
-    },
-  ];
+  // The navigation is defined once (site-navigation.ts) and shared with the
+  // root 404's static header. The labels are read here with literal keys, so
+  // the client message payload test (client-messages.test.ts) sees each one.
+  const labels: NavLabels = {
+    home: t('nav.home'),
+    population: t('nav.population'),
+    populationSearch: t('nav.populationSearch'),
+    populationGame: t('nav.populationGame'),
+    populationData: t('nav.populationData'),
+    populationQuality: t('nav.populationQuality'),
+    populationMethodology: t('nav.populationMethodology'),
+    sport: t('nav.sport'),
+    game: t('nav.game'),
+    elections: t('nav.elections'),
+    electionsArchive: t('elections.navArchiveGuide'),
+    electionsPresidential: t('elections.navPresidential'),
+    electionsParliamentary: t('elections.navParliamentary'),
+    electionsMethodology: t('elections.navMethodology'),
+    economics: t('nav.economics'),
+    economicsPreparing: t('nav.economicsPreparing'),
+    articles: t('articles.title'),
+    about: t('nav.about'),
+    aboutSite: t('about.title'),
+    methodology: t('methodology.title'),
+  };
+  const navigationItems = siteNavigation(labels, { locale, hasArticles, economyPublished: ECONOMY_PUBLISHED });
 
-  const exactActive = (href: string) => pathname.replace(/\/$/, '') === href.replace(/\/$/, '');
-  const sectionActive = (href: string) => exactActive(href) || (href !== '/' && pathname.startsWith(`${href}/`));
-  const isActive = (item: NavItem) => item.href ? sectionActive(item.href) : item.dropdown?.some(sub => sectionActive(sub.href));
+  const exactActive = (href: string) => isExactPath(pathname, href);
+  const isActive = (item: (typeof navigationItems)[number]) => isNavItemActive(item, pathname);
   const closeNavigation = () => {
     setMobileMenuOpen(false);
     setOpenDropdown(null);
@@ -144,7 +116,10 @@ export function Header() {
           const href = targetLocale === 'pt' ? ptPath : enPath;
           const fallback = href !== pathname;
           const languageName = targetLocale === 'pt' ? 'Português' : 'English';
-          const className = `${mobile ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'} rounded font-medium transition-colors ${focusStyle} ${locale === targetLocale ? 'bg-cream text-ink shadow-sm' : 'text-stone-600 hover:text-ink'}`;
+          // 44px in the mobile menu, 40px in the desktop bar (which stays
+          // 60px tall). The current language is marked with a hairline, not
+          // a shadow, so its focus keeps the global paper ring (A11Y2-18).
+          const className = `inline-flex items-center justify-center rounded border font-medium transition-colors ${mobile ? 'min-h-11 min-w-11 px-3 text-sm' : 'min-h-10 min-w-10 px-2 text-xs'} ${locale === targetLocale ? 'border-line bg-cream text-ink' : 'border-transparent text-stone-600 hover:text-ink'}`;
           if (parishPath) return (
             <a key={targetLocale} href={`/${targetLocale}${parishPath}`} hrefLang={targetLocale} lang={targetLocale}
               onClick={closeNavigation} aria-label={languageName} title={languageName}
@@ -178,12 +153,12 @@ export function Header() {
     }} className="border-b border-line bg-paper/95 backdrop-blur-sm sticky top-0 z-50">
       {/* Every page has exactly one main#main-content (tabIndex -1, so the
           jump moves focus) that opens with its hero; landmarks.test.ts. */}
-      <a href="#main-content" className={`sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-cream focus:px-4 focus:py-3 focus:text-ink ${focusStyle}`}>
+      <a href="#main-content" className={`sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-cream focus:px-4 focus:py-3 focus:text-ink`}>
         {isPortuguese ? 'Saltar para o conteúdo' : 'Skip to content'}
       </a>
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
         <Link href="/" aria-label={isPortuguese ? 'estimador — página inicial' : 'estimador — home'}
-          onClick={closeNavigation} className={`brand-link shrink-0 block rounded-sm ${focusStyle}`}>
+          onClick={closeNavigation} className="brand-link inline-flex min-h-11 shrink-0 items-center rounded-sm">
           <span className="hidden sm:block" aria-hidden="true"><LogoHorizontal size={22} /></span>
           <span className="sm:hidden" aria-hidden="true"><LogoHorizontal size={18} /></span>
         </Link>
@@ -202,13 +177,13 @@ export function Header() {
                       openAndFocusDropdown(item.id, event.key === 'ArrowUp');
                     }
                   }}
-                  className={`text-sm px-2.5 py-2 rounded-md inline-flex items-center gap-1 transition-colors ${focusStyle} ${isActive(item) ? 'text-ink bg-ink/10 font-medium' : 'text-stone-600 hover:text-ink hover:bg-parchment'}`}>
+                  className={`text-sm px-2.5 py-2 rounded-md inline-flex items-center gap-1 transition-colors ${isActive(item) ? 'text-ink bg-ink/10 font-medium' : 'text-stone-600 hover:text-ink hover:bg-parchment'}`}>
                   {item.label}<ChevronDown aria-hidden="true" className={`w-3 h-3 ${openDropdown === item.id ? 'rotate-180' : ''}`} />
                 </button>
-                <ul id={`desktop-${item.id}`} hidden={openDropdown !== item.id} className="absolute top-full right-0 mt-1 bg-cream border border-line shadow-lg shadow-forest/10 rounded-md py-1 min-w-[210px] z-50">
+                <ul id={`desktop-${item.id}`} hidden={openDropdown !== item.id} className="absolute top-full right-0 mt-1 bg-cream border border-line shadow-lg shadow-forest/10 rounded-md py-1 min-w-[16rem] z-50">
                   {item.dropdown.map(sub => <li key={sub.href}>
                     <Link href={sub.href} onClick={closeNavigation} aria-current={exactActive(sub.href) ? 'page' : undefined}
-                      className={`block px-4 py-2.5 text-sm ${focusStyle} ${exactActive(sub.href) ? 'text-ink bg-ink/5 font-medium' : 'text-stone-700 hover:bg-stone-100'}`}>
+                      className={`block whitespace-nowrap px-4 py-2.5 text-sm ${exactActive(sub.href) ? 'text-ink bg-ink/5 font-medium' : 'text-stone-700 hover:bg-stone-100'}`}>
                       {sub.label}
                     </Link>
                   </li>)}
@@ -216,7 +191,7 @@ export function Header() {
               </div>
             ) : (
               <Link key={item.id} href={item.href!} onClick={closeNavigation} aria-current={exactActive(item.href!) ? 'page' : undefined}
-                className={`text-sm px-2.5 py-2 rounded-md ${focusStyle} ${isActive(item) ? 'text-ink bg-ink/10 font-medium' : 'text-stone-600 hover:text-ink hover:bg-parchment'}`}>
+                className={`text-sm px-2.5 py-2 rounded-md ${isActive(item) ? 'text-ink bg-ink/10 font-medium' : 'text-stone-600 hover:text-ink hover:bg-parchment'}`}>
                 {item.label}
               </Link>
             ))}
@@ -225,7 +200,7 @@ export function Header() {
           <button type="button" ref={mobileToggleRef} onClick={() => setMobileMenuOpen(current => !current)}
             aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation"
             aria-label={isPortuguese ? (mobileMenuOpen ? 'Fechar menu' : 'Abrir menu') : (mobileMenuOpen ? 'Close menu' : 'Open menu')}
-            className={`lg:hidden p-3 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md ${focusStyle}`}>
+            className={`lg:hidden p-3 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md`}>
             {mobileMenuOpen ? <X aria-hidden="true" className="w-5 h-5" /> : <Menu aria-hidden="true" className="w-5 h-5" />}
           </button>
         </div>
@@ -236,13 +211,13 @@ export function Header() {
             <div key={item.id}>
               <button type="button" aria-expanded={mobileExpanded === item.id} aria-controls={`mobile-${item.id}`}
                 onClick={() => setMobileExpanded(current => current === item.id ? null : item.id)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-md text-base font-medium ${focusStyle} ${isActive(item) ? 'text-ink bg-ink/10' : 'text-stone-700 hover:bg-stone-100'}`}>
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-md text-base font-medium ${isActive(item) ? 'text-ink bg-ink/10' : 'text-stone-700 hover:bg-stone-100'}`}>
                 {item.label}<ChevronDown aria-hidden="true" className={`w-4 h-4 ${mobileExpanded === item.id ? 'rotate-180' : ''}`} />
               </button>
               <ul id={`mobile-${item.id}`} hidden={mobileExpanded !== item.id} className="ml-4 mt-1 space-y-1">
                 {item.dropdown.map(sub => <li key={sub.href}>
                   <Link href={sub.href} onClick={closeNavigation} aria-current={exactActive(sub.href) ? 'page' : undefined}
-                    className={`block px-4 py-3 rounded-md text-sm ${focusStyle} ${exactActive(sub.href) ? 'text-ink bg-ink/5 font-medium' : 'text-stone-600 hover:bg-stone-100'}`}>
+                    className={`block px-4 py-3 rounded-md text-sm ${exactActive(sub.href) ? 'text-ink bg-ink/5 font-medium' : 'text-stone-600 hover:bg-stone-100'}`}>
                     {sub.label}
                   </Link>
                 </li>)}
@@ -250,7 +225,7 @@ export function Header() {
             </div>
           ) : (
             <Link key={item.id} href={item.href!} onClick={closeNavigation} aria-current={exactActive(item.href!) ? 'page' : undefined}
-              className={`block px-4 py-3 rounded-md text-base font-medium ${focusStyle} ${isActive(item) ? 'text-ink bg-ink/10' : 'text-stone-700 hover:bg-stone-100'}`}>
+              className={`block px-4 py-3 rounded-md text-base font-medium ${isActive(item) ? 'text-ink bg-ink/10' : 'text-stone-700 hover:bg-stone-100'}`}>
               {item.label}
             </Link>
           ))}

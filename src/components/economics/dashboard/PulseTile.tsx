@@ -28,6 +28,7 @@ import {
 } from '@/lib/utils/economy-format';
 import { labelKey, pickNote, pickOwnLanguage } from '@/lib/i18n/economy-labels';
 import type { PulseTileData, PulsePoint } from '@/types/economy-dashboard';
+import { withMinus } from '@/lib/typography';
 
 function isNum(v: number | null | undefined): v is number {
   return typeof v === 'number' && Number.isFinite(v);
@@ -243,7 +244,7 @@ export async function PulseTile({
           <ChartTable
             caption={t('pulseChartAria')}
             columns={[t('tableDate'), t('tableValue')]}
-            rows={history.filter((p) => p && isNum(p.value)).map((p) => [fmtDate(p.date, locale), `${new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(p.value)}%`])}
+            rows={history.filter((p) => p && isNum(p.value)).map((p) => [fmtDate(p.date, locale), `${withMinus(new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(p.value))}%`])}
           />
         </div>
       )}

@@ -12,7 +12,8 @@ import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { RevisedDate } from '@/components/brand/RevisedDate';
 import type { Metadata } from 'next';
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
@@ -57,6 +58,9 @@ function getContent(locale: string): { content: string; actualLocale: string } {
 /** The month the prototype the page describes was last tested (no feed is shipped until launch). */
 const PROTOTYPE_TESTED = '2026-07';
 
+/** When this page's text was last checked (a day, like every methodology page). */
+const REVISED = '2026-10-06';
+
 export default async function EconomicsMethodologyPage({
   params,
 }: {
@@ -82,20 +86,17 @@ export default async function EconomicsMethodologyPage({
       <Header />
 
       <main id="main-content" tabIndex={-1}>
+      {/* One kicker (the way back to the section) and one statement of the
+          status, the lede (M-5): the body does not repeat it. */}
       <PageHero
         measure="wide"
         back={{ href: "/economia", label: t(ECONOMY_PUBLISHED ? 'title' : 'preparingTitle') }}
-        icon={<BookOpen aria-hidden="true" className="w-4 h-4" />}
-        eyebrow={t(ECONOMY_PUBLISHED ? 'eyebrow' : 'preparingEyebrow')}
         title={t('methodologyTitle')}
+        lede={ECONOMY_PUBLISHED ? undefined : t('methodologyPreparingNotice', { date: testedUntil })}
+        meta={<RevisedDate date={REVISED} locale={locale} />}
       />
       <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-4xl">
 
-        {!ECONOMY_PUBLISHED && (
-          <p className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-800">
-            {t('methodologyPreparingNotice', { date: testedUntil })}
-          </p>
-        )}
         {actualLocale !== locale && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm text-amber-800">

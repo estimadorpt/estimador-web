@@ -1,11 +1,12 @@
 import { useTranslations } from 'next-intl';
 import { pickNote } from '@/lib/i18n/economy-labels';
+import { Disclosure } from '@/components/viz/Disclosure';
 
 type I18n = { en?: string; pt?: string };
 
 const TONE = {
   body: 'text-sm leading-relaxed text-stone-700 max-w-prose border-l-2 border-stone-300 pl-3',
-  faint: 'text-[11px] leading-snug text-stone-400 max-w-prose',
+  faint: 'text-[11px] leading-snug text-stone-500 max-w-prose',
   caveat: 'text-[11px] leading-snug text-amber-700 max-w-prose border-l-2 border-amber-200 pl-2',
 } as const;
 
@@ -44,12 +45,10 @@ export function ProducerNote({
 
   if (!foreign) return <div className={`space-y-1 ${className}`}>{paragraphs}</div>;
 
+  // The site's one show/hide control (CLAUDE.md, "Primitives").
   return (
-    <details className={className}>
-      <summary className="cursor-pointer text-[11px] font-semibold text-stone-500 hover:text-ink">
-        {t('producerNoteEn')}
-      </summary>
+    <Disclosure summary={t('producerNoteEn')} className={className}>
       <div className="mt-1.5 space-y-1">{paragraphs}</div>
-    </details>
+    </Disclosure>
   );
 }

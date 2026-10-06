@@ -4,7 +4,6 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from 'next-intl/server';
 import { setRequestLocale } from '@/i18n/request-locale';
 import { PageHero } from '@/components/PageHero';
-import { brandDescriptor } from '@/lib/brand/descriptor';
 import type { Metadata } from 'next';
 import { readFileSync, existsSync } from 'fs';
 import path from 'path';
@@ -15,6 +14,7 @@ import { ECONOMY_PUBLISHED, economyState, type EconomyState } from '@/lib/config
 import { Link } from '@/i18n/routing';
 import { fmtDate } from '@/lib/utils/economy-format';
 import { POPULATION_RELEASE } from '@/lib/config/population';
+import { HONESTY } from '@/lib/population/labels';
 
 export async function generateMetadata({
   params
@@ -90,7 +90,7 @@ function EstadoAtual({
 }) {
   const pt = locale !== 'en';
   const economyStatus = economyNow === 'preparing'
-    ? (pt ? 'Em preparação · sem números publicados.' : 'In preparation · no figures published.')
+    ? (pt ? 'Em preparação · ainda sem leituras da economia publicadas.' : 'In preparation · no readings of the economy published yet.')
     : economyNow === 'paused'
     ? (pt
         ? `Em pausa${economyDateLabel ? ` · última leitura a ${economyDateLabel}` : ''}.`
@@ -106,9 +106,11 @@ function EstadoAtual({
       status: pt
         ? `Publicada · população sintética v${POPULATION_RELEASE} (Censos 2021), de 5 de outubro de 2026.`
         : `Released · synthetic population v${POPULATION_RELEASE} (2021 Census), 5 October 2026.`,
+      // The producer's positioning sentence verbatim (HONESTY.positioning), then
+      // which parishes "every parish" means, as a sentence of its own.
       text: pt
-        ? 'Tanto quanto nos foi possível apurar, a primeira população sintética de acesso aberto a cobrir as 3 092 freguesias dos Censos 2021 (CAOP 2021). Pessoas e agregados gerados, não pessoas, famílias ou moradas reais. Podes procurar a tua freguesia, jogar a Freguesia misteriosa do dia e descarregar os microdados.'
-        : 'To the best of our knowledge, the first open-access synthetic population to cover the 3,092 parishes of the 2021 Census (CAOP 2021). Generated people and households, not real people, families or addresses. You can look up your parish, play the daily Mystery parish and download the microdata.',
+        ? `${HONESTY.positioning.pt} São as 3 092 freguesias dos Censos 2021 (limites da CAOP 2021). Pessoas e agregados gerados, não pessoas, famílias ou moradas reais. Podes procurar a tua freguesia, jogar a Freguesia misteriosa do dia e descarregar os microdados.`
+        : `${HONESTY.positioning.en} That is the 3,092 parishes of the 2021 Census (CAOP 2021 boundaries). Generated people and households, not real people, families or addresses. You can look up your parish, play the daily Mystery parish and download the microdata.`,
       method: { href: '/populacao/metodologia', label: pt ? 'Metodologia da população' : 'Population methodology' },
     },
     {
@@ -120,7 +122,7 @@ function EstadoAtual({
       text: pt
         ? 'Um modelo bayesiano que simula milhares de épocas possíveis para estimar a classificação final, as probabilidades de título e de despromoção e o peso de cada jogo nessas contas.'
         : 'A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.',
-      method: { href: '/desporto/liga/metodologia', label: pt ? 'Metodologia do futebol' : 'Football methodology' },
+      method: { href: '/desporto/liga/metodologia', label: pt ? 'Metodologia da Liga Portugal' : 'Liga Portugal methodology' },
     },
     {
       label: pt ? 'Eleições presidenciais 2026' : 'Presidential election 2026',
@@ -151,10 +153,13 @@ function EstadoAtual({
     },
   ];
 
+  // One rule between items and none doubled at the end: the MDX's "---"
+  // closes the list (CL2-11). The id is the mission paragraph's link target.
   return (
-    <ul className="mb-5 list-none divide-y divide-line border-y border-line pl-0">
+    <ul id="o-que-esta-publicado" className="mb-5 list-none divide-y divide-line border-t border-line pl-0">
       {items.map(item => (
-        <li key={item.href} className="py-5">
+        // Full width, so each rule between items is as long as the list's own (CL2-11).
+        <li key={item.href} className="max-w-none py-5">
           <h3 className="m-0 text-lg">
             <Link href={item.href} locale={locale} className="text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{item.label}</Link>
           </h3>
@@ -199,9 +204,18 @@ export default async function AboutPage({
       <Header />
 
       <main id="main-content" tabIndex={-1}>
-        <PageHero measure="reading" compact title={t('about.title')} lede={brandDescriptor(locale)} />
+        {/* The lede says who makes the site; the descriptor is already in
+            this page's footer, so it is not stated a third time (CL2-16). */}
+        <PageHero
+          measure="reading"
+          compact
+          title={t('about.title')}
+          lede={locale === 'en'
+            ? 'An independent project by Bernardo Caldas: data and models about Portugal, with the uncertainty in view.'
+            : 'Um projeto independente de Bernardo Caldas: dados e modelos sobre Portugal, com a incerteza à vista.'}
+        />
 
-        <div className="mx-auto w-full max-w-7xl px-4 py-10 md:py-12"><div className="max-w-3xl">
+        <div className="mx-auto w-full max-w-7xl px-4 pb-10 pt-4 md:pb-12 md:pt-6"><div className="max-w-3xl">
         {/* Locale Notice (if fallback) */}
         {actualLocale !== locale && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
@@ -214,7 +228,9 @@ export default async function AboutPage({
           </div>
         )}
 
-        <article className="article-body max-w-none" lang={actualLocale}>
+        {/* The first heading sits under the hero's rule at the section gap,
+            not at a heading's full top margin (CL2-11). */}
+        <article className="article-body max-w-none [&>:first-child]:!mt-0" lang={actualLocale}>
           <MDXRemote source={mdxContent} components={components} />
         </article>
         </div></div>

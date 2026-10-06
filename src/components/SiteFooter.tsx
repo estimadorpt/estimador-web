@@ -8,7 +8,9 @@ import { brandDescriptor, brandLine } from '@/lib/brand/descriptor';
 
 // Links are ink with an underline at rest (CLAUDE.md); keyboard focus is the
 // global double ring in globals.css, so nothing here declares its own.
-const linkStyle = 'text-ink underline underline-offset-4 decoration-ink/40 transition-colors hover:decoration-ink';
+// Each link is a 44px target on a phone (audit UXM2-09) and tightens to the
+// text's own height where a pointer is precise.
+const linkStyle = 'inline-flex min-h-11 items-center text-ink underline underline-offset-4 decoration-ink/40 transition-colors hover:decoration-ink md:min-h-8';
 
 interface FooterItem {
   href: string;
@@ -19,7 +21,7 @@ function FooterColumn({ heading, items, locale }: { heading: string; items: Foot
   return (
     <div>
       <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{heading}</h2>
-      <ul className="space-y-1.5">
+      <ul>
         {items.map(item => (
           <li key={item.href}>
             <Link href={item.href} locale={locale} className={linkStyle}>
@@ -49,7 +51,8 @@ export async function SiteFooter({ locale }: { locale: string }) {
   // election archive, then the economy while it is in preparation.
   const sections: FooterItem[] = [
     { href: '/populacao', label: t('nav.population') },
-    { href: '/desporto/liga', label: t('football.title') },
+    // One public name for football, the league's own (CLAUDE.md).
+    { href: '/desporto/liga', label: t('nav.liga') },
     // Both forecasts are archives; the label says so wherever they are listed.
     { href: '/eleicoes/presidenciais', label: t('elections.navPresidential') },
     { href: '/eleicoes/legislativas', label: t('elections.navParliamentary') },
@@ -69,7 +72,7 @@ export async function SiteFooter({ locale }: { locale: string }) {
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
-            <Link href="/" locale={locale} className="brand-link inline-block rounded-sm" aria-label={pt ? 'estimador — página inicial' : 'estimador — home'}>
+            <Link href="/" locale={locale} className="brand-link inline-flex min-h-11 items-center rounded-sm" aria-label={pt ? 'estimador — página inicial' : 'estimador — home'}>
               <LogoHorizontal size={20} />
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-stone-500">
@@ -81,9 +84,18 @@ export async function SiteFooter({ locale }: { locale: string }) {
             <FooterColumn heading={t('footer.project')} items={project} locale={locale} />
             <div>
               <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t('footer.contact')}</h2>
-              <ul className="space-y-1.5">
+              <ul>
                 <li>
                   <a href="mailto:info@estimador.pt" className={linkStyle}>info@estimador.pt</a>
+                </li>
+                {/* A way to follow the project between visits (audit CL2-15):
+                    the organisation's public repositories, where each data
+                    release is published. The one account the site can vouch
+                    for (structured-data.ts sameAs). */}
+                <li>
+                  <a href="https://github.com/estimadorpt" rel="me" className={linkStyle}>
+                    {pt ? 'GitHub (versões dos dados)' : 'GitHub (data releases)'}
+                  </a>
                 </li>
                 {hasArticles && (
                   <li>

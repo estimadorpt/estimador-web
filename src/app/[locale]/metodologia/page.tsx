@@ -4,6 +4,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from 'next-intl/server';
 import { setRequestLocale } from '@/i18n/request-locale';
 import { PageHero } from '@/components/PageHero';
+import { RevisedDate } from '@/components/brand/RevisedDate';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { POPULATION_RELEASE } from '@/lib/config/population';
@@ -50,8 +51,6 @@ export default async function MethodologyPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const pt = locale !== 'en';
-  const revised = new Intl.DateTimeFormat(pt ? 'pt-PT' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
-    .format(new Date(`${HUB_REVISED}T00:00:00Z`));
 
   const areas: Area[] = pt ? [
     {
@@ -77,7 +76,7 @@ export default async function MethodologyPage({
     {
       label: ECONOMY_PUBLISHED ? 'Economia' : 'Economia · em preparação',
       question: 'Como vamos ler a economia?',
-      description: 'As fontes, os selos que vão distinguir dados oficiais de estimativas, e como o protótipo foi avaliado. Ainda sem números publicados.',
+      description: 'As fontes, os selos que vão distinguir dados oficiais de estimativas, e como o protótipo foi avaliado. Ainda não há leituras nem estimativas da economia publicadas; os números da página são de um teste interno do protótipo.',
       href: '/economia/metodologia',
     },
   ] : [
@@ -104,7 +103,7 @@ export default async function MethodologyPage({
     {
       label: ECONOMY_PUBLISHED ? 'Economy' : 'Economy · in preparation',
       question: 'How will we read the economy?',
-      description: 'The sources, the labels that will tell official data from estimates, and how the prototype was evaluated. No figures published yet.',
+      description: 'The sources, the labels that will tell official data from estimates, and how the prototype was evaluated. No readings or estimates of the economy are published yet; the figures on that page come from an internal test of the prototype.',
       href: '/economia/metodologia',
     },
   ];
@@ -130,10 +129,10 @@ export default async function MethodologyPage({
           eyebrow={pt ? 'Dados, modelos e limites' : 'Data, models and limits'}
           title={pt ? 'Como chegamos a cada resposta?' : 'How do we arrive at each answer?'}
           lede={pt ? 'Cada secção tem fontes, pressupostos e formas de verificar diferentes. Escolhe a que estás a explorar.' : 'Each section has its own sources, assumptions and ways to check the results. Choose the one you are exploring.'}
-          meta={<span>{pt ? `Revisto a ${revised}` : `Revised ${revised}`}</span>}
+          meta={<RevisedDate date={HUB_REVISED} locale={locale} />}
         />
         <div className="mx-auto w-full max-w-7xl px-4 pb-10 md:pb-16"><div className="max-w-3xl">
-          <nav aria-label={pt ? 'Métodos por secção' : 'Methods by section'} className="my-8 divide-y divide-line border-y border-line">
+          <nav aria-label={pt ? 'Métodos por secção' : 'Methods by section'} className="mb-8 mt-3 divide-y divide-line border-b border-line">
             {areas.map(area => (
               <div key={area.href} id={area.href === '/eleicoes/metodologia' ? 'eleicoes' : undefined} className="py-5">
                 {/* Old shared links (/metodologia#eleicoes, #segunda-volta-2026) land on the elections row. */}

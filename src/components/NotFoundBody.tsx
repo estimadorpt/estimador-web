@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Action } from '@/components/brand/Action';
 import { Mosaic } from '@/components/brand/Mosaic';
+import { CONTAINER_CLASS } from '@/components/brand/Container';
 
 /**
  * The 404, in one language: the hero is the page, with the mosaic beside it
@@ -22,7 +23,8 @@ export async function NotFoundBody({ locale, withTitle = false }: { locale: 'pt'
       {withTitle && <title>{t('title')}</title>}
       {/* No bottom rule: the footer draws the one rule below it. */}
       <section>
-        <div className="mx-auto grid max-w-5xl gap-10 px-4 py-16 md:grid-cols-[1.2fr_1fr] md:items-center md:py-24">
+        {/* The shared container: the text starts where the header's logo does. */}
+        <div className={`${CONTAINER_CLASS} grid gap-10 py-16 md:grid-cols-[1.2fr_1fr] md:items-center md:py-24`}>
           <div>
             <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">404</p>
             <h1 className="max-w-xl text-4xl md:text-5xl">{t('heading')}</h1>

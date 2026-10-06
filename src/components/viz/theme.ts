@@ -7,6 +7,7 @@
  * four: fold into "Outros" or facet.
  */
 import { BRAND } from '@/lib/brand';
+import { withMinus } from '@/lib/typography';
 
 export const SERIES = ['#159881', '#a27d27', '#697fc5', '#ba6b4f'] as const;
 export const SERIES_DARK = ['#0d957e', '#9f7a23', '#677cc2', '#b7684c'] as const;
@@ -42,8 +43,9 @@ export const NUMBER = {
   en: new Intl.NumberFormat('en-GB', { maximumFractionDigits: 1 }),
 };
 
+/** A chart value in the page's format; negatives take the minus sign U+2212. */
 export function formatValue(value: number, locale: 'pt' | 'en' = 'pt', unit = ''): string {
-  return `${NUMBER[locale].format(value)}${unit}`;
+  return `${withMinus(NUMBER[locale].format(value))}${unit}`;
 }
 
 /** A series colour by slot, in fixed order, wrapping only into the de-emphasis grey. */

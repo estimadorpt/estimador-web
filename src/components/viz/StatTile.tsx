@@ -22,7 +22,7 @@ interface StatTileProps {
  */
 export function StatTile({ label, value, unit, delta, note, trend, hero = false, className = '' }: StatTileProps) {
   const positive = delta ? (delta.direction === 'flat' ? null : (delta.direction === 'up') === (delta.good ?? true)) : null;
-  // Text colours, so both clear 4.5:1 on cream: tree (#4e8056) gave 4.45:1.
+  // Text colours that clear 4.5:1 on cream (palette-tokens.test.ts).
   const deltaColor = positive === null ? 'text-stone-500' : positive ? 'text-emerald-700' : 'text-terracotta';
   const Icon = delta?.direction === 'up' ? ArrowUpRight : delta?.direction === 'down' ? ArrowDownRight : Minus;
   return (

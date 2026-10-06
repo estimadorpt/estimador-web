@@ -132,7 +132,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         lede={pt
           ? 'O estimador.pt publica estimativas com a incerteza à vista. A marca é isso mesmo: um intervalo de credibilidade desenhado numa só tinta, o nome na fonte da interface, e um mosaico de pastéis reservado para as superfícies onde não há dados a ler.'
           : 'estimador.pt publishes estimates with their uncertainty in plain sight. The brand is exactly that: a credible interval drawn in one ink, the name in the interface face, and a pastel mosaic reserved for surfaces where nothing is being measured.'}
-        meta={<span>{pt ? 'Versão de setembro de 2026 · ficheiros no fim da página' : 'September 2026 · files at the end of the page'}</span>}
+        meta={<span>{pt ? 'Versão de outubro de 2026 · ficheiros no fim da página' : 'October 2026 · files at the end of the page'}</span>}
         art={<Mosaic variant="corner" className="h-full w-full" />}
       />
 
@@ -249,7 +249,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           {(['economy', 'football', 'elections'] as const).map((scene, index) => <div key={scene} className="rounded-2xl border border-line bg-cream p-4">
             <SectionIllustration scene={scene} />
             <h3 className="mt-4 text-lg">{(pt ? ['Economia: a loja', 'Futebol: o campo', 'Eleições: a mesa de voto'] : ['Economy: the shop', 'Football: the ground', 'Elections: the polling place'])[index]}</h3>
-            <a href={`/images/sections/${scene}.webp`} download className="mt-2 inline-flex min-h-11 items-center text-sm font-bold underline underline-offset-4">{pt ? 'Descarregar ilustração' : 'Download illustration'}</a>
+            <a href={`/images/sections/${scene}.webp`} download className="mt-2 inline-flex min-h-11 items-center text-sm font-bold underline underline-offset-4">{pt ? 'Descarregar ilustração' : 'Download illustration'}<span className="sr-only">{`: ${scene}.webp`}</span></a>
           </div>)}
         </div>
         <ul className="mt-8 grid gap-2 md:grid-cols-2">
@@ -358,7 +358,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           {KIT.map(([file, size, note]) => (
             <li key={file} className="flex items-center justify-between gap-4 px-4 py-3">
               <div><div className="font-mono text-sm text-ink">{file.split('/').pop()}</div><div className="text-xs text-stone-500">{size} · {tr(pt, note)}</div></div>
-              <a href={`/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />{pt ? 'Descarregar' : 'Download'}</a>
+              <a href={`/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />{pt ? 'Descarregar' : 'Download'}<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
             </li>
           ))}
         </ul>
@@ -370,7 +370,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           {FILES.map(([file, note]) => (
             <li key={file} className="flex items-center justify-between gap-4 px-4 py-3">
               <div><div className="font-mono text-sm text-ink">{file}</div><div className="text-xs text-stone-500">{tr(pt, note)}</div></div>
-              <a href={`/brand/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />{pt ? 'Descarregar' : 'Download'}</a>
+              <a href={`/brand/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />{pt ? 'Descarregar' : 'Download'}<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
             </li>
           ))}
         </ul>
