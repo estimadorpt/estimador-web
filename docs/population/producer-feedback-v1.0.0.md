@@ -64,7 +64,7 @@ against the v1.0.3 package. Each says what the site does meanwhile.
     (`GITHUB_PUBLISHED`).
 23. **Reword the positioning sentence** the site quotes verbatim (`HONESTY.positioning`):
     "todas as freguesias de Portugal" should read "as 3 092 freguesias dos Censos 2021
-    (CAOP 2021)", since Portugal has more parishes since the 2025 split (FRESH-11). *Web:*
+    (CAOP 2021)": the 2025 split gave Portugal more parishes than that (FRESH-11). *Web:*
     keeps the quotation unchanged and words its own coverage lines that way.
 24. **Confirm whether `sex_age_single_interior` entered the v10 tilt.** The package calls
     it a tilt-only key, which reads either way: fitted a little, or not at all. *Web:* says
