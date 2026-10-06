@@ -11,7 +11,7 @@
  * travels without the page around it.
  */
 import { BRAND, MARK_FULL } from '@/lib/brand';
-import { POPULATION_RELEASE } from '@/lib/config/population';
+import { POPULATION_PUBLISHED, POPULATION_RELEASE } from '@/lib/config/population';
 import type { ParishRecord, PopulationRecipe, PortraitRecipe, RecipeName } from '@/types/population';
 import { headlineCell, formatDisplay } from './compact';
 import { HONESTY, TIER_COPY, type Locale } from './labels';
@@ -56,8 +56,31 @@ export interface ShareCardModel {
   /** "Qualidade A · números da própria freguesia", when the facts are the parish's own. */
   tierNote: string | null;
   honesty: string;
+  /**
+   * The licence's attribution, short form, for a card that travels on its own:
+   * the source (INE, Censos 2021), that the information was modified, the
+   * licence, and where the full attribution is.
+   */
+  attribution: string;
+  /** The release, its publication date and the parish's address. */
   footer: string;
   fileName: string;
+}
+
+const MONTHS: Record<Locale, string[]> = {
+  pt: ['jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.'],
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+};
+
+/** "5 out. 2026" / "5 Oct 2026". */
+function shortDate(iso: string, locale: Locale): string {
+  const [year, month, day] = iso.slice(0, 10).split('-').map(Number);
+  return `${day} ${MONTHS[locale][month - 1]} ${year}`;
+}
+
+/** "https://estimador.pt/pt/populacao/freguesia/010103/" → "estimador.pt/pt/populacao/freguesia/010103". */
+function bareUrl(url: string): string {
+  return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 }
 
 /** "Quem vive em Aguada de Cima?" / "Quem vive na União das freguesias de …?" */
@@ -84,10 +107,14 @@ export interface ShareCardInput {
   municipalityName: string;
   regionName: string;
   locale: Locale;
+  /** The parish page's address, printed on the card. */
+  url?: string;
+  /** The release's publication date (YYYY-MM-DD). */
+  published?: string;
   maxFacts?: number;
 }
 
-export function shareCardModel({ record, recipes, name, municipalityName, regionName, locale, maxFacts = 3 }: ShareCardInput): ShareCardModel {
+export function shareCardModel({ record, recipes, name, municipalityName, regionName, locale, url, published = POPULATION_PUBLISHED, maxFacts = 3 }: ShareCardInput): ShareCardModel {
   const fallbackName = record.fallback?.name ?? municipalityName;
   const facts: ShareFact[] = [];
   for (const candidate of SHARE_FACTS) {
@@ -119,9 +146,12 @@ export function shareCardModel({ record, recipes, name, municipalityName, region
       : null,
     tierNote,
     honesty: HONESTY.synthetic[locale],
+    attribution: locale === 'pt'
+      ? 'Fonte: INE, Censos 2021 · informação modificada por estimador.pt · CC BY 4.0 · atribuição completa em estimador.pt/pt/populacao/dados'
+      : 'Source: INE, 2021 Census · information modified by estimador.pt · CC BY 4.0 · full attribution at estimador.pt/en/populacao/dados',
     footer: locale === 'pt'
-      ? `estimador.pt · População sintética v${POPULATION_RELEASE} · Censos 2021`
-      : `estimador.pt · Synthetic population v${POPULATION_RELEASE} · 2021 Census`,
+      ? `População sintética v${POPULATION_RELEASE} · ${shortDate(published, locale)} · ${url ? bareUrl(url) : 'estimador.pt'}`
+      : `Synthetic population v${POPULATION_RELEASE} · ${shortDate(published, locale)} · ${url ? bareUrl(url) : 'estimador.pt'}`,
     fileName: `estimador-${record.code.toLowerCase()}-${slug(name) || 'freguesia'}.png`,
   };
 }
@@ -194,7 +224,7 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
 
   // The title takes the largest size at which the whole left column (question,
   // place, tier or município note) ends above the bottom rule; long União names step down.
-  const divider = height - 102;
+  const divider = SHARE_CARD_DIVIDER;
   const leftBottom = divider - 28;
   const titleTop = 172 + 22;
   ctx.font = font(500, 26);
@@ -232,9 +262,9 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
   // Right column: the facts in a cream panel with a hairline.
   if (hasFacts) {
     const panelX = 620;
-    const panelY = 112;
+    const panelY = 100;
     const panelW = width - pad - panelX;
-    const panelH = divider - 32 - panelY;
+    const panelH = divider - 24 - panelY;
     ctx.fillStyle = BRAND.cream;
     ctx.strokeStyle = BRAND.line;
     ctx.lineWidth = 2;
@@ -257,12 +287,12 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
         ctx.stroke();
       }
       ctx.fillStyle = BRAND.ink;
-      ctx.font = font(800, 48);
-      ctx.fillText(fact.value, panelX + 32, top + 58);
+      ctx.font = font(800, 44);
+      ctx.fillText(fact.value, panelX + 32, top + 52);
       ctx.font = font(500, 21);
       ctx.fillStyle = BRAND.ink;
       wrapLines(fact.label, inner, t => ctx.measureText(t).width, 2).forEach((line, j) => {
-        ctx.fillText(line, panelX + 32, top + 90 + j * 25);
+        ctx.fillText(line, panelX + 32, top + 80 + j * 24);
       });
     });
   }
@@ -274,12 +304,26 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
   ctx.moveTo(pad, divider);
   ctx.lineTo(width - pad, divider);
   ctx.stroke();
+  // Four lines at most, 20 px each: the honesty line, the licence attribution
+  // (it may take two), and the release, its date and the parish's address.
+  const bottomWidth = width - pad * 2;
+  let y = divider + 34;
   ctx.font = font(500, 20);
   ctx.fillStyle = BRAND.muted;
-  ctx.fillText(model.honesty, pad, height - 68);
+  ctx.fillText(model.honesty, pad, y);
+  ctx.font = font(500, 20);
+  ctx.fillStyle = BRAND.ink;
+  for (const line of wrapLines(model.attribution, bottomWidth, t => ctx.measureText(t).width, 2)) {
+    y += 28;
+    ctx.fillText(line, pad, y);
+  }
   ctx.font = font(700, 20);
   ctx.fillStyle = BRAND.ink;
-  ctx.fillText(model.footer, pad, height - 36);
+  y += 28;
+  ctx.fillText(wrapLines(model.footer, bottomWidth, t => ctx.measureText(t).width, 1)[0], pad, y);
 
   ctx.restore();
 }
+
+/** Where the bottom rule sits: room under it for four 20 px lines (honesty, attribution ×2, release and address). */
+export const SHARE_CARD_DIVIDER = SHARE_CARD.height - 152;

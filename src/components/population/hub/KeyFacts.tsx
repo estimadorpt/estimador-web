@@ -27,8 +27,8 @@ export function KeyFacts({ locale, persons, households, parishes, municipalities
       <h2 id="population-facts" className="sr-only">{pt ? 'O que tem esta versão' : 'What this release contains'}</h2>
       <p className="mb-3 text-sm text-stone-600">{HONESTY.synthetic[locale]}</p>
       <KpiRow className="lg:grid-cols-3!">
-        <StatTile label={pt ? 'Pessoas geradas' : 'People generated'} value={n(persons)} note={pt ? 'Calibradas nos Censos 2021' : 'Calibrated to the 2021 Census'} />
-        <StatTile label={pt ? 'Agregados gerados' : 'Households generated'} value={n(households)} note={pt ? 'Calibrados nos Censos 2021' : 'Calibrated to the 2021 Census'} />
+        <StatTile label={pt ? 'Pessoas geradas' : 'People generated'} value={n(persons)} note={pt ? 'Geradas a partir dos Censos 2021' : 'Generated from the 2021 Census'} />
+        <StatTile label={pt ? 'Agregados gerados' : 'Households generated'} value={n(households)} note={pt ? 'Gerados; cada alojamento coletivo conta como um' : 'Generated; each collective quarter counts as one'} />
         <StatTile
           label={pt ? 'Freguesias' : 'Parishes'}
           value={n(parishes)}
@@ -41,8 +41,8 @@ export function KeyFacts({ locale, persons, households, parishes, municipalities
         <h3 className="text-base font-bold text-ink">{pt ? 'Quão perto das tabelas do INE?' : 'How close to INE’s tables?'}</h3>
         <p className="mt-1 max-w-3xl text-sm leading-relaxed text-stone-600">
           {pt
-            ? 'Cada freguesia tem um nível de qualidade do ajuste. O nível não esconde nada: diz com que cuidado ler os números.'
-            : 'Each parish has a quality-of-fit tier. The tier hides nothing: it says how carefully to read the numbers.'}
+            ? 'Cada freguesia tem um nível de qualidade, que junta o ajuste às tabelas do INE e o número de residentes. O nível não esconde nada: diz com que cuidado ler os números.'
+            : 'Each parish has a quality tier, which combines the fit to INE’s tables and the number of residents. The tier hides nothing: it says how carefully to read the numbers.'}
         </p>
         <ul className="mt-3 grid gap-3 md:grid-cols-3">
           {TIERS.map(tier => (

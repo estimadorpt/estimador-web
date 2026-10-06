@@ -271,7 +271,7 @@
   "home": {
     "populationKicker": "População",
     "populationTitle": "Quem vive na tua freguesia?",
-    "populationText": "Uma população sintética aberta: {persons} pessoas e {households} agregados gerados para as {parishes} freguesias do país, a partir dos Censos 2021.",
+    "populationText": "Uma população sintética aberta: {persons} pessoas e {households} agregados gerados a partir dos Censos 2021, para as {parishes} freguesias desse recenseamento (CAOP 2021).",
     "populationSearchLabel": "Procura a tua freguesia",
     "populationGame": "Jogar a Freguesia misteriosa de hoje",
     "populationData": "Dados abertos e descarga",

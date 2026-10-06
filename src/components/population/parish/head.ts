@@ -14,8 +14,15 @@
  * So every lookup covers the whole document, and `watchHead` re-applies the
  * tags whenever a title, meta or link element is added or changed anywhere.
  * Each write happens only when a value differs, so the observer settles
- * instead of looping. Elements React rendered are only ever re-valued, never
- * removed; only the ones this module added are removed.
+ * instead of looping.
+ *
+ * Leaving the page is the dangerous moment: on a client-side navigation Next
+ * writes the next page's tags while this observer is still connected. So the
+ * observer only acts while the address is still this parish's (`stillHere`),
+ * and disconnects the moment it is not. Elements this module added leave with
+ * the page; elements it only re-valued get their original value back, but only
+ * if they still hold the value written here (Next may already have given them
+ * the next page's).
  */
 
 const SITE = 'https://estimador.pt';
@@ -53,8 +60,64 @@ export function unknownHead(title: string): HeadSpec {
   return { title, robots: 'noindex, follow' };
 }
 
-function setAttr(element: Element, name: string, value: string) {
-  if (element.getAttribute(name) !== value) element.setAttribute(name, value);
+/**
+ * Whether the address still belongs to the parish page that set the head: a
+ * `/freguesia/{code}` path (any case, with or without the trailing slash).
+ * With no code (an address without a valid one), any parish path counts.
+ */
+export function isParishPath(pathname: string, code: string | null): boolean {
+  const match = /\/populacao\/freguesia\/([^/]*)\/?$/.exec(pathname);
+  if (!match) return false;
+  if (code === null) return true;
+  let segment: string;
+  try {
+    segment = decodeURIComponent(match[1]);
+  } catch {
+    return false;
+  }
+  return segment.trim().toUpperCase() === code;
+}
+
+/** What an element held before this module wrote to it: an attribute, or (attr null) its text. */
+interface Original { element: Element; attr: string | null; before: string | null; written: string }
+
+class Writer {
+  originals: Original[] = [];
+
+  private remember(element: Element, attr: string | null, written: string) {
+    if (element.hasAttribute(OWNED)) return;
+    const known = this.originals.find(item => item.element === element && item.attr === attr);
+    if (known) { known.written = written; return; }
+    this.originals.push({ element, attr, before: attr ? element.getAttribute(attr) : element.textContent, written });
+  }
+
+  setAttr(element: Element, name: string, value: string) {
+    if (element.getAttribute(name) === value) return;
+    this.remember(element, name, value);
+    element.setAttribute(name, value);
+  }
+
+  setText(element: Element, value: string) {
+    if (element.textContent === value) return;
+    this.remember(element, null, value);
+    element.textContent = value;
+  }
+
+  /** Puts back what was there, where nobody has written since. */
+  restore() {
+    for (const { element, attr, before, written } of this.originals) {
+      if (!element.isConnected) continue;
+      const now = attr ? element.getAttribute(attr) : element.textContent;
+      if (now !== written) continue;
+      if (attr) {
+        if (before === null) element.removeAttribute(attr);
+        else element.setAttribute(attr, before);
+      } else {
+        element.textContent = before ?? '';
+      }
+    }
+    this.originals = [];
+  }
 }
 
 /** Every element matching the selector anywhere in the document, or a new one in <head>. */
@@ -67,39 +130,32 @@ function ensure(selector: string, make: () => Element): Element[] {
   return [element];
 }
 
-function meta(attribute: 'name' | 'property', key: string, content: string) {
-  for (const element of ensure(`meta[${attribute}="${key}"]`, () => {
-    const created = document.createElement('meta');
-    created.setAttribute(attribute, key);
-    return created;
-  })) setAttr(element, 'content', content);
-}
+function applyHead(spec: HeadSpec, writer: Writer) {
+  const meta = (attribute: 'name' | 'property', key: string, content: string) => {
+    for (const element of ensure(`meta[${attribute}="${key}"]`, () => {
+      const created = document.createElement('meta');
+      created.setAttribute(attribute, key);
+      return created;
+    })) writer.setAttr(element, 'content', content);
+  };
+  const link = (rel: string, href: string, hreflang?: string) => {
+    const selector = hreflang ? `link[rel="${rel}"][hreflang="${hreflang}"]` : `link[rel="${rel}"]`;
+    for (const element of ensure(selector, () => {
+      const created = document.createElement('link');
+      created.setAttribute('rel', rel);
+      if (hreflang) created.setAttribute('hreflang', hreflang);
+      return created;
+    })) writer.setAttr(element, 'href', href);
+  };
 
-function link(rel: string, href: string, hreflang?: string) {
-  const selector = hreflang ? `link[rel="${rel}"][hreflang="${hreflang}"]` : `link[rel="${rel}"]`;
-  for (const element of ensure(selector, () => {
-    const created = document.createElement('link');
-    created.setAttribute('rel', rel);
-    if (hreflang) created.setAttribute('hreflang', hreflang);
-    return created;
-  })) setAttr(element, 'href', href);
-}
-
-function setTitle(title: string) {
   const titles = [...document.querySelectorAll('title')];
-  if (titles.length === 0) {
-    document.title = title;
-    return;
-  }
-  for (const element of titles) if (element.textContent !== title) element.textContent = title;
-}
+  if (titles.length === 0) document.title = spec.title;
+  for (const element of titles) writer.setText(element, spec.title);
 
-export function applyHead(spec: HeadSpec) {
-  setTitle(spec.title);
   meta('name', 'robots', spec.robots);
   // The layout's googlebot line carries preview limits worth keeping; it only changes to keep a page out.
   if (spec.robots.startsWith('noindex')) {
-    for (const element of document.querySelectorAll('meta[name="googlebot"]')) setAttr(element, 'content', spec.robots);
+    for (const element of document.querySelectorAll('meta[name="googlebot"]')) writer.setAttr(element, 'content', spec.robots);
   }
   if (spec.description) {
     meta('name', 'description', spec.description);
@@ -134,12 +190,28 @@ function touchesHeadTags(record: MutationRecord): boolean {
   return false;
 }
 
-/** Applies the tags now and keeps them applied until the returned cleanup runs. */
-export function watchHead(spec: HeadSpec): () => void {
-  applyHead(spec);
+/**
+ * Applies the tags now and keeps them applied while the address is still this
+ * parish's (`code`; null for an address without a valid code), until the
+ * returned cleanup runs.
+ */
+export function watchHead(spec: HeadSpec, code: string | null): () => void {
+  const writer = new Writer();
+  let done = false;
+  const stillHere = () => isParishPath(window.location.pathname, code);
+  const stop = () => {
+    if (done) return;
+    done = true;
+    observer.disconnect();
+    // A client-side navigation away must not carry this parish's tags to the next page.
+    document.querySelectorAll(`[${OWNED}]`).forEach(element => element.remove());
+    writer.restore();
+  };
   const observer = new MutationObserver(records => {
-    if (records.some(touchesHeadTags)) applyHead(spec);
+    if (!stillHere()) { stop(); return; }
+    if (records.some(touchesHeadTags)) applyHead(spec, writer);
   });
+  if (stillHere()) applyHead(spec, writer);
   observer.observe(document.documentElement, {
     childList: true,
     subtree: true,
@@ -147,9 +219,5 @@ export function watchHead(spec: HeadSpec): () => void {
     attributes: true,
     attributeFilter: ['content', 'href', 'rel', 'name', 'property', 'hreflang'],
   });
-  return () => {
-    observer.disconnect();
-    // A client-side navigation away must not carry this parish's canonical or alternates to the next page.
-    document.querySelectorAll(`[${OWNED}]`).forEach(element => element.remove());
-  };
+  return stop;
 }

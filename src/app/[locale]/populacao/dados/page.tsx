@@ -15,6 +15,8 @@ import { POPULATION_DOWNLOADS, POPULATION_RELEASE, POPULATION_ROUTES } from '@/l
 import { HONESTY, type Locale } from '@/lib/population/labels';
 import { loadPopulationMeta, loadPopulationRelease } from '@/lib/utils/population-data-loader';
 import { createPageMetadata } from '@/lib/metadata';
+import { jsonLdScript, populationDatasetJsonLd } from '@/lib/population/structured-data';
+import { ChevronRight } from 'lucide-react';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -45,6 +47,36 @@ const FILE_COPY: Record<string, { pt: string; en: string }> = {
   checksums: { pt: 'Somas SHA-256 de cada ficheiro do pacote.', en: 'SHA-256 sums of every file in the package.' },
   sums: { pt: 'Somas SHA-256 dos ficheiros publicados na versão.', en: 'SHA-256 sums of the files published with the release.' },
 };
+
+type QualitySource = 'ine' | 'generated' | 'evaluation' | 'geographic' | 'release';
+
+const QUALITY_SOURCE: Record<QualitySource, { pt: string; en: string }> = {
+  ine: { pt: 'INE', en: 'INE' },
+  generated: { pt: 'Gerado', en: 'Generated' },
+  evaluation: { pt: 'Avaliação', en: 'Evaluation' },
+  geographic: { pt: 'Geográfico', en: 'Geographic' },
+  release: { pt: 'Versão', en: 'Release' },
+};
+
+/** quality.csv, column by column (pt-synthpop package; the producer's packager writes it). */
+const QUALITY_COLUMNS: Array<{ name: string; source: QualitySource; meaning: { pt: string; en: string } }> = [
+  { name: 'freguesia', source: 'geographic', meaning: { pt: 'Código DICOFRE da freguesia (6 caracteres, CAOP 2021). Lê-o como texto.', en: 'Parish DICOFRE code (6 characters, CAOP 2021). Read it as text.' } },
+  { name: 'freguesia_name', source: 'geographic', meaning: { pt: 'Nome da freguesia, em maiúsculas.', en: 'Parish name, in capitals.' } },
+  { name: 'municipio, municipio_name', source: 'geographic', meaning: { pt: 'Código do concelho (DDCC00) e nome segundo o INE (2021).', en: 'Municipality code (DDCC00) and INE’s (2021) name.' } },
+  { name: 'district, nuts2', source: 'geographic', meaning: { pt: 'Distrito (2 dígitos) e região NUTS II de 2013 (corrigida na 1.0.3).', en: 'District (2 digits) and 2013 NUTS II region (corrected in 1.0.3).' } },
+  { name: 'population', source: 'generated', meaning: { pt: 'Pessoas geradas na freguesia, incluindo quem vive em alojamentos coletivos. Somadas, dão as pessoas da versão.', en: 'People generated in the parish, residents of collective quarters included. Summed, they give the release’s persons.' } },
+  { name: 'census_population', source: 'ine', meaning: { pt: 'Residentes segundo o INE (o total da tabela por sexo e idade dos Censos 2021). É a contagem que o site mostra como «residentes (INE)».', en: 'Residents according to INE (the total of the 2021 Census sex × age table). It is the count the site shows as “residents (INE)”.' } },
+  { name: 'publication_population', source: 'evaluation', meaning: { pt: 'A menor das duas contagens anteriores: é a que decide os limiares de 500 e 2 000 residentes dos níveis. population e census_population não coincidem em todas as freguesias (a população gerada não reproduz exatamente o total do INE); o pacote não regista a razão freguesia a freguesia.', en: 'The smaller of the two counts above: it decides the tiers’ 500 and 2,000-resident thresholds. population and census_population do not agree in every parish (the generated population does not reproduce INE’s total exactly); the package does not record the reason parish by parish.' } },
+  { name: 'n_households', source: 'generated', meaning: { pt: 'Agregados gerados, contando cada alojamento coletivo como um. Não é a contagem de agregados privados do INE.', en: 'Generated households, counting each collective living quarter as one. It is not INE’s count of private households.' } },
+  { name: 'n_institutional_persons', source: 'generated', meaning: { pt: 'Pessoas em alojamentos coletivos, acrescentadas a partir das contagens do INE.', en: 'People in collective living quarters, appended from INE’s counts.' } },
+  { name: 'pct_children_u15', source: 'generated', meaning: { pt: 'Proporção (de 0 a 1) de pessoas geradas com menos de 15 anos.', en: 'Share (from 0 to 1) of generated people under 15.' } },
+  { name: 'quality_tier', source: 'evaluation', meaning: { pt: 'Nível de qualidade: A, B ou C.', en: 'Quality tier: A, B or C.' } },
+  { name: 'person_srmse_median', source: 'evaluation', meaning: { pt: 'Erro típico da freguesia: a mediana do SRMSE nas 12 tabelas de pessoas do ajuste (0 seria igual às tabelas).', en: 'The parish’s typical error: the median SRMSE over the 12 fitted person tables (0 would match the tables).' } },
+  { name: 'worst_constraint, worst_constraint_srmse', source: 'evaluation', meaning: { pt: 'A tabela de pessoas com o maior erro e esse erro (o segundo critério dos níveis). Na maior parte das freguesias é a idade ano a ano (srmse_p_age_single).', en: 'The person table with the largest error, and that error (the tiers’ second criterion). In most parishes it is single-year age (srmse_p_age_single).' } },
+  { name: 'suppression_reason', source: 'release', meaning: { pt: 'Vazio em todas as freguesias: nenhuma é suprimida.', en: 'Empty for every parish: none is suppressed.' } },
+  { name: 'fallback_geography', source: 'release', meaning: { pt: 'Nas freguesias de nível C, o código do concelho, para quem preferir agregar ao concelho. O site não o usa: todas as freguesias respondem com os seus próprios números.', en: 'For tier C parishes, the municipality code, for readers who prefer to aggregate to it. The site does not use it: every parish answers with its own figures.' } },
+  { name: 'engine, model_version, run_date', source: 'release', meaning: { pt: 'O motor, a versão do modelo e a data da execução.', en: 'The engine, the model version and the run date.' } },
+];
 
 function Code({ children, label }: { children: string; label: string }) {
   return (
@@ -79,7 +111,10 @@ export default async function PopulationData({ params }: { params: Promise<{ loc
   const pkg = POPULATION_DOWNLOADS.files.find(file => file.key === 'package');
   const personsFile = `pt-synthpop-v${POPULATION_RELEASE}-persons.parquet`;
   const householdsFile = `pt-synthpop-v${POPULATION_RELEASE}-households.parquet`;
-  const citationUrl = `${POPULATION_DOWNLOADS.repository}/blob/main/CITATION.cff`;
+  // Pinned to the release's tag, like the model card and the errata.
+  const citationUrl = `${POPULATION_DOWNLOADS.repository}/blob/v${POPULATION_RELEASE}/CITATION.cff`;
+  // The release's cite line with a versioned locator (the release tag page).
+  const citeWithLocator = release ? `${release.attribution.cite_as} ${POPULATION_DOWNLOADS.release}` : '';
 
   const duckdb = `-- DuckDB: ${pt ? 'pessoas por tamanho do agregado, numa freguesia' : 'persons by household size, in one parish'}
 SELECT h.hh_size_bin, count(*) AS ${pt ? 'pessoas' : 'persons'}
@@ -128,6 +163,10 @@ sha256sum checksums.sha256`;
         meta={pkg && <span>{pkg.name} · {formatBytes(pkg.bytes, locale)} · GitHub</span>}
       />
       <PopulationSectionNav current="data" locale={locale} />
+      {release && (
+        // schema.org Dataset, so dataset search can list the release.
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(populationDatasetJsonLd(release, locale)) }} />
+      )}
 
       <div className="mx-auto max-w-5xl space-y-12 px-4 py-8 md:py-12">
         {!release || !meta ? (
@@ -137,14 +176,24 @@ sha256sum checksums.sha256`;
             <Section id="versao" title={pt ? 'Que versão é esta?' : 'Which release is this?'}>
               <Facts rows={[
                 [pt ? 'Versão' : 'Release', <>{release.name} {release.version}, {pt ? 'publicada a' : 'published'} {formatDay(release.published, locale)}</>],
-                [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: calibrada nos Censos 2021 do INE.' : '2021: calibrated to INE’s 2021 Census.'],
+                [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: gerada a partir dos Censos 2021 do INE.' : '2021: generated from INE’s 2021 Census.'],
                 [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span><span className="break-all font-mono text-[13px]">sha256 {release.model_sha256}</span></>],
                 [pt ? 'Código' : 'Code', <span key="c" className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>],
                 [pt ? 'Versões anteriores' : 'Previous releases', <>
-                  {SUPERSEDED[locale]}{' '}
-                  {pt
-                    ? <>Os ficheiros das versões 1.0.0 e 1.0.1 continuam no GitHub, como registo, na <a className={link} href={POPULATION_DOWNLOADS.releases}>lista de versões</a>; a 1.0.2 não chegou a ser publicada lá.</>
-                    : <>The files of releases 1.0.0 and 1.0.1 stay on GitHub, as a record, in the <a className={link} href={POPULATION_DOWNLOADS.releases}>list of releases</a>; 1.0.2 was never published there.</>}
+                  {pt ? 'A 1.0.3 substituiu três versões do mesmo dia; a população gerada é a mesma em todas. ' : '1.0.3 replaced three releases of the same day; the generated population is the same in all of them. '}
+                  {/* The history, said once on the site (UXD-24): the other trust pages link here. */}
+                  <details className="group mt-2">
+                    <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                      <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-90 motion-reduce:transition-none" />
+                      {pt ? 'O que mudou entre as versões' : 'What changed between releases'}
+                    </summary>
+                    <p className="mt-1">
+                      {SUPERSEDED[locale]}{' '}
+                      {pt
+                        ? <>Os ficheiros das versões 1.0.0 e 1.0.1 continuam no GitHub, como registo, na <a className={link} href={POPULATION_DOWNLOADS.releases}>lista de versões</a>; a 1.0.2 não chegou a ser publicada lá.</>
+                        : <>The files of releases 1.0.0 and 1.0.1 stay on GitHub, as a record, in the <a className={link} href={POPULATION_DOWNLOADS.releases}>list of releases</a>; 1.0.2 was never published there.</>}
+                    </p>
+                  </details>
                 </>],
               ]} />
             </Section>
@@ -196,8 +245,8 @@ sha256sum checksums.sha256`;
                   ? `${formatCount(release.counts.parishes_published, locale)} freguesias publicadas, nenhuma suprimida pelo tamanho. As pequenas levam um nível de qualidade em vez de serem retiradas.`
                   : `${formatCount(release.counts.parishes_published, locale)} parishes published, none suppressed for size. Small ones carry a quality tier instead of being withheld.`],
                 [pt ? 'Códigos' : 'Codes', pt
-                  ? 'Códigos DICOFRE de 6 dígitos da CAOP 2021 (as freguesias dos Censos 2021). No pacote, os nomes dos concelhos vêm da geografia dos Censos 2021 do INE; o site usa os da CAOP 2021.'
-                  : '6-digit DICOFRE codes from CAOP 2021 (the 2021 Census parishes). In the package, municipality names come from INE’s 2021 Census geography; the site uses CAOP 2021’s.'],
+                  ? 'Códigos DICOFRE de 6 caracteres da CAOP 2021 (as freguesias dos Censos 2021). Oito códigos de Barcelos têm letras (0302FA a 0302FH): lê a coluna como texto, não como número. No pacote, os nomes dos concelhos vêm da geografia dos Censos 2021 do INE; o site usa os da CAOP 2021. Junta tabelas pelo código (municipio), nunca pelo nome: há nomes de concelho repetidos (Calheta, Lagoa).'
+                  : '6-character DICOFRE codes from CAOP 2021 (the 2021 Census parishes). Eight Barcelos codes contain letters (0302FA to 0302FH): read the column as text, not as a number. In the package, municipality names come from INE’s 2021 Census geography; the site uses CAOP 2021’s. Join tables on the code (municipio), never on the name: some municipality names repeat (Calheta, Lagoa).'],
                 [pt ? 'Regiões' : 'Regions', pt
                   ? 'A coluna nuts2 é a região NUTS II (2013) da freguesia. Até à versão 1.0.2 era um agrupamento por distrito; a 1.0.3 corrigiu-a (ver as erratas).'
                   : 'The nuts2 column is the parish’s NUTS II (2013) region. Up to release 1.0.2 it was a district grouping; 1.0.3 corrected it (see the errata).'],
@@ -241,7 +290,8 @@ sha256sum checksums.sha256`;
                   ? 'Dois exemplos que ligam pessoas a agregados. Se publicares tabelas feitas com estes dados, segue as regras do site: diz o nível de qualidade de cada freguesia, lê com mais cuidado as categorias com poucas pessoas e as freguesias de nível C, e não faças ordenações nem comparações «mais do que» a partir de uma única execução.'
                   : 'Two examples that join persons to households. If you publish tables made from these data, follow the site’s rules: state each parish’s quality tier, read categories with few people and tier C parishes with more care, and make no rankings or “more than” comparisons from a single run.'}
               </p>
-              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+              {/* Stacked, full width: side by side the longer lines were clipped with no cue that they scroll. */}
+              <div className="mt-4 grid gap-4">
                 <Code label="DuckDB">{duckdb}</Code>
                 <Code label="Python">{python}</Code>
               </div>
@@ -283,6 +333,33 @@ sha256sum checksums.sha256`;
                   </li>
                 ))}
               </ul>
+              <h3 className="mt-8 text-lg font-bold text-ink">{pt ? 'O que diz cada coluna do ficheiro de qualidade' : 'What each column of the quality file says'}</h3>
+              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-stone-600">
+                {pt
+                  ? <>O ficheiro <code className="font-mono text-[13px]">quality.csv</code>, que o README do pacote manda ler primeiro. Origem: INE (contagem publicada), gerado (contado na população gerada), avaliação (medido contra as tabelas do INE) ou geográfico.</>
+                  : <>The <code className="font-mono text-[13px]">quality.csv</code> file, which the package README says to read first. Source: INE (a published count), generated (counted in the generated population), evaluation (measured against INE’s tables) or geographic.</>}
+              </p>
+              <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-cream">
+                <table className="min-w-full border-collapse text-sm">
+                  <caption className="sr-only">{pt ? 'Colunas do ficheiro de qualidade' : 'Columns of the quality file'}</caption>
+                  <thead>
+                    <tr>
+                      {[pt ? 'Coluna' : 'Column', pt ? 'Origem' : 'Source', pt ? 'O que é' : 'What it is'].map(header => (
+                        <th key={header} scope="col" className="border-b-2 border-ink px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{header}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {QUALITY_COLUMNS.map(column => (
+                      <tr key={column.name} className="align-top">
+                        <th scope="row" className="whitespace-nowrap border-b border-line px-3 py-2 text-left font-mono text-[13px] font-normal text-ink">{column.name}</th>
+                        <td className="whitespace-nowrap border-b border-line px-3 py-2 text-ink">{QUALITY_SOURCE[column.source][locale]}</td>
+                        <td className="min-w-[18rem] border-b border-line px-3 py-2 leading-relaxed text-stone-700">{column.meaning[locale]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               <p className="mt-4">
                 <Action href={POPULATION_ROUTES.quality} locale={locale} variant="text" arrow>{pt ? 'Como sabemos que funciona?' : 'How do we know it works?'}</Action>
               </p>
@@ -318,11 +395,16 @@ sha256sum checksums.sha256`;
                 ))}
                 <div className="rounded-2xl border border-line bg-cream p-5">
                   <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Citar como' : 'Cite as'}</p>
-                  <p className="mt-2 leading-relaxed text-ink">{release.attribution.cite_as}</p>
+                  <p className="mt-2 leading-relaxed text-ink">{citeWithLocator}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-                    <CopyButton text={release.attribution.cite_as} label={pt ? 'Copiar citação' : 'Copy citation'} locale={locale} />
-                    <a href={citationUrl} className={`${link} text-sm`}>CITATION.cff</a>
+                    <CopyButton text={citeWithLocator} label={pt ? 'Copiar citação' : 'Copy citation'} locale={locale} />
+                    <a href={citationUrl} className={`${link} inline-flex min-h-11 items-center text-sm`}>{`CITATION.cff (v${POPULATION_RELEASE})`}</a>
                   </div>
+                  <p className="mt-3 text-xs text-stone-500">
+                    {pt
+                      ? 'A ligação da citação é a página da versão no GitHub, que não muda. Ainda não há DOI.'
+                      : 'The citation’s link is the release page on GitHub, which does not change. There is no DOI yet.'}
+                  </p>
                 </div>
               </div>
             </Section>

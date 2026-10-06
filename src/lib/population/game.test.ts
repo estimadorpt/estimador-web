@@ -25,6 +25,7 @@ import {
   newRecord,
   parseStore,
   proximity,
+  proximityScale,
   putRecord,
   recordFor,
   shareText,
@@ -215,6 +216,19 @@ describe('geography of a guess', () => {
     expect(far.proximity).toBeLessThan(near.proximity);
     const hit = guessFeedback(answer, answer, 2000);
     expect(hit).toMatchObject({ correct: true, distanceKm: 0, bearing: null, compass: null, proximity: 100 });
+  });
+
+  it('scales mainland guesses to the mainland (pub-PP-07: Sagres is not 76% close to Bragança)', () => {
+    const scale = proximityScale(places.parishes);
+    expect(scale.mainland).toBeLessThan(800);
+    expect(scale.all).toBeGreaterThan(1500);
+    const sagres: GamePlace = { code: '081501', municipality: '0815', region: '08', lat: 37.01, lon: -8.94 };
+    const braganca: GamePlace = { code: '040201', municipality: '0402', region: '04', lat: 41.81, lon: -6.76 };
+    const mainland = guessFeedback(sagres, braganca, scale);
+    expect(mainland.proximity).toBeLessThan(40);
+    // A guess on an island is still measured against the whole country.
+    const azores: GamePlace = { code: '420101', municipality: '4201', region: 'azores', lat: 37.74, lon: -25.67 };
+    expect(guessFeedback(azores, braganca, scale).proximity).toBeCloseTo(proximity(haversineKm(azores, braganca), scale.all), 6);
   });
 });
 

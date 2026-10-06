@@ -11,7 +11,7 @@ import { RegionParishes } from '@/components/population/hub/RegionParishes';
 import { formatCount, regionBySlug, regionListing, regionTables } from '@/components/population/hub/places';
 import { POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { createPageMetadata, SITE_LOCALES } from '@/lib/metadata';
-import { regionSlug, regionTitle } from '@/lib/population/places';
+import { ofRegion, regionSlug } from '@/lib/population/places';
 import type { Locale } from '@/lib/population/labels';
 import { paramsOrPlaceholder } from '@/lib/static-params';
 import { loadPopulationPlaces } from '@/lib/utils/population-data-loader';
@@ -36,14 +36,14 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const places = await loadPopulationPlaces();
   const region = places ? regionBySlug(places, slug) : null;
   if (!region) return {};
-  const title = regionTitle(region.id, region.name, locale);
+  const of = ofRegion(region.id, region.name, locale);
   return createPageMetadata({
     locale,
     path: POPULATION_ROUTES.region(slug),
-    title: locale === 'pt' ? `População sintética: ${title}` : `Synthetic population: ${title}`,
+    title: locale === 'pt' ? `Freguesias ${of}` : `Parishes of ${of}`,
     description: locale === 'pt'
-      ? `Os concelhos e as freguesias de ${title}, com a ligação para a página de cada freguesia na população sintética de Portugal (Censos 2021).`
-      : `The municipalities and parishes of ${title}, each linked to its page in Portugal’s synthetic population (2021 Census).`,
+      ? `Os concelhos e as freguesias ${of}, com a ligação para a página de cada freguesia na população sintética de Portugal (Censos 2021).`
+      : `The municipalities and parishes of ${of}, each linked to its page in Portugal’s synthetic population (2021 Census).`,
     index: true,
   });
 }
@@ -57,7 +57,6 @@ export default async function RegionPage({ params }: { params: Params }) {
   const region = places ? regionBySlug(places, slug) : null;
   if (!places || !region) notFound();
 
-  const title = regionTitle(region.id, region.name, locale);
   const municipalities = regionListing(places, region.id);
   const parishCount = municipalities.reduce((count, m) => count + m.parishes.length, 0);
   const counts = pt
@@ -70,10 +69,10 @@ export default async function RegionPage({ params }: { params: Params }) {
       <main id="main-content" tabIndex={-1}>
       <PageHero
         compact
-        back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
+        back={{ href: POPULATION_ROUTES.hub, label: pt ? 'Todas as regiões' : 'All regions', locale }}
         icon={<MapPinned aria-hidden="true" className="h-4 w-4" />}
         eyebrow={pt ? `População sintética · v${POPULATION_RELEASE} · Censos 2021` : `Synthetic population · v${POPULATION_RELEASE} · 2021 Census`}
-        title={pt ? `População sintética: ${title}` : `Synthetic population: ${title}`}
+        title={pt ? `Freguesias ${ofRegion(region.id, region.name, locale)}` : `Parishes of ${ofRegion(region.id, region.name, locale)}`}
         lede={pt
           ? `${counts} Escolhe uma no mapa ou na lista para ver as respostas da população gerada.`
           : `${counts} Pick one on the map or in the list to see the generated population’s answers.`}

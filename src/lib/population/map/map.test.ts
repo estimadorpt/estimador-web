@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { FeatureCollection, Geometry } from 'geojson';
@@ -192,10 +192,11 @@ describe('the plane and its insets', () => {
     const raw = shapesOf(data, code => code);
     const clean = shapesOf(data, code => code, shapeOptionsForFile('/x/country.json'));
     const rings = (list: typeof raw) => list.reduce((n, s) => n + (s.d.match(/Z/g)?.length ?? 0), 0);
-    const vertices = (list: typeof raw) => list.reduce((n, s) => n + (s.d.match(/[ML]/g)?.length ?? 0), 0);
-    expect(rings(raw)).toBeGreaterThan(3000);
-    expect(rings(clean)).toBeLessThan(150);
-    expect(vertices(clean)).toBeLessThan(vertices(raw) * 0.6);
+    // The file itself is simplified and quantised at build time (scripts/build-atlas-country.py, SP-09):
+    // small to fetch, with the slivers already gone.
+    expect(statSync(path.join(GEO, 'country.json')).size).toBeLessThan(120_000);
+    expect(rings(raw)).toBeLessThan(150);
+    expect(rings(clean)).toBeLessThanOrEqual(rings(raw));
     for (const [index, shape] of clean.entries()) {
       expect(shape.code).toBe(raw[index].code);
       // Rocks under 0.1 km² leave the frame by at most a couple of km.

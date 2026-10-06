@@ -271,7 +271,7 @@
   "home": {
     "populationKicker": "Population",
     "populationTitle": "Who lives in your parish?",
-    "populationText": "An open synthetic population: {persons} people and {households} households generated for all {parishes} parishes in the country, from the 2021 Census.",
+    "populationText": "An open synthetic population: {persons} people and {households} households generated from the 2021 Census, for the {parishes} parishes of that census (CAOP 2021).",
     "populationSearchLabel": "Find your parish",
     "populationGame": "Play today's Mystery parish",
     "populationData": "Open data and downloads",

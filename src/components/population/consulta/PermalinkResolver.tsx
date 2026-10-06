@@ -51,7 +51,8 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
       .then(lookup => {
         if (cancelled) return;
         const entry = Object.prototype.hasOwnProperty.call(lookup, parsed.id) ? lookup[parsed.id] : undefined;
-        const href = targetFor(entry, locale);
+        // An /en/populacao/v/… link opens the English page, even if the host served the Portuguese shell.
+        const href = targetFor(entry, parsed.locale ?? locale);
         if (!href) {
           addNoindex();
           setState({ kind: 'unknown' });

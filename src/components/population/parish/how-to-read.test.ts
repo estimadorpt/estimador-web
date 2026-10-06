@@ -3,7 +3,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR } from '@/lib/config/population';
 import { indexPlaces } from '@/lib/population/places';
-import { HONESTY, TIER_COPY } from '@/lib/population/labels';
+import { HONESTY, TIER_COPY, tierMeaningFor } from '@/lib/population/labels';
 import type { CompactResponse, ParishRecord, PopulationMeta, PopulationPlaces } from '@/types/population';
 import { howToReadItems } from './how-to-read';
 
@@ -24,7 +24,8 @@ describe('how to read a parish page', () => {
       const list = items('030857', undefined, locale);
       const text = JSON.stringify(list);
       expect(list[0].term).toBe(TIER_COPY.C.label[locale]);
-      expect(text).toContain(TIER_COPY.C.meaning[locale]);
+      const place = index.byCode.get('030857')!;
+      expect(text).toContain(JSON.stringify(tierMeaningFor('C', place.publicationPopulation)[locale]).slice(1, -1));
       expect(text).not.toMatch(/concelho|municipality|Suprimido|Suppressed/i);
       expect(text).toContain(locale === 'pt' ? '«0,0%»' : '“0.0%”');
     }
@@ -39,6 +40,20 @@ describe('how to read a parish page', () => {
     }
     expect(TIER_COPY.C.meaning.pt).not.toMatch(/própria freguesia/);
     expect(TIER_COPY.C.meaning.en).not.toMatch(/parish’s own/);
+  });
+
+  it('branches the tier wording on the count the tier was decided on (MISS-01)', () => {
+    // 0302FA: tier B with fewer than 2,000 residents — told it cannot be A, not that its fit is looser.
+    const b = items('0302FA');
+    expect(b[0].body).toMatch(/menos de 2 000 residentes/);
+    expect(b[0].body).not.toMatch(/menos apertado/);
+    // A tier C parish of 500 or more residents is C for its fit, not its size.
+    const bigC = index.parishes.find(p => p.tier === 'C' && p.publicationPopulation >= 500)!;
+    expect(items(bigC.code)[0].body).toMatch(/500 ou mais residentes cujo ajuste/);
+    const smallC = index.parishes.find(p => p.tier === 'C' && p.publicationPopulation < 500)!;
+    expect(items(smallC.code)[0].body).toMatch(/fica sempre no nível C/);
+    // The single-run line no longer forbids what the page plainly shows; it says the page does not compare.
+    expect(JSON.stringify(b)).toMatch(/não compara categorias nem freguesias/);
   });
 
   it('holds for every tier', () => {

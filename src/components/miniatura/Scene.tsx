@@ -83,6 +83,6 @@ export function Scene({ view, alone, paused, locale, svgRef, neighbourhood = 'to
       </g>;
     })}
     </g>
-    <g opacity={compact && grouped ? 0 : 1} fill="#67776a" fontSize="12" fontFamily="Manrope, system-ui, sans-serif"><text x="36" y="565">{pt?'BAIRRO IMAGINADO · SEM LOCALIZAÇÃO REAL':'IMAGINED NEIGHBOURHOOD · NO REAL LOCATION'}</text><text x="965" y="565" textAnchor="end">{count} / 100</text></g>
+    <g className="mini-scene-caption" opacity={compact && grouped ? 0 : 1} fill="#67776a" fontSize="12" fontFamily="Manrope, system-ui, sans-serif"><text x="36" y="565">{pt?'BAIRRO IMAGINADO · SEM LOCALIZAÇÃO REAL':'IMAGINED NEIGHBOURHOOD · NO REAL LOCATION'}</text><text x="965" y="565" textAnchor="end">{count} / 100</text></g>
   </svg>;
 }

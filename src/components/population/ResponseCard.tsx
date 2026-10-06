@@ -6,9 +6,10 @@ import { DataCard } from '@/components/viz/DataCard';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { Mosaic } from '@/components/brand/Mosaic';
 import { Link } from '@/i18n/routing';
-import { POPULATION_ROUTES } from '@/lib/config/population';
+import { POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { isWhole, readCells } from '@/lib/population/compact';
-import { DIMENSION_LABEL, HONESTY, RECIPE_COPY, REASON_COPY, type Locale } from '@/lib/population/labels';
+import { DIMENSION_LABEL, RECIPE_COPY, REASON_COPY, sourceLine, type Locale } from '@/lib/population/labels';
+import { responsePermalink } from '@/lib/population/permalink';
 import type { CompactResponse, PopulationRecipe, PortraitRecipe } from '@/types/population';
 import { AgeColumns, HundredPeople, ShareBars } from './charts';
 import { QualityBadge } from './QualityBadge';
@@ -28,16 +29,21 @@ export interface ResponseCardProps {
   before?: ReactNode;
   /** Hides the chart until true (guess-first). */
   revealed?: boolean;
+  /** Draw the shares as bars even where a 100-dot grid would fit (the page already has that grid). */
+  bars?: boolean;
+  /** Briefly marks the card a shared link pointed to. */
+  highlight?: boolean;
   className?: string;
 }
 
 /**
  * One approved response as a card: the question, who is counted, where the
  * figures are from (parish, or the município when the bundle falls back), the
- * chart, its table twin, and the source. A refused response is a designed
- * empty state with the reason and nothing that looks like a number.
+ * chart, its table twin, the source (how the field was made) and a versioned
+ * link to the response. A refused response is a designed empty state with the
+ * reason and nothing that looks like a number.
  */
-export function ResponseCard({ recipeName, recipe, record, locale, placeName, fallbackName, bare, before, revealed = true, className = '' }: ResponseCardProps) {
+export function ResponseCard({ recipeName, recipe, record, locale, placeName, fallbackName, bare, before, revealed = true, bars = false, highlight = false, className = '' }: ResponseCardProps) {
   const copy = RECIPE_COPY[recipeName];
   const cells = readCells(record, recipe, locale);
   const status = statusLine(record, locale, placeName, fallbackName);
@@ -45,7 +51,10 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
   const title = bare ? copy.short[locale] : copy.question[locale];
 
   return (
-    <div id={anchor} className={`scroll-mt-24 ${className}`}>
+    <div
+      id={anchor}
+      className={`scroll-mt-24 rounded-2xl outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-300 ${highlight ? 'outline-2 outline-ink outline-solid' : 'outline-2 outline-transparent outline-solid'} ${className}`}
+    >
       {/* The footer is drawn here rather than by DataCard so the copy-link action can sit in it, out of the way of the question. */}
       <DataCard title={title} subtitle={copy.population[locale]} locale={locale}>
         {(status.badge || status.text) && (
@@ -59,7 +68,7 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
         ) : (
           <>
             {before}
-            {revealed && <ResponseChart recipeName={recipeName} recipe={recipe} record={record} cells={cells} locale={locale} />}
+            {revealed && <ResponseChart recipeName={recipeName} recipe={recipe} record={record} cells={cells} locale={locale} bars={bars} />}
             {revealed && (
               <ChartTable
                 caption={`${copy.question[locale]} ${status.where}`}
@@ -70,11 +79,18 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
           </>
         )}
         <footer className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line pt-3 text-xs text-stone-500">
-          <span>{HONESTY.source[locale]}</span>
-          <Link href={POPULATION_ROUTES.methodology} locale={locale} className="font-semibold text-ink underline-offset-4 hover:underline">
+          <span>{sourceLine(recipeName, locale)}</span>
+          <Link href={POPULATION_ROUTES.methodology} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline-offset-4 hover:underline">
             {locale === 'pt' ? 'Como foi feito' : 'How it was made'}
           </Link>
-          {!bare && <CopyAnchor anchor={anchor} locale={locale} />}
+          {!bare && (
+            <>
+              <span className="font-mono text-[11px] text-stone-500" title={record.id}>
+                v{POPULATION_RELEASE} · {record.id.slice(0, 11)}
+              </span>
+              <CopyPermalink id={record.id} question={copy.question[locale]} locale={locale} />
+            </>
+          )}
         </footer>
       </DataCard>
     </div>
@@ -104,32 +120,50 @@ function statusLine(record: CompactResponse, locale: Locale, placeName: string, 
   return { badge: null, text: null, where: `(${placeName})` };
 }
 
+/**
+ * "Quem vive sozinho trabalha?": each age band has its own percentages. A band
+ * with nobody living alone in it has every share at zero: it gets a sentence
+ * instead of three empty bars (the table twin keeps the producer's «0,0%»).
+ */
+function AloneByAge({ cells, locale }: { cells: ReturnType<typeof readCells>; locale: Locale }) {
+  const bands = new Map<string, typeof cells>();
+  for (const cell of cells) bands.set(cell.labels[0], [...(bands.get(cell.labels[0]) ?? []), cell]);
+  return (
+    <div className="grid gap-5 sm:grid-cols-3">
+      {[...bands.entries()].map(([band, rows]) => {
+        const nobody = rows.every(row => row.state === 'published' && row.share === 0);
+        return (
+          <div key={band}>
+            <h4 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{band}</h4>
+            {nobody ? (
+              <p className="rounded-xl bg-parchment px-3 py-2.5 text-sm text-stone-600">
+                {locale === 'pt'
+                  ? 'Ninguém desta faixa etária vive sozinho na população gerada.'
+                  : 'Nobody in this age band lives alone in the generated population.'}
+              </p>
+            ) : (
+              <ShareBars cells={rows} locale={locale} stacked />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /** The chart a response gets: the same choice on the parish page and in the game's clues. */
-export function ResponseChart({ recipeName, recipe, record, cells, locale }: {
+export function ResponseChart({ recipeName, recipe, record, cells, locale, bars = false }: {
   recipeName: PortraitRecipe;
   recipe: PopulationRecipe;
   record: CompactResponse;
   cells: ReturnType<typeof readCells>;
   locale: Locale;
+  bars?: boolean;
 }) {
   if (recipeName === 'age') return <AgeColumns cells={cells} locale={locale} />;
-  if (recipeName === 'who_lives_alone') {
-    // Row-normalised: each age band has its own percentages.
-    const bands = new Map<string, typeof cells>();
-    for (const cell of cells) bands.set(cell.labels[0], [...(bands.get(cell.labels[0]) ?? []), cell]);
-    return (
-      <div className="grid gap-5 sm:grid-cols-3">
-        {[...bands.entries()].map(([band, rows]) => (
-          <div key={band}>
-            <h4 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{band}</h4>
-            <ShareBars cells={rows} locale={locale} stacked />
-          </div>
-        ))}
-      </div>
-    );
-  }
+  if (recipeName === 'who_lives_alone') return <AloneByAge cells={cells} locale={locale} />;
   const whole = isWhole(record) && cells.filter(cell => cell.state === 'published').length <= 4;
-  if (whole && (recipeName === 'elders_alone' || recipeName === 'multigenerational' || recipeName === 'employment')) {
+  if (!bars && whole && (recipeName === 'elders_alone' || recipeName === 'multigenerational' || recipeName === 'employment')) {
     return <HundredPeople cells={cells.filter(cell => cell.state !== 'absent')} locale={locale} unit={recipe.unit === 'household' ? 'households' : 'people'} />;
   }
   return <ShareBars cells={cells} locale={locale} />;
@@ -148,25 +182,37 @@ function Refused({ locale }: { locale: Locale }) {
   );
 }
 
-function CopyAnchor({ anchor, locale }: { anchor: string; locale: Locale }) {
-  const [copied, setCopied] = useState(false);
+/**
+ * Copies the response's versioned link (/populacao/v/{release}/q/{id}): it
+ * names the release and resolves to this card on its parish page. The button
+ * names its card for a screen reader, and the result is announced.
+ */
+function CopyPermalink({ id, question, locale }: { id: string; question: string; locale: Locale }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const pt = locale === 'pt';
+  const url = () => responsePermalink(window.location.origin, locale, id);
   return (
-    <button
-      type="button"
-      onClick={async () => {
-        const url = `${window.location.origin}${window.location.pathname}#${anchor}`;
-        try {
-          await navigator.clipboard.writeText(url);
-          setCopied(true);
-          window.setTimeout(() => setCopied(false), 1800);
-        } catch {
-          window.location.hash = anchor;
-        }
-      }}
-      className="ml-auto inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-ink"
-    >
-      <Link2 aria-hidden="true" className="h-3.5 w-3.5" />
-      {copied ? (locale === 'pt' ? 'Ligação copiada' : 'Link copied') : (locale === 'pt' ? 'Copiar ligação' : 'Copy link')}
-    </button>
+    <span className="ml-auto inline-flex flex-wrap items-center gap-x-2">
+      <span role="status" className="text-xs text-stone-600">
+        {state === 'copied' ? (pt ? 'Ligação copiada.' : 'Link copied.') : state === 'failed' ? url() : ''}
+      </span>
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(url());
+            setState('copied');
+            window.setTimeout(() => setState('idle'), 2400);
+          } catch {
+            setState('failed');
+          }
+        }}
+        className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-ink"
+      >
+        <Link2 aria-hidden="true" className="h-3.5 w-3.5" />
+        {pt ? 'Copiar ligação' : 'Copy link'}
+        <span className="sr-only">{pt ? ` para «${question}»` : ` to “${question}”`}</span>
+      </button>
+    </span>
   );
 }

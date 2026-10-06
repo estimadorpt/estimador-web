@@ -6,6 +6,20 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
+  /* Fixed columns, so the counts and tiers line up from one concelho card to the next. */
+  table-layout: fixed;
+}
+
+.table thead th:nth-child(2) {
+  width: 7.5rem;
+}
+
+.table thead th:nth-child(3) {
+  width: 7rem;
+}
+
+.table tbody th {
+  overflow-wrap: anywhere;
 }
 
 .table thead th {

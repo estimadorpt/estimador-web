@@ -43,8 +43,8 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     headline: { living_alone: 'yes' },
   },
   who_lives_alone: {
-    question: { pt: 'Quem vive sozinho?', en: 'Who lives alone?' },
-    short: { pt: 'Quem vive sozinho', en: 'Who lives alone' },
+    question: { pt: 'Quem vive sozinho trabalha?', en: 'Do people who live alone work?' },
+    short: { pt: 'Quem vive sozinho e o trabalho', en: 'Living alone and work' },
     population: {
       pt: 'Pessoas que vivem sozinhas num agregado privado. Em cada faixa etária, como se dividem entre empregadas, desempregadas e inativas; cada linha tem as suas próprias percentagens.',
       en: 'People who live alone in a private household. Within each age band, how they split between employed, unemployed and inactive; each row has its own percentages.',
@@ -197,18 +197,51 @@ export const TIER_COPY: Record<'A' | 'B' | 'C', { label: Text; meaning: Text }> 
   B: {
     label: { pt: 'Qualidade B', en: 'Quality B' },
     meaning: {
-      pt: 'Freguesia com 500 ou mais residentes e um ajuste próximo às tabelas do INE, um pouco menos apertado do que no nível A.',
-      en: 'A parish of 500 or more residents with a close fit to INE’s tables, a little looser than tier A.',
+      pt: 'Freguesia com 500 ou mais residentes e um ajuste próximo às tabelas do INE. Abaixo de 2 000 residentes, uma freguesia fica em B mesmo com um ajuste igual ao de A.',
+      en: 'A parish of 500 or more residents with a close fit to INE’s tables. Under 2,000 residents a parish sits in B even when its fit is as close as tier A’s.',
     },
   },
   C: {
     label: { pt: 'Qualidade C', en: 'Quality C' },
     meaning: {
-      pt: 'Freguesia pequena (menos de 500 residentes) ou com um ajuste mais fraco às tabelas do INE: lê os números com mais cuidado.',
-      en: 'A small parish (under 500 residents) or one with a weaker fit to INE’s tables: read the numbers with more care.',
+      pt: 'Freguesia com menos de 500 residentes, ou com um ajuste às tabelas do INE abaixo dos limiares de A e B: lê os números com mais cuidado.',
+      en: 'A parish of under 500 residents, or one whose fit to INE’s tables falls short of the A and B thresholds: read the numbers with more care.',
     },
   },
 };
+
+/**
+ * What a tier means for one parish, chosen from the count the tier was
+ * decided on (quality.csv `publication_population`): a tier B parish under
+ * 2,000 residents may fit as closely as an A, and a tier C parish of 500 or
+ * more is C for its fit, not its size. Without the count, the generic words.
+ */
+export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null | undefined): Text {
+  if (residents == null) return TIER_COPY[tier].meaning;
+  if (tier === 'B') {
+    return residents < 2000
+      ? {
+        pt: 'Freguesia com menos de 2 000 residentes e um ajuste próximo às tabelas do INE. Com menos de 2 000 residentes não pode ficar em A, por mais próximo que seja o ajuste.',
+        en: 'A parish of under 2,000 residents with a close fit to INE’s tables. Under 2,000 residents it cannot be tier A, however close the fit.',
+      }
+      : {
+        pt: 'Freguesia com 2 000 ou mais residentes e um ajuste próximo às tabelas do INE, sem chegar aos limiares do nível A.',
+        en: 'A parish of 2,000 or more residents with a close fit to INE’s tables that falls short of the tier A thresholds.',
+      };
+  }
+  if (tier === 'C') {
+    return residents < 500
+      ? {
+        pt: 'Freguesia com menos de 500 residentes: fica sempre no nível C, seja qual for o ajuste às tabelas do INE. Com poucas pessoas, cada uma pesa mais; lê os números com mais cuidado.',
+        en: 'A parish of under 500 residents: it is always tier C, whatever its fit to INE’s tables. With few people each one weighs more; read the numbers with more care.',
+      }
+      : {
+        pt: 'Freguesia com 500 ou mais residentes cujo ajuste às tabelas do INE fica abaixo dos limiares de A e B: lê os números com mais cuidado.',
+        en: 'A parish of 500 or more residents whose fit to INE’s tables falls short of the A and B thresholds: read the numbers with more care.',
+      };
+  }
+  return TIER_COPY.A.meaning;
+}
 
 export function tierLabel(tier: QualityTier | null, locale: Locale): string {
   if (tier === 'A' || tier === 'B' || tier === 'C') return TIER_COPY[tier].label[locale];
@@ -251,7 +284,37 @@ export const REASON_COPY: Record<ReasonCode, Text> = {
   },
 };
 
-export const SUPPRESSED: Text = { pt: 'Suprimido', en: 'Suppressed' };
+/**
+ * How a card's figures were made, in the one vocabulary the methodology uses:
+ * five questions group a field whose INE table is among those the population
+ * was fitted to; three are derived from the generated population by a fixed
+ * rule (living alone = a household of one person; a child and someone 65+ in
+ * the same household; age bands), so no table in the fit checks them.
+ */
+export const RECIPE_PROVENANCE: Record<PortraitRecipe, 'fitted' | 'derived'> = {
+  age: 'fitted',
+  education: 'fitted',
+  employment: 'fitted',
+  household_size: 'fitted',
+  household_type: 'fitted',
+  elders_alone: 'derived',
+  multigenerational: 'derived',
+  who_lives_alone: 'derived',
+};
+
+export function sourceLine(recipe: PortraitRecipe, locale: Locale): string {
+  const derived = RECIPE_PROVENANCE[recipe] === 'derived';
+  if (locale === 'pt') {
+    return derived
+      ? `População sintética v${POPULATION_RELEASE} · derivada da população gerada a partir dos Censos 2021 (INE); não é uma das tabelas usadas no ajuste`
+      : `População sintética v${POPULATION_RELEASE} · grupos de um campo ajustado às tabelas dos Censos 2021 (INE)`;
+  }
+  return derived
+    ? `Synthetic population v${POPULATION_RELEASE} · derived from the population generated from the 2021 Census (INE); not one of the tables it was fitted to`
+    : `Synthetic population v${POPULATION_RELEASE} · groups of a field fitted to the 2021 Census tables (INE)`;
+}
+
+export const SUPPRESSED: Text ={ pt: 'Suprimido', en: 'Suppressed' };
 export const NOT_PUBLISHED: Text = { pt: 'Sem valor publicado', en: 'No published value' };
 
 /** Lines that travel with every population number. */
@@ -268,9 +331,10 @@ export const HONESTY = {
     pt: 'Tanto quanto nos foi possível apurar, a primeira população sintética de acesso aberto a cobrir todas as freguesias de Portugal, gerada a partir dos Censos 2021.',
     en: 'To the best of our knowledge, the first open-access synthetic population to cover every parish in Portugal, generated from the 2021 Census.',
   },
+  /** The generic source line (a chart of several kinds of field, or a national figure). */
   source: {
-    pt: `População sintética v${POPULATION_RELEASE} · calibrada nos Censos 2021 (INE)`,
-    en: `Synthetic population v${POPULATION_RELEASE} · calibrated to the 2021 Census (INE)`,
+    pt: `População sintética v${POPULATION_RELEASE} · a partir dos Censos 2021 (INE)`,
+    en: `Synthetic population v${POPULATION_RELEASE} · from the 2021 Census (INE)`,
   },
   zero: {
     pt: '«0,0%»: nenhuma pessoa ou agregado gerado nessa categoria, ou tão poucos que a percentagem arredonda para zero.',

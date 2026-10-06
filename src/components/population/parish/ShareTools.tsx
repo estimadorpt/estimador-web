@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Download, Link2, Share2 } from 'lucide-react';
+import { ChevronDown, Download, Link2, Share2 } from 'lucide-react';
 import { Action } from '@/components/brand/Action';
 import { drawShareCard, SHARE_CARD, SHARE_CARD_FONTS, type ShareCardModel } from '@/lib/population/share-card';
 import type { Locale } from '@/lib/population/labels';
@@ -92,21 +92,9 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
       <div>
         <p className="max-w-2xl text-[15px] leading-relaxed text-stone-600">
           {pt
-            ? 'Partilha a ligação desta página ou descarrega um cartão (1200 × 630 px) para publicar. O cartão diz:'
-            : 'Share this page’s link or download a card (1200 × 630 px) to post. The card says:'}
+            ? 'Partilha a ligação desta página ou descarrega um cartão (1200 × 630 px) para publicar. O cartão leva a fonte, a licença e a ligação para esta página.'
+            : 'Share this page’s link or download a card (1200 × 630 px) to post. The card carries the source, the licence and the link to this page.'}
         </p>
-        {/* The card's own words, readable at any width; the preview below is the picture of them. */}
-        <ul className="mt-3 flex flex-col gap-1.5 text-[15px] text-ink">
-          <li className="font-semibold">{model.title} <span className="font-normal text-stone-600">({model.place})</span></li>
-          {model.facts.map(fact => (
-            <li key={fact.label} className="flex flex-wrap gap-x-2">
-              <span>{fact.label}:</span>
-              <strong className="font-display font-extrabold tabular-nums">{fact.value}</strong>
-            </li>
-          ))}
-          {(model.scopeNote ?? model.tierNote) && <li className="text-sm text-stone-600">{model.scopeNote ?? model.tierNote}</li>}
-          <li className="text-sm text-stone-600">{model.honesty}</li>
-        </ul>
         <div className="mt-4 flex flex-wrap gap-3">
           <Action variant="secondary" onClick={() => void share()}>
             {canShare ? <Share2 aria-hidden="true" className="h-4 w-4" /> : <Link2 aria-hidden="true" className="h-4 w-4" />}
@@ -119,19 +107,38 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
         </div>
         <p className="mt-2 min-h-5 text-sm text-stone-600" role="status">{message}</p>
       </div>
-      {/* Full width of the panel: at desktop widths the card's smallest text (20 px of 1200) renders at 11 px or more. */}
-      <figure>
-        <canvas
-          ref={preview}
-          width={SHARE_CARD.width}
-          height={SHARE_CARD.height}
-          className="block h-auto w-full rounded-xl border border-line bg-paper"
-          aria-hidden="true"
-        />
-        <figcaption className="mt-2 text-xs text-stone-500">
-          {pt ? 'Pré-visualização do cartão. O texto que leva está na lista acima.' : 'Card preview. The text it carries is listed above.'}
-        </figcaption>
-      </figure>
+      {/*
+        The preview stays closed until asked for: the card quotes the answers the
+        "adivinha antes de ver" cards hold back. Inside, the picture and its words
+        once each: the canvas is hidden from screen readers, the list is the text.
+        Full width of the panel: at desktop widths the card's smallest text (20 px
+        of 1200) renders at 11 px or more.
+      */}
+      <details className="group rounded-xl border border-line bg-paper">
+        <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-4 text-[15px] font-semibold text-ink">
+          {pt ? 'Ver o cartão (mostra as respostas)' : 'See the card (it shows the answers)'}
+          <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-stone-500 transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
+        </summary>
+        <div className="border-t border-line p-4">
+          <canvas
+            ref={preview}
+            width={SHARE_CARD.width}
+            height={SHARE_CARD.height}
+            className="block h-auto w-full rounded-lg border border-line bg-paper"
+            aria-hidden="true"
+          />
+          <div className="sr-only">
+            <p>{model.title} ({model.place})</p>
+            <ul>
+              {model.facts.map(fact => <li key={fact.label}>{fact.text}</li>)}
+            </ul>
+            {(model.scopeNote ?? model.tierNote) && <p>{model.scopeNote ?? model.tierNote}</p>}
+            <p>{model.honesty}</p>
+            <p>{model.attribution}</p>
+            <p>{model.footer}</p>
+          </div>
+        </div>
+      </details>
     </div>
   );
 }

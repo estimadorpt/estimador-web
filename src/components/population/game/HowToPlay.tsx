@@ -6,19 +6,28 @@ import { GAME_STORAGE_KEY } from '@/lib/population/game';
 import type { Locale } from '@/lib/population/labels';
 import { GAME_COPY } from './copy';
 
+/** Fired by the game on every guess; the instructions close on the first one. */
+export const GUESS_EVENT = 'misteriosa:guess';
+
 /**
  * "Como se joga?": a disclosure, open for a first-time player (nothing stored
- * on this device yet) and closed for everyone else.
+ * on this device yet) and closed for everyone else. It closes itself at the
+ * first guess, so on a phone the board moves up to the clues.
  */
 export function HowToPlay({ locale, honesty }: { locale: Locale; honesty: string }) {
   const t = GAME_COPY[locale];
-  const [open, setOpen] = useState(false);
+  // Open in the server render (a first visit, the common case, then moves nothing);
+  // a returning player's copy closes after mount.
+  const [open, setOpen] = useState(true);
   useEffect(() => {
     try {
-      if (!window.localStorage.getItem(GAME_STORAGE_KEY)) setOpen(true);
+      if (window.localStorage.getItem(GAME_STORAGE_KEY)) setOpen(false);
     } catch {
-      setOpen(true);
+      // No storage: leave it open.
     }
+    const close = () => setOpen(false);
+    window.addEventListener(GUESS_EVENT, close);
+    return () => window.removeEventListener(GUESS_EVENT, close);
   }, []);
   return (
     <details

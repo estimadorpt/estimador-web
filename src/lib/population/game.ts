@@ -215,8 +215,25 @@ export interface GuessFeedback {
   sameRegion: boolean;
 }
 
-export function guessFeedback(guess: GamePlace, answer: GamePlace, maxDistanceKm: number): GuessFeedback {
+/**
+ * What proximity is measured against: the widest pair of parishes in the
+ * country and, for a guess and an answer both on the mainland, the widest pair
+ * on the mainland. Against the whole country (the Azores reach 1,800 km from
+ * the Algarve) a guess 500 km off on the mainland would still score ~75%.
+ */
+export interface ProximityScale { all: number; mainland: number }
+
+const onMainland = (place: { region: string }) => place.region !== 'azores' && place.region !== 'madeira';
+
+export function proximityScale(places: Array<Point & { region: string }>): ProximityScale {
+  return { all: maxPairDistanceKm(places), mainland: maxPairDistanceKm(places.filter(onMainland)) };
+}
+
+export function guessFeedback(guess: GamePlace, answer: GamePlace, scale: number | ProximityScale): GuessFeedback {
   const correct = guess.code === answer.code;
+  const maxDistanceKm = typeof scale === 'number'
+    ? scale
+    : onMainland(guess) && onMainland(answer) ? scale.mainland : scale.all;
   const distanceKm = correct ? 0 : haversineKm(guess, answer);
   const bearing = correct ? null : initialBearing(guess, answer);
   return {

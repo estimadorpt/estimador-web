@@ -43,9 +43,18 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       siteName: 'estimador.pt',
       locale: pt ? 'pt_PT' : 'en_GB',
       type: 'website',
-      images: [{ url: getOgImageUrl(locale), width: 1200, height: 630, alt: title }],
+      // Link previews do not run the page's JavaScript, so every parish shares the
+      // population section's card (not the site's general one). Per-parish
+      // previews need a server-side step; see the round-2 follow-ups.
+      images: [{ url: getOgImageUrl(locale, '/populacao'), width: 1200, height: 630, alt: title }],
     },
-    twitter: { card: 'summary_large_image', title, description, creator: '@estimadorpt' },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      creator: '@estimadorpt',
+      images: [getOgImageUrl(locale, '/populacao')],
+    },
   };
 }
 
