@@ -651,6 +651,7 @@ export default async function TeamDetailPage({
                   pCurrent={scenarios.critical_paths[teamName].p_current}
                   target={scenarios.critical_paths[teamName].target}
                   locale={locale}
+                  nSims={prediction.n_sims}
                   labels={{
                     matchdayAbbr: t("football.matchdayAbbr"),
                     win: t("football.win"),

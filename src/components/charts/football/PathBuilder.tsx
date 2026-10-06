@@ -17,6 +17,8 @@ interface PathBuilderProps {
   pCurrent: number;
   target: "champion" | "survival";
   locale: string;
+  /** Simulated seasons behind the conditionals (prediction.n_sims). */
+  nSims: number;
   labels: {
     matchdayAbbr: string;
     win: string;
@@ -41,7 +43,7 @@ const OUTCOMES: PathOutcome[] = ["W", "D", "L"];
  * in football-path-builder.ts: one pick gives the exact conditional from the
  * simulations, several are combined as if independent given the target.
  */
-export function PathBuilder({ matches, pCurrent, target, locale, labels }: PathBuilderProps) {
+export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels }: PathBuilderProps) {
   const pt = locale !== "en";
   const [selections, setSelections] = useState<Record<number, PathOutcome>>({});
 
@@ -69,8 +71,8 @@ export function PathBuilder({ matches, pCurrent, target, locale, labels }: PathB
     <div className="max-w-3xl">
       <p className="mb-4 max-w-3xl text-xs leading-relaxed text-stone-500">
         {pt
-          ? "Com uma escolha, o número é a probabilidade condicional tirada das 50 000 simulações. Com várias, as escolhas combinam-se como se fossem independentes entre si, uma aproximação: o ficheiro publicado não guarda a combinação de vários resultados."
-          : "With one pick, the number is the conditional probability read from the 50,000 simulations. With several, the picks are combined as if independent of one another, an approximation: the published file does not hold combinations of results."}
+          ? `Com uma escolha, o número é a probabilidade condicional tirada das ${formatInteger(nSims, locale)} simulações. Com várias, as escolhas combinam-se como se fossem independentes entre si, uma aproximação: o ficheiro publicado não guarda a combinação de vários resultados.`
+          : `With one pick, the number is the conditional probability read from the ${formatInteger(nSims, locale)} simulations. With several, the picks are combined as if independent of one another, an approximation: the published file does not hold combinations of results.`}
       </p>
 
       {/* Column heads, wide screens only (on phones each row names its own parts). */}
