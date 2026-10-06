@@ -31,9 +31,7 @@ export function ArchivePicker({ epoch, today, current, store, locale, onPlay }: 
   const status = (day: number) => {
     const record = store.records[String(day)];
     if (!record) return t.archiveNew;
-    if (record.status === 'won') return t.archiveWon(record.guesses.length);
-    if (record.status === 'lost') return t.archiveLost;
-    return t.archivePlaying;
+    return record.status === 'won' ? t.archiveWon(record.cluesOpened) : t.archivePlaying;
   };
 
   return (

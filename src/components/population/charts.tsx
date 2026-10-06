@@ -54,7 +54,13 @@ export function ShareBars({ cells, locale, color = ACCENT, stacked = false }: {
 }
 
 /** Nineteen five-year age columns with a pointer readout. */
-export function AgeColumns({ cells, locale, height = 200 }: { cells: ReadCell[]; locale: Locale; height?: number }) {
+export function AgeColumns({ cells, locale, height = 200, hint = true }: {
+  cells: ReadCell[];
+  locale: Locale;
+  height?: number;
+  /** The "tap a column" line while nothing is read; off where space is short (the game on a phone), the line then only carries a reading. */
+  hint?: boolean;
+}) {
   const [active, setActive] = useState<number | null>(null);
   // Drawn at the container's real pixel width so axis text never scales below
   // 11px. The plot is measured before it is drawn, and sits absolutely in a box
@@ -90,7 +96,7 @@ export function AgeColumns({ cells, locale, height = 200 }: { cells: ReadCell[];
       <p className="mb-1 min-h-5 text-sm text-stone-600" aria-hidden="true">
         {readout
           ? <><span className="font-semibold text-ink">{readout.labels[0]}</span>{locale === 'pt' ? ' anos: ' : ': '}<span className="font-bold tabular-nums text-ink">{readout.display}</span></>
-          : <span className="text-stone-500">{locale === 'pt' ? 'Toca numa coluna, passa-lhe o cursor ou usa as setas para ler o valor.' : 'Tap or hover over a column, or use the arrow keys, to read its value.'}</span>}
+          : hint && <span className="text-stone-500">{locale === 'pt' ? 'Toca numa coluna, passa-lhe o cursor ou usa as setas para ler o valor.' : 'Tap or hover over a column, or use the arrow keys, to read its value.'}</span>}
       </p>
       {/*
         One tab stop for the whole chart, exposed as a slider over the age
@@ -172,7 +178,14 @@ export function AgeColumns({ cells, locale, height = 200 }: { cells: ReadCell[];
  * so their guess and the published value sit on one grid (VUXD-07). It is the
  * reader's number; nothing is computed from the cells.
  */
-export function HundredPeople({ cells, locale, unit = 'people', guess }: { cells: ReadCell[]; locale: Locale; unit?: 'people' | 'households'; guess?: number }) {
+export function HundredPeople({ cells, locale, unit = 'people', guess, compact = false }: {
+  cells: ReadCell[];
+  locale: Locale;
+  unit?: 'people' | 'households';
+  guess?: number;
+  /** A smaller grid (the game's clue on a phone). */
+  compact?: boolean;
+}) {
   const published = cells.filter(cell => cell.share !== null);
   const counts = useMemo(() => {
     const raw = published.map(cell => (cell.share as number) * 100);
@@ -190,7 +203,7 @@ export function HundredPeople({ cells, locale, unit = 'people', guess }: { cells
   const guessWords = yours === null ? '' : locale === 'pt' ? `O teu palpite: ${yours} em cada 100` : `Your guess: ${yours} in every 100`;
   return (
     <div>
-      <div className="grid max-w-[220px] grid-cols-10 gap-[5px]" role="img" aria-label={[...published.map(cell => `${cell.labels.at(-1)} ${cell.display}`), guessWords].filter(Boolean).join(', ')}>
+      <div className={`grid grid-cols-10 ${compact ? 'max-w-[170px] gap-1' : 'max-w-[220px] gap-[5px]'}`} role="img" aria-label={[...published.map(cell => `${cell.labels.at(-1)} ${cell.display}`), guessWords].filter(Boolean).join(', ')}>
         {dots.map((series, i) => (
           <span
             key={i}

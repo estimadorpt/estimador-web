@@ -182,13 +182,8 @@ export interface PlaceSearch {
  * a município's name, that município comes first, followed by all of its
  * parishes; then the other matches. Ties go alphabetical — the order says
  * nothing about the places.
- *
- * `exactFirst` (the game, where Enter guesses only an exact match) lists a
- * parish named exactly like the query before the município groups, so the
- * option Enter would choose is the first row, not the last ("Lagoa": the
- * parish in Macedo de Cavaleiros, then the two concelhos called Lagoa; UXM3-20).
  */
-export function searchPlaces(index: PlaceIndex, query: string, limit = 12, { exactFirst = false }: { exactFirst?: boolean } = {}): PlaceSearch {
+export function searchPlaces(index: PlaceIndex, query: string, limit = 12): PlaceSearch {
   const q = fold(query);
   if (q.length < 2) return { hits: [], total: 0, outside: 0 };
   const code = /^[0-9a-z]{6}$/.test(q) && /\d/.test(q) ? q.toUpperCase() : null;
@@ -211,11 +206,7 @@ export function searchPlaces(index: PlaceIndex, query: string, limit = 12, { exa
   // the parish Viseu, then the others alphabetically), never last.
   under.sort(byName);
 
-  // A parish named exactly like the query, outside the named município(s), leads in the game.
-  const lifted = exactFirst && named.length ? others.filter(hit => hit.rank === 0) : [];
-  const rest = lifted.length ? others.filter(hit => hit.rank !== 0) : others;
-
-  const hits: PlaceHit[] = lifted.map(hit => ({ kind: 'parish' as const, underMunicipality: false, ...hit }));
+  const hits: PlaceHit[] = [];
   for (const municipality of named) {
     const region = index.regionById.get(municipality.region);
     const parishes = under.filter(hit => hit.parish.municipality === municipality.code);
@@ -227,20 +218,8 @@ export function searchPlaces(index: PlaceIndex, query: string, limit = 12, { exa
   }
   // A named município's own parishes are all shown; the rest fill up to the limit.
   const room = Math.max(named.length ? 5 : limit, limit - hits.length);
-  for (const hit of rest.slice(0, room)) hits.push({ kind: 'parish', underMunicipality: false, ...hit });
+  for (const hit of others.slice(0, room)) hits.push({ kind: 'parish', underMunicipality: false, ...hit });
   return { hits, total: under.length + others.length, outside: others.length };
-}
-
-/**
- * The option Enter may choose without the reader pointing at one, when
- * choosing cannot be undone (a guess in the game): only a parish whose code or
- * full name is exactly the query, and only when exactly one is. Otherwise -1:
- * typing a município's name ("Viseu", "Mealhada") and pressing Enter must not
- * spend a guess on a parish the player never picked.
- */
-export function exactParishOption(hits: PlaceHit[]): number {
-  const exact = hits.flatMap((hit, i) => (hit.kind === 'parish' && hit.rank === 0 ? [i] : []));
-  return exact.length === 1 ? exact[0] : -1;
 }
 
 /** Parish matches only, in the order `searchPlaces` lists them. */
