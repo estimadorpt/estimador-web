@@ -27,8 +27,8 @@ export function KeyFacts({ locale, persons, households, parishes, municipalities
       <h2 id="population-facts" className="sr-only">{pt ? 'O que tem esta versão' : 'What this release contains'}</h2>
       <p className="mb-3 text-sm text-stone-600">{HONESTY.synthetic[locale]}</p>
       <KpiRow className="lg:grid-cols-3!">
-        <StatTile label={pt ? 'Pessoas geradas' : 'People generated'} value={n(persons)} note={pt ? 'Calibradas nos Censos 2021' : 'Calibrated to the 2021 Census'} />
-        <StatTile label={pt ? 'Agregados gerados' : 'Households generated'} value={n(households)} note={pt ? 'Calibrados nos Censos 2021' : 'Calibrated to the 2021 Census'} />
+        <StatTile label={pt ? 'Pessoas geradas' : 'People generated'} value={n(persons)} note={pt ? 'Geradas a partir dos Censos 2021' : 'Generated from the 2021 Census'} />
+        <StatTile label={pt ? 'Agregados gerados' : 'Households generated'} value={n(households)} note={pt ? 'Gerados; cada alojamento coletivo conta como um' : 'Generated; each collective quarter counts as one'} />
         <StatTile
           label={pt ? 'Freguesias' : 'Parishes'}
           value={n(parishes)}

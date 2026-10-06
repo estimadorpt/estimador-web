@@ -20,12 +20,12 @@ import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent
 import { interpolateZoom } from 'd3';
 import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus, RotateCcw, Shuffle } from 'lucide-react';
 import { MarkLoading } from '@/components/brand/MarkLoading';
-import { Legend } from '@/components/viz/Legend';
+
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { parishHref } from '@/components/population/ParishLink';
 import { fetchPlaces } from '@/lib/population/client';
 import { formatCount } from '@/lib/population/format';
-import { TIER_COPY } from '@/lib/population/labels';
+import { tierMeaningFor } from '@/lib/population/labels';
 import { indexPlaces, normaliseParishCode, regionTitle, type Parish, type PlaceIndex } from '@/lib/population/places';
 import {
   cameraTransform, clampZoom, easeInOut, fitCamera, flightDuration, fromZoomView, sameCamera, toZoomView, zoomCamera,
@@ -97,8 +97,9 @@ const copy = {
     tapAgain: 'Toca outra vez na freguesia, ou usa o botão, para a abrir.',
     hintCountry: 'Escolhe um distrito ou uma região autónoma.',
     hintRegion: 'Escolhe um concelho para ver as suas freguesias.',
-    hintMunicipality: 'Escolhe uma freguesia para ver o seu retrato.',
-    legendTitle: 'Qualidade do ajuste: A / B / C',
+    hintMunicipality: 'Escolhe uma freguesia para ver o seu retrato. Num ecrã tátil, aproxima com dois dedos.',
+    legendTitle: 'Nível de qualidade: A / B / C',
+    legendLater: 'As freguesias ganham a cor do seu nível de qualidade (A, B ou C) quando escolhes um concelho.',
     list: 'Ver como lista',
     listCountry: 'Distritos e regiões autónomas',
     listRegion: (name: string) => `Concelhos: ${name}`,
@@ -140,8 +141,9 @@ const copy = {
     tapAgain: 'Tap the parish again, or use the button, to open it.',
     hintCountry: 'Choose a district or an autonomous region.',
     hintRegion: 'Choose a municipality to see its parishes.',
-    hintMunicipality: 'Choose a parish to see its portrait.',
-    legendTitle: 'Quality of fit: A / B / C',
+    hintMunicipality: 'Choose a parish to see its portrait. On a touch screen, zoom with two fingers.',
+    legendTitle: 'Quality tier: A / B / C',
+    legendLater: 'Parishes take the colour of their quality tier (A, B or C) once you pick a municipality.',
     list: 'View as a list',
     listCountry: 'Districts and autonomous regions',
     listRegion: (name: string) => `Municipalities: ${name}`,
@@ -184,6 +186,8 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   const lastViewport = useRef<string>('');
   const pointerType = useRef<string>('mouse');
   const drag = useRef<{ x: number; y: number; start: Camera; moved: boolean } | null>(null);
+  const touches = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{ distance: number; mid: [number, number]; start: Camera } | null>(null);
   const keyboardChoice = useRef(false);
 
   // Props that change after mount move the map (a search on the page, a region link).
@@ -320,8 +324,14 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
       const box = svg.getBoundingClientRect();
       zoomBy(Math.exp(-event.deltaY * 0.01), [event.clientX - box.left, event.clientY - box.top]);
     };
+    // Two fingers belong to the map (pinch and pan); the page must not scroll or zoom under them.
+    const touchmove = (event: TouchEvent) => { if (event.touches.length >= 2) event.preventDefault(); };
     svg.addEventListener('wheel', wheel, { passive: false });
-    return () => svg.removeEventListener('wheel', wheel);
+    svg.addEventListener('touchmove', touchmove, { passive: false });
+    return () => {
+      svg.removeEventListener('wheel', wheel);
+      svg.removeEventListener('touchmove', touchmove);
+    };
   }, [zoomBy]);
 
   // ---- choosing ------------------------------------------------------------------
@@ -399,15 +409,46 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   };
   const onPointerLeave = () => setActive(null);
 
+  // Touch: one finger always scrolls the page; two fingers pinch to zoom and pan the map.
   const onPointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
     pointerType.current = event.pointerType || 'mouse';
     const current = cameraRef.current;
+    if (event.pointerType === 'touch') {
+      touches.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (touches.current.size === 2 && current && svgRef.current) {
+        const [a, b] = [...touches.current.values()];
+        const box = svgRef.current.getBoundingClientRect();
+        pinch.current = {
+          distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+          mid: [(a.x + b.x) / 2 - box.left, (a.y + b.y) / 2 - box.top],
+          start: current,
+        };
+        setActive(null);
+        setMoving(true);
+      }
+      return;
+    }
     if (event.button !== 0 || !current) return;
-    // A touch drag pans only once zoomed in; otherwise the page scrolls as usual.
+    // A pen or mouse drag pans only once zoomed in.
     if (event.pointerType !== 'mouse' && !manual) return;
     drag.current = { x: event.clientX, y: event.clientY, start: current, moved: false };
   };
   const onPointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (event.pointerType === 'touch') {
+      if (!touches.current.has(event.pointerId)) return;
+      touches.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      const gesture = pinch.current;
+      if (!gesture || touches.current.size < 2 || !viewport || !fit || !svgRef.current) return;
+      const [a, b] = [...touches.current.values()];
+      const box = svgRef.current.getBoundingClientRect();
+      const mid: [number, number] = [(a.x + b.x) / 2 - box.left, (a.y + b.y) / 2 - box.top];
+      const factor = Math.hypot(a.x - b.x, a.y - b.y) / gesture.distance;
+      const zoomed = clampZoom(zoomCamera(gesture.start, factor, viewport, gesture.mid), fit, MAX_ZOOM);
+      const next = { ...zoomed, x: zoomed.x - (mid[0] - gesture.mid[0]) / zoomed.k, y: zoomed.y - (mid[1] - gesture.mid[1]) / zoomed.k };
+      cameraRef.current = next;
+      apply(next);
+      return;
+    }
     const state = drag.current;
     if (!state) return;
     const dx = event.clientX - state.x;
@@ -418,7 +459,20 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
     cameraRef.current = next;
     apply(next);
   };
-  const endDrag = () => {
+  const endDrag = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (event.pointerType === 'touch') {
+      touches.current.delete(event.pointerId);
+      if (pinch.current && touches.current.size < 2) {
+        pinch.current = null;
+        const camera = cameraRef.current;
+        if (camera && fit) setManual(camera.k <= fit.k * 1.001 ? null : camera);
+        setMoving(false);
+        // The lifted fingers' click must not open a place.
+        drag.current = { x: 0, y: 0, start: camera ?? fit!, moved: true };
+        setTimeout(() => { drag.current = null; }, 0);
+      }
+      return;
+    }
     const state = drag.current;
     if (state?.moved && cameraRef.current) { setManual(cameraRef.current); setMoving(false); }
     // Keep the flag through the click that follows a drag, then clear it.
@@ -638,7 +692,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                 height={viewport.height}
                 viewBox={`0 0 ${viewport.width} ${viewport.height}`}
                 className={`block select-none ${moving ? styles.moving : ''}`}
-                style={{ touchAction: manual ? 'none' : 'pan-y' }}
+                style={{ touchAction: 'pan-y' }}
                 role="group"
                 aria-label={t.mapLabel(here)}
                 onClick={onClick}
@@ -661,8 +715,9 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                   {focused && <path d={focused.d} fill="none" className="stroke-ink" strokeWidth={3} vectorEffect="non-scaling-stroke" pointerEvents="none" />}
                   {highlighted && (
                     <g pointerEvents="none">
-                      <path d={highlighted.d} fill="none" className="stroke-cream" strokeWidth={5} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-                      <path d={highlighted.d} className="fill-ink/10 stroke-ink" strokeWidth={2} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+                      {/* A paper halo under a 3 px ink line: visible on the pale regions of the country view too. */}
+                      <path d={highlighted.d} fill="none" className="stroke-paper" strokeWidth={7} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+                      <path d={highlighted.d} className="fill-ink/10 stroke-ink" strokeWidth={3} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
                     </g>
                   )}
                 </g>
@@ -728,7 +783,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
 
           {/* What the pointer, the keyboard or a tap is on */}
           <aside className="flex flex-col gap-4 border-t border-line p-4 @3xl:w-80 @3xl:shrink-0 @3xl:border-l @3xl:border-t-0">
-            <div className="min-h-[9.5rem]" aria-live="polite">
+            <div className="sm:min-h-[9.5rem]" aria-live="polite">
               {readout?.kind === 'parish' ? (
                 <>
                   <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.parish}</p>
@@ -764,10 +819,23 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
               )}
             </div>
 
-            <div>
-              <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.legendTitle}</p>
-              <Legend items={(['A', 'B', 'C'] as const).map(tier => ({ label: t.tierLegend[tier], color: TIER_FILL[tier], kind: 'rect' as const }))} />
-            </div>
+            {/* The tier colours exist only once a município's parishes are drawn; before that the legend would explain nothing on screen. */}
+            {view.level === 'municipality' ? (
+              <div>
+                <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.legendTitle}</p>
+                <ul className="flex flex-col gap-1.5 text-xs text-stone-700">
+                  {(['A', 'B', 'C'] as const).map(tier => (
+                    <li key={tier} className="flex items-center gap-2">
+                      {/* The letter sits in the swatch: A and B are close in colour. */}
+                      <span aria-hidden="true" className="inline-flex h-5 w-6 shrink-0 items-center justify-center rounded-[4px] border border-line text-[11px] font-bold text-ink" style={{ backgroundColor: TIER_FILL[tier] }}>{tier}</span>
+                      <span>{t.tierLegend[tier]}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-xs leading-relaxed text-stone-500">{t.legendLater}</p>
+            )}
 
             <p className="mt-auto text-xs leading-relaxed text-stone-500">
               {t.source}{' '}
@@ -828,7 +896,7 @@ function TierLine({ parish, t, locale }: { parish: Parish; t: (typeof copy)['pt'
         <QualityBadge kind={parish.tier} locale={locale} />
         {fallback && <QualityBadge kind="municipality" locale={locale} label={t.fallback} />}
       </div>
-      <p className="text-xs leading-relaxed text-stone-600">{TIER_COPY[parish.tier].meaning[locale]}</p>
+      <p className="text-xs leading-relaxed text-stone-600">{tierMeaningFor(parish.tier, parish.publicationPopulation)[locale]}</p>
       {fallback && <p className="text-xs leading-relaxed text-stone-600">{t.fallbackLong(parish.municipalityName)}</p>}
     </div>
   );

@@ -596,9 +596,12 @@ function HowToRead(props: HowToReadInput & { union: boolean }) {
             </div>
           )}
         </dl>
-        <p className="mt-4 text-sm">
-          <Link href={POPULATION_ROUTES.quality} locale={locale} className="font-semibold text-ink underline underline-offset-4">
+        <p className="mt-4 flex flex-wrap gap-x-6 text-sm">
+          <Link href={POPULATION_ROUTES.quality} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4">
             {pt ? 'Como medimos a qualidade' : 'How quality is measured'}
+          </Link>
+          <Link href={`${POPULATION_ROUTES.quality}#glossario`} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4">
+            {pt ? 'O que quer dizer cada termo' : 'What each term means'}
           </Link>
         </p>
       </div>

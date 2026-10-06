@@ -257,6 +257,18 @@ export function regionSlug(name: string): string {
   return fold(name).replace(/\s+/g, '-');
 }
 
+/**
+ * A region inside a sentence, after "of": PT "do distrito de Aveiro", "do
+ * distrito do Porto", "da Região Autónoma dos Açores"; EN "the Aveiro
+ * district", "the Autonomous Region of the Azores".
+ */
+export function ofRegion(id: string, name: string, locale: 'pt' | 'en'): string {
+  const title = regionTitle(id, name, locale);
+  if (locale === 'en') return `the ${title}`;
+  if (id === 'azores' || id === 'madeira') return `da ${title}`;
+  return `do ${title.charAt(0).toLowerCase()}${title.slice(1)}`;
+}
+
 /** How a region is named in a heading. */
 export function regionTitle(id: string, name: string, locale: 'pt' | 'en'): string {
   if (id === 'azores') return locale === 'pt' ? 'Região Autónoma dos Açores' : 'Autonomous Region of the Azores';
