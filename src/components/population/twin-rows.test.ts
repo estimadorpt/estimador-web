@@ -17,9 +17,9 @@ describe('table twin rows (POP3-ACC-07)', () => {
       const cells = readCells(record.responses.who_lives_alone, meta.recipes.who_lives_alone, locale);
       const rows = twinRows('who_lives_alone', cells, locale);
       const band = locale === 'pt' ? '65 ou mais anos' : '65 or over';
-      expect(rows.filter(row => row[0] === band)).toEqual([[band, NOBODY_ALONE[locale], '—']]);
+      expect(rows.filter(row => row[0] === band)).toEqual([[band, NOBODY_ALONE[locale], '']]);
       // The other bands keep the producer's cells, one row each.
-      expect(rows.filter(row => row[0] !== band).every(row => row[2] !== '—')).toBe(true);
+      expect(rows.filter(row => row[0] !== band).every(row => row[2] !== '')).toBe(true);
       expect(rows.every(row => row.length === 3)).toBe(true);
     }
   });

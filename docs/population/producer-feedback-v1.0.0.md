@@ -128,7 +128,12 @@ reproductions, quoted here for the producer; the site prints none of these count
     `release_version`, so every release changes every id and every 1.0.0 or 1.0.1
     `canonical_path` stops resolving on a site that serves 1.0.3. Either keep the id stable
     when a response's query is unchanged, or ship an id map (old id → new id) with each
-    release. *Web:* see the round 4 report for PRO3-07.
+    release. *Web:* an older id shows what changed between the releases (`consulta/other-release.ts`:
+    the people are the same; from 1.0.1, ages, education, employment and multigenerational
+    homes are unchanged, the private-household questions may have changed) and links to
+    `/dados#versao`, but cannot open the parish: the site ships only the current release's
+    lookup. A legacy lookup could be built from `public_bundle_v1.0.{0,1}.json`
+    (`canonical_path` + query geography and dimensions) if old links turn up.
 32. **The model card's non-use "claims based on fields marked unvalidated"** matches no
     published column (the unvalidated class is withheld). *Web:* rewords the bullet to the
     columns that are not fitted per parish (industry, occupation, place of work, means of

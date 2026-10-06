@@ -27,7 +27,8 @@ export function twinRows(recipeName: PortraitRecipe, cells: Cells, locale: Local
   if (recipeName !== 'who_lives_alone') return cells.map(cell => [...cell.labels, cell.display]);
   const rows: string[][] = [];
   for (const [band, bandCells] of groupByBand(cells)) {
-    if (emptyBand(bandCells)) rows.push([band, NOBODY_ALONE[locale], '—']);
+    // No share cell: «—» means a category the answer does not carry, and this band's categories are carried (at zero).
+    if (emptyBand(bandCells)) rows.push([band, NOBODY_ALONE[locale], '']);
     else rows.push(...bandCells.map(cell => [...cell.labels, cell.display]));
   }
   return rows;

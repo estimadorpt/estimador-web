@@ -5,9 +5,10 @@ import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { Action } from '@/components/brand/Action';
 import { MarkLoading } from '@/components/brand/MarkLoading';
 import { BRAND } from '@/lib/brand';
-import { POPULATION_RELEASE, POPULATION_DOWNLOADS } from '@/lib/config/population';
+import { POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { fetchQueryLookup } from '@/lib/population/client';
 import { isQueryId, isQueryIdPrefix, lookupEntry, parseCanonicalPath, queryBucket, targetFor } from './resolve';
+import { otherReleaseText } from './other-release';
 
 type State =
   | { kind: 'resolving' }
@@ -105,10 +106,9 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
             : (pt ? 'Não encontrámos este resultado' : 'We could not find this result')}
         </h2>
         <p className="mt-3 max-w-xl leading-relaxed text-stone-600">
+          {/* What changed between the releases, question by question (PRO3-07). */}
           {otherRelease
-            ? (pt
-              ? `A ligação aponta para a versão ${state.release}. O site mostra a versão ${POPULATION_RELEASE}, e os números de versões diferentes não se substituem uns aos outros. Procura a freguesia na versão atual, ou consulta o registo de alterações.`
-              : `The link points to release ${state.release}. The site shows release ${POPULATION_RELEASE}, and figures from different releases do not stand in for one another. Look the parish up in the current release, or check the change log.`)
+            ? otherReleaseText(state.release, locale)
             : (pt
               ? 'O endereço não corresponde a nenhum resultado publicado nesta versão. Pode ter sido copiado incompleto: um identificador encurtado precisa de pelo menos 8 caracteres depois de «q1_». Procura a freguesia diretamente.'
               : 'The address does not match any result published in this release. It may have been copied incompletely: a shortened id needs at least 8 characters after “q1_”. Look the parish up directly.')}
@@ -118,8 +118,8 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
             {pt ? 'Procurar uma freguesia' : 'Look up a parish'}
           </Action>
           {otherRelease && (
-            <Action external href={POPULATION_DOWNLOADS.errata} variant="text">
-              {pt ? 'Registo de alterações' : 'Change log'}
+            <Action href={`${POPULATION_ROUTES.data}#versao`} locale={locale} variant="text" arrow>
+              {pt ? 'O que mudou entre as versões' : 'What changed between releases'}
             </Action>
           )}
         </div>
