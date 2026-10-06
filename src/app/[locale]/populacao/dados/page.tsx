@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: POPULATION_ROUTES.data,
     title: pt ? 'Posso usar os dados da população sintética?' : 'Can I use the synthetic population data?',
     description: pt
-      ? `Download da População Sintética de Portugal v${POPULATION_RELEASE}: licença CC BY-NC 4.0, unidades, geografia, dicionário de colunas, qualidade, verificação e citação.`
+      ? `Faz download da População Sintética de Portugal v${POPULATION_RELEASE}: licença CC BY-NC 4.0, unidades, geografia, dicionário de colunas, qualidade, verificação e citação.`
       : `Download the Synthetic Population of Portugal v${POPULATION_RELEASE}: CC BY-NC 4.0 licence, units, geography, column dictionary, quality, verification and citation.`,
   });
 }
@@ -168,7 +168,7 @@ merged = persons.merge(
 # ${pt ? 'só agregados privados, como no site (os alojamentos coletivos têm is_institutional = 1)' : 'private households only, as on the site (collective quarters have is_institutional = 1)'}
 private = merged[merged["is_institutional_hh"] == 0]`;
 
-  const verify = `# ${pt ? '1. Os ficheiros do download, contra SHA256SUMS' : '1. The downloaded files, against SHA256SUMS'}
+  const verify = `# ${pt ? '1. Os ficheiros, depois do download, contra SHA256SUMS' : '1. The downloaded files, against SHA256SUMS'}
 sha256sum -c SHA256SUMS --ignore-missing
 
 # ${pt ? '2. O conteúdo do pacote, na pasta que contém checksums.sha256' : '2. The package contents, in the folder holding checksums.sha256'}

@@ -469,7 +469,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
             <section aria-label={pt ? 'Para saber mais' : 'Further reading'} className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-8">
               <Action href={POPULATION_ROUTES.methodology} locale={locale} arrow>{pt ? 'Como foi feita a população' : 'How the population was made'}</Action>
               <Action external href={POPULATION_DOWNLOADS.modelCard} variant="text" arrow>{pt ? 'Ficha do modelo (GitHub, em inglês)' : 'Model card (GitHub)'}</Action>
-              <Action href={POPULATION_ROUTES.data} locale={locale} variant="text" arrow>{pt ? 'Download dos dados' : 'Download the data'}</Action>
+              <Action href={POPULATION_ROUTES.data} locale={locale} variant="text" arrow>{pt ? 'Fazer download dos dados' : 'Download the data'}</Action>
             </section>
           </>
         )}
