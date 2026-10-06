@@ -91,12 +91,6 @@ export function pollsterDisplayName(name: string): string {
 }
 
 /**
- * The 2025 parliamentary parties in one order for every party chip, matrix
- * column, bloc card and table twin on the archive (AEE3-06): the forecast's
- * election-day vote share, largest first, which is also the seat chart's
- * order. Parties not listed keep their relative order after these.
- */
-/**
  * The pressed state of the archives' toggles and pills (the round switch, the
  * candidate and party chips) without colour: forced-colours mode drops their
  * ink fill, so the pressed one gets a 2px outline in the system colour and
@@ -105,7 +99,13 @@ export function pollsterDisplayName(name: string): string {
  */
 export const PRESSED_IN_FORCED_COLORS = 'forced-colors:aria-pressed:outline-2 forced-colors:aria-pressed:outline-offset-2 forced-colors:aria-pressed:outline-solid';
 
-export const PARLIAMENTARY_PARTY_ORDER =['AD', 'PS', 'CH', 'IL', 'L', 'CDU', 'BE', 'PAN'] as const;
+/**
+ * The 2025 parliamentary parties in one order for every party chip, matrix
+ * column, bloc card and table twin on the archive (AEE3-06): the forecast's
+ * election-day vote share, largest first, which is also the seat chart's
+ * order. Parties not listed keep their relative order after these.
+ */
+export const PARLIAMENTARY_PARTY_ORDER = ['AD', 'PS', 'CH', 'IL', 'L', 'CDU', 'BE', 'PAN'] as const;
 
 export function sortByPartyOrder<T extends string>(parties: readonly T[]): T[] {
   const rank = (party: string) => {
