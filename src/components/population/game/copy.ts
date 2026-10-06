@@ -20,7 +20,7 @@ const pt = {
     'Tens seis tentativas. À meia-noite de Lisboa chega uma freguesia nova.',
   ],
   howPool: 'Qualquer uma das 3 092 freguesias pode ser a misteriosa, seja qual for o seu nível de qualidade (A, B ou C); no fim, mostramos o nível e o que quer dizer. Podes tentar qualquer uma.',
-  howProximity: 'A proximidade compara a tua distância com a maior distância entre duas freguesias de Portugal: 100% é acertar, 0% é estar no extremo oposto do país.',
+  howProximity: 'A proximidade compara a tua distância com a maior distância possível: entre duas freguesias do continente, quando a tentativa e a resposta estão ambas no continente; entre duas freguesias de Portugal, quando uma delas fica nas ilhas. 100% é acertar, 0% é estar no extremo oposto.',
   howStorage: 'Os teus resultados ficam guardados só neste dispositivo.',
 
   loading: 'A preparar a freguesia de hoje…',
@@ -32,6 +32,16 @@ const pt = {
   attemptsUsed: (n: number, max: number) => `${n} de ${max} tentativas usadas`,
   practiceBanner: 'Dia anterior, em modo treino: não conta para as estatísticas.',
   backToToday: 'Voltar à freguesia de hoje',
+  replay: 'Jogar outra vez, em treino',
+  replayBanner: 'Em treino: esta partida não conta para as estatísticas nem fica guardada.',
+  replayStop: 'Voltar ao resultado',
+  replayStarted: 'Nova partida em treino. Tens seis tentativas.',
+  lastGuess: (name: string, distance: string, direction: string) => `Última tentativa: ${name}, a ${distance}. A freguesia misteriosa fica ${direction}.`,
+  announceMiss: (n: number, name: string, municipality: string, distance: string, direction: string, proximity: number) =>
+    `Tentativa ${n}: ${name}, concelho de ${municipality}. A ${distance}; a freguesia misteriosa fica ${direction}. Proximidade ${proximity}%.`,
+  announceClue: (n: number) => `Abriu a pista ${n}.`,
+  announceWon: (n: number, name: string, municipality: string) => `${n === 1 ? 'Acertaste à primeira' : `Acertaste em ${n} tentativas`}: era ${name}, concelho de ${municipality}.`,
+  announceLost: (name: string, municipality: string) => `Desta vez não foi: era ${name}, concelho de ${municipality}.`,
 
   cluesTitle: 'Pistas',
   clue: (n: number) => `Pista ${n}`,
@@ -108,7 +118,7 @@ const en: Copy = {
     'You have six guesses. A new parish arrives at midnight, Lisbon time.',
   ],
   howPool: 'Any of the 3,092 parishes can be the mystery one, whatever its quality tier (A, B or C); at the end we show the tier and what it means. You can guess any of them.',
-  howProximity: 'Proximity compares your distance with the widest distance between two parishes in Portugal: 100% is a hit, 0% is the far side of the country.',
+  howProximity: 'Proximity compares your distance with the widest one possible: between two mainland parishes when your guess and the answer are both on the mainland, between any two parishes in Portugal when either is on the islands. 100% is a hit, 0% is the far side.',
   howStorage: 'Your results are kept on this device only.',
 
   loading: 'Getting today’s parish ready…',
@@ -120,6 +130,16 @@ const en: Copy = {
   attemptsUsed: (n: number, max: number) => `${n} of ${max} guesses used`,
   practiceBanner: 'An earlier day, in practice mode: it does not count towards your stats.',
   backToToday: 'Back to today’s parish',
+  replay: 'Play again, as practice',
+  replayBanner: 'Practice: this game does not count towards your stats and is not saved.',
+  replayStop: 'Back to your result',
+  replayStarted: 'New practice game. You have six guesses.',
+  lastGuess: (name: string, distance: string, direction: string) => `Last guess: ${name}, ${distance} away. The mystery parish lies to the ${direction}.`,
+  announceMiss: (n: number, name: string, municipality: string, distance: string, direction: string, proximity: number) =>
+    `Guess ${n}: ${name}, ${municipality} municipality. ${distance} away; the mystery parish lies to the ${direction}. Proximity ${proximity}%.`,
+  announceClue: (n: number) => `Clue ${n} is open.`,
+  announceWon: (n: number, name: string, municipality: string) => `${n === 1 ? 'Got it first time' : `Got it in ${n} guesses`}: it was ${name}, ${municipality} municipality.`,
+  announceLost: (name: string, municipality: string) => `Not this time: it was ${name}, ${municipality} municipality.`,
 
   cluesTitle: 'Clues',
   clue: (n: number) => `Clue ${n}`,

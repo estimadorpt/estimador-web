@@ -1,5 +1,6 @@
 import type { Locale } from '@/lib/population/labels';
 import type { ReleaseColumn } from '@/types/population';
+import { columnDescription } from './dictionary';
 
 type Text = Record<Locale, string>;
 
@@ -52,7 +53,7 @@ export const PROVENANCE_CODES: Array<{ code: string; name: Text; meaning: Text }
   },
 ];
 
-function Table({ columns, locale }: { columns: Record<string, ReleaseColumn>; locale: Locale }) {
+function Table({ table, columns, locale }: { table: 'persons' | 'households'; columns: Record<string, ReleaseColumn>; locale: Locale }) {
   const pt = locale === 'pt';
   return (
     <div className="max-h-[36rem] overflow-auto">
@@ -70,7 +71,10 @@ function Table({ columns, locale }: { columns: Record<string, ReleaseColumn>; lo
               <th scope="row" className="whitespace-nowrap border-b border-line px-3 py-2 text-left font-mono text-[13px] font-normal text-ink">{name}</th>
               <td className="whitespace-nowrap border-b border-line px-3 py-2 font-mono text-[13px] text-ink">{column.provenance}</td>
               <td className="min-w-[18rem] border-b border-line px-3 py-2 leading-relaxed text-stone-700">
-                {column.description}
+                {(() => {
+                  const { text, edited } = columnDescription(table, name, column);
+                  return <>{text}{edited && <span className="ml-1 text-xs text-stone-500">{pt ? '(texto revisto pelo site)' : '(wording edited by the site)'}</span>}</>;
+                })()}
                 {column.label_map && (
                   <span className="mt-1 block text-xs text-stone-500">
                     {pt ? 'Etiquetas: ' : 'Labels: '}<code className="font-mono">label_maps.{column.label_map}</code>
@@ -92,8 +96,8 @@ export function ColumnDictionary({ dictionary, locale }: {
 }) {
   const pt = locale === 'pt';
   const groups = [
-    { key: 'persons', title: pt ? 'Pessoas' : 'Persons', columns: dictionary.persons },
-    { key: 'households', title: pt ? 'Agregados' : 'Households', columns: dictionary.households },
+    { key: 'persons' as const, title: pt ? 'Pessoas' : 'Persons', columns: dictionary.persons },
+    { key: 'households' as const, title: pt ? 'Agregados' : 'Households', columns: dictionary.households },
   ];
   return (
     <div className="space-y-4">
@@ -106,7 +110,7 @@ export function ColumnDictionary({ dictionary, locale }: {
             </span>
           </summary>
           <div className="p-2 md:p-3">
-            <Table columns={group.columns} locale={locale} />
+            <Table table={group.key} columns={group.columns} locale={locale} />
           </div>
         </details>
       ))}

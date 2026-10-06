@@ -6,9 +6,13 @@ import { GAME_STORAGE_KEY } from '@/lib/population/game';
 import type { Locale } from '@/lib/population/labels';
 import { GAME_COPY } from './copy';
 
+/** Fired by the game on every guess; the instructions close on the first one. */
+export const GUESS_EVENT = 'misteriosa:guess';
+
 /**
  * "Como se joga?": a disclosure, open for a first-time player (nothing stored
- * on this device yet) and closed for everyone else.
+ * on this device yet) and closed for everyone else. It closes itself at the
+ * first guess, so on a phone the board moves up to the clues.
  */
 export function HowToPlay({ locale, honesty }: { locale: Locale; honesty: string }) {
   const t = GAME_COPY[locale];
@@ -19,6 +23,9 @@ export function HowToPlay({ locale, honesty }: { locale: Locale; honesty: string
     } catch {
       setOpen(true);
     }
+    const close = () => setOpen(false);
+    window.addEventListener(GUESS_EVENT, close);
+    return () => window.removeEventListener(GUESS_EVENT, close);
   }, []);
   return (
     <details

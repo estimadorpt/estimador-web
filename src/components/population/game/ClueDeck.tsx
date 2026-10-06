@@ -8,7 +8,7 @@ import { Mosaic } from '@/components/brand/Mosaic';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 import { readCells } from '@/lib/population/compact';
 import { CLUE_ORDER } from '@/lib/population/game';
-import { DIMENSION_LABEL, HONESTY, RECIPE_COPY, type Locale } from '@/lib/population/labels';
+import { DIMENSION_LABEL, HONESTY, RECIPE_COPY, sourceLine, type Locale } from '@/lib/population/labels';
 import type { CompactResponse, GameEntry, PopulationMeta, PortraitRecipe } from '@/types/population';
 import { ResponseChart } from '../ResponseCard';
 import { QualityBadge } from '../QualityBadge';
@@ -82,7 +82,8 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
         </p>
       </div>
 
-      <div role="tablist" aria-label={t.cluesTitle} className="mb-4 grid grid-cols-6 gap-1.5 sm:gap-2">
+      {/* Plain buttons that say which clue is on show (aria-pressed): a tab list would promise arrow-key moves. */}
+      <div role="group" aria-label={t.cluesTitle} className="mb-4 grid grid-cols-6 gap-1.5 sm:gap-2">
         {CLUE_ORDER.map((clueRecipes, i) => {
           const unlocked = i < open;
           const active = i === selected;
@@ -91,11 +92,9 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
             <button
               key={i}
               type="button"
-              role="tab"
               id={`${id}-tab-${i}`}
               aria-controls={`${id}-panel`}
-              aria-selected={active}
-              aria-disabled={!unlocked}
+              aria-pressed={active}
               disabled={!unlocked}
               title={unlocked ? label : t.clueLocked(i)}
               onClick={() => { setSelected(i); setFresh(null); setMoved(true); }}
@@ -115,7 +114,7 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
         })}
       </div>
 
-      <div id={`${id}-panel`} role="tabpanel" aria-labelledby={`${id}-tab-${selected}`}>
+      <div id={`${id}-panel`} role="region" aria-labelledby={`${id}-tab-${selected}`}>
         <Reveal key={`${entry.code}-${selected}`} instant={!moved}>
           <ClueCard
             number={selected + 1}
@@ -153,7 +152,7 @@ function ClueCard({ number, recipes, entry, meta, locale, revealed, fresh }: {
       title={title}
       subtitle={single ? RECIPE_COPY[recipes[0]].population[locale] : undefined}
       badge={fresh ? t.newClue : undefined}
-      source={HONESTY.source[locale]}
+      source={sourceLine(recipes[0], locale)}
       methodologyHref={POPULATION_ROUTES.methodology}
       methodologyLabel={locale === 'pt' ? 'Como foi feito' : 'How it was made'}
       locale={locale}

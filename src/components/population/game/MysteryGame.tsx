@@ -6,6 +6,7 @@ import { MarkLoading } from '@/components/brand/MarkLoading';
 import { BRAND } from '@/lib/brand';
 import { fetchGameChunk, fetchGameIndex, fetchPlaces } from '@/lib/population/client';
 import {
+  COMPASS,
   GAME_STORAGE_KEY,
   MAX_GUESSES,
   answerOrder,
@@ -16,15 +17,18 @@ import {
   dateOfDay,
   emptyStore,
   formatGameDate,
+  formatKm,
   guessFeedback,
-  maxPairDistanceKm,
   msUntilNextLisbonMidnight,
+  newRecord,
   parseStore,
+  proximityScale,
   putRecord,
   recordFor,
   shareText,
   todayIndex,
   type GamePlace,
+  type GameRecord,
   type GameStore,
 } from '@/lib/population/game';
 import { indexPlaces, type Parish, type PlaceIndex } from '@/lib/population/places';
@@ -36,6 +40,7 @@ import { ClueDeck } from './ClueDeck';
 import { GAME_COPY } from './copy';
 import { EndPanel } from './EndPanel';
 import { GuessList } from './GuessList';
+import { GUESS_EVENT } from './HowToPlay';
 import { Locator } from './Locator';
 import { Reveal } from './Reveal';
 
@@ -80,11 +85,18 @@ function dayFromHash(today: number): number | null {
   return day >= 0 && day <= today ? day : null;
 }
 
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /**
  * Freguesia misteriosa. Loads the game index, the place list and only the
  * chunk that holds the day's parish; keeps the player's games in
  * localStorage. Everything date-dependent is computed after mount, so the
  * server render is the same for everyone.
+ *
+ * On a phone the guess box comes before the clues (it is the thing to do),
+ * with the last guess's result beside it; at the end the result panel is
+ * brought into view and takes focus. One polite live region reads each guess
+ * and then the outcome.
  */
 export function MysteryGame({ locale, meta }: { locale: Locale; meta: PopulationMeta }) {
   const t = GAME_COPY[locale];
@@ -96,7 +108,13 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   const [day, setDay] = useState<number | null>(null);
   const [entry, setEntry] = useState<GameEntry | null>(null);
   const [store, setStore] = useState<GameStore>(emptyStore);
+  /** A finished day played again as practice: kept in memory only, never stored or counted. */
+  const [replay, setReplay] = useState<GameRecord | null>(null);
+  const [announcement, setAnnouncement] = useState('');
   const top = useRef<HTMLDivElement>(null);
+  const end = useRef<HTMLDivElement>(null);
+  /** Set when a guess ends the game in this session, so only then the end panel takes focus. */
+  const justEnded = useRef(false);
 
   // Load the index and the places; read the player's games.
   useEffect(() => {
@@ -121,6 +139,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     if (!index || day === null) return;
     let live = true;
     setEntry(null);
+    setReplay(null);
     const order = answerOrder(day, index.candidates);
     fetchGameChunk(chunkOf(order, index.chunk_size))
       .then(entries => {
@@ -153,47 +172,86 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const maxDistance = useMemo(() => (places ? maxPairDistanceKm(places.parishes) : 0), [places]);
+  const scale = useMemo(() => (places ? proximityScale(places.parishes) : { all: 0, mainland: 0 }), [places]);
 
   const ready = index && places && entry && today !== null && day !== null;
   const answer = ready ? places.byCode.get(entry.code) ?? null : null;
-  const record = useMemo(
+  const stored = useMemo(
     () => (day !== null && today !== null ? recordFor(store, day, today) : null),
     [store, day, today],
   );
+  const record = replay ?? stored;
   const guesses = useMemo(
     () => (record && places ? record.guesses.map(code => places.byCode.get(code)).filter((p): p is Parish => Boolean(p)) : []),
     [record, places],
   );
   const feedback = useMemo(
-    () => (answer ? guesses.map(guess => guessFeedback(asGamePlace(guess), asGamePlace(answer), maxDistance)) : []),
-    [guesses, answer, maxDistance],
+    () => (answer ? guesses.map(guess => guessFeedback(asGamePlace(guess), asGamePlace(answer), scale)) : []),
+    [guesses, answer, scale],
   );
   const exclude = useMemo(() => new Set(record?.guesses ?? []), [record]);
 
+  const describe = useCallback((parish: Parish, after: GameRecord, answerParish: Parish): string => {
+    const n = after.guesses.length;
+    const item = guessFeedback(asGamePlace(parish), asGamePlace(answerParish), scale);
+    if (after.status === 'won') return t.announceWon(n, answerParish.name, answerParish.municipalityName);
+    const miss = t.announceMiss(n, parish.name, parish.municipalityName, formatKm(item.distanceKm, locale), item.compass ? COMPASS[item.compass][locale] : '', Math.floor(item.proximity));
+    if (after.status === 'lost') return `${miss} ${t.announceLost(answerParish.name, answerParish.municipalityName)}`;
+    return `${miss} ${t.announceClue(Math.min(n + 1, MAX_GUESSES))}`;
+  }, [scale, t, locale]);
+
   const onGuess = useCallback((parish: Parish) => {
-    if (!entry || today === null || day === null) return;
-    setStore(current => {
-      const before = recordFor(current, day, today);
-      const after = applyGuess(before, parish.code, entry.code);
-      if (after === before) return current;
-      const next = putRecord(current, after);
-      writeStore(next);
-      return next;
+    if (!entry || today === null || day === null || !answer) return;
+    window.dispatchEvent(new Event(GUESS_EVENT));
+    if (replay) {
+      const after = applyGuess(replay, parish.code, entry.code);
+      if (after === replay) return;
+      if (after.status !== 'playing') justEnded.current = true;
+      setReplay(after);
+      setAnnouncement(describe(parish, after, answer));
+      return;
+    }
+    const before = recordFor(store, day, today);
+    const after = applyGuess(before, parish.code, entry.code);
+    if (after === before) return;
+    if (after.status !== 'playing') justEnded.current = true;
+    const next = putRecord(store, after);
+    writeStore(next);
+    setStore(next);
+    setAnnouncement(describe(parish, after, answer));
+  }, [entry, today, day, answer, replay, store, describe]);
+
+  // The game just ended: bring the result into view and put focus on its heading.
+  const finished = record ? record.status !== 'playing' : false;
+  useEffect(() => {
+    if (!finished || !justEnded.current) return;
+    justEnded.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      end.current?.scrollIntoView({ block: 'start', behavior: reducedMotion() ? 'auto' : 'smooth' });
+      end.current?.querySelector<HTMLElement>('#misteriosa-end')?.focus({ preventScroll: true });
     });
-  }, [entry, today, day]);
+    return () => window.cancelAnimationFrame(frame);
+  }, [finished]);
 
   const play = useCallback((target: number) => {
     if (today === null) return;
     setDay(target);
+    setReplay(null);
     try {
       const hash = target === today ? '' : `#dia-${target + 1}`;
       window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
     } catch {
       // Ignore: the address is a convenience.
     }
-    top.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    top.current?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
   }, [today]);
+
+  const playAgain = useCallback(() => {
+    if (day === null) return;
+    setReplay(newRecord(day, false));
+    setAnnouncement(t.replayStarted);
+    top.current?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+  }, [day, t]);
 
   if (failed) {
     return (
@@ -211,8 +269,10 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   }
 
   if (!ready || !record) {
+    // The board's own height at each width (the guess box, the clue deck and
+    // the six guess slots), so the footer does not start in view and jump.
     return (
-      <div role="status" className="flex min-h-[420px] flex-col items-center justify-center gap-3 rounded-2xl border border-line bg-cream p-6 text-sm text-stone-600">
+      <div role="status" className="flex min-h-[1180px] flex-col items-center justify-start gap-3 rounded-2xl border border-line bg-cream p-6 pt-24 text-sm text-stone-600 sm:min-h-[1080px] lg:min-h-[760px]">
         <MarkLoading height={28} color={BRAND.ink} ground={BRAND.cream} />
         {t.loading}
       </div>
@@ -224,24 +284,34 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   }
 
   const playing = record.status === 'playing';
-  const practice = day !== today;
+  const practice = day !== today || replay !== null;
   const open = cluesOpen(record, entry.code);
   const date = dateOfDay(index.epoch, day);
   const stats = computeStats(store, today);
   const share = playing ? '' : shareText({ date, record, feedback, locale });
   const used = record.guesses.length;
+  const last = feedback.length > 0 ? feedback[feedback.length - 1] : null;
+  const lastParish = guesses.length > 0 ? guesses[guesses.length - 1] : null;
 
   return (
     <div ref={top} className="scroll-mt-20">
+      <p role="status" aria-live="polite" className="sr-only">{announcement}</p>
+
       {practice && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-parchment px-4 py-3">
           <p className="flex items-center gap-2 text-sm text-stone-600">
             <History aria-hidden="true" className="h-4 w-4 shrink-0 text-ink" />
-            {t.practiceBanner}
+            {replay ? t.replayBanner : t.practiceBanner}
           </p>
-          <button type="button" onClick={() => play(today)} className="inline-flex min-h-11 items-center text-sm font-semibold text-ink underline underline-offset-4">
-            {t.backToToday}
-          </button>
+          {day !== today ? (
+            <button type="button" onClick={() => play(today)} className="inline-flex min-h-11 items-center text-sm font-semibold text-ink underline underline-offset-4">
+              {t.backToToday}
+            </button>
+          ) : (
+            <button type="button" onClick={() => setReplay(null)} className="inline-flex min-h-11 items-center text-sm font-semibold text-ink underline underline-offset-4">
+              {t.replayStop}
+            </button>
+          )}
         </div>
       )}
 
@@ -250,7 +320,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
           {t.dayLabel(day + 1)} · {formatGameDate(date, locale)}
         </p>
         <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-stone-600" aria-live="polite">
+          <span className="text-sm font-semibold text-stone-600">
             {playing ? t.attempt(Math.min(used + 1, MAX_GUESSES), MAX_GUESSES) : t.attemptsUsed(used, MAX_GUESSES)}
           </span>
           <span className="flex gap-1" aria-hidden="true">
@@ -264,42 +334,60 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
       </div>
 
       {!playing && (
-        <Reveal className="mb-6">
-          <EndPanel
-            record={record}
-            answer={answer}
-            tier={entry.tier}
-            stats={stats}
-            share={share}
-            index={index}
-            locale={locale}
-            practice={practice}
-          />
-        </Reveal>
+        <div ref={end} className="mb-6 scroll-mt-20">
+          <Reveal>
+            <EndPanel
+              record={record}
+              answer={answer}
+              tier={entry.tier}
+              stats={stats}
+              share={share}
+              index={index}
+              locale={locale}
+              practice={practice}
+              onReplay={replay ? null : playAgain}
+            />
+          </Reveal>
+        </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-        <ClueDeck
-          entry={entry}
-          meta={meta}
-          locale={locale}
-          open={open}
-          revealed={playing ? null : { name: answer.name, municipalityName: answer.municipalityName }}
-        />
+      {/*
+        One grid, three pieces. On a phone they stack in source order: the
+        guess box first (the thing to do), then the clues, then the guesses.
+        On a wide screen the clues take the left column and the guess box and
+        the guesses share the right one.
+      */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[auto_1fr] lg:items-start">
+        {playing && (
+          <div className="rounded-2xl border border-line bg-cream p-4 lg:col-start-2 lg:row-start-1">
+            <ParishSearch
+              key={`${day}-${replay ? 'replay' : 'live'}`}
+              locale={locale}
+              onSelect={onGuess}
+              exclude={exclude}
+              label={t.guessLabel}
+              placeholder={t.guessPlaceholder}
+            />
+            {last && lastParish && !last.correct && (
+              // The result of the last miss, beside the box, so a phone does not have to scroll to the list for it.
+              <p className="mt-3 rounded-xl bg-parchment px-3 py-2 text-sm text-stone-600 lg:hidden">
+                {t.lastGuess(lastParish.name, formatKm(last.distanceKm, locale), last.compass ? COMPASS[last.compass][locale] : '')}
+              </p>
+            )}
+          </div>
+        )}
 
-        <div className="flex flex-col gap-4 lg:sticky lg:top-20">
-          {playing && (
-            <div className="rounded-2xl border border-line bg-cream p-4">
-              <ParishSearch
-                key={day}
-                locale={locale}
-                onSelect={onGuess}
-                exclude={exclude}
-                label={t.guessLabel}
-                placeholder={t.guessPlaceholder}
-              />
-            </div>
-          )}
+        <div className="min-w-0 lg:col-start-1 lg:row-span-2 lg:row-start-1">
+          <ClueDeck
+            entry={entry}
+            meta={meta}
+            locale={locale}
+            open={open}
+            revealed={playing ? null : { name: answer.name, municipalityName: answer.municipalityName }}
+          />
+        </div>
+
+        <div className={`flex flex-col gap-4 lg:col-start-2 ${playing ? 'lg:row-start-2' : 'lg:row-start-1'}`}>
           <section aria-label={t.guessesTitle}>
             <h2 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.guessesTitle}</h2>
             <GuessList guesses={guesses} feedback={feedback} locale={locale} playing={playing} />
@@ -321,4 +409,3 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     </div>
   );
 }
-

@@ -20,8 +20,8 @@ export const RELEASE_GATES: Text[] = [
   },
   { pt: 'Zero violações estruturais.', en: 'Structural violations: 0.' },
   {
-    pt: 'A proporção de crianças nunca fica mais de 10% abaixo do publicado, em nenhuma região nem estrato de tamanho; o pior caso fica em +0,01%.',
-    en: 'The child share is no worse than −10% in every region and size stratum, with the worst at +0.01%.',
+    pt: 'A proporção de crianças nunca fica mais de 10% abaixo da publicada, em nenhuma região nem classe de tamanho: no pior caso fica 0,01% abaixo (o limite era 10%).',
+    en: 'The child share is never more than 10% below the published one, in any region or size band: the worst case is 0.01% below (the limit was 10%).',
   },
   {
     pt: 'O total exato de menores de 15 anos em todas as 3 092 freguesias, tanto nos agregados privados como em toda a população residente.',
@@ -34,7 +34,9 @@ export const RELEASE_GATES: Text[] = [
 ];
 
 /**
- * The six known limitations of the population, declared rather than hidden.
+ * The known limitations of the population, declared rather than hidden: the
+ * model card's six, and the housing and nucleus caveats its column dictionary
+ * states (in English only, until now).
  * The model card lists them for v1.0.0; v1.0.3 has the same generated
  * population, so they hold unchanged (its nuts2 correction is in SUPERSEDED).
  */
@@ -42,8 +44,8 @@ export const LIMITATIONS: Array<{ title: Text; body: Text }> = [
   {
     title: { pt: 'Trabalho e deslocações são os atributos mais fracos', en: 'Workplace and commuting are the weakest attributes' },
     body: {
-      pt: 'O local de trabalho, o meio de transporte, o setor e a profissão ajustam-se às tabelas publicadas muito pior do que as tabelas demográficas e de agregado. Por conceção, não são ajustados a essas tabelas: o modelo gera-os, condicionados à região.',
-      en: 'Work location, transport mode, industry and occupation fit the published tables far less well than the demographic and household tables do. By design they are not fitted to those tables: the model generates them, conditioned on the region.',
+      pt: 'O local de trabalho ou estudo, o meio de transporte, o ramo de atividade (secção da CAE) e a profissão (grande grupo da CPP) ficam muito mais longe das tabelas publicadas do que as tabelas demográficas e de agregado. São avaliados, mas por conceção não entram no ajuste: o modelo gera-os, condicionados à região. Do trabalho, entram no ajuste a condição perante o trabalho, o setor de atividade em quatro grandes grupos e a situação na profissão (ver «Que tabelas foram usadas?»).',
+      en: 'Work or study location, transport mode, industry (CAE section) and occupation (CPP major group) sit much further from the published tables than the demographic and household tables do. They are scored but, by design, not fitted: the model generates them, conditioned on the region. Of the work fields, labour-force status, the four-group activity sector and status in employment are fitted (see “Which tables were used?”).',
     },
   },
   {
@@ -70,8 +72,8 @@ export const LIMITATIONS: Array<{ title: Text; body: Text }> = [
   {
     title: { pt: 'Otimização com limite de tempo', en: 'Clock-bound optimisation' },
     body: {
-      pt: 'Em 116 freguesias grandes, a última fase de pesquisa parou no limite de tempo e não por ter convergido. Estes resultados dependem da velocidade da máquina; o registo de cada freguesia diz como terminou.',
-      en: 'In 116 large parishes the final search stopped at its time budget rather than at convergence. These results depend on machine speed; each parish’s record names the exit.',
+      pt: 'Em 116 freguesias grandes, a última fase de pesquisa parou no limite de tempo e não por ter convergido. Estes resultados dependem da velocidade da máquina; o registo interno do produtor diz como terminou cada uma (não faz parte dos ficheiros publicados).',
+      en: 'In 116 large parishes the final search stopped at its time budget rather than at convergence. These results depend on machine speed; the producer’s internal record names how each one ended (it is not part of the published files).',
     },
   },
   {
@@ -79,6 +81,80 @@ export const LIMITATIONS: Array<{ title: Text; body: Text }> = [
     body: {
       pt: 'As pessoas que vivem em lares e noutros alojamentos coletivos são acrescentadas a partir das contagens publicadas pelo INE. O sexo e a idade vêm dessas contagens; os restantes atributos estão incompletos, por conceção.',
       en: 'People living in care homes and other collective quarters are appended from INE’s published counts. Sex and age come from those counts; their other attributes are partial, by design.',
+    },
+  },
+  {
+    // From the release's column dictionary (hh_tenure_code, n_divisions, nucleus_id), which said it only in English.
+    title: { pt: 'Habitação e núcleos familiares', en: 'Housing and family nuclei' },
+    body: {
+      pt: 'O regime de ocupação (proprietário ou arrendatário) e o número de divisões da casa são publicados nos microdados, mas não são ajustados por freguesia: nas aldeias, a população gerada tem mais arrendatários do que a real. E alguns núcleos familiares gerados têm uma só pessoa, quando no INE um núcleo tem sempre pelo menos duas.',
+      en: 'Tenure (owner or tenant) and the number of rooms are published in the microdata but not fitted per parish: in villages the generated population has more renters than the real one. And some generated family nuclei have a single member, where INE’s nucleus always has at least two.',
+    },
+  },
+];
+
+/**
+ * Which tables the population was fitted to and which were only scored, in
+ * the evaluation's own terms (scorecard `constraints` with `was_constrained`,
+ * and the evaluator's other scored tables). The scorecard publishes a median
+ * only for the fitted person tables; the others are listed by name.
+ */
+export const FITTED_TABLES: Text[] = [
+  { pt: 'Pessoas por agregado e núcleos familiares por agregado', en: 'People per household and family nuclei per household' },
+  { pt: 'As 12 tabelas de pessoas do gráfico acima: idade em grupos de 5 anos, estado civil, escolaridade, condição perante o trabalho, principal meio de vida, trabalho × escolaridade, trabalho × meio de vida, nacionalidade, religião, situação na profissão, setor de atividade (quatro grandes grupos) e união de facto', en: 'The 12 person tables in the chart above: age in 5-year bands, marital status, education, labour-force status, main source of income, labour × education, labour × income, nationality, religion, status in employment, activity sector (four groups) and de facto union' },
+];
+
+export const SCORED_ONLY_TABLES: Text[] = [
+  { pt: 'Idade ano a ano', en: 'Single-year age' },
+  { pt: 'Local de trabalho ou estudo', en: 'Place of work or study' },
+  { pt: 'Meio de transporte', en: 'Means of transport' },
+  { pt: 'Ramo de atividade (secção da CAE)', en: 'Industry (CAE section)' },
+  { pt: 'Profissão (grande grupo da CPP)', en: 'Occupation (CPP major group)' },
+  { pt: 'Agregados por número de pessoas empregadas, e por pessoas ativas e dependentes', en: 'Households by number of employed people, and by active and dependent people' },
+];
+
+/** Words the trust pages use, with a reading a non-specialist can act on. */
+export const GLOSSARY: Array<{ term: Text; body: Text }> = [
+  {
+    term: { pt: 'Erro típico (SRMSE)', en: 'Typical error (SRMSE)' },
+    body: {
+      pt: 'Compara, célula a célula, a contagem gerada com a que o INE publicou, e divide o desvio médio pela contagem média de uma célula dessa tabela. É um número sem unidades: 0 quer dizer igual; 0,10 quer dizer que, grosso modo, cada célula se afasta cerca de 10% do tamanho típico de uma célula. Quanto mais baixo, mais perto.',
+      en: 'Compares, cell by cell, the generated count with the one INE published, and divides the average deviation by the average size of a cell in that table. It has no unit: 0 means identical; 0.10 means that, roughly, each cell is off by about 10% of a typical cell’s size. The lower, the closer.',
+    },
+  },
+  {
+    term: { pt: 'Erro típico da freguesia', en: 'A parish’s typical error' },
+    body: {
+      pt: 'A mediana do erro típico nas 12 tabelas de pessoas usadas no ajuste. É o primeiro critério dos níveis A e B, e o que os gráficos desta página resumem por tamanho de freguesia.',
+      en: 'The median typical error over the 12 person tables used in the fit. It is the first criterion of tiers A and B, and what the charts on this page summarise by parish size.',
+    },
+  },
+  {
+    term: { pt: 'Pior tabela', en: 'Worst table' },
+    body: {
+      pt: 'O maior erro típico entre as tabelas de pessoas da freguesia, contando também a idade ano a ano. É o segundo critério dos níveis; na maior parte das freguesias, a pior tabela é a da idade ano a ano.',
+      en: 'The largest typical error among the parish’s person tables, single-year age included. It is the tiers’ second criterion; in most parishes the worst table is single-year age.',
+    },
+  },
+  {
+    term: { pt: 'Ajuste de máxima entropia', en: 'Maximum-entropy fit' },
+    body: {
+      pt: 'A forma de pôr os candidatos gerados a bater com as tabelas do INE mudando o menos possível o peso de cada um.',
+      en: 'The way the generated candidates are made to match INE’s tables while changing each one’s weight as little as possible.',
+    },
+  },
+  {
+    term: { pt: 'AUC (inferência de pertença)', en: 'AUC (membership inference)' },
+    body: {
+      pt: 'Mede, de 0,5 (acaso) a 1 (certeza), se um teste consegue dizer quem estava na amostra. O valor publicado é o excesso sobre o acaso: perto de zero quer dizer que os dados não ajudam.',
+      en: 'Measures, from 0.5 (chance) to 1 (certainty), whether a test can tell who was in the sample. The published figure is the excess over chance: near zero means the data do not help.',
+    },
+  },
+  {
+    term: { pt: 'Réplica SA/CO', en: 'SA/CO replay' },
+    body: {
+      pt: 'Um método de referência que monta a população copiando registos da amostra. Serve de termo de comparação para as coincidências: copia quase tudo, por conceção. A própria auditoria marca-o como não pronto para uso (not_ready); é só uma referência.',
+      en: 'A reference method that builds the population by copying sample records. It is the yardstick for matches: by design it copies almost everything. The audit itself flags it as not ready for use (not_ready); it is a reference only.',
     },
   },
 ];
@@ -109,15 +185,15 @@ export const PRIVACY_FINDINGS: Array<{ title: Text; body: Text }> = [
   {
     title: { pt: 'Coincidências exatas', en: 'Exact matches' },
     body: {
-      pt: `${NOVELTY.pt}. Para comparação, uma réplica que reutiliza registos da amostra (o teste de referência SA/CO) chega a 99,1% das pessoas e 99,9% dos agregados.`,
-      en: `${NOVELTY.en}. For comparison, a replay that reuses sample records (the SA/CO benchmark) reaches 99.1% of people and 99.9% of households.`,
+      pt: `${NOVELTY.pt}. Para comparação, uma réplica que reutiliza registos da amostra (o teste de referência SA/CO, que a própria auditoria marca como não pronto para uso) chega a 99,1% das pessoas e 99,9% dos agregados.`,
+      en: `${NOVELTY.en}. For comparison, a replay that reuses sample records (the SA/CO benchmark, which the audit itself flags as not ready for use) reaches 99.1% of people and 99.9% of households.`,
     },
   },
   {
     title: { pt: 'Distância ao registo mais próximo', en: 'Distance to the closest record' },
     body: {
-      pt: 'As pessoas sintéticas estão mais longe da amostra do que as pessoas da amostra estão umas das outras: 10,8% coincidem exatamente, contra 74,3% entre registos reais.',
-      en: 'Synthetic persons are further from the sample than sample persons are from each other: 10.8% are exact matches, against 74.3% real-to-real.',
+      pt: 'Numa amostra de 5 000 registos, as pessoas sintéticas estão mais longe da amostra do que as pessoas da amostra estão umas das outras: 10,8% das sintéticas coincidem exatamente com o registo mais próximo, contra 74,3% entre registos reais. É uma medida diferente da anterior (13 atributos, todas as pessoas).',
+      en: 'In a sample of 5,000 records, synthetic persons are further from the sample than sample persons are from each other: 10.8% of the synthetic ones exactly match their closest record, against 74.3% real-to-real. It is a different measure from the one above (13 attributes, every person).',
     },
   },
   {
@@ -146,8 +222,8 @@ export const INTENDED_USES: Text[] = [
   { pt: 'Jornalismo e aplicações de dados cívicos.', en: 'Journalism and civic-data applications.' },
   { pt: 'Ensino e investigação reprodutível.', en: 'Education and reproducible research.' },
   {
-    pt: 'Cenários agregados e pós-estratificação, desde que a incerteza seja propagada.',
-    en: 'Aggregate scenario and poststratification work that propagates uncertainty.',
+    pt: 'Cenários agregados e pós-estratificação. Esta versão não publica incerteza (uma só execução): trata os números como pontuais.',
+    en: 'Aggregate scenario and poststratification work. This release publishes no uncertainty (a single run): treat the figures as point values.',
   },
   {
     pt: 'Testar ferramentas que precisam de registos populacionais realistas, mas que não identificam ninguém.',
@@ -184,8 +260,8 @@ export const NON_USES: Text[] = [
 
 /** Plain words for the scorecard's per-parish fit statistic. */
 export const FIT_EXPLAINED: Text = {
-  pt: 'Erro típico face às tabelas do INE; quanto mais baixo, mais perto. É a mediana, entre freguesias, do erro de todas as células das 12 tabelas de pessoas (SRMSE), medido sobre a população residente. É reportado, não é um critério de publicação.',
-  en: 'Typical error against INE’s tables; the lower, the closer. It is the median, across parishes, of the all-cell error over the 12 person tables (SRMSE), measured on the resident population. It is reported, not used as a publication gate.',
+  pt: 'Erro típico (SRMSE) face às tabelas do INE: 0 seria igual, e 0,10 quer dizer que cada célula se afasta, grosso modo, 10% do tamanho típico de uma célula. É a mediana, entre freguesias, do erro em todas as células das 12 tabelas de pessoas usadas no ajuste, medido sobre a população residente. É reportado, não é um critério de publicação. Como estas tabelas entraram no ajuste, o erro mede quão perto o ajuste chegou, não quão bem o modelo prevê o que não viu.',
+  en: 'Typical error (SRMSE) against INE’s tables: 0 would be identical, and 0.10 means each cell is off by roughly 10% of a typical cell’s size. It is the median, across parishes, of the all-cell error over the 12 person tables used in the fit, measured on the resident population. It is reported, not used as a publication gate. Because these tables were in the fit, the error measures how close the fit came, not how well the model predicts what it did not see.',
 };
 
 /** Size bands, by the scorecard's stratum key, in words. */

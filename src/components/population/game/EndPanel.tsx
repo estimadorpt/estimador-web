@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowRight, Share2 } from 'lucide-react';
+import { ArrowRight, RotateCcw, Share2 } from 'lucide-react';
 import { Action } from '@/components/brand/Action';
 import { ACCENT, FURNITURE } from '@/components/viz/theme';
 import { formatCount } from '@/lib/population/format';
 import { MAX_GUESSES, formatCountdown, msUntilNextLisbonMidnight, type GameRecord, type GameStats } from '@/lib/population/game';
 import { regionTitle, type Parish } from '@/lib/population/places';
-import { TIER_COPY, type Locale } from '@/lib/population/labels';
+import { tierMeaningFor, type Locale } from '@/lib/population/labels';
 import type { GameIndex } from '@/types/population';
 import { ParishLink } from '../ParishLink';
 import { QualityBadge } from '../QualityBadge';
+import { ofMunicipality } from '../parish/place-words';
 import { GAME_COPY } from './copy';
 
 const SECONDARY = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] border border-line bg-cream px-5 text-[15px] font-semibold leading-none text-ink transition-colors duration-150 hover:bg-parchment';
@@ -20,7 +21,7 @@ const SECONDARY = 'inline-flex min-h-12 items-center justify-center gap-2 rounde
  * text, the honesty line and the geography's attribution, the player's stats
  * and the time to the next parish.
  */
-export function EndPanel({ record, answer, tier, stats, share, index, locale, practice }: {
+export function EndPanel({ record, answer, tier, stats, share, index, locale, practice, onReplay }: {
   record: GameRecord;
   answer: Parish;
   tier: 'A' | 'B' | 'C';
@@ -29,6 +30,8 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
   index: GameIndex;
   locale: Locale;
   practice: boolean;
+  /** Play the same parish again as practice (not stored, not counted); null while already replaying. */
+  onReplay?: (() => void) | null;
 }) {
   const t = GAME_COPY[locale];
   const won = record.status === 'won';
@@ -59,16 +62,17 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
   return (
     <section aria-labelledby="misteriosa-end" className="rounded-2xl border border-line bg-cream p-5 md:p-6">
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{won ? t.wonKicker(record.guesses.length) : t.lostKicker}</p>
-      <h2 id="misteriosa-end" className="mt-2 text-base font-bold text-stone-600">{t.revealHeading}</h2>
+      {/* Focus lands here when a guess ends the game (MysteryGame), so the result is the next thing read. */}
+      <h2 id="misteriosa-end" tabIndex={-1} className="mt-2 text-base font-bold text-stone-600 outline-none">{t.revealHeading}</h2>
       <p className="mt-1 font-display text-2xl font-extrabold leading-tight text-ink sm:text-3xl md:text-4xl">{answer.name}</p>
       <p className="mt-1 text-[15px] text-stone-600">
-        {locale === 'pt' ? `Concelho de ${answer.municipalityName}` : `${answer.municipalityName} municipality`} · {regionTitle(answer.region, answer.regionName, locale)}
+        {locale === 'pt' ? `Concelho ${ofMunicipality(answer.municipalityName)}` : `${answer.municipalityName} municipality`} · {regionTitle(answer.region, answer.regionName, locale)}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-600">
         <QualityBadge kind={tier} locale={locale} />
         <span>{t.residents}: <strong className="tabular-nums text-ink">{formatCount(answer.censusPopulation, locale)}</strong></span>
       </div>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600">{TIER_COPY[tier].meaning[locale]}</p>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600">{tierMeaningFor(tier, answer.publicationPopulation)[locale]}</p>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <Action onClick={onShare}>
@@ -79,6 +83,12 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
           {t.seePortrait}
           <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </ParishLink>
+        {onReplay && (
+          <button type="button" onClick={onReplay} className="inline-flex min-h-12 items-center gap-2 px-1 text-[15px] font-semibold text-ink underline underline-offset-4">
+            <RotateCcw aria-hidden="true" className="h-4 w-4" />
+            {t.replay}
+          </button>
+        )}
       </div>
       <p className="mt-2 min-h-5 text-sm text-stone-600" aria-live="polite">
         {shareState === 'copied' ? t.copied : shareState === 'failed' ? t.shareFailed : ''}
