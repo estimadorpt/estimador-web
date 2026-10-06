@@ -464,7 +464,8 @@ const NOT_PROMOTED = BRAND.faint;
 /** How the promotion probability moved across the retrospective checkpoints.
  *  Drawn at the container's measured width, so every label is 11px on a phone
  *  too (it used to be a 720px viewBox scaled to 5px text, audit A11Y2-05,
- *  UXM2-02); below 520px the end labels give way to a legend. Every point is
+ *  UXM2-02); below 520px the end labels give way to a legend (a swatch for
+ *  each club that went up, the grey ones as text). Every point is
  *  in the table twin, and each dot has its value as a tip. Framed in the one
  *  chart card, with its source, date and method (audit UXD2-07). */
 export function Liga2PromotionRace({
@@ -627,16 +628,32 @@ export function Liga2PromotionRace({
           ))}
         </svg>
       </div>
-      {narrow && (
-        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-stone-600">
-          {ends.slice().sort((a, b) => b.v - a.v).map(e => (
-            <li key={e.team} className="inline-flex items-center gap-1.5">
-              <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: colourOf(e.team) }} />
-              <span className={wentUpOf(e.team) ? "font-bold text-ink" : ""}>{liga2DisplayName(e.team)} {pct(e.v, pt)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {narrow && (() => {
+        // A swatch only where its colour picks out the line: the clubs that
+        // went up. The grey lines share one colour, so a grey swatch per club
+        // would promise an identity it cannot carry; they are listed as text
+        // (audit UXD3-04).
+        const byValue = ends.slice().sort((a, b) => b.v - a.v);
+        const up = byValue.filter(e => wentUpOf(e.team));
+        const rest = byValue.filter(e => !wentUpOf(e.team));
+        return (
+          <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-stone-600">
+            {up.map(e => (
+              <li key={e.team} className="inline-flex items-center gap-1.5">
+                <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: colourOf(e.team) }} />
+                <span className="font-bold text-ink">{liga2DisplayName(e.team)} {pct(e.v, pt)}</span>
+              </li>
+            ))}
+            {rest.length > 0 && (
+              <li className="basis-full">
+                {pt ? "A cinzento: " : "In grey: "}
+                {/* Each club and its value stay on one line (no-break spaces). */}
+                {rest.map(e => `${liga2DisplayName(e.team)} ${pct(e.v, pt)}`.replace(/ /g, "\u00a0")).join(", ")}
+              </li>
+            )}
+          </ul>
+        );
+      })()}
       <p className="text-[11px] text-stone-600 mt-2 leading-relaxed">
         {pt
           ? "A verde, os dois clubes que acabaram por subir; a cinzento, os outros. Cada ponto é um ajuste independente que só viu os jogos disputados até essa jornada."

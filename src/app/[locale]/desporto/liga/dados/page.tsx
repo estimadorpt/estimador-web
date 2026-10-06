@@ -58,14 +58,14 @@ const copy = {
     licenceOwnAfter:
       ": podes usá-las, redistribuí-las e transformá-las, incluindo para fins comerciais, desde que atribuas a fonte («estimador.pt», com ligação para a página correspondente).",
     licenceThirdParty:
-      "A licença não abrange os dados de terceiros que alguns ficheiros trazem, marcados na lista acima como «Fora da licença»: resultados e estatísticas de jogo (SofaScore), cotações de casas de apostas (Pinnacle e Bet365, via football-data.co.uk) e lesões e valores de mercado (Transfermarkt). Esses dados vêm da fonte original e não são redistribuíveis por nós: para os reutilizar, segue os termos de cada fonte.",
+      "A licença não abrange os dados de terceiros que alguns ficheiros trazem, marcados na lista acima como «Fora da licença»: resultados e estatísticas de jogo (SofaScore), xG (FotMob), cotações de casas de apostas (Pinnacle e Bet365, via football-data.co.uk) e lesões e valores de mercado (Transfermarkt). Esses dados vêm da fonte original e não são redistribuíveis por nós: para os reutilizar, segue os termos de cada fonte.",
     licenceWarranty:
       "Os dados são fornecidos como estão, sem garantias — são previsões probabilísticas de um modelo estatístico, e por definição vão estar erradas parte do tempo.",
     licenceUrl: "https://creativecommons.org/licenses/by/4.0/deed.pt",
     thirdPartyLabel: "Fora da licença:",
     provenanceTitle: "Proveniência",
     provenance:
-      "Resultados e estatísticas de jogo (incluindo xG e remates à baliza) da SofaScore; cotações de fecho (Pinnacle e Bet365) via football-data.co.uk; lesões e valores de mercado do Transfermarkt. As probabilidades vêm de um modelo bayesiano de Poisson bivariado (bivcross), ajustado aos golos e aos remates à baliza das últimas quatro épocas da Primeira Liga e da Liga 2, com os jogos mais antigos a pesar menos e o valor de cada plantel como ponto de partida, e de 50 000 simulações de Monte Carlo por publicação. A pré-época (md00) foi publicada pelo modelo anterior, joint_sot.",
+      "Resultados e estatísticas de jogo (incluindo remates à baliza) da SofaScore; xG da FotMob; cotações de fecho (Pinnacle e Bet365) via football-data.co.uk; lesões e valores de mercado do Transfermarkt. As probabilidades vêm de um modelo bayesiano de Poisson bivariado (bivcross), ajustado aos golos e aos remates à baliza das últimas quatro épocas da Primeira Liga e da Liga 2, com os jogos mais antigos a pesar menos e o valor de cada plantel como ponto de partida, e de 50 000 simulações de Monte Carlo por publicação. A pré-época (md00) foi publicada pelo modelo anterior, joint_sot.",
     unavailable: "Não foi possível listar os ficheiros publicados.",
     methodology: "Como funciona o modelo",
     review: "A época 2025-26 em revista",
@@ -102,14 +102,14 @@ const copy = {
     licenceOwnAfter:
       ": you may use, redistribute and transform them, commercial use included, as long as you credit the source (“estimador.pt”, with a link to the corresponding page).",
     licenceThirdParty:
-      "The licence does not cover the third-party data some files carry, marked “Not under the licence” in the list above: results and match statistics (SofaScore), bookmaker odds (Pinnacle and Bet365, via football-data.co.uk), and injuries and market values (Transfermarkt). Those data come from their original sources and are not ours to redistribute: to reuse them, follow each source's terms.",
+      "The licence does not cover the third-party data some files carry, marked “Not under the licence” in the list above: results and match statistics (SofaScore), xG (FotMob), bookmaker odds (Pinnacle and Bet365, via football-data.co.uk), and injuries and market values (Transfermarkt). Those data come from their original sources and are not ours to redistribute: to reuse them, follow each source's terms.",
     licenceWarranty:
       "The data is provided as is, with no warranty — these are probabilistic forecasts from a statistical model, and by definition they will be wrong some of the time.",
     licenceUrl: "https://creativecommons.org/licenses/by/4.0/",
     thirdPartyLabel: "Not under the licence:",
     provenanceTitle: "Provenance",
     provenance:
-      "Results and match statistics (xG and shots on target included) from SofaScore; closing odds (Pinnacle and Bet365) via football-data.co.uk; injuries and market values from Transfermarkt. The probabilities come from a bivariate Poisson Bayesian model (bivcross), fitted to goals and shots on target from the last four seasons of the Primeira Liga and Liga 2, with older games counting for less and each squad's value as the starting point, and from 50,000 Monte Carlo season simulations per publication. The pre-season file (md00) was published by the previous model, joint_sot.",
+      "Results and match statistics (shots on target included) from SofaScore; xG from FotMob; closing odds (Pinnacle and Bet365) via football-data.co.uk; injuries and market values from Transfermarkt. The probabilities come from a bivariate Poisson Bayesian model (bivcross), fitted to goals and shots on target from the last four seasons of the Primeira Liga and Liga 2, with older games counting for less and each squad's value as the starting point, and from 50,000 Monte Carlo season simulations per publication. The pre-season file (md00) was published by the previous model, joint_sot.",
     unavailable: "Could not list the published files.",
     methodology: "How the model works",
     review: "The 2025-26 season reviewed",
@@ -139,8 +139,8 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc; thirdParty?: Doc }[] 
       en: "The forecast published after a matchday: simulated standings with title, top-three and relegation (17th or 18th place) probabilities, attack and defence strengths, xPts, and the real table at that moment.",
     },
     thirdParty: {
-      pt: "os resultados (actual_standings, matchday_results) e o xG de xpts_table (xgf, xga, e os xPts calculados a partir dele), da SofaScore.",
-      en: "the results (actual_standings, matchday_results) and the xG in xpts_table (xgf, xga, and the xPts computed from it), from SofaScore.",
+      pt: "os resultados (actual_standings, matchday_results), da SofaScore, e o xG de xpts_table (xgf, xga, e os xPts calculados a partir dele), da FotMob.",
+      en: "the results (actual_standings, matchday_results), from SofaScore, and the xG in xpts_table (xgf, xga, and the xPts computed from it), from FotMob.",
     },
   },
   {
@@ -263,8 +263,8 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc; thirdParty?: Doc }[] 
       en: "The season calendar for the Beat the Model game: every fixture with its kickoff (UTC; kickoff_confirmed says whether it is official yet), its lock time (locks_at), the model's probabilities and when they were published (published_at; probs_source names the file they came from) and the result. In the game, a round closes as a whole at the earliest locks_at of its games. The notes below say where these rules part from the calendar.",
     },
     thirdParty: {
-      pt: "os resultados (home_goals, away_goals).",
-      en: "the results (home_goals, away_goals).",
+      pt: "os resultados (home_goals, away_goals), da SofaScore.",
+      en: "the results (home_goals, away_goals), from SofaScore.",
     },
   },
   {
@@ -303,8 +303,8 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc; thirdParty?: Doc }[] 
       en: "The review of a finished season: final table, per-team xPts, the gap between points and xPts (luck; not a clean split between luck and skill) and how the title and relegation probabilities moved through the year. In 2025-26, the matchday 4 to 22 forecasts were reconstructed afterwards, on 4 March 2026; each mdNN.json's timestamp shows it.",
     },
     thirdParty: {
-      pt: "a classificação final e o xG por trás dos xPts (SofaScore).",
-      en: "the final table and the xG behind the xPts (SofaScore).",
+      pt: "a classificação final (SofaScore) e o xG por trás dos xPts (FotMob).",
+      en: "the final table (SofaScore) and the xG behind the xPts (FotMob).",
     },
   },
 ];
@@ -565,7 +565,7 @@ export default async function LigaDataPage({
                         <tr className="border-b border-stone-300">
                           <th
                             scope="col"
-                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left w-52"
+                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left w-28 sm:w-52"
                           >
                             {c.file}
                           </th>
@@ -602,7 +602,7 @@ export default async function LigaDataPage({
                                   </div>
                                 )}
                               </td>
-                              <td className="py-3 pr-3 text-stone-600 leading-relaxed">
+                              <td className="py-3 pr-3 text-stone-600 leading-relaxed [overflow-wrap:anywhere]">
                                 {g.doc ? (pt ? g.doc.pt : g.doc.en) : "—"}
                                 {g.thirdParty && (
                                   <span className="mt-1 block text-xs text-stone-500">

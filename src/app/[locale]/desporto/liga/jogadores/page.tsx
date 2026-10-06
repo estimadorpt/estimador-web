@@ -100,9 +100,18 @@ export default async function PlayerRatingsPage({
         // The back link already names the section (audit CL3-07, /modelo's pattern).
         eyebrow={pt ? "Jogadores" : "Players"}
         title={pt ? "Jogadores da Liga Portugal" : "Liga Portugal players"}
-        lede={`${pt
-          ? "Uma métrica por dimensão, cada uma com o seu intervalo, e nenhuma nota global: um número só não chega para comparar um guarda-redes com um ponta de lança."
-          : "One metric per dimension, each with its own interval, and no overall score: one number cannot compare a goalkeeper with a centre-forward."} ${inventory}`}
+        // On a phone the inventory would push the first ranked row below the
+        // fold (about 914px at 390); each section states its own status
+        // (ranked, null or diagnostics only), so the summary shows from 640px
+        // up (audit UXD2-29, round 4).
+        lede={
+          <>
+            {pt
+              ? "Uma métrica por dimensão, cada uma com o seu intervalo, e nenhuma nota global: um número só não chega para comparar um guarda-redes com um ponta de lança."
+              : "One metric per dimension, each with its own interval, and no overall score: one number cannot compare a goalkeeper with a centre-forward."}
+            <span className="hidden sm:inline"> {inventory}</span>
+          </>
+        }
         meta={cutoff ? <span>{cutoff}</span> : undefined}
       />
 
