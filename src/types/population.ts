@@ -346,12 +346,18 @@ export interface PopulationScorecard {
   };
   constraints: Array<{ key: string; label: string; label_en: string; srmse_median: ScorecardValue; was_constrained: boolean }>;
   /**
-   * Size-band strata. `in_band`, `acceptance` and `release_decision` are
-   * internal (informational ranges; `in_band` is false for a band *better*
-   * than its range) and are never rendered as a pass/fail. From v1.0.2 each
-   * band carries `band_position` and a producer note in words (`note_pt` /
-   * `note_en`; before v1.0.2 `note_pt` held a status code, so the site reads
-   * the notes only when `band_position` is present).
+   * Size-band strata. The quality page shows each band's name (the site's own
+   * `SIZE_BAND` label), its parish count and its `person_srmse_median`, and
+   * nothing else. `in_band`, `acceptance` and `release_decision` are internal
+   * (informational ranges; `in_band` is false for a band *better* than its
+   * range). From v1.0.2 each band also carries `band_position` and a producer
+   * note in words (`note_pt` / `note_en`; before v1.0.2 `note_pt` held a
+   * status code). None of these is read or shown: the ranges were set for an
+   * out-of-fit check with an earlier engine and the page's errors are
+   * in-sample, so the site renders no band verdict (MR2-02;
+   * trust-pages.test.ts keeps `band_position`, the notes and `acceptance` off
+   * the quality page). They are typed only because scorecard.json is kept
+   * verbatim.
    */
   strata: Array<{
     key: string;
