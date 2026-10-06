@@ -88,3 +88,25 @@
    wider than 720px) a fitted scene would be ~100px tall, so there the block scrolls with the page instead. */
 @media(min-width:721px) and (min-height:560px){.mini-stage-view{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;max-height:calc(100vh - 92px);max-height:calc(100svh - 92px)}.mini-stage .mini-canvas{min-height:0}.mini-stage .mini-scene{max-height:min(720px,100%)}}
 @media(min-width:721px) and (max-height:559px){.mini-stage-view{position:relative;top:auto}}
+
+/* Round 4 (UXD2-08, PUB3-04): the stage still ran ~350px past its legend at 1280-1440 wide, because the sidebar
+   carried the filter, the count and the tour under the story. From 721px those three sit in a row under the scene
+   (.mini-stage-tools, a second copy of the sidebar's; one is shown at a time, so a live count is announced once),
+   and the two columns end together. The scene follows the reader inside .mini-stage-follow, which takes any slack
+   and ends above the row, so the stuck scene never slides over it. Phones keep the sidebar's copies, in their order. */
+.mini-stage-follow{display:flex;flex-direction:column}
+.mini-stage-tools{display:none}
+@media(min-width:721px){
+  .mini-stage-follow{flex:1 1 auto;min-height:0}
+  .mini-sidebar>.mini-filter,.mini-sidebar>.mini-answer,.mini-sidebar>.mini-tour,.mini-sidebar>.mini-house-picker{display:none}
+  .mini-stage-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px 24px;padding:12px 20px 14px;border-top:1px solid var(--mini-line);background:#f4f2e9}
+  .mini-stage-tools .mini-filter{margin:0}
+  .mini-stage-tools .mini-answer{display:flex;align-items:center;gap:10px;margin:0;padding:0;border-top:0}
+  .mini-stage-tools .mini-answer p{margin:0;max-width:150px}
+  .mini-stage-tools .mini-house-picker{display:flex;align-items:center;gap:10px;margin:0;white-space:nowrap}
+  .mini-stage-tools .mini-house-picker select{width:auto;min-width:200px}
+  /* .mini-stage styles its own buttons as 44px icon buttons; the tour is a labelled action. */
+  .mini-stage .mini-stage-tools .mini-tour{display:flex;width:auto;height:auto;min-height:44px;margin:0 0 0 auto;padding:12px 16px;background:var(--mini-ink);color:var(--mini-paper);border-radius:5px}
+  .mini-stage .mini-stage-tools .mini-tour:hover{background:var(--color-ink-dark, var(--mini-ink))}
+  .mini-workspace:has(.mini-inspector) .mini-stage-tools{display:none}
+}
