@@ -5,6 +5,7 @@ import { ParishSearch } from '@/components/population/ParishSearch';
 import { HONESTY } from '@/lib/population/labels';
 import { formatCount } from '@/lib/population/format';
 import { POPULATION_ROUTES } from '@/lib/config/population';
+import { formatDay } from '@/components/population/quality/copy';
 import type { PopulationMeta } from '@/types/population';
 import { HomeArt } from './HomeArt';
 import { HomePanel, Kicker, Status } from './HomePanel';
@@ -29,6 +30,14 @@ export async function PopulationPanel({ locale, variant, meta }: { locale: strin
   const lead = variant === 'lead';
   // The homepage's h1 is the site line above the grid; every panel title is an h2.
   const Heading = 'h2';
+  // The same status slot as the other three panels (CL2-05): the release's
+  // state and version in the kicker's pill, its date in the status line, both
+  // read from meta.json. The version keeps its lower-case "v" in the
+  // upper-case kicker.
+  const released = meta?.data_status === 'release';
+  const pill = released
+    ? t.rich('populationPill', { version: meta.release_version, v: chunks => <span className="normal-case">{chunks}</span> })
+    : undefined;
 
   const figures = meta && (
     <>
@@ -57,7 +66,7 @@ export async function PopulationPanel({ locale, variant, meta }: { locale: strin
         <Action href={POPULATION_ROUTES.game} locale={locale} variant="text" arrow>{t('populationGame')}</Action>
         <Link href={POPULATION_ROUTES.data} locale={locale} className="inline-flex min-h-11 items-center text-[13px] font-medium text-stone-600 underline underline-offset-4 hover:text-ink">{t('populationData')}</Link>
       </div>
-      {meta && <Status>{t('populationStatus', { version: meta.release_version })}</Status>}
+      {released && <Status>{t('populationStatus', { date: formatDay(meta.published, lang) })}</Status>}
     </>
   );
 
@@ -67,7 +76,7 @@ export async function PopulationPanel({ locale, variant, meta }: { locale: strin
         <div className="flex min-w-0 flex-1 flex-col p-5 md:p-6">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <Kicker>{t('populationKicker')}</Kicker>
+              <Kicker pill={pill}>{t('populationKicker')}</Kicker>
               <Heading id="home-population-title" className="mt-2 text-2xl md:text-[1.75rem] md:leading-[1.15]">{t('populationTitle')}</Heading>
             </div>
             <HomeArt name="population" shape="square" sizes="72px" className="h-[72px] w-[72px] shrink-0 rounded-xl md:hidden" />
@@ -83,15 +92,16 @@ export async function PopulationPanel({ locale, variant, meta }: { locale: strin
   return (
     <HomePanel labelledBy="home-population-title" className="!overflow-visible md:grid md:grid-cols-[minmax(0,1.1fr)_minmax(220px,.9fr)] min-[1100px]:grid-cols-[minmax(0,1.25fr)_minmax(270px,1fr)]">
       <div className="min-w-0 px-5 pb-5 pt-5 md:flex md:flex-col md:justify-center md:px-6 md:py-6 min-[1100px]:px-7">
-        <Kicker>{t('populationKicker')}</Kicker>
+        <Kicker pill={pill}>{t('populationKicker')}</Kicker>
         <div className="mt-3 grid grid-cols-[minmax(0,1fr)_90px] items-center gap-3 md:block">
           <Heading id="home-population-title" className="max-w-xl text-[1.75rem] leading-[1.1] md:text-[2.4rem]">{t('populationTitle')}</Heading>
-          <HomeArt name="population" shape="lead" priority sizes="90px" className="h-[90px] w-[90px] rounded-xl md:hidden" />
+          {/* Phones only: the media query keeps desktop from fetching it eagerly behind md:hidden (UXM2V-04). */}
+          <HomeArt name="population" shape="lead" priority media="(max-width: 767.98px)" sizes="90px" className="h-[90px] w-[90px] rounded-xl md:hidden" />
         </div>
         {figures}
         {actions}
       </div>
-      <HomeArt name="population" shape="lead" priority sizes="(min-width: 1100px) 40vw, (min-width: 768px) 42vw, 100vw" className="hidden md:block md:col-start-2 md:!m-0 md:h-full md:max-h-[430px] md:self-center md:w-full md:rounded-r-2xl md:py-4 md:[&_img]:object-center" />
+      <HomeArt name="population" shape="lead" priority media="(min-width: 768px)" sizes="(min-width: 1100px) 40vw, 42vw" className="hidden md:block md:col-start-2 md:!m-0 md:h-full md:max-h-[430px] md:self-center md:w-full md:rounded-r-2xl md:py-4 md:[&_img]:object-center" />
     </HomePanel>
   );
 }

@@ -110,7 +110,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
             <Kicker pill={tSections('archiveSection')}>{t('electionsKicker')}</Kicker>
             <h2 id="home-elections-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{t('electionsTitle')}</h2>
           </div>
-          <SectionIllustration scene="elections" className="home-support-scene hidden md:block md:h-[108px] md:w-[138px] md:p-0 md:[&_img]:h-full" />
+          <SectionIllustration scene="elections" sizes="138px" className="home-support-scene hidden md:block md:h-[108px] md:w-[138px] md:p-0 md:[&_img]:h-full" />
         </div>
         <p className="mt-2 text-[14px] leading-relaxed text-stone-600">{t('electionsText')}</p>
         <ul className="mt-3 divide-y divide-line border-y border-line">

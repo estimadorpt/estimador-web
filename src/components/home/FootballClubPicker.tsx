@@ -89,8 +89,11 @@ export function FootballClubPicker({
     setRestored(false);
   }
 
+  // A column that fills the rail card, so the club selector sits on the
+  // card's last line when the row is taller than the forecast (UXD2-V02):
+  // no band of empty cream under it.
   return (
-    <div className="mt-3">
+    <div className="mt-3 flex flex-1 flex-col">
       <div aria-live="polite">
         {selected ? (
           <div>
@@ -162,7 +165,7 @@ export function FootballClubPicker({
 
       <form
         id="escolher-equipa"
-        className="mt-4 flex min-w-0 flex-wrap items-end gap-2"
+        className="mt-auto flex min-w-0 flex-wrap items-end gap-2 pt-4"
         onSubmit={(event) => {
           event.preventDefault();
           // The button is never disabled (it looked broken, audit CL2-04):

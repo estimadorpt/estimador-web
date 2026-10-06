@@ -66,3 +66,16 @@
 @media(min-width:721px){.mini-stage{position:relative;top:auto;align-self:stretch}.mini-under{justify-content:flex-start;gap:32px}}
 /* Round 3 (UXM2V-05): on phones the houses are small tap targets, so the "go to a household" menu comes before the scene. */
 @media(max-width:720px){.mini-house-picker{order:3;margin:0 16px 12px}}
+
+/* Integration of round 3 (UXD2-08): the stage still runs the full height of the controls, but one
+   block inside it follows the reader (the bar, the scene, its zoom controls, the caption and the
+   legend), not the canvas alone, which slid under the caption. The legend sits right under the
+   scene. The data note and its disclosure share one 44px row. */
+.mini-stage-view{display:flex;flex-direction:column;flex:1;min-height:0;position:relative}
+@media(min-width:721px){.mini-stage{justify-content:flex-start}.mini-stage-view{position:sticky;top:76px;flex:none}.mini-stage .mini-canvas{position:relative;top:auto}.mini-stage .mini-legend{margin-top:0}.mini-under{align-items:flex-start}.mini-under>p{min-height:44px;align-items:center}.mini-under>p>svg{margin-top:0}}
+/* Selectors are 44px at every width (UXM2V-05), like the site's other inputs. */
+.mini-lens-control select,.mini-house-picker select{min-height:44px}
+/* The two disclosures are the site's <Disclosure> (chevron, 44px, ink): the old 12px summary size goes. */
+.mini-data summary{font-size:14px}
+/* "Ver pessoas →" on one line (the stage's icon-button grid stacked the arrow under the words). */
+.mini-selected-summary button{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
