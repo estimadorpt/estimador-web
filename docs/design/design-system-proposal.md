@@ -2,6 +2,38 @@
 
 Status: applied to the website on 2026-09-11 (see `/marca` and CLAUDE.md, Design Language). Originally visual prototypes and an implementation specification. Builds on the current `/pt/marca/` identity and the approved second application study. All buttons, badges, cards, illustrations and tiles remain level: no rotation or tilted decoration.
 
+> **Note of 6 October 2026: partly superseded.** Two later decisions replace this proposal's
+> illustration and mosaic rules. The 13 September refinement
+> (`docs/design/original-illustration-refinement/README.md`, "Latest revision — 13 September
+> 2026", and `docs/design/browser-reference/HANDOFF.md`) brought one painting family: three
+> section scenes and the refined population house. The owner decision of 6 October 2026 set
+> where each header goes and confined the mosaic. The header table in CLAUDE.md ("Three levels
+> of expression") and on `/marca#ilustracao` is the current rule. Superseded here:
+>
+> - **Three levels, first row** ("give the mosaic enough space to form a composition"):
+>   section entrances carry their painting. Explainers with a world of their own draw it
+>   (`/populacao/miniatura`). The mosaic is never a page header. The painted forecast
+>   entrances (Liga hub and simulator, the election archives) are an owner exception to the
+>   second row's compact introduction.
+> - **Three levels, third row** ("illustrated cover" for articles, methodology and stories):
+>   these pages are plain paper.
+> - **Apply across the website.** The homepage line ("orderly mosaic composition", "keep the
+>   living village") is replaced: each homepage panel carries its section's painting, and the
+>   village lives on `/populacao/miniatura`. "Explanatory mosaic graphics" for elections and
+>   "a small coherent mosaic" on article covers are replaced too: the mosaic is limited to
+>   brand material (`/marca`, the OG brand card, the social kit), the 404 and empty states.
+>   About and methodology get no "illustrated introduction"; they are plain paper. The atlas
+>   was retired on 5 October 2026.
+> - **Empty, error and loading states** keep "a small mosaic and a specific next step", now
+>   as one variant (`quarters`) at one size (72px, `EmptyStateMark`), the same at every
+>   width. The 404 keeps a larger one, capped at about 200px on desktop and 112px on phones.
+> - The decorative dot grid is gone from every page: next to the site's real dot charts it
+>   reads as data.
+>
+> Still current: the recognisable core, the shared primitives, colour use (one field per
+> page; per section, population periwinkle, economy mint, articles mustard), the
+> visualisation components and the responsive criteria.
+
 ## Keep the recognisable core
 
 Keep the existing single-colour interval mark, `estimador.pt` signature, Manrope UI family, Newsreader article body, and current palette. The mark remains pine on light surfaces and paper on forest. Colour inside the logo is not needed to make the site inviting.
