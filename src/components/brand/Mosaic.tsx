@@ -14,7 +14,8 @@ interface MosaicProps {
 }
 
 /**
- * The mosaic: the site's playful register, kept away from data. The vocabulary
+ * The mosaic: brand material (/marca, the OG brand card, the social kit), the
+ * 404 and empty states (EmptyStateMark), and nowhere else; kept away from data. The vocabulary
  * is small and each piece means something on this site: a quarter-circle is a
  * share of a whole, a circle is a person, a grid of dots is a population, a
  * rounded block is a place. Bands stay in the mark.

@@ -263,7 +263,6 @@ export default async function LigaPage({
       <main id="main-content" tabIndex={-1}>
       <PageHero
         illustration="football"
-        field="periwinkle"
         compact
         icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
         eyebrow={`${t("football.title")} — ${t("football.season")} ${prediction.season}`}

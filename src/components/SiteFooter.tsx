@@ -86,7 +86,7 @@ export async function SiteFooter({ locale }: { locale: string }) {
               <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t('footer.contact')}</h2>
               <ul>
                 <li>
-                  <a href="mailto:info@estimador.pt" className={linkStyle}>info@estimador.pt</a>
+                  <a href="mailto:info@estimador.pt" className={`${linkStyle} [overflow-wrap:anywhere]`}>info@estimador.pt</a>
                 </li>
                 {/* A way to follow the project between visits (audit CL2-15):
                     the organisation's public repositories, where each data

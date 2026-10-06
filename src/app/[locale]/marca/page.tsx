@@ -11,6 +11,7 @@ import { TextLink } from '@/components/brand/TextLink';
 import { PageHero } from '@/components/PageHero';
 import { LogoHorizontal, Mark, MarkSmall } from '@/components/Logo';
 import { Mosaic } from '@/components/brand/Mosaic';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { MarkLoading } from '@/components/brand/MarkLoading';
 import { Action } from '@/components/brand/Action';
 import { VizShowcase } from '@/components/viz/Showcase';
@@ -291,7 +292,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         </div>
         <h3 className="mt-10 text-base font-bold uppercase tracking-wider text-stone-500">{pt ? 'O estado vazio' : 'The empty state'}</h3>
         <div className="mt-4 flex max-w-xl items-start gap-4 rounded-2xl border border-line bg-cream p-5">
-          <Mosaic variant="quarters" className="size-18 shrink-0" ground={BRAND.cream} />
+          <EmptyStateMark surface="cream" />
           <div className="min-w-0">
             <p className="font-bold text-ink">{pt ? 'Não encontrámos esta freguesia.' : 'We could not find this parish.'}</p>
             <p className="mt-1 text-sm leading-relaxed text-stone-600">{pt ? 'O endereço pode ter um código antigo ou incompleto.' : 'The address may carry an old or incomplete code.'}</p>

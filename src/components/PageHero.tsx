@@ -16,7 +16,11 @@ interface PageHeroProps {
   back?: { href: string; label: ReactNode; locale?: string };
   /** The meta line: update date, methodology link, next release. */
   meta?: ReactNode;
-  /** Decorative mosaic or illustration, placed on the right on wide screens. Never over data. */
+  /**
+   * Brand art on the right on wide screens: only /marca uses it. Section pages
+   * take `illustration`, data pages a `field`, reference pages neither
+   * (CLAUDE.md, header table). Never over data.
+   */
   art?: ReactNode;
   /** Recognisable section scene, in its own column rather than behind text. */
   illustration?: IllustrationScene;
