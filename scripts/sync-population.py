@@ -39,11 +39,13 @@ PUBLISHED = "2026-10-05"
 CONTRACT = "1.0"
 
 # doc 206 §7 (v1.0.3, supersedes v1.0.1 and v1.0.2; full hashes where the handoff
-# gives them, prefixes where it abbreviates).
+# gives them, prefixes where it abbreviates). `checksums` is the package's after the
+# 2026-10-06 relabelling to CC BY-NC 4.0 (c5a00967... as built on 2026-10-05): only the
+# licence texts, ERRATA.md and metadata.json changed; every data file is byte-identical.
 PINNED = {
     "bundle": "3a55f0a06de2ba26e5eaf615504d7afc4b2955846d4d2cd4b77f4b61a4800589",
     "scorecard": "f1c590aed8b47e7aa8cc94c13e5799869c5db0a4eed48b9650dbb93d073fade1",
-    "checksums": "c5a009679c9037e48156b3d89d4ffd6a66f1968098ab7792b0159054a195c36e",
+    "checksums": "0992bcfec9595df4fc2102349a6692e570ebc4322377e85438d795dc5a4ab8d8",
     "portrait_index": "556d71e5",
     "mystery_deck": "fc1e7c8a",
     "responses_index": "72460ec7",

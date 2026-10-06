@@ -14,6 +14,7 @@ import { BRAND, MARK_FULL } from '@/lib/brand';
 import { POPULATION_PUBLISHED, POPULATION_RELEASE } from '@/lib/config/population';
 import type { ParishRecord, PopulationRecipe, PortraitRecipe, RecipeName } from '@/types/population';
 import { headlineCell, formatDisplay } from './compact';
+import { SHORT_ATTRIBUTION } from './cite';
 import { HONESTY, TIER_COPY, type Locale } from './labels';
 
 export const SHARE_CARD = { width: 1200, height: 630 } as const;
@@ -153,8 +154,8 @@ export function shareCardModel({ record, recipes, name, municipalityName, region
     tierNote,
     honesty: HONESTY.synthetic[locale],
     attribution: locale === 'pt'
-      ? 'Fonte: INE, Censos 2021 · informação modificada por estimador.pt · CC BY 4.0 · atribuição completa em estimador.pt/pt/populacao/dados'
-      : 'Source: INE, 2021 Census · information modified by estimador.pt · CC BY 4.0 · full attribution at estimador.pt/en/populacao/dados',
+      ? `${SHORT_ATTRIBUTION.pt} · atribuição completa em estimador.pt/pt/populacao/dados`
+      : `${SHORT_ATTRIBUTION.en} · full attribution at estimador.pt/en/populacao/dados`,
     footer: locale === 'pt'
       ? `População sintética v${POPULATION_RELEASE} · ${shortDate(published, locale)} · ${url ? bareUrl(url) : 'estimador.pt'}`
       : `Synthetic population v${POPULATION_RELEASE} · ${shortDate(published, locale)} · ${url ? bareUrl(url) : 'estimador.pt'}`,

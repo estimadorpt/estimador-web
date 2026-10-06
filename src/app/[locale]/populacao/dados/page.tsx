@@ -29,8 +29,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: POPULATION_ROUTES.data,
     title: pt ? 'Posso usar os dados da população sintética?' : 'Can I use the synthetic population data?',
     description: pt
-      ? `Descarregar a População Sintética de Portugal v${POPULATION_RELEASE}: licença CC BY 4.0, unidades, geografia, dicionário de colunas, qualidade, verificação e citação.`
-      : `Download the Synthetic Population of Portugal v${POPULATION_RELEASE}: CC BY 4.0 licence, units, geography, column dictionary, quality, verification and citation.`,
+      ? `Descarregar a População Sintética de Portugal v${POPULATION_RELEASE}: licença CC BY-NC 4.0, unidades, geografia, dicionário de colunas, qualidade, verificação e citação.`
+      : `Download the Synthetic Population of Portugal v${POPULATION_RELEASE}: CC BY-NC 4.0 licence, units, geography, column dictionary, quality, verification and citation.`,
   });
 }
 
@@ -189,8 +189,8 @@ sha256sum checksums.sha256`;
         eyebrow={pt ? `População sintética · dados · versão ${POPULATION_RELEASE}` : `Synthetic population · data · release ${POPULATION_RELEASE}`}
         title={pt ? 'Posso usar estes dados?' : 'Can I use these data?'}
         lede={pt
-          ? 'Os microdados completos estão publicados, com licença aberta. Esta página diz o que contêm, para que servem e para que não servem, como verificar os ficheiros e como citar.'
-          : 'The full microdata are published under an open licence. This page says what they contain, what they are and are not for, how to verify the files and how to cite them.'}
+          ? 'Os microdados completos estão publicados, com a licença CC BY-NC 4.0. Esta página diz o que contêm, para que servem e para que não servem, como verificar os ficheiros e como citar.'
+          : 'The full microdata are published under the CC BY-NC 4.0 licence. This page says what they contain, what they are and are not for, how to verify the files and how to cite them.'}
         actions={pkg && <Action external href={pkg.url} arrow>{pt ? 'Descarregar o pacote completo' : 'Download the full package'}</Action>}
         meta={pkg && <span>{pkg.name} · {formatBytes(pkg.bytes, locale)} · GitHub</span>}
       />
@@ -235,8 +235,8 @@ sha256sum checksums.sha256`;
               id="licenca"
               title={pt ? 'Posso usar e partilhar?' : 'May I use and share them?'}
               lede={<p>{pt
-                ? <>Sim. Os dados são publicados com a licença <a className={link} href="https://creativecommons.org/licenses/by/4.0/deed.pt">CC BY 4.0</a>: podes usá-los, transformá-los e redistribuí-los, incluindo para fins comerciais, desde que incluas a atribuição indicada mais abaixo. Não são microdados oficiais do INE.</>
-                : <>Yes. The data are published under the <a className={link} href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> licence: you may use, adapt and redistribute them, including commercially, as long as you include the attribution given below. They are not official INE microdata.</>}</p>}
+                ? <>Sim, para fins não comerciais. A população sintética é publicada por estimador.pt com a licença <a className={link} href="https://creativecommons.org/licenses/by-nc/4.0/deed.pt">CC BY-NC 4.0</a>: podes usá-la, transformá-la e redistribuí-la para fins não comerciais, desde que incluas a atribuição indicada mais abaixo. A licença não cobre o uso comercial. Os dados do INE em que se baseia (quadros publicados e Ficheiro de Uso Público dos Censos 2021) são reutilizados com a licença <a className={link} href="https://creativecommons.org/licenses/by/4.0/deed.pt">CC BY 4.0</a> do INE. Não são microdados oficiais do INE.</>
+                : <>Yes, for non-commercial purposes. estimador.pt publishes the synthetic population under the <a className={link} href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a> licence: you may use, adapt and redistribute it for non-commercial purposes, as long as you include the attribution given below. The licence does not cover commercial use. The INE data it is based on (the 2021 Census published tables and Public Use File) are reused under INE’s <a className={link} href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> licence. They are not official INE microdata.</>}</p>}
             >
               <div className="grid gap-4 md:grid-cols-2">
                 {[
@@ -443,8 +443,8 @@ sha256sum checksums.sha256`;
 
             <Section id="citar" title={pt ? 'Como cito?' : 'How do I cite them?'} lede={<>
               <p>{pt
-                ? 'A licença CC BY 4.0 pede atribuição em qualquer uso. Ao redistribuir os dados (os ficheiros, ou tabelas tiradas deles), inclui a atribuição completa abaixo. Numa notícia, num gráfico ou num cartão, basta a forma curta, com uma ligação para esta página:'
-                : 'The CC BY 4.0 licence asks for attribution in any use. When you redistribute the data (the files, or tables taken from them), include the full attribution below. In a news story, a chart or a card, the short form is enough, with a link to this page:'}</p>
+                ? 'A licença CC BY-NC 4.0 pede atribuição em qualquer uso. Ao redistribuir os dados (os ficheiros, ou tabelas tiradas deles), inclui a atribuição completa abaixo. Numa notícia, num gráfico ou num cartão, basta a forma curta, com uma ligação para esta página:'
+                : 'The CC BY-NC 4.0 licence asks for attribution in any use. When you redistribute the data (the files, or tables taken from them), include the full attribution below. In a news story, a chart or a card, the short form is enough, with a link to this page:'}</p>
               <p className="mt-2 font-semibold text-ink">{SHORT_ATTRIBUTION[locale]}</p>
             </>}>
               <div className="space-y-5">

@@ -27,7 +27,7 @@ describe('structured data', () => {
       '@type': 'Dataset',
       version: POPULATION_RELEASE,
       datePublished: POPULATION_PUBLISHED,
-      license: 'https://creativecommons.org/licenses/by/4.0/',
+      license: 'https://creativecommons.org/licenses/by-nc/4.0/',
       url: 'https://estimador.pt/pt/populacao/dados/',
       sameAs: POPULATION_DOWNLOADS.release,
       temporalCoverage: '2021',
