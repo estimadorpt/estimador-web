@@ -195,11 +195,17 @@ feed('football/liga-2026-27/market_scorecard.json', value => {
 
 // ---- elections (archives; they must keep resolving) ------------------------
 
-for (const name of ['national_trends.json', 'district_forecast.json']) {
-  feed(`elections/parliamentary-2025/${name}`, value => (nonEmptyArray(value) ? null : 'empty'));
-}
-feed('elections/parliamentary-2025/seat_forecast_simulations.json', value => (nonEmptyArray(value) ? null : 'empty'),
+feed('elections/parliamentary-2025/district_forecast.json', value => (nonEmptyArray(value) ? null : 'empty'));
+// The trend rows go back to 2009 (1.4 MB); the page gets the two-year window
+// in columns, so the file is read at build time only (SEO3-10).
+feed('elections/parliamentary-2025/national_trends.json', value => (nonEmptyArray(value) ? null : 'empty'),
   { buildOnly: true });
+feed('elections/parliamentary-2025/seat_forecast_simulations.json', value => {
+  if (!nonEmptyArray(value)) return 'empty';
+  // The dot plot keeps every scenario of a drawn model draw together
+  // (drawnSeatIndices), which needs each row's draw id.
+  return value.every(row => isObject(row) && row.original_sample_id != null) ? null : 'rows without original_sample_id';
+}, { buildOnly: true });
 feed('elections/parliamentary-2025/contested_summary.json', value =>
   isObject(value) && isObject(value.districts) ? null : 'no districts');
 
@@ -230,7 +236,7 @@ feed('elections/presidential-2026/second_round_trajectories.json', value => {
 }, { buildOnly: true });
 // The raw draws must not drift back into the export (BL-12: 8.6 MB of the
 // Azure size budget, read only at build time).
-for (const relative of ['elections/presidential-2026/second_round_trajectories.json', 'elections/parliamentary-2025/seat_forecast_simulations.json']) {
+for (const relative of ['elections/presidential-2026/second_round_trajectories.json', 'elections/parliamentary-2025/seat_forecast_simulations.json', 'elections/parliamentary-2025/national_trends.json']) {
   if (fs.existsSync(path.join(DATA, relative))) problems.push(`${relative}: build-only input is under public/data — keep it in data/build-only/`);
 }
 feed('elections/presidential-2026/second_round_blank_null.json', value =>

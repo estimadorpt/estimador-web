@@ -2,9 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import {
+  CONTESTED_ENSC,
   closeLeads,
   compactTrendSeries,
+  districtsToWatch,
+  SEAT_CHANGE_SHOWN,
+  seatChangesOf,
+  WATCH_ENSC,
+  type DistrictSeatSummary,
   dotsPerRowToFit,
+  drawnSeatIndices,
   everyKthIndex,
   noBlocMajorityShare,
   seatSumArithmetic,
@@ -137,6 +144,36 @@ describe('parliamentary seats', () => {
     expect(blocs.blocs[0].summary.p5).toBe(230);
     expect(blocs.blocs[0].summary.p95).toBe(230);
   });
+
+  it('keeps every scenario of each drawn model draw together', () => {
+    const rows = Array.from({ length: 12 }, (_, i) => ({ AD: i, original_sample_id: Math.floor(i / 3), diaspora_scenario_applied: ['S_2024', 'S_2022', 'S_2019'][i % 3] }));
+    // 4 draws × 3 scenarios; a target of 6 rows takes every other draw, whole.
+    expect(drawnSeatIndices(rows, 6)).toEqual([0, 1, 2, 6, 7, 8]);
+    // Without ids (inline article data), every k-th row as before.
+    expect(drawnSeatIndices([{ AD: 1 }, { AD: 2 }, { AD: 3 }, { AD: 4 }], 2)).toEqual([0, 2]);
+  });
+
+  it('draws the 2025 dots from all three emigration scenarios, around the median of every draw (AEE3-01)', () => {
+    const sims = readBuildOnlyJson<Array<Record<string, number | string>>>('parliamentary-2025/seat_forecast_simulations.json');
+    const left = ['PS', 'BE', 'CDU', 'L'];
+    const blocs = summariseBlocs(sims, [{ key: 'left', parties: left }], 116);
+    const indices = drawnSeatIndices(sims);
+    expect(blocs.drawn).toBe(750);
+    const mix = (rows: number[]) => {
+      const counts = new Map<string, number>();
+      for (const i of rows) counts.set(String(sims[i].diaspora_scenario_applied), (counts.get(String(sims[i].diaspora_scenario_applied)) ?? 0) + 1);
+      return counts;
+    };
+    // The file: 3 000 draws × 3 scenarios, a third each; the drawn dots too.
+    expect([...mix(sims.map((_, i) => i)).values()]).toEqual([3000, 3000, 3000]);
+    expect([...mix(indices).values()]).toEqual([250, 250, 250]);
+    // The phone keeps every 4th dot (CoalitionDotPlot): 4 is coprime with 3, so still balanced.
+    const phone = everyKthIndex(indices.length, 200).map(k => indices[k]);
+    expect(Math.max(...mix(phone).values()) - Math.min(...mix(phone).values())).toBeLessThanOrEqual(1);
+    // The drawn left-bloc dots sit within a seat of the median over all 9 000.
+    const sample = [...blocs.blocs[0].sample].sort((a, b) => a - b);
+    expect(Math.abs(quantileSorted(sample, 0.5) - blocs.blocs[0].summary.median)).toBeLessThanOrEqual(1);
+  });
 });
 
 describe('trend window', () => {
@@ -170,7 +207,7 @@ describe('trend series in columns', () => {
   });
 
   it('carries the published window in far fewer bytes than the long rows', () => {
-    const trends = recentTrendRows(readJson<{ date: string; party: string; metric: string; value: number }[]>('parliamentary-2025/national_trends.json'));
+    const trends = recentTrendRows(readBuildOnlyJson<{ date: string; party: string; metric: string; value: number }[]>('parliamentary-2025/national_trends.json'));
     const series = compactTrendSeries(trends);
     const values = Object.values(series.parties).flatMap(p => [...p.mean, ...p.low, ...p.high]).filter(v => v != null);
     expect(values.length).toBe(trends.length);
@@ -218,6 +255,41 @@ describe('dot histogram', () => {
     expect(dotsPerRowToFit(100, 10, 140)).toBe(3);
     expect(dotsPerRowToFit(10, 10, 140)).toBe(1);
     expect(dotsPerRowToFit(10_000, 10, 140, 4)).toBe(4);
+  });
+});
+
+describe('district seat changes', () => {
+  const contested = readJson<{ districts: Record<string, DistrictSeatSummary> }>('parliamentary-2025/contested_summary.json').districts;
+
+  it('keeps every party past 5% on a card, not the first three (AEE3-V01)', () => {
+    const lisboa = seatChangesOf(contested.Lisboa);
+    // Lisboa: seven parties past the mark, CDU's +1 at 43% among them.
+    expect(lisboa).toHaveLength(7);
+    const cdu = lisboa.find(c => c.party === 'CDU');
+    expect(cdu?.gainProb).toBeCloseTo(0.427, 3);
+    // Every party with a change above the mark is rendered; none below it is.
+    for (const [district, summary] of Object.entries(contested)) {
+      const shown = new Set(seatChangesOf(summary).map(c => c.party));
+      for (const [party, probs] of Object.entries(summary.parties ?? {})) {
+        const gain = Object.entries(probs).filter(([k]) => Number(k) > 0).reduce((s, [, p]) => s + p, 0);
+        const loss = Object.entries(probs).filter(([k]) => Number(k) < 0).reduce((s, [, p]) => s + p, 0);
+        expect(shown.has(party), `${district} ${party}`).toBe(gain > SEAT_CHANGE_SHOWN || loss > SEAT_CHANGE_SHOWN);
+      }
+    }
+  });
+
+  it('adds every step of a change, so "+1 ou mais" is what the card says (AEE3-03)', () => {
+    const [change] = seatChangesOf({ ENSC: 1, parties: { X: { '-2': 0.01, '-1': 0.1, '0': 0.5, '1': 0.3, '2': 0.07, '3': 0.02 } } });
+    expect(change.gainProb).toBeCloseTo(0.39);
+    expect(change.loseProb).toBeCloseTo(0.11);
+  });
+
+  it('names the districts under the threshold whose seats still move (AEE3-V02)', () => {
+    const watched = districtsToWatch(contested);
+    expect(watched.map(w => w.district)).toEqual(['Portalegre', 'Faro', 'Setúbal', 'Santarém']);
+    expect(watched.every(w => w.ensc >= WATCH_ENSC && w.ensc <= CONTESTED_ENSC)).toBe(true);
+    expect(watched[1]).toMatchObject({ party: 'PS', direction: 'loss' });
+    expect(watched[1].probability).toBeCloseTo(0.27, 2);
   });
 });
 

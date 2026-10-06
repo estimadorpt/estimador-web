@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { formatElectionNumber, formatElectionSigned, pollsterDisplayName } from "@/lib/election-display";
+import { formatElectionNumber, formatElectionSigned, pollsterDisplayName, sortByPartyOrder } from "@/lib/election-display";
 import { partyColors } from "@/lib/config/colors";
 import { BRAND } from "@/lib/brand";
 import { getHeatmapColor, HOUSE_EFFECT_BLANK_BELOW } from "@/lib/election-heatmap";
@@ -50,9 +50,10 @@ export function HouseEffects({ data, labels }: HouseEffectsProps) {
   }));
 
   const pollsters = Array.from(new Set(transformedData.map(d => d.pollster))).sort((a, b) => a.localeCompare(b, locale === 'en' ? 'en' : 'pt'));
-  const parties = Object.keys(partyColors).filter(party =>
+  // Columns in the archive's one party order, as in the trend chips and twins (AEE3-06).
+  const parties = sortByPartyOrder(Object.keys(partyColors).filter(party =>
     transformedData.some(d => d.party === party)
-  );
+  ));
 
   const matrix: Record<string, Record<string, number>> = {};
   transformedData.forEach(d => {

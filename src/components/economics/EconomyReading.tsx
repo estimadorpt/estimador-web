@@ -3,7 +3,6 @@
 import * as Tabs from '@radix-ui/react-tabs';
 import { Link2 } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
-import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import { Disclosure } from '@/components/viz/Disclosure';
 
 // The "prices" question/answer below is the site's one canonical phrasing of
@@ -37,19 +36,19 @@ const topics = [
   },
 ];
 
+/**
+ * The three reading questions of /economia. No painting: /economia is a data
+ * page (a mint field, no art), and the shop scene stays on the homepage's
+ * economy panel only (VUXD-03).
+ */
 export function EconomyReading({
   locale,
   status,
-  showIllustration = false,
 }: {
   locale: string;
   /** Paused/unavailable/live status + last-reading date, rendered right beside
    * the question and answer — never as a separate section above them. */
   status?: ReactNode;
-  /** The small companion illustration. Off by default; the paused/unavailable
-   * branches (where this is the page's lead content) turn it on. It never
-   * renders on narrow phones, so it cannot push the answer below the fold. */
-  showIllustration?: boolean;
 }) {
   const lang = locale === 'pt' ? 0 : 1;
   const [topicId, setTopicId] = useState('prices');
@@ -101,20 +100,9 @@ export function EconomyReading({
               <p className="text-[11px] font-bold uppercase tracking-widest text-ink-muted">{lang === 0 ? 'Ler um indicador' : 'Reading an indicator'}</p>
               {status && <div className="text-[11px] font-semibold text-ink-muted">{status}</div>}
             </div>
-            <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:gap-4"><h2 className="text-2xl leading-tight">{topic.title[lang]}</h2><button type="button" onClick={() => shareTopic(topic.id)} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-bold text-ink underline underline-offset-4 hover:bg-moss/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"><Link2 aria-hidden="true" size={15}/>{lang === 0 ? 'Partilhar' : 'Share'}</button></div>
-                <p className="mt-4 leading-relaxed text-ink-muted">{topic.body[lang]}</p>
-              </div>
-              {/* The shop illustration: a small companion beside the answer on
-                  wider screens, never a section above it, never shown on a
-                  narrow phone where every pixel goes to the answer. */}
-              {showIllustration && (
-                <SectionIllustration
-                  scene="economy"
-                  className="hidden sm:block shrink-0 self-start !h-[84px] !w-[96px] !p-0 [&_img]:h-full [&_img]:w-full [&_img]:object-contain"
-                />
-              )}
+            <div className="mt-3 min-w-0">
+              <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:gap-4"><h2 className="text-2xl leading-tight">{topic.title[lang]}</h2><button type="button" onClick={() => shareTopic(topic.id)} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-bold text-ink underline underline-offset-4 hover:bg-moss/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"><Link2 aria-hidden="true" size={15}/>{lang === 0 ? 'Partilhar' : 'Share'}</button></div>
+              <p className="mt-4 leading-relaxed text-ink-muted">{topic.body[lang]}</p>
             </div>
             <p className="my-6 rounded-lg bg-[#dce8e9] p-4 text-sm font-bold leading-relaxed text-ink">{topic.insight[lang]}</p>
             <Disclosure className="border-t border-line pt-2" summary={topic.question[lang]}><p className="mt-2 text-sm leading-relaxed text-ink-muted">{topic.answer[lang]}</p></Disclosure>

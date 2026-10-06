@@ -27,6 +27,14 @@ interface SecondRoundBeeswarmProps {
 
 /** Phones draw every fourth of the server's sample, so the dots stay legible in a narrow facet. */
 const PHONE_STRIDE_TARGET = 200;
+/**
+ * On a phone the x axis is ~290px for 70 points, so the dodge stacks the
+ * swarm tall: at r = 2 in 600px it ran past its row, Ventura's column into
+ * the "30%" tick and Seguro's into his median label (UXM3-15). Smaller dots
+ * in a taller plot keep each swarm inside its own row.
+ */
+const PHONE_DOT_RADIUS = 1.5;
+const PHONE_HEIGHT = 660;
 
 /**
  * Election-day shares of the valid vote across the runoff simulations, one dot
@@ -60,7 +68,8 @@ export function SecondRoundBeeswarm({ simulations, translations }: SecondRoundBe
       const medianLabel = { x: "median", fy: "candidate", text: medianText, frameAnchor: "top", dy: -12, fontSize: 12, fontWeight: 700, fill: FURNITURE.text } as const;
       const plot = Plot.plot({
         width,
-        height: phone ? 600 : 520,
+        // 560 on wider screens: at 520 Seguro's swarm touched his median label.
+        height: phone ? PHONE_HEIGHT : 560,
         marginLeft: phone ? 12 : 24,
         marginRight: phone ? 12 : 40,
         // Two lines above each row: the name, then the median label.
@@ -84,7 +93,7 @@ export function SecondRoundBeeswarm({ simulations, translations }: SecondRoundBe
             fy: "candidate",
             fill: "candidate",
             fillOpacity: 0.7,
-            r: phone ? 2 : 1.4,
+            r: phone ? PHONE_DOT_RADIUS : 1.4,
             anchor: "middle",
             title: (d: { candidate: string; share: number }) => `${d.candidate}: ${pct(d.share)} ${translations.tipSuffix}`,
             tip: true,

@@ -91,6 +91,31 @@ export function pollsterDisplayName(name: string): string {
 }
 
 /**
+ * The pressed state of the archives' toggles and pills (the round switch, the
+ * candidate and party chips) without colour: forced-colours mode drops their
+ * ink fill, so the pressed one gets a 2px outline in the system colour and
+ * every one a transparent border, which forced colours draws as the button's
+ * edge (A11Y3-11). Keyboard focus keeps its own ring.
+ */
+export const PRESSED_IN_FORCED_COLORS = 'forced-colors:aria-pressed:outline-2 forced-colors:aria-pressed:outline-offset-2 forced-colors:aria-pressed:outline-solid';
+
+/**
+ * The 2025 parliamentary parties in one order for every party chip, matrix
+ * column, bloc card and table twin on the archive (AEE3-06): the forecast's
+ * election-day vote share, largest first, which is also the seat chart's
+ * order. Parties not listed keep their relative order after these.
+ */
+export const PARLIAMENTARY_PARTY_ORDER = ['AD', 'PS', 'CH', 'IL', 'L', 'CDU', 'BE', 'PAN'] as const;
+
+export function sortByPartyOrder<T extends string>(parties: readonly T[]): T[] {
+  const rank = (party: string) => {
+    const i = (PARLIAMENTARY_PARTY_ORDER as readonly string[]).indexOf(party);
+    return i === -1 ? PARLIAMENTARY_PARTY_ORDER.length : i;
+  };
+  return parties.map((party, i) => ({ party, i })).sort((a, b) => rank(a.party) - rank(b.party) || a.i - b.i).map(({ party }) => party);
+}
+
+/**
  * The calendar date an ISO string names. The archives store plain dates
  * ("2026-01-18") and local timestamps without a zone ("2026-01-16T21:21:29");
  * both are read as the date written, so a server in another time zone never
@@ -102,8 +127,30 @@ function calendarDate(value: string | Date): Date {
   return day ? new Date(`${day}T12:00:00Z`) : new Date(value);
 }
 
+/**
+ * A date in a table column: "09/01/2026" / "9 Jan 2026". pt-PT's own short
+ * pattern leaves the day unpadded ("9/01/2026" under "15/01/2026"), so the
+ * Portuguese column is written dd/mm/aaaa and its dates line up (AEE3-07).
+ */
 export function formatElectionDate(value: string | Date, locale: string): string {
-  return calendarDate(value).toLocaleDateString(electionIntlLocale(locale), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const date = calendarDate(value);
+  return electionLocale(locale) === 'pt'
+    ? date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })
+    : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
+/**
+ * A date spelled out, short: "6 fev. 2026" / "6 Feb 2026", for chart ticks
+ * and tips, where the page's prose spells dates out (VUXD-05). pt-PT's Intl
+ * turns day + short month + year into digits, so the parts are joined here.
+ */
+export function formatElectionShortDate(value: string | Date, locale: string): string {
+  const date = calendarDate(value);
+  if (electionLocale(locale) === 'en') {
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  }
+  const month = date.toLocaleDateString('pt-PT', { month: 'short', timeZone: 'UTC' });
+  return `${date.getUTCDate()} ${month} ${date.getUTCFullYear()}`;
 }
 
 /** "16 de janeiro de 2026" / "16 January 2026". */

@@ -59,6 +59,12 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * A status beside the card's kicker: one box that wraps as a box on a phone.
+ * A rounded-full inline span broke into two ragged pills (UXM3-10).
+ */
+const STATUS_PILL = 'inline-block rounded-lg px-2.5 py-1';
+
 export default async function EconomiaPage({
   params,
 }: {
@@ -102,15 +108,10 @@ export default async function EconomiaPage({
           lede={t("preparingLede")}
         />
         <div className="mx-auto w-full max-w-7xl px-4 py-6"><div className="max-w-5xl">
-          <EconomyReading
-            locale={locale}
-            showIllustration
-            status={
-              <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-800">
-                {t("statusPreparing")}
-              </span>
-            }
-          />
+          {/* The status is the kicker's and the lede's: the card says it no
+              third time (CL3-09), and carries no painting, since a data page
+              takes a tinted field and no art (VUXD-03). */}
+          <EconomyReading locale={locale} />
           {/* Why there are no numbers is in the lede above; what remains here
               is where the method is explained. */}
           <div className="mt-8 border-t border-line pt-4">
@@ -144,9 +145,8 @@ export default async function EconomiaPage({
         <div className="mx-auto w-full max-w-7xl px-4 py-6"><div className="max-w-5xl">
           <EconomyReading
             locale={locale}
-            showIllustration
             status={
-              <span className="rounded-full bg-stone-200 px-2.5 py-1 text-stone-700">
+              <span className={`${STATUS_PILL} bg-stone-200 text-stone-700`}>
                 {t("statusUnavailable")}
               </span>
             }
@@ -185,9 +185,8 @@ export default async function EconomiaPage({
         <div className="mx-auto w-full max-w-7xl px-4 py-6"><div className="max-w-5xl">
           <EconomyReading
             locale={locale}
-            showIllustration
             status={
-              <span className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-800">
+              <span className={`${STATUS_PILL} bg-amber-100 text-amber-800`}>
                 {t("statusPaused", { date: updatedDate })}
               </span>
             }

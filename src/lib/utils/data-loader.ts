@@ -26,6 +26,7 @@ import { PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/co
 import { leftBlocParties, rightBlocParties, majorityThreshold } from '@/lib/config/blocs';
 import { calculateBlocMajorityProbability, calculatePartyMostSeatsProbability } from '@/lib/utils/probability-calculator';
 import { compactTrendSeries, noBlocMajorityShare, recentTrendRows, seatSumArithmetic, summariseBlocs, summariseRunoff, summariseSeats, type RunoffSimulations } from '@/lib/election-aggregates';
+import { PARLIAMENTARY_PARTY_ORDER } from '@/lib/election-display';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyStories } from '@/types/economy-stories';
 
@@ -39,9 +40,10 @@ export async function loadJsonData<T>(filename: string, subdirectory?: string): 
 }
 
 /**
- * Build-only inputs: raw simulation draws the pages reduce on the server
- * (summariseRunoff, summariseSeats). They live outside public/ so the static
- * export never ships them; no page fetches them at runtime.
+ * Build-only inputs: raw simulation draws and long trend rows the pages reduce
+ * on the server (summariseRunoff, summariseSeats, compactTrendSeries). They
+ * live outside public/ so the static export never ships them; no page fetches
+ * them at runtime.
  */
 export async function loadBuildOnlyJson<T>(filename: string, subdirectory: string): Promise<T> {
   const filePath = path.join(process.cwd(), 'data', 'build-only', subdirectory, filename);
@@ -80,7 +82,9 @@ export async function loadForecastData() {
   try {
     const [seatData, nationalTrends, districtForecast, contestedSeats, houseEffects] = await Promise.all([
       loadBuildOnlyJson<SeatData[]>('seat_forecast_simulations.json', PARLIAMENTARY_DIR),
-      loadJsonData<TrendData[]>('national_trends.json', PARLIAMENTARY_DIR),
+      // 1.4 MB of long rows back to 2009; the page receives the two-year
+      // window in columns (compactTrendSeries), so the file is build-only (SEO3-10).
+      loadBuildOnlyJson<TrendData[]>('national_trends.json', PARLIAMENTARY_DIR),
       loadJsonData<DistrictForecast[]>('district_forecast.json', PARLIAMENTARY_DIR),
       loadJsonData<ContestedSummary>('contested_summary.json', PARLIAMENTARY_DIR),
       loadJsonData<HouseEffect[]>('house_effects.json', PARLIAMENTARY_DIR).catch(() => [])
@@ -105,8 +109,8 @@ export async function loadForecastData() {
   }
 }
 
-/** Parties drawn by the archive's seat chart. */
-const PARLIAMENTARY_PARTIES = ['AD', 'PS', 'CH', 'IL', 'L', 'BE', 'CDU', 'PAN'];
+/** Parties drawn by the archive's seat chart, in the archive's one order (AEE3-06). */
+const PARLIAMENTARY_PARTIES = [...PARLIAMENTARY_PARTY_ORDER];
 
 /**
  * The parliamentary 2025 archive, summarised on the server: probabilities,

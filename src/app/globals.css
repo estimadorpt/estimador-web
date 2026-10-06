@@ -567,6 +567,9 @@
   .illustrated-hero > .section-illustration img { height: 100%; object-fit: contain; }
   .illustrated-hero > .section-illustration--football { height: 125px; }
   .illustrated-hero > .section-illustration--football img { object-fit: cover; object-position: center 60%; }
+  /* The voting scene fills its strip like the stadium does, cropped to the
+     voter's face, hand and ballot box, not letterboxed between cream bands (CL3-08). */
+  .illustrated-hero > .section-illustration--elections img { object-fit: cover; object-position: center 32%; }
 }
 
 /* Football journey: shared probability typography, quieter surfaces, one scene.

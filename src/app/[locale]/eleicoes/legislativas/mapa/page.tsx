@@ -69,7 +69,9 @@ export default async function MapPage({
       {/* The map reads one election's district forecast, so it opens as a
           page of that election, not as a general elections surface. */}
       <main id="main-content" tabIndex={-1}>
+      {/* Compact, like /legislativas it hangs from: the title keeps its size and place (UXD3-09). */}
       <PageHero
+        compact
         icon={<Vote aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t('forecast.mapEyebrow')}
         title={t('map.title')}
@@ -197,8 +199,8 @@ function MapStats({ districtForecast, t, locale }: { districtForecast: DistrictF
         </p>
         <p className="text-xs text-stone-500 mt-1">
           {locale === 'pt'
-            ? `Todos os ${districtForecast.length} distritos, pelo partido com maior percentagem de votos prevista — não é o número de mandatos prováveis.`
-            : `All ${districtForecast.length} districts, by the party with the highest predicted vote share — not the count of likely seats.`}
+            ? `Os ${districtForecast.length} distritos e regiões autónomas, pelo partido com maior percentagem de votos prevista. Não é o número de mandatos prováveis.`
+            : `All ${districtForecast.length} districts and autonomous regions, by the party with the highest predicted vote share. It is not the count of likely seats.`}
         </p>
       </div>
     </div>

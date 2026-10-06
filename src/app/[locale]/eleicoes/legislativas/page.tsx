@@ -3,8 +3,9 @@ import { leftBlocParties, rightBlocParties, majorityThreshold } from "@/lib/conf
 import { partyColors } from "@/lib/config/colors";
 import { OFFICIAL_RESULTS, PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from "@/lib/config/elections";
 import { loadParliamentaryArchive } from "@/lib/utils/data-loader";
-import { formatElectionLongDate, formatElectionNumber, formatElectionPercent, formatElectionProbabilityText } from "@/lib/election-display";
+import { formatElectionLongDate, formatElectionNumber, formatElectionPercent, formatElectionProbabilityText, pollsterDisplayName, sortByPartyOrder } from "@/lib/election-display";
 import { closeLeads } from "@/lib/election-aggregates";
+import { electionMethodHref } from "@/lib/election-methodology";
 import { ProbabilityFigure } from "@/components/charts/ProbabilityFigure";
 import { Calendar, BarChart3, TrendingUp, Users, Vote } from "lucide-react";
 import { PollingChart } from "@/components/charts/PollingChart";
@@ -48,8 +49,7 @@ const linkClass = 'text-ink underline underline-offset-4 hover:text-ink-muted';
  */
 const standaloneLinkClass = `inline-flex min-h-11 items-center gap-1 ${linkClass}`;
 /** A section's question over its chart frame, as on the Liga hub. */
-const sectionTitleClass = 'text-2xl text-stone-900 mb-1 tracking-tight';
-const sectionLedeClass = 'text-sm text-stone-500 mb-6 max-w-3xl';
+const sectionTitleClass = 'text-2xl text-stone-900 mb-3 tracking-tight';
 
 export default async function ParliamentaryArchivePage({
   params
@@ -107,9 +107,13 @@ export default async function ParliamentaryArchivePage({
       </>
     );
   };
-  const rightName = rightBlocParties.join(' + ');
-  const leftName = leftBlocParties.join(' + ');
-  const otherParties = ['CH', 'PAN'];
+  // Every party list on the page in the archive's one order (AEE3-06): the
+  // left bloc reads PS + L + CDU + BE here as in the chips and the tables.
+  const rightParties = sortByPartyOrder(rightBlocParties);
+  const leftParties = sortByPartyOrder(leftBlocParties);
+  const rightName = rightParties.join(' + ');
+  const leftName = leftParties.join(' + ');
+  const otherParties = sortByPartyOrder(['CH', 'PAN']);
   const officialResults = OFFICIAL_RESULTS['parliamentary-2025'][0];
   // Districts the map and the count give to a party that led by under a point.
   const close = closeLeads(districtForecast);
@@ -154,9 +158,12 @@ export default async function ParliamentaryArchivePage({
       <Header />
 
       <main id="main-content" tabIndex={-1}>
+      {/* The way back to the archive guide, which says how to read this page
+          (CL3-V01); the kicker then names the archive's year, not the section. */}
       <PageHero
         compact
         illustration="elections"
+        back={{ href: '/eleicoes/arquivo', label: t('nav.elections'), locale }}
         icon={<Vote aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t('forecast.archiveEyebrow')}
         lede={t('forecast.archiveLede')}
@@ -219,13 +226,14 @@ export default async function ParliamentaryArchivePage({
               (DataCard: title, plot, source, forecast date, method). */}
           <div id="polling">
             <h2 className={sectionTitleClass}>{t('forecast.pollingTrends')}</h2>
-            <p className={sectionLedeClass}>
-              {t('forecast.pollingTrendsDescription', { count: formatElectionNumber(trendDates, locale) })}
-            </p>
+            {/* The section's one chart: its explanation is the frame's
+                subtitle, not a second grey line above it (UXD3-11). */}
             <DataCard
               title={pt ? 'Percentagem de votos estimada, por partido' : 'Estimated vote share, by party'}
+              subtitle={t('forecast.pollingTrendsDescription', { count: formatElectionNumber(trendDates, locale) })}
               source={trendSource}
               {...frame}
+              methodologyHref={electionMethodHref('trend', locale)}
             >
               <PollingChart series={trends} voteShareLabel={t('forecast.voteShareLabel')} />
             </DataCard>
@@ -233,12 +241,12 @@ export default async function ParliamentaryArchivePage({
 
           <div>
             <h2 className={sectionTitleClass}>{t('forecast.coalitionSeats')}</h2>
-            <p className={sectionLedeClass}>{t('forecast.coalitionDescription')}</p>
             <DataCard
               title={pt ? 'Mandatos de cada bloco, simulação a simulação' : 'Each bloc’s seats, simulation by simulation'}
-              subtitle={t('forecast.coalitionArithmeticNote')}
+              subtitle={`${t('forecast.coalitionDescription')} ${t('forecast.coalitionArithmeticNote')}`}
               source={simulationsSource}
               {...frame}
+              methodologyHref={electionMethodHref('pageShows', locale)}
             >
               <CoalitionDotPlot
                 simulations={blocs}
@@ -254,13 +262,12 @@ export default async function ParliamentaryArchivePage({
 
           <div>
             <h2 className={sectionTitleClass}>{t('forecast.individualParties')}</h2>
-            <p className={sectionLedeClass}>
-              {t('forecast.simulationDescription', { count: formatElectionNumber(archive.simulations, locale) })}
-            </p>
             <DataCard
               title={pt ? 'Mandatos por partido' : 'Seats by party'}
+              subtitle={t('forecast.simulationDescription', { count: formatElectionNumber(archive.simulations, locale) })}
               source={simulationsSource}
               {...frame}
+              methodologyHref={electionMethodHref('seats', locale)}
             >
               <SeatChart stats={seats} tableCaption={t('forecast.projectedSeatsByParty')} />
             </DataCard>
@@ -277,6 +284,7 @@ export default async function ParliamentaryArchivePage({
               title={pt ? 'Mandatos em disputa e partido à frente, por distrito' : 'Seats in play and the party ahead, by district'}
               source={simulationsSource}
               {...frame}
+              methodologyHref={electionMethodHref('pageShows', locale)}
             >
               <DistrictSummary districtData={districtForecast} contestedData={contestedSeats} closeLeadNote={closeLeadNote} headingLevel={4} />
             </DataCard>
@@ -286,8 +294,8 @@ export default async function ParliamentaryArchivePage({
           <div>
             <p className="mb-4 max-w-3xl text-sm text-stone-600">{t('forecast.blocProjectionCaption', { election: electionDate, date: forecastDate })}</p>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blocCard(leftName, leftBlocParties, probabilities.leftMajority)}
-              {blocCard(rightName, rightBlocParties, probabilities.rightMajority)}
+              {blocCard(leftName, leftParties, probabilities.leftMajority)}
+              {blocCard(rightName, rightParties, probabilities.rightMajority)}
               {blocCard(t('forecast.otherParties'), otherParties, null)}
             </div>
           </div>
@@ -301,8 +309,14 @@ export default async function ParliamentaryArchivePage({
               title={pt ? 'Desvio de cada empresa de sondagens, por partido' : 'Each polling firm’s deviation, by party'}
               source={pollsSource}
               {...frame}
+              methodologyHref={electionMethodHref('houseEffects', locale)}
             >
-              <Disclosure summary={t('forecast.show')} srSuffix={t('forecast.pollingHouseEffects')}>
+              {/* The toggle names what it opens: a lone "Mostrar" made the
+                  card look unfinished (UXD3-12). */}
+              <Disclosure summary={t('forecast.showHouseEffects', {
+                pollsters: formatElectionNumber(new Set(houseEffects.map(h => pollsterDisplayName(h.pollster))).size, locale),
+                parties: formatElectionNumber(new Set(houseEffects.map(h => h.party).filter(p => p in partyColors)).size, locale),
+              })}>
                 <div className="mt-3">
                   <HouseEffects data={houseEffects} />
                 </div>

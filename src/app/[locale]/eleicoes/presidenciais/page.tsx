@@ -171,10 +171,12 @@ export default async function PresidentialArchivePage({
 
       <section id="trajectory" className="py-10 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('presidential.supportTrajectory')}</h2>
-          <p className="text-sm text-stone-500 mb-6 max-w-xl">{t('presidential.trendDescription')}</p>
+          {/* One chart per section: the question, then the frame, whose
+              subtitle carries the explanation (no second grey line, UXD3-11). */}
+          <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('presidential.supportTrajectory')}</h2>
           <DataCard
             title={pt ? 'Apoio estimado por candidato, dia a dia' : 'Estimated support by candidate, day by day'}
+            subtitle={t('presidential.trendDescription')}
             source={pollsSource}
             {...firstFrame}
           >
@@ -196,12 +198,10 @@ export default async function PresidentialArchivePage({
       {headToHead.dates.length > 0 && (
         <section className="py-10 border-b border-stone-300">
           <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('presidential.headToHeadTitle')}</h2>
-            <p className="text-sm text-stone-500 mb-6 max-w-xl">
-              {t('presidential.headToHeadDescription', { candidateA: headToHead.candidate_a, candidateB: headToHead.candidate_b })}
-            </p>
+            <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('presidential.headToHeadTitle')}</h2>
             <DataCard
               title={pt ? `${headToHead.candidate_a} contra ${headToHead.candidate_b}, dia a dia` : `${headToHead.candidate_a} against ${headToHead.candidate_b}, day by day`}
+              subtitle={t('presidential.headToHeadDescription', { candidateA: headToHead.candidate_a, candidateB: headToHead.candidate_b })}
               source={pollsSource}
               {...firstFrame}
             >
@@ -245,12 +245,10 @@ export default async function PresidentialArchivePage({
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
             <div className="lg:col-span-3">
-              <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('presidential.projectedVoteShare')}</h2>
-              <p className="text-sm text-stone-500 mb-6">
-                {t('presidential.forecastForElectionDay', { forecast: firstForecast ?? '', election: firstElection })}
-              </p>
+              <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('presidential.projectedVoteShare')}</h2>
               <DataCard
                 title={pt ? 'Percentagem de votos por candidato, com o intervalo de 95%' : 'Vote share by candidate, with the 95% interval'}
+                subtitle={t('presidential.forecastForElectionDay', { forecast: firstForecast ?? '', election: firstElection })}
                 source={modelSource}
                 {...firstFrame}
               >
@@ -307,9 +305,11 @@ export default async function PresidentialArchivePage({
       <Header />
 
       <main id="main-content" tabIndex={-1}>
+        {/* The way back to the archive guide (CL3-V01); the kicker names the year. */}
         <PageHero
           compact
           illustration="elections"
+          back={{ href: '/eleicoes/arquivo', label: t('nav.elections'), locale }}
           icon={<Vote aria-hidden="true" className="w-4 h-4" />}
           eyebrow={t('presidential.archiveEyebrow')}
           title={t('presidential.archiveTitle')}
