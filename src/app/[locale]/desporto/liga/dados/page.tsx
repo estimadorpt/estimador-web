@@ -40,7 +40,7 @@ const copy = {
     standfirstA:
       "As previsões das páginas da Liga Portugal vêm de ficheiros JSON estáticos servidos deste site, sem chave a pedir nem limite de pedidos. Só o jogo Contra o Modelo usa uma API própria, para guardar as previsões de quem joga; os dados do modelo estão todos aqui.",
     standfirstB:
-      "Se construíres alguma coisa com eles, podes usar as saídas do modelo nos termos da licença CC BY 4.0: atribuição a estimador.pt e uma ligação para a página de origem. Os dados de terceiros que alguns ficheiros trazem ficam fora dessa licença (vê abaixo). E se publicares, diz-nos: gostamos de ver.",
+      "Se construíres alguma coisa com eles, podes usar as saídas do modelo nos termos da licença CC BY-NC 4.0: uso não comercial, com atribuição a estimador.pt e uma ligação para a página de origem. Os dados de terceiros que alguns ficheiros trazem ficam fora dessa licença (vê abaixo). E se publicares, diz-nos: gostamos de ver.",
     filesTitle: "Ficheiros publicados",
     filesIntro:
       "A lista abaixo é gerada a partir do que está realmente no servidor no momento em que a página foi construída.",
@@ -61,7 +61,7 @@ const copy = {
       "A licença não abrange os dados de terceiros que alguns ficheiros trazem, marcados na lista acima como «Fora da licença»: resultados e estatísticas de jogo (SofaScore), xG (FotMob), cotações de casas de apostas (Pinnacle e Bet365, via football-data.co.uk) e lesões e valores de mercado (Transfermarkt). Esses dados vêm da fonte original e não são redistribuíveis por nós: para os reutilizar, segue os termos de cada fonte.",
     licenceWarranty:
       "Os dados são fornecidos como estão, sem garantias — são previsões probabilísticas de um modelo estatístico, e por definição vão estar erradas parte do tempo.",
-    licenceUrl: "https://creativecommons.org/licenses/by/4.0/deed.pt",
+    licenceUrl: "https://creativecommons.org/licenses/by-nc/4.0/deed.pt",
     thirdPartyLabel: "Fora da licença:",
     provenanceTitle: "Proveniência",
     provenance:
@@ -84,7 +84,7 @@ const copy = {
     standfirstA:
       "The forecasts on the Liga Portugal pages come from static JSON files served from this site, with no key to request and no rate limit. Only the Beat the Model game uses an API of its own, to store players' picks; the model's data is all here.",
     standfirstB:
-      "If you build something with them, you may use the model's outputs under the CC BY 4.0 licence: attribution to estimador.pt and a link back to the source page. The third-party data some files carry are outside that licence (see below). And if you publish, tell us: we like seeing it.",
+      "If you build something with them, you may use the model's outputs under the CC BY-NC 4.0 licence: non-commercial use, with attribution to estimador.pt and a link back to the source page. The third-party data some files carry are outside that licence (see below). And if you publish, tell us: we like seeing it.",
     filesTitle: "Published files",
     filesIntro:
       "The list below is generated from what is actually on the server at the moment this page was built.",
@@ -105,7 +105,7 @@ const copy = {
       "The licence does not cover the third-party data some files carry, marked “Not under the licence” in the list above: results and match statistics (SofaScore), xG (FotMob), bookmaker odds (Pinnacle and Bet365, via football-data.co.uk), and injuries and market values (Transfermarkt). Those data come from their original sources and are not ours to redistribute: to reuse them, follow each source's terms.",
     licenceWarranty:
       "The data is provided as is, with no warranty — these are probabilistic forecasts from a statistical model, and by definition they will be wrong some of the time.",
-    licenceUrl: "https://creativecommons.org/licenses/by/4.0/",
+    licenceUrl: "https://creativecommons.org/licenses/by-nc/4.0/",
     thirdPartyLabel: "Not under the licence:",
     provenanceTitle: "Provenance",
     provenance:
@@ -127,7 +127,7 @@ type Doc = { pt: string; en: string };
 
 /**
  * `thirdParty` names the fields a file reproduces from another source, which
- * the CC BY 4.0 grant does not cover (audit PRO3-03): the page marks them
+ * the CC BY-NC 4.0 grant does not cover (audit PRO3-03): the page marks them
  * "Fora da licença" rather than grant what is not ours to grant.
  */
 const FILE_DOCS: { match: RegExp; label: string; doc: Doc; thirdParty?: Doc }[] = [
@@ -710,7 +710,7 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
             <p>
               {c.licenceOwn} (
               <a href={c.licenceUrl} className="font-semibold text-ink underline underline-offset-4">
-                CC BY 4.0
+                CC BY-NC 4.0
               </a>
               ){c.licenceOwnAfter}
             </p>
