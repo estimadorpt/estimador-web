@@ -2,6 +2,7 @@ import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PageHero } from '@/components/PageHero';
 import { PermalinkResolver } from '@/components/population/consulta/PermalinkResolver';
+import { consultaShellScript } from '@/components/population/consulta/shell-script';
 import { createPageMetadata } from '@/lib/metadata';
 import { setRequestLocale } from '@/i18n/request-locale';
 
@@ -31,6 +32,10 @@ export default async function PopulationPermalink({ params }: { params: Promise<
   const pt = locale === 'pt';
   return (
     <div className="min-h-screen bg-paper">
+      {/* The one early script: resolves the shared link and opens its parish page before the
+          page's JavaScript loads, saving a whole page load (SEO3V-M2). The resolver below
+          handles everything it leaves alone (another release, an unknown id). */}
+      <script dangerouslySetInnerHTML={{ __html: consultaShellScript(pt ? 'pt' : 'en') }} />
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero

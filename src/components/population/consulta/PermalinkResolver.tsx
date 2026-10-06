@@ -7,7 +7,16 @@ import { MarkLoading } from '@/components/brand/MarkLoading';
 import { BRAND } from '@/lib/brand';
 import { POPULATION_RELEASE, POPULATION_DOWNLOADS } from '@/lib/config/population';
 import { fetchQueryLookup } from '@/lib/population/client';
+import { siteTitle } from '@/lib/site-title';
 import { isQueryId, isQueryIdPrefix, lookupEntry, parseCanonicalPath, queryBucket, targetFor } from './resolve';
+
+/**
+ * The room the page keeps for its answer: the tallest card an unresolved link
+ * ends on (measured at 360 to 1280 in both locales: up to 506px on a phone,
+ * 336px from 640px, 260px from 768px), so swapping "A abrir…" for that card
+ * moves nothing below it (SEO3-13: CLS 0.157).
+ */
+const RESERVED = 'min-h-[32rem] sm:min-h-[21rem] md:min-h-[16.5rem]';
 
 type State =
   | { kind: 'resolving' }
@@ -78,8 +87,27 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
     };
   }, [locale]);
 
+  // The tab, the history and a shared preview name what the page says, not "A abrir…" (SEO3-13).
+  // Kept while the page is open: streamed metadata can write its <title> after this runs.
+  useEffect(() => {
+    const title = state.kind === 'other-release'
+      ? siteTitle(pt ? 'Ligação de outra versão da população' : 'Link from another release of the population')
+      : state.kind === 'unknown' ? siteTitle(pt ? 'Resultado não encontrado' : 'Result not found') : null;
+    if (!title) return undefined;
+    const apply = () => {
+      const titles = document.querySelectorAll('title');
+      if (titles.length === 0) { document.title = title; return; }
+      titles.forEach(element => { if (element.textContent !== title) element.textContent = title; });
+    };
+    apply();
+    const observer = new MutationObserver(apply);
+    observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
+  }, [state.kind, pt]);
+
   if (state.kind === 'resolving' || state.kind === 'redirecting') {
     return (
+      <div className={RESERVED}>
       <div role="status" aria-live="polite" className="flex flex-col items-start gap-4 py-6">
         <MarkLoading height={36} color={BRAND.ink} ground={BRAND.paper} />
         <p className="text-base text-stone-600">
@@ -91,11 +119,13 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
           </a>
         )}
       </div>
+      </div>
     );
   }
 
   const otherRelease = state.kind === 'other-release';
   return (
+    <div className={RESERVED}>
     <div className="flex flex-col gap-6 rounded-2xl border border-line bg-cream p-6 md:flex-row md:items-start md:p-8">
       <EmptyStateMark />
       <div className="min-w-0 flex-1">
@@ -124,6 +154,7 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }
