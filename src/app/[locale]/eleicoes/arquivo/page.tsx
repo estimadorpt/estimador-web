@@ -73,14 +73,14 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
     <Header />
     <main id="main-content" tabIndex={-1}>
     <PageHero
-      width="5xl"
+      measure="wide"
       compact
       illustration="elections"
       eyebrow={pt ? 'Eleições · arquivo' : 'Elections · archive'}
       title={pt ? 'As eleições passaram. O que diziam as previsões?' : 'The elections are over. What did the forecasts say?'}
       lede={pt ? 'Um arquivo permite voltar à informação disponível na altura. Não é uma página de resultados oficiais. Não há eleição em curso; a próxima previsão será anunciada aqui.' : 'An archive lets you revisit the information available at the time. It is not a page of official results. There is no election under way; the next forecast will be announced here.'}
     />
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
       <section aria-labelledby="archive-choice-title" className="border-y border-line py-7">
         <p className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">{pt ? 'Começar por aqui' : 'Start here'}</p>
         <h2 id="archive-choice-title" className="mt-2 text-2xl">{pt ? 'Escolhe uma previsão' : 'Choose a forecast'}</h2>
@@ -129,7 +129,7 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
           <Action href="/desporto/liga/modelo" locale={locale} variant="text" arrow>{pt ? 'A avaliação do modelo de futebol' : 'The football model’s evaluation'}</Action>
         </div>
       </section>
-    </div>
+    </div></div>
     </main>
     <SiteFooter locale={locale} />
   </div>;

@@ -72,7 +72,7 @@ export default async function TagPage({ params }: TagPageProps) {
 
       <main id="main-content" tabIndex={-1}>
         <PageHero
-          width="4xl"
+          measure="wide"
           compact
           back={{ href: '/artigos/tema', label: t('articles.topicsHeading'), locale }}
           eyebrow={t('articles.topicEyebrow')}
@@ -80,7 +80,7 @@ export default async function TagPage({ params }: TagPageProps) {
           meta={<span>{t('articles.topicCount', { count: group.articles.length })}</span>}
         />
 
-        <div className="max-w-4xl mx-auto px-4 pt-8 pb-12">
+        <div className="mx-auto w-full max-w-7xl px-4 pt-8 pb-12"><div className="max-w-4xl">
           <ul className="border-t-2 border-stone-800">
             {group.articles.map(article => (
               <ArticleRow key={article.slug} article={article} locale={locale} />
@@ -92,7 +92,7 @@ export default async function TagPage({ params }: TagPageProps) {
               {t('articles.backToArticles')}
             </Link>
           </p>
-        </div>
+        </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

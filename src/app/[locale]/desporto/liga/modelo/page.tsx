@@ -175,7 +175,7 @@ export default async function LigaModelPage({
       <Header />
       <main id="main-content" tabIndex={-1}>
         <PageHero
-          width="5xl"
+          measure="wide"
           compact
           back={{ href: "/desporto/liga", label: c.back, locale }}
           eyebrow={c.kicker}
@@ -188,7 +188,7 @@ export default async function LigaModelPage({
           ) : undefined}
         />
 
-        <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
           {s && (
             <div className="max-w-3xl space-y-4 mb-10">
               {!s.same && (
@@ -259,7 +259,7 @@ export default async function LigaModelPage({
               </Link>
             </div>
           </section>
-        </div>
+        </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

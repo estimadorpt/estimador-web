@@ -45,7 +45,6 @@ export default async function MysteryParishPage({ params }: { params: Promise<{ 
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="7xl"
         field="periwinkle"
         eyebrow={t.heroEyebrow}
         title={t.heroTitle}

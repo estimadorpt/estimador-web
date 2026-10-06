@@ -83,13 +83,13 @@ export default async function EconomicsMethodologyPage({
 
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="4xl"
+        measure="wide"
         back={{ href: "/economia", label: t(ECONOMY_PUBLISHED ? 'title' : 'preparingTitle') }}
         icon={<BookOpen aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t(ECONOMY_PUBLISHED ? 'eyebrow' : 'preparingEyebrow')}
         title={t('methodologyTitle')}
       />
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-4xl">
 
         {!ECONOMY_PUBLISHED && (
           <p className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-800">
@@ -123,7 +123,7 @@ export default async function EconomicsMethodologyPage({
             {t(ECONOMY_PUBLISHED ? 'title' : 'preparingTitle')}
           </Link>
         </div>
-      </div>
+      </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

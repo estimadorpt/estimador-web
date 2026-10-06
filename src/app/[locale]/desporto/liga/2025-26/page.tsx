@@ -142,7 +142,7 @@ export default async function SeasonReviewPage({
         <Header />
         <main id="main-content" tabIndex={-1}>
           <PageHero
-            width="5xl"
+            measure="wide"
             compact
             back={{ href: "/desporto/liga", label: c.back, locale }}
             eyebrow={c.kicker}
@@ -211,7 +211,7 @@ export default async function SeasonReviewPage({
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="5xl"
+        measure="wide"
         compact
         back={{ href: "/desporto/liga", label: c.back, locale }}
         eyebrow={c.kicker}
@@ -219,7 +219,7 @@ export default async function SeasonReviewPage({
         lede={c.standfirstA}
       />
 
-      <div className="max-w-5xl mx-auto px-4 py-10">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
         <p className="max-w-3xl mb-10 text-lg text-stone-800 leading-relaxed font-medium">
           {c.standfirstB}
         </p>
@@ -487,7 +487,7 @@ export default async function SeasonReviewPage({
             </Link>
           </div>
         </section>
-      </div>
+      </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

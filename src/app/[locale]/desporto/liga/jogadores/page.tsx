@@ -74,7 +74,7 @@ export default async function PlayerRatingsPage({
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="4xl"
+        measure="wide"
         compact
         back={{ href: "/desporto/liga", label: "Liga Portugal", locale }}
         eyebrow={pt ? "Liga Portugal · Jogadores" : "Liga Portugal · Players"}
@@ -84,7 +84,7 @@ export default async function PlayerRatingsPage({
           : "Separate metrics — finishing, attacking contribution, contested possession and goalkeeping — each with its own interval. There is no overall ranking: one number cannot compare a goalkeeper with a centre-forward."}
       />
 
-      <div className="max-w-4xl mx-auto px-4 py-8 md:py-10">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:py-10"><div className="max-w-4xl">
         <PlayerRatingsHub
           showHeading={false}
           finishers={finishers}
@@ -116,7 +116,7 @@ export default async function PlayerRatingsPage({
             {pt ? "Como medimos os jogadores" : "How we measure players"}
           </Link>
         </div>
-      </div>
+      </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

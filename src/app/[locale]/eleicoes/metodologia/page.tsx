@@ -42,7 +42,7 @@ export default async function ElectionMethodologyPage({ params }: { params: Prom
       <Header />
       <main id="main-content" tabIndex={-1}>
         <PageHero
-          width="3xl"
+          measure="reading"
           compact
           eyebrow={pt ? 'Eleições · arquivo' : 'Elections · archive'}
           title={pt ? 'Como foram feitas as previsões eleitorais?' : 'How were the election forecasts made?'}
@@ -57,7 +57,7 @@ export default async function ElectionMethodologyPage({ params }: { params: Prom
             </>
           }
         />
-        <div className="max-w-3xl mx-auto px-4 pb-10 md:pb-16">
+        <div className="mx-auto w-full max-w-7xl px-4 pb-10 md:pb-16"><div className="max-w-3xl">
           <nav aria-label={pt ? 'Nesta página' : 'On this page'} className="my-8 flex flex-wrap gap-x-5 gap-y-2 border-y border-line py-4 text-sm">
             <a href="#legislativas" className={linkClass}>{pt ? 'Legislativas 2025' : 'Parliamentary 2025'}</a>
             <a href="#presidenciais" className={linkClass}>{pt ? 'Presidenciais 2026: 1.ª volta' : 'Presidential 2026: first round'}</a>
@@ -66,7 +66,7 @@ export default async function ElectionMethodologyPage({ params }: { params: Prom
           <article className="article-body max-w-none" lang={pt ? 'pt' : 'en'}>
             <MDXRemote source={electionMethodologySource(locale)} components={getMDXComponents()} />
           </article>
-        </div>
+        </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

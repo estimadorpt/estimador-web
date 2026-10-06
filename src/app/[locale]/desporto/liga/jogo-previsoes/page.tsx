@@ -88,7 +88,7 @@ export default async function JogoPrevisoesPage({
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="3xl"
+        measure="reading"
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
         icon={<Swords aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t("football.title")}
@@ -100,7 +100,7 @@ export default async function JogoPrevisoesPage({
       />
 
       <section>
-        <div className="max-w-3xl mx-auto px-4 py-10">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-3xl">
           {data ? (
             // Auth wraps this page only: readers of forecast pages never
             // download an auth bundle they have no use for.
@@ -114,11 +114,11 @@ export default async function JogoPrevisoesPage({
                 : "Game data is not available right now."}
             </p>
           )}
-        </div>
+        </div></div>
       </section>
 
       <section className="border-t border-stone-200">
-        <div className="max-w-3xl mx-auto px-4 py-8 text-xs text-stone-500 space-y-2">
+        <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-3xl text-xs text-stone-500 space-y-2">
           {/* Where a season is stored, and what is kept, depends on whether
               the season backend answers, which only the browser can know: the
               game states it once, in its own storage note (audit pub-PP-10,
@@ -150,7 +150,7 @@ export default async function JogoPrevisoesPage({
               </>
             )}
           </p>
-        </div>
+        </div></div>
       </section>
       </main>
       <SiteFooter locale={locale} />

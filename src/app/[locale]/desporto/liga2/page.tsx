@@ -111,7 +111,7 @@ export default async function Liga2Page({
         <Header />
         <main id="main-content" tabIndex={-1}>
           <PageHero
-            width="5xl"
+            measure="wide"
             compact
             back={{ href: "/desporto/liga", label: c.back, locale }}
             eyebrow={c.kicker}
@@ -153,14 +153,14 @@ export default async function Liga2Page({
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="5xl"
+        measure="wide"
         compact
         back={{ href: "/desporto/liga", label: c.back, locale }}
         eyebrow={c.kicker}
         title={c.title}
       />
 
-      <div className="max-w-5xl mx-auto px-4 py-10">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
 
         {/* Lighter-model label, stated before any number is shown */}
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 mb-8 max-w-3xl">
@@ -471,7 +471,7 @@ export default async function Liga2Page({
             </Link>
           </div>
         </section>
-      </div>
+      </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

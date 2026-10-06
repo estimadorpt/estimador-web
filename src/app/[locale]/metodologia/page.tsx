@@ -125,14 +125,14 @@ export default async function MethodologyPage({
 
       <main id="main-content" tabIndex={-1}>
         <PageHero
-          width="3xl"
+          measure="reading"
           compact
           eyebrow={pt ? 'Dados, modelos e limites' : 'Data, models and limits'}
           title={pt ? 'Como chegamos a cada resposta?' : 'How do we arrive at each answer?'}
           lede={pt ? 'Cada secção tem fontes, pressupostos e formas de verificar diferentes. Escolhe a que estás a explorar.' : 'Each section has its own sources, assumptions and ways to check the results. Choose the one you are exploring.'}
           meta={<span>{pt ? `Revisto a ${revised}` : `Revised ${revised}`}</span>}
         />
-        <div className="max-w-3xl mx-auto px-4 pb-10 md:pb-16">
+        <div className="mx-auto w-full max-w-7xl px-4 pb-10 md:pb-16"><div className="max-w-3xl">
           <nav aria-label={pt ? 'Métodos por secção' : 'Methods by section'} className="my-8 divide-y divide-line border-y border-line">
             {areas.map(area => (
               <div key={area.href} className="py-5">
@@ -159,7 +159,7 @@ export default async function MethodologyPage({
               <Link href="/sobre" locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{pt ? 'sobre o estimador.pt' : 'about estimador.pt'}</Link>.
             </p>
           </section>
-        </div>
+        </div></div>
       </main>
 
       <SiteFooter locale={locale} />

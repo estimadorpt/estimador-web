@@ -87,12 +87,12 @@ const FILES: readonly (readonly [string, Copy])[] = [
 function Section({ id, kicker, title, lede, children }: { id: string; kicker: string; title: string; lede?: string; children: React.ReactNode }) {
   return (
     <section id={id} className="border-b border-line py-12 last:border-b-0 md:py-16">
-      <div className="mx-auto max-w-5xl px-4">
+      <div className="mx-auto w-full max-w-7xl px-4"><div className="max-w-5xl">
         <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{kicker}</p>
         <h2 className="text-2xl md:text-3xl">{title}</h2>
         {lede && <p className="mt-3 max-w-2xl text-base leading-relaxed text-stone-600">{lede}</p>}
         <div className="mt-8">{children}</div>
-      </div>
+      </div></div>
     </section>
   );
 }
@@ -126,7 +126,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="5xl"
+        measure="wide"
         eyebrow={pt ? 'Marca · guia de identidade' : 'Brand · identity guide'}
         title={pt ? 'Uma mediana sobre um intervalo.' : 'A median on an interval.'}
         lede={pt

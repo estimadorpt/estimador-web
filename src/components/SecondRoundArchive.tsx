@@ -74,11 +74,11 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
       </section>
 
       <section className="py-8 bg-cream border-b border-stone-200">
-        <div className="max-w-3xl mx-auto px-4">
+        <div className="mx-auto w-full max-w-7xl px-4"><div className="max-w-3xl">
           <ErrorBoundary componentName="Vote Split">
             <SecondRoundVoteSplit validVotes={data.validVotes} translations={{ validVotesNote: t('validVotesNote') }} />
           </ErrorBoundary>
-        </div>
+        </div></div>
       </section>
 
       <section id="trajectory" className="py-10 border-b border-stone-300">
@@ -129,7 +129,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
       </section>
 
       <section className="py-10 bg-paper border-b border-line">
-        <div className="max-w-3xl mx-auto px-4">
+        <div className="mx-auto w-full max-w-7xl px-4"><div className="max-w-3xl">
           <SecondRoundScenarios
             simulations={simulations}
             locale={locale}
@@ -140,11 +140,11 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
               scenarioDescription: t('scenarioDescription', { total }),
             }}
           />
-        </div>
+        </div></div>
       </section>
 
       <section className="py-10 border-b border-stone-300">
-        <div className="max-w-3xl mx-auto px-4">
+        <div className="mx-auto w-full max-w-7xl px-4"><div className="max-w-3xl">
           <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('projectedVoteShare')}</h2>
           <p className="text-xs text-stone-500 mb-6 max-w-xl">{t('projectedVoteShareNote')}</p>
           <ErrorBoundary componentName="Forecast Bars">
@@ -159,7 +159,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
               }}
             />
           </ErrorBoundary>
-        </div>
+        </div></div>
       </section>
     </>
   );

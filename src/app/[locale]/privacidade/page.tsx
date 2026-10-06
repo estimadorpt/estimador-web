@@ -85,7 +85,7 @@ export default async function PrivacyPage({
 
       <main id="main-content" tabIndex={-1}>
         <PageHero
-          width="3xl"
+          measure="reading"
           compact
           title={pt ? 'Privacidade' : 'Privacy'}
           lede={pt
@@ -93,7 +93,7 @@ export default async function PrivacyPage({
             : 'What estimador.pt records about its visitors. It describes what the site actually does, not what it intends to do.'}
         />
 
-        <div className="max-w-3xl mx-auto px-4 py-10 md:py-12">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10 md:py-12"><div className="max-w-3xl">
           {actualLocale !== locale && (
             <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <p className="text-sm text-amber-800">
@@ -107,7 +107,7 @@ export default async function PrivacyPage({
           <article className="article-body max-w-none" lang={actualLocale}>
             <MDXRemote source={content} components={components} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
           </article>
-        </div>
+        </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

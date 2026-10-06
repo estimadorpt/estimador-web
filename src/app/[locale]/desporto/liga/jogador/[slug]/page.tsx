@@ -143,7 +143,7 @@ export default async function PlayerPage({
         <Header />
         <main id="main-content" tabIndex={-1}>
           <PageHero
-            width="4xl"
+            measure="wide"
             compact
             back={{ href: "/desporto/liga/jogadores", label: pt ? "Jogadores" : "Players", locale }}
             eyebrow="Liga Portugal"
@@ -182,14 +182,14 @@ export default async function PlayerPage({
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="4xl"
+        measure="wide"
         compact
         back={{ href: "/desporto/liga/jogadores", label: pt ? "Jogadores" : "Players", locale }}
         eyebrow={`Liga Portugal · ${pt ? "Jogadores" : "Players"}`}
         title={player.player}
       />
 
-      <div className="max-w-4xl mx-auto px-4 py-8 md:py-10">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:py-10"><div className="max-w-4xl">
         <PlayerProfile
           showName={false}
           clubInLeague={clubInLeague}
@@ -212,7 +212,7 @@ export default async function PlayerPage({
             {pt ? "Como medimos os jogadores" : "How we measure players"}
           </Link>
         </div>
-      </div>
+      </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

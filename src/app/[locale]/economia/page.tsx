@@ -93,7 +93,7 @@ export default async function EconomiaPage({
         <Header />
         <main id="main-content" tabIndex={-1}>
         <PageHero
-          width="5xl"
+          measure="wide"
           field="mint"
           compact
           icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
@@ -101,7 +101,7 @@ export default async function EconomiaPage({
           title={t("preparingTitle")}
           lede={t("preparingLede")}
         />
-        <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="mx-auto w-full max-w-7xl px-4 py-6"><div className="max-w-5xl">
           <EconomyReading
             locale={locale}
             showIllustration
@@ -117,7 +117,7 @@ export default async function EconomiaPage({
             <Action href="/economia/metodologia" locale={locale} variant="text" arrow>{t("methodologyTitle")}</Action>
           </div>
           {notes}
-        </div>
+        </div></div>
         </main>
         <SiteFooter locale={locale} />
       </div>
@@ -133,7 +133,7 @@ export default async function EconomiaPage({
         <Header />
         <main id="main-content" tabIndex={-1}>
         <PageHero
-          width="5xl"
+          measure="wide"
           field="mint"
           compact
           icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
@@ -141,7 +141,7 @@ export default async function EconomiaPage({
           title={t("title")}
           lede={t("explainerLede")}
         />
-        <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="mx-auto w-full max-w-7xl px-4 py-6"><div className="max-w-5xl">
           <EconomyReading
             locale={locale}
             showIllustration
@@ -155,7 +155,7 @@ export default async function EconomiaPage({
             {t("unavailableBody")}
           </p>
           {notes}
-        </div>
+        </div></div>
         </main>
         <SiteFooter locale={locale} />
       </div>
@@ -174,7 +174,7 @@ export default async function EconomiaPage({
         <Header />
         <main id="main-content" tabIndex={-1}>
         <PageHero
-          width="5xl"
+          measure="wide"
           field="mint"
           compact
           icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
@@ -182,7 +182,7 @@ export default async function EconomiaPage({
           title={t("title")}
           lede={t("explainerLede")}
         />
-        <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="mx-auto w-full max-w-7xl px-4 py-6"><div className="max-w-5xl">
           <EconomyReading
             locale={locale}
             showIllustration
@@ -197,7 +197,7 @@ export default async function EconomiaPage({
             <Action href="/economia/metodologia" locale={locale} variant="text" arrow>{t("methodologyLink")}</Action>
           </Disclosure>
           {notes}
-        </div>
+        </div></div>
         </main>
         <SiteFooter locale={locale} />
       </div>
@@ -222,7 +222,7 @@ export default async function EconomiaPage({
 
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="5xl"
+        measure="wide"
         field="mint"
         compact
         icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
@@ -242,7 +242,7 @@ export default async function EconomiaPage({
           </>
         }
       />
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-5">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-5xl space-y-5">
 
       {/* Tiles */}
         {/* Staleness guard (client-side): banner when the payload is older than
@@ -453,7 +453,7 @@ export default async function EconomiaPage({
           className="pt-4"
           containerClassName="border-t border-stone-200 pt-8"
         />
-      </div>
+      </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

@@ -113,7 +113,7 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
 
         <main id="main-content" tabIndex={-1}>
           <PageHero
-            width="3xl"
+            measure="reading"
             compact
             back={{ href: '/artigos', label: t('articles.backToArticles'), locale }}
             eyebrow={
@@ -147,7 +147,7 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
             }
           />
 
-          <div className="max-w-3xl mx-auto px-4 pt-8 pb-16">
+          <div className="mx-auto w-full max-w-7xl px-4 pt-8 pb-16"><div className="max-w-3xl">
             {actualLocale !== locale && (
               <p lang={locale} className="mb-8 border-l-2 border-stone-400 bg-stone-50 py-3 pl-4 text-sm text-stone-600">
                 {t('articles.onlyInPortugueseNotice')}
@@ -174,7 +174,7 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
                 {t('articles.topicsAll')}
               </Link>
             </p>
-          </div>
+          </div></div>
         </main>
         <SiteFooter locale={locale} />
       </div>

@@ -172,7 +172,7 @@ export function ParishPage({ locale }: { locale: Locale }) {
         <PageHero
           compact
           field="periwinkle"
-          width="5xl"
+          measure="wide"
           eyebrow={EYEBROW[locale]}
           title={pt ? 'Não encontrámos esta freguesia' : 'We could not find this parish'}
           lede={state.code
@@ -180,7 +180,7 @@ export function ParishPage({ locale }: { locale: Locale }) {
             : (pt ? 'Este endereço não tem um código de freguesia válido. Procura-a pelo nome.' : 'This address does not carry a valid parish code. Search for it by name.')}
         />
         <PopulationSectionNav current="parish" locale={locale} />
-        <div className="mx-auto max-w-5xl px-4 py-10">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
           <div className="flex flex-col gap-6 rounded-2xl border border-line bg-cream p-5 md:flex-row md:items-start md:p-8">
             <Mosaic variant="corner" className="h-16 w-16 shrink-0" />
             <div className="min-w-0 flex-1">
@@ -193,7 +193,7 @@ export function ParishPage({ locale }: { locale: Locale }) {
               </Action>
             </div>
           </div>
-        </div>
+        </div></div>
       </main>
     );
   }
@@ -204,7 +204,7 @@ export function ParishPage({ locale }: { locale: Locale }) {
         <PageHero
           compact
           field="periwinkle"
-          width="5xl"
+          measure="wide"
           eyebrow={EYEBROW[locale]}
           title={pt ? 'Não foi possível carregar esta freguesia' : 'This parish could not be loaded'}
           lede={pt ? 'Os dados não chegaram. Pode ser a ligação; tenta outra vez.' : 'The data did not arrive. It may be the connection; try again.'}
@@ -232,7 +232,7 @@ function Skeleton({ locale }: { locale: Locale }) {
       <PageHero
         compact
         field="periwinkle"
-        width="5xl"
+        measure="wide"
         back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
         eyebrow={EYEBROW[locale]}
         title={<span className="sr-only" role="status">{pt ? 'A carregar a freguesia…' : 'Loading the parish…'}</span>}
@@ -247,7 +247,7 @@ function Skeleton({ locale }: { locale: Locale }) {
         meta={<span aria-hidden="true" className={`inline-block h-7 w-48 ${bar}`} />}
       />
       <PopulationSectionNav current="parish" locale={locale} />
-      <div aria-hidden="true" className="mx-auto max-w-5xl px-4 pb-16 pt-8">
+      <div aria-hidden="true" className="mx-auto w-full max-w-7xl px-4 pb-16 pt-8"><div className="max-w-5xl">
         <div className="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
           <div className="hidden lg:block"><div className={`h-[520px] ${bar}`} /></div>
           <div className="flex min-w-0 flex-col gap-12">
@@ -258,7 +258,7 @@ function Skeleton({ locale }: { locale: Locale }) {
             <div className="h-[640px] rounded-2xl border border-line bg-cream" />
           </div>
         </div>
-      </div>
+      </div></div>
     </main>
   );
 }
@@ -373,7 +373,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
       <PageHero
         compact
         field="periwinkle"
-        width="5xl"
+        measure="wide"
         back={{ href: regionHref, label: regionHeading, locale }}
         eyebrow={EYEBROW[locale]}
         title={parishQuestion(place.name, locale)}
@@ -408,7 +408,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
       />
       <PopulationSectionNav current="parish" locale={locale} />
 
-      <div className="mx-auto max-w-5xl px-4 pb-16 pt-8">
+      <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-8"><div className="max-w-5xl">
         <div className="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
           <nav aria-label={pt ? 'Nesta página' : 'On this page'} className="hidden lg:block">
             <div className="sticky top-24">
@@ -558,7 +558,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
             </section>
           </div>
         </div>
-      </div>
+      </div></div>
     </main>
   );
 }

@@ -112,7 +112,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="5xl"
+        measure="wide"
         compact
         back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
         eyebrow={pt ? `População sintética · versão ${POPULATION_RELEASE}` : `Synthetic population · release ${POPULATION_RELEASE}`}
@@ -124,7 +124,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
       />
       <PopulationSectionNav current="quality" locale={locale} />
 
-      <div className="mx-auto max-w-5xl space-y-12 px-4 py-8 md:py-12">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:py-12"><div className="max-w-5xl space-y-12">
         {!scorecard || !meta ? (
           <PopulationUnavailable locale={locale} />
         ) : (
@@ -421,7 +421,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
             </section>
           </>
         )}
-      </div>
+      </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

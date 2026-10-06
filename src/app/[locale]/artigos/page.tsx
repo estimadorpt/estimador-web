@@ -82,7 +82,7 @@ export default async function ArticlesPage({
 
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="4xl"
+        measure="wide"
         compact
         field="mustard"
         eyebrow={t('articles.eyebrow')}
@@ -98,7 +98,7 @@ export default async function ArticlesPage({
           </a>
         ) : undefined}
       />
-      <div className="max-w-4xl mx-auto px-4 py-10">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-4xl">
 
 
         {articles.length === 0 ? (
@@ -153,15 +153,15 @@ export default async function ArticlesPage({
             )}
           </>
         )}
-      </div>
+      </div></div>
       </main>
 
       {/* No decorative subscription box on an honestly empty index — nothing
           to subscribe to yet in this language. */}
       {articles.length > 0 && (
-        <div className="max-w-4xl mx-auto px-4 pb-16">
+        <div className="mx-auto w-full max-w-7xl px-4 pb-16"><div className="max-w-4xl">
           <Subscribe variant="inline" locale={locale} />
-        </div>
+        </div></div>
       )}
 
       <SiteFooter locale={locale} />

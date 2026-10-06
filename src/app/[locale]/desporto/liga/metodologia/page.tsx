@@ -120,7 +120,7 @@ export default async function LigaMethodologyPage({
       <Header />
       <main id="main-content" tabIndex={-1}>
         <PageHero
-          width="3xl"
+          measure="reading"
           compact
           back={{ href: "/desporto/liga", label: t("football.title"), locale }}
           eyebrow={isPt ? "Metodologia" : "Methodology"}
@@ -129,11 +129,11 @@ export default async function LigaMethodologyPage({
           meta={<span>{isPt ? `Revisto a ${formatLongDate(REVISED, locale)}` : `Revised ${formatLongDate(REVISED, locale)}`}</span>}
         />
 
-        <div className="max-w-3xl mx-auto px-4 py-10">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-3xl">
           <article className="article-body max-w-none" lang={locale}>
             <MDXRemote source={readMethodology(locale)} components={components} />
           </article>
-        </div>
+        </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

@@ -151,7 +151,7 @@ sha256sum checksums.sha256`;
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="5xl"
+        measure="wide"
         compact
         back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
         eyebrow={pt ? `População sintética · dados · versão ${POPULATION_RELEASE}` : `Synthetic population · data · release ${POPULATION_RELEASE}`}
@@ -168,7 +168,7 @@ sha256sum checksums.sha256`;
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(populationDatasetJsonLd(locale, release)) }} />
       )}
 
-      <div className="mx-auto max-w-5xl space-y-12 px-4 py-8 md:py-12">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:py-12"><div className="max-w-5xl space-y-12">
         {!release || !meta ? (
           <PopulationUnavailable locale={locale} />
         ) : (
@@ -421,7 +421,7 @@ sha256sum checksums.sha256`;
             </Section>
           </>
         )}
-      </div>
+      </div></div>
       </main>
       <SiteFooter locale={locale} />
     </div>

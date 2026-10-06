@@ -132,7 +132,7 @@ export default async function MatchPage({
         <Header />
         <main id="main-content" tabIndex={-1}>
           <PageHero
-            width="5xl"
+            measure="wide"
             compact
             back={{ href: "/desporto/liga", label: "Liga Portugal", locale }}
             eyebrow="Liga Portugal"
@@ -232,7 +232,7 @@ export default async function MatchPage({
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        width="5xl"
+        measure="wide"
         compact
         back={{ href: "/desporto/liga", label: L.back, locale }}
         eyebrow={`Liga Portugal · ${pt ? "Jornada" : "Matchday"} ${fixture.matchday}${fixture.inProgressMatchday ? ` · ${L.live}` : ""}${isPlayed ? (pt ? " · jogo disputado" : " · played") : ""}`}
@@ -248,7 +248,7 @@ export default async function MatchPage({
 
       {/* Probabilities */}
       <section className="border-b border-stone-200">
-        <div className="max-w-5xl mx-auto px-4 py-8 md:py-10">
+        <div className="mx-auto w-full max-w-7xl px-4 py-8 md:py-10"><div className="max-w-5xl">
           <MatchProbabilityHero
             home={home}
             away={away}
@@ -264,13 +264,13 @@ export default async function MatchPage({
             played={fixture.played}
             probsPublishedAt={fixture.probsPublishedAt}
           />
-        </div>
+        </div></div>
       </section>
 
       {/* What each result would do — only before the match */}
       {!isPlayed && (
       <section className="border-b border-stone-200">
-        <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
           <MatchOutcomeImpact
             home={home}
             away={away}
@@ -283,14 +283,14 @@ export default async function MatchPage({
             awayStanding={prediction?.table?.find(t => t.team === away)}
             decisive={fixture.decisive}
           />
-        </div>
+        </div></div>
       </section>
       )}
 
       {/* Form, strength, xPts — today's, so only before the match */}
       {!isPlayed && (
       <section className="border-b border-stone-200">
-        <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
           <MatchTeamCompare
             home={panelFor(home, "H")}
             away={panelFor(away, "A")}
@@ -311,13 +311,13 @@ export default async function MatchPage({
               ) : null,
             )}
           </div>
-        </div>
+        </div></div>
       </section>
       )}
 
       {isPlayed && (
         <section className="border-b border-stone-200">
-          <div className="max-w-5xl mx-auto flex flex-wrap gap-x-6 gap-y-2 px-4 py-8">
+          <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-5xl flex flex-wrap gap-x-6 gap-y-2">
             {[home, away].map(team =>
               ligaTeamSlugs[team] ? (
                 <Link
@@ -331,14 +331,14 @@ export default async function MatchPage({
                 </Link>
               ) : null,
             )}
-          </div>
+          </div></div>
         </section>
       )}
 
       {/* Squads */}
       {!isPlayed && (injuries || players) && (
         <section className="border-b border-stone-200">
-          <div className="max-w-5xl mx-auto px-4 py-10">
+          <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
             <MatchSquadNews
               home={squadSide(home, homeColor)}
               away={squadSide(away, awayColor)}
@@ -352,14 +352,14 @@ export default async function MatchPage({
                 locale,
               )}
             />
-          </div>
+          </div></div>
         </section>
       )}
 
       {/* Other fixtures */}
       {otherFixtures.length > 0 && (
         <section className="border-b border-stone-200">
-          <div className="max-w-5xl mx-auto px-4 py-10">
+          <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
             <h2 className="text-2xl tracking-tight mb-1">{isPlayed ? (pt ? "Próximos jogos" : "Next fixtures") : L.otherMatches}</h2>
             <p className="mb-4 text-sm text-stone-500">{pt ? "Por ordem de início, hora de Lisboa." : "In kickoff order, Lisbon time."}</p>
             <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -388,13 +388,13 @@ export default async function MatchPage({
                 );
               })}
             </ol>
-          </div>
+          </div></div>
         </section>
       )}
 
       {/* Method footnote */}
       <section>
-        <div className="max-w-5xl mx-auto px-4 py-8 text-xs text-stone-500">
+        <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-5xl text-xs text-stone-500">
           {L.method(formatInteger(prediction?.n_sims ?? 50000, locale))}{" "}
           <Link
             href="/desporto/liga/metodologia"
@@ -406,7 +406,7 @@ export default async function MatchPage({
           {prediction?.timestamp
             ? ` · ${pt ? "previsão de" : "forecast of"} ${formatLongDate(prediction.timestamp, locale)}`
             : ""}
-        </div>
+        </div></div>
       </section>
       </main>
       <SiteFooter locale={locale} />

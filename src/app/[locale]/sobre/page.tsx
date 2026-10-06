@@ -199,9 +199,9 @@ export default async function AboutPage({
       <Header />
 
       <main id="main-content" tabIndex={-1}>
-        <PageHero width="3xl" compact title={t('about.title')} lede={brandDescriptor(locale)} />
+        <PageHero measure="reading" compact title={t('about.title')} lede={brandDescriptor(locale)} />
 
-        <div className="max-w-3xl mx-auto px-4 py-10 md:py-12">
+        <div className="mx-auto w-full max-w-7xl px-4 py-10 md:py-12"><div className="max-w-3xl">
         {/* Locale Notice (if fallback) */}
         {actualLocale !== locale && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
@@ -217,7 +217,7 @@ export default async function AboutPage({
         <article className="article-body max-w-none" lang={actualLocale}>
           <MDXRemote source={mdxContent} components={components} />
         </article>
-        </div>
+        </div></div>
       </main>
 
       <SiteFooter locale={locale} />
