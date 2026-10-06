@@ -20,7 +20,8 @@ async function run(pathname: string, locale: 'pt' | 'en' = 'pt', lookup: Record<
   const response = { ok: true, clone: () => ({ json: () => Promise.resolve(lookup) }), json: () => Promise.resolve(lookup) };
   const fetch = (url: string) => { requested.push(url); return Promise.resolve(response); };
   const location = { pathname, replace: (href: string) => replaced.push(href) };
-  new Function('window', 'location', 'fetch', consultaShellScript(locale))(window, location, fetch);
+  // Strict, as the page runs it: an inline module script (UXM3-13).
+  new Function('window', 'location', 'fetch', `'use strict';${consultaShellScript(locale)}`)(window, location, fetch);
   for (let i = 0; i < 5; i++) await Promise.resolve();
   await new Promise(resolve => setTimeout(resolve, 0));
   return { requested, replaced, prefetch: window[PARISH_PREFETCH_KEY] as Record<string, unknown> | undefined };

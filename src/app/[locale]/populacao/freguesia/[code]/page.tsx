@@ -69,8 +69,11 @@ export default async function ParishRoute({ params }: { params: Promise<{ locale
   return (
     <div className="min-h-screen bg-paper">
       {/* The one early script: starts the parish's data and writes its canonical and
-          alternates before the page's JavaScript has loaded (UXM2V-01, SPV-03). */}
-      <script dangerouslySetInnerHTML={{ __html: parishShellScript(locale === 'en' ? 'en' : 'pt') }} />
+          alternates before the page's JavaScript has loaded (UXM2V-01, SPV-03). An async
+          module (UXM3-13): React puts the stylesheets first in <head>, and a classic inline
+          script anywhere after them waits for the CSS before it runs; an async inline
+          module runs as soon as the parser reaches it. */}
+      <script type="module" async dangerouslySetInnerHTML={{ __html: parishShellScript(locale === 'en' ? 'en' : 'pt') }} />
       <Header />
       <ParishPage locale={locale === 'en' ? 'en' : 'pt'} />
       <SiteFooter locale={locale} />

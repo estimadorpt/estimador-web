@@ -18,7 +18,8 @@ function run(pathname: string, locale = pathname.startsWith('/en/') ? 'en' : 'pt
     },
   };
   const tracked = (url: string) => { requested.push(url); return fetch(url); };
-  new Function('window', 'location', 'document', 'fetch', parishShellScript(locale))(window, { pathname }, document, tracked);
+  // Strict, as the page runs it: an inline module script (UXM3-13).
+  new Function('window', 'location', 'document', 'fetch', `'use strict';${parishShellScript(locale)}`)(window, { pathname }, document, tracked);
   const prefetch = window[PARISH_PREFETCH_KEY] as Record<string, Promise<unknown>> | undefined;
   return { requested, prefetch, links: head.map(link => link.attrs), window };
 }
