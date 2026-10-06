@@ -48,7 +48,10 @@
   --color-periwinkle-soft: #bdc7e7;
   --color-terracotta: #a3543a;
   --color-rust: #bd714e;
-  --color-tree: #4e8056;
+  /* #377455, not #4e8056 (4.16:1 on paper): tree, positive, success and
+     green-600 are used as text, so they share emerald-600's retuned value
+     (A11Y2-08; src/components/viz/palette-tokens.test.ts). */
+  --color-tree: #377455;
   --color-teal: #245c68;
   /* Chart series, validated on cream (light) and on forest (dark): fixed
      order, never cycled, never on text; a fifth series folds into "other".
@@ -64,7 +67,7 @@
   --color-deemphasis: #c3c8bb;   /* context series and "other" */
 
   /* Semantic aliases */
-  --color-positive: #4e8056;
+  --color-positive: #377455;
   --color-negative: #a3543a;
 
   /* Compatibility with the pre-atlas brand names. */
@@ -131,7 +134,7 @@
   --color-green-300: #a1ddb0;
   --color-green-400: #7cc691;
   --color-green-500: #67b07c;
-  --color-green-600: #4e8056;
+  --color-green-600: #377455;
   --color-green-700: #426b4a;
   --color-green-800: #3a553f;
   --color-green-900: #304434;
@@ -206,6 +209,7 @@
 }
 
 :root {
+  --chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   --radius: 0.625rem;
   --background: #f5f3ea;
   --foreground: #234c40;
@@ -229,7 +233,7 @@
   --chart-2: #72c8b4;
   --chart-3: #a9b9ed;
   --chart-4: #e29a83;
-  --chart-5: #4e8056;
+  --chart-5: #377455;
   --sidebar: #fcfbf5;
   --sidebar-foreground: #234c40;
   --sidebar-primary: #234c40;
@@ -251,12 +255,12 @@
 
   /* Legacy accent names still referenced by a few election components. */
   --green-dark: #234c40;
-  --green-medium: #4e8056;
+  --green-medium: #377455;
   --green-light: #5eb184;
   --green-pale: #f5f3ea;
 
   /* Semantic colours */
-  --success: #4e8056;
+  --success: #377455;
   --warning: #c49536;
   --error: #a3543a;
   --info: #245c68;
@@ -389,6 +393,22 @@
 }
 
 @layer components {
+  /* A scroll area that says it scrolls (audit UXM2-04): a soft shadow at
+     the left or right edge while there is more content that way, gone once
+     that edge is reached. Pure CSS (the cream covers move with the content,
+     the shadows stay with the box), so it works in server components and
+     without JavaScript. For areas on cream; set --scroll-cue-ground for
+     another surface. */
+  .scroll-cue {
+    --scroll-cue-ground: var(--color-cream);
+    background:
+      linear-gradient(to right, var(--scroll-cue-ground) 40%, transparent) left center / 2.5rem 100% no-repeat local,
+      linear-gradient(to left, var(--scroll-cue-ground) 40%, transparent) right center / 2.5rem 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgb(18 47 44 / 0.16), transparent) left center / 0.875rem 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgb(18 47 44 / 0.16), transparent) right center / 0.875rem 100% no-repeat scroll;
+    background-color: var(--scroll-cue-ground);
+  }
+
   /* Long-form reading surface: the body of notas, explicadores, methodology
      and about. Set in Newsreader at a wider measure than the dashboards:
      a piece of writing should not be typeset like a chart legend. Headings,
@@ -406,11 +426,30 @@
   .article-body details > summary {
     display: flex;
     align-items: center;
+    gap: 0.375rem;
     min-height: 2.75rem;
     padding: 0.5rem 1rem;
     cursor: pointer;
+    list-style: none;
     font-weight: 600;
     color: var(--color-ink);
+  }
+  .article-body details > summary::-webkit-details-marker { display: none; }
+  /* The Disclosure primitive's chevron (viz/Disclosure.tsx): on the left,
+     turning when open, so an MDX <details> reads as the same control. */
+  .article-body details > summary::before {
+    content: '';
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    background-color: currentColor;
+    -webkit-mask: var(--chevron-down) center / contain no-repeat;
+    mask: var(--chevron-down) center / contain no-repeat;
+    transition: transform 150ms ease;
+  }
+  .article-body details[open] > summary::before { transform: rotate(180deg); }
+  @media (prefers-reduced-motion: reduce) {
+    .article-body details > summary::before { transition: none; }
   }
   .article-body details[open] > summary { border-bottom: 1px solid var(--color-line); }
   .article-body details > :not(summary) { padding-inline: 1rem; }

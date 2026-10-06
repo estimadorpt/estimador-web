@@ -24,7 +24,6 @@ export function HomeArt({ name, shape, sizes, priority = false, className = '' }
       <picture className="block h-full w-full">
         <source type="image/avif" srcSet={set('avif')} sizes={sizes} />
         <source type="image/webp" srcSet={set('webp')} sizes={sizes} />
-        {/* eslint-disable-next-line @next/next/no-img-element -- static export, responsive sources above */}
         <img
           src={`/images/home/${name}-${shape}-${widths[widths.length - 1]}.webp`}
           width={width}

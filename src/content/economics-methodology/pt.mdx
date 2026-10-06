@@ -1,9 +1,7 @@
 # Como vamos ler a economia?
 
-A secção de economia está em preparação. Esta página descreve o protótipo que testámos até
-julho de 2026: o que a secção vai medir, de onde vêm os dados, como cada número vai dizer o
-que é e como o protótipo foi avaliado. Nada aqui é uma leitura atual da economia, e os
-resultados no fim da página vêm de um teste interno, não de previsões publicadas.
+Nada aqui é uma leitura atual da economia. A página explica o que a secção vai medir, de onde
+vêm os dados, como cada número vai dizer o que é e como o protótipo foi avaliado.
 
 ---
 
@@ -124,8 +122,8 @@ trimestre como o número menos autoritativo.
 
 - **AR(1)**: um modelo simples que estima o próximo trimestre a partir do anterior. É a
   referência que qualquer modelo tem de bater.
-- **Erro relativo**: o erro quadrático médio do modelo a dividir pelo do AR(1). Abaixo de 1,
-  o modelo erra menos.
+- **Erro relativo**: a raiz do erro quadrático médio (RMSE) do modelo a dividir pela do
+  AR(1). Abaixo de 1, o modelo erra menos; 0,90 quer dizer um erro cerca de 10% menor.
 - **Teste de Diebold–Mariano e valor-p**: um teste que diz se a diferença de erros entre dois
   modelos podia ser acaso. Um valor-p abaixo de 0,05 é o limiar convencional para dizer que
   não é.
@@ -138,6 +136,6 @@ trimestre como o número menos autoritativo.
 
 ---
 
-Última revisão desta página: outubro de 2026. Descreve o protótipo testado até julho de
-2026, avaliado até ao 1.º trimestre de 2026. O código da secção ainda não é público; quando
+Esta página descreve o protótipo testado até julho de 2026, avaliado até ao 1.º trimestre de
+2026. O código da secção ainda não é público; quando
 for, a ligação fica aqui.

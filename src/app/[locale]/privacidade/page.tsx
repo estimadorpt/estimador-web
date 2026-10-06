@@ -2,6 +2,7 @@ import { createPageMetadata } from '@/lib/metadata';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PageHero } from '@/components/PageHero';
+import { RevisedDate } from '@/components/brand/RevisedDate';
 import { getTranslations } from 'next-intl/server';
 import { setRequestLocale } from '@/i18n/request-locale';
 import type { Metadata } from 'next';
@@ -10,6 +11,9 @@ import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import { getMDXComponents } from '@/mdx-components';
+
+/** When this page was last checked against what the site does (move it with the text). */
+const PRIVACY_REVISED = '2026-10-05';
 
 export async function generateMetadata({
   params,
@@ -91,6 +95,7 @@ export default async function PrivacyPage({
           lede={pt
             ? 'O que o estimador.pt regista sobre quem o visita. Descreve o comportamento real do site, não intenções.'
             : 'What estimador.pt records about its visitors. It describes what the site actually does, not what it intends to do.'}
+          meta={<RevisedDate date={PRIVACY_REVISED} locale={locale} />}
         />
 
         <div className="mx-auto w-full max-w-7xl px-4 py-10 md:py-12"><div className="max-w-3xl">
@@ -104,7 +109,7 @@ export default async function PrivacyPage({
             </div>
           )}
 
-          <article className="article-body max-w-none" lang={actualLocale}>
+          <article className="article-body max-w-none [&>:first-child]:!mt-0" lang={actualLocale}>
             <MDXRemote source={content} components={components} options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }} />
           </article>
         </div></div>

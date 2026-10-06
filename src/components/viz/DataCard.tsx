@@ -21,6 +21,8 @@ interface DataCardProps {
  * The frame every chart and table sits in: a cream panel with the title, the
  * scoping controls, the plot, and a footer that names the source, the date and
  * where the method is explained. A chart without these three is an assertion.
+ * One frame for every section (CLAUDE.md, "Chart frame"): a chart is not
+ * given a bespoke card, an icon header or a loose legend instead.
  */
 export function DataCard({ title, subtitle, badge, controls, children, source, updated, methodologyHref, methodologyLabel = 'Metodologia', locale, className = '' }: DataCardProps) {
   const hasFooter = source || updated || methodologyHref;
@@ -36,10 +38,11 @@ export function DataCard({ title, subtitle, badge, controls, children, source, u
       {controls && <div className="mb-4 flex flex-wrap items-center gap-3">{controls}</div>}
       <div className="min-w-0">{children}</div>
       {hasFooter && (
-        <footer className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line pt-3 text-xs text-stone-500">
+        <footer className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line pt-1.5 text-xs text-stone-500">
           {source && <span>{source}</span>}
           {updated && <span>{updated}</span>}
-          {methodologyHref && <Link href={methodologyHref} locale={locale} className="font-semibold text-ink underline-offset-4 hover:underline">{methodologyLabel}</Link>}
+          {/* A standalone link: a 44px target, the text's own size (UXM2-09). */}
+          {methodologyHref && <Link href={methodologyHref} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{methodologyLabel}</Link>}
         </footer>
       )}
     </section>

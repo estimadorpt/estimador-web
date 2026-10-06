@@ -16,6 +16,8 @@ import { FootballPanel } from "@/components/home/FootballPanel";
 import { EconomyPanel } from "@/components/home/EconomyPanel";
 import { ElectionsPanel, type ElectionSnapshot } from "@/components/home/ElectionsPanel";
 import { setRequestLocale } from '@/i18n/request-locale';
+import { CONTAINER_CLASS } from '@/components/brand/Container';
+import { SearchShortcut } from "@/components/home/SearchShortcut";
 import { brandDescriptor, brandLine } from '@/lib/brand/descriptor';
 
 export async function generateMetadata({
@@ -108,17 +110,22 @@ export default async function HomePage({
 
   // The shortcuts stand in for the nav below 1024px, where it sits behind the
   // menu button: labelled, each with its status, in the order of what is live.
-  // The economy has none while it is in preparation.
+  // The economy has none while it is in preparation. "A minha freguesia" goes
+  // to the search already on this page (PUB2-20), dated by its source rather
+  // than a version number a newcomer cannot read (CL2-06).
   const shortcuts = [
-    { href: '/populacao', label: t('shortcutPopulation'), status: populationMeta ? t('shortcutPopulationStatus', { version: populationMeta.release_version }) : null },
-    { href: '/#escolher-equipa', label: t('shortcutClub'), status: ligaSummary ? t('shortcutClubStatus', { matchday: ligaSummary.matchday }) : null },
-    { href: '/eleicoes/arquivo', label: t('shortcutElections'), status: t('shortcutElectionsStatus') },
+    { href: '#home-population-title', inPage: true, label: t('shortcutPopulation'), status: populationMeta ? t('shortcutPopulationStatus') : null },
+    { href: '/#escolher-equipa', inPage: false, label: t('shortcutClub'), status: ligaSummary ? t('shortcutClubStatus', { matchday: ligaSummary.matchday }) : null },
+    { href: '/eleicoes/arquivo', inPage: false, label: t('shortcutElections'), status: t('shortcutElectionsStatus') },
   ];
+  const chipClass = 'flex h-full min-h-14 flex-col justify-center rounded-lg border border-line bg-cream px-2.5 py-2 text-ink transition-colors hover:bg-parchment';
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1280px] px-4 py-6 outline-none md:px-6 md:py-8">
+      {/* The shared container (UXD2-14): the line, the cards and the header's
+          logo start at the same x. */}
+      <main id="main-content" tabIndex={-1} className={`${CONTAINER_CLASS} pt-6 outline-none md:pt-8`}>
         {/* What the site is, before any one subject: the line is the page's
             h1, kept small so the population lead stays above the fold. */}
         <div className="mb-5 max-w-4xl md:mb-6">
@@ -133,30 +140,37 @@ export default async function HomePage({
           <ul className="grid grid-cols-3 gap-2">
             {shortcuts.map(task => (
               <li key={task.href} className="min-w-0">
-                <Link href={task.href} locale={locale} className="flex h-full min-h-14 flex-col justify-center rounded-lg border border-line bg-cream px-2.5 py-2 text-ink transition-colors hover:bg-parchment">
-                  <span className="text-sm font-semibold leading-tight">{task.label}</span>
-                  {task.status && <span className="mt-0.5 text-[12px] leading-tight text-stone-600">{task.status}</span>}
-                </Link>
+                {task.inPage ? (
+                  <SearchShortcut targetId="home-population-title" className={chipClass}>
+                    <span className="text-sm font-semibold leading-tight">{task.label}</span>
+                    {task.status && <span className="mt-0.5 text-[12px] leading-tight text-stone-600">{task.status}</span>}
+                  </SearchShortcut>
+                ) : (
+                  <Link href={task.href} locale={locale} className={chipClass}>
+                    <span className="text-sm font-semibold leading-tight">{task.label}</span>
+                    {task.status && <span className="mt-0.5 text-[12px] leading-tight text-stone-600">{task.status}</span>}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
         </nav>
-        {/* Cards keep their own height (items-start): a short rail or support
-            card ends where its content does instead of stretching into an
-            empty cream block beside a taller neighbour. */}
-        <div className="grid items-start gap-4 md:gap-6 min-[1100px]:grid-cols-[2fr_1fr]">
+        {/* The cards in a row share its height (UXD2-V02, CL2-10): a shorter
+            card fills its cell and puts its last line (a status, a link) at
+            the bottom, so a row reads as one block, not a bento with holes. */}
+        <div className="grid items-stretch gap-4 md:gap-6 min-[1100px]:grid-cols-[2fr_1fr]">
           {panel(layout.lead, 'lead')}
           {panel(layout.secondary, 'secondary')}
         </div>
-        <div className="mt-4 grid items-start gap-4 md:mt-6 md:gap-6 min-[900px]:grid-cols-2">
+        <div className="mt-4 grid items-stretch gap-4 md:mt-6 md:gap-6 min-[900px]:grid-cols-2">
           {support.map(section => panel(section, 'support'))}
         </div>
         <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-stone-600 md:mt-8">
           <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{t('moreKicker')}</span>
-          <Link href="/metodologia" locale={locale} className="font-semibold text-ink underline-offset-4 hover:underline">{t('moreMethodology')}</Link>
+          <Link href="/metodologia" locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{t('moreMethodology')}</Link>
           {latestArticle && (
             <span>
-              {t('moreArticle')}: <Link href={`/artigos/${latestArticle.slug}`} locale={locale} className="font-semibold text-ink underline-offset-4 hover:underline">{latestArticle.title}</Link>
+              {t('moreArticle')}: <Link href={`/artigos/${latestArticle.slug}`} locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{latestArticle.title}</Link>
               {latestArticle.date && <span> · {articleDate.format(new Date(latestArticle.date))}</span>}
             </span>
           )}

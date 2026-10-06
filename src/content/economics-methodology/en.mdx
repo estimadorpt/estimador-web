@@ -1,10 +1,8 @@
 # How will we read the economy?
 
-The economy section is in preparation. This page describes the prototype we tested up to
-July 2026: what the section will measure, where the data comes from, how each figure will
-say what it is and how the prototype was evaluated. Nothing here is a current reading of the
-economy, and the results at the end of the page come from an internal test, not from
-published forecasts.
+Nothing here is a current reading of the economy. The page explains what the section will
+measure, where the data comes from, how each figure will say what it is and how the prototype
+was evaluated.
 
 ---
 
@@ -123,8 +121,8 @@ authoritative figure.
 
 - **AR(1)**: a simple model that estimates the next quarter from the previous one. It is the
   benchmark any model has to beat.
-- **Relative error**: the model's root mean squared error divided by the AR(1)'s. Below 1,
-  the model errs less.
+- **Relative error**: the model's root mean squared error (RMSE) divided by the AR(1)'s.
+  Below 1, the model errs less; 0.90 means an error about 10% smaller.
 - **Diebold–Mariano test and p-value**: a test of whether the difference in errors between
   two models could be chance. A p-value below 0.05 is the conventional threshold for saying
   it is not.
@@ -137,5 +135,4 @@ authoritative figure.
 
 ---
 
-Last revised: October 2026. Describes the prototype tested up to July 2026, scored up to
-2026 Q1. The section's code is not public yet; when it is, the link will be here.
+This page describes the prototype tested up to July 2026, scored up to 2026 Q1. The section's code is not public yet; when it is, the link will be here.

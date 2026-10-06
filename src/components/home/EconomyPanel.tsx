@@ -25,8 +25,8 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
   const live = state === 'live' && economy && typeof pulse === 'number' && typeof recession === 'number';
   const preparing = state === 'preparing';
   return (
-    <HomePanel labelledBy="home-economy-title">
-      <div className="min-w-0 p-5 md:p-6">
+    <HomePanel labelledBy="home-economy-title" className="flex flex-col">
+      <div className="flex min-w-0 flex-1 flex-col p-5 md:p-6">
         <div className="md:grid md:grid-cols-[minmax(0,1fr)_110px] md:items-center md:gap-4">
           <div>
             <Kicker pill={live ? undefined : tSections(preparing ? 'preparingSection' : 'pausedSection')}>{t('economyKicker')}</Kicker>
@@ -45,13 +45,13 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
             <p className="mt-2 text-[14px] leading-relaxed text-stone-600">{t('economyPausedText')}</p>
             <div className="mt-3"><Action href="/economia#compreender" locale={locale} variant="secondary" arrow>{t('economyMethodsAction')}</Action></div>
             {preparing
-              ? <Status tone="paused">{t('economyPreparingStatus')}</Status>
-              : economy?.vintage_date && <Status tone="paused">{t('economyPausedStatus', { date: fmtDate(economy.vintage_date, locale) })}</Status>}
+              ? <Status tone="paused" bottom>{t('economyPreparingStatus')}</Status>
+              : economy?.vintage_date && <Status tone="paused" bottom>{t('economyPausedStatus', { date: fmtDate(economy.vintage_date, locale) })}</Status>}
           </>
         )}
         {article && (
           <p className="mt-3 text-[13px] text-stone-600">
-            {t('moreArticle')}: <Link href={`/artigos/${article.slug}`} locale={locale} className="font-semibold text-ink underline-offset-4 hover:underline">{article.title}</Link>
+            {t('moreArticle')}: <Link href={`/artigos/${article.slug}`} locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{article.title}</Link>
           </p>
         )}
       </div>

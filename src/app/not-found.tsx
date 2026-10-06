@@ -1,7 +1,11 @@
 import './globals.css';
 import { getTranslations } from 'next-intl/server';
 import { LocaleOnlyProvider } from '@/components/LocaleOnlyProvider';
+import { ChevronDown, Globe, Menu, X } from 'lucide-react';
 import { LogoHorizontal } from '@/components/Logo';
+import { navLabels, siteNavigation } from '@/components/brand/site-navigation';
+import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
+import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { NotFoundBody } from '@/components/NotFoundBody';
 import { NotFoundByPath } from '@/components/NotFoundSwitch';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -13,50 +17,98 @@ import { LOCALE_REDIRECT_SCRIPT } from '@/lib/locale-redirect';
 // reader without JavaScript). NotFoundByPath keeps it in step afterwards.
 const LANG_FROM_PATH = "if(/^\\/en(\\/|$)/.test(location.pathname))document.documentElement.lang='en'";
 
+/** A section address with the locale written out and the export's trailing slash. */
+const localeHref = (locale: string, href: string) => `/${locale}${href === '/' ? '/' : `${href}/`}`;
+
 /**
- * The 404's own header. It renders outside the locale layout, where the site
- * Header (client hooks, the article index, next-intl's Link) has nothing to
- * read, so it is a static copy: the sections as plain anchors with the
- * locale written out, and a PT/EN switch to each language's start page (an
- * address that is missing in one language is missing in both).
+ * The 404's own header, drawn from the same navigation as the site Header
+ * (src/components/brand/site-navigation.ts): the same items, order and
+ * labels, the same 60px bar and container. It renders outside the locale
+ * layout, where the client Header (hooks, next-intl's Link, the article
+ * index) has nothing to read, so it needs no JavaScript: the menus are
+ * native <details>, the links plain anchors with the locale written out, and
+ * the PT/EN switch goes to each language's start page (an address that is
+ * missing in one language is missing in both).
  */
 async function NotFoundHeader({ locale }: { locale: 'pt' | 'en' }) {
   const t = await getTranslations({ locale });
   const pt = locale === 'pt';
-  const links = [
-    { href: `/${locale}/populacao/`, label: t('nav.population') },
-    { href: `/${locale}/desporto/liga/`, label: t('nav.liga') },
-    { href: `/${locale}/eleicoes/arquivo/`, label: t('nav.elections') },
-    { href: `/${locale}/sobre/`, label: t('nav.about') },
-  ];
+  const items = siteNavigation(navLabels(key => t(key as never)), {
+    locale,
+    hasArticles: getMDXArticlesByLocale(locale).length > 0,
+    economyPublished: ECONOMY_PUBLISHED,
+  });
+  const languages = (mobile: boolean) => (
+    <div role="group" aria-label={pt ? 'Idioma' : 'Language'} className="flex gap-1 rounded-md bg-stone-100 p-0.5">
+      {(['pt', 'en'] as const).map(target => (
+        <a key={target} href={`/${target}/`} hrefLang={target} lang={target}
+          aria-label={target === 'pt' ? 'Português' : 'English'}
+          aria-current={target === locale ? 'page' : undefined}
+          className={`inline-flex items-center justify-center rounded border font-medium ${mobile ? 'min-h-11 min-w-11 px-3 text-sm' : 'min-h-10 min-w-10 px-2 text-xs'} ${target === locale ? 'border-line bg-cream text-ink' : 'border-transparent text-stone-600 hover:text-ink'}`}>
+          {target.toUpperCase()}
+        </a>
+      ))}
+    </div>
+  );
   return (
-    <header className="border-b border-line bg-paper">
+    <header className="sticky top-0 z-50 border-b border-line bg-paper/95 backdrop-blur-sm">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-cream focus:px-4 focus:py-3 focus:text-ink">
         {pt ? 'Saltar para o conteúdo' : 'Skip to content'}
       </a>
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-3">
-        <a href={`/${locale}/`} className="brand-link inline-block rounded-sm" aria-label={pt ? 'estimador.pt — página inicial' : 'estimador.pt — home'}>
-          <LogoHorizontal size={22} />
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2">
+        <a href={`/${locale}/`} className="brand-link inline-flex min-h-11 shrink-0 items-center rounded-sm" aria-label={pt ? 'estimador — página inicial' : 'estimador — home'}>
+          <span className="hidden sm:block" aria-hidden="true"><LogoHorizontal size={22} /></span>
+          <span className="sm:hidden" aria-hidden="true"><LogoHorizontal size={18} /></span>
         </a>
-        <div className="order-2 flex items-center gap-2 md:order-3">
-          <div role="group" aria-label={pt ? 'Idioma' : 'Language'} className="flex gap-1 rounded-md bg-stone-100 p-0.5">
-            {(['pt', 'en'] as const).map(target => (
-              <a key={target} href={`/${target}/`} hrefLang={target} lang={target}
-                aria-label={target === 'pt' ? 'Português' : 'English'}
-                aria-current={target === locale ? 'page' : undefined}
-                className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded px-2 text-xs font-medium ${target === locale ? 'bg-cream text-ink shadow-sm' : 'text-stone-600 hover:text-ink'}`}>
-                {target.toUpperCase()}
-              </a>
+        <div className="flex items-center gap-3">
+          <nav aria-label={pt ? 'Navegação principal' : 'Main navigation'} className="hidden gap-0.5 lg:flex">
+            {items.map(item => item.dropdown ? (
+              <details key={item.id} className="group/menu relative">
+                <summary className="inline-flex cursor-pointer list-none items-center gap-1 rounded-md px-2.5 py-2 text-sm text-stone-600 transition-colors hover:bg-parchment hover:text-ink [&::-webkit-details-marker]:hidden">
+                  {item.label}<ChevronDown aria-hidden="true" className="h-3 w-3 group-open/menu:rotate-180" />
+                </summary>
+                <ul className="absolute right-0 top-full z-50 mt-1 min-w-[16rem] rounded-md border border-line bg-cream py-1 shadow-lg shadow-forest/10">
+                  {item.dropdown.map(link => (
+                    <li key={link.href}>
+                      <a href={localeHref(locale, link.href)} className="block whitespace-nowrap px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-100">{link.label}</a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : (
+              <a key={item.id} href={localeHref(locale, item.href!)} className="rounded-md px-2.5 py-2 text-sm text-stone-600 hover:bg-parchment hover:text-ink">{item.label}</a>
             ))}
-          </div>
+          </nav>
+          <div className="hidden items-center gap-2 lg:flex"><Globe aria-hidden="true" className="h-4 w-4 text-stone-500" />{languages(false)}</div>
+          {/* Below 1024px: the same hamburger as the site header, as a native disclosure. */}
+          <details className="group/mobile lg:hidden">
+            <summary aria-label={pt ? 'Menu' : 'Menu'} className="inline-flex cursor-pointer list-none rounded-md p-3 text-stone-600 hover:bg-stone-100 hover:text-stone-900 [&::-webkit-details-marker]:hidden">
+              <Menu aria-hidden="true" className="h-5 w-5 group-open/mobile:hidden" />
+              <X aria-hidden="true" className="hidden h-5 w-5 group-open/mobile:block" />
+            </summary>
+            <div className="absolute inset-x-0 top-full max-h-[calc(100dvh-85px)] overflow-y-auto border-y border-line bg-paper">
+              <nav aria-label={pt ? 'Navegação principal móvel' : 'Mobile main navigation'} className="mx-auto max-w-7xl space-y-1 px-4 py-4">
+                {items.map(item => item.dropdown ? (
+                  <details key={item.id} className="group/section">
+                    <summary className="flex w-full cursor-pointer list-none items-center justify-between rounded-md px-4 py-3 text-base font-medium text-stone-700 hover:bg-stone-100 [&::-webkit-details-marker]:hidden">
+                      {item.label}<ChevronDown aria-hidden="true" className="h-4 w-4 group-open/section:rotate-180" />
+                    </summary>
+                    <ul className="ml-4 mt-1 space-y-1">
+                      {item.dropdown.map(link => (
+                        <li key={link.href}><a href={localeHref(locale, link.href)} className="block rounded-md px-4 py-3 text-sm text-stone-600 hover:bg-stone-100">{link.label}</a></li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : (
+                  <a key={item.id} href={localeHref(locale, item.href!)} className="block rounded-md px-4 py-3 text-base font-medium text-stone-700 hover:bg-stone-100">{item.label}</a>
+                ))}
+                <div className="mt-4 flex items-center gap-3 border-t border-stone-200 px-4 pt-4">
+                  <Globe aria-hidden="true" className="h-4 w-4 text-stone-500" /><span className="mr-auto text-sm text-stone-600">{pt ? 'Idioma' : 'Language'}</span>{languages(true)}
+                </div>
+              </nav>
+            </div>
+          </details>
         </div>
-        <nav aria-label={pt ? 'Navegação principal' : 'Main navigation'} className="order-3 -mx-2.5 flex w-full flex-wrap md:order-2 md:mx-0 md:ml-auto md:w-auto">
-          {links.map(link => (
-            <a key={link.href} href={link.href} className="inline-flex min-h-11 items-center rounded-md px-2.5 text-sm text-stone-600 hover:bg-parchment hover:text-ink">
-              {link.label}
-            </a>
-          ))}
-        </nav>
       </div>
     </header>
   );
