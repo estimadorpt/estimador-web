@@ -459,8 +459,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 </p>
                 <p className="mt-2">
                   {pt
-                    ? 'Antes de gerar esta população, registámos intervalos de erro para essa verificação fora do ajuste, com o motor anterior. Os erros desta página são medidos nas tabelas do ajuste, por isso não se comparam com esses intervalos, e a página não diz se ficaram «dentro» ou «abaixo» deles.'
-                    : 'Before generating this population, we registered error ranges for that out-of-fit check, with the earlier engine. The errors on this page are measured on the fitted tables, so they do not compare with those ranges, and the page does not say whether they landed “inside” or “below” them.'}
+                    ? 'Antes de gerar esta população, registámos intervalos de erro para essa verificação fora do ajuste, com a versão anterior do modelo. Os erros desta página são medidos nas tabelas do ajuste, por isso não se comparam com esses intervalos, e a página não diz se ficaram «dentro» ou «abaixo» deles.'
+                    : 'Before generating this population, we registered error ranges for that out-of-fit check, with the earlier version of the model. The errors on this page are measured on the fitted tables, so they do not compare with those ranges, and the page does not say whether they landed “inside” or “below” them.'}
                 </p>
               </div>
             </Section>

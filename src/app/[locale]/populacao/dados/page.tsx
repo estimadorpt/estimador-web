@@ -77,7 +77,7 @@ const QUALITY_COLUMNS: Array<{ name: string; source: QualitySource; meaning: { p
   { name: 'worst_constraint, worst_constraint_srmse', source: 'evaluation', meaning: { pt: 'A tabela de pessoas com o maior erro e esse erro (o segundo critério dos níveis), contando também a idade ano a ano. Na maior parte das freguesias é a idade ano a ano (srmse_p_age_single). Que tabela é cada código: abaixo da tabela.', en: 'The person table with the largest error, and that error (the tiers’ second criterion), single-year age included. In most parishes it is single-year age (srmse_p_age_single). Which table each code is: under the table.' } },
   { name: 'suppression_reason', source: 'release', meaning: { pt: 'Vazio em todas as freguesias: nenhuma é suprimida.', en: 'Empty for every parish: none is suppressed.' } },
   { name: 'fallback_geography', source: 'release', meaning: { pt: 'Nas freguesias de nível C, o código do concelho, para quem preferir agregar ao concelho. O site não o usa: todas as freguesias respondem com os seus próprios números.', en: 'For tier C parishes, the municipality code, for readers who prefer to aggregate to it. The site does not use it: every parish answers with its own figures.' } },
-  { name: 'engine, model_version, run_date', source: 'release', meaning: { pt: 'O motor, a versão do modelo e a data da execução.', en: 'The engine, the model version and the run date.' } },
+  { name: 'engine, model_version, run_date', source: 'release', meaning: { pt: 'O gerador usado (engine), a versão do modelo e a data da execução.', en: 'The engine, the model version and the run date.' } },
 ];
 
 function Code({ children, label }: { children: string; label: string }) {
@@ -214,7 +214,7 @@ sha256sum checksums.sha256`;
                   )}
                 </>],
                 [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: gerada a partir dos Censos 2021 do INE.' : '2021: generated from INE’s 2021 Census.'],
-                [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span>{/* The 64-digit hash on its own lines, two rows of 32, never one orphan digit (VUXD-08). */}<span className="mt-1 block font-mono text-[13px]">sha256 <span className="block max-w-[32ch] break-all">{release.model_sha256}</span></span></>],
+                [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Versão' : 'Version'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span>{/* The 64-digit hash on its own lines, two rows of 32, never one orphan digit (VUXD-08). */}<span className="mt-1 block font-mono text-[13px]">sha256 <span className="block max-w-[32ch] break-all">{release.model_sha256}</span></span></>],
                 // What the hash identifies, and that it cannot be looked up yet (PRO3-11).
                 [pt ? 'Código' : 'Code', <span key="c">{pt ? 'Versão do código que gerou os ficheiros: ' : 'Version of the code that produced the files: '}<span className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>{pt ? ' (o repositório ainda não é público).' : ' (the repository is not public yet).'}</span>],
                 [pt ? 'Versões anteriores' : 'Previous releases', <>
