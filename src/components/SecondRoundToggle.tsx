@@ -56,7 +56,8 @@ export function SecondRoundToggle({ translations }: SecondRoundToggleProps) {
       onClick={() => choose(round)}
       aria-pressed={currentRound === round}
       className={`min-h-11 px-4 py-2 text-xs font-bold rounded-md transition-colors ${
-        currentRound === round ? 'bg-ink text-cream' : 'text-ink-muted hover:text-ink'
+        // Ink, not ink-muted: muted ink on parchment is 4.33:1 (A11Y-15).
+        currentRound === round ? 'bg-ink text-cream' : 'text-ink hover:bg-cream'
       }`}
     >
       {label}

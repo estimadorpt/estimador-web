@@ -79,6 +79,8 @@ export function SeatChart({ data, stats: provided, seatsLabel }: SeatChartProps)
           Plot.text(stats, { x: "mean", y: "party", text: "mean", dx: 15, fontSize: 11, fontWeight: 600, fill: FURNITURE.text }),
         ],
       });
+      // The table twin below is the accessible version; Plot labels role-less <g>s (A11Y-12).
+      plot.setAttribute("aria-hidden", "true");
       container.replaceChildren(plot);
     };
     render();

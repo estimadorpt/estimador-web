@@ -1,10 +1,10 @@
 import { createPageMetadata } from '@/lib/metadata';
-import { formatProbabilityPercent } from "@/lib/utils/probability-calculator";
 import { leftBlocParties, rightBlocParties, majorityThreshold } from "@/lib/config/blocs";
 import { partyColors } from "@/lib/config/colors";
 import { OFFICIAL_RESULTS, PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from "@/lib/config/elections";
 import { loadParliamentaryArchive } from "@/lib/utils/data-loader";
-import { formatElectionLongDate, formatElectionNumber, formatElectionPercent } from "@/lib/election-display";
+import { formatElectionLongDate, formatElectionNumber, formatElectionPercent, formatElectionProbabilityText } from "@/lib/election-display";
+import { ProbabilityFigure } from "@/components/charts/ProbabilityFigure";
 import { Calendar, BarChart3, TrendingUp, Users, Map, Vote } from "lucide-react";
 import { PollingChart } from "@/components/charts/PollingChart";
 import { SeatChart } from "@/components/charts/SeatChart";
@@ -18,7 +18,6 @@ import { SectionNotes } from "@/components/articles/SectionNotes";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
-import type { TrendData } from '@/types';
 import { ElectionSummaryStats } from '@/components/ElectionSummaryStats';
 import { setRequestLocale } from '@/i18n/request-locale';
 
@@ -50,32 +49,34 @@ export default async function ParliamentaryArchivePage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale });
   const archive = await loadParliamentaryArchive();
-  const { probabilities, blocs, seats, trends, trendDates, districtForecast, contestedSeats, houseEffects } = archive;
+  const { probabilities, adChArithmetic, blocs, seats, trends, trendDates, districtForecast, contestedSeats, houseEffects } = archive;
 
   const forecastDate = formatElectionLongDate(PARLIAMENTARY_2025_FORECAST_CUTOFF, locale);
   const electionDate = formatElectionLongDate(PARLIAMENTARY_2025.date, locale);
   const pct = (v: number) => formatElectionPercent(v, locale);
 
   // Election-day projection per party: mean and the 94% HDI band, read from
-  // the last date of the trend file (the election day itself).
-  const latestDate = trends.reduce<string | null>((max, d) => (!max || d.date > max ? d.date : max), null);
-  const projection = trends
-    .filter(d => d.date === latestDate)
-    .reduce<Record<string, { mean?: number; low?: number; high?: number }>>((acc, d: TrendData) => {
-      const key = d.metric.replace('vote_share_', '') as 'mean' | 'low' | 'high';
-      (acc[d.party] ??= {})[key] = d.value;
-      return acc;
-    }, {});
+  // the last date of the trend window (the election day itself).
+  const last = trends.dates.length - 1;
   const projectionText = (party: string) => {
-    const p = projection[party];
-    if (!p || p.mean == null) return '—';
-    return p.low != null && p.high != null ? `${pct(p.mean)} (${pct(p.low)}–${pct(p.high)})` : pct(p.mean);
+    const p = trends.parties[party];
+    const mean = p?.mean[last];
+    if (mean == null) return '—';
+    const low = p.low[last];
+    const high = p.high[last];
+    return low != null && high != null ? `${pct(mean)} (${pct(low)}–${pct(high)})` : pct(mean);
   };
+  const rightName = rightBlocParties.join(' + ');
+  const leftName = leftBlocParties.join(' + ');
+  const otherParties = ['CH', 'PAN'];
   const officialResults = OFFICIAL_RESULTS['parliamentary-2025'][0];
 
-  const blocCard = (title: string, parties: string[], majority: number) => (
+  // One card per group of parties: the two blocs with their majority odds,
+  // and the parties in neither bloc (CH, PAN), so every modelled party's
+  // projected share is on the page.
+  const blocCard = (title: string, parties: string[], majority: number | null) => (
     <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-      <h3 className="text-lg text-stone-900 mb-1">{title} <span className="text-sm font-normal text-stone-500">({parties.join(' + ')})</span></h3>
+      <h3 className="text-lg text-stone-900 mb-1">{title}</h3>
       <p className="text-xs text-stone-500 mb-4">{t('forecast.blocProjectionCaption', { election: electionDate, date: forecastDate })}</p>
       <div className="space-y-3">
         {parties.map(party => (
@@ -87,12 +88,14 @@ export default async function ParliamentaryArchivePage({
             <span className="text-sm font-bold text-stone-900 tabular-nums">{projectionText(party)}</span>
           </div>
         ))}
-        <div className="border-t border-line pt-3 mt-3">
-          <div className="flex items-center justify-between font-semibold">
-            <span className="text-sm text-stone-900">{t('forecast.majorityChance')}</span>
-            <span className="text-lg text-stone-900 tabular-nums">{formatProbabilityPercent(majority)}</span>
+        {majority != null && (
+          <div className="border-t border-line pt-3 mt-3">
+            <div className="flex items-center justify-between font-semibold">
+              <span className="text-sm text-stone-900">{t('forecast.majorityChance')}</span>
+              <ProbabilityFigure probability={majority} locale={locale} className="text-lg text-stone-900 tabular-nums" />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -143,20 +146,18 @@ export default async function ParliamentaryArchivePage({
             probPsMostSeats={probabilities.psMostSeats}
             probRightMajority={probabilities.rightMajority}
             probLeftMajority={probabilities.leftMajority}
-            rightCoalitionMembers={rightBlocParties.join(' + ')}
-            leftCoalitionMembers={leftBlocParties.join(' + ')}
             translations={{
               mostSeats: t('forecast.mostSeats'),
-              rightMajority: t('homepage.rightMajority'),
-              leftMajority: t('homepage.leftMajority'),
-              presidentialLeading: t('forecast.presidentialLeading'),
-              secondRound: t('forecast.secondRound'),
-              comingSoon: t('forecast.comingSoon'),
-              mayoralRaces: t('forecast.mayoralRaces'),
-              municipalCouncils: t('forecast.municipalCouncils'),
-              mepAllocation: t('forecast.mepAllocation'),
-              politicalGroups: t('forecast.politicalGroups'),
-              coalitionArithmeticNote: t('forecast.coalitionArithmeticNote'),
+              rightMajority: t('forecast.blocMajority', { parties: rightName }),
+              leftMajority: t('forecast.blocMajority', { parties: leftName }),
+              notes: [
+                t('forecast.noBlocMajorityNote', {
+                  probability: formatElectionProbabilityText(probabilities.noBlocMajority, locale),
+                  median: formatElectionNumber(adChArithmetic.median, locale),
+                  reach: formatElectionProbabilityText(adChArithmetic.reach, locale),
+                }),
+                t('forecast.coalitionArithmeticNote'),
+              ],
             }}
           />
         </div>
@@ -170,7 +171,7 @@ export default async function ParliamentaryArchivePage({
               <TrendingUp aria-hidden="true" className="w-5 h-5 text-stone-500" />
               <h2 className="text-2xl text-stone-900">{t('forecast.pollingTrends')}</h2>
             </div>
-            <PollingChart data={trends} voteShareLabel={t('forecast.voteShareLabel')} />
+            <PollingChart series={trends} voteShareLabel={t('forecast.voteShareLabel')} />
             <p className="text-sm text-stone-600 mt-4">
               {t('forecast.pollingTrendsDescription', { count: formatElectionNumber(trendDates, locale) })}
             </p>
@@ -183,16 +184,14 @@ export default async function ParliamentaryArchivePage({
             </div>
             <CoalitionDotPlot
               simulations={blocs}
-              leftCoalitionLabel={t('forecast.leftCoalition')}
-              rightCoalitionLabel={t('forecast.rightCoalition')}
+              leftCoalitionLabel={leftName}
+              rightCoalitionLabel={rightName}
               projectedSeatsLabel={t('forecast.projectedSeats')}
               majorityLabel={t('forecast.majorityThresholdLabel', { seats: majorityThreshold, total: 230 })}
               showingOutcomesLabel={t.raw('forecast.drawnSimulations') as string}
             />
             <p className="text-sm text-stone-600 mt-4">{t('forecast.coalitionDescription')}</p>
-            <p className="text-xs text-stone-500 mt-2">
-              {t('forecast.rightCoalition')} = {rightBlocParties.join(' + ')} · {t('forecast.leftCoalition')} = {leftBlocParties.join(' + ')}. {t('forecast.coalitionArithmeticNote')}
-            </p>
+            <p className="text-xs text-stone-500 mt-2">{t('forecast.coalitionArithmeticNote')}</p>
           </div>
 
           <div className="bg-cream border border-stone-200 rounded-2xl p-6">
@@ -219,9 +218,10 @@ export default async function ParliamentaryArchivePage({
             <DistrictSummary districtData={districtForecast} contestedData={contestedSeats} />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {blocCard(t('forecast.leftCoalition'), leftBlocParties, probabilities.leftMajority)}
-            {blocCard(t('forecast.rightCoalition'), rightBlocParties, probabilities.rightMajority)}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blocCard(leftName, leftBlocParties, probabilities.leftMajority)}
+            {blocCard(rightName, rightBlocParties, probabilities.rightMajority)}
+            {blocCard(t('forecast.otherParties'), otherParties, null)}
           </div>
 
           {/* Polling analysis — a specialist method/evidence view, not a
@@ -261,7 +261,7 @@ export default async function ParliamentaryArchivePage({
                   {t('forecast.methodology')}
                 </h3>
                 <p>{t('forecast.methodologyDescription')}</p>
-                <Link href="/metodologia#eleicoes" locale={locale} className={`mt-2 inline-block ${linkClass}`}>{t('common.methodology')} →</Link>
+                <Link href="/eleicoes/metodologia#legislativas" locale={locale} className={`mt-2 inline-block ${linkClass}`}>{t('common.methodology')} →</Link>
               </div>
               <div>
                 <h3 className="flex items-center gap-2 mb-2 font-medium">

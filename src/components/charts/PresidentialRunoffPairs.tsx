@@ -27,9 +27,9 @@ export function PresidentialRunoffPairs({
   // Take top N pairs
   const topPairs = pairs.slice(0, maxPairs);
   
-  // Find max probability for scaling
-  const maxProb = Math.max(...topPairs.map(p => p.probability));
-  const scaleMax = Math.ceil(maxProb * 10) / 10 + 0.05;
+  // A probability bar on a full-width track reads as a share of 100%, so the
+  // scale is always 0–100%: a 43% pair fills 43% of the track.
+  const scaleMax = 1;
 
   const formatPercent = (value: number) => formatElectionProbability(value, locale);
 
@@ -86,8 +86,8 @@ export function PresidentialRunoffPairs({
       <div className="relative h-3 mt-3" aria-hidden="true">
         <div className="absolute inset-x-0 flex justify-between text-[11px] text-stone-500">
           <span>{formatElectionPercent(0, locale, 0)}</span>
-          <span>{formatElectionPercent(scaleMax / 2, locale, 0)}</span>
-          <span>{formatElectionPercent(scaleMax, locale, 0)}</span>
+          <span>{formatElectionPercent(0.5, locale, 0)}</span>
+          <span>{formatElectionPercent(1, locale, 0)}</span>
         </div>
       </div>
     </div>

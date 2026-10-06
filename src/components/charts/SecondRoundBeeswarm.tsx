@@ -85,7 +85,8 @@ export function SecondRoundBeeswarm({ simulations, translations }: SecondRoundBe
           Plot.text(medians, {
             x: "median",
             fy: "candidate",
-            text: (d: { median: number }) => pct(d.median),
+            // Named: the cards above show the mean, this line the median.
+            text: (d: { median: number }) => `${translations.median.toLocaleLowerCase(locale)} ${pct(d.median)}`,
             frameAnchor: "top",
             dy: -16,
             dx: 6,
@@ -105,6 +106,8 @@ export function SecondRoundBeeswarm({ simulations, translations }: SecondRoundBe
           }),
         ],
       });
+      // The table twin below is the accessible version; Plot labels role-less <g>s (A11Y-12).
+      plot.setAttribute("aria-hidden", "true");
       container.replaceChildren(plot);
     };
     render();

@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import {
+  compactTrendSeries,
+  dotsPerRowToFit,
   everyKthIndex,
+  noBlocMajorityShare,
+  seatSumArithmetic,
+  stackDots,
   quantileSorted,
   recentTrendRows,
   summariseBlocs,
@@ -143,5 +148,74 @@ describe('trend window', () => {
     ];
     expect(recentTrendRows(rows).map(r => r.v)).toEqual([3, 4]);
     expect(recentTrendRows([])).toEqual([]);
+  });
+});
+
+describe('trend series in columns', () => {
+  const rows = [
+    { date: '2025-05-18', party: 'AD', metric: 'vote_share_mean', value: 0.34216 },
+    { date: '2025-05-18', party: 'AD', metric: 'vote_share_low', value: 0.31 },
+    { date: '2025-05-18', party: 'AD', metric: 'vote_share_high', value: 0.37 },
+    { date: '2025-05-15', party: 'AD', metric: 'vote_share_mean', value: 0.33 },
+    { date: '2025-05-15', party: 'PS', metric: 'vote_share_mean', value: 0.27 },
+    { date: '2025-05-15', party: 'PS', metric: 'other_metric', value: 9 },
+  ];
+
+  it('keeps every value on its own date, with null where the file has none', () => {
+    const series = compactTrendSeries(rows);
+    expect(series.dates).toEqual(['2025-05-15', '2025-05-18']);
+    expect(series.parties.AD).toEqual({ mean: [0.33, 0.3422], low: [null, 0.31], high: [null, 0.37] });
+    expect(series.parties.PS.mean).toEqual([0.27, null]);
+  });
+
+  it('carries the published window in far fewer bytes than the long rows', () => {
+    const trends = recentTrendRows(readJson<{ date: string; party: string; metric: string; value: number }[]>('parliamentary-2025/national_trends.json'));
+    const series = compactTrendSeries(trends);
+    const values = Object.values(series.parties).flatMap(p => [...p.mean, ...p.low, ...p.high]).filter(v => v != null);
+    expect(values.length).toBe(trends.length);
+    expect(JSON.stringify(series).length).toBeLessThan(JSON.stringify(trends).length / 4);
+  });
+});
+
+describe('majority arithmetic', () => {
+  const draws = [
+    { AD: 90, IL: 10, CH: 50, PS: 60 },
+    { AD: 110, IL: 8, CH: 40, PS: 50 },
+    { AD: 80, IL: 6, CH: 60, PS: 70 },
+  ];
+
+  it('counts the draws in which no bloc reaches the threshold', () => {
+    expect(noBlocMajorityShare(draws, [['AD', 'IL'], ['PS']], 116)).toBeCloseTo(2 / 3);
+    expect(noBlocMajorityShare([], [['AD']], 116)).toBeNaN();
+  });
+
+  it('gives the median and the reach of a seat sum', () => {
+    expect(seatSumArithmetic(draws, ['AD', 'CH'], 116)).toEqual({ median: 140, reach: 1 });
+  });
+
+  it('reproduces the archived 2025 figures: no bloc majority, AD + CH at 138', () => {
+    const seats = readBuildOnlyJson<Record<string, number>[]>('parliamentary-2025/seat_forecast_simulations.json');
+    expect(noBlocMajorityShare(seats, [['AD', 'IL'], ['PS', 'BE', 'CDU', 'L']], 116)).toBe(1);
+    expect(seatSumArithmetic(seats, ['AD', 'CH'], 116)).toEqual({ median: 138, reach: 1 });
+  });
+});
+
+describe('dot histogram', () => {
+  it('stacks equal values side by side, then upwards', () => {
+    const { dots, rows } = stackDots([5, 5, 5, 6], 2);
+    expect(dots).toEqual([
+      { value: 5, col: 0, row: 0 },
+      { value: 5, col: 1, row: 0 },
+      { value: 5, col: 0, row: 1 },
+      { value: 6, col: 0, row: 0 },
+    ]);
+    expect(rows).toBe(2);
+  });
+
+  it('sets enough dots per row for the tallest column to fit', () => {
+    // 100 dots, 10px per seat, 140px tall: 1 per row needs 1000px, 3 per row 34 × 3.3 ≈ 113px.
+    expect(dotsPerRowToFit(100, 10, 140)).toBe(3);
+    expect(dotsPerRowToFit(10, 10, 140)).toBe(1);
+    expect(dotsPerRowToFit(10_000, 10, 140, 4)).toBe(4);
   });
 });

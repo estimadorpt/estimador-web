@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return createPageMetadata({
     locale,
     path: '/eleicoes/arquivo',
-    title: siteTitle(locale === 'pt' ? 'Como ler uma previsão arquivada' : 'How to read an archived forecast'),
+    title: siteTitle(locale === 'pt' ? 'Eleições: previsões arquivadas' : 'Elections: archived forecasts'),
     description: locale === 'pt'
       ? 'As previsões das presidenciais de 2026 e das legislativas de 2025, guardadas com a informação disponível à data, e como lê-las sem as confundir com resultados.'
       : 'The 2026 presidential and 2025 parliamentary forecasts, kept with the information available at the time, and how to read them without mistaking them for results.',
@@ -61,12 +61,12 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
     ? [
       ['01 · Situa a previsão', 'De que data é?', 'Começa pela data da previsão e pela volta eleitoral. A informação disponível muda ao longo da campanha.'],
       ['02 · Lê a pergunta', 'Votos ou probabilidade de ganhar?', 'Uma estimativa de votos e uma probabilidade de vitória respondem a perguntas diferentes. Lê o título e a unidade antes de comparar.'],
-      ['03 · Avalia com cuidado', 'Acertar no vencedor basta?', 'Não. Importam também a margem de erro e os intervalos. Uma só eleição não demonstra que as probabilidades estejam bem calibradas.'],
+      ['03 · Avalia com cuidado', 'Acertar no vencedor basta?', 'Não. Importam também a distância ao resultado e os intervalos de credibilidade. Uma só eleição não demonstra que as probabilidades estejam bem calibradas.'],
     ]
     : [
       ['01 · Place the forecast', 'Which date?', 'Start with the forecast date and election round. Available information changes throughout the campaign.'],
       ['02 · Read the question', 'Votes or winning probability?', 'A vote estimate and a winning probability answer different questions. Read the title and unit before comparing.'],
-      ['03 · Assess carefully', 'Is naming the winner enough?', 'No. Errors and intervals matter too. A single election does not establish that probabilities are well calibrated.'],
+      ['03 · Assess carefully', 'Is naming the winner enough?', 'No. The distance to the result and the credible intervals matter too. A single election does not establish that probabilities are well calibrated.'],
     ];
 
   return <div className="min-h-screen bg-paper">
@@ -76,9 +76,9 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
       width="5xl"
       compact
       illustration="elections"
-      eyebrow={pt ? 'Eleições · depois do voto' : 'Elections · after the vote'}
-      title={pt ? 'A eleição passou. O que dizia a previsão?' : 'The election is over. What did the forecast say?'}
-      lede={pt ? 'Um arquivo permite voltar à informação disponível na altura. Não é uma página de resultados oficiais.' : 'An archive lets you revisit the information available at the time. It is not a page of official results.'}
+      eyebrow={pt ? 'Eleições · arquivo' : 'Elections · archive'}
+      title={pt ? 'As eleições passaram. O que diziam as previsões?' : 'The elections are over. What did the forecasts say?'}
+      lede={pt ? 'Um arquivo permite voltar à informação disponível na altura. Não é uma página de resultados oficiais. Não há eleição em curso; a próxima previsão será anunciada aqui.' : 'An archive lets you revisit the information available at the time. It is not a page of official results. There is no election under way; the next forecast will be announced here.'}
     />
     <div className="mx-auto max-w-5xl px-4 py-10">
       <section aria-labelledby="archive-choice-title" className="border-y border-line py-7">
@@ -125,7 +125,7 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
           ? 'Ainda não publicámos uma avaliação destas previsões contra os resultados oficiais, por isso esta página não atribui uma pontuação ao modelo. A única avaliação publicada no site é a do modelo de futebol.'
           : 'We have not yet published an evaluation of these forecasts against the official results, so this page does not score the model. The only published evaluation on the site is the football model’s.'}</p>
         <div className="mt-2 flex flex-wrap gap-x-6">
-          <Action href="/metodologia#eleicoes" locale={locale} variant="text" arrow>{pt ? 'Como foram construídas as previsões' : 'How the forecasts were built'}</Action>
+          <Action href="/eleicoes/metodologia" locale={locale} variant="text" arrow>{pt ? 'Como foram construídas as previsões' : 'How the forecasts were built'}</Action>
           <Action href="/desporto/liga/modelo" locale={locale} variant="text" arrow>{pt ? 'A avaliação do modelo de futebol' : 'The football model’s evaluation'}</Action>
         </div>
       </section>

@@ -3,7 +3,8 @@
 import React from 'react';
 import { useLocale } from 'next-intl';
 import { SecondRoundWinProbabilityData, SecondRoundValidVotesData } from '@/types';
-import { formatElectionPercent, formatElectionProbability } from '@/lib/election-display';
+import { formatElectionPercent } from '@/lib/election-display';
+import { ProbabilityFigure } from './ProbabilityFigure';
 
 interface SecondRoundWinnerCardsProps {
   winProbability: SecondRoundWinProbabilityData;
@@ -24,9 +25,9 @@ export function SecondRoundWinnerCards({
   translations,
 }: SecondRoundWinnerCardsProps) {
   const locale = useLocale();
-  // Win probabilities are whole percentages bounded by <1% and >99%: 8000
-  // simulations cannot support more precision, or a claim of certainty.
-  const formatProbability = (value: number) => formatElectionProbability(value, locale);
+  // Win probabilities are whole percentages bounded by "menos de 1%" and
+  // "mais de 99%" (ProbabilityFigure): 8000 simulations cannot support more
+  // precision, or a claim of certainty.
   const formatPercent = (value: number) => formatElectionPercent(value, locale);
 
   const formatCI = (lower: number, upper: number) => {
@@ -57,9 +58,7 @@ export function SecondRoundWinnerCards({
           <h3 className="text-lg text-stone-900 mb-1">
             {candidateA.name}
           </h3>
-          <div className="text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2">
-            {formatProbability(candidateA.win_probability)}
-          </div>
+          <ProbabilityFigure probability={candidateA.win_probability} locale={locale} className="block text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2" />
           <div className="text-xs uppercase tracking-wide text-stone-500 mb-4">
             {translations.winProbability}
           </div>
@@ -90,9 +89,7 @@ export function SecondRoundWinnerCards({
           <h3 className="text-lg text-stone-900 mb-1">
             {candidateB.name}
           </h3>
-          <div className="text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2">
-            {formatProbability(candidateB.win_probability)}
-          </div>
+          <ProbabilityFigure probability={candidateB.win_probability} locale={locale} className="block text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2" />
           <div className="text-xs uppercase tracking-wide text-stone-500 mb-4">
             {translations.winProbability}
           </div>

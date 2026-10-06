@@ -15,10 +15,6 @@
   "common": {
     "methodology": "Methodology"
   },
-  "homepage": {
-    "rightMajority": "Right majority",
-    "leftMajority": "Left majority"
-  },
   "map": {
     "title": "District map",
     "backToForecast": "Back to the 2025 parliamentary forecast",
@@ -26,9 +22,9 @@
     "portugalForecasts": "Forecast by district and region",
     "howToInterpret": "How to read the map",
     "colors": "Colours",
-    "colorsDescription": "Each district is coloured with the party that has the highest predicted vote share in that region.",
+    "colorsDescription": "Each district has the colour of the party with the highest predicted vote share in that region; the key under the map says which colour is which party.",
     "interaction": "Interaction",
-    "interactionDescription": "Hover over a district to see the leading party and its share, or choose it to see every detail.",
+    "interactionDescription": "Tap or hover over a district to see each party’s predicted vote share, or choose it from the list above the map.",
     "islands": "Islands",
     "islandsDescription": "The Azores and Madeira appear as multiple islands, but forecasts are aggregated by region.",
     "generalStats": "Leading party by district",
@@ -39,18 +35,18 @@
   },
   "forecast": {
     "subtitle": "Parliamentary election 2025: what the forecast said",
-    "pollingTrends": "Polling trends",
+    "pollingTrends": "Trend estimated from the polls",
     "coalitionSeats": "Coalition seat distributions",
     "individualParties": "Individual party projections",
     "districtAnalysis": "District analysis",
-    "leftCoalition": "Left",
-    "rightCoalition": "Right",
+    "leftCoalition": "PS + BE + CDU + L",
+    "rightCoalition": "AD + IL",
     "majorityChance": "Majority chance",
     "pollingHouseEffects": "Polling house effects",
     "houseEffectsLoading": "Loading the house-effects analysis…",
     "houseEffectsTerm": "House effects",
     "houseEffectsExplainer": "show how each pollster systematically differs from the polling average in logit space. Red cells indicate the pollster tends to show higher support for that party, blue cells show lower support.",
-    "houseEffectsValuesNote": "Values are logit deviations. Larger absolute values indicate stronger systematic bias. Hover over cells for exact values.",
+    "houseEffectsValuesNote": "Values are logit deviations, the model’s scale before it turns them into percentages. Each deviation is a component that sums to zero across each firm’s parties, multiplied by a standard deviation of each party’s own; so the table’s rows do not sum exactly to zero. Hover over cells for exact values.",
     "aboutModel": "About this model",
     "dataSources": "Data sources",
     "methodology": "Methodology",
@@ -58,8 +54,8 @@
     "mostSeats": "most seats",
     "coalitionDescription": "Each dot is one simulation, at the bloc’s exact seat count. The solid line marks the median; the dashed line, the majority.",
     "simulationDescription": "Based on {count} Monte Carlo simulations. Dots show the mean; bands show 50% (P25–P75) and 80% (P10–P90) credible intervals.",
-    "pollingTrendsDescription": "Smoothed polling averages over the two years before the election ({count} estimate dates). Lines show the estimated vote share; the table includes the uncertainty band, a 94% credible interval (HDI).",
-    "dataSourcesDescription": "Polling data from major Portuguese polling firms, weighted by reliability and recency. Historical election results and demographic data.",
+    "pollingTrendsDescription": "The model’s estimate for each party on the dates of the polls it read, over the two years before the election ({count} dates), with its 94% credible interval (HDI). The polls themselves are not part of this archive; the table has every party’s estimate and band.",
+    "dataSourcesDescription": "Polls by Aximage, CESOP–Católica, Consulmark2, ICS/ISCTE/GfK Metris, Intercampus, Metris and Pitagórica, up to the last one, on 15 May 2025, and the results of previous parliamentary elections (CNE), from which the differences between districts come.",
     "methodologyDescription": "Monte Carlo simulation accounting for polling uncertainty, district-level variations, and D'Hondt seat allocation system.",
     "updatesDescription": "The model was updated as new polls came out. This is the last forecast published, on {date}.",
     "voteShareLabel": "Vote share (%)",
@@ -70,9 +66,9 @@
     "seatGain": "+1 seat: {pct}%",
     "seatLoss": "−1 seat: {pct}%",
     "closeRace": "Close race for seat allocation",
-    "likelyWinners": "Likely winners by district",
-    "likelyWinnersSubtitle": "Among the {count} districts with a stable allocation — not all {total} districts.",
-    "districtsUnit": "districts",
+    "likelyWinners": "Party ahead in votes, by district",
+    "likelyWinnersSubtitle": "All {total} districts and regions, by the party with the highest predicted vote share. It is neither a seat count nor a probability of winning.",
+    "districtsUnit": "{count, plural, one {district} other {districts}}",
     "totalDistricts": "Districts",
     "seatsInPlay": "With seats in play",
     "stableAllocation": "Stable allocation",
@@ -92,13 +88,10 @@
     "blocProjectionCaption": "Projected vote share for election day ({election}), in the forecast of {date}; in brackets, the 94% credible interval (HDI).",
     "mapEyebrow": "Parliamentary 2025 · archive",
     "mapLede": "The forecast of {forecast} by district, for the election of {election}. Choose a district to see each party’s predicted vote share.",
-    "presidentialLeading": "Leading candidate",
-    "secondRound": "Second round needed",
-    "comingSoon": "Coming soon",
-    "mayoralRaces": "Mayoral races",
-    "municipalCouncils": "Municipal councils",
-    "mepAllocation": "MEP allocation",
-    "politicalGroups": "Political groups"
+    "blocMajority": "{parties} majority",
+    "noBlocMajorityNote": "Neither bloc with a majority: {probability} of the simulations. The AD + CH sum, as arithmetic only, reached 116 seats in {reach} of the simulations (median: {median}).",
+    "otherParties": "Other parties",
+    "seatChangeBaseline": "The +1 and −1 compare each party with its own most frequent seat count in that district across the simulations, not with 2024. Because each party is compared with its own count, a district’s gains and losses need not balance: when a seat is split almost evenly between two parties, both show −1."
   },
   "articles": {
     "title": "Analysis and articles",
@@ -149,7 +142,7 @@
   },
   "methodology": {
     "title": "Methodology",
-    "subtitle": "How our election models work — and where to find each domain’s methodology"
+    "subtitle": "How we arrive at each answer: synthetic population, Liga Portugal, elections and economy. Sources, assumptions and limits."
   },
   "parties": {
     "AD": "Democratic Alliance",
@@ -166,7 +159,7 @@
     "firstRoundTab": "1st round",
     "secondRoundTab": "2nd round",
     "winProbability": "Win probability",
-    "validVoteShare": "Valid votes",
+    "validVoteShare": "Mean share of valid votes",
     "headlineDescription": "The forecast of {date} for the runoff on {election}, between {candidateA} and {candidateB}.",
     "versus": "vs",
     "blankNull": "Blank/Null",
@@ -201,8 +194,8 @@
     "secondRoundNeeded": "Second round needed",
     "probability": "Probability",
     "winProbabilitiesToday": "Each candidate’s chance of reaching the runoff",
-    "chanceOfRunoff": "Runoff odds",
-    "voteShare": "Projected vote share",
+    "chanceOfRunoff": "Chance of reaching the runoff",
+    "voteShare": "Projected vote share on election day",
     "partyAffiliation": "Party",
     "supportTrajectory": "How did estimated support move?",
     "trendDescription": "Choose a candidate to see their estimated support over time; the other candidates appear as faint lines.",
@@ -221,10 +214,9 @@
     "headToHeadDescription": "Probability that {candidateA} was ahead of {candidateB}, by date, up to the last poll.",
     "leads": "leads",
     "runoffScenariosTitle": "Which pairs would reach the runoff?",
-    "runoffScenariosDescription": "The candidate pairs most likely to contest the runoff in the forecast’s simulations, at the date of the last poll.",
+    "runoffScenariosDescription": "The candidate pairs most likely to contest the runoff in the forecast’s simulations for election day.",
     "mostLikelyMatchups": "Most likely matchups",
     "vs": "vs",
-    "sinceLastPoll": "since last poll",
     "archiveEyebrow": "Elections · archive",
     "archiveTitle": "Presidential election 2026: what the forecast said",
     "archiveLede": "Forecasts for both rounds, preserved with the information available at the time. These are not election results.",
@@ -251,13 +243,13 @@
   "elections": {
     "navPresidential": "Presidential 2026 · archive",
     "navParliamentary": "Parliamentary 2025 · archive",
-    "navArchiveGuide": "How to read the archive"
+    "navArchiveGuide": "All elections (archive)",
+    "navMethodology": "How the forecasts were made"
   },
   "model": {
     "assumptions": {
       "title": "Model assumptions",
-      "declared_voters": "Forecast declared voting intention only (about 65% of the electorate)",
-      "undecided": "The roughly 35% undecided represented additional uncertainty",
+      "declared_voters": "Forecast declared voting intention only (about 65% of respondents); the roughly 35% undecided are not in the bands",
       "house_effects": "Pollster house effects informed by parliamentary election data",
       "random_walk": "Random-walk dynamics, as in The Economist’s and FiveThirtyEight’s models"
     },
@@ -298,21 +290,21 @@
     "economyAction": "See the reading and evidence",
     "electionsKicker": "Elections",
     "electionsTitle": "What did the model say before the vote?",
-    "electionsText": "Choose an archived forecast to see the information available at the time. These are not official results or a calculated model evaluation.",
+    "electionsText": "These are the forecasts as they were published before the vote, not the official results.",
     "electionsArchived": "Archived forecast",
     "electionsForecast": "Forecast",
     "electionsAction": "See the archived forecast",
     "electionsOpen": "See forecast",
     "electionsUncertainty": "Every estimate carries its credible interval.",
-    "electionsRounds": "1st round {date1} · 2nd round {date2}",
     "electionsForecastAsOf": "forecast as of {date}",
     "electionsQuestionRunoff": "Whom did the model expect to win the runoff?",
     "electionsQuestionSeats": "Which party did the model expect to win most seats, and would there be a majority?",
-    "electionsArchiveGuide": "How to read the archive",
+    "electionsArchiveGuide": "All elections (archive)",
     "electionsLeadRunoffLabel": "Runoff on {date} · of the valid vote · {interval}",
     "moreKicker": "How we work",
     "moreMethodology": "Methodology for each domain",
-    "moreArticle": "Latest analysis"
+    "moreArticle": "Latest analysis",
+    "electionsForecastRunoff": "forecast of {date} for the runoff"
   },
   "sections": {
     "ligaPortugal": "Liga Portugal",

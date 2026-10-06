@@ -14,8 +14,6 @@ import {
   PresidentialHouseEffectsData,
   PresidentialHeadToHeadData,
   PresidentialRunoffPairsData,
-  PresidentialChangesData,
-  PresidentialRunoffChangesData,
   SecondRoundForecastData,
   SecondRoundTrendsData,
   SecondRoundTrajectoriesData,
@@ -27,7 +25,7 @@ import {
 import { PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections';
 import { leftBlocParties, rightBlocParties, majorityThreshold } from '@/lib/config/blocs';
 import { calculateBlocMajorityProbability, calculatePartyMostSeatsProbability } from '@/lib/utils/probability-calculator';
-import { recentTrendRows, summariseBlocs, summariseRunoff, summariseSeats, type RunoffSimulations } from '@/lib/election-aggregates';
+import { compactTrendSeries, noBlocMajorityShare, recentTrendRows, seatSumArithmetic, summariseBlocs, summariseRunoff, summariseSeats, type RunoffSimulations } from '@/lib/election-aggregates';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyStories } from '@/types/economy-stories';
 
@@ -113,13 +111,14 @@ const PARLIAMENTARY_PARTIES = ['AD', 'PS', 'CH', 'IL', 'L', 'BE', 'CDU', 'PAN'];
 /**
  * The parliamentary 2025 archive, summarised on the server: probabilities,
  * bloc and party seat distributions from all 9000 draws, a fixed 800-draw
- * subsample for the dot plot, and the two-year trend window the chart shows.
+ * subsample for the dot plot, and the two-year trend window the chart shows,
+ * in columns (compactTrendSeries) rather than the file's long rows.
  * `available` is false when a required file is missing, and the page then
  * says so instead of drawing zeros.
  */
 export async function loadParliamentaryArchive() {
   const { seatData, nationalTrends, districtForecast, contestedSeats, houseEffects } = await loadForecastData();
-  const trends = recentTrendRows(nationalTrends);
+  const trends = compactTrendSeries(recentTrendRows(nationalTrends));
   return {
     available: seatData.length > 0 && nationalTrends.length > 0,
     simulations: seatData.length,
@@ -128,7 +127,11 @@ export async function loadParliamentaryArchive() {
       psMostSeats: calculatePartyMostSeatsProbability(seatData, 'PS', ['AD', 'CH']),
       rightMajority: calculateBlocMajorityProbability(seatData, rightBlocParties, majorityThreshold),
       leftMajority: calculateBlocMajorityProbability(seatData, leftBlocParties, majorityThreshold),
+      /** Neither bloc the page shows reaches 116: the methodology's "parlamento sem maioria". */
+      noBlocMajority: noBlocMajorityShare(seatData, [rightBlocParties, leftBlocParties], majorityThreshold),
     },
+    /** AD + CH, stated as seat arithmetic beside the blocs (not a government forecast). */
+    adChArithmetic: seatSumArithmetic(seatData, ['AD', 'CH'], majorityThreshold),
     blocs: summariseBlocs(seatData, [
       { key: 'left', parties: leftBlocParties },
       { key: 'right', parties: rightBlocParties },
@@ -136,7 +139,7 @@ export async function loadParliamentaryArchive() {
     seats: summariseSeats(seatData, PARLIAMENTARY_PARTIES),
     trends,
     /** Estimate dates inside the trend window (what the chart's caption counts). */
-    trendDates: new Set(trends.map(row => row.date)).size,
+    trendDates: trends.dates.length,
     districtForecast,
     contestedSeats,
     houseEffects,
@@ -154,7 +157,7 @@ const EMPTY_PRESIDENTIAL_TRENDS = { election_date: PRESIDENTIAL_2026.date, dates
  */
 export async function loadPresidentialData() {
   try {
-    const [forecast, winProbabilities, trends, snapshotProbabilities, polls, houseEffects, headToHead, electionDayRunoffPairs, snapshotRunoffPairs, changes, runoffChanges] = await Promise.all([
+    const [forecast, winProbabilities, trends, snapshotProbabilities, polls, houseEffects, headToHead, runoffPairs] = await Promise.all([
       loadJsonData<PresidentialForecastData>('presidential_forecast.json', PRESIDENTIAL_DIR),
       loadJsonData<PresidentialWinProbabilitiesData>('presidential_win_probabilities.json', PRESIDENTIAL_DIR),
       loadJsonData<PresidentialTrendsData>('presidential_trends.json', PRESIDENTIAL_DIR),
@@ -177,25 +180,20 @@ export async function loadPresidentialData() {
         dates: [],
         probability_a_leads: []
       })),
+      // Runoff pairs for election day, the horizon the section's date line
+      // names and the vote-share bars use. The snapshot file
+      // (presidential_snapshot_runoff_pairs.json, at the last poll) answered a
+      // different date and is no longer shown; nor are the changes since the
+      // previous poll, which described that snapshot.
       loadJsonData<PresidentialRunoffPairsData>('presidential_runoff_pairs.json', PRESIDENTIAL_DIR).catch(() => ({
         election_date: PRESIDENTIAL_2026.date,
         pairs: [],
         matrix: { candidates: [], colors: [], probabilities: [] }
       })),
-      // Snapshot runoff pairs, computed at the last poll date from the full posterior
-      loadJsonData<PresidentialRunoffPairsData>('presidential_snapshot_runoff_pairs.json', PRESIDENTIAL_DIR).catch(() => null),
-      // Leading-probability changes since the previous poll
-      loadJsonData<PresidentialChangesData>('presidential_changes.json', PRESIDENTIAL_DIR).catch(() => null),
-      // Runoff-probability changes since the previous poll
-      loadJsonData<PresidentialRunoffChangesData>('presidential_runoff_changes.json', PRESIDENTIAL_DIR).catch(() => null)
     ]);
 
     // The last poll the forecast saw
     const lastPollDate = polls.polls.reduce<string | null>((latest, poll) => (!latest || poll.date > latest ? poll.date : latest), null);
-
-    // Snapshot runoff pairs (at the last poll date) when published, otherwise
-    // the election-day pairs
-    const runoffPairs = snapshotRunoffPairs || electionDayRunoffPairs;
 
     return {
       available: forecast.candidates.length > 0,
@@ -207,8 +205,6 @@ export async function loadPresidentialData() {
       houseEffects,
       headToHead,
       runoffPairs,
-      changes,
-      runoffChanges,
       lastPollDate
     };
   } catch (error) {
@@ -223,8 +219,6 @@ export async function loadPresidentialData() {
       houseEffects: { pollsters: [], candidates: [], effects: {} } as PresidentialHouseEffectsData,
       headToHead: { election_date: PRESIDENTIAL_2026.date, candidate_a: '', candidate_b: '', color_a: '', color_b: '', dates: [], probability_a_leads: [] } as PresidentialHeadToHeadData,
       runoffPairs: { election_date: PRESIDENTIAL_2026.date, pairs: [], matrix: { candidates: [], colors: [], probabilities: [] } } as PresidentialRunoffPairsData,
-      changes: null as PresidentialChangesData | null,
-      runoffChanges: null as PresidentialRunoffChangesData | null,
       lastPollDate: null as string | null
     };
   }
