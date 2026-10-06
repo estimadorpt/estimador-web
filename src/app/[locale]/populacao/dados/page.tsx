@@ -214,7 +214,7 @@ sha256sum checksums.sha256`;
                   )}
                 </>],
                 [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: gerada a partir dos Censos 2021 do INE.' : '2021: generated from INE’s 2021 Census.'],
-                [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span><span className="break-all font-mono text-[13px]">sha256 {release.model_sha256}</span></>],
+                [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span>{/* The 64-digit hash on its own lines, two rows of 32, never one orphan digit (VUXD-08). */}<span className="mt-1 block font-mono text-[13px]">sha256 <span className="block max-w-[32ch] break-all">{release.model_sha256}</span></span></>],
                 // What the hash identifies, and that it cannot be looked up yet (PRO3-11).
                 [pt ? 'Código' : 'Code', <span key="c">Commit <span className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>{pt ? ' do código de empacotamento; o repositório ainda não é público.' : ' of the packaging code; the repository is not public yet.'}</span>],
                 [pt ? 'Versões anteriores' : 'Previous releases', <>

@@ -166,8 +166,13 @@ export function AgeColumns({ cells, locale, height = 200 }: { cells: ReadCell[];
  * "If this place were 100 people": one hundred dots split by the response's
  * shares, by largest remainder so they always add to 100. Only for responses
  * with nothing suppressed (see isWhole) and at most four categories.
+ *
+ * `guess` (a guess-first card, after the reveal): the reader's own number,
+ * outlined on the first dots, which belong to the card's headline category,
+ * so their guess and the published value sit on one grid (VUXD-07). It is the
+ * reader's number; nothing is computed from the cells.
  */
-export function HundredPeople({ cells, locale, unit = 'people' }: { cells: ReadCell[]; locale: Locale; unit?: 'people' | 'households' }) {
+export function HundredPeople({ cells, locale, unit = 'people', guess }: { cells: ReadCell[]; locale: Locale; unit?: 'people' | 'households'; guess?: number }) {
   const published = cells.filter(cell => cell.share !== null);
   const counts = useMemo(() => {
     const raw = published.map(cell => (cell.share as number) * 100);
@@ -181,10 +186,18 @@ export function HundredPeople({ cells, locale, unit = 'people' }: { cells: ReadC
   const each = unit === 'people'
     ? (locale === 'pt' ? 'Cada ponto, cerca de 1 pessoa em cada 100.' : 'Each dot, about 1 person in 100.')
     : (locale === 'pt' ? 'Cada ponto, cerca de 1 agregado em cada 100.' : 'Each dot, about 1 household in 100.');
+  const yours = guess === undefined ? null : Math.min(100, Math.max(0, Math.round(guess)));
+  const guessWords = yours === null ? '' : locale === 'pt' ? `O teu palpite: ${yours} em cada 100` : `Your guess: ${yours} in every 100`;
   return (
     <div>
-      <div className="grid max-w-[220px] grid-cols-10 gap-[5px]" role="img" aria-label={published.map(cell => `${cell.labels.at(-1)} ${cell.display}`).join(', ')}>
-        {dots.map((series, i) => <span key={i} className="aspect-square w-full rounded-full" style={{ backgroundColor: SERIES[series] ?? DEEMPHASIS }} />)}
+      <div className="grid max-w-[220px] grid-cols-10 gap-[5px]" role="img" aria-label={[...published.map(cell => `${cell.labels.at(-1)} ${cell.display}`), guessWords].filter(Boolean).join(', ')}>
+        {dots.map((series, i) => (
+          <span
+            key={i}
+            className="aspect-square w-full rounded-full"
+            style={{ backgroundColor: SERIES[series] ?? DEEMPHASIS, boxShadow: yours !== null && i < yours ? `0 0 0 1.5px var(--color-paper), 0 0 0 3px var(--color-ink)` : undefined }}
+          />
+        ))}
       </div>
       <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-600">
         {published.map((cell, i) => (
@@ -193,6 +206,12 @@ export function HundredPeople({ cells, locale, unit = 'people' }: { cells: ReadC
             {cell.labels.at(-1)} <strong className="tabular-nums text-ink">{cell.display}</strong>
           </li>
         ))}
+        {yours !== null && (
+          <li className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full border-[1.5px] border-ink" aria-hidden="true" />
+            {locale === 'pt' ? 'Contorno: o teu palpite,' : 'Outline: your guess,'} <strong className="tabular-nums text-ink">{yours}</strong>
+          </li>
+        )}
       </ul>
       <p className="mt-2 text-xs text-stone-500">{each}</p>
     </div>

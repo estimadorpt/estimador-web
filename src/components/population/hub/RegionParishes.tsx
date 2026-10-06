@@ -5,6 +5,7 @@ import { parishHref } from '@/components/population/ParishLink';
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { formatCount } from '@/lib/population/format';
 import { HONESTY, TIER_COPY, type Locale } from '@/lib/population/labels';
+import { ofMunicipality } from '../parish/place-words';
 import type { RegionTable } from './places';
 import styles from './RegionParishes.module.css';
 
@@ -62,11 +63,13 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
       {/*
         Two columns of concelhos on a wide screen, so a name, its count and its
         tier sit within about 600px instead of across the whole page (and the
-        page is half as long); one column below that.
+        page is half as long); one column below that. The cards run in rows,
+        left to right, so A→Z reads as the chip row above does (UXD3-14), and
+        each card ends at its own last row.
       */}
-      <div className="lg:columns-2 lg:gap-6">
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
         {municipalities.map(m => (
-          <section key={m.code} id={`concelho-${m.code}`} aria-labelledby={`concelho-${m.code}-title`} className="mb-6 break-inside-avoid rounded-2xl border border-line bg-cream p-3 sm:p-4 md:p-5">
+          <section key={m.code} id={`concelho-${m.code}`} aria-labelledby={`concelho-${m.code}-title`} className="mb-6 rounded-2xl border border-line bg-cream p-3 sm:p-4 md:p-5">
             <header className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <h2 id={`concelho-${m.code}-title`} className="text-xl text-ink">{m.name}</h2>
               <p className="text-sm text-stone-500">
@@ -78,7 +81,7 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
             <div className="overflow-x-auto">
               <table className={styles.table}>
                 <caption className="sr-only">
-                  {pt ? `Freguesias do concelho de ${m.name}` : `Parishes of ${m.name} municipality`}
+                  {pt ? `Freguesias do concelho ${ofMunicipality(m.name)}` : `Parishes of ${m.name} municipality`}
                 </caption>
                 <thead>
                   <tr>

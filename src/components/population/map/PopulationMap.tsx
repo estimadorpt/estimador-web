@@ -27,17 +27,18 @@ import { parishHref } from '@/components/population/ParishLink';
 import { fetchPlaces } from '@/lib/population/client';
 import { formatCount } from '@/lib/population/format';
 import { tierMeaningFor } from '@/lib/population/labels';
-import { indexPlaces, normaliseParishCode, regionTitle, type Parish, type PlaceIndex } from '@/lib/population/places';
+import { indexPlaces, normaliseParishCode, regionLabel, regionTitle, type Parish, type PlaceIndex } from '@/lib/population/places';
 import {
   cameraTransform, clampZoom, easeInOut, fitCamera, flightDuration, fromZoomView, sameCamera, toZoomView, zoomCamera,
   type Camera, type Viewport,
 } from '@/lib/population/map/camera';
-import { countryBounds, insetFrame, project, type Bounds, type MapShape } from '@/lib/population/map/geometry';
+import { countryBounds, insetFrame, project, type Bounds, type MapShape, type Point } from '@/lib/population/map/geometry';
+import { AZORES_GROUPS, azoresGroupBounds, nearestShape, type AzoresGroup } from '@/lib/population/map/islands';
 import {
   breadcrumb, byName, COUNTRY, geometryFiles, parentView, regionOfMunicipality, resolveInitialView, sameView, shortParishName, viewOfParish,
   type MapView,
 } from '@/lib/population/map/levels';
-import { placeLabels, type LabelCandidate } from '@/lib/population/map/placement';
+import { COUNTRY_LABEL_SHORT, placeLabels, type LabelCandidate } from '@/lib/population/map/placement';
 import { loadShapes } from '@/lib/population/map/load';
 import styles from './PopulationMap.module.css';
 
@@ -67,6 +68,14 @@ const TIER_FILL = {
   C: 'var(--color-amber-200)',
 } as const;
 const MAX_ZOOM = 10;
+/** The zoom controls' column (44px and its 12px inset): a region framed beside them keeps clear of it (UXM3V-01: Santa Maria sat under them). */
+const CONTROL_ROOM = 56;
+
+/** `fitCamera` with `right` pixels of the viewport kept free on the right. */
+function fitBeside(bounds: Bounds, viewport: Viewport, padding: number, right: number): Camera {
+  const camera = fitCamera(bounds, { width: Math.max(1, viewport.width - right), height: viewport.height }, padding);
+  return { ...camera, x: camera.x + right / 2 / camera.k };
+}
 
 const copy = {
   pt: {
@@ -91,6 +100,12 @@ const copy = {
     ine: 'INE, Censos 2021',
     tier: (tier: 'A' | 'B' | 'C') => `Qualidade ${tier}`,
     tierLegend: { A: 'A · ajuste próximo, 2 000 ou mais residentes', B: 'B · ajuste próximo, 500 ou mais residentes', C: 'C · freguesia pequena ou ajuste mais fraco' },
+    tierShort: { A: 'Ajuste próximo às tabelas do INE.', B: 'Ajuste próximo às tabelas do INE.', C: 'Lê estes números com mais cuidado.' },
+    tierWhy: (tier: 'A' | 'B' | 'C') => `O que quer dizer o nível ${tier}?`,
+    islands: 'Ilhas',
+    islandGroups: 'Grupos de ilhas dos Açores',
+    islandGroup: (name: string) => `Grupo ${name}`,
+    skip: 'Saltar o mapa e ver como lista',
     fallback: 'Valores do concelho',
     fallbackLong: (name: string) => `O retrato mostra os números do concelho de ${name}: os da freguesia não têm qualidade para publicar.`,
     open: 'Ver a freguesia',
@@ -109,7 +124,7 @@ const copy = {
     insets: 'Açores e Madeira em caixa; os Açores a uma escala menor.',
     selvagens: 'As ilhas Selvagens (Sé, Funchal) ficam fora do enquadramento.',
     showing: (name: string, what: string) => `${name}: ${what} no mapa.`,
-    mapLabel: (name: string) => `Mapa: ${name}. Usa Tab para percorrer os lugares e Enter para escolher; Escape sobe um nível.`,
+    mapLabel: (name: string) => `Mapa: ${name}. Usa Tab para percorrer os lugares e Enter para escolher; Escape sobe um nível. Antes do mapa, uma ligação salta para a lista.`,
     breadcrumb: 'Onde estás no mapa',
     controls: 'Controlos do mapa',
   },
@@ -135,6 +150,12 @@ const copy = {
     ine: 'INE, 2021 Census',
     tier: (tier: 'A' | 'B' | 'C') => `Quality ${tier}`,
     tierLegend: { A: 'A · close fit, 2,000 or more residents', B: 'B · close fit, 500 or more residents', C: 'C · small parish or weaker fit' },
+    tierShort: { A: 'A close fit to INE’s tables.', B: 'A close fit to INE’s tables.', C: 'Read these numbers with more care.' },
+    tierWhy: (tier: 'A' | 'B' | 'C') => `What does tier ${tier} mean?`,
+    islands: 'Islands',
+    islandGroups: 'Island groups of the Azores',
+    islandGroup: (name: string) => `${name} group`,
+    skip: 'Skip the map and view it as a list',
     fallback: 'Municipality figures',
     fallbackLong: (name: string) => `The portrait shows the figures for the municipality of ${name}: the parish’s own did not reach publication quality.`,
     open: 'See the parish',
@@ -153,7 +174,7 @@ const copy = {
     insets: 'The Azores and Madeira are boxed; the Azores at a smaller scale.',
     selvagens: 'The Selvagens islands (Sé, Funchal) fall outside the frame.',
     showing: (name: string, what: string) => `${name}: ${what} on the map.`,
-    mapLabel: (name: string) => `Map: ${name}. Use Tab to move between places and Enter to choose; Escape goes up a level.`,
+    mapLabel: (name: string) => `Map: ${name}. Use Tab to move between places and Enter to choose; Escape goes up a level. A link before the map skips to the list.`,
     breadcrumb: 'Where you are on the map',
     controls: 'Map controls',
   },
@@ -171,6 +192,15 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   const [active, setActive] = useState<Subject | null>(null);
   const [preview, setPreview] = useState<{ code: string; touch: boolean } | null>(null);
   const [manual, setManual] = useState<Camera | null>(null);
+  /** The Azores island group the reader framed (region view) and the camera that framed it. */
+  const [framed, setFramed] = useState<{ id: AzoresGroup; camera: Camera } | null>(null);
+  /**
+   * places.json (every parish, ~250 KB) is fetched only when something on the
+   * map needs it: a município's parishes (tier fills, readout), the reader
+   * reaching for the map, or a parish to focus. A region page no longer
+   * fetches it on arrival (UXM3-12); names fall back to the geometry's own.
+   */
+  const [wantPlaces, setWantPlaces] = useState(() => Boolean(normaliseParishCode(focusParish)));
   const [camera, setCamera] = useState<Camera | null>(null);
   const [moving, setMoving] = useState(false);
   const [near, setNear] = useState(false);
@@ -178,7 +208,9 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [places, setPlaces] = useState<PlaceIndex | null>(null);
-  const [width, setWidth] = useState(0);
+  /** The frame's drawn size. Its height is CSS (see the frame below), so the server render and the drawn map agree. */
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const width = size.width;
 
   const frameRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -193,6 +225,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   /** After Escape, the place to focus on the level above: the one the reader came from (A11Y2-13). */
   const returnTo = useRef<string | null>(null);
   const readoutRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Props that change after mount move the map (a search on the page, a region link).
   const firstProps = useRef(true);
@@ -210,7 +243,10 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   useEffect(() => {
     const frame = frameRef.current;
     if (!frame) return;
-    const observer = new ResizeObserver(([entry]) => setWidth(Math.round(entry.contentRect.width)));
+    const observer = new ResizeObserver(([entry]) => {
+      const next = { width: Math.round(entry.contentRect.width), height: Math.round(entry.contentRect.height) };
+      setSize(previous => (previous.width === next.width && previous.height === next.height ? previous : next));
+    });
     observer.observe(frame);
     return () => observer.disconnect();
   }, []);
@@ -227,16 +263,21 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   }, []);
 
   const compact = width > 0 && width < 640;
-  const mapHeight = compact ? Math.round(Math.min(height, Math.max(360, width * 1.08))) : height;
+  // The frame's height is set in CSS (PopulationMap.module.css: `height` on wide frames, and
+  // on narrow ones min(height, max(360px, 1.08 × the width))), so the box is the same before
+  // and after hydration and nothing below it moves when the map arrives (UXM3-03, SEO3-03).
+  // The drawing takes the height the frame actually has.
+  const mapHeight = size.height || height;
   const viewport = useMemo<Viewport | null>(() => (width ? { width, height: mapHeight } : null), [width, mapHeight]);
 
   // ---- data ------------------------------------------------------------------
+  const needPlaces = near && (wantPlaces || view.level === 'municipality');
   useEffect(() => {
-    if (!near) return;
+    if (!needPlaces || places) return;
     let cancelled = false;
     fetchPlaces().then(data => { if (!cancelled) setPlaces(indexPlaces(data)); }).catch(() => { /* names fall back to the geometry's own */ });
     return () => { cancelled = true; };
-  }, [near]);
+  }, [needPlaces, places]);
 
   const files = useMemo(() => geometryFiles(view), [view]);
   useEffect(() => {
@@ -254,10 +295,15 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   const countryShapes = shapes[files[0]];
   const municipalityShapes = files[1] ? shapes[files[1]] : undefined;
   const parishShapes = files[2] ? shapes[files[2]] : undefined;
+
   const loadingLevel = near && !failed && files.some(url => !shapes[url]);
 
   // ---- names -------------------------------------------------------------------
-  const regionName = useCallback((id: string) => places?.regionById.get(id)?.name ?? countryShapes?.find(s => s.code === id)?.name, [places, countryShapes]);
+  const regionName = useCallback((id: string) => {
+    const name = places?.regionById.get(id)?.name ?? countryShapes?.find(s => s.code === id)?.name ?? (id === 'azores' ? 'Açores' : undefined);
+    // "Azores" under English copy, as the headings and the share card say (POP3-ACC-08).
+    return name === undefined ? undefined : regionLabel(id, name, locale);
+  }, [places, countryShapes, locale]);
   const municipalityName = useCallback((code: string) => places?.municipalityByCode.get(code)?.name ?? municipalityShapes?.find(s => s.code === code)?.name, [places, municipalityShapes]);
   const crumbs = useMemo(() => breadcrumb(view, { region: regionName, municipality: municipalityName }), [view, regionName, municipalityName]);
   const here = crumbs[crumbs.length - 1].label;
@@ -272,7 +318,14 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   }, [countryShapes, municipalityShapes, view]);
 
   const padding = compact ? 16 : 28;
-  const fit = useMemo(() => (fitBounds && viewport ? fitCamera(fitBounds, viewport, padding) : null), [fitBounds, viewport, padding]);
+  // The Azores reach the bottom-right corner, where the zoom controls sit: frame them beside the controls.
+  const besideControls = view.level === 'region' && view.region === 'azores';
+  const fit = useMemo(() => {
+    if (!fitBounds || !viewport) return null;
+    return besideControls ? fitBeside(fitBounds, viewport, padding, CONTROL_ROOM) : fitCamera(fitBounds, viewport, padding);
+  }, [fitBounds, viewport, padding, besideControls]);
+  // A group reads as framed only while the camera is still its framing: a zoom, a pan or a reset ends it.
+  const group = framed && manual && sameCamera(manual, framed.camera) ? framed.id : null;
   const target = useMemo(() => manual ?? fit, [manual, fit]);
 
   const apply = useCallback((next: Camera) => {
@@ -343,6 +396,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   const goTo = useCallback((next: MapView) => {
     setView(previous => (sameView(previous, next) ? previous : next));
     setManual(null);
+    setFramed(null);
     setActive(null);
     setPreview(null);
   }, []);
@@ -369,13 +423,27 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
     up();
   }, [manual, fit, zoomBy, up]);
 
-  const random = useCallback(() => {
-    if (!places?.parishes.length) return;
-    const parish = places.parishes[Math.floor(Math.random() * places.parishes.length)];
+  const random = useCallback(async () => {
+    let index = places;
+    if (!index) {
+      try { index = indexPlaces(await fetchPlaces()); setPlaces(index); } catch { return; }
+    }
+    if (!index.parishes.length) return;
+    const parish = index.parishes[Math.floor(Math.random() * index.parishes.length)];
     goTo(viewOfParish(parish.code));
     setFocus(parish.code);
     setPreview({ code: parish.code, touch: false });
   }, [places, goTo]);
+
+  /** Frame one island group of the Azores (UXM3V-01); pressing the framed group again goes back to all of them. */
+  const frameGroup = useCallback((id: AzoresGroup) => {
+    if (group === id) { setManual(null); setFramed(null); return; }
+    const bounds = municipalityShapes ? azoresGroupBounds(municipalityShapes, id) : null;
+    if (!bounds || !viewport || !fit) return;
+    const camera = clampZoom(fitBeside(bounds, viewport, padding, CONTROL_ROOM), fit, MAX_ZOOM);
+    setManual(camera);
+    setFramed({ id, camera });
+  }, [group, municipalityShapes, viewport, fit, padding]);
 
   const subjectOf = (target: EventTarget | null): Subject | null => {
     const element = (target as Element | null)?.closest?.('[data-code]') as SVGElement | null;
@@ -386,7 +454,16 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   const onClick = (event: ReactMouseEvent<SVGSVGElement>) => {
     if (drag.current?.moved) return;
     const subject = subjectOf(event.target);
-    if (subject) choose(subject.kind, subject.code);
+    if (subject) { choose(subject.kind, subject.code); return; }
+    // A tap in the sea beside a small município or parish (an island of a few pixels on a
+    // phone) takes the nearest one within 22px, so every place has a 44px target (UXM3V-01).
+    const current = cameraRef.current;
+    const list = view.level === 'region' ? municipalityShapes : view.level === 'municipality' ? parishShapes : undefined;
+    if (!current || !viewport || !list || !svgRef.current) return;
+    const box = svgRef.current.getBoundingClientRect();
+    const at: Point = [event.clientX - box.left, event.clientY - box.top];
+    const near = nearestShape(list, at, current, viewport);
+    if (near) choose(view.level === 'region' ? 'municipality' : 'parish', near.code);
   };
   const onKeyDown = (event: ReactKeyboardEvent<SVGSVGElement>) => {
     if (event.key === 'Escape') {
@@ -531,12 +608,12 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
           vectorEffect="non-scaling-stroke"
           tabIndex={interactive ? 0 : undefined}
           role={interactive ? 'button' : undefined}
-          aria-label={interactive ? `${shape.name}, ${t.region(shape.code).toLowerCase()}` : undefined}
+          aria-label={interactive ? `${regionLabel(shape.code, shape.name, locale)}, ${t.region(shape.code).toLowerCase()}` : undefined}
           aria-hidden={interactive ? undefined : true}
         />
       );
     });
-  }, [countryShapes, view.level, currentRegion, t]);
+  }, [countryShapes, view.level, currentRegion, t, locale]);
 
   const municipalityLayer = useMemo(() => {
     if (!municipalityShapes || view.level === 'country') return null;
@@ -619,13 +696,18 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
     let candidates: LabelCandidate[] = [];
     if (view.level === 'country' && countryShapes) {
       candidates = countryShapes.map(shape => {
+        const text = regionLabel(shape.code, shape.name, locale);
         if (shape.code === 'azores' || shape.code === 'madeira') {
           const frame = insetFrame(shape.code);
           const at: [number, number] = [(frame[0][0] + frame[1][0]) / 2, frame[0][1] + 14 / camera.k];
-          return { code: shape.code, text: shape.name, at, bounds: frame };
+          return { code: shape.code, text, at, bounds: frame };
         }
-        return { code: shape.code, text: shape.name, at: shape.label, bounds: shape.bounds };
+        const short = COUNTRY_LABEL_SHORT[shape.name];
+        return { code: shape.code, text, alternates: short ? [short] : undefined, at: shape.label, bounds: shape.bounds };
       });
+      // Every district named at country zoom (VUXD-09): a name may run a little past a narrow
+      // district and step up or down to clear its neighbours' names.
+      return placeLabels(candidates, camera, viewport, 60, { maxRatio: 1.8, nudge: true });
     } else if (view.level === 'region' && municipalityShapes) {
       candidates = municipalityShapes.map(shape => ({ code: shape.code, text: shape.name, at: shape.label, bounds: shape.fit }));
     } else if (view.level === 'municipality' && parishShapes) {
@@ -636,7 +718,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
       });
     }
     return placeLabels(candidates, camera, viewport);
-  }, [camera, viewport, view.level, countryShapes, municipalityShapes, parishShapes, parishByCode]);
+  }, [camera, viewport, view.level, countryShapes, municipalityShapes, parishShapes, parishByCode, locale]);
 
   // ---- readout -------------------------------------------------------------------
   const subject: Subject | null = active ?? (preview ? { kind: 'parish', code: preview.code } : null) ?? (focused ? { kind: 'parish', code: focused.code } : null);
@@ -652,11 +734,18 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   })();
 
   const children = useMemo(() => {
+    // Districts and municípios come from places.json or, before it is fetched, from the geometry drawn.
+    if (view.level === 'country') {
+      const items = places ? places.regions.map(r => ({ code: r.id, name: r.name })) : countryShapes?.map(s => ({ code: s.code, name: s.name }));
+      return items ? { kind: 'region' as const, items: byName(items.map(item => ({ ...item, name: regionLabel(item.code, item.name, locale) })), r => r.name) } : null;
+    }
+    if (view.level === 'region') {
+      const items = places ? places.municipalities.filter(m => m.region === view.region).map(m => ({ code: m.code, name: m.name })) : municipalityShapes?.map(s => ({ code: s.code, name: s.name }));
+      return items ? { kind: 'municipality' as const, items: byName(items, m => m.name) } : null;
+    }
     if (!places) return null;
-    if (view.level === 'country') return { kind: 'region' as const, items: byName(places.regions.map(r => ({ code: r.id, name: r.name })), r => r.name) };
-    if (view.level === 'region') return { kind: 'municipality' as const, items: byName(places.municipalities.filter(m => m.region === view.region).map(m => ({ code: m.code, name: m.name })), m => m.name) };
     return { kind: 'parish' as const, items: byName(places.parishes.filter(p => p.municipality === view.municipality), p => p.name) };
-  }, [places, view]);
+  }, [places, view, countryShapes, municipalityShapes, locale]);
 
   const countOf = (kind: Kind, code: string): string | null => {
     if (!places) return null;
@@ -677,7 +766,14 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
     : <a href={parishHref(code, locale)} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink underline underline-offset-4">{label}<ArrowRight aria-hidden="true" className="h-4 w-4" /></a>;
 
   return (
-    <section className={`@container ${className}`} aria-label={t.map}>
+    <section
+      className={`@container ${className}`}
+      aria-label={t.map}
+      // Reaching for the map (a pointer over it, a tap, focus) is when its place list is wanted.
+      onPointerOverCapture={() => setWantPlaces(true)}
+      onPointerDownCapture={() => setWantPlaces(true)}
+      onFocusCapture={() => setWantPlaces(true)}
+    >
       <div className="overflow-hidden rounded-2xl border border-line bg-cream">
         {/* Where you are, and a way back up */}
         <div className="flex min-h-14 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-line px-3 py-1.5 sm:px-4">
@@ -699,15 +795,53 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
               })}
             </ol>
           </nav>
-          <button type="button" onClick={random} disabled={!places} className="inline-flex min-h-11 items-center gap-2 rounded-[10px] px-2 text-sm font-semibold text-ink hover:bg-parchment disabled:opacity-50">
+          <button type="button" onClick={() => { void random(); }} className="inline-flex min-h-11 items-center gap-2 rounded-[10px] px-2 text-sm font-semibold text-ink hover:bg-parchment">
             <Shuffle aria-hidden="true" className="h-4 w-4" />
             {t.random}
           </button>
         </div>
 
+        {view.level === 'region' && view.region === 'azores' && (
+          // The archipelago spans 600 km: its three groups, each framed on its own, make every
+          // island tappable on a phone (UXM3V-01). Rendered from the first paint on this region,
+          // so the map does not move when it arrives.
+          <div role="group" aria-label={t.islandGroups} className="flex flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-line px-3 py-1.5 sm:gap-x-2 sm:px-4">
+            <span aria-hidden="true" className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.islands}</span>
+            {AZORES_GROUPS.map(item => (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={group === item.id}
+                aria-label={t.islandGroup(item.label[locale])}
+                onClick={() => frameGroup(item.id)}
+                className={`inline-flex min-h-11 items-center rounded-[10px] border px-2.5 text-sm font-semibold transition-colors duration-150 sm:px-3 ${group === item.id ? 'border-ink bg-ink text-paper' : 'border-line bg-cream text-ink hover:bg-parchment'}`}
+              >
+                {item.label[locale]}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex flex-col @3xl:flex-row">
           {/* The map */}
-          <div ref={frameRef} className="relative min-w-0 flex-1 bg-parchment" style={{ height: mapHeight }}>
+          {/*
+            basis-auto, not flex-1, in the column layout: a zero basis there overrode the
+            height and collapsed the frame to 0px until the drawing arrived (UXM3-03).
+          */}
+          <div ref={frameRef} className={`relative min-w-0 shrink-0 basis-auto bg-parchment @3xl:flex-1 ${styles.frame}`} style={{ ['--map-height' as string]: `${height}px` }}>
+            {/* A bypass for keyboard readers: every place on the map is a Tab stop (A11Y3-05). */}
+            <a
+              href={`#${uid}-list`}
+              onClick={event => {
+                event.preventDefault();
+                const details = listRef.current?.querySelector('details');
+                if (details) details.open = true;
+                listRef.current?.querySelector<HTMLElement>('summary')?.focus();
+              }}
+              className="sr-only z-10 min-h-11 items-center rounded-[10px] border border-line bg-cream px-3 text-sm font-semibold text-ink underline underline-offset-4 focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:inline-flex"
+            >
+              {t.skip}
+            </a>
             {viewport && (
               <svg
                 ref={svgRef}
@@ -870,6 +1004,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
         </div>
 
         {/* The table twin: the same places as a list */}
+        <div ref={listRef} id={`${uid}-list`}>
         <Disclosure className="border-t border-line px-3 sm:px-4" summary={t.list}>
           {children && (
             <div className="pb-4">
@@ -905,21 +1040,29 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
             </div>
           )}
         </Disclosure>
+        </div>
       </div>
     </section>
   );
 }
 
-/** The parish's tier and what it means; município figures are named only when the parish actually falls back. */
+/**
+ * The parish's tier in one plain line, with what it means in full behind a
+ * disclosure (PUB3-03: the long tier C sentence pushed the parish's link down);
+ * município figures are named only when the parish actually falls back.
+ */
 function TierLine({ parish, t, locale }: { parish: Parish; t: (typeof copy)['pt'] | (typeof copy)['en']; locale: 'pt' | 'en' }) {
   const fallback = parish.level === 'municipality';
   return (
     <div className="mt-2 space-y-1">
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5">
         <QualityBadge kind={parish.tier} locale={locale} />
         {fallback && <QualityBadge kind="municipality" locale={locale} label={t.fallback} />}
+        <span className="text-xs text-stone-600">{t.tierShort[parish.tier]}</span>
       </div>
-      <p className="text-xs leading-relaxed text-stone-600">{tierMeaningFor(parish.tier, parish.publicationPopulation, parish.censusPopulation)[locale]}</p>
+      <Disclosure summary={t.tierWhy(parish.tier)}>
+        <p className="pb-1 text-xs leading-relaxed text-stone-600">{tierMeaningFor(parish.tier, parish.publicationPopulation, parish.censusPopulation)[locale]}</p>
+      </Disclosure>
       {fallback && <p className="text-xs leading-relaxed text-stone-600">{t.fallbackLong(parish.municipalityName)}</p>}
     </div>
   );

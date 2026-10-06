@@ -108,10 +108,12 @@ export interface SearchHit {
   /**
    * How the query matched, for ordering (lower first): 0 the code or the exact
    * name, 1 an exact member of a union, 2 the name starts with the query,
-   * 3 a member or a word starts with it, 4 the name contains it, 5 every word
-   * of the query starts a word of the parish or município name, 6 the
-   * município's name starts with it. A parish of a município the query names
-   * exactly is listed under that município, before everything else.
+   * 3 a member or a word starts with it, 4 the name contains it, 4.5 every
+   * word of the query is a whole word of the parish or município name
+   * ("Bragança Sé": the Sé union of Bragança, PUB3-01), 5 every word of the
+   * query only starts a word of them ("se" in "Sendas"), 6 the município's
+   * name starts with it. A parish of a município the query names exactly is
+   * listed under that município, before everything else.
    */
   rank: number;
 }
@@ -157,10 +159,20 @@ function rankParish(parish: Parish, q: string, queryTokens: string[], code: stri
   const municipality = fold(parish.municipalityName);
   if (queryTokens.length > 1) {
     const pool = [...words, ...municipality.split(' ')];
+    // Whole words first: "porto se" is the Sé of Porto, not a "Serra" in Porto de Mós.
+    if (queryTokens.every(token => pool.includes(token))) return 4.5;
     if (queryTokens.every(token => pool.some(word => word.startsWith(token)))) return 5;
   }
   if (municipality.startsWith(q)) return 6;
   return Infinity;
+}
+
+export interface PlaceSearch {
+  hits: PlaceHit[];
+  /** How many parishes matched, so a list cut at `limit` can say so. */
+  total: number;
+  /** How many of them are outside the município the query names (all of them when it names none). */
+  outside: number;
 }
 
 /**
@@ -169,12 +181,16 @@ function rankParish(parish: Parish, q: string, queryTokens: string[], code: stri
  * punctuation and the small words (de, da, do, e). When the query is exactly
  * a município's name, that município comes first, followed by all of its
  * parishes; then the other matches. Ties go alphabetical — the order says
- * nothing about the places. `total` is how many parishes matched, so a list
- * cut at `limit` can say so.
+ * nothing about the places.
+ *
+ * `exactFirst` (the game, where Enter guesses only an exact match) lists a
+ * parish named exactly like the query before the município groups, so the
+ * option Enter would choose is the first row, not the last ("Lagoa": the
+ * parish in Macedo de Cavaleiros, then the two concelhos called Lagoa; UXM3-20).
  */
-export function searchPlaces(index: PlaceIndex, query: string, limit = 12): { hits: PlaceHit[]; total: number } {
+export function searchPlaces(index: PlaceIndex, query: string, limit = 12, { exactFirst = false }: { exactFirst?: boolean } = {}): PlaceSearch {
   const q = fold(query);
-  if (q.length < 2) return { hits: [], total: 0 };
+  if (q.length < 2) return { hits: [], total: 0, outside: 0 };
   const code = /^[0-9a-z]{6}$/.test(q) && /\d/.test(q) ? q.toUpperCase() : null;
   const queryTokens = tokens(q);
   const named = index.municipalities.filter(m => fold(m.name) === q);
@@ -195,7 +211,11 @@ export function searchPlaces(index: PlaceIndex, query: string, limit = 12): { hi
   // the parish Viseu, then the others alphabetically), never last.
   under.sort(byName);
 
-  const hits: PlaceHit[] = [];
+  // A parish named exactly like the query, outside the named município(s), leads in the game.
+  const lifted = exactFirst && named.length ? others.filter(hit => hit.rank === 0) : [];
+  const rest = lifted.length ? others.filter(hit => hit.rank !== 0) : others;
+
+  const hits: PlaceHit[] = lifted.map(hit => ({ kind: 'parish' as const, underMunicipality: false, ...hit }));
   for (const municipality of named) {
     const region = index.regionById.get(municipality.region);
     const parishes = under.filter(hit => hit.parish.municipality === municipality.code);
@@ -207,8 +227,8 @@ export function searchPlaces(index: PlaceIndex, query: string, limit = 12): { hi
   }
   // A named município's own parishes are all shown; the rest fill up to the limit.
   const room = Math.max(named.length ? 5 : limit, limit - hits.length);
-  for (const hit of others.slice(0, room)) hits.push({ kind: 'parish', underMunicipality: false, ...hit });
-  return { hits, total: under.length + others.length };
+  for (const hit of rest.slice(0, room)) hits.push({ kind: 'parish', underMunicipality: false, ...hit });
+  return { hits, total: under.length + others.length, outside: others.length };
 }
 
 /**
@@ -296,6 +316,16 @@ export function ofRegion(id: string, name: string, locale: 'pt' | 'en'): string 
   if (locale === 'en') return `the ${title}`;
   if (id === 'azores' || id === 'madeira') return `da ${title}`;
   return `do ${title.charAt(0).toLowerCase()}${title.slice(1)}`;
+}
+
+/**
+ * A region's name in a list, a breadcrumb or beside a parish: the CAOP name,
+ * except the Azores, which English copy calls "Azores" (POP3-ACC-08), as the
+ * headings (`regionTitle`) and the share card do. Madeira and the districts
+ * keep their names in both languages.
+ */
+export function regionLabel(id: string, name: string, locale: 'pt' | 'en'): string {
+  return locale === 'en' && id === 'azores' ? 'Azores' : name;
 }
 
 /** How a region is named in a heading. */

@@ -330,6 +330,41 @@ describe('parish search', () => {
     expect(across.some(name => /Aguada/.test(name))).toBe(true);
   });
 
+  it('ranks a parish whose words are all in the query above prefix matches (PUB3-01: "<concelho> Sé")', () => {
+    const first = (query: string) => searchParishes(index, query)[0]?.parish;
+    for (const query of ['Bragança Sé', 'Sé Bragança', 'Se Braganca', 'Bragança (Sé']) {
+      expect(first(query)?.name, query).toBe('União das freguesias de Sé, Santa Maria e Meixedo');
+    }
+    expect(first('Porto Sé')?.name).toBe('União das freguesias de Cedofeita, Santo Ildefonso, Sé, Miragaia, São Nicolau e Vitória');
+    expect(first('Braga Sé')?.name).toBe('União das freguesias de Braga (Maximinos, Sé e Cividade)');
+    // Prefix-only matches still come, after the whole-word ones.
+    const braganca = searchParishes(index, 'Bragança Sé').map(hit => hit.parish.name);
+    expect(braganca.indexOf('Sendas')).toBeGreaterThan(0);
+  });
+
+  it('lists a parish named exactly like the query first in the game, above the concelhos of that name (UXM3-20: lagoa)', () => {
+    const game = searchPlaces(index, 'Lagoa', 12, { exactFirst: true }).hits;
+    expect(game[0]).toMatchObject({ kind: 'parish', parish: { code: '040516', name: 'Lagoa' } });
+    expect(exactParishOption(game)).toBe(0);
+    expect(game.filter(hit => hit.kind === 'municipality').map(hit => hit.kind === 'municipality' && hit.municipality.name)).toEqual(['Lagoa', 'Lagoa']);
+    // Off the game, the concelhos still lead (choosing one opens its list).
+    expect(searchPlaces(index, 'Lagoa').hits[0].kind).toBe('municipality');
+    // With no parish named exactly like the concelho, nothing moves.
+    expect(searchPlaces(index, 'porto', 12, { exactFirst: true }).hits[0].kind).toBe('municipality');
+  });
+
+  it('counts the matches outside a named concelho apart from its own parishes (PUB3-V02)', () => {
+    const porto = searchPlaces(index, 'porto');
+    const own = index.parishes.filter(p => p.municipalityName === 'Porto').length;
+    expect(porto.total - porto.outside).toBe(own);
+    expect(porto.outside).toBeGreaterThan(0);
+    const shownOutside = porto.hits.filter(hit => hit.kind === 'parish' && !hit.underMunicipality).length;
+    expect(shownOutside).toBeLessThan(porto.outside);
+    // Without a named concelho every match is "outside".
+    const se = searchPlaces(index, 'sé');
+    expect(se.outside).toBe(se.total);
+  });
+
   it('finds no parish for a location far from Portugal (25 km cap)', () => {
     expect(nearestParish(index, { lat: 48.8566, lon: 2.3522 })).toBeNull();
     expect(nearestParish(index, { lat: 38.7223, lon: -9.1393 })?.municipalityName).toBe('Lisboa');

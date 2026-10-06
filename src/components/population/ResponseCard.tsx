@@ -31,6 +31,8 @@ export interface ResponseCardProps {
   before?: ReactNode;
   /** Hides the chart until true (guess-first). */
   revealed?: boolean;
+  /** The reader's guess (0–100), outlined on the 100 dots once revealed (guess-first, VUXD-07). */
+  guess?: number;
   /** Draw the shares as bars even where a 100-dot grid would fit (the page already has that grid). */
   bars?: boolean;
   /** Briefly marks the card a shared link pointed to. */
@@ -52,7 +54,7 @@ export interface ResponseCardProps {
  * link to the response. A refused response is a designed empty state with the
  * reason and nothing that looks like a number.
  */
-export function ResponseCard({ recipeName, recipe, record, locale, placeName, fallbackName, bare, before, revealed = true, bars = false, highlight = false, place, className = '' }: ResponseCardProps) {
+export function ResponseCard({ recipeName, recipe, record, locale, placeName, fallbackName, bare, before, revealed = true, guess, bars = false, highlight = false, place, className = '' }: ResponseCardProps) {
   const copy = RECIPE_COPY[recipeName];
   const cells = readCells(record, recipe, locale);
   const status = statusLine(record, locale, placeName, fallbackName);
@@ -81,7 +83,7 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
         ) : (
           <>
             {before}
-            {revealed && <ResponseChart recipeName={recipeName} recipe={recipe} record={record} cells={cells} locale={locale} bars={bars} />}
+            {revealed && <ResponseChart recipeName={recipeName} recipe={recipe} record={record} cells={cells} locale={locale} bars={bars} guess={guess} />}
             {revealed && (
               <ChartTable
                 caption={`${copy.question[locale]} ${status.where}`}
@@ -102,28 +104,29 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
 }
 
 /**
- * A card's footer, in two fixed rows whatever the source's length (UXD2-12):
- * the source and "Como foi feito", which opens the methodology at the row of
- * the field this card groups or derives and names the card's question to a
- * screen reader (MR2-10, PRO2-11); then the release and the full result id
- * (the one a permalink resolves, PRO2-01) with "Copiar ligação" at the right.
+ * A card's footer, in the same two rows on every card whatever the source's
+ * length (UXD2-12): the source sentence on its own; then "Como foi feito",
+ * which opens the methodology at the row of the field this card groups or
+ * derives and names the card's question to a screen reader (MR2-10,
+ * PRO2-11), on the left, and the release with the full result id (the one a
+ * permalink resolves, PRO2-01) and "Copiar ligação" on the right.
  */
 export function CardFooter({ source, id, question, recipe, locale }: { source: string; id: string | null; question: string; recipe: string; locale: Locale }) {
   return (
     <footer className="mt-4 border-t border-line pt-2 text-xs text-stone-500">
-      <div className="flex flex-wrap items-center gap-x-4">
-        <span>{source}</span>
+      <p className="pt-1">{source}</p>
+      <div className="flex flex-wrap items-center justify-between gap-x-4">
         <TextLink href={`${POPULATION_ROUTES.methodology}#${methodologyAnchorForRecipe(recipe, locale)}`} locale={locale}>
           {locale === 'pt' ? 'Como foi feito' : 'How it was made'}
           <span className="sr-only">: {question}</span>
         </TextLink>
+        {id && (
+          <span className="inline-flex flex-wrap items-center justify-end gap-x-3">
+            <span className="font-mono text-[11px] text-stone-500 [overflow-wrap:anywhere]">v{POPULATION_RELEASE} · {id}</span>
+            <CopyPermalink id={id} question={question} locale={locale} />
+          </span>
+        )}
       </div>
-      {id && (
-        <div className="flex flex-wrap items-center justify-between gap-x-4">
-          <span className="font-mono text-[11px] text-stone-500 [overflow-wrap:anywhere]">v{POPULATION_RELEASE} · {id}</span>
-          <CopyPermalink id={id} question={question} locale={locale} />
-        </div>
-      )}
     </footer>
   );
 }
@@ -177,19 +180,21 @@ function AloneByAge({ cells, locale }: { cells: ReturnType<typeof readCells>; lo
 }
 
 /** The chart a response gets: the same choice on the parish page and in the game's clues. */
-export function ResponseChart({ recipeName, recipe, record, cells, locale, bars = false }: {
+export function ResponseChart({ recipeName, recipe, record, cells, locale, bars = false, guess }: {
   recipeName: PortraitRecipe;
   recipe: PopulationRecipe;
   record: CompactResponse;
   cells: ReturnType<typeof readCells>;
   locale: Locale;
   bars?: boolean;
+  /** The reader's guess, outlined on the 100 dots (guess-first cards only). */
+  guess?: number;
 }) {
   if (recipeName === 'age') return <AgeColumns cells={cells} locale={locale} />;
   if (recipeName === 'who_lives_alone') return <AloneByAge cells={cells} locale={locale} />;
   const whole = isWhole(record) && cells.filter(cell => cell.state === 'published').length <= 4;
   if (!bars && whole && (recipeName === 'elders_alone' || recipeName === 'multigenerational' || recipeName === 'employment')) {
-    return <HundredPeople cells={cells.filter(cell => cell.state !== 'absent')} locale={locale} unit={recipe.unit === 'household' ? 'households' : 'people'} />;
+    return <HundredPeople cells={cells.filter(cell => cell.state !== 'absent')} locale={locale} unit={recipe.unit === 'household' ? 'households' : 'people'} guess={guess} />;
   }
   return <ShareBars cells={cells} locale={locale} />;
 }
