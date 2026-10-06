@@ -15,7 +15,7 @@ export interface HowToReadInput {
 /**
  * What a reader needs before the cards. It only describes what this parish's
  * record holds: município figures and «Suprimido» are explained when the
- * record has them (none do in v1.0.1), and «0,0%» always is.
+ * record has them (none do since v1.0.1), and «0,0%» always is.
  */
 export function howToReadItems({ place, record, meta, locale, fallbackName, municipalityFigures }: HowToReadInput): Array<{ term: string; body: string }> {
   const pt = locale === 'pt';

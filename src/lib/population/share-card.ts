@@ -6,7 +6,7 @@
  * `drawShareCard` only lays those words out on a 2D context it is given. The
  * facts are published cells quoted with the producer's display string and the
  * population each one is a share of. The card names the parish's quality tier
- * (every v1.0.1 answer is the parish's own); a município fallback, which the
+ * (every answer since v1.0.1 is the parish's own); a município fallback, which the
  * contract can still express, says so in the line itself, because a card
  * travels without the page around it.
  */
@@ -14,7 +14,7 @@ import { BRAND, MARK_FULL } from '@/lib/brand';
 import { POPULATION_RELEASE } from '@/lib/config/population';
 import type { ParishRecord, PopulationRecipe, PortraitRecipe, RecipeName } from '@/types/population';
 import { headlineCell, formatDisplay } from './compact';
-import { HONESTY, RECIPE_COPY, TIER_COPY, type Locale } from './labels';
+import { HONESTY, TIER_COPY, type Locale } from './labels';
 
 export const SHARE_CARD = { width: 1200, height: 630 } as const;
 
@@ -26,9 +26,10 @@ type Text = Record<Locale, string>;
  * The order is editorial (people first, then homes), never by value.
  */
 export const SHARE_FACTS: Array<{ recipe: PortraitRecipe; cell: Record<string, string>; label: Text }> = [
-  { recipe: 'elders_alone', cell: { living_alone: 'yes' }, label: RECIPE_COPY.elders_alone.short },
-  { recipe: 'multigenerational', cell: { multigenerational: 'yes' }, label: RECIPE_COPY.multigenerational.short },
-  { recipe: 'household_size', cell: { hh_size_bin: '1' }, label: { pt: 'Agregados de uma só pessoa', en: 'One-person households' } },
+  // A card travels without its page, so the household universe is in the line.
+  { recipe: 'elders_alone', cell: { living_alone: 'yes' }, label: { pt: 'Pessoas com 65+ em agregados privados que vivem sozinhas', en: 'People aged 65+ in private households living alone' } },
+  { recipe: 'multigenerational', cell: { multigenerational: 'yes' }, label: { pt: 'Agregados privados com criança e pessoa de 65+', en: 'Private households with a child and someone 65+' } },
+  { recipe: 'household_size', cell: { hh_size_bin: '1' }, label: { pt: 'Agregados privados de uma só pessoa', en: 'One-person private households' } },
   { recipe: 'education', cell: { education_level_coarse5: '5' }, label: { pt: 'Pessoas com ensino superior (todas as idades)', en: 'People with tertiary education (all ages)' } },
   { recipe: 'employment', cell: { employment_status_coarse3: '11' }, label: { pt: 'Pessoas empregadas (todas as idades)', en: 'Employed people (all ages)' } },
 ];
@@ -38,7 +39,7 @@ export interface ShareFact {
   label: string;
   /** The producer's display value in the reader's number format ("17,2%"). */
   value: string;
-  /** The line as one sentence: "Pessoas com 65+ que vivem sozinhas: 17,2%". */
+  /** The line as one sentence: "Agregados privados de uma só pessoa: 19,8%". */
   text: string;
   /** Whether the figure is the município's. */
   fallback: boolean;

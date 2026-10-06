@@ -12,7 +12,7 @@ const meta = json<PopulationMeta>('meta.json');
 const parish = (code: string) => json<ParishRecord>(`parish/${code}.json`);
 
 /**
- * No v1.0.1 answer falls back to the município; the contract can still say so,
+ * No answer since v1.0.1 falls back to the município; the contract can still say so,
  * so the fallback wording is tested on a synthetic edit of a real record.
  */
 function asFallback(record: ParishRecord, name: string): ParishRecord {
@@ -38,9 +38,9 @@ describe('shareCardModel', () => {
     expect(model.title).toBe('Quem vive em Aguada de Cima?');
     expect(model.place).toBe('Águeda · Aveiro');
     expect(model.facts.map(f => f.text)).toEqual([
-      'Pessoas com 65+ que vivem sozinhas: 17,2%',
-      'Agregados com criança e pessoa de 65+: 2,5%',
-      expect.stringMatching(/^Agregados de uma só pessoa: \d+,\d%$/),
+      'Pessoas com 65+ em agregados privados que vivem sozinhas: 18,0%',
+      'Agregados privados com criança e pessoa de 65+: 2,5%',
+      'Agregados privados de uma só pessoa: 19,8%',
     ]);
     expect(model.scopeNote).toBeNull();
     expect(model.tierNote).toBe('Qualidade A · números da própria freguesia.');
@@ -67,7 +67,7 @@ describe('shareCardModel', () => {
   it('names the município on every fact of a fallback record (synthetic)', () => {
     const model = shareCardModel({ record: asFallback(parish('010122'), 'Águeda'), recipes: meta.recipes, name: 'União das freguesias de Barrô e Aguada de Baixo', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'pt' });
     expect(model.facts).toHaveLength(3);
-    expect(model.facts[0].text).toMatch(/^Pessoas com 65\+ que vivem sozinhas \(concelho de Águeda\): \d+,\d%$/);
+    expect(model.facts[0].text).toMatch(/^Pessoas com 65\+ em agregados privados que vivem sozinhas \(concelho de Águeda\): \d+,\d%$/);
     expect(model.tierNote).toBeNull();
     for (const fact of model.facts) {
       expect(fact.fallback).toBe(true);
@@ -76,9 +76,9 @@ describe('shareCardModel', () => {
     expect(model.scopeNote).toContain('Valores do concelho de Águeda');
   });
 
-  it('writes English with the producer’s own decimal point', () => {
+  it('writes English with a decimal point (the producer writes pt-PT commas)', () => {
     const model = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en' });
-    expect(model.facts[0].text).toBe('People aged 65+ living alone: 17.2%');
+    expect(model.facts[0].text).toBe('People aged 65+ in private households living alone: 18.0%');
     expect(model.footer).toBe(`estimador.pt · Synthetic population v${POPULATION_RELEASE} · 2021 Census`);
   });
 

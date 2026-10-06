@@ -69,7 +69,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
 
   // What a tier means for its parish page, from this release's own decisions:
   // a fallback or a refusal is only described when the release takes one
-  // (v1.0.1 takes neither: every parish answers with its own figures).
+  // (none has since v1.0.1: every parish answers with its own figures).
   const takesFallback = (meta?.counts.decisions.fallback ?? 0) > 0;
   const tierOnPage = (tier: 'A' | 'B' | 'C'): string => {
     if (tier === 'B' && aOnly.length > 0) return `${TIER_PAGE.B[locale]} ${aOnly.join(', ').toLowerCase()}.`;

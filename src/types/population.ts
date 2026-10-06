@@ -208,7 +208,7 @@ export interface PopulationMeta {
     parishes: number;
     municipalities: number;
     tiers: Record<'A' | 'B' | 'C', number>;
-    /** Only the decisions the release takes (v1.0.1: publish only). */
+    /** Only the decisions the release takes (publish only since v1.0.1). */
     decisions: Partial<Record<PublicationDecision, number>>;
     responses: number;
     suppressed_cells: number;

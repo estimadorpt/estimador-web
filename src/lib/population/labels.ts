@@ -3,9 +3,10 @@
  * quality / fallback / refusal copy. Every surface takes its wording from here
  * so the same thing is never called two names.
  *
- * The producer's own card titles drop their filters ("Vive sozinho" is in fact
- * "people aged 65+ who live alone"), so each question below states its
- * population in full. Categories are listed in their natural order, never by
+ * Each question below states its population in full (from v1.0.2 the
+ * producer's own titles do too). The household questions, "who lives alone"
+ * and "elders alone" count private households only (is_institutional = 0,
+ * INE's household universe). Categories are listed in their natural order, never by
  * size: with a single model run nothing here may rank (handoff §3).
  */
 import { POPULATION_RELEASE } from '@/lib/config/population';
@@ -35,8 +36,8 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     },
     short: { pt: 'Pessoas com 65+ que vivem sozinhas', en: 'People aged 65+ living alone' },
     population: {
-      pt: 'Pessoas com 65 ou mais anos. Quem vive num lar ou noutro alojamento coletivo conta como vivendo com outras pessoas.',
-      en: 'People aged 65 or over. Residents of care homes and other collective living quarters count as living with others.',
+      pt: 'Pessoas com 65 ou mais anos em agregados privados. Quem vive num lar ou noutro alojamento coletivo não entra nesta pergunta.',
+      en: 'People aged 65 or over in private households. Residents of care homes and other collective living quarters are not part of this question.',
     },
     anchor: 'vivem-sozinhas',
     headline: { living_alone: 'yes' },
@@ -45,8 +46,8 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     question: { pt: 'Quem vive sozinho?', en: 'Who lives alone?' },
     short: { pt: 'Quem vive sozinho', en: 'Who lives alone' },
     population: {
-      pt: 'Pessoas que vivem sozinhas. Em cada faixa etária, como se dividem entre empregadas, desempregadas e inativas; cada linha tem as suas próprias percentagens.',
-      en: 'People who live alone. Within each age band, how they split between employed, unemployed and inactive; each row has its own percentages.',
+      pt: 'Pessoas que vivem sozinhas num agregado privado. Em cada faixa etária, como se dividem entre empregadas, desempregadas e inativas; cada linha tem as suas próprias percentagens.',
+      en: 'People who live alone in a private household. Within each age band, how they split between employed, unemployed and inactive; each row has its own percentages.',
     },
     anchor: 'quem-vive-sozinho',
   },
@@ -91,8 +92,8 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     question: { pt: 'Quantas pessoas vivem em cada casa?', en: 'How many people live in each home?' },
     short: { pt: 'Pessoas por agregado', en: 'People per household' },
     population: {
-      pt: 'Agregados por número de pessoas. Cada alojamento coletivo (um lar, por exemplo) conta como um agregado.',
-      en: 'Households by number of people. Each collective living quarter (a care home, for example) counts as one household.',
+      pt: 'Agregados privados por número de pessoas. Os lares e outros alojamentos coletivos não entram nesta pergunta.',
+      en: 'Private households by number of people. Care homes and other collective living quarters are not part of this question.',
     },
     anchor: 'pessoas-por-casa',
   },
@@ -100,8 +101,8 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     question: { pt: 'Que famílias formam?', en: 'What families do they form?' },
     short: { pt: 'Núcleos familiares por agregado', en: 'Family nuclei per household' },
     population: {
-      pt: 'Agregados pelo número de núcleos familiares: um casal, com ou sem filhos, ou um pai ou uma mãe com filhos. Inclui os alojamentos coletivos.',
-      en: 'Households by number of family nuclei: a couple, with or without children, or a parent with children. Includes collective living quarters.',
+      pt: 'Agregados privados pelo número de núcleos familiares: um casal, com ou sem filhos, ou um pai ou uma mãe com filhos. Os lares e outros alojamentos coletivos não entram nesta pergunta.',
+      en: 'Private households by number of family nuclei: a couple, with or without children, or a parent with children. Care homes and other collective living quarters are not part of this question.',
     },
     anchor: 'familias',
   },
@@ -170,8 +171,6 @@ export const VALUES: Record<string, Array<{ value: string; label: Text }>> = {
     { value: '2', label: { pt: 'Um núcleo', en: 'One nucleus' } },
     { value: '3', label: { pt: 'Dois núcleos', en: 'Two nuclei' } },
     { value: '4', label: { pt: 'Três ou mais núcleos', en: 'Three or more nuclei' } },
-    // The producer leaves institutional containers unlabelled ("<NA>").
-    { value: '<NA>', label: { pt: 'Alojamento coletivo', en: 'Collective living quarters' } },
   ],
   age_5y: AGE_BANDS.map(value => ({ value, label: ageLabel(value) })),
 };
@@ -181,7 +180,7 @@ export function valueLabel(dimension: string, value: string, locale: Locale): st
 }
 
 /**
- * The quality tiers are reading guides, not publication gates: since v1.0.1
+ * The quality tiers are reading guides, not publication gates: from v1.0.1
  * every parish answers every question with its own numbers and its tier.
  * Thresholds from release.json `quality_tier_policy` (doc 27 §7.2): A has a
  * median SRMSE of at most 0.10, a worst table of at most 0.18 and 2,000 or more
@@ -222,8 +221,8 @@ export function tierLabel(tier: QualityTier | null, locale: Locale): string {
  * - `joint_not_publication_grade` says "cruzamento" even for one variable;
  * - `use_municipio_or_wait_for_v1_1` offers a municipal result that no
  *   release ships for a refused question.
- * No v1.0.1 answer is a fallback or a refusal and no cell is suppressed; the
- * copy stays because the contract can still express them.
+ * No answer since v1.0.1 is a fallback or a refusal and no cell is suppressed;
+ * the copy stays because the contract can still express them.
  */
 export const REASON_COPY: Record<ReasonCode, Text> = {
   population_below_500: {

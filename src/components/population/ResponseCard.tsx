@@ -99,7 +99,7 @@ function statusLine(record: CompactResponse, locale: Locale, placeName: string, 
       where: locale === 'pt' ? `(concelho de ${name})` : `(${name} municipality)`,
     };
   }
-  // Every v1.0.1 answer is the parish's own: the page states that and the tier
+  // Every answer since v1.0.1 is the parish's own: the page states that and the tier
   // once, at the top, so a published card carries no status line of its own.
   return { badge: null, text: null, where: `(${placeName})` };
 }

@@ -63,8 +63,9 @@ describe('guessTarget', () => {
   it('measures against the published headline cell of a parish (tier A)', () => {
     const record = parish('010103');
     expect(guessTarget('elders_alone', record.responses.elders_alone, meta.recipes.elders_alone))
-      .toEqual({ share: record.responses.elders_alone.cells.find(c => c[0][0] === 'yes')![1], display: '17.2%' });
-    expect(guessTarget('multigenerational', record.responses.multigenerational, meta.recipes.multigenerational)?.display).toBe('2.5%');
+      .toEqual({ share: record.responses.elders_alone.cells.find(c => c[0][0] === 'yes')![1], display: '18,0%' });
+    // The producer's own string (pt-PT from v1.0.2); GuessFirst formats it for the reader's locale.
+    expect(guessTarget('multigenerational', record.responses.multigenerational, meta.recipes.multigenerational)?.display).toBe('2,5%');
   });
 
   it('offers a guess on a tier C parish’s own figures', () => {
@@ -77,7 +78,8 @@ describe('guessTarget', () => {
 
   it('still offers a guess on município figures (synthetic fallback; the card names them)', () => {
     const fallback: CompactResponse = { ...parish('010122').responses.elders_alone, decision: 'fallback', resolved: '010100' };
-    expect(guessTarget('elders_alone', fallback, meta.recipes.elders_alone)?.display).toMatch(/^\d+\.\d%$/);
+    const yes = fallback.cells.find(c => c[0][0] === 'yes')!;
+    expect(guessTarget('elders_alone', fallback, meta.recipes.elders_alone)).toEqual({ share: yes[1], display: '16,1%' });
   });
 
   it('is not offered for a refused response, a suppressed headline, or another recipe', () => {

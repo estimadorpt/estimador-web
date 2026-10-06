@@ -119,7 +119,7 @@ export interface ReadCell {
 
 /**
  * The cells to draw, in natural category order. Since v1.0.1 every category is
- * in the response, with a share of 0 ("0.0%") when no generated person is in
+ * in the response, with a share of 0 ("0,0%" from v1.0.2) when no generated person is in
  * it. A category a response does not carry still comes back as `absent`, shown
  * as a dash and never as zero; suppressed cells keep their label. For a two-way
  * response the order is row by row.

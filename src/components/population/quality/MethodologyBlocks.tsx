@@ -122,7 +122,7 @@ export function methodologyBlocks({ locale, meta, release, scorecard }: {
               </ul>
             </>
           ) : (
-            // One decision only (v1.0.1): a sentence, not a one-item list.
+            // One decision only (since v1.0.1): a sentence, not a one-item list.
             <p className="mb-5">
               {pt
                 ? 'Nesta versão, todas as perguntas são respondidas com os números da própria freguesia, e a página de cada freguesia diz o seu nível de qualidade.'

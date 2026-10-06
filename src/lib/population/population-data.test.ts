@@ -54,7 +54,7 @@ describe('population release files', () => {
         expect(hashQuery(response.query)).toBe(compact.id);
         if (compact.decision === 'fallback') expect(compact.resolved).toBe(record.fallback?.code);
         decisions[compact.decision] = (decisions[compact.decision] ?? 0) + 1;
-        // v1.0.1: every category of a question is present; nobody in it reads 0.0%, not a dash.
+        // From v1.0.1 every category of a question is present; nobody in it reads 0,0%, not a dash.
         const cells = readCells(compact, meta.recipes[name as PortraitRecipe], 'pt');
         expect(cells.filter(cell => cell.state !== 'published'), `${record.code} ${name}`).toEqual([]);
         zeros += compact.cells.filter(cell => cell[1] === 0).length;
@@ -68,10 +68,11 @@ describe('population release files', () => {
     decisions[national.response.decision] = (decisions[national.response.decision] ?? 0) + 1;
     expect(checked + 1).toBe(meta.counts.responses);
     expect(decisions).toEqual(meta.counts.decisions);
-    // v1.0.1 (doc 206 §5): every answer is the parish's own, nothing suppressed, zeros shown.
+    // v1.0.3 (doc 206 §5-§7): every answer is the parish's own, nothing suppressed, zeros shown.
+    // 8,723 zero categories (10,130 in v1.0.1, before "<NA>" left the household questions).
     expect(meta.counts.decisions).toEqual({ publish: 24737 });
     expect(meta.counts.suppressed_cells).toBe(0);
-    expect(zeros).toBe(10130);
+    expect(zeros).toBe(8723);
   });
 
   it('has words for every category value in the release', () => {
@@ -80,6 +81,22 @@ describe('population release files', () => {
       expect(values.filter(value => !known.has(value)), dimension).toEqual([]);
     }
     expect(Object.keys(RECIPE_COPY).sort()).toEqual([...meta.recipe_order].sort());
+  });
+
+  it('asks the household questions of private households, and says so (v1.0.2 onwards)', () => {
+    const PRIVATE = ['elders_alone', 'who_lives_alone', 'multigenerational', 'household_size', 'household_type'] as const;
+    for (const name of PRIVATE) {
+      expect(meta.recipes[name].filters, name).toContainEqual({ field: 'is_institutional', operator: 'eq', values: ['0'] });
+      expect(RECIPE_COPY[name].population.pt, name).toMatch(/agregados? privados?/i);
+      expect(RECIPE_COPY[name].population.en, name).toMatch(/private households?/i);
+      expect(RECIPE_COPY[name].population.pt, name).not.toMatch(/conta como|Inclui os alojamentos/);
+    }
+    // The institutional "<NA>" household type is gone from the release and from the labels.
+    expect(meta.coordinates.hh_type_top).toEqual(['1', '2', '3', '4']);
+    expect(VALUES.hh_type_top.map(entry => entry.value)).toEqual(['1', '2', '3', '4']);
+    const record = json<ParishRecord>('parish/010103.json');
+    expect(readCells(record.responses.elders_alone, meta.recipes.elders_alone, 'pt').map(cell => cell.display)).toEqual(['18,0%', '82,0%']);
+    expect(readCells(record.responses.elders_alone, meta.recipes.elders_alone, 'en').map(cell => cell.display)).toEqual(['18.0%', '82.0%']);
   });
 
   it('agrees with the place list on tier and publication level', () => {
@@ -91,7 +108,7 @@ describe('population release files', () => {
       expect(parish!.tier).toBe(record.tier);
       expect(parish!.level).toBe(record.status === 'publish' ? 'parish' : 'municipality');
       expect(record.fallback === null).toBe(record.status === 'publish');
-      // v1.0.1: every parish answers with its own figures, tier C included.
+      // From v1.0.1 every parish answers with its own figures, tier C included.
       expect(record.status).toBe('publish');
       for (const response of Object.values(record.responses)) expect(response.resolved_tier).toBe(record.tier);
     }

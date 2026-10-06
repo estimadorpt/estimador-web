@@ -77,7 +77,7 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
         label: '65+ sozinhos',
         heading: `Se as pessoas com 65 ou mais anos ${ofScope(scope, locale)} fossem 100`,
         title: 'Quantas vivem sozinhas?',
-        who: 'Em cada 100 pessoas com 65 ou mais anos. Quem vive num lar conta como vivendo com outras pessoas.',
+        who: 'Em cada 100 pessoas com 65 ou mais anos em agregados privados. Quem vive num lar não entra nesta conta.',
       },
       multigenerational: {
         label: 'Gerações',
@@ -97,7 +97,7 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
         label: '65+ alone',
         heading: `If the people aged 65 or over ${inScope(scope, locale)} were 100`,
         title: 'How many live alone?',
-        who: 'Out of every 100 people aged 65 or over. Care-home residents count as living with others.',
+        who: 'Out of every 100 people aged 65 or over in private households. Care-home residents are not counted here.',
       },
       multigenerational: {
         label: 'Generations',
