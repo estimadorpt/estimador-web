@@ -92,6 +92,17 @@ function tierCReadings(small: number, large: number, locale: Locale): Array<{ ke
   ];
 }
 
+/**
+ * Card C's reading when the two readings below the cards are shown: a pointer to
+ * them. TIER_READING.C (the reading when places.json does not load) speaks of small
+ * numbers only, which is one of the two kinds of C parish and repeats the first
+ * reading word for word.
+ */
+const TIER_C_POINTER = {
+  pt: 'O nível C junta dois tipos de freguesia, que se leem de maneira diferente: vê abaixo.',
+  en: 'Tier C holds two kinds of parish, read in different ways: see below.',
+};
+
 const TIER_PAGE: Record<'A' | 'B' | 'C', { pt: string; en: string }> = {
   A: {
     pt: 'Na página da freguesia, todas as perguntas são respondidas com os números da própria freguesia, e o nível aparece no topo.',
@@ -127,6 +138,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
   // a fallback or a refusal is only described when the release takes one
   // (none has since v1.0.1: every parish answers with its own figures).
   const takesFallback = (meta?.counts.decisions.fallback ?? 0) > 0;
+  // Tier C's two readings (small parishes, and 500+ ones C for their worst table) need places.json's counts.
+  const showTierCReadings = !takesFallback && Boolean(places);
   const tierOnPage = (tier: 'A' | 'B' | 'C'): string => {
     if (tier === 'B' && aOnly.length > 0) return `${TIER_PAGE.B[locale]} ${aOnly.join(', ').toLowerCase()}.`;
     if (tier === 'C' && takesFallback) return TIER_PAGE.C[locale];
@@ -333,13 +346,16 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 : 'Every parish is published, and every parish answers with its own figures; each parish page shows its tier at the top. The tier combines the fit to INE’s tables and the number of residents, and says how carefully to read the numbers, but it hides nothing. The counts are the published release’s.'}</p>}
             >
               {/* The three cards hold the same four rows (badge, count, meaning, reading),
-                  on one subgrid from lg, so their hairlines line up and they end together;
+                  on one subgrid from md, so their hairlines line up and they end together;
                   tier C's two size readings follow as one note under the row, instead of
-                  making card C twice as tall as A and B. C's meaning is twice as long as
-                  A's, so its column is wider: with equal thirds, A ended in a 50px band. */}
-              <div className="grid gap-4 lg:grid-cols-[1fr_1fr_1.4fr] lg:gap-y-0">
+                  making card C twice as tall as A and B, and card C's reading points to it.
+                  The columns are as wide as their text is long (C's meaning is about twice
+                  A's): with equal thirds, A carried an 80 to 100px band above its hairline
+                  and a 50px one under its reading. From md to lg, A and B share a row and
+                  C takes the next one, whole. */}
+              <div className="grid gap-4 md:grid-cols-2 md:gap-y-0 lg:grid-cols-[1fr_1.3fr_1.4fr]">
                 {(['A', 'B', 'C'] as const).map(tier => (
-                  <div key={tier} className="flex flex-col rounded-2xl border border-line bg-cream p-5 lg:row-span-4 lg:grid lg:grid-rows-subgrid">
+                  <div key={tier} className={`flex flex-col rounded-2xl border border-line bg-cream p-5 md:row-span-4 md:grid md:grid-rows-subgrid ${tier === 'C' ? 'md:col-span-2 md:mt-4 lg:col-span-1 lg:mt-0' : ''}`}>
                     <QualityBadge kind={tier} locale={locale} className="self-start justify-self-start" />
                     <div className="mt-4">
                       <p className="font-display text-3xl font-extrabold tabular-nums text-ink">{formatCount(meta.counts.tiers[tier], locale)}</p>
@@ -347,20 +363,17 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                     </div>
                     <p className="mt-4 text-sm leading-relaxed text-ink">{TIER_COPY[tier].meaning[locale]}</p>
                     <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-stone-600">
-                      {tierOnPage(tier)}
+                      {tier === 'C' && showTierCReadings ? TIER_C_POINTER[locale] : tierOnPage(tier)}
                     </p>
                   </div>
                 ))}
               </div>
-              {!takesFallback && places && (
-                <div className="mt-4 rounded-2xl bg-parchment p-5">
-                  <QualityBadge kind="C" locale={locale} />
-                  <ul className="mt-3 grid gap-x-8 gap-y-3 text-sm leading-relaxed text-stone-600 md:grid-cols-2">
-                    {tierCReadings(tierCSmall, tierCLarge, locale).map(reading => (
-                      <li key={reading.key}><span className="font-semibold text-ink">{reading.lead}</span> {reading.body}</li>
-                    ))}
-                  </ul>
-                </div>
+              {showTierCReadings && (
+                <ul className="mt-4 grid gap-x-8 gap-y-3 rounded-2xl bg-parchment p-5 text-sm leading-relaxed text-stone-600 md:grid-cols-2">
+                  {tierCReadings(tierCSmall, tierCLarge, locale).map(reading => (
+                    <li key={reading.key}><span className="font-semibold text-ink">{reading.lead}</span> {reading.body}</li>
+                  ))}
+                </ul>
               )}
               <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
                 {pt ? 'Os limiares de cada nível: ' : 'Each tier’s thresholds: '}
