@@ -302,7 +302,7 @@ export function LeagueTable({
               const name = (
                 <>
                   {teamLogoSrc(team.team) ? (
-                    <img src={teamLogoSrc(team.team)} alt="" className="h-5 w-5 shrink-0 object-contain" />
+                    <img src={teamLogoSrc(team.team)} alt="" width={20} height={20} loading="lazy" decoding="async" className="h-5 w-5 shrink-0 object-contain" />
                   ) : (
                     <i aria-hidden="true" className="h-5 w-1 shrink-0" style={{ backgroundColor: color }} />
                   )}

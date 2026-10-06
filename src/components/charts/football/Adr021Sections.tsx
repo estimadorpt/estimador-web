@@ -1,7 +1,7 @@
 "use client";
 
 import { PlayerRatingList } from "@/components/charts/football/PlayerRatingList";
-import { formatDecimal } from "@/lib/football-format";
+import { formatDecimal, formatPercent } from "@/lib/football-format";
 import type { RatingEntry } from "@/lib/utils/player-ratings";
 import type {
   ContestedCell,
@@ -324,7 +324,7 @@ export function GkChannelsSection({
               ...(e.pAbove !== null
                 ? [{
                     label: pt ? "Prob. acima da média" : "P(above average)",
-                    value: `${Math.round(e.pAbove * 100)}%`,
+                    value: formatPercent(e.pAbove, pt ? "pt" : "en"),
                   }]
                 : []),
             ]}

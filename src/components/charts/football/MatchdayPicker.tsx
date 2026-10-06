@@ -354,7 +354,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 {matchHrefs[`${f.home}|${f.away}`] && (
                   <>
                     {' · '}
-                    <Link href={matchHrefs[`${f.home}|${f.away}`]} locale={locale} className="font-semibold text-ink underline underline-offset-2">
+                    <Link href={matchHrefs[`${f.home}|${f.away}`]} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-2">
                       {pt ? 'ver jogo' : 'match preview'}
                     </Link>
                   </>
@@ -516,7 +516,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     {meta && ' · '}
                     {pt ? 'Diferença entre desfechos' : 'Difference between outcomes'}: {formatPp(swing, locale).replace('+', '')}
                   </span>
-                  {matchHrefs[`${match.home_team}|${match.away_team}`] && <Link href={matchHrefs[`${match.home_team}|${match.away_team}`]} locale={locale} className="font-semibold text-ink underline underline-offset-2">{pt?'Ver jogo':'Match preview'}</Link>}
+                  {matchHrefs[`${match.home_team}|${match.away_team}`] && <Link href={matchHrefs[`${match.home_team}|${match.away_team}`]} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-2">{pt?'Ver jogo':'Match preview'}</Link>}
                 </div>
                 {/* Home team */}
                 <div className="order-1 flex min-w-0 items-center gap-1.5 sm:w-[120px] sm:justify-end">

@@ -1,5 +1,7 @@
 "use client";
 
+import { formatInteger } from "@/lib/football-format";
+
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -102,8 +104,9 @@ export function PlayerSkillRanking({
     v.toLocaleString(pt ? "pt-PT" : "en-GB", {
       minimumFractionDigits: d,
       maximumFractionDigits: d,
-    });
-  const int = (v: number) => v.toLocaleString(pt ? "pt-PT" : "en-GB");
+    }).replace(/^-/, "\u2212");
+  // Grouped like every other count on the site ("3 677", audit FA2-12).
+  const int = (v: number) => formatInteger(Math.round(v), pt ? "pt" : "en");
 
   // Read the interval mass from the feed. This was hardcoded to 94% while the
   // model published 90%, so never reintroduce a literal here.
@@ -204,7 +207,7 @@ export function PlayerSkillRanking({
           SAR
         </div>
         {/* Keeps the header aligned with the per-row link column */}
-        <div className="w-6 flex-shrink-0" />
+        <div className="w-11 flex-shrink-0" />
       </div>
 
       {hasUnavailable && (
@@ -354,12 +357,12 @@ export function PlayerSkillRanking({
                     href={`/desporto/liga/jogador/${slug}`}
                     locale={locale}
                     aria-label={t.openPlayer(p.player)}
-                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors"
+                    className="w-11 min-h-11 flex-shrink-0 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
                 ) : (
-                  <span className="w-6 flex-shrink-0" />
+                  <span className="w-11 flex-shrink-0" />
                 )}
               </div>
 

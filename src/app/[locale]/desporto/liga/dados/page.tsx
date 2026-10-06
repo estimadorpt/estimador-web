@@ -456,7 +456,7 @@ export default async function LigaDataPage({
                     {season.basePath}/
                   </p>
 
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={`${c.filesTitle} · ${season.season}`}>
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-stone-300">
@@ -521,7 +521,7 @@ export default async function LigaDataPage({
         <section className="mb-14">
           <h2 className="text-2xl tracking-tight mb-1">{c.schemaTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.schemaIntro}</p>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={c.schemaTitle}>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-300">
@@ -576,7 +576,7 @@ export default async function LigaDataPage({
         <section className="mb-14">
           <h2 className="text-2xl tracking-tight mb-1">{c.usageTitle}</h2>
           <p className="text-sm text-stone-500 mb-4 max-w-3xl">{c.usageIntro}</p>
-          <pre className="bg-stone-900 text-stone-100 text-xs overflow-x-auto p-4 leading-relaxed">
+          <pre tabIndex={0} aria-label={c.usageTitle} className="rounded-2xl bg-forest text-paper text-xs overflow-x-auto p-4 leading-relaxed">
             <code>{pt
               ? `# um ficheiro de jornada (o mais recente é o NN mais alto)
 curl -s ${SITE}/data/football/liga-2026-27/md01.json | jq '.table[0]'

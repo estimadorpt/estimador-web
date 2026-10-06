@@ -1,5 +1,7 @@
 "use client";
 
+import { formatInteger } from "@/lib/football-format";
+
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -88,8 +90,9 @@ export function PlayerRatingList({
     v.toLocaleString(pt ? "pt-PT" : "en-GB", {
       minimumFractionDigits: d,
       maximumFractionDigits: d,
-    });
-  const int = (v: number) => Math.round(v).toLocaleString(pt ? "pt-PT" : "en-GB");
+    }).replace(/^-/, "−");
+  // Grouped like every other count on the site ("3 677", audit FA2-12).
+  const int = (v: number) => formatInteger(Math.round(v), pt ? "pt" : "en");
   const signed = (v: number, d = digits) => `${v > 0 ? "+" : ""}${nf(v, d)}`;
 
   const domain = ratingDomain(entries);
@@ -126,7 +129,7 @@ export function PlayerRatingList({
             {labels.interval}
           </div>
         </div>
-        <div className="w-6 flex-shrink-0" />
+        <div className="w-11 flex-shrink-0" />
       </div>
 
       <div className="divide-y divide-stone-100">
@@ -287,12 +290,12 @@ export function PlayerRatingList({
                     href={`/desporto/liga/jogador/${slug}`}
                     locale={locale}
                     aria-label={labels.openPlayer(e.player)}
-                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors"
+                    className="w-11 min-h-11 flex-shrink-0 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
                 ) : (
-                  <span className="w-6 flex-shrink-0" />
+                  <span className="w-11 flex-shrink-0" />
                 )}
               </div>
 

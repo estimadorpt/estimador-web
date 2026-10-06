@@ -9,7 +9,7 @@ import {
   teamLogoSrc,
 } from "@/lib/config/football";
 import { positionCodeEn, positionCodePt } from "@/lib/i18n/football-labels";
-import { formatLongDate } from "@/lib/football-format";
+import { formatLongDate, formatInteger, formatPercent } from "@/lib/football-format";
 import {
   formatShortDate,
   playerDataCutoffLabel,
@@ -159,8 +159,9 @@ export function PlayerProfile({
     v.toLocaleString(pt ? "pt-PT" : "en-GB", {
       minimumFractionDigits: d,
       maximumFractionDigits: d,
-    });
-  const int = (v: number) => v.toLocaleString(pt ? "pt-PT" : "en-GB");
+    }).replace(/^-/, "\u2212");
+  // Grouped like every other count on the site ("3 677", audit FA2-12).
+  const int = (v: number) => formatInteger(Math.round(v), pt ? "pt" : "en");
 
   const color = ligaTeamColors[player.team] ?? "#5f7062";
   const teamSlug = ligaTeamSlugs[player.team];
@@ -185,6 +186,14 @@ export function PlayerProfile({
   const seasons = player.seasons;
   const withSkill = seasons.filter(s => s.sar_season !== null);
   const change = player.skill_change;
+  // "Melhorou?" compares two seasons only when both had real minutes: a
+  // one-minute season is all prior (audit FA2-15).
+  const MIN_SEASON_MINUTES = 450;
+  const thinSeason = change
+    ? [change.from_season, change.to_season]
+        .map(id => seasons.find(s => s.season === id))
+        .find(s => s && s.minutes < MIN_SEASON_MINUTES)
+    : undefined;
   const firstSeason = data.generated_from.seasons?.[0];
   const lastSeason =
     data.generated_from.seasons?.[data.generated_from.seasons.length - 1];
@@ -755,7 +764,7 @@ export function PlayerProfile({
                   value:
                     player.p_above_replacement === null
                       ? "—"
-                      : `${Math.round(player.p_above_replacement * 100)}%`,
+                      : formatPercent(player.p_above_replacement, pt ? "pt" : "en"),
                 },
               ]
             : []),
@@ -812,7 +821,7 @@ export function PlayerProfile({
                   const sd = s.sar_season_sd ?? 0;
                   return (
                     <tr key={s.season} className="border-b border-stone-100">
-                      <td className="py-2 pr-3 tabular-nums font-medium text-stone-800">
+                      <td className="whitespace-nowrap py-2 pr-3 tabular-nums font-medium text-stone-800">
                         {s.season}
                       </td>
                       <td className="py-2 pr-3 text-stone-500 hidden sm:table-cell">
@@ -873,7 +882,11 @@ export function PlayerProfile({
             <div className="mt-5 border-l-2 border-stone-300 pl-4 py-1 max-w-2xl">
               <h3 className="text-sm text-stone-900 mb-1">{t.nullTitle}</h3>
               <p className="text-sm text-stone-600 leading-relaxed">
-                {change && withSkill.length > 1 ? t.nullBody(change) : t.nullSingle}
+                {thinSeason
+                  ? pt
+                    ? `Minutos insuficientes para comparar épocas: em ${thinSeason.season} jogou ${int(thinSeason.minutes)} ${thinSeason.minutes === 1 ? "minuto" : "minutos"} (o mínimo para comparar é ${int(MIN_SEASON_MINUTES)}), e a estimativa dessa época é quase só o ponto de partida do modelo.`
+                    : `Not enough minutes to compare seasons: in ${thinSeason.season} he played ${int(thinSeason.minutes)} ${thinSeason.minutes === 1 ? "minute" : "minutes"} (the minimum to compare is ${int(MIN_SEASON_MINUTES)}), so that season's estimate is almost all the model's starting point.`
+                  : change && withSkill.length > 1 ? t.nullBody(change) : t.nullSingle}
               </p>
             </div>
           )}
@@ -887,38 +900,56 @@ export function PlayerProfile({
           {cutoffLabel && (
             <p className="text-xs text-stone-500 mb-3">{cutoffLabel}</p>
           )}
-          <div className="divide-y divide-stone-100">
-            {recent.map((m, i) => (
-              <div
-                key={`${m.season}-${m.matchday}-${i}`}
-                className="flex items-center gap-3 py-2 text-sm"
-              >
-                <span className="w-24 text-[11px] tabular-nums text-stone-500 flex-shrink-0">
-                  {formatShortDate(m.date, locale) ?? `${m.season} J${m.matchday}`}
-                </span>
-                <span className="flex-1 min-w-0 truncate text-stone-800">
-                  {teamDisplayName(m.opponent)}{" "}
-                  <span className="text-stone-500 text-xs">
-                    ({m.is_home ? t.home : t.away})
+          {/* Headed columns, the venue as a badge outside the name's
+              truncation, minutes on one line (audit UXD2-18, UXM2V-03). */}
+          <div className="max-w-3xl">
+            <div aria-hidden="true" className="flex items-center gap-3 border-b border-stone-200 pb-1 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+              <span className="w-12 flex-shrink-0 sm:w-24">{pt ? "Data" : "Date"}</span>
+              <span className="min-w-0 flex-1">{pt ? "Adversário" : "Opponent"}</span>
+              <span className="w-[5.25rem] flex-shrink-0 text-right">{t.minutes}</span>
+              <span className="w-10 flex-shrink-0 text-right">{t.goals}</span>
+              <span className="hidden w-24 flex-shrink-0 text-right sm:inline">{pt ? "Nota (fonte)" : "Rating (source)"}</span>
+            </div>
+            <ul className="divide-y divide-stone-100">
+              {recent.map((m, i) => (
+                <li
+                  key={`${m.season}-${m.matchday}-${i}`}
+                  className="flex items-center gap-3 py-2 text-sm"
+                >
+                  <span className="w-12 flex-shrink-0 whitespace-nowrap text-[11px] tabular-nums text-stone-600 sm:w-24">
+                    {/* Day and month on a phone; the year is in the cut-off line above. */}
+                    <span className="sm:hidden">{(formatShortDate(m.date, locale) ?? `J${m.matchday}`).replace(/\s\d{4}$/, "")}</span>
+                    <span className="hidden sm:inline">{formatShortDate(m.date, locale) ?? `${m.season} J${m.matchday}`}</span>
                   </span>
-                </span>
-                <span className="text-[11px] text-stone-500 tabular-nums w-16 text-right flex-shrink-0">
-                  {int(m.minutes)}&apos; · {m.started ? t.starter : t.sub}
-                </span>
-                <span className="w-14 text-right tabular-nums flex-shrink-0">
-                  {m.goals > 0 ? (
-                    <span className="font-bold text-stone-900">
-                      {m.goals} {m.goals === 1 ? t.goalOne : t.goals.toLowerCase()}
+                  <span className="flex min-w-0 flex-1 items-center gap-1.5">
+                    <span className="min-w-0 truncate text-stone-800">{teamDisplayName(m.opponent)}</span>
+                    <span
+                      className="flex-shrink-0 rounded border border-line px-1 text-[11px] font-semibold text-stone-600"
+                      title={m.is_home ? t.home : t.away}
+                    >
+                      <span aria-hidden="true">{m.is_home ? (pt ? "C" : "H") : (pt ? "F" : "A")}</span>
+                      <span className="sr-only">{m.is_home ? t.home : t.away}</span>
                     </span>
-                  ) : (
-                    <span className="text-stone-500">—</span>
-                  )}
-                </span>
-                <span className="w-14 text-right tabular-nums text-stone-500 text-xs flex-shrink-0 hidden sm:inline">
-                  {m.rating === null ? "" : `${nf(m.rating, 1)} ${t.rating}`}
-                </span>
-              </div>
-            ))}
+                  </span>
+                  <span className="w-[5.25rem] flex-shrink-0 whitespace-nowrap text-right text-[11px] tabular-nums text-stone-600">
+                    {int(m.minutes)}&apos; · {m.started ? t.starter : t.sub}
+                  </span>
+                  <span className="w-10 flex-shrink-0 text-right tabular-nums">
+                    {m.goals > 0 ? (
+                      <span className="font-bold text-stone-900">{m.goals}</span>
+                    ) : (
+                      <span className="text-stone-500">
+                        <span aria-hidden="true">—</span>
+                        <span className="sr-only">{pt ? "sem golos" : "no goals"}</span>
+                      </span>
+                    )}
+                  </span>
+                  <span className="hidden w-24 flex-shrink-0 text-right text-xs tabular-nums text-stone-600 sm:inline">
+                    {m.rating === null ? "" : nf(m.rating, 1)}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
           <p className="text-[11px] text-stone-500 mt-3 max-w-2xl leading-relaxed">
             {t.recentNote}
@@ -931,7 +962,7 @@ export function PlayerProfile({
         <Link
           href="/desporto/liga/jogadores"
           locale={locale}
-          className="text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+          className="text-stone-600 hover:text-stone-900 inline-flex min-h-11 items-center gap-1"
         >
           {t.hub}
           <ArrowRight className="w-3 h-3" />
@@ -940,7 +971,7 @@ export function PlayerProfile({
           <Link
             href={`/desporto/liga/jogador/${prev.slug}`}
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+            className="text-stone-600 hover:text-stone-900 inline-flex min-h-11 items-center gap-1"
           >
             <ArrowLeft className="w-3 h-3" />
             {t.prev}: {prev.player} (#{prev.rank})
@@ -950,7 +981,7 @@ export function PlayerProfile({
           <Link
             href={`/desporto/liga/jogador/${next.slug}`}
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+            className="text-stone-600 hover:text-stone-900 inline-flex min-h-11 items-center gap-1"
           >
             {t.next}: {next.player} (#{next.rank})
             <ArrowRight className="w-3 h-3" />
@@ -960,7 +991,7 @@ export function PlayerProfile({
           <Link
             href={`/desporto/liga/${teamSlug}`}
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+            className="text-stone-600 hover:text-stone-900 inline-flex min-h-11 items-center gap-1"
           >
             {t.teamPage}: {teamDisplayName(player.team)}
             <ArrowRight className="w-3 h-3" />

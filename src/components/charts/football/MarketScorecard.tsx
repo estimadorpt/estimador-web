@@ -591,7 +591,7 @@ function CheckpointChart({
         summary={pt ? "Ver como tabela" : "See as a table"}
         srSuffix={pt ? "RPS do modelo e do mercado por jornada" : "model and market RPS by matchday"}
       >
-        <div className="mt-2 overflow-x-auto">
+        <div className="mt-2 overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? "RPS do modelo e do mercado por jornada prevista" : "Model and market RPS by matchday forecast"}>
           <table className="w-full text-xs tabular-nums">
             <caption className="sr-only">
               {pt
