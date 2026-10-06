@@ -11,12 +11,14 @@ import type { HouseEffect } from '@/types';
 
 interface HouseEffectsProps {
   data: HouseEffect[];
-  /** Overrides for the two notes below; by default they follow the page locale. */
+  /** Overrides for the text below; by default it follows the page locale. */
   labels?: {
     /** Says that a blank cell is a deviation under the display threshold. */
     blankCells?: string;
     /** Caption of the table twin (every value to three decimals). */
     tableCaption?: string;
+    /** Name of the matrix's scroll area, read by assistive technology. */
+    regionLabel?: string;
   };
 }
 
@@ -31,6 +33,7 @@ export function HouseEffects({ data, labels }: HouseEffectsProps) {
   const tableCaption = labels?.tableCaption ?? (pt
     ? 'Efeito de cada empresa de sondagens em cada partido, em logit'
     : 'Each polling firm’s effect on each party, in logit');
+  const regionLabel = labels?.regionLabel ?? (pt ? 'Efeitos das empresas de sondagens' : 'Polling house effects');
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8 text-stone-500">
@@ -59,49 +62,49 @@ export function HouseEffects({ data, labels }: HouseEffectsProps) {
 
   return (
     <div className="w-full">
-      <div className="bg-cream border border-line rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead className="bg-parchment">
-              <tr>
-                <th scope="col" className="px-4 py-3 text-left text-sm font-semibold text-stone-700 w-40">
-                  {t("pollsterHeader")}
+      {/* A scroll area: focusable, so a keyboard can scroll it, and named
+          (A11Y2-06); the edge shadow says there is more to the side. */}
+      <div tabIndex={0} role="region" aria-label={regionLabel} className="scroll-cue overflow-x-auto rounded-2xl border border-line">
+        <table className="min-w-full">
+          <thead className="bg-parchment">
+            <tr>
+              <th scope="col" className="px-4 py-3 text-left text-sm font-semibold text-stone-700 w-40">
+                {t("pollsterHeader")}
+              </th>
+              {parties.map(party => (
+                <th key={party} scope="col" className="px-3 py-3 text-center text-sm font-semibold text-ink w-20">
+                  <span className="mr-1 inline-block size-2 rounded-full" aria-hidden="true" style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }} />
+                  {party}
                 </th>
-                {parties.map(party => (
-                  <th key={party} scope="col" className="px-3 py-3 text-center text-sm font-semibold text-ink w-20">
-                    <span className="mr-1 inline-block size-2 rounded-full" aria-hidden="true" style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }} />
-                    {party}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {pollsters.map(pollster => (
-                <tr key={pollster}>
-                  <th scope="row" className="px-4 py-3 text-left text-sm font-medium text-ink bg-parchment">
-                    {pollster}
-                  </th>
-                  {parties.map(party => {
-                    const effect = matrix[pollster]?.[party] ?? 0;
-                    const showValue = Math.abs(effect) > HOUSE_EFFECT_BLANK_BELOW;
-                    // The exact value is the cell's title for a mouse and the
-                    // table twin below for everyone else: no hover tooltip.
-                    return (
-                      <td
-                        key={`${pollster}-${party}`}
-                        className="px-3 py-3 text-center text-xs font-semibold tabular-nums"
-                        style={{ backgroundColor: getHeatmapColor(effect), color: BRAND.forest }}
-                        title={`${pollster} → ${party}: ${formatElectionSigned(effect, locale, 3)} logit`}
-                      >
-                        {showValue ? formatElectionSigned(effect, locale, 2) : null}
-                      </td>
-                    );
-                  })}
-                </tr>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {pollsters.map(pollster => (
+              <tr key={pollster}>
+                <th scope="row" className="px-4 py-3 text-left text-sm font-medium text-ink bg-parchment">
+                  {pollster}
+                </th>
+                {parties.map(party => {
+                  const effect = matrix[pollster]?.[party] ?? 0;
+                  const showValue = Math.abs(effect) > HOUSE_EFFECT_BLANK_BELOW;
+                  // The exact value is the cell's title for a mouse and the
+                  // table twin below for everyone else: no hover tooltip.
+                  return (
+                    <td
+                      key={`${pollster}-${party}`}
+                      className="px-3 py-3 text-center text-xs font-semibold tabular-nums"
+                      style={{ backgroundColor: getHeatmapColor(effect), color: BRAND.forest }}
+                      title={`${pollster} → ${party}: ${formatElectionSigned(effect, locale, 3)} logit`}
+                    >
+                      {showValue ? formatElectionSigned(effect, locale, 2) : null}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <div className="mt-4 text-sm text-stone-600 space-y-2">

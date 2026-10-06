@@ -25,6 +25,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 const linkClass = 'text-ink underline underline-offset-4 hover:text-ink-muted';
+/** A link on a line of its own in the hero: a 44px target at the text's own size (UXM2-09). */
+const standaloneLinkClass = `inline-flex min-h-11 items-center ${linkClass}`;
+/** The in-page anchors: 44px on a phone or a coarse pointer (`.tap-target`, globals.css). */
+const anchorClass = `tap-target ${linkClass}`;
 
 /**
  * The election methods, moved out of /metodologia (which is now the hub of
@@ -51,16 +55,16 @@ export default async function ElectionMethodologyPage({ params }: { params: Prom
           meta={
             <>
               <RevisedDate date={ELECTION_METHODOLOGY_REVISED} locale={locale} />
-              <Link href="/eleicoes/arquivo" locale={locale} className={linkClass}>{pt ? 'Todas as eleições (arquivo)' : 'All elections (archive)'}</Link>
-              <Link href="/metodologia" locale={locale} className={linkClass}>{pt ? 'Métodos das outras áreas' : 'Methods of the other areas'}</Link>
+              <Link href="/eleicoes/arquivo" locale={locale} className={standaloneLinkClass}>{pt ? 'Todas as eleições (arquivo)' : 'All elections (archive)'}</Link>
+              <Link href="/metodologia" locale={locale} className={standaloneLinkClass}>{pt ? 'Métodos das outras áreas' : 'Methods of the other areas'}</Link>
             </>
           }
         />
         <div className="mx-auto w-full max-w-7xl px-4 pb-10 md:pb-16"><div className="max-w-3xl">
           <nav aria-label={pt ? 'Nesta página' : 'On this page'} className="my-8 flex flex-wrap gap-x-5 gap-y-2 border-y border-line py-4 text-sm">
-            <a href="#legislativas" className={linkClass}>{pt ? 'Legislativas 2025' : 'Parliamentary 2025'}</a>
-            <a href="#presidenciais" className={linkClass}>{pt ? 'Presidenciais 2026: 1.ª volta' : 'Presidential 2026: first round'}</a>
-            <a href="#segunda-volta-2026" className={linkClass}>{pt ? '2.ª volta' : 'Runoff'}</a>
+            <a href="#legislativas" className={anchorClass}>{pt ? 'Legislativas 2025' : 'Parliamentary 2025'}</a>
+            <a href="#presidenciais" className={anchorClass}>{pt ? 'Presidenciais 2026: 1.ª volta' : 'Presidential 2026: first round'}</a>
+            <a href="#segunda-volta-2026" className={anchorClass}>{pt ? '2.ª volta' : 'Runoff'}</a>
           </nav>
           <article className="article-body max-w-none" lang={pt ? 'pt' : 'en'}>
             <MDXRemote source={electionMethodologySource(locale)} components={getMDXComponents()} />

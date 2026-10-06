@@ -23,11 +23,19 @@ interface DistrictSummaryProps {
   contestedData: ContestedData;
   /** Names the districts whose two leaders are under a point apart (from the page, via closeLeads). */
   closeLeadNote?: string;
+  /**
+   * The level of the two part headings ("Mandatos em disputa", "Partido à
+   * frente"); each district card's name sits one below. 3 by default (an
+   * article's figure); 4 inside a DataCard, whose title is the h3.
+   */
+  headingLevel?: 3 | 4;
 }
 
-export function DistrictSummary({ districtData, contestedData, closeLeadNote }: DistrictSummaryProps) {
+export function DistrictSummary({ districtData, contestedData, closeLeadNote, headingLevel = 3 }: DistrictSummaryProps) {
   const t = useTranslations("forecast");
   const locale = useLocale();
+  const Heading = headingLevel === 4 ? 'h4' : 'h3';
+  const CardHeading = headingLevel === 4 ? 'h5' : 'h4';
   if (!districtData || districtData.length === 0) {
     return (
       <div className="text-center py-8 text-stone-500">
@@ -64,9 +72,9 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote }: 
       {/* Contested Districts */}
       {contestedDistricts.length > 0 && (
         <div>
-          <h3 className="text-lg text-stone-900 mb-4">
+          <Heading className="text-lg font-bold tracking-[-0.02em] text-stone-900 mb-4">
             {t("seatsInPlayTitle", { count: contestedDistricts.length })}
-          </h3>
+          </Heading>
           <p className="text-sm text-stone-600 mb-2">
             {t("seatsInPlayLede")}
           </p>
@@ -106,7 +114,7 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote }: 
                 // Amber is the site's caveat colour, not emphasis.
                 <div key={district.district_name} className="bg-cream border border-line rounded-2xl p-4">
                   <div className="flex items-center justify-between gap-3 mb-3">
-                    <h4 className="font-semibold text-ink">{district.district_name}</h4>
+                    <CardHeading className="font-semibold text-ink">{district.district_name}</CardHeading>
                     <span className="whitespace-nowrap rounded-full border border-line bg-parchment px-2 py-0.5 text-xs font-medium text-stone-700 tabular-nums">
                       ENSC: {formatElectionNumber(district.competitiveness, locale, 2)}
                     </span>
@@ -147,9 +155,9 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote }: 
       {/* The party ahead in votes in every district and region: the same
           count as the map (14/5/1), not a likely-winner count over a subset. */}
       <div>
-        <h3 className="text-lg text-stone-900 mb-1">
+        <Heading className="text-lg font-bold tracking-[-0.02em] text-stone-900 mb-1">
           {t("likelyWinners")}
-        </h3>
+        </Heading>
         <p className="text-xs text-stone-500 mb-4">
           {t("likelyWinnersSubtitle", { total: districtData.length })}
         </p>
