@@ -67,7 +67,7 @@ const COPY = {
     populationSection: 'População',
     populationLabel: 'População sintética aberta',
     populationSubject: 'freguesias · Censos 2021',
-    populationCaption: (persons, households, parishes) => `${persons} pessoas e ${households} agregados gerados para as ${parishes} freguesias dos Censos 2021 (CAOP 2021).`,
+    populationCaption: (persons, households, parishes) => `${persons} pessoas e ${households} agregados gerados para as ${parishes} freguesias dos Censos 2021 (CAOP\u00a02021).`,
     populationFooter: (version, date) => `Versão ${version} · publicada a ${date}`,
   },
   en: {
@@ -95,7 +95,7 @@ const COPY = {
     populationSection: 'Population',
     populationLabel: 'Open synthetic population',
     populationSubject: 'parishes · 2021 Census',
-    populationCaption: (persons, households, parishes) => `${persons} people and ${households} households generated for the ${parishes} parishes of the 2021 Census (CAOP 2021).`,
+    populationCaption: (persons, households, parishes) => `${persons} people and ${households} households generated for the ${parishes} parishes of the 2021 Census (CAOP\u00a02021).`,
     populationFooter: (version, date) => `Version ${version} · released ${date}`,
   },
 };
