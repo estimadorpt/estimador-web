@@ -6,10 +6,10 @@ import { ChartTable } from "@/components/viz/ChartTable";
 import { quietPlot } from "@/components/viz/plot-a11y";
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
-import type { LigaHistorical } from "@/types/football";
+import type { LigaProbabilityHistory } from "@/types/football";
 
 interface TitleRaceChartProps {
-  historical: LigaHistorical;
+  historical: LigaProbabilityHistory;
   yAxisLabel?: string;
   /** One line under the plot, above the table twin: what the lines are not
    * (the title-calibration caveat on the Liga page, audit F-H2). */

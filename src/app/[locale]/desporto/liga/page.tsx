@@ -3,6 +3,7 @@ import { createPageMetadata } from '@/lib/metadata';
 import {
   loadLigaWithDeltas,
   loadLigaHistorical,
+  probabilityHistory,
   loadLigaSamples,
   loadLigaMarketScorecard,
   loadUpcomingFixtures,
@@ -65,6 +66,9 @@ export default async function LigaPage({
       loadUpcomingFixtures(),
       loadLigaMarketScorecard(),
     ]);
+
+  // The two probability charts get only what they draw (SP-08).
+  const probabilities = probabilityHistory(historical);
 
   // Every fixture still to play that carries a published 1X2, with its own
   // kickoff (game_fixtures.json), conditionals and match page: the round in
@@ -364,7 +368,7 @@ export default async function LigaPage({
               locale={locale}
             >
               <TitleRaceChart
-                historical={historical}
+                historical={probabilities}
                 yAxisLabel={t("football.championPercent")}
                 caveat={<>
                   {t("football.titleCalibrationCaveat")}{" "}
@@ -406,7 +410,7 @@ export default async function LigaPage({
               methodologyLabel={methodLabel}
               locale={locale}
             >
-              <RelegationChart historical={historical} yAxisLabel={t("football.relegationPercent")} />
+              <RelegationChart historical={probabilities} yAxisLabel={t("football.relegationPercent")} />
             </DataCard>
           </div>
         </section>

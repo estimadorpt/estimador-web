@@ -4,6 +4,7 @@ import type {
   LigaPrediction,
   ScenarioData,
   LigaHistorical,
+  LigaProbabilityHistory,
   TeamDelta,
   DecisiveMatch,
   NextMatchdayScenarioMatch,
@@ -892,4 +893,12 @@ export async function loadLigaSummary() {
     console.error('Error loading liga summary:', error);
     return null;
   }
+}
+
+/** The trimmed history the title-race and relegation charts read (SP-08). */
+export function probabilityHistory(historical: LigaHistorical): LigaProbabilityHistory {
+  return historical.map(md => ({
+    matchday: md.matchday,
+    table: md.table.map(({ team, p_champion, p_relegation }) => ({ team, p_champion, p_relegation })),
+  }));
 }

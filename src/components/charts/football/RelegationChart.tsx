@@ -5,11 +5,11 @@ import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
-import type { LigaHistorical } from "@/types/football";
+import type { LigaProbabilityHistory } from "@/types/football";
 import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface RelegationChartProps {
-  historical: LigaHistorical;
+  historical: LigaProbabilityHistory;
   yAxisLabel?: string;
   /** Defaults the chart to this club plus a few relevant comparisons, instead
    * of every team ever above the risk threshold (diagnosis §5/9 — "many

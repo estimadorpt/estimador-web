@@ -267,3 +267,14 @@ export interface NextMatchdayScenarios {
 
 // Historical data: array of predictions per matchday for time-series charts
 export type LigaHistorical = LigaPrediction[];
+
+/**
+ * What the title-race and relegation charts read from the history: the
+ * matchday and each club's two probabilities. The page passes this trimmed
+ * copy to the client charts rather than every published prediction in full
+ * (audit SP-08: the Liga page shipped all of them in its payload).
+ */
+export type LigaProbabilityHistory = Array<{
+  matchday: number;
+  table: Array<Pick<TeamStanding, 'team' | 'p_champion' | 'p_relegation'>>;
+}>;
