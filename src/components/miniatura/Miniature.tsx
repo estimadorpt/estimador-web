@@ -110,7 +110,7 @@ export function Miniature({ locale }: { locale: 'pt' | 'en' }) {
         {housePicker('mini-house')}
       </aside>
       <section className="mini-stage" aria-label={pt?'População animada':'Animated population'}>
-        {/* One block that follows the reader down the controls on wide screens (UXD2-08): the bar, the scene, its zoom controls, the caption and the legend move together, so the caption never crosses the scene. It follows inside .mini-stage-follow, which ends above the scene's tools, so it never slides over them. */}
+        {/* The bar, the scene, its zoom controls, the caption and the legend, then the scene's tools: the stage ends at its own content, with no slack inside it. Where the sidebar is the taller column (721-1199px), the whole stage follows the reader down it, fitted to the viewport (miniatura.css, round 5). */}
         <div className="mini-stage-follow">
         <div className="mini-stage-view">
         <div className="mini-stage-top"><span><span className="mini-live-dot"/>{pt?'UM RETRATO EM MOVIMENTO':'A PORTRAIT IN MOTION'}</span><button onClick={()=>{setPaused(!paused);setTour(false);}} disabled={reduced} aria-label={paused?(pt?'Retomar movimento':'Resume motion'):(pt?'Pausar movimento':'Pause motion')}>{paused||reduced?<Play size={16}/>:<Pause size={16}/>}</button></div>
@@ -122,7 +122,7 @@ export function Miniature({ locale }: { locale: 'pt' | 'en' }) {
         <div className="mini-legend" aria-label={pt?'Legenda':'Legend'}>{FIELD_LABELS[locale][lens].map((label,i)=><span key={label}><i style={{background:COLOURS[i]}}/>{label}</span>)}</div>
         </div>
         </div>
-        {/* From 721px the scene's own controls sit under it, so the stage ends with the sidebar instead of over an empty band (UXD2-08, PUB3-04). One copy is shown at a time (CSS), so the count is announced once. */}
+        {/* From 721px the scene's own controls sit right under its legend (UXD2-08, PUB3-04). One copy is shown at a time (CSS), so the count is announced once. */}
         <div className="mini-stage-tools">{sceneTools}{housePicker('mini-house-stage')}</div>
       </section>
     </div>
