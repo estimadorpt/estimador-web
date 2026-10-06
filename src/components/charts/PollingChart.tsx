@@ -191,7 +191,10 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         marginBottom,
         style: { backgroundColor: "transparent", color: FURNITURE.textMuted, fontSize: mobile ? "11px" : "12px", fontFamily: FURNITURE.font },
         x: {
-          type: "time",
+          // UTC, like the dates (built at T12:00Z) and the tick formatter: a
+          // local "time" scale put ticks at Lisbon midnight, 23:00Z the day
+          // before in summer, and the UTC formatter named the previous month.
+          type: "utc",
           label: null,
           // The page's locale ("jul. 2023" / "Jul 2023"), never d3's default English.
           tickFormat: (d: Date) => `${d.toLocaleDateString(intl, { month: "short", timeZone: "UTC" })} ${d.getUTCFullYear()}`,

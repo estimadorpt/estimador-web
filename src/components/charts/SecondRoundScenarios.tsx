@@ -26,16 +26,17 @@ export function SecondRoundScenarios({ simulations, locale, translations }: Seco
 
   return (
     <div className="space-y-4" data-testid="scenarios">
-      <h3 className="text-lg text-stone-900">
+      {/* A section of the page like its siblings, so the same level and size. */}
+      <h2 className="text-2xl text-stone-900 tracking-tight">
         {translations.keyScenarios}
-      </h3>
+      </h2>
 
       <div className="space-y-4">
         {scenarios.map((scenario) => (
           <div key={scenario.key} className="bg-cream rounded-2xl border border-stone-200 p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between gap-3 mb-2">
               <span className="text-sm text-stone-700">{scenario.label}</span>
-              <span className="text-sm font-bold text-stone-900 tabular-nums">
+              <span className="shrink-0 whitespace-nowrap text-sm font-bold text-stone-900 tabular-nums">
                 {formatElectionProbability(scenario.probability, locale)}
               </span>
             </div>

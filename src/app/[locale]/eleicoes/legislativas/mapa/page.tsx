@@ -150,7 +150,7 @@ export default async function MapPage({
                     locale={locale}
                     className="text-sm font-medium text-ink underline underline-offset-4 hover:text-ink-muted"
                   >
-                    {locale === 'pt' ? 'Ver mandatos em disputa →' : 'See seats in play →'}
+                    {locale === 'pt' ? 'Ver mandatos em disputa' : 'See seats in play'}<span aria-hidden="true"> →</span>
                   </Link>
                 </CardContent>
               </Card>

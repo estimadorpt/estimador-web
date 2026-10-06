@@ -52,12 +52,19 @@ export function SecondRoundBeeswarm({ simulations, translations }: SecondRoundBe
       const names = simulations.candidates.map(c => c.name);
       const points = simulations.candidates.flatMap(c => keep.map(i => ({ candidate: c.name, share: c.sample[i] })));
       const medians = simulations.candidates.map(c => ({ candidate: c.name, median: c.summary.median }));
+      // The median label reads to the right of its line, except near the right
+      // edge, where it is anchored at its end and reads to the left, so it is
+      // never cut ("mediana 67,6%" ran past the frame on a phone).
+      const flipAt = 0.6;
+      const medianText = (d: { median: number }) => `${translations.median.toLocaleLowerCase(locale)} ${pct(d.median)}`;
+      const medianLabel = { x: "median", fy: "candidate", text: medianText, frameAnchor: "top", dy: -12, fontSize: 12, fontWeight: 700, fill: FURNITURE.text } as const;
       const plot = Plot.plot({
         width,
-        height: phone ? 480 : 480,
+        height: phone ? 600 : 520,
         marginLeft: phone ? 12 : 24,
         marginRight: phone ? 12 : 40,
-        marginTop: 28,
+        // Two lines above each row: the name, then the median label.
+        marginTop: 46,
         marginBottom: 44,
         style: { backgroundColor: "transparent", fontSize: "12px", fontFamily: FURNITURE.font, color: FURNITURE.textMuted },
         x: {
@@ -68,7 +75,7 @@ export function SecondRoundBeeswarm({ simulations, translations }: SecondRoundBe
           grid: true,
         },
         // Candidate names sit above each row (below), so long names are never clipped on a phone.
-        fy: { domain: names, label: null, axis: null, padding: 0.16 },
+        fy: { domain: names, label: null, axis: null, padding: 0.26 },
         color: { domain: names, range: simulations.candidates.map(c => c.color) },
         marks: [
           Plot.ruleX([0.5], { stroke: FURNITURE.text, strokeWidth: 1.5, strokeDasharray: "4,3", facet: "exclude" }),
@@ -83,24 +90,15 @@ export function SecondRoundBeeswarm({ simulations, translations }: SecondRoundBe
             tip: true,
           })),
           Plot.ruleX(medians, { x: "median", fy: "candidate", stroke: FURNITURE.text, strokeWidth: 2 }),
-          Plot.text(medians, {
-            x: "median",
-            fy: "candidate",
-            // Named: the cards above show the mean, this line the median.
-            text: (d: { median: number }) => `${translations.median.toLocaleLowerCase(locale)} ${pct(d.median)}`,
-            frameAnchor: "top",
-            dy: -16,
-            dx: 6,
-            textAnchor: "start",
-            fontSize: 12,
-            fontWeight: 700,
-            fill: FURNITURE.text,
-          }),
+          // Named: the cards above show the mean, this line the median.
+          Plot.text(medians.filter(d => d.median < flipAt), { ...medianLabel, dx: 6, textAnchor: "start" }),
+          Plot.text(medians.filter(d => d.median >= flipAt), { ...medianLabel, dx: -6, textAnchor: "end" }),
+          // The candidate's name on its own line above the median label.
           Plot.text(names.map(name => ({ candidate: name })), {
             fy: "candidate",
             text: "candidate",
             frameAnchor: "top-left",
-            dy: -16,
+            dy: -30,
             fontSize: 12,
             fontWeight: 700,
             fill: FURNITURE.text,

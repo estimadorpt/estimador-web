@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import {
+  closeLeads,
   compactTrendSeries,
   dotsPerRowToFit,
   everyKthIndex,
@@ -217,5 +218,22 @@ describe('dot histogram', () => {
     expect(dotsPerRowToFit(100, 10, 140)).toBe(3);
     expect(dotsPerRowToFit(10, 10, 140)).toBe(1);
     expect(dotsPerRowToFit(10_000, 10, 140, 4)).toBe(4);
+  });
+});
+
+describe('close leads', () => {
+  it('names the districts whose two leaders are under a point apart, from the archive', () => {
+    const close = closeLeads(readJson<{ district_name: string; probs: Record<string, number> }[]>('parliamentary-2025/district_forecast.json'));
+    expect(close.map(c => c.district)).toEqual(['Castelo Branco']);
+    expect(close[0].first.party).toBe('PS');
+    expect(close[0].second.party).toBe('AD');
+  });
+  it('honours the margin and ignores single-party districts', () => {
+    const districts = [
+      { district_name: 'A', probs: { X: 0.40, Y: 0.385 } },
+      { district_name: 'B', probs: { X: 0.40 } },
+    ];
+    expect(closeLeads(districts)).toEqual([]);
+    expect(closeLeads(districts, 0.02).map(c => c.district)).toEqual(['A']);
   });
 });

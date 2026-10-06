@@ -21,6 +21,8 @@ interface SeatChartProps {
   stats?: PartySeatStats[];
   /** Axis label; defaults to the locale's "projected seats". */
   seatsLabel?: string;
+  /** Name of the table twin; distinct from the bloc chart's, so two regions on one page never share a name. */
+  tableCaption?: string;
 }
 
 function statsFromRows(rows: SeatData[]): PartySeatStats[] {
@@ -44,7 +46,7 @@ function statsFromRows(rows: SeatData[]): PartySeatStats[] {
 }
 
 /** Seats per party: mean (dot), 50% band (P25–P75, darker) and 80% band (P10–P90, lighter). */
-export function SeatChart({ data, stats: provided, seatsLabel }: SeatChartProps) {
+export function SeatChart({ data, stats: provided, seatsLabel, tableCaption }: SeatChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("forecast");
   const xLabel = seatsLabel ?? t("projectedSeats");
@@ -92,7 +94,7 @@ export function SeatChart({ data, stats: provided, seatsLabel }: SeatChartProps)
   return (
     <div className="w-full">
       <div ref={containerRef} className="overflow-x-auto" />
-      <ChartTable caption={xLabel} columns={[pt ? "Partido" : "Party", "P10", "P25", pt ? "Média" : "Mean", "P75", "P90"]} rows={stats.map(s => [name(s.party), s.p10, s.p25, s.mean, s.p75, s.p90])} />
+      <ChartTable caption={tableCaption ?? `${xLabel} · ${pt ? "por partido" : "by party"}`} columns={[pt ? "Partido" : "Party", "P10", "P25", pt ? "Média" : "Mean", "P75", "P90"]} rows={stats.map(s => [name(s.party), s.p10, s.p25, s.mean, s.p75, s.p90])} />
     </div>
   );
 }

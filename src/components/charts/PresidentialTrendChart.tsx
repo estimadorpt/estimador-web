@@ -44,6 +44,12 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(820);
   const [hover, setHover] = useState<number | null>(null);
+  useEffect(() => {
+    if (hover == null) return;
+    const clear = (event: PointerEvent) => { if (!containerRef.current?.contains(event.target as Node)) setHover(null); };
+    document.addEventListener('pointerdown', clear);
+    return () => document.removeEventListener('pointerdown', clear);
+  }, [hover]);
   const dates = useMemo(() => {
     const firstAfterCutoff = cutoffDate ? trends.dates.findIndex(date => date.slice(0, 10) > cutoffDate.slice(0, 10)) : -1;
     return trends.dates.slice(0, firstAfterCutoff === -1 ? trends.dates.length : firstAfterCutoff);
@@ -117,6 +123,12 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
     formatElectionDate(dates[index], locale), name, fmt(c.mean[index]), fmt(c.ci_25[index]), fmt(c.ci_75[index]), fmt(c.ci_05[index]), fmt(c.ci_95[index]),
   ]));
   const pollColumns = candidates.map(([name]) => name);
+  // The table holds the candidates the chart draws (the chooser's), so its
+  // label says how many, not "every candidate".
+  const seriesCount = formatElectionNumber(candidates.length, locale);
+  const seriesSummary = candidates.length === 2
+    ? (pt ? 'Ver a série dos dois candidatos, mais recente primeiro' : 'View both candidates’ series, latest first')
+    : (pt ? `Ver a série dos ${seriesCount} candidatos do gráfico, mais recente primeiro` : `View the series of the chart’s ${seriesCount} candidates, latest first`);
 
   const onPointer = (event: React.PointerEvent<SVGSVGElement>) => {
     const box = event.currentTarget.getBoundingClientRect();
@@ -126,6 +138,10 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
     for (let i = 1; i < parsedDates.length; i++) if (Math.abs(parsedDates[i].getTime() - t) < Math.abs(parsedDates[best].getTime() - t)) best = i;
     setHover(best);
   };
+  // Touch: a tap or a horizontal drag sets the tip (pointerdown/move); lifting
+  // the finger fires pointerleave, which must not clear it. A tap elsewhere on
+  // the page does. pan-y keeps vertical swipes scrolling the page.
+  const onLeave = (event: React.PointerEvent<SVGSVGElement>) => { if (event.pointerType !== 'touch') setHover(null); };
   const tipIndex = hover;
   const tipX = tipIndex != null ? x(parsedDates[tipIndex]) : 0;
 
@@ -139,7 +155,7 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
     </div>
     <div ref={containerRef} className="relative w-full">
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="block max-w-full" role="img" aria-label={`${selectedName}: ${pt ? 'apoio estimado ao longo do tempo' : 'estimated support over time'}`}
-        onPointerMove={onPointer} onPointerLeave={() => setHover(null)}>
+        onPointerDown={onPointer} onPointerMove={onPointer} onPointerLeave={onLeave} style={{ touchAction: 'pan-y' }}>
         {Array.from({ length: Math.floor((yMax - yMin) / .1 + 1e-9) + 1 }, (_, index) => Math.round((yMin + index * .1) * 10) / 10).map(tick => <g key={tick}><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} stroke={FURNITURE.grid} /><text x={margin.left - 8} y={y(tick)} textAnchor="end" dominantBaseline="middle" fontSize={11} fill={FURNITURE.textMuted}>{formatElectionPercent(tick, locale, 0)}</text></g>)}
         {tickDates.map((date, index) => <g key={date.toISOString()}><line x1={x(date)} x2={x(date)} y1={height - margin.bottom} y2={height - margin.bottom + 5} stroke={FURNITURE.axis} /><text x={x(date)} y={height - margin.bottom + 22} textAnchor={index === 0 ? 'start' : index === tickDates.length - 1 ? 'end' : 'middle'} fontSize={12} fill={FURNITURE.textMuted}>{formatElectionDate(date, locale)}</text></g>)}
         {candidates.filter(([name]) => name !== selectedName).map(([name, candidate]) => drawAll
@@ -161,7 +177,7 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
       )}
     </div>
     <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-ink-muted"><span>{pt ? 'Linha: estimativa média' : 'Line: mean estimate'}</span><span>{band50}</span><span>{band90}</span>{showPolls && <span>{pt ? 'Pontos: sondagens' : 'Dots: polls'}</span>}</div>
-    <ChartTable caption={pt ? 'Apoio estimado por candidato e data' : 'Estimated support by candidate and date'} summaryLabel={pt ? 'Ver a série de todos os candidatos, mais recente primeiro' : 'View every candidate’s series, latest first'} columns={[pt ? 'Data' : 'Date', pt ? 'Candidato' : 'Candidate', pt ? 'Média' : 'Mean', 'P25', 'P75', 'P5', 'P95']} rows={rows} />
+    <ChartTable caption={pt ? 'Apoio estimado por candidato e data' : 'Estimated support by candidate and date'} summaryLabel={seriesSummary} columns={[pt ? 'Data' : 'Date', pt ? 'Candidato' : 'Candidate', pt ? 'Média' : 'Mean', 'P25', 'P75', 'P5', 'P95']} rows={rows} />
     {showPolls && visiblePolls.length > 0 && (
       <ChartTable caption={pt ? 'Sondagens desenhadas no gráfico' : 'Polls drawn on the chart'} summaryLabel={pt ? `Ver as ${formatElectionNumber(visiblePolls.length, locale)} sondagens` : `View the ${formatElectionNumber(visiblePolls.length, locale)} polls`} columns={[pt ? 'Data' : 'Date', pt ? 'Empresa' : 'Pollster', pt ? 'Amostra' : 'Sample', ...pollColumns]} rows={visiblePolls.map(poll => [formatElectionDate(poll.date, locale), pollsterDisplayName(poll.pollster), typeof poll.sample_size === 'number' ? formatElectionNumber(poll.sample_size, locale) : '—', ...pollColumns.map(name => typeof poll[name] === 'number' ? fmt(poll[name] as number) : '—')])} />
     )}

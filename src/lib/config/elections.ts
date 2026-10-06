@@ -5,7 +5,8 @@ import { getParliamentaryContestants, presidentialCandidateColors, presidentialC
 export const PRESIDENTIAL_2026: ElectionConfig = {
   type: 'presidential',
   id: 'presidential-2026',
-  name: 'Eleições Presidenciais 2026',
+  // Sentence case, as everywhere on the site (the homepage panel prints it).
+  name: 'Eleições presidenciais 2026',
   date: '2026-01-18',
   description: 'Eleição do Presidente da República',
   isActive: false,
@@ -22,7 +23,7 @@ export const PRESIDENTIAL_2026_SECOND_ROUND_DATE = '2026-02-08';
 export const PARLIAMENTARY_2025: ElectionConfig = {
   type: 'parliamentary',
   id: 'parliamentary-2025',
-  name: 'Eleições Legislativas 2025',
+  name: 'Eleições legislativas 2025',
   date: '2025-05-18',
   description: 'Eleições para a Assembleia da República',
   isActive: false, // Previous election

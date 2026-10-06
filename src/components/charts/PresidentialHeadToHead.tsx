@@ -35,6 +35,12 @@ export function PresidentialHeadToHead({ data, cutoffDate, height = 260, transla
   const [width, setWidth] = useState(800);
   const [hover, setHover] = useState<number | null>(null);
   useEffect(() => {
+    if (hover == null) return;
+    const clear = (event: PointerEvent) => { if (!containerRef.current?.contains(event.target as Node)) setHover(null); };
+    document.addEventListener('pointerdown', clear);
+    return () => document.removeEventListener('pointerdown', clear);
+  }, [hover]);
+  useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const measure = () => setWidth(Math.max(280, Math.round(el.clientWidth)));
@@ -78,6 +84,9 @@ export function PresidentialHeadToHead({ data, cutoffDate, height = 260, transla
     for (let i = 1; i < parsed.length; i++) if (Math.abs(parsed[i].getTime() - t) < Math.abs(parsed[best].getTime() - t)) best = i;
     setHover(best);
   };
+  // Touch: a tap or a horizontal drag sets the tip; lifting the finger fires
+  // pointerleave, which must not clear it. A tap elsewhere does.
+  const onLeave = (event: React.PointerEvent<SVGSVGElement>) => { if (event.pointerType !== 'touch') setHover(null); };
   const tipX = hover != null ? x(parsed[hover].getTime()) : 0;
 
   return (
@@ -85,7 +94,7 @@ export function PresidentialHeadToHead({ data, cutoffDate, height = 260, transla
       <div ref={containerRef} className="relative w-full">
         <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="block max-w-full" role="img"
           aria-label={`${translations.title}: ${candidate_a} ${translations.probability}`}
-          onPointerMove={onPointer} onPointerLeave={() => setHover(null)}>
+          onPointerDown={onPointer} onPointerMove={onPointer} onPointerLeave={onLeave} style={{ touchAction: 'pan-y' }}>
           <path d={fill(p => Math.max(p, 0.5))} fill={color_a} opacity={0.2} />
           <path d={fill(p => Math.min(p, 0.5))} fill={color_b} opacity={0.2} />
           {[0, 0.25, 0.5, 0.75, 1].map(tick => (

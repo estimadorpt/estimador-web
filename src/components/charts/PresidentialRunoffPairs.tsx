@@ -24,8 +24,12 @@ export function PresidentialRunoffPairs({
   const locale = useLocale();
   const { pairs } = data;
   
-  // Take top N pairs
+  // Take top N pairs; the rest are summed on one line, so the list adds up
+  // and a pair that is not drawn is still accounted for.
   const topPairs = pairs.slice(0, maxPairs);
+  const rest = pairs.slice(maxPairs);
+  const restProbability = rest.reduce((sum, pair) => sum + pair.probability, 0);
+  const pt = locale !== 'en';
   
   // A probability bar on a full-width track reads as a share of 100%, so the
   // scale is always 0–100%: a 43% pair fills 43% of the track.
@@ -81,6 +85,23 @@ export function PresidentialRunoffPairs({
           </div>
         );
       })}
+
+      {rest.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-sm text-stone-700">
+              {pt
+                ? `Outros ${rest.length} pares, em conjunto`
+                : `The other ${rest.length} pairs, together`}
+            </span>
+            <span className="text-sm font-bold text-stone-900 tabular-nums">{formatPercent(restProbability)}</span>
+          </div>
+          <div className="relative h-4 bg-parchment rounded overflow-hidden" aria-hidden="true">
+            <div className="absolute h-full rounded bg-stone-400" style={{ width: `${(restProbability / scaleMax) * 100}%` }} />
+          </div>
+          <p className="mt-1 text-xs text-stone-500">{rest.map(pair => `${pair.candidate_a} ${translations.vs} ${pair.candidate_b} ${formatPercent(pair.probability)}`).join(' · ')}</p>
+        </div>
+      )}
 
       {/* Scale markers */}
       <div className="relative h-3 mt-3" aria-hidden="true">

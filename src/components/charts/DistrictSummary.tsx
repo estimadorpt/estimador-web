@@ -21,9 +21,11 @@ interface ContestedData {
 interface DistrictSummaryProps {
   districtData: DistrictForecast[];
   contestedData: ContestedData;
+  /** Names the districts whose two leaders are under a point apart (from the page, via closeLeads). */
+  closeLeadNote?: string;
 }
 
-export function DistrictSummary({ districtData, contestedData }: DistrictSummaryProps) {
+export function DistrictSummary({ districtData, contestedData, closeLeadNote }: DistrictSummaryProps) {
   const t = useTranslations("forecast");
   const locale = useLocale();
   if (!districtData || districtData.length === 0) {
@@ -100,10 +102,12 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
                 .slice(0, 3);
 
               return (
-                <div key={district.district_name} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium text-stone-900">{district.district_name}</h4>
-                    <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">
+                // A normal grid of results: cream cards and a neutral chip.
+                // Amber is the site's caveat colour, not emphasis.
+                <div key={district.district_name} className="bg-cream border border-line rounded-2xl p-4">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <h4 className="font-semibold text-ink">{district.district_name}</h4>
+                    <span className="whitespace-nowrap rounded-full border border-line bg-parchment px-2 py-0.5 text-xs font-medium text-stone-700 tabular-nums">
                       ENSC: {formatElectionNumber(district.competitiveness, locale, 2)}
                     </span>
                   </div>
@@ -149,7 +153,7 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
         <p className="text-xs text-stone-500 mb-4">
           {t("likelyWinnersSubtitle", { total: districtData.length })}
         </p>
-        <div className="bg-cream border border-stone-200 rounded-2xl p-4">
+        <div className="bg-cream border border-line rounded-2xl p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {Object.values(partyColors).map((color, index) => {
               const party = Object.keys(partyColors)[index];
@@ -176,21 +180,22 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
             })}
           </div>
         </div>
+        {closeLeadNote && <p className="mt-3 text-xs text-stone-600">{closeLeadNote}</p>}
       </div>
 
       {/* Summary Stats */}
-      <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4">
+      <div className="bg-cream border border-line rounded-2xl p-4">
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-2xl font-bold text-stone-900">{districtData.length}</div>
+            <div className="text-2xl font-bold text-ink tabular-nums">{districtData.length}</div>
             <div className="text-sm text-stone-600">{t("totalDistricts")}</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-yellow-600">{contestedDistricts.length}</div>
+            <div className="text-2xl font-bold text-ink tabular-nums">{contestedDistricts.length}</div>
             <div className="text-sm text-stone-600">{t("seatsInPlay")}</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-green-600">{safeDistricts.length}</div>
+            <div className="text-2xl font-bold text-ink tabular-nums">{safeDistricts.length}</div>
             <div className="text-sm text-stone-600">{t("stableAllocation")}</div>
           </div>
         </div>

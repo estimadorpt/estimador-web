@@ -78,7 +78,7 @@ Tem duas fontes de variação: o erro de amostragem (que depende de n) e uma var
 
 **Distribuições a priori da concentração:**
 - Sondagens: Gamma(α=2, β=0,01), com média de cerca de 200, o que admite variação além do erro de amostragem
-- Resultados eleitorais: Gamma(α=100, β=0,1), com média de cerca de 1000, um ajuste mais apertado aos resultados reais
+- Resultados eleitorais: Gamma(α=100, β=0,1), com média de cerca de 1 000, um ajuste mais apertado aos resultados reais
 
 </details>
 
@@ -90,7 +90,7 @@ Para passar de votos a mandatos, simulámos o sistema eleitoral português:
 2. **Emigração**: os 4 mandatos dos círculos da Europa e de Fora da Europa vinham de um dos cenários históricos de 2019, 2022 ou 2024, um por simulação, em partes iguais.
 3. **Total**: cada simulação somava assim **230 mandatos**.
 
-A previsão arquivada tem **9000 simulações**. Em cada uma:
+A previsão arquivada tem **9 000 simulações**. Em cada uma:
 1. tira-se uma amostra das percentagens nacionais estimadas para o dia da eleição;
 2. aplicam-se as diferenças de cada distrito;
 3. aplica-se o método de Hondt em cada círculo do território nacional e junta-se o cenário da emigração;
@@ -103,7 +103,7 @@ O resultado é uma distribuição de composições possíveis do parlamento.
 A partir das simulações, a página publica:
 
 - **A probabilidade de cada partido ter mais mandatos** do que qualquer outro.
-- **A probabilidade de maioria (116 mandatos) de dois blocos**: AD + IL e PS + BE + CDU + L. São agrupamentos aritméticos de mandatos, não previsões de governo. A página publica também a percentagem de simulações em que nenhum dos dois chega aos 116 (na previsão arquivada, mais de 99%) e, só como aritmética, a soma AD + CH (116 ou mais em todas as simulações; mediana de 138).
+- **A probabilidade de maioria (116 mandatos) de dois blocos**: AD + IL e PS + BE + CDU + L. São agrupamentos aritméticos de mandatos, não previsões de governo. A página publica também a percentagem de simulações em que nenhum dos dois chega aos 116 (na previsão arquivada, mais de 99%) e, só como aritmética, a soma AD + CH (116 ou mais em mais de 99% das simulações, pela mesma regra de arredondamento das probabilidades; mediana de 138).
 - **Mandatos por partido**: a média e intervalos de credibilidade de 50% (P25–P75) e de 80% (P10–P90).
 - **Mandatos em disputa por distrito**, com o **ENSC** (número efetivo de mudanças de mandato). Para cada partido, conta-se em que percentagem das simulações o partido fica com um número de mandatos diferente do seu valor mais frequente nesse distrito; o ENSC soma essas percentagens sobre os partidos. Um ENSC de 0 diz que todas as simulações dão a mesma distribuição; acima de 0,8 (o limiar usado), pelo menos um mandato muda de partido numa parte grande das simulações, e o distrito conta como «em disputa». Os +1 e −1 dos cartões comparam cada partido com o seu próprio valor mais frequente, por isso os ganhos e as perdas de um distrito não têm de se compensar.
 
@@ -164,8 +164,8 @@ Depois da primeira volta, a 18 de janeiro de 2026, a segunda volta entre Antóni
 - **Modelo**: um passeio aleatório diário em escala logística sobre quatro respostas: Seguro, Ventura, brancos e nulos, e indecisos. A abstenção é retirada das sondagens antes do ajuste.
 - **Indecisos**: no dia da eleição, os indecisos são repartidos entre os dois candidatos na proporção dos seus votos válidos.
 - **Brancos e nulos**: entram no modelo como uma resposta própria. Por isso há duas bases na página: a percentagem de **todos os boletins** (brancos e nulos incluídos, nas barras e no gráfico de evolução) e a percentagem dos **votos válidos** (sem brancos e nulos), que é a base da maioria de 50% e da probabilidade de vitória.
-- **Simulações**: 8000 trajetórias diárias, de 21 de janeiro a 8 de fevereiro. A probabilidade de vitória é a percentagem de simulações em que o candidato passa os 50% dos votos válidos no dia da eleição. Com 8000 simulações, valores que arredondam a 0% ou a 100% aparecem como «menos de 1%» e «mais de 99%».
-- **Intervalos**: os cartões e as barras mostram intervalos de credibilidade de 95% (P2,5–P97,5) e a **média** das simulações; o gráfico de evolução mostra bandas de 50% (P25–P75) e de 90% (P5–P95). O gráfico de pontos desenha 800 das 8000 simulações, escolhidas a intervalos regulares, e marca a **mediana**; as medianas e a tabela usam todas.
+- **Simulações**: 8 000 trajetórias diárias, de 21 de janeiro a 8 de fevereiro. A probabilidade de vitória é a percentagem de simulações em que o candidato passa os 50% dos votos válidos no dia da eleição. Com 8 000 simulações, valores que arredondam a 0% ou a 100% aparecem como «menos de 1%» e «mais de 99%».
+- **Intervalos**: os cartões e as barras mostram intervalos de credibilidade de 95% (P2,5–P97,5) e a **média** das simulações; o gráfico de evolução mostra bandas de 50% (P25–P75) e de 90% (P5–P95). O gráfico de pontos desenha 800 das 8 000 simulações, escolhidas a intervalos regulares, e marca a **mediana**; as medianas e a tabela usam todas.
 
 ---
 
