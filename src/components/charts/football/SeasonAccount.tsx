@@ -155,7 +155,7 @@ export function SeasonAccount({
             <div className="flex items-center gap-3 text-xs">
               <SyncBadge state={syncState} labels={t} />
               {deadline && (
-                <span className="text-stone-400 tabular-nums hidden sm:inline">
+                <span className="text-stone-500 tabular-nums hidden sm:inline">
                   {t.deadline}{" "}
                   {new Date(deadline).toLocaleString(pt ? "pt-PT" : "en-GB", {
                     day: "2-digit",
@@ -227,7 +227,7 @@ function SyncBadge({
 }) {
   if (state === "saving") {
     return (
-      <span className="inline-flex items-center gap-1 text-stone-400">
+      <span className="inline-flex items-center gap-1 text-stone-500">
         <Cloud className="w-3.5 h-3.5 motion-safe:animate-pulse" />
         {labels.saving}
       </span>

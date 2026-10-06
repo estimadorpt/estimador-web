@@ -1,5 +1,5 @@
 import { teamDisplayName, teamLogoSrc } from "@/lib/config/football";
-import { formatDecimal } from "@/lib/football-format";
+import { formatDecimal, formatOrdinal, formatSigned } from "@/lib/football-format";
 import type { ActualStanding, TeamStrength, XptsEntry } from "@/types/football";
 
 export interface FormEntry {
@@ -30,15 +30,7 @@ interface MatchTeamCompareProps {
   locale: string;
 }
 
-function ordinal(n: number, locale: string): string {
-  if (locale !== "en") return `${n}º`;
-  if (n % 100 >= 11 && n % 100 <= 13) return `${n}th`;
-  const last = n % 10;
-  if (last === 1) return `${n}st`;
-  if (last === 2) return `${n}nd`;
-  if (last === 3) return `${n}rd`;
-  return `${n}th`;
-}
+const ordinal = formatOrdinal;
 
 const RESULT_STYLE: Record<FormEntry["result"], string> = {
   W: "bg-emerald-700 text-white",
@@ -98,7 +90,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
         <span className="text-sm font-bold text-stone-900">
           {teamDisplayName(panel.team)}
         </span>
-        <span className="ml-auto text-[11px] font-bold uppercase tracking-wider text-stone-400">
+        <span className="ml-auto text-[11px] font-bold uppercase tracking-wider text-stone-500">
           {panel.venue === "H" ? L.home : L.away}
         </span>
       </div>
@@ -116,8 +108,8 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
             <span>
               {L.gd}:{" "}
               <strong className="text-stone-800">
-                {panel.standing.gd > 0 ? "+" : ""}
-                {panel.standing.gd}
+                {/* U+2212 for a negative difference (audit FA2-17). */}
+                {formatSigned(panel.standing.gd, locale, 0)}
               </strong>
             </span>
           </div>
@@ -125,11 +117,11 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
 
         {/* Form */}
         <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
             {L.form}
           </div>
           {panel.form.length === 0 ? (
-            <div className="text-xs text-stone-400">{L.noForm}</div>
+            <div className="text-xs text-stone-500">{L.noForm}</div>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {panel.form.map(f => (
@@ -160,7 +152,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
         {/* Model strength */}
         {(attackPct !== null || defensePct !== null) && (
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
               {pt ? "Força do modelo" : "Model strength"}
             </div>
             <div className="space-y-1.5">
@@ -193,17 +185,17 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
                 </div>
               )}
             </div>
-            <div className="text-[11px] text-stone-400 mt-1">{L.strengthNote}</div>
+            <div className="text-[11px] text-stone-500 mt-1">{L.strengthNote}</div>
           </div>
         )}
 
         {/* xPts */}
         <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
             {pt ? "Desempenho esperado" : "Expected performance"}
           </div>
           {!panel.xpts ? (
-            <div className="text-xs text-stone-400">{L.noXpts}</div>
+            <div className="text-xs text-stone-500">{L.noXpts}</div>
           ) : (
             <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone-500">
               <span>

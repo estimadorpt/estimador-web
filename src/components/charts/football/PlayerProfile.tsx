@@ -444,7 +444,7 @@ export function PlayerProfile({
           <span className="text-sm text-stone-500">{posCopy[pr.kind].unit}</span>
         </div>
         {prEntry.rank !== null && pr.peers.length > 0 && (
-          <p className="text-[11px] uppercase tracking-wider text-stone-400">
+          <p className="text-[11px] uppercase tracking-wider text-stone-500">
             {t.posRank(prEntry.rank, pr.peers.length)}
           </p>
         )}
@@ -500,7 +500,7 @@ export function PlayerProfile({
                 style={{ left: `${prPct(prEntry.value)}%`, backgroundColor: color }}
               />
             </div>
-            <div className="flex justify-between text-[11px] tabular-nums text-stone-400">
+            <div className="flex justify-between text-[11px] tabular-nums text-stone-500">
               <span>{nf(prDomain.min)}</span>
               <span>
                 {prEntry.lo !== null && prEntry.hi !== null
@@ -511,7 +511,7 @@ export function PlayerProfile({
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="w-px h-3" style={{ backgroundColor: TRACK }} />
-              <span className="text-[11px] text-stone-400">{t.posOthers}</span>
+              <span className="text-[11px] text-stone-500">{t.posOthers}</span>
             </div>
           </div>
         )}
@@ -519,7 +519,7 @@ export function PlayerProfile({
         <p className="text-sm text-stone-600 leading-relaxed max-w-2xl mt-4">
           {posCopy[pr.kind].meaning}
         </p>
-        <p className="text-xs text-stone-400 leading-relaxed max-w-2xl mt-2">
+        <p className="text-xs text-stone-500 leading-relaxed max-w-2xl mt-2">
           {prEntry.lo === null || prEntry.hi === null
             ? `${t.posNoInterval} ${posCopy[pr.kind].caveat}`
             : posCopy[pr.kind].caveat}
@@ -530,7 +530,7 @@ export function PlayerProfile({
           <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2">
             {prEntry.shots !== null && (
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] uppercase tracking-wider text-stone-500">
                   {t.posShots}
                 </div>
                 <div className="text-lg font-bold tabular-nums text-stone-900">
@@ -540,7 +540,7 @@ export function PlayerProfile({
             )}
             {prEntry.raw !== null && (
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] uppercase tracking-wider text-stone-500">
                   {t.posRaw}
                 </div>
                 <div className="text-lg font-bold tabular-nums text-stone-900">
@@ -557,7 +557,7 @@ export function PlayerProfile({
   /** Shown to keepers and defenders when no position metric is published. */
   const suppressedSection = (
     <section className="mb-10">
-      <h2 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
+      <h2 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
         {t.suppressedTitle}
       </h2>
       <p className="text-sm text-stone-600 leading-relaxed max-w-2xl">
@@ -592,7 +592,7 @@ export function PlayerProfile({
                 <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 bg-stone-100 px-1.5 py-0.5">
                   {t.rank}
                 </span>
-                <span className="text-[11px] uppercase tracking-wider text-stone-400">
+                <span className="text-[11px] uppercase tracking-wider text-stone-500">
                   {t.ofN}
                 </span>
               </>
@@ -617,7 +617,7 @@ export function PlayerProfile({
               />
             )}
             <span>{teamDisplayName(player.team)}</span>
-            <span className="text-stone-300">·</span>
+            <span className="text-stone-500">·</span>
             <span>{posLabel}</span>
           </div>
         </div>
@@ -628,7 +628,7 @@ export function PlayerProfile({
           <span className="font-semibold text-red-700">{t.out}</span>
           {injuryReason ? <span className="text-stone-600"> — {injuryReason}</span> : null}
           {injury.expected_return ? (
-            <span className="text-stone-400">
+            <span className="text-stone-500">
               {" "}
               ({pt ? "regresso previsto a" : "expected back"} {formatLongDate(injury.expected_return, locale)})
             </span>
@@ -696,7 +696,7 @@ export function PlayerProfile({
               style={{ left: `${pct(sar)}%`, backgroundColor: color }}
             />
           </div>
-          <div className="flex justify-between text-[11px] tabular-nums text-stone-400">
+          <div className="flex justify-between text-[11px] tabular-nums text-stone-500">
             <span>0</span>
             <span>
               {nf(lo)} – {nf(hi)} · {t.interval}
@@ -705,14 +705,14 @@ export function PlayerProfile({
           </div>
           <div className="flex items-center gap-1.5 mt-1">
             <span className="w-px h-3" style={{ backgroundColor: TRACK }} />
-            <span className="text-[11px] text-stone-400">{t.others}</span>
+            <span className="text-[11px] text-stone-500">{t.others}</span>
           </div>
         </div>
 
         <p className="text-sm text-stone-600 leading-relaxed max-w-2xl mt-4">
           {t.meaning}
         </p>
-        <p className="text-xs text-stone-400 leading-relaxed max-w-2xl mt-2">
+        <p className="text-xs text-stone-500 leading-relaxed max-w-2xl mt-2">
           {t.intervalMeaning}
         </p>
       </section>
@@ -761,7 +761,7 @@ export function PlayerProfile({
             : []),
         ].map(cell => (
           <div key={cell.label}>
-            <div className="text-[11px] uppercase tracking-wider text-stone-400">
+            <div className="text-[11px] uppercase tracking-wider text-stone-500">
               {cell.label}
             </div>
             <div className="text-lg font-bold tabular-nums text-stone-900">
@@ -784,23 +784,23 @@ export function PlayerProfile({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-300 text-left">
-                  <th className="py-2 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-400">
+                  <th className="py-2 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-500">
                     {t.season}
                   </th>
-                  <th className="py-2 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-400 hidden sm:table-cell">
+                  <th className="py-2 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-500 hidden sm:table-cell">
                     {t.club}
                   </th>
-                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                     {t.minutes}
                   </th>
-                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                     {t.goals}
                   </th>
-                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400 hidden sm:table-cell">
+                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500 hidden sm:table-cell">
                     {t.perNinety}
                   </th>
                   {showGoalsSar && (
-                    <th className="py-2 pl-2 font-medium text-[11px] uppercase tracking-wider text-stone-400 w-[38%]">
+                    <th className="py-2 pl-2 font-medium text-[11px] uppercase tracking-wider text-stone-500 w-[38%]">
                       {t.skillCol}
                     </th>
                   )}
@@ -830,7 +830,7 @@ export function PlayerProfile({
                       {showGoalsSar && (
                       <td className="py-2 pl-2">
                         {v === null ? (
-                          <span className="text-stone-300">—</span>
+                          <span className="text-stone-500">—</span>
                         ) : (
                           <div className="flex items-center gap-2">
                             <div className="relative h-4 flex-1 min-w-[80px]">
@@ -898,11 +898,11 @@ export function PlayerProfile({
                 </span>
                 <span className="flex-1 min-w-0 truncate text-stone-800">
                   {teamDisplayName(m.opponent)}{" "}
-                  <span className="text-stone-400 text-xs">
+                  <span className="text-stone-500 text-xs">
                     ({m.is_home ? t.home : t.away})
                   </span>
                 </span>
-                <span className="text-[11px] text-stone-400 tabular-nums w-16 text-right flex-shrink-0">
+                <span className="text-[11px] text-stone-500 tabular-nums w-16 text-right flex-shrink-0">
                   {int(m.minutes)}&apos; · {m.started ? t.starter : t.sub}
                 </span>
                 <span className="w-14 text-right tabular-nums flex-shrink-0">
@@ -911,7 +911,7 @@ export function PlayerProfile({
                       {m.goals} {m.goals === 1 ? t.goalOne : t.goals.toLowerCase()}
                     </span>
                   ) : (
-                    <span className="text-stone-300">—</span>
+                    <span className="text-stone-500">—</span>
                   )}
                 </span>
                 <span className="w-14 text-right tabular-nums text-stone-500 text-xs flex-shrink-0 hidden sm:inline">
@@ -920,7 +920,7 @@ export function PlayerProfile({
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-stone-400 mt-3 max-w-2xl leading-relaxed">
+          <p className="text-[11px] text-stone-500 mt-3 max-w-2xl leading-relaxed">
             {t.recentNote}
           </p>
         </section>
@@ -968,7 +968,7 @@ export function PlayerProfile({
         )}
       </section>
 
-      <p className="text-[11px] text-stone-400 mt-6 leading-relaxed max-w-2xl">
+      <p className="text-[11px] text-stone-500 mt-6 leading-relaxed max-w-2xl">
         {t.footnote}
       </p>
     </div>

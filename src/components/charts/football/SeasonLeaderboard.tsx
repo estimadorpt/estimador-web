@@ -170,7 +170,7 @@ function Row({
 
   return (
     <tr className={background}>
-      <td className="px-3 py-2 tabular-nums text-stone-400 text-xs">
+      <td className="px-3 py-2 tabular-nums text-stone-500 text-xs">
         {row.isModel ? <Bot className="w-3.5 h-3.5" /> : row.rank}
       </td>
       <td className="px-3 py-2">

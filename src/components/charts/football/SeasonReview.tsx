@@ -354,7 +354,7 @@ export function TitleRaceEvolution({
               x={padL - 6}
               y={y(tk) + 3}
               textAnchor="end"
-              className="fill-stone-400"
+              className="fill-stone-500"
               fontSize="11"
             >
               {Math.round(tk * 100)}%
@@ -384,7 +384,7 @@ export function TitleRaceEvolution({
           <text
             x={x(lastForecastMd) + 5}
             y={padT + 11}
-            className="fill-stone-400"
+            className="fill-stone-500"
             fontSize="11"
           >
             {pt ? "sem previsão" : "no forecast"}
@@ -436,7 +436,7 @@ export function TitleRaceEvolution({
             x={x(tk)}
             y={padT + plotH + 15}
             textAnchor="middle"
-            className="fill-stone-400"
+            className="fill-stone-500"
             fontSize="11"
           >
             {tk}
@@ -445,7 +445,7 @@ export function TitleRaceEvolution({
         <text
           x={padL}
           y={padT + plotH + 28}
-          className="fill-stone-400"
+          className="fill-stone-500"
           fontSize="11"
         >
           {pt ? "jornada" : "matchday"}
@@ -628,7 +628,7 @@ export function ReportCard({
               </th>
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-right w-20"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-right w-20"
               >
                 {pt
                   ? `${teamDisplayName(rc.champion)} campeão`
@@ -636,7 +636,7 @@ export function ReportCard({
               </th>
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left pl-4"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left pl-4"
               >
                 {pt ? "Erro médio nos pontos finais" : "Mean error on final points"}
               </th>

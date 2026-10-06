@@ -947,6 +947,7 @@ export async function loadLigaSummary() {
 export function probabilityHistory(historical: LigaHistorical): LigaProbabilityHistory {
   return historical.map(md => ({
     matchday: md.matchday,
+    timestamp: md.timestamp,
     table: md.table.map(({ team, p_champion, p_relegation }) => ({ team, p_champion, p_relegation })),
   }));
 }

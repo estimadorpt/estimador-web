@@ -275,7 +275,7 @@ export default async function SeasonReviewPage({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="border-t-2 border-emerald-700 pt-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                 {pt ? "Mais acima do xG" : "Furthest above xG"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
@@ -298,7 +298,7 @@ export default async function SeasonReviewPage({
               </p>
             </div>
             <div className="border-t-2 border-red-600 pt-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                 {pt ? "Mais abaixo do xG" : "Furthest below xG"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
@@ -322,7 +322,7 @@ export default async function SeasonReviewPage({
               </p>
             </div>
             <div className="border-t-2 border-stone-400 pt-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                 {pt ? "A melhor finalização" : "The best finishing"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
@@ -452,7 +452,7 @@ export default async function SeasonReviewPage({
 
         {/* Small print */}
         <section className="pt-8 border-t border-stone-200">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400 mb-3">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3">
             {c.creditsTitle}
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">

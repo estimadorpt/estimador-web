@@ -80,12 +80,12 @@ function SideCard({
       {/* Unavailable */}
       <div className="px-4 py-3 border-b border-stone-100">
         <div className="flex items-center gap-1.5 mb-2">
-          <Stethoscope className="w-3.5 h-3.5 text-stone-400" />
-          <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <Stethoscope className="w-3.5 h-3.5 text-stone-500" />
+          <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
             {pt ? "Indisponíveis" : "Unavailable"}
           </span>
           {absencesStatus === "current" && side.injurySummary?.share_of_squad != null && (
-            <span className="text-[11px] text-stone-400">
+            <span className="text-[11px] text-stone-500">
               ·{" "}
               {pt
                 ? `${Math.round(side.injurySummary.share_of_squad * 100)}% do valor do plantel`
@@ -109,7 +109,7 @@ function SideCard({
               <li key={p.player} className="flex items-baseline gap-2 text-xs">
                 <span className="font-medium text-stone-800">{p.player}</span>
                 {p.position && (
-                  <span className="text-[11px] text-stone-400">
+                  <span className="text-[11px] text-stone-500">
                     {positionLabel(p.position, locale)}
                   </span>
                 )}
@@ -123,7 +123,7 @@ function SideCard({
                         ? "Lesão"
                         : "Injury")}
                 </span>
-                <span className="text-[11px] tabular-nums text-stone-400 w-14 text-right">
+                <span className="text-[11px] tabular-nums text-stone-500 w-14 text-right">
                   {formatValue(p.market_value_eur, pt)}
                 </span>
               </li>
@@ -134,17 +134,17 @@ function SideCard({
 
       {/* Top players by SAR */}
       <div className="px-4 py-3">
-        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">
+        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">
           {pt ? "Finalização (SAR)" : "Finishing (SAR)"}
         </div>
-        <p className="text-[11px] text-stone-400 mb-2 leading-relaxed">
+        <p className="text-[11px] text-stone-500 mb-2 leading-relaxed">
           {pt
             ? "Só golos por 90 minutos acima do substituto — uma métrica de avançados, não uma classificação geral de qualidade."
             : "Goals/90 above replacement only — a forwards metric, not a general quality ranking."}
           {sarCutoffLabel ? ` ${sarCutoffLabel}.` : ""}
         </p>
         {side.topPlayers.length === 0 ? (
-          <div className="text-xs text-stone-400">
+          <div className="text-xs text-stone-500">
             {pt ? "Sem jogadores com minutos suficientes." : "No players with enough minutes."}
           </div>
         ) : (
@@ -155,11 +155,11 @@ function SideCard({
                 <li key={p.player}>
                   <div className="flex items-baseline gap-2 text-xs mb-0.5">
                     <span
-                      className={`font-medium ${out ? "text-stone-400 line-through" : "text-stone-800"}`}
+                      className={`font-medium ${out ? "text-stone-500 line-through" : "text-stone-800"}`}
                     >
                       {p.player}
                     </span>
-                    <span className="text-[11px] text-stone-400">
+                    <span className="text-[11px] text-stone-500">
                       {codes[p.position] ?? p.position}
                     </span>
                     {out && (

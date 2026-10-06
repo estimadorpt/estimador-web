@@ -102,12 +102,12 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
   return (
     <div>
       <div className="flex items-center gap-2 mb-1">
-        <Stethoscope className="w-4 h-4 text-stone-400" />
+        <Stethoscope className="w-4 h-4 text-stone-500" />
         <h2 className="text-2xl tracking-tight">{t.title}</h2>
       </div>
       <p className="text-sm text-stone-500 mb-1 max-w-3xl leading-relaxed">{t.intro}</p>
       {snapshot && (
-        <p className="text-[11px] uppercase tracking-wider text-stone-400 mb-6">
+        <p className="text-[11px] uppercase tracking-wider text-stone-500 mb-6">
           {t.snapshot(snapshot)}
         </p>
       )}
@@ -138,7 +138,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                   {sharePct.toLocaleString(pt ? "pt-PT" : "en-GB", {
                     maximumFractionDigits: sharePct < 10 ? 1 : 0,
                   })}
-                  <span className="text-xs font-bold text-stone-400">%</span>
+                  <span className="text-xs font-bold text-stone-500">%</span>
                 </span>
               </div>
 
@@ -148,7 +148,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                   style={{ width: `${barPct}%`, backgroundColor: "#a3543a", opacity: 0.75 }}
                 />
               </div>
-              <div className="text-[11px] text-stone-400 mb-2 tabular-nums">
+              <div className="text-[11px] text-stone-500 mb-2 tabular-nums">
                 {t.outOfSquad} · {formatValue(team.value_out_eur, pt)}
               </div>
 
@@ -176,19 +176,19 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                           <div className="text-stone-500">
                             {injuryReasonLabel(p.reason, locale)}
                             {p.position && (
-                              <span className="text-stone-400">
+                              <span className="text-stone-500">
                                 {" · "}
                                 {positionLabel(p.position, locale)}
                               </span>
                             )}
                           </div>
                           {back && (
-                            <div className="text-[11px] text-stone-400">
+                            <div className="text-[11px] text-stone-500">
                               {t.back}: {back}
                             </div>
                           )}
                         </div>
-                        <span className="text-[11px] tabular-nums text-stone-400 flex-shrink-0">
+                        <span className="text-[11px] tabular-nums text-stone-500 flex-shrink-0">
                           {formatValue(p.market_value_eur, pt)}
                         </span>
                       </li>
@@ -200,7 +200,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
         })}
       </div>
 
-      <p className="text-[11px] text-stone-400 mt-6 max-w-3xl">
+      <p className="text-[11px] text-stone-500 mt-6 max-w-3xl">
         {t.valueNote}
         {data.n_suspensions === 0 && ` ${t.noSuspensions}`}
       </p>

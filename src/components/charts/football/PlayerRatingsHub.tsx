@@ -312,7 +312,7 @@ export function PlayerRatingsHub({
             </summary>
             <ul className="mt-2 space-y-1.5 border-l border-stone-200 pl-3">
               {block.meta.caveats.map((c, i) => (
-                <li key={i} className="text-[11px] text-stone-400 leading-relaxed">
+                <li key={i} className="text-[11px] text-stone-500 leading-relaxed">
                   {c}
                 </li>
               ))}
@@ -336,7 +336,7 @@ export function PlayerRatingsHub({
       (r.range !== null && r.range < 0.02);
     return (
       <div className="mt-6 border-t border-stone-200 pt-4 max-w-3xl">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">
           {pt ? "A distribuição por posição" : "The distribution by position"}
         </h3>
         <p className="text-[11px] text-stone-500 mb-3 leading-relaxed">
@@ -348,19 +348,19 @@ export function PlayerRatingsHub({
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-stone-300 text-left">
-              <th className="py-1.5 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-500">
                 {pt ? "Posição" : "Position"}
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                 n
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                 {pt ? "mediana" : "median"}
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                 {pt ? "amplitude" : "range"}
               </th>
-              <th className="py-1.5 pl-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 pl-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                 {pt ? "valores distintos" : "distinct values"}
               </th>
             </tr>
@@ -853,7 +853,7 @@ export function PlayerRatingsHub({
                 <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 border-t border-stone-200 pt-4 max-w-3xl">
                   {defNumbers.map((d) => (
                     <div key={d.label}>
-                      <dt className="text-[11px] uppercase tracking-wider text-stone-400">
+                      <dt className="text-[11px] uppercase tracking-wider text-stone-500">
                         {d.label}
                       </dt>
                       <dd className="text-sm font-semibold tabular-nums text-stone-800">
@@ -867,7 +867,7 @@ export function PlayerRatingsHub({
                 <dl className="mt-4 space-y-2 max-w-3xl">
                   {defText.map((d) => (
                     <div key={d.label}>
-                      <dt className="text-[11px] uppercase tracking-wider text-stone-400">
+                      <dt className="text-[11px] uppercase tracking-wider text-stone-500">
                         {d.label}
                       </dt>
                       <dd className="text-xs text-stone-600 leading-relaxed">

@@ -153,7 +153,7 @@ export function PlayerRatingList({
                   aria-expanded={isOpen}
                   className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left hover:bg-stone-100 transition-colors"
                 >
-                  <div className="w-6 flex-shrink-0 text-right text-xs font-bold tabular-nums text-stone-400">
+                  <div className="w-6 flex-shrink-0 text-right text-xs font-bold tabular-nums text-stone-500">
                     {e.rank ?? ""}
                   </div>
 
@@ -300,14 +300,14 @@ export function PlayerRatingList({
                 <div className="pl-8 pr-2 pb-3 pt-1 bg-stone-50/60">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-xs">
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
                         {labels.interval}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
                         {hasInterval ? (
                           `${signed(e.lo!)} – ${signed(e.hi!)}`
                         ) : (
-                          <span className="font-normal text-stone-400">
+                          <span className="font-normal text-stone-500">
                             {labels.noInterval}
                           </span>
                         )}
@@ -315,7 +315,7 @@ export function PlayerRatingList({
                     </div>
                     {cells.map((cell) => (
                       <div key={cell.label}>
-                        <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                        <div className="text-[11px] uppercase tracking-wider text-stone-500">
                           {cell.label}
                         </div>
                         <div className="font-semibold tabular-nums text-stone-800">

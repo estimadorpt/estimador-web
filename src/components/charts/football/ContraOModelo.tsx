@@ -329,7 +329,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
           <div className="border border-stone-200 rounded-xl overflow-hidden">
             <div className="grid grid-cols-2 divide-x divide-stone-200">
               <div className="p-4 sm:p-6">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                   {t.yourScore}
                 </div>
                 <div
@@ -340,7 +340,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
                 </div>
               </div>
               <div className="p-4 sm:p-6">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                   {t.modelScore}
                 </div>
                 <div
@@ -438,7 +438,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
 
             <div className="flex items-end gap-6 mb-4">
               <div>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
                   {t.you}
                 </div>
                 <div className="text-4xl font-bold tabular-nums" style={{ color: USER_COLOR }}>
@@ -447,7 +447,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
               </div>
               <div className="text-xl font-bold text-stone-500 pb-2" aria-hidden="true">vs</div>
               <div>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
                   {t.model}
                 </div>
                 <div className="text-4xl font-bold tabular-nums" style={{ color: MODEL_COLOR }}>
@@ -772,7 +772,7 @@ function RoundReview({
     <div className="border border-stone-200 rounded-xl overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 bg-stone-50 border-b border-stone-200">
         <div className="flex items-center gap-2">
-          <Lock className="w-3.5 h-3.5 text-stone-400" />
+          <Lock className="w-3.5 h-3.5 text-stone-500" />
           <span className="font-semibold text-stone-900 text-sm">
             {t.matchday} {round.matchday}
           </span>
@@ -826,12 +826,12 @@ function RoundReview({
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="font-medium text-stone-900 truncate">
                       {teamDisplayName(s.home)} {fixture.result!.homeGoals}
-                      <span className="text-stone-300">-</span>
+                      <span className="text-stone-500">-</span>
                       {fixture.result!.awayGoals} {teamDisplayName(s.away)}
                     </span>
                     <span
                       className={`text-xs font-bold tabular-nums shrink-0 ${
-                        s.edge > 0 ? "text-emerald-700" : s.edge < 0 ? "text-red-700" : "text-stone-400"
+                        s.edge > 0 ? "text-emerald-700" : s.edge < 0 ? "text-red-700" : "text-stone-500"
                       }`}
                     >
                       {s.edge > 0 ? "+" : ""}
@@ -853,7 +853,7 @@ function RoundReview({
         </>
       )}
 
-      <div className="px-4 py-2 bg-stone-50 border-t border-stone-100 text-[11px] text-stone-400">
+      <div className="px-4 py-2 bg-stone-50 border-t border-stone-100 text-[11px] text-stone-500">
         {lock.reason === "kickoff" ? t.lockedKickoff : t.lockedResults}
         {/* No "N you didn't predict" tally. Unpredicted matches do not enter
             the mean, so counting them only tells a late joiner they were

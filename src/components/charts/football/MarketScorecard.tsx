@@ -559,7 +559,7 @@ function CheckpointChart({
         >
           <div className="font-semibold text-stone-900 mb-1">
             {pt ? "Jornada" : "Matchday"} {predictedMatchday(h)}{" "}
-            <span className="font-normal text-stone-400">n={h.n}</span>
+            <span className="font-normal text-stone-500">n={h.n}</span>
           </div>
           <div className="flex justify-between tabular-nums">
             <span className="text-stone-500">{pt ? "Modelo" : "Model"}</span>
@@ -579,7 +579,7 @@ function CheckpointChart({
         </div>
       )}
 
-      <p className="mt-2 text-[11px] leading-relaxed text-stone-400">
+      <p className="mt-2 text-[11px] leading-relaxed text-stone-500">
         {pt
           ? `Eixo vertical truncado (${num(yLo, 2)} a ${num(yHi, 2)}) para tornar visíveis as diferenças; as diferenças reais são as da faixa inferior. Cada ponto junta os jogos de uma jornada nas ${data.n_seasons} épocas${perPoint ? ` (n = ${perPoint} jogos por ponto)` : ""}, previstos com os resultados até à jornada anterior. Na faixa inferior, uma barra cuja linha de ±${K} erros padrão atravessa o zero é um empate técnico.`
           : `Vertical axis truncated (${num(yLo, 2)} to ${num(yHi, 2)}) so the differences are visible; the real differences are the ones in the lower strip. Each point pools one matchday's games across the ${data.n_seasons} seasons${perPoint ? ` (n = ${perPoint} matches per point)` : ""}, forecast with the results up to the previous matchday. In the lower strip, a bar whose ±${K} standard-error line crosses zero is a statistical tie.`}
@@ -746,7 +746,7 @@ function Disagreements({ data, pt, locale }: { data: MarketScorecardData; pt: bo
                 </span>{" "}
                 {teamDisplayName(d.away_team)}
               </span>
-              <span className="text-xs text-stone-400">
+              <span className="text-xs text-stone-500">
                 {d.season} · {pt ? "jornada" : "matchday"} {d.matchday ?? d.checkpoint}
               </span>
               <span className="ml-auto">{verdictChip(d.verdict)}</span>
@@ -784,7 +784,7 @@ function Disagreements({ data, pt, locale }: { data: MarketScorecardData; pt: bo
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-[11px] text-stone-400">
+      <p className="mt-3 text-[11px] text-stone-500">
         {pt
           ? `Os ${data.disagreements.length} jogos em que os dois favoritos mais se afastaram um do outro. «Nenhum» significa que saiu o terceiro resultado.`
           : `The ${data.disagreements.length} matches where the two favourites were furthest apart. “Neither” means the third result came in.`}

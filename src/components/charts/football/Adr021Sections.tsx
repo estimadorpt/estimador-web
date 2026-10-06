@@ -136,7 +136,7 @@ export function ContestedSection({
           <h3 className="text-sm text-stone-800 mb-1">
             {cellTitle(cell)}
           </h3>
-          <p className="text-[11px] text-stone-400 mb-3">
+          <p className="text-[11px] text-stone-500 mb-3">
             {pt
               ? `${cell.separable} de ${int(cell.n_players)} jogadores ajustados separam-se da média da posição (${cell.permutation_null.toLocaleString("pt-PT", { maximumFractionDigits: 2 })} esperados por acaso). A lista mostra só quem está na Liga esta época.`
               : `${cell.separable} of ${int(cell.n_players)} fitted players separate from the positional average (${cell.permutation_null.toLocaleString("en-GB", { maximumFractionDigits: 2 })} expected by chance). The list shows only players in the league this season.`}
@@ -195,7 +195,7 @@ export function ContestedSection({
         </div>
       ))}
 
-      <p className="text-[11px] text-stone-400 mt-2 leading-relaxed max-w-3xl">
+      <p className="text-[11px] text-stone-500 mt-2 leading-relaxed max-w-3xl">
         {pt
           ? `Épocas ${data.seasons[0]}–${data.seasons[data.seasons.length - 1]}. Cada célula passou três portas pré-registadas: separabilidade acima de 3× o acaso, correlação com a qualidade do clube abaixo de 0,3 e estabilidade em jogadores que mudaram de clube. A taxa média da liga é exatamente 50% por construção — cada duelo ganho é o duelo perdido de outro jogador.`
           : `Seasons ${data.seasons[0]}–${data.seasons[data.seasons.length - 1]}. Every cell passed three pre-registered gates: separability above 3× chance, club-quality correlation under 0.3, and stability across players who changed clubs. The league-average rate is exactly 50% by construction — every duel won is another player's duel lost.`}
@@ -287,7 +287,7 @@ export function GkChannelsSection({
               ? `A percentagem de cruzamentos sofridos em que o guarda-redes sai — alívio de punhos ou bola agarrada. É o primeiro eixo de guarda-redes deste site em que os jogadores realmente se separam: ${cross.separable} de ${int(cross.n_fitted ?? cross.ranking.length)} no painel ajustado, para além do acaso (~5 esperados). E é do guarda-redes, não do clube: dois guarda-redes da mesma equipa não se parecem um com o outro (correlação ${formatDecimal(cross.teammate_r, "pt", 2)}). A lista mostra só quem está na Liga esta época.`
               : `The share of crosses faced where the keeper comes for the ball — a punch or a claim. It is the first goalkeeper axis on this site where players genuinely separate: ${cross.separable} of ${int(cross.n_fitted ?? cross.ranking.length)} in the fitted panel, beyond chance (~5 expected). And it belongs to the keeper, not the club: two keepers at the same club do not resemble each other (correlation ${formatDecimal(cross.teammate_r, "en", 2)}). The list shows only keepers in the league this season.`}
           </p>
-          <p className="text-[11px] text-stone-400 mb-3 max-w-3xl">
+          <p className="text-[11px] text-stone-500 mb-3 max-w-3xl">
             {pt
               ? "Não lhe chamamos “domínio da área”: a métrica não distingue um guarda-redes que agarra de um que soca tudo."
               : "We do not call this “command of the area”: the metric cannot tell a commanding catcher from a punch-happy keeper."}
@@ -329,7 +329,7 @@ export function GkChannelsSection({
                 : []),
             ]}
           />
-          <p className="text-[11px] text-stone-400 mt-2 max-w-3xl leading-relaxed">
+          <p className="text-[11px] text-stone-500 mt-2 max-w-3xl leading-relaxed">
             {pt
               ? "Nenhum guarda-redes mudou de clube entre épocas consecutivas com jogos suficientes, por isso ainda não sabemos se esta característica viaja com o jogador."
               : "No keeper changed clubs between consecutive seasons with enough matches, so whether this trait travels with the player is still untested."}
