@@ -1,63 +1,40 @@
 ## Our mission
 
-estimador.pt is a data analysis platform that publishes transparent, probabilistic forecasts about Portugal. We believe the public benefits from rigorous, unbiased analysis, not just punditry and speculation.
+estimador.pt publishes data and models about Portugal: who lives in each parish, in an open synthetic population; how the Liga Portugal could end, in a forecast updated every matchday; and what the election forecasts said, kept in an archive as they were published. A section on the economy is in preparation.
 
-Our goal is to bring the standards of modern statistical modelling to the Portuguese context, combining Bayesian methods with real data to answer relevant questions.
+We believe that understanding the country takes more than commentary: it takes numbers with a date, a source and a stated uncertainty, and models explained well enough to be checked.
 
 ---
 
-## Current status
+## Who makes estimador.pt
 
-Each section has its own status (released, publishing, in preparation, paused or archive), described here the same way it is on the section itself, so there is never a second version of the same fact.
+estimador.pt is an independent project by **Bernardo Caldas**, with no external funding and no editorial pressure.
+
+For questions, suggestions or media enquiries, write to [info@estimador.pt](mailto:info@estimador.pt). The [privacy policy](/en/privacidade/) describes what the site records about its visitors.
+
+---
+
+## What is published today
 
 <EstadoAtual />
 
 ---
 
-## What we do
-
-**Economy** — in preparation
-A consolidated read of Portuguese economic indicators: activity, labour market, inflation, recession risk and public accounts. Once it is published, each indicator will state whether it is an official figure or an estimate from our model, the period it refers to and its publication date. Until then, the explanations of how to read the indicators are available. See the [economy methodology](/en/economia/metodologia/).
-
-**Population** — version 1.0.3, released 5 October 2026 (replacing versions 1.0.0, 1.0.1 and 1.0.2 of the same day)
-To the best of our knowledge, the first open-access synthetic population to cover every parish in Portugal, generated from the 2021 Census. Generated people and households, not real people, families or addresses. At [/populacao](/en/populacao/) you can look up your parish, play the daily Mystery parish and download the microdata. See the [population methodology](/en/populacao/metodologia/).
-
-**Liga Portugal** — published on a continuing basis
-A Bayesian model that simulates thousands of possible seasons to forecast standings, title and relegation probabilities, and the impact of each matchday on the league. See the [football methodology](/en/desporto/liga/metodologia/).
-
-**Presidential elections 2026** — archive
-The forecasts we published for the 2026 presidential election, preserved as they were made. They are not updated, nor rewritten with the outcome. They include that cycle's polling analysis: the estimated house effect of each polling firm, the consistent lean each one showed towards certain candidates.
-
-**Parliamentary elections 2025** — archive
-The forecast model for the 2025 parliamentary election, with district-level seat projections using the D'Hondt method and the pollster house effects estimated at the time.
-
----
-
 ## Our approach
 
-We use Bayesian statistical methods, which quantify uncertainty explicitly. Our forecasts produce probability distributions that reflect what we actually know, and what we do not, about the outcomes.
+Each section uses the method its question calls for: Bayesian statistical models for the Liga and the elections, and a synthetic population fitted to the 2021 Census tables for the population. In all of them, the numbers state their date, their source and how uncertain they are, or say that no margin of error was calculated.
 
 **Principles:**
 
-- **Transparency:** open methodology, with documentation of the models and their assumptions.
+- **Transparency:** open methodology, with documentation of the models, the data and the assumptions.
 - **Independence:** no external funding and no editorial pressure.
-- **Accuracy:** we say how each forecast is evaluated, and claim only what is published. The Liga Portugal model is checked against actual results and bookmakers' closing odds, over past seasons, in [Model vs market](/en/desporto/liga/modelo/). An evaluation of the election forecasts against the results is not published.
-- **Accessibility:** probabilistic forecasts presented so that any reader can follow them.
-
----
-
-## About the project
-
-estimador.pt was created by **Bernardo Caldas** as an independent project combining Bayesian statistics, computational methods and analysis of Portuguese data.
-
-For questions, suggestions or media enquiries, write to [info@estimador.pt](mailto:info@estimador.pt).
-
-The [privacy policy](/en/privacidade/) describes what the site records about its visitors.
+- **Accuracy:** we say how each result is evaluated and claim only what is published. The Liga Portugal model is checked against actual results and bookmakers' closing odds in [Model vs market](/en/desporto/liga/modelo/); the quality of every parish in the synthetic population is on [Quality](/en/populacao/qualidade/). An evaluation of the election forecasts against the results is not published.
+- **Accessibility:** numbers and probabilities presented so that any reader can follow them.
 
 ---
 
 ## Limitations and caveats
 
-Probabilistic forecasting is uncertain by nature, which is why we present probabilities, not certainties. Our models account for several sources of uncertainty, but there are always unpredictable factors.
+Probabilistic forecasting is uncertain by nature, which is why we present probabilities, not certainties. A forecast of 70% also means a 30% chance of the opposite. The models account for several sources of uncertainty, but there are always unpredictable factors.
 
-A forecast of 70% also means a 30% chance of the opposite. Read our forecasts as informed probabilistic assessments, not facts.
+The synthetic population is not a forecast: it is people and households generated to reproduce the Census tables, in a single run with no margin of error calculated. Read its numbers as an estimate of the 2021 picture, not as a count of real people.

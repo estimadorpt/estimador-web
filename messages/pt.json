@@ -11,7 +11,15 @@
     "economics": "Economia",
     "economicsPreparing": "Economia · em preparação",
     "population": "População",
+<<<<<<< HEAD
     "game": "Contra o Modelo"
+=======
+    "populationSearch": "Procurar a tua freguesia",
+    "populationGame": "Freguesia misteriosa (jogo diário)",
+    "populationData": "Dados abertos",
+    "populationQuality": "Qualidade",
+    "populationMethodology": "Metodologia"
+>>>>>>> worktree-wf_7788cb80-c97-4
   },
   "common": {
     "methodology": "Metodologia"
@@ -97,12 +105,12 @@
   "articles": {
     "title": "Análise e artigos",
     "eyebrow": "Notas e explicadores",
-    "subtitle": "Notas datadas sobre o que aparece nos dados — futebol, economia e eleições — e explicadores sobre como ler os números.",
+    "subtitle": "Notas datadas sobre o que aparece nos dados (população, futebol, eleições e economia) e explicadores sobre como ler os números.",
     "by": "Por",
     "backToArticles": "Voltar aos artigos",
     "onlyInPortuguese": "Apenas em português",
-    "empty": "Ainda não há artigos publicados.",
-    "emptyNextStep": "Ler a metodologia →",
+    "empty": "Ainda não há artigos publicados. Entretanto, os dados estão nas secções: começa pela tua freguesia.",
+    "emptyNextStep": "Procurar a tua freguesia",
     "readTimeSuffix": "de leitura",
     "feedLink": "RSS",
     "notesHeading": "Notas",
@@ -139,11 +147,15 @@
   },
   "about": {
     "title": "Sobre o estimador.pt",
-    "footerDeveloper": "Desenvolvido por Bernardo Caldas"
+    "footerDeveloper": "Um projeto independente de Bernardo Caldas."
   },
   "methodology": {
+<<<<<<< HEAD
     "title": "Metodologia",
     "subtitle": "Como chegamos a cada resposta: população sintética, Liga Portugal, eleições e economia. Fontes, pressupostos e limites."
+=======
+    "title": "Metodologia"
+>>>>>>> worktree-wf_7788cb80-c97-4
   },
   "parties": {
     "AD": "Aliança Democrática",
@@ -304,7 +316,18 @@
     "moreKicker": "Como fazemos",
     "moreMethodology": "Metodologia de cada domínio",
     "moreArticle": "Última análise",
+<<<<<<< HEAD
     "electionsForecastRunoff": "previsão de {date} para a 2.ª volta"
+=======
+    "aboutLink": "Sobre o projeto",
+    "shortcutsLabel": "Atalhos",
+    "shortcutPopulation": "A minha freguesia",
+    "shortcutPopulationStatus": "Versão {version}",
+    "shortcutClub": "O meu clube",
+    "shortcutClubStatus": "Após a jornada {matchday}",
+    "shortcutElections": "Eleições",
+    "shortcutElectionsStatus": "Arquivo"
+>>>>>>> worktree-wf_7788cb80-c97-4
   },
   "sections": {
     "ligaPortugal": "Liga Portugal",
@@ -538,7 +561,7 @@
   },
   "meta": {
     "defaultTitle": "estimador.pt — Dados para compreender Portugal",
-    "defaultDescription": "Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.",
+    "defaultDescription": "Dados e modelos sobre Portugal, com a incerteza à vista: quem vive em cada freguesia, como pode acabar a Liga e o que diziam as previsões eleitorais.",
     "homepageTitle": "estimador.pt — Dados para compreender Portugal",
     "presidentialTitle": "Presidenciais 2026: arquivo da previsão",
     "presidentialDescription": "Previsão arquivada das eleições presidenciais de 2026, com a informação disponível à data: 1.ª volta a {date1} e 2.ª volta a {date2}.",
@@ -549,16 +572,17 @@
     "articlesTitle": "Análise e artigos",
     "aboutTitle": "Sobre o estimador.pt",
     "economicsTitle": "Estado da economia portuguesa",
-    "economicsDescription": "Uma leitura consolidada e centrada na incerteza do estado atual da economia portuguesa — pulso da atividade, risco de recessão, risco em baixa e uma estimativa preliminar do PIB. Não é uma previsão.",
+    "economicsDescription": "Uma leitura do estado atual da economia portuguesa, com a incerteza à vista: atividade, risco de recessão e uma estimativa preliminar do PIB.",
     "economicsPreparingTitle": "Economia (em preparação)",
     "economicsPreparingDescription": "Como ler os indicadores da economia portuguesa: inflação, emprego e atividade. A leitura do estado da economia está em preparação.",
     "privacyTitle": "Privacidade",
     "privacyDescription": "O que o estimador.pt regista sobre quem o visita: medição sem cookies, registos do servidor e dados do jogo de previsões.",
     "economicsMethodologyTitle": "Metodologia da economia",
-    "economicsMethodologyDescription": "Como construímos a leitura do estado da economia portuguesa: indicadores, fontes oficiais, o que é medido e o que é estimado.",
+    "economicsMethodologyDescription": "Como vamos ler a economia portuguesa: as fontes, os quatro selos e a avaliação do protótipo testado até julho de 2026. Ainda sem números publicados.",
     "topicsTitle": "Temas dos artigos",
     "topicTitle": "{topic}: artigos",
-    "topicDescription": "Tudo o que o estimador.pt publicou sobre {topic}: notas datadas e explicadores."
+    "topicDescription": "Tudo o que o estimador.pt publicou sobre {topic}: notas datadas e explicadores.",
+    "aboutDescription": "Quem faz o estimador.pt, o que está publicado em cada secção e como trabalhamos: métodos, princípios e limites."
   },
   "economics": {
     "title": "Estado da economia",
@@ -744,10 +768,8 @@
     "pausedQuestion": "Porque não aparecem números atuais?",
     "preparingTitle": "Compreender a economia",
     "preparingEyebrow": "Economia · em preparação",
-    "preparingBody": "A leitura do estado da economia ainda está em preparação, por isso não mostramos números. Até lá ficam as explicações sobre como ler os indicadores e a metodologia.",
-    "preparingQuestion": "Porque não aparecem números?",
     "explainerLede": "Perceber o que os indicadores medem — e o que deixam de fora.",
-    "methodologyPreparingNotice": "Esta secção está em preparação. A metodologia descreve o painel tal como foi testado até {date}; não há números publicados.",
+    "methodologyPreparingNotice": "Esta secção está em preparação e não há números publicados. A página descreve o protótipo tal como foi testado até {date}.",
     "statusPaused": "Painel em pausa · última leitura: {date}",
     "statusPreparing": "Em preparação · sem números publicados",
     "statusUnavailable": "Painel indisponível de momento",
@@ -849,18 +871,21 @@
     "paDebtAria": "Trajetória da dívida pública nos últimos 24 meses",
     "calendarTitle": "Próximas divulgações",
     "calendarEstimated": "data estimada",
-    "calendarUpdates": "atualiza"
+    "calendarUpdates": "atualiza",
+    "preparingLede": "A leitura do estado da economia está em preparação, por isso ainda não há números. Entretanto: três perguntas sobre como ler preços, trabalho e atividade.",
+    "methodologyTitle": "Como vamos ler a economia?"
   },
   "footer": {
-    "products": "Produtos",
+    "products": "Secções",
     "project": "O projeto",
-    "privacy": "Privacidade"
+    "privacy": "Privacidade",
+    "contact": "Contacto"
   },
   "notFound": {
     "title": "Página não encontrada | estimador.pt",
     "heading": "Este caminho não leva a lado nenhum.",
     "lede": "A página que procuras não existe, mudou de sítio ou nunca foi estimada.",
     "home": "Voltar ao início",
-    "atlas": "Explorar o atlas"
+    "atlas": "Procurar a tua freguesia"
   }
 }

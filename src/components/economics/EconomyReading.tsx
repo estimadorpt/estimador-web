@@ -92,8 +92,10 @@ export function EconomyReading({
         <Tabs.List aria-label={lang === 0 ? 'Tema da economia' : 'Economy topic'} className="mb-4 flex rounded-xl bg-moss/60 p-1">
           {topics.map(topic => <Tabs.Trigger key={topic.id} value={topic.id} className="min-h-12 min-w-0 flex-1 rounded-lg px-2 text-sm font-bold text-ink data-[state=active]:bg-ink data-[state=active]:text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">{topic.label[lang]}</Tabs.Trigger>)}
         </Tabs.List>
+        {/* No id on the panels: Radix names them, and each tab's
+            aria-controls points at that name. */}
         {topics.map(topic => (
-          <Tabs.Content key={topic.id} value={topic.id} id={`economy-topic-${topic.id}`} className="rounded-2xl border border-line bg-cream p-6 md:p-7 focus-visible:outline-2 focus-visible:outline-ink">
+          <Tabs.Content key={topic.id} value={topic.id} className="rounded-2xl border border-line bg-cream p-6 md:p-7 focus-visible:outline-2 focus-visible:outline-ink">
             <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
               <p className="text-[11px] font-bold uppercase tracking-widest text-ink-muted">{lang === 0 ? 'Ler um indicador' : 'Reading an indicator'}</p>
               {status && <div className="text-[11px] font-semibold text-ink-muted">{status}</div>}

@@ -78,11 +78,12 @@ export default async function TopicsPage({
               <p className="text-stone-600">{t('articles.empty')}</p>
               <p className="mt-4">
                 <Link
-                  href="/metodologia"
+                  href="/populacao"
                   locale={locale}
                   className="inline-flex items-center gap-1.5 font-semibold text-ink underline underline-offset-4 hover:no-underline"
                 >
                   {t('articles.emptyNextStep')}
+                  <span aria-hidden="true">→</span>
                 </Link>
               </p>
             </div>

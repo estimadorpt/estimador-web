@@ -52,15 +52,11 @@ const isObject = value => typeof value === 'object' && value !== null && !Array.
 const nonEmptyArray = value => Array.isArray(value) && value.length > 0;
 
 // ---- economics -------------------------------------------------------------
-
-feed('economics/dashboard.json', value => {
-  if (!isObject(value)) return 'expected an object';
-  if (typeof value.vintage_date !== 'string') return 'no vintage_date — the dashboard cannot be dated';
-  if (!isObject(value.tiles) || Object.keys(value.tiles).length === 0) return 'no tiles';
-  return null;
-});
-
-feed('economics/stories.json', value => (isObject(value) && isObject(value.modules) ? null : 'no modules'), { required: false });
+//
+// Nothing to check while the section is in preparation: the economy feeds are
+// not in public/data until launch (src/lib/config/economy-status.json, and the
+// guard in scripts/sync-data.sh). Before setting `published: true`, sync them
+// and restore a required check on economics/dashboard.json here.
 
 // ---- football --------------------------------------------------------------
 

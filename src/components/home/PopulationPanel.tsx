@@ -27,7 +27,8 @@ export async function PopulationPanel({ locale, variant, meta }: { locale: strin
   const t = await getTranslations({ locale, namespace: 'home' });
   const lang = locale === 'en' ? 'en' : 'pt';
   const lead = variant === 'lead';
-  const Heading = lead ? 'h1' : 'h2';
+  // The homepage's h1 is the site line above the grid; every panel title is an h2.
+  const Heading = 'h2';
 
   const figures = meta && (
     <>

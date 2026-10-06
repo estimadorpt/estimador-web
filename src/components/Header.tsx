@@ -7,6 +7,7 @@ import { Globe, Menu, X, ChevronDown } from 'lucide-react';
 import { LogoHorizontal } from './Logo';
 import { useArticleLanguagePath, useHasArticles } from '@/lib/article-navigation';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
+import { POPULATION_ROUTES } from '@/lib/config/population';
 
 interface NavItem {
   id: string;
@@ -32,11 +33,20 @@ export function Header() {
   const isPortuguese = locale === 'pt';
   const hasArticles = useHasArticles(locale);
 
+  // Ordered by what is live: the population, the Liga, the election archive,
+  // then the economy while it is in preparation (src/lib/config/economy-status.json).
   const navigationItems: NavItem[] = [
     { id: 'home', href: '/', label: t('nav.home') },
-    { id: 'population', href: '/populacao', label: t('nav.population') },
-    // The editorial flag in src/lib/config/economy-status.json, not data age.
-    { id: 'economics', href: '/economia', label: t(ECONOMY_PUBLISHED ? 'nav.economics' : 'nav.economicsPreparing') },
+    {
+      id: 'population', label: t('nav.population'),
+      dropdown: [
+        { href: POPULATION_ROUTES.hub, label: t('nav.populationSearch') },
+        { href: POPULATION_ROUTES.game, label: t('nav.populationGame') },
+        { href: POPULATION_ROUTES.data, label: t('nav.populationData') },
+        { href: POPULATION_ROUTES.quality, label: t('nav.populationQuality') },
+        { href: POPULATION_ROUTES.methodology, label: t('nav.populationMethodology') },
+      ],
+    },
     {
       id: 'sport', label: t('nav.sport'),
       dropdown: [
@@ -49,18 +59,21 @@ export function Header() {
     {
       id: 'elections', label: t('nav.elections'),
       dropdown: [
-        // Both forecasts are archives: the label says so before the click.
+        // The overview of the archive first; both forecasts are archives and
+        // the labels say so before the click.
+        { href: '/eleicoes/arquivo', label: t('elections.navArchiveGuide') },
         { href: '/eleicoes/presidenciais', label: t('elections.navPresidential') },
         { href: '/eleicoes/legislativas', label: t('elections.navParliamentary') },
-        { href: '/eleicoes/arquivo', label: t('elections.navArchiveGuide') },
       ],
     },
+    // The editorial flag in src/lib/config/economy-status.json, not data age.
+    { id: 'economics', href: '/economia', label: t(ECONOMY_PUBLISHED ? 'nav.economics' : 'nav.economicsPreparing') },
     // No nav item for an index with nothing in it in this language.
     ...(hasArticles ? [{ id: 'articles', href: '/artigos', label: t('articles.title') }] : []),
     {
       id: 'about', label: t('nav.about'),
       dropdown: [
-        { href: '/sobre', label: t('nav.about') },
+        { href: '/sobre', label: t('about.title') },
         { href: '/metodologia', label: t('methodology.title') },
         { href: '/privacidade', label: isPortuguese ? 'Privacidade' : 'Privacy' },
       ],
@@ -75,6 +88,16 @@ export function Header() {
     setOpenDropdown(null);
     setMobileExpanded(null);
   };
+
+  // The open mobile menu holds the page still beneath it, and lets it go on
+  // close (or when the header unmounts).
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const root = document.documentElement;
+    const previous = root.style.overflow;
+    root.style.overflow = 'hidden';
+    return () => { root.style.overflow = previous; };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     function closeOutside(event: PointerEvent) {
@@ -107,7 +130,7 @@ export function Header() {
 
   function LanguageLinks({ mobile = false }: { mobile?: boolean }) {
     return (
-      <div className="flex gap-1 bg-stone-100 rounded-md p-0.5" aria-label={isPortuguese ? 'Idioma' : 'Language'}>
+      <div role="group" className="flex gap-1 bg-stone-100 rounded-md p-0.5" aria-label={isPortuguese ? 'Idioma' : 'Language'}>
         {(['pt', 'en'] as const).map(targetLocale => {
           const href = targetLocale === 'pt' ? ptPath : enPath;
           const fallback = href !== pathname;
@@ -128,7 +151,14 @@ export function Header() {
   }
 
   return (
-    <header ref={headerRef} onKeyDown={handleEscape} className="border-b border-line bg-paper/95 backdrop-blur-sm sticky top-0 z-50">
+    <header ref={headerRef} onKeyDown={handleEscape} onBlur={event => {
+      // Keyboard focus that leaves the header closes the menus, so nothing
+      // focused can sit hidden under the open mobile panel. A null target
+      // (a tap on the panel's own padding) is not a departure; pointerdown
+      // outside the header already covers taps elsewhere.
+      const next = event.relatedTarget;
+      if (next instanceof Node && !event.currentTarget.contains(next)) closeNavigation();
+    }} className="border-b border-line bg-paper/95 backdrop-blur-sm sticky top-0 z-50">
       {/* Every page has exactly one main#main-content (tabIndex -1, so the
           jump moves focus) that opens with its hero; landmarks.test.ts. */}
       <a href="#main-content" className={`sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-cream focus:px-4 focus:py-3 focus:text-ink ${focusStyle}`}>
@@ -183,7 +213,7 @@ export function Header() {
           </button>
         </div>
       </div>
-      <div id="mobile-navigation" hidden={!mobileMenuOpen} className="lg:hidden border-t border-line bg-paper max-h-[calc(100dvh-85px)] overflow-y-auto">
+      <div id="mobile-navigation" hidden={!mobileMenuOpen} className="lg:hidden border-t border-line bg-paper max-h-[calc(100dvh-85px)] overflow-y-auto overscroll-contain">
         <nav aria-label={isPortuguese ? 'Navegação principal móvel' : 'Mobile main navigation'} className="max-w-7xl mx-auto px-4 py-4 space-y-1">
           {navigationItems.map(item => item.dropdown ? (
             <div key={item.id}>

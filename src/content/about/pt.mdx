@@ -1,63 +1,40 @@
 ## A nossa missão
 
-O estimador.pt é uma plataforma de análise de dados que publica previsões transparentes e probabilísticas sobre Portugal. Acreditamos que o público beneficia quando tem acesso a análises rigorosas e imparciais, e não apenas a comentário e especulação.
+O estimador.pt publica dados e modelos sobre Portugal: quem vive em cada freguesia, numa população sintética aberta; como pode acabar a Liga Portugal, numa previsão atualizada a cada jornada; e o que diziam as previsões eleitorais, guardadas em arquivo tal como foram publicadas. Uma secção sobre a economia está em preparação.
 
-O nosso objetivo é trazer os padrões da modelação estatística moderna para o contexto português, combinando métodos bayesianos com dados reais para responder a perguntas relevantes.
+Acreditamos que perceber o país pede mais do que comentário: pede números com data, fonte e grau de incerteza, e modelos explicados o suficiente para poderem ser verificados.
 
 ---
 
-## Estado atual
+## Quem faz o estimador.pt
 
-Cada secção tem o seu próprio estado (publicada, em publicação, em preparação, em pausa ou arquivo) e é descrita aqui da mesma forma que na própria página, para que não haja duas versões da mesma informação.
+O estimador.pt é um projeto independente de **Bernardo Caldas**, sem financiamento externo nem pressão editorial.
+
+Para questões, sugestões ou pedidos dos media, escreve para [info@estimador.pt](mailto:info@estimador.pt). A [política de privacidade](/pt/privacidade/) descreve o que o site regista sobre quem o visita.
+
+---
+
+## O que está publicado hoje
 
 <EstadoAtual />
 
 ---
 
-## O que fazemos
-
-**Economia** — em preparação
-Uma leitura consolidada de indicadores económicos portugueses: atividade, mercado de trabalho, inflação, risco de recessão e contas públicas. Quando for publicada, cada indicador vai dizer se é um valor oficial ou uma estimativa do nosso modelo, o período a que se refere e a data de publicação. Até lá ficam as explicações sobre como ler os indicadores. Vê a [metodologia da economia](/pt/economia/metodologia/).
-
-**População** — versão 1.0.3, publicada a 5 de outubro de 2026 (substitui as versões 1.0.0, 1.0.1 e 1.0.2, do mesmo dia)
-Tanto quanto nos foi possível apurar, a primeira população sintética de acesso aberto a cobrir todas as freguesias de Portugal, gerada a partir dos Censos 2021. Pessoas e agregados gerados, não pessoas, famílias ou moradas reais. Em [/populacao](/pt/populacao/) podes procurar a tua freguesia, jogar a Freguesia misteriosa do dia e descarregar os microdados. Vê a [metodologia da população](/pt/populacao/metodologia/).
-
-**Liga Portugal** — em publicação contínua
-Um modelo bayesiano que simula milhares de épocas possíveis para prever classificações, probabilidades de título e de despromoção, e o impacto de cada jornada nos destinos da liga. Vê a [metodologia do futebol](/pt/desporto/liga/metodologia/).
-
-**Eleições presidenciais 2026** — arquivo
-As previsões que publicámos para as presidenciais de 2026, preservadas tal como foram feitas. Não são atualizadas nem reescritas com o resultado. Incluem a análise de sondagens desse ciclo: a estimativa dos efeitos de cada empresa de sondagens, os desvios consistentes que cada instituto mostrava em relação a certos candidatos.
-
-**Eleições legislativas 2025** — arquivo
-O modelo de previsão para as legislativas de 2025, com projeções de mandatos por distrito pelo método de Hondt e os efeitos das empresas de sondagens estimados nessa altura.
-
----
-
 ## A nossa abordagem
 
-Usamos métodos estatísticos bayesianos, que quantificam a incerteza de forma explícita. As nossas previsões produzem distribuições de probabilidade que refletem o que realmente sabemos, e o que não sabemos, sobre os resultados.
+Cada secção usa o método que a pergunta pede: modelos estatísticos bayesianos para a Liga e para as eleições, e uma população sintética ajustada às tabelas dos Censos 2021 para a população. Em todas, os números dizem a data, a fonte e o grau de incerteza que têm, ou dizem que não têm margem de erro calculada.
 
 **Princípios:**
 
-- **Transparência:** metodologia aberta, com documentação dos modelos e dos pressupostos.
+- **Transparência:** metodologia aberta, com documentação dos modelos, dos dados e dos pressupostos.
 - **Independência:** sem financiamento externo nem pressão editorial.
-- **Rigor:** dizemos como cada previsão é avaliada, e só afirmamos o que está publicado. O modelo da Liga Portugal é comparado com os resultados reais e com as cotações de fecho das casas de apostas, em épocas passadas, em [Modelo vs mercado](/pt/desporto/liga/modelo/). A avaliação das previsões eleitorais contra os resultados não está publicada.
-- **Acessibilidade:** previsões probabilísticas apresentadas de forma compreensível para qualquer leitor.
-
----
-
-## Sobre o projeto
-
-O estimador.pt foi criado por **Bernardo Caldas** como um projeto independente que combina estatística bayesiana, métodos computacionais e análise de dados portugueses.
-
-Para questões, sugestões ou pedidos dos media, escreve para [info@estimador.pt](mailto:info@estimador.pt).
-
-A [política de privacidade](/pt/privacidade/) descreve o que o site regista sobre quem o visita.
+- **Rigor:** dizemos como cada resultado é avaliado e só afirmamos o que está publicado. O modelo da Liga Portugal é comparado com os resultados reais e com as cotações de fecho das casas de apostas em [Modelo vs mercado](/pt/desporto/liga/modelo/); a qualidade de cada freguesia da população sintética está em [Qualidade](/pt/populacao/qualidade/). A avaliação das previsões eleitorais contra os resultados não está publicada.
+- **Acessibilidade:** números e probabilidades apresentados de forma que qualquer leitor os consiga acompanhar.
 
 ---
 
 ## Limitações e advertências
 
-Uma previsão probabilística é incerta por natureza, e é por isso que apresentamos probabilidades e não certezas. Os nossos modelos consideram várias fontes de incerteza, mas há sempre fatores imprevisíveis.
+Uma previsão probabilística é incerta por natureza, e é por isso que apresentamos probabilidades e não certezas. Uma previsão de 70% também quer dizer 30% de probabilidade do contrário. Os modelos consideram várias fontes de incerteza, mas há sempre fatores imprevisíveis.
 
-Uma previsão de 70% de probabilidade também quer dizer 30% de probabilidade do contrário. Lê as nossas previsões como avaliações probabilísticas informadas, não como factos.
+A população sintética não é uma previsão: são pessoas e agregados gerados para reproduzir as tabelas dos Censos, numa única execução e sem margem de erro calculada. Lê os números como uma estimativa do retrato de 2021, não como uma contagem de pessoas reais.

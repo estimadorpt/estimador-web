@@ -29,4 +29,4 @@ Tudo aqui é gerado por `npm run brand` a partir de `src/lib/brand/geometry.json
 
 ## Voz
 
-Frase: **Dados para compreender Portugal.** Descrição: *Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população.* Escreve-se em frases, em caixa baixa; perguntas como títulos; a incerteza diz-se, não se esconde; cada publicação com data e fonte; uma ação por peça.
+Frase: **Dados para compreender Portugal.** Descrição: *Dados e modelos sobre Portugal, com a incerteza à vista: quem vive em cada freguesia, como pode acabar a Liga e o que diziam as previsões eleitorais.* (Ambas vivem em `src/lib/brand/descriptor.json`.) Escreve-se em frases, em caixa baixa; perguntas como títulos; a incerteza diz-se, não se esconde; cada publicação com data e fonte; uma ação por peça.

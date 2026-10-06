@@ -18,9 +18,9 @@ function pick(entry: Record<BrandLocale, string>, locale: string): string {
 
 /** "Dados para compreender Portugal." */
 export const BRAND_LINE: Readonly<Record<BrandLocale, string>> = copy.line;
-/** "Previsões e análises com a incerteza à vista: economia, Liga Portugal, eleições e população." */
+/** "Dados e modelos sobre Portugal, com a incerteza à vista: …": what is live, in that order. */
 export const BRAND_DESCRIPTOR: Readonly<Record<BrandLocale, string>> = copy.descriptor;
-/** The 160-character social bio. */
+/** The social bio (under 160 characters), live sections first. */
 export const BRAND_BIO: Readonly<Record<BrandLocale, string>> = copy.bio;
 
 export const brandLine = (locale: string) => pick(copy.line, locale);

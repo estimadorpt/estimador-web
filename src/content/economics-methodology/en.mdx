@@ -1,152 +1,141 @@
-# Methodology — State of the economy
+# How will we read the economy?
 
-The state-of-the-economy dashboard is a fast, consolidated, honest read on where the
-Portuguese economy stands right now. It is not a GDP forecast and it does not compete with
-Banco de Portugal or INE on authority — it competes on **timeliness, explanation,
-calibrated risk and openness**. This page explains where the data comes from, which models
-we publish at each point of the quarter, how we score ourselves, and which limits we accept.
-
-The governing principle: **every number on the dashboard says what it is and what it is
-not**. When a result is modest we say so; when it is provisional it is labelled
-provisional; when a model loses to a naive benchmark, the benchmark is what we publish.
+The economy section is in preparation. This page describes the prototype we tested up to
+July 2026: what the section will measure, where the data comes from, how each figure will
+say what it is and how the prototype was evaluated. Nothing here is a current reading of the
+economy, and the results at the end of the page come from an internal test, not from
+published forecasts.
 
 ---
 
-## Where the data comes from
+## What will the section be?
 
-The dashboard rests on roughly **210 public series**, all collected from official or open
-sources through an open pipeline:
+A quick, explained reading of where the Portuguese economy stands: activity, the labour
+market, inflation and recession risk. It will not be a GDP forecast and it does not replace
+Banco de Portugal or INE, which remain the official sources.
 
-- **BPstat (Banco de Portugal)** — 117 series: coincident activity, credit, deposits,
-  interest rates, financial stress, wages;
-- **Eurostat** — 57 series: national accounts (the GDP target), industrial production,
-  retail trade, prices, the labour market, and the **DG-ECFIN** confidence surveys
-  (consumers, industry, services, construction, retail — released at the end of each
-  month, with zero publication lag);
-- **FRED / ALFRED** — 15 series, including the historical vintages of Portuguese GDP that
-  let us score calls against the number **as first published**;
-- **Google Trends** — 9 search series;
-- **ECB, REN, ENTSO-E, IMF and others** — reference rates, electricity consumption,
-  economic-policy uncertainty.
-
-All transformations (year-on-year, quarter-on-quarter, adjustments) are deterministic and
-reproducible; no data is hand-edited.
+The principle: **every figure will say what it is and what it is not**. When a result is
+modest, we will say so; when it is provisional, it will be marked provisional; when a model
+loses to a simple benchmark, the benchmark is what we publish.
 
 ---
 
-## What we publish — the four badges
+## Where does the data come from?
 
-Every number on the dashboard carries a badge stating its epistemic status. The taxonomy is
-fixed:
+The prototype used about **210 public series**, all from official or open sources:
 
-1. **Official datum** ("Dado oficial") — a value published by an official source (INE,
-   Eurostat, BdP, IEFP), reproduced verbatim. It is not ours; we simply show it with the
-   date it refers to.
-2. **Reading** ("Leitura") — a synthesis of already-published official data (the activity
-   pulse, the labour market, current recession risk, the contributions). It describes the
-   present; **it is not a forecast**.
-3. **Indicative estimate** ("Estimativa indicativa") — a model estimate of a value not yet
-   published (current-quarter q/q GDP). Never authoritative: the official number is INE's,
-   and our in-quarter estimates are not statistically distinguishable from simple
-   benchmarks at the 5% level.
-4. **Forecast** ("Previsão") — a simulated distribution of future outcomes (the annual
-   outlook). We always publish it as a distribution — read the bands, not the midpoint.
+- **BPstat (Banco de Portugal)**: coincident activity, credit, deposits, interest rates,
+  financial stress and wages;
+- **Eurostat**: national accounts (GDP), industrial production, retail trade, prices, the
+  labour market and the European Commission's confidence surveys (consumers, industry,
+  services, construction and retail, published at the end of each month);
+- **FRED / ALFRED**: including the historical versions of Portuguese GDP, which let an
+  estimate be scored against the value as it was first published;
+- **Google Trends**: search series;
+- **ECB, REN, ENTSO-E, IMF and others**: policy rates, electricity consumption and economic
+  policy uncertainty.
 
-Two compound badges derive from these: **Risk scenario** (conditional growth quantiles —
-risk context, not what we expect) and **Official data + our calls** (the track record,
-where official GDP outturns sit side by side with the calls we actually published).
+The transformations (year-on-year and quarter-on-quarter changes, adjustments) are automatic
+and reproducible; no data is edited by hand.
 
 ---
 
-## The models, by point in the quarter
+## How will each figure say what it is?
 
-Quarter-on-quarter GDP is near-white-noise in a normal quarter — the hardest series here to
-nowcast. Publication is therefore **horizon-aware**: the model changes with the month of
-the quarter, and each horizon publishes only what survived evaluation.
+Each figure will carry one of four labels, with a fixed meaning:
 
-| Point | Published model | Performance (ex-COVID, vs AR(1)) |
-|---|---|---|
-| **M1** (1st month) | Shrinkage combination: supply-side bridge + factor DFM, with a **hard AR(1) floor** | rel-RMSE ≈ 0.90 |
-| **M2** (2nd month) | The same combination **+ an ESI-momentum member** (3 parameters) | rel-RMSE ≈ 0.81 — **PROVISIONAL** (see below) |
-| **M3** (quarter-end) | Certified supply-side bridge | rel-RMSE 0.775, correlation +0.70 |
-
-Three mandatory honesty notes on this table:
-
-- **The M2 ESI member is provisional.** It was the sole survivor of a pre-registered
-  bake-off of 19 candidates under a frozen selection rule. The raw Diebold–Mariano p-value
-  is 0.014, but because it was *the best of 19*, the selection-adjusted p is **≈0.06–0.1**
-  — short of the conventional confidence bar. It is tracked on new quarters under a
-  **pre-committed demotion trigger**: if the edge does not hold on post-selection scored
-  quarters, the member is dropped and M2 reverts to the two-member combination. That
-  commitment was written down **before** seeing the results.
-- **The M3 edge is modest and not significant at 5%** (DM p≈0.23; partly carried by the
-  2021 rebound — dropping 2021, rel 0.87). We never present it as a standalone asset.
-- **Part of the edge over AR(1) is level-adaptation.** Over the last decade, a simple
-  rolling 12-quarter mean captures most of the gain; genuine co-movement skill is
-  concentrated in 2005–2014 and 2021. Our evaluation harness always reports the
-  rolling-mean comparison too.
+1. **Official data**: a value published by an official source (INE, Eurostat, Banco de
+   Portugal, IEFP), reproduced as is, with the date it refers to. It is not ours.
+2. **Reading**: a summary of official data already published (the activity pulse, the labour
+   market, current recession risk). It describes the present; it is not a forecast.
+3. **Indicative estimate**: a model estimate of a value not yet released (GDP growth in the
+   current quarter). It is never authoritative: the official number is INE's.
+4. **Forecast**: a simulated distribution of future outcomes (how the year could end). It will
+   always be published as a distribution: read the intervals, not just the central point.
 
 ---
 
-## How we score ourselves
+## How was the prototype evaluated?
 
-- **Pseudo-real-time evaluation.** We replay history: for every quarter since 2005 the
-  model sees only what would have been published by that date (the panel is masked by each
-  series' publication lag). A serious, stated caveat: true vintage archives do not exist
-  for most inputs, so we use **revised** values masked by date — which tends to
-  **overstate** real-time skill. The partial defence: the DG-ECFIN surveys, which carry
-  much of the in-quarter signal, are **essentially never revised** — for them the revised
-  and the real-time value coincide.
-- **First-release scoring.** Where vintages exist (ALFRED), we score calls against GDP
-  **as it was first published** — not against today's revised value, which the model could
-  never have known. The M3 edge survives first-release scoring (rel ≈ 0.81).
-- **The benchmark is always fair.** We compare against an AR(1) using exactly the same
-  information set, never a strawman. And we say when we lose: in the first post-selection
-  scored quarter (2026Q1), **all of our models lost to the AR(1)** — it is written into
-  the track record.
-
----
-
-## Intervals: calibrated on our own past misses
-
-The q/q GDP uncertainty bands do not come from model theory (the native standard error was
-~2–3× too narrow — our own audit says so). They come from **split-conformal prediction**,
-built on the distribution of **our own past errors** at each horizon:
-
-- at **M1/M2** the interval is **asymmetric** — the model tends to under-predict growth,
-  so the band is wider above the point;
-- at **M3** the symmetric interval passes coverage and PIT uniformity tests;
-- coverage is calibrated for normal quarters: a genuine crisis will pierce the band, and
-  the tile says so.
-
-In the first tracking quarter (2026Q1), the 80% band covered the outturn at all three
-horizons — at M2 by just 0.007 percentage points; the model's native band would have
-missed. That is precisely what the calibration is for.
+- **As if in real time.** We replayed history from 2005: in each quarter, the model only sees
+  what would have been published by then. One caveat: most series have no archive of past
+  versions, so we used today's revised values, cut off by their publication date. That tends
+  to make the model look better than it would have been in real time. The confidence
+  surveys, which carry much of the signal, are hardly ever revised.
+- **Against the first release.** Where past versions exist, we scored each estimate against
+  GDP as it was first published, not against today's value, which the model could never
+  have known.
+- **Against a fair benchmark.** The benchmark is an AR(1): a simple model that estimates the
+  quarter from the previous one, with exactly the same information.
+- **Intervals from our own errors.** The intervals do not come from the model's theory, which
+  made them two to three times too narrow, but from the distribution of the errors the
+  prototype made in the past at each point of the quarter.
 
 ---
 
-## The revision floor
+## What did the internal test show?
 
-A structural argument that frames everything: **the first print of Portuguese GDP is
-itself an estimate**. Between INE's flash estimate and the final figures, revisions have an
-RMSE of **≈0.3 percentage points** (measured across more than a thousand historical
-vintages; the mean revision is +0.15pp). No nowcast of final GDP can be more authoritative
-than that — not ours, not anyone's. That is why the dashboard leads with readings of the
-state of the economy and treats the q/q number as the least authoritative of its ten
-tiles.
+These results come from an internal test run on the data available up to July 2026. They are
+not published forecasts and will be redone before launch. The relative error compares the
+model's error with the AR(1)'s: 0.90 means an error about 10% smaller.
+
+- **In the first month of the quarter**, a combination of two models had a relative error of
+  about 0.90.
+- **In the second month**, the same combination with an economic sentiment indicator had
+  about 0.81, a **provisional** result. That indicator was the only survivor of a contest
+  with 19 candidates and a selection rule fixed in advance. The raw p-value of the
+  Diebold–Mariano test was 0.014, but because it was the best of 19, the selection-adjusted
+  p-value is about 0.06 to 0.1: **above 0.05, so it is not statistically significant at the
+  conventional level**. It was written down before the results that if the advantage does
+  not hold in the following quarters, the indicator goes.
+- **At the end of the quarter**, the relative error was 0.775, a modest advantage that is not
+  significant at 5% (p-value about 0.23) and rests partly on the 2021 rebound.
+- **Part of the advantage is just tracking the level.** Over the last decade, a simple moving
+  average of the last 12 quarters captures most of the gain over the AR(1).
+- **In the first quarter scored after the selection (2026 Q1), every model lost to the
+  AR(1).** The 80% interval covered the observed value at all three points of the quarter;
+  in the second month, only just.
 
 ---
 
-## Limits we accept
+## Why will quarterly GDP not be the headline figure?
 
-- Small samples (≈80 usable ex-COVID quarters) mean low statistical power; many honest
+The first GDP release is itself an estimate. Between INE's flash estimate and the final
+values, revisions have a typical error of about 0.3 percentage points. No estimate of final
+GDP can be more certain than that. So when the section is published, it will lead with
+readings of official data and treat the current-quarter GDP estimate as its least
+authoritative figure.
+
+---
+
+## Which limits do we accept?
+
+- There are few quarters to evaluate (about 80, excluding the pandemic), so many honest
   results are "modest, not significant".
-- Without true vintages for most inputs, the evaluation is pseudo-real-time.
-- In-quarter reads are **indicative, never authoritative**.
-- The dashboard shrinks whatever fails audit: previously-celebrated models were demoted
-  when their numbers did not reproduce, and the old headline figures were banned from our
-  communication.
+- Without past versions of most data, the evaluation only approximates real time.
+- Estimates for the current quarter will be indicative, never authoritative.
+- What does not survive evaluation goes: models that looked good were withdrawn when their
+  numbers did not reproduce.
 
-*Last revision of this page: July 2026. The collection, modelling and evaluation code is
-open; evaluation artifacts (backtests, calibration, pre-registered bake-offs) are stored
-timestamped and never overwritten.*
+---
+
+## Glossary
+
+- **AR(1)**: a simple model that estimates the next quarter from the previous one. It is the
+  benchmark any model has to beat.
+- **Relative error**: the model's root mean squared error divided by the AR(1)'s. Below 1,
+  the model errs less.
+- **Diebold–Mariano test and p-value**: a test of whether the difference in errors between
+  two models could be chance. A p-value below 0.05 is the conventional threshold for saying
+  it is not.
+- **First, second and third month**: the point in the quarter at which the estimate is made.
+  The later it is, the more official data is already out.
+- **Economic sentiment indicator**: the European Commission's index that summarises the
+  confidence surveys.
+- **80% interval**: the range in which, in the normal quarters of the past, the official
+  value fell eight times in ten.
+
+---
+
+Last revised: October 2026. Describes the prototype tested up to July 2026, scored up to
+2026 Q1. The section's code is not public yet; when it is, the link will be here.
