@@ -30,7 +30,7 @@ the website does meanwhile and what would let it stop.
    `/desporto/liga/dados`, the fields it cannot license ("Fora da licença": SofaScore match
    statistics and results, FotMob xG, Transfermarkt injuries and values, bookmaker-derived
    market fields), from the provenance it knows (PRO3-03). The xG behind `xpts_table` (md
-   files and `review.json`) is now named as FotMob's everywhere on the site, as the model
+   files and `review.json`) is named as FotMob's on `/dados`, `/2025-26` and the methodology, as the model
    code says (`analysis/xpts.py` reads `xg_data.parquet`, which `cli/predict.py` rebuilds
    with `data/fotmob.build_xg_dataset`): please confirm. Results are named as SofaScore's;
    past seasons' rows in `liga_portugal.parquet` come from football-data.co.uk's CSVs, with
@@ -38,8 +38,9 @@ the website does meanwhile and what would let it stop.
    results field carries. A `sources` block per file (field → provider) would let the page
    read the marks instead of keeping them by hand. *Web:* `FILE_DOCS[].thirdParty`,
    `licenceThirdParty` and `provenance` in `src/app/[locale]/desporto/liga/dados/page.tsx`;
-   the xPts source lines on `/desporto/liga/2025-26`, the methodology's xPts paragraph and
-   the hub's `football.xgAttribution`.
+   the xPts source lines on `/desporto/liga/2025-26` and the methodology's xPts paragraph
+   (`src/lib/football-provenance.test.ts`). The hub's `football.xgAttribution` still reads
+   "Dados xG: SofaScore" and is to change to FotMob.
 6. **Freeze `next_matchday` with the game record, or drop it.** In 2026-27 the
    `next_matchday` of md01, md03 and md04 differs from `game_fixtures.json` by up to
    0.2 pp, and md03, md04 and md05 list 6, 7 and 8 of the next round's 9 games (FA3-06).
