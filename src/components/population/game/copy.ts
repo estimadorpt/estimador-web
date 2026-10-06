@@ -13,13 +13,14 @@ const pt = {
   metaDescription: 'O jogo diário da população sintética: descobre a freguesia a partir das idades, dos agregados, da escolaridade e do trabalho. Seis tentativas.',
 
   howTitle: 'Como se joga?',
+  howSummary: 'Seis tentativas; cada erro abre uma nova pista. Uma freguesia nova à meia-noite de Lisboa.',
   howSteps: [
     'Começas com uma pista: as idades das pessoas geradas para a freguesia misteriosa.',
     'Escreve o nome de uma freguesia (ou do concelho) e escolhe-a na lista. Dizemos a que distância ficaste, em que direção está a freguesia certa e se acertaste no concelho ou na região (o distrito, ou a região autónoma).',
     'Cada tentativa falhada abre a pista seguinte: pessoas por agregado, núcleos familiares, escolaridade, condição perante o trabalho e, por fim, quem tem 65 ou mais anos e vive só, a par das casas que juntam crianças e pessoas de 65+.',
     'Tens seis tentativas. À meia-noite de Lisboa chega uma freguesia nova.',
   ],
-  howPool: 'Qualquer uma das 3 092 freguesias dos Censos 2021 pode ser a misteriosa, seja qual for o seu nível de qualidade (A, B ou C); no fim, mostramos o nível e o que quer dizer. Podes tentar qualquer uma.',
+  howPool: 'Qualquer uma das 3 092 freguesias dos Censos 2021 pode ser a misteriosa, seja qual for o seu nível de qualidade (A, B ou C); no fim, mostramos o nível e o que quer dizer. Podes tentar qualquer uma.',
   howProximity: 'A proximidade compara a tua distância com a maior distância possível: entre duas freguesias do continente, quando a tentativa e a resposta estão ambas no continente; entre duas freguesias de Portugal, quando uma delas fica nas ilhas. 100% é acertar, 0% é estar no extremo oposto.',
   howStorage: 'Os teus resultados ficam guardados só neste dispositivo.',
 
@@ -111,6 +112,7 @@ const en: Copy = {
   metaDescription: 'The synthetic population’s daily game: find the parish from its ages, households, education and work. Six guesses.',
 
   howTitle: 'How do you play?',
+  howSummary: 'Six guesses; each miss opens a new clue. A new parish at midnight, Lisbon time.',
   howSteps: [
     'You start with one clue: the ages of the people generated for the mystery parish.',
     'Type the name of a parish (or its municipality) and pick it from the list. We tell you how far off you are, which way the right parish lies, and whether you got the municipality or the region (the district, or the autonomous region).',

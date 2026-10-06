@@ -307,17 +307,32 @@ export function formatKm(distanceKm: number, locale: Locale): string {
 
 export const GAME_NAME: Record<Locale, string> = { pt: 'Freguesia misteriosa', en: 'Mystery parish' };
 
+/** The game's address, with its scheme so every app makes it a link. */
+export function gameUrl(locale: Locale, site = 'https://estimador.pt'): string {
+  return `${site}/${locale}/populacao/misteriosa/`;
+}
+
+export interface ShareMessage {
+  title: string;
+  /** Everything but the address (the share sheet takes the address on its own). */
+  text: string;
+  url: string;
+}
+
 /**
- * The text a player shares: the game, the date, the score, one line per miss
- * (direction and distance, never a name) and the address. No emoji.
+ * What a player shares: the game and its number ("n.º 2", as the board shows
+ * it), the date, the score, one line per miss (direction and distance, never a
+ * name) and the address, with https so it is a link everywhere. No emoji.
+ * `day` counts from 0, like the board's day.
  */
-export function shareText({ date, record, feedback, locale, site = 'estimador.pt' }: {
+export function shareMessage({ date, day, record, feedback, locale, site }: {
   date: string;
+  day: number;
   record: GameRecord;
   feedback: GuessFeedback[];
   locale: Locale;
   site?: string;
-}): string {
+}): ShareMessage {
   const score = record.status === 'won' ? `${record.guesses.length}/${MAX_GUESSES}` : `X/${MAX_GUESSES}`;
   const lines = feedback
     .filter(item => !item.correct)
@@ -325,13 +340,18 @@ export function shareText({ date, record, feedback, locale, site = 'estimador.pt
   const ending = record.status === 'won'
     ? (locale === 'pt' ? 'acertei' : 'got it')
     : (locale === 'pt' ? 'não acertei' : 'missed it');
-  return [
-    `${GAME_NAME[locale]} · ${formatGameDate(date, locale)}`,
-    score,
-    ...lines,
-    ending,
-    `${site}/${locale}/populacao/misteriosa/`,
-  ].join('\n');
+  const number = locale === 'pt' ? `n.º ${day + 1}` : `No. ${day + 1}`;
+  return {
+    title: GAME_NAME[locale],
+    text: [`${GAME_NAME[locale]} ${number} · ${formatGameDate(date, locale)}`, score, ...lines, ending].join('\n'),
+    url: gameUrl(locale, site),
+  };
+}
+
+/** The same, as one block of text (for the clipboard): the message, then the address. */
+export function shareText(input: Parameters<typeof shareMessage>[0]): string {
+  const message = shareMessage(input);
+  return `${message.text}\n${message.url}`;
 }
 
 // ---- stored results and stats -----------------------------------------------------

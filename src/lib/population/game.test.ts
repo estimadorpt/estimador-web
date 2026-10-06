@@ -28,6 +28,7 @@ import {
   proximityScale,
   putRecord,
   recordFor,
+  shareMessage,
   shareText,
   todayIndex,
   type GamePlace,
@@ -35,7 +36,7 @@ import {
   type GameStore,
 } from './game';
 import { haversineKm, indexPlaces } from './places';
-import { POPULATION_DATA_DIR } from '@/lib/config/population';
+import { POPULATION_DATA_DIR, POPULATION_GAME_EPOCH } from '@/lib/config/population';
 import type { GameEntry, GameIndex, PopulationPlaces } from '@/types/population';
 
 const DATA = path.resolve(import.meta.dirname, '../../../public/data', POPULATION_DATA_DIR);
@@ -45,6 +46,21 @@ const places = indexPlaces(JSON.parse(readFileSync(path.join(DATA, 'places.json'
 const EMOJI = /\p{Extended_Pictographic}/u;
 
 describe('the Lisbon calendar', () => {
+  // The calendar arithmetic, on a fixed epoch (the game's own is checked below).
+  const EPOCH = '2026-10-05';
+
+  it('starts the game on launch day: game/index.json carries POPULATION_GAME_EPOCH', () => {
+    // scripts/sync-population.py reads the constant; if either moves alone, this fails.
+    expect(index.epoch).toBe(POPULATION_GAME_EPOCH);
+    // On launch day, in Lisbon, the board is N.º 1 and plays the curated day-0 parish.
+    const launch = new Date(`${POPULATION_GAME_EPOCH}T00:00:00+01:00`);
+    expect(todayIndex(index.epoch, launch)).toBe(0);
+    expect(todayIndex(index.epoch, new Date(launch.getTime() + 23.9 * 3600_000))).toBe(0);
+    expect(todayIndex(index.epoch, new Date(launch.getTime() + 24 * 3600_000))).toBe(1);
+    expect(dateOfDay(index.epoch, 0)).toBe(POPULATION_GAME_EPOCH);
+    expect(answerOrder(0, index.candidates)).toBe(0);
+  });
+
   it('reads the date in Lisbon, not UTC, on both sides of midnight', () => {
     // Summer time (UTC+1): 23:00 UTC is already the next day in Lisbon.
     expect(lisbonDate(new Date('2026-10-05T22:59:59Z'))).toBe('2026-10-05');
@@ -55,21 +71,20 @@ describe('the Lisbon calendar', () => {
   });
 
   it('counts game days from the epoch', () => {
-    expect(index.epoch).toBe('2026-10-05');
-    expect(todayIndex(index.epoch, new Date('2026-10-05T12:00:00Z'))).toBe(0);
-    expect(todayIndex(index.epoch, new Date('2026-10-04T23:00:00Z'))).toBe(0); // 00:00 on the 5th in Lisbon
-    expect(todayIndex(index.epoch, new Date('2026-10-04T22:59:59Z'))).toBe(0); // before the epoch: clamped
-    expect(todayIndex(index.epoch, new Date('2026-10-05T23:00:00Z'))).toBe(1);
-    expect(todayIndex(index.epoch, new Date('2027-01-01T00:00:00Z'))).toBe(88);
+    expect(todayIndex(EPOCH, new Date('2026-10-05T12:00:00Z'))).toBe(0);
+    expect(todayIndex(EPOCH, new Date('2026-10-04T23:00:00Z'))).toBe(0); // 00:00 on the 5th in Lisbon
+    expect(todayIndex(EPOCH, new Date('2026-10-04T22:59:59Z'))).toBe(0); // before the epoch: clamped
+    expect(todayIndex(EPOCH, new Date('2026-10-05T23:00:00Z'))).toBe(1);
+    expect(todayIndex(EPOCH, new Date('2027-01-01T00:00:00Z'))).toBe(88);
     expect(daysBetween('2026-10-05', '2026-10-01')).toBe(-4);
   });
 
   it('keeps whole days across the clock changes', () => {
     // Clocks go back on 25 Oct 2026 and forward on 28 Mar 2027 (01:00 UTC).
-    expect(todayIndex(index.epoch, new Date('2026-10-24T22:59:59Z'))).toBe(19);
-    expect(todayIndex(index.epoch, new Date('2026-10-24T23:00:00Z'))).toBe(20); // 25 Oct, 00:00 WEST
-    expect(todayIndex(index.epoch, new Date('2026-10-25T23:59:59Z'))).toBe(20); // 25 Oct, 23:59 WET
-    expect(todayIndex(index.epoch, new Date('2026-10-26T00:00:00Z'))).toBe(21);
+    expect(todayIndex(EPOCH, new Date('2026-10-24T22:59:59Z'))).toBe(19);
+    expect(todayIndex(EPOCH, new Date('2026-10-24T23:00:00Z'))).toBe(20); // 25 Oct, 00:00 WEST
+    expect(todayIndex(EPOCH, new Date('2026-10-25T23:59:59Z'))).toBe(20); // 25 Oct, 23:59 WET
+    expect(todayIndex(EPOCH, new Date('2026-10-26T00:00:00Z'))).toBe(21);
     expect(lisbonDate(new Date('2027-03-27T23:59:59Z'))).toBe('2027-03-27');
     expect(lisbonDate(new Date('2027-03-28T00:00:00Z'))).toBe('2027-03-28');
     expect(lisbonDate(new Date('2027-03-28T22:59:59Z'))).toBe('2027-03-28');
@@ -77,10 +92,10 @@ describe('the Lisbon calendar', () => {
   });
 
   it('maps day numbers back to dates', () => {
-    expect(dateOfDay(index.epoch, 0)).toBe('2026-10-05');
-    expect(dateOfDay(index.epoch, 27)).toBe('2026-11-01');
-    expect(dateOfDay(index.epoch, 88)).toBe('2027-01-01');
-    for (let day = 0; day < 800; day += 37) expect(daysBetween(index.epoch, dateOfDay(index.epoch, day))).toBe(day);
+    expect(dateOfDay(EPOCH, 0)).toBe('2026-10-05');
+    expect(dateOfDay(EPOCH, 27)).toBe('2026-11-01');
+    expect(dateOfDay(EPOCH, 88)).toBe('2027-01-01');
+    for (let day = 0; day < 800; day += 37) expect(daysBetween(EPOCH, dateOfDay(EPOCH, day))).toBe(day);
   });
 
   it('counts down to the next midnight in Lisbon, including 23- and 25-hour days', () => {
@@ -280,26 +295,34 @@ describe('share text', () => {
   const won: GameRecord = { day: 0, guesses: ['A', 'B', 'C'], status: 'won', live: true };
 
   it('says the date, the score and each miss, in Portuguese', () => {
-    expect(shareText({ date: '2026-10-05', record: won, feedback, locale: 'pt' })).toBe(
-      'Freguesia misteriosa · 5 out. 2026\n3/6\n⇗ 412 km\n⇖ 37 km\nacertei\nestimador.pt/pt/populacao/misteriosa/',
+    expect(shareText({ date: '2026-10-07', day: 1, record: won, feedback, locale: 'pt' })).toBe(
+      'Freguesia misteriosa n.º 2 · 7 out. 2026\n3/6\n⇗ 412 km\n⇖ 37 km\nacertei\nhttps://estimador.pt/pt/populacao/misteriosa/',
     );
+  });
+
+  it('gives a share sheet the address as its own https link (PUB2-16)', () => {
+    const message = shareMessage({ date: '2026-10-06', day: 0, record: won, feedback, locale: 'pt' });
+    expect(message.url).toBe('https://estimador.pt/pt/populacao/misteriosa/');
+    expect(message.title).toBe('Freguesia misteriosa');
+    expect(message.text.split('\n')[0]).toBe('Freguesia misteriosa n.º 1 · 6 out. 2026');
+    expect(message.text).not.toContain('estimador.pt');
   });
 
   it('says it in English, and marks a loss', () => {
     const lost: GameRecord = { day: 1, guesses: ['A', 'B', 'D', 'E', 'F', 'G'], status: 'lost', live: true };
     const misses = Array.from({ length: 6 }, (_, i) => ({ ...feedback[0], code: String(i), distanceKm: 1234.4 }));
-    const text = shareText({ date: '2026-10-06', record: lost, feedback: misses, locale: 'en' });
+    const text = shareText({ date: '2026-10-07', day: 1, record: lost, feedback: misses, locale: 'en' });
     expect(text.split('\n')).toEqual([
-      'Mystery parish · 6 Oct 2026', 'X/6',
+      'Mystery parish No. 2 · 7 Oct 2026', 'X/6',
       ...Array(6).fill('⇗ 1,234 km'),
-      'missed it', 'estimador.pt/en/populacao/misteriosa/',
+      'missed it', 'https://estimador.pt/en/populacao/misteriosa/',
     ]);
   });
 
   it('never contains an emoji, whatever the directions', () => {
     for (const locale of ['pt', 'en'] as const) {
       const all = Object.keys(COMPASS).map((compass, i) => ({ ...feedback[0], code: String(i), compass: compass as keyof typeof COMPASS }));
-      const text = shareText({ date: '2026-10-05', record: { day: 0, guesses: all.map(a => a.code), status: 'lost', live: true }, feedback: all, locale });
+      const text = shareText({ date: '2026-10-06', day: 0, record: { day: 0, guesses: all.map(a => a.code), status: 'lost', live: true }, feedback: all, locale });
       expect(text).not.toMatch(EMOJI);
       expect(text).not.toMatch(/\p{Emoji_Presentation}/u);
       expect(text).not.toContain('️');
@@ -308,7 +331,7 @@ describe('share text', () => {
   });
 
   it('never names a guess', () => {
-    const text = shareText({ date: '2026-10-05', record: won, feedback, locale: 'pt' });
+    const text = shareText({ date: '2026-10-06', day: 0, record: won, feedback, locale: 'pt' });
     for (const code of ['A', 'B', 'C']) expect(text).not.toMatch(new RegExp(`\\b${code}\\b`));
   });
 

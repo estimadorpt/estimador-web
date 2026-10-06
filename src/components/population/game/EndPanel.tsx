@@ -5,7 +5,7 @@ import { ArrowRight, RotateCcw, Share2 } from 'lucide-react';
 import { Action } from '@/components/brand/Action';
 import { ACCENT, FURNITURE } from '@/components/viz/theme';
 import { formatCount } from '@/lib/population/format';
-import { MAX_GUESSES, formatCountdown, msUntilNextLisbonMidnight, type GameRecord, type GameStats } from '@/lib/population/game';
+import { MAX_GUESSES, formatCountdown, msUntilNextLisbonMidnight, type GameRecord, type GameStats, type ShareMessage } from '@/lib/population/game';
 import { regionTitle, type Parish } from '@/lib/population/places';
 import { tierMeaningFor, type Locale } from '@/lib/population/labels';
 import type { GameIndex } from '@/types/population';
@@ -26,7 +26,7 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
   answer: Parish;
   tier: 'A' | 'B' | 'C';
   stats: GameStats;
-  share: string;
+  share: ShareMessage;
   index: GameIndex;
   locale: Locale;
   practice: boolean;
@@ -38,20 +38,22 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
   const [shareState, setShareState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const geography = index.geography as { source_license_url?: string; source_url?: string };
 
+  // The clipboard gets one block of text; a share sheet gets the address as its own link.
+  const shareBlock = `${share.text}\n${share.url}`;
   const onShare = async () => {
     try {
       const touch = window.matchMedia('(pointer: coarse)').matches;
       if (touch && typeof navigator.share === 'function') {
-        await navigator.share({ text: share });
+        await navigator.share({ title: share.title, text: share.text, url: share.url });
         return;
       }
-      await navigator.clipboard.writeText(share);
+      await navigator.clipboard.writeText(shareBlock);
       setShareState('copied');
       window.setTimeout(() => setShareState('idle'), 2400);
     } catch (error) {
       if ((error as Error)?.name === 'AbortError') return;
       try {
-        await navigator.clipboard.writeText(share);
+        await navigator.clipboard.writeText(shareBlock);
         setShareState('copied');
       } catch {
         setShareState('failed');
@@ -94,7 +96,7 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
         {shareState === 'copied' ? t.copied : shareState === 'failed' ? t.shareFailed : ''}
       </p>
       {shareState === 'failed' && (
-        <pre className="mt-2 whitespace-pre-wrap rounded-xl bg-parchment p-3 font-sans text-sm text-ink">{share}</pre>
+        <pre className="mt-2 whitespace-pre-wrap rounded-xl bg-parchment p-3 font-sans text-sm text-ink">{shareBlock}</pre>
       )}
 
       <div className="mt-4 border-t border-line pt-4 text-sm text-stone-600">

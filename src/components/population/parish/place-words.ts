@@ -14,7 +14,7 @@ export interface Scope {
   municipality: boolean;
 }
 
-export const isUnion = (name: string) => /^União das freguesias/i.test(name);
+export const isUnion = (name: string) => /^União (das|de) freguesias/i.test(name);
 
 /**
  * Município names that take an article in Portuguese ("concelho do Porto").

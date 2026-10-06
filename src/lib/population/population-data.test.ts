@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { POPULATION_DATA_DIR, POPULATION_DOWNLOADS, POPULATION_RELEASE } from '@/lib/config/population';
+import { POPULATION_DATA_DIR, POPULATION_DOWNLOADS, POPULATION_GAME_EPOCH, POPULATION_RELEASE } from '@/lib/config/population';
 import type {
   GameEntry,
   GameIndex,
@@ -15,7 +15,7 @@ import type {
 import { canonicalQuery, formatDisplay, isWhole, readCells, rebuildResponse } from './compact';
 import { parsePublicResponse } from './contract';
 import { RECIPE_COPY, VALUES } from './labels';
-import { fold, indexPlaces, nearestParish, regionSlug, searchNames, searchParishes, searchPlaces } from './places';
+import { exactParishOption, fold, indexPlaces, nearestParish, regionSlug, searchNames, searchParishes, searchPlaces } from './places';
 
 const DIR = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR);
 const json = <T,>(file: string): T => JSON.parse(fs.readFileSync(path.join(DIR, file), 'utf8')) as T;
@@ -148,7 +148,21 @@ describe('population release files', () => {
       expect(index.byCode.get(entry.code)?.level).toBe('parish');
     }
     expect(entries.filter(entry => entry.tier === 'C')).toHaveLength(meta.counts.tiers.C);
-    expect(game.epoch).toBe(meta.published);
+    // Day 0 is the launch day, not the release date (see POPULATION_GAME_EPOCH).
+    expect(game.epoch).toBe(POPULATION_GAME_EPOCH);
+  });
+
+  it('carries quality.csv’s worst table in every parish header (MR2-03)', () => {
+    let ageSingleInC500 = 0;
+    for (const file of parishFiles) {
+      const record = json<ParishRecord>(`parish/${file}`);
+      const place = record.place as (NonNullable<ParishRecord['place']> & { worst_constraint?: string; worst_constraint_srmse?: number }) | undefined;
+      expect(place?.worst_constraint).toMatch(/^srmse_[a-z0-9_]+$/);
+      expect(place?.worst_constraint_srmse).toBeGreaterThanOrEqual(0);
+      if (record.tier === 'C' && (place?.publication_population ?? 0) >= 500 && place?.worst_constraint === 'srmse_p_age_single') ageSingleInC500 += 1;
+    }
+    // The audit's count: 705 of the 728 tier C parishes of 500 or more have single-year age as their worst table.
+    expect(ageSingleInC500).toBe(705);
   });
 
   it('maps every permalink query id to a parish response', () => {
@@ -244,6 +258,48 @@ describe('parish search', () => {
     expect(searchNames(first.name).slice(1)).toContain('se');
     const seara = searchParishes(index, 'sé').findIndex(hit => fold(hit.parish.name).startsWith('seara'));
     expect(seara === -1 || seara > 0).toBe(true);
+  });
+
+  it('finds a member named in parentheses or after "União das freguesias da/do" (sé: Funchal, Angra, Lamego, Portalegre)', () => {
+    const se = searchParishes(index, 'sé').map(hit => hit.parish.name);
+    for (const name of ['Funchal (Sé)', 'Angra (Sé)', 'Lamego (Almacave e Sé)', 'União das freguesias da Sé e São Lourenço', 'União das freguesias de Faro (Sé e São Pedro)']) {
+      expect(se).toContain(name);
+    }
+    // Exact members (rank 1) come before names that only start with "se" (Seara…).
+    const seara = se.findIndex(name => fold(name).startsWith('seara'));
+    expect(seara === -1 || seara > se.indexOf('Funchal (Sé)')).toBe(true);
+    expect(searchNames('Funchal (Sé)')).toEqual(['funchal se', 'funchal', 'se']);
+    expect(searchNames('União das freguesias do Bombarral e Vale Covo')).toEqual(['uniao das freguesias do bombarral e vale covo', 'bombarral', 'vale covo']);
+    expect(searchNames('União de freguesias de Agrela e Serafão').slice(1)).toEqual(['agrela', 'serafao']);
+    expect(searchNames('Aguada de Cima')).toEqual(['aguada de cima']);
+  });
+
+  it('puts the parish named like a município first among its parishes (MISS-01: viseu, vinhais, guarda)', () => {
+    for (const name of ['Viseu', 'Vinhais', 'Guarda', 'Mértola']) {
+      const { hits } = searchPlaces(index, name);
+      expect(hits[0].kind).toBe('municipality');
+      const first = hits[1];
+      expect(first.kind === 'parish' && first.parish.name).toBe(name);
+      // The rest follow by how well they match ("Coutos de Viseu" before "Abraveses"), then alphabetically.
+      const rest = hits.slice(2).flatMap(hit => (hit.kind === 'parish' && hit.underMunicipality ? [hit] : []));
+      const sorted = [...rest].sort((a, b) => (a.rank === b.rank ? a.parish.name.localeCompare(b.parish.name, 'pt') : a.rank - b.rank));
+      expect(rest.map(hit => hit.parish.name)).toEqual(sorted.map(hit => hit.parish.name));
+    }
+  });
+
+  it('lets Enter guess only a parish named exactly like the query (MISS-01)', () => {
+    // "Viseu": one parish is called exactly that, so Enter may choose it.
+    const viseu = searchPlaces(index, 'viseu').hits;
+    const chosen = viseu[exactParishOption(viseu)];
+    expect(chosen.kind === 'parish' && chosen.parish.name).toBe('Viseu');
+    // "Mealhada": no parish is called exactly that (it is a union's member), so Enter chooses nothing.
+    expect(exactParishOption(searchPlaces(index, 'mealhada').hits)).toBe(-1);
+    // A partial name never picks for the player, nor does a name shared by several parishes.
+    expect(exactParishOption(searchPlaces(index, 'abrav').hits)).toBe(-1);
+    expect(exactParishOption(searchPlaces(index, 'santa maria maior').hits)).toBe(-1);
+    // A code is exact.
+    const code = searchPlaces(index, '030831').hits;
+    expect(code[exactParishOption(code)]).toMatchObject({ kind: 'parish', parish: { code: '030831' } });
   });
 
   it('accepts a six-character code, digits or letters (030831, 0302fa)', () => {

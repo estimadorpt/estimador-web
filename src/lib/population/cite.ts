@@ -11,9 +11,11 @@ export function releaseCitation(release = POPULATION_RELEASE, year = '2026'): st
 }
 
 /**
- * The parish page's address has no version, so a citation carries the day it
- * was read (`accessed`, YYYY-MM-DD, the reader's own date at copy time): after
- * a new release the same address shows that release's figures (PRO2-10).
+ * The parish page shows the current release, so its address is not versioned:
+ * with `accessed` (the reader's date at copy time, ISO or formatted, e.g.
+ * "6 out. 2026") the citation says when it was read, as a citation of a web
+ * page should; after a new release the same address shows that release's
+ * figures (PRO2-10). A value without a year is ignored.
  */
 export function parishCitation({ name, code, url, accessed, locale = 'pt' }: {
   name: string;
@@ -23,7 +25,7 @@ export function parishCitation({ name, code, url, accessed, locale = 'pt' }: {
   locale?: 'pt' | 'en';
 }): string {
   const base = `${releaseCitation()} ${name} (${code}): ${url}`;
-  if (!accessed || !/^\d{4}-\d{2}-\d{2}$/.test(accessed)) return base;
+  if (!accessed || !/\b\d{4}\b/.test(accessed)) return base;
   return `${base} (${locale === 'pt' ? 'consultado a' : 'accessed'} ${accessed})`;
 }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lisbonDate } from '@/lib/population/game';
 import { siteTitle } from '@/lib/site-title';
 import { ChevronDown, MapPinned } from 'lucide-react';
 import { Link } from '@/i18n/routing';
@@ -27,7 +28,7 @@ import { formatDay } from '../quality/copy';
 import { GuessFirstCard } from './GuessFirst';
 import { howToReadItems, type HowToReadInput } from './how-to-read';
 import { parishHead, parishUrl, unknownHead, watchHead } from './head';
-import { HundredSection } from './HundredSection';
+import { parishDescription, parishTitle } from './head-text';
 import { inScope, isLongName, isUnion, municipalityPhrase, scopeSubject, THIS_PARISH, type Scope } from './place-words';
 import { ShareTools } from './ShareTools';
 
@@ -147,14 +148,18 @@ export function ParishPage({ locale }: { locale: Locale }) {
   useEffect(() => {
     if (state.kind === 'ready') {
       const { place, code } = state;
-      const question = parishQuestion(place.name, locale);
       return watchHead(parishHead({
         locale,
         code,
-        title: siteTitle(`${question} · ${locale === 'pt' ? 'População sintética' : 'Synthetic population'}`),
-        description: locale === 'pt'
-          ? `Idades, trabalho, escolaridade e agregados em ${place.name} (${place.municipalityName}), numa população sintética gerada a partir dos Censos 2021. ${formatCount(place.censusPopulation, locale)} residentes (INE).${place.level === 'municipality' ? ' Valores do concelho.' : ''}`
-          : `Ages, work, education and households in ${place.name} (${place.municipalityName}), from a synthetic population generated from the 2021 Census. ${formatCount(place.censusPopulation, locale)} residents (INE).${place.level === 'municipality' ? ' Municipality figures.' : ''}`,
+        // Within 70 and 155 characters for every parish, union names included (SPV-01).
+        title: parishTitle(place.name, locale),
+        description: parishDescription({
+          name: place.name,
+          municipalityName: place.municipalityName,
+          censusPopulation: place.censusPopulation,
+          municipalityFigures: place.level === 'municipality',
+          locale,
+        }),
       }), code);
     }
     if (state.kind === 'unknown') {
@@ -252,10 +257,13 @@ function Skeleton({ locale }: { locale: Locale }) {
           <div className="hidden lg:block"><div className={`h-[520px] ${bar}`} /></div>
           <div className="flex min-w-0 flex-col gap-12">
             <div className={`h-12 lg:hidden ${bar}`} />
-            <div className="h-[64px] rounded-2xl border border-line bg-cream lg:h-[300px]" />
-            <div className={`h-9 w-3/4 ${bar}`} />
-            <div className="h-[720px] rounded-2xl border border-line bg-cream sm:h-[520px]" />
-            <div className="h-[640px] rounded-2xl border border-line bg-cream" />
+            {/* "Como ler" (closed at every width), then "Pessoas" and its first two cards, at their measured heights. */}
+            <div className="h-[54px] rounded-2xl border border-line bg-cream" />
+            <div className="flex flex-col gap-5">
+              <div className={`h-8 w-1/3 md:h-9 ${bar}`} />
+              <div className="h-[800px] rounded-2xl border border-line bg-cream sm:h-[600px]" />
+              <div className="h-[860px] rounded-2xl border border-line bg-cream sm:h-[470px]" />
+            </div>
           </div>
         </div>
       </div></div>
@@ -267,26 +275,33 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
   const pt = locale === 'pt';
   const [index, setIndex] = useState<PlaceIndex | null>(null);
   const [highlight, setHighlight] = useState<string | null>(null);
+  /** The rail's current section: the last one whose top has scrolled past the header. */
+  const [current, setCurrent] = useState<string | null>(null);
   const regionHeading = regionTitle(place.region, place.regionName, locale);
   const fallbackName = record.fallback?.name ?? null;
   const municipalityFigures = place.level === 'municipality' || record.status === 'fallback';
   const parishScope: Scope = { name: place.name, municipality: false };
-  const subject = scopeSubject(parishScope, locale);
-  const Subject = subject.charAt(0).toUpperCase() + subject.slice(1);
-  // A union's name already fills the h1 and the hero; below them the page says "esta freguesia".
+  // A union's name already fills the h1; from the lede on, the page says "esta freguesia" (UXM2-17).
   const long = isLongName(place.name);
+  const subject = long ? THIS_PARISH.subject[locale] : scopeSubject(parishScope, locale);
+  const Subject = subject.charAt(0).toUpperCase() + subject.slice(1);
   const regionInline = pt && place.region !== 'azores' && place.region !== 'madeira'
     ? regionHeading.charAt(0).toLowerCase() + regionHeading.slice(1)
     : regionHeading;
   const url = parishUrl(locale, code);
 
-  // Every parish (for the neighbours list) only once the page is drawn.
+  // Every parish (87 KB, for the neighbours list) only when that list comes near
+  // the screen, not with the page (UXM2-21).
   useEffect(() => {
     let live = true;
-    const timer = window.setTimeout(() => {
-      fetchPlaces().then(data => { if (live) setIndex(indexPlaces(data)); }).catch(() => undefined);
-    }, 300);
-    return () => { live = false; window.clearTimeout(timer); };
+    const target = document.getElementById('outras');
+    const load = () => { fetchPlaces().then(data => { if (live) setIndex(indexPlaces(data)); }).catch(() => undefined); };
+    if (!target || typeof IntersectionObserver === 'undefined') { load(); return () => { live = false; }; }
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) { observer.disconnect(); load(); }
+    }, { rootMargin: '800px 0px' });
+    observer.observe(target);
+    return () => { live = false; observer.disconnect(); };
   }, []);
 
   // A shared link to one answer (#vivem-sozinhas, from /populacao/v/…/q/…):
@@ -310,6 +325,30 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
     return () => { window.cancelAnimationFrame(frame); window.clearTimeout(timer); };
   }, [target]);
 
+  // Which section is in view, for the rail's marker (aria-current).
+  useEffect(() => {
+    const targets = [...document.querySelectorAll<HTMLElement>('[data-rail]')];
+    if (targets.length === 0) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      let found: string | null = null;
+      for (const target of targets) {
+        if (target.getBoundingClientRect().top <= 140) found = `#${target.id}`;
+      }
+      setCurrent(found);
+    };
+    const onScroll = () => { if (!frame) frame = window.requestAnimationFrame(update); };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
   const neighbours = useMemo(
     () => (index
       ? index.parishes.filter(other => other.municipality === place.municipality && other.code !== place.code).sort((a, b) => a.name.localeCompare(b.name, 'pt'))
@@ -317,7 +356,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
     [index, place],
   );
   const shareModel = useMemo(() => shareCardModel({
-    record, recipes: meta.recipes, name: place.name, municipalityName: place.municipalityName, regionName: place.regionName, locale, url,
+    record, recipes: meta.recipes, name: place.name, municipalityName: place.municipalityName, regionName: place.regionName, region: place.region, locale, url,
   }), [record, meta, place, locale, url]);
 
   const regionHref = POPULATION_ROUTES.region(regionSlug(place.regionName));
@@ -331,34 +370,46 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
       : `The figures on this page are those of ${fallbackName ?? place.municipalityName} municipality, which includes this parish: the parish's own figures do not reach the quality needed to publish.`)
     : (pt ? 'Todas as respostas desta página usam os números da própria freguesia.' : 'Every answer on this page uses the parish’s own figures.');
 
+  // The rail names each card by its own title (the question), so the two read the same (UXD2-11).
   const toc = [
-    { href: '#cem', label: pt ? 'Se fosse 100' : 'If it were 100' },
     ...groups.flatMap(group => [
       { href: `#${group.id}`, label: group.title[locale], group: true },
-      ...group.recipes.map(recipe => ({ href: `#${RECIPE_COPY[recipe].anchor}`, label: RECIPE_COPY[recipe].short[locale] })),
+      ...group.recipes.map(recipe => ({ href: `#${RECIPE_COPY[recipe].anchor}`, label: RECIPE_COPY[recipe].question[locale] })),
     ]),
-    { href: '#partilhar', label: pt ? 'Partilhar' : 'Share' },
+    { href: '#partilhar', label: pt ? 'Partilhar' : 'Share', after: true },
     { href: '#citar', label: pt ? 'Como citar' : 'How to cite' },
     { href: '#outras', label: pt ? 'Outras freguesias' : 'Other parishes' },
-  ] as Array<{ href: string; label: string; group?: boolean }>;
+  ] as Array<{ href: string; label: string; group?: boolean; after?: boolean }>;
 
-  const renderToc = (className = '') => (
+  const renderToc = (className = '', marker = false) => (
     <ol className={`flex flex-col text-sm ${className}`}>
-      {toc.map(item => (
-        <li key={item.href}>
-          <a
-            href={item.href}
-            className={`flex min-h-9 items-center rounded-md px-2 transition-colors duration-150 hover:bg-parchment hover:text-ink ${item.group ? 'mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500' : 'text-stone-600'}`}
-          >
-            {item.label}
-          </a>
-        </li>
-      ))}
+      {toc.map(item => {
+        const here = marker && current === item.href;
+        return (
+          <li key={item.href} className={item.after ? 'mt-5' : ''}>
+            <a
+              href={item.href}
+              aria-current={here ? 'location' : undefined}
+              className={`flex min-h-9 items-center rounded-md border-l-2 px-2 py-1.5 leading-snug transition-colors duration-150 hover:bg-parchment hover:text-ink ${here ? 'border-ink font-semibold text-ink' : 'border-transparent'} ${item.group ? 'mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500' : here ? '' : 'text-stone-600'}`}
+            >
+              {item.label}
+            </a>
+          </li>
+        );
+      })}
     </ol>
   );
 
   const where = (scope: Scope) => (long && !scope.municipality ? THIS_PARISH.in[locale] : inScope(scope, locale));
-  const citation = parishCitation({ name: place.name, code, url });
+  // Tier C: say on every card what its percentages are of, from the published counts (PRO2-08).
+  const small = place.publicationPopulation < 500;
+  const base = place.tier === 'C'
+    ? (pt
+      ? `Base: ${formatCount(place.censusPopulation, locale)} residentes (INE, Censos 2021) · ${formatCount(place.generatedHouseholds, locale)} agregados gerados.${small ? ' Com poucas pessoas, cada uma pesa mais numa percentagem.' : ''}`
+      : `Base: ${formatCount(place.censusPopulation, locale)} residents (INE, 2021 Census) · ${formatCount(place.generatedHouseholds, locale)} generated households.${small ? ' With few people, each one weighs more in a percentage.' : ''}`)
+    : undefined;
+  // The page shows the current release, so a citation says when it was read (PRO2-10).
+  const citation = parishCitation({ name: place.name, code, url, accessed: formatDay(lisbonDate(new Date()), locale), locale });
   // Population › region › parish (SP-10). The shell is one page for every
   // parish, so the breadcrumb is rendered here, once the place is known.
   const breadcrumbs = jsonLd(breadcrumbJsonLd(locale, [
@@ -411,9 +462,10 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
       <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-8"><div className="max-w-5xl">
         <div className="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
           <nav aria-label={pt ? 'Nesta página' : 'On this page'} className="hidden lg:block">
-            <div className="sticky top-24">
-              <p className="mb-1 px-2 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Nesta página' : 'On this page'}</p>
-              {renderToc()}
+            {/* Pulled left by the links' rule and padding, so the rail's text lines up with the hero's (UXD2-14). */}
+            <div className="sticky top-24 -ml-2.5">
+              <p className="mb-1 px-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Nesta página' : 'On this page'}</p>
+              {renderToc('', true)}
             </div>
           </nav>
 
@@ -435,11 +487,9 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
               union={isUnion(place.name)}
             />
 
-            <HundredSection record={record} meta={meta} locale={locale} name={place.name} fallbackName={fallbackName ?? place.municipalityName} />
-
             {groups.map(group => (
               <section key={group.id} aria-labelledby={group.id} className="flex flex-col gap-5">
-                <h2 id={group.id} className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
+                <h2 id={group.id} data-rail className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
                   {group.title[locale]}
                 </h2>
                 {group.recipes.map(recipe => {
@@ -460,6 +510,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                       where={where(scope)}
                       initiallyRevealed={target === anchor}
                       highlight={highlight === anchor}
+                      base={base}
                     />
                   ) : (
                     <ResponseCard
@@ -470,16 +521,16 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                       locale={locale}
                       placeName={place.name}
                       fallbackName={fallbackName}
-                      // The work grid is drawn once, in "Se fosse 100" above.
-                      bars={recipe === 'employment'}
+                      // Employment is drawn as 100 dots here, once (the page has no separate "Se fosse 100" block).
                       highlight={highlight === anchor}
+                      base={base}
                     />
                   );
                 })}
               </section>
             ))}
 
-            <section id="partilhar" aria-labelledby="partilhar-title">
+            <section id="partilhar" data-rail aria-labelledby="partilhar-title">
               <h2 id="partilhar-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
                 {pt ? `Queres mostrar ${long ? THIS_PARISH.subject.pt : 'esta freguesia'} a alguém?` : 'Want to show this parish to someone?'}
               </h2>
@@ -488,7 +539,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
               </div>
             </section>
 
-            <section id="citar" aria-labelledby="citar-title">
+            <section id="citar" data-rail aria-labelledby="citar-title">
               <h2 id="citar-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
                 {pt ? 'Como cito esta página?' : 'How do I cite this page?'}
               </h2>
@@ -525,7 +576,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
               </div>
             </section>
 
-            <section id="outras" aria-labelledby="outras-title">
+            <section id="outras" data-rail aria-labelledby="outras-title">
               <h2 id="outras-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
                 {pt ? `Outras freguesias do ${municipalityPhrase(place.municipalityName, locale)}` : `Other parishes in ${place.municipalityName} municipality`}
               </h2>
@@ -564,17 +615,16 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
 }
 
 /**
- * "Como ler esta página", as a disclosure: open on a wide screen, where it
- * sits beside the contents list, and closed on a phone, so the first answer
- * is not a screen and a half down (the hero already carries the honesty line).
+ * "Como ler esta página", as a disclosure, closed: the first answer follows the
+ * hero on every screen (the hero already carries the tier and the honesty line).
  */
 function HowToRead(props: HowToReadInput & { union: boolean }) {
   const { locale, union } = props;
   const pt = locale === 'pt';
   const items = howToReadItems(props);
-  // Decided on the first render (this page only renders in the browser), so the
-  // layout does not move under a shared link's scroll to its card.
-  const [open, setOpen] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches);
+  // Closed at every width: the hero already carries the tier and the honesty
+  // line, so the first answer is what follows it (UXD2-25).
+  const [open, setOpen] = useState(false);
   return (
     <details
       open={open}

@@ -8,8 +8,18 @@
  */
 export const POPULATION_RELEASE = '1.0.3';
 
-/** Publication date of the release (also day 0 of Freguesia Misteriosa). */
+/** Publication date of the release. */
 export const POPULATION_PUBLISHED = '2026-10-05';
+
+/**
+ * Day 0 of Freguesia misteriosa (N.º 1, the curated parish 030857): the day the
+ * site goes live, not the release date, so the public's first game is N.º 1.
+ * scripts/sync-population.py reads this line and writes the same date into
+ * game/index.json (a test checks they match). It must equal the first deploy
+ * date: if the launch moves, change it here, re-run the sync, and only then
+ * deploy. /data/population/v* is served immutable, so it cannot move after.
+ */
+export const POPULATION_GAME_EPOCH = '2026-10-06';
 
 /** Where the compact files live, relative to the site root. */
 export const POPULATION_DATA_PATH = `/data/population/v${POPULATION_RELEASE}`;

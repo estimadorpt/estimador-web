@@ -8,11 +8,25 @@ import type { GameEntry, GameIndex, ParishRecord, PopulationMeta, PopulationPlac
 
 const cache = new Map<string, Promise<unknown>>();
 
+/** Requests started by the parish shell's inline script, before hydration (`parishPrefetchScript` in prefetch.ts). */
+declare global {
+  interface Window { __populationPrefetch?: Record<string, Promise<Response>> }
+}
+
+/** A request the page's inline script already started for this URL, taken once. */
+function prefetched(url: string): Promise<Response> | null {
+  if (typeof window === 'undefined') return null;
+  const started = window.__populationPrefetch?.[url];
+  if (!started) return null;
+  delete window.__populationPrefetch![url];
+  return started;
+}
+
 export function fetchPopulationFile<T>(file: string, signal?: AbortSignal): Promise<T> {
   const url = `${POPULATION_DATA_PATH}/${file}`;
   let pending = cache.get(url) as Promise<T> | undefined;
   if (!pending) {
-    pending = fetch(url, { signal }).then(response => {
+    pending = (prefetched(url) ?? fetch(url, { signal })).then(response => {
       if (!response.ok) throw new Error(`${response.status} ${url}`);
       return response.json() as Promise<T>;
     });

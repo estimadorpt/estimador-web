@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { History } from 'lucide-react';
 import { MarkLoading } from '@/components/brand/MarkLoading';
 import { BRAND } from '@/lib/brand';
+import { POPULATION_GAME_EPOCH } from '@/lib/config/population';
 import { fetchGameChunk, fetchGameIndex, fetchPlaces } from '@/lib/population/client';
 import {
   COMPASS,
@@ -25,7 +26,7 @@ import {
   proximityScale,
   putRecord,
   recordFor,
-  shareText,
+  shareMessage,
   todayIndex,
   type GamePlace,
   type GameRecord,
@@ -86,6 +87,9 @@ function dayFromHash(today: number): number | null {
   return day >= 0 && day <= today ? day : null;
 }
 
+/** Day 0 (N.º 1): the launch day. game/index.json carries the same date (tested). */
+const EPOCH = POPULATION_GAME_EPOCH;
+
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
@@ -125,7 +129,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     Promise.all([fetchGameIndex(), fetchPlaces()])
       .then(([gameIndex, placeData]) => {
         if (!live) return;
-        const current = todayIndex(gameIndex.epoch, now());
+        const current = todayIndex(EPOCH, now());
         setIndex(gameIndex);
         setPlaces(indexPlaces(placeData));
         setToday(current);
@@ -157,7 +161,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   useEffect(() => {
     if (!index || today === null) return;
     const timer = window.setTimeout(() => {
-      const next = todayIndex(index.epoch, now());
+      const next = todayIndex(EPOCH, now());
       setDay(current => (current === today ? next : current));
       setToday(next);
     }, msUntilNextLisbonMidnight(now()) + 1000);
@@ -289,9 +293,9 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   const playing = record.status === 'playing';
   const practice = day !== today || replay !== null;
   const open = cluesOpen(record, entry.code);
-  const date = dateOfDay(index.epoch, day);
+  const date = dateOfDay(EPOCH, day);
   const stats = computeStats(store, today);
-  const share = playing ? '' : shareText({ date, record, feedback, locale });
+  const share = shareMessage({ date, day, record, feedback, locale });
   const used = record.guesses.length;
   const last = feedback.length > 0 ? feedback[feedback.length - 1] : null;
   const lastParish = guesses.length > 0 ? guesses[guesses.length - 1] : null;
@@ -382,6 +386,8 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
 
         <div className="min-w-0 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <ClueDeck
+            // A replay of the same day starts a fresh deck (its first clue, nothing selected from the finished game).
+            key={`${day}-${replay ? 'replay' : 'live'}`}
             entry={entry}
             meta={meta}
             locale={locale}
@@ -401,7 +407,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
 
       <div className="mt-10">
         <ArchivePicker
-          epoch={index.epoch}
+          epoch={EPOCH}
           today={today}
           current={day}
           store={store}
