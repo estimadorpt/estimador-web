@@ -17,9 +17,10 @@ import { LOCALE_REDIRECT_SCRIPT } from '@/lib/locale-redirect';
 // copy. NotFoundByPath keeps it in step afterwards. BCP 47 tags, as on every
 // other page (SEO3-12).
 const LANG_FROM_PATH = "if(/^\\/en(\\/|$)/.test(location.pathname))document.documentElement.lang='en-GB'";
-// Both copies render a <title> and the first one (Portuguese) names the
-// document until hydration; at the start of <body> the titles are parsed, so
-// an English address gets its own from the first paint too.
+// The static HTML carries one <title>, the Portuguese copy's (two would leave
+// the order to the renderer); at the start of <body> it is parsed, so an
+// English address gets its own title from the first paint, and NotFoundByPath
+// sets it again once hydrated.
 const titleFromPath = (english: string) => `if(/^\\/en(\\/|$)/.test(location.pathname))document.title=${JSON.stringify(english).replace(/</g, '\\u003c')}`;
 
 /**
@@ -47,7 +48,7 @@ function Page({ locale }: { locale: 'pt' | 'en' }) {
   return (
     <LocaleOnlyProvider locale={locale}>
       <NotFoundHeader locale={locale} />
-      <NotFoundBody locale={locale} withTitle />
+      <NotFoundBody locale={locale} withTitle={locale === 'pt'} />
       <SiteFooter locale={locale} />
     </LocaleOnlyProvider>
   );
@@ -74,7 +75,7 @@ export default async function NotFound() {
         <script dangerouslySetInnerHTML={{ __html: LOCALE_REDIRECT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: titleFromPath(englishTitle) }} />
         <div className="min-h-screen bg-paper text-ink">
-          <NotFoundByPath pt={<Page locale="pt" />} en={<Page locale="en" />} />
+          <NotFoundByPath pt={<Page locale="pt" />} en={<Page locale="en" />} englishTitle={englishTitle} />
         </div>
       </body>
     </html>

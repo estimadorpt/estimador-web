@@ -23,12 +23,15 @@ export const NOT_FOUND_LANGUAGE_CSS = 'html[lang^="en"] [data-nf-lang="pt"],html
  * hydrated, only that language stays in the document, with `lang` on <html>
  * following it.
  */
-export function NotFoundByPath({ pt, en }: { pt: ReactNode; en: ReactNode }) {
+export function NotFoundByPath({ pt, en, englishTitle }: { pt: ReactNode; en: ReactNode; englishTitle?: string }) {
   // 'both' while prerendering and hydrating, so the client matches the HTML.
   const language = useSyncExternalStore(noSubscription, languageOfPath, bothLanguages);
   useEffect(() => {
-    if (language !== 'both') document.documentElement.lang = language === 'en' ? 'en-GB' : 'pt-PT';
-  }, [language]);
+    if (language === 'both') return;
+    document.documentElement.lang = language === 'en' ? 'en-GB' : 'pt-PT';
+    // Only the Portuguese copy renders a <title> (one title in the static HTML).
+    if (language === 'en' && englishTitle) document.title = englishTitle;
+  }, [language, englishTitle]);
   return (
     <>
       {language !== 'en' && <div key="pt" data-nf-lang="pt">{pt}</div>}
