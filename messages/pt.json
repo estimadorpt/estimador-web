@@ -266,9 +266,7 @@
       "description": "As bandas e os intervalos mostravam onde o modelo esperava que estivesse o apoio real. Nesta página:",
       "ci_explanation": "Um intervalo de X% contém o valor em X% das simulações do modelo; não é a margem de erro de uma sondagem",
       "based_on_polls": "Com base em {count} sondagens e num modelo estatístico bayesiano",
-      "wider_bands": "Bandas mais largas = mais incerteza",
-      "note": "Nota:",
-      "undecided_note": "os cerca de 35% de indecisos nas sondagens acrescentavam incerteza que as bandas não mostram"
+      "wider_bands": "Bandas mais largas = mais incerteza"
     }
   },
   "home": {
@@ -568,7 +566,7 @@
     "privacyTitle": "Privacidade",
     "privacyDescription": "O que o estimador.pt regista sobre quem o visita: medição sem cookies, registos do servidor e dados do jogo de previsões.",
     "economicsMethodologyTitle": "Metodologia da economia",
-    "economicsMethodologyDescription": "Como vamos ler a economia portuguesa: as fontes, os quatro selos e a avaliação do protótipo testado até julho de 2026. Ainda sem números publicados.",
+    "economicsMethodologyDescription": "Como vamos ler a economia portuguesa: as fontes, os quatro selos e o teste interno do protótipo até julho de 2026. Ainda sem leituras da economia publicadas.",
     "topicsTitle": "Temas dos artigos",
     "topicTitle": "{topic}: artigos",
     "topicDescription": "Tudo o que o estimador.pt publicou sobre {topic}: notas datadas e explicadores.",

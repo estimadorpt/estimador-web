@@ -266,9 +266,7 @@
       "description": "The bands and intervals showed where the model expected true support to lie. On this page:",
       "ci_explanation": "An X% interval holds the value in X% of the model’s simulations; it is not a poll’s margin of error",
       "based_on_polls": "Based on {count} polls and a Bayesian statistical model",
-      "wider_bands": "Wider bands = more uncertainty",
-      "note": "Note:",
-      "undecided_note": "the roughly 35% undecided in the polls added uncertainty the bands do not show"
+      "wider_bands": "Wider bands = more uncertainty"
     }
   },
   "home": {
@@ -568,7 +566,7 @@
     "privacyTitle": "Privacy",
     "privacyDescription": "What estimador.pt records about its visitors: cookieless measurement, server logs and prediction-game data.",
     "economicsMethodologyTitle": "Economy methodology",
-    "economicsMethodologyDescription": "How we will read the Portuguese economy: the sources, the four labels and the evaluation of the prototype tested up to July 2026. No figures published yet.",
+    "economicsMethodologyDescription": "How we will read Portugal’s economy: the sources, the four labels and the prototype’s internal test up to July 2026. No readings of the economy published yet.",
     "topicsTitle": "Article topics",
     "topicTitle": "{topic}: articles",
     "topicDescription": "Everything estimador.pt has published on {topic}: dated notes and explainers.",

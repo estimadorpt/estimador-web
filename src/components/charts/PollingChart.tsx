@@ -94,7 +94,8 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
     setSelectedParties(next.length > 0 ? next : current);
   };
 
-  // The table twin: every estimate in the window, every party, with its band.
+  // The table twin: every estimate in the window, every party, with its band,
+  // newest first, so the values the end labels quote open the table on a phone.
   const table = useMemo(() => {
     if (series.dates.length === 0) return { columns: [], rows: [] };
     return {
@@ -109,7 +110,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
           const high = v.high[i];
           return low != null && high != null ? `${fmtPct(mean)} (${fmtPct(low)}–${fmtPct(high)})` : fmtPct(mean);
         }),
-      ]),
+      ]).reverse(),
     };
   }, [series, ranked, pt]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -231,7 +232,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
             type="button"
             onClick={() => { setViewMode("selected"); toggleParty(party); }}
             aria-pressed={viewMode === "selected" && activeParties.includes(party)}
-            className={`min-h-9 rounded-full border px-3 text-sm ${viewMode === "selected" && activeParties.includes(party) ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:bg-cream"}`}
+            className={`min-h-11 rounded-full border px-3 text-sm ${viewMode === "selected" && activeParties.includes(party) ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:bg-cream"}`}
           >
             <span aria-hidden="true" className="mr-1.5 inline-block size-2 rounded-full" style={{ background: partyColors[party as keyof typeof partyColors] || "#888" }} />
             {party}
@@ -241,7 +242,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
           type="button"
           onClick={() => setViewMode(viewMode === "all" ? "selected" : "all")}
           aria-pressed={viewMode === "all"}
-          className={`min-h-9 rounded-full border px-3 text-sm ${viewMode === "all" ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:bg-cream"}`}
+          className={`min-h-11 rounded-full border px-3 text-sm ${viewMode === "all" ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:bg-cream"}`}
         >
           {pt ? "Todos os partidos" : "All parties"}
         </button>
@@ -272,7 +273,12 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
           ))}
         </div>
       )}
-      <ChartTable caption={`${voteShareLabel} · ${pt ? "estimativa e banda de 94% (HDI), todos os partidos" : "estimate and 94% HDI band, every party"}`} columns={table.columns} rows={table.rows} />
+      <ChartTable
+        caption={`${voteShareLabel} · ${pt ? "estimativa e banda de 94% (HDI), todos os partidos" : "estimate and 94% HDI band, every party"}`}
+        summaryLabel={pt ? "Ver como tabela, mais recente primeiro" : "View as table, latest first"}
+        columns={table.columns}
+        rows={table.rows}
+      />
     </div>
   );
 }

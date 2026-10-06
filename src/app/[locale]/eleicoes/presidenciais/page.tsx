@@ -14,6 +14,7 @@ import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SectionNotes } from "@/components/articles/SectionNotes";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { DataCard } from "@/components/viz/DataCard";
 import { ModelAssumptionsCard } from "@/components/ModelAssumptionsCard";
 import { UncertaintyExplainer } from "@/components/UncertaintyExplainer";
 import { getTranslations } from 'next-intl/server';
@@ -44,6 +45,11 @@ export async function generateMetadata({
 }
 
 const linkClass = 'text-ink underline underline-offset-4 hover:text-ink-muted';
+/**
+ * A link on a line of its own: a 44px target at the text's own size (UXM2-09).
+ * The gap stands in for the space before an arrow, which a flex box collapses.
+ */
+const standaloneLinkClass = `inline-flex min-h-11 items-center gap-1 ${linkClass}`;
 
 export default async function PresidentialArchivePage({
   params
@@ -79,14 +85,29 @@ export default async function PresidentialArchivePage({
   const interval90 = credibleIntervalLabel(.05, .95, locale);
   const modelledCandidates = forecast.candidates.filter(c => c.name !== 'Others').length;
   const results = OFFICIAL_RESULTS['presidential-2026'];
+  const pt = locale === 'pt';
+
+  // The chart frame's footer (CLAUDE.md, "Chart frame"): the source, the
+  // forecast's own date and where the method is explained. The first-round
+  // files carry no simulation count, so the trend cites the polls it read.
+  const firstFrame = {
+    updated: firstForecast ? (pt ? `Previsão de ${firstForecast}` : `Forecast of ${firstForecast}`) : undefined,
+    methodologyHref: '/eleicoes/metodologia#presidenciais',
+    methodologyLabel: t('common.methodology'),
+    locale,
+  };
+  const modelSource = pt ? 'Fonte: modelo estimador.pt' : 'Source: estimador.pt model';
+  const pollsSource = pt
+    ? `Fonte: modelo estimador.pt, ${formatElectionNumber(polls.polls.length, locale)} sondagens`
+    : `Source: estimador.pt model, ${formatElectionNumber(polls.polls.length, locale)} polls`;
 
   const officialResults = (
-    <span className="inline-flex flex-wrap items-center gap-x-2">
+    <span className="inline-flex flex-wrap items-center gap-x-3">
       <span>{t('presidential.officialResults')}:</span>
       {/* The link names carry their context ("Resultados oficiais (SGMAI): 1.ª volta");
-          the arrow is decoration. */}
+          the arrow is decoration. Each is a 44px target (UXM2-09). */}
       {results.map(r => (
-        <a key={r.href} href={r.href} className={linkClass} rel="noopener noreferrer">
+        <a key={r.href} href={r.href} className={standaloneLinkClass} rel="noopener noreferrer">
           <span className="sr-only">{t('presidential.officialResults')}: </span>
           {r.round === 1 ? t('secondRound.firstRoundTab') : t('secondRound.secondRoundTab')}
           <span aria-hidden="true"> ↗</span>
@@ -151,40 +172,52 @@ export default async function PresidentialArchivePage({
       <section id="trajectory" className="py-10 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('presidential.supportTrajectory')}</h2>
-          <p className="text-sm text-stone-500 mb-8 max-w-xl">{t('presidential.trendDescription')}</p>
-          <ErrorBoundary componentName="Support Trends">
-            <PresidentialTrendChart
-              trends={trends}
-              polls={polls}
-              electionDate={PRESIDENTIAL_2026.date}
-              cutoffDate={lastPollDate}
-              height={420}
-              showPolls={true}
-              maxCandidates={5}
-            />
-          </ErrorBoundary>
+          <p className="text-sm text-stone-500 mb-6 max-w-xl">{t('presidential.trendDescription')}</p>
+          <DataCard
+            title={pt ? 'Apoio estimado por candidato, dia a dia' : 'Estimated support by candidate, day by day'}
+            source={pollsSource}
+            {...firstFrame}
+          >
+            <ErrorBoundary componentName="Support Trends">
+              <PresidentialTrendChart
+                trends={trends}
+                polls={polls}
+                electionDate={PRESIDENTIAL_2026.date}
+                cutoffDate={lastPollDate}
+                height={420}
+                showPolls={true}
+                maxCandidates={5}
+              />
+            </ErrorBoundary>
+          </DataCard>
         </div>
       </section>
 
       {headToHead.dates.length > 0 && (
-        <section className="py-10 bg-cream border-b border-stone-300">
+        <section className="py-10 border-b border-stone-300">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('presidential.headToHeadTitle')}</h2>
-            <p className="text-sm text-stone-500 mb-8 max-w-xl">
+            <p className="text-sm text-stone-500 mb-6 max-w-xl">
               {t('presidential.headToHeadDescription', { candidateA: headToHead.candidate_a, candidateB: headToHead.candidate_b })}
             </p>
-            <ErrorBoundary componentName="Head-to-Head">
-              <PresidentialHeadToHead
-                data={headToHead}
-                cutoffDate={lastPollDate}
-                translations={{
-                  title: t('presidential.headToHeadTitle'),
-                  probability: t('presidential.leads'),
-                  lastValue: t('presidential.headToHeadLastValue'),
-                  empty: t('presidential.headToHeadEmpty'),
-                }}
-              />
-            </ErrorBoundary>
+            <DataCard
+              title={pt ? `${headToHead.candidate_a} contra ${headToHead.candidate_b}, dia a dia` : `${headToHead.candidate_a} against ${headToHead.candidate_b}, day by day`}
+              source={pollsSource}
+              {...firstFrame}
+            >
+              <ErrorBoundary componentName="Head-to-Head">
+                <PresidentialHeadToHead
+                  data={headToHead}
+                  cutoffDate={lastPollDate}
+                  translations={{
+                    title: t('presidential.headToHeadTitle'),
+                    probability: t('presidential.leads'),
+                    lastValue: t('presidential.headToHeadLastValue'),
+                    empty: t('presidential.headToHeadEmpty'),
+                  }}
+                />
+              </ErrorBoundary>
+            </DataCard>
           </div>
         </section>
       )}
@@ -213,20 +246,26 @@ export default async function PresidentialArchivePage({
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
             <div className="lg:col-span-3">
               <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('presidential.projectedVoteShare')}</h2>
-              <p className="text-xs text-stone-500 mb-6">
+              <p className="text-sm text-stone-500 mb-6">
                 {t('presidential.forecastForElectionDay', { forecast: firstForecast ?? '', election: firstElection })}
               </p>
-              <ErrorBoundary componentName="Forecast Bars">
-                <PresidentialForecastBars
-                  forecast={forecast}
-                  showUncertainty={true}
-                  maxCandidates={8}
-                  translations={{
-                    projectedVoteShare: t('presidential.projectedVoteShare'),
-                    confidenceInterval: interval95,
-                  }}
-                />
-              </ErrorBoundary>
+              <DataCard
+                title={pt ? 'Percentagem de votos por candidato, com o intervalo de 95%' : 'Vote share by candidate, with the 95% interval'}
+                source={modelSource}
+                {...firstFrame}
+              >
+                <ErrorBoundary componentName="Forecast Bars">
+                  <PresidentialForecastBars
+                    forecast={forecast}
+                    showUncertainty={true}
+                    maxCandidates={8}
+                    translations={{
+                      projectedVoteShare: t('presidential.projectedVoteShare'),
+                      confidenceInterval: interval95,
+                    }}
+                  />
+                </ErrorBoundary>
+              </DataCard>
             </div>
 
             <div className="lg:col-span-2 lg:border-l lg:border-stone-200 lg:pl-12">
@@ -293,9 +332,9 @@ export default async function PresidentialArchivePage({
               }}
             />
             <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-              <a href="#forecast" className={linkClass}>{t('presidential.navForecast')}</a>
-              <a href="#trajectory" className={linkClass}>{t('presidential.navUncertainty')}</a>
-              <a href="#evidence" className={linkClass}>{t('presidential.navEvidence')}</a>
+              <a href="#forecast" className={`tap-target ${linkClass}`}>{t('presidential.navForecast')}</a>
+              <a href="#trajectory" className={`tap-target ${linkClass}`}>{t('presidential.navUncertainty')}</a>
+              <a href="#evidence" className={`tap-target ${linkClass}`}>{t('presidential.navEvidence')}</a>
             </div>
           </div>
         </nav>
@@ -323,7 +362,7 @@ export default async function PresidentialArchivePage({
                 { href: '/eleicoes/arquivo', label: t('elections.navArchiveGuide') },
                 { href: '/eleicoes/metodologia', label: t('elections.navMethodology') },
               ].map(link => (
-                <Link key={link.href} href={link.href} locale={locale} className="group inline-flex items-center gap-2 text-ink underline underline-offset-4">
+                <Link key={link.href} href={link.href} locale={locale} className="group inline-flex min-h-11 items-center gap-2 text-ink underline underline-offset-4">
                   <span className="font-semibold">{link.label}</span>
                   <ArrowRight aria-hidden="true" className="w-4 h-4" />
                 </Link>

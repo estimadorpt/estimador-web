@@ -1,5 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/routing';
 import { SecondRoundWinnerCards } from './charts/SecondRoundWinnerCards';
 import { SecondRoundVoteSplit } from './charts/SecondRoundVoteSplit';
 import { SecondRoundForecastBars } from './charts/SecondRoundForecastBars';
@@ -7,6 +6,8 @@ import { SecondRoundBeeswarm } from './charts/SecondRoundBeeswarm';
 import { SecondRoundScenarios } from './charts/SecondRoundScenarios';
 import { PresidentialTrendChart } from './charts/PresidentialTrendChart';
 import { ErrorBoundary } from './ErrorBoundary';
+import { TextLink } from './brand/TextLink';
+import { DataCard } from './viz/DataCard';
 import { PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections';
 import { BLANK_NULL } from '@/lib/election-aggregates';
 import { credibleIntervalLabel, formatElectionLongDate, formatElectionNumber } from '@/lib/election-display';
@@ -20,6 +21,7 @@ import type { SecondRoundArchive as SecondRoundArchiveData } from '@/lib/utils/d
 export async function SecondRoundArchive({ data, locale }: { data: SecondRoundArchiveData; locale: string }) {
   const t = await getTranslations({ locale, namespace: 'secondRound' });
   const tf = await getTranslations({ locale, namespace: 'forecast' });
+  const tc = await getTranslations({ locale, namespace: 'common' });
   if (!data.available || !data.simulations) {
     return (
       <section id="forecast" className="border-b border-line">
@@ -37,6 +39,16 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
   const [candidateA, candidateB] = data.winProbability.candidates;
   const hasTrend = Object.keys(data.trends.candidates || {}).length > 0 && data.trends.dates.length > 0;
   const total = formatElectionNumber(simulations.total, locale);
+  const pt = locale === 'pt';
+  // The chart frame's footer (CLAUDE.md, "Chart frame"): an archived forecast
+  // names its run, its date and where the method is explained.
+  const frame = {
+    updated: pt ? `Previsão de ${cutoffLabel}` : `Forecast of ${cutoffLabel}`,
+    methodologyHref: '/eleicoes/metodologia#segunda-volta-2026',
+    methodologyLabel: tc('methodology'),
+    locale,
+  };
+  const simulationsSource = pt ? `Fonte: modelo estimador.pt, ${total} simulações` : `Source: estimador.pt model, ${total} simulations`;
 
   return (
     <>
@@ -48,9 +60,9 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
             <p className="text-lg text-stone-600 mb-4 leading-relaxed">
               {t('headlineDescription', { date: cutoffLabel, election: electionLabel, candidateA: candidateA?.name ?? '', candidateB: candidateB?.name ?? '' })}
             </p>
-            <Link href="/eleicoes/metodologia#segunda-volta-2026" locale={locale} className="text-sm font-medium text-ink underline underline-offset-4">
+            <TextLink href="/eleicoes/metodologia#segunda-volta-2026" locale={locale} className="text-sm">
               {t('methodologyLink')}
-            </Link>
+            </TextLink>
           </div>
         </div>
       </section>
@@ -85,21 +97,27 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('supportTrends')}</h2>
           <p className="text-sm text-stone-500 mb-3 max-w-xl">{t('trendDescription')}</p>
-          <p className="text-xs text-stone-600 mb-8 max-w-xl border-l-2 border-line pl-3">
+          <p className="text-xs text-stone-600 mb-6 max-w-xl border-l-2 border-line pl-3">
             {t('noRunoffPollsNote', { date: cutoffLabel })}
           </p>
           {hasTrend ? (
-            <ErrorBoundary componentName="Second Round Trend">
-              <PresidentialTrendChart
-                trends={data.trends}
-                cutoffDate={cutoff}
-                showPolls={false}
-                maxCandidates={2}
-                exclude={['Others', BLANK_NULL]}
-                height={380}
-                candidateParam="candidate2"
-              />
-            </ErrorBoundary>
+            <DataCard
+              title={pt ? 'Apoio estimado na segunda volta, dia a dia' : 'Estimated runoff support, day by day'}
+              source={pt ? 'Fonte: modelo estimador.pt' : 'Source: estimador.pt model'}
+              {...frame}
+            >
+              <ErrorBoundary componentName="Second Round Trend">
+                <PresidentialTrendChart
+                  trends={data.trends}
+                  cutoffDate={cutoff}
+                  showPolls={false}
+                  maxCandidates={2}
+                  exclude={['Others', BLANK_NULL]}
+                  height={380}
+                  candidateParam="candidate2"
+                />
+              </ErrorBoundary>
+            </DataCard>
           ) : (
             <p className="text-sm text-stone-500">{t('noTrend')}</p>
           )}
@@ -109,22 +127,28 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
       <section className="py-10 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('simulationDistribution')}</h2>
-          <p className="text-sm text-stone-500 mb-8 max-w-xl">{t('simulationDescription')}</p>
-          <ErrorBoundary componentName="Beeswarm">
-            <SecondRoundBeeswarm
-              simulations={simulations}
-              translations={{
-                axisLabel: t('axisLabel'),
-                fiftyPercentLine: t('fiftyPercentLine'),
-                drawnCaption: tf.raw('drawnSimulations') as string,
-                tableCaption: t('tableCaption'),
-                candidate: t('candidateColumn'),
-                median: t('medianColumn'),
-                winShare: t('winShareColumn'),
-                tipSuffix: t('tipSuffix'),
-              }}
-            />
-          </ErrorBoundary>
+          <p className="text-sm text-stone-500 mb-6 max-w-xl">{t('simulationDescription')}</p>
+          <DataCard
+            title={pt ? 'Votos válidos de cada candidato no dia da eleição, por simulação' : 'Each candidate’s valid-vote share on election day, by simulation'}
+            source={simulationsSource}
+            {...frame}
+          >
+            <ErrorBoundary componentName="Beeswarm">
+              <SecondRoundBeeswarm
+                simulations={simulations}
+                translations={{
+                  axisLabel: t('axisLabel'),
+                  fiftyPercentLine: t('fiftyPercentLine'),
+                  drawnCaption: tf.raw('drawnSimulations') as string,
+                  tableCaption: t('tableCaption'),
+                  candidate: t('candidateColumn'),
+                  median: t('medianColumn'),
+                  winShare: t('winShareColumn'),
+                  tipSuffix: t('tipSuffix'),
+                }}
+              />
+            </ErrorBoundary>
+          </DataCard>
         </div>
       </section>
 
@@ -146,19 +170,25 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
       <section className="py-10 border-b border-stone-300">
         <div className="mx-auto w-full max-w-7xl px-4"><div className="max-w-3xl">
           <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('projectedVoteShare')}</h2>
-          <p className="text-xs text-stone-500 mb-6 max-w-xl">{t('projectedVoteShareNote')}</p>
-          <ErrorBoundary componentName="Forecast Bars">
-            <SecondRoundForecastBars
-              forecast={data.forecast}
-              showUncertainty={true}
-              translations={{
-                projectedVoteShare: t('projectedVoteShare'),
-                confidenceInterval: interval95,
-                blankNull: t('blankNull'),
-                leading: t('leading'),
-              }}
-            />
-          </ErrorBoundary>
+          <p className="text-sm text-stone-500 mb-6 max-w-xl">{t('projectedVoteShareNote')}</p>
+          <DataCard
+            title={pt ? 'Percentagem de todos os boletins, com o intervalo de 95%' : 'Share of all ballots, with the 95% interval'}
+            source={simulationsSource}
+            {...frame}
+          >
+            <ErrorBoundary componentName="Forecast Bars">
+              <SecondRoundForecastBars
+                forecast={data.forecast}
+                showUncertainty={true}
+                translations={{
+                  projectedVoteShare: t('projectedVoteShare'),
+                  confidenceInterval: interval95,
+                  blankNull: t('blankNull'),
+                  leading: t('leading'),
+                }}
+              />
+            </ErrorBoundary>
+          </DataCard>
         </div></div>
       </section>
     </>

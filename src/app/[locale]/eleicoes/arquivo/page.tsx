@@ -2,7 +2,7 @@ import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PageHero } from '@/components/PageHero';
 import { Action } from '@/components/brand/Action';
-import { createPageMetadata, siteTitle } from '@/lib/metadata';
+import { createPageMetadata } from '@/lib/metadata';
 import { OFFICIAL_RESULTS, PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE, PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from '@/lib/config/elections';
 import { formatElectionLongDate } from '@/lib/election-display';
 import { loadSecondRoundData, loadPresidentialData } from '@/lib/utils/data-loader';
@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return createPageMetadata({
     locale,
     path: '/eleicoes/arquivo',
-    title: siteTitle(locale === 'pt' ? 'Eleições: previsões arquivadas' : 'Elections: archived forecasts'),
+    title: locale === 'pt' ? 'Eleições: previsões arquivadas' : 'Elections: archived forecasts',
     description: locale === 'pt'
       ? 'As previsões das presidenciais de 2026 e das legislativas de 2025, guardadas com a informação disponível à data, e como lê-las sem as confundir com resultados.'
       : 'The 2026 presidential and 2025 parliamentary forecasts, kept as published at the time, and how to read them without mistaking them for results.',
@@ -81,7 +81,7 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
       lede={pt ? 'Um arquivo permite voltar à informação disponível na altura. Não é uma página de resultados oficiais. Não há eleição em curso; a próxima previsão será anunciada aqui.' : 'An archive lets you revisit the information available at the time. It is not a page of official results. There is no election under way; the next forecast will be announced here.'}
     />
     <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
-      <section aria-labelledby="archive-choice-title" className="border-y border-line py-7">
+      <section aria-labelledby="archive-choice-title" className="border-b border-line pb-7">
         <p className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">{pt ? 'Começar por aqui' : 'Start here'}</p>
         <h2 id="archive-choice-title" className="mt-2 text-2xl">{pt ? 'Escolhe uma previsão' : 'Choose a forecast'}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">{pt ? 'Abre a previsão que queres situar no tempo. Encontrarás a data, a volta e as estimativas então publicadas.' : 'Open the forecast you want to place in time. It contains the date, election round and estimates published then.'}</p>
@@ -97,10 +97,11 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
                   {pt ? 'Ver a previsão' : 'View the forecast'}
                 </Action>
               </div>
-              <p className="mt-3 flex flex-wrap gap-x-3 text-sm text-ink-muted">
+              {/* Each result link is a 44px target (UXM2-09). */}
+              <p className="mt-3 flex flex-wrap items-center gap-x-3 text-sm text-ink-muted">
                 <span>{pt ? 'Resultados oficiais (SGMAI)' : 'Official results (SGMAI)'}:</span>
                 {entry.results.map(r => (
-                  <a key={r.href} href={r.href} className={linkClass} rel="noopener noreferrer">
+                  <a key={r.href} href={r.href} className={`inline-flex min-h-11 items-center gap-1 ${linkClass}`} rel="noopener noreferrer">
                     <span className="sr-only">{entry.name}, {pt ? 'resultados oficiais' : 'official results'}: </span>
                     {r.round === 1 ? (pt ? '1.ª volta' : '1st round') : r.round === 2 ? (pt ? '2.ª volta' : '2nd round') : (pt ? 'resultados' : 'results')}
                     <span aria-hidden="true"> ↗</span>

@@ -150,7 +150,8 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
       {candidates.map(([name, candidate]) => <button key={name} type="button" onClick={() => selectCandidate(name)} aria-pressed={selectedName === name} className={`min-h-11 max-w-full rounded-full border px-3 text-left text-sm ${selectedName === name ? 'border-ink bg-ink text-paper' : 'border-line bg-paper text-ink hover:bg-cream'}`}><span className="mr-2 inline-block size-2 rounded-full" style={{ background: candidate.color }} />{name}</button>)}
     </div>
     <div className="mb-4 border-l-2 pl-4" style={{ borderColor: selected.color }}>
-      <h3 className="text-lg font-semibold text-ink">{selectedName}</h3>
+      {/* The chosen series' name, not a heading: the chart frame's title is the heading. */}
+      <p className="text-lg font-semibold text-ink">{selectedName}</p>
       <p className="mt-1 text-sm text-ink-muted">{pt ? `Estimativa a ${formatElectionDate(dates[latest], locale)}` : `Estimate on ${formatElectionDate(dates[latest], locale)}`}: <strong className="text-ink tabular-nums">{fmt(selected.mean[latest])}</strong>{' · '}{band50}: {fmt(selected.ci_25[latest])}–{fmt(selected.ci_75[latest])}{' · '}{band90}: {fmt(selected.ci_05[latest])}–{fmt(selected.ci_95[latest])}</p>
     </div>
     <div ref={containerRef} className="relative w-full">
