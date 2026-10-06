@@ -5,7 +5,7 @@ import { POPULATION_DATA_DIR } from '@/lib/config/population';
 import type { PopulationScorecard } from '@/types/population';
 import { CONSTRAINT_LABEL, FITTED_PERSON_KEYS, FITTED_TABLES, GLOSSARY, LIMITATIONS, NOVELTY, PRIVACY_FINDINGS, RELEASE_GATES, SCORED_ONLY_TABLES, constraintLabel, formatFit, generatedGap } from './copy';
 import { formatBytes } from '../data/format';
-import { METHODOLOGY_ANCHORS, headingSlug, methodologyFieldAnchor } from './anchors';
+import { METHODOLOGY_ANCHORS, headingSlug, methodologyAnchorForRecipe, methodologyFieldAnchor } from './anchors';
 import type { PopulationPlaces, PopulationReleaseInfo } from '@/types/population';
 
 const root = process.cwd();
@@ -145,6 +145,13 @@ describe('methodology headings (MR2-10, PRO2-11, PRO2-13, POP2-ACC-04)', () => {
 
   it('gives field rows ids that are the same in both locales', () => {
     expect(methodologyFieldAnchor('living_alone')).toBe('campo-living-alone');
+    // Every card recipe opens a row the methodology actually renders (meta.provenance.fields).
+    const meta = read<{ provenance: { fields: Record<string, unknown> }; recipe_order: string[] }>('meta.json');
+    for (const recipe of meta.recipe_order) {
+      const anchor = methodologyAnchorForRecipe(recipe, 'pt');
+      expect(Object.keys(meta.provenance.fields).map(methodologyFieldAnchor), recipe).toContain(anchor);
+    }
+    expect(methodologyAnchorForRecipe('unknown', 'en')).toBe(METHODOLOGY_ANCHORS.fitted.en);
   });
 });
 

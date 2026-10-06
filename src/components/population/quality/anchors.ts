@@ -27,3 +27,20 @@ export const METHODOLOGY_ANCHORS = {
 export function methodologyFieldAnchor(field: string): string {
   return `campo-${field.replace(/_/g, '-')}`;
 }
+
+/** The methodology row a card's "Como foi feito" should open: the field that card groups or derives. */
+const RECIPE_FIELD: Record<string, string> = {
+  age: 'age_5y',
+  education: 'education_level_coarse5',
+  employment: 'employment_status_coarse3',
+  household_size: 'hh_size_bin',
+  household_type: 'hh_type_top',
+  elders_alone: 'living_alone',
+  who_lives_alone: 'living_alone',
+  multigenerational: 'multigenerational',
+};
+
+export function methodologyAnchorForRecipe(recipe: string, locale: 'pt' | 'en'): string {
+  const field = RECIPE_FIELD[recipe];
+  return field ? methodologyFieldAnchor(field) : METHODOLOGY_ANCHORS.fitted[locale];
+}

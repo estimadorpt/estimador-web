@@ -376,7 +376,19 @@ sha256sum checksums.sha256`;
                   ? <>O ficheiro <code className="font-mono text-[13px]">quality.csv</code>, que o README do pacote manda ler primeiro. Origem: INE (contagem publicada), gerado (contado na população gerada), avaliação (medido contra as tabelas do INE) ou geográfico.</>
                   : <>The <code className="font-mono text-[13px]">quality.csv</code> file, which the package README says to read first. Source: INE (a published count), generated (counted in the generated population), evaluation (measured against INE’s tables) or geographic.</>}
               </p>
-              <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-cream">
+              {/* Phones: one stacked entry per column, so the meaning is not clipped behind a sideways scroll. */}
+              <dl className="mt-4 divide-y divide-line rounded-2xl border border-line bg-cream sm:hidden">
+                {QUALITY_COLUMNS.map(column => (
+                  <div key={column.name} className="px-4 py-3">
+                    <dt className="flex flex-wrap items-baseline gap-x-2">
+                      <span className="font-mono text-[13px] font-semibold text-ink [overflow-wrap:anywhere]">{column.name}</span>
+                      <span className="text-xs text-stone-500">{QUALITY_SOURCE[column.source][locale]}</span>
+                    </dt>
+                    <dd className="mt-1 text-sm leading-relaxed text-stone-700">{column.meaning[locale]}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="mt-4 hidden overflow-x-auto rounded-2xl border border-line bg-cream sm:block">
                 <table className="min-w-full border-collapse text-sm">
                   <caption className="sr-only">{pt ? 'Colunas do ficheiro de qualidade' : 'Columns of the quality file'}</caption>
                   <thead>
