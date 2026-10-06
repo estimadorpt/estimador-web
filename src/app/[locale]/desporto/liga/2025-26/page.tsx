@@ -14,8 +14,9 @@ import {
 } from "@/components/charts/football/SeasonReview";
 import { LuckIndex } from "@/components/charts/football/LuckIndex";
 import type { LuckEntry } from "@/components/charts/football/LuckIndex";
+import { DataCard } from "@/components/viz/DataCard";
 import { teamDisplayName } from "@/lib/config/football";
-import { formatLongDate } from "@/lib/football-format";
+import { formatInteger, formatLongDate } from "@/lib/football-format";
 import { matchdayListPhrase, modelPlainName } from "@/lib/football-model-evaluation";
 import { forecastProvenance, type ForecastStamp } from "@/lib/season-review-provenance";
 import type { Metadata } from "next";
@@ -23,8 +24,8 @@ import { setRequestLocale } from '@/i18n/request-locale';
 
 const SEASON = "2025-26";
 
-/** Each archived forecast file's matchday, timestamp and model. */
-async function loadForecastStamps(season: string): Promise<ForecastStamp[]> {
+/** Each archived forecast file's matchday, timestamp, model and simulation count. */
+async function loadForecastStamps(season: string): Promise<Array<ForecastStamp & { nSims: number | null }>> {
   try {
     const dir = path.join(process.cwd(), "public", "data", "football", `liga-${season}`);
     const files = (await readdir(dir)).filter((f) => /^md\d+\.json$/.test(f));
@@ -35,6 +36,7 @@ async function loadForecastStamps(season: string): Promise<ForecastStamp[]> {
           matchday: typeof d.matchday === "number" ? d.matchday : Number(f.slice(2, -5)),
           timestamp: typeof d.timestamp === "string" ? d.timestamp : null,
           model: typeof d.model === "string" ? d.model : null,
+          nSims: typeof d.n_sims === "number" ? d.n_sims : null,
         };
       }),
     );
@@ -200,6 +202,28 @@ export default async function SeasonReviewPage({
           : "",
       ].filter(Boolean);
 
+  // The two charts' frames (CLAUDE.md "Chart frame", audit UXD2-07): the
+  // archived run named in the footer, its simulation count and the date of
+  // its last forecast, all read from the files.
+  const reviewStamps = stamps.filter((s) => inReview.has(s.matchday));
+  const simCounts = Array.from(new Set(reviewStamps.map((s) => s.nSims).filter((n): n is number => n != null)));
+  const lastStamp = reviewStamps.find((s) => s.matchday === lastForecast) ?? null;
+  const raceSource = simCounts.length === 1
+    ? pt
+      ? `Fonte: modelo anterior do estimador.pt, ${formatInteger(simCounts[0], locale)} simulações por previsão`
+      : `Source: estimador.pt's previous model, ${formatInteger(simCounts[0], locale)} simulations per forecast`
+    : pt
+      ? "Fonte: modelo anterior do estimador.pt"
+      : "Source: estimador.pt's previous model";
+  const raceUpdated = lastStamp?.timestamp
+    ? pt
+      ? `Última previsão: jornada ${lastForecast}, ${formatLongDate(lastStamp.timestamp, locale)}`
+      : `Last forecast: matchday ${lastForecast}, ${formatLongDate(lastStamp.timestamp, locale)}`
+    : undefined;
+  const reviewUpdated = pt
+    ? `Revisão gerada a ${formatLongDate(review.generated, locale)}`
+    : `Review generated on ${formatLongDate(review.generated, locale)}`;
+
   // Biggest final-points miss at the last published forecast, computed from
   // the same numbers the report card uses — no hand-written claims.
   const nf = (v: number, d = 1) =>
@@ -357,16 +381,27 @@ export default async function SeasonReviewPage({
             </div>
           </div>
 
-          <LuckIndex
-            entries={luckEntries}
-            locale={pt ? "pt" : "en"}
-            labels={{
-              overperforming: pt ? "Acima do esperado" : "Above expectation",
-              underperforming: pt ? "Abaixo do esperado" : "Below expectation",
-              pointsShort: pt ? "pts reais" : "real pts",
-              expectedShort: pt ? "esperados" : "expected",
-            }}
-          />
+          <DataCard
+            title={pt ? "Pontos reais e pontos esperados (xPts) por clube" : "Real and expected points (xPts) by club"}
+            source={pt
+              ? `Fonte: xG da SofaScore, ${review.matches_played} jogos; xPts calculados pelo estimador.pt`
+              : `Source: SofaScore xG, ${review.matches_played} matches; xPts computed by estimador.pt`}
+            updated={reviewUpdated}
+            methodologyHref={pt ? "/desporto/liga/metodologia#pontos-esperados-xpts" : "/desporto/liga/metodologia#expected-points-xpts"}
+            methodologyLabel={pt ? "O que o xPts mede" : "What xPts measures"}
+            locale={locale}
+          >
+            <LuckIndex
+              entries={luckEntries}
+              locale={pt ? "pt" : "en"}
+              labels={{
+                overperforming: pt ? "Acima do esperado" : "Above expectation",
+                underperforming: pt ? "Abaixo do esperado" : "Below expectation",
+                pointsShort: pt ? "pts reais" : "real pts",
+                expectedShort: pt ? "esperados" : "expected",
+              }}
+            />
+          </DataCard>
           <p className="text-xs text-stone-500 mt-4 max-w-3xl border-l-2 border-stone-200 pl-4">
             {c.luckNote}
           </p>
@@ -376,17 +411,26 @@ export default async function SeasonReviewPage({
         <section className="mb-14">
           <h2 className="text-2xl tracking-tight mb-1">{c.raceTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.raceIntro}</p>
-          <TitleRaceEvolution
-            race={review.title_race}
-            totalMatchdays={review.matchdays}
+          <DataCard
+            title={pt ? "Probabilidade de ser campeão, previsão a previsão" : "Chance of the title, forecast by forecast"}
+            source={raceSource}
+            updated={raceUpdated}
+            methodologyHref="/desporto/liga/metodologia"
+            methodologyLabel={c.methodology}
             locale={locale}
-            reconstructed={reconstructed}
-            outcomeLabel={
-              pt
-                ? `As previsões param na jornada ${lastForecast}: as últimas ${review.matchdays - lastForecast} jornadas nunca foram simuladas. O ${teamDisplayName(review.champion)} foi campeão.`
-                : `The forecasts stop at matchday ${lastForecast}: the last ${review.matchdays - lastForecast} rounds were never simulated. ${teamDisplayName(review.champion)} won the title.`
-            }
-          />
+          >
+            <TitleRaceEvolution
+              race={review.title_race}
+              totalMatchdays={review.matchdays}
+              locale={locale}
+              reconstructed={reconstructed}
+              outcomeLabel={
+                pt
+                  ? `As previsões param na jornada ${lastForecast}: as últimas ${review.matchdays - lastForecast} jornadas nunca foram simuladas. O ${teamDisplayName(review.champion)} foi campeão.`
+                  : `The forecasts stop at matchday ${lastForecast}: the last ${review.matchdays - lastForecast} rounds were never simulated. ${teamDisplayName(review.champion)} won the title.`
+              }
+            />
+          </DataCard>
         </section>
 
         {/* Report card */}
@@ -474,26 +518,26 @@ export default async function SeasonReviewPage({
             <Link
               href="/desporto/liga"
               locale={locale}
-              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.current}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
               href="/desporto/liga/dados"
               locale={locale}
-              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.data}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.methodology}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </section>

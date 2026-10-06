@@ -10,6 +10,7 @@ import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/mdx-components';
 import { loadEconomyDashboard } from '@/lib/utils/data-loader';
+import { loadLigaPlayers } from '@/lib/utils/football-data-loader';
 import { ECONOMY_PUBLISHED, economyState, type EconomyState } from '@/lib/config/economy-status';
 import { Link } from '@/i18n/routing';
 import { fmtDate } from '@/lib/utils/economy-format';
@@ -76,16 +77,21 @@ function getAboutContent(locale: string): { content: string; actualLocale: strin
  * in the order of what is live, each with its status, what it is and where its
  * method is explained. Only the economy's status is derived (`economyState`:
  * the editorial flag, then the staleness guard /economia itself uses), so that
- * line cannot drift from what the section shows. The rest is stable editorial
- * fact (CLAUDE.md, "Sections"), not something a loader here can compute.
+ * line cannot drift from what the section shows. The Liga's player cut-off
+ * is read from players.json, the season its fit ends with (audit CL2-02). The
+ * rest is stable editorial fact (CLAUDE.md, "Sections"), not something a
+ * loader here can compute.
  */
 function EstadoAtual({
   economyNow,
   economyDateLabel,
+  playerSeason,
   locale,
 }: {
   economyNow: EconomyState;
   economyDateLabel: string | null;
+  /** The last season in the player models' fit ("2025-26"), or null. */
+  playerSeason: string | null;
   locale: string;
 }) {
   const pt = locale !== 'en';
@@ -120,8 +126,8 @@ function EstadoAtual({
         ? 'Em publicação contínua · previsões atualizadas a cada jornada da época em curso.'
         : 'Published on a continuing basis · forecasts updated every matchday of the current season.',
       text: pt
-        ? 'Um modelo bayesiano que simula milhares de épocas possíveis para estimar a classificação final, as probabilidades de título e de despromoção e o peso de cada jogo nessas contas.'
-        : 'A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.',
+        ? `Um modelo bayesiano que simula milhares de épocas possíveis para estimar a classificação final, as probabilidades de título e de despromoção e o peso de cada jogo nessas contas.${playerSeason ? ` Mede também os jogadores, uma métrica por dimensão: a finalização e a contribuição ofensiva vão até ao fim da época ${playerSeason}.` : ''}`
+        : `A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.${playerSeason ? ` It also rates players, one metric per dimension: finishing and attacking contribution run to the end of the ${playerSeason} season.` : ''}`,
       method: { href: '/desporto/liga/metodologia', label: pt ? 'Metodologia da Liga Portugal' : 'Liga Portugal methodology' },
     },
     {
@@ -192,10 +198,14 @@ export default async function AboutPage({
   const economyDateIso = economyData?.as_of ?? economyData?.vintage_date;
   const economyNow = economyState(economyDateIso);
   const economyDateLabel = economyData?.vintage_date ? fmtDate(economyData.vintage_date, locale) : null;
+  // The player models' cut-off, the same season /desporto/liga/jogadores and
+  // the Liga methodology name (CL2-02).
+  const players = await loadLigaPlayers();
+  const playerSeason = players?.generated_from?.seasons?.at(-1) ?? null;
 
   const components = getMDXComponents({
     EstadoAtual: () => (
-      <EstadoAtual economyNow={economyNow} economyDateLabel={economyDateLabel} locale={locale} />
+      <EstadoAtual economyNow={economyNow} economyDateLabel={economyDateLabel} playerSeason={playerSeason} locale={locale} />
     ),
   });
 

@@ -488,7 +488,7 @@ export default async function LigaDataPage({
                               <td className="py-3 pr-3">
                                 <a
                                   href={`${season.basePath}/${sample}`}
-                                  className="font-mono text-xs text-ink underline underline-offset-4 break-all"
+                                  className="inline-flex min-h-11 items-center font-mono text-xs text-ink underline underline-offset-4 break-all"
                                 >
                                   {g.label}
                                 </a>
@@ -609,18 +609,18 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.methodology}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
               href="/desporto/liga/2025-26"
               locale={locale}
-              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.review}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </section>

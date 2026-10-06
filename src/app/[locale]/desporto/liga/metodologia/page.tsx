@@ -7,6 +7,7 @@ import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
+import { RevisedDate } from '@/components/brand/RevisedDate';
 import { Callout } from '@/components/mdx/Callout';
 import { getMDXComponents } from '@/mdx-components';
 import { getTranslations } from "next-intl/server";
@@ -16,7 +17,7 @@ import {
   loadLigaPlayersDetail,
   loadLigaSamples,
 } from "@/lib/utils/football-data-loader";
-import { formatInteger, formatLongDate } from "@/lib/football-format";
+import { formatInteger } from "@/lib/football-format";
 import { pointsCalibrationSentence, titleCalibrationParagraphs } from "@/lib/football-model-evaluation";
 import { playerDataCutoffSentence } from "@/lib/utils/player-pages";
 import type { Metadata } from "next";
@@ -216,7 +217,7 @@ export default async function LigaMethodologyPage({
           eyebrow={isPt ? "Metodologia" : "Methodology"}
           title={t("football.methodologyTitle")}
           lede={t("football.methodologySubtitle")}
-          meta={<span>{isPt ? `Revisto a ${formatLongDate(REVISED, locale)}` : `Revised ${formatLongDate(REVISED, locale)}`}</span>}
+          meta={<RevisedDate date={REVISED} locale={locale} />}
         />
 
         <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-3xl">
