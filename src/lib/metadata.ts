@@ -54,7 +54,19 @@ export interface OgManifest {
   files?: Record<string, string>;
   /** Route path → card filename, per locale. Written by scripts/generate-og-images.mjs. */
   cards?: Record<string, Record<string, string>>;
+  /** The pixel size every card was rendered at, read from the PNGs themselves. */
+  size?: { width: number; height: number };
 }
+
+/** What a page declares as og:image:width/height when the manifest says nothing. */
+export const OG_IMAGE_SIZE = { width: 1200, height: 630 } as const;
+
+/**
+ * Pages under a section that must not inherit the section's card: the card
+ * carries the live headline number (this season's title odds), which would be
+ * wrong on an archived season, and the imagined miniature is not the release.
+ */
+const NO_SECTION_CARD = [/^\/desporto\/liga\/\d{4}-\d{2}(\/|$)/, /^\/populacao\/miniatura(\/|$)/];
 
 /** One leading slash, no trailing one — the shape the generator writes. */
 function cardKey(pathname: string): string {
@@ -63,16 +75,35 @@ function cardKey(pathname: string): string {
 }
 
 /**
+ * The card for a route: its own, else the nearest section above it that has
+ * one (longest prefix, by whole segments: /desporto/liga/jogo/x takes the
+ * /desporto/liga card, /desporto/liga2 does not). The root's card is the
+ * locale default and is reached through the fallback, not inherited.
+ */
+function sectionCard(cards: Record<string, string> | undefined, pathname: string): string | undefined {
+  if (!cards) return undefined;
+  const key = cardKey(pathname);
+  if (cards[key]) return cards[key];
+  if (NO_SECTION_CARD.some(pattern => pattern.test(key))) return undefined;
+  const segments = key.split('/').filter(Boolean);
+  for (let length = segments.length - 1; length > 0; length -= 1) {
+    const card = cards[`/${segments.slice(0, length).join('/')}`];
+    if (card) return card;
+  }
+  return undefined;
+}
+
+/**
  * Kept pure so the fallback chain can be tested without a manifest on disk:
- * a page's own card, then the locale default, then the unversioned file that
- * ships even when nobody has run the generator.
+ * a page's own card, then its section's, then the locale default, then the
+ * unversioned file that ships even when nobody has run the generator.
  */
 export function resolveOgImageFile(
   manifest: OgManifest | null,
   locale: string,
   pathname?: string,
 ): string {
-  const specific = pathname ? manifest?.cards?.[locale]?.[cardKey(pathname)] : undefined;
+  const specific = pathname ? sectionCard(manifest?.cards?.[locale], pathname) : undefined;
   const fallback = manifest?.files?.[locale];
   return specific ?? fallback ?? `og-image-${locale}.png`;
 }
@@ -94,6 +125,42 @@ function readOgManifest(): OgManifest | null {
 /** The card for a page, or the locale's default when that page has none. */
 export function getOgImageUrl(locale: string, pathname?: string): string {
   return new URL(resolveOgImageFile(readOgManifest(), locale, pathname), `${SITE_URL}/`).href;
+}
+
+/**
+ * The size the cards really are, for og:image:width/height (a declared size
+ * that differs from the file makes some platforms crop or refetch). Pages that
+ * build their own head use this rather than typing 1200 × 630.
+ */
+export function getOgImageSize(): { width: number; height: number } {
+  const size = readOgManifest()?.size;
+  return size && size.width > 0 && size.height > 0 ? { width: size.width, height: size.height } : { ...OG_IMAGE_SIZE };
+}
+
+/** Lengths past which search results cut a title or a description. */
+export const META_LIMITS = { title: 70, description: 160 } as const;
+
+/** What is too long in a page's title (with its suffix) and description, if anything. */
+export function metaLengthIssues(title: string, description: string): string[] {
+  const issues: string[] = [];
+  if (title.length > META_LIMITS.title) issues.push(`title is ${title.length} characters (keep to about 60, at most ${META_LIMITS.title})`);
+  if (description.length > META_LIMITS.description) issues.push(`description is ${description.length} characters (keep to about 155, at most ${META_LIMITS.description})`);
+  return issues;
+}
+
+const reportedLengths = new Set<string>();
+
+/**
+ * A build-log warning, once per page, for a title or description that search
+ * results will truncate. A warning, not an error: the page is still correct,
+ * and scripts/check-export-budget.mjs lists the same pages after an export.
+ */
+function warnMetaLength(url: string, title: string, description: string) {
+  if (process.env.VITEST || reportedLengths.has(url)) return;
+  const issues = metaLengthIssues(title, description);
+  if (!issues.length) return;
+  reportedLengths.add(url);
+  console.warn(`[metadata] ${url}: ${issues.join('; ')}`);
 }
 
 interface PageMetadataOptions {
@@ -121,12 +188,14 @@ export function createPageMetadata({
   const title = siteTitle(typedTitle);
   const url = localizedUrl(locale, pathname);
   const feedTypes = feedAlternates(locale);
+  warnMetaLength(url, title, description);
+  const cardSize = getOgImageSize();
   const socialImage = {
-    // A page gets its own card by route, so a section page needs no wiring here
-    // beyond the `path` it already passes.
+    // A page gets its own card by route (or its section's), so a section page
+    // needs no wiring here beyond the `path` it already passes.
     url: image?.url ?? getOgImageUrl(locale, pathname),
-    width: image?.width ?? 1200,
-    height: image?.height ?? 630,
+    width: image?.width ?? cardSize.width,
+    height: image?.height ?? cardSize.height,
     alt: image?.alt ?? title,
   };
   return {

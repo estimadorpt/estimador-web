@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { Link } from '@/i18n/routing';
 import { POPULATION_ROUTES } from '@/lib/config/population';
+import { CONTAINER_CLASS } from '@/components/brand/Container';
 
 export type PopulationPage = 'hub' | 'parish' | 'region' | 'game' | 'quality' | 'data' | 'methodology';
 
@@ -35,7 +36,8 @@ export function PopulationSectionNav({ current, locale }: { current: PopulationP
 
   return (
     <nav aria-label={pt ? 'Secções da população' : 'Population sections'} className="border-b border-line bg-paper">
-      <ul ref={list} className="relative mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4">
+      {/* The page container (the header's box), so the first tab lines up with the logo and the hero. */}
+      <ul ref={list} className={`relative flex gap-1 overflow-x-auto ${CONTAINER_CLASS}`}>
         {ITEMS.map(item => (
           <li key={item.key} className="shrink-0">
             <Link

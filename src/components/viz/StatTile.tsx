@@ -22,7 +22,8 @@ interface StatTileProps {
  */
 export function StatTile({ label, value, unit, delta, note, trend, hero = false, className = '' }: StatTileProps) {
   const positive = delta ? (delta.direction === 'flat' ? null : (delta.direction === 'up') === (delta.good ?? true)) : null;
-  const deltaColor = positive === null ? 'text-stone-500' : positive ? 'text-tree' : 'text-terracotta';
+  // Text colours, so both clear 4.5:1 on cream: tree (#4e8056) gave 4.45:1.
+  const deltaColor = positive === null ? 'text-stone-500' : positive ? 'text-emerald-700' : 'text-terracotta';
   const Icon = delta?.direction === 'up' ? ArrowUpRight : delta?.direction === 'down' ? ArrowDownRight : Minus;
   return (
     <div className={`flex flex-col gap-1.5 rounded-2xl border border-line bg-cream p-5 ${className}`}>

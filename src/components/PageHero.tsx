@@ -2,13 +2,7 @@ import type { ReactNode } from 'react';
 import { SectionIllustration, type IllustrationScene } from '@/components/brand/SectionIllustration';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-
-const widths = {
-  '3xl': 'max-w-3xl',
-  '4xl': 'max-w-4xl',
-  '5xl': 'max-w-5xl',
-  '7xl': 'max-w-7xl',
-} as const;
+import { containerClass, MEASURES, type ContainerWidth, type Measure } from '@/components/brand/Container';
 
 interface PageHeroProps {
   /** Small uppercase label above the title: the section and, if useful, the edition. */
@@ -30,8 +24,15 @@ interface PageHeroProps {
   field?: 'mint' | 'periwinkle' | 'coral' | 'mustard';
   /** One main action and, at most, one secondary. */
   actions?: ReactNode;
-  /** Matches the page's own container width so the hero lines up with the content below. */
-  width?: keyof typeof widths;
+  /**
+   * Matches the page's own container width so the hero lines up with the
+   * content below. Prefer the default (the header's container) with `measure`
+   * for a narrow text column: the left edge then matches the header, the
+   * section tabs and the body (see Container).
+   */
+  width?: ContainerWidth;
+  /** A narrower text column inside the full container, aligned to its left edge. */
+  measure?: Measure;
   /** Dashboards and listings: a shallower header, so the data arrives sooner. Large art stays on entrances and explainers. */
   compact?: boolean;
   className?: string;
@@ -43,7 +44,7 @@ interface PageHeroProps {
  * bands the sections used to open with, so a page now starts the way the
  * atlas does.
  */
-export function PageHero({ eyebrow, icon, title, lede, back, meta, art, illustration, field, actions, width = '7xl', compact = false, className = '' }: PageHeroProps) {
+export function PageHero({ eyebrow, icon, title, lede, back, meta, art, illustration, field, actions, width = '7xl', measure = 'full', compact = false, className = '' }: PageHeroProps) {
   return (
     <section className={`relative overflow-hidden border-b border-line ${field && !illustration ? `field-${field}` : 'bg-paper'} ${className}`}>
       {art && !illustration && (
@@ -51,13 +52,14 @@ export function PageHero({ eyebrow, icon, title, lede, back, meta, art, illustra
           {art}
         </div>
       )}
-      <div className={`relative ${widths[width]} mx-auto px-4 ${illustration ? 'illustrated-hero' : ''} ${compact ? 'pt-6 pb-6 md:pt-7 md:pb-7' : 'pt-8 pb-8 md:pt-10 md:pb-10'}`}>
-        <div className="min-w-0">
+      <div className={`relative ${containerClass(width)} ${illustration ? 'illustrated-hero' : ''} ${compact ? 'pt-6 pb-6 md:pt-7 md:pb-7' : 'pt-8 pb-8 md:pt-10 md:pb-10'}`}>
+        <div className={`min-w-0 ${MEASURES[measure]}`}>
         {back && (
           <Link
             href={back.href}
             locale={back.locale}
-            className="mb-5 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-stone-500 transition-colors hover:text-ink"
+            // 44px tall for a thumb; the negative margin keeps the visual rhythm.
+            className="-mt-3 mb-2 inline-flex min-h-11 items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-stone-500 transition-colors hover:text-ink"
           >
             <ArrowLeft aria-hidden="true" className="h-3.5 w-3.5" />
             {back.label}
@@ -74,7 +76,8 @@ export function PageHero({ eyebrow, icon, title, lede, back, meta, art, illustra
         {actions && <div className={`flex flex-wrap items-center gap-x-4 gap-y-3 ${compact ? 'mt-5' : 'mt-6'}`}>{actions}</div>}
         {meta && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-stone-600">{meta}</div>}
         </div>
-        {illustration && <SectionIllustration scene={illustration} />}
+        {/* The hero scene is the largest paint on the forecast pages: fetch it first. */}
+        {illustration && <SectionIllustration scene={illustration} priority />}
       </div>
     </section>
   );

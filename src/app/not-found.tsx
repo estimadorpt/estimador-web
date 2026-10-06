@@ -6,6 +6,7 @@ import { NotFoundBody } from '@/components/NotFoundBody';
 import { NotFoundByPath } from '@/components/NotFoundSwitch';
 import { SiteFooter } from '@/components/SiteFooter';
 import { fontVariables } from './fonts';
+import { LOCALE_REDIRECT_SCRIPT } from '@/lib/locale-redirect';
 
 // Sets <html lang> from the address before the first paint, so the English
 // 404 is never read with Portuguese pronunciation while it hydrates (or by a
@@ -85,6 +86,9 @@ export default function NotFound() {
         <script dangerouslySetInnerHTML={{ __html: LANG_FROM_PATH }} />
       </head>
       <body className="antialiased">
+        {/* A locale-less section address (/populacao/misteriosa) goes on to /pt/…
+            before anything paints; src/lib/locale-redirect.ts. */}
+        <script dangerouslySetInnerHTML={{ __html: LOCALE_REDIRECT_SCRIPT }} />
         <div className="min-h-screen bg-paper text-ink">
           <NotFoundByPath pt={<Page locale="pt" />} en={<Page locale="en" />} />
         </div>

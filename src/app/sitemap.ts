@@ -9,7 +9,7 @@ import {
 import { ligaTeamSlugs } from '@/lib/config/football'
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles'
 import { buildTagIndex } from '@/lib/article-discovery'
-import { SITE_LOCALES, localizedUrl } from '@/lib/metadata'
+import { SITE_LOCALES, languageAlternates, localizedUrl } from '@/lib/metadata'
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status'
 import { PARLIAMENTARY_2025, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections'
 import { loadPopulationPlaces } from '@/lib/utils/population-data-loader'
@@ -81,7 +81,6 @@ const ECONOMY_ROUTES = ['/economia', '/economia/metodologia']
  * by their (last) election day; the 2025-26 Liga review by its generation.
  */
 function archiveDates(): Record<string, Date> {
-  const day = (iso: string) => new Date(`${iso.slice(0, 10)}T00:00:00Z`)
   const dates: Record<string, Date> = {
     '/eleicoes/presidenciais': day(PRESIDENTIAL_2026_SECOND_ROUND_DATE),
     '/eleicoes/legislativas': day(PARLIAMENTARY_2025.date),
@@ -95,6 +94,40 @@ function archiveDates(): Record<string, Date> {
     // no review file: the route falls back to the build date
   }
   return dates
+}
+
+const day = (iso: string) => new Date(`${iso.slice(0, 10)}T00:00:00Z`)
+const validDay = (iso: unknown): Date | undefined =>
+  typeof iso === 'string' && /^\d{4}-\d{2}-\d{2}/.test(iso) ? day(iso) : undefined
+
+/**
+ * When the content of a live page last changed, from the data it renders:
+ * the newest Liga forecast's timestamp for the Liga pages, the release date
+ * for the population pages, the player file's cut-off for the player pages.
+ * A page with no such date (about, privacy, methodology prose) carries no
+ * lastmod at all: a build timestamp on every deploy told crawlers that
+ * unchanged pages had changed, which teaches them to ignore the field.
+ */
+function contentDates({ liga, players }: { liga?: Date; players?: Date }): Record<string, Date | undefined> {
+  const population = day(POPULATION_PUBLISHED)
+  const newest = (...dates: Array<Date | undefined>) => {
+    const known = dates.filter((date): date is Date => Boolean(date))
+    return known.length ? new Date(Math.max(...known.map(date => +date))) : undefined
+  }
+  return {
+    // The homepage shows the Liga forecast and the population release.
+    '/': newest(liga, population),
+    '/desporto/liga': liga,
+    '/desporto/liga/simulador': liga,
+    '/desporto/liga/jogo-previsoes': liga,
+    '/desporto/liga/dados': liga,
+    '/desporto/liga/jogadores': players,
+    '/populacao': population,
+    '/populacao/misteriosa': population,
+    '/populacao/qualidade': population,
+    '/populacao/dados': population,
+    '/populacao/metodologia': population,
+  }
 }
 
 /** Whether a route is published in this locale's sitemap for this build. */
@@ -128,25 +161,29 @@ function staticRoutes(): string[] {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const lastModified = new Date()
   const urls: MetadataRoute.Sitemap = []
   const seen = new Set<string>()
 
+  /**
+   * One entry, with its hreflang alternates: every locale the page exists in,
+   * plus x-default (the parish pages have no server-rendered hreflang, so for
+   * them the sitemap is the only place a crawler learns the pairing).
+   */
   const add = (
     locale: string,
     route: string,
     hint?: { changeFrequency: Frequency; priority: number; lastModified?: Date },
+    available: readonly string[] = SITE_LOCALES,
   ) => {
     const url = localizedUrl(locale, route)
     if (seen.has(url)) return
     seen.add(url)
     urls.push({
       url,
-      // The build date is the honest answer for a page rendered from data that
-      // moves with the build. Anything that carries its own date says so.
-      lastModified: hint?.lastModified ?? lastModified,
+      ...(hint?.lastModified ? { lastModified: hint.lastModified } : {}),
       changeFrequency: hint?.changeFrequency ?? 'monthly',
       priority: hint?.priority ?? 0.5,
+      ...(available.length > 1 ? { alternates: { languages: languageAlternates(route, available) } } : {}),
     })
   }
 
@@ -159,13 +196,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const clubSlugs = [...new Set(
     (prediction?.table ?? []).map(row => ligaTeamSlugs[row.team]).filter((slug): slug is string => Boolean(slug)),
   )]
+  const ligaDate = validDay(prediction?.timestamp)
+  const players = await loadLigaPlayersDetail().catch(() => null)
+  const playersDate = validDay((players as { appearances_through?: unknown } | null)?.appearances_through)
+  const dated = { ...contentDates({ liga: ligaDate, players: playersDate }), ...archived }
+  const withDate = <T extends { changeFrequency: Frequency; priority: number }>(hint: T, date: Date | undefined) =>
+    date ? { ...hint, lastModified: date } : hint
+
+  const hasArticlesIn = Object.fromEntries(SITE_LOCALES.map(locale => [locale, getMDXArticlesByLocale(locale).length > 0]))
+  const articleLocales = new Map<string, string[]>()
+  for (const locale of SITE_LOCALES) {
+    for (const article of getMDXArticlesByLocale(locale)) {
+      articleLocales.set(article.slug, [...(articleLocales.get(article.slug) ?? []), locale])
+    }
+  }
 
   for (const locale of SITE_LOCALES) {
-    const hasArticles = getMDXArticlesByLocale(locale).length > 0
+    const hasArticles = hasArticlesIn[locale]
     for (const route of staticRoutes()) {
       if (!listedRoute(route, { hasArticles })) continue
-      const hint = ROUTE_HINTS[route]
-      add(locale, route, archived[route] && hint ? { ...hint, lastModified: archived[route] } : hint)
+      const hint = ROUTE_HINTS[route] ?? { changeFrequency: 'monthly' as Frequency, priority: 0.5 }
+      const available = SITE_LOCALES.filter(other => listedRoute(route, { hasArticles: hasArticlesIn[other] }))
+      add(locale, route, withDate(hint, dated[route]), available)
     }
 
     // Articles exist per locale: only list the translations that were published.
@@ -176,7 +228,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: article.kind === 'nota' ? 'yearly' : 'monthly',
         priority: 0.6,
         lastModified: new Date(`${article.updated ?? article.date}T00:00:00Z`),
-      })
+      }, articleLocales.get(article.slug) ?? [locale])
     }
 
     // Tag pages are enumerated per locale, not across both: the catalogues are
@@ -188,15 +240,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .map(article => article.updated ?? article.date)
         .sort()
         .at(-1)
+      // Tags are written in each locale's language: no alternate.
       add(locale, `/artigos/tema/${group.slug}`, {
         changeFrequency: 'monthly',
         priority: 0.4,
         ...(newest ? { lastModified: new Date(`${newest}T00:00:00Z`) } : {}),
-      })
+      }, [locale])
     }
 
     for (const slug of clubSlugs) {
-      add(locale, `/desporto/liga/${slug}`, { changeFrequency: 'daily', priority: 0.7 })
+      add(locale, `/desporto/liga/${slug}`, withDate({ changeFrequency: 'daily' as Frequency, priority: 0.7 }, ligaDate))
     }
   }
 
@@ -229,7 +282,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const fixtures = await loadUpcomingFixtures()
     for (const locale of SITE_LOCALES) {
       for (const fixture of fixtures) {
-        add(locale, `/desporto/liga/jogo/${fixture.slug}`, { changeFrequency: 'daily', priority: 0.7 })
+        add(locale, `/desporto/liga/jogo/${fixture.slug}`, withDate({ changeFrequency: 'daily' as Frequency, priority: 0.7 }, ligaDate))
       }
     }
   } catch {
@@ -240,10 +293,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // The placeholder page is never listed — it exists only so the static
   // export has something to build when no players are published.
   try {
-    const players = await loadLigaPlayersDetail()
     for (const locale of SITE_LOCALES) {
       for (const player of players?.players ?? []) {
-        add(locale, `/desporto/liga/jogador/${player.slug}`, { changeFrequency: 'weekly', priority: 0.6 })
+        add(locale, `/desporto/liga/jogador/${player.slug}`, withDate({ changeFrequency: 'weekly' as Frequency, priority: 0.6 }, playersDate))
       }
     }
   } catch {

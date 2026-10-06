@@ -43,11 +43,13 @@ const COPY = {
   pt: {
     brandHeadline: BRAND_COPY.line.pt,
     brandStandfirst: BRAND_COPY.descriptor.pt,
+    // Live sections first, in the navigation's order; the elections are
+    // archives and say so; the economy says it is in preparation until its flag.
     columns: (economyPublished) => [
-      { name: 'Economia', blurb: economyPublished ? 'Estado da economia e risco de recessão' : 'Como ler os indicadores (em preparação)' },
-      { name: 'Liga Portugal', blurb: 'Probabilidades de título e despromoção' },
-      { name: 'Eleições', blurb: 'Sondagens, previsões e arquivo' },
       { name: 'População', blurb: 'Uma população sintética aberta, freguesia a freguesia' },
+      { name: 'Liga Portugal', blurb: 'Probabilidades de título e despromoção' },
+      { name: 'Eleições', blurb: 'Previsões arquivadas: presidenciais 2026 e legislativas 2025' },
+      { name: 'Economia', blurb: economyPublished ? 'Estado da economia e risco de recessão' : 'Como ler os indicadores (em preparação)' },
     ],
     brandFooter: 'Metodologia aberta · Bernardo Caldas',
     readSuffix: 'de leitura',
@@ -72,10 +74,10 @@ const COPY = {
     brandHeadline: BRAND_COPY.line.en,
     brandStandfirst: BRAND_COPY.descriptor.en,
     columns: (economyPublished) => [
-      { name: 'Economy', blurb: economyPublished ? 'State of the economy and recession risk' : 'Reading the indicators (in preparation)' },
-      { name: 'Liga Portugal', blurb: 'Title and relegation probabilities' },
-      { name: 'Elections', blurb: 'Polling, forecasts and the archive' },
       { name: 'Population', blurb: 'An open synthetic population, parish by parish' },
+      { name: 'Liga Portugal', blurb: 'Title and relegation probabilities' },
+      { name: 'Elections', blurb: 'Archived forecasts: 2026 presidential, 2025 legislative' },
+      { name: 'Economy', blurb: economyPublished ? 'State of the economy and recession risk' : 'Reading the indicators (in preparation)' },
     ],
     brandFooter: 'Open methodology · Bernardo Caldas',
     readSuffix: 'read',
@@ -244,17 +246,16 @@ function ligaCard(data, locale) {
 
   const leader = contenders[0];
   const groupedSims = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB').format(data.n_sims ?? 0);
-  // The interval the table and the title-race chart print beside the same
-  // number (p_champion_lo/hi), so a screenshot of the card carries it too.
-  const interval = typeof leader.p_champion_lo === 'number' && typeof leader.p_champion_hi === 'number'
-    ? ` (${formatPercent(leader.p_champion_lo)}–${formatPercent(leader.p_champion_hi)}%)`
-    : '';
+  // No bracketed range beside the probability: p_champion_lo/hi is the spread
+  // of 500-simulation blocks, about ten times the Monte Carlo error of the
+  // published 50 000-simulation figure, and the site no longer shows it
+  // anywhere (audit F-H1). The card carries the number and its simulation count.
   return figureCard({
     sectionLabel: copy.ligaSection,
     label: copy.ligaLabel,
     value: formatPercent(leader.p_champion),
     unit: '%',
-    subject: `${teamName(leader.team)}${interval}`,
+    subject: teamName(leader.team),
     caption: data.n_sims ? copy.ligaCaption(groupedSims) : null,
     rows: contenders.map(team => ({
       name: teamName(team.team),
@@ -328,36 +329,83 @@ function populationCard(meta, locale) {
 
 /* --------------------------------------------------------------- output --- */
 
+const CARD_FILE = /^og-image-.+-[0-9a-f]{8}\.png$/;
+
+/** The pixel size of a PNG, from its IHDR chunk. */
+function pngSize(png) {
+  return { width: png.readUInt32BE(16), height: png.readUInt32BE(20) };
+}
+
+let renderedSize = null;
+
 async function emit(node, basename) {
   const png = await renderCard(node, { width: CARD_WIDTH, height: CARD_HEIGHT });
+  renderedSize ??= pngSize(png);
   const filename = `${basename}-${contentHash(png)}.png`;
   fs.writeFileSync(path.join(PUBLIC_DIR, filename), png);
   return filename;
 }
 
-/**
- * Every file a manifest names. Read before the new manifest replaces it: the
- * cards the previous build served stay one more build, because they are cached
- * as immutable and a platform that scraped one shortly before a deploy would
- * otherwise get a 404 on the next fetch.
- */
-function manifestFiles(file) {
+/** Every hashed card file a manifest object names, `retained` included when asked. */
+function namedCards(manifest, { withRetained = false } = {}) {
+  if (!manifest || typeof manifest !== 'object') return [];
+  return [...new Set([
+    ...Object.values(manifest.files ?? {}),
+    ...Object.values(manifest.cards ?? {}).flatMap(cards => Object.values(cards ?? {})),
+    ...(withRetained ? manifest.retained ?? [] : []),
+  ])].filter(name => typeof name === 'string' && CARD_FILE.test(name));
+}
+
+function readManifest(file) {
   try {
-    const manifest = JSON.parse(fs.readFileSync(file, 'utf8'));
-    return [...new Set([
-      ...Object.values(manifest.files ?? {}),
-      ...Object.values(manifest.cards ?? {}).flatMap(cards => Object.values(cards)),
-    ])].filter(name => typeof name === 'string' && /^og-image-.+-[0-9a-f]{8}\.png$/.test(name));
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
   } catch {
-    return [];
+    return null;
   }
 }
 
 /**
- * Anything matching the generated pattern that neither the new manifest nor
- * the previous one claims is a card for an article that was renamed or a data
- * vintage that has moved on two builds ago. Leaving them behind is how public/
- * accumulated twelve orphaned PNGs.
+ * The manifest production is serving right now. Its cards are what platforms
+ * have scraped, and they are cached as immutable: a deploy that deleted them
+ * would turn every recent share into a broken image. The committed manifest is
+ * not a substitute (a branch regenerates cards that production never served),
+ * so the live one is fetched, with a short timeout so an offline build still
+ * finishes; OG_LIVE_MANIFEST=off skips the request.
+ */
+async function liveManifest() {
+  const url = process.env.OG_LIVE_MANIFEST ?? 'https://estimador.pt/og-manifest.json';
+  if (url === 'off') return null;
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(5000), headers: { accept: 'application/json' } });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.warn(`og: could not read the live manifest (${url}: ${error.message}); keeping the committed manifest's cards instead`);
+    return null;
+  }
+}
+
+/**
+ * The current card that stands in for an old file name: same kind and locale
+ * (og-image-liga-pt-…, og-image-artigo-{slug}-en-…), else the locale's brand
+ * card. Economy cards always get the brand card while the section is in
+ * preparation: production's carry a recession figure from July, and a share
+ * card never shows a number the page does not.
+ */
+function standIn(name, manifest, economyIsPublished) {
+  const base = name.replace(/-[0-9a-f]{8}\.png$/, '');
+  const locale = LOCALES.find(candidate => base.endsWith(`-${candidate}`)) ?? 'pt';
+  const brand = manifest.files[locale];
+  if (base.startsWith('og-image-economia-') && !economyIsPublished) return brand;
+  const sameKind = Object.values(manifest.cards[locale] ?? {}).find(file => file.replace(/-[0-9a-f]{8}\.png$/, '') === base);
+  return sameKind ?? brand;
+}
+
+/**
+ * Anything matching the generated pattern that the new manifest, the previous
+ * one and production's do not claim is a card for an article that was renamed
+ * or a data vintage that has moved on two builds ago. Leaving them behind is
+ * how public/ accumulated twelve orphaned PNGs.
  */
 function pruneOrphans(keep) {
   const kept = new Set(keep);
@@ -376,7 +424,8 @@ async function main() {
   const population = populationMeta();
   const economyIsPublished = economyPublished();
   const manifestPath = path.join(PUBLIC_DIR, 'og-manifest.json');
-  const previous = manifestFiles(manifestPath);
+  const committed = readManifest(manifestPath);
+  const live = await liveManifest();
   const manifest = { generatedAt: new Date().toISOString(), files: {}, cards: {} };
   const written = [];
 
@@ -415,11 +464,33 @@ async function main() {
     console.log(`${locale}: ${Object.keys(cards).length} cards`);
   }
 
+  // What was served before this build stays for one more: production's cards
+  // (fetched), or, offline, what the committed manifest says was kept last
+  // time; plus the committed manifest's own cards.
+  const servedLive = live ? namedCards(live) : namedCards(committed, { withRetained: true });
+  const previous = [...new Set([...servedLive, ...namedCards(committed)])].filter(file => !written.includes(file));
+
+  // A file production serves but this checkout does not have (the branch
+  // regenerated its cards since the last deploy) is written as a copy of the
+  // current card of its kind, so its URL keeps answering after the deploy.
+  let standIns = 0;
+  for (const file of servedLive) {
+    const target = path.join(PUBLIC_DIR, file);
+    const isDormantEconomy = file.startsWith('og-image-economia-') && !economyIsPublished;
+    if (written.includes(file) || (fs.existsSync(target) && !isDormantEconomy)) continue;
+    fs.copyFileSync(path.join(PUBLIC_DIR, standIn(file, manifest, economyIsPublished)), target);
+    standIns += 1;
+  }
+
+  manifest.size = renderedSize;
+  // Not read by the site: the names kept from the previous deploy, so an
+  // offline build of this checkout still knows to keep them.
+  manifest.retained = previous;
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
   const removed = pruneOrphans([...written, ...previous, ...LOCALES.map(locale => `og-image-${locale}.png`)]);
-  const retained = previous.filter(file => !written.includes(file)).length;
-  console.log(`${written.length} cards written, ${retained} from the previous build kept, ${removed} orphaned files removed`);
+  console.log(`${written.length} cards written (${renderedSize?.width}×${renderedSize?.height}), ${previous.length} from the previous deploy kept`
+    + ` (${live ? 'live manifest' : 'committed manifest'}; ${standIns} written as stand-ins), ${removed} orphaned files removed`);
 }
 
 main().catch(error => {

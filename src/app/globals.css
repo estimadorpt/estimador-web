@@ -118,7 +118,9 @@
   --color-emerald-300: #9ddcb8;
   --color-emerald-400: #74c899;
   --color-emerald-500: #5eb184;
-  --color-emerald-600: #3f8461;
+  /* 600 is a text colour too (deltas, "live" labels): 5.0:1 on paper, 5.3:1
+     on cream and on its own 50 tint. Keep it above 4.5:1 when retuning. */
+  --color-emerald-600: #377455;
   --color-emerald-700: #3a6b50;
   --color-emerald-800: #345343;
   --color-emerald-900: #2c4238;
@@ -135,15 +137,18 @@
   --color-green-900: #304434;
   --color-green-950: #1b2a1f;
 
-  /* Negative movement and errors: terracotta instead of stock red. */
+  /* Negative movement and errors: terracotta instead of stock red. 500, 600
+     and 700 are used as text (losses, "<1%" relegation cells, deltas), so each
+     clears 4.5:1 on paper, cream and the 50/100 tints; fills inherit the same
+     steps. src/lib/palette-contrast.test.ts holds them to it. */
   --color-red-50: #fff2ee;
   --color-red-100: #ffe2d9;
   --color-red-200: #ffcab9;
   --color-red-300: #e29a83;
   --color-red-400: #d4886a;
-  --color-red-500: #bd714e;
-  --color-red-600: #ad624b;
-  --color-red-700: #a3543a;
+  --color-red-500: #9f5b3b;
+  --color-red-600: #955441;
+  --color-red-700: #8c4832;
   --color-red-800: #7d4230;
   --color-red-900: #5f3526;
   --color-red-950: #3a2017;
@@ -294,6 +299,31 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+
+  /* The header is sticky (about 61px tall, 69px on a phone). Anything the
+     browser scrolls into view for us (a Tab or Shift+Tab stop, an in-page
+     anchor such as "Nesta página", scrollIntoView with block: start) stops
+     this far below the top, so focus is never hidden under the bar (WCAG
+     2.4.11). Elements no longer need scroll-mt-* to clear the header. */
+  html {
+    scroll-padding-top: 5rem;
+  }
+
+  /* Thumb-sized targets for the stand-alone links of the chrome: the footer's
+     lists and every list-shaped navigation (breadcrumbs, section rows, tables of
+     contents). Running prose is untouched, since only an anchor that is a list
+     item's direct child in a footer or nav matches. On a coarse pointer or a
+     phone-width viewport only: on a desktop the lists keep their rhythm. Any
+     other stand-alone link can opt in with the tap-target class. In the base
+     layer, so a component's own display or min-h utility still wins. */
+  @media (pointer: coarse), (max-width: 639.98px) {
+    :where(footer, nav) li > a,
+    .tap-target {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
   }
 
   /* Keyboard focus: a paper separation ring and a pine outer ring, readable on
@@ -476,9 +506,11 @@
   .illustrated-hero > .section-illustration--football img { object-fit: cover; object-position: center 60%; }
 }
 
-/* Football journey: shared probability typography, quieter surfaces, one scene. */
-.football-page > section > .max-w-7xl { max-width: 1160px; padding-left: 24px; padding-right: 24px; }
-.football-page .illustrated-hero { max-width: 1160px; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; }
+/* Football journey: shared probability typography, quieter surfaces, one scene.
+   The hero keeps the page container (the header's box, see Container.tsx):
+   no narrower max-width or extra padding here, or its title starts to the
+   right of the logo and the body (UXD-05). */
+.football-page .illustrated-hero { grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; }
 .football-page .illustrated-hero > .section-illustration--football { width: 320px; border-radius: 16px 16px 4px 4px; }
 .football-home-scene { border-radius: 12px; }
 .football-home-scene img { height: 108px !important; object-fit: cover; object-position: center 60%; }
@@ -510,7 +542,6 @@
 .football-history-chart svg [aria-label="y-grid"] { color: var(--color-line); }
 .football-history-chart svg [aria-label="x-axis"], .football-history-chart svg [aria-label="y-axis"] { color: var(--color-ink-muted); }
 @media(max-width:760px) {
-  .football-page > section > .max-w-7xl { padding-left: 16px; padding-right: 16px; }
   .football-page .illustrated-hero { grid-template-columns: minmax(0,1fr); gap: 20px; }
   .football-page .illustrated-hero > .section-illustration--football { width: 100%; }
   .football-probabilities > li { padding: 0 10px; gap: 3px; }
@@ -526,9 +557,7 @@
 /* One section family: scenes introduce a subject; quiet, aligned data follows. */
 .home-support-scene { align-self: center; border-radius: 0; background: transparent; padding: 16px; }
 .home-support-scene img { object-fit: contain; }
-.election-page > section > .max-w-7xl,
-.election-page > .max-w-7xl,
-.election-page .illustrated-hero { max-width: 1160px; }
+/* Same container as the header and the body (no 1160px box): see above. */
 .election-page .illustrated-hero { gap: 36px; }
 .election-page h2 { letter-spacing: -.025em; }
 @media(max-width:760px) {
@@ -536,5 +565,15 @@
   .home-support-scene img { height: 100%; }
 }
 
-/* Keep page-owned keyboard and anchor targets below the sticky navigation. */
-main[id] { scroll-margin-top: 5rem; }
+/* Phones. Unlayered on purpose: it must beat the text-sm / text-[15px]
+   utilities the form controls set, which live in @layer utilities. */
+@media (max-width: 639.98px) {
+  /* iOS Safari zooms the page when a form control under 16px takes focus and
+     leaves it zoomed and scrolled sideways. 16px from the phone breakpoint
+     down; components keep their own size from sm up. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
