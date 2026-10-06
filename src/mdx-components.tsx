@@ -1,6 +1,7 @@
 import type { MDXComponents } from 'mdx/types';
 import { Figure } from '@/components/mdx/Figure';
 import { Callout } from '@/components/mdx/Callout';
+import { MdxPre, MdxTable } from '@/components/mdx/ScrollBlocks';
 
 /**
  * Element styling for long-form pages. The reading face, measure and rhythm
@@ -56,17 +57,17 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
     code: ({ children, className }) => {
       // Inside a <pre> the highlighter owns the styling; only inline code needs it.
       if (className?.includes('language-')) return <code className={className}>{children}</code>;
+      // A long path ("/pt/desporto/liga/jogador/joao-silva/") breaks where it
+      // must, so the page never scrolls sideways at 320px (A11Y3-06, WCAG 1.4.10).
+      // break-word, not anywhere: a table cell keeps its code whole and the
+      // table scrolls in its own region instead of splitting every key.
       return (
-        <code className="bg-stone-100 px-1.5 py-0.5 font-mono text-[0.85em] text-stone-800">
+        <code className="bg-stone-100 px-1.5 py-0.5 font-mono text-[0.85em] text-stone-800 break-words">
           {children}
         </code>
       );
     },
-    pre: ({ children }) => (
-      <pre className="mb-6 overflow-x-auto bg-stone-800 p-4 font-mono text-sm text-stone-100 [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-inherit">
-        {children}
-      </pre>
-    ),
+    pre: ({ children }) => <MdxPre>{children}</MdxPre>,
     a: ({ href, children }) => (
       <a
         href={href}
@@ -77,11 +78,7 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
         {children}
       </a>
     ),
-    table: ({ children }) => (
-      <div className="my-8 overflow-x-auto">
-        <table className="min-w-full border-collapse font-sans text-sm tabular-nums">{children}</table>
-      </div>
-    ),
+    table: ({ children }) => <MdxTable>{children}</MdxTable>,
     th: ({ children }) => (
       <th className="border-b-2 border-stone-800 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">
         {children}

@@ -263,16 +263,16 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         <div className="grid gap-4 md:grid-cols-[1.4fr_1fr]">
           <div className="rounded-xl border border-line bg-cream p-6 md:p-8">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">Manrope</p>
-            <p className="mt-4 text-4xl font-extrabold tracking-[-0.03em] text-ink md:text-5xl">Portugal, à escala humana.</p>
-            <p className="mt-3 text-2xl font-bold tracking-[-0.02em] text-ink">Classificação prevista</p>
-            <p className="mt-3 max-w-md text-base leading-relaxed text-ink">Classificação prevista com base em 50 000 simulações. Pontos médios e probabilidades de cada resultado.</p>
-            <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-stone-500">Liga Portugal — época 2026-27</p>
+            <p lang="pt" className="mt-4 text-4xl font-extrabold tracking-[-0.03em] text-ink md:text-5xl">Portugal, à escala humana.</p>
+            <p lang="pt" className="mt-3 text-2xl font-bold tracking-[-0.02em] text-ink">Classificação prevista</p>
+            <p lang="pt" className="mt-3 max-w-md text-base leading-relaxed text-ink">Classificação prevista com base em 50 000 simulações. Pontos médios e probabilidades de cada resultado.</p>
+            <p lang="pt" className="mt-3 text-[11px] font-bold uppercase tracking-wider text-stone-500">Liga Portugal — época 2026-27</p>
             <p className="mt-3 text-4xl font-extrabold tabular-nums tracking-[-0.03em] text-ink">55<span className="text-2xl text-stone-400">%</span></p>
             <p className="mt-4 text-xs text-stone-500">{pt ? 'Títulos 800, subtítulos 700, texto 400 e 500, etiquetas 700 em versaletes, números 800 com algarismos tabulares.' : 'Titles 800, subtitles 700, text 400 and 500, labels 700 in small caps, numbers 800 with tabular figures.'}</p>
           </div>
           <div className="rounded-xl border border-line bg-cream p-6 md:p-8">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">Newsreader</p>
-            <div className="article-body mt-4">
+            <div lang="pt" className="article-body mt-4">
               <p>O estimador.pt utiliza modelos estatísticos Bayesianos para prever eleições portuguesas. A nossa abordagem é fundamentalmente probabilística: em vez de prever um único resultado, estimamos distribuições de probabilidade.</p>
             </div>
             <p className="mt-4 text-xs text-stone-500">{pt ? 'Só em parágrafos, listas e citações de peças longas. Títulos, legendas, tabelas e figuras ficam em Manrope.' : 'Only in paragraphs, lists and quotes of long pieces. Titles, captions, tables and figures stay in Manrope.'}</p>
@@ -423,11 +423,11 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-line bg-cream p-6">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Frase e descrição' : 'Line and description'}</p>
-            <p className="mt-4 text-2xl font-extrabold tracking-[-0.03em] text-ink">{BRAND_LINE.pt}</p>
-            <p className="mt-3 text-base leading-relaxed text-ink">{BRAND_DESCRIPTOR.pt}</p>
+            <p lang="pt" className="mt-4 text-2xl font-extrabold tracking-[-0.03em] text-ink">{BRAND_LINE.pt}</p>
+            <p lang="pt" className="mt-3 text-base leading-relaxed text-ink">{BRAND_DESCRIPTOR.pt}</p>
             <p lang="en" className="mt-2 text-sm leading-relaxed text-stone-600">{BRAND_LINE.en} {BRAND_DESCRIPTOR.en}</p>
             <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Biografia · 160 caracteres' : 'Bio · 160 characters'}</p>
-            <p className="mt-2 text-sm leading-relaxed text-ink">{BRAND_BIO.pt}</p>
+            <p lang="pt" className="mt-2 text-sm leading-relaxed text-ink">{BRAND_BIO.pt}</p>
             <p lang="en" className="mt-2 text-sm leading-relaxed text-stone-600">{BRAND_BIO.en}</p>
           </div>
           <div className="rounded-2xl border border-line bg-cream p-6">

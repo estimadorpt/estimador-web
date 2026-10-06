@@ -179,6 +179,8 @@ function applyHead(spec: HeadSpec, writer: Writer) {
   if (spec.description) {
     meta('name', 'description', spec.description);
     meta('property', 'og:description', spec.description);
+    // The shell's static twitter:description is the generic one (SEO3-04).
+    meta('name', 'twitter:description', spec.description);
   }
   meta('property', 'og:title', spec.title);
   meta('name', 'twitter:title', spec.title);
@@ -198,7 +200,7 @@ function applyHead(spec: HeadSpec, writer: Writer) {
 const HEAD_TAGS = new Set(['TITLE', 'META', 'LINK']);
 
 /** The single-valued meta tags this module writes, by their key attribute. */
-const SINGLE_META = ['name="robots"', 'name="description"', 'property="og:description"', 'property="og:title"', 'name="twitter:title"', 'property="og:url"'];
+const SINGLE_META = ['name="robots"', 'name="description"', 'property="og:description"', 'name="twitter:description"', 'property="og:title"', 'name="twitter:title"', 'property="og:url"'];
 
 /**
  * React adopts a server-rendered <meta> during hydration only while its

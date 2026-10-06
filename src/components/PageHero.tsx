@@ -3,6 +3,7 @@ import { SectionIllustration, type IllustrationScene } from '@/components/brand/
 import { ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { containerClass, MEASURES, type ContainerWidth, type Measure } from '@/components/brand/Container';
+import { kickerWithoutBack } from '@/components/brand/hero-kicker';
 
 interface PageHeroProps {
   /** Small uppercase label above the title: the section and, if useful, the edition. */
@@ -48,7 +49,9 @@ interface PageHeroProps {
  * bands the sections used to open with, so a page now starts the way the
  * atlas does.
  */
-export function PageHero({ eyebrow, icon, title, lede, back, meta, art, illustration, field, actions, width = '7xl', measure = 'full', compact = false, className = '' }: PageHeroProps) {
+export function PageHero({ eyebrow: givenEyebrow, icon, title, lede, back, meta, art, illustration, field, actions, width = '7xl', measure = 'full', compact = false, className = '' }: PageHeroProps) {
+  // Under a back link, the kicker does not say the section's name again (CL3-07).
+  const eyebrow = back ? kickerWithoutBack(givenEyebrow, back.label) : givenEyebrow;
   return (
     <section className={`relative overflow-hidden border-b border-line ${field && !illustration ? `field-${field}` : 'bg-paper'} ${className}`}>
       {art && !illustration && (

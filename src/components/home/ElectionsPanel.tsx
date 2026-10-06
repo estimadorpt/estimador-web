@@ -117,8 +117,10 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
           {elections.filter(e => ELECTION_ROUTES[e.id]).map(e => {
             const cutoff = forecastCutoffs[e.id];
             return (
-              <li key={e.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3">
-                <div className="min-w-[170px] flex-1">
+              // Below 640px the link goes under the text, which keeps the row's
+              // width instead of a 180px column with orphans (UXM3-14).
+              <li key={e.id} className="flex flex-col items-start gap-y-1 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4">
+                <div className="min-w-0 sm:min-w-[170px] sm:flex-1">
                   <span className="block text-[15px] font-semibold text-ink">{electionName(e)}</span>
                   <span className="block text-[13px] text-stone-600">
                     {past(e) ? t('electionsArchived') : t('electionsForecast')} · {dateLine(e, cutoff)}

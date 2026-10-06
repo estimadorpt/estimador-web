@@ -11,7 +11,8 @@ export type HomeArtShape = 'lead' | 'square';
  * square the whole scene (tree, house, cypress), padded to a square.
  */
 const SHAPES: Record<HomeArtShape, { width: number; height: number; widths: number[] }> = {
-  lead: { width: 880, height: 1086, widths: [600, 880] },
+  // 300 serves the 90px phone thumbnail at up to 3x, which had fetched the 600 (SEO3-14).
+  lead: { width: 880, height: 1086, widths: [300, 600, 880] },
   square: { width: 1160, height: 1160, widths: [400, 800] },
 };
 

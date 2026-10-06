@@ -17,11 +17,15 @@ interface FooterItem {
   label: string;
 }
 
+// A link that wraps onto two lines keeps the same air above and below it as
+// a one-line link, so two wrapped entries never read as one (UXM3-09).
+const listStyle = 'space-y-1.5 md:space-y-0.5';
+
 function FooterColumn({ heading, items, locale }: { heading: string; items: FooterItem[]; locale: string }) {
   return (
     <div>
       <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{heading}</h2>
-      <ul>
+      <ul className={listStyle}>
         {items.map(item => (
           <li key={item.href}>
             <Link href={item.href} locale={locale} className={linkStyle}>
@@ -53,9 +57,9 @@ export async function SiteFooter({ locale }: { locale: string }) {
     { href: '/populacao', label: t('nav.population') },
     // One public name for football, the league's own (CLAUDE.md).
     { href: '/desporto/liga', label: t('nav.liga') },
-    // Both forecasts are archives; the label says so wherever they are listed.
-    { href: '/eleicoes/presidenciais', label: t('elections.navPresidential') },
-    { href: '/eleicoes/legislativas', label: t('elections.navParliamentary') },
+    // One entry for both archived forecasts, as the header groups them under
+    // "Eleições": the archive's own page leads to each (CL3-06).
+    { href: '/eleicoes/arquivo', label: t('footer.electionsArchive') },
     { href: '/economia', label: t(ECONOMY_PUBLISHED ? 'sections.economics' : 'nav.economicsPreparing') },
   ];
   // The brand guide (/marca) is an internal, unindexed page: reachable by its
@@ -63,6 +67,8 @@ export async function SiteFooter({ locale }: { locale: string }) {
   const project: FooterItem[] = [
     { href: '/sobre', label: t('about.title') },
     { href: '/metodologia', label: t('nav.methodology') },
+    // The reuse terms and the citation form for every page (PRO3-V02).
+    { href: '/sobre#reutilizar', label: t('footer.reuse') },
     ...(hasArticles ? [{ href: '/artigos', label: t('articles.title') }] : []),
     { href: '/privacidade', label: t('footer.privacy') },
   ];
@@ -72,19 +78,20 @@ export async function SiteFooter({ locale }: { locale: string }) {
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
-            <Link href="/" locale={locale} className="brand-link inline-flex min-h-11 items-center rounded-sm" aria-label={pt ? 'estimador — página inicial' : 'estimador — home'}>
+            <Link href="/" locale={locale} className="brand-link inline-flex min-h-11 items-center rounded-sm" aria-label={pt ? 'estimador.pt — página inicial' : 'estimador.pt — home'}>
               <LogoHorizontal size={20} />
             </Link>
-            <p className="mt-3 text-sm leading-relaxed text-stone-500">
-              {brandLine(locale)} {brandDescriptor(locale)}
-            </p>
+            {/* The line on its own, then the descriptor: set as one paragraph
+                they read "Dados… Dados… Portugal… Portugal" (CL3-16). */}
+            <p className="mt-3 text-sm font-semibold text-ink">{brandLine(locale)}</p>
+            <p className="mt-1 text-sm leading-relaxed text-stone-500">{brandDescriptor(locale)}</p>
           </div>
           <div className="grid grid-cols-2 gap-x-10 gap-y-6 text-sm sm:grid-cols-3">
             <FooterColumn heading={t('footer.products')} items={sections} locale={locale} />
             <FooterColumn heading={t('footer.project')} items={project} locale={locale} />
             <div>
               <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t('footer.contact')}</h2>
-              <ul>
+              <ul className={listStyle}>
                 <li>
                   <a href="mailto:info@estimador.pt" className={`${linkStyle} [overflow-wrap:anywhere]`}>info@estimador.pt</a>
                 </li>

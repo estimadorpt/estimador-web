@@ -35,7 +35,7 @@ export async function generateMetadata({
   });
 }
 
-type Area = { label: string; question: string; description: string; href: string; extra?: { href: string; label: string } };
+type Area = { label: string; question: string; description: string; href: string; extras?: Array<{ href: string; label: string }> };
 
 /**
  * The methodology hub: one short, dated page that sends each reader to the
@@ -58,14 +58,22 @@ export default async function MethodologyPage({
       question: 'Como é gerada uma população sintética?',
       description: `Os dados de partida (Censos 2021), o ajuste às tabelas do INE, os níveis de qualidade e a privacidade da versão ${POPULATION_RELEASE}.`,
       href: '/populacao/metodologia',
-      extra: { href: '/populacao/qualidade', label: 'Ver a qualidade de cada freguesia' },
+      // The quality page explains the measure and the tiers; each parish's own
+      // tier is on its page (METH3-V03). The files sit with each section (METH3-23).
+      extras: [
+        { href: '/populacao/qualidade', label: 'Como medimos a qualidade (níveis A, B e C)' },
+        { href: '/populacao/dados', label: 'Dados abertos' },
+      ],
     },
     {
       label: 'Liga Portugal',
       question: 'O que sustenta estas probabilidades?',
       description: 'O modelo, as simulações da época e os pressupostos, atualizados a cada jornada.',
       href: '/desporto/liga/metodologia',
-      extra: { href: '/desporto/liga/modelo', label: 'Ver a avaliação publicada do modelo' },
+      extras: [
+        { href: '/desporto/liga/modelo', label: 'Ver a avaliação publicada do modelo' },
+        { href: '/desporto/liga/dados', label: 'Dados abertos' },
+      ],
     },
     {
       label: 'Eleições · arquivo',
@@ -85,14 +93,20 @@ export default async function MethodologyPage({
       question: 'How is a synthetic population generated?',
       description: `The inputs (2021 Census), the fit to the INE tables, the quality tiers and the privacy of release ${POPULATION_RELEASE}.`,
       href: '/populacao/metodologia',
-      extra: { href: '/populacao/qualidade', label: 'See the quality of each parish' },
+      extras: [
+        { href: '/populacao/qualidade', label: 'How we measure quality (tiers A, B and C)' },
+        { href: '/populacao/dados', label: 'Open data' },
+      ],
     },
     {
       label: 'Liga Portugal',
       question: 'What supports these probabilities?',
       description: 'The model, the season simulations and the assumptions, updated every matchday.',
       href: '/desporto/liga/metodologia',
-      extra: { href: '/desporto/liga/modelo', label: 'See the published evaluation of the model' },
+      extras: [
+        { href: '/desporto/liga/modelo', label: 'See the published evaluation of the model' },
+        { href: '/desporto/liga/dados', label: 'Open data' },
+      ],
     },
     {
       label: 'Elections · archive',
@@ -139,12 +153,15 @@ export default async function MethodologyPage({
                 {area.href === '/eleicoes/metodologia' && <span id="segunda-volta-2026" className="block" />}
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{area.label}</p>
                 <Link href={area.href} locale={locale} className="mt-2 inline-flex min-h-11 items-center text-lg font-bold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">
-                  {area.question}&nbsp;<span aria-hidden="true">→</span>
+                  {/* One inline run, so a wrapped question keeps its arrow on its last line. */}
+                  <span>{area.question}&nbsp;<span aria-hidden="true">→</span></span>
                 </Link>
                 <p className="mt-1 text-sm leading-relaxed text-stone-600">{area.description}</p>
-                {area.extra && (
-                  <p className="mt-1 text-sm">
-                    <Link href={area.extra.href} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{area.extra.label}</Link>
+                {area.extras && (
+                  <p className="mt-1 flex flex-wrap gap-x-6 text-sm">
+                    {area.extras.map(extra => (
+                      <Link key={extra.href} href={extra.href} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{extra.label}</Link>
+                    ))}
                   </p>
                 )}
               </div>
@@ -156,7 +173,7 @@ export default async function MethodologyPage({
               {principles.map(line => <li key={line}>{line}</li>)}
             </ul>
             <p className="mt-6 text-sm text-stone-600">
-              {pt ? 'Quem faz o site e o que está publicado hoje: ' : 'Who makes the site and what is published today: '}
+              {pt ? 'Quem faz o site, o que está publicado hoje e como reutilizar e citar: ' : 'Who makes the site, what is published today and how to reuse and cite it: '}
               <Link href="/sobre" locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{pt ? 'sobre o estimador.pt' : 'about estimador.pt'}</Link>.
             </p>
           </section>

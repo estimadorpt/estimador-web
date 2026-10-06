@@ -44,8 +44,9 @@ const WALLS = [329, 1116];
  * cream covers that pixel, 0 to 1.
  */
 export const SHAPES = {
+  // 300 for the 90px phone thumbnail at up to 3x (SEO3-14); 600 and 880 for the desktop column.
   lead: {   // 0.81: the house alone, roof overhang included
-    region: [280, 0, 880, 1086], widths: [600, 880],
+    region: [280, 0, 880, 1086], widths: [300, 600, 880],
     veil: (x, y) => (x < WALLS[0] || x > WALLS[1] ? ramp(y, 560, 600) : 0),
   },
   square: { // 1.00: tree, house and cypress, the scene's centre

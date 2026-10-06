@@ -235,9 +235,11 @@ export function createPageMetadata({
       images: [socialImage],
       ...(type === 'article' ? { type, publishedTime, modifiedTime, authors, tags } : { type }),
     },
+    // No twitter:creator or twitter:site until the owner confirms the
+    // account (SEO3-07); add it then, with the footer link.
     twitter: {
       card: 'summary_large_image', title, description,
-      creator: '@estimadorpt', images: [{ url: socialImage.url, alt: socialImage.alt }],
+      images: [{ url: socialImage.url, alt: socialImage.alt }],
     },
     robots: { index, follow: true },
   };

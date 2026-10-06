@@ -36,8 +36,8 @@ export function KeyFacts({ locale, persons, households, parishes, municipalities
           label={pt ? 'Freguesias' : 'Parishes'}
           value={n(parishes)}
           note={pt
-            ? `Em ${n(municipalities)} concelhos, CAOP 2021. Todas com os seus próprios números.`
-            : `In ${n(municipalities)} municipalities, CAOP 2021. Each with its own figures.`}
+            ? `Em ${n(municipalities)} concelhos, com os limites de 2021 (CAOP). Todas com os seus próprios números.`
+            : `In ${n(municipalities)} municipalities, with the 2021 boundaries (CAOP). Each with its own figures.`}
         />
       </KpiRow>
       <p className="mt-3 max-w-3xl text-sm leading-relaxed text-stone-600">

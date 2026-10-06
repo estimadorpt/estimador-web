@@ -7,7 +7,8 @@ import { FixtureStakes } from "@/components/football/FixtureStakes";
 import type { ClubOutlookEntry } from "@/components/football/club-outlook";
 import { readStoredClub, resolveInitialClub, writeStoredClub } from "@/components/football/club-preference";
 import type { TeamDelta } from "@/types/football";
-import { teamWithArticle } from "@/lib/config/football";
+import { teamColorOnPaper, teamDisplayName, teamWithArticle } from "@/lib/config/football";
+import { formatPercent } from "@/lib/football-format";
 
 export interface FootballClubOption {
   label: string;
@@ -31,6 +32,7 @@ export function FootballClubPicker({
   top3,
   deltas,
   generalLabels,
+  relegation,
 }: {
   locale: string;
   outlooks: ClubOutlookEntry[];
@@ -38,6 +40,8 @@ export function FootballClubPicker({
   deltas?: Record<string, TeamDelta>;
   /** The general outlook's visible caption and its link to the Liga page. */
   generalLabels?: { champion: string; change: string | null; link: string };
+  /** The other end of the table, from the same forecast: the three likeliest to go down. */
+  relegation?: { label: string; teams: Array<{ team: string; p_relegation: number }> };
 }) {
   const pt = locale === "pt";
   const validSlugs = useMemo(() => outlooks.map((o) => o.slug), [outlooks]);
@@ -89,9 +93,9 @@ export function FootballClubPicker({
     setRestored(false);
   }
 
-  // A column that fills the rail card, so the club selector sits on the
-  // card's last line when the row is taller than the forecast (UXD2-V02):
-  // no band of empty cream under it.
+  // The club selector follows the outlook directly (CL3-02): pinned to the
+  // card's last line it left a band of empty cream in the middle of the rail
+  // whenever the population card set a taller row.
   return (
     <div className="mt-3 flex flex-1 flex-col">
       <div aria-live="polite">
@@ -152,6 +156,25 @@ export function FootballClubPicker({
             <div className="mt-2">
               <TitleProbabilities teams={top3} deltas={generalLabels?.change ? deltas : undefined} locale={locale} compact />
             </div>
+            {/* "Como pode acabar" has two ends: the title above, the drop here,
+                smaller, from the same dated forecast (CL3-02: real content,
+                not a hole, where the rail is as tall as the population card). */}
+            {relegation && relegation.teams.length > 0 && (
+              <div className="mt-4 border-t border-line pt-3">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{relegation.label}</p>
+                <ul className="mt-1.5 grid grid-cols-3 gap-x-3 gap-y-1">
+                  {relegation.teams.map(team => (
+                    <li key={team.team} className="min-w-0">
+                      <span className="flex items-center gap-1.5 text-[12px] leading-tight text-stone-600">
+                        <i aria-hidden="true" className="inline-block h-[7px] w-[7px] shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(team.team) }} />
+                        <span className="min-w-0 break-words">{teamDisplayName(team.team)}</span>
+                      </span>
+                      <span className="block font-display text-lg font-extrabold tabular-nums text-ink">{formatPercent(team.p_relegation, locale)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {generalLabels && (
               <div className="mt-4">
                 <Action href="/desporto/liga" locale={locale} variant="secondary" arrow>
@@ -165,7 +188,7 @@ export function FootballClubPicker({
 
       <form
         id="escolher-equipa"
-        className="mt-auto flex min-w-0 flex-wrap items-end gap-2 pt-4"
+        className="flex min-w-0 flex-wrap items-end gap-2 pt-5"
         onSubmit={(event) => {
           event.preventDefault();
           // The button is never disabled (it looked broken, audit CL2-04):

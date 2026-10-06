@@ -118,7 +118,8 @@ export default async function HomePage({
     { href: '/#escolher-equipa', inPage: false, label: t('shortcutClub'), status: ligaSummary ? t('shortcutClubStatus', { matchday: ligaSummary.matchday }) : null },
     { href: '/eleicoes/arquivo', inPage: false, label: t('shortcutElections'), status: t('shortcutElectionsStatus') },
   ];
-  const chipClass = 'flex h-full min-h-14 flex-col justify-center rounded-lg border border-line bg-cream px-2.5 py-2 text-ink transition-colors hover:bg-parchment';
+  // One alignment for every line of every chip, wrapped titles included (UXM3-19).
+  const chipClass = 'flex h-full min-h-14 flex-col items-start justify-center rounded-lg border border-line bg-cream px-2.5 py-2 text-left text-ink transition-colors hover:bg-parchment';
 
   return (
     <div className="min-h-screen bg-paper">
@@ -130,8 +131,10 @@ export default async function HomePage({
             h1, kept small so the population lead stays above the fold. */}
         <div className="mb-5 max-w-4xl md:mb-6">
           <h1 className="text-lg leading-snug text-ink md:text-xl">{brandLine(locale)}</h1>
+          {/* Who stands behind it, next to the way to find out more (CL3-10). */}
           <p className="mt-1 text-sm leading-relaxed text-stone-600 md:text-[15px]">
             {brandDescriptor(locale)}{' '}
+            {t('identityByline')}{' · '}
             <Link href="/sobre" locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{t('aboutLink')}</Link>
           </p>
         </div>
@@ -155,14 +158,16 @@ export default async function HomePage({
             ))}
           </ul>
         </nav>
-        {/* The cards in a row share its height (UXD2-V02, CL2-10): a shorter
-            card fills its cell and puts its last line (a status, a link) at
-            the bottom, so a row reads as one block, not a bento with holes. */}
+        {/* The lead row shares its height (UXD2-V02): the rail is as tall as
+            the population card, and fills it with the outlook's two ends, the
+            title and the drop, then the club picker (CL3-02). The support row
+            keeps each card's own height: stretched, the economy card's text
+            sat over about 180px of empty cream (CL2-10, CL3-02). */}
         <div className="grid items-stretch gap-4 md:gap-6 min-[1100px]:grid-cols-[2fr_1fr]">
           {panel(layout.lead, 'lead')}
           {panel(layout.secondary, 'secondary')}
         </div>
-        <div className="mt-4 grid items-stretch gap-4 md:mt-6 md:gap-6 min-[900px]:grid-cols-2">
+        <div className="mt-4 grid items-start gap-4 md:mt-6 md:gap-6 min-[900px]:grid-cols-2">
           {support.map(section => panel(section, 'support'))}
         </div>
         <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-stone-600 md:mt-8">

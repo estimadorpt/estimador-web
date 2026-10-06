@@ -80,7 +80,7 @@ export default async function TopicsPage({
                 <Link
                   href="/populacao"
                   locale={locale}
-                  className="inline-flex items-center gap-1.5 font-semibold text-ink underline underline-offset-4 hover:no-underline"
+                  className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-ink underline underline-offset-4 hover:no-underline"
                 >
                   {t('articles.emptyNextStep')}
                   <span aria-hidden="true">→</span>

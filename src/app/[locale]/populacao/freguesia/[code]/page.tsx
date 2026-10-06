@@ -57,7 +57,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       card: 'summary_large_image',
       title,
       description,
-      creator: '@estimadorpt',
       images: [{ url: image, alt: imageAlt }],
     },
   };

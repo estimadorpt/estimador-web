@@ -654,6 +654,11 @@
       "statusCode": 301
     },
     {
+      "route": "/index.html",
+      "redirect": "/pt/",
+      "statusCode": 301
+    },
+    {
       "route": "/",
       "redirect": "/pt/",
       "statusCode": 301

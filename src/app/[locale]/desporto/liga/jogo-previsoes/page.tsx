@@ -99,6 +99,7 @@ export default async function JogoPrevisoesPage({
       <main id="main-content" tabIndex={-1}>
       <PageHero
         measure="reading"
+        compact
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
         icon={<Swords aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t("football.title")}

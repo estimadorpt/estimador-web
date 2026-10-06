@@ -27,6 +27,11 @@
  * It also lists, without failing, pages whose <title> or meta description
  * search results will cut (about 60 and 155 characters; warned past 70/160).
  *
+ * And it weighs staticwebapp.config.json, which Azure refuses past 20 KB:
+ * every locale-less redirect, retained OG card and host 404 rule is a line in
+ * it (16.1 KB in October 2026, after 6 KB in one round; SEO3V-M4). It warns
+ * from 18 KB, so there is time to compact the rules before a deploy fails.
+ *
  *   node scripts/check-export-budget.mjs [out-dir]
  */
 
@@ -41,6 +46,12 @@ const LIMITS = {
   fileBytes: Number(process.env.EXPORT_BUDGET_FILE_MB ?? 10) * MB,
 };
 const META = { title: 70, description: 160 };
+/** The host config: Azure Static Web Apps' limit, and where a warning starts. */
+const HOST_CONFIG = {
+  file: path.resolve(process.env.SWA_CONFIG ?? 'staticwebapp.config.json'),
+  limitBytes: 20 * 1024,
+  warnBytes: 18 * 1024,
+};
 /** Where a warning starts: early enough to plan a slimmer page or a plan change. */
 const WARN_SHARE = { totalBytes: 190 / 220, files: 11_500 / 13_000 };
 
@@ -122,6 +133,19 @@ function main() {
   }
   if (files.length > LIMITS.files * WARN_SHARE.files && files.length <= LIMITS.files) {
     console.warn(`export budget: ${files.length} files is close to the ${LIMITS.files} limit`);
+  }
+
+  if (fs.existsSync(HOST_CONFIG.file)) {
+    const bytes = fs.statSync(HOST_CONFIG.file).size;
+    const kb = value => `${(value / 1024).toFixed(1)} KB`;
+    console.log(`  ${'host config'.padEnd(20)} ${kb(bytes).padStart(9)}  (Azure limit ${kb(HOST_CONFIG.limitBytes)})`);
+    if (bytes > HOST_CONFIG.limitBytes) {
+      failures.push(`staticwebapp.config.json is ${kb(bytes)}, over Azure's ${kb(HOST_CONFIG.limitBytes)}; compact its routes`);
+    } else if (bytes > HOST_CONFIG.warnBytes) {
+      console.warn(`export budget: staticwebapp.config.json is ${kb(bytes)}, close to Azure's ${kb(HOST_CONFIG.limitBytes)} limit; compact its routes (one rule per retained OG card and the '/x' plus '/x/*' 404 pairs are the first candidates)`);
+    }
+  } else {
+    console.warn(`export budget: ${HOST_CONFIG.file} not found; host config size not checked`);
   }
 
   const long = metaReport(files);

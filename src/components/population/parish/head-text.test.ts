@@ -64,8 +64,38 @@ describe('parish titles and descriptions (SPV-01)', () => {
   it('drops the union prefix, keeps short names whole and adds the INE count while it fits', () => {
     expect(shortParishName('União das freguesias de Milhazes, Vilar de Figos e Faria')).toBe('Milhazes, Vilar de Figos e Faria');
     expect(parishTitle('União das freguesias de Milhazes, Vilar de Figos e Faria', 'pt')).toBe('Quem vive em Milhazes, Vilar de Figos e Faria?' + SUFFIX);
-    expect(parishTitle('Aguada de Cima', 'pt')).toBe('Quem vive em Aguada de Cima? · População sintética' + SUFFIX);
+    expect(parishTitle('Aguada de Cima', 'pt')).toBe('Quem vive em Aguada de Cima?' + SUFFIX);
     const aguada = parishDescription({ name: 'Aguada de Cima', municipalityName: 'Águeda', censusPopulation: 3893, municipalityFigures: false, locale: 'pt' });
     expect(aguada).toBe('Idades, trabalho, escolaridade e agregados em Aguada de Cima (Águeda): população sintética dos Censos 2021. 3 893 residentes (INE).');
+  });
+
+  it('keeps the article a union name carries, in the title and the description (SEO3-04)', () => {
+    expect(parishTitle('União das freguesias do Vade', 'pt')).toBe('Quem vive no Vade?' + SUFFIX);
+    expect(parishTitle('União das freguesias da Ribeira do Neiva', 'pt')).toBe('Quem vive na Ribeira do Neiva?' + SUFFIX);
+    expect(parishTitle('União de freguesias da cidade de Santarém', 'en')).toBe('Who lives in cidade de Santarém?' + SUFFIX);
+    expect(parishDescription({ name: 'União das freguesias do Vade', municipalityName: 'Vila Verde', censusPopulation: 1000, municipalityFigures: false, locale: 'pt' }))
+      .toMatch(/^Idades, trabalho, escolaridade e agregados na União das freguesias do Vade \(Vila Verde\)/);
+  });
+
+  it('writes one separator and an agreeing preposition for every parish (SEO3-04)', () => {
+    // Written out here rather than imported, so the test does not share a mistake with the code.
+    const articleOf: Record<string, string> = { do: 'no', da: 'na', dos: 'nos', das: 'nas' };
+    let unionsWithArticle = 0;
+    for (const parish of places.parishes) {
+      for (const locale of ['pt', 'en'] as const) {
+        const title = parishTitle(parish.name, locale);
+        expect(title.slice(0, -SUFFIX.length), title).not.toContain(' · ');
+        const description = parishDescription({ name: parish.name, municipalityName: parish.municipalityName, censusPopulation: parish.censusPopulation, municipalityFigures: parish.level === 'municipality', locale });
+        if (locale !== 'pt') continue;
+        expect(description, description).not.toMatch(/ em União /);
+        const union = /^União (?:das|de) freguesias (do|da|dos|das) /i.exec(parish.name);
+        if (union) {
+          unionsWithArticle++;
+          expect(title, title).toMatch(new RegExp(`^Quem vive ${articleOf[union[1].toLowerCase()]} `));
+        }
+      }
+    }
+    // The audit counted 18 such titles that had dropped the article.
+    expect(unionsWithArticle).toBeGreaterThanOrEqual(18);
   });
 });

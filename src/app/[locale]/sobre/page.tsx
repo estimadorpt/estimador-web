@@ -10,7 +10,8 @@ import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/mdx-components';
 import { loadEconomyDashboard } from '@/lib/utils/data-loader';
-import { loadLigaPlayers } from '@/lib/utils/football-data-loader';
+import { loadLigaPlayers, loadLigaSummary } from '@/lib/utils/football-data-loader';
+import { formatLongDate } from '@/lib/football-format';
 import { ECONOMY_PUBLISHED, economyState, type EconomyState } from '@/lib/config/economy-status';
 import { Link } from '@/i18n/routing';
 import { fmtDate } from '@/lib/utils/economy-format';
@@ -78,7 +79,8 @@ function getAboutContent(locale: string): { content: string; actualLocale: strin
  * method is explained. Only the economy's status is derived (`economyState`:
  * the editorial flag, then the staleness guard /economia itself uses), so that
  * line cannot drift from what the section shows. The Liga's player cut-off
- * is read from players.json, the season its fit ends with (audit CL2-02). The
+ * is read from players.json, the season its fit ends with (audit CL2-02), and
+ * its status names the latest forecast's round and date (FR3V-M3). The
  * rest is stable editorial fact (CLAUDE.md, "Sections"), not something a
  * loader here can compute.
  */
@@ -86,15 +88,27 @@ function EstadoAtual({
   economyNow,
   economyDateLabel,
   playerSeason,
+  ligaLatest,
   locale,
 }: {
   economyNow: EconomyState;
   economyDateLabel: string | null;
   /** The last season in the player models' fit ("2025-26"), or null. */
   playerSeason: string | null;
+  /** The latest Liga forecast: the round it follows and when it was updated, or null. */
+  ligaLatest: { matchday: number; updated: string } | null;
   locale: string;
 }) {
   const pt = locale !== 'en';
+  // Dated like the population row: which forecast is live, and from when
+  // (FR3V-M3), read from the file the Liga page reads.
+  const ligaStatus = ligaLatest
+    ? (pt
+        ? `Em publicação contínua · última previsão depois da jornada ${ligaLatest.matchday}, atualizada a ${ligaLatest.updated}.`
+        : `Published on a continuing basis · latest forecast after matchday ${ligaLatest.matchday}, updated ${ligaLatest.updated}.`)
+    : (pt
+        ? 'Em publicação contínua · previsões atualizadas a cada jornada da época em curso.'
+        : 'Published on a continuing basis · forecasts updated every matchday of the current season.');
   const economyStatus = economyNow === 'preparing'
     ? (pt ? 'Em preparação · ainda sem leituras da economia publicadas.' : 'In preparation · no readings of the economy published yet.')
     : economyNow === 'paused'
@@ -122,9 +136,7 @@ function EstadoAtual({
     {
       label: 'Liga Portugal',
       href: '/desporto/liga',
-      status: pt
-        ? 'Em publicação contínua · previsões atualizadas a cada jornada da época em curso.'
-        : 'Published on a continuing basis · forecasts updated every matchday of the current season.',
+      status: ligaStatus,
       text: pt
         ? `Um modelo bayesiano que simula milhares de épocas possíveis para estimar a classificação final, as probabilidades de título e de despromoção e o peso de cada jogo nessas contas.${playerSeason ? ` Modelos bayesianos próprios medem também os jogadores, um por dimensão; os de finalização e de contribuição ofensiva vão até ao fim da época ${playerSeason}.` : ''}`
         : `A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.${playerSeason ? ` Dedicated Bayesian models also rate the players, one per dimension; the finishing and attacking contribution models run to the end of the ${playerSeason} season.` : ''}`,
@@ -166,13 +178,14 @@ function EstadoAtual({
       {items.map(item => (
         // Full width, so each rule between items is as long as the list's own (CL2-11).
         <li key={item.href} className="max-w-none py-5">
+          {/* Stand-alone links, so a thumb-sized target on a phone (UXM3-07). */}
           <h3 className="m-0 text-lg">
-            <Link href={item.href} locale={locale} className="text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{item.label}</Link>
+            <Link href={item.href} locale={locale} className="tap-target text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{item.label}</Link>
           </h3>
           <p className="mt-1 font-sans text-sm font-semibold text-stone-600">{item.status}</p>
           <p className="mt-2">{item.text}</p>
           <p className="mt-1 font-sans text-sm">
-            <Link href={item.method.href} locale={locale} className="text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{item.method.label}</Link>
+            <Link href={item.method.href} locale={locale} className="tap-target text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{item.method.label}</Link>
           </p>
         </li>
       ))}
@@ -200,12 +213,15 @@ export default async function AboutPage({
   const economyDateLabel = economyData?.vintage_date ? fmtDate(economyData.vintage_date, locale) : null;
   // The player models' cut-off, the same season /desporto/liga/jogadores and
   // the Liga methodology name (CL2-02).
-  const players = await loadLigaPlayers();
+  const [players, ligaSummary] = await Promise.all([loadLigaPlayers(), loadLigaSummary()]);
   const playerSeason = players?.generated_from?.seasons?.at(-1) ?? null;
+  // The latest forecast's round and update date, as the Liga page's status line has them.
+  const ligaUpdated = ligaSummary?.timestamp ? formatLongDate(ligaSummary.timestamp, locale) : '';
+  const ligaLatest = ligaSummary && ligaUpdated ? { matchday: ligaSummary.matchday, updated: ligaUpdated } : null;
 
   const components = getMDXComponents({
     EstadoAtual: () => (
-      <EstadoAtual economyNow={economyNow} economyDateLabel={economyDateLabel} playerSeason={playerSeason} locale={locale} />
+      <EstadoAtual economyNow={economyNow} economyDateLabel={economyDateLabel} playerSeason={playerSeason} ligaLatest={ligaLatest} locale={locale} />
     ),
   });
 

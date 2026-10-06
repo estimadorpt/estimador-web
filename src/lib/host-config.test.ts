@@ -80,6 +80,15 @@ describe('host config', () => {
     }
   });
 
+  it('sends the root document asked for by name to the Portuguese start page (SEO3-15)', () => {
+    // out/index.html is Next's error-root document (no title); only /pt/ and /en/ are pages.
+    for (const url of ['/', '/index.html']) {
+      expect(firstMatch(url)?.redirect, url).toBe('/pt/');
+      expect(firstMatch(url)?.statusCode, url).toBe(301);
+    }
+    expect(firstMatch('/pt/index.html')?.redirect).toBeUndefined();
+  });
+
   it('stays under the host\'s 20 KB config limit', () => {
     expect(fs.statSync(path.join(process.cwd(), 'staticwebapp.config.json')).size).toBeLessThan(20 * 1024);
   });
