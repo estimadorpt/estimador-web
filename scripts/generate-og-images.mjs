@@ -20,7 +20,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   ROOT_DIR, COLOR, renderCard, contentHash,
-  formatPercent, formatDate, formatQuarter,
+  formatPercent, formatDate, formatShortDate, formatQuarter,
 } from './lib/og-render.mjs';
 import { articleCard, figureCard, brandCard, CARD_WIDTH, CARD_HEIGHT } from './lib/og-cards.mjs';
 import { teamName, teamColor } from './lib/football-brand.mjs';
@@ -56,8 +56,14 @@ const COPY = {
     updated: 'atualizado a',
     ligaSection: 'Liga Portugal',
     ligaLabel: 'Probabilidade de título',
-    ligaCaption: (sims) => `${sims} simulações da época a partir da classificação atual.`,
-    ligaFooter: (matchday, season) => `Jornada ${matchday} · Liga Portugal ${season}`,
+    ligaCaption: (sims, matchday) => `${sims} simulações da época a partir da classificação depois da jornada\u00a0${matchday}.`,
+    // The as-of line is what keeps a screenshot of the card honest weeks later (FA2-08).
+    ligaFooter: (matchday, date, season) => [`Depois da jornada ${matchday}`, date ? `atualizado a ${date}` : null, `Liga Portugal ${season}`].filter(Boolean).join(' · '),
+    ligaAlt: (season, matchday, date, rows) => `Liga Portugal ${season} depois da jornada ${matchday}${date ? ` (atualizado a ${date})` : ''}: probabilidade de título, ${rows}.`,
+    brandAlt: (line, descriptor) => `estimador.pt. ${line} ${descriptor}`,
+    populationAlt: (parishes, version, date) => `População sintética aberta: ${parishes} freguesias dos Censos 2021, versão ${version} publicada a ${date}.`,
+    economyAlt: (value, quarter) => `Economia: risco de recessão de ${value}% em ${quarter}.`,
+    articleAlt: (title, kind, date) => `${title} (${kind === 'nota' ? 'nota' : 'explicador'}, ${date}).`,
     economySection: 'Economia',
     economyLabel: 'Risco de recessão',
     economySubject: (quarter) => `este trimestre · ${quarter}`,
@@ -84,8 +90,13 @@ const COPY = {
     updated: 'updated',
     ligaSection: 'Liga Portugal',
     ligaLabel: 'Title probability',
-    ligaCaption: (sims) => `${sims} simulations of the season from the current table.`,
-    ligaFooter: (matchday, season) => `Matchday ${matchday} · Liga Portugal ${season}`,
+    ligaCaption: (sims, matchday) => `${sims} simulations of the season from the table after matchday\u00a0${matchday}.`,
+    ligaFooter: (matchday, date, season) => [`After matchday ${matchday}`, date ? `updated ${date}` : null, `Liga Portugal ${season}`].filter(Boolean).join(' · '),
+    ligaAlt: (season, matchday, date, rows) => `Liga Portugal ${season} after matchday ${matchday}${date ? ` (updated ${date})` : ''}: title probability, ${rows}.`,
+    brandAlt: (line, descriptor) => `estimador.pt. ${line} ${descriptor}`,
+    populationAlt: (parishes, version, date) => `Open synthetic population: ${parishes} parishes of the 2021 Census, version ${version} released ${date}.`,
+    economyAlt: (value, quarter) => `Economy: recession risk of ${value}% in ${quarter}.`,
+    articleAlt: (title, kind, date) => `${title} (${kind === 'nota' ? 'note' : 'explainer'}, ${date}).`,
     economySection: 'Economy',
     economyLabel: 'Recession risk',
     economySubject: (quarter) => `this quarter · ${quarter}`,
@@ -211,21 +222,26 @@ function populationMeta() {
 
 /* --------------------------------------------------------------- cards ---- */
 
+/**
+ * Each card comes with its alt text (og:image:alt), which describes what the
+ * image shows rather than repeating the page's title (SPV-04).
+ */
 function defaultCard(locale, economyIsPublished) {
   const copy = COPY[locale];
-  return brandCard({
+  const node = brandCard({
     headline: copy.brandHeadline,
     standfirst: copy.brandStandfirst,
     columns: copy.columns(economyIsPublished),
     footerLeft: copy.brandFooter,
     footerRight: 'estimador.pt',
   });
+  return { node, alt: copy.brandAlt(copy.brandHeadline, copy.brandStandfirst) };
 }
 
 function articleCardFor(article, locale) {
   const copy = COPY[locale];
   const date = formatDate(article.date, locale);
-  return articleCard({
+  const node = articleCard({
     locale,
     title: article.title,
     excerpt: article.excerpt,
@@ -234,6 +250,7 @@ function articleCardFor(article, locale) {
     byline: article.author,
     readTime: `${article.readMinutes} min ${copy.readSuffix}`,
   });
+  return { node, alt: copy.articleAlt(article.title, article.kind ?? 'explicador', date) };
 }
 
 function ligaCard(data, locale) {
@@ -246,26 +263,31 @@ function ligaCard(data, locale) {
 
   const leader = contenders[0];
   const groupedSims = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB').format(data.n_sims ?? 0);
+  const updated = data.timestamp ? formatShortDate(data.timestamp, locale) : null;
   // No bracketed range beside the probability: p_champion_lo/hi is the spread
   // of 500-simulation blocks, about ten times the Monte Carlo error of the
   // published 50 000-simulation figure, and the site no longer shows it
   // anywhere (audit F-H1). The card carries the number and its simulation count.
-  return figureCard({
+  const node = figureCard({
     sectionLabel: copy.ligaSection,
     label: copy.ligaLabel,
     value: formatPercent(leader.p_champion),
     unit: '%',
     subject: teamName(leader.team),
-    caption: data.n_sims ? copy.ligaCaption(groupedSims) : null,
+    caption: data.n_sims ? copy.ligaCaption(groupedSims, data.matchday) : null,
+    // On the probability's own 0–100% scale: scaled to the leader, a 51% bar
+    // filled the track and read as certainty once the card travelled alone.
     rows: contenders.map(team => ({
       name: teamName(team.team),
       value: `${formatPercent(team.p_champion)}%`,
-      fraction: team.p_champion / leader.p_champion,
+      fraction: team.p_champion,
       color: teamColor(team.team),
     })),
-    footerLeft: copy.ligaFooter(data.matchday, data.season),
+    footerLeft: copy.ligaFooter(data.matchday, updated, data.season),
     footerRight: printedUrl(locale, SITE_PATH.liga),
   });
+  const rows = contenders.map(team => `${teamName(team.team)} ${formatPercent(team.p_champion)}%`).join(', ');
+  return { node, alt: copy.ligaAlt(data.season, data.matchday, updated, rows) };
 }
 
 /**
@@ -287,12 +309,13 @@ function economyCard(dashboard, locale, isPublished) {
     ? `${formatQuarter(history[0].quarter, locale)} – ${formatQuarter(history[history.length - 1].quarter, locale)}`
     : '';
 
-  return figureCard({
+  const quarter = formatQuarter(current.as_of_quarter ?? tile.as_of_quarter, locale);
+  const node = figureCard({
     sectionLabel: copy.economySection,
     label: copy.economyLabel,
     value: formatPercent(current.probability),
     unit: '%',
-    subject: copy.economySubject(formatQuarter(current.as_of_quarter ?? tile.as_of_quarter, locale)),
+    subject: copy.economySubject(quarter),
     caption: copy.economyCaption,
     spark: {
       label: copy.economySpark,
@@ -303,6 +326,7 @@ function economyCard(dashboard, locale, isPublished) {
     footerLeft: copy.economyFooter(formatDate(dashboard.vintage_date, locale)),
     footerRight: printedUrl(locale, SITE_PATH.economy),
   });
+  return { node, alt: copy.economyAlt(formatPercent(current.probability), quarter) };
 }
 
 /**
@@ -317,7 +341,7 @@ function populationCard(meta, locale) {
   if (!counts?.parishes || !counts.persons || !counts.households || !honesty) return null;
   // Grouped like formatCount on the site ("3 092"): Intl's pt-PT leaves four digits ungrouped.
   const number = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { useGrouping: 'always' });
-  return figureCard({
+  const node = figureCard({
     sectionLabel: copy.populationSection,
     label: copy.populationLabel,
     value: number.format(counts.parishes),
@@ -326,6 +350,7 @@ function populationCard(meta, locale) {
     footerLeft: copy.populationFooter(meta.release_version, formatDate(meta.published, locale)),
     footerRight: printedUrl(locale, SITE_PATH.population),
   });
+  return { node, alt: copy.populationAlt(number.format(counts.parishes), meta.release_version, formatDate(meta.published, locale)) };
 }
 
 /* --------------------------------------------------------------- output --- */
@@ -419,6 +444,33 @@ function pruneOrphans(keep) {
   return removed;
 }
 
+/** What a retained card name is served with: it no longer holds the bytes its hash names. */
+const RETAINED_CACHE_CONTROL = 'public, max-age=0, must-revalidate';
+
+/**
+ * Keeps the host config's exact-name card routes equal to the retained list,
+ * just ahead of the `/og-image-*.png` wildcard (first match wins). A retained
+ * name holds a stand-in, not the bytes its hash promised, so it must not be
+ * cached as immutable: these routes make every cache that revalidates pick up
+ * the current card (FRESH-V4). A cache that already holds production's copy
+ * under the old immutable header keeps it; nothing a deploy does reaches it.
+ */
+function syncRetainedRoutes(retained) {
+  const file = path.join(ROOT_DIR, 'staticwebapp.config.json');
+  const config = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const exact = route => /^\/og-image-.+-[0-9a-f]{8}\.png$/.test(route.route);
+  const routes = config.routes.filter(route => !exact(route));
+  const wildcard = routes.findIndex(route => route.route === '/og-image-*.png');
+  if (wildcard === -1) throw new Error('staticwebapp.config.json has no /og-image-*.png route');
+  routes.splice(wildcard, 0, ...[...retained].sort().map(name => ({
+    route: `/${name}`,
+    headers: { 'cache-control': RETAINED_CACHE_CONTROL },
+  })));
+  config.routes = routes;
+  const next = `${JSON.stringify(config, null, 2)}\n`;
+  if (next !== fs.readFileSync(file, 'utf8')) fs.writeFileSync(file, next);
+}
+
 async function main() {
   const liga = latestLigaMatchday();
   const economy = economyDashboard();
@@ -427,14 +479,16 @@ async function main() {
   const manifestPath = path.join(PUBLIC_DIR, 'og-manifest.json');
   const committed = readManifest(manifestPath);
   const live = await liveManifest();
-  const manifest = { generatedAt: new Date().toISOString(), files: {}, cards: {} };
+  const manifest = { generatedAt: new Date().toISOString(), files: {}, cards: {}, alt: {} };
   const written = [];
 
   for (const locale of LOCALES) {
     const cards = {};
 
-    const fallback = await emit(defaultCard(locale, economyIsPublished), `og-image-${locale}`);
+    const brand = defaultCard(locale, economyIsPublished);
+    const fallback = await emit(brand.node, `og-image-${locale}`);
     manifest.files[locale] = fallback;
+    manifest.alt[fallback] = brand.alt;
     cards[SITE_PATH.home] = fallback;
     written.push(fallback);
 
@@ -448,16 +502,19 @@ async function main() {
       population ? [SITE_PATH.population, populationCard(population, locale), `og-image-populacao-${locale}`] : null,
     ].filter(Boolean);
 
-    for (const [route, node, basename] of sections) {
-      if (!node) continue;
-      const filename = await emit(node, basename);
+    for (const [route, card, basename] of sections) {
+      if (!card) continue;
+      const filename = await emit(card.node, basename);
       cards[route] = filename;
+      manifest.alt[filename] = card.alt;
       written.push(filename);
     }
 
     for (const article of readArticles(locale)) {
-      const filename = await emit(articleCardFor(article, locale), `og-image-artigo-${article.slug}-${locale}`);
+      const card = articleCardFor(article, locale);
+      const filename = await emit(card.node, `og-image-artigo-${article.slug}-${locale}`);
       cards[`/artigos/${article.slug}`] = filename;
+      manifest.alt[filename] = card.alt;
       written.push(filename);
     }
 
@@ -465,23 +522,21 @@ async function main() {
     console.log(`${locale}: ${Object.keys(cards).length} cards`);
   }
 
-  // What was served before this build stays for one more: production's cards
-  // (fetched), or, offline, what the committed manifest says was kept last
-  // time; plus the committed manifest's own cards.
-  const servedLive = live ? namedCards(live) : namedCards(committed, { withRetained: true });
-  const previous = [...new Set([...servedLive, ...namedCards(committed)])].filter(file => !written.includes(file));
+  // What production serves stays for one more deploy, so every link already
+  // shared keeps an image. With the live manifest that is exactly its cards;
+  // offline, what the committed manifest named and kept last time. Cards this
+  // checkout generated but never deployed are not kept (they would only pile up).
+  const served = live ? namedCards(live) : namedCards(committed, { withRetained: true });
+  const previous = served.filter(file => !written.includes(file));
 
-  // A file production serves but this checkout does not have (the branch
-  // regenerated its cards since the last deploy) is written as a copy of the
-  // current card of its kind, so its URL keeps answering after the deploy.
-  let standIns = 0;
-  for (const file of servedLive) {
-    const target = path.join(PUBLIC_DIR, file);
-    const isDormantEconomy = file.startsWith('og-image-economia-') && !economyIsPublished;
-    if (written.includes(file) || (fs.existsSync(target) && !isDormantEconomy)) continue;
-    fs.copyFileSync(path.join(PUBLIC_DIR, standIn(file, manifest, economyIsPublished)), target);
-    standIns += 1;
+  // Every retained name is rewritten as a copy of the current card of its kind
+  // (the brand card for the general and, while it is in preparation, the
+  // economy cards), never left with retired copy or an old figure (FRESH-05),
+  // and served with must-revalidate rather than as immutable (syncRetainedRoutes).
+  for (const file of previous) {
+    fs.copyFileSync(path.join(PUBLIC_DIR, standIn(file, manifest, economyIsPublished)), path.join(PUBLIC_DIR, file));
   }
+  syncRetainedRoutes(previous);
 
   manifest.size = renderedSize;
   // Not read by the site: the names kept from the previous deploy, so an
@@ -491,7 +546,7 @@ async function main() {
 
   const removed = pruneOrphans([...written, ...previous, ...LOCALES.map(locale => `og-image-${locale}.png`)]);
   console.log(`${written.length} cards written (${renderedSize?.width}×${renderedSize?.height}), ${previous.length} from the previous deploy kept`
-    + ` (${live ? 'live manifest' : 'committed manifest'}; ${standIns} written as stand-ins), ${removed} orphaned files removed`);
+    + ` as stand-ins (${live ? 'live manifest' : 'committed manifest'}), ${removed} orphaned files removed`);
 }
 
 main().catch(error => {

@@ -34,27 +34,51 @@
       }
     },
     {
+      "route": "/og-image-economia-en-a63fc5ab.png",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "route": "/og-image-economia-pt-4e3d3bf7.png",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "route": "/og-image-en-791edd88.png",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "route": "/og-image-liga-en-d1b51d8a.png",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "route": "/og-image-liga-pt-3c459aab.png",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "route": "/og-image-pt-98c61d68.png",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
       "route": "/og-image-*.png",
       "headers": {
         "cache-control": "public, max-age=31536000, immutable"
       }
     },
     {
-      "route": "/data/population/manifest.json",
-      "headers": {
-        "cache-control": "public, max-age=300, must-revalidate"
-      }
-    },
-    {
       "route": "/data/population/v*",
       "headers": {
         "cache-control": "public, max-age=31536000, immutable"
-      }
-    },
-    {
-      "route": "/data/population/*",
-      "headers": {
-        "cache-control": "public, max-age=86400"
       }
     },
     {
@@ -412,6 +436,211 @@
     {
       "route": "/desporto/liga/2025-26",
       "redirect": "/pt/desporto/liga/2025-26/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/academico-viseu",
+      "redirect": "/pt/desporto/liga/academico-viseu/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/alverca",
+      "redirect": "/pt/desporto/liga/alverca/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/arouca",
+      "redirect": "/pt/desporto/liga/arouca/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/benfica",
+      "redirect": "/pt/desporto/liga/benfica/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/braga",
+      "redirect": "/pt/desporto/liga/braga/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/casa-pia",
+      "redirect": "/pt/desporto/liga/casa-pia/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/estoril",
+      "redirect": "/pt/desporto/liga/estoril/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/estrela",
+      "redirect": "/pt/desporto/liga/estrela/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/famalicao",
+      "redirect": "/pt/desporto/liga/famalicao/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/gil-vicente",
+      "redirect": "/pt/desporto/liga/gil-vicente/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/maritimo",
+      "redirect": "/pt/desporto/liga/maritimo/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/moreirense",
+      "redirect": "/pt/desporto/liga/moreirense/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/nacional",
+      "redirect": "/pt/desporto/liga/nacional/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/porto",
+      "redirect": "/pt/desporto/liga/porto/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/rio-ave",
+      "redirect": "/pt/desporto/liga/rio-ave/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/santa-clara",
+      "redirect": "/pt/desporto/liga/santa-clara/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/sporting",
+      "redirect": "/pt/desporto/liga/sporting/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/vitoria",
+      "redirect": "/pt/desporto/liga/vitoria/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga2",
+      "redirect": "/pt/desporto/liga2/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/acores",
+      "redirect": "/pt/populacao/regiao/acores/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/aveiro",
+      "redirect": "/pt/populacao/regiao/aveiro/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/beja",
+      "redirect": "/pt/populacao/regiao/beja/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/braga",
+      "redirect": "/pt/populacao/regiao/braga/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/braganca",
+      "redirect": "/pt/populacao/regiao/braganca/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/castelo-branco",
+      "redirect": "/pt/populacao/regiao/castelo-branco/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/coimbra",
+      "redirect": "/pt/populacao/regiao/coimbra/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/evora",
+      "redirect": "/pt/populacao/regiao/evora/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/faro",
+      "redirect": "/pt/populacao/regiao/faro/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/guarda",
+      "redirect": "/pt/populacao/regiao/guarda/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/leiria",
+      "redirect": "/pt/populacao/regiao/leiria/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/lisboa",
+      "redirect": "/pt/populacao/regiao/lisboa/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/madeira",
+      "redirect": "/pt/populacao/regiao/madeira/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/portalegre",
+      "redirect": "/pt/populacao/regiao/portalegre/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/porto",
+      "redirect": "/pt/populacao/regiao/porto/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/santarem",
+      "redirect": "/pt/populacao/regiao/santarem/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/setubal",
+      "redirect": "/pt/populacao/regiao/setubal/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/viana-do-castelo",
+      "redirect": "/pt/populacao/regiao/viana-do-castelo/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/vila-real",
+      "redirect": "/pt/populacao/regiao/vila-real/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/regiao/viseu",
+      "redirect": "/pt/populacao/regiao/viseu/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/miniatura",
+      "redirect": "/pt/populacao/miniatura/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/consulta",
+      "redirect": "/pt/populacao/consulta/",
       "statusCode": 301
     },
     {

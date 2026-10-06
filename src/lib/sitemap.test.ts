@@ -8,6 +8,7 @@ import { SITE_LOCALES } from '@/lib/metadata';
 import { ligaTeamSlugs } from '@/lib/config/football';
 import { loadLigaData } from '@/lib/utils/football-data-loader';
 import { POPULATION_PUBLISHED } from '@/lib/config/population';
+import { COPY_REVISED } from '@/lib/sitemap-dates';
 
 const APP = path.join(process.cwd(), 'src/app/[locale]');
 
@@ -85,17 +86,19 @@ describe('sitemap', () => {
   });
 
   // FR-06 / SP-M5: content dates, never the build's clock.
-  it('dates live pages by their data and gives undated prose no lastmod', async () => {
+  it('dates live pages by their data and prose by its revision, never by the build', async () => {
     const byUrl = new Map(entries.map(entry => [entry.url, entry]));
     const { prediction } = await loadLigaData();
     const ligaDay = prediction!.timestamp.slice(0, 10);
     expect(new Date(byUrl.get(url('pt', '/desporto/liga'))!.lastModified!).toISOString().slice(0, 10)).toBe(ligaDay);
     expect(new Date(byUrl.get(url('en', '/populacao'))!.lastModified!).toISOString().slice(0, 10)).toBe(POPULATION_PUBLISHED);
-    for (const prose of ['/sobre', '/privacidade', '/metodologia']) {
-      expect(byUrl.get(url('pt', prose))?.lastModified, prose).toBeUndefined();
+    // FRESH-07: prose pages carry the date their copy was revised (src/lib/sitemap-dates.ts).
+    for (const prose of ['/privacidade', '/metodologia']) {
+      expect(new Date(byUrl.get(url('pt', prose))!.lastModified!).toISOString().slice(0, 10), prose).toBe(COPY_REVISED[prose]);
     }
     const today = new Date().toISOString().slice(0, 10);
-    const stamped = entries.filter(entry => entry.lastModified && new Date(entry.lastModified).toISOString().slice(0, 10) === today && today !== ligaDay && today !== POPULATION_PUBLISHED);
+    const known = new Set([ligaDay, POPULATION_PUBLISHED, ...Object.values(COPY_REVISED)]);
+    const stamped = entries.filter(entry => entry.lastModified && new Date(entry.lastModified).toISOString().slice(0, 10) === today && !known.has(today));
     expect(stamped.map(entry => entry.url)).toEqual([]);
   });
 

@@ -132,6 +132,30 @@ export function formatDate(isoDate, locale = 'pt') {
   return locale === 'pt' ? `${day} de ${name} de ${year}` : `${day} ${name} ${year}`;
 }
 
+const SHORT_MONTHS = {
+  pt: ['jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.'],
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
+};
+
+/**
+ * The calendar day of a timestamp in Lisbon ("2026-09-25T23:30:00Z" is the
+ * 26th there in summer), or a plain YYYY-MM-DD as given.
+ */
+export function lisbonDay(isoDateOrTimestamp) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(isoDateOrTimestamp)) return isoDateOrTimestamp;
+  const date = new Date(isoDateOrTimestamp);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+}
+
+/** Short date for a card footer: "25 set. 2026", "25 Sept 2026". */
+export function formatShortDate(isoDateOrTimestamp, locale = 'pt') {
+  const day = lisbonDay(isoDateOrTimestamp);
+  if (!day) return null;
+  const [year, month, date] = day.split('-').map(Number);
+  return `${date} ${(SHORT_MONTHS[locale] ?? SHORT_MONTHS.pt)[month - 1]} ${year}`;
+}
+
 /** "2026Q2" as the site writes it: 2026 T2 in Portuguese, 2026 Q2 in English. */
 export function formatQuarter(quarter, locale = 'pt') {
   const match = /^(\d{4})Q([1-4])$/.exec(quarter ?? '');

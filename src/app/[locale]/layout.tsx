@@ -8,7 +8,8 @@ import { PostHogProvider } from '../providers';
 import '../globals.css';
 import { fontVariables } from '../fonts';
 import type { Metadata } from 'next';
-import { createPageMetadata } from '@/lib/metadata';
+import { createPageMetadata, parishHeadScript } from '@/lib/metadata';
+import { POPULATION_DATA_PATH } from '@/lib/config/population';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { ArticleLocalesProvider, type ArticleLocales } from '@/lib/article-navigation';
 import { CLIENT_MESSAGE_KEYS, pickMessages } from '@/lib/i18n/client-messages';
@@ -91,6 +92,8 @@ export default async function RootLayout({
   return (
     <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
+        {/* Parish pages only: preloads the parish data and writes its canonical before hydration (inert elsewhere). */}
+        <script dangerouslySetInnerHTML={{ __html: parishHeadScript(POPULATION_DATA_PATH) }} />
         {/* The site and its publisher, for search engines (schema.org WebSite + Organization). */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(siteJsonLd(locale)) }} />
         <PostHogProvider>

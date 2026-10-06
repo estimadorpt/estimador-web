@@ -16,6 +16,7 @@ import { PARLIAMENTARY_2025, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/c
 import { loadPopulationPlaces } from '@/lib/utils/population-data-loader'
 import { POPULATION_PUBLISHED, POPULATION_ROUTES } from '@/lib/config/population'
 import { regionSlug } from '@/lib/population/places'
+import { COPY_REVISED, newestDate, sitemapDay } from '@/lib/sitemap-dates'
 
 export const dynamic = 'force-static'
 
@@ -78,8 +79,10 @@ const HIDDEN_ROUTES = new Set([
 const ECONOMY_ROUTES = ['/economia', '/economia/metodologia']
 
 /**
- * Frozen pages: dated by what they archive, not by the build. The elections
- * by their (last) election day; the 2025-26 Liga review by its generation.
+ * Frozen pages: dated by what they archive, not by the build: the elections
+ * by their (last) election day, unless their copy was revised since
+ * (COPY_REVISED). The 2025-26 Liga review is dated by its copy revision,
+ * which postdates its data (FRESH-07).
  */
 function archiveDates(): Record<string, Date> {
   const dates: Record<string, Date> = {
@@ -88,12 +91,6 @@ function archiveDates(): Record<string, Date> {
     '/eleicoes/legislativas/mapa': day(PARLIAMENTARY_2025.date),
     '/eleicoes/arquivo': day(PRESIDENTIAL_2026_SECOND_ROUND_DATE),
   }
-  try {
-    const review = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data/football/liga-2025-26/review.json'), 'utf8'))
-    if (typeof review.generated === 'string') dates['/desporto/liga/2025-26'] = day(review.generated)
-  } catch {
-    // no review file: the route falls back to the build date
-  }
   return dates
 }
 
@@ -101,34 +98,52 @@ const day = (iso: string) => new Date(`${iso.slice(0, 10)}T00:00:00Z`)
 const validDay = (iso: unknown): Date | undefined =>
   typeof iso === 'string' && /^\d{4}-\d{2}-\d{2}/.test(iso) ? day(iso) : undefined
 
+/** A date field from one of the season's JSON files, or undefined. */
+function ligaFileDate(file: string, field: string): Date | undefined {
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data/football/liga-2026-27', file), 'utf8'))
+    return validDay(data?.[field])
+  } catch {
+    return undefined
+  }
+}
+
 /**
- * When the content of a live page last changed, from the data it renders:
- * the newest Liga forecast's timestamp for the Liga pages, the release date
- * for the population pages, the player file's cut-off for the player pages.
- * A page with no such date (about, privacy, methodology prose) carries no
- * lastmod at all: a build timestamp on every deploy told crawlers that
- * unchanged pages had changed, which teaches them to ignore the field.
+ * When the content of a page last changed: the newest of the data it renders
+ * (the newest Liga forecast, the game's fixtures and the injury snapshot, the
+ * model-vs-market evaluation, the population release, the player file's
+ * cut-off) and the last revision of its prose (COPY_REVISED in
+ * src/lib/sitemap-dates.ts). A page with neither carries no lastmod at all: a
+ * build timestamp on every deploy told crawlers that unchanged pages had
+ * changed, which teaches them to ignore the field.
  */
 function contentDates({ liga, players }: { liga?: Date; players?: Date }): Record<string, Date | undefined> {
   const population = day(POPULATION_PUBLISHED)
-  const newest = (...dates: Array<Date | undefined>) => {
-    const known = dates.filter((date): date is Date => Boolean(date))
-    return known.length ? new Date(Math.max(...known.map(date => +date))) : undefined
-  }
-  return {
+  const fixtures = ligaFileDate('game_fixtures.json', 'generated_at')
+  const injuries = ligaFileDate('injuries.json', 'snapshot_date')
+  const scorecard = ligaFileDate('market_scorecard.json', 'generated_at')
+  const data: Record<string, Date | undefined> = {
     // The homepage shows the Liga forecast and the population release.
-    '/': newest(liga, population),
+    '/': newestDate(liga, population),
     '/desporto/liga': liga,
     '/desporto/liga/simulador': liga,
-    '/desporto/liga/jogo-previsoes': liga,
-    '/desporto/liga/dados': liga,
+    '/desporto/liga/jogo-previsoes': newestDate(liga, fixtures),
+    '/desporto/liga/dados': newestDate(liga, fixtures, injuries, scorecard),
     '/desporto/liga/jogadores': players,
+    '/desporto/liga/modelo': scorecard,
+    // /sobre lists every section's status (the forecast, the release).
+    '/sobre': newestDate(liga, population),
     '/populacao': population,
     '/populacao/misteriosa': population,
     '/populacao/qualidade': population,
     '/populacao/dados': population,
     '/populacao/metodologia': population,
   }
+  const routes = new Set([...Object.keys(data), ...Object.keys(COPY_REVISED)])
+  return Object.fromEntries([...routes].map(route => [
+    route,
+    newestDate(data[route], COPY_REVISED[route] ? sitemapDay(COPY_REVISED[route]) : undefined),
+  ]))
 }
 
 /** Whether a route is published in this locale's sitemap for this build. */
@@ -200,7 +215,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const ligaDate = validDay(prediction?.timestamp)
   const players = await loadLigaPlayersDetail().catch(() => null)
   const playersDate = validDay((players as { appearances_through?: unknown } | null)?.appearances_through)
-  const dated = { ...contentDates({ liga: ligaDate, players: playersDate }), ...archived }
+  const content = contentDates({ liga: ligaDate, players: playersDate })
+  const dated: Record<string, Date | undefined> = { ...content }
+  for (const [route, date] of Object.entries(archived)) dated[route] = newestDate(date, content[route])
   const withDate = <T extends { changeFrequency: Frequency; priority: number }>(hint: T, date: Date | undefined) =>
     date ? { ...hint, lastModified: date } : hint
 

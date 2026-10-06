@@ -3,15 +3,22 @@
  * The static export's budget, checked after every build (npm "postbuild", so
  * CI runs it before deploying).
  *
- * Azure Static Web Apps (Standard) takes at most 250 MB per environment and
- * refuses any single file over 100 MB; the free plan, 15,000 files. The
- * population release alone writes thousands of small files, so the site can
- * cross a limit without anyone noticing until a deploy fails. The budget here
- * sits under the host's limits, with room for the next release:
+ * Azure Static Web Apps takes at most 250 MB per environment on the Free
+ * plan (500 MB on Standard) and refuses any single file over 100 MB; it also
+ * caps the number of files (15,000 on Free). The population release alone writes
+ * thousands of small files, and every played Liga match keeps its page (about
+ * 0.4 MB for both locales), so the site can cross a limit without anyone
+ * noticing until a deploy fails (SP2-02: about 237 MB projected by May 2027).
+ * The budget sits under the Free plan's limits, with room for a deploy:
  *
- *   - the whole of out/          at most 230 MB
- *   - number of files            at most 14,000
+ *   - the whole of out/          at most 220 MB (warned from 190 MB)
+ *   - number of files            at most 13,000 (warned from 11,500)
  *   - any single file            at most 10 MB
+ *
+ * Each run also prints the size of the families that grow over a season (match
+ * and player pages, the Liga data, the population release), so the growth is
+ * visible in every CI log before it fails one. Moving to Standard: raise the
+ * limits with the variables below.
  *
  * Any breach fails with the numbers and the largest offenders. Override the
  * limits with EXPORT_BUDGET_MB, EXPORT_BUDGET_FILES and EXPORT_BUDGET_FILE_MB
@@ -29,11 +36,37 @@ import path from 'node:path';
 const MB = 1024 * 1024;
 const OUT = path.resolve(process.argv[2] ?? 'out');
 const LIMITS = {
-  totalBytes: Number(process.env.EXPORT_BUDGET_MB ?? 230) * MB,
-  files: Number(process.env.EXPORT_BUDGET_FILES ?? 14_000),
+  totalBytes: Number(process.env.EXPORT_BUDGET_MB ?? 220) * MB,
+  files: Number(process.env.EXPORT_BUDGET_FILES ?? 13_000),
   fileBytes: Number(process.env.EXPORT_BUDGET_FILE_MB ?? 10) * MB,
 };
 const META = { title: 70, description: 160 };
+/** Where a warning starts: early enough to plan a slimmer page or a plan change. */
+const WARN_SHARE = { totalBytes: 190 / 220, files: 11_500 / 13_000 };
+
+/** The families that grow during a season or with a release, by path prefix. */
+const FAMILIES = [
+  ['match pages', /^(pt|en)\/desporto\/liga\/jogo\//],
+  ['player pages', /^(pt|en)\/desporto\/liga\/jogador\//],
+  ['club pages', /^(pt|en)\/desporto\/liga\/[a-z-]+\/index\.(html|txt)$/],
+  ['Liga data', /^data\/football\//],
+  ['population data', /^data\/population\//],
+  ['geography', /^data\/population-geography\//],
+  ['scripts and styles', /^_next\//],
+];
+
+/** Bytes and files per family, the rest as "other". */
+function familyReport(files) {
+  const totals = new Map([...FAMILIES.map(([name]) => [name, { bytes: 0, files: 0 }]), ['other', { bytes: 0, files: 0 }]]);
+  for (const { file, bytes } of files) {
+    const relative = path.relative(OUT, file).split(path.sep).join('/');
+    const family = FAMILIES.find(([, pattern]) => pattern.test(relative))?.[0] ?? 'other';
+    const total = totals.get(family);
+    total.bytes += bytes;
+    total.files += 1;
+  }
+  return totals;
+}
 
 const mb = bytes => `${(bytes / MB).toFixed(1)} MB`;
 
@@ -81,6 +114,15 @@ function main() {
   for (const { file, bytes } of oversized) failures.push(`${path.relative(OUT, file)} is ${mb(bytes)}, over ${mb(LIMITS.fileBytes)}`);
 
   console.log(`export budget: ${files.length} files, ${mb(total)} (limits ${LIMITS.files} files, ${mb(LIMITS.totalBytes)}, ${mb(LIMITS.fileBytes)} per file)`);
+  for (const [name, family] of familyReport(files)) {
+    console.log(`  ${name.padEnd(20)} ${mb(family.bytes).padStart(9)}  ${String(family.files).padStart(6)} files`);
+  }
+  if (total > LIMITS.totalBytes * WARN_SHARE.totalBytes && total <= LIMITS.totalBytes) {
+    console.warn(`export budget: ${mb(total)} is close to the ${mb(LIMITS.totalBytes)} limit; slim the match or player pages, or plan the Standard plan`);
+  }
+  if (files.length > LIMITS.files * WARN_SHARE.files && files.length <= LIMITS.files) {
+    console.warn(`export budget: ${files.length} files is close to the ${LIMITS.files} limit`);
+  }
 
   const long = metaReport(files);
   if (long.length) {
