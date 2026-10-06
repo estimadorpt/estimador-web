@@ -10,7 +10,7 @@
  *   /metodologia                HUB_REVISED in metodologia/page.tsx
  *   /desporto/liga/metodologia  REVISED in desporto/liga/metodologia/page.tsx
  *   /eleicoes/metodologia       ELECTION_METHODOLOGY_REVISED (imported)
- *   /privacidade                "Última revisão" in src/content/privacy/pt.mdx
+ *   /privacidade                PRIVACY_REVISED in src/app/[locale]/privacidade/page.tsx
  *
  * The others print no date; their entry is the day their copy last changed.
  */

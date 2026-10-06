@@ -5,7 +5,6 @@ import sitemap from '@/app/sitemap';
 import { COPY_REVISED, newestDate } from './sitemap-dates';
 
 const read = (file: string) => fs.readFileSync(path.join(process.cwd(), file), 'utf8');
-const PT_MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
 let lastmod: Map<string, string | undefined>;
 
@@ -21,10 +20,7 @@ describe('sitemap revision dates (FRESH-07)', () => {
   it('matches the revision date each page prints', () => {
     expect(read('src/app/[locale]/metodologia/page.tsx')).toContain(`const HUB_REVISED = '${COPY_REVISED['/metodologia']}'`);
     expect(read('src/app/[locale]/desporto/liga/metodologia/page.tsx')).toContain(`const REVISED = '${COPY_REVISED['/desporto/liga/metodologia']}'`);
-    const privacy = /\*\*Última revisão: (\d{1,2}) de ([a-zç]+) de (\d{4})\*\*/.exec(read('src/content/privacy/pt.mdx'));
-    expect(privacy).not.toBeNull();
-    const [, day, month, year] = privacy!;
-    expect(`${year}-${String(PT_MONTHS.indexOf(month) + 1).padStart(2, '0')}-${day.padStart(2, '0')}`).toBe(COPY_REVISED['/privacidade']);
+    expect(read('src/app/[locale]/privacidade/page.tsx')).toContain(`const PRIVACY_REVISED = '${COPY_REVISED['/privacidade']}'`);
   });
 
   it('gives every prose page a lastmod no older than its copy', () => {
