@@ -20,10 +20,73 @@ The site serves v1.0.3, which supersedes v1.0.1 and v1.0.2 (v1.0.2 was never ser
   `CITATION.cff` has url, repository and date; DOI still waits for Zenodo).
 - **Resolved in v1.0.3:** 13 (`nuts2` is NUTS-2013, in ERRATA as resolved; the site
   still does not use the column).
-- **Settled:** 12 (day 0 is the publication date; v1.0.3's deck carries v1.0.1's calendar
-  day for day, so day 0 is 030857, not the 150912 of item 12) and 15 (public repository
-  copy).
-- **Open:** 10 (more national and district templates, v1.1 public layer).
+- **Settled:** 12 (v1.0.3's deck carries v1.0.1's calendar day for day, so day 0 is
+  030857, not the 150912 of item 12; since round 3 day 0 is not the publication date but
+  the site's launch day, `POPULATION_GAME_EPOCH` = 2026-10-06 in
+  `src/lib/config/population.ts`, which the sync writes into `game/index.json`) and 15
+  (public repository copy).
+- **Open:** 10 (more national and district templates, v1.1 public layer), and 17–24 below.
+
+## Asks after round 3 (2026-10-06)
+
+Found while fixing the trust pages (`/populacao/qualidade`, `/dados`, `/metodologia`)
+against the v1.0.3 package. Each says what the site does meanwhile.
+
+17. **Re-baseline the strata bands on the in-sample ruler, or drop them from
+    `scorecard.json`.** The pre-registered ranges (`band_reading`, `band_position`, the
+    strata notes, `in_band`, `coverage_in_band`) were set for an out-of-fit check with the
+    earlier engine; the errors the scorecard now reports are in-sample, so a band verdict
+    would compare two different rulers. *Web:* renders no band verdict at all (MR2-02) and
+    keeps `scorecard.json` verbatim.
+18. **Errata for three `metadata.json` descriptions.** `industry_section` and
+    `occupation_major` say "per-parish INE target", but the model card says both are
+    generated and only compared with INE's tables when scoring, not fitted; `freguesia`
+    says "6-digit", but eight Barcelos codes contain letters (0302FA to 0302FH);
+    `municipio_name` says "CAOP lookup", but the names are INE 2021's (CAOP 2024.1 where INE
+    has none). *Web:* rewords the four columns on `/dados` (`DESCRIPTION_OVERRIDES` in
+    `src/components/population/data/dictionary.ts`); the downloaded file keeps the text.
+19. **`label_maps` for `activity_sector_code`, `education_level_coarse5` and `nuts2`**, and
+    reconcile doc 08, which gives sector 3 as CAE O–Q, with the data, where 3 is O–U without
+    division 95 (95 is in 4, by a crosstab of `industry_section` in the v1.0.3 microdata).
+    *Web:* supplies the three maps itself (`SITE_LABEL_MAPS`, same file) and says so.
+20. **Explain the INE-zero-cell mechanism.** About 22,000 people sit in a combination INE
+    publishes as zero for their parish (model card, "Rare combinations"); the card's causal
+    clause ("so the model has no cell for them") does not say how a person ends up there.
+    *Web:* reports the counts and attributes the clause to the model card without restating
+    it (`LIMITATIONS` in `src/components/population/quality/copy.ts`).
+21. **Say what the integer allocation is exact to, and why 762 parishes differ from
+    `census_population`** (the generated total runs from 119 people fewer to 30 more).
+    *Web:* quotes the two release columns and the gap (`GENERATED_VS_INE`, same file),
+    never a reason.
+22. **Re-date v1.0.3, or note the upload in the release text.** GitHub's `published_at` is
+    2026-10-06T00:01Z, while `CITATION.cff` and `release.json` say 2026-10-05. *Web:* keeps
+    the release's own date and adds GitHub's beside it in the version history on `/dados`
+    (`GITHUB_PUBLISHED`).
+23. **Reword the positioning sentence** the site quotes verbatim (`HONESTY.positioning`):
+    "todas as freguesias de Portugal" should read "as 3 092 freguesias dos Censos 2021
+    (CAOP 2021)", since Portugal has more parishes since the 2025 split (FRESH-11). *Web:*
+    keeps the quotation unchanged and words its own coverage lines that way.
+24. **Confirm whether `sex_age_single_interior` entered the v10 tilt.** The package calls
+    it a tilt-only key, which reads either way: fitted a little, or not at all. *Web:* says
+    single-year age is "not one of the 12 fitted person tables / 21 coverage tables", never
+    "unfitted" (decision 3 below).
+
+## Site decisions taken without the producer (round 3 owner calls)
+
+Where the audit left an owner call, the site took the conservative option. Each can be
+undone once the producer answers.
+
+1. **PRO2-04:** `/dados` does not show the producer's original column descriptions behind
+   a disclosure: they would re-expose the internal references (doc numbers, script paths,
+   rulings) that X-02 removed. The downloaded `metadata.json` keeps them (ask 18).
+2. **MR2-04:** the quality chart's statistic is named "all-cell" ("todas as células das 12
+   tabelas de pessoas") from the model card's own wording, without the producer confirming
+   it.
+3. **Single-year age** is described as "not one of the 12 fitted person tables / 21
+   coverage tables", not "unfitted", because the `sex_age_single_interior` tilt-only key is
+   ambiguous (ask 24).
+4. **H1:** the band box on `/populacao/qualidade` was removed outright rather than
+   reworded (ask 17).
 
 ## Contract and bundle
 
