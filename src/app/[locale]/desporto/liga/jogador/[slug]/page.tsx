@@ -30,8 +30,6 @@ import { currentAbsences } from "@/lib/football-injuries";
 import { formatDecimal } from "@/lib/football-format";
 import { setRequestLocale } from '@/i18n/request-locale';
 
-const SITE = "https://estimador.pt";
-
 /* ------------------------------------------------------- position metric */
 
 /**
@@ -109,7 +107,6 @@ export async function generateMetadata({
           locale,
           2,
         )} goals per 90 minutes above a replacement-level player, with credible interval, minutes, goals and season-by-season history.`;
-  const url = `${SITE}/${locale}/desporto/liga/jogador/${slug}`;
 
   return createPageMetadata({
     locale,
@@ -206,11 +203,13 @@ export default async function PlayerPage({
 
         <div className="mt-10 pt-5 border-t border-stone-200 text-xs">
           <Link
-            href="/desporto/liga/metodologia"
+            href={pt
+              ? "/desporto/liga/metodologia#como-medimos-os-jogadores"
+              : "/desporto/liga/metodologia#how-do-we-measure-players"}
             locale={locale}
-            className="text-ink underline underline-offset-4"
+            className="inline-flex min-h-11 items-center text-ink underline underline-offset-4"
           >
-            {pt ? "Como funciona o modelo" : "How the model works"}
+            {pt ? "Como medimos os jogadores" : "How we measure players"}
           </Link>
         </div>
       </div>

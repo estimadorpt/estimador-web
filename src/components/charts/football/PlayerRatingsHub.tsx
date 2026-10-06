@@ -12,7 +12,8 @@ import type {
   GkChannels,
 } from "@/lib/utils/football-data-loader";
 import type { PlayerSkillData } from "@/components/charts/football/PlayerSkillRanking";
-import { countSeparated } from "@/lib/utils/player-ratings";
+import { countSeparated, withPublishedGoalsRanks } from "@/lib/utils/player-ratings";
+import { playerDataCutoffLabel } from "@/lib/utils/player-pages";
 import type {
   PositionalRow,
   RatingEntry,
@@ -44,6 +45,8 @@ interface PlayerRatingsHubProps {
   gkChannels?: GkChannels | null;
   playerSlugs?: Record<string, string>;
   locale?: string;
+  /** Last appearance in the goals and contribution fits (players_detail.json). */
+  dataThrough?: string | null;
 }
 
 /** Convert a goals-SAR row into the shared rating shape. */
@@ -81,6 +84,7 @@ export function PlayerRatingsHub({
   playerSlugs,
   locale = "pt",
   showHeading = true,
+  dataThrough = null,
 }: PlayerRatingsHubProps & { showHeading?: boolean }) {
   const pt = locale !== "en";
   const nf = (v: number, d = 2) =>
@@ -112,7 +116,7 @@ export function PlayerRatingsHub({
       pt ? `Ver a lista completa (${n})` : `Show the full list (${n})`,
     showLess: pt ? "Mostrar menos" : "Show less",
     movement: pt ? "vs golos" : "vs goals",
-    newEntry: pt ? "novo" : "new",
+    newEntry: pt ? "fora da lista de finalização" : "not in the finishing list",
     playerPage: pt ? "Página do jogador" : "Player page",
     openPlayer: (name: string) =>
       pt ? `Abrir a página de ${name}` : `Open ${name}'s page`,
@@ -140,6 +144,17 @@ export function PlayerRatingsHub({
   const goalsRankByPlayer = Object.fromEntries(
     finisherRows.map((p) => [p.player, p.rank]),
   );
+  // The goals and contribution fits stop at the same appearance date; the
+  // label goes next to each of them (audit F-H6). The contested and
+  // goalkeeper feeds carry their own season labels.
+  const cutoff = playerDataCutoffLabel(
+    dataThrough,
+    finishers?.generated_from?.seasons ?? null,
+    locale,
+  );
+  const methodologyHref = pt
+    ? "/desporto/liga/metodologia#como-medimos-os-jogadores"
+    : "/desporto/liga/metodologia#how-do-we-measure-players";
 
   // How many keepers the model actually told apart from the average. Zero is
   // the answer today, and it is the headline of that section.
@@ -226,12 +241,42 @@ export function PlayerRatingsHub({
           ? `mínimo ${int(m.minMinutes)} minutos`
           : `${int(m.minMinutes)}-minute minimum`,
       );
-    if (m.maxRhat !== null) bits.push(`r̂ máx ${nf(m.maxRhat, 3)}`);
-    if (m.divergences !== null)
-      bits.push(
-        pt ? `${int(m.divergences)} divergências` : `${int(m.divergences)} divergences`,
-      );
     return bits.join(" · ");
+  };
+
+  /**
+   * The fit's convergence checks, behind a disclosure with a gloss (audit
+   * X-07): r̂ and divergences are MCMC diagnostics most readers cannot read.
+   */
+  const Diagnostics = ({
+    maxRhat,
+    divergences,
+  }: {
+    maxRhat: number | null | undefined;
+    divergences: number | null | undefined;
+  }) => {
+    if (maxRhat == null && divergences == null) return null;
+    const bits = [
+      maxRhat != null ? (pt ? `r̂ máximo ${nf(maxRhat, 3)}` : `max r̂ ${nf(maxRhat, 3)}`) : null,
+      divergences != null
+        ? pt
+          ? `${int(divergences)} divergências`
+          : `${int(divergences)} divergences`
+        : null,
+    ].filter(Boolean);
+    return (
+      <details className="mt-2 max-w-3xl text-[11px] text-stone-500">
+        <summary className="inline-flex min-h-11 cursor-pointer items-center underline underline-offset-2 hover:text-stone-800">
+          {pt ? "Verificações técnicas do ajuste" : "Technical checks on the fit"}
+        </summary>
+        <p className="leading-relaxed">
+          {bits.join(" · ")}.{" "}
+          {pt
+            ? "O r̂ (R-hat) compara as várias cadeias do algoritmo: perto de 1 quer dizer que concordam. Zero divergências quer dizer que o algoritmo não encontrou zonas que não conseguiu explorar. Os dois juntos dizem que o ajuste convergiu; não dizem que o modelo está certo."
+            : "R-hat compares the algorithm's chains: close to 1 means they agree. Zero divergences means the algorithm met no regions it could not explore. Together they say the fit converged; they do not say the model is right."}
+        </p>
+      </details>
+    );
   };
 
   /**
@@ -249,11 +294,12 @@ export function PlayerRatingsHub({
     const line = metaLine(block);
     return (
       <div className="mt-3 max-w-3xl">
-        <p className="text-[11px] text-stone-400 leading-relaxed">
+        <p className="text-[11px] text-stone-500 leading-relaxed">
           {caveat}
           {block.meta.note ? ` ${block.meta.note}` : ""}
           {line ? ` ${line}.` : ""}
         </p>
+        <Diagnostics maxRhat={block.meta.maxRhat} divergences={block.meta.divergences} />
         {/* The model's own caveats, verbatim. They are written by whoever
             fitted it and are more specific than anything this page could
             say on its behalf. */}
@@ -298,6 +344,7 @@ export function PlayerRatingsHub({
             ? "O teste que esta página existe para passar: se uma posição inteira cai praticamente no mesmo valor, a métrica não a está a medir. Vale para o universo completo do modelo, não só para os jogadores listados acima."
             : "The test this page exists to pass: if a whole position collapses onto practically one value, the metric is not measuring it. This covers the model's full universe, not only the players listed above."}
         </p>
+        <div className="overflow-x-auto" role="region" tabIndex={0} aria-label={pt ? "A distribuição por posição" : "The distribution by position"}>
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-stone-300 text-left">
@@ -361,6 +408,7 @@ export function PlayerRatingsHub({
             })}
           </tbody>
         </table>
+        </div>
       </div>
     );
   };
@@ -418,16 +466,13 @@ export function PlayerRatingsHub({
             ? "Não existe forma honesta de pôr um guarda-redes e um ponta de lança na mesma tabela. São trabalhos diferentes, medidos por dados diferentes, e qualquer número único que os junte está a dizer sobretudo em que posição joga cada um."
             : "There is no honest way to put a goalkeeper and a centre-forward in the same table. They do different jobs, measured by different data, and any single number that merges them is mostly reporting what position each player occupies."}
         </p>
-        <p className="text-sm text-stone-600 leading-relaxed mb-4">
-          {pt
-            ? "Durante meses este site publicou exatamente esse erro. O ranking de jogadores media golos por 90 minutos acima de um substituto — uma boa métrica, mas de finalização — e apresentava-o como se fosse um ranking da Liga. Ao verificarmos a distribuição por posição, o problema era evidente: todos os guarda-redes do modelo recebiam exatamente o mesmo valor, porque o modelo não tinha nada a dizer sobre eles. Não estava a medi-los mal: não os estava a medir de todo."
-            : "For months this site published exactly that mistake. The player ranking measured goals per 90 minutes above a replacement player — a good metric, but a finishing one — and presented it as a league ranking. Checking the distribution by position made the problem obvious: every goalkeeper in the model received an identical value, because the model had nothing to say about them. It was not measuring them badly; it was not measuring them at all."}
-        </p>
-        <p className="text-sm text-stone-600 leading-relaxed">
-          {pt
-            ? "A correção não é um número melhor. É admitir que são precisos vários, cada um com a sua escala, o seu intervalo de credibilidade e a sua amostra — e que comparar valores entre eles não faz sentido. Um 0,20 de finalização e um 0,20 de guarda-redes não são a mesma coisa."
-            : "The fix is not a better number. It is admitting that several are needed, each with its own scale, its own credible interval and its own sample — and that comparing values across them is meaningless. A 0.20 in finishing and a 0.20 in goalkeeping are not the same thing."}
-        </p>
+        {cutoff && (
+          <p className="text-sm text-stone-600 leading-relaxed">
+            {pt
+              ? `${cutoff}: finalização e contribuição ainda não incluem os jogos de 2026-27. A posse disputada e os guarda-redes dizem as épocas que cobrem em cada secção.`
+              : `${cutoff}: finishing and contribution do not include 2026-27 matches yet. Contested possession and the goalkeeper axes state the seasons they cover in their own sections.`}
+          </p>
+        )}
 
         <div className="mt-6 border-l-2 border-stone-300 pl-4 py-1">
           <p className="text-xs text-stone-500 leading-relaxed">
@@ -442,8 +487,8 @@ export function PlayerRatingsHub({
             {inconclusive.length > 0 && (
               <span>
                 {pt
-                  ? ` Modelo corrido mas sem ranking possível: ${inconclusive.join(", ")}.`
-                  : ` Model run but no ranking possible: ${inconclusive.join(", ")}.`}
+                  ? ` Sem lista, porque o modelo ainda não distingue os jogadores uns dos outros: ${inconclusive.join(", ")}.`
+                  : ` No list, because the model cannot yet tell the players apart: ${inconclusive.join(", ")}.`}
               </span>
             )}
             {missing.length > 0 && (
@@ -465,9 +510,10 @@ export function PlayerRatingsHub({
           </h2>
           <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
             {pt
-              ? "Golos por 90 minutos acima de um jogador de nível de substituição, depois de descontar minutos, adversário e fator casa. Os golos são limitados antes da conta, para que uma tarde de quatro golos não passe por talento permanente."
-              : "Goals per 90 minutes above a replacement-level player, after adjusting for minutes, opponent and home advantage. Goals are capped before the estimate, so one four-goal afternoon is not read as permanent skill."}
+              ? "Golos por 90 minutos acima de um jogador de nível de substituição (SAR, do inglês skill above replacement), depois de descontar minutos, adversário e fator casa. Os golos são limitados antes da conta, para que uma tarde de quatro golos não passe por talento permanente."
+              : "Goals per 90 minutes above a replacement-level player (SAR, skill above replacement), after adjusting for minutes, opponent and home advantage. Goals are capped before the estimate, so one four-goal afternoon is not read as permanent skill."}
           </p>
+          {cutoff && <p className="text-xs text-stone-500 mb-2">{cutoff}</p>}
           <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-5 max-w-3xl leading-relaxed">
             {pt
               ? `O que esta lista não é: um ranking da Liga. Os ${int(
@@ -510,7 +556,7 @@ export function PlayerRatingsHub({
             ]}
           />
 
-          <p className="text-[11px] text-stone-400 mt-3 leading-relaxed max-w-3xl">
+          <p className="text-[11px] text-stone-500 mt-3 leading-relaxed max-w-3xl">
             {pt
               ? `Top 10 de ${int(finisherRows.length)} publicados. Mínimo de ${int(
                   finishers.generated_from.min_minutes,
@@ -522,16 +568,12 @@ export function PlayerRatingsHub({
                 )}-minute minimum; fitted on ${int(
                   finishers.generated_from.n_observations,
                 )} individual appearances since ${finishers.generated_from.seasons[0]}`}
-            {finishers.generated_from.max_rhat !== undefined
-              ? ` · r̂ máx ${nf(finishers.generated_from.max_rhat, 3)}`
-              : ""}
-            {finishers.generated_from.divergences !== undefined
-              ? ` · ${int(finishers.generated_from.divergences)} ${
-                  pt ? "divergências" : "divergences"
-                }`
-              : ""}
             .
           </p>
+          <Diagnostics
+            maxRhat={finishers.generated_from.max_rhat}
+            divergences={finishers.generated_from.divergences}
+          />
 
           <Link
             href="/desporto/liga"
@@ -557,12 +599,13 @@ export function PlayerRatingsHub({
           </p>
           <p className="text-xs text-stone-500 mb-5 max-w-3xl leading-relaxed">
             {pt
-              ? "A coluna «vs golos» mostra quantas posições cada jogador sobe ou desce face ao ranking só de golos. É aí que está a história: quem o número antigo subestimava."
-              : "The “vs goals” column shows how many places each player moves against the goals-only ranking. That is where the story is: who the old number was underrating."}
+              ? `A coluna «vs golos» (em ecrãs largos) mostra quantas posições cada jogador sobe ou desce face à lista de finalização publicada acima, com ${int(finisherRows.length)} nomes; «—» quer dizer que não está nessa lista. É aí que está a história: quem o número só de golos subestimava.`
+              : `The “vs goals” column (on wide screens) shows how many places each player moves against the finishing list published above, with ${int(finisherRows.length)} names; “—” means he is not on that list. That is where the story is: who the goals-only number was underrating.`}
           </p>
+          {cutoff && <p className="text-xs text-stone-500 mb-2">{cutoff}</p>}
 
           <PlayerRatingList
-            entries={contrib.players}
+            entries={withPublishedGoalsRanks(contrib.players, goalsRankByPlayer)}
             locale={locale}
             metricHeader={
               pt
@@ -744,7 +787,7 @@ export function PlayerRatingsHub({
               </p>
               <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-5 max-w-3xl leading-relaxed">
                 {pt
-                  ? "Leia os intervalos antes dos valores. Colegas de equipa que jogam sempre juntos são difíceis de separar, e num campeonato de 34 jornadas os intervalos são largos. Diferenças pequenas entre jogadores desta lista não são diferenças."
+                  ? "Lê os intervalos antes dos valores. Colegas de equipa que jogam sempre juntos são difíceis de separar, e num campeonato de 34 jornadas os intervalos são largos. Diferenças pequenas entre jogadores desta lista não são diferenças."
                   : "Read the intervals before the values. Team-mates who always play together are hard to tell apart, and in a 34-match league the intervals are wide. Small differences between players on this list are not differences."}
               </p>
 
@@ -850,17 +893,38 @@ export function PlayerRatingsHub({
       <section className="border-t border-stone-200 pt-6 max-w-3xl">
         <p className="text-xs text-stone-500 leading-relaxed">
           {pt
-            ? "Cada métrica tem a sua escala. Não some, não compare nem faça médias de valores de secções diferentes: um guarda-redes e um avançado não estão a ser medidos na mesma unidade, e ordená-los juntos era exatamente o erro que esta página existe para corrigir."
+            ? "Cada métrica tem a sua escala. Não somes, não compares nem faças médias de valores de secções diferentes: um guarda-redes e um avançado não estão a ser medidos na mesma unidade, e ordená-los juntos era exatamente o erro que esta página existe para corrigir."
             : "Each metric has its own scale. Do not add, compare or average values across sections: a goalkeeper and a forward are not measured in the same unit, and ranking them together was exactly the mistake this page exists to correct."}
         </p>
         <Link
-          href="/desporto/liga/metodologia"
+          href={methodologyHref}
           locale={locale}
-          className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-stone-500 hover:text-stone-900 underline underline-offset-2"
+          className="mt-3 inline-flex min-h-11 items-center gap-1 text-xs font-medium text-stone-600 hover:text-stone-900 underline underline-offset-2"
         >
-          {pt ? "Como funciona o modelo" : "How the model works"}
-          <ArrowRight className="w-3 h-3" />
+          {pt ? "Como medimos os jogadores" : "How we measure players"}
+          <ArrowRight aria-hidden="true" className="w-3 h-3" />
         </Link>
+
+        {/* The correction history, dated and out of the way (audit CL-M2):
+            a reader who chose "Jogadores" came for players, not for the
+            story of a past mistake. */}
+        <details className="mt-6 rounded-2xl border border-line bg-cream px-4 py-1 text-sm">
+          <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-stone-800">
+            {pt ? "O que mudou nesta página (12 de agosto de 2026)" : "What changed on this page (12 August 2026)"}
+          </summary>
+          <div className="space-y-3 pb-4 text-stone-600 leading-relaxed">
+            <p>
+              {pt
+                ? "Até 12 de agosto de 2026, este site publicava um único ranking de jogadores. Media golos por 90 minutos acima de um substituto — uma boa métrica, mas de finalização — e apresentava-o como se fosse um ranking da Liga. Ao verificarmos a distribuição por posição, o problema era evidente: todos os guarda-redes do modelo recebiam exatamente o mesmo valor, porque o modelo não tinha nada a dizer sobre eles. Não estava a medi-los mal: não os estava a medir de todo."
+                : "Until 12 August 2026 this site published a single player ranking. It measured goals per 90 minutes above a replacement player — a good metric, but a finishing one — and presented it as a league ranking. Checking the distribution by position made the problem obvious: every goalkeeper in the model received an identical value, because the model had nothing to say about them. It was not measuring them badly; it was not measuring them at all."}
+            </p>
+            <p>
+              {pt
+                ? "A correção não foi um número melhor. Foi admitir que são precisos vários, cada um com a sua escala, o seu intervalo de credibilidade e a sua amostra — e que comparar valores entre eles não faz sentido. Um 0,20 de finalização e um 0,20 de guarda-redes não são a mesma coisa."
+                : "The fix was not a better number. It was admitting that several are needed, each with its own scale, its own credible interval and its own sample — and that comparing values across them is meaningless. A 0.20 in finishing and a 0.20 in goalkeeping are not the same thing."}
+            </p>
+          </div>
+        </details>
       </section>
     </div>
   );

@@ -10,7 +10,8 @@
     "liga": "Liga Portugal",
     "economics": "Economia",
     "economicsPreparing": "Economia · em preparação",
-    "population": "População"
+    "population": "População",
+    "game": "Contra o Modelo"
   },
   "common": {
     "methodology": "Metodologia"
@@ -432,7 +433,8 @@
     "season": "Época",
     "updated": "Atualizado",
     "viewScenarios": "Ver cenários",
-    "teamPageTitle": "{team} — Previsão Liga Portugal",
+    "teamPageTitle": "{team}: previsão da Liga Portugal",
+    "titleCalibrationCaveat": "Lê com cautela: no passado, o modelo subestimou quem liderava com 3 ou mais pontos de vantagem (deu-lhes 56% em média, e foram campeões em 74% dos casos).",
     "teamPageDescription": "Cenários de título e jogos decisivos para {team} na Liga Portugal {season}.",
     "scenariosTitle": "Cenários de vitória",
     "scenariosDescription": "Três percursos possíveis para o título, do mais provável ao menos provável. Cada cenário mostra o que precisa de acontecer — e o que os rivais têm de fazer.",

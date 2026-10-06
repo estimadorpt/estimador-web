@@ -11,6 +11,12 @@ import {
 import { positionCodeEn, positionCodePt } from "@/lib/i18n/football-labels";
 import { formatLongDate } from "@/lib/football-format";
 import {
+  formatShortDate,
+  playerDataCutoffLabel,
+  playerDataCutoffSentence,
+  sortAppearancesNewestFirst,
+} from "@/lib/utils/player-pages";
+import {
   goalsSarIsMeaningful,
   ratingDomain,
   ratingPct,
@@ -101,6 +107,8 @@ export interface PlayerDetailData {
     seasons?: string[];
   };
   skill_change_note?: string;
+  /** Last appearance date in the fit ("2026-05-16"); older feeds omit it. */
+  appearances_through?: string;
   n_players: number;
   players: PlayerDetailEntry[];
 }
@@ -180,6 +188,25 @@ export function PlayerProfile({
   const firstSeason = data.generated_from.seasons?.[0];
   const lastSeason =
     data.generated_from.seasons?.[data.generated_from.seasons.length - 1];
+  // Every number from the player fit stops at the fit's last appearance; the
+  // label sits next to each block, not only in the footer (audit F-H6).
+  const cutoffLabel = playerDataCutoffLabel(
+    data.appearances_through,
+    data.generated_from.seasons,
+    locale,
+  );
+  const cutoffSentence = playerDataCutoffSentence(
+    data.appearances_through,
+    data.generated_from.seasons,
+    locale,
+  );
+  const recent = sortAppearancesNewestFirst(player.recent);
+  // "em duas épocas", from this player's own season rows, never a typed count.
+  const nSeasons = seasons.length;
+  const seasonWords = pt
+    ? ["", "uma", "duas", "três", "quatro", "cinco"]
+    : ["", "one", "two", "three", "four", "five"];
+  const seasonCount = seasonWords[nSeasons] ?? String(nSeasons);
 
   /* ------------------------------------------------- position-aware metric */
 
@@ -220,7 +247,7 @@ export function PlayerProfile({
         ? `Quanto muda o que a equipa sofre consoante ${player.player} esteja ou não em campo, com encolhimento forte. Mede o contributo para o resultado, não desarmes contados.`
         : `How much what the team concedes changes depending on whether ${player.player} is on the pitch, heavily shrunk. It measures contribution to the outcome, not counted tackles.`,
       caveat: pt
-        ? "Colegas que jogam sempre juntos são difíceis de separar, e o campeonato tem 34 jornadas. Leia o intervalo antes do valor: diferenças pequenas entre defesas não são diferenças."
+        ? "Colegas que jogam sempre juntos são difíceis de separar, e o campeonato tem 34 jornadas. Lê o intervalo antes do valor: diferenças pequenas entre defesas não são diferenças."
         : "Team-mates who always play together are hard to tell apart, and the league is 34 matches long. Read the interval before the value: small differences between defenders are not differences.",
     },
     contrib: {
@@ -279,9 +306,13 @@ export function PlayerProfile({
       ? pt
         ? "Minutos e golos, época a época. A coluna de talento a marcar não aparece aqui: para esta posição não mede nada."
         : "Minutes and goals, season by season. The scoring-skill column is absent here: for this position it measures nothing."
-      : pt
-        ? "Os golos sobem e descem; a estimativa de talento quase não se mexe. É assim de propósito: o modelo só admite uma mudança de talento quando os dados a exigem, e em três épocas de Liga Portugal nunca exigiram."
-        : "Goals go up and down; the skill estimate barely moves. That is by design: the model only admits a change in skill when the data demand one, and across three Liga Portugal seasons they never have.",
+      : nSeasons > 1
+        ? pt
+          ? `Os golos sobem e descem; a estimativa de talento quase não se mexe. É assim de propósito: o modelo só admite uma mudança de talento quando os dados a exigem, e nas ${seasonCount} épocas deste jogador na Liga Portugal nunca exigiram.`
+          : `Goals go up and down; the skill estimate barely moves. That is by design: the model only admits a change in skill when the data demand one, and across this player's ${seasonCount} Liga Portugal seasons they never have.`
+        : pt
+          ? "Minutos, golos e a estimativa de talento na única época deste jogador nos dados. O modelo só admite uma mudança de talento quando os dados a exigem."
+          : "Minutes, goals and the skill estimate for this player's only season in the data. The model only admits a change in skill when the data demand one.",
     nullTitle: pt ? "Melhorou? Não dá para dizer" : "Did he improve? Can't say",
     nullBody: (c: PlayerSkillChange) => {
       // Ratio of noise to signal. It can be enormous when the delta is ~0,
@@ -296,14 +327,14 @@ export function PlayerProfile({
           : `${nf(ratio, ratio < 10 ? 1 : 0)} times larger`;
       return pt
         ? `Entre ${c.from_season} e ${c.to_season} a estimativa mudou ${
-            c.delta > 0 ? "+" : ""
-          }${nf(c.delta, 3)} — mas a margem de erro dessa diferença é ±${nf(
+            c.delta > 0 ? "+" : c.delta < 0 ? "−" : ""
+          }${nf(Math.abs(c.delta), 3)} — mas a margem de erro dessa diferença é ±${nf(
             c.delta_ref_sd,
             3,
           )}, ${size}. Ou seja: indistinguível de zero. Uma boa época de golos costuma ser variação natural, não talento novo.`
         : `Between ${c.from_season} and ${c.to_season} the estimate moved ${
-            c.delta > 0 ? "+" : ""
-          }${nf(c.delta, 3)} — but the margin of error on that difference is ±${nf(
+            c.delta > 0 ? "+" : c.delta < 0 ? "−" : ""
+          }${nf(Math.abs(c.delta), 3)} — but the margin of error on that difference is ±${nf(
             c.delta_ref_sd,
             3,
           )}, ${size}. In other words: indistinguishable from zero. A big goal season is usually natural variation, not new skill.`;
@@ -314,7 +345,7 @@ export function PlayerProfile({
     season: pt ? "Época" : "Season",
     club: pt ? "Clube" : "Club",
     skillCol: pt ? "Talento (com margem)" : "Skill (with margin)",
-    recentTitle: pt ? "Últimas partidas" : "Recent appearances",
+    recentTitle: pt ? "Últimas partidas registadas" : "Latest recorded appearances",
     recentNote: pt
       ? "Dados de jogo a jogo (SofaScore). A nota é a do fornecedor, não do modelo — o modelo só usa golos, minutos e adversário."
       : "Match-by-match data (SofaScore). The rating is the provider's, not the model's — the model only uses goals, minutes and opponent.",
@@ -355,7 +386,7 @@ export function PlayerProfile({
           ? `Intervalo de credibilidade ${nf(pr.meta.intervalPct, 0)}%`
           : `${nf(pr.meta.intervalPct, 0)}% credible interval`,
     posNoInterval: pt
-      ? "Este valor foi publicado sem intervalo de credibilidade, por isso não sabemos quão firme é. Leia-o com desconfiança."
+      ? "Este valor foi publicado sem intervalo de credibilidade, por isso não sabemos quão firme é. Lê-o com desconfiança."
       : "This value was published without a credible interval, so we do not know how firm it is. Read it with suspicion.",
     posOthers: pt ? "outros jogadores na mesma métrica" : "other players on the same metric",
     posRank: (r: number, n: number) =>
@@ -372,14 +403,18 @@ export function PlayerProfile({
           firstSeason ? ` desde ${firstSeason}` : ""
         }, com um mínimo de ${int(
           data.generated_from.min_minutes ?? 600,
-        )} minutos para entrar no ranking. Clube = o último clube do jogador nos dados (${firstSeason} a ${lastSeason}); transferências recentes podem não estar refletidas.`
+        )} minutos para entrar no ranking. Clube = plantel atual (${data.season}); a tabela época a época mostra onde jogou em cada época.${
+          cutoffSentence ? ` ${cutoffSentence}` : ""
+        }`
       : `Bayesian player model fitted on ${int(
           data.generated_from.n_observations ?? 0,
         )} individual appearances${
           firstSeason ? ` since ${firstSeason}` : ""
         }, with a ${int(
           data.generated_from.min_minutes ?? 600,
-        )}-minute minimum to qualify. Club = the player's most recent club in the data (${firstSeason} to ${lastSeason}); recent transfers may not be reflected.`,
+        )}-minute minimum to qualify. Club = current squad (${data.season}); the season-by-season table shows where he played each season.${
+          cutoffSentence ? ` ${cutoffSentence}` : ""
+        }`,
   };
 
   /**
@@ -390,9 +425,16 @@ export function PlayerProfile({
   const positionSection =
     pr && prEntry ? (
       <section className="mb-10">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">
           {posCopy[pr.kind].title}
         </h2>
+        {pr.meta.seasons.length > 0 && (
+          <p className="text-[11px] text-stone-500 mb-2">
+            {pt
+              ? `Épocas ${pr.meta.seasons[0]} a ${pr.meta.seasons[pr.meta.seasons.length - 1]}`
+              : `Seasons ${pr.meta.seasons[0]} to ${pr.meta.seasons[pr.meta.seasons.length - 1]}`}
+          </p>
+        )}
         <div className="flex items-baseline gap-2 mb-1 flex-wrap">
           <span className="text-4xl font-bold tabular-nums text-stone-900">
             {prEntry.value === null
@@ -601,9 +643,12 @@ export function PlayerProfile({
       {/* The goals-only metric — suppressed where it is degenerate */}
       {showGoalsSar && (
       <section className="mb-10">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">
           {t.metricTitle}
         </h2>
+        {cutoffLabel && (
+          <p className="text-[11px] text-stone-500 mb-2">{cutoffLabel}</p>
+        )}
         <div className="flex items-baseline gap-2 mb-1">
           <span className="text-4xl font-bold tabular-nums text-stone-900">
             {nf(sar)}
@@ -679,7 +724,15 @@ export function PlayerProfile({
 
       {/* Raw record. The two derived columns are goals-model outputs, so they
           go with it when it is suppressed. */}
-      <section className="mb-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-4 border-t border-stone-200 pt-5">
+      <section className="mb-10 border-t border-stone-200 pt-5">
+      {cutoffLabel && (
+        <p className="mb-3 text-[11px] text-stone-500">
+          {pt
+            ? `Minutos, jogos e golos${firstSeason && lastSeason ? ` de ${firstSeason} a ${lastSeason}` : ""} · ${cutoffLabel}`
+            : `Minutes, matches and goals${firstSeason && lastSeason ? ` from ${firstSeason} to ${lastSeason}` : ""} · ${cutoffLabel}`}
+        </p>
+      )}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-4">
         {[
           { label: t.minutes, value: int(player.minutes) },
           { label: t.matches, value: int(player.matches) },
@@ -716,6 +769,7 @@ export function PlayerProfile({
             </div>
           </div>
         ))}
+      </div>
       </section>
 
       {/* Trajectory — the flat skill line next to the noisy goal counts */}
@@ -827,17 +881,20 @@ export function PlayerProfile({
       )}
 
       {/* Recent appearances */}
-      {player.recent.length > 0 && (
+      {recent.length > 0 && (
         <section className="mb-10 border-t border-stone-200 pt-5">
-          <h2 className="text-2xl tracking-tight mb-3">{t.recentTitle}</h2>
+          <h2 className="text-2xl tracking-tight mb-1">{t.recentTitle}</h2>
+          {cutoffLabel && (
+            <p className="text-xs text-stone-500 mb-3">{cutoffLabel}</p>
+          )}
           <div className="divide-y divide-stone-100">
-            {player.recent.map((m, i) => (
+            {recent.map((m, i) => (
               <div
                 key={`${m.season}-${m.matchday}-${i}`}
                 className="flex items-center gap-3 py-2 text-sm"
               >
-                <span className="w-16 text-[11px] tabular-nums text-stone-400 flex-shrink-0">
-                  {m.date ?? `${m.season} J${m.matchday}`}
+                <span className="w-24 text-[11px] tabular-nums text-stone-500 flex-shrink-0">
+                  {formatShortDate(m.date, locale) ?? `${m.season} J${m.matchday}`}
                 </span>
                 <span className="flex-1 min-w-0 truncate text-stone-800">
                   {teamDisplayName(m.opponent)}{" "}

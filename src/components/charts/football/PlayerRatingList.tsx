@@ -99,25 +99,30 @@ export function PlayerRatingList({
 
   return (
     <div>
+      <p className="sm:hidden mb-1 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+        {metricHeader}
+      </p>
       {/* Column header */}
       <div className="flex items-center gap-2 mb-2 pb-2 border-b border-stone-200">
         <div className="w-6 flex-shrink-0" />
-        <div className="w-32 sm:w-52 flex-shrink-0 text-[11px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="w-24 sm:w-52 flex-shrink-0 text-[11px] font-bold uppercase tracking-wider text-stone-500">
           {labels.player}
         </div>
-        <div className="flex-1 text-[11px] font-bold uppercase tracking-wider text-stone-400">
-          {metricHeader}
+        {/* On a phone the bar column is too narrow for its name, which then
+            sits above the list instead (audit UXM-03). */}
+        <div className="flex-1 min-w-0 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+          <span className="hidden sm:inline">{metricHeader}</span>
         </div>
         {showMovement && (
-          <div className="w-10 flex-shrink-0 text-right text-[11px] font-bold uppercase tracking-wider text-stone-400 hidden sm:block">
+          <div className="w-10 flex-shrink-0 text-right text-[11px] font-bold uppercase tracking-wider text-stone-500 hidden sm:block">
             {labels.movement}
           </div>
         )}
-        <div className="w-20 sm:w-28 flex-shrink-0 text-right">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+        <div className="w-[4.5rem] sm:w-28 flex-shrink-0 text-right">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
             {valueHeader}
           </div>
-          <div className="text-[11px] uppercase tracking-wider text-stone-300 leading-tight">
+          <div className="text-[11px] uppercase tracking-wider text-stone-500 leading-tight">
             {labels.interval}
           </div>
         </div>
@@ -152,7 +157,7 @@ export function PlayerRatingList({
                     {e.rank ?? ""}
                   </div>
 
-                  <div className="w-32 sm:w-52 flex-shrink-0 min-w-0">
+                  <div className="w-24 sm:w-52 flex-shrink-0 min-w-0">
                     <div className="text-xs sm:text-sm font-semibold truncate text-stone-900">
                       {e.player}
                     </div>
@@ -171,26 +176,26 @@ export function PlayerRatingList({
                       )}
                       {e.team && (
                         <>
-                          <span className="text-[11px] text-stone-400 truncate sm:hidden">
+                          <span className="text-[11px] text-stone-500 truncate sm:hidden">
                             {ligaTeamShortNames[e.team] || e.team}
                           </span>
-                          <span className="text-[11px] text-stone-400 truncate hidden sm:inline">
+                          <span className="text-[11px] text-stone-500 truncate hidden sm:inline">
                             {teamDisplayName(e.team)}
                           </span>
                         </>
                       )}
                       {e.position && (
-                        <span className="text-[11px] text-stone-300 hidden sm:inline">
+                        <span className="text-[11px] text-stone-500 hidden sm:inline">
                           · {posLabel(e.position)}
                         </span>
                       )}
                       {e.minutes !== null && (
-                        <span className="text-[11px] text-stone-300">
+                        <span className="text-[11px] text-stone-500 hidden sm:inline">
                           · {int(e.minutes)} min
                         </span>
                       )}
                       {e.minutes === null && e.shots !== null && (
-                        <span className="text-[11px] text-stone-300">
+                        <span className="text-[11px] text-stone-500 hidden sm:inline">
                           · {int(e.shots)} {pt ? "remates" : "shots"}
                         </span>
                       )}
@@ -199,7 +204,7 @@ export function PlayerRatingList({
 
                   {/* Diverging bar from the zero reference, with the 94%
                       credible interval drawn on top. */}
-                  <div className="flex-1 h-6 relative">
+                  <div className="flex-1 min-w-0 h-6 relative">
                     <div className="absolute inset-y-0 left-0 right-0 bg-stone-50" />
                     <div
                       className="absolute inset-y-0 w-px"
@@ -241,15 +246,16 @@ export function PlayerRatingList({
                   {showMovement && (
                     <div className="w-10 flex-shrink-0 text-right hidden sm:block">
                       {move === null ? (
-                        <span className="text-[11px] text-stone-300">
-                          {labels.newEntry}
+                        <span className="text-[11px] text-stone-500" title={labels.newEntry}>
+                          <span aria-hidden="true">—</span>
+                          <span className="sr-only">{labels.newEntry}</span>
                         </span>
                       ) : move === 0 ? (
-                        <span className="text-[11px] text-stone-300">=</span>
+                        <span className="text-[11px] text-stone-500">=</span>
                       ) : (
                         <span
                           className={`text-[11px] font-semibold tabular-nums ${
-                            move > 0 ? "text-emerald-700" : "text-stone-400"
+                            move > 0 ? "text-emerald-700" : "text-stone-500"
                           }`}
                         >
                           {move > 0 ? "▲" : "▼"}
@@ -262,11 +268,11 @@ export function PlayerRatingList({
                   {/* Value with its interval underneath. The interval is not
                       hidden behind a tap: a rating without uncertainty is the
                       thing this site exists not to publish. */}
-                  <div className="w-20 sm:w-28 flex-shrink-0 text-right">
+                  <div className="w-[4.5rem] sm:w-28 flex-shrink-0 text-right">
                     <span className="text-xs sm:text-sm font-bold tabular-nums text-stone-900">
                       {e.value === null ? "—" : signed(e.value)}
                     </span>
-                    <div className="text-[11px] sm:text-[11px] tabular-nums text-stone-400 leading-tight">
+                    <div className="text-[11px] tabular-nums text-stone-500 leading-tight">
                       {hasInterval ? (
                         `${signed(e.lo!)} … ${signed(e.hi!)}`
                       ) : (
@@ -281,7 +287,7 @@ export function PlayerRatingList({
                     href={`/desporto/liga/jogador/${slug}`}
                     locale={locale}
                     aria-label={labels.openPlayer(e.player)}
-                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-300 hover:text-stone-800 hover:bg-stone-100 transition-colors"
+                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
@@ -339,7 +345,8 @@ export function PlayerRatingList({
         <button
           type="button"
           onClick={() => setShowAll(!showAll)}
-          className="mt-3 text-xs font-medium text-ink hover:text-ink-dark"
+          aria-expanded={showAll}
+          className="mt-1 inline-flex min-h-11 items-center text-xs font-medium text-ink underline underline-offset-4 hover:text-ink-dark"
         >
           {showAll ? labels.showLess : labels.showAll(entries.length)}
         </button>

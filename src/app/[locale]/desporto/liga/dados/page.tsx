@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { createPageMetadata, siteTitle } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
@@ -7,6 +9,13 @@ import { ArrowRight } from "lucide-react";
 import { loadPublishedFootballData } from "@/lib/utils/football-data-loader";
 import type { PublishedFile, PublishedSeason } from "@/lib/utils/football-data-loader";
 import type { Metadata } from "next";
+import { teamDisplayName } from "@/lib/config/football";
+import { formatKickoff, formatLongDate } from "@/lib/football-format";
+import {
+  earlyLocks,
+  latePublications,
+  type ManifestRoundLike,
+} from "@/lib/utils/prediction-game-record";
 import { setRequestLocale } from '@/i18n/request-locale';
 
 const SITE = "https://estimador.pt";
@@ -15,7 +24,7 @@ const SITE = "https://estimador.pt";
 
 const copy = {
   pt: {
-    title: "Dados abertos — Liga Portugal",
+    title: "Dados abertos da Liga Portugal",
     description:
       "Todas as previsões da Liga Portugal publicadas em estimador.pt estão disponíveis como JSON estático, sem chave nem registo. Esta página documenta cada ficheiro e os seus campos principais.",
     back: "Liga Portugal",
@@ -51,7 +60,7 @@ const copy = {
     size: "Tamanho",
   },
   en: {
-    title: "Open data — Liga Portugal",
+    title: "Liga Portugal open data",
     description:
       "Every Liga Portugal forecast published on estimador.pt is available as static JSON, with no key and no sign-up. This page documents each file and its main fields.",
     back: "Liga Portugal",
@@ -97,8 +106,8 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
     match: /^md\d+\.json$/,
     label: "mdNN.json",
     doc: {
-      pt: "A previsão de uma jornada: classificação simulada com probabilidades de título, top 3 e descida, forças de ataque e defesa, xPts e a classificação real nessa altura.",
-      en: "One matchday's forecast: simulated standings with title, top-three and relegation probabilities, attack and defence strengths, xPts, and the real table at that moment.",
+      pt: "A previsão publicada depois de uma jornada: classificação simulada com probabilidades de título, top 3 e despromoção (17.º ou 18.º lugar), forças de ataque e defesa, xPts e a classificação real nessa altura.",
+      en: "The forecast published after a matchday: simulated standings with title, top-three and relegation (17th or 18th place) probabilities, attack and defence strengths, xPts, and the real table at that moment.",
     },
   },
   {
@@ -121,16 +130,16 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
     match: /^players\.json$/,
     label: "players.json",
     doc: {
-      pt: "Ranking de jogadores pelo Soccer Factor Model: golos acima do nível de substituto por 90 minutos, com intervalo de credibilidade e a variação face à época anterior.",
-      en: "Player ranking from the Soccer Factor Model: goals above replacement per 90 minutes, with a credible interval and the change from last season.",
+      pt: "A lista de finalização: golos por 90 minutos acima do nível de substituição (SAR), com intervalo de credibilidade de 90% e a variação face à época anterior. generated_from.seasons diz as épocas usadas.",
+      en: "The finishing list: goals per 90 minutes above replacement level (SAR), with a 90% credible interval and the change from last season. generated_from.seasons names the seasons used.",
     },
   },
   {
     match: /^contrib_ratings\.json$/,
     label: "contrib_ratings.json",
     doc: {
-      pt: "Contribuição ofensiva: golos mais assistências por 90 acima do substituto, com intervalo, a variação face ao ranking só de golos e a distribuição da métrica por posição.",
-      en: "Attacking contribution: goals plus assists per 90 above replacement, with interval, the move against the goals-only ranking, and the metric's distribution by position.",
+      pt: "Contribuição ofensiva: golos mais assistências por 90 acima do substituto, com intervalo e a distribuição da métrica por posição. rank_goals_only e rank_change_vs_goals_only contam posições entre todos os jogadores do modelo, não na lista de finalização publicada; /jogadores compara com essa lista.",
+      en: "Attacking contribution: goals plus assists per 90 above replacement, with interval and the metric's distribution by position. rank_goals_only and rank_change_vs_goals_only count places among every player in the model, not in the published finishing list; /jogadores compares against that list.",
     },
   },
   {
@@ -185,40 +194,40 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
     match: /^game_fixtures\.json$/,
     label: "game_fixtures.json",
     doc: {
-      pt: "O calendário da época para o jogo Contra o Modelo: cada jogo com hora de início (UTC; kickoff_confirmed diz se já é a oficial), a hora a que fecha para previsões (locks_at), as probabilidades do modelo congeladas antes da jornada (probs_source diz de que ficheiro vieram) e o resultado.",
-      en: "The season calendar for the Beat the Model game: every fixture with its kickoff (UTC; kickoff_confirmed says whether it is official yet), when it closes for picks (locks_at), the model's probabilities frozen before the round (probs_source names the file they came from) and the result.",
+      pt: "O calendário da época para o jogo Contra o Modelo: cada jogo com hora de início (UTC; kickoff_confirmed diz se já é a oficial), a sua hora de fecho (locks_at), as probabilidades do modelo e quando foram publicadas (published_at; probs_source diz de que ficheiro vieram) e o resultado. No jogo, uma jornada fecha inteira no locks_at mais cedo dos seus jogos. As notas abaixo dizem onde estas regras se afastam do calendário.",
+      en: "The season calendar for the Beat the Model game: every fixture with its kickoff (UTC; kickoff_confirmed says whether it is official yet), its lock time (locks_at), the model's probabilities and when they were published (published_at; probs_source names the file they came from) and the result. In the game, a round closes as a whole at the earliest locks_at of its games. The notes below say where these rules part from the calendar.",
     },
   },
   {
     match: /^players_detail\.json$/,
     label: "players_detail.json",
     doc: {
-      pt: "O detalhe por jogador por trás das páginas de jogador: histórico época a época e jogos recentes. As páginas mostram só os jogadores do ranking de players.json, com a posição e os números desse ranking.",
-      en: "The per-player detail behind the player pages: season-by-season history and recent matches. The pages show only the players ranked in players.json, with that ranking's position and numbers.",
+      pt: "O detalhe por jogador por trás das páginas de jogador: histórico época a época e jogos recentes. appearances_through é a data do último jogo incluído. As páginas mostram só os jogadores da lista de players.json, com a posição e os números dessa lista; team é o plantel atual.",
+      en: "The per-player detail behind the player pages: season-by-season history and recent matches. appearances_through is the date of the last match included. The pages show only the players in players.json's list, with that list's position and numbers; team is the current squad.",
     },
   },
   {
     match: /^ask\.json$/,
     label: "ask.json",
     doc: {
-      pt: "Ponto de partida para perguntas condicionais sobre a época: as probabilidades de cada equipa (título, top 3, Europa, descida) e os jogos em aberto cobertos. Nenhuma página o usa ainda.",
-      en: "The starting point for conditional questions about the season: each team's probabilities (title, top three, Europe, relegation) and the open fixtures covered. No page uses it yet.",
+      pt: "Para perguntas condicionais sobre a época («e se o Porto perder em Braga?»): as probabilidades de cada equipa (título, top 3, Europa, despromoção) e os jogos em aberto cobertos. Ainda sem página própria no site.",
+      en: "For conditional questions about the season (“what if Porto lose at Braga?”): each team's probabilities (title, top three, Europe, relegation) and the open fixtures covered. No page of its own on the site yet.",
     },
   },
   {
     match: /^ask_samples\.json$/,
     label: "ask_samples.json",
     doc: {
-      pt: "Uma amostra das épocas simuladas, compactada: em cada uma, o resultado de cada jogo em aberto e a posição final de cada equipa (a codificação está descrita no próprio ficheiro). Nenhuma página o usa ainda.",
-      en: "A compact sample of the simulated seasons: in each, the result of every open fixture and every team's final position (the encoding is described in the file itself). No page uses it yet.",
+      pt: "Uma amostra das épocas simuladas, compactada, para responder a essas perguntas: em cada uma, o resultado de cada jogo em aberto e a posição final de cada equipa (a codificação está descrita no próprio ficheiro).",
+      en: "A compact sample of the simulated seasons, for answering those questions: in each, the result of every open fixture and every team's final position (the encoding is described in the file itself).",
     },
   },
   {
     match: /^review\.json$/,
     label: "review.json",
     doc: {
-      pt: "A revisão de uma época terminada: classificação final, xPts por equipa, índice de sorte e a evolução das probabilidades que o modelo publicou durante o ano.",
-      en: "The review of a finished season: final table, per-team xPts, luck index, and how the probabilities the model published moved through the year.",
+      pt: "A revisão de uma época terminada: classificação final, xPts por equipa, a diferença entre pontos e xPts (luck; não é uma separação limpa entre sorte e talento) e a evolução das probabilidades de título e de despromoção ao longo do ano. Em 2025-26, as previsões das jornadas 4 a 22 foram reconstituídas depois, a 4 de março de 2026; o timestamp de cada mdNN.json mostra-o.",
+      en: "The review of a finished season: final table, per-team xPts, the gap between points and xPts (luck; not a clean split between luck and skill) and how the title and relegation probabilities moved through the year. In 2025-26, the matchday 4 to 22 forecasts were reconstructed afterwards, on 4 March 2026; each mdNN.json's timestamp shows it.",
     },
   },
 ];
@@ -227,8 +236,8 @@ const MD_FIELDS: { name: string; doc: Doc }[] = [
   {
     name: "table[]",
     doc: {
-      pt: "Uma entrada por equipa: mean_pts, std_pts, mean_gd e as probabilidades p_champion, p_top3, p_relegation, cada uma com intervalo _lo/_hi (erro de Monte Carlo).",
-      en: "One entry per team: mean_pts, std_pts, mean_gd and the probabilities p_champion, p_top3, p_relegation, each with a _lo/_hi interval (Monte Carlo error).",
+      pt: "Uma entrada por equipa: mean_pts, std_pts, mean_gd e as probabilidades p_champion, p_top3 e p_relegation (despromoção = terminar em 17.º ou 18.º; o 16.º, que vai ao play-off, não conta). p_champion e p_relegation trazem ainda _lo/_hi: os percentis 3 e 97 da mesma probabilidade calculada em 100 blocos de 500 simulações. É a dispersão de uma estimativa com 500 simulações, cerca de dez vezes a margem de erro de Monte Carlo do número publicado (±0,4 pontos percentuais com 50 000 simulações), e não é a incerteza do modelo. O site não os mostra. p_top3 não tem _lo/_hi.",
+      en: "One entry per team: mean_pts, std_pts, mean_gd and the probabilities p_champion, p_top3 and p_relegation (relegation = finishing 17th or 18th; 16th, which goes to the play-off, does not count). p_champion and p_relegation also carry _lo/_hi: the 3rd and 97th percentiles of the same probability computed over 100 blocks of 500 simulations. That is the spread of a 500-simulation estimate, about ten times the Monte Carlo error of the published number (±0.4 percentage points with 50,000 simulations), and it is not the model's uncertainty. The site does not show them. p_top3 has no _lo/_hi.",
     },
   },
   {
@@ -262,27 +271,58 @@ const MD_FIELDS: { name: string; doc: Doc }[] = [
   {
     name: "next_matchday{}",
     doc: {
-      pt: "A jornada seguinte com p_home, p_draw e p_away por jogo.",
-      en: "The next matchday with p_home, p_draw and p_away for each fixture.",
+      pt: "A jornada seguinte com p_home, p_draw e p_away por jogo. Pode incluir jogos adiados de jornadas anteriores.",
+      en: "The next matchday with p_home, p_draw and p_away for each fixture. It can include postponed games from earlier matchdays.",
     },
   },
   {
     name: "matchday_results[] / matches_remaining[]",
     doc: {
-      pt: "Jogos já disputados da jornada em curso, e os que ainda faltam (com kickoff quando conhecido).",
-      en: "Matches already played in the current matchday, and those still to come (with kickoff where known).",
+      pt: "matchday_results: os resultados que entraram desde a publicação anterior, que podem ser de mais do que uma jornada (jogos adiados ou antecipados). matches_remaining: jogos da jornada em curso ainda por disputar quando o ficheiro foi gerado (com kickoff quando conhecido); fica vazio quando a jornada acabou, mesmo que haja jogos adiados. Um mdNN.json não é cortado exatamente na jornada NN: actual_standings diz quantos jogos cada equipa já tinha.",
+      en: "matchday_results: the results that came in since the previous publication, which can span more than one matchday (postponed or brought-forward games). matches_remaining: games of the current matchday still to play when the file was generated (with kickoff where known); empty once the matchday is over, even with postponed games outstanding. An mdNN.json is not cut exactly at matchday NN: actual_standings says how many games each team had played.",
     },
   },
   {
     name: "season, matchday, model, n_sims, timestamp",
     doc: {
-      pt: "Metadados: que época, que jornada, que modelo, quantas simulações e quando foi gerado (UTC, ISO 8601). Em 2026-27, model é joint_sot na pré-época (md00) e bivcross da jornada 1 em diante: a mudança de modelo está no próprio ficheiro.",
-      en: "Metadata: which season, which matchday, which model, how many simulations, and when it was generated (UTC, ISO 8601). In 2026-27, model is joint_sot for the pre-season file (md00) and bivcross from matchday 1 on: the model change is recorded in the file itself.",
+      pt: "Metadados: que época, que jornada, que modelo, quantas simulações e quando foi gerado (UTC, ISO 8601). Em 2026-27, model é joint_sot (o modelo anterior) na pré-época (md00) e bivcross (o modelo atual, Poisson bivariado com remates à baliza) da jornada 1 em diante; toda a época 2025-26 é joint_sot.",
+      en: "Metadata: which season, which matchday, which model, how many simulations, and when it was generated (UTC, ISO 8601). In 2026-27, model is joint_sot (the previous model) for the pre-season file (md00) and bivcross (the current model, bivariate Poisson with shots on target) from matchday 1 on; all of 2025-26 is joint_sot.",
     },
   },
 ];
 
 /* ---------------------------------------------------------------- helpers */
+
+/** The current season's game manifest, raw (null when absent). */
+async function loadGameManifest(): Promise<{ season?: string; matchdays?: ManifestRoundLike[] } | null> {
+  try {
+    const file = path.join(process.cwd(), "public", "data", "football", "liga-2026-27", "game_fixtures.json");
+    return JSON.parse(await readFile(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Where the game's lock and scoring rules part from the calendar, from the
+ * manifest itself (audit M2, F18): a round published after its games began,
+ * and a postponed game scored on its original round's forecast.
+ */
+function gameNotes(rounds: ManifestRoundLike[], locale: string): string[] {
+  const pt = locale !== "en";
+  const notes: string[] = [];
+  for (const l of latePublications(rounds)) {
+    notes.push(pt
+      ? `Jornada ${l.matchday}: as probabilidades do modelo foram publicadas a ${formatLongDate(l.publishedAt, locale)}, depois de ${l.startedBefore} dos ${l.total} jogos terem começado. Ninguém podia jogar essa jornada, mas ela conta no registo do modelo na classificação da época. A partir da jornada ${l.matchday + 1}, as probabilidades são publicadas antes do primeiro jogo.`
+      : `Matchday ${l.matchday}: the model's probabilities were published on ${formatLongDate(l.publishedAt, locale)}, after ${l.startedBefore} of its ${l.total} games had started. Nobody could play that round, but it counts in the model's record in the season table. From matchday ${l.matchday + 1} on, the probabilities are published before the first game.`);
+  }
+  for (const e of earlyLocks(rounds)) {
+    notes.push(pt
+      ? `${teamDisplayName(e.home)}–${teamDisplayName(e.away)} (jornada ${e.matchday}) foi adiado para ${formatKickoff(e.kickoff, locale)}, mas fechou com a sua jornada, a ${formatLongDate(e.locksAt, locale)}: é avaliado com as probabilidades que o modelo publicou para essa jornada.`
+      : `${teamDisplayName(e.home)}–${teamDisplayName(e.away)} (matchday ${e.matchday}) was postponed to ${formatKickoff(e.kickoff, locale)}, but it closed with its round, on ${formatLongDate(e.locksAt, locale)}: it is scored on the probabilities the model published for that round.`);
+  }
+  return notes;
+}
 
 function docFor(name: string) {
   return FILE_DOCS.find(d => d.match.test(name));
@@ -348,7 +388,11 @@ export default async function LigaDataPage({
   setRequestLocale(locale);
   const pt = locale !== "en";
   const c = pt ? copy.pt : copy.en;
-  const seasons: PublishedSeason[] = await loadPublishedFootballData();
+  const [seasons, manifest]: [PublishedSeason[], Awaited<ReturnType<typeof loadGameManifest>>] = await Promise.all([
+    loadPublishedFootballData(),
+    loadGameManifest(),
+  ]);
+  const notes = gameNotes(manifest?.matchdays ?? [], locale);
 
   return (
     <div className="min-h-screen bg-paper">
@@ -492,6 +536,23 @@ export default async function LigaDataPage({
           </div>
         </section>
 
+        {/* Game manifest notes */}
+        {notes.length > 0 && (
+          <section className="mb-14" aria-labelledby="notas-jogo">
+            <h2 id="notas-jogo" className="text-2xl tracking-tight mb-1">
+              {pt ? "Notas sobre o jogo Contra o Modelo" : "Notes on the Beat the Model game"}
+            </h2>
+            <p className="text-sm text-stone-500 mb-4 max-w-3xl">
+              {pt
+                ? "Lidas do próprio game_fixtures.json: onde as regras de fecho e de avaliação se afastam do calendário."
+                : "Read from game_fixtures.json itself: where the lock and scoring rules part from the calendar."}
+            </p>
+            <ul className="max-w-3xl list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-700">
+              {notes.map((n) => <li key={n.slice(0, 40)}>{n}</li>)}
+            </ul>
+          </section>
+        )}
+
         {/* Usage */}
         <section className="mb-14">
           <h2 className="text-2xl tracking-tight mb-1">{c.usageTitle}</h2>
@@ -501,12 +562,12 @@ export default async function LigaDataPage({
               ? `# um ficheiro de jornada (o mais recente é o NN mais alto)
 curl -s ${SITE}/data/football/liga-2026-27/md01.json | jq '.table[0]'
 
-# a classificação final e o índice de sorte de 2025-26
+# a classificação final e a diferença pontos − xPts de 2025-26
 curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`
               : `# one matchday file (the latest is the highest NN)
 curl -s ${SITE}/data/football/liga-2026-27/md01.json | jq '.table[0]'
 
-# the 2025-26 final table and luck index
+# the 2025-26 final table and the points − xPts gap
 curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
           </pre>
         </section>

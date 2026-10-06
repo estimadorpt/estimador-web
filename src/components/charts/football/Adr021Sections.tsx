@@ -138,8 +138,8 @@ export function ContestedSection({
           </h3>
           <p className="text-[11px] text-stone-400 mb-3">
             {pt
-              ? `${cell.separable} de ${int(cell.n_players)} jogadores ajustados separam-se da média da posição (${cell.permutation_null} esperados por acaso). A lista mostra só quem está na Liga esta época.`
-              : `${cell.separable} of ${int(cell.n_players)} fitted players separate from the positional average (${cell.permutation_null} expected by chance). The list shows only players in the league this season.`}
+              ? `${cell.separable} de ${int(cell.n_players)} jogadores ajustados separam-se da média da posição (${cell.permutation_null.toLocaleString("pt-PT", { maximumFractionDigits: 2 })} esperados por acaso). A lista mostra só quem está na Liga esta época.`
+              : `${cell.separable} of ${int(cell.n_players)} fitted players separate from the positional average (${cell.permutation_null.toLocaleString("en-GB", { maximumFractionDigits: 2 })} expected by chance). The list shows only players in the league this season.`}
           </p>
           <PlayerRatingList
             entries={contestedEntries(cell).slice(0, 8)}
