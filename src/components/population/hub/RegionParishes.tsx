@@ -60,7 +60,7 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
 
       <div className="space-y-6">
         {municipalities.map(m => (
-          <section key={m.code} id={`concelho-${m.code}`} aria-labelledby={`concelho-${m.code}-title`} className="scroll-mt-24 rounded-2xl border border-line bg-cream p-4 md:p-5">
+          <section key={m.code} id={`concelho-${m.code}`} aria-labelledby={`concelho-${m.code}-title`} className="rounded-2xl border border-line bg-cream p-4 md:p-5">
             <header className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <h2 id={`concelho-${m.code}-title`} className="text-xl text-ink">{m.name}</h2>
               <p className="text-sm text-stone-500">

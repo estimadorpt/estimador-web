@@ -19,6 +19,7 @@ import { parishCitation, SHORT_ATTRIBUTION } from '@/lib/population/cite';
 import { formatCount } from '@/lib/population/format';
 import { GUESS_RECIPES } from '@/lib/population/guess';
 import { HONESTY, RECIPE_COPY, tierMeaningFor, type Locale } from '@/lib/population/labels';
+import { breadcrumbJsonLd, jsonLd } from '@/lib/structured-data';
 import { indexPlaces, NEARBY_KEY, normaliseParishCode, regionSlug, regionTitle, type Parish, type PlaceIndex } from '@/lib/population/places';
 import { parishQuestion, shareCardModel } from '@/lib/population/share-card';
 import type { ParishRecord, PopulationMeta, PortraitRecipe } from '@/types/population';
@@ -358,9 +359,17 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
 
   const where = (scope: Scope) => (long && !scope.municipality ? THIS_PARISH.in[locale] : inScope(scope, locale));
   const citation = parishCitation({ name: place.name, code, url });
+  // Population › region › parish (SP-10). The shell is one page for every
+  // parish, so the breadcrumb is rendered here, once the place is known.
+  const breadcrumbs = jsonLd(breadcrumbJsonLd(locale, [
+    { name: pt ? 'População' : 'Population', path: POPULATION_ROUTES.hub },
+    { name: place.regionName, path: regionHref },
+    { name: place.name },
+  ]));
 
   return (
     <main id="main-content" tabIndex={-1}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbs }} />
       <PageHero
         compact
         field="periwinkle"
@@ -430,7 +439,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
 
             {groups.map(group => (
               <section key={group.id} aria-labelledby={group.id} className="flex flex-col gap-5">
-                <h2 id={group.id} className="scroll-mt-24 text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
+                <h2 id={group.id} className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
                   {group.title[locale]}
                 </h2>
                 {group.recipes.map(recipe => {
@@ -470,7 +479,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
               </section>
             ))}
 
-            <section id="partilhar" aria-labelledby="partilhar-title" className="scroll-mt-24">
+            <section id="partilhar" aria-labelledby="partilhar-title">
               <h2 id="partilhar-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
                 {pt ? `Queres mostrar ${long ? THIS_PARISH.subject.pt : 'esta freguesia'} a alguém?` : 'Want to show this parish to someone?'}
               </h2>
@@ -479,7 +488,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
               </div>
             </section>
 
-            <section id="citar" aria-labelledby="citar-title" className="scroll-mt-24">
+            <section id="citar" aria-labelledby="citar-title">
               <h2 id="citar-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
                 {pt ? 'Como cito esta página?' : 'How do I cite this page?'}
               </h2>
@@ -516,7 +525,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
               </div>
             </section>
 
-            <section id="outras" aria-labelledby="outras-title" className="scroll-mt-24">
+            <section id="outras" aria-labelledby="outras-title">
               <h2 id="outras-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
                 {pt ? `Outras freguesias do ${municipalityPhrase(place.municipalityName, locale)}` : `Other parishes in ${place.municipalityName} municipality`}
               </h2>

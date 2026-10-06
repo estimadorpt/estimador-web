@@ -15,7 +15,7 @@ import { POPULATION_DOWNLOADS, POPULATION_RELEASE, POPULATION_ROUTES } from '@/l
 import { HONESTY, type Locale } from '@/lib/population/labels';
 import { loadPopulationMeta, loadPopulationRelease } from '@/lib/utils/population-data-loader';
 import { createPageMetadata } from '@/lib/metadata';
-import { jsonLdScript, populationDatasetJsonLd } from '@/lib/population/structured-data';
+import { jsonLd, populationDatasetJsonLd } from '@/lib/structured-data';
 import { ChevronRight } from 'lucide-react';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -165,7 +165,7 @@ sha256sum checksums.sha256`;
       <PopulationSectionNav current="data" locale={locale} />
       {release && (
         // schema.org Dataset, so dataset search can list the release.
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(populationDatasetJsonLd(release, locale)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(populationDatasetJsonLd(locale, release)) }} />
       )}
 
       <div className="mx-auto max-w-5xl space-y-12 px-4 py-8 md:py-12">

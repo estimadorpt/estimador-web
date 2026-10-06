@@ -213,7 +213,7 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
               else if (event.key === 'Enter' && showList && hits[active]) { event.preventDefault(); choose(hits[active]); }
               else if (event.key === 'Escape') { setOpen(false); }
             }}
-            className={`parish-search h-12 w-full scroll-mt-20 rounded-[10px] border border-line bg-cream pl-10 pr-11 text-base text-ink placeholder:text-stone-500 sm:text-[15px] [&::-webkit-search-cancel-button]:appearance-none ${inputClassName}`}
+            className={`parish-search h-12 w-full rounded-[10px] border border-line bg-cream pl-10 pr-11 text-base text-ink placeholder:text-stone-500 sm:text-[15px] [&::-webkit-search-cancel-button]:appearance-none ${inputClassName}`}
           />
           {query && !disabled && (
             <button

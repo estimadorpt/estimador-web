@@ -92,7 +92,7 @@ export default async function LigaMethodologyPage({
 
   const components = getMDXComponents({
     h2: ({ children }) => (
-      <h2 id={slugify(children)} className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight scroll-mt-24">
+      <h2 id={slugify(children)} className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight">
         {children}
       </h2>
     ),

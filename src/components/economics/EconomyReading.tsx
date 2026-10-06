@@ -4,6 +4,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import { Link2 } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { SectionIllustration } from '@/components/brand/SectionIllustration';
+import { Disclosure } from '@/components/viz/Disclosure';
 
 // The "prices" question/answer below is the site's one canonical phrasing of
 // the inflation distinction — the home economy panel (EconomyPanel.tsx) and
@@ -116,7 +117,7 @@ export function EconomyReading({
               )}
             </div>
             <p className="my-6 rounded-lg bg-[#dce8e9] p-4 text-sm font-bold leading-relaxed text-ink">{topic.insight[lang]}</p>
-            <details className="border-t border-line pt-4"><summary className="cursor-pointer py-2 text-sm font-bold text-ink">{topic.question[lang]}</summary><p className="mt-3 text-sm leading-relaxed text-ink-muted">{topic.answer[lang]}</p></details>
+            <Disclosure className="border-t border-line pt-2" summary={topic.question[lang]}><p className="mt-2 text-sm leading-relaxed text-ink-muted">{topic.answer[lang]}</p></Disclosure>
           </Tabs.Content>
         ))}
       </Tabs.Root>

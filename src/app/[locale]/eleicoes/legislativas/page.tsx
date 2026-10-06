@@ -132,14 +132,14 @@ export default async function ParliamentaryArchivePage({
       </nav>
 
       {!archive.available ? (
-        <section id="overview" className="scroll-mt-24">
+        <section id="overview">
           <div className="max-w-7xl mx-auto px-4 py-10">
             <p className="max-w-2xl text-stone-600">{t('forecast.unavailable')}</p>
           </div>
         </section>
       ) : (
       <>
-      <section id="overview" className="scroll-mt-24 border-b border-line">
+      <section id="overview" className="border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <ElectionSummaryStats
             probAdMostSeats={probabilities.adMostSeats}
@@ -166,7 +166,7 @@ export default async function ParliamentaryArchivePage({
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4 space-y-8">
 
-          <div id="polling" className="scroll-mt-24 bg-cream border border-stone-200 rounded-2xl p-6">
+          <div id="polling" className="bg-cream border border-stone-200 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-6">
               <TrendingUp aria-hidden="true" className="w-5 h-5 text-stone-500" />
               <h2 className="text-2xl text-stone-900">{t('forecast.pollingTrends')}</h2>
@@ -205,7 +205,7 @@ export default async function ParliamentaryArchivePage({
             </p>
           </div>
 
-          <div id="district-analysis" className="scroll-mt-24 bg-cream border border-stone-200 rounded-2xl p-6">
+          <div id="district-analysis" className="bg-cream border border-stone-200 rounded-2xl p-6">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-3">
                 <Map aria-hidden="true" className="w-5 h-5 text-stone-500" />
@@ -245,7 +245,7 @@ export default async function ParliamentaryArchivePage({
 
       <section className="pb-8">
         <div className="max-w-7xl mx-auto px-4 space-y-8">
-          <div id="evidence" className="scroll-mt-24 bg-paper border border-line rounded-2xl p-6">
+          <div id="evidence" className="bg-paper border border-line rounded-2xl p-6">
             <h2 className="text-lg text-stone-900 mb-4">{t('forecast.aboutModel')}</h2>
             <div className="grid md:grid-cols-3 gap-6 text-sm text-stone-600">
               <div>

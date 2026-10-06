@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Disclosure } from "@/components/viz/Disclosure";
 import { teamDisplayName } from "@/lib/config/football";
 import { blockVerdict, SIGNIFICANCE_T, type PointsCalibration } from "@/lib/football-scorecard";
 import {
@@ -580,10 +581,11 @@ function CheckpointChart({
       </p>
 
       {/* Table view twin */}
-      <details className="mt-3 group">
-        <summary className="cursor-pointer text-xs font-medium text-stone-500 hover:text-stone-800">
-          {pt ? "Ver os números em tabela" : "See the numbers as a table"}
-        </summary>
+      <Disclosure
+        className="mt-3"
+        summary={pt ? "Ver os números em tabela" : "See the numbers as a table"}
+        srSuffix={pt ? "RPS do modelo e do mercado por jornada" : "model and market RPS by matchday"}
+      >
         <div className="mt-2 overflow-x-auto">
           <table className="w-full text-xs tabular-nums">
             <caption className="sr-only">
@@ -638,7 +640,7 @@ function CheckpointChart({
             </tbody>
           </table>
         </div>
-      </details>
+      </Disclosure>
     </div>
   );
 }

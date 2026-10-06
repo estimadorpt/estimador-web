@@ -108,7 +108,7 @@ export default async function PopulationHub({ params }: { params: Promise<{ loca
         </section>
 
         {ageCells && (
-          <section id="idade" aria-labelledby="idade-titulo" className="mt-12 scroll-mt-24">
+          <section id="idade" aria-labelledby="idade-titulo" className="mt-12">
             <h2 id="idade-titulo" className="mb-4 text-2xl md:text-3xl">{pt ? 'Que idade tem Portugal?' : 'How old is Portugal?'}</h2>
             <NationalAgeCard cells={ageCells} locale={locale} />
           </section>

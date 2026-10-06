@@ -297,7 +297,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   const lastParish = guesses.length > 0 ? guesses[guesses.length - 1] : null;
 
   return (
-    <div ref={top} className="scroll-mt-20">
+    <div ref={top}>
       <p role="status" aria-live="polite" className="sr-only">{announcement}</p>
 
       {practice && (
@@ -337,7 +337,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
       </div>
 
       {!playing && (
-        <div ref={end} className="mb-6 scroll-mt-20">
+        <div ref={end} className="mb-6">
           <Reveal>
             <EndPanel
               record={record}

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR, POPULATION_RELEASE } from '@/lib/config/population';
-import { jsonLdScript, populationDatasetJsonLd } from '@/lib/population/structured-data';
+import { jsonLd, populationDatasetJsonLd } from '@/lib/structured-data';
 import type { PopulationReleaseInfo } from '@/types/population';
 import { columnDescription, DESCRIPTION_OVERRIDES, INTERNAL_REFERENCE } from './dictionary';
 
@@ -28,12 +28,16 @@ describe('the column dictionary on /dados (X-02)', () => {
 
 describe('Dataset JSON-LD for /populacao/dados', () => {
   it('names the release, its licence, its files and its citation', () => {
-    const data = populationDatasetJsonLd(release, 'pt');
+    const data = populationDatasetJsonLd('pt', release);
     expect(data['@type']).toBe('Dataset');
     expect(data.version).toBe(POPULATION_RELEASE);
     expect(data.license).toBe('https://creativecommons.org/licenses/by/4.0/');
     expect(data.citation).toBe(release.attribution.cite_as);
     expect((data.distribution as unknown[]).length).toBeGreaterThanOrEqual(4);
-    expect(jsonLdScript({ a: '</script>' })).not.toContain('</script>');
+    expect(data.creditText).toBe(release.attribution.pt);
+    // The release's own counts, grouped like the rest of the site.
+    expect(data.description).toContain('3\u00a0092 freguesias dos Censos 2021');
+    expect(populationDatasetJsonLd('en', release).description).toContain('3,092 parishes of the 2021 Census');
+    expect(jsonLd({ a: '</script>' })).not.toContain('</script>');
   });
 });

@@ -272,7 +272,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   ? 'Com poucas pessoas, cada uma pesa mais em cada tabela: por isso cada freguesia tem um nível de qualidade, mostrado no topo da sua página.'
                   : 'With few people, each one weighs more in every table: that is why every parish carries a quality tier, shown at the top of its page.'}
               </p>
-              <div id="tabelas" className="mt-6 scroll-mt-24 rounded-2xl border border-line bg-cream p-5 md:p-6">
+              <div id="tabelas" className="mt-6 rounded-2xl border border-line bg-cream p-5 md:p-6">
                 <h3 className="text-base font-bold text-ink">{pt ? 'Que tabelas foram usadas?' : 'Which tables were used?'}</h3>
                 <div className="mt-3 grid gap-6 md:grid-cols-2">
                   <div>

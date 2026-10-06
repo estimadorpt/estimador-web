@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { ParishPage } from '@/components/population/parish/ParishPage';
-import { feedAlternates, getOgImageUrl, siteTitle, SITE_URL } from '@/lib/metadata';
+import { feedAlternates, getOgImageSize, getOgImageUrl, siteTitle, SITE_URL } from '@/lib/metadata';
 import { setRequestLocale } from '@/i18n/request-locale';
 
 /**
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       // Link previews do not run the page's JavaScript, so every parish shares the
       // population section's card (not the site's general one). Per-parish
       // previews need a server-side step; see the round-2 follow-ups.
-      images: [{ url: getOgImageUrl(locale, '/populacao'), width: 1200, height: 630, alt: title }],
+      images: [{ url: getOgImageUrl(locale, '/populacao'), ...getOgImageSize(), alt: title }],
     },
     twitter: {
       card: 'summary_large_image',

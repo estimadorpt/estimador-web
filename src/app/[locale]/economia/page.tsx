@@ -1,4 +1,5 @@
 import { createPageMetadata } from '@/lib/metadata';
+import { Disclosure } from '@/components/viz/Disclosure';
 import { loadEconomyDashboard, loadEconomyStories } from "@/lib/utils/data-loader";
 import { isTileAvailable, type EconomyDashboardTiles } from "@/types/economy-dashboard";
 import { isModuleAvailable } from "@/types/economy-stories";
@@ -191,11 +192,10 @@ export default async function EconomiaPage({
               </span>
             }
           />
-          <details className="mt-8 border-t border-line pt-4 text-sm text-ink-muted">
-            <summary className="cursor-pointer py-3 font-semibold text-ink">{t("pausedQuestion")}</summary>
+          <Disclosure className="mt-8 border-t border-line pt-3 text-sm text-ink-muted" summary={t("pausedQuestion")}>
             <p className="my-3 leading-relaxed">{t("pausedBody", { date: updatedDate })}</p>
             <Action href="/economia/metodologia" locale={locale} variant="text" arrow>{t("methodologyLink")}</Action>
-          </details>
+          </Disclosure>
           {notes}
         </div>
         </main>

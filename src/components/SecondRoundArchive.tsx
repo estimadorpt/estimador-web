@@ -22,7 +22,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
   const tf = await getTranslations({ locale, namespace: 'forecast' });
   if (!data.available || !data.simulations) {
     return (
-      <section id="forecast" className="scroll-mt-24 border-b border-line">
+      <section id="forecast" className="border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-10">
           <p className="max-w-2xl text-stone-600">{t('unavailable')}</p>
         </div>
@@ -40,7 +40,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
 
   return (
     <>
-      <section id="forecast" className="scroll-mt-24 bg-paper border-b border-line">
+      <section id="forecast" className="bg-paper border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-7">
           <div className="max-w-3xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500 mb-2">{t('title')}</p>
@@ -81,7 +81,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
         </div>
       </section>
 
-      <section id="trajectory" className="scroll-mt-24 py-10 border-b border-stone-300">
+      <section id="trajectory" className="py-10 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('supportTrends')}</h2>
           <p className="text-sm text-stone-500 mb-3 max-w-xl">{t('trendDescription')}</p>

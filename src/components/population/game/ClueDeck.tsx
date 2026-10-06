@@ -73,7 +73,7 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
   const recipes = CLUE_ORDER[selected] ?? CLUE_ORDER[0];
 
   return (
-    <div ref={deck} className="min-w-0 scroll-mt-24">
+    <div ref={deck} className="min-w-0">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="text-xl text-ink md:text-2xl">{t.cluesTitle}</h2>
         {/* Said once for the deck: every published clue is the parish's own figures. A município fallback says so on its own clue. */}

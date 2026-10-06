@@ -53,7 +53,7 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
   return (
     <div
       id={anchor}
-      className={`scroll-mt-24 rounded-2xl outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-300 ${highlight ? 'outline-2 outline-ink outline-solid' : 'outline-2 outline-transparent outline-solid'} ${className}`}
+      className={`rounded-2xl outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-300 ${highlight ? 'outline-2 outline-ink outline-solid' : 'outline-2 outline-transparent outline-solid'} ${className}`}
     >
       {/* The footer is drawn here rather than by DataCard so the copy-link action can sit in it, out of the way of the question. */}
       <DataCard title={title} subtitle={copy.population[locale]} locale={locale}>

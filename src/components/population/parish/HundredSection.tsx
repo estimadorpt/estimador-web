@@ -126,7 +126,7 @@ export function HundredSection({ record, meta, locale, name, fallbackName }: {
   const readout = active === null ? null : option.cells[active];
 
   return (
-    <section id="cem" aria-labelledby="cem-title" className="scroll-mt-24">
+    <section id="cem" aria-labelledby="cem-title">
       <h2 id="cem-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">{heading}</h2>
       <p className="mt-1 max-w-2xl text-[15px] text-stone-600">
         {pt

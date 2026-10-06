@@ -15,6 +15,7 @@ import { ofRegion, regionSlug } from '@/lib/population/places';
 import type { Locale } from '@/lib/population/labels';
 import { paramsOrPlaceholder } from '@/lib/static-params';
 import { loadPopulationPlaces } from '@/lib/utils/population-data-loader';
+import { breadcrumbJsonLd, jsonLd } from '@/lib/structured-data';
 
 type Params = Promise<{ locale: string; slug: string }>;
 
@@ -65,6 +66,11 @@ export default async function RegionPage({ params }: { params: Params }) {
 
   return (
     <div className="min-h-screen bg-paper">
+      {/* Population › region, for search results (SP-10). */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbJsonLd(locale, [
+        { name: pt ? 'População' : 'Population', path: POPULATION_ROUTES.hub },
+        { name: region.name },
+      ])) }} />
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero

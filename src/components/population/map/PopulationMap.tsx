@@ -16,6 +16,7 @@
  * the município's parishes) once the map comes near the viewport.
  */
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { Disclosure } from '@/components/viz/Disclosure';
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, FocusEvent as ReactFocusEvent } from 'react';
 import { interpolateZoom } from 'd3';
 import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus, RotateCcw, Shuffle } from 'lucide-react';
@@ -846,8 +847,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
         </div>
 
         {/* The table twin: the same places as a list */}
-        <details className="border-t border-line px-3 sm:px-4">
-          <summary className="inline-flex min-h-11 cursor-pointer items-center text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-ink">{t.list}</summary>
+        <Disclosure className="border-t border-line px-3 sm:px-4" summary={t.list}>
           {children && (
             <div className="pb-4">
               <p className="mb-2 text-sm font-bold text-ink">
@@ -881,7 +881,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
               </ul>
             </div>
           )}
-        </details>
+        </Disclosure>
       </div>
     </section>
   );

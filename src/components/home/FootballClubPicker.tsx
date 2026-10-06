@@ -160,7 +160,7 @@ export function FootballClubPicker({
 
       <form
         id="escolher-equipa"
-        className="mt-4 flex min-w-0 scroll-mt-24 items-end gap-2"
+        className="mt-4 flex min-w-0 items-end gap-2"
         onSubmit={(event) => {
           event.preventDefault();
           handleSelect(pending);

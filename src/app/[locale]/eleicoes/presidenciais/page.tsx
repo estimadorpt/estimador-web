@@ -92,14 +92,14 @@ export default async function PresidentialArchivePage({
   );
 
   const firstRound = !first.available ? (
-    <section id="forecast" className="scroll-mt-24 border-b border-line">
+    <section id="forecast" className="border-b border-line">
       <div className="max-w-7xl mx-auto px-4 py-10">
         <p className="max-w-2xl text-stone-600">{t('presidential.unavailable')}</p>
       </div>
     </section>
   ) : (
     <>
-      <section id="forecast" className="scroll-mt-24 bg-paper border-b border-line">
+      <section id="forecast" className="bg-paper border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-7">
           <div className="max-w-3xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500 mb-2">{t('presidential.firstRoundKicker')}</p>
@@ -144,7 +144,7 @@ export default async function PresidentialArchivePage({
         </div>
       </section>
 
-      <section id="trajectory" className="scroll-mt-24 py-10 border-b border-stone-300">
+      <section id="trajectory" className="py-10 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('presidential.supportTrajectory')}</h2>
           <p className="text-sm text-stone-500 mb-8 max-w-xl">{t('presidential.trendDescription')}</p>
@@ -327,7 +327,7 @@ export default async function PresidentialArchivePage({
           </div>
         </section>
 
-        <section id="evidence" className="scroll-mt-24 border-t border-line">
+        <section id="evidence" className="border-t border-line">
           <div className="max-w-7xl mx-auto px-4 py-10">
             <div className="max-w-2xl">
               <h2 className="text-2xl mb-3">{t('presidential.aboutForecast')}</h2>

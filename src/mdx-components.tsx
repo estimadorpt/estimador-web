@@ -106,7 +106,7 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
       </details>
     ),
     summary: ({ children }) => (
-      <summary className="cursor-pointer bg-stone-50 px-4 py-3 font-medium text-stone-800 hover:bg-stone-100">
+      <summary className="flex min-h-11 cursor-pointer items-center bg-stone-50 px-4 py-2 font-medium text-stone-800 hover:bg-stone-100">
         {children}
       </summary>
     ),
