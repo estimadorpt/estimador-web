@@ -1,23 +1,33 @@
-export type HomeArtName = 'population' | 'football' | 'economy' | 'elections';
-export type HomeArtShape = 'lead' | 'wide' | 'square';
+/**
+ * The population house is the homepage's one painting of its own; the other
+ * panels use the section scenes (SectionIllustration).
+ */
+export type HomeArtName = 'population';
+export type HomeArtShape = 'lead' | 'square';
 
-/** Mirrors scripts/generate-home-art.mjs: the crop's pixel size and the widths shipped. */
+/**
+ * Mirrors scripts/generate-home-art.mjs: the cut's pixel size and the widths
+ * shipped. The lead is the house alone (its neighbours veiled to cream), the
+ * square the whole scene (tree, house, cypress), padded to a square.
+ */
 const SHAPES: Record<HomeArtShape, { width: number; height: number; widths: number[] }> = {
-  lead: { width: 850, height: 1086, widths: [600, 1000] },
-  wide: { width: 1448, height: 850, widths: [480, 960] },
-  square: { width: 1086, height: 1086, widths: [400, 800] },
+  lead: { width: 880, height: 1086, widths: [600, 880] },
+  square: { width: 1160, height: 1160, widths: [400, 800] },
 };
 
-/** The illustrations' own field, so a contained image reads edge to edge. */
-export const ART_FIELD = '#fbfaf4';
+/**
+ * The panel's cream (BRAND.cream), which scripts/generate-home-art.mjs tones the
+ * house's ground onto, so a contained image reads edge to edge.
+ */
+export const ART_FIELD = '#fcfbf5';
 
 /** A 1×1 transparent GIF: what a viewport outside `media` gets instead of the art. */
 const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 /**
- * A homepage illustration: decorative, contained, never stretched, on its own
- * cream field so it can run to a panel's edge. Masters and crops are described
- * in scripts/generate-home-art.mjs; this only picks a width.
+ * The homepage's population house: decorative, contained, never stretched, on
+ * its own cream field so it can run to a panel's edge. The master and its crops
+ * are described in scripts/generate-home-art.mjs; this only picks a width.
  *
  * `media` limits the art to the viewports that show it (UXM2V-04): a wrapper
  * hidden by CSS still downloads an eager image, so an illustration shown only

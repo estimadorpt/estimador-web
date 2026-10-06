@@ -18,9 +18,13 @@ interface SectionIllustrationProps {
 /**
  * Decorative context only. Keep estimates, labels and controls outside the image.
  *
- * The forecast pages keep their raster scenes (an owner exception to the
- * mosaic-only rule), so they have to load fast. Each scene ships at 720 px and
- * at 360 px (`{scene}-360.webp`, made from the 720 px master with sharp:
+ * The 13 September section scenes head the section entrances (the Liga hub
+ * and simulator, /eleicoes/arquivo, /legislativas, /presidenciais) and the
+ * homepage panels: which page gets a painting, a tinted field or plain paper is
+ * the header table under "Three levels of expression" in CLAUDE.md's Design
+ * Language. As the largest paint of those heroes they have to load fast. Each
+ * scene ships at 720 px and at 360 px (`{scene}-360.webp`, made from the
+ * 720 px master with sharp:
  * `sharp(src).resize({ width: 360 }).webp({ quality: 82 })`). The export does
  * not optimise images, so this is a plain <img> with its own srcset rather
  * than next/image, which would print only the 720 px file.

@@ -40,15 +40,31 @@ function logotype() {
  * The mosaic: four surface pastels in the site's small vocabulary (a quarter
  * circle is a share, a circle a person, a block a place). Only on the brand
  * card and on explainer covers; never beside a number.
+ *
+ * The same drawing as `<Mosaic variant="cover">` (src/components/brand/Mosaic.tsx),
+ * in its 200-unit box: four 98-unit cells with 4-unit gutters; the top-left and
+ * bottom-right cells are quarter circles whose right angle sits at the cell's
+ * top-left corner, so both arcs face the bottom-right; the top-right block
+ * holds a 48-unit circle of the ground. `dark` is the forest version the
+ * social kit uses: the data pastels, which need the chroma on a dark ground,
+ * around a forest window.
  */
-export function mosaic(size = 260) {
-  const half = size / 2;
-  const block = (backgroundColor, style = {}, child = null) => h('div', { width: half, height: half, backgroundColor, display: 'flex', alignItems: 'center', justifyContent: 'center', ...style }, child);
-  return h('div', { display: 'flex', flexWrap: 'wrap', width: size, height: size, flexShrink: 0 },
-    block(COLOR.mintSoft, { borderTopLeftRadius: size }),
-    block(COLOR.mustardSoft, {}, h('div', { width: half * 0.46, height: half * 0.46, borderRadius: 999, backgroundColor: COLOR.ground })),
-    block(COLOR.coralSoft, {}),
-    block(COLOR.periwinkleSoft, { borderBottomRightRadius: size }));
+export const PASTEL = { mint: '#72c8b4', mustard: '#e5b958', coral: '#e29a83', periwinkle: '#a9b9ed' };
+export function mosaic(size = 260, { dark = false } = {}) {
+  const unit = size / 200, cell = 98 * unit, gutter = 4 * unit;
+  const [a, b, c, d] = dark
+    ? [PASTEL.mint, PASTEL.mustard, PASTEL.coral, PASTEL.periwinkle]
+    : [COLOR.mintSoft, COLOR.mustardSoft, COLOR.coralSoft, COLOR.periwinkleSoft];
+  const window = dark ? COLOR.forest : COLOR.ground;
+  const block = (backgroundColor, style = {}, child = null) => h('div', { width: cell, height: cell, backgroundColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, ...style }, child);
+  const quarter = (backgroundColor, style = {}) => block(backgroundColor, { borderBottomRightRadius: cell, ...style });
+  return h('div', { display: 'flex', flexDirection: 'column', width: size, height: size, flexShrink: 0 },
+    h('div', { display: 'flex' },
+      quarter(a),
+      block(b, { marginLeft: gutter }, h('div', { width: 48 * unit, height: 48 * unit, borderRadius: 999, backgroundColor: window }))),
+    h('div', { display: 'flex', marginTop: gutter },
+      block(c),
+      quarter(d, { marginLeft: gutter })));
 }
 
 /** The uppercase tracked micro-label the site uses above every section. */

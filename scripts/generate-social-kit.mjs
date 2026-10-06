@@ -15,10 +15,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { h, svg, renderCard, ROOT_DIR, COLOR } from './lib/og-render.mjs';
+import { mosaic as coverMosaic } from './lib/og-cards.mjs';
 
 const geometry = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'src', 'lib', 'brand', 'geometry.json'), 'utf8'));
 const MARK_D = [geometry.MARK_LEFT, geometry.MARK_BAND, geometry.MARK_RIGHT].join(' ');
-const PASTEL = { mint: '#72c8b4', mustard: '#e5b958', coral: '#e29a83', periwinkle: '#a9b9ed' };
 
 // The line and the descriptor are written once, in src/lib/brand/descriptor.json,
 // and read here the same way the app imports them (descriptor.test.ts holds it).
@@ -41,16 +41,13 @@ function lockup(size, dark) {
       h('div', {}, 'estimador'), h('div', { color: muted }, '.pt')));
 }
 
-/** Four blocks in the site's vocabulary: a share, a person, a place, a share. */
+/**
+ * Four blocks in the site's vocabulary: a share, a person, a place, a share.
+ * The OG cards' drawing (scripts/lib/og-cards.mjs), which is `<Mosaic
+ * variant="cover">`; on forest, its data-pastel version.
+ */
 function mosaic(size, dark) {
-  const half = size / 2, window = dark ? COLOR.forest : COLOR.ground;
-  const c = dark ? [PASTEL.mint, PASTEL.mustard, PASTEL.coral, PASTEL.periwinkle] : [COLOR.mintSoft, COLOR.mustardSoft, COLOR.coralSoft, COLOR.periwinkleSoft];
-  const block = (backgroundColor, style = {}, child = null) => h('div', { width: half, height: half, backgroundColor, display: 'flex', alignItems: 'center', justifyContent: 'center', ...style }, child);
-  return h('div', { display: 'flex', flexWrap: 'wrap', width: size, height: size, flexShrink: 0 },
-    block(c[0], { borderTopLeftRadius: size }),
-    block(c[1], {}, h('div', { width: half * 0.46, height: half * 0.46, borderRadius: 999, backgroundColor: window })),
-    block(c[2], {}),
-    block(c[3], { borderBottomRightRadius: size }));
+  return coverMosaic(size, { dark });
 }
 
 function ground(width, height, dark, children, style = {}) {

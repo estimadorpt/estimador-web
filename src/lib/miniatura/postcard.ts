@@ -1,4 +1,22 @@
 import { FIELD_LABELS, PEOPLE, exploredPosition, type Lens, type Neighbourhood, type View } from './population';
+import { BRAND, MARK_FULL } from '@/lib/brand';
+import { WORDMARK_BASELINE, WORDMARK_NAME, WORDMARK_TLD, WORDMARK_X } from '@/lib/brand/wordmark';
+
+/**
+ * The card's text. The SVG is drawn into an <img> to make the PNG, where no
+ * web font loads, so Manrope is asked for and a plain sans stands in; the
+ * signature itself is outlined paths and needs no font.
+ */
+const SANS = "Manrope,'Helvetica Neue',Arial,sans-serif";
+
+/**
+ * The site's signature (the interval mark and "estimador.pt", ".pt" in
+ * BRAND.muted), drawn from the logo's own paths at `scale`, its 24-unit box
+ * starting at (x, y).
+ */
+function signature(x: number, y: number, scale: number): string {
+  return `<g transform="translate(${x} ${y}) scale(${scale})"><title>estimador.pt</title><path d="${MARK_FULL}" fill="${BRAND.ink}"/><g transform="translate(${WORDMARK_X} ${WORDMARK_BASELINE})"><path d="${WORDMARK_NAME}" fill="${BRAND.ink}"/><path d="${WORDMARK_TLD}" fill="${BRAND.muted}"/></g></g>`;
+}
 
 /** Self-contained postcard: no network assets, external CSS or unpublished data. */
 export function postcardSvg(source: SVGSVGElement, locale: 'pt' | 'en', view: View, animated: boolean, alone: boolean): string {
@@ -46,9 +64,11 @@ export function postcardSvg(source: SVGSVGElement, locale: 'pt' | 'en', view: Vi
       });
     });
   }
-  const labels = locale === 'pt' ? {title:'Portugal em miniatura', views:{village:'Um bairro imaginado',ages:'As idades de um pequeno mundo',households:'Há muitas maneiras de ser família'},demo:'DEMONSTRAÇÃO · DADOS FICTÍCIOS',note:'100 pessoas inventadas · 30 agregados · não representa Portugal',filter:'Em destaque: quem vive sozinho'} : {title:'Portugal in miniature', views:{village:'An imagined neighbourhood',ages:'The ages of a small world',households:'Many ways to be a household'},demo:'DEMONSTRATION · FICTIONAL DATA',note:'100 invented people · 30 households · not representative of Portugal',filter:'Highlighted: people living alone'};
+  const labels = locale === 'pt' ? {views:{village:'Um bairro imaginado',ages:'As idades de um pequeno mundo',households:'Há muitas maneiras de ser família'},demo:'DEMONSTRAÇÃO · DADOS FICTÍCIOS',note:'100 pessoas inventadas · 30 agregados · não representa Portugal',filter:'Em destaque: quem vive sozinho'} : {views:{village:'An imagined neighbourhood',ages:'The ages of a small world',households:'Many ways to be a household'},demo:'DEMONSTRATION · FICTIONAL DATA',note:'100 invented people · 30 households · not representative of Portugal',filter:'Highlighted: people living alone'};
   const groupNote = source.dataset.selectedGroup !== undefined ? ` · ${FIELD_LABELS[locale][source.dataset.lens as Lens][Number(source.dataset.selectedGroup)]}` : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="880" viewBox="0 0 1200 880"><rect width="1200" height="880" fill="#f4f2e9"/><g fill="#234f42" font-family="Georgia,serif"><text x="55" y="59" font-size="25">estimador / ${labels.title}</text><text x="55" y="109" font-size="36">${labels.views[view]}${source.dataset.selectedHouse ? ` · ${locale==='pt'?'Agregado':'Household'} ${Number(source.dataset.selectedHouse)+1}` : ''}</text></g><text x="1145" y="54" text-anchor="end" fill="#8c533b" font-family="Arial,sans-serif" font-size="14">${labels.demo}</text>${new XMLSerializer().serializeToString(scene)}<g fill="#52675a" font-family="Arial,sans-serif" font-size="16"><text x="55" y="811">${labels.note}${groupNote}${alone ? ` · ${labels.filter}` : ''}</text><text x="55" y="845">estimador.pt/populacao/miniatura</text></g></svg>`;
+  // The signature where the old serif "estimador / Portugal em miniatura" stood:
+  // its baseline on the old title's (y 59), at 1.25 × the logo's 24px box.
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="880" viewBox="0 0 1200 880"><rect width="1200" height="880" fill="${BRAND.paper}"/>${signature(55, 35, 1.25)}<text x="55" y="109" fill="${BRAND.ink}" font-family="${SANS}" font-size="34" font-weight="700" letter-spacing="-0.5">${labels.views[view]}${source.dataset.selectedHouse ? ` · ${locale==='pt'?'Agregado':'Household'} ${Number(source.dataset.selectedHouse)+1}` : ''}</text><text x="1145" y="54" text-anchor="end" fill="${BRAND.terracotta}" font-family="${SANS}" font-size="14" font-weight="700" letter-spacing="1.5">${labels.demo}</text>${new XMLSerializer().serializeToString(scene)}<g fill="${BRAND.muted}" font-family="${SANS}" font-size="16"><text x="55" y="811">${labels.note}${groupNote}${alone ? ` · ${labels.filter}` : ''}</text><text x="55" y="845">estimador.pt/populacao/miniatura</text></g></svg>`;
 }
 export async function pngFromSvg(svg: string): Promise<Blob> {
   const url = URL.createObjectURL(new Blob([svg], {type:'image/svg+xml'}));

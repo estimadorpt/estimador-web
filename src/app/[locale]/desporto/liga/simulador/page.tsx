@@ -98,8 +98,10 @@ export default async function SimuladorPage({
     <div className="football-page min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      {/* The section's painting, eager, as on the Liga hub: a section entrance
+          (the header table in CLAUDE.md's Design Language). */}
       <PageHero
-        field="periwinkle"
+        illustration="football"
         compact
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
         icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
