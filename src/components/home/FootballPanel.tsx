@@ -24,8 +24,8 @@ export interface FootballSnapshot {
  * that club — its relevant objective, dated baseline and its own supported
  * fixture's three-outcome stakes (diagnosis §4/§12). The per-club payload is
  * computed once here, server-side, for all 18 clubs; FootballClubPicker only
- * switches between precomputed answers. The illustration stays a narrow
- * accent beside the heading so the answer gets the space, not a full-width
+ * switches between precomputed answers. The stadium comes after the answer,
+ * as the band that fills the rest of the panel (`.home-band`), never a
  * banner ahead of it.
  */
 export async function FootballPanel({ locale, variant, snapshot, deltas }: { locale: string; variant: 'secondary' | 'support'; snapshot: FootballSnapshot | null; deltas?: Record<string, TeamDelta> }) {
@@ -90,8 +90,7 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
 
   const copy = (
     <>
-      <div className="flex items-start gap-3">
-        <SectionIllustration scene="football" sizes="80px" className="football-home-scene football-home-scene--accent shrink-0" />
+      <div>
         <div className="min-w-0">
           <Kicker pill={pill}>{t('footballKicker')}</Kicker>
           <h2 id="home-football-title" className={`mt-1 ${rail ? 'text-xl md:text-[1.5rem] md:leading-[1.15]' : 'text-lg md:text-[1.35rem] md:leading-[1.2]'}`}>
@@ -131,13 +130,15 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
   if (rail) {
     return (
       <HomePanel labelledBy="home-football-title" className="flex flex-col">
-        <div className="flex flex-1 flex-col p-4 md:p-5">{copy}</div>
+        <div className="p-4 md:p-5">{copy}</div>
+        <SectionIllustration scene="football" sizes="(min-width: 1100px) 32vw, 100vw" className="home-band home-band--football" />
       </HomePanel>
     );
   }
   return (
     <HomePanel labelledBy="home-football-title" className="flex flex-col">
       <div className="min-w-0 p-5 md:p-6">{copy}</div>
+      <SectionIllustration scene="football" sizes="(min-width: 900px) 50vw, 100vw" className="home-band home-band--football" />
     </HomePanel>
   );
 }

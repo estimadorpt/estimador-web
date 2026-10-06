@@ -26,13 +26,10 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
   const preparing = state === 'preparing';
   return (
     <HomePanel labelledBy="home-economy-title" className="flex flex-col">
-      <div className="flex min-w-0 flex-1 flex-col p-5 md:p-6">
-        <div className="md:grid md:grid-cols-[minmax(0,1fr)_110px] md:items-center md:gap-4">
-          <div>
-            <Kicker pill={live ? undefined : tSections(preparing ? 'preparingSection' : 'pausedSection')}>{t('economyKicker')}</Kicker>
-            <h2 id="home-economy-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{live ? t('economyTitleLive') : t('economyTitlePaused')}</h2>
-          </div>
-          <SectionIllustration scene="economy" sizes="110px" className="home-support-scene hidden md:block md:!h-[100px] md:!w-[110px] md:!p-0 md:[&_img]:h-full" />
+      <div className="flex min-w-0 flex-col p-5 md:p-6">
+        <div>
+          <Kicker pill={live ? undefined : tSections(preparing ? 'preparingSection' : 'pausedSection')}>{t('economyKicker')}</Kicker>
+          <h2 id="home-economy-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{live ? t('economyTitleLive') : t('economyTitlePaused')}</h2>
         </div>
         {live ? (
           <>
@@ -55,6 +52,7 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
           </p>
         )}
       </div>
+      <SectionIllustration scene="economy" sizes="(min-width: 900px) 40vw, 100vw" className="home-band hidden md:block" />
     </HomePanel>
   );
 }

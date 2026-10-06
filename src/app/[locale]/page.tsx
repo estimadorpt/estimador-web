@@ -167,7 +167,7 @@ export default async function HomePage({
           {panel(layout.lead, 'lead')}
           {panel(layout.secondary, 'secondary')}
         </div>
-        <div className="mt-4 grid items-start gap-4 md:mt-6 md:gap-6 min-[900px]:grid-cols-2">
+        <div className="mt-4 grid items-stretch gap-4 md:mt-6 md:gap-6 min-[900px]:grid-cols-[3fr_2fr]">
           {support.map(section => panel(section, 'support'))}
         </div>
         <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-stone-600 md:mt-8">

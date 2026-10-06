@@ -103,14 +103,11 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
   const questionLine = (e: ElectionConfig) => e.type === 'presidential' ? t('electionsQuestionRunoff') : t('electionsQuestionSeats');
 
   return (
-    <HomePanel labelledBy="home-elections-title">
+    <HomePanel labelledBy="home-elections-title" className="flex flex-col">
       <div className="min-w-0 p-5 md:p-6">
-        <div className="md:grid md:grid-cols-[minmax(0,1fr)_138px] md:items-center md:gap-5">
-          <div>
-            <Kicker pill={tSections('archiveSection')}>{t('electionsKicker')}</Kicker>
-            <h2 id="home-elections-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{t('electionsTitle')}</h2>
-          </div>
-          <SectionIllustration scene="elections" sizes="138px" className="home-support-scene hidden md:block md:h-[108px] md:w-[138px] md:p-0 md:[&_img]:h-full" />
+        <div>
+          <Kicker pill={tSections('archiveSection')}>{t('electionsKicker')}</Kicker>
+          <h2 id="home-elections-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{t('electionsTitle')}</h2>
         </div>
         <p className="mt-2 text-[14px] leading-relaxed text-stone-600">{t('electionsText')}</p>
         <ul className="mt-3 divide-y divide-line border-y border-line">
@@ -134,6 +131,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
         </ul>
         <div className="mt-3"><Action href="/eleicoes/arquivo" locale={locale} variant="text" arrow>{t('electionsArchiveGuide')}</Action></div>
       </div>
+      <SectionIllustration scene="elections" sizes="(min-width: 900px) 50vw, 100vw" className="home-band hidden md:block" />
     </HomePanel>
   );
 }
