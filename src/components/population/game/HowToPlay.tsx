@@ -16,12 +16,14 @@ export const GUESS_EVENT = 'misteriosa:guess';
  */
 export function HowToPlay({ locale, honesty }: { locale: Locale; honesty: string }) {
   const t = GAME_COPY[locale];
-  const [open, setOpen] = useState(false);
+  // Open in the server render (a first visit, the common case, then moves nothing);
+  // a returning player's copy closes after mount.
+  const [open, setOpen] = useState(true);
   useEffect(() => {
     try {
-      if (!window.localStorage.getItem(GAME_STORAGE_KEY)) setOpen(true);
+      if (window.localStorage.getItem(GAME_STORAGE_KEY)) setOpen(false);
     } catch {
-      setOpen(true);
+      // No storage: leave it open.
     }
     const close = () => setOpen(false);
     window.addEventListener(GUESS_EVENT, close);
