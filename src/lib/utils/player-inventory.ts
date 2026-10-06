@@ -9,7 +9,7 @@ import { nextSeason, playerDataCutoffLabel } from '@/lib/utils/player-pages';
  * Three states, not two: a ranking, a fit that came back inconclusive, and
  * nothing at all. Collapsing the middle one into either of the others would
  * be the dishonesty that page is about. Shared by the page's hero (the lede
- * states it once, audit UXD2-29) and the hub component.
+ * states it once from 640px up, audit UXD2-29) and the hub component.
  */
 export interface PlayerInventory {
   ranked: string[];

@@ -75,7 +75,8 @@ export default async function PlayerRatingsPage({
     ]);
 
   // The premise, what is ranked and the data cut-off, each said once, in the
-  // hero, before the first list (audit UXD2-29, CL3-12).
+  // hero, before the first list (audit UXD2-29, CL3-12); what is ranked from
+  // 640px up only (see the lede).
   const inventory = playerInventorySentence(
     playerInventory(
       { finishers: (finishers?.players?.length ?? 0) > 0, contrib, gk, def, contested, gkChannels },
