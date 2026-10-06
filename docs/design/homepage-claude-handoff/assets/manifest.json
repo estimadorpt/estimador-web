@@ -4,7 +4,8 @@
     "file": "population.png",
     "width": 1448,
     "height": 1086,
-    "bytes": 1326326,
+    "bytes": 1448429,
+    "source": "docs/design/original-illustration-refinement/03-people-v2.png (the 13 September 2026 refinement), copied here as population.png on 6 October 2026. The 12 September house it replaced is kept in docs/design/homepage-claude-handoff.zip.",
     "role": "Decorative section illustration; not data or UI",
     "fit": "contain",
     "alt": "Use empty alt when adjacent section text supplies its meaning."
@@ -15,6 +16,7 @@
     "width": 1448,
     "height": 1086,
     "bytes": 1181849,
+    "retired": "6 October 2026: the homepage football panel uses the 13 September section scene (public/images/sections); scripts/generate-home-art.mjs no longer cuts this master.",
     "role": "Decorative section illustration; not data or UI",
     "fit": "contain",
     "alt": "Use empty alt when adjacent section text supplies its meaning."
@@ -25,6 +27,7 @@
     "width": 1448,
     "height": 1086,
     "bytes": 1413462,
+    "retired": "6 October 2026: the homepage economy panel uses the 13 September section scene (public/images/sections); scripts/generate-home-art.mjs no longer cuts this master.",
     "role": "Decorative section illustration; not data or UI",
     "fit": "contain",
     "alt": "Use empty alt when adjacent section text supplies its meaning."
@@ -35,6 +38,7 @@
     "width": 1448,
     "height": 1086,
     "bytes": 1146358,
+    "retired": "6 October 2026: the homepage elections panel uses the 13 September section scene (public/images/sections); scripts/generate-home-art.mjs no longer cuts this master.",
     "role": "Decorative section illustration; not data or UI",
     "fit": "contain",
     "alt": "Use empty alt when adjacent section text supplies its meaning."
