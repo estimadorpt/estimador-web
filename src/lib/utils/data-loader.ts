@@ -181,10 +181,9 @@ export async function loadPresidentialData() {
         probability_a_leads: []
       })),
       // Runoff pairs for election day, the horizon the section's date line
-      // names and the vote-share bars use. The snapshot file
-      // (presidential_snapshot_runoff_pairs.json, at the last poll) answered a
-      // different date and is no longer shown; nor are the changes since the
-      // previous poll, which described that snapshot.
+      // names and the vote-share bars use. (The last-poll snapshot pairs and
+      // the changes since the previous poll answered a different date; they
+      // were never shown and their files were deleted.)
       loadJsonData<PresidentialRunoffPairsData>('presidential_runoff_pairs.json', PRESIDENTIAL_DIR).catch(() => ({
         election_date: PRESIDENTIAL_2026.date,
         pairs: [],

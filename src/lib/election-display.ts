@@ -124,17 +124,3 @@ export function voteShareScopeLabel(scope: 'validVotes' | 'allBallots', locale: 
     ? (pt ? 'dos votos válidos' : 'of valid votes')
     : (pt ? 'incluindo brancos e nulos' : 'including blank and void ballots');
 }
-
-/**
- * Two panels can also disagree because they answer different questions in
- * time: a snapshot at the last poll versus a projection to election day. Name
- * the horizon beside the number rather than letting the ranges look comparable.
- * The archives are past forecasts, so the snapshot is named by its date
- * ("at the last poll"), never as "current".
- */
-export function estimateHorizonLabel(kind: 'current' | 'electionDay', locale: string): string {
-  const pt = electionLocale(locale) === 'pt';
-  return kind === 'current'
-    ? (pt ? 'estimativa à data da última sondagem' : 'estimate at the last poll')
-    : (pt ? 'previsão para o dia da eleição' : 'forecast for election day');
-}

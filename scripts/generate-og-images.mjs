@@ -67,7 +67,7 @@ const COPY = {
     populationSection: 'População',
     populationLabel: 'População sintética aberta',
     populationSubject: 'freguesias · Censos 2021',
-    populationCaption: (persons, households) => `${persons} pessoas e ${households} agregados gerados para todas as freguesias do país.`,
+    populationCaption: (persons, households, parishes) => `${persons} pessoas e ${households} agregados gerados para as ${parishes} freguesias dos Censos 2021 (CAOP 2021).`,
     populationFooter: (version, date) => `Versão ${version} · publicada a ${date}`,
   },
   en: {
@@ -95,7 +95,7 @@ const COPY = {
     populationSection: 'Population',
     populationLabel: 'Open synthetic population',
     populationSubject: 'parishes · 2021 Census',
-    populationCaption: (persons, households) => `${persons} people and ${households} households generated for every parish in the country.`,
+    populationCaption: (persons, households, parishes) => `${persons} people and ${households} households generated for the ${parishes} parishes of the 2021 Census (CAOP 2021).`,
     populationFooter: (version, date) => `Version ${version} · released ${date}`,
   },
 };
@@ -315,13 +315,14 @@ function populationCard(meta, locale) {
   const counts = meta?.counts;
   const honesty = meta?.honesty?.portrait?.[locale];
   if (!counts?.parishes || !counts.persons || !counts.households || !honesty) return null;
-  const number = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB');
+  // Grouped like formatCount on the site ("3 092"): Intl's pt-PT leaves four digits ungrouped.
+  const number = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { useGrouping: 'always' });
   return figureCard({
     sectionLabel: copy.populationSection,
     label: copy.populationLabel,
     value: number.format(counts.parishes),
     subject: copy.populationSubject,
-    caption: `${copy.populationCaption(number.format(counts.persons), number.format(counts.households))} ${honesty}`,
+    caption: `${copy.populationCaption(number.format(counts.persons), number.format(counts.households), number.format(counts.parishes))} ${honesty}`,
     footerLeft: copy.populationFooter(meta.release_version, formatDate(meta.published, locale)),
     footerRight: printedUrl(locale, SITE_PATH.population),
   });

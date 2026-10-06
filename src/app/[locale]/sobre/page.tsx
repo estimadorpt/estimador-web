@@ -107,8 +107,8 @@ function EstadoAtual({
         ? `Publicada · população sintética v${POPULATION_RELEASE} (Censos 2021), de 5 de outubro de 2026.`
         : `Released · synthetic population v${POPULATION_RELEASE} (2021 Census), 5 October 2026.`,
       text: pt
-        ? 'Tanto quanto nos foi possível apurar, a primeira população sintética de acesso aberto a cobrir todas as freguesias de Portugal. Pessoas e agregados gerados, não pessoas, famílias ou moradas reais. Podes procurar a tua freguesia, jogar a Freguesia misteriosa do dia e descarregar os microdados.'
-        : 'To the best of our knowledge, the first open-access synthetic population to cover every parish in Portugal. Generated people and households, not real people, families or addresses. You can look up your parish, play the daily Mystery parish and download the microdata.',
+        ? 'Tanto quanto nos foi possível apurar, a primeira população sintética de acesso aberto a cobrir as 3 092 freguesias dos Censos 2021 (CAOP 2021). Pessoas e agregados gerados, não pessoas, famílias ou moradas reais. Podes procurar a tua freguesia, jogar a Freguesia misteriosa do dia e descarregar os microdados.'
+        : 'To the best of our knowledge, the first open-access synthetic population to cover the 3,092 parishes of the 2021 Census (CAOP 2021). Generated people and households, not real people, families or addresses. You can look up your parish, play the daily Mystery parish and download the microdata.',
       method: { href: '/populacao/metodologia', label: pt ? 'Metodologia da população' : 'Population methodology' },
     },
     {
@@ -127,18 +127,18 @@ function EstadoAtual({
       href: '/eleicoes/presidenciais',
       status: pt ? 'Arquivo · previsão preservada tal como foi publicada.' : 'Archive · forecast preserved as published.',
       text: pt
-        ? 'As previsões que publicámos para as duas voltas, com a informação disponível à data. Não são atualizadas nem reescritas com o resultado.'
-        : 'The forecasts we published for both rounds, with the information available at the time. They are not updated, nor rewritten with the outcome.',
-      method: { href: '/eleicoes/arquivo', label: pt ? 'Como ler o arquivo' : 'How to read the archive' },
+        ? 'As previsões que publicámos para as duas voltas, com a informação disponível à data: as sondagens desse ciclo, a evolução estimada de cada candidato e as probabilidades das duas voltas. Os efeitos das empresas de sondagens foram estimados, mas ficaram muito perto de zero e não são mostrados. Não são atualizadas nem reescritas com o resultado.'
+        : 'The forecasts we published for both rounds, with the information available at the time: that cycle\'s polls, each candidate\'s estimated trend and the probabilities for both rounds. The pollster house effects were estimated but came out very close to zero and are not shown. They are not updated, nor rewritten with the outcome.',
+      method: { href: '/eleicoes/metodologia', label: pt ? 'Metodologia das eleições' : 'Election methodology' },
     },
     {
       label: pt ? 'Eleições legislativas 2025' : 'Parliamentary election 2025',
       href: '/eleicoes/legislativas',
       status: pt ? 'Arquivo · não é atualizado com novos resultados.' : 'Archive · not updated with new results.',
       text: pt
-        ? 'As projeções nacionais de mandatos, simuladas distrito a distrito pelo método de Hondt, e os efeitos das empresas de sondagens estimados nessa altura.'
-        : 'The national seat projections, simulated district by district with the D’Hondt method, and the pollster house effects estimated at the time.',
-      method: { href: '/eleicoes/arquivo', label: pt ? 'Como ler o arquivo' : 'How to read the archive' },
+        ? 'As projeções nacionais de mandatos, simuladas distrito a distrito pelo método de Hondt, os distritos com mandatos em disputa e os efeitos das empresas de sondagens estimados nessa altura.'
+        : 'The national seat projections, simulated district by district with the D’Hondt method, the districts with seats in play and the pollster house effects estimated at the time.',
+      method: { href: '/eleicoes/metodologia', label: pt ? 'Metodologia das eleições' : 'Election methodology' },
     },
     {
       label: pt ? 'Economia' : 'Economy',

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   credibleIntervalLabel,
   electionProbabilityParts,
-  estimateHorizonLabel,
   formatElectionDate,
   formatElectionDayMonth,
   formatElectionLongDate,
@@ -48,12 +47,6 @@ describe('election display', () => {
     expect(voteShareScopeLabel('allBallots', 'pt')).toBe('incluindo brancos e nulos');
     expect(voteShareScopeLabel('validVotes', 'en')).toBe('of valid votes');
     expect(voteShareScopeLabel('allBallots', 'en')).toBe('including blank and void ballots');
-  });
-  it('names the estimate horizon by its date, never as "current", since these are archives', () => {
-    expect(estimateHorizonLabel('current', 'pt')).toBe('estimativa à data da última sondagem');
-    expect(estimateHorizonLabel('electionDay', 'pt')).toBe('previsão para o dia da eleição');
-    expect(estimateHorizonLabel('current', 'en')).toBe('estimate at the last poll');
-    expect(estimateHorizonLabel('electionDay', 'en')).toBe('forecast for election day');
   });
   it('sets the bound of a headline probability in words, not as a chevron', () => {
     expect(electionProbabilityParts(1, 'pt')).toEqual({ bound: 'mais de', value: '99%' });
