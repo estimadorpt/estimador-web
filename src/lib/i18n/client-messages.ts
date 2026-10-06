@@ -26,8 +26,9 @@ import type { AbstractIntlMessages } from 'next-intl';
 export const CLIENT_MESSAGE_KEYS = [
   // Header (every page): navigation labels.
   'nav.home', 'nav.population', 'nav.economics', 'nav.economicsPreparing', 'nav.sport', 'nav.liga',
-  'nav.elections', 'nav.about',
+  'nav.elections', 'nav.about', 'nav.game',
   'elections.navPresidential', 'elections.navParliamentary', 'elections.navArchiveGuide',
+  'elections.navMethodology',
   'articles.title', 'methodology.title',
 
   // Homepage economy panel and the economy page's banners (templates, no figures).

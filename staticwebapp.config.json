@@ -98,6 +98,14 @@
       "rewrite": "/en/populacao/freguesia/_/index.html"
     },
     {
+      "route": "/pt/populacao/v/*",
+      "rewrite": "/pt/populacao/consulta/index.html"
+    },
+    {
+      "route": "/en/populacao/v/*",
+      "rewrite": "/en/populacao/consulta/index.html"
+    },
+    {
       "route": "/populacao/v/*",
       "rewrite": "/pt/populacao/consulta/index.html"
     },
@@ -264,6 +272,11 @@
     {
       "route": "/eleicoes/legislativas/mapa",
       "redirect": "/pt/eleicoes/legislativas/mapa/",
+      "statusCode": 301
+    },
+    {
+      "route": "/eleicoes/metodologia",
+      "redirect": "/pt/eleicoes/metodologia/",
       "statusCode": 301
     },
     {

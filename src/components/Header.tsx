@@ -32,6 +32,14 @@ export function Header() {
   const enPath = useArticleLanguagePath(pathname, 'en');
   const isPortuguese = locale === 'pt';
   const hasArticles = useHasArticles(locale);
+  // The parish shell is one exported page behind a rewrite, with no RSC
+  // payload of its own: its language switch is a plain anchor built from the
+  // real address (upper-case code, trailing slash), never /freguesia/_/.
+  const [parishPath, setParishPath] = useState<string | null>(null);
+  useEffect(() => {
+    const match = /\/populacao\/freguesia\/([^/]+)\/?$/.exec(window.location.pathname);
+    setParishPath(match && match[1] !== '_' ? `/populacao/freguesia/${decodeURIComponent(match[1]).toUpperCase()}/` : null);
+  }, [pathname]);
 
   // Ordered by what is live: the population, the Liga, the election archive,
   // then the economy while it is in preparation (src/lib/config/economy-status.json).
@@ -53,7 +61,7 @@ export function Header() {
         { href: '/desporto/liga', label: t('nav.liga') },
         { href: '/desporto/liga/jogadores', label: isPortuguese ? 'Jogadores' : 'Players' },
         { href: '/desporto/liga/simulador', label: isPortuguese ? 'Simulador' : 'Simulator' },
-        { href: '/desporto/liga/jogo-previsoes', label: isPortuguese ? 'Jogo de previsões' : 'Prediction game' },
+        { href: '/desporto/liga/jogo-previsoes', label: t('nav.game') },
       ],
     },
     {
@@ -64,6 +72,7 @@ export function Header() {
         { href: '/eleicoes/arquivo', label: t('elections.navArchiveGuide') },
         { href: '/eleicoes/presidenciais', label: t('elections.navPresidential') },
         { href: '/eleicoes/legislativas', label: t('elections.navParliamentary') },
+        { href: '/eleicoes/metodologia', label: t('elections.navMethodology') },
       ],
     },
     // The editorial flag in src/lib/config/economy-status.json, not data age.
@@ -135,13 +144,21 @@ export function Header() {
           const href = targetLocale === 'pt' ? ptPath : enPath;
           const fallback = href !== pathname;
           const languageName = targetLocale === 'pt' ? 'Português' : 'English';
+          const className = `${mobile ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'} rounded font-medium transition-colors ${focusStyle} ${locale === targetLocale ? 'bg-cream text-ink shadow-sm' : 'text-stone-600 hover:text-ink'}`;
+          if (parishPath) return (
+            <a key={targetLocale} href={`/${targetLocale}${parishPath}`} hrefLang={targetLocale} lang={targetLocale}
+              onClick={closeNavigation} aria-label={languageName} title={languageName}
+              aria-current={locale === targetLocale ? 'page' : undefined} className={className}>
+              {targetLocale.toUpperCase()}
+            </a>
+          );
           const fallbackLabel = isPortuguese ? 'índice de artigos; tradução indisponível' : 'article index; translation unavailable';
           return (
             <Link key={targetLocale} href={href} locale={targetLocale} hrefLang={targetLocale} lang={targetLocale}
               onClick={closeNavigation} aria-label={fallback ? `${languageName}: ${fallbackLabel}` : languageName}
               aria-current={locale === targetLocale ? 'page' : undefined}
               title={fallback ? `${languageName}: ${fallbackLabel}` : languageName}
-              className={`${mobile ? 'px-3 py-2 text-sm' : 'px-2 py-1.5 text-xs'} rounded font-medium transition-colors ${focusStyle} ${locale === targetLocale ? 'bg-cream text-ink shadow-sm' : 'text-stone-600 hover:text-ink'}`}>
+              className={className}>
               {targetLocale.toUpperCase()}{fallback ? (isPortuguese ? ' · Índice' : ' · Index') : ''}
             </Link>
           );
