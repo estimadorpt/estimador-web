@@ -291,13 +291,28 @@ export interface PopulationScorecard {
     child_deficit: ScorecardValue;
     n_failures: number;
     passes_gate: boolean;
+    /** Share strictly inside a pre-registered range (0 when every band sits below it, i.e. better). Never shown. */
     coverage_in_band: number;
+    /**
+     * From v1.0.2: the producer's own reading of the size bands against their
+     * pre-registered (informational) ranges, in words. Shown as written.
+     */
+    band_reading?: {
+      pt: string;
+      en: string;
+      share_at_or_better_than_range: number;
+      parishes_by_position: Record<'below' | 'inside' | 'above', number>;
+      ranges_gate_release: boolean;
+    };
   };
   constraints: Array<{ key: string; label: string; label_en: string; srmse_median: ScorecardValue; was_constrained: boolean }>;
   /**
-   * Size-band strata. `in_band`, `acceptance` and `note_pt` are internal
-   * (informational bands; the medians sit below them, i.e. better) and must
-   * never be rendered as a pass/fail.
+   * Size-band strata. `in_band`, `acceptance` and `release_decision` are
+   * internal (informational ranges; `in_band` is false for a band *better*
+   * than its range) and are never rendered as a pass/fail. From v1.0.2 each
+   * band carries `band_position` and a producer note in words (`note_pt` /
+   * `note_en`; before v1.0.2 `note_pt` held a status code, so the site reads
+   * the notes only when `band_position` is present).
    */
   strata: Array<{
     key: string;
@@ -306,6 +321,9 @@ export interface PopulationScorecard {
     label_en: string;
     n_parishes: number;
     person_srmse_median: ScorecardValue;
+    band_position?: 'below' | 'inside' | 'above';
+    note_pt?: string;
+    note_en?: string;
     [internal: string]: unknown;
   }>;
   retrodiction: { status: string; reason?: string };

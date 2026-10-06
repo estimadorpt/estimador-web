@@ -8,6 +8,7 @@ import { QualityBadge } from '@/components/population/QualityBadge';
 import { PopulationSectionNav } from '@/components/population/SectionNav';
 import { FitBars } from '@/components/population/quality/FitBars';
 import { PopulationUnavailable, Section, StatusItem } from '@/components/population/quality/parts';
+import { bandReading } from '@/components/population/quality/band-reading';
 import {
   ACCIDENTAL_MATCHES,
   FIT_EXPLAINED,
@@ -76,6 +77,9 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
     if (tier === 'C' && takesFallback) return TIER_PAGE.C[locale];
     return TIER_PAGE.A[locale];
   };
+
+  // The size bands against their pre-registered ranges, in the producer's words.
+  const bands = scorecard ? bandReading(scorecard, locale) : null;
 
   const source = pt
     ? `Avaliação da versão ${POPULATION_RELEASE} · Censos 2021 (INE)`
@@ -216,6 +220,26 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   />
                 </DataCard>
               </div>
+              {bands && (bands.reading || bands.notes.length > 0) && (
+                <div className="mt-6 max-w-3xl rounded-2xl border border-line bg-cream p-5">
+                  <h3 className="text-base font-bold text-ink">{pt ? 'Ficou onde se esperava?' : 'Did it land where expected?'}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-stone-700">
+                    {pt
+                      ? 'Antes da avaliação nacional, cada classe de tamanho de freguesia tinha um intervalo de erro pré-registado: o erro que se esperava ver. '
+                      : 'Before the national evaluation, each parish size band had a pre-registered error range: the error it was expected to show. '}
+                    {bands.reading}
+                  </p>
+                  {bands.notes.length === 1 && bands.notes[0].label === null ? (
+                    <p className="mt-2 text-sm leading-relaxed text-stone-700">
+                      {pt ? 'Em todas as classes: ' : 'In every band: '}{bands.notes[0].note}
+                    </p>
+                  ) : (
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-relaxed text-stone-700">
+                      {bands.notes.map(item => <li key={item.key}><span className="font-semibold text-ink">{item.label}:</span> {item.note}</li>)}
+                    </ul>
+                  )}
+                </div>
+              )}
               <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
                 {pt
                   ? 'Com poucas pessoas, cada uma pesa mais em cada tabela: por isso cada freguesia tem um nível de qualidade, mostrado no topo da sua página.'
@@ -259,7 +283,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 <p className="mt-3 max-w-3xl text-sm leading-relaxed text-stone-600">{HONESTY.zero[locale]}</p>
               )}
               <div className="mt-6 max-w-3xl rounded-2xl border border-line bg-cream p-5">
-                <h3 className="text-base font-bold text-ink">{pt ? 'Porque é que a versão 1.0.1 substituiu a 1.0.0?' : 'Why did release 1.0.1 replace 1.0.0?'}</h3>
+                <h3 className="text-base font-bold text-ink">{pt ? 'Porque é que há quatro versões de 5 de outubro?' : 'Why are there four releases of 5 October?'}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-stone-700">{SUPERSEDED[locale]}</p>
               </div>
             </Section>
@@ -291,8 +315,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               id="limitacoes"
               title={pt ? 'Onde é que os dados são mais fracos?' : 'Where are the data weakest?'}
               lede={<p>{pt
-                ? `Limitações conhecidas da população gerada (a mesma nas versões 1.0.0 e ${POPULATION_RELEASE}), declaradas em vez de escondidas. A próxima versão tem um plano para cada uma.`
-                : `Known limitations of the generated population (the same in releases 1.0.0 and ${POPULATION_RELEASE}), declared rather than hidden. The next release has a plan for each.`}</p>}
+                ? `Limitações conhecidas da população gerada (a mesma da versão 1.0.0 à ${POPULATION_RELEASE}), declaradas em vez de escondidas. A próxima versão tem um plano para cada uma.`
+                : `Known limitations of the generated population (the same from release 1.0.0 to ${POPULATION_RELEASE}), declared rather than hidden. The next release has a plan for each.`}</p>}
             >
               <ol className="grid gap-4 md:grid-cols-2">
                 {LIMITATIONS.map(limitation => (
