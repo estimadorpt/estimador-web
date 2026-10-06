@@ -109,8 +109,8 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
     tieNote: stats.ptsTie === 0
       ? ""
       : pt
-        ? ` (${formatInteger(stats.ptsTie, "pt")} ${stats.ptsTie === 1 ? "época" : "épocas"}; nos critérios de desempate, ${formatInteger(stats.tieToA, "pt")} para ${teamWithArticle(samples.teams[iA], "o")} e ${formatInteger(stats.ptsTie - stats.tieToA, "pt")} para ${teamWithArticle(samples.teams[iB], "o")})`
-        : ` (${formatInteger(stats.ptsTie, "en")} ${stats.ptsTie === 1 ? "season" : "seasons"}; on the tiebreakers, ${formatInteger(stats.tieToA, "en")} to ${nameA} and ${formatInteger(stats.ptsTie - stats.tieToA, "en")} to ${nameB})`,
+        ? ` (${formatInteger(stats.ptsTie, "pt")} ${stats.ptsTie === 1 ? "época" : "épocas"}; no desempate do modelo, ${formatInteger(stats.tieToA, "pt")} para ${teamWithArticle(samples.teams[iA], "o")} e ${formatInteger(stats.ptsTie - stats.tieToA, "pt")} para ${teamWithArticle(samples.teams[iB], "o")})`
+        : ` (${formatInteger(stats.ptsTie, "en")} ${stats.ptsTie === 1 ? "season" : "seasons"}; on the model's tiebreak, ${formatInteger(stats.tieToA, "en")} to ${nameA} and ${formatInteger(stats.ptsTie - stats.tieToA, "en")} to ${nameB})`,
     marginNote: pt
       ? `Com ${formatInteger(stats.n, "pt")} épocas, a margem de amostragem é de cerca de ±${margin} pontos percentuais; os números de título ao lado vêm das ${formatInteger(samples.n_sims, "pt")} simulações e têm uma margem muito menor.`
       : `With ${formatInteger(stats.n, "en")} seasons, the sampling margin is about ±${margin} percentage points; the title figures beside them come from all ${formatInteger(samples.n_sims, "en")} simulations and carry a much smaller margin.`,

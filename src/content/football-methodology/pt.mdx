@@ -40,7 +40,7 @@ Os xPts não usam o modelo de previsão: são uma leitura independente. A difere
 
 O [simulador](/pt/desporto/liga/simulador/) usa as mesmas simulações. Quando escolhes um resultado para um jogo da jornada seguinte, as probabilidades passam a ser as das simulações em que esse resultado aconteceu: é uma probabilidade condicional, não uma nova corrida do modelo. Um resultado pouco provável tem menos simulações por trás, e as suas probabilidades têm mais ruído. Por isso o simulador trabalha com um resultado de cada vez, e só lista outros jogos que mudam as contas do teu clube em pelo menos 3 pontos percentuais: abaixo disso, a diferença confunde-se com o ruído.
 
-A pergunta «Quem acaba à frente?», na mesma página, usa outra coisa: <Samples /> épocas completas sorteadas das simulações. Conta quem acaba com mais pontos, e diz à parte quantas épocas acabam empatadas em pontos e para que lado as desempatam os critérios da Liga. Com essa amostra, uma percentagem como 64% tem uma margem de cerca de ±5 pontos percentuais, muito maior do que a das probabilidades de título calculadas com todas as simulações.
+A pergunta «Quem acaba à frente?», na mesma página, usa outra coisa: <Samples /> épocas completas sorteadas das simulações. Conta quem acaba com mais pontos, e diz à parte quantas épocas acabam empatadas em pontos e para que lado o modelo as desempata. Com essa amostra, uma percentagem como 64% tem uma margem de cerca de ±5 pontos percentuais, muito maior do que a das probabilidades de título calculadas com todas as simulações.
 
 ## Jogos decisivos
 

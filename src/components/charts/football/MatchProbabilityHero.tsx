@@ -187,16 +187,16 @@ export function MatchProbabilityHero({
           ? kickoffSteps(kickoff, kickoffConfirmed, matchStartedLine(forecastTimestamp, locale), matchPlayedLine(forecastTimestamp, locale))
           : [];
         const shownFromSm = Boolean(centre) && !played && kickoffConfirmed;
-        if (shownFromSm && steps.length === 0) {
-          return <div className="mb-4 text-[11px] font-bold uppercase tracking-wider text-stone-500 sm:hidden">{when}</div>;
-        }
+        const line = "mb-4 text-[11px] font-bold uppercase tracking-wider text-stone-500";
+        // The whole line is the switched node, so no empty margin is left
+        // on wide screens before kickoff.
+        const initial = <div className={shownFromSm ? `${line} sm:hidden` : line}>{when}</div>;
+        if (steps.length === 0) return initial;
         return (
-          <div className="mb-4 text-[11px] font-bold uppercase tracking-wider text-stone-500">
-            <ClockSwitch
-              initial={shownFromSm ? <span className="sm:hidden">{when}</span> : when}
-              steps={steps}
-            />
-          </div>
+          <ClockSwitch
+            initial={initial}
+            steps={steps.map(s => ({ at: s.at, value: <div className={line}>{s.value}</div> }))}
+          />
         );
       })()}
       {!when && <div className="mb-4 text-[11px] font-bold uppercase tracking-wider text-stone-500">{labels.matchday}</div>}
