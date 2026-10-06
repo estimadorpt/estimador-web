@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { formatDecimal } from "@/lib/football-format";
-import { ligaTeamColors, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
+import { formatPercent, formatSigned } from "@/lib/football-format";
+import { teamColorOnPaper, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
 import { Dices } from "lucide-react";
 
 export interface SeasonSamples {
@@ -40,10 +40,11 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
       : `Each click shows ONE complete season drawn from the model's ${samples.n_sims.toLocaleString("en")} simulations — a possible future, not a prediction.`,
     button: drawIdx === null ? (pt ? "Sortear" : "Draw") : (pt ? "Sortear outra" : "Draw again"),
     champion: pt ? "Campeão" : "Champion",
+    // The one percentage rule (football-format), so "<0,1%" never reads "0%".
     inSims: (p: number) =>
       pt
-        ? `acontece em ${formatDecimal(p * 100, "pt", p < 0.01 ? 1 : 0)}% das simulações`
-        : `happens in ${formatDecimal(p * 100, "en", p < 0.01 ? 1 : 0)}% of simulations`,
+        ? `acontece em ${formatPercent(p, "pt")} das simulações`
+        : `happens in ${formatPercent(p, "en")} of simulations`,
     relegated: pt ? "Despromovidos" : "Relegated",
     ptsLabel: pt ? "Pts" : "Pts",
   };
@@ -82,7 +83,7 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
 
       <button
         onClick={draw}
-        className="mb-4 px-4 py-2 rounded-lg bg-emerald-700 text-white text-sm font-semibold hover:bg-emerald-800 transition-colors"
+        className="mb-4 min-h-11 px-4 py-2 rounded-lg bg-emerald-700 text-white text-sm font-semibold hover:bg-emerald-800 transition-colors"
       >
         {t.button}
       </button>
@@ -90,7 +91,14 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
       {s && champion && (
         <div>
           <div className="mb-3 text-sm">
-            <span className="font-bold" style={{ color: ligaTeamColors[champion.team] ?? "#333" }}>
+            {/* Ink text with the club colour as a swatch: a team colour is
+                not a text colour (audit A11Y2-10). */}
+            <span className="inline-flex items-center gap-1.5 font-bold text-ink">
+              <i
+                aria-hidden="true"
+                className="inline-block h-3.5 w-[3px] shrink-0 rounded-full"
+                style={{ backgroundColor: teamColorOnPaper(champion.team) }}
+              />
               {t.champion}: {teamDisplayName(champion.team)} ({champion.pts} {t.ptsLabel})
             </span>{" "}
             <span className="text-stone-500">— {t.inSims(champion.pChamp)}</span>
@@ -110,12 +118,12 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
               >
                 <span className="w-5 text-right text-stone-500 tabular-nums">{r.pos}</span>
                 {teamLogoSrc(r.team) && (
-                  <img src={teamLogoSrc(r.team)} alt="" className="w-4 h-4 object-contain" />
+                  <img src={teamLogoSrc(r.team)} alt="" width={16} height={16} loading="lazy" decoding="async" className="w-4 h-4 object-contain" />
                 )}
                 <span className="flex-1 truncate">{teamDisplayName(r.team)}</span>
                 <span className="tabular-nums font-medium">{r.pts}</span>
                 <span className="w-9 text-right tabular-nums text-stone-500 text-xs">
-                  {r.gd > 0 ? `+${r.gd}` : r.gd}
+                  {formatSigned(r.gd, locale, 0)}
                 </span>
               </div>
             ))}

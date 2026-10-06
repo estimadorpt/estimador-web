@@ -135,7 +135,7 @@ export function DueloFinal({ samples, locale = "pt", headingId, forecastTimestam
       </label>
       <div className="flex items-center gap-2 mb-1">
         {teamLogoSrc(samples.teams[value]) && (
-          <img src={teamLogoSrc(samples.teams[value])} alt="" width={20} height={20} loading="lazy" className="w-5 h-5 object-contain" />
+          <img src={teamLogoSrc(samples.teams[value])} alt="" width={20} height={20} loading="lazy" decoding="async" className="w-5 h-5 object-contain" />
         )}
         <select
           id={`${selectId}-${which}`}

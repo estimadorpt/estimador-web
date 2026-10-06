@@ -53,6 +53,10 @@ export function RemainingSchedule({ matches, teamColor, labels }: RemainingSched
                 <img
                   src={teamLogoSrc(m.opponent)}
                   alt=""
+                  width={16}
+                  height={16}
+                  loading="lazy"
+                  decoding="async"
                   className="w-4 h-4 object-contain"
                 />
               )}

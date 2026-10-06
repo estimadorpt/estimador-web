@@ -324,7 +324,7 @@
   },
   "sections": {
     "ligaPortugal": "Liga Portugal",
-    "ligaPortugalDescription": "Previsões para a Liga Portugal com base em simulações Bayesianas",
+    "ligaPortugalDescription": "Previsões para a Liga Portugal com base em simulações bayesianas",
     "presidential2026": "Presidenciais 2026",
     "presidential2026Description": "Previsão arquivada das eleições presidenciais de 2026",
     "parliamentary2025": "Legislativas 2025",
@@ -507,7 +507,7 @@
     "easiestSchedule": "Mais fácil",
     "toughOpponents": "Adversários mais fortes",
     "teamStrengths": "Força das equipas",
-    "teamStrengthsDescription": "Parâmetros de ataque e defesa estimados pelo modelo Bayesiano.",
+    "teamStrengthsDescription": "Parâmetros de ataque e defesa estimados pelo modelo bayesiano.",
     "attack": "Ataque",
     "defense": "Defesa",
     "worse": "pior",

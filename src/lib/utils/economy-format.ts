@@ -1,5 +1,6 @@
-// Pure, dependency-free formatting + scale helpers for the economy dashboard.
-// Shared by server tiles and client components alike (no React, no I/O).
+// Pure formatting + scale helpers for the economy dashboard. Shared by server
+// tiles and client components alike (no React, no I/O; only the brand and
+// typography constants).
 //
 // UNIT CONVENTIONS (do not mix these up):
 //  - GDP growth values (point_qoq, GaR quantiles, contributions) are stored as
@@ -8,6 +9,12 @@
 //  - The pulse value is ALREADY in percent units (yoy_gdp_growth_pct): 1.648
 //    means 1.65%. Use fmtPctValue / fmtSignedPctValue (NO scaling).
 //  - Probabilities are 0..1: 0.086 == 8.6%. Use fmtProbPct (×100).
+//
+// Negatives carry the minus sign U+2212 (CLAUDE.md, "Numbers and ordinals"):
+// every signed helper below passes its text through withMinus.
+
+import { BRAND } from '@/lib/brand';
+import { MINUS, withMinus } from '@/lib/typography';
 
 const DASH = '—';
 
@@ -15,11 +22,11 @@ function ok(v: number | null | undefined): v is number {
   return typeof v === 'number' && Number.isFinite(v);
 }
 
-/** Fraction → signed percent. 0.004 → "+0.40%". */
+/** Fraction → signed percent. 0.004 → "+0.40%", -0.004 → "−0.40%". */
 export function fmtSignedPct(frac: number | null | undefined, dp = 2): string {
   if (!ok(frac)) return DASH;
   const pct = frac * 100;
-  return `${pct >= 0 ? '+' : ''}${pct.toFixed(dp)}%`;
+  return withMinus(`${pct >= 0 ? '+' : ''}${pct.toFixed(dp)}%`);
 }
 
 /** Fraction → unsigned percent. 0.004 → "0.40%". */
@@ -28,11 +35,11 @@ export function fmtPct(frac: number | null | undefined, dp = 2): string {
   return `${(frac * 100).toFixed(dp)}%`;
 }
 
-/** Fraction → signed percentage points. -0.00037 → "-0.04pp". */
+/** Fraction → signed percentage points. -0.00037 → "−0.04pp". */
 export function fmtSignedPp(frac: number | null | undefined, dp = 2): string {
   if (!ok(frac)) return DASH;
   const pp = frac * 100;
-  return `${pp >= 0 ? '+' : ''}${pp.toFixed(dp)}pp`;
+  return withMinus(`${pp >= 0 ? '+' : ''}${pp.toFixed(dp)}pp`);
 }
 
 /** Probability 0..1 → percent. 0.086 → "9%" (dp 0) or "8.6%" (dp 1). */
@@ -50,13 +57,13 @@ export function fmtPctValue(v: number | null | undefined, dp = 1): string {
 /** Already-percent value → signed percent string. 1.648 → "+1.6%". */
 export function fmtSignedPctValue(v: number | null | undefined, dp = 1): string {
   if (!ok(v)) return DASH;
-  return `${v >= 0 ? '+' : ''}${v.toFixed(dp)}%`;
+  return withMinus(`${v >= 0 ? '+' : ''}${v.toFixed(dp)}%`);
 }
 
-/** Plain signed number (for z-score-style sector composites). -0.4838 → "-0.48". */
+/** Plain signed number (for z-score-style sector composites). -0.4838 → "−0.48". */
 export function fmtSignedNum(v: number | null | undefined, dp = 2): string {
   if (!ok(v)) return DASH;
-  return `${v >= 0 ? '+' : ''}${v.toFixed(dp)}`;
+  return withMinus(`${v >= 0 ? '+' : ''}${v.toFixed(dp)}`);
 }
 
 /** Correlation / ratio, 2dp, no sign forcing. 0.69 → "0.69". */
@@ -71,18 +78,19 @@ export function fmtScore(v: number | null | undefined): string {
   return Math.round(v).toString();
 }
 
-/** Already-pp value → signed pp string. -0.536 → "-0.5pp" / "-0,5pp" (NO scaling). */
+/** Already-pp value → signed pp string. -0.536 → "−0.5pp" / "−0,5pp" (NO scaling). */
 export function fmtSignedPpValue(v: number | null | undefined, dp = 1, locale = 'en'): string {
   if (!ok(v)) return DASH;
   const s = v.toFixed(dp);
-  return `${v >= 0 ? '+' : ''}${locale === 'pt' ? s.replace('.', ',') : s}pp`;
+  return withMinus(`${v >= 0 ? '+' : ''}${locale === 'pt' ? s.replace('.', ',') : s}pp`);
 }
 
-/** Signed integer with locale thousands separators. 5727 → "+5,727" / "+5 727". */
+/** Signed integer with locale thousands separators. 5727 → "+5,727" / "+5 727", -12 → "−12". */
 export function fmtSignedInt(v: number | null | undefined, locale: string): string {
   if (!ok(v)) return DASH;
-  const s = Math.abs(Math.round(v)).toLocaleString(locale === 'pt' ? 'pt-PT' : 'en-US');
-  return `${v >= 0 ? '+' : '-'}${s}`;
+  const rounded = Math.round(v);
+  const s = Math.abs(rounded).toLocaleString(locale === 'pt' ? 'pt-PT' : 'en-US');
+  return `${rounded < 0 ? MINUS : '+'}${s}`;
 }
 
 /** Localized long date from an ISO date or datetime string. */
@@ -111,7 +119,7 @@ export function fmtDateShort(iso: string | null | undefined, locale: string): st
 // ---- shared palette (brand teal + stone + semantic) -------------------------
 
 export const COLORS = {
-  teal: '#245c68', // brand accent
+  teal: BRAND.teal, // brand accent
   tealLight: '#427893',
   stone: '#7f9284',
   stoneDark: '#4f5f57',
@@ -121,7 +129,8 @@ export const COLORS = {
   redSoft: '#bd714e',
   amber: '#8a6a26',
   green: '#15803d',
-  emerald: '#4e8056',
+  // The text-strength green token, not #4e8056 (4.16:1 on paper; A11Y2-08).
+  emerald: BRAND.tree,
 } as const;
 
 // ---- health verdict scale ---------------------------------------------------

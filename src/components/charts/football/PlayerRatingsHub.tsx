@@ -1,9 +1,10 @@
 "use client";
 
-import { formatPercent } from "@/lib/football-format";
+import { formatInteger, formatPercent } from "@/lib/football-format";
 
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
+import { Disclosure } from "@/components/viz/Disclosure";
 import { PlayerRatingList } from "@/components/charts/football/PlayerRatingList";
 import {
   ContestedSection,
@@ -89,12 +90,14 @@ export function PlayerRatingsHub({
   dataThrough = null,
 }: PlayerRatingsHubProps & { showHeading?: boolean }) {
   const pt = locale !== "en";
+  // U+2212 for a negative median (audit FA2-17), and counts grouped like
+  // every other count on the site ("3 677", audit FA2-12).
   const nf = (v: number, d = 2) =>
     v.toLocaleString(pt ? "pt-PT" : "en-GB", {
       minimumFractionDigits: d,
       maximumFractionDigits: d,
-    });
-  const int = (v: number) => Math.round(v).toLocaleString(pt ? "pt-PT" : "en-GB");
+    }).replace(/^-/, "\u2212");
+  const int = (v: number) => formatInteger(Math.round(v), pt ? "pt" : "en");
 
   /**
    * Interval labels are read from the feed, never assumed. Every model
@@ -294,17 +297,17 @@ export function PlayerRatingsHub({
         : null,
     ].filter(Boolean);
     return (
-      <details className="mt-2 max-w-3xl text-[11px] text-stone-500">
-        <summary className="inline-flex min-h-11 cursor-pointer items-center underline underline-offset-2 hover:text-stone-800">
-          {pt ? "Verificações técnicas do ajuste" : "Technical checks on the fit"}
-        </summary>
-        <p className="leading-relaxed">
+      <Disclosure
+        className="mt-2 max-w-3xl"
+        summary={pt ? "Verificações técnicas do ajuste" : "Technical checks on the fit"}
+      >
+        <p className="text-[11px] leading-relaxed text-stone-500">
           {bits.join(" · ")}.{" "}
           {pt
             ? "O r̂ (R-hat) compara as várias cadeias do algoritmo: perto de 1 quer dizer que concordam. Zero divergências quer dizer que o algoritmo não encontrou zonas que não conseguiu explorar. Os dois juntos dizem que o ajuste convergiu; não dizem que o modelo está certo."
             : "R-hat compares the algorithm's chains: close to 1 means they agree. Zero divergences means the algorithm met no regions it could not explore. Together they say the fit converged; they do not say the model is right."}
         </p>
-      </details>
+      </Disclosure>
     );
   };
 
@@ -333,12 +336,14 @@ export function PlayerRatingsHub({
             fitted it and are more specific than anything this page could
             say on its behalf. */}
         {block.meta.caveats.length > 0 && (
-          <details className="mt-2 group">
-            <summary className="text-[11px] text-stone-500 cursor-pointer hover:text-stone-800 list-none">
-              {pt
+          <Disclosure
+            className="mt-2"
+            summary={
+              pt
                 ? `O que esta métrica não mede (${block.meta.caveats.length}, em inglês tal como o modelo os publica)`
-                : `What this metric does not measure (${block.meta.caveats.length})`}
-            </summary>
+                : `What this metric does not measure (${block.meta.caveats.length})`
+            }
+          >
             <ul className="mt-2 space-y-1.5 border-l border-stone-200 pl-3">
               {block.meta.caveats.map((c, i) => (
                 <li key={i} className="text-[11px] text-stone-500 leading-relaxed">
@@ -346,7 +351,7 @@ export function PlayerRatingsHub({
                 </li>
               ))}
             </ul>
-          </details>
+          </Disclosure>
         )}
       </div>
     );
@@ -913,10 +918,10 @@ export function PlayerRatingsHub({
               )}
               {ciPair && <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">{ciPair}</p>}
               {defTechnical.length > 0 && (
-                <details className="mt-2 max-w-3xl text-[11px] text-stone-500">
-                  <summary className="inline-flex min-h-11 cursor-pointer items-center underline underline-offset-2 hover:text-stone-800">
-                    {pt ? "Verificações técnicas do ajuste" : "Technical checks on the fit"}
-                  </summary>
+                <Disclosure
+                  className="mt-2 max-w-3xl"
+                  summary={pt ? "Verificações técnicas do ajuste" : "Technical checks on the fit"}
+                >
                   <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
                     {defTechnical.map((d) => (
                       <div key={d.label}>
@@ -925,7 +930,7 @@ export function PlayerRatingsHub({
                       </div>
                     ))}
                   </dl>
-                </details>
+                </Disclosure>
               )}
             </>
           )}
@@ -960,10 +965,10 @@ export function PlayerRatingsHub({
         {/* The correction history, dated and out of the way (audit CL-M2):
             a reader who chose "Jogadores" came for players, not for the
             story of a past mistake. */}
-        <details className="mt-6 rounded-2xl border border-line bg-cream px-4 py-1 text-sm">
-          <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-stone-800">
-            {pt ? "O que mudou nesta página (12 de agosto de 2026)" : "What changed on this page (12 August 2026)"}
-          </summary>
+        <Disclosure
+          className="mt-6 rounded-2xl border border-line bg-cream px-4 py-1 text-sm"
+          summary={pt ? "O que mudou nesta página (12 de agosto de 2026)" : "What changed on this page (12 August 2026)"}
+        >
           <div className="space-y-3 pb-4 text-stone-600 leading-relaxed">
             <p>
               {pt
@@ -976,7 +981,7 @@ export function PlayerRatingsHub({
                 : "The fix was not a better number. It was admitting that several are needed, each with its own scale, its own credible interval and its own sample — and that comparing values across them is meaningless. A 0.20 in finishing and a 0.20 in goalkeeping are not the same thing."}
             </p>
           </div>
-        </details>
+        </Disclosure>
       </section>
     </div>
   );

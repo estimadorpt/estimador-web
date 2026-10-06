@@ -65,7 +65,7 @@ export function ClubFixtures({ rows, locale, limit }: { rows: ClubFixtureRow[]; 
             </span>
             <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-0.5">
               {teamLogoSrc(r.opponent) ? (
-                <img src={teamLogoSrc(r.opponent)} alt="" className="h-4 w-4 shrink-0 object-contain" />
+                <img src={teamLogoSrc(r.opponent)} alt="" width={16} height={16} loading="lazy" decoding="async" className="h-4 w-4 shrink-0 object-contain" />
               ) : (
                 <i aria-hidden="true" className="h-4 w-1 shrink-0" style={{ backgroundColor: teamColorOnPaper(r.opponent) }} />
               )}

@@ -125,6 +125,10 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                   <img
                     src={teamLogoSrc(team.team)}
                     alt=""
+                    width={16}
+                    height={16}
+                    loading="lazy"
+                    decoding="async"
                     className="w-4 h-4 object-contain self-center flex-shrink-0"
                   />
                 )}

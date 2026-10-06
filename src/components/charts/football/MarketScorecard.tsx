@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Disclosure } from "@/components/viz/Disclosure";
+import { ChartTable } from "@/components/viz/ChartTable";
 import { teamDisplayName } from "@/lib/config/football";
-import { formatPercent } from "@/lib/football-format";
+import { formatInteger, formatPercent } from "@/lib/football-format";
 import { SERIES } from "@/components/viz/theme";
 import { blockVerdict, SIGNIFICANCE_T, type PointsCalibration } from "@/lib/football-scorecard";
 import {
@@ -585,64 +585,26 @@ function CheckpointChart({
           : `Vertical axis truncated (${num(yLo, 2)} to ${num(yHi, 2)}) so the differences are visible; the real differences are the ones in the lower strip. Each point pools one matchday's games across the ${data.n_seasons} seasons${perPoint ? ` (n = ${perPoint} matches per point)` : ""}, forecast with the results up to the previous matchday. In the lower strip, a bar whose ±${K} standard-error line crosses zero is a statistical tie.`}
       </p>
 
-      {/* Table view twin */}
-      <Disclosure
-        className="mt-3"
-        summary={pt ? "Ver como tabela" : "See as a table"}
-        srSuffix={pt ? "RPS do modelo e do mercado por jornada" : "model and market RPS by matchday"}
-      >
-        <div className="mt-2 overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? "RPS do modelo e do mercado por jornada prevista" : "Model and market RPS by matchday forecast"}>
-          <table className="w-full text-xs tabular-nums">
-            <caption className="sr-only">
-              {pt
-                ? "RPS do modelo e do mercado por jornada prevista"
-                : "Model and market RPS by matchday forecast"}
-            </caption>
-            <thead>
-              <tr className="border-b border-stone-300 text-stone-500 text-left">
-                <th scope="col" className="py-1 pr-3 font-medium">
-                  {pt ? "Jornada prevista" : "Matchday forecast"}
-                </th>
-                <th scope="col" className="py-1 px-3 font-medium text-right">
-                  {pt ? "Modelo" : "Model"}
-                </th>
-                <th scope="col" className="py-1 px-3 font-medium text-right">
-                  {pt ? "Mercado" : "Market"}
-                </th>
-                <th scope="col" className="py-1 px-3 font-medium text-right">
-                  {pt ? "Diferença" : "Difference"}
-                </th>
-                <th scope="col" className="py-1 px-3 font-medium text-right">
-                  {pt ? "Erro padrão" : "Std. error"}
-                </th>
-                <th scope="col" className="py-1 px-3 font-medium text-right">
-                  t
-                </th>
-                <th scope="col" className="py-1 pl-3 font-medium text-right">
-                  {pt ? "Jogos" : "Matches"}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {cps.map((c) => (
-                <tr key={c.checkpoint} className="border-b border-stone-100">
-                  <th scope="row" className="py-1 pr-3 font-medium text-stone-700 text-left">
-                    {predictedMatchday(c)}
-                  </th>
-                  <td className="py-1 px-3 text-right text-stone-700">{num(c.model_rps, 4)}</td>
-                  <td className="py-1 px-3 text-right text-stone-700">{num(c.market_rps, 4)}</td>
-                  <td className="py-1 px-3 text-right font-medium text-ink">
-                    {signed(c.delta, 4)}
-                  </td>
-                  <td className="py-1 px-3 text-right text-stone-500">{num(c.se, 4)}</td>
-                  <td className="py-1 px-3 text-right text-stone-500">{c.t < 0 ? `−${num(Math.abs(c.t), 2)}` : num(c.t, 2)}</td>
-                  <td className="py-1 pl-3 text-right text-stone-500">{c.n}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Disclosure>
+      {/* Table view twin: the shared ChartTable (audit A11Y2-06), a named,
+          focusable scroll region with the edge cue and a sticky first
+          column, so the seven columns scroll on a phone with their labels. */}
+      <ChartTable
+        caption={pt ? "RPS do modelo e do mercado por jornada prevista" : "Model and market RPS by matchday forecast"}
+        columns={
+          pt
+            ? ["Jornada prevista", "Modelo", "Mercado", "Diferença", "Erro padrão", "t", "Jogos"]
+            : ["Matchday forecast", "Model", "Market", "Difference", "Std. error", "t", "Matches"]
+        }
+        rows={cps.map((c) => [
+          String(predictedMatchday(c)),
+          num(c.model_rps, 4),
+          num(c.market_rps, 4),
+          signed(c.delta, 4),
+          num(c.se, 4),
+          c.t < 0 ? `−${num(Math.abs(c.t), 2)}` : num(c.t, 2),
+          formatInteger(c.n, pt ? "pt" : "en"),
+        ])}
+      />
     </div>
   );
 }

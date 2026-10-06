@@ -70,7 +70,7 @@ function SideCard({
     <div className="overflow-hidden rounded-2xl border border-line bg-cream">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100">
         {teamLogoSrc(side.team) && (
-          <img src={teamLogoSrc(side.team)} alt="" className="w-7 h-7 object-contain" />
+          <img src={teamLogoSrc(side.team)} alt="" width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 object-contain" />
         )}
         <span className="text-sm font-bold text-stone-900">
           {teamDisplayName(side.team)}

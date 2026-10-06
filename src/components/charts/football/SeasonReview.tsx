@@ -127,7 +127,7 @@ export function FinalTable({
   const num = "py-2 pl-2 text-right tabular-nums";
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? `Classificação final da Liga Portugal ${data.season}` : `Final Liga Portugal ${data.season} standings`}>
       <table className="w-full text-sm">
         <caption className="sr-only">
           {pt
@@ -197,6 +197,10 @@ export function FinalTable({
                       <img
                         src={teamLogoSrc(row.team)}
                         alt=""
+                        width={16}
+                        height={16}
+                        loading="lazy"
+                        decoding="async"
                         className="w-4 h-4 object-contain flex-shrink-0"
                       />
                     )}
@@ -627,7 +631,7 @@ export function ReportCard({
         ))}
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? "Erro médio absoluto dos pontos finais previstos" : "Mean absolute error of predicted final points"}>
         <table className="w-full text-sm">
           <caption className="sr-only">
             {pt

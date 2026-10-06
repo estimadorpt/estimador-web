@@ -85,7 +85,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
     <div className="overflow-hidden rounded-2xl border border-line bg-cream">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100">
         {teamLogoSrc(panel.team) && (
-          <img src={teamLogoSrc(panel.team)} alt="" className="w-7 h-7 object-contain" />
+          <img src={teamLogoSrc(panel.team)} alt="" width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 object-contain" />
         )}
         <span className="text-sm font-bold text-stone-900">
           {teamDisplayName(panel.team)}
@@ -219,8 +219,8 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
                           : "text-stone-800"
                     }
                   >
-                    {luck > 0 ? "+" : ""}
-                    {num(luck, pt)}
+                    {/* U+2212 for a negative gap (audit FA2-17). */}
+                    {formatSigned(luck, locale, 1)}
                   </strong>
                 </span>
               )}
