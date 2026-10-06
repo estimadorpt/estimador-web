@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-10-05T21:02:39.192Z",
+  "generatedAt": "2026-10-06T00:10:16.488Z",
   "files": {
-    "pt": "og-image-pt-500c4412.png",
-    "en": "og-image-en-ce679e39.png"
+    "pt": "og-image-pt-18ee9cf4.png",
+    "en": "og-image-en-2afc2d73.png"
   },
   "cards": {
     "pt": {
-      "/": "og-image-pt-500c4412.png",
+      "/": "og-image-pt-18ee9cf4.png",
       "/desporto/liga": "og-image-liga-pt-93530abc.png",
-      "/populacao": "og-image-populacao-pt-f015be82.png"
+      "/populacao": "og-image-populacao-pt-94774219.png"
     },
     "en": {
-      "/": "og-image-en-ce679e39.png",
+      "/": "og-image-en-2afc2d73.png",
       "/desporto/liga": "og-image-liga-en-db623667.png",
-      "/populacao": "og-image-populacao-en-2b1ee4fc.png"
+      "/populacao": "og-image-populacao-en-8110a9af.png"
     }
   }
 }
