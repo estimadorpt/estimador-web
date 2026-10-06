@@ -4,8 +4,8 @@
  * parishes, so the full name cannot always fit: the title drops the "União das
  * freguesias de" prefix and the section tag when long, and the description
  * adds the INE count only while it stays within 155 characters. A name that
- * still does not fit is cut before a whole word, never after "de" or "e" and
- * never inside an open "(" (S-08). The h1 keeps the full name.
+ * still does not fit is cut before a whole word, never after "de" or "e", and
+ * a parenthesis it cuts into is closed (S-08). The h1 keeps the full name.
  */
 import { formatCount } from '@/lib/population/format';
 import type { Locale } from '@/lib/population/labels';
@@ -41,35 +41,39 @@ function unclosedParenthesis(text: string): number {
   return open.length > 0 ? open[0] : -1;
 }
 
-/**
- * Steps a cut back until it ends cleanly: no trailing punctuation, no
- * function word, no "(" left open (the parenthesis goes whole).
- */
-function tidyCut(text: string): string {
+/** Steps a cut back until it ends on a whole word: no trailing punctuation or function word. */
+function tidyEnd(text: string): string {
   let cut = text;
   for (;;) {
     const before = cut;
     cut = cut.replace(TRAILING_PUNCTUATION, '').replace(TRAILING_FUNCTION_WORD, '');
-    const open = unclosedParenthesis(cut);
-    if (open >= 0) cut = cut.slice(0, open);
     if (cut === before) return cut;
   }
 }
 
 /**
  * Cuts at a word boundary and closes with "…", so the text is at most `max`
- * characters. The cut never ends on a function word ("de", "e") or inside an
- * unclosed "(": it steps back a word at a time, and out of the parenthesis,
- * until it does not ("Sintra (Santa Maria e São Miguel, São Martinho e São…"
- * becomes "Sintra…").
+ * characters. The cut never ends on a function word ("de", "e"). A cut inside
+ * a parenthesis keeps what fits of it and closes it, so the place stays told
+ * apart from its município ("Sintra (Santa Maria e São Miguel, São Martinho…)",
+ * not "Sintra…", which reads as the município); only when nothing of the
+ * parenthesis fits does it go whole.
  */
 function fit(text: string, max: number): string {
   if (text.length <= max) return text;
-  const cut = text.slice(0, max - 1);
-  const space = cut.lastIndexOf(' ');
-  // A first word too long to keep whole is cut inside it, as before.
-  const tidy = tidyCut(space > max * 0.6 ? cut.slice(0, space) : cut);
-  return `${tidy || cut.replace(TRAILING_PUNCTUATION, '')}…`;
+  const wordCut = (room: number) => {
+    const cut = text.slice(0, room);
+    const space = cut.lastIndexOf(' ');
+    // A first word too long to keep whole is cut inside it, as before.
+    return tidyEnd(space > max * 0.6 ? cut.slice(0, space) : cut);
+  };
+  const inside = wordCut(max - 2);
+  const open = unclosedParenthesis(inside);
+  if (open >= 0 && inside.length > open + 1) return `${inside}…)`;
+  let tidy = wordCut(max - 1);
+  const stillOpen = unclosedParenthesis(tidy);
+  if (stillOpen >= 0) tidy = tidyEnd(tidy.slice(0, stillOpen));
+  return `${tidy || text.slice(0, max - 1).replace(TRAILING_PUNCTUATION, '')}…`;
 }
 
 export function parishTitle(name: string, locale: Locale): string {

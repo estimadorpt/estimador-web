@@ -435,6 +435,8 @@
     color: var(--color-ink);
   }
   .article-body details > summary::-webkit-details-marker { display: none; }
+  /* The same hover as <Disclosure>'s summary. */
+  .article-body details > summary:hover { text-decoration: underline; text-underline-offset: 4px; }
   /* The Disclosure primitive's chevron (viz/Disclosure.tsx): on the left,
      turning when open, so an MDX <details> reads as the same control. */
   .article-body details > summary::before {

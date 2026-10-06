@@ -51,9 +51,10 @@ describe('parish titles and descriptions (SPV-01)', () => {
     expect(cut).toBeGreaterThan(40);
   });
 
-  it('steps a cut back out of an open parenthesis and past a trailing "de" or "e"', () => {
+  it('closes a parenthesis it cuts into and steps past a trailing "de" or "e"', () => {
+    // Not "Sintra…", which a search result would read as the município.
     expect(parishTitle('União das freguesias de Sintra (Santa Maria e São Miguel, São Martinho e São Pedro de Penaferrim)', 'pt'))
-      .toBe('Quem vive em Sintra…?' + SUFFIX);
+      .toBe('Quem vive em Sintra (Santa Maria e São Miguel, São Martinho e São…)?' + SUFFIX);
     expect(parishTitle('União das freguesias de Alandroal (Nossa Senhora da Conceição), São Brás dos Matos (Mina do Bugalho) e Juromenha (Nossa Senhora do Loreto)', 'en'))
       .toBe('Who lives in Alandroal (Nossa Senhora da Conceição), São Brás…?' + SUFFIX);
     expect(parishTitle('União das freguesias de Ponte da Barca, Vila Nova de Muía e Paço Vedro de Magalhães', 'pt'))

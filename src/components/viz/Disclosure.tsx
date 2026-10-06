@@ -29,7 +29,7 @@ export function Disclosure({ summary, srSuffix, children, defaultOpen = false, c
       <summary
         className={`inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-ink underline-offset-4 hover:underline [&::-webkit-details-marker]:hidden ${summaryClassName}`}
       >
-        <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 transition-transform duration-150 group-open/disclosure:rotate-180 motion-reduce:transition-none" />
+        <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 transition-transform duration-150 [details[open]>summary>&]:rotate-180 motion-reduce:transition-none" />
         <span>{summary}</span>
         {srSuffix && <span className="sr-only">: {srSuffix}</span>}
       </summary>
