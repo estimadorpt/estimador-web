@@ -78,7 +78,7 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
       illustration="elections"
       eyebrow={pt ? 'Eleições · arquivo' : 'Elections · archive'}
       title={pt ? 'As eleições passaram. O que diziam as previsões?' : 'The elections are over. What did the forecasts say?'}
-      lede={pt ? 'Um arquivo permite voltar à informação disponível na altura. Não é uma página de resultados oficiais. Não há eleição em curso; a próxima previsão será anunciada aqui.' : 'An archive lets you revisit the information available at the time. It is not a page of official results. There is no election under way; the next forecast will be announced here.'}
+      lede={pt ? 'Um arquivo permite voltar à informação disponível na altura. Não é uma página de resultados oficiais. Não há eleição em curso.' : 'An archive lets you revisit the information available at the time. It is not a page of official results. There is no election under way.'}
     />
     <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
       <section aria-labelledby="archive-choice-title" className="border-b border-line pb-7">
@@ -97,17 +97,23 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
                   {pt ? 'Ver a previsão' : 'View the forecast'}
                 </Action>
               </div>
-              {/* Each result link is a 44px target (UXM2-09). */}
-              <p className="mt-3 flex flex-wrap items-center gap-x-3 text-sm text-ink-muted">
-                <span>{pt ? 'Resultados oficiais (SGMAI)' : 'Official results (SGMAI)'}:</span>
-                {entry.results.map(r => (
-                  <a key={r.href} href={r.href} className={`inline-flex min-h-11 items-center gap-1 ${linkClass}`} rel="noopener noreferrer">
-                    <span className="sr-only">{entry.name}, {pt ? 'resultados oficiais' : 'official results'}: </span>
-                    {r.round === 1 ? (pt ? '1.ª volta' : '1st round') : r.round === 2 ? (pt ? '2.ª volta' : '2nd round') : (pt ? 'resultados' : 'results')}
-                    <span aria-hidden="true"> ↗</span>
-                  </a>
-                ))}
-              </p>
+              {/* The label on its own line and the links in a row under it, so
+                  "2.ª volta" never drops alone to the margin on a phone
+                  (UXM3-18). Each link is a 44px target (UXM2-09). */}
+              <div className="mt-3 text-sm text-ink-muted">
+                <p>{pt ? 'Resultados oficiais (SGMAI):' : 'Official results (SGMAI):'}</p>
+                <ul className="flex list-none flex-wrap gap-x-5 pl-0">
+                  {entry.results.map(r => (
+                    <li key={r.href}>
+                      <a href={r.href} className={`inline-flex min-h-11 items-center gap-1 ${linkClass}`} rel="noopener noreferrer">
+                        <span className="sr-only">{entry.name}, {pt ? 'resultados oficiais' : 'official results'}: </span>
+                        {r.round === 1 ? (pt ? '1.ª volta' : '1st round') : r.round === 2 ? (pt ? '2.ª volta' : '2nd round') : (pt ? 'resultados' : 'results')}
+                        <span aria-hidden="true"> ↗</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           ))}
         </div>
@@ -126,8 +132,8 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
 
       <section className="mt-8 max-w-3xl border-t border-line pt-6 text-sm leading-relaxed text-ink-muted">
         <p>{pt
-          ? 'Ainda não publicámos uma avaliação destas previsões contra os resultados oficiais, por isso esta página não atribui uma pontuação ao modelo. A única avaliação publicada no site é a do modelo de futebol.'
-          : 'We have not yet published an evaluation of these forecasts against the official results, so this page does not score the model. The only published evaluation on the site is the football model’s.'}</p>
+          ? 'Não publicámos uma avaliação destas previsões contra os resultados oficiais, e não há data marcada para a publicar, por isso esta página não atribui uma pontuação ao modelo. A única avaliação publicada no site é a do modelo de futebol.'
+          : 'We have not published an evaluation of these forecasts against the official results, and none is scheduled, so this page does not score the model. The only published evaluation on the site is the football model’s.'}</p>
         <div className="mt-2 flex flex-wrap gap-x-6">
           <Action href="/eleicoes/metodologia" locale={locale} variant="text" arrow>{pt ? 'Como foram construídas as previsões' : 'How the forecasts were built'}</Action>
           <Action href="/desporto/liga/modelo" locale={locale} variant="text" arrow>{pt ? 'A avaliação do modelo de futebol' : 'The football model’s evaluation'}</Action>

@@ -43,7 +43,7 @@ export const CLIENT_MESSAGE_KEYS = [
   'forecast.enscExplainer', 'forecast.enscTerm', 'forecast.likelyWinners',
   'forecast.likelyWinnersSubtitle', 'forecast.seatGain', 'forecast.seatLoss',
   'forecast.seatsInPlay', 'forecast.seatsInPlayLede', 'forecast.seatsInPlayTitle',
-  'forecast.stableAllocation', 'forecast.totalDistricts', 'forecast.houseEffectsExplainer',
+  'forecast.belowThreshold', 'forecast.belowThresholdWatch', 'forecast.totalDistricts', 'forecast.houseEffectsExplainer',
   'forecast.houseEffectsLoading', 'forecast.houseEffectsTerm', 'forecast.houseEffectsValuesNote',
   'forecast.pollsterHeader', 'forecast.voteShareLabel',
 

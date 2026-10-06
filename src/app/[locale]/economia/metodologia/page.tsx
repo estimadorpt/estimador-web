@@ -22,6 +22,7 @@ import remarkGfm from 'remark-gfm';
 import { getMDXComponents } from '@/mdx-components';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 import { setRequestLocale } from '@/i18n/request-locale';
+import { headingSlug, headingText } from '@/lib/election-methodology';
 
 export async function generateMetadata({
   params,
@@ -78,8 +79,17 @@ export default async function EconomicsMethodologyPage({
     .format(new Date(`${PROTOTYPE_TESTED}-01T00:00:00Z`));
   // Set as reading prose like every methodology page, with the shared MDX
   // components (ink links); the PageHero carries the title, so the file's own
-  // "# " line is dropped.
-  const components = getMDXComponents({ h1: () => null });
+  // "# " line is dropped. Each h2 and h3 carries an id from its text, as on the
+  // other methodologies, so a section can be linked to (METH3-16).
+  const components = getMDXComponents({
+    h1: () => null,
+    h2: ({ children }) => (
+      <h2 id={headingSlug(headingText(children))} className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight">{children}</h2>
+    ),
+    h3: ({ children }) => (
+      <h3 id={headingSlug(headingText(children))} className="text-lg text-stone-900 mt-8 mb-2">{children}</h3>
+    ),
+  });
 
   return (
     <div className="min-h-screen bg-paper">
@@ -90,6 +100,8 @@ export default async function EconomicsMethodologyPage({
           status, the lede (M-5): the body does not repeat it. */}
       <PageHero
         measure="wide"
+        // Compact like every other methodology page's hero (UXD3-09).
+        compact
         back={{ href: "/economia", label: t(ECONOMY_PUBLISHED ? 'title' : 'preparingTitle') }}
         title={t('methodologyTitle')}
         lede={ECONOMY_PUBLISHED ? undefined : t('methodologyPreparingNotice', { date: testedUntil })}

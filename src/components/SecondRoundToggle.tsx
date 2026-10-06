@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from 'react';
+import { PRESSED_IN_FORCED_COLORS } from '@/lib/election-display';
 
 export type Round = 1 | 2;
 
@@ -55,7 +56,10 @@ export function SecondRoundToggle({ translations }: SecondRoundToggleProps) {
       type="button"
       onClick={() => choose(round)}
       aria-pressed={currentRound === round}
-      className={`min-h-11 px-4 py-2 text-xs font-bold rounded-md transition-colors ${
+      // The transparent border is what forced-colours mode draws as each
+      // button's edge, and the pressed round gets an outline there, where the
+      // ink fill is dropped (A11Y3-11).
+      className={`min-h-11 px-4 py-2 text-xs font-bold rounded-md border border-transparent transition-colors ${PRESSED_IN_FORCED_COLORS} ${
         // Ink, not ink-muted: muted ink on parchment is 4.33:1 (A11Y-15).
         currentRound === round ? 'bg-ink text-cream' : 'text-ink hover:bg-cream'
       }`}

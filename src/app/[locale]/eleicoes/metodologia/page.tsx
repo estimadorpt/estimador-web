@@ -8,7 +8,7 @@ import { getMDXComponents } from '@/mdx-components';
 import { createPageMetadata } from '@/lib/metadata';
 import { setRequestLocale } from '@/i18n/request-locale';
 import { RevisedDate } from '@/components/brand/RevisedDate';
-import { ELECTION_METHODOLOGY_REVISED, electionMethodologySource } from '@/lib/election-methodology';
+import { ELECTION_METHODOLOGY_REVISED, electionMethodologySource, headingSlug, headingText } from '@/lib/election-methodology';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -29,6 +29,20 @@ const linkClass = 'text-ink underline underline-offset-4 hover:text-ink-muted';
 const standaloneLinkClass = `inline-flex min-h-11 items-center ${linkClass}`;
 /** The in-page anchors: 44px on a phone or a coarse pointer (`.tap-target`, globals.css). */
 const anchorClass = `tap-target ${linkClass}`;
+
+/**
+ * Every h2 and h3 carries an id from its text (headingSlug), so a chart can
+ * link to its own method and a reader can share a section (METH3-16). The
+ * classes are mdx-components.tsx's own.
+ */
+const headingsWithIds = getMDXComponents({
+  h2: ({ children }) => (
+    <h2 id={headingSlug(headingText(children))} className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight">{children}</h2>
+  ),
+  h3: ({ children }) => (
+    <h3 id={headingSlug(headingText(children))} className="text-lg text-stone-900 mt-8 mb-2">{children}</h3>
+  ),
+});
 
 /**
  * The election methods, moved out of /metodologia (which is now the hub of
@@ -67,7 +81,7 @@ export default async function ElectionMethodologyPage({ params }: { params: Prom
             <a href="#segunda-volta-2026" className={anchorClass}>{pt ? '2.ª volta' : 'Runoff'}</a>
           </nav>
           <article className="article-body max-w-none" lang={pt ? 'pt' : 'en'}>
-            <MDXRemote source={electionMethodologySource(locale)} components={getMDXComponents()} />
+            <MDXRemote source={electionMethodologySource(locale)} components={headingsWithIds} />
           </article>
         </div></div>
       </main>

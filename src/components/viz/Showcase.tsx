@@ -21,6 +21,12 @@ export function VizShowcase({ pt }: { pt: boolean }) {
     precos: { name: pt ? 'Inflação homóloga (%)' : 'Year-on-year inflation (%)', subtitle: pt ? 'IPC, variação homóloga, com banda de 80%' : 'CPI, year-on-year change, with an 80% band', points: [...observed([2.6, 2.5, 2.3, 2.4, 2.2, 2.1, 2.2, 2, 2.1, 2.1, 2, 2.1], 0.2, 0.01), ...projected([2.1, 2], 0.5)], format: v => `${one(v)}%`, yMin: 0, yMax: 4 },
   };
   const current = scopes[scope] ?? scopes.geral;
+  // The footer of an example card names what its numbers are and links to no
+  // section's methodology: invented figures credited to INE, with a link to the
+  // economy method, read as the economy figures the site does not publish
+  // (AEE3-05). The first card's link shows the footer's place for one, here.
+  const invented = pt ? 'Fonte: valores inventados para exemplo' : 'Source: made-up values for the example';
+  const approximate = pt ? 'Fonte: valores aproximados para exemplo, na ordem de grandeza dos Censos 2021' : 'Source: approximate values for the example, of the order of the 2021 Census';
   return (
     <div className="grid min-w-0 grid-cols-1 gap-4">
       <KpiRow>
@@ -32,12 +38,12 @@ export function VizShowcase({ pt }: { pt: boolean }) {
 
       <DataCard title={pt ? 'Evolução ao longo do tempo' : 'Change over time'} subtitle={current.subtitle} badge={example}
         controls={<Segmented label={pt ? 'Âmbito' : 'Scope'} value={scope} onChange={setScope} options={[{ value: 'geral', label: pt ? 'Visão geral' : 'Overview' }, { value: 'trabalho', label: pt ? 'Trabalho' : 'Labour' }, { value: 'precos', label: pt ? 'Preços' : 'Prices' }]} />}
-        source={pt ? 'Fonte: INE' : 'Source: INE'} updated={pt ? 'Atualização: data de exemplo' : 'Updated: example date'} methodologyHref="/economia/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        source={invented} updated={pt ? 'Atualização: data de exemplo' : 'Updated: example date'} methodologyHref="/marca#visualizacoes" methodologyLabel={pt ? 'Sobre este exemplo' : 'About this example'}>
         <TrendChart key={scope} series={[{ name: current.name, points: current.points }]} format={current.format} yMin={current.yMin} yMax={current.yMax} locale={pt ? 'pt' : 'en'} tableCaption={current.name} />
       </DataCard>
 
       <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
-        <DataCard title={pt ? 'Probabilidade de ser campeão' : 'Title probability'} badge={example} source={pt ? 'Fonte: modelo estimador' : 'Source: estimador model'} updated={pt ? 'Jornada de exemplo' : 'Example matchday'} methodologyHref="/desporto/liga/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        <DataCard title={pt ? 'Probabilidade de ser campeão' : 'Title probability'} badge={example} source={invented} updated={pt ? 'Jornada de exemplo' : 'Example matchday'}>
           <RankedBars rows={[
             { label: 'Equipa A', value: 0.42, display: '42%', color: '#234c40' },
             { label: 'Equipa B', value: 0.28, display: '28%', color: '#697fc5' },
@@ -47,17 +53,17 @@ export function VizShowcase({ pt }: { pt: boolean }) {
           ]} max={0.42} tableCaption={pt ? 'Probabilidade de ser campeão' : 'Title probability'} />
           <p className="mt-3 text-xs text-stone-500">{pt ? 'As cores são as das equipas; num ranking sem entidades com cor própria, uma só tinta.' : 'Colours belong to the teams; a ranking without owned colours uses one ink.'}</p>
         </DataCard>
-        <DataCard title={pt ? 'Próximo jogo' : 'Next match'} subtitle="Equipa A · Equipa B" badge={example} source={pt ? 'Fonte: modelo estimador' : 'Source: estimador model'} updated={pt ? 'Jornada de exemplo' : 'Example matchday'} methodologyHref="/desporto/liga/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        <DataCard title={pt ? 'Próximo jogo' : 'Next match'} subtitle="Equipa A · Equipa B" badge={example} source={invented} updated={pt ? 'Jornada de exemplo' : 'Example matchday'}>
           <OutcomeBar segments={[{ label: '1', value: 0.45, display: '45%' }, { label: 'X', value: 0.28, display: '28%' }, { label: '2', value: 0.27, display: '27%' }]} tableCaption={pt ? 'Próximo jogo' : 'Next match'} />
           <p className="mt-4 text-xs text-stone-500">{pt ? 'Três resultados, uma barra: cada segmento com o seu valor por baixo, para que nada dependa da cor.' : 'Three outcomes, one bar: each segment with its value below it, so nothing depends on colour.'}</p>
         </DataCard>
       </div>
 
       <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
-        <DataCard title={pt ? 'População residente por grupo etário' : 'Resident population by age group'} badge={example} source={pt ? 'Fonte: INE, Censos 2021' : 'Source: INE, 2021 Census'} methodologyHref="/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        <DataCard title={pt ? 'População residente por grupo etário' : 'Resident population by age group'} badge={example} source={approximate}>
           <ColumnChart data={[{ label: '0–14', value: 1.3 }, { label: '15–24', value: 1.1 }, { label: '25–64', value: 5.6, highlight: true }, { label: '65+', value: 2.4 }]} emphasis tableCaption={pt ? 'População residente por grupo etário' : 'Resident population by age group'} xLabel={pt ? 'Grupo etário' : 'Age group'} format={v => `${v.toFixed(1).replace('.', ',')} M`} yLabel={pt ? 'milhões' : 'millions'} height={220} locale={pt ? 'pt' : 'en'} />
         </DataCard>
-        <DataCard title={pt ? 'Cem pessoas' : 'One hundred people'} subtitle={pt ? 'Cada ponto é 1% do grupo' : 'Each dot is 1% of the group'} badge={example} source={pt ? 'Fonte: INE, Censos 2021' : 'Source: INE, 2021 Census'} updated={pt ? 'Atualização: data de exemplo' : 'Updated: example date'} methodologyHref="/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        <DataCard title={pt ? 'Cem pessoas' : 'One hundred people'} subtitle={pt ? 'Cada ponto é 1% do grupo' : 'Each dot is 1% of the group'} badge={example} source={approximate} updated={pt ? 'Atualização: data de exemplo' : 'Updated: example date'}>
           <PeopleGrid shares={[{ label: '0–17', value: 0.16 }, { label: '18–39', value: 0.27 }, { label: '40–64', value: 0.35 }, { label: '65+', value: 0.22 }]} tableCaption={pt ? 'População por grupo etário' : 'Population by age group'} />
         </DataCard>
       </div>

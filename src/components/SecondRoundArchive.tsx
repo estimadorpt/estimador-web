@@ -95,14 +95,16 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
 
       <section id="trajectory" className="py-10 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('supportTrends')}</h2>
-          <p className="text-sm text-stone-500 mb-3 max-w-xl">{t('trendDescription')}</p>
+          {/* The question, its caveat, then the frame: the explanation is the
+              frame's subtitle, not a second grey line above it (UXD3-11). */}
+          <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('supportTrends')}</h2>
           <p className="text-xs text-stone-600 mb-6 max-w-xl border-l-2 border-line pl-3">
             {t('noRunoffPollsNote', { date: cutoffLabel })}
           </p>
           {hasTrend ? (
             <DataCard
               title={pt ? 'Apoio estimado na segunda volta, dia a dia' : 'Estimated runoff support, day by day'}
+              subtitle={t('trendDescription')}
               source={pt ? 'Fonte: modelo estimador.pt' : 'Source: estimador.pt model'}
               {...frame}
             >
@@ -126,10 +128,10 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
 
       <section className="py-10 border-b border-stone-300">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('simulationDistribution')}</h2>
-          <p className="text-sm text-stone-500 mb-6 max-w-xl">{t('simulationDescription')}</p>
+          <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('simulationDistribution')}</h2>
           <DataCard
             title={pt ? 'Votos válidos de cada candidato no dia da eleição, por simulação' : 'Each candidate’s valid-vote share on election day, by simulation'}
+            subtitle={t('simulationDescription')}
             source={simulationsSource}
             {...frame}
           >
@@ -169,10 +171,10 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
 
       <section className="py-10 border-b border-stone-300">
         <div className="mx-auto w-full max-w-7xl px-4"><div className="max-w-3xl">
-          <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('projectedVoteShare')}</h2>
-          <p className="text-sm text-stone-500 mb-6 max-w-xl">{t('projectedVoteShareNote')}</p>
+          <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('projectedVoteShare')}</h2>
           <DataCard
             title={pt ? 'Percentagem de todos os boletins, com o intervalo de 95%' : 'Share of all ballots, with the 95% interval'}
+            subtitle={t('projectedVoteShareNote')}
             source={simulationsSource}
             {...frame}
           >

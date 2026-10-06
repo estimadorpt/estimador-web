@@ -5,7 +5,7 @@ import { useLocale } from 'next-intl';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { FURNITURE } from '@/components/viz/theme';
 import { PresidentialPollsData } from '@/types';
-import { credibleIntervalLabel, formatElectionDate, formatElectionNumber, formatElectionPercent, pollsterDisplayName } from '@/lib/election-display';
+import { credibleIntervalLabel, formatElectionDate, formatElectionLongDate, formatElectionNumber, formatElectionPercent, formatElectionShortDate, pollsterDisplayName, PRESSED_IN_FORCED_COLORS } from '@/lib/election-display';
 
 /** Structural shape shared by presidential_trends.json and second_round_trends.json,
  * so this chart can render either without a second, near-duplicate component. */
@@ -147,30 +147,30 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
 
   return <div className="w-full">
     <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label={pt ? 'Escolher candidato' : 'Choose candidate'}>
-      {candidates.map(([name, candidate]) => <button key={name} type="button" onClick={() => selectCandidate(name)} aria-pressed={selectedName === name} className={`min-h-11 max-w-full rounded-full border px-3 text-left text-sm ${selectedName === name ? 'border-ink bg-ink text-paper' : 'border-line bg-paper text-ink hover:bg-cream'}`}><span className="mr-2 inline-block size-2 rounded-full" style={{ background: candidate.color }} />{name}</button>)}
+      {candidates.map(([name, candidate]) => <button key={name} type="button" onClick={() => selectCandidate(name)} aria-pressed={selectedName === name} className={`min-h-11 max-w-full rounded-full border px-3 text-left text-sm ${PRESSED_IN_FORCED_COLORS} ${selectedName === name ? 'border-ink bg-ink text-paper' : 'border-line bg-paper text-ink hover:bg-cream'}`}><span aria-hidden="true" className="mr-2 inline-block size-2 rounded-full" style={{ background: candidate.color }} />{name}</button>)}
     </div>
     <div className="mb-4 border-l-2 pl-4" style={{ borderColor: selected.color }}>
       {/* The chosen series' name, not a heading: the chart frame's title is the heading. */}
       <p className="text-lg font-semibold text-ink">{selectedName}</p>
-      <p className="mt-1 text-sm text-ink-muted">{pt ? `Estimativa a ${formatElectionDate(dates[latest], locale)}` : `Estimate on ${formatElectionDate(dates[latest], locale)}`}: <strong className="text-ink tabular-nums">{fmt(selected.mean[latest])}</strong>{' · '}{band50}: {fmt(selected.ci_25[latest])}–{fmt(selected.ci_75[latest])}{' · '}{band90}: {fmt(selected.ci_05[latest])}–{fmt(selected.ci_95[latest])}</p>
+      <p className="mt-1 text-sm text-ink-muted">{pt ? `Estimativa a ${formatElectionLongDate(dates[latest], locale)}` : `Estimate on ${formatElectionLongDate(dates[latest], locale)}`}: <strong className="text-ink tabular-nums">{fmt(selected.mean[latest])}</strong>{' · '}{band50}: {fmt(selected.ci_25[latest])}–{fmt(selected.ci_75[latest])}{' · '}{band90}: {fmt(selected.ci_05[latest])}–{fmt(selected.ci_95[latest])}</p>
     </div>
     <div ref={containerRef} className="relative w-full">
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="block max-w-full" role="img" aria-label={`${selectedName}: ${pt ? 'apoio estimado ao longo do tempo' : 'estimated support over time'}`}
         onPointerDown={onPointer} onPointerMove={onPointer} onPointerLeave={onLeave} style={{ touchAction: 'pan-y' }}>
         {Array.from({ length: Math.floor((yMax - yMin) / .1 + 1e-9) + 1 }, (_, index) => Math.round((yMin + index * .1) * 10) / 10).map(tick => <g key={tick}><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} stroke={FURNITURE.grid} /><text x={margin.left - 8} y={y(tick)} textAnchor="end" dominantBaseline="middle" fontSize={11} fill={FURNITURE.textMuted}>{formatElectionPercent(tick, locale, 0)}</text></g>)}
-        {tickDates.map((date, index) => <g key={date.toISOString()}><line x1={x(date)} x2={x(date)} y1={height - margin.bottom} y2={height - margin.bottom + 5} stroke={FURNITURE.axis} /><text x={x(date)} y={height - margin.bottom + 22} textAnchor={index === 0 ? 'start' : index === tickDates.length - 1 ? 'end' : 'middle'} fontSize={12} fill={FURNITURE.textMuted}>{formatElectionDate(date, locale)}</text></g>)}
+        {tickDates.map((date, index) => <g key={date.toISOString()}><line x1={x(date)} x2={x(date)} y1={height - margin.bottom} y2={height - margin.bottom + 5} stroke={FURNITURE.axis} /><text x={x(date)} y={height - margin.bottom + 22} textAnchor={index === 0 ? 'start' : index === tickDates.length - 1 ? 'end' : 'middle'} fontSize={12} fill={FURNITURE.textMuted}>{formatElectionShortDate(date, locale)}</text></g>)}
         {candidates.filter(([name]) => name !== selectedName).map(([name, candidate]) => drawAll
           ? <g key={name}><path d={areaPath(points(candidate.ci_95), points(candidate.ci_05))} fill={candidate.color} opacity=".12" /><path d={areaPath(points(candidate.ci_75), points(candidate.ci_25))} fill={candidate.color} opacity=".28" /><path d={linePath(points(candidate.mean.slice(0, dates.length)))} fill="none" stroke={candidate.color} strokeWidth="2.5" strokeLinecap="round"><title>{name}</title></path></g>
           : <path key={name} d={linePath(points(candidate.mean.slice(0, dates.length)))} fill="none" stroke={candidate.color} strokeWidth="1.5" opacity=".32" strokeLinecap="round"><title>{name}</title></path>)}
         <path d={areaPath(points(selected.ci_95), points(selected.ci_05))} fill={selected.color} opacity=".12" /><path d={areaPath(points(selected.ci_75), points(selected.ci_25))} fill={selected.color} opacity=".28" /><path d={linePath(points(selected.mean.slice(0, dates.length)))} fill="none" stroke={selected.color} strokeWidth="3" strokeLinecap="round" />
         {drawAll && candidates.map(([name, candidate]) => <text key={`label-${name}`} x={x(parsedDates[latest]) - 4} y={y(candidate.mean[latest]) - 10} textAnchor="end" fontSize={12} fontWeight={700} fill={FURNITURE.text}>{`${name} ${fmt(candidate.mean[latest])}`}</text>)}
-        {selectedPolls.map((poll, index) => <circle key={`${poll.date}-${index}`} cx={x(new Date(`${poll.date}T12:00:00Z`))} cy={y(poll[selectedName] as number)} r="4" fill={selected.color} opacity=".75" stroke={FURNITURE.surface} strokeWidth="1.5"><title>{`${pollsterDisplayName(poll.pollster)}: ${fmt(poll[selectedName] as number)} · ${formatElectionDate(poll.date, locale)}`}</title></circle>)}
+        {selectedPolls.map((poll, index) => <circle key={`${poll.date}-${index}`} cx={x(new Date(`${poll.date}T12:00:00Z`))} cy={y(poll[selectedName] as number)} r="4" fill={selected.color} opacity=".75" stroke={FURNITURE.surface} strokeWidth="1.5"><title>{`${pollsterDisplayName(poll.pollster)}: ${fmt(poll[selectedName] as number)} · ${formatElectionShortDate(poll.date, locale)}`}</title></circle>)}
         {tipIndex != null && <g pointerEvents="none"><line x1={tipX} x2={tipX} y1={margin.top} y2={height - margin.bottom} stroke={FURNITURE.text} strokeDasharray="3,3" /><circle cx={tipX} cy={y(selected.mean[tipIndex])} r="4.5" fill={selected.color} stroke={FURNITURE.surface} strokeWidth="2" /></g>}
       </svg>
       {tipIndex != null && (
         <div aria-hidden="true" className="pointer-events-none absolute top-2 z-10 max-w-[16rem] rounded-lg border border-line bg-cream px-3 py-2 text-xs text-ink shadow-none"
           style={tipX > width / 2 ? { right: width - tipX + 8 } : { left: tipX + 8 }}>
-          <div className="font-bold">{formatElectionDate(dates[tipIndex], locale)}</div>
+          <div className="font-bold">{formatElectionShortDate(dates[tipIndex], locale)}</div>
           <div className="tabular-nums">{selectedName}: <strong>{fmt(selected.mean[tipIndex])}</strong></div>
           <div className="tabular-nums text-stone-600">P25–P75: {fmt(selected.ci_25[tipIndex])}–{fmt(selected.ci_75[tipIndex])}</div>
           <div className="tabular-nums text-stone-600">P5–P95: {fmt(selected.ci_05[tipIndex])}–{fmt(selected.ci_95[tipIndex])}</div>

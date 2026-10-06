@@ -59,6 +59,8 @@ Each deviation was the product of two parts: a component that sums to zero acros
 
 The prior on that standard deviation was HalfNormal(σ=0.05) per party, on the logit scale. For a party on about 30% of the vote, a deviation of 0.05 on that scale is about 1 percentage point (the slope of the conversion is p × (1 − p), at most 0.25); for smaller parties, less.
 
+Besides each firm's deviations, the model included an **average deviation of all polls**, per party: how much the polls, taken together, tended to overstate or understate each party against the results, learnt from the previous elections for which there were both polls and results. It also sums to zero across parties; the prior on its scale was HalfNormal(σ=0.1), on the logit scale. The page does not publish this deviation.
+
 ### Differences between districts
 
 Seats are allocated district by district. The model included a **fixed difference between each district and the country**, per party, estimated from the results of previous elections. Each difference followed a Normal centred on zero with a standard deviation of each party's own; the prior on that standard deviation was HalfNormal(σ=0.1), also on the logit scale. For a party on about 30% of the vote, 0.1 on that scale is about 2 percentage points.
@@ -87,25 +89,25 @@ It has two sources of variation: sampling error (which depends on n) and extra v
 To go from votes to seats, we simulated the Portuguese electoral system:
 
 1. **National territory**: the 226 seats of the 20 constituencies of the national territory (18 mainland districts, the Azores and Madeira) allocated by the **D'Hondt method**, which divides each party's votes by 1, 2, 3, … and gives the seats to the largest quotients.
-2. **Emigrants**: the 4 seats of the Europe and Outside Europe constituencies came from one of the historical scenarios of 2019, 2022 or 2024, one per simulation, in equal shares.
+2. **Emigrants**: the 4 seats of the Europe and Outside Europe constituencies came from the historical scenarios of 2019, 2022 and 2024; each model draw was combined with all three, so each scenario carries a third of the weight.
 3. **Total**: each simulation therefore added up to **230 seats**.
 
-The archived forecast has **9,000 simulations**. In each one:
-1. a sample of the estimated national shares for election day is drawn;
+The archived forecast has **9,000 simulations**: **3,000 draws** from the model, each combined with the three emigrant scenarios. In each draw:
+1. the estimated national shares for election day are taken;
 2. each district's differences are applied;
-3. the D'Hondt method is applied in each constituency of the national territory and the emigrant scenario is added;
-4. each party's seats are added up.
+3. the D'Hondt method is applied in each constituency of the national territory;
+4. each of the three emigrant scenarios is added and each party's seats are summed, which gives three simulations.
 
-The result is a distribution of possible parliaments.
+The result is a distribution of possible parliaments. The national and district uncertainty rests on the 3,000 draws; the emigrant scenarios only change the 4 emigrant seats.
 
 ### What the page shows
 
 From the simulations, the page publishes:
 
 - **The probability of each party winning the most seats.**
-- **The probability of a majority (116 seats) for two blocs**: AD + IL and PS + BE + CDU + L. These are arithmetic groupings of seats, not government forecasts. The page also publishes the share of simulations in which neither reaches 116 (over 99% in the archived forecast) and, as arithmetic only, the AD + CH sum (116 or more in over 99% of the simulations, by the same rounding rule as the probabilities; median 138).
+- **The probability of a majority (116 seats) for two blocs**: AD + IL and PS + L + CDU + BE. These are arithmetic groupings of seats, not government forecasts. The page also publishes the share of simulations in which neither reaches 116 (over 99% in the archived forecast) and, as arithmetic only, the AD + CH sum (116 or more in over 99% of the simulations, by the same rounding rule as the probabilities; median 138).
 - **Seats by party**: the mean and 50% (P25–P75) and 80% (P10–P90) credible intervals.
-- **Seats in play by district**, with the **ENSC** (effective number of seat changes). For each party, it counts the share of simulations in which the party ends with a seat count different from its most frequent one in that district; the ENSC adds those shares across parties. An ENSC of 0 says every simulation gives the same allocation; above 0.8 (the threshold used), at least one seat changes party in a large share of the simulations, and the district counts as "in play". The +1 and −1 on the cards compare each party with its own most frequent count, so a district's gains and losses need not balance.
+- **Seats in play by district**, with the **ENSC** (effective number of seat changes). For each party, it counts the share of simulations in which the party ends with a seat count different from its most frequent one in that district; the ENSC adds those shares across parties. An ENSC of 0 says every simulation gives the same allocation; above 0.8 (the threshold used), at least one seat changes party in a large share of the simulations, and the district counts as "in play". The +1 and −1 on the cards compare each party with its own most frequent count and also count two seats or more, so a district's gains and losses need not balance. Each card shows every party with a chance above 5% of gaining or losing a seat. Below the threshold a seat can still change party often: the page names the districts with an ENSC between 0.4 and 0.8.
 
 ---
 
@@ -113,7 +115,7 @@ From the simulations, the page publishes:
 
 ## Presidential 2026: first round
 
-### Model structure
+### How did the presidential model differ?
 
 The presidential model differed from the parliamentary one because:
 - candidates are people, not parties with a long history;
@@ -174,7 +176,7 @@ After the first round, on 18 January 2026, the runoff between António José Seg
 The models built in several sources of uncertainty:
 
 - **Polling error**: the expected variation between polls and the actual result
-- **Pollster effects**: the uncertainty in each firm's estimated deviations
+- **Pollster effects**: the uncertainty in each firm's estimated deviations and in the average deviation of all polls
 - **Model uncertainty**: the parameters of the curves and the other components
 - **Campaign effects**: late shifts the polls had not yet captured
 
@@ -182,7 +184,7 @@ The models built in several sources of uncertainty:
 
 Uncertainty appears as credible intervals, probabilities ("70% chance that X wins the most seats") and distributions of simulations. An X% interval holds the value in X% of the model's simulations; it is not a poll's margin of error. Each chart says which interval it draws:
 
-- **Parliamentary 2025**: the trend estimated from the polls draws the 94% credible band (HDI) of the chosen parties, and the table has it for every party; the seats-by-party chart shows 50% (P25–P75) and 80% (P10–P90) intervals; the bloc chart draws individual simulations and its table gives the P5 to P95 percentiles.
+- **Parliamentary 2025**: the trend estimated from the polls draws the 94% credible band (HDI) of the chosen parties, and the table has it for every party; the seats-by-party chart shows 50% (P25–P75) and 80% (P10–P90) intervals; the bloc chart draws individual simulations (up to 750 of the 9,000: one model draw in every twelve, with its three emigrant scenarios) and its table gives the P5 to P95 percentiles, computed over all 9,000.
 - **Presidential 2026, first round**: the trend chart shows 50% (P25–P75) and 90% (P5–P95) bands; the cards and the election-day forecast bars show 95% intervals (P2.5–P97.5).
 - **Presidential 2026, runoff**: see the [runoff](#segunda-volta-2026).
 
@@ -190,9 +192,9 @@ Uncertainty appears as credible intervals, probabilities ("70% chance that X win
 
 ## Evaluation
 
-We have not yet published an evaluation of the election forecasts. The forecasts for the 2025 parliamentary and 2026 presidential elections are archived as published, with links to the official results, but without a calculated comparison against those results.
+We have not published an evaluation of the election forecasts, and none is scheduled. The forecasts for the 2025 parliamentary and 2026 presidential elections are archived as published, with links to the official results, but without a calculated comparison against those results.
 
-When we publish it, it will measure the error of each estimate, whether the credible intervals contained the result as often as expected, and the score of the probabilities (log score). A single election is not enough to show that the probabilities are well calibrated.
+If one is published, it will measure the error of each estimate, whether the credible intervals contained the result as often as expected, and the score of the probabilities (log score). A single election is not enough to show that the probabilities are well calibrated.
 
 The only evaluation published on the site is the [football model's](/en/desporto/liga/modelo/).
 
@@ -213,7 +215,8 @@ The only evaluation published on the site is the [football model's](/en/desporto
 
 ## Limitations
 
-- **Reliance on polls**: if polls carry systematic errors that the history does not reveal, the forecast inherits them.
+- **Reliance on polls**: the model corrected for the average deviation the polls showed in previous elections; if that deviation changes, or if polls carry systematic errors that the history does not reveal, the forecast inherits them.
+- **Fixed district differences**: the model had no district polls and assumed each district deviated from the country as in previous elections; a regional shift outside that pattern was not captured, and that assumption is what decides close seats such as Castelo Branco's.
 - **Unforeseen events**: scandals, crises or other events can change the picture quickly.
 - **Historical patterns**: the model assumes the past informs the future, which can fail in unprecedented situations.
 - **Undecided voters**: how people who have not decided will vote is hard to predict.

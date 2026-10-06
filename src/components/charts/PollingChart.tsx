@@ -7,7 +7,7 @@ import { ChartTable } from "@/components/viz/ChartTable";
 import { FURNITURE } from "@/components/viz/theme";
 import { partyColors } from "@/lib/config/colors";
 import { compactTrendSeries, recentTrendRows, type TrendSeries } from "@/lib/election-aggregates";
-import { electionIntlLocale } from "@/lib/election-display";
+import { electionIntlLocale, formatElectionDate, formatElectionShortDate, PRESSED_IN_FORCED_COLORS, sortByPartyOrder } from "@/lib/election-display";
 import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface TrendData {
@@ -55,7 +55,6 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
   const pt = locale !== "en";
   const intl = electionIntlLocale(locale);
   const fmtPct = (v: number) => `${(v * 100).toLocaleString(intl, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
-  const fmtDate = (d: Date) => d.toLocaleDateString(intl, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
   const series = useMemo(() => provided ?? compactTrendSeries(recentTrendRows(data ?? [])), [provided, data]);
   const points = useMemo(() => {
@@ -78,10 +77,8 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
     [series, lastIndex],
   );
   const defaultParties = useMemo(() => ranked.slice(0, DEFAULT_PARTIES), [ranked]);
-  const allParties = useMemo(
-    () => [...ranked].sort((a, b) => Object.keys(partyColors).indexOf(a) - Object.keys(partyColors).indexOf(b)),
-    [ranked],
-  );
+  // Chips and table columns in the archive's one party order (AEE3-06).
+  const allParties = useMemo(() => sortByPartyOrder(ranked), [ranked]);
 
   const [viewMode, setViewMode] = useState<"selected" | "all">("selected");
   const [selectedParties, setSelectedParties] = useState<string[] | null>(null);
@@ -99,10 +96,10 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
   const table = useMemo(() => {
     if (series.dates.length === 0) return { columns: [], rows: [] };
     return {
-      columns: [pt ? "Data" : "Date", ...ranked],
+      columns: [pt ? "Data" : "Date", ...allParties],
       rows: series.dates.map((date, i) => [
-        fmtDate(day(date)),
-        ...ranked.map(party => {
+        formatElectionDate(date, locale),
+        ...allParties.map(party => {
           const v = series.parties[party];
           const mean = v.mean[i];
           if (mean == null) return "";
@@ -112,7 +109,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         }),
       ]).reverse(),
     };
-  }, [series, ranked, pt]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [series, allParties, pt, locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const shown = viewMode === "all" ? allParties : activeParties;
   const latestValues = useMemo(
@@ -160,10 +157,21 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         Plot.areaY(withBand, { x: "date", y1: "low", y2: "high", fill: "party", fillOpacity: 0.16, curve: "catmull-rom" }),
         Plot.line(drawn, { x: "date", y: "mean", stroke: "party", strokeWidth: mobile ? 2 : 2.5, curve: "catmull-rom" }),
         Plot.dot(latest, { x: "date", y: "mean", fill: "party", r: mobile ? 3 : 4, stroke: FURNITURE.surface, strokeWidth: mobile ? 1.5 : 2 }),
+        // On a phone the tip is three short lines (party and value, band,
+        // date): one long line ran up to 110px past the card's edge (UXM3-02).
+        // No wider than half the plot, it always fits on one side of a point.
         Plot.tip(drawn, Plot.pointer({
           x: "date",
           y: "mean",
-          title: (d: Point) => `${d.party} ${fmtPct(d.mean)}${d.low != null && d.high != null ? ` (${fmtPct(d.low)}–${fmtPct(d.high)})` : ""} · ${fmtDate(d.date)}`,
+          // Plot's own tip text is 10px; nothing on the site goes below 11.
+          fontSize: mobile ? 11 : 12,
+          title: (d: Point) => {
+            const band = d.low != null && d.high != null ? `(${fmtPct(d.low)}–${fmtPct(d.high)})` : "";
+            const date = formatElectionShortDate(d.date, locale);
+            return mobile
+              ? [`${d.party} ${fmtPct(d.mean)}`, band, date].filter(Boolean).join("\n")
+              : `${d.party} ${fmtPct(d.mean)}${band ? ` ${band}` : ""} · ${date}`;
+          },
         })),
       ];
 
@@ -232,7 +240,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
             type="button"
             onClick={() => { setViewMode("selected"); toggleParty(party); }}
             aria-pressed={viewMode === "selected" && activeParties.includes(party)}
-            className={`min-h-11 rounded-full border px-3 text-sm ${viewMode === "selected" && activeParties.includes(party) ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:bg-cream"}`}
+            className={`min-h-11 rounded-full border px-3 text-sm ${PRESSED_IN_FORCED_COLORS} ${viewMode === "selected" && activeParties.includes(party) ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:bg-cream"}`}
           >
             <span aria-hidden="true" className="mr-1.5 inline-block size-2 rounded-full" style={{ background: partyColors[party as keyof typeof partyColors] || "#888" }} />
             {party}
@@ -242,7 +250,7 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
           type="button"
           onClick={() => setViewMode(viewMode === "all" ? "selected" : "all")}
           aria-pressed={viewMode === "all"}
-          className={`min-h-11 rounded-full border px-3 text-sm ${viewMode === "all" ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:bg-cream"}`}
+          className={`min-h-11 rounded-full border px-3 text-sm ${PRESSED_IN_FORCED_COLORS} ${viewMode === "all" ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:bg-cream"}`}
         >
           {pt ? "Todos os partidos" : "All parties"}
         </button>

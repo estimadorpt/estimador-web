@@ -1,23 +1,23 @@
-# Como vamos ler a economia?
+# Como leríamos a economia?
 
-Nada aqui é uma leitura atual da economia. A página explica o que a secção vai medir, de onde
-vêm os dados, como cada número vai dizer o que é e como o protótipo foi avaliado.
+Nada aqui é uma leitura atual da economia. A página descreve o que a secção mediria, de onde
+viriam os dados, como cada número diria o que é e como o protótipo foi avaliado.
 
 ---
 
-## O que vai ser a secção?
+## O que seria a secção?
 
 Uma leitura rápida e explicada de onde está a economia portuguesa: atividade, mercado de
-trabalho, inflação e risco de recessão. Não vai ser uma previsão do PIB e não substitui o
-Banco de Portugal nem o INE, que continuam a ser as fontes oficiais.
+trabalho, inflação e risco de recessão. Não seria uma previsão do PIB nem substituiria o
+Banco de Portugal ou o INE, que são as fontes oficiais.
 
-O princípio: **cada número vai dizer o que é e o que não é**. Quando um resultado for
-modesto, vamos dizê-lo; quando for provisório, vai estar marcado como provisório; quando um
-modelo perder para uma referência simples, é essa referência que publicamos.
+O princípio: **cada número diria o que é e o que não é**. Um resultado modesto seria
+apresentado como modesto; um resultado provisório, marcado como provisório; e, quando um
+modelo perdesse para uma referência simples, seria essa referência a publicada.
 
 ---
 
-## De onde vêm os dados?
+## De onde vinham os dados?
 
 O protótipo usou cerca de **210 séries públicas**, todas de fontes oficiais ou abertas:
 
@@ -32,14 +32,14 @@ O protótipo usou cerca de **210 séries públicas**, todas de fontes oficiais o
 - **BCE, REN, ENTSO-E, FMI e outros**: taxas de referência, consumo de eletricidade e
   incerteza de política económica.
 
-As transformações (variações homólogas e em cadeia, ajustamentos) são automáticas e
-reproduzíveis; nenhum dado é editado à mão.
+As transformações (variações homólogas e em cadeia, ajustamentos) eram automáticas e
+reproduzíveis; nenhum dado era editado à mão.
 
 ---
 
-## Como vai cada número dizer o que é?
+## Como diria cada número o que é?
 
-Cada número vai trazer um de quatro selos, com um significado fixo:
+Cada número traria um de quatro selos, com um significado fixo:
 
 1. **Dado oficial**: um valor publicado por uma fonte oficial (INE, Eurostat, Banco de
    Portugal, IEFP), reproduzido tal e qual, com a data a que se refere. Não é nosso.
@@ -49,22 +49,24 @@ Cada número vai trazer um de quatro selos, com um significado fixo:
    crescimento do PIB do trimestre em curso). Nunca é autoritativa: o número oficial é o do
    INE.
 4. **Previsão**: uma distribuição simulada de resultados futuros (como pode acabar o ano).
-   Vai ser publicada sempre como distribuição: lê os intervalos, não só o ponto central.
+   Seria sempre publicada como distribuição: lê os intervalos, não só o ponto central.
 
 ---
 
 ## Como foi avaliado o protótipo?
 
-- **Como se fosse em tempo real.** Repetimos a história desde 2005: em cada trimestre, o
-  modelo só vê o que estaria publicado nessa data. Uma ressalva: para a maioria das séries
-  não há arquivo das versões antigas, por isso usámos os valores revistos de hoje, cortados
-  pela data de publicação. Isso tende a fazer o modelo parecer melhor do que seria em tempo
-  real. Os inquéritos de confiança, que trazem grande parte do sinal, quase não são revistos.
+- **Como se fosse em tempo real.** Repetimos a história do 1.º trimestre de 2005 ao 4.º de
+  2025: em cada trimestre, o modelo só vê o que estaria publicado nessa data. Os quatro
+  trimestres de 2020 (a pandemia) ficaram fora da avaliação; os de 2021 entram. Uma
+  ressalva: para a maioria das séries não há arquivo das versões antigas, por isso usámos os
+  valores revistos de hoje, cortados pela data de publicação. Isso tende a fazer o modelo
+  parecer melhor do que seria em tempo real. Os inquéritos de confiança, que trazem grande
+  parte do sinal, quase não são revistos.
 - **Contra a primeira publicação.** Onde as versões antigas existem, comparámos cada
   estimativa com o PIB tal como saiu pela primeira vez, e não com o valor de hoje, que o
   modelo nunca poderia ter conhecido.
 - **Contra uma referência justa.** A referência é um AR(1): um modelo simples que estima o
-  trimestre a partir do anterior, com exatamente a mesma informação.
+  trimestre a partir do anterior, com os dados disponíveis à mesma data.
 - **Intervalos a partir dos nossos próprios erros.** Os intervalos não vêm da teoria do
   modelo, que os dava duas a três vezes estreitos demais, mas da distribuição dos erros que
   o protótipo cometeu no passado em cada momento do trimestre.
@@ -73,9 +75,10 @@ Cada número vai trazer um de quatro selos, com um significado fixo:
 
 ## O que mostrou o teste interno?
 
-Estes resultados são de um teste interno feito com os dados disponíveis até julho de 2026.
-Não são previsões publicadas e vão ser refeitos antes do lançamento. O erro relativo
-compara o erro do modelo com o do AR(1): 0,90 quer dizer um erro cerca de 10% menor.
+Estes resultados são de um teste interno feito com os dados disponíveis até julho de 2026,
+sobre os 80 trimestres avaliados (2005 a 2025, sem 2020). Não são previsões publicadas e
+teriam de ser refeitos antes de qualquer publicação. O erro relativo compara o erro do
+modelo com o do AR(1): 0,90 quer dizer um erro cerca de 10% menor.
 
 - **No primeiro mês do trimestre**, uma combinação de dois modelos teve um erro relativo de
   cerca de 0,90.
@@ -84,10 +87,11 @@ compara o erro do modelo com o do AR(1): 0,90 quer dizer um erro cerca de 10% me
   concurso com 19 candidatos e uma regra de seleção fixada antes. O valor-p bruto do teste
   de Diebold–Mariano foi 0,014, mas, como foi o melhor de 19, o valor-p ajustado à seleção é
   de cerca de 0,06 a 0,1: **acima de 0,05, por isso não é estatisticamente significativo ao
-  nível convencional**. Ficou escrito antes dos resultados que, se a vantagem não se mantiver
-  nos trimestres seguintes, o indicador sai.
-- **No fim do trimestre**, o erro relativo foi 0,775, uma vantagem modesta que não é
-  significativa a 5% (valor-p de cerca de 0,23) e que depende em parte do ressalto de 2021.
+  nível convencional**. Ficou escrito antes dos resultados que, se a vantagem não se
+  mantivesse nos trimestres seguintes, o indicador sairia.
+- **No terceiro mês**, o erro relativo foi de cerca de 0,78, uma vantagem modesta que não é
+  significativa a 5% (valor-p de cerca de 0,23) e que depende em parte do ressalto de 2021:
+  sem 2021, a vantagem encolhe para um erro relativo de cerca de 0,9.
 - **Parte da vantagem é só acompanhar o nível.** Na última década, uma média móvel simples
   dos últimos 12 trimestres capta a maior parte do ganho sobre o AR(1).
 - **No primeiro trimestre avaliado depois da seleção (o 1.º de 2026), todos os modelos
@@ -96,24 +100,26 @@ compara o erro do modelo com o do AR(1): 0,90 quer dizer um erro cerca de 10% me
 
 ---
 
-## Porque é que o PIB do trimestre não vai ser o número principal?
+## Porque é que o PIB do trimestre não seria o número principal?
 
-A primeira publicação do PIB é ela própria uma estimativa. Entre a estimativa rápida do INE
-e os valores finais, as revisões têm um erro típico de cerca de 0,3 pontos percentuais.
-Nenhuma estimativa do PIB final pode ser mais certa do que isso. Por isso, quando a secção
-for publicada, vai começar pelas leituras de dados oficiais e tratar a estimativa do PIB do
-trimestre como o número menos autoritativo.
+A primeira publicação do PIB é ela própria uma estimativa. Entre a primeira publicação e os
+valores mais recentes, as revisões do PIB português têm um erro típico (a raiz do erro
+quadrático médio) de cerca de 0,3 pontos percentuais, calculado por nós a partir das versões
+históricas guardadas no ALFRED (Reserva Federal de St. Louis). Nenhuma estimativa do PIB
+final pode ser mais certa do que isso. Por isso, se a secção fosse publicada, começaria
+pelas leituras de dados oficiais e trataria a estimativa do PIB do trimestre como o número
+menos autoritativo.
 
 ---
 
 ## Que limites assumimos?
 
-- Há poucos trimestres para avaliar (cerca de 80, sem a pandemia), por isso muitos
-  resultados honestos são "modestos, não significativos".
+- Há poucos trimestres para avaliar (80, sem os de 2020), por isso muitos resultados
+  honestos são "modestos, não significativos".
 - Sem as versões antigas da maioria dos dados, a avaliação é só uma aproximação ao tempo
   real.
-- As estimativas do trimestre em curso vão ser indicativas, nunca autoritativas.
-- O que não sobreviver à avaliação sai: modelos que pareciam bons foram retirados quando os
+- As estimativas do trimestre em curso seriam indicativas, nunca autoritativas.
+- O que não sobrevive à avaliação sai: modelos que pareciam bons foram retirados quando os
   números não se reproduziram.
 
 ---
@@ -137,5 +143,4 @@ trimestre como o número menos autoritativo.
 ---
 
 Esta página descreve o protótipo testado até julho de 2026, avaliado até ao 1.º trimestre de
-2026. O código da secção ainda não é público; quando
-for, a ligação fica aqui.
+2026. O código da secção não é público.

@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { formatElectionNumber } from "@/lib/election-display";
+import { CONTESTED_ENSC, districtsToWatch, SEAT_CHANGE_SHOWN, seatChangesOf } from "@/lib/election-aggregates";
 import { partyColors, partyNames } from "@/lib/config/colors";
 
 interface DistrictForecast {
@@ -59,13 +60,20 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
         ...district,
         competitiveness,
         topParties: parties,
-        isContested: competitiveness > 0.8
+        isContested: competitiveness > CONTESTED_ENSC
       };
     })
     .sort((a, b) => b.competitiveness - a.competitiveness);
 
   const contestedDistricts = sortedDistricts.filter(d => d.isContested);
-  const safeDistricts = sortedDistricts.filter(d => !d.isContested);
+  const belowThreshold = sortedDistricts.filter(d => !d.isContested);
+  // Under the threshold is not the same as settled: name the districts whose
+  // seats still move in a fifth to a third of the simulations (AEE3-V02).
+  const watched = districtsToWatch(contestedData?.districts ?? {});
+  const watchList = watched.map(w => {
+    const pct = formatElectionNumber(w.probability * 100, locale);
+    return `${w.district} (${w.party} ${w.direction === 'gain' ? t("seatGain", { pct }) : t("seatLoss", { pct })})`;
+  });
 
   return (
     <div className="space-y-6">
@@ -90,24 +98,9 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
           <p className="text-xs text-stone-500 mb-4">{t("seatChangeBaseline")}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {contestedDistricts.slice(0, 9).map(district => {
-              const contestedInfo = contestedData?.districts?.[district.district_name];
-              const seatChanges = contestedInfo?.parties || {};
-              
-              // Find parties with meaningful seat change probabilities
-              const partiesWithChanges = Object.entries(seatChanges)
-                .map(([party, probs]) => {
-                  const gainProb = (probs["1"] || 0) + (probs["2"] || 0);
-                  const loseProb = (probs["-1"] || 0) + (probs["-2"] || 0);
-                  return {
-                    party,
-                    gainProb,
-                    loseProb,
-                    hasChange: gainProb > 0.05 || loseProb > 0.05
-                  };
-                })
-                .filter(p => p.hasChange)
-                .sort((a, b) => (b.gainProb + b.loseProb) - (a.gainProb + a.loseProb))
-                .slice(0, 3);
+              // Every party past the 5% mark, not the first three: Lisboa's
+              // CDU +1 (43%) was hidden behind three other rows (AEE3-V01).
+              const partiesWithChanges = seatChangesOf(contestedData?.districts?.[district.district_name]);
 
               return (
                 // A normal grid of results: cream cards and a neutral chip.
@@ -123,7 +116,8 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
                     {partiesWithChanges.length > 0 ? partiesWithChanges.map(({ party, gainProb, loseProb }) => (
                       <div key={party} className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <div 
+                          <div
+                            aria-hidden="true"
                             className="w-3 h-3 rounded"
                             style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }}
                           />
@@ -132,11 +126,11 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
                           </span>
                         </div>
                         <div className="ml-5 text-xs text-stone-600">
-                          {gainProb > 0.05 && (
+                          {gainProb > SEAT_CHANGE_SHOWN && (
                             <span className="text-green-700">{t("seatGain", { pct: formatElectionNumber(gainProb * 100, locale) })}</span>
                           )}
-                          {gainProb > 0.05 && loseProb > 0.05 && <span className="mx-1">•</span>}
-                          {loseProb > 0.05 && (
+                          {gainProb > SEAT_CHANGE_SHOWN && loseProb > SEAT_CHANGE_SHOWN && <span className="mx-1">•</span>}
+                          {loseProb > SEAT_CHANGE_SHOWN && (
                             <span className="text-red-700">{t("seatLoss", { pct: formatElectionNumber(loseProb * 100, locale) })}</span>
                           )}
                         </div>
@@ -203,11 +197,16 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
             <div className="text-sm text-stone-600">{t("seatsInPlay")}</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-ink tabular-nums">{safeDistricts.length}</div>
-            <div className="text-sm text-stone-600">{t("stableAllocation")}</div>
+            <div className="text-2xl font-bold text-ink tabular-nums">{belowThreshold.length}</div>
+            <div className="text-sm text-stone-600">{t("belowThreshold")}</div>
           </div>
         </div>
       </div>
+      {watchList.length > 0 && (
+        <p className="-mt-3 text-xs text-stone-600">
+          {t("belowThresholdWatch", { list: new Intl.ListFormat(locale === "en" ? "en-GB" : "pt-PT", { type: "conjunction" }).format(watchList) })}
+        </p>
+      )}
     </div>
   );
 }

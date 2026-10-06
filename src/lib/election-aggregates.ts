@@ -209,9 +209,33 @@ export interface BlocSimulations {
   blocs: BlocSeatSummary[];
 }
 
+/**
+ * The draws the dot plot shows, keeping every scenario a posterior draw was
+ * run under. The 2025 file holds 3 000 model draws (`original_sample_id`),
+ * each written three times in a row, once per emigration scenario (2024,
+ * 2022, 2019). Every 12th row of that file is always the 2024 row, so a plain
+ * stride drew one scenario and put the left bloc's dots a seat low (AEE3-01).
+ * Here every k-th draw is taken with all of its rows: 250 draws × 3 scenarios.
+ * Files without ids (an article's inline data) fall back to every k-th row.
+ */
+export function drawnSeatIndices(draws: readonly SeatDraw[], target = DRAWN_SAMPLE_SIZE): number[] {
+  const groups = new Map<number | string, number[]>();
+  for (let i = 0; i < draws.length; i++) {
+    const id = draws[i].original_sample_id;
+    if (id == null) return everyKthIndex(draws.length, target);
+    const rows = groups.get(id);
+    if (rows) rows.push(i);
+    else groups.set(id, [i]);
+  }
+  const ids = Array.from(groups.keys());
+  if (ids.length === 0) return [];
+  const rowsPerDraw = Math.max(1, Math.round(draws.length / ids.length));
+  return everyKthIndex(ids.length, Math.max(1, Math.floor(target / rowsPerDraw))).flatMap(j => groups.get(ids[j])!);
+}
+
 /** Bloc seat totals over every draw, plus the deterministic subsample the dot plot draws. */
 export function summariseBlocs(draws: readonly SeatDraw[], blocs: readonly BlocDefinition[], threshold: number, sampleSize = DRAWN_SAMPLE_SIZE): BlocSimulations {
-  const indices = everyKthIndex(draws.length, sampleSize);
+  const indices = drawnSeatIndices(draws, sampleSize);
   return {
     total: draws.length,
     drawn: indices.length,
@@ -337,6 +361,79 @@ export function seatSumArithmetic(draws: readonly SeatDraw[], parties: readonly 
   if (draws.length === 0) return { median: NaN, reach: NaN };
   const totals = draws.map(d => parties.reduce((sum, p) => sum + seatsOf(d, p), 0)).sort((a, b) => a - b);
   return { median: quantileSorted(totals, 0.5), reach: totals.filter(v => v >= threshold).length / totals.length };
+}
+
+// ---- district seat changes (contested_summary.json) ------------------------
+
+/** A district's ENSC above which its seats count as "em disputa". */
+export const CONTESTED_ENSC = 0.8;
+/** Below the threshold but still named on the page: a seat changes party in a fifth to a third of the simulations. */
+export const WATCH_ENSC = 0.4;
+/** A party's change is shown on a district card from this probability up. */
+export const SEAT_CHANGE_SHOWN = 0.05;
+
+/** One district's entry in contested_summary.json: per party, the share of simulations at each change from its most frequent count. */
+export interface DistrictSeatSummary {
+  ENSC: number;
+  parties?: Record<string, Record<string, number>>;
+}
+
+export interface DistrictSeatChange {
+  party: string;
+  /** One seat or more above the party's own most frequent count in the district. */
+  gainProb: number;
+  /** One seat or more below it. */
+  loseProb: number;
+}
+
+/**
+ * Every party whose chance of ending one seat or more above or below its own
+ * most frequent count passes SEAT_CHANGE_SHOWN, largest first. All of them,
+ * not the first three: the cards hid Lisboa's CDU +1 at 43% (AEE3-V01). The
+ * changes add every step (+1, +2…), which is why the cards say "ou mais".
+ */
+export function seatChangesOf(district?: DistrictSeatSummary): DistrictSeatChange[] {
+  return Object.entries(district?.parties ?? {})
+    .map(([party, probs]) => {
+      let gainProb = 0;
+      let loseProb = 0;
+      for (const [step, p] of Object.entries(probs)) {
+        const k = Number(step);
+        if (k > 0) gainProb += p;
+        else if (k < 0) loseProb += p;
+      }
+      return { party, gainProb, loseProb };
+    })
+    .filter(p => p.gainProb > SEAT_CHANGE_SHOWN || p.loseProb > SEAT_CHANGE_SHOWN)
+    .sort((a, b) => (b.gainProb + b.loseProb) - (a.gainProb + a.loseProb));
+}
+
+export interface DistrictToWatch {
+  district: string;
+  ensc: number;
+  party: string;
+  direction: 'gain' | 'loss';
+  probability: number;
+}
+
+/**
+ * Districts under the "em disputa" threshold whose seats still move often
+ * (ENSC from WATCH_ENSC to CONTESTED_ENSC), each with its largest change:
+ * "abaixo do limiar" is a cut-off, not a promise of stability (AEE3-V02).
+ */
+export function districtsToWatch(districts: Record<string, DistrictSeatSummary>): DistrictToWatch[] {
+  return Object.entries(districts)
+    .filter(([, d]) => d.ENSC >= WATCH_ENSC && d.ENSC <= CONTESTED_ENSC)
+    .sort(([, a], [, b]) => b.ENSC - a.ENSC)
+    .flatMap(([district, d]) => {
+      const top = seatChangesOf(d)
+        .flatMap(c => [
+          { party: c.party, direction: 'gain' as const, probability: c.gainProb },
+          { party: c.party, direction: 'loss' as const, probability: c.loseProb },
+        ])
+        .sort((a, b) => b.probability - a.probability)[0];
+      return top ? [{ district, ensc: d.ENSC, ...top }] : [];
+    });
 }
 
 export interface CloseLead {

@@ -1,24 +1,24 @@
-# How will we read the economy?
+# How would we read the economy?
 
-Nothing here is a current reading of the economy. The page explains what the section will
-measure, where the data comes from, how each figure will say what it is and how the prototype
-was evaluated.
+Nothing here is a current reading of the economy. The page describes what the section would
+measure, where the data would come from, how each figure would say what it is and how the
+prototype was evaluated.
 
 ---
 
-## What will the section be?
+## What would the section be?
 
 A quick, explained reading of where the Portuguese economy stands: activity, the labour
-market, inflation and recession risk. It will not be a GDP forecast and it does not replace
-Banco de Portugal or INE, which remain the official sources.
+market, inflation and recession risk. It would not be a GDP forecast and would not replace
+Banco de Portugal or INE, which are the official sources.
 
-The principle: **every figure will say what it is and what it is not**. When a result is
-modest, we will say so; when it is provisional, it will be marked provisional; when a model
-loses to a simple benchmark, the benchmark is what we publish.
+The principle: **every figure would say what it is and what it is not**. A modest result
+would be presented as modest; a provisional one, marked provisional; and when a model lost
+to a simple benchmark, the benchmark is what would be published.
 
 ---
 
-## Where does the data come from?
+## Where did the data come from?
 
 The prototype used about **210 public series**, all from official or open sources:
 
@@ -33,14 +33,14 @@ The prototype used about **210 public series**, all from official or open source
 - **ECB, REN, ENTSO-E, IMF and others**: policy rates, electricity consumption and economic
   policy uncertainty.
 
-The transformations (year-on-year and quarter-on-quarter changes, adjustments) are automatic
-and reproducible; no data is edited by hand.
+The transformations (year-on-year and quarter-on-quarter changes, adjustments) were automatic
+and reproducible; no data was edited by hand.
 
 ---
 
-## How will each figure say what it is?
+## How would each figure say what it is?
 
-Each figure will carry one of four labels, with a fixed meaning:
+Each figure would carry one of four labels, with a fixed meaning:
 
 1. **Official data**: a value published by an official source (INE, Eurostat, Banco de
    Portugal, IEFP), reproduced as is, with the date it refers to. It is not ours.
@@ -48,23 +48,26 @@ Each figure will carry one of four labels, with a fixed meaning:
    market, current recession risk). It describes the present; it is not a forecast.
 3. **Indicative estimate**: a model estimate of a value not yet released (GDP growth in the
    current quarter). It is never authoritative: the official number is INE's.
-4. **Forecast**: a simulated distribution of future outcomes (how the year could end). It will
-   always be published as a distribution: read the intervals, not just the central point.
+4. **Forecast**: a simulated distribution of future outcomes (how the year could end). It
+   would always be published as a distribution: read the intervals, not just the central
+   point.
 
 ---
 
 ## How was the prototype evaluated?
 
-- **As if in real time.** We replayed history from 2005: in each quarter, the model only sees
-  what would have been published by then. One caveat: most series have no archive of past
-  versions, so we used today's revised values, cut off by their publication date. That tends
-  to make the model look better than it would have been in real time. The confidence
-  surveys, which carry much of the signal, are hardly ever revised.
+- **As if in real time.** We replayed history from the first quarter of 2005 to the fourth of
+  2025: in each quarter, the model only sees what would have been published by then. The
+  four quarters of 2020 (the pandemic) were left out of the evaluation; those of 2021 are
+  in. One caveat: most series have no archive of past versions, so we used today's revised
+  values, cut off by their publication date. That tends to make the model look better than
+  it would have been in real time. The confidence surveys, which carry much of the signal,
+  are hardly ever revised.
 - **Against the first release.** Where past versions exist, we scored each estimate against
   GDP as it was first published, not against today's value, which the model could never
   have known.
 - **Against a fair benchmark.** The benchmark is an AR(1): a simple model that estimates the
-  quarter from the previous one, with exactly the same information.
+  quarter from the previous one, with the data available on the same date.
 - **Intervals from our own errors.** The intervals do not come from the model's theory, which
   made them two to three times too narrow, but from the distribution of the errors the
   prototype made in the past at each point of the quarter.
@@ -73,9 +76,10 @@ Each figure will carry one of four labels, with a fixed meaning:
 
 ## What did the internal test show?
 
-These results come from an internal test run on the data available up to July 2026. They are
-not published forecasts and will be redone before launch. The relative error compares the
-model's error with the AR(1)'s: 0.90 means an error about 10% smaller.
+These results come from an internal test run on the data available up to July 2026, over the
+80 quarters evaluated (2005 to 2025, without 2020). They are not published forecasts and
+would have to be redone before any publication. The relative error compares the model's
+error with the AR(1)'s: 0.90 means an error about 10% smaller.
 
 - **In the first month of the quarter**, a combination of two models had a relative error of
   about 0.90.
@@ -84,10 +88,11 @@ model's error with the AR(1)'s: 0.90 means an error about 10% smaller.
   with 19 candidates and a selection rule fixed in advance. The raw p-value of the
   Diebold–Mariano test was 0.014, but because it was the best of 19, the selection-adjusted
   p-value is about 0.06 to 0.1: **above 0.05, so it is not statistically significant at the
-  conventional level**. It was written down before the results that if the advantage does
-  not hold in the following quarters, the indicator goes.
-- **At the end of the quarter**, the relative error was 0.775, a modest advantage that is not
-  significant at 5% (p-value about 0.23) and rests partly on the 2021 rebound.
+  conventional level**. It was written down before the results that if the advantage did
+  not hold in the following quarters, the indicator would go.
+- **In the third month**, the relative error was about 0.78, a modest advantage that is not
+  significant at 5% (p-value about 0.23) and rests partly on the 2021 rebound: without 2021,
+  the advantage shrinks to a relative error of about 0.9.
 - **Part of the advantage is just tracking the level.** Over the last decade, a simple moving
   average of the last 12 quarters captures most of the gain over the AR(1).
 - **In the first quarter scored after the selection (2026 Q1), every model lost to the
@@ -96,22 +101,23 @@ model's error with the AR(1)'s: 0.90 means an error about 10% smaller.
 
 ---
 
-## Why will quarterly GDP not be the headline figure?
+## Why would quarterly GDP not be the headline figure?
 
-The first GDP release is itself an estimate. Between INE's flash estimate and the final
-values, revisions have a typical error of about 0.3 percentage points. No estimate of final
-GDP can be more certain than that. So when the section is published, it will lead with
-readings of official data and treat the current-quarter GDP estimate as its least
-authoritative figure.
+The first GDP release is itself an estimate. Between the first release and the latest values,
+revisions to Portuguese GDP have a typical error (root mean squared error) of about 0.3
+percentage points, which we computed from the historical versions kept in ALFRED (Federal
+Reserve Bank of St. Louis). No estimate of final GDP can be more certain than that. So if
+the section were published, it would lead with readings of official data and treat the
+current-quarter GDP estimate as its least authoritative figure.
 
 ---
 
 ## Which limits do we accept?
 
-- There are few quarters to evaluate (about 80, excluding the pandemic), so many honest
-  results are "modest, not significant".
+- There are few quarters to evaluate (80, without those of 2020), so many honest results are
+  "modest, not significant".
 - Without past versions of most data, the evaluation only approximates real time.
-- Estimates for the current quarter will be indicative, never authoritative.
+- Estimates for the current quarter would be indicative, never authoritative.
 - What does not survive evaluation goes: models that looked good were withdrawn when their
   numbers did not reproduce.
 
@@ -135,4 +141,5 @@ authoritative figure.
 
 ---
 
-This page describes the prototype tested up to July 2026, scored up to 2026 Q1. The section's code is not public yet; when it is, the link will be here.
+This page describes the prototype tested up to July 2026, scored up to 2026 Q1. The section's
+code is not public.
