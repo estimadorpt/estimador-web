@@ -18,7 +18,10 @@ export function readFootballExplorationState(
   }
 
   const team = params.get('team');
-  const objective = params.get('goal') === 'p_relegation' ? 'p_relegation' : 'p_champion';
+  // Only a goal the URL names: without one the simulator picks the club's
+  // own default (defaultObjective, audit FA3-03).
+  const goal = params.get('goal');
+  const objective: Objective | undefined = goal === 'p_relegation' || goal === 'p_champion' ? goal : undefined;
   const pick = params.get('pick');
   const [rawIndex, rawOutcome] = pick?.split(':') ?? [];
   const index = Number(rawIndex);
@@ -27,7 +30,7 @@ export function readFootballExplorationState(
   return {
     state: {
       ...(team && Object.hasOwn(data.baseline, team) ? { team } : {}),
-      objective,
+      ...(objective ? { objective } : {}),
       ...(Number.isInteger(index) && index >= 0 && index < data.matches.length && outcome
         ? { selection: { index, outcome } }
         : {}),
@@ -74,6 +77,20 @@ export function shouldPushSelectionState(prev: UrlWriteState, next: UrlWriteStat
 }
 
 export type Objective = 'p_champion' | 'p_relegation';
+
+/** From this title chance up, the simulator opens on the title. */
+export const TITLE_DEFAULT_FROM = 0.01;
+
+/**
+ * What the simulator asks for a club when the reader has not said: the
+ * title from 1%, else relegation. Opening every club on the title showed
+ * "0% → 0% → 0%" for the 14 clubs whose title chance is zero (audit FA3-03,
+ * UXM3-04); the 1% line is the one the club pages fold figures at.
+ */
+export function defaultObjective(baseline: { p_champion?: number } | undefined): Objective {
+  return (baseline?.p_champion ?? 0) >= TITLE_DEFAULT_FROM ? 'p_champion' : 'p_relegation';
+}
+
 /** Conditional forecasts for a single match; never add independent effects. */
 export function conditionalProbabilities(data: NextMatchdayScenarios, selection?: {index:number; outcome:Outcome}) {
   const conditional = selection && data.matches[selection.index]?.conditionals[selection.outcome];

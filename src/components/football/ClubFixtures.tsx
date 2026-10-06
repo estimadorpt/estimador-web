@@ -2,6 +2,8 @@ import { Link } from "@/i18n/routing";
 import { teamColorOnPaper, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
 import { byKickoff, type GameFixturesData } from "@/lib/football-fixtures";
 import { formatKickoffShort, formatPercent } from "@/lib/football-format";
+import { kickoffSteps } from "@/lib/football-status";
+import { ClockSwitch } from "./ClockSwitch";
 
 export interface ClubFixtureRow {
   matchday: number;
@@ -45,7 +47,19 @@ export function clubFixtureRows(
   return byKickoff(rows);
 }
 
-export function ClubFixtures({ rows, locale, limit }: { rows: ClubFixtureRow[]; locale: string; limit?: number }) {
+export function ClubFixtures({
+  rows,
+  locale,
+  limit,
+  forecastTimestamp,
+}: {
+  rows: ClubFixtureRow[];
+  locale: string;
+  limit?: number;
+  /** The forecast's timestamp: a game past its kickoff is marked as played,
+   * its result in the next forecast (audit FA3-07). */
+  forecastTimestamp?: string;
+}) {
   const pt = locale !== "en";
   const shown = limit ? rows.slice(0, limit) : rows;
   if (shown.length === 0) return null;
@@ -55,6 +69,14 @@ export function ClubFixtures({ rows, locale, limit }: { rows: ClubFixtureRow[]; 
         const when = r.kickoff
           ? formatKickoffShort(r.kickoff, locale, { confirmed: r.kickoffConfirmed })
           : "";
+        const status = forecastTimestamp
+          ? kickoffSteps(
+              r.kickoff,
+              r.kickoffConfirmed,
+              <span className="block text-[11px] font-semibold text-stone-600">{pt ? "jogo começou" : "under way"}</span>,
+              <span className="block text-[11px] font-semibold text-stone-600">{pt ? "jogado · resultado na próxima previsão" : "played · result in the next forecast"}</span>,
+            )
+          : [];
         const body = (
           <>
             <span className="w-24 shrink-0 text-xs tabular-nums text-stone-500 sm:w-36">
@@ -62,6 +84,7 @@ export function ClubFixtures({ rows, locale, limit }: { rows: ClubFixtureRow[]; 
               {r.kickoff && !r.kickoffConfirmed && (
                 <span className="block text-[11px]">{pt ? "data provisória" : "provisional date"}</span>
               )}
+              {status.length > 0 && <ClockSwitch initial={null} steps={status} />}
             </span>
             <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-0.5">
               {teamLogoSrc(r.opponent) ? (

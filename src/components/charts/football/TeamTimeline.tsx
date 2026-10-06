@@ -10,6 +10,9 @@ interface TimelinePoint {
   matchday: number;
   /** Percentage, 0–100. */
   value: number;
+  /** The publication, dated: "J2 · 14 ago." (audit FA3-05: md02 held one
+   * jornada-2 result, so "Jornada 2" misstated what the point covers). */
+  label?: string;
 }
 
 interface TeamTimelineProps {
@@ -19,12 +22,14 @@ interface TeamTimelineProps {
   yAxisLabel: string;
   /** Localised x-axis label; matchdays are integers, never dates. */
   xAxisLabel?: string;
+  /** The table twin's first column when the points carry their own labels. */
+  pointLabel?: string;
 }
 
 // One club's probability after each matchday. No band (audit F-H1, see
 // TitleRaceChart); the end label is in ink, never in the club colour, so a
 // light club colour cannot make it disappear.
-export function TeamTimeline({ data, teamColor, yAxisLabel, xAxisLabel = "Jornada" }: TeamTimelineProps) {
+export function TeamTimeline({ data, teamColor, yAxisLabel, xAxisLabel = "Jornada", pointLabel }: TeamTimelineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const locale = useLocale();
 
@@ -65,7 +70,7 @@ export function TeamTimeline({ data, teamColor, yAxisLabel, xAxisLabel = "Jornad
           Plot.tip(data, Plot.pointerX({
             x: "matchday",
             y: "value",
-            title: (d: TimelinePoint) => `${xAxisLabel} ${d.matchday}: ${formatPercent(d.value / 100, locale)}`,
+            title: (d: TimelinePoint) => `${d.label ?? `${xAxisLabel} ${d.matchday}`}\n${formatPercent(d.value / 100, locale)}`,
           })),
           Plot.dot([last], { x: "matchday", y: "value", fill: teamColor, r: 4 }),
           Plot.text([last], {
@@ -93,7 +98,11 @@ export function TeamTimeline({ data, teamColor, yAxisLabel, xAxisLabel = "Jornad
   return (
     <div className="w-full">
       <div ref={containerRef} className="w-full min-h-[200px]" />
-      <ChartTable caption={yAxisLabel} columns={[xAxisLabel, yAxisLabel]} rows={data.map(d => [d.matchday, formatPercent(d.value / 100, locale)])} />
+      <ChartTable
+        caption={yAxisLabel}
+        columns={[pointLabel ?? xAxisLabel, yAxisLabel]}
+        rows={data.map(d => [d.label ?? d.matchday, formatPercent(d.value / 100, locale)])}
+      />
     </div>
   );
 }

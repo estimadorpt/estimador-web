@@ -948,6 +948,7 @@ export function probabilityHistory(historical: LigaHistorical): LigaProbabilityH
   return historical.map(md => ({
     matchday: md.matchday,
     timestamp: md.timestamp,
+    model: md.model,
     table: md.table.map(({ team, p_champion, p_relegation }) => ({ team, p_champion, p_relegation })),
   }));
 }

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useClockReached } from "@/components/football/ClockSwitch";
+import { forecastAsOf, matchPlayedAt } from "@/lib/football-status";
 import { teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { CriticalPathMatch } from "@/types/football";
 import { RotateCcw, Check } from "lucide-react";
@@ -19,6 +21,13 @@ interface PathBuilderProps {
   locale: string;
   /** Simulated seasons behind the conditionals (prediction.n_sims). */
   nSims: number;
+  /** When the forecast's "agora" goes out of date: the next round played (FR3-01). */
+  staleAt?: string | null;
+  /** The forecast's timestamp, to date "agora" after `staleAt`. */
+  forecastTimestamp?: string | null;
+  /** Confirmed kickoffs of the club's games, by matchday: a game two hours
+   * past its kickoff is marked as played and can no longer be picked. */
+  kickoffs?: Record<number, string>;
   labels: {
     matchdayAbbr: string;
     win: string;
@@ -45,16 +54,34 @@ const FIRST_GAMES = 6;
  * in football-path-builder.ts: one pick gives the exact conditional from the
  * simulations, several are combined as if independent given the target.
  *
- * The running answer is said once, in a summary that stays in view (sticky
- * at the foot of the screen on phones, beside the list on wide screens), with
- * "Repor" next to it. Unpicked rows keep full contrast (audit A11Y2-01: an
- * opacity fade put them at 2,5–3,1:1); a picked row is marked by a rule and
- * a tint, and only picked rows carry a figure (UXD2-16).
+ * The running answer is said once, in a summary beside the list on wide
+ * screens (sticky there) and under it on phones, with "Limpar tudo" next to
+ * it. Below `lg` it is not sticky: a bar fixed to the foot of a phone hid the
+ * focused V/E/D buttons, and at 400% zoom left a 36px strip to work in
+ * (audit A11Y3-02, A11Y3-M1). Unpicked rows keep full contrast (audit
+ * A11Y2-01: an opacity fade put them at 2,5–3,1:1); a picked row is marked by
+ * a rule and a tint, and only picked rows carry a figure (UXD2-16).
  */
-export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels }: PathBuilderProps) {
+export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, staleAt = null, forecastTimestamp = null, kickoffs = {} }: PathBuilderProps) {
   const pt = locale !== "en";
   const [selections, setSelections] = useState<Record<number, PathOutcome>>({});
   const [showAll, setShowAll] = useState(false);
+  const [notice, setNotice] = useState("");
+
+  // The reader's clock, after mount only (hydration parity): "agora" is
+  // dated once the next round is played, and a played game is marked.
+  const stale = useClockReached(staleAt);
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const isPlayed = (matchday: number) => {
+    const at = matchPlayedAt(kickoffs[matchday]);
+    return now != null && at != null && Date.parse(at) <= now;
+  };
+  const nowWord = stale && forecastTimestamp ? forecastAsOf(forecastTimestamp, locale) : (pt ? "agora" : "now");
 
   const sorted = useMemo(() => [...matches].sort((a, b) => a.matchday - b.matchday), [matches]);
   const running = useMemo(() => runningProbabilities(pCurrent, sorted, selections), [pCurrent, sorted, selections]);
@@ -68,12 +95,24 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels }
   const venueWord = (venue: "H" | "A") => (venue === "H" ? (pt ? "em casa" : "at home") : (pt ? "fora" : "away"));
 
   function toggle(index: number, outcome: PathOutcome) {
+    // A played game is marked, not removed: its buttons stay focusable and
+    // say why they do nothing (aria-disabled, never `disabled`, A11Y3-01).
+    if (isPlayed(sorted[index].matchday)) return;
     setSelections(prev => {
       const next = { ...prev };
       if (next[index] === outcome) delete next[index];
       else next[index] = outcome;
       return next;
     });
+  }
+
+  // "Limpar tudo" stays where it is (aria-disabled with nothing picked), so
+  // focus stays on it instead of dropping to <body> (audit A11Y3-01); the
+  // reset is announced.
+  function resetAll() {
+    if (!hasSelections) return;
+    setSelections({});
+    setNotice(pt ? "Escolhas limpas." : "Picks cleared.");
   }
 
   const hidden = sorted.length - FIRST_GAMES;
@@ -103,9 +142,10 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels }
             const prev = i === 0 ? pCurrent : running[i - 1];
             const step = prob - prev;
             const opponent = teamDisplayName(m.opponent);
+            const played = isPlayed(m.matchday);
             const context = pt
-              ? `frente ao ${opponent}, ${venueWord(m.venue)}, jornada ${m.matchday}`
-              : `against ${opponent}, ${venueWord(m.venue)}, matchday ${m.matchday}`;
+              ? `frente ao ${opponent}, ${venueWord(m.venue)}, jornada ${m.matchday}${played ? ", já jogado" : ""}`
+              : `against ${opponent}, ${venueWord(m.venue)}, matchday ${m.matchday}${played ? ", already played" : ""}`;
             const figure = sel ? (
               <>
                 <span className="text-sm font-bold text-ink">{formatPercent(prob, locale)}</span>
@@ -132,6 +172,11 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels }
                     {teamLogoSrc(m.opponent) && <img src={teamLogoSrc(m.opponent)} alt="" width={16} height={16} loading="lazy" decoding="async" className="h-4 w-4 shrink-0 object-contain" />}
                     <span className="truncate text-sm font-medium text-ink">{opponent}</span>
                     <span className="shrink-0 text-[11px] text-stone-600">({m.venue === "H" ? labels.home : labels.away})</span>
+                    {played && (
+                      <span className="shrink-0 rounded bg-parchment px-1 text-[11px] font-bold text-stone-600">
+                        {pt ? "jogado" : "played"}
+                      </span>
+                    )}
                   </span>
                   {/* On a phone the figure sits under the opponent, so the
                       result buttons share the opponent's row. */}
@@ -149,10 +194,15 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels }
                         key={o}
                         type="button"
                         aria-pressed={active}
+                        aria-disabled={played || undefined}
                         aria-label={`${outcomeWord(o)} ${context}`}
                         onClick={() => toggle(i, o)}
                         className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-[8px] px-2 text-sm font-semibold transition-colors duration-150 ${
-                          active ? "bg-ink text-paper" : "text-stone-700 hover:bg-parchment hover:text-ink"
+                          active
+                            ? "bg-ink text-paper"
+                            : played
+                              ? "cursor-not-allowed text-stone-500"
+                              : "text-stone-700 hover:bg-parchment hover:text-ink"
                         }`}
                       >
                         {active && <Check aria-hidden="true" className="h-3.5 w-3.5" />}
@@ -181,19 +231,20 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels }
         )}
       </div>
 
-      {/* The running answer, once, always in view while the builder is. */}
-      <div className="sticky bottom-0 z-10 -mx-4 mt-4 border-t border-line bg-paper px-4 py-3 lg:top-24 lg:bottom-auto lg:mx-0 lg:mt-0 lg:rounded-2xl lg:border lg:bg-cream lg:p-4">
+      {/* The running answer, once: beside the list and sticky from `lg`,
+          under it in the flow below (A11Y3-02, A11Y3-M1). */}
+      <div data-scenario-bar className="mt-4 rounded-2xl border border-line bg-cream p-4 lg:sticky lg:top-24 lg:mt-0">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <div aria-live="polite">
             <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
-              {hasSelections ? `${labels.yourScenario} · ${targetLabel}` : `${targetLabel} · ${pt ? "agora" : "now"}`}
+              {hasSelections ? `${labels.yourScenario} · ${targetLabel}` : `${targetLabel} · ${nowWord}`}
             </p>
             <p className="flex items-baseline gap-1.5">
               <span className="font-display text-2xl font-extrabold tabular-nums text-ink">{formatPercent(hasSelections ? finalProb : pCurrent, locale)}</span>
               {hasSelections && (
                 <span className={`text-sm font-bold ${finalProb >= pCurrent ? "text-emerald-700" : "text-red-700"}`}>
                   <span aria-hidden="true">{formatPp(finalProb - pCurrent, locale)}</span>
-                  <span className="sr-only">{describePp(finalProb - pCurrent, locale, pt ? "face a agora" : "from now")}</span>
+                  <span className="sr-only">{describePp(finalProb - pCurrent, locale, pt ? `face a ${stale ? nowWord : "agora"}` : `from ${stale ? nowWord : "now"}`)}</span>
                 </span>
               )}
             </p>
@@ -207,17 +258,19 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels }
                   : "Pick W, D or L in a game to see what changes."}
             </p>
           </div>
-          {hasSelections && (
-            <button
-              type="button"
-              onClick={() => setSelections({})}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-cream px-3 text-sm font-semibold text-ink hover:bg-parchment"
-            >
-              <RotateCcw aria-hidden="true" className="h-3.5 w-3.5" />
-              {labels.resetAll}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={resetAll}
+            aria-disabled={!hasSelections || undefined}
+            className={`inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-sm font-semibold ${
+              hasSelections ? "text-ink hover:bg-parchment" : "cursor-not-allowed text-stone-500"
+            }`}
+          >
+            <RotateCcw aria-hidden="true" className="h-3.5 w-3.5" />
+            {labels.resetAll}
+          </button>
         </div>
+        <p role="status" className="sr-only">{notice}</p>
       </div>
     </div>
   );

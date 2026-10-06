@@ -1,6 +1,7 @@
 import { teamColorOnPaper, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import { formatPercent, matchLabel } from "@/lib/football-format";
 import type { DecisiveMatch } from "@/types/football";
+import type { ReactNode } from "react";
 
 /** Which race a list is about. A club page passes its own race only. */
 export type DecisiveRace = "title" | "relegation" | "both";
@@ -13,7 +14,8 @@ interface DecisiveMatchesProps {
   race?: DecisiveRace;
   locale: string;
   labels: {
-    current: string;
+    /** "Atual", or a ClockSwitch that dates it once the round is played. */
+    current: ReactNode;
     /** "Se o __TEAM__ vencer" */
     ifTeamWins: string;
     /** "Se o __TEAM__ perder" */

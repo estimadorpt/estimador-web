@@ -123,3 +123,100 @@ export function forecastStatusLinePlayed(input: ForecastStatusInput, locale: str
   }
   return base.join(' · ');
 }
+
+/* ------------------------------------------------- one game, one round --- */
+
+/** The instant one game counts as played: its kickoff plus two hours (the
+ * same settle time as a round). Null without a usable kickoff. */
+export function matchPlayedAt(kickoff: string | null | undefined): string | null {
+  return roundPlayedAt([kickoff]);
+}
+
+/** "Jogo disputado · previsão de 25 set." / "Played · forecast of 25 Sept"
+ * (audit FR3-04): "Jogo começou" read as live days after the final whistle. */
+export function matchPlayedLine(forecastTimestamp: string, locale: string): string {
+  const date = formatShortDate(forecastTimestamp, locale);
+  return locale === 'en'
+    ? `Played · forecast of ${date}`
+    : `Jogo disputado · previsão de ${date}`;
+}
+
+/**
+ * The two steps a game's status takes after its kickoff: "Jogo começou" at
+ * the kickoff, "Jogo disputado" two hours later. Empty without a confirmed
+ * kickoff (a placeholder date is not an instant).
+ */
+export function kickoffSteps<T>(
+  kickoff: string | null | undefined,
+  confirmed: boolean,
+  started: T,
+  played: T,
+): Array<ClockStep<T>> {
+  if (!kickoff || !confirmed) return [];
+  return [
+    { at: kickoff, value: started },
+    { at: matchPlayedAt(kickoff), value: played },
+  ];
+}
+
+/**
+ * What "agora" becomes once the forecast is out of date, the round it waits
+ * for having been played: "na previsão de 25 set." / "in the 25 Sept
+ * forecast" (audit FR3-01). `capital` starts it with a capital letter.
+ */
+export function forecastAsOf(
+  forecastTimestamp: string,
+  locale: string,
+  { capital = false }: { capital?: boolean } = {},
+): string {
+  const date = formatShortDate(forecastTimestamp, locale);
+  if (locale === 'en') return `${capital ? 'In' : 'in'} the ${date} forecast`;
+  return `${capital ? 'Na' : 'na'} previsão de ${date}`;
+}
+
+/** The fields of an upcoming fixture the round timing reads. */
+export interface TimedFixture {
+  matchday: number;
+  kickoff: string | null;
+  postponed?: boolean;
+}
+
+export interface NextRoundTiming {
+  /** The round whose results trigger the next update; null at season's end. */
+  round: number | null;
+  /** Kickoffs of that round's games, for its date span. */
+  kickoffs: Array<string | null>;
+  /** The round's first kickoff (ISO), or null. */
+  startsAt: string | null;
+  /** The instant the round counts as played (ISO), or null. After it, every
+   * "agora" in the published forecast is out of date. */
+  playedAt: string | null;
+  /** Games left over from earlier rounds that the forecast also prices. */
+  postponed: TimedFixture[];
+}
+
+/**
+ * When the round the next forecast waits for starts and ends: the round in
+ * progress when the forecast came out mid-round, else the next one. One
+ * source for the hub, the club pages, the simulator and the match pages, so
+ * they all turn stale at the same instant (audit FR3-01, FR3-02).
+ */
+export function nextRoundTiming<F extends TimedFixture>(
+  prediction: {
+    matchday: number;
+    matches_remaining?: unknown[] | null;
+    next_matchday?: { matchday?: number } | null;
+  },
+  upcoming: F[],
+): NextRoundTiming & { postponed: F[] } {
+  const complete = !prediction.matches_remaining?.length;
+  const round = complete ? (prediction.next_matchday?.matchday ?? null) : prediction.matchday;
+  const kickoffs = upcoming.filter(f => f.matchday === round).map(f => f.kickoff);
+  return {
+    round,
+    kickoffs,
+    startsAt: roundStartsAt(kickoffs),
+    playedAt: roundPlayedAt(kickoffs),
+    postponed: round == null ? [] : upcoming.filter(f => f.matchday < round),
+  };
+}

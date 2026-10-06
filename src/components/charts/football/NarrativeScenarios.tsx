@@ -7,6 +7,8 @@ import type {
 import { teamColorOnPaper, teamDisplayName, teamWithArticle } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
 import { rivalConditionsWithoutOwnMatches } from "@/lib/football-scenarios";
+import { forecastAsOf } from "@/lib/football-status";
+import { ClockSwitch } from "@/components/football/ClockSwitch";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -50,6 +52,9 @@ const RESULT_STYLE: Record<ScenarioStep["result"], string> = {
 function StepRow({ step, teamColor, prevP, labels, locale }: { step: ScenarioStep; teamColor: string; prevP: number; labels: StepLabels; locale: string }) {
   const delta = step.p_target_after - prevP;
   const resultLabel = step.result === "W" ? labels.resultWin : step.result === "D" ? labels.resultDraw : labels.resultLoss;
+  // The path builder's letters (V/E/D, W/D/L): the word "Vitória" beside the
+  // club Vitória read as a name (audit UXD3-05). The word stays for readers.
+  const resultLetter = resultLabel.charAt(0).toUpperCase();
   const venueLabel = step.venue === "H" ? labels.home : labels.away;
 
   return (
@@ -61,7 +66,10 @@ function StepRow({ step, teamColor, prevP, labels, locale }: { step: ScenarioSte
           </span>
           <span className="truncate text-sm text-stone-700">{teamDisplayName(step.opponent)}</span>
           <span className="shrink-0 text-[11px] text-stone-500">({venueLabel})</span>
-          <span className={`shrink-0 rounded px-1 py-0.5 text-[11px] font-bold ${RESULT_STYLE[step.result]}`}>{resultLabel}</span>
+          <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[11px] font-bold ${RESULT_STYLE[step.result]}`}>
+            <span aria-hidden="true">{resultLetter}</span>
+            <span className="sr-only">{resultLabel}</span>
+          </span>
         </div>
         <div aria-hidden="true" className="relative mt-1 h-3 w-full overflow-hidden rounded-sm bg-parchment">
           <div className="absolute inset-y-0 left-0" style={{ width: cssPct(Math.min(prevP, step.p_target_after)), backgroundColor: teamColor, opacity: 0.35 }} />
@@ -125,6 +133,8 @@ function ScenarioCard({
   summary,
   locale,
   survival,
+  staleAt,
+  forecastTimestamp,
 }: {
   scenario: NarrativeScenario;
   team: string;
@@ -134,9 +144,16 @@ function ScenarioCard({
   labels: ScenarioCardLabels;
   summary: string;
   locale: string;
+  staleAt?: string | null;
+  forecastTimestamp?: string | null;
 }) {
   const pt = locale !== "en";
   const finalP = scenario.steps[scenario.steps.length - 1]?.p_target_after ?? pCurrent;
+  // "agora" until the round the next forecast waits for is played, then the
+  // forecast's date (audit FR3-01).
+  const target = survival ? (pt ? "Permanência" : "Staying up") : (pt ? "Título" : "Title");
+  const nowWord = pt ? "agora" : "now";
+  const scenarioWord = pt ? "neste cenário" : "in this scenario";
   return (
     <li className="overflow-hidden rounded-2xl border border-line bg-cream">
       <div className="h-1" style={{ backgroundColor: teamColor }} aria-hidden="true" />
@@ -150,9 +167,12 @@ function ScenarioCard({
         {/* "22% → 47%", read left to right: now, then in this scenario (audit UXD-19). */}
         <p className="shrink-0 text-right">
           <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500">
-            {survival
-              ? pt ? "Permanência: agora → neste cenário" : "Staying up: now → in this scenario"
-              : pt ? "Título: agora → neste cenário" : "Title: now → in this scenario"}
+            <ClockSwitch
+              initial={`${target}: ${nowWord} → ${scenarioWord}`}
+              steps={staleAt && forecastTimestamp
+                ? [{ at: staleAt, value: `${target}: ${forecastAsOf(forecastTimestamp, locale)} → ${scenarioWord}` }]
+                : []}
+            />
           </span>
           <span className="font-display text-lg font-extrabold tabular-nums text-ink">
             <span className="text-stone-500">{formatPercent(pCurrent, locale)}</span>
@@ -185,9 +205,14 @@ export function NarrativeScenarios({
   data,
   labels,
   locale,
+  staleAt = null,
+  forecastTimestamp = null,
 }: {
   data: TeamNarrativeScenarios;
   locale: string;
+  /** When the forecast's "agora" goes out of date (the next round played). */
+  staleAt?: string | null;
+  forecastTimestamp?: string | null;
   labels: {
     scenarioComfortable: string;
     scenarioRealistic: string;
@@ -241,6 +266,8 @@ export function NarrativeScenarios({
             labels={adjustedLabels}
             locale={locale}
             survival={data.target === "survival"}
+            staleAt={staleAt}
+            forecastTimestamp={forecastTimestamp}
             summary={scenarioSummary(scenario, {
               win: adjustedLabels.winAbbr,
               winPlural: adjustedLabels.winAbbrPlural,

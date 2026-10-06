@@ -9,7 +9,7 @@ import {
   type FixtureSwings,
 } from "@/lib/football-fixtures";
 import { formatKickoffShort, formatPercent, matchLabel } from "@/lib/football-format";
-import { matchStartedLine } from "@/lib/football-status";
+import { kickoffSteps, matchPlayedLine, matchStartedLine } from "@/lib/football-status";
 import { ClockSwitch } from "@/components/football/ClockSwitch";
 
 /** One fixture card: the 1X2, its kickoff and what it can change. */
@@ -25,6 +25,8 @@ export interface MatchdayFixture {
   p_away: number;
   /** This fixture's own conditionals (next_matchday_scenarios), for its stakes. */
   scenario: NextMatchdayScenarioMatch | null;
+  /** A game left over from an earlier round (audit UXD3-02, CL3-01). */
+  postponed?: boolean;
   /** Match page, when one is generated. */
   href?: string;
 }
@@ -73,7 +75,9 @@ export function MatchdayPredictions({ fixtures, locale, forecastTimestamp }: Mat
   const pt = locale !== "en";
 
   const withSwings = byKickoff(fixtures).map(f => ({ fixture: f, swings: fixtureSwings(f.scenario) }));
-  const top = withSwings.reduce<(typeof withSwings)[number] | null>(
+  // "Jogo da jornada" is a game of the round: a leftover from an earlier one
+  // carries its own badge instead.
+  const top = withSwings.filter(x => !x.fixture.postponed).reduce<(typeof withSwings)[number] | null>(
     (best, x) => (!best || combinedSwing(x.swings) > combinedSwing(best.swings) ? x : best),
     null,
   );
@@ -103,12 +107,18 @@ export function MatchdayPredictions({ fixtures, locale, forecastTimestamp }: Mat
                       {when || (pt ? `Jornada ${f.matchday}` : `Matchday ${f.matchday}`)}
                       {when && !f.kickoffConfirmed && (pt ? " · horário por confirmar" : " · kickoff to be confirmed")}
                     </>}
-                    steps={f.kickoffConfirmed && f.kickoff ? [{ at: f.kickoff, value: matchStartedLine(forecastTimestamp, locale) }] : []}
+                    steps={kickoffSteps(f.kickoff, f.kickoffConfirmed, matchStartedLine(forecastTimestamp, locale), matchPlayedLine(forecastTimestamp, locale))}
                   />
                 </span>
                 {isTop && (
                   <span className="rounded-md bg-ink px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-paper">
                     {pt ? "Jogo da jornada" : "Match of the round"}
+                  </span>
+                )}
+                {/* The simulator's own label for a leftover (UXD3-02). */}
+                {f.postponed && (
+                  <span className="rounded-md bg-parchment px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-stone-600">
+                    {pt ? `Jogo em atraso · jornada ${f.matchday}` : `Postponed · matchday ${f.matchday}`}
                   </span>
                 )}
               </div>

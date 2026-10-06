@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamSlugs, teamColorOnPaper, teamLogoSrc, teamDisplayName, teamPhoneName } from "@/lib/config/football";
+import { ligaTeamSlugs, teamColorOnPaper, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { ActualStanding, TeamStanding, TeamDelta } from "@/types/football";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
@@ -107,6 +107,9 @@ interface LeagueTableProps {
   calibration?: PointsCalibration | null;
   /** The matchday the deltas compare with, for their words. */
   previousMatchday?: number;
+  /** The matchday the forecast follows (prediction.matchday): the played
+   * and points columns are the table after it, not "now" (audit FR3-07). */
+  matchday?: number;
   labels: {
     team: string;
     meanPoints: string;
@@ -173,6 +176,7 @@ export function LeagueTable({
   model,
   calibration,
   previousMatchday,
+  matchday,
 }: LeagueTableProps) {
   const locale = useLocale();
   const pt = locale !== "en";
@@ -247,7 +251,12 @@ export function LeagueTable({
             {hasActual && (
               <tr className="hidden text-left text-[11px] uppercase tracking-wider text-stone-500 sm:table-row">
                 <th className="py-1 pr-2" colSpan={2}><span className="sr-only">{labels.team}</span></th>
-                <th className="px-2 py-1 text-center" colSpan={2}>{pt ? "Atual" : "Current"}</th>
+                {/* True at any instant, also once the next round is played (FR3-07). */}
+                <th className="px-2 py-1 text-center" colSpan={2}>
+                  {matchday != null
+                    ? pt ? `Depois da jornada ${matchday}` : `After matchday ${matchday}`
+                    : pt ? "Classificação" : "Standings"}
+                </th>
                 <th className="border-l border-stone-200 px-3 py-1 text-center" colSpan={hasBands ? 5 : 4}>
                   {pt ? "Previsão do modelo" : "Model forecast"}
                 </th>
@@ -294,11 +303,15 @@ export function LeagueTable({
               const i = data.indexOf(team);
               const color = teamColorOnPaper(team.team);
               const interval = intervals?.[team.team];
-              const isRelegationZone = i >= data.length - 3;
+              // Despromoção is 17th or 18th: the 16th plays off and is not
+              // tinted, as the footnote says (audit VUXD-01).
+              const isRelegationZone = i >= data.length - 2;
               const isChampionZone = i < 3;
               const isSelected = i === selectedIndex;
               const slug = ligaTeamSlugs[team.team];
               const actual = actualLookup.get(team.team);
+              // One name per club on the page, the cards' and the picker's
+              // ("Sp. Braga", "Santa Clara"), wrapping when it must (PUB3-11).
               const name = (
                 <>
                   {teamLogoSrc(team.team) ? (
@@ -306,8 +319,7 @@ export function LeagueTable({
                   ) : (
                     <i aria-hidden="true" className="h-5 w-1 shrink-0" style={{ backgroundColor: color }} />
                   )}
-                  <span className="font-medium text-ink sm:hidden">{teamPhoneName(team.team)}</span>
-                  <span className="hidden font-medium text-ink sm:inline">{teamDisplayName(team.team)}</span>
+                  <span className="font-medium leading-tight text-ink">{teamDisplayName(team.team)}</span>
                 </>
               );
               return (

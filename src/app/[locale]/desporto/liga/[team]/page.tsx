@@ -28,6 +28,10 @@ import type { Metadata } from "next";
 import { buildClubOutlooks, positionSpread } from "@/components/football/club-outlook";
 import { loadGameFixtures } from "@/components/football/load-game-fixtures";
 import { FixtureStakes } from "@/components/football/FixtureStakes";
+import { ClockSwitch } from "@/components/football/ClockSwitch";
+import { ShareLink } from "@/components/football/ShareLink";
+import { forecastAsOf, nextRoundTiming } from "@/lib/football-status";
+import { previousModelMatchdays, publicationLabel } from "@/components/charts/football/probability-history-table";
 import { setRequestLocale } from '@/i18n/request-locale';
 
 const ordinal = formatOrdinal;
@@ -144,6 +148,15 @@ export default async function TeamDetailPage({
   const isRelegationCandidate = pRelegation >= 1;
 
   const forecastDate = formatLongDate(prediction.timestamp, locale);
+  const pt = locale !== "en";
+
+  // The page is exported once per forecast. Once the round the next forecast
+  // waits for has been played, every "agora" on it is the forecast of
+  // 25 September, and the page says so (audit FR3-01): the hub's instant.
+  const timing = nextRoundTiming(prediction, upcomingFixtures);
+  const staleAt = timing.playedAt;
+  const asOfCapital = forecastAsOf(prediction.timestamp, locale, { capital: true });
+  const staleSteps = <T,>(value: T) => (staleAt ? [{ at: staleAt, value }] : []);
 
   // Which of the three fixed cards (title / top 3 / relegation) carry
   // information worth their own card — below 1% they fold into one line
@@ -155,12 +168,26 @@ export default async function TeamDetailPage({
   ];
   const shownMetrics = standing ? metricCards.filter((m) => m.value >= 1) : [];
   const foldedMetrics = standing ? metricCards.filter((m) => m.value < 1) : [];
+  // "Campeão, top 3 e despromoção: abaixo de 1%": a sentence, not a
+  // lowercase fragment, and a list with one "e" (audit CL3-V03, FA3-13).
+  const foldedLabels = foldedMetrics.map((m, i) => (i === 0 ? m.label : m.label.toLowerCase()));
+  const foldedList = foldedLabels.length > 1
+    ? `${foldedLabels.slice(0, -1).join(", ")} ${pt ? "e" : "and"} ${foldedLabels[foldedLabels.length - 1]}`
+    : foldedLabels[0] ?? "";
+  const relegationFolded = foldedMetrics.some((m) => m.key === "relegation");
+  // What "despromoção" counts, said once beside the club's own figure (M-07).
+  const relegationDefinition = pt
+    ? "17.º ou 18.º lugar; o 16.º joga o play-off e não conta"
+    : "17th or 18th; 16th plays off and is not counted";
 
   // This club's own supported fixture and three-outcome stakes, from the
   // same helper the homepage module uses (diagnosis §5's "a stronger answer
   // format exists in the product and should be promoted/reused").
   const clubOutlook = buildClubOutlooks(locale === "pt" ? "pt" : "en", prediction, scenarios, gameFixtures)
     .find((entry) => entry.team === teamName) ?? null;
+  const clubNextMatchday = clubOutlook?.matchHref
+    ? (upcomingFixtures.find((f) => `/desporto/liga/jogo/${f.slug}` === clubOutlook.matchHref)?.matchday ?? null)
+    : null;
 
   // Timeline: the club's own race — the title, else the top three when it is
   // a real prospect (Sp. Braga at 8%, audit F14), else relegation. No band:
@@ -175,10 +202,19 @@ export default async function TeamDetailPage({
       : isRelegationCandidate
         ? "p_relegation"
         : null;
+  // Each point is a dated publication, as on the hub ("J2 · 14 ago."), and
+  // the pre-season one from the previous model says so (FA3-05, VFA-M4).
+  const previousModel = new Set(previousModelMatchdays(historical));
   const timelineData = timelineMetric
     ? historical.flatMap((md) => {
         const row = md.table.find((t) => t.team === teamName);
-        return row ? [{ matchday: md.matchday, value: row[timelineMetric] * 100 }] : [];
+        return row
+          ? [{
+              matchday: md.matchday,
+              value: row[timelineMetric] * 100,
+              label: publicationLabel(md, locale, previousModel.has(md.matchday)),
+            }]
+          : [];
       })
     : [];
   const timelineLabel = timelineMetric === "p_champion"
@@ -257,6 +293,13 @@ export default async function TeamDetailPage({
     };
   });
 
+  // The builder's games with a confirmed kickoff, so a game already played
+  // is marked and can no longer be picked (audit FR3-01).
+  const builderKickoffs: Record<number, string> = {};
+  for (const row of fixtureRows) {
+    if (row.kickoff && row.kickoffConfirmed) builderKickoffs[row.matchday] = row.kickoff;
+  }
+
   // Magic numbers: compute for this team, from the run-in only.
   //
   // A magic number is the points that *mathematically guarantee* a zone
@@ -334,7 +377,8 @@ export default async function TeamDetailPage({
       )
     : [];
   const decisiveLabels = {
-    current: t("football.current"),
+    // "Atual" until the round is played, then the forecast's date (FR3-01).
+    current: <ClockSwitch initial={t("football.current")} steps={staleSteps(asOfCapital)} />,
     ifTeamWins: t("football.ifWinsTemplate"),
     ifTeamLoses: t("football.ifLosesTemplate"),
     titleRaceSection: t("football.titleRaceSection"),
@@ -357,9 +401,17 @@ export default async function TeamDetailPage({
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
         // "depois da jornada 7 · atualizado a 25 set.", like the hub: a bare
         // "Jornada 7" read as the current or next matchday (FRESH-06, CL2-14).
-        eyebrow={locale === "pt"
-          ? `Liga Portugal · ${prediction.season} · depois da jornada ${prediction.matchday} · atualizado a ${formatShortDate(prediction.timestamp, locale)}`
-          : `Liga Portugal · ${prediction.season} · after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)}`}
+        // Once the next round is played it says so, as the hub does (FR3-01).
+        eyebrow={
+          <ClockSwitch
+            initial={pt
+              ? `Liga Portugal · ${prediction.season} · depois da jornada ${prediction.matchday} · atualizado a ${formatShortDate(prediction.timestamp, locale)}`
+              : `Liga Portugal · ${prediction.season} · after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)}`}
+            steps={staleSteps(pt
+              ? `Liga Portugal · ${prediction.season} · depois da jornada ${prediction.matchday} · atualizado a ${formatShortDate(prediction.timestamp, locale)} · jornada ${timing.round} jogada, nova previsão em preparação`
+              : `Liga Portugal · ${prediction.season} · after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)} · matchday ${timing.round} played, new forecast in preparation`)}
+          />
+        }
         title={
           <span className="flex items-center gap-3">
             <span aria-hidden="true" className="h-9 w-1.5 shrink-0 rounded-full md:h-11" style={{ backgroundColor: teamColor }} />
@@ -369,12 +421,19 @@ export default async function TeamDetailPage({
             <span>{teamDisplayName(teamName)}</span>
           </span>
         }
+        // The date is in the kicker; the lede says what the page answers (CL3-14).
         lede={t("football.clubPageIntro", {
           team: teamDisplayName(teamName),
           teamFor: teamWithArticle(teamName, "para"),
-          teamOf: teamWithArticle(teamName, "de"),
-          date: forecastDate,
         })}
+        // A link to this club's page, not the hub's card, for a group chat
+        // (audit PRO3-15).
+        actions={
+          <ShareLink
+            title={t("football.teamPageTitle", { team: teamDisplayName(teamName) })}
+            locale={pt ? "pt" : "en"}
+          />
+        }
       />
 
       {/* Key stats + season projection */}
@@ -403,18 +462,23 @@ export default async function TeamDetailPage({
                 narrow distinction (diagnosis §5) — fold anything below 1%
                 into one factual line instead of three confident zeros. */}
             {foldedMetrics.length > 0 && (
-              <p className={`text-sm text-stone-500 ${shownMetrics.length > 0 ? "mt-4" : ""}`}>
-                {t("football.belowOnePercentFold", {
-                  labels: foldedMetrics.map((m) => m.label.toLowerCase()).join(locale === "pt" ? " e " : " and "),
-                })}
+              <p className={`text-sm text-stone-600 ${shownMetrics.length > 0 ? "mt-4" : ""}`}>
+                {t("football.belowOnePercentFold", { labels: foldedList })}
+                {/* The definition goes with the figure when relegation is
+                    folded here, so the word is not said twice (CL3-V03). */}
+                {relegationFolded && (
+                  <span className="text-stone-500">
+                    {" "}({foldedMetrics.length > 1 ? `${pt ? "despromoção" : "relegation"}: ` : ""}{relegationDefinition}).
+                  </span>
+                )}
               </p>
             )}
             {/* What "despromoção" counts, wherever the club's own figure is (M-07). */}
-            <p className="mt-3 text-[11px] leading-relaxed text-stone-500">
-              {locale === "pt"
-                ? "Despromoção = 17.º ou 18.º lugar; o 16.º joga o play-off e não conta."
-                : "Relegation = 17th or 18th; 16th plays off and is not counted."}
-            </p>
+            {!relegationFolded && (
+              <p className="mt-3 text-[11px] leading-relaxed text-stone-500">
+                {pt ? "Despromoção" : "Relegation"}: {relegationDefinition}.
+              </p>
+            )}
             {/* Season projection summary */}
             <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-500">
               <span>
@@ -438,37 +502,21 @@ export default async function TeamDetailPage({
                   </strong>
                 </span>
               )}
+              {/* The model's strength as a rank with its scale in words, not
+                  an unlabelled club-coloured bar (audit PUB3-12). */}
               {teamStrength && totalTeams > 0 && (
-                <span className="inline-flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1.5">
-                    {t("football.attack")}:
-                    <span className="inline-flex items-center gap-1">
-                      <span className="inline-block w-12 h-1.5 bg-stone-200 rounded-full overflow-hidden">
-                        <span
-                          className="block h-full rounded-full"
-                          style={{
-                            width: `${((totalTeams - attackRank + 1) / totalTeams) * 100}%`,
-                            backgroundColor: teamColor,
-                          }}
-                        />
-                      </span>
-                      <strong className="text-ink text-xs">{ordinal(attackRank, locale)}</strong>
-                    </span>
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    {t("football.defense")}:
-                    <span className="inline-flex items-center gap-1">
-                      <span className="inline-block w-12 h-1.5 bg-stone-200 rounded-full overflow-hidden">
-                        <span
-                          className="block h-full rounded-full"
-                          style={{
-                            width: `${((totalTeams - defenseRank + 1) / totalTeams) * 100}%`,
-                            backgroundColor: teamColor,
-                          }}
-                        />
-                      </span>
-                      <strong className="text-ink text-xs">{ordinal(defenseRank, locale)}</strong>
-                    </span>
+                <span>
+                  {t("football.attack")}: <strong className="text-ink">{ordinal(attackRank, locale)}</strong>
+                  {" · "}
+                  {t("football.defense")}: <strong className="text-ink">{ordinal(defenseRank, locale)}</strong>
+                  {" "}
+                  <span className="text-stone-500">
+                    ({pt
+                      ? `força estimada pelo modelo entre os ${totalTeams} clubes, 1.º = melhor; `
+                      : `strength estimated by the model among the ${totalTeams} clubs, 1st = best; `}
+                    <Link href="/desporto/liga#forca-das-equipas" locale={locale} className="font-medium text-ink underline underline-offset-4">
+                      {pt ? "todos os clubes" : "every club"}
+                    </Link>)
                   </span>
                 </span>
               )}
@@ -585,19 +633,47 @@ export default async function TeamDetailPage({
       {clubOutlook && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
+            {/* "Próximo jogo" until the club's game kicks off; then the block
+                is what the model gave before it, dated (FR3-01, FA3-07). */}
             <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
-              {t("football.fixtureStakesSectionTitle")}
+              <ClockSwitch
+                initial={t("football.fixtureStakesSectionTitle")}
+                steps={clubOutlook.fixtureKickoff && clubNextMatchday != null
+                  ? [{
+                      at: clubOutlook.fixtureKickoff,
+                      value: pt
+                        ? `Jornada ${clubNextMatchday} · o que o modelo dava antes do jogo`
+                        : `Matchday ${clubNextMatchday} · what the model gave before the match`,
+                    }]
+                  : []}
+              />
             </p>
             <h2 className="text-2xl tracking-tight mb-6">
-              {clubOutlook.opponentLabel
+              {clubOutlook.opponentLabel && clubOutlook.opponent ? (
+                <ClockSwitch
+                  initial={t("football.fixtureStakesHeading", {
+                    team: clubOutlook.label,
+                    opponent: clubOutlook.opponentLabel,
+                    opponentAgainst: teamWithArticle(clubOutlook.opponent, "contra"),
+                  })}
+                  steps={clubOutlook.fixtureKickoff
+                    ? [{
+                        at: clubOutlook.fixtureKickoff,
+                        value: pt
+                          ? `${clubOutlook.label}: o que estava em jogo ${teamWithArticle(clubOutlook.opponent, "contra")}?`
+                          : `${clubOutlook.label}: what was at stake against ${clubOutlook.opponentLabel}?`,
+                      }]
+                    : []}
+                />
+              ) : clubOutlook.opponentLabel
                 ? t("football.fixtureStakesHeading", {
                     team: clubOutlook.label,
                     opponent: clubOutlook.opponentLabel,
-                    opponentAgainst: clubOutlook.opponent ? teamWithArticle(clubOutlook.opponent, "contra") : clubOutlook.opponentLabel,
+                    opponentAgainst: clubOutlook.opponentLabel,
                   })
                 : t("football.fixtureStakesHeadingNoOpponent", { team: clubOutlook.label })}
             </h2>
-            <FixtureStakes locale={locale === "pt" ? "pt" : "en"} entry={clubOutlook} matchLink />
+            <FixtureStakes locale={pt ? "pt" : "en"} entry={clubOutlook} matchLink simulatorLink />
           </div>
         </section>
       )}
@@ -608,14 +684,19 @@ export default async function TeamDetailPage({
       {timelineData.length >= 5 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
+            {/* One title level per chart (UXD3-11); the card says what each
+                point is, as on the hub (FA3-05, VFA-M4). */}
+            <h2 className="text-2xl tracking-tight mb-6">
               {t("football.probabilityOverTime")}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.probabilityOverTimeDescription", { target: timelineTarget })}
-            </p>
             <DataCard
               title={locale === "pt" ? `Probabilidade de ${timelineTarget}, jornada a jornada` : `Chance of ${timelineTarget}, matchday by matchday`}
+              subtitle={`${pt
+                ? "Cada ponto é uma previsão publicada, com os jogos disputados até então; a data de cada uma está na dica e na tabela."
+                : "Each dot is a published forecast, with the matches played up to then; each one's date is in the tip and the table."}${
+                previousModel.size > 0
+                  ? pt ? " O ponto da pré-época (J0) vem do modelo anterior." : " The pre-season point (MD0) comes from the previous model."
+                  : ""}`}
               source={locale === "pt"
                 ? `Fonte: modelo estimador.pt, ${formatInteger(prediction.n_sims, locale)} simulações por previsão`
                 : `Source: estimador.pt model, ${formatInteger(prediction.n_sims, locale)} simulations per forecast`}
@@ -629,6 +710,7 @@ export default async function TeamDetailPage({
                 teamColor={teamColor}
                 yAxisLabel={timelineLabel}
                 xAxisLabel={t("football.matchday")}
+                pointLabel={pt ? "Previsão" : "Forecast"}
               />
             </DataCard>
           </div>
@@ -660,6 +742,8 @@ export default async function TeamDetailPage({
             <NarrativeScenarios
               data={narrativeData}
               locale={locale}
+              staleAt={staleAt}
+              forecastTimestamp={prediction.timestamp}
               labels={{
                 scenarioComfortable: t("football.scenarioComfortable"),
                 scenarioRealistic: t("football.scenarioRealistic"),
@@ -711,6 +795,9 @@ export default async function TeamDetailPage({
                   target={scenarios.critical_paths[teamName].target}
                   locale={locale}
                   nSims={prediction.n_sims}
+                  staleAt={staleAt}
+                  forecastTimestamp={prediction.timestamp}
+                  kickoffs={builderKickoffs}
                   labels={{
                     matchdayAbbr: t("football.matchdayAbbr"),
                     win: t("football.win"),
@@ -816,7 +903,7 @@ export default async function TeamDetailPage({
                 ? "Por ordem de data, hora de Lisboa. O modelo dá probabilidades para a próxima jornada; as datas mais distantes ainda podem mudar."
                 : "In date order, Lisbon time. The model prices the next round; later dates can still change."}
             </p>
-            <ClubFixtures rows={fixtureRows} locale={locale} />
+            <ClubFixtures rows={fixtureRows} locale={locale} forecastTimestamp={prediction.timestamp} />
           </div>
         </section>
       )}

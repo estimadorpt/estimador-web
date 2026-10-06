@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { probabilityHistoryTable } from './probability-history-table';
+import { previousModelMatchdays, probabilityHistoryTable, publicationLabel, trendTipTitle } from './probability-history-table';
 import type { LigaProbabilityHistory } from '@/types/football';
 
 const history: LigaProbabilityHistory = [
@@ -59,5 +59,26 @@ describe('probabilityHistoryTable', () => {
   it('omits the date when a forecast has none', () => {
     const { columns } = probabilityHistoryTable([{ matchday: 0, table: [] }], [], 'p_champion', 'pt');
     expect(columns).toEqual(['Equipa', 'J0']);
+  });
+
+  it('marks the points the previous model published (audit VFA-M4)', () => {
+    const withModels: LigaProbabilityHistory = [
+      { ...history[0], matchday: 0, model: 'joint_sot' },
+      { ...history[1], matchday: 1, model: 'bivcross' },
+      { ...history[2], matchday: 2, model: 'bivcross' },
+    ];
+    expect(previousModelMatchdays(withModels)).toEqual([0]);
+    expect(previousModelMatchdays(history)).toEqual([]);
+    const { columns } = probabilityHistoryTable(withModels, ['Benfica'], 'p_champion', 'pt');
+    expect(columns.at(-1)).toBe('J0 · 10 ago. · modelo anterior');
+    expect(columns[1]).toBe('J2 · 24 ago.');
+    expect(publicationLabel(withModels[0], 'en', true)).toBe('MD0 · 10 Aug · previous model');
+  });
+
+  it('writes the tip on three short lines (audit UXM3-01)', () => {
+    expect(trendTipTitle('Sporting', history[0], 0.59, 'pt')).toBe('Sporting\nJ1 · previsão de 10 ago.\n59%');
+    expect(trendTipTitle('Sporting', { matchday: 0, timestamp: '2026-08-10T20:00:00Z' }, 0.59, 'en', true)).toBe(
+      'Sporting\nMD0 · forecast of 10 Aug · previous model\n59%',
+    );
   });
 });
