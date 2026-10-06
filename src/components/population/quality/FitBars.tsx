@@ -24,7 +24,7 @@ export function FitBars({ rows, caption, columns, noteColumn, max }: {
   /** Header of the note column in the table twin, when rows carry notes. */
   noteColumn?: string;
   /**
-   * The value a full bar stands for. Two charts set side by side share one, so
+   * The value a full bar stands for. Two charts shown together share one, so
    * the same length means the same error in both (METH3-08); by default, this
    * chart's own largest value.
    */

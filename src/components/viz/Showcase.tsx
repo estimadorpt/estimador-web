@@ -42,7 +42,11 @@ export function VizShowcase({ pt }: { pt: boolean }) {
         <TrendChart key={scope} series={[{ name: current.name, points: current.points }]} format={current.format} yMin={current.yMin} yMax={current.yMax} locale={pt ? 'pt' : 'en'} tableCaption={current.name} />
       </DataCard>
 
-      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
+      {/* The rule this guide models: a DataCard is as tall as its chart. Five
+          ranked bars and one three-outcome bar are not the same height, so they
+          stack, each at its own height, instead of sharing a row where the
+          shorter card would stretch around blank cream. */}
+      <div className="grid min-w-0 grid-cols-1 gap-4">
         <DataCard title={pt ? 'Probabilidade de ser campeão' : 'Title probability'} badge={example} source={invented} updated={pt ? 'Jornada de exemplo' : 'Example matchday'}>
           <RankedBars rows={[
             { label: 'Equipa A', value: 0.42, display: '42%', color: '#234c40' },

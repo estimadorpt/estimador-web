@@ -125,11 +125,14 @@ export default async function ParliamentaryArchivePage({
   const external = <span aria-hidden="true"> ↗</span>;
   const arrow = <span aria-hidden="true"> →</span>;
 
-  // One card per group of parties: the two blocs with their majority odds,
-  // and the parties in neither bloc (CH, PAN), so every modelled party's
-  // projected share is on the page.
-  const blocCard = (title: string, parties: string[], majority: number | null) => (
-    <div className="bg-cream border border-stone-200 rounded-2xl p-6">
+  // One column per group of parties, in one card: the two blocs with their
+  // majority odds, and the parties in neither bloc (CH, PAN), so every
+  // modelled party's projected share is on the page. The groups hold two to
+  // four parties, so as three cards the shorter ones were stretched to the
+  // tallest and ended in blank cream; as columns of one card, split by
+  // hairlines, each reads top-down at its own length.
+  const blocColumn = (title: string, parties: string[], majority: number | null) => (
+    <div className="p-6">
       <h3 className="text-lg text-stone-900 mb-4">{title}</h3>
       <div className="space-y-3">
         {parties.map(party => (
@@ -293,10 +296,10 @@ export default async function ParliamentaryArchivePage({
           {/* One caption for the three cards: it was repeated in each. */}
           <div>
             <p className="mb-4 max-w-3xl text-sm text-stone-600">{t('forecast.blocProjectionCaption', { election: electionDate, date: forecastDate })}</p>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blocCard(leftName, leftParties, probabilities.leftMajority)}
-              {blocCard(rightName, rightParties, probabilities.rightMajority)}
-              {blocCard(t('forecast.otherParties'), otherParties, null)}
+            <div className="grid divide-y divide-line rounded-2xl border border-line bg-cream lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+              {blocColumn(leftName, leftParties, probabilities.leftMajority)}
+              {blocColumn(rightName, rightParties, probabilities.rightMajority)}
+              {blocColumn(t('forecast.otherParties'), otherParties, null)}
             </div>
           </div>
 

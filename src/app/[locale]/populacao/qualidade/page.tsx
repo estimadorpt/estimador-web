@@ -113,7 +113,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
   setRequestLocale(locale);
   const pt = locale === 'pt';
   const [scorecard, meta, places] = await Promise.all([loadPopulationScorecard(), loadPopulationMeta(), loadPopulationPlaces()]);
-  // Tier C by the count the tier uses (places.json publication_population): the two readings of the C card.
+  // Tier C by the count the tier uses (places.json publication_population): the two readings in the note under the tier cards.
   const tierC = places?.parishes.filter(row => row[3] === 'C') ?? [];
   const tierCLarge = tierC.filter(row => row[9] >= 500).length;
   const tierCSmall = tierC.length - tierCLarge;
@@ -242,11 +242,13 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               title={pt ? 'Quão perto ficam das tabelas do INE?' : 'How close do they come to INE’s tables?'}
               lede={<p>{FIT_EXPLAINED[locale]}</p>}
             >
-              <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+              {/* Stacked, each at its own height: 4 bars beside 12 left the shorter card
+                  stretched around a blank band. One above the other, the two share the
+                  card width, so the same bar length is the same error in both. */}
+              <div className="grid gap-6">
                 <DataCard
-                  className="lg:flex lg:h-full lg:flex-col lg:[&>footer]:mt-auto"
                   title={pt ? 'Erro do ajuste, por tamanho de freguesia' : 'Fit error, by parish size'}
-                  subtitle={pt ? 'Mediana entre freguesias, todas as células das 12 tabelas de pessoas; classes pelos residentes do INE; mesma escala do gráfico ao lado' : 'Median across parishes, all cells of the 12 person tables; bands by INE’s residents; same scale as the chart beside it'}
+                  subtitle={pt ? 'Mediana entre freguesias, todas as células das 12 tabelas de pessoas; classes pelos residentes do INE; mesma escala do gráfico abaixo' : 'Median across parishes, all cells of the 12 person tables; bands by INE’s residents; same scale as the chart below'}
                   source={source}
                   updated={updated}
                   methodologyHref={POPULATION_ROUTES.methodology}
@@ -268,9 +270,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   />
                 </DataCard>
                 <DataCard
-                  className="lg:flex lg:h-full lg:flex-col lg:[&>footer]:mt-auto"
                   title={pt ? 'Erro típico, por tabela' : 'Typical error, by table'}
-                  subtitle={pt ? 'Mediana entre freguesias do erro de cada uma das 12 tabelas de pessoas usadas no ajuste (as de agregados não têm mediana publicada); mesma escala do gráfico ao lado' : 'Median across parishes of the error of each of the 12 fitted person tables (the household tables have no published median); same scale as the chart beside it'}
+                  subtitle={pt ? 'Mediana entre freguesias do erro de cada uma das 12 tabelas de pessoas usadas no ajuste (as de agregados não têm mediana publicada); mesma escala do gráfico acima' : 'Median across parishes of the error of each of the 12 fitted person tables (the household tables have no published median); same scale as the chart above'}
                   source={source}
                   updated={updated}
                   methodologyHref={POPULATION_ROUTES.methodology}
@@ -331,27 +332,36 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 ? 'Todas as freguesias são publicadas, e todas respondem com os seus próprios números; a página de cada uma mostra o nível no topo. O nível junta o ajuste às tabelas do INE e o número de residentes, e diz com que cuidado ler os números, mas não esconde nada. As contagens são as da versão publicada.'
                 : 'Every parish is published, and every parish answers with its own figures; each parish page shows its tier at the top. The tier combines the fit to INE’s tables and the number of residents, and says how carefully to read the numbers, but it hides nothing. The counts are the published release’s.'}</p>}
             >
-              <div className="grid gap-4 md:grid-cols-3">
+              {/* The three cards hold the same four rows (badge, count, meaning, reading),
+                  on one subgrid from lg, so their hairlines line up and they end together;
+                  tier C's two size readings follow as one note under the row, instead of
+                  making card C twice as tall as A and B. C's meaning is twice as long as
+                  A's, so its column is wider: with equal thirds, A ended in a 50px band. */}
+              <div className="grid gap-4 lg:grid-cols-[1fr_1fr_1.4fr] lg:gap-y-0">
                 {(['A', 'B', 'C'] as const).map(tier => (
-                  <div key={tier} className="flex flex-col rounded-2xl border border-line bg-cream p-5">
-                    <QualityBadge kind={tier} locale={locale} className="self-start" />
-                    <p className="mt-4 font-display text-3xl font-extrabold tabular-nums text-ink">{formatCount(meta.counts.tiers[tier], locale)}</p>
-                    <p className="text-sm text-stone-500">{pt ? 'freguesias' : 'parishes'}</p>
+                  <div key={tier} className="flex flex-col rounded-2xl border border-line bg-cream p-5 lg:row-span-4 lg:grid lg:grid-rows-subgrid">
+                    <QualityBadge kind={tier} locale={locale} className="self-start justify-self-start" />
+                    <div className="mt-4">
+                      <p className="font-display text-3xl font-extrabold tabular-nums text-ink">{formatCount(meta.counts.tiers[tier], locale)}</p>
+                      <p className="text-sm text-stone-500">{pt ? 'freguesias' : 'parishes'}</p>
+                    </div>
                     <p className="mt-4 text-sm leading-relaxed text-ink">{TIER_COPY[tier].meaning[locale]}</p>
-                    {tier === 'C' && !takesFallback && places ? (
-                      <ul className="mt-3 space-y-2 border-t border-line pt-3 text-sm leading-relaxed text-stone-600">
-                        {tierCReadings(tierCSmall, tierCLarge, locale).map(reading => (
-                          <li key={reading.key}><span className="font-semibold text-ink">{reading.lead}</span> {reading.body}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-stone-600">
-                        {tierOnPage(tier)}
-                      </p>
-                    )}
+                    <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-stone-600">
+                      {tierOnPage(tier)}
+                    </p>
                   </div>
                 ))}
               </div>
+              {!takesFallback && places && (
+                <div className="mt-4 rounded-2xl bg-parchment p-5">
+                  <QualityBadge kind="C" locale={locale} />
+                  <ul className="mt-3 grid gap-x-8 gap-y-3 text-sm leading-relaxed text-stone-600 md:grid-cols-2">
+                    {tierCReadings(tierCSmall, tierCLarge, locale).map(reading => (
+                      <li key={reading.key}><span className="font-semibold text-ink">{reading.lead}</span> {reading.body}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
                 {pt ? 'Os limiares de cada nível: ' : 'Each tier’s thresholds: '}
                 {pt

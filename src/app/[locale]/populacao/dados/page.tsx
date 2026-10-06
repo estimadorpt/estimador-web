@@ -239,12 +239,13 @@ sha256sum checksums.sha256`;
                 ? <>Sim, para fins não comerciais. A população sintética é publicada por estimador.pt com a licença <a className={link} href="https://creativecommons.org/licenses/by-nc/4.0/deed.pt">CC BY-NC 4.0</a>: podes usá-la, transformá-la e redistribuí-la para fins não comerciais, desde que incluas a atribuição indicada mais abaixo. A licença não cobre o uso comercial. Os dados do INE em que se baseia (quadros publicados e Ficheiro de Uso Público dos Censos 2021) são reutilizados com a licença <a className={link} href="https://creativecommons.org/licenses/by/4.0/deed.pt">CC BY 4.0</a> do INE. Não são microdados oficiais do INE.</>
                 : <>Yes, for non-commercial purposes. estimador.pt publishes the synthetic population under the <a className={link} href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a> licence: you may use, adapt and redistribute it for non-commercial purposes, as long as you include the attribution given below. The licence does not cover commercial use. The INE data it is based on (the 2021 Census published tables and Public Use File) are reused under INE’s <a className={link} href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> licence. They are not official INE microdata.</>}</p>}
             >
-              <div className="grid gap-4 md:grid-cols-2">
+              {/* One card, two columns split by a hairline (stacked below md), as on the methodology page. */}
+              <div className="grid divide-y divide-line rounded-2xl border border-line bg-cream md:grid-cols-2 md:divide-x md:divide-y-0">
                 {[
                   { title: pt ? 'Serve para…' : 'Suitable for…', items: INTENDED_USES },
                   { title: pt ? 'Não serve para…' : 'Not suitable for…', items: NON_USES },
                 ].map(group => (
-                  <div key={group.title} className="rounded-2xl border border-line bg-cream p-5">
+                  <div key={group.title} className="p-5">
                     <h3 className="text-base font-bold text-ink">{group.title}</h3>
                     <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-stone-700">
                       {group.items.map(item => <li key={item.en}>{item[locale]}</li>)}

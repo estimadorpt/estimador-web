@@ -223,12 +223,14 @@ export function methodologyBlocks({ locale, meta, release, scorecard, ineResiden
       </>
     ),
     Uses: () => (
-      <div className="my-6 grid gap-4 font-sans md:grid-cols-2">
+      // One card, two columns split by a hairline (stacked below md): the two
+      // lists differ in length, and as two cards the shorter one ended in blank cream.
+      <div className="my-6 grid divide-y divide-line rounded-2xl border border-line bg-cream font-sans md:grid-cols-2 md:divide-x md:divide-y-0">
         {[
           { title: pt ? 'Serve para' : 'Suitable for', items: INTENDED_USES },
           { title: pt ? 'Não serve para' : 'Not suitable for', items: NON_USES },
         ].map(group => (
-          <div key={group.title} className="rounded-2xl border border-line bg-cream p-5">
+          <div key={group.title} className="p-5">
             <h3 className="mt-0 text-base font-bold text-ink">{group.title}</h3>
             <ul className="mb-0 mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-stone-700">
               {group.items.map(item => <li key={item.en}>{item[locale]}</li>)}
