@@ -1,4 +1,5 @@
 import { createPageMetadata, siteTitle } from '@/lib/metadata';
+import { formatInteger, formatLongDate } from "@/lib/football-format";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -125,7 +126,7 @@ export default async function Liga2Page({
 
   const review = data.review;
   const live = data.live;
-  const nSims = data.n_sims.toLocaleString(pt ? "pt-PT" : "en-GB");
+  const nSims = formatInteger(data.n_sims, locale);
   const totalMatches = data.history.reduce(
     (acc, h) => acc + h.final_table.reduce((a, r) => a + r.played, 0) / 2,
     0
@@ -162,9 +163,9 @@ export default async function Liga2Page({
       <div className="max-w-5xl mx-auto px-4 py-10">
 
         {/* Lighter-model label, stated before any number is shown */}
-        <div className="border border-amber-200 bg-amber-50 p-4 mb-8 max-w-3xl">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 mb-8 max-w-3xl">
           <div className="flex items-start gap-3">
-            <TriangleAlert className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <TriangleAlert aria-hidden="true" className="w-5 h-5 text-amber-700 mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm font-bold text-stone-900 mb-1">
                 {c.lighterLabel} — {pt ? data.model_label.pt : data.model_label.en}
@@ -182,19 +183,19 @@ export default async function Liga2Page({
             <p className="text-lg text-stone-600 leading-relaxed">
               {pt ? (
                 <>
-                  A época {data.target_season} da Liga 2 ainda não tem jogos nos
-                  nossos dados, por isso esta página mostra a época{" "}
-                  {review.season}, que terminou — e o que este modelo teria dito
-                  enquanto ela decorria. Assim que as primeiras jornadas
-                  entrarem, a tabela ao vivo aparece aqui, no mesmo formato.
+                  Esta página não acompanha a época {data.target_season} da Liga 2:
+                  os dados que a alimentam são de{" "}
+                  {formatLongDate(data.generated_at, locale)}, antes de a época
+                  começar. Mostra a época {review.season}, que terminou, e o que
+                  este modelo teria dito enquanto ela decorria.
                 </>
               ) : (
                 <>
-                  The {data.target_season} Liga 2 season has no matches in our
-                  data yet, so this page shows {review.season}, which is
-                  finished — and what this model would have been saying while it
-                  ran. As soon as the first matchdays land, the live table
-                  appears here in the same format.
+                  This page does not follow the {data.target_season} Liga 2
+                  season: its data are from{" "}
+                  {formatLongDate(data.generated_at, locale)}, before the season
+                  began. It shows {review.season}, which is finished, and what
+                  this model would have been saying while it ran.
                 </>
               )}
             </p>
@@ -249,10 +250,10 @@ export default async function Liga2Page({
         )}
 
         {/* Headline numbers */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-stone-200 border border-stone-200 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden rounded-2xl bg-line border border-line mb-12">
           {[
             {
-              value: totalMatches.toLocaleString(pt ? "pt-PT" : "en-GB"),
+              value: formatInteger(totalMatches, locale),
               label: pt
                 ? `jogos da Liga 2 no modelo, em ${data.history.length} épocas`
                 : `Liga 2 matches in the model, across ${data.history.length} seasons`,
@@ -296,7 +297,7 @@ export default async function Liga2Page({
                 ? `Jornada ${live.matchday}, com ${live.matches_remaining} jogos por disputar. Ajuste em ${live.training_matches} jogos das épocas ${live.seasons_fitted.join(", ")}.`
                 : `Matchday ${live.matchday}, with ${live.matches_remaining} matches left. Fitted on ${live.training_matches} matches from ${live.seasons_fitted.join(", ")}.`}
             </p>
-            <Liga2ProbabilityTable rows={live.teams} locale={locale} />
+            <Liga2ProbabilityTable rows={live.teams} locale={locale} label={`${c.liveTitle} ${live.season}`} />
             <h3 className="text-lg tracking-tight mt-10 mb-4">
               {c.strengthsTitle}
             </h3>
@@ -319,6 +320,7 @@ export default async function Liga2Page({
               <Liga2FinalTable
                 rows={review.final_table}
                 locale={locale}
+                label={pt ? `Classificação final ${review.season}` : `Final table ${review.season}`}
                 promotionSlots={data.rules.promotion_slots}
                 relegationSlots={data.rules.relegation_slots}
               />
@@ -389,6 +391,7 @@ export default async function Liga2Page({
                       rows={cp.teams}
                       locale={locale}
                       showFinalRank
+                      label={c.matchdayLabel(cp.matchday)}
                     />
                   </div>
                 ))}

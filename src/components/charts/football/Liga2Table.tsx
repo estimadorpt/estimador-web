@@ -148,9 +148,11 @@ function TeamBadge({ team }: { team: string }) {
     );
   }
   return (
+    // Two letters on cream inside the club's colour: the letters always fit
+    // and never sit in white on a club fill (audit UXD-29, S-H6).
     <span
-      className="w-5 h-5 flex-shrink-0 flex items-center justify-center text-[11px] font-bold text-white tabular-nums"
-      style={{ backgroundColor: liga2TeamColor(team) }}
+      className="w-6 h-6 flex-shrink-0 flex items-center justify-center rounded-full border-2 bg-cream text-[11px] font-bold leading-none text-ink"
+      style={{ borderColor: liga2TeamColor(team) }}
       aria-hidden
     >
       {liga2Initials(team)}
@@ -184,17 +186,20 @@ export function Liga2FinalTable({
   locale = "pt",
   promotionSlots = 2,
   relegationSlots = 2,
+  label,
 }: {
   rows: Liga2FinalRow[];
   locale?: string;
   promotionSlots?: number;
   relegationSlots?: number;
+  /** Names the scrollable table region; unique per page. */
+  label?: string;
 }) {
   const pt = locale !== "en";
   const n = rows.length;
 
   return (
-    <div className="overflow-x-auto border border-stone-200">
+    <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="overflow-x-auto rounded-2xl border border-line bg-cream">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500">
@@ -315,15 +320,18 @@ export function Liga2ProbabilityTable({
   rows,
   locale = "pt",
   showFinalRank = false,
+  label,
 }: {
   rows: Liga2ProbRow[];
   locale?: string;
   showFinalRank?: boolean;
+  /** Names the scrollable table region; unique per page. */
+  label?: string;
 }) {
   const pt = locale !== "en";
 
   return (
-    <div className="overflow-x-auto border border-stone-200">
+    <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="overflow-x-auto rounded-2xl border border-line bg-cream">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500">
@@ -407,7 +415,7 @@ function ProbCell({
   if (value === null) {
     return (
       <span
-        className="text-stone-300"
+        className="text-stone-500"
         title={
           pt
             ? "Equipa B: não pode subir"
@@ -428,10 +436,10 @@ function ProbCell({
           ? "text-stone-400"
           : "text-emerald-700"
       : strong
-        ? "text-red-600 font-bold"
+        ? "text-red-700 font-bold"
         : faint
           ? "text-stone-400"
-          : "text-red-600";
+          : "text-red-700";
   return <span className={color}>{pct(value, pt)}</span>;
 }
 
@@ -484,7 +492,7 @@ export function Liga2PromotionRace({
     last.teams.find(t => t.team === team)?.final_rank;
 
   return (
-    <div className="border border-stone-200 bg-cream p-4">
+    <div className="rounded-2xl border border-line bg-cream p-4">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full h-auto"
@@ -602,7 +610,7 @@ export function Liga2Strengths({
   const bar = (v: number) => Math.round((Math.abs(v) / span) * 50);
 
   return (
-    <div className="border border-stone-200">
+    <div className="overflow-hidden rounded-2xl border border-line bg-cream">
       <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-3 py-2 bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500 font-bold">
         <span>{pt ? "Clube" : "Club"}</span>
         <span className="w-28 text-center">{pt ? "Ataque" : "Attack"}</span>

@@ -1,21 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ligaTeamColors, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
+import { useId, useMemo, useState } from "react";
+import { teamColorOnPaper, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
+import { formatInteger } from "@/lib/football-format";
 import { Swords } from "lucide-react";
 import type { SeasonSamples } from "./SeasonDraw";
 
 interface DueloFinalProps {
   samples: SeasonSamples;
   locale?: string;
+  /** Id for the heading, so the page section can be labelled by it. */
+  headingId?: string;
 }
 
 const HALF_BINS = 4; // 4 bins each side of zero + center bin = 9 bins
 
 /** Head-to-head "who finishes ahead?" duel computed over the real sampled
  *  seasons from the Monte Carlo (same samples.json the SeasonDraw uses). */
-export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
+export function DueloFinal({ samples, locale = "pt", headingId }: DueloFinalProps) {
   const pt = locale !== "en";
+  const selectId = useId();
 
   // Default matchup = the two teams with the highest title probability
   const defaults = useMemo(() => {
@@ -60,8 +64,8 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
 
   const nameA = teamDisplayName(samples.teams[iA]);
   const nameB = teamDisplayName(samples.teams[iB]);
-  const colorA = ligaTeamColors[samples.teams[iA]] ?? "#4f5f57";
-  const colorB = ligaTeamColors[samples.teams[iB]] ?? "#7f9284";
+  const colorA = teamColorOnPaper(samples.teams[iA]);
+  const colorB = teamColorOnPaper(samples.teams[iB]);
   const pctAhead = Math.round((100 * stats.ahead) / stats.n);
   const pctTie = Math.round((100 * stats.ptsTie) / stats.n);
   const maxCount = Math.max(1, ...stats.counts);
@@ -69,8 +73,8 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
   const t = {
     title: pt ? "Quem acaba à frente?" : "Who finishes ahead?",
     subtitle: pt
-      ? `Escolhe duas equipas e vê quem acaba à frente nas ${stats.n} épocas completas tiradas das ${samples.n_sims.toLocaleString("pt-PT")} simulações do modelo.`
-      : `Pick two teams and see who finishes ahead across ${stats.n} complete seasons drawn from the model's ${samples.n_sims.toLocaleString("en")} simulations.`,
+      ? `Escolhe duas equipas e vê quem acaba à frente nas ${formatInteger(stats.n, "pt")} épocas completas tiradas das ${formatInteger(samples.n_sims, "pt")} simulações do modelo.`
+      : `Pick two teams and see who finishes ahead across ${formatInteger(stats.n, "en")} complete seasons drawn from the model's ${formatInteger(samples.n_sims, "en")} simulations.`,
     hero: pt
       ? `O ${nameA} acaba à frente do ${nameB} em ${pctAhead}% das simulações.`
       : `${nameA} finishes ahead of ${nameB} in ${pctAhead}% of simulations.`,
@@ -88,28 +92,32 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
     <div className="flex items-center gap-2 text-xs text-stone-600">
       <span
         className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-        style={{ backgroundColor: ligaTeamColors[samples.teams[idx]] ?? "#4f5f57" }}
+        style={{ backgroundColor: teamColorOnPaper(samples.teams[idx]) }}
       />
       <span>
         {t.champion}: <span className="font-semibold text-stone-900 tabular-nums">{Math.round(samples.p_champion[idx] * 100)}%</span>
       </span>
-      <span className="text-stone-300">·</span>
+      <span aria-hidden="true" className="text-stone-500">·</span>
       <span>
         {t.medianPts}: <span className="font-semibold text-stone-900 tabular-nums">{Math.round(samples.points_q50[idx])}</span>
       </span>
     </div>
   );
 
-  const select = (value: number, other: number, onChange: (i: number) => void) => (
+  const select = (value: number, other: number, onChange: (i: number) => void, which: "a" | "b") => (
     <div className="flex-1 min-w-0">
+      <label htmlFor={`${selectId}-${which}`} className="mb-1 block text-xs font-semibold text-stone-600">
+        {which === "a" ? (pt ? "Primeira equipa" : "First club") : (pt ? "Segunda equipa" : "Second club")}
+      </label>
       <div className="flex items-center gap-2 mb-1">
         {teamLogoSrc(samples.teams[value]) && (
           <img src={teamLogoSrc(samples.teams[value])} alt="" className="w-5 h-5 object-contain" />
         )}
         <select
+          id={`${selectId}-${which}`}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full border border-stone-300 rounded-lg px-2 py-1.5 text-sm bg-cream font-medium"
+          className="min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base font-medium text-ink sm:text-sm"
         >
           {teamOptions
             .filter((o) => o.i !== other)
@@ -125,17 +133,17 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
   );
 
   return (
-    <div className="border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
+    <div className="rounded-2xl border border-line bg-cream p-4 sm:p-6">
       <div className="flex items-center gap-2 mb-1">
-        <Swords className="w-5 h-5 text-emerald-700" />
-        <h3 className="text-stone-900">{t.title}</h3>
+        <Swords aria-hidden="true" className="w-5 h-5 text-stone-500" />
+        <h2 id={headingId} className="text-xl font-bold text-ink">{t.title}</h2>
       </div>
       <p className="text-sm text-stone-500 mb-4">{t.subtitle}</p>
 
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 mb-5">
-        {select(iA, iB, setIA)}
-        <span className="hidden sm:flex items-center text-xs font-bold uppercase text-stone-400">vs</span>
-        {select(iB, iA, setIB)}
+        {select(iA, iB, setIA, "a")}
+        <span aria-hidden="true" className="hidden sm:flex items-end pb-3 text-lg font-bold text-stone-500">–</span>
+        {select(iB, iA, setIB, "b")}
       </div>
 
       <p className="text-lg sm:text-xl font-bold text-stone-900 mb-1">{t.hero}</p>
@@ -153,7 +161,7 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
               <div
                 key={bi}
                 className="flex-1 flex flex-col justify-end h-full"
-                title={`${center > 0 ? "+" : ""}${center} pts: ${t.seasonsLabel(c)}`}
+                title={`${center > 0 ? "+" : center < 0 ? "\u2212" : ""}${Math.abs(center)} pts: ${t.seasonsLabel(c)}`}
               >
                 <div
                   className="w-full max-w-[24px] mx-auto rounded-t-[4px]"
@@ -170,8 +178,8 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
           {stats.counts.map((_, bi) => {
             const center = (bi - HALF_BINS) * stats.binWidth;
             return (
-              <span key={bi} className="flex-1 text-center text-[11px] text-stone-400 tabular-nums">
-                {center > 0 ? `+${center}` : center}
+              <span key={bi} className="flex-1 text-center text-[11px] text-stone-500 tabular-nums">
+                {center > 0 ? `+${center}` : center < 0 ? `\u2212${Math.abs(center)}` : center}
               </span>
             );
           })}
@@ -186,7 +194,7 @@ export function DueloFinal({ samples, locale = "pt" }: DueloFinalProps) {
             <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: colorA }} />
           </span>
         </div>
-        <p className="text-[11px] text-stone-400 mt-2 text-center">{t.axis}</p>
+        <p className="text-[11px] text-stone-500 mt-2 text-center">{t.axis}</p>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Action } from "@/components/brand/Action";
 import { TitleProbabilities } from "@/components/football/TitleProbabilities";
 import { FixtureStakes } from "@/components/football/FixtureStakes";
@@ -45,6 +45,10 @@ export function FootballClubPicker({
   // "A tua equipa · mudar" control only appears for a genuinely remembered
   // choice, not a selection just made interactively in this same visit.
   const [restored, setRestored] = useState(false);
+  // The select only proposes; "Ver" commits. Arrowing through the list with
+  // a keyboard never swaps the panel under the reader (audit A11Y-14).
+  const [pending, setPending] = useState("");
+  const selectId = useId();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -53,6 +57,7 @@ export function FootballClubPicker({
     const resolved = resolveInitialClub(querySlug, stored, validSlugs);
     if (resolved) {
       setSelectedSlug(resolved);
+      setPending(resolved);
       setRestored(true);
     }
     // Restore once, from the URL/storage present when the module first
@@ -67,6 +72,7 @@ export function FootballClubPicker({
   function handleSelect(slug: string) {
     if (!slug) {
       setSelectedSlug(null);
+      setPending("");
       setRestored(false);
       return;
     }
@@ -91,11 +97,11 @@ export function FootballClubPicker({
                 <span>
                   {pt ? "A tua equipa" : "Your club"}: <span className="text-ink">{selected.label}</span>
                 </span>
-                <button type="button" onClick={() => handleSelect("")} className="text-ink underline-offset-4 hover:underline">
+                <button type="button" onClick={() => handleSelect("")} className="inline-flex min-h-11 items-center text-ink underline underline-offset-4">
                   {pt ? "mudar" : "change"}
                 </button>
-                <span aria-hidden="true" className="text-stone-300">·</span>
-                <button type="button" onClick={handleForget} className="text-ink underline-offset-4 hover:underline">
+                <span aria-hidden="true" className="text-stone-500">·</span>
+                <button type="button" onClick={handleForget} className="inline-flex min-h-11 items-center text-ink underline underline-offset-4">
                   {pt ? "esquecer" : "forget"}
                 </button>
               </p>
@@ -126,7 +132,7 @@ export function FootballClubPicker({
               <button
                 type="button"
                 onClick={() => handleSelect("")}
-                className="mt-3 text-xs font-semibold text-stone-500 underline-offset-4 hover:underline"
+                className="mt-3 inline-flex min-h-11 items-center text-xs font-semibold text-ink underline underline-offset-4"
               >
                 {pt ? "escolher outra equipa" : "choose another club"}
               </button>
@@ -152,20 +158,37 @@ export function FootballClubPicker({
         )}
       </div>
 
-      <form id="escolher-equipa" className="mt-4 flex min-w-0 scroll-mt-24 items-end gap-2" onSubmit={(event) => event.preventDefault()}>
-        <label className="min-w-0 flex-1 text-sm font-semibold text-ink-muted">
-          {pt ? "Acompanha a tua equipa" : "Follow your club"}
+      <form
+        id="escolher-equipa"
+        className="mt-4 flex min-w-0 scroll-mt-24 items-end gap-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleSelect(pending);
+        }}
+      >
+        <span className="flex min-w-0 flex-1 flex-col">
+          <label htmlFor={selectId} className="text-sm font-semibold text-ink-muted">
+            {pt ? "Acompanha a tua equipa" : "Follow your club"}
+          </label>
           <select
-            value={selectedSlug ?? ""}
-            onChange={(event) => handleSelect(event.target.value)}
-            className="mt-1 block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-sm font-medium text-ink"
+            id={selectId}
+            value={pending}
+            onChange={(event) => setPending(event.target.value)}
+            className="mt-1 block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base font-medium text-ink sm:text-sm"
           >
             <option value="">{pt ? "Escolhe a tua equipa" : "Choose your club"}</option>
             {outlooks.map((club) => (
               <option key={club.slug} value={club.slug}>{club.label}</option>
             ))}
           </select>
-        </label>
+        </span>
+        <button
+          type="submit"
+          disabled={pending === (selectedSlug ?? "")}
+          className="min-h-11 shrink-0 rounded-[10px] bg-ink px-4 text-sm font-semibold text-paper disabled:opacity-50"
+        >
+          {pt ? "Ver" : "Show"}
+        </button>
       </form>
     </div>
   );

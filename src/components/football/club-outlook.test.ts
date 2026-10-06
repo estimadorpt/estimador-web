@@ -107,14 +107,20 @@ describe('formatClubPercent', () => {
 });
 
 describe('positionSpread', () => {
-  it('reports a 5th-9th range when neighbouring positions carry comparable probability to the 7th-place mode', () => {
-    // 7th (index 6) at 12%, with 5th-9th all carrying at least half of that.
+  it('reports a 6th-9th range when neighbouring positions carry comparable probability to the 7th-place mode', () => {
+    // 7th (index 6) at 12%, with 6th-9th each carrying at least two thirds of that.
     const probs = [0, 0, 0, 0, 0.07, 0.09, 0.12, 0.10, 0.08, 0.05, 0, 0, 0, 0, 0, 0, 0, 0];
     const result = positionSpread(probs);
     expect(result?.modalPosition).toBe(7);
     expect(result?.broad).toBe(true);
-    expect(result?.rangeStart).toBe(5);
+    expect(result?.rangeStart).toBe(6);
     expect(result?.rangeEnd).toBe(9);
+    expect(result?.rangeProb).toBeCloseTo(0.39, 6);
+  });
+
+  it('does not call 51% and 29% "similar support" (audit F13)', () => {
+    const probs = [0.51, 0.29, 0.19, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    expect(positionSpread(probs)?.broad).toBe(false);
   });
 
   it('reports a confident single position when neighbours trail far behind', () => {

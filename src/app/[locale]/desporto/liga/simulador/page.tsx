@@ -1,6 +1,7 @@
 import { createPageMetadata } from '@/lib/metadata';
-import { loadLigaData, loadLigaSamples, loadUpcomingFixtures } from "@/lib/utils/football-data-loader";
+import { loadGameFixtures, loadLigaData, loadLigaSamples, loadUpcomingFixtures } from "@/lib/utils/football-data-loader";
 import { listSupportedFixtures } from "@/lib/football-fixtures";
+import { formatDateSpan, formatShortDate } from "@/lib/football-format";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -23,8 +24,8 @@ export async function generateMetadata({
     locale,
     path: `/desporto/liga/simulador`,
     title: locale === "pt"
-      ? "Simulador · Liga Portugal"
-      : "Simulator · Liga Portugal",
+      ? "Simulador da Liga Portugal"
+      : "Liga Portugal simulator",
     description: t("football.whatIfDescription"),
   });
 }
@@ -38,10 +39,11 @@ export default async function SimuladorPage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale });
 
-  const [{ prediction, scenarios }, seasonSamples, upcomingFixtures] = await Promise.all([
+  const [{ prediction, scenarios }, seasonSamples, upcomingFixtures, gameFixtures] = await Promise.all([
     loadLigaData(),
     loadLigaSamples(),
     loadUpcomingFixtures(),
+    loadGameFixtures(),
   ]);
 
   if (!prediction || !scenarios?.next_matchday_scenarios) {
@@ -72,7 +74,16 @@ export default async function SimuladorPage({
   // Which of next_matchday_scenarios.matches is each club's own outstanding
   // fixture, and which are postponed leftovers — the "O meu próximo jogo"
   // path (diagnosis §5 "Simulator").
-  const supportedFixtures = listSupportedFixtures(prediction, scenarios);
+  const supportedFixtures = listSupportedFixtures(prediction, scenarios, gameFixtures);
+
+  // "Jornada 7 · atualizado a 25 set. · simula a jornada 8 (9–12 out.)": the
+  // forecast this page starts from, and the round it lets you play out
+  // (audit FR-09), the same matchday the rest of the site names.
+  const simRound = prediction.next_matchday?.matchday ?? prediction.matchday + 1;
+  const simSpan = formatDateSpan(upcomingFixtures.filter(f => f.matchday === simRound).map(f => f.kickoff), locale, { short: true });
+  const statusLine = locale === "pt"
+    ? `Previsão depois da jornada ${prediction.matchday} · atualizada a ${formatShortDate(prediction.timestamp, locale)} · simula a jornada ${simRound}${simSpan ? ` (${simSpan})` : ""}`
+    : `Forecast after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)} · plays out matchday ${simRound}${simSpan ? ` (${simSpan})` : ""}`;
 
   return (
     <div className="football-page min-h-screen bg-paper">
@@ -83,9 +94,10 @@ export default async function SimuladorPage({
         compact
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
         icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
-        eyebrow={`${t("football.title")} — ${t("football.matchday")} ${prediction.next_matchday.matchday}`}
+        eyebrow={t("football.title")}
         title={t("football.simulator")}
-        lede={t("football.simulatorCta")}
+        lede={t("football.simulatorLede")}
+        meta={<span>{statusLine}</span>}
       />
 
       {/* Simulator */}
@@ -126,12 +138,12 @@ export default async function SimuladorPage({
       {seasonSamples && (
         <section aria-labelledby="duelo-final-heading" className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <div className="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <p className="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">
               <Swords className="w-3.5 h-3.5" aria-hidden="true" />
-              <span id="duelo-final-heading">{locale === 'pt' ? 'Outra pergunta' : 'A different question'}</span>
-            </div>
+              <span>{locale === 'pt' ? 'Outra pergunta' : 'A different question'}</span>
+            </p>
             <p className="mb-5 border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-muted">{locale === 'pt' ? 'Previsão de base — a comparação abaixo usa as épocas originais do modelo e não incorpora os resultados que escolheste acima.' : 'Baseline forecast — the comparison below uses the original model seasons and does not incorporate your selections above.'}</p>
-            <DueloFinal samples={seasonSamples} locale={locale} />
+            <DueloFinal samples={seasonSamples} locale={locale} headingId="duelo-final-heading" />
           </div>
         </section>
       )}

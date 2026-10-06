@@ -2,18 +2,23 @@
 
 import { useState, useMemo } from "react";
 import { teamLogoSrc, teamDisplayName } from "@/lib/config/football";
-import type { CriticalPathMatch, PointsLookupEntry } from "@/types/football";
-import { RotateCcw } from "lucide-react";
-
-type Outcome = "W" | "D" | "L";
+import type { CriticalPathMatch } from "@/types/football";
+import { RotateCcw, Check } from "lucide-react";
+import {
+  expectedPoints as expectedPointsOf,
+  pickedPoints,
+  runningProbabilities,
+  type PathOutcome,
+} from "@/lib/football-path-builder";
+import { describePp, formatInteger, formatPercent, formatPp } from "@/lib/football-format";
 
 interface PathBuilderProps {
   matches: CriticalPathMatch[];
   pCurrent: number;
   target: "champion" | "survival";
-  teamColor: string;
-  /** Points-to-probability lookup: remaining_points → {p_target, n_sims} */
-  pointsLookup?: Record<string, PointsLookupEntry>;
+  locale: string;
+  /** Simulated seasons behind the conditionals (prediction.n_sims). */
+  nSims: number;
   labels: {
     matchdayAbbr: string;
     win: string;
@@ -30,336 +35,142 @@ interface PathBuilderProps {
   };
 }
 
-function outcomePoints(o: Outcome): number {
-  return o === "W" ? 3 : o === "D" ? 1 : 0;
-}
+const OUTCOMES: PathOutcome[] = ["W", "D", "L"];
 
 /**
- * Interpolate P(target) from the lookup table for a given remaining-points value.
- * Uses linear interpolation between the two nearest entries.
+ * "Cria o teu cenário": fix the result of any of the club's remaining games
+ * and read its title (or survival) chance after each pick. The maths lives
+ * in football-path-builder.ts: one pick gives the exact conditional from the
+ * simulations, several are combined as if independent given the target.
  */
-function interpolateLookup(
-  lookup: Record<string, PointsLookupEntry>,
-  points: number
-): number | null {
-  const entries = Object.entries(lookup)
-    .map(([k, v]) => ({ pts: parseInt(k), p: v.p_target }))
-    .sort((a, b) => a.pts - b.pts);
+export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels }: PathBuilderProps) {
+  const pt = locale !== "en";
+  const [selections, setSelections] = useState<Record<number, PathOutcome>>({});
 
-  if (entries.length === 0) return null;
+  const sorted = useMemo(() => [...matches].sort((a, b) => a.matchday - b.matchday), [matches]);
+  const running = useMemo(() => runningProbabilities(pCurrent, sorted, selections), [pCurrent, sorted, selections]);
+  const nPicked = Object.keys(selections).length;
+  const hasSelections = nPicked > 0;
+  const finalProb = running.length ? running[running.length - 1] : pCurrent;
+  const targetLabel = target === "champion" ? labels.championship : labels.survival;
 
-  // Exact match
-  const exact = entries.find((e) => e.pts === points);
-  if (exact) return exact.p;
+  const outcomeWord = (o: PathOutcome) => (o === "W" ? labels.win : o === "D" ? labels.draw : labels.loss);
+  const outcomeShort = (o: PathOutcome) => outcomeWord(o).charAt(0);
+  const venueWord = (venue: "H" | "A") => (venue === "H" ? (pt ? "em casa" : "at home") : (pt ? "fora" : "away"));
 
-  // Below minimum
-  if (points < entries[0].pts) return entries[0].p;
-  // Above maximum
-  if (points > entries[entries.length - 1].pts)
-    return entries[entries.length - 1].p;
-
-  // Linear interpolation between two nearest
-  for (let i = 0; i < entries.length - 1; i++) {
-    if (points >= entries[i].pts && points <= entries[i + 1].pts) {
-      const t =
-        (points - entries[i].pts) / (entries[i + 1].pts - entries[i].pts);
-      return entries[i].p + t * (entries[i + 1].p - entries[i].p);
-    }
-  }
-
-  return null;
-}
-
-export function PathBuilder({
-  matches,
-  pCurrent,
-  target,
-  teamColor,
-  pointsLookup,
-  labels,
-}: PathBuilderProps) {
-  const [selections, setSelections] = useState<Record<number, Outcome>>({});
-
-  const sorted = useMemo(
-    () => [...matches].sort((a, b) => a.matchday - b.matchday),
-    [matches]
-  );
-
-  const hasSelections = Object.keys(selections).length > 0;
-
-  // Compute running probability using lookup table
-  // Strategy: at each row, compute "if all remaining unselected matches go as expected,
-  // what's the probability given picks so far?"
-  const withDeltas = useMemo(() => {
-    if (!pointsLookup) {
-      // Fallback: no lookup available, use Bayesian LR (imperfect but functional)
-      let cumProb = pCurrent;
-      return sorted.map((m, i) => {
-        const sel = selections[i];
-        const prevProb = cumProb;
-        if (sel) {
-          const pGivenTarget =
-            sel === "W"
-              ? m.p_win_given_target
-              : sel === "D"
-              ? m.p_draw_given_target
-              : m.p_loss_given_target;
-          const pOverall =
-            sel === "W"
-              ? m.p_win_overall
-              : sel === "D"
-              ? m.p_draw_overall
-              : m.p_loss_overall;
-          if (pOverall > 0 && cumProb > 0 && cumProb < 1) {
-            const lr = pGivenTarget / pOverall;
-            const odds = (cumProb / (1 - cumProb)) * lr;
-            cumProb = odds / (1 + odds);
-          }
-        }
-        return { prob: cumProb, delta: cumProb - prevProb, selected: !!sel };
-      });
-    }
-
-    // Lookup-based: for each row, compute total remaining points as:
-    // picked points (from selected matches) + expected points (from unselected matches)
-    // Then look up P(target | remaining_points) from the simulation data.
-
-    // First compute expected points from ALL matches (baseline)
-    const totalExpected = sorted.reduce(
-      (sum, m) => sum + m.p_win_overall * 3 + m.p_draw_overall * 1,
-      0
-    );
-
-    // For each row, track: cumulative picked points, cumulative expected points replaced
-    const results: { prob: number; delta: number; selected: boolean }[] = [];
-    let pickedPoints = 0;
-    let expectedReplaced = 0; // how much expected we've replaced with actual picks
-
-    for (let i = 0; i < sorted.length; i++) {
-      const m = sorted[i];
-      const sel = selections[i];
-      const matchExpected = m.p_win_overall * 3 + m.p_draw_overall * 1;
-
-      if (sel) {
-        pickedPoints += outcomePoints(sel);
-        expectedReplaced += matchExpected;
-      }
-
-      // Estimated total remaining = picked + expected from unpicked
-      const estimatedTotal = pickedPoints + (totalExpected - expectedReplaced);
-      const prevProb = i === 0 ? pCurrent : results[i - 1].prob;
-
-      if (!hasSelections) {
-        // No selections yet — show baseline
-        results.push({ prob: pCurrent, delta: 0, selected: false });
-      } else {
-        const lookedUp = interpolateLookup(pointsLookup, estimatedTotal);
-        const prob = lookedUp !== null ? lookedUp : pCurrent;
-        results.push({ prob, delta: prob - prevProb, selected: !!sel });
-      }
-    }
-
-    return results;
-  }, [sorted, selections, pCurrent, pointsLookup, hasSelections]);
-
-  const finalProb =
-    withDeltas.length > 0 ? withDeltas[withDeltas.length - 1].prob : pCurrent;
-
-  // Points tally
-  const pointsFromPicks = Object.entries(selections).reduce(
-    (sum, [, o]) => sum + outcomePoints(o),
-    0
-  );
-  const expectedPoints = sorted.reduce(
-    (sum, m) => sum + m.p_win_overall * 3 + m.p_draw_overall * 1,
-    0
-  );
-
-  function toggle(index: number, outcome: Outcome) {
-    setSelections((prev) => {
+  function toggle(index: number, outcome: PathOutcome) {
+    setSelections(prev => {
       const next = { ...prev };
-      if (next[index] === outcome) {
-        delete next[index];
-      } else {
-        next[index] = outcome;
-      }
+      if (next[index] === outcome) delete next[index];
+      else next[index] = outcome;
       return next;
     });
   }
 
-  const targetLabel =
-    target === "champion" ? labels.championship : labels.survival;
-
   return (
-    <div>
-      {/* Header row */}
-      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-stone-400 pb-1 border-b border-stone-200">
-        <div className="w-8 text-center">{labels.matchdayAbbr}</div>
-        <div className="w-36 md:w-44" />
-        <div className="flex gap-1 w-[6.5rem]">
-          <div className="w-8 text-center">{labels.win.charAt(0)}</div>
-          <div className="w-8 text-center">{labels.draw.charAt(0)}</div>
-          <div className="w-8 text-center">{labels.loss.charAt(0)}</div>
-        </div>
-        <div className="flex-1 text-right">{targetLabel}</div>
+    <div className="max-w-3xl">
+      <p className="mb-4 max-w-3xl text-xs leading-relaxed text-stone-500">
+        {pt
+          ? `Com uma escolha, o número é a probabilidade condicional tirada das ${formatInteger(nSims, locale)} simulações. Com várias, as escolhas combinam-se como se fossem independentes entre si, uma aproximação: o ficheiro publicado não guarda a combinação de vários resultados.`
+          : `With one pick, the number is the conditional probability read from the ${formatInteger(nSims, locale)} simulations. With several, the picks are combined as if independent of one another, an approximation: the published file does not hold combinations of results.`}
+      </p>
+
+      {/* Column heads, wide screens only (on phones each row names its own parts). */}
+      <div aria-hidden="true" className="hidden grid-cols-[2.5rem_minmax(0,1fr)_auto_6.5rem] items-end gap-3 border-b border-stone-200 pb-1 text-[11px] font-bold uppercase tracking-wider text-stone-500 sm:grid">
+        <span className="text-center">{labels.matchdayAbbr}</span>
+        <span>{pt ? "Adversário" : "Opponent"}</span>
+        <span className="w-[9.5rem] text-center">{pt ? "Resultado" : "Result"}</span>
+        <span className="text-right">{targetLabel}</span>
       </div>
 
-      {/* Match rows */}
-      <div className="divide-y divide-stone-100">
+      <ol className="divide-y divide-line">
         {sorted.map((m, i) => {
           const sel = selections[i];
-          const rp = withDeltas[i];
-          const probPct = Math.round(rp.prob * 100);
-          const prevPct = i === 0 ? Math.round(pCurrent * 100) : Math.round(withDeltas[i - 1].prob * 100);
-          const deltaPp = probPct - prevPct;
-          const isMuted = !sel && hasSelections;
-
+          const prob = running[i];
+          const prev = i === 0 ? pCurrent : running[i - 1];
+          const step = prob - prev;
+          const opponent = teamDisplayName(m.opponent);
+          const context = pt
+            ? `frente ao ${opponent}, ${venueWord(m.venue)}, jornada ${m.matchday}`
+            : `against ${opponent}, ${venueWord(m.venue)}, matchday ${m.matchday}`;
           return (
-            <div
-              key={i}
-              className={`flex items-center gap-2 py-1.5 transition-opacity ${
-                isMuted ? "opacity-40" : ""
-              }`}
+            <li
+              key={`${m.matchday}-${m.opponent}`}
+              className={`grid grid-cols-[2.5rem_minmax(0,1fr)_6.5rem] items-center gap-x-3 gap-y-2 py-2 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto_6.5rem] ${!sel && hasSelections ? "opacity-60" : ""}`}
             >
-              {/* Matchday */}
-              <div className="w-8 text-center text-xs text-stone-400 tabular-nums">
-                {m.matchday}
-              </div>
-
-              {/* Opponent + venue */}
-              <div className="w-36 md:w-44 flex items-center gap-1.5 shrink-0">
-                {teamLogoSrc(m.opponent) && (
-                  <img
-                    src={teamLogoSrc(m.opponent)}
-                    alt=""
-                    className="w-4 h-4 object-contain"
-                  />
-                )}
-                <span className="text-sm font-medium text-stone-800 truncate">
-                  {teamDisplayName(m.opponent)}
-                </span>
-                <span className="text-[11px] text-stone-400 shrink-0">
-                  ({m.venue === "H" ? labels.home : labels.away})
-                </span>
-              </div>
-
-              {/* W/D/L toggle buttons */}
-              <div className="flex gap-1 w-[6.5rem]">
-                {(["W", "D", "L"] as Outcome[]).map((o) => {
-                  const isSelected = sel === o;
-                  const label =
-                    o === "W"
-                      ? labels.win.charAt(0)
-                      : o === "D"
-                      ? labels.draw.charAt(0)
-                      : labels.loss.charAt(0);
-                  let bg = "transparent";
-                  let color = "#7f9284";
-                  let border = "2px solid #dadccf";
-                  if (isSelected) {
-                    if (o === "W") {
-                      bg = teamColor;
-                      color = "#fff";
-                      border = `2px solid ${teamColor}`;
-                    } else if (o === "D") {
-                      bg = "#5f7062";
-                      color = "#fff";
-                      border = "2px solid #5f7062";
-                    } else {
-                      bg = "#bd714e";
-                      color = "#fff";
-                      border = "2px solid #bd714e";
-                    }
-                  }
+              <span className="text-center text-xs tabular-nums text-stone-500">
+                <span className="sr-only">{pt ? "Jornada " : "Matchday "}</span>{m.matchday}
+              </span>
+              <span className="flex min-w-0 items-center gap-1.5">
+                {teamLogoSrc(m.opponent) && <img src={teamLogoSrc(m.opponent)} alt="" className="h-4 w-4 shrink-0 object-contain" />}
+                <span className="truncate text-sm font-medium text-ink">{opponent}</span>
+                <span className="shrink-0 text-[11px] text-stone-500">({m.venue === "H" ? labels.home : labels.away})</span>
+              </span>
+              <span
+                role="group"
+                aria-label={pt ? `Resultado ${context}` : `Result ${context}`}
+                className="col-span-3 inline-flex justify-self-start rounded-[10px] border border-line bg-paper p-1 sm:col-span-1 sm:col-start-3 sm:row-start-1"
+              >
+                {OUTCOMES.map(o => {
+                  const active = sel === o;
                   return (
                     <button
                       key={o}
+                      type="button"
+                      aria-pressed={active}
+                      aria-label={`${outcomeWord(o)} ${context}`}
                       onClick={() => toggle(i, o)}
-                      className="w-8 h-8 text-[11px] font-bold transition-all"
-                      style={{ backgroundColor: bg, color, border }}
+                      className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-[8px] px-2 text-sm font-semibold transition-colors duration-150 ${
+                        active ? "bg-ink text-paper" : "text-stone-600 hover:bg-parchment hover:text-ink"
+                      }`}
                     >
-                      {label}
+                      {active && <Check aria-hidden="true" className="h-3.5 w-3.5" />}
+                      <span aria-hidden="true">{outcomeShort(o)}</span>
                     </button>
                   );
                 })}
-              </div>
-
-              {/* Running probability + delta */}
-              <div className="flex-1 flex items-center justify-end gap-1.5 tabular-nums">
-                <span
-                  className="text-sm font-bold"
-                  style={{ color: rp.selected ? teamColor : "#7f9284" }}
-                >
-                  {probPct}%
-                </span>
-                {rp.selected && deltaPp !== 0 && (
-                  <span
-                    className={`text-[11px] font-medium ${
-                      deltaPp > 0 ? "text-emerald-600" : "text-red-500"
-                    }`}
-                  >
-                    {deltaPp > 0 ? "+" : ""}
-                    {deltaPp}
+              </span>
+              <span className="col-start-3 row-start-1 flex flex-col items-end tabular-nums sm:col-start-4">
+                <span className="text-sm font-bold text-ink">{formatPercent(prob, locale)}</span>
+                {sel && Math.abs(step) >= 0.0005 && (
+                  <span className={`text-[11px] font-semibold ${step > 0 ? "text-emerald-700" : "text-red-700"}`}>
+                    <span aria-hidden="true">{formatPp(step, locale)}</span>
+                    <span className="sr-only">{describePp(step, locale)}</span>
                   </span>
                 )}
-              </div>
-            </div>
+              </span>
+            </li>
           );
         })}
-      </div>
+      </ol>
 
-      {/* Summary strip */}
       {hasSelections && (
-        <div className="mt-4 pt-4 border-t border-stone-200 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-500">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-stone-200 pt-4">
+          <p className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-600">
             <span>
-              <strong className="text-stone-800">{pointsFromPicks}</strong>{" "}
-              {labels.pointsFromPicks} ({Object.keys(selections).length}/
-              {sorted.length})
+              <strong className="text-ink">{formatInteger(pickedPoints(selections), locale)}</strong> {labels.pointsFromPicks} ({nPicked}/{sorted.length})
             </span>
             <span>
-              {labels.expectedPoints}:{" "}
-              <strong className="text-stone-800">
-                {Math.round(expectedPoints)}
-              </strong>
+              {labels.expectedPoints}: <strong className="text-ink">{formatInteger(expectedPointsOf(sorted.filter((_, i) => selections[i])), locale)}</strong>
             </span>
-          </div>
-
+          </p>
           <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
-                {labels.yourScenario}
-              </div>
-              <div className="flex items-baseline gap-1.5">
-                <span
-                  className="text-2xl font-display font-extrabold tabular-nums"
-                  style={{ color: teamColor }}
-                >
-                  {Math.round(finalProb * 100)}%
+            <div className="text-right" aria-live="polite">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{labels.yourScenario}</p>
+              <p className="flex items-baseline justify-end gap-1.5">
+                <span className="font-display text-2xl font-extrabold tabular-nums text-ink">{formatPercent(finalProb, locale)}</span>
+                <span className={`text-sm font-bold ${finalProb >= pCurrent ? "text-emerald-700" : "text-red-700"}`}>
+                  <span aria-hidden="true">{formatPp(finalProb - pCurrent, locale)}</span>
+                  <span className="sr-only">{describePp(finalProb - pCurrent, locale, pt ? "face a agora" : "from now")}</span>
                 </span>
-                {(() => {
-                  const finalPct = Math.round(finalProb * 100);
-                  const basePct = Math.round(pCurrent * 100);
-                  const diff = finalPct - basePct;
-                  if (diff === 0) return null;
-                  return (
-                    <span
-                      className={`text-sm font-bold ${
-                        diff > 0 ? "text-emerald-600" : "text-red-500"
-                      }`}
-                    >
-                      {diff > 0 ? "+" : ""}
-                      {diff}pp
-                    </span>
-                  );
-                })()}
-              </div>
+              </p>
             </div>
             <button
+              type="button"
               onClick={() => setSelections({})}
-              className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-stone-600 transition-colors"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line px-3 text-sm font-semibold text-ink hover:bg-parchment"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw aria-hidden="true" className="h-3.5 w-3.5" />
               {labels.resetAll}
             </button>
           </div>

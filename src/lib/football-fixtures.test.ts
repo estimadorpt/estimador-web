@@ -10,6 +10,10 @@ import {
   nextSupportedFixtureFor,
   postponedLeftoverFor,
   relevantObjective,
+  fixtureSwings,
+  combinedSwing,
+  byKickoff,
+  STAKES_BADGE_THRESHOLD,
   type GameFixturesData,
   type SupportedFixture,
 } from './football-fixtures';
@@ -285,7 +289,9 @@ describe('formatObjectiveLabel', () => {
 
   it('labels the title and relegation objectives in both locales', () => {
     expect(formatObjectiveLabel('p_champion', 'pt')).toBe('ser campeão');
-    expect(formatObjectiveLabel('p_relegation', 'en')).toBe('being relegated');
+    // One word for the outcome everywhere (audit UXM-15): despromoção, never "descida".
+    expect(formatObjectiveLabel('p_relegation', 'pt')).toBe('despromoção');
+    expect(formatObjectiveLabel('p_relegation', 'en')).toBe('relegation');
   });
 });
 
@@ -468,5 +474,37 @@ describe('frozen md06 bundle (src/test-fixtures/liga-2026-27, published 2026-09-
     expect(porto?.kickoffConfirmed).toBe(false);
     expect(porto?.kickoff).toBe('2026-09-19T23:00:00Z');
     expect(porto?.matchProbabilities).toBeDefined();
+  });
+});
+
+describe("fixture stakes from the round's own conditionals (audit F-H4)", () => {
+  it('names the club each md08 fixture moves most, on both races', async () => {
+    const scenarios: ScenarioData = JSON.parse(
+      await fs.readFile(path.join(process.cwd(), 'public', 'data', 'football', 'liga-2026-27', 'md07_scenarios.json'), 'utf8'),
+    );
+    if (scenarios.matchday !== 7) return;
+    const find = (home: string, away: string) =>
+      scenarios.next_matchday_scenarios!.matches.find(m => m.home_team === home && m.away_team === away);
+    const maritimoPorto = fixtureSwings(find('Maritimo', 'Porto'));
+    expect(maritimoPorto.title?.team).toBe('Porto');
+    expect(Math.round((maritimoPorto.title?.swing ?? 0) * 100)).toBe(18);
+    expect(maritimoPorto.relegation?.team).toBe('Maritimo');
+    expect(Math.round((maritimoPorto.relegation?.swing ?? 0) * 100)).toBe(15);
+    // A fixture outside the season-wide decisive list still gets its stakes.
+    const casaPia = fixtureSwings(find('Casa Pia', 'Santa Clara'));
+    expect(casaPia.relegation?.team).toBe('Casa Pia');
+    expect(casaPia.relegation!.swing).toBeGreaterThan(STAKES_BADGE_THRESHOLD);
+    expect(combinedSwing(maritimoPorto)).toBeGreaterThan(combinedSwing(fixtureSwings(find('Famalicao', 'Alverca'))));
+    expect(fixtureSwings(null)).toEqual({ title: null, relegation: null });
+  });
+
+  it('orders a round by kickoff, undated fixtures last', () => {
+    const ordered = byKickoff([
+      { id: 'c', kickoff: '2026-10-11T17:00:00Z', matchday: 8 },
+      { id: 'u', kickoff: null, matchday: 8 },
+      { id: 'a', kickoff: '2026-10-09T17:45:00Z', matchday: 8 },
+      { id: 'b', kickoff: '2026-10-09T19:15:00Z', matchday: 8 },
+    ]);
+    expect(ordered.map(f => f.id)).toEqual(['a', 'b', 'c', 'u']);
   });
 });

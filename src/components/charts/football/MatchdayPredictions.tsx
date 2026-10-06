@@ -1,178 +1,146 @@
-"use client";
-
-import { ligaTeamColors, teamDisplayName } from "@/lib/config/football";
+import { teamColorOnPaper, teamDisplayName } from "@/lib/config/football";
 import { Link } from "@/i18n/routing";
-import { ChevronRight } from "lucide-react";
-import type { DecisiveMatch, MatchPrediction } from "@/types/football";
+import type { NextMatchdayScenarioMatch } from "@/types/football";
+import {
+  byKickoff,
+  combinedSwing,
+  fixtureSwings,
+  STAKES_BADGE_THRESHOLD,
+  type FixtureSwings,
+} from "@/lib/football-fixtures";
+import { formatKickoffShort, formatPercent, matchLabel } from "@/lib/football-format";
 
-interface MatchdayPredictionsProps {
-  matches: MatchPrediction[];
+/** One fixture card: the 1X2, its kickoff and what it can change. */
+export interface MatchdayFixture {
+  home: string;
+  away: string;
   matchday: number;
-  labels: {
-    home: string;
-    draw: string;
-    away: string;
-    titleImpact?: string;
-    relegationImpact?: string;
-    matchOfTheWeek?: string;
-    matchPage?: string;
-  };
-  decisiveMatches?: DecisiveMatch[];
-  /**
-   * Per-match page hrefs keyed by `${home}|${away}`. Rows without an entry stay
-   * unlinked, so a fixture with no generated page never becomes a dead link.
-   */
-  matchHrefs?: Record<string, string>;
-  locale?: string;
+  /** UTC ISO; printed in Lisbon. */
+  kickoff: string | null;
+  kickoffConfirmed: boolean;
+  p_home: number;
+  p_draw: number;
+  p_away: number;
+  /** This fixture's own conditionals (next_matchday_scenarios), for its stakes. */
+  scenario: NextMatchdayScenarioMatch | null;
+  /** Match page, when one is generated. */
+  href?: string;
 }
 
-function ProbabilityBar({ pHome, pDraw, pAway }: {
-  pHome: number;
-  pDraw: number;
-  pAway: number;
-}) {
+interface MatchdayPredictionsProps {
+  fixtures: MatchdayFixture[];
+  locale: string;
+}
+
+// Three clearly different values, all drawn without text inside the bar
+// (the numbers sit under it in ink), so nothing depends on telling two
+// greys apart: home dark, draw pale, away mid.
+const BAR = { home: "#434d48", draw: "#d6d8cc", away: "#8b9a8e" } as const;
+
+function Stakes({ swings, pt }: { swings: FixtureSwings; pt: boolean }) {
+  const items: string[] = [];
+  if (swings.title && swings.title.swing >= STAKES_BADGE_THRESHOLD) {
+    items.push(`${pt ? "Título" : "Title"} · ${teamDisplayName(swings.title.team)} ${Math.round(swings.title.swing * 100)} pp`);
+  }
+  if (swings.relegation && swings.relegation.swing >= STAKES_BADGE_THRESHOLD) {
+    items.push(`${pt ? "Despromoção" : "Relegation"} · ${teamDisplayName(swings.relegation.team)} ${Math.round(swings.relegation.swing * 100)} pp`);
+  }
+  if (items.length === 0) return null;
   return (
-    <div className="flex h-6 w-full overflow-hidden rounded-md">
-      <div
-        className="flex items-center justify-center text-[11px] font-bold text-white bg-stone-700"
-        style={{ width: `${pHome * 100}%`, minWidth: pHome > 0.05 ? '28px' : 0 }}
-      >
-        {pHome >= 0.05 ? `${Math.round(pHome * 100)}%` : ''}
-      </div>
-      <div
-        className="flex items-center justify-center text-[11px] font-bold text-stone-600 bg-stone-200"
-        style={{ width: `${pDraw * 100}%`, minWidth: pDraw > 0.05 ? '28px' : 0 }}
-      >
-        {pDraw >= 0.05 ? `${Math.round(pDraw * 100)}%` : ''}
-      </div>
-      <div
-        className="flex items-center justify-center text-[11px] font-bold text-white bg-stone-500"
-        style={{ width: `${pAway * 100}%`, minWidth: pAway > 0.05 ? '28px' : 0 }}
-      >
-        {pAway >= 0.05 ? `${Math.round(pAway * 100)}%` : ''}
-      </div>
-    </div>
+    <ul className="mt-3 flex flex-wrap gap-2" aria-label={pt ? "O que este jogo pode mudar" : "What this match can change"}>
+      {items.map(item => (
+        <li key={item} className="rounded-md bg-parchment px-2 py-0.5 text-[11px] font-bold text-stone-600">
+          {item}
+        </li>
+      ))}
+    </ul>
   );
 }
 
-export function MatchdayPredictions({
-  matches,
-  matchday,
-  labels,
-  decisiveMatches,
-  matchHrefs,
-  locale,
-}: MatchdayPredictionsProps) {
-  if (!matches || matches.length === 0) return null;
+/**
+ * The next round, in kickoff order (Lisbon time on every card). Each card's
+ * stakes come from its own published conditionals: for the title and for
+ * relegation, the club whose chances spread most between the three results.
+ * "Jogo da jornada" marks the biggest combined spread, as a badge only; it
+ * never reorders the list.
+ */
+export function MatchdayPredictions({ fixtures, locale }: MatchdayPredictionsProps) {
+  if (!fixtures || fixtures.length === 0) return null;
+  const pt = locale !== "en";
 
-  // Build lookup for decisive match annotations
-  const decisiveLookup = new Map<string, DecisiveMatch>();
-  if (decisiveMatches) {
-    for (const dm of decisiveMatches) {
-      decisiveLookup.set(`${dm.home_team}|${dm.away_team}`, dm);
-    }
-  }
-
-  // Sort matches by importance (highest swing first)
-  const sortedMatches = [...matches].sort((a, b) => {
-    const dmA = decisiveLookup.get(`${a.home}|${a.away}`);
-    const dmB = decisiveLookup.get(`${b.home}|${b.away}`);
-    const impactA = (dmA?.title_swing ?? 0) + (dmA?.relegation_swing ?? 0);
-    const impactB = (dmB?.title_swing ?? 0) + (dmB?.relegation_swing ?? 0);
-    return impactB - impactA;
-  });
-
-  // Find match of the week (highest combined swing)
-  const topDm = sortedMatches.length > 0
-    ? decisiveLookup.get(`${sortedMatches[0].home}|${sortedMatches[0].away}`)
-    : undefined;
-  const topSwing = topDm ? (topDm.title_swing + (topDm.relegation_swing ?? 0)) : 0;
-  const hasMatchOfWeek = topSwing > 0.05;
+  const withSwings = byKickoff(fixtures).map(f => ({ fixture: f, swings: fixtureSwings(f.scenario) }));
+  const top = withSwings.reduce<(typeof withSwings)[number] | null>(
+    (best, x) => (!best || combinedSwing(x.swings) > combinedSwing(best.swings) ? x : best),
+    null,
+  );
+  const matchOfTheWeek = top && combinedSwing(top.swings) >= STAKES_BADGE_THRESHOLD ? top.fixture : null;
 
   return (
-    <div className="grid grid-cols-1 gap-x-8 gap-y-5 md:grid-cols-2">
-      {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-[11px] uppercase tracking-wider text-ink-muted font-bold md:col-span-2">
-        <span className="inline-flex items-center gap-2"><i aria-hidden="true" className="h-2.5 w-2.5 rounded-sm bg-stone-700" />{labels.home}</span>
-        <span className="inline-flex items-center gap-2"><i aria-hidden="true" className="h-2.5 w-2.5 rounded-sm bg-stone-200" />{labels.draw}</span>
-        <span className="inline-flex items-center gap-2"><i aria-hidden="true" className="h-2.5 w-2.5 rounded-sm bg-stone-500" />{labels.away}</span>
-      </div>
-
-      {sortedMatches.map((match, i) => {
-        const homeColor = ligaTeamColors[match.home] || '#5f7062';
-        const awayColor = ligaTeamColors[match.away] || '#5f7062';
-        const dm = decisiveLookup.get(`${match.home}|${match.away}`);
-        const hasTitleImpact = dm && dm.title_swing > 0.05;
-        const hasRelegImpact = dm && (dm.relegation_swing ?? 0) > 0.05;
-        const isMatchOfWeek = i === 0 && hasMatchOfWeek;
-        const href = matchHrefs?.[`${match.home}|${match.away}`];
-
-        const rowBody = (
-          <>
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2">
-                <div className="w-1 h-4" style={{ backgroundColor: homeColor }} />
-                <span className="text-sm font-medium text-stone-900">{teamDisplayName(match.home)}</span>
-              </div>
-              <span className="text-xs text-stone-400 px-2">vs</span>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-stone-900">{teamDisplayName(match.away)}</span>
-                <div className="w-1 h-4" style={{ backgroundColor: awayColor }} />
-                {href && (
-                  <ChevronRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-stone-700 transition-colors" />
-                )}
-              </div>
-            </div>
-            <ProbabilityBar
-              pHome={match.p_home}
-              pDraw={match.p_draw}
-              pAway={match.p_away}
-            />
-            {/* Impact badges */}
-            {(hasTitleImpact || hasRelegImpact) && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {hasTitleImpact && dm && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded-md bg-parchment text-ink-muted">
-                    {labels.titleImpact ?? "Title impact"} {Math.round(dm.title_swing * 100)}pp
-                  </span>
-                )}
-                {hasRelegImpact && dm && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded-md bg-parchment text-ink-muted">
-                    {labels.relegationImpact ?? "Relegation impact"} {Math.round((dm.relegation_swing ?? 0) * 100)}pp
+    <div>
+      <p className="mb-4 flex flex-wrap gap-4 text-[11px] font-bold uppercase tracking-wider text-stone-500" aria-hidden="true">
+        <span className="inline-flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: BAR.home }} />{pt ? "Vitória da casa" : "Home win"}</span>
+        <span className="inline-flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-sm border border-line" style={{ backgroundColor: BAR.draw }} />{pt ? "Empate" : "Draw"}</span>
+        <span className="inline-flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: BAR.away }} />{pt ? "Vitória de fora" : "Away win"}</span>
+      </p>
+      <ol className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {withSwings.map(({ fixture: f, swings }) => {
+          const home = teamDisplayName(f.home);
+          const away = teamDisplayName(f.away);
+          const when = formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed });
+          const isTop = matchOfTheWeek === f;
+          const body = (
+            <>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-semibold tabular-nums text-stone-500">
+                  {when || (pt ? `Jornada ${f.matchday}` : `Matchday ${f.matchday}`)}
+                  {when && !f.kickoffConfirmed && (pt ? " · horário por confirmar" : " · kickoff to be confirmed")}
+                </span>
+                {isTop && (
+                  <span className="rounded-md bg-ink px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-paper">
+                    {pt ? "Jogo da jornada" : "Match of the round"}
                   </span>
                 )}
               </div>
-            )}
-            {href && (
-              <span className="mt-1.5 inline-block text-[11px] font-bold uppercase tracking-wider text-stone-400 group-hover:text-stone-700 transition-colors">
-                {labels.matchPage ?? "Análise do jogo"}
-              </span>
-            )}
-          </>
-        );
-
-        return (
-          <div key={i} className={`min-w-0 border-b border-line pb-5 ${isMatchOfWeek ? 'pt-1' : ''}`}>
-            {isMatchOfWeek && (
-              <div className="text-[11px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 inline-flex items-center px-2 py-0.5 mb-2">
-                {labels.matchOfTheWeek ?? "Jogo da Jornada"}
+              <h3 className="flex items-center gap-2 text-base font-bold text-ink">
+                <i aria-hidden="true" className="h-4 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(f.home) }} />
+                <span className="min-w-0">{matchLabel(home, away)}</span>
+                <i aria-hidden="true" className="h-4 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(f.away) }} />
+              </h3>
+              <div aria-hidden="true" className="mt-2 flex h-3 w-full gap-[2px] overflow-hidden rounded-[4px]">
+                <span style={{ width: `${f.p_home * 100}%`, backgroundColor: BAR.home }} />
+                <span style={{ width: `${f.p_draw * 100}%`, backgroundColor: BAR.draw }} />
+                <span style={{ width: `${f.p_away * 100}%`, backgroundColor: BAR.away }} />
               </div>
-            )}
-            {href ? (
-              <Link
-                href={href}
-                locale={locale}
-                className="group block rounded-lg -mx-2 px-2 py-2 hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink transition-colors"
-                aria-label={`${teamDisplayName(match.home)} - ${teamDisplayName(match.away)}`}
-              >
-                {rowBody}
-              </Link>
-            ) : (
-              rowBody
-            )}
-          </div>
-        );
-      })}
+              <p className="mt-1.5 flex flex-wrap justify-between gap-x-3 text-xs text-stone-600 tabular-nums">
+                <span>{home}<span className="sr-only">{pt ? " ganha" : " win"}</span> <strong className="text-ink">{formatPercent(f.p_home, locale)}</strong></span>
+                <span>{pt ? "Empate" : "Draw"} <strong className="text-ink">{formatPercent(f.p_draw, locale)}</strong></span>
+                <span>{away}<span className="sr-only">{pt ? " ganha" : " win"}</span> <strong className="text-ink">{formatPercent(f.p_away, locale)}</strong></span>
+              </p>
+              <Stakes swings={swings} pt={pt} />
+              {f.href && (
+                <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-ink underline underline-offset-4">
+                  {pt ? "Análise do jogo" : "Match preview"} <span aria-hidden="true">→</span>
+                </span>
+              )}
+            </>
+          );
+          return (
+            <li key={`${f.matchday}-${f.home}-${f.away}`} className="min-w-0">
+              {f.href ? (
+                <Link
+                  href={f.href}
+                  locale={locale}
+                  className="block h-full rounded-2xl border border-line bg-cream p-4 transition-colors duration-150 hover:bg-parchment"
+                >
+                  {body}
+                </Link>
+              ) : (
+                <div className="h-full rounded-2xl border border-line bg-cream p-4">{body}</div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }

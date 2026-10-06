@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useId } from "react";
 import { useLocale } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
-import { ligaTeamColors, ligaTeamSlugs, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
+import { ligaTeamSlugs, teamColorOnPaper, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
+import { describePp, formatKickoffShort, formatPercent, formatPp, matchLabel } from "@/lib/football-format";
 import { Link } from "@/i18n/routing";
 import type { NextMatchdayScenarios, ScenarioData } from "@/types/football";
 
@@ -41,36 +42,14 @@ interface MatchdayPickerProps {
   };
 }
 
-function formatDelta(delta: number): string {
-  const pct = delta * 100;
-  if (Math.abs(pct) < 0.5) return "—";
-  const sign = pct > 0 ? "+" : "";
-  return `${sign}${Math.round(pct)} pp`;
+// One rule for every football figure (football-format.ts): whole numbers
+// from 10, one decimal below, U+2212 for minus (audit F16).
+function formatDelta(delta: number, locale: string): string {
+  return Math.abs(delta) < 0.0005 ? "—" : formatPp(delta, locale);
 }
 
-function formatPct(value: number): string {
-  const pct = value * 100;
-  if (pct > 99 && pct < 100) return ">99%";
-  if (pct < 1 && pct > 0) return "<1%";
-  return `${Math.round(pct)}%`;
-}
-
-// Same digit rule as formatClubPercent (one decimal below 10 pp, whole above)
-// so a small delta — e.g. Arouca's relegation odds moving from 2.29% to
-// 0.89% — reads as "-1,4 pp" instead of rounding to "—". Kept separate from
-// the shared `formatDelta` above (still Math.round-based) so this fix stays
-// scoped to the header line and "O meu próximo jogo" stakes card, and
-// doesn't change the detail table / title-race deltas below.
 function formatDeltaPrecise(delta: number, locale: Locale): string {
-  const pct = delta * 100;
-  if (Math.abs(pct) < 1e-9) return "—";
-  const digits = Math.abs(pct) < 10 ? 1 : 0;
-  const sign = pct > 0 ? "+" : "";
-  const formatted = new Intl.NumberFormat(locale === "pt" ? "pt-PT" : "en-GB", {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(pct);
-  return `${sign}${formatted} pp`;
+  return formatDelta(delta, locale);
 }
 
 interface RankedMatchTeams {
@@ -88,8 +67,8 @@ function matchOutcomeLabels(match: RankedMatchTeams, focusTeam: string, pt: bool
   const isHome = match.home_team === focusTeam;
   const isAway = match.away_team === focusTeam;
   if (isHome || isAway) {
-    const winLabel = pt ? `Se ${teamDisplayName(focusTeam)} ganhar` : `If ${teamDisplayName(focusTeam)} win`;
-    const loseLabel = pt ? `Se ${teamDisplayName(focusTeam)} perder` : `If ${teamDisplayName(focusTeam)} lose`;
+    const winLabel = pt ? `Se o ${teamDisplayName(focusTeam)} ganhar` : `If ${teamDisplayName(focusTeam)} win`;
+    const loseLabel = pt ? `Se o ${teamDisplayName(focusTeam)} perder` : `If ${teamDisplayName(focusTeam)} lose`;
     const winShort = pt ? "V" : "W";
     const loseShort = pt ? "D" : "L";
     return {
@@ -105,9 +84,9 @@ function matchOutcomeLabels(match: RankedMatchTeams, focusTeam: string, pt: bool
     home: pt ? `${teamDisplayName(match.home_team)} ganha` : `${teamDisplayName(match.home_team)} win`,
     draw: pt ? "Empate" : "Draw",
     away: pt ? `${teamDisplayName(match.away_team)} ganha` : `${teamDisplayName(match.away_team)} win`,
-    shortHome: teamDisplayName(match.home_team).charAt(0),
-    shortDraw: pt ? "E" : "D",
-    shortAway: teamDisplayName(match.away_team).charAt(0),
+    shortHome: "1",
+    shortDraw: "X",
+    shortAway: "2",
   };
 }
 
@@ -115,6 +94,19 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
   const locale = useLocale();
   const pt = locale !== "en";
   const localeCode: Locale = pt ? "pt" : "en";
+  const formatPct = (value: number) => formatPercent(value, locale);
+  const ids = useId();
+  // After a club is chosen the chooser unmounts; focus moves to the new
+  // view's heading instead of dropping to <body> (audit F-H7).
+  const viewHeadingRef = useRef<HTMLHeadingElement>(null);
+  const [focusPending, setFocusPending] = useState(false);
+  const [pendingTeam, setPendingTeam] = useState('');
+  useEffect(() => {
+    if (focusPending && viewHeadingRef.current) {
+      viewHeadingRef.current.focus();
+      setFocusPending(false);
+    }
+  }, [focusPending]);
   const [selections, setSelections] = useState<Record<number, Outcome | null>>(
     {}
   );
@@ -222,12 +214,30 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
     () => rankedMatches.filter(m => m.index !== myFixture?.index),
     [rankedMatches, myFixture],
   );
-  const visibleOtherMatches = showAll ? otherRankedMatches : otherRankedMatches.filter((item, i) => i < 3 || selections[item.index]);
   const supportedByIndex = useMemo(() => {
     const map = new Map<number, SupportedFixture>();
     for (const f of supportedFixtures) map.set(f.index, f);
     return map;
   }, [supportedFixtures]);
+  // Which games to show: the three that move this objective most (or all),
+  // listed in kickoff order with their Lisbon date (audit F-H4) — the
+  // spread picks the games, it never orders them.
+  const kickoffMs = (index: number) => {
+    const k = supportedByIndex.get(index)?.kickoff;
+    const ms = k ? Date.parse(k) : NaN;
+    return Number.isNaN(ms) ? Number.MAX_SAFE_INTEGER : ms;
+  };
+  const visibleOtherMatches = (showAll ? otherRankedMatches : otherRankedMatches.filter((item, i) => i < 3 || selections[item.index]))
+    .slice()
+    .sort((a, b) => kickoffMs(a.index) - kickoffMs(b.index) || a.index - b.index);
+  const chronologicalFixtures = useMemo(
+    () => [...supportedFixtures].sort((a, b) => {
+      const am = a.kickoff ? Date.parse(a.kickoff) : Number.MAX_SAFE_INTEGER;
+      const bm = b.kickoff ? Date.parse(b.kickoff) : Number.MAX_SAFE_INTEGER;
+      return am - bm || a.matchday - b.matchday || a.index - b.index;
+    }),
+    [supportedFixtures],
+  );
 
   if (!focusTeam) {
     // Before the mount effect has read the URL, render nothing rather than a
@@ -245,36 +255,56 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         <h2 className="mb-2 text-xl font-bold text-ink">{pt ? 'Escolhe uma equipa' : 'Choose a club'}</h2>
         <p className="mb-4 max-w-xl text-sm leading-relaxed text-ink-muted">
           {pt
-            ? 'Segue uma equipa para veres o que o teu próximo jogo muda no objetivo escolhido, e quais os outros jogos que mais pesam.'
-            : 'Follow a club to see what your next match changes for the chosen objective, and which other matches weigh most.'}
+            ? 'Segue uma equipa para veres o que o próximo jogo dela muda no objetivo escolhido, e quais os outros jogos que mais pesam.'
+            : 'Follow a club to see what its next match changes for the chosen objective, and which other matches weigh most.'}
         </p>
-        <select
-          value=""
-          onChange={e => e.target.value && setFocusTeam(e.target.value)}
-          className="mb-6 block min-h-11 w-full max-w-sm rounded-lg border border-line bg-paper px-2 text-sm text-ink"
+        <form
+          className="mb-6 flex flex-wrap items-end gap-2"
+          onSubmit={e => {
+            e.preventDefault();
+            if (!pendingTeam) return;
+            setFocusTeam(pendingTeam);
+            setFocusPending(true);
+          }}
         >
-          <option value="" disabled>
-            {pt ? 'Escolhe um clube' : 'Choose a club'}
-          </option>
-          {Object.keys(data.baseline)
-            .sort((a, b) => teamDisplayName(a).localeCompare(teamDisplayName(b), 'pt'))
-            .map(team => (
-              <option key={team} value={team}>
-                {teamDisplayName(team)}
+          <span className="flex min-w-0 max-w-sm flex-1 flex-col gap-1">
+            <label htmlFor={`${ids}-choose`} className="text-xs font-semibold text-ink-muted">{pt ? 'Equipa a seguir' : 'Club to follow'}</label>
+            <select
+              id={`${ids}-choose`}
+              value={pendingTeam}
+              onChange={e => setPendingTeam(e.target.value)}
+              className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm"
+            >
+              <option value="" disabled>
+                {pt ? 'Escolhe um clube' : 'Choose a club'}
               </option>
-            ))}
-        </select>
+              {Object.keys(data.baseline)
+                .sort((a, b) => teamDisplayName(a).localeCompare(teamDisplayName(b), 'pt'))
+                .map(team => (
+                  <option key={team} value={team}>
+                    {teamDisplayName(team)}
+                  </option>
+                ))}
+            </select>
+          </span>
+          <button type="submit" disabled={!pendingTeam} className="min-h-11 rounded-[10px] bg-ink px-4 text-sm font-semibold text-paper disabled:opacity-50">
+            {pt ? 'Seguir' : 'Follow'}
+          </button>
+        </form>
 
-        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-3">
-          {pt ? 'Todos os jogos incluídos nesta previsão' : 'Every fixture in this forecast'}
-        </div>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-3">
+          {pt ? 'Todos os jogos incluídos nesta previsão, por ordem de início' : 'Every fixture in this forecast, in kickoff order'}
+        </h3>
         <ul className="space-y-1">
-          {supportedFixtures.map(f => (
+          {chronologicalFixtures.map(f => (
             <li key={f.index} className="flex flex-wrap items-center justify-between gap-2 border-b border-line/60 py-2 text-sm text-ink">
               <span>
-                {teamDisplayName(f.home)} — {teamDisplayName(f.away)}
+                {f.kickoff && (
+                  <span className="mr-2 text-xs tabular-nums text-stone-500">{formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed })}</span>
+                )}
+                {matchLabel(teamDisplayName(f.home), teamDisplayName(f.away))}
                 {f.postponed && (
-                  <span className="ml-2 text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                  <span className="ml-2 rounded bg-parchment px-1 text-[11px] font-bold uppercase tracking-wider text-stone-600">
                     {pt ? 'jogo em atraso' : 'postponed'}
                   </span>
                 )}
@@ -300,10 +330,13 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-      <section aria-label={pt?'A tua pergunta':'Your question'} className="sticky top-[66px] z-20 col-span-full rounded-xl border border-line bg-cream p-3 shadow-sm md:p-5">
+      <h2 ref={viewHeadingRef} tabIndex={-1} className="col-span-full text-2xl tracking-tight">
+        {pt ? `${teamDisplayName(focusTeam)}: o que muda na próxima jornada?` : `${teamDisplayName(focusTeam)}: what changes in the next round?`}
+      </h2>
+      <section aria-label={pt?'A tua pergunta':'Your question'} className="sticky top-[66px] z-20 col-span-full rounded-2xl border border-line bg-cream p-3 md:p-5">
         <div className="flex flex-wrap items-end gap-3">
-          <label className="min-w-0 flex-1 text-xs font-semibold text-ink-muted">{pt?'Segue uma equipa':'Follow a team'}<select value={focusTeam} onChange={e=>setFocusTeam(e.target.value)} className="mt-1 block min-h-11 w-full rounded-lg border border-line bg-paper px-2 text-sm text-ink">{Object.keys(data.baseline).sort((a,b)=>teamDisplayName(a).localeCompare(teamDisplayName(b),'pt')).map(team=><option key={team} value={team}>{teamDisplayName(team)}</option>)}</select></label>
-          <label className="min-w-0 flex-1 text-xs font-semibold text-ink-muted">{pt?'O que queres saber?':'What matters to you?'}<select value={objective} onChange={e=>setObjective(e.target.value as typeof objective)} className="mt-1 block min-h-11 w-full rounded-lg border border-line bg-paper px-2 text-sm text-ink"><option value="p_champion">{pt?'Ganhar o título':'Win the title'}</option><option value="p_relegation">{pt?'Despromoção':'Relegation'}</option></select></label>
+          <span className="flex min-w-0 flex-1 flex-col gap-1"><label htmlFor={`${ids}-team`} className="text-xs font-semibold text-ink-muted">{pt?'Equipa a seguir':'Club to follow'}</label><select id={`${ids}-team`} value={focusTeam} onChange={e=>setFocusTeam(e.target.value)} className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm">{Object.keys(data.baseline).sort((a,b)=>teamDisplayName(a).localeCompare(teamDisplayName(b),'pt')).map(team=><option key={team} value={team}>{teamDisplayName(team)}</option>)}</select></span>
+          <span className="flex min-w-0 flex-1 flex-col gap-1"><label htmlFor={`${ids}-goal`} className="text-xs font-semibold text-ink-muted">{pt?'O que queres saber?':'What matters to you?'}</label><select id={`${ids}-goal`} value={objective} onChange={e=>setObjective(e.target.value as typeof objective)} className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm"><option value="p_champion">{pt?'Ganhar o título':'Win the title'}</option><option value="p_relegation">{pt?'Despromoção':'Relegation'}</option></select></span>
           <p aria-live="polite" aria-atomic="true" className="basis-full text-sm leading-relaxed text-ink md:basis-auto"><strong>{teamDisplayName(focusTeam)}</strong> · {pt?'Base':'Baseline'} {formatClubPercent(focalBaseline, localeCode)} → <strong>{hasSelections?(pt?'Com a escolha':'With the choice'):(pt?'Sem escolha':'No selection')} {formatClubPercent(focalCurrent, localeCode)}</strong>{hasSelections&&` (${formatDeltaPrecise(focalCurrent - focalBaseline, localeCode)})`}</p>
         </div>
       </section>
@@ -322,9 +355,9 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           shown with all three outcomes, team-labelled, no click required
           (diagnosis §5/9 "Simulator"). */}
       <div className="col-span-full rounded-2xl border border-line bg-cream p-5 md:p-6">
-        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-3">
-          {pt ? 'O meu próximo jogo' : 'My next match'}
-        </div>
+        <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-3">
+          {pt ? `O próximo jogo do ${teamDisplayName(focusTeam)}` : `${teamDisplayName(focusTeam)}'s next match`}
+        </h3>
         {!myFixture && (
           <p className="text-sm leading-relaxed text-ink-muted">
             {pt
@@ -340,18 +373,18 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         {myFixture && myStakes && myWinOutcome && myLossOutcome && (
           <>
             <p className="mb-3 text-sm text-ink">
-              <strong>{teamDisplayName(myFixture.home)}</strong> — <strong>{teamDisplayName(myFixture.away)}</strong>
+              <strong>{matchLabel(teamDisplayName(myFixture.home), teamDisplayName(myFixture.away))}</strong>
               {myFixtureStatus && <span className="text-ink-muted"> · {myFixtureStatus.label}</span>}
             </p>
             <div className="grid gap-2 sm:grid-cols-4">
               <div className="rounded-lg border border-line bg-paper p-3">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">{pt ? 'Agora' : 'Now'}</div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Agora' : 'Now'}</div>
                 <div className="mt-1 text-lg font-bold tabular-nums text-ink">{formatClubPercent(myStakes.baseline, localeCode)}</div>
               </div>
               {([
-                { outcome: myWinOutcome, label: pt ? `Se ${teamDisplayName(focusTeam)} ganhar` : `If ${teamDisplayName(focusTeam)} win`, value: myStakes.win },
+                { outcome: myWinOutcome, label: pt ? `Se o ${teamDisplayName(focusTeam)} ganhar` : `If ${teamDisplayName(focusTeam)} win`, value: myStakes.win },
                 { outcome: 'D' as Outcome, label: pt ? 'Se empatar' : 'If they draw', value: myStakes.draw },
-                { outcome: myLossOutcome, label: pt ? `Se ${teamDisplayName(focusTeam)} perder` : `If ${teamDisplayName(focusTeam)} lose`, value: myStakes.loss },
+                { outcome: myLossOutcome, label: pt ? `Se o ${teamDisplayName(focusTeam)} perder` : `If ${teamDisplayName(focusTeam)} lose`, value: myStakes.loss },
               ]).map(row => {
                 const active = selections[myFixture.index] === row.outcome;
                 return (
@@ -366,7 +399,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                       backgroundColor: active ? '#234c40' : 'var(--color-paper, #fff)',
                     }}
                   >
-                    <div className={`text-[11px] font-bold uppercase tracking-wider ${active ? 'text-cream' : 'text-stone-400'}`}>{row.label}</div>
+                    <div className={`text-[11px] font-bold uppercase tracking-wider ${active ? 'text-cream' : 'text-stone-500'}`}>{row.label}</div>
                     <div className={`mt-1 text-lg font-bold tabular-nums ${active ? 'text-cream' : 'text-ink'}`}>{formatClubPercent(row.value, localeCode)}</div>
                     <div className={`text-[11px] tabular-nums ${active ? 'text-cream/80' : 'text-ink-muted'}`}>{formatDeltaPrecise(row.value - myStakes.baseline, localeCode)}</div>
                   </button>
@@ -382,9 +415,9 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           and not by date (diagnosis §5/9 "Simulator"). */}
       <div className="min-w-0 rounded-2xl border border-line bg-cream p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
             {pt ? 'Outros jogos que afetam este objetivo' : 'Other matches that affect this objective'}
-          </div>
+          </h3>
           {hasSelections && (
             <button
               onClick={resetAll}
@@ -395,7 +428,9 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           )}
         </div>
 
-        <p className="mb-3 text-sm leading-relaxed text-ink-muted">{pt?'Ordenados pela diferença entre vitória, empate e derrota — não é uma pontuação de importância causal, nem ordem cronológica.':'Ordered by the spread between win, draw and loss — not a causal importance score, and not chronological.'}</p>
+        <p className="mb-3 text-sm leading-relaxed text-ink-muted">{showAll
+          ? (pt ? 'Todos os jogos, por ordem de início (hora de Lisboa).' : 'Every match, in kickoff order (Lisbon time).')
+          : (pt ? `Os três jogos cujo resultado mais mexe nas contas do ${teamDisplayName(focusTeam)}, por ordem de início (hora de Lisboa).` : `The three matches whose result moves ${teamDisplayName(focusTeam)}'s chances most, in kickoff order (Lisbon time).`)}</p>
         <div className="space-y-1">
           {visibleOtherMatches.map(({match, index:idx, swing}) => {
             const meta = supportedByIndex.get(idx);
@@ -409,14 +444,15 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 key={idx}
                 className="grid grid-cols-2 items-center gap-3 py-4 border-b border-line last:border-b-0 sm:flex sm:flex-wrap sm:gap-2"
               >
-                <div className="order-0 col-span-2 flex items-center justify-between gap-3 text-[11px] text-ink-muted">
+                <div className="order-0 col-span-2 flex flex-wrap items-center sm:w-full justify-between gap-3 text-[11px] text-ink-muted">
                   <span>
+                    {meta?.kickoff && <span className="font-semibold tabular-nums">{formatKickoffShort(meta.kickoff, locale, { confirmed: meta.kickoffConfirmed })} · </span>}
                     {meta && (pt ? `Jornada ${meta.matchday}` : `Matchday ${meta.matchday}`)}
                     {meta?.postponed && (
-                      <span className="ml-1.5 font-bold uppercase tracking-wider text-amber-700">{pt ? '· jogo em atraso' : '· postponed'}</span>
+                      <span className="ml-1.5 font-bold uppercase tracking-wider text-stone-600">{pt ? '· jogo em atraso' : '· postponed'}</span>
                     )}
                     {meta && ' · '}
-                    {pt ? 'Diferença entre desfechos' : 'Difference between outcomes'}: {(swing*100).toLocaleString(pt?'pt-PT':'en-GB',{maximumFractionDigits:1})} pp
+                    {pt ? 'Diferença entre desfechos' : 'Difference between outcomes'}: {formatPp(swing, locale).replace('+', '')}
                   </span>
                   {matchHrefs[`${match.home_team}|${match.away_team}`] && <Link href={matchHrefs[`${match.home_team}|${match.away_team}`]} locale={locale} className="font-semibold text-ink underline underline-offset-2">{pt?'Ver jogo':'Match preview'}</Link>}
                 </div>
@@ -437,7 +473,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                   <button
                     onClick={() => toggleSelection(idx, "H")}
                     aria-pressed={selected === "H"}
-                    aria-label={`${match.home_team} — ${match.away_team}: ${outcomeLabels.home}`}
+                    aria-label={`${matchLabel(teamDisplayName(match.home_team), teamDisplayName(match.away_team))}: ${outcomeLabels.home}`}
                     className="h-12 flex-1 sm:w-11 sm:flex-none rounded-lg text-[12px] font-bold transition-colors duration-150"
                     style={{
                       backgroundColor:
@@ -454,7 +490,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                   <button
                     onClick={() => toggleSelection(idx, "D")}
                     aria-pressed={selected === "D"}
-                    aria-label={`${match.home_team} — ${match.away_team}: ${outcomeLabels.draw}`}
+                    aria-label={`${matchLabel(teamDisplayName(match.home_team), teamDisplayName(match.away_team))}: ${outcomeLabels.draw}`}
                     className="h-12 flex-1 sm:w-11 sm:flex-none rounded-lg text-[12px] font-bold transition-colors duration-150"
                     style={{
                       backgroundColor:
@@ -471,7 +507,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                   <button
                     onClick={() => toggleSelection(idx, "A")}
                     aria-pressed={selected === "A"}
-                    aria-label={`${match.home_team} — ${match.away_team}: ${outcomeLabels.away}`}
+                    aria-label={`${matchLabel(teamDisplayName(match.home_team), teamDisplayName(match.away_team))}: ${outcomeLabels.away}`}
                     className="h-12 flex-1 sm:w-11 sm:flex-none rounded-lg text-[12px] font-bold transition-colors duration-150"
                     style={{
                       backgroundColor:
@@ -512,9 +548,9 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
       {/* Right: Probability impact */}
       <div className="min-w-0 rounded-2xl border border-line bg-cream p-5 md:p-6">
         <div className="mb-5 rounded-xl bg-paper p-4">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400">{pt ? 'A resposta para a tua equipa' : 'Your team’s answer'}</p>
-          <p className="mt-1 text-sm text-ink"><strong>{teamDisplayName(focusTeam)}</strong> · {objective === 'p_champion' ? (pt ? 'ganhar o título' : 'win the title') : (pt ? 'descer de divisão' : 'be relegated')}</p>
-          {selectedFixture && selectedOutcome ? <p className="mt-2 text-sm leading-relaxed text-ink-muted">{teamDisplayName(selectedFixture.home_team)} {selectedOutcome === 'H' ? (pt ? 'vence' : 'win') : selectedOutcome === 'D' ? (pt ? 'empata com' : 'draw') : (pt ? 'perde para' : 'lose to')} {teamDisplayName(selectedFixture.away_team)}: <strong className="text-ink">{formatPct(focalCurrent)}</strong> ({formatDelta(focalCurrent - focalBaseline)} {pt ? 'face à base' : 'from baseline'}).</p> : <p className="mt-2 text-sm leading-relaxed text-ink-muted">{pt ? 'Escolhe vitória caseira, empate ou vitória visitante para comparar cada desfecho com a previsão de base.' : 'Choose a home win, draw or away win to compare that outcome with the baseline forecast.'}</p>}
+          <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'A resposta para a equipa que segues' : 'The answer for your club'}</p>
+          <p className="mt-1 text-sm text-ink"><strong>{teamDisplayName(focusTeam)}</strong> · {objective === 'p_champion' ? (pt ? 'ganhar o título' : 'win the title') : (pt ? 'despromoção' : 'relegation')}</p>
+          {selectedFixture && selectedOutcome ? <p className="mt-2 text-sm leading-relaxed text-ink-muted">{teamDisplayName(selectedFixture.home_team)} {selectedOutcome === 'H' ? (pt ? 'vence' : 'win') : selectedOutcome === 'D' ? (pt ? 'empata com' : 'draw') : (pt ? 'perde para' : 'lose to')} {teamDisplayName(selectedFixture.away_team)}: <strong className="text-ink">{formatPct(focalCurrent)}</strong> ({formatDelta(focalCurrent - focalBaseline, locale)} {pt ? 'face à base' : 'from baseline'}).</p> : <p className="mt-2 text-sm leading-relaxed text-ink-muted">{pt ? 'Escolhe vitória caseira, empate ou vitória visitante para comparar cada desfecho com a previsão de base.' : 'Choose a home win, draw or away win to compare that outcome with the baseline forecast.'}</p>}
         </div>
         <div className="mb-5 flex flex-wrap gap-x-4 gap-y-2 border-b border-line pb-4 text-xs text-ink-muted">
           <span>{pt ? 'Probabilidade · escala 0–100%' : 'Probability · 0–100% scale'}</span>
@@ -527,7 +563,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         {/* Title race */}
         {titleTeams.length > 0 && (
           <div className="mb-6">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-3">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-3">
               {labels.impactOnTitle}
             </div>
             <div className="space-y-2">
@@ -535,7 +571,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 const base = data.baseline[team];
                 const current = probabilities[team];
                 const delta = current.p_champion - base.p_champion;
-                const teamColor = ligaTeamColors[team] || "#5f7062";
+                const teamColor = teamColorOnPaper(team);
 
                 return (
                   <div key={team} className="scenario-probability-row flex items-center gap-2 border-b border-line/50 py-2 last:border-0">
@@ -579,13 +615,14 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                           <span
                             className={`text-[11px] font-bold tabular-nums ${
                               delta > 0.005
-                                ? "text-emerald-600"
+                                ? "text-emerald-700"
                                 : delta < -0.005
-                                ? "text-red-600"
-                                : "text-stone-400"
+                                ? "text-red-700"
+                                : "text-stone-500"
                             }`}
                           >
-                            {formatDelta(delta)}
+                            <span aria-hidden="true">{formatDelta(delta, locale)}</span>
+                            <span className="sr-only">{describePp(delta, locale)}</span>
                           </span>
                         </motion.div>
                       )}
@@ -600,7 +637,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         {/* Relegation */}
         {relegationTeams.length > 0 && (
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-3">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-3">
               {labels.impactOnRelegation}
             </div>
             <div className="space-y-2">
@@ -608,7 +645,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 const base = data.baseline[team];
                 const current = probabilities[team];
                 const delta = current.p_relegation - base.p_relegation;
-                const teamColor = ligaTeamColors[team] || "#5f7062";
+                const teamColor = teamColorOnPaper(team);
 
                 return (
                   <div key={team} className="scenario-probability-row flex items-center gap-2 border-b border-line/50 py-2 last:border-0">
@@ -649,13 +686,14 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                           <span
                             className={`text-[11px] font-bold tabular-nums ${
                               delta > 0.005
-                                ? "text-red-600"
+                                ? "text-red-700"
                                 : delta < -0.005
-                                ? "text-emerald-600"
-                                : "text-stone-400"
+                                ? "text-emerald-700"
+                                : "text-stone-500"
                             }`}
                           >
-                            {formatDelta(delta)}
+                            <span aria-hidden="true">{formatDelta(delta, locale)}</span>
+                            <span className="sr-only">{describePp(delta, locale)}</span>
                           </span>
                         </motion.div>
                       )}
@@ -692,6 +730,8 @@ function SimulatedTable({
   hasSelections: boolean;
   labels: MatchdayPickerProps["labels"];
 }) {
+  const locale = useLocale();
+  const formatPct = (value: number) => formatPercent(value, locale);
   const sorted = useMemo(() => {
     return Object.entries(probabilities)
       .sort((a, b) => {
@@ -704,7 +744,7 @@ function SimulatedTable({
 
   return (
     <div className="col-span-1 lg:col-span-2 mt-8 border-t border-stone-200 pt-8">
-      <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-4">
+      <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-4">
         {labels.simulatedStandings}
       </div>
       <div className="overflow-x-auto">
@@ -725,7 +765,7 @@ function SimulatedTable({
               const relegDelta = probs.p_relegation - base.p_relegation;
               const isRelegationZone = i >= sorted.length - 3;
               const isChampionZone = i < 3;
-              const teamColor = ligaTeamColors[team] || "#5f7062";
+              const teamColor = teamColorOnPaper(team);
 
               return (
                 <motion.tr
@@ -736,7 +776,7 @@ function SimulatedTable({
                     isRelegationZone ? "bg-red-50/40" : isChampionZone ? "bg-stone-50" : ""
                   }`}
                 >
-                  <td className="py-2 pr-2 text-stone-400 tabular-nums">{i + 1}</td>
+                  <td className="py-2 pr-2 text-stone-500 tabular-nums">{i + 1}</td>
                   <td className="py-2 pr-4">
                     <div className="flex items-center gap-2">
                       {teamLogoSrc(team) ? (
@@ -779,19 +819,22 @@ function DeltaCell({
   bold?: boolean;
   danger?: boolean;
 }) {
+  const locale = useLocale();
+  const formatPct = (v: number) => formatPercent(v, locale);
   const showDelta = hasSelections && Math.abs(delta * 100) >= 0.5;
   const deltaColor = danger
-    ? delta > 0.005 ? "text-red-600" : delta < -0.005 ? "text-emerald-600" : "text-stone-400"
-    : delta > 0.005 ? "text-emerald-600" : delta < -0.005 ? "text-red-600" : "text-stone-400";
+    ? delta > 0.005 ? "text-red-700" : delta < -0.005 ? "text-emerald-700" : "text-stone-500"
+    : delta > 0.005 ? "text-emerald-700" : delta < -0.005 ? "text-red-700" : "text-stone-500";
 
   return (
     <span className="inline-flex items-center gap-1 justify-end">
-      <span className={bold ? (danger ? "font-semibold text-red-700" : "font-semibold") : danger && value > 0 ? "text-red-600" : "text-stone-400"}>
+      <span className={bold ? (danger ? "font-semibold text-red-700" : "font-semibold") : danger && value > 0 ? "text-red-700" : "text-stone-500"}>
         {formatPct(value)}
       </span>
       {showDelta && (
         <span className={`text-[11px] font-bold ${deltaColor}`}>
-          {formatDelta(delta)}
+          <span aria-hidden="true">{formatDelta(delta, locale)}</span>
+          <span className="sr-only">{describePp(delta, locale)}</span>
         </span>
       )}
     </span>

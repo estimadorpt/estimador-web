@@ -10,6 +10,7 @@
 // only switches between pre-rounded, pre-linked answers.
 
 import type { LigaPrediction, ScenarioData } from '@/types/football';
+import { formatPercent } from '@/lib/football-format';
 import {
   clubStakes,
   fixtureStatus,
@@ -186,13 +187,9 @@ export function buildClubOutlooks(
  * rounds to the same "2%"/"1%"/"2%"/"2%". `value` is a raw 0–1 fraction.
  */
 export function formatClubPercent(value: number, locale: Locale): string {
-  const pct = value * 100;
-  const digits = pct < 10 ? 1 : 0;
-  const formatted = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(pct);
-  return `${formatted}%`;
+  // The one football percentage rule (football-format.ts), so a club's
+  // figure reads the same here, in the league table and on the hub (F16).
+  return formatPercent(value, locale);
 }
 
 export interface PositionSpread {
@@ -209,6 +206,8 @@ export interface PositionSpread {
    * modalPosition on both ends when `broad` is false. */
   rangeStart: number;
   rangeEnd: number;
+  /** Raw 0–1 probability of finishing anywhere in rangeStart..rangeEnd. */
+  rangeProb: number;
 }
 
 /**
@@ -228,10 +227,11 @@ export function positionSpread(probs: number[]): PositionSpread | null {
   const modalProb = probs[modalIndex];
   if (modalProb <= 0) return null;
 
-  // A neighbour "has similar support" when it carries at least half of the
-  // modal position's own probability; the range extends outward from the
-  // mode while that holds, contiguously.
-  const threshold = modalProb / 2;
+  // A neighbour "has similar support" when it carries at least two thirds
+  // of the modal position's own probability; the range extends outward from
+  // the mode while that holds, contiguously. Half was too loose: it called
+  // Porto's 51% first and 29% second "similar support" (audit F13).
+  const threshold = (modalProb * 2) / 3;
   let start = modalIndex;
   let end = modalIndex;
   while (start > 0 && probs[start - 1] >= threshold) start--;
@@ -243,5 +243,6 @@ export function positionSpread(probs: number[]): PositionSpread | null {
     broad: end > start,
     rangeStart: start + 1,
     rangeEnd: end + 1,
+    rangeProb: probs.slice(start, end + 1).reduce((a, b) => a + b, 0),
   };
 }

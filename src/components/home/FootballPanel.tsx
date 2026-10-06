@@ -8,7 +8,7 @@ import type { TeamDelta } from '@/types/football';
 import { HomePanel, Kicker } from './HomePanel';
 import { FootballClubPicker } from './FootballClubPicker';
 import { TitleProbabilities } from '@/components/football/TitleProbabilities';
-import { formatLongDate } from '@/lib/football-format';
+import { forecastStatusLine } from '@/lib/football-status';
 
 export interface FootballSnapshot {
   matchday: number;
@@ -32,8 +32,27 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
     snapshot ? loadLigaData() : Promise.resolve({ prediction: null, scenarios: null }),
     snapshot ? loadGameFixtures() : Promise.resolve(null),
   ]);
-  const date = snapshot?.timestamp ? formatLongDate(snapshot.timestamp, locale) : '';
   const rail = variant === 'secondary';
+  // "Depois da jornada 7 · atualizado a 25 set. · próxima atualização após a
+  // jornada 8 (9–12 out.)": the same dated line as the Liga page, so the
+  // forecast date never reads like a match date (audit CL-M4).
+  const prediction = latest.prediction;
+  const inProgress = Boolean(prediction?.matches_remaining?.length);
+  const nextRound = prediction ? (inProgress ? prediction.matchday : (prediction.next_matchday?.matchday ?? null)) : null;
+  const statusLine = snapshot?.timestamp
+    ? forecastStatusLine(
+        {
+          matchday: snapshot.matchday,
+          timestamp: snapshot.timestamp,
+          inProgress,
+          nextRound,
+          nextRoundKickoffs: (gameFixtures?.matchdays ?? [])
+            .filter((md) => md.matchday === nextRound)
+            .flatMap((md) => md.fixtures.filter((f) => f.home_goals == null).map((f) => f.kickoff)),
+        },
+        locale,
+      )
+    : '';
   const outlooks = latest.prediction
     ? buildClubOutlooks(locale === 'pt' ? 'pt' : 'en', latest.prediction, latest.scenarios, gameFixtures)
     : [];
@@ -56,7 +75,7 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
             {t('footballTitle')}
           </h2>
           {snapshot ? (
-            <p className="mt-1 text-[13px] font-semibold text-stone-600">{t('footballDate', { matchday: snapshot.matchday, date })}</p>
+            <p className="mt-1 text-[13px] font-semibold text-stone-600">{statusLine}</p>
           ) : (
             <p className="mt-2 text-[15px] leading-relaxed text-stone-600">{t('footballUnavailable')}</p>
           )}

@@ -8,14 +8,16 @@ import {
   loadUpcomingFixtures,
 } from "@/lib/utils/football-data-loader";
 import { teamDisplayName } from "@/lib/config/football";
-import { formatInteger, formatLongDate, formatSigned } from "@/lib/football-format";
+import { formatDateSpan, formatInteger, formatLongDate, formatPp } from "@/lib/football-format";
+import { forecastStatusLine } from "@/lib/football-status";
 import { evaluatesCurrentModel } from "@/lib/football-scorecard";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
+import { DataCard } from "@/components/viz/DataCard";
 import { LeagueTable, ClubChooser } from "@/components/charts/football/LeagueTable";
 import type { PointsInterval } from "@/components/charts/football/LeagueTable";
-import { MatchdayPredictions } from "@/components/charts/football/MatchdayPredictions";
+import { MatchdayPredictions, type MatchdayFixture } from "@/components/charts/football/MatchdayPredictions";
 import { TitleRaceChart } from "@/components/charts/football/TitleRaceChart";
 import { RelegationChart } from "@/components/charts/football/RelegationChart";
 import { TeamStrengthRatings } from "@/components/charts/football/TeamStrengthRatings";
@@ -64,24 +66,25 @@ export default async function LigaPage({
       loadLigaMarketScorecard(),
     ]);
 
-  // Fixture row → match page. Rows without a generated page stay unlinked.
-  const matchHrefs: Record<string, string> = Object.fromEntries(
-    upcomingFixtures.map(f => [
-      `${f.home}|${f.away}`,
-      `/desporto/liga/jogo/${f.slug}`,
-    ]),
-  );
-
-  // Fixtures with published 1X2, for the in-progress-matchday list
-  const upcomingWithProbs = upcomingFixtures
+  // Every fixture still to play that carries a published 1X2, with its own
+  // kickoff (game_fixtures.json), conditionals and match page: the round in
+  // progress and the next one alike (audit F-H4).
+  const fixtureCards: MatchdayFixture[] = upcomingFixtures
     .filter(f => f.p_home != null && f.p_draw != null && f.p_away != null)
     .map(f => ({
       home: f.home,
       away: f.away,
+      matchday: f.matchday,
+      kickoff: f.kickoff,
+      kickoffConfirmed: f.kickoffConfirmed,
       p_home: f.p_home as number,
       p_draw: f.p_draw as number,
       p_away: f.p_away as number,
+      scenario: f.scenario,
+      href: `/desporto/liga/jogo/${f.slug}`,
     }));
+  const cardRounds = Array.from(new Set(fixtureCards.map(f => f.matchday))).sort((a, b) => a - b);
+  const cardSpan = formatDateSpan(fixtureCards.map(f => f.kickoff), locale);
 
   if (!prediction) {
     return (
@@ -146,9 +149,28 @@ export default async function LigaPage({
   const factualChange =
     biggestMover && Math.abs(biggestMover.p_champion_delta) >= 1
       ? locale === "pt"
-        ? `${teamDisplayName(biggestMover.team)} ${formatSigned(Math.round(biggestMover.p_champion_delta), locale, 0)} pp no título desde a última jornada`
-        : `${teamDisplayName(biggestMover.team)} ${formatSigned(Math.round(biggestMover.p_champion_delta), locale, 0)} pp on the title since last matchday`
+        ? `${teamDisplayName(biggestMover.team)} ${formatPp(biggestMover.p_champion_delta / 100, locale)} no título desde a jornada anterior`
+        : `${teamDisplayName(biggestMover.team)} ${formatPp(biggestMover.p_champion_delta / 100, locale)} on the title since the previous matchday`
       : null;
+
+  // "Depois da jornada 7 · atualizado a 25 set. · próxima atualização após a
+  // jornada 8 (9–12 out.)", every part from the data (audit CL-11, CL-M4).
+  const nextRound = matchdayComplete ? (prediction.next_matchday?.matchday ?? null) : prediction.matchday;
+  const statusLine = forecastStatusLine(
+    {
+      matchday: prediction.matchday,
+      timestamp: prediction.timestamp,
+      inProgress: !matchdayComplete,
+      nextRound,
+      nextRoundKickoffs: upcomingFixtures.filter(f => f.matchday === nextRound).map(f => f.kickoff),
+    },
+    locale,
+  );
+  const sourceLine = locale === "pt"
+    ? `Fonte: modelo estimador.pt, ${simsLabel} simulações do resto da época`
+    : `Source: estimador.pt model, ${simsLabel} simulations of the rest of the season`;
+  const updatedLine = locale === "pt" ? `Atualizado a ${updatedDate}` : `Updated ${updatedDate}`;
+  const methodLabel = locale === "pt" ? "Como funciona o modelo" : "How the model works";
 
   const allTeams = prediction.table.map(t => t.team);
 
@@ -178,8 +200,8 @@ export default async function LigaPage({
         eyebrow={`${t("football.title")} — ${t("football.season")} ${prediction.season}`}
         title={t("football.subtitle")}
         lede={locale === "pt"
-          ? "Explora os dados, simula cenários e acompanha o que ainda pode acontecer."
-          : "Explore the data, simulate scenarios and follow what can still happen."}
+          ? `Quem fica com o título, quem acaba nos três primeiros e quem desce: as hipóteses de cada clube em ${simsLabel} simulações do resto da época, atualizadas depois de cada jornada.`
+          : `Who takes the title, who finishes in the top three and who goes down: each club's chances across ${simsLabel} simulations of the rest of the season, updated after every matchday.`}
         actions={
           <ClubChooser
             teams={allTeams}
@@ -189,7 +211,7 @@ export default async function LigaPage({
         }
         meta={
           <span>
-            {t("football.matchday")} {prediction.matchday} · {t("football.updated")} {updatedDate}
+            {statusLine}
             {factualChange ? ` · ${factualChange}` : ""}
           </span>
         }
@@ -198,7 +220,7 @@ export default async function LigaPage({
       {/* Key stats — top 3 championship probabilities */}
       <section className="border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-4">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-4">
             {t("football.championshipProbability")}
           </div>
           <TitleProbabilities teams={[leader, second, third]} deltas={deltas} locale={locale} />
@@ -208,74 +230,35 @@ export default async function LigaPage({
             className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-ink underline underline-offset-4"
           >
             {locale === "pt" ? "Como se compara o modelo com o mercado?" : "How does the model compare with the market?"}
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />
           </Link>
         </div>
       </section>
 
-      {/* Next relevant fixtures and their stakes — moved up ahead of the
-          table (diagnosis §5/9/12: "reading the outlook" and finding what's
-          next are the first tasks, not specialist analyses). */}
-      {!matchdayComplete && upcomingWithProbs.length > 0 && (
-        <section className="border-b border-stone-200">
+      {/* The games to come, in kickoff order with Lisbon dates and times,
+          ahead of the table (reading the outlook and finding what's next are
+          the first tasks). Each card's stakes come from its own published
+          conditionals (audit F-H4). */}
+      {fixtureCards.length > 0 && (
+        <section className="border-b border-stone-200" aria-labelledby="liga-next-round">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
-              {locale === "en" ? "Fixtures to come" : "Jogos por disputar"}
+            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+              {matchdayComplete ? t("football.nextMatchday") : (locale === "en" ? "Fixtures to come" : "Jogos por disputar")}
+            </p>
+            <h2 id="liga-next-round" className="text-2xl tracking-tight mb-1">
+              {cardRounds.length === 1
+                ? `${t("football.matchday")} ${cardRounds[0]}`
+                : locale === "en"
+                  ? `Matchdays ${cardRounds.slice(0, -1).join(", ")} and ${cardRounds[cardRounds.length - 1]}`
+                  : `Jornadas ${cardRounds.slice(0, -1).join(", ")} e ${cardRounds[cardRounds.length - 1]}`}
+              {cardSpan ? ` · ${cardSpan}` : ""}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
+            <p className="text-sm text-stone-500 mb-6 max-w-3xl">
               {locale === "en"
-                ? "What is left of this matchday, then the next one. Open a fixture for the full preview."
-                : "O que falta desta jornada e a jornada seguinte. Abre um jogo para a análise completa."}
+                ? "In kickoff order, Lisbon time. Under each match, the club whose title or relegation chances its result moves most, and the gap between that club's best and worst of the three results, in percentage points."
+                : "Por ordem de início, hora de Lisboa. Em cada jogo, o clube cujas hipóteses de título ou de despromoção o resultado mais mexe, e a distância entre o melhor e o pior dos três resultados para esse clube, em pontos percentuais."}
             </p>
-            <MatchdayPredictions
-              matches={upcomingWithProbs}
-              matchday={prediction.matchday}
-              labels={{
-                home: t("football.home"),
-                draw: t("football.draw"),
-                away: t("football.away"),
-                titleImpact: t("football.titleImpact"),
-                relegationImpact: t("football.relegationImpact"),
-                matchPage: locale === "en" ? "Match preview" : "Análise do jogo",
-              }}
-              decisiveMatches={scenarios?.decisive_matches}
-              matchHrefs={matchHrefs}
-              locale={locale}
-            />
-          </div>
-        </section>
-      )}
-
-      {matchdayComplete && (
-        <section className="border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
-              {t("football.nextMatchday")} — {t("football.matchday")}{" "}
-              {prediction.next_matchday.matchday}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.nextMatchdayDescription", {
-                matchday: prediction.next_matchday.matchday,
-              })}
-            </p>
-            <MatchdayPredictions
-              matches={prediction.next_matchday.matches}
-              matchday={prediction.next_matchday.matchday}
-              labels={{
-                home: t("football.home"),
-                draw: t("football.draw"),
-                away: t("football.away"),
-                titleImpact: t("football.titleImpact"),
-                relegationImpact: t("football.relegationImpact"),
-                matchOfTheWeek: t("football.matchOfTheWeek"),
-                matchPage: locale === "en" ? "Match preview" : "Análise do jogo",
-              }}
-              decisiveMatches={scenarios?.decisive_matches?.filter(
-                (m) => m.matchday === prediction.next_matchday.matchday
-              )}
-              matchHrefs={matchHrefs}
-              locale={locale}
-            />
+            <MatchdayPredictions fixtures={fixtureCards} locale={locale} />
           </div>
         </section>
       )}
@@ -301,6 +284,7 @@ export default async function LigaPage({
             nSims={prediction.n_sims}
             model={prediction.model}
             calibration={scorecard?.calibration ?? null}
+            previousMatchday={prediction.matchday > 1 ? prediction.matchday - 1 : undefined}
             labels={{
               team: t("football.team"),
               meanPoints: t("football.meanPoints"),
@@ -332,13 +316,16 @@ export default async function LigaPage({
               .sort((a, b) => b.delta - a.delta);
             if (luckEntries.length === 0) return null;
             return (
-              <div className="mt-10">
-                <h3 className="text-base text-stone-900 mb-1">
-                  {t("football.luckIndex")}
-                </h3>
-                <p className="text-sm text-stone-500 mb-4">
-                  {t("football.luckIndexDescription")}
-                </p>
+              <DataCard
+                className="mt-10"
+                title={t("football.luckIndex")}
+                subtitle={t("football.luckIndexDescription")}
+                source={t("football.xgAttribution")}
+                updated={updatedLine}
+                methodologyHref="/desporto/liga/metodologia"
+                methodologyLabel={methodLabel}
+                locale={locale}
+              >
                 <LuckIndex
                   entries={luckEntries}
                   locale={locale}
@@ -349,10 +336,7 @@ export default async function LigaPage({
                     expectedShort: t("football.luckExpectedShort"),
                   }}
                 />
-                <p className="text-[11px] text-stone-400 mt-2 text-right">
-                  {t("football.xgAttribution")}
-                </p>
-              </div>
+              </DataCard>
             );
           })()}
         </div>
@@ -368,7 +352,19 @@ export default async function LigaPage({
             <p className="text-sm text-stone-500 mb-6">
               {t("football.titleRaceDescription")}
             </p>
-            <TitleRaceChart historical={historical} yAxisLabel={t("football.championPercent")} />
+            <DataCard
+              title={locale === "pt" ? "Probabilidade de ser campeão, jornada a jornada" : "Chance of the title, matchday by matchday"}
+              subtitle={locale === "pt"
+                ? "Uma linha por clube que já passou de 1%. Cada ponto é a previsão publicada depois dessa jornada."
+                : "One line per club that has been above 1%. Each point is the forecast published after that matchday."}
+              source={sourceLine}
+              updated={updatedLine}
+              methodologyHref="/desporto/liga/metodologia"
+              methodologyLabel={methodLabel}
+              locale={locale}
+            >
+              <TitleRaceChart historical={historical} yAxisLabel={t("football.championPercent")} />
+            </DataCard>
           </div>
         </section>
       )}
@@ -384,7 +380,19 @@ export default async function LigaPage({
             <p className="text-sm text-stone-500 mb-6">
               {t("football.relegationBattleDescription")}
             </p>
-            <RelegationChart historical={historical} yAxisLabel={t("football.relegationPercent")} />
+            <DataCard
+              title={locale === "pt" ? "Probabilidade de despromoção, jornada a jornada" : "Chance of relegation, matchday by matchday"}
+              subtitle={locale === "pt"
+                ? "Despromoção é acabar em 17.º ou 18.º; o 16.º vai ao play-off e não conta aqui."
+                : "Relegation means finishing 17th or 18th; 16th goes to a play-off and is not counted here."}
+              source={sourceLine}
+              updated={updatedLine}
+              methodologyHref="/desporto/liga/metodologia"
+              methodologyLabel={methodLabel}
+              locale={locale}
+            >
+              <RelegationChart historical={historical} yAxisLabel={t("football.relegationPercent")} />
+            </DataCard>
           </div>
         </section>
       )}
@@ -399,15 +407,24 @@ export default async function LigaPage({
             <p className="text-sm text-stone-500 mb-6">
               {t("football.teamStrengthsDescription")}
             </p>
-            <TeamStrengthRatings
-              strengths={prediction.team_strengths}
-              labels={{
-                attack: t("football.attack"),
-                defense: t("football.defense"),
-                worse: t("football.worse"),
-                better: t("football.better"),
-              }}
-            />
+            <DataCard
+              title={locale === "pt" ? "Ataque e defesa estimados" : "Estimated attack and defence"}
+              source={sourceLine}
+              updated={updatedLine}
+              methodologyHref="/desporto/liga/metodologia"
+              methodologyLabel={methodLabel}
+              locale={locale}
+            >
+              <TeamStrengthRatings
+                strengths={prediction.team_strengths}
+                labels={{
+                  attack: t("football.attack"),
+                  defense: t("football.defense"),
+                  worse: t("football.worse"),
+                  better: t("football.better"),
+                }}
+              />
+            </DataCard>
           </div>
         </section>
       )}
@@ -421,19 +438,19 @@ export default async function LigaPage({
             <Link
               href="/desporto/liga/simulador"
               locale={locale}
-              className="block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+              className="block rounded-2xl border border-line bg-cream hover:bg-parchment transition-colors duration-150 p-4 md:p-5 group"
             >
               <div className="flex items-start gap-3">
-                <SlidersHorizontal className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+                <SlidersHorizontal aria-hidden="true" className="w-5 h-5 text-stone-500 mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <h3 className="text-stone-900">{t("football.simulator")}</h3>
                   <p className="text-sm text-stone-500 mt-0.5">
                     {t("football.simulatorCta")}
                   </p>
                 </div>
-                <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+                <span className="text-sm font-semibold text-ink underline underline-offset-4 inline-flex items-center gap-1 flex-shrink-0 mt-0.5">
                   {t("football.trySimulator")}
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  <ArrowRight aria-hidden="true" className="w-4 h-4" />
                 </span>
               </div>
             </Link>
@@ -446,10 +463,10 @@ export default async function LigaPage({
           <Link
             href="/desporto/liga/jogo-previsoes"
             locale={locale}
-            className="block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+            className="block rounded-2xl border border-line bg-cream hover:bg-parchment transition-colors duration-150 p-4 md:p-5 group"
           >
             <div className="flex items-start gap-3">
-              <Gamepad2 className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+              <Gamepad2 aria-hidden="true" className="w-5 h-5 text-stone-500 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <h3 className="text-stone-900">
                   {locale === "en" ? "Beat the model" : "Contra o Modelo"}
@@ -460,9 +477,9 @@ export default async function LigaPage({
                     : "Prevê a próxima jornada antes de começar e compara-te com o modelo, a época inteira."}
                 </p>
               </div>
-              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+              <span className="text-sm font-semibold text-ink underline underline-offset-4 inline-flex items-center gap-1 flex-shrink-0 mt-0.5">
                 {locale === "en" ? "Play" : "Jogar"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight aria-hidden="true" className="w-4 h-4" />
               </span>
             </div>
           </Link>
@@ -494,10 +511,10 @@ export default async function LigaPage({
           <Link
             href="/desporto/liga/modelo"
             locale={locale}
-            className="mt-6 block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+            className="mt-6 block rounded-2xl border border-line bg-cream hover:bg-parchment transition-colors duration-150 p-4 md:p-5 group"
           >
             <div className="flex items-start gap-3">
-              <Scale className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+              <Scale aria-hidden="true" className="w-5 h-5 text-stone-500 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <h3 className="text-stone-900">
                   {locale === "en" ? "Model vs market" : "Modelo vs mercado"}
@@ -506,9 +523,9 @@ export default async function LigaPage({
                   {scorecardCard}
                 </p>
               </div>
-              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+              <span className="text-sm font-semibold text-ink underline underline-offset-4 inline-flex items-center gap-1 flex-shrink-0 mt-0.5">
                 {locale === "en" ? "See the scorecard" : "Ver a avaliação"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight aria-hidden="true" className="w-4 h-4" />
               </span>
             </div>
           </Link>
@@ -517,10 +534,10 @@ export default async function LigaPage({
           <Link
             href="/desporto/liga/2025-26"
             locale={locale}
-            className="mt-4 block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+            className="mt-4 block rounded-2xl border border-line bg-cream hover:bg-parchment transition-colors duration-150 p-4 md:p-5 group"
           >
             <div className="flex items-start gap-3">
-              <History className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+              <History aria-hidden="true" className="w-5 h-5 text-stone-500 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <h3 className="text-stone-900">
                   {locale === "en"
@@ -533,9 +550,9 @@ export default async function LigaPage({
                     : "O Porto foi campeão com 88 pontos, o Sporting marcou 89 golos e ficou em segundo, e o Benfica acabou invicto em terceiro. O que o xG diz sobre quem mereceu — e como se portaram as nossas previsões."}
                 </p>
               </div>
-              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+              <span className="text-sm font-semibold text-ink underline underline-offset-4 inline-flex items-center gap-1 flex-shrink-0 mt-0.5">
                 {locale === "en" ? "Read the review" : "Ver a revisão"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight aria-hidden="true" className="w-4 h-4" />
               </span>
             </div>
           </Link>
@@ -544,10 +561,10 @@ export default async function LigaPage({
           <Link
             href="/desporto/liga/jogadores"
             locale={locale}
-            className="mt-4 block border border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100 transition-colors p-4 md:p-5 group"
+            className="mt-4 block rounded-2xl border border-line bg-cream hover:bg-parchment transition-colors duration-150 p-4 md:p-5 group"
           >
             <div className="flex items-start gap-3">
-              <Users className="w-5 h-5 text-stone-400 mt-0.5 flex-shrink-0" />
+              <Users aria-hidden="true" className="w-5 h-5 text-stone-500 mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <h3 className="text-stone-900">
                   {locale === "en" ? "The players, measured honestly" : "Os jogadores, medidos com honestidade"}
@@ -558,9 +575,9 @@ export default async function LigaPage({
                     : "Finalização, contribuição ofensiva, posse disputada, guarda-redes — uma métrica por dimensão, cada uma com a sua escala e a sua incerteza, sem nota global inventada."}
                 </p>
               </div>
-              <span className="text-sm font-medium text-stone-500 group-hover:text-stone-900 inline-flex items-center gap-1 flex-shrink-0 mt-0.5 transition-colors">
+              <span className="text-sm font-semibold text-ink underline underline-offset-4 inline-flex items-center gap-1 flex-shrink-0 mt-0.5">
                 {locale === "en" ? "See the players" : "Ver os jogadores"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight aria-hidden="true" className="w-4 h-4" />
               </span>
             </div>
           </Link>
@@ -572,7 +589,7 @@ export default async function LigaPage({
               className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {t("football.methodology")}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4" />
             </Link>
             <Link
               href="/desporto/liga/dados"
@@ -580,7 +597,7 @@ export default async function LigaPage({
               className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
             >
               {locale === "en" ? "Open forecast data" : "Dados abertos das previsões"}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4" />
             </Link>
           </div>
         </div>

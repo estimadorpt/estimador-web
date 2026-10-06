@@ -1,6 +1,4 @@
 import { createPageMetadata } from '@/lib/metadata';
-import fs from "fs";
-import path from "path";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -15,10 +13,12 @@ import {
   loadLigaHistorical,
   loadLigaInjuries,
   loadLigaPlayers,
+  loadPlayedFixtures,
   loadUpcomingFixtures,
   NO_FIXTURES_SLUG,
 } from "@/lib/utils/football-data-loader";
-import { ligaTeamColors, teamDisplayName, ligaTeamSlugs } from "@/lib/config/football";
+import { teamColorOnPaper, teamDisplayName, ligaTeamSlugs } from "@/lib/config/football";
+import { byKickoff } from "@/lib/football-fixtures";
 import { MatchProbabilityHero } from "@/components/charts/football/MatchProbabilityHero";
 import { MatchOutcomeImpact } from "@/components/charts/football/MatchOutcomeImpact";
 import { MatchTeamCompare } from "@/components/charts/football/MatchTeamCompare";
@@ -27,33 +27,24 @@ import { MatchSquadNews } from "@/components/charts/football/MatchSquadNews";
 import type { MatchSquadSide } from "@/components/charts/football/MatchSquadNews";
 import { formFor } from "@/lib/football-form";
 import { currentAbsences } from "@/lib/football-injuries";
-import { formatInteger, formatLongDate, formatProbability } from "@/lib/football-format";
+import { formatInteger, formatKickoffShort, formatLongDate, formatPercent, matchLabel } from "@/lib/football-format";
 import { setRequestLocale } from '@/i18n/request-locale';
-
-const SITE = "https://estimador.pt";
 
 /* ------------------------------------------------------------- static params */
 
 export async function generateStaticParams() {
-  const fixtures = await loadUpcomingFixtures();
+  // The games to come, and this season's games already played: a match page
+  // stays online after its round, with the result and the model's pre-match
+  // odds, instead of disappearing the week it is played (audit SP-13).
+  const [fixtures, played] = await Promise.all([loadUpcomingFixtures(), loadPlayedFixtures()]);
+  const all = [...fixtures, ...played];
   // Static export rejects a dynamic route with zero params, so a placeholder
   // page stands in whenever the feed publishes no fixtures at all.
-  if (fixtures.length === 0) return [{ slug: NO_FIXTURES_SLUG }];
-  return fixtures.map(f => ({ slug: f.slug }));
+  if (all.length === 0) return [{ slug: NO_FIXTURES_SLUG }];
+  return all.map(f => ({ slug: f.slug }));
 }
 
 /* ------------------------------------------------------------------ metadata */
-
-// Same versioned OG asset the root layout uses; no per-fixture image pipeline.
-function ogImageFilename(locale: string): string {
-  try {
-    const manifestPath = path.join(process.cwd(), "public", "og-manifest.json");
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-    return manifest.files?.[locale] || `og-image-${locale}.png`;
-  } catch {
-    return `og-image-${locale}.png`;
-  }
-}
 
 export async function generateMetadata({
   params,
@@ -74,9 +65,13 @@ export async function generateMetadata({
   const pt = locale !== "en";
   const home = teamDisplayName(fixture.home);
   const away = teamDisplayName(fixture.away);
-  const title = pt
-    ? `${home} x ${away}: probabilidades e cenários`
-    : `${home} vs ${away}: probabilities and scenarios`;
+  const title = fixture.played
+    ? pt
+      ? `${matchLabel(home, away)}, ${fixture.played.home_goals}–${fixture.played.away_goals}: resultado e previsão`
+      : `${matchLabel(home, away)}, ${fixture.played.home_goals}–${fixture.played.away_goals}: result and forecast`
+    : pt
+      ? `${matchLabel(home, away)}: probabilidades e cenários`
+      : `${matchLabel(home, away)}: probabilities and scenarios`;
 
   const probLine =
     fixture.p_home != null && fixture.p_draw != null && fixture.p_away != null
@@ -89,12 +84,13 @@ export async function generateMetadata({
           )}%, ${away} ${Math.round(fixture.p_away * 100)}%.`
       : "";
 
-  const description = pt
-    ? `Previsão do modelo para ${home}-${away}, jornada ${fixture.matchday} da Liga Portugal. ${probLine} O que cada resultado muda no título, no top 3 e na descida.`.trim()
-    : `Model forecast for ${home}-${away}, matchday ${fixture.matchday} of Liga Portugal. ${probLine} What each result changes for the title, top 3 and relegation.`.trim();
-
-  const url = `${SITE}/${locale}/desporto/liga/jogo/${slug}`;
-  const image = `${SITE}/${ogImageFilename(locale)}`;
+  const description = fixture.played
+    ? pt
+      ? `${matchLabel(home, away)}, jornada ${fixture.matchday} da Liga Portugal: ${fixture.played.home_goals}–${fixture.played.away_goals}. ${probLine ? `Antes do jogo, o modelo dava: ${probLine}` : ""}`.trim()
+      : `${matchLabel(home, away)}, matchday ${fixture.matchday} of Liga Portugal: ${fixture.played.home_goals}–${fixture.played.away_goals}. ${probLine ? `Before the match the model gave: ${probLine}` : ""}`.trim()
+    : pt
+      ? `Previsão do modelo para ${matchLabel(home, away)}, jornada ${fixture.matchday} da Liga Portugal. ${probLine} O que cada resultado muda no título, no top 3 e na despromoção.`.trim()
+      : `Model forecast for ${matchLabel(home, away)}, matchday ${fixture.matchday} of Liga Portugal. ${probLine} What each result changes for the title, top 3 and relegation.`.trim();
 
   return createPageMetadata({
     locale,
@@ -149,8 +145,10 @@ export default async function MatchPage({
   }
 
   const { home, away } = fixture;
-  const homeColor = ligaTeamColors[home] ?? "#5f7062";
-  const awayColor = ligaTeamColors[away] ?? "#4f5f57";
+  // Club colours as drawn on paper (contrast-checked), for bars and swatches only.
+  const homeColor = teamColorOnPaper(home);
+  const awayColor = teamColorOnPaper(away);
+  const isPlayed = !!fixture.played;
 
   const L = {
     back: pt ? "Liga Portugal" : "Liga Portugal",
@@ -222,7 +220,9 @@ export default async function MatchPage({
       .map(p => p.player),
   );
 
-  const otherFixtures = fixtures.filter(f => f.slug !== fixture.slug).slice(0, 8);
+  // The other games still to play, in kickoff order with their Lisbon
+  // date and time (audit F-H4), not the feed's order.
+  const otherFixtures = byKickoff(fixtures.filter(f => f.slug !== fixture.slug)).slice(0, 9);
 
   return (
     <div className="min-h-screen bg-paper">
@@ -232,11 +232,15 @@ export default async function MatchPage({
         width="5xl"
         compact
         back={{ href: "/desporto/liga", label: L.back, locale }}
-        eyebrow={`Liga Portugal · ${pt ? "Jornada" : "Matchday"} ${fixture.matchday}${fixture.inProgressMatchday ? ` · ${L.live}` : ""}`}
-        title={`${teamDisplayName(home)} ${pt ? "x" : "vs"} ${teamDisplayName(away)}`}
-        lede={pt
-          ? "O que o modelo espera deste jogo e o que cada resultado muda para os dois clubes."
-          : "What the model expects from this match, and what each result changes for both clubs."}
+        eyebrow={`Liga Portugal · ${pt ? "Jornada" : "Matchday"} ${fixture.matchday}${fixture.inProgressMatchday ? ` · ${L.live}` : ""}${isPlayed ? (pt ? " · jogo disputado" : " · played") : ""}`}
+        title={matchLabel(teamDisplayName(home), teamDisplayName(away))}
+        lede={isPlayed
+          ? pt
+            ? "O resultado e o que o modelo dava antes do jogo. A previsão da época continua na página da Liga."
+            : "The result and what the model gave before the match. The season forecast is on the Liga page."
+          : pt
+            ? "O que o modelo espera deste jogo e o que cada resultado muda para os dois clubes."
+            : "What the model expects from this match, and what each result changes for both clubs."}
       />
 
       {/* Probabilities */}
@@ -255,11 +259,13 @@ export default async function MatchPage({
             kickoffConfirmed={fixture.kickoffConfirmed}
             locale={locale}
             played={fixture.played}
+            probsPublishedAt={fixture.probsPublishedAt}
           />
         </div>
       </section>
 
-      {/* What each result would do */}
+      {/* What each result would do — only before the match */}
+      {!isPlayed && (
       <section className="border-b border-stone-200">
         <div className="max-w-5xl mx-auto px-4 py-10">
           <MatchOutcomeImpact
@@ -276,8 +282,10 @@ export default async function MatchPage({
           />
         </div>
       </section>
+      )}
 
-      {/* Form, strength, xPts */}
+      {/* Form, strength, xPts — today's, so only before the match */}
+      {!isPlayed && (
       <section className="border-b border-stone-200">
         <div className="max-w-5xl mx-auto px-4 py-10">
           <MatchTeamCompare
@@ -295,16 +303,37 @@ export default async function MatchPage({
                   className="text-xs font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1"
                 >
                   {L.teamPage}: {teamDisplayName(team)}
-                  <ArrowRight className="w-3 h-3" />
+                  <ArrowRight aria-hidden="true" className="w-3 h-3" />
                 </Link>
               ) : null,
             )}
           </div>
         </div>
       </section>
+      )}
+
+      {isPlayed && (
+        <section className="border-b border-stone-200">
+          <div className="max-w-5xl mx-auto flex flex-wrap gap-x-6 gap-y-2 px-4 py-8">
+            {[home, away].map(team =>
+              ligaTeamSlugs[team] ? (
+                <Link
+                  key={team}
+                  href={`/desporto/liga/${ligaTeamSlugs[team]}`}
+                  locale={locale}
+                  className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-ink underline underline-offset-4"
+                >
+                  {pt ? `O que falta ao ${teamDisplayName(team)}` : `What ${teamDisplayName(team)} has left`}
+                  <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />
+                </Link>
+              ) : null,
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Squads */}
-      {(injuries || players) && (
+      {!isPlayed && (injuries || players) && (
         <section className="border-b border-stone-200">
           <div className="max-w-5xl mx-auto px-4 py-10">
             <MatchSquadNews
@@ -323,31 +352,34 @@ export default async function MatchPage({
       {otherFixtures.length > 0 && (
         <section className="border-b border-stone-200">
           <div className="max-w-5xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-4">{L.otherMatches}</h2>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {otherFixtures.map(f => (
-                <Link
-                  key={f.slug}
-                  href={`/desporto/liga/jogo/${f.slug}`}
-                  locale={locale}
-                  className="border border-stone-200 px-3 py-2 hover:border-stone-400 transition-colors"
-                >
-                  <div className="text-sm font-medium text-stone-800 truncate">
-                    {teamDisplayName(f.home)} — {teamDisplayName(f.away)}
-                  </div>
-                  <div className="text-[11px] text-stone-500 tabular-nums">
-                    {f.p_home != null && f.p_draw != null && f.p_away != null
-                      ? `${formatProbability(f.p_home, locale)} · ${formatProbability(
-                          f.p_draw,
-                          locale,
-                        )} · ${formatProbability(f.p_away, locale)}`
-                      : pt
-                        ? `Jornada ${f.matchday}`
-                        : `Matchday ${f.matchday}`}
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <h2 className="text-2xl tracking-tight mb-1">{isPlayed ? (pt ? "Próximos jogos" : "Next fixtures") : L.otherMatches}</h2>
+            <p className="mb-4 text-sm text-stone-500">{pt ? "Por ordem de início, hora de Lisboa." : "In kickoff order, Lisbon time."}</p>
+            <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {otherFixtures.map(f => {
+                const when = formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed });
+                return (
+                  <li key={f.slug}>
+                    <Link
+                      href={`/desporto/liga/jogo/${f.slug}`}
+                      locale={locale}
+                      className="block h-full rounded-2xl border border-line bg-cream px-3 py-2 transition-colors duration-150 hover:bg-parchment"
+                    >
+                      <span className="block text-[11px] font-semibold tabular-nums text-stone-500">
+                        {when || (pt ? `Jornada ${f.matchday}` : `Matchday ${f.matchday}`)}
+                      </span>
+                      <span className="block text-sm font-medium text-ink">
+                        {matchLabel(teamDisplayName(f.home), teamDisplayName(f.away))}
+                      </span>
+                      {f.p_home != null && f.p_draw != null && f.p_away != null && (
+                        <span className="block text-[11px] tabular-nums text-stone-600">
+                          {teamDisplayName(f.home)} {formatPercent(f.p_home, locale)} · {pt ? "empate" : "draw"} {formatPercent(f.p_draw, locale)} · {teamDisplayName(f.away)} {formatPercent(f.p_away, locale)}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ol>
           </div>
         </section>
       )}

@@ -24,7 +24,7 @@ export function RemainingSchedule({ matches, teamColor, labels }: RemainingSched
   return (
     <div className="space-y-1">
       {/* Header */}
-      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-stone-400 pb-1 border-b border-stone-200">
+      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-stone-500 pb-1 border-b border-stone-200">
         <div className="w-8 text-center">{labels.matchdayAbbr}</div>
         <div className="w-36 md:w-44" />
         <div className="flex-1" />
@@ -43,7 +43,7 @@ export function RemainingSchedule({ matches, teamColor, labels }: RemainingSched
         return (
           <div key={i} className="flex items-center gap-2 py-1">
             {/* Matchday */}
-            <div className="w-8 text-center text-xs text-stone-400 tabular-nums">
+            <div className="w-8 text-center text-xs text-stone-500 tabular-nums">
               {m.matchday}
             </div>
 
@@ -59,13 +59,13 @@ export function RemainingSchedule({ matches, teamColor, labels }: RemainingSched
               <span className="text-sm font-medium text-stone-800 truncate">
                 {teamDisplayName(m.opponent)}
               </span>
-              <span className="text-[11px] text-stone-400 shrink-0">
+              <span className="text-[11px] text-stone-500 shrink-0">
                 ({m.venue === "H" ? labels.home : labels.away})
               </span>
             </div>
 
             {/* Stacked bar with 1px gaps */}
-            <div className="flex-1 h-5 flex gap-[1px] bg-stone-100 overflow-hidden">
+            <div aria-hidden="true" className="flex-1 h-5 flex gap-[1px] bg-stone-100 overflow-hidden rounded-sm">
               <div
                 style={{ width: `${pWin}%`, backgroundColor: teamColor }}
                 className="h-full"
@@ -82,11 +82,9 @@ export function RemainingSchedule({ matches, teamColor, labels }: RemainingSched
 
             {/* Numeric labels */}
             <div className="w-28 md:w-40 flex justify-between tabular-nums text-xs shrink-0">
-              <span className="font-semibold" style={{ color: teamColor }}>
-                {pWin}%
-              </span>
-              <span className="text-stone-400">{pDraw}%</span>
-              <span className="text-red-500">{pLoss}%</span>
+              <span className="font-semibold text-ink">{pWin}%</span>
+              <span className="text-stone-600">{pDraw}%</span>
+              <span className="text-stone-600">{pLoss}%</span>
             </div>
           </div>
         );
