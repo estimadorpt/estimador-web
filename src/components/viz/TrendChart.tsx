@@ -73,7 +73,7 @@ export function TrendChart({ series, format = v => String(v), xLabel, yLabel, he
       }
       marks.push(Plot.dot(last, { x: 'x', y: 'y', r: 4.5, fill: 'color', stroke: FURNITURE.surface, strokeWidth: 2 }));
       marks.push(Plot.text(last, { x: 'x', y: 'y', text: d => format(d.y), dx: 10, textAnchor: 'start', fill: FURNITURE.text, fontWeight: 700, fontSize: 12 }));
-      marks.push(Plot.tip(rows, Plot.pointerX({ x: 'x', y: 'y', stroke: 'color', title: d => `${d.series}: ${format(d.y)}${d.lo != null ? ` (${format(d.lo)} a ${format(d.hi as number)})` : ''}` })));
+      marks.push(Plot.tip(rows, Plot.pointerX({ x: 'x', y: 'y', stroke: 'color', title: d => `${d.series}: ${format(d.y)}${d.lo != null ? ` (${format(d.lo)}–${format(d.hi as number)})` : ''}` })));
       marks.push(Plot.crosshairX(rows, { x: 'x', y: 'y', stroke: FURNITURE.axis, textFill: FURNITURE.text, textStroke: FURNITURE.surface }));
       // Date ticks in the page's language: monthly steps from the first month,
       // the year on January and on the first tick; yearly steps sit on January
@@ -106,7 +106,7 @@ export function TrendChart({ series, format = v => String(v), xLabel, yLabel, he
     return () => { disposed = true; };
   }, [series, width, height, format, xLabel, yLabel, yMin, yMax, reference, locale]);
 
-  const fmtX = (x: Date | number) => x instanceof Date ? x.toLocaleDateString(locale === 'pt' ? 'pt-PT' : 'en-GB', { month: 'short', year: 'numeric' }) : String(x);
+  const fmtX = (x: Date | number) => x instanceof Date ? x.toLocaleDateString(locale === 'pt' ? 'pt-PT' : 'en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }) : String(x);
   const xs = Array.from(new Set(series.flatMap(s => s.points.map(p => +p.x)))).sort((a, b) => a - b);
   const banded = series.map(s => s.points.some(p => p.lo != null && p.hi != null));
   const projectedNote = locale === 'pt' ? 'projeção' : 'projected';

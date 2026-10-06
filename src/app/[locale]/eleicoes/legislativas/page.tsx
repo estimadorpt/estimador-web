@@ -6,7 +6,7 @@ import { loadParliamentaryArchive } from "@/lib/utils/data-loader";
 import { formatElectionLongDate, formatElectionNumber, formatElectionPercent, formatElectionProbabilityText } from "@/lib/election-display";
 import { closeLeads } from "@/lib/election-aggregates";
 import { ProbabilityFigure } from "@/components/charts/ProbabilityFigure";
-import { Calendar, BarChart3, TrendingUp, Users, Map, Vote } from "lucide-react";
+import { Calendar, BarChart3, TrendingUp, Users, Vote } from "lucide-react";
 import { PollingChart } from "@/components/charts/PollingChart";
 import { SeatChart } from "@/components/charts/SeatChart";
 import { DistrictSummary } from "@/components/charts/DistrictSummary";
@@ -16,6 +16,8 @@ import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SectionNotes } from "@/components/articles/SectionNotes";
+import { DataCard } from "@/components/viz/DataCard";
+import { Disclosure } from "@/components/viz/Disclosure";
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
@@ -40,6 +42,14 @@ export async function generateMetadata({
 }
 
 const linkClass = 'text-ink underline underline-offset-4 hover:text-ink-muted';
+/**
+ * A link on a line of its own: a 44px target at the text's own size (UXM2-09).
+ * The gap stands in for the space before an arrow, which a flex box collapses.
+ */
+const standaloneLinkClass = `inline-flex min-h-11 items-center gap-1 ${linkClass}`;
+/** A section's question over its chart frame, as on the Liga hub. */
+const sectionTitleClass = 'text-2xl text-stone-900 mb-1 tracking-tight';
+const sectionLedeClass = 'text-sm text-stone-500 mb-6 max-w-3xl';
 
 export default async function ParliamentaryArchivePage({
   params
@@ -52,9 +62,24 @@ export default async function ParliamentaryArchivePage({
   const archive = await loadParliamentaryArchive();
   const { probabilities, adChArithmetic, blocs, seats, trends, trendDates, districtForecast, contestedSeats, houseEffects } = archive;
 
+  const pt = locale === 'pt';
   const forecastDate = formatElectionLongDate(PARLIAMENTARY_2025_FORECAST_CUTOFF, locale);
   const electionDate = formatElectionLongDate(PARLIAMENTARY_2025.date, locale);
   const pct = (v: number) => formatElectionPercent(v, locale);
+
+  // The chart frame's footer (CLAUDE.md, "Chart frame"): an archived forecast
+  // names its run. The seat charts summarise the simulations; the trend is the
+  // model's estimate fitted to the polls, so it cites those instead.
+  const frame = {
+    updated: pt ? `Previsão de ${forecastDate}` : `Forecast of ${forecastDate}`,
+    methodologyHref: '/eleicoes/metodologia#legislativas',
+    methodologyLabel: t('common.methodology'),
+    locale,
+  };
+  const simulationsSource = pt
+    ? `Fonte: modelo estimador.pt, ${formatElectionNumber(archive.simulations, locale)} simulações`
+    : `Source: estimador.pt model, ${formatElectionNumber(archive.simulations, locale)} simulations`;
+  const trendSource = pt ? 'Fonte: modelo estimador.pt, ajustado às sondagens' : 'Source: estimador.pt model, fitted to the polls';
 
   // Election-day projection per party: mean and the 94% HDI band, read from
   // the last date of the trend window (the election day itself).
@@ -134,16 +159,16 @@ export default async function ParliamentaryArchivePage({
               <Calendar aria-hidden="true" className="w-3 h-3" />
               {t('forecast.forecastDateLine', { forecast: forecastDate, election: electionDate })}
             </span>
-            <a href={officialResults.href} className={linkClass} rel="noopener noreferrer">{t('forecast.officialResults')}{external}</a>
+            <a href={officialResults.href} className={standaloneLinkClass} rel="noopener noreferrer">{t('forecast.officialResults')}{external}</a>
           </>
         }
       />
 
       <nav aria-label={t('presidential.inThisArchive')} className="border-b border-line bg-paper">
         <div className="mx-auto flex max-w-7xl flex-wrap gap-x-5 gap-y-2 px-4 py-3 text-sm">
-          <a href="#overview" className={linkClass}>{t('presidential.navForecast')}</a>
-          <a href="#polling" className={linkClass}>{t('presidential.navUncertainty')}</a>
-          <a href="#evidence" className={linkClass}>{t('presidential.navEvidence')}</a>
+          <a href="#overview" className={`tap-target ${linkClass}`}>{t('presidential.navForecast')}</a>
+          <a href="#polling" className={`tap-target ${linkClass}`}>{t('presidential.navUncertainty')}</a>
+          <a href="#evidence" className={`tap-target ${linkClass}`}>{t('presidential.navEvidence')}</a>
         </div>
       </nav>
 
@@ -180,55 +205,63 @@ export default async function ParliamentaryArchivePage({
       </section>
 
       <section className="py-8">
-        <div className="max-w-7xl mx-auto px-4 space-y-8">
+        <div className="max-w-7xl mx-auto px-4 space-y-12">
 
-          <div id="polling" className="bg-cream border border-stone-200 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <TrendingUp aria-hidden="true" className="hidden sm:block w-5 h-5 shrink-0 text-stone-500" />
-              <h2 className="text-2xl text-stone-900">{t('forecast.pollingTrends')}</h2>
-            </div>
-            <PollingChart series={trends} voteShareLabel={t('forecast.voteShareLabel')} />
-            <p className="text-sm text-stone-600 mt-4">
+          {/* Each chart under its question and in the one chart frame
+              (DataCard: title, plot, source, forecast date, method). */}
+          <div id="polling">
+            <h2 className={sectionTitleClass}>{t('forecast.pollingTrends')}</h2>
+            <p className={sectionLedeClass}>
               {t('forecast.pollingTrendsDescription', { count: formatElectionNumber(trendDates, locale) })}
             </p>
+            <DataCard
+              title={pt ? 'Percentagem de votos estimada, por partido' : 'Estimated vote share, by party'}
+              source={trendSource}
+              {...frame}
+            >
+              <PollingChart series={trends} voteShareLabel={t('forecast.voteShareLabel')} />
+            </DataCard>
           </div>
 
-          <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <BarChart3 aria-hidden="true" className="hidden sm:block w-5 h-5 shrink-0 text-stone-500" />
-              <h2 className="text-2xl text-stone-900">{t('forecast.coalitionSeats')}</h2>
-            </div>
-            <CoalitionDotPlot
-              simulations={blocs}
-              leftCoalitionLabel={leftName}
-              rightCoalitionLabel={rightName}
-              projectedSeatsLabel={t('forecast.projectedSeats')}
-              majorityLabel={t('forecast.majorityThresholdLabel', { seats: majorityThreshold, total: 230 })}
-              showingOutcomesLabel={t.raw('forecast.drawnSimulations') as string}
-              tableCaption={t('forecast.projectedSeatsByBloc')}
-            />
-            <p className="text-sm text-stone-600 mt-4">{t('forecast.coalitionDescription')}</p>
-            <p className="text-xs text-stone-500 mt-2">{t('forecast.coalitionArithmeticNote')}</p>
+          <div>
+            <h2 className={sectionTitleClass}>{t('forecast.coalitionSeats')}</h2>
+            <p className={sectionLedeClass}>{t('forecast.coalitionDescription')}</p>
+            <DataCard
+              title={pt ? 'Mandatos de cada bloco, simulação a simulação' : 'Each bloc’s seats, simulation by simulation'}
+              subtitle={t('forecast.coalitionArithmeticNote')}
+              source={simulationsSource}
+              {...frame}
+            >
+              <CoalitionDotPlot
+                simulations={blocs}
+                leftCoalitionLabel={leftName}
+                rightCoalitionLabel={rightName}
+                projectedSeatsLabel={t('forecast.projectedSeats')}
+                majorityLabel={t('forecast.majorityThresholdLabel', { seats: majorityThreshold, total: 230 })}
+                showingOutcomesLabel={t.raw('forecast.drawnSimulations') as string}
+                tableCaption={t('forecast.projectedSeatsByBloc')}
+              />
+            </DataCard>
           </div>
 
-          <div className="bg-cream border border-stone-200 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Users aria-hidden="true" className="hidden sm:block w-5 h-5 shrink-0 text-stone-500" />
-              <h2 className="text-2xl text-stone-900">{t('forecast.individualParties')}</h2>
-            </div>
-            <SeatChart stats={seats} tableCaption={t('forecast.projectedSeatsByParty')} />
-            <p className="text-sm text-stone-600 mt-4">
+          <div>
+            <h2 className={sectionTitleClass}>{t('forecast.individualParties')}</h2>
+            <p className={sectionLedeClass}>
               {t('forecast.simulationDescription', { count: formatElectionNumber(archive.simulations, locale) })}
             </p>
+            <DataCard
+              title={pt ? 'Mandatos por partido' : 'Seats by party'}
+              source={simulationsSource}
+              {...frame}
+            >
+              <SeatChart stats={seats} tableCaption={t('forecast.projectedSeatsByParty')} />
+            </DataCard>
           </div>
 
-          <div id="district-analysis" className="bg-cream border border-stone-200 rounded-2xl p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-              <div className="flex items-center gap-3">
-                <Map aria-hidden="true" className="hidden sm:block w-5 h-5 shrink-0 text-stone-500" />
-                <h2 className="text-2xl text-stone-900">{t('forecast.districtAnalysis')}</h2>
-              </div>
-              <Link href="/eleicoes/legislativas/mapa" locale={locale} className={`text-sm font-medium ${linkClass}`}>
+          <div id="district-analysis" className="bg-cream border border-line rounded-2xl p-6">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 mb-6">
+              <h2 className="text-2xl text-stone-900">{t('forecast.districtAnalysis')}</h2>
+              <Link href="/eleicoes/legislativas/mapa" locale={locale} className={`text-sm font-medium ${standaloneLinkClass}`}>
                 {t('map.title')}{arrow}
               </Link>
             </div>
@@ -245,21 +278,17 @@ export default async function ParliamentaryArchivePage({
             </div>
           </div>
 
-          {/* Polling analysis — a specialist method/evidence view, not a
-              main-path answer, so it sits behind a disclosure. */}
-          <details className="group bg-cream border border-stone-200 rounded-2xl p-6">
-            {/* The heading wraps on a phone, so the "Mostrar" cue drops below it there. */}
-            <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1">
-              <Users aria-hidden="true" className="hidden sm:block w-5 h-5 shrink-0 text-stone-500" />
-              <h2 className="text-2xl text-stone-900">{t('forecast.pollingHouseEffects')}</h2>
-              <span className="basis-full text-xs font-bold uppercase tracking-wider text-stone-500 group-open:hidden sm:ml-auto sm:basis-auto">
-                {t('forecast.show')}
-              </span>
-            </summary>
-            <div className="mt-6">
-              <HouseEffects data={houseEffects} />
-            </div>
-          </details>
+          {/* Polling analysis: a specialist method/evidence view, not a
+              main-path answer, so the matrix sits behind the one show/hide
+              control. The heading stays outside the summary. */}
+          <div className="bg-cream border border-line rounded-2xl p-6">
+            <h2 className="text-2xl text-stone-900">{t('forecast.pollingHouseEffects')}</h2>
+            <Disclosure summary={t('forecast.show')} srSuffix={t('forecast.pollingHouseEffects')} className="mt-2">
+              <div className="mt-4">
+                <HouseEffects data={houseEffects} />
+              </div>
+            </Disclosure>
+          </div>
         </div>
       </section>
       </>
@@ -283,7 +312,7 @@ export default async function ParliamentaryArchivePage({
                   {t('forecast.methodology')}
                 </h3>
                 <p>{t('forecast.methodologyDescription')}</p>
-                <Link href="/eleicoes/metodologia#legislativas" locale={locale} className={`mt-2 inline-block ${linkClass}`}>{t('common.methodology')}{arrow}</Link>
+                <Link href="/eleicoes/metodologia#legislativas" locale={locale} className={`mt-1 ${standaloneLinkClass}`}>{t('common.methodology')}{arrow}</Link>
               </div>
               <div>
                 <h3 className="flex items-center gap-2 mb-2 text-base font-bold text-ink">
@@ -291,7 +320,7 @@ export default async function ParliamentaryArchivePage({
                   {t('forecast.updates')}
                 </h3>
                 <p>{t('forecast.updatesDescription', { date: forecastDate })}</p>
-                <a href={officialResults.href} className={`mt-2 inline-block ${linkClass}`} rel="noopener noreferrer">{t('forecast.officialResults')}{external}</a>
+                <a href={officialResults.href} className={`mt-1 ${standaloneLinkClass}`} rel="noopener noreferrer">{t('forecast.officialResults')}{external}</a>
               </div>
             </div>
           </div>

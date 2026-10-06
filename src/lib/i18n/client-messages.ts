@@ -49,9 +49,8 @@ export const CLIENT_MESSAGE_KEYS = [
 
   // Presidential archive: model assumptions and the uncertainty explainer.
   'model.assumptions.title', 'model.assumptions.declared_voters', 'model.assumptions.house_effects',
-  'model.assumptions.random_walk',   'model.uncertainty.title', 'model.uncertainty.description', 'model.uncertainty.based_on_polls',
-  'model.uncertainty.ci_explanation', 'model.uncertainty.note', 'model.uncertainty.undecided_note',
-  'model.uncertainty.wider_bands',
+  'model.assumptions.random_walk', 'model.uncertainty.title', 'model.uncertainty.description',
+  'model.uncertainty.based_on_polls', 'model.uncertainty.ci_explanation', 'model.uncertainty.wider_bands',
 
   // Legislativas district map.
   'map.topTwoGap', 'map.voteShareByParty', 'map.voteShareCaption',

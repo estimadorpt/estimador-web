@@ -133,10 +133,12 @@ export function PresidentialHeadToHead({ data, cutoffDate, height = 260, transla
         <span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: color_b, opacity: 0.5 }} />{candidate_b} {translations.probability}</span>
         <span className="text-ink">{translations.lastValue} ({formatElectionDate(filteredDates[filteredDates.length - 1], locale)}): <strong>{leaderLast} {formatElectionProbability(leaderProb, locale)}</strong></span>
       </div>
+      {/* Newest first: the last poll's value, which the line above quotes, opens the table. */}
       <ChartTable
         caption={translations.title}
+        summaryLabel={pt ? 'Ver como tabela, mais recente primeiro' : 'View as table, latest first'}
         columns={[pt ? 'Data' : 'Date', `${candidate_a} ${translations.probability}`, `${candidate_b} ${translations.probability}`]}
-        rows={filteredDates.map((d, i) => [formatElectionDate(d, locale), formatElectionProbability(filteredProbs[i] ?? 0, locale), formatElectionProbability(1 - (filteredProbs[i] ?? 0), locale)])}
+        rows={filteredDates.map((d, i) => [formatElectionDate(d, locale), formatElectionProbability(filteredProbs[i] ?? 0, locale), formatElectionProbability(1 - (filteredProbs[i] ?? 0), locale)]).reverse()}
       />
     </div>
   );

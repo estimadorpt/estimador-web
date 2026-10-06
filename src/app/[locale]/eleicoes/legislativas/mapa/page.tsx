@@ -79,9 +79,9 @@ export default async function MapPage({
         })}
         back={{ href: '/eleicoes/legislativas', label: t('map.backToForecast'), locale }}
       />
-      <div className="container mx-auto px-4 py-8">
-
-        <div className="max-w-7xl mx-auto">
+      {/* The shared container (CONTAINER_CLASS), so the body lines up with the
+          header and the hero at every width. */}
+      <div className="mx-auto w-full max-w-7xl px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Map */}
             <div className="lg:col-span-2">
@@ -139,8 +139,8 @@ export default async function MapPage({
                   the outcome change?" than land coloured by leading party —
                   link to it instead of inventing leader-change odds here. */}
               <Card>
-                <CardContent className="pt-6">
-                  <p className="text-sm text-stone-600 mb-3">
+                <CardContent>
+                  <p className="text-sm text-stone-600 mb-1">
                     {locale === 'pt'
                       ? 'Esta cor mostra apenas a percentagem de votos prevista. Para saber onde os mandatos podiam realmente mudar de partido, vê a análise distrital com o índice ENSC.'
                       : 'This colour only shows the predicted vote share. For where seats could actually change party, see the district analysis with the ENSC index.'}
@@ -148,7 +148,7 @@ export default async function MapPage({
                   <Link
                     href="/eleicoes/legislativas#district-analysis"
                     locale={locale}
-                    className="text-sm font-medium text-ink underline underline-offset-4 hover:text-ink-muted"
+                    className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-ink underline underline-offset-4 hover:text-ink-muted"
                   >
                     {locale === 'pt' ? 'Ver mandatos em disputa' : 'See seats in play'}<span aria-hidden="true"> →</span>
                   </Link>
@@ -156,7 +156,6 @@ export default async function MapPage({
               </Card>
             </div>
           </div>
-        </div>
       </div>
       </main>
       <SiteFooter locale={locale} />
