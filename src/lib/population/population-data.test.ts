@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { POPULATION_DATA_DIR } from '@/lib/config/population';
+import { POPULATION_DATA_DIR, POPULATION_DOWNLOADS, POPULATION_RELEASE } from '@/lib/config/population';
 import type {
   GameEntry,
   GameIndex,
@@ -97,6 +97,26 @@ describe('population release files', () => {
     const record = json<ParishRecord>('parish/010103.json');
     expect(readCells(record.responses.elders_alone, meta.recipes.elders_alone, 'pt').map(cell => cell.display)).toEqual(['18,0%', '82,0%']);
     expect(readCells(record.responses.elders_alone, meta.recipes.elders_alone, 'en').map(cell => cell.display)).toEqual(['18.0%', '82.0%']);
+  });
+
+  it('links downloads whose sizes match the release’s own package list', () => {
+    const release = json<{ version: string; files: Array<{ path: string; bytes: number }> }>('release.json');
+    expect(release.version).toBe(POPULATION_RELEASE);
+    expect(meta.release_version).toBe(POPULATION_RELEASE);
+    const packaged = new Map(release.files.map(file => [file.path, file.bytes]));
+    const inPackage: Record<string, string> = {
+      persons: 'national/persons.parquet',
+      households: 'national/households.parquet',
+      quality: 'quality/quality.csv',
+      metadata: 'metadata.json',
+    };
+    for (const [key, packagePath] of Object.entries(inPackage)) {
+      const file = POPULATION_DOWNLOADS.files.find(entry => entry.key === key)!;
+      expect(file.bytes, key).toBe(packaged.get(packagePath));
+      expect(file.url).toContain(`/releases/download/v${POPULATION_RELEASE}/`);
+    }
+    expect(POPULATION_DOWNLOADS.modelCard).toContain(`/blob/v${POPULATION_RELEASE}/`);
+    expect(POPULATION_DOWNLOADS.errata).toContain(`/blob/v${POPULATION_RELEASE}/`);
   });
 
   it('agrees with the place list on tier and publication level', () => {

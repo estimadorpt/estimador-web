@@ -30,15 +30,20 @@ export const POPULATION_DOWNLOADS = {
   // Pinned to the release's tag, so the documents match the data the site serves.
   modelCard: `${REPO}/blob/v${POPULATION_RELEASE}/MODEL_CARD.md`,
   errata: `${REPO}/blob/v${POPULATION_RELEASE}/ERRATA.md`,
-  /** v1.0.0, published and superseded on 2026-10-05 (same microdata; its public answers applied launch thresholds). */
-  superseded: `${REPO}/releases/tag/v1.0.0`,
+  /**
+   * Every release on GitHub (v1.0.0, v1.0.1 and the current one; v1.0.2 was
+   * never released there). All of 2026-10-05; the current one supersedes them.
+   */
+  releases: `${REPO}/releases`,
   issues: `${REPO}/issues`,
   files: [
-    { key: 'package', name: `pt-synthpop-v${POPULATION_RELEASE}.zip`, bytes: 181_763_298 },
-    { key: 'persons', name: `pt-synthpop-v${POPULATION_RELEASE}-persons.parquet`, bytes: 78_216_680 },
-    { key: 'households', name: `pt-synthpop-v${POPULATION_RELEASE}-households.parquet`, bytes: 6_766_126 },
-    { key: 'quality', name: `pt-synthpop-v${POPULATION_RELEASE}-quality.csv`, bytes: 667_983 },
-    { key: 'metadata', name: `pt-synthpop-v${POPULATION_RELEASE}-metadata.json`, bytes: 65_521 },
+    // Sizes of the GitHub release assets; the four single files are also in
+    // release.json's package list (tested), the zip only on GitHub.
+    { key: 'package', name: `pt-synthpop-v${POPULATION_RELEASE}.zip`, bytes: 181_731_672 },
+    { key: 'persons', name: `pt-synthpop-v${POPULATION_RELEASE}-persons.parquet`, bytes: 78_216_701 },
+    { key: 'households', name: `pt-synthpop-v${POPULATION_RELEASE}-households.parquet`, bytes: 6_766_320 },
+    { key: 'quality', name: `pt-synthpop-v${POPULATION_RELEASE}-quality.csv`, bytes: 668_145 },
+    { key: 'metadata', name: `pt-synthpop-v${POPULATION_RELEASE}-metadata.json`, bytes: 66_748 },
     { key: 'checksums', name: 'checksums.sha256', bytes: 7_318 },
     { key: 'sums', name: 'SHA256SUMS', bytes: 573 },
   ].map(file => ({ ...file, url: ASSET(file.name) })),

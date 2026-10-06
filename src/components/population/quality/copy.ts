@@ -2,8 +2,9 @@
  * The trust pages' wording, taken from the producer's model card
  * (estimador-microsynthesis docs/public/model_card.md, published as
  * MODEL_CARD.md in github.com/estimadorpt/pt-synthpop) and the handoff (doc 206
- * §3 for v1.0.0, §5 for v1.0.1, which keeps v1.0.0's microdata and changes
- * only the public answers). These are quotations of the producer's claims, in plain PT
+ * §3 for v1.0.0; §5–§7 for v1.0.1 to v1.0.3, which keep v1.0.0's generated
+ * population and change the public answers, two label columns and nuts2).
+ * These are quotations of the producer's claims, in plain PT
  * and EN: no number here is computed on the site. When a release changes the
  * model card, this file changes with it.
  */
@@ -34,8 +35,8 @@ export const RELEASE_GATES: Text[] = [
 
 /**
  * The six known limitations of the population, declared rather than hidden.
- * The model card lists them for v1.0.0; v1.0.1 has the same microdata, so
- * they hold unchanged.
+ * The model card lists them for v1.0.0; v1.0.3 has the same generated
+ * population, so they hold unchanged (its nuts2 correction is in SUPERSEDED).
  */
 export const LIMITATIONS: Array<{ title: Text; body: Text }> = [
   {
@@ -83,13 +84,13 @@ export const LIMITATIONS: Array<{ title: Text; body: Text }> = [
 ];
 
 /**
- * How the public answers changed on publication day (doc 206 §5): v1.0.1
- * replaced v1.0.0's launch thresholds. A historical fact about v1.0.0, so its
- * counts are written out, not read from the current release's metadata.
+ * The publication day's four releases (doc 206 §5–§7; ERRATA): v1.0.3
+ * replaced v1.0.0, v1.0.1 and v1.0.2, all of 2026-10-05. A historical fact,
+ * so it is written out, not read from the current release's metadata.
  */
 export const SUPERSEDED: Text = {
-  pt: 'A versão 1.0.0, publicada a 5 de outubro de 2026, aplicava às respostas do site limiares de lançamento definidos em julho: as 1 611 freguesias de qualidade C mostravam os números do concelho, e as categorias com menos de 10 pessoas geradas ficavam escondidas. A versão 1.0.1, do mesmo dia, retirou esses limiares: cada freguesia responde com os seus próprios números e o seu nível de qualidade, nada é suprimido, e uma categoria sem ninguém aparece como 0,0%. As pessoas e os agregados gerados são os mesmos nas duas versões.',
-  en: 'Release 1.0.0, published on 5 October 2026, applied launch thresholds written in July to the site’s answers: the 1,611 quality C parishes showed their municipality’s figures, and categories with fewer than 10 generated people were hidden. Release 1.0.1, the same day, removed those thresholds: every parish answers with its own figures and its quality tier, nothing is suppressed, and a category with no one in it shows 0.0%. The generated people and households are the same in both releases.',
+  pt: 'A versão 1.0.3 substituiu as versões 1.0.0, 1.0.1 e 1.0.2, todas de 5 de outubro de 2026. A 1.0.0 aplicava às respostas do site limiares de lançamento que escondiam cerca de metade das respostas das freguesias; a 1.0.1 retirou-os, e cada freguesia passou a responder com os seus próprios números; a 1.0.2 passou as perguntas sobre agregados para os agregados privados e corrigiu a apresentação; a 1.0.3 corrigiu a coluna nuts2 dos microdados, que passou a seguir as regiões NUTS II de 2013. As pessoas e os agregados gerados são os mesmos nas quatro versões.',
+  en: 'Release 1.0.3 replaced releases 1.0.0, 1.0.1 and 1.0.2, all of 5 October 2026. Release 1.0.0 applied launch thresholds to the site’s answers that hid about half of the parish answers; 1.0.1 removed them, so every parish answers with its own figures; 1.0.2 asked the household questions of private households and fixed the presentation; 1.0.3 corrected the microdata’s nuts2 column to the 2013 NUTS II regions. The generated people and households are the same in all four releases.',
 };
 
 /** Novelty, verbatim from the handoff (scorecard.novelty, rounded by the producer). */

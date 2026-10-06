@@ -140,11 +140,11 @@ sha256sum checksums.sha256`;
                 [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: calibrada nos Censos 2021 do INE.' : '2021: calibrated to INE’s 2021 Census.'],
                 [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span><span className="break-all font-mono text-[13px]">sha256 {release.model_sha256}</span></>],
                 [pt ? 'Código' : 'Code', <span key="c" className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>],
-                [pt ? 'Versão anterior' : 'Previous release', <>
+                [pt ? 'Versões anteriores' : 'Previous releases', <>
+                  {SUPERSEDED[locale]}{' '}
                   {pt
-                    ? <>Os ficheiros da <a className={link} href={POPULATION_DOWNLOADS.superseded}>versão 1.0.0</a> continuam no GitHub, como registo. </>
-                    : <>The files of <a className={link} href={POPULATION_DOWNLOADS.superseded}>release 1.0.0</a> stay on GitHub, as a record. </>}
-                  {SUPERSEDED[locale]}
+                    ? <>Os ficheiros das versões 1.0.0 e 1.0.1 continuam no GitHub, como registo, na <a className={link} href={POPULATION_DOWNLOADS.releases}>lista de versões</a>; a 1.0.2 não chegou a ser publicada lá.</>
+                    : <>The files of releases 1.0.0 and 1.0.1 stay on GitHub, as a record, in the <a className={link} href={POPULATION_DOWNLOADS.releases}>list of releases</a>; 1.0.2 was never published there.</>}
                 </>],
               ]} />
             </Section>
@@ -182,8 +182,8 @@ sha256sum checksums.sha256`;
                   ? `${formatCount(release.counts.persons, locale)} linhas, uma por pessoa gerada, incluindo quem vive em alojamentos coletivos (is_institutional = 1, registos parciais).`
                   : `${formatCount(release.counts.persons, locale)} rows, one per generated person, including residents of collective quarters (is_institutional = 1, partial records).`],
                 [pt ? 'Agregados' : 'Households', pt
-                  ? `${formatCount(release.counts.households, locale)} linhas, uma por agregado gerado. Cada alojamento coletivo conta como um agregado (is_institutional = 1).`
-                  : `${formatCount(release.counts.households, locale)} rows, one per generated household. Each collective living quarter counts as one household (is_institutional = 1).`],
+                  ? `${formatCount(release.counts.households, locale)} linhas, uma por agregado gerado. Cada alojamento coletivo conta como um agregado (is_institutional = 1). As perguntas do site sobre agregados contam só os agregados privados (is_institutional = 0).`
+                  : `${formatCount(release.counts.households, locale)} rows, one per generated household. Each collective living quarter counts as one household (is_institutional = 1). The site’s household questions count private households only (is_institutional = 0).`],
                 [pt ? 'Ligação' : 'Join', pt
                   ? 'Pessoas e agregados ligam-se por (freguesia, synthetic_hh_id): o identificador do agregado só é único dentro de cada freguesia.'
                   : 'Persons and households join on (freguesia, synthetic_hh_id): the household id is unique only within a parish.'],
@@ -196,8 +196,11 @@ sha256sum checksums.sha256`;
                   ? `${formatCount(release.counts.parishes_published, locale)} freguesias publicadas, nenhuma suprimida pelo tamanho. As pequenas levam um nível de qualidade em vez de serem retiradas.`
                   : `${formatCount(release.counts.parishes_published, locale)} parishes published, none suppressed for size. Small ones carry a quality tier instead of being withheld.`],
                 [pt ? 'Códigos' : 'Codes', pt
-                  ? 'Códigos DICOFRE de 6 dígitos da CAOP 2021 (as freguesias dos Censos 2021). Os nomes dos concelhos vêm da CAOP 2024.1.'
-                  : '6-digit DICOFRE codes from CAOP 2021 (the 2021 Census parishes). Municipality names come from CAOP 2024.1.'],
+                  ? 'Códigos DICOFRE de 6 dígitos da CAOP 2021 (as freguesias dos Censos 2021). No pacote, os nomes dos concelhos vêm da geografia dos Censos 2021 do INE; o site usa os da CAOP 2021.'
+                  : '6-digit DICOFRE codes from CAOP 2021 (the 2021 Census parishes). In the package, municipality names come from INE’s 2021 Census geography; the site uses CAOP 2021’s.'],
+                [pt ? 'Regiões' : 'Regions', pt
+                  ? 'A coluna nuts2 é a região NUTS II (2013) da freguesia. Até à versão 1.0.2 era um agrupamento por distrito; a 1.0.3 corrigiu-a (ver as erratas).'
+                  : 'The nuts2 column is the parish’s NUTS II (2013) region. Up to release 1.0.2 it was a district grouping; 1.0.3 corrected it (see the errata).'],
                 [pt ? 'Concelhos' : 'Municipalities', pt
                   ? `${formatCount(meta.counts.municipalities, locale)} concelhos, com o código no formato DDCC00.`
                   : `${formatCount(meta.counts.municipalities, locale)} municipalities, coded as DDCC00.`],
