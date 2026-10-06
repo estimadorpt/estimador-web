@@ -32,7 +32,7 @@ export function VizShowcase({ pt }: { pt: boolean }) {
 
       <DataCard title={pt ? 'Evolução ao longo do tempo' : 'Change over time'} subtitle={current.subtitle} badge={example}
         controls={<Segmented label={pt ? 'Âmbito' : 'Scope'} value={scope} onChange={setScope} options={[{ value: 'geral', label: pt ? 'Visão geral' : 'Overview' }, { value: 'trabalho', label: pt ? 'Trabalho' : 'Labour' }, { value: 'precos', label: pt ? 'Preços' : 'Prices' }]} />}
-        source="Fonte: INE" updated={pt ? 'Atualização: 15 de março de 2026' : 'Updated: 15 March 2026'} methodologyHref="/economia/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        source={pt ? 'Fonte: INE' : 'Source: INE'} updated={pt ? 'Atualização: 15 de março de 2026' : 'Updated: 15 March 2026'} methodologyHref="/economia/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
         <TrendChart key={scope} series={[{ name: current.name, points: current.points }]} format={current.format} yMin={current.yMin} yMax={current.yMax} locale={pt ? 'pt' : 'en'} tableCaption={current.name} />
       </DataCard>
 
@@ -54,10 +54,10 @@ export function VizShowcase({ pt }: { pt: boolean }) {
       </div>
 
       <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
-        <DataCard title={pt ? 'População residente por grupo etário' : 'Resident population by age group'} badge={example} source="Fonte: INE, Censos 2021" methodologyHref="/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        <DataCard title={pt ? 'População residente por grupo etário' : 'Resident population by age group'} badge={example} source={pt ? 'Fonte: INE, Censos 2021' : 'Source: INE, 2021 Census'} methodologyHref="/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
           <ColumnChart data={[{ label: '0–14', value: 1.3 }, { label: '15–24', value: 1.1 }, { label: '25–64', value: 5.6, highlight: true }, { label: '65+', value: 2.4 }]} emphasis tableCaption={pt ? 'População residente por grupo etário' : 'Resident population by age group'} xLabel={pt ? 'Grupo etário' : 'Age group'} format={v => `${v.toFixed(1).replace('.', ',')} M`} yLabel={pt ? 'milhões' : 'millions'} height={220} locale={pt ? 'pt' : 'en'} />
         </DataCard>
-        <DataCard title={pt ? 'Cem pessoas' : 'One hundred people'} subtitle={pt ? 'Cada ponto é 1% do grupo' : 'Each dot is 1% of the group'} badge={example} source="Fonte: INE, Censos 2021" updated={pt ? 'Atualização: 15 de março de 2026' : 'Updated: 15 March 2026'} methodologyHref="/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
+        <DataCard title={pt ? 'Cem pessoas' : 'One hundred people'} subtitle={pt ? 'Cada ponto é 1% do grupo' : 'Each dot is 1% of the group'} badge={example} source={pt ? 'Fonte: INE, Censos 2021' : 'Source: INE, 2021 Census'} updated={pt ? 'Atualização: 15 de março de 2026' : 'Updated: 15 March 2026'} methodologyHref="/metodologia" methodologyLabel={pt ? 'Metodologia' : 'Methodology'}>
           <PeopleGrid shares={[{ label: '0–17', value: 0.16 }, { label: '18–39', value: 0.27 }, { label: '40–64', value: 0.35 }, { label: '65+', value: 0.22 }]} tableCaption={pt ? 'População por grupo etário' : 'Population by age group'} />
         </DataCard>
       </div>

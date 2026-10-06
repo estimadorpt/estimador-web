@@ -135,7 +135,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               <h2 id="estado-title" className="text-2xl text-ink md:text-[1.75rem]">
                 {pt ? 'Esta versão passou nos critérios de publicação?' : 'Did this release pass its gates?'}
               </h2>
-              <aside className="max-w-3xl border-l-2 border-amber-500 bg-amber-50 py-4 pl-5 pr-4 text-sm leading-relaxed text-stone-700">
+              <div role="note" className="max-w-3xl border-l-2 border-amber-500 bg-amber-50 py-4 pl-5 pr-4 text-sm leading-relaxed text-stone-700">
                 <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Antes de ler qualquer número' : 'Before reading any figure'}</p>
                 <p className="font-semibold text-ink">{scorecard.honesty_notes[2]?.[locale]}</p>
                 <p className="mt-1.5">
@@ -158,7 +158,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                     {scorecard.honesty_notes.slice(0, 2).map(note => <li key={note.en}>{note[locale]}</li>)}
                   </ul>
                 </details>
-              </aside>
+              </div>
               <div className="grid gap-4 md:grid-cols-3">
                 <StatusItem
                   tone={scorecard.headline.passes_gate && scorecard.status === 'ok' ? 'pass' : 'caveat'}

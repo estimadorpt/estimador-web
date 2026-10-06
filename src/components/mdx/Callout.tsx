@@ -25,11 +25,11 @@ interface CalloutProps {
  */
 export function Callout({ children, kind = 'context', label }: CalloutProps) {
   return (
-    <aside className={`my-6 border-l-2 py-4 pl-5 pr-4 font-sans text-sm leading-relaxed ${TONE[kind]}`}>
+    <div role="note" className={`my-6 border-l-2 py-4 pl-5 pr-4 font-sans text-sm leading-relaxed ${TONE[kind]}`}>
       {label && (
         <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{label}</p>
       )}
       <div className="[&>p]:mb-2 [&>p:last-child]:mb-0">{children}</div>
-    </aside>
+    </div>
   );
 }

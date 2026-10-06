@@ -135,7 +135,9 @@ export default async function MethodologyPage({
         <div className="mx-auto w-full max-w-7xl px-4 pb-10 md:pb-16"><div className="max-w-3xl">
           <nav aria-label={pt ? 'Métodos por secção' : 'Methods by section'} className="my-8 divide-y divide-line border-y border-line">
             {areas.map(area => (
-              <div key={area.href} className="py-5">
+              <div key={area.href} id={area.href === '/eleicoes/metodologia' ? 'eleicoes' : undefined} className="py-5">
+                {/* Old shared links (/metodologia#eleicoes, #segunda-volta-2026) land on the elections row. */}
+                {area.href === '/eleicoes/metodologia' && <span id="segunda-volta-2026" className="block" />}
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{area.label}</p>
                 <Link href={area.href} locale={locale} className="mt-2 inline-flex min-h-11 items-center text-lg font-bold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">
                   {area.question}&nbsp;<span aria-hidden="true">→</span>

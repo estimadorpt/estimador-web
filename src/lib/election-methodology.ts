@@ -3,8 +3,8 @@ import path from 'path';
 
 /**
  * The election methodology (/eleicoes/metodologia), one MDX file per locale in
- * src/content/methodology/eleicoes/. /metodologia keeps only a short note in
- * src/content/methodology/{locale}.mdx that points here, with the old anchors.
+ * src/content/methodology/eleicoes/. The /metodologia hub keeps the old
+ * #eleicoes and #segunda-volta-2026 anchors on its elections row.
  */
 export const ELECTION_METHODOLOGY_REVISED = '2026-10-06';
 

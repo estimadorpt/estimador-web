@@ -393,6 +393,28 @@
      and about. Set in Newsreader at a wider measure than the dashboards:
      a piece of writing should not be typeset like a chart legend. Headings,
      captions, tables and figures inside it keep the interface face. */
+  /* Hand-written <details>/<summary> in MDX bypass the components map: give
+     them the disclosure look and a 44px target here. */
+  .article-body details {
+    margin-block: 1.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background: var(--color-cream);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+  }
+  .article-body details > summary {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .article-body details[open] > summary { border-bottom: 1px solid var(--color-line); }
+  .article-body details > :not(summary) { padding-inline: 1rem; }
+
   .article-body {
     font-family: var(--font-serif);
     font-optical-sizing: auto;

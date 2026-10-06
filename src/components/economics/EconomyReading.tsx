@@ -121,7 +121,7 @@ export function EconomyReading({
           </Tabs.Content>
         ))}
       </Tabs.Root>
-      <aside className="rounded-2xl border border-line bg-cream p-6">
+      <div className="rounded-2xl border border-line bg-cream p-6">
         <h2 className="text-xl">{lang === 0 ? 'Antes de comparar' : 'Before comparing'}</h2>
         <ol className="mt-5 space-y-6 text-sm text-ink-muted">
           {(lang === 0 ? [
@@ -134,7 +134,7 @@ export function EconomyReading({
             ['The same version?', 'Data may be revised after their first publication.'],
           ]).map(([title, body], i) => <li key={title} className="flex gap-3"><span className="pt-1 text-[11px] font-bold" aria-hidden="true">0{i+1}</span><div><h3 className="text-sm leading-snug font-bold text-ink">{title}</h3><p className="mt-2 leading-relaxed">{body}</p></div></li>)}
         </ol>
-      </aside>
+      </div>
       <p className="sr-only" role="status">{notice}</p>
     </section>
   );

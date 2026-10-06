@@ -783,7 +783,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
           </div>
 
           {/* What the pointer, the keyboard or a tap is on */}
-          <aside className="flex flex-col gap-4 border-t border-line p-4 @3xl:w-80 @3xl:shrink-0 @3xl:border-l @3xl:border-t-0">
+          <div className="flex flex-col gap-4 border-t border-line p-4 @3xl:w-80 @3xl:shrink-0 @3xl:border-l @3xl:border-t-0">
             <div className="sm:min-h-[9.5rem]" aria-live="polite">
               {readout?.kind === 'parish' ? (
                 <>
@@ -843,7 +843,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
               {view.level === 'country' ? t.insets : currentRegion === 'madeira' ? t.selvagens : ''}
             </p>
             <p className="sr-only" aria-live="polite">{announce}</p>
-          </aside>
+          </div>
         </div>
 
         {/* The table twin: the same places as a list */}

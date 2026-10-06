@@ -770,7 +770,7 @@
     "narrativeByTemplate": "texto de regras fixas sobre os painéis publicados (sem modelo, sem afirmações novas)",
     "producerNoteEn": "Nota técnica do produtor (em inglês)",
     "staleBanner": "Dados de {date} — esta página não reflete ainda os indicadores mais recentes.",
-    "staleBannerDetail": "O pipeline de atualização ainda não publicou dados mais recentes. Leia cada painel como um retrato dessa data, não de hoje.",
+    "staleBannerDetail": "A atualização ainda não publicou dados mais recentes. Lê cada painel como um retrato dessa data, não de hoje.",
     "quarterEndedNote": "O trimestre {quarter} já terminou — aguarda-se a estimativa rápida do INE. Os dados abaixo são um retrato {position} de dentro do trimestre.",
     "positionNowNote": "Pelo calendário estamos agora em {position}; os dados abaixo são de uma versão {payloadPosition}.",
     "staleNarrativeNote": "Resumo escrito com dados de {date}",
