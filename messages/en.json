@@ -11,15 +11,12 @@
     "economics": "Economy",
     "economicsPreparing": "Economy · in preparation",
     "population": "Population",
-<<<<<<< HEAD
-    "game": "Beat the Model"
-=======
-    "populationSearch": "Find your parish",
-    "populationGame": "Mystery parish (daily game)",
+    "game": "Beat the Model",
+    "populationMethodology": "Methodology",
     "populationData": "Open data",
+    "populationSearch": "Find your parish",
     "populationQuality": "Quality",
-    "populationMethodology": "Methodology"
->>>>>>> worktree-wf_7788cb80-c97-4
+    "populationGame": "Mystery parish (daily game)"
   },
   "common": {
     "methodology": "Methodology"
@@ -97,10 +94,10 @@
     "blocProjectionCaption": "Projected vote share for election day ({election}), in the forecast of {date}; in brackets, the 94% credible interval (HDI).",
     "mapEyebrow": "Parliamentary 2025 · archive",
     "mapLede": "The forecast of {forecast} by district, for the election of {election}. Choose a district to see each party’s predicted vote share.",
-    "blocMajority": "{parties} majority",
-    "noBlocMajorityNote": "Neither bloc with a majority: {probability} of the simulations. The AD + CH sum, as arithmetic only, reached 116 seats in {reach} of the simulations (median: {median}).",
+    "seatChangeBaseline": "The +1 and −1 compare each party with its own most frequent seat count in that district across the simulations, not with 2024. Because each party is compared with its own count, a district’s gains and losses need not balance: when a seat is split almost evenly between two parties, both show −1.",
     "otherParties": "Other parties",
-    "seatChangeBaseline": "The +1 and −1 compare each party with its own most frequent seat count in that district across the simulations, not with 2024. Because each party is compared with its own count, a district’s gains and losses need not balance: when a seat is split almost evenly between two parties, both show −1."
+    "noBlocMajorityNote": "Neither bloc with a majority: {probability} of the simulations. The AD + CH sum, as arithmetic only, reached 116 seats in {reach} of the simulations (median: {median}).",
+    "blocMajority": "{parties} majority"
   },
   "articles": {
     "title": "Analysis and articles",
@@ -150,12 +147,7 @@
     "footerDeveloper": "An independent project by Bernardo Caldas."
   },
   "methodology": {
-<<<<<<< HEAD
-    "title": "Methodology",
-    "subtitle": "How we arrive at each answer: synthetic population, Liga Portugal, elections and economy. Sources, assumptions and limits."
-=======
     "title": "Methodology"
->>>>>>> worktree-wf_7788cb80-c97-4
   },
   "parties": {
     "AD": "Democratic Alliance",
@@ -316,18 +308,15 @@
     "moreKicker": "How we work",
     "moreMethodology": "Methodology for each domain",
     "moreArticle": "Latest analysis",
-<<<<<<< HEAD
-    "electionsForecastRunoff": "forecast of {date} for the runoff"
-=======
-    "aboutLink": "About the project",
-    "shortcutsLabel": "Shortcuts",
+    "electionsForecastRunoff": "forecast of {date} for the runoff",
     "shortcutPopulation": "My parish",
+    "shortcutsLabel": "Shortcuts",
     "shortcutPopulationStatus": "Version {version}",
     "shortcutClub": "My club",
-    "shortcutClubStatus": "After matchday {matchday}",
     "shortcutElections": "Elections",
-    "shortcutElectionsStatus": "Archive"
->>>>>>> worktree-wf_7788cb80-c97-4
+    "shortcutElectionsStatus": "Archive",
+    "shortcutClubStatus": "After matchday {matchday}",
+    "aboutLink": "About the project"
   },
   "sections": {
     "ligaPortugal": "Liga Portugal",
@@ -397,7 +386,6 @@
     "survivalGateDetail": "Practically safe",
     "titleSwing": "Swing",
     "ifWinsTemplate": "If __TEAM__ win",
-    "ifLosesTemplate": "If __TEAM__ lose",
     "winUplift": "Importance",
     "target": "Target",
     "champion": "Champion",
@@ -439,10 +427,6 @@
     "season": "Season",
     "viewScenarios": "View scenarios",
     "teamPageTitle": "{team}: Liga Portugal forecast",
-<<<<<<< HEAD
-=======
-    "titleCalibrationCaveat": "Read with care: in past seasons the model underrated teams leading by 3 or more points (it gave them 56% on average, and they won the title 74% of the time).",
->>>>>>> worktree-wf_7788cb80-c97-2
     "teamPageDescription": "Title scenarios and decisive matches for {team} in Liga Portugal {season}.",
     "scenariosTitle": "Victory scenarios",
     "scenariosDescription": "Three possible paths to the title, from most likely to least likely. Each scenario shows what needs to happen — and what rivals must do.",
@@ -508,7 +492,6 @@
     "noChange": "no change",
     "simulator": "Simulator",
     "simulatorCta": "Pick the result of a next-round match and see how the title and relegation chances change.",
-    "simulatorLede": "Pick the result of a next-round match and see how every club's title and relegation chances change. One match at a time: every other result stays uncertain.",
     "trySimulator": "Try it",
     "teamClickHint": "Choose a club in the table to see its page.",
     "simulatedStandings": "Simulated standings",
@@ -557,7 +540,10 @@
     "matchesRemainingLabel": "Remaining",
     "matchdayImpact": "Impact",
     "championDelta": "title",
-    "relegationDelta": "relegation"
+    "relegationDelta": "relegation",
+    "simulatorLede": "Pick the result of a next-round match and see how every club's title and relegation chances change. One match at a time: every other result stays uncertain.",
+    "ifLosesTemplate": "If __TEAM__ lose",
+    "titleCalibrationCaveat": "Read with care: in past seasons the model underrated teams leading by 3 or more points (it gave them 56% on average, and they won the title 74% of the time)."
   },
   "meta": {
     "defaultTitle": "estimador.pt — Data to understand Portugal",
@@ -872,8 +858,8 @@
     "calendarTitle": "Upcoming releases",
     "calendarEstimated": "estimated date",
     "calendarUpdates": "updates",
-    "preparingLede": "The read-out of the state of the economy is in preparation, so there are no figures yet. Meanwhile: three questions on how to read prices, work and activity.",
-    "methodologyTitle": "How will we read the economy?"
+    "methodologyTitle": "How will we read the economy?",
+    "preparingLede": "The read-out of the state of the economy is in preparation, so there are no figures yet. Meanwhile: three questions on how to read prices, work and activity."
   },
   "footer": {
     "products": "Sections",

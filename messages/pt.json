@@ -11,15 +11,12 @@
     "economics": "Economia",
     "economicsPreparing": "Economia · em preparação",
     "population": "População",
-<<<<<<< HEAD
-    "game": "Contra o Modelo"
-=======
-    "populationSearch": "Procurar a tua freguesia",
+    "game": "Contra o Modelo",
     "populationGame": "Freguesia misteriosa (jogo diário)",
+    "populationMethodology": "Metodologia",
     "populationData": "Dados abertos",
     "populationQuality": "Qualidade",
-    "populationMethodology": "Metodologia"
->>>>>>> worktree-wf_7788cb80-c97-4
+    "populationSearch": "Procurar a tua freguesia"
   },
   "common": {
     "methodology": "Metodologia"
@@ -97,10 +94,10 @@
     "blocProjectionCaption": "Percentagem de votos prevista para o dia da eleição ({election}), na previsão de {date}; entre parênteses, o intervalo de credibilidade de 94% (HDI).",
     "mapEyebrow": "Legislativas 2025 · arquivo",
     "mapLede": "A previsão de {forecast} por distrito, para a eleição de {election}. Escolhe um distrito para ver a percentagem de votos prevista para cada partido.",
-    "blocMajority": "Maioria {parties}",
+    "seatChangeBaseline": "Os +1 e −1 comparam cada partido com o seu próprio número de mandatos mais frequente nesse distrito, nas simulações, e não com 2024. Como cada partido é comparado com o seu valor, os ganhos e as perdas de um distrito não têm de se compensar: quando um mandato se divide quase a meias entre dois partidos, ambos aparecem com −1.",
     "noBlocMajorityNote": "Nenhum destes blocos com maioria: {probability} das simulações. A soma AD + CH, só como aritmética, chegava aos 116 mandatos em {reach} das simulações (mediana: {median}).",
     "otherParties": "Outros partidos",
-    "seatChangeBaseline": "Os +1 e −1 comparam cada partido com o seu próprio número de mandatos mais frequente nesse distrito, nas simulações, e não com 2024. Como cada partido é comparado com o seu valor, os ganhos e as perdas de um distrito não têm de se compensar: quando um mandato se divide quase a meias entre dois partidos, ambos aparecem com −1."
+    "blocMajority": "Maioria {parties}"
   },
   "articles": {
     "title": "Análise e artigos",
@@ -150,12 +147,7 @@
     "footerDeveloper": "Um projeto independente de Bernardo Caldas."
   },
   "methodology": {
-<<<<<<< HEAD
-    "title": "Metodologia",
-    "subtitle": "Como chegamos a cada resposta: população sintética, Liga Portugal, eleições e economia. Fontes, pressupostos e limites."
-=======
     "title": "Metodologia"
->>>>>>> worktree-wf_7788cb80-c97-4
   },
   "parties": {
     "AD": "Aliança Democrática",
@@ -316,18 +308,15 @@
     "moreKicker": "Como fazemos",
     "moreMethodology": "Metodologia de cada domínio",
     "moreArticle": "Última análise",
-<<<<<<< HEAD
-    "electionsForecastRunoff": "previsão de {date} para a 2.ª volta"
-=======
+    "electionsForecastRunoff": "previsão de {date} para a 2.ª volta",
+    "shortcutClub": "O meu clube",
+    "shortcutElections": "Eleições",
+    "shortcutPopulation": "A minha freguesia",
     "aboutLink": "Sobre o projeto",
     "shortcutsLabel": "Atalhos",
-    "shortcutPopulation": "A minha freguesia",
     "shortcutPopulationStatus": "Versão {version}",
-    "shortcutClub": "O meu clube",
-    "shortcutClubStatus": "Após a jornada {matchday}",
-    "shortcutElections": "Eleições",
-    "shortcutElectionsStatus": "Arquivo"
->>>>>>> worktree-wf_7788cb80-c97-4
+    "shortcutElectionsStatus": "Arquivo",
+    "shortcutClubStatus": "Após a jornada {matchday}"
   },
   "sections": {
     "ligaPortugal": "Liga Portugal",
@@ -397,7 +386,6 @@
     "survivalGateDetail": "Está praticamente seguro",
     "titleSwing": "Variação",
     "ifWinsTemplate": "Se o __TEAM__ vencer",
-    "ifLosesTemplate": "Se o __TEAM__ perder",
     "winUplift": "Importância",
     "target": "Objetivo",
     "champion": "Campeão",
@@ -439,10 +427,6 @@
     "season": "Época",
     "viewScenarios": "Ver cenários",
     "teamPageTitle": "{team}: previsão da Liga Portugal",
-<<<<<<< HEAD
-=======
-    "titleCalibrationCaveat": "Lê com cautela: no passado, o modelo subestimou quem liderava com 3 ou mais pontos de vantagem (deu-lhes 56% em média, e foram campeões em 74% dos casos).",
->>>>>>> worktree-wf_7788cb80-c97-2
     "teamPageDescription": "Cenários de título e jogos decisivos para {team} na Liga Portugal {season}.",
     "scenariosTitle": "Cenários de vitória",
     "scenariosDescription": "Três percursos possíveis para o título, do mais provável ao menos provável. Cada cenário mostra o que precisa de acontecer — e o que os rivais têm de fazer.",
@@ -508,7 +492,6 @@
     "noChange": "sem alteração",
     "simulator": "Simulador",
     "simulatorCta": "Escolhe o resultado de um jogo da próxima jornada e vê como mudam as hipóteses de título e de despromoção.",
-    "simulatorLede": "Escolhe o resultado de um jogo da próxima jornada e vê como mudam as hipóteses de título e de despromoção de cada clube. Um jogo de cada vez: todos os outros resultados continuam incertos.",
     "trySimulator": "Experimentar",
     "teamClickHint": "Escolhe uma equipa na tabela para veres a página dela.",
     "simulatedStandings": "Classificação simulada",
@@ -557,7 +540,10 @@
     "matchesRemainingLabel": "Por disputar",
     "matchdayImpact": "Impacto",
     "championDelta": "título",
-    "relegationDelta": "despromoção"
+    "relegationDelta": "despromoção",
+    "simulatorLede": "Escolhe o resultado de um jogo da próxima jornada e vê como mudam as hipóteses de título e de despromoção de cada clube. Um jogo de cada vez: todos os outros resultados continuam incertos.",
+    "ifLosesTemplate": "Se o __TEAM__ perder",
+    "titleCalibrationCaveat": "Lê com cautela: no passado, o modelo subestimou quem liderava com 3 ou mais pontos de vantagem (deu-lhes 56% em média, e foram campeões em 74% dos casos)."
   },
   "meta": {
     "defaultTitle": "estimador.pt — Dados para compreender Portugal",
@@ -872,8 +858,8 @@
     "calendarTitle": "Próximas divulgações",
     "calendarEstimated": "data estimada",
     "calendarUpdates": "atualiza",
-    "preparingLede": "A leitura do estado da economia está em preparação, por isso ainda não há números. Entretanto: três perguntas sobre como ler preços, trabalho e atividade.",
-    "methodologyTitle": "Como vamos ler a economia?"
+    "methodologyTitle": "Como vamos ler a economia?",
+    "preparingLede": "A leitura do estado da economia está em preparação, por isso ainda não há números. Entretanto: três perguntas sobre como ler preços, trabalho e atividade."
   },
   "footer": {
     "products": "Secções",
