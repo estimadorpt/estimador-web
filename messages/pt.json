@@ -16,10 +16,6 @@
   "common": {
     "methodology": "Metodologia"
   },
-  "homepage": {
-    "rightMajority": "Maioria de direita",
-    "leftMajority": "Maioria de esquerda"
-  },
   "map": {
     "title": "Mapa distrital",
     "backToForecast": "Voltar às Legislativas 2025",
@@ -27,9 +23,9 @@
     "portugalForecasts": "Previsão por distrito e região",
     "howToInterpret": "Como ler o mapa",
     "colors": "Cores",
-    "colorsDescription": "Cada distrito está colorido com a cor do partido com maior percentagem de votos prevista nessa região.",
+    "colorsDescription": "Cada distrito tem a cor do partido com maior percentagem de votos prevista nessa região; a legenda por baixo do mapa diz que cor é de que partido.",
     "interaction": "Interação",
-    "interactionDescription": "Passa o rato sobre um distrito para ver o partido à frente e a percentagem, ou escolhe-o para ver todos os detalhes.",
+    "interactionDescription": "Toca ou passa o cursor num distrito para ver a percentagem de votos prevista de cada partido, ou escolhe-o na lista acima do mapa.",
     "islands": "Ilhas",
     "islandsDescription": "Os Açores e Madeira aparecem como múltiplas ilhas, mas as previsões são agregadas por região.",
     "generalStats": "Partido à frente por distrito",
@@ -40,18 +36,18 @@
   },
   "forecast": {
     "subtitle": "Legislativas 2025: o que a previsão dizia",
-    "pollingTrends": "Tendências das sondagens",
+    "pollingTrends": "Tendência estimada a partir das sondagens",
     "coalitionSeats": "Distribuição de mandatos por coligação",
     "individualParties": "Projeções de partidos individuais",
     "districtAnalysis": "Análise distrital",
-    "leftCoalition": "Esquerda",
-    "rightCoalition": "Direita",
+    "leftCoalition": "PS + BE + CDU + L",
+    "rightCoalition": "AD + IL",
     "majorityChance": "Probabilidade de maioria",
     "pollingHouseEffects": "Efeitos das empresas de sondagens",
     "houseEffectsLoading": "A carregar a análise das empresas de sondagens…",
     "houseEffectsTerm": "Os efeitos de casa",
     "houseEffectsExplainer": "mostram como cada empresa de sondagens se desvia sistematicamente da média das sondagens, em escala logit. Células a vermelho indicam que a empresa tende a mostrar mais apoio a esse partido; células a azul, menos.",
-    "houseEffectsValuesNote": "Os valores são desvios em logit. Valores absolutos maiores indicam um enviesamento sistemático mais forte. Passa o cursor sobre as células para ver os valores exatos.",
+    "houseEffectsValuesNote": "Os valores são desvios em logit, a escala do modelo antes de passar a percentagens. Cada desvio é uma componente que soma zero entre os partidos de cada empresa, multiplicada por um desvio-padrão próprio de cada partido; por isso as linhas da tabela não somam exatamente zero. Passa o cursor sobre as células para ver os valores exatos.",
     "aboutModel": "Sobre este modelo",
     "dataSources": "Fontes de dados",
     "methodology": "Metodologia",
@@ -59,8 +55,8 @@
     "mostSeats": "mais mandatos",
     "coalitionDescription": "Cada ponto é uma simulação, no número exato de mandatos do bloco. A linha a cheio marca a mediana; a tracejada, a maioria.",
     "simulationDescription": "Com base em {count} simulações de Monte Carlo. Os pontos mostram a média; as bandas, intervalos de credibilidade de 50% (P25–P75) e de 80% (P10–P90).",
-    "pollingTrendsDescription": "Médias de sondagens suavizadas nos dois anos anteriores à eleição ({count} datas de estimativa). As linhas mostram a percentagem de votos estimada; a tabela inclui a banda de incerteza, um intervalo de credibilidade de 94% (HDI).",
-    "dataSourcesDescription": "Dados de sondagens das principais empresas de sondagens portuguesas, ponderados por fiabilidade e atualidade. Resultados históricos de eleições e dados demográficos.",
+    "pollingTrendsDescription": "A estimativa do modelo para cada partido nas datas das sondagens que leu, nos dois anos anteriores à eleição ({count} datas), com o intervalo de credibilidade de 94% (HDI). As sondagens em si não fazem parte deste arquivo; a tabela tem a estimativa e a banda de todos os partidos.",
+    "dataSourcesDescription": "Sondagens de Aximage, CESOP–Católica, Consulmark2, ICS/ISCTE/GfK Metris, Intercampus, Metris e Pitagórica, até à última, de 15 de maio de 2025, e os resultados das legislativas anteriores (CNE), de onde vêm as diferenças entre distritos.",
     "methodologyDescription": "Simulação de Monte Carlo considerando incerteza das sondagens, variações distritais e sistema de alocação de mandatos D'Hondt.",
     "updatesDescription": "O modelo foi atualizado à medida que surgiam novas sondagens. Esta é a última previsão publicada, de {date}.",
     "voteShareLabel": "Percentagem de votos (%)",
@@ -71,9 +67,9 @@
     "seatGain": "+1 mandato: {pct}%",
     "seatLoss": "−1 mandato: {pct}%",
     "closeRace": "Disputa renhida pela atribuição de mandatos",
-    "likelyWinners": "Vencedor provável por distrito",
-    "likelyWinnersSubtitle": "Entre os {count} distritos de atribuição estável — não os {total} distritos no total.",
-    "districtsUnit": "distritos",
+    "likelyWinners": "Partido à frente em votos, por distrito",
+    "likelyWinnersSubtitle": "Os {total} distritos e regiões, pelo partido com maior percentagem de votos prevista. Não é o número de mandatos nem uma probabilidade de vitória.",
+    "districtsUnit": "{count, plural, one {distrito} other {distritos}}",
     "totalDistricts": "Distritos",
     "seatsInPlay": "Com mandatos em disputa",
     "stableAllocation": "Atribuição estável",
@@ -93,13 +89,10 @@
     "blocProjectionCaption": "Percentagem de votos prevista para o dia da eleição ({election}), na previsão de {date}; entre parênteses, o intervalo de credibilidade de 94% (HDI).",
     "mapEyebrow": "Legislativas 2025 · arquivo",
     "mapLede": "A previsão de {forecast} por distrito, para a eleição de {election}. Escolhe um distrito para ver a percentagem de votos prevista para cada partido.",
-    "presidentialLeading": "Candidato líder",
-    "secondRound": "Necessidade de segunda volta",
-    "comingSoon": "Em breve",
-    "mayoralRaces": "Corridas autárquicas",
-    "municipalCouncils": "Câmaras municipais",
-    "mepAllocation": "Distribuição de deputados",
-    "politicalGroups": "Grupos políticos"
+    "blocMajority": "Maioria {parties}",
+    "noBlocMajorityNote": "Nenhum destes blocos com maioria: {probability} das simulações. A soma AD + CH, só como aritmética, chegava aos 116 mandatos em {reach} das simulações (mediana: {median}).",
+    "otherParties": "Outros partidos",
+    "seatChangeBaseline": "Os +1 e −1 comparam cada partido com o seu próprio número de mandatos mais frequente nesse distrito, nas simulações, e não com 2024. Como cada partido é comparado com o seu valor, os ganhos e as perdas de um distrito não têm de se compensar: quando um mandato se divide quase a meias entre dois partidos, ambos aparecem com −1."
   },
   "articles": {
     "title": "Análise e artigos",
@@ -150,7 +143,7 @@
   },
   "methodology": {
     "title": "Metodologia",
-    "subtitle": "Como funcionam os nossos modelos eleitorais — e onde encontrar a metodologia de cada domínio"
+    "subtitle": "Como chegamos a cada resposta: população sintética, Liga Portugal, eleições e economia. Fontes, pressupostos e limites."
   },
   "parties": {
     "AD": "Aliança Democrática",
@@ -167,7 +160,7 @@
     "firstRoundTab": "1.ª volta",
     "secondRoundTab": "2.ª volta",
     "winProbability": "Probabilidade de vitória",
-    "validVoteShare": "Votos válidos",
+    "validVoteShare": "Média dos votos válidos",
     "headlineDescription": "A previsão de {date} para a segunda volta de {election}, entre {candidateA} e {candidateB}.",
     "versus": "vs",
     "blankNull": "Brancos/Nulos",
@@ -202,8 +195,8 @@
     "secondRoundNeeded": "Necessidade de segunda volta",
     "probability": "Probabilidade",
     "winProbabilitiesToday": "Probabilidade de cada candidato chegar à segunda volta",
-    "chanceOfRunoff": "Prob. 2.ª volta",
-    "voteShare": "Intenção de voto prevista",
+    "chanceOfRunoff": "Prob. de chegar à 2.ª volta",
+    "voteShare": "Intenção de voto prevista para o dia da eleição",
     "partyAffiliation": "Partido",
     "supportTrajectory": "Como evoluiu o apoio estimado?",
     "trendDescription": "Escolhe um candidato para ver a evolução do apoio estimado; os restantes candidatos aparecem como linhas discretas.",
@@ -222,10 +215,9 @@
     "headToHeadDescription": "Probabilidade de {candidateA} estar à frente de {candidateB}, por data, até à última sondagem.",
     "leads": "lidera",
     "runoffScenariosTitle": "Que pares chegariam à segunda volta?",
-    "runoffScenariosDescription": "Os pares de candidatos mais prováveis de disputar a segunda volta nas simulações da previsão, à data da última sondagem.",
+    "runoffScenariosDescription": "Os pares de candidatos mais prováveis de disputar a segunda volta nas simulações da previsão para o dia da eleição.",
     "mostLikelyMatchups": "Confrontos mais prováveis",
     "vs": "vs",
-    "sinceLastPoll": "desde última sondagem",
     "archiveEyebrow": "Eleições · arquivo",
     "archiveTitle": "Presidenciais 2026: o que a previsão dizia",
     "archiveLede": "Previsões preservadas com a informação disponível à data, para as duas voltas. Não são resultados eleitorais.",
@@ -252,13 +244,13 @@
   "elections": {
     "navPresidential": "Presidenciais 2026 · arquivo",
     "navParliamentary": "Legislativas 2025 · arquivo",
-    "navArchiveGuide": "Como ler o arquivo"
+    "navArchiveGuide": "Todas as eleições (arquivo)",
+    "navMethodology": "Como foram feitas as previsões"
   },
   "model": {
     "assumptions": {
       "title": "Pressupostos do modelo",
-      "declared_voters": "Previa apenas a intenção de voto declarada (cerca de 65% do eleitorado)",
-      "undecided": "Os cerca de 35% de indecisos representavam incerteza adicional",
+      "declared_voters": "Previa apenas a intenção de voto declarada (cerca de 65% dos inquiridos); os cerca de 35% de indecisos não entram nas bandas",
       "house_effects": "Efeitos das empresas de sondagens informados pelas eleições legislativas",
       "random_walk": "Dinâmica de passeio aleatório (random walk), como nos modelos do Economist e do FiveThirtyEight"
     },
@@ -298,21 +290,21 @@
     "economyAction": "Ver a leitura e a evidência",
     "electionsKicker": "Eleições",
     "electionsTitle": "O que dizia o modelo antes do voto?",
-    "electionsText": "Escolhe uma previsão arquivada para ver a informação disponível na altura. Não são resultados oficiais nem uma avaliação calculada do modelo.",
+    "electionsText": "São as previsões tal como foram publicadas antes do voto, não os resultados oficiais.",
     "electionsArchived": "Previsão arquivada",
     "electionsForecast": "Previsão",
     "electionsAction": "Ver a previsão arquivada",
     "electionsOpen": "Ver a previsão",
     "electionsUncertainty": "Cada estimativa traz o seu intervalo de credibilidade.",
-    "electionsRounds": "1.ª volta {date1} · 2.ª volta {date2}",
     "electionsForecastAsOf": "previsão de {date}",
     "electionsQuestionRunoff": "Quem previa o modelo a vencer a 2.ª volta?",
     "electionsQuestionSeats": "Que partido previa o modelo com mais mandatos, e haveria maioria?",
-    "electionsArchiveGuide": "Como ler o arquivo",
+    "electionsArchiveGuide": "Todas as eleições (arquivo)",
     "electionsLeadRunoffLabel": "2.ª volta a {date} · dos votos válidos · {interval}",
     "moreKicker": "Como fazemos",
     "moreMethodology": "Metodologia de cada domínio",
-    "moreArticle": "Última análise"
+    "moreArticle": "Última análise",
+    "electionsForecastRunoff": "previsão de {date} para a 2.ª volta"
   },
   "sections": {
     "ligaPortugal": "Liga Portugal",

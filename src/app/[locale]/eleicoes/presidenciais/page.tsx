@@ -20,7 +20,7 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { OFFICIAL_RESULTS, PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from "@/lib/config/elections";
-import { credibleIntervalLabel, formatElectionDayMonth, formatElectionLongDate, formatElectionNumber, formatElectionProbability } from "@/lib/election-display";
+import { credibleIntervalLabel, formatElectionDayMonth, formatElectionLongDate, formatElectionNumber, formatElectionProbabilityText } from "@/lib/election-display";
 import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
@@ -56,7 +56,7 @@ export default async function PresidentialArchivePage({
 
   const first = await loadPresidentialData();
   const secondRound = await loadSecondRoundData();
-  const { forecast, winProbabilities, trends, snapshotProbabilities, polls, headToHead, runoffPairs, changes, runoffChanges, lastPollDate } = first;
+  const { forecast, winProbabilities, trends, polls, headToHead, runoffPairs, lastPollDate } = first;
 
   // Dates, each named once. The first-round forecast is dated by its run
   // (updated_at) and by the last poll it saw; the runoff by its own run.
@@ -105,7 +105,7 @@ export default async function PresidentialArchivePage({
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500 mb-2">{t('presidential.firstRoundKicker')}</p>
             <h2 className="text-2xl md:text-3xl text-stone-900 mb-3 leading-tight">{t('presidential.firstRoundTitle')}</h2>
             <p className="text-lg text-stone-600 leading-relaxed">
-              {t('presidential.firstRoundLede', { date: firstForecast ?? firstElection, probability: formatElectionProbability(winProbabilities.second_round_probability, locale) })}
+              {t('presidential.firstRoundLede', { date: firstForecast ?? firstElection, probability: formatElectionProbabilityText(winProbabilities.second_round_probability, locale) })}
             </p>
           </div>
         </div>
@@ -132,18 +132,12 @@ export default async function PresidentialArchivePage({
             <PresidentialCandidateCards
               winProbabilities={winProbabilities}
               forecast={forecast}
-              trends={trends}
-              snapshotProbabilities={snapshotProbabilities}
               runoffPairs={runoffPairs}
-              runoffChanges={runoffChanges}
-              changes={changes}
-              cutoffDate={lastPollDate ?? undefined}
               maxCandidates={5}
               translations={{
                 chanceOfRunoff: t('presidential.chanceOfRunoff'),
                 voteShare: t('presidential.voteShare'),
                 partyLabel: t('presidential.partyAffiliation'),
-                sinceLastPoll: t('presidential.sinceLastPoll'),
               }}
             />
           </ErrorBoundary>
@@ -322,7 +316,7 @@ export default async function PresidentialArchivePage({
               {[
                 { href: '/eleicoes/legislativas', label: t('nav.parliamentaryForecast') },
                 { href: '/eleicoes/arquivo', label: t('elections.navArchiveGuide') },
-                { href: '/metodologia', label: t('common.methodology') },
+                { href: '/eleicoes/metodologia', label: t('elections.navMethodology') },
               ].map(link => (
                 <Link key={link.href} href={link.href} locale={locale} className="group inline-flex items-center gap-2 text-ink underline underline-offset-4">
                   <span className="font-semibold">{link.label}</span>
@@ -338,16 +332,16 @@ export default async function PresidentialArchivePage({
             <div className="max-w-2xl">
               <h2 className="text-2xl mb-3">{t('presidential.aboutForecast')}</h2>
               <p className="text-sm leading-relaxed text-stone-600 mb-5">{t('presidential.aboutDescription')}</p>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-600">
-                <span className="inline-flex items-center gap-2">
+              {/* One fact per line: inline "·" separators were left dangling
+                  at the end of a wrapped line. */}
+              <ul className="space-y-1 text-sm text-stone-600">
+                <li className="flex items-center gap-2">
                   <Users aria-hidden="true" className="w-4 h-4" />
                   {t('presidential.candidatesModeled', { count: formatElectionNumber(modelledCandidates, locale) })}
-                </span>
-                <span aria-hidden="true">·</span>
-                <span>{firstRoundDateLine}</span>
-                <span aria-hidden="true">·</span>
-                <span>{secondRoundDateLine}</span>
-              </div>
+                </li>
+                <li>{firstRoundDateLine}</li>
+                <li>{secondRoundDateLine}</li>
+              </ul>
               <p className="mt-4 text-sm text-stone-600">{officialResults}</p>
             </div>
           </div>

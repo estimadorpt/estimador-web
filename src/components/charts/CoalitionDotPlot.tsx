@@ -6,7 +6,7 @@ import { ChartTable } from "@/components/viz/ChartTable";
 import { FURNITURE } from "@/components/viz/theme";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { leftBlocParties, rightBlocParties, majorityThreshold } from "@/lib/config/blocs";
-import { everyKthIndex, summariseBlocs, type BlocSimulations, type SeatDraw } from "@/lib/election-aggregates";
+import { dotsPerRowToFit, everyKthIndex, stackDots, summariseBlocs, type BlocSimulations, type SeatDraw } from "@/lib/election-aggregates";
 import { formatElectionNumber, formatElectionProbability } from "@/lib/election-display";
 
 interface CoalitionDotPlotProps {
@@ -25,11 +25,17 @@ interface CoalitionDotPlotProps {
 const BLOC_COLOURS: Record<string, string> = { left: "#5eb184", right: "#c49536" };
 const PHONE_TARGET = 200;
 
+const SEAT_DOMAIN: [number, number] = [40, 140];
+const FACET_PADDING = 0.16;
+
 /**
- * Seat totals of the two blocs across the simulations: one dot per drawn
- * simulation at its exact seat count (dodgeY stacks equal counts; nothing is
+ * Seat totals of the two blocs across the simulations as a dot histogram: one
+ * dot per drawn simulation in its exact seat count's column (nothing is
  * jittered), from a fixed, evenly spaced subsample, so the picture is the same
- * on every load. Medians, quantiles and majority odds come from every draw.
+ * on every load. The dots per row are chosen from the tallest column, so each
+ * bloc's stack stays inside its own row and never reaches the axis (a dodge
+ * let the 100-dot columns run into the next row). Medians, quantiles and
+ * majority odds come from every draw.
  */
 export function CoalitionDotPlot({
   data,
@@ -63,32 +69,49 @@ export function CoalitionDotPlot({
       const keep = everyKthIndex(simulations.drawn, phone ? PHONE_TARGET : simulations.drawn);
       setDrawnHere(keep.length);
       const blocNames = simulations.blocs.map(b => labels[b.key] ?? b.key);
-      const points = simulations.blocs.flatMap(b => keep.map(i => ({ bloc: labels[b.key] ?? b.key, seats: b.sample[i] })));
+      const height = phone ? 360 : 420;
+      const margin = { top: 28, right: phone ? 12 : 40, bottom: 44, left: phone ? 12 : 24 };
+      // Plot's band scale with equal inner and outer padding.
+      const facetHeight = ((height - margin.top - margin.bottom) / (blocNames.length + FACET_PADDING)) * (1 - FACET_PADDING);
+      const unitPx = (width - margin.left - margin.right) / (SEAT_DOMAIN[1] - SEAT_DOMAIN[0]);
+      const samples = simulations.blocs.map(b => keep.map(i => b.sample[i]));
+      const tallest = Math.max(1, ...samples.map(values => Math.max(0, ...Array.from(values.reduce((m, v) => m.set(v, (m.get(v) ?? 0) + 1), new Map<number, number>()).values()))));
+      const perRow = dotsPerRowToFit(tallest, unitPx, facetHeight - 6);
+      const pitch = unitPx / perRow;
+      const r = Math.max(0.8, Math.min(phone ? 2.2 : 2.4, pitch * 0.42));
+      const points = simulations.blocs.flatMap((b, k) => stackDots(samples[k], perRow).dots.map(dot => ({
+        bloc: labels[b.key] ?? b.key,
+        seats: dot.value,
+        x: dot.value + ((dot.col + 0.5) / perRow - 0.5) * 0.92,
+        y: dot.row + 0.5,
+      })));
       const medians = simulations.blocs.map(b => ({ bloc: labels[b.key] ?? b.key, median: b.summary.median }));
       const plot = Plot.plot({
         width,
-        height: phone ? 520 : 400,
-        marginLeft: phone ? 12 : 24,
-        marginRight: phone ? 12 : 40,
-        marginTop: 28,
-        marginBottom: 44,
+        height,
+        marginLeft: margin.left,
+        marginRight: margin.right,
+        marginTop: margin.top,
+        marginBottom: margin.bottom,
         style: { backgroundColor: "transparent", fontSize: "12px", fontFamily: FURNITURE.font, color: FURNITURE.textMuted },
-        x: { label: projectedSeatsLabel, domain: [40, 140], grid: true, ticks: phone ? [50, 75, 100, majorityThreshold] : [50, 75, 100, majorityThreshold, 125] },
+        x: { label: projectedSeatsLabel, domain: SEAT_DOMAIN, grid: true, ticks: phone ? [50, 75, 100, majorityThreshold] : [50, 75, 100, majorityThreshold, 125] },
+        // Rows counted up from each facet's baseline, on the same pitch as the columns.
+        y: { domain: [0, facetHeight / pitch], axis: null },
         // Bloc names sit above each row, so they never take width from the plot on a phone.
-        fy: { domain: blocNames, label: null, axis: null, padding: 0.16 },
+        fy: { domain: blocNames, label: null, axis: null, padding: FACET_PADDING },
         color: { domain: blocNames, range: simulations.blocs.map(b => BLOC_COLOURS[b.key] ?? FURNITURE.axis) },
         marks: [
           Plot.ruleX([majorityThreshold], { stroke: FURNITURE.text, strokeWidth: 1.5, strokeDasharray: "4,3", facet: "exclude" }),
-          Plot.dotX(points, Plot.dodgeY({
-            x: "seats",
+          Plot.dot(points, {
+            x: "x",
+            y: "y",
             fy: "bloc",
             fill: "bloc",
-            fillOpacity: 0.75,
-            r: phone ? 1.8 : 1.5,
-            anchor: "middle",
+            fillOpacity: 0.8,
+            r,
             title: (d: { bloc: string; seats: number }) => `${d.bloc}: ${d.seats} ${pt ? "mandatos" : "seats"}`,
             tip: true,
-          })),
+          }),
           Plot.ruleX(medians, { x: "median", fy: "bloc", stroke: FURNITURE.text, strokeWidth: 2 }),
           Plot.text(medians, {
             x: "median",
@@ -113,6 +136,8 @@ export function CoalitionDotPlot({
           }),
         ],
       });
+      // The table twin below is the accessible version; Plot labels role-less <g>s (A11Y-12).
+      plot.setAttribute("aria-hidden", "true");
       container.replaceChildren(plot);
     };
     render();

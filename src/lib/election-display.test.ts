@@ -1,13 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
   credibleIntervalLabel,
+  electionProbabilityParts,
   estimateHorizonLabel,
   formatElectionDate,
   formatElectionDayMonth,
   formatElectionLongDate,
   formatElectionNumber,
   formatElectionPercent,
+  formatElectionPoints,
   formatElectionProbability,
+  formatElectionRange,
+  pollsterDisplayName,
   voteShareScopeLabel,
 } from './election-display';
 
@@ -17,7 +21,7 @@ describe('election display', () => {
     expect(credibleIntervalLabel(.05, .95, 'en')).toBe('90% credible interval (P5–P95)');
   });
   it('names fractional quantiles (e.g. a 95% interval published as ci_lower/ci_upper)', () => {
-    expect(credibleIntervalLabel(.025, .975, 'pt')).toBe('Intervalo de credibilidade de 95% (P2.5–P97.5)');
+    expect(credibleIntervalLabel(.025, .975, 'pt')).toBe('Intervalo de credibilidade de 95% (P2,5–P97,5)');
     expect(credibleIntervalLabel(.025, .975, 'en')).toBe('95% credible interval (P2.5–P97.5)');
   });
   it('uses the visitor locale for election values', () => {
@@ -50,5 +54,20 @@ describe('election display', () => {
     expect(estimateHorizonLabel('electionDay', 'pt')).toBe('previsão para o dia da eleição');
     expect(estimateHorizonLabel('current', 'en')).toBe('estimate at the last poll');
     expect(estimateHorizonLabel('electionDay', 'en')).toBe('forecast for election day');
+  });
+  it('sets the bound of a headline probability in words, not as a chevron', () => {
+    expect(electionProbabilityParts(1, 'pt')).toEqual({ bound: 'mais de', value: '99%' });
+    expect(electionProbabilityParts(0.001, 'en')).toEqual({ bound: 'under', value: '1%' });
+    expect(electionProbabilityParts(0.4328, 'pt')).toEqual({ bound: null, value: '43%' });
+  });
+  it('prints an interval as a range and a gap in percentage points', () => {
+    expect(formatElectionRange(0.1965, 0.2338, 'pt')).toBe('19,7%–23,4%');
+    expect(formatElectionPoints(0.296 - 0.266, 'pt')).toBe('3,0 p.p.');
+    expect(formatElectionPoints(0.03, 'en')).toBe('3.0 pp');
+  });
+  it('writes one firm one way on both archives', () => {
+    expect(pollsterDisplayName('Pitagorica')).toBe('Pitagórica');
+    expect(pollsterDisplayName('ICS')).toBe('ICS/ISCTE');
+    expect(pollsterDisplayName('Intercampus')).toBe('Intercampus');
   });
 });

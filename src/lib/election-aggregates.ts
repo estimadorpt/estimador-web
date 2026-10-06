@@ -229,6 +229,46 @@ export function summariseBlocs(draws: readonly SeatDraw[], blocs: readonly BlocD
   };
 }
 
+/** A dot in a stacked dot histogram: its value, its sub-column within the value's column, and its row from the baseline. */
+export interface StackedDot {
+  value: number;
+  col: number;
+  row: number;
+}
+
+/**
+ * Stack equal values into a dot histogram, `perRow` dots side by side within
+ * each value's column, rows counted up from the baseline. Unlike a dodge, the
+ * tallest column's height is known in advance, so the chart can size its dots
+ * to fit the row and no stack runs into the next one or over the axis.
+ */
+export function stackDots(values: readonly number[], perRow: number): { dots: StackedDot[]; rows: number } {
+  const per = Math.max(1, Math.floor(perRow));
+  const seen = new Map<number, number>();
+  let rows = 0;
+  const dots = values.map(value => {
+    const k = seen.get(value) ?? 0;
+    seen.set(value, k + 1);
+    const row = Math.floor(k / per);
+    rows = Math.max(rows, row + 1);
+    return { value, col: k % per, row };
+  });
+  return { dots, rows };
+}
+
+/**
+ * How many dots to set side by side in each value's column so the tallest
+ * column fits `heightPx`, given `unitPx` pixels per value. Dots are square on
+ * a pitch of unitPx / perRow; the smallest perRow that fits keeps them as
+ * large as possible. Returns the cap when even that does not fit.
+ */
+export function dotsPerRowToFit(maxCount: number, unitPx: number, heightPx: number, cap = 8): number {
+  for (let per = 1; per <= cap; per++) {
+    if (Math.ceil(maxCount / per) * (unitPx / per) <= heightPx) return per;
+  }
+  return cap;
+}
+
 // ---- trends ----------------------------------------------------------------
 
 /**
@@ -242,6 +282,61 @@ export function recentTrendRows<T extends { date: string }>(rows: readonly T[], 
   cutoff.setUTCFullYear(cutoff.getUTCFullYear() - years);
   const from = cutoff.toISOString().slice(0, 10);
   return rows.filter(r => r.date >= from);
+}
+
+/** One party's estimate and band on each date of a {@link TrendSeries}; null where the file has no row. */
+export interface TrendSeriesParty {
+  mean: (number | null)[];
+  low: (number | null)[];
+  high: (number | null)[];
+}
+
+/**
+ * The trend chart's window in columns: the dates once, then per party three
+ * arrays aligned with them. The long rows ({date, party, metric, value}, three
+ * per party and date) repeat every key and date string, which made the
+ * legislativas page carry ~350 KB of inline props; this shape carries the same
+ * numbers, every one the chart and its table draw, in about a tenth.
+ */
+export interface TrendSeries {
+  dates: string[];
+  parties: Record<string, TrendSeriesParty>;
+}
+
+const TREND_METRICS = { vote_share_mean: 'mean', vote_share_low: 'low', vote_share_high: 'high' } as const;
+
+export function compactTrendSeries(rows: readonly { date: string; party: string; metric: string; value: number }[]): TrendSeries {
+  const dates = Array.from(new Set(rows.map(r => r.date))).sort();
+  const index = new Map(dates.map((d, i) => [d, i]));
+  const parties: Record<string, TrendSeriesParty> = {};
+  for (const row of rows) {
+    const key = TREND_METRICS[row.metric as keyof typeof TREND_METRICS];
+    if (!key || !Number.isFinite(row.value)) continue;
+    const party = (parties[row.party] ??= { mean: dates.map(() => null), low: dates.map(() => null), high: dates.map(() => null) });
+    party[key][index.get(row.date)!] = round4(row.value);
+  }
+  return { dates, parties };
+}
+
+/**
+ * Share of draws in which no listed bloc reaches the threshold: the
+ * "parlamento sem maioria" figure the methodology promises, for the blocs the
+ * page shows.
+ */
+export function noBlocMajorityShare(draws: readonly SeatDraw[], blocs: readonly (readonly string[])[], threshold: number): number {
+  if (draws.length === 0) return NaN;
+  let none = 0;
+  for (const d of draws) {
+    if (blocs.every(parties => parties.reduce((sum, p) => sum + seatsOf(d, p), 0) < threshold)) none++;
+  }
+  return none / draws.length;
+}
+
+/** Seat-sum arithmetic for one grouping over every draw: its median and how often it reaches the threshold. */
+export function seatSumArithmetic(draws: readonly SeatDraw[], parties: readonly string[], threshold: number): { median: number; reach: number } {
+  if (draws.length === 0) return { median: NaN, reach: NaN };
+  const totals = draws.map(d => parties.reduce((sum, p) => sum + seatsOf(d, p), 0)).sort((a, b) => a - b);
+  return { median: quantileSorted(totals, 0.5), reach: totals.filter(v => v >= threshold).length / totals.length };
 }
 
 function round4(value: number): number {

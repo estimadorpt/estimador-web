@@ -93,9 +93,13 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
     const second = await loadSecondRoundData();
     forecastCutoffs['presidential-2026'] = second.forecast.updated_at || undefined;
   }
-  const dateLine = (e: ElectionConfig) => e.id === 'presidential-2026'
-    ? t('electionsRounds', { date1: longDate(e.date), date2: longDate(PRESIDENTIAL_2026_SECOND_ROUND_DATE) })
-    : longDate(e.date);
+  // One date per row, the forecast's: the election and round dates are on the
+  // archive page itself.
+  const dateLine = (e: ElectionConfig, cutoff?: string) => {
+    if (!cutoff) return longDate(e.date);
+    const date = longDate(cutoff);
+    return e.id === 'presidential-2026' ? t('electionsForecastRunoff', { date }) : t('electionsForecastAsOf', { date });
+  };
   const questionLine = (e: ElectionConfig) => e.type === 'presidential' ? t('electionsQuestionRunoff') : t('electionsQuestionSeats');
 
   return (
@@ -117,8 +121,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
                 <div className="min-w-[170px] flex-1">
                   <span className="block text-[15px] font-semibold text-ink">{electionName(e)}</span>
                   <span className="block text-[13px] text-stone-600">
-                    {past(e) ? t('electionsArchived') : t('electionsForecast')} · {dateLine(e)}
-                    {cutoff ? ` · ${t('electionsForecastAsOf', { date: longDate(cutoff) })}` : ''}
+                    {past(e) ? t('electionsArchived') : t('electionsForecast')} · {dateLine(e, cutoff)}
                   </span>
                   <span className="block text-[12px] text-stone-500">{questionLine(e)}</span>
                 </div>

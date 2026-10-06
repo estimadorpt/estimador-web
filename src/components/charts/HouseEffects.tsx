@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { formatElectionNumber } from "@/lib/election-display";
+import { formatElectionNumber, pollsterDisplayName } from "@/lib/election-display";
 import { partyColors } from "@/lib/config/colors";
 
 import type { HouseEffect } from '@/types';
@@ -48,13 +48,14 @@ export function HouseEffects({ data }: HouseEffectsProps) {
 
   // Transform data format if needed
   const transformedData = data.map(d => ({
-    pollster: d.pollster,
+    // One firm, one spelling across both archives ("Pitagorica" → "Pitagórica").
+    pollster: pollsterDisplayName(d.pollster),
     party: d.party,
     effect: d.house_effect ?? d.effect ?? 0
   }));
 
   // Get unique pollsters and parties
-  const pollsters = Array.from(new Set(transformedData.map(d => d.pollster))).sort();
+  const pollsters = Array.from(new Set(transformedData.map(d => d.pollster))).sort((a, b) => a.localeCompare(b, locale === 'en' ? 'en' : 'pt'));
   const parties = Object.keys(partyColors).filter(party => 
     transformedData.some(d => d.party === party)
   );

@@ -5,7 +5,7 @@ import { useLocale } from 'next-intl';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { FURNITURE } from '@/components/viz/theme';
 import { PresidentialPollsData } from '@/types';
-import { credibleIntervalLabel, formatElectionDate, formatElectionNumber, formatElectionPercent } from '@/lib/election-display';
+import { credibleIntervalLabel, formatElectionDate, formatElectionNumber, formatElectionPercent, pollsterDisplayName } from '@/lib/election-display';
 
 /** Structural shape shared by presidential_trends.json and second_round_trends.json,
  * so this chart can render either without a second, near-duplicate component. */
@@ -94,8 +94,16 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
   const innerWidth = width - margin.left - margin.right; const innerHeight = height - margin.top - margin.bottom;
   const parsedDates = dates.map(date => new Date(`${date.slice(0, 10)}T12:00:00Z`)); const minDate = parsedDates[0].getTime(); const maxDate = parsedDates[parsedDates.length - 1].getTime();
   const yMax = Math.ceil(Math.max(...candidates.flatMap(([, candidate]) => candidate.ci_95.slice(0, dates.length)), .1) * 20) / 20 + .05;
+  // The axis starts at zero unless every band sits well above it (the runoff,
+  // where both candidates stay between about 25% and 70%): then it starts at
+  // the tenth below the lowest band, so the two series are not flattened.
+  const lowest = Math.min(...candidates.flatMap(([, candidate]) => candidate.ci_05.slice(0, dates.length)));
+  const yMin = Math.max(0, Math.floor((lowest - .05) * 10) / 10);
+  // With two candidates (the runoff) both are drawn in full, bands and end
+  // labels; with more, the chosen one is, and the others are faint lines.
+  const drawAll = candidates.length <= 2;
   const x = (date: Date) => margin.left + ((date.getTime() - minDate) / Math.max(1, maxDate - minDate)) * innerWidth;
-  const y = (value: number) => margin.top + (1 - value / yMax) * innerHeight;
+  const y = (value: number) => margin.top + (1 - (value - yMin) / (yMax - yMin)) * innerHeight;
   const points = (values: number[]) => parsedDates.map((date, index) => ({ x: x(date), y: y(values[index]) }));
   const latest = dates.length - 1;
   const selectedPolls = visiblePolls.filter(poll => typeof poll[selectedName] === 'number');
@@ -132,11 +140,14 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
     <div ref={containerRef} className="relative w-full">
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="block max-w-full" role="img" aria-label={`${selectedName}: ${pt ? 'apoio estimado ao longo do tempo' : 'estimated support over time'}`}
         onPointerMove={onPointer} onPointerLeave={() => setHover(null)}>
-        {Array.from({ length: Math.floor(yMax / .1) + 1 }, (_, index) => index * .1).map(tick => <g key={tick}><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} stroke={FURNITURE.grid} /><text x={margin.left - 8} y={y(tick)} textAnchor="end" dominantBaseline="middle" fontSize={11} fill={FURNITURE.textMuted}>{formatElectionPercent(tick, locale, 0)}</text></g>)}
+        {Array.from({ length: Math.floor((yMax - yMin) / .1 + 1e-9) + 1 }, (_, index) => Math.round((yMin + index * .1) * 10) / 10).map(tick => <g key={tick}><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} stroke={FURNITURE.grid} /><text x={margin.left - 8} y={y(tick)} textAnchor="end" dominantBaseline="middle" fontSize={11} fill={FURNITURE.textMuted}>{formatElectionPercent(tick, locale, 0)}</text></g>)}
         {tickDates.map((date, index) => <g key={date.toISOString()}><line x1={x(date)} x2={x(date)} y1={height - margin.bottom} y2={height - margin.bottom + 5} stroke={FURNITURE.axis} /><text x={x(date)} y={height - margin.bottom + 22} textAnchor={index === 0 ? 'start' : index === tickDates.length - 1 ? 'end' : 'middle'} fontSize={12} fill={FURNITURE.textMuted}>{formatElectionDate(date, locale)}</text></g>)}
-        {candidates.filter(([name]) => name !== selectedName).map(([name, candidate]) => <path key={name} d={linePath(points(candidate.mean.slice(0, dates.length)))} fill="none" stroke={candidate.color} strokeWidth="1.5" opacity=".32" strokeLinecap="round"><title>{name}</title></path>)}
+        {candidates.filter(([name]) => name !== selectedName).map(([name, candidate]) => drawAll
+          ? <g key={name}><path d={areaPath(points(candidate.ci_95), points(candidate.ci_05))} fill={candidate.color} opacity=".12" /><path d={areaPath(points(candidate.ci_75), points(candidate.ci_25))} fill={candidate.color} opacity=".28" /><path d={linePath(points(candidate.mean.slice(0, dates.length)))} fill="none" stroke={candidate.color} strokeWidth="2.5" strokeLinecap="round"><title>{name}</title></path></g>
+          : <path key={name} d={linePath(points(candidate.mean.slice(0, dates.length)))} fill="none" stroke={candidate.color} strokeWidth="1.5" opacity=".32" strokeLinecap="round"><title>{name}</title></path>)}
         <path d={areaPath(points(selected.ci_95), points(selected.ci_05))} fill={selected.color} opacity=".12" /><path d={areaPath(points(selected.ci_75), points(selected.ci_25))} fill={selected.color} opacity=".28" /><path d={linePath(points(selected.mean.slice(0, dates.length)))} fill="none" stroke={selected.color} strokeWidth="3" strokeLinecap="round" />
-        {selectedPolls.map((poll, index) => <circle key={`${poll.date}-${index}`} cx={x(new Date(`${poll.date}T12:00:00Z`))} cy={y(poll[selectedName] as number)} r="4" fill={selected.color} opacity=".75" stroke={FURNITURE.surface} strokeWidth="1.5"><title>{`${poll.pollster}: ${fmt(poll[selectedName] as number)} · ${formatElectionDate(poll.date, locale)}`}</title></circle>)}
+        {drawAll && candidates.map(([name, candidate]) => <text key={`label-${name}`} x={x(parsedDates[latest]) - 4} y={y(candidate.mean[latest]) - 10} textAnchor="end" fontSize={12} fontWeight={700} fill={FURNITURE.text}>{`${name} ${fmt(candidate.mean[latest])}`}</text>)}
+        {selectedPolls.map((poll, index) => <circle key={`${poll.date}-${index}`} cx={x(new Date(`${poll.date}T12:00:00Z`))} cy={y(poll[selectedName] as number)} r="4" fill={selected.color} opacity=".75" stroke={FURNITURE.surface} strokeWidth="1.5"><title>{`${pollsterDisplayName(poll.pollster)}: ${fmt(poll[selectedName] as number)} · ${formatElectionDate(poll.date, locale)}`}</title></circle>)}
         {tipIndex != null && <g pointerEvents="none"><line x1={tipX} x2={tipX} y1={margin.top} y2={height - margin.bottom} stroke={FURNITURE.text} strokeDasharray="3,3" /><circle cx={tipX} cy={y(selected.mean[tipIndex])} r="4.5" fill={selected.color} stroke={FURNITURE.surface} strokeWidth="2" /></g>}
       </svg>
       {tipIndex != null && (
@@ -152,7 +163,7 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
     <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-ink-muted"><span>{pt ? 'Linha: estimativa média' : 'Line: mean estimate'}</span><span>{band50}</span><span>{band90}</span>{showPolls && <span>{pt ? 'Pontos: sondagens' : 'Dots: polls'}</span>}</div>
     <ChartTable caption={pt ? 'Apoio estimado por candidato e data' : 'Estimated support by candidate and date'} summaryLabel={pt ? 'Ver a série de todos os candidatos, mais recente primeiro' : 'View every candidate’s series, latest first'} columns={[pt ? 'Data' : 'Date', pt ? 'Candidato' : 'Candidate', pt ? 'Média' : 'Mean', 'P25', 'P75', 'P5', 'P95']} rows={rows} />
     {showPolls && visiblePolls.length > 0 && (
-      <ChartTable caption={pt ? 'Sondagens desenhadas no gráfico' : 'Polls drawn on the chart'} summaryLabel={pt ? `Ver as ${formatElectionNumber(visiblePolls.length, locale)} sondagens` : `View the ${formatElectionNumber(visiblePolls.length, locale)} polls`} columns={[pt ? 'Data' : 'Date', pt ? 'Empresa' : 'Pollster', pt ? 'Amostra' : 'Sample', ...pollColumns]} rows={visiblePolls.map(poll => [formatElectionDate(poll.date, locale), poll.pollster, typeof poll.sample_size === 'number' ? formatElectionNumber(poll.sample_size, locale) : '—', ...pollColumns.map(name => typeof poll[name] === 'number' ? fmt(poll[name] as number) : '—')])} />
+      <ChartTable caption={pt ? 'Sondagens desenhadas no gráfico' : 'Polls drawn on the chart'} summaryLabel={pt ? `Ver as ${formatElectionNumber(visiblePolls.length, locale)} sondagens` : `View the ${formatElectionNumber(visiblePolls.length, locale)} polls`} columns={[pt ? 'Data' : 'Date', pt ? 'Empresa' : 'Pollster', pt ? 'Amostra' : 'Sample', ...pollColumns]} rows={visiblePolls.map(poll => [formatElectionDate(poll.date, locale), pollsterDisplayName(poll.pollster), typeof poll.sample_size === 'number' ? formatElectionNumber(poll.sample_size, locale) : '—', ...pollColumns.map(name => typeof poll[name] === 'number' ? fmt(poll[name] as number) : '—')])} />
     )}
   </div>;
 }

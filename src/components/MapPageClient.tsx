@@ -37,7 +37,7 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
           districtForecast={districtForecast}
           onDistrictClick={handleDistrictClick}
           selectedDistrict={selectedDistrict}
-          className="border rounded-lg"
+          className="sm:border sm:border-line sm:rounded-lg"
         />
       </MapErrorBoundary>
       
@@ -49,7 +49,7 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <h4 className="font-medium">{t('voteShareByParty')}</h4>
+              <h2 className="text-base font-medium">{t('voteShareByParty')}</h2>
               <div className="space-y-3">
                 {Object.entries(selectedData.probs)
                   .sort(([,a], [,b]) => b - a)

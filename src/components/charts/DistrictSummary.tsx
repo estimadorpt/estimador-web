@@ -70,9 +70,14 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
           </p>
           {/* Named and explained before the ENSC badges below use it, so the
               term is never seen before its definition. */}
-          <p className="text-xs text-stone-500 mb-4">
+          <p className="text-xs text-stone-500 mb-2">
             <strong>{t("enscTerm")}</strong> {t("enscExplainer")}
           </p>
+          {/* The +1/−1 below are measured against each party's own most
+              frequent seat count in that district (the exporter's
+              convention), not against 2024 or one joint allocation, so a
+              district's gains and losses need not balance. */}
+          <p className="text-xs text-stone-500 mb-4">{t("seatChangeBaseline")}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {contestedDistricts.slice(0, 9).map(district => {
               const contestedInfo = contestedData?.districts?.[district.district_name];
@@ -135,37 +140,37 @@ export function DistrictSummary({ districtData, contestedData }: DistrictSummary
         </div>
       )}
 
-      {/* Safe Districts Summary — the per-party tally below counts only the
-          stable-allocation subset, so the subset size is stated at the same
-          point, not just in the totals row further down
-          (product-audit-2026-09-17-elections-economy.md, "8/4/1 vs 14/5/1"). */}
+      {/* The party ahead in votes in every district and region: the same
+          count as the map (14/5/1), not a likely-winner count over a subset. */}
       <div>
         <h3 className="text-lg text-stone-900 mb-1">
           {t("likelyWinners")}
         </h3>
         <p className="text-xs text-stone-500 mb-4">
-          {t("likelyWinnersSubtitle", { count: safeDistricts.length, total: districtData.length })}
+          {t("likelyWinnersSubtitle", { total: districtData.length })}
         </p>
         <div className="bg-cream border border-stone-200 rounded-2xl p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {Object.values(partyColors).map((color, index) => {
               const party = Object.keys(partyColors)[index];
-              const wins = safeDistricts.filter(d => d.winning_party === party).length;
+              const wins = districtData.filter(d => d.winning_party === party).length;
               
               if (wins === 0) return null;
               
               return (
                 <div key={party} className="text-center">
-                  <div 
-                    className="w-12 h-12 mx-auto mb-2 rounded-lg flex items-center justify-center text-white font-bold"
-                    style={{ backgroundColor: color }}
+                  {/* Ink on cream inside a party-coloured ring: white on the
+                      lighter party colours failed contrast. */}
+                  <div
+                    className="w-12 h-12 mx-auto mb-2 rounded-lg border-[3px] bg-cream flex items-center justify-center text-lg text-ink font-bold tabular-nums"
+                    style={{ borderColor: color }}
                   >
                     {wins}
                   </div>
                   <div className="text-sm font-medium text-stone-900">
                     {partyNames[party as keyof typeof partyNames] || party}
                   </div>
-                  <div className="text-xs text-stone-500">{t("districtsUnit")}</div>
+                  <div className="text-xs text-stone-500">{t("districtsUnit", { count: wins })}</div>
                 </div>
               );
             })}

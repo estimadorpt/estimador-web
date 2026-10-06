@@ -6,7 +6,7 @@ import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import MapPageClient from '@/components/MapPageClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { partyColors } from '@/lib/config/colors';
 import { Vote } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from '@/lib/config/elections';
@@ -89,7 +89,8 @@ export default async function MapPage({
                 <CardHeader>
                   <CardTitle>{t('map.portugalForecasts')}</CardTitle>
                 </CardHeader>
-                <CardContent>
+                {/* Narrow padding on a phone so the map gets the column's width. */}
+                <CardContent className="px-3 sm:px-6">
                   <MapPageClient districtForecast={districtForecast} />
                 </CardContent>
               </Card>
@@ -104,19 +105,19 @@ export default async function MapPage({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-medium mb-2">{t('map.colors')}</h4>
+                    <h2 className="text-base font-medium mb-2">{t('map.colors')}</h2>
                     <p className="text-sm text-stone-600">
                       {t('map.colorsDescription')}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-medium mb-2">{t('map.interaction')}</h4>
+                    <h2 className="text-base font-medium mb-2">{t('map.interaction')}</h2>
                     <p className="text-sm text-stone-600">
                       {t('map.interactionDescription')}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-medium mb-2">{t('map.islands')}</h4>
+                    <h2 className="text-base font-medium mb-2">{t('map.islands')}</h2>
                     <p className="text-sm text-stone-600">
                       {t('map.islandsDescription')}
                     </p>
@@ -179,11 +180,14 @@ function MapStats({ districtForecast, t, locale }: { districtForecast: DistrictF
           forecast page separately shows likely winners among only the
           "stable allocation" subset, which is a smaller, different count
           (product-audit-2026-09-17-elections-economy.md, "8/4/1 vs 14/5/1"). */}
-      <h4 className="font-medium">{t('map.districtsLed')}</h4>
+      <h2 className="text-base font-medium">{t('map.districtsLed')}</h2>
       <div className="space-y-2">
         {sortedParties.map(([party, count]) => (
           <div key={party} className="flex justify-between items-center">
-            <Badge variant="outline">{party}</Badge>
+            <span className="inline-flex items-center gap-2 text-sm font-medium">
+              <span aria-hidden="true" className="inline-block size-3 rounded-sm" style={{ backgroundColor: partyColors[party] ?? '#dadccf' }} />
+              {party}
+            </span>
             <span className="text-sm font-medium">{count}</span>
           </div>
         ))}

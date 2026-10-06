@@ -1,0 +1,233 @@
+## Em resumo
+
+As duas previsões eleitorais do estimador.pt estão arquivadas: as **legislativas de 18 de maio de 2025** (previsão de 16 de maio, com sondagens até 15 de maio) e as **presidenciais de 2026** (1.ª volta a 18 de janeiro, previsão de 16 de janeiro com sondagens até 15 de janeiro; 2.ª volta a 8 de fevereiro, previsão de 6 de fevereiro). Esta página descreve os modelos tal como correram nessas datas. Não há eleição em curso nem previsão nova.
+
+Os dois modelos são bayesianos: em vez de um único resultado, estimam uma distribuição de resultados possíveis, e os números publicados (percentagens, intervalos e probabilidades) resumem milhares de simulações dessa distribuição. Foram escritos em [PyMC](https://www.pymc.io/), uma biblioteca de programação probabilística.
+
+---
+
+<span id="legislativas" className="block scroll-mt-24"></span>
+
+## Legislativas 2025
+
+### Estrutura do modelo
+
+O modelo combinava as sondagens com os resultados das eleições legislativas anteriores para estimar a evolução do apoio a cada partido ao longo do tempo. A tendência nacional era a soma de três **processos gaussianos** (curvas suaves cuja forma o modelo aprende com os dados), cada um com a sua escala de tempo:
+
+**1. Tendência de fundo**
+- Escala de tempo: cerca de 4 anos
+- Capta mudanças estruturais no sistema partidário
+- Núcleo (kernel) quadrático exponencial, o mais suave
+
+**2. Médio prazo**
+- Escala de tempo: cerca de 1 ano
+- Capta ciclos políticos e mudanças graduais da opinião
+- Núcleo Matérn 5/2
+
+**3. Curto prazo**
+- Escala de tempo: cerca de 14 dias
+- Capta a dinâmica da campanha e reações a acontecimentos
+- Núcleo Matérn 3/2, que permite variações mais rápidas
+
+A soma dos três separa o sinal de longo prazo do ruído de curto prazo, sem deixar de captar movimentos reais durante a campanha. As três curvas viviam numa escala de log-odds (logit) e eram convertidas em percentagens que somam 100% por uma transformação softmax.
+
+<details>
+<summary>**Detalhes técnicos: processos gaussianos**</summary>
+
+Um processo gaussiano define uma distribuição a priori sobre funções, em vez de parâmetros fixos, e deixa o modelo aprender a forma das tendências a partir dos dados.
+
+Para tornar o cálculo viável usámos a aproximação **HSGP** (processo gaussiano em espaço de Hilbert), que representa cada curva por uma série de funções de base, com um custo muito menor e sem perda significativa de precisão.
+
+A função de covariância da tendência de fundo era:
+```
+k(t, t') = σ² × exp(-|t-t'|² / (2ℓ²))
+```
+
+**Distribuições a priori:**
+- Escala de tempo da tendência de fundo: LogNormal(μ=log(1460), σ=0,3), centrada em cerca de 4 anos
+- Escala de tempo do médio prazo: LogNormal(μ=log(365), σ=0,5), centrada em cerca de 1 ano
+- Escala de tempo do curto prazo: LogNormal(μ=log(14), σ=0,3), centrada em cerca de 14 dias
+- Amplitude de cada curva: HalfNormal(σ=0,2 a 0,3)
+
+</details>
+
+### Efeitos das empresas de sondagens
+
+Cada empresa de sondagens tende a sobrestimar ou a subestimar certos partidos de forma sistemática. O modelo estimava esses desvios (em inglês, «house effects») a partir de todas as sondagens, e corrigia-os ao combinar sondagens de várias fontes.
+
+Cada desvio era o produto de duas partes: uma componente que soma zero entre os partidos de cada empresa (se uma empresa sobrestima um partido, subestima outros) e um desvio-padrão próprio de cada partido. Por causa desta multiplicação, os desvios publicados na tabela da página não somam exatamente zero em cada linha.
+
+A distribuição a priori desse desvio-padrão era HalfNormal(σ=0,05) por partido, na escala logit. Para um partido com cerca de 30% dos votos, um desvio de 0,05 nessa escala corresponde a cerca de 1 ponto percentual (a inclinação da conversão é p × (1 − p), no máximo 0,25); para partidos mais pequenos, a menos.
+
+### Diferenças entre distritos
+
+Os mandatos são atribuídos distrito a distrito. O modelo incluía uma **diferença fixa entre cada distrito e o país**, por partido, estimada a partir dos resultados das eleições anteriores. Cada diferença seguia uma Normal centrada em zero, com um desvio-padrão próprio de cada partido; a distribuição a priori desse desvio-padrão era HalfNormal(σ=0,1), também na escala logit. Para um partido com cerca de 30% dos votos, 0,1 nessa escala corresponde a cerca de 2 pontos percentuais.
+
+### Verosimilhança
+
+As sondagens entravam no modelo através de uma distribuição **Dirichlet-Multinomial**, adequada a percentagens que somam 100%.
+
+<details>
+<summary>**Detalhes técnicos: Dirichlet-Multinomial**</summary>
+
+A Dirichlet-Multinomial tem dois parâmetros:
+- `n`: a dimensão da amostra da sondagem
+- `α`: um vetor de concentração, proporcional às percentagens esperadas de cada partido
+
+Tem duas fontes de variação: o erro de amostragem (que depende de n) e uma variação extra, controlada pela concentração. Isso permite tratar as sondagens como amostras que nem sempre se comportam como amostras aleatórias simples.
+
+**Distribuições a priori da concentração:**
+- Sondagens: Gamma(α=2, β=0,01), com média de cerca de 200, o que admite variação além do erro de amostragem
+- Resultados eleitorais: Gamma(α=100, β=0,1), com média de cerca de 1000, um ajuste mais apertado aos resultados reais
+
+</details>
+
+### Método de Hondt e atribuição de mandatos
+
+Para passar de votos a mandatos, simulámos o sistema eleitoral português:
+
+1. **Território nacional**: os 226 mandatos dos 20 círculos do território nacional (18 distritos do continente, Açores e Madeira) atribuídos pelo **método de Hondt**, que divide os votos de cada partido por 1, 2, 3, … e entrega os mandatos aos maiores quocientes.
+2. **Emigração**: os 4 mandatos dos círculos da Europa e de Fora da Europa vinham de um dos cenários históricos de 2019, 2022 ou 2024, um por simulação, em partes iguais.
+3. **Total**: cada simulação somava assim **230 mandatos**.
+
+A previsão arquivada tem **9000 simulações**. Em cada uma:
+1. tira-se uma amostra das percentagens nacionais estimadas para o dia da eleição;
+2. aplicam-se as diferenças de cada distrito;
+3. aplica-se o método de Hondt em cada círculo do território nacional e junta-se o cenário da emigração;
+4. somam-se os mandatos de cada partido.
+
+O resultado é uma distribuição de composições possíveis do parlamento.
+
+### O que a página mostra
+
+A partir das simulações, a página publica:
+
+- **A probabilidade de cada partido ter mais mandatos** do que qualquer outro.
+- **A probabilidade de maioria (116 mandatos) de dois blocos**: AD + IL e PS + BE + CDU + L. São agrupamentos aritméticos de mandatos, não previsões de governo. A página publica também a percentagem de simulações em que nenhum dos dois chega aos 116 (na previsão arquivada, mais de 99%) e, só como aritmética, a soma AD + CH (116 ou mais em todas as simulações; mediana de 138).
+- **Mandatos por partido**: a média e intervalos de credibilidade de 50% (P25–P75) e de 80% (P10–P90).
+- **Mandatos em disputa por distrito**, com o **ENSC** (número efetivo de mudanças de mandato). Para cada partido, conta-se em que percentagem das simulações o partido fica com um número de mandatos diferente do seu valor mais frequente nesse distrito; o ENSC soma essas percentagens sobre os partidos. Um ENSC de 0 diz que todas as simulações dão a mesma distribuição; acima de 0,8 (o limiar usado), pelo menos um mandato muda de partido numa parte grande das simulações, e o distrito conta como «em disputa». Os +1 e −1 dos cartões comparam cada partido com o seu próprio valor mais frequente, por isso os ganhos e as perdas de um distrito não têm de se compensar.
+
+---
+
+<span id="presidenciais" className="block scroll-mt-24"></span>
+
+## Presidenciais 2026: primeira volta
+
+### Estrutura do modelo
+
+O modelo presidencial era diferente do legislativo porque:
+- os candidatos são pessoas, não partidos com um longo histórico;
+- o sistema tem duas voltas (é precisa maioria absoluta dos votos válidos);
+- a dinâmica da campanha pesa mais.
+
+O apoio a cada candidato seguia um **passeio aleatório** diário na escala logit: em cada dia, o apoio de véspera mais uma pequena variação.
+
+<details>
+<summary>**Detalhes técnicos: passeio aleatório**</summary>
+
+O passeio aleatório é:
+```
+latente[t] = latente[t-1] + inovação[t]
+```
+onde `inovação[t] ~ ZeroSumNormal(σ)` faz com que os ganhos de um candidato correspondam a perdas de outros.
+
+O desvio-padrão diário das inovações (σ ≈ 0,05 em log-odds) foi fixado, não estimado, de modo a permitir movimentos de cerca de 5 pontos percentuais ao longo de 50 dias de campanha, como no modelo da revista The Economist: com poucas sondagens, a volatilidade não se estima de forma fiável.
+
+**Distribuições a priori dos candidatos:**
+- Ponto de partida: Normal centrada no apoio histórico do partido de cada candidato (em logit)
+- Concentração da verosimilhança: fixa em 60 para as sondagens presidenciais
+
+</details>
+
+Para os candidatos com partido conhecido, o ponto de partida vinha do apoio histórico desse partido, o que estabilizava as estimativas quando havia poucas sondagens. Os efeitos das empresas de sondagens estimados no modelo legislativo serviam de distribuição a priori para os do modelo presidencial. As estimativas presidenciais desses efeitos ficaram muito perto de zero (todas abaixo de 0,013 em valor absoluto na escala do modelo), por isso a página não as mostra; o modelo tratou como duas empresas a ICS e a ICS/ISCTE, que são a mesma.
+
+### Dados e datas
+
+- **Sondagens**: 20 sondagens de 8 de outubro de 2025 a 15 de janeiro de 2026, de Aximage, CESOP–Católica, Consulmark2, ICS/ISCTE, Intercampus e Pitagórica.
+- **Previsão arquivada**: corrida a 16 de janeiro de 2026, para a eleição de 18 de janeiro. O modelo previa apenas a intenção de voto declarada, cerca de 65% dos inquiridos; os cerca de 35% de indecisos não entram nas bandas.
+
+### Quem chega à segunda volta
+
+Em cada simulação da previsão para o dia da eleição:
+1. verifica-se se algum candidato passa os 50% dos votos válidos;
+2. se nenhum passa, registam-se os dois mais votados.
+
+A probabilidade de cada par disputar a segunda volta é a percentagem de simulações em que esse par fica nos dois primeiros lugares; a probabilidade de cada candidato chegar à segunda volta é a soma dos pares em que aparece. Os cartões, a lista de pares e as barras de intenção de voto usam todos a previsão para o dia da eleição.
+
+<span id="segunda-volta-2026" className="block scroll-mt-24"></span>
+
+## Presidenciais 2026: segunda volta
+
+Depois da primeira volta, a 18 de janeiro de 2026, a segunda volta entre António José Seguro e André Ventura foi prevista com um modelo próprio. É esta a previsão que a página arquivada mostra por omissão.
+
+- **Dados de entrada**: as sondagens da segunda volta disponíveis até ao dia da previsão, 6 de fevereiro de 2026, e uma estimativa prévia construída a partir das percentagens da primeira volta e de um inquérito de transferência de votos (ICS/ISCTE, janeiro de 2026), que estima para onde iam os votos de cada candidato eliminado.
+- **Modelo**: um passeio aleatório diário em escala logística sobre quatro respostas: Seguro, Ventura, brancos e nulos, e indecisos. A abstenção é retirada das sondagens antes do ajuste.
+- **Indecisos**: no dia da eleição, os indecisos são repartidos entre os dois candidatos na proporção dos seus votos válidos.
+- **Brancos e nulos**: entram no modelo como uma resposta própria. Por isso há duas bases na página: a percentagem de **todos os boletins** (brancos e nulos incluídos, nas barras e no gráfico de evolução) e a percentagem dos **votos válidos** (sem brancos e nulos), que é a base da maioria de 50% e da probabilidade de vitória.
+- **Simulações**: 8000 trajetórias diárias, de 21 de janeiro a 8 de fevereiro. A probabilidade de vitória é a percentagem de simulações em que o candidato passa os 50% dos votos válidos no dia da eleição. Com 8000 simulações, valores que arredondam a 0% ou a 100% aparecem como «menos de 1%» e «mais de 99%».
+- **Intervalos**: os cartões e as barras mostram intervalos de credibilidade de 95% (P2,5–P97,5) e a **média** das simulações; o gráfico de evolução mostra bandas de 50% (P25–P75) e de 90% (P5–P95). O gráfico de pontos desenha 800 das 8000 simulações, escolhidas a intervalos regulares, e marca a **mediana**; as medianas e a tabela usam todas.
+
+---
+
+## Incerteza
+
+Os modelos incorporavam várias fontes de incerteza:
+
+- **Erro das sondagens**: a variação esperada entre as sondagens e o resultado real
+- **Efeitos das empresas de sondagens**: a incerteza nos desvios estimados de cada empresa
+- **Incerteza do modelo**: os parâmetros das curvas e das restantes componentes
+- **Efeitos de campanha**: mudanças tardias que as sondagens ainda não tinham captado
+
+### Como se lê a incerteza nas páginas
+
+A incerteza aparece como intervalos de credibilidade, probabilidades («70% de probabilidade de X ter mais mandatos») e distribuições de simulações. Um intervalo de X% contém o valor em X% das simulações do modelo; não é a margem de erro de uma sondagem. Cada gráfico diz que intervalo desenha:
+
+- **Legislativas 2025**: a tendência estimada a partir das sondagens desenha a banda de credibilidade de 94% (HDI) dos partidos escolhidos, e a tabela tem-na para todos; o gráfico de mandatos por partido mostra intervalos de 50% (P25–P75) e de 80% (P10–P90); o gráfico dos blocos desenha simulações individuais e a sua tabela dá os percentis P5 a P95.
+- **Presidenciais 2026, 1.ª volta**: o gráfico de evolução mostra bandas de 50% (P25–P75) e de 90% (P5–P95); os cartões e as barras da previsão para o dia da eleição mostram intervalos de 95% (P2,5–P97,5).
+- **Presidenciais 2026, 2.ª volta**: ver a [segunda volta](#segunda-volta-2026).
+
+---
+
+## Avaliação
+
+Ainda não publicámos uma avaliação das previsões eleitorais. As previsões das legislativas de 2025 e das presidenciais de 2026 estão arquivadas tal como foram publicadas, com ligações para os resultados oficiais, mas sem uma comparação calculada com esses resultados.
+
+Quando a publicarmos, vai medir o erro de cada estimativa, se os intervalos de credibilidade continham o resultado com a frequência esperada e a pontuação das probabilidades (log-score). Uma só eleição não basta para mostrar que as probabilidades estão bem calibradas.
+
+A única avaliação publicada no site é a do [modelo de futebol](/pt/desporto/liga/modelo/).
+
+---
+
+## Fontes de dados
+
+### Sondagens
+- Legislativas 2025: Aximage, CESOP–Católica, Consulmark2, ICS/ISCTE/GfK Metris, Intercampus, Metris e Pitagórica, até 15 de maio de 2025
+- Presidenciais 2026, 1.ª volta: Aximage, CESOP–Católica, Consulmark2, ICS/ISCTE, Intercampus e Pitagórica, até 15 de janeiro de 2026
+- Presidenciais 2026, 2.ª volta: as sondagens da segunda volta publicadas até 6 de fevereiro de 2026 e o inquérito de transferência de votos do ICS/ISCTE (janeiro de 2026)
+
+### Resultados eleitorais
+- Comissão Nacional de Eleições (CNE)
+- Secretaria-Geral do Ministério da Administração Interna (SGMAI)
+
+---
+
+## Limitações
+
+- **Dependência das sondagens**: se as sondagens tiverem desvios sistemáticos que o histórico não revela, a previsão herda-os.
+- **Acontecimentos imprevistos**: escândalos, crises ou outros acontecimentos podem mudar o panorama depressa.
+- **Padrões históricos**: o modelo assume que o passado informa o futuro, o que pode falhar em contextos sem precedentes.
+- **Indecisos**: o comportamento de quem ainda não decidiu é difícil de prever.
+
+As previsões devem ser lidas como **estimativas probabilísticas**, não como certezas.
+
+---
+
+## Referências
+
+A metodologia inspirou-se em:
+- [The Economist Election Forecast](https://www.economist.com/interactive/us-2024-election/prediction-model/president)
+- [FiveThirtyEight](https://web.archive.org/web/20221231234624/https://fivethirtyeight.com/) (encerrado em março de 2025; cópia arquivada)
+- [Andrew Gelman, Bayesian Data Analysis](http://www.stat.columbia.edu/~gelman/book/)
+- [Documentação do PyMC](https://www.pymc.io/projects/docs/en/stable/)
+
+Última revisão: 6 de outubro de 2026.

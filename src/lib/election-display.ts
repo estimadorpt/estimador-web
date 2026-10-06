@@ -31,6 +31,53 @@ export function formatElectionProbability(probability: number, locale: string): 
 }
 
 /**
+ * The same probability split for a headline figure: the bound in words
+ * ("mais de" / "menos de") and the number. In a display face at 800 the bare
+ * "<" and ">" read as chevrons, so the big numbers set the bound as text.
+ */
+export function electionProbabilityParts(probability: number, locale: string): { bound: string | null; value: string } {
+  const pt = electionLocale(locale) === 'pt';
+  const pct = probability * 100;
+  if (pct > 99) return { bound: pt ? 'mais de' : 'over', value: '99%' };
+  if (pct < 1) return { bound: pt ? 'menos de' : 'under', value: '1%' };
+  return { bound: null, value: `${Math.round(pct).toLocaleString(electionIntlLocale(locale))}%` };
+}
+
+/** The same in running text: "mais de 99%", "menos de 1%", "43%". */
+export function formatElectionProbabilityText(probability: number, locale: string): string {
+  const { bound, value } = electionProbabilityParts(probability, locale);
+  return bound ? `${bound} ${value}` : value;
+}
+
+/** A share's interval as a range, "19,7%–23,4%": never "±", which reads as a poll's margin of error. */
+export function formatElectionRange(lower: number, upper: number, locale: string, digits = 1): string {
+  return `${formatElectionPercent(lower, locale, digits)}–${formatElectionPercent(upper, locale, digits)}`;
+}
+
+/** A difference between two shares, in percentage points: "3,0 p.p." / "3.0 pp". */
+export function formatElectionPoints(difference: number, locale: string, digits = 1): string {
+  return `${formatElectionNumber(difference * 100, locale, digits)} ${electionLocale(locale) === 'pt' ? 'p.p.' : 'pp'}`;
+}
+
+/**
+ * Pollster names as the archives print them. The exports carry the name each
+ * source used ("Pitagorica" without its accent in the 2025 file; "ICS" for one
+ * ICS/ISCTE poll in the 2026 file), so one firm is written one way on both
+ * archives. The 2026 model estimated a separate effect for "ICS" and
+ * "ICS/ISCTE"; that is a data fix for the exporter, not a label.
+ */
+const POLLSTER_NAMES: Record<string, string> = {
+  Pitagorica: 'Pitagórica',
+  ICS: 'ICS/ISCTE',
+  'CESOP-U.Católica': 'CESOP–Católica',
+  'CESOP-UCP': 'CESOP–Católica',
+};
+
+export function pollsterDisplayName(name: string): string {
+  return POLLSTER_NAMES[name] ?? name;
+}
+
+/**
  * The calendar date an ISO string names. The archives store plain dates
  * ("2026-01-18") and local timestamps without a zone ("2026-01-16T21:21:29");
  * both are read as the date written, so a server in another time zone never
@@ -59,7 +106,9 @@ export function formatElectionDayMonth(value: string | Date, locale: string): st
 /** The data files publish quantiles, so labels must describe those exact spans. */
 export function credibleIntervalLabel(lowerQuantile: number, upperQuantile: number, locale: string): string {
   const coverage = Math.round((upperQuantile - lowerQuantile) * 100);
-  const quantiles = `P${(lowerQuantile * 100).toFixed(lowerQuantile * 100 % 1 === 0 ? 0 : 1)}–P${(upperQuantile * 100).toFixed(upperQuantile * 100 % 1 === 0 ? 0 : 1)}`;
+  // The page's decimal sign: "P2,5" in Portuguese, "P2.5" in English.
+  const q = (p: number) => `P${formatElectionNumber(p * 100, locale, Math.round(p * 1000) % 10 === 0 ? 0 : 1)}`;
+  const quantiles = `${q(lowerQuantile)}–${q(upperQuantile)}`;
   return electionLocale(locale) === 'pt' ? `Intervalo de credibilidade de ${coverage}% (${quantiles})` : `${coverage}% credible interval (${quantiles})`;
 }
 

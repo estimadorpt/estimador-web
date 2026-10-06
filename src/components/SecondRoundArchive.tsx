@@ -48,7 +48,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
             <p className="text-lg text-stone-600 mb-4 leading-relaxed">
               {t('headlineDescription', { date: cutoffLabel, election: electionLabel, candidateA: candidateA?.name ?? '', candidateB: candidateB?.name ?? '' })}
             </p>
-            <Link href="/metodologia#segunda-volta-2026" locale={locale} className="text-sm font-medium text-ink underline underline-offset-4">
+            <Link href="/eleicoes/metodologia#segunda-volta-2026" locale={locale} className="text-sm font-medium text-ink underline underline-offset-4">
               {t('methodologyLink')}
             </Link>
           </div>
