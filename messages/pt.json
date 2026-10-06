@@ -421,7 +421,7 @@
     "methodology": "Metodologia",
     "methodologyTitle": "Metodologia da Liga Portugal",
     "methodologySubtitle": "Como funciona o nosso modelo de previsão para a Liga Portugal",
-    "methodologyDescription": "Como prevemos a Liga Portugal: um modelo bayesiano de Poisson bivariado, com os golos e remates à baliza de quatro épocas e o valor dos plantéis, e 50 000 épocas simuladas.",
+    "methodologyDescription": "Como prevemos a Liga Portugal: um modelo bayesiano de Poisson bivariado com golos, remates à baliza e o valor dos plantéis, e 50 000 épocas simuladas.",
     "championPercent": "Campeão (%)",
     "relegationPercent": "Despromoção (%)",
     "season": "Época",
