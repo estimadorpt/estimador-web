@@ -92,21 +92,14 @@ export async function generateMetadata({
     : `${player.player}: what the model knows`;
   // The goals-only claim is only made where it means something: a keeper or a
   // defender sits at the floor of that scale by construction (ADR-019).
+  // Under 160 characters, the metric first (SP-17).
   const description = !goalsSarIsMeaningful(player.position)
     ? pt
-      ? `${player.player} (${teamDisplayName(player.team)}): minutos, jogos e histórico época a época, com a métrica que se aplica à posição — e a explicação de por que razão o ranking de finalização não diz nada sobre ele.`
-      : `${player.player} (${teamDisplayName(player.team)}): minutes, matches and season-by-season history, with the metric that applies to the position — and why the finishing ranking says nothing about him.`
+      ? `${player.player} (${teamDisplayName(player.team)}): minutos, jogos e cada época, com a métrica da posição; o ranking de finalização não se aplica.`
+      : `${player.player} (${teamDisplayName(player.team)}): minutes, matches and every season, with the metric for the position; the finishing ranking does not apply.`
     : pt
-      ? `${player.player} (${teamDisplayName(player.team)}) é o n.º ${player.rank} em finalização entre os ${data.n_players} jogadores publicados: ${formatDecimal(
-          sar,
-          locale,
-          2,
-        )} golos por 90 minutos acima de um jogador de nível de substituição, com intervalo de credibilidade, minutos, golos e histórico época a época.`
-      : `${player.player} (${teamDisplayName(player.team)}) is number ${player.rank} for finishing among the ${data.n_players} players published: ${formatDecimal(
-          sar,
-          locale,
-          2,
-        )} goals per 90 minutes above a replacement-level player, with credible interval, minutes, goals and season-by-season history.`;
+      ? `${player.player} (${teamDisplayName(player.team)}): ${formatDecimal(sar, locale, 2)} golos/90 acima do substituto, n.º ${player.rank} de ${data.n_players} em finalização. Intervalo, minutos e épocas.`
+      : `${player.player} (${teamDisplayName(player.team)}): ${formatDecimal(sar, locale, 2)} goals/90 above replacement, number ${player.rank} of ${data.n_players} for finishing. Interval, minutes and seasons.`;
 
   return createPageMetadata({
     locale,

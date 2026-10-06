@@ -48,7 +48,7 @@ const copy = {
     title: "Liga Portugal 2025-26: a época em revista",
     shortTitle: "Época 2025-26",
     description:
-      "O FC Porto foi campeão com 88 pontos. O Sporting marcou 89 golos e teve a melhor diferença de golos da liga — e ficou em segundo. O Benfica não perdeu um jogo e ficou em terceiro. A época 2025-26 revista com os pontos esperados a partir do xG e com as previsões do modelo anterior: as publicadas na altura e as reconstituídas depois.",
+      "O FC Porto foi campeão com 88 pontos, o Sporting marcou 89 golos e o Benfica não perdeu um jogo. A época 2025-26 com os pontos esperados (xG) e as previsões do modelo.",
     back: "Liga Portugal",
     kicker: "Revisão da época",
     unavailable: "Dados da época 2025-26 indisponíveis.",
@@ -79,7 +79,7 @@ const copy = {
     title: "Liga Portugal 2025-26: the season reviewed",
     shortTitle: "2025-26 season",
     description:
-      "FC Porto won the title with 88 points. Sporting scored 89 goals and had the best goal difference in the league — and finished second. Benfica did not lose a match and finished third. The 2025-26 season reviewed with expected points from xG and with the previous model's forecasts: those published at the time and those reconstructed afterwards.",
+      "FC Porto won with 88 points, Sporting scored 89 goals and Benfica never lost. The 2025-26 season reviewed with expected points from xG and the model's forecasts.",
     back: "Liga Portugal",
     kicker: "Season review",
     unavailable: "2025-26 season data unavailable.",

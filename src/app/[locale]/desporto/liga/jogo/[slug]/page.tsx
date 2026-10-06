@@ -91,8 +91,8 @@ export async function generateMetadata({
       ? `${matchLabel(home, away)}, jornada ${fixture.matchday} da Liga Portugal: ${fixture.played.home_goals}–${fixture.played.away_goals}. ${probLine ? `Antes do jogo, o modelo dava: ${probLine}` : ""}`.trim()
       : `${matchLabel(home, away)}, matchday ${fixture.matchday} of Liga Portugal: ${fixture.played.home_goals}–${fixture.played.away_goals}. ${probLine ? `Before the match the model gave: ${probLine}` : ""}`.trim()
     : pt
-      ? `Previsão do modelo para ${matchLabel(home, away)}, jornada ${fixture.matchday} da Liga Portugal. ${probLine} O que cada resultado muda no título, no top 3 e na despromoção.`.trim()
-      : `Model forecast for ${matchLabel(home, away)}, matchday ${fixture.matchday} of Liga Portugal. ${probLine} What each result changes for the title, top 3 and relegation.`.trim();
+      ? `${matchLabel(home, away)}, jornada ${fixture.matchday} da Liga Portugal. Modelo: ${probLine} E o que muda com cada resultado.`.trim()
+      : `${matchLabel(home, away)}, matchday ${fixture.matchday} of Liga Portugal. Model: ${probLine} And what each result changes.`.trim();
 
   return createPageMetadata({
     locale,

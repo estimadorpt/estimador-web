@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: siteTitle(locale === 'pt' ? 'Eleições: previsões arquivadas' : 'Elections: archived forecasts'),
     description: locale === 'pt'
       ? 'As previsões das presidenciais de 2026 e das legislativas de 2025, guardadas com a informação disponível à data, e como lê-las sem as confundir com resultados.'
-      : 'The 2026 presidential and 2025 parliamentary forecasts, kept with the information available at the time, and how to read them without mistaking them for results.',
+      : 'The 2026 presidential and 2025 parliamentary forecasts, kept as published at the time, and how to read them without mistaking them for results.',
   });
 }
 

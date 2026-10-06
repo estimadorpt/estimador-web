@@ -22,7 +22,7 @@ const copy = {
     kicker: "Liga Portugal 2",
     title: "A Liga 2 em probabilidades",
     description:
-      "Uma tabela probabilística da Liga Portugal 2: probabilidades de subida, de descida e de posição final, a partir de um modelo Poisson hierárquico ajustado a seis épocas do segundo escalão. Modelo mais leve do que o da Primeira Liga — só golos, sem xG nem valores de mercado.",
+      "A Liga Portugal 2 em probabilidades de subida, despromoção e posição final, de um modelo Poisson hierárquico mais leve do que o da Primeira Liga: só golos, seis épocas.",
     back: "Liga Portugal",
     unavailable: "Dados da Liga 2 indisponíveis de momento.",
     lighterLabel: "Modelo ligeiro",
@@ -49,7 +49,7 @@ const copy = {
     kicker: "Liga Portugal 2",
     title: "Liga 2 in probabilities",
     description:
-      "A probabilistic table for Liga Portugal 2: promotion, relegation and final-position probabilities from a hierarchical Poisson model fitted to six seasons of the second tier. A lighter model than the Primeira Liga one — goals only, no xG and no squad values.",
+      "Liga Portugal 2 in promotion, relegation and final-position probabilities, from a hierarchical Poisson model lighter than the Primeira Liga one: goals only, six seasons.",
     back: "Liga Portugal",
     unavailable: "Liga 2 data unavailable right now.",
     lighterLabel: "Lighter model",

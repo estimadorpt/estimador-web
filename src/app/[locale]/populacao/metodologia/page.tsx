@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: POPULATION_ROUTES.methodology,
     title: pt ? 'Como foi feita a população sintética de Portugal' : 'How the synthetic population of Portugal was made',
     description: pt
-      ? 'O que é uma população sintética, como foi gerada em cinco passos, o que quer dizer cada nível de qualidade, privacidade, usos adequados, limitações e como citar.'
+      ? 'O que é uma população sintética, como foi gerada em cinco passos, o que quer dizer cada nível de qualidade, privacidade, usos, limitações e como citar.'
       : 'What a synthetic population is, how it was generated in five steps, what each quality tier means, privacy, suitable uses, limitations and how to cite it.',
   });
 }

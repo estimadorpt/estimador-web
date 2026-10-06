@@ -26,7 +26,7 @@ const copy = {
   pt: {
     title: "Dados abertos da Liga Portugal",
     description:
-      "Todas as previsões da Liga Portugal publicadas em estimador.pt estão disponíveis como JSON estático, sem chave nem registo. Esta página documenta cada ficheiro e os seus campos principais.",
+      "Todas as previsões da Liga Portugal do estimador.pt em JSON estático, sem chave nem registo: cada ficheiro e os seus campos principais.",
     back: "Liga Portugal",
     kicker: "Dados abertos",
     standfirstA:
@@ -62,7 +62,7 @@ const copy = {
   en: {
     title: "Liga Portugal open data",
     description:
-      "Every Liga Portugal forecast published on estimador.pt is available as static JSON, with no key and no sign-up. This page documents each file and its main fields.",
+      "Every Liga Portugal forecast on estimador.pt as static JSON, with no key and no sign-up: each file and its main fields.",
     back: "Liga Portugal",
     kicker: "Open data",
     standfirstA:

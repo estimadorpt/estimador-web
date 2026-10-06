@@ -32,7 +32,7 @@ export async function generateMetadata({
     // One name for the game everywhere, from nav.game (audit pub-PP-15).
     title: `${t("nav.game")} · Liga Portugal`,
     description: pt
-      ? "Faz as tuas previsões para a próxima jornada da Liga Portugal e vê se bates o modelo. Avaliação por Ranked Probability Score, a mesma medida com que avaliamos o modelo."
+      ? "Faz as tuas previsões para a próxima jornada da Liga Portugal e vê se bates o modelo, avaliado pela mesma medida que tu: o Ranked Probability Score."
       : "Forecast the next Liga Portugal matchday and see if you can beat the model. Scored with the Ranked Probability Score, the same measure we grade the model with.",
   });
 }

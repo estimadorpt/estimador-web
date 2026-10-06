@@ -34,8 +34,8 @@ export async function generateMetadata({
   // with its own scale and interval; the description no longer opens on the
   // argument against a single ranking (audit CL-M2).
   const description = pt
-    ? "Os jogadores da Liga Portugal em métricas separadas: finalização, contribuição ofensiva, posse disputada e guarda-redes, cada uma com a sua escala, o seu intervalo de credibilidade e a data dos dados."
-    : "Liga Portugal players on separate metrics: finishing, attacking contribution, contested possession and goalkeeping, each with its own scale, credible interval and data date.";
+    ? "Os jogadores da Liga Portugal em métricas separadas (finalização, contribuição ofensiva, posse disputada, guarda-redes), com intervalo de credibilidade e data."
+    : "Liga Portugal players on separate metrics (finishing, attacking contribution, contested possession, goalkeeping), each with a credible interval and a data date.";
 
   return createPageMetadata({
     locale,
