@@ -1,6 +1,7 @@
 import { TitleProbabilities } from '@/components/football/TitleProbabilities';
 import { createPageMetadata } from '@/lib/metadata';
 import {
+  loadLigaData,
   loadLigaWithDeltas,
   loadLigaHistorical,
   probabilityHistory,
@@ -8,7 +9,7 @@ import {
   loadLigaMarketScorecard,
   loadUpcomingFixtures,
 } from "@/lib/utils/football-data-loader";
-import { teamDisplayName } from "@/lib/config/football";
+import { CURRENT_LIGA_SEASON, teamDisplayName } from "@/lib/config/football";
 import { formatDateSpan, formatInteger, formatLongDate, formatPp } from "@/lib/football-format";
 import {
   forecastStatusLine,
@@ -46,11 +47,13 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale });
+  // The description names the season the forecast is for (audit FA2-09, SP2-05).
+  const { prediction } = await loadLigaData();
   return createPageMetadata({
     locale,
     path: `/desporto/liga`,
     title: t("meta.ligaTitle"),
-    description: t("meta.ligaDescription"),
+    description: t("meta.ligaDescription", { season: prediction?.season ?? CURRENT_LIGA_SEASON }),
   });
 }
 
@@ -291,7 +294,7 @@ export default async function LigaPage({
           <Link
             href="/desporto/liga/modelo"
             locale={locale}
-            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-ink underline underline-offset-4"
+            className="mt-4 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-ink underline underline-offset-4"
           >
             {locale === "pt" ? "Como se compara o modelo com o mercado?" : "How does the model compare with the market?"}
             <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />

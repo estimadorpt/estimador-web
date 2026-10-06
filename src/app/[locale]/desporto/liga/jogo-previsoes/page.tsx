@@ -29,8 +29,9 @@ export async function generateMetadata({
   return createPageMetadata({
     locale,
     path: `/desporto/liga/jogo-previsoes`,
-    // One name for the game everywhere, from nav.game (audit pub-PP-15).
-    title: `${t("nav.game")} · Liga Portugal`,
+    // One name for the game everywhere, from nav.game (audit pub-PP-15);
+    // a colon, not a second separator before the site suffix (SP2-11).
+    title: `${t("nav.game")}: Liga Portugal`,
     description: pt
       ? "Faz as tuas previsões para a próxima jornada da Liga Portugal e vê se bates o modelo, avaliado pela mesma medida que tu: o Ranked Probability Score."
       : "Forecast the next Liga Portugal matchday and see if you can beat the model. Scored with the Ranked Probability Score, the same measure we grade the model with.",

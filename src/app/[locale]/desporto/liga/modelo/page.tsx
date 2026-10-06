@@ -130,7 +130,8 @@ export async function generateMetadata({
   return createPageMetadata({
     locale,
     path: `/desporto/liga/modelo`,
-    title: siteTitle(`${c.title} · Liga Portugal`),
+    // A colon, not a second separator before the site suffix (SP2-11).
+    title: siteTitle(`${c.title}: Liga Portugal`),
     description: scorecard
       ? summary(scorecard, prediction?.model ?? null, locale).description
       : c.fallbackDescription,

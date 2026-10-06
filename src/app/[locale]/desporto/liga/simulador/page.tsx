@@ -11,7 +11,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { MatchdayPicker } from "@/components/charts/football/MatchdayPicker";
 import { DueloFinal } from "@/components/charts/football/DueloFinal";
 import { getTranslations } from "next-intl/server";
-import { Trophy, Swords } from "lucide-react";
+import { Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import { setRequestLocale } from '@/i18n/request-locale';
 
@@ -157,9 +157,9 @@ export default async function SimuladorPage({
       {seasonSamples && (
         <section aria-labelledby="duelo-final-heading" className="border-b border-stone-200 last:border-b-0">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <p className="mb-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">
-              <Swords className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>{locale === 'pt' ? 'Outra pergunta' : 'A different question'}</span>
+            {/* A plain kicker, no icon: the duel's card carries the one title (UXD2-07). */}
+            <p className="mb-5 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+              {locale === 'pt' ? 'Outra pergunta' : 'A different question'}
             </p>
             <p className="mb-5 border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-muted">{locale === 'pt' ? 'Previsão de base: esta comparação usa as épocas simuladas da previsão publicada, sem nenhum resultado escolhido no simulador.' : 'Baseline forecast: this comparison uses the published forecast\'s simulated seasons, with no result picked in the simulator.'}</p>
             <DueloFinal samples={seasonSamples} locale={locale} headingId="duelo-final-heading" forecastTimestamp={prediction.timestamp} />
