@@ -114,7 +114,8 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
                     : 'cursor-not-allowed border-dashed border-line bg-parchment text-stone-500'
               }`}
             >
-              {unlocked ? i + 1 : <Lock aria-hidden="true" className="h-4 w-4" />}
+              {/* The numeral is for the eye; the sr-only line names the clue, so it is not read twice ("1 Pista 1", A11Y3-08). */}
+              {unlocked ? <span aria-hidden="true">{i + 1}</span> : <Lock aria-hidden="true" className="h-4 w-4" />}
               <span className="sr-only">{unlocked ? `${t.clue(i + 1)}: ${label}` : `${t.clue(i + 1)}: ${t.clueLocked(i)}`}</span>
               {fresh === i && !active && <span aria-hidden="true" className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-coral" />}
             </button>

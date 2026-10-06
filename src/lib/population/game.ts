@@ -216,10 +216,14 @@ export interface GuessFeedback {
 }
 
 /**
- * What proximity is measured against: the widest pair of parishes in the
- * country and, for a guess and an answer both on the mainland, the widest pair
- * on the mainland. Against the whole country (the Azores reach 1,800 km from
- * the Algarve) a guess 500 km off on the mainland would still score ~75%.
+ * What proximity is measured against: the widest pair of parishes on the
+ * mainland when the answer is on the mainland, and the widest pair in the
+ * whole country when the answer is on the islands. Against the whole country
+ * (the Azores reach 1,800 km from the Algarve) a guess 500 km off on the
+ * mainland would still score ~75%. The scale follows the answer alone, so one
+ * game has one scale and proximity never rises with distance: a guess on the
+ * islands for a mainland answer is past the mainland's widest pair and scores
+ * 0% (PUB3-02: Funchal at 1,236 km scored 41% while Faro at 491 km scored 15%).
  */
 export interface ProximityScale { all: number; mainland: number }
 
@@ -233,7 +237,7 @@ export function guessFeedback(guess: GamePlace, answer: GamePlace, scale: number
   const correct = guess.code === answer.code;
   const maxDistanceKm = typeof scale === 'number'
     ? scale
-    : onMainland(guess) && onMainland(answer) ? scale.mainland : scale.all;
+    : onMainland(answer) ? scale.mainland : scale.all;
   const distanceKm = correct ? 0 : haversineKm(guess, answer);
   const bearing = correct ? null : initialBearing(guess, answer);
   return {

@@ -241,9 +241,36 @@ describe('geography of a guess', () => {
     const braganca: GamePlace = { code: '040201', municipality: '0402', region: '04', lat: 41.81, lon: -6.76 };
     const mainland = guessFeedback(sagres, braganca, scale);
     expect(mainland.proximity).toBeLessThan(40);
-    // A guess on an island is still measured against the whole country.
+    // The scale follows the answer: for a mainland answer an island guess is past the mainland's widest pair (0%),
     const azores: GamePlace = { code: '420101', municipality: '4201', region: 'azores', lat: 37.74, lon: -25.67 };
-    expect(guessFeedback(azores, braganca, scale).proximity).toBeCloseTo(proximity(haversineKm(azores, braganca), scale.all), 6);
+    expect(guessFeedback(azores, braganca, scale).proximity).toBe(0);
+    // and for an island answer every guess, mainland or not, is measured against the whole country.
+    expect(guessFeedback(braganca, azores, scale).proximity).toBeCloseTo(proximity(haversineKm(azores, braganca), scale.all), 6);
+  });
+
+  it('never scores a farther guess higher within one game (PUB3-02: Funchal 1 236 km above Faro 491 km)', () => {
+    const scale = proximityScale(places.parishes);
+    const index = places;
+    const asGame = (code: string): GamePlace => {
+      const p = index.byCode.get(code)!;
+      return { code: p.code, municipality: p.municipality, region: p.region, lat: p.lat, lon: p.lon };
+    };
+    // Answers on the mainland, in Madeira and in the Azores; guesses from all three.
+    const answers = ['030857', '310310', '430105', '0302FA'];
+    const guesses = index.parishes.filter((_, i) => i % 37 === 0).map(p => p.code);
+    for (const code of answers) {
+      const answer = asGame(code);
+      const scored = guesses.map(guess => guessFeedback(asGame(guess), answer, scale)).sort((a, b) => a.distanceKm - b.distanceKm);
+      for (let i = 1; i < scored.length; i++) {
+        expect(scored[i].proximity, `${code}: ${scored[i].code} after ${scored[i - 1].code}`).toBeLessThanOrEqual(scored[i - 1].proximity);
+      }
+    }
+    // The audited game (N.º 1, Candoso (São Martinho), Guimarães): Funchal (Sé) no longer outscores Faro (Sé e São Pedro).
+    const answer = asGame('030857');
+    const funchal = guessFeedback(asGame('310310'), answer, scale);
+    const faro = guessFeedback(asGame('080508'), answer, scale);
+    expect(funchal.distanceKm).toBeGreaterThan(faro.distanceKm);
+    expect(funchal.proximity).toBeLessThanOrEqual(faro.proximity);
   });
 });
 

@@ -120,6 +120,13 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   const end = useRef<HTMLDivElement>(null);
   /** Set when a guess ends the game in this session, so only then the end panel takes focus. */
   const justEnded = useRef(false);
+  /**
+   * Set when the reader starts or leaves a board with a control that then
+   * unmounts ("Jogar outra vez", "Voltar ao resultado", "Voltar à freguesia de
+   * hoje", a day from the archive): once the board is drawn, focus goes to the
+   * guess box, or to the result's heading, instead of falling to the page (A11Y3-01).
+   */
+  const focusBoard = useRef(false);
 
   // Load the index and the places; read the player's games.
   useEffect(() => {
@@ -240,8 +247,24 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     return () => window.cancelAnimationFrame(frame);
   }, [finished]);
 
+  // The board for a new game (or the result of a finished one) is drawn: put focus on it.
+  const boardReady = Boolean(ready && record && answer);
+  useEffect(() => {
+    if (!focusBoard.current || !boardReady || !record) return;
+    const playingNow = record.status === 'playing';
+    const frame = window.requestAnimationFrame(() => {
+      focusBoard.current = false;
+      const target = playingNow
+        ? top.current?.querySelector<HTMLElement>('input[role="combobox"]')
+        : top.current?.querySelector<HTMLElement>('#misteriosa-end');
+      target?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [boardReady, record]);
+
   const play = useCallback((target: number) => {
     if (today === null) return;
+    focusBoard.current = true;
     setDay(target);
     setReplay(null);
     try {
@@ -255,10 +278,16 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
 
   const playAgain = useCallback(() => {
     if (day === null) return;
+    focusBoard.current = true;
     setReplay(newRecord(day, false));
     setAnnouncement(t.replayStarted);
     top.current?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
   }, [day, t]);
+
+  const stopReplay = () => {
+    focusBoard.current = true;
+    setReplay(null);
+  };
 
   if (failed) {
     return (
@@ -315,7 +344,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
               {t.backToToday}
             </button>
           ) : (
-            <button type="button" onClick={() => setReplay(null)} className="inline-flex min-h-11 items-center text-sm font-semibold text-ink underline underline-offset-4">
+            <button type="button" onClick={stopReplay} className="inline-flex min-h-11 items-center text-sm font-semibold text-ink underline underline-offset-4">
               {t.replayStop}
             </button>
           )}

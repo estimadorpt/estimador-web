@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { LocateFixed, Search, X } from 'lucide-react';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 import { fetchPlaces } from '@/lib/population/client';
@@ -11,6 +11,7 @@ import {
   NEARBY_KEY,
   NEAREST_MAX_KM,
   nearestParish,
+  regionLabel,
   regionSlug,
   searchPlaces,
   type MunicipalityHit,
@@ -20,6 +21,7 @@ import {
 } from '@/lib/population/places';
 import type { Locale } from '@/lib/population/labels';
 import { parishHref } from './ParishLink';
+import { ofMunicipality } from './parish/place-words';
 
 interface ParishSearchProps {
   locale: Locale;
@@ -67,8 +69,16 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
   const input = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const loading = useRef(false);
+  /** The phone's "lift the field" scroll, pending for 250 ms after focus (A11Y3-07). */
+  const lift = useRef<number | null>(null);
   /** A guess cannot be undone: in the game a município row is a heading, and Enter chooses only an exact match. */
   const guessing = Boolean(onSelect);
+
+  const cancelLift = () => {
+    if (lift.current !== null) window.clearTimeout(lift.current);
+    lift.current = null;
+  };
+  useEffect(() => cancelLift, []);
 
   const load = () => {
     if (index || loading.current) return;
@@ -80,14 +90,27 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
       .finally(() => { loading.current = false; });
   };
 
-  const { hits, total } = useMemo(() => {
-    if (!index) return { hits: [] as PlaceHit[], total: 0 };
-    const found = searchPlaces(index, query, 12);
+  const { hits, total, outside } = useMemo(() => {
+    if (!index) return { hits: [] as PlaceHit[], total: 0, outside: 0 };
+    // In the game a parish named exactly like the query comes first, so the row Enter chooses is in view (UXM3-20).
+    const found = searchPlaces(index, query, 12, { exactFirst: guessing });
     // In the game the município row stays, as a heading over its parishes (it cannot be chosen).
     const visible = found.hits.filter(hit => hit.kind === 'municipality' || !exclude?.has(hit.parish.code));
-    return { hits: visible, total: found.total };
-  }, [index, query, exclude]);
+    return { hits: visible, total: found.total, outside: found.outside };
+  }, [index, query, exclude, guessing]);
   const shownParishes = hits.filter(hit => hit.kind === 'parish').length;
+  /** A named concelho's parishes are all listed; what is cut is only the matches outside it (PUB3-V02). */
+  const namesMunicipality = hits.some(hit => hit.kind === 'municipality');
+  const shownOutside = hits.filter(hit => hit.kind === 'parish' && !hit.underMunicipality).length;
+  const hidden = namesMunicipality ? Math.max(0, outside - shownOutside) : Math.max(0, total - shownParishes);
+  /** Where a concelho's group ends and the other matches begin: a divider row goes before this option. */
+  const othersStart = namesMunicipality
+    ? hits.findIndex((hit, i) => {
+      if (i === 0 || hit.kind !== 'parish' || hit.underMunicipality) return false;
+      const previous = hits[i - 1];
+      return previous.kind === 'municipality' || previous.underMunicipality;
+    })
+    : -1;
   const selectable = (i: number) => Boolean(hits[i]) && !(guessing && hits[i].kind === 'municipality');
   // What Enter chooses before the reader points at anything: the first row when
   // choosing only navigates; in the game, only a parish named exactly like the query.
@@ -119,6 +142,8 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
   };
 
   const locate = () => {
+    // Busy is aria-disabled, not disabled, so focus stays on the button (A11Y3-01).
+    if (locating === 'busy') return;
     load();
     if (!('geolocation' in navigator)) { setLocating('denied'); return; }
     setLocating('busy');
@@ -162,8 +187,10 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
       count: (shown: number, all: number) => (all === 0 ? '' : shown < all
         ? `${formatCount(shown, 'pt')} de ${formatCount(all, 'pt')} freguesias. Escreve mais para afinar.`
         : `${formatCount(all, 'pt')} ${all === 1 ? 'freguesia encontrada' : 'freguesias encontradas'}.`),
+      more: (n: number) => `Há mais ${formatCount(n, 'pt')} ${n === 1 ? 'resultado' : 'resultados'} fora deste concelho. Escreve mais para afinar.`,
+      others: (typed: string) => `Outros resultados para «${typed}»`,
       underMunicipality: 'deste concelho',
-      municipalityHeading: (name: string) => `Freguesias do concelho de ${name}: escolhe uma`,
+      municipalityHeading: (name: string) => `Freguesias do concelho ${ofMunicipality(name)}: escolhe uma`,
       pick: 'Escolhe uma freguesia da lista, com as setas ou com um toque: a tentativa só conta depois de a escolheres.',
     }
     : {
@@ -186,12 +213,18 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
       count: (shown: number, all: number) => (all === 0 ? '' : shown < all
         ? `${formatCount(shown, 'en')} of ${formatCount(all, 'en')} parishes. Type more to narrow it down.`
         : `${formatCount(all, 'en')} ${all === 1 ? 'parish found' : 'parishes found'}.`),
+      more: (n: number) => `${formatCount(n, 'en')} more ${n === 1 ? 'match' : 'matches'} outside this municipality. Type more to narrow it down.`,
+      others: (typed: string) => `Other matches for “${typed}”`,
       underMunicipality: 'in this municipality',
       municipalityHeading: (name: string) => `Parishes of ${name} municipality: pick one`,
       pick: 'Pick a parish from the list, with the arrow keys or a tap: the guess only counts once you pick it.',
     };
 
   const typed = query.trim().length >= 2;
+  /** The line under the list (and its spoken twin): a named concelho counts only the matches outside it. */
+  const countLine = namesMunicipality
+    ? (hidden > 0 ? t.more(hidden) : t.count(total, total))
+    : t.count(shownParishes, total);
   const showList = open && typed && index !== null && hits.length > 0;
   const showPanel = open && typed && !showList;
   const locationMessage = locating === 'denied' ? t.denied : locating === 'far' ? t.far : t.privacy;
@@ -234,11 +267,18 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
               onFocus?.();
               // On a phone the keyboard takes half the screen: lift the field, its
               // label included, so the suggestions have room (the page's scroll
-              // padding keeps it clear of the sticky header).
+              // padding keeps it clear of the sticky header). Only while the field
+              // still has focus: a reader tabbing past it must not be pulled back (A11Y3-07).
               if (window.matchMedia('(max-width: 640px)').matches) {
-                window.setTimeout(() => field.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }), 250);
+                cancelLift();
+                lift.current = window.setTimeout(() => {
+                  lift.current = null;
+                  if (document.activeElement !== input.current) return;
+                  field.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+                }, 250);
               }
             }}
+            onBlur={cancelLift}
             onChange={event => { setQuery(event.target.value); setMoved(null); setNudge(false); setOpen(true); }}
             onKeyDown={event => {
               if (event.key === 'ArrowDown') { event.preventDefault(); setOpen(true); setMoved(step(1)); }
@@ -281,15 +321,22 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
                 if (guessing && hit.kind === 'municipality') {
                   // Not an option: a heading over the município's parishes (each of them names its município too).
                   return (
-                    <li key={key} role="presentation" aria-hidden="true" className="border-b border-line px-4 py-2.5">
+                    <li key={key} role="presentation" aria-hidden="true" className={`border-b border-line px-4 py-2.5 ${i > 0 ? 'border-t' : ''}`}>
                       <span className="block text-sm font-bold text-ink">{t.municipalityHeading(hit.municipality.name)}</span>
-                      <span className="block text-xs text-stone-600">{hit.municipality.regionName}</span>
+                      <span className="block text-xs text-stone-600">{regionLabel(hit.municipality.region, hit.municipality.regionName, locale)}</span>
                     </li>
                   );
                 }
+                // The concelho's group is closed before the other matches (PUB3-V02).
+                const divider = i === othersStart && (
+                  <li role="presentation" aria-hidden="true" className="mt-1 border-y border-line bg-paper px-4 py-2 text-xs font-bold text-stone-600">
+                    {t.others(query.trim())}
+                  </li>
+                );
                 return (
+                  <Fragment key={key}>
+                  {divider}
                   <li
-                    key={key}
                     id={`${id}-opt-${i}`}
                     data-index={i}
                     role="option"
@@ -303,25 +350,26 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
                     {hit.kind === 'municipality' ? (
                       <>
                         <span className="block text-[15px] font-bold text-ink">{t.municipality(hit.municipality.name)}</span>
-                        <span className="block text-xs text-stone-600">{hit.municipality.regionName} · {t.municipalityCount(hit.municipality.parishCount)}</span>
+                        <span className="block text-xs text-stone-600">{regionLabel(hit.municipality.region, hit.municipality.regionName, locale)} · {t.municipalityCount(hit.municipality.parishCount)}</span>
                       </>
                     ) : (
                       <>
                         <span className="block text-[15px] font-semibold text-ink">{hit.parish.name}</span>
                         <span className="block text-xs text-stone-500">
-                          {hit.underMunicipality && !guessing ? t.underMunicipality : `${hit.parish.municipalityName} · ${hit.parish.regionName}`}
+                          {hit.underMunicipality && !guessing ? t.underMunicipality : `${hit.parish.municipalityName} · ${regionLabel(hit.parish.region, hit.parish.regionName, locale)}`}
                         </span>
                       </>
                     )}
                   </li>
+                  </Fragment>
                 );
               })}
             </ul>
             {nudge && active < 0 && (
               <p aria-hidden="true" className="border-t border-line px-4 py-2 text-xs font-semibold text-ink">{t.pick}</p>
             )}
-            {shownParishes < total && (
-              <p aria-hidden="true" className="border-t border-line px-4 py-2 text-xs text-stone-600">{t.count(shownParishes, total)}</p>
+            {hidden > 0 && (
+              <p aria-hidden="true" className="border-t border-line px-4 py-2 text-xs text-stone-600">{countLine}</p>
             )}
             </div>
           )}
@@ -348,8 +396,10 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
           <button
             type="button"
             onClick={locate}
-            disabled={disabled || locating === 'busy'}
-            className="inline-flex min-h-12 items-center gap-2 rounded-[10px] border border-line bg-cream px-4 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-parchment disabled:opacity-50"
+            // While it locates the button stays focusable (aria-disabled, not disabled), so focus does not fall to the page (A11Y3-01).
+            disabled={disabled}
+            aria-disabled={locating === 'busy' || undefined}
+            className="inline-flex min-h-12 items-center gap-2 rounded-[10px] border border-line bg-cream px-4 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-parchment disabled:opacity-50 aria-disabled:cursor-wait aria-disabled:opacity-50"
           >
             <LocateFixed aria-hidden="true" className="h-4 w-4" />
             {locating === 'busy' ? t.locating : t.locate}
@@ -358,7 +408,7 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
       </div>
       {/* One polite line for what the list holds, outside it, so it is announced. */}
       <p id={`${id}-status`} role="status" className="sr-only">
-        {typed && index ? (hits.length === 0 ? t.none : nudge && active < 0 ? t.pick : t.count(shownParishes, total)) : ''}
+        {typed && index ? (hits.length === 0 ? t.none : nudge && active < 0 ? t.pick : countLine) : ''}
       </p>
       {withLocation && (
         <p className={`mt-1.5 text-xs ${locating === 'far' || locating === 'denied' ? 'font-semibold text-ink' : 'text-stone-500'}`} aria-live="polite">{locationMessage}</p>
