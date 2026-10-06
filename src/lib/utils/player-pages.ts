@@ -55,9 +55,11 @@ export function playerDataCutoffSentence(
   const season = lastSeason(seasons);
   const next = season ? nextSeason(season) : null;
   if (locale === 'en') {
-    return `The player data runs to ${date}${season ? `, the end of the ${season} season` : ''}. The player models have not been refitted with ${next ? `${next} matches` : 'this season’s matches'} yet, so minutes, goals and recent appearances stop there.`;
+    return `The finishing and contribution data runs to ${date}${season ? `, the end of the ${season} season` : ''}. Those models have not been refitted with ${next ? `${next} matches` : 'this season’s matches'} yet, so minutes, goals and recent appearances stop there; contested possession, goalkeepers and defenders use the seasons their own files list.`;
   }
-  return `Os dados de jogadores vão até ${date}${season ? `, o fim da época ${season}` : ''}. Os modelos de jogadores ainda não foram reajustados com os jogos de ${next ?? 'esta época'}, por isso minutos, golos e últimas partidas param aí.`;
+  // Only finishing and contribution stop there; duels, goalkeepers and
+  // defenders already include the season in course (audit MR2-05).
+  return `Os dados de finalização e de contribuição vão até ${date}${season ? `, o fim da época ${season}` : ''}. Esses modelos ainda não foram reajustados com os jogos de ${next ?? 'esta época'}, por isso minutos, golos e últimas partidas param aí; a posse disputada, os guarda-redes e as defesas usam as épocas que os seus ficheiros indicam.`;
 }
 
 /** "2025-26" → "2026-27". */

@@ -16,7 +16,8 @@ import { formatDecimal, formatLongDate } from "@/lib/football-format";
 import { useState } from "react";
 import type { LeaderboardResponse, LeaderboardRow } from "@/lib/utils/prediction-game-api";
 
-const USER_COLOR = "#4e8056";
+// Text-strength green on paper (audit A11Y2-08).
+const USER_COLOR = "#377455";
 const MODEL_COLOR = "#5f7062";
 
 interface SeasonLeaderboardProps {
@@ -169,7 +170,7 @@ function Row({
 
   return (
     <tr className={background}>
-      <td className="px-3 py-2 tabular-nums text-stone-400 text-xs">
+      <td className="px-3 py-2 tabular-nums text-stone-500 text-xs">
         {row.isModel ? <Bot className="w-3.5 h-3.5" /> : row.rank}
       </td>
       <td className="px-3 py-2">

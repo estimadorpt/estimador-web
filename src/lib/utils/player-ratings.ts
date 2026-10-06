@@ -386,6 +386,7 @@ function normaliseMeta(root: Json): RatingsMeta {
     ? caveatsRaw
         .map(c => (isObject(c) ? pickStr(c, ['text', 'caveat', 'note', 'label']) : str(c)))
         .filter((c): c is string => c !== null)
+        .map(stripInternalRefs)
     : [];
 
   return {
@@ -548,6 +549,23 @@ function normaliseDiagnostics(root: unknown): DiagnosticEntry[] {
  * Turn a raw parsed feed into a `RatingsBlock`, or null when there is nothing
  * worth rendering (no named players *and* no diagnostics).
  */
+/**
+ * The producer's caveats name internal decision records ("ADR-017") and
+ * file names ("contrib_skill_walkforward.parquet") that mean nothing to a
+ * reader and link nowhere (audit FA2-M6): keep the substance, drop those.
+ */
+export function stripInternalRefs(text: string): string {
+  return text
+    .replace(/\s*\((?:see |per )?ADR-\d+(?:\/\d+)*\)/g, '')
+    .replace(/,?\s*per ADR-\d+(?:\/\d+)*/g, '')
+    .replace(/ADR-\d+(?:\/\d+)*'s\s*/g, 'the earlier ')
+    .replace(/\s*\([\w./-]+\.parquet\)/g, '')
+    .replace(/[\w./-]+\.parquet\s*/g, '')
+    .replace(/\s+([.,;:])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 export function normaliseRatings(root: unknown, kind: RatingKind): RatingsBlock | null {
   if (!isObject(root) && !Array.isArray(root)) return null;
 

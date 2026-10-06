@@ -4,7 +4,7 @@ import { useRef, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
-import { formatPercent } from "@/lib/football-format";
+import { formatPercent, formatShortDate } from "@/lib/football-format";
 import type { LigaProbabilityHistory } from "@/types/football";
 import { quietPlot } from "@/components/viz/plot-a11y";
 
@@ -57,7 +57,7 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
     const rows = [...visibleTeams]
       .sort((a, b) => (last?.table.find(t => t.team === b)?.p_relegation ?? 0) - (last?.table.find(t => t.team === a)?.p_relegation ?? 0))
       .map(team => [teamDisplayName(team), ...historical.map(md => { const t = md.table.find(x => x.team === team); return t ? formatPercent(t.p_relegation, locale) : ""; })]);
-    return { columns: [pt ? "Equipa" : "Team", ...historical.map(md => `${pt ? "J" : "MD"}${md.matchday}`)], rows };
+    return { columns: [pt ? "Equipa" : "Team", ...historical.map(md => `${pt ? "J" : "MD"}${md.matchday}${md.timestamp ? ` · ${formatShortDate(md.timestamp, locale)}` : ""}`)], rows };
   }, [historical, pt, visibleTeams, locale]);
 
   useEffect(() => {
@@ -69,6 +69,7 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
       if (!container) return;
 
       const width = container.offsetWidth;
+      const dates = new Map(historical.map(md => [md.matchday, md.timestamp ? formatShortDate(md.timestamp, locale) : ""]));
       const height = Math.max(280, Math.min(360, width * 0.45));
 
       const teamsAtRisk = new Set<string>(visibleTeams);
@@ -145,10 +146,12 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
             strokeWidth: 2,
             curve: "monotone-x",
           }),
+          // A dot per published forecast (audit FA2-16).
+          Plot.dot(lineData, { x: "matchday", y: "p_relegation", fill: "team", r: 2.5 }),
           Plot.tip(lineData, Plot.pointer({
             x: "matchday",
             y: "p_relegation",
-            title: (d: { team: string; matchday: number; p_relegation: number }) => `${teamDisplayName(d.team)} · ${pt ? "J" : "MD"}${d.matchday}: ${formatPercent(d.p_relegation / 100, locale)}`,
+            title: (d: { team: string; matchday: number; p_relegation: number }) => `${teamDisplayName(d.team)} · ${pt ? "J" : "MD"}${d.matchday}${dates.get(d.matchday) ? ` (${pt ? "previsão de" : "forecast of"} ${dates.get(d.matchday)})` : ""}: ${formatPercent(d.p_relegation / 100, locale)}`,
           })),
           Plot.text(
             endLabels,

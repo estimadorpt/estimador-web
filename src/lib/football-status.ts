@@ -44,3 +44,82 @@ export function forecastStatusLine(input: ForecastStatusInput, locale: string): 
   }
   return parts.join(' · ');
 }
+
+/* ---------------------------------------------------------- the clock --- */
+// The export is built once per forecast, but a reader opens it on any day.
+// These helpers say what a page should show at a given instant: before a
+// kickoff the forecast as published, after it "Jogo começou", and once the
+// round's last game is over, that a new forecast is in preparation (audit
+// FRESH-01). Components read the clock only after mount (ClockSwitch), so
+// the server render is always the published state.
+
+/** How long after a round's last kickoff it counts as played. */
+export const ROUND_SETTLE_MS = 2 * 60 * 60 * 1000;
+
+export interface ClockStep<T> {
+  /** UTC ISO instant from which `value` applies. */
+  at: string | null | undefined;
+  value: T;
+}
+
+/** The value of the latest step whose instant has passed, else `initial`. */
+export function clockValue<T>(initial: T, steps: Array<ClockStep<T>>, now: number): T {
+  let best: { ms: number; value: T } | null = null;
+  for (const step of steps) {
+    if (!step.at) continue;
+    const ms = Date.parse(step.at);
+    if (Number.isNaN(ms) || ms > now) continue;
+    if (!best || ms >= best.ms) best = { ms, value: step.value };
+  }
+  return best ? best.value : initial;
+}
+
+/** The instant a round counts as played: its last kickoff plus two hours. */
+export function roundPlayedAt(kickoffs: Array<string | null | undefined>): string | null {
+  const times = kickoffs
+    .map(k => (k ? Date.parse(k) : NaN))
+    .filter(ms => !Number.isNaN(ms));
+  if (times.length === 0) return null;
+  return new Date(Math.max(...times) + ROUND_SETTLE_MS).toISOString();
+}
+
+/** The earliest of a round's kickoffs (ISO), or null. */
+export function roundStartsAt(kickoffs: Array<string | null | undefined>): string | null {
+  const times = kickoffs
+    .map(k => (k ? Date.parse(k) : NaN))
+    .filter(ms => !Number.isNaN(ms));
+  if (times.length === 0) return null;
+  return new Date(Math.min(...times)).toISOString();
+}
+
+/** "Jogo começou · previsão de 25 set." / "Match under way · forecast of 25 Sept". */
+export function matchStartedLine(forecastTimestamp: string, locale: string): string {
+  const date = formatShortDate(forecastTimestamp, locale);
+  return locale === 'en'
+    ? `Match under way · forecast of ${date}`
+    : `Jogo começou · previsão de ${date}`;
+}
+
+/** "Jornada 8 · jogada, nova previsão em preparação". */
+export function roundPlayedLine(matchday: number, locale: string): string {
+  return locale === 'en'
+    ? `Matchday ${matchday} · played, new forecast in preparation`
+    : `Jornada ${matchday} · jogada, nova previsão em preparação`;
+}
+
+/**
+ * The status line once the next round is played: "Depois da jornada 7 ·
+ * atualizado a 25 set. · jornada 8 jogada, nova previsão em preparação".
+ */
+export function forecastStatusLinePlayed(input: ForecastStatusInput, locale: string): string {
+  const pt = locale !== 'en';
+  const base = forecastStatusLine({ ...input, nextRound: null }, locale).split(' · ').slice(0, -1);
+  if (input.nextRound != null) {
+    base.push(
+      pt
+        ? `jornada ${input.nextRound} jogada, nova previsão em preparação`
+        : `matchday ${input.nextRound} played, new forecast in preparation`,
+    );
+  }
+  return base.join(' · ');
+}

@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { teamDisplayName, teamLogoSrc } from "@/lib/config/football";
+import { OUTCOME_TONES, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
+import { Link } from "@/i18n/routing";
 import { Swords, Lock, Trash2, SlidersHorizontal, Check, Share2 } from "lucide-react";
 import { useSeasonGame } from "@/hooks/useSeasonGame";
-import { formatDecimal, formatKickoff, formatLongDate } from "@/lib/football-format";
+import { formatDecimal, formatKickoff, formatKickoffShort, formatLongDate } from "@/lib/football-format";
 
 /** RPS values: three decimals in the page's number format. */
 const rpsFmt = (v: number, pt: boolean) => formatDecimal(v, pt ? "pt" : "en", 3);
@@ -41,7 +42,8 @@ interface ContraOModeloProps {
 const OUTCOME_ORDER: Outcome[] = ["H", "D", "A"];
 
 /** Emerald for the user, stone for the model — consistent everywhere below. */
-const USER_COLOR = "#4e8056";
+// Text-strength green on paper (audit A11Y2-08: #4e8056 was 4,16:1).
+const USER_COLOR = "#377455";
 const MODEL_COLOR = "#5f7062";
 
 export function ContraOModelo({ data, locale = "pt", recordNote = null }: ContraOModeloProps) {
@@ -282,7 +284,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
           </h2>
         </div>
         <p className="text-sm text-stone-500">{t.intro}</p>
-        <div className="mt-6 h-40 rounded-lg bg-stone-100 animate-pulse" />
+        <div className="mt-6 h-40 rounded-lg bg-stone-100 motion-safe:animate-pulse" />
       </div>
     );
   }
@@ -327,7 +329,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
           <div className="border border-stone-200 rounded-xl overflow-hidden">
             <div className="grid grid-cols-2 divide-x divide-stone-200">
               <div className="p-4 sm:p-6">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                   {t.yourScore}
                 </div>
                 <div
@@ -338,7 +340,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
                 </div>
               </div>
               <div className="p-4 sm:p-6">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                   {t.modelScore}
                 </div>
                 <div
@@ -436,7 +438,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
 
             <div className="flex items-end gap-6 mb-4">
               <div>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
                   {t.you}
                 </div>
                 <div className="text-4xl font-bold tabular-nums" style={{ color: USER_COLOR }}>
@@ -445,7 +447,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
               </div>
               <div className="text-xl font-bold text-stone-500 pb-2" aria-hidden="true">vs</div>
               <div>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
                   {t.model}
                 </div>
                 <div className="text-4xl font-bold tabular-nums" style={{ color: MODEL_COLOR }}>
@@ -531,6 +533,8 @@ function RoundPicker({
   const pickedCount = round.fixtures.filter(f => picks[f.key]).length;
   const lock = roundLockState(round, Date.now());
   const allConfirmed = round.fixtures.every(f => f.kickoffConfirmed !== false);
+  const kickoffs = round.fixtures.map(f => (f.kickoff ? Date.parse(f.kickoff) : NaN)).filter(ms => !Number.isNaN(ms));
+  const lastKickoff = allConfirmed && kickoffs.length ? new Date(Math.max(...kickoffs)).toISOString() : null;
 
   return (
     <section>
@@ -573,7 +577,7 @@ function RoundPicker({
                   <img src={teamLogoSrc(fixture.home)} alt="" className="w-5 h-5 object-contain" />
                 )}
                 <span className="truncate">{teamDisplayName(fixture.home)}</span>
-                <span className="text-stone-500 font-normal" aria-hidden="true">vs</span>
+                <span className="text-stone-500 font-normal" aria-hidden="true">–</span>
                 <span className="truncate">{teamDisplayName(fixture.away)}</span>
                 {teamLogoSrc(fixture.away) && (
                   <img src={teamLogoSrc(fixture.away)} alt="" className="w-5 h-5 object-contain" />
@@ -583,7 +587,7 @@ function RoundPicker({
                 <p className="-mt-2 mb-3 text-[11px] text-stone-500">
                   {fixture.kickoffConfirmed === false
                     ? `${formatLongDate(fixture.kickoff, pt ? "pt" : "en", { year: false })} · ${t.toBeConfirmed}`
-                    : formatKickoff(fixture.kickoff, pt ? "pt" : "en")}
+                    : formatKickoffShort(fixture.kickoff, pt ? "pt" : "en")}
                 </p>
               )}
 
@@ -715,15 +719,32 @@ function RoundPicker({
           );
         })}
       </div>
+
+      {/* Every game picked: say they are kept and what comes next (audit PUB2-22). */}
+      {pickedCount === round.fixtures.length && round.fixtures.length > 0 && (
+        <div role="status" className="mt-4 rounded-2xl border border-line bg-parchment px-4 py-3 text-sm leading-relaxed text-stone-700">
+          <p>
+            {pt
+              ? `As tuas ${pickedCount} previsões estão guardadas neste dispositivo e podes mudá-las até ao primeiro jogo.${lastKickoff ? ` Os resultados chegam depois do último jogo da jornada (${formatKickoffShort(lastKickoff, "pt")}).` : ""}`
+              : `Your ${pickedCount} picks are saved on this device and you can change them until the first game.${lastKickoff ? ` The results come in after the round's last game (${formatKickoffShort(lastKickoff, "en")}).` : ""}`}
+          </p>
+          <p className="mt-1">
+            <Link href="/desporto/liga" locale={pt ? "pt" : "en"} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4">
+              {pt ? "Ver a previsão da Liga" : "See the Liga forecast"}
+            </Link>
+          </p>
+        </div>
+      )}
     </section>
   );
 }
 
 function ProbBar({ pct }: { pct: [number, number, number] }) {
   const segments = [
-    { v: pct[0], color: "#4e8056" },
-    { v: pct[1], color: "#cbccbb" },
-    { v: pct[2], color: "#16362e" },
+    // The site's one 1X2 encoding (audit UXD2-V06).
+    { v: pct[0], color: OUTCOME_TONES.home },
+    { v: pct[1], color: OUTCOME_TONES.draw },
+    { v: pct[2], color: OUTCOME_TONES.away },
   ];
   return (
     <div className="flex h-2 rounded-full overflow-hidden bg-stone-100">
@@ -751,7 +772,7 @@ function RoundReview({
     <div className="border border-stone-200 rounded-xl overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 bg-stone-50 border-b border-stone-200">
         <div className="flex items-center gap-2">
-          <Lock className="w-3.5 h-3.5 text-stone-400" />
+          <Lock className="w-3.5 h-3.5 text-stone-500" />
           <span className="font-semibold text-stone-900 text-sm">
             {t.matchday} {round.matchday}
           </span>
@@ -805,12 +826,12 @@ function RoundReview({
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="font-medium text-stone-900 truncate">
                       {teamDisplayName(s.home)} {fixture.result!.homeGoals}
-                      <span className="text-stone-300">-</span>
+                      <span className="text-stone-500">-</span>
                       {fixture.result!.awayGoals} {teamDisplayName(s.away)}
                     </span>
                     <span
                       className={`text-xs font-bold tabular-nums shrink-0 ${
-                        s.edge > 0 ? "text-emerald-700" : s.edge < 0 ? "text-red-700" : "text-stone-400"
+                        s.edge > 0 ? "text-emerald-700" : s.edge < 0 ? "text-red-700" : "text-stone-500"
                       }`}
                     >
                       {s.edge > 0 ? "+" : ""}
@@ -832,7 +853,7 @@ function RoundReview({
         </>
       )}
 
-      <div className="px-4 py-2 bg-stone-50 border-t border-stone-100 text-[11px] text-stone-400">
+      <div className="px-4 py-2 bg-stone-50 border-t border-stone-100 text-[11px] text-stone-500">
         {lock.reason === "kickoff" ? t.lockedKickoff : t.lockedResults}
         {/* No "N you didn't predict" tally. Unpredicted matches do not enter
             the mean, so counting them only tells a late joiner they were

@@ -207,7 +207,7 @@ export function FinalTable({
                       {teamDisplayName(row.team)}
                     </span>
                     {row.lost === 0 && (
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 border border-emerald-200 px-1 py-px flex-shrink-0">
+                      <span className="flex-shrink-0 rounded-full border border-line bg-parchment px-2 py-px text-[11px] font-semibold text-emerald-700">
                         {pt ? "invicto" : "unbeaten"}
                       </span>
                     )}
@@ -288,8 +288,10 @@ export function TitleRaceEvolution({
   const rebuilt = new Set(reconstructed);
 
   const narrow = width < 520;
-  const padL = narrow ? 30 : 38;
-  const padR = narrow ? 12 : 74;
+  // Room for "100%" at 11px on a phone (audit UXM2-13) and for the end
+  // labels' full club names on a wide screen (UXD2-01).
+  const padL = 40;
+  const padR = narrow ? 12 : 110;
   const padT = 14;
   const plotH = narrow ? 190 : 240;
   const axisH = 30;
@@ -308,6 +310,22 @@ export function TitleRaceEvolution({
     (v, i, a) => v <= lastMd && a.indexOf(v) === i
   );
   const lastForecastMd = mds[mds.length - 1];
+  // End labels sorted by height and pushed at least 13px apart.
+  const endY = new Map<string, number>();
+  {
+    const ends = race.series
+      .map(s => ({ team: s.team, v: s.values[s.values.length - 1] }))
+      .filter((e): e is { team: string; v: number } => e.v !== null && e.v !== undefined)
+      .map(e => ({ team: e.team, y: y(e.v) + 4 }))
+      .sort((a, b) => b.y - a.y);
+    // From the bottom up, so no label drops under the axis.
+    const floor = padT + plotH - 2;
+    for (let i = 0; i < ends.length; i++) {
+      const limit = i === 0 ? floor : ends[i - 1].y - 13;
+      if (ends[i].y > limit) ends[i].y = limit;
+      endY.set(ends[i].team, ends[i].y);
+    }
+  }
 
   const lineFor = (values: (number | null)[]) =>
     values
@@ -354,7 +372,7 @@ export function TitleRaceEvolution({
               x={padL - 6}
               y={y(tk) + 3}
               textAnchor="end"
-              className="fill-stone-400"
+              className="fill-stone-500"
               fontSize="11"
             >
               {Math.round(tk * 100)}%
@@ -380,16 +398,8 @@ export function TitleRaceEvolution({
           strokeWidth="1"
           strokeDasharray="3 3"
         />
-        {!narrow && (
-          <text
-            x={x(lastForecastMd) + 5}
-            y={padT + 11}
-            className="fill-stone-400"
-            fontSize="11"
-          >
-            {pt ? "sem previsão" : "no forecast"}
-          </text>
-        )}
+        {/* The note under the chart says the forecasts stop here; a label
+            inside the band ran over the end labels (audit UXD2-01). */}
 
         {/* series */}
         {race.series.map((s) => {
@@ -406,16 +416,22 @@ export function TitleRaceEvolution({
                   <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill={color} />
                 )
               )}
-              {!narrow && lastVal !== null && lastVal !== undefined && (
-                <text
-                  x={x(lastForecastMd) + 8}
-                  y={y(lastVal) + 3}
-                  fontSize="11"
-                  fontWeight="600"
-                  fill={color}
-                >
-                  {ligaTeamShortNames[s.team] || s.team} {pctText(lastVal)}
-                </text>
+              {!narrow && lastVal !== null && lastVal !== undefined && endY.has(s.team) && (
+                // Ink text with a colour swatch, dodged apart, with the hub's
+                // club names (audit UXD2-01, A11Y2-10).
+                <g>
+                  <line x1={x(lastForecastMd) + 3} x2={x(lastForecastMd) + 7} y1={y(lastVal)} y2={endY.get(s.team)! - 4} stroke={color} strokeWidth="1" />
+                  <rect x={x(lastForecastMd) + 8} y={endY.get(s.team)! - 9} width="6" height="6" fill={color} />
+                  <text
+                    x={x(lastForecastMd) + 17}
+                    y={endY.get(s.team)!}
+                    fontSize="11"
+                    fontWeight="600"
+                    fill="#234c40"
+                  >
+                    {teamDisplayName(s.team)} {pctText(lastVal)}
+                  </text>
+                </g>
               )}
             </g>
           );
@@ -436,7 +452,7 @@ export function TitleRaceEvolution({
             x={x(tk)}
             y={padT + plotH + 15}
             textAnchor="middle"
-            className="fill-stone-400"
+            className="fill-stone-500"
             fontSize="11"
           >
             {tk}
@@ -445,7 +461,7 @@ export function TitleRaceEvolution({
         <text
           x={padL}
           y={padT + plotH + 28}
-          className="fill-stone-400"
+          className="fill-stone-500"
           fontSize="11"
         >
           {pt ? "jornada" : "matchday"}
@@ -576,7 +592,7 @@ export function ReportCard({
 
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-stone-200 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         {[
           {
             value: `${rc.checkpoints.filter((c) => c.favourite_correct).length}/${rc.n_forecasts}`,
@@ -602,7 +618,7 @@ export function ReportCard({
               : "average error on predicted final points in the last published forecast",
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-cream p-4">
+          <div key={kpi.label} className="rounded-2xl border border-line bg-cream p-4">
             <div className="text-2xl font-display font-extrabold text-stone-900 tabular-nums">
               {kpi.value}
             </div>
@@ -628,7 +644,7 @@ export function ReportCard({
               </th>
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-right w-20"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-right w-20"
               >
                 {pt
                   ? `${teamDisplayName(rc.champion)} campeão`
@@ -636,7 +652,7 @@ export function ReportCard({
               </th>
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left pl-4"
+                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left pl-4"
               >
                 {pt ? "Erro médio nos pontos finais" : "Mean error on final points"}
               </th>

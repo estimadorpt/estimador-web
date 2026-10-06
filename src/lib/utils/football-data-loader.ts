@@ -20,6 +20,7 @@ import {
   type PredictionGameData,
 } from '@/lib/utils/prediction-game';
 import type { GameFixturesData, GameFixtureEntry } from '@/lib/football-fixtures';
+import { frozenBeforePreviousRoundEnded } from '@/lib/utils/prediction-game-record';
 
 /** The current season's data directory under public/data. One constant for
  * every football loader, so the season rollover is a one-line change. */
@@ -337,6 +338,8 @@ export interface UpcomingFixture {
   kickoffConfirmed: boolean;
   /** True when the fixture is a leftover of the matchday already in progress. */
   inProgressMatchday: boolean;
+  /** True for a game postponed from an earlier, finished round. */
+  postponed?: boolean;
   p_home: number | null;
   p_draw: number | null;
   p_away: number | null;
@@ -352,6 +355,19 @@ export interface UpcomingFixture {
    * published after it kicked off: those are not shown as a forecast.
    */
   probsPublishedAt?: string | null;
+  /**
+   * For a played fixture whose probabilities were published only after it
+   * kicked off: when they were (matchday 1's md00 came out on 10 August, after
+   * eight of its nine games). The page says why it shows no forecast (audit
+   * FRESH-03).
+   */
+  probsLatePublishedAt?: string | null;
+  /**
+   * For a played fixture: the previous matchday, when its odds were frozen
+   * before that round's last game ("quando a jornada 6 ainda decorria",
+   * audit FRESH-02 / FA2-04). Null otherwise.
+   */
+  probsFrozenDuringRound?: number | null;
 }
 
 /**
@@ -448,6 +464,32 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
       });
     }
 
+    // A postponed leftover from an earlier round that the conditionals still
+    // cover (Sp. Braga–Gil Vicente, jornada 2, 19 October): it gets its match
+    // page like any game to come (audit FA2-06), with the 1X2 of the current
+    // forecast read from its conditionals.
+    const listed = new Set(raw.map(f => `${f.home}|${f.away}`));
+    if (raw.length > 0) {
+      for (const m of scenarioMatches) {
+        if (listed.has(`${m.home_team}|${m.away_team}`)) continue;
+        if (typeof m.matchday !== 'number' || m.matchday >= prediction.matchday) continue;
+        const fx = manifestByKey.get(manifestKey(m.matchday, m.home_team, m.away_team));
+        if (fx && isNum(fx.home_goals) && isNum(fx.away_goals)) continue;
+        raw.push({
+          home: m.home_team,
+          away: m.away_team,
+          matchday: m.matchday,
+          ...kickoffFor(m.matchday, m.home_team, m.away_team, null),
+          inProgressMatchday: false,
+          postponed: true,
+          ...probsFromConditionals(m),
+          scenario: m,
+          decisive: findDecisive(m.home_team, m.away_team, m.matchday),
+          played: null,
+        });
+      }
+    }
+
     // End of season: nothing left to play. Fall back to the fixtures of the
     // matchday just finished so the route still has pages to generate.
     if (raw.length === 0) {
@@ -499,7 +541,11 @@ export async function loadPlayedFixtures(): Promise<UpcomingFixture[]> {
     if (!manifest) return [];
     const taken = new Set(upcoming.map(f => f.slug));
     const raw: Omit<UpcomingFixture, 'slug'>[] = [];
-    for (const md of manifest.matchdays ?? []) {
+    const rounds = manifest.matchdays ?? [];
+    // Rounds whose odds were frozen while the previous round was still
+    // being played (audit FRESH-02, FA2-04).
+    const frozenMidRound = new Map(frozenBeforePreviousRoundEnded(rounds).map(f => [f.matchday, f.previous]));
+    for (const md of rounds) {
       for (const fx of md.fixtures ?? []) {
         if (!isNum(fx.home_goals) || !isNum(fx.away_goals)) continue;
         const priced = isNum(fx.p_home) && isNum(fx.p_draw) && isNum(fx.p_away);
@@ -522,6 +568,8 @@ export async function loadPlayedFixtures(): Promise<UpcomingFixture[]> {
           decisive: null,
           played: { home_goals: fx.home_goals as number, away_goals: fx.away_goals as number },
           probsPublishedAt: beforeKickoff ? publishedAt : null,
+          probsLatePublishedAt: priced && !beforeKickoff && publishedAt ? publishedAt : null,
+          probsFrozenDuringRound: beforeKickoff ? (frozenMidRound.get(md.matchday) ?? null) : null,
         });
       }
     }
@@ -899,6 +947,7 @@ export async function loadLigaSummary() {
 export function probabilityHistory(historical: LigaHistorical): LigaProbabilityHistory {
   return historical.map(md => ({
     matchday: md.matchday,
+    timestamp: md.timestamp,
     table: md.table.map(({ team, p_champion, p_relegation }) => ({ team, p_champion, p_relegation })),
   }));
 }

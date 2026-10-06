@@ -1,7 +1,10 @@
 import { createPageMetadata } from '@/lib/metadata';
 import { loadGameFixtures, loadLigaData, loadLigaSamples, loadUpcomingFixtures } from "@/lib/utils/football-data-loader";
 import { listSupportedFixtures } from "@/lib/football-fixtures";
-import { formatDateSpan, formatShortDate } from "@/lib/football-format";
+import { formatDateSpan, formatInteger, formatShortDate } from "@/lib/football-format";
+import { roundPlayedAt } from "@/lib/football-status";
+import { ClockSwitch } from "@/components/football/ClockSwitch";
+import { Link } from "@/i18n/routing";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -84,25 +87,41 @@ export default async function SimuladorPage({
   const statusLine = locale === "pt"
     ? `Previsão depois da jornada ${prediction.matchday} · atualizada a ${formatShortDate(prediction.timestamp, locale)} · simula a jornada ${simRound}${simSpan ? ` (${simSpan})` : ""}`
     : `Forecast after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)} · plays out matchday ${simRound}${simSpan ? ` (${simSpan})` : ""}`;
+  // Once that round is played the simulator plays out results already known:
+  // it says so (audit FRESH-01).
+  const simRoundPlayedAt = roundPlayedAt(upcomingFixtures.filter(f => f.matchday === simRound).map(f => f.kickoff));
+  const statusPlayed = locale === "pt"
+    ? `Previsão depois da jornada ${prediction.matchday} · atualizada a ${formatShortDate(prediction.timestamp, locale)} · a jornada ${simRound} já foi jogada, nova previsão em preparação: o simulador mostra o que o modelo dava antes`
+    : `Forecast after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)} · matchday ${simRound} has been played, new forecast in preparation: the simulator shows what the model gave before it`;
 
   return (
     <div className="football-page min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        illustration="football"
+        field="periwinkle"
         compact
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
         icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t("football.title")}
-        title={t("football.simulator")}
-        lede={t("football.simulatorLede")}
-        meta={<span>{statusLine}</span>}
+        title={locale === "pt" ? `Simulador da jornada ${simRound}` : `Matchday ${simRound} simulator`}
+        lede={t("football.simulatorLede", { round: simRound })}
+        meta={<span><ClockSwitch initial={statusLine} steps={[{ at: simRoundPlayedAt, value: statusPlayed }]} /></span>}
       />
 
       {/* Simulator */}
       <section className="border-b border-stone-200 last:border-b-0">
         <div className="max-w-7xl mx-auto px-4 py-10">
+          {/* Where the numbers come from and how the method works, beside
+              the tool (audit MR2-07). */}
+          <p className="mb-6 max-w-3xl text-xs leading-relaxed text-stone-500">
+            {locale === "pt"
+              ? `Fonte: modelo estimador.pt, ${formatInteger(prediction.n_sims, locale)} simulações do resto da época (previsão de ${formatShortDate(prediction.timestamp, locale)}). Cada resultado escolhido mostra as simulações em que ele aconteceu; um resultado pouco provável tem menos simulações por trás e mais ruído. `
+              : `Source: estimador.pt model, ${formatInteger(prediction.n_sims, locale)} simulations of the rest of the season (forecast of ${formatShortDate(prediction.timestamp, locale)}). Each result you pick shows the simulations where it happened; an unlikely result has fewer simulations behind it and more noise. `}
+            <Link href={locale === "pt" ? "/desporto/liga/metodologia#o-simulador" : "/desporto/liga/metodologia#the-simulator"} locale={locale} className="font-semibold text-ink underline underline-offset-4">
+              {locale === "pt" ? "Como funciona o simulador" : "How the simulator works"}
+            </Link>
+          </p>
           <MatchdayPicker
             data={scenarios.next_matchday_scenarios}
             version={`${prediction.season}-${prediction.timestamp}`}
@@ -142,8 +161,8 @@ export default async function SimuladorPage({
               <Swords className="w-3.5 h-3.5" aria-hidden="true" />
               <span>{locale === 'pt' ? 'Outra pergunta' : 'A different question'}</span>
             </p>
-            <p className="mb-5 border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-muted">{locale === 'pt' ? 'Previsão de base — a comparação abaixo usa as épocas originais do modelo e não incorpora os resultados que escolheste acima.' : 'Baseline forecast — the comparison below uses the original model seasons and does not incorporate your selections above.'}</p>
-            <DueloFinal samples={seasonSamples} locale={locale} headingId="duelo-final-heading" />
+            <p className="mb-5 border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-muted">{locale === 'pt' ? 'Previsão de base: esta comparação usa as épocas simuladas da previsão publicada, sem nenhum resultado escolhido no simulador.' : 'Baseline forecast: this comparison uses the published forecast\'s simulated seasons, with no result picked in the simulator.'}</p>
+            <DueloFinal samples={seasonSamples} locale={locale} headingId="duelo-final-heading" forecastTimestamp={prediction.timestamp} />
           </div>
         </section>
       )}

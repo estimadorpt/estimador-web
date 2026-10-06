@@ -13,7 +13,9 @@ import { teamDisplayName } from "@/lib/config/football";
 import { formatKickoff, formatLongDate } from "@/lib/football-format";
 import {
   earlyLocks,
+  frozenBeforePreviousRoundEnded,
   latePublications,
+  roundsWithoutSource,
   type ManifestRoundLike,
 } from "@/lib/utils/prediction-game-record";
 import { setRequestLocale } from '@/i18n/request-locale';
@@ -162,16 +164,16 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc }[] = [
     match: /^contested_ratings\.json$/,
     label: "contested_ratings.json",
     doc: {
-      pt: "Posse disputada: probabilidade de ganhar duelos aéreos e no chão, defesas e médios, agregada sobre três épocas de carreira. Células que falharam uma porta pré-registada trazem ranking: null.",
-      en: "Contested possession: probability of winning aerial and ground duels, defenders and midfielders, pooled over a three-season career. Cells that failed a pre-registered gate carry ranking: null.",
+      pt: "Posse disputada: probabilidade de ganhar duelos aéreos e no chão, defesas e médios, agregada sobre as épocas que o próprio ficheiro lista (seasons; quatro nesta versão, 2023-24 a 2026-27). Células que falharam uma porta pré-registada trazem ranking: null.",
+      en: "Contested possession: probability of winning aerial and ground duels, defenders and midfielders, pooled over the seasons the file itself lists (seasons; four in this version, 2023-24 to 2026-27). Cells that failed a pre-registered gate carry ranking: null.",
     },
   },
   {
     match: /^gk_channels\.json$/,
     label: "gk_channels.json",
     doc: {
-      pt: "Os três eixos de guarda-redes, publicados separados e nunca combinados: intervenção em cruzamentos (separável), saídas da área (estilo) e defesa de remates (nulo com potência adequada em três épocas).",
-      en: "The three goalkeeper axes, published separately and never combined: cross intervention (separable), sweeping (a style), and shot-stopping (a properly-powered null over three seasons).",
+      pt: "Os três eixos de guarda-redes, publicados separados e nunca combinados: intervenção em cruzamentos (separável), saídas da área (estilo) e defesa de remates (nulo com potência adequada). As épocas usadas estão no campo seasons (quatro nesta versão, 2023-24 a 2026-27).",
+      en: "The three goalkeeper axes, published separately and never combined: cross intervention (separable), sweeping (a style), and shot-stopping (a properly-powered null). The seasons used are in the seasons field (four in this version, 2023-24 to 2026-27).",
     },
   },
   {
@@ -285,8 +287,8 @@ const MD_FIELDS: { name: string; doc: Doc }[] = [
   {
     name: "season, matchday, model, n_sims, timestamp",
     doc: {
-      pt: "Metadados: que época, que jornada, que modelo, quantas simulações e quando foi gerado (UTC, ISO 8601). Em 2026-27, model é joint_sot (o modelo anterior) na pré-época (md00) e bivcross (o modelo atual, Poisson bivariado com remates à baliza) da jornada 1 em diante; toda a época 2025-26 é joint_sot.",
-      en: "Metadata: which season, which matchday, which model, how many simulations, and when it was generated (UTC, ISO 8601). In 2026-27, model is joint_sot (the previous model) for the pre-season file (md00) and bivcross (the current model, bivariate Poisson with shots on target) from matchday 1 on; all of 2025-26 is joint_sot.",
+      pt: "Metadados: que época, que jornada, que modelo, quantas simulações e quando foi gerado pela última vez (UTC, ISO 8601). Um mdNN.json é regenerado no mesmo endereço enquanto a sua jornada decorre, à medida que entram resultados, por isso timestamp é a última regeneração e não a primeira publicação; next_matchday fica congelado na primeira versão. Em 2026-27, model é joint_sot (o modelo anterior) na pré-época (md00) e bivcross (o modelo atual, Poisson bivariado com remates à baliza) da jornada 1 em diante; toda a época 2025-26 é joint_sot.",
+      en: "Metadata: which season, which matchday, which model, how many simulations, and when it was last generated (UTC, ISO 8601). An mdNN.json is regenerated at the same address while its matchday is played, as results come in, so timestamp is the last regeneration, not the first publication; next_matchday stays frozen at the first version. In 2026-27, model is joint_sot (the previous model) for the pre-season file (md00) and bivcross (the current model, bivariate Poisson with shots on target) from matchday 1 on; all of 2025-26 is joint_sot.",
     },
   },
 ];
@@ -317,10 +319,27 @@ function gameNotes(rounds: ManifestRoundLike[], locale: string): string[] {
       : `Matchday ${l.matchday}: the model's probabilities were published on ${formatLongDate(l.publishedAt, locale)}, after ${l.startedBefore} of its ${l.total} games had started. Nobody could play that round, but it counts in the model's record in the season table. From matchday ${l.matchday + 1} on, the probabilities are published before the first game.`);
   }
   for (const e of earlyLocks(rounds)) {
+    // The round's lock, the earliest of its games, is when the game closed
+    // (audit FA2-05); its own locks_at is the original kickoff.
     notes.push(pt
-      ? `${teamDisplayName(e.home)}–${teamDisplayName(e.away)} (jornada ${e.matchday}) foi adiado para ${formatKickoff(e.kickoff, locale)}, mas fechou com a sua jornada, a ${formatLongDate(e.locksAt, locale)}: é avaliado com as probabilidades que o modelo publicou para essa jornada.`
-      : `${teamDisplayName(e.home)}–${teamDisplayName(e.away)} (matchday ${e.matchday}) was postponed to ${formatKickoff(e.kickoff, locale)}, but it closed with its round, on ${formatLongDate(e.locksAt, locale)}: it is scored on the probabilities the model published for that round.`);
+      ? `${teamDisplayName(e.home)} – ${teamDisplayName(e.away)} (jornada ${e.matchday}) foi adiado para ${formatKickoff(e.kickoff, locale)}, mas fechou com a jornada ${e.matchday}, a ${formatLongDate(e.roundLocksAt, locale)} (a hora original do jogo era ${formatLongDate(e.locksAt, locale)}): é avaliado com as probabilidades que o modelo publicou para essa jornada.`
+      : `${teamDisplayName(e.home)} – ${teamDisplayName(e.away)} (matchday ${e.matchday}) was postponed to ${formatKickoff(e.kickoff, locale)}, but it closed with matchday ${e.matchday}, on ${formatLongDate(e.roundLocksAt, locale)} (its original kickoff was ${formatLongDate(e.locksAt, locale)}): it is scored on the probabilities the model published for that round.`);
   }
+  // Odds frozen while the previous round was still being played (audit
+  // FA2-04, FRESH-02): they miss the results still to come.
+  const frozen = frozenBeforePreviousRoundEnded(rounds);
+  if (frozen.length) {
+    const list = frozen.map(f => f.matchday);
+    const last = frozen[frozen.length - 1];
+    const join = (xs: number[]) => xs.length > 1 ? `${xs.slice(0, -1).join(", ")}${pt ? " e " : " and "}${xs[xs.length - 1]}` : `${xs[0]}`;
+    notes.push(pt
+      ? `As probabilidades ${list.length > 1 ? "das jornadas" : "da jornada"} ${join(list)} foram congeladas antes do fim da jornada anterior (por exemplo, as da jornada ${last.matchday} a ${formatLongDate(last.publishedAt, locale)}, com a jornada ${last.previous} ainda a decorrer até ${formatLongDate(last.previousLastKickoff, locale)}): não incluem os resultados que faltavam. O modelo é avaliado no jogo com essas probabilidades, tal como foram congeladas.`
+      : `The probabilities for matchday${list.length > 1 ? "s" : ""} ${join(list)} were frozen before the previous round ended (for example, matchday ${last.matchday}'s on ${formatLongDate(last.publishedAt, locale)}, with matchday ${last.previous} still being played until ${formatLongDate(last.previousLastKickoff, locale)}): they do not include the results still to come. The model is scored in the game on those probabilities, as frozen.`);
+  }
+  const noSource = roundsWithoutSource(rounds);
+  notes.push(pt
+    ? `O registo de cada jogo é o game_fixtures.json: published_at diz quando as probabilidades foram congeladas e probs_source de que publicação vieram (ficheiro e commit). O mdNN.json com esse nome pode ter sido regenerado depois, por isso o seu timestamp e os seus números podem não coincidir com os do jogo.${noSource.length ? ` ${noSource.length > 1 ? "As jornadas" : "A jornada"} ${noSource.join(pt ? " e " : " and ")} não ${noSource.length > 1 ? "têm" : "tem"} probs_source.` : ""}`
+    : `Each game's record is game_fixtures.json: published_at says when the probabilities were frozen and probs_source which publication they came from (file and commit). The mdNN.json of that name may have been regenerated since, so its timestamp and numbers may not match the game's.${noSource.length ? ` Matchday${noSource.length > 1 ? "s" : ""} ${noSource.join(" and ")} ${noSource.length > 1 ? "have" : "has"} no probs_source.` : ""}`);
   return notes;
 }
 
@@ -428,34 +447,34 @@ export default async function LigaDataPage({
                     <h3 className="text-base text-stone-900">
                       {pt ? "Época" : "Season"} {season.season}
                     </h3>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
                       {season.current ? c.currentSeason : c.archived}
                     </span>
                   </div>
-                  <p className="text-xs text-stone-400 mb-4 font-mono break-all">
+                  <p className="text-xs text-stone-500 mb-4 font-mono break-all">
                     {SITE}
                     {season.basePath}/
                   </p>
 
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={`${c.filesTitle} · ${season.season}`}>
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-stone-300">
                           <th
                             scope="col"
-                            className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left w-52"
+                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left w-52"
                           >
                             {c.file}
                           </th>
                           <th
                             scope="col"
-                            className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
+                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left"
                           >
                             {c.meaning}
                           </th>
                           <th
                             scope="col"
-                            className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-right w-20"
+                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-right w-20"
                           >
                             {c.size}
                           </th>
@@ -474,7 +493,7 @@ export default async function LigaDataPage({
                                   {g.label}
                                 </a>
                                 {g.names.length > 1 && (
-                                  <div className="text-[11px] text-stone-400 mt-0.5">
+                                  <div className="text-[11px] text-stone-500 mt-0.5">
                                     {g.names.length} {c.files} ({g.names[0]} …{" "}
                                     {g.names[g.names.length - 1]})
                                   </div>
@@ -483,7 +502,7 @@ export default async function LigaDataPage({
                               <td className="py-3 pr-3 text-stone-600 leading-relaxed">
                                 {g.doc ? (pt ? g.doc.pt : g.doc.en) : "—"}
                               </td>
-                              <td className="py-3 text-right tabular-nums text-stone-400 text-xs whitespace-nowrap">
+                              <td className="py-3 text-right tabular-nums text-stone-500 text-xs whitespace-nowrap">
                                 {formatBytes(g.bytes, pt)}
                               </td>
                             </tr>
@@ -502,19 +521,19 @@ export default async function LigaDataPage({
         <section className="mb-14">
           <h2 className="text-2xl tracking-tight mb-1">{c.schemaTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.schemaIntro}</p>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={c.schemaTitle}>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-300">
                   <th
                     scope="col"
-                    className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left w-64"
+                    className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left w-64"
                   >
                     {c.field}
                   </th>
                   <th
                     scope="col"
-                    className="text-[11px] font-bold uppercase tracking-wider text-stone-400 py-2 text-left"
+                    className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left"
                   >
                     {c.meaning}
                   </th>
@@ -557,7 +576,7 @@ export default async function LigaDataPage({
         <section className="mb-14">
           <h2 className="text-2xl tracking-tight mb-1">{c.usageTitle}</h2>
           <p className="text-sm text-stone-500 mb-4 max-w-3xl">{c.usageIntro}</p>
-          <pre className="bg-stone-900 text-stone-100 text-xs overflow-x-auto p-4 leading-relaxed">
+          <pre tabIndex={0} aria-label={c.usageTitle} className="rounded-2xl bg-forest text-paper text-xs overflow-x-auto p-4 leading-relaxed">
             <code>{pt
               ? `# um ficheiro de jornada (o mais recente é o NN mais alto)
 curl -s ${SITE}/data/football/liga-2026-27/md01.json | jq '.table[0]'
@@ -574,12 +593,12 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
 
         {/* Licence + provenance */}
         <section className="pt-8 border-t border-stone-200">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400 mb-3">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3">
             {c.licenceTitle}
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">{c.licence}</p>
 
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400 mb-3 mt-8">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3 mt-8">
             {c.provenanceTitle}
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">

@@ -6,6 +6,7 @@ import {
   teamColorOnPaper,
   teamLogoSrc,
   teamDisplayName,
+  teamWithArticle,
 } from "@/lib/config/football";
 import { Link } from "@/i18n/routing";
 import { DataCard } from "@/components/viz/DataCard";
@@ -21,7 +22,7 @@ import { RemainingSchedule } from "@/components/charts/football/RemainingSchedul
 import { PathBuilder } from "@/components/charts/football/PathBuilder";
 import { PositionDistribution } from "@/components/charts/football/PositionDistribution";
 import { getTranslations } from "next-intl/server";
-import { formatInteger, formatLongDate, formatPercent } from "@/lib/football-format";
+import { formatInteger, formatLongDate, formatOrdinal, formatPercent, formatShortDate } from "@/lib/football-format";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { buildClubOutlooks, positionSpread } from "@/components/football/club-outlook";
@@ -29,14 +30,22 @@ import { loadGameFixtures } from "@/components/football/load-game-fixtures";
 import { FixtureStakes } from "@/components/football/FixtureStakes";
 import { setRequestLocale } from '@/i18n/request-locale';
 
-function ordinal(n: number, locale: string): string {
-  if (locale === "pt") return `${n}.º`;
-  if (n % 100 >= 11 && n % 100 <= 13) return `${n}th`;
-  const last = n % 10;
-  if (last === 1) return `${n}st`;
-  if (last === 2) return `${n}nd`;
-  if (last === 3) return `${n}rd`;
-  return `${n}th`;
+const ordinal = formatOrdinal;
+
+/**
+ * The race a club's page is about, for its meta description (audit FA2-09):
+ * a relegation club is not described by "cenários de título".
+ */
+function clubRace(
+  team: string,
+  prediction: Awaited<ReturnType<typeof loadLigaData>>["prediction"],
+  scenarios: Awaited<ReturnType<typeof loadLigaData>>["scenarios"],
+): "title" | "relegation" | "other" {
+  const row = prediction?.table.find((r) => r.team === team);
+  if (scenarios?.narrative_scenarios?.[team]?.target === "survival") return "relegation";
+  if (row && row.p_champion >= 0.01) return "title";
+  if (row && row.p_relegation >= 0.01) return "relegation";
+  return "other";
 }
 
 // Any other slug is a 404, in development as in the export.
@@ -67,14 +76,17 @@ export async function generateMetadata({
   if (!teamName) return {};
 
   const t = await getTranslations({ locale });
-  const { prediction } = await loadLigaData();
+  const { prediction, scenarios } = await loadLigaData();
 
   return createPageMetadata({
     locale,
     path: `/desporto/liga/${slug}`,
     title: t("football.teamPageTitle", { team: teamDisplayName(teamName) }),
     description: t("football.teamPageDescription", {
+      race: clubRace(teamName, prediction, scenarios),
       team: teamDisplayName(teamName),
+      teamFor: teamWithArticle(teamName, "para"),
+      teamOf: teamWithArticle(teamName, "de"),
       season: prediction?.season ?? "",
     }),
   });
@@ -343,7 +355,11 @@ export default async function TeamDetailPage({
       <PageHero
         compact
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
-        eyebrow={`Liga Portugal · ${t("football.season")} ${prediction.season} · ${t("football.matchday")} ${prediction.matchday}`}
+        // "depois da jornada 7 · atualizado a 25 set.", like the hub: a bare
+        // "Jornada 7" read as the current or next matchday (FRESH-06, CL2-14).
+        eyebrow={locale === "pt"
+          ? `Liga Portugal · ${prediction.season} · depois da jornada ${prediction.matchday} · atualizado a ${formatShortDate(prediction.timestamp, locale)}`
+          : `Liga Portugal · ${prediction.season} · after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)}`}
         title={
           <span className="flex items-center gap-3">
             <span aria-hidden="true" className="h-9 w-1.5 shrink-0 rounded-full md:h-11" style={{ backgroundColor: teamColor }} />
@@ -353,7 +369,12 @@ export default async function TeamDetailPage({
             <span>{teamDisplayName(teamName)}</span>
           </span>
         }
-        lede={t("football.clubPageIntro", { team: teamDisplayName(teamName), date: forecastDate })}
+        lede={t("football.clubPageIntro", {
+          team: teamDisplayName(teamName),
+          teamFor: teamWithArticle(teamName, "para"),
+          teamOf: teamWithArticle(teamName, "de"),
+          date: forecastDate,
+        })}
       />
 
       {/* Key stats + season projection */}
@@ -456,10 +477,10 @@ export default async function TeamDetailPage({
             {/* Magic Numbers */}
             {magicNumbers.length > 0 && (
               <div className="mt-4 pt-4 border-t border-stone-100">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-0.5">
                   {t("football.magicNumbers")}
                 </div>
-                <div className="text-[11px] text-stone-400 mb-2">
+                <div className="text-[11px] text-stone-500 mb-2">
                   {t("football.magicNumbersDescription")}
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -467,7 +488,7 @@ export default async function TeamDetailPage({
                     const impossible = mn.pointsNeeded > mn.maxRemaining;
                     return (
                       <div key={mn.label} className="rounded-xl bg-cream border border-line px-3 py-2 min-w-[120px]">
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                           {t(`football.${mn.label}`)}
                         </div>
                         {mn.clinched ? (
@@ -486,11 +507,11 @@ export default async function TeamDetailPage({
                           <div>
                             <span className="text-lg font-display font-extrabold tabular-nums text-ink">
                               {mn.pointsNeeded}
-                              <span className="text-xs text-stone-400 font-normal ml-0.5">
+                              <span className="text-xs text-stone-500 font-normal ml-0.5">
                                 {t("football.magicPtsAbbr")}
                               </span>
                             </span>
-                            <div className="text-[11px] text-stone-400 mt-0.5">
+                            <div className="text-[11px] text-stone-500 mt-0.5">
                               {/* When the number equals everything still on
                                   offer, say so — "96 of 96 available" is a
                                   riddle where "win every match" is a fact. */}
@@ -520,11 +541,24 @@ export default async function TeamDetailPage({
             <p className="text-sm text-stone-500 mb-6">
               {t("football.positionDistributionDescription")}
             </p>
-            <PositionDistribution
-              probs={positionProbs}
-              teamColor={teamColor}
+            {/* Framed like every other chart: title, source, date, method (UXD2-07). */}
+            <DataCard
+              title={locale === "pt" ? `Onde acaba o ${teamDisplayName(teamName)}?` : `Where does ${teamDisplayName(teamName)} finish?`}
+              subtitle={locale === "pt" ? "Parte das simulações em que termina em cada posição, numa escala de 0 a 100%." : "Share of simulations finishing in each position, on a 0–100% scale."}
+              source={locale === "pt"
+                ? `Fonte: modelo estimador.pt, ${formatInteger(prediction.n_sims, locale)} simulações`
+                : `Source: estimador.pt model, ${formatInteger(prediction.n_sims, locale)} simulations`}
+              updated={locale === "pt" ? `Atualizado a ${forecastDate}` : `Updated ${forecastDate}`}
+              methodologyHref="/desporto/liga/metodologia"
+              methodologyLabel={locale === "pt" ? "Como funciona o modelo" : "How the model works"}
               locale={locale}
-            />
+            >
+              <PositionDistribution
+                probs={positionProbs}
+                teamColor={teamColor}
+                locale={locale}
+              />
+            </DataCard>
             {/* "6th is most likely, at 12%" can overstate a narrow distinction
                 in a broad finish distribution (diagnosis §5) — say so when
                 neighbouring positions carry comparable support. */}
@@ -551,15 +585,19 @@ export default async function TeamDetailPage({
       {clubOutlook && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
               {t("football.fixtureStakesSectionTitle")}
             </p>
             <h2 className="text-2xl tracking-tight mb-6">
               {clubOutlook.opponentLabel
-                ? t("football.fixtureStakesHeading", { team: clubOutlook.label, opponent: clubOutlook.opponentLabel })
+                ? t("football.fixtureStakesHeading", {
+                    team: clubOutlook.label,
+                    opponent: clubOutlook.opponentLabel,
+                    opponentAgainst: clubOutlook.opponent ? teamWithArticle(clubOutlook.opponent, "contra") : clubOutlook.opponentLabel,
+                  })
                 : t("football.fixtureStakesHeadingNoOpponent", { team: clubOutlook.label })}
             </h2>
-            <FixtureStakes locale={locale === "pt" ? "pt" : "en"} entry={clubOutlook} />
+            <FixtureStakes locale={locale === "pt" ? "pt" : "en"} entry={clubOutlook} matchLink />
           </div>
         </section>
       )}
@@ -609,7 +647,15 @@ export default async function TeamDetailPage({
             <p className="text-sm text-stone-500 mb-6">
               {isSurvival
                 ? t("football.survivalScenariosDescription")
-                : t("football.scenariosDescription")}
+                : t("football.scenariosDescription")}{" "}
+              {/* How the paths are chosen, in the methodology (audit MR2-06). */}
+              <Link
+                href={locale === "pt" ? "/desporto/liga/metodologia#cenarios-de-vitoria" : "/desporto/liga/metodologia#winning-scenarios"}
+                locale={locale}
+                className="font-medium text-ink underline underline-offset-4"
+              >
+                {locale === "pt" ? "Como se escolhem" : "How they are chosen"}
+              </Link>
             </p>
             <NarrativeScenarios
               data={narrativeData}
@@ -650,7 +696,14 @@ export default async function TeamDetailPage({
                   {t("football.buildYourPath")}
                 </h2>
                 <p className="text-sm text-stone-500 mb-6">
-                  {t("football.buildYourPathDescription")}
+                  {t("football.buildYourPathDescription")}{" "}
+                  <Link
+                    href={locale === "pt" ? "/desporto/liga/metodologia#cria-o-teu-cenario" : "/desporto/liga/metodologia#build-your-own-scenario"}
+                    locale={locale}
+                    className="font-medium text-ink underline underline-offset-4"
+                  >
+                    {locale === "pt" ? "Como funciona" : "How it works"}
+                  </Link>
                 </p>
                 <PathBuilder
                   matches={remainingMatches}

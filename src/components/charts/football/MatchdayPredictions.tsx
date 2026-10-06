@@ -1,4 +1,4 @@
-import { teamColorOnPaper, teamDisplayName } from "@/lib/config/football";
+import { OUTCOME_TONES, teamColorOnPaper, teamDisplayName } from "@/lib/config/football";
 import { Link } from "@/i18n/routing";
 import type { NextMatchdayScenarioMatch } from "@/types/football";
 import {
@@ -9,6 +9,8 @@ import {
   type FixtureSwings,
 } from "@/lib/football-fixtures";
 import { formatKickoffShort, formatPercent, matchLabel } from "@/lib/football-format";
+import { matchStartedLine } from "@/lib/football-status";
+import { ClockSwitch } from "@/components/football/ClockSwitch";
 
 /** One fixture card: the 1X2, its kickoff and what it can change. */
 export interface MatchdayFixture {
@@ -30,12 +32,14 @@ export interface MatchdayFixture {
 interface MatchdayPredictionsProps {
   fixtures: MatchdayFixture[];
   locale: string;
+  /** The forecast's timestamp, for "Jogo começou · previsão de 25 set." once a game kicks off. */
+  forecastTimestamp: string;
 }
 
 // Three clearly different values, all drawn without text inside the bar
 // (the numbers sit under it in ink), so nothing depends on telling two
 // greys apart: home dark, draw pale, away mid.
-const BAR = { home: "#434d48", draw: "#d6d8cc", away: "#8b9a8e" } as const;
+const BAR = OUTCOME_TONES;
 
 function Stakes({ swings, pt }: { swings: FixtureSwings; pt: boolean }) {
   const items: string[] = [];
@@ -64,7 +68,7 @@ function Stakes({ swings, pt }: { swings: FixtureSwings; pt: boolean }) {
  * "Jogo da jornada" marks the biggest combined spread, as a badge only; it
  * never reorders the list.
  */
-export function MatchdayPredictions({ fixtures, locale }: MatchdayPredictionsProps) {
+export function MatchdayPredictions({ fixtures, locale, forecastTimestamp }: MatchdayPredictionsProps) {
   if (!fixtures || fixtures.length === 0) return null;
   const pt = locale !== "en";
 
@@ -92,8 +96,15 @@ export function MatchdayPredictions({ fixtures, locale }: MatchdayPredictionsPro
             <>
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs font-semibold tabular-nums text-stone-500">
-                  {when || (pt ? `Jornada ${f.matchday}` : `Matchday ${f.matchday}`)}
-                  {when && !f.kickoffConfirmed && (pt ? " · horário por confirmar" : " · kickoff to be confirmed")}
+                  {/* After kickoff the card stops reading as a preview: the
+                      1X2 is what the model gave, dated (audit FRESH-01). */}
+                  <ClockSwitch
+                    initial={<>
+                      {when || (pt ? `Jornada ${f.matchday}` : `Matchday ${f.matchday}`)}
+                      {when && !f.kickoffConfirmed && (pt ? " · horário por confirmar" : " · kickoff to be confirmed")}
+                    </>}
+                    steps={f.kickoffConfirmed && f.kickoff ? [{ at: f.kickoff, value: matchStartedLine(forecastTimestamp, locale) }] : []}
+                  />
                 </span>
                 {isTop && (
                   <span className="rounded-md bg-ink px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-paper">

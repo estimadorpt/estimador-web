@@ -60,6 +60,8 @@ export function TeamTimeline({ data, teamColor, yAxisLabel, xAxisLabel = "Jornad
         marks: [
           Plot.ruleY([0], { stroke: "#dadccf" }),
           Plot.lineY(data, { x: "matchday", y: "value", stroke: teamColor, strokeWidth: 2, curve: "monotone-x" }),
+          // A dot per published forecast, not only the last (audit FA2-16).
+          Plot.dot(data, { x: "matchday", y: "value", fill: teamColor, r: 2.5 }),
           Plot.tip(data, Plot.pointerX({
             x: "matchday",
             y: "value",

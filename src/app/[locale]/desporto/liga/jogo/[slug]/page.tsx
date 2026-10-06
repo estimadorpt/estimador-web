@@ -30,7 +30,14 @@ import { formFor } from "@/lib/football-form";
 import { currentAbsences } from "@/lib/football-injuries";
 import { playerDataCutoffLabel } from "@/lib/utils/player-pages";
 import { formatInteger, formatKickoffShort, formatLongDate, formatPercent, matchLabel } from "@/lib/football-format";
+import { matchStartedLine } from "@/lib/football-status";
+import { ClockSwitch } from "@/components/football/ClockSwitch";
 import { setRequestLocale } from '@/i18n/request-locale';
+
+/** A sentence's full stop, unless it already ends on one ("25 set."). */
+function withStop(text: string): string {
+  return text.endsWith(".") ? text : `${text}.`;
+}
 
 /* ------------------------------------------------------------- static params */
 
@@ -67,24 +74,23 @@ export async function generateMetadata({
   const pt = locale !== "en";
   const home = teamDisplayName(fixture.home);
   const away = teamDisplayName(fixture.away);
+  const hasProbs = fixture.p_home != null && fixture.p_draw != null && fixture.p_away != null;
+  // A played game whose odds came out after kickoff has no forecast to
+  // show, so its title promises only the result (audit SP2-04, FRESH-03).
   const title = fixture.played
     ? pt
-      ? `${matchLabel(home, away)}, ${fixture.played.home_goals}–${fixture.played.away_goals}: resultado e previsão`
-      : `${matchLabel(home, away)}, ${fixture.played.home_goals}–${fixture.played.away_goals}: result and forecast`
+      ? `${matchLabel(home, away)}, ${fixture.played.home_goals}–${fixture.played.away_goals}: resultado${hasProbs ? " e previsão" : ""}`
+      : `${matchLabel(home, away)}, ${fixture.played.home_goals}–${fixture.played.away_goals}: result${hasProbs ? " and forecast" : ""}`
     : pt
       ? `${matchLabel(home, away)}: probabilidades e cenários`
       : `${matchLabel(home, away)}: probabilities and scenarios`;
 
-  const probLine =
-    fixture.p_home != null && fixture.p_draw != null && fixture.p_away != null
-      ? pt
-        ? `${home} ${Math.round(fixture.p_home * 100)}%, empate ${Math.round(
-            fixture.p_draw * 100,
-          )}%, ${away} ${Math.round(fixture.p_away * 100)}%.`
-        : `${home} ${Math.round(fixture.p_home * 100)}%, draw ${Math.round(
-            fixture.p_draw * 100,
-          )}%, ${away} ${Math.round(fixture.p_away * 100)}%.`
-      : "";
+  // The page's own percentage rule ("Marítimo 7,1%", not "7%"), audit FA2-09.
+  const probLine = hasProbs
+    ? pt
+      ? `${home} ${formatPercent(fixture.p_home as number, locale)}, empate ${formatPercent(fixture.p_draw as number, locale)}, ${away} ${formatPercent(fixture.p_away as number, locale)}.`
+      : `${home} ${formatPercent(fixture.p_home as number, locale)}, draw ${formatPercent(fixture.p_draw as number, locale)}, ${away} ${formatPercent(fixture.p_away as number, locale)}.`
+    : "";
 
   const description = fixture.played
     ? pt
@@ -235,15 +241,32 @@ export default async function MatchPage({
         measure="wide"
         compact
         back={{ href: "/desporto/liga", label: L.back, locale }}
-        eyebrow={`Liga Portugal · ${pt ? "Jornada" : "Matchday"} ${fixture.matchday}${fixture.inProgressMatchday ? ` · ${L.live}` : ""}${isPlayed ? (pt ? " · jogo disputado" : " · played") : ""}`}
+        eyebrow={`Liga Portugal · ${pt ? "Jornada" : "Matchday"} ${fixture.matchday}${fixture.inProgressMatchday ? ` · ${L.live}` : ""}${fixture.postponed ? (pt ? " · jogo em atraso" : " · postponed") : ""}${isPlayed ? (pt ? " · jogo disputado" : " · played") : ""}`}
         title={matchLabel(teamDisplayName(home), teamDisplayName(away))}
         lede={isPlayed
-          ? pt
-            ? "O resultado e o que o modelo dava antes do jogo. A previsão da época continua na página da Liga."
-            : "The result and what the model gave before the match. The season forecast is on the Liga page."
-          : pt
-            ? "O que o modelo espera deste jogo e o que cada resultado muda para os dois clubes."
-            : "What the model expects from this match, and what each result changes for both clubs."}
+          ? fixture.p_home != null
+            ? pt
+              ? "O resultado e o que o modelo dava antes do jogo. A previsão da época continua na página da Liga."
+              : "The result and what the model gave before the match. The season forecast is on the Liga page."
+            : pt
+              ? "O resultado deste jogo. A previsão da época continua na página da Liga."
+              : "This match's result. The season forecast is on the Liga page."
+          : (
+            // After kickoff the page stops previewing the game (audit FRESH-01).
+            <ClockSwitch
+              initial={pt
+                ? "O que o modelo espera deste jogo e o que cada resultado muda para os dois clubes."
+                : "What the model expects from this match, and what each result changes for both clubs."}
+              steps={fixture.kickoffConfirmed && fixture.kickoff && prediction?.timestamp
+                ? [{
+                    at: fixture.kickoff,
+                    value: pt
+                      ? `${withStop(matchStartedLine(prediction.timestamp, locale))} O que o modelo dava antes do jogo e o que cada resultado mudava; a nova previsão sai depois da jornada.`
+                      : `${withStop(matchStartedLine(prediction.timestamp, locale))} What the model gave before the match and what each result would change; the new forecast follows the matchday.`,
+                  }]
+                : []}
+            />
+          )}
       />
 
       {/* Probabilities */}
@@ -263,6 +286,9 @@ export default async function MatchPage({
             locale={locale}
             played={fixture.played}
             probsPublishedAt={fixture.probsPublishedAt}
+            probsLatePublishedAt={fixture.probsLatePublishedAt}
+            probsFrozenDuringRound={fixture.probsFrozenDuringRound}
+            forecastTimestamp={prediction?.timestamp ?? null}
           />
         </div></div>
       </section>
@@ -282,6 +308,8 @@ export default async function MatchPage({
             homeStanding={prediction?.table?.find(t => t.team === home)}
             awayStanding={prediction?.table?.find(t => t.team === away)}
             decisive={fixture.decisive}
+            kickoff={fixture.kickoffConfirmed ? fixture.kickoff : null}
+            forecastTimestamp={prediction?.timestamp ?? null}
           />
         </div></div>
       </section>
@@ -403,8 +431,12 @@ export default async function MatchPage({
           >
             {L.methodLink}
           </Link>
+          {/* On a played page the date belongs to the "Próximos jogos" list,
+              not to the pre-match odds above (audit FA2-10). */}
           {prediction?.timestamp
-            ? ` · ${pt ? "previsão de" : "forecast of"} ${formatLongDate(prediction.timestamp, locale)}`
+            ? isPlayed
+              ? ` · ${pt ? "Próximos jogos: previsão de" : "Next fixtures: forecast of"} ${formatLongDate(prediction.timestamp, locale)}`
+              : ` · ${pt ? "previsão de" : "forecast of"} ${formatLongDate(prediction.timestamp, locale)}`
             : ""}
         </div></div>
       </section>

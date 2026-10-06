@@ -276,5 +276,7 @@ export type LigaHistorical = LigaPrediction[];
  */
 export type LigaProbabilityHistory = Array<{
   matchday: number;
+  /** The publication's timestamp, so a point can be dated (audit FA2-03). */
+  timestamp?: string;
   table: Array<Pick<TeamStanding, 'team' | 'p_champion' | 'p_relegation'>>;
 }>;

@@ -1,5 +1,7 @@
 "use client";
 
+import { formatPercent } from "@/lib/football-format";
+
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
 import { PlayerRatingList } from "@/components/charts/football/PlayerRatingList";
@@ -168,7 +170,7 @@ export function PlayerRatingsHub({
     const n = Number(v);
     // Trailing zeros would read as thousands under pt-PT grouping ("78,600").
     return Number.isFinite(n) && v.trim() !== ""
-      ? n.toLocaleString(pt ? "pt-PT" : "en-GB", { maximumFractionDigits: 3 })
+      ? n.toLocaleString(pt ? "pt-PT" : "en-GB", { maximumFractionDigits: 3 }).replace(/^-/, "\u2212")
       : v;
   };
   // The producer's diagnostic keys arrive in English snake_case; known ones
@@ -201,20 +203,47 @@ export function PlayerRatingsHub({
     "Team only": ["Só equipas", "Teams only"],
     "Validation": ["Validação", "Validation"],
     "Walk forward": ["Walk-forward", "Walk-forward"],
+    // def_ratings.json verdict keys (audit FA2-M1, MR2-15).
+    "Walkforward t": ["t fora da amostra", "Out-of-sample t"],
+    "N players": ["Jogadores estimados", "Players estimated"],
+    "N separable": ["Separáveis dos colegas", "Separable from team-mates"],
+    "Median shrinkage": ["Encolhimento mediano", "Median shrinkage"],
+    "Max shrinkage": ["Encolhimento máximo", "Max shrinkage"],
+    "N ci excludes zero": ["Intervalos que excluem zero", "Intervals excluding zero"],
+    "Expected false positives at 90pct": ["Esperados por acaso (90%)", "Expected by chance (90%)"],
+    "Walkforward logscore gain": ["Ganho de log-score fora da amostra", "Out-of-sample log-score gain"],
+    "Passes shrinkage": ["Passa o encolhimento", "Passes shrinkage"],
+    "Passes out of sample": ["Passa fora da amostra", "Passes out of sample"],
   };
+  /** The few that carry the story stay in view; the rest go behind the
+   * technical-checks disclosure (audit FA2-M1). */
+  const DIAG_MAIN = new Set(["N players", "N separable", "Separable", "Criterion"]);
   const DIAG_VALUES: Record<string, [string, string]> = {
     ">= 20 players with shrinkage >= 0.2 AND positive walk-forward log-score gain": [
       "≥ 20 jogadores com encolhimento ≥ 0,2 e ganho positivo de log-score em walk-forward",
       "≥ 20 players with shrinkage ≥ 0.2 and a positive walk-forward log-score gain",
     ],
   };
-  const defDiagnostics = (def?.diagnostics ?? []).map((d) => ({
+  const rawDiag = def?.diagnostics ?? [];
+  const diagValue = (key: string) => rawDiag.find((d) => d.label === key)?.value;
+  const defDiagnostics = rawDiag.map((d) => ({
     ...d,
+    key: d.label,
+    main: DIAG_MAIN.has(d.label),
     label: DIAG_LABELS[d.label] ? DIAG_LABELS[d.label][pt ? 0 : 1] : d.label,
     value: DIAG_VALUES[d.value] ? DIAG_VALUES[d.value][pt ? 0 : 1] : tidyValue(d.value),
   }));
-  const defNumbers = defDiagnostics.filter((d) => d.value.length <= 12);
-  const defText = defDiagnostics.filter((d) => d.value.length > 12);
+  const defNumbers = defDiagnostics.filter((d) => d.main && d.value.length <= 12);
+  const defText = defDiagnostics.filter((d) => d.main && d.value.length > 12);
+  const defTechnical = defDiagnostics.filter((d) => !d.main && d.key !== "N ci excludes zero" && d.key !== "Expected false positives at 90pct");
+  // "12" never travels without the 79 expected by chance (audit MR2-15).
+  const ciExcl = diagValue("N ci excludes zero");
+  const falsePos = diagValue("Expected false positives at 90pct");
+  const ciPair = ciExcl != null && falsePos != null
+    ? pt
+      ? `Intervalos de 90% que excluem zero: ${tidyValue(ciExcl)} (esperados só por acaso: ${int(Math.round(Number(falsePos)))}). Com tantos jogadores, é o que o acaso daria: não é sinal de defesas melhores.`
+      : `90% intervals that exclude zero: ${tidyValue(ciExcl)} (expected by chance alone: ${int(Math.round(Number(falsePos)))}). With this many players, that is what chance would give: it is no sign of better defenders.`
+    : null;
 
   /* ------------------------------------------------------ shared meta block */
 
@@ -312,7 +341,7 @@ export function PlayerRatingsHub({
             </summary>
             <ul className="mt-2 space-y-1.5 border-l border-stone-200 pl-3">
               {block.meta.caveats.map((c, i) => (
-                <li key={i} className="text-[11px] text-stone-400 leading-relaxed">
+                <li key={i} className="text-[11px] text-stone-500 leading-relaxed">
                   {c}
                 </li>
               ))}
@@ -336,7 +365,7 @@ export function PlayerRatingsHub({
       (r.range !== null && r.range < 0.02);
     return (
       <div className="mt-6 border-t border-stone-200 pt-4 max-w-3xl">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">
           {pt ? "A distribuição por posição" : "The distribution by position"}
         </h3>
         <p className="text-[11px] text-stone-500 mb-3 leading-relaxed">
@@ -348,20 +377,21 @@ export function PlayerRatingsHub({
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-stone-300 text-left">
-              <th className="py-1.5 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-500">
                 {pt ? "Posição" : "Position"}
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                 n
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                 {pt ? "mediana" : "median"}
               </th>
-              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+              <th className="py-1.5 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                 {pt ? "amplitude" : "range"}
               </th>
-              <th className="py-1.5 pl-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
-                {pt ? "valores distintos" : "distinct values"}
+              <th className="py-1.5 pl-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
+                <span className="sm:hidden">{pt ? "distintos" : "distinct"}</span>
+                <span className="hidden sm:inline">{pt ? "valores distintos" : "distinct values"}</span>
               </th>
             </tr>
           </thead>
@@ -438,7 +468,9 @@ export function PlayerRatingsHub({
     );
   if (gkChannels && !gkChannels.channels.shot_stopping.ships)
     inconclusive.push(
-      pt ? "defesa de remates (3 épocas)" : "shot-stopping (3 seasons)",
+      pt
+        ? `defesa de remates (${gkChannels.seasons.length} épocas)`
+        : `shot-stopping (${gkChannels.seasons.length} seasons)`,
     );
   // The xGOT feed is superseded by the three-axis section when that feed
   // exists; listing an unrendered section as ranked would be a lie.
@@ -461,11 +493,15 @@ export function PlayerRatingsHub({
             </h1>
           </>
         )}
-        <p className="text-base text-stone-600 leading-relaxed mb-4">
-          {pt
-            ? "Não existe forma honesta de pôr um guarda-redes e um ponta de lança na mesma tabela. São trabalhos diferentes, medidos por dados diferentes, e qualquer número único que os junte está a dizer sobretudo em que posição joga cada um."
-            : "There is no honest way to put a goalkeeper and a centre-forward in the same table. They do different jobs, measured by different data, and any single number that merges them is mostly reporting what position each player occupies."}
-        </p>
+        {/* The premise is stated once: by the page's lede, or here when the
+            hub carries its own heading (audit UXD2-29). */}
+        {showHeading && (
+          <p className="text-base text-stone-600 leading-relaxed mb-4">
+            {pt
+              ? "Não existe forma honesta de pôr um guarda-redes e um ponta de lança na mesma tabela. São trabalhos diferentes, medidos por dados diferentes, e qualquer número único que os junte está a dizer sobretudo em que posição joga cada um."
+              : "There is no honest way to put a goalkeeper and a centre-forward in the same table. They do different jobs, measured by different data, and any single number that merges them is mostly reporting what position each player occupies."}
+          </p>
+        )}
         {cutoff && (
           <p className="text-sm text-stone-600 leading-relaxed">
             {pt
@@ -477,7 +513,7 @@ export function PlayerRatingsHub({
         <div className="mt-6 border-l-2 border-stone-300 pl-4 py-1">
           <p className="text-xs text-stone-500 leading-relaxed">
             <span>
-              {pt ? "Com ranking nesta página: " : "Ranked on this page: "}
+              {pt ? "Listas ordenadas nesta página: " : "Ordered lists on this page: "}
               <span className="font-semibold text-stone-700">
                 {`${
                   published.length ? published.join(", ") : pt ? "nada" : "nothing"
@@ -516,10 +552,10 @@ export function PlayerRatingsHub({
           {cutoff && <p className="text-xs text-stone-500 mb-2">{cutoff}</p>}
           <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-5 max-w-3xl leading-relaxed">
             {pt
-              ? `O que esta lista não é: um ranking da Liga. Os ${int(
+              ? `Esta lista ordena avançados, não a Liga inteira. Os ${int(
                   finisherRows.length,
                 )} nomes publicados são ${posBreakdown} — é uma métrica de avançados, e deve ser lida como tal.`
-              : `What this list is not: a league ranking. The ${int(
+              : `This list orders forwards, not the whole league. The ${int(
                   finisherRows.length,
                 )} published names are ${posBreakdown} — it is a forwards metric, and should be read as one.`}
           </p>
@@ -549,7 +585,7 @@ export function PlayerRatingsHub({
                 ? [
                     {
                       label: pt ? "Prob. acima do subst." : "P(above replacement)",
-                      value: `${Math.round(e.pAbove * 100)}%`,
+                      value: formatPercent(e.pAbove, pt ? "pt" : "en"),
                     },
                   ]
                 : []),
@@ -634,7 +670,7 @@ export function PlayerRatingsHub({
                 ? [
                     {
                       label: pt ? "Prob. acima do subst." : "P(above replacement)",
-                      value: `${Math.round(e.pAbove * 100)}%`,
+                      value: formatPercent(e.pAbove, pt ? "pt" : "en"),
                     },
                   ]
                 : []),
@@ -752,7 +788,7 @@ export function PlayerRatingsHub({
                 ? [
                     {
                       label: pt ? "Prob. acima da média" : "P(above average)",
-                      value: `${Math.round(e.pAbove * 100)}%`,
+                      value: formatPercent(e.pAbove, pt ? "pt" : "en"),
                     },
                   ]
                 : []),
@@ -812,7 +848,7 @@ export function PlayerRatingsHub({
                     ? [
                         {
                           label: pt ? "Prob. acima da média" : "P(above average)",
-                          value: `${Math.round(e.pAbove * 100)}%`,
+                          value: formatPercent(e.pAbove, pt ? "pt" : "en"),
                         },
                       ]
                     : []),
@@ -851,7 +887,7 @@ export function PlayerRatingsHub({
                 <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 border-t border-stone-200 pt-4 max-w-3xl">
                   {defNumbers.map((d) => (
                     <div key={d.label}>
-                      <dt className="text-[11px] uppercase tracking-wider text-stone-400">
+                      <dt className="text-[11px] uppercase tracking-wider text-stone-500">
                         {d.label}
                       </dt>
                       <dd className="text-sm font-semibold tabular-nums text-stone-800">
@@ -865,7 +901,7 @@ export function PlayerRatingsHub({
                 <dl className="mt-4 space-y-2 max-w-3xl">
                   {defText.map((d) => (
                     <div key={d.label}>
-                      <dt className="text-[11px] uppercase tracking-wider text-stone-400">
+                      <dt className="text-[11px] uppercase tracking-wider text-stone-500">
                         {d.label}
                       </dt>
                       <dd className="text-xs text-stone-600 leading-relaxed">
@@ -874,6 +910,22 @@ export function PlayerRatingsHub({
                     </div>
                   ))}
                 </dl>
+              )}
+              {ciPair && <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">{ciPair}</p>}
+              {defTechnical.length > 0 && (
+                <details className="mt-2 max-w-3xl text-[11px] text-stone-500">
+                  <summary className="inline-flex min-h-11 cursor-pointer items-center underline underline-offset-2 hover:text-stone-800">
+                    {pt ? "Verificações técnicas do ajuste" : "Technical checks on the fit"}
+                  </summary>
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
+                    {defTechnical.map((d) => (
+                      <div key={d.label}>
+                        <dt className="text-[11px] text-stone-500">{d.label}</dt>
+                        <dd className="text-xs tabular-nums text-stone-700">{d.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </details>
               )}
             </>
           )}

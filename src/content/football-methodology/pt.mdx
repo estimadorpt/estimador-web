@@ -4,7 +4,7 @@ O modelo estima, para cada clube, uma força de ataque e uma força de defesa. A
 
 Os dados são as últimas quatro épocas da Primeira Liga e da Liga 2, juntas, para que os clubes promovidos cheguem com historial. Cada jogo pesa menos quanto mais antigo é: um jogo de há cerca de 23 meses vale metade de um de hoje. O ponto de partida de cada clube é o valor do seu plantel (Transfermarkt), medido época a época, para que os resultados antigos sejam lidos contra o plantel que o clube tinha nessa altura.
 
-O modelo é reajustado de raiz depois de cada jornada, com todos os jogos disputados até essa altura.
+O modelo é reajustado de raiz a cada publicação, com os jogos disputados até então. Uma publicação nem sempre coincide com o fim exato de uma jornada: algumas incluem já jogos da jornada seguinte, ou saem antes de acabarem todos os da própria, e os [dados abertos](/pt/desporto/liga/dados/) dizem quais.
 
 ## Que modelo publica as previsões?
 
@@ -38,24 +38,27 @@ Os xPts não usam o modelo de previsão: são uma leitura independente. A difere
 
 ## O simulador
 
-O [simulador](/pt/desporto/liga/simulador/) usa as mesmas simulações. Quando escolhes um resultado para um jogo da jornada seguinte, as probabilidades passam a ser as das simulações em que esse resultado aconteceu: é uma probabilidade condicional, não uma nova corrida do modelo. Um resultado pouco provável tem menos simulações por trás, e as suas probabilidades têm mais ruído. Por isso o simulador trabalha com um resultado de cada vez.
+O [simulador](/pt/desporto/liga/simulador/) usa as mesmas simulações. Quando escolhes um resultado para um jogo da jornada seguinte, as probabilidades passam a ser as das simulações em que esse resultado aconteceu: é uma probabilidade condicional, não uma nova corrida do modelo. Um resultado pouco provável tem menos simulações por trás, e as suas probabilidades têm mais ruído. Por isso o simulador trabalha com um resultado de cada vez, e só lista outros jogos que mudam as contas do teu clube em pelo menos 3 pontos percentuais: abaixo disso, a diferença confunde-se com o ruído.
+
+A pergunta «Quem acaba à frente?», na mesma página, usa outra coisa: <Samples /> épocas completas sorteadas das simulações. Com essa amostra, uma percentagem como 66% tem uma margem de cerca de ±5 pontos percentuais, muito maior do que a das probabilidades de título calculadas com todas as simulações.
 
 ## Jogos decisivos
 
-Para medir o peso de cada jogo, fixamos o resultado (vitória da casa, empate ou vitória de fora) e simulamos o resto da época. Comparamos a probabilidade de título, ou de despromoção, em cada cenário. Os jogos em que a diferença entre o melhor e o pior cenário é maior são os mais decisivos.
+Para medir o peso de cada jogo, separamos as <Sims /> simulações pelo resultado desse jogo (vitória da casa, empate, vitória de fora) e comparamos a probabilidade de título, ou de despromoção, em cada grupo. Não voltamos a simular a época: é a mesma contagem, feita dentro de cada grupo. Os jogos em que a diferença entre o melhor e o pior resultado é maior são os mais decisivos.
 
-## Jogos-chave por equipa
+## Cenários de vitória
 
-Para cada equipa com aspirações ao título ou em risco de despromoção, comparamos duas coisas em cada jogo que lhe falta: com que frequência o vence em todas as simulações, e com que frequência o vence nas simulações em que atinge o objetivo. Quanto maior a diferença, mais essencial é vencer esse jogo.
+Nas páginas dos clubes que lutam pelo título ou contra a descida, os cenários escolhem os quatro jogos do clube que mais separam as simulações em que atinge o objetivo das outras, e mostram as três combinações de resultados nesses jogos que mais vezes aparecem nessas simulações, com a probabilidade depois de cada passo. Juntas, cobrem só uma parte das simulações (cada página diz quanto): são exemplos do que pode acontecer, não o caminho previsto. Um resultado de outro clube só aparece ao lado de um cenário quando acontece em pelo menos 90% das simulações desse cenário.
+
+## Cria o teu cenário
+
+Na mesma página, podes fixar o resultado de qualquer jogo que falte ao clube. Com uma escolha, o número é a probabilidade condicional tirada das simulações, como no simulador. Com várias, as escolhas combinam-se como se fossem independentes entre si: é uma aproximação, porque o ficheiro publicado guarda o efeito de cada jogo, não o de cada combinação de jogos.
 
 ## Como medimos os jogadores?
 
-A [página de jogadores](/pt/desporto/liga/jogadores/) publica várias métricas separadas, uma por dimensão do jogo, porque um guarda-redes e um avançado não se medem com o mesmo número. Cada uma vem de um modelo bayesiano próprio, ajustado às atuações individuais na Liga <PlayerSeasons />, com um mínimo de <PlayerMinMinutes /> minutos:
+A [página de jogadores](/pt/desporto/liga/jogadores/) publica várias métricas separadas, uma por dimensão do jogo, porque um guarda-redes e um avançado não se medem com o mesmo número. Cada uma vem de um modelo bayesiano próprio, ajustado às atuações individuais na Liga, com as épocas e o mínimo de minutos que o seu próprio ficheiro indica:
 
-- **Finalização**: golos por 90 minutos acima de um jogador de nível de substituição (SAR, do inglês *skill above replacement*), descontados os minutos, o adversário e o fator casa.
-- **Contribuição ofensiva**: a mesma conta, com golos e assistências juntos.
-- **Posse disputada**: a probabilidade de ganhar duelos aéreos e no chão, para defesas e médios.
-- **Guarda-redes**: a intervenção em cruzamentos e as saídas da área. A defesa de remates não separa os guarda-redes em três épocas de dados, por isso não tem lista.
+<PlayerMetrics />
 
 Cada valor vem com um intervalo de credibilidade de 90%: o modelo dá 90% de probabilidade a que o valor verdadeiro esteja lá dentro. Com poucos minutos, o valor é puxado para o nível de substituição e o intervalo alarga-se. A página também mostra verificações técnicas de cada ajuste (se o algoritmo convergiu); estão numa caixa à parte, para quem as quiser ler.
 
@@ -66,7 +69,9 @@ Cada valor vem com um intervalo de credibilidade de 90%: o modelo dá 90% de pro
 - **Avaliado**: a previsão de vitória, empate ou derrota de cada jogo da jornada seguinte, contra a linha de fecho do mercado, em épocas passadas. O resultado está em [modelo vs mercado](/pt/desporto/liga/modelo/).
 - **Avaliado**: os intervalos de 90% para os pontos finais (secção acima).
 - **Verificado em parte**: as probabilidades de título de quem lidera, que o modelo tende a subestimar (secção acima).
-- **Não avaliado**: as probabilidades de despromoção e de top 3, os jogos decisivos, os jogos-chave por equipa e o simulador.
+- **Não avaliado**: as probabilidades de despromoção e de top 3, os jogos decisivos, os cenários de vitória, o «Cria o teu cenário» e o simulador.
+
+A comparação com o mercado também não é independente da escolha do modelo: o modelo atual foi escolhido entre variantes testadas nessas mesmas épocas, o que tende a favorecê-lo. A primeira avaliação limpa será a da época 2026-27.
 
 ## O que fica de fora?
 

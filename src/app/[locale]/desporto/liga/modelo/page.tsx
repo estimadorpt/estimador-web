@@ -15,14 +15,15 @@ import {
 } from "@/lib/football-scorecard";
 import {
   gamesOfMatchdays,
+  leadVerdictSentence,
   modelPlainName,
-  phaseMatchdays,
   pointsCalibrationSentence,
   predictedMatchday,
+  selectionCaveat,
   titleCalibrationParagraphs,
-  verdictLine,
 } from "@/lib/football-model-evaluation";
-import { formatDecimal, formatInteger, formatLongDate, formatSigned } from "@/lib/football-format";
+import { CURRENT_LIGA_SEASON } from "@/lib/config/football";
+import { formatInteger, formatLongDate } from "@/lib/football-format";
 import type { Metadata } from "next";
 import { setRequestLocale } from '@/i18n/request-locale';
 
@@ -45,35 +46,9 @@ function summary(
   const same = evaluatesCurrentModel(sc.model, forecastModel);
   const evaluated = modelPlainName(sc.model, locale);
   const current = forecastModel ? modelPlainName(forecastModel, locale) : null;
-  const o = sc.overall;
-  const early = sc.phases.early;
-  const late = sc.phases.mid_late;
-  const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
-
-  // The lead as one sentence and a list (audit UXD-02: the old lead chained
-  // "Jornadas 1-10: O mercado…" labels into one paragraph).
-  const verdicts = [
-    {
-      label: pt ? "Todas as jornadas avaliadas" : "Every matchday evaluated",
-      scope: cap(gamesOfMatchdays(mds, locale)),
-      detail: pt
-        ? `Diferença ${formatSigned(o.delta, locale, 4)}, erro padrão ${formatDecimal(o.se, locale, 4)}.`
-        : `Gap ${formatSigned(o.delta, locale, 4)}, standard error ${formatDecimal(o.se, locale, 4)}.`,
-      verdict: verdictLine(o, locale),
-    },
-    {
-      label: pt ? "Início da época" : "Early season",
-      scope: cap(gamesOfMatchdays(phaseMatchdays(sc, "early"), locale)),
-      detail: null,
-      verdict: verdictLine(early, locale),
-    },
-    {
-      label: pt ? "Resto da época" : "Rest of the season",
-      scope: cap(gamesOfMatchdays(phaseMatchdays(sc, "mid_late"), locale)),
-      detail: null,
-      verdict: verdictLine(late, locale),
-    },
-  ];
+  // One sentence, from the same verdicts as the three cards below: the
+  // cards are the one full statement of the result (audit MR2-18, UXD2-17).
+  const lead = leadVerdictSentence(sc, locale);
 
   const which = same
     ? pt
@@ -86,16 +61,21 @@ function summary(
   return {
     same,
     which,
-    verdicts,
+    lead,
     intro: pt
-      ? `O resultado, em ${formatInteger(sc.n, locale)} jogos ao longo de ${sc.n_seasons} épocas (${range}):`
-      : `The result, over ${formatInteger(sc.n, locale)} matches across ${sc.n_seasons} seasons (${range}):`,
+      ? `Em ${formatInteger(sc.n, locale)} jogos ao longo de ${sc.n_seasons} épocas (${range}): ${lead.charAt(0).toLowerCase()}${lead.slice(1)}`
+      : `Over ${formatInteger(sc.n, locale)} matches across ${sc.n_seasons} seasons (${range}): ${lead.charAt(0).toLowerCase()}${lead.slice(1)}`,
+    // What the page finds, not a claim the model is "à frente" anywhere
+    // (audit FA2-09): the verdicts come from the file.
     description: pt
-      ? `O modelo da Liga Portugal contra a linha de fecho do mercado em ${formatInteger(sc.n, locale)} jogos de ${sc.n_seasons} épocas (${range}): onde está à frente, atrás e com que margem.`
-      : `The Liga Portugal model against the market's closing line over ${formatInteger(sc.n, locale)} matches from ${sc.n_seasons} seasons (${range}): where it is ahead, behind, and by how much.`,
+      ? `Modelo vs linha de fecho do mercado, ${formatInteger(sc.n, locale)} jogos: ${lead.charAt(0).toLowerCase()}${lead.slice(1)}`
+      : `Model vs the market's closing line, ${formatInteger(sc.n, locale)} matches: ${lead.charAt(0).toLowerCase()}${lead.slice(1)}`,
     footnote: pt
       ? `Avaliação em ${formatInteger(sc.n, locale)} jogos: ${sc.n_seasons} épocas (${range}) × ${mds.length} jornadas (${gamesOfMatchdays(mds, locale)}). Para prever cada jornada, o modelo é ajustado apenas com os jogos disputados até à jornada anterior, sem ver o futuro. As probabilidades do mercado derivam das cotações de fecho publicadas pela football-data.co.uk${sources ? ` (${sources})` : ""}${shin ? ", com a margem retirada pelo método de Shin" : ""}. Avaliação gerada a ${formatLongDate(sc.generated_at, locale)}.`
       : `Evaluated on ${formatInteger(sc.n, locale)} matches: ${sc.n_seasons} seasons (${range}) × ${mds.length} matchdays (${gamesOfMatchdays(mds, locale)}). To forecast each matchday, the model is fitted only on the matches played up to the one before, without seeing the future. Market probabilities are derived from closing odds published by football-data.co.uk${sources ? ` (${sources})` : ""}${shin ? ", with the margin removed using Shin's method" : ""}. Evaluation generated on ${formatLongDate(sc.generated_at, locale)}.`,
+    // The evaluation is retrospective and not independent of the model's
+    // choice (audit MR2-V01, FRESH-V1).
+    selection: selectionCaveat(CURRENT_LIGA_SEASON, locale),
   };
 }
 
@@ -197,20 +177,8 @@ export default async function LigaModelPage({
                 </p>
               )}
               <p className="text-lg text-stone-800 leading-relaxed font-medium">{s.intro}</p>
-              <ul className="space-y-3">
-                {s.verdicts.map((v) => (
-                  <li key={v.label} className="border-l-2 border-line pl-4">
-                    <p className="text-base font-semibold text-ink">
-                      {v.label} <span className="font-normal text-stone-500">· {v.scope}</span>
-                    </p>
-                    <p className="text-base text-stone-800 leading-relaxed">
-                      {v.detail ? `${v.detail} ` : ""}{v.verdict}
-                    </p>
-                  </li>
-                ))}
-              </ul>
               <p className="text-sm text-stone-500 leading-relaxed border-l-2 border-stone-200 pl-4">
-                {c.caveat}
+                {c.caveat} {s.selection}
               </p>
             </div>
           )}
@@ -245,7 +213,7 @@ export default async function LigaModelPage({
             </h2>
             {s && (
               <p className="text-sm text-stone-600 leading-relaxed max-w-3xl">
-                {s.footnote} {s.which}
+                {s.footnote} {s.which} {s.selection}
               </p>
             )}
             <div className="mt-5">

@@ -381,7 +381,7 @@ export default async function Liga2Page({
                       <h3 className="text-base text-stone-900">
                         {c.matchdayLabel(cp.matchday)}
                       </h3>
-                      <span className="text-xs text-stone-400 tabular-nums">
+                      <span className="text-xs text-stone-500 tabular-nums">
                         {pt
                           ? `${cp.matches_played} jogos vistos, ${cp.matches_remaining} simulados`
                           : `${cp.matches_played} matches seen, ${cp.matches_remaining} simulated`}
@@ -424,7 +424,7 @@ export default async function Liga2Page({
 
         {/* Small print */}
         <section className="border-t border-stone-200 pt-6">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-3">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3">
             {c.footnote}
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">

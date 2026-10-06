@@ -108,20 +108,20 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
                       : ""
                 }`}
               >
-                <span className="w-5 text-right text-stone-400 tabular-nums">{r.pos}</span>
+                <span className="w-5 text-right text-stone-500 tabular-nums">{r.pos}</span>
                 {teamLogoSrc(r.team) && (
                   <img src={teamLogoSrc(r.team)} alt="" className="w-4 h-4 object-contain" />
                 )}
                 <span className="flex-1 truncate">{teamDisplayName(r.team)}</span>
                 <span className="tabular-nums font-medium">{r.pts}</span>
-                <span className="w-9 text-right tabular-nums text-stone-400 text-xs">
+                <span className="w-9 text-right tabular-nums text-stone-500 text-xs">
                   {r.gd > 0 ? `+${r.gd}` : r.gd}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="mt-2 text-xs text-stone-400">
+          <div className="mt-2 text-xs text-stone-500">
             {t.relegated}: {relegated.map((r) => teamDisplayName(r.team)).join(", ")}
           </div>
         </div>

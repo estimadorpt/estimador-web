@@ -4,7 +4,7 @@ The model estimates an attacking and a defensive strength for each club. It fits
 
 The data is the last four seasons of the Primeira Liga and Liga 2, together, so promoted clubs arrive with a record. Each match counts for less the older it is: a match from about 23 months ago is worth half of one played today. Each club's starting point is its squad value (Transfermarkt), measured season by season, so old results are read against the squad the club had at the time.
 
-The model is refitted from scratch after every matchday, with every match played so far.
+The model is refitted from scratch at every publication, with the matches played up to then. A publication does not always fall exactly at the end of a matchday: some already include games of the next one, or come out before all of their own are played, and the [open data](/en/desporto/liga/dados/) page says which.
 
 ## Which model publishes the forecasts?
 
@@ -38,24 +38,27 @@ xPts do not use the forecasting model: they are an independent read. The gap bet
 
 ## The simulator
 
-The [simulator](/en/desporto/liga/simulador/) uses the same simulations. When you pick a result for one of next matchday's games, the probabilities become those of the simulations in which that result happened: a conditional probability, not a new run of the model. An unlikely result has fewer simulations behind it, so its probabilities are noisier. That is why the simulator works with one result at a time.
+The [simulator](/en/desporto/liga/simulador/) uses the same simulations. When you pick a result for one of next matchday's games, the probabilities become those of the simulations in which that result happened: a conditional probability, not a new run of the model. An unlikely result has fewer simulations behind it, so its probabilities are noisier. That is why the simulator works with one result at a time, and only lists other matches that move your club's chances by at least 3 percentage points: below that, the difference blends into the noise.
+
+The "Who finishes ahead?" question on the same page uses something else: <Samples /> complete seasons drawn from the simulations. With that sample, a share like 66% carries a margin of about ±5 percentage points, much larger than that of the title probabilities computed from every simulation.
 
 ## Decisive matches
 
-To measure the weight of each match, we fix the result (home win, draw or away win) and simulate the rest of the season. We compare the title probability, or the relegation probability, in each scenario. The matches where the gap between the best and worst case is largest are the most decisive.
+To measure the weight of each match, we split the <Sims /> simulations by that match's result (home win, draw, away win) and compare the title probability, or the relegation probability, in each group. We do not simulate the season again: it is the same count, made within each group. The matches where the gap between the best and worst result is largest are the most decisive.
 
-## Key matches per team
+## Winning scenarios
 
-For each team chasing the title or at risk of relegation, we compare two things for each match it has left: how often it wins that match across all simulations, and how often it wins it in the simulations where it reaches its goal. The bigger the gap, the more essential that win is.
+On the pages of clubs in the title race or the relegation fight, the scenarios pick the four games of the club that most separate the simulations where it reaches its goal from the rest, and show the three combinations of results in those games that turn up most often in those simulations, with the probability after each step. Together they cover only part of the simulations (each page says how much): they are examples of what can happen, not the forecast path. Another club's result only appears beside a scenario when it happens in at least 90% of that scenario's simulations.
+
+## Build your own scenario
+
+On the same page you can fix the result of any game the club has left. With one pick, the number is the conditional probability read from the simulations, as in the simulator. With several, the picks are combined as if independent of one another: an approximation, because the published file holds each game's effect, not each combination of games.
 
 ## How do we measure players?
 
-The [players page](/en/desporto/liga/jogadores/) publishes several separate metrics, one per dimension of the game, because a goalkeeper and a forward cannot be measured with the same number. Each comes from its own Bayesian model, fitted to individual Liga appearances <PlayerSeasons />, with a <PlayerMinMinutes />-minute minimum:
+The [players page](/en/desporto/liga/jogadores/) publishes several separate metrics, one per dimension of the game, because a goalkeeper and a forward cannot be measured with the same number. Each comes from its own Bayesian model, fitted to individual Liga appearances, with the seasons and minimum minutes its own file states:
 
-- **Finishing**: goals per 90 minutes above a replacement-level player (SAR, skill above replacement), adjusted for minutes, opponent and home advantage.
-- **Attacking contribution**: the same calculation, with goals and assists together.
-- **Contested possession**: the probability of winning aerial and ground duels, for defenders and midfielders.
-- **Goalkeepers**: cross intervention and sweeping. Shot-stopping does not separate keepers over three seasons of data, so it has no list.
+<PlayerMetrics />
 
 Each value comes with a 90% credible interval: the model puts a 90% probability on the true value lying inside it. With few minutes, the value is pulled toward replacement level and the interval widens. The page also shows each fit's technical checks (whether the algorithm converged); they sit in a separate box for anyone who wants them.
 
@@ -66,7 +69,9 @@ Each value comes with a 90% credible interval: the model puts a 90% probability 
 - **Evaluated**: the win, draw or loss forecast for each game of the next matchday, against the market's closing line, over past seasons. The result is on [model vs market](/en/desporto/liga/modelo/).
 - **Evaluated**: the 90% ranges for final points (section above).
 - **Partly checked**: the title probabilities of the team in front, which the model tends to underrate (section above).
-- **Not evaluated**: the relegation and top-three probabilities, the decisive matches, the key matches per team and the simulator.
+- **Not evaluated**: the relegation and top-three probabilities, the decisive matches, the winning scenarios, "Build your own scenario" and the simulator.
+
+The comparison with the market is not independent of the model's choice either: the current model was picked among variants backtested on those same seasons, which tends to favour it. The first clean test will be the 2026-27 season.
 
 ## What is left out?
 

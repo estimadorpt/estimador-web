@@ -1,5 +1,7 @@
 "use client";
 
+import { formatInteger } from "@/lib/football-format";
+
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -88,8 +90,9 @@ export function PlayerRatingList({
     v.toLocaleString(pt ? "pt-PT" : "en-GB", {
       minimumFractionDigits: d,
       maximumFractionDigits: d,
-    });
-  const int = (v: number) => Math.round(v).toLocaleString(pt ? "pt-PT" : "en-GB");
+    }).replace(/^-/, "−");
+  // Grouped like every other count on the site ("3 677", audit FA2-12).
+  const int = (v: number) => formatInteger(Math.round(v), pt ? "pt" : "en");
   const signed = (v: number, d = digits) => `${v > 0 ? "+" : ""}${nf(v, d)}`;
 
   const domain = ratingDomain(entries);
@@ -126,7 +129,7 @@ export function PlayerRatingList({
             {labels.interval}
           </div>
         </div>
-        <div className="w-6 flex-shrink-0" />
+        <div className="w-11 flex-shrink-0" />
       </div>
 
       <div className="divide-y divide-stone-100">
@@ -153,7 +156,7 @@ export function PlayerRatingList({
                   aria-expanded={isOpen}
                   className="flex-1 min-w-0 flex items-center gap-2 py-1.5 text-left hover:bg-stone-100 transition-colors"
                 >
-                  <div className="w-6 flex-shrink-0 text-right text-xs font-bold tabular-nums text-stone-400">
+                  <div className="w-6 flex-shrink-0 text-right text-xs font-bold tabular-nums text-stone-500">
                     {e.rank ?? ""}
                   </div>
 
@@ -287,12 +290,12 @@ export function PlayerRatingList({
                     href={`/desporto/liga/jogador/${slug}`}
                     locale={locale}
                     aria-label={labels.openPlayer(e.player)}
-                    className="w-6 flex-shrink-0 flex items-center justify-center text-stone-500 hover:text-stone-800 hover:bg-stone-100 transition-colors"
+                    className="w-11 min-h-11 flex-shrink-0 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
                 ) : (
-                  <span className="w-6 flex-shrink-0" />
+                  <span className="w-11 flex-shrink-0" />
                 )}
               </div>
 
@@ -300,14 +303,14 @@ export function PlayerRatingList({
                 <div className="pl-8 pr-2 pb-3 pt-1 bg-stone-50/60">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-xs">
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
                         {labels.interval}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
                         {hasInterval ? (
                           `${signed(e.lo!)} – ${signed(e.hi!)}`
                         ) : (
-                          <span className="font-normal text-stone-400">
+                          <span className="font-normal text-stone-500">
                             {labels.noInterval}
                           </span>
                         )}
@@ -315,7 +318,7 @@ export function PlayerRatingList({
                     </div>
                     {cells.map((cell) => (
                       <div key={cell.label}>
-                        <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                        <div className="text-[11px] uppercase tracking-wider text-stone-500">
                           {cell.label}
                         </div>
                         <div className="font-semibold tabular-nums text-stone-800">

@@ -3,14 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Disclosure } from "@/components/viz/Disclosure";
 import { teamDisplayName } from "@/lib/config/football";
+import { formatPercent } from "@/lib/football-format";
+import { SERIES } from "@/components/viz/theme";
 import { blockVerdict, SIGNIFICANCE_T, type PointsCalibration } from "@/lib/football-scorecard";
 import {
   crossingSentence,
+  disagreementSentence,
   gamesOfMatchdays,
   openingLineSentence,
   phaseMatchdays,
   predictedMatchday,
-  uncertaintyNote,
+  readingRule,
   verdictLine,
 } from "@/lib/football-model-evaluation";
 
@@ -116,11 +119,14 @@ interface Props {
    surface contrast floor. Emerald carries the model, stone the market
    benchmark; marker shape and direct labels repeat the identity so it is
    never colour alone. */
-const MODEL_COLOR = "#4e8056"; // emerald-600
-const MARKET_COLOR = "#4f5f57"; // stone-600
+// The design system's first two series (teal, gold), in its fixed order
+// (audit UXD2-V08); they never colour text (A11Y2-08), and marker shape plus
+// the legend repeat the identity.
+const MODEL_COLOR = SERIES[0];
+const MARKET_COLOR = SERIES[1];
 const GRID = "#dadccf"; // stone-200
 const AXIS_TEXT = "#5f7062"; // stone-500
-const SURFACE = "#ffffff";
+const SURFACE = "#f5f3ea"; // paper
 
 /* ------------------------------------------------------------- formatting */
 
@@ -183,8 +189,20 @@ function CheckpointChart({
   const H = stripTop + stripH + 24;
 
   const innerW = Math.max(60, width - padL - padR);
-  const xs = cps.map((_, i) => padL + (innerW * (i + 0.5)) / cps.length);
-  const bandW = innerW / cps.length;
+  // Matchdays 2 to 11 are consecutive, then 15, 19, 23…: a gap and a break
+  // mark on the axis where the step changes, so the later points do not
+  // read as consecutive rounds (audit UXD2-V08).
+  const BREAK_GAP = 0.6;
+  const mdList = cps.map(predictedMatchday);
+  const breaksBefore = mdList.map((md, i) => (i > 0 && md - mdList[i - 1] > 1 ? 1 : 0));
+  const slots = cps.length + BREAK_GAP * breaksBefore.reduce<number>((a, b) => a + b, 0);
+  const bandW = innerW / slots;
+  let acc = 0;
+  const xs = cps.map((_, i) => {
+    acc += breaksBefore[i] ? BREAK_GAP : 0;
+    return padL + bandW * (i + acc + 0.5);
+  });
+  const breakXs = breaksBefore.flatMap((b, i) => (b && !breaksBefore.slice(0, i).some(Boolean) ? [(xs[i - 1] + xs[i]) / 2] : []));
 
   // RPS scale — a truncated axis read from the data (the values live in a
   // narrow band), rounded out to the hundredth; the note states its range.
@@ -210,8 +228,9 @@ function CheckpointChart({
   const stripTick = maxAbs > 0.025 ? 0.02 : 0.01;
   const dy = (v: number) => stripTop + stripH / 2 - (v / maxAbs) * (stripH / 2 - 6);
 
+  // The line breaks where the axis does.
   const line = (get: (c: MarketCheckpoint) => number) =>
-    cps.map((c, i) => `${i === 0 ? "M" : "L"}${xs[i]},${y(get(c))}`).join(" ");
+    cps.map((c, i) => `${i === 0 || breaksBefore[i] ? "M" : "L"}${xs[i]},${y(get(c))}`).join(" ");
 
   // Phase boundary sits between checkpoint 10 and checkpoint 14.
   const boundaryIdx = cps.findIndex((c) => c.phase === "mid_late");
@@ -345,29 +364,8 @@ function CheckpointChart({
           />
         ))}
 
-        {/* direct labels at the left edge, where the two series separate */}
-        {!narrow && (
-          <>
-            <text
-              x={xs[0] + 8}
-              y={y(cps[0].model_rps) - 8}
-              fontSize="11"
-              fontWeight={600}
-              fill="#434d48"
-            >
-              {pt ? "Modelo" : "Model"}
-            </text>
-            <text
-              x={xs[0] + 8}
-              y={y(cps[0].market_rps) + 16}
-              fontSize="11"
-              fontWeight={600}
-              fill="#434d48"
-            >
-              {pt ? "Mercado" : "Market"}
-            </text>
-          </>
-        )}
+        {/* The legend above names the two series; inline labels used to
+            overprint the lines at jornada 2 (audit UXD2-V08). */}
 
         {/* phase captions */}
         <text
@@ -404,6 +402,13 @@ function CheckpointChart({
           stroke="#cbccbb"
           strokeWidth="1"
         />
+        {breakXs.map((bx) => (
+          <g key={`brk-${bx}`} aria-hidden="true">
+            <rect x={bx - 5} y={padT + plotH - 4} width={10} height={8} fill={SURFACE} />
+            <line x1={bx - 5} x2={bx - 1} y1={padT + plotH + 4} y2={padT + plotH - 4} stroke="#7f9284" strokeWidth="1" />
+            <line x1={bx + 1} x2={bx + 5} y1={padT + plotH + 4} y2={padT + plotH - 4} stroke="#7f9284" strokeWidth="1" />
+          </g>
+        ))}
         {cps.map((c, i) => (
           <text
             key={`x-${c.checkpoint}`}
@@ -422,7 +427,7 @@ function CheckpointChart({
           y={padT + plotH + 30}
           textAnchor="middle"
           fontSize={11}
-          fill="#7f9284"
+          fill={AXIS_TEXT}
           className="uppercase"
           letterSpacing="0.06em"
         >
@@ -554,7 +559,7 @@ function CheckpointChart({
         >
           <div className="font-semibold text-stone-900 mb-1">
             {pt ? "Jornada" : "Matchday"} {predictedMatchday(h)}{" "}
-            <span className="font-normal text-stone-400">n={h.n}</span>
+            <span className="font-normal text-stone-500">n={h.n}</span>
           </div>
           <div className="flex justify-between tabular-nums">
             <span className="text-stone-500">{pt ? "Modelo" : "Model"}</span>
@@ -574,7 +579,7 @@ function CheckpointChart({
         </div>
       )}
 
-      <p className="mt-2 text-[11px] leading-relaxed text-stone-400">
+      <p className="mt-2 text-[11px] leading-relaxed text-stone-500">
         {pt
           ? `Eixo vertical truncado (${num(yLo, 2)} a ${num(yHi, 2)}) para tornar visíveis as diferenças; as diferenças reais são as da faixa inferior. Cada ponto junta os jogos de uma jornada nas ${data.n_seasons} épocas${perPoint ? ` (n = ${perPoint} jogos por ponto)` : ""}, previstos com os resultados até à jornada anterior. Na faixa inferior, uma barra cuja linha de ±${K} erros padrão atravessa o zero é um empate técnico.`
           : `Vertical axis truncated (${num(yLo, 2)} to ${num(yHi, 2)}) so the differences are visible; the real differences are the ones in the lower strip. Each point pools one matchday's games across the ${data.n_seasons} seasons${perPoint ? ` (n = ${perPoint} matches per point)` : ""}, forecast with the results up to the previous matchday. In the lower strip, a bar whose ±${K} standard-error line crosses zero is a statistical tie.`}
@@ -583,10 +588,10 @@ function CheckpointChart({
       {/* Table view twin */}
       <Disclosure
         className="mt-3"
-        summary={pt ? "Ver os números em tabela" : "See the numbers as a table"}
+        summary={pt ? "Ver como tabela" : "See as a table"}
         srSuffix={pt ? "RPS do modelo e do mercado por jornada" : "model and market RPS by matchday"}
       >
-        <div className="mt-2 overflow-x-auto">
+        <div className="mt-2 overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? "RPS do modelo e do mercado por jornada prevista" : "Model and market RPS by matchday forecast"}>
           <table className="w-full text-xs tabular-nums">
             <caption className="sr-only">
               {pt
@@ -626,10 +631,7 @@ function CheckpointChart({
                   </th>
                   <td className="py-1 px-3 text-right text-stone-700">{num(c.model_rps, 4)}</td>
                   <td className="py-1 px-3 text-right text-stone-700">{num(c.market_rps, 4)}</td>
-                  <td
-                    className="py-1 px-3 text-right font-medium"
-                    style={{ color: c.delta < 0 ? MODEL_COLOR : MARKET_COLOR }}
-                  >
+                  <td className="py-1 px-3 text-right font-medium text-ink">
                     {signed(c.delta, 4)}
                   </td>
                   <td className="py-1 px-3 text-right text-stone-500">{num(c.se, 4)}</td>
@@ -699,28 +701,28 @@ function pickLabel(
   return teamDisplayName(side === "home" ? home : away);
 }
 
-function Disagreements({ data, pt }: { data: MarketScorecardData; pt: boolean }) {
-  const { num, signed } = makeFmt(pt);
+function Disagreements({ data, pt, locale }: { data: MarketScorecardData; pt: boolean; locale: string }) {
   const s = data.disagreement_summary;
 
   const verdictChip = (v: MarketDisagreement["verdict"]) => {
     const map = {
       model: {
         text: pt ? "Modelo certo" : "Model right",
-        cls: "bg-emerald-50 text-emerald-800 border-emerald-200",
+        cls: "bg-parchment text-ink border-line",
       },
       market: {
         text: pt ? "Mercado certo" : "Market right",
-        cls: "bg-stone-100 text-stone-700 border-stone-300",
+        cls: "bg-parchment text-ink border-line",
       },
       neither: {
         text: pt ? "Nenhum" : "Neither",
-        cls: "bg-cream text-stone-500 border-stone-200",
+        cls: "bg-cream text-stone-600 border-line",
       },
     } as const;
     const m = map[v];
+    // The site's rounded pill, sentence case (audit UXD2-09).
     return (
-      <span className={`text-[11px] font-semibold uppercase tracking-wide border px-1.5 py-0.5 ${m.cls}`}>
+      <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${m.cls}`}>
         {m.text}
       </span>
     );
@@ -728,10 +730,9 @@ function Disagreements({ data, pt }: { data: MarketScorecardData; pt: boolean })
 
   return (
     <div>
+      {/* The verdict comes from the same 2 SE rule as the cards (audit MR2-01). */}
       <p className="text-sm text-stone-600 leading-relaxed max-w-3xl">
-        {pt
-          ? `Em ${s.n_disagree} dos ${data.n} jogos (${num(s.pct_of_matches, 1)}%) o modelo e o mercado apontaram favoritos diferentes. Nesses jogos o favorito do mercado ganhou ${s.market_pick_won} vezes e o do modelo ${s.model_pick_won}, com ${s.neither_won} a acabar num terceiro resultado. A diferença de erro nesse subconjunto é ${signed(s.delta, 4)}, com erro padrão ${num(s.se, 4)} — demasiado ruidosa para arbitrar a questão.`
-          : `In ${s.n_disagree} of the ${data.n} matches (${num(s.pct_of_matches, 1)}%) model and market named different favourites. In those, the market's pick won ${s.market_pick_won} times and the model's ${s.model_pick_won}, with ${s.neither_won} landing on a third result. The error gap on that subset is ${signed(s.delta, 4)}, with a standard error of ${num(s.se, 4)} — far too noisy to settle the question.`}
+        {disagreementSentence(s, data.n, locale)}
       </p>
 
       <ul className="mt-5 divide-y divide-stone-100 border-t border-stone-200">
@@ -745,7 +746,7 @@ function Disagreements({ data, pt }: { data: MarketScorecardData; pt: boolean })
                 </span>{" "}
                 {teamDisplayName(d.away_team)}
               </span>
-              <span className="text-xs text-stone-400">
+              <span className="text-xs text-stone-500">
                 {d.season} · {pt ? "jornada" : "matchday"} {d.matchday ?? d.checkpoint}
               </span>
               <span className="ml-auto">{verdictChip(d.verdict)}</span>
@@ -761,8 +762,8 @@ function Disagreements({ data, pt }: { data: MarketScorecardData; pt: boolean })
                 <span className="text-stone-800">
                   {pickLabel(d.model_pick, d.home_team, d.away_team, pt)}
                 </span>
-                <span className="tabular-nums text-stone-400">
-                  {Math.round(d.model_pick_prob * 100)}%
+                <span className="tabular-nums text-stone-500">
+                  {formatPercent(d.model_pick_prob, locale)}
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -775,15 +776,15 @@ function Disagreements({ data, pt }: { data: MarketScorecardData; pt: boolean })
                 <span className="text-stone-800">
                   {pickLabel(d.market_pick, d.home_team, d.away_team, pt)}
                 </span>
-                <span className="tabular-nums text-stone-400">
-                  {Math.round(d.market_pick_prob * 100)}%
+                <span className="tabular-nums text-stone-500">
+                  {formatPercent(d.market_pick_prob, locale)}
                 </span>
               </div>
             </div>
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-[11px] text-stone-400">
+      <p className="mt-3 text-[11px] text-stone-500">
         {pt
           ? `Os ${data.disagreements.length} jogos em que os dois favoritos mais se afastaram um do outro. «Nenhum» significa que saiu o terceiro resultado.`
           : `The ${data.disagreements.length} matches where the two favourites were furthest apart. “Neither” means the third result came in.`}
@@ -911,7 +912,7 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
           </div>
         </dl>
         <p className="mt-5 text-sm text-stone-600 leading-relaxed max-w-3xl">
-          {uncertaintyNote(data, locale)}
+          {readingRule(locale)}
         </p>
       </section>
 
@@ -925,7 +926,7 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
             ? "Modelo e mercado quase sempre veem o mesmo jogo. Estes são os casos em que não viram."
             : "Model and market almost always see the same match. These are the cases where they did not."}
         </p>
-        <Disagreements data={data} pt={pt} />
+        <Disagreements data={data} pt={pt} locale={locale} />
       </section>
     </div>
   );

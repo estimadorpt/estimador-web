@@ -80,8 +80,8 @@ export default async function PlayerRatingsPage({
         eyebrow={pt ? "Liga Portugal · Jogadores" : "Liga Portugal · Players"}
         title={pt ? "Jogadores da Liga Portugal" : "Liga Portugal players"}
         lede={pt
-          ? "Métricas separadas — finalização, contribuição ofensiva, posse disputada e guarda-redes —, cada uma com o seu intervalo. Não há um ranking geral: um número só não chega para comparar um guarda-redes com um ponta de lança."
-          : "Separate metrics — finishing, attacking contribution, contested possession and goalkeeping — each with its own interval. There is no overall ranking: one number cannot compare a goalkeeper with a centre-forward."}
+          ? "Métricas separadas — finalização, contribuição ofensiva, posse disputada e guarda-redes —, cada uma com o seu intervalo. Não há uma nota global que junte todos os jogadores: um número só não chega para comparar um guarda-redes com um ponta de lança."
+          : "Separate metrics — finishing, attacking contribution, contested possession and goalkeeping — each with its own interval. There is no overall score joining every player: one number cannot compare a goalkeeper with a centre-forward."}
       />
 
       <div className="mx-auto w-full max-w-7xl px-4 py-8 md:py-10"><div className="max-w-4xl">

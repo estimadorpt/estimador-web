@@ -5,7 +5,7 @@ import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { quietPlot } from "@/components/viz/plot-a11y";
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
-import { formatPercent } from "@/lib/football-format";
+import { formatPercent, formatShortDate } from "@/lib/football-format";
 import type { LigaProbabilityHistory } from "@/types/football";
 
 interface TitleRaceChartProps {
@@ -45,7 +45,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
         return t ? formatPercent(t.p_champion, locale) : "";
       }),
     ]);
-    return { columns: [pt ? "Equipa" : "Team", ...historical.map(md => `${pt ? "J" : "MD"}${md.matchday}`)], rows };
+    return { columns: [pt ? "Equipa" : "Team", ...historical.map(md => `${pt ? "J" : "MD"}${md.matchday}${md.timestamp ? ` · ${formatShortDate(md.timestamp, locale)}` : ""}`)], rows };
   }, [historical, teams, pt, locale]);
 
   useEffect(() => {
@@ -57,6 +57,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
       if (!container) return;
 
       const width = container.offsetWidth;
+      const dates = new Map(historical.map(md => [md.matchday, md.timestamp ? formatShortDate(md.timestamp, locale) : ""]));
       const height = Math.max(280, Math.min(360, width * 0.45));
       const teamSet = new Set(teams);
 
@@ -106,11 +107,14 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
         marks: [
           Plot.ruleY([0], { stroke: "#dadccf" }),
           Plot.lineY(lineData, { x: "matchday", y: "p_champion", stroke: "team", strokeWidth: 2, curve: "monotone-x" }),
+          // A dot per published forecast: the curve between them is drawn,
+          // the dots are the publications (audit FA2-16).
+          Plot.dot(lineData, { x: "matchday", y: "p_champion", fill: "team", r: 2.5 }),
           Plot.tip(lineData, Plot.pointer({
             x: "matchday",
             y: "p_champion",
             title: (d: { team: string; matchday: number; p_champion: number }) =>
-              `${teamDisplayName(d.team)} · ${pt ? "J" : "MD"}${d.matchday}: ${formatPercent(d.p_champion / 100, locale)}`,
+              `${teamDisplayName(d.team)} · ${pt ? "J" : "MD"}${d.matchday}${dates.get(d.matchday) ? ` (${pt ? "previsão de" : "forecast of"} ${dates.get(d.matchday)})` : ""}: ${formatPercent(d.p_champion / 100, locale)}`,
           })),
           Plot.text(endLabels, {
             x: "matchday",

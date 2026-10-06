@@ -9,7 +9,7 @@ import {
   teamLogoSrc,
 } from "@/lib/config/football";
 import { positionCodeEn, positionCodePt } from "@/lib/i18n/football-labels";
-import { formatLongDate } from "@/lib/football-format";
+import { formatLongDate, formatInteger, formatPercent } from "@/lib/football-format";
 import {
   formatShortDate,
   playerDataCutoffLabel,
@@ -159,8 +159,9 @@ export function PlayerProfile({
     v.toLocaleString(pt ? "pt-PT" : "en-GB", {
       minimumFractionDigits: d,
       maximumFractionDigits: d,
-    });
-  const int = (v: number) => v.toLocaleString(pt ? "pt-PT" : "en-GB");
+    }).replace(/^-/, "\u2212");
+  // Grouped like every other count on the site ("3 677", audit FA2-12).
+  const int = (v: number) => formatInteger(Math.round(v), pt ? "pt" : "en");
 
   const color = ligaTeamColors[player.team] ?? "#5f7062";
   const teamSlug = ligaTeamSlugs[player.team];
@@ -185,6 +186,14 @@ export function PlayerProfile({
   const seasons = player.seasons;
   const withSkill = seasons.filter(s => s.sar_season !== null);
   const change = player.skill_change;
+  // "Melhorou?" compares two seasons only when both had real minutes: a
+  // one-minute season is all prior (audit FA2-15).
+  const MIN_SEASON_MINUTES = 450;
+  const thinSeason = change
+    ? [change.from_season, change.to_season]
+        .map(id => seasons.find(s => s.season === id))
+        .find(s => s && s.minutes < MIN_SEASON_MINUTES)
+    : undefined;
   const firstSeason = data.generated_from.seasons?.[0];
   const lastSeason =
     data.generated_from.seasons?.[data.generated_from.seasons.length - 1];
@@ -444,7 +453,7 @@ export function PlayerProfile({
           <span className="text-sm text-stone-500">{posCopy[pr.kind].unit}</span>
         </div>
         {prEntry.rank !== null && pr.peers.length > 0 && (
-          <p className="text-[11px] uppercase tracking-wider text-stone-400">
+          <p className="text-[11px] uppercase tracking-wider text-stone-500">
             {t.posRank(prEntry.rank, pr.peers.length)}
           </p>
         )}
@@ -500,7 +509,7 @@ export function PlayerProfile({
                 style={{ left: `${prPct(prEntry.value)}%`, backgroundColor: color }}
               />
             </div>
-            <div className="flex justify-between text-[11px] tabular-nums text-stone-400">
+            <div className="flex justify-between text-[11px] tabular-nums text-stone-500">
               <span>{nf(prDomain.min)}</span>
               <span>
                 {prEntry.lo !== null && prEntry.hi !== null
@@ -511,7 +520,7 @@ export function PlayerProfile({
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="w-px h-3" style={{ backgroundColor: TRACK }} />
-              <span className="text-[11px] text-stone-400">{t.posOthers}</span>
+              <span className="text-[11px] text-stone-500">{t.posOthers}</span>
             </div>
           </div>
         )}
@@ -519,7 +528,7 @@ export function PlayerProfile({
         <p className="text-sm text-stone-600 leading-relaxed max-w-2xl mt-4">
           {posCopy[pr.kind].meaning}
         </p>
-        <p className="text-xs text-stone-400 leading-relaxed max-w-2xl mt-2">
+        <p className="text-xs text-stone-500 leading-relaxed max-w-2xl mt-2">
           {prEntry.lo === null || prEntry.hi === null
             ? `${t.posNoInterval} ${posCopy[pr.kind].caveat}`
             : posCopy[pr.kind].caveat}
@@ -530,7 +539,7 @@ export function PlayerProfile({
           <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2">
             {prEntry.shots !== null && (
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] uppercase tracking-wider text-stone-500">
                   {t.posShots}
                 </div>
                 <div className="text-lg font-bold tabular-nums text-stone-900">
@@ -540,7 +549,7 @@ export function PlayerProfile({
             )}
             {prEntry.raw !== null && (
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-stone-400">
+                <div className="text-[11px] uppercase tracking-wider text-stone-500">
                   {t.posRaw}
                 </div>
                 <div className="text-lg font-bold tabular-nums text-stone-900">
@@ -557,7 +566,7 @@ export function PlayerProfile({
   /** Shown to keepers and defenders when no position metric is published. */
   const suppressedSection = (
     <section className="mb-10">
-      <h2 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">
+      <h2 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
         {t.suppressedTitle}
       </h2>
       <p className="text-sm text-stone-600 leading-relaxed max-w-2xl">
@@ -592,7 +601,7 @@ export function PlayerProfile({
                 <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 bg-stone-100 px-1.5 py-0.5">
                   {t.rank}
                 </span>
-                <span className="text-[11px] uppercase tracking-wider text-stone-400">
+                <span className="text-[11px] uppercase tracking-wider text-stone-500">
                   {t.ofN}
                 </span>
               </>
@@ -617,7 +626,7 @@ export function PlayerProfile({
               />
             )}
             <span>{teamDisplayName(player.team)}</span>
-            <span className="text-stone-300">·</span>
+            <span className="text-stone-500">·</span>
             <span>{posLabel}</span>
           </div>
         </div>
@@ -628,7 +637,7 @@ export function PlayerProfile({
           <span className="font-semibold text-red-700">{t.out}</span>
           {injuryReason ? <span className="text-stone-600"> — {injuryReason}</span> : null}
           {injury.expected_return ? (
-            <span className="text-stone-400">
+            <span className="text-stone-500">
               {" "}
               ({pt ? "regresso previsto a" : "expected back"} {formatLongDate(injury.expected_return, locale)})
             </span>
@@ -696,7 +705,7 @@ export function PlayerProfile({
               style={{ left: `${pct(sar)}%`, backgroundColor: color }}
             />
           </div>
-          <div className="flex justify-between text-[11px] tabular-nums text-stone-400">
+          <div className="flex justify-between text-[11px] tabular-nums text-stone-500">
             <span>0</span>
             <span>
               {nf(lo)} – {nf(hi)} · {t.interval}
@@ -705,14 +714,14 @@ export function PlayerProfile({
           </div>
           <div className="flex items-center gap-1.5 mt-1">
             <span className="w-px h-3" style={{ backgroundColor: TRACK }} />
-            <span className="text-[11px] text-stone-400">{t.others}</span>
+            <span className="text-[11px] text-stone-500">{t.others}</span>
           </div>
         </div>
 
         <p className="text-sm text-stone-600 leading-relaxed max-w-2xl mt-4">
           {t.meaning}
         </p>
-        <p className="text-xs text-stone-400 leading-relaxed max-w-2xl mt-2">
+        <p className="text-xs text-stone-500 leading-relaxed max-w-2xl mt-2">
           {t.intervalMeaning}
         </p>
       </section>
@@ -755,13 +764,13 @@ export function PlayerProfile({
                   value:
                     player.p_above_replacement === null
                       ? "—"
-                      : `${Math.round(player.p_above_replacement * 100)}%`,
+                      : formatPercent(player.p_above_replacement, pt ? "pt" : "en"),
                 },
               ]
             : []),
         ].map(cell => (
           <div key={cell.label}>
-            <div className="text-[11px] uppercase tracking-wider text-stone-400">
+            <div className="text-[11px] uppercase tracking-wider text-stone-500">
               {cell.label}
             </div>
             <div className="text-lg font-bold tabular-nums text-stone-900">
@@ -784,23 +793,23 @@ export function PlayerProfile({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-300 text-left">
-                  <th className="py-2 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-400">
+                  <th className="py-2 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-500">
                     {t.season}
                   </th>
-                  <th className="py-2 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-400 hidden sm:table-cell">
+                  <th className="py-2 pr-3 font-medium text-[11px] uppercase tracking-wider text-stone-500 hidden sm:table-cell">
                     {t.club}
                   </th>
-                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                     {t.minutes}
                   </th>
-                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400">
+                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500">
                     {t.goals}
                   </th>
-                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-400 hidden sm:table-cell">
+                  <th className="py-2 px-2 text-right font-medium text-[11px] uppercase tracking-wider text-stone-500 hidden sm:table-cell">
                     {t.perNinety}
                   </th>
                   {showGoalsSar && (
-                    <th className="py-2 pl-2 font-medium text-[11px] uppercase tracking-wider text-stone-400 w-[38%]">
+                    <th className="py-2 pl-2 font-medium text-[11px] uppercase tracking-wider text-stone-500 w-[38%]">
                       {t.skillCol}
                     </th>
                   )}
@@ -812,7 +821,7 @@ export function PlayerProfile({
                   const sd = s.sar_season_sd ?? 0;
                   return (
                     <tr key={s.season} className="border-b border-stone-100">
-                      <td className="py-2 pr-3 tabular-nums font-medium text-stone-800">
+                      <td className="whitespace-nowrap py-2 pr-3 tabular-nums font-medium text-stone-800">
                         {s.season}
                       </td>
                       <td className="py-2 pr-3 text-stone-500 hidden sm:table-cell">
@@ -830,7 +839,7 @@ export function PlayerProfile({
                       {showGoalsSar && (
                       <td className="py-2 pl-2">
                         {v === null ? (
-                          <span className="text-stone-300">—</span>
+                          <span className="text-stone-500">—</span>
                         ) : (
                           <div className="flex items-center gap-2">
                             <div className="relative h-4 flex-1 min-w-[80px]">
@@ -873,7 +882,11 @@ export function PlayerProfile({
             <div className="mt-5 border-l-2 border-stone-300 pl-4 py-1 max-w-2xl">
               <h3 className="text-sm text-stone-900 mb-1">{t.nullTitle}</h3>
               <p className="text-sm text-stone-600 leading-relaxed">
-                {change && withSkill.length > 1 ? t.nullBody(change) : t.nullSingle}
+                {thinSeason
+                  ? pt
+                    ? `Minutos insuficientes para comparar épocas: em ${thinSeason.season} jogou ${int(thinSeason.minutes)} ${thinSeason.minutes === 1 ? "minuto" : "minutos"} (o mínimo para comparar é ${int(MIN_SEASON_MINUTES)}), e a estimativa dessa época é quase só o ponto de partida do modelo.`
+                    : `Not enough minutes to compare seasons: in ${thinSeason.season} he played ${int(thinSeason.minutes)} ${thinSeason.minutes === 1 ? "minute" : "minutes"} (the minimum to compare is ${int(MIN_SEASON_MINUTES)}), so that season's estimate is almost all the model's starting point.`
+                  : change && withSkill.length > 1 ? t.nullBody(change) : t.nullSingle}
               </p>
             </div>
           )}
@@ -887,40 +900,58 @@ export function PlayerProfile({
           {cutoffLabel && (
             <p className="text-xs text-stone-500 mb-3">{cutoffLabel}</p>
           )}
-          <div className="divide-y divide-stone-100">
-            {recent.map((m, i) => (
-              <div
-                key={`${m.season}-${m.matchday}-${i}`}
-                className="flex items-center gap-3 py-2 text-sm"
-              >
-                <span className="w-24 text-[11px] tabular-nums text-stone-500 flex-shrink-0">
-                  {formatShortDate(m.date, locale) ?? `${m.season} J${m.matchday}`}
-                </span>
-                <span className="flex-1 min-w-0 truncate text-stone-800">
-                  {teamDisplayName(m.opponent)}{" "}
-                  <span className="text-stone-400 text-xs">
-                    ({m.is_home ? t.home : t.away})
+          {/* Headed columns, the venue as a badge outside the name's
+              truncation, minutes on one line (audit UXD2-18, UXM2V-03). */}
+          <div className="max-w-3xl">
+            <div aria-hidden="true" className="flex items-center gap-3 border-b border-stone-200 pb-1 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+              <span className="w-12 flex-shrink-0 sm:w-24">{pt ? "Data" : "Date"}</span>
+              <span className="min-w-0 flex-1">{pt ? "Adversário" : "Opponent"}</span>
+              <span className="w-[5.25rem] flex-shrink-0 text-right">{t.minutes}</span>
+              <span className="w-10 flex-shrink-0 text-right">{t.goals}</span>
+              <span className="hidden w-24 flex-shrink-0 text-right sm:inline">{pt ? "Nota (fonte)" : "Rating (source)"}</span>
+            </div>
+            <ul className="divide-y divide-stone-100">
+              {recent.map((m, i) => (
+                <li
+                  key={`${m.season}-${m.matchday}-${i}`}
+                  className="flex items-center gap-3 py-2 text-sm"
+                >
+                  <span className="w-12 flex-shrink-0 whitespace-nowrap text-[11px] tabular-nums text-stone-600 sm:w-24">
+                    {/* Day and month on a phone; the year is in the cut-off line above. */}
+                    <span className="sm:hidden">{(formatShortDate(m.date, locale) ?? `J${m.matchday}`).replace(/\s\d{4}$/, "")}</span>
+                    <span className="hidden sm:inline">{formatShortDate(m.date, locale) ?? `${m.season} J${m.matchday}`}</span>
                   </span>
-                </span>
-                <span className="text-[11px] text-stone-400 tabular-nums w-16 text-right flex-shrink-0">
-                  {int(m.minutes)}&apos; · {m.started ? t.starter : t.sub}
-                </span>
-                <span className="w-14 text-right tabular-nums flex-shrink-0">
-                  {m.goals > 0 ? (
-                    <span className="font-bold text-stone-900">
-                      {m.goals} {m.goals === 1 ? t.goalOne : t.goals.toLowerCase()}
+                  <span className="flex min-w-0 flex-1 items-center gap-1.5">
+                    <span className="min-w-0 truncate text-stone-800">{teamDisplayName(m.opponent)}</span>
+                    <span
+                      className="flex-shrink-0 rounded border border-line px-1 text-[11px] font-semibold text-stone-600"
+                      title={m.is_home ? t.home : t.away}
+                    >
+                      <span aria-hidden="true">{m.is_home ? (pt ? "C" : "H") : (pt ? "F" : "A")}</span>
+                      <span className="sr-only">{m.is_home ? t.home : t.away}</span>
                     </span>
-                  ) : (
-                    <span className="text-stone-300">—</span>
-                  )}
-                </span>
-                <span className="w-14 text-right tabular-nums text-stone-500 text-xs flex-shrink-0 hidden sm:inline">
-                  {m.rating === null ? "" : `${nf(m.rating, 1)} ${t.rating}`}
-                </span>
-              </div>
-            ))}
+                  </span>
+                  <span className="w-[5.25rem] flex-shrink-0 whitespace-nowrap text-right text-[11px] tabular-nums text-stone-600">
+                    {int(m.minutes)}&apos; · {m.started ? t.starter : t.sub}
+                  </span>
+                  <span className="w-10 flex-shrink-0 text-right tabular-nums">
+                    {m.goals > 0 ? (
+                      <span className="font-bold text-stone-900">{m.goals}</span>
+                    ) : (
+                      <span className="text-stone-500">
+                        <span aria-hidden="true">—</span>
+                        <span className="sr-only">{pt ? "sem golos" : "no goals"}</span>
+                      </span>
+                    )}
+                  </span>
+                  <span className="hidden w-24 flex-shrink-0 text-right text-xs tabular-nums text-stone-600 sm:inline">
+                    {m.rating === null ? "" : nf(m.rating, 1)}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <p className="text-[11px] text-stone-400 mt-3 max-w-2xl leading-relaxed">
+          <p className="text-[11px] text-stone-500 mt-3 max-w-2xl leading-relaxed">
             {t.recentNote}
           </p>
         </section>
@@ -931,7 +962,7 @@ export function PlayerProfile({
         <Link
           href="/desporto/liga/jogadores"
           locale={locale}
-          className="text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+          className="text-stone-600 hover:text-stone-900 inline-flex min-h-11 items-center gap-1"
         >
           {t.hub}
           <ArrowRight className="w-3 h-3" />
@@ -940,7 +971,7 @@ export function PlayerProfile({
           <Link
             href={`/desporto/liga/jogador/${prev.slug}`}
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+            className="text-stone-600 hover:text-stone-900 inline-flex min-h-11 items-center gap-1"
           >
             <ArrowLeft className="w-3 h-3" />
             {t.prev}: {prev.player} (#{prev.rank})
@@ -950,7 +981,7 @@ export function PlayerProfile({
           <Link
             href={`/desporto/liga/jogador/${next.slug}`}
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+            className="text-stone-600 hover:text-stone-900 inline-flex min-h-11 items-center gap-1"
           >
             {t.next}: {next.player} (#{next.rank})
             <ArrowRight className="w-3 h-3" />
@@ -960,7 +991,7 @@ export function PlayerProfile({
           <Link
             href={`/desporto/liga/${teamSlug}`}
             locale={locale}
-            className="text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+            className="text-stone-600 hover:text-stone-900 inline-flex min-h-11 items-center gap-1"
           >
             {t.teamPage}: {teamDisplayName(player.team)}
             <ArrowRight className="w-3 h-3" />
@@ -968,7 +999,7 @@ export function PlayerProfile({
         )}
       </section>
 
-      <p className="text-[11px] text-stone-400 mt-6 leading-relaxed max-w-2xl">
+      <p className="text-[11px] text-stone-500 mt-6 leading-relaxed max-w-2xl">
         {t.footnote}
       </p>
     </div>

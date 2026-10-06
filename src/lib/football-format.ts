@@ -105,6 +105,20 @@ export function describePp(delta: number, locale: string, since?: string): strin
   return `${verb} ${amount} ${unit}${since ? ` ${since}` : ''}`;
 }
 
+/**
+ * The one ordinal (audit FA2-M4, UXD2-V03): pt-PT "5.º" (with the full stop,
+ * never "5º"), en-GB "5th".
+ */
+export function formatOrdinal(n: number, locale: string): string {
+  if (locale !== 'en') return `${n}.º`;
+  if (n % 100 >= 11 && n % 100 <= 13) return `${n}th`;
+  const last = n % 10;
+  if (last === 1) return `${n}st`;
+  if (last === 2) return `${n}nd`;
+  if (last === 3) return `${n}rd`;
+  return `${n}th`;
+}
+
 /** The one separator between two clubs in a fixture: "Benfica – Vitória". */
 export function matchLabel(home: string, away: string): string {
   return `${home} \u2013 ${away}`;

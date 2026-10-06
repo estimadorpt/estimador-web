@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { earlyLocks, latePublications } from './prediction-game-record';
+import { earlyLocks, frozenBeforePreviousRoundEnded, latePublications, roundsWithoutSource } from './prediction-game-record';
 
 const round = (matchday: number, fixtures: Array<Record<string, string | null>>) => ({
   matchday,
@@ -55,7 +55,20 @@ describe('the published 2026-27 manifest', () => {
     expect(late[0].total).toBe(9);
   });
 
-  it('has the postponed Sp. Braga–Gil Vicente as an early lock', () => {
-    expect(earlyLocks(manifest.matchdays).map(e => e.id)).toEqual(['md02-sc-braga-vs-gil-vicente']);
+  it('has the postponed Sp. Braga–Gil Vicente as an early lock, closed with its round on 14 August', () => {
+    const early = earlyLocks(manifest.matchdays);
+    expect(early.map(e => e.id)).toEqual(['md02-sc-braga-vs-gil-vicente']);
+    // The round's lock, not the game's own (audit FA2-05).
+    expect(early[0].roundLocksAt).toBe('2026-08-14T19:15:00.000Z');
+  });
+
+  it('lists the rounds frozen before the previous one ended (audit FA2-04)', () => {
+    const frozen = frozenBeforePreviousRoundEnded(manifest.matchdays);
+    expect(frozen.map(f => f.matchday)).toEqual([3, 5, 6, 7]);
+    expect(frozen.map(f => f.previous)).toEqual([2, 4, 5, 6]);
+  });
+
+  it('names matchdays 1 and 2 as the rounds with no probs_source', () => {
+    expect(roundsWithoutSource(manifest.matchdays)).toEqual([1, 2]);
   });
 });

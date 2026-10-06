@@ -55,13 +55,13 @@ const copy = {
     standfirstA:
       "O FC Porto foi campeão da Liga Portugal 2025-26 com 88 pontos: 28 vitórias, quatro empates, duas derrotas. Atrás dele ficaram duas equipas com histórias estranhas. O Sporting marcou 89 golos — mais 23 do que o campeão — e fechou a época com a melhor diferença de golos da liga, +65, para terminar a seis pontos. O Benfica atravessou 34 jornadas sem perder um único jogo e ficou em terceiro, com 11 empates a pesar mais do que qualquer derrota.",
     standfirstB:
-      "Em baixo, o Tondela e o AVS desceram. Esta página junta três coisas: a classificação final, o que o xG diz sobre quem mereceu o que teve, e o que o modelo anterior dizia ao longo da época — incluindo o que disse mal.",
+      "Em baixo, o Tondela e o AVS desceram. Esta página junta três coisas: a classificação final, o que o xG diz sobre a qualidade das oportunidades de cada equipa, e o que o modelo anterior dizia ao longo da época — incluindo o que disse mal.",
     tableTitle: "Classificação final",
     tableIntro:
       "Os 306 jogos da época, com os pontos esperados (xPts) calculados a partir do xG de cada jogo. A última coluna é a diferença entre os pontos reais e os esperados.",
     luckTitle: "Quem fez mais pontos do que o xG dizia?",
     luckIntro:
-      "Para cada jogo, o xG das duas equipas é convertido em probabilidades de vitória, empate e derrota, e daí em pontos esperados. Somando a época inteira, fica claro quem converteu melhor do que as suas oportunidades sugeriam — e quem foi castigado.",
+      "Para cada jogo, o xG das duas equipas é convertido em probabilidades de vitória, empate e derrota, e daí em pontos esperados. Somando a época inteira, mostra quem fez mais ou menos pontos do que as oportunidades sugeriam, uma diferença que mistura finalização, guarda-redes e acaso.",
     luckNote:
       "Pts − xPts não é uma separação limpa entre sorte e talento: mistura a eficácia de quem remata, as defesas do guarda-redes e o acaso. Finalizar bem é uma competência; a questão é quanto dela se repete no ano seguinte.",
     raceTitle: "A corrida ao título, jornada a jornada",
@@ -86,13 +86,13 @@ const copy = {
     standfirstA:
       "FC Porto won Liga Portugal 2025-26 with 88 points: 28 wins, four draws, two defeats. Behind them sat two teams with strange seasons. Sporting scored 89 goals — 23 more than the champions — and finished with the best goal difference in the league, +65, six points back. Benfica went all 34 matchdays without losing once and finished third, 11 draws costing them more than any defeat could have.",
     standfirstB:
-      "At the bottom, Tondela and AVS went down. This page puts together three things: the final table, what xG says about who deserved what they got, and what the previous model was saying through the season — including what it got wrong.",
+      "At the bottom, Tondela and AVS went down. This page puts together three things: the final table, what xG says about the quality of each side's chances, and what the previous model was saying through the season — including what it got wrong.",
     tableTitle: "Final table",
     tableIntro:
       "All 306 matches, with expected points (xPts) computed from each match's xG. The last column is the gap between real and expected points.",
     luckTitle: "Who took more points than their xG said?",
     luckIntro:
-      "For every match, both teams' xG is turned into win, draw and loss probabilities, and from there into expected points. Summed over the season, it shows who converted better than their chances suggested — and who was punished.",
+      "For every match, both teams' xG is turned into win, draw and loss probabilities, and from there into expected points. Summed over the season, it shows who took more or fewer points than their chances suggested, a gap that mixes finishing, goalkeeping and chance.",
     luckNote:
       "Pts − xPts is not a clean split between luck and skill: it mixes finishing, goalkeeping and chance. Finishing well is a skill; the open question is how much of it repeats next year.",
     raceTitle: "The title race, matchday by matchday",
@@ -165,6 +165,8 @@ export default async function SeasonReviewPage({
   const luckiest = review.overperformers[0];
   const unluckiest = review.underperformers[0];
   const bestFinishing = [...review.luck].sort((a, b) => b.finishing - a.finishing)[0];
+  // The two best by xPts: a 1,2-point gap is a tie, not a ranking (MR2-V03).
+  const xgLeaders = [...review.luck].sort((a, b) => b.xpts - a.xpts).slice(0, 2);
   const rc = review.report_card;
   const lastForecast = review.forecast_matchdays[review.forecast_matchdays.length - 1];
   // Which forecasts were published at the time and which were generated
@@ -225,7 +227,8 @@ export default async function SeasonReviewPage({
         </p>
 
         {/* Headline numbers */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-stone-200 border border-stone-200 mb-12">
+        {/* Rounded tiles, like the rest of the site (audit UXD2-09). */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
           {[
             {
               value: `${review.table[0].points}`,
@@ -248,11 +251,11 @@ export default async function SeasonReviewPage({
             {
               value: `${nf(Math.abs(unluckiest.delta))}`,
               label: pt
-                ? `pontos abaixo do esperado para o ${teamDisplayName(unluckiest.team)}, despromovido`
-                : `points below expectation for relegated ${teamDisplayName(unluckiest.team)}`,
+                ? `pontos abaixo do que o xG sugeria para o ${teamDisplayName(unluckiest.team)}, despromovido (finalização, guarda-redes e acaso juntos)`
+                : `points below what xG suggested for relegated ${teamDisplayName(unluckiest.team)} (finishing, goalkeeping and chance together)`,
             },
           ].map((kpi) => (
-            <div key={kpi.label} className="bg-cream p-4">
+            <div key={kpi.label} className="rounded-2xl border border-line bg-cream p-4">
               <div className="text-3xl font-display font-extrabold text-stone-900 tabular-nums">
                 {kpi.value}
               </div>
@@ -275,7 +278,7 @@ export default async function SeasonReviewPage({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="border-t-2 border-emerald-700 pt-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                 {pt ? "Mais acima do xG" : "Furthest above xG"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
@@ -284,21 +287,28 @@ export default async function SeasonReviewPage({
                     O <strong>{teamDisplayName(luckiest.team)}</strong> fez{" "}
                     {luckiest.points} pontos com um xG que valia{" "}
                     {nf(luckiest.xpts)} — <strong>{nf(luckiest.delta)}</strong> acima do
-                    esperado, a maior diferença da liga. A tabela do xG punha o Sporting
-                    em primeiro.
+                    esperado, a maior diferença da liga.{" "}
+                    {xgLeaders.length === 2 && Math.abs(xgLeaders[0].xpts - xgLeaders[1].xpts) < 3
+                      ? <>Pelo xG, o {teamDisplayName(xgLeaders[0].team)} e o {teamDisplayName(xgLeaders[1].team)} ficavam praticamente empatados ({nf(xgLeaders[0].xpts)} e {nf(xgLeaders[1].xpts)}).</>
+                      : xgLeaders[0] ? <>A tabela do xG punha o {teamDisplayName(xgLeaders[0].team)} em primeiro.</> : null}{" "}
+                    <Link href="/desporto/liga/metodologia#pontos-esperados-xpts" locale={locale} className="font-medium text-ink underline underline-offset-4">O que o xPts mede</Link>
                   </>
                 ) : (
                   <>
                     <strong>{teamDisplayName(luckiest.team)}</strong> took{" "}
                     {luckiest.points} points from an xG worth {nf(luckiest.xpts)} —{" "}
                     <strong>{nf(luckiest.delta)}</strong> above expectation, the largest
-                    gap in the league. The xG table had Sporting first.
+                    gap in the league.{" "}
+                    {xgLeaders.length === 2 && Math.abs(xgLeaders[0].xpts - xgLeaders[1].xpts) < 3
+                      ? <>By xG, {teamDisplayName(xgLeaders[0].team)} and {teamDisplayName(xgLeaders[1].team)} were practically level ({nf(xgLeaders[0].xpts)} and {nf(xgLeaders[1].xpts)}).</>
+                      : xgLeaders[0] ? <>The xG table had {teamDisplayName(xgLeaders[0].team)} first.</> : null}{" "}
+                    <Link href="/desporto/liga/metodologia#expected-points-xpts" locale={locale} className="font-medium text-ink underline underline-offset-4">What xPts measures</Link>
                   </>
                 )}
               </p>
             </div>
             <div className="border-t-2 border-red-600 pt-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                 {pt ? "Mais abaixo do xG" : "Furthest below xG"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
@@ -322,7 +332,7 @@ export default async function SeasonReviewPage({
               </p>
             </div>
             <div className="border-t-2 border-stone-400 pt-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                 {pt ? "A melhor finalização" : "The best finishing"}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">
@@ -452,7 +462,7 @@ export default async function SeasonReviewPage({
 
         {/* Small print */}
         <section className="pt-8 border-t border-stone-200">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400 mb-3">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3">
             {c.creditsTitle}
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">

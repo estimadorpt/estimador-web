@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ChartTable } from "@/components/viz/ChartTable";
+import { formatOrdinal, formatSigned } from "@/lib/football-format";
 import {
   isReserveSide,
   liga2DisplayName,
@@ -126,8 +128,9 @@ function num(v: number, d: number, pt: boolean) {
   });
 }
 
+// U+2212 for a negative goal difference, as everywhere else (audit FA2-17).
 function signed(v: number) {
-  return v > 0 ? `+${v}` : `${v}`;
+  return formatSigned(v, "pt", 0);
 }
 
 /* ------------------------------------------------------------- team badge */
@@ -162,7 +165,7 @@ function TeamBadge({ team }: { team: string }) {
 
 function TeamCell({ team, muted = false }: { team: string; muted?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-2 min-w-0">
+    <span className="flex min-w-0 max-w-full items-center gap-2 overflow-hidden">
       <TeamBadge team={team} />
       <span
         className={`truncate ${muted ? "text-stone-500" : "text-stone-900 font-medium"}`}
@@ -170,7 +173,7 @@ function TeamCell({ team, muted = false }: { team: string; muted?: boolean }) {
         {liga2DisplayName(team)}
       </span>
       {isReserveSide(team) && (
-        <span className="text-[11px] uppercase tracking-wider text-stone-400 font-bold flex-shrink-0">
+        <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold flex-shrink-0">
           B
         </span>
       )}
@@ -203,11 +206,11 @@ export function Liga2FinalTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500">
-            <th className="py-2 pl-3 pr-1 text-left font-bold w-8">#</th>
-            <th className="py-2 px-2 text-left font-bold">
+            <th className="sticky left-0 z-10 w-8 bg-stone-50 py-2 pl-3 pr-1 text-left font-bold">#</th>
+            <th className="sticky left-8 z-10 bg-stone-50 py-2 px-2 text-left font-bold">
               {pt ? "Clube" : "Club"}
             </th>
-            <th className="py-2 px-2 text-right font-bold">J</th>
+            <th className="hidden py-2 px-2 text-right font-bold sm:table-cell">J</th>
             <th className="py-2 px-1 text-right font-bold">
               {pt ? "V" : "W"}
             </th>
@@ -248,7 +251,7 @@ export function Liga2FinalTable({
                   borderAfter ? "border-b-2 border-b-stone-300" : ""
                 } ${up ? "bg-emerald-50/60" : down ? "bg-red-50/60" : ""}`}
               >
-                <td className="py-2 pl-3 pr-1 text-stone-400 tabular-nums text-xs">
+                <td className="sticky left-0 z-10 bg-cream py-2 pl-3 pr-1 text-stone-500 tabular-nums text-xs">
                   <span className="inline-flex items-center gap-1">
                     <span
                       className="w-0.5 h-4"
@@ -263,10 +266,10 @@ export function Liga2FinalTable({
                     {row.rank}
                   </span>
                 </td>
-                <td className="py-2 px-2 max-w-[10rem] md:max-w-none">
+                <td className="sticky left-8 z-10 max-w-[9rem] bg-cream py-2 px-2 md:max-w-none">
                   <TeamCell team={row.team} />
                 </td>
-                <td className="py-2 px-2 text-right tabular-nums text-stone-500">
+                <td className="hidden py-2 px-2 text-right tabular-nums text-stone-500 sm:table-cell">
                   {row.played}
                 </td>
                 <td className="py-2 px-1 text-right tabular-nums text-stone-600">
@@ -305,7 +308,7 @@ export function Liga2FinalTable({
           {pt ? "Desceu à Liga 3" : "Relegated to Liga 3"}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="font-bold text-stone-400">B</span>
+          <span className="font-bold text-stone-500">B</span>
           {pt ? "Equipa B, não pode subir" : "Reserve side, cannot be promoted"}
         </span>
       </div>
@@ -335,15 +338,15 @@ export function Liga2ProbabilityTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500">
-            <th className="py-2 pl-3 pr-2 text-left font-bold">
+            <th className="sticky left-0 z-10 bg-stone-50 py-2 pl-3 pr-2 text-left font-bold">
               {pt ? "Clube" : "Club"}
             </th>
-            <th className="py-2 px-2 text-right font-bold">J</th>
+            <th className="hidden py-2 px-2 text-right font-bold sm:table-cell">J</th>
             <th className="py-2 px-2 text-right font-bold">Pts</th>
-            <th className="py-2 px-2 text-right font-bold">
+            <th className="hidden py-2 px-2 text-right font-bold sm:table-cell">
               {pt ? "Pts finais" : "Final pts"}
             </th>
-            <th className="py-2 px-2 text-right font-bold">
+            <th className="hidden py-2 px-2 text-right font-bold sm:table-cell">
               {pt ? "1.º" : "1st"}
             </th>
             <th className="py-2 px-2 text-right font-bold">
@@ -365,23 +368,23 @@ export function Liga2ProbabilityTable({
               key={row.team}
               className="border-b border-stone-100 last:border-0"
             >
-              <td className="py-2 pl-3 pr-2 max-w-[9rem] md:max-w-none">
+              <td className="sticky left-0 z-10 max-w-[9rem] bg-cream py-2 pl-3 pr-2 md:max-w-none">
                 <TeamCell team={row.team} />
               </td>
-              <td className="py-2 px-2 text-right tabular-nums text-stone-400">
+              <td className="hidden py-2 px-2 text-right tabular-nums text-stone-500 sm:table-cell">
                 {row.played}
               </td>
               <td className="py-2 px-2 text-right tabular-nums text-stone-600">
                 {row.points}
               </td>
-              <td className="py-2 px-2 text-right tabular-nums text-stone-900">
+              <td className="hidden py-2 px-2 text-right tabular-nums text-stone-900 sm:table-cell">
                 {num(row.mean_pts, 1, pt)}
-                <span className="text-stone-400 text-[11px]">
+                <span className="text-stone-500 text-[11px]">
                   {" "}
                   ±{num(row.std_pts, 0, pt)}
                 </span>
               </td>
-              <td className="py-2 px-2 text-right tabular-nums text-stone-600">
+              <td className="hidden py-2 px-2 text-right tabular-nums text-stone-600 sm:table-cell">
                 {pct(row.p_champion, pt)}
               </td>
               <td className="py-2 px-2 text-right tabular-nums">
@@ -392,7 +395,7 @@ export function Liga2ProbabilityTable({
               </td>
               {showFinalRank && (
                 <td className="py-2 pr-3 pl-2 text-right tabular-nums text-stone-500">
-                  {row.final_rank ?? "—"}.º
+                  {row.final_rank != null ? formatOrdinal(row.final_rank, pt ? "pt" : "en") : "—"}
                 </td>
               )}
             </tr>
@@ -433,19 +436,23 @@ function ProbCell({
       ? strong
         ? "text-emerald-700 font-bold"
         : faint
-          ? "text-stone-400"
+          ? "text-stone-500"
           : "text-emerald-700"
       : strong
         ? "text-red-700 font-bold"
         : faint
-          ? "text-stone-400"
+          ? "text-stone-500"
           : "text-red-700";
   return <span className={color}>{pct(value, pt)}</span>;
 }
 
 /* ------------------------------------------------------- promotion race -- */
 
-/** How the promotion probability moved across the retrospective checkpoints. */
+/** How the promotion probability moved across the retrospective checkpoints.
+ *  Drawn at the container's measured width, so every label is 11px on a phone
+ *  too (it used to be a 720px viewBox scaled to 5px text, audit A11Y2-05,
+ *  UXM2-02); below 520px the end labels give way to a legend. Every point is
+ *  in the table twin, and each dot has its value as a tip. */
 export function Liga2PromotionRace({
   checkpoints,
   locale = "pt",
@@ -457,6 +464,17 @@ export function Liga2PromotionRace({
 }) {
   const pt = locale !== "en";
   const last = checkpoints[checkpoints.length - 1];
+  const ref = useRef<HTMLDivElement>(null);
+  const [W, setW] = useState(720);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setW(Math.max(260, el.clientWidth));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Track the clubs that ever looked plausible, so a late riser is not hidden
   // by a club that led early and faded.
@@ -472,10 +490,10 @@ export function Liga2PromotionRace({
     .slice(0, maxTeams)
     .map(([team]) => team);
 
-  const W = 720;
-  const H = 260;
+  const narrow = W < 520;
+  const H = narrow ? 220 : 260;
   const padL = 44;
-  const padR = 128;
+  const padR = narrow ? 16 : 140;
   const padT = 16;
   const padB = 30;
   const xs = checkpoints.map((_, i) =>
@@ -490,104 +508,118 @@ export function Liga2PromotionRace({
 
   const finalRank = (team: string) =>
     last.teams.find(t => t.team === team)?.final_rank;
+  const colourOf = (team: string) => {
+    const rank = finalRank(team);
+    return rank !== undefined && rank <= 2 ? "#377455" : liga2TeamColor(team);
+  };
+  const wentUpOf = (team: string) => {
+    const rank = finalRank(team);
+    return rank !== undefined && rank <= 2;
+  };
+
+  // End labels, pushed apart so none overprints another (13px apart).
+  const ends = teams
+    .map(team => {
+      const vals = checkpoints.map(cp => valueFor(team, cp));
+      const lastIdx = vals.map((v, i) => (v === null ? -1 : i)).filter(i => i >= 0).pop();
+      return lastIdx === undefined ? null : { team, x: xs[lastIdx], v: vals[lastIdx] as number, y: y(vals[lastIdx] as number) };
+    })
+    .filter((e): e is { team: string; x: number; v: number; y: number } => e !== null)
+    .sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) {
+    if (ends[i].y - ends[i - 1].y < 13) ends[i].y = ends[i - 1].y + 13;
+  }
 
   return (
     <div className="rounded-2xl border border-line bg-cream p-4">
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="w-full h-auto"
-        role="img"
-        aria-label={
-          pt
-            ? "Evolução da probabilidade de subida por jornada de referência"
-            : "Promotion probability by checkpoint matchday"
-        }
-      >
-        {[0, 0.25, 0.5, 0.75, 1].map(g => (
-          <g key={g}>
-            <line
-              x1={padL}
-              x2={W - padR}
-              y1={y(g)}
-              y2={y(g)}
-              stroke="#dadccf"
-              strokeWidth={1}
-            />
-            <text
-              x={padL - 8}
-              y={y(g) + 3}
-              textAnchor="end"
-              className="fill-stone-400"
-              fontSize={11}
-            >
-              {Math.round(g * 100)}%
-            </text>
-          </g>
-        ))}
-
-        {checkpoints.map((cp, i) => (
-          <text
-            key={cp.matchday}
-            x={xs[i]}
-            y={H - 10}
-            textAnchor="middle"
-            className="fill-stone-500"
-            fontSize={11}
-          >
-            {pt ? `J${cp.matchday}` : `MD${cp.matchday}`}
-          </text>
-        ))}
-
-        {teams.map(team => {
-          const pts = checkpoints
-            .map((cp, i) => {
-              const v = valueFor(team, cp);
-              return v === null ? null : { x: xs[i], y: y(v), v };
-            })
-            .filter((p): p is { x: number; y: number; v: number } => p !== null);
-          if (pts.length === 0) return null;
-          const d = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
-          const rank = finalRank(team);
-          const wentUp = rank !== undefined && rank <= 2;
-          const colour = wentUp ? "#4e8056" : liga2TeamColor(team);
-          const end = pts[pts.length - 1];
-          return (
-            <g key={team}>
-              <path
-                d={d}
-                fill="none"
-                stroke={colour}
-                strokeWidth={wentUp ? 2.5 : 1.5}
-                strokeOpacity={wentUp ? 1 : 0.65}
-              />
-              {pts.map(p => (
-                <circle
-                  key={p.x}
-                  cx={p.x}
-                  cy={p.y}
-                  r={wentUp ? 3.5 : 2.5}
-                  fill={colour}
-                  fillOpacity={wentUp ? 1 : 0.65}
-                />
-              ))}
-              <text
-                x={end.x + 8}
-                y={end.y + 3}
-                fontSize={11}
-                className={wentUp ? "fill-emerald-800" : "fill-stone-500"}
-                fontWeight={wentUp ? 700 : 400}
-              >
-                {liga2DisplayName(team)} {Math.round(end.v * 100)}%
+      <div ref={ref} className="w-full">
+        <svg
+          width={W}
+          height={H}
+          role="img"
+          aria-label={
+            pt
+              ? "Evolução da probabilidade de subida por jornada de referência; os valores estão na tabela abaixo"
+              : "Promotion probability by checkpoint matchday; the values are in the table below"
+          }
+        >
+          {[0, 0.25, 0.5, 0.75, 1].map(g => (
+            <g key={g}>
+              <line x1={padL} x2={W - padR} y1={y(g)} y2={y(g)} stroke="#dadccf" strokeWidth={1} />
+              <text x={padL - 8} y={y(g) + 4} textAnchor="end" fill="#5f7062" fontSize={11}>
+                {Math.round(g * 100)}%
               </text>
             </g>
-          );
-        })}
-      </svg>
-      <p className="text-[11px] text-stone-500 mt-2 leading-relaxed">
+          ))}
+
+          {checkpoints.map((cp, i) => (
+            <text key={cp.matchday} x={xs[i]} y={H - 10} textAnchor="middle" fill="#5f7062" fontSize={11}>
+              {pt ? `J${cp.matchday}` : `MD${cp.matchday}`}
+            </text>
+          ))}
+
+          {teams.map(team => {
+            const pts = checkpoints
+              .map((cp, i) => {
+                const v = valueFor(team, cp);
+                return v === null ? null : { x: xs[i], y: y(v), v, md: cp.matchday };
+              })
+              .filter((p): p is { x: number; y: number; v: number; md: number } => p !== null);
+            if (pts.length === 0) return null;
+            const d = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+            const wentUp = wentUpOf(team);
+            const colour = colourOf(team);
+            return (
+              <g key={team}>
+                <path d={d} fill="none" stroke={colour} strokeWidth={wentUp ? 2.5 : 1.5} strokeOpacity={wentUp ? 1 : 0.65} />
+                {pts.map(p => (
+                  <circle key={p.x} cx={p.x} cy={p.y} r={wentUp ? 4 : 3} fill={colour} fillOpacity={wentUp ? 1 : 0.7}>
+                    <title>{`${liga2DisplayName(team)} · ${pt ? "J" : "MD"}${p.md}: ${pct(p.v, pt)}`}</title>
+                  </circle>
+                ))}
+              </g>
+            );
+          })}
+          {!narrow && ends.map(e => (
+            <text
+              key={e.team}
+              x={e.x + 8}
+              y={e.y + 4}
+              fontSize={11}
+              fill={wentUpOf(e.team) ? "#234c40" : "#5f7062"}
+              fontWeight={wentUpOf(e.team) ? 700 : 400}
+            >
+              {liga2DisplayName(e.team)} {pct(e.v, pt)}
+            </text>
+          ))}
+        </svg>
+      </div>
+      {narrow && (
+        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-stone-600">
+          {ends.slice().sort((a, b) => b.v - a.v).map(e => (
+            <li key={e.team} className="inline-flex items-center gap-1.5">
+              <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: colourOf(e.team) }} />
+              <span className={wentUpOf(e.team) ? "font-bold text-ink" : ""}>{liga2DisplayName(e.team)} {pct(e.v, pt)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="text-[11px] text-stone-600 mt-2 leading-relaxed">
         {pt
           ? "A verde, os dois clubes que acabaram por subir. Cada ponto é um ajuste independente que só viu os jogos disputados até essa jornada."
           : "In green, the two clubs that actually went up. Each point is an independent refit that saw only the matches played up to that matchday."}
       </p>
+      <ChartTable
+        caption={pt ? "Probabilidade de subida por jornada de referência" : "Promotion probability by checkpoint matchday"}
+        columns={[pt ? "Clube" : "Club", ...checkpoints.map(cp => (pt ? `J${cp.matchday}` : `MD${cp.matchday}`))]}
+        rows={teams.map(team => [
+          liga2DisplayName(team),
+          ...checkpoints.map(cp => {
+            const v = valueFor(team, cp);
+            return v === null ? "—" : pct(v, pt);
+          }),
+        ])}
+      />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useId } from "react";
 import { useLocale } from "next-intl";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "framer-motion";
 import { ligaTeamSlugs, teamColorOnPaper, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import { describePp, formatKickoffShort, formatPercent, formatPp, matchLabel } from "@/lib/football-format";
 import { Link } from "@/i18n/routing";
@@ -11,6 +11,11 @@ import type { NextMatchdayScenarios, ScenarioData } from "@/types/football";
 import { conditionalProbabilities, rankMatches, readFootballExplorationState, writeFootballExplorationState, shouldPushSelectionState, type Outcome } from "@/lib/football-exploration";
 import { nextSupportedFixtureFor, clubStakes, fixtureStatus, type SupportedFixture } from "@/lib/football-fixtures";
 import { formatClubPercent, type Locale } from "@/components/football/club-outlook";
+import { matchStartedLine } from "@/lib/football-status";
+
+/** Below this spread, a game's effect on the followed club is within the
+ * Monte Carlo noise of thin conditional buckets (audit FA2-06). */
+const OTHER_MATCH_NOISE_FLOOR = 0.03;
 
 interface MatchdayPickerProps {
   data: NextMatchdayScenarios;
@@ -101,6 +106,20 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
   const viewHeadingRef = useRef<HTMLHeadingElement>(null);
   const [focusPending, setFocusPending] = useState(false);
   const [pendingTeam, setPendingTeam] = useState('');
+  const [chooseHint, setChooseHint] = useState(false);
+  // The reader's clock, read after mount only (audit FRESH-01): a game that
+  // has kicked off says so, instead of offering itself as still to come.
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const started = (kickoff?: string | null) => {
+    if (now == null || !kickoff) return false;
+    const ms = Date.parse(kickoff);
+    return !Number.isNaN(ms) && ms <= now;
+  };
   useEffect(() => {
     if (focusPending && viewHeadingRef.current) {
       viewHeadingRef.current.focus();
@@ -227,7 +246,10 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
     const ms = k ? Date.parse(k) : NaN;
     return Number.isNaN(ms) ? Number.MAX_SAFE_INTEGER : ms;
   };
-  const visibleOtherMatches = (showAll ? otherRankedMatches : otherRankedMatches.filter((item, i) => i < 3 || selections[item.index]))
+  // The default list keeps only games that move this club's objective by at
+  // least 3 pp; a 1,2 pp difference is noise, not a reason to watch a game.
+  const aboveNoise = otherRankedMatches.filter(m => m.swing >= OTHER_MATCH_NOISE_FLOOR);
+  const visibleOtherMatches = (showAll ? otherRankedMatches : otherRankedMatches.filter((item) => aboveNoise.indexOf(item) > -1 && aboveNoise.indexOf(item) < 3 || selections[item.index]))
     .slice()
     .sort((a, b) => kickoffMs(a.index) - kickoffMs(b.index) || a.index - b.index);
   const chronologicalFixtures = useMemo(
@@ -262,7 +284,12 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           className="mb-6 flex flex-wrap items-end gap-2"
           onSubmit={e => {
             e.preventDefault();
-            if (!pendingTeam) return;
+            // Never a disabled button that looks broken (audit CL2-04).
+            if (!pendingTeam) {
+              setChooseHint(true);
+              document.getElementById(`${ids}-choose`)?.focus();
+              return;
+            }
             setFocusTeam(pendingTeam);
             setFocusPending(true);
           }}
@@ -272,7 +299,11 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
             <select
               id={`${ids}-choose`}
               value={pendingTeam}
-              onChange={e => setPendingTeam(e.target.value)}
+              aria-describedby={chooseHint ? `${ids}-choose-hint` : undefined}
+              onChange={e => {
+                setPendingTeam(e.target.value);
+                setChooseHint(false);
+              }}
               className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm"
             >
               <option value="" disabled>
@@ -287,9 +318,14 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 ))}
             </select>
           </span>
-          <button type="submit" disabled={!pendingTeam} className="min-h-11 rounded-[10px] bg-ink px-4 text-sm font-semibold text-paper disabled:opacity-50">
+          <button type="submit" className="min-h-11 rounded-[10px] bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-forest">
             {pt ? 'Seguir' : 'Follow'}
           </button>
+          {chooseHint && (
+            <p id={`${ids}-choose-hint`} role="status" className="w-full text-sm text-stone-600">
+              {pt ? 'Escolhe primeiro um clube na lista.' : 'Choose a club from the list first.'}
+            </p>
+          )}
         </form>
 
         <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-3">
@@ -300,7 +336,11 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
             <li key={f.index} className="flex flex-wrap items-center justify-between gap-2 border-b border-line/60 py-2 text-sm text-ink">
               <span>
                 {f.kickoff && (
-                  <span className="mr-2 text-xs tabular-nums text-stone-500">{formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed })}</span>
+                  <span className="mr-2 text-xs tabular-nums text-stone-600">
+                    {f.kickoffConfirmed && started(f.kickoff) && forecastTimestamp
+                      ? matchStartedLine(forecastTimestamp, locale)
+                      : formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed })}
+                  </span>
                 )}
                 {matchLabel(teamDisplayName(f.home), teamDisplayName(f.away))}
                 {f.postponed && (
@@ -314,7 +354,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 {matchHrefs[`${f.home}|${f.away}`] && (
                   <>
                     {' · '}
-                    <Link href={matchHrefs[`${f.home}|${f.away}`]} locale={locale} className="font-semibold text-ink underline underline-offset-2">
+                    <Link href={matchHrefs[`${f.home}|${f.away}`]} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-2">
                       {pt ? 'ver jogo' : 'match preview'}
                     </Link>
                   </>
@@ -329,15 +369,25 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
   }
 
   return (
+    // Layout and delta animations stop under prefers-reduced-motion (A11Y2-03).
+    <MotionConfig reducedMotion="user">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
       <h2 ref={viewHeadingRef} tabIndex={-1} className="col-span-full text-2xl tracking-tight">
         {pt ? `${teamDisplayName(focusTeam)}: o que muda na próxima jornada?` : `${teamDisplayName(focusTeam)}: what changes in the next round?`}
       </h2>
-      <section aria-label={pt?'A tua pergunta':'Your question'} className="sticky top-[66px] z-20 col-span-full rounded-2xl border border-line bg-cream p-3 md:p-5">
-        <div className="flex flex-wrap items-end gap-3">
-          <span className="flex min-w-0 flex-1 flex-col gap-1"><label htmlFor={`${ids}-team`} className="text-xs font-semibold text-ink-muted">{pt?'Equipa a seguir':'Club to follow'}</label><select id={`${ids}-team`} value={focusTeam} onChange={e=>setFocusTeam(e.target.value)} className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm">{Object.keys(data.baseline).sort((a,b)=>teamDisplayName(a).localeCompare(teamDisplayName(b),'pt')).map(team=><option key={team} value={team}>{teamDisplayName(team)}</option>)}</select></span>
-          <span className="flex min-w-0 flex-1 flex-col gap-1"><label htmlFor={`${ids}-goal`} className="text-xs font-semibold text-ink-muted">{pt?'O que queres saber?':'What matters to you?'}</label><select id={`${ids}-goal`} value={objective} onChange={e=>setObjective(e.target.value as typeof objective)} className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm"><option value="p_champion">{pt?'Ganhar o título':'Win the title'}</option><option value="p_relegation">{pt?'Despromoção':'Relegation'}</option></select></span>
-          <p aria-live="polite" aria-atomic="true" className="basis-full text-sm leading-relaxed text-ink md:basis-auto"><strong>{teamDisplayName(focusTeam)}</strong> · {pt?'Base':'Baseline'} {formatClubPercent(focalBaseline, localeCode)} → <strong>{hasSelections?(pt?'Com a escolha':'With the choice'):(pt?'Sem escolha':'No selection')} {formatClubPercent(focalCurrent, localeCode)}</strong>{hasSelections&&` (${formatDeltaPrecise(focalCurrent - focalBaseline, localeCode)})`}</p>
+      {/* Not sticky: a sticky panel this tall hid the control that had focus
+          when tabbing backwards (audit A11Y2-02). */}
+      <section aria-label={pt?'A tua pergunta':'Your question'} className="col-span-full rounded-2xl border border-line bg-cream p-3 md:p-5">
+        <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
+          <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-team`} className="text-xs font-semibold text-ink-muted">{pt?'Equipa a seguir':'Club to follow'}</label><select id={`${ids}-team`} value={focusTeam} onChange={e=>setFocusTeam(e.target.value)} className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm">{Object.keys(data.baseline).sort((a,b)=>teamDisplayName(a).localeCompare(teamDisplayName(b),'pt')).map(team=><option key={team} value={team}>{teamDisplayName(team)}</option>)}</select></span>
+          <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-goal`} className="text-xs font-semibold text-ink-muted">{pt?'O que queres saber?':'What matters to you?'}</label><select id={`${ids}-goal`} value={objective} onChange={e=>setObjective(e.target.value as typeof objective)} className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm"><option value="p_champion">{pt?'Ganhar o título':'Win the title'}</option><option value="p_relegation">{pt?'Despromoção':'Relegation'}</option></select></span>
+          {/* No arrow to an identical number before a pick (audit MISS-02). */}
+          <p aria-live="polite" aria-atomic="true" className="text-sm leading-relaxed text-ink sm:col-span-2">
+            <strong>{teamDisplayName(focusTeam)}</strong>
+            {hasSelections
+              ? <> · {pt ? 'Base' : 'Baseline'} {formatClubPercent(focalBaseline, localeCode)} → <strong>{pt ? 'Com a escolha' : 'With the choice'} {formatClubPercent(focalCurrent, localeCode)}</strong> ({formatDeltaPrecise(focalCurrent - focalBaseline, localeCode)})</>
+              : <> · {pt ? 'agora' : 'now'} {formatClubPercent(focalBaseline, localeCode)} · {pt ? 'escolhe um resultado para ver o que muda' : 'pick a result to see what changes'}</>}
+          </p>
         </div>
       </section>
       {staleVersion && (
@@ -374,11 +424,15 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           <>
             <p className="mb-3 text-sm text-ink">
               <strong>{matchLabel(teamDisplayName(myFixture.home), teamDisplayName(myFixture.away))}</strong>
-              {myFixtureStatus && <span className="text-ink-muted"> · {myFixtureStatus.label}</span>}
+              {myFixtureStatus && (
+                <span className="text-ink-muted"> · {myFixture.kickoffConfirmed && started(myFixture.kickoff) && forecastTimestamp ? matchStartedLine(forecastTimestamp, locale) : myFixtureStatus.label}</span>
+              )}
             </p>
             <div className="grid gap-2 sm:grid-cols-4">
               <div className="rounded-lg border border-line bg-paper p-3">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Agora' : 'Now'}</div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                  {myFixture.kickoffConfirmed && started(myFixture.kickoff) ? (pt ? 'Antes do jogo' : 'Before the match') : (pt ? 'Agora' : 'Now')}
+                </div>
                 <div className="mt-1 text-lg font-bold tabular-nums text-ink">{formatClubPercent(myStakes.baseline, localeCode)}</div>
               </div>
               {([
@@ -429,8 +483,10 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         </div>
 
         <p className="mb-3 text-sm leading-relaxed text-ink-muted">{showAll
-          ? (pt ? 'Todos os jogos, por ordem de início (hora de Lisboa).' : 'Every match, in kickoff order (Lisbon time).')
-          : (pt ? `Os três jogos cujo resultado mais mexe nas contas do ${teamDisplayName(focusTeam)}, por ordem de início (hora de Lisboa).` : `The three matches whose result moves ${teamDisplayName(focusTeam)}'s chances most, in kickoff order (Lisbon time).`)}</p>
+          ? (pt ? 'Todos os jogos, por ordem de início (hora de Lisboa). Abaixo de 3 pontos percentuais, a diferença entre desfechos confunde-se com o ruído das simulações.' : 'Every match, in kickoff order (Lisbon time). Below 3 percentage points, the difference between outcomes blends into the simulations\' noise.')
+          : aboveNoise.length === 0
+            ? (pt ? `Nenhum outro jogo muda as contas do ${teamDisplayName(focusTeam)} em 3 pontos percentuais ou mais.` : `No other match moves ${teamDisplayName(focusTeam)}'s chances by 3 percentage points or more.`)
+            : (pt ? `Os jogos (até três) cujo resultado mexe pelo menos 3 pontos percentuais nas contas do ${teamDisplayName(focusTeam)}, por ordem de início (hora de Lisboa).` : `The matches (up to three) whose result moves ${teamDisplayName(focusTeam)}'s chances by at least 3 percentage points, in kickoff order (Lisbon time).`)}</p>
         <div className="space-y-1">
           {visibleOtherMatches.map(({match, index:idx, swing}) => {
             const meta = supportedByIndex.get(idx);
@@ -446,7 +502,13 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
               >
                 <div className="order-0 col-span-2 flex flex-wrap items-center sm:w-full justify-between gap-3 text-[11px] text-ink-muted">
                   <span>
-                    {meta?.kickoff && <span className="font-semibold tabular-nums">{formatKickoffShort(meta.kickoff, locale, { confirmed: meta.kickoffConfirmed })} · </span>}
+                    {meta?.kickoff && (
+                      <span className="font-semibold tabular-nums">
+                        {meta.kickoffConfirmed && started(meta.kickoff) && forecastTimestamp
+                          ? matchStartedLine(forecastTimestamp, locale)
+                          : formatKickoffShort(meta.kickoff, locale, { confirmed: meta.kickoffConfirmed })} ·{' '}
+                      </span>
+                    )}
                     {meta && (pt ? `Jornada ${meta.matchday}` : `Matchday ${meta.matchday}`)}
                     {meta?.postponed && (
                       <span className="ml-1.5 font-bold uppercase tracking-wider text-stone-600">{pt ? '· jogo em atraso' : '· postponed'}</span>
@@ -454,7 +516,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     {meta && ' · '}
                     {pt ? 'Diferença entre desfechos' : 'Difference between outcomes'}: {formatPp(swing, locale).replace('+', '')}
                   </span>
-                  {matchHrefs[`${match.home_team}|${match.away_team}`] && <Link href={matchHrefs[`${match.home_team}|${match.away_team}`]} locale={locale} className="font-semibold text-ink underline underline-offset-2">{pt?'Ver jogo':'Match preview'}</Link>}
+                  {matchHrefs[`${match.home_team}|${match.away_team}`] && <Link href={matchHrefs[`${match.home_team}|${match.away_team}`]} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-2">{pt?'Ver jogo':'Match preview'}</Link>}
                 </div>
                 {/* Home team */}
                 <div className="order-1 flex min-w-0 items-center gap-1.5 sm:w-[120px] sm:justify-end">
@@ -542,7 +604,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
             );
           })}
         </div>
-        {otherRankedMatches.length>3&&<button onClick={()=>setShowAll(!showAll)} className="mt-3 min-h-11 text-sm font-semibold text-ink underline underline-offset-4">{showAll?(pt?'Mostrar os jogos principais':'Show key matches'):(pt?`Ver todos os ${otherRankedMatches.length} jogos`:`See all ${otherRankedMatches.length} matches`)}</button>}
+        {otherRankedMatches.length>visibleOtherMatches.length || showAll ? <button onClick={()=>setShowAll(!showAll)} className="mt-3 min-h-11 text-sm font-semibold text-ink underline underline-offset-4">{showAll?(pt?'Mostrar os jogos principais':'Show key matches'):(pt?`Ver todos os ${otherRankedMatches.length} jogos`:`See all ${otherRankedMatches.length} matches`)}</button> : null}
       </div>
 
       {/* Right: Probability impact */}
@@ -716,6 +778,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         </details>
       )}
     </div>
+    </MotionConfig>
   );
 }
 
@@ -731,6 +794,9 @@ function SimulatedTable({
   labels: MatchdayPickerProps["labels"];
 }) {
   const locale = useLocale();
+  // MotionConfig does not stop layout animations: the rows only reorder in
+  // place when the reader allows motion (audit A11Y2-03).
+  const reduceMotion = useReducedMotion();
   const formatPct = (value: number) => formatPercent(value, locale);
   const sorted = useMemo(() => {
     return Object.entries(probabilities)
@@ -770,8 +836,8 @@ function SimulatedTable({
               return (
                 <motion.tr
                   key={team}
-                  layout
-                  transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                  layout={!reduceMotion}
+                  transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 35 }}
                   className={`border-b border-stone-200 ${
                     isRelegationZone ? "bg-red-50/40" : isChampionZone ? "bg-stone-50" : ""
                   }`}
