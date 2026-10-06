@@ -192,8 +192,8 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   const [active, setActive] = useState<Subject | null>(null);
   const [preview, setPreview] = useState<{ code: string; touch: boolean } | null>(null);
   const [manual, setManual] = useState<Camera | null>(null);
-  /** The Azores island group the reader framed (region view), until the camera moves on. */
-  const [group, setGroup] = useState<AzoresGroup | null>(null);
+  /** The Azores island group the reader framed (region view) and the camera that framed it. */
+  const [framed, setFramed] = useState<{ id: AzoresGroup; camera: Camera } | null>(null);
   /**
    * places.json (every parish, ~250 KB) is fetched only when something on the
    * map needs it: a município's parishes (tier fills, readout), the reader
@@ -324,8 +324,8 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
     if (!fitBounds || !viewport) return null;
     return besideControls ? fitBeside(fitBounds, viewport, padding, CONTROL_ROOM) : fitCamera(fitBounds, viewport, padding);
   }, [fitBounds, viewport, padding, besideControls]);
-  // A framed island group lasts until the camera is reset or the view changes.
-  useEffect(() => { if (!manual) setGroup(null); }, [manual]);
+  // A group reads as framed only while the camera is still its framing: a zoom, a pan or a reset ends it.
+  const group = framed && manual && sameCamera(manual, framed.camera) ? framed.id : null;
   const target = useMemo(() => manual ?? fit, [manual, fit]);
 
   const apply = useCallback((next: Camera) => {
@@ -396,7 +396,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   const goTo = useCallback((next: MapView) => {
     setView(previous => (sameView(previous, next) ? previous : next));
     setManual(null);
-    setGroup(null);
+    setFramed(null);
     setActive(null);
     setPreview(null);
   }, []);
@@ -437,11 +437,12 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
 
   /** Frame one island group of the Azores (UXM3V-01); pressing the framed group again goes back to all of them. */
   const frameGroup = useCallback((id: AzoresGroup) => {
-    if (group === id) { setManual(null); return; }
+    if (group === id) { setManual(null); setFramed(null); return; }
     const bounds = municipalityShapes ? azoresGroupBounds(municipalityShapes, id) : null;
     if (!bounds || !viewport || !fit) return;
-    setManual(clampZoom(fitBeside(bounds, viewport, padding, CONTROL_ROOM), fit, MAX_ZOOM));
-    setGroup(id);
+    const camera = clampZoom(fitBeside(bounds, viewport, padding, CONTROL_ROOM), fit, MAX_ZOOM);
+    setManual(camera);
+    setFramed({ id, camera });
   }, [group, municipalityShapes, viewport, fit, padding]);
 
   const subjectOf = (target: EventTarget | null): Subject | null => {
