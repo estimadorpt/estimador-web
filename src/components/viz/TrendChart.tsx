@@ -5,6 +5,7 @@ import type { Markish } from '@observablehq/plot';
 import { ChartTable } from './ChartTable';
 import { Legend } from './Legend';
 import { FURNITURE, seriesColor } from './theme';
+import { quietPlot } from './plot-a11y';
 
 export interface TrendPoint { x: Date | number; y: number; lo?: number; hi?: number; projected?: boolean }
 export interface TrendSeries { name: string; points: TrendPoint[]; color?: string }
@@ -99,7 +100,8 @@ export function TrendChart({ series, format = v => String(v), xLabel, yLabel, he
         y: { label: yLabel ?? null, domain: yMin != null || yMax != null ? [yMin ?? 0, yMax ?? Math.max(...rows.map(r => r.hi ?? r.y))] : undefined, tickFormat: (d: number) => format(d), grid: false },
         marks,
       });
-      el.replaceChildren(plot);
+      // The table twin below is the accessible version; the drawing is hidden.
+      el.replaceChildren(quietPlot(plot));
     })();
     return () => { disposed = true; };
   }, [series, width, height, format, xLabel, yLabel, yMin, yMax, reference, locale]);

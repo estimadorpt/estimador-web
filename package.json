@@ -8,6 +8,8 @@
     "predev": "node scripts/generate-article-slugs.mjs",
     "prebuild": "node scripts/generate-article-slugs.mjs && npm run og",
     "build": "next build",
+    "postbuild": "npm run check:export",
+    "check:export": "node scripts/check-export-budget.mjs out",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",

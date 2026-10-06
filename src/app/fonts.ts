@@ -21,11 +21,22 @@ import '@fontsource/manrope/600.css';
 import '@fontsource/manrope/700.css';
 import '@fontsource/manrope/800.css';
 
+/*
+ * Not preloaded: only `.article-body` (methodology, about, privacy, articles)
+ * sets the serif, and a preload made every page (the homepage, a shared parish
+ * link, a club page) download about 460 KB of type it never draws. The
+ * @font-face rules stay in the CSS, so a page that does render the serif
+ * fetches it on first use, and unicode-range keeps that to the glyphs it needs.
+ * Italic stays declared because the prose uses <em> for foreign terms
+ * (*vintages*, *referrer*); without preload it costs nothing until it appears.
+ * Portuguese and English are wholly inside the latin subset.
+ */
 const newsreader = Newsreader({
-  subsets: ['latin', 'latin-ext'],
+  subsets: ['latin'],
   style: ['normal', 'italic'],
   axes: ['opsz'],
   display: 'swap',
+  preload: false,
   variable: '--font-newsreader',
 });
 

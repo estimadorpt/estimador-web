@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChartTable } from './ChartTable';
 import { ACCENT, DEEMPHASIS, FURNITURE } from './theme';
+import { quietPlot } from './plot-a11y';
 
 export interface Column { label: string; value: number; /** The one column the story is about. */ highlight?: boolean; color?: string }
 
@@ -58,7 +59,8 @@ export function ColumnChart({ data, format = v => String(v), yLabel, xLabel, hei
       });
       // Columns are capped at 24px wide: the band's leftover is air, never fill.
       plot.querySelectorAll('rect').forEach(r => { const w = Number(r.getAttribute('width')); if (w > 24) { const x = Number(r.getAttribute('x')); r.setAttribute('x', String(x + (w - 24) / 2)); r.setAttribute('width', '24'); } });
-      el.replaceChildren(plot);
+      // The table twin below is the accessible version; the drawing is hidden.
+      el.replaceChildren(quietPlot(plot));
     })();
     return () => { disposed = true; };
   }, [data, width, height, format, yLabel, emphasis]);

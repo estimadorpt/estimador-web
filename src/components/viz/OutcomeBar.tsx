@@ -19,7 +19,9 @@ interface Segment {
  */
 export function OutcomeBar({ segments, tableCaption, tableColumns, className = '' }: { segments: Segment[]; /** Renders the table twin when given. */ tableCaption?: string; tableColumns?: [string, string]; className?: string }) {
   const locale = useLocale();
-  const palette = ['#434d48', '#c3c8bb', '#7f9284'];
+  // The third fill carries paper text: #5f7062 gives it 4.75:1 (the old
+  // #7f9284 gave 2.97:1), and it stays apart from the light middle segment.
+  const palette = ['#434d48', '#c3c8bb', '#5f7062'];
   const columns = tableColumns ?? (locale === 'en' ? ['Outcome', 'Probability'] : ['Resultado', 'Probabilidade']);
   return (
     <div className={className}>

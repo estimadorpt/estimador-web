@@ -40,9 +40,45 @@
       }
     },
     {
+      "route": "/data/population/manifest.json",
+      "headers": {
+        "cache-control": "public, max-age=300, must-revalidate"
+      }
+    },
+    {
+      "route": "/data/population/v*",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
       "route": "/data/population/*",
       "headers": {
         "cache-control": "public, max-age=86400"
+      }
+    },
+    {
+      "route": "/data/population-geography/*",
+      "headers": {
+        "cache-control": "public, max-age=86400"
+      }
+    },
+    {
+      "route": "/images/*",
+      "headers": {
+        "cache-control": "public, max-age=604800, stale-while-revalidate=86400"
+      }
+    },
+    {
+      "route": "/brand/*",
+      "headers": {
+        "cache-control": "public, max-age=604800, stale-while-revalidate=86400"
+      }
+    },
+    {
+      "route": "/branding/*",
+      "headers": {
+        "cache-control": "public, max-age=604800, stale-while-revalidate=86400"
       }
     },
     {
@@ -278,6 +314,101 @@
     {
       "route": "/feed.xml",
       "redirect": "/pt/feed.xml",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/desporto/liga/avs",
+      "redirect": "/pt/desporto/liga/2025-26/",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/desporto/liga/tondela",
+      "redirect": "/pt/desporto/liga/2025-26/",
+      "statusCode": 301
+    },
+    {
+      "route": "/pt/desporto/liga/boavista",
+      "redirect": "/pt/desporto/liga/",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/desporto/liga/avs",
+      "redirect": "/en/desporto/liga/2025-26/",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/desporto/liga/tondela",
+      "redirect": "/en/desporto/liga/2025-26/",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/desporto/liga/boavista",
+      "redirect": "/en/desporto/liga/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/misteriosa",
+      "redirect": "/pt/populacao/misteriosa/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/dados",
+      "redirect": "/pt/populacao/dados/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/qualidade",
+      "redirect": "/pt/populacao/qualidade/",
+      "statusCode": 301
+    },
+    {
+      "route": "/populacao/metodologia",
+      "redirect": "/pt/populacao/metodologia/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/simulador",
+      "redirect": "/pt/desporto/liga/simulador/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/jogo-previsoes",
+      "redirect": "/pt/desporto/liga/jogo-previsoes/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/jogadores",
+      "redirect": "/pt/desporto/liga/jogadores/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/modelo",
+      "redirect": "/pt/desporto/liga/modelo/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/metodologia",
+      "redirect": "/pt/desporto/liga/metodologia/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/dados",
+      "redirect": "/pt/desporto/liga/dados/",
+      "statusCode": 301
+    },
+    {
+      "route": "/desporto/liga/2025-26",
+      "redirect": "/pt/desporto/liga/2025-26/",
+      "statusCode": 301
+    },
+    {
+      "route": "/economia/metodologia",
+      "redirect": "/pt/economia/metodologia/",
+      "statusCode": 301
+    },
+    {
+      "route": "/marca",
+      "redirect": "/pt/marca/",
       "statusCode": 301
     },
     {

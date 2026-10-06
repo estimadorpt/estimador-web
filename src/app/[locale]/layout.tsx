@@ -11,6 +11,8 @@ import type { Metadata } from 'next';
 import { createPageMetadata } from '@/lib/metadata';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { ArticleLocalesProvider, type ArticleLocales } from '@/lib/article-navigation';
+import { CLIENT_MESSAGE_KEYS, pickMessages } from '@/lib/i18n/client-messages';
+import { jsonLd, siteJsonLd } from '@/lib/structured-data';
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -75,7 +77,10 @@ export default async function RootLayout({
   // render. Pages call it too, since Next may render them separately.
   setRequestLocale(locale);
 
-  const messages = await getMessages({ locale });
+  // Only the keys client components read (src/lib/i18n/client-messages.ts):
+  // the provider serialises its messages into every page, and the whole
+  // catalogue was about 55 KB of each one.
+  const messages = pickMessages(await getMessages({ locale }), CLIENT_MESSAGE_KEYS);
   const articles: ArticleLocales = {};
   for (const articleLocale of locales) {
     for (const article of getMDXArticlesByLocale(articleLocale)) {
@@ -86,6 +91,8 @@ export default async function RootLayout({
   return (
     <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
+        {/* The site and its publisher, for search engines (schema.org WebSite + Organization). */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(siteJsonLd(locale)) }} />
         <PostHogProvider>
           <NextIntlClientProvider messages={messages} locale={locale}>
             <ArticleLocalesProvider articles={articles}>{children}</ArticleLocalesProvider>

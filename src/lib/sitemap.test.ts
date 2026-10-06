@@ -7,6 +7,7 @@ import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { SITE_LOCALES } from '@/lib/metadata';
 import { ligaTeamSlugs } from '@/lib/config/football';
 import { loadLigaData } from '@/lib/utils/football-data-loader';
+import { POPULATION_PUBLISHED } from '@/lib/config/population';
 
 const APP = path.join(process.cwd(), 'src/app/[locale]');
 
@@ -81,5 +82,34 @@ describe('sitemap', () => {
     expect(new Date(presidential!.lastModified!).toISOString().slice(0, 10)).toBe('2026-02-08');
     const legislativas = byUrl.get(url('en', '/eleicoes/legislativas/mapa'));
     expect(new Date(legislativas!.lastModified!).toISOString().slice(0, 10)).toBe('2025-05-18');
+  });
+
+  // FR-06 / SP-M5: content dates, never the build's clock.
+  it('dates live pages by their data and gives undated prose no lastmod', async () => {
+    const byUrl = new Map(entries.map(entry => [entry.url, entry]));
+    const { prediction } = await loadLigaData();
+    const ligaDay = prediction!.timestamp.slice(0, 10);
+    expect(new Date(byUrl.get(url('pt', '/desporto/liga'))!.lastModified!).toISOString().slice(0, 10)).toBe(ligaDay);
+    expect(new Date(byUrl.get(url('en', '/populacao'))!.lastModified!).toISOString().slice(0, 10)).toBe(POPULATION_PUBLISHED);
+    for (const prose of ['/sobre', '/privacidade', '/metodologia']) {
+      expect(byUrl.get(url('pt', prose))?.lastModified, prose).toBeUndefined();
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const stamped = entries.filter(entry => entry.lastModified && new Date(entry.lastModified).toISOString().slice(0, 10) === today && today !== ligaDay && today !== POPULATION_PUBLISHED);
+    expect(stamped.map(entry => entry.url)).toEqual([]);
+  });
+
+  // SP-M4: hreflang pairs in the sitemap, the only place parish pages declare them server-side.
+  it('pairs every parish, region and static page with its other locale', () => {
+    const byUrl = new Map(entries.map(entry => [entry.url, entry]));
+    const parish = entries.find(entry => entry.url.includes('/populacao/freguesia/'))!;
+    expect(parish.alternates?.languages).toMatchObject({
+      pt: parish.url.replace('/en/', '/pt/'),
+      en: parish.url.replace('/pt/', '/en/'),
+      'x-default': parish.url.replace('/en/', '/pt/'),
+    });
+    const region = entries.find(entry => entry.url.includes('/populacao/regiao/'))!;
+    expect(Object.keys(region.alternates?.languages ?? {}).sort()).toEqual(['en', 'pt', 'x-default']);
+    expect(byUrl.get(url('en', '/sobre'))?.alternates?.languages).toMatchObject({ pt: url('pt', '/sobre'), en: url('en', '/sobre') });
   });
 });
