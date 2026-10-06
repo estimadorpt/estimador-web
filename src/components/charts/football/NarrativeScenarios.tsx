@@ -56,7 +56,7 @@ function StepRow({ step, teamColor, prevP, labels, locale }: { step: ScenarioSte
     <li className="flex items-center gap-2 border-b border-line py-2 last:border-0">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="w-7 shrink-0 text-xs font-bold tabular-nums text-stone-500">
+          <span className="w-9 shrink-0 text-xs font-bold tabular-nums text-stone-500">
             {labels.matchdayPrefix}{step.matchday}
           </span>
           <span className="truncate text-sm text-stone-700">{teamDisplayName(step.opponent)}</span>

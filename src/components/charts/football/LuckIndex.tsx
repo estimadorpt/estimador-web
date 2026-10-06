@@ -106,7 +106,9 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
                       : { left: `${50 - barPct}%`, width: `${barPct}%`, backgroundColor: '#a3543a', opacity: 0.35 }}
                   />
                   <div
-                    className={`absolute top-0 flex h-full items-center text-[11px] font-bold tabular-nums ${isPositive ? "text-emerald-700" : "text-red-700"}`}
+                    // On the bar itself (the longest ones), the label is ink:
+                    // red or green on the tinted bar fails contrast.
+                    className={`absolute top-0 flex h-full items-center text-[11px] font-bold tabular-nums ${50 + barPct + 1 > 86 ? "text-ink" : isPositive ? "text-emerald-700" : "text-red-700"}`}
                     style={isPositive ? { left: `${labelAt}%` } : { right: `${labelAt}%` }}
                   >
                     {formatSigned(entry.delta, locale, 1)}

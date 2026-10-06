@@ -647,7 +647,15 @@ export default async function TeamDetailPage({
             <p className="text-sm text-stone-500 mb-6">
               {isSurvival
                 ? t("football.survivalScenariosDescription")
-                : t("football.scenariosDescription")}
+                : t("football.scenariosDescription")}{" "}
+              {/* How the paths are chosen, in the methodology (audit MR2-06). */}
+              <Link
+                href={locale === "pt" ? "/desporto/liga/metodologia#cenarios-de-vitoria" : "/desporto/liga/metodologia#winning-scenarios"}
+                locale={locale}
+                className="font-medium text-ink underline underline-offset-4"
+              >
+                {locale === "pt" ? "Como se escolhem" : "How they are chosen"}
+              </Link>
             </p>
             <NarrativeScenarios
               data={narrativeData}
@@ -688,7 +696,14 @@ export default async function TeamDetailPage({
                   {t("football.buildYourPath")}
                 </h2>
                 <p className="text-sm text-stone-500 mb-6">
-                  {t("football.buildYourPathDescription")}
+                  {t("football.buildYourPathDescription")}{" "}
+                  <Link
+                    href={locale === "pt" ? "/desporto/liga/metodologia#cria-o-teu-cenario" : "/desporto/liga/metodologia#build-your-own-scenario"}
+                    locale={locale}
+                    className="font-medium text-ink underline underline-offset-4"
+                  >
+                    {locale === "pt" ? "Como funciona" : "How it works"}
+                  </Link>
                 </p>
                 <PathBuilder
                   matches={remainingMatches}

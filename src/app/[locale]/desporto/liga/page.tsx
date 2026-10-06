@@ -308,7 +308,7 @@ export default async function LigaPage({
           <div className="max-w-7xl mx-auto px-4 py-10">
             <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
               <ClockSwitch
-                initial={matchdayComplete ? t("football.nextMatchday") : (locale === "en" ? "Fixtures to come" : "Jogos por disputar")}
+                initial={matchdayComplete && cardRounds.length === 1 ? t("football.nextMatchday") : (locale === "en" ? "Fixtures to come" : "Jogos por disputar")}
                 steps={nextRound != null ? [
                   { at: nextRoundStartsAt, value: locale === "en" ? `Matchday ${nextRound} under way` : `Jornada ${nextRound} a decorrer` },
                   { at: nextRoundPlayedAt, value: roundPlayedLine(nextRound, locale) },
