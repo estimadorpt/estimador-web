@@ -6,6 +6,7 @@ import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "framer-
 import { ligaTeamSlugs, teamColorOnPaper, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import { describePp, formatKickoffShort, formatPercent, formatPp, matchLabel } from "@/lib/football-format";
 import { Link } from "@/i18n/routing";
+import { Disclosure } from "@/components/viz/Disclosure";
 import type { NextMatchdayScenarios, ScenarioData } from "@/types/football";
 
 import { conditionalProbabilities, rankMatches, readFootballExplorationState, writeFootballExplorationState, shouldPushSelectionState, type Outcome } from "@/lib/football-exploration";
@@ -525,6 +526,10 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     <img
                       src={teamLogoSrc(match.home_team)}
                       alt=""
+                      width={20}
+                      height={20}
+                      loading="lazy"
+                      decoding="async"
                       className="w-5 h-5 object-contain flex-shrink-0"
                     />
                   )}
@@ -595,6 +600,10 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     <img
                       src={teamLogoSrc(match.away_team)}
                       alt=""
+                      width={20}
+                      height={20}
+                      loading="lazy"
+                      decoding="async"
                       className="w-5 h-5 object-contain flex-shrink-0"
                     />
                   )}
@@ -619,8 +628,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           {hasSelections && <span className="inline-flex items-center gap-2"><i aria-hidden="true" className="h-4 w-[2px] bg-ink" />{pt ? 'Previsão de base' : 'Baseline forecast'}</span>}
           {hasSelections && <span>{pt ? 'Variação em pontos percentuais' : 'Change in percentage points'}</span>}
         </div>
-        <details className="group">
-          <summary className="cursor-pointer text-sm font-semibold text-ink underline underline-offset-4">{pt ? 'Ver o detalhe de todas as equipas' : 'See all-team detail'}</summary>
+        <Disclosure summary={pt ? 'Ver o detalhe de todas as equipas' : 'See all-team detail'}>
           <div className="mt-5">
         {/* Title race */}
         {titleTeams.length > 0 && (
@@ -642,6 +650,10 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                         <img
                           src={teamLogoSrc(team)}
                           alt=""
+                          width={16}
+                          height={16}
+                          loading="lazy"
+                          decoding="async"
                           className="w-4 h-4 object-contain flex-shrink-0"
                         />
                       )}
@@ -716,6 +728,10 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                         <img
                           src={teamLogoSrc(team)}
                           alt=""
+                          width={16}
+                          height={16}
+                          loading="lazy"
+                          decoding="async"
                           className="w-4 h-4 object-contain flex-shrink-0"
                         />
                       )}
@@ -767,15 +783,17 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           </div>
         )}
           </div>
-        </details>
+        </Disclosure>
       </div>
 
       {/* Full probability table */}
       {labels.simulatedStandings && (
-        <details className="col-span-1 lg:col-span-2 mt-2 border-t border-stone-200 pt-5">
-          <summary className="cursor-pointer text-sm font-semibold text-ink underline underline-offset-4">{pt ? 'Abrir a tabela completa' : 'Open the full table'}</summary>
+        <Disclosure
+          className="col-span-1 lg:col-span-2 mt-2 border-t border-stone-200 pt-5"
+          summary={pt ? 'Abrir a tabela completa' : 'Open the full table'}
+        >
           <SimulatedTable probabilities={probabilities} baseline={data.baseline} hasSelections={hasSelections} labels={labels} />
-        </details>
+        </Disclosure>
       )}
     </div>
     </MotionConfig>
@@ -813,7 +831,7 @@ function SimulatedTable({
       <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-4">
         {labels.simulatedStandings}
       </div>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={labels.simulatedStandings}>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b-2 border-stone-800 text-left">
@@ -846,7 +864,7 @@ function SimulatedTable({
                   <td className="py-2 pr-4">
                     <div className="flex items-center gap-2">
                       {teamLogoSrc(team) ? (
-                        <img src={teamLogoSrc(team)} alt="" className="w-5 h-5 flex-shrink-0 object-contain" />
+                        <img src={teamLogoSrc(team)} alt="" width={20} height={20} loading="lazy" decoding="async" className="w-5 h-5 flex-shrink-0 object-contain" />
                       ) : (
                         <div className="w-1 h-5 flex-shrink-0" style={{ backgroundColor: teamColor }} />
                       )}

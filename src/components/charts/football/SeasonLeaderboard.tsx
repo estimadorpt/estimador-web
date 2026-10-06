@@ -16,9 +16,10 @@ import { formatDecimal, formatLongDate } from "@/lib/football-format";
 import { useState } from "react";
 import type { LeaderboardResponse, LeaderboardRow } from "@/lib/utils/prediction-game-api";
 
-// Text-strength green on paper (audit A11Y2-08).
-const USER_COLOR = "#377455";
-const MODEL_COLOR = "#5f7062";
+// The tokens, not literals: the text-strength green (#377455, audit A11Y2-08)
+// and the muted ink. Both are only ever used in inline styles.
+const USER_COLOR = "var(--color-positive)";
+const MODEL_COLOR = "var(--color-ink-muted)";
 
 interface SeasonLeaderboardProps {
   board: LeaderboardResponse | null;
@@ -110,7 +111,7 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh, recordNote 
         </div>
       ) : (
         <div className="border border-stone-200 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t.title}>
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-stone-50 border-b border-stone-200 text-[11px] font-bold uppercase tracking-wider text-stone-500">

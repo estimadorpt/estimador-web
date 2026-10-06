@@ -5,7 +5,7 @@ import { OUTCOME_TONES, teamDisplayName, teamLogoSrc } from "@/lib/config/footba
 import { Link } from "@/i18n/routing";
 import { Swords, Lock, Trash2, SlidersHorizontal, Check, Share2 } from "lucide-react";
 import { useSeasonGame } from "@/hooks/useSeasonGame";
-import { formatDecimal, formatKickoff, formatKickoffShort, formatLongDate } from "@/lib/football-format";
+import { formatDecimal, formatKickoff, formatKickoffShort, formatLongDate, formatSigned } from "@/lib/football-format";
 
 /** RPS values: three decimals in the page's number format. */
 const rpsFmt = (v: number, pt: boolean) => formatDecimal(v, pt ? "pt" : "en", 3);
@@ -42,9 +42,10 @@ interface ContraOModeloProps {
 const OUTCOME_ORDER: Outcome[] = ["H", "D", "A"];
 
 /** Emerald for the user, stone for the model — consistent everywhere below. */
-// Text-strength green on paper (audit A11Y2-08: #4e8056 was 4,16:1).
-const USER_COLOR = "#377455";
-const MODEL_COLOR = "#5f7062";
+// The tokens, not literals: the text-strength green (#377455; #4e8056 was
+// 4,16:1, audit A11Y2-08) and the muted ink, used only in inline styles.
+const USER_COLOR = "var(--color-positive)";
+const MODEL_COLOR = "var(--color-ink-muted)";
 
 export function ContraOModelo({ data, locale = "pt", recordNote = null }: ContraOModeloProps) {
   const pt = locale !== "en";
@@ -574,13 +575,13 @@ function RoundPicker({
               {/* fixture line */}
               <div className="flex items-center gap-2 mb-3 text-sm font-semibold text-stone-900">
                 {teamLogoSrc(fixture.home) && (
-                  <img src={teamLogoSrc(fixture.home)} alt="" className="w-5 h-5 object-contain" />
+                  <img src={teamLogoSrc(fixture.home)} alt="" width={20} height={20} loading="lazy" decoding="async" className="w-5 h-5 object-contain" />
                 )}
                 <span className="truncate">{teamDisplayName(fixture.home)}</span>
                 <span className="text-stone-500 font-normal" aria-hidden="true">–</span>
                 <span className="truncate">{teamDisplayName(fixture.away)}</span>
                 {teamLogoSrc(fixture.away) && (
-                  <img src={teamLogoSrc(fixture.away)} alt="" className="w-5 h-5 object-contain" />
+                  <img src={teamLogoSrc(fixture.away)} alt="" width={20} height={20} loading="lazy" decoding="async" className="w-5 h-5 object-contain" />
                 )}
               </div>
               {fixture.kickoff && (
@@ -834,8 +835,8 @@ function RoundReview({
                         s.edge > 0 ? "text-emerald-700" : s.edge < 0 ? "text-red-700" : "text-stone-500"
                       }`}
                     >
-                      {s.edge > 0 ? "+" : ""}
-                      {rpsFmt(s.edge, pt)}
+                      {/* U+2212 when the model was closer (audit FA2-17). */}
+                      {formatSigned(s.edge, pt ? "pt" : "en", 3)}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-stone-500 tabular-nums">

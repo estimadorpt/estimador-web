@@ -162,6 +162,14 @@ export function PlayerProfile({
     }).replace(/^-/, "\u2212");
   // Grouped like every other count on the site ("3 677", audit FA2-12).
   const int = (v: number) => formatInteger(Math.round(v), pt ? "pt" : "en");
+  // A missing value: a dash for the eye, words for a screen reader
+  // (audit A11Y2-17), never stone-300 and never zero.
+  const noData = (
+    <>
+      <span aria-hidden="true">—</span>
+      <span className="sr-only">{pt ? "sem dados" : "no data"}</span>
+    </>
+  );
 
   const color = ligaTeamColors[player.team] ?? "#5f7062";
   const teamSlug = ligaTeamSlugs[player.team];
@@ -447,7 +455,7 @@ export function PlayerProfile({
         <div className="flex items-baseline gap-2 mb-1 flex-wrap">
           <span className="text-4xl font-bold tabular-nums text-stone-900">
             {prEntry.value === null
-              ? "—"
+              ? noData
               : `${prEntry.value > 0 ? "+" : ""}${nf(prEntry.value)}`}
           </span>
           <span className="text-sm text-stone-500">{posCopy[pr.kind].unit}</span>
@@ -622,6 +630,10 @@ export function PlayerProfile({
               <img
                 src={teamLogoSrc(player.team)}
                 alt=""
+                width={16}
+                height={16}
+                loading="lazy"
+                decoding="async"
                 className="w-4 h-4 object-contain"
               />
             )}
@@ -748,7 +760,7 @@ export function PlayerProfile({
           { label: t.goals, value: int(player.goals) },
           {
             label: t.perNinety,
-            value: player.goals_per_90 === null ? "—" : nf(player.goals_per_90),
+            value: player.goals_per_90 === null ? noData : nf(player.goals_per_90),
           },
           ...(showGoalsSar
             ? [
@@ -756,14 +768,14 @@ export function PlayerProfile({
                   label: t.xgSkill,
                   value:
                     player.xg_skill_per_90 === null
-                      ? "—"
+                      ? noData
                       : nf(player.xg_skill_per_90),
                 },
                 {
                   label: t.pAbove,
                   value:
                     player.p_above_replacement === null
-                      ? "—"
+                      ? noData
                       : formatPercent(player.p_above_replacement, pt ? "pt" : "en"),
                 },
               ]
@@ -789,7 +801,7 @@ export function PlayerProfile({
             {t.trajBody}
           </p>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t.trajTitle}>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-300 text-left">
@@ -834,12 +846,12 @@ export function PlayerProfile({
                         {int(s.goals)}
                       </td>
                       <td className="py-2 px-2 text-right tabular-nums text-stone-500 hidden sm:table-cell">
-                        {s.goals_per_90 === null ? "—" : nf(s.goals_per_90)}
+                        {s.goals_per_90 === null ? noData : nf(s.goals_per_90)}
                       </td>
                       {showGoalsSar && (
                       <td className="py-2 pl-2">
                         {v === null ? (
-                          <span className="text-stone-500">—</span>
+                          <span className="text-stone-500">{noData}</span>
                         ) : (
                           <div className="flex items-center gap-2">
                             <div className="relative h-4 flex-1 min-w-[80px]">

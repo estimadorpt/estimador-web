@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChartTable } from "@/components/viz/ChartTable";
+import { BRAND } from "@/lib/brand";
 import { formatOrdinal, formatSigned } from "@/lib/football-format";
 import {
   isReserveSide,
@@ -145,6 +146,10 @@ function TeamBadge({ team }: { team: string }) {
       <img
         src={logo}
         alt=""
+        width={20}
+        height={20}
+        loading="lazy"
+        decoding="async"
         className="w-5 h-5 object-contain flex-shrink-0"
         onError={() => setBroken(true)}
       />
@@ -202,7 +207,7 @@ export function Liga2FinalTable({
   const n = rows.length;
 
   return (
-    <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="overflow-x-auto rounded-2xl border border-line bg-cream">
+    <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="scroll-cue overflow-x-auto rounded-2xl border border-line bg-cream">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500">
@@ -256,10 +261,11 @@ export function Liga2FinalTable({
                     <span
                       className="w-0.5 h-4"
                       style={{
+                        // The tokens, not literals (audit A11Y2-08).
                         backgroundColor: up
-                          ? "#4e8056"
+                          ? "var(--color-positive)"
                           : down
-                            ? "#a3543a"
+                            ? "var(--color-negative)"
                             : "transparent",
                       }}
                     />
@@ -334,7 +340,7 @@ export function Liga2ProbabilityTable({
   const pt = locale !== "en";
 
   return (
-    <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="overflow-x-auto rounded-2xl border border-line bg-cream">
+    <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="scroll-cue overflow-x-auto rounded-2xl border border-line bg-cream">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500">
@@ -510,7 +516,7 @@ export function Liga2PromotionRace({
     last.teams.find(t => t.team === team)?.final_rank;
   const colourOf = (team: string) => {
     const rank = finalRank(team);
-    return rank !== undefined && rank <= 2 ? "#377455" : liga2TeamColor(team);
+    return rank !== undefined && rank <= 2 ? BRAND.tree : liga2TeamColor(team);
   };
   const wentUpOf = (team: string) => {
     const rank = finalRank(team);

@@ -129,7 +129,7 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels }
                 </span>
                 <span className="min-w-0">
                   <span className="flex min-w-0 items-center gap-1.5">
-                    {teamLogoSrc(m.opponent) && <img src={teamLogoSrc(m.opponent)} alt="" width={16} height={16} loading="lazy" className="h-4 w-4 shrink-0 object-contain" />}
+                    {teamLogoSrc(m.opponent) && <img src={teamLogoSrc(m.opponent)} alt="" width={16} height={16} loading="lazy" decoding="async" className="h-4 w-4 shrink-0 object-contain" />}
                     <span className="truncate text-sm font-medium text-ink">{opponent}</span>
                     <span className="shrink-0 text-[11px] text-stone-600">({m.venue === "H" ? labels.home : labels.away})</span>
                   </span>

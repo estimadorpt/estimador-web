@@ -125,7 +125,7 @@ function TeamSection({
     <div>
       <p className="flex items-center gap-2 border-b border-stone-200 py-1.5">
         {teamLogoSrc(team) ? (
-          <img src={teamLogoSrc(team)} alt="" className="h-5 w-5 object-contain" />
+          <img src={teamLogoSrc(team)} alt="" width={20} height={20} loading="lazy" decoding="async" className="h-5 w-5 object-contain" />
         ) : (
           <i aria-hidden="true" className="h-4 w-1 shrink-0" style={{ backgroundColor: teamColorOnPaper(team) }} />
         )}
