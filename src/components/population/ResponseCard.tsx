@@ -5,7 +5,8 @@ import { Link2 } from 'lucide-react';
 import { DataCard } from '@/components/viz/DataCard';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { Mosaic } from '@/components/brand/Mosaic';
-import { Link } from '@/i18n/routing';
+import { TextLink } from '@/components/brand/TextLink';
+import { methodologyAnchorForRecipe } from '@/components/population/quality/anchors';
 import { POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { isWhole, readCells } from '@/lib/population/compact';
 import { DIMENSION_LABEL, RECIPE_COPY, REASON_COPY, sourceLine, type Locale } from '@/lib/population/labels';
@@ -83,7 +84,7 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
             )}
           </>
         )}
-        <CardFooter source={sourceLine(recipeName, locale)} id={bare ? null : record.id} question={copy.question[locale]} locale={locale} />
+        <CardFooter source={sourceLine(recipeName, locale)} id={bare ? null : record.id} question={copy.question[locale]} recipe={recipeName} locale={locale} />
       </DataCard>
     </div>
   );
@@ -91,21 +92,24 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
 
 /**
  * A card's footer, in two fixed rows whatever the source's length (UXD2-12):
- * the source and "Como foi feito"; then the release and the full result id
+ * the source and "Como foi feito", which opens the methodology at the row of
+ * the field this card groups or derives and names the card's question to a
+ * screen reader (MR2-10, PRO2-11); then the release and the full result id
  * (the one a permalink resolves, PRO2-01) with "Copiar ligação" at the right.
  */
-export function CardFooter({ source, id, question, locale }: { source: string; id: string | null; question: string; locale: Locale }) {
+export function CardFooter({ source, id, question, recipe, locale }: { source: string; id: string | null; question: string; recipe: string; locale: Locale }) {
   return (
     <footer className="mt-4 border-t border-line pt-2 text-xs text-stone-500">
       <div className="flex flex-wrap items-center gap-x-4">
         <span>{source}</span>
-        <Link href={POPULATION_ROUTES.methodology} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline-offset-4 hover:underline">
+        <TextLink href={`${POPULATION_ROUTES.methodology}#${methodologyAnchorForRecipe(recipe, locale)}`} locale={locale}>
           {locale === 'pt' ? 'Como foi feito' : 'How it was made'}
-        </Link>
+          <span className="sr-only">: {question}</span>
+        </TextLink>
       </div>
       {id && (
         <div className="flex flex-wrap items-center justify-between gap-x-4">
-          <span className="break-all font-mono text-[11px] text-stone-500">v{POPULATION_RELEASE} · {id}</span>
+          <span className="font-mono text-[11px] text-stone-500 [overflow-wrap:anywhere]">v{POPULATION_RELEASE} · {id}</span>
           <CopyPermalink id={id} question={question} locale={locale} />
         </div>
       )}

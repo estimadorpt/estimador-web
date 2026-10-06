@@ -1,5 +1,5 @@
 import { readCells } from '@/lib/population/compact';
-import { HONESTY, TIER_COPY, tierMeaningFor, type Locale } from '@/lib/population/labels';
+import { HONESTY, TIER_COPY, tierMeaningFor, type Locale, type WorstTable } from '@/lib/population/labels';
 import type { ParishRecord, PopulationMeta, PortraitRecipe } from '@/types/population';
 
 /** The facts about a place this list needs (from the parish file's `place`, or places.json). */
@@ -8,6 +8,10 @@ export interface HowToReadPlace {
   municipalityName: string;
   /** The count the tier was decided on; without it the tier gets its generic words. */
   publicationPopulation?: number | null;
+  /** INE's residents: named when it and the tier's count sit on either side of a threshold. */
+  censusPopulation?: number | null;
+  /** quality.csv's worst table (parish file only): a tier C parish of 500 or more says what set its tier. */
+  worst?: WorstTable | null;
 }
 
 export interface HowToReadInput {
@@ -29,7 +33,7 @@ export interface HowToReadInput {
 export function howToReadItems({ place, record, meta, locale, fallbackName, municipalityFigures }: HowToReadInput): Array<{ term: string; body: string }> {
   const pt = locale === 'pt';
   const tier = TIER_COPY[place.tier];
-  const meaning = tierMeaningFor(place.tier, place.publicationPopulation)[locale];
+  const meaning = tierMeaningFor(place.tier, place.publicationPopulation, place.censusPopulation, place.worst)[locale];
   const municipality = fallbackName ?? place.municipalityName;
   const cells = Object.entries(record.responses).flatMap(([recipe, response]) =>
     response && meta.recipes[recipe as PortraitRecipe] ? readCells(response, meta.recipes[recipe as PortraitRecipe], locale) : []);

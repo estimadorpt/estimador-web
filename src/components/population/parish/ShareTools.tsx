@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Download, Link2, Share2 } from 'lucide-react';
+import { Download, Link2, Share2 } from 'lucide-react';
 import { Action } from '@/components/brand/Action';
+import { Disclosure } from '@/components/viz/Disclosure';
 import { drawShareCard, SHARE_CARD, SHARE_CARD_FONTS, type ShareCardModel } from '@/lib/population/share-card';
 import type { Locale } from '@/lib/population/labels';
 
@@ -114,11 +115,11 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
         Full width of the panel: at desktop widths the card's smallest text (20 px
         of 1200) renders at 11 px or more.
       */}
-      <details className="group rounded-xl border border-line bg-paper">
-        <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-4 text-[15px] font-semibold text-ink">
-          {pt ? 'Ver o cartão (mostra as respostas)' : 'See the card (it shows the answers)'}
-          <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-stone-500 transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
-        </summary>
+      <Disclosure
+        className="rounded-xl border border-line bg-paper"
+        summaryClassName="w-full px-4 py-0.5"
+        summary={pt ? 'Ver o cartão (mostra as respostas)' : 'See the card (it shows the answers)'}
+      >
         <div className="border-t border-line p-4">
           <canvas
             ref={preview}
@@ -138,7 +139,7 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
             <p>{model.footer}</p>
           </div>
         </div>
-      </details>
+      </Disclosure>
     </div>
   );
 }

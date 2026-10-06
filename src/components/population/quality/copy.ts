@@ -8,7 +8,7 @@
  * and EN: no number here is computed on the site. When a release changes the
  * model card, this file changes with it.
  */
-import type { Locale } from '@/lib/population/labels';
+import { CONSTRAINT_LABEL, formatFit, type Locale } from '@/lib/population/labels';
 import { formatCount } from '@/lib/population/format';
 
 type Text = Record<Locale, string>;
@@ -96,29 +96,10 @@ export const LIMITATIONS: Array<{ title: Text; body: Text }> = [
   },
 ];
 
-/**
- * One name per evaluated table, keyed on the scorecard's `constraints[].key`
- * (and quality.csv's `worst_constraint`, which is `srmse_` + the key). The
- * scorecard file stays verbatim; its own labels are not shown, because two of
- * them used other words than the rest of the site ("Situação perante o
- * trabalho", "Trabalho × rendimento": the table is MEIOVIDA, the main source of
- * livelihood, not income). `age_single` is scored but is not one of the 12.
- */
-export const CONSTRAINT_LABEL: Record<string, Text> = {
-  p_age5: { pt: 'Idade (grupos de 5 anos)', en: 'Age (5-year bands)' },
-  p_marital: { pt: 'Estado civil', en: 'Marital status' },
-  p_educ: { pt: 'Escolaridade', en: 'Education' },
-  p_labour: { pt: 'Condição perante o trabalho', en: 'Labour-force status' },
-  p_income: { pt: 'Principal meio de vida', en: 'Main source of livelihood' },
-  p_labour3_educ5: { pt: 'Trabalho × escolaridade', en: 'Labour × education' },
-  p_labour3_income: { pt: 'Trabalho × principal meio de vida', en: 'Labour × source of livelihood' },
-  p_nat: { pt: 'Nacionalidade', en: 'Nationality' },
-  p_religion: { pt: 'Religião', en: 'Religion' },
-  p_sitprof: { pt: 'Situação na profissão', en: 'Status in employment' },
-  p_sector: { pt: 'Setor de atividade (quatro grandes grupos)', en: 'Activity sector (four groups)' },
-  p_union: { pt: 'União de facto', en: 'De facto union' },
-  p_age_single: { pt: 'Idade ano a ano', en: 'Single-year age' },
-};
+// One name per evaluated table (and the fit formatter): they live with the
+// rest of the population wording in labels.ts, because a parish page's tier
+// sentence names its worst table too (MR2-03).
+export { CONSTRAINT_LABEL, formatFit };
 
 /** A scorecard key's site label, or the scorecard's own label for a key the map does not know yet. */
 export function constraintLabel(key: string, fallback: Text, locale: Locale): string {
@@ -360,14 +341,6 @@ export const SIZE_BAND: Record<string, Text> = {
   '2k_10k': { pt: '2 000 a 10 000 residentes', en: '2,000 to 10,000 residents' },
   gt_10k: { pt: 'Mais de 10 000 residentes', en: 'More than 10,000 residents' },
 };
-
-/** Fit statistics are shown with three decimals, as the model card prints them. */
-export function formatFit(value: number, locale: Locale): string {
-  return new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
-    minimumFractionDigits: 3,
-    maximumFractionDigits: 3,
-  }).format(value);
-}
 
 export { formatCount };
 

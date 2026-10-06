@@ -1,5 +1,7 @@
 import { KpiRow, StatTile } from '@/components/viz/StatTile';
 import { QualityBadge } from '@/components/population/QualityBadge';
+import { Link } from '@/i18n/routing';
+import { POPULATION_ROUTES } from '@/lib/config/population';
 import { HONESTY, TIER_COPY, type Locale } from '@/lib/population/labels';
 import { formatCount } from './places';
 
@@ -10,7 +12,8 @@ const TIERS = ['A', 'B', 'C'] as const;
  * release's own counts), the parishes, and how many parishes sit in each
  * quality tier (meta.counts.tiers: a count of places, not a statistic). Every
  * parish answers with its own numbers; the tier says how closely they follow
- * INE's tables.
+ * INE's tables. The generated total is not INE's resident count, so the row
+ * says so and links to the gap on /dados (MR2-V02).
  */
 export function KeyFacts({ locale, persons, households, parishes, municipalities, tiers }: {
   locale: Locale;
@@ -37,6 +40,14 @@ export function KeyFacts({ locale, persons, households, parishes, municipalities
             : `In ${n(municipalities)} municipalities, CAOP 2021. Each with its own figures.`}
         />
       </KpiRow>
+      <p className="mt-3 max-w-3xl text-sm leading-relaxed text-stone-600">
+        {pt
+          ? 'O total de pessoas geradas não é o de residentes contados pelo INE: em parte das freguesias, os dois diferem. '
+          : 'The total of generated people is not the resident count INE published: in some parishes the two differ. '}
+        <Link href={`${POPULATION_ROUTES.data}#total-gerado`} locale={locale} className="font-semibold text-ink underline underline-offset-4">
+          {pt ? 'Quanto difere' : 'By how much'}
+        </Link>
+      </p>
       <div className="mt-6">
         <h3 className="text-base font-bold text-ink">{pt ? 'Quão perto das tabelas do INE?' : 'How close to INE’s tables?'}</h3>
         <p className="mt-1 max-w-3xl text-sm leading-relaxed text-stone-600">

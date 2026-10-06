@@ -212,6 +212,86 @@ export const TIER_COPY: Record<'A' | 'B' | 'C', { label: Text; meaning: Text }> 
 };
 
 /**
+ * One name per evaluated table, keyed on the scorecard's `constraints[].key`
+ * (and quality.csv's `worst_constraint`, which is `srmse_` + the key). The
+ * scorecard file stays verbatim; its own labels are not shown, because two of
+ * them used other words than the rest of the site ("Situação perante o
+ * trabalho", "Trabalho × rendimento": the table is MEIOVIDA, the main source of
+ * livelihood, not income). `age_single` is scored but is not one of the 12.
+ */
+export const CONSTRAINT_LABEL: Record<string, Text> = {
+  p_age5: { pt: 'Idade (grupos de 5 anos)', en: 'Age (5-year bands)' },
+  p_marital: { pt: 'Estado civil', en: 'Marital status' },
+  p_educ: { pt: 'Escolaridade', en: 'Education' },
+  p_labour: { pt: 'Condição perante o trabalho', en: 'Labour-force status' },
+  p_income: { pt: 'Principal meio de vida', en: 'Main source of livelihood' },
+  p_labour3_educ5: { pt: 'Trabalho × escolaridade', en: 'Labour × education' },
+  p_labour3_income: { pt: 'Trabalho × principal meio de vida', en: 'Labour × source of livelihood' },
+  p_nat: { pt: 'Nacionalidade', en: 'Nationality' },
+  p_religion: { pt: 'Religião', en: 'Religion' },
+  p_sitprof: { pt: 'Situação na profissão', en: 'Status in employment' },
+  p_sector: { pt: 'Setor de atividade (quatro grandes grupos)', en: 'Activity sector (four groups)' },
+  p_union: { pt: 'União de facto', en: 'De facto union' },
+  p_age_single: { pt: 'Idade ano a ano', en: 'Single-year age' },
+};
+
+/** Fit statistics are shown with three decimals, as the model card prints them. */
+export function formatFit(value: number, locale: Locale): string {
+  return new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
+    minimumFractionDigits: 3,
+    maximumFractionDigits: 3,
+  }).format(value);
+}
+
+/** release.json `quality_tier_policy.thresholds.B.max_worst_srmse` (labels.test.ts reads it back). */
+export const TIER_B_MAX_WORST_SRMSE = 0.26;
+
+/** quality.csv's one worst table for a parish, from the parish file's `place` header (MR2-03). */
+export interface WorstTable {
+  /** `worst_constraint`, e.g. `srmse_p_age_single`. */
+  key: string;
+  /** `worst_constraint_srmse`, as the producer wrote it. */
+  srmse: number;
+}
+
+/** The site's name for a worst-table code, lower-cased to sit inside a sentence; null for a code it does not know. */
+function worstTableName(key: string, locale: Locale): string | null {
+  const label = CONSTRAINT_LABEL[key.replace(/^srmse_/, '')]?.[locale];
+  return label ? label.charAt(0).toLowerCase() + label.slice(1) : null;
+}
+
+/**
+ * A tier C parish of 500 or more residents, told what put it there. Its worst
+ * table past tier B's limit is enough on its own (726 of 728 in v1.0.3; 705 of
+ * them single-year age, scored but outside the fit); otherwise it is the
+ * typical error (the median of the 12 fitted tables), which the place header
+ * does not carry, so the sentence names the criterion and the worst table
+ * without a comparison. Null when the code is not one the site names.
+ */
+function worstTableMeaning(worst: WorstTable): Text | null {
+  const pt = worstTableName(worst.key, 'pt');
+  const en = worstTableName(worst.key, 'en');
+  if (!pt || !en) return null;
+  const error = { pt: formatFit(worst.srmse, 'pt'), en: formatFit(worst.srmse, 'en') };
+  if (worst.srmse <= TIER_B_MAX_WORST_SRMSE) {
+    return {
+      pt: `Freguesia com 500 ou mais residentes, no nível C pelo seu erro típico, a mediana dos erros das 12 tabelas de pessoas do ajuste: lê os números com mais cuidado. A sua pior tabela é ${pt}, com um erro de ${error.pt}.`,
+      en: `A parish of 500 or more residents, in tier C because of its typical error, the median of the errors of the 12 fitted person tables: read the numbers with more care. Its worst table is ${en}, with an error of ${error.en}.`,
+    };
+  }
+  if (worst.key === 'srmse_p_age_single') {
+    return {
+      pt: `Freguesia com 500 ou mais residentes, no nível C pela sua pior tabela, ${pt}, com um erro de ${error.pt}. Essa tabela é avaliada à parte das 12 tabelas de pessoas do ajuste e as respostas não a usam (mostram a idade em grupos de 5 anos), por isso as respostas podem estar perto das tabelas do INE.`,
+      en: `A parish of 500 or more residents, in tier C because of its worst table, ${en}, with an error of ${error.en}. That table is scored apart from the 12 fitted person tables and the answers do not use it (they show age in 5-year bands), so the answers can be close to INE’s tables.`,
+    };
+  }
+  return {
+    pt: `Freguesia com 500 ou mais residentes, no nível C pela sua pior tabela, ${pt}, com um erro de ${error.pt}. É uma das 12 tabelas de pessoas do ajuste: lê os números com mais cuidado.`,
+    en: `A parish of 500 or more residents, in tier C because of its worst table, ${en}, with an error of ${error.en}. It is one of the 12 fitted person tables: read the numbers with more care.`,
+  };
+}
+
+/**
  * When INE's count and the count the tier uses sit on opposite sides of a
  * size threshold (one parish in v1.0.3: 160707, INE 500, publication 499),
  * the sentence names both, so the page does not say "500 residents" and
@@ -233,9 +313,13 @@ function acrossThreshold(threshold: number, residents: number, census: number | 
  * more is C for its typical error or its worst table, not its size; in almost
  * all of them (705 of 728 in quality.csv) the worst table is single-year age.
  * Pass INE's count (`census`) as well, and a parish whose two counts sit on
- * either side of a threshold says so. Without the count, the generic words.
+ * either side of a threshold says so; pass the parish's worst table (`worst`,
+ * from its file's place header) and a tier C parish of 500 or more names the
+ * table, or the criterion, that set its tier (MR2-03). Without them, the
+ * generic words (the map and the game, which read places.json, have no worst
+ * table).
  */
-export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null | undefined, census?: number | null): Text {
+export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null | undefined, census?: number | null, worst?: WorstTable | null): Text {
   if (residents == null) return TIER_COPY[tier].meaning;
   if (tier === 'B') {
     const across = acrossThreshold(2000, residents, census);
@@ -262,6 +346,10 @@ export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null |
         pt: `${across.pt} Abaixo de 500, uma freguesia fica sempre no nível C, seja qual for o ajuste. Com poucas pessoas, cada uma pesa mais; lê os números com mais cuidado.`,
         en: `${across.en} Under 500, a parish is always tier C, whatever its fit. With few people each one weighs more; read the numbers with more care.`,
       };
+    }
+    if (residents >= 500 && worst) {
+      const named = worstTableMeaning(worst);
+      if (named) return named;
     }
     return residents < 500
       ? {

@@ -31,6 +31,7 @@ export function methodologyFieldAnchor(field: string): string {
 /** The methodology row a card's "Como foi feito" should open: the field that card groups or derives. */
 const RECIPE_FIELD: Record<string, string> = {
   age: 'age_5y',
+  national_age: 'age_5y',
   education: 'education_level_coarse5',
   employment: 'employment_status_coarse3',
   household_size: 'hh_size_bin',

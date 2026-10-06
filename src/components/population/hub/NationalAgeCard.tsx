@@ -36,7 +36,7 @@ export function NationalAgeCard({ cells, locale, id, headingId }: { cells: ReadC
         columns={[DIMENSION_LABEL.age_5y[locale], pt ? 'Percentagem' : 'Share']}
         rows={cells.map(cell => [cell.labels[0], cell.display])}
       />
-      <CardFooter source={HONESTY.source[locale]} id={id} question={pt ? 'Que idade tem Portugal?' : 'How old is Portugal?'} locale={locale} />
+      <CardFooter source={HONESTY.source[locale]} id={id} question={pt ? 'Que idade tem Portugal?' : 'How old is Portugal?'} recipe="national_age" locale={locale} />
     </DataCard>
   );
 }

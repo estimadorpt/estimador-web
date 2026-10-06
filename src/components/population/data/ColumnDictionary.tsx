@@ -1,3 +1,4 @@
+import { Disclosure } from '@/components/viz/Disclosure';
 import type { Locale } from '@/lib/population/labels';
 import type { ReleaseColumn } from '@/types/population';
 import { columnDescription, SITE_LABEL_MAPS } from './dictionary';
@@ -78,7 +79,7 @@ function Description({ table, name, column, locale }: { table: 'persons' | 'hous
   );
 }
 
-function Table({ table, columns, locale }: { table: 'persons' | 'households'; columns: Record<string, ReleaseColumn>; locale: Locale }) {
+function Table({ table, title, columns, locale }: { table: 'persons' | 'households'; title: string; columns: Record<string, ReleaseColumn>; locale: Locale }) {
   const pt = locale === 'pt';
   const entries = Object.entries(columns);
   return (
@@ -97,7 +98,8 @@ function Table({ table, columns, locale }: { table: 'persons' | 'households'; co
           </div>
         ))}
       </dl>
-      <div className="hidden max-h-[36rem] overflow-auto sm:block">
+      {/* A scroll area: focusable, so a keyboard can scroll it, and named (A11Y2-06); the edge shadow says there is more. */}
+      <div tabIndex={0} role="region" aria-label={pt ? `Dicionário de colunas: ${title}` : `Column dictionary: ${title}`} className="scroll-cue hidden max-h-[36rem] overflow-auto sm:block">
         <table className="min-w-full border-collapse text-sm">
           <thead>
             <tr>
@@ -123,7 +125,7 @@ function Table({ table, columns, locale }: { table: 'persons' | 'households'; co
   );
 }
 
-/** The release's own column dictionary, persons and households, behind disclosures. */
+/** The release's own column dictionary, persons and households, behind the site's one disclosure (UXD2-26). */
 export function ColumnDictionary({ dictionary, locale }: {
   dictionary: { persons: Record<string, ReleaseColumn>; households: Record<string, ReleaseColumn> };
   locale: Locale;
@@ -136,17 +138,16 @@ export function ColumnDictionary({ dictionary, locale }: {
   return (
     <div className="space-y-4">
       {groups.map(group => (
-        <details key={group.key} className="group rounded-2xl border border-line bg-cream">
-          <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-4 px-5 py-3 font-semibold text-ink hover:bg-parchment group-open:border-b group-open:border-line">
-            <span>{group.title}</span>
-            <span className="text-sm font-normal text-stone-500">
-              {Object.keys(group.columns).length} {pt ? 'colunas' : 'columns'}
-            </span>
-          </summary>
-          <div className="p-2 md:p-3">
-            <Table table={group.key} columns={group.columns} locale={locale} />
+        <Disclosure
+          key={group.key}
+          className="rounded-2xl border border-line bg-cream"
+          summaryClassName="w-full px-5 py-1.5"
+          summary={<>{group.title} <span className="font-normal text-stone-500">· {Object.keys(group.columns).length} {pt ? 'colunas' : 'columns'}</span></>}
+        >
+          <div className="border-t border-line p-2 md:p-3">
+            <Table table={group.key} title={group.title} columns={group.columns} locale={locale} />
           </div>
-        </details>
+        </Disclosure>
       ))}
     </div>
   );
