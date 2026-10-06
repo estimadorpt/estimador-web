@@ -77,6 +77,14 @@ sync_economics() {
     return 1
   fi
 
+  # Nothing reaches public/data while the section is in preparation: the files
+  # would be served (and committed) although every page says "sem números
+  # publicados". Set "published": true in economy-status.json first.
+  if ! grep -q '"published": *true' "$PROJECT_DIR/src/lib/config/economy-status.json"; then
+    echo "Economy is in preparation (src/lib/config/economy-status.json): not syncing economics data."
+    return 0
+  fi
+
   mkdir -p "$ECONOMICS_DEST"
   # Publish ONLY the dashboard feed, renamed to dashboard.json (the file the web
   # app reads). NEVER `cp *.json` here: output/ holds ~190 internal research/eval

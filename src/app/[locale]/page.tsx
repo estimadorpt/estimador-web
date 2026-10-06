@@ -6,7 +6,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { loadLigaSummary, loadLigaWithDeltas } from "@/lib/utils/football-data-loader";
 import { loadEconomyDashboard, loadPresidentialData, loadForecastData } from "@/lib/utils/data-loader";
-import { economyState } from "@/lib/config/economy-status";
+import { ECONOMY_PUBLISHED, economyState } from "@/lib/config/economy-status";
 import { loadPopulationMeta } from "@/lib/utils/population-data-loader";
 import { getArticlesBySection, getMDXArticlesByLocale } from "@/lib/mdx-articles";
 import { ALL_ELECTIONS } from "@/lib/config/elections";
@@ -16,6 +16,7 @@ import { FootballPanel } from "@/components/home/FootballPanel";
 import { EconomyPanel } from "@/components/home/EconomyPanel";
 import { ElectionsPanel, type ElectionSnapshot } from "@/components/home/ElectionsPanel";
 import { setRequestLocale } from '@/i18n/request-locale';
+import { brandDescriptor, brandLine } from '@/lib/brand/descriptor';
 
 export async function generateMetadata({
   params,
@@ -68,7 +69,13 @@ export default async function HomePage({
   const t = await getTranslations({ locale, namespace: 'home' });
   const config = homepageConfig();
 
-  const [ligaSummary, economy, populationMeta] = await Promise.all([loadLigaSummary(), loadEconomyDashboard(), loadPopulationMeta()]);
+  // The economy feed is not shipped while the section is in preparation, so it
+  // is only read once the flag is on.
+  const [ligaSummary, economy, populationMeta] = await Promise.all([
+    loadLigaSummary(),
+    ECONOMY_PUBLISHED ? loadEconomyDashboard() : Promise.resolve(null),
+    loadPopulationMeta(),
+  ]);
   const ligaDeltas = ligaSummary ? (await loadLigaWithDeltas()).deltas : {};
   // The editorial flag first (src/lib/config/economy-status.json), then the
   // staleness guard: fresh data alone never puts a number on the homepage.
@@ -95,38 +102,54 @@ export default async function HomePage({
         return <ElectionsPanel key={section} locale={locale} variant={place === 'lead' ? 'lead' : 'support'} elections={ALL_ELECTIONS} current={current} />;
     }
   };
-  // The mobile shortcuts follow the page's hierarchy: the club first, and the
-  // economy explainer last while the section is in preparation.
-  const quickTasks = locale === 'pt'
-    ? [
-        { href: '/#escolher-equipa', label: 'O meu clube' },
-        { href: '/eleicoes/arquivo', label: 'Eleições' },
-        { href: '/economia#compreender', label: 'Inflação' },
-      ]
-    : [
-        { href: '/#escolher-equipa', label: 'My club' },
-        { href: '/eleicoes/arquivo', label: 'Elections' },
-        { href: '/economia#compreender', label: 'Inflation' },
-      ];
+  // The support row reads in the order of what is live, as the nav does: the
+  // economy, while it is in preparation, comes after the election archive.
+  const support = ECONOMY_PUBLISHED ? layout.support : [...layout.support].sort((a, b) => Number(a === 'economy') - Number(b === 'economy'));
+
+  // The shortcuts stand in for the nav below 1024px, where it sits behind the
+  // menu button: labelled, each with its status, in the order of what is live.
+  // The economy has none while it is in preparation.
+  const shortcuts = [
+    { href: '/populacao', label: t('shortcutPopulation'), status: populationMeta ? t('shortcutPopulationStatus', { version: populationMeta.release_version }) : null },
+    { href: '/#escolher-equipa', label: t('shortcutClub'), status: ligaSummary ? t('shortcutClubStatus', { matchday: ligaSummary.matchday }) : null },
+    { href: '/eleicoes/arquivo', label: t('shortcutElections'), status: t('shortcutElectionsStatus') },
+  ];
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1280px] px-4 py-6 outline-none md:px-6 md:py-8">
-        <nav aria-label={locale === 'pt' ? 'Outras perguntas' : 'Other questions'} className="mb-4 grid grid-cols-3 gap-2 min-[1100px]:hidden">
-          {quickTasks.map(task => (
-            <Link key={task.href} href={task.href} locale={locale} className="inline-flex min-h-11 items-center justify-center rounded-lg border border-line bg-cream px-2 text-sm font-semibold text-ink transition-colors hover:bg-parchment">
-              {task.label}
-            </Link>
-          ))}
+        {/* What the site is, before any one subject: the line is the page's
+            h1, kept small so the population lead stays above the fold. */}
+        <div className="mb-5 max-w-4xl md:mb-6">
+          <h1 className="text-lg leading-snug text-ink md:text-xl">{brandLine(locale)}</h1>
+          <p className="mt-1 text-sm leading-relaxed text-stone-600 md:text-[15px]">
+            {brandDescriptor(locale)}{' '}
+            <Link href="/sobre" locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{t('aboutLink')}</Link>
+          </p>
+        </div>
+        <nav aria-labelledby="home-shortcuts-label" className="mb-5 lg:hidden">
+          <p id="home-shortcuts-label" className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{t('shortcutsLabel')}</p>
+          <ul className="grid grid-cols-3 gap-2">
+            {shortcuts.map(task => (
+              <li key={task.href} className="min-w-0">
+                <Link href={task.href} locale={locale} className="flex h-full min-h-14 flex-col justify-center rounded-lg border border-line bg-cream px-2.5 py-2 text-ink transition-colors hover:bg-parchment">
+                  <span className="text-sm font-semibold leading-tight">{task.label}</span>
+                  {task.status && <span className="mt-0.5 text-[12px] leading-tight text-stone-600">{task.status}</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </nav>
-        <div className="grid gap-4 md:gap-6 min-[1100px]:grid-cols-[2fr_1fr]">
+        {/* Cards keep their own height (items-start): a short rail or support
+            card ends where its content does instead of stretching into an
+            empty cream block beside a taller neighbour. */}
+        <div className="grid items-start gap-4 md:gap-6 min-[1100px]:grid-cols-[2fr_1fr]">
           {panel(layout.lead, 'lead')}
           {panel(layout.secondary, 'secondary')}
         </div>
-        <div className="mt-4 grid gap-4 md:mt-6 md:gap-6 min-[900px]:grid-cols-2">
-          {panel(layout.support[0], 'support')}
-          {panel(layout.support[1], 'support')}
+        <div className="mt-4 grid items-start gap-4 md:mt-6 md:gap-6 min-[900px]:grid-cols-2">
+          {support.map(section => panel(section, 'support'))}
         </div>
         <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-stone-600 md:mt-8">
           <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{t('moreKicker')}</span>

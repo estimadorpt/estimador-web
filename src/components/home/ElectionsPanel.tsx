@@ -61,7 +61,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
       <HomePanel labelledBy="home-elections-title" className="relative min-[1100px]:pr-[45%]">
         <div className="min-w-0 px-5 pt-5 md:px-7 md:pt-6">
           <Kicker pill={past(election) ? t('electionsArchived') : t('electionsForecast')}>{t('electionsKicker')}</Kicker>
-          <h1 id="home-elections-title" className="mt-3 max-w-xl text-[2rem] leading-[1.06] md:text-[2.4rem]">{electionName(election)}</h1>
+          <h2 id="home-elections-title" className="mt-3 max-w-xl text-[2rem] leading-[1.06] md:text-[2.4rem]">{electionName(election)}</h2>
           <p className="mt-3 text-[13px] font-semibold text-stone-600">
             {longDate(election.date)}{updatedAt ? ` · ${t('electionsForecastAsOf', { date: longDate(updatedAt) })}` : ''}
           </p>
@@ -122,7 +122,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
                   </span>
                   <span className="block text-[12px] text-stone-500">{questionLine(e)}</span>
                 </div>
-                <Link href={ELECTION_ROUTES[e.id]} locale={locale} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap text-[15px] font-semibold text-ink underline underline-offset-4">{t('electionsOpen')} →</Link>
+                <Link href={ELECTION_ROUTES[e.id]} locale={locale} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap text-[15px] font-semibold text-ink underline underline-offset-4">{t('electionsOpen')}<span className="sr-only">: {electionName(e)}</span>&nbsp;<span aria-hidden="true">→</span></Link>
               </li>
             );
           })}

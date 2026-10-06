@@ -11,7 +11,8 @@ import path from 'path';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/mdx-components';
 import { loadEconomyDashboard } from '@/lib/utils/data-loader';
-import { economyState, type EconomyState } from '@/lib/config/economy-status';
+import { ECONOMY_PUBLISHED, economyState, type EconomyState } from '@/lib/config/economy-status';
+import { Link } from '@/i18n/routing';
 import { fmtDate } from '@/lib/utils/economy-format';
 import { POPULATION_RELEASE } from '@/lib/config/population';
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
     locale,
     path: '/sobre',
     title: t('meta.aboutTitle'),
-    description: brandDescriptor(locale),
+    description: t('meta.aboutDescription'),
   });
 }
 
@@ -71,12 +72,12 @@ function getAboutContent(locale: string): { content: string; actualLocale: strin
 }
 
 /**
- * "Estado atual" list embedded in the About MDX (`<EstadoAtual />`). Only the
- * economy line is derived (`economyState`: the editorial flag, then the same
- * staleness guard the economy page itself uses) so that line cannot drift from
- * what /economia actually shows. Population, football and elections status is stable
- * editorial fact — see CLAUDE.md's "Active Sections" and "Population section" —
- * not something a loader in this file's scope can safely compute.
+ * The one status list on /sobre (`<EstadoAtual />` in the MDX): every section
+ * in the order of what is live, each with its status, what it is and where its
+ * method is explained. Only the economy's status is derived (`economyState`:
+ * the editorial flag, then the staleness guard /economia itself uses), so that
+ * line cannot drift from what the section shows. The rest is stable editorial
+ * fact (CLAUDE.md, "Sections"), not something a loader here can compute.
  */
 function EstadoAtual({
   economyNow,
@@ -89,47 +90,79 @@ function EstadoAtual({
 }) {
   const pt = locale !== 'en';
   const economyStatus = economyNow === 'preparing'
-    ? (pt
-        ? 'Em preparação — sem números publicados; as explicações sobre como ler os indicadores estão disponíveis.'
-        : 'In preparation — no figures published; the explanations of how to read the indicators are available.')
+    ? (pt ? 'Em preparação · sem números publicados.' : 'In preparation · no figures published.')
     : economyNow === 'paused'
     ? (pt
-        ? `Painel em pausa${economyDateLabel ? ` — última leitura: ${economyDateLabel}` : ''}. As explicações continuam disponíveis.`
-        : `Dashboard paused${economyDateLabel ? ` — last reading: ${economyDateLabel}` : ''}. The explanations remain available.`)
+        ? `Em pausa${economyDateLabel ? ` · última leitura a ${economyDateLabel}` : ''}.`
+        : `Paused${economyDateLabel ? ` · last reading ${economyDateLabel}` : ''}.`)
     : (pt
-        ? `Leitura ativa${economyDateLabel ? ` — atualizada a ${economyDateLabel}` : ''}.`
-        : `Active reading${economyDateLabel ? ` — updated ${economyDateLabel}` : ''}.`);
+        ? `Publicada${economyDateLabel ? ` · atualizada a ${economyDateLabel}` : ''}.`
+        : `Published${economyDateLabel ? ` · updated ${economyDateLabel}` : ''}.`);
 
-  const items: { label: string; status: string }[] = [
-    { label: pt ? 'Economia' : 'Economy', status: economyStatus },
+  const items: { label: string; href: string; status: string; text: string; method: { href: string; label: string } }[] = [
     {
       label: pt ? 'População' : 'Population',
+      href: '/populacao',
       status: pt
-        ? `Publicada — população sintética v${POPULATION_RELEASE} (Censos 2021), lançada a 5 de outubro de 2026: cada freguesia com os seus próprios números e o seu nível de qualidade. Pessoas e agregados gerados, não pessoas reais.`
-        : `Released — synthetic population v${POPULATION_RELEASE} (2021 Census), published 5 October 2026: every parish with its own figures and its quality tier. Generated people and households, not real people.`,
+        ? `Publicada · população sintética v${POPULATION_RELEASE} (Censos 2021), de 5 de outubro de 2026.`
+        : `Released · synthetic population v${POPULATION_RELEASE} (2021 Census), 5 October 2026.`,
+      text: pt
+        ? 'Tanto quanto nos foi possível apurar, a primeira população sintética de acesso aberto a cobrir todas as freguesias de Portugal. Pessoas e agregados gerados, não pessoas, famílias ou moradas reais. Podes procurar a tua freguesia, jogar a Freguesia misteriosa do dia e descarregar os microdados.'
+        : 'To the best of our knowledge, the first open-access synthetic population to cover every parish in Portugal. Generated people and households, not real people, families or addresses. You can look up your parish, play the daily Mystery parish and download the microdata.',
+      method: { href: '/populacao/metodologia', label: pt ? 'Metodologia da população' : 'Population methodology' },
     },
     {
-      label: pt ? 'Liga Portugal' : 'Liga Portugal',
+      label: 'Liga Portugal',
+      href: '/desporto/liga',
       status: pt
-        ? 'Em publicação contínua — previsões atualizadas a cada jornada da época em curso.'
-        : 'Published on a continuing basis — forecasts updated every matchday of the current season.',
+        ? 'Em publicação contínua · previsões atualizadas a cada jornada da época em curso.'
+        : 'Published on a continuing basis · forecasts updated every matchday of the current season.',
+      text: pt
+        ? 'Um modelo bayesiano que simula milhares de épocas possíveis para estimar a classificação final, as probabilidades de título e de despromoção e o peso de cada jogo nessas contas.'
+        : 'A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.',
+      method: { href: '/desporto/liga/metodologia', label: pt ? 'Metodologia do futebol' : 'Football methodology' },
     },
     {
-      label: pt ? 'Eleições presidenciais 2026' : 'Presidential elections 2026',
-      status: pt ? 'Arquivo — previsão preservada tal como foi publicada.' : 'Archive — forecast preserved as published.',
+      label: pt ? 'Eleições presidenciais 2026' : 'Presidential election 2026',
+      href: '/eleicoes/presidenciais',
+      status: pt ? 'Arquivo · previsão preservada tal como foi publicada.' : 'Archive · forecast preserved as published.',
+      text: pt
+        ? 'As previsões que publicámos para as duas voltas, com a informação disponível à data. Não são atualizadas nem reescritas com o resultado.'
+        : 'The forecasts we published for both rounds, with the information available at the time. They are not updated, nor rewritten with the outcome.',
+      method: { href: '/eleicoes/arquivo', label: pt ? 'Como ler o arquivo' : 'How to read the archive' },
     },
     {
-      label: pt ? 'Eleições legislativas 2025' : 'Parliamentary elections 2025',
-      status: pt ? 'Arquivo — não é atualizado com novos resultados.' : 'Archive — not updated with new results.',
+      label: pt ? 'Eleições legislativas 2025' : 'Parliamentary election 2025',
+      href: '/eleicoes/legislativas',
+      status: pt ? 'Arquivo · não é atualizado com novos resultados.' : 'Archive · not updated with new results.',
+      text: pt
+        ? 'As projeções nacionais de mandatos, simuladas distrito a distrito pelo método de Hondt, e os efeitos das empresas de sondagens estimados nessa altura.'
+        : 'The national seat projections, simulated district by district with the D’Hondt method, and the pollster house effects estimated at the time.',
+      method: { href: '/eleicoes/arquivo', label: pt ? 'Como ler o arquivo' : 'How to read the archive' },
+    },
+    {
+      label: pt ? 'Economia' : 'Economy',
+      href: '/economia',
+      status: economyStatus,
+      text: pt
+        ? 'Uma leitura de indicadores económicos portugueses: atividade, mercado de trabalho e inflação. Quando for publicada, cada número vai dizer se é um valor oficial ou uma estimativa nossa, o período a que se refere e a data de publicação. Até lá ficam as explicações sobre como ler os indicadores.'
+        : 'A read of Portuguese economic indicators: activity, the labour market and inflation. Once published, each figure will say whether it is an official value or our estimate, the period it refers to and its publication date. Until then, the explanations of how to read the indicators are available.',
+      method: { href: '/economia/metodologia', label: pt ? 'Metodologia da economia' : 'Economy methodology' },
     },
   ];
 
   return (
-    <ul className="mb-5 list-none space-y-3 pl-0">
+    <ul className="mb-5 list-none divide-y divide-line border-y border-line pl-0">
       {items.map(item => (
-        <li key={item.label} className="flex flex-col gap-0.5 border-b border-stone-100 pb-3 sm:flex-row sm:items-baseline sm:gap-3">
-          <span className="shrink-0 font-bold text-stone-900 sm:w-56">{item.label}</span>
-          <span className="text-stone-600">{item.status}</span>
+        <li key={item.href} className="py-5">
+          <h3 className="m-0 text-lg">
+            <Link href={item.href} locale={locale} className="text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{item.label}</Link>
+          </h3>
+          <p className="mt-1 font-sans text-sm font-semibold text-stone-600">{item.status}</p>
+          <p className="mt-2">{item.text}</p>
+          <p className="mt-1 font-sans text-sm">
+            <Link href={item.method.href} locale={locale} className="text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{item.method.label}</Link>
+          </p>
         </li>
       ))}
     </ul>
@@ -147,10 +180,10 @@ export default async function AboutPage({
 
   const { content: mdxContent, actualLocale } = getAboutContent(locale);
 
-  // The one status this page can derive rather than restate: whether the
-  // economy dashboard is currently paused, using the exact same guard
-  // /economia uses. Everything else is stable editorial fact (see EstadoAtual).
-  const economyData = await loadEconomyDashboard();
+  // The one status this page derives rather than restates: the economy's,
+  // with the guard /economia uses. Everything else is editorial fact.
+  // The feed is not shipped while the section is in preparation.
+  const economyData = ECONOMY_PUBLISHED ? await loadEconomyDashboard() : null;
   const economyDateIso = economyData?.as_of ?? economyData?.vintage_date;
   const economyNow = economyState(economyDateIso);
   const economyDateLabel = economyData?.vintage_date ? fmtDate(economyData.vintage_date, locale) : null;

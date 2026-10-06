@@ -45,20 +45,23 @@ export async function SiteFooter({ locale }: { locale: string }) {
   // published something; the feed routes keep working either way.
   const hasArticles = getMDXArticlesByLocale(locale).length > 0;
 
-  const products: FooterItem[] = [
-    { href: '/populacao', label: pt ? 'População' : 'Population' },
-    { href: '/economia', label: t(ECONOMY_PUBLISHED ? 'sections.economics' : 'nav.economicsPreparing') },
+  // Ordered by what is live, as in the header: population, the Liga, the
+  // election archive, then the economy while it is in preparation.
+  const sections: FooterItem[] = [
+    { href: '/populacao', label: t('nav.population') },
     { href: '/desporto/liga', label: t('football.title') },
     // Both forecasts are archives; the label says so wherever they are listed.
     { href: '/eleicoes/presidenciais', label: t('elections.navPresidential') },
     { href: '/eleicoes/legislativas', label: t('elections.navParliamentary') },
+    { href: '/economia', label: t(ECONOMY_PUBLISHED ? 'sections.economics' : 'nav.economicsPreparing') },
   ];
+  // The brand guide (/marca) is an internal, unindexed page: reachable by its
+  // address, not listed here.
   const project: FooterItem[] = [
-    { href: '/sobre', label: t('nav.about') },
+    { href: '/sobre', label: t('about.title') },
     { href: '/metodologia', label: t('nav.methodology') },
     ...(hasArticles ? [{ href: '/artigos', label: t('articles.title') }] : []),
     { href: '/privacidade', label: t('footer.privacy') },
-    { href: '/marca', label: pt ? 'Marca' : 'Brand' },
   ];
 
   return (
@@ -74,11 +77,14 @@ export async function SiteFooter({ locale }: { locale: string }) {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-x-10 gap-y-6 text-sm sm:grid-cols-3">
-            <FooterColumn heading={t('footer.products')} items={products} locale={locale} />
+            <FooterColumn heading={t('footer.products')} items={sections} locale={locale} />
             <FooterColumn heading={t('footer.project')} items={project} locale={locale} />
             <div>
-              <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Seguir' : 'Follow'}</h2>
+              <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t('footer.contact')}</h2>
               <ul className="space-y-1.5">
+                <li>
+                  <a href="mailto:info@estimador.pt" className={linkStyle}>info@estimador.pt</a>
+                </li>
                 {hasArticles && (
                   <li>
                     <a href={`/${locale}/feed.xml`} className={`inline-flex items-center gap-1.5 ${linkStyle}`}>
@@ -87,18 +93,13 @@ export async function SiteFooter({ locale }: { locale: string }) {
                     </a>
                   </li>
                 )}
-                <li>
-                  <a href="mailto:info@estimador.pt" className={linkStyle}>
-                    {pt ? 'Contacto' : 'Contact'}
-                  </a>
-                </li>
               </ul>
             </div>
           </div>
         </div>
         <div className="mt-8 flex flex-col gap-2 border-t border-line pt-5 text-xs text-stone-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {year} estimador.pt · {t('about.footerDeveloper')}</p>
-          <p>{pt ? 'Construído com transparência e metodologia aberta.' : 'Built with transparency and open methodology.'}</p>
+          <p>{t('about.footerDeveloper')}</p>
+          <p>© {year} estimador.pt</p>
         </div>
       </div>
     </footer>

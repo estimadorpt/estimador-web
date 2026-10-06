@@ -65,3 +65,7 @@ public/duckdb/
 # Local tool state and verification artefacts
 .claude/
 output/
+
+# The economy feeds stay out of the repository and the export until the section
+# is published (src/lib/config/economy-status.json; scripts/sync-data.sh guards it).
+/public/data/economics/

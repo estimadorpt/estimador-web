@@ -67,8 +67,10 @@ export default async function EconomiaPage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "economics" });
 
-  const data = await loadEconomyDashboard();
-  const stories = await loadEconomyStories();
+  // The feeds are not shipped while the section is in preparation
+  // (economy-status.json), so they are only read once it is published.
+  const data = ECONOMY_PUBLISHED ? await loadEconomyDashboard() : null;
+  const stories = ECONOMY_PUBLISHED ? await loadEconomyStories() : null;
   const state = economyState(data?.as_of ?? data?.vintage_date);
 
   // Written analysis filed under the economy, on every branch of the page; it
@@ -96,7 +98,7 @@ export default async function EconomiaPage({
           icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
           eyebrow={t("preparingEyebrow")}
           title={t("preparingTitle")}
-          lede={t("explainerLede")}
+          lede={t("preparingLede")}
         />
         <div className="max-w-5xl mx-auto px-4 py-6">
           <EconomyReading
@@ -108,11 +110,11 @@ export default async function EconomiaPage({
               </span>
             }
           />
-          <details className="mt-8 border-t border-line pt-4 text-sm text-ink-muted">
-            <summary className="cursor-pointer py-3 font-semibold text-ink">{t("preparingQuestion")}</summary>
-            <p className="my-3 leading-relaxed">{t("preparingBody")}</p>
-            <Action href="/economia/metodologia" locale={locale} variant="text" arrow>{t("methodologyLink")}</Action>
-          </details>
+          {/* Why there are no numbers is in the lede above; what remains here
+              is where the method is explained. */}
+          <div className="mt-8 border-t border-line pt-4">
+            <Action href="/economia/metodologia" locale={locale} variant="text" arrow>{t("methodologyTitle")}</Action>
+          </div>
           {notes}
         </div>
         </main>

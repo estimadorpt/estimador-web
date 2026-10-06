@@ -170,12 +170,12 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           <div className="flex h-40 items-center justify-center rounded-xl border border-line bg-cream"><span className="brand-link inline-block"><LogoHorizontal size={34} /></span></div>
           <div className="flex h-40 items-center justify-center rounded-xl bg-forest"><span className="brand-link inline-block"><LogoHorizontal size={34} tone="paper" /></span></div>
         </div>
-        <p className="mt-3 text-xs text-stone-500">{pt ? 'Passa o rato por cima: o intervalo abre dois pontos e volta a fechar. É o único movimento da assinatura.' : 'Hover: the interval opens by two units and closes again. It is the signature\'s only movement.'}</p>
+        <p className="mt-3 text-xs text-stone-500">{pt ? 'Passa o cursor por cima ou foca a ligação com o teclado: o intervalo abre dois pontos e volta a fechar. É o único movimento da assinatura.' : 'Hover over it or focus the link with the keyboard: the interval opens by two units and closes again. It is the signature\'s only movement.'}</p>
         <ul className="mt-6 grid gap-2 md:grid-cols-2">
           <Rule yes>{pt ? 'Espaço livre à volta: metade da altura do símbolo, no mínimo.' : 'Clear space around it: at least half the mark\'s height.'}</Rule>
           <Rule yes>{pt ? 'No cabeçalho, 22 px de símbolo; em rodapés, 20 px; em cartões sociais, 26 a 34 px.' : 'In the header, a 22px mark; in footers, 20px; on social cards, 26 to 34px.'}</Rule>
           <Rule yes={false}>{pt ? 'Não se recompõe: o nome nunca vai por baixo do símbolo, nem em serifa, nem sem o .pt.' : 'It is never rearranged: the name never goes under the mark, never in a serif, never without the .pt.'}</Rule>
-          <Rule yes={false}>{pt ? 'Não se anima em ciclo: o gesto de abrir e fechar responde ao rato, não ao tempo.' : 'It never loops: opening and closing answers the pointer, not the clock.'}</Rule>
+          <Rule yes={false}>{pt ? 'Não se anima em ciclo: o gesto de abrir e fechar responde ao cursor e ao teclado, não ao tempo.' : 'It never loops: opening and closing answers the pointer, not the clock.'}</Rule>
         </ul>
       </Section>
 
@@ -267,10 +267,10 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         </TileCard>
       </Section>
 
-      <Section id="movimento" kicker="06" title={pt ? 'O movimento' : 'Motion'} lede={pt ? 'Um só gesto, sempre na mesma tinta: a incerteza mexe-se. Enquanto algo carrega, o ponto percorre a faixa; ao passar o rato pela assinatura, o intervalo abre e fecha. Nada disto acontece sobre uma previsão já publicada.' : 'One gesture, always in the same ink: the uncertainty moves. While something loads, the counter travels the band; on hover, the interval opens and closes. None of it happens over a published forecast.'}>
+      <Section id="movimento" kicker="06" title={pt ? 'O movimento' : 'Motion'} lede={pt ? 'Um só gesto, sempre na mesma tinta: a incerteza mexe-se. Enquanto algo carrega, o ponto percorre a faixa; ao passar o cursor pela assinatura, o intervalo abre e fecha. Nada disto acontece sobre uma previsão já publicada.' : 'One gesture, always in the same ink: the uncertainty moves. While something loads, the counter travels the band; on hover, the interval opens and closes. None of it happens over a published forecast.'}>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="flex h-36 flex-col items-center justify-center gap-3 rounded-xl bg-forest"><MarkLoading height={36} color={BRAND.paper} ground={BRAND.forest} label={pt ? 'A estimar' : 'Estimating'} /><span className="text-xs text-stone-300">{pt ? 'A estimar…' : 'Estimating…'}</span></div>
-          <div className="flex h-36 flex-col items-center justify-center gap-3 rounded-xl border border-line bg-cream"><span className="brand-link inline-block"><Mark height={36} color={BRAND.ink} /></span><span className="text-xs text-stone-500">{pt ? 'Passa o rato por cima.' : 'Hover.'}</span></div>
+          <div className="flex h-36 flex-col items-center justify-center gap-3 rounded-xl border border-line bg-cream"><span className="brand-link inline-block"><Mark height={36} color={BRAND.ink} /></span><span className="text-xs text-stone-500">{pt ? 'Passa o cursor por cima.' : 'Hover over it.'}</span></div>
         </div>
         <ul className="mt-8 grid gap-2 md:grid-cols-2">
           <Rule yes>{pt ? 'Respeita prefers-reduced-motion: sem movimento, o símbolo fica parado e completo.' : 'Respects prefers-reduced-motion: without motion, the mark stays still and complete.'}</Rule>

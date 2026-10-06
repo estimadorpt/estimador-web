@@ -10,7 +10,12 @@
     "liga": "Liga Portugal",
     "economics": "Economy",
     "economicsPreparing": "Economy · in preparation",
-    "population": "Population"
+    "population": "Population",
+    "populationSearch": "Find your parish",
+    "populationGame": "Mystery parish (daily game)",
+    "populationData": "Open data",
+    "populationQuality": "Quality",
+    "populationMethodology": "Methodology"
   },
   "common": {
     "methodology": "Methodology"
@@ -103,12 +108,12 @@
   "articles": {
     "title": "Analysis and articles",
     "eyebrow": "Notes and explainers",
-    "subtitle": "Dated notes on what shows up in the data — football, the economy and elections — and explainers on how to read the numbers.",
+    "subtitle": "Dated notes on what shows up in the data (population, football, elections and the economy) and explainers on how to read the numbers.",
     "by": "By",
     "backToArticles": "Back to articles",
     "onlyInPortuguese": "Portuguese only",
-    "empty": "No articles published yet.",
-    "emptyNextStep": "Read the methodology →",
+    "empty": "No articles published yet. In the meantime, the data is in the sections: start with your parish.",
+    "emptyNextStep": "Find your parish",
     "readTimeSuffix": "read",
     "feedLink": "RSS",
     "notesHeading": "Notes",
@@ -145,11 +150,10 @@
   },
   "about": {
     "title": "About estimador.pt",
-    "footerDeveloper": "Developed by Bernardo Caldas"
+    "footerDeveloper": "An independent project by Bernardo Caldas."
   },
   "methodology": {
-    "title": "Methodology",
-    "subtitle": "How our election models work — and where to find each domain’s methodology"
+    "title": "Methodology"
   },
   "parties": {
     "AD": "Democratic Alliance",
@@ -312,7 +316,15 @@
     "electionsLeadRunoffLabel": "Runoff on {date} · of the valid vote · {interval}",
     "moreKicker": "How we work",
     "moreMethodology": "Methodology for each domain",
-    "moreArticle": "Latest analysis"
+    "moreArticle": "Latest analysis",
+    "aboutLink": "About the project",
+    "shortcutsLabel": "Shortcuts",
+    "shortcutPopulation": "My parish",
+    "shortcutPopulationStatus": "Version {version}",
+    "shortcutClub": "My club",
+    "shortcutClubStatus": "After matchday {matchday}",
+    "shortcutElections": "Elections",
+    "shortcutElectionsStatus": "Archive"
   },
   "sections": {
     "ligaPortugal": "Liga Portugal",
@@ -551,7 +563,7 @@
   },
   "meta": {
     "defaultTitle": "estimador.pt — Data to understand Portugal",
-    "defaultDescription": "Forecasts and analysis with the uncertainty in plain sight: the economy, Liga Portugal, elections and population.",
+    "defaultDescription": "Data and models about Portugal, with the uncertainty in view: who lives in each parish, how the Liga could end, and what the election forecasts said.",
     "homepageTitle": "estimador.pt — Data to understand Portugal",
     "presidentialTitle": "Presidential election 2026: forecast archive",
     "presidentialDescription": "Archived forecast of the 2026 presidential election, with the information available at the time: first round on {date1}, runoff on {date2}.",
@@ -562,16 +574,17 @@
     "articlesTitle": "Analysis and articles",
     "aboutTitle": "About estimador.pt",
     "economicsTitle": "State of the Portuguese economy",
-    "economicsDescription": "A consolidated, uncertainty-first read-out of the current state of the Portuguese economy — activity pulse, recession risk, downside risk and a preliminary GDP nowcast. Not a forecast.",
+    "economicsDescription": "A reading of the current state of the Portuguese economy, uncertainty in view: activity, recession risk and a preliminary GDP estimate.",
     "economicsPreparingTitle": "Economy (in preparation)",
     "economicsPreparingDescription": "How to read the indicators of the Portuguese economy: inflation, employment and activity. The read-out of the state of the economy is in preparation.",
     "privacyTitle": "Privacy",
     "privacyDescription": "What estimador.pt records about its visitors: cookieless measurement, server logs and prediction-game data.",
     "economicsMethodologyTitle": "Economy methodology",
-    "economicsMethodologyDescription": "How we build the read on the Portuguese economy: indicators, official sources, what is measured and what is estimated.",
+    "economicsMethodologyDescription": "How we will read the Portuguese economy: the sources, the four labels and the evaluation of the prototype tested up to July 2026. No figures published yet.",
     "topicsTitle": "Article topics",
     "topicTitle": "{topic}: articles",
-    "topicDescription": "Everything estimador.pt has published on {topic}: dated notes and explainers."
+    "topicDescription": "Everything estimador.pt has published on {topic}: dated notes and explainers.",
+    "aboutDescription": "Who makes estimador.pt, what each section publishes today and how we work: methods, principles and limits."
   },
   "economics": {
     "title": "State of the economy",
@@ -757,10 +770,8 @@
     "pausedQuestion": "Why are current figures unavailable?",
     "preparingTitle": "Understanding the economy",
     "preparingEyebrow": "Economy · in preparation",
-    "preparingBody": "The read-out of the state of the economy is still in preparation, so we show no figures. Until then, here are the explanations of how to read the indicators, and the methodology.",
-    "preparingQuestion": "Why are there no figures?",
     "explainerLede": "Understand what the indicators measure — and what they leave out.",
-    "methodologyPreparingNotice": "This section is in preparation. The methodology describes the dashboard as it was tested up to {date}; no figures are published.",
+    "methodologyPreparingNotice": "This section is in preparation and no figures are published. The page describes the prototype as it was tested up to {date}.",
     "statusPaused": "Dashboard paused · last reading: {date}",
     "statusPreparing": "In preparation · no figures published",
     "statusUnavailable": "Dashboard unavailable right now",
@@ -862,18 +873,21 @@
     "paDebtAria": "Public debt path over the last 24 months",
     "calendarTitle": "Upcoming releases",
     "calendarEstimated": "estimated date",
-    "calendarUpdates": "updates"
+    "calendarUpdates": "updates",
+    "preparingLede": "The read-out of the state of the economy is in preparation, so there are no figures yet. Meanwhile: three questions on how to read prices, work and activity.",
+    "methodologyTitle": "How will we read the economy?"
   },
   "footer": {
-    "products": "Products",
+    "products": "Sections",
     "project": "The project",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "contact": "Contact"
   },
   "notFound": {
     "title": "Page not found | estimador.pt",
     "heading": "This path leads nowhere.",
     "lede": "The page you are looking for does not exist, has moved, or was never estimated.",
     "home": "Back to the start",
-    "atlas": "Explore the atlas"
+    "atlas": "Find your parish"
   }
 }

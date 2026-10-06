@@ -20,7 +20,8 @@ export async function NotFoundBody({ locale, withTitle = false }: { locale: 'pt'
       {/* React hoists this into <head>. Only the root 404 needs it: inside a
           locale the page's own metadata names the document. */}
       {withTitle && <title>{t('title')}</title>}
-      <section className="border-b border-line">
+      {/* No bottom rule: the footer draws the one rule below it. */}
+      <section>
         <div className="mx-auto grid max-w-5xl gap-10 px-4 py-16 md:grid-cols-[1.2fr_1fr] md:items-center md:py-24">
           <div>
             <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">404</p>
