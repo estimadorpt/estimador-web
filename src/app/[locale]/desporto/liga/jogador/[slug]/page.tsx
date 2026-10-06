@@ -27,7 +27,7 @@ import type {
 import { injuryReasonLabel } from "@/lib/i18n/football-labels";
 import { teamDisplayName } from "@/lib/config/football";
 import { currentAbsences } from "@/lib/football-injuries";
-import { formatDecimal } from "@/lib/football-format";
+import { formatDecimal, formatShortDate } from "@/lib/football-format";
 import { setRequestLocale } from '@/i18n/request-locale';
 
 /* ------------------------------------------------------- position metric */
@@ -97,9 +97,15 @@ export async function generateMetadata({
     ? pt
       ? `${player.player} (${teamDisplayName(player.team)}): minutos, jogos e cada época, com a métrica da posição; o ranking de finalização não se aplica.`
       : `${player.player} (${teamDisplayName(player.team)}): minutes, matches and every season, with the metric for the position; the finishing ranking does not apply.`
-    : pt
-      ? `${player.player} (${teamDisplayName(player.team)}): ${formatDecimal(sar, locale, 2)} golos/90 acima do substituto, n.º ${player.rank} de ${data.n_players} em finalização. Intervalo, minutos e épocas.`
-      : `${player.player} (${teamDisplayName(player.team)}): ${formatDecimal(sar, locale, 2)} goals/90 above replacement, number ${player.rank} of ${data.n_players} for finishing. Interval, minutes and seasons.`;
+    // The snippet carries the data cut-off the page shows beside every SAR
+    // figure (audit FA3-12).
+    : (() => {
+        const day = formatShortDate(data.appearances_through, locale);
+        const through = day ? `${day} ${String(data.appearances_through).slice(0, 4)}` : "";
+        return pt
+          ? `${player.player} (${teamDisplayName(player.team)}): ${formatDecimal(sar, locale, 2)} golos/90 acima do substituto, n.º ${player.rank} de ${data.n_players} em finalização${through ? ` (dados até ${through})` : ""}. Intervalo, minutos e épocas.`
+          : `${player.player} (${teamDisplayName(player.team)}): ${formatDecimal(sar, locale, 2)} goals/90 above replacement, number ${player.rank} of ${data.n_players} for finishing${through ? ` (data to ${through})` : ""}. Interval, minutes and seasons.`;
+      })();
 
   return createPageMetadata({
     locale,
