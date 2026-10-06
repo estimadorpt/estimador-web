@@ -586,8 +586,8 @@ function CheckpointChart({
 
       <p className="mt-2 text-[11px] leading-relaxed text-stone-500">
         {pt
-          ? `Eixo vertical truncado (${num(yLo, 2)} a ${num(yHi, 2)}) para tornar visíveis as diferenças; as diferenças reais são as da faixa inferior. Cada ponto junta os jogos de uma jornada nas ${data.n_seasons} épocas${perPoint ? ` (n = ${perPoint} jogos por ponto)` : ""}, previstos com os resultados até à jornada anterior. Na faixa inferior, uma barra cuja linha de ±${K} erros padrão atravessa o zero é um empate técnico.`
-          : `Vertical axis truncated (${num(yLo, 2)} to ${num(yHi, 2)}) so the differences are visible; the real differences are the ones in the lower strip. Each point pools one matchday's games across the ${data.n_seasons} seasons${perPoint ? ` (n = ${perPoint} matches per point)` : ""}, forecast with the results up to the previous matchday. In the lower strip, a bar whose ±${K} standard-error line crosses zero is a statistical tie.`}
+          ? `Eixo vertical truncado (${num(yLo, 2)} a ${num(yHi, 2)}) para tornar visíveis as diferenças; as diferenças reais são as da faixa inferior. Cada ponto junta os jogos de uma jornada nas ${data.n_seasons} épocas${perPoint ? ` (n = ${perPoint} jogos por ponto)` : ""}, previstos com os resultados até à jornada anterior. Na faixa inferior, uma barra cuja linha de ±${K} erros padrão atravessa o zero é um empate técnico. Com ${cps.length} jornadas, é de esperar que uma ou outra passe os ${K} erros padrão só por acaso: a leitura principal é a dos três cartões, que juntam os jogos todos.`
+          : `Vertical axis truncated (${num(yLo, 2)} to ${num(yHi, 2)}) so the differences are visible; the real differences are the ones in the lower strip. Each point pools one matchday's games across the ${data.n_seasons} seasons${perPoint ? ` (n = ${perPoint} matches per point)` : ""}, forecast with the results up to the previous matchday. In the lower strip, a bar whose ±${K} standard-error line crosses zero is a statistical tie. With ${cps.length} matchdays, one or two are expected to pass ${K} standard errors by chance alone: the main reading is the three cards', which pool every match.`}
       </p>
 
       {/* Table view twin: the shared ChartTable (audit A11Y2-06), a named,
@@ -844,9 +844,11 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
           title={pt
             ? "Erro de previsão do modelo e do mercado, jornada a jornada"
             : "Model and market forecast error, matchday by matchday"}
+          // Named like every other card, not by its file (audit FA3-11); the
+          // file is listed on /desporto/liga/dados.
           source={pt
-            ? "Fonte: market_scorecard.json · football-data.co.uk"
-            : "Source: market_scorecard.json · football-data.co.uk"}
+            ? "Fonte: avaliação do modelo estimador.pt; cotações de fecho via football-data.co.uk"
+            : "Source: estimador.pt model evaluation; closing odds via football-data.co.uk"}
           updated={pt
             ? `Atualizado a ${formatLongDate(data.generated_at, locale)}`
             : `Updated ${formatLongDate(data.generated_at, locale)}`}
@@ -870,8 +872,8 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
             </dt>
             <dd className="text-stone-600 leading-relaxed">
               {pt
-                ? "O Ranked Probability Score mede quanto uma previsão de vitória-empate-derrota se afasta do que aconteceu, penalizando mais os erros grandes. Zero é uma previsão perfeita; dar 33% a cada resultado dá cerca de 0,22."
-                : "The Ranked Probability Score measures how far a win-draw-loss forecast lands from what happened, penalising big misses more. Zero is a perfect forecast; putting 33% on each result scores about 0.22."}
+                ? "O Ranked Probability Score mede quanto uma previsão de vitória-empate-derrota se afasta do que aconteceu, penalizando mais os erros grandes. Zero é uma previsão perfeita; dar 33% a cada resultado dá cerca de 0,23 a 0,24, com a proporção de empates da Liga."
+                : "The Ranked Probability Score measures how far a win-draw-loss forecast lands from what happened, penalising big misses more. Zero is a perfect forecast; putting 33% on each result scores about 0.23 to 0.24, given the Liga's share of draws."}
             </dd>
           </div>
           <div>

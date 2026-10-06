@@ -76,6 +76,21 @@ export function formatPercent(p: number, locale: string): string {
   return `${formatInteger(Math.round(pct), locale)}%`;
 }
 
+/**
+ * A posterior probability from a model fit: a player's chance of being above
+ * replacement level, a keeper's of being above the average. Unlike a share of
+ * simulations, which can be exactly 0 or 1, a posterior is never certain; the
+ * player feeds round it to four decimals, so a published 1.0 means "0,99995 or
+ * more" and prints ">99%" (audit FA3-04), and a published 0 prints "<0,1%".
+ * Everything in between follows formatPercent.
+ */
+export function formatPosterior(p: number, locale: string): string {
+  if (!Number.isFinite(p)) return '—';
+  if (p >= 1) return '>99%';
+  if (p <= 0) return locale === 'en' ? '<0.1%' : '<0,1%';
+  return formatPercent(p, locale);
+}
+
 /** Kept for existing callers: the same rule as formatPercent. */
 export function formatProbability(p: number, locale: string): string {
   return formatPercent(p, locale);

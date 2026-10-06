@@ -360,6 +360,8 @@ export default async function Liga2Page({
                 <Liga2PromotionRace
                   checkpoints={review.checkpoints}
                   locale={locale}
+                  generatedAt={data.generated_at}
+                  nSims={data.n_sims}
                 />
               </section>
             )}
@@ -454,18 +456,18 @@ export default async function Liga2Page({
             <Link
               href="/desporto/liga"
               locale={locale}
-              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.primeira}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
               href="/desporto/liga/metodologia"
               locale={locale}
-              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1 group"
+              className="text-sm font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1 group"
             >
               {c.methodology}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight aria-hidden="true" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </section>

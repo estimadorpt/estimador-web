@@ -1,6 +1,7 @@
 "use client";
 
 import { formatInteger } from "@/lib/football-format";
+import { PLAYER_MARKS } from "@/components/charts/football/player-marks";
 
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
@@ -76,8 +77,9 @@ interface PlayerSkillRankingProps {
 
 // Single-hue magnitude ramp — identity is carried by the logo + club chip,
 // so the bar stays one colour and lengths stay comparable across rows.
-const BAR = "#16362e"; // stone-900
-const BAR_SOFT = "#7f9284"; // stone-400 — interval, over the light surface
+const BAR = PLAYER_MARKS.bar; // stone-900
+// The interval carries the uncertainty: stone-400, 3:1 on paper (A11Y3-10).
+const BAR_SOFT = PLAYER_MARKS.whisker;
 const BAR_INSIDE = "#cbccbb"; // stone-300 — interval, over the dark bar
 
 export function PlayerSkillRanking({

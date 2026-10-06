@@ -62,6 +62,8 @@ A [página de jogadores](/pt/desporto/liga/jogadores/) publica várias métricas
 
 Cada valor vem com um intervalo de credibilidade de 90%: o modelo dá 90% de probabilidade a que o valor verdadeiro esteja lá dentro. Com poucos minutos, o valor é puxado para o nível de substituição e o intervalo alarga-se. A página também mostra verificações técnicas de cada ajuste (se o algoritmo convergiu); estão numa caixa à parte, para quem as quiser ler.
 
+Um jogador «separa-se» da média quando o seu intervalo de 90% deixa de fora a média da posição (nos defesas, o zero). Ao lado de cada contagem, a página diz quantos se separariam só por acaso, e com que teste: na posse disputada, um teste de permutação (o mesmo ajuste com os duelos baralhados entre colegas do mesmo clube, época e posição); nos guarda-redes e nos defesas, a taxa nominal de um intervalo de 90%, que deixa um em cada dez valores de fora. Quando o modelo encolhe muito os valores, como nos defesas, essa taxa exagera o que o acaso daria.
+
 <PlayersCutoff />
 
 ## O que avaliámos e o que não avaliámos?

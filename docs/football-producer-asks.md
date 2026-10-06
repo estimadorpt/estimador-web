@@ -25,3 +25,31 @@ the website does meanwhile and what would let it stop.
    `src/lib/utils/prediction-game-record.ts`), and the game scores them as frozen.
 4. **Fill `probs_source` for matchdays 1 and 2.** Both rounds have published odds but no
    source on any game. *Web:* says so on `/desporto/liga/dados` (`roundsWithoutSource`).
+5. **Name the third-party fields in each file, and confirm the xG provider.** The site
+   now publishes its own model outputs under CC BY 4.0 and marks, per file on
+   `/desporto/liga/dados`, the fields it cannot license ("Fora da licença": SofaScore match
+   statistics and results, Transfermarkt injuries and values, bookmaker-derived market
+   fields), from the provenance it knows (PRO3-03). A `sources` block per file (field →
+   provider) would let the page read the marks instead of keeping them by hand, and would
+   settle whether the xG behind `xpts_table` is SofaScore's (as the site says) or FotMob's.
+   *Web:* `FILE_DOCS[].thirdParty` in `src/app/[locale]/desporto/liga/dados/page.tsx`.
+6. **Freeze `next_matchday` with the game record, or drop it.** In 2026-27 the
+   `next_matchday` of md01, md03 and md04 differs from `game_fixtures.json` by up to
+   0.2 pp, and md03, md04 and md05 list 6, 7 and 8 of the next round's 9 games (FA3-06).
+   *Web:* `/desporto/liga/dados` states both, read from the files
+   (`src/lib/football-next-matchday.ts`), and treats the game record as the one that counts.
+7. **Re-issue the title-calibration leader table after the matchday-label fix.** The
+   assessment of 25 September 2026 (§94) found two matchday-one cells that are data
+   artefacts (Famalicão 2019-20, Santa Clara 2020-21). *Web:* leads with the 17 clean cells
+   (63% given, 82% won) and gives the 19 second (`TITLE_CALIBRATION` in
+   `src/lib/football-model-evaluation.ts`, METH3-15); a re-run would replace both.
+8. **Reader-facing caveats.** The player feeds' caveats are English, name internal fields
+   (`positional_distribution`) and files, and Portuguese readers get them verbatim behind a
+   labelled disclosure (FA3-10). A `caveats_pt` list (or one keyed translation per caveat)
+   would let `/pt/desporto/liga/jogadores` show them in Portuguese. *Web:*
+   `stripInternalRefs` in `src/lib/utils/player-ratings.ts` drops ADR numbers and file names
+   and reads `positional_distribution` as words.
+9. **Posteriors with enough precision.** `p_above_replacement` is rounded to four decimals,
+   so several players publish exactly 1.0. *Web:* prints a posterior of 1.0 as ">99%" and 0
+   as "<0,1%" (`formatPosterior`, FA3-04); a value such as 0.99997 would say the same thing
+   without the special case.

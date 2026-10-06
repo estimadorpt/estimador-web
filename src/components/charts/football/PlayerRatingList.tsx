@@ -12,6 +12,7 @@ import {
   teamLogoSrc,
 } from "@/lib/config/football";
 import { positionCodeEn, positionCodePt } from "@/lib/i18n/football-labels";
+import { PLAYER_BAR_OPACITY, PLAYER_MARKS } from "@/components/charts/football/player-marks";
 import {
   ratingDomain,
   ratingPct,
@@ -30,10 +31,12 @@ import {
  * copy of its own.
  */
 
-const BAR = "#16362e"; // stone-900
-const BAR_NEG = "#7f9284"; // stone-400 — below the reference level
-const SOFT = "#7f9284"; // stone-400 — interval whisker
-const ZERO = "#cbccbb"; // stone-300 — the reference line
+// The bars, the whiskers and their caps carry the estimate, so they reach
+// 3:1 on every ground (audit A11Y3-10; player-marks.test.ts).
+const BAR = PLAYER_MARKS.bar;
+const BAR_NEG = PLAYER_MARKS.barNegative;
+const SOFT = PLAYER_MARKS.whisker;
+const ZERO = PLAYER_MARKS.zero;
 
 export interface PlayerRatingListProps {
   entries: RatingEntry[];
@@ -64,6 +67,15 @@ export interface PlayerRatingListProps {
     newEntry: string;
     playerPage: string;
     openPlayer: (name: string) => string;
+    /** The rank movement in words, for a screen reader (the ▲/▼ glyphs are hidden). */
+    movedUp: (n: number) => string;
+    movedDown: (n: number) => string;
+    unmoved: string;
+    /**
+     * The value and its interval in words, for a screen reader: the visible
+     * "+0,57 / +0,42 … +0,72" is hidden from it (audit A11Y3-14).
+     */
+    valueWords: (value: string, lo: string | null, hi: string | null) => string;
   };
 }
 
@@ -160,11 +172,15 @@ export function PlayerRatingList({
                     {e.rank ?? ""}
                   </div>
 
+                  {/* Names and clubs wrap rather than truncate: a long name
+                      ("Ignacio de Arruabarrena") takes two lines on a phone,
+                      and nothing is cut under user text spacing (audit
+                      UXM3-16, A11Y3-M4). */}
                   <div className="w-24 sm:w-52 flex-shrink-0 min-w-0">
-                    <div className="text-xs sm:text-sm font-semibold truncate text-stone-900">
+                    <div className="text-xs sm:text-sm font-semibold leading-snug break-words text-stone-900">
                       {e.player}
                     </div>
-                    <div className="flex items-center gap-1 mt-0.5">
+                    <div className="flex flex-wrap items-center gap-x-1 mt-0.5">
                       {e.team && teamLogoSrc(e.team) ? (
                         <img
                           src={teamLogoSrc(e.team)}
@@ -183,10 +199,10 @@ export function PlayerRatingList({
                       )}
                       {e.team && (
                         <>
-                          <span className="text-[11px] text-stone-500 truncate sm:hidden">
+                          <span className="text-[11px] text-stone-500 break-words sm:hidden">
                             {ligaTeamShortNames[e.team] || e.team}
                           </span>
-                          <span className="text-[11px] text-stone-500 truncate hidden sm:inline">
+                          <span className="text-[11px] text-stone-500 break-words hidden sm:inline">
                             {teamDisplayName(e.team)}
                           </span>
                         </>
@@ -224,7 +240,7 @@ export function PlayerRatingList({
                           left: `${Math.min(vPct, zeroPct)}%`,
                           width: `${Math.max(Math.abs(vPct - zeroPct), 0.4)}%`,
                           backgroundColor: negative ? BAR_NEG : BAR,
-                          opacity: 0.85,
+                          opacity: PLAYER_BAR_OPACITY,
                         }}
                       />
                     )}
@@ -258,15 +274,23 @@ export function PlayerRatingList({
                           <span className="sr-only">{labels.newEntry}</span>
                         </span>
                       ) : move === 0 ? (
-                        <span className="text-[11px] text-stone-500">=</span>
+                        <span className="text-[11px] text-stone-500">
+                          <span aria-hidden="true">=</span>
+                          <span className="sr-only">{labels.unmoved}</span>
+                        </span>
                       ) : (
                         <span
                           className={`text-[11px] font-semibold tabular-nums ${
                             move > 0 ? "text-emerald-700" : "text-stone-500"
                           }`}
                         >
-                          {move > 0 ? "▲" : "▼"}
-                          {Math.abs(move)}
+                          <span aria-hidden="true">
+                            {move > 0 ? "▲" : "▼"}
+                            {Math.abs(move)}
+                          </span>
+                          <span className="sr-only">
+                            {move > 0 ? labels.movedUp(move) : labels.movedDown(Math.abs(move))}
+                          </span>
                         </span>
                       )}
                     </div>
@@ -276,16 +300,25 @@ export function PlayerRatingList({
                       hidden behind a tap: a rating without uncertainty is the
                       thing this site exists not to publish. */}
                   <div className="w-[4.5rem] sm:w-28 flex-shrink-0 text-right">
-                    <span className="text-xs sm:text-sm font-bold tabular-nums text-stone-900">
+                    <span aria-hidden="true" className="text-xs sm:text-sm font-bold tabular-nums text-stone-900">
                       {e.value === null ? "—" : signed(e.value)}
                     </span>
-                    <div className="text-[11px] tabular-nums text-stone-500 leading-tight">
+                    <div aria-hidden="true" className="text-[11px] tabular-nums text-stone-500 leading-tight">
                       {hasInterval ? (
                         `${signed(e.lo!)} … ${signed(e.hi!)}`
                       ) : (
-                        <span className="italic">{labels.noInterval}</span>
+                        labels.noInterval
                       )}
                     </div>
+                    {/* One sentence instead of "+0,57 +0,42 … +0,72" read raw
+                        (audit A11Y3-14). */}
+                    <span className="sr-only">
+                      {`${metricHeader}: ${labels.valueWords(
+                        e.value === null ? (pt ? "sem dados" : "no data") : signed(e.value),
+                        hasInterval ? signed(e.lo!) : null,
+                        hasInterval ? signed(e.hi!) : null,
+                      )}`}
+                    </span>
                   </div>
                 </button>
 

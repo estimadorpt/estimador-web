@@ -212,9 +212,11 @@ export default async function LigaModelPage({
             <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3">
               {c.footnoteTitle}
             </h2>
+            {/* The selection caveat is said once, in the callout at the top
+                (audit UXD2-17). */}
             {s && (
               <p className="text-sm text-stone-600 leading-relaxed max-w-3xl">
-                {s.footnote} {s.which} {s.selection}
+                {s.footnote} {s.which}
               </p>
             )}
             <div className="mt-5">

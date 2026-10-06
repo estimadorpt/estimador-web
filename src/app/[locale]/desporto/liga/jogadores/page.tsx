@@ -17,6 +17,11 @@ import {
   loadPlayerSlugs,
 } from "@/lib/utils/football-data-loader";
 import { setRequestLocale } from '@/i18n/request-locale';
+import {
+  playerCutoffMeta,
+  playerInventory,
+  playerInventorySentence,
+} from "@/lib/utils/player-inventory";
 
 export async function generateMetadata({
   params,
@@ -69,6 +74,21 @@ export default async function PlayerRatingsPage({
       loadLigaPlayersDetail(),
     ]);
 
+  // The premise, what is ranked and the data cut-off, each said once, in the
+  // hero, before the first list (audit UXD2-29, CL3-12).
+  const inventory = playerInventorySentence(
+    playerInventory(
+      { finishers: (finishers?.players?.length ?? 0) > 0, contrib, gk, def, contested, gkChannels },
+      locale,
+    ),
+    locale,
+  );
+  const cutoff = playerCutoffMeta(
+    detail?.appearances_through ?? null,
+    finishers?.generated_from?.seasons ?? null,
+    locale,
+  );
+
   return (
     <div className="min-h-screen bg-paper">
       <Header />
@@ -77,11 +97,13 @@ export default async function PlayerRatingsPage({
         measure="wide"
         compact
         back={{ href: "/desporto/liga", label: "Liga Portugal", locale }}
-        eyebrow={pt ? "Liga Portugal · Jogadores" : "Liga Portugal · Players"}
+        // The back link already names the section (audit CL3-07, /modelo's pattern).
+        eyebrow={pt ? "Jogadores" : "Players"}
         title={pt ? "Jogadores da Liga Portugal" : "Liga Portugal players"}
-        lede={pt
-          ? "Métricas separadas — finalização, contribuição ofensiva, posse disputada e guarda-redes —, cada uma com o seu intervalo. Não há uma nota global que junte todos os jogadores: um número só não chega para comparar um guarda-redes com um ponta de lança."
-          : "Separate metrics — finishing, attacking contribution, contested possession and goalkeeping — each with its own interval. There is no overall score joining every player: one number cannot compare a goalkeeper with a centre-forward."}
+        lede={`${pt
+          ? "Uma métrica por dimensão, cada uma com o seu intervalo, e nenhuma nota global: um número só não chega para comparar um guarda-redes com um ponta de lança."
+          : "One metric per dimension, each with its own interval, and no overall score: one number cannot compare a goalkeeper with a centre-forward."} ${inventory}`}
+        meta={cutoff ? <span>{cutoff}</span> : undefined}
       />
 
       <div className="mx-auto w-full max-w-7xl px-4 py-8 md:py-10"><div className="max-w-4xl">

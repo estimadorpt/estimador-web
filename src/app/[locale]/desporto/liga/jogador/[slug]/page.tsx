@@ -178,7 +178,8 @@ export default async function PlayerPage({
         measure="wide"
         compact
         back={{ href: "/desporto/liga/jogadores", label: pt ? "Jogadores" : "Players", locale }}
-        eyebrow={`Liga Portugal · ${pt ? "Jogadores" : "Players"}`}
+        // The back link already says "Jogadores" (audit CL3-07).
+        eyebrow="Liga Portugal"
         title={player.player}
       />
 

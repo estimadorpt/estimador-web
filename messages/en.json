@@ -545,7 +545,7 @@
     "relegationDelta": "relegation",
     "simulatorLede": "Choose a club, then the result of a matchday {round} game: you see how the title and relegation chances change. One match at a time; every other result stays uncertain.",
     "ifLosesTemplate": "If __TEAM__ lose",
-    "titleCalibrationCaveat": "Read with care: in past seasons the model underrated teams leading by 3 or more points (it gave them 56% on average, and they won the title 74% of the time)."
+    "titleCalibrationCaveat": "Read with care: in past seasons the model underrated teams leading by 3 or more points (it gave them 63% on average, and they won the title 82% of the time, leaving out two cases with a data error)."
   },
   "meta": {
     "defaultTitle": "estimador.pt — Data to understand Portugal",

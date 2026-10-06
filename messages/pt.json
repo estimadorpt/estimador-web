@@ -545,7 +545,7 @@
     "relegationDelta": "despromoção",
     "simulatorLede": "Escolhe um clube e depois o resultado de um jogo da jornada {round}: vês como mudam as hipóteses de título e de despromoção. Um jogo de cada vez; os outros resultados continuam incertos.",
     "ifLosesTemplate": "Se o __TEAM__ perder",
-    "titleCalibrationCaveat": "Lê com cautela: no passado, o modelo subestimou quem liderava com 3 ou mais pontos de vantagem (deu-lhes 56% em média, e foram campeões em 74% dos casos)."
+    "titleCalibrationCaveat": "Lê com cautela: no passado, o modelo subestimou quem liderava com 3 ou mais pontos de vantagem (deu-lhes 63% em média, e foram campeões em 82% dos casos, sem dois casos com um erro nos dados)."
   },
   "meta": {
     "defaultTitle": "estimador.pt — Dados para compreender Portugal",

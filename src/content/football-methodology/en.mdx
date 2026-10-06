@@ -62,6 +62,8 @@ The [players page](/en/desporto/liga/jogadores/) publishes several separate metr
 
 Each value comes with a 90% credible interval: the model puts a 90% probability on the true value lying inside it. With few minutes, the value is pulled toward replacement level and the interval widens. The page also shows each fit's technical checks (whether the algorithm converged); they sit in a separate box for anyone who wants them.
 
+A player "separates" from the average when their 90% interval leaves out the positional average (for defenders, zero). Beside each count, the page says how many would separate by chance alone, and by which test: for contested possession, a permutation test (the same fit with the duels shuffled among team-mates of the same club, season and position); for goalkeepers and defenders, the nominal rate of a 90% interval, which leaves one value in ten outside. When the model shrinks the values hard, as it does for defenders, that rate overstates what chance would give.
+
 <PlayersCutoff />
 
 ## What have we evaluated, and what not?
