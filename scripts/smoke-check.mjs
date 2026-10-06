@@ -256,7 +256,9 @@ const checks = [
   ...pageRoutes
     .filter(route => route !== '/' && fs.existsSync(path.join(OUT_DIR, route, 'index.txt')))
     .map(route => ({ route: `${route}index.txt`, expect: 200, type: 'text/plain' })),
-  ...assets.files.filter(route => !answersNotFound(route))
+  // 404.html is left out here too: on Azure it answers a 301 to /404, which the
+  // host 404 rule above then answers 404 (the local emulator serves it as a file).
+  ...assets.files.filter(route => route !== '/404.html' && !answersNotFound(route))
     .map(route => ({ route, expect: 200, type: EXPECTED_TYPES[path.extname(route)] })),
   ...assets.sampleDirs.flatMap(name => sampleTree(name, 2).map(route => ({
     route,
