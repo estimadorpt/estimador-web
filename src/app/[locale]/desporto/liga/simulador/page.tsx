@@ -102,9 +102,10 @@ export default async function SimuladorPage({
   const statusPlayed = locale === "pt"
     ? `Previsão depois da jornada ${prediction.matchday} · atualizada a ${formatShortDate(prediction.timestamp, locale)} · a jornada ${simRound} já foi jogada, nova previsão em preparação: o simulador mostra o que o modelo dava antes`
     : `Forecast after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)} · matchday ${simRound} has been played, new forecast in preparation: the simulator shows what the model gave before it`;
+  const asOf = forecastAsOf(prediction.timestamp, locale);
   const ledePlayed = locale === "pt"
-    ? `A jornada ${simRound} já foi jogada: escolhe um clube e depois um resultado para veres o que esse resultado mudava ${forecastAsOf(prediction.timestamp, locale)}. Um jogo de cada vez; os outros resultados continuam incertos.`
-    : `Matchday ${simRound} has been played: choose a club, then a result, to see what that result would have changed ${forecastAsOf(prediction.timestamp, locale)}. One match at a time; every other result stays uncertain.`;
+    ? `A jornada ${simRound} já foi jogada: escolhe um clube e depois um resultado para veres o que esse resultado mudava ${asOf.endsWith(".") ? asOf : `${asOf}.`} Um jogo de cada vez; os outros resultados continuam incertos.`
+    : `Matchday ${simRound} has been played: choose a club, then a result, to see what that result would have changed ${asOf}. One match at a time; every other result stays uncertain.`;
 
   return (
     <div className="football-page min-h-screen bg-paper">

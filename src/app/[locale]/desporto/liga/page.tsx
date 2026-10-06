@@ -42,6 +42,11 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { setRequestLocale } from '@/i18n/request-locale';
 
+/** A sentence's full stop, unless it already ends on one ("25 set."). */
+function withStop(text: string): string {
+  return text.endsWith(".") ? text : `${text}.`;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -264,8 +269,8 @@ export default async function LigaPage({
         <ClockSwitch
           initial={t("football.simulatorCta")}
           steps={playedSteps(pt
-            ? `Vê o que cada resultado da jornada ${nextRound} mudava, ${asOf}.`
-            : `See what each matchday ${nextRound} result would have changed, ${asOf}.`)}
+            ? `Vê o que cada resultado da jornada ${nextRound} mudava, ${withStop(asOf)}`
+            : `See what each matchday ${nextRound} result would have changed, ${withStop(asOf)}`)}
         />
       ),
       action: t("football.trySimulator"),

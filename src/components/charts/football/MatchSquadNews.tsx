@@ -1,4 +1,5 @@
 import { teamDisplayName, teamLogoSrc } from "@/lib/config/football";
+import { Link } from "@/i18n/routing";
 import {
   injuryReasonLabel,
   positionLabel,
@@ -35,6 +36,9 @@ interface MatchSquadNewsProps {
   /** "Dados até 16 mai. 2026 (fim da época 2025-26)": the SAR fit's last
    * appearance (playerDataCutoffLabel), shown next to the SAR lists (F-H6). */
   sarCutoffLabel?: string | null;
+  /** How many players the published finishing list holds (players.json):
+   * a club with none in it is not a club without minutes (audit VFA-M1). */
+  publishedCount?: number;
 }
 
 function formatValue(v: number | null | undefined, pt: boolean): string {
@@ -54,12 +58,14 @@ function SideCard({
   unavailable,
   absencesStatus,
   sarCutoffLabel,
+  publishedCount = 0,
 }: {
   side: MatchSquadSide;
   locale: string;
   unavailable: Set<string>;
   absencesStatus: AbsencesStatus;
   sarCutoffLabel?: string | null;
+  publishedCount?: number;
 }) {
   const pt = locale !== "en";
   const codes = pt ? positionCodePt : positionCodeEn;
@@ -69,6 +75,8 @@ function SideCard({
   return (
     <div className="overflow-hidden rounded-2xl border border-line bg-cream">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100">
+        {/* The club colour as the identity rule; the bars are ink (UXD3-07). */}
+        <i aria-hidden="true" className="h-5 w-1 shrink-0 rounded-full" style={{ backgroundColor: side.color }} />
         {teamLogoSrc(side.team) && (
           <img src={teamLogoSrc(side.team)} alt="" width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 object-contain" />
         )}
@@ -144,8 +152,18 @@ function SideCard({
           {sarCutoffLabel ? ` ${sarCutoffLabel}.` : ""}
         </p>
         {side.topPlayers.length === 0 ? (
+          // The reason is the list, not the minutes (audit VFA-M1).
           <div className="text-xs text-stone-500">
-            {pt ? "Sem jogadores com minutos suficientes." : "No players with enough minutes."}
+            {publishedCount > 0
+              ? pt
+                ? `Nenhum jogador deste clube está entre os ${publishedCount} publicados na lista de finalização. `
+                : `No player from this club is among the ${publishedCount} on the published finishing list. `
+              : pt
+                ? "Nenhum jogador deste clube está na lista de finalização publicada. "
+                : "No player from this club is on the published finishing list. "}
+            <Link href="/desporto/liga/jogadores" locale={pt ? "pt" : "en"} className="font-semibold text-ink underline underline-offset-4">
+              {pt ? "Ver a lista" : "See the list"}
+            </Link>
           </div>
         ) : (
           <ul className="space-y-2">
@@ -176,7 +194,7 @@ function SideCard({
                       className="block h-full"
                       style={{
                         width: `${Math.max(4, (p.sar / maxSar) * 100)}%`,
-                        backgroundColor: side.color,
+                        backgroundColor: "var(--color-ink)",
                       }}
                     />
                   </span>
@@ -198,6 +216,7 @@ export function MatchSquadNews({
   absencesStatus,
   snapshotDate,
   sarCutoffLabel,
+  publishedCount = 0,
 }: MatchSquadNewsProps) {
   const pt = locale !== "en";
   const current = absencesStatus === "current";
@@ -208,9 +227,11 @@ export function MatchSquadNews({
         {pt ? "Plantéis" : "Squads"}
       </h2>
       <p className="text-sm text-stone-500 mb-6">
+        {/* The players are those of the published list, not a ranking within
+            each club (audit VFA-M1). */}
         {pt
-          ? "Baixas conhecidas e os jogadores com maior valor acima do substituto (SAR) em cada equipa. Baixas e jogadores individuais não entram nesta previsão: o modelo usa golos, remates à baliza e o valor de cada plantel."
-          : "Known absentees and each side's highest skill-above-replacement (SAR) players. Neither absences nor individual players feed this forecast: the model uses goals, shots on target and each squad's value."}
+          ? `Baixas conhecidas e os jogadores de cada equipa que entram na lista de finalização publicada${publishedCount ? `, de ${publishedCount} jogadores` : ""} (SAR, valor acima do substituto). Baixas e jogadores individuais não entram nesta previsão: o modelo usa golos, remates à baliza e o valor de cada plantel.`
+          : `Known absentees and each side's players on the published finishing list${publishedCount ? ` of ${publishedCount}` : ""} (SAR, skill above replacement). Neither absences nor individual players feed this forecast: the model uses goals, shots on target and each squad's value.`}
         {current && snapshot
           ? ` ${pt ? "Baixas registadas a" : "Absences recorded as of"} ${snapshot}.`
           : !current
@@ -222,8 +243,8 @@ export function MatchSquadNews({
             : ""}
       </p>
       <div className="grid gap-4 md:grid-cols-2">
-        <SideCard side={home} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} />
-        <SideCard side={away} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} />
+        <SideCard side={home} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} publishedCount={publishedCount} />
+        <SideCard side={away} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} publishedCount={publishedCount} />
       </div>
       {/* The feed's metric_label is English; the definition is ours to write. */}
       <p className="text-[11px] text-stone-500 mt-3">

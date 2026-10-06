@@ -83,7 +83,10 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
 
   return (
     <div className="overflow-hidden rounded-2xl border border-line bg-cream">
+      {/* The club colour is the identity rule beside the name; the bars
+          below are ink, so a red kit never reads as a "bad" bar (UXD3-07). */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100">
+        <i aria-hidden="true" className="h-5 w-1 shrink-0 rounded-full" style={{ backgroundColor: panel.color }} />
         {teamLogoSrc(panel.team) && (
           <img src={teamLogoSrc(panel.team)} alt="" width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 object-contain" />
         )}
@@ -162,7 +165,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
                   <span className="flex-1 h-1.5 bg-stone-200 overflow-hidden rounded-full">
                     <span
                       className="block h-full rounded-full"
-                      style={{ width: `${attackPct}%`, backgroundColor: panel.color }}
+                      style={{ width: `${attackPct}%`, backgroundColor: "var(--color-ink)" }}
                     />
                   </span>
                   <span className="text-[11px] font-bold text-stone-700 tabular-nums w-8 text-right">
@@ -176,7 +179,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
                   <span className="flex-1 h-1.5 bg-stone-200 overflow-hidden rounded-full">
                     <span
                       className="block h-full rounded-full"
-                      style={{ width: `${defensePct}%`, backgroundColor: panel.color }}
+                      style={{ width: `${defensePct}%`, backgroundColor: "var(--color-ink)" }}
                     />
                   </span>
                   <span className="text-[11px] font-bold text-stone-700 tabular-nums w-8 text-right">

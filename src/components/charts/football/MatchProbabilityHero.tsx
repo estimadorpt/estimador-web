@@ -1,6 +1,7 @@
-import { OUTCOME_TONES, teamColorOnPaper, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
+import { Check } from "lucide-react";
+import { OUTCOME_TONES, teamColorOnPaper, teamDisplayName, teamLogoSrc, teamWithArticle } from "@/lib/config/football";
 import { formatKickoff, formatKickoffShort, formatLongDate, formatPercent } from "@/lib/football-format";
-import { matchStartedLine } from "@/lib/football-status";
+import { kickoffSteps, matchPlayedLine, matchStartedLine } from "@/lib/football-status";
 import { ClockSwitch } from "@/components/football/ClockSwitch";
 
 interface MatchProbabilityHeroProps {
@@ -26,6 +27,9 @@ interface MatchProbabilityHeroProps {
   probsFrozenDuringRound?: number | null;
   /** The forecast's timestamp, for "Jogo começou · previsão de 25 set." after kickoff. */
   forecastTimestamp?: string | null;
+  /** For a postponed game still to play: the 1X2 frozen when its round
+   * opened, which the game and the match record use (audit VFA-M2). */
+  frozenProbs?: { p_home: number; p_draw: number; p_away: number; publishedAt: string } | null;
 }
 
 /** The number part of the one football percentage rule ("44", "8,4", ">99"). */
@@ -61,6 +65,7 @@ export function MatchProbabilityHero({
   probsLatePublishedAt,
   probsFrozenDuringRound,
   forecastTimestamp,
+  frozenProbs = null,
 }: MatchProbabilityHeroProps) {
   const pt = locale !== "en";
   const hasProbs = pHome != null && pDraw != null && pAway != null;
@@ -102,6 +107,18 @@ export function MatchProbabilityHero({
 
   const top = outcomes.length
     ? [...outcomes].sort((a, b) => b.p - a.p)[0]
+    : null;
+
+  // A played game marks the outcome that happened, beside what the model
+  // gave it before kickoff (audit UXD3-03).
+  const happened: "H" | "D" | "A" | null = played
+    ? played.home_goals > played.away_goals ? "H" : played.home_goals < played.away_goals ? "A" : "D"
+    : null;
+  const happenedOutcome = happened ? outcomes.find(o => o.key === happened) ?? null : null;
+  const happenedSentence = happenedOutcome
+    ? pt
+      ? `${happenedOutcome.team ? `Ganhou ${teamWithArticle(happenedOutcome.team, "o")}` : "Empate"}. Antes do jogo, o modelo dava ${formatPercent(happenedOutcome.p, locale)} a este resultado.`
+      : `${happenedOutcome.team ? `${teamDisplayName(happenedOutcome.team)} won` : "A draw"}. Before the match, the model gave this outcome ${formatPercent(happenedOutcome.p, locale)}.`
     : null;
 
   const publishedNote = probsPublishedAt
@@ -160,20 +177,29 @@ export function MatchProbabilityHero({
         </div>
       </div>
 
-      <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-4">
-        {labels.matchday}
-        {when ? " · " : ""}
-        {when && (
-          // After kickoff the hero dates what it shows instead of announcing
-          // the game (audit FRESH-01).
-          <ClockSwitch
-            initial={when}
-            steps={!played && kickoffConfirmed && kickoff && forecastTimestamp
-              ? [{ at: kickoff, value: matchStartedLine(forecastTimestamp, locale) }]
-              : []}
-          />
-        )}
-      </div>
+      {/* The kickoff once: centred in the fixture line from `sm`, here on
+          phones, where the names need the width; the matchday is the
+          hero's kicker (audit UXD3-06). After kickoff the line dates what
+          the page shows instead (FRESH-01), at every width, and says the
+          game was played two hours on (FR3-04). */}
+      {when && (() => {
+        const steps = !played && forecastTimestamp
+          ? kickoffSteps(kickoff, kickoffConfirmed, matchStartedLine(forecastTimestamp, locale), matchPlayedLine(forecastTimestamp, locale))
+          : [];
+        const shownFromSm = Boolean(centre) && !played && kickoffConfirmed;
+        if (shownFromSm && steps.length === 0) {
+          return <div className="mb-4 text-[11px] font-bold uppercase tracking-wider text-stone-500 sm:hidden">{when}</div>;
+        }
+        return (
+          <div className="mb-4 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            <ClockSwitch
+              initial={shownFromSm ? <span className="sm:hidden">{when}</span> : when}
+              steps={steps}
+            />
+          </div>
+        );
+      })()}
+      {!when && <div className="mb-4 text-[11px] font-bold uppercase tracking-wider text-stone-500">{labels.matchday}</div>}
 
       {played && hasProbs && (
         <p className="mb-4 text-sm text-stone-600">
@@ -207,19 +233,36 @@ export function MatchProbabilityHero({
         <>
           {/* Three big numbers */}
           <div className="grid grid-cols-3 gap-2 md:gap-4 mb-3">
-            {outcomes.map(o => (
-              <div key={o.key} className="border-t-4 pt-3" style={{ borderColor: o.rule }}>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1 break-words">
-                  <i aria-hidden="true" className="mr-1.5 inline-block h-2.5 w-2.5 rounded-sm border border-line align-[-1px]" style={{ backgroundColor: o.tone }} />
-                  {o.label}
+            {outcomes.map(o => {
+              const isHappened = happened === o.key;
+              const dimmed = happened != null && !isHappened;
+              return (
+                <div
+                  key={o.key}
+                  className="border-t-4 pt-3"
+                  // The outcome that happened carries the ink rule; the other
+                  // two are muted, never below AA (UXD3-03).
+                  style={{ borderColor: isHappened ? "var(--color-ink)" : dimmed ? "var(--color-line)" : o.rule }}
+                >
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1 break-words">
+                    <i aria-hidden="true" className="mr-1.5 inline-block h-2.5 w-2.5 rounded-sm border border-line align-[-1px]" style={{ backgroundColor: o.tone }} />
+                    {o.label}
+                  </div>
+                  <div className={`text-3xl md:text-6xl font-display font-extrabold tabular-nums leading-none ${dimmed ? "text-stone-500" : "text-stone-900"}`}>
+                    {pct(o.p, locale)}
+                    <span className="text-lg md:text-2xl font-bold text-stone-500">%</span>
+                  </div>
+                  {isHappened ? (
+                    <div className="mt-1.5 inline-flex items-center gap-1 rounded bg-ink px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-paper">
+                      <Check aria-hidden="true" className="h-3 w-3" />
+                      {pt ? "Aconteceu" : "Happened"}
+                    </div>
+                  ) : (
+                    o.venue && <div className="text-[11px] text-stone-500 mt-1">{o.venue}</div>
+                  )}
                 </div>
-                <div className="text-3xl md:text-6xl font-display font-extrabold tabular-nums text-stone-900 leading-none">
-                  {pct(o.p, locale)}
-                  <span className="text-lg md:text-2xl font-bold text-stone-500">%</span>
-                </div>
-                {o.venue && <div className="text-[11px] text-stone-500 mt-1">{o.venue}</div>}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Split bar */}
@@ -231,7 +274,11 @@ export function MatchProbabilityHero({
             ))}
           </div>
 
-          {top && (
+          {happenedSentence ? (
+            // One dated sentence on a played page, in place of the
+            // favourite and its caveat (UXD3-03).
+            <p className="mt-3 text-sm text-stone-700">{happenedSentence}</p>
+          ) : top && (
             <div className="mt-3 text-sm text-stone-500">
               {labels.favourite}:{" "}
               <strong className="text-stone-800">
@@ -244,9 +291,19 @@ export function MatchProbabilityHero({
           {/* "Porto 42% is a favourite among three outcomes, not more likely
               to win than not" (diagnosis §5/12 "Match page"). Only needed
               when the top outcome is a plurality, not an outright majority. */}
-          {top && top.p < 0.5 && (
+          {!happened && top && top.p < 0.5 && (
             <p className="mt-1.5 text-xs text-stone-500 leading-relaxed max-w-xl">
               {labels.notMajority(top.team ? teamDisplayName(top.team) : labels.draw, top.p)}
+            </p>
+          )}
+
+          {/* A postponed game is scored, in the game and in its record, on
+              the odds frozen when its round opened (audit VFA-M2). */}
+          {frozenProbs && !played && (
+            <p className="mt-3 max-w-2xl border-l-2 border-line pl-3 text-xs leading-relaxed text-stone-600">
+              {pt
+                ? `No Contra o Modelo e no registo do jogo contam as probabilidades congeladas a ${formatLongDate(frozenProbs.publishedAt, locale, { year: false })}, quando a jornada ${matchday} abriu: ${teamDisplayName(home)} ${formatPercent(frozenProbs.p_home, locale)}, empate ${formatPercent(frozenProbs.p_draw, locale)}, ${teamDisplayName(away)} ${formatPercent(frozenProbs.p_away, locale)}.`
+                : `Beat the Model and the match record use the probabilities frozen on ${formatLongDate(frozenProbs.publishedAt, locale, { year: false })}, when matchday ${matchday} opened: ${teamDisplayName(home)} ${formatPercent(frozenProbs.p_home, locale)}, draw ${formatPercent(frozenProbs.p_draw, locale)}, ${teamDisplayName(away)} ${formatPercent(frozenProbs.p_away, locale)}.`}
             </p>
           )}
         </>
