@@ -190,14 +190,14 @@ export const TIER_COPY: Record<'A' | 'B' | 'C', { label: Text; meaning: Text }> 
   A: {
     label: { pt: 'Qualidade A', en: 'Quality A' },
     meaning: {
-      pt: 'Freguesia com 2 000 ou mais residentes em que a população gerada reproduz de perto as tabelas publicadas pelo INE.',
+      pt: 'Freguesia com 2 000 ou mais residentes em que a população gerada reproduz de perto as tabelas publicadas pelo INE.',
       en: 'A parish of 2,000 or more residents where the generated population closely reproduces the tables INE publishes.',
     },
   },
   B: {
     label: { pt: 'Qualidade B', en: 'Quality B' },
     meaning: {
-      pt: 'Freguesia com 500 ou mais residentes e um ajuste próximo às tabelas do INE. Abaixo de 2 000 residentes, uma freguesia fica em B mesmo com um ajuste igual ao de A.',
+      pt: 'Freguesia com 500 ou mais residentes e um ajuste próximo às tabelas do INE. Abaixo de 2 000 residentes, uma freguesia fica em B mesmo com um ajuste igual ao de A.',
       en: 'A parish of 500 or more residents with a close fit to INE’s tables. Under 2,000 residents a parish sits in B even when its fit is as close as tier A’s.',
     },
   },
@@ -221,11 +221,11 @@ export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null |
   if (tier === 'B') {
     return residents < 2000
       ? {
-        pt: 'Freguesia com menos de 2 000 residentes e um ajuste próximo às tabelas do INE. Com menos de 2 000 residentes não pode ficar em A, por mais próximo que seja o ajuste.',
+        pt: 'Freguesia com menos de 2 000 residentes e um ajuste próximo às tabelas do INE. Com menos de 2 000 residentes não pode ficar em A, por mais próximo que seja o ajuste.',
         en: 'A parish of under 2,000 residents with a close fit to INE’s tables. Under 2,000 residents it cannot be tier A, however close the fit.',
       }
       : {
-        pt: 'Freguesia com 2 000 ou mais residentes e um ajuste próximo às tabelas do INE, sem chegar aos limiares do nível A.',
+        pt: 'Freguesia com 2 000 ou mais residentes e um ajuste próximo às tabelas do INE, sem chegar aos limiares do nível A.',
         en: 'A parish of 2,000 or more residents with a close fit to INE’s tables that falls short of the tier A thresholds.',
       };
   }

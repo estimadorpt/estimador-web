@@ -88,6 +88,14 @@ describe('shareCardModel', () => {
     expect(model.scopeNote).toContain('Valores do concelho de Águeda');
   });
 
+  it('names the Azores and Madeira in English on an English card, and keeps district names (POP2-ACC-06)', () => {
+    const azores = { record: parish('480107'), recipes: meta.recipes, name: 'Mosteiro', municipalityName: 'Lajes das Flores', regionName: 'Açores', region: 'azores' };
+    expect(shareCardModel({ ...azores, locale: 'en' }).place).toBe('Lajes das Flores · Azores');
+    expect(shareCardModel({ ...azores, locale: 'pt' }).place).toBe('Lajes das Flores · Açores');
+    expect(shareCardModel({ ...azores, regionName: 'Madeira', region: 'madeira', locale: 'en' }).place).toBe('Lajes das Flores · Madeira');
+    expect(shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', region: '01', locale: 'en' }).place).toBe('Águeda · Aveiro');
+  });
+
   it('writes English with a decimal point (the producer writes pt-PT commas)', () => {
     const model = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en' });
     expect(model.facts[0].text).toBe('People aged 65+ in private households living alone: 18.0%');

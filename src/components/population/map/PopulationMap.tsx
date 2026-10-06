@@ -90,7 +90,7 @@ const copy = {
     residents: 'Residentes',
     ine: 'INE, Censos 2021',
     tier: (tier: 'A' | 'B' | 'C') => `Qualidade ${tier}`,
-    tierLegend: { A: 'A · ajuste próximo, 2 000 ou mais residentes', B: 'B · ajuste próximo, 500 ou mais residentes', C: 'C · freguesia pequena ou ajuste mais fraco' },
+    tierLegend: { A: 'A · ajuste próximo, 2 000 ou mais residentes', B: 'B · ajuste próximo, 500 ou mais residentes', C: 'C · freguesia pequena ou ajuste mais fraco' },
     fallback: 'Valores do concelho',
     fallbackLong: (name: string) => `O retrato mostra os números do concelho de ${name}: os da freguesia não têm qualidade para publicar.`,
     open: 'Ver a freguesia',
@@ -190,6 +190,9 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
   const touches = useRef(new Map<number, { x: number; y: number }>());
   const pinch = useRef<{ distance: number; mid: [number, number]; start: Camera } | null>(null);
   const keyboardChoice = useRef(false);
+  /** After Escape, the place to focus on the level above: the one the reader came from (A11Y2-13). */
+  const returnTo = useRef<string | null>(null);
+  const readoutRef = useRef<HTMLDivElement>(null);
 
   // Props that change after mount move the map (a search on the page, a region link).
   const firstProps = useRef(true);
@@ -390,6 +393,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
       if (!parentView(view)) return;
       event.preventDefault();
       keyboardChoice.current = true;
+      returnTo.current = view.level === 'municipality' ? view.municipality : view.level === 'region' ? view.region : null;
       up();
       return;
     }
@@ -480,13 +484,31 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
     setTimeout(() => { drag.current = null; }, 0);
   };
 
-  // After a keyboard choice, put focus on the first place of the new level.
+  // After a keyboard choice, put focus on the first place of the new level; after
+  // Escape, on the place the reader came up from, so they keep their place.
   useEffect(() => {
     if (!keyboardChoice.current) return;
     const svg = svgRef.current;
-    const first = svg?.querySelector<SVGElement>('[data-code][tabindex="0"]');
-    if (first) { keyboardChoice.current = false; first.focus({ preventScroll: true }); }
+    const back = returnTo.current
+      ? svg?.querySelector<SVGElement>(`[data-code="${CSS.escape(returnTo.current)}"][tabindex="0"]`)
+      : null;
+    const target = back ?? svg?.querySelector<SVGElement>('[data-code][tabindex="0"]');
+    if (target) {
+      keyboardChoice.current = false;
+      returnTo.current = null;
+      target.focus({ preventScroll: true });
+    }
   }, [view, countryShapes, municipalityShapes, parishShapes]);
+
+  // A first tap on a parish previews it: on a phone the readout (name, "Ver a
+  // freguesia", "toca outra vez") is under the map, so bring it into view (UXM2-12).
+  useEffect(() => {
+    if (!preview?.touch) return;
+    const frame = window.requestAnimationFrame(() => {
+      readoutRef.current?.scrollIntoView({ block: 'nearest', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [preview]);
 
   // ---- layers ------------------------------------------------------------------
   const parishByCode = places?.byCode;
@@ -784,7 +806,8 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
 
           {/* What the pointer, the keyboard or a tap is on */}
           <div className="flex flex-col gap-4 border-t border-line p-4 @3xl:w-80 @3xl:shrink-0 @3xl:border-l @3xl:border-t-0">
-            <div className="sm:min-h-[9.5rem]" aria-live="polite">
+            {/* Not a live region: the focused shape names itself, and level changes are announced below. */}
+            <div ref={readoutRef} className="sm:min-h-[9.5rem]">
               {readout?.kind === 'parish' ? (
                 <>
                   <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.parish}</p>

@@ -33,6 +33,8 @@ export interface ResponseCardProps {
   bars?: boolean;
   /** Briefly marks the card a shared link pointed to. */
   highlight?: boolean;
+  /** What the percentages are of, said on small (tier C) parishes' cards. */
+  base?: string;
   className?: string;
 }
 
@@ -43,7 +45,7 @@ export interface ResponseCardProps {
  * link to the response. A refused response is a designed empty state with the
  * reason and nothing that looks like a number.
  */
-export function ResponseCard({ recipeName, recipe, record, locale, placeName, fallbackName, bare, before, revealed = true, bars = false, highlight = false, className = '' }: ResponseCardProps) {
+export function ResponseCard({ recipeName, recipe, record, locale, placeName, fallbackName, bare, before, revealed = true, bars = false, highlight = false, base, className = '' }: ResponseCardProps) {
   const copy = RECIPE_COPY[recipeName];
   const cells = readCells(record, recipe, locale);
   const status = statusLine(record, locale, placeName, fallbackName);
@@ -53,10 +55,13 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
   return (
     <div
       id={anchor}
+      data-rail
       className={`rounded-2xl outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-300 ${highlight ? 'outline-2 outline-ink outline-solid' : 'outline-2 outline-transparent outline-solid'} ${className}`}
     >
       {/* The footer is drawn here rather than by DataCard so the copy-link action can sit in it, out of the way of the question. */}
       <DataCard title={title} subtitle={copy.population[locale]} locale={locale}>
+        {/* Only on the parish's own figures: a município fallback's base is not the parish's count. */}
+        {base && record.decision === 'publish' && <p className="-mt-1 mb-4 text-xs leading-relaxed text-stone-600">{base}</p>}
         {(status.badge || status.text) && (
           <div className="mb-4 flex flex-wrap items-center gap-2">
             {status.badge}
@@ -78,22 +83,33 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
             )}
           </>
         )}
-        <footer className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line pt-3 text-xs text-stone-500">
-          <span>{sourceLine(recipeName, locale)}</span>
-          <Link href={POPULATION_ROUTES.methodology} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline-offset-4 hover:underline">
-            {locale === 'pt' ? 'Como foi feito' : 'How it was made'}
-          </Link>
-          {!bare && (
-            <>
-              <span className="font-mono text-[11px] text-stone-500" title={record.id}>
-                v{POPULATION_RELEASE} · {record.id.slice(0, 11)}
-              </span>
-              <CopyPermalink id={record.id} question={copy.question[locale]} locale={locale} />
-            </>
-          )}
-        </footer>
+        <CardFooter source={sourceLine(recipeName, locale)} id={bare ? null : record.id} question={copy.question[locale]} locale={locale} />
       </DataCard>
     </div>
+  );
+}
+
+/**
+ * A card's footer, in two fixed rows whatever the source's length (UXD2-12):
+ * the source and "Como foi feito"; then the release and the full result id
+ * (the one a permalink resolves, PRO2-01) with "Copiar ligação" at the right.
+ */
+export function CardFooter({ source, id, question, locale }: { source: string; id: string | null; question: string; locale: Locale }) {
+  return (
+    <footer className="mt-4 border-t border-line pt-2 text-xs text-stone-500">
+      <div className="flex flex-wrap items-center gap-x-4">
+        <span>{source}</span>
+        <Link href={POPULATION_ROUTES.methodology} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline-offset-4 hover:underline">
+          {locale === 'pt' ? 'Como foi feito' : 'How it was made'}
+        </Link>
+      </div>
+      {id && (
+        <div className="flex flex-wrap items-center justify-between gap-x-4">
+          <span className="break-all font-mono text-[11px] text-stone-500">v{POPULATION_RELEASE} · {id}</span>
+          <CopyPermalink id={id} question={question} locale={locale} />
+        </div>
+      )}
+    </footer>
   );
 }
 
@@ -192,7 +208,7 @@ function CopyPermalink({ id, question, locale }: { id: string; question: string;
   const pt = locale === 'pt';
   const url = () => responsePermalink(window.location.origin, locale, id);
   return (
-    <span className="ml-auto inline-flex flex-wrap items-center gap-x-2">
+    <span className="inline-flex flex-wrap items-center gap-x-2">
       <span role="status" className="text-xs text-stone-600">
         {state === 'copied' ? (pt ? 'Ligação copiada.' : 'Link copied.') : state === 'failed' ? url() : ''}
       </span>

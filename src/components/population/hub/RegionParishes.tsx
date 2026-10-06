@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowUp } from 'lucide-react';
 import { parishHref } from '@/components/population/ParishLink';
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { formatCount } from '@/lib/population/format';
@@ -25,7 +26,7 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
   const municipalityWord = pt ? 'Concelho' : 'Municipality';
   return (
     <div>
-      <nav aria-label={pt ? 'Concelhos' : 'Municipalities'} className="mb-6">
+      <nav id="concelhos" aria-label={pt ? 'Concelhos' : 'Municipalities'} className="mb-6">
         <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500">{pt ? 'Ir para o concelho' : 'Jump to a municipality'}</h2>
         <ul className="flex flex-wrap gap-2">
           {municipalities.map(m => (
@@ -58,9 +59,14 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
         </p>
       </div>
 
-      <div className="space-y-6">
+      {/*
+        Two columns of concelhos on a wide screen, so a name, its count and its
+        tier sit within about 600px instead of across the whole page (and the
+        page is half as long); one column below that.
+      */}
+      <div className="lg:columns-2 lg:gap-6">
         {municipalities.map(m => (
-          <section key={m.code} id={`concelho-${m.code}`} aria-labelledby={`concelho-${m.code}-title`} className="rounded-2xl border border-line bg-cream p-4 md:p-5">
+          <section key={m.code} id={`concelho-${m.code}`} aria-labelledby={`concelho-${m.code}-title`} className="mb-6 break-inside-avoid rounded-2xl border border-line bg-cream p-3 sm:p-4 md:p-5">
             <header className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <h2 id={`concelho-${m.code}-title`} className="text-xl text-ink">{m.name}</h2>
               <p className="text-sm text-stone-500">
@@ -78,7 +84,11 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
                   <tr>
                     <th scope="col">{pt ? 'Freguesia' : 'Parish'}</th>
                     <th scope="col">{residents}</th>
-                    <th scope="col">{pt ? 'Qualidade' : 'Quality'}</th>
+                    {/* "Nível" on a phone, so the name column keeps the width. */}
+                    <th scope="col">
+                      <span className="sm:hidden">{pt ? 'Nível' : 'Tier'}</span>
+                      <span className="hidden sm:inline">{pt ? 'Qualidade' : 'Quality'}</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -95,6 +105,12 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
                 </tbody>
               </table>
             </div>
+            {m.rows.length > 8 && (
+              <a href="#concelhos" className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink underline underline-offset-4">
+                <ArrowUp aria-hidden="true" className="h-4 w-4" />
+                {pt ? 'Voltar à lista de concelhos' : 'Back to the list of municipalities'}
+              </a>
+            )}
           </section>
         ))}
       </div>

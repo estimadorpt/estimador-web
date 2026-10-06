@@ -56,7 +56,8 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
       <label htmlFor={`${id}-guess`} className="mt-1.5 block text-base font-semibold text-ink">
         {PROMPT[recipeName][locale](where)}
       </label>
-      <div className="mt-4 flex items-center gap-4">
+      {/* On a phone the reader's number sits above a full-width slider (UXM2-11); side by side from sm. */}
+      <div className="mt-4 flex flex-col-reverse items-stretch gap-2 sm:flex-row sm:items-center sm:gap-4">
         <input
           id={`${id}-guess`}
           type="range"
@@ -66,10 +67,10 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
           value={guess}
           aria-valuetext={t.valueText(clampGuess(guess), unit)}
           onChange={event => { setGuess(clampGuess(Number(event.target.value))); setTouched(true); }}
-          className="guess-range h-11 min-w-0 flex-1 cursor-pointer accent-[var(--color-ink)]"
+          className="guess-range h-11 w-full min-w-0 flex-1 cursor-pointer accent-[var(--color-ink)]"
         />
         {/* The reader's number, not a published one: labelled, in a bordered field, and muted until they move the slider. */}
-        <div className="w-24 shrink-0 rounded-[10px] border border-dashed border-line px-2 py-1 text-right" aria-hidden="true">
+        <div className="w-24 shrink-0 self-start rounded-[10px] border border-dashed border-line px-2 py-1 text-right sm:self-auto" aria-hidden="true">
           <p className="text-[11px] font-semibold text-stone-500">{t.yours}</p>
           <output htmlFor={`${id}-guess`} className={`block font-display text-2xl font-extrabold tabular-nums ${touched ? 'text-ink' : 'text-stone-500'}`}>
             {formatGuess(guess)}
@@ -84,7 +85,11 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
     </div>
   ) : (
     // Focus moves here after a reveal, so the result is read once; no live region on top of it.
-    <div ref={result} tabIndex={-1} className="mb-4 outline-none">
+    <div ref={result} tabIndex={-1} className={phase === 'revealed' ? 'mb-4 outline-none' : 'outline-none'}>
+      {phase === 'skipped' && (
+        // Focus lands here after "Mostrar sem adivinhar": say the value, so a screen reader hears it (A11Y2-04).
+        <p className="sr-only">{t.published}: {published} ({headlineValue}).</p>
+      )}
       {phase === 'revealed' && (
         <div className="flex flex-wrap items-stretch gap-3 rounded-xl border border-line bg-paper p-4">
           <div className="min-w-[8rem]">

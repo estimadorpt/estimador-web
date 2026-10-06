@@ -45,7 +45,7 @@ describe('how to read a parish page', () => {
   it('branches the tier wording on the count the tier was decided on (MISS-01)', () => {
     // 0302FA: tier B with fewer than 2,000 residents — told it cannot be A, not that its fit is looser.
     const b = items('0302FA');
-    expect(b[0].body).toMatch(/menos de 2 000 residentes/);
+    expect(b[0].body).toMatch(/menos de 2\u00a0000 residentes/);
     expect(b[0].body).not.toMatch(/menos apertado/);
     // A tier C parish of 500 or more residents is C for its fit, not its size.
     const bigC = index.parishes.find(p => p.tier === 'C' && p.publicationPopulation >= 500)!;

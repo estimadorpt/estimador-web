@@ -83,29 +83,40 @@ export function AgeColumns({ cells, locale, height = 200 }: { cells: ReadCell[];
   const ticks = [0, top / 2, top];
   const readout = active === null ? null : cells[active];
   const pct = (value: number) => `${Math.round(value * 100)}%`;
+  const valueText = (cell: ReadCell) => `${cell.labels[0]}${locale === 'pt' ? ' anos' : ''}: ${cell.display}`;
   return (
     <div>
-      <p className="mb-1 min-h-5 text-sm text-stone-600" aria-live="polite">
+      {/* The slider below announces each step itself (aria-valuetext); this line is for the eye. */}
+      <p className="mb-1 min-h-5 text-sm text-stone-600" aria-hidden="true">
         {readout
           ? <><span className="font-semibold text-ink">{readout.labels[0]}</span>{locale === 'pt' ? ' anos: ' : ': '}<span className="font-bold tabular-nums text-ink">{readout.display}</span></>
           : <span className="text-stone-500">{locale === 'pt' ? 'Toca numa coluna, passa-lhe o cursor ou usa as setas para ler o valor.' : 'Tap or hover over a column, or use the arrow keys, to read its value.'}</span>}
       </p>
-      {/* One tab stop for the whole chart: the arrow keys move along the columns and the line above reads the value. The table twin below is the full alternative. */}
+      {/*
+        One tab stop for the whole chart, exposed as a slider over the age
+        groups (A11Y2-16): screen readers switch to focus mode on it and read
+        each step's group and share. The table twin below is the full alternative.
+      */}
       <div
         ref={box}
         className="relative w-full overflow-hidden rounded-md"
         style={{ height }}
         tabIndex={0}
-        role="group"
+        role="slider"
+        aria-orientation="horizontal"
+        aria-valuemin={0}
+        aria-valuemax={Math.max(0, cells.length - 1)}
+        aria-valuenow={active ?? 0}
+        aria-valuetext={cells.length ? valueText(cells[active ?? 0]) : undefined}
         aria-label={locale === 'pt' ? 'Gráfico das idades: usa as setas para ler cada grupo' : 'Age chart: use the arrow keys to read each group'}
         onKeyDown={event => {
           const key = event.key;
-          if (key !== 'ArrowRight' && key !== 'ArrowLeft' && key !== 'Home' && key !== 'End') return;
+          if (!['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(key)) return;
           event.preventDefault();
           setActive(current => {
             if (key === 'Home') return 0;
             if (key === 'End') return cells.length - 1;
-            const step = key === 'ArrowRight' ? 1 : -1;
+            const step = key === 'ArrowRight' || key === 'ArrowUp' ? 1 : -1;
             if (current === null) return step > 0 ? 0 : cells.length - 1;
             return Math.min(cells.length - 1, Math.max(0, current + step));
           });

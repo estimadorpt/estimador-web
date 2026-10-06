@@ -10,8 +10,14 @@ export function releaseCitation(release = POPULATION_RELEASE, year = '2026'): st
   return `estimador.pt, População Sintética de Portugal v${release} (${year}), CC BY 4.0.`;
 }
 
-export function parishCitation({ name, code, url }: { name: string; code: string; url: string }): string {
-  return `${releaseCitation()} ${name} (${code}): ${url}`;
+/**
+ * The parish page shows the current release, so its address is not versioned:
+ * with `accessed` (a formatted date) the citation says when it was read
+ * ("consultado a 6 out. 2026"), as a citation of a web page should.
+ */
+export function parishCitation({ name, code, url, accessed, locale = 'pt' }: { name: string; code: string; url: string; accessed?: string; locale?: 'pt' | 'en' }): string {
+  const when = accessed ? ` (${locale === 'pt' ? 'consultado a' : 'accessed'} ${accessed})` : '';
+  return `${releaseCitation()} ${name} (${code}): ${url}${when}`;
 }
 
 /** The licence's short attribution, for a quotation that travels without the page. */

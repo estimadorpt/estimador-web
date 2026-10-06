@@ -3,6 +3,7 @@ import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { ParishPage } from '@/components/population/parish/ParishPage';
 import { feedAlternates, getOgImageSize, getOgImageUrl, siteTitle, SITE_URL } from '@/lib/metadata';
+import { parishPrefetchScript } from '@/lib/population/prefetch';
 import { setRequestLocale } from '@/i18n/request-locale';
 
 /**
@@ -63,6 +64,8 @@ export default async function ParishRoute({ params }: { params: Promise<{ locale
   setRequestLocale(locale);
   return (
     <div className="min-h-screen bg-paper">
+      {/* Starts the parish's data before the page's JavaScript has loaded (UXM2V-01). */}
+      <script dangerouslySetInnerHTML={{ __html: parishPrefetchScript() }} />
       <Header />
       <ParishPage locale={locale === 'en' ? 'en' : 'pt'} />
       <SiteFooter locale={locale} />

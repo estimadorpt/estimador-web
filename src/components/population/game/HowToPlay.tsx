@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { GAME_STORAGE_KEY } from '@/lib/population/game';
 import type { Locale } from '@/lib/population/labels';
 import { GAME_COPY } from './copy';
 
@@ -10,21 +9,16 @@ import { GAME_COPY } from './copy';
 export const GUESS_EVENT = 'misteriosa:guess';
 
 /**
- * "Como se joga?": a disclosure, open for a first-time player (nothing stored
- * on this device yet) and closed for everyone else. It closes itself at the
- * first guess, so on a phone the board moves up to the clues.
+ * "Como se joga?": a closed disclosure whose summary already says the rules in
+ * one line (six guesses, a clue per miss, a new parish at midnight), so a
+ * first visit lands on the guess box and the first clue, not on a page of
+ * instructions (UXD2-02, PUB2-07). The full rules open on demand, and close
+ * again at the next guess.
  */
 export function HowToPlay({ locale, honesty }: { locale: Locale; honesty: string }) {
   const t = GAME_COPY[locale];
-  // Open in the server render (a first visit, the common case, then moves nothing);
-  // a returning player's copy closes after mount.
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   useEffect(() => {
-    try {
-      if (window.localStorage.getItem(GAME_STORAGE_KEY)) setOpen(false);
-    } catch {
-      // No storage: leave it open.
-    }
     const close = () => setOpen(false);
     window.addEventListener(GUESS_EVENT, close);
     return () => window.removeEventListener(GUESS_EVENT, close);
@@ -35,8 +29,12 @@ export function HowToPlay({ locale, honesty }: { locale: Locale; honesty: string
       onToggle={event => setOpen((event.currentTarget as HTMLDetailsElement).open)}
       className="group rounded-2xl border border-line bg-cream"
     >
-      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-5 py-3 text-base font-bold text-ink [&::-webkit-details-marker]:hidden">
-        {t.howTitle}
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-2.5 sm:px-5 [&::-webkit-details-marker]:hidden">
+        <span className="min-w-0">
+          <span className="text-base font-bold text-ink">{t.howTitle}</span>{' '}
+          {/* The hero already says it on a phone; from sm the line stands in for the closed rules. */}
+          <span className="hidden text-sm text-stone-600 sm:inline">{t.howSummary}</span>
+        </span>
         <ChevronDown aria-hidden="true" className="h-5 w-5 shrink-0 text-stone-500 transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none" />
       </summary>
       <div className="border-t border-line px-5 pb-5 pt-4 text-[15px] leading-relaxed text-stone-600">

@@ -72,5 +72,10 @@ describe('versioned links and citation (P-H2, pro-PP-07)', () => {
     expect(releaseCitation()).toBe(release.attribution.cite_as);
     expect(parishCitation({ name: 'Aguada de Cima', code: '010103', url: 'https://estimador.pt/pt/populacao/freguesia/010103/' }))
       .toBe(`${release.attribution.cite_as} Aguada de Cima (010103): https://estimador.pt/pt/populacao/freguesia/010103/`);
+    // The parish address is not versioned, so the copied citation says when it was read (PRO2-10).
+    expect(parishCitation({ name: 'Aguada de Cima', code: '010103', url: 'https://estimador.pt/pt/populacao/freguesia/010103/', accessed: '6 out. 2026', locale: 'pt' }))
+      .toMatch(/010103\/ \(consultado a 6 out\. 2026\)$/);
+    expect(parishCitation({ name: 'Aguada de Cima', code: '010103', url: 'https://estimador.pt/en/populacao/freguesia/010103/', accessed: '6 Oct 2026', locale: 'en' }))
+      .toMatch(/010103\/ \(accessed 6 Oct 2026\)$/);
   });
 });

@@ -81,13 +81,25 @@ export function fold(text: string): string {
     .trim();
 }
 
-const UNION = /^uniao das freguesias de /;
+/** "União das freguesias de/da/do…" and "União de freguesias de…" (both spellings are in CAOP 2021). */
+const UNION_PREFIX = /^uni[aã]o (?:das|de) freguesias (?:de|da|do|das|dos) /i;
+const SEPARATOR = /,\s*|\s+e\s+/;
 
-/** The names a parish answers to: its full name and, for a union, each member parish. */
+/**
+ * The names a parish answers to: its full name and its members. A union's
+ * members are the parishes it joined ("União das freguesias da Sé e São
+ * Lourenço" → "se", "sao lourenco"); a parenthesised part names members too
+ * ("Funchal (Sé)" → "funchal", "se"; "Lamego (Almacave e Sé)" → "lamego",
+ * "almacave", "se"), so a short member name finds its parish exactly.
+ */
 export function searchNames(name: string): string[] {
   const folded = fold(name);
-  if (!UNION.test(folded)) return [folded];
-  const members = name.replace(/^União das freguesias de /i, '').split(/,\s*|\s+e\s+/).map(fold).filter(Boolean);
+  const union = UNION_PREFIX.test(name);
+  const inner = [...name.matchAll(/\(([^)]*)\)/g)].map(match => match[1]);
+  if (!union && inner.length === 0) return [folded];
+  const outside = name.replace(/\([^)]*\)/g, ' ').replace(UNION_PREFIX, '').replace(/\s+/g, ' ').trim();
+  const parts = [...(union ? outside.split(SEPARATOR) : [outside]), ...inner.flatMap(part => part.split(SEPARATOR))];
+  const members = [...new Set(parts.map(fold).filter(member => member && member !== folded))];
   return [folded, ...members];
 }
 
@@ -126,8 +138,11 @@ function tokens(folded: string): string[] {
   return kept.length ? kept : all;
 }
 
+/** Rank first (Infinity-safe: Infinity − Infinity is NaN), then alphabetical. */
+const byRank = (a: SearchHit, b: SearchHit) => (a.rank === b.rank ? 0 : a.rank < b.rank ? -1 : 1);
+
 const byName = (a: SearchHit, b: SearchHit) =>
-  a.rank - b.rank || a.parish.name.localeCompare(b.parish.name, 'pt') || a.parish.municipalityName.localeCompare(b.parish.municipalityName, 'pt');
+  byRank(a, b) || a.parish.name.localeCompare(b.parish.name, 'pt') || a.parish.municipalityName.localeCompare(b.parish.municipalityName, 'pt');
 
 function rankParish(parish: Parish, q: string, queryTokens: string[], code: string | null): number {
   if (code && parish.code === code) return 0;
@@ -176,7 +191,9 @@ export function searchPlaces(index: PlaceIndex, query: string, limit = 12): { hi
     if (rank < Infinity) others.push({ parish, rank });
   }
   others.sort(byName);
-  under.sort((a, b) => a.parish.name.localeCompare(b.parish.name, 'pt'));
+  // Within a named município, a parish named like the query leads ("viseu":
+  // the parish Viseu, then the others alphabetically), never last.
+  under.sort(byName);
 
   const hits: PlaceHit[] = [];
   for (const municipality of named) {
@@ -192,6 +209,18 @@ export function searchPlaces(index: PlaceIndex, query: string, limit = 12): { hi
   const room = Math.max(named.length ? 5 : limit, limit - hits.length);
   for (const hit of others.slice(0, room)) hits.push({ kind: 'parish', underMunicipality: false, ...hit });
   return { hits, total: under.length + others.length };
+}
+
+/**
+ * The option Enter may choose without the reader pointing at one, when
+ * choosing cannot be undone (a guess in the game): only a parish whose code or
+ * full name is exactly the query, and only when exactly one is. Otherwise -1:
+ * typing a município's name ("Viseu", "Mealhada") and pressing Enter must not
+ * spend a guess on a parish the player never picked.
+ */
+export function exactParishOption(hits: PlaceHit[]): number {
+  const exact = hits.flatMap((hit, i) => (hit.kind === 'parish' && hit.rank === 0 ? [i] : []));
+  return exact.length === 1 ? exact[0] : -1;
 }
 
 /** Parish matches only, in the order `searchPlaces` lists them. */

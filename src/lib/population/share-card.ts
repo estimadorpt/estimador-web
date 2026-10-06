@@ -86,7 +86,7 @@ function bareUrl(url: string): string {
 /** "Quem vive em Aguada de Cima?" / "Quem vive na União das freguesias de …?" */
 export function parishQuestion(name: string, locale: Locale): string {
   if (locale === 'en') return `Who lives in ${name}?`;
-  return /^União das freguesias/i.test(name) ? `Quem vive na ${name}?` : `Quem vive em ${name}?`;
+  return /^União (das|de) freguesias/i.test(name) ? `Quem vive na ${name}?` : `Quem vive em ${name}?`;
 }
 
 function slug(text: string): string {
@@ -106,6 +106,8 @@ export interface ShareCardInput {
   name: string;
   municipalityName: string;
   regionName: string;
+  /** The region id ("azores", "madeira" or a district code): an English card names the islands in English. */
+  region?: string;
   locale: Locale;
   /** The parish page's address, printed on the card. */
   url?: string;
@@ -114,7 +116,11 @@ export interface ShareCardInput {
   maxFacts?: number;
 }
 
-export function shareCardModel({ record, recipes, name, municipalityName, regionName, locale, url, published = POPULATION_PUBLISHED, maxFacts = 3 }: ShareCardInput): ShareCardModel {
+/** "Açores" and "Madeira" under English copy are "Azores" and "Madeira"; district names stay as they are. */
+const REGION_EN: Record<string, string> = { azores: 'Azores', madeira: 'Madeira' };
+
+export function shareCardModel({ record, recipes, name, municipalityName, regionName, region, locale, url, published = POPULATION_PUBLISHED, maxFacts = 3 }: ShareCardInput): ShareCardModel {
+  const regionLabel = locale === 'en' && region && REGION_EN[region] ? REGION_EN[region] : regionName;
   const fallbackName = record.fallback?.name ?? municipalityName;
   const facts: ShareFact[] = [];
   for (const candidate of SHARE_FACTS) {
@@ -139,7 +145,7 @@ export function shareCardModel({ record, recipes, name, municipalityName, region
   return {
     eyebrow: locale === 'pt' ? 'População sintética · Censos 2021' : 'Synthetic population · 2021 Census',
     title: parishQuestion(name, locale),
-    place: [municipalityName, regionName].filter(Boolean).join(' · '),
+    place: [municipalityName, regionLabel].filter(Boolean).join(' · '),
     facts,
     scopeNote: anyFallback
       ? (locale === 'pt' ? `Valores do concelho de ${fallbackName}, que inclui esta freguesia.` : `Figures for ${fallbackName} municipality, which includes this parish.`)

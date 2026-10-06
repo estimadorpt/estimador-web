@@ -28,6 +28,7 @@ import csv
 import hashlib
 import json
 import os
+import re
 import shutil
 import sys
 from collections import Counter, defaultdict
@@ -52,7 +53,20 @@ MODEL_SHA256 = "062e2ad784886b7287536233f853db151c57615d2b1a952fb2e12368581e76d3
 
 PARISH_COUNT = 3092
 GAME_CHUNK = 32
-GAME_EPOCH = PUBLISHED  # day 0 of Freguesia Misteriosa is the publication day
+
+
+def game_epoch() -> str:
+    """Day 0 of Freguesia misteriosa: POPULATION_GAME_EPOCH in src/lib/config/population.ts.
+
+    The site's launch day, not the release date, so the public's first game is N.º 1.
+    Read from the TypeScript config so the two can never disagree (a vitest checks
+    game/index.json against the constant too).
+    """
+    config = (WEB / "src/lib/config/population.ts").read_text(encoding="utf-8")
+    match = re.search(r"export const POPULATION_GAME_EPOCH = '(\d{4}-\d{2}-\d{2})';", config)
+    if not match:
+        raise SystemExit("POPULATION_GAME_EPOCH not found in src/lib/config/population.ts")
+    return match.group(1)
 
 WEB = Path(__file__).resolve().parent.parent
 
@@ -99,7 +113,16 @@ def main() -> int:
         help="estimador-microsynthesis checkout",
     )
     parser.add_argument("--dest", default=str(WEB / "public/data/population" / f"v{RELEASE}"))
+    parser.add_argument(
+        "--game-epoch",
+        default=None,
+        help="day 0 of Freguesia misteriosa (YYYY-MM-DD); default POPULATION_GAME_EPOCH from src/lib/config/population.ts",
+    )
     args = parser.parse_args()
+    args.game_epoch = args.game_epoch or game_epoch()
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", args.game_epoch):
+        print(f"--game-epoch must be YYYY-MM-DD, not {args.game_epoch}", file=sys.stderr)
+        return 1
 
     src = Path(args.source)
     public = src / "data/products/public"
@@ -418,6 +441,11 @@ def main() -> int:
                 "census_population": int(row["census_population"]),
                 "generated_households": int(row["n_households"]),
                 "publication_population": int(row["publication_population"]),
+                # quality.csv's one worst table and its SRMSE (release columns, verbatim),
+                # so a tier C page can say which table set the tier (MR2-03). A code
+                # (e.g. srmse_p_age_single), labelled by the site, never shown raw.
+                "worst_constraint": row["worst_constraint"],
+                "worst_constraint_srmse": float(row["worst_constraint_srmse"]),
             },
             "responses": {name: per_parish[code][name] for name in recipe_order},
         })
@@ -509,7 +537,7 @@ def main() -> int:
     write("game/index.json", {
         "schema": deck["schema"],
         "release_version": RELEASE,
-        "epoch": GAME_EPOCH,
+        "epoch": args.game_epoch,
         "candidates": len(candidates),
         "chunk_size": GAME_CHUNK,
         "chunks": chunks,

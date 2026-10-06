@@ -120,9 +120,19 @@ class Writer {
   }
 }
 
-/** Every element matching the selector anywhere in the document, or a new one in <head>. */
+/**
+ * Every element matching the selector anywhere in the document, or a new one
+ * in <head>. When Next's own tag arrives after this module made one (streamed
+ * metadata), the one made here goes, so the page never carries the tag twice
+ * (SP2-09).
+ */
 function ensure(selector: string, make: () => Element): Element[] {
   const found = [...document.querySelectorAll(selector)];
+  const theirs = found.filter(element => !element.hasAttribute(OWNED));
+  if (theirs.length && theirs.length < found.length) {
+    found.filter(element => element.hasAttribute(OWNED)).forEach(element => element.remove());
+    return theirs;
+  }
   if (found.length) return found;
   const element = make();
   element.setAttribute(OWNED, '');

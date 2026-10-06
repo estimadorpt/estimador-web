@@ -52,6 +52,12 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
         const top = deck.current?.getBoundingClientRect().top ?? 0;
         if (top < 0) deck.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
       }
+    } else if (open < previous.current) {
+      // Fewer clues than before (the same day played again, in practice): never
+      // stay on a clue that is locked again; start from the newest open one.
+      setSelected(open - 1);
+      setFresh(null);
+      setMoved(false);
     }
     previous.current = open;
   }, [open, revealed]);
@@ -70,7 +76,9 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry.code]);
 
-  const recipes = CLUE_ORDER[selected] ?? CLUE_ORDER[0];
+  // A locked clue is never on show, whatever the order of the updates above.
+  const shown = Math.min(selected, open - 1);
+  const recipes = CLUE_ORDER[shown] ?? CLUE_ORDER[0];
 
   return (
     <div ref={deck} className="min-w-0">
@@ -86,7 +94,7 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
       <div role="group" aria-label={t.cluesTitle} className="mb-4 grid grid-cols-6 gap-1.5 sm:gap-2">
         {CLUE_ORDER.map((clueRecipes, i) => {
           const unlocked = i < open;
-          const active = i === selected;
+          const active = i === shown;
           const label = clueRecipes.map(r => RECIPE_COPY[r].short[locale]).join(' · ');
           return (
             <button
@@ -114,16 +122,16 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
         })}
       </div>
 
-      <div id={`${id}-panel`} role="region" aria-labelledby={`${id}-tab-${selected}`}>
-        <Reveal key={`${entry.code}-${selected}`} instant={!moved}>
+      <div id={`${id}-panel`} role="region" aria-labelledby={`${id}-tab-${shown}`}>
+        <Reveal key={`${entry.code}-${shown}`} instant={!moved}>
           <ClueCard
-            number={selected + 1}
+            number={shown + 1}
             recipes={recipes}
             entry={entry}
             meta={meta}
             locale={locale}
             revealed={revealed}
-            fresh={fresh === selected}
+            fresh={fresh === shown}
           />
         </Reveal>
       </div>

@@ -6,6 +6,7 @@ import { POPULATION_ROUTES } from '@/lib/config/population';
 import { fetchPlaces } from '@/lib/population/client';
 import { formatCount } from '@/lib/population/format';
 import {
+  exactParishOption,
   indexPlaces,
   NEARBY_KEY,
   NEAREST_MAX_KM,
@@ -57,11 +58,17 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
   const [failed, setFailed] = useState(false);
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
+  /** The highlighted option; null until the reader moves it (then the query's default applies). */
+  const [moved, setMoved] = useState<number | null>(null);
+  /** Enter was pressed with no option to choose (game mode): say how to pick one. */
+  const [nudge, setNudge] = useState(false);
   const [locating, setLocating] = useState<'idle' | 'busy' | 'denied' | 'far'>('idle');
+  const field = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const loading = useRef(false);
+  /** A guess cannot be undone: in the game a município row is a heading, and Enter chooses only an exact match. */
+  const guessing = Boolean(onSelect);
 
   const load = () => {
     if (index || loading.current) return;
@@ -76,20 +83,31 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
   const { hits, total } = useMemo(() => {
     if (!index) return { hits: [] as PlaceHit[], total: 0 };
     const found = searchPlaces(index, query, 12);
-    const visible = found.hits.filter(hit => (hit.kind === 'municipality'
-      // Choosing a place in the game means a parish; the município row only navigates.
-      ? !onSelect
-      : !exclude?.has(hit.parish.code)));
+    // In the game the município row stays, as a heading over its parishes (it cannot be chosen).
+    const visible = found.hits.filter(hit => hit.kind === 'municipality' || !exclude?.has(hit.parish.code));
     return { hits: visible, total: found.total };
-  }, [index, query, exclude, onSelect]);
+  }, [index, query, exclude]);
   const shownParishes = hits.filter(hit => hit.kind === 'parish').length;
+  const selectable = (i: number) => Boolean(hits[i]) && !(guessing && hits[i].kind === 'municipality');
+  // What Enter chooses before the reader points at anything: the first row when
+  // choosing only navigates; in the game, only a parish named exactly like the query.
+  const fallback = guessing ? exactParishOption(hits) : hits.length > 0 ? 0 : -1;
+  const active = moved !== null && selectable(moved) ? moved : fallback;
+  const step = (direction: 1 | -1) => {
+    for (let i = active + direction; i >= 0 && i < hits.length; i += direction) {
+      if (selectable(i)) return i;
+    }
+    return active;
+  };
 
   // Keep the highlighted option in view as the arrow keys move it.
   useEffect(() => {
+    if (active < 0) return;
     list.current?.querySelector<HTMLElement>(`[data-index="${active}"]`)?.scrollIntoView({ block: 'nearest' });
   }, [active]);
 
   const choose = (hit: PlaceHit) => {
+    if (guessing && hit.kind === 'municipality') return;
     setOpen(false);
     if (hit.kind === 'municipality') {
       window.location.assign(municipalityHref(hit.municipality, locale));
@@ -145,6 +163,8 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
         ? `${formatCount(shown, 'pt')} de ${formatCount(all, 'pt')} freguesias. Escreve mais para afinar.`
         : `${formatCount(all, 'pt')} ${all === 1 ? 'freguesia encontrada' : 'freguesias encontradas'}.`),
       underMunicipality: 'deste concelho',
+      municipalityHeading: (name: string) => `Freguesias do concelho de ${name}: escolhe uma`,
+      pick: 'Escolhe uma freguesia da lista, com as setas ou com um toque: a tentativa só conta depois de a escolheres.',
     }
     : {
       label: 'Find a parish',
@@ -167,6 +187,8 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
         ? `${formatCount(shown, 'en')} of ${formatCount(all, 'en')} parishes. Type more to narrow it down.`
         : `${formatCount(all, 'en')} ${all === 1 ? 'parish found' : 'parishes found'}.`),
       underMunicipality: 'in this municipality',
+      municipalityHeading: (name: string) => `Parishes of ${name} municipality: pick one`,
+      pick: 'Pick a parish from the list, with the arrow keys or a tap: the guess only counts once you pick it.',
     };
 
   const typed = query.trim().length >= 2;
@@ -175,11 +197,21 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
   const locationMessage = locating === 'denied' ? t.denied : locating === 'far' ? t.far : t.privacy;
 
   return (
-    <div className={className}>
+    <div ref={field} className={className}>
       <label htmlFor={`${id}-input`} className="mb-1.5 block text-sm font-semibold text-ink">{label ?? t.label}</label>
       <div className="flex flex-wrap items-stretch gap-2">
-        {/* The suggestions open right under the field, over the location button. */}
-        <div className="relative min-w-0 flex-1 basis-64">
+        {/*
+          The suggestions open right under the field, over the location button.
+          The list or panel stays open while focus is anywhere inside this box
+          (the clear button, the map link) and closes when it leaves.
+        */}
+        <div
+          className="relative min-w-0 flex-1 basis-64"
+          onBlur={event => {
+            if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+            window.setTimeout(() => setOpen(false), 150);
+          }}
+        >
           <Search aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" />
           <input
             ref={input}
@@ -190,7 +222,7 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
             aria-controls={listId}
             aria-autocomplete="list"
             aria-describedby={`${id}-status`}
-            aria-activedescendant={showList && hits[active] ? `${id}-opt-${active}` : undefined}
+            aria-activedescendant={showList && active >= 0 && hits[active] ? `${id}-opt-${active}` : undefined}
             autoComplete="off"
             spellCheck={false}
             disabled={disabled}
@@ -200,25 +232,34 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
               load();
               setOpen(true);
               onFocus?.();
-              // On a phone the keyboard takes half the screen: lift the field so the suggestions have room.
+              // On a phone the keyboard takes half the screen: lift the field, its
+              // label included, so the suggestions have room (the page's scroll
+              // padding keeps it clear of the sticky header).
               if (window.matchMedia('(max-width: 640px)').matches) {
-                window.setTimeout(() => input.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }), 250);
+                window.setTimeout(() => field.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }), 250);
               }
             }}
-            onBlur={() => window.setTimeout(() => setOpen(false), 150)}
-            onChange={event => { setQuery(event.target.value); setActive(0); setOpen(true); }}
+            onChange={event => { setQuery(event.target.value); setMoved(null); setNudge(false); setOpen(true); }}
             onKeyDown={event => {
-              if (event.key === 'ArrowDown') { event.preventDefault(); setOpen(true); setActive(i => Math.min(i + 1, Math.max(0, hits.length - 1))); }
-              else if (event.key === 'ArrowUp') { event.preventDefault(); setActive(i => Math.max(0, i - 1)); }
-              else if (event.key === 'Enter' && showList && hits[active]) { event.preventDefault(); choose(hits[active]); }
-              else if (event.key === 'Escape') { setOpen(false); }
+              if (event.key === 'ArrowDown') { event.preventDefault(); setOpen(true); setMoved(step(1)); }
+              else if (event.key === 'ArrowUp') { event.preventDefault(); setMoved(step(-1)); }
+              else if (event.key === 'Enter' && showList) {
+                event.preventDefault();
+                if (active >= 0 && selectable(active)) choose(hits[active]);
+                else setNudge(true);
+              }
+              else if (event.key === 'Escape' && (showList || showPanel)) {
+                // The first Escape only closes the suggestions; a second one clears the field (the search input's own behaviour).
+                event.preventDefault();
+                setOpen(false);
+              }
             }}
             className={`parish-search h-12 w-full rounded-[10px] border border-line bg-cream pl-10 pr-11 text-base text-ink placeholder:text-stone-500 sm:text-[15px] [&::-webkit-search-cancel-button]:appearance-none ${inputClassName}`}
           />
           {query && !disabled && (
             <button
               type="button"
-              onClick={() => { setQuery(''); setActive(0); input.current?.focus(); }}
+              onClick={() => { setQuery(''); setMoved(null); setNudge(false); input.current?.focus(); }}
               className="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-ink hover:bg-parchment"
             >
               <X aria-hidden="true" className="h-4 w-4" />
@@ -237,6 +278,15 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
               {hits.map((hit, i) => {
                 const selected = i === active;
                 const key = hit.kind === 'municipality' ? `m-${hit.municipality.code}` : hit.parish.code;
+                if (guessing && hit.kind === 'municipality') {
+                  // Not an option: a heading over the município's parishes (each of them names its município too).
+                  return (
+                    <li key={key} role="presentation" aria-hidden="true" className="border-b border-line px-4 py-2.5">
+                      <span className="block text-sm font-bold text-ink">{t.municipalityHeading(hit.municipality.name)}</span>
+                      <span className="block text-xs text-stone-600">{hit.municipality.regionName}</span>
+                    </li>
+                  );
+                }
                 return (
                   <li
                     key={key}
@@ -245,7 +295,7 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
                     role="option"
                     aria-selected={selected}
                     onMouseDown={event => { event.preventDefault(); choose(hit); }}
-                    onMouseEnter={() => setActive(i)}
+                    onMouseEnter={() => setMoved(i)}
                     className={`relative cursor-pointer py-2.5 pr-4 ${hit.kind === 'parish' && hit.underMunicipality ? 'pl-7' : 'pl-4'} ${selected ? 'bg-parchment' : ''} ${hit.kind === 'municipality' ? 'border-b border-line' : ''}`}
                   >
                     {/* The active option carries an ink bar, not only a tint. */}
@@ -259,7 +309,7 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
                       <>
                         <span className="block text-[15px] font-semibold text-ink">{hit.parish.name}</span>
                         <span className="block text-xs text-stone-500">
-                          {hit.underMunicipality ? t.underMunicipality : `${hit.parish.municipalityName} · ${hit.parish.regionName}`}
+                          {hit.underMunicipality && !guessing ? t.underMunicipality : `${hit.parish.municipalityName} · ${hit.parish.regionName}`}
                         </span>
                       </>
                     )}
@@ -267,6 +317,9 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
                 );
               })}
             </ul>
+            {nudge && active < 0 && (
+              <p aria-hidden="true" className="border-t border-line px-4 py-2 text-xs font-semibold text-ink">{t.pick}</p>
+            )}
             {shownParishes < total && (
               <p aria-hidden="true" className="border-t border-line px-4 py-2 text-xs text-stone-600">{t.count(shownParishes, total)}</p>
             )}
@@ -305,7 +358,7 @@ export function ParishSearch({ locale, onSelect, label, placeholder, withLocatio
       </div>
       {/* One polite line for what the list holds, outside it, so it is announced. */}
       <p id={`${id}-status`} role="status" className="sr-only">
-        {typed && index ? (hits.length === 0 ? t.none : t.count(shownParishes, total)) : ''}
+        {typed && index ? (hits.length === 0 ? t.none : nudge && active < 0 ? t.pick : t.count(shownParishes, total)) : ''}
       </p>
       {withLocation && (
         <p className={`mt-1.5 text-xs ${locating === 'far' || locating === 'denied' ? 'font-semibold text-ink' : 'text-stone-500'}`} aria-live="polite">{locationMessage}</p>

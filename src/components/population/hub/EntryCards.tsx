@@ -26,8 +26,8 @@ function entries(locale: Locale): Entry[] {
       kicker: pt ? 'Freguesia misteriosa' : 'Mystery parish',
       title: pt ? 'Consegues adivinhar a freguesia de hoje?' : 'Can you guess today’s parish?',
       text: pt
-        ? 'Uma freguesia por dia, escondida atrás das suas respostas. Revela as pistas uma a uma e tenta descobrir qual é. Amanhã há outra.'
-        : 'One parish a day, hidden behind its answers. Reveal the clues one at a time and try to work out which it is. Tomorrow brings another.',
+        ? 'Uma freguesia por dia, escondida atrás das suas respostas. Cada palpite errado abre uma nova pista; tens seis tentativas. Amanhã há outra.'
+        : 'One parish a day, hidden behind its answers. Each wrong guess opens a new clue; you have six guesses. Tomorrow brings another.',
       action: pt ? 'Joga a de hoje' : 'Play today’s',
       href: POPULATION_ROUTES.game,
       wide: true,
@@ -70,10 +70,10 @@ function entries(locale: Locale): Entry[] {
       key: 'explainer',
       icon: icon(Shapes),
       kicker: pt ? 'Explicador' : 'Explainer',
-      title: pt ? 'Como se constrói uma população sintética?' : 'How is a synthetic population built?',
+      title: pt ? 'Como se lê uma população sintética?' : 'How do you read a synthetic population?',
       text: pt
-        ? 'Um bairro imaginado, com dados fictícios, mostra a ideia passo a passo.'
-        : 'An imagined neighbourhood, with fictional data, shows the idea step by step.',
+        ? 'Um bairro imaginado, com 100 pessoas inventadas, mostra como ler e como se constrói uma população sintética.'
+        : 'An imagined neighbourhood of 100 invented people shows how a synthetic population is read and how it is built.',
       action: pt ? 'Ver o explicador' : 'See the explainer',
       href: POPULATION_ROUTES.explainer,
     },
