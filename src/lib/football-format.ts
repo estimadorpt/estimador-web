@@ -15,19 +15,25 @@ export function intlLocale(locale: string): 'pt-PT' | 'en-GB' {
   return locale === 'en' ? 'en-GB' : 'pt-PT';
 }
 
-/** A number with a fixed number of decimals in the page's format ("81,1"). */
+/** The typographic minus sign (U+2212), used for every negative football figure. */
+export const MINUS = '\u2212';
+
+/**
+ * A number with a fixed number of decimals in the page's format ("81,1"),
+ * negatives with U+2212 ("\u22120,4") as formatSigned and formatInteger write
+ * them. A negative that rounds to zero prints unsigned ("0,0", not "\u22120,0").
+ */
 export function formatDecimal(value: number, locale: string, digits = 1): string {
-  return new Intl.NumberFormat(intlLocale(locale), {
+  const abs = new Intl.NumberFormat(intlLocale(locale), {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
-  }).format(value);
+  }).format(Math.abs(value));
+  const negative = value < 0 && (!Number.isFinite(value) || /[1-9]/.test(abs));
+  return negative ? `${MINUS}${abs}` : abs;
 }
 
 /** The Portuguese thousands separator: a no-break space, as Intl's pt-PT writes it. */
 const PT_GROUP = String.fromCharCode(0xa0);
-
-/** The typographic minus sign (U+2212), used for every negative football figure. */
-export const MINUS = '\u2212';
 
 /**
  * A whole number with the page's grouping, from the thousands up: "4 942"

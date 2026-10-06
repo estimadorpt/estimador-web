@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChartTable } from "@/components/viz/ChartTable";
+import { DataCard } from "@/components/viz/DataCard";
 import { teamDisplayName } from "@/lib/config/football";
-import { formatInteger, formatPercent } from "@/lib/football-format";
+import { formatInteger, formatLongDate, formatPercent } from "@/lib/football-format";
 import { SERIES } from "@/components/viz/theme";
 import { blockVerdict, SIGNIFICANCE_T, type PointsCalibration } from "@/lib/football-scorecard";
 import {
@@ -126,7 +127,11 @@ const MODEL_COLOR = SERIES[0];
 const MARKET_COLOR = SERIES[1];
 const GRID = "#dadccf"; // stone-200
 const AXIS_TEXT = "#5f7062"; // stone-500
-const SURFACE = "#f5f3ea"; // paper
+// The chart sits in a DataCard, so its ground is cream: the marker cut-outs
+// and the axis-break mask are cream, and the early-season wash is paper, a
+// shade darker than the card.
+const SURFACE = "#fcfbf5"; // cream
+const EARLY_WASH = "#f5f3ea"; // paper
 
 /* ------------------------------------------------------------- formatting */
 
@@ -287,7 +292,7 @@ function CheckpointChart({
           y={padT}
           width={boundaryX - padL}
           height={plotH}
-          fill="#fcfbf5"
+          fill={EARLY_WASH}
         />
 
         {/* gridlines + y ticks */}
@@ -550,7 +555,7 @@ function CheckpointChart({
       {/* Tooltip — enhances; every value is also in the table below */}
       {h && (
         <div
-          className="pointer-events-none absolute z-10 rounded-md border border-stone-200 bg-paper/95 px-3 py-2 text-xs shadow-sm"
+          className="pointer-events-none absolute z-10 rounded-md border border-stone-200 bg-cream/95 px-3 py-2 text-xs shadow-sm"
           style={{
             left: Math.min(Math.max(hoverX - 92, 0), Math.max(0, width - 184)),
             top: padT + 4,
@@ -832,7 +837,25 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
             : "Forecast error (RPS) for the model and the closing line at each matchday forecast. Lower is better."}
           {crossing ? ` ${crossing}` : ""}
         </p>
-        <CheckpointChart data={data} pt={pt} />
+        {/* The one chart frame (CLAUDE.md, "Visualisations"): title, then the
+            source, the evaluation's date and the method under the plot; the
+            table twin sits on the card's cream. */}
+        <DataCard
+          title={pt
+            ? "Erro de previsão do modelo e do mercado, jornada a jornada"
+            : "Model and market forecast error, matchday by matchday"}
+          source={pt
+            ? "Fonte: market_scorecard.json · football-data.co.uk"
+            : "Source: market_scorecard.json · football-data.co.uk"}
+          updated={pt
+            ? `Atualizado a ${formatLongDate(data.generated_at, locale)}`
+            : `Updated ${formatLongDate(data.generated_at, locale)}`}
+          methodologyHref="/desporto/liga/metodologia"
+          methodologyLabel={pt ? "Como funciona o modelo" : "How the model works"}
+          locale={locale}
+        >
+          <CheckpointChart data={data} pt={pt} />
+        </DataCard>
       </section>
 
       {/* Explainer */}

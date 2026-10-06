@@ -151,18 +151,21 @@ export default async function SimuladorPage({
 
       {/* A separate, unrelated question — kept out of the scenario flow above
           so that flow never needs a warning that half the page ignores the
-          chosen result (diagnosis §5 "Simulator"). DueloFinal carries its own
-          heading and disclaimer already; this wrapper just gives the section
-          its own identity in the page furniture. */}
+          chosen result (diagnosis §5 "Simulator"). The question is this
+          section's h2, as on the Liga page; DueloFinal is its DataCard, whose
+          title names the chart (the card's h3 cannot carry an id). */}
       {seasonSamples && (
         <section aria-labelledby="duelo-final-heading" className="border-b border-stone-200 last:border-b-0">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            {/* A plain kicker, no icon: the duel's card carries the one title (UXD2-07). */}
-            <p className="mb-5 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            {/* A plain kicker, no icon (UXD2-07). */}
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">
               {locale === 'pt' ? 'Outra pergunta' : 'A different question'}
             </p>
-            <p className="mb-5 border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-muted">{locale === 'pt' ? 'Previsão de base: esta comparação usa as épocas simuladas da previsão publicada, sem nenhum resultado escolhido no simulador.' : 'Baseline forecast: this comparison uses the published forecast\'s simulated seasons, with no result picked in the simulator.'}</p>
-            <DueloFinal samples={seasonSamples} locale={locale} headingId="duelo-final-heading" forecastTimestamp={prediction.timestamp} />
+            <h2 id="duelo-final-heading" className="mb-3 text-2xl tracking-tight">
+              {locale === 'pt' ? 'Quem acaba à frente?' : 'Who finishes ahead?'}
+            </h2>
+            <p className="mb-6 border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-muted">{locale === 'pt' ? 'Previsão de base: esta comparação usa as épocas simuladas da previsão publicada, sem nenhum resultado escolhido no simulador.' : 'Baseline forecast: this comparison uses the published forecast\'s simulated seasons, with no result picked in the simulator.'}</p>
+            <DueloFinal samples={seasonSamples} locale={locale} forecastTimestamp={prediction.timestamp} />
           </div>
         </section>
       )}

@@ -1,5 +1,5 @@
 import { createPageMetadata, siteTitle } from '@/lib/metadata';
-import { formatInteger, formatLongDate } from "@/lib/football-format";
+import { formatInteger, formatLongDate, formatSigned } from "@/lib/football-format";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -211,9 +211,8 @@ export default async function Liga2Page({
                         {liga2DisplayName(runnerUp.team)} e o{" "}
                         {liga2DisplayName(third.team)} fecharam ambos com{" "}
                         {runnerUp.points} pontos, e a subida ficou para quem
-                        tinha {runnerUp.gd > 0 ? "+" : ""}
-                        {runnerUp.gd} contra {third.gd > 0 ? "+" : ""}
-                        {third.gd}.
+                        tinha {formatSigned(runnerUp.gd, locale, 0)} contra{" "}
+                        {formatSigned(third.gd, locale, 0)}.
                       </>
                     ) : (
                       <>
@@ -232,9 +231,8 @@ export default async function Liga2Page({
                         {liga2DisplayName(runnerUp.team)} and{" "}
                         {liga2DisplayName(third.team)} both finished on{" "}
                         {runnerUp.points} points, and promotion went to the one
-                        with {runnerUp.gd > 0 ? "+" : ""}
-                        {runnerUp.gd} against {third.gd > 0 ? "+" : ""}
-                        {third.gd}.
+                        with {formatSigned(runnerUp.gd, locale, 0)} against{" "}
+                        {formatSigned(third.gd, locale, 0)}.
                       </>
                     ) : (
                       <>

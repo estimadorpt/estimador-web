@@ -126,8 +126,8 @@ function EstadoAtual({
         ? 'Em publicação contínua · previsões atualizadas a cada jornada da época em curso.'
         : 'Published on a continuing basis · forecasts updated every matchday of the current season.',
       text: pt
-        ? `Um modelo bayesiano que simula milhares de épocas possíveis para estimar a classificação final, as probabilidades de título e de despromoção e o peso de cada jogo nessas contas.${playerSeason ? ` Mede também os jogadores, uma métrica por dimensão: a finalização e a contribuição ofensiva vão até ao fim da época ${playerSeason}.` : ''}`
-        : `A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.${playerSeason ? ` It also rates players, one metric per dimension: finishing and attacking contribution run to the end of the ${playerSeason} season.` : ''}`,
+        ? `Um modelo bayesiano que simula milhares de épocas possíveis para estimar a classificação final, as probabilidades de título e de despromoção e o peso de cada jogo nessas contas.${playerSeason ? ` Modelos bayesianos próprios medem também os jogadores, um por dimensão; os de finalização e de contribuição ofensiva vão até ao fim da época ${playerSeason}.` : ''}`
+        : `A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.${playerSeason ? ` Dedicated Bayesian models also rate the players, one per dimension; the finishing and attacking contribution models run to the end of the ${playerSeason} season.` : ''}`,
       method: { href: '/desporto/liga/metodologia', label: pt ? 'Metodologia da Liga Portugal' : 'Liga Portugal methodology' },
     },
     {

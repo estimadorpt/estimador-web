@@ -5,16 +5,13 @@ import { teamColorOnPaper, teamDisplayName, teamLogoSrc } from "@/lib/config/foo
 import { formatInteger, formatPercent, formatShortDate, MINUS } from "@/lib/football-format";
 import { duelBins, samplingMargin } from "@/lib/football-scenarios";
 import { ChartTable } from "@/components/viz/ChartTable";
-import { Link } from "@/i18n/routing";
-import { Swords } from "lucide-react";
+import { DataCard } from "@/components/viz/DataCard";
 import type { SeasonSamples } from "./SeasonDraw";
 
 interface DueloFinalProps {
   samples: SeasonSamples;
   locale?: string;
-  /** Id for the heading, so the page section can be labelled by it. */
-  headingId?: string;
-  /** The forecast's timestamp, for the source line. */
+  /** The forecast's timestamp, for the card's date line. */
   forecastTimestamp?: string | null;
 }
 
@@ -25,8 +22,10 @@ const TIE_COLOR = "#8b9a8e";
  *  The tie on points has its own bar; the share carries its sampling margin
  *  (300 seasons, about ±5 points, audit MR2-07); the bins are in a table
  *  twin and in the chart's own label (A11Y2-M1); source, date and method sit
- *  in the card's footer (MR2-07, UXD2-05). */
-export function DueloFinal({ samples, locale = "pt", headingId, forecastTimestamp }: DueloFinalProps) {
+ *  in the card's footer (MR2-07, UXD2-05). The frame is the shared DataCard
+ *  (title, subtitle, the two pickers as its controls, footer); the question
+ *  itself is the page section's h2, so the card's title names the chart. */
+export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloFinalProps) {
   const pt = locale !== "en";
   const selectId = useId();
 
@@ -87,7 +86,6 @@ export function DueloFinal({ samples, locale = "pt", headingId, forecastTimestam
   };
 
   const t = {
-    title: pt ? "Quem acaba à frente?" : "Who finishes ahead?",
     subtitle: pt
       ? `Escolhe duas equipas e vê quem acaba à frente nas ${formatInteger(stats.n, "pt")} épocas completas tiradas das ${formatInteger(samples.n_sims, "pt")} simulações do modelo.`
       : `Pick two teams and see who finishes ahead across ${formatInteger(stats.n, "en")} complete seasons drawn from the model's ${formatInteger(samples.n_sims, "en")} simulations.`,
@@ -157,19 +155,26 @@ export function DueloFinal({ samples, locale = "pt", headingId, forecastTimestam
   );
 
   return (
-    <div className="rounded-2xl border border-line bg-cream p-4 sm:p-6">
-      <div className="flex items-center gap-2 mb-1">
-        <Swords aria-hidden="true" className="w-5 h-5 text-stone-500" />
-        <h2 id={headingId} className="text-xl font-bold text-ink">{t.title}</h2>
-      </div>
-      <p className="text-sm text-stone-500 mb-4">{t.subtitle}</p>
-
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 mb-5">
-        {select(iA, iB, setIA, "a")}
-        <span aria-hidden="true" className="hidden sm:flex items-end pb-3 text-lg font-bold text-stone-500">–</span>
-        {select(iB, iA, setIB, "b")}
-      </div>
-
+    <DataCard
+      title={t.axis}
+      subtitle={t.subtitle}
+      controls={
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:gap-6">
+          {select(iA, iB, setIA, "a")}
+          <span aria-hidden="true" className="hidden sm:flex items-end pb-3 text-lg font-bold text-stone-500">–</span>
+          {select(iB, iA, setIB, "b")}
+        </div>
+      }
+      source={pt
+        ? `Fonte: modelo estimador.pt, ${formatInteger(stats.n, "pt")} épocas sorteadas das ${formatInteger(samples.n_sims, "pt")} simulações`
+        : `Source: estimador.pt model, ${formatInteger(stats.n, "en")} seasons drawn from ${formatInteger(samples.n_sims, "en")} simulations`}
+      updated={forecastTimestamp
+        ? pt ? `Previsão de ${formatShortDate(forecastTimestamp, "pt")}` : `Forecast of ${formatShortDate(forecastTimestamp, "en")}`
+        : undefined}
+      methodologyHref={pt ? "/desporto/liga/metodologia#o-simulador" : "/desporto/liga/metodologia#the-simulator"}
+      methodologyLabel={pt ? "Como funciona o simulador" : "How the simulator works"}
+      locale={pt ? "pt" : "en"}
+    >
       <p className="text-lg sm:text-xl font-bold text-stone-900 mb-1">{t.hero}</p>
       <p className="text-xs text-stone-600 mb-4 max-w-3xl leading-relaxed">
         {t.ptsTieLabel}: <span className="tabular-nums">{formatPercent(shareTie, locale)}</span> · {t.marginNote}
@@ -220,24 +225,6 @@ export function DueloFinal({ samples, locale = "pt", headingId, forecastTimestam
           formatPercent(stats.n ? b.count / stats.n : 0, locale),
         ])}
       />
-
-      <footer className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line pt-3 text-xs text-stone-500">
-        <span>
-          {pt
-            ? `Fonte: modelo estimador.pt, ${formatInteger(stats.n, "pt")} épocas sorteadas das ${formatInteger(samples.n_sims, "pt")} simulações`
-            : `Source: estimador.pt model, ${formatInteger(stats.n, "en")} seasons drawn from ${formatInteger(samples.n_sims, "en")} simulations`}
-        </span>
-        {forecastTimestamp && (
-          <span>{pt ? `Previsão de ${formatShortDate(forecastTimestamp, "pt")}` : `Forecast of ${formatShortDate(forecastTimestamp, "en")}`}</span>
-        )}
-        <Link
-          href={pt ? "/desporto/liga/metodologia#o-simulador" : "/desporto/liga/metodologia#the-simulator"}
-          locale={pt ? "pt" : "en"}
-          className="inline-flex min-h-11 items-center font-semibold text-ink underline-offset-4 hover:underline"
-        >
-          {pt ? "Como funciona o simulador" : "How the simulator works"}
-        </Link>
-      </footer>
-    </div>
+    </DataCard>
   );
 }

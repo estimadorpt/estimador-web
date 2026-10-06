@@ -7,6 +7,7 @@ import { quietPlot } from "@/components/viz/plot-a11y";
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent, formatShortDate } from "@/lib/football-format";
 import type { LigaProbabilityHistory } from "@/types/football";
+import { probabilityHistoryTable } from "./probability-history-table";
 
 interface TitleRaceChartProps {
   historical: LigaProbabilityHistory;
@@ -36,17 +37,12 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
   }, [historical]);
   const colours = useMemo(() => distinctTeamColors(teams), [teams]);
 
-  // The table twin: one row per club on the chart, one column per matchday.
-  const table = useMemo(() => {
-    const rows = teams.map(team => [
-      teamDisplayName(team),
-      ...historical.map(md => {
-        const t = md.table.find(x => x.team === team);
-        return t ? formatPercent(t.p_champion, locale) : "";
-      }),
-    ]);
-    return { columns: [pt ? "Equipa" : "Team", ...historical.map(md => `${pt ? "J" : "MD"}${md.matchday}${md.timestamp ? ` · ${formatShortDate(md.timestamp, locale)}` : ""}`)], rows };
-  }, [historical, teams, pt, locale]);
+  // The table twin: one row per club on the chart, one column per matchday,
+  // newest first (the chart itself stays oldest-first).
+  const table = useMemo(
+    () => probabilityHistoryTable(historical, teams, "p_champion", locale),
+    [historical, teams, locale],
+  );
 
   useEffect(() => {
     if (!containerRef.current || historical.length === 0) return;
