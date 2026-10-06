@@ -120,8 +120,11 @@ export function Header() {
           // 60px tall). The current language is marked with a hairline, not
           // a shadow, so its focus keeps the global paper ring (A11Y2-18).
           const className = `inline-flex items-center justify-center rounded border font-medium transition-colors ${mobile ? 'min-h-11 min-w-11 px-3 text-sm' : 'min-h-10 min-w-10 px-2 text-xs'} ${locale === targetLocale ? 'border-line bg-cream text-ink' : 'border-transparent text-stone-600 hover:text-ink'}`;
-          if (parishPath) return (
-            <a key={targetLocale} href={`/${targetLocale}${parishPath}`} hrefLang={targetLocale} lang={targetLocale}
+          // In the shell's static HTML (code "_") the parish is not known yet: link
+          // the population hub until mount, never /freguesia/_/, a not-found page (SPV-03).
+          const plainPath = parishPath ?? (/\/populacao\/freguesia\/_\/?$/.test(pathname) ? '/populacao/' : null);
+          if (plainPath) return (
+            <a key={targetLocale} href={`/${targetLocale}${plainPath}`} hrefLang={targetLocale} lang={targetLocale}
               onClick={closeNavigation} aria-label={languageName} title={languageName}
               aria-current={locale === targetLocale ? 'page' : undefined} className={className}>
               {targetLocale.toUpperCase()}

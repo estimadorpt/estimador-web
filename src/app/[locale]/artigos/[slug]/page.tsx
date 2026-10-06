@@ -17,6 +17,7 @@ import type { Metadata } from 'next';
 import { readFileSync } from 'fs';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getMDXComponents } from '@/mdx-components';
+import { ARTICLE_CHARTS } from '@/components/mdx/article-charts';
 
 interface MDXArticlePageProps {
   params: Promise<{
@@ -95,7 +96,7 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
     notFound();
   }
 
-  const components = getMDXComponents();
+  const components = getMDXComponents(ARTICLE_CHARTS);
   const dateFormat = new Intl.DateTimeFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', {
     year: 'numeric', month: 'long', day: 'numeric',
   });

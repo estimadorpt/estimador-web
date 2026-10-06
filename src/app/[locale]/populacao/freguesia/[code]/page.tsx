@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { ParishPage } from '@/components/population/parish/ParishPage';
-import { feedAlternates, getOgImageSize, getOgImageUrl, siteTitle, SITE_URL } from '@/lib/metadata';
-import { parishPrefetchScript } from '@/lib/population/prefetch';
+import { feedAlternates, getOgImageAlt, getOgImageSize, getOgImageUrl, siteTitle, SITE_URL } from '@/lib/metadata';
+import { parishShellScript } from '@/lib/population/prefetch';
 import { setRequestLocale } from '@/i18n/request-locale';
 
 /**
@@ -20,8 +20,9 @@ export function generateStaticParams() {
  * Static metadata that names no parish. Deliberately not createPageMetadata:
  * it always sets a canonical, and a canonical (or a noindex) in this shell
  * would apply to every parish at once. `alternates` is replaced, not merged,
- * so this also drops the layout's homepage canonical and hreflang links; the
- * client sets the parish's own (ParishPage → setParishHead).
+ * so this also drops the layout's homepage canonical and hreflang links. The
+ * shell's early script writes the parish's own before hydration
+ * (parishShellScript) and ParishPage keeps them right (head.ts → watchHead).
  */
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -31,6 +32,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const description = pt
     ? 'Quem vive em cada freguesia de Portugal: idades, trabalho, escolaridade e agregados numa população sintética gerada a partir dos Censos 2021.'
     : 'Who lives in each parish of Portugal: ages, work, education and households in a synthetic population generated from the 2021 Census.';
+  const image = getOgImageUrl(locale, '/populacao');
+  // The alt describes the card the preview shows (the population card), not the page (SPV-04).
+  const imageAlt = getOgImageAlt(locale, '/populacao', title);
   return {
     metadataBase: new URL(SITE_URL),
     title,
@@ -47,14 +51,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       // Link previews do not run the page's JavaScript, so every parish shares the
       // population section's card (not the site's general one). Per-parish
       // previews need a server-side step; see the round-2 follow-ups.
-      images: [{ url: getOgImageUrl(locale, '/populacao'), ...getOgImageSize(), alt: title }],
+      images: [{ url: image, ...getOgImageSize(), alt: imageAlt }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
       creator: '@estimadorpt',
-      images: [getOgImageUrl(locale, '/populacao')],
+      images: [{ url: image, alt: imageAlt }],
     },
   };
 }
@@ -64,8 +68,9 @@ export default async function ParishRoute({ params }: { params: Promise<{ locale
   setRequestLocale(locale);
   return (
     <div className="min-h-screen bg-paper">
-      {/* Starts the parish's data before the page's JavaScript has loaded (UXM2V-01). */}
-      <script dangerouslySetInnerHTML={{ __html: parishPrefetchScript() }} />
+      {/* The one early script: starts the parish's data and writes its canonical and
+          alternates before the page's JavaScript has loaded (UXM2V-01, SPV-03). */}
+      <script dangerouslySetInnerHTML={{ __html: parishShellScript(locale === 'en' ? 'en' : 'pt') }} />
       <Header />
       <ParishPage locale={locale === 'en' ? 'en' : 'pt'} />
       <SiteFooter locale={locale} />

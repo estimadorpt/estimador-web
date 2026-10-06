@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createPageMetadata, PARISH_PREFETCH_KEY, parishHeadScript, resolveOgImageAlt, siteTitle, TITLE_SUFFIX, type OgManifest } from './metadata';
+import { createPageMetadata, resolveOgImageAlt, siteTitle, TITLE_SUFFIX, type OgManifest } from './metadata';
 
 describe('page titles', () => {
   it('appends the one site suffix to a bare title', () => {
@@ -59,44 +59,5 @@ describe('og:image:alt (SPV-04)', () => {
   it('falls back to the title when the card has no description', () => {
     expect(resolveOgImageAlt(manifest, 'pt', '/sobre', 'Sobre | estimador.pt')).toBe('Sobre | estimador.pt');
     expect(resolveOgImageAlt(null, 'pt', '/desporto/liga', 'Liga | estimador.pt')).toBe('Liga | estimador.pt');
-  });
-});
-
-describe('parish head script (UXM2V-01, SPV-03)', () => {
-  interface FakeLink { attrs: Record<string, string>; setAttribute(name: string, value: string): void }
-  function run(pathname: string) {
-    const head: FakeLink[] = [];
-    const fetched: string[] = [];
-    const window: Record<string, unknown> = {};
-    const document = {
-      head: { appendChild: (element: FakeLink) => head.push(element) },
-      createElement: () => {
-        const attrs: Record<string, string> = {};
-        return { attrs, setAttribute: (name: string, value: string) => { attrs[name] = value; } };
-      },
-    };
-    const fetch = (url: string) => { fetched.push(url); return Promise.resolve(url); };
-    new Function('location', 'document', 'window', 'fetch', parishHeadScript('/data/population/v9.9.9'))({ pathname }, document, window, fetch);
-    return { links: head.map(link => link.attrs), fetched, prefetch: window[PARISH_PREFETCH_KEY] as Record<string, Promise<string>> | undefined };
-  }
-
-  it('starts the parish data requests and writes the canonical and alternates, owned by head.ts', async () => {
-    const { links, fetched, prefetch } = run('/en/populacao/freguesia/0302fa');
-    expect(fetched).toEqual(['/data/population/v9.9.9/meta.json', '/data/population/v9.9.9/parish/0302FA.json']);
-    expect(await prefetch?.['/data/population/v9.9.9/parish/0302FA.json']).toBe('/data/population/v9.9.9/parish/0302FA.json');
-    // No <link rel=preload>: one in the head before hydration duplicated og:title.
-    expect(links).toEqual([
-      { rel: 'canonical', href: 'https://estimador.pt/en/populacao/freguesia/0302FA/', 'data-parish-head': '' },
-      { rel: 'alternate', hreflang: 'pt', href: 'https://estimador.pt/pt/populacao/freguesia/0302FA/', 'data-parish-head': '' },
-      { rel: 'alternate', hreflang: 'en', href: 'https://estimador.pt/en/populacao/freguesia/0302FA/', 'data-parish-head': '' },
-      { rel: 'alternate', hreflang: 'x-default', href: 'https://estimador.pt/pt/populacao/freguesia/0302FA/', 'data-parish-head': '' },
-    ]);
-  });
-
-  it('does nothing on other pages or without a valid code', () => {
-    for (const pathname of ['/pt/', '/pt/populacao/', '/pt/populacao/freguesia/', '/pt/populacao/freguesia/_/', '/pt/populacao/freguesia/abc/', '/pt/populacao/freguesia/%E0%A4%A/']) {
-      const { links, fetched } = run(pathname);
-      expect([...links, ...fetched], pathname).toEqual([]);
-    }
   });
 });

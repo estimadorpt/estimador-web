@@ -1,9 +1,4 @@
 import type { MDXComponents } from 'mdx/types';
-import { CoalitionDotPlot } from '@/components/charts/CoalitionDotPlot';
-import { PollingChart } from '@/components/charts/PollingChart';
-import { SeatChart } from '@/components/charts/SeatChart';
-import { HouseEffects } from '@/components/charts/HouseEffects';
-import { DistrictSummary } from '@/components/charts/DistrictSummary';
 import { Figure } from '@/components/mdx/Figure';
 import { Callout } from '@/components/mdx/Callout';
 
@@ -21,13 +16,8 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
     Figure,
     Callout,
 
-    // Chart components, callable from MDX with inline data:
-    //   <Figure caption="…" source="…"><SeatChart data={[…]} /></Figure>
-    CoalitionDotPlot,
-    PollingChart,
-    SeatChart,
-    HouseEffects,
-    DistrictSummary,
+    // The chart components are added by the article page only
+    // (src/components/mdx/article-charts.ts), so the prose pages skip Plot and d3.
 
     // Articles put the title in the page header, but the standalone pages
     // (about, methodology, privacy) open their MDX with one.

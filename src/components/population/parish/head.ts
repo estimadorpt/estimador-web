@@ -23,11 +23,20 @@
  * the page; elements it only re-valued get their original value back, but only
  * if they still hold the value written here (Next may already have given them
  * the next page's).
+ *
+ * The shell's early script (`parishShellScript`, src/lib/population/prefetch.ts)
+ * writes the canonical and alternates before hydration with the same OWNED
+ * attribute, so they are this module's from the start.
  */
 
 const SITE = 'https://estimador.pt';
-/** Marks the elements this module added, so they leave with the page. */
-const OWNED = 'data-parish-head';
+/**
+ * Marks the elements this module added, so they leave with the page. The
+ * shell's early script types the same literal (it cannot import from a
+ * 'use client' module); prefetch.test.ts checks the two agree.
+ */
+export const PARISH_HEAD_ATTR = 'data-parish-head';
+const OWNED = PARISH_HEAD_ATTR;
 
 export function parishUrl(locale: string, code: string): string {
   return `${SITE}/${locale}/populacao/freguesia/${code}/`;
@@ -188,6 +197,30 @@ function applyHead(spec: HeadSpec, writer: Writer) {
 
 const HEAD_TAGS = new Set(['TITLE', 'META', 'LINK']);
 
+/** The single-valued meta tags this module writes, by their key attribute. */
+const SINGLE_META = ['name="robots"', 'name="description"', 'property="og:description"', 'property="og:title"', 'name="twitter:title"', 'property="og:url"'];
+
+/**
+ * React adopts a server-rendered <meta> during hydration only while its
+ * content is the one it rendered. The shell's early script starts the parish
+ * data before the bundles load, so this module can re-value the shell's tags
+ * before Next's metadata hydrates; React then adds a fresh tag and leaves the
+ * old one behind: two og:title, two twitter:title (SP2-09). The tag React just
+ * added is the one it manages, so every other tag with the same key goes, and
+ * applyHead re-values the one that stays.
+ */
+function dropSupersededMeta(records: MutationRecord[]) {
+  for (const record of records) {
+    for (const node of record.addedNodes) {
+      if (node.nodeType !== Node.ELEMENT_NODE || (node as Element).tagName !== 'META') continue;
+      const added = node as Element;
+      const key = SINGLE_META.find(candidate => added.matches(`meta[${candidate}]`));
+      if (!key) continue;
+      document.querySelectorAll(`meta[${key}]`).forEach(other => { if (other !== added) other.remove(); });
+    }
+  }
+}
+
 /** Whether a mutation touched a title, meta or link element (and not, say, a chart's style). */
 function touchesHeadTags(record: MutationRecord): boolean {
   const target = record.target.nodeType === Node.TEXT_NODE ? record.target.parentElement : record.target as Element;
@@ -219,6 +252,7 @@ export function watchHead(spec: HeadSpec, code: string | null): () => void {
   };
   const observer = new MutationObserver(records => {
     if (!stillHere()) { stop(); return; }
+    dropSupersededMeta(records);
     if (records.some(touchesHeadTags)) applyHead(spec, writer);
   });
   if (stillHere()) applyHead(spec, writer);

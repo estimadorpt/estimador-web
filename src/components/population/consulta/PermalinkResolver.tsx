@@ -15,12 +15,18 @@ type State =
   | { kind: 'other-release'; release: string }
   | { kind: 'unknown' };
 
+/**
+ * Keeps the shell out of search results. Its metadata already says noindex
+ * (createPageMetadata with index: false), so the tag is set in place rather
+ * than a second robots tag added beside it (SP2-09); a new one only if the
+ * page has none.
+ */
 function addNoindex() {
-  if (document.head.querySelector('meta[name="robots"][data-consulta]')) return;
+  const existing = document.querySelector('meta[name="robots"]');
+  if (existing) { existing.setAttribute('content', 'noindex, follow'); return; }
   const meta = document.createElement('meta');
   meta.name = 'robots';
   meta.content = 'noindex, follow';
-  meta.setAttribute('data-consulta', '');
   document.head.appendChild(meta);
 }
 

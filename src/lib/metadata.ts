@@ -242,34 +242,3 @@ export function createPageMetadata({
     robots: { index, follow: true },
   };
 }
-
-/** Where the parish script leaves its early requests: data URL → fetch() promise. */
-export const PARISH_PREFETCH_KEY = '__parishPrefetch';
-
-/**
- * The parish pages' first script, inlined at the top of <body> by the [locale]
- * layout and inert on every other page (one regex test).
- *
- * All 3,092 parish pages are one exported shell behind a host rewrite, so the
- * static HTML cannot name the parish. Before any bundle loads, this reads the
- * code from the address (normalised as `normaliseParishCode` does) and:
- *
- *  - starts the requests for meta.json and parish/{CODE}.json, so the data
- *    that draws the page is on its way while the JavaScript downloads instead
- *    of being asked for after hydration (UXM2V-01, SP2-10). The promises wait
- *    on `window.__parishPrefetch`, keyed by URL, for
- *    src/lib/population/client.ts to take over; until it does, the files are
- *    served immutable, so its own request is answered from the cache. These
- *    are fetch() calls, not <link rel=preload> elements: a preload link in the
- *    head before hydration made React add a second og:title and twitter:title;
- *  - writes the parish's canonical and pt/en/x-default alternates (SPV-03), so
- *    a crawler that runs scripts but not the app sees them from the start.
- *    Each carries `data-parish-head`, the attribute
- *    src/components/population/parish/head.ts uses for the tags it owns: it
- *    re-values them once the page knows the parish, drops them for a code that
- *    is not a parish, and removes them when the reader navigates away, so none
- *    leaks onto the next page.
- */
-export function parishHeadScript(dataPath: string): string {
-  return `(function(){try{var m=/^\\/(pt|en)\\/populacao\\/freguesia\\/([^/]+)\\/?$/.exec(location.pathname);if(!m)return;var c;try{c=decodeURIComponent(m[2]).trim().toUpperCase()}catch(e){return}if(!/^[0-9A-Z]{6}$/.test(c))return;var d=${JSON.stringify(dataPath)},p=window.${PARISH_PREFETCH_KEY}={};[d+'/meta.json',d+'/parish/'+c+'.json'].forEach(function(f){p[f]=fetch(f);p[f].catch(function(){})});var h=document.head;function add(a){var e=document.createElement('link');for(var k in a)e.setAttribute(k,a[k]);e.setAttribute('data-parish-head','');h.appendChild(e)}function u(l){return ${JSON.stringify(SITE_URL)}+'/'+l+'/populacao/freguesia/'+c+'/'}add({rel:'canonical',href:u(m[1])});add({rel:'alternate',hreflang:'pt',href:u('pt')});add({rel:'alternate',hreflang:'en',href:u('en')});add({rel:'alternate',hreflang:'x-default',href:u('pt')})}catch(e){}})();`;
-}

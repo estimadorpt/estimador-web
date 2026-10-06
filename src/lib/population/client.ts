@@ -8,7 +8,10 @@ import type { GameEntry, GameIndex, ParishRecord, PopulationMeta, PopulationPlac
 
 const cache = new Map<string, Promise<unknown>>();
 
-/** Requests started by the parish shell's inline script, before hydration (`parishPrefetchScript` in prefetch.ts). */
+/**
+ * Requests the parish shell's early script started before hydration
+ * (`parishShellScript` in prefetch.ts, key `PARISH_PREFETCH_KEY`).
+ */
 declare global {
   interface Window { __populationPrefetch?: Record<string, Promise<Response>> }
 }
