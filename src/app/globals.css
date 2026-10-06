@@ -611,6 +611,11 @@
 .home-band { position: relative; flex: 1 1 auto; min-height: 140px; margin: 0; overflow: hidden; border-radius: 0; background: var(--color-cream); }
 .home-band img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; object-position: center 62%; }
 @media (min-width: 768px) { .home-band { min-height: 160px; } }
+/* Beside the population card the rail must not be the taller of the two: with
+   a 160px floor it set the row's height and left the population card centred
+   over 44 to 58px of empty cream. A lower floor lets the population card set
+   the height; the stadium takes whatever the rail has left. */
+@media (min-width: 1100px) { .home-band--football { min-height: 96px; } }
 
 /* The support row (elections, economy) is two media objects (owner, 6 Oct
    2026): text on the left, the section's painting on the right as a column
