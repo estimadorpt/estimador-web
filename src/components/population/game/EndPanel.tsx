@@ -114,15 +114,14 @@ export function EndPanel({ record, answer, choices, ruledOut, tier, errors, stat
             <p className="max-w-2xl pb-1 text-sm leading-relaxed text-stone-600">{tierMeaningFor(tier, answer.publicationPopulation, answer.censusPopulation)[locale]}</p>
           </Disclosure>
           <p className="mt-1 text-sm text-stone-600">{t.residents}: <strong className="tabular-nums text-ink">{formatCount(answer.censusPopulation, locale)}</strong></p>
-
-          <Stats stats={stats} locale={locale} highlight={!practice ? record.cluesOpened : null} />
-          {!practice && <Countdown locale={locale} />}
         </div>
 
         <div className="min-w-0">
           <Locator choices={choices} ruledOut={ruledOut} answer={answer} locale={locale} withKey className="bg-paper" />
         </div>
       </div>
+
+      <Stats stats={stats} locale={locale} highlight={!practice ? record.cluesOpened : null} countdown={!practice} />
 
       <div className="mt-6 border-t border-line pt-4 text-sm text-stone-600">
         <p>{locale === 'pt' ? index.honesty.message_pt : index.honesty.message_en}</p>
@@ -146,14 +145,14 @@ function Countdown({ locale }: { locale: Locale }) {
     return () => window.clearInterval(timer);
   }, []);
   return (
-    <p className="mt-4 rounded-xl bg-parchment px-4 py-3 text-sm text-stone-600">
+    <p className="rounded-xl bg-parchment px-4 py-3 text-sm text-stone-600">
       {t.next}{' '}
       <strong className="font-display text-lg font-extrabold tabular-nums text-ink" suppressHydrationWarning>{ms === null ? '··:··:··' : formatCountdown(ms)}</strong>
     </p>
   );
 }
 
-function Stats({ stats, locale, highlight }: { stats: GameStats; locale: Locale; highlight: number | null }) {
+function Stats({ stats, locale, highlight, countdown }: { stats: GameStats; locale: Locale; highlight: number | null; countdown: boolean }) {
   const t = GAME_COPY[locale];
   const tiles: Array<[string, number]> = [
     [t.played, stats.played],
@@ -164,7 +163,7 @@ function Stats({ stats, locale, highlight }: { stats: GameStats; locale: Locale;
     <div className="mt-6 border-t border-line pt-5">
       <h3 className="text-base font-bold text-ink">{t.statsTitle}</h3>
       <p className="text-xs text-stone-500">{t.statsNote}</p>
-      <div className="mt-3 grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start">
+      <div className="mt-3 grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,18rem)]">
         <dl className="grid grid-cols-2 gap-2 sm:w-56">
           {tiles.map(([label, value]) => (
             <div key={label} className="flex min-w-0 flex-col-reverse rounded-xl border border-line bg-paper px-2 py-2.5 text-center">
@@ -189,6 +188,7 @@ function Stats({ stats, locale, highlight }: { stats: GameStats; locale: Locale;
             ))}
           </tbody>
         </table>
+        {countdown && <div className="sm:col-span-2 lg:col-span-1"><Countdown locale={locale} /></div>}
       </div>
     </div>
   );

@@ -52,7 +52,7 @@ const pt = {
 
   cluesTitle: 'Pistas',
   clue: (n: number) => `Pista ${n}`,
-  clueLocked: 'Ainda fechada: abre com um erro ou com «Ver a próxima pista»',
+  clueLocked: 'Ainda fechada',
   newClue: 'Nova pista',
   mysteryFigures: 'Valores da freguesia misteriosa.',
   answerFigures: (name: string) => `Valores de ${name}.`,
@@ -141,7 +141,7 @@ const en: Copy = {
 
   cluesTitle: 'Clues',
   clue: (n: number) => `Clue ${n}`,
-  clueLocked: 'Still closed: a wrong pick or “See the next clue” opens it',
+  clueLocked: 'Not open yet',
   newClue: 'New clue',
   mysteryFigures: 'Figures for the mystery parish.',
   answerFigures: (name: string) => `Figures for ${name}.`,

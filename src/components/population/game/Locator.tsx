@@ -30,7 +30,7 @@ export function locate(point: { lat: number; lon: number }): { x: number; y: num
  * leader line from a dot at their true point (PUB3-07). The figure's label,
  * and the key beside it when `withKey` is set, are its text alternative.
  */
-export function Locator({ choices, ruledOut, answer, locale, withKey = false, className = '' }: {
+export function Locator({ choices, ruledOut, answer, locale, withKey = false, scale = 1, className = '' }: {
   /** The four, in the order of the list. */
   choices: Parish[];
   /** Codes picked wrongly. */
@@ -40,6 +40,8 @@ export function Locator({ choices, ruledOut, answer, locale, withKey = false, cl
   locale: Locale;
   /** List the four beside the map (the end panel); on the board, the choice list is the key. */
   withKey?: boolean;
+  /** Drawn larger than its pixel size (the board's column has room); its 11px labels only grow. */
+  scale?: number;
   className?: string;
 }) {
   const t = GAME_COPY[locale];
@@ -57,7 +59,7 @@ export function Locator({ choices, ruledOut, answer, locale, withKey = false, cl
   ].join('; ');
 
   const map = (
-    <svg width={OUTLINE_WIDTH} height={OUTLINE_HEIGHT} viewBox={`0 0 ${OUTLINE_WIDTH} ${OUTLINE_HEIGHT}`} role="img" aria-label={label} className="block shrink-0">
+    <svg width={Math.round(OUTLINE_WIDTH * Math.max(1, scale))} height={Math.round(OUTLINE_HEIGHT * Math.max(1, scale))} viewBox={`0 0 ${OUTLINE_WIDTH} ${OUTLINE_HEIGHT}`} role="img" aria-label={label} className="block shrink-0">
       {FRAME_NAMES.map(name => {
         const f = OUTLINE_FRAMES[name];
         return (
@@ -93,10 +95,10 @@ export function Locator({ choices, ruledOut, answer, locale, withKey = false, cl
     <figure className={`rounded-2xl border border-line bg-cream p-4 ${className}`}>
       <figcaption className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.locatorTitle}</figcaption>
       {withKey ? (
-        <div className="flex items-start gap-4">
+        <div className="flex flex-col items-center gap-4 min-[480px]:flex-row min-[480px]:items-start">
           {map}
           {/* The key: the four, numbered as on the map, with their state in an icon and a word. */}
-          <ol className="flex min-w-0 flex-1 flex-col gap-2.5 text-sm" aria-hidden="true">
+          <ol className="grid w-full min-w-0 flex-1 grid-cols-2 gap-x-4 gap-y-3 text-sm min-[480px]:flex min-[480px]:flex-col min-[480px]:gap-2.5" aria-hidden="true">
             {choices.map((parish, i) => {
               const s = state(parish);
               return (
