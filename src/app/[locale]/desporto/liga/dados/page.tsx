@@ -686,7 +686,7 @@ export default async function LigaDataPage({
         <section className="mb-14">
           <h2 className="text-2xl tracking-tight mb-1">{c.usageTitle}</h2>
           <p className="text-sm text-stone-500 mb-4 max-w-3xl">{c.usageIntro}</p>
-          <pre tabIndex={0} aria-label={c.usageTitle} className="rounded-2xl bg-forest text-paper text-xs overflow-x-auto p-4 leading-relaxed">
+          <pre tabIndex={0} role="region" aria-label={c.usageTitle} className="rounded-2xl bg-forest text-paper text-xs overflow-x-auto p-4 leading-relaxed max-sm:whitespace-pre-wrap max-sm:[overflow-wrap:anywhere]">
             <code>{pt
               ? `# um ficheiro de jornada (o mais recente é o NN mais alto)
 curl -s ${SITE}/data/football/liga-2026-27/md01.json | jq '.table[0]'

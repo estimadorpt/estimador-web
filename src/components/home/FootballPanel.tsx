@@ -76,6 +76,17 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
     change: hasDeltas && snapshot ? t('footballChangeCaption', { matchday: snapshot.matchday - 1 }) : null,
     link: t('footballLink'),
   };
+  // The three clubs likeliest to finish 17th or 18th in the same forecast,
+  // the bottom of "como pode acabar" beside the title race (CL3-02).
+  const relegation = latest.prediction
+    ? {
+        label: t('footballRelegationLabel'),
+        teams: [...latest.prediction.table]
+          .sort((a, b) => b.p_relegation - a.p_relegation)
+          .slice(0, 3)
+          .map(({ team, p_relegation }) => ({ team, p_relegation })),
+      }
+    : undefined;
 
   const copy = (
     <>
@@ -94,7 +105,7 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
         </div>
       </div>
       {snapshot && outlooks.length ? (
-        <FootballClubPicker locale={locale} outlooks={outlooks} top3={snapshot.top3} deltas={deltas} generalLabels={generalLabels} />
+        <FootballClubPicker locale={locale} outlooks={outlooks} top3={snapshot.top3} deltas={deltas} generalLabels={generalLabels} relegation={relegation} />
       ) : snapshot ? (
         // A forecast without per-club outlooks (no scenarios published):
         // the general title race, labelled, and the way into the Liga page.

@@ -1,11 +1,15 @@
 /**
- * A parish page's <title> and meta description (SPV-01). 6,184 parish URLs
- * are in the sitemap, and a third of the names are unions of two to five
- * parishes, so the full name cannot always fit: the title drops the "União das
- * freguesias de" prefix and the section tag when long, and the description
- * adds the INE count only while it stays within 155 characters. A name that
- * still does not fit is cut before a whole word, never after "de" or "e", and
- * a parenthesis it cuts into is closed (S-08). The h1 keeps the full name.
+ * A parish page's <title> and meta description (SPV-01, SEO3-04), the one
+ * implementation the page ships. 6,184 parish URLs are in the sitemap, and a
+ * third of the names are unions of two to five parishes, so the full name
+ * cannot always fit: the title is the page's question with the "União das
+ * freguesias de" prefix dropped and the one site suffix (no section tag, no
+ * second separator), and the description names the full union while it fits,
+ * then the short name, and adds the INE count only while it stays within 155
+ * characters. A name that still does not fit is cut before a whole word, never
+ * after "de" or "e", and a parenthesis it cuts into is closed (S-08). The
+ * Portuguese preposition agrees with the name ("na União das freguesias do
+ * Vade", "no Vade", "em Aguada de Cima"). The h1 keeps the full name.
  */
 import { formatCount } from '@/lib/population/format';
 import type { Locale } from '@/lib/population/labels';
@@ -15,11 +19,31 @@ import { siteTitle } from '@/lib/site-title';
 export const TITLE_MAX = 70;
 export const DESCRIPTION_MAX = 155;
 
-const UNION_PREFIX = /^União (?:das|de) freguesias (?:de|da|do|das|dos) /i;
+// "União das freguesias de X, Y e Z" (759 of the 3,092 names) and its
+// variants: "União de freguesias de", "… do/da/das/dos".
+const UNION_PREFIX = /^União (?:das|de) freguesias (de|da|do|das|dos) /i;
+const ARTICLE = { de: '', do: 'o', da: 'a', dos: 'os', das: 'as' } as const;
 
 /** "União das freguesias de Milhazes, Vilar de Figos e Faria" → "Milhazes, Vilar de Figos e Faria". */
 export function shortParishName(name: string): string {
   return name.replace(UNION_PREFIX, '').trim() || name;
+}
+
+/**
+ * The preposition and the name a sentence puts after "Quem vive" or
+ * "agregados": a union's full name is feminine ("na União das freguesias do
+ * Vade"); with the prefix dropped, the article it ended on still agrees ("no
+ * Vade", "na Ribeira do Neiva", "em Milhazes, Vilar de Figos e Faria"); any
+ * other name takes "em", as the h1 does (parishQuestion). English: "in".
+ */
+export function placePhrase(name: string, locale: Locale, { short }: { short: boolean }): { lead: string; place: string } {
+  const match = UNION_PREFIX.exec(name);
+  const place = short ? shortParishName(name) : name;
+  if (locale !== 'pt') return { lead: 'in', place };
+  if (!match) return { lead: 'em', place };
+  if (!short) return { lead: 'na', place };
+  const article = ARTICLE[match[1].toLowerCase() as keyof typeof ARTICLE];
+  return { lead: article ? `n${article}` : 'em', place };
 }
 
 /**
@@ -76,15 +100,14 @@ function fit(text: string, max: number): string {
   return `${tidy || text.slice(0, max - 1).replace(TRAILING_PUNCTUATION, '')}…`;
 }
 
+/** "Quem vive no Vade? | estimador.pt": the page's question and the one site suffix. */
 export function parishTitle(name: string, locale: Locale): string {
-  const short = shortParishName(name);
-  const tag = locale === 'pt' ? ' · População sintética' : ' · Synthetic population';
-  const question = locale === 'pt' ? `Quem vive em ${short}?` : `Who lives in ${short}?`;
-  if (question.length + tag.length <= 60) return siteTitle(`${question}${tag}`);
+  const { lead, place } = placePhrase(name, locale, { short: true });
+  const ask = (text: string) => (locale === 'pt' ? `Quem vive ${lead} ${text}?` : `Who lives ${lead} ${text}?`);
+  const question = ask(place);
   if (question.length <= TITLE_MAX) return siteTitle(question);
-  const room = TITLE_MAX - (question.length - short.length);
-  const fitted = fit(short, room);
-  return siteTitle(locale === 'pt' ? `Quem vive em ${fitted}?` : `Who lives in ${fitted}?`);
+  const room = TITLE_MAX - (question.length - place.length);
+  return siteTitle(ask(fit(place, room)));
 }
 
 export function parishDescription({ name, municipalityName, censusPopulation, municipalityFigures, locale }: {
@@ -95,19 +118,21 @@ export function parishDescription({ name, municipalityName, censusPopulation, mu
   locale: Locale;
 }): string {
   const pt = locale === 'pt';
-  const build = (place: string) => (pt
-    ? `Idades, trabalho, escolaridade e agregados em ${place} (${municipalityName}): população sintética dos Censos 2021.`
-    : `Ages, work, education and households in ${place} (${municipalityName}): a synthetic population from the 2021 Census.`);
+  const build = ({ lead, place }: { lead: string; place: string }) => (pt
+    ? `Idades, trabalho, escolaridade e agregados ${lead} ${place} (${municipalityName}): população sintética dos Censos 2021.`
+    : `Ages, work, education and households ${lead} ${place} (${municipalityName}): a synthetic population from the 2021 Census.`);
   // The município note first: it changes what the numbers are; the INE count is a courtesy.
   const extras = [
     municipalityFigures ? (pt ? ' Valores do concelho.' : ' Municipality figures.') : '',
     pt ? ` ${formatCount(censusPopulation, locale)} residentes (INE).` : ` ${formatCount(censusPopulation, locale)} residents (INE).`,
   ];
-  let text = build(name);
-  if (text.length > DESCRIPTION_MAX) text = build(shortParishName(name));
+  let text = build(placePhrase(name, locale, { short: false }));
   if (text.length > DESCRIPTION_MAX) {
-    const short = shortParishName(name);
-    text = build(fit(short, short.length - (text.length - DESCRIPTION_MAX)));
+    const short = placePhrase(name, locale, { short: true });
+    text = build(short);
+    if (text.length > DESCRIPTION_MAX) {
+      text = build({ lead: short.lead, place: fit(short.place, short.place.length - (text.length - DESCRIPTION_MAX)) });
+    }
   }
   for (const extra of extras) {
     if (extra && text.length + extra.length <= DESCRIPTION_MAX) text += extra;

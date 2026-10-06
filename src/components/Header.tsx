@@ -118,26 +118,32 @@ export function Header() {
           const languageName = targetLocale === 'pt' ? 'Português' : 'English';
           // 44px in the mobile menu, 40px in the desktop bar (which stays
           // 60px tall). The current language is marked with a hairline, not
-          // a shadow, so its focus keeps the global paper ring (A11Y2-18).
-          const className = `inline-flex items-center justify-center rounded border font-medium transition-colors ${mobile ? 'min-h-11 min-w-11 px-3 text-sm' : 'min-h-10 min-w-10 px-2 text-xs'} ${locale === targetLocale ? 'border-line bg-cream text-ink' : 'border-transparent text-stone-600 hover:text-ink'}`;
+          // a shadow, so its focus keeps the global paper ring (A11Y2-18);
+          // forced colours draw every border, so there it is underlined too
+          // (A11Y3-11).
+          const className = `inline-flex items-center justify-center rounded border font-medium transition-colors ${mobile ? 'min-h-11 min-w-11 px-3 text-sm' : 'min-h-10 min-w-10 px-2 text-xs'} ${locale === targetLocale ? 'border-line bg-cream text-ink forced-colors:underline forced-colors:decoration-2 forced-colors:underline-offset-4' : 'border-transparent text-stone-600 hover:text-ink'}`;
+          // The accessible name starts with what the link shows ("PT"), so a
+          // reader who says what they see can follow it (A11Y3-M2, WCAG 2.5.3).
+          const code = targetLocale.toUpperCase();
           // In the shell's static HTML (code "_") the parish is not known yet: link
           // the population hub until mount, never /freguesia/_/, a not-found page (SPV-03).
           const plainPath = parishPath ?? (/\/populacao\/freguesia\/_\/?$/.test(pathname) ? '/populacao/' : null);
           if (plainPath) return (
             <a key={targetLocale} href={`/${targetLocale}${plainPath}`} hrefLang={targetLocale} lang={targetLocale}
-              onClick={closeNavigation} aria-label={languageName} title={languageName}
+              onClick={closeNavigation} aria-label={`${code}, ${languageName}`} title={languageName}
               aria-current={locale === targetLocale ? 'page' : undefined} className={className}>
-              {targetLocale.toUpperCase()}
+              {code}
             </a>
           );
           const fallbackLabel = isPortuguese ? 'índice de artigos; tradução indisponível' : 'article index; translation unavailable';
+          const visible = `${code}${fallback ? (isPortuguese ? ' · Índice' : ' · Index') : ''}`;
           return (
             <Link key={targetLocale} href={href} locale={targetLocale} hrefLang={targetLocale} lang={targetLocale}
-              onClick={closeNavigation} aria-label={fallback ? `${languageName}: ${fallbackLabel}` : languageName}
+              onClick={closeNavigation} aria-label={fallback ? `${visible}, ${languageName}: ${fallbackLabel}` : `${visible}, ${languageName}`}
               aria-current={locale === targetLocale ? 'page' : undefined}
               title={fallback ? `${languageName}: ${fallbackLabel}` : languageName}
               className={className}>
-              {targetLocale.toUpperCase()}{fallback ? (isPortuguese ? ' · Índice' : ' · Index') : ''}
+              {visible}
             </Link>
           );
         })}
@@ -160,7 +166,8 @@ export function Header() {
         {isPortuguese ? 'Saltar para o conteúdo' : 'Skip to content'}
       </a>
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
-        <Link href="/" aria-label={isPortuguese ? 'estimador — página inicial' : 'estimador — home'}
+        {/* The name starts with the wordmark it shows (A11Y3-M2). */}
+        <Link href="/" aria-label={isPortuguese ? 'estimador.pt — página inicial' : 'estimador.pt — home'}
           onClick={closeNavigation} className="brand-link inline-flex min-h-11 shrink-0 items-center rounded-sm">
           <span className="hidden sm:block" aria-hidden="true"><LogoHorizontal size={22} /></span>
           <span className="sm:hidden" aria-hidden="true"><LogoHorizontal size={18} /></span>
@@ -208,7 +215,9 @@ export function Header() {
           </button>
         </div>
       </div>
-      <div id="mobile-navigation" hidden={!mobileMenuOpen} className="lg:hidden border-t border-line bg-paper max-h-[calc(100dvh-85px)] overflow-y-auto overscroll-contain">
+      {/* A full-height sheet under the 60px bar: shorter, the page showed
+          through below it and read as part of the menu (UXM3-08). */}
+      <div id="mobile-navigation" hidden={!mobileMenuOpen} className="lg:hidden border-t border-line bg-paper h-[calc(100dvh-61px)] overflow-y-auto overscroll-contain">
         <nav aria-label={isPortuguese ? 'Navegação principal móvel' : 'Mobile main navigation'} className="max-w-7xl mx-auto px-4 py-4 space-y-1">
           {navigationItems.map(item => item.dropdown ? (
             <div key={item.id}>

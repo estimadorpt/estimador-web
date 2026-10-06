@@ -38,7 +38,12 @@ export function jsonLd(data: object): string {
 }
 
 const ORGANIZATION_ID = `${SITE_URL}/#organization`;
-const WEBSITE_ID = `${SITE_URL}/#website`;
+/**
+ * One WebSite node per language, each named by its own start page: a single
+ * id would carry a different url and inLanguage on every Portuguese and
+ * English page (SEO3V-M3).
+ */
+const websiteId = (locale: Locale) => `${pageUrl(locale, '/')}#website`;
 
 /** The publisher: who stands behind every page and dataset. */
 export function organizationJsonLd() {
@@ -66,7 +71,7 @@ export function websiteJsonLd(locale: string) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    '@id': WEBSITE_ID,
+    '@id': websiteId(lang),
     name: 'estimador.pt',
     url: pageUrl(lang, '/'),
     description: `${descriptor.line[lang]} ${descriptor.descriptor[lang]}`,

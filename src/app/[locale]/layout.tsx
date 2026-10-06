@@ -12,7 +12,7 @@ import { createPageMetadata } from '@/lib/metadata';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { ArticleLocalesProvider, type ArticleLocales } from '@/lib/article-navigation';
 import { CLIENT_MESSAGE_KEYS, pickMessages } from '@/lib/i18n/client-messages';
-import { jsonLd, siteJsonLd } from '@/lib/structured-data';
+import { jsonLd, languageTag, siteJsonLd } from '@/lib/structured-data';
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -89,7 +89,9 @@ export default async function RootLayout({
   }
   
   return (
-    <html lang={locale} className={fontVariables} suppressHydrationWarning>
+    // pt-PT / en-GB, the tags og:locale, the JSON-LD and the feeds use (SEO3-12);
+    // hreflang stays "pt"/"en".
+    <html lang={languageTag(locale)} className={fontVariables} suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
         {/* The site and its publisher, for search engines (schema.org WebSite + Organization). */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(siteJsonLd(locale)) }} />

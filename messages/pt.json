@@ -253,7 +253,7 @@
     "navPresidential": "Presidenciais 2026 · arquivo",
     "navParliamentary": "Legislativas 2025 · arquivo",
     "navArchiveGuide": "Todas as eleições (arquivo)",
-    "navMethodology": "Como foram feitas as previsões"
+    "navMethodology": "Metodologia"
   },
   "model": {
     "assumptions": {
@@ -286,6 +286,7 @@
     "footballLink": "Ver a Liga Portugal",
     "footballUnavailable": "As previsões da Liga chegam com a próxima jornada publicada.",
     "footballMethod": "Como funciona o modelo",
+    "footballRelegationLabel": "Probabilidade de despromoção (17.º ou 18.º)",
     "economyKicker": "Economia",
     "economyTitlePaused": "Inflação mais baixa significa preços mais baixos?",
     "economyPausedStatus": "Painel em pausa · última leitura: {date}",
@@ -311,6 +312,7 @@
     "moreKicker": "Como fazemos",
     "moreMethodology": "Metodologia de cada secção",
     "moreArticle": "Última análise",
+    "identityByline": "Um projeto independente",
     "electionsForecastRunoff": "previsão de {date} para a 2.ª volta",
     "shortcutClub": "O meu clube",
     "shortcutElections": "Eleições",
@@ -867,7 +869,9 @@
     "products": "Secções",
     "project": "O projeto",
     "privacy": "Privacidade",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "electionsArchive": "Eleições · arquivo",
+    "reuse": "Reutilizar e citar"
   },
   "notFound": {
     "title": "Página não encontrada | estimador.pt",

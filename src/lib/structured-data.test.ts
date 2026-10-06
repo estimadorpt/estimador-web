@@ -13,6 +13,10 @@ describe('structured data', () => {
 
   it('describes the site and its publisher in the reader’s language', () => {
     expect(websiteJsonLd('en')).toMatchObject({ '@type': 'WebSite', url: 'https://estimador.pt/en/', inLanguage: 'en-GB' });
+    // One node id per definition: the two languages' WebSite nodes differ in
+    // url and inLanguage, so they cannot share an @id (SEO3V-M3).
+    expect(websiteJsonLd('pt')['@id']).toBe('https://estimador.pt/pt/#website');
+    expect(websiteJsonLd('en')['@id']).toBe('https://estimador.pt/en/#website');
     expect(websiteJsonLd('pt').description).toMatch(/^Dados para compreender Portugal\./);
     const graph = siteJsonLd('pt')['@graph'];
     expect(graph.map(node => node['@type'])).toEqual(['Organization', 'WebSite']);

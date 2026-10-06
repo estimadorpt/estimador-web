@@ -114,6 +114,11 @@ const MUST_404 = [
 const MUST_200 = [
   { route: '/pt/populacao/', type: 'text/html' },
   { route: '/pt/populacao/freguesia/010103/', type: 'text/html' },
+  // Unslashed and lower-case: the rewrite answers 200 with the shell rather
+  // than a 301 (SWA cannot redirect conditionally), and the shell's early
+  // script writes the upper-case, trailing-slash canonical (SEO3V-M5; the
+  // canonical itself is tested in src/lib/population/prefetch.test.ts).
+  { route: '/pt/populacao/freguesia/0302fa', type: 'text/html' },
   { route: '/en/populacao/freguesia/0302FA/', type: 'text/html' },
   { route: `/populacao/v/${POPULATION_RELEASE}/q/${NATIONAL_QUERY}`, type: 'text/html' },
   // The localised share links ("Copiar ligação" copies the reader's locale).

@@ -253,7 +253,7 @@
     "navPresidential": "Presidential 2026 · archive",
     "navParliamentary": "Parliamentary 2025 · archive",
     "navArchiveGuide": "All elections (archive)",
-    "navMethodology": "How the forecasts were made"
+    "navMethodology": "Methodology"
   },
   "model": {
     "assumptions": {
@@ -286,6 +286,7 @@
     "footballLink": "See Liga Portugal",
     "footballUnavailable": "Liga forecasts arrive with the next published matchday.",
     "footballMethod": "How the model works",
+    "footballRelegationLabel": "Relegation probability (17th or 18th)",
     "economyKicker": "Economy",
     "economyTitlePaused": "Does lower inflation mean lower prices?",
     "economyPausedStatus": "Dashboard paused · last reading: {date}",
@@ -303,7 +304,7 @@
     "electionsAction": "See the archived forecast",
     "electionsOpen": "See forecast",
     "electionsUncertainty": "Every estimate carries its credible interval.",
-    "electionsForecastAsOf": "forecast as of {date}",
+    "electionsForecastAsOf": "forecast of {date}",
     "electionsQuestionRunoff": "Whom did the model expect to win the runoff?",
     "electionsQuestionSeats": "Which party did the model expect to win most seats, and would there be a majority?",
     "electionsArchiveGuide": "All elections (archive)",
@@ -311,6 +312,7 @@
     "moreKicker": "How we work",
     "moreMethodology": "Methodology for each section",
     "moreArticle": "Latest analysis",
+    "identityByline": "An independent project",
     "electionsForecastRunoff": "forecast of {date} for the runoff",
     "shortcutPopulation": "My parish",
     "shortcutsLabel": "Shortcuts",
@@ -867,7 +869,9 @@
     "products": "Sections",
     "project": "The project",
     "privacy": "Privacy",
-    "contact": "Contact"
+    "contact": "Contact",
+    "electionsArchive": "Elections · archive",
+    "reuse": "Reuse and citation"
   },
   "notFound": {
     "title": "Page not found | estimador.pt",

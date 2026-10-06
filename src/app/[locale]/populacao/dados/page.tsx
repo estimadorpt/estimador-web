@@ -83,7 +83,7 @@ const QUALITY_COLUMNS: Array<{ name: string; source: QualitySource; meaning: { p
 function Code({ children, label }: { children: string; label: string }) {
   return (
     // A scrollable region: focusable so a keyboard can scroll it, and named so a screen reader says what it holds.
-    <pre role="region" aria-label={label} tabIndex={0} className="overflow-x-auto rounded-xl border border-line bg-parchment p-4 font-mono text-[13px] leading-relaxed text-ink">
+    <pre role="region" aria-label={label} tabIndex={0} className="scroll-cue overflow-x-auto rounded-xl border border-line bg-parchment p-4 font-mono text-[13px] leading-relaxed text-ink [--scroll-cue-ground:var(--color-parchment)]">
       <code>{children}</code>
     </pre>
   );

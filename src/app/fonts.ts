@@ -29,12 +29,13 @@ import '@fontsource/manrope/800.css';
  * fetches it on first use, and unicode-range keeps that to the glyphs it needs.
  * Italic stays declared because the prose uses <em> for foreign terms
  * (*vintages*, *referrer*); without preload it costs nothing until it appears.
- * Portuguese and English are wholly inside the latin subset.
+ * Portuguese and English are wholly inside the latin subset. The weight axis
+ * only: the optical-size axis (opsz) made each file about 130 to 150 KB, more
+ * than a prose page's own scripts, for a face set at one reading size (SEO3-06).
  */
 const newsreader = Newsreader({
   subsets: ['latin'],
   style: ['normal', 'italic'],
-  axes: ['opsz'],
   display: 'swap',
   preload: false,
   variable: '--font-newsreader',

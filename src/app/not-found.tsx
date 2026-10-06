@@ -6,15 +6,22 @@ import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { NotFoundBody } from '@/components/NotFoundBody';
 import { NotFoundHeaderView } from '@/components/NotFoundHeaderView';
-import { NotFoundByPath } from '@/components/NotFoundSwitch';
+import { NOT_FOUND_LANGUAGE_CSS, NotFoundByPath } from '@/components/NotFoundSwitch';
 import { SiteFooter } from '@/components/SiteFooter';
 import { fontVariables } from './fonts';
 import { LOCALE_REDIRECT_SCRIPT } from '@/lib/locale-redirect';
 
 // Sets <html lang> from the address before the first paint, so the English
 // 404 is never read with Portuguese pronunciation while it hydrates (or by a
-// reader without JavaScript). NotFoundByPath keeps it in step afterwards.
-const LANG_FROM_PATH = "if(/^\\/en(\\/|$)/.test(location.pathname))document.documentElement.lang='en'";
+// reader without JavaScript), and NOT_FOUND_LANGUAGE_CSS shows the English
+// copy. NotFoundByPath keeps it in step afterwards. BCP 47 tags, as on every
+// other page (SEO3-12).
+const LANG_FROM_PATH = "if(/^\\/en(\\/|$)/.test(location.pathname))document.documentElement.lang='en-GB'";
+// The static HTML carries one <title>, the Portuguese copy's (two would leave
+// the order to the renderer); at the start of <body> it is parsed, so an
+// English address gets its own title from the first paint, and NotFoundByPath
+// sets it again once hydrated.
+const titleFromPath = (english: string) => `if(/^\\/en(\\/|$)/.test(location.pathname))document.title=${JSON.stringify(english).replace(/</g, '\\u003c')}`;
 
 /**
  * The 404's own header, drawn from the same navigation as the site Header
@@ -41,7 +48,7 @@ function Page({ locale }: { locale: 'pt' | 'en' }) {
   return (
     <LocaleOnlyProvider locale={locale}>
       <NotFoundHeader locale={locale} />
-      <NotFoundBody locale={locale} withTitle />
+      <NotFoundBody locale={locale} withTitle={locale === 'pt'} />
       <SiteFooter locale={locale} />
     </LocaleOnlyProvider>
   );
@@ -51,20 +58,24 @@ function Page({ locale }: { locale: 'pt' | 'en' }) {
  * The 404 for every address the export does not have, under /pt, /en or
  * neither: Azure serves this one file (/404.html) for all of them. It renders
  * outside the locale layout, so it carries its own document, and it holds both
- * languages, showing the one the address asks for (NotFoundByPath).
+ * languages, showing the one the address asks for from the first paint
+ * (NotFoundByPath).
  */
-export default function NotFound() {
+export default async function NotFound() {
+  const englishTitle = (await getTranslations({ locale: 'en', namespace: 'notFound' }))('title');
   return (
-    <html lang="pt" className={fontVariables} suppressHydrationWarning>
+    <html lang="pt-PT" className={fontVariables} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: LANG_FROM_PATH }} />
+        <style dangerouslySetInnerHTML={{ __html: NOT_FOUND_LANGUAGE_CSS }} />
       </head>
       <body className="antialiased">
         {/* A locale-less section address (/populacao/misteriosa) goes on to /pt/…
             before anything paints; src/lib/locale-redirect.ts. */}
         <script dangerouslySetInnerHTML={{ __html: LOCALE_REDIRECT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: titleFromPath(englishTitle) }} />
         <div className="min-h-screen bg-paper text-ink">
-          <NotFoundByPath pt={<Page locale="pt" />} en={<Page locale="en" />} />
+          <NotFoundByPath pt={<Page locale="pt" />} en={<Page locale="en" />} englishTitle={englishTitle} />
         </div>
       </body>
     </html>

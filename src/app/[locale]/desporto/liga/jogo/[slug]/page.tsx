@@ -331,7 +331,7 @@ export default async function MatchPage({
                   key={team}
                   href={`/desporto/liga/${ligaTeamSlugs[team]}`}
                   locale={locale}
-                  className="text-xs font-medium text-ink underline underline-offset-4 inline-flex items-center gap-1"
+                  className="text-xs font-medium text-ink underline underline-offset-4 inline-flex min-h-11 items-center gap-1"
                 >
                   {L.teamPage}: {teamDisplayName(team)}
                   <ArrowRight aria-hidden="true" className="w-3 h-3" />

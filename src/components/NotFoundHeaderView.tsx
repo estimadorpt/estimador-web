@@ -21,9 +21,9 @@ export function NotFoundHeaderView({ locale, items }: { locale: 'pt' | 'en'; ite
     <div role="group" aria-label={pt ? 'Idioma' : 'Language'} className="flex gap-1 rounded-md bg-stone-100 p-0.5">
       {(['pt', 'en'] as const).map(target => (
         <a key={target} href={`/${target}/`} hrefLang={target} lang={target}
-          aria-label={target === 'pt' ? 'Português' : 'English'}
+          aria-label={`${target.toUpperCase()}, ${target === 'pt' ? 'Português' : 'English'}`}
           aria-current={target === locale ? 'page' : undefined}
-          className={`inline-flex items-center justify-center rounded border font-medium ${mobile ? 'min-h-11 min-w-11 px-3 text-sm' : 'min-h-10 min-w-10 px-2 text-xs'} ${target === locale ? 'border-line bg-cream text-ink' : 'border-transparent text-stone-600 hover:text-ink'}`}>
+          className={`inline-flex items-center justify-center rounded border font-medium ${mobile ? 'min-h-11 min-w-11 px-3 text-sm' : 'min-h-10 min-w-10 px-2 text-xs'} ${target === locale ? 'border-line bg-cream text-ink forced-colors:underline forced-colors:decoration-2 forced-colors:underline-offset-4' : 'border-transparent text-stone-600 hover:text-ink'}`}>
           {target.toUpperCase()}
         </a>
       ))}
@@ -35,7 +35,7 @@ export function NotFoundHeaderView({ locale, items }: { locale: 'pt' | 'en'; ite
         {pt ? 'Saltar para o conteúdo' : 'Skip to content'}
       </a>
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2">
-        <a href={`/${locale}/`} className="brand-link inline-flex min-h-11 shrink-0 items-center rounded-sm" aria-label={pt ? 'estimador — página inicial' : 'estimador — home'}>
+        <a href={`/${locale}/`} className="brand-link inline-flex min-h-11 shrink-0 items-center rounded-sm" aria-label={pt ? 'estimador.pt — página inicial' : 'estimador.pt — home'}>
           <span className="hidden sm:block" aria-hidden="true"><LogoHorizontal size={22} /></span>
           <span className="sm:hidden" aria-hidden="true"><LogoHorizontal size={18} /></span>
         </a>
@@ -65,7 +65,8 @@ export function NotFoundHeaderView({ locale, items }: { locale: 'pt' | 'en'; ite
               <Menu aria-hidden="true" className="h-5 w-5 group-open/mobile:hidden" />
               <X aria-hidden="true" className="hidden h-5 w-5 group-open/mobile:block" />
             </summary>
-            <div className="absolute inset-x-0 top-full max-h-[calc(100dvh-85px)] overflow-y-auto border-y border-line bg-paper">
+            {/* A full-height sheet, as the site header's (UXM3-08). */}
+            <div className="absolute inset-x-0 top-full h-[calc(100dvh-61px)] overflow-y-auto border-t border-line bg-paper">
               <nav aria-label={pt ? 'Navegação principal móvel' : 'Mobile main navigation'} className="mx-auto max-w-7xl space-y-1 px-4 py-4">
                 {items.map(item => item.dropdown ? (
                   <details key={item.id} className="group/section">
