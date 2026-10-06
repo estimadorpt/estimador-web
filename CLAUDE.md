@@ -32,7 +32,10 @@ e.g. every `/desporto/*` page for Liga Portugal). The client `Header` and the st
 of the root 404 (`src/app/not-found.tsx`, native `<details>` menus, plain anchors, the same
 60px bar) both render from it, so they cannot drift. `Header.tsx` reads each label with a
 literal `t('…')` key (the client-messages test only sees literals);
-`site-navigation.test.ts` checks the two stay in step.
+`site-navigation.test.ts` checks the two stay in step. The few labels only the menu uses
+("Previsões da época", "Jogadores", "Simulador", "Modelo vs mercado", the "(jogo semanal)"
+suffix, "Privacidade") are bilingual literals in `site-navigation.ts`, not message keys, so
+they need no `CLIENT_MESSAGE_KEYS` entry.
 
 ## Commands
 
@@ -56,8 +59,9 @@ npm run check:export # Export budget (files, MB, per-file) + over-long titles/de
 Suspense, a route with no params): before a release, build the export from a copy
 (`git archive HEAD` into a scratch folder, symlink `node_modules`, `npm run build`), never
 with `next build` in the working checkout. `postbuild` runs `check:export`, which fails over
-the budget (230 MB, 14 000 files, 10 MB per file) and lists every page whose title passes 70
-characters or description 160 (`createPageMetadata` also warns once per page at build).
+the budget (220 MB, 13 000 files, 10 MB per file; it warns from 190 MB and 11 500 files) and
+lists every page whose title passes 70 characters or description 160 (`createPageMetadata`
+also warns once per page at build).
 
 ### Deployment
 The project deploys automatically to Azure Static Web Apps via GitHub Actions when pushing to `main`. The deployment uses:
@@ -94,12 +98,14 @@ the paths below omit it.
 locale (`/economia` → `/pt/economia/`, `/desporto/liga`, `/eleicoes/…`, `/sobre`,
 `/artigos`, `/metodologia`, `/privacidade`, `/populacao`, `/eleicoes/metodologia`), for the
 shareable pages typed without a locale (`/populacao/misteriosa`, `/dados`, `/qualidade`,
-`/metodologia`, the Liga sub-pages, `/marca`), for `/{pt,en}/desporto` → liga and
+`/metodologia`, `/miniatura`, `/consulta`, the 20 regions `/populacao/regiao/{slug}`, the
+Liga sub-pages, the 18 clubs `/desporto/liga/{club}`, `/desporto/liga2`, `/marca`), all to
+`/pt/`, for `/{pt,en}/desporto` → liga and
 `/{pt,en}/eleicoes` → arquivo, and for the clubs that left the Primeira
 (`/{pt,en}/desporto/liga/{avs,tondela}` → the 2025-26 review, `boavista` → the Liga page).
 SWA redirects cannot reuse a wildcard capture, so a new top-level section needs its own
 line; `scripts/smoke-check.mjs` checks every redirect in the file. Deeper locale-less
-addresses (a parish, a club, a match) reach `/404.html`, whose first script
+addresses (a parish, a match, a player) reach `/404.html`, whose first script
 (`src/lib/locale-redirect.ts`, mounted in `src/app/not-found.tsx`) replaces the address
 with `/pt` + the same path, for the known section prefixes only.
 
@@ -117,13 +123,13 @@ The site's identity is the interval mark and the atlas palette. Everything lives
 - **Type**: one family, Manrope (`--font-sans`, `--font-display`): h1 800, h2/h3 700, text 400/500, uppercase kickers 700, headline numbers `font-display font-extrabold tabular-nums`. Newsreader (`--font-serif`) is the reading face and appears only inside `.article-body` (articles, methodology, about, privacy). No italics as decoration. Nothing below 11px. Both faces are self-hosted (`src/app/fonts.ts`): Manrope from `@fontsource/manrope` (it keeps the family name `Manrope`, which Plot, SVG and canvas code name directly), Newsreader through `next/font/google`, downloaded at build time and served from `/_next/static`; no page view contacts a font host.
 - **Mosaic** (`src/components/brand/Mosaic.tsx`): quarter-circles are shares, circles people, dot grids populations, rounded blocks places; bands stay in the mark. Allowed on brand and explainer covers, hero art of pages without data (`<PageHero art>`), empty states, the 404 and avatars. Never beside a club or party number, never encoding information.
 - **Motion**: the interval opens on hover of a `.brand-link`; `<MarkLoading>` only where something is genuinely loading. Both stop under prefers-reduced-motion. A published forecast never animates.
-- **Three levels of expression** (docs/design/design-system-proposal.md): entrances, explainers and empty states are the most playful (a soft field, a mosaic, one invitation); dashboards and forecasts are restrained (a compact tinted introduction via `<PageHero field>`, then cream tables and plots, decoration outside the plotting areas); articles and methodology are editorial. One colour field per page at most. Owner exception (October 2026): the Liga hub (`/desporto/liga`), `/eleicoes/legislativas` and `/eleicoes/presidenciais` keep their raster section illustration in the hero (`<PageHero illustration>`, `SectionIllustration`) instead of the tinted field. Because that image is the page's largest paint, it must load eagerly (`priority` / `fetchPriority="high"`), with a narrow (about 360px) variant for phones where the asset pipeline makes one cheap; no other forecast page gets a raster hero.
+- **Three levels of expression** (docs/design/design-system-proposal.md): entrances, explainers and empty states are the most playful (a soft field, a mosaic, one invitation); dashboards and forecasts are restrained (a compact tinted introduction via `<PageHero field>`, then cream tables and plots, decoration outside the plotting areas); articles and methodology are editorial. One colour field per page at most. Owner exception (October 2026): the Liga hub (`/desporto/liga`), `/eleicoes/legislativas` and `/eleicoes/presidenciais` keep their raster section illustration in the hero (`<PageHero illustration>`, `SectionIllustration`) instead of the tinted field. Because that image is the page's largest paint, it must load eagerly (`priority` / `fetchPriority="high"`), with a narrow (about 360px) variant for phones where the asset pipeline makes one cheap; no other forecast page gets a raster hero (the Liga simulator, for one, opens on the periwinkle field).
 - **Primitives**: actions are `<Action>` (`src/components/brand/Action.tsx`: primary pine, secondary bordered cream, tint, text; 48px, 10px corners, one main action per view); keyboard focus is the global double ring in globals.css, so components do not declare their own; inputs and selectors are 44 to 48px with a visible label; cards use `rounded-2xl`, a thin border and no shadow; motion is 140 to 200ms feedback and 200 to 300ms panels. `<TeaserBand>` is the explainer teaser that follows a dashboard's data. Empty states get a small mosaic and a specific next step, and missing data is never shown as zero.
 - **One container** (`src/components/brand/Container.tsx`): the header, section tab rows, every `<PageHero>` and the page body share `CONTAINER_CLASS` (`mx-auto w-full max-w-7xl px-4`), so their left edges line up at every width. A narrower column is a `measure` inside it, left-aligned (`<PageHero measure="reading|wide">`, `<Container measure="reading|wide">`, or an inner `max-w-3xl`/`max-w-5xl` div), never a second, narrower centred box (`max-w-3xl mx-auto`): that is what put heroes, tabs and text at four x positions (UXD-05). No page passes `PageHero`'s `width` any more; it stays for a deliberate exception.
 - **Show/hide** is `<Disclosure>` (`src/components/viz/Disclosure.tsx`: a native `<details>`, 44px summary, a left chevron that turns when open, sentence-case label in ink, works in server and client components): table twins (`ChartTable` uses it), map lists, FAQs, notes, "Como ler isto" (`HonestyNote`), producer notes. One look for one action: no uppercase "MOSTRAR" toggles, no rows without a chevron, no chevron on the right, no bespoke button with `useState` for something a `<details>` does. A details whose open state the page controls (the misteriosa "Como se joga?" card, open in the server render and closed after a guess) keeps its own element with the same look (left chevron, 44px, sentence case). MDX `<details>`/`<summary>` get the same left chevron and 44px row from `.article-body details` in globals.css (on top of `mdx-components.tsx`), so a methodology page's details read as the same control.
 - **Standalone links** (a link on its own line or in a card footer, not inside a sentence) are `<TextLink>` (`src/components/brand/TextLink.tsx`): ink, underlined at rest, 44px tall at any font size. **Back links** have one pattern: `<PageHero back={{ href, label }}>`, an arrow and the parent's own name ("← Liga Portugal", "← População sintética", "← Distrito de Lisboa"), never "Voltar à …".
-- **Revision dates** are `<RevisedDate date="YYYY-MM-DD" />` (`src/components/brand/RevisedDate.tsx`) in the PageHero's `meta`: "Revisto a 6 de outubro de 2026" / "Revised 6 October 2026", always a full day, never "Última revisão" or a month alone. The date is a constant beside the page (`REVISED`, `HUB_REVISED`, `PRIVACY_REVISED`), moved with the text.
-- **Numbers and ordinals** (`src/lib/typography.ts`): negatives use the minus sign U+2212 (`MINUS`, `formatSignedNumber`, `withMinus` for a string Intl or `toFixed` already formatted), never the hyphen-minus, in text, tables, SVG labels and chart ticks (`formatValue` in `viz/theme.ts` does it); football keeps `formatSigned`/`formatPp` from `football-format.ts`, which follow the same rule. Ordinals go through `ordinal(n, locale, gender)`: "5.º", "1.ª" in Portuguese (always the abbreviation point, never "5º"), "5th", "1st" in English. No local `ordinal()` copies.
+- **Revision dates** are `<RevisedDate date="YYYY-MM-DD" />` (`src/components/brand/RevisedDate.tsx`) in the PageHero's `meta`: "Revisto a 6 de outubro de 2026" / "Revised 6 October 2026", always a full day, never "Última revisão" or a month alone. The date is a constant beside the page (`REVISED`, `HUB_REVISED`, `PRIVACY_REVISED`), moved with the text. A prose page's sitemap `lastmod` is its entry in `COPY_REVISED` (`src/lib/sitemap-dates.ts`): when a page's revision line or copy changes, change its entry too (`sitemap-dates.test.ts` fails when an entry and a printed date drift; data pages are dated by their data).
+- **Numbers and ordinals** (`src/lib/typography.ts`): negatives use the minus sign U+2212 (`MINUS`, `formatSignedNumber`, `withMinus` for a string Intl or `toFixed` already formatted), never the hyphen-minus, in text, tables, SVG labels and chart ticks (`formatValue` in `viz/theme.ts` does it); football keeps `formatSigned`/`formatPp` from `football-format.ts`, which follow the same rule. Ordinals go through `ordinal(n, locale, gender)`: "5.º", "1.ª" in Portuguese (always the abbreviation point, never "5º"), "5th", "1st" in English. Football keeps `formatOrdinal(n, locale)` from `football-format.ts` for table positions, with the same output as the masculine `ordinal`. No local `ordinal()` copies.
 - **Chart frame**: every chart and every standalone table of figures sits in one `<DataCard>` (title, optional subtitle and badge, the plot, a footer with source, date and a methodology link), in every section. No bespoke card, icon-titled header or loose legend instead of it; a chart inside an article is a `<Figure>` (caption, source, as-of), the editorial twin. Archived forecasts name their run in the footer ("Fonte: modelo estimador.pt, 9 000 simulações · previsão de 16 mai. 2025 · Metodologia"). A new chart without the frame and a `<ChartTable>` twin is not finished.
 - **Wide tables on phones**: `ChartTable` keeps its first column (the row label) sticky with a hairline, the header row sticky, and a `.scroll-cue` edge shadow (globals.css, pure CSS) while there is more to scroll; another scroll area gets `tabIndex={0} role="region" aria-label` and `.scroll-cue` the same way.
 - **Phones**: tap targets are at least 44px (`min-h-11`); on a coarse pointer or below 640px, `:where(footer, nav) li > a` and the opt-in `.tap-target` class get it from the base layer, so lists of links need nothing of their own. Form controls are 16px below 640px (globals.css, unlayered), so iOS does not zoom on focus. `html` has `scroll-padding-top: 5rem`, so anchors, focus and `scrollIntoView` clear the sticky header: do not add `scroll-mt-*`.
@@ -174,25 +180,31 @@ alone restores indexing, the sitemap entries, the share card and the plain nav l
 The synthetic population release (`pt-synthpop` v1.0.3, published 2026-10-05; microdata on
 GitHub releases, `POPULATION_DOWNLOADS`). Config, routes and the release number live in
 `src/lib/config/population.ts`; code reads `POPULATION_RELEASE`, never a typed version.
-v1.0.3 superseded v1.0.0, v1.0.1 and v1.0.2, all of the same day (doc 206 §5–§7; v1.0.2
-was never served nor released on GitHub). The generated population is v1.0.0's
+v1.0.3 superseded v1.0.0, v1.0.1 and v1.0.2, all dated 5 October 2026 (doc 206 §5–§7;
+v1.0.2 was never served nor released on GitHub, and GitHub shows v1.0.3 on 6 October,
+because it went up at 00:01 UTC: `GITHUB_PUBLISHED`). The generated population is v1.0.0's
 throughout. Every parish answers every question with its own numbers and its measured
-tier (A 776 / B 705 / C 1,611), no cell is suppressed, a category with no one in it shows
-"0,0%" (8,723 of them), and the game deck holds all 3,092 parishes with v1.0.1's calendar
-(day 0 = 030857). The game's numbering starts on the day the site goes live:
-  `POPULATION_GAME_EPOCH` in `src/lib/config/population.ts` (default `'2026-10-06'`, so
-  N.º 1 on launch day plays the curated day-0 parish 030857) and the epoch
-  `scripts/sync-population.py` writes into `game/index.json` must both equal the **first
-  deploy date** (a test checks they match). `/data/population/v*` is served immutable, so
-  if the merge does not deploy on 6 October 2026, move both before merging, never after.
-  Household size, household type, "who lives alone" and "elders alone"
-(like multigenerational) count private households only (`is_institutional = 0`); the
-producer writes pt-PT display values ("18,0%") and `formatDisplay` sets the decimal mark
-per locale. The package's `nuts2` is NUTS-2013 from v1.0.3 and its município names are
-INE 2021's; the site keeps CAOP 2021 names. The history sentence lives once, in
-`SUPERSEDED` (`src/components/population/quality/copy.ts`). The quality page quotes the
-scorecard's `band_reading` and band notes (`band-reading.ts`) and never renders `in_band`
-or `coverage_in_band`. Tiers are reading guides, not gates.
+tier (A 776 / B 705 / C 1,611), no cell is suppressed, and a category with no one in it
+shows "0,0%" (8,723 of them). Household size, household type, "who lives alone" and
+"elders alone" (like multigenerational) count private households only
+(`is_institutional = 0`); the producer writes pt-PT display values ("18,0%") and
+`formatDisplay` sets the decimal mark per locale. The package's `nuts2` is NUTS-2013 from
+v1.0.3 and its município names are INE 2021's; the site keeps CAOP 2021 names. The history
+sentence lives once, in `SUPERSEDED` (`src/components/population/quality/copy.ts`, with
+`REPLACED` and `GITHUB_PUBLISHED` beside it). The quality page renders no band verdict: the
+scorecard's pre-registered ranges (`band_reading`, `band_position`, the strata notes,
+`in_band`, `coverage_in_band`) were set for an out-of-fit check with the earlier engine,
+the page's errors are in-sample, and none of them is shown (MR2-02); `scorecard.json`
+stays verbatim. Tiers are reading guides, not gates.
+
+**Freguesia misteriosa's calendar.** The game deck holds all 3,092 parishes with v1.0.1's
+calendar; day 0 (N.º 1, parish 030857) is `POPULATION_GAME_EPOCH` in
+`src/lib/config/population.ts`, the site's launch day (2026-10-06), not the release date.
+`scripts/sync-population.py` reads that constant (or `--game-epoch`) into
+`game/index.json`, and `game.test.ts` checks that they match. The epoch must equal the
+first deploy date: if the merge or deploy is not on 6 October 2026, change the constant,
+re-run the sync and only then deploy (`/data/population/v*` is served immutable, so the
+epoch cannot move after).
 
 - **Routes** (`src/app/[locale]/populacao/`): hub `/populacao`, parish pages
   `/populacao/freguesia/{CODE}` (6-char DICOFRE, e.g. `0302FA`), regions
@@ -206,7 +218,9 @@ or `coverage_in_band`. Tiers are reading guides, not gates.
   `src/lib/utils/population-data-loader.ts`, browser code through
   `src/lib/population/client.ts`. To bump: re-sync, change `POPULATION_RELEASE` (config and
   `scripts/validate-data.mjs`), the asset sizes in `POPULATION_DOWNLOADS` (tested against
-  release.json), `SUPERSEDED` if the history changes, and rerun `npm run og`.
+  release.json), `SUPERSEDED` if the history changes, and rerun `npm run og`. What the
+  site still asks of the producer, and the calls it took without them, are in
+  `docs/population/producer-feedback-v1.0.0.md`.
 - **Data rules** (producer handoff doc 206 §3, enforced in review): every number comes
   from a published response, the scorecard, release/meta counts or the INE counts in
   places.json (labelled "INE, Censos 2021"); never compute new numbers from cells.
@@ -222,9 +236,28 @@ or `coverage_in_band`. Tiers are reading guides, not gates.
 - **Parish shell + rewrite**: one exported shell per locale
   (`generateStaticParams` → `[{ code: '_' }]`); `staticwebapp.config.json` rewrites
   every `/{locale}/populacao/freguesia/*` to it and `/populacao/v/*` to the consultation
-  page. The client reads the code from `window.location.pathname` after mount; the shell
-  emits no canonical or noindex in its static HTML (title, canonical and, for an unknown
-  code, noindex are set client-side). Never `useSearchParams`.
+  page. The shell's static HTML names no parish and carries no canonical, hreflang or
+  noindex (any of them would apply to every parish at once); its og:image and
+  twitter:image are the population card, since link previews run no script (per-parish
+  previews are a later, server-side step). The shell page, not the `[locale]` layout,
+  renders the one pre-hydration script, as its first child, before the header:
+  `parishShellScript(locale)` (`src/lib/population/prefetch.ts`) reads the code from the
+  address, writes the parish's canonical and pt/en/x-default alternates (marked
+  `data-parish-head`) and starts the `meta.json` and `parish/<CODE>.json` requests (plain
+  `fetch()` calls, not preload links) while the JavaScript downloads, leaving them in one
+  window key, `window.__populationPrefetch` (`PARISH_PREFETCH_KEY`);
+  `src/lib/population/client.ts` takes each request from that key once, so each file is
+  fetched once per view. After mount the client reads the code from
+  `window.location.pathname` and `parish/head.ts` sets the title and description,
+  re-values the `data-parish-head` links, adds noindex only for an unknown code and
+  removes what it added when the reader leaves; when the data arrive before Next's
+  metadata hydrates, it also drops the second og:title and twitter:title React then adds.
+  In the shell's static HTML the header's language links point at the population hub,
+  never at `/freguesia/_/`, until the page knows its parish. Titles and descriptions come
+  from `parish/head-text.ts` (at most 70 and 155 characters, tested over every parish; the
+  h1 keeps the full name). `places.json` is not needed for the first paint: it loads only
+  as "Outras freguesias" comes near (an IntersectionObserver in `ParishPage`). Never
+  `useSearchParams`.
 - **Plain links**: link to parish pages with `ParishLink`/`parishHref` (a plain `<a>`),
   never `next/link` — there is no RSC payload behind the rewrite.
 - **Site wiring**: `PopulationPanel` on the homepage (search, game, data link; counts from
@@ -241,7 +274,9 @@ or `coverage_in_band`. Tiers are reading guides, not gates.
   newest `meta.json` (parish, person and household counts, the release's own honesty
   line); rerun it after a release bump.
 
-- **Places and the parish file**: `places.json` columns are `[code, name, municipality, tier, level, census_population, generated_households, lat, lon, publication_population]` (+ `households_source`); `generated_households` counts the generated population's households (a collective quarters counts one) and is never labelled INE. Each `parish/<code>.json` carries a `place` header (name, município code and name, region id and name, level, census_population, generated_households, publication_population), so a parish page draws from one file; `places.json` loads lazily for search and the other-parishes list. Helpers: `tierMeaningFor(tier, publication_population)` and `sourceLine(recipe)` / `RECIPE_PROVENANCE` (fitted vs derived) in `labels.ts`; `searchPlaces` (município rows too), `NEARBY_KEY` and `NEAREST_MAX_KM` (25 km) in `places.ts`. `country.json` is rebuilt with `~/code/estimador-microsynthesis/.venv/bin/python scripts/build-atlas-country.py` (needs shapely). Coverage is worded "as 3 092 freguesias dos Censos 2021 (CAOP 2021)" (the 2025 split into 302 parishes post-dates the census), on the pages, `/sobre` and the OG card.
+- **Places and the parish file**: `places.json` columns are `[code, name, municipality, tier, level, census_population, generated_households, lat, lon, publication_population]` (+ `households_source`); `generated_households` counts the generated population's households (a collective quarters counts one) and is never labelled INE. Each `parish/<code>.json` carries a `place` header (name, município code and name, region id and name, level, census_population, generated_households, publication_population, and `worst_constraint` / `worst_constraint_srmse` from quality.csv, verbatim: the code is shown only through its site label, never raw), so a parish page draws from one file; `places.json` loads lazily for search and the other-parishes list. Helpers: `tierMeaningFor(tier, publication_population, census_population?, worst?)` (pass INE's count too, so a parish whose two counts sit either side of a tier threshold says so; pass the place header's worst table, `{ key: worst_constraint, srmse: worst_constraint_srmse }`, and a tier C parish of 500 or more names the table or the criterion that set its tier, its SRMSE with three decimals in the reader's locale (`formatFit`); the map and the game read places.json, which has no worst table, and keep the generic words) and `sourceLine(recipe)` / `RECIPE_PROVENANCE` (fitted vs derived) in `labels.ts`; `searchPlaces` (município rows too), `NEARBY_KEY` and `NEAREST_MAX_KM` (25 km) in `places.ts`. `country.json` is rebuilt with `~/code/estimador-microsynthesis/.venv/bin/python scripts/build-atlas-country.py` (needs shapely). Coverage is worded "as 3 092 freguesias dos Censos 2021 (CAOP 2021)" (the 2025 split into 302 parishes post-dates the census), on the pages, `/sobre` and the OG card; the homepage panel names the Censos 2021 once and then says "as 3 092 freguesias que existiam nessa altura" (`home.populationText`).
+- **Trust-page vocabulary** (`src/components/population/quality/`, `data/`): `CONSTRAINT_LABEL` (in `src/lib/population/labels.ts`, with `formatFit`, both re-exported by `quality/copy.ts`) is the one name per evaluated table, keyed on the scorecard's bare `constraints[].key` (`p_age5`). `constraintLabel(key, fallback, locale)` in `quality/copy.ts` looks that bare key up and strips no prefix; quality.csv's and the place header's `worst_constraint` is `srmse_` + the key (`srmse_p_age_single`), so drop the prefix before a lookup, as `tierMeaningFor` does with its `worst` argument. `FITTED_PERSON_KEYS` are the 12 fitted person tables; single-year age is scored but is not one of them. The scorecard's own labels are not shown. `quality/anchors.ts` holds the methodology anchors other pages link to (`METHODOLOGY_ANCHORS`, `methodologyFieldAnchor(field)`, and `methodologyAnchorForRecipe(recipe, locale)` for a card's "Como foi feito"; a test keeps them in step with the MDX headings). `SITE_LABEL_MAPS` in `data/dictionary.ts` labels the three code columns the release's `label_maps` leaves out (`activity_sector_code`, `education_level_coarse5`, `nuts2`) on `/populacao/dados`, until the producer ships them.
+- **Parish page sections**: the employment card draws the 100 dots; the separate "Se fosse 100" section was removed.
 - **Permalinks and citing**: `responsePermalink` (`src/lib/population/permalink.ts`) builds `/populacao/v/{release}/q/{id}` (with `/en` in front for an English reader); the host rewrites it to the consultation page, whose resolver opens the response on its parish page at the card's anchor (e.g. `/pt/populacao/freguesia/010103/#vivem-sozinhas`), upper-case ids and an `/en` prefix included. The parish page replaces its address with the upper-case, trailing-slash form, and the header's language switch is a plain anchor built from that address. Every parish page ends with a "Como citar" block (`#citar`) from `src/lib/population/cite.ts` (release citation, parish citation, short attribution).
 - **Miniatura**: an explainer with invented people, under `<PageHero>`, titled "Como se lê uma população sintética?".
 - **Formats**: `src/lib/population/format.ts` (`formatCount`) is the one count formatter for every INE and release count, the homepage panel included ("3 092" with a no-break space in Portuguese, where Intl's pt-PT leaves four digits ungrouped). Each page states the parish's quality tier once, in the hero; cards carry no repeated status line.
@@ -306,7 +341,7 @@ interface SectionConfig {
 ### Locale and landmarks
 - Every `[locale]` page and `generateMetadata` calls `setRequestLocale(locale)` from `@/i18n/request-locale` (not next-intl's own): the static export has no middleware, and server components that read the locale implicitly (`useLocale` in `ChartTable`, `OutcomeBar` and the other viz pieces, `getTranslations()` without a locale) otherwise fall back to Portuguese. Server components that can take `locale` as a prop should (`<Subscribe locale={locale} />` requires it).
 - Every page has exactly one `<main id="main-content" tabIndex={-1}>`, opened before `<PageHero>` so the hero is inside it; the header's skip link targets `#main-content`. Put page width on an inner wrapper, not on `<main>`. `src/lib/landmarks.test.ts` enforces this.
-- Metadata: `languageAlternates` adds `x-default` (the pt URL, or the only locale a page exists in); the RSS autodiscovery link is emitted only once that locale has a published article (`feedAlternates`), the same rule as the nav, footer and sitemap. The parish shell builds its head by hand and keeps no canonical or robots.
+- Metadata: `languageAlternates` adds `x-default` (the pt URL, or the only locale a page exists in); the RSS autodiscovery link is emitted only once that locale has a published article (`feedAlternates`), the same rule as the nav, footer and sitemap. The parish shell builds its head by hand: no canonical or robots in its static HTML; its first script and `parish/head.ts` add the parish's own in the browser (see "Population section").
 - Message keys: `npm run messages:unused` lists keys nothing reads, and `messages-unused.test.ts` (part of `npm run check`) keeps the count at zero and pt/en in parity. Delete a key in both locales when its last reader goes.
 - Client messages: the browser gets only `CLIENT_MESSAGE_KEYS` (`src/lib/i18n/client-messages.ts`), not the catalogue. When a client component (`'use client'`) calls `useTranslations` for a new key, add the key there; `client-messages.test.ts` walks every route's import graph and fails on a missing key or a listed key that no longer exists. Server components read messages on the server; prefer passing text down as props over adding client keys.
 - Structured data: `src/lib/structured-data.ts` is the one JSON-LD helper (`jsonLd()` escapes `<`): the WebSite + Organization `@graph` on every page (the `[locale]` layout), `populationDatasetJsonLd(locale, release)` on `/populacao/dados` (release counts, citation and credit line from release.json), and `breadcrumbJsonLd(locale, items)` on region pages and, once the place is known, parish pages (rendered by `ParishPage`).
@@ -326,19 +361,23 @@ All chart components follow a consistent pattern:
 - **RelegationChart.tsx** — Relegation probability time series
 - **DecisiveMatches.tsx** — Title-swinging upcoming matches
 - **MarketScorecard.tsx** — model vs closing line (`/desporto/liga/modelo`); every figure, the RPS axis range, n per point, the season span and the bookmakers (`market_sources`) are read from `market_scorecard.json`
-- Helpers: `src/lib/football-format.ts` (pt-PT/en-GB numbers, Lisbon dates), `src/lib/football-injuries.ts` (when an injury list is recent enough to show), `src/lib/football-scorecard.ts` (verdicts, model names, market sources, and the league table's calibration sentence from `market_scorecard.json` → `calibration`, quoted only for the model it was measured on), `src/lib/football-path-builder.ts` (the club page's scenario builder maths), `src/lib/football-status.ts` (the dated forecast line), `src/lib/football-model-evaluation.ts` (the one ±2 SE verdict source for `/modelo`; `TITLE_CALIBRATION` is a dated constant from the 2026-09 assessment, to update when it is re-run), `src/lib/season-review-provenance.ts` (published vs reconstructed forecasts on `/2025-26`), `src/lib/utils/prediction-game-record.ts` (the game's season record and the matchday-1 late-publication flag), `src/lib/utils/player-pages.ts` (`playerDataCutoffLabel`/`Sentence`: the player models' data cut-off, shown beside every SAR figure, match pages included). In `config/football.ts`: `teamDisplayName` (accents, e.g. Paços de Ferreira), `teamPhoneName` (narrow columns), `teamColorOnPaper` (a club colour that reads on paper) and `distinctTeamColors` (lines that stay apart on one chart). `src/components/football/ClubFixtures.tsx` lists a club's played and remaining fixtures on its page.
+- Helpers: `src/lib/football-format.ts` (pt-PT/en-GB numbers, Lisbon dates), `src/lib/football-injuries.ts` (when an injury list is recent enough to show), `src/lib/football-scorecard.ts` (verdicts, model names, market sources, and the league table's calibration sentence from `market_scorecard.json` → `calibration`, quoted only for the model it was measured on), `src/lib/football-path-builder.ts` (the club page's scenario builder maths), `src/lib/football-status.ts` (the dated forecast line), `src/lib/football-model-evaluation.ts` (the one ±2 SE verdict source for `/modelo`; `TITLE_CALIBRATION` is a dated constant from the 2026-09 assessment, to update when it is re-run), `src/lib/season-review-provenance.ts` (published vs reconstructed forecasts on `/2025-26`), `src/lib/utils/prediction-game-record.ts` (the game's season record and the matchday-1 late-publication flag), `src/lib/utils/player-pages.ts` (`playerDataCutoffLabel`/`Sentence`: the player models' data cut-off, shown beside every SAR figure, match pages included). In `config/football.ts`: `teamDisplayName` (accents, e.g. Paços de Ferreira), `teamPhoneName` (narrow columns), `teamColorOnPaper` (a club colour that reads on paper), `distinctTeamColors` (lines that stay apart on one chart), `teamWithArticle(team, form)` (Portuguese copy never writes "para Porto" or "de Benfica": "para o Porto", "do Benfica", "no Casa Pia") and `OUTCOME_TONES`, the one 1X2 encoding (home dark, draw pale, away mid, on the hub cards and the match page; club colours never fill the split bar). `src/components/football/ClubFixtures.tsx` lists a club's played and remaining fixtures on its page.
+- **The reader's clock**: a Liga page is exported once per forecast, so what changes with time is read in the browser. `ClockSwitch` / `useClockReached` (`src/components/football/ClockSwitch.tsx`) swap a line once an instant has passed, using `clockValue`, `roundPlayedAt`, `matchStartedLine`, `roundPlayedLine` and `forecastStatusLinePlayed` from `football-status.ts` ("Jogo começou · previsão de 25 set.", "Jornada 8 · jogada, nova previsão em preparação"). The server render, and the first client render, are always the published state; the clock is read only after mount, and re-read every minute.
+- **Scenarios** (`src/lib/football-scenarios.ts`, behind the club scenario cards and the match page's impact panel): a rival result is part of a scenario only when it happens in at least 90% of the scenario's simulations (`RIVAL_CONDITION_MIN_SHARE`), and never when it is one of the club's own games; the final-duel bins carry a tie bar (`duelBins`), and `samplingMargin` states the simulation margin beside a share.
+- **The prediction game's record** (`src/lib/utils/prediction-game-record.ts`): `frozenBeforePreviousRoundEnded` lists the rounds whose odds were frozen before the previous round's last game (2026-27: matchdays 3, 5, 6 and 7), `roundsWithoutSource` the rounds whose games carry no `probs_source`, and `roundLockAt` the instant a round closes in the game (its earliest lock); `/desporto/liga/dados` names both kinds of round and `/jogo-previsoes` the frozen ones. The dates in the files: an `mdNN.json` `timestamp` is its last regeneration, not its first publication; its `next_matchday` is frozen at the first version; and `game_fixtures.json`'s `published_at` is the record of when a round's odds went out.
 - **One percentage rule** for every football figure: `formatPercent` / `formatPp` in `football-format.ts` (whole numbers from 10%, one decimal below, `<0,1%` and `>99%` at the ends so nothing non-zero reads 0% and nothing short of certain reads 100%, U+2212 for minus, pp for changes), grouped four-digit counts, and `matchLabel(home, away)` with an en dash ("Benfica – Vitória"). No `Math.round(p * 100)` in new code.
 - **No probability bands** on the Liga title and relegation charts, club timelines, their table twins or the OG card (owner decision, October 2026): the published `p_champion_lo/hi` and `p_relegation_lo/hi` are the spread of 500-simulation blocks, not the model's uncertainty, and `/desporto/liga/dados` says so. The 90% final-points ranges stay. The title-race chart carries the title-calibration caveat (`football.titleCalibrationCaveat`, linked to the methodology's answer), and "despromoção" means 17th or 18th wherever it is shown (the 16th goes to a play-off and is not counted): table footnote, relegation caption, club pages, methodology, `/dados`. The page passes the two charts a trimmed history (`probabilityHistory()`), not every prediction in full.
-- Match pages (`/jogo/{slug}`) cover the fixtures to come (`loadUpcomingFixtures`) and the season's played games (`loadPlayedFixtures`: the result plus the pre-match odds, only when they were published before kickoff); played pages stay online and are in the sitemap, dated by kickoff.
+- Match pages (`/jogo/{slug}`) cover the fixtures to come (`loadUpcomingFixtures`, postponed leftovers still in `next_matchday_scenarios` included, with `postponed: true` and a "jogo em atraso" label) and the season's played games (`loadPlayedFixtures`: the result plus the pre-match odds, only when they were published before kickoff); played pages stay online and are in the sitemap, dated by kickoff. The slug (`{home-away}`) has no season in it, so the 2027-28 fixtures would collide with this season's pages: move them to a season-scoped address before 2027-28 (plan in `docs/football-runbook.md`).
 - The methodology page renders `src/content/football-methodology/{pt,en}.mdx` (MDX plus data-bound components; the `REVISED` date lives in `metodologia/page.tsx`).
 - The published forecasts come from `bivcross` (bivariate Poisson with shots on target) since matchday 1 of 2026-27; md00 was `joint_sot`. Each md file names its model in `model`. Model codenames appear only on `/desporto/liga/dados`, never in reader-facing copy.
 - Several older components in that folder (PositionHeatmap, CriticalPaths, PathsToVictory, PointsPace, MatchdayLive, ScheduleDifficulty) are imported by no page; do not build on them without checking.
 
 ### Election Chart Components (`src/components/charts/`)
-- **HouseEffects.tsx**: Custom HTML/CSS matrix
+- **HouseEffects.tsx**: Custom HTML/CSS matrix with no hover tooltip (an exception to the hover-tip rule above): each cell's `title` and the `<ChartTable>` twin carry the exact values; the cell colours come from `src/lib/election-heatmap.ts` (one forest ink on every cell, the red and blue ramps capped where it still reaches 4.5:1, `election-heatmap.test.ts` sweeps them)
 - **CoalitionDotPlot.tsx**: the two blocs' seat totals as a dot histogram (stacked dots, an evenly spaced subsample of the draws)
 - **DistrictSummary.tsx**: ENSC methodology for contested seats
 - **PollingChart.tsx**: takes a columnar `TrendSeries` (`compactTrendSeries` in `election-aggregates.ts`) instead of long rows, so the page payload stays small
+- **Numbers** (`src/lib/election-display.ts`): election probabilities print "menos de 1%" / "mais de 99%" ("under 1%" / "over 99%") everywhere, tables and twins included, never "<1%" or 0% and 100% (`formatElectionProbability`, `electionProbabilityParts` for a headline figure); counts group from four digits (`formatElectionNumber` uses `useGrouping: 'always'`: "9 000" with a no-break space in Portuguese, like `formatInteger` and `formatCount`), and the methodology MDX writes its counts the same way by hand ("9 000", "8 000", "1 000").
 - The election methodology is its own page, `/eleicoes/metodologia` (`src/content/methodology/eleicoes/{pt,en}.mdx`, dated); `src/content/methodology/{pt,en}.mdx` is a short note that keeps the old `/metodologia#eleicoes` and `#segunda-volta-2026` anchors working.
 
 ## Azure Static Web Apps Configuration
@@ -346,11 +385,11 @@ All chart components follow a consistent pattern:
 ### staticwebapp.config.json
 - 301 redirects: old URLs, locale-less section paths and the bare root (see "Route Structure")
 - Rewrites: `/{locale}/populacao/freguesia/*` to the parish shell; `/pt/populacao/v/*` and `/en/populacao/v/*` to each locale's consultation page, and the locale-less `/populacao/v/*` (the producer's `canonical_path`) to the Portuguese one
-- Cache headers: `/_next/static/*` and the hashed `og-image-*-{hash}.png` cards immutable for a year (the unversioned `og-image-{pt,en}.png` are matched first and revalidate); `/data/population/v*` immutable (a release never changes) and its `manifest.json` five minutes; the rest of `/data/population/*` and the geography a day; `/images/*`, `/brand/*`, `/branding/*` a week with stale-while-revalidate; everything else `max-age=0, must-revalidate`
+- Cache headers: `/_next/static/*` and the hashed `og-image-*-{hash}.png` cards immutable for a year, except the names matched first by exact routes, which revalidate (`max-age=0, must-revalidate`): the unversioned `og-image-{pt,en}.png` and every retained card name (see the OG paragraph below), whose routes `scripts/generate-og-images.mjs` writes just ahead of the `/og-image-*.png` wildcard; `/data/population/v*` immutable (a release never changes); `/data/population-geography/*` a day; `/images/*`, `/brand/*`, `/branding/*` a week with stale-while-revalidate; everything else `max-age=0, must-revalidate`
 - MIME types for `.json`, `.txt` (RSC payloads), `.wasm`, `.parquet`, `.xml`, `.avif`
 - 404s rewrite to `/404.html`; there is no navigation fallback
 - Bare `"statusCode": 404` rules for the pages the export must write but nobody should reach: `/{pt,en}/artigos/sem-artigos/` and `/{pt,en}/artigos/tema/sem-temas/` (placeholders while nothing is published) and `/404/`. `scripts/smoke-check.mjs` reads these rules, probes each for a 404 and leaves them out of its 200 walk.
-- OG cards are served immutable, so `scripts/generate-og-images.mjs` never deletes one production still serves: it fetches the live `og-manifest.json` (offline, the committed manifest's `retained` list) and keeps those files, writing a stand-in copy of the current card of the same kind for any it no longer has (economy cards get the brand card while the section is in preparation); anything else unclaimed is pruned. `manifest.size` records the rendered size for `getOgImageSize()`. Commit the regenerated manifest and cards; never delete a file named in `retained`.
+- OG cards are served immutable, so `scripts/generate-og-images.mjs` never deletes one production still serves: it fetches the live `og-manifest.json` (offline, the committed manifest's `retained` list) and keeps those names. With the live manifest only production's cards are retained (cards a branch generated and never deployed are not). Every retained name is rewritten as a stand-in, a copy of the current card of its kind and locale (the brand card for the general card and, while the section is in preparation, the economy cards), not only the names it no longer has, and is served `max-age=0, must-revalidate` through the exact routes the script writes into `staticwebapp.config.json`; anything else unclaimed is pruned. So `npm run og` (and the CI `prebuild`) edits the host config too: commit the regenerated manifest, the cards and `staticwebapp.config.json` together, and never delete a file named in `retained`. `manifest.size` records the rendered size for `getOgImageSize()`, and `manifest.alt` the text of each card, which `getOgImageAlt()` uses for `og:image:alt`. Owner call (FRESH-V4, October 2026): retained names get revalidating stand-ins rather than a frozen copy of production's bytes, because production's general card carries the retired descriptor and its economy cards carry July's figures; a cache that already holds one under the old immutable header keeps it, and no deploy can reach it.
 
 ## Development Workflow
 
@@ -454,7 +493,7 @@ only and no email field. The privacy page (`src/content/privacy/{pt,en}.mdx`) na
 Buttondown as the processor; keep that section true to what the card actually does.
 
 ### Data Updates
-- **Football**: Run `./scripts/sync-data.sh football` to copy from `~/code/estimador-football/output/`; it also copies `game_fixtures.json` to `api/data/` (the game server's copy, which `validate-data` requires to be byte-identical) and drops the model's `cards.json`, which is not a published feed
+- **Football**: Run `./scripts/sync-data.sh football` to copy from `~/code/estimador-football/output/`; it also copies `game_fixtures.json` to `api/data/` (the game server's copy, which `validate-data` requires to be byte-identical) and drops the model's `cards.json`, which is not a published feed. After a round's last game, sync and deploy the next `mdNN` within 24 hours: the reader's clock (`ClockSwitch`) covers the gap on the pages, but the static meta descriptions of that round's match pages keep the pre-match odds until the rebuild. Dates and the season's other chores: `docs/football-runbook.md`; asks for the model repository: `docs/football-producer-asks.md`
 - **Elections**: Manually update JSON files in `public/data/elections/`
 - **Economics**: Run `./scripts/sync-data.sh economics` to copy `dashboard_latest.json` (and `stories_latest.json`) from `~/code/estimador-economics/output/`. Not part of `all`, and a no-op until `economy-status.json` says `published: true`: publishing is the flag, not the sync.
 
