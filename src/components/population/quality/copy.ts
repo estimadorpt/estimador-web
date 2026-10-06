@@ -19,7 +19,8 @@ export const RELEASE_GATES: Text[] = [
     pt: 'Cobertura completa: 21 tabelas avaliadas em todas as 3 092 freguesias.',
     en: 'Coverage complete: 21 scored tables in all 3,092 parishes.',
   },
-  { pt: 'Zero violações estruturais.', en: 'Structural violations: 0.' },
+  // What a "structural violation" is: the glossary (METH3-03).
+  { pt: 'Zero violações estruturais (registos impossíveis; ver o glossário).', en: 'Structural violations: 0 (impossible records; see the glossary).' },
   {
     // scorecard headline.child_deficit = +0.000127: the worst stratum sits above the published share (model card: "the worst at +0.01%").
     pt: 'A proporção de crianças nunca fica mais de 10% abaixo da publicada, em nenhuma região nem classe de tamanho. Nenhuma ficou abaixo: no pior caso fica 0,01% acima (o limite era −10%).',
@@ -34,6 +35,19 @@ export const RELEASE_GATES: Text[] = [
     en: 'An integrity audit of every parish, with 0 errors.',
   },
 ];
+
+/**
+ * What a resident of a collective living quarter carries in the microdata
+ * (v1.0.3 persons file, is_institutional = 1): appended after the fit, with
+ * sex and age from INE's counts and education imputed (the release's column
+ * dictionary says "hot-decked"); the other personal columns are filled, with
+ * the same age rules as everyone else; nucleus_id and the work columns are
+ * null for all of them. The /dados dictionary row lists the columns.
+ */
+export const INSTITUTIONAL_RECORDS: Text = {
+  pt: 'As pessoas que vivem em lares e noutros alojamentos coletivos são acrescentadas depois do ajuste, a partir das contagens publicadas pelo INE. O sexo e a idade vêm dessas contagens e a escolaridade é imputada a partir de registos semelhantes; a condição perante o trabalho, o estado civil e a nacionalidade estão preenchidos. Ficam vazios, por conceção, o núcleo familiar e os campos de trabalho (situação na profissão, setor, profissão, ramo, local de trabalho e meio de transporte).',
+  en: 'People living in care homes and other collective quarters are appended after the fit, from INE’s published counts. Sex and age come from those counts and education is imputed from similar records; employment status, marital status and nationality are filled. By design, the family nucleus and the work fields (status in employment, sector, occupation, industry, place of work and means of transport) are left empty.',
+};
 
 /**
  * The known limitations of the population, declared rather than hidden: the
@@ -82,8 +96,10 @@ export const LIMITATIONS: Array<{ title: Text; body: Text }> = [
   {
     title: { pt: 'Residentes em alojamentos coletivos são registos parciais', en: 'Residents of collective quarters are partial records' },
     body: {
-      pt: 'As pessoas que vivem em lares e noutros alojamentos coletivos são acrescentadas a partir das contagens publicadas pelo INE. O sexo e a idade vêm dessas contagens; os restantes atributos estão incompletos, por conceção.',
-      en: 'People living in care homes and other collective quarters are appended from INE’s published counts. Sex and age come from those counts; their other attributes are partial, by design.',
+      // One statement on every page (METH3-20, POP3-ACC-V02, PRO3-10), as the v1.0.3 persons file has it:
+      // which columns are filled for is_institutional = 1 and which are null for all of them.
+      pt: INSTITUTIONAL_RECORDS.pt,
+      en: INSTITUTIONAL_RECORDS.en,
     },
   },
   {
@@ -168,10 +184,19 @@ export const GLOSSARY: Array<{ term: Text; body: Text }> = [
     },
   },
   {
+    // The producer's release gate (estimador-microsynthesis evaluation/release_gates.py, GATED_STRUCTURAL_CHECKS
+    // and GATED_RELATIONAL_CHECKS), in words; the model card names the gate but does not define it (METH3-03).
+    term: { pt: 'Violação estrutural', en: 'Structural violation' },
+    body: {
+      pt: 'Um registo que a lógica dos dados não permite, verificado registo a registo antes de publicar: por exemplo, uma criança com menos de 15 anos empregada ou com um meio de vida, um curso superior antes dos 18 anos, uma idade negativa ou acima de 115, uma pessoa sem agregado, ou um agregado cujo tamanho não é o número das suas pessoas. Esta versão tem zero. Não conta as pessoas que ficam numa combinação que o INE publica como zero para a sua freguesia: essas combinações são possíveis, só não aparecem nessa freguesia nas tabelas do INE, e estão nas limitações.',
+      en: 'A record the logic of the data does not allow, checked record by record before release: for example a child under 15 who is employed or has a source of livelihood, a university degree before 18, an age below zero or above 115, a person without a household, or a household whose size is not the number of its people. This release has none. It does not count the people who sit in a combination INE publishes as zero for their parish: those combinations are possible, they just do not occur in that parish in INE’s tables, and they are listed under the limitations.',
+    },
+  },
+  {
     term: { pt: 'Ajuste de máxima entropia', en: 'Maximum-entropy fit' },
     body: {
-      pt: 'A forma de pôr os candidatos gerados a bater com as tabelas do INE mudando o menos possível o peso de cada um.',
-      en: 'The way the generated candidates are made to match INE’s tables while changing each one’s weight as little as possible.',
+      pt: 'A forma de aproximar os candidatos gerados das tabelas do INE, mudando o menos possível o peso de cada um.',
+      en: 'The way the generated candidates are brought close to INE’s tables while changing each one’s weight as little as possible.',
     },
   },
   {
@@ -233,10 +258,10 @@ export function generatedGap(persons: number, ineResidents: number, locale: Loca
   const fmt = (value: number) => formatCount(value, locale);
   if (locale === 'pt') {
     const national = gap === 0 ? 'no país, os totais coincidem' : `no país, são ${fmt(Math.abs(gap))} pessoas ${gap > 0 ? 'a menos' : 'a mais'} (${fmt(persons)} geradas, contra ${fmt(ineResidents)} residentes segundo o INE)`;
-    return `O total gerado nem sempre é o do INE: em ${fmt(parishes)} freguesias difere, entre ${fmt(fewest)} pessoas a menos e ${fmt(most)} a mais; ${national}. Os níveis de qualidade usam a menor das duas contagens (publication_population).`;
+    return `O total gerado nem sempre é o do INE: em ${fmt(parishes)} freguesias difere, entre ${fmt(fewest)} pessoas a menos e ${fmt(most)} a mais; ${national}. Os níveis de qualidade usam a menor das duas contagens, a contagem de publicação.`;
   }
   const national = gap === 0 ? 'nationally, the totals agree' : `nationally, there are ${fmt(Math.abs(gap))} people ${gap > 0 ? 'fewer' : 'more'} (${fmt(persons)} generated, against ${fmt(ineResidents)} residents according to INE)`;
-  return `The generated total is not always INE’s: in ${fmt(parishes)} parishes it differs, from ${fmt(fewest)} people fewer to ${fmt(most)} more; ${national}. The quality tiers use the smaller of the two counts (publication_population).`;
+  return `The generated total is not always INE’s: in ${fmt(parishes)} parishes it differs, from ${fmt(fewest)} people fewer to ${fmt(most)} more; ${national}. The quality tiers use the smaller of the two counts, the publication count.`;
 }
 
 /** Novelty, verbatim from the handoff (scorecard.novelty, rounded by the producer). */
@@ -260,10 +285,18 @@ export const PRIVACY_FINDINGS: Array<{ title: Text; body: Text }> = [
     },
   },
   {
+    // Model card, privacy section: the figure on the 11 generated attributes, beside the 13-attribute one (METH3-04).
+    title: { pt: 'Combinações comuns', en: 'Common combinations' },
+    body: {
+      pt: 'Nos 11 atributos que o modelo gera, 80% das pessoas sintéticas partilham a combinação com alguma pessoa da amostra. São perfis comuns, e a distância ao registo mais próximo, nesses 11 atributos, continua maior do que entre as pessoas da própria amostra.',
+      en: 'On the 11 attributes the model generates, 80% of synthetic persons share an attribute combination with some sample person. Those are common profiles, and the distance to the closest record on those 11 attributes is still larger than between the sample’s own people.',
+    },
+  },
+  {
     title: { pt: 'Distância ao registo mais próximo', en: 'Distance to the closest record' },
     body: {
-      pt: 'Numa amostra de 5 000 registos, as pessoas sintéticas estão mais longe da amostra do que as pessoas da amostra estão umas das outras: 10,8% das sintéticas coincidem exatamente com o registo mais próximo, contra 74,3% entre registos reais. É uma medida diferente da anterior (13 atributos, todas as pessoas).',
-      en: 'In a sample of 5,000 records, synthetic persons are further from the sample than sample persons are from each other: 10.8% of the synthetic ones exactly match their closest record, against 74.3% real-to-real. It is a different measure from the one above (13 attributes, every person).',
+      pt: 'Numa amostra de 5 000 registos, as pessoas sintéticas estão mais longe da amostra do que as pessoas da amostra estão umas das outras: 10,8% das sintéticas coincidem exatamente com o registo mais próximo, contra 74,3% entre registos reais. É uma medida diferente da coincidência exata em 13 atributos (todas as pessoas).',
+      en: 'In a sample of 5,000 records, synthetic persons are further from the sample than sample persons are from each other: 10.8% of the synthetic ones exactly match their closest record, against 74.3% real-to-real. It is a different measure from the exact match on 13 attributes (every person).',
     },
   },
   {
@@ -292,8 +325,8 @@ export const INTENDED_USES: Text[] = [
   { pt: 'Jornalismo e aplicações de dados cívicos.', en: 'Journalism and civic-data applications.' },
   { pt: 'Ensino e investigação reprodutível.', en: 'Education and reproducible research.' },
   {
-    pt: 'Cenários agregados e pós-estratificação. Esta versão não publica incerteza (uma só execução): trata os números como pontuais.',
-    en: 'Aggregate scenario and poststratification work. This release publishes no uncertainty (a single run): treat the figures as point values.',
+    pt: 'Cenários agregados e pós-estratificação (reponderar um inquérito para que bata com a população). Esta versão não publica incerteza (uma só execução): trata os números como pontuais.',
+    en: 'Aggregate scenario and poststratification work (reweighting a survey so it matches the population). This release publishes no uncertainty (a single run): treat the figures as point values.',
   },
   {
     pt: 'Testar ferramentas que precisam de registos populacionais realistas, mas que não identificam ninguém.',
@@ -315,7 +348,12 @@ export const NON_USES: Text[] = [
     pt: 'Cruzamentos sem restrições em freguesias muito pequenas ou de qualidade fraca.',
     en: 'Unrestricted cross-tabulation in tiny or weak-quality parishes.',
   },
-  { pt: 'Conclusões assentes em campos não validados.', en: 'Claims based on fields marked unvalidated.' },
+  // The model card's "fields marked unvalidated" names a class no published column belongs to; the
+  // columns a reader can act on are the ones not fitted per parish, which the dictionary marks (PRO3-04).
+  {
+    pt: 'Conclusões sobre uma freguesia assentes em campos que não são ajustados por freguesia: ramo de atividade, profissão, local de trabalho, meio de transporte, regime de ocupação e divisões da casa (o dicionário de colunas diz quais são).',
+    en: 'Parish-level claims based on fields that are not fitted per parish: industry, occupation, place of work, means of transport, tenure and number of rooms (the column dictionary says which they are).',
+  },
   { pt: 'Conclusões causais sobre efeitos de políticas.', en: 'Causal conclusions about policy effects.' },
   {
     pt: 'Prever comportamentos ou simular agentes sem um modelo próprio e validado.',

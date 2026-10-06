@@ -45,7 +45,7 @@ describe('shareCardModel', () => {
     expect(model.scopeNote).toBeNull();
     expect(model.tierNote).toBe('Qualidade A · números da própria freguesia.');
     expect(model.honesty).toBe(HONESTY.synthetic.pt);
-    expect(model.footer).toBe(`População sintética v${POPULATION_RELEASE} · 5 out. 2026 · estimador.pt`);
+    expect(model.footer).toBe(`População sintética v${POPULATION_RELEASE} de 5 out. 2026 · estimador.pt`);
     expect(model.fileName).toBe('estimador-010103-aguada-de-cima.png');
   });
 
@@ -55,10 +55,10 @@ describe('shareCardModel', () => {
     expect(model.attribution).toContain('informação modificada por estimador.pt');
     expect(model.attribution).toContain('CC BY 4.0');
     expect(model.attribution).toContain('estimador.pt/pt/populacao/dados');
-    expect(model.footer).toBe(`População sintética v${POPULATION_RELEASE} · 5 out. 2026 · estimador.pt/pt/populacao/freguesia/010103`);
+    expect(model.footer).toBe(`População sintética v${POPULATION_RELEASE} de 5 out. 2026 · estimador.pt/pt/populacao/freguesia/010103`);
     const en = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en', url: 'https://estimador.pt/en/populacao/freguesia/010103/' });
     expect(en.attribution).toMatch(/^Source: INE, 2021 Census · information modified by estimador\.pt · CC BY 4\.0/);
-    expect(en.footer).toContain('5 Oct 2026 · estimador.pt/en/populacao/freguesia/010103');
+    expect(en.footer).toContain('of 5 Oct 2026 · estimador.pt/en/populacao/freguesia/010103');
   });
 
   it('quotes a tier C parish’s own figures and says to read them with more care', () => {
@@ -74,6 +74,21 @@ describe('shareCardModel', () => {
     expect(model.tierNote).toBe('Qualidade C · números da própria freguesia, a ler com mais cuidado.');
     const en = shareCardModel({ record, recipes: meta.recipes, name: 'X', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en' });
     expect(en.tierNote).toBe('Quality C · the parish’s own figures, to read with more care.');
+  });
+
+  it('names a small parish’s INE residents in the tier line, since the card travels on its own (PRO3-02, Mosteiro 480107)', () => {
+    const record = parish('480107');
+    const { census_population: census, publication_population: publication } = record.place!;
+    expect(publication).toBeLessThan(500);
+    const input = { record, recipes: meta.recipes, name: 'Mosteiro', municipalityName: 'Lajes das Flores', regionName: 'Açores', region: 'azores', censusPopulation: census, publicationPopulation: publication };
+    const pt = shareCardModel({ ...input, locale: 'pt' });
+    expect(pt.tierNote).toBe(`Qualidade C · ${census} residentes (INE) · números da própria freguesia: com tão poucas pessoas, cada uma pesa muito numa percentagem.`);
+    const en = shareCardModel({ ...input, locale: 'en' });
+    expect(en.tierNote).toBe(`Quality C · ${census} residents (INE) · the parish’s own figures: with so few people, each one weighs a lot in a percentage.`);
+    // 500 or more on the tier's count: no resident count on the card (Fátima, 142106).
+    const fatima = parish('142106');
+    expect(shareCardModel({ record: fatima, recipes: meta.recipes, name: 'Fátima', municipalityName: 'Ourém', regionName: 'Santarém', locale: 'pt', censusPopulation: fatima.place!.census_population, publicationPopulation: fatima.place!.publication_population }).tierNote)
+      .toBe('Qualidade C · números da própria freguesia, a ler com mais cuidado.');
   });
 
   it('names the município on every fact of a fallback record (synthetic)', () => {
@@ -99,7 +114,7 @@ describe('shareCardModel', () => {
   it('writes English with a decimal point (the producer writes pt-PT commas)', () => {
     const model = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en' });
     expect(model.facts[0].text).toBe('People aged 65+ in private households living alone: 18.0%');
-    expect(model.footer).toBe(`Synthetic population v${POPULATION_RELEASE} · 5 Oct 2026 · estimador.pt`);
+    expect(model.footer).toBe(`Synthetic population v${POPULATION_RELEASE} of 5 Oct 2026 · estimador.pt`);
   });
 
   it('skips suppressed, absent and refused cells instead of showing a zero', () => {

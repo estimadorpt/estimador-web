@@ -53,9 +53,9 @@ export default async function PopulationMethodology({ params }: { params: Promis
         eyebrow={pt ? `População sintética · versão ${POPULATION_RELEASE}` : `Synthetic population · release ${POPULATION_RELEASE}`}
         title={pt ? 'Como foi feita a população sintética?' : 'How was the synthetic population made?'}
         lede={pt
-          ? 'Pessoas e agregados inventados por um modelo e depois escolhidos para bater com as tabelas dos Censos 2021 de cada freguesia, e o que quer dizer o nível de qualidade de cada uma.'
-          : 'People and households invented by a model and then chosen to match each parish’s 2021 Census tables, and what each parish’s quality tier means.'}
-        meta={<><span>{pt ? 'Censos 2021 (INE)' : '2021 Census (INE)'}</span><span>{pt ? `Publicada a ${formatDay(POPULATION_PUBLISHED, locale)}` : `Published ${formatDay(POPULATION_PUBLISHED, locale)}`}</span></>}
+          ? 'Pessoas e agregados inventados por um modelo e depois escolhidos para ficar o mais perto possível das tabelas dos Censos 2021 de cada freguesia, e o que quer dizer o nível de qualidade de cada uma.'
+          : 'People and households invented by a model and then chosen to come as close as possible to each parish’s 2021 Census tables, and what each parish’s quality tier means.'}
+        meta={<><span>{pt ? 'Censos 2021 (INE)' : '2021 Census (INE)'}</span><span>{pt ? `Versão de ${formatDay(POPULATION_PUBLISHED, locale)}` : `Release dated ${formatDay(POPULATION_PUBLISHED, locale)}`}</span></>}
       />
       <PopulationSectionNav current="methodology" locale={locale} />
       <div className="mx-auto w-full max-w-7xl px-4 py-10 md:py-14"><div className="max-w-3xl">

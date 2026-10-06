@@ -1,7 +1,7 @@
 import { Disclosure } from '@/components/viz/Disclosure';
 import type { Locale } from '@/lib/population/labels';
 import type { ReleaseColumn } from '@/types/population';
-import { columnDescription, SITE_LABEL_MAPS } from './dictionary';
+import { columnDescription, SITE_LABEL_MAPS, SITE_NOTES } from './dictionary';
 
 type Text = Record<Locale, string>;
 
@@ -58,10 +58,12 @@ function Description({ table, name, column, locale }: { table: 'persons' | 'hous
   const pt = locale === 'pt';
   const { text, edited } = columnDescription(table, name, column);
   const siteMap = SITE_LABEL_MAPS[`${table}.${name}`];
+  const note = SITE_NOTES[`${table}.${name}`];
   return (
     <>
       {text}
       {edited && <span className="ml-1 text-xs text-stone-500">{pt ? '(texto revisto pelo site)' : '(wording revised by the site)'}</span>}
+      {note && <span role="note" className="mt-1.5 block border-l-2 border-amber-500 pl-2.5 text-xs leading-relaxed text-stone-700">{note[locale]}</span>}
       {column.label_map && (
         <span className="mt-1 block text-xs text-stone-500">
           {pt ? 'Etiquetas: ' : 'Labels: '}<code className="font-mono">label_maps.{column.label_map}</code>

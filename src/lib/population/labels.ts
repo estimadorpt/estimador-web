@@ -205,8 +205,8 @@ export const TIER_COPY: Record<'A' | 'B' | 'C', { label: Text; meaning: Text }> 
   C: {
     label: { pt: 'Qualidade C', en: 'Quality C' },
     meaning: {
-      pt: 'Freguesia com menos de 500 residentes, ou em que o erro típico ou a pior tabela (muitas vezes, a idade ano a ano) passa os limiares do nível B: lê os números com mais cuidado.',
-      en: 'A parish of under 500 residents, or one whose typical error or worst table (often single-year age) is past the tier B thresholds: read the numbers with more care.',
+      pt: 'Freguesia com menos de 500 residentes, ou em que o erro típico ou a pior tabela (nas maiores, quase sempre a idade ano a ano, que as respostas do site não usam) passa os limiares do nível B: lê os números com mais cuidado.',
+      en: 'A parish of under 500 residents, or one whose typical error or worst table (in the larger ones, almost always single-year age, which the site’s answers do not use) is past the tier B thresholds: read the numbers with more care.',
     },
   },
 };
@@ -304,8 +304,8 @@ function worstTableMeaning(worst: WorstTable): Text | null {
     };
     return median != null
       ? {
-        pt: `${head.pt} O erro típico, a mediana dos erros dessas 12 tabelas, fica dentro do limiar do nível B, por isso as respostas podem estar perto das tabelas do INE.`,
-        en: `${head.en} The typical error, the median of the errors of those 12 tables, is within tier B’s limit, so the answers can be close to INE’s tables.`,
+        pt: `${head.pt} O erro típico, a mediana dos erros dessas 12 tabelas, fica dentro do limiar do nível B, por isso as respostas podem estar perto das tabelas do INE. A cautela do nível C vale sobretudo para quem usar a idade ano a ano dos microdados.`,
+        en: `${head.en} The typical error, the median of the errors of those 12 tables, is within tier B’s limit, so the answers can be close to INE’s tables. The tier C caution applies mostly to anyone using single-year age from the microdata.`,
       }
       : {
         pt: `${head.pt} Lê os números com mais cuidado.`,
@@ -385,8 +385,8 @@ export function tierMeaningFor(tier: 'A' | 'B' | 'C', residents: number | null |
         en: 'A parish of under 500 residents: it is always tier C, whatever its fit to INE’s tables. With few people each one weighs more; read the numbers with more care.',
       }
       : {
-        pt: 'Freguesia com 500 ou mais residentes cujo ajuste não chega aos limiares do nível B, no erro típico ou na pior tabela: lê os números com mais cuidado. Em quase todas estas freguesias, a pior tabela é a idade ano a ano, avaliada à parte das 12 tabelas de pessoas do ajuste e que as respostas não usam (mostram a idade em grupos de 5 anos). O ficheiro de qualidade diz qual é a pior tabela de cada freguesia.',
-        en: 'A parish of 500 or more residents whose fit misses the tier B thresholds, on its typical error or its worst table: read the numbers with more care. In almost all such parishes the worst table is single-year age, scored apart from the 12 fitted person tables and not used by the answers (which show age in 5-year bands). The quality file names each parish’s worst table.',
+        pt: 'Freguesia com 500 ou mais residentes cujo ajuste não chega aos limiares do nível B, no erro típico ou na pior tabela: lê os números com mais cuidado. Em quase todas estas freguesias, a pior tabela é a idade ano a ano, avaliada à parte das 12 tabelas de pessoas do ajuste e que as respostas não usam (mostram a idade em grupos de 5 anos); aí, a cautela vale sobretudo para quem usar a idade ano a ano dos microdados. O ficheiro de qualidade diz qual é a pior tabela de cada freguesia.',
+        en: 'A parish of 500 or more residents whose fit misses the tier B thresholds, on its typical error or its worst table: read the numbers with more care. In almost all such parishes the worst table is single-year age, scored apart from the 12 fitted person tables and not used by the answers (which show age in 5-year bands); there, the caution applies mostly to anyone using single-year age from the microdata. The quality file names each parish’s worst table.',
       };
   }
   return TIER_COPY.A.meaning;
@@ -451,16 +451,51 @@ export const RECIPE_PROVENANCE: Record<PortraitRecipe, 'fitted' | 'derived'> = {
   who_lives_alone: 'derived',
 };
 
-export function sourceLine(recipe: PortraitRecipe, locale: Locale): string {
+/**
+ * A response the site shows as published but whose figures, the producer
+ * found, may not match the downloadable microdata (POP3-ACC-01): v1.0.3's
+ * household_type answers were computed before the release's final packaging
+ * recounted the family nuclei. The site neither recomputes them nor prints
+ * its own measure of the gap (handoff §3); it says so wherever the figures
+ * appear (the card, the game clue, the methodology row, the column
+ * dictionary) until the producer ships a corrected release.
+ */
+export const RECIPE_CAVEAT: Partial<Record<PortraitRecipe, Text>> = {
+  household_type: {
+    pt: 'Esta resposta foi calculada antes do empacotamento final dos microdados e pode diferir ligeiramente do que se obtém deles; o produtor vai corrigi-la.',
+    en: 'This answer was computed before the microdata’s final packaging and may differ slightly from what they give; the producer will correct it.',
+  },
+};
+
+/**
+ * Person questions whose field, for residents of collective living quarters,
+ * was assigned after the fit (education imputed from similar records,
+ * employment status filled in): the source line says so, since "fitted" is
+ * not true of those rows (POP3-ACC-V02).
+ */
+const INSTITUTIONAL_AFTER_FIT: readonly PortraitRecipe[] = ['education', 'employment'];
+
+/**
+ * A card's source line. It ends with the recipe's caveat, if it has one, so a
+ * surface that shows only the source (the game's clue) still carries it; the
+ * parish card passes `withCaveat: false` and sets the caveat apart as a note.
+ */
+export function sourceLine(recipe: PortraitRecipe, locale: Locale, { withCaveat = true }: { withCaveat?: boolean } = {}): string {
   const derived = RECIPE_PROVENANCE[recipe] === 'derived';
+  const institutional = INSTITUTIONAL_AFTER_FIT.includes(recipe)
+    ? (locale === 'pt'
+      ? '; quem vive em alojamentos coletivos entra com valores atribuídos depois do ajuste'
+      : '; residents of collective quarters carry values assigned after the fit')
+    : '';
+  const caveat = withCaveat && RECIPE_CAVEAT[recipe] ? `. ${RECIPE_CAVEAT[recipe]![locale]}` : '';
   if (locale === 'pt') {
     return derived
-      ? `População sintética v${POPULATION_RELEASE} · derivada da população gerada a partir dos Censos 2021 (INE); não é uma das tabelas usadas no ajuste`
-      : `População sintética v${POPULATION_RELEASE} · grupos de um campo ajustado às tabelas dos Censos 2021 (INE)`;
+      ? `População sintética v${POPULATION_RELEASE} · derivada da população gerada a partir dos Censos 2021 (INE); não é uma das tabelas usadas no ajuste${caveat}`
+      : `População sintética v${POPULATION_RELEASE} · grupos de um campo ajustado às tabelas dos Censos 2021 (INE)${institutional}${caveat}`;
   }
   return derived
-    ? `Synthetic population v${POPULATION_RELEASE} · derived from the population generated from the 2021 Census (INE); not one of the tables it was fitted to`
-    : `Synthetic population v${POPULATION_RELEASE} · groups of a field fitted to the 2021 Census tables (INE)`;
+    ? `Synthetic population v${POPULATION_RELEASE} · derived from the population generated from the 2021 Census (INE); not one of the tables it was fitted to${caveat}`
+    : `Synthetic population v${POPULATION_RELEASE} · groups of a field fitted to the 2021 Census tables (INE)${institutional}${caveat}`;
 }
 
 export const SUPPRESSED: Text ={ pt: 'Suprimido', en: 'Suppressed' };

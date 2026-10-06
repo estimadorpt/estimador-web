@@ -14,6 +14,7 @@ import { BRAND, MARK_FULL } from '@/lib/brand';
 import { POPULATION_PUBLISHED, POPULATION_RELEASE } from '@/lib/config/population';
 import type { ParishRecord, PopulationRecipe, PortraitRecipe, RecipeName } from '@/types/population';
 import { headlineCell, formatDisplay } from './compact';
+import { formatCount } from './format';
 import { HONESTY, TIER_COPY, type Locale } from './labels';
 
 export const SHARE_CARD = { width: 1200, height: 630 } as const;
@@ -53,7 +54,12 @@ export interface ShareCardModel {
   facts: ShareFact[];
   /** "Valores do concelho de Águeda" when any fact is the município's. */
   scopeNote: string | null;
-  /** "Qualidade A · números da própria freguesia", when the facts are the parish's own. */
+  /**
+   * "Qualidade A · números da própria freguesia", when the facts are the
+   * parish's own; under 500 residents (the count the tier uses) it adds INE's
+   * count of residents, since the card travels without the page that states it
+   * (PRO3-02).
+   */
   tierNote: string | null;
   honesty: string;
   /**
@@ -62,7 +68,7 @@ export interface ShareCardModel {
    * licence, and where the full attribution is.
    */
   attribution: string;
-  /** The release, its publication date and the parish's address. */
+  /** The release, its date and the parish's address. */
   footer: string;
   fileName: string;
 }
@@ -111,15 +117,19 @@ export interface ShareCardInput {
   locale: Locale;
   /** The parish page's address, printed on the card. */
   url?: string;
-  /** The release's publication date (YYYY-MM-DD). */
+  /** The release's own date (YYYY-MM-DD), as release.json and CITATION.cff give it. */
   published?: string;
+  /** INE's residents (places.json / the place header), printed on a small parish's card. */
+  censusPopulation?: number | null;
+  /** The count the tier uses (publication_population): under 500, the card names the residents. */
+  publicationPopulation?: number | null;
   maxFacts?: number;
 }
 
 /** "Açores" and "Madeira" under English copy are "Azores" and "Madeira"; district names stay as they are. */
 const REGION_EN: Record<string, string> = { azores: 'Azores', madeira: 'Madeira' };
 
-export function shareCardModel({ record, recipes, name, municipalityName, regionName, region, locale, url, published = POPULATION_PUBLISHED, maxFacts = 3 }: ShareCardInput): ShareCardModel {
+export function shareCardModel({ record, recipes, name, municipalityName, regionName, region, locale, url, published = POPULATION_PUBLISHED, censusPopulation = null, publicationPopulation = null, maxFacts = 3 }: ShareCardInput): ShareCardModel {
   const regionLabel = locale === 'en' && region && REGION_EN[region] ? REGION_EN[region] : regionName;
   const fallbackName = record.fallback?.name ?? municipalityName;
   const facts: ShareFact[] = [];
@@ -137,10 +147,16 @@ export function shareCardModel({ record, recipes, name, municipalityName, region
   }
   const anyFallback = facts.some(fact => fact.fallback);
   const tier = record.tier === 'A' || record.tier === 'B' || record.tier === 'C' ? record.tier : null;
+  const small = publicationPopulation != null && publicationPopulation < 500 && censusPopulation != null;
+  const residents = small ? formatCount(censusPopulation, locale) : null;
   const tierNote = tier && !anyFallback
     ? (locale === 'pt'
-      ? `${TIER_COPY[tier].label.pt} · números da própria freguesia${tier === 'C' ? ', a ler com mais cuidado' : ''}.`
-      : `${TIER_COPY[tier].label.en} · the parish’s own figures${tier === 'C' ? ', to read with more care' : ''}.`)
+      ? (residents
+        ? `${TIER_COPY[tier].label.pt} · ${residents} residentes (INE) · números da própria freguesia: com tão poucas pessoas, cada uma pesa muito numa percentagem.`
+        : `${TIER_COPY[tier].label.pt} · números da própria freguesia${tier === 'C' ? ', a ler com mais cuidado' : ''}.`)
+      : (residents
+        ? `${TIER_COPY[tier].label.en} · ${residents} residents (INE) · the parish’s own figures: with so few people, each one weighs a lot in a percentage.`
+        : `${TIER_COPY[tier].label.en} · the parish’s own figures${tier === 'C' ? ', to read with more care' : ''}.`))
     : null;
   return {
     eyebrow: locale === 'pt' ? 'População sintética · Censos 2021' : 'Synthetic population · 2021 Census',
@@ -155,9 +171,10 @@ export function shareCardModel({ record, recipes, name, municipalityName, region
     attribution: locale === 'pt'
       ? 'Fonte: INE, Censos 2021 · informação modificada por estimador.pt · CC BY 4.0 · atribuição completa em estimador.pt/pt/populacao/dados'
       : 'Source: INE, 2021 Census · information modified by estimador.pt · CC BY 4.0 · full attribution at estimador.pt/en/populacao/dados',
+    // The release's date, worded as a version's date, not a publication day (FR3-09, PRO3-06).
     footer: locale === 'pt'
-      ? `População sintética v${POPULATION_RELEASE} · ${shortDate(published, locale)} · ${url ? bareUrl(url) : 'estimador.pt'}`
-      : `Synthetic population v${POPULATION_RELEASE} · ${shortDate(published, locale)} · ${url ? bareUrl(url) : 'estimador.pt'}`,
+      ? `População sintética v${POPULATION_RELEASE} de ${shortDate(published, locale)} · ${url ? bareUrl(url) : 'estimador.pt'}`
+      : `Synthetic population v${POPULATION_RELEASE} of ${shortDate(published, locale)} · ${url ? bareUrl(url) : 'estimador.pt'}`,
     fileName: `estimador-${record.code.toLowerCase()}-${slug(name) || 'freguesia'}.png`,
   };
 }
@@ -237,7 +254,8 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
   const placeLines = wrapLines(model.place, leftWidth, t => ctx.measureText(t).width, 2);
   ctx.font = font(600, 21);
   const note = model.scopeNote ?? model.tierNote;
-  const noteLines = note ? wrapLines(note, leftWidth, t => ctx.measureText(t).width, 2) : [];
+  // Three lines at most: a small parish's tier line also names its residents.
+  const noteLines = note ? wrapLines(note, leftWidth, t => ctx.measureText(t).width, 3) : [];
   const layoutAt = (size: number) => {
     ctx.font = font(800, size);
     const lines = wrapLines(model.title, leftWidth, t => ctx.measureText(t).width, 5);

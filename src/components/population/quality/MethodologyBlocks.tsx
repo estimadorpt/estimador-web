@@ -4,7 +4,7 @@ import { Callout } from '@/components/mdx/Callout';
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { Link } from '@/i18n/routing';
 import { POPULATION_DOWNLOADS, POPULATION_ROUTES } from '@/lib/config/population';
-import { DIMENSION_LABEL, HONESTY, TIER_COPY, type Locale } from '@/lib/population/labels';
+import { DIMENSION_LABEL, HONESTY, RECIPE_CAVEAT, TIER_COPY, type Locale } from '@/lib/population/labels';
 import type { PopulationMeta, PopulationReleaseInfo, PopulationScorecard } from '@/types/population';
 import { SHORT_ATTRIBUTION } from '@/lib/population/cite';
 import { ACCIDENTAL_MATCHES, INTENDED_USES, LIMITATIONS, NON_USES, NOVELTY, REPLACED, formatCount, generatedGap } from './copy';
@@ -27,18 +27,21 @@ type Kind = 'grouped' | 'derived' | 'flag';
  * download) and whether an INE table in the fit checks it. The producer's
  * response metadata calls the first five "census_calibrated"; the dictionary
  * marks them D, because each is a grouping of a generated field whose table is
- * in the fit. Both are true; this table says so once.
+ * in the fit. Both are true; this table says so once. The age bands (under 45,
+ * 45–64, 65+) are unions of the fitted five-year bands, so they are a grouping
+ * too (METH3-09): six groupings, two derived fields, one flag.
  */
-const FIELDS: Array<{ field: string; column: string | null; kind: Kind; rule: Record<Locale, string> }> = [
+const FIELDS: Array<{ field: string; column: string | null; kind: Kind; rule: Record<Locale, string>; caveat?: Record<Locale, string> }> = [
   { field: 'age_5y', column: 'age_5y (D)', kind: 'grouped', rule: { pt: 'Grupo de 5 anos da idade gerada. A tabela do INE por sexo e grupo de 5 anos entra no ajuste.', en: 'Five-year band of the generated age. INE’s sex × five-year-age table is in the fit.' } },
   { field: 'education_level_coarse5', column: 'education_level_coarse5 (D)', kind: 'grouped', rule: { pt: 'Cinco níveis a partir do código de escolaridade gerado (11 níveis). A tabela de escolaridade entra no ajuste.', en: 'Five levels from the generated education code (11 levels). The education table is in the fit.' } },
   { field: 'employment_status_coarse3', column: 'employment_status_coarse3 (D)', kind: 'grouped', rule: { pt: 'Empregado, desempregado ou inativo, a partir do código gerado (7 categorias). A condição perante o trabalho entra no ajuste.', en: 'Employed, unemployed or inactive, from the generated code (7 categories). Labour-force status is in the fit.' } },
   { field: 'hh_size_bin', column: 'hh_size_bin (D)', kind: 'grouped', rule: { pt: 'O número de pessoas do agregado, com 5 ou mais juntos. A tabela de pessoas por agregado entra no ajuste.', en: 'The household’s number of people, 5 or more together. The household-size table is in the fit.' } },
-  { field: 'hh_type_top', column: 'hh_type_top (D)', kind: 'grouped', rule: { pt: 'O número de núcleos familiares, contado a partir das pessoas do agregado. A tabela de núcleos por agregado entra no ajuste.', en: 'The number of family nuclei, counted from the household’s people. The nuclei-per-household table is in the fit.' } },
+  // The site's answer on this field does not reproduce from the column in every parish (POP3-ACC-01): said here, not recomputed.
+  { field: 'hh_type_top', column: 'hh_type_top (D)', kind: 'grouped', rule: { pt: 'O número de núcleos familiares, contado a partir das pessoas do agregado. A tabela de núcleos por agregado entra no ajuste.', en: 'The number of family nuclei, counted from the household’s people. The nuclei-per-household table is in the fit.' }, caveat: RECIPE_CAVEAT.household_type },
   { field: 'is_institutional', column: 'is_institutional (flag)', kind: 'flag', rule: { pt: '1 para um alojamento coletivo acrescentado a partir das contagens do INE, 0 para um agregado privado.', en: '1 for a collective living quarter appended from INE’s counts, 0 for a private household.' } },
   { field: 'living_alone', column: null, kind: 'derived', rule: { pt: '«Sim» quando o agregado da pessoa tem uma só pessoa (hh_size = 1). Nenhuma tabela do ajuste o verifica.', en: '“Yes” when the person’s household has one person (hh_size = 1). No table in the fit checks it.' } },
   { field: 'multigenerational', column: null, kind: 'derived', rule: { pt: '«Sim» quando o agregado tem pelo menos uma pessoa com menos de 15 anos (age < 15) e outra com 65 ou mais (age ≥ 65). Nenhuma tabela do ajuste o verifica.', en: '“Yes” when the household has at least one person under 15 (age < 15) and another aged 65 or over (age ≥ 65). No table in the fit checks it.' } },
-  { field: 'age_story_band', column: null, kind: 'derived', rule: { pt: 'Menos de 45, 45 a 64, 65 ou mais, a partir da idade (age).', en: 'Under 45, 45 to 64, 65 or over, from age.' } },
+  { field: 'age_story_band', column: null, kind: 'grouped', rule: { pt: 'Menos de 45, 45 a 64, 65 ou mais, a partir da idade (age): cada faixa junta grupos de 5 anos inteiros, e a tabela por grupo de 5 anos entra no ajuste.', en: 'Under 45, 45 to 64, 65 or over, from age: each band joins whole five-year groups, and the five-year table is in the fit.' } },
 ];
 
 const KIND_LABEL: Record<Kind, Record<Locale, string>> = {
@@ -119,6 +122,11 @@ export function methodologyBlocks({ locale, meta, release, scorecard, ineResiden
                   ? <code className="mr-1.5 text-xs text-ink">{row.column}</code>
                   : <span className="mr-1.5 text-xs font-semibold text-stone-600">{pt ? 'Não é uma coluna:' : 'Not a column:'}</span>}
                 {row.rule?.[locale] ?? String(meta.provenance.fields[row.field])}
+                {'caveat' in row && row.caveat && (
+                  <span role="note" className="mt-2 block border-l-2 border-amber-500 pl-3 text-[13px] text-stone-700">
+                    {pt ? 'A resposta do site («Que famílias formam?»): ' : 'The site’s answer (“What families do they form?”): '}{row.caveat[locale]}
+                  </span>
+                )}
               </dd>
             </div>
           ))}
@@ -203,12 +211,13 @@ export function methodologyBlocks({ locale, meta, release, scorecard, ineResiden
     },
     Novelty: () => (
       <>
+        {/* The privacy terms glossed inline, for the page's general reader (METH3-19); the 11-attribute figure beside the 13-attribute one (METH3-04). */}
         <p className="mb-5">
           {pt ? 'Na auditoria nacional, ' : 'In the national audit, '}
           {NOVELTY[locale]}
           {pt
-            ? '. Uma réplica que reutiliza registos da amostra (a referência SA/CO, que a própria auditoria marca como não pronta para uso) chega a 99,1% das pessoas e 99,9% dos agregados. Não há sinal de inferência de pertença em excesso, nem vantagem na inferência de atributos. A auditoria foi aprovada.'
-            : '. A replay that reuses sample records (the SA/CO benchmark, which the audit itself flags as not ready for use) reaches 99.1% of people and 99.9% of households. There is no excess membership-inference signal and no attribute-inference advantage. The audit passed.'}
+            ? <>. Uma réplica que reutiliza registos da amostra (a <Link href={`${POPULATION_ROUTES.quality}#glossario`} locale={locale} className={link}>referência SA/CO</Link>, que a própria auditoria marca como não pronta para uso) chega a 99,1% das pessoas e 99,9% dos agregados. Nos 11 atributos que o modelo gera, 80% das pessoas sintéticas partilham a combinação com alguma pessoa da amostra: são perfis comuns, e a distância ao registo mais próximo continua maior do que entre as pessoas da própria amostra. Não há sinal em excesso de inferência de pertença (adivinhar se alguém estava na amostra usada no treino), nem vantagem na inferência de atributos (adivinhar um atributo de alguém a partir dos outros). A auditoria foi aprovada.</>
+            : <>. A replay that reuses sample records (the <Link href={`${POPULATION_ROUTES.quality}#glossario`} locale={locale} className={link}>SA/CO benchmark</Link>, which the audit itself flags as not ready for use) reaches 99.1% of people and 99.9% of households. On the 11 attributes the model generates, 80% of synthetic persons share an attribute combination with some sample person: those are common profiles, and the distance to the closest record is still larger than between the sample’s own people. There is no excess membership-inference signal (guessing whether someone was in the sample used for training) and no attribute-inference advantage (guessing someone’s attribute from the others). The audit passed.</>}
         </p>
         <p className="mb-5 font-semibold">{ACCIDENTAL_MATCHES[locale]}</p>
       </>

@@ -16,15 +16,21 @@ export interface FitRow {
  * is printed at the end of every bar, so the reading needs no hover; the table
  * twin carries the same rows with the note in its own column.
  */
-export function FitBars({ rows, caption, columns, noteColumn }: {
+export function FitBars({ rows, caption, columns, noteColumn, max }: {
   rows: FitRow[];
   caption: string;
   /** Table twin headers: label, value. */
   columns: [string, string];
   /** Header of the note column in the table twin, when rows carry notes. */
   noteColumn?: string;
+  /**
+   * The value a full bar stands for. Two charts set side by side share one, so
+   * the same length means the same error in both (METH3-08); by default, this
+   * chart's own largest value.
+   */
+  max?: number;
 }) {
-  const top = Math.max(...rows.map(row => row.value), 0.0001);
+  const top = Math.max(max ?? 0, ...rows.map(row => row.value), 0.0001);
   const tableColumns = noteColumn ? [columns[0], noteColumn, columns[1]] : columns;
   const tableRows = rows.map(row => (noteColumn ? [row.label, row.note ?? '', row.display] : [row.label, row.display]));
   return (

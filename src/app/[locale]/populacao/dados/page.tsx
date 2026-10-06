@@ -139,7 +139,7 @@ JOIN '${householdsFile}' AS h
   USING (freguesia, synthetic_hh_id)
 WHERE p.freguesia = '060318'
   -- ${pt ? 'só agregados privados, como no site: os alojamentos coletivos' : 'private households only, as on the site: collective quarters'}
-  -- ${pt ? '(is_institutional = 1) contam como um agregado e caem em «5»' : '(is_institutional = 1) count as one household and fall under "5"'}
+  -- ${pt ? '(is_institutional = 1) contam como um agregado e quase todos caem em «5»' : '(is_institutional = 1) count as one household and almost all fall under "5"'}
   AND h.is_institutional = 0
 GROUP BY h.hh_size_bin
 ORDER BY h.hh_size_bin;`;
@@ -215,7 +215,8 @@ sha256sum checksums.sha256`;
                 </>],
                 [pt ? 'Ano de referência' : 'Reference year', pt ? '2021: gerada a partir dos Censos 2021 do INE.' : '2021: generated from INE’s 2021 Census.'],
                 [pt ? 'Modelo' : 'Model', <><span>{pt ? 'Motor' : 'Engine'} {release.engine}, {pt ? 'uma única execução' : 'a single run'}. </span><span className="break-all font-mono text-[13px]">sha256 {release.model_sha256}</span></>],
-                [pt ? 'Código' : 'Code', <span key="c" className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>],
+                // What the hash identifies, and that it cannot be looked up yet (PRO3-11).
+                [pt ? 'Código' : 'Code', <span key="c">Commit <span className="font-mono text-[13px]">{release.code_commit.slice(0, 7)}</span>{pt ? ' do código de empacotamento; o repositório ainda não é público.' : ' of the packaging code; the repository is not public yet.'}</span>],
                 [pt ? 'Versões anteriores' : 'Previous releases', <>
                   {pt ? 'A 1.0.3 substituiu três versões datadas de 5 de outubro (a 1.0.2 nunca chegou ao GitHub); a população gerada é a mesma em todas. ' : '1.0.3 replaced three releases dated 5 October (1.0.2 never reached GitHub); the generated population is the same in all of them. '}
                   {/* The history, said once on the site (UXD-24): the other trust pages link here. */}
@@ -311,7 +312,7 @@ sha256sum checksums.sha256`;
                     {POPULATION_DOWNLOADS.files.map(file => (
                       <tr key={file.key} className="align-top">
                         <th scope="row" className="border-b border-line px-4 py-3 text-left font-normal">
-                          <a href={file.url} className="font-mono text-[13px] font-semibold text-ink underline underline-offset-4 [overflow-wrap:anywhere]">{file.name}</a>
+                          <a href={file.url} className="tap-target font-mono text-[13px] font-semibold text-ink underline underline-offset-4 [overflow-wrap:anywhere]">{file.name}</a>
                           <span className="mt-1 block leading-relaxed text-stone-700">{FILE_COPY[file.key]?.[locale]}</span>
                         </th>
                         <td className="whitespace-nowrap border-b border-line px-4 py-3 text-right tabular-nums text-ink">{formatBytes(file.bytes, locale)}</td>

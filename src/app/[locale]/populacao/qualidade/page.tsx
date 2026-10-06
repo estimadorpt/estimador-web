@@ -53,8 +53,9 @@ const TIER_READING: Record<'A' | 'B' | 'C', { pt: string; en: string }> = {
     en: 'Read the figures as a portrait close to INE’s tables for the parish.',
   },
   B: {
-    pt: 'Também próximo das tabelas; numa freguesia com menos de 2 000 residentes, o B diz o tamanho, não um ajuste pior.',
-    en: 'Also close to the tables; in a parish of under 2,000 residents, B says its size, not a weaker fit.',
+    // "pode dizer só o tamanho": under 2,000 residents B is not always a size verdict; some of these parishes also miss A's fit (METH3-02, POP3-ACC-03).
+    pt: 'Também próximo das tabelas; numa freguesia com menos de 2 000 residentes, o B pode dizer só o tamanho, não um ajuste pior.',
+    en: 'Also close to the tables; in a parish of under 2,000 residents, B may reflect only its size, not a weaker fit.',
   },
   C: {
     pt: 'Com poucas pessoas, uma ou duas mudam uma percentagem: lê com cuidado as categorias pequenas e evita tirar conclusões de uma só.',
@@ -65,25 +66,28 @@ const TIER_READING: Record<'A' | 'B' | 'C', { pt: string; en: string }> = {
 /**
  * Tier C holds two kinds of parish (MR2-03): small ones, C for their size, and
  * 500+ ones, C for their worst table, which in almost all of them is
- * single-year age (705 of 728 in quality.csv `worst_constraint`). The counts
- * shown are read from places.json (tier and the count the tier uses).
+ * single-year age (705 of 728 in quality.csv `worst_constraint`), or, in a
+ * couple, for their typical error alone (POP3-ACC-06). The counts shown are
+ * read from places.json (tier and the count the tier uses, publication_population),
+ * and the lead says so: the size chart above counts INE's residents, which
+ * puts one parish (160707) on the other side of 500 (POP3-ACC-04).
  */
 function tierCReadings(small: number, large: number, locale: Locale): Array<{ key: string; lead: string; body: string }> {
   const pt = locale === 'pt';
   return [
     {
       key: 'small',
-      lead: pt ? `Menos de 500 residentes (${formatCount(small, locale)}):` : `Under 500 residents (${formatCount(small, locale)}):`,
+      lead: pt ? `Menos de 500 na contagem de publicação (${formatCount(small, locale)}):` : `Under 500 on the publication count (${formatCount(small, locale)}):`,
       body: pt
-        ? 'são C pelo tamanho. Uma ou duas pessoas mudam uma percentagem, e 100% pode ser uma ou duas: confere no topo da página quantos residentes e agregados tem a freguesia.'
-        : 'they are C for their size. One or two people shift a share, and 100% can be one or two: check at the top of the page how many residents and households the parish has.',
+        ? 'são C pelo tamanho. Cada pergunta conta só o seu grupo (por exemplo, quem vive sozinho), que pode ser de poucas pessoas: uma ou duas mudam uma percentagem, e 100% pode ser uma ou duas. O topo da página de cada freguesia diz quantos residentes tem.'
+        : 'they are C for their size. Each question counts only its own group (for example, those who live alone), which can be a handful of people: one or two shift a share, and 100% can be one or two. The top of each parish page says how many residents it has.',
     },
     {
       key: 'large',
-      lead: pt ? `500 ou mais residentes (${formatCount(large, locale)}):` : `500 or more residents (${formatCount(large, locale)}):`,
+      lead: pt ? `500 ou mais na contagem de publicação (${formatCount(large, locale)}):` : `500 or more on the publication count (${formatCount(large, locale)}):`,
       body: pt
-        ? 'são C pela pior tabela, quase sempre a idade ano a ano, que fica fora das 12 tabelas de pessoas do ajuste e que as respostas do site não usam. O ficheiro de qualidade diz a pior tabela de cada uma.'
-        : 'they are C for their worst table, almost always single-year age, which sits outside the 12 fitted person tables and which the site’s answers do not use. The quality file names each one’s worst table.',
+        ? 'são C pela pior tabela (quase sempre a idade ano a ano) ou, em poucas, pelo erro típico. A idade ano a ano fica fora das 12 tabelas de pessoas do ajuste e as respostas do site não a usam: nessas freguesias, a cautela vale sobretudo para quem usar essa coluna dos microdados. O ficheiro de qualidade diz a pior tabela de cada uma, e a página de cada freguesia diz o que a pôs no nível C.'
+        : 'they are C for their worst table (almost always single-year age) or, in a few, for their typical error. Single-year age sits outside the 12 fitted person tables and the site’s answers do not use it: in those parishes the caution applies mostly to anyone using that column of the microdata. The quality file names each one’s worst table, and each parish page says what put it in tier C.',
     },
   ];
 }
@@ -138,7 +142,13 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
   const source = pt
     ? `Avaliação da versão ${POPULATION_RELEASE} · Censos 2021 (INE)`
     : `Evaluation of release ${POPULATION_RELEASE} · 2021 Census (INE)`;
-  const updated = pt ? `Publicada a ${formatDay(POPULATION_PUBLISHED, locale)}` : `Published ${formatDay(POPULATION_PUBLISHED, locale)}`;
+  // The release's own date ("datada de", as on /dados); GitHub's upload day is said only there (FR3-09).
+  const updated = pt ? `Versão de ${formatDay(POPULATION_PUBLISHED, locale)}` : `Release dated ${formatDay(POPULATION_PUBLISHED, locale)}`;
+  // One scale for the two fit charts, so equal bars mean equal errors side by side (METH3-08).
+  const fitValues = scorecard
+    ? [...scorecard.strata.map(stratum => stratum.person_srmse_median.value), ...scorecard.constraints.map(table => table.srmse_median.value)]
+    : [];
+  const fitTop = Math.max(...fitValues, 0.0001);
 
   return (
     <div className="min-h-screen bg-paper">
@@ -236,7 +246,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 <DataCard
                   className="lg:flex lg:h-full lg:flex-col lg:[&>footer]:mt-auto"
                   title={pt ? 'Erro do ajuste, por tamanho de freguesia' : 'Fit error, by parish size'}
-                  subtitle={pt ? 'Mediana entre freguesias, todas as células das 12 tabelas de pessoas' : 'Median across parishes, all cells of the 12 person tables'}
+                  subtitle={pt ? 'Mediana entre freguesias, todas as células das 12 tabelas de pessoas; classes pelos residentes do INE; mesma escala do gráfico ao lado' : 'Median across parishes, all cells of the 12 person tables; bands by INE’s residents; same scale as the chart beside it'}
                   source={source}
                   updated={updated}
                   methodologyHref={POPULATION_ROUTES.methodology}
@@ -247,6 +257,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                     caption={pt ? 'Erro do ajuste face às tabelas do INE, por tamanho de freguesia' : 'Fit error against INE’s tables, by parish size'}
                     columns={[pt ? 'Tamanho' : 'Size', pt ? 'Erro do ajuste' : 'Fit error']}
                     noteColumn={pt ? 'Freguesias' : 'Parishes'}
+                    max={fitTop}
                     rows={scorecard.strata.map(stratum => ({
                       key: stratum.key,
                       label: SIZE_BAND[stratum.key]?.[locale] ?? (pt ? stratum.label : stratum.label_en),
@@ -259,7 +270,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 <DataCard
                   className="lg:flex lg:h-full lg:flex-col lg:[&>footer]:mt-auto"
                   title={pt ? 'Erro típico, por tabela' : 'Typical error, by table'}
-                  subtitle={pt ? 'Mediana entre freguesias do erro de cada tabela usada no ajuste' : 'Median across parishes of each fitted table’s error'}
+                  subtitle={pt ? 'Mediana entre freguesias do erro de cada uma das 12 tabelas de pessoas usadas no ajuste (as de agregados não têm mediana publicada); mesma escala do gráfico ao lado' : 'Median across parishes of the error of each of the 12 fitted person tables (the household tables have no published median); same scale as the chart beside it'}
                   source={source}
                   updated={updated}
                   methodologyHref={POPULATION_ROUTES.methodology}
@@ -269,6 +280,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   <FitBars
                     caption={pt ? 'Erro típico face às tabelas do INE, por tabela' : 'Typical error against INE’s tables, by table'}
                     columns={[pt ? 'Tabela' : 'Table', pt ? 'Erro típico' : 'Typical error']}
+                    max={fitTop}
                     rows={scorecard.constraints.map(table => ({
                       key: table.key,
                       label: constraintLabel(table.key, { pt: table.label, en: table.label_en }, locale),
@@ -393,9 +405,6 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 ))}
               </dl>
               <p className="mt-5 max-w-3xl leading-relaxed text-ink">
-                {pt
-                  ? 'Algumas pessoas geradas partilham combinações comuns de atributos com registos da amostra, porque essas combinações são frequentes. '
-                  : 'Some generated people share common attribute combinations with sample records, because those combinations are frequent. '}
                 <strong>{ACCIDENTAL_MATCHES[locale]}</strong>
               </p>
             </Section>
@@ -404,8 +413,8 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
               id="limitacoes"
               title={pt ? 'Onde é que os dados são mais fracos?' : 'Where are the data weakest?'}
               lede={<p>{pt
-                ? <>Limitações conhecidas da população gerada (a mesma da versão 1.0.0 à {POPULATION_RELEASE}), declaradas em vez de escondidas. A <a href={POPULATION_DOWNLOADS.modelCard} className="font-semibold text-ink underline underline-offset-4">ficha do modelo</a> remete o plano para as resolver para a próxima versão (a 1.1, que corrige a população dos Censos 2021); cada correção fica registada nas <a href={POPULATION_DOWNLOADS.errata} className="font-semibold text-ink underline underline-offset-4">erratas</a>.</>
-                : <>Known limitations of the generated population (the same from release 1.0.0 to {POPULATION_RELEASE}), declared rather than hidden. The <a href={POPULATION_DOWNLOADS.modelCard} className="font-semibold text-ink underline underline-offset-4">model card</a> leaves the plan to remove them to the next release (1.1, which corrects the 2021 Census population); every correction is recorded in the <a href={POPULATION_DOWNLOADS.errata} className="font-semibold text-ink underline underline-offset-4">errata</a>.</>}</p>}
+                ? <>Limitações conhecidas da população gerada (a mesma da versão 1.0.0 à {POPULATION_RELEASE}), declaradas em vez de escondidas. A <a href={POPULATION_DOWNLOADS.modelCard} className="font-semibold text-ink underline underline-offset-4">ficha do modelo</a> remete o plano para as resolver para a próxima versão (a 1.1, uma versão corrigida da população sintética de 2021); cada correção fica registada nas <a href={POPULATION_DOWNLOADS.errata} className="font-semibold text-ink underline underline-offset-4">erratas</a>.</>
+                : <>Known limitations of the generated population (the same from release 1.0.0 to {POPULATION_RELEASE}), declared rather than hidden. The <a href={POPULATION_DOWNLOADS.modelCard} className="font-semibold text-ink underline underline-offset-4">model card</a> leaves the plan to remove them to the next release (1.1, a corrected synthetic population for 2021); every correction is recorded in the <a href={POPULATION_DOWNLOADS.errata} className="font-semibold text-ink underline underline-offset-4">errata</a>.</>}</p>}
             >
               <ol className="grid gap-4 md:grid-cols-2">
                 {LIMITATIONS.map(limitation => (

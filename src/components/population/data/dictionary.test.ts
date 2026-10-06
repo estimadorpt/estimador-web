@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR, POPULATION_RELEASE } from '@/lib/config/population';
 import { jsonLd, populationDatasetJsonLd } from '@/lib/structured-data';
 import type { PopulationReleaseInfo } from '@/types/population';
-import { columnDescription, DESCRIPTION_OVERRIDES, INTERNAL_REFERENCE, SITE_LABEL_MAPS } from './dictionary';
+import { columnDescription, DESCRIPTION_OVERRIDES, INTERNAL_REFERENCE, SITE_LABEL_MAPS, SITE_NOTES } from './dictionary';
 
 const release = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR, 'release.json'), 'utf8')) as PopulationReleaseInfo;
 
@@ -52,6 +52,36 @@ describe('the dictionary agrees with the page and the model card (PRO2-04, POP2-
     }
     expect(SITE_LABEL_MAPS['persons.activity_sector_code'].map(entry => entry.code)).toEqual(['1', '2', '3', '4']);
     expect(SITE_LABEL_MAPS['households.nuts2'].map(entry => entry.code)).toEqual(['11', '15', '16', '17', '18', '20', '30']);
+  });
+});
+
+describe('collective quarters and the household-type answer (round 3: PRO3-10, METH3-20, POP3-ACC-01, POP3-ACC-05)', () => {
+  const persons = (name: string) => columnDescription('persons', name, release.column_dictionary.persons[name]).text;
+
+  it('says which person columns are null for every resident of a collective quarter', () => {
+    const institutional = persons('is_institutional');
+    for (const column of ['nucleus_id', 'sitprof_code', 'activity_sector_code', 'occupation_major', 'occupation_code', 'industry_section', 'work_location_type', 'transport_mode']) {
+      expect(institutional, column).toContain(column);
+      expect(release.column_dictionary.persons[column], column).toBeDefined();
+    }
+    expect(institutional).toContain('education imputed');
+    expect(persons('nucleus_id')).toMatch(/Null for every resident of a collective living quarter/);
+  });
+
+  it('prints no tenure share of its own (the producer’s 0.16% does not reproduce)', () => {
+    const tenure = columnDescription('households', 'hh_tenure_code', release.column_dictionary.households.hh_tenure_code).text;
+    expect(tenure).not.toMatch(/\d+\.\d+%/);
+  });
+
+  it('notes, in both languages, that the household-type answer predates the final packaging', () => {
+    for (const key of Object.keys(SITE_NOTES)) {
+      const [table, name] = key.split('.') as ['persons' | 'households', string];
+      expect(release.column_dictionary[table][name], key).toBeDefined();
+    }
+    expect(SITE_NOTES['households.hh_type_top'].pt).toContain('empacotamento final dos microdados');
+    expect(SITE_NOTES['households.hh_type_top'].en).toContain('final packaging');
+    // No figure of the site's own measuring (handoff §3).
+    expect(SITE_NOTES['households.hh_type_top'].pt).not.toMatch(/\d/);
   });
 });
 
