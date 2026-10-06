@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowRight, Check, RotateCcw, Share2 } from 'lucide-react';
+import { ArrowRight, RotateCcw, Share2 } from 'lucide-react';
 import { Action } from '@/components/brand/Action';
-import { Disclosure } from '@/components/viz/Disclosure';
 import { ACCENT, FURNITURE } from '@/components/viz/theme';
 import { formatCount } from '@/lib/population/format';
 import { MAX_GUESSES, formatCountdown, msUntilNextLisbonMidnight, type GameRecord, type GameStats, type ShareMessage } from '@/lib/population/game';
@@ -18,11 +17,9 @@ import { GAME_COPY } from './copy';
 const SECONDARY = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] border border-line bg-cream px-5 text-[15px] font-semibold leading-none text-ink transition-colors duration-150 hover:bg-parchment';
 
 /**
- * The end of a game: the parish named, then straight away the share button and
- * a link to its portrait (UXD3-13, PUB3-03), then its quality tier in one plain
- * line with the full meaning behind a disclosure, the honesty line and the
- * geography's attribution, the player's stats and the time to the next parish.
- * "Copied" shows in the share button itself, where the reader is looking (PUB3-08).
+ * The end of a game: the parish named, a link to its portrait, the share
+ * text, the honesty line and the geography's attribution, the player's stats
+ * and the time to the next parish.
  */
 export function EndPanel({ record, answer, tier, stats, share, index, locale, practice, onReplay }: {
   record: GameRecord;
@@ -58,7 +55,6 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
       try {
         await navigator.clipboard.writeText(shareBlock);
         setShareState('copied');
-        window.setTimeout(() => setShareState('idle'), 2400);
       } catch {
         setShareState('failed');
       }
@@ -74,11 +70,16 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
       <p className="mt-1 text-[15px] text-stone-600">
         {locale === 'pt' ? `Concelho ${ofMunicipality(answer.municipalityName)}` : `${answer.municipalityName} municipality`} · {regionTitle(answer.region, answer.regionName, locale)}
       </p>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-600">
+        <QualityBadge kind={tier} locale={locale} />
+        <span>{t.residents}: <strong className="tabular-nums text-ink">{formatCount(answer.censusPopulation, locale)}</strong></span>
+      </div>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600">{tierMeaningFor(tier, answer.publicationPopulation, answer.censusPopulation)[locale]}</p>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      <div className="mt-5 flex flex-wrap items-center gap-3">
         <Action onClick={onShare}>
-          {shareState === 'copied' ? <Check aria-hidden="true" className="h-4 w-4" /> : <Share2 aria-hidden="true" className="h-4 w-4" />}
-          {shareState === 'copied' ? t.copied : t.share}
+          <Share2 aria-hidden="true" className="h-4 w-4" />
+          {t.share}
         </Action>
         <ParishLink code={answer.code} locale={locale} className={SECONDARY}>
           {t.seePortrait}
@@ -91,23 +92,12 @@ export function EndPanel({ record, answer, tier, stats, share, index, locale, pr
           </button>
         )}
       </div>
-      {/* Spoken either way; seen only on a failure (the button itself says "copied"). */}
-      <p className={shareState === 'failed' ? 'mt-2 text-sm text-stone-600' : 'sr-only'} aria-live="polite">
+      <p className="mt-2 min-h-5 text-sm text-stone-600" aria-live="polite">
         {shareState === 'copied' ? t.copied : shareState === 'failed' ? t.shareFailed : ''}
       </p>
       {shareState === 'failed' && (
         <pre className="mt-2 whitespace-pre-wrap rounded-xl bg-parchment p-3 font-sans text-sm text-ink">{shareBlock}</pre>
       )}
-
-      {/* The tier in one plain line; what it means, in full, one tap away. */}
-      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-600">
-        <QualityBadge kind={tier} locale={locale} />
-        <span>{t.tierShort[tier]}</span>
-        <span>{t.residents}: <strong className="tabular-nums text-ink">{formatCount(answer.censusPopulation, locale)}</strong></span>
-      </div>
-      <Disclosure className="mt-1" summary={t.tierWhy(tier)}>
-        <p className="max-w-2xl pb-1 text-sm leading-relaxed text-stone-600">{tierMeaningFor(tier, answer.publicationPopulation, answer.censusPopulation)[locale]}</p>
-      </Disclosure>
 
       <div className="mt-4 border-t border-line pt-4 text-sm text-stone-600">
         <p>{locale === 'pt' ? index.honesty.message_pt : index.honesty.message_en}</p>

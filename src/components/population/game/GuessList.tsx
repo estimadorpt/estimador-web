@@ -4,7 +4,7 @@ import { ArrowUp, CircleCheck } from 'lucide-react';
 import { ACCENT, FURNITURE } from '@/components/viz/theme';
 import { COMPASS, MAX_GUESSES, formatKm, type GuessFeedback } from '@/lib/population/game';
 import type { Locale } from '@/lib/population/labels';
-import { regionLabel, type Parish } from '@/lib/population/places';
+import type { Parish } from '@/lib/population/places';
 import { GAME_COPY } from './copy';
 import { Reveal } from './Reveal';
 
@@ -36,7 +36,7 @@ export function GuessList({ guesses, feedback, locale, playing }: {
                 <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-line bg-paper text-xs font-bold tabular-nums text-stone-600" aria-hidden="true">{i + 1}</span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[15px] font-semibold leading-snug text-ink">{parish.name}</p>
-                  <p className="text-xs text-stone-500">{parish.municipalityName} · {regionLabel(parish.region, parish.regionName, locale)}</p>
+                  <p className="text-xs text-stone-500">{parish.municipalityName} · {parish.regionName}</p>
                   {!item.correct && (item.sameMunicipality || item.sameRegion) && (
                     <p className="mt-1.5 flex flex-wrap gap-1.5">
                       {item.sameMunicipality && <Chip>{t.sameMunicipality}</Chip>}
