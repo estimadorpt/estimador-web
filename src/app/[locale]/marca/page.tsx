@@ -47,7 +47,7 @@ const INKS: readonly (readonly [Copy, string, string, Copy])[] = [
   [['Pinho escuro', 'Dark pine'], 'ink-dark', BRAND.inkDark, ['Hover de ligações e botões.', 'Link and button hover.']],
   [['Cinza-verde', 'Green-grey'], 'stone-500', BRAND.muted, ['Texto secundário e o .pt da assinatura, 4,5:1 sobre papel.', 'Secondary text and the .pt of the signature, 4.5:1 on paper.']],
   [['Cinza claro', 'Light grey'], 'stone-400', BRAND.faint, ['Etiquetas pequenas e decoração; nunca o .pt, que ficaria abaixo de 3:1.', 'Small labels and decoration; never the .pt, which would fall below 3:1.']],
-  [['Floresta', 'Forest'], 'forest', BRAND.forest, ['Superfícies escuras: o mundo do atlas, cartões sociais.', 'Dark surfaces: the atlas world, social cards.']],
+  [['Floresta', 'Forest'], 'forest', BRAND.forest, ['Superfícies escuras: o ícone de app e os cartões sociais escuros.', 'Dark surfaces: the app icon and the dark social cards.']],
 ];
 const DATA: readonly (readonly [Copy, string, string, string, string])[] = [
   [['Menta', 'Mint'], 'mint', BRAND.mint, BRAND.mintSoft, 'mint-soft'],
@@ -84,7 +84,7 @@ const MOSAIC_USES: readonly (readonly ['cover' | 'corner' | 'quarters' | 'people
 
 /** The painting family: one picture per section, in the site's section order. */
 const PAINTINGS: readonly (readonly ['population' | 'football' | 'elections' | 'economy', Copy, Copy, string])[] = [
-  ['population', ['População: a casa', 'Population: the house'], ['Só no painel da população, na página inicial. Nunca nas páginas de dados da população.', 'Only on the homepage\'s population panel. Never on the population data pages.'], '/images/home/population-square-800.webp'],
+  ['population', ['População: a casa', 'Population: the house'], ['No painel da população da página inicial e neste guia. Nunca nas páginas de dados da população.', 'The homepage\'s population panel, and this guide. Never on the population data pages.'], '/images/home/population-square-800.webp'],
   ['football', ['Futebol: o campo', 'Football: the ground'], ['Cabeçalhos da Liga e do simulador; painel da página inicial.', 'Liga and simulator headers; the homepage panel.'], '/images/sections/football.webp'],
   ['elections', ['Eleições: a mesa de voto', 'Elections: the polling place'], ['Cabeçalhos do arquivo, das legislativas e das presidenciais; painel da página inicial.', 'Archive, parliamentary and presidential headers; the homepage panel.'], '/images/sections/elections.webp'],
   ['economy', ['Economia: a loja', 'Economy: the shop'], ['Painel da página inicial e um pequeno acento no explicador da Economia. Sem cabeçalho.', 'The homepage panel and a small accent in the economy explainer. No header.'], '/images/sections/economy.webp'],
@@ -247,7 +247,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
             </div>
           ))}
         </div>
-        <p className="mt-3 max-w-2xl text-xs leading-relaxed text-stone-500">{pt ? 'À esquerda de cada par, a versão de dados: categorias nos gráficos e as pessoas do atlas. À direita, a versão de superfície: campos de cor, fundos, o mosaico. Uma nunca faz o trabalho da outra.' : 'Left of each pair, the data version: chart categories and the atlas\'s people. Right, the surface version: tinted fields, backgrounds, the mosaic. Neither ever does the other\'s job.'}</p>
+        <p className="mt-3 max-w-2xl text-xs leading-relaxed text-stone-500">{pt ? 'À esquerda de cada par, a versão de dados: categorias e marcas pequenas, como uma tentativa errada na Freguesia misteriosa (as séries dos gráficos usam passos mais escuros dos mesmos quatro tons). À direita, a versão de superfície: campos de cor, fundos, o mosaico. Uma nunca faz o trabalho da outra.' : 'Left of each pair, the data version: categories and small marks, such as a wrong guess in the Mystery parish (chart series use darker steps of the same four hues). Right, the surface version: tinted fields, backgrounds, the mosaic. Neither ever does the other\'s job.'}</p>
         <h3 className="mt-10 text-base font-bold uppercase tracking-wider text-stone-500">{pt ? 'Semânticas' : 'Semantic'}</h3>
         <div className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-4">{SEMANTIC.map(([n, t, h, note]) => <Swatch key={t} name={tr(pt, n)} token={t} hex={h} note={tr(pt, note)} />)}</div>
         <ul className="mt-8 grid gap-2 md:grid-cols-2">
@@ -279,7 +279,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         </div>
       </Section>
 
-      <Section id="mosaico" kicker="05" title={pt ? 'O mosaico' : 'The mosaic'} lede={pt ? 'Material de marca, com um vocabulário pequeno e com sentido: um quarto de círculo é uma quota, um círculo é uma pessoa, um bloco arredondado é um lugar. As faixas ficam no símbolo. Desde 6 de outubro de 2026, vive em três sítios: a marca, o 404 e os estados vazios. Não é cabeçalho de nenhuma página.' : 'Brand material, with a small vocabulary that means something: a quarter-circle is a share, a circle a person, a rounded block a place. Bands stay in the mark. Since 6 October 2026 it lives in three places: brand material, the 404 and empty states. It heads no page.'}>
+      <Section id="mosaico" kicker="05" title={pt ? 'O mosaico' : 'The mosaic'} lede={pt ? 'Material de marca, com um vocabulário pequeno e com sentido: um quarto de círculo é uma quota, um círculo é uma pessoa, um bloco arredondado é um lugar. As faixas ficam no símbolo. Desde 6 de outubro de 2026, vive em três sítios: a marca, o 404 e os estados vazios. Não é cabeçalho de nenhuma página, salvo a deste guia, que também é material de marca.' : 'Brand material, with a small vocabulary that means something: a quarter-circle is a share, a circle a person, a rounded block a place. Bands stay in the mark. Since 6 October 2026 it lives in three places: brand material, the 404 and empty states. It heads no page but this guide, which is brand material itself.'}>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {MOSAIC_USES.map(([v, use, live]) => (
             <div key={v} className="flex flex-col gap-2">
@@ -302,7 +302,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         <ul className="mt-8 grid gap-2 md:grid-cols-2">
           <Rule yes>{pt ? 'Material de marca (este guia, o cartão de partilha da marca, o kit social), o 404 e os estados vazios, sempre com um passo seguinte.' : 'Brand material (this guide, the OG brand card, the social kit), the 404 and empty states, always with a next step.'}</Rule>
           <Rule yes>{pt ? 'Sempre nas versões de superfície dos pastéis, sobre papel ou creme.' : 'Always in the surface versions of the pastels, on paper or cream.'}</Rule>
-          <Rule yes={false}>{pt ? 'Nunca num cabeçalho de página, nem ao lado de um número ou de um gráfico: saiu dos cabeçalhos da Liga, da Economia e dos Artigos a 11 de setembro e dos da População a 6 de outubro.' : 'Never in a page header, never beside a number or a chart: it came off the Liga, economy and articles headers on 11 September and off the population ones on 6 October.'}</Rule>
+          <Rule yes={false}>{pt ? 'Nunca no cabeçalho de uma página do site fora deste guia, nem ao lado de um número ou de um gráfico: saiu dos cabeçalhos da Liga, da Economia e dos Artigos a 11 de setembro e dos da População a 6 de outubro.' : 'Never in the header of a site page outside this guide, never beside a number or a chart: it came off the Liga, economy and articles headers on 11 September and off the population ones on 6 October.'}</Rule>
           <Rule yes={false}>{pt ? 'Nunca a codificar informação, nem a parecer que codifica: a grelha de pontos fica fora das páginas, porque ao lado dos gráficos de pontos verdadeiros lê-se como dados.' : 'Never encoding information, nor looking as if it does: the dot grid stays off every page, because next to the real dot charts it reads as data.'}</Rule>
         </ul>
       </Section>
@@ -311,9 +311,14 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {PAINTINGS.map(([scene, name, use, file]) => (
             <div key={scene} className="flex flex-col rounded-2xl border border-line bg-cream p-4">
-              {scene === 'population'
-                ? <HomeArt name="population" shape="square" sizes="(min-width: 1024px) 260px, (min-width: 640px) 45vw, calc(100vw - 64px)" className="aspect-[3/2] w-full rounded-2xl" />
-                : <SectionIllustration scene={scene} sizes="(min-width: 1024px) 260px, (min-width: 640px) 45vw, calc(100vw - 64px)" />}
+              {/* One mat for all four: each painting whole, at its own shape, with the same margin
+                  above and below. The house has no 3:2 crop (it fills its master's height), so it
+                  sits as the square the homepage uses rather than pillarboxed in a 3:2 box. */}
+              <div className="relative flex aspect-[3/2] w-full items-center justify-center rounded-xl bg-parchment">
+                {scene === 'population'
+                  ? <HomeArt name="population" shape="square" sizes="(min-width: 1024px) 160px, (min-width: 640px) 28vw, 60vw" className="absolute left-1/2 top-[6%] aspect-square h-[88%] -translate-x-1/2 rounded-2xl" />
+                  : <div className="w-[88%]"><SectionIllustration scene={scene} sizes="(min-width: 1024px) 180px, (min-width: 640px) 40vw, calc(100vw - 96px)" /></div>}
+              </div>
               <h3 className="mt-4 text-lg">{tr(pt, name)}</h3>
               <p className="mt-1 text-sm leading-relaxed text-stone-600">{tr(pt, use)}</p>
               <a href={file} download className="mt-auto inline-flex min-h-11 items-center pt-2 text-sm font-bold underline underline-offset-4">{pt ? 'Descarregar pintura' : 'Download painting'}<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
@@ -323,7 +328,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         <ul className="mt-8 grid gap-2 md:grid-cols-2">
           <Rule yes>{pt ? 'Cenas frontais e concretas, com arquitetura, materiais e pequenos gestos humanos.' : 'Concrete, frontal scenes with architecture, materials and small human gestures.'}</Rule>
           <Rule yes>{pt ? 'Cabeçalhos compactos: imagem até 295 px no desktop, carregada logo, por ser o que a página pinta de maior. Em ferramentas, o controlo vem primeiro.' : 'Compact headers: artwork up to 295 px on desktop, loaded eagerly, since it is the page\'s largest paint. In tools, controls come first.'}</Rule>
-          <Rule yes={false}>{pt ? 'Sem moradores pintados nas páginas de dados da população: a casa só aparece na página inicial.' : 'No painted residents on the population data pages: the house appears on the homepage only.'}</Rule>
+          <Rule yes={false}>{pt ? 'Sem moradores pintados nas páginas de dados da população: a casa só aparece na página inicial (e neste guia).' : 'No painted residents on the population data pages: the house appears on the homepage only (and in this guide).'}</Rule>
           <Rule yes={false}>{pt ? 'Sem imagens atrás de dados, símbolos indecifráveis, cores de partidos decorativas ou personagens genéricas como assinatura.' : 'No imagery behind data, unreadable symbols, decorative party colours or generic characters as the signature.'}</Rule>
         </ul>
 
@@ -409,7 +414,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           <Rule yes>{pt ? 'Marcas finas: linhas de 2 px, barras até 24 px, pontos de 8 px com anel de creme, grelha de um fio.' : 'Thin marks: 2px lines, bars up to 24px, 8px dots with a cream ring, a hairline grid.'}</Rule>
           <Rule yes>{pt ? 'Cada gráfico tem a sua tabela e a sua fonte com data; a dica ao passar acrescenta, nunca esconde.' : 'Every chart has its table and its dated source; the hover tip adds, it never hides.'}</Rule>
           <Rule yes={false}>{pt ? 'Sem cores de partido ou de clube inventadas, sem arco-íris, sem tartes.' : 'No invented party or club colours, no rainbows, no pies.'}</Rule>
-          <Rule yes={false}>{pt ? 'Sem pastel de superfície dentro de um gráfico: menta, mostarda, coral e pervinca claros ficam nas capas.' : 'No surface pastel inside a chart: light mint, mustard, coral and periwinkle stay on covers.'}</Rule>
+          <Rule yes={false}>{pt ? 'Sem pastel de superfície dentro de um gráfico: menta, mostarda, coral e pervinca claros ficam nos campos de cor e nos fundos.' : 'No surface pastel inside a chart: light mint, mustard, coral and periwinkle stay in tinted fields and backgrounds.'}</Rule>
         </ul>
       </Section>
 

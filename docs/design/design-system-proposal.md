@@ -12,7 +12,7 @@ Status: applied to the website on 2026-09-11 (see `/marca` and CLAUDE.md, Design
 >
 > - **Three levels, first row** ("give the mosaic enough space to form a composition"):
 >   section entrances carry their painting. Explainers with a world of their own draw it
->   (`/populacao/miniatura`). The mosaic is never a page header. The painted forecast
+>   (`/populacao/miniatura`). The mosaic heads no page but `/marca`, the brand guide. The painted forecast
 >   entrances (Liga hub and simulator, the election archives) are an owner exception to the
 >   second row's compact introduction.
 > - **Three levels, third row** ("illustrated cover" for articles, methodology and stories):

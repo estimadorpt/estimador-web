@@ -26,8 +26,10 @@ phones (`sharp(src).resize({ width: 360 }).webp({ quality: 82 })`).
 
 The house is the refined 13 September master,
 `docs/design/original-illustration-refinement/03-people-v2.png`, saved as `population.png` in
-`docs/design/homepage-claude-handoff/assets`. Both folders' PNGs are git-ignored (only
-`manifest.json` is tracked), so the master lives in the owner's checkout.
+`docs/design/homepage-claude-handoff/assets`. The PNGs in both folders are git-ignored, so the
+master lives in the owner's checkout. The handoff assets folder tracks a `manifest.json` that
+describes it (size and source); the refinement folder tracks only its README and prompts. The
+12 September house it replaced is kept in `docs/design/homepage-claude-handoff.zip`.
 `node scripts/generate-home-art.mjs` cuts it into the lead and square crops in
 `public/images/home`; check that every crop keeps the house whole and centred when the master
 changes. The 12 September homepage paintings (football, economy, elections) were deleted on
@@ -40,7 +42,7 @@ changes. The 12 September homepage paintings (football, economy, elections) were
 | Football | Liga hub `/desporto/liga`, Liga simulator `/desporto/liga/simulador` | Homepage football panel, as an 80px accent |
 | Elections | `/eleicoes/arquivo`, `/eleicoes/legislativas`, `/eleicoes/presidenciais` | Homepage elections panel |
 | Economy | none: `/economia` is a page with a mint field | Homepage economy panel; a 96px accent beside the answer in the `/economia` explainer's reading card (from 640px up) |
-| Population | none: population pages are data pages with a periwinkle field | Homepage population panel only (the lead column from 768px and a 90px thumbnail on phones; in election mode a 200px square, 72px on phones) |
+| Population | none: population pages are data pages with a periwinkle field | Homepage population panel (the lead column from 768px and a 90px thumbnail on phones; in election mode a 200px square, 72px on phones) and `/marca`; nowhere else |
 
 Every other page goes without a painting, following the header table in CLAUDE.md ("Three
 levels of expression") and on `/marca#ilustracao`. Data pages, dashboards and tools get a
