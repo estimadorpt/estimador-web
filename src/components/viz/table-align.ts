@@ -12,6 +12,11 @@ export type ColumnAlign = 'left' | 'right';
  * word. A letter anywhere else ("J2", "Porto", "14 ago.") makes it text.
  */
 const FIGURE = /^(?:[^\p{L}]|[ºª])*(?:pp|p\.p\.|pts?|mil|x)?(?:[^\p{L}]|[ºª])*$/u;
+/**
+ * The bound election probabilities print at the ends ("menos de 1%", "mais de
+ * 99%"; "under 1%", "over 99%", election-display.ts): still a figure.
+ */
+const BOUND = /^(?:menos de|mais de|under|over)\s+/i;
 /** What a table prints for a missing value; it says nothing about the column. */
 const MISSING = new Set(['', '—', '–', '-', '…']);
 
@@ -24,7 +29,7 @@ export function isFigureColumn(rows: ReadonlyArray<ReadonlyArray<string | number
       figures++;
       continue;
     }
-    const text = String(value ?? '').trim();
+    const text = String(value ?? '').trim().replace(BOUND, '');
     if (MISSING.has(text)) continue;
     if (!FIGURE.test(text) || !/\d/.test(text)) return false;
     figures++;

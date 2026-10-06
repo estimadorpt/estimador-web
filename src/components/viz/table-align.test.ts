@@ -11,6 +11,13 @@ describe('table twin alignment (UXD3-08)', () => {
     expect([1, 2, 3, 4, 5].map(j => isFigureColumn(rows, j))).toEqual([true, true, true, true, true]);
   });
 
+  it('reads the election bounds as figures ("menos de 1%", "over 99%")', () => {
+    expect(isFigureColumn([['PS', 'menos de 1%'], ['AD', '51%'], ['CH', 'mais de 99%']], 1)).toBe(true);
+    expect(isFigureColumn([['PS', 'under 1%'], ['AD', 'over 99%']], 1)).toBe(true);
+    // A word after the bound is still a word.
+    expect(isFigureColumn([['PS', 'menos de metade']], 1)).toBe(false);
+  });
+
   it('keeps words, dates and labels with digits on the left', () => {
     const rows = [
       ['J2', 'Porto', '14 ago.', 'J2 · 14 ago.', 'Homens'],
