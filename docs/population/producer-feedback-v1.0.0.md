@@ -200,9 +200,14 @@ undone once the producer answers.
 11. **Similarity is driven by missing data.** `_similarity` treats a missing feature as share
     0 before standardising; B-tier candidates lack the who-lives-alone features, so 99.4% of
     each candidate's five nearest neighbours share its tier. *Web:* does not use the deck's
-    similarity or `similar`; feedback is distance and direction only.
-12. **No date anchor** for `curation.schedule` day 0. *Web:* epoch = publication date
-    (2026-10-05), so day 0 is 150912 as curated.
+    similarity or `similar`. Since game v2 ("qual destas quatro?", 6 October 2026) the other
+    three parishes on a board are drawn by place and INE resident count only (`gameChoices`
+    in `src/lib/population/game.ts`), never by a published figure or a similarity.
+12. **No date anchor** for `curation.schedule` day 0. *Web:* settled (see "Status at
+    v1.0.3" above): the epoch is the site's launch day, `POPULATION_GAME_EPOCH` = 2026-10-06
+    (`src/lib/config/population.ts`, written into `game/index.json` by the sync), and day 0
+    is 030857, v1.0.1's calendar; the first answer (publication date 2026-10-05, day 0
+    150912) was superseded in round 3.
 
 ## Release package
 

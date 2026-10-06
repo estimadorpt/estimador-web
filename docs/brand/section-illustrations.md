@@ -39,16 +39,16 @@ changes. The 12 September homepage paintings (football, economy, elections) were
 
 | Picture | Page headers (`<PageHero illustration>`, eager) | Elsewhere |
 |---|---|---|
-| Football | Liga hub `/desporto/liga`, Liga simulator `/desporto/liga/simulador` | Homepage football panel, as an 80px accent |
-| Elections | `/eleicoes/arquivo`, `/eleicoes/legislativas`, `/eleicoes/presidenciais` | Homepage elections panel |
-| Economy | none: `/economia` is a page with a mint field | Homepage economy panel; a 96px accent beside the answer in the `/economia` explainer's reading card (from 640px up) |
+| Football | Liga hub `/desporto/liga`, Liga simulator `/desporto/liga/simulador` | Homepage Liga panel: the band the rail ends on, cropped to fill the height the panel has left (`.home-band`) |
+| Elections | `/eleicoes/arquivo`, `/eleicoes/legislativas`, `/eleicoes/presidenciais` | Homepage elections panel: a media object's full-height painting column from 768px (`.home-media`), none on phones; in election mode, the lead panel's picture |
+| Economy | none: `/economia` is a page with a mint field | Homepage economy panel: a media object's full-height painting column from 768px (`.home-media`), none on phones; nowhere on `/economia` |
 | Population | none: population pages are data pages with a periwinkle field | Homepage population panel (the lead column from 768px and a 90px thumbnail on phones; in election mode a 200px square, 72px on phones) and `/marca`; nowhere else |
 
 Every other page goes without a painting, following the header table in CLAUDE.md ("Three
 levels of expression") and on `/marca#ilustracao`. Data pages, dashboards and tools get a
 compact tinted field. Reference, methodology and editorial pages are plain paper.
-`/populacao/miniatura` has its own drawing, the village. Empty and error states, the 404
-and brand material use the mosaic.
+`/populacao/miniatura` has its own drawing, the village. Empty and error states (`EmptyStateMark`),
+the 404 and brand material use the mosaic, and nothing else does.
 
 ## Rules
 
