@@ -39,6 +39,21 @@ describe('football number formats', () => {
     expect(formatSigned(-2.7, 'pt')).toBe(`${MINUS}2,7`);
     expect(formatSigned(-3, 'en', 0)).toBe(`${MINUS}3`);
     expect(formatInteger(-12, 'pt')).toBe(`${MINUS}12`);
+    expect(formatDecimal(-0.4, 'pt')).toBe(`${MINUS}0,4`);
+    expect(formatDecimal(-0.4, 'en')).toBe(`${MINUS}0.4`);
+    expect(formatDecimal(-1.234, 'pt', 2)).toBe(`${MINUS}1,23`);
+    expect(formatDecimal(-1234.5, 'en', 1)).toBe(`${MINUS}1,234.5`);
+    for (const v of [-0.4, -2.66, -81.1, -1234.5]) {
+      expect(formatDecimal(v, 'pt', 2)).not.toContain('-');
+      expect(formatDecimal(v, 'en', 2)).not.toContain('-');
+    }
+  });
+
+  it('prints a negative that rounds to zero without a sign', () => {
+    expect(formatDecimal(-0.04, 'pt', 1)).toBe('0,0');
+    expect(formatDecimal(-0.004, 'en', 2)).toBe('0.00');
+    expect(formatDecimal(-0, 'pt', 1)).toBe('0,0');
+    expect(formatDecimal(0.04, 'pt', 1)).toBe('0,0');
   });
 
   it('has one percentage rule: whole from 10%, one decimal below, guards at both ends', () => {

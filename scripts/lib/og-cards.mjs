@@ -160,7 +160,7 @@ export function rankedRow({ name, value, note, fraction, color, trailing }, isLe
     h('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' },
       h('div', { display: 'flex', alignItems: 'baseline' },
         h('div', { fontSize: 21, fontWeight: isLead ? 700 : 500, color: isLead ? COLOR.ink : COLOR.inkSoft }, name),
-        note ? h('div', { fontSize: 16, color: COLOR.faint, marginLeft: 10 }, note) : null),
+        note ? h('div', { fontSize: 16, color: COLOR.muted, marginLeft: 10 }, note) : null),
       h('div', { display: 'flex', alignItems: 'baseline' },
         h('div', { fontSize: 21, fontWeight: 700, color: isLead ? COLOR.ink : COLOR.muted }, value),
         trailing ? h('div', { fontSize: 17, fontWeight: 500, color: trailing.color, marginLeft: 12 }, trailing.text) : null)),

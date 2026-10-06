@@ -6,6 +6,7 @@ import { ChartTable } from "@/components/viz/ChartTable";
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent, formatShortDate } from "@/lib/football-format";
 import type { LigaProbabilityHistory } from "@/types/football";
+import { probabilityHistoryTable } from "./probability-history-table";
 import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface RelegationChartProps {
@@ -51,14 +52,14 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
   // neutral line instead, so no two lines can be confused (audit UXD-V06).
   const colours = useMemo(() => distinctTeamColors(visibleTeams), [visibleTeams]);
 
-  // The table twin: one row per visible team, one column per matchday.
+  // The table twin: one row per visible team (highest risk first), one
+  // column per matchday, newest first (the chart itself stays oldest-first).
   const table = useMemo(() => {
     const last = historical[historical.length - 1];
-    const rows = [...visibleTeams]
-      .sort((a, b) => (last?.table.find(t => t.team === b)?.p_relegation ?? 0) - (last?.table.find(t => t.team === a)?.p_relegation ?? 0))
-      .map(team => [teamDisplayName(team), ...historical.map(md => { const t = md.table.find(x => x.team === team); return t ? formatPercent(t.p_relegation, locale) : ""; })]);
-    return { columns: [pt ? "Equipa" : "Team", ...historical.map(md => `${pt ? "J" : "MD"}${md.matchday}${md.timestamp ? ` · ${formatShortDate(md.timestamp, locale)}` : ""}`)], rows };
-  }, [historical, pt, visibleTeams, locale]);
+    const ordered = [...visibleTeams]
+      .sort((a, b) => (last?.table.find(t => t.team === b)?.p_relegation ?? 0) - (last?.table.find(t => t.team === a)?.p_relegation ?? 0));
+    return probabilityHistoryTable(historical, ordered, "p_relegation", locale);
+  }, [historical, visibleTeams, locale]);
 
   useEffect(() => {
     if (!containerRef.current || historical.length === 0) return;

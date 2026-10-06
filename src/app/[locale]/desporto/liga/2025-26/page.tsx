@@ -16,7 +16,7 @@ import { LuckIndex } from "@/components/charts/football/LuckIndex";
 import type { LuckEntry } from "@/components/charts/football/LuckIndex";
 import { DataCard } from "@/components/viz/DataCard";
 import { teamDisplayName } from "@/lib/config/football";
-import { formatInteger, formatLongDate } from "@/lib/football-format";
+import { formatDecimal, formatInteger, formatLongDate, formatSigned } from "@/lib/football-format";
 import { matchdayListPhrase, modelPlainName } from "@/lib/football-model-evaluation";
 import { forecastProvenance, type ForecastStamp } from "@/lib/season-review-provenance";
 import type { Metadata } from "next";
@@ -224,13 +224,8 @@ export default async function SeasonReviewPage({
     ? `Revisão gerada a ${formatLongDate(review.generated, locale)}`
     : `Review generated on ${formatLongDate(review.generated, locale)}`;
 
-  // Biggest final-points miss at the last published forecast, computed from
-  // the same numbers the report card uses — no hand-written claims.
-  const nf = (v: number, d = 1) =>
-    v.toLocaleString(pt ? "pt-PT" : "en-GB", {
-      minimumFractionDigits: d,
-      maximumFractionDigits: d,
-    });
+  // One decimal in the page's format, negatives with U+2212 (formatDecimal).
+  const nf = (v: number, d = 1) => formatDecimal(v, locale, d);
 
   return (
     <div className="min-h-screen bg-paper">
@@ -364,16 +359,14 @@ export default async function SeasonReviewPage({
                   <>
                     O <strong>{teamDisplayName(bestFinishing.team)}</strong> marcou{" "}
                     {bestFinishing.gf} golos a partir de {nf(bestFinishing.xgf)} de xG —{" "}
-                    <strong>{bestFinishing.finishing > 0 ? "+" : ""}
-                    {nf(bestFinishing.finishing)}</strong> golos acima do esperado. Não
+                    <strong>{formatSigned(bestFinishing.finishing, locale)}</strong> golos acima do esperado. Não
                     chegou: o título decidiu-se em vitórias, e o Porto ganhou mais três.
                   </>
                 ) : (
                   <>
                     <strong>{teamDisplayName(bestFinishing.team)}</strong> scored{" "}
                     {bestFinishing.gf} goals from {nf(bestFinishing.xgf)} xG —{" "}
-                    <strong>{bestFinishing.finishing > 0 ? "+" : ""}
-                    {nf(bestFinishing.finishing)}</strong> goals above expectation. It was
+                    <strong>{formatSigned(bestFinishing.finishing, locale)}</strong> goals above expectation. It was
                     not enough: the title turned on wins, and Porto took three more.
                   </>
                 )}

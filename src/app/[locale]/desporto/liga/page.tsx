@@ -7,6 +7,7 @@ import {
   probabilityHistory,
   loadLigaSamples,
   loadLigaMarketScorecard,
+  loadLigaPlayers,
   loadUpcomingFixtures,
 } from "@/lib/utils/football-data-loader";
 import { CURRENT_LIGA_SEASON, teamDisplayName } from "@/lib/config/football";
@@ -68,14 +69,18 @@ export default async function LigaPage({
 
   // seasonSamples stays for the table's final-points intervals; the
   // draw-a-season widget that also read it was cut in the 2026-08 trim.
-  const [{ prediction, scenarios, deltas }, historical, seasonSamples, upcomingFixtures, scorecard] =
+  const [{ prediction, scenarios, deltas }, historical, seasonSamples, upcomingFixtures, scorecard, players] =
     await Promise.all([
       loadLigaWithDeltas(),
       loadLigaHistorical(),
       loadLigaSamples(),
       loadUpcomingFixtures(),
       loadLigaMarketScorecard(),
+      loadLigaPlayers(),
     ]);
+  // The player models' cut-off, read the way /sobre reads it: the last season
+  // in players.json's fit, never a typed year.
+  const playerSeason = players?.generated_from?.seasons?.at(-1) ?? null;
 
   // The two probability charts get only what they draw (SP-08).
   const probabilities = probabilityHistory(historical);
@@ -246,8 +251,8 @@ export default async function LigaPage({
       // Neutral title, and the data cut-off on the way in (UXD2-15, CL2-02).
       title: pt ? "Jogadores: uma métrica por dimensão" : "Players: one metric per dimension",
       body: pt
-        ? "Finalização, contribuição ofensiva, posse disputada e guarda-redes, cada uma com a sua escala e a sua incerteza. Finalização e contribuição vão até ao fim da época 2025-26."
-        : "Finishing, attacking contribution, contested possession and goalkeeping, each with its own scale and its own uncertainty. Finishing and contribution run to the end of the 2025-26 season.",
+        ? `Finalização, contribuição ofensiva, posse disputada e guarda-redes, cada uma com a sua escala e a sua incerteza.${playerSeason ? ` Finalização e contribuição vão até ao fim da época ${playerSeason}.` : ""}`
+        : `Finishing, attacking contribution, contested possession and goalkeeping, each with its own scale and its own uncertainty.${playerSeason ? ` Finishing and contribution run to the end of the ${playerSeason} season.` : ""}`,
       action: pt ? "Ver os jogadores" : "See the players",
     },
   ];
