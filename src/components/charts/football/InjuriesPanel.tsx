@@ -1,6 +1,6 @@
 "use client";
 
-import { teamDisplayName, teamLogoSrc, ligaTeamShortNames } from "@/lib/config/football";
+import { teamDisplayName, teamLogoSrc, teamPhoneName } from "@/lib/config/football";
 import { injuryReasonLabel, positionLabel } from "@/lib/i18n/football-labels";
 import { Stethoscope } from "lucide-react";
 
@@ -130,7 +130,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                 )}
                 <span className="text-sm font-bold text-stone-900 truncate">
                   <span className="sm:hidden">
-                    {ligaTeamShortNames[team.team] || team.team}
+                    {teamPhoneName(team.team)}
                   </span>
                   <span className="hidden sm:inline">{teamDisplayName(team.team)}</span>
                 </span>

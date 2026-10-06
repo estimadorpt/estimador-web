@@ -8,7 +8,7 @@ import type {
   DecisiveMatch,
   NextMatchdayScenarioMatch,
 } from '@/types/football';
-import { assignFixtureSlugs } from '@/lib/config/fixtures';
+import { assignFixtureSlugs, teamSlug } from '@/lib/config/fixtures';
 import { normaliseRatings, reconcilePlayerPages, type RatingKind } from '@/lib/utils/player-ratings';
 import {
   fixtureKey,
@@ -345,6 +345,12 @@ export interface UpcomingFixture {
   decisive: DecisiveMatch | null;
   /** Final score, when the fixture has already been played. */
   played: { home_goals: number; away_goals: number } | null;
+  /**
+   * For a played fixture, when its 1X2 above was frozen (game_fixtures.json →
+   * published_at). Null for a played fixture whose probabilities were
+   * published after it kicked off: those are not shown as a forecast.
+   */
+  probsPublishedAt?: string | null;
 }
 
 /**
@@ -383,15 +389,18 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
     if (!prediction) return [];
 
     // Kickoffs live in the game manifest; the md files carry them only for
-    // the round in progress, and never say whether they are confirmed.
+    // the round in progress, and never say whether they are confirmed. The
+    // join goes through the team slugs, so a spelling difference between
+    // the manifest and the model files ("Sporting CP" / "Sporting") cannot
+    // silently drop a kickoff.
     const manifestByKey = new Map<string, GameFixtureEntry>();
     for (const md of manifest?.matchdays ?? []) {
       for (const fx of md.fixtures ?? []) {
-        manifestByKey.set(`${md.matchday}|${fx.home}|${fx.away}`, fx);
+        manifestByKey.set(manifestKey(md.matchday, fx.home, fx.away), fx);
       }
     }
     const kickoffFor = (md: number, home: string, away: string, fallback: string | null) => {
-      const fx = manifestByKey.get(`${md}|${home}|${away}`);
+      const fx = manifestByKey.get(manifestKey(md, home, away));
       if (fx?.kickoff) return { kickoff: fx.kickoff, kickoffConfirmed: fx.kickoff_confirmed === true };
       return { kickoff: fallback, kickoffConfirmed: false };
     };
@@ -469,9 +478,66 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
 }
 
 /** Resolve one fixture page by slug (null when the slug is unknown). */
+/** Matchday + both clubs, by team slug: the join key between the manifest and the model files. */
+function manifestKey(matchday: number, home: string, away: string): string {
+  return `${matchday}|${teamSlug(home)}|${teamSlug(away)}`;
+}
+
+/**
+ * This season's fixtures that have been played, from game_fixtures.json,
+ * so a match page stays online after its round instead of disappearing
+ * the week it is played (audit SP-13). Each keeps its final score and the
+ * model's 1X2 frozen when its round opened, when that happened before
+ * kickoff. Slugs are the same `home-away` form the upcoming pages use (a
+ * pairing meets at one ground once a season); one that an upcoming fixture
+ * already holds is left to it. Returns [] on any failure.
+ */
+export async function loadPlayedFixtures(): Promise<UpcomingFixture[]> {
+  try {
+    const [manifest, upcoming] = await Promise.all([loadGameFixtures(), loadUpcomingFixtures()]);
+    if (!manifest) return [];
+    const taken = new Set(upcoming.map(f => f.slug));
+    const raw: Omit<UpcomingFixture, 'slug'>[] = [];
+    for (const md of manifest.matchdays ?? []) {
+      for (const fx of md.fixtures ?? []) {
+        if (!isNum(fx.home_goals) || !isNum(fx.away_goals)) continue;
+        const priced = isNum(fx.p_home) && isNum(fx.p_draw) && isNum(fx.p_away);
+        const publishedAt = typeof fx.published_at === 'string' ? fx.published_at : null;
+        const kickoffMs = fx.kickoff ? Date.parse(fx.kickoff) : NaN;
+        const publishedMs = publishedAt ? Date.parse(publishedAt) : NaN;
+        // Probabilities published after kickoff are not a forecast of the game.
+        const beforeKickoff = priced && !Number.isNaN(kickoffMs) && !Number.isNaN(publishedMs) && publishedMs <= kickoffMs;
+        raw.push({
+          home: fx.home,
+          away: fx.away,
+          matchday: md.matchday,
+          kickoff: fx.kickoff ?? null,
+          kickoffConfirmed: fx.kickoff_confirmed === true,
+          inProgressMatchday: false,
+          p_home: beforeKickoff ? (fx.p_home as number) : null,
+          p_draw: beforeKickoff ? (fx.p_draw as number) : null,
+          p_away: beforeKickoff ? (fx.p_away as number) : null,
+          scenario: null,
+          decisive: null,
+          played: { home_goals: fx.home_goals as number, away_goals: fx.away_goals as number },
+          probsPublishedAt: beforeKickoff ? publishedAt : null,
+        });
+      }
+    }
+    return assignFixtureSlugs(raw).filter(f => !taken.has(f.slug));
+  } catch (error) {
+    console.error('Error loading played fixtures:', error);
+    return [];
+  }
+}
+
+/** An upcoming fixture first, then a played one from this season. */
 export async function loadFixtureBySlug(slug: string): Promise<UpcomingFixture | null> {
   const fixtures = await loadUpcomingFixtures();
-  return fixtures.find(f => f.slug === slug) ?? null;
+  const upcoming = fixtures.find(f => f.slug === slug);
+  if (upcoming) return upcoming;
+  const played = await loadPlayedFixtures();
+  return played.find(f => f.slug === slug) ?? null;
 }
 
 /* ------------------------------------------------- "Contra o Modelo" game */

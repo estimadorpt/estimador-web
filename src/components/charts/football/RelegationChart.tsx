@@ -3,7 +3,8 @@
 import { useRef, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
-import { ligaTeamColors, teamDisplayName } from "@/lib/config/football";
+import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
+import { formatPercent } from "@/lib/football-format";
 import type { LigaHistorical } from "@/types/football";
 
 interface RelegationChartProps {
@@ -20,7 +21,6 @@ const COMPARISON_COUNT = 3;
 
 export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", defaultTeam }: RelegationChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [, setDimensions] = useState({ width: 0, height: 0 });
   const [showAll, setShowAll] = useState(false);
   const locale = useLocale();
   const pt = locale !== "en";
@@ -46,15 +46,18 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
   }, [allRiskTeams, defaultTeam]);
 
   const visibleTeams = showAll ? allRiskTeams : focusTeams;
+  // Look-alike club colours (Marítimo and Rio Ave are both dark green) get a
+  // neutral line instead, so no two lines can be confused (audit UXD-V06).
+  const colours = useMemo(() => distinctTeamColors(visibleTeams), [visibleTeams]);
 
   // The table twin: one row per visible team, one column per matchday.
   const table = useMemo(() => {
     const last = historical[historical.length - 1];
     const rows = [...visibleTeams]
       .sort((a, b) => (last?.table.find(t => t.team === b)?.p_relegation ?? 0) - (last?.table.find(t => t.team === a)?.p_relegation ?? 0))
-      .map(team => [teamDisplayName(team), ...historical.map(md => { const t = md.table.find(x => x.team === team); if (!t) return ""; const v = Math.round(t.p_relegation * 100); const lo = t.p_relegation_lo, hi = t.p_relegation_hi; return lo != null && hi != null ? `${v}% (${Math.round(lo * 100)}–${Math.round(hi * 100)}%)` : `${v}%`; })]);
+      .map(team => [teamDisplayName(team), ...historical.map(md => { const t = md.table.find(x => x.team === team); return t ? formatPercent(t.p_relegation, locale) : ""; })]);
     return { columns: [pt ? "Equipa" : "Team", ...historical.map(md => `${pt ? "J" : "MD"}${md.matchday}`)], rows };
-  }, [historical, pt, visibleTeams]);
+  }, [historical, pt, visibleTeams, locale]);
 
   useEffect(() => {
     if (!containerRef.current || historical.length === 0) return;
@@ -81,8 +84,6 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
             matchday: md.matchday,
             team: t.team,
             p_relegation: t.p_relegation * 100,
-            p_relegation_lo: (t.p_relegation_lo ?? t.p_relegation) * 100,
-            p_relegation_hi: (t.p_relegation_hi ?? t.p_relegation) * 100,
           }))
       );
 
@@ -96,8 +97,8 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
         .sort((a, b) => a.p_relegation - b.p_relegation);
 
       // Compute adjusted y positions to prevent label overlap
-      const usableHeight = height - 55; // marginTop (~20) + marginBottom (35)
-      const minSpacingPx = 14;
+      const usableHeight = height - 65; // marginTop (30) + marginBottom (35)
+      const minSpacingPx = 15;
       const minSpacingData = (minSpacingPx / usableHeight) * yMax;
 
       const endLabels = endPoints.map(d => ({ ...d, adjustedY: d.p_relegation }));
@@ -110,8 +111,10 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
       const plot = Plot.plot({
         width,
         height,
+        // Room above the top tick for the axis label (audit UXD-15).
+        marginTop: 30,
         marginLeft: 45,
-        marginRight: width < 500 ? 82 : 120,
+        marginRight: width < 500 ? 92 : 128,
         marginBottom: 35,
         style: { fontFamily: "Manrope, system-ui, sans-serif", fontSize: "12px", background: "transparent", color: "#5f7062", overflow: "visible" },
         x: {
@@ -129,42 +132,29 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
         },
         color: {
           domain: Array.from(teamsAtRisk),
-          range: Array.from(teamsAtRisk).map(t => ligaTeamColors[t] || '#5f7062'),
+          range: Array.from(teamsAtRisk).map(t => colours[t] ?? '#5f7062'),
         },
         marks: [
           Plot.ruleY([0], { stroke: "#dadccf" }),
-          // HDI bands
-          ...Array.from(teamsAtRisk).map(team =>
-            Plot.areaY(
-              lineData.filter(d => d.team === team),
-              {
-                x: "matchday",
-                y1: "p_relegation_lo",
-                y2: "p_relegation_hi",
-                fill: ligaTeamColors[team] || '#5f7062',
-                fillOpacity: 0.12,
-                curve: "monotone-x",
-              }
-            )
-          ),
+          // No band: see TitleRaceChart (audit F-H1).
           Plot.lineY(lineData, {
             x: "matchday",
             y: "p_relegation",
             stroke: "team",
-            strokeWidth: 2.5,
+            strokeWidth: 2,
             curve: "monotone-x",
           }),
           Plot.tip(lineData, Plot.pointer({
             x: "matchday",
             y: "p_relegation",
-            title: (d: { team: string; matchday: number; p_relegation: number }) => `${teamDisplayName(d.team)} · ${pt ? "J" : "MD"}${d.matchday}: ${Math.round(d.p_relegation)}%`,
+            title: (d: { team: string; matchday: number; p_relegation: number }) => `${teamDisplayName(d.team)} · ${pt ? "J" : "MD"}${d.matchday}: ${formatPercent(d.p_relegation / 100, locale)}`,
           })),
           Plot.text(
             endLabels,
             {
               x: "matchday",
               y: "adjustedY",
-              text: (d: { team: string; p_relegation: number }) => `${teamDisplayName(d.team)} ${Math.round(d.p_relegation)}%`,
+              text: (d: { team: string; p_relegation: number }) => `${teamDisplayName(d.team)} ${formatPercent(d.p_relegation / 100, locale)}`,
               textAnchor: "start",
               dx: 6,
               fill: "#234c40",
@@ -175,25 +165,20 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
         ],
       });
 
+      plot.setAttribute("aria-hidden", "true");
       container.replaceChildren(plot);
     };
 
     render();
-
-    const observer = new ResizeObserver(() => {
-      if (containerRef.current) {
-        setDimensions({ width: containerRef.current.offsetWidth, height: containerRef.current.offsetHeight });
-        render();
-      }
-    });
+    const observer = new ResizeObserver(() => render());
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [historical, yAxisLabel, pt, visibleTeams]);
+  }, [historical, yAxisLabel, pt, visibleTeams, colours, locale]);
 
   const hiddenCount = allRiskTeams.length - focusTeams.length;
 
   return (
-    <div className="football-history-chart w-full">
+    <div className="w-full">
       <div ref={containerRef} className="w-full min-h-[280px]" />
       {hiddenCount > 0 && (
         <button
@@ -206,7 +191,7 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
             : (pt ? `Ver todas as equipas (+${hiddenCount})` : `See all teams (+${hiddenCount})`)}
         </button>
       )}
-      <ChartTable caption={`${yAxisLabel} · ${pt ? "valor e intervalo" : "value and interval"}`} columns={table.columns} rows={table.rows} />
+      <ChartTable caption={yAxisLabel} columns={table.columns} rows={table.rows} />
     </div>
   );
 }

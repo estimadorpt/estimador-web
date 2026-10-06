@@ -1,6 +1,5 @@
-import { teamDisplayName, teamLogoSrc } from "@/lib/config/football";
-import { readableTextOn } from "@/lib/utils/football-contrast";
-import { formatKickoff, formatLongDate, formatInteger } from "@/lib/football-format";
+import { teamColorOnPaper, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
+import { formatKickoff, formatLongDate, formatPercent } from "@/lib/football-format";
 
 interface MatchProbabilityHeroProps {
   home: string;
@@ -17,12 +16,13 @@ interface MatchProbabilityHeroProps {
   locale: string;
   /** Final score, when the fixture has already been played. */
   played?: { home_goals: number; away_goals: number } | null;
+  /** For a played fixture: when the 1X2 shown was frozen, before kickoff. */
+  probsPublishedAt?: string | null;
 }
 
+/** The number part of the one football percentage rule ("44", "8,4", ">99"). */
 function pct(p: number, locale: string): string {
-  if (p >= 0.995) return ">99";
-  if (p > 0 && p < 0.005) return "<1";
-  return formatInteger(Math.round(p * 100), locale);
+  return formatPercent(p, locale).replace(/%$/, "");
 }
 
 /** Kickoff in Lisbon time; a placeholder kickoff shows its day only. */
@@ -49,6 +49,7 @@ export function MatchProbabilityHero({
   kickoffConfirmed = true,
   locale,
   played,
+  probsPublishedAt,
 }: MatchProbabilityHeroProps) {
   const pt = locale !== "en";
   const hasProbs = pHome != null && pDraw != null && pAway != null;
@@ -76,9 +77,9 @@ export function MatchProbabilityHero({
 
   const outcomes = hasProbs
     ? ([
-        { key: "H", p: pHome!, label: labels.homeWin, venue: labels.venueHome, team: home, color: homeColor },
-        { key: "D", p: pDraw!, label: labels.draw, venue: "", team: null, color: "#cbccbb" },
-        { key: "A", p: pAway!, label: labels.awayWin, venue: labels.venueAway, team: away, color: awayColor },
+        { key: "H", p: pHome!, label: labels.homeWin, venue: labels.venueHome, team: home, color: teamColorOnPaper(home) || homeColor },
+        { key: "D", p: pDraw!, label: labels.draw, venue: "", team: null, color: "#c3c8bb" },
+        { key: "A", p: pAway!, label: labels.awayWin, venue: labels.venueAway, team: away, color: teamColorOnPaper(away) || awayColor },
       ] as const)
     : [];
 
@@ -103,8 +104,8 @@ export function MatchProbabilityHero({
           </span>
         </div>
         {" "}
-        <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-stone-400 shrink-0">
-          vs
+        <span aria-hidden="true" className="text-xl md:text-3xl font-bold text-stone-500 shrink-0">
+          –
         </span>
         {" "}
         <div className="flex items-center gap-3 min-w-0 justify-end">
@@ -121,21 +122,29 @@ export function MatchProbabilityHero({
         </div>
       </div>
 
-      <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-4">
+      <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-4">
         {labels.matchday}
         {when ? ` · ${when}` : ""}
       </div>
 
       {played && (
         <div className="mb-4">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
             {labels.finalScore}
           </div>
           <div className="text-4xl md:text-5xl font-display font-extrabold tabular-nums text-stone-900">
             {played.home_goals}
-            <span className="text-stone-300 mx-2">:</span>
+            <span aria-hidden="true" className="text-stone-500 mx-2">–</span>
+            <span className="sr-only">{pt ? " a " : " to "}</span>
             {played.away_goals}
           </div>
+          {hasProbs && (
+            <p className="mt-2 text-sm text-stone-600">
+              {pt
+                ? `Antes do jogo, o modelo dava estas probabilidades${probsPublishedAt ? ` (publicadas a ${formatLongDate(probsPublishedAt, locale)})` : ""}:`
+                : `Before the match, the model gave these probabilities${probsPublishedAt ? ` (published ${formatLongDate(probsPublishedAt, locale)})` : ""}:`}
+            </p>
+          )}
         </div>
       )}
 
@@ -151,12 +160,12 @@ export function MatchProbabilityHero({
           <div className="grid grid-cols-3 gap-2 md:gap-4 mb-3">
             {outcomes.map(o => (
               <div key={o.key} className="border-t-4 pt-3" style={{ borderColor: o.color }}>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1 truncate">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1 break-words">
                   {o.label}
                 </div>
-                <div className="text-4xl md:text-6xl font-display font-extrabold tabular-nums text-stone-900 leading-none">
+                <div className="text-3xl md:text-6xl font-display font-extrabold tabular-nums text-stone-900 leading-none">
                   {pct(o.p, locale)}
-                  <span className="text-lg md:text-2xl font-bold text-stone-400">%</span>
+                  <span className="text-lg md:text-2xl font-bold text-stone-500">%</span>
                 </div>
                 {o.venue && <div className="text-[11px] text-stone-500 mt-1">{o.venue}</div>}
               </div>
@@ -164,19 +173,11 @@ export function MatchProbabilityHero({
           </div>
 
           {/* Split bar */}
-          <div className="flex h-8 w-full overflow-hidden rounded-sm">
+          {/* The bar repeats the three numbers above; it carries no text, so
+              no number ever sits in white on a club colour (audit S-H6). */}
+          <div aria-hidden="true" className="flex h-4 w-full gap-[2px] overflow-hidden rounded-[4px]">
             {outcomes.map(o => (
-              <div
-                key={o.key}
-                className="flex items-center justify-center text-[11px] font-bold"
-                style={{
-                  width: `${o.p * 100}%`,
-                  backgroundColor: o.color,
-                  color: readableTextOn(o.color),
-                }}
-              >
-                {o.p >= 0.08 ? `${pct(o.p, locale)}%` : ""}
-              </div>
+              <div key={o.key} style={{ width: `${o.p * 100}%`, backgroundColor: o.color }} />
             ))}
           </div>
 
@@ -186,7 +187,7 @@ export function MatchProbabilityHero({
               <strong className="text-stone-800">
                 {top.team ? teamDisplayName(top.team) : labels.draw}
               </strong>{" "}
-              ({pct(top.p, locale)}%)
+              ({formatPercent(top.p, locale)})
             </div>
           )}
 

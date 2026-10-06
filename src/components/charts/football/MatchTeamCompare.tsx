@@ -41,9 +41,9 @@ function ordinal(n: number, locale: string): string {
 }
 
 const RESULT_STYLE: Record<FormEntry["result"], string> = {
-  W: "bg-emerald-600 text-white",
+  W: "bg-emerald-700 text-white",
   D: "bg-stone-300 text-stone-700",
-  L: "bg-red-500 text-white",
+  L: "bg-red-700 text-white",
 };
 
 function num(v: number, pt: boolean, digits = 1): string {
@@ -90,7 +90,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
     panel.standing && panel.xpts ? panel.standing.points - panel.xpts.xpts : null;
 
   return (
-    <div className="border border-stone-200">
+    <div className="overflow-hidden rounded-2xl border border-line bg-cream">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100">
         {teamLogoSrc(panel.team) && (
           <img src={teamLogoSrc(panel.team)} alt="" className="w-7 h-7 object-contain" />
@@ -135,7 +135,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
               {panel.form.map(f => (
                 <div
                   key={`${f.matchday}-${f.opponent}`}
-                  className="flex items-center gap-1.5 border border-stone-200 pr-2"
+                  className="flex items-center gap-1.5 rounded border border-line pr-2"
                 >
                   <span
                     className={`w-5 h-5 flex items-center justify-center text-[11px] font-display font-extrabold ${
@@ -145,10 +145,11 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
                     {L.resultLetters[f.result]}
                   </span>
                   <span className="text-[11px] tabular-nums text-stone-700 font-medium">
-                    {f.gf}-{f.ga}
+                    {f.gf}–{f.ga}
                   </span>
-                  <span className="text-[11px] text-stone-400">
-                    {f.venue === "H" ? "v" : "@"} {teamDisplayName(f.opponent)}
+                  <span className="text-[11px] text-stone-500">
+                    {teamDisplayName(f.opponent)} ({f.venue === "H" ? (pt ? "C" : "H") : (pt ? "F" : "A")}
+                    <span className="sr-only">{f.venue === "H" ? (pt ? ", em casa" : ", at home") : (pt ? ", fora" : ", away")}</span>)
                   </span>
                 </div>
               ))}
@@ -220,9 +221,9 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
                   <strong
                     className={
                       luck > 0.5
-                        ? "text-emerald-600"
+                        ? "text-emerald-700"
                         : luck < -0.5
-                          ? "text-red-500"
+                          ? "text-red-700"
                           : "text-stone-800"
                     }
                   >

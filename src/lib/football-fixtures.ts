@@ -365,7 +365,7 @@ export function clubStakes(
 
 const OBJECTIVE_LABELS: Record<ClubObjective, { pt: string; en: string }> = {
   p_champion: { pt: 'ser campeão', en: 'winning the title' },
-  p_relegation: { pt: 'descer de divisão', en: 'being relegated' },
+  p_relegation: { pt: 'despromoção', en: 'relegation' },
   // Top three is not automatically the same event as European qualification
   // (diagnosis §5) — never call it "Europa".
   p_top3: { pt: 'ficar no top 3', en: 'finishing in the top 3' },
@@ -448,6 +448,76 @@ export function fixtureStatus(
         ? `Próximo jogo previsto para ${kickoffDate} (horário por confirmar)`
         : `Next match expected ${kickoffDate} (kickoff unconfirmed)`,
   };
+}
+
+/* ------------------------------------------------------- fixture stakes */
+
+/** The club a fixture moves most on one race, and by how much (0–1 scale). */
+export interface RaceSwing {
+  team: string;
+  /** Spread between the club's best and worst conditional, in probability. */
+  swing: number;
+}
+
+export interface FixtureSwings {
+  title: RaceSwing | null;
+  relegation: RaceSwing | null;
+}
+
+/** Editorial threshold for a stakes badge: 5 percentage points. */
+export const STAKES_BADGE_THRESHOLD = 0.05;
+
+/**
+ * What one fixture can change, read from its own published conditionals:
+ * for each race, the club whose probability spreads most between the home
+ * win, the draw and the away win (Marítimo–Porto in md08: 18 pp on the
+ * title for Porto, 15 pp on relegation for Marítimo). This replaces the
+ * season-wide `decisive_matches` top-30 list, which covers only a handful of
+ * the round's games and so left every other fixture with no stakes at all.
+ */
+export function fixtureSwings(match: NextMatchdayScenarioMatch | null | undefined): FixtureSwings {
+  if (!match?.conditionals) return { title: null, relegation: null };
+  const outcomes = (['H', 'D', 'A'] as const).map(o => match.conditionals[o]?.teams ?? {});
+  const teams = new Set<string>();
+  for (const t of outcomes) for (const name of Object.keys(t)) teams.add(name);
+  const best = (metric: 'p_champion' | 'p_relegation'): RaceSwing | null => {
+    let top: RaceSwing | null = null;
+    for (const team of teams) {
+      const values = outcomes
+        .map(t => t[team]?.[metric])
+        .filter((v): v is number => typeof v === 'number');
+      if (values.length < 3) continue;
+      const swing = Math.max(...values) - Math.min(...values);
+      if (!top || swing > top.swing) top = { team, swing };
+    }
+    return top && top.swing > 0 ? top : null;
+  };
+  return { title: best('p_champion'), relegation: best('p_relegation') };
+}
+
+/** Combined stakes of a fixture, for choosing the round's "jogo da jornada". */
+export function combinedSwing(s: FixtureSwings): number {
+  return (s.title?.swing ?? 0) + (s.relegation?.swing ?? 0);
+}
+
+/**
+ * Chronological order for a round: by kickoff, earliest first; fixtures
+ * without a kickoff go last, in matchday order and then their given order
+ * (the owner's standing preference is chronological, never by a hidden
+ * importance score).
+ */
+export function byKickoff<T extends { kickoff?: string | null; matchday?: number }>(fixtures: T[]): T[] {
+  return fixtures
+    .map((f, i) => ({ f, i, ms: f.kickoff ? Date.parse(f.kickoff) : NaN }))
+    .sort((a, b) => {
+      const aHas = !Number.isNaN(a.ms);
+      const bHas = !Number.isNaN(b.ms);
+      if (aHas && bHas && a.ms !== b.ms) return a.ms - b.ms;
+      if (aHas !== bHas) return aHas ? -1 : 1;
+      const md = (a.f.matchday ?? 0) - (b.f.matchday ?? 0);
+      return md !== 0 ? md : a.i - b.i;
+    })
+    .map(x => x.f);
 }
 
 // Re-exported so callers building slugs for a fixture this module didn't

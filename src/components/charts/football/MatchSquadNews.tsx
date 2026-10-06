@@ -62,7 +62,7 @@ function SideCard({
   const maxSar = Math.max(0.0001, ...side.topPlayers.map(p => p.sar));
 
   return (
-    <div className="border border-stone-200">
+    <div className="overflow-hidden rounded-2xl border border-line bg-cream">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100">
         {teamLogoSrc(side.team) && (
           <img src={teamLogoSrc(side.team)} alt="" className="w-7 h-7 object-contain" />
@@ -157,7 +157,7 @@ function SideCard({
                       {codes[p.position] ?? p.position}
                     </span>
                     {out && (
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-red-500">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-red-700">
                         {pt ? "fora" : "out"}
                       </span>
                     )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamShortNames, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
+import { teamPhoneName, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import type { TeamStrength } from "@/types/football";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
@@ -44,14 +44,14 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
       <div className="flex items-center gap-2 mb-3">
         <div className="w-16 sm:w-32 flex-shrink-0" />
         <div className="flex-1 flex justify-between text-[11px] font-bold uppercase tracking-wider text-stone-400 px-1">
-          <span className="text-red-400 hidden sm:inline">&larr; {labels.worse ?? "worse"}</span>
+          <span className="text-red-700 hidden sm:inline">&larr; {labels.worse ?? "worse"}</span>
           <span>{labels.defense ?? "Defense"}</span>
-          <span className="text-emerald-600 hidden sm:inline">{labels.better ?? "better"} &rarr;</span>
+          <span className="text-emerald-700 hidden sm:inline">{labels.better ?? "better"} &rarr;</span>
         </div>
         <div className="flex-1 flex justify-between text-[11px] font-bold uppercase tracking-wider text-stone-400 px-1">
-          <span className="text-red-400 hidden sm:inline">&larr; {labels.worse ?? "worse"}</span>
+          <span className="text-red-700 hidden sm:inline">&larr; {labels.worse ?? "worse"}</span>
           <span>{labels.attack ?? "Attack"}</span>
-          <span className="text-emerald-600 hidden sm:inline">{labels.better ?? "better"} &rarr;</span>
+          <span className="text-emerald-700 hidden sm:inline">{labels.better ?? "better"} &rarr;</span>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
                   <div className="w-1 h-4 flex-shrink-0 bg-stone-400" />
                 )}
                 <span className="text-xs font-medium text-stone-700 truncate sm:hidden">
-                  {ligaTeamShortNames[entry.team] || entry.team}
+                  {teamPhoneName(entry.team)}
                 </span>
                 <span className="text-xs font-medium text-stone-700 truncate hidden sm:inline">
                   {teamDisplayName(entry.team)}

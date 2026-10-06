@@ -1,6 +1,6 @@
 "use client";
 
-import { ligaTeamShortNames, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
+import { teamPhoneName, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { formatDecimal, formatSigned } from "@/lib/football-format";
 
@@ -37,11 +37,11 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
       {/* Scale labels */}
       <div className="flex items-center gap-2 mb-3">
         <div className="w-16 sm:w-28 flex-shrink-0" />
-        <div className="flex-1 flex justify-between text-[11px] font-bold uppercase tracking-wider px-1">
-          <span className="text-red-400">{labels.underperforming ?? "Abaixo do esperado"}</span>
-          <span className="text-emerald-600">{labels.overperforming ?? "Acima do esperado"}</span>
+        <div className="min-w-0 flex-1 flex flex-wrap justify-between gap-x-2 text-[11px] font-bold uppercase tracking-wider px-1">
+          <span className="text-red-700">{labels.underperforming ?? "Abaixo do esperado"}</span>
+          <span className="text-emerald-700">{labels.overperforming ?? "Acima do esperado"}</span>
         </div>
-        <div className="w-16 sm:w-36 flex-shrink-0" />
+        <div className="hidden sm:block sm:w-36 flex-shrink-0" />
       </div>
 
       <div className="space-y-1">
@@ -63,7 +63,7 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
                   <div className="w-1 h-4 flex-shrink-0 bg-stone-400" />
                 )}
                 <span className="text-xs font-medium text-stone-700 truncate sm:hidden">
-                  {ligaTeamShortNames[entry.team] || entry.team}
+                  {teamPhoneName(entry.team)}
                 </span>
                 <span className="text-xs font-medium text-stone-700 truncate hidden sm:inline">
                   {teamDisplayName(entry.team)}

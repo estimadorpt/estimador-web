@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartTable } from "@/components/viz/ChartTable";
-import { formatDecimal } from "@/lib/football-format";
+import { formatDecimal, formatPercent } from "@/lib/football-format";
 
 interface PositionDistributionProps {
   probs: number[];
@@ -31,7 +31,7 @@ export function PositionDistribution({ probs, teamColor, locale }: PositionDistr
 
   const maxProb = Math.max(...positions.map(d => d.prob));
   const pt = locale !== "en";
-  const pctLabel = (prob: number) => (prob < 1 ? "<1%" : `${Math.round(prob)}%`);
+  const pctLabel = (prob: number) => formatPercent(prob / 100, locale);
 
   return (
     <div>
