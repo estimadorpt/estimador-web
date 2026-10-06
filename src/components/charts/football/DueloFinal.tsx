@@ -1,8 +1,10 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { teamColorOnPaper, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
-import { formatInteger, formatPercent, formatShortDate, MINUS } from "@/lib/football-format";
+import { teamColorOnPaper, teamDisplayName, teamLogoSrc, teamWithArticle } from "@/lib/config/football";
+import { formatInteger, formatPercent, formatShortDate } from "@/lib/football-format";
+
+const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 import { duelBins, samplingMargin } from "@/lib/football-scenarios";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { DataCard } from "@/components/viz/DataCard";
@@ -50,29 +52,41 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
     [samples.teams]
   );
 
+  // One basis, the chart's: points at the end of the season. The headline
+  // used to count final positions (tiebreaks included) while the bars count
+  // points, so 66% sat over bars that add up to 64% (audit FA3-02). The
+  // points ties are said apart, with how the tiebreaks split them.
   const stats = useMemo(() => {
     const n = samples.samples.length;
-    let ahead = 0;
+    let aheadA = 0;
+    let aheadB = 0;
     let ptsTie = 0;
+    let tieToA = 0;
     const diffs: number[] = [];
     for (const s of samples.samples) {
-      if (s.pos[iA] < s.pos[iB]) ahead++;
-      if (s.pts[iA] === s.pts[iB]) ptsTie++;
+      if (s.pts[iA] > s.pts[iB]) aheadA++;
+      else if (s.pts[iA] < s.pts[iB]) aheadB++;
+      else {
+        ptsTie++;
+        if (s.pos[iA] < s.pos[iB]) tieToA++;
+      }
       diffs.push(s.pts[iA] - s.pts[iB]);
     }
-    return { n, ahead, ptsTie, bins: duelBins(diffs) };
+    return { n, aheadA, aheadB, ptsTie, tieToA, bins: duelBins(diffs) };
   }, [samples, iA, iB]);
 
   const nameA = teamDisplayName(samples.teams[iA]);
   const nameB = teamDisplayName(samples.teams[iB]);
   const colorA = teamColorOnPaper(samples.teams[iA]);
   const colorB = teamColorOnPaper(samples.teams[iB]);
-  const shareAhead = stats.n ? stats.ahead / stats.n : 0;
+  const shareA = stats.n ? stats.aheadA / stats.n : 0;
+  const shareB = stats.n ? stats.aheadB / stats.n : 0;
   const shareTie = stats.n ? stats.ptsTie / stats.n : 0;
-  const margin = Math.round(samplingMargin(shareAhead, stats.n) * 100);
+  const margin = Math.round(samplingMargin(shareA, stats.n) * 100);
   const maxCount = Math.max(1, ...stats.bins.map(b => b.count));
+  // The first club's side on the left, as its selector is (audit UXD3-01).
+  const shownBins = [...stats.bins].reverse();
 
-  const signed = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `${MINUS}${Math.abs(v)}` : "0");
   const rangeLabel = (lo: number, hi: number) => {
     if (lo === 0 && hi === 0) return pt ? "Empate" : "Level";
     const a = Math.min(Math.abs(lo), Math.abs(hi));
@@ -90,14 +104,19 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
       ? `Escolhe duas equipas e vê quem acaba à frente nas ${formatInteger(stats.n, "pt")} épocas completas tiradas das ${formatInteger(samples.n_sims, "pt")} simulações do modelo.`
       : `Pick two teams and see who finishes ahead across ${formatInteger(stats.n, "en")} complete seasons drawn from the model's ${formatInteger(samples.n_sims, "en")} simulations.`,
     hero: pt
-      ? `O ${nameA} acaba à frente do ${nameB} em ${formatPercent(shareAhead, "pt")} das épocas sorteadas.`
-      : `${nameA} finishes ahead of ${nameB} in ${formatPercent(shareAhead, "en")} of the drawn seasons.`,
+      ? `${capitalise(teamWithArticle(samples.teams[iA], "o"))} acaba com mais pontos do que ${teamWithArticle(samples.teams[iB], "o")} em ${formatPercent(shareA, "pt")} das épocas sorteadas; ${teamWithArticle(samples.teams[iB], "o")}, em ${formatPercent(shareB, "pt")}.`
+      : `${nameA} finish with more points than ${nameB} in ${formatPercent(shareA, "en")} of the drawn seasons; ${nameB}, in ${formatPercent(shareB, "en")}.`,
+    tieNote: stats.ptsTie === 0
+      ? ""
+      : pt
+        ? ` (${formatInteger(stats.ptsTie, "pt")} ${stats.ptsTie === 1 ? "época" : "épocas"}; no desempate do modelo, ${formatInteger(stats.tieToA, "pt")} para ${teamWithArticle(samples.teams[iA], "o")} e ${formatInteger(stats.ptsTie - stats.tieToA, "pt")} para ${teamWithArticle(samples.teams[iB], "o")})`
+        : ` (${formatInteger(stats.ptsTie, "en")} ${stats.ptsTie === 1 ? "season" : "seasons"}; on the model's tiebreak, ${formatInteger(stats.tieToA, "en")} to ${nameA} and ${formatInteger(stats.ptsTie - stats.tieToA, "en")} to ${nameB})`,
     marginNote: pt
       ? `Com ${formatInteger(stats.n, "pt")} épocas, a margem de amostragem é de cerca de ±${margin} pontos percentuais; os números de título ao lado vêm das ${formatInteger(samples.n_sims, "pt")} simulações e têm uma margem muito menor.`
       : `With ${formatInteger(stats.n, "en")} seasons, the sampling margin is about ±${margin} percentage points; the title figures beside them come from all ${formatInteger(samples.n_sims, "en")} simulations and carry a much smaller margin.`,
     axis: pt
-      ? `Diferença de pontos no fim da época (${nameA} − ${nameB})`
-      : `Points difference at the end of the season (${nameA} − ${nameB})`,
+      ? `Diferença de pontos no fim da época: ${nameA} e ${nameB}`
+      : `Points gap at the end of the season: ${nameA} and ${nameB}`,
     ahead: (name: string) => (pt ? `${name} à frente` : `${name} ahead`),
     ptsTieLabel: pt ? "Empate em pontos" : "Level on points",
     champion: pt ? "Campeão" : "Champion",
@@ -177,14 +196,15 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
     >
       <p className="text-lg sm:text-xl font-bold text-stone-900 mb-1">{t.hero}</p>
       <p className="text-xs text-stone-600 mb-4 max-w-3xl leading-relaxed">
-        {t.ptsTieLabel}: <span className="tabular-nums">{formatPercent(shareTie, locale)}</span> · {t.marginNote}
+        {t.ptsTieLabel}: <span className="tabular-nums">{formatPercent(shareTie, locale)}</span>{t.tieNote} · {t.marginNote}
       </p>
 
-      {/* Diverging histogram of pts[A] − pts[B]: B ahead on the left, the
-          tie in the middle, A ahead on the right, across the card's width. */}
+      {/* Diverging histogram of the points gap: the first club ahead on the
+          left, under its selector, the tie in the middle, the second club
+          ahead on the right (audit UXD3-01). */}
       <div>
         <div className="flex items-end gap-1 h-32" role="img" aria-label={summary}>
-          {stats.bins.map((b) => (
+          {shownBins.map((b) => (
             <div key={`${b.lo}`} className="flex-1 flex flex-col justify-end h-full">
               <div
                 className="w-full max-w-[56px] mx-auto rounded-t-[4px]"
@@ -197,7 +217,7 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
           ))}
         </div>
         <div aria-hidden="true" className="flex gap-1 border-t border-stone-300 pt-1">
-          {stats.bins.map((b) => (
+          {shownBins.map((b) => (
             <span key={`${b.lo}`} className="flex-1 text-center text-[11px] leading-tight text-stone-600 tabular-nums">
               {b.side === "tie" ? (pt ? "Empate" : "Level") : rangeLabel(b.lo, b.hi)}
             </span>
@@ -205,22 +225,22 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
         </div>
         <div aria-hidden="true" className="flex justify-between mt-1 text-[11px] text-stone-600">
           <span className="flex items-center gap-1">
-            <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: colorB }} />
-            {t.ahead(nameB)}
+            <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: colorA }} />
+            {t.ahead(nameA)}
           </span>
           <span className="flex items-center gap-1">
-            {t.ahead(nameA)}
-            <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: colorA }} />
+            {t.ahead(nameB)}
+            <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: colorB }} />
           </span>
         </div>
-        <p aria-hidden="true" className="text-[11px] text-stone-600 mt-2 text-center">{t.axis}, {pt ? "em pontos" : "in points"}</p>
+        <p aria-hidden="true" className="text-[11px] text-stone-600 mt-2 text-center">{pt ? "Diferença de pontos no fim da época" : "Points gap at the end of the season"}</p>
       </div>
 
       <ChartTable
         caption={t.axis}
         columns={[pt ? "Diferença" : "Difference", pt ? "Épocas" : "Seasons", pt ? "Parte" : "Share"]}
-        rows={stats.bins.map(b => [
-          `${binWords(b.lo, b.hi)} (${signed(b.lo)}${b.lo !== b.hi ? `${pt ? " a " : " to "}${signed(b.hi)}` : ""})`,
+        rows={shownBins.map(b => [
+          binWords(b.lo, b.hi),
           formatInteger(b.count, locale),
           formatPercent(stats.n ? b.count / stats.n : 0, locale),
         ])}

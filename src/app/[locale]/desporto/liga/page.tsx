@@ -13,11 +13,11 @@ import {
 import { CURRENT_LIGA_SEASON, teamDisplayName } from "@/lib/config/football";
 import { formatDateSpan, formatInteger, formatLongDate, formatPp } from "@/lib/football-format";
 import {
+  forecastAsOf,
   forecastStatusLine,
   forecastStatusLinePlayed,
-  roundPlayedAt,
+  nextRoundTiming,
   roundPlayedLine,
-  roundStartsAt,
 } from "@/lib/football-status";
 import { ClockSwitch } from "@/components/football/ClockSwitch";
 import { evaluatesCurrentModel } from "@/lib/football-scorecard";
@@ -29,6 +29,7 @@ import { LeagueTable, ClubChooser } from "@/components/charts/football/LeagueTab
 import type { PointsInterval } from "@/components/charts/football/LeagueTable";
 import { MatchdayPredictions, type MatchdayFixture } from "@/components/charts/football/MatchdayPredictions";
 import { TitleRaceChart } from "@/components/charts/football/TitleRaceChart";
+import { previousModelMatchdays } from "@/components/charts/football/probability-history-table";
 import { RelegationChart } from "@/components/charts/football/RelegationChart";
 import { TeamStrengthRatings } from "@/components/charts/football/TeamStrengthRatings";
 import { LuckIndex } from "@/components/charts/football/LuckIndex";
@@ -38,7 +39,13 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { Trophy, ArrowRight, SlidersHorizontal, Scale, History, Users, Gamepad2 } from "lucide-react";
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { setRequestLocale } from '@/i18n/request-locale';
+
+/** A sentence's full stop, unless it already ends on one ("25 set."). */
+function withStop(text: string): string {
+  return text.endsWith(".") ? text : `${text}.`;
+}
 
 export async function generateMetadata({
   params,
@@ -84,6 +91,19 @@ export default async function LigaPage({
 
   // The two probability charts get only what they draw (SP-08).
   const probabilities = probabilityHistory(historical);
+  // Part of the first move on each line is a change of model, not of results:
+  // the pre-season point came from the previous model (audit VFA-M4). The
+  // tip and the table twin mark the point; the caption says it once.
+  const previousModelRounds = previousModelMatchdays(probabilities);
+  const preSeasonNote = previousModelRounds.length === 0
+    ? ""
+    : locale === "pt"
+      ? previousModelRounds.length === 1 && previousModelRounds[0] === 0
+        ? " O ponto da pré-época (J0) vem do modelo anterior."
+        : ` Os pontos ${previousModelRounds.map(m => `J${m}`).join(", ")} vêm do modelo anterior.`
+      : previousModelRounds.length === 1 && previousModelRounds[0] === 0
+        ? " The pre-season point (MD0) comes from the previous model."
+        : ` Points ${previousModelRounds.map(m => `MD${m}`).join(", ")} come from the previous model.`;
 
   // Every fixture still to play that carries a published 1X2, with its own
   // kickoff (game_fixtures.json), conditionals and match page: the round in
@@ -100,10 +120,9 @@ export default async function LigaPage({
       p_draw: f.p_draw as number,
       p_away: f.p_away as number,
       scenario: f.scenario,
+      postponed: f.postponed === true,
       href: `/desporto/liga/jogo/${f.slug}`,
     }));
-  const cardRounds = Array.from(new Set(fixtureCards.map(f => f.matchday))).sort((a, b) => a - b);
-  const cardSpan = formatDateSpan(fixtureCards.map(f => f.kickoff), locale);
 
   if (!prediction) {
     return (
@@ -165,29 +184,55 @@ export default async function LigaPage({
         null,
       )
     : null;
+  // Named against the forecast it compares with, not "the previous matchday":
+  // once jornada 8 is played, "desde a jornada anterior" read as a move
+  // caused by it (audit FR3V-M1). The table's own words (LeagueTable `since`).
   const factualChange =
     biggestMover && Math.abs(biggestMover.p_champion_delta) >= 1
       ? locale === "pt"
-        ? `${teamDisplayName(biggestMover.team)} ${formatPp(biggestMover.p_champion_delta / 100, locale)} no título desde a jornada anterior`
-        : `${teamDisplayName(biggestMover.team)} ${formatPp(biggestMover.p_champion_delta / 100, locale)} on the title since the previous matchday`
+        ? `${teamDisplayName(biggestMover.team)} ${formatPp(biggestMover.p_champion_delta / 100, locale)} no título face à previsão depois da jornada ${prediction.matchday - 1}`
+        : `${teamDisplayName(biggestMover.team)} ${formatPp(biggestMover.p_champion_delta / 100, locale)} on the title since the forecast after matchday ${prediction.matchday - 1}`
       : null;
 
   // "Depois da jornada 7 · atualizado a 25 set. · próxima atualização após a
   // jornada 8 (9–12 out.)", every part from the data (audit CL-11, CL-M4).
-  const nextRound = matchdayComplete ? (prediction.next_matchday?.matchday ?? null) : prediction.matchday;
-  const nextRoundKickoffs = upcomingFixtures.filter(f => f.matchday === nextRound).map(f => f.kickoff);
+  const timing = nextRoundTiming(prediction, upcomingFixtures);
+  const nextRound = timing.round;
   const statusInput = {
     matchday: prediction.matchday,
     timestamp: prediction.timestamp,
     inProgress: !matchdayComplete,
     nextRound,
-    nextRoundKickoffs,
+    nextRoundKickoffs: timing.kickoffs,
   };
   const statusLine = forecastStatusLine(statusInput, locale);
   // Once the round the next update waits for is over, the line says the new
   // forecast is in preparation instead of promising it (audit FRESH-01).
-  const nextRoundPlayedAt = roundPlayedAt(nextRoundKickoffs);
-  const nextRoundStartsAt = roundStartsAt(nextRoundKickoffs);
+  const nextRoundPlayedAt = timing.playedAt;
+  const nextRoundStartsAt = timing.startsAt;
+
+  // The games to come are the next round plus any game left over from an
+  // earlier one: the heading names the round and counts the leftovers, which
+  // carry their own "jogo em atraso" badge (audit UXD3-02, CL3-01). The date
+  // span is the round's own: the leftover is dated on its card.
+  const postponedCards = fixtureCards.filter(f => f.postponed || (nextRound != null && f.matchday < nextRound));
+  const roundCards = fixtureCards.filter(f => !postponedCards.includes(f));
+  const cardRounds = Array.from(new Set(roundCards.map(f => f.matchday))).sort((a, b) => a - b);
+  const cardSpan = formatDateSpan(roundCards.map(f => f.kickoff), locale);
+  const postponedCount = postponedCards.length;
+  const postponedPhrase = postponedCount === 0
+    ? ""
+    : locale === "en"
+      ? `, plus ${postponedCount === 1 ? "one postponed match" : `${postponedCount} postponed matches`}`
+      : `, e ${postponedCount === 1 ? "um jogo em atraso" : postponedCount === 2 ? "dois jogos em atraso" : `${postponedCount} jogos em atraso`}`;
+  const roundsHeading = cardRounds.length === 0
+    ? (locale === "en" ? "Postponed matches" : "Jogos em atraso")
+    : cardRounds.length === 1
+      ? `${t("football.matchday")} ${cardRounds[0]}`
+      : locale === "en"
+        ? `Matchdays ${cardRounds.slice(0, -1).join(", ")} and ${cardRounds[cardRounds.length - 1]}`
+        : `Jornadas ${cardRounds.slice(0, -1).join(", ")} e ${cardRounds[cardRounds.length - 1]}`;
+  const asOf = forecastAsOf(prediction.timestamp, locale);
   const sourceLine = locale === "pt"
     ? `Fonte: modelo estimador.pt, ${simsLabel} simulações do resto da época`
     : `Source: estimador.pt model, ${simsLabel} simulations of the rest of the season`;
@@ -211,12 +256,23 @@ export default async function LigaPage({
       : "The model compared with the market's closing line.";
 
   const pt = locale !== "en";
-  const teasers = [
+  // Once the round is played, the two invitations stop offering it: the
+  // simulator shows what each result would have changed, and the game's
+  // next round opens with the next forecast (audit FR3V-M1).
+  const playedSteps = (value: ReactNode) => (nextRoundPlayedAt ? [{ at: nextRoundPlayedAt, value }] : []);
+  const teasers: Array<{ href: string; Icon: typeof Trophy; title: string; body: ReactNode; action: string }> = [
     ...(scenarios?.next_matchday_scenarios ? [{
       href: "/desporto/liga/simulador",
       Icon: SlidersHorizontal,
       title: t("football.simulator"),
-      body: t("football.simulatorCta"),
+      body: (
+        <ClockSwitch
+          initial={t("football.simulatorCta")}
+          steps={playedSteps(pt
+            ? `Vê o que cada resultado da jornada ${nextRound} mudava, ${withStop(asOf)}`
+            : `See what each matchday ${nextRound} result would have changed, ${withStop(asOf)}`)}
+        />
+      ),
       action: t("football.trySimulator"),
     }] : []),
     {
@@ -224,9 +280,16 @@ export default async function LigaPage({
       Icon: Gamepad2,
       // Marked as a game: the name alone does not say it (audit CL2-13).
       title: pt ? "Contra o Modelo (jogo semanal)" : "Beat the model (weekly game)",
-      body: pt
-        ? "Prevê a próxima jornada antes de começar e compara-te com o modelo, a época inteira."
-        : "Call the next matchday before it kicks off and get scored against the model, all season long.",
+      body: (
+        <ClockSwitch
+          initial={pt
+            ? "Prevê a próxima jornada antes de começar e compara-te com o modelo, a época inteira."
+            : "Call the next matchday before it kicks off and get scored against the model, all season long."}
+          steps={playedSteps(pt
+            ? "A próxima jornada abre com a nova previsão; até lá, vê como te saíste e compara-te com o modelo, a época inteira."
+            : "The next matchday opens with the new forecast; until then, see how you did and how you compare with the model, all season long.")}
+        />
+      ),
       action: pt ? "Jogar" : "Play",
     },
     {
@@ -323,17 +386,22 @@ export default async function LigaPage({
               />
             </p>
             <h2 id="liga-next-round" className="text-2xl tracking-tight mb-1">
-              {cardRounds.length === 1
-                ? `${t("football.matchday")} ${cardRounds[0]}`
-                : locale === "en"
-                  ? `Matchdays ${cardRounds.slice(0, -1).join(", ")} and ${cardRounds[cardRounds.length - 1]}`
-                  : `Jornadas ${cardRounds.slice(0, -1).join(", ")} e ${cardRounds[cardRounds.length - 1]}`}
+              {roundsHeading}
               {cardSpan ? ` · ${cardSpan}` : ""}
+              {postponedPhrase}
             </h2>
             <p className="text-sm text-stone-500 mb-6 max-w-3xl">
               {locale === "en"
                 ? "In kickoff order, Lisbon time. Under each match, the club whose title or relegation chances its result moves most, and the gap between that club's best and worst of the three results, in percentage points."
-                : "Por ordem de início, hora de Lisboa. Em cada jogo, o clube cujas hipóteses de título ou de despromoção o resultado mais mexe, e a distância entre o melhor e o pior dos três resultados para esse clube, em pontos percentuais."}
+                : "Por ordem de início, hora de Lisboa. Em cada jogo, o clube cujas hipóteses de título ou de despromoção o resultado mais mexe, e a distância entre o melhor e o pior dos três resultados para esse clube, em pontos percentuais."}{" "}
+              {/* The method behind these swings, not the generic page (audit METH3-17). */}
+              <Link
+                href={locale === "pt" ? "/desporto/liga/metodologia#jogos-decisivos" : "/desporto/liga/metodologia#decisive-matches"}
+                locale={locale}
+                className="font-medium text-ink underline underline-offset-4"
+              >
+                {locale === "pt" ? "Como medimos o peso de cada jogo" : "How we measure each match's weight"}
+              </Link>
             </p>
             <MatchdayPredictions fixtures={fixtureCards} locale={locale} forecastTimestamp={prediction.timestamp} />
           </div>
@@ -361,6 +429,7 @@ export default async function LigaPage({
             nSims={prediction.n_sims}
             model={prediction.model}
             calibration={scorecard?.calibration ?? null}
+            matchday={prediction.matchday}
             previousMatchday={prediction.matchday > 1 ? prediction.matchday - 1 : undefined}
             labels={{
               team: t("football.team"),
@@ -399,8 +468,8 @@ export default async function LigaPage({
                 subtitle={t("football.luckIndexDescription")}
                 source={t("football.xgAttribution")}
                 updated={updatedLine}
-                methodologyHref="/desporto/liga/metodologia"
-                methodologyLabel={methodLabel}
+                methodologyHref={locale === "pt" ? "/desporto/liga/metodologia#pontos-esperados-xpts" : "/desporto/liga/metodologia#expected-points-xpts"}
+                methodologyLabel={locale === "pt" ? "Como se calculam os xPts" : "How xPts are computed"}
                 locale={locale}
               >
                 <LuckIndex
@@ -423,17 +492,16 @@ export default async function LigaPage({
       {historical.length > 1 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
+            {/* One title level per chart: the section's question, then the
+                card that names the plot (audit UXD3-11). */}
+            <h2 className="text-2xl tracking-tight mb-6">
               {t("football.titleRace")}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.titleRaceDescription")}
-            </p>
             <DataCard
               title={locale === "pt" ? "Probabilidade de ser campeão, jornada a jornada" : "Chance of the title, matchday by matchday"}
-              subtitle={locale === "pt"
+              subtitle={`${locale === "pt"
                 ? "Uma linha por clube que já passou de 1%. Cada ponto é uma previsão publicada, com os jogos disputados até então; a data de cada uma está na dica e na tabela."
-                : "One line per club that has been above 1%. Each dot is a published forecast, with the matches played up to then; each one's date is in the tip and the table."}
+                : "One line per club that has been above 1%. Each dot is a published forecast, with the matches played up to then; each one's date is in the tip and the table."}${preSeasonNote}`}
               source={sourceLine}
               updated={updatedLine}
               methodologyHref="/desporto/liga/metodologia"
@@ -466,17 +534,14 @@ export default async function LigaPage({
       {historical.length > 1 && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
+            <h2 className="text-2xl tracking-tight mb-6">
               {t("football.relegationBattle")}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.relegationBattleDescription")}
-            </p>
             <DataCard
               title={locale === "pt" ? "Probabilidade de despromoção, jornada a jornada" : "Chance of relegation, matchday by matchday"}
-              subtitle={locale === "pt"
+              subtitle={`${locale === "pt"
                 ? "Despromoção é acabar em 17.º ou 18.º; o 16.º vai ao play-off e não conta aqui."
-                : "Relegation means finishing 17th or 18th; 16th goes to a play-off and is not counted here."}
+                : "Relegation means finishing 17th or 18th; 16th goes to a play-off and is not counted here."}${preSeasonNote}`}
               source={sourceLine}
               updated={updatedLine}
               methodologyHref="/desporto/liga/metodologia"
@@ -493,12 +558,10 @@ export default async function LigaPage({
       {prediction.team_strengths && (
         <section className="border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
+            {/* Club pages link here for every club's rank (PUB3-12). */}
+            <h2 id="forca-das-equipas" className="text-2xl tracking-tight mb-6">
               {t("football.teamStrengths")}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.teamStrengthsDescription")}
-            </p>
             <DataCard
               title={locale === "pt" ? "Ataque e defesa estimados" : "Estimated attack and defence"}
               source={sourceLine}

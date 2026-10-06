@@ -4,9 +4,9 @@ import { useRef, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
-import { formatPercent, formatShortDate } from "@/lib/football-format";
+import { formatPercent } from "@/lib/football-format";
 import type { LigaProbabilityHistory } from "@/types/football";
-import { probabilityHistoryTable } from "./probability-history-table";
+import { previousModelMatchdays, probabilityHistoryTable, trendTipTitle } from "./probability-history-table";
 import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface RelegationChartProps {
@@ -70,7 +70,8 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
       if (!container) return;
 
       const width = container.offsetWidth;
-      const dates = new Map(historical.map(md => [md.matchday, md.timestamp ? formatShortDate(md.timestamp, locale) : ""]));
+      const publications = new Map(historical.map(md => [md.matchday, md]));
+      const previous = new Set(previousModelMatchdays(historical));
       const height = Math.max(280, Math.min(360, width * 0.45));
 
       const teamsAtRisk = new Set<string>(visibleTeams);
@@ -152,7 +153,9 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
           Plot.tip(lineData, Plot.pointer({
             x: "matchday",
             y: "p_relegation",
-            title: (d: { team: string; matchday: number; p_relegation: number }) => `${teamDisplayName(d.team)} · ${pt ? "J" : "MD"}${d.matchday}${dates.get(d.matchday) ? ` (${pt ? "previsão de" : "forecast of"} ${dates.get(d.matchday)})` : ""}: ${formatPercent(d.p_relegation / 100, locale)}`,
+            // Three short lines, so the tip fits a phone's plot (UXM3-01).
+            title: (d: { team: string; matchday: number; p_relegation: number }) =>
+              trendTipTitle(teamDisplayName(d.team), publications.get(d.matchday) ?? { matchday: d.matchday }, d.p_relegation / 100, locale, previous.has(d.matchday)),
           })),
           Plot.text(
             endLabels,

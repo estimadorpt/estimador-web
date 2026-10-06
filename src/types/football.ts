@@ -278,5 +278,8 @@ export type LigaProbabilityHistory = Array<{
   matchday: number;
   /** The publication's timestamp, so a point can be dated (audit FA2-03). */
   timestamp?: string;
+  /** The model that published it: the pre-season point came from the
+   * previous one, and the charts mark it (audit VFA-M4). */
+  model?: string;
   table: Array<Pick<TeamStanding, 'team' | 'p_champion' | 'p_relegation'>>;
 }>;

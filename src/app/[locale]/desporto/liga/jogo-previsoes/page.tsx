@@ -64,8 +64,9 @@ export default async function JogoPrevisoesPage({
   // The deadline of the round open when the page was built, from the game
   // manifest's locks_at. The line re-reads the clock in the browser and says
   // the round has closed once the deadline passes (audit FR-11).
-  const openRound = data ? findOpenRound(data, Date.now()) : null;
-  const openLock = openRound ? roundLockState(openRound, Date.now()) : null;
+  const buildNow = Date.now();
+  const openRound = data ? findOpenRound(data, buildNow) : null;
+  const openLock = openRound ? roundLockState(openRound, buildNow) : null;
   const deadline =
     openRound && openLock?.lockAt != null ? (
       <DeadlineLine
@@ -111,12 +112,14 @@ export default async function JogoPrevisoesPage({
       />
 
       <section>
-        <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-3xl">
+        {/* A wider measure: the round's cards go two to a row from lg; the
+            text inside keeps its reading width (audit UXD3-10). */}
+        <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
           {data ? (
             // Auth wraps this page only: readers of forecast pages never
             // download an auth bundle they have no use for.
             <GameAuthProvider>
-              <ContraOModelo data={data} locale={locale} recordNote={recordNote} />
+              <ContraOModelo data={data} locale={locale} recordNote={recordNote} builtAt={buildNow} />
             </GameAuthProvider>
           ) : (
             <p className="text-stone-500 text-sm">

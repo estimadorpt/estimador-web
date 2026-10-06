@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { describePp, formatInteger, formatPercent, formatPp, formatShortDate } from "@/lib/football-format";
 import { useClockReached } from "@/components/football/ClockSwitch";
-import { teamColorOnPaper, teamDisplayName } from "@/lib/config/football";
+import { matchPlayedAt } from "@/lib/football-status";
+import { OUTCOME_TONES, teamColorOnPaper, teamDisplayName } from "@/lib/config/football";
+import { Link } from "@/i18n/routing";
 import { relevantObjective, formatObjectiveLabel, type ClubObjective } from "@/lib/football-fixtures";
 import { impactStakes as stakesFor, initialImpactSide, type TeamProbs } from "@/lib/football-scenarios";
 import type {
@@ -31,6 +33,11 @@ interface MatchOutcomeImpactProps {
   kickoff?: string | null;
   /** The forecast's timestamp, to date the figures once the game has started. */
   forecastTimestamp?: string | null;
+  /** For a game of an earlier round: when the round the forecast waits for
+   * is played, and its "agora" goes out of date before this kickoff (FR3-02). */
+  staleAt?: string | null;
+  /** That round, for "antes da jornada 8". */
+  staleRound?: number | null;
 }
 
 
@@ -47,25 +54,38 @@ export function MatchOutcomeImpact({
   decisive,
   kickoff,
   forecastTimestamp,
+  staleAt = null,
+  staleRound = null,
 }: MatchOutcomeImpactProps) {
   const pt = locale !== "en";
   const [chosen, setChosen] = useState<"home" | "away">(() => initialImpactSide(scenario, baseline, home, away));
-  // After kickoff the "now" row is what the model gave before the game.
+  // After kickoff the "now" row is what the model gave before the game; for
+  // a postponed game, already once the round the forecast waits for is
+  // played (audit FR3-02).
   const started = useClockReached(kickoff);
+  // Two hours on, the game has been played, not "started" (FR3-04).
+  const finished = useClockReached(matchPlayedAt(kickoff));
+  const staleReached = useClockReached(staleAt);
+  const stale = staleReached && !started;
   const forecastDate = forecastTimestamp ? formatShortDate(forecastTimestamp, locale) : "";
   const chosenTeam = chosen === "home" ? home : away;
   const otherTeam = chosen === "home" ? away : home;
-  // Every bar is the chosen club's: "Se o Sp. Braga perder" is drawn in
-  // Braga's colour, not Sporting's (audit UXD-17). Contrast-checked for paper.
-  const chosenColor = teamColorOnPaper(chosenTeam) || (chosen === "home" ? homeColor : awayColor);
+  // Bars by outcome, not by club: a red kit drew a good result as a "bad"
+  // bar and Moreirense's loss row in its own green (audit UXD3-07). The
+  // baseline is a pale neutral, the three results ink.
+  const nowWord = stale
+    ? pt ? `na previsão de ${forecastDate}${staleRound ? `, antes da jornada ${staleRound}` : ""}` : `in the ${forecastDate} forecast${staleRound ? `, before matchday ${staleRound}` : ""}`
+    : started
+      ? pt ? "antes do jogo" : "before the match"
+      : pt ? "agora" : "now";
 
   const L = {
     title: pt ? `O que muda para o ${teamDisplayName(chosenTeam)}?` : `What changes for ${teamDisplayName(chosenTeam)}?`,
     switchLabel: pt ? "Ver as contas de" : "Show the stakes for",
     withData: (objective: ClubObjective) =>
       pt
-        ? `Probabilidade de ${formatObjectiveLabel(objective, "pt")}, ${started ? "antes do jogo" : "agora"} e em cada um dos três resultados possíveis, na mesma escala.`
-        : `Probability of ${formatObjectiveLabel(objective, "en")}, ${started ? "before the match" : "now"} and under each of the three possible results, on the same scale.`,
+        ? `Probabilidade de ${formatObjectiveLabel(objective, "pt")}, ${nowWord} e em cada um dos três resultados possíveis, na mesma escala.`
+        : `Probability of ${formatObjectiveLabel(objective, "en")}, ${nowWord} and under each of the three possible results, on the same scale.`,
     noData: pt
       ? "Os cenários por resultado só são publicados para a jornada em curso. Para já, o retrato é a projeção de época de cada equipa."
       : "Per-outcome scenarios are only published for the matchday in progress. For now, here is each team's season projection.",
@@ -74,18 +94,25 @@ export function MatchOutcomeImpact({
     relegation: pt ? "Despromoção" : "Relegation",
     baselineNow: started
       ? pt ? `Antes do jogo (previsão de ${forecastDate})` : `Before the match (forecast of ${forecastDate})`
-      : pt ? "Agora" : "Now",
+      : stale
+        ? pt ? `Na previsão de ${forecastDate}` : `In the ${forecastDate} forecast`
+        : pt ? "Agora" : "Now",
     win: (team: string) => (pt ? `Se o ${teamDisplayName(team)} vencer` : `If ${teamDisplayName(team)} win`),
     draw: pt ? "Se empatar" : "If they draw",
     loss: (team: string) => (pt ? `Se o ${teamDisplayName(team)} perder` : `If ${teamDisplayName(team)} lose`),
+    // "Sp. Braga's title chance is currently 0.2%", not "has 0.2% of title" (FA3-13).
     comparison: (team: string, label: string, value: string) =>
       pt
         ? started
           ? `Para comparação: o ${teamDisplayName(team)} tinha antes do jogo ${value} de ${label}.`
-          : `Para comparação: o ${teamDisplayName(team)} tem agora ${value} de ${label}.`
+          : stale
+            ? `Para comparação: o ${teamDisplayName(team)} tinha ${value} de ${label} ${nowWord}.`
+            : `Para comparação: o ${teamDisplayName(team)} tem agora ${value} de ${label}.`
         : started
-          ? `For comparison: ${teamDisplayName(team)} had ${value} of ${label} before the match.`
-          : `For comparison: ${teamDisplayName(team)} currently has ${value} of ${label}.`,
+          ? `For comparison: ${teamDisplayName(team)}'s ${label} chance was ${value} before the match.`
+          : stale
+            ? `For comparison: ${teamDisplayName(team)}'s ${label} chance was ${value} ${nowWord}.`
+            : `For comparison: ${teamDisplayName(team)}'s ${label} chance is currently ${value}.`,
     noMaterial: pt
       ? "Nenhum objetivo deste clube muda de forma material com este jogo."
       : "No objective for this club changes materially with this match.",
@@ -113,10 +140,10 @@ export function MatchOutcomeImpact({
 
   if (hasConditionals && objective && stakes) {
     const rows: { key: "baseline" | "win" | "draw" | "loss"; label: string; value: number; color: string }[] = [
-      { key: "baseline", label: L.baselineNow, value: stakes.baseline, color: "#8b9a8e" },
-      { key: "win", label: L.win(chosenTeam), value: stakes.win, color: chosenColor },
-      { key: "draw", label: L.draw, value: stakes.draw, color: chosenColor },
-      { key: "loss", label: L.loss(chosenTeam), value: stakes.loss, color: chosenColor },
+      { key: "baseline", label: L.baselineNow, value: stakes.baseline, color: OUTCOME_TONES.away },
+      { key: "win", label: L.win(chosenTeam), value: stakes.win, color: "var(--color-ink)" },
+      { key: "draw", label: L.draw, value: stakes.draw, color: "var(--color-ink)" },
+      { key: "loss", label: L.loss(chosenTeam), value: stakes.loss, color: "var(--color-ink)" },
     ];
     const maxValue = Math.max(0.05, ...rows.map(r => r.value));
 
@@ -172,7 +199,7 @@ export function MatchOutcomeImpact({
                 {row.key !== "baseline" && (
                   <span className="ml-1.5 text-[11px] tabular-nums text-stone-500">
                     <span aria-hidden="true">({formatPp(row.value - stakes.baseline, locale)})</span>
-                    <span className="sr-only">, {describePp(row.value - stakes.baseline, locale, started ? (pt ? "face a antes do jogo" : "from before the match") : (pt ? "face a agora" : "from now"))}</span>
+                    <span className="sr-only">, {describePp(row.value - stakes.baseline, locale, started ? (pt ? "face a antes do jogo" : "from before the match") : stale ? (pt ? `face à previsão de ${forecastDate}` : `from the ${forecastDate} forecast`) : (pt ? "face a agora" : "from now"))}</span>
                   </span>
                 )}
               </div>
@@ -182,11 +209,23 @@ export function MatchOutcomeImpact({
         <p className="text-[11px] text-stone-500 mt-3">
           {started
             ? pt
-              ? `O jogo já começou: a linha vertical marca a probabilidade antes do jogo, na previsão de ${forecastDate}; as barras mostram cada resultado, na mesma escala. Isto não é a probabilidade de o jogo terminar assim.`
-              : `The match has started: the vertical line marks the probability before it, in the forecast of ${forecastDate}; the bars show each result, on the same scale. This is not the chance the match ends that way.`
-            : pt
-              ? "A linha vertical marca a probabilidade atual (agora); as barras mostram cada resultado, na mesma escala. Isto não é a probabilidade de o jogo terminar assim — ver a secção de probabilidades do jogo acima."
-              : "The vertical line marks the current probability (now); the bars show each result, on the same scale. This is not the chance the match ends that way — see the match-probabilities section above."}
+              ? `${finished ? "O jogo já foi disputado" : "O jogo já começou"}: a linha vertical marca a probabilidade antes do jogo, na previsão de ${forecastDate}; as barras mostram cada resultado, na mesma escala. Isto não é a probabilidade de o jogo terminar assim.`
+              : `${finished ? "The match has been played" : "The match has started"}: the vertical line marks the probability before it, in the forecast of ${forecastDate}; the bars show each result, on the same scale. This is not the chance the match ends that way.`
+            : stale
+              ? pt
+                ? `A linha vertical marca a probabilidade ${nowWord}; as barras mostram cada resultado, na mesma escala. Isto não é a probabilidade de o jogo terminar assim.`
+                : `The vertical line marks the probability ${nowWord}; the bars show each result, on the same scale. This is not the chance the match ends that way.`
+              : pt
+                ? "A linha vertical marca a probabilidade atual (agora); as barras mostram cada resultado, na mesma escala. Isto não é a probabilidade de o jogo terminar assim — ver a secção de probabilidades do jogo acima."
+                : "The vertical line marks the current probability (now); the bars show each result, on the same scale. This is not the chance the match ends that way — see the match-probabilities section above."}{" "}
+          {/* The method behind these numbers, not the generic page (METH3-17). */}
+          <Link
+            href={pt ? "/desporto/liga/metodologia#jogos-decisivos" : "/desporto/liga/metodologia#decisive-matches"}
+            locale={pt ? "pt" : "en"}
+            className="font-semibold text-ink underline underline-offset-4"
+          >
+            {pt ? "Como se calcula" : "How it is computed"}
+          </Link>
         </p>
         {typeof otherBaseline === "number" && (
           <p className="text-xs text-stone-500 mt-2">

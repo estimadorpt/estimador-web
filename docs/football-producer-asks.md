@@ -26,7 +26,7 @@ the website does meanwhile and what would let it stop.
 4. **Fill `probs_source` for matchdays 1 and 2.** Both rounds have published odds but no
    source on any game. *Web:* says so on `/desporto/liga/dados` (`roundsWithoutSource`).
 5. **Name the third-party fields in each file, and confirm the xG provider.** The site
-   now publishes its own model outputs under CC BY 4.0 and marks, per file on
+   now publishes its own model outputs under CC BY-NC 4.0 and marks, per file on
    `/desporto/liga/dados`, the fields it cannot license ("Fora da licença": SofaScore match
    statistics and results, FotMob xG, Transfermarkt injuries and values, bookmaker-derived
    market fields), from the provenance it knows (PRO3-03). The xG behind `xpts_table` (md
@@ -60,3 +60,17 @@ the website does meanwhile and what would let it stop.
    so several players publish exactly 1.0. *Web:* prints a posterior of 1.0 as ">99%" and 0
    as "<0,1%" (`formatPosterior`, FA3-04); a value such as 0.99997 would say the same thing
    without the special case.
+
+Added in round 4 (2026-10-06):
+
+10. **Player names with their accents in every ratings file.** `contested_ratings.json` (twice)
+   and `def_ratings.json` (once) spell Nacional's "Ze Vitor", without the accents of
+   "Zé Vítor" (audit FA3-13). Fix the name at the source (estimador-data's player table),
+   so every file writes it the same way. *Web:* renders the name as published on `/jogadores`; no
+   display-name map exists, and one would only hide the mismatch.
+11. **Optionally, decisive matches at fixed strengths.** Each simulation draws the clubs'
+   strengths as well as the results, so splitting the simulations by one game's result
+   mixes the effect of its points with what the result says about the clubs' strength
+   (audit METH3-V02). A variant that conditions on the result with the strengths held at
+   their posterior means would isolate the points. *Web:* says so in the methodology
+   (`#jogos-decisivos`), and the swings stay a conditional reading.

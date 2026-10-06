@@ -23,7 +23,7 @@ import {
   type FixtureStatus,
   type GameFixturesData,
 } from '@/lib/football-fixtures';
-import { ligaTeamSlugs, teamDisplayName } from '@/lib/config/football';
+import { ligaTeamSlugs, teamDisplayName, teamWithArticle } from '@/lib/config/football';
 
 export type Locale = 'pt' | 'en';
 
@@ -79,14 +79,16 @@ export interface ClubOutlookEntry {
   /** Carries this club, its objective and the bundle version into the
    * simulator, per src/lib/football-exploration.ts's read/write contract.
    * The simulator only understands 'p_champion' | 'p_relegation' as `goal`,
-   * so a top-three objective maps to 'p_champion' here (its own conditionals
-   * are still the ones shown on this club's own answer, this link is only a
-   * "explore further" jumping-off point). */
+   * so a top-three objective (or none) leaves `goal` out and the simulator
+   * picks its own default for the club (audit FA3-03). */
   simulatorHref: string;
 }
 
-function simulatorGoal(objective: ClubObjective | null): 'p_champion' | 'p_relegation' {
-  return objective === 'p_relegation' ? 'p_relegation' : 'p_champion';
+/** The simulator's goal for a club, or null to let the simulator pick its
+ * default (the title from 1%, else relegation: audit FA3-03), since it has
+ * no top-three objective. */
+function simulatorGoal(objective: ClubObjective | null): 'p_champion' | 'p_relegation' | null {
+  return objective === 'p_relegation' || objective === 'p_champion' ? objective : null;
 }
 
 /**
@@ -124,7 +126,8 @@ export function buildClubOutlooks(
     if (leftover) {
       const other = leftover.home === team ? leftover.away : leftover.home;
       const status = fixtureStatus(leftover, prediction.timestamp, locale);
-      postponedLabel = `${status.label} (${locale === 'pt' ? 'contra' : 'against'} ${teamDisplayName(other)})`;
+      // "contra o Gil Vicente": a club's name takes its article (audit VFA-M3).
+      postponedLabel = `${status.label} (${locale === 'pt' ? teamWithArticle(other, 'contra') : `against ${teamDisplayName(other)}`})`;
     }
     let win: number | null = null;
     let draw: number | null = null;
@@ -177,7 +180,8 @@ export function buildClubOutlooks(
       }
     }
 
-    const simParams = new URLSearchParams({ v: version, team, goal: simulatorGoal(objective) });
+    const goal = simulatorGoal(objective);
+    const simParams = new URLSearchParams({ v: version, team, ...(goal ? { goal } : {}) });
 
     entries.push({
       team,

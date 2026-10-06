@@ -54,7 +54,8 @@ describe('club names take their article (audit CL2-01, UXD2-06)', () => {
         expect(text).not.toMatch(/\b(para para|contra contra|de do)\b/);
       }
       expect(intro).toContain(`para o ${teamDisplayName(team)}`);
-      expect(intro).toContain(`do ${teamDisplayName(team)}`);
+      // The date is the kicker's alone (audit CL3-14).
+      expect(intro).not.toMatch(/atualizad|setembro/);
     }
   });
 

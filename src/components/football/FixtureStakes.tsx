@@ -1,6 +1,6 @@
 import { Link } from '@/i18n/routing';
 import { teamWithArticle } from '@/lib/config/football';
-import { matchStartedLine } from '@/lib/football-status';
+import { kickoffSteps, matchPlayedLine, matchStartedLine } from '@/lib/football-status';
 import { ClockSwitch } from './ClockSwitch';
 import { formatClubPercent, type ClubOutlookEntry, type Locale } from './club-outlook';
 
@@ -15,29 +15,50 @@ import { formatClubPercent, type ClubOutlookEntry, type Locale } from './club-ou
  * disclaimer. With `matchLink`, it ends with the way to the match page (the
  * club page, audit PUB2-04; the homepage has its own action).
  */
-export function FixtureStakes({ locale, entry, matchLink = false }: { locale: Locale; entry: ClubOutlookEntry; matchLink?: boolean }) {
+export function FixtureStakes({
+  locale,
+  entry,
+  matchLink = false,
+  simulatorLink = false,
+}: {
+  locale: Locale;
+  entry: ClubOutlookEntry;
+  matchLink?: boolean;
+  /** Also link to the simulator, set to this club and its objective (audit FA3-03). */
+  simulatorLink?: boolean;
+}) {
   const pt = locale === 'pt';
   const clubFor = pt ? teamWithArticle(entry.team, 'para') : entry.label;
   const clubOf = pt ? teamWithArticle(entry.team, 'de') : entry.label;
 
   // After kickoff the status line stops calling the game "próximo" and dates
-  // the forecast instead (audit FRESH-01).
+  // the forecast instead (audit FRESH-01), and two hours on it says the game
+  // was played, not that it is under way (FR3-04).
   const statusLine = entry.fixtureStatusLabel ? (
     <ClockSwitch
       initial={entry.fixtureStatusLabel}
-      steps={entry.fixtureKickoff ? [{ at: entry.fixtureKickoff, value: matchStartedLine(entry.forecastTimestamp, locale) }] : []}
+      steps={kickoffSteps(
+        entry.fixtureKickoff,
+        Boolean(entry.fixtureKickoff),
+        matchStartedLine(entry.forecastTimestamp, locale),
+        matchPlayedLine(entry.forecastTimestamp, locale),
+      )}
     />
   ) : null;
 
-  const link = matchLink && entry.matchHref ? (
-    <p>
-      <Link
-        href={entry.matchHref}
-        locale={locale}
-        className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-ink underline underline-offset-4"
-      >
-        {pt ? 'Análise do jogo' : 'Match analysis'} <span aria-hidden="true">→</span>
-      </Link>
+  const linkClass = 'inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-ink underline underline-offset-4';
+  const link = (matchLink && entry.matchHref) || simulatorLink ? (
+    <p className="flex flex-wrap gap-x-6">
+      {matchLink && entry.matchHref && (
+        <Link href={entry.matchHref} locale={locale} className={linkClass}>
+          {pt ? 'Análise do jogo' : 'Match analysis'} <span aria-hidden="true">→</span>
+        </Link>
+      )}
+      {simulatorLink && (
+        <Link href={entry.simulatorHref} locale={locale} className={linkClass}>
+          {pt ? 'Ver no simulador' : 'See it in the simulator'} <span aria-hidden="true">→</span>
+        </Link>
+      )}
     </p>
   ) : null;
 

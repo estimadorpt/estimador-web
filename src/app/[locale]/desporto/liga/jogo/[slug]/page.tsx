@@ -9,6 +9,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import {
   loadFixtureBySlug,
+  loadGameFixtures,
   loadLigaData,
   loadLigaHistorical,
   loadLigaInjuries,
@@ -18,7 +19,7 @@ import {
   loadUpcomingFixtures,
   NO_FIXTURES_SLUG,
 } from "@/lib/utils/football-data-loader";
-import { teamColorOnPaper, teamDisplayName, ligaTeamSlugs } from "@/lib/config/football";
+import { CURRENT_LIGA_SEASON, teamColorOnPaper, teamDisplayName, ligaTeamSlugs } from "@/lib/config/football";
 import { byKickoff } from "@/lib/football-fixtures";
 import { MatchProbabilityHero } from "@/components/charts/football/MatchProbabilityHero";
 import { MatchOutcomeImpact } from "@/components/charts/football/MatchOutcomeImpact";
@@ -26,11 +27,16 @@ import { MatchTeamCompare } from "@/components/charts/football/MatchTeamCompare"
 import type { MatchTeamPanel } from "@/components/charts/football/MatchTeamCompare";
 import { MatchSquadNews } from "@/components/charts/football/MatchSquadNews";
 import type { MatchSquadSide } from "@/components/charts/football/MatchSquadNews";
-import { formFor } from "@/lib/football-form";
+import { formFor, kickoffsByPair } from "@/lib/football-form";
 import { currentAbsences } from "@/lib/football-injuries";
 import { playerDataCutoffLabel } from "@/lib/utils/player-pages";
-import { formatInteger, formatKickoffShort, formatLongDate, formatPercent, matchLabel } from "@/lib/football-format";
-import { matchStartedLine } from "@/lib/football-status";
+import { formatInteger, formatKickoffShort, formatLongDate, formatPercent, formatShortDate, matchLabel } from "@/lib/football-format";
+import {
+  kickoffSteps,
+  matchPlayedLine,
+  matchStartedLine,
+  nextRoundTiming,
+} from "@/lib/football-status";
 import { ClockSwitch } from "@/components/football/ClockSwitch";
 import { setRequestLocale } from '@/i18n/request-locale';
 
@@ -92,10 +98,22 @@ export async function generateMetadata({
       : `${home} ${formatPercent(fixture.p_home as number, locale)}, draw ${formatPercent(fixture.p_draw as number, locale)}, ${away} ${formatPercent(fixture.p_away as number, locale)}.`
     : "";
 
-  const description = fixture.played
+  // A game played before the model's first forecast says so, with its date,
+  // rather than stopping at the score (audit SEO3-09: 49-character snippets).
+  const playedDay = fixture.kickoff ? formatShortDate(fixture.kickoff, locale) : "";
+  const lateNote = fixture.probsLatePublishedAt
     ? pt
-      ? `${matchLabel(home, away)}, jornada ${fixture.matchday} da Liga Portugal: ${fixture.played.home_goals}–${fixture.played.away_goals}. ${probLine ? `Antes do jogo, o modelo dava: ${probLine}` : ""}`.trim()
-      : `${matchLabel(home, away)}, matchday ${fixture.matchday} of Liga Portugal: ${fixture.played.home_goals}–${fixture.played.away_goals}. ${probLine ? `Before the match the model gave: ${probLine}` : ""}`.trim()
+      ? " O modelo só publicou previsões depois deste jogo."
+      : " The model only published forecasts after this match."
+    : "";
+  const description = fixture.played
+    ? probLine
+      ? pt
+        ? `${matchLabel(home, away)}, jornada ${fixture.matchday} da Liga Portugal: ${fixture.played.home_goals}–${fixture.played.away_goals}. Antes do jogo, o modelo dava: ${probLine}`
+        : `${matchLabel(home, away)}, matchday ${fixture.matchday} of Liga Portugal: ${fixture.played.home_goals}–${fixture.played.away_goals}. Before the match the model gave: ${probLine}`
+      : pt
+        ? `${matchLabel(home, away)}, ${fixture.played.home_goals}–${fixture.played.away_goals}, jornada ${fixture.matchday} da Liga Portugal ${CURRENT_LIGA_SEASON}${playedDay ? ` (${playedDay})` : ""}.${lateNote}`
+        : `${matchLabel(home, away)}, ${fixture.played.home_goals}–${fixture.played.away_goals}, matchday ${fixture.matchday} of Liga Portugal ${CURRENT_LIGA_SEASON}${playedDay ? ` (${playedDay})` : ""}.${lateNote}`
     : pt
       ? `${matchLabel(home, away)}, jornada ${fixture.matchday} da Liga Portugal. Modelo: ${probLine} E o que muda com cada resultado.`.trim()
       : `${matchLabel(home, away)}, matchday ${fixture.matchday} of Liga Portugal. Model: ${probLine} And what each result changes.`.trim();
@@ -120,7 +138,7 @@ export default async function MatchPage({
   setRequestLocale(locale);
   const pt = locale !== "en";
 
-  const [fixture, { prediction, scenarios }, historical, injuries, players, fixtures, playersDetail] =
+  const [fixture, { prediction, scenarios }, historical, injuries, players, fixtures, playersDetail, gameFixtures] =
     await Promise.all([
       loadFixtureBySlug(slug),
       loadLigaData(),
@@ -129,6 +147,7 @@ export default async function MatchPage({
       loadLigaPlayers(),
       loadUpcomingFixtures(),
       loadLigaPlayersDetail(),
+      loadGameFixtures(),
     ]);
 
   if (!fixture) {
@@ -188,6 +207,8 @@ export default async function MatchPage({
       .forEach(([t], i) => (defenseRank[t] = i + 1));
   }
 
+  // Form in the order the games were played (FA3-01).
+  const playedKickoffs = kickoffsByPair(gameFixtures);
   const panelFor = (team: string, venue: "H" | "A"): MatchTeamPanel => ({
     team,
     color: venue === "H" ? homeColor : awayColor,
@@ -198,7 +219,7 @@ export default async function MatchPage({
     defenseRank: defenseRank[team],
     totalTeams,
     xpts: prediction?.xpts_table?.find(x => x.team === team),
-    form: formFor(team, historical, prediction),
+    form: formFor(team, historical, prediction, 5, playedKickoffs),
   });
 
   // Absences only when the list is recent enough to be squad news for this
@@ -230,8 +251,43 @@ export default async function MatchPage({
   );
 
   // The other games still to play, in kickoff order with their Lisbon
-  // date and time (audit F-H4), not the feed's order.
-  const otherFixtures = byKickoff(fixtures.filter(f => f.slug !== fixture.slug)).slice(0, 9);
+  // date and time (audit F-H4), not the feed's order: all of them, the
+  // postponed leftover included, the hub's set (FA3-08, VUXD-04: a nine-game
+  // cut dropped Braga – Gil Vicente from every played page).
+  const otherFixtures = byKickoff(fixtures.filter(f => f.slug !== fixture.slug));
+
+  // The forecast's clock (audit FR3-02, FR3-08): the round it waits for, and
+  // the instant that round is played, after which every "agora" on a page
+  // built from it is the forecast of its date.
+  const timing = prediction ? nextRoundTiming(prediction, fixtures) : null;
+  const roundPlayedAtIso = timing?.playedAt ?? null;
+  // A game of an earlier round, still to play, outlives the round its
+  // forecast waits for: it goes stale before its own kickoff.
+  const staleAt = !isPlayed && timing?.round != null && fixture.matchday !== timing.round ? roundPlayedAtIso : null;
+  const forecastShort = prediction?.timestamp ? formatShortDate(prediction.timestamp, locale) : "";
+  const statusInput = prediction && timing
+    ? {
+        matchday: prediction.matchday,
+        timestamp: prediction.timestamp,
+        inProgress: Boolean(prediction.matches_remaining?.length),
+        nextRound: timing.round,
+        nextRoundKickoffs: timing.kickoffs,
+      }
+    : null;
+
+  // The frozen 1X2 a postponed game is scored on in Contra o Modelo and
+  // recorded with once played, beside the current forecast's (audit VFA-M2).
+  const manifestEntry = fixture.postponed
+    ? (gameFixtures?.matchdays.find(md => md.matchday === fixture.matchday)?.fixtures ?? [])
+        .find(fx => fx.home === fixture.home && fx.away === fixture.away) ?? null
+    : null;
+  const frozen = manifestEntry
+    && typeof manifestEntry.p_home === "number"
+    && typeof manifestEntry.p_draw === "number"
+    && typeof manifestEntry.p_away === "number"
+    && typeof manifestEntry.published_at === "string"
+    ? { p_home: manifestEntry.p_home, p_draw: manifestEntry.p_draw, p_away: manifestEntry.p_away, publishedAt: manifestEntry.published_at }
+    : null;
 
   return (
     <div className="min-h-screen bg-paper">
@@ -251,22 +307,59 @@ export default async function MatchPage({
             : pt
               ? "O resultado deste jogo. A previsão da época continua na página da Liga."
               : "This match's result. The season forecast is on the Liga page."
-          : (
-            // After kickoff the page stops previewing the game (audit FRESH-01).
+          : (() => {
+              // After kickoff the page stops previewing the game (audit
+              // FRESH-01); a postponed game's new forecast comes with the next
+              // update, not "after the matchday" (FR3-02).
+              const ts = prediction?.timestamp;
+              const next = fixture.postponed
+                ? pt ? "a nova previsão sai com a próxima atualização." : "the new forecast comes with the next update."
+                : pt ? "a nova previsão sai depois da jornada." : "the new forecast follows the matchday."
+              const after = (status: string) => pt
+                ? `${withStop(status)} O que o modelo dava antes do jogo e o que cada resultado mudava; ${next}`
+                : `${withStop(status)} What the model gave before the match and what each result would change; ${next}`;
+              const steps = ts
+                ? [
+                    ...(staleAt && timing?.round != null
+                      ? [{
+                          at: staleAt,
+                          value: pt
+                            ? `Jogo em atraso · previsão de ${forecastShort}, antes da jornada ${timing.round}. O que o modelo dava e o que cada resultado mudava; a nova previsão sai com a próxima atualização.`
+                            : `Postponed match · forecast of ${forecastShort}, before matchday ${timing.round}. What the model gave and what each result would change; the new forecast comes with the next update.`,
+                        }]
+                      : []),
+                    ...kickoffSteps(fixture.kickoff, fixture.kickoffConfirmed, after(matchStartedLine(ts, locale)), after(matchPlayedLine(ts, locale))),
+                  ]
+                : [];
+              return (
+                <ClockSwitch
+                  initial={pt
+                    ? "O que o modelo espera deste jogo e o que cada resultado muda para os dois clubes."
+                    : "What the model expects from this match, and what each result changes for both clubs."}
+                  steps={steps}
+                />
+              );
+            })()}
+        // The forecast's date where the first number is, not only in the
+        // footer (audit FR3-08, PRO3-13), and its staleness once the round
+        // is played.
+        meta={!isPlayed && statusInput ? (
+          <span>
             <ClockSwitch
               initial={pt
-                ? "O que o modelo espera deste jogo e o que cada resultado muda para os dois clubes."
-                : "What the model expects from this match, and what each result changes for both clubs."}
-              steps={fixture.kickoffConfirmed && fixture.kickoff && prediction?.timestamp
+                ? `Previsão de ${forecastShort} (depois da jornada ${statusInput.matchday})${statusInput.nextRound != null ? ` · próxima atualização após a jornada ${statusInput.nextRound}` : ""}`
+                : `Forecast of ${forecastShort} (after matchday ${statusInput.matchday})${statusInput.nextRound != null ? ` · next update after matchday ${statusInput.nextRound}` : ""}`}
+              steps={roundPlayedAtIso && statusInput.nextRound != null
                 ? [{
-                    at: fixture.kickoff,
+                    at: roundPlayedAtIso,
                     value: pt
-                      ? `${withStop(matchStartedLine(prediction.timestamp, locale))} O que o modelo dava antes do jogo e o que cada resultado mudava; a nova previsão sai depois da jornada.`
-                      : `${withStop(matchStartedLine(prediction.timestamp, locale))} What the model gave before the match and what each result would change; the new forecast follows the matchday.`,
+                      ? `Previsão de ${forecastShort} (depois da jornada ${statusInput.matchday}) · jornada ${statusInput.nextRound} jogada, nova previsão em preparação`
+                      : `Forecast of ${forecastShort} (after matchday ${statusInput.matchday}) · matchday ${statusInput.nextRound} played, new forecast in preparation`,
                   }]
                 : []}
             />
-          )}
+          </span>
+        ) : undefined}
       />
 
       {/* Probabilities */}
@@ -289,6 +382,7 @@ export default async function MatchPage({
             probsLatePublishedAt={fixture.probsLatePublishedAt}
             probsFrozenDuringRound={fixture.probsFrozenDuringRound}
             forecastTimestamp={prediction?.timestamp ?? null}
+            frozenProbs={frozen}
           />
         </div></div>
       </section>
@@ -310,6 +404,8 @@ export default async function MatchPage({
             decisive={fixture.decisive}
             kickoff={fixture.kickoffConfirmed ? fixture.kickoff : null}
             forecastTimestamp={prediction?.timestamp ?? null}
+            staleAt={staleAt}
+            staleRound={timing?.round ?? null}
           />
         </div></div>
       </section>
@@ -374,6 +470,7 @@ export default async function MatchPage({
               unavailable={unavailable}
               absencesStatus={absences.status}
               snapshotDate={absences.snapshotDate}
+              publishedCount={players?.players?.length ?? 0}
               sarCutoffLabel={playerDataCutoffLabel(
                 playersDetail?.appearances_through,
                 playersDetail?.generated_from?.seasons ?? players?.generated_from?.seasons ?? null,
@@ -388,7 +485,22 @@ export default async function MatchPage({
       {otherFixtures.length > 0 && (
         <section className="border-b border-stone-200">
           <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
-            <h2 className="text-2xl tracking-tight mb-1">{isPlayed ? (pt ? "Próximos jogos" : "Next fixtures") : L.otherMatches}</h2>
+            {/* Once the round is played the list is what the model gave for
+                it, dated; each game says when it started and was played
+                (audit FR3-03), and a leftover says so (FA3-08). */}
+            <h2 className="text-2xl tracking-tight mb-1">
+              <ClockSwitch
+                initial={isPlayed ? (pt ? "Próximos jogos" : "Next fixtures") : L.otherMatches}
+                steps={roundPlayedAtIso && timing?.round != null
+                  ? [{
+                      at: roundPlayedAtIso,
+                      value: pt
+                        ? `Jornada ${timing.round} · o que o modelo dava (previsão de ${forecastShort})`
+                        : `Matchday ${timing.round} · what the model gave (forecast of ${forecastShort})`,
+                    }]
+                  : []}
+              />
+            </h2>
             <p className="mb-4 text-sm text-stone-500">{pt ? "Por ordem de início, hora de Lisboa." : "In kickoff order, Lisbon time."}</p>
             <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {otherFixtures.map(f => {
@@ -401,7 +513,13 @@ export default async function MatchPage({
                       className="block h-full rounded-2xl border border-line bg-cream px-3 py-2 transition-colors duration-150 hover:bg-parchment"
                     >
                       <span className="block text-[11px] font-semibold tabular-nums text-stone-500">
-                        {when || (pt ? `Jornada ${f.matchday}` : `Matchday ${f.matchday}`)}
+                        <ClockSwitch
+                          initial={when || (pt ? `Jornada ${f.matchday}` : `Matchday ${f.matchday}`)}
+                          steps={prediction?.timestamp
+                            ? kickoffSteps(f.kickoff, f.kickoffConfirmed, matchStartedLine(prediction.timestamp, locale), matchPlayedLine(prediction.timestamp, locale))
+                            : []}
+                        />
+                        {f.postponed && (pt ? ` · jogo em atraso, jornada ${f.matchday}` : ` · postponed, matchday ${f.matchday}`)}
                       </span>
                       <span className="block text-sm font-medium text-ink">
                         {matchLabel(teamDisplayName(f.home), teamDisplayName(f.away))}

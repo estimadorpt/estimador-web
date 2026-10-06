@@ -3,16 +3,16 @@
 import { useState, useMemo, useEffect, useRef, useId } from "react";
 import { useLocale } from "next-intl";
 import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "framer-motion";
-import { ligaTeamSlugs, teamColorOnPaper, teamLogoSrc, teamDisplayName } from "@/lib/config/football";
+import { ligaTeamSlugs, teamColorOnPaper, teamLogoSrc, teamDisplayName, teamWithArticle } from "@/lib/config/football";
 import { describePp, formatKickoffShort, formatPercent, formatPp, matchLabel } from "@/lib/football-format";
 import { Link } from "@/i18n/routing";
 import { Disclosure } from "@/components/viz/Disclosure";
 import type { NextMatchdayScenarios, ScenarioData } from "@/types/football";
 
-import { conditionalProbabilities, rankMatches, readFootballExplorationState, writeFootballExplorationState, shouldPushSelectionState, type Outcome } from "@/lib/football-exploration";
+import { conditionalProbabilities, defaultObjective, rankMatches, readFootballExplorationState, writeFootballExplorationState, shouldPushSelectionState, type Objective, type Outcome } from "@/lib/football-exploration";
 import { nextSupportedFixtureFor, clubStakes, fixtureStatus, type SupportedFixture } from "@/lib/football-fixtures";
 import { formatClubPercent, type Locale } from "@/components/football/club-outlook";
-import { matchStartedLine } from "@/lib/football-status";
+import { forecastAsOf, matchPlayedAt, matchPlayedLine, matchStartedLine } from "@/lib/football-status";
 
 /** Below this spread, a game's effect on the followed club is within the
  * Monte Carlo noise of thin conditional buckets (audit FA2-06). */
@@ -29,6 +29,9 @@ interface MatchdayPickerProps {
   supportedFixtures?: SupportedFixture[];
   /** The published bundle's own timestamp, for dating an unscheduled fixture. */
   forecastTimestamp?: string;
+  /** When the round the simulator plays out has been played: its "agora" is
+   * then the forecast's date (audit FR3-05). */
+  staleAt?: string | null;
   labels: {
     whatIfTitle: string;
     whatIfDescription: string;
@@ -96,7 +99,7 @@ function matchOutcomeLabels(match: RankedMatchTeams, focusTeam: string, pt: bool
   };
 }
 
-export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}, supportedFixtures = [], forecastTimestamp = "" }: MatchdayPickerProps) {
+export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}, supportedFixtures = [], forecastTimestamp = "", staleAt = null }: MatchdayPickerProps) {
   const locale = useLocale();
   const pt = locale !== "en";
   const localeCode: Locale = pt ? "pt" : "en";
@@ -121,6 +124,9 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
     const ms = Date.parse(kickoff);
     return !Number.isNaN(ms) && ms <= now;
   };
+  // "Jogo começou" at the kickoff, "Jogo disputado" two hours on (FR3-04).
+  const kickoffLine = (kickoff: string | null | undefined, ts: string) =>
+    started(matchPlayedAt(kickoff)) ? matchPlayedLine(ts, locale) : matchStartedLine(ts, locale);
   useEffect(() => {
     if (focusPending && viewHeadingRef.current) {
       viewHeadingRef.current.focus();
@@ -134,7 +140,13 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
   // No team until the URL says so, or the visitor picks one — never a silent
   // default (diagnosis §5/12 "Simulator", "Club continuity").
   const [focusTeam, setFocusTeam] = useState('');
-  const [objective, setObjective] = useState<'p_champion'|'p_relegation'>('p_champion');
+  // The objective the reader chose (or the URL named). Until they do, a club
+  // opens on its own question: the title from 1%, else relegation, so the
+  // 14 clubs with no title chance do not open on "0% → 0% → 0%" (FA3-03,
+  // UXM3-04). Once chosen, the choice stays across clubs.
+  const [chosenObjective, setObjective] = useState<Objective | null>(null);
+  const objective: Objective = chosenObjective ?? defaultObjective(data.baseline[focusTeam]);
+  const objectiveIsDefault = chosenObjective === null;
   const [showAll, setShowAll] = useState(false);
   const [ready, setReady] = useState(false);
   const [shareNotice,setShareNotice]=useState('');
@@ -155,7 +167,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
     }
     lastWritten.current = {
       team: restored.state.team ?? '',
-      objective: restored.state.objective ?? 'p_champion',
+      objective: restored.state.objective ?? (restored.state.team ? defaultObjective(data.baseline[restored.state.team]) : 'p_champion'),
       pick: restored.state.selection ? `${restored.state.selection.index}:${restored.state.selection.outcome}` : '',
     };
     setReady(true);
@@ -183,7 +195,12 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
     setSelections(prev => prev[matchIdx] === outcome ? {} : {[matchIdx]:outcome});
   };
 
-  const resetAll = () => setSelections({});
+  // "Limpar tudo" stays mounted (aria-disabled with nothing picked), so focus
+  // stays on it instead of falling to <body> (audit A11Y3-01).
+  const resetAll = () => {
+    if (!Object.values(selections).some(v => v !== null)) return;
+    setSelections({});
+  };
 
   const probabilities = useMemo(() => {
     const picked = Object.entries(selections).find(([,outcome])=>outcome);
@@ -263,10 +280,10 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
   );
 
   if (!focusTeam) {
-    // Before the mount effect has read the URL, render nothing rather than a
-    // "choose a club" placeholder that would flash and then be replaced —
-    // most visits arrive with `?team=` already set.
-    if (!ready) return <div aria-hidden="true" className="min-h-[240px]" />;
+    // The chooser is the server render too: most visits arrive from the hub,
+    // the menu or a search with no `?team=`, and a 240px placeholder that
+    // grew into the chooser after mount moved everything below it (CLS 0.115
+    // at 1280, audit SEO3-05). A shared link with a club still swaps once.
     return (
       <div>
         {staleVersion && (
@@ -339,7 +356,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 {f.kickoff && (
                   <span className="mr-2 text-xs tabular-nums text-stone-600">
                     {f.kickoffConfirmed && started(f.kickoff) && forecastTimestamp
-                      ? matchStartedLine(forecastTimestamp, locale)
+                      ? kickoffLine(f.kickoff, forecastTimestamp)
                       : formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed })}
                   </span>
                 )}
@@ -382,12 +399,20 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
           <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-team`} className="text-xs font-semibold text-ink-muted">{pt?'Equipa a seguir':'Club to follow'}</label><select id={`${ids}-team`} value={focusTeam} onChange={e=>setFocusTeam(e.target.value)} className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm">{Object.keys(data.baseline).sort((a,b)=>teamDisplayName(a).localeCompare(teamDisplayName(b),'pt')).map(team=><option key={team} value={team}>{teamDisplayName(team)}</option>)}</select></span>
           <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-goal`} className="text-xs font-semibold text-ink-muted">{pt?'O que queres saber?':'What matters to you?'}</label><select id={`${ids}-goal`} value={objective} onChange={e=>setObjective(e.target.value as typeof objective)} className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm"><option value="p_champion">{pt?'Ganhar o título':'Win the title'}</option><option value="p_relegation">{pt?'Despromoção':'Relegation'}</option></select></span>
+          {/* Why the question is relegation, when the reader did not choose it (FA3-03). */}
+          {objectiveIsDefault && objective === 'p_relegation' && (
+            <p className="text-xs leading-relaxed text-ink-muted sm:col-span-2">
+              {pt
+                ? `Mostramos a despromoção: o título está abaixo de 1% para ${teamWithArticle(focusTeam, 'o')}. Podes mudar a pergunta acima.`
+                : `Showing relegation: ${teamDisplayName(focusTeam)}'s title chance is below 1%. You can change the question above.`}
+            </p>
+          )}
           {/* No arrow to an identical number before a pick (audit MISS-02). */}
           <p aria-live="polite" aria-atomic="true" className="text-sm leading-relaxed text-ink sm:col-span-2">
             <strong>{teamDisplayName(focusTeam)}</strong>
             {hasSelections
               ? <> · {pt ? 'Base' : 'Baseline'} {formatClubPercent(focalBaseline, localeCode)} → <strong>{pt ? 'Com a escolha' : 'With the choice'} {formatClubPercent(focalCurrent, localeCode)}</strong> ({formatDeltaPrecise(focalCurrent - focalBaseline, localeCode)})</>
-              : <> · {pt ? 'agora' : 'now'} {formatClubPercent(focalBaseline, localeCode)} · {pt ? 'escolhe um resultado para ver o que muda' : 'pick a result to see what changes'}</>}
+              : <> · {started(staleAt) && forecastTimestamp ? forecastAsOf(forecastTimestamp, locale) : pt ? 'agora' : 'now'} {formatClubPercent(focalBaseline, localeCode)} · {pt ? 'escolhe um resultado para ver o que muda' : 'pick a result to see what changes'}</>}
           </p>
         </div>
       </section>
@@ -426,7 +451,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
             <p className="mb-3 text-sm text-ink">
               <strong>{matchLabel(teamDisplayName(myFixture.home), teamDisplayName(myFixture.away))}</strong>
               {myFixtureStatus && (
-                <span className="text-ink-muted"> · {myFixture.kickoffConfirmed && started(myFixture.kickoff) && forecastTimestamp ? matchStartedLine(forecastTimestamp, locale) : myFixtureStatus.label}</span>
+                <span className="text-ink-muted"> · {myFixture.kickoffConfirmed && started(myFixture.kickoff) && forecastTimestamp ? kickoffLine(myFixture.kickoff, forecastTimestamp) : myFixtureStatus.label}</span>
               )}
             </p>
             <div className="grid gap-2 sm:grid-cols-4">
@@ -473,14 +498,14 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
             {pt ? 'Outros jogos que afetam este objetivo' : 'Other matches that affect this objective'}
           </h3>
-          {hasSelections && (
-            <button
-              onClick={resetAll}
-              className="min-h-11 rounded-lg border border-line px-3 text-xs font-bold text-ink hover:bg-paper transition-colors"
-            >
-              {labels.resetAll}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={resetAll}
+            aria-disabled={!hasSelections || undefined}
+            className={`min-h-11 rounded-lg border border-line px-3 text-xs font-bold transition-colors ${hasSelections ? "text-ink hover:bg-paper" : "cursor-not-allowed text-stone-500"}`}
+          >
+            {labels.resetAll}
+          </button>
         </div>
 
         <p className="mb-3 text-sm leading-relaxed text-ink-muted">{showAll
@@ -506,7 +531,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     {meta?.kickoff && (
                       <span className="font-semibold tabular-nums">
                         {meta.kickoffConfirmed && started(meta.kickoff) && forecastTimestamp
-                          ? matchStartedLine(forecastTimestamp, locale)
+                          ? kickoffLine(meta.kickoff, forecastTimestamp)
                           : formatKickoffShort(meta.kickoff, locale, { confirmed: meta.kickoffConfirmed })} ·{' '}
                       </span>
                     )}
@@ -847,7 +872,8 @@ function SimulatedTable({
               const base = baseline[team];
               const champDelta = probs.p_champion - base.p_champion;
               const relegDelta = probs.p_relegation - base.p_relegation;
-              const isRelegationZone = i >= sorted.length - 3;
+              // 17th and 18th only: the 16th plays off (audit VUXD-01).
+              const isRelegationZone = i >= sorted.length - 2;
               const isChampionZone = i < 3;
               const teamColor = teamColorOnPaper(team);
 

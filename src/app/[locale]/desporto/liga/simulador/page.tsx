@@ -2,7 +2,7 @@ import { createPageMetadata } from '@/lib/metadata';
 import { loadGameFixtures, loadLigaData, loadLigaSamples, loadUpcomingFixtures } from "@/lib/utils/football-data-loader";
 import { listSupportedFixtures } from "@/lib/football-fixtures";
 import { formatDateSpan, formatInteger, formatShortDate } from "@/lib/football-format";
-import { roundPlayedAt } from "@/lib/football-status";
+import { forecastAsOf, nextRoundTiming, roundPlayedAt } from "@/lib/football-status";
 import { ClockSwitch } from "@/components/football/ClockSwitch";
 import { Link } from "@/i18n/routing";
 import { Header } from "@/components/Header";
@@ -83,16 +83,29 @@ export default async function SimuladorPage({
   // forecast this page starts from, and the round it lets you play out
   // (audit FR-09), the same matchday the rest of the site names.
   const simRound = prediction.next_matchday?.matchday ?? prediction.matchday + 1;
-  const simSpan = formatDateSpan(upcomingFixtures.filter(f => f.matchday === simRound).map(f => f.kickoff), locale, { short: true });
+  // The scope is every game the simulator offers, as on the hub: the round
+  // and any leftover from an earlier one, with its own date (audit VFA-M5).
+  const timing = nextRoundTiming(prediction, upcomingFixtures);
+  const leftoverRounds = Array.from(new Set(supportedFixtures.filter(f => f.matchday !== simRound).map(f => f.matchday))).sort((a, b) => a - b);
+  const simSpan = formatDateSpan(supportedFixtures.map(f => f.kickoff), locale, { short: true });
+  const scope = leftoverRounds.length === 0
+    ? locale === "pt" ? `a jornada ${simRound}` : `matchday ${simRound}`
+    : locale === "pt"
+      ? `a jornada ${simRound} e ${leftoverRounds.length === 1 && supportedFixtures.filter(f => f.matchday !== simRound).length === 1 ? "o jogo em atraso" : "os jogos em atraso"} da jornada ${leftoverRounds.join(" e ")}`
+      : `matchday ${simRound} and the postponed ${supportedFixtures.filter(f => f.matchday !== simRound).length === 1 ? "match" : "matches"} from matchday ${leftoverRounds.join(" and ")}`;
   const statusLine = locale === "pt"
-    ? `Previsão depois da jornada ${prediction.matchday} · atualizada a ${formatShortDate(prediction.timestamp, locale)} · simula a jornada ${simRound}${simSpan ? ` (${simSpan})` : ""}`
-    : `Forecast after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)} · plays out matchday ${simRound}${simSpan ? ` (${simSpan})` : ""}`;
+    ? `Previsão depois da jornada ${prediction.matchday} · atualizada a ${formatShortDate(prediction.timestamp, locale)} · simula ${scope}${simSpan ? ` (${simSpan})` : ""}`
+    : `Forecast after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)} · plays out ${scope}${simSpan ? ` (${simSpan})` : ""}`;
   // Once that round is played the simulator plays out results already known:
-  // it says so (audit FRESH-01).
-  const simRoundPlayedAt = roundPlayedAt(upcomingFixtures.filter(f => f.matchday === simRound).map(f => f.kickoff));
+  // it says so (audit FRESH-01), in the lede too (FR3-05).
+  const simRoundPlayedAt = timing.round === simRound ? timing.playedAt : roundPlayedAt(upcomingFixtures.filter(f => f.matchday === simRound).map(f => f.kickoff));
   const statusPlayed = locale === "pt"
     ? `Previsão depois da jornada ${prediction.matchday} · atualizada a ${formatShortDate(prediction.timestamp, locale)} · a jornada ${simRound} já foi jogada, nova previsão em preparação: o simulador mostra o que o modelo dava antes`
     : `Forecast after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)} · matchday ${simRound} has been played, new forecast in preparation: the simulator shows what the model gave before it`;
+  const asOf = forecastAsOf(prediction.timestamp, locale);
+  const ledePlayed = locale === "pt"
+    ? `A jornada ${simRound} já foi jogada: escolhe um clube e depois um resultado para veres o que esse resultado mudava ${asOf.endsWith(".") ? asOf : `${asOf}.`} Um jogo de cada vez; os outros resultados continuam incertos.`
+    : `Matchday ${simRound} has been played: choose a club, then a result, to see what that result would have changed ${asOf}. One match at a time; every other result stays uncertain.`;
 
   return (
     <div className="football-page min-h-screen bg-paper">
@@ -107,7 +120,7 @@ export default async function SimuladorPage({
         icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t("football.title")}
         title={locale === "pt" ? `Simulador da jornada ${simRound}` : `Matchday ${simRound} simulator`}
-        lede={t("football.simulatorLede", { round: simRound })}
+        lede={<ClockSwitch initial={t("football.simulatorLede", { round: simRound })} steps={[{ at: simRoundPlayedAt, value: ledePlayed }]} />}
         meta={<span><ClockSwitch initial={statusLine} steps={[{ at: simRoundPlayedAt, value: statusPlayed }]} /></span>}
       />
 
@@ -130,6 +143,7 @@ export default async function SimuladorPage({
             matchHrefs={matchHrefs}
             supportedFixtures={supportedFixtures}
             forecastTimestamp={prediction.timestamp}
+            staleAt={simRoundPlayedAt}
             labels={{
               whatIfTitle: t("football.whatIfTitle"),
               whatIfDescription: t("football.whatIfDescription"),

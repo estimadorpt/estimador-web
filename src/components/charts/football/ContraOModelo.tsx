@@ -5,7 +5,7 @@ import { OUTCOME_TONES, teamDisplayName, teamLogoSrc } from "@/lib/config/footba
 import { Link } from "@/i18n/routing";
 import { Swords, Lock, Trash2, SlidersHorizontal, Check, Share2 } from "lucide-react";
 import { useSeasonGame } from "@/hooks/useSeasonGame";
-import { formatDecimal, formatKickoff, formatKickoffShort, formatLongDate, formatSigned } from "@/lib/football-format";
+import { formatDecimal, formatKickoffShort, formatLongDate, formatSigned } from "@/lib/football-format";
 
 /** RPS values: three decimals in the page's number format. */
 const rpsFmt = (v: number, pt: boolean) => formatDecimal(v, pt ? "pt" : "en", 3);
@@ -37,6 +37,10 @@ interface ContraOModeloProps {
   locale?: string;
   /** A caveat on the model's season record, shown under the season table. */
   recordNote?: string | null;
+  /** The build's clock (ms): the round open when the page was exported is in
+   * its HTML, unpicked, so the page does not grow after hydration (audit
+   * SEO3-01: CLS 0.35 on phones when only the intro was server-rendered). */
+  builtAt?: number | null;
 }
 
 const OUTCOME_ORDER: Outcome[] = ["H", "D", "A"];
@@ -47,7 +51,7 @@ const OUTCOME_ORDER: Outcome[] = ["H", "D", "A"];
 const USER_COLOR = "var(--color-positive)";
 const MODEL_COLOR = "var(--color-ink-muted)";
 
-export function ContraOModelo({ data, locale = "pt", recordNote = null }: ContraOModeloProps) {
+export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt = null }: ContraOModeloProps) {
   const pt = locale !== "en";
 
   // Static export ships HTML with no picks and a build-time clock. Everything
@@ -104,9 +108,13 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
     setPicks({});
   }, [pt, online]);
 
+  // Before mount, the build's clock: the server HTML and the first client
+  // render show the round that was open at export time, with no picks; the
+  // reader's clock takes over after mount (the same round, in launch week).
+  const clock = mounted ? now : builtAt;
   const openRound = useMemo(
-    () => (mounted ? findOpenRound(data, now) : null),
-    [data, now, mounted],
+    () => (clock != null ? findOpenRound(data, clock) : null),
+    [data, clock],
   );
 
   useEffect(() => {
@@ -228,10 +236,11 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
     shareHint: pt
       ? "Tira um screenshot deste cartão ou copia o texto."
       : "Screenshot this card or copy the text.",
+    // Words for any of the three picks: a draw is not a "favorito" (PUB3-09).
     confLabels: {
-      leve: pt ? "Ligeiro favorito" : "Slight edge",
-      media: pt ? "Favorito" : "Favourite",
-      alta: pt ? "Muito confiante" : "Very confident",
+      leve: pt ? "Pouco confiante" : "Not very sure",
+      media: pt ? "Confiante" : "Fairly sure",
+      alta: pt ? "Muito confiante" : "Very sure",
     } as Record<Confidence, string>,
     // The one privacy line on the page, and the only one that knows whether
     // the season table is reachable (audit pub-PP-10, F21).
@@ -271,29 +280,13 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
 
   /* ------------------------------------------------------------ rendering */
 
-  // Stable pre-hydration shell: no picks, no clock, no lock decisions.
-  if (!mounted) {
-    return (
-      <div className="border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
-        {/* Not the game's name: the page hero already carries it, and
-            printing it twice made the card read as a second page header.
-            This card's job is explaining how the scoring works. */}
-        <div className="flex items-center gap-2 mb-2">
-          <Swords className="w-4 h-4 text-emerald-700" />
-          <h2 className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
-            {t.howItWorks}
-          </h2>
-        </div>
-        <p className="text-sm text-stone-500">{t.intro}</p>
-        <div className="mt-6 h-40 rounded-lg bg-stone-100 motion-safe:animate-pulse" />
-      </div>
-    );
-  }
-
+  // One tree before and after mount (audit SEO3-01): the server HTML has the
+  // intro, an empty scoreboard and the round open at build time, unpicked;
+  // after mount the reader's picks and clock fill the same places.
   return (
     <div className="space-y-8">
       {/* ----------------------------------------------------------- intro */}
-      <div className="border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
+      <div className="max-w-3xl border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
         {/* Not the game's name: the page hero already carries it, and
             printing it twice made the card read as a second page header.
             This card's job is explaining how the scoring works. */}
@@ -310,6 +303,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
 
       {/* ------------------------------------------------- season identity */}
       {online && (
+        <div className="max-w-3xl">
         <SeasonAccount
           player={game.player}
           authenticated={game.authenticated}
@@ -320,10 +314,11 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
           onName={game.setDisplayName}
           locale={locale}
         />
+        </div>
       )}
 
       {/* ------------------------------------------------------ scoreboard */}
-      <section>
+      <section className="max-w-3xl">
         {season.matchesScored === 0 ? (
           <p className="text-sm text-stone-500">{t.noScore}</p>
         ) : (
@@ -379,12 +374,14 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
 
       {/* ---------------------------------------------------- leaderboard */}
       {online && (
-        <SeasonLeaderboard
-          board={game.leaderboard}
-          locale={locale}
-          onRefresh={game.refreshLeaderboard}
-          recordNote={recordNote}
-        />
+        <div className="max-w-3xl">
+          <SeasonLeaderboard
+            board={game.leaderboard}
+            locale={locale}
+            onRefresh={game.refreshLeaderboard}
+            recordNote={recordNote}
+          />
+        </div>
       )}
 
       {/* ---------------------------------------------------- active round */}
@@ -400,14 +397,14 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
           outcomeLabel={outcomeLabel}
         />
       ) : (
-        <p className="text-sm text-stone-500 border border-stone-200 rounded-2xl p-4 sm:p-6">
+        <p className="max-w-3xl text-sm text-stone-500 border border-stone-200 rounded-2xl p-4 sm:p-6">
           {t.noOpen}
         </p>
       )}
 
       {/* ------------------------------------------------------- history */}
       {playedRounds.length > 0 && (
-        <section className="space-y-4">
+        <section className="max-w-3xl space-y-4">
           {playedRounds.map(roundScore => {
             const round = data.rounds.find(r => r.matchday === roundScore.matchday)!;
             return (
@@ -425,7 +422,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
 
       {/* ---------------------------------------------------- share + reset */}
       {season.matchesScored > 0 && (
-        <section>
+        <section className="max-w-3xl">
           <div
             className="border-2 border-stone-900 rounded-2xl p-5 sm:p-6 bg-cream"
             aria-label={t.share}
@@ -479,7 +476,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null }: Contra
         </section>
       )}
 
-      <section className="pt-2 space-y-2">
+      <section className="max-w-3xl pt-2 space-y-2">
         <button
           type="button"
           onClick={reset}
@@ -547,16 +544,16 @@ function RoundPicker({
           {t.picked(pickedCount, round.fixtures.length)}
         </span>
       </div>
-      {lock.lockAt !== null && (
-        <p className="text-xs text-stone-600 mb-1">
-          {allConfirmed
-            ? t.closes(formatKickoff(new Date(lock.lockAt).toISOString(), pt ? "pt" : "en"))
-            : t.closesUnconfirmed}
-        </p>
+      {/* The deadline is the hero's line (it re-reads the clock); here only
+          the note for kickoffs still to be confirmed (audit UXD3-10). */}
+      {lock.lockAt !== null && !allConfirmed && (
+        <p className="text-xs text-stone-600 mb-1">{t.closesUnconfirmed}</p>
       )}
-      <p className="text-xs text-stone-500 mb-4">{t.hidden}</p>
+      <p className="max-w-3xl text-xs text-stone-500 mb-4">{t.hidden}</p>
 
-      <div className="space-y-3">
+      {/* Two cards to a row from lg: nine games in one 784px column left
+          the right half empty and the page 2,700px tall (UXD3-10). */}
+      <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
         {round.fixtures.map(fixture => {
           const stored = picks[fixture.key];
           const probs = stored?.p ?? null;
@@ -609,9 +606,10 @@ function RoundPicker({
                           mode: "quick",
                         })
                       }
+                      // One selected style for both rows: ink with a check (UXD3-10).
                       className={`min-h-11 px-2 py-2 rounded-[10px] text-xs sm:text-sm font-semibold border transition-colors leading-tight break-words ${
                         active
-                          ? "bg-emerald-700 border-emerald-700 text-white"
+                          ? "bg-ink border-ink text-paper"
                           : "bg-cream border-stone-300 text-stone-700 hover:border-stone-400"
                       }`}
                     >
@@ -646,10 +644,11 @@ function RoundPicker({
                           }
                           className={`min-h-11 px-1.5 py-1.5 rounded-[10px] text-xs font-medium border transition-colors leading-tight ${
                             active
-                              ? "bg-stone-900 border-stone-900 text-white"
+                              ? "bg-ink border-ink text-paper"
                               : "bg-cream border-stone-300 text-stone-700 hover:border-stone-400"
                           }`}
                         >
+                          {active && <Check aria-hidden="true" className="mr-1 inline-block h-3.5 w-3.5 -mt-0.5" />}
                           {t.confLabels[c]}
                         </button>
                       );

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { conditionalProbabilities, rankMatches, readFootballExplorationState, writeFootballExplorationState, shouldPushSelectionState } from './football-exploration';
+import { conditionalProbabilities, defaultObjective, rankMatches, readFootballExplorationState, writeFootballExplorationState, shouldPushSelectionState } from './football-exploration';
 import type { NextMatchdayScenarios } from '@/types/football';
 const base={p_champion:0.3,p_top3:0.8,p_relegation:0.1};
 function match(values:number[]) {return {home_team:'A',away_team:'B',conditionals:Object.fromEntries(['H','D','A'].map((outcome,i)=>[outcome,{teams:{A:{...base,p_champion:values[i]}}}]))};}
@@ -11,7 +11,19 @@ describe('focused football exploration',()=>{
  it('ranks independently for the chosen objective',()=>{expect(rankMatches(data,'A','p_relegation').map(m=>m.index)).toEqual([0,1]);});
  it('restores only a valid, version-matched single conditional selection',()=>{
    expect(readFootballExplorationState('?v=current&team=A&goal=p_relegation&pick=1:A','current',data)).toEqual({state:{team:'A',objective:'p_relegation',selection:{index:1,outcome:'A'}},resetForVersion:false});
-   expect(readFootballExplorationState('?v=current&team=missing&pick=1:Z','current',data)).toEqual({state:{objective:'p_champion'},resetForVersion:false});
+   expect(readFootballExplorationState('?v=current&team=missing&pick=1:Z','current',data)).toEqual({state:{},resetForVersion:false});
+ });
+ it('reads a goal only when the URL names one, so the club default can apply (audit FA3-03)',()=>{
+   expect(readFootballExplorationState('?v=current&team=A','current',data).state).toEqual({team:'A'});
+   expect(readFootballExplorationState('?v=current&team=A&goal=p_champion','current',data).state).toEqual({team:'A',objective:'p_champion'});
+   expect(readFootballExplorationState('?v=current&team=A&goal=nonsense','current',data).state).toEqual({team:'A'});
+ });
+ it('opens on the title from 1%, else on relegation (audit FA3-03, UXM3-04)',()=>{
+   expect(defaultObjective({p_champion:0.51})).toBe('p_champion');
+   expect(defaultObjective({p_champion:0.01})).toBe('p_champion');
+   expect(defaultObjective({p_champion:0.0024})).toBe('p_relegation');
+   expect(defaultObjective({p_champion:0})).toBe('p_relegation');
+   expect(defaultObjective(undefined)).toBe('p_relegation');
  });
  it('resets a stale version and writes an unambiguous share state',()=>{
    expect(readFootballExplorationState('?v=old&team=A&pick=1:H','current',data)).toEqual({state:{},resetForVersion:true});

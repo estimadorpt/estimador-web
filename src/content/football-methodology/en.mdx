@@ -40,11 +40,11 @@ xPts do not use the forecasting model: they are an independent read. The gap bet
 
 The [simulator](/en/desporto/liga/simulador/) uses the same simulations. When you pick a result for one of next matchday's games, the probabilities become those of the simulations in which that result happened: a conditional probability, not a new run of the model. An unlikely result has fewer simulations behind it, so its probabilities are noisier. That is why the simulator works with one result at a time, and only lists other matches that move your club's chances by at least 3 percentage points: below that, the difference blends into the noise.
 
-The "Who finishes ahead?" question on the same page uses something else: <Samples /> complete seasons drawn from the simulations. With that sample, a share like 66% carries a margin of about ±5 percentage points, much larger than that of the title probabilities computed from every simulation.
+The "Who finishes ahead?" question on the same page uses something else: <Samples /> complete seasons drawn from the simulations. It counts who finishes with more points, and says separately how many seasons end level on points and which way the model splits them. With that sample, a share like 64% carries a margin of about ±5 percentage points, much larger than that of the title probabilities computed from every simulation.
 
 ## Decisive matches
 
-To measure the weight of each match, we split the <Sims /> simulations by that match's result (home win, draw, away win) and compare the title probability, or the relegation probability, in each group. We do not simulate the season again: it is the same count, made within each group. The matches where the gap between the best and worst result is largest are the most decisive.
+To measure the weight of each match, we split the <Sims /> simulations by that match's result (home win, draw, away win) and compare the title probability, or the relegation probability, in each group. We do not simulate the season again: it is the same count, made within each group. The matches where the gap between the best and worst result is largest are the most decisive. Because each simulation also draws the teams' strengths, splitting by the result mixes the effect of the points with what that result says about each club's strength: the gap is a conditional reading, not the isolated effect of winning. The same holds for what each result changes on the match and club pages, and in the simulator.
 
 ## Winning scenarios
 

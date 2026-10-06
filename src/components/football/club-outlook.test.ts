@@ -56,7 +56,10 @@ describe('buildClubOutlooks (frozen md06 bundle)', () => {
     expect(braga?.hasFixture).toBe(true);
     expect(braga?.fixtureStatusKind).not.toBe('postponed');
     expect(braga?.matchHref).not.toBeNull();
-    expect(braga?.postponedLabel).toBe('Jogo em atraso da jornada 2 (contra Gil Vicente)');
+    // The club's name takes its article (audit VFA-M3).
+    expect(braga?.postponedLabel).toBe('Jogo em atraso da jornada 2 (contra o Gil Vicente)');
+    const bragaEn = buildClubOutlooks('en', prediction, scenarios, gameFixtures).find(e => e.team === 'SC Braga');
+    expect(bragaEn?.postponedLabel).toContain('(against Gil Vicente)');
     const sporting = entries.find(e => e.team === 'Sporting CP');
     expect(sporting?.postponedLabel).toBeNull();
   });

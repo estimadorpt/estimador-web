@@ -40,11 +40,11 @@ Os xPts não usam o modelo de previsão: são uma leitura independente. A difere
 
 O [simulador](/pt/desporto/liga/simulador/) usa as mesmas simulações. Quando escolhes um resultado para um jogo da jornada seguinte, as probabilidades passam a ser as das simulações em que esse resultado aconteceu: é uma probabilidade condicional, não uma nova corrida do modelo. Um resultado pouco provável tem menos simulações por trás, e as suas probabilidades têm mais ruído. Por isso o simulador trabalha com um resultado de cada vez, e só lista outros jogos que mudam as contas do teu clube em pelo menos 3 pontos percentuais: abaixo disso, a diferença confunde-se com o ruído.
 
-A pergunta «Quem acaba à frente?», na mesma página, usa outra coisa: <Samples /> épocas completas sorteadas das simulações. Com essa amostra, uma percentagem como 66% tem uma margem de cerca de ±5 pontos percentuais, muito maior do que a das probabilidades de título calculadas com todas as simulações.
+A pergunta «Quem acaba à frente?», na mesma página, usa outra coisa: <Samples /> épocas completas sorteadas das simulações. Conta quem acaba com mais pontos, e diz à parte quantas épocas acabam empatadas em pontos e para que lado o modelo as desempata. Com essa amostra, uma percentagem como 64% tem uma margem de cerca de ±5 pontos percentuais, muito maior do que a das probabilidades de título calculadas com todas as simulações.
 
 ## Jogos decisivos
 
-Para medir o peso de cada jogo, separamos as <Sims /> simulações pelo resultado desse jogo (vitória da casa, empate, vitória de fora) e comparamos a probabilidade de título, ou de despromoção, em cada grupo. Não voltamos a simular a época: é a mesma contagem, feita dentro de cada grupo. Os jogos em que a diferença entre o melhor e o pior resultado é maior são os mais decisivos.
+Para medir o peso de cada jogo, separamos as <Sims /> simulações pelo resultado desse jogo (vitória da casa, empate, vitória de fora) e comparamos a probabilidade de título, ou de despromoção, em cada grupo. Não voltamos a simular a época: é a mesma contagem, feita dentro de cada grupo. Os jogos em que a diferença entre o melhor e o pior resultado é maior são os mais decisivos. Como cada simulação sorteia também a força das equipas, separar pelo resultado mistura o efeito dos pontos com o que esse resultado diz sobre a força de cada clube: a diferença é uma leitura condicional, não o efeito isolado de ganhar. O mesmo vale para o que muda com cada resultado nas páginas dos jogos e dos clubes, e no simulador.
 
 ## Cenários de vitória
 
