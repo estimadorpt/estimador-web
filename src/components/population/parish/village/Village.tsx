@@ -12,18 +12,17 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { ChevronLeft, ChevronRight, Dices, Mountain, RotateCcw, Shuffle, X } from 'lucide-react';
 import { Landscape } from '@/components/miniatura/Landscape';
-import { houseShape, nearestPoint } from '@/components/miniatura/hit-test';
+import { nearestPoint } from '@/components/miniatura/hit-test';
 import { COLOURS, Figure, HouseArt, SKINS, ageBand } from '@/components/miniatura/parts';
-import { NEIGHBOURHOODS, neighbourhoodPosition, type Neighbourhood } from '@/lib/miniatura/population';
+import { NEIGHBOURHOODS, type Neighbourhood } from '@/lib/miniatura/population';
 import { decodeSamples, defaultLandscape, householdLine, personDetails, personHead, type Locale, type ParishSample, type SampleHousehold } from '@/lib/population/sample';
+import { STREET, openTop, placeHouses, sceneBox } from './layout';
 import styles from './village.module.css';
 
 /** How far from a house a finger may land and still open it, in CSS pixels. */
 const TAP_RADIUS_PX = 44;
 /** Figures drawn in front of an open house; more than this shows six and "+N" (the card lists everyone). */
 const OPEN_FIGURES = 6;
-/** A full street: three of them, never repeating a household, when the parish has 72 or more. */
-const STREET = 24;
 /** Figures waiting at a closed door. */
 const DOOR_FIGURES = 2;
 /** How long the houses take to settle in: 24 delays of 22ms and a 360ms drop, with room to spare. */
@@ -38,19 +37,6 @@ const SCENERY: Record<Neighbourhood, Record<Locale, string>> = {
   hills: { pt: 'serra', en: 'hills' },
 };
 const AGE_LEGEND = ['0–17', '18–39', '40–64', '65+'];
-
-/** Where house i stands, in the 1000 × 600 scenery. */
-function slot(i: number, kind: Neighbourhood, compact: boolean) {
-  // The explainer's city packs its blocks tight; a street of 24 to open one by one needs air.
-  if (!compact && kind === 'city') {
-    const col = i % 6, row = Math.floor(i / 6);
-    return { x: 255 + col * 104 - row * 26, y: 150 + row * 84 + col * 14 };
-  }
-  if (!compact) return neighbourhoodPosition(i, kind);
-  const col = i % 4, row = Math.floor(i / 4);
-  const base = kind === 'town' ? 395 : 255;
-  return { x: base + col * 118 + (row % 2) * 26 - (kind === 'city' ? row * 12 : 0), y: 135 + row * 76 + (kind === 'hills' ? Math.sin(col * 0.9) * 12 : 0) };
-}
 
 /**
  * Where the k-th figure stands, relative to its house's anchor: two at a closed
@@ -117,24 +103,11 @@ export default function Village({ file, locale, region, municipality, censusPopu
   // Each house: where it stands, which drawing it gets, its height (for the
   // bubble and the tap target). The drawing changes with the sample, so a new
   // street looks new.
-  const houses = useMemo(() => households.map((household, i) => {
-    // City blocks all get three floors (multiples of 3), so a tall tower never hides the street behind it.
-    const art = kind === 'city' ? ((i + sampleIndex * 4) % 10) * 3 : (i * 7 + sampleIndex * 5) % 30;
-    const { x, y } = slot(i, kind, compact);
-    return { i, household, art, x, y, height: houseShape(art, kind).height };
-  }), [households, kind, compact, sampleIndex]);
-
-  const box = useMemo(() => {
-    if (houses.length === 0) return { x: 0, y: 0, w: 1000, h: 600 };
-    // The village keeps its windmill whole rather than a sliver of it at the edge.
-    const left = Math.max(0, Math.min(...houses.map(h => h.x)) - (kind === 'village' && !compact ? 150 : 60));
-    const right = Math.min(1000, Math.max(...houses.map(h => h.x)) + 70);
-    // Room above the tallest house for its lifted roof, without showing a band above the landscape's edge
-    // (the city's plaza sits on the scene's own ground, so a tall tower may reach a little higher).
-    const top = Math.max(kind === 'town' ? 36 : kind === 'city' ? -24 : 0, Math.min(...houses.map(h => h.y - h.height)) - 78);
-    const bottom = Math.min(600, Math.max(...houses.map(h => h.y)) + 52);
-    return { x: left, y: top, w: right - left, h: bottom - top };
-  }, [houses, kind, compact]);
+  const houses = useMemo(
+    () => placeHouses(households.length, kind, compact, sampleIndex).map(house => ({ ...house, household: households[house.i], people: households[house.i].people.length })),
+    [households, kind, compact, sampleIndex],
+  );
+  const box = useMemo(() => sceneBox(houses, kind, compact), [houses, kind, compact]);
   /** Screen pixels per scene unit, so the bubble's words stay readable on a phone. */
   const scale = width > 0 ? width / box.w : 1;
   const bubbleFont = Math.max(15, 14 / scale);
@@ -218,19 +191,40 @@ export default function Village({ file, locale, region, municipality, censusPopu
   };
 
   const current = selected === null ? null : houses[selected] ?? null;
-  // The bubble stands beside the open house's door (its right side, or its left
-  // near the scene's edge), clear of the lifted roof and of the people outside.
+  // The bubble stands beside the open house's door (its right side, or its
+  // left), clear of the lifted roof and of the people outside; when a nearer
+  // house stands there, it goes above the lifted roof if the drawing has room.
   const bubble = current && (() => {
     const w = bubbleFont * (pt ? 5.2 : 7.3), h = bubbleFont * 1.7;
-    const right = current.x + 40 + w <= box.x + box.w;
-    const left = right ? current.x + 40 : current.x - 34 - w;
-    const middle = Math.max(current.y - Math.max(current.height / 2, 24) - h / 2 - 6, box.y + h / 2 + 4);
-    // Base on the bubble's straight bottom edge, tip towards the door.
-    const near = (d: number) => (right ? d : w - d);
+    const beside = Math.max(current.y - Math.max(current.height / 2, 24) - h / 2 + 4, box.y + h / 2 + 4);
+    const roofTop = openTop(current, kind);
+    const candidates: Array<{ side: 'right' | 'left' | 'above'; left: number; middle: number }> = [
+      { side: 'right', left: current.x + 40, middle: beside },
+      { side: 'left', left: current.x - 34 - w, middle: beside },
+      { side: 'above', left: current.x + 3 - w / 2, middle: roofTop - h / 2 - bubbleFont * 0.9 },
+    ];
+    const fits = (c: (typeof candidates)[number]) =>
+      c.left >= box.x + 2 && c.left + w <= box.x + box.w - 2 && c.middle - h / 2 >= box.y + 2;
+    // How much of the other houses (walls and roof, roughly x−29…x+35 from the ridge to the front corner) a place covers.
+    const covered = (c: (typeof candidates)[number]) => houses.reduce((sum, other) => {
+      if (other.i === current.i) return sum;
+      const dx = Math.min(c.left + w, other.x + 35) - Math.max(c.left, other.x - 29);
+      const dy = Math.min(c.middle + h / 2, other.y + 17) - Math.max(c.middle - h / 2, other.y - other.height - 17);
+      return sum + (dx > 0 && dy > 0 ? dx * dy : 0);
+    }, 0);
+    // The first place in order that covers no more than a corner of a neighbour, else the one that covers least.
+    const fitting = candidates.filter(fits);
+    const placed = fitting.find(c => covered(c) < 60)
+      ?? fitting.reduce<(typeof candidates)[number] | undefined>((best, c) => (best && covered(best) <= covered(c) ? best : c), undefined)
+      ?? candidates[0];
+    // The tail leaves the bubble's straight bottom edge and points at the door (or, above, at the roof).
     const base = h / 2 - 2;
-    const tail = `M${near(bubbleFont * 1.0)} ${base} L${near(-bubbleFont * 0.15)} ${h / 2 + bubbleFont * 0.75} L${near(bubbleFont * 1.7)} ${base}Z`;
-    const join = `M${near(bubbleFont * 1.1)} ${h / 2}H${near(bubbleFont * 1.6)}`;
-    return { w, h, right, left, middle, tail, join };
+    const tip = placed.side === 'right' ? -bubbleFont * 0.15 : placed.side === 'left' ? w + bubbleFont * 0.15 : w / 2;
+    const from = placed.side === 'right' ? bubbleFont * 1.0 : placed.side === 'left' ? w - bubbleFont * 1.7 : w / 2 - bubbleFont * 0.35;
+    const to = from + bubbleFont * 0.7;
+    const tail = `M${from} ${base} L${tip} ${h / 2 + bubbleFont * 0.75} L${to} ${base}Z`;
+    const join = `M${from + bubbleFont * 0.1} ${h / 2}H${to - bubbleFont * 0.1}`;
+    return { w, h, left: placed.left, middle: placed.middle, tail, join };
   })();
   const streetsTotal = samples.length;
 

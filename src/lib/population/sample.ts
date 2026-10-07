@@ -67,13 +67,17 @@ export function decodeSamples(file: ParishSample): SampleHousehold[][] {
 type Gendered = { pt: [f: string, m: string]; en: string };
 type Plain = { pt: string; en: string };
 
-/** education_level_code: the highest level completed, as people say it ("tem o 9.º ano"). */
+/**
+ * education_level_code: the highest level completed, as people say it ("tem o
+ * 9.º ano", "left school after year 9"). Someone still studying has finished a
+ * year rather than left school (`FINISHED_YEAR`).
+ */
 export const EDUCATION: Record<number, Plain> = {
   1: { pt: 'sem escolaridade', en: 'no schooling' },
-  21: { pt: 'tem o 4.º ano', en: 'schooled to year 4' },
-  22: { pt: 'tem o 6.º ano', en: 'schooled to year 6' },
-  23: { pt: 'tem o 9.º ano', en: 'schooled to year 9' },
-  3: { pt: 'tem o 12.º ano', en: 'schooled to year 12' },
+  21: { pt: 'tem o 4.º ano', en: 'left school after year 4' },
+  22: { pt: 'tem o 6.º ano', en: 'left school after year 6' },
+  23: { pt: 'tem o 9.º ano', en: 'left school after year 9' },
+  3: { pt: 'tem o 12.º ano', en: 'left school after year 12' },
   4: { pt: 'tem um curso pós-secundário', en: 'has a post-secondary course' },
   51: { pt: 'tem um curso técnico superior', en: 'has a higher technical course' },
   52: { pt: 'tem bacharelato', en: 'has a three-year degree' },
@@ -82,10 +86,13 @@ export const EDUCATION: Record<number, Plain> = {
   55: { pt: 'tem doutoramento', en: 'has a doctorate' },
 };
 
+/** For a student, in English: "finished year 9", not "left school after year 9". */
+const FINISHED_YEAR: Record<number, string> = { 21: 'finished year 4', 22: 'finished year 6', 23: 'finished year 9', 3: 'finished year 12' };
+
 /**
  * employment_status_code other than 11 (employed, which sitprof_code words).
  * 25, the census's "outra situação", is never said: it reads like a form, and
- * the rest of the line (studies where, schooling) says enough.
+ * the rest of the line (where the day is spent, schooling) says enough.
  */
 export const ACTIVITY: Record<number, Gendered> = {
   12: { pt: ['desempregada', 'desempregado'], en: 'unemployed' },
@@ -159,6 +166,8 @@ export const MODE: Record<number, Plain> = {
   10: { pt: 'de barco', en: 'by boat' },
   11: { pt: 'noutro transporte', en: 'by other transport' },
 };
+/** Whoever runs a business or works for themselves has no "empresa" bus to be driven in. */
+const OWN_WORK_MODE: Plain = { pt: 'em transporte do trabalho', en: 'by work transport' };
 /** Under 18 someone else drives, and the shared transport is the school's. */
 const CHILD_MODE: Record<number, Plain> = {
   2: { pt: 'de carro', en: 'by car' },
@@ -196,17 +205,27 @@ function childGoes(age: number, locale: Locale) {
  * said twice ("estuda noutro concelho", not "estudante · estuda …"), and a
  * child under 15 gets neither a schooling level nor the census's "outra
  * situação".
+ *
+ * The census asks where people work or study, so "estuda" is said only of a
+ * student (or of someone under 25 in "outra situação"); anyone else without a
+ * job who has a place in the record "passa o dia" there, and a place that is
+ * no place ("sem local fixo") is said only of a job.
  */
 export function personDetails(person: SamplePerson, locale: Locale): string[] {
   const pt = locale === 'pt';
   const child = person.age < 15;
   const minor = person.age < 18;
+  const employed = person.emp === 11;
+  const studies = person.emp === 21 || (person.emp === UNSAID_ACTIVITY && person.age < 25);
   const parts: string[] = [];
-  const place = person.work > 0 ? PLACE[person.work]?.[locale] ?? null : null;
-  const modeWords = person.work === 1 ? undefined : (minor ? CHILD_MODE[person.mode] : undefined) ?? MODE[person.mode];
+  const place = person.work > 0 && (employed || person.work !== 6) ? PLACE[person.work]?.[locale] ?? null : null;
+  const ownWork = employed && person.sit >= 1 && person.sit <= 3;
+  const modeWords = person.work === 1
+    ? undefined
+    : (minor ? CHILD_MODE[person.mode] : undefined) ?? (ownWork && person.mode === 5 ? OWN_WORK_MODE : MODE[person.mode]);
   const where = place ? `${place}${modeWords ? `, ${modeWords[locale]}` : ''}` : null;
 
-  if (person.emp === 11) {
+  if (employed) {
     const situation = SITUATION[person.sit]?.[locale] ?? (pt ? 'trabalha' : 'works');
     // An employer's line keeps a field ("na construção") but not a role ("como gestor") or "tarefas não qualificadas".
     const employer = person.sit === 1 || person.sit === 2;
@@ -220,16 +239,16 @@ export function personDetails(person: SamplePerson, locale: Locale): string[] {
     }
   } else if (where && child) {
     parts.push(`${childGoes(person.age, locale)} ${where}`);
-  } else if (where) {
-    // Somewhere to go each day, without a job: the census asks where people study.
-    const activity = person.emp === 21 || person.emp === UNSAID_ACTIVITY ? null : gendered(ACTIVITY[person.emp], person.sex, locale);
-    if (activity) parts.push(activity);
+  } else if (where && studies) {
     parts.push(`${pt ? 'estuda' : 'studies'} ${where}`);
-  } else if (person.emp !== UNSAID_ACTIVITY) {
-    const activity = gendered(ACTIVITY[person.emp], person.sex, locale);
+  } else {
+    const activity = person.emp === UNSAID_ACTIVITY ? null : gendered(ACTIVITY[person.emp], person.sex, locale);
     if (activity) parts.push(activity);
+    if (where) parts.push(`${pt ? 'passa o dia' : 'spends the day'} ${where}`);
   }
-  if (!child && EDUCATION[person.edu]) parts.push(EDUCATION[person.edu][locale]);
+  if (!child && EDUCATION[person.edu]) {
+    parts.push(!pt && studies && FINISHED_YEAR[person.edu] ? FINISHED_YEAR[person.edu] : EDUCATION[person.edu][locale]);
+  }
   if (person.age >= 18) {
     const marital = gendered(MARITAL[person.mar], person.sex, locale);
     if (marital) parts.push(marital);

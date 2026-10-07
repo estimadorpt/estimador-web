@@ -116,7 +116,7 @@ describe('parish samples (Bate à porta)', () => {
     const one = (raw: number[]) => decodeSamples({ r: POPULATION_RELEASE, s: [[[3, raw]]] })[0][0].people[0];
     const line = (raw: number[], locale: 'pt' | 'en' = 'pt') => [personHead(one(raw), locale), ...personDetails(one(raw), locale)].join(' · ');
     expect(line([1, 74, 21, 23, 3])).toBe('Mulher, 74 anos · reformada · tem o 4.º ano · viúva');
-    expect(line([1, 74, 21, 23, 3], 'en')).toBe('Woman, 74 · retired · schooled to year 4 · widowed');
+    expect(line([1, 74, 21, 23, 3], 'en')).toBe('Woman, 74 · retired · left school after year 4 · widowed');
     expect(line([2, 41, 3, 11, 2, 0, 4, 6, 4, 2]))
       .toBe('Homem, 41 anos · trabalha por conta de outrem, nos serviços ou nas vendas · noutro concelho, de carro · tem o 12.º ano · casado');
     // The occupation takes the person's gender.
@@ -125,10 +125,23 @@ describe('parish samples (Bate à porta)', () => {
     expect(line([2, 50, 23, 11, 2, 0, 4, 10, 2, 1])).toBe('Homem, 50 anos · trabalha por conta de outrem, em tarefas não qualificadas · na freguesia, a pé · tem o 9.º ano · casado');
     // An employer has a business; the place still says "trabalha".
     expect(line([1, 52, 23, 11, 2, 0, 1, 6, 1])).toBe('Mulher, 52 anos · tem uma empresa com menos de 10 pessoas, nos serviços ou nas vendas · trabalha em casa · tem o 9.º ano · casada');
-    expect(line([1, 52, 23, 11, 2, 0, 1, 6, 1], 'en')).toBe('Woman, 52 · runs a business with under 10 staff, in services or sales · works at home · schooled to year 9 · married');
+    expect(line([1, 52, 23, 11, 2, 0, 1, 6, 1], 'en')).toBe('Woman, 52 · runs a business with under 10 staff, in services or sales · works at home · left school after year 9 · married');
     // A student is said once: where they study.
     expect(line([1, 20, 3, 21, 1, 0, 0, 0, 4, 4])).toBe('Mulher, 20 anos · estuda noutro concelho, de autocarro · tem o 12.º ano · solteira');
     expect(line([1, 20, 3, 21, 1])).toBe('Mulher, 20 anos · estudante · tem o 12.º ano · solteira');
+    expect(line([1, 20, 3, 21, 1, 0, 0, 0, 4, 4], 'en')).toBe('Woman, 20 · studies in another municipality, by bus · finished year 12 · single');
+    // "Estuda" only of a student, or of someone under 25 in "outra situação"; anyone else spends the day there.
+    expect(line([2, 19, 23, 25, 1, 0, 0, 0, 3, 4])).toBe('Homem, 19 anos · estuda noutra freguesia do concelho, de autocarro · tem o 9.º ano · solteiro');
+    expect(line([2, 50, 23, 25, 2, 0, 0, 0, 4, 2])).toBe('Homem, 50 anos · passa o dia noutro concelho, de carro · tem o 9.º ano · casado');
+    expect(line([2, 50, 23, 25, 2, 0, 0, 0, 4, 2], 'en')).toBe('Man, 50 · spends the day in another municipality, by car · left school after year 9 · married');
+    // "Sem local fixo" is said only of a job: a retired woman with no fixed place gets no place at all.
+    expect(line([1, 63, 21, 23, 2, 0, 0, 0, 6, 2])).toBe('Mulher, 63 anos · reformada · tem o 4.º ano · casada');
+    expect(line([1, 8, 1, 25, 0, 0, 0, 0, 6, 2])).toBe('Menina, 8 anos');
+    expect(line([2, 30, 3, 11, 1, 0, 4, 9, 6, 2])).toBe('Homem, 30 anos · trabalha por conta de outrem, como operador de máquinas ou condutor · sem local fixo, de carro · tem o 12.º ano · solteiro');
+    // Whoever runs a business or works for themselves goes in work transport, not "da empresa".
+    expect(line([2, 45, 23, 11, 2, 0, 2, 8, 4, 5])).toBe('Homem, 45 anos · tem uma empresa com 10 ou mais pessoas, na indústria, na construção ou num ofício · trabalha noutro concelho, em transporte do trabalho · tem o 9.º ano · casado');
+    expect(line([2, 45, 23, 11, 2, 0, 3, 7, 3, 5])).toBe('Homem, 45 anos · trabalha por conta própria, na agricultura, na floresta ou na pesca · noutra freguesia do concelho, em transporte do trabalho · tem o 9.º ano · casado');
+    expect(line([2, 45, 23, 11, 2, 0, 4, 10, 3, 5])).toBe('Homem, 45 anos · trabalha por conta de outrem, em tarefas não qualificadas · noutra freguesia do concelho, no transporte da empresa · tem o 9.º ano · casado');
     // "Outra situação" is never said, at any age.
     expect(line([2, 45, 22, 25, 4])).toBe('Homem, 45 anos · tem o 6.º ano · divorciado');
     // Children: creche, jardim de infância or escola, by school bus; no schooling level.

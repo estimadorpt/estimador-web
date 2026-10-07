@@ -78,7 +78,7 @@
   100% { transform: translateY(0); opacity: 1; }
 }
 
-/* "Toc, toc" over the door, for a moment. */
+/* "Toc, toc" beside the door, for a moment (still, under reduced motion). */
 .knock {
   animation: knock 1500ms ease-out both;
   pointer-events: none;
@@ -107,13 +107,12 @@
   .house :global(.mini-roof) {
     transition: none;
   }
+  /* "Toc, toc" stays still beside the door while the house is open. */
   .arrive,
   .hop,
   .panel,
-  .wash {
-    animation: none;
-  }
+  .wash,
   .knock {
-    display: none;
+    animation: none;
   }
 }
