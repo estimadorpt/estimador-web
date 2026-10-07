@@ -472,6 +472,10 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
               />
             )}
             <span className="font-mono text-[13px] text-stone-600">{pt ? 'Código' : 'Code'} {code}</span>
+            {/* The village sits low on a long page: a way down to it from the top (on phones the rail is folded away). */}
+            <a href="#bate-a-porta" className="inline-flex min-h-11 items-center text-[13px] font-semibold text-ink underline underline-offset-4">
+              {pt ? 'Bate à porta ↓' : 'Knock on a door ↓'}
+            </a>
             <span className="basis-full text-[13px] text-stone-600 sm:basis-auto">{publication}</span>
             {/* What the tier means for this parish, on screen rather than in a tooltip (CL3-05). */}
             <span className="basis-full max-w-3xl text-[13px] leading-relaxed text-stone-600">
@@ -566,8 +570,8 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
               </h2>
               <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-stone-700">
                 {pt
-                  ? 'Cada casa é um agregado que a população sintética gerou para esta freguesia, e cada boneco uma pessoa dele. Bate à porta para veres quem lá vive.'
-                  : 'Each house is a household the synthetic population generated for this parish, and each figure one of its people. Knock to see who lives there.'}
+                  ? 'Cada casa é um agregado que a população sintética gerou para esta freguesia, com uma ou duas das suas pessoas à porta. Bate à porta para veres todas as que lá vivem.'
+                  : 'Each house is a household the synthetic population generated for this parish, with one or two of its people at the door. Knock to see everyone who lives there.'}
               </p>
               <div className="mt-4">
                 <DoorKnock code={code} locale={locale} region={place.region} municipality={place.municipality} censusPopulation={place.censusPopulation} />

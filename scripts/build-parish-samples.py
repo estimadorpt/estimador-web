@@ -4,9 +4,9 @@ The parish page's village (src/components/population/parish/village/) draws
 about two dozen houses whose people are real records of the release's
 microdata: private households only (is_institutional = 0), drawn at random
 with a seed fixed by the release and the parish code, so a rebuild writes the
-same bytes. Each parish gets up to three samples of up to 24 households
-(disjoint when the parish has 72 or more; a parish with 24 or fewer gets one
-sample holding all of them).
+same bytes. No household appears twice in a parish's file: a parish with 72
+or more private households gets three disjoint samples of 24; one with fewer
+gets all of them, split into one to three near-equal streets of at most 24.
 
 It is a toy, not a statistic: the page labels the people as generated and the
 sample as a sample, and prints no number computed from it.
@@ -98,16 +98,19 @@ def encode_person(row: dict) -> list[int]:
 
 
 def draw(ids: np.ndarray, code: str) -> list[list[int]]:
-    """Up to three samples of household ids, in a seeded order."""
+    """The parish's streets: household ids in a seeded order, never one twice.
+
+    72 or more private households: three disjoint samples of 24. Fewer: every
+    household, split into as few near-equal streets of at most 24 as fit them
+    (50 -> 17, 17, 16), so "Mais casas" always shows houses not yet seen.
+    """
     rng = np.random.default_rng(seed_for(code))
-    ids = np.sort(ids)
-    n = len(ids)
-    if n <= PER_SAMPLE:
-        return [rng.permutation(ids).tolist()]
+    order = rng.permutation(np.sort(ids))
+    n = len(order)
     if n >= PER_SAMPLE * SAMPLES:
-        order = rng.permutation(ids)
         return [order[i * PER_SAMPLE:(i + 1) * PER_SAMPLE].tolist() for i in range(SAMPLES)]
-    return [rng.choice(ids, PER_SAMPLE, replace=False).tolist() for _ in range(SAMPLES)]
+    streets = -(-n // PER_SAMPLE)
+    return [chunk.tolist() for chunk in np.array_split(order, streets)]
 
 
 def build(assets: Path, only: set[str] | None):
@@ -131,6 +134,10 @@ def build(assets: Path, only: set[str] | None):
         info[(code, hh)] = (size, rooms)
 
     samples = {code: draw(np.array(hh_list, dtype=np.int64), code) for code, hh_list in by_parish.items()}
+    for code, parish in samples.items():
+        drawn = [hh for sample in parish for hh in sample]
+        assert len(drawn) == len(set(drawn)), f'{code}: a household appears in two samples'
+        assert len(drawn) == min(len(by_parish[code]), PER_SAMPLE * SAMPLES), f'{code}: {len(drawn)} households drawn'
     chosen = {(code, hh) for code, parish in samples.items() for sample in parish for hh in sample}
 
     persons = pq.read_table(assets / f'pt-synthpop-v{RELEASE}-persons.parquet', columns=PERSON_COLUMNS)
@@ -183,7 +190,7 @@ def main():
             extra = sorted(p.stem for p in OUT.glob('*.json') if p.stem not in files)
             if extra:
                 sys.exit(f'sample files with no parish: {", ".join(extra[:8])}')
-        print('verified: deterministic, members belong to their household, private households only')
+        print('verified: deterministic, no household twice, members belong to their household, private households only')
         return
 
     OUT.mkdir(parents=True, exist_ok=True)

@@ -67,22 +67,26 @@ export function decodeSamples(file: ParishSample): SampleHousehold[][] {
 type Gendered = { pt: [f: string, m: string]; en: string };
 type Plain = { pt: string; en: string };
 
-/** education_level_code. */
+/** education_level_code: the highest level completed, as people say it ("tem o 9.º ano"). */
 export const EDUCATION: Record<number, Plain> = {
   1: { pt: 'sem escolaridade', en: 'no schooling' },
-  21: { pt: '1.º ciclo do básico', en: 'primary school' },
-  22: { pt: '2.º ciclo do básico', en: '2nd cycle of basic school' },
-  23: { pt: '3.º ciclo do básico', en: 'lower secondary' },
-  3: { pt: 'secundário', en: 'upper secondary' },
-  4: { pt: 'pós-secundário', en: 'post-secondary' },
-  51: { pt: 'curso técnico superior', en: 'higher technical course' },
-  52: { pt: 'bacharelato', en: 'bacharelato (3-year degree)' },
-  53: { pt: 'licenciatura', en: 'degree' },
-  54: { pt: 'mestrado', en: 'master’s' },
-  55: { pt: 'doutoramento', en: 'doctorate' },
+  21: { pt: 'tem o 4.º ano', en: 'schooled to year 4' },
+  22: { pt: 'tem o 6.º ano', en: 'schooled to year 6' },
+  23: { pt: 'tem o 9.º ano', en: 'schooled to year 9' },
+  3: { pt: 'tem o 12.º ano', en: 'schooled to year 12' },
+  4: { pt: 'tem um curso pós-secundário', en: 'has a post-secondary course' },
+  51: { pt: 'tem um curso técnico superior', en: 'has a higher technical course' },
+  52: { pt: 'tem bacharelato', en: 'has a three-year degree' },
+  53: { pt: 'tem licenciatura', en: 'has a degree' },
+  54: { pt: 'tem mestrado', en: 'has a master’s' },
+  55: { pt: 'tem doutoramento', en: 'has a doctorate' },
 };
 
-/** employment_status_code other than 11 (employed, which sitprof_code words). */
+/**
+ * employment_status_code other than 11 (employed, which sitprof_code words).
+ * 25, the census's "outra situação", is never said: it reads like a form, and
+ * the rest of the line (studies where, schooling) says enough.
+ */
 export const ACTIVITY: Record<number, Gendered> = {
   12: { pt: ['desempregada', 'desempregado'], en: 'unemployed' },
   21: { pt: ['estudante', 'estudante'], en: 'student' },
@@ -91,29 +95,37 @@ export const ACTIVITY: Record<number, Gendered> = {
   24: { pt: ['incapacitada para o trabalho', 'incapacitado para o trabalho'], en: 'unable to work' },
   25: { pt: ['outra situação', 'outra situação'], en: 'other situation' },
 };
+const UNSAID_ACTIVITY = 25;
 
 /** sitprof_code, for the employed. */
-export const SITUATION: Record<number, Gendered> = {
-  1: { pt: ['patroa, com menos de 10 pessoas', 'patrão, com menos de 10 pessoas'], en: 'employer, under 10 staff' },
-  2: { pt: ['patroa, com 10 ou mais pessoas', 'patrão, com 10 ou mais pessoas'], en: 'employer, 10 or more staff' },
-  3: { pt: ['trabalha por conta própria', 'trabalha por conta própria'], en: 'self-employed' },
-  4: { pt: ['trabalha por conta de outrem', 'trabalha por conta de outrem'], en: 'employee' },
-  5: { pt: ['trabalha', 'trabalha'], en: 'works' },
+export const SITUATION: Record<number, Plain> = {
+  1: { pt: 'tem uma empresa com menos de 10 pessoas', en: 'runs a business with under 10 staff' },
+  2: { pt: 'tem uma empresa com 10 ou mais pessoas', en: 'runs a business with 10 or more staff' },
+  3: { pt: 'trabalha por conta própria', en: 'self-employed' },
+  4: { pt: 'trabalha por conta de outrem', en: 'works for an employer' },
+  5: { pt: 'trabalha', en: 'works' },
 };
 
-/** CPP 2010 major group (occupation_major). */
-export const OCCUPATION: Record<number, Plain> = {
-  0: { pt: 'Forças Armadas', en: 'armed forces' },
-  1: { pt: 'direção e gestão', en: 'management' },
-  2: { pt: 'profissão intelectual ou científica', en: 'professional' },
-  3: { pt: 'técnico de nível intermédio', en: 'technician' },
-  4: { pt: 'apoio administrativo', en: 'clerical support' },
-  5: { pt: 'serviços e vendas', en: 'services and sales' },
-  6: { pt: 'agricultura e pesca', en: 'farming and fishing' },
-  7: { pt: 'indústria, construção e ofícios', en: 'crafts and trades' },
-  8: { pt: 'operação de máquinas', en: 'machine operation' },
-  9: { pt: 'trabalho não qualificado', en: 'elementary work' },
+/**
+ * CPP 2010 major group (occupation_major), said after the situation: "trabalha
+ * por conta de outrem, como técnica de nível intermédio", "trabalha nos serviços
+ * ou nas vendas". A role takes the person's gender.
+ */
+export const OCCUPATION: Record<number, Gendered> = {
+  0: { pt: ['nas Forças Armadas', 'nas Forças Armadas'], en: 'in the armed forces' },
+  1: { pt: ['como diretora ou gestora', 'como diretor ou gestor'], en: 'as a manager' },
+  2: { pt: ['numa profissão intelectual ou científica', 'numa profissão intelectual ou científica'], en: 'in a professional occupation' },
+  3: { pt: ['como técnica de nível intermédio', 'como técnico de nível intermédio'], en: 'as a technician' },
+  4: { pt: ['como administrativa', 'como administrativo'], en: 'in an office job' },
+  5: { pt: ['nos serviços ou nas vendas', 'nos serviços ou nas vendas'], en: 'in services or sales' },
+  6: { pt: ['na agricultura, na floresta ou na pesca', 'na agricultura, na floresta ou na pesca'], en: 'in farming, forestry or fishing' },
+  7: { pt: ['na indústria, na construção ou num ofício', 'na indústria, na construção ou num ofício'], en: 'in industry, construction or a trade' },
+  8: { pt: ['como operadora de máquinas ou condutora', 'como operador de máquinas ou condutor'], en: 'as a machine operator or driver' },
+  9: { pt: ['em tarefas não qualificadas', 'em tarefas não qualificadas'], en: 'in elementary tasks' },
 };
+
+/** The groups said as a field of work (nas Forças Armadas, nos serviços…), not as a role. */
+const FIELD_GROUPS = new Set([0, 2, 5, 6, 7]);
 
 /** marital_status_code. */
 export const MARITAL: Record<number, Gendered> = {
@@ -133,13 +145,13 @@ export const PLACE: Record<number, Plain> = {
   6: { pt: 'sem local fixo', en: 'with no fixed place' },
 };
 
-/** transport_mode (NR, "não indicado", is dropped by decodePerson). */
+/** transport_mode (NR, "não indicado", is dropped by decodePerson); a child's words come from CHILD_MODE. */
 export const MODE: Record<number, Plain> = {
   1: { pt: 'a pé', en: 'on foot' },
   2: { pt: 'de carro', en: 'by car' },
-  3: { pt: 'à boleia, de carro', en: 'by car, as a passenger' },
+  3: { pt: 'à boleia', en: 'getting a lift' },
   4: { pt: 'de autocarro', en: 'by bus' },
-  5: { pt: 'no transporte da empresa ou da escola', en: 'by company or school transport' },
+  5: { pt: 'no transporte da empresa', en: 'by company transport' },
   6: { pt: 'de metro', en: 'by metro' },
   7: { pt: 'de comboio', en: 'by train' },
   8: { pt: 'de mota', en: 'by motorbike' },
@@ -147,46 +159,75 @@ export const MODE: Record<number, Plain> = {
   10: { pt: 'de barco', en: 'by boat' },
   11: { pt: 'noutro transporte', en: 'by other transport' },
 };
+/** Under 18 someone else drives, and the shared transport is the school's. */
+const CHILD_MODE: Record<number, Plain> = {
+  2: { pt: 'de carro', en: 'by car' },
+  3: { pt: 'de carro', en: 'by car' },
+  5: { pt: 'de transporte escolar', en: 'by school bus' },
+};
 
 const gendered = (words: Gendered | undefined, sex: 'f' | 'm', locale: Locale) =>
   words ? (locale === 'pt' ? words.pt[sex === 'f' ? 0 : 1] : words.en) : null;
 
-/** "Mulher, 74 anos", "Menino, 7 anos", "Woman, 74", "Boy, 7". */
+/** "Mulher, 74 anos", "Menino, 7 anos", "Bebé"; "Woman, 74", "Boy, 7", "Baby". */
 export function personHead(person: SamplePerson, locale: Locale): string {
   const { sex, age } = person;
   const f = sex === 'f';
+  if (age === 0) return locale === 'pt' ? 'Bebé' : 'Baby';
   if (locale === 'pt') {
     const who = age < 13 ? (f ? 'Menina' : 'Menino') : age < 18 ? (f ? 'Rapariga' : 'Rapaz') : f ? 'Mulher' : 'Homem';
-    return `${who}, ${age === 0 ? 'menos de 1 ano' : age === 1 ? '1 ano' : `${age} anos`}`;
+    return `${who}, ${age === 1 ? '1 ano' : `${age} anos`}`;
   }
   const who = age < 18 ? (f ? 'Girl' : 'Boy') : f ? 'Woman' : 'Man';
-  return `${who}, ${age === 0 ? 'under 1' : age}`;
+  return `${who}, ${age}`;
+}
+
+/** What a child who leaves home for the day does: creche, jardim de infância, escola. */
+function childGoes(age: number, locale: Locale) {
+  if (age < 3) return locale === 'pt' ? 'vai à creche' : 'goes to nursery';
+  if (age < 6) return locale === 'pt' ? 'vai ao jardim de infância' : 'goes to preschool';
+  return locale === 'pt' ? 'vai à escola' : 'goes to school';
 }
 
 /**
  * The rest of the line, in the order a neighbour would say it: what the person
  * does, where they work or study and how they get there, schooling, marital
- * status, nationality. Fields a record leaves empty are left out; a child's
- * schooling and "outra situação" are not said (they read wrong under 15).
+ * status, nationality. Fields a record leaves empty are left out, nothing is
+ * said twice ("estuda noutro concelho", not "estudante · estuda …"), and a
+ * child under 15 gets neither a schooling level nor the census's "outra
+ * situação".
  */
 export function personDetails(person: SamplePerson, locale: Locale): string[] {
   const pt = locale === 'pt';
   const child = person.age < 15;
+  const minor = person.age < 18;
   const parts: string[] = [];
+  const place = person.work > 0 ? PLACE[person.work]?.[locale] ?? null : null;
+  const modeWords = person.work === 1 ? undefined : (minor ? CHILD_MODE[person.mode] : undefined) ?? MODE[person.mode];
+  const where = place ? `${place}${modeWords ? `, ${modeWords[locale]}` : ''}` : null;
+
   if (person.emp === 11) {
-    const doing = gendered(SITUATION[person.sit], person.sex, locale) ?? (pt ? 'trabalha' : 'works');
-    const occupation = person.occ === null ? null : OCCUPATION[person.occ]?.[locale];
-    parts.push(occupation ? `${doing} (${occupation})` : doing);
-  } else if (!(child && person.emp === 25)) {
+    const situation = SITUATION[person.sit]?.[locale] ?? (pt ? 'trabalha' : 'works');
+    // An employer's line keeps a field ("na construção") but not a role ("como gestor") or "tarefas não qualificadas".
+    const employer = person.sit === 1 || person.sit === 2;
+    const occupation = person.occ === null || (employer && !FIELD_GROUPS.has(person.occ)) ? null : gendered(OCCUPATION[person.occ], person.sex, locale);
+    // "trabalha nos serviços…" reads on; "trabalha por conta de outrem, como técnica…" takes a comma.
+    const bare = situation === (pt ? 'trabalha' : 'works');
+    parts.push(occupation ? `${situation}${bare ? ' ' : ', '}${occupation}` : situation);
+    if (where) {
+      const said = situation.startsWith(pt ? 'trabalha' : 'works');
+      parts.push(said ? where : `${pt ? 'trabalha' : 'works'} ${where}`);
+    }
+  } else if (where && child) {
+    parts.push(`${childGoes(person.age, locale)} ${where}`);
+  } else if (where) {
+    // Somewhere to go each day, without a job: the census asks where people study.
+    const activity = person.emp === 21 || person.emp === UNSAID_ACTIVITY ? null : gendered(ACTIVITY[person.emp], person.sex, locale);
+    if (activity) parts.push(activity);
+    parts.push(`${pt ? 'estuda' : 'studies'} ${where}`);
+  } else if (person.emp !== UNSAID_ACTIVITY) {
     const activity = gendered(ACTIVITY[person.emp], person.sex, locale);
     if (activity) parts.push(activity);
-  }
-  if (person.work > 0 && PLACE[person.work]) {
-    // "trabalha por conta própria · noutro concelho, de carro": the verb is not said twice.
-    const said = parts[0]?.startsWith(pt ? 'trabalha' : 'works');
-    const verb = said ? '' : person.emp === 11 ? (pt ? 'trabalha ' : 'works ') : (pt ? 'estuda ' : 'studies ');
-    const mode = person.work === 1 ? null : MODE[person.mode]?.[locale];
-    parts.push(`${verb}${PLACE[person.work][locale]}${mode ? `, ${mode}` : ''}`);
   }
   if (!child && EDUCATION[person.edu]) parts.push(EDUCATION[person.edu][locale]);
   if (person.age >= 18) {

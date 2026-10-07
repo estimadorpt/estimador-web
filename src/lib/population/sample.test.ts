@@ -26,6 +26,9 @@ const PINNED: Record<string, string> = {
   '030857': '88a2e6d84cbc32b45085e59435ccba0b711bf5201f718cb8f67eacdcf4979f59',
   // Mosteiro (Lajes das Flores): 11 private households, all of them in one sample.
   '480107': '0c0f3eccd0030bb1039be7ba5d86438dc1e39bdd606db4beb7793245af77cf74',
+  // Between 25 and 71 private households: every one of them, in two or three streets, none twice.
+  '480201': '7206a18192bd306a0acd6c36da47478a387ac10916e6c288c6d4dcb28ff35489',
+  '090729': '850d56f2414e8085cc7ed2388aa2c21210246a8730982d01a02119255607f5a0',
 };
 
 describe('parish samples (Bate à porta)', () => {
@@ -110,18 +113,40 @@ describe('parish samples (Bate à porta)', () => {
   });
 
   it('speak in plain words', () => {
-    const [person] = decodeSamples({ r: POPULATION_RELEASE, s: [[[4, [1, 74, 21, 23, 3]]]] })[0][0].people;
-    expect(personHead(person, 'pt')).toBe('Mulher, 74 anos');
-    expect(personDetails(person, 'pt')).toEqual(['reformada', '1.º ciclo do básico', 'viúva']);
-    expect(personDetails(person, 'en')).toEqual(['retired', 'primary school', 'widowed']);
-    const [worker] = decodeSamples({ r: POPULATION_RELEASE, s: [[[3, [2, 41, 3, 11, 2, 0, 4, 6, 4, 2]]]] })[0][0].people;
-    expect([personHead(worker, 'pt'), ...personDetails(worker, 'pt')].join(' · '))
-      .toBe('Homem, 41 anos · trabalha por conta de outrem (serviços e vendas) · noutro concelho, de carro · secundário · casado');
-    // A child: no schooling level, no "outra situação"; where they study and how they get there.
-    const [child] = decodeSamples({ r: POPULATION_RELEASE, s: [[[3, [1, 8, 1, 25, 0, 0, 0, 0, 2, 5]]]] })[0][0].people;
-    expect(personHead(child, 'pt')).toBe('Menina, 8 anos');
-    expect(personDetails(child, 'pt')).toEqual(['estuda na freguesia, no transporte da empresa ou da escola']);
-    expect(personHead(child, 'en')).toBe('Girl, 8');
+    const one = (raw: number[]) => decodeSamples({ r: POPULATION_RELEASE, s: [[[3, raw]]] })[0][0].people[0];
+    const line = (raw: number[], locale: 'pt' | 'en' = 'pt') => [personHead(one(raw), locale), ...personDetails(one(raw), locale)].join(' · ');
+    expect(line([1, 74, 21, 23, 3])).toBe('Mulher, 74 anos · reformada · tem o 4.º ano · viúva');
+    expect(line([1, 74, 21, 23, 3], 'en')).toBe('Woman, 74 · retired · schooled to year 4 · widowed');
+    expect(line([2, 41, 3, 11, 2, 0, 4, 6, 4, 2]))
+      .toBe('Homem, 41 anos · trabalha por conta de outrem, nos serviços ou nas vendas · noutro concelho, de carro · tem o 12.º ano · casado');
+    // The occupation takes the person's gender.
+    expect(line([1, 38, 3, 11, 2, 0, 4, 4, 3, 7])).toBe('Mulher, 38 anos · trabalha por conta de outrem, como técnica de nível intermédio · noutra freguesia do concelho, de comboio · tem o 12.º ano · casada');
+    // Elementary work never says "trabalha … (trabalho …)".
+    expect(line([2, 50, 23, 11, 2, 0, 4, 10, 2, 1])).toBe('Homem, 50 anos · trabalha por conta de outrem, em tarefas não qualificadas · na freguesia, a pé · tem o 9.º ano · casado');
+    // An employer has a business; the place still says "trabalha".
+    expect(line([1, 52, 23, 11, 2, 0, 1, 6, 1])).toBe('Mulher, 52 anos · tem uma empresa com menos de 10 pessoas, nos serviços ou nas vendas · trabalha em casa · tem o 9.º ano · casada');
+    expect(line([1, 52, 23, 11, 2, 0, 1, 6, 1], 'en')).toBe('Woman, 52 · runs a business with under 10 staff, in services or sales · works at home · schooled to year 9 · married');
+    // A student is said once: where they study.
+    expect(line([1, 20, 3, 21, 1, 0, 0, 0, 4, 4])).toBe('Mulher, 20 anos · estuda noutro concelho, de autocarro · tem o 12.º ano · solteira');
+    expect(line([1, 20, 3, 21, 1])).toBe('Mulher, 20 anos · estudante · tem o 12.º ano · solteira');
+    // "Outra situação" is never said, at any age.
+    expect(line([2, 45, 22, 25, 4])).toBe('Homem, 45 anos · tem o 6.º ano · divorciado');
+    // Children: creche, jardim de infância or escola, by school bus; no schooling level.
+    expect(line([1, 8, 1, 25, 0, 0, 0, 0, 2, 5])).toBe('Menina, 8 anos · vai à escola na freguesia, de transporte escolar');
+    expect(line([1, 8, 1, 25, 0, 0, 0, 0, 2, 5], 'en')).toBe('Girl, 8 · goes to school in the parish, by school bus');
+    expect(line([2, 4, 1, 25, 0, 0, 0, 0, 3, 3])).toBe('Menino, 4 anos · vai ao jardim de infância noutra freguesia do concelho, de carro');
+    expect(line([2, 0, 1, 25])).toBe('Bebé');
+    expect(line([2, 0, 1, 25], 'en')).toBe('Baby');
+    expect(line([1, 1, 1, 25])).toBe('Menina, 1 ano');
+  });
+
+  it('never repeat a household across a parish’s streets', () => {
+    // Under 72 private households the streets are near-equal and hold every household once (25 to 71 → 2 or 3 streets).
+    for (const code of ['480201', '090729']) {
+      const sizes = decodeSamples(JSON.parse(read(code).toString('utf8'))).map(sample => sample.length);
+      expect(Math.max(...sizes) - Math.min(...sizes), code).toBeLessThanOrEqual(1);
+      expect(Math.max(...sizes), code).toBeLessThan(24);
+    }
   });
 
   it('pick a decorative landscape', () => {

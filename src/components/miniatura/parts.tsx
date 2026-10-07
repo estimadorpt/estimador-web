@@ -17,8 +17,12 @@ export function ageBand(age: number) {
   return age < 18 ? 0 : age < 40 ? 1 : age < 65 ? 2 : 3;
 }
 
-/** A house drawn around its anchor (0, 0); `id` picks its colours and floors. */
-export function HouseArt({ id, neighbourhood, selected, glow = '#e7b35c' }: { id: number; neighbourhood: Neighbourhood; selected: boolean; glow?: string | null }) {
+/**
+ * A house drawn around its anchor (0, 0); `id` picks its colours and floors.
+ * When `selected`, the roof lifts; the explainer fades it (`liftedRoof` .25),
+ * the parish village keeps it solid so the open house reads at a glance.
+ */
+export function HouseArt({ id, neighbourhood, selected, glow = '#e7b35c', liftedRoof = 0.25 }: { id: number; neighbourhood: Neighbourhood; selected: boolean; glow?: string | null; liftedRoof?: number }) {
   const urban=neighbourhood==='city',stone=neighbourhood==='hills',coast=neighbourhood==='town';
   const { floors, height } = houseShape(id, neighbourhood);
   const wall=urban?['#d7dcd5','#d2b88f','#b6c6c5','#d3b2a6'][id%4]:stone?['#a8a89c','#bab5a4','#999e96'][id%3]:coast?['#f9f3dc','#d5e2dd','#ece5c7'][id%3]:'#f5ecd6';
@@ -36,7 +40,7 @@ export function HouseArt({ id, neighbourhood, selected, glow = '#e7b35c' }: { id
     {coast&&[0,1,2,3].map(i=><path key={i} d={`M${-23+i*7} 1v${-height}l3 2v${height}Z`} fill={id%2?'#6a9caf':'#c96f57'} opacity=".35"/>)}
     <path d="M12 11l7 -4v-14l-7 4Z" fill="#617866"/>
     <path d="M-23 2l27 15v-4l-27 -15Z" fill={stone?'#7e8375':coast?'#5992a6':urban?'#758f8b':'#487cac'}/>
-    <g className="mini-roof" style={{transform:selected?'translateY(-35px)':'translateY(0)',opacity:selected?.25:1}}>
+    <g className="mini-roof" style={{transform:selected?'translateY(-35px)':'translateY(0)',opacity:selected?liftedRoof:1}}>
       {urban?<><path d={`M-27 ${1-height}l29 17 32 -17 -30 -17Z`} fill="#c0c5ba"/><path d={`M-27 ${1-height}v-5l29 17 32 -17v5l-32 17Z`} fill="#e6e6d6"/><path d={`M-12 ${-height-2}l11 6 8 -5 -11 -6Z`} fill="#699090"/><path d={`M16 ${-height-7}v-18m-6 6h12`} stroke="#61726e" fill="none" strokeWidth="1.5"/></>:
       <><path d={`M-29 ${2-height}L-3 ${-17-height}L35 ${1-height}L5 ${20-height}Z`} fill={stone?'#66736c':'#b86b51'}/><path d={`M-29 ${2-height}L-3 ${-17-height}L3 ${-5-height}L-23 ${13-height}Z`} fill={stone?'#87918a':'#d88762'}/>{[0,1,2,3].map(i=><path key={i} d={`M${-20+i*8} ${-4-height+i*4}l24 13`} stroke={stone?'#505f58':'#a6533d'} strokeWidth="1.2" opacity=".5"/>)}{!coast&&<path d={`M14 ${-height}v-17l8 4v17Z`} fill={stone?'#b4b5a4':'#f1e7ca'}/>}</>}
     </g>
