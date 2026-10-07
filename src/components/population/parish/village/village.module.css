@@ -1,0 +1,140 @@
+/* "Bate à porta": the parish village. Motion is feedback only and stops under
+   prefers-reduced-motion; the houses never move on their own. */
+
+.scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.house {
+  cursor: pointer;
+  outline: none;
+}
+
+.lift {
+  transition: transform 220ms cubic-bezier(.22, .7, .2, 1);
+}
+
+/* With a house open, the rest of the street steps back. */
+.house {
+  transition: opacity 200ms;
+}
+.scene[data-open='true'] .house[aria-pressed='false'] {
+  opacity: .7;
+}
+.scene[data-open='true'] .house[aria-pressed='false']:hover,
+.scene[data-open='true'] .house[aria-pressed='false']:focus-visible {
+  opacity: 1;
+}
+
+.house:hover .lift {
+  transform: translateY(-3px);
+}
+
+.house[aria-pressed='true'] .lift {
+  transform: translateY(-8px);
+}
+
+.house :global(.mini-roof) {
+  transition: transform 300ms cubic-bezier(.22, .7, .2, 1), opacity 300ms;
+}
+
+.house:hover:not([aria-pressed='true']) :global(.mini-roof) {
+  transform: translateY(-6px) !important;
+}
+
+.house:focus-visible :global(.mini-house-target) {
+  stroke: var(--color-ink);
+  stroke-width: 3;
+  stroke-dasharray: 5 4;
+  fill: #bdc7e733;
+}
+
+/* The scene changes sample or landscape: the houses settle in, one after another. */
+.arrive {
+  animation: arrive 360ms cubic-bezier(.22, .7, .2, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes arrive {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* The people of an open house come out and give a little hop. */
+.hop {
+  animation: hop 520ms cubic-bezier(.3, .7, .3, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes hop {
+  0% { transform: translateY(-6px); opacity: 0; }
+  45% { transform: translateY(-9px); opacity: 1; }
+  75% { transform: translateY(1px); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* "Toc, toc" over the door, for a moment. */
+.knock {
+  animation: knock 1500ms ease-out both;
+  pointer-events: none;
+}
+
+@keyframes knock {
+  0% { opacity: 0; transform: translateY(6px) scale(.9); }
+  15% { opacity: 1; transform: translateY(0) scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
+.panel {
+  animation: panel 220ms ease-out both;
+}
+
+@keyframes panel {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* The scenery's small lives (Landscape's classes), with a pause in the controls. */
+.scene :global(.land-wave) { animation: land-wave 4s ease-in-out infinite; }
+.scene :global(.land-boat) { animation: land-boat 22s ease-in-out infinite; }
+.scene :global(.land-bird) { animation: land-bird 15s linear infinite; animation-delay: var(--offset); }
+.scene :global(.land-windmill) { animation: land-spin 13s linear infinite; }
+.scene :global(.land-cloud) { animation: land-cloud 35s ease-in-out infinite; }
+.scene :global(.land-mist) { animation: land-cloud 25s ease-in-out infinite; }
+.scene :global(.land-tree) { transform-box: fill-box; transform-origin: bottom center; animation: land-sway 5s ease-in-out infinite; }
+.scene :global(.land-stream) { animation: land-stream 3s linear infinite; }
+.scene :global(.land-tram) { animation: land-tram 18s linear infinite; }
+.scene[data-still='true'] :global([class^='land-']) { animation-play-state: paused; }
+
+@keyframes land-wave { 0%, 100% { transform: translate(0, 0); opacity: .2; } 50% { transform: translate(20px, 5px); opacity: .8; } }
+@keyframes land-boat { 0%, 100% { transform: translate(-15px, 35px) rotate(-2deg); } 50% { transform: translate(45px, -60px) rotate(2deg); } }
+@keyframes land-bird { 0% { transform: translate(-80px, 0); } 50% { transform: translate(45px, -22px); } 100% { transform: translate(170px, 0); } }
+@keyframes land-spin { to { transform: rotate(360deg); } }
+@keyframes land-cloud { 0%, 100% { transform: translate(-40px, 0); } 50% { transform: translate(110px, -7px); } }
+@keyframes land-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes land-stream { to { stroke-dashoffset: -72; } }
+@keyframes land-tram { 0% { transform: translate(0, 0); } 45%, 55% { transform: translate(425px, 140px); } 100% { transform: translate(0, 0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .scene :global([class^='land-']) {
+    animation: none !important;
+  }
+  .lift,
+  .house :global(.mini-roof) {
+    transition: none;
+  }
+  .arrive,
+  .hop,
+  .panel {
+    animation: none;
+  }
+  .knock {
+    display: none;
+  }
+}

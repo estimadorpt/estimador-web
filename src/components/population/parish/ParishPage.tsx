@@ -32,6 +32,7 @@ import { parishHead, parishUrl, unknownHead, watchHead } from './head';
 import { parishDescription, parishTitle } from './head-text';
 import { inScope, isLongName, isUnion, municipalityPhrase, scopeSubject, THIS_PARISH, type Scope } from './place-words';
 import { ShareTools } from './ShareTools';
+import { DoorKnock } from './village/DoorKnock';
 
 /** What the page needs to know about the place: from the parish file's `place` (v1.0.3 on), else places.json. */
 interface PagePlace {
@@ -388,7 +389,8 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
       { href: `#${group.id}`, label: group.title[locale], group: true },
       ...group.recipes.map(recipe => ({ href: `#${RECIPE_COPY[recipe].anchor}`, label: RECIPE_COPY[recipe].question[locale] })),
     ]),
-    { href: '#partilhar', label: pt ? 'Partilhar' : 'Share', after: true },
+    { href: '#bate-a-porta', label: pt ? 'Bate à porta' : 'Knock on a door', after: true },
+    { href: '#partilhar', label: pt ? 'Partilhar' : 'Share' },
     { href: '#citar', label: pt ? 'Como citar' : 'How to cite' },
     { href: '#outras', label: pt ? 'Outras freguesias' : 'Other parishes' },
   ] as Array<{ href: string; label: string; group?: boolean; after?: boolean }>;
@@ -556,6 +558,21 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                 })}
               </section>
             ))}
+
+            {/* A toy beside the answers (owner, 7 October 2026): generated households of this parish, drawn as a street. */}
+            <section id="bate-a-porta" data-rail aria-labelledby="bate-a-porta-title">
+              <h2 id="bate-a-porta-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
+                {pt ? 'Quem vive atrás destas portas?' : 'Who lives behind these doors?'}
+              </h2>
+              <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-stone-700">
+                {pt
+                  ? 'Cada casa é um agregado que a população sintética gerou para esta freguesia, e cada boneco uma pessoa dele. Bate à porta para veres quem lá vive.'
+                  : 'Each house is a household the synthetic population generated for this parish, and each figure one of its people. Knock to see who lives there.'}
+              </p>
+              <div className="mt-4">
+                <DoorKnock code={code} locale={locale} region={place.region} municipality={place.municipality} censusPopulation={place.censusPopulation} />
+              </div>
+            </section>
 
             <section id="partilhar" data-rail aria-labelledby="partilhar-title">
               <h2 id="partilhar-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">

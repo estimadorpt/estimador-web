@@ -119,7 +119,14 @@ sync_population() {
     echo "Warning: no microsynthesis virtualenv at $MS_DIR/.venv"
     return 1
   fi
-  "$PYTHON" "$SCRIPT_DIR/sync-population.py" --source "$MS_DIR"
+  "$PYTHON" "$SCRIPT_DIR/sync-population.py" --source "$MS_DIR" || return 1
+  # The sync rewrites the release folder, so the parish pages' "Bate à porta"
+  # samples (sample/<CODE>.json) are rebuilt from the release's parquet files.
+  if [ -n "${SYNTHPOP_ASSETS:-}" ]; then
+    "$PYTHON" "$SCRIPT_DIR/build-parish-samples.py" --assets "$SYNTHPOP_ASSETS"
+  else
+    echo "Warning: SYNTHPOP_ASSETS is not set, so sample/ was not rebuilt: run scripts/build-parish-samples.py --assets <dir with the release parquet files>"
+  fi
 }
 
 case "$SECTION" in
