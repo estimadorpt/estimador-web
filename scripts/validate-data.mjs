@@ -267,6 +267,16 @@ feed(`${populationDir}/meta.json`, meta => {
   return null;
 });
 feed(`${populationDir}/scorecard.json`, card => (isObject(card) && card.status === 'ok' ? null : 'scorecard status is not ok'));
+// The parish pages' "Bate à porta" households (scripts/build-parish-samples.py).
+// Not in the manifest (the sync rewrites the folder and they are built after it
+// from the release's parquet files), so check that every parish has one: a
+// sync without the rebuild leaves the village empty.
+{
+  const sampleDir = path.join(DATA, populationDir, 'sample');
+  const parishes = fs.existsSync(path.join(DATA, populationDir, 'parish')) ? fs.readdirSync(path.join(DATA, populationDir, 'parish')).filter(name => name.endsWith('.json')) : [];
+  const missing = parishes.filter(name => !fs.existsSync(path.join(sampleDir, name)));
+  if (missing.length) problems.push(`${populationDir}/sample: ${missing.length} parish(es) without a sample (${missing.slice(0, 3).join(', ')}) — run scripts/build-parish-samples.py --assets <release parquet dir> after the sync`);
+}
 
 // ---- report ----------------------------------------------------------------
 

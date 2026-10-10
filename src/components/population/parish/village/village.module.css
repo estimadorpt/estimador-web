@@ -1,0 +1,118 @@
+/* "Bate à porta": the parish village. Nothing loops: motion is feedback only
+   (arrival, knock, step-out) and stops under prefers-reduced-motion. */
+
+.scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.house {
+  cursor: pointer;
+  outline: none;
+}
+
+.lift {
+  transition: transform 220ms cubic-bezier(.22, .7, .2, 1);
+}
+
+/* With a house open, a cream wash sets the rest of the street back; the walls stay solid. */
+.wash {
+  opacity: .5;
+  pointer-events: none;
+  animation: wash 200ms ease-out both;
+}
+
+@keyframes wash {
+  from { opacity: 0; }
+  to { opacity: .5; }
+}
+
+.house:hover .lift {
+  transform: translateY(-3px);
+}
+
+.house[aria-pressed='true'] .lift {
+  transform: translateY(-8px);
+}
+
+.house :global(.mini-roof) {
+  transition: transform 300ms cubic-bezier(.22, .7, .2, 1), opacity 300ms;
+}
+
+.house:hover:not([aria-pressed='true']) :global(.mini-roof) {
+  transform: translateY(-6px) !important;
+}
+
+.house:focus-visible :global(.mini-house-target) {
+  stroke: var(--color-ink);
+  stroke-width: 3;
+  stroke-dasharray: 5 4;
+  fill: #bdc7e733;
+}
+
+/* The scene changes sample or landscape: the houses settle in, one after another. */
+.arrive {
+  animation: arrive 360ms cubic-bezier(.22, .7, .2, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes arrive {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* The people of an open house come out and give a little hop. */
+.hop {
+  animation: hop 520ms cubic-bezier(.3, .7, .3, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes hop {
+  0% { transform: translateY(-6px); opacity: 0; }
+  45% { transform: translateY(-9px); opacity: 1; }
+  75% { transform: translateY(1px); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* "Toc, toc" beside the door, for a moment (still, under reduced motion). */
+.knock {
+  animation: knock 1500ms ease-out both;
+  pointer-events: none;
+}
+
+@keyframes knock {
+  0% { opacity: 0; transform: translateY(6px) scale(.9); }
+  15% { opacity: 1; transform: translateY(0) scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
+.panel {
+  animation: panel 220ms ease-out both;
+}
+
+@keyframes panel {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* The scenery stands still: Landscape's looping classes (waves, birds, tram…) get no animation here. */
+
+@media (prefers-reduced-motion: reduce) {
+  .lift,
+  .house :global(.mini-roof) {
+    transition: none;
+  }
+  /* "Toc, toc" stays still beside the door while the house is open. */
+  .arrive,
+  .hop,
+  .panel,
+  .wash,
+  .knock {
+    animation: none;
+  }
+}

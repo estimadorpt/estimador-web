@@ -25,13 +25,17 @@ export function houseCentre(id: number, neighbourhood: Neighbourhood): { x: numb
  * on the sea or an empty field selects nothing.
  */
 export function nearestHouse(point: { x: number; y: number }, neighbourhood: Neighbourhood, maxDistance: number): number | null {
+  return nearestPoint(point, HOUSEHOLDS.map(house => ({ id: house.id, ...houseCentre(house.id, neighbourhood) })), maxDistance);
+}
+
+/** The id of the centre nearest `point`, or null when none is within `maxDistance`; ties keep the first. */
+export function nearestPoint(point: { x: number; y: number }, centres: ReadonlyArray<{ id: number; x: number; y: number }>, maxDistance: number): number | null {
   let best: number | null = null;
   let bestDistance = maxDistance;
-  for (const house of HOUSEHOLDS) {
-    const centre = houseCentre(house.id, neighbourhood);
+  for (const centre of centres) {
     const distance = Math.hypot(point.x - centre.x, point.y - centre.y);
-    if (distance <= bestDistance) {
-      best = house.id;
+    if (distance <= bestDistance && (best === null || distance < bestDistance)) {
+      best = centre.id;
       bestDistance = distance;
     }
   }

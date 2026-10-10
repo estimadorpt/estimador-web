@@ -5,6 +5,7 @@
  */
 import { POPULATION_DATA_PATH } from '@/lib/config/population';
 import type { GameEntry, GameIndex, ParishRecord, PopulationMeta, PopulationPlaces } from '@/types/population';
+import type { ParishSample } from '@/lib/population/sample';
 
 const cache = new Map<string, Promise<unknown>>();
 
@@ -47,3 +48,5 @@ export const fetchGameChunk = (chunk: number) =>
   fetchPopulationFile<GameEntry[]>(`game/chunk-${String(chunk).padStart(3, '0')}.json`);
 export const fetchQueryLookup = (bucket: string) =>
   fetchPopulationFile<Record<string, [code: string, recipe: string]>>(`q/${bucket}.json`);
+/** The parish page's "Bate à porta" households (scripts/build-parish-samples.py). */
+export const fetchSample = (code: string) => fetchPopulationFile<ParishSample>(`sample/${code}.json`);
