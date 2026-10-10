@@ -63,9 +63,12 @@ describe('the published 2026-27 manifest', () => {
   });
 
   it('lists the rounds frozen before the previous one ended (audit FA2-04)', () => {
-    const frozen = frozenBeforePreviousRoundEnded(manifest.matchdays);
-    expect(frozen.map(f => f.matchday)).toEqual([3, 5, 6, 7]);
-    expect(frozen.map(f => f.previous)).toEqual([2, 4, 5, 6]);
+    // Pin only the audited rounds. Freezing the next forecast before a
+    // Monday game is routine, so the list grows with the season (md09 did
+    // on 10 October) and a full-list snapshot fails every weekend publish.
+    const audited = frozenBeforePreviousRoundEnded(manifest.matchdays).filter(f => f.matchday <= 7);
+    expect(audited.map(f => f.matchday)).toEqual([3, 5, 6, 7]);
+    expect(audited.map(f => f.previous)).toEqual([2, 4, 5, 6]);
   });
 
   it('names matchdays 1 and 2 as the rounds with no probs_source', () => {
