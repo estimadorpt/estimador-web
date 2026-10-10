@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "generated_at": "2026-10-10T13:03:06Z",
+  "generated_at": "2026-10-10T23:12:08Z",
   "n_matchdays": 34,
   "matchdays": [
     {
@@ -994,8 +994,8 @@
           "p_home": 0.3208,
           "p_draw": 0.2972,
           "p_away": 0.382,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 0,
+          "away_goals": 1,
           "published_at": "2026-09-25T14:50:48.445152+00:00",
           "probs_source": "md07.json@10877c9"
         },
@@ -1009,8 +1009,8 @@
           "p_home": 0.2352,
           "p_draw": 0.2433,
           "p_away": 0.5216,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 1,
+          "away_goals": 3,
           "published_at": "2026-09-25T14:50:48.445152+00:00",
           "probs_source": "md07.json@10877c9"
         },
@@ -1024,8 +1024,8 @@
           "p_home": 0.2837,
           "p_draw": 0.3046,
           "p_away": 0.4117,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 0,
+          "away_goals": 1,
           "published_at": "2026-09-25T14:50:48.445152+00:00",
           "probs_source": "md07.json@10877c9"
         },
@@ -1039,8 +1039,8 @@
           "p_home": 0.0711,
           "p_draw": 0.1567,
           "p_away": 0.7723,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 1,
+          "away_goals": 2,
           "published_at": "2026-09-25T14:50:48.445152+00:00",
           "probs_source": "md07.json@10877c9"
         },
@@ -1054,8 +1054,8 @@
           "p_home": 0.2971,
           "p_draw": 0.268,
           "p_away": 0.4349,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 2,
+          "away_goals": 1,
           "published_at": "2026-09-25T14:50:48.445152+00:00",
           "probs_source": "md07.json@10877c9"
         },
@@ -1133,11 +1133,13 @@
           "kickoff": "2026-10-23T19:45:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-10-23T19:45:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.57,
+          "p_draw": 0.2468,
+          "p_away": 0.1832,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-10T23:11:24.521701+00:00",
+          "probs_source": "md08.json"
         },
         {
           "id": "md09-estrela-amadora-vs-casa-pia",
@@ -1146,11 +1148,13 @@
           "kickoff": "2026-10-24T14:30:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-10-24T14:30:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.4215,
+          "p_draw": 0.2871,
+          "p_away": 0.2914,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-10T23:11:24.521701+00:00",
+          "probs_source": "md08.json"
         },
         {
           "id": "md09-alverca-vs-arouca",
@@ -1159,11 +1163,13 @@
           "kickoff": "2026-10-24T17:00:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-10-24T17:00:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.4338,
+          "p_draw": 0.2691,
+          "p_away": 0.2971,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-10T23:11:24.521701+00:00",
+          "probs_source": "md08.json"
         },
         {
           "id": "md09-gil-vicente-vs-porto",
@@ -1172,11 +1178,13 @@
           "kickoff": "2026-10-24T19:30:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-10-24T19:30:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.1258,
+          "p_draw": 0.2201,
+          "p_away": 0.6541,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-10T23:11:24.521701+00:00",
+          "probs_source": "md08.json"
         },
         {
           "id": "md09-estoril-vs-moreirense",
@@ -1185,11 +1193,13 @@
           "kickoff": "2026-10-25T15:30:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-10-25T15:30:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.4987,
+          "p_draw": 0.2616,
+          "p_away": 0.2397,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-10T23:11:24.521701+00:00",
+          "probs_source": "md08.json"
         },
         {
           "id": "md09-rio-ave-vs-famalicao",
@@ -1198,11 +1208,13 @@
           "kickoff": "2026-10-25T18:00:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-10-25T18:00:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.3067,
+          "p_draw": 0.2747,
+          "p_away": 0.4186,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-10T23:11:24.521701+00:00",
+          "probs_source": "md08.json"
         },
         {
           "id": "md09-nacional-vs-sc-braga",
@@ -1211,11 +1223,13 @@
           "kickoff": "2026-10-25T18:00:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-10-25T18:00:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.1652,
+          "p_draw": 0.2204,
+          "p_away": 0.6144,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-10T23:11:24.521701+00:00",
+          "probs_source": "md08.json"
         },
         {
           "id": "md09-sporting-cp-vs-academico-viseu",
@@ -1224,11 +1238,13 @@
           "kickoff": "2026-10-25T20:30:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-10-25T20:30:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.8808,
+          "p_draw": 0.0863,
+          "p_away": 0.0329,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-10T23:11:24.521701+00:00",
+          "probs_source": "md08.json"
         },
         {
           "id": "md09-santa-clara-vs-benfica",
@@ -1237,11 +1253,13 @@
           "kickoff": "2026-10-26T18:45:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-10-26T18:45:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.1371,
+          "p_draw": 0.2172,
+          "p_away": 0.6457,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-10T23:11:24.521701+00:00",
+          "probs_source": "md08.json"
         }
       ]
     },
