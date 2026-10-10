@@ -35,6 +35,7 @@ export const injuryReasonPt: Record<string, string> = {
   "Calf problems": "Problemas na barriga da perna",
   "Broken foot": "Fratura do pé",
   "Concussion": "Concussão",
+  "Lumbar vertebra problems": "Problemas nas vértebras lombares",
   Suspension: "Suspensão",
 };
 
