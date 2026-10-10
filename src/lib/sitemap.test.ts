@@ -97,7 +97,18 @@ describe('sitemap', () => {
       expect(new Date(byUrl.get(url('pt', prose))!.lastModified!).toISOString().slice(0, 10), prose).toBe(COPY_REVISED[prose]);
     }
     const today = new Date().toISOString().slice(0, 10);
-    const known = new Set([ligaDay, POPULATION_PUBLISHED, ...Object.values(COPY_REVISED)]);
+    // The feeds that date the Liga data and predictions pages (contentDates in sitemap.ts):
+    // on the day a sync refreshes them, today is their content date, not the build's.
+    const feedDay = (file: string, field: string) => {
+      try {
+        const value = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data/football/liga-2026-27', file), 'utf8'))?.[field];
+        return typeof value === 'string' ? value.slice(0, 10) : undefined;
+      } catch {
+        return undefined;
+      }
+    };
+    const feeds = [feedDay('game_fixtures.json', 'generated_at'), feedDay('injuries.json', 'snapshot_date'), feedDay('market_scorecard.json', 'generated_at')];
+    const known = new Set([ligaDay, POPULATION_PUBLISHED, ...Object.values(COPY_REVISED), ...feeds.filter((d): d is string => !!d)]);
     const stamped = entries.filter(entry => entry.lastModified && new Date(entry.lastModified).toISOString().slice(0, 10) === today && !known.has(today));
     expect(stamped.map(entry => entry.url)).toEqual([]);
   });
