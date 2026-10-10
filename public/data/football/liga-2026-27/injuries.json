@@ -1,25 +1,25 @@
 {
   "season": "2026-27",
-  "snapshot_date": "2026-10-09",
+  "snapshot_date": "2026-10-11",
   "stale": false,
   "source": "transfermarkt",
-  "n_out": 20,
-  "n_injuries": 20,
+  "n_out": 21,
+  "n_injuries": 21,
   "n_suspensions": 0,
   "teams": [
+    {
+      "team": "Porto",
+      "n_out": 6,
+      "value_out_eur": 63500000,
+      "squad_value_eur": 467100000,
+      "share_of_squad": 0.1359
+    },
     {
       "team": "Benfica",
       "n_out": 3,
       "value_out_eur": 62000000,
       "squad_value_eur": 385550000,
       "share_of_squad": 0.1608
-    },
-    {
-      "team": "Porto",
-      "n_out": 5,
-      "value_out_eur": 33500000,
-      "squad_value_eur": 467100000,
-      "share_of_squad": 0.0717
     },
     {
       "team": "SC Braga",
@@ -195,6 +195,15 @@
       "reason": "Broken fibula",
       "expected_return": null,
       "market_value_eur": 2000000
+    },
+    {
+      "player": "William Gomes",
+      "team": "Porto",
+      "kind": "injury",
+      "position": "Right Winger",
+      "reason": "unknown injury",
+      "expected_return": null,
+      "market_value_eur": 30000000
     },
     {
       "player": "Zaidu Sanusi",
