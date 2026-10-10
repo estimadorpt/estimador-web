@@ -70,6 +70,8 @@ const HIDDEN_ROUTES = new Set([
   // The shared-query landing: every /populacao/v/… link is rewritten to it,
   // and on its own it answers nothing.
   '/populacao/consulta',
+  // The Lisbon housing game, unlisted until the owner launches it.
+  '/habitacao/aguarda-parecer',
 ])
 
 /**
