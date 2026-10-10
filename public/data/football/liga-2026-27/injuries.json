@@ -1,18 +1,18 @@
 {
   "season": "2026-27",
-  "snapshot_date": "2026-10-05",
+  "snapshot_date": "2026-10-09",
   "stale": false,
   "source": "transfermarkt",
-  "n_out": 19,
-  "n_injuries": 19,
+  "n_out": 20,
+  "n_injuries": 20,
   "n_suspensions": 0,
   "teams": [
     {
       "team": "Benfica",
-      "n_out": 2,
-      "value_out_eur": 42000000,
+      "n_out": 3,
+      "value_out_eur": 62000000,
       "squad_value_eur": 385550000,
-      "share_of_squad": 0.1089
+      "share_of_squad": 0.1608
     },
     {
       "team": "Porto",
@@ -84,7 +84,7 @@
       "team": "Benfica",
       "kind": "injury",
       "position": "Attacking Midfield",
-      "reason": "unknown injury",
+      "reason": "Ankle sprain",
       "expected_return": null,
       "market_value_eur": 25000000
     },
@@ -96,6 +96,15 @@
       "reason": "Muscle injury",
       "expected_return": null,
       "market_value_eur": 17000000
+    },
+    {
+      "player": "Leandro Barreiro",
+      "team": "Benfica",
+      "kind": "injury",
+      "position": "Central Midfield",
+      "reason": "Back problems",
+      "expected_return": null,
+      "market_value_eur": 20000000
     },
     {
       "player": "André Gomes",
@@ -210,7 +219,7 @@
       "team": "Rio Ave",
       "kind": "injury",
       "position": "Goalkeeper",
-      "reason": "Back problems",
+      "reason": "Lumbar vertebra problems",
       "expected_return": null,
       "market_value_eur": 5000000
     },
