@@ -4,7 +4,7 @@ import { useState } from "react";
 import { describePp, formatInteger, formatPercent, formatPp, formatShortDate } from "@/lib/football-format";
 import { useClockReached } from "@/components/football/ClockSwitch";
 import { matchPlayedAt } from "@/lib/football-status";
-import { OUTCOME_TONES, teamColorOnPaper, teamDisplayName } from "@/lib/config/football";
+import { OUTCOME_TONES, teamColorOnPaper, teamDisplayName, teamWithArticle } from "@/lib/config/football";
 import { Link } from "@/i18n/routing";
 import { relevantObjective, formatObjectiveLabel, type ClubObjective } from "@/lib/football-fixtures";
 import { impactStakes as stakesFor, initialImpactSide, type TeamProbs } from "@/lib/football-scenarios";
@@ -80,7 +80,7 @@ export function MatchOutcomeImpact({
       : pt ? "agora" : "now";
 
   const L = {
-    title: pt ? `O que muda para o ${teamDisplayName(chosenTeam)}?` : `What changes for ${teamDisplayName(chosenTeam)}?`,
+    title: pt ? `O que este jogo muda ${teamWithArticle(chosenTeam, "para")}` : `What this match changes for ${teamDisplayName(chosenTeam)}`,
     switchLabel: pt ? "Ver as contas de" : "Show the stakes for",
     withData: (objective: ClubObjective) =>
       pt
@@ -97,17 +97,17 @@ export function MatchOutcomeImpact({
       : stale
         ? pt ? `Na previsão de ${forecastDate}` : `In the ${forecastDate} forecast`
         : pt ? "Agora" : "Now",
-    win: (team: string) => (pt ? `Se o ${teamDisplayName(team)} vencer` : `If ${teamDisplayName(team)} win`),
+    win: (team: string) => (pt ? `Se ${teamWithArticle(team)} vencer` : `If ${teamDisplayName(team)} win`),
     draw: pt ? "Se empatar" : "If they draw",
-    loss: (team: string) => (pt ? `Se o ${teamDisplayName(team)} perder` : `If ${teamDisplayName(team)} lose`),
+    loss: (team: string) => (pt ? `Se ${teamWithArticle(team)} perder` : `If ${teamDisplayName(team)} lose`),
     // "Sp. Braga's title chance is currently 0.2%", not "has 0.2% of title" (FA3-13).
     comparison: (team: string, label: string, value: string) =>
       pt
         ? started
-          ? `Para comparação: o ${teamDisplayName(team)} tinha antes do jogo ${value} de ${label}.`
+          ? `Para comparação: ${teamWithArticle(team)} tinha antes do jogo ${value} de ${label}.`
           : stale
-            ? `Para comparação: o ${teamDisplayName(team)} tinha ${value} de ${label} ${nowWord}.`
-            : `Para comparação: o ${teamDisplayName(team)} tem agora ${value} de ${label}.`
+            ? `Para comparação: ${teamWithArticle(team)} tinha ${value} de ${label} ${nowWord}.`
+            : `Para comparação: ${teamWithArticle(team)} tem agora ${value} de ${label}.`
         : started
           ? `For comparison: ${teamDisplayName(team)}'s ${label} chance was ${value} before the match.`
           : stale
@@ -150,8 +150,8 @@ export function MatchOutcomeImpact({
     return (
       <div>
         <div className="flex flex-wrap items-baseline justify-between gap-3 mb-1">
-          <h2 className="text-2xl tracking-tight">{L.title}</h2>
-          <div className="inline-flex rounded-none border border-line bg-paper p-1 text-sm font-semibold" role="group" aria-label={L.switchLabel}>
+          <h2 className="text-2xl md:text-[28px]">{L.title}</h2>
+          <div className="inline-flex border border-rule bg-paper p-1 text-sm font-semibold" role="group" aria-label={L.switchLabel}>
             {(["home", "away"] as const).map(side => {
               const team = side === "home" ? home : away;
               const active = chosen === side;
@@ -161,7 +161,7 @@ export function MatchOutcomeImpact({
                   type="button"
                   onClick={() => setChosen(side)}
                   aria-pressed={active}
-                  className={`min-h-11 px-3 transition-colors duration-150 ${active ? "bg-ink text-paper" : "text-stone-600 hover:bg-parchment"}`}
+                  className={`min-h-11 px-3 transition-colors duration-150 ${active ? "bg-ink text-paper" : "text-stone-600 hover:bg-field"}`}
                 >
                   {teamDisplayName(team)}
                 </button>
@@ -181,15 +181,16 @@ export function MatchOutcomeImpact({
             // outcome tracks, drawing 22% longer than 25%).
             <div key={row.key} className="grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-x-3 gap-y-1 sm:flex sm:gap-3">
               <div className="col-span-2 text-xs text-stone-600 sm:w-52 sm:shrink-0">{row.label}</div>
-              <div aria-hidden="true" className="min-w-0 flex-1 h-6 bg-stone-100 rounded-sm relative overflow-hidden">
+              {/* One scale, from the ink zero edge, no grey track. */}
+              <div aria-hidden="true" className="min-w-0 flex-1 h-6 border-l border-ink relative overflow-hidden">
                 <div
-                  className="h-full rounded-sm"
+                  className="h-full"
                   style={{ width: `${(row.value / maxValue) * 100}%`, backgroundColor: row.color }}
                 />
                 {row.key !== "baseline" && (
                   <div
                     aria-hidden="true"
-                    className="absolute top-0 bottom-0 w-[2px] bg-stone-900"
+                    className="absolute top-0 bottom-0 w-[2px] bg-ink outline outline-1 outline-paper"
                     style={{ left: `${(stakes.baseline / maxValue) * 100}%` }}
                   />
                 )}
@@ -249,15 +250,15 @@ export function MatchOutcomeImpact({
 
   return (
     <div>
-      <h2 className="text-2xl tracking-tight mb-1">
+      <h2 className="text-2xl md:text-[28px] mb-1">
         {pt ? "O que está em jogo" : "What is at stake"}
       </h2>
       <p className="text-sm text-stone-500 mb-6">{L.noData}</p>
 
       {cards.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
           {cards.map(c => (
-            <div key={c.name} className="rounded-2xl border border-line bg-cream p-4">
+            <div key={c.name} className="border-t border-ink pt-3">
               <div className="flex items-center gap-1.5 mb-3">
                 <span aria-hidden="true" className="inline-block w-1 h-4" style={{ backgroundColor: teamColorOnPaper(c.name) || c.color }} />
                 <span className="text-sm font-bold text-stone-800">
@@ -276,7 +277,7 @@ export function MatchOutcomeImpact({
                   </div>
                 ))}
               </div>
-              <div className="mt-3 pt-3 border-t border-stone-100 text-xs text-stone-500">
+              <div className="mt-3 pt-3 border-t border-grid text-xs text-stone-500">
                 {L.expectedPts}:{" "}
                 <strong className="text-stone-800">{formatInteger(c.standing!.mean_pts, locale)}</strong>
               </div>
@@ -286,7 +287,7 @@ export function MatchOutcomeImpact({
       )}
 
       {decisive && (
-        <div className="mt-4 rounded-lg border-l-2 border-line bg-parchment px-3 py-2 text-xs text-stone-700">
+        <div className="mt-4 border-t border-rule pt-2 text-xs text-stone-700">
           {L.swing}: <strong>{formatPp(decisive.title_swing, locale).replace(/^\+/, "")}</strong> (
           {L.swingWho}: {teamDisplayName(decisive.most_affected_team)})
         </div>

@@ -4,7 +4,7 @@ import { useRef, useEffect, useMemo, type ReactNode } from "react";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { quietPlot } from "@/components/viz/plot-a11y";
-import { FONT_STACK } from '@/lib/brand';
+import { BRAND, FONT_STACK } from '@/lib/brand';
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
 import type { LigaProbabilityHistory } from "@/types/football";
@@ -88,7 +88,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
         marginLeft: 45,
         marginRight: width < 500 ? 92 : 128,
         marginBottom: 35,
-        style: { fontFamily: FONT_STACK, fontSize: "12px", background: "transparent", color: "#5e5e5e", overflow: "visible" },
+        style: { fontFamily: FONT_STACK, fontSize: "12px", background: "transparent", color: BRAND.muted, overflow: "visible" },
         x: {
           label: pt ? "Jornada" : "Matchday",
           ticks: Array.from(new Set(lineData.map(d => d.matchday))).sort((a, b) => a - b).filter((_, i, arr) => i % Math.max(1, Math.ceil(arr.length / Math.max(2, width / 60))) === 0),
@@ -103,7 +103,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
         },
         color: { domain: teams, range: teams.map(t => colours[t]) },
         marks: [
-          Plot.ruleY([0], { stroke: "#e2e2df" }),
+          Plot.ruleY([0], { stroke: BRAND.line }),
           Plot.lineY(lineData, { x: "matchday", y: "p_champion", stroke: "team", strokeWidth: 2, curve: "monotone-x" }),
           // A dot per published forecast: the curve between them is drawn,
           // the dots are the publications (audit FA2-16).
@@ -121,7 +121,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
             text: (d: { team: string; p_champion: number }) => `${teamDisplayName(d.team)} ${formatPercent(d.p_champion / 100, locale)}`,
             textAnchor: "start",
             dx: 6,
-            fill: "#141414",
+            fill: BRAND.ink,
             fontSize: width < 500 ? 11 : 12,
             fontWeight: "bold",
           }),
@@ -140,7 +140,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
   return (
     <div className="w-full">
       <div ref={containerRef} className="w-full min-h-[280px]" />
-      {caveat && <p className="mt-3 text-xs leading-relaxed text-stone-600">{caveat}</p>}
+      {caveat && <p className="mt-3 text-xs leading-relaxed text-graphite">{caveat}</p>}
       <ChartTable caption={yAxisLabel} columns={table.columns} rows={table.rows} />
     </div>
   );

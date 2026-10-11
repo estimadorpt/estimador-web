@@ -1,4 +1,4 @@
-## Como funciona o modelo?
+## Como funciona o modelo
 
 O modelo estima, para cada clube, uma força de ataque e uma força de defesa. Ajusta-as a dois sinais de cada jogo: os golos marcados e sofridos, modelados em conjunto (um Poisson bivariado, que permite que os golos das duas equipas no mesmo jogo não sejam independentes), e os remates à baliza, que dizem mais sobre o domínio de um jogo do que um resultado de 1-0.
 
@@ -6,7 +6,7 @@ Os dados são as últimas quatro épocas da Primeira Liga e da Liga 2, juntas, p
 
 O modelo é reajustado de raiz a cada publicação, com os jogos disputados até então. Uma publicação nem sempre coincide com o fim exato de uma jornada: algumas incluem já jogos da jornada seguinte, ou saem antes de acabarem todos os da própria, e os [dados abertos](/pt/desporto/liga/dados/) dizem quais.
 
-## Que modelo publica as previsões?
+## O modelo que publica as previsões
 
 Desde a jornada 1 de 2026-27 (agosto de 2026), as previsões vêm do modelo descrito acima. A previsão de pré-época de 2026-27 e as previsões da época 2025-26 vieram do modelo anterior. Cada ficheiro de previsão diz que modelo o produziu; os nomes internos dos dois modelos estão nos [dados abertos](/pt/desporto/liga/dados/).
 
@@ -16,15 +16,15 @@ Com as forças estimadas, simulamos todos os jogos que faltam, <Sims /> vezes. C
 
 As probabilidades que apresentamos vêm diretamente destas simulações. Se uma equipa termina em primeiro lugar em 51% das simulações, dizemos que tem 51% de probabilidade de ser campeã: é a contagem de quantas vezes cada resultado acontece. Os pontos finais aparecem com um intervalo de 90%: o total de pontos fica dentro dele em 90% das simulações.
 
-## O que conta como despromoção?
+## Despromoção é acabar em 17.º ou 18.º
 
 Nas nossas páginas, despromoção é terminar em 17.º ou 18.º lugar: a descida direta à Liga 2. O 16.º classificado joga um play-off com o 3.º da Liga 2 e também pode descer, mas esse lugar não entra na probabilidade de despromoção que mostramos.
 
-## Os intervalos de pontos estão calibrados?
+## Calibração dos intervalos de pontos
 
 Um intervalo de 90% só é honesto se, olhando para o passado, apanhar o resultado real cerca de 90% das vezes. <PointsCalibration />
 
-## As probabilidades de título estão calibradas?
+## Quem lidera ganha o título mais vezes do que o modelo diz
 
 <TitleCaveat />
 
@@ -40,7 +40,7 @@ Os xPts não usam o modelo de previsão: são uma leitura independente. A difere
 
 O [simulador](/pt/desporto/liga/simulador/) usa as mesmas simulações. Quando escolhes um resultado para um jogo da jornada seguinte, as probabilidades passam a ser as das simulações em que esse resultado aconteceu: é uma probabilidade condicional, não uma nova corrida do modelo. Um resultado pouco provável tem menos simulações por trás, e as suas probabilidades têm mais ruído. Por isso o simulador trabalha com um resultado de cada vez, e só lista outros jogos que mudam as contas do teu clube em pelo menos 3 pontos percentuais: abaixo disso, a diferença confunde-se com o ruído.
 
-A pergunta «Quem acaba à frente?», na mesma página, usa outra coisa: <Samples /> épocas completas sorteadas das simulações. Conta quem acaba com mais pontos, e diz à parte quantas épocas acabam empatadas em pontos e para que lado o modelo as desempata. Com essa amostra, uma percentagem como 64% tem uma margem de cerca de ±5 pontos percentuais, muito maior do que a das probabilidades de título calculadas com todas as simulações.
+O duelo final, na mesma página, usa outra coisa: <Samples /> épocas completas sorteadas das simulações. Conta quem acaba com mais pontos, e diz à parte quantas épocas acabam empatadas em pontos e para que lado o modelo as desempata. Com essa amostra, uma percentagem como 64% tem uma margem de cerca de ±5 pontos percentuais, muito maior do que a das probabilidades de título calculadas com todas as simulações.
 
 ## Jogos decisivos
 
@@ -54,7 +54,7 @@ Nas páginas dos clubes que lutam pelo título ou contra a descida, os cenários
 
 Na mesma página, podes fixar o resultado de qualquer jogo que falte ao clube. Com uma escolha, o número é a probabilidade condicional tirada das simulações, como no simulador. Com várias, as escolhas combinam-se como se fossem independentes entre si: é uma aproximação, porque o ficheiro publicado guarda o efeito de cada jogo, não o de cada combinação de jogos.
 
-## Como medimos os jogadores?
+## Como medimos os jogadores
 
 A [página de jogadores](/pt/desporto/liga/jogadores/) publica várias métricas separadas, uma por dimensão do jogo, porque um guarda-redes e um avançado não se medem com o mesmo número. Cada uma vem de um modelo bayesiano próprio, ajustado às atuações individuais na Liga, com as épocas e o mínimo de minutos que o seu próprio ficheiro indica:
 
@@ -66,7 +66,7 @@ Um jogador «separa-se» da média quando o seu intervalo de 90% deixa de fora a
 
 <PlayersCutoff />
 
-## O que avaliámos e o que não avaliámos?
+## O que avaliámos e o que não avaliámos
 
 - **Avaliado**: a previsão de vitória, empate ou derrota de cada jogo da jornada seguinte, contra a linha de fecho do mercado, em épocas passadas. O resultado está em [modelo vs mercado](/pt/desporto/liga/modelo/).
 - **Avaliado**: os intervalos de 90% para os pontos finais (secção acima).
@@ -75,7 +75,7 @@ Um jogador «separa-se» da média quando o seu intervalo de 90% deixa de fora a
 
 A comparação com o mercado também não é independente da escolha do modelo: o modelo atual foi escolhido entre variantes testadas nessas mesmas épocas, o que tende a favorecê-lo. A primeira avaliação limpa será a da época 2026-27.
 
-## O que fica de fora?
+## O que fica de fora
 
 O modelo dá a cada clube uma força fixa para o resto da época e não usa:
 

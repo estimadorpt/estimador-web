@@ -21,6 +21,9 @@ const FILES = [
   'src/app/[locale]/desporto/liga/2025-26/page.tsx',
   'src/content/football-methodology/pt.mdx',
   'src/content/football-methodology/en.mdx',
+  // The hub's source line under the xPts chart (football.xgAttribution).
+  'messages/pt.json',
+  'messages/en.json',
 ];
 const PROVIDER = /SofaScore|FotMob|Transfermarkt|football-data\.co\.uk|Pinnacle|Bet365/;
 

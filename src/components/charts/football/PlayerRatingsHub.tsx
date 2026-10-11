@@ -177,7 +177,7 @@ export function PlayerRatingsHub({
   );
   const methodologyHref = pt
     ? "/desporto/liga/metodologia#como-medimos-os-jogadores"
-    : "/desporto/liga/metodologia#how-do-we-measure-players";
+    : "/desporto/liga/metodologia#how-we-measure-players";
 
   // How many keepers the model actually told apart from the average. Zero is
   // the answer today, and it is the headline of that section.
@@ -400,8 +400,8 @@ export function PlayerRatingsHub({
       (r.nDistinct !== null && r.n !== null && r.nDistinct <= Math.max(3, r.n * 0.05)) ||
       (r.range !== null && r.range < 0.02);
     return (
-      <div className="mt-6 border-t border-stone-200 pt-4 max-w-3xl">
-        <h3 className="text-xs font-bold sm:tracking-wider text-stone-500 mb-1">
+      <div className="mt-6 border-t border-rule pt-4 max-w-3xl">
+        <h3 className="text-[13px] font-semibold text-ink mb-1">
           {pt ? "A distribuição por posição" : "The distribution by position"}
         </h3>
         <p className="text-[11px] text-stone-500 mb-3 leading-relaxed">
@@ -413,19 +413,19 @@ export function PlayerRatingsHub({
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-stone-300 text-left">
-              <th className="py-1.5 pr-2 sm:pr-3 font-medium text-[12px] text-graphite sm:tracking-wider text-stone-500">
+              <th className="py-1.5 pr-2 sm:pr-3 font-medium text-[12px] text-graphite">
                 {pt ? "Posição" : "Position"}
               </th>
-              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[12px] text-graphite sm:tracking-wider text-stone-500">
+              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[12px] text-graphite">
                 n
               </th>
-              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[12px] text-graphite sm:tracking-wider text-stone-500">
+              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[12px] text-graphite">
                 {pt ? "mediana" : "median"}
               </th>
-              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[12px] text-graphite sm:tracking-wider text-stone-500">
+              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[12px] text-graphite">
                 {pt ? "amplitude" : "range"}
               </th>
-              <th className="py-1.5 pl-1.5 sm:pl-2 text-right font-medium text-[12px] text-graphite sm:tracking-wider text-stone-500">
+              <th className="py-1.5 pl-1.5 sm:pl-2 text-right font-medium text-[12px] text-graphite">
                 <span className="sm:hidden">{pt ? "distintos" : "distinct"}</span>
                 <span className="hidden sm:inline">{pt ? "valores distintos" : "distinct values"}</span>
               </th>
@@ -446,7 +446,7 @@ export function PlayerRatingsHub({
                     {/* On its own line and unbroken, so "Guarda-redes" and the
                         badge never split over three lines (audit UXM3-17). */}
                     {flat && (
-                      <span className="mt-0.5 block w-fit whitespace-nowrap text-[12px] text-graphite bg-amber-50 text-amber-700 px-1 py-px">
+                      <span className="mt-0.5 block w-fit whitespace-nowrap text-[12px] font-semibold text-amber-800">
                         {pt ? "não medido" : "not measured"}
                       </span>
                     )}
@@ -506,7 +506,7 @@ export function PlayerRatingsHub({
             <p className="text-[12px] font-semibold text-graphite mb-2">
               {pt ? "Jogadores" : "Players"}
             </p>
-            <h1 className="text-3xl sm:text-4xl tracking-tight text-stone-900 mb-4">
+            <h1 className="text-3xl sm:text-4xl text-ink mb-4">
               {pt
                 ? "Uma métrica por dimensão, porque um número só não chega"
                 : "One metric per dimension, because one number is not enough"}
@@ -538,8 +538,8 @@ export function PlayerRatingsHub({
       {/* ------------------------------------------------------- 1. finishers */}
       {finisherRows.length > 0 && finishers && (
         // The first section needs no rule of its own under the page's hero.
-        <section className="mb-12 border-t border-stone-200 pt-8 first:border-t-0 first:pt-0">
-          <h2 className="text-2xl tracking-tight mb-1">
+        <section className="mb-12 border-t border-rule pt-8 first:border-t-0 first:pt-0">
+          <h2 className="text-2xl md:text-[28px] mb-1">
             {pt ? "Finalização" : "Finishing"}
           </h2>
           <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
@@ -547,12 +547,13 @@ export function PlayerRatingsHub({
               ? "Golos por 90 minutos acima de um jogador de nível de substituição (SAR, do inglês skill above replacement), depois de descontar minutos, adversário e fator casa. Os golos são limitados antes da conta, para que uma tarde de quatro golos não passe por talento permanente."
               : "Goals per 90 minutes above a replacement-level player (SAR, skill above replacement), after adjusting for minutes, opponent and home advantage. Goals are capped before the estimate, so one four-goal afternoon is not read as permanent skill."}
           </p>
-          <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-5 max-w-3xl leading-relaxed">
+          <p className="border-t border-rule pt-2 text-xs leading-relaxed text-amber-800 mb-5 max-w-3xl">
+            <strong className="font-semibold">{pt ? "Ressalva:" : "Caveat:"}</strong>{" "}
             {pt
-              ? `Esta lista ordena avançados, não a Liga inteira. Os ${int(
+              ? `esta lista ordena avançados, não a Liga inteira. Os ${int(
                   finisherRows.length,
                 )} nomes publicados são ${posBreakdown} — é uma métrica de avançados, e deve ser lida como tal.`
-              : `This list orders forwards, not the whole league. The ${int(
+              : `this list orders forwards, not the whole league. The ${int(
                   finisherRows.length,
                 )} published names are ${posBreakdown} — it is a forwards metric, and should be read as one.`}
           </p>
@@ -614,8 +615,8 @@ export function PlayerRatingsHub({
 
       {/* ----------------------------------------------------- 2. contribution */}
       {contrib && contrib.players.length > 0 && (
-        <section className="mb-12 border-t border-stone-200 pt-8">
-          <h2 className="text-2xl tracking-tight mb-1">
+        <section className="mb-12 border-t border-rule pt-8">
+          <h2 className="text-2xl md:text-[28px] mb-1">
             {pt ? "Contribuição ofensiva" : "Attacking contribution"}
           </h2>
           <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
@@ -703,8 +704,8 @@ export function PlayerRatingsHub({
           Superseded by the three-axis section above when its feed exists —
           rendering both would present two shot-stopping verdicts. */}
       {!gkChannels && gk && gk.players.length > 0 && (
-        <section className="mb-12 border-t border-stone-200 pt-8">
-          <h2 className="text-2xl tracking-tight mb-1">
+        <section className="mb-12 border-t border-rule pt-8">
+          <h2 className="text-2xl md:text-[28px] mb-1">
             {pt ? "Guarda-redes" : "Goalkeepers"}
           </h2>
           <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
@@ -722,8 +723,8 @@ export function PlayerRatingsHub({
               keeper's interval clears zero, the order below is description,
               not a finding. */}
           {gkSeparated === 0 && (
-            <div className="mb-5 max-w-3xl border-l-2 border-amber-300 bg-amber-50 pl-3 py-2">
-              <h3 className="text-sm text-amber-900 mb-1">
+            <div className="mb-5 max-w-3xl border-t border-rule pt-2">
+              <h3 className="text-sm text-ink mb-1">
                 {pt
                   ? "Nenhum guarda-redes se separa da média"
                   : "No goalkeeper separates from the average"}
@@ -798,8 +799,8 @@ export function PlayerRatingsHub({
 
       {/* -------------------------------------------------------- 4. defenders */}
       {def && (
-        <section className="mb-12 border-t border-stone-200 pt-8">
-          <h2 className="text-2xl tracking-tight mb-1">
+        <section className="mb-12 border-t border-rule pt-8">
+          <h2 className="text-2xl md:text-[28px] mb-1">
             {pt ? "Defesas" : "Defenders"}
           </h2>
 
@@ -810,10 +811,11 @@ export function PlayerRatingsHub({
                   ? "Golos sofridos pela equipa com e sem cada jogador em campo, com encolhimento forte. Mede o contributo para o resultado, não o número de desarmes — um defesa com muitos cortes pode estar sob pressão constante em vez de a defender bem."
                   : "Goals conceded by the team with and without each player on the pitch, heavily shrunk. It measures contribution to outcomes, not tackle counts — a defender making many clearances may be under constant pressure rather than defending well."}
               </p>
-              <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-5 max-w-3xl leading-relaxed">
+              <p className="border-t border-rule pt-2 text-xs leading-relaxed text-amber-800 mb-5 max-w-3xl">
+                <strong className="font-semibold">{pt ? "Ressalva:" : "Caveat:"}</strong>{" "}
                 {pt
-                  ? "Lê os intervalos antes dos valores. Colegas de equipa que jogam sempre juntos são difíceis de separar, e num campeonato de 34 jornadas os intervalos são largos. Diferenças pequenas entre jogadores desta lista não são diferenças."
-                  : "Read the intervals before the values. Team-mates who always play together are hard to tell apart, and in a 34-match league the intervals are wide. Small differences between players on this list are not differences."}
+                  ? "lê os intervalos antes dos valores. Colegas de equipa que jogam sempre juntos são difíceis de separar, e num campeonato de 34 jornadas os intervalos são largos. Diferenças pequenas entre jogadores desta lista não são diferenças."
+                  : "read the intervals before the values. Team-mates who always play together are hard to tell apart, and in a 34-match league the intervals are wide. Small differences between players on this list are not differences."}
               </p>
 
               <PlayerRatingList
@@ -873,7 +875,7 @@ export function PlayerRatingsHub({
               </p>
 
               {defNumbers.length > 0 && (
-                <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 border-t border-stone-200 pt-4 max-w-3xl">
+                <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 border-t border-rule pt-4 max-w-3xl">
                   {defNumbers.map((d) => (
                     <div key={d.label}>
                       <dt className="text-[12px] text-graphite">
@@ -944,7 +946,7 @@ export function PlayerRatingsHub({
       )}
 
       {/* ------------------------------------------------------------ closing */}
-      <section className="border-t border-stone-200 pt-6 max-w-3xl">
+      <section className="border-t border-rule pt-6 max-w-3xl">
         <p className="text-xs text-stone-500 leading-relaxed">
           {pt
             ? "Cada métrica tem a sua escala. Não somes, não compares nem faças médias de valores de secções diferentes: um guarda-redes e um avançado não estão a ser medidos na mesma unidade, e ordená-los juntos era exatamente o erro que esta página existe para corrigir."
@@ -963,7 +965,7 @@ export function PlayerRatingsHub({
             a reader who chose "Jogadores" came for players, not for the
             story of a past mistake. */}
         <Disclosure
-          className="mt-6 rounded-2xl border border-line bg-cream px-4 py-1 text-sm"
+          className="mt-6 border-t border-rule text-sm"
           summary={pt ? "O que mudou nesta página (12 de agosto de 2026)" : "What changed on this page (12 August 2026)"}
         >
           <div className="space-y-3 pb-4 text-stone-600 leading-relaxed">

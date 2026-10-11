@@ -20,6 +20,7 @@ import {
 import { formatInteger } from "@/lib/football-format";
 import { pointsCalibrationSentence, titleCalibrationParagraphs } from "@/lib/football-model-evaluation";
 import { playerDataCutoffSentence } from "@/lib/utils/player-pages";
+import { headingSlug, headingText } from "@/lib/election-methodology";
 import type { Metadata } from "next";
 import { setRequestLocale } from '@/i18n/request-locale';
 
@@ -46,16 +47,14 @@ function readMethodology(locale: 'pt' | 'en'): string {
   return readFileSync(path.join(process.cwd(), 'src/content/football-methodology', `${locale}.mdx`), 'utf8');
 }
 
-/** A stable anchor from a heading's text ("Como medimos os jogadores?" → como-medimos-os-jogadores). */
+/**
+ * A stable anchor from a heading's text ("Como medimos os jogadores" →
+ * como-medimos-os-jogadores). Other pages link to these slugs:
+ * football-methodology-anchors.test.ts keeps every link in step with the MDX,
+ * with the same headingSlug the election and economy methodologies use.
+ */
 function slugify(node: ReactNode): string | undefined {
-  const text = typeof node === 'string' ? node : Array.isArray(node) ? node.filter(n => typeof n === 'string').join('') : '';
-  if (!text) return undefined;
-  return text
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  return headingSlug(headingText(node)) || undefined;
 }
 
 type Json = Record<string, unknown>;
@@ -172,7 +171,7 @@ export default async function LigaMethodologyPage({
 
   const components = getMDXComponents({
     h2: ({ children }) => (
-      <h2 id={slugify(children)} className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight">
+      <h2 id={slugify(children)} className="mt-12 mb-3 text-2xl text-ink">
         {children}
       </h2>
     ),
@@ -186,7 +185,7 @@ export default async function LigaMethodologyPage({
     TitleCalibration: () => (
       <>
         {titleCalibrationParagraphs(locale).map((p) => (
-          <p key={p.slice(0, 40)} className="mb-5 text-stone-800">{p}</p>
+          <p key={p.slice(0, 40)} className="mb-5 text-ink">{p}</p>
         ))}
       </>
     ),

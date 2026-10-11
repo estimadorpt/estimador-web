@@ -3,6 +3,7 @@
 import { teamDisplayName, teamLogoSrc, teamPhoneName } from "@/lib/config/football";
 import { injuryReasonLabel, positionLabel } from "@/lib/i18n/football-labels";
 import { Stethoscope } from "lucide-react";
+import { BRAND } from "@/lib/brand";
 
 export interface InjuryPlayer {
   player: string;
@@ -103,7 +104,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
     <div>
       <div className="flex items-center gap-2 mb-1">
         <Stethoscope className="w-4 h-4 text-stone-500" />
-        <h2 className="text-2xl tracking-tight">{t.title}</h2>
+        <h2 className="text-2xl md:text-[28px]">{t.title}</h2>
       </div>
       <p className="text-sm text-stone-500 mb-1 max-w-3xl leading-relaxed">{t.intro}</p>
       {snapshot && (
@@ -119,7 +120,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
           const barPct = ((team.share_of_squad ?? 0) / maxShare) * 100;
 
           return (
-            <div key={team.team} className="border-t border-stone-200 pt-3">
+            <div key={team.team} className="border-t border-ink pt-3">
               <div className="flex items-baseline gap-2 mb-1">
                 {teamLogoSrc(team.team) && (
                   <img
@@ -146,10 +147,10 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                 </span>
               </div>
 
-              <div className="h-1.5 relative bg-stone-100 mb-1">
+              <div className="relative mb-1 h-2 border-b border-scale">
                 <div
-                  className="absolute inset-y-0 left-0 rounded-none"
-                  style={{ width: `${barPct}%`, backgroundColor: "#a3543a", opacity: 0.75 }}
+                  className="absolute top-0 bottom-px left-0"
+                  style={{ width: `${barPct}%`, backgroundColor: BRAND.terracotta }}
                 />
               </div>
               <div className="text-[11px] text-stone-500 mb-2 tabular-nums">
@@ -167,12 +168,11 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                     const back = formatDate(p.expected_return, pt);
                     return (
                       <li key={p.player} className="flex items-start gap-2 text-xs">
-                        <span className="w-1 h-1 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline gap-1.5 flex-wrap">
                             <span className="font-semibold text-stone-800">{p.player}</span>
                             {rank !== undefined && (
-                              <span className="text-[12px] text-graphite bg-stone-800 text-white px-1 py-px">
+                              <span className="text-[12px] font-semibold text-ink">
                                 {t.modelRank(rank)}
                               </span>
                             )}

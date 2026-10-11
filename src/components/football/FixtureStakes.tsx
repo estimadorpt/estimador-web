@@ -107,7 +107,7 @@ export function FixtureStakes({
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-semibold text-graphite">
         <span>{entry.objectiveLabel}</span>
         {statusLine && (
-          <span className="font-medium normal-case tracking-normal text-stone-500">· {statusLine}</span>
+          <span className="font-medium text-graphite">· {statusLine}</span>
         )}
       </p>
       {entry.postponedLabel && (

@@ -12,6 +12,7 @@ import {
 import { positionCodeEn, positionCodePt } from "@/lib/i18n/football-labels";
 import { formatInteger, formatLongDate, formatPosterior, formatSigned } from "@/lib/football-format";
 import { PLAYER_MARKS } from "@/components/charts/football/player-marks";
+import { BRAND } from "@/lib/brand";
 import {
   formatShortDate,
   playerDataCutoffLabel,
@@ -179,7 +180,7 @@ export function PlayerProfile({
     </>
   );
 
-  const color = ligaTeamColors[player.team] ?? "#5c5c5c";
+  const color = ligaTeamColors[player.team] ?? BRAND.muted;
   const teamSlug = ligaTeamSlugs[player.team];
   const posLabel =
     (pt ? positionCodePt[player.position] : positionCodeEn[player.position]) ??
@@ -202,7 +203,7 @@ export function PlayerProfile({
   const seasons = player.seasons;
   const withSkill = seasons.filter(s => s.sar_season !== null);
   const change = player.skill_change;
-  // "Melhorou?" compares two seasons only when both had real minutes: a
+  // The improvement note compares two seasons only when both had real minutes: a
   // one-minute season is all prior (audit FA2-15).
   const MIN_SEASON_MINUTES = 450;
   const thinSeason = change
@@ -343,7 +344,7 @@ export function PlayerProfile({
         : pt
           ? "Minutos, golos e a estimativa de talento na única época deste jogador nos dados. O modelo só admite uma mudança de talento quando os dados a exigem."
           : "Minutes, goals and the skill estimate for this player's only season in the data. The model only admits a change in skill when the data demand one.",
-    nullTitle: pt ? "Melhorou? Não dá para dizer" : "Did he improve? Can't say",
+    nullTitle: pt ? "Não dá para dizer se melhorou" : "There is no telling whether he improved",
     nullBody: (c: PlayerSkillChange) => {
       // Ratio of noise to signal. It can be enormous when the delta is ~0,
       // so past 20x the sentence stops quoting a number.
@@ -497,7 +498,7 @@ export function PlayerProfile({
               {/* Zero: the reference level this metric is measured against */}
               <div
                 className="absolute top-1/2 -translate-y-1/2 w-px h-8"
-                style={{ left: `${prZero}%`, backgroundColor: "#cbccbb" }}
+                style={{ left: `${prZero}%`, backgroundColor: PLAYER_MARKS.zero }}
               />
               {prEntry.lo !== null && prEntry.hi !== null && (
                 <>
@@ -617,7 +618,7 @@ export function PlayerProfile({
                 suppressed along with the number itself. */}
             {showGoalsSar && (
               <>
-                <span className="text-[12px] font-semibold text-graphite bg-stone-100 px-1.5 py-0.5">
+                <span className="text-[12px] font-semibold text-ink">
                   {t.rank}
                 </span>
                 <span className="text-[12px] text-graphite">
@@ -626,13 +627,13 @@ export function PlayerProfile({
               </>
             )}
             {injury && (
-              <span className="text-[12px] font-semibold text-graphite text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5">
+              <span className="text-[12px] font-semibold text-red-700">
                 {t.out}
               </span>
             )}
           </div>
           {showName && (
-            <h1 className="text-2xl sm:text-3xl tracking-tight text-stone-900">
+            <h1 className="text-2xl sm:text-3xl text-ink">
               {player.player}
             </h1>
           )}
@@ -809,7 +810,7 @@ export function PlayerProfile({
       {/* Trajectory — the flat skill line next to the noisy goal counts */}
       {seasons.length > 0 && (
         <section className="mb-10 border-t border-stone-200 pt-5">
-          <h2 className="text-2xl tracking-tight mb-1">{t.trajTitle}</h2>
+          <h2 className="text-2xl md:text-[28px] mb-1">{t.trajTitle}</h2>
           <p className="text-sm text-stone-500 mb-4 max-w-2xl leading-relaxed">
             {t.trajBody}
           </p>
@@ -921,7 +922,7 @@ export function PlayerProfile({
       {/* Recent appearances */}
       {recent.length > 0 && (
         <section className="mb-10 border-t border-stone-200 pt-5">
-          <h2 className="text-2xl tracking-tight mb-1">{t.recentTitle}</h2>
+          <h2 className="text-2xl md:text-[28px] mb-1">{t.recentTitle}</h2>
           {cutoffLabel && (
             <p className="text-xs text-stone-500 mb-3">{cutoffLabel}</p>
           )}
@@ -957,7 +958,7 @@ export function PlayerProfile({
                   <span className="flex min-w-0 flex-1 items-center gap-1.5">
                     <span className="min-w-0 truncate text-stone-800">{teamDisplayName(m.opponent)}</span>
                     <span
-                      className="flex-shrink-0 rounded border border-line px-1 text-[11px] font-semibold text-stone-600"
+                      className="flex-shrink-0 text-[11px] font-semibold text-stone-600"
                       title={m.is_home ? t.home : t.away}
                     >
                       <span aria-hidden="true">{m.is_home ? (pt ? "C" : "H") : (pt ? "F" : "A")}</span>

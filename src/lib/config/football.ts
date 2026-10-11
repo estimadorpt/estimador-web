@@ -1,4 +1,5 @@
 // Liga Portugal team configuration
+import { BRAND } from '@/lib/brand';
 
 export const ligaTeamColors: Record<string, string> = {
   'Porto': '#003893',
@@ -153,16 +154,19 @@ export function teamPhoneName(team: string): string {
 /* ------------------------------------------------- colours on the page --- */
 
 /**
- * The one 1X2 encoding (audit UXD2-V06): home dark, draw pale, away mid, the
- * same on the hub cards and the match page. Club colours stay on the rule
- * above each club's number, never in the split bar (a black or white kit
- * would match the ink or the paper).
+ * The one 1X2 encoding (audit UXD2-V06): home ink, draw the rule's pale grey,
+ * away the scale's mid grey, the same on the match page and the game. Club
+ * colours stay on the rule above each club's number, never in the split bar
+ * (a black or white kit would match the ink or the paper). The labels under
+ * the bar name each part, so the greys never carry the meaning alone.
  */
-export const OUTCOME_TONES = { home: '#434d48', draw: '#d6d8cc', away: '#8b9a8e' } as const;
+export const OUTCOME_TONES = { home: BRAND.ink, draw: BRAND.line, away: BRAND.faint } as const;
 
 /** The page ground the team colours are drawn on (globals.css --color-paper). */
-const PAPER = '#ffffff';
-const INK = '#141414';
+const PAPER = BRAND.paper;
+const INK = BRAND.ink;
+/** The neutral a club without a known colour is drawn in (graphite, 6.4:1 on paper). */
+const NEUTRAL = BRAND.muted;
 
 function hexToRgb(hex: string): [number, number, number] | null {
   const m = /^#?([a-f\d]{6})$/i.exec(hex.trim());
@@ -201,9 +205,9 @@ export function contrastRatio(a: string, b: string): number {
  * colour. For bars, swatches, lines and borders — numbers stay in ink.
  */
 export function teamColorOnPaper(team: string): string {
-  const base = ligaTeamColors[team] ?? liga2TeamColors[team] ?? '#5c5c5c';
+  const base = ligaTeamColors[team] ?? liga2TeamColors[team] ?? NEUTRAL;
   const rgb = hexToRgb(base);
-  if (!rgb) return '#5c5c5c';
+  if (!rgb) return NEUTRAL;
   let current: [number, number, number] = rgb;
   for (let i = 0; i < 40 && contrastRatio(rgbToHex(current), PAPER) < 3; i++) {
     current = [current[0] * 0.92, current[1] * 0.92, current[2] * 0.92];
@@ -224,7 +228,7 @@ function colourDistance(a: string, b: string): number {
 }
 
 /** Neutral line colours for a club whose own colour another line already uses (all ≥ 3:1 on paper). */
-const LINE_FALLBACKS = ['#434d48', '#8a5a2b', '#4d5b8c', '#7a4a6a', INK, '#5c5c5c'];
+const LINE_FALLBACKS = ['#383838', '#8a5a2b', '#4d5b8c', '#7a4a6a', INK, NEUTRAL];
 
 /**
  * Line colours for several clubs on one chart: each club keeps its on-paper
@@ -312,9 +316,9 @@ export function liga2DisplayName(team: string): string {
   return liga2DisplayNames[team] ?? ligaDisplayNames[team] ?? team;
 }
 
-/** Accent colour for a Liga 2 club; neutral stone when we do not know it. */
+/** Accent colour for a Liga 2 club; neutral graphite when we do not know it. */
 export function liga2TeamColor(team: string): string {
-  return liga2TeamColors[team] ?? ligaTeamColors[team] ?? '#78716c';
+  return liga2TeamColors[team] ?? ligaTeamColors[team] ?? NEUTRAL;
 }
 
 /** Logo path, or null when no file exists for this club. */

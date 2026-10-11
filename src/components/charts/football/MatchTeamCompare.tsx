@@ -32,10 +32,11 @@ interface MatchTeamCompareProps {
 
 const ordinal = formatOrdinal;
 
-const RESULT_STYLE: Record<FormEntry["result"], string> = {
-  W: "bg-emerald-700 text-white",
-  D: "bg-stone-300 text-stone-700",
-  L: "bg-red-700 text-white",
+/** A small square beside each result letter; the letter carries the meaning. */
+const RESULT_SQUARE: Record<FormEntry["result"], string> = {
+  W: "bg-emerald-700",
+  D: "bg-stone-300",
+  L: "bg-red-700",
 };
 
 function num(v: number, pt: boolean, digits = 1): string {
@@ -82,15 +83,15 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
     panel.standing && panel.xpts ? panel.standing.points - panel.xpts.xpts : null;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-cream">
+    <div className="min-w-0 border-t border-ink">
       {/* The club colour is the identity rule beside the name; the bars
           below are ink, so a red kit never reads as a "bad" bar (UXD3-07). */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100">
-        <i aria-hidden="true" className="h-5 w-1 shrink-0 rounded-full" style={{ backgroundColor: panel.color }} />
+      <div className="flex items-center gap-2 py-2.5 border-b border-rule">
+        <i aria-hidden="true" className="h-5 w-1 shrink-0" style={{ backgroundColor: panel.color }} />
         {teamLogoSrc(panel.team) && (
           <img src={teamLogoSrc(panel.team)} alt="" width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 object-contain" />
         )}
-        <span className="text-sm font-bold text-stone-900">
+        <span className="name-cut text-sm text-ink">
           {teamDisplayName(panel.team)}
         </span>
         <span className="ml-auto text-[12px] font-semibold text-graphite">
@@ -98,7 +99,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
         </span>
       </div>
 
-      <div className="px-4 py-3 space-y-4">
+      <div className="py-3 space-y-4">
         {/* Standing line */}
         {panel.standing && (
           <div className="flex gap-4 text-xs text-stone-500">
@@ -126,17 +127,14 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
           {panel.form.length === 0 ? (
             <div className="text-xs text-stone-500">{L.noForm}</div>
           ) : (
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
               {panel.form.map(f => (
                 <div
                   key={`${f.matchday}-${f.opponent}`}
-                  className="flex items-center gap-1.5 rounded border border-line pr-2"
+                  className="flex items-center gap-1.5"
                 >
-                  <span
-                    className={`w-5 h-5 flex items-center justify-center text-[11px] font-display font-extrabold ${
-                      RESULT_STYLE[f.result]
-                    }`}
-                  >
+                  <i aria-hidden="true" className={`h-2 w-2 shrink-0 ${RESULT_SQUARE[f.result]}`} />
+                  <span className="text-[13px] font-semibold text-ink">
                     {L.resultLetters[f.result]}
                   </span>
                   <span className="text-[11px] tabular-nums text-stone-700 font-medium">
@@ -162,9 +160,9 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
               {attackPct !== null && (
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-stone-500 w-14">{L.attack}</span>
-                  <span className="flex-1 h-1.5 bg-stone-200 overflow-hidden rounded-full">
+                  <span className="flex-1 border-b border-scale pb-px">
                     <span
-                      className="block h-full rounded-full"
+                      className="block h-1.5"
                       style={{ width: `${attackPct}%`, backgroundColor: "var(--color-ink)" }}
                     />
                   </span>
@@ -176,9 +174,9 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
               {defensePct !== null && (
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-stone-500 w-14">{L.defense}</span>
-                  <span className="flex-1 h-1.5 bg-stone-200 overflow-hidden rounded-full">
+                  <span className="flex-1 border-b border-scale pb-px">
                     <span
-                      className="block h-full rounded-full"
+                      className="block h-1.5"
                       style={{ width: `${defensePct}%`, backgroundColor: "var(--color-ink)" }}
                     />
                   </span>
@@ -239,7 +237,7 @@ export function MatchTeamCompare({ home, away, locale }: MatchTeamCompareProps) 
   const pt = locale !== "en";
   return (
     <div>
-      <h2 className="text-2xl tracking-tight mb-1">
+      <h2 className="text-2xl md:text-[28px] mb-1">
         {pt ? "Como chegam" : "How they arrive"}
       </h2>
       <p className="text-sm text-stone-500 mb-6">
@@ -247,7 +245,7 @@ export function MatchTeamCompare({ home, away, locale }: MatchTeamCompareProps) 
           ? "Forma recente, força estimada pelo modelo e pontos esperados (xPts) a partir do xG."
           : "Recent form, model-estimated strength and expected points (xPts) from xG."}
       </p>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
         <TeamCard panel={home} locale={locale} />
         <TeamCard panel={away} locale={locale} />
       </div>

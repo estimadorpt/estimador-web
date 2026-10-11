@@ -205,7 +205,7 @@ export default async function PlayerPage({
           <Link
             href={pt
               ? "/desporto/liga/metodologia#como-medimos-os-jogadores"
-              : "/desporto/liga/metodologia#how-do-we-measure-players"}
+              : "/desporto/liga/metodologia#how-we-measure-players"}
             locale={locale}
             className="inline-flex min-h-11 items-center text-ink underline underline-offset-4"
           >

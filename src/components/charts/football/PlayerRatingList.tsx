@@ -13,6 +13,7 @@ import {
 } from "@/lib/config/football";
 import { positionCodeEn, positionCodePt } from "@/lib/i18n/football-labels";
 import { PLAYER_BAR_OPACITY, PLAYER_MARKS } from "@/components/charts/football/player-marks";
+import { BRAND } from "@/lib/brand";
 import {
   ratingDomain,
   ratingPct,
@@ -148,7 +149,7 @@ export function PlayerRatingList({
         {visible.map((e) => {
           const isOpen = openKey === e.key;
           const slug = playerSlugs?.[e.player];
-          const chip = (e.team && ligaTeamColors[e.team]) || "#5c5c5c";
+          const chip = (e.team && ligaTeamColors[e.team]) || BRAND.muted;
           const hasInterval = e.lo !== null && e.hi !== null;
           const move = showMovement ? rankMovement(e, goalsRankByPlayer) : null;
 
@@ -225,10 +226,9 @@ export function PlayerRatingList({
                     </div>
                   </div>
 
-                  {/* Diverging bar from the zero reference, with the 94%
-                      credible interval drawn on top. */}
+                  {/* Diverging bar from the zero reference, with the
+                      credible interval drawn on top; no grey track. */}
                   <div className="flex-1 min-w-0 h-6 relative">
-                    <div className="absolute inset-y-0 left-0 right-0 bg-stone-50" />
                     <div
                       className="absolute inset-y-0 w-px"
                       style={{ left: `${zeroPct}%`, backgroundColor: ZERO }}
@@ -337,7 +337,7 @@ export function PlayerRatingList({
               </div>
 
               {isOpen && (
-                <div className="pl-8 pr-2 pb-3 pt-1 bg-stone-50/60">
+                <div className="pl-8 pr-2 pb-3 pt-1">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-xs">
                     <div>
                       <div className="text-[12px] text-graphite">

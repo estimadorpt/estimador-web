@@ -64,7 +64,7 @@ export function ClubFixtures({
   const shown = limit ? rows.slice(0, limit) : rows;
   if (shown.length === 0) return null;
   return (
-    <ol className="divide-y divide-line rounded-2xl border border-line bg-cream px-4">
+    <ol className="divide-y divide-grid border-y border-ink">
       {shown.map(r => {
         const when = r.kickoff
           ? formatKickoffShort(r.kickoff, locale, { confirmed: r.kickoffConfirmed })
@@ -97,7 +97,7 @@ export function ClubFixtures({
                 {r.venue === "H" ? (pt ? "em casa" : "home") : (pt ? "fora" : "away")} · {pt ? "J" : "MD"}{r.matchday}
               </span>
               {r.postponed && (
-                <span className="shrink-0 rounded bg-parchment px-1 text-[11px] font-bold text-stone-600">
+                <span className="shrink-0 text-[12px] font-semibold text-ink">
                   {pt ? "jogo em atraso" : "postponed"}
                 </span>
               )}
@@ -114,7 +114,7 @@ export function ClubFixtures({
         return (
           <li key={`${r.matchday}-${r.opponent}`}>
             {r.href ? (
-              <Link href={r.href} locale={locale} className="flex min-h-11 items-center gap-3 py-2 hover:bg-parchment">
+              <Link href={r.href} locale={locale} className="flex min-h-11 items-center gap-3 py-2 hover:bg-field">
                 {body}
               </Link>
             ) : (

@@ -3,7 +3,7 @@
 import { useRef, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
-import { FONT_STACK } from '@/lib/brand';
+import { BRAND, FONT_STACK } from '@/lib/brand';
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
 import type { LigaProbabilityHistory } from "@/types/football";
@@ -121,7 +121,7 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
         marginLeft: 45,
         marginRight: width < 500 ? 92 : 128,
         marginBottom: 35,
-        style: { fontFamily: FONT_STACK, fontSize: "12px", background: "transparent", color: "#5e5e5e", overflow: "visible" },
+        style: { fontFamily: FONT_STACK, fontSize: "12px", background: "transparent", color: BRAND.muted, overflow: "visible" },
         x: {
           label: pt ? "Jornada" : "Matchday",
           // Whole matchdays only, thinned to roughly one per 60px.
@@ -137,10 +137,10 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
         },
         color: {
           domain: Array.from(teamsAtRisk),
-          range: Array.from(teamsAtRisk).map(t => colours[t] ?? '#5c5c5c'),
+          range: Array.from(teamsAtRisk).map(t => colours[t] ?? BRAND.muted),
         },
         marks: [
-          Plot.ruleY([0], { stroke: "#e2e2df" }),
+          Plot.ruleY([0], { stroke: BRAND.line }),
           // No band: see TitleRaceChart (audit F-H1).
           Plot.lineY(lineData, {
             x: "matchday",
@@ -166,7 +166,7 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
               text: (d: { team: string; p_relegation: number }) => `${teamDisplayName(d.team)} ${formatPercent(d.p_relegation / 100, locale)}`,
               textAnchor: "start",
               dx: 6,
-              fill: "#141414",
+              fill: BRAND.ink,
               fontSize: width < 500 ? 11 : 12,
               fontWeight: "bold",
             }

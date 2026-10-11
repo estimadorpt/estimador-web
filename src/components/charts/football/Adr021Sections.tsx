@@ -128,8 +128,8 @@ export function ContestedSection({
   const shipped = data.cells.filter((c) => c.ships && c.ranking?.length);
 
   return (
-    <section className="mb-12 border-t border-stone-200 pt-8">
-      <h2 className="text-2xl tracking-tight mb-1">
+    <section className="mb-12 border-t border-rule pt-8">
+      <h2 className="text-2xl md:text-[28px] mb-1">
         {pt ? "Posse disputada" : "Contested possession"}
       </h2>
       <p className="text-sm text-stone-500 mb-2 max-w-3xl leading-relaxed">
@@ -137,10 +137,11 @@ export function ContestedSection({
           ? `A probabilidade de ganhar um duelo — aéreo ou no chão — estimada sobre a carreira de cada jogador nas ${data.seasons.length} épocas do ficheiro. É a primeira métrica desta página em que defesas e médios se separam de facto uns dos outros, porque o resultado é atribuído ao jogador que disputou o lance, não à equipa inteira.`
           : `The probability of winning a duel — aerial or on the ground — estimated over each player's career in the file's ${data.seasons.length} seasons. It is the first metric on this page where defenders and midfielders genuinely separate from one another, because the outcome is attributed to the player who contested it, not to the whole team.`}
       </p>
-      <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-2 max-w-3xl leading-relaxed">
+      <p className="border-t border-rule pt-2 text-xs leading-relaxed text-amber-800 mb-2 max-w-3xl">
+        <strong className="font-semibold">{pt ? "O que isto não é:" : "What this is not:"}</strong>{" "}
         {pt
-          ? "O que isto não é: uma classificação defensiva. Mede posse disputada — uma dimensão estreita e honesta — e nada mais. O contributo defensivo individual para os golos sofridos continua a não ser mensurável nesta liga, e nenhuma métrica desta página finge o contrário."
-          : "What this is not: a defensive rating. It measures contested possession — one narrow, honest dimension — and nothing else. Individual defensive contribution to goals conceded remains unmeasurable in this league, and no metric on this page pretends otherwise."}
+          ? "uma classificação defensiva. Mede posse disputada — uma dimensão estreita e honesta — e nada mais. O contributo defensivo individual para os golos sofridos continua a não ser mensurável nesta liga, e nenhuma métrica desta página finge o contrário."
+          : "a defensive rating. It measures contested possession — one narrow, honest dimension — and nothing else. Individual defensive contribution to goals conceded remains unmeasurable in this league, and no metric on this page pretends otherwise."}
       </p>
       <p className="text-xs text-stone-500 mb-5 max-w-3xl leading-relaxed">
         {pt
@@ -281,8 +282,8 @@ export function GkChannelsSection({
   const stop = data.channels.shot_stopping;
 
   return (
-    <section className="mb-12 border-t border-stone-200 pt-8">
-      <h2 className="text-2xl tracking-tight mb-1">
+    <section className="mb-12 border-t border-rule pt-8">
+      <h2 className="text-2xl md:text-[28px] mb-1">
         {pt
           ? "Guarda-redes: três eixos, publicados separados"
           : "Goalkeepers: three axes, published separately"}
@@ -312,10 +313,11 @@ export function GkChannelsSection({
           {/* The ranked axis's own reliability, beside its list (audit
               VFA-M6): it separates within the sample but does not repeat
               from one season to the next. */}
-          <p className="text-xs text-amber-700 bg-amber-50 border-l-2 border-amber-300 pl-3 py-1.5 mb-3 max-w-3xl leading-relaxed">
+          <p className="border-t border-rule pt-2 text-xs leading-relaxed text-amber-800 mb-3 max-w-3xl">
+            <strong className="font-semibold">{pt ? "Ressalva:" : "Caveat:"}</strong>{" "}
             {pt
-              ? `Dentro da amostra, a ordem repete-se (metade dos jogos contra a outra metade: correlação ${withMinus(formatDecimal(cross.split_half, "pt", 2))}), mas de uma época para a outra não (correlação ${withMinus(formatDecimal(cross.season_to_season, "pt", 2))}). Lê a lista como o que aconteceu nestas épocas, não como uma característica estável de cada guarda-redes.`
-              : `Within the sample the order holds (one half of the matches against the other: correlation ${withMinus(formatDecimal(cross.split_half, "en", 2))}), but not from one season to the next (correlation ${withMinus(formatDecimal(cross.season_to_season, "en", 2))}). Read the list as what happened in these seasons, not as a stable trait of each keeper.`}
+              ? `dentro da amostra, a ordem repete-se (metade dos jogos contra a outra metade: correlação ${withMinus(formatDecimal(cross.split_half, "pt", 2))}), mas de uma época para a outra não (correlação ${withMinus(formatDecimal(cross.season_to_season, "pt", 2))}). Lê a lista como o que aconteceu nestas épocas, não como uma característica estável de cada guarda-redes.`
+              : `within the sample the order holds (one half of the matches against the other: correlation ${withMinus(formatDecimal(cross.split_half, "en", 2))}), but not from one season to the next (correlation ${withMinus(formatDecimal(cross.season_to_season, "en", 2))}). Read the list as what happened in these seasons, not as a stable trait of each keeper.`}
           </p>
           <PlayerRatingList
             entries={gkEntries(
@@ -419,7 +421,7 @@ export function GkChannelsSection({
             labels={labels}
           />
         ) : (
-          <div className="max-w-3xl border-l-2 border-amber-300 bg-amber-50 pl-3 py-2">
+          <div className="max-w-3xl border-t border-rule pt-2">
             <p className="text-xs text-amber-800 leading-relaxed">
               {/* Counts come from the feed — the fitted panel grows as
                   seasons accumulate, and a hardcoded 47 would silently rot. */}

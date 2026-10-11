@@ -161,7 +161,7 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
               <li
                 key={`${m.matchday}-${m.opponent}`}
                 className={`grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-3 py-2 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto_6.5rem] ${
-                  sel ? "-ml-2 border-l-2 border-ink bg-cream pl-2" : ""
+                  sel ? "-ml-2 border-l-2 border-ink pl-2" : ""
                 }`}
               >
                 <span className="text-center text-xs tabular-nums text-stone-600">
@@ -173,7 +173,7 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
                     <span className="truncate text-sm font-medium text-ink">{opponent}</span>
                     <span className="shrink-0 text-[11px] text-stone-600">({m.venue === "H" ? labels.home : labels.away})</span>
                     {played && (
-                      <span className="shrink-0 rounded bg-parchment px-1 text-[11px] font-bold text-stone-600">
+                      <span className="shrink-0 text-[12px] font-semibold text-ink">
                         {pt ? "jogado" : "played"}
                       </span>
                     )}
@@ -185,7 +185,7 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
                 <span
                   role="group"
                   aria-label={pt ? `Resultado ${context}` : `Result ${context}`}
-                  className="inline-flex justify-self-end rounded-none border border-line bg-paper p-1 sm:justify-self-start"
+                  className="inline-flex justify-self-end border border-rule bg-paper p-1 sm:justify-self-start"
                 >
                   {OUTCOMES.map(o => {
                     const active = sel === o;
@@ -197,12 +197,12 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
                         aria-disabled={played || undefined}
                         aria-label={`${outcomeWord(o)} ${context}`}
                         onClick={() => toggle(i, o)}
-                        className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-none px-2 text-sm font-semibold transition-colors duration-150 ${
+                        className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1 px-2 text-sm font-semibold transition-colors duration-150 ${
                           active
                             ? "bg-ink text-paper"
                             : played
                               ? "cursor-not-allowed text-stone-500"
-                              : "text-stone-700 hover:bg-parchment hover:text-ink"
+                              : "text-stone-700 hover:bg-field hover:text-ink"
                         }`}
                       >
                         {active && <Check aria-hidden="true" className="h-3.5 w-3.5" />}
@@ -233,7 +233,7 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
 
       {/* The running answer, once: beside the list and sticky from `lg`,
           under it in the flow below (A11Y3-02, A11Y3-M1). */}
-      <div data-scenario-bar className="mt-4 rounded-2xl border border-line bg-cream p-4 lg:sticky lg:top-24 lg:mt-0">
+      <div data-scenario-bar className="mt-4 border-t border-ink bg-paper pt-3 pb-4 lg:sticky lg:top-24 lg:mt-0">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <div aria-live="polite">
             <p className="text-[12px] font-semibold text-graphite">
@@ -262,8 +262,8 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
             type="button"
             onClick={resetAll}
             aria-disabled={!hasSelections || undefined}
-            className={`inline-flex min-h-11 items-center gap-1.5 rounded-none border border-line bg-paper px-3 text-sm font-semibold ${
-              hasSelections ? "text-ink hover:bg-parchment" : "cursor-not-allowed text-stone-500"
+            className={`inline-flex min-h-11 items-center gap-1.5 border border-ink bg-paper px-3 text-sm font-semibold ${
+              hasSelections ? "text-ink hover:bg-field" : "cursor-not-allowed border-rule text-stone-500"
             }`}
           >
             <RotateCcw aria-hidden="true" className="h-3.5 w-3.5" />

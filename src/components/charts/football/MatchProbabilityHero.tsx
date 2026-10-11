@@ -130,7 +130,7 @@ export function MatchProbabilityHero({
   return (
     <div>
       {/* Fixture line with the crests. The page's h1 is in its PageHero. */}
-      <div className="flex items-center justify-between gap-3 mb-5 text-base font-normal tracking-normal">
+      <div className="flex items-center justify-between gap-3 mb-5 text-base font-normal">
         <div className="flex items-center gap-3 min-w-0">
           {teamLogoSrc(home) && (
             <img
@@ -141,7 +141,7 @@ export function MatchProbabilityHero({
               className="w-10 h-10 md:w-14 md:h-14 object-contain"
             />
           )}
-          <span className="text-xl md:text-3xl font-display font-extrabold tracking-tight text-stone-900 truncate">
+          <span className="text-xl md:text-3xl font-display font-extrabold text-ink truncate">
             {teamDisplayName(home)}
           </span>
         </div>
@@ -156,13 +156,13 @@ export function MatchProbabilityHero({
           </span>
         ) : centre ? (
           // On a phone the names need the width; the kickoff is on the line below.
-          <span className="hidden shrink-0 text-center text-[12px] font-semibold text-graphite tabular-nums text-stone-500 sm:inline md:text-xs">
+          <span className="hidden shrink-0 text-center text-[12px] font-semibold text-graphite tabular-nums sm:inline md:text-xs">
             {centre}
           </span>
         ) : null}
         {" "}
         <div className="flex items-center gap-3 min-w-0 justify-end">
-          <span className="text-xl md:text-3xl font-display font-extrabold tracking-tight text-stone-900 truncate text-right">
+          <span className="text-xl md:text-3xl font-display font-extrabold text-ink truncate text-right">
             {teamDisplayName(away)}
           </span>
           {teamLogoSrc(away) && (
@@ -245,7 +245,7 @@ export function MatchProbabilityHero({
                   style={{ borderColor: isHappened ? "var(--color-ink)" : dimmed ? "var(--color-line)" : o.rule }}
                 >
                   <div className="text-[12px] font-semibold text-graphite mb-1 break-words">
-                    <i aria-hidden="true" className="mr-1.5 inline-block h-2.5 w-2.5 rounded-sm border border-line align-[-1px]" style={{ backgroundColor: o.tone }} />
+                    <i aria-hidden="true" className="mr-1.5 inline-block h-2.5 w-2.5 border border-scale align-[-1px]" style={{ backgroundColor: o.tone }} />
                     {o.label}
                   </div>
                   <div className={`text-3xl md:text-6xl font-display font-extrabold tabular-nums leading-none ${dimmed ? "text-stone-500" : "text-stone-900"}`}>
@@ -253,7 +253,7 @@ export function MatchProbabilityHero({
                     <span className="text-lg md:text-2xl font-bold text-stone-500">%</span>
                   </div>
                   {isHappened ? (
-                    <div className="mt-1.5 inline-flex items-center gap-1 rounded bg-ink px-1.5 py-0.5 text-[12px] font-semibold text-graphite text-paper">
+                    <div className="mt-1.5 inline-flex items-center gap-1 text-[12px] font-semibold text-ink">
                       <Check aria-hidden="true" className="h-3 w-3" />
                       {pt ? "Aconteceu" : "Happened"}
                     </div>
@@ -268,7 +268,7 @@ export function MatchProbabilityHero({
           {/* Split bar */}
           {/* The bar repeats the three numbers above; it carries no text, so
               no number ever sits in white on a club colour (audit S-H6). */}
-          <div aria-hidden="true" className="flex h-4 w-full gap-[2px] overflow-hidden rounded-none">
+          <div aria-hidden="true" className="flex h-4 w-full gap-[2px] overflow-hidden">
             {outcomes.map(o => (
               <div key={o.key} style={{ width: `${o.p * 100}%`, backgroundColor: o.tone }} />
             ))}

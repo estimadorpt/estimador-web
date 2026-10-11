@@ -5,6 +5,7 @@ import type { TeamStrength } from "@/types/football";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { formatSigned } from "@/lib/football-format";
+import { BRAND } from "@/lib/brand";
 
 interface TeamStrengthRatingsProps {
   strengths: Record<string, TeamStrength>;
@@ -16,22 +17,24 @@ interface TeamStrengthRatingsProps {
   };
 }
 
-// Consistent color palette — no team colors to avoid the white/red problem
-const GOOD_COLOR = '#3a6b50';   // green-800 — strong attack or strong defense
-const WEAK_COLOR = '#a3543a';   // red-600  — weak attack or weak defense
+// One pair for every club (no team colours, which would make a white or red
+// kit read as a verdict): green above the league average, red below, both
+// at least 5:1 on paper.
+const GOOD_COLOR = BRAND.tree;
+const WEAK_COLOR = BRAND.terracotta;
 
 function Bar({ value, maxVal }: { value: number; maxVal: number }) {
-  // value: positive = better. Bars grow from the centre line (league average).
+  // value: positive = better. Bars grow from the ink zero line (league
+  // average), with no grey track behind them.
   const pct = (Math.abs(value) / maxVal) * 50;
   return (
     <div className="relative h-5 flex-1">
-      <div className="absolute inset-0 bg-parchment" />
-      <div className="absolute top-0 bottom-0 w-px bg-stone-500" style={{ left: "50%" }} />
+      <div className="absolute top-0 bottom-0 w-px bg-ink" style={{ left: "50%" }} />
       <div
-        className="absolute top-0 h-full"
+        className="absolute top-1 bottom-1"
         style={value >= 0
-          ? { left: "50%", width: `${pct}%`, backgroundColor: GOOD_COLOR, opacity: 0.55 }
-          : { left: `${50 - pct}%`, width: `${pct}%`, backgroundColor: WEAK_COLOR, opacity: 0.45 }}
+          ? { left: "50%", width: `${pct}%`, backgroundColor: GOOD_COLOR }
+          : { left: `${50 - pct}%`, width: `${pct}%`, backgroundColor: WEAK_COLOR }}
       />
     </div>
   );
@@ -74,7 +77,7 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
   const trackHead = (label: string) => (
     <div className="flex-1">
       <div className="text-center text-[12px] font-semibold text-graphite">{label}</div>
-      <div className="flex justify-between text-[11px] text-stone-600">
+      <div className="flex justify-between text-[11px] text-graphite">
         <span><span aria-hidden="true">← </span>{worse}</span>
         <span>{pt ? "média" : "average"}</span>
         <span>{better}<span aria-hidden="true"> →</span></span>
@@ -106,7 +109,7 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
                 ) : (
                   <div className="w-1 h-4 flex-shrink-0 bg-stone-400" />
                 )}
-                <span className="text-xs font-medium text-stone-700 sm:truncate">{teamDisplayName(entry.team)}</span>
+                <span className="name-cut text-xs text-ink sm:truncate">{teamDisplayName(entry.team)}</span>
               </div>
               <div className="flex flex-1 items-center gap-2">
                 {/* Defence: negative is good in the data, so it is flipped. */}

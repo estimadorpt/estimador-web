@@ -4,7 +4,6 @@ import {
   ligaTeamSlugs,
   ligaSlugToTeam,
   teamColorOnPaper,
-  teamLogoSrc,
   teamDisplayName,
   teamWithArticle,
 } from "@/lib/config/football";
@@ -33,6 +32,7 @@ import { ShareLink } from "@/components/football/ShareLink";
 import { forecastAsOf, nextRoundTiming } from "@/lib/football-status";
 import { previousModelMatchdays, publicationLabel } from "@/components/charts/football/probability-history-table";
 import { setRequestLocale } from '@/i18n/request-locale';
+import { Register } from '@/components/instrument';
 
 const ordinal = formatOrdinal;
 
@@ -391,9 +391,10 @@ export default async function TeamDetailPage({
       <Header />
 
       <main id="main-content" tabIndex={-1}>
-      {/* Hero: the club colour is an accent (stripe + crest), never the
+      {/* Hero: the club colour is a swatch beside the name, never the
           background — a readable neutral surface works for all 18 clubs,
-          including a bright yellow one like Arouca (diagnosis §10). The intro
+          including a bright yellow one like Arouca (diagnosis §10). No crest:
+          a hero carries no icon. The intro
           recognises a deep arrival: the club, the forecast date and what the
           page answers. */}
       <PageHero
@@ -414,10 +415,7 @@ export default async function TeamDetailPage({
         }
         title={
           <span className="flex items-center gap-3">
-            <span aria-hidden="true" className="h-9 w-1.5 shrink-0 rounded-full md:h-11" style={{ backgroundColor: teamColor }} />
-            {teamLogoSrc(teamName) && (
-              <img src={teamLogoSrc(teamName)} alt="" className="w-12 h-12 md:w-16 md:h-16 object-contain" />
-            )}
+            <span aria-hidden="true" className="h-9 w-1.5 shrink-0 md:h-11" style={{ backgroundColor: teamColor }} />
             <span>{teamDisplayName(teamName)}</span>
           </span>
         }
@@ -438,7 +436,7 @@ export default async function TeamDetailPage({
 
       {/* Key stats + season projection */}
       {standing && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-8">
             {shownMetrics.length > 0 && (
               <div className="grid gap-6 md:gap-8" style={{ gridTemplateColumns: `repeat(${shownMetrics.length}, minmax(0, 1fr))` }}>
@@ -480,7 +478,7 @@ export default async function TeamDetailPage({
               </p>
             )}
             {/* Season projection summary */}
-            <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-500">
+            <div className="mt-4 pt-4 border-t border-grid flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-500">
               <span>
                 {t("football.expectedPoints")}:{" "}
                 <strong className="text-ink">{formatInteger(Math.round(standing.mean_pts), locale)}</strong>
@@ -522,58 +520,42 @@ export default async function TeamDetailPage({
               )}
             </div>
 
-            {/* Magic Numbers */}
+            {/* Magic numbers: one ruled row per objective, the fact in the
+                value column (a word for clinched, out of reach or depends on
+                others; else the points still needed), no chips. */}
             {magicNumbers.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-stone-100">
-                <div className="text-[12px] font-semibold text-graphite mb-0.5">
+              <Register
+                className="mt-6 max-w-2xl"
+                title={<>
                   {t("football.magicNumbers")}
-                </div>
-                <div className="text-[11px] text-stone-500 mb-2">
-                  {t("football.magicNumbersDescription")}
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {magicNumbers.map(mn => {
-                    const impossible = mn.pointsNeeded > mn.maxRemaining;
-                    return (
-                      <div key={mn.label} className="rounded-xl bg-cream border border-line px-3 py-2 min-w-[120px]">
-                        <div className="text-[12px] font-semibold text-graphite mb-1">
-                          {t(`football.${mn.label}`)}
-                        </div>
-                        {mn.clinched ? (
-                          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                            {t("football.magicClinched")}
-                          </span>
-                        ) : mn.eliminated ? (
-                          <span className="text-xs font-bold text-red-700 bg-red-50 px-1.5 py-0.5 rounded">
-                            {t("football.magicEliminated")}
-                          </span>
-                        ) : impossible ? (
-                          <span className="text-xs font-medium text-amber-700 bg-amber-50 px-1.5 py-0.5">
-                            {t("football.magicDependsOnOthers")}
-                          </span>
-                        ) : (
-                          <div>
-                            <span className="text-lg font-display font-extrabold tabular-nums text-ink">
-                              {mn.pointsNeeded}
-                              <span className="text-xs text-stone-500 font-normal ml-0.5">
-                                {t("football.magicPtsAbbr")}
-                              </span>
-                            </span>
-                            <div className="text-[11px] text-stone-500 mt-0.5">
-                              {/* When the number equals everything still on
-                                  offer, say so — "96 of 96 available" is a
-                                  riddle where "win every match" is a fact. */}
-                              {mn.pointsNeeded >= mn.maxRemaining
-                                ? t("football.magicWinEverything")
-                                : t("football.magicNeedsOf", { available: mn.maxRemaining })}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                  <span className="mt-0.5 block text-[12px] font-normal text-graphite">{t("football.magicNumbersDescription")}</span>
+                </>}
+                items={magicNumbers.map(mn => {
+                  const impossible = mn.pointsNeeded > mn.maxRemaining;
+                  return {
+                    label: t(`football.${mn.label}`),
+                    value: mn.clinched ? (
+                      <span className="text-emerald-700">{t("football.magicClinched")}</span>
+                    ) : mn.eliminated ? (
+                      <span className="text-red-700">{t("football.magicEliminated")}</span>
+                    ) : impossible ? (
+                      <span className="text-amber-800">{t("football.magicDependsOnOthers")}</span>
+                    ) : (
+                      <>
+                        {mn.pointsNeeded} {t("football.magicPtsAbbr")}{" "}
+                        <span className="font-normal text-graphite">
+                          {/* When the number equals everything still on
+                              offer, say so — "96 of 96 available" is a
+                              riddle where "win every match" is a fact. */}
+                          {mn.pointsNeeded >= mn.maxRemaining
+                            ? t("football.magicWinEverything")
+                            : t("football.magicNeedsOf", { available: mn.maxRemaining })}
+                        </span>
+                      </>
+                    ),
+                  };
+                })}
+              />
             )}
           </div>
         </section>
@@ -581,9 +563,9 @@ export default async function TeamDetailPage({
 
       {/* Position distribution */}
       {positionProbs && positionProbs.length > 0 && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
+            <h2 className="text-2xl md:text-[28px] mb-1">
               {t("football.positionDistribution")}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
@@ -591,7 +573,7 @@ export default async function TeamDetailPage({
             </p>
             {/* Framed like every other chart: title, source, date, method (UXD2-07). */}
             <DataCard
-              title={locale === "pt" ? `Onde acaba o ${teamDisplayName(teamName)}?` : `Where does ${teamDisplayName(teamName)} finish?`}
+              title={locale === "pt" ? `Onde ${teamWithArticle(teamName)} pode acabar` : `Where ${teamDisplayName(teamName)} can finish`}
               subtitle={locale === "pt" ? "Parte das simulações em que termina em cada posição, numa escala de 0 a 100%." : "Share of simulations finishing in each position, on a 0–100% scale."}
               source={locale === "pt"
                 ? `Fonte: modelo estimador.pt, ${formatInteger(prediction.n_sims, locale)} simulações`
@@ -631,7 +613,7 @@ export default async function TeamDetailPage({
           baseline and the three-outcome stakes, oriented from its own
           perspective (diagnosis §5's club page, second step). */}
       {clubOutlook && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
             {/* "Próximo jogo" until the club's game kicks off; then the block
                 is what the model gave before it, dated (FR3-01, FA3-07). */}
@@ -648,11 +630,12 @@ export default async function TeamDetailPage({
                   : []}
               />
             </p>
-            <h2 className="text-2xl tracking-tight mb-6">
+            <h2 className="text-2xl md:text-[28px] mb-6">
               {clubOutlook.opponentLabel && clubOutlook.opponent ? (
                 <ClockSwitch
                   initial={t("football.fixtureStakesHeading", {
                     team: clubOutlook.label,
+                    teamFor: teamWithArticle(teamName, "para"),
                     opponent: clubOutlook.opponentLabel,
                     opponentAgainst: teamWithArticle(clubOutlook.opponent, "contra"),
                   })}
@@ -660,18 +643,19 @@ export default async function TeamDetailPage({
                     ? [{
                         at: clubOutlook.fixtureKickoff,
                         value: pt
-                          ? `${clubOutlook.label}: o que estava em jogo ${teamWithArticle(clubOutlook.opponent, "contra")}?`
-                          : `${clubOutlook.label}: what was at stake against ${clubOutlook.opponentLabel}?`,
+                          ? `O que estava em jogo ${teamWithArticle(teamName, "para")} ${teamWithArticle(clubOutlook.opponent, "contra")}`
+                          : `What was at stake for ${clubOutlook.label} against ${clubOutlook.opponentLabel}`,
                       }]
                     : []}
                 />
               ) : clubOutlook.opponentLabel
                 ? t("football.fixtureStakesHeading", {
                     team: clubOutlook.label,
+                    teamFor: teamWithArticle(teamName, "para"),
                     opponent: clubOutlook.opponentLabel,
-                    opponentAgainst: clubOutlook.opponentLabel,
+                    opponentAgainst: `${pt ? "contra" : "against"} ${clubOutlook.opponentLabel}`,
                   })
-                : t("football.fixtureStakesHeadingNoOpponent", { team: clubOutlook.label })}
+                : t("football.fixtureStakesHeadingNoOpponent", { team: clubOutlook.label, teamFor: teamWithArticle(teamName, "para") })}
             </h2>
             <FixtureStakes locale={pt ? "pt" : "en"} entry={clubOutlook} matchLink simulatorLink />
           </div>
@@ -682,11 +666,11 @@ export default async function TeamDetailPage({
           actually a line to read. Two points are a segment, not a trend, and
           the axis has nothing to say about a season two matchdays old. */}
       {timelineData.length >= 5 && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
             {/* One title level per chart (UXD3-11); the card says what each
                 point is, as on the hub (FA3-05, VFA-M4). */}
-            <h2 className="text-2xl tracking-tight mb-6">
+            <h2 className="text-2xl md:text-[28px] mb-6">
               {t("football.probabilityOverTime")}
             </h2>
             <DataCard
@@ -719,9 +703,9 @@ export default async function TeamDetailPage({
 
       {/* Narrative Scenarios */}
       {narrativeData && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
+            <h2 className="text-2xl md:text-[28px] mb-1">
               {isSurvival
                 ? t("football.survivalScenariosTitle")
                 : t("football.scenariosTitle")}
@@ -772,11 +756,11 @@ export default async function TeamDetailPage({
 
       {/* Build Your Path / Remaining schedule */}
       {remainingMatches && remainingMatches.length > 0 && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
             {scenarios?.critical_paths?.[teamName] ? (
               <>
-                <h2 className="text-2xl tracking-tight mb-1">
+                <h2 className="text-2xl md:text-[28px] mb-1">
                   {t("football.buildYourPath")}
                 </h2>
                 <p className="text-sm text-stone-500 mb-6">
@@ -816,7 +800,7 @@ export default async function TeamDetailPage({
               </>
             ) : (
               <>
-                <h2 className="text-2xl tracking-tight mb-1">
+                <h2 className="text-2xl md:text-[28px] mb-1">
                   {t("football.remainingSchedule")}
                 </h2>
                 <p className="text-sm text-stone-500 mb-6">
@@ -842,10 +826,10 @@ export default async function TeamDetailPage({
 
       {/* Decisive Matches — direct impact on this team */}
       {hasDirectDecisive && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
-              {t("football.decisiveMatchesFor", { team: teamDisplayName(teamName) })}
+            <h2 className="text-2xl md:text-[28px] mb-1">
+              {t("football.decisiveMatchesFor", { team: teamDisplayName(teamName), teamOf: teamWithArticle(teamName, "de") })}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
               {ownRace === "relegation"
@@ -871,10 +855,10 @@ export default async function TeamDetailPage({
           Arouca's page). Each row's own team badge/name (in DecisiveMatches)
           still names that club again. */}
       {teamFeaturedMatches.length > 0 && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-1">
-              {t("football.otherClubsImpactFor", { team: teamDisplayName(teamName) })}
+            <h2 className="text-2xl md:text-[28px] mb-1">
+              {t("football.otherClubsImpactFor", { team: teamDisplayName(teamName), teamOf: teamWithArticle(teamName, "de") })}
             </h2>
             <p className="text-sm text-stone-500 mb-6">
               {t("football.otherClubsImpactForDescription", { team: teamDisplayName(teamName) })}
@@ -893,10 +877,10 @@ export default async function TeamDetailPage({
           game left, from the fixture manifest, postponed ones included
           (audit F14). */}
       {!scenarios?.critical_paths?.[teamName] && fixtureRows.length > 0 && (
-        <section className="border-b border-stone-200" aria-labelledby="club-fixtures">
+        <section className="border-b border-rule" aria-labelledby="club-fixtures">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 id="club-fixtures" className="text-2xl tracking-tight mb-1">
-              {locale === "pt" ? `Que jogos faltam ao ${teamDisplayName(teamName)}?` : `Which games does ${teamDisplayName(teamName)} have left?`}
+            <h2 id="club-fixtures" className="text-2xl md:text-[28px] mb-1">
+              {locale === "pt" ? `Os jogos que faltam ${teamWithArticle(teamName, "a")}` : `The games ${teamDisplayName(teamName)} has left`}
             </h2>
             <p className="text-sm text-stone-500 mb-6 max-w-3xl">
               {locale === "pt"

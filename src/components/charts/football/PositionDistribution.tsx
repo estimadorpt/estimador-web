@@ -39,34 +39,33 @@ export function PositionDistribution({ probs, teamColor, locale }: PositionDistr
             title={pt ? `${ordinal(position, locale)} lugar: ${pctLabel(prob)} das simulações` : `${ordinal(position, locale)} place: ${pctLabel(prob)} of simulations`}
           >
             {/* Position label */}
-            <div className="w-10 text-right text-xs font-medium text-stone-500 tabular-nums">
+            <div className="w-10 text-right text-xs font-medium text-graphite tabular-nums">
               {ordinal(position, locale)}
             </div>
 
-            {/* Bar with background track */}
-            <div className="flex-1 h-6 bg-parchment relative">
+            {/* The bar on the 0–100% scale's own grid lines, no grey track. */}
+            <div className="relative h-6 flex-1 border-l border-ink">
+              {[25, 50, 75, 100].map(tick => (
+                <span key={tick} aria-hidden="true" className="absolute inset-y-0 w-px bg-grid" style={{ left: `${tick}%` }} />
+              ))}
               <div
-                className="h-full"
+                className="relative h-full"
                 style={{
                   width: `${widthPct}%`,
                   backgroundColor: teamColor,
-                  opacity: 0.85,
                 }}
               />
-              {[25, 50, 75].map(tick => (
-                <span key={tick} aria-hidden="true" className="absolute inset-y-0 w-px bg-paper" style={{ left: `${tick}%` }} />
-              ))}
             </div>
 
             {/* Percentage */}
-            <div className="w-12 text-right text-xs font-semibold tabular-nums text-stone-700">
+            <div className="w-12 text-right text-xs font-semibold tabular-nums text-ink">
               {pctLabel(prob)}
             </div>
           </div>
         );
       })}
     </div>
-    <div aria-hidden="true" className="mt-1 flex items-center gap-2 text-[11px] tabular-nums text-stone-600">
+    <div aria-hidden="true" className="mt-1 flex items-center gap-2 text-[11px] tabular-nums text-graphite">
       <div className="w-10" />
       <div className="relative h-4 flex-1">
         {[0, 25, 50, 75, 100].map(tick => (

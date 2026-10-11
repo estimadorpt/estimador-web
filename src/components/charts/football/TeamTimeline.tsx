@@ -5,7 +5,7 @@ import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { formatPercent } from "@/lib/football-format";
 import { quietPlot } from "@/components/viz/plot-a11y";
-import { FONT_STACK } from '@/lib/brand';
+import { BRAND, FONT_STACK } from '@/lib/brand';
 
 interface TimelinePoint {
   matchday: number;
@@ -60,11 +60,11 @@ export function TeamTimeline({ data, teamColor, yAxisLabel, xAxisLabel = "Jornad
         marginLeft: 45,
         marginRight: 48,
         marginBottom: 35,
-        style: { fontFamily: FONT_STACK, fontSize: "12px", background: "transparent", color: "#5e5e5e", overflow: "visible" },
+        style: { fontFamily: FONT_STACK, fontSize: "12px", background: "transparent", color: BRAND.muted, overflow: "visible" },
         x: { label: xAxisLabel, ticks: tickValues, tickFormat: (d: number) => `${Math.round(d)}` },
         y: { label: yAxisLabel, domain: [0, yMax], grid: true, tickFormat: (d: number) => `${d}%` },
         marks: [
-          Plot.ruleY([0], { stroke: "#e2e2df" }),
+          Plot.ruleY([0], { stroke: BRAND.line }),
           Plot.lineY(data, { x: "matchday", y: "value", stroke: teamColor, strokeWidth: 2, curve: "monotone-x" }),
           // A dot per published forecast, not only the last (audit FA2-16).
           Plot.dot(data, { x: "matchday", y: "value", fill: teamColor, r: 2.5 }),
@@ -80,7 +80,7 @@ export function TeamTimeline({ data, teamColor, yAxisLabel, xAxisLabel = "Jornad
             text: (d: TimelinePoint) => formatPercent(d.value / 100, locale),
             dx: 8,
             textAnchor: "start",
-            fill: "#141414",
+            fill: BRAND.ink,
             fontSize: 12,
             fontWeight: "bold",
           }),

@@ -493,11 +493,11 @@ export default async function LigaPage({
 
       {/* Title Race */}
       {historical.length > 1 && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            {/* One title level per chart: the section's question, then the
+            {/* One title level per chart: the section's name, then the
                 card that names the plot (audit UXD3-11). */}
-            <h2 className="text-2xl tracking-tight mb-6">
+            <h2 className="text-2xl md:text-[28px] mb-6">
               {t("football.titleRace")}
             </h2>
             <DataCard
@@ -518,8 +518,8 @@ export default async function LigaPage({
                   {t("football.titleCalibrationCaveat")}{" "}
                   <Link
                     href={locale === "pt"
-                      ? "/desporto/liga/metodologia#as-probabilidades-de-titulo-estao-calibradas"
-                      : "/desporto/liga/metodologia#are-the-title-probabilities-calibrated"}
+                      ? "/desporto/liga/metodologia#quem-lidera-ganha-o-titulo-mais-vezes-do-que-o-modelo-diz"
+                      : "/desporto/liga/metodologia#leaders-win-the-title-more-often-than-the-model-says"}
                     locale={locale}
                     className="font-medium text-ink underline underline-offset-4"
                   >
@@ -535,9 +535,9 @@ export default async function LigaPage({
       {/* Relegation Battle — defaults to the highest-risk club plus a few
           comparisons; "todas as equipas" stays one click away. */}
       {historical.length > 1 && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl tracking-tight mb-6">
+            <h2 className="text-2xl md:text-[28px] mb-6">
               {t("football.relegationBattle")}
             </h2>
             <DataCard
@@ -559,10 +559,10 @@ export default async function LigaPage({
 
       {/* Team Strength Ratings */}
       {prediction.team_strengths && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
             {/* Club pages link here for every club's rank (PUB3-12). */}
-            <h2 id="forca-das-equipas" className="text-2xl tracking-tight mb-6">
+            <h2 id="forca-das-equipas" className="text-2xl md:text-[28px] mb-6">
               {t("football.teamStrengths")}
             </h2>
             <DataCard
@@ -592,7 +592,7 @@ export default async function LigaPage({
       <SectionNotes
         section="football"
         locale={locale}
-        className="border-b border-stone-200"
+        className="border-b border-rule"
         containerClassName="max-w-7xl mx-auto px-4 py-10"
       />
 
@@ -602,10 +602,10 @@ export default async function LigaPage({
           UXD2-15). The last section: the footer draws the rule (UXD-10). */}
       <section aria-labelledby="liga-mais">
         <div className="max-w-7xl mx-auto px-4 py-10">
-          <h2 id="liga-mais" className="text-2xl tracking-tight mb-3">
+          <h2 id="liga-mais" className="text-2xl md:text-[28px] mb-3">
             {locale === "en" ? "More on the Liga" : "Mais sobre a Liga"}
           </h2>
-          <p className="text-sm text-stone-600 leading-relaxed max-w-3xl">
+          <p className="text-sm text-graphite leading-relaxed max-w-3xl">
             {t("football.modelDescription", {
               count: simsLabel,
             })}
@@ -620,7 +620,7 @@ export default async function LigaPage({
                 >
                   <div className="min-w-0">
                     <h3 className="text-[21px] leading-snug text-ink">{teaser.title}</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-stone-600">{teaser.body}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-graphite">{teaser.body}</p>
                   </div>
                   <span className="mt-3 inline-flex items-center gap-1 self-start text-sm font-semibold text-ink underline underline-offset-4 md:mt-auto md:pt-3">
                     {teaser.action}

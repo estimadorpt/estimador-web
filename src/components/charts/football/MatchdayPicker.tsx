@@ -33,7 +33,6 @@ interface MatchdayPickerProps {
    * then the forecast's date (audit FR3-05). */
   staleAt?: string | null;
   labels: {
-    whatIfTitle: string;
     whatIfDescription: string;
     resetAll: string;
     impactOnTitle: string;

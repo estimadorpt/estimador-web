@@ -19,7 +19,7 @@ import {
   loadUpcomingFixtures,
   NO_FIXTURES_SLUG,
 } from "@/lib/utils/football-data-loader";
-import { CURRENT_LIGA_SEASON, teamColorOnPaper, teamDisplayName, ligaTeamSlugs } from "@/lib/config/football";
+import { CURRENT_LIGA_SEASON, teamColorOnPaper, teamDisplayName, teamWithArticle, ligaTeamSlugs } from "@/lib/config/football";
 import { byKickoff } from "@/lib/football-fixtures";
 import { MatchProbabilityHero } from "@/components/charts/football/MatchProbabilityHero";
 import { MatchOutcomeImpact } from "@/components/charts/football/MatchOutcomeImpact";
@@ -363,7 +363,7 @@ export default async function MatchPage({
       />
 
       {/* Probabilities */}
-      <section className="border-b border-stone-200">
+      <section className="border-b border-rule">
         <div className="mx-auto w-full max-w-7xl px-4 py-8 md:py-10"><div className="max-w-5xl">
           <MatchProbabilityHero
             home={home}
@@ -389,7 +389,7 @@ export default async function MatchPage({
 
       {/* What each result would do — only before the match */}
       {!isPlayed && (
-      <section className="border-b border-stone-200">
+      <section className="border-b border-rule">
         <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
           <MatchOutcomeImpact
             home={home}
@@ -413,7 +413,7 @@ export default async function MatchPage({
 
       {/* Form, strength, xPts — today's, so only before the match */}
       {!isPlayed && (
-      <section className="border-b border-stone-200">
+      <section className="border-b border-rule">
         <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
           <MatchTeamCompare
             home={panelFor(home, "H")}
@@ -440,7 +440,7 @@ export default async function MatchPage({
       )}
 
       {isPlayed && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-5xl flex flex-wrap gap-x-6 gap-y-2">
             {[home, away].map(team =>
               ligaTeamSlugs[team] ? (
@@ -450,7 +450,7 @@ export default async function MatchPage({
                   locale={locale}
                   className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-ink underline underline-offset-4"
                 >
-                  {pt ? `O que falta ao ${teamDisplayName(team)}` : `What ${teamDisplayName(team)} has left`}
+                  {pt ? `O que falta ${teamWithArticle(team, "a")}` : `What ${teamDisplayName(team)} has left`}
                   <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />
                 </Link>
               ) : null,
@@ -461,7 +461,7 @@ export default async function MatchPage({
 
       {/* Squads */}
       {!isPlayed && (injuries || players) && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
             <MatchSquadNews
               home={squadSide(home, homeColor)}
@@ -483,12 +483,12 @@ export default async function MatchPage({
 
       {/* Other fixtures */}
       {otherFixtures.length > 0 && (
-        <section className="border-b border-stone-200">
+        <section className="border-b border-rule">
           <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
             {/* Once the round is played the list is what the model gave for
                 it, dated; each game says when it started and was played
                 (audit FR3-03), and a leftover says so (FA3-08). */}
-            <h2 className="text-2xl tracking-tight mb-1">
+            <h2 className="text-2xl md:text-[28px] mb-1">
               <ClockSwitch
                 initial={isPlayed ? (pt ? "Próximos jogos" : "Next fixtures") : L.otherMatches}
                 steps={roundPlayedAtIso && timing?.round != null
@@ -502,7 +502,7 @@ export default async function MatchPage({
               />
             </h2>
             <p className="mb-4 text-sm text-stone-500">{pt ? "Por ordem de início, hora de Lisboa." : "In kickoff order, Lisbon time."}</p>
-            <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <ol className="grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
               {otherFixtures.map(f => {
                 const when = formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed });
                 return (
@@ -510,7 +510,7 @@ export default async function MatchPage({
                     <Link
                       href={`/desporto/liga/jogo/${f.slug}`}
                       locale={locale}
-                      className="block h-full rounded-2xl border border-line bg-cream px-3 py-2 transition-colors duration-150 hover:bg-parchment"
+                      className="block h-full border-t border-rule py-2.5 transition-colors duration-150 hover:bg-field"
                     >
                       <span className="block text-[11px] font-semibold tabular-nums text-stone-500">
                         <ClockSwitch

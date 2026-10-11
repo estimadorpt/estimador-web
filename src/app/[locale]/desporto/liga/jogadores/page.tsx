@@ -141,7 +141,7 @@ export default async function PlayerRatingsPage({
           <Link
             href={pt
               ? "/desporto/liga/metodologia#como-medimos-os-jogadores"
-              : "/desporto/liga/metodologia#how-do-we-measure-players"}
+              : "/desporto/liga/metodologia#how-we-measure-players"}
             locale={locale}
             className="text-ink underline underline-offset-4"
           >

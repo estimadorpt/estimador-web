@@ -80,19 +80,19 @@ function SideColumn({
 
   return (
     <div className={`md:row-span-3 md:grid md:grid-rows-subgrid ${className}`}>
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-100">
+      <div className="flex items-center gap-2 py-2.5 border-b border-rule">
         {/* The club colour as the identity rule; the bars are ink (UXD3-07). */}
-        <i aria-hidden="true" className="h-5 w-1 shrink-0 rounded-full" style={{ backgroundColor: side.color }} />
+        <i aria-hidden="true" className="h-5 w-1 shrink-0" style={{ backgroundColor: side.color }} />
         {teamLogoSrc(side.team) && (
           <img src={teamLogoSrc(side.team)} alt="" width={28} height={28} loading="lazy" decoding="async" className="w-7 h-7 object-contain" />
         )}
-        <span className="text-sm font-bold text-stone-900">
+        <span className="name-cut text-sm text-ink">
           {teamDisplayName(side.team)}
         </span>
       </div>
 
       {/* Unavailable */}
-      <div className="px-4 py-3 border-b border-stone-100">
+      <div className="py-3 border-b border-grid">
         <div className="flex items-center gap-1.5 mb-2">
           <Stethoscope className="w-3.5 h-3.5 text-stone-500" />
           <span className="text-[12px] font-semibold text-graphite">
@@ -147,7 +147,7 @@ function SideColumn({
       </div>
 
       {/* Top players by SAR */}
-      <div className="px-4 py-3">
+      <div className="py-3">
         <div className="text-[12px] font-semibold text-graphite mb-2">
           {pt ? "Finalização (SAR)" : "Finishing (SAR)"}
         </div>
@@ -187,7 +187,7 @@ function SideColumn({
                       {codes[p.position] ?? p.position}
                     </span>
                     {out && (
-                      <span className="text-[12px] font-semibold text-graphite text-red-700">
+                      <span className="text-[12px] font-semibold text-red-700">
                         {pt ? "fora" : "out"}
                       </span>
                     )}
@@ -195,9 +195,9 @@ function SideColumn({
                       {formatDecimal(p.sar, locale, 2)}
                     </span>
                   </div>
-                  <span className="block h-1 bg-stone-100 overflow-hidden">
+                  <span className="block border-b border-scale pb-px">
                     <span
-                      className="block h-full"
+                      className="block h-1"
                       style={{
                         width: `${Math.max(4, (p.sar / maxSar) * 100)}%`,
                         backgroundColor: "var(--color-ink)",
@@ -229,7 +229,7 @@ export function MatchSquadNews({
   const snapshot = snapshotDate ? formatLongDate(snapshotDate, locale) : "";
   return (
     <div>
-      <h2 className="text-2xl tracking-tight mb-1">
+      <h2 className="text-2xl md:text-[28px] mb-1">
         {pt ? "Plantéis" : "Squads"}
       </h2>
       <p className="text-sm text-stone-500 mb-6">
@@ -248,12 +248,12 @@ export function MatchSquadNews({
               }`
             : ""}
       </p>
-      {/* The two teams are compared, so they share one card: two columns split by
-          a hairline (stacked below md, with the hairline between them), not two
-          cards where the shorter one is stretched to the taller one's height. */}
-      <div className="overflow-hidden rounded-2xl border border-line bg-cream md:grid md:grid-cols-2 md:grid-rows-[auto_auto_auto]">
-        <SideColumn side={home} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} publishedCount={publishedCount} />
-        <SideColumn side={away} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} publishedCount={publishedCount} className="border-t border-line md:border-t-0 md:border-l" />
+      {/* The two teams are compared, so they share one instrument under one
+          ink rule: two columns split by a hairline (stacked below md, with
+          the hairline between them), rows aligned across both. */}
+      <div className="border-t border-ink md:grid md:grid-cols-2 md:grid-rows-[auto_auto_auto]">
+        <SideColumn side={home} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} publishedCount={publishedCount} className="md:pr-6" />
+        <SideColumn side={away} locale={locale} unavailable={unavailable} absencesStatus={absencesStatus} sarCutoffLabel={sarCutoffLabel} publishedCount={publishedCount} className="border-t border-rule md:border-t-0 md:border-l md:pl-6" />
       </div>
       {/* The feed's metric_label is English; the definition is ours to write. */}
       <p className="text-[11px] text-stone-500 mt-3">

@@ -3,6 +3,7 @@
 import { teamLogoSrc, teamDisplayName } from "@/lib/config/football";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { formatDecimal, formatSigned } from "@/lib/football-format";
+import { BRAND } from "@/lib/brand";
 
 export interface LuckEntry {
   team: string;
@@ -50,8 +51,8 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
 
   const points = (entry: LuckEntry) => (
     <span className="text-right leading-tight">
-      <span className="block text-xs font-semibold tabular-nums text-stone-700">{entry.actualPts} {pts}</span>
-      <span className="block text-[11px] tabular-nums text-stone-600">{formatDecimal(entry.expectedPts, locale, 1)} {exp}</span>
+      <span className="block text-xs font-semibold tabular-nums text-ink">{entry.actualPts} {pts}</span>
+      <span className="block text-[11px] tabular-nums text-graphite">{formatDecimal(entry.expectedPts, locale, 1)} {exp}</span>
     </span>
   );
 
@@ -62,7 +63,7 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
         {/* Which side is which, at the two ends of the track. */}
         <div className="mb-3 flex items-center gap-2">
           <div className="hidden w-28 flex-shrink-0 sm:block" />
-          <div className="flex min-w-0 flex-1 justify-between gap-x-2 px-1 text-[11px] font-bold text-stone-600">
+          <div className="flex min-w-0 flex-1 justify-between gap-x-2 px-1 text-[12px] font-semibold">
             <span className="text-red-700">← {under}</span>
             <span className="text-emerald-700">{over} →</span>
           </div>
@@ -73,8 +74,10 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
           {entries.map((entry) => {
             const barPct = (Math.abs(entry.delta) / maxAbsDelta) * 40; // max 40% of the track
             const isPositive = entry.delta >= 0;
-            // The value sits just past the bar's end, kept inside the track.
-            const labelAt = Math.min(50 + barPct + 1, 86);
+            // The value sits just past the bar's end; the longest bars carry
+            // it inside, in white (5:1 or more on either colour).
+            const inside = 50 + barPct + 1 > 86;
+            const labelAt = inside ? 50 + barPct - 1 : 50 + barPct + 1;
 
             return (
               <div
@@ -90,26 +93,25 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
                     ) : (
                       <span className="w-1 h-4 flex-shrink-0 bg-stone-400" />
                     )}
-                    <span className="text-xs font-medium text-stone-700 sm:truncate">{teamDisplayName(entry.team)}</span>
+                    <span className="name-cut text-xs text-ink sm:truncate">{teamDisplayName(entry.team)}</span>
                   </span>
                   <span className="sm:hidden">{points(entry)}</span>
                 </div>
 
-                {/* Diverging bar */}
+                {/* Diverging bar from the ink zero line, no grey track. */}
                 <div className="relative h-5 flex-1">
-                  <div className="absolute inset-0 bg-parchment" />
-                  <div className="absolute top-0 bottom-0 w-px bg-stone-500" style={{ left: '50%' }} />
+                  <div className="absolute top-0 bottom-0 w-px bg-ink" style={{ left: '50%' }} />
                   <div
                     className="absolute top-0 h-full"
                     style={isPositive
-                      ? { left: '50%', width: `${barPct}%`, backgroundColor: '#3a6b50', opacity: 0.45 }
-                      : { left: `${50 - barPct}%`, width: `${barPct}%`, backgroundColor: '#a3543a', opacity: 0.35 }}
+                      ? { left: '50%', width: `${barPct}%`, backgroundColor: BRAND.tree }
+                      : { left: `${50 - barPct}%`, width: `${barPct}%`, backgroundColor: BRAND.terracotta }}
                   />
                   <div
-                    // On the bar itself (the longest ones), the label is ink:
-                    // red or green on the tinted bar fails contrast.
-                    className={`absolute top-0 flex h-full items-center text-[11px] font-bold tabular-nums ${50 + barPct + 1 > 86 ? "text-ink" : isPositive ? "text-emerald-700" : "text-red-700"}`}
-                    style={isPositive ? { left: `${labelAt}%` } : { right: `${labelAt}%` }}
+                    className={`absolute top-0 flex h-full items-center text-[11px] font-bold tabular-nums ${inside ? "text-white" : isPositive ? "text-emerald-700" : "text-red-700"}`}
+                    style={isPositive
+                      ? inside ? { right: `${100 - labelAt}%` } : { left: `${labelAt}%` }
+                      : inside ? { left: `${100 - labelAt}%` } : { right: `${labelAt}%` }}
                   >
                     {formatSigned(entry.delta, locale, 1)}
                   </div>

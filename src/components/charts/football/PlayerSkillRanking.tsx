@@ -2,6 +2,7 @@
 
 import { formatInteger } from "@/lib/football-format";
 import { PLAYER_MARKS } from "@/components/charts/football/player-marks";
+import { BRAND } from "@/lib/brand";
 
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
@@ -80,7 +81,7 @@ interface PlayerSkillRankingProps {
 const BAR = PLAYER_MARKS.bar; // stone-900
 // The interval carries the uncertainty: stone-400, 3:1 on paper (A11Y3-10).
 const BAR_SOFT = PLAYER_MARKS.whisker;
-const BAR_INSIDE = "#cbccbb"; // stone-300 — interval, over the dark bar
+const BAR_INSIDE = PLAYER_MARKS.zero; // stone-300 — interval, over the dark bar
 
 export function PlayerSkillRanking({
   data,
@@ -179,7 +180,7 @@ export function PlayerSkillRanking({
 
   return (
     <div>
-      <h2 className="text-2xl tracking-tight mb-1">{t.title}</h2>
+      <h2 className="text-2xl md:text-[28px] mb-1">{t.title}</h2>
       <p className="text-sm text-stone-500 mb-3 max-w-3xl leading-relaxed">{t.intro}</p>
 
       {/* One number cannot rank a keeper against a striker; the hub carries
@@ -214,8 +215,7 @@ export function PlayerSkillRanking({
 
       {hasUnavailable && (
         <div className="flex items-center gap-1.5 mb-1 mt-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-          <span className="text-[11px] text-stone-500">{t.legendOut}</span>
+          <span className="text-[11px] text-stone-500"><span className="font-semibold text-red-700">{t.out}</span>: {t.legendOut}</span>
         </div>
       )}
 
@@ -234,7 +234,7 @@ export function PlayerSkillRanking({
           const stale = teamSet ? !teamSet.has(p.team) : false;
           const outReason = unavailable?.[p.player];
           const isOpen = openRank === p.rank;
-          const chip = ligaTeamColors[p.team] || "#5c5c5c";
+          const chip = ligaTeamColors[p.team] || BRAND.muted;
           const slug = playerSlugs?.[p.player];
 
           return (
@@ -265,10 +265,11 @@ export function PlayerSkillRanking({
                     </span>
                     {outReason && (
                       <span
-                        className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"
+                        className="flex-shrink-0 text-[11px] font-semibold text-red-700"
                         title={outReason}
-                        aria-label={t.out}
-                      />
+                      >
+                        {t.out}
+                      </span>
                     )}
                   </div>
                   <div className="flex items-center gap-1 mt-0.5">
@@ -301,7 +302,7 @@ export function PlayerSkillRanking({
                       · {int(p.minutes)}&apos;
                     </span>
                     {stale && (
-                      <span className="text-[12px] text-graphite text-amber-600 bg-amber-50 px-1 py-px flex-shrink-0">
+                      <span className="text-[11px] text-amber-800 flex-shrink-0">
                         {t.notInLeague}
                       </span>
                     )}
@@ -312,10 +313,9 @@ export function PlayerSkillRanking({
                     interval sits on top in two segments so the half that
                     overlaps the bar stays legible against the dark fill. */}
                 <div className="flex-1 h-6 relative">
-                  <div className="absolute inset-y-0 left-0 right-0 bg-stone-50" />
-                  {/* Point estimate */}
+                  {/* Point estimate, no grey track */}
                   <div
-                    className="absolute top-1/2 -translate-y-1/2 h-2.5 rounded-none"
+                    className="absolute top-1/2 -translate-y-1/2 h-2.5"
                     style={{
                       left: 0,
                       width: `${barPct}%`,
@@ -373,7 +373,7 @@ export function PlayerSkillRanking({
               </div>
 
               {isOpen && (
-                <div className="pl-8 pr-2 pb-3 pt-1 bg-stone-50/60">
+                <div className="pl-8 pr-2 pb-3 pt-1">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-xs">
                     <div>
                       <div className="text-[12px] text-graphite">

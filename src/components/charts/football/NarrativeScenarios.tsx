@@ -9,6 +9,7 @@ import { formatPercent } from "@/lib/football-format";
 import { rivalConditionsWithoutOwnMatches } from "@/lib/football-scenarios";
 import { forecastAsOf } from "@/lib/football-status";
 import { ClockSwitch } from "@/components/football/ClockSwitch";
+import { BRAND } from "@/lib/brand";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -43,22 +44,17 @@ interface StepLabels {
   away: string;
 }
 
-const RESULT_STYLE: Record<ScenarioStep["result"], string> = {
-  W: "bg-emerald-50 text-emerald-700",
-  D: "bg-parchment text-stone-700",
-  L: "bg-red-50 text-red-700",
-};
-
 function StepRow({ step, teamColor, prevP, labels, locale }: { step: ScenarioStep; teamColor: string; prevP: number; labels: StepLabels; locale: string }) {
   const delta = step.p_target_after - prevP;
   const resultLabel = step.result === "W" ? labels.resultWin : step.result === "D" ? labels.resultDraw : labels.resultLoss;
-  // The path builder's letters (V/E/D, W/D/L): the word "Vitória" beside the
-  // club Vitória read as a name (audit UXD3-05). The word stays for readers.
+  // The path builder's letters (V/E/D, W/D/L), as plain semibold text: the
+  // word "Vitória" beside the club Vitória read as a name (audit UXD3-05).
+  // The word stays for screen readers.
   const resultLetter = resultLabel.charAt(0).toUpperCase();
   const venueLabel = step.venue === "H" ? labels.home : labels.away;
 
   return (
-    <li className="flex items-center gap-2 border-b border-line py-2 last:border-0">
+    <li className="flex items-center gap-2 border-b border-grid py-2 last:border-0">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="w-9 shrink-0 text-xs font-bold tabular-nums text-stone-500">
@@ -66,17 +62,19 @@ function StepRow({ step, teamColor, prevP, labels, locale }: { step: ScenarioSte
           </span>
           <span className="truncate text-sm text-stone-700">{teamDisplayName(step.opponent)}</span>
           <span className="shrink-0 text-[11px] text-stone-500">({venueLabel})</span>
-          <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-[11px] font-bold ${RESULT_STYLE[step.result]}`}>
+          <span className="inline-flex w-4 shrink-0 justify-center text-[13px] font-semibold text-ink">
             <span aria-hidden="true">{resultLetter}</span>
             <span className="sr-only">{resultLabel}</span>
           </span>
         </div>
-        <div aria-hidden="true" className="relative mt-1 h-3 w-full overflow-hidden rounded-sm bg-parchment">
-          <div className="absolute inset-y-0 left-0" style={{ width: cssPct(Math.min(prevP, step.p_target_after)), backgroundColor: teamColor, opacity: 0.35 }} />
+        {/* 0–100% on a thin scale rule, no grey track: what the club had,
+            pale, then the step's gain in its colour or its loss in red. */}
+        <div aria-hidden="true" className="relative mt-1 h-3 w-full overflow-hidden border-b border-scale">
+          <div className="absolute top-0 bottom-px left-0" style={{ width: cssPct(Math.min(prevP, step.p_target_after)), backgroundColor: teamColor, opacity: 0.35 }} />
           {delta >= 0 ? (
-            <div className="absolute inset-y-0" style={{ left: cssPct(prevP), width: cssPct(delta), backgroundColor: teamColor }} />
+            <div className="absolute top-0 bottom-px" style={{ left: cssPct(prevP), width: cssPct(delta), backgroundColor: teamColor }} />
           ) : (
-            <div className="absolute inset-y-0" style={{ left: cssPct(step.p_target_after), width: cssPct(-delta), backgroundColor: "#a3543a", opacity: 0.6 }} />
+            <div className="absolute top-0 bottom-px" style={{ left: cssPct(step.p_target_after), width: cssPct(-delta), backgroundColor: BRAND.terracotta }} />
           )}
         </div>
       </div>
@@ -94,12 +92,12 @@ function RivalConditions({ conditions, labels, locale }: { conditions: ScenarioR
   if (conditions.length === 0) return null;
   const pt = locale !== "en";
   return (
-    <div className="border-t border-line bg-paper px-3 py-2 md:px-4">
+    <div className="border-t border-grid py-2">
       <p className="mb-1.5 text-[12px] font-semibold text-graphite">{labels.thisWorksBecause}</p>
       <ul className="space-y-1">
         {conditions.map((rc, i) => (
           <li key={i} className="flex items-start gap-1.5 text-xs text-stone-600">
-            <i aria-hidden="true" className="mt-0.5 h-3 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(rc.rival) }} />
+            <i aria-hidden="true" className="mt-0.5 h-3 w-1 shrink-0" style={{ backgroundColor: teamColorOnPaper(rc.rival) }} />
             <span>
               <span className="font-semibold text-ink">{teamDisplayName(rc.rival)}</span> {labels.dropsPointsVs}{" "}
               {pt ? teamWithArticle(rc.opponent) : teamDisplayName(rc.opponent)}
@@ -155,11 +153,10 @@ function ScenarioCard({
   const nowWord = pt ? "agora" : "now";
   const scenarioWord = pt ? "neste cenário" : "in this scenario";
   return (
-    <li className="overflow-hidden rounded-2xl border border-line bg-cream">
-      <div className="h-1" style={{ backgroundColor: teamColor }} aria-hidden="true" />
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line p-3 md:p-4">
+    <li className="min-w-0 border-t border-ink">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-rule py-3">
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-bold text-ink">{summary}</h3>
+          <h3 className="text-base text-ink">{summary}</h3>
           <p className="mt-0.5 text-[11px] text-stone-500">
             <span className="font-medium tabular-nums">{formatPercent(scenario.frequency, locale)}</span> {labels.ofChampionSims}
           </p>
@@ -182,7 +179,7 @@ function ScenarioCard({
           </span>
         </p>
       </div>
-      <ol className="px-3 md:px-4">
+      <ol>
         {scenario.steps.map((step, i) => (
           <StepRow
             key={i}
@@ -255,7 +252,7 @@ export function NarrativeScenarios({
   return (
     <div>
       <p className="mb-4 max-w-3xl text-sm leading-relaxed text-stone-600">{lead}</p>
-      <ul className="space-y-3">
+      <ul className="space-y-8">
         {sorted.map((scenario, i) => (
           <ScenarioCard
             key={i}

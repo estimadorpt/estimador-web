@@ -61,9 +61,9 @@ function MatchRow({ match, affectedTeam, baseline, probs, labels, isTitle, local
   return (
     <li className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-line py-2 last:border-0">
       <span className="flex min-w-0 items-center gap-1.5">
-        <i aria-hidden="true" className="h-3.5 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(match.home_team) }} />
+        <i aria-hidden="true" className="h-3.5 w-1 shrink-0" style={{ backgroundColor: teamColorOnPaper(match.home_team) }} />
         <span className="text-sm font-medium text-ink">{matchLabel(teamDisplayName(match.home_team), teamDisplayName(match.away_team))}</span>
-        <i aria-hidden="true" className="h-3.5 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(match.away_team) }} />
+        <i aria-hidden="true" className="h-3.5 w-1 shrink-0" style={{ backgroundColor: teamColorOnPaper(match.away_team) }} />
         <span className="ml-1 text-xs text-stone-500">{labels.matchdayPrefix}{match.matchday}</span>
       </span>
       <span className="flex flex-wrap items-baseline gap-x-3 text-xs">

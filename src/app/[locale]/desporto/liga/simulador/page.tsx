@@ -145,7 +145,6 @@ export default async function SimuladorPage({
             forecastTimestamp={prediction.timestamp}
             staleAt={simRoundPlayedAt}
             labels={{
-              whatIfTitle: t("football.whatIfTitle"),
               whatIfDescription: t("football.whatIfDescription"),
               resetAll: t("football.resetAll"),
               impactOnTitle: t("football.impactOnTitle"),
