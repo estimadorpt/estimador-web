@@ -48,7 +48,7 @@ describe('host config', () => {
   it('caches versioned population data for good and the rest sensibly (SP-19, SP-M6)', () => {
     expect(firstMatch('/data/population/v1.0.3/parish/010103.json')?.headers?.['cache-control']).toContain('immutable');
     expect(firstMatch('/data/population-geography/country.json')?.headers?.['cache-control']).toBe('public, max-age=86400');
-    for (const asset of ['/images/sections/football.webp', '/brand/estimador-logo.svg', '/branding/logo-horizontal.svg']) {
+    for (const asset of ['/images/teams/porto.png', '/brand/estimador-logo.svg', '/branding/logo-horizontal.svg']) {
       expect(firstMatch(asset)?.headers?.['cache-control'], asset).toMatch(/max-age=604800/);
     }
   });

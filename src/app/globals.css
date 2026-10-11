@@ -426,17 +426,17 @@
 @layer components {
   /* A scroll area that says it scrolls (audit UXM2-04): a soft shadow at
      the left or right edge while there is more content that way, gone once
-     that edge is reached. Pure CSS (the cream covers move with the content,
+     that edge is reached. Pure CSS (the white covers move with the content,
      the shadows stay with the box), so it works in server components and
-     without JavaScript. For areas on cream; set --scroll-cue-ground for
+     without JavaScript. For areas on white; set --scroll-cue-ground for
      another surface. */
   .scroll-cue {
-    --scroll-cue-ground: var(--color-cream);
+    --scroll-cue-ground: var(--color-paper);
     background:
       linear-gradient(to right, var(--scroll-cue-ground) 40%, transparent) left center / 2.5rem 100% no-repeat local,
       linear-gradient(to left, var(--scroll-cue-ground) 40%, transparent) right center / 2.5rem 100% no-repeat local,
-      radial-gradient(farthest-side at 0 50%, rgb(18 47 44 / 0.16), transparent) left center / 0.875rem 100% no-repeat scroll,
-      radial-gradient(farthest-side at 100% 50%, rgb(18 47 44 / 0.16), transparent) right center / 0.875rem 100% no-repeat scroll;
+      radial-gradient(farthest-side at 0 50%, rgb(17 17 17 / 0.14), transparent) left center / 0.875rem 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgb(17 17 17 / 0.14), transparent) right center / 0.875rem 100% no-repeat scroll;
     background-color: var(--scroll-cue-ground);
   }
 
@@ -448,9 +448,9 @@
      them the disclosure look and a 44px target here. */
   .article-body details {
     margin-block: 1.5rem;
-    border: 1px solid var(--color-line);
-    border-radius: 0.75rem;
-    background: var(--color-cream);
+    border-top: 1px solid var(--color-ink);
+    border-bottom: 1px solid var(--color-rule);
+    background: var(--color-paper);
     font-family: var(--font-sans);
     font-size: 0.875rem;
   }
@@ -574,6 +574,11 @@
   .iv > s { position: absolute; z-index: 1; top: 6px; left: calc(var(--now) - 4px); width: 8px; height: 8px; background: var(--color-ink); box-shadow: 0 0 0 1px var(--color-paper); text-decoration: none; }
   .iv > u { position: absolute; z-index: 1; top: 5px; left: calc(var(--res) - 5px); width: 10px; height: 10px; background: var(--color-ink); text-decoration: none; }
   .iv > .iv-ref { position: absolute; top: 0; bottom: 0; left: var(--ref); border-left: 1px dashed var(--color-ink); }
+  /* The empty instrument (EmptyStateMark): CanvasText in forced colours. */
+  @media (forced-colors: active) {
+    .empty-mark rect { fill: CanvasText; }
+    .empty-mark rect[stroke] { fill: none; stroke: CanvasText; }
+  }
   @media (forced-colors: active) {
     .iv > b { background: Canvas; border-inline-color: CanvasText; }
     .iv > i, .iv > s, .iv > u { background: CanvasText; }
@@ -613,10 +618,6 @@
 
   /* Soft fields: one leading decorative colour per page, mixed towards paper so
      text stays pine and the field never competes with data. */
-  .field-mint { background: var(--color-paper); }
-  .field-periwinkle { background: var(--color-paper); }
-  .field-coral { background: var(--color-paper); }
-  .field-mustard { background: var(--color-paper); }
 
   /* Party colour classes */
   .text-ps { color: var(--ps-color); }
@@ -650,8 +651,6 @@
 }
 
 /* Section scenes survive only as specimens on /marca. */
-.section-illustration { margin: 0; overflow: hidden; background: var(--color-paper); }
-.section-illustration img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
 
 /* Football pages: chart furniture shared by the probability charts.
    The hero keeps the page container (the header's box, see Container.tsx):

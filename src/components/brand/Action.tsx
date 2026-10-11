@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 
-type Variant = 'primary' | 'secondary' | 'tint' | 'text';
+type Variant = 'primary' | 'secondary' | 'text';
 
 interface ActionProps {
   href?: string;
@@ -19,16 +19,14 @@ interface ActionProps {
 }
 
 /**
- * The site's actions: a pine main action, a
- * bordered secondary one on cream, a tinted third for soft entrances, and a
- * text action. All 48px tall with 10px corners; the keyboard focus ring is
- * global (globals.css). One main action per view.
+ * The site's actions: an ink main action, a ruled secondary one on white, and
+ * a text action. All 48px tall and square; the keyboard focus ring is global
+ * (globals.css). One main action per view.
  */
 const base = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-none px-5 text-[15px] font-semibold leading-none transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50';
 const variants: Record<Variant, string> = {
   primary: `${base} bg-ink text-paper hover:bg-ink-dark`,
-  secondary: `${base} border border-line bg-cream text-ink hover:bg-parchment`,
-  tint: `${base} bg-periwinkle-soft text-ink hover:bg-periwinkle`,
+  secondary: `${base} border border-rule bg-paper text-ink hover:bg-field`,
   text: 'inline-flex min-h-12 items-center gap-1.5 text-[15px] font-semibold text-ink underline-offset-4 hover:underline',
 };
 

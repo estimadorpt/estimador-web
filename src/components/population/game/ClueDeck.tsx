@@ -235,7 +235,7 @@ function Clue({ recipe, record, meta, locale, revealed, compact }: {
   if (!record || !definition || record.decision === 'refuse') {
     return (
       <div className="flex items-center gap-4 rounded-xl bg-parchment p-4">
-        <EmptyStateMark surface="parchment" />
+        <EmptyStateMark />
         <p className="text-sm text-stone-600">{t.refused}</p>
       </div>
     );

@@ -1,14 +1,13 @@
 import { getTranslations } from 'next-intl/server';
 import { Action } from '@/components/brand/Action';
-import { Mosaic } from '@/components/brand/Mosaic';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { CONTAINER_CLASS } from '@/components/brand/Container';
 
 /**
- * The 404, in one language: the hero is the page, with the `quarters` mosaic
- * as its one brand moment, the largest mosaic outside brand material and
- * capped so it never fills a phone screen: 112px above the text on phones,
- * 200px beside it from md (every other empty or error state carries the 72px
- * EmptyStateMark; the header table in CLAUDE.md). Both
+ * The 404, in one language: the hero is the page, with the empty instrument
+ * (EmptyStateMark) at its larger size, capped so it never fills a phone
+ * screen: 112px wide above the text on phones, 200px beside it from md
+ * (every other empty or error state carries the 72px one). Both
  * not-found files render it twice, once per locale, and let a client switch
  * pick one (NotFoundSwitch): the export prerenders a not-found with no request
  * locale, so the server cannot choose.
@@ -37,7 +36,7 @@ export async function NotFoundBody({ locale, withTitle = false }: { locale: 'pt'
               <Action href={`/${locale}/populacao/`} external variant="secondary" arrow>{t('atlas')}</Action>
             </div>
           </div>
-          <Mosaic variant="quarters" className="order-first size-28 md:order-none md:size-[200px] md:justify-self-center" />
+          <EmptyStateMark size="lg" className="order-first md:order-none md:justify-self-center" />
         </div>
       </section>
     </main>

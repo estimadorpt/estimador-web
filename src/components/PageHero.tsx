@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import type { IllustrationScene } from '@/components/brand/SectionIllustration';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { containerClass, MEASURES, type ContainerWidth, type Measure } from '@/components/brand/Container';
@@ -24,9 +23,9 @@ interface PageHeroProps {
    */
   art?: ReactNode;
   /** Accepted for compatibility; section scenes are no longer drawn. */
-  illustration?: IllustrationScene;
+  illustration?: string;
   /** Accepted for compatibility; heroes are plain white. */
-  field?: 'mint' | 'periwinkle' | 'coral' | 'mustard';
+  field?: string;
   /** One main action and, at most, one secondary. */
   actions?: ReactNode;
   /**

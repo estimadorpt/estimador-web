@@ -73,7 +73,7 @@ export default async function TopicsPage({
 
         {groups.length === 0 ? (
           <div className="flex items-center gap-6 py-6">
-            <EmptyStateMark surface="paper" />
+            <EmptyStateMark />
             <div>
               <p className="text-stone-600">{t('articles.empty')}</p>
               <p className="mt-4">

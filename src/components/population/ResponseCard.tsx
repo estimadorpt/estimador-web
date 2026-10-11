@@ -204,7 +204,7 @@ export function ResponseChart({ recipeName, recipe, record, cells, locale, bars 
 function Refused({ locale }: { locale: Locale }) {
   return (
     <div className="flex items-center gap-4 rounded-xl bg-parchment p-4">
-      <EmptyStateMark surface="parchment" />
+      <EmptyStateMark />
       <p className="text-sm text-stone-600">
         {locale === 'pt'
           ? 'Sem resposta publicada para esta freguesia na versão 1.0. Não mostramos um número que não passou o controlo de qualidade.'

@@ -1,10 +1,10 @@
 /**
  * Chart theme: the parameters the data-visualisation method needs, filled in
- * with the brand's values. Series colours are data steps of the four brand
- * hues, validated on the cream surface (light) and the forest surface (dark):
- * lightness band, chroma floor, colour-vision separation, normal-vision
- * separation and 3:1 contrast all pass in this fixed order. Never cycle past
- * four: fold into "Outros" or facet.
+ * with the instrument's values. Series colours are four data hues, validated
+ * on white (light) and on ink (dark): lightness band, chroma floor,
+ * colour-vision separation, normal-vision separation and 3:1 contrast all
+ * pass in this fixed order. Never cycle past four: fold into "Outros" or
+ * facet. Never the signal yellow, which is the model's margin only.
  */
 import { BRAND, FONT_STACK } from '@/lib/brand';
 import { withMinus } from '@/lib/typography';
@@ -16,24 +16,25 @@ export const SERIES_NAMES = ['teal', 'ouro', 'pervinca', 'coral'] as const;
 /** The one series when only one thing is plotted, and the emphasis hue when one series is the point. */
 export const ACCENT = SERIES[0];
 /** Context series when one series is the point. */
-export const DEEMPHASIS = '#c8c8c4';
+export const DEEMPHASIS = '#bdbdbd';
 
 export const STATUS = {
   good: BRAND.tree,
   warning: BRAND.gold,
-  serious: '#c9784d',
+  serious: '#b45309',
   critical: BRAND.terracotta,
 } as const;
 
 export const FURNITURE = {
-  surface: BRAND.cream,
+  surface: BRAND.paper,
   surfaceDark: BRAND.forest,
   grid: BRAND.line,
   gridDark: '#3a3a3a',
   axis: BRAND.muted,
-  axisDark: '#a8a8a5',
+  axisDark: '#a8a8a8',
   text: BRAND.ink,
   textMuted: BRAND.muted,
+  /** Retired: bars stand on a scale rule, not on a grey track (ProbBar). */
   track: BRAND.parchment,
   font: FONT_STACK,
 } as const;
