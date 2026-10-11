@@ -84,7 +84,7 @@ export function Coupon({ fixtures, locale, forecastTimestamp, columns = 1 }: {
                 ) : <span className="name-cut">{name}</span>}
               </th>
               {p.map((v, j) => (
-                <td key={j} className={`pt-2 text-right align-bottom ${j === top ? 'disp text-[18px]' : 'text-[14.5px]'}`}>
+                <td key={j} className={`pt-2 text-right align-bottom ${j === top ? 'fig text-[18px]' : 'text-[14.5px]'}`}>
                   {Math.round(v * 100)}
                   <span className="sr-only">%</span>
                 </td>

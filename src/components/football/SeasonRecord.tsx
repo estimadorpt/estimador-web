@@ -28,7 +28,7 @@ export function SeasonRecord({ record, locale }: { record: Record; locale: strin
         </td>
         <td className="whitespace-nowrap py-2 pr-3 text-right text-[13.5px] text-graphite">{pt ? 'esperado' : 'expected'} {formatDecimal(r.expected, locale, 1)}<span className="block">{pt ? 'margem' : 'range'} {r.q05}–{r.q95}</span></td>
         <td className="py-2 text-right">
-          <span className="disp text-[23px] leading-6">{formatInteger(r.happened, locale)}</span>
+          <span className="fig text-[23px] leading-6">{formatInteger(r.happened, locale)}</span>
           <span className="block text-[12px] text-graphite">{inside ? (pt ? 'dentro' : 'inside') : (pt ? 'fora' : 'outside')}</span>
         </td>
       </tr>

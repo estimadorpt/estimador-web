@@ -126,7 +126,7 @@ export function LigaInstrument({ locale, prediction, scenarios, deltas, quantile
                       </span>
                     </th>
                     <td className="py-1.5 pr-2 text-right">
-                      <span className="disp text-[23px] leading-6">{formatPercent(r.p_champion, locale).replace('%', '')}<small className="ml-px text-[13px] font-bold">%</small></span>
+                      <span className="fig text-[23px] leading-6">{formatPercent(r.p_champion, locale).replace('%', '')}<small className="ml-px text-[13px] font-bold">%</small></span>
                       {delta != null && <span className="block text-[12px] leading-4 text-graphite sm:hidden">{formatPp(delta / 100, locale)}</span>}
                     </td>
                     <td className="hidden whitespace-nowrap py-1.5 pr-2 text-right text-[13px] text-graphite sm:table-cell">{delta != null ? formatPp(delta / 100, locale) : '—'}</td>
@@ -174,7 +174,7 @@ export function LigaInstrument({ locale, prediction, scenarios, deltas, quantile
                       </span>
                     </th>
                     <td className="w-[110px] py-1.5 pr-2"><ProbBar p={r.p_relegation} width={100} /></td>
-                    <td className="py-1.5 pr-1 text-right"><span className="disp text-[19px]">{formatPercent(r.p_relegation, locale)}</span></td>
+                    <td className="py-1.5 pr-1 text-right"><span className="fig text-[19px]">{formatPercent(r.p_relegation, locale)}</span></td>
                     <td className="py-1.5 text-right text-[12.5px] text-graphite">{deltas[r.team] ? formatPp(deltas[r.team].p_relegation_delta / 100, locale) : ''}</td>
                   </tr>
                 ))}
