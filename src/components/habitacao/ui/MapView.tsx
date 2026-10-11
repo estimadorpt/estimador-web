@@ -71,13 +71,32 @@ export const LAYERS: { key: Layer; label: L }[] = [
   { key: 'patrimonio', label: { pt: 'Património', en: 'Heritage' } },
 ];
 
+// estimador.pt's palette (Instrumento): the same values as BRAND in src/lib/brand and SERIES in
+// src/components/viz/theme.ts, written out so the game stays portable to its own repository.
+// Ink lines on white, greys for ground and water, and colour only for data: each layer is one
+// SERIES hue, from near-white to the full hue; never the signal yellow, which on the site means
+// a model's margin.
+const C = {
+  paper: '#ffffff', field: '#f4f4f4', grid: '#ececec', scale: '#8a8a8a', ink: '#111111',
+  terracotta: '#b91c1c', tree: '#15803d',
+  teal: '#159881', ouro: '#a27d27', pervinca: '#697fc5', coral: '#ba6b4f',
+} as const;
+/** A hue mixed into white at a share from 0 to 1 (sRGB), as a hex colour. */
+const onPaper = (hex: string, share: number) => '#' + [1, 3, 5].map((i) => {
+  const v = Math.round(255 - (255 - parseInt(hex.slice(i, i + 2), 16)) * share);
+  return v.toString(16).padStart(2, '0');
+}).join('');
+const STEPS = [0.06, 0.2, 0.36, 0.54, 0.74, 1];
+const rampOf = (hex: string, top = 1) => STEPS.map((t) => onPaper(hex, t * top));
 const RAMPS: Record<string, string[]> = {
-  teal: ['#eef6f4', '#cfe7e1', '#9dcec1', '#5fae9f', '#2f8577', '#245c68'],
-  coral: ['#fff2ee', '#ffe2d9', '#f3c2b0', '#e29a83', '#c7745b', '#a3543a'],
-  peri: ['#f1f3fb', '#dde3f6', '#bdc7e7', '#a9b9ed', '#7d8fcf', '#4f5f9e'],
-  gold: ['#fffaef', '#fdecc9', '#f9d187', '#e5b958', '#c49536', '#8a6a26'],
-  green: ['#f1fbf5', '#def5e7', '#b9e6cc', '#9ddcb8', '#5d9a78', '#377455'],
+  teal: rampOf(C.teal),
+  coral: rampOf(C.coral),
+  peri: rampOf(C.pervinca),
+  gold: rampOf(C.ouro),
+  grey: rampOf(C.ink, 0.8),
 };
+/** Short lets closed to new registrations: the ouro series at its middle step. */
+const AL_CLOSED = onPaper(C.ouro, 0.54);
 const ramp = (name: string, t: number) => {
   const r = RAMPS[name];
   return r[Math.max(0, Math.min(r.length - 1, Math.floor(t * r.length)))];
@@ -118,8 +137,8 @@ function layerSpec(layer: Layer, s: GameState, lang: 'pt' | 'en'): LayerSpec | n
       const f = (c: string) => DENSITY[c];
       const vals = codes.map(f);
       return {
-        value: f, fill: norm(f, 'green'), fmt: (c) => `${num(f(c), lang)} ${lang === 'pt' ? 'hab./km²' : 'per km²'} · ${num(FREGUESIAS[c].pop, lang)} ${lang === 'pt' ? 'residentes' : 'residents'}`,
-        legend: { ramp: 'green', lo: num(Math.min(...vals), lang), hi: num(Math.max(...vals), lang), title: { pt: 'Residentes por km², Censos 2021', en: 'Residents per km², 2021 Census' } },
+        value: f, fill: norm(f, 'grey'), fmt: (c) => `${num(f(c), lang)} ${lang === 'pt' ? 'hab./km²' : 'per km²'} · ${num(FREGUESIAS[c].pop, lang)} ${lang === 'pt' ? 'residentes' : 'residents'}`,
+        legend: { ramp: 'grey', lo: num(Math.min(...vals), lang), hi: num(Math.max(...vals), lang), title: { pt: 'Residentes por km², Censos 2021', en: 'Residents per km², 2021 Census' } },
       };
     }
     case 'al': {
@@ -127,9 +146,9 @@ function layerSpec(layer: Layer, s: GameState, lang: 'pt' | 'en'): LayerSpec | n
       const closed = (c: string) => r.alFrozen || r.alClosed.includes(c);
       return {
         value: (c) => (closed(c) ? 1 : 0),
-        fill: (c) => (closed(c) ? '#e5b958' : '#ffffff'),
+        fill: (c) => (closed(c) ? AL_CLOSED : C.paper),
         fmt: (c) => (closed(c) ? (lang === 'pt' ? 'novos registos suspensos' : 'new registrations suspended') : lang === 'pt' ? 'aberto a novos registos' : 'open to new registrations'),
-        legend: { title: { pt: 'Novos registos de alojamento local', en: 'New short-let registrations' }, keys: [{ color: '#ffffff', label: { pt: 'Abertos', en: 'Open' } }, { color: '#e5b958', label: { pt: 'Suspensos', en: 'Suspended' } }] },
+        legend: { title: { pt: 'Novos registos de alojamento local', en: 'New short-let registrations' }, keys: [{ color: C.paper, label: { pt: 'Abertos', en: 'Open' } }, { color: AL_CLOSED, label: { pt: 'Suspensos', en: 'Suspended' } }] },
       };
     }
     case 'viz':
@@ -154,13 +173,15 @@ function layerSpec(layer: Layer, s: GameState, lang: 'pt' | 'en'): LayerSpec | n
 
 type SiteView = { site: Site; p?: Project; state: ReturnType<typeof siteState> };
 
+// A site's stage as a square mark: open (white, a cross), in review (ouro), financing (white, a
+// dashed red outline), building (pervinca), built (green), closed (grey, an x).
 const MARK = {
-  open: { fill: '#ffffff', stroke: '#141414' },
-  review: { fill: '#e5b958', stroke: '#8a6a26' },
-  fin: { fill: '#ffffff', stroke: '#a3543a' },
-  obra: { fill: '#a9b9ed', stroke: '#2f4277' },
-  done: { fill: '#377455', stroke: '#141414' },
-  dead: { fill: '#e2e2df', stroke: '#8a8a87' },
+  open: { fill: C.paper, stroke: C.ink },
+  review: { fill: C.ouro, stroke: C.ink },
+  fin: { fill: C.paper, stroke: C.terracotta },
+  obra: { fill: C.pervinca, stroke: C.ink },
+  done: { fill: C.tree, stroke: C.ink },
+  dead: { fill: C.grid, stroke: C.scale },
 };
 
 export function MapView({ s, selected, onSelect, layer, names }: {
@@ -241,15 +262,15 @@ export function MapView({ s, selected, onSelect, layer, names }: {
         onPointerUp={onUp}
         onPointerLeave={() => { drag.current = null; setHover(null); setHoverFr(null); }}
       >
-        <rect x={0} y={0} width={W} height={H} fill="#f3f3f1" />
+        <rect x={0} y={0} width={W} height={H} fill={C.paper} />
         <g transform={`translate(${view.x} ${view.y}) scale(${k})`}>
-          <path d={TEJO_D} fill="#d7def3" />
+          <path d={TEJO_D} fill={C.grid} />
           {PATHS.map(({ code, d }) => (
             <path
               key={code}
               d={d}
               className={`fr${hoverFr === code ? ' hover' : ''}`}
-              fill={spec ? spec.fill(code) : FREGUESIAS[code].centro ? '#f7f4e8' : '#ffffff'}
+              fill={spec ? spec.fill(code) : FREGUESIAS[code].centro ? C.field : C.paper}
               onPointerMove={(e) => {
                 if (drag.current?.moved) return;
                 setHoverFr(code);
@@ -295,13 +316,13 @@ export function MapView({ s, selected, onSelect, layer, names }: {
                   <g>
                     <rect x={x - r * 0.9} y={y - tall} width={r * 1.8} height={tall} fill="none" stroke={m.stroke} strokeWidth={1 / k} strokeDasharray={kind === 'obra' ? `${3 / k} ${2 / k}` : undefined} />
                     <rect x={x - r * 0.9} y={y - tall * progress} width={r * 1.8} height={tall * progress} fill={m.fill} opacity={0.9} />
-                    <rect x={x - r * 0.9} y={y - tall * progress} width={r * 1.8} height={1.6 / k} fill={kind === 'done' && p && p.affUnits / p.units >= 0.25 ? '#e5b958' : '#ffffff'} />
+                    <rect x={x - r * 0.9} y={y - tall * progress} width={r * 1.8} height={1.6 / k} fill={kind === 'done' && p && p.affUnits / p.units >= 0.25 ? C.ouro : C.paper} />
                   </g>
                 )}
-                {alert && <circle cx={x} cy={y} r={r + 5 / k} fill="none" stroke="#a3543a" strokeWidth={2.5 / k} />}
-                <rect className="mark" x={x - r} y={y - r} width={r * 2} height={r * 2} rx={r * 0.35} fill={m.fill} stroke={sel ? '#000000' : m.stroke} strokeWidth={(sel ? 3 : 1.5) / k} strokeDasharray={kind === 'fin' ? `${3 / k} ${2 / k}` : undefined} />
-                {kind === 'open' && <path d={`M${x - r * 0.5},${y}H${x + r * 0.5}M${x},${y - r * 0.5}V${y + r * 0.5}`} stroke="#141414" strokeWidth={1.5 / k} />}
-                {kind === 'dead' && <path d={`M${x - r * 0.5},${y - r * 0.5}L${x + r * 0.5},${y + r * 0.5}M${x + r * 0.5},${y - r * 0.5}L${x - r * 0.5},${y + r * 0.5}`} stroke="#8a8a87" strokeWidth={1.5 / k} />}
+                {alert && <circle cx={x} cy={y} r={r + 5 / k} fill="none" stroke={C.terracotta} strokeWidth={2.5 / k} />}
+                <rect className="mark" x={x - r} y={y - r} width={r * 2} height={r * 2} fill={m.fill} stroke={sel ? C.ink : m.stroke} strokeWidth={(sel ? 3 : 1.5) / k} strokeDasharray={kind === 'fin' ? `${3 / k} ${2 / k}` : undefined} />
+                {kind === 'open' && <path d={`M${x - r * 0.5},${y}H${x + r * 0.5}M${x},${y - r * 0.5}V${y + r * 0.5}`} stroke={C.ink} strokeWidth={1.5 / k} />}
+                {kind === 'dead' && <path d={`M${x - r * 0.5},${y - r * 0.5}L${x + r * 0.5},${y + r * 0.5}M${x + r * 0.5},${y - r * 0.5}L${x - r * 0.5},${y + r * 0.5}`} stroke={C.scale} strokeWidth={1.5 / k} />}
               </g>
             );
           })}
