@@ -154,7 +154,7 @@ export default async function ParliamentaryArchivePage({
   );
 
   return (
-    <div className="election-page min-h-screen bg-paper">
+    <div className="min-h-screen bg-paper">
       <Header />
 
       <main id="main-content" tabIndex={-1}>

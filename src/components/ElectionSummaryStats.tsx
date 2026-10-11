@@ -41,7 +41,7 @@ export function ElectionSummaryStats({
   ];
   return (
     <div>
-      <div className="election-summary grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-7">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-7">
         {tiles.map(([probability, label]) => (
           <div key={label} className="border-l border-line pl-4 first:border-0 first:pl-0">
             <ProbabilityFigure probability={probability} locale={locale} className={figureClass} />
