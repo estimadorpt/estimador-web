@@ -30,8 +30,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const pt = locale === 'pt';
   const title = siteTitle(pt ? 'Freguesia · População sintética' : 'Parish · Synthetic population');
   const description = pt
-    ? 'Quem vive em cada freguesia de Portugal: idades, trabalho, escolaridade e agregados numa população sintética gerada a partir dos Censos 2021.'
-    : 'Who lives in each parish of Portugal: ages, work, education and households in a synthetic population generated from the 2021 Census.';
+    ? 'Idades, trabalho, escolaridade e agregados de cada freguesia de Portugal, numa população sintética gerada a partir dos Censos 2021.'
+    : 'Ages, work, education and households for every parish in Portugal, in a synthetic population generated from the 2021 Census.';
   const image = getOgImageUrl(locale, '/populacao');
   // The alt describes the card the preview shows (the population card), not the page (SPV-04).
   const imageAlt = getOgImageAlt(locale, '/populacao', title);
