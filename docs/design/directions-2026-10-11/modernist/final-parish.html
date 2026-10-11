@@ -1,0 +1,457 @@
+<!doctype html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Misericórdia, Lisboa | estimador.pt</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400..800&family=Sofia+Sans+Condensed:wght@800&family=Source+Serif+4:wght@400&display=swap" rel="stylesheet"><style>
+:root{
+  --papel:#ffffff; --tinta:#141414; --cinza:#5a5a5a; --fio:#d6d6d2; --vazio:#f2f2f0;
+  --ocre:#CC9A2E; --sobre-ocre:#2e2e2e;
+  --f-head:'Sofia Sans Condensed','Arial Narrow',sans-serif;
+  --f-txt:'Sofia Sans',system-ui,sans-serif;
+  --f-nota:'Source Serif 4',Georgia,serif;
+  --wrap:1376px; --gut:32px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--papel);color:var(--tinta);font-family:var(--f-txt);font-size:17px;line-height:1.45;font-feature-settings:"lnum" 1}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--tinta);outline-offset:2px;box-shadow:0 0 0 2px #fff}
+.wrap{max-width:calc(var(--wrap) + 2*var(--gut));margin:0 auto;padding:0 var(--gut)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tab{font-variant-numeric:tabular-nums}
+.cinza{color:var(--cinza)}
+
+/* masthead: the ochre plate carries the wordmark, measured by its own cota */
+.mast-in{display:flex;align-items:stretch;gap:28px;height:72px}
+.brand{display:flex;align-items:center;text-decoration:none;background:var(--ocre);padding:0 22px;min-height:44px}
+.wmw{position:relative;display:inline-block;padding-bottom:10px;margin-top:4px}
+.wm{font-family:var(--f-head);font-weight:800;font-size:31px;letter-spacing:.005em;line-height:1;display:block}
+.cota-wm{position:absolute;left:1px;right:1px;bottom:1px;height:2px;background:var(--tinta)}
+.cota-wm::before,.cota-wm::after{content:"";position:absolute;top:-4px;width:2px;height:10px;background:var(--tinta);transform:rotate(45deg)}
+.cota-wm::before{left:-1px}.cota-wm::after{right:-1px}
+.nav{display:flex;gap:2px;margin-left:auto;align-items:stretch}
+.nav a{display:flex;align-items:center;padding:0 15px;text-decoration:none;font-weight:600;font-size:16px;line-height:1.1}
+.nav a[aria-current]{background:var(--tinta);color:#fff}
+.lang{display:flex;align-items:center}
+.lang a{display:flex;align-items:center;justify-content:center;min-width:44px;height:44px;font-weight:700;font-size:14px;text-decoration:none}
+.lang a[aria-current]{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px}
+.menu-btn{display:none}
+.rule6{height:6px;background:var(--tinta)}
+
+/* section line: a 2px rule; Liga's edition hangs from it as a printer's tag (ink, white serial) */
+.secline{display:flex;align-items:flex-start;gap:14px;border-top:2px solid var(--tinta);padding:0;flex-wrap:wrap}
+.secline .sec{padding-top:10px}
+.edtag{background:var(--tinta);color:#fff;font-family:var(--f-head);font-weight:800;font-size:26px;line-height:1;padding:7px 10px 6px;letter-spacing:.01em}
+.sec{font-family:var(--f-head);font-weight:800;font-size:26px;line-height:1.1;margin:0}
+.sec a{text-decoration:none;display:inline-flex;align-items:center;min-height:44px;margin:-8px 0}
+.sec a:hover{text-decoration:underline}
+
+/* ficha técnica: the ERC poll box, label over value */
+.ficha{margin:0}
+.ficha .ft{font-family:var(--f-head);font-weight:800;font-size:15px;margin:0 0 4px;letter-spacing:.01em}
+.ficha dl{display:flex;flex-wrap:wrap;gap:4px 22px;margin:0;font-size:14px;line-height:1.25}
+.ficha dl div{display:flex;flex-direction:column}
+.ficha dt{color:var(--cinza);font-size:13px;font-weight:500}
+.ficha dd{margin:0;font-weight:700}
+
+/* type */
+.hl{font-family:var(--f-head);font-weight:800;letter-spacing:-.006em;line-height:1.03;margin:0}
+.nota{font-family:var(--f-nota);font-size:18px;line-height:1.5;margin:0}
+.by{display:flex;align-items:center;gap:10px;font-size:14px;line-height:1.25;margin:0 0 10px}
+.mono{width:40px;height:40px;flex:none;border-radius:50%;background:var(--tinta);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--f-head);font-weight:800;font-size:17px;letter-spacing:.03em}
+.by b{display:block;font-size:15px}
+.cap{font-size:14px;color:var(--cinza);line-height:1.4;margin:0}
+.link{font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;display:inline-flex;align-items:center;min-height:44px}
+
+/* the title strip: one whole cut by share, a 30px bar in the clubs' colours, ink figures above */
+.tbar{forced-color-adjust:none}
+.tfigs,.tbar{display:flex;gap:3px;width:100%}
+.tfig{min-width:0;padding:0 6px 8px 0;line-height:1.2}
+.tfig .n{display:block;color:var(--tinta);font-family:var(--f-head);font-weight:800;font-size:46px;line-height:.9;letter-spacing:-.005em;margin:2px 0 6px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tfig .n small{font-size:.56em;margin-left:.02em}
+.tfig b{font-size:16px}
+.tfig span{display:block;font-size:13.5px;color:var(--cinza)}
+.tbar i{display:block;height:30px;min-width:0;forced-color-adjust:none}
+.ruler{position:relative;height:30px;margin-top:6px}
+.ruler::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--tinta)}
+.ruler i{position:absolute;top:0;width:1px;height:7px;background:var(--tinta)}
+.ruler i.half{width:2px;height:12px;margin-left:-1px}
+.ruler span{position:absolute;top:10px;font-size:13px;color:var(--cinza);white-space:nowrap;line-height:1.2}
+.ruler span.mid{transform:translateX(-50%);color:var(--tinta);font-weight:700}
+.ruler span.end{right:0}
+
+/* standings: cota + every position */
+table.st{width:100%;border-collapse:collapse;font-size:16px}
+.st thead th{font-weight:600;font-size:13px;color:var(--cinza);text-align:right;vertical-align:bottom;padding:0 8px 6px;line-height:1.2}
+.st thead th.l{text-align:left}
+.st thead tr.grp th{font-weight:800;font-size:14px;color:var(--tinta);text-align:left;border-bottom:2px solid var(--tinta);padding:0 8px 5px}
+.st tbody tr{border-top:1px solid var(--fio)}
+.st tbody tr.cut td,.st tbody tr.cut th{border-bottom:2px solid var(--tinta)}
+.st td,.st th{padding:0 8px;height:50px;vertical-align:middle}
+.st .pos{color:var(--cinza);width:38px;font-size:15px}
+.st .club{text-align:left;font-weight:700;white-space:nowrap}
+.st .club a{display:flex;align-items:center;gap:9px;text-decoration:none;min-height:44px}
+.st .club a:hover span{text-decoration:underline}
+.st .club i{width:12px;height:12px;flex:none;forced-color-adjust:none}
+.st .club .short{display:none}
+.st td.n{text-align:right}
+.st td.b{font-weight:800}
+.st td.z{color:var(--cinza)}
+.st td.cota{padding:0 4px}
+.st td.cota svg{display:block}
+.st .cm{display:none}
+.st .gap td{height:44px;color:var(--cinza);font-size:14px;text-align:left}
+.st .gap a{color:var(--tinta);font-weight:600;display:inline-flex;align-items:center;min-height:44px}
+.axis{position:relative;height:16px;margin-top:3px}
+.axis span{position:absolute;transform:translateX(-50%);font-size:12px;color:var(--cinza);font-weight:500}
+.heat{display:flex;gap:1px;forced-color-adjust:none}
+.heat b{display:block;width:11px;height:22px}
+.heat b.sep{margin-right:3px}
+.hh{display:flex;justify-content:space-between;width:220px;font-weight:500}
+
+/* 1 X 2: figures with their own bar, no tip; under each, what the result does */
+table.x2{width:100%;border-collapse:collapse;font-size:16px}
+.x2 th,.x2 td{padding:0;text-align:left;font-weight:400}
+.x2 abbr{text-decoration:none}
+.x2 thead th.c{font-family:var(--f-head);font-weight:800;font-size:19px;text-align:left;padding:0 0 4px 10px}
+.x2 tbody{border-top:1px solid var(--fio);position:relative}
+.x2 tbody th{font-weight:700;padding:0 8px}
+.x2 tbody th a{text-decoration:none}
+.x2 tbody th a::after{content:"";position:absolute;inset:0}
+.x2 tbody:hover th a{text-decoration:underline}
+.x2 .when{font-size:13px;color:var(--cinza);line-height:1.2;width:64px;padding:8px 0 0;vertical-align:top}
+.x2 td.c{width:66px;height:46px;padding:6px 0 0 10px;border-left:1px solid var(--fio);vertical-align:top}
+.x2 td.c b{display:block;font-family:var(--f-head);font-weight:800;font-size:21px;line-height:1}
+.x2 td.c i{display:block;height:5px;background:var(--tinta);margin-top:4px;forced-color-adjust:none}
+.x2 tr.ej th{font-weight:500;font-size:13.5px;color:var(--cinza);padding:0 8px 8px;vertical-align:top;line-height:1.25}
+.x2 tr.ej td{font-size:13.5px;font-weight:600;padding:0 0 8px 10px;border-left:1px solid var(--fio);vertical-align:top}
+.x2 tr.ej td.pouco{color:var(--cinza);font-weight:500}
+
+/* text tabs */
+.tabs{display:flex;gap:18px}
+.tabs button{appearance:none;border:0;background:none;font:700 15px var(--f-txt);color:var(--cinza);cursor:pointer;min-height:44px;padding:0;border-bottom:3px solid transparent}
+.tabs button[aria-selected=true]{color:var(--tinta);border-bottom-color:var(--tinta)}
+
+/* footer: one colophon on white */
+.foot{margin-top:80px}
+.foot-in{border-top:2px solid var(--tinta);padding:22px 0 40px;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:24px 48px}
+.foot .wmw{margin-top:0}
+.foot p{margin:14px 0 0;font-size:15px;max-width:34em}
+.foot ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:0 22px;align-content:flex-start}
+.foot li a{display:flex;align-items:center;min-height:44px;font-weight:600;font-size:15px;text-decoration:none}
+.foot li a:hover{text-decoration:underline}
+.foot li .cinza{font-weight:500}
+.foot .lic{grid-column:1/-1;max-width:none;border-top:1px solid var(--fio);padding-top:14px;font-size:14px;color:var(--cinza);margin:0}
+
+@media (forced-colors:active){
+  svg [fill="#141414"],svg text{fill:CanvasText}
+  svg [stroke="#141414"]{stroke:CanvasText}
+  .mono,.edtag{border:2px solid CanvasText}
+  .ruler::before,.ruler i,.cota-wm,.cota-wm::before,.cota-wm::after,.rule6{forced-color-adjust:none;background:CanvasText}
+  .nav a[aria-current]{border-bottom:3px solid CanvasText}
+  .tabs button[aria-selected=true]{border-bottom-color:Highlight}
+}
+@media (max-width:1100px){
+  .nav{display:none}
+  .menu-btn{display:flex;margin-left:auto;align-self:center;align-items:center;height:44px;padding:0 4px;border:0;border-bottom:2px solid var(--tinta);background:none;font:700 16px var(--f-txt);color:var(--tinta)}
+}
+@media (max-width:640px){
+  :root{--gut:16px}
+  body{font-size:16px}
+  .mast-in{height:60px;gap:6px}
+  .brand{padding:0 12px}
+  .wm{font-size:25px}
+  .wmw{padding-bottom:9px}
+  .lang a{min-width:40px}
+  .sec{font-size:22px}
+  .edtag{font-size:23px;padding:6px 8px 5px}
+  .tfig .n{font-size:31px;margin:2px 0 4px}
+  .tfig b{font-size:14px}
+  .tfig span{font-size:12px}
+  .tfig .dl{display:none}
+  .tbar i{height:24px}
+  .nota{font-size:17px}
+  .st td,.st th{padding:0 2px;height:50px}
+  .st .pos{width:24px;font-size:12.5px}
+  .st td.n{font-size:14.5px}
+  .st .club .full{display:none}.st .club .short{display:inline}
+  .st .club a{gap:6px;font-size:14.5px}
+  .st .club i{width:10px;height:10px}
+  .st .hide-m{display:none}
+  .st .cd{display:none}.st .cm{display:block}
+  .st thead tr.grp{display:none}
+  .x2 .when{width:50px;font-size:12px}
+  .x2 tbody th{font-size:15px;padding:0 6px}
+  .x2 td.c{width:52px;padding-left:7px}
+  .x2 td.c b{font-size:19px}
+  .x2 tr.ej th{padding:0 6px 8px;font-size:13px}
+  .x2 tr.ej td{padding-left:7px;font-size:13px}
+  .foot-in{grid-template-columns:1fr}
+  .foot ul{gap:0 18px}
+}
+
+.hubbar{display:flex;align-items:stretch;border-bottom:1px solid var(--fio)}
+.hubbar .sec{display:flex;align-items:center;padding:0 22px 0 0;font-size:27px}
+.subnav{display:flex;flex-wrap:nowrap;margin:0 0 0 auto;padding:0;list-style:none}
+.subnav a{display:flex;align-items:center;min-height:52px;padding:0 13px;text-decoration:none;font-weight:600;font-size:15px;white-space:nowrap;border-bottom:3px solid transparent}
+.subnav a[aria-current]{border-bottom-color:var(--tinta);font-weight:800}
+.subnav .mm{display:none}
+.back{display:inline-flex;align-items:center;min-height:44px;font-weight:600;font-size:15px;text-decoration:none;margin-top:8px}
+.back:hover{text-decoration:underline}
+.plead{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:0 44px;margin-top:4px;align-items:start}
+.p-h1{font-family:var(--f-head);font-weight:800;font-size:68px;line-height:.95;letter-spacing:-.01em;margin:6px 0 8px}
+.p-sub{font-size:17px;font-weight:600;margin:0 0 18px}
+.p-lede{font-size:19px;line-height:1.45;margin:0 0 20px;max-width:38em}
+.p-lede b{font-weight:800}
+.p-ficha{border-top:2px solid var(--tinta);padding-top:10px}
+.p-ficha dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 24px}
+.p-ficha dd{font-size:15px}
+.tier{margin:16px 0 0;font-size:16px;max-width:44em;border-top:1px solid var(--fio);padding-top:10px}
+.tier b{font-family:var(--f-head);font-weight:800;font-size:19px;margin-right:4px}
+.plane{background:var(--ocre);padding:0 22px 18px}
+.plane .secline{border-color:var(--tinta)}
+.plane .sec{font-size:21px}
+.locm{width:100%;height:auto;display:block;margin:6px 0 2px}
+.plane .mc{font-size:13.5px;margin:0 0 14px;color:var(--sobre-ocre)}
+.search label{display:block;font-weight:700;font-size:15px;margin-bottom:6px}
+.search .f{display:flex}
+.search input{flex:1;min-width:0;height:50px;border:0;border-bottom:2px solid var(--tinta);background:#fff;padding:0 12px;font:17px var(--f-txt);color:var(--tinta);border-radius:0}
+.search input::placeholder{color:#5f5f5f}
+.search button{height:50px;padding:0 16px;background:var(--tinta);color:#fff;border:0;font:700 16px var(--f-txt);border-radius:0}
+.plane .colo{font-size:13.5px;color:var(--sobre-ocre);margin:16px 0 0;border-top:1px solid var(--tinta);padding-top:8px}
+
+.grp{margin-top:56px}
+.grp > h2{font-family:var(--f-head);font-weight:800;font-size:31px;margin:0;border-top:2px solid var(--tinta);padding-top:8px}
+.qs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 56px}
+.qs.three{grid-template-columns:repeat(3,minmax(0,1fr));gap:0 44px}
+.q{padding-top:22px;display:flex;flex-direction:column}
+.q.full{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,860px) minmax(0,1fr);grid-template-areas:"fig text";gap:0 44px;align-items:start}
+.q.full .qtext{grid-area:text;padding-top:6px}.q.full .qfig{grid-area:fig;padding-top:30px}
+.q.full .qf{padding-top:16px}
+.qn{font-size:13px;font-weight:700;color:var(--cinza);margin:0;letter-spacing:.01em}
+.q h3{font-family:var(--f-head);font-weight:800;font-size:23px;line-height:1.1;margin:2px 0 6px}
+.q .who{font-size:14.5px;color:var(--cinza);margin:0 0 10px;max-width:40em}
+.q .where{font-size:13.5px;font-weight:700;margin:0 0 8px;border-top:1px solid var(--tinta);padding-top:6px}
+table.rows{border-collapse:collapse;width:100%;font-size:15.5px}
+.rows th{text-align:left;font-weight:600;padding:0 12px 0 0;white-space:nowrap;height:30px;width:1%}
+.rows td.bar{padding:0 10px 0 0}
+.rows td.bar i{display:block;height:12px;background:var(--tinta);forced-color-adjust:none}
+.rows td.v{text-align:right;font-weight:800;width:1%;white-space:nowrap}
+.rows tbody tr{border-bottom:1px solid #ebebe7}
+.st3 thead th{font-size:13px;font-weight:600;color:var(--cinza);padding:0 0 6px 12px;white-space:nowrap}
+.st3 thead th.v{text-align:right}
+.st3 td.v{padding-left:12px}
+.st3 td.stack{padding-right:4px}
+.st3 td.stack span{display:flex;gap:2px;height:14px}
+.st3 td.stack i,.sw{display:block;min-width:0;forced-color-adjust:none}
+.e1{background:#141414}.e2{background:#7c7c78}.e3{background:#fff;box-shadow:inset 0 0 0 1.5px #141414}
+.sw{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:-1px}
+.swm{display:none}
+.stkey{display:none}
+.dotwrap{display:flex;gap:28px;align-items:center;flex-wrap:wrap}
+.dots{display:grid;grid-template-columns:repeat(10,14px);gap:6px}
+.dots i{width:14px;height:14px;border-radius:50%;display:block;forced-color-adjust:none}
+.dots i.e3{box-shadow:inset 0 0 0 1.5px #141414}
+.dk{width:auto}
+.dk th{width:auto;padding-right:24px}
+.note{font-size:13.5px;color:var(--cinza);margin:10px 0 0}
+.agesvg{display:block;max-width:860px}
+.age-m{display:none}
+.caveat{display:grid;grid-template-columns:22px 1fr;gap:10px;margin:12px 0 0;font-size:14.5px;line-height:1.4}
+.caveat b{display:flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--tinta);color:#fff;font-family:var(--f-head);font-weight:800;font-size:15px}
+.qf{margin-top:auto;padding-top:12px}
+.qf p{font-size:13.5px;color:var(--cinza);margin:0;line-height:1.4}
+.qf .acts{display:flex;gap:0 20px;flex-wrap:wrap}
+.qf .acts a{display:inline-flex;align-items:center;min-height:44px;color:var(--tinta);font-weight:700;font-size:14px;text-underline-offset:3px}
+.idx{margin-top:22px;border-top:2px solid var(--tinta);padding-top:10px}
+.idx .ft{font-family:var(--f-head);font-weight:800;font-size:15px;margin:0 0 2px}
+.idx ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px}
+.idx a{display:flex;align-items:center;gap:10px;min-height:40px;text-decoration:none;font-weight:600;font-size:15px;border-bottom:1px solid #ebebe7}
+.idx a:hover{text-decoration:underline}
+.idx a b{font-family:var(--f-head);font-weight:800;font-size:17px;width:16px}
+.cite{margin-top:64px;display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:0 56px}
+.cite h2{font-family:var(--f-head);font-weight:800;font-size:27px;margin:0 0 10px;border-top:2px solid var(--tinta);padding-top:8px}
+.cite blockquote{margin:0 0 12px;font-size:15.5px;border-left:2px solid var(--tinta);padding-left:12px}
+.cite .small{font-size:14px;color:var(--cinza);margin:0}
+.oth ul{list-style:none;margin:0;padding:0;columns:2;column-gap:24px}
+.oth li a{display:flex;align-items:center;min-height:44px;font-weight:600;font-size:15px;text-decoration:none}
+.oth li a:hover{text-decoration:underline}
+
+@media (max-width:1100px){
+  .subnav{display:none}
+  .plead{grid-template-columns:minmax(0,1fr)}
+  .plane{margin-top:28px}
+  .qs.three{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cite{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:900px){
+  .qs,.qs.three{grid-template-columns:minmax(0,1fr)}
+  .age-d{display:none}.age-m{display:block}
+  .q.full{display:flex;flex-direction:column}
+  .q.full .qtext{display:contents}
+  .q.full .qfig{order:2;padding-top:0}.q.full .qf{order:3}
+}
+@media (max-width:640px){
+  .hubbar{flex-wrap:wrap;border-bottom:0}
+  .hubbar .sec{font-size:23px;min-height:48px}
+  .subnav{display:flex;width:100%;margin:0;border-top:1px solid var(--fio);border-bottom:1px solid var(--fio)}
+  .subnav .dm{display:none}.subnav .mm{display:block;margin-left:auto}
+  .subnav a{padding:0 10px;min-height:46px}
+  .subnav li:first-child a{padding-left:0}
+  .p-h1{font-size:46px}
+  .p-sub{font-size:16px}
+  .p-lede{font-size:17px}
+  .p-ficha dl{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}
+  .plane{margin-left:calc(-1*var(--gut));margin-right:calc(-1*var(--gut));padding:0 var(--gut) 16px}
+  .locm{max-width:300px}
+  .grp{margin-top:44px}
+  .grp > h2{font-size:26px}
+  .q h3{font-size:21px}
+  .rows{font-size:15px;table-layout:fixed}
+  .rows th{white-space:normal;width:46%}
+  .rows td.v{width:64px}
+  .q.full{align-items:stretch}
+  .st3{table-layout:auto}
+  .st3 thead{display:none}
+  .stkey{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--cinza);margin:0 0 6px}
+  .st3 tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:6px 0 8px}
+  .st3 tbody th{grid-column:1/-1;width:auto;height:auto;padding:0 0 4px}
+  .st3 td.stack{grid-column:1/-1;padding:0 0 4px}
+  .st3 td.v{text-align:left;padding:0;width:auto;font-size:14.5px}
+  .swm{display:inline-block}
+  .oth ul{columns:1}
+  .idx{display:none}
+}
+</style></head><body><header class="mast"><div class="wrap mast-in">
+  <a class="brand" href="#" aria-label="estimador.pt — página inicial"><span class="wmw "><span class="wm">estimador.pt</span><span class="cota-wm" aria-hidden="true"></span></span></a>
+  <nav class="nav" aria-label="Secções"><a href="#">Início</a><a href="#" aria-current="page">População</a><a href="#">Liga Portugal</a><a href="#">Eleições</a><a href="#">Sobre</a></nav>
+  <button class="menu-btn" type="button" aria-expanded="false">Menu</button>
+  <div class="lang"><a href="#" aria-current="true" aria-label="PT, Português">PT</a><a href="#" aria-label="EN, English">EN</a></div>
+</div><div class="wrap"><div class="rule6"></div></div></header>
+<main id="main-content" tabindex="-1">
+<div class="wrap">
+  <div class="hubbar"><p class="sec">População</p>
+    <nav aria-label="População" style="display:contents"><ul class="subnav"><li><a href="#" aria-current="page">Freguesias</a></li><li><a href="#">Mapa</a></li><li><a href="#">Freguesia misteriosa</a></li><li class="dm"><a href="#">Qualidade</a></li><li class="dm"><a href="#">Dados</a></li><li class="dm"><a href="#">Metodologia</a></li><li class="mm"><a href="#">Mais</a></li></ul></nav>
+  </div>
+  <a class="back" href="#">← Distrito de Lisboa</a>
+
+  <div class="plead">
+    <div>
+      <h1 class="p-h1">Misericórdia</h1>
+      <p class="p-sub">Freguesia do concelho de Lisboa, código 110661</p>
+      <p class="p-lede">A população sintética tem aqui <b class="tab">9 646</b> pessoas em <b class="tab">4 872</b> agregados, gerados para reproduzir os <b class="tab">9 658</b> residentes que o INE contou nos Censos 2021. Ninguém aqui existe: as pessoas e os agregados foram gerados por um modelo e não têm morada.</p>
+      <div class="p-ficha ficha"><p class="ft">Ficha técnica</p><dl>
+        <div><dt>Universo</dt><dd>Residentes da freguesia, Censos 2021</dd></div>
+        <div><dt>Base</dt><dd>INE, 9 658 residentes</dd></div>
+        <div><dt>Gerado</dt><dd>9 646 pessoas, 4 872 agregados</dd></div>
+        <div><dt>Versão</dt><dd>pt-synthpop v1.0.3, de 5 out. 2026</dd></div>
+        <div><dt>Intervalos</dt><dd><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" style="vertical-align:-2px;margin-right:6px"><circle cx="7" cy="7" r="5" fill="none" stroke="#141414" stroke-width="2"/></svg>nenhum: uma só execução</dd></div>
+        <div><dt>Qualidade</dt><dd>nível A</dd></div></dl></div>
+      <p class="tier"><b>Nível A.</b> Freguesia com 2 000 ou mais residentes em que a população gerada reproduz de perto as tabelas publicadas pelo INE.</p>
+      <nav class="idx" aria-label="Quadros desta freguesia"><p class="ft">Nesta página</p><ol><li><a href="#vivem-sozinhas"><b>1</b>Pessoas com 65+ que vivem sozinhas</a></li><li><a href="#quem-vive-sozinho"><b>2</b>Quem vive sozinho</a></li><li><a href="#idades"><b>3</b>Idades</a></li><li><a href="#trabalho"><b>4</b>Condição perante o trabalho</a></li><li><a href="#escolaridade"><b>5</b>Escolaridade</a></li><li><a href="#varias-geracoes"><b>6</b>Agregados com criança e pessoa de 65+</a></li><li><a href="#pessoas-por-casa"><b>7</b>Pessoas por agregado</a></li><li><a href="#familias"><b>8</b>Núcleos familiares</a></li></ol></nav>
+    </div>
+    <aside class="plane" aria-label="Onde fica e outra freguesia">
+      <div class="secline"><p class="sec" style="padding-top:8px;margin:0">Onde fica</p></div>
+      <svg class="locm" viewBox="0 0 340 250" role="img" aria-label="Mapa das 24 freguesias do concelho de Lisboa, com a Misericórdia a preto">
+<path d="M230.5-118.5l6-13l10-3.5l7 0l7-2.5l8.5-0.5l3.5-2l4 2.5l3 0l7.5-2l2.5-1l1-1.5l4.5-0.5l1.5-8.5l3.5-4l-1-1.5l1-1.5l-2.5-7l1.5-14l-1.5 1l-5.5 1l-3.5-1.5l-2.5-5l0-4.5l-3.5-4l-0.5-3l0-1l-4 1l-3.5 3l-1 2l-2 0l-5 6l-3 0l-1.5-1l-0.5 1l-4.5 1.5l-1-2.5l-3 1l-3.5-4l-4 3.5l-2.5-5.5l-0.5-5.5l-4-1l-1 4.5l-1.5-3.5l-3-1.5l-2.5-6l-0.5-3.5l-12.5-9.5l-3.5 0l-8 4.5l-3-0.5l-3.5 3l-3-2l-3-4.5l-13.5 18.5l-3 6l-0.5 4.5l-1-0.5l0.5 1.5l-1.5 2l1 1l-7.5-1.5l1 2l-2 2l-1-0.5l0 3.5l-1.5 1.5l0 2.5l-7-3l-5 0.5l0.5 1.5l-1 6.5l0.5 2.5l-1-0.5l-0.5 2.5l-3 4l3 2l0 2.5l1.5 0l0.5 1.5l2.5-1.5l2.5 0l3-2l9.5 0l3.5 0.5l2 2l0.5-1l1.5 0.5l2 4l4.5 1l-1 4.5l0.5 5l-0.5 1l2 3l2.5-2l0.5-2.5l6 1l1.5 2l3-2.5l4 2.5l9.5 2l0.5 2.5l-1 0.5l-1.5 7l0.5 0l1 1.5l-2 0.5l-1 1l3.5 1.5l2-2.5l-1.5 3l0.5 0.5l3.5-1l5 2l-0.5 3l-3 0.5l0.5 3l1 0l-1 4.5l0.5 0.5l2.5-5l5-5.5l3.5-0.5l5.5-12.5l11.5 13l3.5 8l3 2l1.5 4l2.5 3l-0.5 3.5l2 2l1.5 2.5l-1 4l1.5 3.5l-23.5 7l2 7.5l3.5 1.5l-5 5.5l-0.5 4.5l3 1.5l0 4.5l-0.5-0.5l-0.5 4l-2.5 3l0 4l-3 4.5l1-2l14 1l-0.5-1.5l0-3.5l2 1l0-5.5l2.5 0.5l1-4l-3 1.5l5.5-7l-1-3.5l3-0.5l4-3.5l5-0.5l3-3.5l0.5-1.5l5.5-3l1-4l8.5 4.5l-1 0l0.5 1l1.5 3.5l7 7l-4 7.5l11.5 8.5l-2.5 6l-1.5 5l-7 10.5l-6 12l-3 9.5l-3.5 25l0 11l-13-0.5l-3.5 1l-4.5-2.5l3.5 1.5l-2 11.5l0.5 11.5l-7 0.5l0-5l-6-2l-5.5-6.5l-10.5 13l0.5 1l11.5 4.5l8.5 9l10.5-0.5l-2-14M217-121l-11 2l5.5-0.5l2-0.5M213-120.5l1.5-2.5l-0.5 0l-1.5 2M210.5-125.5l0.5-3.5l2-4M212.5-135.5l-1.5-1l-8-1l-4.5-2.5l-2.5 2.5M148-159l-2 2l-3-0.5l-3-2l-2 1l2 1l-1.5 3l1 1.5l-0.5 3l2 6.5l2.5 1l0 3.5l-3 10l2.5 12.5l2.5 6.5l0.5 3l-0.5 2l1 2.5l3-1l-1-3l7 0l3.5 1.5l0.5-1l3.5 0.5l3.5-2.5l1 1.5l7.5-2.5l4 0l3 2l0.5 1.5l7-3l3 7l-0.5 1.5l5-2l0.5-3.5l1 0.5l0-1l-2-0.5l-0.5-3l2.5 0l2.5-2l0.5-5l1.5-3l2-1l1 1.5M197.5-105.5l-0.5 3.5l-5 2M146.5-102.5l-1 6.5l2 1.5l-1.5-0.5l-0.5-1l1-5l-0.5-3l-3 0.5l3-1l-0.5-5.5M143.5-142.5l-2.5-0.5l-2.5-9.5l-4.5-2l-2.5-2.5l-5.5-1.5l-1.5-5l-1.5-2l-1-2.5l-3.5-2.5l-5.5 2l-3.5-2.5l-15.5-2.5l-2.5-1l-4.5 1.5l1 4l-1.5 1l0 3l-2.5 0.5l1 2.5l-3.5 0.5l-1 2.5l-1.5 1l1.5 6l4.5 4.5l1 3.5l3 1l-2 2.5l-1 5l3 5l0.5 6l-1 1l1.5 1l0 1l1 1.5l-2.5 3.5l3.5 3l-3 2.5l-1 2.5l0 2l-2.5 2l0 1.5l2.5 1l-0.5 3l1 1l0 1.5l1 0.5l0 4l-1.5 0.5l0.5 1.5l4.5 0l-4 0l-1-1.5l0 1.5l-5 7.5l-2-1.5l-6 3l-1.5-2.5l-1 0l4 5l1 9.5l4 8l-1.5 3l1 6l2.5-0.5l-2.5 1l-3.5-0.5l-0.5-2l-5-1l0 2.5l-1.5 2.5l-4.5 1l-2.5 2l4 2l7-3l-0.5 1.5l1.5 2l-2 0.5l-3.5 5l4 2l-1 0l0.5 1.5l2 0.5l-0.5 0.5l-1 0l0 1.5l3.5 0.5l0 2.5l1.5 0.5l1 5.5l-1 1l0.5 2.5l3.5 0.5l6-1.5l4-2.5l1.5-2l-0.5 1.5l2.5 1.5l1 1.5l1.5 0l4.5 1.5l0 2.5l3.5 0.5l3 3l4 2l4-1l3.5 6.5l0 6.5l2.5 2l4-0.5l2.5 4l11-5l-1.5-2l3.5 1.5l4.5-1l3.5-5.5l2.5-0.5l3.5 3.5l3.5 0.5l1.5-3.5l-1-2l2-2.5l2 0l3 3l3-2.5l3 1.5l2.5 0l1.5 1.5l4-2l-2-4l-3-1.5l2 0.5l19.5-6.5l-7-1l-4.5-2.5l-0.5-1.5l2 0.5l-0.5-1.5l5-3.5l0.5-1l-2.5-1.5l4-2l-10-10l-3.5-0.5l-1-3.5l-1 0l-1.5-3l0.5-0.5l-1.5-4l-1.5 4l0 5l-2.5 4l-2.5-5l-2 2.5l-3.5-4l1-0.5l-2.5-4l-1 0.5l-1.5-2l-1-4l1-2l-3-4.5l-4-1.5l-2.5 2.5l-2-4l0.5-6.5l0-8l-3.5-8l0.5-2.5M143-103.5l-4-2l-3 1l-3 5l-2.5 0.5l0.5 0.5l-8.5-1.5l-2 4.5l-3.5 1.5l-1 1.5l-4.5 1.5l0 1l-2.5-1.5l-2.5 0.5l-4 2.5l-6 0.5l-3.5-2l4 2l5.5-0.5M150.5-84l-0.5 16l1 0l1 2.5M160.5-60l0.5 3.5l2 2.5M176-52.5l1-4l2 4M185.5-45l5 4l9.5 11.5l-4.5-5.5M162.5-6.5l-2 3.5l-3-0.5l-3.5-3.5M151.5-6.5l-3.5 5.5l-4.5 1M140-1.5l2 3.5l3 2l-3.5-3.5l-11 5M121.5 0l-0.5-8l-3-5M94.5-26l-4 4l-9 2l-1 3.5l4 7l-4 3.5l-4.5-4.5l-5.5 3l1.5 3l0 2l2.5 2l0.5 4.5l-1.5 4.5l1.5-0.5l1 3l1.5-0.5l1 3.5l2-0.5l2 2l4.5 0l3.5-1l1.5 1l1-0.5l2 3l1 4l0.5-1l-1 1l-2 3l0.5 2l4 2l-3.5 2.5l-2 4l1 2l-3.5-4l-3.5 0.5l-2 3l-0.5-3l-4.5 1l-2-2.5l-2.5-0.5l-1.5 1.5l-5.5 0l-2 2l-0.5 9.5l1 7.5l-1 0l-0.5 2.5l-2 2l-0.5 1.5l-1.5 0.5l-6 10l0 2.5l-1.5 6.5l0 4.5l4 2l-1.5 4l0.5 3l2 2.5l3-1.5l9 0l14 8l-12.5-8l-10 0l-3 1l0 5.5l1.5 1.5l0.5 1.5l-1 1l-0.5 7.5l3 0.5l-3 3l2 0.5l0.5 2.5l-1 6.5l0.5 1.5l-1-1.5l-1.5 2.5l-3 1l0.5 4l-2.5 0l-5.5-5l-9.5 2.5l-1 2.5l2.5 2.5l1.5 2l-4-5l2.5-4l-0.5-2l-2-1.5l6.5-5.5l-6.5 1.5l-8-4.5l-8 1.5l-6-5l-6.5-1l1 8l-1 0l-1-3l-0.5 1.5l-9 2.5l-11-1l0-6.5l-2-2l-3 1.5l4 9.5l4.5 8l1.5 14.5l3.5 2l4-0.5l6 3.5l2 4.5l-4 5.5l-1 2.5l6 3l4.5 10.5l14-2.5l6 0.5l-6.5-11l-1.5-11l8 3.5l2-1.5l4.5 1.5l4.5 0l0-5.5l-3-10.5l0-2M230.5 55.5l-4 1l-8.5-3l0-4l3.5-2l-0.5-1l4-11l3.5 1l3.5-4l-3.5-2.5l8-7l0.5-0.5l-2-1.5l4.5-5l5.5 3.5l3.5 0.5l-1.5 4.5l4.5 5.5l2 1l4 0l-4.5 0l-3-2.5l-3-5l1.5-3.5l2.5-3.5l0.5-5l-1.5-4.5l-4-2.5l3.5 2.5l1.5 2.5l1 3.5l-1 3.5M218 53.5l-6-1.5l-7-3l-2-2.5l-3.5 0.5l-1.5-10l-4-2l-4.5-4l1-2.5l-1-0.5l2-1.5l0-1.5l2 0l-0.5-1.5l1-1l1 0.5l1-0.5l-1-1l4.5-1.5l-2.5-1l3-2.5l-2.5-1l1-1l0-2.5l3-1.5l3 1l1.5-7.5l4-4.5l-1.5-3l1.5-1l0-2l2-0.5l2.5-3.5l2-1l-2-2.5l1-2.5l-0.5-4l4-3l-2.5 0.5l-3-4l1-1.5l-1-1l8-5.5l0-1.5l3.5-1l6 0.5l4 3l0 2l-1.5 4.5l2.5 8l5 4.5l4 6.5l1 3.5l-1.5 4.5l0 3l1.5 2M233.5-27.5l1.5-5l-0.5-6l0.5 4.5l-5-3.5l-4 0l-6.5 1.5l-6.5-1.5l-5 4l-8 4M208-33.5l4.5-4l9 1M191.5 25l0 1.5l-6-3.5l6 3.5l-2 1.5M185.5 23l-1 4l-3.5 0l-0.5-1.5l2-3l0.5-6.5l-3.5-1.5l-3.5 0.5l-6.5-1.5l-3.5 3l-0.5 2.5l0.5 7l-4.5-3l-1-2.5l-3-2l-7.5-11.5l-3-3l-2 0M166 26l2.5 4.5l-0.5 3.5l1.5 4l-4 4l-3 1l-1.5 2.5l0.5-1.5l4-2M166 26l-4.5-2.5l-2-4l-12.5-15.5M189.5 31l3.5 3l-2 0l-2 2.5l-2-0.5l-1 1.5l-2 0l-7 8.5l-2.5 1l-2.5 3.5l-2-0.5l-3 1.5l-4.5-3l-1.5-3M42 137.5l3 10.5l0 5.5M34 172l6.5 3.5l9.5 0l4-2.5l5.5-8l6.5-2l4.5 0.5l13 7l12.5 0l3-0.5l-12 1l-6.5-1.5l-11-6l-6 0l-4.5 2.5l-7 8.5l-3 1l-7 0l-8-3.5M28 171.5l-23.5 4.5l-17 0.5l-6.5 2l6-2l16.5-0.5l10.5-2M-17 111l-3.5 0.5l2.5 5l-2 4.5l0 4.5l-3.5 9l-0.5 4.5l-1.5 2.5l-3.5 2.5l-2.5 0l-3 3l0.5 2l3.5 2l-0.5 3l2 6.5l0 4.5l-1 0.5l1 3.5l-2 0l-2 3l1 2.5l-2.5 0.5l-1.5 4l-4-2l0 1.5l2.5 1l1.5 6.5l8-2l9-5.5M-36 186l1 1.5l-4.5 1.5l-0.5 4l5 7l-14 3l1 10.5l1-0.5l2.5 6.5l1.5 0l1 10l2 2l-2.5 7l-2 0l-1 5l4.5 2l0.5-1l-1-1l0-1.5l3.5-2l2 2l3.5 0l1.5-1.5l0-2l-1-1.5l1.5-1l0-2.5l1.5-0.5l0-1l1-0.5l0.5-5l1 1.5l-1-0.5l4-2.5l7.5-0.5l0 1l0-1l4.5-2l5-5.5l6.5-1.5l0-2l3.5-2.5l-1.5-0.5l0.5-1.5l2-1.5l0.5 0.5l1-1.5l5-2l4-0.5l0.5-2l1.5-0.5l5.5 1l1 2l0-1.5l6.5 0l3.5-2l3.5 0.5l3-1.5l5 0l7 0l5 1.5l0 2l0.5-2.5l12 0l5.5 2l4.5 7l0.5-0.5l-1-1l3-2.5l3 2l-0.5 1l1.5-1.5l1-4l2 1l1-1l-1.5-2l2-9.5l5.5-4.5l-1.5-7l1-5l3.5-5.5l5.5-5.5l6-3.5l-5-7l-14-14.5l-0.5 1l-9.5-1.5l-2.5 0.5l1-1l-2 0.5l-6-3l-4.5 1.5l-3.5-2l-12.5 6l-0.5-0.5l0-4l-2.5 3.5l-0.5 3.5l-1.5-3l1-3l-5-5l-1.5 0l-0.5 0.5l2-0.5l5 5l-1 3M45 200l-0.5-4l-4.5-9l-3.5-0.5l-1-1.5l1-3l5-3l0.5-3.5M91 140.5l0.5-1l-3-4l-7-13.5l-2-7l2 6.5l7.5 15.5l16.5 17M110.5 161l4.5-3.5l-2.5-10l6.5-13.5l-0.5-4.5l-14 0.5l-15-4l15.5 4l13.5-0.5l-0.5-4.5l-8-13l-5 1.5l-1 1.5l-3-0.5l-8.5-4l0 1l-5-0.5l-8 4l8-4l5 0l-3-2.5l-2.5-5.5l2.5 5l1.5 2l10 4.5l3 0.5l1-1.5l7-2.5l2-4l-0.5-2.5l1.5-1l0-1.5l1.5-1l0-3l0 3.5l1-1l3 0.5l7.5-3.5l0.5-3l-4.5 1l-1.5-4l0-3.5l-4.5-8l-11.5-9.5l-1.5-4.5l1 4l3 3.5l9 6.5l4.5 8M81.5 121.5l8 4.5M124 95.5l4-1l-1-1.5l-2.5-0.5l0.5-1.5l4-1l0-1.5l-1.5-2.5l3.5-7l4-3.5l0-1l1 0.5l3.5-2.5l3-4l2.5-0.5l3.5-4.5l6.5-2.5l2.5 0.5l3-1.5l0.5-2.5l4.5-2.5l1.5-3.5M116.5 98l-3-1l-4.5-8l-2 0l-0.5 1.5l-4-1l-0.5-0.5l1.5-2.5l-2-1l0-1l-7.5 2l-1.5-5.5l0.5-2l-1-2.5l3-1l0.5-2l-1-1l-0.5-6.5l1.5 9l-3.5 1.5M92.5 81l-4 1.5l4.5-2l0-1.5M94 66l-3.5-2.5l1-4l1 1l2-4l2.5-1l1-1.5l4 2.5l-1.5 2l1 1l-0.5 3.5l2 3.5l2-0.5l-2.5 0.5l-1.5-3.5l0.5-3.5M98 54l-5.5-4l9.5 6l-1.5 2.5M87 103l-2.5-2.5l3.5-2l-2.5-2.5l-1-7l0.5-1.5l2-0.5l0-2l1.5-2.5M93.5 37.5l-1 1l0 5l1 3l-1 3.5M148.5 63.5l-2.5-6.5l-1.5 2l-5.5 3.5l-6.5-5l-2-3l3.5-4.5l0-3l-2-3l1-3l-3.5-13l3 0l2-3l1.5 0l1 0.5l0 1l2-1l3 2.5l2-4l9 0l6.5-4.5M129.5 28l-3 0.5l-4-2l-1.5-3l-1-6l2 8.5l5 2.5l5.5-0.5l2-3M96.5 21l2 1l2-2.5l-1-1l7 1.5l1-3l-1-2l5-2l0.5 4l3.5 1l4.5-0.5" fill="none" stroke="#141414" stroke-opacity=".35" stroke-width="0.6" vector-effect="non-scaling-stroke"/>
+<path d="M134.5 198l-1-0.5l-3 0.5l-0.5-2l-4-1l0 2.5l-4-1l0-10.5l-2.5 1l-1-5.5l-3.5-2l-3 0l1-3.5l2.5 0.5l2.5-4l-5-7l20.5-9l0 15l1.5 0l0.5 5.5l0.5 2l3.5 2l5 6l-4.5-1l0 2.5l-3 4.5l-0.5 4l-2 1l3 4.5l-4-5M113 165.5l-14 4.5l-3.5 5.5l-1 5l1.5 7l-5.5 4.5l-2 9.5l1.5 2l-1 1l-2-1l-12.5 25.5l11.5 4.5l29-2.5l7-4.5l9.5-8.5l13-4.5l4-1l11 0.5l-1.5-12l1.5-0.5l-1-4l2.5-12l-3-9.5l1.5-7.5l-1-5l1-3l-18-4.5l-8 1.5M159.5 159.5l-1 2l1 6l-1.5 7l1 3.5l2 6.5M159.5 159.5l5.5 1l13.5-3l14.5-2l-8.5 1l-20 4l-9.5-2.5l5-2.5l1-2l-0.5-1.5l-2.5-1l-5.5-7l2.5-1.5l4 0l1-2.5l-11.5-4.5l-4.5-3l0.5-3l-4.5-1.5l-1-4.5l1-8.5l2.5-6.5l-7.5-5.5l-2 0l1-3.5l-5.5-2l-3 0.5l-5 3l-3-0.5l-2.5 1.5l0 1.5l-1.5 1l0.5 2.5l-2 4l-2 1l8 13.5l1 8.5l-6.5 13.5l2.5 10l-14.5 10l-1.5 2.5l38-14.5l5.5 0l12.5 2.5l4.5-2.5l1.5-2.5l-8.5-9l7-2l1-1.5l0.5-8.5l-1 8l-11.5-4.5M159.5 213l12.5-2l7.5-4l14 1.5l-6-29.5l1.5-1l-2-5l-4 1.5l3.5-1.5l-1-5.5l0-4l-7-6M144.5 213.5l-3-12l-4 1M264.5 144l-9.5-4l-0.5-3.5l1 4l9 3.5l-4 12.5l-7 7l-12.5-10l-4-11l-6.5-1l-4.5-4.5l-1.5-3l4.5-2l-1-1l0.5-2l4.5-1l-4.5 1l-0.5 2M264.5 144l0.5-7l7.5-28l-51-18.5l-0.5 1.5l0 2.5l-1.5 16l1 0.5l1 2.5l-2.5 0.5l1 0.5l-0.5 1l4.5 5.5l9 7l3.5 5.5l3 2.5l2 0l0.5 2l7.5 2l2-5.5l3 2M253.5 163.5l-5.5 10.5l-17-14l-6.5-1l-1.5-1l-1.5 1l-1.5 3.5l-1-0.5l-1.5-3l-1 0.5l3-6l-0.5-2.5l-3-1l-0.5-2.5l2.5-6.5l0-6l6.5-1M229 132l-2.5 1l-5 1.5l-10.5 1l0 1.5l-2 1l-5 0.5l-1-6.5l1-0.5l-5-10l20-1.5l0.5-4.5l4.5 5.5l7 5l5 6l0.5 1.5M142.5 108.5l6.5-6l11.5-3l-6-4l2-4.5l0.5-13l-3.5 2l-4.5-7.5l3-2l0.5-1.5l5.5-5l1-3.5l-4 0.5l-6.5 2.5l-3.5 4.5l-2.5 0.5l-1 2l-1 0.5l-1 1.5l-3.5 2.5l-1-0.5l0 1l-4 3.5l-3.5 7l1.5 2.5l0 1.5l-4 1l-0.5 1.5l2.5 0.5l1.5 1.5l-0.5 3l6 2l-1 3.5l2 0M140 115l2-5l2.5-3.5l4-3.5l5.5-2.5l12.5 0l7 0l-14.5-0.5l1.5-0.5M184 134.5l-1.5-2.5l-3.5 2l-7.5-2l-3.5-4.5l-4 4l-1.5-0.5l-1.5 1M184 134.5l-1 0.5l-1.5 4.5l-1 1.5l1-0.5l4 4l-6 5.5l5 6.5M184 134.5l-3-6l2 3.5l-4 2M159 60.5l1.5-0.5l0.5-2.5l4.5-2.5l1.5-3.5l5.5 4.5l3.5-1.5l-1.5 1.5l1 4l-1 3.5l1-1l4 1l0.5 4l2-2l2.5 0.5l0.5-2.5l1.5-1l9 4l0.5-1.5l4.5 2.5l1-3l2.5 0.5l-6 8.5l-2 6.5l1.5 6.5l-1 4l0.5 1.5l-23.5 8.5l25-9l6.5-1l-8 1.5M153.5 80l3.5-2l-0.5 13M204 65l4-7.5l-10 16M167 51.5l3-1.5l2 0.5l2.5-3.5l2.5-1l7-9l2 0.5l1-1.5l2 0.5l2-2.5l2 0l1.5 1.5l3.5 1.5l1.5 10l3.5-0.5l3.5 3l5.5 3l14.5 4l4-1l0.5 1l11.5 4.5l8.5 9l2.5 0l8-0.5l-2.5-24.5l2-12l5-0.5l12.5 0.5l-4 39.5l-1 32.5l-1 4l-16.5-6l-2.5-33M185 63.5l2-1l4 2.5l4.5 1.5M221.5 90.5l-16.5 0l17.5 0l33.5 12.5M219 114l1.5 0.5l-1.5 1.5l0 4l-23 2l-1-6l-11 2l-7.5 3.5l-4.5-10l-5.5-6.5l0-4.5M208 57.5l0-4l-1.5-4M176.5 121.5l-6 3l6 4.5l4.5-0.5M170.5 124.5l12-6l12.5-2.5M196 122l3-0.5M211 135.5l7-0.5M211 137l-2.5 1l-9 0.5l4.5 0M216.5 159.5l1.5 1.5l-0.5 2.5l-2.5 3.5l-1.5-2.5l-3 0l0 2l1 3l-3 3.5l-3-1.5l-1.5-3l2-1.5l-1-1.5l1-1.5l-2-0.5l1.5-3l-2.5-1.5l0.5-1.5l-2-2l1-1l-3-4.5l-4 0.5l4.5-9.5l-0.5-2.5M215 167l-1-0.5l4.5 8l-5-10M211.5 169.5l-2.5 3.5l-1.5 0l-2.5-3l-1-1.5M195.5 150.5l-2.5 5l7-14.5M218 141l-2.5 8l3.5 2l0.5 3l-2 4.5l1.5 3.5l1 0.5M185.5 167.5l1.5 5l2 5.5M183 174.5l0-1.5l-1-0.5l-3.5 0l-1-1.5l-3.5 1.5l-1 4.5l-4.5 0.5l-2-4.5l-3.5-1l-1.5 3.5l1.5-3.5l3.5 1M161.5 175.5l0.5 2.5l-3 0M193.5 208.5l4 0.5l11-4l-5-18l2-1l-2.5-0.5l0-4.5l-0.5 0l-0.5-4l2-1l-3.5-4l-4-0.5l-3-2l-0.5 3l-2.5 0l-1-2l-2.5 2M200.5 172l1 1l2.5 3M208.5 205l3.5-2l11-9l16-8l3-3l6-9M218.5 174.5l0.5 2l2 0.5l1-2l3 1.5l1.5-1l2 1l0-1l10.5 10.5M201.5 173l0.5-1l3-2" fill="none" stroke="#141414" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+<path d="M200.6 171.9L204.1 175.9L201.9 176.8L202.4 180.9L203.2 181.0L202.8 185.5L205.3 186.2L203.7 187.0L208.3 205.0L197.5 208.8L193.5 208.7L187.7 178.9L189.1 178.0L186.9 172.4L189.3 170.3L190.3 172.3L192.8 172.6L193.6 169.6L196.7 171.6L200.6 171.9Z" fill="#141414"/>
+<line x1="197.0" y1="193.2" x2="167.0" y2="227.2" stroke="#141414" stroke-width="1.2"/>
+<text x="163.0" y="241.2" text-anchor="middle" font-family="Sofia Sans" font-weight="800" font-size="14" fill="#141414">Misericórdia</text>
+</svg>
+      <p class="mc">As 24 freguesias do concelho de Lisboa, com os concelhos vizinhos a cinzento (CAOP 2021).</p>
+      <form class="search" role="search" onsubmit="return false"><label for="q">Outra freguesia ou concelho</label><div class="f"><input id="q" placeholder="Ex.: Arroios, Lisboa" autocomplete="off"><button type="submit">Procurar</button></div></form>
+      <p class="colo">pt-synthpop v1.0.3, sob CC BY-NC 4.0. Base: INE, Censos 2021, e DGT, CAOP 2021, ambos sob CC BY 4.0.</p>
+    </aside>
+  </div>
+
+  <section class="grp" aria-labelledby="g1"><h2 id="g1">Pessoas</h2>
+    <div class="qs">
+      <section class="q " id="vivem-sozinhas" aria-labelledby="vivem-sozinhas-t">
+  <p class="qn">Quadro 1</p>
+  <h3 id="vivem-sozinhas-t">Pessoas com 65 ou mais anos que vivem sozinhas</h3>
+  <p class="who">Pessoas com 65 ou mais anos em agregados privados. Quem vive num lar ou noutro alojamento coletivo não entra nesta pergunta.</p>
+  <p class="where">Misericórdia (110661), concelho de Lisboa</p>
+  <table class="rows"><caption class="sr">Pessoas com 65 ou mais anos: vivem sozinhas ou com outras pessoas, em %</caption><thead class="sr"><tr><th scope="col">Categoria</th><td></td><th scope="col">Percentagem</th></tr></thead><tbody><tr><th scope="row">Vivem sozinhas</th><td class="bar"><i style="width:39.16%"></i></td><td class="v tab">39,2%</td></tr><tr><th scope="row">Vivem com outras pessoas</th><td class="bar"><i style="width:60.84%"></i></td><td class="v tab">60,8%</td></tr></tbody></table>
+  
+  <div class="qf"><p>Fonte: população sintética v1.0.3, derivada da população gerada a partir dos Censos 2021 (INE); esta pergunta não é uma das tabelas do ajuste.</p><p class="acts"><a href="#">Como foi feito</a><a href="#">Copiar o link deste quadro</a></p></div>
+</section>
+      <section class="q " id="quem-vive-sozinho" aria-labelledby="quem-vive-sozinho-t">
+  <p class="qn">Quadro 2</p>
+  <h3 id="quem-vive-sozinho-t">Quem vive sozinho, por idade e trabalho</h3>
+  <p class="who">Pessoas que vivem sozinhas num agregado privado. Em cada faixa etária, como se dividem entre empregadas, desempregadas e inativas; cada faixa soma 100% por si.</p>
+  <p class="where">Misericórdia (110661), concelho de Lisboa</p>
+  <p class="stkey" aria-hidden="true"><span><i class="sw e1"></i>Empregadas</span><span><i class="sw e2"></i>Desempregadas</span><span><i class="sw e3"></i>Inativas</span></p><table class="rows st3"><caption class="sr">Quem vive sozinho, por faixa etária: empregadas, desempregadas e inativas, em %; cada faixa soma 100%</caption><thead><tr><th scope="col"><span class="sr">Faixa etária</span></th><td></td><th scope="col" class="v"><i class="sw e1" aria-hidden="true"></i>Empregadas</th><th scope="col" class="v"><i class="sw e2" aria-hidden="true"></i>Desempregadas</th><th scope="col" class="v"><i class="sw e3" aria-hidden="true"></i>Inativas</th></tr></thead><tbody><tr><th scope="row">Menos de 45 anos</th><td class="stack" aria-hidden="true"><span><i class="e1" style="flex:0.7687943262411348 1 0"></i><i class="e2" style="flex:0.10212765957446808 1 0"></i><i class="e3" style="flex:0.12907801418439716 1 0"></i></span></td><td class="v tab"><i class="sw e1 swm" aria-hidden="true"></i>76,9%</td><td class="v tab"><i class="sw e2 swm" aria-hidden="true"></i>10,2%</td><td class="v tab"><i class="sw e3 swm" aria-hidden="true"></i>12,9%</td></tr><tr><th scope="row">45 a 64 anos</th><td class="stack" aria-hidden="true"><span><i class="e1" style="flex:0.6781954887218045 1 0"></i><i class="e2" style="flex:0.0887218045112782 1 0"></i><i class="e3" style="flex:0.23308270676691728 1 0"></i></span></td><td class="v tab"><i class="sw e1 swm" aria-hidden="true"></i>67,8%</td><td class="v tab"><i class="sw e2 swm" aria-hidden="true"></i>8,9%</td><td class="v tab"><i class="sw e3 swm" aria-hidden="true"></i>23,3%</td></tr><tr><th scope="row">65 ou mais anos</th><td class="stack" aria-hidden="true"><span><i class="e1" style="flex:0.08816705336426914 1 0"></i><i class="e2" style="flex:0.001160092807424594 1 0"></i><i class="e3" style="flex:0.9106728538283063 1 0"></i></span></td><td class="v tab"><i class="sw e1 swm" aria-hidden="true"></i>8,8%</td><td class="v tab"><i class="sw e2 swm" aria-hidden="true"></i>0,1%</td><td class="v tab"><i class="sw e3 swm" aria-hidden="true"></i>91,1%</td></tr></tbody></table>
+  
+  <div class="qf"><p>Fonte: população sintética v1.0.3, derivada da população gerada a partir dos Censos 2021 (INE); esta pergunta não é uma das tabelas do ajuste.</p><p class="acts"><a href="#">Como foi feito</a><a href="#">Copiar o link deste quadro</a></p></div>
+</section>
+      <section class="q full" id="idades" aria-labelledby="idades-t">
+  <div class="qtext"><p class="qn">Quadro 3</p><h3 id="idades-t">Idades, em grupos de cinco anos</h3><p class="who">Todas as pessoas, por grupo de cinco anos de idade, em %.</p><p class="where">Misericórdia (110661), concelho de Lisboa</p>
+  <div class="qf"><p>Fonte: população sintética v1.0.3, ajustada às tabelas dos Censos 2021 (INE).</p><p class="acts"><a href="#">Como foi feito</a><a href="#">Copiar o link deste quadro</a></p></div></div>
+  <div class="qfig"><div class="age-d"><svg class="agesvg" viewBox="0 0 860 230" width="100%" aria-hidden="true"><line x1="34" x2="860" y1="200.0" y2="200.0" stroke="#141414" stroke-width="1"/><text x="28" y="204.0" text-anchor="end" font-family="Sofia Sans" font-size="12" fill="#5a5a5a">0</text><line x1="34" x2="860" y1="113.0" y2="113.0" stroke="#e4e4e0" stroke-width="1"/><text x="28" y="117.0" text-anchor="end" font-family="Sofia Sans" font-size="12" fill="#5a5a5a">5%</text><line x1="34" x2="860" y1="26.0" y2="26.0" stroke="#e4e4e0" stroke-width="1"/><text x="28" y="30.0" text-anchor="end" font-family="Sofia Sans" font-size="12" fill="#5a5a5a">10%</text><rect x="34.0" y="143.5" width="39.7" height="56.5" fill="#141414"/><text x="53.8" y="137.5" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">3,2</text><text x="53.8" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">0</text><rect x="77.7" y="146.8" width="39.7" height="53.2" fill="#141414"/><text x="97.5" y="140.8" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">3,1</text><text x="97.5" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">5</text><rect x="121.4" y="137.8" width="39.7" height="62.2" fill="#141414"/><text x="141.2" y="131.8" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">3,6</text><text x="141.2" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">10</text><rect x="165.1" y="136.5" width="39.7" height="63.5" fill="#141414"/><text x="184.9" y="130.5" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">3,6</text><text x="184.9" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">15</text><rect x="208.7" y="108.2" width="39.7" height="91.8" fill="#141414"/><text x="228.6" y="102.2" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">5,3</text><text x="228.6" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">20</text><rect x="252.4" y="71.2" width="39.7" height="128.8" fill="#141414"/><text x="272.3" y="65.2" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">7,4</text><text x="272.3" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">25</text><rect x="296.1" y="57.9" width="39.7" height="142.1" fill="#141414"/><text x="315.9" y="51.9" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">8,2</text><text x="315.9" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">30</text><rect x="339.8" y="66.7" width="39.7" height="133.3" fill="#141414"/><text x="359.6" y="60.7" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">7,7</text><text x="359.6" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">35</text><rect x="383.5" y="63.4" width="39.7" height="136.6" fill="#141414"/><text x="403.3" y="57.4" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">7,8</text><text x="403.3" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">40</text><rect x="427.2" y="66.7" width="39.7" height="133.3" fill="#141414"/><text x="447.0" y="60.7" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">7,7</text><text x="447.0" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">45</text><rect x="470.8" y="81.5" width="39.7" height="118.5" fill="#141414"/><text x="490.7" y="75.5" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">6,8</text><text x="490.7" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">50</text><rect x="514.5" y="89.8" width="39.7" height="110.2" fill="#141414"/><text x="534.4" y="83.8" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">6,3</text><text x="534.4" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">55</text><rect x="558.2" y="91.9" width="39.7" height="108.1" fill="#141414"/><text x="578.1" y="85.9" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">6,2</text><text x="578.1" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">60</text><rect x="601.9" y="103.9" width="39.7" height="96.1" fill="#141414"/><text x="621.7" y="97.9" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">5,5</text><text x="621.7" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">65</text><rect x="645.6" y="109.6" width="39.7" height="90.4" fill="#141414"/><text x="665.4" y="103.6" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">5,2</text><text x="665.4" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">70</text><rect x="689.3" y="116.7" width="39.7" height="83.3" fill="#141414"/><text x="709.1" y="110.7" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">4,8</text><text x="709.1" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">75</text><rect x="732.9" y="137.9" width="39.7" height="62.1" fill="#141414"/><text x="752.8" y="131.9" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">3,6</text><text x="752.8" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">80</text><rect x="776.6" y="158.2" width="39.7" height="41.8" fill="#141414"/><text x="796.5" y="152.2" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">2,4</text><text x="796.5" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">85</text><rect x="820.3" y="171.9" width="39.7" height="28.1" fill="#141414"/><text x="840.2" y="165.9" text-anchor="middle" font-family="Sofia Sans" font-weight="700" font-size="12.5" fill="#141414">1,6</text><text x="840.2" y="217" text-anchor="middle" font-family="Sofia Sans" font-size="12.5" fill="#5a5a5a">90+</text></svg><div hidden><table class="rows"><caption class="sr">Pessoas por grupo de cinco anos de idade, em %</caption><thead class="sr"><tr><th scope="col">Categoria</th><td></td><th scope="col">Percentagem</th></tr></thead><tbody><tr><th scope="row">0 a 4 anos</th><td class="bar"><i style="width:32.45%"></i></td><td class="v tab">3,2%</td></tr><tr><th scope="row">5 a 9 anos</th><td class="bar"><i style="width:30.58%"></i></td><td class="v tab">3,1%</td></tr><tr><th scope="row">10 a 14 anos</th><td class="bar"><i style="width:35.77%"></i></td><td class="v tab">3,6%</td></tr><tr><th scope="row">15 a 19 anos</th><td class="bar"><i style="width:36.49%"></i></td><td class="v tab">3,6%</td></tr><tr><th scope="row">20 a 24 anos</th><td class="bar"><i style="width:52.77%"></i></td><td class="v tab">5,3%</td></tr><tr><th scope="row">25 a 29 anos</th><td class="bar"><i style="width:74.02%"></i></td><td class="v tab">7,4%</td></tr><tr><th scope="row">30 a 34 anos</th><td class="bar"><i style="width:81.69%"></i></td><td class="v tab">8,2%</td></tr><tr><th scope="row">35 a 39 anos</th><td class="bar"><i style="width:76.61%"></i></td><td class="v tab">7,7%</td></tr><tr><th scope="row">40 a 44 anos</th><td class="bar"><i style="width:78.48%"></i></td><td class="v tab">7,8%</td></tr><tr><th scope="row">45 a 49 anos</th><td class="bar"><i style="width:76.61%"></i></td><td class="v tab">7,7%</td></tr><tr><th scope="row">50 a 54 anos</th><td class="bar"><i style="width:68.11%"></i></td><td class="v tab">6,8%</td></tr><tr><th scope="row">55 a 59 anos</th><td class="bar"><i style="width:63.34%"></i></td><td class="v tab">6,3%</td></tr><tr><th scope="row">60 a 64 anos</th><td class="bar"><i style="width:62.10%"></i></td><td class="v tab">6,2%</td></tr><tr><th scope="row">65 a 69 anos</th><td class="bar"><i style="width:55.26%"></i></td><td class="v tab">5,5%</td></tr><tr><th scope="row">70 a 74 anos</th><td class="bar"><i style="width:51.94%"></i></td><td class="v tab">5,2%</td></tr><tr><th scope="row">75 a 79 anos</th><td class="bar"><i style="width:47.90%"></i></td><td class="v tab">4,8%</td></tr><tr><th scope="row">80 a 84 anos</th><td class="bar"><i style="width:35.66%"></i></td><td class="v tab">3,6%</td></tr><tr><th scope="row">85 a 89 anos</th><td class="bar"><i style="width:24.05%"></i></td><td class="v tab">2,4%</td></tr><tr><th scope="row">90 ou mais</th><td class="bar"><i style="width:16.17%"></i></td><td class="v tab">1,6%</td></tr></tbody></table></div></div><div class="age-m"><p class="note" style="margin:0 0 4px">Barras numa escala de 0 a 10%.</p><table class="rows"><caption class="sr">Pessoas por grupo de cinco anos de idade, em %</caption><thead class="sr"><tr><th scope="col">Categoria</th><td></td><th scope="col">Percentagem</th></tr></thead><tbody><tr><th scope="row">0 a 4 anos</th><td class="bar"><i style="width:32.45%"></i></td><td class="v tab">3,2%</td></tr><tr><th scope="row">5 a 9 anos</th><td class="bar"><i style="width:30.58%"></i></td><td class="v tab">3,1%</td></tr><tr><th scope="row">10 a 14 anos</th><td class="bar"><i style="width:35.77%"></i></td><td class="v tab">3,6%</td></tr><tr><th scope="row">15 a 19 anos</th><td class="bar"><i style="width:36.49%"></i></td><td class="v tab">3,6%</td></tr><tr><th scope="row">20 a 24 anos</th><td class="bar"><i style="width:52.77%"></i></td><td class="v tab">5,3%</td></tr><tr><th scope="row">25 a 29 anos</th><td class="bar"><i style="width:74.02%"></i></td><td class="v tab">7,4%</td></tr><tr><th scope="row">30 a 34 anos</th><td class="bar"><i style="width:81.69%"></i></td><td class="v tab">8,2%</td></tr><tr><th scope="row">35 a 39 anos</th><td class="bar"><i style="width:76.61%"></i></td><td class="v tab">7,7%</td></tr><tr><th scope="row">40 a 44 anos</th><td class="bar"><i style="width:78.48%"></i></td><td class="v tab">7,8%</td></tr><tr><th scope="row">45 a 49 anos</th><td class="bar"><i style="width:76.61%"></i></td><td class="v tab">7,7%</td></tr><tr><th scope="row">50 a 54 anos</th><td class="bar"><i style="width:68.11%"></i></td><td class="v tab">6,8%</td></tr><tr><th scope="row">55 a 59 anos</th><td class="bar"><i style="width:63.34%"></i></td><td class="v tab">6,3%</td></tr><tr><th scope="row">60 a 64 anos</th><td class="bar"><i style="width:62.10%"></i></td><td class="v tab">6,2%</td></tr><tr><th scope="row">65 a 69 anos</th><td class="bar"><i style="width:55.26%"></i></td><td class="v tab">5,5%</td></tr><tr><th scope="row">70 a 74 anos</th><td class="bar"><i style="width:51.94%"></i></td><td class="v tab">5,2%</td></tr><tr><th scope="row">75 a 79 anos</th><td class="bar"><i style="width:47.90%"></i></td><td class="v tab">4,8%</td></tr><tr><th scope="row">80 a 84 anos</th><td class="bar"><i style="width:35.66%"></i></td><td class="v tab">3,6%</td></tr><tr><th scope="row">85 a 89 anos</th><td class="bar"><i style="width:24.05%"></i></td><td class="v tab">2,4%</td></tr><tr><th scope="row">90 ou mais</th><td class="bar"><i style="width:16.17%"></i></td><td class="v tab">1,6%</td></tr></tbody></table></div></div>
+</section>
+      <section class="q " id="trabalho" aria-labelledby="trabalho-t">
+  <p class="qn">Quadro 4</p>
+  <h3 id="trabalho-t">Condição perante o trabalho</h3>
+  <p class="who">Todas as pessoas. Crianças, estudantes e reformados contam como inativos.</p>
+  <p class="where">Misericórdia (110661), concelho de Lisboa</p>
+  <div class="dotwrap"><div class="dots" aria-hidden="true"><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e1"></i><i class="e2"></i><i class="e2"></i><i class="e2"></i><i class="e2"></i><i class="e2"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i><i class="e3"></i></div><table class="rows dk"><caption class="sr">Condição perante o trabalho, em %</caption><tbody><tr><th scope="row"><i class="sw e1" aria-hidden="true"></i>Empregadas</th><td class="v tab">45,7%</td></tr><tr><th scope="row"><i class="sw e2" aria-hidden="true"></i>Desempregadas</th><td class="v tab">5,3%</td></tr><tr><th scope="row"><i class="sw e3" aria-hidden="true"></i>Inativas</th><td class="v tab">48,9%</td></tr></tbody></table></div><p class="note">Cada ponto é uma pessoa em cada 100, arredondada.</p>
+  
+  <div class="qf"><p>Fonte: população sintética v1.0.3, ajustada às tabelas dos Censos 2021 (INE); quem vive em alojamentos coletivos entra com valores atribuídos depois do ajuste.</p><p class="acts"><a href="#">Como foi feito</a><a href="#">Copiar o link deste quadro</a></p></div>
+</section>
+      <section class="q " id="escolaridade" aria-labelledby="escolaridade-t">
+  <p class="qn">Quadro 5</p>
+  <h3 id="escolaridade-t">Escolaridade, pelo nível mais alto completado</h3>
+  <p class="who">Todas as pessoas. As crianças contam em «Nenhum» até completarem o 1.º ciclo.</p>
+  <p class="where">Misericórdia (110661), concelho de Lisboa</p>
+  <table class="rows"><caption class="sr">Escolaridade, em %</caption><thead class="sr"><tr><th scope="col">Categoria</th><td></td><th scope="col">Percentagem</th></tr></thead><tbody><tr><th scope="row">Nenhum</th><td class="bar"><i style="width:11.40%"></i></td><td class="v tab">11,4%</td></tr><tr><th scope="row">Ensino básico</th><td class="bar"><i style="width:33.40%"></i></td><td class="v tab">33,4%</td></tr><tr><th scope="row">Ensino secundário</th><td class="bar"><i style="width:20.19%"></i></td><td class="v tab">20,2%</td></tr><tr><th scope="row">Pós-secundário</th><td class="bar"><i style="width:1.05%"></i></td><td class="v tab">1,0%</td></tr><tr><th scope="row">Ensino superior</th><td class="bar"><i style="width:33.95%"></i></td><td class="v tab">34,0%</td></tr></tbody></table>
+  
+  <div class="qf"><p>Fonte: população sintética v1.0.3, ajustada às tabelas dos Censos 2021 (INE); quem vive em alojamentos coletivos entra com valores atribuídos depois do ajuste.</p><p class="acts"><a href="#">Como foi feito</a><a href="#">Copiar o link deste quadro</a></p></div>
+</section>
+    </div>
+  </section>
+
+  <section class="grp" aria-labelledby="g2"><h2 id="g2">Casas e famílias</h2>
+    <div class="qs three">
+      <section class="q " id="varias-geracoes" aria-labelledby="varias-geracoes-t">
+  <p class="qn">Quadro 6</p>
+  <h3 id="varias-geracoes-t">Agregados com uma criança e uma pessoa de 65 ou mais</h3>
+  <p class="who">Agregados privados com pelo menos uma pessoa com menos de 15 anos e outra com 65 ou mais. Não são necessariamente avós e netos.</p>
+  <p class="where">Misericórdia (110661), concelho de Lisboa</p>
+  <table class="rows"><caption class="sr">Agregados com criança e pessoa de 65 ou mais, em %</caption><thead class="sr"><tr><th scope="col">Categoria</th><td></td><th scope="col">Percentagem</th></tr></thead><tbody><tr><th scope="row">Com criança e pessoa de 65+</th><td class="bar"><i style="width:1.23%"></i></td><td class="v tab">1,2%</td></tr><tr><th scope="row">Outros agregados</th><td class="bar"><i style="width:98.77%"></i></td><td class="v tab">98,8%</td></tr></tbody></table>
+  
+  <div class="qf"><p>Fonte: população sintética v1.0.3, derivada da população gerada a partir dos Censos 2021 (INE); esta pergunta não é uma das tabelas do ajuste.</p><p class="acts"><a href="#">Como foi feito</a><a href="#">Copiar o link deste quadro</a></p></div>
+</section>
+      <section class="q " id="pessoas-por-casa" aria-labelledby="pessoas-por-casa-t">
+  <p class="qn">Quadro 7</p>
+  <h3 id="pessoas-por-casa-t">Pessoas por agregado</h3>
+  <p class="who">Agregados privados por número de pessoas. Os lares e outros alojamentos coletivos não entram nesta pergunta.</p>
+  <p class="where">Misericórdia (110661), concelho de Lisboa</p>
+  <table class="rows"><caption class="sr">Agregados por número de pessoas, em %</caption><thead class="sr"><tr><th scope="col">Categoria</th><td></td><th scope="col">Percentagem</th></tr></thead><tbody><tr><th scope="row">1 pessoa</th><td class="bar"><i style="width:45.87%"></i></td><td class="v tab">45,9%</td></tr><tr><th scope="row">2 pessoas</th><td class="bar"><i style="width:30.79%"></i></td><td class="v tab">30,8%</td></tr><tr><th scope="row">3 pessoas</th><td class="bar"><i style="width:12.33%"></i></td><td class="v tab">12,3%</td></tr><tr><th scope="row">4 pessoas</th><td class="bar"><i style="width:7.05%"></i></td><td class="v tab">7,0%</td></tr><tr><th scope="row">5 ou mais</th><td class="bar"><i style="width:3.97%"></i></td><td class="v tab">4,0%</td></tr></tbody></table>
+  
+  <div class="qf"><p>Fonte: população sintética v1.0.3, ajustada às tabelas dos Censos 2021 (INE).</p><p class="acts"><a href="#">Como foi feito</a><a href="#">Copiar o link deste quadro</a></p></div>
+</section>
+      <section class="q " id="familias" aria-labelledby="familias-t">
+  <p class="qn">Quadro 8</p>
+  <h3 id="familias-t">Núcleos familiares por agregado</h3>
+  <p class="who">Agregados privados pelo número de núcleos familiares: um casal, com ou sem filhos, ou um pai ou uma mãe com filhos.</p>
+  <p class="where">Misericórdia (110661), concelho de Lisboa</p>
+  <table class="rows"><caption class="sr">Agregados por número de núcleos familiares, em %</caption><thead class="sr"><tr><th scope="col">Categoria</th><td></td><th scope="col">Percentagem</th></tr></thead><tbody><tr><th scope="row">Sem núcleo familiar</th><td class="bar"><i style="width:54.19%"></i></td><td class="v tab">54,2%</td></tr><tr><th scope="row">Um núcleo</th><td class="bar"><i style="width:44.70%"></i></td><td class="v tab">44,7%</td></tr><tr><th scope="row">Dois núcleos</th><td class="bar"><i style="width:1.01%"></i></td><td class="v tab">1,0%</td></tr><tr><th scope="row">Três ou mais</th><td class="bar"><i style="width:1px"></i></td><td class="v tab">0,1%</td></tr></tbody></table>
+  <p class="caveat"><b aria-hidden="true">!</b><span>Estes valores podem diferir ligeiramente dos que se obtêm a partir dos microdados para download. Vamos corrigi-los na próxima versão.</span></p>
+  <div class="qf"><p>Fonte: população sintética v1.0.3, ajustada às tabelas dos Censos 2021 (INE).</p><p class="acts"><a href="#">Como foi feito</a><a href="#">Copiar o link deste quadro</a></p></div>
+</section>
+    </div>
+  </section>
+
+  <div class="cite">
+    <section id="citar" aria-labelledby="cit-h"><h2 id="cit-h">Como citar</h2>
+      <blockquote>estimador.pt, População Sintética de Portugal v1.0.3 (2026), CC BY-NC 4.0. Misericórdia (110661): https://estimador.pt/pt/populacao/freguesia/110661/ (consultado a 11 de outubro de 2026)</blockquote>
+      <p class="small">Fonte: INE, Censos 2021 (CC BY 4.0), informação modificada por estimador.pt (CC BY-NC 4.0). Cada quadro tem o seu link, com a versão e o identificador da resposta.</p>
+    </section>
+    <section class="oth" aria-labelledby="oth-h"><h2 id="oth-h">Outras freguesias de Lisboa</h2>
+      <ul><li><a href="#">Ajuda</a></li><li><a href="#">Alcântara</a></li><li><a href="#">Alvalade</a></li><li><a href="#">Areeiro</a></li><li><a href="#">Arroios</a></li><li><a href="#">Avenidas Novas</a></li><li><a href="#">Beato</a></li><li><a href="#">Belém</a></li><li><a href="#">Benfica</a></li><li><a href="#">Campo de Ourique</a></li><li><a href="#">Campolide</a></li><li><a href="#">Carnide</a></li><li><a href="#">Estrela</a></li><li><a href="#">Lumiar</a></li><li><a href="#">Marvila</a></li><li><a href="#">Olivais</a></li><li><a href="#">Parque das Nações</a></li><li><a href="#">Penha de França</a></li><li><a href="#">Santa Clara</a></li><li><a href="#">Santa Maria Maior</a></li><li><a href="#">Santo António</a></li><li><a href="#">São Domingos de Benfica</a></li><li><a href="#">São Vicente</a></li></ul>
+    </section>
+  </div>
+</div>
+</main>
+<footer class="foot"><div class="wrap"><div class="foot-in">
+  <div><span class="wmw "><span class="wm">estimador.pt</span><span class="cota-wm" aria-hidden="true"></span></span><p>Feito por Bernardo Caldas. Modelos sobre Portugal: 50 000 épocas simuladas a cada jornada, 9 000 legislativas simuladas, uma população gerada para as 3 092 freguesias.</p></div>
+  <ul><li><a href="#">População</a></li><li><a href="#">Liga Portugal</a></li><li><a href="#">Eleições, arquivo</a></li><li><a href="#">Economia&nbsp;<span class="cinza">(em preparação)</span></a></li><li><a href="#">Sobre</a></li><li><a href="#">Metodologia</a></li><li><a href="#">Reutilizar e citar</a></li><li><a href="#">Privacidade</a></li><li><a href="#">Feed RSS</a></li></ul>
+  <p class="lic">Dados e modelos do estimador.pt sob CC BY-NC 4.0. Dados do INE (Censos 2021) e geometria da DGT (CAOP 2021) sob CC BY 4.0. Resultados, odds e sondagens de terceiros ficam fora da licença.</p>
+</div></div></footer></body></html>

@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liga Portugal 2026-27: previsão da jornada 8 | estimador.pt</title>
+<meta name="description" content="O Porto ganha a Liga em metade das 50 000 épocas simuladas. Pontos finais com faixa de 90%, despromoção e os próximos 14 jogos, um a um.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2016%2016%22%20aria-hidden%3D%22true%22%3E%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%23FFD400%22%2F%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%221.6%22%20height%3D%2210%22%20fill%3D%22%23111%22%2F%3E%3Crect%20x%3D%2211.4%22%20y%3D%223%22%20width%3D%221.6%22%20height%3D%2210%22%20fill%3D%22%23111%22%2F%3E%3Crect%20x%3D%227.2%22%20y%3D%221.5%22%20width%3D%222.4%22%20height%3D%2213%22%20fill%3D%22%23111%22%2F%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body,h1,h2,h3,h4,p,ol,ul,li,figure,table,dl,dd{margin:0;padding:0}
+:root{
+  --paper:#FFFFFF; --ink:#111111; --graphite:#5E5E5E; --mark:#8A8A8A; --rule:#D9D9D9; --grid:#ECECEC; --field:#F4F4F4;
+  --signal:#FFD400; --signal-low:#FFF1B3;
+  --sans:"Archivo",system-ui,sans-serif; --serif:"Source Serif 4",Georgia,serif;
+}
+html{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%;text-rendering:optimizeLegibility}
+body{background:var(--paper)}
+a{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:var(--mark)}
+a:hover{text-decoration-color:var(--ink);text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.num,td,th,.disp{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum","lnum"}
+.disp{font-stretch:75%;font-weight:800;letter-spacing:-.005em}
+.ser{font-size:14px;line-height:16px;font-weight:800;font-stretch:75%;letter-spacing:.01em;font-variant-numeric:tabular-nums lining-nums}
+.clk{font-variant-numeric:tabular-nums lining-nums}
+.g{color:var(--graphite)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:1440px;margin:0 auto;padding:0 40px}
+@media (max-width:640px){.wrap{padding:0 16px}}
+.only-m{display:none}
+@media (max-width:760px){.only-m{display:revert}.only-d{display:none!important}}
+.nw{white-space:nowrap}
+.vx,.vl,.vt{display:none}
+@media (min-width:1321px){.vx{display:block}}
+@media (min-width:1101px) and (max-width:1320px){.vl{display:block}}
+@media (min-width:761px) and (max-width:1100px){.vt{display:block}}
+@media (pointer:coarse),(max-width:640px){.club a,.tap{display:inline-flex;align-items:center;min-height:44px}.brand{min-height:44px}}
+
+/* ---------- lockup ---------- */
+.lockup{display:inline-flex;flex-direction:column;gap:calc(var(--fs) * .14);line-height:1}
+.lockup .wm{font-size:var(--fs);font-weight:800;font-stretch:75%;letter-spacing:-.01em;line-height:.86}
+.lockup svg{display:block}
+
+/* ---------- header ---------- */
+.hdr{border-bottom:1px solid var(--ink);background:var(--paper)}
+.hdr-in{display:flex;align-items:stretch;height:60px;gap:28px}
+.brand{display:flex;align-items:center;text-decoration:none}
+.brand:hover{text-decoration:none}
+.nav{display:flex;gap:2px;margin-left:auto;align-items:stretch}
+.nav a{display:flex;align-items:center;padding:0 12px;text-decoration:none;font-size:15px;font-weight:500;position:relative;white-space:nowrap}
+.nav a:hover{background:var(--field)}
+.nav a[aria-current]{font-weight:700}
+.nav a[aria-current]::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;border-bottom:3px solid var(--ink)}
+.lang{display:flex;align-items:center;font-size:13px;border-left:1px solid var(--rule);padding-left:14px;gap:2px}
+.lang a{display:flex;align-items:center;justify-content:center;min-width:34px;height:36px;text-decoration:none;color:var(--graphite);font-weight:500}
+.lang a[aria-current]{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--ink);text-decoration-thickness:2px}
+.menu{display:none;margin-left:auto;align-items:center;gap:10px;font:600 15px var(--sans);background:none;border:0;border-left:1px solid var(--rule);padding:0 0 0 16px;color:var(--ink);min-height:44px}
+.menu i{display:block;width:18px;height:2px;background:var(--ink);box-shadow:0 -6px 0 var(--ink),0 6px 0 var(--ink)}
+@media (max-width:1000px){.nav,.lang{display:none}.menu{display:flex}}
+@media (forced-colors:active){.nav a[aria-current]::after{border-color:Highlight}}
+
+/* ---------- instrument heads ---------- */
+.ih{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:0 0 9px;border-bottom:1px solid var(--ink)}
+.ih h2{font-size:27px;line-height:28px;font-weight:800;font-stretch:75%;letter-spacing:-.005em}
+.ih h2 a{text-decoration:none;display:inline-flex;align-items:center;min-height:32px}
+.ih h2 a:hover{text-decoration:underline;text-decoration-thickness:2px}
+.ih .serial{font-size:15px;font-weight:800;font-stretch:75%;letter-spacing:.01em}
+.ih .clock{margin-left:auto;font-size:13px;color:var(--graphite)}
+.ih .clock b{color:var(--ink);font-weight:600}
+@media (max-width:760px){.ih .clock{margin-left:0;flex-basis:100%}}
+@media (pointer:coarse),(max-width:640px){.ih h2 a{min-height:44px}}
+.sub{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:22px 0 6px}
+.sub h3{font-size:19px;line-height:22px;font-weight:750;font-stretch:75%;letter-spacing:0}
+.sub .ser{color:var(--graphite)}
+.finding{font-size:36px;line-height:36px;font-weight:800;font-stretch:75%;letter-spacing:-.008em;margin:16px 0 8px;text-wrap:balance}
+.lede{font-size:15.5px;line-height:22px;max-width:64ch}
+.chart{display:block}
+.src{font-size:12.5px;line-height:17px;color:var(--graphite);margin-top:8px;max-width:84ch}
+.src a{color:var(--graphite)}
+.more{display:inline-flex;align-items:center;min-height:44px;font-weight:600;font-size:15px}
+
+/* ---------- typographic tabs (CSS-only radios: the table twin as a tab) ---------- */
+.tw{position:relative}
+.tw > input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.tw .tabhead{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:22px 0 6px}
+.tw .tabhead h3{font-size:19px;line-height:22px;font-weight:750;font-stretch:75%;margin-right:auto;padding-bottom:9px}
+.tw .tabs{display:flex;gap:16px}
+.tw .tabs label{display:inline-flex;align-items:center;min-height:36px;font-size:13.5px;font-weight:500;color:var(--graphite);cursor:pointer;border-bottom:2px solid transparent}
+@media (pointer:coarse),(max-width:640px){.tw .tabs label{min-height:44px}}
+.tw > input:nth-of-type(1):checked ~ .tabhead label:nth-child(1),
+.tw > input:nth-of-type(2):checked ~ .tabhead label:nth-child(2){color:var(--ink);font-weight:650;border-bottom-color:var(--ink)}
+.tw > input:nth-of-type(1):focus-visible ~ .tabhead label:nth-child(1),
+.tw > input:nth-of-type(2):focus-visible ~ .tabhead label:nth-child(2){outline:2px solid var(--ink);outline-offset:2px}
+.tw .pane2{display:none}
+.tw > input:nth-of-type(2):checked ~ .pane1{display:none}
+.tw > input:nth-of-type(2):checked ~ .pane2{display:block}
+@media (forced-colors:active){.tw .tabs label{border-bottom-color:Canvas}.tw > input:checked ~ .tabhead label{border-bottom-color:Highlight}}
+
+/* ---------- tables ---------- */
+table{border-collapse:collapse;width:100%}
+th{font-weight:500;text-align:left}
+.rd thead th{font-size:12.5px;line-height:16px;color:var(--graphite);font-weight:500;padding:0 8px 6px 0;vertical-align:bottom;border-bottom:1px solid var(--ink)}
+.rd td,.rd tbody th{padding:0 8px 0 0;height:34px;border-bottom:1px solid var(--grid);vertical-align:middle}
+.rd .r{text-align:right}
+.big{font-size:23px;line-height:24px;font-weight:800;font-stretch:75%;letter-spacing:0}
+.big small{font-size:13px;font-weight:700;margin-left:1px}
+.club{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-weight:700;font-stretch:85%;font-size:15.5px}
+.club a{text-decoration:none}
+.club a:hover{text-decoration:underline}
+.sw{display:inline-block;width:10px;height:10px;flex:none}
+.sw.o{box-shadow:inset 0 0 0 1.5px #111}
+.d{font-size:13px;color:var(--graphite);white-space:nowrap}
+.zero{color:var(--graphite)}
+svg text{font-family:var(--sans);font-variant-numeric:tabular-nums}
+.nums{font-weight:600;color:var(--ink);white-space:nowrap;font-size:13.5px}
+.nums span{color:var(--graphite);font-weight:400}
+
+/* ---------- the reading: interval band on a ruler (CSS, sized by its cell) ---------- */
+.iv{position:relative;display:block;height:20px;min-width:80px}
+.iv::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid var(--grid)}
+.iv b{position:absolute;top:6px;height:8px;left:var(--lo);width:calc(var(--hi) - var(--lo));background:var(--signal);border-inline:1px solid var(--ink);min-width:3px}
+.iv b::before,.iv b::after{content:"";position:absolute;top:-3px;height:14px;border-left:1px solid var(--ink)}
+.iv b::before{left:-1px}.iv b::after{right:-1px}
+.iv i{position:absolute;top:2px;height:16px;left:calc(var(--md) - 1px);width:2px;background:var(--ink)}
+.iv.low b{background:var(--signal-low)}
+.iv s{position:absolute;top:6px;left:calc(var(--now) - 4px);width:8px;height:8px;background:var(--ink)}
+.iv u{position:absolute;top:5px;left:calc(var(--res) - 5px);width:10px;height:10px;background:var(--ink);text-decoration:none}
+@media (forced-colors:active){.iv s,.iv u{background:CanvasText}}
+.iv .ref{position:absolute;top:0;bottom:0;left:var(--ref);border-left:1px dashed var(--ink)}
+.iv .res{position:absolute;top:4px;left:calc(var(--res) - 6px);width:12px;height:12px;background:var(--paper);border:2px solid var(--ink);transform:rotate(45deg) scale(.8)}
+@media (forced-colors:active){.iv b{background:Canvas;border-inline-color:CanvasText}.iv i{background:CanvasText}}
+/* ruler printed in the column head */
+.ruler{position:relative;display:block;height:26px;min-width:80px;margin-top:2px}
+.ruler::after{content:"";position:absolute;left:0;right:0;bottom:0;height:8px;border-bottom:1px solid var(--ink);
+  background:linear-gradient(90deg,var(--mark) 1px,transparent 1px) 0 100%/var(--minor) 4px repeat-x,linear-gradient(90deg,var(--ink) 1px,transparent 1px) 0 100%/var(--major) 8px repeat-x}
+.ruler span{position:absolute;top:0;transform:translateX(-50%);font-size:11.5px;line-height:14px;color:var(--graphite);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ruler span.s{transform:none}.ruler span.e{transform:translateX(-100%)}
+.ruler .refm{position:absolute;top:auto;bottom:0;height:12px;border-left:2px solid var(--ink);transform:translateX(-1px)}
+
+/* the counter-sign: a reading with no margin (single model run) */
+.nomargin{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--graphite);white-space:nowrap}
+.nomargin svg{flex:none}
+.gl{display:inline-block;vertical-align:-3px;flex:none}
+.rr{display:inline-flex;flex-wrap:wrap;column-gap:18px;row-gap:4px;align-items:center}
+.rr > span{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+
+.ft{border-top:2px solid var(--ink);margin-top:72px;padding-top:26px;padding-bottom:40px}
+.ft-in{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;row-gap:28px}
+.ft-id{grid-column:span 5;display:flex;flex-direction:column;gap:14px}
+.ft-id p{font-size:14.5px;line-height:21px;max-width:48ch}
+.ft-id p.nonio{font-size:13px;line-height:19px;color:var(--graphite)}
+.ft-id p.ftrule{font-size:13px;line-height:19px;max-width:none}
+.ft-id p.ftrule .rr{flex-direction:column;align-items:flex-start}
+.ft-col{grid-column:span 2}
+.ft-lic{grid-column:span 3}
+.ft h4{font-size:13px;font-weight:700;margin-bottom:6px}
+.ft ul{list-style:none}
+.ft li a{display:inline-flex;min-height:30px;align-items:center;font-size:14.5px}
+.ft dl{display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:5px;font-size:13px;line-height:18px}
+.ft dt{font-weight:600}
+.ft dd{color:var(--graphite)}
+@media (max-width:1000px){.ft-id,.ft-lic{grid-column:span 12}.ft-col{grid-column:span 6}}
+@media (pointer:coarse),(max-width:640px){.ft li a{min-height:44px}}
+.tabsrow{border-bottom:1px solid var(--rule)}
+.tabsrow nav{display:flex;flex-wrap:wrap;align-items:stretch}
+.tabsrow a,.tabsrow summary{display:inline-flex;align-items:center;min-height:44px;padding:0 22px 0 0;font-size:14.5px;font-weight:500;text-decoration:none;position:relative;cursor:pointer}
+.tabsrow a[aria-current]{font-weight:700}
+.tabsrow a[aria-current]::after{content:"";position:absolute;left:0;right:22px;bottom:-1px;border-bottom:3px solid var(--ink)}
+.tabsrow details{display:none;position:relative}
+.tabsrow summary{list-style:none}
+.tabsrow summary::-webkit-details-marker{display:none}
+.tabsrow summary::after{content:"";width:7px;height:7px;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);transform:rotate(45deg);margin:-4px 0 0 9px}
+.tabsrow details ul{position:absolute;right:0;top:44px;background:var(--paper);border:1px solid var(--ink);list-style:none;padding:4px 14px;z-index:5;min-width:200px}
+.tabsrow details li a{padding:0;min-height:44px}
+@media (max-width:640px){.tabsrow a,.tabsrow summary{padding-right:16px}.tabsrow a[aria-current]::after{right:16px}.tabsrow .xm{display:none}.tabsrow details{display:block}}
+@media (forced-colors:active){.tabsrow a[aria-current]::after{border-color:Highlight}}
+.top{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);column-gap:56px;padding-top:30px;padding-bottom:28px;align-items:start}
+.top h1{font-size:60px;line-height:58px;font-weight:800;font-stretch:75%;letter-spacing:-.01em;text-wrap:balance;max-width:30ch}
+.stand{margin-top:16px;font-size:17px;line-height:25px;max-width:64ch}
+.stand b{font-weight:700}
+.reg{width:100%}
+.reg caption{text-align:left;font-size:13px;font-weight:700;padding-bottom:5px;border-bottom:1px solid var(--ink)}
+.reg th{font-size:13px;color:var(--graphite);padding:6px 12px 6px 0;white-space:nowrap;vertical-align:top;border-bottom:1px solid var(--grid);font-weight:500}
+.reg td{font-size:13.5px;line-height:18px;padding:6px 0;border-bottom:1px solid var(--grid)}
+.regline{display:none;margin-top:12px;font-size:13.5px;line-height:19px;color:var(--graphite)}
+.row1{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:2px solid var(--ink)}
+.row1 > *{min-width:0}
+.row1 > .left{padding-right:36px}
+.row1 > .pred{padding-left:36px;border-left:1px solid var(--rule)}
+.sub.first{margin-top:16px}
+.ink{color:var(--ink);font-weight:600}
+.note{margin-top:26px;padding-top:12px;border-top:1px solid var(--ink)}
+.note h3{font-size:19px;line-height:22px;font-weight:750;font-stretch:75%;margin-bottom:8px}
+.note p{font-family:var(--serif);font-size:18px;line-height:27px;max-width:58ch;font-optical-sizing:auto}
+.note .sig{font-family:var(--sans);font-size:13.5px;font-weight:600;margin-top:8px}
+.twin{max-width:520px;margin-top:6px}
+.key{font-size:12.5px;color:var(--graphite);margin-top:8px;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.kgap{display:inline-block;width:12px}
+.full td,.full tbody th{height:29px}
+.full thead th{white-space:nowrap}
+.full thead th.bandh{white-space:normal}
+.full .rk{color:var(--graphite);width:24px;padding-right:10px}
+.full .pc{width:52px;font-size:14px;font-weight:600}
+.full .pc.zero{color:var(--graphite);font-weight:400}
+.full tr.cut td,.full tr.cut th{border-bottom:1px solid var(--ink)}
+.full .bandc,.full .bandh{width:170px;min-width:150px}
+.full .bandh{padding-right:12px}
+.full .hist{width:1%;padding-left:8px;padding-right:0}
+.hist-h{padding-left:8px!important}
+.hist-h > span:first-child{display:block}
+.hx{display:flex;justify-content:space-between;width:75px;font-size:11.5px;margin-top:4px}
+.blk{margin-top:52px}
+.coupon{max-width:1180px}
+.coupon .grp th{padding:20px 0 6px;border-bottom:1px solid var(--ink);height:auto;text-align:left}
+.coupon tbody:first-of-type .grp th{padding-top:6px}
+.coupon .gt{font-size:17px;font-weight:750;font-stretch:75%;margin-right:6px}
+.coupon .grp .g{font-size:13px;font-weight:400}
+.coupon td{height:auto;padding:0 10px 0 0}
+.coupon td.m{width:24%}
+.coupon td.m a,.board8 td.m{display:flex;flex-direction:column;justify-content:center;min-height:48px;padding:3px 8px 3px 0;text-decoration:none}
+.coupon td.m a:hover .teams{text-decoration:underline}
+.when{color:var(--graphite);font-size:12px;line-height:15px;font-variant-numeric:tabular-nums}
+.teams{font-size:15px;line-height:19px;font-weight:700;font-stretch:85%;white-space:nowrap}
+.ox{width:58px;text-align:center;font-size:14.5px;padding:0!important;font-variant-numeric:tabular-nums}
+.ox.fav{font-weight:800;font-stretch:75%;font-size:18px}
+th.ox{font-size:12.5px;font-weight:500;color:var(--graphite)}
+.coupon th.stkh{padding-left:28px}
+.coupon td.stk{padding-left:28px;width:22%;font-size:14.5px;font-weight:600}
+.coupon td.stk.g{font-size:13.5px;font-weight:400}
+.coupon .sv{width:78px;font-size:14px}
+.coupon .sp{width:96px;font-weight:700;font-size:14px}
+.coupon thead th{padding-bottom:6px}
+.stake-m{display:none}
+.recg{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);column-gap:56px}
+.recg > div{min-width:0}
+.board8 td.m{display:table-cell}
+.board8 td.m .when,.board8 td.m .teams{display:block}
+.board8 td{height:52px;border-bottom:1px solid var(--grid)}
+.rv{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:30px}
+.ring{position:absolute;left:50%;top:50%;width:46px;height:30px;transform:translate(-50%,-50%);pointer-events:none}
+.rec td,.rec tbody th{height:36px}
+.rec tbody th{font-size:14.5px;font-weight:600;white-space:nowrap}
+.rec tbody th .n{font-size:12.5px;font-weight:400}
+.rec .bandc,.rec .bandh{width:44%;min-width:160px}
+.rec .bandh{padding-right:12px}
+.rec .nums b{font-weight:800;font-stretch:75%;font-size:17px}
+.rec .grp2 th{padding:16px 0 6px;font-size:13px;color:var(--graphite);font-weight:600;border-bottom:1px solid var(--ink);height:auto}
+.grids{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:56px}
+.mx{margin-top:4px}
+.mx thead th{font-size:12.5px;font-weight:600;color:var(--ink);text-align:center;padding:0 0 6px;border-bottom:1px solid var(--ink)}
+.mx thead th:first-child{text-align:left;font-size:12.5px;color:var(--graphite)}
+.mx thead th.r{text-align:right;font-size:12.5px;color:var(--graphite)}
+.mx th[scope=row]{padding-right:10px;border-bottom:2px solid var(--paper);height:38px}
+.hc{width:12%;text-align:center;font-size:14px;font-weight:500;border-left:2px solid var(--paper);border-bottom:2px solid var(--paper)}
+.hc.z{color:var(--graphite)!important}
+.ag{width:12%;text-align:center;font-size:13.5px;color:var(--graphite);border-bottom:1px solid var(--grid)}
+.mx .sep{border-left:1px solid var(--rule)}
+.mx .cutl{border-left:2px solid var(--ink)}
+.mx td.rel{font-size:16px;font-weight:800;font-stretch:75%;padding-left:10px;width:1%;white-space:nowrap;border-bottom:1px solid var(--grid)}
+.legend{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--graphite);margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:18px;height:12px;margin-left:6px}
+.plates{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:56px;margin-top:56px;border-top:2px solid var(--ink);padding-top:14px}
+.plates h3{font-size:22px;line-height:24px;font-weight:800;font-stretch:75%;margin-bottom:10px}
+.plates p{font-size:15.5px;line-height:23px;max-width:62ch}
+.plates dl{display:grid;grid-template-columns:auto 1fr;column-gap:16px;row-gap:6px;font-size:14px;line-height:20px}
+.plates dt{color:var(--graphite)}
+.mk{margin:14px 0 4px;max-width:640px}
+.mk th[scope=row]{font-size:14px;white-space:nowrap;padding-right:16px;width:1%}
+.mk .bandc{width:auto;min-width:160px}
+.mk .bandh{padding-right:8px}
+.mk td.nums{width:1%;padding-left:12px}
+.mk thead th{white-space:nowrap}
+@media (max-width:1240px){.full .hist,.hist-h{display:none}}
+@media (max-width:1100px){
+  .row1{grid-template-columns:minmax(0,1fr)}
+  .row1 > .left{padding-right:0}
+  .row1 > .pred{padding-left:0;border-left:0;margin-top:36px}
+  .row1 .full{max-width:900px}
+  .grids,.recg{grid-template-columns:minmax(0,1fr);row-gap:28px}
+  .full .hist,.hist-h{display:table-cell}
+}
+@media (max-width:900px){.top{grid-template-columns:minmax(0,1fr);row-gap:20px}.plates{grid-template-columns:minmax(0,1fr);row-gap:32px}}
+@media (max-width:760px){
+  .top{padding-top:22px;padding-bottom:20px}
+  .top h1{font-size:42px;line-height:41px;max-width:none}
+  .tw .tabhead{margin-top:16px;row-gap:0}
+  .tw .tabhead h3{padding-bottom:0;flex-basis:100%}
+  .stand{font-size:16px;line-height:23px}
+  .reg{display:none}
+  .regline{display:block}
+  .hide-m{display:none!important}
+  .full td,.full tbody th{height:auto;padding-top:6px;padding-bottom:6px}
+  .full .bandc,.full .bandh{width:auto;min-width:0}
+  .bn-m{display:block;font-size:12.5px;line-height:15px;margin-top:2px}
+  .full .pc{width:44px;font-size:13.5px}
+  .full .rk{width:18px;padding-right:6px}
+  .full .club{font-size:15px}
+  .coupon.only-d{display:none}
+  .coupon tr{display:grid;grid-template-columns:minmax(0,1fr) 54px 54px 54px}
+  .coupon tr.grp{display:block}
+  .coupon .grp th{display:block}
+  .coupon td{border-bottom:0;padding:0}
+  .coupon td.m{width:auto}
+  .coupon td.ox{display:flex;align-items:center;justify-content:center;min-height:48px}
+  .ox{width:54px}
+  .coupon td.stake-m{display:block;grid-column:1 / -1;font-size:13.5px;line-height:19px;color:var(--graphite);padding:0 0 10px;border-bottom:1px solid var(--grid)}
+  .stake-m b{color:var(--ink);font-weight:600}
+  .coupon thead tr{grid-template-columns:minmax(0,1fr) 54px 54px 54px}
+  .board8 tr{border-bottom:1px solid var(--grid)}
+  .board8 td{border-bottom:0;height:auto}
+  .rec .bandc,.rec .bandh{width:auto;min-width:0}
+  .rec tbody th{white-space:normal;width:40%;font-size:14px;line-height:17px;padding-top:6px;padding-bottom:6px}
+  .rec tbody th .n{display:block}
+  .rec td{height:auto;padding-top:6px;padding-bottom:6px}
+  .rec .bn-m b{font-weight:800}
+  .mx .hc,.mx .ag{font-size:12.5px}
+  .mx th[scope=row] .club{font-size:14px}
+  .mx th[scope=row] .sw{display:none}
+  .mk .bandc{min-width:0;width:auto}
+  .mk th[scope=row]{white-space:normal;width:34%;font-size:13.5px;line-height:17px}
+}
+
+@media (max-width:380px){
+  .full .sw{display:none}
+  .full .pc{width:38px;font-size:13px}
+  .full .iv,.full .ruler{min-width:56px}
+  .full td,.full th{padding-right:6px}
+}
+</style></head>
+<body>
+<header class="hdr"><div class="wrap hdr-in">
+  <a class="brand" href="#" aria-label="estimador.pt, página inicial"><span class="lockup" style="--fs:27px"><span class="wm">estimador.pt</span><svg width="131" height="10" viewBox="0 0 131 10" aria-hidden="true"><rect x="0" y="0" width="131" height="1.56" fill="#111"/><rect x="0.00" y="0" width="1.14" height="6.23" fill="#111"/><rect x="5.19" y="0" width="1.14" height="3.63" fill="#111"/><rect x="10.38" y="0" width="1.14" height="3.63" fill="#111"/><rect x="15.57" y="0" width="1.14" height="3.63" fill="#111"/><rect x="20.76" y="0" width="1.14" height="3.63" fill="#111"/><rect x="25.95" y="0" width="1.14" height="6.23" fill="#111"/><rect x="31.14" y="0" width="1.14" height="3.63" fill="#111"/><rect x="36.33" y="0" width="1.14" height="3.63" fill="#111"/><rect x="41.52" y="0" width="1.14" height="3.63" fill="#111"/><rect x="46.71" y="0" width="1.14" height="3.63" fill="#111"/><rect x="51.90" y="0" width="1.14" height="6.23" fill="#111"/><rect x="57.09" y="0" width="1.14" height="3.63" fill="#111"/><rect x="62.28" y="0" width="1.14" height="3.63" fill="#111"/><rect x="67.47" y="0" width="1.14" height="3.63" fill="#111"/><rect x="72.66" y="0" width="1.14" height="3.63" fill="#111"/><rect x="77.85" y="0" width="1.14" height="6.23" fill="#111"/><rect x="83.04" y="0" width="1.14" height="3.63" fill="#111"/><rect x="88.23" y="0" width="1.14" height="3.63" fill="#111"/><rect x="93.42" y="0" width="1.14" height="3.63" fill="#111"/><rect x="98.61" y="0" width="1.14" height="3.63" fill="#111"/><rect x="103.80" y="0" width="1.14" height="6.23" fill="#111"/><rect x="108.99" y="0" width="1.14" height="3.63" fill="#111"/><rect x="114.18" y="0" width="1.14" height="3.63" fill="#111"/><rect x="119.37" y="0" width="1.14" height="3.63" fill="#111"/><rect x="124.56" y="0" width="1.14" height="3.63" fill="#111"/><rect x="129.75" y="0" width="1.14" height="6.23" fill="#111"/><rect x="61.57" y="1.56" width="31.44" height="5.71" fill="#FFD400"/><rect x="61.57" y="0" width="1.56" height="9.35" fill="#111"/><rect x="91.45" y="0" width="1.56" height="9.35" fill="#111"/><rect x="77.25" y="0" width="2.70" height="10" fill="#111"/></svg></span></a>
+  <nav class="nav" aria-label="Secções"><a href="#">Início</a><a href="#">População</a><a href="#" aria-current="page">Liga Portugal</a><a href="#">Eleições</a><a href="#">Sobre</a></nav>
+  <div class="lang" aria-label="Língua"><a href="#" aria-current="true" lang="pt" aria-label="PT, Português">PT</a><a href="#" lang="en" aria-label="EN, English">EN</a></div>
+  <button class="menu" type="button" aria-expanded="false"><i></i>Menu</button>
+</div></header>
+<div class="tabsrow"><div class="wrap"><nav aria-label="Liga Portugal">
+  <a href="#" aria-current="page">Previsão</a><a href="#">Jogos</a><a href="#">Clubes</a><a href="#" class="xm">Jogadores</a><a href="#">Simulador</a><a href="#" class="xm">Modelo vs mercado</a><a href="#" class="xm">Dados</a><a href="#" class="xm">Jogo semanal</a>
+  <details><summary>Mais</summary><ul><li><a href="#">Jogadores</a></li><li><a href="#">Modelo vs mercado</a></li><li><a href="#">Dados</a></li><li><a href="#">Jogo semanal</a></li></ul></details>
+</nav></div></div>
+<main id="main-content" tabindex="-1">
+  <div class="wrap top">
+    <div>
+      <h1>O Porto ganha a Liga em metade das épocas simuladas</h1>
+      <p class="stand">Em <b>25 335</b> de 50 000. O Sporting é campeão em <b>14 819</b> (+3,7 pp, depois de ganhar 1–3 em Braga), o Benfica em <b>9 789</b> (−2,8 pp, com um jogo a menos) e o Sp. Braga em 0,1%.</p>
+      <p class="regline">Previsão de 11 de outubro de 2026 às 00:11, feita com 5 dos 9 jogos da jornada 8 jogados. A seguinte sai depois de Famalicão – Alverca, segunda, 12 de outubro.</p>
+    </div>
+    <table class="reg">
+      <caption>Ficha desta leitura</caption>
+      <tbody>
+        <tr><th>Previsão</th><td>11 out. 2026, 00:11, hora de Lisboa</td></tr>
+        <tr><th>Jornada 8</th><td>5 de 9 jogos jogados à hora da previsão</td></tr>
+        <tr><th>Seguinte</th><td>depois de Famalicão – Alverca, seg. 12 out.</td></tr>
+        <tr><th>Simulações</th><td>50 000 épocas</td></tr>
+        <tr><th>Faixas de 90%</th><td>89,3% num teste retrospetivo de 162 épocas de clube</td></tr>
+        <tr><th>Modelo</th><td>Poisson bivariado com remates à baliza. <a href="#">Método</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="wrap">
+    <div class="row1">
+      <section class="left" aria-labelledby="race-h">
+<div class="tw">
+  <input type="radio" name="race" id="race-g" checked aria-label="Gráfico"><input type="radio" name="race" id="race-t" aria-label="Tabela">
+  <div class="tabhead"><h3 id="race-h">Probabilidade de título, previsão a previsão</h3><div class="tabs"><label for="race-g">Gráfico</label><label for="race-t">Tabela</label></div></div>
+  <div class="pane1">
+    <div class="vx"><svg class="chart" viewBox="0 0 580 340" width="580" height="340" style="max-width:100%;height:auto" role="img" aria-label="Probabilidade de ser campeão em cada previsão, da J0 à J8. A tabela tem os valores."><line x1="34" x2="448" y1="314" y2="314" stroke="#111"/><line x1="28" x2="34" y1="314" y2="314" stroke="#111"/><text x="25" y="318" font-size="11" text-anchor="end" fill="#5E5E5E">0</text><line x1="31" x2="34" y1="295.73333333333335" y2="295.73333333333335" stroke="#8A8A8A"/><line x1="31" x2="34" y1="277.4666666666667" y2="277.4666666666667" stroke="#8A8A8A"/><line x1="31" x2="34" y1="259.2" y2="259.2" stroke="#8A8A8A"/><line x1="31" x2="34" y1="240.93333333333334" y2="240.93333333333334" stroke="#8A8A8A"/><line x1="34" x2="448" y1="222.66666666666669" y2="222.66666666666669" stroke="#ECECEC"/><line x1="28" x2="34" y1="222.66666666666669" y2="222.66666666666669" stroke="#111"/><text x="25" y="226.66666666666669" font-size="11" text-anchor="end" fill="#5E5E5E">25</text><line x1="31" x2="34" y1="204.4" y2="204.4" stroke="#8A8A8A"/><line x1="31" x2="34" y1="186.13333333333333" y2="186.13333333333333" stroke="#8A8A8A"/><line x1="31" x2="34" y1="167.86666666666667" y2="167.86666666666667" stroke="#8A8A8A"/><line x1="31" x2="34" y1="149.6" y2="149.6" stroke="#8A8A8A"/><line x1="34" x2="448" y1="131.33333333333334" y2="131.33333333333334" stroke="#ECECEC"/><line x1="28" x2="34" y1="131.33333333333334" y2="131.33333333333334" stroke="#111"/><text x="25" y="135.33333333333334" font-size="11" text-anchor="end" fill="#5E5E5E">50</text><line x1="31" x2="34" y1="113.06666666666666" y2="113.06666666666666" stroke="#8A8A8A"/><line x1="31" x2="34" y1="94.80000000000001" y2="94.80000000000001" stroke="#8A8A8A"/><line x1="31" x2="34" y1="76.53333333333333" y2="76.53333333333333" stroke="#8A8A8A"/><line x1="31" x2="34" y1="58.26666666666668" y2="58.26666666666668" stroke="#8A8A8A"/><line x1="34" x2="448" y1="40" y2="40" stroke="#ECECEC"/><line x1="28" x2="34" y1="40" y2="40" stroke="#111"/><text x="25" y="44" font-size="11" text-anchor="end" fill="#5E5E5E">75%</text><line x1="34" x2="34" y1="40" y2="314" stroke="#111"/><line x1="34" x2="34" y1="314" y2="319" stroke="#111"/><text x="34" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J0</text><line x1="85.75" x2="85.75" y1="314" y2="319" stroke="#111"/><text x="85.75" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J1</text><line x1="137.5" x2="137.5" y1="314" y2="319" stroke="#111"/><text x="137.5" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J2</text><line x1="189.25" x2="189.25" y1="314" y2="319" stroke="#111"/><text x="189.25" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J3</text><line x1="241" x2="241" y1="314" y2="319" stroke="#111"/><text x="241" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J4</text><line x1="292.75" x2="292.75" y1="314" y2="319" stroke="#111"/><text x="292.75" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J5</text><line x1="344.5" x2="344.5" y1="314" y2="319" stroke="#111"/><text x="344.5" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J6</text><line x1="396.25" x2="396.25" y1="314" y2="319" stroke="#111"/><text x="396.25" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J7</text><line x1="448" x2="448" y1="314" y2="319" stroke="#111"/><text x="448" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J8</text><line x1="396.25" x2="396.25" y1="34" y2="314" stroke="#111" stroke-dasharray="2 3"/><text x="400.25" y="14" font-size="12" text-anchor="end" fill="#111" style="font-family:Archivo;font-weight:600">J7: Porto 3–1 Benfica</text><text x="400.25" y="29" font-size="12" text-anchor="end" fill="#111" style="font-family:Archivo">Sporting 2–2 Arouca</text><polyline points="34.0,310.8 85.8,310.8 137.5,310.8 189.3,312.3 241.0,311.8 292.8,312.9 344.5,312.5 396.3,313.1 448.0,313.6" fill="none" stroke="#8A8A8A" stroke-width="1.5" stroke-linejoin="round"/><circle cx="448" cy="313.59813333333335" r="3.2" fill="#8A8A8A"/><polyline points="34.0,225.6 85.8,234.2 137.5,234.9 189.3,235.1 241.0,238.2 292.8,221.4 344.5,205.9 396.3,232.2 448.0,242.5" fill="none" stroke="#E20E1B" stroke-width="2.5" stroke-linejoin="round"/><circle cx="448" cy="242.46773333333334" r="3.2" fill="#E20E1B"/><polyline points="34.0,97.5 85.8,98.2 137.5,96.2 189.3,100.1 241.0,114.8 292.8,121.3 344.5,152.7 396.3,219.4 448.0,205.7" fill="none" stroke="#006B3F" stroke-width="2.5" stroke-linejoin="round"/><circle cx="448" cy="205.71519999999998" r="3.2" fill="#006B3F"/><polyline points="34.0,256.9 85.8,247.5 137.5,248.9 189.3,243.2 241.0,225.8 292.8,235.1 344.5,219.6 396.3,125.9 448.0,128.9" fill="none" stroke="#003893" stroke-width="2.5" stroke-linejoin="round"/><circle cx="448" cy="128.88559999999998" r="3.2" fill="#003893"/><rect x="457" y="123.88559999999998" width="10" height="10" fill="#003893"/><text x="472" y="133.38559999999998" font-size="13" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Porto <tspan style="font-weight:500;font-variant-numeric:tabular-nums">50,7%</tspan></text><rect x="457" y="200.71519999999998" width="10" height="10" fill="#006B3F"/><text x="472" y="210.21519999999998" font-size="13" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Sporting <tspan style="font-weight:500;font-variant-numeric:tabular-nums">29,6%</tspan></text><rect x="457" y="237.46773333333334" width="10" height="10" fill="#E20E1B"/><text x="472" y="246.96773333333334" font-size="13" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Benfica <tspan style="font-weight:500;font-variant-numeric:tabular-nums">19,6%</tspan></text><rect x="457" y="308.59813333333335" width="10" height="10" fill="#8A8A8A"/><text x="472" y="318.09813333333335" font-size="13" fill="#111" style="font-family:Archivo;font-weight:500;font-stretch:85%">Sp. Braga <tspan style="font-weight:500;font-variant-numeric:tabular-nums">0,1%</tspan></text></svg></div><div class="vl"><svg class="chart" viewBox="0 0 470 300" width="470" height="300" style="max-width:100%;height:auto" role="img" aria-label="Probabilidade de ser campeão em cada previsão, da J0 à J8. A tabela tem os valores."><line x1="34" x2="338" y1="274" y2="274" stroke="#111"/><line x1="28" x2="34" y1="274" y2="274" stroke="#111"/><text x="25" y="278" font-size="11" text-anchor="end" fill="#5E5E5E">0</text><line x1="31" x2="34" y1="258.4" y2="258.4" stroke="#8A8A8A"/><line x1="31" x2="34" y1="242.8" y2="242.8" stroke="#8A8A8A"/><line x1="31" x2="34" y1="227.2" y2="227.2" stroke="#8A8A8A"/><line x1="31" x2="34" y1="211.6" y2="211.6" stroke="#8A8A8A"/><line x1="34" x2="338" y1="196" y2="196" stroke="#ECECEC"/><line x1="28" x2="34" y1="196" y2="196" stroke="#111"/><text x="25" y="200" font-size="11" text-anchor="end" fill="#5E5E5E">25</text><line x1="31" x2="34" y1="180.4" y2="180.4" stroke="#8A8A8A"/><line x1="31" x2="34" y1="164.8" y2="164.8" stroke="#8A8A8A"/><line x1="31" x2="34" y1="149.2" y2="149.2" stroke="#8A8A8A"/><line x1="31" x2="34" y1="133.6" y2="133.6" stroke="#8A8A8A"/><line x1="34" x2="338" y1="118" y2="118" stroke="#ECECEC"/><line x1="28" x2="34" y1="118" y2="118" stroke="#111"/><text x="25" y="122" font-size="11" text-anchor="end" fill="#5E5E5E">50</text><line x1="31" x2="34" y1="102.39999999999998" y2="102.39999999999998" stroke="#8A8A8A"/><line x1="31" x2="34" y1="86.80000000000001" y2="86.80000000000001" stroke="#8A8A8A"/><line x1="31" x2="34" y1="71.19999999999999" y2="71.19999999999999" stroke="#8A8A8A"/><line x1="31" x2="34" y1="55.60000000000002" y2="55.60000000000002" stroke="#8A8A8A"/><line x1="34" x2="338" y1="40" y2="40" stroke="#ECECEC"/><line x1="28" x2="34" y1="40" y2="40" stroke="#111"/><text x="25" y="44" font-size="11" text-anchor="end" fill="#5E5E5E">75%</text><line x1="34" x2="34" y1="40" y2="274" stroke="#111"/><line x1="34" x2="34" y1="274" y2="279" stroke="#111"/><text x="34" y="292" font-size="11" text-anchor="middle" fill="#5E5E5E">J0</text><line x1="72" x2="72" y1="274" y2="279" stroke="#111"/><text x="72" y="292" font-size="11" text-anchor="middle" fill="#5E5E5E">J1</text><line x1="110" x2="110" y1="274" y2="279" stroke="#111"/><text x="110" y="292" font-size="11" text-anchor="middle" fill="#5E5E5E">J2</text><line x1="148" x2="148" y1="274" y2="279" stroke="#111"/><text x="148" y="292" font-size="11" text-anchor="middle" fill="#5E5E5E">J3</text><line x1="186" x2="186" y1="274" y2="279" stroke="#111"/><text x="186" y="292" font-size="11" text-anchor="middle" fill="#5E5E5E">J4</text><line x1="224" x2="224" y1="274" y2="279" stroke="#111"/><text x="224" y="292" font-size="11" text-anchor="middle" fill="#5E5E5E">J5</text><line x1="262" x2="262" y1="274" y2="279" stroke="#111"/><text x="262" y="292" font-size="11" text-anchor="middle" fill="#5E5E5E">J6</text><line x1="300" x2="300" y1="274" y2="279" stroke="#111"/><text x="300" y="292" font-size="11" text-anchor="middle" fill="#5E5E5E">J7</text><line x1="338" x2="338" y1="274" y2="279" stroke="#111"/><text x="338" y="292" font-size="11" text-anchor="middle" fill="#5E5E5E">J8</text><line x1="300" x2="300" y1="34" y2="274" stroke="#111" stroke-dasharray="2 3"/><text x="304" y="14" font-size="12" text-anchor="end" fill="#111" style="font-family:Archivo;font-weight:600">J7: Porto 3–1 Benfica</text><text x="304" y="29" font-size="12" text-anchor="end" fill="#111" style="font-family:Archivo">Sporting 2–2 Arouca</text><polyline points="34.0,271.3 72.0,271.3 110.0,271.3 148.0,272.5 186.0,272.1 224.0,273.1 262.0,272.7 300.0,273.3 338.0,273.7" fill="none" stroke="#8A8A8A" stroke-width="1.5" stroke-linejoin="round"/><circle cx="338" cy="273.6568" r="3.2" fill="#8A8A8A"/><polyline points="34.0,198.5 72.0,205.9 110.0,206.5 148.0,206.6 186.0,209.3 224.0,194.9 262.0,181.6 300.0,204.2 338.0,212.9" fill="none" stroke="#E20E1B" stroke-width="2.5" stroke-linejoin="round"/><circle cx="338" cy="212.9104" r="3.2" fill="#E20E1B"/><polyline points="34.0,89.1 72.0,89.7 110.0,88.0 148.0,91.3 186.0,103.9 224.0,109.5 262.0,136.3 300.0,193.2 338.0,181.5" fill="none" stroke="#006B3F" stroke-width="2.5" stroke-linejoin="round"/><circle cx="338" cy="181.5232" r="3.2" fill="#006B3F"/><polyline points="34.0,225.3 72.0,217.2 110.0,218.4 148.0,213.6 186.0,198.7 224.0,206.6 262.0,193.4 300.0,113.4 338.0,115.9" fill="none" stroke="#003893" stroke-width="2.5" stroke-linejoin="round"/><circle cx="338" cy="115.90959999999998" r="3.2" fill="#003893"/><rect x="347" y="110.90959999999998" width="10" height="10" fill="#003893"/><text x="362" y="120.40959999999998" font-size="13" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Porto <tspan style="font-weight:500;font-variant-numeric:tabular-nums">50,7%</tspan></text><rect x="347" y="176.5232" width="10" height="10" fill="#006B3F"/><text x="362" y="186.0232" font-size="13" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Sporting <tspan style="font-weight:500;font-variant-numeric:tabular-nums">29,6%</tspan></text><rect x="347" y="207.9104" width="10" height="10" fill="#E20E1B"/><text x="362" y="217.4104" font-size="13" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Benfica <tspan style="font-weight:500;font-variant-numeric:tabular-nums">19,6%</tspan></text><rect x="347" y="268.6568" width="10" height="10" fill="#8A8A8A"/><text x="362" y="278.1568" font-size="13" fill="#111" style="font-family:Archivo;font-weight:500;font-stretch:85%">Sp. Braga <tspan style="font-weight:500;font-variant-numeric:tabular-nums">0,1%</tspan></text></svg></div><div class="vt"><svg class="chart" viewBox="0 0 600 340" width="600" height="340" style="max-width:100%;height:auto" role="img" aria-label="Probabilidade de ser campeão em cada previsão, da J0 à J8. A tabela tem os valores."><line x1="34" x2="468" y1="314" y2="314" stroke="#111"/><line x1="28" x2="34" y1="314" y2="314" stroke="#111"/><text x="25" y="318" font-size="11" text-anchor="end" fill="#5E5E5E">0</text><line x1="31" x2="34" y1="295.73333333333335" y2="295.73333333333335" stroke="#8A8A8A"/><line x1="31" x2="34" y1="277.4666666666667" y2="277.4666666666667" stroke="#8A8A8A"/><line x1="31" x2="34" y1="259.2" y2="259.2" stroke="#8A8A8A"/><line x1="31" x2="34" y1="240.93333333333334" y2="240.93333333333334" stroke="#8A8A8A"/><line x1="34" x2="468" y1="222.66666666666669" y2="222.66666666666669" stroke="#ECECEC"/><line x1="28" x2="34" y1="222.66666666666669" y2="222.66666666666669" stroke="#111"/><text x="25" y="226.66666666666669" font-size="11" text-anchor="end" fill="#5E5E5E">25</text><line x1="31" x2="34" y1="204.4" y2="204.4" stroke="#8A8A8A"/><line x1="31" x2="34" y1="186.13333333333333" y2="186.13333333333333" stroke="#8A8A8A"/><line x1="31" x2="34" y1="167.86666666666667" y2="167.86666666666667" stroke="#8A8A8A"/><line x1="31" x2="34" y1="149.6" y2="149.6" stroke="#8A8A8A"/><line x1="34" x2="468" y1="131.33333333333334" y2="131.33333333333334" stroke="#ECECEC"/><line x1="28" x2="34" y1="131.33333333333334" y2="131.33333333333334" stroke="#111"/><text x="25" y="135.33333333333334" font-size="11" text-anchor="end" fill="#5E5E5E">50</text><line x1="31" x2="34" y1="113.06666666666666" y2="113.06666666666666" stroke="#8A8A8A"/><line x1="31" x2="34" y1="94.80000000000001" y2="94.80000000000001" stroke="#8A8A8A"/><line x1="31" x2="34" y1="76.53333333333333" y2="76.53333333333333" stroke="#8A8A8A"/><line x1="31" x2="34" y1="58.26666666666668" y2="58.26666666666668" stroke="#8A8A8A"/><line x1="34" x2="468" y1="40" y2="40" stroke="#ECECEC"/><line x1="28" x2="34" y1="40" y2="40" stroke="#111"/><text x="25" y="44" font-size="11" text-anchor="end" fill="#5E5E5E">75%</text><line x1="34" x2="34" y1="40" y2="314" stroke="#111"/><line x1="34" x2="34" y1="314" y2="319" stroke="#111"/><text x="34" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J0</text><line x1="88.25" x2="88.25" y1="314" y2="319" stroke="#111"/><text x="88.25" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J1</text><line x1="142.5" x2="142.5" y1="314" y2="319" stroke="#111"/><text x="142.5" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J2</text><line x1="196.75" x2="196.75" y1="314" y2="319" stroke="#111"/><text x="196.75" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J3</text><line x1="251" x2="251" y1="314" y2="319" stroke="#111"/><text x="251" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J4</text><line x1="305.25" x2="305.25" y1="314" y2="319" stroke="#111"/><text x="305.25" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J5</text><line x1="359.5" x2="359.5" y1="314" y2="319" stroke="#111"/><text x="359.5" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J6</text><line x1="413.75" x2="413.75" y1="314" y2="319" stroke="#111"/><text x="413.75" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J7</text><line x1="468" x2="468" y1="314" y2="319" stroke="#111"/><text x="468" y="332" font-size="11" text-anchor="middle" fill="#5E5E5E">J8</text><line x1="413.75" x2="413.75" y1="34" y2="314" stroke="#111" stroke-dasharray="2 3"/><text x="417.75" y="14" font-size="12" text-anchor="end" fill="#111" style="font-family:Archivo;font-weight:600">J7: Porto 3–1 Benfica</text><text x="417.75" y="29" font-size="12" text-anchor="end" fill="#111" style="font-family:Archivo">Sporting 2–2 Arouca</text><polyline points="34.0,310.8 88.3,310.8 142.5,310.8 196.8,312.3 251.0,311.8 305.3,312.9 359.5,312.5 413.8,313.1 468.0,313.6" fill="none" stroke="#8A8A8A" stroke-width="1.5" stroke-linejoin="round"/><circle cx="468" cy="313.59813333333335" r="3.2" fill="#8A8A8A"/><polyline points="34.0,225.6 88.3,234.2 142.5,234.9 196.8,235.1 251.0,238.2 305.3,221.4 359.5,205.9 413.8,232.2 468.0,242.5" fill="none" stroke="#E20E1B" stroke-width="2.5" stroke-linejoin="round"/><circle cx="468" cy="242.46773333333334" r="3.2" fill="#E20E1B"/><polyline points="34.0,97.5 88.3,98.2 142.5,96.2 196.8,100.1 251.0,114.8 305.3,121.3 359.5,152.7 413.8,219.4 468.0,205.7" fill="none" stroke="#006B3F" stroke-width="2.5" stroke-linejoin="round"/><circle cx="468" cy="205.71519999999998" r="3.2" fill="#006B3F"/><polyline points="34.0,256.9 88.3,247.5 142.5,248.9 196.8,243.2 251.0,225.8 305.3,235.1 359.5,219.6 413.8,125.9 468.0,128.9" fill="none" stroke="#003893" stroke-width="2.5" stroke-linejoin="round"/><circle cx="468" cy="128.88559999999998" r="3.2" fill="#003893"/><rect x="477" y="123.88559999999998" width="10" height="10" fill="#003893"/><text x="492" y="133.38559999999998" font-size="13" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Porto <tspan style="font-weight:500;font-variant-numeric:tabular-nums">50,7%</tspan></text><rect x="477" y="200.71519999999998" width="10" height="10" fill="#006B3F"/><text x="492" y="210.21519999999998" font-size="13" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Sporting <tspan style="font-weight:500;font-variant-numeric:tabular-nums">29,6%</tspan></text><rect x="477" y="237.46773333333334" width="10" height="10" fill="#E20E1B"/><text x="492" y="246.96773333333334" font-size="13" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Benfica <tspan style="font-weight:500;font-variant-numeric:tabular-nums">19,6%</tspan></text><rect x="477" y="308.59813333333335" width="10" height="10" fill="#8A8A8A"/><text x="492" y="318.09813333333335" font-size="13" fill="#111" style="font-family:Archivo;font-weight:500;font-stretch:85%">Sp. Braga <tspan style="font-weight:500;font-variant-numeric:tabular-nums">0,1%</tspan></text></svg></div>
+    <div class="only-m"><svg class="chart" viewBox="0 0 328 262" width="328" height="262" style="max-width:100%;height:auto" role="img" aria-label="Probabilidade de ser campeão em cada previsão, da J0 à J8. A tabela tem os valores."><line x1="34" x2="220" y1="236" y2="236" stroke="#111"/><line x1="28" x2="34" y1="236" y2="236" stroke="#111"/><text x="25" y="240" font-size="11" text-anchor="end" fill="#5E5E5E">0</text><line x1="31" x2="34" y1="223.33333333333334" y2="223.33333333333334" stroke="#8A8A8A"/><line x1="31" x2="34" y1="210.66666666666666" y2="210.66666666666666" stroke="#8A8A8A"/><line x1="31" x2="34" y1="198" y2="198" stroke="#8A8A8A"/><line x1="31" x2="34" y1="185.33333333333334" y2="185.33333333333334" stroke="#8A8A8A"/><line x1="34" x2="220" y1="172.66666666666669" y2="172.66666666666669" stroke="#ECECEC"/><line x1="28" x2="34" y1="172.66666666666669" y2="172.66666666666669" stroke="#111"/><text x="25" y="176.66666666666669" font-size="11" text-anchor="end" fill="#5E5E5E">25</text><line x1="31" x2="34" y1="160" y2="160" stroke="#8A8A8A"/><line x1="31" x2="34" y1="147.33333333333334" y2="147.33333333333334" stroke="#8A8A8A"/><line x1="31" x2="34" y1="134.66666666666669" y2="134.66666666666669" stroke="#8A8A8A"/><line x1="31" x2="34" y1="122" y2="122" stroke="#8A8A8A"/><line x1="34" x2="220" y1="109.33333333333334" y2="109.33333333333334" stroke="#ECECEC"/><line x1="28" x2="34" y1="109.33333333333334" y2="109.33333333333334" stroke="#111"/><text x="25" y="113.33333333333334" font-size="11" text-anchor="end" fill="#5E5E5E">50</text><line x1="31" x2="34" y1="96.66666666666666" y2="96.66666666666666" stroke="#8A8A8A"/><line x1="31" x2="34" y1="84" y2="84" stroke="#8A8A8A"/><line x1="31" x2="34" y1="71.33333333333331" y2="71.33333333333331" stroke="#8A8A8A"/><line x1="31" x2="34" y1="58.666666666666686" y2="58.666666666666686" stroke="#8A8A8A"/><line x1="34" x2="220" y1="46" y2="46" stroke="#ECECEC"/><line x1="28" x2="34" y1="46" y2="46" stroke="#111"/><text x="25" y="50" font-size="11" text-anchor="end" fill="#5E5E5E">75%</text><line x1="34" x2="34" y1="46" y2="236" stroke="#111"/><line x1="34" x2="34" y1="236" y2="241" stroke="#111"/><text x="34" y="254" font-size="11" text-anchor="middle" fill="#5E5E5E">J0</text><line x1="57.25" x2="57.25" y1="236" y2="241" stroke="#111"/><text x="57.25" y="254" font-size="11" text-anchor="middle" fill="#5E5E5E">J1</text><line x1="80.5" x2="80.5" y1="236" y2="241" stroke="#111"/><text x="80.5" y="254" font-size="11" text-anchor="middle" fill="#5E5E5E">J2</text><line x1="103.75" x2="103.75" y1="236" y2="241" stroke="#111"/><text x="103.75" y="254" font-size="11" text-anchor="middle" fill="#5E5E5E">J3</text><line x1="127" x2="127" y1="236" y2="241" stroke="#111"/><text x="127" y="254" font-size="11" text-anchor="middle" fill="#5E5E5E">J4</text><line x1="150.25" x2="150.25" y1="236" y2="241" stroke="#111"/><text x="150.25" y="254" font-size="11" text-anchor="middle" fill="#5E5E5E">J5</text><line x1="173.5" x2="173.5" y1="236" y2="241" stroke="#111"/><text x="173.5" y="254" font-size="11" text-anchor="middle" fill="#5E5E5E">J6</text><line x1="196.75" x2="196.75" y1="236" y2="241" stroke="#111"/><text x="196.75" y="254" font-size="11" text-anchor="middle" fill="#5E5E5E">J7</text><line x1="220" x2="220" y1="236" y2="241" stroke="#111"/><text x="220" y="254" font-size="11" text-anchor="middle" fill="#5E5E5E">J8</text><line x1="196.75" x2="196.75" y1="40" y2="236" stroke="#111" stroke-dasharray="2 3"/><text x="200.75" y="20" font-size="12" text-anchor="end" fill="#111" style="font-family:Archivo;font-weight:600">J7: Porto 3–1 Benfica</text><text x="200.75" y="35" font-size="12" text-anchor="end" fill="#111" style="font-family:Archivo">Sporting 2–2 Arouca</text><polyline points="34.0,233.8 57.3,233.8 80.5,233.8 103.8,234.8 127.0,234.5 150.3,235.2 173.5,235.0 196.8,235.4 220.0,235.7" fill="none" stroke="#8A8A8A" stroke-width="1.5" stroke-linejoin="round"/><circle cx="220" cy="235.72133333333332" r="3.2" fill="#8A8A8A"/><polyline points="34.0,174.7 57.3,180.7 80.5,181.2 103.8,181.3 127.0,183.5 150.3,171.8 173.5,161.0 196.8,179.3 220.0,186.4" fill="none" stroke="#E20E1B" stroke-width="2.5" stroke-linejoin="round"/><circle cx="220" cy="186.39733333333334" r="3.2" fill="#E20E1B"/><polyline points="34.0,85.8 57.3,86.3 80.5,84.9 103.8,87.6 127.0,97.9 150.3,102.4 173.5,124.2 196.8,170.4 220.0,160.9" fill="none" stroke="#006B3F" stroke-width="2.5" stroke-linejoin="round"/><circle cx="220" cy="160.912" r="3.2" fill="#006B3F"/><polyline points="34.0,196.4 57.3,189.9 80.5,190.8 103.8,186.9 127.0,174.9 150.3,181.3 173.5,170.6 196.8,105.6 220.0,107.6" fill="none" stroke="#003893" stroke-width="2.5" stroke-linejoin="round"/><circle cx="220" cy="107.636" r="3.2" fill="#003893"/><rect x="229" y="102.636" width="10" height="10" fill="#003893"/><text x="244" y="112.136" font-size="12.5" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Porto <tspan style="font-weight:500;font-variant-numeric:tabular-nums">50,7%</tspan></text><rect x="229" y="155.912" width="10" height="10" fill="#006B3F"/><text x="244" y="165.412" font-size="12.5" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Sporting <tspan style="font-weight:500;font-variant-numeric:tabular-nums">29,6%</tspan></text><rect x="229" y="181.39733333333334" width="10" height="10" fill="#E20E1B"/><text x="244" y="190.89733333333334" font-size="12.5" fill="#111" style="font-family:Archivo;font-weight:700;font-stretch:85%">Benfica <tspan style="font-weight:500;font-variant-numeric:tabular-nums">19,6%</tspan></text><rect x="229" y="230.72133333333332" width="10" height="10" fill="#8A8A8A"/><text x="244" y="240.22133333333332" font-size="12.5" fill="#111" style="font-family:Archivo;font-weight:500;font-stretch:85%">Sp. Braga <tspan style="font-weight:500;font-variant-numeric:tabular-nums">0,1%</tspan></text></svg></div>
+  </div>
+  <div class="pane2"><table class="rd twin"><thead><tr><th>Previsão</th><th class="r">Porto</th><th class="r">Sporting</th><th class="r">Benfica</th><th class="r">Sp. Braga</th></tr></thead><tbody><tr><th scope="row">J8</th><td class="r">50,7</td><td class="r">29,6</td><td class="r">19,6</td><td class="r">0,1</td></tr><tr><th scope="row">J7</th><td class="r">51,5</td><td class="r">25,9</td><td class="r">22,4</td><td class="r">0,2</td></tr><tr><th scope="row">J6</th><td class="r">25,8</td><td class="r">44,1</td><td class="r">29,6</td><td class="r">0,4</td></tr><tr><th scope="row">J5</th><td class="r">21,6</td><td class="r">52,7</td><td class="r">25,4</td><td class="r">0,3</td></tr><tr><th scope="row">J4</th><td class="r">24,1</td><td class="r">54,5</td><td class="r">20,7</td><td class="r">0,6</td></tr><tr><th scope="row">J3</th><td class="r">19,4</td><td class="r">58,6</td><td class="r">21,6</td><td class="r">0,5</td></tr><tr><th scope="row">J2</th><td class="r">17,8</td><td class="r">59,6</td><td class="r">21,6</td><td class="r">0,9</td></tr><tr><th scope="row">J1</th><td class="r">18,2</td><td class="r">59,1</td><td class="r">21,8</td><td class="r">0,9</td></tr><tr><th scope="row">J0</th><td class="r">15,6</td><td class="r">59,3</td><td class="r">24,2</td><td class="r">0,9</td></tr></tbody></table><p class="src">% das épocas simuladas em que cada clube é campeão. A mais recente primeiro.</p></div>
+</div>
+<p class="src">Percentagem das 50 000 épocas simuladas em cada previsão; a J0 usou a versão anterior do modelo. Lê com cautela: no passado, o modelo deu em média 63% a quem liderava com 3 ou mais pontos de vantagem, e esses líderes foram campeões em 82% dos casos (fora dois casos com um erro nos dados). O Porto lidera com 6. <a href="#">Calibração</a></p>
+<aside class="note" aria-labelledby="note-h">
+  <h3 id="note-h">Nota da jornada 8</h3>
+  <p>A maior surpresa até agora: Académico de Viseu 2–1 Estoril. O modelo dava 30% a este resultado. E a sorte da época: o Porto tem 24 pontos para 17,4 esperados; o Vitória tem 5 para 13,4.</p>
+  <p class="sig">Bernardo Caldas, 11 out.</p>
+</aside></section>
+      
+<section class="pred" aria-labelledby="tab-h">
+  <div class="sub first"><h3 id="tab-h">Classificação prevista</h3><span class="ser">J8</span></div>
+  <table class="rd full">
+    <thead><tr>
+      <th class="r">#</th><th>Clube</th><th class="r hide-m">J</th><th class="r">Pts</th>
+      <th class="bandh">Pontos, agora e no fim<span class="ruler" style="--minor:5.0000%;--major:25.0000%" aria-hidden="true"><span class="s" style="left:0.00%">0</span><span class="" style="left:25.00%">25</span><span class="" style="left:50.00%">50</span><span class="" style="left:75.00%">75</span><span class="e" style="left:100.00%">100</span></span></th>
+      <th class="hide-m">No fim, 90%</th>
+      <th class="r">Título</th><th class="r">Desce</th>
+      <th class="hide-m hist-h"><span>Posição final</span><span class="hx"><span>1.º</span><span>18.º</span></span></th>
+    </tr></thead>
+    <tbody><tr>
+  <td class="r rk">1</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#003893"></i><a href="#">Porto</a></span></th>
+  <td class="r hide-m g">8</td>
+  <td class="r">24</td>
+  <td class="bandc"><span class="iv" style="--lo:72.00%;--hi:91.00%;--md:82.00%;--now:24.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">82 <span>72–91</span></span></td>
+  <td class="nums hide-m">82 <span>72–91</span></td>
+  <td class="r pc">50,7</td>
+  <td class="r pc zero">0</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="6.87" width="3" height="10.13" fill="#111"/><rect x="4" y="11.04" width="3" height="5.96" fill="#111"/><rect x="8" y="13.27" width="3" height="3.73" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="17.00" width="3" height="0.00" fill="#111"/><rect x="20" y="17.00" width="3" height="0.00" fill="#111"/><rect x="24" y="17.00" width="3" height="0.00" fill="#111"/><rect x="28" y="17.00" width="3" height="0.00" fill="#111"/><rect x="32" y="17.00" width="3" height="0.00" fill="#111"/><rect x="36" y="17.00" width="3" height="0.00" fill="#111"/><rect x="40" y="17.00" width="3" height="0.00" fill="#111"/><rect x="44" y="17.00" width="3" height="0.00" fill="#111"/><rect x="48" y="17.00" width="3" height="0.00" fill="#111"/><rect x="52" y="17.00" width="3" height="0.00" fill="#111"/><rect x="56" y="17.00" width="3" height="0.00" fill="#111"/><rect x="60" y="17.00" width="3" height="0.00" fill="#111"/><rect x="67" y="17.00" width="3" height="0.00" fill="#111"/><rect x="71" y="17.00" width="3" height="0.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">2</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#006B3F"></i><a href="#">Sporting</a></span></th>
+  <td class="r hide-m g">8</td>
+  <td class="r">18</td>
+  <td class="bandc"><span class="iv" style="--lo:69.00%;--hi:87.00%;--md:79.00%;--now:18.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">79 <span>69–87</span></span></td>
+  <td class="nums hide-m">79 <span>69–87</span></td>
+  <td class="r pc">29,6</td>
+  <td class="r pc zero">0</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="11.07" width="3" height="5.93" fill="#111"/><rect x="4" y="9.59" width="3" height="7.41" fill="#111"/><rect x="8" y="10.64" width="3" height="6.36" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="17.00" width="3" height="0.00" fill="#111"/><rect x="20" y="17.00" width="3" height="0.00" fill="#111"/><rect x="24" y="17.00" width="3" height="0.00" fill="#111"/><rect x="28" y="17.00" width="3" height="0.00" fill="#111"/><rect x="32" y="17.00" width="3" height="0.00" fill="#111"/><rect x="36" y="17.00" width="3" height="0.00" fill="#111"/><rect x="40" y="17.00" width="3" height="0.00" fill="#111"/><rect x="44" y="17.00" width="3" height="0.00" fill="#111"/><rect x="48" y="17.00" width="3" height="0.00" fill="#111"/><rect x="52" y="17.00" width="3" height="0.00" fill="#111"/><rect x="56" y="17.00" width="3" height="0.00" fill="#111"/><rect x="60" y="17.00" width="3" height="0.00" fill="#111"/><rect x="67" y="17.00" width="3" height="0.00" fill="#111"/><rect x="71" y="17.00" width="3" height="0.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">3</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#E20E1B"></i><a href="#">Benfica</a></span></th>
+  <td class="r hide-m g">7</td>
+  <td class="r">16</td>
+  <td class="bandc"><span class="iv" style="--lo:67.00%;--hi:86.00%;--md:77.00%;--now:16.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">77 <span>67–86</span></span></td>
+  <td class="nums hide-m">77 <span>67–86</span></td>
+  <td class="r pc">19,6</td>
+  <td class="r pc zero">0</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="13.08" width="3" height="3.92" fill="#111"/><rect x="4" y="10.53" width="3" height="6.47" fill="#111"/><rect x="8" y="8.11" width="3" height="8.89" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="16.00" width="3" height="1.00" fill="#111"/><rect x="20" y="17.00" width="3" height="0.00" fill="#111"/><rect x="24" y="17.00" width="3" height="0.00" fill="#111"/><rect x="28" y="17.00" width="3" height="0.00" fill="#111"/><rect x="32" y="17.00" width="3" height="0.00" fill="#111"/><rect x="36" y="17.00" width="3" height="0.00" fill="#111"/><rect x="40" y="17.00" width="3" height="0.00" fill="#111"/><rect x="44" y="17.00" width="3" height="0.00" fill="#111"/><rect x="48" y="17.00" width="3" height="0.00" fill="#111"/><rect x="52" y="17.00" width="3" height="0.00" fill="#111"/><rect x="56" y="17.00" width="3" height="0.00" fill="#111"/><rect x="60" y="17.00" width="3" height="0.00" fill="#111"/><rect x="67" y="17.00" width="3" height="0.00" fill="#111"/><rect x="71" y="17.00" width="3" height="0.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">4</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#C41E3A"></i><a href="#">Sp. Braga</a></span></th>
+  <td class="r hide-m g">7</td>
+  <td class="r">11</td>
+  <td class="bandc"><span class="iv" style="--lo:51.00%;--hi:72.00%;--md:61.00%;--now:11.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">61 <span>51–72</span></span></td>
+  <td class="nums hide-m">61 <span>51–72</span></td>
+  <td class="r pc">0,1</td>
+  <td class="r pc zero">0</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="16.00" width="3" height="1.00" fill="#111"/><rect x="4" y="16.00" width="3" height="1.00" fill="#111"/><rect x="8" y="16.00" width="3" height="1.00" fill="#111"/><rect x="12" y="1.78" width="3" height="15.22" fill="#111"/><rect x="16" y="14.60" width="3" height="2.40" fill="#111"/><rect x="20" y="16.00" width="3" height="1.00" fill="#111"/><rect x="24" y="16.00" width="3" height="1.00" fill="#111"/><rect x="28" y="16.00" width="3" height="1.00" fill="#111"/><rect x="32" y="16.00" width="3" height="1.00" fill="#111"/><rect x="36" y="16.00" width="3" height="1.00" fill="#111"/><rect x="40" y="17.00" width="3" height="0.00" fill="#111"/><rect x="44" y="17.00" width="3" height="0.00" fill="#111"/><rect x="48" y="17.00" width="3" height="0.00" fill="#111"/><rect x="52" y="17.00" width="3" height="0.00" fill="#111"/><rect x="56" y="17.00" width="3" height="0.00" fill="#111"/><rect x="60" y="17.00" width="3" height="0.00" fill="#111"/><rect x="67" y="17.00" width="3" height="0.00" fill="#111"/><rect x="71" y="17.00" width="3" height="0.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">5</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#C8102E"></i><a href="#">Santa Clara</a></span></th>
+  <td class="r hide-m g">8</td>
+  <td class="r">18</td>
+  <td class="bandc"><span class="iv low" style="--lo:40.00%;--hi:61.00%;--md:50.00%;--now:18.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">50 <span>40–61</span></span></td>
+  <td class="nums hide-m">50 <span>40–61</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">0,1</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="16.00" width="3" height="1.00" fill="#111"/><rect x="12" y="15.24" width="3" height="1.76" fill="#111"/><rect x="16" y="10.34" width="3" height="6.66" fill="#111"/><rect x="20" y="12.92" width="3" height="4.08" fill="#111"/><rect x="24" y="14.39" width="3" height="2.61" fill="#111"/><rect x="28" y="15.25" width="3" height="1.75" fill="#111"/><rect x="32" y="15.85" width="3" height="1.15" fill="#111"/><rect x="36" y="16.00" width="3" height="1.00" fill="#111"/><rect x="40" y="16.00" width="3" height="1.00" fill="#111"/><rect x="44" y="16.00" width="3" height="1.00" fill="#111"/><rect x="48" y="16.00" width="3" height="1.00" fill="#111"/><rect x="52" y="16.00" width="3" height="1.00" fill="#111"/><rect x="56" y="16.00" width="3" height="1.00" fill="#111"/><rect x="60" y="16.00" width="3" height="1.00" fill="#111"/><rect x="67" y="17.00" width="3" height="0.00" fill="#111"/><rect x="71" y="17.00" width="3" height="0.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">6</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#1B3A6B"></i><a href="#">Famalicão</a></span></th>
+  <td class="r hide-m g">7</td>
+  <td class="r">7</td>
+  <td class="bandc"><span class="iv low" style="--lo:34.00%;--hi:55.00%;--md:44.00%;--now:7.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">44 <span>34–55</span></span></td>
+  <td class="nums hide-m">44 <span>34–55</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">1,3</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="14.62" width="3" height="2.38" fill="#111"/><rect x="20" y="14.11" width="3" height="2.89" fill="#111"/><rect x="24" y="14.19" width="3" height="2.81" fill="#111"/><rect x="28" y="14.60" width="3" height="2.40" fill="#111"/><rect x="32" y="14.85" width="3" height="2.15" fill="#111"/><rect x="36" y="15.23" width="3" height="1.77" fill="#111"/><rect x="40" y="15.55" width="3" height="1.45" fill="#111"/><rect x="44" y="15.88" width="3" height="1.12" fill="#111"/><rect x="48" y="16.00" width="3" height="1.00" fill="#111"/><rect x="52" y="16.00" width="3" height="1.00" fill="#111"/><rect x="56" y="16.00" width="3" height="1.00" fill="#111"/><rect x="60" y="16.00" width="3" height="1.00" fill="#111"/><rect x="67" y="16.00" width="3" height="1.00" fill="#111"/><rect x="71" y="16.00" width="3" height="1.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">7</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#D4121F"></i><a href="#">Gil Vicente</a></span></th>
+  <td class="r hide-m g">7</td>
+  <td class="r">11</td>
+  <td class="bandc"><span class="iv low" style="--lo:34.00%;--hi:55.00%;--md:44.00%;--now:11.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">44 <span>34–55</span></span></td>
+  <td class="nums hide-m">44 <span>34–55</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">1,2</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="14.85" width="3" height="2.15" fill="#111"/><rect x="20" y="14.31" width="3" height="2.69" fill="#111"/><rect x="24" y="14.31" width="3" height="2.69" fill="#111"/><rect x="28" y="14.49" width="3" height="2.51" fill="#111"/><rect x="32" y="14.80" width="3" height="2.20" fill="#111"/><rect x="36" y="15.16" width="3" height="1.84" fill="#111"/><rect x="40" y="15.46" width="3" height="1.54" fill="#111"/><rect x="44" y="15.78" width="3" height="1.22" fill="#111"/><rect x="48" y="16.00" width="3" height="1.00" fill="#111"/><rect x="52" y="16.00" width="3" height="1.00" fill="#111"/><rect x="56" y="16.00" width="3" height="1.00" fill="#111"/><rect x="60" y="16.00" width="3" height="1.00" fill="#111"/><rect x="67" y="16.00" width="3" height="1.00" fill="#111"/><rect x="71" y="16.00" width="3" height="1.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">8</td>
+  <th scope="row"><span class="club"><i class="sw o" style="background:#FFD100"></i><a href="#">Arouca</a></span></th>
+  <td class="r hide-m g">7</td>
+  <td class="r">11</td>
+  <td class="bandc"><span class="iv low" style="--lo:33.00%;--hi:55.00%;--md:44.00%;--now:11.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">44 <span>33–55</span></span></td>
+  <td class="nums hide-m">44 <span>33–55</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">1,6</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="15.02" width="3" height="1.98" fill="#111"/><rect x="20" y="14.50" width="3" height="2.50" fill="#111"/><rect x="24" y="14.40" width="3" height="2.60" fill="#111"/><rect x="28" y="14.55" width="3" height="2.45" fill="#111"/><rect x="32" y="14.79" width="3" height="2.21" fill="#111"/><rect x="36" y="15.12" width="3" height="1.88" fill="#111"/><rect x="40" y="15.36" width="3" height="1.64" fill="#111"/><rect x="44" y="15.66" width="3" height="1.34" fill="#111"/><rect x="48" y="15.97" width="3" height="1.03" fill="#111"/><rect x="52" y="16.00" width="3" height="1.00" fill="#111"/><rect x="56" y="16.00" width="3" height="1.00" fill="#111"/><rect x="60" y="16.00" width="3" height="1.00" fill="#111"/><rect x="67" y="16.00" width="3" height="1.00" fill="#111"/><rect x="71" y="16.00" width="3" height="1.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">9</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#D4121F"></i><a href="#">Alverca</a></span></th>
+  <td class="r hide-m g">7</td>
+  <td class="r">8</td>
+  <td class="bandc"><span class="iv low" style="--lo:31.00%;--hi:53.00%;--md:42.00%;--now:8.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">42 <span>31–53</span></span></td>
+  <td class="nums hide-m">42 <span>31–53</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">2,8</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="15.55" width="3" height="1.45" fill="#111"/><rect x="20" y="14.93" width="3" height="2.07" fill="#111"/><rect x="24" y="14.77" width="3" height="2.23" fill="#111"/><rect x="28" y="14.78" width="3" height="2.22" fill="#111"/><rect x="32" y="14.80" width="3" height="2.20" fill="#111"/><rect x="36" y="15.01" width="3" height="1.99" fill="#111"/><rect x="40" y="15.24" width="3" height="1.76" fill="#111"/><rect x="44" y="15.46" width="3" height="1.54" fill="#111"/><rect x="48" y="15.68" width="3" height="1.32" fill="#111"/><rect x="52" y="15.96" width="3" height="1.04" fill="#111"/><rect x="56" y="16.00" width="3" height="1.00" fill="#111"/><rect x="60" y="16.00" width="3" height="1.00" fill="#111"/><rect x="67" y="16.00" width="3" height="1.00" fill="#111"/><rect x="71" y="16.00" width="3" height="1.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">10</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#000000"></i><a href="#">Vitória</a></span></th>
+  <td class="r hide-m g">7</td>
+  <td class="r">5</td>
+  <td class="bandc"><span class="iv low" style="--lo:31.00%;--hi:53.00%;--md:42.00%;--now:5.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">42 <span>31–53</span></span></td>
+  <td class="nums hide-m">42 <span>31–53</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">2,7</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="15.49" width="3" height="1.51" fill="#111"/><rect x="20" y="14.91" width="3" height="2.09" fill="#111"/><rect x="24" y="14.74" width="3" height="2.26" fill="#111"/><rect x="28" y="14.68" width="3" height="2.32" fill="#111"/><rect x="32" y="14.86" width="3" height="2.14" fill="#111"/><rect x="36" y="14.96" width="3" height="2.04" fill="#111"/><rect x="40" y="15.25" width="3" height="1.75" fill="#111"/><rect x="44" y="15.51" width="3" height="1.49" fill="#111"/><rect x="48" y="15.75" width="3" height="1.25" fill="#111"/><rect x="52" y="15.97" width="3" height="1.03" fill="#111"/><rect x="56" y="16.00" width="3" height="1.00" fill="#111"/><rect x="60" y="16.00" width="3" height="1.00" fill="#111"/><rect x="67" y="16.00" width="3" height="1.00" fill="#111"/><rect x="71" y="16.00" width="3" height="1.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">11</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#1A1A1A"></i><a href="#">Ac. Viseu</a></span></th>
+  <td class="r hide-m g">8</td>
+  <td class="r">14</td>
+  <td class="bandc"><span class="iv low" style="--lo:30.00%;--hi:50.00%;--md:39.00%;--now:14.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">39 <span>30–50</span></span></td>
+  <td class="nums hide-m">39 <span>30–50</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">6,1</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="16.00" width="3" height="1.00" fill="#111"/><rect x="20" y="16.00" width="3" height="1.00" fill="#111"/><rect x="24" y="15.67" width="3" height="1.33" fill="#111"/><rect x="28" y="15.35" width="3" height="1.65" fill="#111"/><rect x="32" y="15.14" width="3" height="1.86" fill="#111"/><rect x="36" y="15.01" width="3" height="1.99" fill="#111"/><rect x="40" y="14.94" width="3" height="2.06" fill="#111"/><rect x="44" y="14.99" width="3" height="2.01" fill="#111"/><rect x="48" y="15.05" width="3" height="1.95" fill="#111"/><rect x="52" y="15.26" width="3" height="1.74" fill="#111"/><rect x="56" y="15.56" width="3" height="1.44" fill="#111"/><rect x="60" y="15.83" width="3" height="1.17" fill="#111"/><rect x="67" y="16.00" width="3" height="1.00" fill="#111"/><rect x="71" y="16.00" width="3" height="1.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">12</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#E30613"></i><a href="#">Estrela</a></span></th>
+  <td class="r hide-m g">7</td>
+  <td class="r">10</td>
+  <td class="bandc"><span class="iv low" style="--lo:28.00%;--hi:48.00%;--md:38.00%;--now:10.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">38 <span>28–48</span></span></td>
+  <td class="nums hide-m">38 <span>28–48</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">9,7</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="16.00" width="3" height="1.00" fill="#111"/><rect x="20" y="16.00" width="3" height="1.00" fill="#111"/><rect x="24" y="16.00" width="3" height="1.00" fill="#111"/><rect x="28" y="15.77" width="3" height="1.23" fill="#111"/><rect x="32" y="15.48" width="3" height="1.52" fill="#111"/><rect x="36" y="15.22" width="3" height="1.78" fill="#111"/><rect x="40" y="15.01" width="3" height="1.99" fill="#111"/><rect x="44" y="14.90" width="3" height="2.10" fill="#111"/><rect x="48" y="14.91" width="3" height="2.09" fill="#111"/><rect x="52" y="15.03" width="3" height="1.97" fill="#111"/><rect x="56" y="15.17" width="3" height="1.83" fill="#111"/><rect x="60" y="15.41" width="3" height="1.59" fill="#111"/><rect x="67" y="15.80" width="3" height="1.20" fill="#111"/><rect x="71" y="16.00" width="3" height="1.00" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">13</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#006838"></i><a href="#">Moreirense</a></span></th>
+  <td class="r hide-m g">8</td>
+  <td class="r">8</td>
+  <td class="bandc"><span class="iv low" style="--lo:26.00%;--hi:47.00%;--md:36.00%;--now:8.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">36 <span>26–47</span></span></td>
+  <td class="nums hide-m">36 <span>26–47</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">14,7</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="16.00" width="3" height="1.00" fill="#111"/><rect x="16" y="16.00" width="3" height="1.00" fill="#111"/><rect x="20" y="16.00" width="3" height="1.00" fill="#111"/><rect x="24" y="16.00" width="3" height="1.00" fill="#111"/><rect x="28" y="16.00" width="3" height="1.00" fill="#111"/><rect x="32" y="15.79" width="3" height="1.21" fill="#111"/><rect x="36" y="15.54" width="3" height="1.46" fill="#111"/><rect x="40" y="15.27" width="3" height="1.73" fill="#111"/><rect x="44" y="15.03" width="3" height="1.97" fill="#111"/><rect x="48" y="14.85" width="3" height="2.15" fill="#111"/><rect x="52" y="14.84" width="3" height="2.16" fill="#111"/><rect x="56" y="14.81" width="3" height="2.19" fill="#111"/><rect x="60" y="14.94" width="3" height="2.06" fill="#111"/><rect x="67" y="15.25" width="3" height="1.75" fill="#111"/><rect x="71" y="15.81" width="3" height="1.19" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">14</td>
+  <th scope="row"><span class="club"><i class="sw o" style="background:#FFD700"></i><a href="#">Estoril</a></span></th>
+  <td class="r hide-m g">8</td>
+  <td class="r">2</td>
+  <td class="bandc"><span class="iv low" style="--lo:25.00%;--hi:46.00%;--md:35.00%;--now:2.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">35 <span>25–46</span></span></td>
+  <td class="nums hide-m">35 <span>25–46</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">18,2</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="17.00" width="3" height="0.00" fill="#111"/><rect x="16" y="16.00" width="3" height="1.00" fill="#111"/><rect x="20" y="16.00" width="3" height="1.00" fill="#111"/><rect x="24" y="16.00" width="3" height="1.00" fill="#111"/><rect x="28" y="16.00" width="3" height="1.00" fill="#111"/><rect x="32" y="15.93" width="3" height="1.07" fill="#111"/><rect x="36" y="15.65" width="3" height="1.35" fill="#111"/><rect x="40" y="15.45" width="3" height="1.55" fill="#111"/><rect x="44" y="15.18" width="3" height="1.82" fill="#111"/><rect x="48" y="15.01" width="3" height="1.99" fill="#111"/><rect x="52" y="14.82" width="3" height="2.18" fill="#111"/><rect x="56" y="14.75" width="3" height="2.25" fill="#111"/><rect x="60" y="14.80" width="3" height="2.20" fill="#111"/><rect x="67" y="14.97" width="3" height="2.03" fill="#111"/><rect x="71" y="15.39" width="3" height="1.61" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">15</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#006338"></i><a href="#">Rio Ave</a></span></th>
+  <td class="r hide-m g">7</td>
+  <td class="r">4</td>
+  <td class="bandc"><span class="iv" style="--lo:24.00%;--hi:46.00%;--md:35.00%;--now:4.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">35 <span>24–46</span></span></td>
+  <td class="nums hide-m">35 <span>24–46</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">21,9</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="17.00" width="3" height="0.00" fill="#111"/><rect x="16" y="16.00" width="3" height="1.00" fill="#111"/><rect x="20" y="16.00" width="3" height="1.00" fill="#111"/><rect x="24" y="16.00" width="3" height="1.00" fill="#111"/><rect x="28" y="16.00" width="3" height="1.00" fill="#111"/><rect x="32" y="16.00" width="3" height="1.00" fill="#111"/><rect x="36" y="15.80" width="3" height="1.20" fill="#111"/><rect x="40" y="15.55" width="3" height="1.45" fill="#111"/><rect x="44" y="15.31" width="3" height="1.69" fill="#111"/><rect x="48" y="15.07" width="3" height="1.93" fill="#111"/><rect x="52" y="14.86" width="3" height="2.14" fill="#111"/><rect x="56" y="14.72" width="3" height="2.28" fill="#111"/><rect x="60" y="14.61" width="3" height="2.39" fill="#111"/><rect x="67" y="14.68" width="3" height="2.32" fill="#111"/><rect x="71" y="14.93" width="3" height="2.07" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr class="cut">
+  <td class="r rk">16</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#009655"></i><a href="#">Marítimo</a></span></th>
+  <td class="r hide-m g">8</td>
+  <td class="r">8</td>
+  <td class="bandc"><span class="iv" style="--lo:23.00%;--hi:43.00%;--md:33.00%;--now:8.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">33 <span>23–43</span></span></td>
+  <td class="nums hide-m">33 <span>23–43</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">30,8</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="17.00" width="3" height="0.00" fill="#111"/><rect x="16" y="16.00" width="3" height="1.00" fill="#111"/><rect x="20" y="16.00" width="3" height="1.00" fill="#111"/><rect x="24" y="16.00" width="3" height="1.00" fill="#111"/><rect x="28" y="16.00" width="3" height="1.00" fill="#111"/><rect x="32" y="16.00" width="3" height="1.00" fill="#111"/><rect x="36" y="16.00" width="3" height="1.00" fill="#111"/><rect x="40" y="15.92" width="3" height="1.08" fill="#111"/><rect x="44" y="15.64" width="3" height="1.36" fill="#111"/><rect x="48" y="15.33" width="3" height="1.67" fill="#111"/><rect x="52" y="14.90" width="3" height="2.10" fill="#111"/><rect x="56" y="14.51" width="3" height="2.49" fill="#111"/><rect x="60" y="14.18" width="3" height="2.82" fill="#111"/><rect x="67" y="13.87" width="3" height="3.13" fill="#111"/><rect x="71" y="13.97" width="3" height="3.03" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">17</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#000000"></i><a href="#">Nacional</a></span></th>
+  <td class="r hide-m g">7</td>
+  <td class="r">4</td>
+  <td class="bandc"><span class="iv" style="--lo:22.00%;--hi:43.00%;--md:32.00%;--now:4.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">32 <span>22–43</span></span></td>
+  <td class="nums hide-m">32 <span>22–43</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">36,2</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="17.00" width="3" height="0.00" fill="#111"/><rect x="16" y="16.00" width="3" height="1.00" fill="#111"/><rect x="20" y="16.00" width="3" height="1.00" fill="#111"/><rect x="24" y="16.00" width="3" height="1.00" fill="#111"/><rect x="28" y="16.00" width="3" height="1.00" fill="#111"/><rect x="32" y="16.00" width="3" height="1.00" fill="#111"/><rect x="36" y="16.00" width="3" height="1.00" fill="#111"/><rect x="40" y="16.00" width="3" height="1.00" fill="#111"/><rect x="44" y="15.78" width="3" height="1.22" fill="#111"/><rect x="48" y="15.44" width="3" height="1.56" fill="#111"/><rect x="52" y="15.06" width="3" height="1.94" fill="#111"/><rect x="56" y="14.64" width="3" height="2.36" fill="#111"/><rect x="60" y="14.17" width="3" height="2.83" fill="#111"/><rect x="67" y="13.61" width="3" height="3.39" fill="#111"/><rect x="71" y="13.14" width="3" height="3.86" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr><tr>
+  <td class="r rk">18</td>
+  <th scope="row"><span class="club"><i class="sw" style="background:#1C3E6E"></i><a href="#">Casa Pia</a></span></th>
+  <td class="r hide-m g">8</td>
+  <td class="r">4</td>
+  <td class="bandc"><span class="iv" style="--lo:20.00%;--hi:40.00%;--md:29.00%;--now:4.00%" aria-hidden="true"><s></s><b></b><i></i></span><span class="only-m bn-m nums">29 <span>20–40</span></span></td>
+  <td class="nums hide-m">29 <span>20–40</span></td>
+  <td class="r pc zero">0</td>
+  <td class="r pc">52,6</td>
+  <td class="hist hide-m"><svg width="74" height="18" viewBox="0 0 74 18" aria-hidden="true" style="display:block"><rect x="0" y="17.00" width="3" height="0.00" fill="#111"/><rect x="4" y="17.00" width="3" height="0.00" fill="#111"/><rect x="8" y="17.00" width="3" height="0.00" fill="#111"/><rect x="12" y="17.00" width="3" height="0.00" fill="#111"/><rect x="16" y="17.00" width="3" height="0.00" fill="#111"/><rect x="20" y="16.00" width="3" height="1.00" fill="#111"/><rect x="24" y="16.00" width="3" height="1.00" fill="#111"/><rect x="28" y="16.00" width="3" height="1.00" fill="#111"/><rect x="32" y="16.00" width="3" height="1.00" fill="#111"/><rect x="36" y="16.00" width="3" height="1.00" fill="#111"/><rect x="40" y="16.00" width="3" height="1.00" fill="#111"/><rect x="44" y="16.00" width="3" height="1.00" fill="#111"/><rect x="48" y="15.96" width="3" height="1.04" fill="#111"/><rect x="52" y="15.56" width="3" height="1.44" fill="#111"/><rect x="56" y="15.01" width="3" height="1.99" fill="#111"/><rect x="60" y="14.21" width="3" height="2.79" fill="#111"/><rect x="67" y="12.96" width="3" height="4.04" fill="#111"/><rect x="71" y="10.51" width="3" height="6.49" fill="#111"/><rect x="0" y="17" width="74" height="1" fill="#BDBDBD"/></svg></td>
+</tr></tbody>
+  </table>
+  <p class="key"><span class="rr"><span><svg class="gl" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><rect x="1" y="3" width="8" height="8" fill="#111"/></svg>o que já aconteceu</span><span><svg class="gl" width="34" height="16" viewBox="0 0 34 16" aria-hidden="true"><rect x="1" y="4" width="32" height="8" fill="#FFD400"/><rect x="0.5" y="1" width="1" height="14" fill="#111"/><rect x="32.5" y="1" width="1" height="14" fill="#111"/><rect x="16" y="0" width="2" height="16" fill="#111"/></svg>a margem do modelo, 90%</span></span></p>
+  <p class="src"><b class="ink">Teste retrospetivo: em 162 épocas de clube (2017-18 a 2025-26), lidas depois das jornadas 1, 3, 5, 7, 10 e 18, os pontos finais caíram dentro da faixa de 90% em 89,3% das 972 leituras.</b> A faixa vai do 5.º ao 95.º percentil das épocas simuladas; o traço é a mediana. Amarelo forte nos quatro de cima e nos quatro de baixo. Desce quem acaba em 17.º ou 18.º; o 16.º vai ao play-off.</p>
+</section>
+    </div>
+
+    <section class="blk" aria-labelledby="j-h">
+      <header class="ih"><h2 id="j-h">Os próximos 14 jogos</h2><span class="clock">probabilidades em %, horas de Lisboa</span></header>
+      <table class="rd coupon only-d">
+        <thead><tr><th>Jogo</th><th class="ox">Casa</th><th class="ox">Empate</th><th class="ox">Fora</th><th class="stkh">Em jogo</th><th class="r">se ganhar</th><th class="r">se empatar</th><th class="r">se perder</th><th class="r">diferença, pp</th></tr></thead>
+        <tbody>
+  <tr class="grp"><th colspan="9"><span class="gt">Jornada 8, por jogar</span> <span class="g">11 e 12 out.</span></th></tr>
+  <tr><td class="m"><a href="#"><span class="when">dom. 11 out., 15:30</span><span class="teams">Rio Ave – Nacional</span></a></td><td class="ox fav">44</td><td class="ox">26</td><td class="ox">30</td><td class="stk">Descida do Nacional</td><td class="r sv">25</td><td class="r sv">36</td><td class="r sv">44</td><td class="r sp">18,5</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 11 out., 18:00</span><span class="teams">Benfica – Vitória</span></a></td><td class="ox fav">73</td><td class="ox">17</td><td class="ox">10</td><td class="stk">Título do Benfica</td><td class="r sv">22</td><td class="r sv">15</td><td class="r sv">11</td><td class="r sp">10,8</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 11 out., 20:30</span><span class="teams">Arouca – Estrela</span></a></td><td class="ox fav">47</td><td class="ox">27</td><td class="ox">26</td><td class="stk">Descida do Estrela</td><td class="r sv">5,1</td><td class="r sv">9,3</td><td class="r sv">13</td><td class="r sp">7,5</td></tr><tr><td class="m"><a href="#"><span class="when">seg. 12 out., 20:15</span><span class="teams">Famalicão – Alverca</span></a></td><td class="ox fav">46</td><td class="ox">28</td><td class="ox">27</td><td class="stk g" colspan="5">pouco em jogo: nenhum clube muda 5 pp</td></tr>
+</tbody><tbody>
+  <tr class="grp"><th colspan="9"><span class="gt">Jogo em atraso da jornada 2</span> <span class="g">19 out.</span></th></tr>
+  <tr><td class="m"><a href="#"><span class="when">seg. 19 out., 20:15</span><span class="teams">Sp. Braga – Gil Vicente</span></a></td><td class="ox fav">59</td><td class="ox">23</td><td class="ox">18</td><td class="stk g" colspan="5">pouco em jogo: nenhum clube muda 5 pp</td></tr>
+</tbody><tbody>
+  <tr class="grp"><th colspan="9"><span class="gt">Jornada 9</span> <span class="g">23 a 26 out.</span></th></tr>
+  <tr><td class="m"><a href="#"><span class="when">sex. 23 out., 20:45</span><span class="teams">Vitória – Marítimo</span></a></td><td class="ox fav">57</td><td class="ox">25</td><td class="ox">18</td><td class="stk">Descida do Marítimo</td><td class="r sv">19</td><td class="r sv">29</td><td class="r sv">35</td><td class="r sp">16,0</td></tr><tr><td class="m"><a href="#"><span class="when">sáb. 24 out., 15:30</span><span class="teams">Estrela – Casa Pia</span></a></td><td class="ox fav">42</td><td class="ox">29</td><td class="ox">29</td><td class="stk">Descida do Casa Pia</td><td class="r sv">41</td><td class="r sv">53</td><td class="r sv">61</td><td class="r sp">20,1</td></tr><tr><td class="m"><a href="#"><span class="when">sáb. 24 out., 18:00</span><span class="teams">Alverca – Arouca</span></a></td><td class="ox fav">43</td><td class="ox">27</td><td class="ox">30</td><td class="stk g" colspan="5">pouco em jogo: nenhum clube muda 5 pp</td></tr><tr><td class="m"><a href="#"><span class="when">sáb. 24 out., 20:30</span><span class="teams">Gil Vicente – Porto</span></a></td><td class="ox">13</td><td class="ox">22</td><td class="ox fav">65</td><td class="stk">Título do Porto</td><td class="r sv">55</td><td class="r sv">43</td><td class="r sv">39</td><td class="r sp">16,2</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 25 out., 15:30</span><span class="teams">Estoril – Moreirense</span></a></td><td class="ox fav">50</td><td class="ox">26</td><td class="ox">24</td><td class="stk">Descida do Estoril</td><td class="r sv">13</td><td class="r sv">21</td><td class="r sv">26</td><td class="r sp">12,7</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 25 out., 18:00</span><span class="teams">Rio Ave – Famalicão</span></a></td><td class="ox">31</td><td class="ox">27</td><td class="ox fav">42</td><td class="stk">Descida do Rio Ave</td><td class="r sv">14</td><td class="r sv">22</td><td class="r sv">27</td><td class="r sp">13,0</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 25 out., 18:00</span><span class="teams">Nacional – Sp. Braga</span></a></td><td class="ox">17</td><td class="ox">22</td><td class="ox fav">61</td><td class="stk">Descida do Nacional</td><td class="r sv">25</td><td class="r sv">34</td><td class="r sv">40</td><td class="r sp">15,3</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 25 out., 20:30</span><span class="teams">Sporting – Ac. Viseu</span></a></td><td class="ox fav">88</td><td class="ox">9</td><td class="ox">3</td><td class="stk">Título do Sporting</td><td class="r sv">31</td><td class="r sv">22</td><td class="r sv">19</td><td class="r sp">12,2</td></tr><tr><td class="m"><a href="#"><span class="when">seg. 26 out., 18:45</span><span class="teams">Santa Clara – Benfica</span></a></td><td class="ox">14</td><td class="ox">22</td><td class="ox fav">65</td><td class="stk">Título do Benfica</td><td class="r sv">23</td><td class="r sv">15</td><td class="r sv">12</td><td class="r sp">11,1</td></tr>
+</tbody>
+      </table>
+      <table class="rd coupon only-m">
+        <thead><tr><th>Jogo</th><th class="ox">Casa</th><th class="ox">Empate</th><th class="ox">Fora</th></tr></thead>
+        <tbody>
+  <tr class="grp"><th colspan="4"><span class="gt">Jornada 8, por jogar</span> <span class="g">11 e 12 out.</span></th></tr>
+  <tr><td class="m"><a href="#"><span class="when">dom. 11 out., 15:30</span><span class="teams">Rio Ave – Nacional</span></a></td><td class="ox fav">44</td><td class="ox">26</td><td class="ox">30</td><td class="stake-m"><b>Descida do Nacional:</b> 25% se ganhar, 36% se empatar, 44% se perder.</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 11 out., 18:00</span><span class="teams">Benfica – Vitória</span></a></td><td class="ox fav">73</td><td class="ox">17</td><td class="ox">10</td><td class="stake-m"><b>Título do Benfica:</b> 22% se ganhar, 15% se empatar, 11% se perder.</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 11 out., 20:30</span><span class="teams">Arouca – Estrela</span></a></td><td class="ox fav">47</td><td class="ox">27</td><td class="ox">26</td><td class="stake-m"><b>Descida do Estrela:</b> 5,1% se ganhar, 9,3% se empatar, 13% se perder.</td></tr><tr><td class="m"><a href="#"><span class="when">seg. 12 out., 20:15</span><span class="teams">Famalicão – Alverca</span></a></td><td class="ox fav">46</td><td class="ox">28</td><td class="ox">27</td><td class="stake-m">Pouco em jogo: nenhum clube muda 5 pp.</td></tr>
+</tbody><tbody>
+  <tr class="grp"><th colspan="4"><span class="gt">Jogo em atraso da jornada 2</span> <span class="g">19 out.</span></th></tr>
+  <tr><td class="m"><a href="#"><span class="when">seg. 19 out., 20:15</span><span class="teams">Sp. Braga – Gil Vicente</span></a></td><td class="ox fav">59</td><td class="ox">23</td><td class="ox">18</td><td class="stake-m">Pouco em jogo: nenhum clube muda 5 pp.</td></tr>
+</tbody><tbody>
+  <tr class="grp"><th colspan="4"><span class="gt">Jornada 9</span> <span class="g">23 a 26 out.</span></th></tr>
+  <tr><td class="m"><a href="#"><span class="when">sex. 23 out., 20:45</span><span class="teams">Vitória – Marítimo</span></a></td><td class="ox fav">57</td><td class="ox">25</td><td class="ox">18</td><td class="stake-m"><b>Descida do Marítimo:</b> 19% se ganhar, 29% se empatar, 35% se perder.</td></tr><tr><td class="m"><a href="#"><span class="when">sáb. 24 out., 15:30</span><span class="teams">Estrela – Casa Pia</span></a></td><td class="ox fav">42</td><td class="ox">29</td><td class="ox">29</td><td class="stake-m"><b>Descida do Casa Pia:</b> 41% se ganhar, 53% se empatar, 61% se perder.</td></tr><tr><td class="m"><a href="#"><span class="when">sáb. 24 out., 18:00</span><span class="teams">Alverca – Arouca</span></a></td><td class="ox fav">43</td><td class="ox">27</td><td class="ox">30</td><td class="stake-m">Pouco em jogo: nenhum clube muda 5 pp.</td></tr><tr><td class="m"><a href="#"><span class="when">sáb. 24 out., 20:30</span><span class="teams">Gil Vicente – Porto</span></a></td><td class="ox">13</td><td class="ox">22</td><td class="ox fav">65</td><td class="stake-m"><b>Título do Porto:</b> 55% se ganhar, 43% se empatar, 39% se perder.</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 25 out., 15:30</span><span class="teams">Estoril – Moreirense</span></a></td><td class="ox fav">50</td><td class="ox">26</td><td class="ox">24</td><td class="stake-m"><b>Descida do Estoril:</b> 13% se ganhar, 21% se empatar, 26% se perder.</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 25 out., 18:00</span><span class="teams">Rio Ave – Famalicão</span></a></td><td class="ox">31</td><td class="ox">27</td><td class="ox fav">42</td><td class="stake-m"><b>Descida do Rio Ave:</b> 14% se ganhar, 22% se empatar, 27% se perder.</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 25 out., 18:00</span><span class="teams">Nacional – Sp. Braga</span></a></td><td class="ox">17</td><td class="ox">22</td><td class="ox fav">61</td><td class="stake-m"><b>Descida do Nacional:</b> 25% se ganhar, 34% se empatar, 40% se perder.</td></tr><tr><td class="m"><a href="#"><span class="when">dom. 25 out., 20:30</span><span class="teams">Sporting – Ac. Viseu</span></a></td><td class="ox fav">88</td><td class="ox">9</td><td class="ox">3</td><td class="stake-m"><b>Título do Sporting:</b> 31% se ganhar, 22% se empatar, 19% se perder.</td></tr><tr><td class="m"><a href="#"><span class="when">seg. 26 out., 18:45</span><span class="teams">Santa Clara – Benfica</span></a></td><td class="ox">14</td><td class="ox">22</td><td class="ox fav">65</td><td class="stake-m"><b>Título do Benfica:</b> 23% se ganhar, 15% se empatar, 12% se perder.</td></tr>
+</tbody>
+      </table>
+      <p class="src">A negro, o resultado mais provável. «Em jogo» dá a hipótese de título ou de descida do clube que o jogo mais mexe, do lado desse clube: se ganhar, se empatar, se perder; números inteiros a partir de 10%. Abaixo de 5 pp de diferença, pouco em jogo. O jogo em atraso entra na previsão como os outros.</p>
+    </section>
+
+    
+<section class="blk" aria-labelledby="rec-h">
+  <header class="ih"><h2 id="rec-h">O que dissemos e o que aconteceu</h2><span class="serial">2026-27</span><span class="clock">só probabilidades publicadas antes do pontapé de saída</span></header>
+  <div class="recg">
+    <div>
+      <div class="sub first"><h3>Jornada 8, contra o modelo</h3></div>
+      <table class="rd coupon board8">
+        <thead><tr><th>Jogo e resultado</th><th class="ox">Casa</th><th class="ox">Empate</th><th class="ox">Fora</th></tr></thead>
+        <tbody><tr><td class="m"><span class="when">sex. 9 out., 18:45</span><span class="teams">Moreirense 0–1 Gil Vicente</span></td><td class="ox"><span class="rv">32</span></td><td class="ox"><span class="rv">30</span></td><td class="ox fav"><span class="rv">38<svg class="ring" viewBox="0 0 46 30" aria-hidden="true"><path d="M7 19.5C3.6 12.2 10.4 4.1 22.6 3.2c11.7-.8 20.4 4.3 19.8 11.3-.6 7.1-10.1 12-21.3 11.6C11.4 25.7 4.6 21.6 4.9 15.4c.2-4.2 4.4-8 9.8-10" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"/></svg><span class="sr"> (aconteceu)</span></span></td></tr><tr><td class="m"><span class="when">sex. 9 out., 20:15</span><span class="teams">Sp. Braga 1–3 Sporting</span></td><td class="ox"><span class="rv">24</span></td><td class="ox"><span class="rv">24</span></td><td class="ox fav"><span class="rv">52<svg class="ring" viewBox="0 0 46 30" aria-hidden="true"><path d="M7 19.5C3.6 12.2 10.4 4.1 22.6 3.2c11.7-.8 20.4 4.3 19.8 11.3-.6 7.1-10.1 12-21.3 11.6C11.4 25.7 4.6 21.6 4.9 15.4c.2-4.2 4.4-8 9.8-10" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"/></svg><span class="sr"> (aconteceu)</span></span></td></tr><tr><td class="m"><span class="when">sáb. 10 out., 15:30</span><span class="teams">Casa Pia 0–1 Santa Clara</span></td><td class="ox"><span class="rv">28</span></td><td class="ox"><span class="rv">30</span></td><td class="ox fav"><span class="rv">41<svg class="ring" viewBox="0 0 46 30" aria-hidden="true"><path d="M7 19.5C3.6 12.2 10.4 4.1 22.6 3.2c11.7-.8 20.4 4.3 19.8 11.3-.6 7.1-10.1 12-21.3 11.6C11.4 25.7 4.6 21.6 4.9 15.4c.2-4.2 4.4-8 9.8-10" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"/></svg><span class="sr"> (aconteceu)</span></span></td></tr><tr><td class="m"><span class="when">sáb. 10 out., 18:00</span><span class="teams">Marítimo 1–2 Porto</span></td><td class="ox"><span class="rv">7</span></td><td class="ox"><span class="rv">16</span></td><td class="ox fav"><span class="rv">77<svg class="ring" viewBox="0 0 46 30" aria-hidden="true"><path d="M7 19.5C3.6 12.2 10.4 4.1 22.6 3.2c11.7-.8 20.4 4.3 19.8 11.3-.6 7.1-10.1 12-21.3 11.6C11.4 25.7 4.6 21.6 4.9 15.4c.2-4.2 4.4-8 9.8-10" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"/></svg><span class="sr"> (aconteceu)</span></span></td></tr><tr><td class="m"><span class="when">sáb. 10 out., 20:30</span><span class="teams">Ac. Viseu 2–1 Estoril</span></td><td class="ox"><span class="rv">30<svg class="ring" viewBox="0 0 46 30" aria-hidden="true"><path d="M7 19.5C3.6 12.2 10.4 4.1 22.6 3.2c11.7-.8 20.4 4.3 19.8 11.3-.6 7.1-10.1 12-21.3 11.6C11.4 25.7 4.6 21.6 4.9 15.4c.2-4.2 4.4-8 9.8-10" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"/></svg><span class="sr"> (aconteceu)</span></span></td><td class="ox"><span class="rv">27</span></td><td class="ox fav"><span class="rv">43</span></td></tr></tbody>
+      </table>
+      <p class="src">Probabilidades da previsão de 25 de setembro, publicadas antes de cada jogo; o círculo marca o que aconteceu. Quatro dos cinco acabaram no resultado que o modelo achava mais provável.</p>
+    </div>
+    <div>
+      <div class="sub first"><h3>A época até agora, 59 jogos</h3></div>
+      <table class="rd rec">
+        <thead><tr><th>Quantos</th><th class="bandh"><span class="ruler" style="--minor:3.1250%;--major:15.6250%" aria-hidden="true"><span class="s" style="left:0.00%">0</span><span class="" style="left:31.25%">10</span><span class="" style="left:62.50%">20</span><span class="" style="left:93.75%">30</span></span></th><th class="hide-m">Aconteceram; o modelo dava, 90%</th></tr></thead>
+        <tbody>
+          <tr>
+  <th scope="row">Vitórias da casa</th>
+  <td class="bandc"><span class="iv" style="--lo:59.38%;--hi:93.75%;--md:75.00%;--res:68.75%" aria-hidden="true"><b></b><i></i><u></u></span><span class="only-m bn-m nums"><b>22</b> <span>aconteceram; o modelo dava 19 a 30</span></span></td>
+  <td class="nums hide-m"><b>22</b> <span>de 19 a 30</span></td>
+</tr><tr>
+  <th scope="row">Empates</th>
+  <td class="bandc"><span class="iv" style="--lo:28.13%;--hi:62.50%;--md:43.75%;--res:43.75%" aria-hidden="true"><b></b><i></i><u></u></span><span class="only-m bn-m nums"><b>14</b> <span>aconteceram; o modelo dava 9 a 20</span></span></td>
+  <td class="nums hide-m"><b>14</b> <span>de 9 a 20</span></td>
+</tr><tr>
+  <th scope="row">Vitórias de fora</th>
+  <td class="bandc"><span class="iv" style="--lo:46.88%;--hi:81.25%;--md:62.50%;--res:71.88%" aria-hidden="true"><b></b><i></i><u></u></span><span class="only-m bn-m nums"><b>23</b> <span>aconteceram; o modelo dava 15 a 26</span></span></td>
+  <td class="nums hide-m"><b>23</b> <span>de 15 a 26</span></td>
+</tr>
+          <tr class="grp2"><th colspan="3">O favorito do modelo ganhou, quando tinha…</th></tr>
+          <tr>
+  <th scope="row">70% ou mais<span class="g n"> 13 jogos</span></th>
+  <td class="bandc"><span class="iv" style="--lo:21.88%;--hi:37.50%;--md:31.25%;--res:37.50%" aria-hidden="true"><b></b><i></i><u></u></span><span class="only-m bn-m nums"><b>12</b> <span>aconteceram; o modelo dava 7 a 12</span></span></td>
+  <td class="nums hide-m"><b>12</b> <span>de 7 a 12</span></td>
+</tr><tr>
+  <th scope="row">55% a 70%<span class="g n"> 8 jogos</span></th>
+  <td class="bandc"><span class="iv" style="--lo:9.38%;--hi:21.88%;--md:15.63%;--res:15.63%" aria-hidden="true"><b></b><i></i><u></u></span><span class="only-m bn-m nums"><b>5</b> <span>aconteceram; o modelo dava 3 a 7</span></span></td>
+  <td class="nums hide-m"><b>5</b> <span>de 3 a 7</span></td>
+</tr><tr>
+  <th scope="row">40% a 55%<span class="g n"> 29 jogos</span></th>
+  <td class="bandc"><span class="iv" style="--lo:28.13%;--hi:56.25%;--md:40.63%;--res:34.38%" aria-hidden="true"><b></b><i></i><u></u></span><span class="only-m bn-m nums"><b>11</b> <span>aconteceram; o modelo dava 9 a 18</span></span></td>
+  <td class="nums hide-m"><b>11</b> <span>de 9 a 18</span></td>
+</tr><tr>
+  <th scope="row">menos de 40%<span class="g n"> 9 jogos</span></th>
+  <td class="bandc"><span class="iv" style="--lo:3.13%;--hi:18.75%;--md:9.38%;--res:18.75%" aria-hidden="true"><b></b><i></i><u></u></span><span class="only-m bn-m nums"><b>6</b> <span>aconteceram; o modelo dava 1 a 6</span></span></td>
+  <td class="nums hide-m"><b>6</b> <span>de 1 a 6</span></td>
+</tr>
+        </tbody>
+      </table>
+      <p class="key"><svg class="gl" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><rect x="1" y="3" width="8" height="8" fill="#111"/></svg> o que aconteceu <span class="kgap"></span><svg class="gl" width="34" height="16" viewBox="0 0 34 16" aria-hidden="true"><rect x="1" y="4" width="32" height="8" fill="#FFD400"/><rect x="0.5" y="1" width="1" height="14" fill="#111"/><rect x="32.5" y="1" width="1" height="14" fill="#111"/><rect x="16" y="0" width="2" height="16" fill="#111"/></svg> o que o modelo dava, 90%</p>
+      <p class="src">Faixas calculadas a partir das probabilidades publicadas para cada jogo. Os 8 jogos da jornada 1 com probabilidades publicadas depois do início ficam de fora. Com 59 jogos, as faixas ainda são largas.</p>
+    </div>
+  </div>
+</section>
+
+    <section class="blk" aria-labelledby="g-h">
+      <header class="ih"><h2 id="g-h">Onde acabam</h2><span class="clock">% das épocas simuladas</span></header>
+      <div class="grids">
+        <div>
+          <div class="sub first"><h3>Os cinco de cima</h3></div>
+          <table class="mx"><thead><tr><th>Clube</th><th>1.º</th><th>2.º</th><th>3.º</th><th>4.º</th><th>5.º</th><th>6.º</th><th>7.º a 18.º</th></tr></thead><tbody><tr><th scope="row"><span class="club"><i class="sw" style="background:#003893"></i>Porto</span></th><td class="hc" style="background:#565656;color:#FFFFFF">50,7</td><td class="hc" style="background:#8d8d8d;color:#111111">29,8</td><td class="hc" style="background:#adadad;color:#111111">18,6</td><td class="hc" style="background:#eeeeee;color:#111111">0,9</td><td class="hc" style="background:#FFFFFF;color:#5E5E5E"><0,1</td><td class="hc z" style="background:#FFFFFF;color:#5E5E5E">0</td><td class="ag sep">0</td></tr><tr><th scope="row"><span class="club"><i class="sw" style="background:#006B3F"></i>Sporting</span></th><td class="hc" style="background:#8e8e8e;color:#111111">29,6</td><td class="hc" style="background:#767676;color:#FFFFFF">37,0</td><td class="hc" style="background:#878787;color:#111111">31,8</td><td class="hc" style="background:#ebebeb;color:#111111">1,5</td><td class="hc" style="background:#FFFFFF;color:#5E5E5E"><0,1</td><td class="hc z" style="background:#FFFFFF;color:#5E5E5E">0</td><td class="ag sep">0</td></tr><tr><th scope="row"><span class="club"><i class="sw" style="background:#E20E1B"></i>Benfica</span></th><td class="hc" style="background:#aaaaaa;color:#111111">19,6</td><td class="hc" style="background:#868686;color:#111111">32,3</td><td class="hc" style="background:#666666;color:#FFFFFF">44,4</td><td class="hc" style="background:#e1e1e1;color:#111111">3,5</td><td class="hc" style="background:#f3f3f3;color:#111111">0,1</td><td class="hc z" style="background:#FFFFFF;color:#5E5E5E">0</td><td class="ag sep">0</td></tr><tr><th scope="row"><span class="club"><i class="sw" style="background:#C41E3A"></i>Sp. Braga</span></th><td class="hc" style="background:#f3f3f3;color:#111111">0,1</td><td class="hc" style="background:#eeeeee;color:#111111">0,8</td><td class="hc" style="background:#dcdcdc;color:#111111">4,9</td><td class="hc" style="background:#1a1a1a;color:#FFFFFF">76,1</td><td class="hc" style="background:#c2c2c2;color:#111111">12,0</td><td class="hc" style="background:#e1e1e1;color:#111111">3,6</td><td class="ag sep">2,4</td></tr><tr><th scope="row"><span class="club"><i class="sw" style="background:#C8102E"></i>Santa Clara</span></th><td class="hc z" style="background:#FFFFFF;color:#5E5E5E">0</td><td class="hc" style="background:#FFFFFF;color:#5E5E5E"><0,1</td><td class="hc" style="background:#f2f2f2;color:#111111">0,2</td><td class="hc" style="background:#cdcdcd;color:#111111">8,8</td><td class="hc" style="background:#838383;color:#111111">33,3</td><td class="hc" style="background:#a8a8a8;color:#111111">20,4</td><td class="ag sep">37,3</td></tr></tbody></table>
+        </div>
+        <div>
+          <div class="sub first"><h3>Os cinco de baixo</h3></div>
+          <table class="mx"><thead><tr><th>Clube</th><th>1.º a 13.º</th><th>14.º</th><th>15.º</th><th>16.º</th><th class="cutl">17.º</th><th>18.º</th><th class="r">Desce</th></tr></thead><tbody><tr><th scope="row"><span class="club"><i class="sw o" style="background:#FFD700"></i>Estoril</span></th><td class="ag">48,7</td><td class="hc sep" style="background:#c6c6c6;color:#111111">10,9</td><td class="hc" style="background:#c5c5c5;color:#111111">11,2</td><td class="hc" style="background:#c6c6c6;color:#111111">11,0</td><td class="hc cutl" style="background:#c9c9c9;color:#111111">10,1</td><td class="hc" style="background:#d0d0d0;color:#111111">8,0</td><td class="r rel">18,2</td></tr><tr><th scope="row"><span class="club"><i class="sw" style="background:#006338"></i>Rio Ave</span></th><td class="ag">44,0</td><td class="hc sep" style="background:#c7c7c7;color:#111111">10,7</td><td class="hc" style="background:#c4c4c4;color:#111111">11,4</td><td class="hc" style="background:#c3c3c3;color:#111111">11,9</td><td class="hc cutl" style="background:#c4c4c4;color:#111111">11,6</td><td class="hc" style="background:#c8c8c8;color:#111111">10,4</td><td class="r rel">21,9</td></tr><tr><th scope="row"><span class="club"><i class="sw" style="background:#009655"></i>Marítimo</span></th><td class="ag">32,1</td><td class="hc sep" style="background:#c7c7c7;color:#111111">10,5</td><td class="hc" style="background:#c1c1c1;color:#111111">12,4</td><td class="hc" style="background:#bbbbbb;color:#111111">14,1</td><td class="hc cutl" style="background:#b6b6b6;color:#111111">15,7</td><td class="hc" style="background:#b8b8b8;color:#111111">15,2</td><td class="r rel">30,8</td></tr><tr><th scope="row"><span class="club"><i class="sw" style="background:#000000"></i>Nacional</span></th><td class="ag">28,1</td><td class="hc sep" style="background:#cacaca;color:#111111">9,7</td><td class="hc" style="background:#c3c3c3;color:#111111">11,8</td><td class="hc" style="background:#bbbbbb;color:#111111">14,2</td><td class="hc cutl" style="background:#b3b3b3;color:#111111">16,9</td><td class="hc" style="background:#ababab;color:#111111">19,3</td><td class="r rel">36,2</td></tr><tr><th scope="row"><span class="club"><i class="sw" style="background:#1C3E6E"></i>Casa Pia</span></th><td class="ag">16,3</td><td class="hc sep" style="background:#d3d3d3;color:#111111">7,2</td><td class="hc" style="background:#c9c9c9;color:#111111">10,0</td><td class="hc" style="background:#bcbcbc;color:#111111">14,0</td><td class="hc cutl" style="background:#a9a9a9;color:#111111">20,2</td><td class="hc" style="background:#868686;color:#111111">32,5</td><td class="r rel">52,6</td></tr></tbody></table>
+        </div>
+      </div>
+      <div class="legend"><span>Cada casa: % das épocas em que o clube acaba nessa posição.</span><i style="background:#dbdbdb"></i>5<i style="background:#a9a9a9"></i>20<i style="background:#727272"></i>40<i style="background:#404040"></i>60<i style="background:#111111"></i>80%<span>Colunas agrupadas sem cor.</span></div>
+    </section>
+
+    <div class="plates">
+      <section aria-labelledby="mk-h">
+        <h3 id="mk-h">Contra o mercado</h3>
+        <p>Teste retrospetivo: o modelo de hoje, aplicado a 810 jogos de 2020-21 a 2025-26 (9 jogos em 15 momentos de cada época), contra as cotações do mercado. As cotações de fecho foram mais precisas: a diferença de RPS (quanto menor, melhor) fica toda acima de zero.</p>
+        <table class="rd mk">
+          <thead><tr><th>Contra as cotações de</th><th class="bandh">Modelo menos mercado, RPS, 95%<span class="ruler" style="--minor:8.3333%;--major:16.6667%" aria-hidden="true"><span class="" style="left:16.67%">0</span><span class="" style="left:50.00%">0,004</span><span class="" style="left:83.33%">0,008</span><span class="refm" style="left:16.67%"></span></span></th><th class="hide-m">Diferença</th></tr></thead>
+          <tbody><tr>
+  <th scope="row">fecho</th>
+  <td class="bandc"><span class="iv" style="--lo:31.71%;--hi:84.96%;--md:58.33%;--ref:16.67%" aria-hidden="true"><span class="ref"></span><b></b><i></i></span><span class="only-m bn-m nums">0,0050 <span>0,0018 a 0,0082</span></span></td>
+  <td class="nums hide-m">0,0050 <span>0,0018 a 0,0082</span></td></tr><tr>
+  <th scope="row">abertura</th>
+  <td class="bandc"><span class="iv" style="--lo:13.56%;--hi:59.94%;--md:36.75%;--ref:16.67%" aria-hidden="true"><span class="ref"></span><b></b><i></i></span><span class="only-m bn-m nums">0,0024 <span>−0,0004 a 0,0052</span></span></td>
+  <td class="nums hide-m">0,0024 <span>−0,0004 a 0,0052</span></td></tr></tbody>
+        </table>
+        <p class="src">Acima de zero, o mercado foi mais preciso. Contra as cotações de abertura, a faixa toca o zero. Nos 108 jogos em que o modelo e o mercado tinham favoritos diferentes, ganhou o favorito do mercado 41 vezes, o do modelo 25 e nenhum dos dois 42. Cotações Pinnacle (773 jogos) e Bet365 (37), via football-data.co.uk. <a href="#">O registo completo</a></p>
+      </section>
+      <section aria-labelledby="fi-h">
+        <h3 id="fi-h">Como foi feita</h3>
+        <dl>
+          <dt>Modelo</dt><dd>Poisson bivariado com remates à baliza, desde a jornada 1</dd>
+          <dt>Simulações</dt><dd>50 000 épocas por previsão</dd>
+          <dt>Atualização</dt><dd>depois de cada jornada, até 24 horas após o último jogo</dd>
+          <dt>Faixas de 90%</dt><dd>89,3% de acerto em teste retrospetivo: 162 épocas de clube, 6 momentos cada</dd>
+          <dt>Dados de jogo</dt><dd>SofaScore (resultados), FotMob (xG), football-data.co.uk (cotações)</dd>
+          <dt>Licença</dt><dd>previsões CC BY-NC 4.0; dados de terceiros fora da licença</dd>
+        </dl>
+      </section>
+    </div>
+  </div>
+</main>
+<footer class="ft"><div class="wrap ft-in">
+    <div class="ft-id"><a class="brand" href="#" aria-label="estimador.pt, página inicial"><span class="lockup" style="--fs:27px"><span class="wm">estimador.pt</span><svg width="131" height="10" viewBox="0 0 131 10" aria-hidden="true"><rect x="0" y="0" width="131" height="1.56" fill="#111"/><rect x="0.00" y="0" width="1.14" height="6.23" fill="#111"/><rect x="5.19" y="0" width="1.14" height="3.63" fill="#111"/><rect x="10.38" y="0" width="1.14" height="3.63" fill="#111"/><rect x="15.57" y="0" width="1.14" height="3.63" fill="#111"/><rect x="20.76" y="0" width="1.14" height="3.63" fill="#111"/><rect x="25.95" y="0" width="1.14" height="6.23" fill="#111"/><rect x="31.14" y="0" width="1.14" height="3.63" fill="#111"/><rect x="36.33" y="0" width="1.14" height="3.63" fill="#111"/><rect x="41.52" y="0" width="1.14" height="3.63" fill="#111"/><rect x="46.71" y="0" width="1.14" height="3.63" fill="#111"/><rect x="51.90" y="0" width="1.14" height="6.23" fill="#111"/><rect x="57.09" y="0" width="1.14" height="3.63" fill="#111"/><rect x="62.28" y="0" width="1.14" height="3.63" fill="#111"/><rect x="67.47" y="0" width="1.14" height="3.63" fill="#111"/><rect x="72.66" y="0" width="1.14" height="3.63" fill="#111"/><rect x="77.85" y="0" width="1.14" height="6.23" fill="#111"/><rect x="83.04" y="0" width="1.14" height="3.63" fill="#111"/><rect x="88.23" y="0" width="1.14" height="3.63" fill="#111"/><rect x="93.42" y="0" width="1.14" height="3.63" fill="#111"/><rect x="98.61" y="0" width="1.14" height="3.63" fill="#111"/><rect x="103.80" y="0" width="1.14" height="6.23" fill="#111"/><rect x="108.99" y="0" width="1.14" height="3.63" fill="#111"/><rect x="114.18" y="0" width="1.14" height="3.63" fill="#111"/><rect x="119.37" y="0" width="1.14" height="3.63" fill="#111"/><rect x="124.56" y="0" width="1.14" height="3.63" fill="#111"/><rect x="129.75" y="0" width="1.14" height="6.23" fill="#111"/><rect x="61.57" y="1.56" width="31.44" height="5.71" fill="#FFD400"/><rect x="61.57" y="0" width="1.56" height="9.35" fill="#111"/><rect x="91.45" y="0" width="1.56" height="9.35" fill="#111"/><rect x="77.25" y="0" width="2.70" height="10" fill="#111"/></svg></span></a>
+      <p>A Liga Portugal em 50&nbsp;000 épocas simuladas, uma população sintética das 3&nbsp;092 freguesias dos Censos 2021 e o arquivo das previsões eleitorais. Feito por Bernardo Caldas, em Lisboa.</p>
+      <p class="ftrule"><span class="rr"><span><svg class="gl" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><rect x="1" y="3" width="8" height="8" fill="#111"/></svg>Preto: o que já aconteceu.</span><span><svg class="gl" width="34" height="16" viewBox="0 0 34 16" aria-hidden="true"><rect x="1" y="4" width="32" height="8" fill="#FFD400"/><rect x="0.5" y="1" width="1" height="14" fill="#111"/><rect x="32.5" y="1" width="1" height="14" fill="#111"/><rect x="16" y="0" width="2" height="16" fill="#111"/></svg>Amarelo: a margem do modelo.</span><span><svg class="gl" width="26" height="16" viewBox="0 0 26 16" aria-hidden="true"><rect x="0" y="11" width="26" height="1" fill="#111"/><rect x="0" y="8" width="1" height="4" fill="#111"/><rect x="25" y="8" width="1" height="4" fill="#111"/><rect x="12" y="1" width="2" height="12" fill="#111"/></svg>Traço só: uma corrida, sem margem.</span></span></p>
+      <p class="nonio">Em português, a escala que lê entre duas marcas chama-se nónio, em honra de Pedro Nunes (<i>De crepusculis</i>, Lisboa, 1542).</p></div>
+    <div class="ft-col"><h4>Secções</h4><ul><li><a href="#">População</a></li><li><a href="#">Liga Portugal</a></li><li><a href="#">Eleições (arquivo)</a></li></ul></div>
+    <div class="ft-col"><h4>O projeto</h4><ul><li><a href="#">Sobre</a></li><li><a href="#">Como trabalho</a></li><li><a href="#">Reutilizar e citar</a></li><li><a href="#">Privacidade</a></li></ul></div>
+    <div class="ft-lic"><h4>Licenças</h4><dl>
+      <dt>estimador.pt</dt><dd>dados e previsões, <span class="nw">CC BY-NC 4.0</span></dd>
+      <dt>INE</dt><dd>Censos 2021, <span class="nw">CC BY 4.0</span></dd>
+      <dt>DGT</dt><dd>CAOP 2021, <span class="nw">CC BY 4.0</span></dd>
+      <dt>Terceiros</dt><dd>resultados, cotações e sondagens ficam fora da licença</dd>
+    </dl></div>
+  </div></footer>
+</body></html>
