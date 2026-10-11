@@ -9,7 +9,7 @@ const read = name => readFileSync(new URL(name, root), 'utf8');
 const write = (name, data) => writeFileSync(new URL(name, root), data);
 const geometry = JSON.parse(read('src/lib/brand/geometry.json'));
 const full = [geometry.MARK_LEFT, geometry.MARK_BAND, geometry.MARK_RIGHT].join(' ');
-const ink = '#141414', paper = '#ffffff', forest = '#1f1f1f';
+const ink = '#111111', paper = '#ffffff', forest = '#111111';
 const svg = (w, h, body) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${body}</svg>`;
 const mark = (small, color) => `<path d="${small ? geometry.MARK_SMALL : full}" fill="${color}"/>`;
 const icon = (color, ground) => svg(32, 32, `<rect width="32" height="32" rx="7" fill="${ground}"/>${mark(true, color)}`);

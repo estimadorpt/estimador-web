@@ -466,7 +466,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
             <button
               type="button"
               onClick={copyShare}
-              className="inline-flex min-h-11 items-center gap-1.5 px-4 rounded-[10px] bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 transition-colors"
+              className="inline-flex min-h-11 items-center gap-1.5 px-4 rounded-none bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 transition-colors"
             >
               {copied ? <Check aria-hidden="true" className="w-4 h-4" /> : <Share2 aria-hidden="true" className="w-4 h-4" />}
               {copied ? t.shareDone : t.share}
@@ -607,7 +607,7 @@ function RoundPicker({
                         })
                       }
                       // One selected style for both rows: ink with a check (UXD3-10).
-                      className={`min-h-11 px-2 py-2 rounded-[10px] text-xs sm:text-sm font-semibold border transition-colors leading-tight break-words ${
+                      className={`min-h-11 px-2 py-2 rounded-none text-xs sm:text-sm font-semibold border transition-colors leading-tight break-words ${
                         active
                           ? "bg-ink border-ink text-paper"
                           : "bg-cream border-stone-300 text-stone-700 hover:border-stone-400"
@@ -642,7 +642,7 @@ function RoundPicker({
                               mode: "quick",
                             })
                           }
-                          className={`min-h-11 px-1.5 py-1.5 rounded-[10px] text-xs font-medium border transition-colors leading-tight ${
+                          className={`min-h-11 px-1.5 py-1.5 rounded-none text-xs font-medium border transition-colors leading-tight ${
                             active
                               ? "bg-ink border-ink text-paper"
                               : "bg-cream border-stone-300 text-stone-700 hover:border-stone-400"

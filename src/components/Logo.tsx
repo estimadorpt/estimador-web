@@ -1,4 +1,5 @@
 import { BRAND, MARK_BAND, MARK_LEFT, MARK_RIGHT, MARK_SMALL } from '@/lib/brand';
+import { WORDMARK_BASELINE, WORDMARK_HEIGHT, WORDMARK_NAME, WORDMARK_TLD, WORDMARK_WIDTH, WORDMARK_X } from '@/lib/brand/wordmark';
 
 interface MarkProps {
   /** Rendered height in px; the mark is twice as wide. */
@@ -58,27 +59,42 @@ export function MarkSmall({ size = 16, color = 'currentColor', className = '', t
 interface LogoHorizontalProps {
   /** Mark height in px; the wordmark scales with it. */
   size?: number;
-  /** `ink` on light surfaces, `paper` on forest. */
+  /** `ink` on light surfaces, `paper` on dark ones. */
   tone?: 'ink' | 'paper';
   className?: string;
 }
 
-/** The signature: mark plus "estimador.pt" in Manrope 800. There is no serif version. */
+/**
+ * The signature: the interval mark and "estimador.pt", drawn exactly as the
+ * published logo (public/brand/estimador-logo.svg): the wordmark is outlined
+ * paths (src/lib/brand/wordmark.ts), so it never depends on the page's
+ * typeface. The whiskers keep their own paths for the hover on `.brand-link`.
+ */
 export function LogoHorizontal({ size = 24, tone = 'ink', className = '' }: LogoHorizontalProps) {
   const color = tone === 'paper' ? BRAND.paper : BRAND.ink;
-  // The ".pt" steps back from the name but stays readable: BRAND.muted is
-  // 4.75:1 on paper (BRAND.faint was 2.98:1); the paper tone is 4.96:1 on forest.
-  const muted = tone === 'paper' ? 'rgba(245,243,234,0.55)' : BRAND.muted;
+  // The ".pt" steps back from the name but stays readable (BRAND.muted is
+  // 6.4:1 on white; the paper tone is 4.9:1 or better on ink).
+  const muted = tone === 'paper' ? 'rgba(255,255,255,0.62)' : BRAND.muted;
   return (
-    <span className={`inline-flex items-center ${className}`} style={{ gap: Math.round(size * 0.42), color }}>
-      <Mark height={size} />
-      <span
-        className="font-display font-extrabold leading-none tracking-[-0.035em] whitespace-nowrap"
-        style={{ fontSize: Math.round(size * 1.1) }}
-      >
-        estimador<span style={{ color: muted }}>.pt</span>
-      </span>
-    </span>
+    <svg
+      className={`brand-mark ${className}`}
+      width={Math.round((size * WORDMARK_WIDTH) / WORDMARK_HEIGHT)}
+      height={size}
+      viewBox={`0 0 ${WORDMARK_WIDTH} ${WORDMARK_HEIGHT}`}
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g fill={color}>
+        <path className="brand-mark-left" d={MARK_LEFT} />
+        <path d={MARK_BAND} />
+        <path className="brand-mark-right" d={MARK_RIGHT} />
+      </g>
+      <g transform={`translate(${WORDMARK_X} ${WORDMARK_BASELINE})`}>
+        <path d={WORDMARK_NAME} fill={color} />
+        <path d={WORDMARK_TLD} fill={muted} />
+      </g>
+    </svg>
   );
 }
 

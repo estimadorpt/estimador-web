@@ -268,7 +268,7 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
                 setOpen(false);
               }
             }}
-            className={`parish-search h-12 w-full rounded-[10px] border border-line bg-cream pl-10 pr-11 text-base text-ink placeholder:text-stone-500 sm:text-[15px] [&::-webkit-search-cancel-button]:appearance-none ${inputClassName}`}
+            className={`parish-search h-12 w-full rounded-none border border-line bg-cream pl-10 pr-11 text-base text-ink placeholder:text-stone-500 sm:text-[15px] [&::-webkit-search-cancel-button]:appearance-none ${inputClassName}`}
           />
           {query && !disabled && (
             <button
@@ -281,7 +281,7 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
             </button>
           )}
           {showList && (
-            <div className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden rounded-[10px] border border-line bg-cream shadow-[0_8px_24px_rgba(18,47,44,0.12)]">
+            <div className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden rounded-none border border-line bg-cream shadow-[0_8px_24px_rgba(18,47,44,0.12)]">
             <ul
               ref={list}
               id={listId}
@@ -336,7 +336,7 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
             </div>
           )}
           {showPanel && (
-            <div className="absolute left-0 right-0 top-full z-30 mt-1 rounded-[10px] border border-line bg-cream px-4 py-3 text-sm text-stone-600 shadow-[0_8px_24px_rgba(18,47,44,0.12)]">
+            <div className="absolute left-0 right-0 top-full z-30 mt-1 rounded-none border border-line bg-cream px-4 py-3 text-sm text-stone-600 shadow-[0_8px_24px_rgba(18,47,44,0.12)]">
               {failed ? (
                 <p>
                   {t.error}{' '}
@@ -361,7 +361,7 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
             // While it locates the button stays focusable (aria-disabled, not disabled), so focus does not fall to the page (A11Y3-01).
             disabled={disabled}
             aria-disabled={locating === 'busy' || undefined}
-            className="inline-flex min-h-12 items-center gap-2 rounded-[10px] border border-line bg-cream px-4 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-parchment disabled:opacity-50 aria-disabled:cursor-wait aria-disabled:opacity-50"
+            className="inline-flex min-h-12 items-center gap-2 rounded-none border border-line bg-cream px-4 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-parchment disabled:opacity-50 aria-disabled:cursor-wait aria-disabled:opacity-50"
           >
             <LocateFixed aria-hidden="true" className="h-4 w-4" />
             {locating === 'busy' ? t.locating : t.locate}

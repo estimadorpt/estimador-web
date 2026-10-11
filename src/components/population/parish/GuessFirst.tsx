@@ -77,7 +77,7 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
           className="guess-range h-11 w-full min-w-0 flex-none cursor-pointer accent-[var(--color-ink)] sm:flex-1"
         />
         {/* The reader's number, not a published one: labelled, in a bordered field, and muted until they move the slider. */}
-        <div className="w-24 shrink-0 self-start rounded-[10px] border border-dashed border-line px-2 py-1 text-right sm:self-auto" aria-hidden="true">
+        <div className="w-24 shrink-0 self-start rounded-none border border-dashed border-line px-2 py-1 text-right sm:self-auto" aria-hidden="true">
           <p className="text-[11px] font-semibold text-stone-500">{t.yours}</p>
           <output htmlFor={`${id}-guess`} className={`block font-display text-2xl font-extrabold tabular-nums ${touched ? 'text-ink' : 'text-stone-500'}`}>
             {formatGuess(guess)}

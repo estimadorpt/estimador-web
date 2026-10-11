@@ -56,7 +56,7 @@ export function ClubChooser({
             setValue(e.target.value);
             setHint(false);
           }}
-          className="min-h-11 min-w-[200px] rounded-[10px] border border-line bg-paper px-3 text-base text-ink sm:text-sm"
+          className="min-h-11 min-w-[200px] rounded-none border border-line bg-paper px-3 text-base text-ink sm:text-sm"
         >
           <option value="" disabled>
             {placeholder}
@@ -70,7 +70,7 @@ export function ClubChooser({
       </span>
       <button
         type="submit"
-        className="min-h-11 rounded-[10px] bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-forest"
+        className="min-h-11 rounded-none bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-forest"
       >
         {locale === "en" ? "See club" : "Ver equipa"}
       </button>

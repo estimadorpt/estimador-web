@@ -1,4 +1,5 @@
 import { useId, useEffect, useRef, useState, type CSSProperties, type Ref } from 'react';
+import { FONT_STACK } from '@/lib/brand';
 import { FIELD_LABELS, HOUSEHOLDS, PEOPLE, neighbourhoodPosition, exploredPosition, distribution, groupFor, type Lens, type Neighbourhood, type View } from '@/lib/miniatura/population';
 
 import { Landscape } from './Landscape';
@@ -31,7 +32,7 @@ function House({ id, neighbourhood, selected, onSelect, locale }: { id: number; 
       {urban?<><path d={`M-27 ${1-height}l29 17 32 -17 -30 -17Z`} fill="#c0c5ba"/><path d={`M-27 ${1-height}v-5l29 17 32 -17v5l-32 17Z`} fill="#e6e6d6"/><path d={`M-12 ${-height-2}l11 6 8 -5 -11 -6Z`} fill="#699090"/><path d={`M16 ${-height-7}v-18m-6 6h12`} stroke="#61726e" fill="none" strokeWidth="1.5"/></>:
       <><path d={`M-29 ${2-height}L-3 ${-17-height}L35 ${1-height}L5 ${20-height}Z`} fill={stone?'#66736c':'#b86b51'}/><path d={`M-29 ${2-height}L-3 ${-17-height}L3 ${-5-height}L-23 ${13-height}Z`} fill={stone?'#87918a':'#d88762'}/>{[0,1,2,3].map(i=><path key={i} d={`M${-20+i*8} ${-4-height+i*4}l24 13`} stroke={stone?'#505f58':'#a6533d'} strokeWidth="1.2" opacity=".5"/>)}{!coast&&<path d={`M14 ${-height}v-17l8 4v17Z`} fill={stone?'#b4b5a4':'#f1e7ca'}/>}</>}
     </g>
-    {selected&&<text x="3" y={-height-43} textAnchor="middle" fontSize="12" fill="#244f42" fontFamily="Manrope, system-ui, sans-serif">{locale==='pt'?'Casa':'Home'} {id+1}</text>}
+    {selected&&<text x="3" y={-height-43} textAnchor="middle" fontSize="12" fill="#244f42" fontFamily={FONT_STACK}>{locale==='pt'?'Casa':'Home'} {id+1}</text>}
     {coast&&id%3===0&&<path d="M-28 3l30 17 7 -4 -30 -17Z" fill="#5f8ea5"/>}
     {neighbourhood==='village'&&<><path d="M-33 18l26 15" stroke="#9ca674" strokeWidth="7"/><circle cx="-26" cy="11" r="6" fill="#99a77b"/></>}
 
@@ -78,12 +79,12 @@ export function Scene({ view, alone, paused, locale, svgRef, neighbourhood = 'to
       <Landscape kind={neighbourhood}/>
       {[...HOUSEHOLDS].sort((a,b)=>neighbourhoodPosition(a.id,neighbourhood).y-neighbourhoodPosition(b.id,neighbourhood).y).map(h=><House id={h.id} key={h.id} locale={locale} neighbourhood={neighbourhood} selected={selectedHouse===h.id} onSelect={onHouseSelect && view==='village'?()=>{if(!drag.current?.moved)onHouseSelect(h.id);}:undefined}/>)}
     </g>
-    {grouped && <g className="mini-group-labels" fill="#2a5045" fontFamily="Manrope, system-ui, sans-serif" textAnchor="middle">
+    {grouped && <g className="mini-group-labels" fill="#2a5045" fontFamily={FONT_STACK} textAnchor="middle">
       {(view === 'ages' ? FIELD_LABELS[locale][lens] : ['1','2','3','4','5']).map((label,i)=>{
         const group = PEOPLE.filter(p=>view==='ages'?groupFor(p,lens)===i:p.size===i+1);
         const x = compact ? 100 + (i % 2) * 200 : view==='ages'?90+(i+.5)*(820/distribution(lens).length):142+i*178;
         const row = compact ? Math.floor(i / 2) * 240 : 0;
-        return <g key={label}><text x={x} y={compact ? 38 + row : 145} fontSize={view==='ages' ? compact ? 13 : 22 : compact ? 25 : 34} fontFamily="Manrope, system-ui, sans-serif" fontWeight="800">{label}</text><text x={x} y={compact ? 59 + row : 174} fontSize={compact ? 12 : 15}>{view==='ages'?(pt?'pessoas':'people'):(pt?i===0?'pessoa por agregado':'pessoas por agregado':i===0?'person per household':'people per household')}</text><text x={x} y={compact ? 220 + row : 454} fontSize={compact ? 15 : 22}>{group.length} {pt?'pessoas':'people'}</text>{view==='households' && !compact && <text x={x} y="480" fontSize="15">{HOUSEHOLDS.filter(h=>h.people.length===i+1).length} {pt?'agregados':'households'}</text>}</g>;
+        return <g key={label}><text x={x} y={compact ? 38 + row : 145} fontSize={view==='ages' ? compact ? 13 : 22 : compact ? 25 : 34} fontFamily={FONT_STACK} fontWeight="800">{label}</text><text x={x} y={compact ? 59 + row : 174} fontSize={compact ? 12 : 15}>{view==='ages'?(pt?'pessoas':'people'):(pt?i===0?'pessoa por agregado':'pessoas por agregado':i===0?'person per household':'people per household')}</text><text x={x} y={compact ? 220 + row : 454} fontSize={compact ? 15 : 22}>{group.length} {pt?'pessoas':'people'}</text>{view==='households' && !compact && <text x={x} y="480" fontSize="15">{HOUSEHOLDS.filter(h=>h.people.length===i+1).length} {pt?'agregados':'households'}</text>}</g>;
       })}
     </g>}
     {PEOPLE.map(person=>{
@@ -101,6 +102,6 @@ export function Scene({ view, alone, paused, locale, svgRef, neighbourhood = 'to
       </g>;
     })}
     </g>
-    <g className="mini-scene-caption" opacity={compact && grouped ? 0 : 1} fill="#67776a" fontSize="12" fontFamily="Manrope, system-ui, sans-serif"><text x="36" y="565">{pt?'BAIRRO IMAGINADO · SEM LOCALIZAÇÃO REAL':'IMAGINED NEIGHBOURHOOD · NO REAL LOCATION'}</text><text x="965" y="565" textAnchor="end">{count} / 100</text></g>
+    <g className="mini-scene-caption" opacity={compact && grouped ? 0 : 1} fill="#67776a" fontSize="12" fontFamily={FONT_STACK}><text x="36" y="565">{pt?'BAIRRO IMAGINADO · SEM LOCALIZAÇÃO REAL':'IMAGINED NEIGHBOURHOOD · NO REAL LOCATION'}</text><text x="965" y="565" textAnchor="end">{count} / 100</text></g>
   </svg>;
 }

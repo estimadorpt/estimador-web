@@ -9,7 +9,7 @@
  */
 export const PLAYER_MARKS = {
   /** A value above the reference level (stone-900). */
-  bar: '#141414',
+  bar: '#111111',
   /** A value below the reference level (stone-400). */
   barNegative: '#6b6b6b',
   /** The credible interval: its line and its two caps (stone-400). */

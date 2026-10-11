@@ -33,7 +33,7 @@ export function CopyButton({ text, label, locale }: { text: string; label: strin
       <button
         type="button"
         onClick={copy}
-        className="inline-flex min-h-11 items-center gap-2 rounded-[10px] border border-line bg-cream px-4 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-parchment"
+        className="inline-flex min-h-11 items-center gap-2 rounded-none border border-line bg-cream px-4 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-parchment"
       >
         {state === 'copied' ? <Check aria-hidden="true" className="h-4 w-4" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
         {label}

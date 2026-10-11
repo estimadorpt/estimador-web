@@ -151,7 +151,7 @@ export function MatchOutcomeImpact({
       <div>
         <div className="flex flex-wrap items-baseline justify-between gap-3 mb-1">
           <h2 className="text-2xl tracking-tight">{L.title}</h2>
-          <div className="inline-flex rounded-[10px] border border-line bg-paper p-1 text-sm font-semibold" role="group" aria-label={L.switchLabel}>
+          <div className="inline-flex rounded-none border border-line bg-paper p-1 text-sm font-semibold" role="group" aria-label={L.switchLabel}>
             {(["home", "away"] as const).map(side => {
               const team = side === "home" ? home : away;
               const active = chosen === side;

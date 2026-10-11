@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { formatPercent } from "@/lib/football-format";
 import { quietPlot } from "@/components/viz/plot-a11y";
+import { FONT_STACK } from '@/lib/brand';
 
 interface TimelinePoint {
   matchday: number;
@@ -59,7 +60,7 @@ export function TeamTimeline({ data, teamColor, yAxisLabel, xAxisLabel = "Jornad
         marginLeft: 45,
         marginRight: 48,
         marginBottom: 35,
-        style: { fontFamily: "Inter, system-ui, sans-serif", fontSize: "12px", background: "transparent", color: "#5c5c5c", overflow: "visible" },
+        style: { fontFamily: FONT_STACK, fontSize: "12px", background: "transparent", color: "#5e5e5e", overflow: "visible" },
         x: { label: xAxisLabel, ticks: tickValues, tickFormat: (d: number) => `${Math.round(d)}` },
         y: { label: yAxisLabel, domain: [0, yMax], grid: true, tickFormat: (d: number) => `${d}%` },
         marks: [

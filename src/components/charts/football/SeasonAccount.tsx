@@ -114,14 +114,14 @@ export function SeasonAccount({
                 }}
                 maxLength={24}
                 placeholder={t.placeholder}
-                className="flex-1 min-w-[10rem] min-h-11 px-3 py-1.5 rounded-[10px] border border-stone-300 bg-paper text-base sm:text-sm focus:border-emerald-700"
+                className="flex-1 min-w-[10rem] min-h-11 px-3 py-1.5 rounded-none border border-stone-300 bg-paper text-base sm:text-sm focus:border-emerald-700"
                 aria-label={t.placeholder}
               />
               <button
                 type="button"
                 onClick={submit}
                 disabled={!draft.trim() || saving}
-                className="min-h-11 px-4 py-1.5 rounded-[10px] bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 disabled:opacity-40 disabled:hover:bg-stone-900 transition-colors"
+                className="min-h-11 px-4 py-1.5 rounded-none bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 disabled:opacity-40 disabled:hover:bg-stone-900 transition-colors"
               >
                 {renaming ? t.confirm : t.save}
               </button>
@@ -129,7 +129,7 @@ export function SeasonAccount({
                 <button
                   type="button"
                   onClick={() => setRenaming(false)}
-                  className="min-h-11 px-3 py-1.5 rounded-[10px] text-sm text-stone-500 hover:text-stone-900 transition-colors"
+                  className="min-h-11 px-3 py-1.5 rounded-none text-sm text-stone-500 hover:text-stone-900 transition-colors"
                 >
                   {t.cancel}
                 </button>

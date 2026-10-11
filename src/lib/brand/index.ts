@@ -12,18 +12,30 @@ export const { MARK_LEFT, MARK_BAND, MARK_RIGHT, MARK_SMALL, COUNTER_X } = geome
 export const MARK_FULL = `${MARK_LEFT} ${MARK_BAND} ${MARK_RIGHT}`;
 
 /** Compact marks retain shorter whiskers and thicker caps in a 32×32 box. */
+/**
+ * The interface font stacks, for SVG, Plot and canvas code that cannot read
+ * CSS variables. They mirror --font-sans and --font-display in globals.css;
+ * change them together.
+ */
+export const FONT_STACK = "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif";
+export const DISPLAY_FONT_STACK = "'IBM Plex Sans Condensed', 'IBM Plex Sans Variable', system-ui, sans-serif";
+
 /** Same values as the tokens in globals.css; exported for SVG and canvas code that cannot read CSS variables. */
 export const BRAND = {
   paper: '#ffffff',
   cream: '#ffffff',
-  parchment: '#f3f3f1',
-  line: '#e2e2df',
-  ink: '#141414',
+  parchment: '#f4f4f4',
+  line: '#d9d9d9',
+  grid: '#ececec',
+  ink: '#111111',
   inkDark: '#000000',
-  muted: '#5c5c5c',
-  faint: '#8a8a87',
-  forest: '#1f1f1f',
-  forestDeep: '#141414',
+  muted: '#5e5e5e',
+  faint: '#8a8a8a',
+  forest: '#111111',
+  forestDeep: '#000000',
+  // The model's margin: the band of an interval, and nothing else.
+  signal: '#ffd400',
+  signalLow: '#fff1b3',
   // Data pastels: chart categoricals and the atlas's people.
   mint: '#72c8b4',
   mustard: '#e5b958',

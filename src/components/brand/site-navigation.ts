@@ -12,8 +12,8 @@ import { POPULATION_ROUTES } from '@/lib/config/population';
  * the client message payload test sees them); the few labels that only the
  * menu uses are written here in both languages.
  *
- * Ordered by what is live (round-1 owner decision): Início, População, Liga
- * Portugal, Eleições (arquivo), Economia (em preparação), then Sobre.
+ * Ordered by what is live: Início, População, Liga Portugal, Eleições
+ * (arquivo), Economia once it publishes, then Sobre.
  * Football has one public name, "Liga Portugal" (CLAUDE.md); the URLs keep
  * /desporto.
  */
@@ -137,8 +137,10 @@ export function siteNavigation(
         { href: '/eleicoes/metodologia', label: labels.electionsMethodology },
       ],
     },
-    // The editorial flag in src/lib/config/economy-status.json, not data age.
-    { id: 'economics', href: '/economia', label: economyPublished ? labels.economics : labels.economicsPreparing },
+    // The economy has no place in the navigation until it publishes (the
+    // editorial flag in src/lib/config/economy-status.json, not data age):
+    // a menu item that announces an absence is furniture.
+    ...(economyPublished ? [{ id: 'economics' as const, href: '/economia', label: labels.economics }] : []),
     // No nav item for an index with nothing in it in this language.
     ...(hasArticles ? [{ id: 'articles' as const, href: '/artigos', label: labels.articles }] : []),
     {

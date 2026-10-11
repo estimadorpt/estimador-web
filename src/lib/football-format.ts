@@ -219,6 +219,23 @@ function lisbonParts(d: Date, dateOnly = false) {
 }
 
 /**
+ * When a reading was made, to the minute, in Lisbon: "11 out. 2026, 00:11" /
+ * "11 Oct 2026, 00:11". The forecast files carry UTC; a reader in Portugal
+ * reads the clock on the wall.
+ */
+export function formatReadingTime(iso: string | null | undefined, locale: string): string {
+  if (!iso) return '';
+  const d = toDate(iso);
+  if (!d) return '';
+  const p = lisbonParts(d);
+  if (locale === 'en') {
+    const month = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: LISBON_TZ }).format(d);
+    return `${p.day} ${month} ${p.year}, ${p.time}`;
+  }
+  return `${p.day} ${PT_MONTHS_SHORT[p.month - 1]} ${p.year}, ${p.time}`;
+}
+
+/**
  * A short date ("25 set." / "25 Sept"), read in Lisbon. pt-PT's Intl short
  * month is numeric ("25/09"), so the Portuguese abbreviations are written here.
  */

@@ -289,7 +289,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
         <button
           type="button"
           onClick={() => { setFailed(false); setAttempt(n => n + 1); }}
-          className="mt-4 inline-flex min-h-12 items-center justify-center rounded-[10px] border border-line bg-cream px-5 text-[15px] font-semibold text-ink hover:bg-parchment"
+          className="mt-4 inline-flex min-h-12 items-center justify-center rounded-none border border-line bg-cream px-5 text-[15px] font-semibold text-ink hover:bg-parchment"
         >
           {t.retry}
         </button>

@@ -4,10 +4,10 @@ import { WORDMARK_BASELINE, WORDMARK_NAME, WORDMARK_TLD, WORDMARK_X } from '@/li
 
 /**
  * The card's text. The SVG is drawn into an <img> to make the PNG, where no
- * web font loads, so Manrope is asked for and a plain sans stands in; the
+ * web font loads, so the site face is asked for and a plain sans stands in; the
  * signature itself is outlined paths and needs no font.
  */
-const SANS = "Manrope,'Helvetica Neue',Arial,sans-serif";
+const SANS = "'IBM Plex Sans Variable','IBM Plex Sans','Helvetica Neue',Arial,sans-serif";
 
 /**
  * The site's signature (the interval mark and "estimador.pt", ".pt" in

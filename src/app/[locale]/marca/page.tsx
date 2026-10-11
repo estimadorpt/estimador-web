@@ -5,8 +5,6 @@ import { Download } from 'lucide-react';
 import { createPageMetadata } from '@/lib/metadata';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
-import { SectionIllustration } from '@/components/brand/SectionIllustration';
-import { HomeArt } from '@/components/home/HomeArt';
 import { TextLink } from '@/components/brand/TextLink';
 import { PageHero } from '@/components/PageHero';
 import { LogoHorizontal, Mark, MarkSmall } from '@/components/Logo';
@@ -83,47 +81,6 @@ const MOSAIC_USES: readonly (readonly ['cover' | 'corner' | 'quarters' | 'people
   ['people', ['Fora das páginas: ao lado dos gráficos de pontos verdadeiros, lê-se como dados.', 'On no page: next to the real dot charts, it reads as data.'], false],
 ];
 
-/** The painting family: one picture per section, in the site's section order. */
-const PAINTINGS: readonly (readonly ['population' | 'football' | 'elections' | 'economy', Copy, Copy, string])[] = [
-  ['population', ['População: a casa', 'Population: the house'], ['No painel da população da página inicial e neste guia. Nunca nas páginas de dados da população.', 'The homepage\'s population panel, and this guide. Never on the population data pages.'], '/images/home/population-square-800.webp'],
-  ['football', ['Futebol: o campo', 'Football: the ground'], ['Cabeçalhos da Liga e do simulador; painel da página inicial.', 'Liga and simulator headers; the homepage panel.'], '/images/sections/football.webp'],
-  ['elections', ['Eleições: a mesa de voto', 'Elections: the polling place'], ['Cabeçalhos do arquivo, das legislativas e das presidenciais; painel da página inicial.', 'Archive, parliamentary and presidential headers; the homepage panel.'], '/images/sections/elections.webp'],
-  ['economy', ['Economia: a loja', 'Economy: the shop'], ['Painel da página inicial e um pequeno acento no explicador da Economia. Sem cabeçalho.', 'The homepage panel and a small accent in the economy explainer. No header.'], '/images/sections/economy.webp'],
-];
-
-/** Which header each kind of page gets (owner decision of 6 October 2026; the same table is in CLAUDE.md). */
-const HEADERS: readonly (readonly [kind: Copy, header: Copy, pages: Copy])[] = [
-  [
-    ['Entrada de secção com pintura', 'Section entrance with a painting'],
-    ['A pintura de 13 de setembro da secção, carregada logo.', 'The section\'s 13 September painting, loaded eagerly.'],
-    ['Liga, simulador da Liga, /eleicoes/arquivo, /eleicoes/legislativas, /eleicoes/presidenciais. Na página inicial, cada painel leva a pintura da sua secção (população: a casa).', 'Liga hub, Liga simulator, /eleicoes/arquivo, /eleicoes/legislativas, /eleicoes/presidenciais. On the homepage, each panel carries its section\'s painting (population: the house).'],
-  ],
-  [
-    ['Páginas de dados, painéis, ferramentas', 'Data pages, dashboards, tools'],
-    ['Campo de cor compacto, sem imagem.', 'A compact tinted field, no art.'],
-    ['/populacao, as freguesias, as regiões, /populacao/misteriosa, /economia, /artigos.', '/populacao, the parish pages, the region pages, /populacao/misteriosa, /economia, /artigos.'],
-  ],
-  [
-    ['Referência, metodologia, editorial', 'Reference, methodology, editorial'],
-    ['Papel liso.', 'Plain paper.'],
-    ['As subpáginas da Liga e das eleições (clube, jogo, jogador, modelo, dados, 2025-26, jogo-previsoes, mapa), todas as metodologias, /populacao/qualidade, /dados, /sobre, /privacidade, /metodologia.', 'The Liga and election sub-pages (club, match, player, modelo, dados, 2025-26, jogo-previsoes, mapa), every methodology page, /populacao/qualidade, /dados, /sobre, /privacidade, /metodologia.'],
-  ],
-  [
-    ['Explicador com mundo próprio', 'Explainer with its own world'],
-    ['O seu próprio desenho, por baixo do cabeçalho comum.', 'Its own drawing, below the shared header.'],
-    ['/populacao/miniatura (a aldeia).', '/populacao/miniatura (the village).'],
-  ],
-  [
-    ['Vazio, erro, 404', 'Empty, error, 404'],
-    ['Um pequeno mosaico quarters e um passo seguinte.', 'A small quarters mosaic and one next step.'],
-    ['Freguesia desconhecida, link desconhecido, arquivo vazio, artigos vazios, estados recusados ou indisponíveis, 404.', 'Unknown parish, unknown permalink, empty archive, empty articles, refused or unavailable states, 404.'],
-  ],
-  [
-    ['Material de marca', 'Brand material'],
-    ['Mosaico.', 'Mosaic.'],
-    ['/marca, o cartão de partilha da marca, o kit social.', '/marca, the OG brand card, the social kit.'],
-  ],
-];
 
 const FILES: readonly (readonly [string, Copy])[] = [
   ['estimador-logo.svg', ['Assinatura, pinho sobre transparente', 'Signature, pine on transparent']],
@@ -312,54 +269,6 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
         </ul>
       </Section>
 
-      <Section id="ilustracao" kicker="05.1" title={pt ? 'Uma família de pinturas' : 'One family of paintings'} lede={pt ? 'Quatro pinturas, uma por secção: a casa, o campo, a mesa de voto e a loja. Dão contexto à entrada; o conteúdo e os dados ocupam o centro da página. Não há outras.' : 'Four paintings, one per section: the house, the ground, the polling place and the shop. They give context at the entrance; content and data take the centre of the page. There are no others.'}>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {PAINTINGS.map(([scene, name, use, file]) => (
-            <div key={scene} className="flex flex-col rounded-2xl border border-line bg-cream p-4">
-              {/* One mat for all four: each painting whole, at its own shape, with the same margin
-                  above and below. The house has no 3:2 crop (it fills its master's height), so it
-                  sits as the square the homepage uses rather than pillarboxed in a 3:2 box. */}
-              <div className="relative flex aspect-[3/2] w-full items-center justify-center rounded-xl bg-parchment">
-                {scene === 'population'
-                  ? <HomeArt name="population" shape="square" sizes="(min-width: 1024px) 160px, (min-width: 640px) 28vw, 60vw" className="absolute left-1/2 top-[6%] aspect-square h-[88%] -translate-x-1/2 rounded-2xl" />
-                  : <div className="w-[88%]"><SectionIllustration scene={scene} sizes="(min-width: 1024px) 180px, (min-width: 640px) 40vw, calc(100vw - 96px)" /></div>}
-              </div>
-              <h3 className="mt-4 text-lg">{tr(pt, name)}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-stone-600">{tr(pt, use)}</p>
-              <a href={file} download className="mt-auto inline-flex min-h-11 items-center pt-2 text-sm font-bold underline underline-offset-4">{pt ? 'Download da pintura' : 'Download painting'}<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
-            </div>
-          ))}
-        </div>
-        <ul className="mt-8 grid gap-2 md:grid-cols-2">
-          <Rule yes>{pt ? 'Cenas frontais e concretas, com arquitetura, materiais e pequenos gestos humanos.' : 'Concrete, frontal scenes with architecture, materials and small human gestures.'}</Rule>
-          <Rule yes>{pt ? 'Cabeçalhos compactos: imagem até 295 px no desktop, carregada logo, por ser o que a página pinta de maior. Em ferramentas, o controlo vem primeiro.' : 'Compact headers: artwork up to 295 px on desktop, loaded eagerly, since it is the page\'s largest paint. In tools, controls come first.'}</Rule>
-          <Rule yes={false}>{pt ? 'Sem moradores pintados nas páginas de dados da população: a casa só aparece na página inicial (e neste guia).' : 'No painted residents on the population data pages: the house appears on the homepage only (and in this guide).'}</Rule>
-          <Rule yes={false}>{pt ? 'Sem imagens atrás de dados, símbolos indecifráveis, cores de partidos decorativas ou personagens genéricas como assinatura.' : 'No imagery behind data, unreadable symbols, decorative party colours or generic characters as the signature.'}</Rule>
-        </ul>
-
-        <h3 id="cabecalhos" className="mt-12 text-base font-bold uppercase tracking-wider text-stone-500">{pt ? 'Que cabeçalho tem cada página' : 'Which header each page gets'}</h3>
-        <div className="mt-4 rounded-2xl border border-line bg-cream">
-          <div aria-hidden="true" className="hidden gap-6 border-b border-line px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-stone-500 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.6fr)]">
-            <span>{pt ? 'Tipo de página' : 'Page kind'}</span><span>{pt ? 'Cabeçalho' : 'Header'}</span><span>{pt ? 'Páginas' : 'Pages'}</span>
-          </div>
-          <ul className="divide-y divide-line">
-            {HEADERS.map(([kind, header, pages]) => (
-              <li key={kind[1]} className="grid gap-1.5 px-5 py-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.6fr)] md:gap-6">
-                <h4 className="text-sm font-bold text-ink">{tr(pt, kind)}</h4>
-                <p className="text-sm leading-relaxed text-ink"><span className="font-semibold text-stone-500 md:sr-only">{pt ? 'Cabeçalho: ' : 'Header: '}</span>{tr(pt, header)}</p>
-                <p className="text-sm leading-relaxed text-stone-600"><span className="font-semibold text-stone-500 md:sr-only">{pt ? 'Páginas: ' : 'Pages: '}</span>{tr(pt, pages)}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink">
-          <span>{pt ? 'Um campo de cor por página e uma cor por secção:' : 'One tinted field per page and one colour per section:'}</span>
-          {([['periwinkle', ['População', 'Population']], ['mint', ['Economia', 'Economy']], ['mustard', ['Artigos', 'Articles']]] as const).map(([field, name]) => (
-            <span key={field} className="inline-flex items-center gap-2"><span aria-hidden="true" className={`field-${field} inline-block h-4 w-6 rounded border border-line`} />{tr(pt, name)}</span>
-          ))}
-        </div>
-      </Section>
-
       <Section id="economia-componentes" kicker="05.2" title={pt ? 'Contexto, depois evidência' : 'Context, then evidence'} lede={pt ? 'Um exemplo de componente económico. Dados fictícios para mostrar hierarquia e legibilidade; não descrevem a economia portuguesa.' : 'An economy component example. Fictional data demonstrate hierarchy and readability; they do not describe the Portuguese economy.'}>
         <TileCard title={pt ? 'Uma série ao longo do tempo' : 'A series over time'} eyebrow={pt ? 'Exemplo visual · índice' : 'Visual example · index'} label={pt ? 'Dados fictícios' : 'Fictional data'} honesty={pt ? 'A mesma escala e os mesmos valores no telemóvel e no desktop. A composição adapta-se para manter as etiquetas legíveis.' : 'The same scale and values on phone and desktop. The composition adapts to keep labels readable.'}>
           <StoryLineChart ariaLabel={pt ? 'Série fictícia de exemplo' : 'Fictional example series'} series={[{ label: pt ? 'Exemplo' : 'Example', color: '#245c68', values: [8, 12, 10, 16, 18, 15, 20] }]} xStartLabel={pt ? 'Início' : 'Start'} xEndLabel={pt ? 'Fim' : 'End'} />
@@ -393,7 +302,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           <div className="rounded-2xl border border-line bg-cream p-6">
             <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{pt ? 'Campos e seletores' : 'Fields and selectors'}</p>
             <label className="mt-4 block text-sm font-medium text-ink" htmlFor="marca-demo-select">{pt ? 'Selecionar tema' : 'Select a topic'}</label>
-            <select id="marca-demo-select" className="mt-1.5 block min-h-12 w-full rounded-[10px] border border-line bg-cream px-3 text-sm text-ink" defaultValue="populacao">
+            <select id="marca-demo-select" className="mt-1.5 block min-h-12 w-full rounded-none border border-line bg-cream px-3 text-sm text-ink" defaultValue="populacao">
               <option value="populacao">{pt ? 'População' : 'Population'}</option>
               <option value="economia">{pt ? 'Economia' : 'Economy'}</option>
             </select>
@@ -470,7 +379,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           {KIT.map(([file, size, note]) => (
             <li key={file} className="flex items-center justify-between gap-4 px-4 py-3">
               <div><div className="font-mono text-sm text-ink">{file.split('/').pop()}</div><div className="text-xs text-stone-500">{size} · {tr(pt, note)}</div></div>
-              <a href={`/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />Download<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
+              <a href={`/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-none border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />Download<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
             </li>
           ))}
         </ul>
@@ -482,7 +391,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
           {FILES.map(([file, note]) => (
             <li key={file} className="flex items-center justify-between gap-4 px-4 py-3">
               <div><div className="font-mono text-sm text-ink">{file}</div><div className="text-xs text-stone-500">{tr(pt, note)}</div></div>
-              <a href={`/brand/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />Download<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
+              <a href={`/brand/${file}`} download className="inline-flex min-h-11 items-center gap-1.5 rounded-none border border-line bg-paper px-3 text-xs font-semibold text-ink hover:bg-parchment"><Download aria-hidden="true" className="h-3.5 w-3.5" />Download<span className="sr-only">{`: ${file.split('/').pop()}`}</span></a>
             </li>
           ))}
         </ul>

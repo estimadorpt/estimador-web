@@ -9,12 +9,12 @@ interface Option { value: string; label: string }
  */
 export function Segmented({ options, value, onChange, label, className = '' }: { options: Option[]; value: string; onChange: (value: string) => void; label: string; className?: string }) {
   return (
-    <div role="group" aria-label={label} className={`inline-flex rounded-[10px] border border-line bg-paper p-1 ${className}`}>
+    <div role="group" aria-label={label} className={`inline-flex rounded-none border border-line bg-paper p-1 ${className}`}>
       {options.map(o => {
         const active = o.value === value;
         return (
           <button key={o.value} type="button" aria-pressed={active} onClick={() => onChange(o.value)}
-            className={`min-h-11 rounded-[8px] px-3.5 text-sm font-semibold transition-colors duration-150 ${active ? 'bg-ink text-paper' : 'text-stone-600 hover:bg-parchment hover:text-ink'}`}>
+            className={`min-h-11 rounded-none px-3.5 text-sm font-semibold transition-colors duration-150 ${active ? 'bg-ink text-paper' : 'text-stone-600 hover:bg-parchment hover:text-ink'}`}>
             {o.label}
           </button>
         );

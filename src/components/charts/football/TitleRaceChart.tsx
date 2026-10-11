@@ -4,6 +4,7 @@ import { useRef, useEffect, useMemo, type ReactNode } from "react";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { quietPlot } from "@/components/viz/plot-a11y";
+import { FONT_STACK } from '@/lib/brand';
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
 import type { LigaProbabilityHistory } from "@/types/football";
@@ -87,7 +88,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
         marginLeft: 45,
         marginRight: width < 500 ? 92 : 128,
         marginBottom: 35,
-        style: { fontFamily: "Inter, system-ui, sans-serif", fontSize: "12px", background: "transparent", color: "#5c5c5c", overflow: "visible" },
+        style: { fontFamily: FONT_STACK, fontSize: "12px", background: "transparent", color: "#5e5e5e", overflow: "visible" },
         x: {
           label: pt ? "Jornada" : "Matchday",
           ticks: Array.from(new Set(lineData.map(d => d.matchday))).sort((a, b) => a - b).filter((_, i, arr) => i % Math.max(1, Math.ceil(arr.length / Math.max(2, width / 60))) === 0),

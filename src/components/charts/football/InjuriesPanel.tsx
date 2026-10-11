@@ -148,7 +148,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
 
               <div className="h-1.5 relative bg-stone-100 mb-1">
                 <div
-                  className="absolute inset-y-0 left-0 rounded-r-[3px]"
+                  className="absolute inset-y-0 left-0 rounded-none"
                   style={{ width: `${barPct}%`, backgroundColor: "#a3543a", opacity: 0.75 }}
                 />
               </div>

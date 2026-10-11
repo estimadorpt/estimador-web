@@ -29,8 +29,8 @@ export function RankedBars({ rows, max, tableCaption, tableColumns, className = 
       {rows.map(row => (
         <li key={row.label} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 sm:grid-cols-[140px_minmax(0,1fr)_72px]">
           <span className={`truncate text-sm ${row.muted ? 'text-stone-500' : 'font-semibold text-ink'}`}>{row.label}{row.note && <span className="ml-2 text-xs font-normal text-stone-500">{row.note}</span>}</span>
-          <span className="order-3 col-span-2 h-2.5 overflow-hidden rounded-r-[4px] sm:order-none sm:col-span-1" style={{ backgroundColor: FURNITURE.track }} aria-hidden="true">
-            <span className="block h-full rounded-r-[4px]" style={{ width: `${Math.max(1.5, (row.value / top) * 100)}%`, backgroundColor: row.muted ? '#c3c8bb' : (row.color ?? ACCENT) }} />
+          <span className="order-3 col-span-2 h-2.5 overflow-hidden rounded-none sm:order-none sm:col-span-1" style={{ backgroundColor: FURNITURE.track }} aria-hidden="true">
+            <span className="block h-full rounded-none" style={{ width: `${Math.max(1.5, (row.value / top) * 100)}%`, backgroundColor: row.muted ? '#c3c8bb' : (row.color ?? ACCENT) }} />
           </span>
           <span className={`text-right text-sm tabular-nums ${row.muted ? 'text-stone-500' : 'font-bold text-ink'}`}>{row.display}</span>
         </li>

@@ -3,8 +3,9 @@ import { Link } from '@/i18n/routing';
 import { Action } from '@/components/brand/Action';
 import { ELECTION_ROUTES } from '@/lib/config/homepage';
 import { PARLIAMENTARY_2025_FORECAST_CUTOFF, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections';
-import { credibleIntervalLabel, formatElectionLongDate, formatElectionPercent } from '@/lib/election-display';
-import { loadSecondRoundData } from '@/lib/utils/data-loader';
+import { credibleIntervalLabel, formatElectionLongDate, formatElectionPercent, formatElectionProbability } from '@/lib/election-display';
+import { loadForecastData, loadSecondRoundData } from '@/lib/utils/data-loader';
+import { ChannelHead } from '@/components/instrument';
 import type { ElectionConfig } from '@/types';
 import { HomePanel, Kicker } from './HomePanel';
 
@@ -16,8 +17,9 @@ export interface ElectionSnapshot {
 }
 
 /**
- * Elections. Standard mode: the configured elections as dated archive routes,
- * labelled for what the destinations hold (archived forecasts, not results).
+ * Elections. Standard mode: the archive as an instrument, one dated finding
+ * per election read from its own files, labelled for what the destinations
+ * hold (archived forecasts, not results).
  * Election mode: the selected election leads, with its real forecast date, its
  * state named carefully and one strong action; uncertainty stays visible.
  */
@@ -87,9 +89,19 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
   // meaningful one; the parliamentary files carry no run date, so its date is
   // the configured cutoff (PARLIAMENTARY_2025_FORECAST_CUTOFF).
   const forecastCutoffs: Record<string, string | undefined> = { 'parliamentary-2025': PARLIAMENTARY_2025_FORECAST_CUTOFF };
+  // Each archive's finding, read from its own files: the runoff winner's
+  // chance, and the party with most seats in the seat draws.
+  const findings: Record<string, string | undefined> = {};
   if (elections.some(e => e.id === 'presidential-2026')) {
     const second = await loadSecondRoundData();
     forecastCutoffs['presidential-2026'] = second.forecast.updated_at || undefined;
+    const leader = [...second.winProbability.candidates].sort((a, b) => b.win_probability - a.win_probability)[0];
+    if (leader) findings['presidential-2026'] = t('electionsFindingRunoff', { name: leader.name, p: formatElectionProbability(leader.win_probability, locale) });
+  }
+  if (elections.some(e => e.id === 'parliamentary-2025')) {
+    const { seatData } = await loadForecastData();
+    const top = mostSeats(seatData);
+    if (top) findings['parliamentary-2025'] = t('electionsFindingSeats', { party: partyWithArticle(top.party, locale), p: formatElectionProbability(top.share, locale) });
   }
   // One date per row, the forecast's: the election and round dates are on the
   // archive page itself.
@@ -98,37 +110,44 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
     const date = longDate(cutoff);
     return e.id === 'presidential-2026' ? t('electionsForecastRunoff', { date }) : t('electionsForecastAsOf', { date });
   };
-  const questionLine = (e: ElectionConfig) => e.type === 'presidential' ? t('electionsQuestionRunoff') : t('electionsQuestionSeats');
 
   return (
-    <HomePanel labelledBy="home-elections-title">
-      <div className="min-w-0 p-5 md:p-6">
-        <div>
-          <Kicker pill={tSections('archiveSection')}>{t('electionsKicker')}</Kicker>
-          <h2 id="home-elections-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{t('electionsTitle')}</h2>
-        </div>
-        <p className="mt-2 text-[14px] leading-relaxed text-stone-600">{t('electionsText')}</p>
-        <ul className="mt-3 divide-y divide-line border-y border-line">
-          {elections.filter(e => ELECTION_ROUTES[e.id]).map(e => {
-            const cutoff = forecastCutoffs[e.id];
-            return (
-              // Below 640px the link goes under the text, which keeps the row's
-              // width instead of a 180px column with orphans (UXM3-14).
-              <li key={e.id} className="flex flex-col items-start gap-y-1 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4">
-                <div className="min-w-0 sm:min-w-[170px] sm:flex-1">
-                  <span className="block text-[15px] font-semibold text-ink">{electionName(e)}</span>
-                  <span className="block text-[13px] text-stone-600">
-                    {past(e) ? t('electionsArchived') : t('electionsForecast')} · {dateLine(e, cutoff)}
-                  </span>
-                  <span className="block text-[12px] text-stone-500">{questionLine(e)}</span>
-                </div>
-                <Link href={ELECTION_ROUTES[e.id]} locale={locale} className="inline-flex min-h-11 shrink-0 items-center whitespace-nowrap text-[15px] font-semibold text-ink underline underline-offset-4">{t('electionsOpen')}<span className="sr-only">: {electionName(e)}</span>&nbsp;<span aria-hidden="true">→</span></Link>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="mt-3"><Action href="/eleicoes/arquivo" locale={locale} variant="text" arrow>{t('electionsArchiveGuide')}</Action></div>
-      </div>
-    </HomePanel>
+    <section aria-labelledby="home-elections" className="min-w-0">
+      <ChannelHead id="home-elections" title={t('electionsKicker')} href="/eleicoes/arquivo" locale={locale} serial={tSections('archiveSection').toLowerCase()} />
+      <p className="mt-3 max-w-[70ch] text-[14px] leading-5 text-graphite">{t('electionsText')}</p>
+      <ul className="mt-3 grid gap-x-8 md:grid-cols-2">
+        {elections.filter(e => ELECTION_ROUTES[e.id]).map(e => (
+          <li key={e.id} className="min-w-0 border-t border-rule py-3">
+            <p className="text-[13px] text-graphite">
+              <span className="font-semibold text-ink">{electionName(e)}</span>{' · '}{dateLine(e, forecastCutoffs[e.id])}
+            </p>
+            {findings[e.id] && <p className="disp mt-1 text-[22px] leading-[1.08] md:text-[24px]">{findings[e.id]}</p>}
+            <Link href={ELECTION_ROUTES[e.id]} locale={locale} className="mt-1 inline-flex min-h-11 items-center text-[15px] font-semibold text-ink underline underline-offset-4">
+              {t('electionsOpen')}<span className="sr-only">: {electionName(e)}</span>&nbsp;<span aria-hidden="true">→</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
+}
+
+/** The party with most seats in the most draws, and the share of draws it leads (ties count for no one). */
+function mostSeats(draws: Array<Record<string, number>>): { party: string; share: number } | null {
+  if (!draws.length) return null;
+  const parties = Object.keys(draws[0]).filter(k => typeof draws[0][k] === 'number' && !/scenario|sample|_id$/.test(k));
+  const wins: Record<string, number> = {};
+  for (const draw of draws) {
+    const ranked = parties.map(p => [p, draw[p]] as const).sort((a, b) => b[1] - a[1]);
+    if (ranked.length > 1 && ranked[0][1] > ranked[1][1]) wins[ranked[0][0]] = (wins[ranked[0][0]] ?? 0) + 1;
+  }
+  const [party, count] = Object.entries(wins).sort((a, b) => b[1] - a[1])[0] ?? [];
+  return party ? { party, share: count / draws.length } : null;
+}
+
+/** "A AD", "O PS": the party as the subject of a Portuguese sentence. */
+function partyWithArticle(party: string, locale: string): string {
+  if (locale === 'en') return party;
+  const feminine = new Set(['AD', 'IL', 'CDU']);
+  return `${feminine.has(party) ? 'A' : 'O'} ${party}`;
 }

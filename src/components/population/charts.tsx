@@ -36,9 +36,9 @@ export function ShareBars({ cells, locale, color = ACCENT, stacked = false }: {
           className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 ${stacked ? '' : 'sm:grid-cols-[minmax(120px,190px)_minmax(0,1fr)_64px]'}`}
         >
           <span className="text-sm text-ink">{cell.labels[cell.labels.length - 1]}</span>
-          <span className={`order-3 col-span-2 h-2.5 overflow-hidden rounded-r-[4px] ${stacked ? '' : 'sm:order-none sm:col-span-1'}`} style={{ backgroundColor: FURNITURE.track }} aria-hidden="true">
+          <span className={`order-3 col-span-2 h-2.5 overflow-hidden rounded-none ${stacked ? '' : 'sm:order-none sm:col-span-1'}`} style={{ backgroundColor: FURNITURE.track }} aria-hidden="true">
             {cell.share !== null && cell.share > 0 && (
-              <span className="block h-full rounded-r-[4px]" style={{ width: `${Math.max(0.8, cell.share * 100)}%`, backgroundColor: color }} />
+              <span className="block h-full rounded-none" style={{ width: `${Math.max(0.8, cell.share * 100)}%`, backgroundColor: color }} />
             )}
           </span>
           <span

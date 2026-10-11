@@ -32,7 +32,7 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
         <ul className="flex flex-wrap gap-2">
           {municipalities.map(m => (
             <li key={m.code}>
-              <a href={`#concelho-${m.code}`} className="inline-flex min-h-11 items-center rounded-[10px] border border-line bg-cream px-3 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-parchment">
+              <a href={`#concelho-${m.code}`} className="inline-flex min-h-11 items-center rounded-none border border-line bg-cream px-3 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-parchment">
                 {m.name}
               </a>
             </li>

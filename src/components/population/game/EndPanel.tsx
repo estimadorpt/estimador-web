@@ -16,7 +16,7 @@ import { ofMunicipality } from '../parish/place-words';
 import { GAME_COPY } from './copy';
 import { Locator } from './Locator';
 
-const SECONDARY = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] border border-line bg-cream px-5 text-[15px] font-semibold leading-none text-ink transition-colors duration-150 hover:bg-parchment';
+const SECONDARY = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-none border border-line bg-cream px-5 text-[15px] font-semibold leading-none text-ink transition-colors duration-150 hover:bg-parchment';
 
 /**
  * The end of a game: the parish named, then straight away the share button and
@@ -180,7 +180,7 @@ function Stats({ stats, locale, highlight, countdown }: { stats: GameStats; loca
                 <th scope="row" className="w-20 py-0.5 pr-2 text-left text-xs font-semibold tabular-nums text-ink">{t.distributionRow(i + 1)}</th>
                 <td className="py-0.5">
                   <span className="flex items-center gap-2">
-                    <span className="block h-4 rounded-r-[4px]" style={{ width: `${Math.max(2, (value / top) * 85)}%`, backgroundColor: highlight === i + 1 ? ACCENT : value ? FURNITURE.axis : FURNITURE.track }} aria-hidden="true" />
+                    <span className="block h-4 rounded-none" style={{ width: `${Math.max(2, (value / top) * 85)}%`, backgroundColor: highlight === i + 1 ? ACCENT : value ? FURNITURE.axis : FURNITURE.track }} aria-hidden="true" />
                     <span className="text-xs font-bold tabular-nums text-ink">{value}</span>
                   </span>
                 </td>

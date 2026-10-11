@@ -268,7 +268,7 @@ export function MatchProbabilityHero({
           {/* Split bar */}
           {/* The bar repeats the three numbers above; it carries no text, so
               no number ever sits in white on a club colour (audit S-H6). */}
-          <div aria-hidden="true" className="flex h-4 w-full gap-[2px] overflow-hidden rounded-[4px]">
+          <div aria-hidden="true" className="flex h-4 w-full gap-[2px] overflow-hidden rounded-none">
             {outcomes.map(o => (
               <div key={o.key} style={{ width: `${o.p * 100}%`, backgroundColor: o.tone }} />
             ))}

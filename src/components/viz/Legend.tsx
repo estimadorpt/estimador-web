@@ -7,7 +7,7 @@ export function Legend({ items, className = '' }: { items: Item[]; className?: s
     <ul className={`flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-stone-600 ${className}`}>
       {items.map(i => (
         <li key={i.label} className="flex items-center gap-1.5">
-          {i.kind === 'rect' ? <span className="inline-block h-2.5 w-2.5 rounded-[2px]" style={{ backgroundColor: i.color }} aria-hidden="true" />
+          {i.kind === 'rect' ? <span className="inline-block h-2.5 w-2.5 rounded-none" style={{ backgroundColor: i.color }} aria-hidden="true" />
             : i.kind === 'dot' ? <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: i.color }} aria-hidden="true" />
             : <span className="inline-block h-[2px] w-4 rounded-full" style={{ backgroundColor: i.color }} aria-hidden="true" />}
           {i.label}

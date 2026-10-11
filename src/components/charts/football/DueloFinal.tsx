@@ -158,7 +158,7 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
           id={`${selectId}-${which}`}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base font-medium text-ink sm:text-sm"
+          className="min-h-11 w-full rounded-none border border-line bg-paper px-2 text-base font-medium text-ink sm:text-sm"
         >
           {teamOptions
             .filter((o) => o.i !== other)
@@ -207,7 +207,7 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
           {shownBins.map((b) => (
             <div key={`${b.lo}`} className="flex-1 flex flex-col justify-end h-full">
               <div
-                className="w-full max-w-[56px] mx-auto rounded-t-[4px]"
+                className="w-full max-w-[56px] mx-auto rounded-none"
                 style={{
                   height: `${Math.max(b.count > 0 ? 3 : 0, (100 * b.count) / maxCount)}%`,
                   backgroundColor: b.side === "a" ? colorA : b.side === "b" ? colorB : TIE_COLOR,

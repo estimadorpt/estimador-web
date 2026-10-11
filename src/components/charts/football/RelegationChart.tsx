@@ -3,6 +3,7 @@
 import { useRef, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
+import { FONT_STACK } from '@/lib/brand';
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
 import type { LigaProbabilityHistory } from "@/types/football";
@@ -120,7 +121,7 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
         marginLeft: 45,
         marginRight: width < 500 ? 92 : 128,
         marginBottom: 35,
-        style: { fontFamily: "Inter, system-ui, sans-serif", fontSize: "12px", background: "transparent", color: "#5c5c5c", overflow: "visible" },
+        style: { fontFamily: FONT_STACK, fontSize: "12px", background: "transparent", color: "#5e5e5e", overflow: "visible" },
         x: {
           label: pt ? "Jornada" : "Matchday",
           // Whole matchdays only, thinned to roughly one per 60px.

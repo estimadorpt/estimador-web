@@ -322,7 +322,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 setPendingTeam(e.target.value);
                 setChooseHint(false);
               }}
-              className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm"
+              className="block min-h-11 w-full rounded-none border border-line bg-paper px-2 text-base text-ink sm:text-sm"
             >
               <option value="" disabled>
                 {pt ? 'Escolhe um clube' : 'Choose a club'}
@@ -336,7 +336,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 ))}
             </select>
           </span>
-          <button type="submit" className="min-h-11 rounded-[10px] bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-forest">
+          <button type="submit" className="min-h-11 rounded-none bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-forest">
             {pt ? 'Seguir' : 'Follow'}
           </button>
           {chooseHint && (
@@ -397,8 +397,8 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           when tabbing backwards (audit A11Y2-02). */}
       <section aria-label={pt?'A tua pergunta':'Your question'} className="col-span-full rounded-2xl border border-line bg-cream p-3 md:p-5">
         <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
-          <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-team`} className="text-xs font-semibold text-ink-muted">{pt?'Equipa a seguir':'Club to follow'}</label><select id={`${ids}-team`} value={focusTeam} onChange={e=>setFocusTeam(e.target.value)} className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm">{Object.keys(data.baseline).sort((a,b)=>teamDisplayName(a).localeCompare(teamDisplayName(b),'pt')).map(team=><option key={team} value={team}>{teamDisplayName(team)}</option>)}</select></span>
-          <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-goal`} className="text-xs font-semibold text-ink-muted">{pt?'O que queres saber?':'What matters to you?'}</label><select id={`${ids}-goal`} value={objective} onChange={e=>setObjective(e.target.value as typeof objective)} className="block min-h-11 w-full rounded-[10px] border border-line bg-paper px-2 text-base text-ink sm:text-sm"><option value="p_champion">{pt?'Ganhar o título':'Win the title'}</option><option value="p_relegation">{pt?'Despromoção':'Relegation'}</option></select></span>
+          <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-team`} className="text-xs font-semibold text-ink-muted">{pt?'Equipa a seguir':'Club to follow'}</label><select id={`${ids}-team`} value={focusTeam} onChange={e=>setFocusTeam(e.target.value)} className="block min-h-11 w-full rounded-none border border-line bg-paper px-2 text-base text-ink sm:text-sm">{Object.keys(data.baseline).sort((a,b)=>teamDisplayName(a).localeCompare(teamDisplayName(b),'pt')).map(team=><option key={team} value={team}>{teamDisplayName(team)}</option>)}</select></span>
+          <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-goal`} className="text-xs font-semibold text-ink-muted">{pt?'O que queres saber?':'What matters to you?'}</label><select id={`${ids}-goal`} value={objective} onChange={e=>setObjective(e.target.value as typeof objective)} className="block min-h-11 w-full rounded-none border border-line bg-paper px-2 text-base text-ink sm:text-sm"><option value="p_champion">{pt?'Ganhar o título':'Win the title'}</option><option value="p_relegation">{pt?'Despromoção':'Relegation'}</option></select></span>
           {/* Why the question is relegation, when the reader did not choose it (FA3-03). */}
           {objectiveIsDefault && objective === 'p_relegation' && (
             <p className="text-xs leading-relaxed text-ink-muted sm:col-span-2">

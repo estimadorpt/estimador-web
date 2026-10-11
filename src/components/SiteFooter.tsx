@@ -5,6 +5,7 @@ import { LogoHorizontal } from './Logo';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 import { brandDescriptor, brandLine } from '@/lib/brand/descriptor';
+import { ReadingRule } from '@/components/instrument/ReadingRule';
 
 // Links are ink with an underline at rest (CLAUDE.md); keyboard focus is the
 // global double ring in globals.css, so nothing here declares its own.
@@ -24,7 +25,7 @@ const listStyle = 'space-y-1.5 md:space-y-0.5';
 function FooterColumn({ heading, items, locale }: { heading: string; items: FooterItem[]; locale: string }) {
   return (
     <div>
-      <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{heading}</h2>
+      <h2 className="font-sans tracking-normal mb-2 text-[13px] font-bold not-italic leading-5">{heading}</h2>
       <ul className={listStyle}>
         {items.map(item => (
           <li key={item.href}>
@@ -52,7 +53,7 @@ export async function SiteFooter({ locale }: { locale: string }) {
   const hasArticles = getMDXArticlesByLocale(locale).length > 0;
 
   // Ordered by what is live, as in the header: population, the Liga, the
-  // election archive, then the economy while it is in preparation.
+  // election archive, then the economy once it publishes.
   const sections: FooterItem[] = [
     { href: '/populacao', label: t('nav.population') },
     // One public name for football, the league's own (CLAUDE.md).
@@ -60,7 +61,7 @@ export async function SiteFooter({ locale }: { locale: string }) {
     // One entry for both archived forecasts, as the header groups them under
     // "Eleições": the archive's own page leads to each (CL3-06).
     { href: '/eleicoes/arquivo', label: t('footer.electionsArchive') },
-    { href: '/economia', label: t(ECONOMY_PUBLISHED ? 'sections.economics' : 'nav.economicsPreparing') },
+    ...(ECONOMY_PUBLISHED ? [{ href: '/economia', label: t('sections.economics') }] : []),
   ];
   // The brand guide (/marca) is an internal, unindexed page: reachable by its
   // address, not listed here.
@@ -74,23 +75,27 @@ export async function SiteFooter({ locale }: { locale: string }) {
   ];
 
   return (
-    <footer className="mt-16 border-t border-line bg-paper">
+    <footer className="mt-16 border-t-2 border-ink bg-paper">
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
-            <Link href="/" locale={locale} className="brand-link inline-flex min-h-11 items-center rounded-sm" aria-label={pt ? 'estimador.pt — página inicial' : 'estimador.pt — home'}>
+            <Link href="/" locale={locale} className="brand-link inline-flex min-h-11 items-center" aria-label={pt ? 'estimador.pt — página inicial' : 'estimador.pt — home'}>
               <LogoHorizontal size={20} />
             </Link>
             {/* The line on its own, then the descriptor: set as one paragraph
                 they read "Dados… Dados… Portugal… Portugal" (CL3-16). */}
             <p className="mt-3 text-sm font-semibold text-ink">{brandLine(locale)}</p>
-            <p className="mt-1 text-sm leading-relaxed text-stone-500">{brandDescriptor(locale)}</p>
+            <p className="mt-1 text-sm leading-relaxed text-graphite">{brandDescriptor(locale)}</p>
+            {/* The site's three marks, explained once for every page. */}
+            <p className="mt-4 text-[13px] leading-5 text-ink">
+              <ReadingRule locale={locale} className="flex-col !items-start" />
+            </p>
           </div>
           <div className="grid grid-cols-2 gap-x-10 gap-y-6 text-sm sm:grid-cols-3">
             <FooterColumn heading={t('footer.products')} items={sections} locale={locale} />
             <FooterColumn heading={t('footer.project')} items={project} locale={locale} />
             <div>
-              <h2 className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t('footer.contact')}</h2>
+              <h2 className="font-sans tracking-normal mb-2 text-[13px] font-bold leading-5">{t('footer.contact')}</h2>
               <ul className={listStyle}>
                 <li>
                   <a href="mailto:info@estimador.pt" className={`${linkStyle} [overflow-wrap:anywhere]`}>info@estimador.pt</a>
@@ -116,7 +121,7 @@ export async function SiteFooter({ locale }: { locale: string }) {
             </div>
           </div>
         </div>
-        <div className="mt-8 flex flex-col gap-2 border-t border-line pt-5 text-xs text-stone-500 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 flex flex-col gap-2 border-t border-rule pt-5 text-xs text-graphite sm:flex-row sm:items-center sm:justify-between">
           <p>{t('about.footerDeveloper')}</p>
           <p>© {year} estimador.pt</p>
         </div>

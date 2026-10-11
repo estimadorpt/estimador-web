@@ -778,7 +778,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
         {/* Where you are, and a way back up */}
         <div className="flex min-h-14 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-line px-3 py-1.5 sm:px-4">
           <nav aria-label={t.breadcrumb} className="flex min-w-0 items-center gap-1">
-            <button type="button" onClick={up} disabled={view.level === 'country'} aria-label={t.up} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-ink hover:bg-parchment disabled:pointer-events-none disabled:opacity-30">
+            <button type="button" onClick={up} disabled={view.level === 'country'} aria-label={t.up} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-none text-ink hover:bg-parchment disabled:pointer-events-none disabled:opacity-30">
               <ChevronLeft aria-hidden="true" className="h-5 w-5" />
             </button>
             <ol className="flex min-w-0 flex-wrap items-center gap-x-1 text-sm">
@@ -795,7 +795,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
               })}
             </ol>
           </nav>
-          <button type="button" onClick={() => { void random(); }} className="inline-flex min-h-11 items-center gap-2 rounded-[10px] px-2 text-sm font-semibold text-ink hover:bg-parchment">
+          <button type="button" onClick={() => { void random(); }} className="inline-flex min-h-11 items-center gap-2 rounded-none px-2 text-sm font-semibold text-ink hover:bg-parchment">
             <Shuffle aria-hidden="true" className="h-4 w-4" />
             {t.random}
           </button>
@@ -814,7 +814,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                 aria-pressed={group === item.id}
                 aria-label={t.islandGroup(item.label[locale])}
                 onClick={() => frameGroup(item.id)}
-                className={`inline-flex min-h-11 items-center rounded-[10px] border px-2.5 text-sm font-semibold transition-colors duration-150 sm:px-3 ${group === item.id ? 'border-ink bg-ink text-paper' : 'border-line bg-cream text-ink hover:bg-parchment'}`}
+                className={`inline-flex min-h-11 items-center rounded-none border px-2.5 text-sm font-semibold transition-colors duration-150 sm:px-3 ${group === item.id ? 'border-ink bg-ink text-paper' : 'border-line bg-cream text-ink hover:bg-parchment'}`}
               >
                 {item.label[locale]}
               </button>
@@ -838,7 +838,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                 if (details) details.open = true;
                 listRef.current?.querySelector<HTMLElement>('summary')?.focus();
               }}
-              className="sr-only z-10 min-h-11 items-center rounded-[10px] border border-line bg-cream px-3 text-sm font-semibold text-ink underline underline-offset-4 focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:inline-flex"
+              className="sr-only z-10 min-h-11 items-center rounded-none border border-line bg-cream px-3 text-sm font-semibold text-ink underline underline-offset-4 focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:inline-flex"
             >
               {t.skip}
             </a>
@@ -911,7 +911,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
             {failed && (
               <div className="absolute inset-x-3 top-3 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-cream p-3 text-sm text-ink" role="alert">
                 <span>{t.failed}</span>
-                <button type="button" onClick={() => setAttempt(n => n + 1)} className="inline-flex min-h-11 items-center rounded-[10px] border border-line bg-cream px-4 font-semibold hover:bg-parchment">{t.retry}</button>
+                <button type="button" onClick={() => setAttempt(n => n + 1)} className="inline-flex min-h-11 items-center rounded-none border border-line bg-cream px-4 font-semibold hover:bg-parchment">{t.retry}</button>
               </div>
             )}
 
@@ -985,7 +985,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                   {(['A', 'B', 'C'] as const).map(tier => (
                     <li key={tier} className="flex items-center gap-2">
                       {/* The letter sits in the swatch: A and B are close in colour. */}
-                      <span aria-hidden="true" className="inline-flex h-5 w-6 shrink-0 items-center justify-center rounded-[4px] border border-line text-[11px] font-bold text-ink" style={{ backgroundColor: TIER_FILL[tier] }}>{tier}</span>
+                      <span aria-hidden="true" className="inline-flex h-5 w-6 shrink-0 items-center justify-center rounded-none border border-line text-[11px] font-bold text-ink" style={{ backgroundColor: TIER_FILL[tier] }}>{tier}</span>
                       <span>{t.tierLegend[tier]}</span>
                     </li>
                   ))}

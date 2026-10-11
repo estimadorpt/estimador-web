@@ -55,7 +55,7 @@ export function ArchivePicker({ epoch, today, current, store, locale, onPlay }: 
                 id={`${id}-day`}
                 value={choice}
                 onChange={event => setChoice(Number(event.target.value))}
-                className="h-12 w-full rounded-[10px] border border-line bg-cream px-3 text-[15px] text-ink"
+                className="h-12 w-full rounded-none border border-line bg-cream px-3 text-[15px] text-ink"
               >
                 {earlier.map(day => (
                   <option key={day} value={day}>

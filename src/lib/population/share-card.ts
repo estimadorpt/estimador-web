@@ -10,7 +10,8 @@
  * contract can still express, says so in the line itself, because a card
  * travels without the page around it.
  */
-import { BRAND, MARK_FULL } from '@/lib/brand';
+import { BRAND, FONT_STACK, MARK_FULL } from '@/lib/brand';
+import { WORDMARK_BASELINE, WORDMARK_NAME, WORDMARK_TLD, WORDMARK_X } from '@/lib/brand/wordmark';
 import { POPULATION_PUBLISHED, POPULATION_RELEASE } from '@/lib/config/population';
 import type { ParishRecord, PopulationRecipe, PortraitRecipe, RecipeName } from '@/types/population';
 import { headlineCell, formatDisplay } from './compact';
@@ -203,7 +204,7 @@ export function wrapLines(text: string, maxWidth: number, measure: (text: string
   return kept;
 }
 
-const FONT = 'Inter, system-ui, sans-serif';
+const FONT = FONT_STACK;
 const font = (weight: number, size: number) => `${weight} ${size}px ${FONT}`;
 
 /** The weights the card uses; load them before drawing (document.fonts.load). */
@@ -224,20 +225,19 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
   ctx.fillStyle = BRAND.paper;
   ctx.fillRect(0, 0, width, height);
 
-  // Signature: the interval mark (48×24 box) and the wordmark, Manrope 800.
+  // Signature: the published logo drawing (the interval mark in its 48×24
+  // box and the outlined wordmark in the logo's 220×24 box), so it needs no font.
   const markHeight = 30;
   ctx.save();
   ctx.translate(pad, 56);
   ctx.scale(markHeight / 24, markHeight / 24);
   ctx.fillStyle = BRAND.ink;
   ctx.fill(new Path2D(MARK_FULL));
+  ctx.translate(WORDMARK_X, WORDMARK_BASELINE);
+  ctx.fill(new Path2D(WORDMARK_NAME));
+  ctx.fillStyle = BRAND.muted;
+  ctx.fill(new Path2D(WORDMARK_TLD));
   ctx.restore();
-  ctx.font = font(800, 32);
-  ctx.fillStyle = BRAND.ink;
-  const wordX = pad + markHeight * 2 + 14;
-  ctx.fillText('estimador', wordX, 56 + 26);
-  ctx.fillStyle = BRAND.faint;
-  ctx.fillText('.pt', wordX + ctx.measureText('estimador').width, 56 + 26);
 
   // Left column: eyebrow, question, place.
   const hasFacts = model.facts.length > 0;

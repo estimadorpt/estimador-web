@@ -6,9 +6,9 @@ import { containerClass, MEASURES, type ContainerWidth, type Measure } from '@/c
 import { kickerWithoutBack } from '@/components/brand/hero-kicker';
 
 interface PageHeroProps {
-  /** Small uppercase label above the title: the section and, if useful, the edition. */
+  /** The section and, if useful, the edition, above the title ("Liga Portugal — época 2026-27"). */
   eyebrow?: ReactNode;
-  /** Icon rendered before the eyebrow. */
+  /** Accepted for compatibility; heroes draw no icons. */
   icon?: ReactNode;
   title: ReactNode;
   /** One or two sentences under the title. */
@@ -25,7 +25,7 @@ interface PageHeroProps {
   art?: ReactNode;
   /** Accepted for compatibility; section scenes are no longer drawn. */
   illustration?: IllustrationScene;
-  /** One soft field per page at most: the entrance colour of a section. */
+  /** Accepted for compatibility; heroes are plain white. */
   field?: 'mint' | 'periwinkle' | 'coral' | 'mustard';
   /** One main action and, at most, one secondary. */
   actions?: ReactNode;
@@ -44,16 +44,15 @@ interface PageHeroProps {
 }
 
 /**
- * The opening of every forecast and dashboard page: kicker, title and
- * lede on the paper ground, closed by a hairline. It replaces the charcoal
- * bands the sections used to open with, so a page now starts the way the
- * atlas does.
+ * The opening of every page: the section's name, the title (a finding where
+ * the page has one), a lede and the reading's facts, on white, closed by a
+ * rule. No icon, no tinted field, no painting.
  */
-export function PageHero({ eyebrow: givenEyebrow, icon, title, lede, back, meta, art, field, actions, width = '7xl', measure = 'full', compact = false, className = '' }: PageHeroProps) {
+export function PageHero({ eyebrow: givenEyebrow, title, lede, back, meta, art, actions, width = '7xl', measure = 'full', compact = false, className = '' }: PageHeroProps) {
   // Under a back link, the kicker does not say the section's name again (CL3-07).
   const eyebrow = back ? kickerWithoutBack(givenEyebrow, back.label) : givenEyebrow;
   return (
-    <section className={`relative overflow-hidden border-b border-line ${field ? `field-${field}` : 'bg-paper'} ${className}`}>
+    <section className={`relative overflow-hidden border-b border-rule bg-paper ${className}`}>
       {art && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 hidden w-[38%] max-w-[520px] lg:block">
           {art}
@@ -66,22 +65,19 @@ export function PageHero({ eyebrow: givenEyebrow, icon, title, lede, back, meta,
             href={back.href}
             locale={back.locale}
             // 44px tall for a thumb; the negative margin keeps the visual rhythm.
-            className="-mt-3 mb-2 inline-flex min-h-11 items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-stone-500 transition-colors hover:text-ink"
+            className="-mt-3 mb-1 inline-flex min-h-11 items-center gap-1 text-[14px] font-semibold text-ink underline decoration-scale underline-offset-4 hover:decoration-ink"
           >
             <ArrowLeft aria-hidden="true" className="h-3.5 w-3.5" />
             {back.label}
           </Link>
         )}
         {eyebrow && (
-          <div className="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-wide text-stone-500">
-            {icon}
-            <span>{eyebrow}</span>
-          </div>
+          <p className="disp mb-2 text-[15px] leading-5">{eyebrow}</p>
         )}
-        <h1 className={`max-w-3xl leading-[1.08] text-ink ${compact ? 'text-2xl md:text-4xl' : 'text-3xl md:text-[2.75rem]'}`}>{title}</h1>
-        {lede && <p className={`max-w-2xl leading-relaxed text-stone-600 ${compact ? 'mt-2 text-base' : 'mt-3 text-base md:text-lg'}`}>{lede}</p>}
+        <h1 className={`max-w-4xl leading-[1.02] text-ink ${compact ? 'text-[2rem] md:text-[2.75rem]' : 'text-[2.25rem] md:text-[3.5rem]'}`}>{title}</h1>
+        {lede && <p className={`max-w-2xl leading-relaxed text-ink ${compact ? 'mt-3 text-base' : 'mt-3 text-base md:text-[17px]'}`}>{lede}</p>}
         {actions && <div className={`flex flex-wrap items-center gap-x-4 gap-y-3 ${compact ? 'mt-5' : 'mt-6'}`}>{actions}</div>}
-        {meta && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-stone-600">{meta}</div>}
+        {meta && <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-graphite">{meta}</div>}
         </div>
       </div>
     </section>

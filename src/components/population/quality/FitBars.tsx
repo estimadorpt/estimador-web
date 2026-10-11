@@ -42,8 +42,8 @@ export function FitBars({ rows, caption, columns, noteColumn, max }: {
               {row.label}
               {row.note && <span className="block text-xs font-normal text-stone-500">{row.note}</span>}
             </span>
-            <span className="order-3 col-span-2 h-2.5 overflow-hidden rounded-r-[4px] sm:order-none sm:col-span-1" style={{ backgroundColor: FURNITURE.track }} aria-hidden="true">
-              <span className="block h-full rounded-r-[4px]" style={{ width: `${Math.max(1.5, (row.value / top) * 100)}%`, backgroundColor: ACCENT }} />
+            <span className="order-3 col-span-2 h-2.5 overflow-hidden rounded-none sm:order-none sm:col-span-1" style={{ backgroundColor: FURNITURE.track }} aria-hidden="true">
+              <span className="block h-full rounded-none" style={{ width: `${Math.max(1.5, (row.value / top) * 100)}%`, backgroundColor: ACCENT }} />
             </span>
             <span className="text-right text-sm font-bold tabular-nums text-ink">{row.display}</span>
           </li>

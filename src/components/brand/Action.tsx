@@ -24,7 +24,7 @@ interface ActionProps {
  * text action. All 48px tall with 10px corners; the keyboard focus ring is
  * global (globals.css). One main action per view.
  */
-const base = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] px-5 text-[15px] font-semibold leading-none transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50';
+const base = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-none px-5 text-[15px] font-semibold leading-none transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50';
 const variants: Record<Variant, string> = {
   primary: `${base} bg-ink text-paper hover:bg-ink-dark`,
   secondary: `${base} border border-line bg-cream text-ink hover:bg-parchment`,

@@ -6,7 +6,7 @@
  * separation and 3:1 contrast all pass in this fixed order. Never cycle past
  * four: fold into "Outros" or facet.
  */
-import { BRAND } from '@/lib/brand';
+import { BRAND, FONT_STACK } from '@/lib/brand';
 import { withMinus } from '@/lib/typography';
 
 export const SERIES = ['#159881', '#a27d27', '#697fc5', '#ba6b4f'] as const;
@@ -35,7 +35,7 @@ export const FURNITURE = {
   text: BRAND.ink,
   textMuted: BRAND.muted,
   track: BRAND.parchment,
-  font: 'Inter, system-ui, sans-serif',
+  font: FONT_STACK,
 } as const;
 
 export const NUMBER = {

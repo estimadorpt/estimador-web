@@ -140,7 +140,7 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
               disabled={!unlocked}
               title={unlocked ? label : t.clueLocked}
               onClick={() => { setSelected(i); setFresh(null); setMoved(true); }}
-              className={`relative flex min-h-12 flex-col items-center justify-center rounded-[10px] border text-[15px] font-extrabold tabular-nums transition-colors duration-150 ${
+              className={`relative flex min-h-12 flex-col items-center justify-center rounded-none border text-[15px] font-extrabold tabular-nums transition-colors duration-150 ${
                 active
                   ? 'border-ink bg-ink text-paper'
                   : unlocked

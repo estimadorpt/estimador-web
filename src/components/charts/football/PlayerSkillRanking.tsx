@@ -315,7 +315,7 @@ export function PlayerSkillRanking({
                   <div className="absolute inset-y-0 left-0 right-0 bg-stone-50" />
                   {/* Point estimate */}
                   <div
-                    className="absolute top-1/2 -translate-y-1/2 h-2.5 rounded-r-[3px]"
+                    className="absolute top-1/2 -translate-y-1/2 h-2.5 rounded-none"
                     style={{
                       left: 0,
                       width: `${barPct}%`,

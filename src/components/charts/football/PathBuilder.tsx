@@ -185,7 +185,7 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
                 <span
                   role="group"
                   aria-label={pt ? `Resultado ${context}` : `Result ${context}`}
-                  className="inline-flex justify-self-end rounded-[10px] border border-line bg-paper p-1 sm:justify-self-start"
+                  className="inline-flex justify-self-end rounded-none border border-line bg-paper p-1 sm:justify-self-start"
                 >
                   {OUTCOMES.map(o => {
                     const active = sel === o;
@@ -197,7 +197,7 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
                         aria-disabled={played || undefined}
                         aria-label={`${outcomeWord(o)} ${context}`}
                         onClick={() => toggle(i, o)}
-                        className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-[8px] px-2 text-sm font-semibold transition-colors duration-150 ${
+                        className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-none px-2 text-sm font-semibold transition-colors duration-150 ${
                           active
                             ? "bg-ink text-paper"
                             : played
@@ -262,7 +262,7 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
             type="button"
             onClick={resetAll}
             aria-disabled={!hasSelections || undefined}
-            className={`inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-line bg-paper px-3 text-sm font-semibold ${
+            className={`inline-flex min-h-11 items-center gap-1.5 rounded-none border border-line bg-paper px-3 text-sm font-semibold ${
               hasSelections ? "text-ink hover:bg-parchment" : "cursor-not-allowed text-stone-500"
             }`}
           >

@@ -67,7 +67,7 @@ export function Choices({ choices, ruledOut, locale, canOpenMore, onPick, onNext
         <button
           type="button"
           onClick={onNextClue}
-          className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[10px] border border-line bg-cream px-5 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-parchment sm:w-auto"
+          className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-none border border-line bg-cream px-5 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-parchment sm:w-auto"
         >
           <Eye aria-hidden="true" className="h-4 w-4" />
           {t.nextClue}

@@ -69,7 +69,7 @@ export async function Subscribe({ variant = 'page', locale }: SubscribeProps) {
               required
               autoComplete="email"
               placeholder={t('placeholder')}
-              className="min-h-12 min-w-0 flex-1 rounded-[10px] border border-stone-300 bg-cream px-4 text-stone-900 placeholder:text-stone-400"
+              className="min-h-12 min-w-0 flex-1 rounded-none border border-stone-300 bg-cream px-4 text-stone-900 placeholder:text-stone-400"
             />
             <Action type="submit">{t('cta')}</Action>
           </form>

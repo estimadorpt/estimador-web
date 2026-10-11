@@ -127,7 +127,7 @@ export function MatchdayPredictions({ fixtures, locale, forecastTimestamp }: Mat
                 <span className="min-w-0">{matchLabel(home, away)}</span>
                 <i aria-hidden="true" className="h-4 w-1 shrink-0 rounded-full" style={{ backgroundColor: teamColorOnPaper(f.away) }} />
               </h3>
-              <div aria-hidden="true" className="mt-2 flex h-3 w-full gap-[2px] overflow-hidden rounded-[4px]">
+              <div aria-hidden="true" className="mt-2 flex h-3 w-full gap-[2px] overflow-hidden rounded-none">
                 <span style={{ width: `${f.p_home * 100}%`, backgroundColor: BAR.home }} />
                 <span style={{ width: `${f.p_draw * 100}%`, backgroundColor: BAR.draw }} />
                 <span style={{ width: `${f.p_away * 100}%`, backgroundColor: BAR.away }} />

@@ -11,8 +11,8 @@ const lookup = (catalogue: unknown) => (key: string) => {
   return value;
 };
 
-const nav = (locale: 'pt' | 'en', hasArticles = false) =>
-  siteNavigation(navLabels(lookup(locale === 'pt' ? pt : en)), { locale, hasArticles, economyPublished: false });
+const nav = (locale: 'pt' | 'en', hasArticles = false, economyPublished = false) =>
+  siteNavigation(navLabels(lookup(locale === 'pt' ? pt : en)), { locale, hasArticles, economyPublished });
 
 const active = (items: NavItem[], pathname: string) => items.filter(item => isNavItemActive(item, pathname)).map(item => item.id);
 
@@ -32,10 +32,16 @@ describe('site navigation', () => {
 
   it('lists the sections in the order of what is live, under one football name', () => {
     const items = nav('pt');
-    expect(items.map(item => item.id)).toEqual(['home', 'population', 'sport', 'elections', 'economics', 'about']);
+    expect(items.map(item => item.id)).toEqual(['home', 'population', 'sport', 'elections', 'about']);
     expect(items.find(item => item.id === 'sport')?.label).toBe('Liga Portugal');
     expect(nav('en').find(item => item.id === 'sport')?.label).toBe('Liga Portugal');
-    expect(items.find(item => item.id === 'economics')?.label).toBe('Economia · em preparação');
+  });
+
+  it('leaves the economy out until it publishes, then names it plainly', () => {
+    expect(nav('pt').map(item => item.id)).not.toContain('economics');
+    const published = nav('pt', false, true);
+    expect(published.map(item => item.id)).toEqual(['home', 'population', 'sport', 'elections', 'economics', 'about']);
+    expect(published.find(item => item.id === 'economics')?.label).toBe('Economia');
   });
 
   it('offers articles only once the locale has published one', () => {
@@ -57,7 +63,7 @@ describe('site navigation', () => {
     expect(active(items, '/desporto/liga/benfica/')).toEqual(['sport']);
     expect(active(items, '/populacao/freguesia/010103/')).toEqual(['population']);
     expect(active(items, '/eleicoes/legislativas/mapa/')).toEqual(['elections']);
-    expect(active(items, '/economia/metodologia/')).toEqual(['economics']);
+    expect(active(nav('pt', false, true), '/economia/metodologia/')).toEqual(['economics']);
     expect(active(items, '/privacidade/')).toEqual(['about']);
     expect(active(items, '/')).toEqual(['home']);
     expect(active(items, '/desportos/')).toEqual([]);
