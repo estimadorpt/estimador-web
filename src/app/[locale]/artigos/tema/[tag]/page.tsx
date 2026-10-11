@@ -81,15 +81,15 @@ export default async function TagPage({ params }: TagPageProps) {
         />
 
         <div className="mx-auto w-full max-w-7xl px-4 pt-8 pb-12"><div className="max-w-4xl">
-          <ul className="border-t-2 border-stone-800">
+          <ul className="border-t border-ink">
             {group.articles.map(article => (
               <ArticleRow key={article.slug} article={article} locale={locale} />
             ))}
           </ul>
 
           <p className="mt-10 text-sm">
-            <Link href="/artigos" locale={locale} className="font-semibold text-ink underline underline-offset-4">
-              {t('articles.backToArticles')}
+            <Link href="/artigos" locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4">
+              {t('articles.viewAll')}
             </Link>
           </p>
         </div></div>

@@ -30,7 +30,7 @@ export function MdxPre({ children }: { children?: ReactNode }) {
   const firstLine = firstLineOf(children);
   const label = `${pt ? 'Código' : 'Code'}${firstLine ? `: ${firstLine}` : ''}`;
   return (
-    <pre tabIndex={0} role="region" aria-label={label} className="mb-6 overflow-x-auto bg-stone-800 p-4 font-mono text-sm text-stone-100 max-sm:whitespace-pre-wrap max-sm:[overflow-wrap:anywhere] [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-inherit">
+    <pre tabIndex={0} role="region" aria-label={label} className="mb-6 overflow-x-auto bg-ink p-4 font-mono text-sm text-paper max-sm:whitespace-pre-wrap max-sm:[overflow-wrap:anywhere] [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-inherit">
       {children}
     </pre>
   );

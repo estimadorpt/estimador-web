@@ -8,6 +8,7 @@ import { buildTagIndex } from '@/lib/article-discovery';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { createPageMetadata, SITE_LOCALES } from '@/lib/metadata';
 import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
+import { PageHero } from '@/components/PageHero';
 import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
@@ -55,27 +56,20 @@ export default async function TopicsPage({
     <div className="min-h-screen bg-paper">
       <Header />
 
-      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-7xl px-4 py-12"><div className="max-w-4xl">
-        <nav className="mb-8">
-          <Link
-            href="/artigos"
-            locale={locale}
-            className="text-xs font-bold text-stone-500 hover:text-stone-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-          >
-            ← {t('articles.backToArticles')}
-          </Link>
-        </nav>
-
-        <header className="mb-8">
-          <h1 className="text-3xl text-stone-900">{t('articles.topicsHeading')}</h1>
-          <p className="mt-3 max-w-2xl text-lg text-stone-600">{t('articles.topicsIntro')}</p>
-        </header>
-
+      <main id="main-content" tabIndex={-1}>
+        <PageHero
+          measure="wide"
+          compact
+          back={{ href: '/artigos', label: t('articles.title'), locale }}
+          title={t('articles.topicsHeading')}
+          lede={t('articles.topicsIntro')}
+        />
+        <div className="mx-auto w-full max-w-7xl px-4 pt-8 pb-12"><div className="max-w-4xl">
         {groups.length === 0 ? (
           <div className="flex items-center gap-6 py-6">
             <EmptyStateMark />
             <div>
-              <p className="text-stone-600">{t('articles.empty')}</p>
+              <p className="text-graphite">{t('articles.empty')}</p>
               <p className="mt-4">
                 <Link
                   href="/populacao"
@@ -89,18 +83,18 @@ export default async function TopicsPage({
             </div>
           </div>
         ) : (
-          <ul className="border-t-2 border-stone-800">
+          <ul className="border-t border-ink">
             {groups.map(group => (
-              <li key={group.slug} className="border-b border-stone-200">
+              <li key={group.slug} className="border-b border-rule">
                 <Link
                   href={`/artigos/tema/${group.slug}`}
                   locale={locale}
                   className="group flex items-baseline justify-between gap-4 py-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
                 >
-                  <span className="text-base font-medium text-stone-900 group-hover:text-ink">
+                  <span className="text-base font-medium text-ink group-hover:text-ink">
                     {group.label}
                   </span>
-                  <span className="text-xs tabular-nums text-stone-500">
+                  <span className="text-xs tabular-nums text-graphite">
                     {t('articles.topicCount', { count: group.articles.length })}
                   </span>
                 </Link>
@@ -108,7 +102,8 @@ export default async function TopicsPage({
             ))}
           </ul>
         )}
-      </div></main>
+        </div></div>
+      </main>
       <SiteFooter locale={locale} />
     </div>
   );

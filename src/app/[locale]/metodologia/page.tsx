@@ -14,8 +14,8 @@ import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 const HUB_REVISED = '2026-10-06';
 
 const DESCRIPTION = {
-  pt: 'Como chegamos a cada resposta: população sintética, Liga Portugal, eleições e economia. Fontes, pressupostos e limites de cada secção.',
-  en: 'How we arrive at each answer: the synthetic population, Liga Portugal, elections and the economy. The sources, assumptions and limits of each section.',
+  pt: 'Os métodos de cada secção: população sintética, Liga Portugal, eleições e economia. Fontes, pressupostos e limites de cada uma.',
+  en: 'The methods behind each section: the synthetic population, Liga Portugal, elections and the economy. The sources, assumptions and limits of each.',
 };
 
 export async function generateMetadata({
@@ -35,7 +35,7 @@ export async function generateMetadata({
   });
 }
 
-type Area = { label: string; question: string; description: string; href: string; extras?: Array<{ href: string; label: string }> };
+type Area = { label: string; title: string; description: string; href: string; extras?: Array<{ href: string; label: string }> };
 
 /**
  * The methodology hub: one short, dated page that sends each reader to the
@@ -55,7 +55,7 @@ export default async function MethodologyPage({
   const areas: Area[] = pt ? [
     {
       label: 'População',
-      question: 'Como é gerada uma população sintética?',
+      title: 'Como geramos a população sintética',
       description: `Os dados de partida (Censos 2021), o ajuste às tabelas do INE, os níveis de qualidade e a privacidade da versão ${POPULATION_RELEASE}.`,
       href: '/populacao/metodologia',
       // The quality page explains the measure and the tiers; each parish's own
@@ -67,7 +67,7 @@ export default async function MethodologyPage({
     },
     {
       label: 'Liga Portugal',
-      question: 'O que sustenta estas probabilidades?',
+      title: 'O modelo por trás das probabilidades da Liga Portugal',
       description: 'O modelo, as simulações da época e os pressupostos, atualizados a cada jornada.',
       href: '/desporto/liga/metodologia',
       extras: [
@@ -77,20 +77,20 @@ export default async function MethodologyPage({
     },
     {
       label: 'Eleições · arquivo',
-      question: 'Como foram feitas as previsões eleitorais?',
+      title: 'Como foram feitas as previsões eleitorais',
       description: 'Como as sondagens foram combinadas e simuladas nas presidenciais de 2026 e nas legislativas de 2025. Previsões arquivadas, não atualizadas.',
       href: '/eleicoes/metodologia',
     },
     {
       label: ECONOMY_PUBLISHED ? 'Economia' : 'Economia · em preparação',
-      question: 'Como vamos ler a economia?',
+      title: 'A leitura que faríamos da economia',
       description: 'As fontes, os selos que vão distinguir dados oficiais de estimativas, e como o protótipo foi avaliado. Ainda não há leituras nem estimativas da economia publicadas; os números da página são de um teste interno do protótipo.',
       href: '/economia/metodologia',
     },
   ] : [
     {
       label: 'Population',
-      question: 'How is a synthetic population generated?',
+      title: 'How we generate the synthetic population',
       description: `The inputs (2021 Census), the fit to the INE tables, the quality tiers and the privacy of release ${POPULATION_RELEASE}.`,
       href: '/populacao/metodologia',
       extras: [
@@ -100,7 +100,7 @@ export default async function MethodologyPage({
     },
     {
       label: 'Liga Portugal',
-      question: 'What supports these probabilities?',
+      title: 'The model behind the Liga Portugal probabilities',
       description: 'The model, the season simulations and the assumptions, updated every matchday.',
       href: '/desporto/liga/metodologia',
       extras: [
@@ -110,13 +110,13 @@ export default async function MethodologyPage({
     },
     {
       label: 'Elections · archive',
-      question: 'How were the election forecasts made?',
+      title: 'How the election forecasts were made',
       description: 'How the polls were combined and simulated for the 2026 presidential and 2025 parliamentary elections. Archived forecasts, not updated.',
       href: '/eleicoes/metodologia',
     },
     {
       label: ECONOMY_PUBLISHED ? 'Economy' : 'Economy · in preparation',
-      question: 'How will we read the economy?',
+      title: 'How we would read the economy',
       description: 'The sources, the labels that will tell official data from estimates, and how the prototype was evaluated. No readings or estimates of the economy are published yet; the figures on that page come from an internal test of the prototype.',
       href: '/economia/metodologia',
     },
@@ -141,7 +141,7 @@ export default async function MethodologyPage({
           measure="reading"
           compact
           eyebrow={pt ? 'Dados, modelos e limites' : 'Data, models and limits'}
-          title={pt ? 'Como chegamos a cada resposta?' : 'How do we arrive at each answer?'}
+          title={pt ? 'Os métodos de cada secção' : 'The methods behind each section'}
           lede={pt ? 'Cada secção tem fontes, pressupostos e formas de verificar diferentes. Escolhe a que estás a explorar.' : 'Each section has its own sources, assumptions and ways to check the results. Choose the one you are exploring.'}
           meta={<RevisedDate date={HUB_REVISED} locale={locale} />}
         />
@@ -153,10 +153,10 @@ export default async function MethodologyPage({
                 {area.href === '/eleicoes/metodologia' && <span id="segunda-volta-2026" className="block" />}
                 <p className="text-[12px] font-semibold text-graphite">{area.label}</p>
                 <Link href={area.href} locale={locale} className="mt-2 inline-flex min-h-11 items-center text-lg font-bold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">
-                  {/* One inline run, so a wrapped question keeps its arrow on its last line. */}
-                  <span>{area.question}&nbsp;<span aria-hidden="true">→</span></span>
+                  {/* One inline run, so a wrapped title keeps its arrow on its last line. */}
+                  <span>{area.title}&nbsp;<span aria-hidden="true">→</span></span>
                 </Link>
-                <p className="mt-1 text-sm leading-relaxed text-stone-600">{area.description}</p>
+                <p className="mt-1 text-sm leading-relaxed text-graphite">{area.description}</p>
                 {area.extras && (
                   <p className="mt-1 flex flex-wrap gap-x-6 text-sm">
                     {area.extras.map(extra => (
@@ -168,11 +168,11 @@ export default async function MethodologyPage({
             ))}
           </nav>
           <section aria-labelledby="methodology-principles">
-            <h2 id="methodology-principles" className="text-xl md:text-2xl">{pt ? 'O que vale para todas as secções?' : 'What holds for every section?'}</h2>
-            <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-stone-700">
+            <h2 id="methodology-principles" className="text-xl md:text-2xl">{pt ? 'Três regras para todas as secções' : 'Three rules for every section'}</h2>
+            <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-ink">
               {principles.map(line => <li key={line}>{line}</li>)}
             </ul>
-            <p className="mt-6 text-sm text-stone-600">
+            <p className="mt-6 text-sm text-graphite">
               {pt ? 'Quem faz o site, o que está publicado hoje e como reutilizar e citar: ' : 'Who makes the site, what is published today and how to reuse and cite it: '}
               <Link href="/sobre" locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{pt ? 'sobre o estimador.pt' : 'about estimador.pt'}</Link>.
             </p>

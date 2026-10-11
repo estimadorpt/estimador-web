@@ -100,13 +100,12 @@ export default async function PrivacyPage({
 
         <div className="mx-auto w-full max-w-7xl px-4 py-10 md:py-12"><div className="max-w-3xl">
           {actualLocale !== locale && (
-            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm text-amber-800">
-                {locale === 'en'
-                  ? 'This page is only available in Portuguese. Showing the Portuguese version.'
-                  : 'Esta página apenas está disponível em português.'}
-              </p>
-            </div>
+            <p className="mb-6 border-t border-rule pt-3 text-sm text-amber-800">
+              <strong className="font-semibold">{locale === 'en' ? 'Note:' : 'Nota:'}</strong>{' '}
+              {locale === 'en'
+                ? 'This page is only available in Portuguese. Showing the Portuguese version.'
+                : 'Esta página apenas está disponível em português.'}
+            </p>
           )}
 
           <article className="article-body max-w-none [&>:first-child]:!mt-0" lang={actualLocale}>

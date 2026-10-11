@@ -46,29 +46,29 @@ export async function SectionNotes({
   return (
     <section className={className}>
       <div className={containerClassName}>
-        <h2 className="text-2xl tracking-tight text-stone-900 mb-1">
+        <h2 className="text-2xl text-ink mb-1">
           {t('articles.sectionHeading')}
         </h2>
-        <p className="text-sm text-stone-500 mb-4">{t('articles.sectionIntro')}</p>
+        <p className="text-sm text-graphite mb-4">{t('articles.sectionIntro')}</p>
 
-        <ul className="border-t border-stone-200">
+        <ul className="border-t border-rule">
           {articles.map(article => (
-            <li key={article.slug} className="border-b border-stone-200">
+            <li key={article.slug} className="border-b border-rule">
               <Link
                 href={`/artigos/${article.slug}`}
                 locale={locale}
                 className="group block py-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
               >
                 <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-semibold text-graphite">
-                  <span className="text-stone-800">
+                  <span className="text-ink">
                     {t(article.kind === 'nota' ? 'articles.kindNota' : 'articles.kindExplicador')}
                   </span>
                   <time dateTime={article.date}>{dateFormat.format(new Date(article.date))}</time>
                 </div>
-                <h3 className="text-base leading-snug text-stone-900 group-hover:text-ink">
+                <h3 className="text-base leading-snug text-ink group-hover:text-ink">
                   {article.title}
                 </h3>
-                <p className="mt-1 text-sm leading-relaxed text-stone-600 max-w-2xl">
+                <p className="mt-1 text-sm leading-relaxed text-graphite max-w-2xl">
                   {article.excerpt}
                 </p>
               </Link>

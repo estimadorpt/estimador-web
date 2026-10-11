@@ -124,8 +124,8 @@ function EstadoAtual({
       label: pt ? 'População' : 'Population',
       href: '/populacao',
       status: pt
-        ? `Publicada · população sintética v${POPULATION_RELEASE} (Censos 2021), de 5 de outubro de 2026.`
-        : `Released · synthetic population v${POPULATION_RELEASE} (2021 Census), 5 October 2026.`,
+        ? `Publicada · população sintética v${POPULATION_RELEASE} (Censos 2021), datada de 5 de outubro de 2026.`
+        : `Released · synthetic population v${POPULATION_RELEASE} (2021 Census), dated 5 October 2026.`,
       // The producer's positioning sentence verbatim (HONESTY.positioning), then
       // which parishes "every parish" means, as a sentence of its own.
       text: pt
@@ -182,7 +182,7 @@ function EstadoAtual({
           <h3 className="m-0 text-lg">
             <Link href={item.href} locale={locale} className="tap-target text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{item.label}</Link>
           </h3>
-          <p className="mt-1 font-sans text-sm font-semibold text-stone-600">{item.status}</p>
+          <p className="mt-1 font-sans text-sm font-semibold text-graphite">{item.status}</p>
           <p className="mt-2">{item.text}</p>
           <p className="mt-1 font-sans text-sm">
             <Link href={item.method.href} locale={locale} className="tap-target text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{item.method.label}</Link>
@@ -244,14 +244,13 @@ export default async function AboutPage({
         <div className="mx-auto w-full max-w-7xl px-4 pb-10 pt-4 md:pb-12 md:pt-6"><div className="max-w-3xl">
         {/* Locale Notice (if fallback) */}
         {actualLocale !== locale && (
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <p className="text-sm text-amber-800">
-              {locale === 'en'
-                ? `This page is only available in Portuguese. Showing Portuguese version.`
-                : `Esta página apenas está disponível em português.`
-              }
-            </p>
-          </div>
+          <p className="mb-6 border-t border-rule pt-3 text-sm text-amber-800">
+            <strong className="font-semibold">{locale === 'en' ? 'Note:' : 'Nota:'}</strong>{' '}
+            {locale === 'en'
+              ? `This page is only available in Portuguese. Showing Portuguese version.`
+              : `Esta página apenas está disponível em português.`
+            }
+          </p>
         )}
 
         {/* The first heading sits under the hero's rule at the section gap,

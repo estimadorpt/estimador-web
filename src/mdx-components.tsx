@@ -6,7 +6,7 @@ import { MdxPre, MdxTable } from '@/components/mdx/ScrollBlocks';
 /**
  * Element styling for long-form pages. The reading face, measure and rhythm
  * come from `.article-body` in globals.css; these set the per-element
- * treatment, in the same stone palette the rest of the site uses.
+ * treatment in the instrument's ink, graphite and rules.
  *
  * Headings stay sans while the body is serif — the page should read as an
  * article without looking like it was lifted off another site.
@@ -23,17 +23,17 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
     // Articles put the title in the page header, but the standalone pages
     // (about, methodology, privacy) open their MDX with one.
     h1: ({ children }) => (
-      <h1 className="text-3xl md:text-4xl text-stone-900 mb-6 tracking-tight">
+      <h1 className="text-3xl md:text-4xl text-ink mb-6">
         {children}
       </h1>
     ),
     h2: ({ children }) => (
-      <h2 className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight">
+      <h2 className="text-2xl text-ink mt-12 mb-3">
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="text-lg text-stone-900 mt-8 mb-2">
+      <h3 className="text-lg text-ink mt-8 mb-2">
         {children}
       </h3>
     ),
@@ -42,15 +42,15 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
         {children}
       </h4>
     ),
-    p: ({ children }) => <p className="mb-5 text-stone-800">{children}</p>,
-    ul: ({ children }) => <ul className="list-disc pl-6 mb-5 space-y-1.5 text-stone-800">{children}</ul>,
-    ol: ({ children }) => <ol className="list-decimal pl-6 mb-5 space-y-1.5 text-stone-800">{children}</ol>,
+    p: ({ children }) => <p className="mb-5 text-ink">{children}</p>,
+    ul: ({ children }) => <ul className="list-disc pl-6 mb-5 space-y-1.5 text-ink">{children}</ul>,
+    ol: ({ children }) => <ol className="list-decimal pl-6 mb-5 space-y-1.5 text-ink">{children}</ol>,
     li: ({ children }) => <li className="pl-1">{children}</li>,
-    strong: ({ children }) => <strong className="font-bold text-stone-900">{children}</strong>,
+    strong: ({ children }) => <strong className="font-bold text-ink">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
-    hr: () => <hr className="my-10 border-0 border-t border-stone-200" />,
+    hr: () => <hr className="my-10 border-0 border-t border-rule" />,
     blockquote: ({ children }) => (
-      <blockquote className="my-6 border-l-2 border-stone-800 pl-5 text-stone-600 [&>p]:mb-2 [&>p:last-child]:mb-0">
+      <blockquote className="my-6 border-l-2 border-ink pl-5 text-graphite [&>p]:mb-2 [&>p:last-child]:mb-0">
         {children}
       </blockquote>
     ),
@@ -62,7 +62,7 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
       // break-word, not anywhere: a table cell keeps its code whole and the
       // table scrolls in its own region instead of splitting every key.
       return (
-        <code className="bg-stone-100 px-1.5 py-0.5 font-mono text-[0.85em] text-stone-800 break-words">
+        <code className="bg-field px-1 font-mono text-[0.85em] text-ink break-words">
           {children}
         </code>
       );
@@ -80,12 +80,12 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
     ),
     table: ({ children }) => <MdxTable>{children}</MdxTable>,
     th: ({ children }) => (
-      <th className="border-b-2 border-stone-800 px-3 py-2 text-left text-[12px] font-semibold text-graphite">
+      <th className="border-b border-ink px-3 py-2 text-left text-[12px] font-semibold text-graphite">
         {children}
       </th>
     ),
     td: ({ children }) => (
-      <td className="border-b border-stone-200 px-3 py-2 text-stone-800">{children}</td>
+      <td className="border-b border-rule px-3 py-2 text-ink">{children}</td>
     ),
 
     // No `details` or `summary` here. Markdown has no syntax for them, and MDX 3
@@ -93,7 +93,7 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
     // compiles them to the plain element), so entries here never ran and only
     // contradicted the real look. That look lives once, in `.article-body
     // details` in globals.css: the <Disclosure> control (viz/Disclosure.tsx) on
-    // a cream panel, with a 44px summary in ink, a left chevron that turns when
+    // a ruled block, with a 44px summary in ink, a left chevron that turns when
     // open and no native marker.
 
     ...components,

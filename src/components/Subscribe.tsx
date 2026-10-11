@@ -45,19 +45,19 @@ export async function Subscribe({ variant = 'page', locale }: SubscribeProps) {
 
   return (
     <aside
-      className={`border-t border-stone-200 bg-stone-50 ${compact ? 'px-5 py-6' : 'px-6 py-8'}`}
+      className={`border-t border-ink ${compact ? 'pt-4 pb-2' : 'pt-5 pb-4'}`}
       aria-labelledby="subscribe-heading"
     >
       <div className="max-w-2xl">
         <p className="text-[12px] font-semibold text-graphite mb-2">
           {ENDPOINT ? t('eyebrow') : t('eyebrowFeed')}
         </p>
-        <h2 id="subscribe-heading" className={`font-semibold text-stone-900 ${compact ? 'text-lg' : 'text-xl'} mb-2`}>
+        <h2 id="subscribe-heading" className={`font-semibold text-ink ${compact ? 'text-lg' : 'text-xl'} mb-2`}>
           {ENDPOINT ? t('title') : t('titleFeed')}
         </h2>
         {/* The promise has to match the capability: only offer email delivery
             when NEXT_PUBLIC_NEWSLETTER_ENDPOINT is actually configured. */}
-        <p className="text-stone-600 leading-relaxed mb-5">{ENDPOINT ? t('body') : t('bodyFeed')}</p>
+        <p className="text-graphite leading-relaxed mb-5">{ENDPOINT ? t('body') : t('bodyFeed')}</p>
 
         {ENDPOINT && (
           <form action={ENDPOINT} method="post" target="_blank" rel="noopener" className="mb-4 flex flex-col gap-2 sm:flex-row">
@@ -69,15 +69,15 @@ export async function Subscribe({ variant = 'page', locale }: SubscribeProps) {
               required
               autoComplete="email"
               placeholder={t('placeholder')}
-              className="min-h-12 min-w-0 flex-1 rounded-none border border-stone-300 bg-cream px-4 text-stone-900 placeholder:text-stone-400"
+              className="min-h-12 min-w-0 flex-1 border border-rule bg-paper px-4 text-ink placeholder:text-graphite"
             />
             <Action type="submit">{t('cta')}</Action>
           </form>
         )}
 
-        {ENDPOINT && <p className="mb-3 text-sm text-stone-500">{t('confirm')}</p>}
+        {ENDPOINT && <p className="mb-3 text-sm text-graphite">{t('confirm')}</p>}
 
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-graphite">
           <a
             href={`/${locale}/feed.xml`}
             className="inline-flex items-center gap-1.5 font-medium text-ink underline underline-offset-4 hover:text-ink-dark"

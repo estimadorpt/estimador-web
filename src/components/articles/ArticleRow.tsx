@@ -30,7 +30,7 @@ export async function ArticleRow({
   const translated = SITE_LOCALES.every(candidate => articleExistsInLocale(article.slug, candidate));
 
   return (
-    <li className="border-b border-stone-200">
+    <li className="border-b border-rule">
       <Link
         href={`/artigos/${article.slug}`}
         locale={locale}
@@ -44,16 +44,16 @@ export async function ArticleRow({
             <span key={tag} className="text-stone-400">{tag}</span>
           ))}
           {!translated && (
-            <span className="bg-stone-200 px-1.5 py-0.5 text-stone-600">
+            <span className="text-ink">
               {t('articles.onlyInPortuguese')}
             </span>
           )}
         </div>
-        <h3 className="text-xl text-stone-900 group-hover:text-ink mb-1.5">
+        <h3 className="text-xl text-ink group-hover:text-ink mb-1.5">
           {article.title}
         </h3>
-        <p className="text-stone-600 leading-relaxed max-w-2xl">{article.excerpt}</p>
-        <p className="mt-2 text-xs text-stone-500">
+        <p className="text-graphite leading-relaxed max-w-2xl">{article.excerpt}</p>
+        <p className="mt-2 text-xs text-graphite">
           {article.kind === 'explicador' && <>{dateFormat.format(new Date(article.date))} · </>}
           {t('articles.by')} {article.author} · {article.readTime} {t('articles.readTimeSuffix')}
         </p>

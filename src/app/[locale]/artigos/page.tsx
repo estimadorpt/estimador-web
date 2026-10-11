@@ -63,10 +63,10 @@ export default async function ArticlesPage({
     if (!items.length) return null;
     return (
       <section className="mb-14 last:mb-0">
-        <div className="border-b-2 border-stone-800 pb-2 mb-1">
-          <h2 className="text-xs font-bold text-stone-800">{heading}</h2>
+        <div className="border-b border-ink pb-2 mb-1">
+          <h2 className="text-[19px] leading-6 text-ink">{heading}</h2>
         </div>
-        <p className="text-sm text-stone-500 py-3 border-b border-stone-200">{intro}</p>
+        <p className="text-sm text-graphite py-3 border-b border-rule">{intro}</p>
         <ul>
           {items.map(article => <ArticleRow key={article.slug} article={article} locale={locale} />)}
         </ul>
@@ -84,7 +84,6 @@ export default async function ArticlesPage({
       <PageHero
         measure="wide"
         compact
-        field="mustard"
         eyebrow={t('articles.eyebrow')}
         title={t('articles.title')}
         lede={t('articles.subtitle')}
@@ -105,7 +104,7 @@ export default async function ArticlesPage({
           <div className="flex items-center gap-6 py-6">
             <EmptyStateMark />
             <div>
-              <p className="text-stone-600">{t('articles.empty')}</p>
+              <p className="text-graphite">{t('articles.empty')}</p>
               <p className="mt-4">
                 <Link
                   href="/populacao"
@@ -127,24 +126,25 @@ export default async function ArticlesPage({
                 row is already one. This is where they become navigable. */}
             {topics.length > 0 && (
               <section className="mt-14">
-                <div className="border-b-2 border-stone-800 pb-2 mb-1">
-                  <h2 className="text-xs font-bold text-stone-800">
+                <div className="border-b border-ink pb-2 mb-1">
+                  <h2 className="text-[19px] leading-6 text-ink">
                     {t('articles.topicsHeading')}
                   </h2>
                 </div>
-                <p className="text-sm text-stone-500 py-3 border-b border-stone-200">
+                <p className="text-sm text-graphite py-3 border-b border-rule">
                   {t('articles.topicsIntro')}
                 </p>
-                <ul className="flex flex-wrap gap-2 pt-5">
+                {/* Topics as text links with their count, not chips. */}
+                <ul className="flex flex-wrap gap-x-6 gap-y-1 pt-3">
                   {topics.map(topic => (
                     <li key={topic.slug}>
                       <Link
                         href={`/artigos/tema/${topic.slug}`}
                         locale={locale}
-                        className="flex items-baseline gap-2 border border-stone-300 bg-cream px-2.5 py-1.5 text-xs text-stone-700 hover:border-stone-800 hover:text-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                        className="group inline-flex min-h-11 items-center gap-1.5 text-[15px] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
                       >
-                        {topic.label}
-                        <span className="tabular-nums text-stone-400">{topic.articles.length}</span>
+                        <span className="underline decoration-ink/40 underline-offset-4 group-hover:decoration-ink">{topic.label}</span>
+                        <span className="tabular-nums text-[13px] text-graphite">{topic.articles.length}</span>
                       </Link>
                     </li>
                   ))}

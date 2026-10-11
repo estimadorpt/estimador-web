@@ -20,11 +20,11 @@ interface FigureProps {
  */
 export function Figure({ children, caption, source, asOf }: FigureProps) {
   return (
-    <figure className="my-8 border-y border-stone-200 py-6">
+    <figure className="my-8 border-y border-rule py-6">
       <div className="not-prose font-sans">{children}</div>
       {(caption || source || asOf) && (
-        <figcaption className="mt-4 font-sans text-sm leading-relaxed text-stone-500">
-          {caption && <span className="block text-stone-700">{caption}</span>}
+        <figcaption className="mt-4 font-sans text-sm leading-relaxed text-graphite">
+          {caption && <span className="block text-ink">{caption}</span>}
           {(source || asOf) && (
             <span className="mt-1 block text-xs">
               {source}

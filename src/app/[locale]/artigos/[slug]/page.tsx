@@ -116,7 +116,7 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
           <PageHero
             measure="reading"
             compact
-            back={{ href: '/artigos', label: t('articles.backToArticles'), locale }}
+            back={{ href: '/artigos', label: t('articles.title'), locale }}
             eyebrow={
               <>
                 {t(article.kind === 'nota' ? 'articles.kindNota' : 'articles.kindExplicador')}
@@ -150,7 +150,7 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
 
           <div className="mx-auto w-full max-w-7xl px-4 pt-8 pb-16"><div className="max-w-3xl">
             {actualLocale !== locale && (
-              <p lang={locale} className="mb-8 border-l-2 border-stone-400 bg-stone-50 py-3 pl-4 text-sm text-stone-600">
+              <p lang={locale} className="mb-8 border-t border-rule pt-3 text-sm text-graphite">
                 {t('articles.onlyInPortugueseNotice')}
               </p>
             )}
@@ -167,11 +167,11 @@ export default async function MDXArticlePage({ params }: MDXArticlePageProps) {
               <Subscribe locale={locale} />
             </div>
 
-            <p className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-center text-sm">
-              <Link href="/artigos" locale={locale} className="font-semibold text-ink underline underline-offset-4">
-                {t('articles.backToArticles')}
+            <p className="mt-8 flex flex-wrap gap-x-6 text-sm">
+              <Link href="/artigos" locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4">
+                {t('articles.viewAll')}
               </Link>
-              <Link href="/artigos/tema" locale={locale} className="font-semibold text-ink underline underline-offset-4">
+              <Link href="/artigos/tema" locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4">
                 {t('articles.topicsAll')}
               </Link>
             </p>
