@@ -1,7 +1,7 @@
 Aguarda parecer, the Lisbon housing game.
 
 sim/, data/, ui/ and habitacao.css are mirrored from bernardocaldas/habitacao (src/) at
-d27c7bb. Edit them there, run its tests, then copy them here; HousingGame.tsx is the only
+c99927d. Edit them there, run its tests, then copy them here; HousingGame.tsx is the only
 file that belongs to this repository.
 
 The map geometry (`data/lisboa-freguesias.json`, `data/terra.json`, `data/vizinhos.json`) combines
