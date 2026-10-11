@@ -14,13 +14,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Economia** (`/economia/`) — **in preparation** (see "Economy section"): explainers online, no figures published
 
 This is also the order of what is live, and the site lists its sections in it everywhere: the
-header (Início, População, Liga Portugal, Eleições, Economia · em preparação, Sobre), the footer's
-"Secções", the homepage shortcuts, `/sobre`'s status list, `/metodologia` and the descriptor.
+header (Início, População, Liga Portugal, Eleições, Sobre; Economia joins only once it publishes),
+the footer's "Secções", the homepage, `/sobre`'s status list, `/metodologia` and the descriptor.
 
 **One name for football: "Liga Portugal"** (both locales) for the section wherever it is
 named as a place on the site: the header item (`nav.sport`), its menu, the footer
-(`nav.liga`), the 404 header, the homepage kicker (`home.footballKicker`) and card, `/sobre`
-and `/metodologia`. "Futebol"/"football" is a common noun, for prose only ("um modelo de
+(`nav.liga`), the 404 header, the homepage's Liga channel, `/sobre` and `/metodologia`. "Futebol"/"football" is a common noun, for prose only ("um modelo de
 futebol"); never "Desporto" or "campeonato português" as the section's name. The URLs keep
 `/desporto/liga`. In English write "Liga Portugal" without an article ("How could Liga
 Portugal end?"); "the Liga" reads as Spain's league. The one exception is the owner's
@@ -30,7 +29,8 @@ The navigation is defined once, in `src/components/brand/site-navigation.ts`
 (`siteNavigation(labels, …)`: order, hrefs, labels, the `match` prefixes that light an item,
 e.g. every `/desporto/*` page for Liga Portugal). The client `Header` and the static header
 of the root 404 (`src/app/not-found.tsx`, native `<details>` menus, plain anchors, the same
-60px bar) both render from it, so they cannot drift. `Header.tsx` reads each label with a
+60px bar on a 1px ink rule, the current section under a 3px ink underline) both render from it,
+so they cannot drift. `Header.tsx` reads each label with a
 literal `t('…')` key (the client-messages test only sees literals);
 `site-navigation.test.ts` checks the two stay in step. The few labels only the menu uses
 ("Previsões da época", "Jogadores", "Simulador", "Modelo vs mercado", the "(jogo semanal)"
@@ -44,10 +44,12 @@ menu twice (about 40 KB a page). The mobile menu is a full-height sheet
 the current one underlined in forced colours; the logo link is "estimador.pt — página
 inicial" / "estimador.pt — home".
 
-The footer (`SiteFooter.tsx`) lists, under "Secções", População, Liga Portugal, "Eleições ·
-arquivo" (one link to `/eleicoes/arquivo`, `footer.electionsArchive`) and Economia; "O
-projeto" includes "Reutilizar e citar" (`/sobre#reutilizar`, `footer.reuse`); its blurb is
-the line (semibold) and the descriptor, as two paragraphs.
+The footer (`SiteFooter.tsx`, under a 2px ink rule) lists, under "Secções", População, Liga
+Portugal and "Eleições · arquivo" (one link to `/eleicoes/arquivo`, `footer.electionsArchive`),
+and Economia once it publishes; "O projeto" includes "Reutilizar e citar" (`/sobre#reutilizar`,
+`footer.reuse`); its blurb is the line (semibold), the descriptor and the reading rule (the
+three marks, see "Design Language"). The owner's name appears only in the footer's credit line
+and on `/sobre`, never in a masthead or a share card (owner decision, 11 October 2026).
 
 ## Commands
 
@@ -130,48 +132,191 @@ with `/pt` + the same path, for the known section prefixes only.
 
 ## Design Language
 
-The site's identity is the interval mark and the atlas palette. Everything lives in `src/app/globals.css` (tokens), `src/lib/brand/index.ts` (mark paths and hex values for SVG and canvas code) and `src/components/Logo.tsx`; the living guide, with downloadable files, is `/marca` (`src/app/[locale]/marca/page.tsx`, not indexed).
+**Instrumento** (owner decision of 11 October 2026, after friends called the September look
+"vibed": the exploration, ranking and the chosen direction's mocks are in
+`docs/design/directions-2026-10-11/`). estimador.pt reads like a measuring instrument: black ink
+on white, 1px rules between instruments, findings as headlines, and one grammar of three marks
+used the same way on every page. Everything lives in `src/app/globals.css` (tokens and the mark
+CSS), `src/lib/brand/index.ts` (hex values and font stacks for SVG, Plot and canvas code) and
+`src/components/instrument/` (the primitives). The September system (cream paper, pine ink,
+Manrope, rounded cream cards, pills, letter-spaced uppercase kickers, painted section scenes, the
+pastel mosaic, question headlines) is retired; do not bring any of it back.
 
-- **Mark**: a credible interval drawn as one path in one colour. `<Mark>` from 24px up, `<MarkSmall>` below; `<LogoHorizontal>` is the only signature (Manrope 800 wordmark, no serif or stacked version). Pine on light, paper on dark. Never a coloured band, never inside a chart. Assets in `public/brand/`; regenerate them with the brand script in the session scratchpad or by hand from `src/lib/brand`.
-- **Surfaces**: `bg-paper` (page ground), `bg-cream` (cards, panels, table rows), `bg-parchment` (sunken areas, hovers), `border-line` (hairlines). Dark surfaces use `bg-forest`.
-- **Ink**: `text-ink` for text and primary actions, `text-stone-500` for secondary text. Links are ink with an underline, never blue.
-- **Pastels in two strengths**: data (`mint`, `mustard`, `coral`, `periwinkle`) for categories and small marks (a wrong pick on the Freguesia misteriosa board; chart series use `SERIES`, darker data steps of the same hues); surface (`mint-soft`, `mustard-soft`, `coral-soft`, `periwinkle-soft`) for the mosaic, tinted fields and backgrounds. Neither does the other's job. Party and team colours stay as they are; gold/amber means "caveat", never emphasis.
-- **Retuned Tailwind ramps**: `stone`, `amber`/`yellow`, `emerald`/`green`, `red` and `blue` are redefined in `@theme`, so existing utilities keep their meaning but sit on paper. Do not use `gray`, `slate` or `bg-white`. Red and green as text use the 700 step (`text-red-700`, `text-emerald-700`, darkened for AA on cream and parchment) or ink; never `text-red-400` or `text-stone-300` for words. `tree`, `positive`, `success`, `green-600` and `BRAND.tree` are `#377455` (4.5:1 on paper, cream and parchment; `src/components/viz/palette-tokens.test.ts`), and no component types `#4e8056`. Chart text (ticks, axis captions, end labels) is `FURNITURE.axis` (`#5f7062`); `BRAND.faint` (`#7f9284`) is for strokes only. Team colours are not text colours: a club's name or end label is ink with a colour swatch beside it. A missing value is a `text-stone-500` "—" with an sr-only "sem dados", never stone-300.
-- **Type**: one family, Manrope (`--font-sans`, `--font-display`): h1 800, h2/h3 700, text 400/500, uppercase kickers 700, headline numbers `font-display font-extrabold tabular-nums`. Newsreader (`--font-serif`) is the reading face and appears only inside `.article-body` (articles, methodology, about, privacy). No italics as decoration. Nothing below 11px. Both faces are self-hosted (`src/app/fonts.ts`): Manrope from `@fontsource/manrope` (it keeps the family name `Manrope`, which Plot, SVG and canvas code name directly), Newsreader through `next/font/google`, downloaded at build time and served from `/_next/static`; no page view contacts a font host. Newsreader ships the weight axis only (no `opsz`, which made each file 130 to 150 KB) and is not preloaded, so only a page that sets the serif fetches it.
-- **Mosaic** (`src/components/brand/Mosaic.tsx`): quarter-circles are shares, circles people, dot grids populations, rounded blocks places; bands stay in the mark. Owner decision of 6 October 2026: brand material, the 404 and empty states only. Brand material is `/marca` (whose hero is the one `<PageHero art>` left), the OG brand card and the social kit. Every empty, error, refused or unavailable state (unknown parish or permalink, empty archive, empty `/artigos`, a refused response) draws `<EmptyStateMark>` (`src/components/brand/EmptyStateMark.tsx`: `quarters` at 72px, the same at every width) beside or above its message and one specific next step. The 404 (`NotFoundBody`) keeps a larger `quarters` as its one brand moment, capped at about 200px on desktop and 112px on phones so it never fills a screen. Never the header of a site page outside `/marca` (it came off Liga, Economia and Artigos on 11 September and off `/populacao` and `/misteriosa` on 6 October), never beside a number or a chart, never encoding information. The decorative dot grid (`people`) looks like data, so it is on no page; it stays on `/marca` as a labelled specimen.
-- **Motion**: the interval opens on hover of a `.brand-link`; `<MarkLoading>` only where something is genuinely loading. Both stop under prefers-reduced-motion. A published forecast never animates.
-- **Three levels of expression**: section entrances carry their painting; dashboards, tools and data pages are restrained (a compact tinted introduction via `<PageHero field>`, then cream tables and plots, decoration outside the plotting areas); reference, methodology and editorial pages are plain paper. The governing art direction is `docs/design/original-illustration-refinement/README.md` ("Latest revision — 13 September 2026") with `docs/design/browser-reference/HANDOFF.md`; `docs/design/design-system-proposal.md` is the 11 September base, and its dated note says which parts they superseded. One colour field per page at most, and one field colour per section where a field is used: population periwinkle, economy mint, articles mustard. No painted residents on population data pages: the house is the homepage's only population painting. One painting family (`docs/brand/section-illustrations.md`): the three 13 September section scenes (`public/images/sections/{football,elections,economy}.webp`) and the refined population house. Which header each kind of page gets (owner decision of 6 October 2026, also on `/marca#ilustracao`):
-
-  | Page kind | Header | Pages |
-  |---|---|---|
-  | Section entrance with a painting | the section's 13 Sept painting, eager | Liga hub, Liga simulator, /eleicoes/arquivo, /eleicoes/legislativas, /eleicoes/presidenciais; on the homepage each panel carries its section's painting edge to edge (the refined house as the population card's column, the stadium as the band the Liga rail ends on, elections and economy as media objects; see "Homepage") |
-  | Data pages, dashboards, tools | compact tinted field, no art | /populacao (hub), parish pages, region pages, /populacao/misteriosa, /economia, /artigos |
-  | Reference, methodology, editorial | plain paper | Liga and election sub-pages (club, match, player, modelo, dados, 2025-26, jogo-previsoes, mapa), every methodology page, /populacao/qualidade, /dados, /sobre, /privacidade, /metodologia |
-  | Explainer with its own world | its own drawing, under `<PageHero>` | /populacao/miniatura (the village) |
-  | Empty, error, 404 | small `quarters` mosaic + one next step | unknown parish, unknown permalink, empty archive, empty articles, refused/unavailable states, 404 |
-  | Brand material | mosaic | /marca, OG brand card, social kit |
-
-  The painted headers are an owner exception (October 2026) to the restrained rule for forecasts, and the only raster heroes: the Liga hub (`/desporto/liga`), the Liga simulator (`/desporto/liga/simulador`), `/eleicoes/arquivo`, `/eleicoes/legislativas` and `/eleicoes/presidenciais` open on `<PageHero illustration>` (`SectionIllustration`) instead of a tinted field, and the homepage panels carry their section's painting (see "Homepage"). Because that image is the hero's largest paint, it must load eagerly (`priority` / `fetchPriority="high"`, which `<PageHero illustration>` passes), with a narrow (about 360px) variant for phones where the asset pipeline makes one cheap; no other page gets a raster hero.
-- **Primitives**: actions are `<Action>` (`src/components/brand/Action.tsx`: primary pine, secondary bordered cream, tint, text; 48px, 10px corners, one main action per view); keyboard focus is the global double ring in globals.css, so components do not declare their own; inputs and selectors are 44 to 48px with a visible label; cards use `rounded-2xl`, a thin border and no shadow; motion is 140 to 200ms feedback and 200 to 300ms panels. `<TeaserBand>` is the explainer teaser that follows a dashboard's data (a soft field, a question, one action, no mosaic; shown only on a published economy). Empty and error states get `<EmptyStateMark>` and a specific next step (see Mosaic), and missing data is never shown as zero.
-- **One container** (`src/components/brand/Container.tsx`): the header, section tab rows, every `<PageHero>` and the page body share `CONTAINER_CLASS` (`mx-auto w-full max-w-7xl px-4`), so their left edges line up at every width. A narrower column is a `measure` inside it, left-aligned (`<PageHero measure="reading|wide">`, `<Container measure="reading|wide">`, or an inner `max-w-3xl`/`max-w-5xl` div), never a second, narrower centred box (`max-w-3xl mx-auto`): that is what put heroes, tabs and text at four x positions (UXD-05). No page passes `PageHero`'s `width` any more; it stays for a deliberate exception.
-- **No blank bands, no ragged rows** (owner decision of 6 October 2026): a card never ends in a band of empty cream because a neighbour in its row is taller, and `items-start` is not the fix. Things the reader compares become one card with hairline columns (the three blocs on `/eleicoes/legislativas`, one cream card split by hairlines from `lg`; "Serve para / Não serve para" on the population methodology and `/populacao/dados`; the `/populacao/qualidade` tier cards, which share four subgrid rows from `md` (C on its own row until `lg`), at `1fr 1.3fr 1.4fr` from `lg`, columns as wide as their text, with tier C's two size readings in a note under the row); uneven content is evened (a wider column for the longer text, as the homepage's economy card gives its painting); very different charts stack, each at its own height (the `/qualidade` fit charts, the `/marca` showcase). In the standard layout, homepage panels end on their painting (see "Homepage").
-- **Show/hide** is `<Disclosure>` (`src/components/viz/Disclosure.tsx`: a native `<details>`, 44px summary, a left chevron that turns when open, sentence-case label in ink, works in server and client components): table twins (`ChartTable` uses it), map lists, FAQs, notes, "Como ler isto" (`HonestyNote`), producer notes. One look for one action: no uppercase "MOSTRAR" toggles, no rows without a chevron, no chevron on the right, no bespoke button with `useState` for something a `<details>` does. A details whose open state the page controls (the misteriosa "Como se joga?" card, which the page closes after a pick or a new clue) keeps its own element with the same look (left chevron, 44px, sentence case). MDX `<details>`/`<summary>` get the same left chevron and 44px row from `.article-body details` in globals.css (MDX 3 renders a hand-written `<details>` as a plain element, so `mdx-components.tsx` cannot style it), so a methodology page's details read as the same control.
-- **Standalone links** (a link on its own line or in a card footer, not inside a sentence) are `<TextLink>` (`src/components/brand/TextLink.tsx`): ink, underlined at rest, 44px tall at any font size. **Back links** have one pattern: `<PageHero back={{ href, label }}>`, an arrow and the parent's own name ("← Liga Portugal", "← População sintética", "← Distrito de Lisboa"), never "Voltar à …". `PageHero` drops the kicker segments that repeat the back label (`kickerWithoutBack`, `src/components/brand/hero-kicker.ts`: "← Liga Portugal" over "Jogadores", not "Liga Portugal · Jogadores"); it reads strings only, so a kicker built from elements (a `ClockSwitch`) is written without the section name by hand. The election archive pages open with "← Eleições" (to `/eleicoes/arquivo`) and the kicker "Arquivo · 2025" or "Arquivo · 2026"; `/eleicoes/legislativas/mapa` with "← Legislativas 2025".
-- **Revision dates** are `<RevisedDate date="YYYY-MM-DD" />` (`src/components/brand/RevisedDate.tsx`) in the PageHero's `meta`: "Revisto a 6 de outubro de 2026" / "Revised 6 October 2026", always a full day, never "Última revisão" or a month alone. The date is a constant beside the page (`REVISED`, `HUB_REVISED`, `PRIVACY_REVISED`), moved with the text. A prose page's sitemap `lastmod` is its entry in `COPY_REVISED` (`src/lib/sitemap-dates.ts`): when a page's revision line or copy changes, change its entry too (`sitemap-dates.test.ts` fails when an entry and a printed date drift; data pages are dated by their data).
-- **Numbers and ordinals** (`src/lib/typography.ts`): negatives use the minus sign U+2212 (`MINUS`, `formatSignedNumber`, `withMinus` for a string Intl or `toFixed` already formatted), never the hyphen-minus, in text, tables, SVG labels and chart ticks (`formatValue` in `viz/theme.ts` does it); football keeps `formatSigned`/`formatPp` from `football-format.ts`, which follow the same rule. Ordinals go through `ordinal(n, locale, gender)`: "5.º", "1.ª" in Portuguese (always the abbreviation point, never "5º"), "5th", "1st" in English. Football keeps `formatOrdinal(n, locale)` from `football-format.ts` for table positions, with the same output as the masculine `ordinal`. No local `ordinal()` copies.
-- **Chart frame**: every chart and every standalone table of figures sits in one `<DataCard>` (title, optional subtitle and badge, the plot, a footer with source, date and a methodology link), in every section. No bespoke card, icon-titled header or loose legend instead of it; a chart inside an article is a `<Figure>` (caption, source, as-of), the editorial twin. Archived forecasts name their run in the footer ("Fonte: modelo estimador.pt, 9 000 simulações · Previsão de 16 de maio de 2025 · Metodologia"; "Forecast of 16 May 2025" in English, the long date from `formatElectionLongDate`). A new chart without the frame and a `<ChartTable>` twin is not finished.
-- **Wide tables on phones**: `ChartTable` keeps its first column (the row label) sticky with a hairline, the header row sticky, and a `.scroll-cue` edge shadow (globals.css, pure CSS) while there is more to scroll; another scroll area gets `tabIndex={0} role="region" aria-label` and `.scroll-cue` the same way. `ChartTable` right-aligns figure columns, header included, and left-aligns words (`columnAlignments` in `src/components/viz/table-align.ts`; bounds such as "menos de 1%" count as figures; the `align` prop overrides). MDX tables and code blocks are named, focusable scroll regions (`MdxTable`, `MdxPre` in `src/components/mdx/ScrollBlocks.tsx`: the table on paper with `.scroll-cue`, code wrapping below 640px); inline MDX code breaks words.
-- **Phones**: tap targets are at least 44px (`min-h-11`); on a coarse pointer or below 640px, `:where(footer, nav) li > a` and the opt-in `.tap-target` class get it from the base layer, so lists of links need nothing of their own. Form controls are 16px below 640px (globals.css, unlayered), so iOS does not zoom on focus. `html` has `scroll-padding-top: 5rem`, so anchors, focus and `scrollIntoView` clear the sticky header: do not add `scroll-mt-*`.
-- **Visualisations** (`src/components/viz`, showcased as section 08 of `/marca`): `<DataCard>` (title, source, date, methodology link) frames every chart; `<StatTile>`/`<KpiRow>` for headline numbers with optional sparkline and delta; `<TrendChart>` (2px line, 80% band wash, dashed projected segment, end labels, crosshair tip); `<ColumnChart>` (24px caps, one highlighted column); `<RankedBars>`; `<OutcomeBar>` for 1X2; `<PeopleGrid>` (100 dots); `<Segmented>` filters; `<Legend>`; `<ChartTable>` (the table twin every chart carries). Series colours live in `theme.ts` (`SERIES`/`SERIES_DARK`, mirrored as `--color-series-1..4` and `--color-series-dark-1..4` tokens): fixed order teal, gold, periwinkle, coral; never cycled, never on text, at most four (the fifth folds into "other"). `STATUS` colours are reserved for state and always ship with an icon and a word. Team and party colours keep their own maps. The data pastels are for categorical fills and small marks, not for line series. Chart text is Manrope (`FURNITURE.font`), never Inter. Every Observable Plot output goes through `quietPlot()` (`src/components/viz/plot-a11y.ts`, exported from `@/components/viz`) before it is inserted: it hides the drawing from assistive technology (Plot labels role-less `<g>`s, which axe reports as aria-prohibited-attr), since the DataCard title and the `<ChartTable>` twin are the accessible version. The same contract applies to the older Plot and SVG charts: the title race, relegation, team timeline, polling, seat, coalition, presidential trend and head-to-head charts and the economy sparklines carry a `<ChartTable>` twin and a hover tip, so a new chart must too. A table twin is a complete alternative: every point the chart draws at the chart's own resolution, with its bands or quantiles in their own columns, in the page's number format; long tables scroll inside the disclosure. Nothing in an SVG is below 11px.
-- **Chrome**: every page opens with `<PageHero>` and closes with `<SiteFooter locale={locale} />` (one exception left: `/artigos/tema` still opens on a hand-written `<header>`; give it the `/artigos` hero when it is next touched). OG cards come from `scripts/lib/og-cards.mjs` (Manrope via `@fontsource/manrope`; the mosaic only on the brand card, drawn with the geometry of `<Mosaic variant="cover">`; `articleCard` still adds one to an explainer's card, which the 6 October rule does not list, and no explainer is published yet: settle it before the first one ships).
-- **Communications**: one line ("Dados para compreender Portugal."), one descriptor ("Dados e modelos sobre Portugal, com a incerteza à vista: quem vive em cada freguesia, como pode acabar a Liga e o que diziam as previsões eleitorais.", owner decision of 6 October 2026: live sections first, no "previsões" for everything) and two bios (pt, en; same order), written once in `src/lib/brand/descriptor.json` (`src/lib/brand/descriptor.ts` for the app) and read by `meta.defaultDescription`, the homepage's identity line (the page's h1 is the line, the descriptor follows), the footer blurb, the feed description, the OG brand card (`scripts/generate-og-images.mjs`), the social kit and the README; `descriptor.test.ts` fails on a retyped copy. The brand notes live in `docs/brand/` (`social-kit.md`, `section-illustrations.md`). `npm run brand` regenerates every logo, icon and social asset (`scripts/generate-brand-identity.mjs` + `scripts/generate-social-kit.mjs`, outputs under `public/brand`, `public/branding`, `public/images/brand`); the Liga matchday card is `scripts/generate-social-images.mjs`. Voice: sentence case, questions as headings, uncertainty stated with interval, date and source, one action per piece, no emoji or exclamation marks. Portuguese copy addresses the reader as **tu** ("Escolhe a tua equipa", "Explora", "Segue o feed"), never você, including meta descriptions and buttons; English is en-GB. Portuguese copy keeps the English tech terms PT-PT readers actually say ("download", "link" for a URL, "checksums", "online", "email", "feed", "app"; never "descarregar", "descarga", "ligação" for a URL or "somas de verificação"; "ligação" meaning a connection stays) and never shows internal production jargon ("empacotamento", "bundle", "contrato", "pipeline", "o produtor"): the publisher is estimador.pt, so copy says "nós". Page titles go through `siteTitle()` (`src/lib/site-title.ts`, re-exported by `src/lib/metadata.ts`; `createPageMetadata` applies it), which appends the one suffix " | estimador.pt": pass a bare, sentence-case title and never type a suffix, in code or in `meta.*` messages. The `.pt` of the signature is `BRAND.muted`, never `BRAND.faint`. The kit and the voice rules are on `/marca`. No `twitter:creator` or `twitter:site` (`src/lib/metadata.ts`) until the owner confirms the account; add them together with a footer link.
-- **Licences** (owner decision of 6 October 2026): estimador.pt's own data and model outputs are CC BY-NC 4.0 (non-commercial, with attribution; commercial users write in): the synthetic population (every `pt-synthpop` release relabelled in place; the data files are byte-identical, only the package's licence texts, `ERRATA.md`, `metadata.json` and `checksums.sha256` changed, which `PINNED.checksums` in `scripts/sync-population.py` pins), the Liga Portugal open data (`/desporto/liga/dados`) and the archived election forecasts. `/sobre#reutilizar` is the one site-wide answer (scope, exclusions, citation form). Material from others keeps its own licence and every attribution says which licence covers which part: INE's Censos 2021 data and DGT's CAOP 2021 geometry stay CC BY 4.0 (`SHORT_ATTRIBUTION` and `releaseCitation` in `src/lib/population/cite.ts`: "Fonte: INE, Censos 2021 (CC BY 4.0) · informação modificada por estimador.pt (CC BY-NC 4.0)"; the population map and the game's end panel credit the CAOP geometry as CC BY 4.0). Third-party football data are never relicensed: `/desporto/liga/dados` marks them "Fora da licença" per file (`FILE_DOCS[].thirdParty`: SofaScore results and match statistics, FotMob xG, Pinnacle and Bet365 odds via football-data.co.uk, Transfermarkt injuries and market values); update the mark when a feed gains or loses such a field. Polls, official results, odds and the brand stay outside the grant too.
+- **The reading rule**, printed in the homepage masthead and the footer (`<ReadingRule>`), and
+  as a short key under any chart that uses the marks:
+  - a **black square**: what has already happened (a club's points today, a game's result, the
+    count that occurred);
+  - a **yellow band between thin ink caps, with an ink median tick** (`<IntervalBand>`): the
+    model's margin, a 90% interval unless the label says otherwise. `--color-signal`
+    (`#ffd400`, `BRAND.signal`) means this and nothing else on the site; `--color-signal-low`
+    (`#fff1b3`) is a de-emphasised band (mid-table rows);
+  - a **lone tick on a short ruler** (`<NoMargin>`): one model run, no margin. Every figure from
+    the synthetic population carries it (with `HONESTY.synthetic`) before the first number.
+  The band's meaning never depends on the yellow (1.4:1): the ink caps, the median and the
+  printed range carry it. In forced colours the band is drawn in CanvasText.
+- **Mark and signature**: the interval mark (two square caps with whiskers, a band, a counter
+  left of centre) and the wordmark, one colour (`#111` on white). `<LogoHorizontal>` draws the
+  published logo from paths (`src/lib/brand/geometry.json`, `wordmark-paths.json`, the same
+  drawing as `public/brand/estimador-logo.svg`; `wordmark.test.ts` holds them together), so it
+  never depends on the page's typeface; the canvas share card draws the same paths. A
+  straight-line revision of the mark and a Plex wordmark are drawn and waiting for the owner's
+  pick (`docs/design/directions-2026-10-11/logo/`; drop-in geometry and wordmark JSON in
+  `variants/`): swapping is replacing those two JSON files and the SVGs, then `npm run brand`.
+- **Surfaces and rules**: `bg-paper` (white, the page and every panel; `cream` is a legacy alias
+  for it), `bg-field` (`#f4f4f4`, hovers, sunken areas; `parchment` is its alias), `border-rule`
+  (`#d9d9d9`, 1px between instruments; `line` is its alias), `border-grid` (`#ececec`, table row
+  hairlines and chart grids), `border-ink` for the rule under a channel head or a table head. No
+  cards with backgrounds, no shadows, no radii: every `--radius-*` token is 0, so `rounded-*`
+  utilities draw square corners; `rounded-full` stays for dots. Dark surfaces (`bg-forest`) are
+  ink.
+- **Ink**: `text-ink` (`#111`) for text and marks, `text-graphite` (`#5e5e5e`, 6.4:1) for
+  secondary text and chart text, `--color-scale` (`#8a8a8a`) for minor ticks and strokes only,
+  never for words. Links are ink with an underline at rest. The retuned ramps (`stone` neutral
+  grey, `red`, `emerald`/`green`, `blue`, `amber`) keep their meaning on white; red and green
+  as text use the 700 step; `stone-400` and up read as text (AA). `palette-contrast.test.ts`
+  and `palette-tokens.test.ts` hold them. Colour otherwise belongs to the data: team and party
+  colours keep their own maps (`teamColorOnPaper` reaches 3:1 on white), as swatches, bars and
+  lines, never as text.
+- **Type** (owner's pick of seven options, `docs/design/directions-2026-10-11/type/`): **IBM
+  Plex Sans** for text (`--font-sans`, `@fontsource-variable/ibm-plex-sans`, the weight axis)
+  and **IBM Plex Sans Condensed** for the display cut (`--font-display`,
+  `@fontsource/ibm-plex-sans-condensed` 500/600/700): h1 and h2 700, h3 600, headline figures
+  (`.disp`, or `font-display font-extrabold tabular-nums`) and names in tables (`.name-cut`,
+  600). Figures are tabular in every `td`/`th` and `.tnum`. `FONT_STACK` and
+  `DISPLAY_FONT_STACK` in `src/lib/brand` mirror the two CSS stacks for Plot, SVG and canvas;
+  change them together (`--display-stretch` exists for a face whose condensed cut is a width
+  axis). Newsreader (`--font-serif`) stays the reading face inside `.article-body` only. Labels
+  are sentence case at 12px in graphite: no letter-spaced uppercase kickers anywhere. Nothing
+  below 11px. Fonts are self-hosted; no page view contacts a font host.
+- **Primitives** (`src/components/instrument/`, server-safe): `IntervalBand` (lo/md/hi on the
+  cell's own scale, `now` square, `result`, `reference`, `low`), `Ruler` (the scale printed in a
+  column head, same min/max as the bands below it), `ReadingRule` and the three glyphs,
+  `NoMargin`, `ChannelHead` (an instrument's h2, optional serial such as "J8" or "v1.0.3", and the
+  reading's date on the right, over an ink rule), `Register` (a reading's facts as a ruled
+  definition list, instead of pills or middle-dot chains), `PosHist` (where a club can finish,
+  1st to 18th), `ProbBar` (an ink bar on a 0–100 ruler, no grey track), `ChartTabs` ("Gráfico |
+  Tabela" as CSS radio tabs). Football adds `Coupon` (`src/components/football/Coupon.tsx`: the
+  games to come with Lisbon kickoff and the reader's clock, 1X2 in whole numbers with the
+  likeliest set heavier and nothing boxed or filled, the club-side stake under each game) and
+  `SeasonRecord` ("O que dissemos e o que aconteceu"). Actions are `<Action>` (square, 48px);
+  keyboard focus is the global ring in globals.css; inputs are 44 to 48px with a visible label.
+- **Findings, not questions**: a page or instrument with a result states it as the headline, in
+  words people repeat, with the counts behind it in the standfirst ("O Porto ganha a Liga em
+  metade das épocas simuladas" / "Em 25 335 de 50 000 épocas simuladas", from
+  `src/lib/football-finding.ts`, which reads `victory_paths.n_target` when published). Questions
+  stay only where the reader is asked something (the misteriosa game, a search label). The
+  population pages and several sub-pages still carry question headlines from September; replace
+  them when touched. Stakes are stated from the playing club's side (`src/lib/football-stakes.ts`:
+  "Título do Porto: 55% se ganhar, 43% se empatar, 39% se perder"; under 5 pp, "Pouco em jogo").
+  Uncertainty is shown as an object (a band, a range printed beside it), not declared in hedging
+  prose; dates are absolute and in Lisbon time (`formatReadingTime`: "11 out. 2026, 00:11"),
+  never "hoje" or "amanhã" in a static page (the reader's clock, `ClockSwitch`, handles change).
+- **No paintings, no mosaic on pages**: the September section scenes and the house are retired
+  from every page (`PageHero` ignores `illustration` and `field`; `SectionIllustration` survives
+  only as a specimen on `/marca`). `<EmptyStateMark>` (the `quarters` mosaic) still marks empty
+  and error states and the 404 until it is redrawn in the instrument's grammar; `/marca` still
+  documents the September system in places and needs rewriting for Instrumento.
+- **One container** (`src/components/brand/Container.tsx`): the header, section tab rows, every
+  `<PageHero>` and the page body share `CONTAINER_CLASS` (`mx-auto w-full max-w-7xl px-4`), so
+  their left edges line up at every width. A narrower column is a `measure` inside it,
+  left-aligned, never a second, narrower centred box (UXD-05).
+- **Show/hide** is `<Disclosure>` (`src/components/viz/Disclosure.tsx`: a native `<details>`, 44px
+  summary, a left chevron, sentence-case label): table twins (`ChartTable` uses it; new charts
+  may use `ChartTabs` instead), map lists, FAQs, notes. MDX `<details>` get the same look from
+  `.article-body details` in globals.css.
+- **Standalone links** are `<TextLink>` (ink, underlined, 44px). **Back links** are `<PageHero
+  back={{ href, label }}>`, an arrow and the parent's own name ("← Liga Portugal", "← Distrito de
+  Lisboa"), never "Voltar à …"; `kickerWithoutBack` drops the kicker segments that repeat it. The
+  election archive pages open with "← Eleições" and the kicker "Arquivo · 2025" or "Arquivo · 2026".
+- **Revision dates** are `<RevisedDate date="YYYY-MM-DD" />` in the PageHero's `meta` ("Revisto a 6
+  de outubro de 2026"), a constant beside the page; a prose page's sitemap `lastmod` is its entry
+  in `COPY_REVISED` (`src/lib/sitemap-dates.ts`; `sitemap-dates.test.ts` holds them together).
+- **Numbers and ordinals** (`src/lib/typography.ts`): negatives use the minus sign U+2212
+  (`MINUS`, `formatSignedNumber`, `withMinus`), in text, tables, SVG labels and chart ticks;
+  football keeps `formatSigned`/`formatPp` (`football-format.ts`). Ordinals go through
+  `ordinal(n, locale, gender)` ("5.º", "1.ª"; "5th"); football keeps `formatOrdinal`.
+- **Chart frame**: every chart and standalone table of figures has a title, a source sentence
+  (source, date, method link) and a table twin (`<ChartTable>` or `ChartTabs`); `<DataCard>`
+  provides that frame for the existing charts (now square and white), `<Figure>` inside articles.
+  Archived forecasts name their run ("Fonte: modelo estimador.pt, 9 000 simulações · Previsão de
+  16 de maio de 2025"). A new chart without a twin is not finished.
+- **Wide tables on phones**: `ChartTable` keeps its first column and header row sticky with a
+  `.scroll-cue` edge shadow; another scroll area gets `tabIndex={0} role="region" aria-label` and
+  `.scroll-cue`. Figure columns right-aligned, words left (`columnAlignments`). MDX tables and code
+  blocks are named, focusable scroll regions (`ScrollBlocks.tsx`).
+- **Phones**: tap targets at least 44px (`min-h-11`; `:where(footer, nav) li > a` and `.tap-target`
+  get it from the base layer on a coarse pointer or below 640px); form controls are 16px below
+  640px; `html` has `scroll-padding-top: 5rem` (no `scroll-mt-*`).
+- **Visualisations** (`src/components/viz`): every Observable Plot output goes through
+  `quietPlot()` before it is inserted (the title and the twin are the accessible version); chart
+  text is `FURNITURE.font` (`FONT_STACK`) in `FURNITURE.axis` (graphite). Series colours
+  (`SERIES` in `theme.ts`) are a fixed order of four, never cycled, never on text; team and party
+  colours keep their own maps. `STATUS` colours ship with an icon and a word. A table twin is a
+  complete alternative: every point at the chart's resolution, bands or quantiles in their own
+  columns. Nothing in an SVG is below 11px.
+- **Chrome**: every page opens with `<PageHero>` (section name in the display cut, the title, a
+  lede, the meta line; no icon, field or painting) and closes with `<SiteFooter locale={locale}
+  />`. OG cards come from `scripts/lib/og-cards.mjs` and `og-render.mjs`; they still draw the
+  September palette and must be redrawn in the instrument's grammar (the finalist's link-card
+  mock is `docs/design/directions-2026-10-11/instrument/final-og.png`), with no owner name.
+- **Communications**: one line ("Dados para compreender Portugal."), one descriptor and two bios,
+  written once in `src/lib/brand/descriptor.json` (`descriptor.ts` for the app) and read by
+  `meta.defaultDescription`, the footer blurb, the feed description, the OG brand card, the social
+  kit and the README; `descriptor.test.ts` fails on a retyped copy. `npm run brand` regenerates
+  every logo, icon and social asset. Voice: sentence case, findings as headlines, uncertainty
+  drawn and dated with its source, one action per piece, no emoji or exclamation marks.
+  Portuguese copy addresses the reader as **tu**, never você; English is en-GB. Portuguese keeps
+  the English tech terms PT-PT readers say ("download", "link", "checksums", "online", "email",
+  "feed", "app") and never shows production jargon ("empacotamento", "bundle", "contrato",
+  "pipeline", "o produtor"): the publisher is estimador.pt, so copy says "nós". Page titles go
+  through `siteTitle()` (one suffix " | estimador.pt", never typed). No `twitter:creator` or
+  `twitter:site` until the owner confirms the account.
+- **Licences** (owner decision of 6 October 2026): estimador.pt's own data and model outputs are
+  CC BY-NC 4.0: the synthetic population (every `pt-synthpop` release relabelled in place;
+  `PINNED.checksums` in `scripts/sync-population.py` pins the changed files), the Liga Portugal
+  open data (`/desporto/liga/dados`) and the archived election forecasts. `/sobre#reutilizar` is
+  the one site-wide answer. Material from others keeps its own licence and every attribution says
+  which licence covers which part: INE's Censos 2021 data and DGT's CAOP 2021 geometry stay CC BY
+  4.0 (`SHORT_ATTRIBUTION` and `releaseCitation` in `src/lib/population/cite.ts`). Third-party
+  football data are never relicensed: `/desporto/liga/dados` marks them "Fora da licença" per file
+  (`FILE_DOCS[].thirdParty`: SofaScore results and match statistics, FotMob xG, Pinnacle and
+  Bet365 odds via football-data.co.uk, Transfermarkt injuries and market values). Polls, official
+  results, odds and the brand stay outside the grant too.
 
 ## Homepage
 
-Four subjects, one hierarchy (`src/app/[locale]/page.tsx`, panels in `src/components/home/`). The page opens by saying what the site is: a compact identity block whose h1 is the brand line (`brandLine`), followed by the descriptor (`brandDescriptor`), "Um projeto independente" (`home.identityByline`) and a "Sobre o projeto" link; every panel title is an h2, in election mode too. Below 1024px, where the nav sits behind the menu button, a labelled row of shortcuts ("Atalhos": A minha freguesia, which goes to the parish search on the same page and focuses it, `SearchShortcut`; O meu clube; Eleições) follows it, left-aligned chips each with a status a newcomer can read ("Censos 2021", "Depois da J7" from `home.shortcutClubStatus`, "Arquivo"); the economy has no shortcut while it is in preparation. The page body uses the shared container (`CONTAINER_CLASS`), so it lines up with the header. Standard mode leads with the synthetic population (2fr: parish search, today's Freguesia misteriosa), football is the rail (1fr), economy and elections support in a second row; below 1100px the lead row stacks.
+The site's live readings as instruments (`src/app/[locale]/page.tsx`, pieces in
+`src/components/home/`), in the order of what is live. It opens with a masthead line: the brand
+line as the page's h1 (`brandLine`, small), "Sobre o projeto", and on the right the reading rule.
+Then:
 
-In the standard layout every panel ends on its painting, so no card ends in empty cream (the layout rule in "Design Language"); in election mode the lead `ElectionsPanel` sets its scene inside the card (inset under the heading, and from 1100px absolutely at the top right, 40% wide), not edge to edge. The lead row shares one height (`items-stretch`): from 768px the population card holds the house in its right column, its ground toned to the card's cream (`ART_FIELD`), up to 430px tall, vertically centred and inset 16px top and bottom (`md:max-h-[430px] md:self-center md:py-4`), so it reads as a column without being full height; the Liga rail (`FootballPanel`) shows, before a club is picked (`FootballClubPicker` then shows that club's outlook), the title race, then the three clubs likeliest to go down ("Probabilidade de despromoção (17.º ou 18.º)", `home.footballRelegationLabel`, from the same `mdNN`), then "Ver a Liga Portugal" and the club picker, and ends on the stadium as a band that takes the height the rail has left (`.home-band` in `globals.css`, cropped to fill; its floor drops from 160px to 96px from 1100px, so the population card, not the rail, sets the row's height). The support row is two media objects (owner choice, 6 October 2026; `.home-media`): text on the left, the section's painting on the right as a column the card's full height, bleeding to its top, right and bottom edges behind a hairline and cropped to fill at a per-scene focus. Below 768px the support cards are text only; from 768px they stack, both painting columns 40% so the paintings line up; from 1280px they sit side by side (3fr/2fr, one shared height), the elections painting at 38% and the economy painting at 50%, so the economy card's shorter text fills the height. The election archive rows inside that card stack below `sm`. Every panel's kicker carries a status pill read from the data (`Kicker pill` and `Status` in `src/components/home/HomePanel.tsx`): the population "Publicada · v{version}" (`home.populationPill`, only when `meta.json` says `data_status: "release"`), with "Versão de {date} · Censos 2021" (`home.populationStatus`, from `meta.published`) as its status line; football the round the forecast follows ("Depois da jornada 7"), which `splitForecastRound` (`src/components/home/football-status-pill.ts`) splits off `forecastStatusLine`, so the rest of that line (the date and the next update, which `ClockSwitch` swaps once the next round is played) sits under the heading and the round is not said twice; elections "Arquivo" ("Previsão" for an election still to come, in election mode); economy "Em preparação" or "Em pausa", and no pill once live. The hierarchy is an editorial setting in `src/lib/config/homepage.ts`: set `HOMEPAGE` to `{ mode: 'election', election: '<id from elections.ts>' }` and rebuild to lead with an election; an id without published data falls back to the standard layout with a build-log warning, and a past election is labelled an archived forecast, never live. Preview without editing: `HOMEPAGE_MODE=election HOMEPAGE_ELECTION=presidential-2026 npm run build`. Every number on the page comes from the loaders (`loadPopulationMeta` counts, `loadLigaSummary` + `loadLigaWithDeltas`, `loadEconomyDashboard` behind `economyState` — the editorial flag, then the pause rule — the election loaders in election mode only); the economy stays in the support row in both modes while it is in preparation (a test pins this); the copy lives under `home` in `messages/*.json`. Each panel carries its section's painting, from the one family in "Three levels of expression". The population panel's is the house, and `<HomeArt>` (`src/components/home/HomeArt.tsx`) draws it and nothing else: the refined 13 September master (`docs/design/original-illustration-refinement/03-people-v2.png`, saved as `population.png` in `docs/design/homepage-claude-handoff/assets`; git-ignored PNGs, only `manifest.json` is tracked), which `node scripts/generate-home-art.mjs` cuts into two shapes of AVIF/WebP in `public/images/home`, its ground toned onto the panel's cream (`ART_FIELD`): the lead is the house alone, its neighbours veiled to cream below the eaves (300, 600 and 880 wide; the 300 serves the 90px phone thumbnail), and the square is the whole scene (tree, house, cypress) padded to a square (400 and 800, for election mode and `/marca`); `<HomeArt>` picks a width (its `SHAPES` mirror the script). The script refuses a master whose size is not the one `manifest.json` records (it prints the `cp` from `03-people-v2.png` to run), and `prebuild` does not run it: the committed crops are what ships. A new master needs the manifest's bytes and the toning constants (`GROUND`) re-measured. `<HomeArt>`'s `media` prop goes on both `<source>`s and swaps the fallback `<img>` for a 1×1 GIF, so art hidden by CSS at one width is not fetched there (UXM2V-04): the two eager placements of the lead layout pass complementary queries (`(max-width: 767.98px)` for the phone thumbnail, `(min-width: 768px)` for the desktop column), and the lazy ones of the secondary layout pass none. The football, economy and elections panels use the section scenes (`SectionIllustration`, `/images/sections/`); the 12 September homepage paintings of those three sections were deleted on 6 October 2026, with their crops. `HomeMiniature` (the village hero) is no longer on the homepage but stays available.
+- **Liga Portugal** (`LigaInstrument`, two thirds of the first row from `lg`): `ChannelHead`
+  ("Liga Portugal", serial "J8", "previsão de 11 out. 2026, 00:11"), the finding as a large
+  display line (`titleFinding`), a standfirst with the count of seasons (`titleSeasons`), how many
+  of the round's games the forecast had seen and the biggest title move since the previous
+  forecast; the clubs with a title chance on one 0–100 points ruler (title share, change, today's
+  points as a square and the final-points band from `samples.json`, the place histogram); then,
+  stacked below until 1560px and beside the table from there, relegation (17th or 18th, `ProbBar`)
+  and the next five games as a `Coupon`.
+- **População sintética** (`PopulationPanel`, the first row's last third): `ChannelHead` with the
+  release version and its own date (`home.populationStatus`, "datada de 5 de outubro de 2026"),
+  the statement "As 3 092 freguesias dos Censos 2021, uma a uma" (`home.populationTitle`), the
+  release counts from `meta.json` in one sentence (`home.populationText`), the no-margin sign and
+  `HONESTY.synthetic` before any further figure, the parish search, today's Freguesia misteriosa
+  and the open data as text links.
+- **Eleições, arquivo** (`ElectionsPanel` standard variant): one dated finding per election, read
+  from its own files ("António José Seguro vencia a 2.ª volta em mais de 99% das simulações";
+  "A AD elegia mais deputados do que qualquer outro partido em mais de 99% das simulações", from
+  the 9 000 seat draws), each with a link to its archive page.
+- **Economia** appears only once it publishes (`EconomyPanel`); while it is in preparation the
+  homepage says nothing about it. There are no shortcut chips, pills, paintings or status dots.
+
+Election mode is an editorial setting in `src/lib/config/homepage.ts` (`HOMEPAGE = { mode:
+'election', election: '<id>' }`; preview with `HOMEPAGE_MODE=election
+HOMEPAGE_ELECTION=presidential-2026 npm run build`): the configured election's lead panel comes
+first, then the same first row; an id without published data falls back to the standard layout
+with a build-log warning, and a past election is labelled an archived forecast. Every number on
+the page comes from the loaders; the copy lives under `home` in `messages/*.json`.
 
 ## Economy section
 
@@ -194,9 +339,9 @@ a published one (the 20-business-day guard in `economy-time.ts`). While the flag
   under one kicker (the back link) and a `RevisedDate`; say "leituras", not "números", since
   the methodology does print backtest figures; both are noindex and
   out of the sitemap, and have no share card of their own (they use the brand card);
-- the header, mobile menu and footer say "Economia · em preparação"
-  (`nav.economicsPreparing`), the homepage panel carries the "Em preparação" pill and
-  status, and `/sobre`'s status list says the same;
+- the economy is absent from the header, the mobile menu, the footer and the homepage
+  (`siteNavigation`, `SiteFooter` and the homepage read `ECONOMY_PUBLISHED`; the pages stay
+  reachable by address), and `/sobre`'s status list says it is in preparation;
 - no economy figures are served: `public/data/economics/` is empty and git-ignored (the
   July 2026 `dashboard.json`/`stories.json` were removed), `validate-data` has no economy
   entry, and the loaders are only called when `ECONOMY_PUBLISHED` is true;
@@ -211,7 +356,8 @@ messages, en-GB dates, the methodology rewritten for the published panel (presen
 the live track record, a link to the code), then set `published: true`, remove
 `/public/data/economics/` from `.gitignore`, run `./scripts/sync-data.sh economics` and
 restore a required `economics/dashboard.json` check in `scripts/validate-data.mjs`. The flag
-alone restores indexing, the sitemap entries, the share card and the plain nav label.
+alone restores indexing, the sitemap entries, the share card, the nav and footer items and the
+homepage panel.
 
 ## Population section
 
@@ -459,13 +605,14 @@ All chart components follow a consistent pattern:
 
 ### Football Chart Components (`src/components/charts/football/`)
 - **LeagueTable.tsx** — Predicted standings with probabilities
-- **MatchdayPredictions.tsx** — Next matchday probability bars
+- **Coupon** (`src/components/football/Coupon.tsx`) — the games to come: 1X2 and each game's club-side stake (`football-stakes.ts`)
+- **SeasonRecord** (`src/components/football/SeasonRecord.tsx`) — the season's pre-kickoff record against the model's ranges (`football-record.ts`)
 - **TitleRaceChart.tsx** — Championship probability time series
 - **RelegationChart.tsx** — Relegation probability time series
 - **DecisiveMatches.tsx** — Title-swinging upcoming matches
 - **MarketScorecard.tsx** — model vs closing line (`/desporto/liga/modelo`); every figure, the RPS axis range, n per point, the season span and the bookmakers (`market_sources`) are read from `market_scorecard.json`
-- Helpers: `src/lib/football-format.ts` (pt-PT/en-GB numbers, Lisbon dates), `src/lib/football-injuries.ts` (when an injury list is recent enough to show), `src/lib/football-scorecard.ts` (verdicts, model names, market sources, and the league table's calibration sentence from `market_scorecard.json` → `calibration`, quoted only for the model it was measured on), `src/lib/football-path-builder.ts` (the club page's scenario builder maths), `src/lib/football-status.ts` (the dated forecast line), `src/lib/football-model-evaluation.ts` (the one ±2 SE verdict source for `/modelo`; `TITLE_CALIBRATION` is a dated constant from the 2026-09 assessment, to update when it is re-run), `src/lib/season-review-provenance.ts` (published vs reconstructed forecasts on `/2025-26`), `src/lib/utils/prediction-game-record.ts` (the game's season record and the matchday-1 late-publication flag), `src/lib/utils/player-pages.ts` (`playerDataCutoffLabel`/`Sentence`: the player models' data cut-off, shown beside every SAR figure, match pages and player meta descriptions included; on `/jogadores` it is said once in the hero's meta line and again in the finishing and contribution footers, not above each list), `src/lib/utils/player-inventory.ts` (`playerInventory`, `playerInventorySentence`, `playerCutoffMeta`: what `/jogadores` ranks and what it does not, stated once in the hero, from 640px up), `src/components/charts/football/player-marks.ts` (`PLAYER_MARKS`: the player charts' bars, whiskers and caps in stone-400/900, at least 3:1, held by `player-marks.test.ts`; `BRAND.faint` is not used for a meaningful mark), `src/lib/football-next-matchday.ts` (where an `mdNN`'s `next_matchday` and the game record disagree, for `/dados`) and `src/lib/football-exploration.ts` (the simulator: `defaultObjective` opens a club on the title from 1% of title chance, `TITLE_DEFAULT_FROM`, else on relegation; the URL's goal overrides). Seasons in the copy are read, not typed: the player models' cut-off season is the last entry of `players.json` → `generated_from.seasons`, which `/sobre`'s Liga row reads (`loadLigaPlayers`, CL2-02) as the player hub and the Liga methodology do, and `meta.ligaDescription` takes `{season}` (the latest prediction's `season`, else `CURRENT_LIGA_SEASON` in `config/football.ts`). In `config/football.ts`: `teamDisplayName` (accents, e.g. Paços de Ferreira), `teamPhoneName` (narrow columns), `teamColorOnPaper` (a club colour that reads on paper), `distinctTeamColors` (lines that stay apart on one chart), `teamWithArticle(team, form)` (Portuguese copy never writes "para Porto" or "de Benfica": "para o Porto", "do Benfica", "no Casa Pia") and `OUTCOME_TONES`, the one 1X2 encoding (home dark, draw pale, away mid, on the hub cards and the match page; club colours never fill the split bar). `src/components/football/ClubFixtures.tsx` lists a club's played and remaining fixtures on its page.
-- **The reader's clock**: a Liga page is exported once per forecast, so what changes with time is read in the browser. `ClockSwitch` / `useClockReached` (`src/components/football/ClockSwitch.tsx`) swap a line once an instant has passed, using `clockValue`, `roundPlayedAt`, `matchStartedLine`, `roundPlayedLine` and `forecastStatusLinePlayed` from `football-status.ts` ("Jogo começou · previsão de 25 set.", "Jornada 8 · jogada, nova previsão em preparação"). The server render, and the first client render, are always the published state; the clock is read only after mount, and re-read every minute. `football-status.ts` owns the instants, so the hub, the club pages, the simulator and the match pages turn stale together; the homepage rail (`FootballPanel`) does not call `nextRoundTiming` but repeats its round rule inline (the round in progress, else `next_matchday`, with the unplayed `game_fixtures` kickoffs) and shares only `roundPlayedAt`, `forecastStatusLine` and `forecastStatusLinePlayed`, so a change to the rule must be made in both places. The helpers: `nextRoundTiming` (used by the hub, the simulator, the club and match pages; the round the next forecast waits for: the round in progress when the forecast came out mid-round, else the next; its kickoffs, start, `playedAt`, and the postponed leftovers it also prices), `roundPlayedAt` (the last kickoff plus `ROUND_SETTLE_MS`, two hours), `kickoffSteps` / `matchPlayedLine` (a game reads "Jogo começou" at kickoff and "Jogo disputado · previsão de …" two hours later), and `forecastAsOf` ("na previsão de 25 set.", what "agora" becomes once the forecast is out of date). A postponed game ("jogo em atraso") says its new forecast comes "com a próxima atualização", never "depois da jornada".
+- Helpers: `src/lib/football-format.ts` (pt-PT/en-GB numbers, Lisbon dates), `src/lib/football-injuries.ts` (when an injury list is recent enough to show), `src/lib/football-scorecard.ts` (verdicts, model names, market sources, and the league table's calibration sentence from `market_scorecard.json` → `calibration`, quoted only for the model it was measured on), `src/lib/football-path-builder.ts` (the club page's scenario builder maths), `src/lib/football-status.ts` (the dated forecast line), `src/lib/football-model-evaluation.ts` (the one ±2 SE verdict source for `/modelo`; `TITLE_CALIBRATION` is a dated constant from the 2026-09 assessment, to update when it is re-run), `src/lib/season-review-provenance.ts` (published vs reconstructed forecasts on `/2025-26`), `src/lib/utils/prediction-game-record.ts` (the game's season record and the matchday-1 late-publication flag), `src/lib/utils/player-pages.ts` (`playerDataCutoffLabel`/`Sentence`: the player models' data cut-off, shown beside every SAR figure, match pages and player meta descriptions included; on `/jogadores` it is said once in the hero's meta line and again in the finishing and contribution footers, not above each list), `src/lib/utils/player-inventory.ts` (`playerInventory`, `playerInventorySentence`, `playerCutoffMeta`: what `/jogadores` ranks and what it does not, stated once in the hero, from 640px up), `src/components/charts/football/player-marks.ts` (`PLAYER_MARKS`: the player charts' bars, whiskers and caps in stone-400/900, at least 3:1, held by `player-marks.test.ts`; `BRAND.faint` is not used for a meaningful mark), `src/lib/football-next-matchday.ts` (where an `mdNN`'s `next_matchday` and the game record disagree, for `/dados`) and `src/lib/football-exploration.ts` (the simulator: `defaultObjective` opens a club on the title from 1% of title chance, `TITLE_DEFAULT_FROM`, else on relegation; the URL's goal overrides). Seasons in the copy are read, not typed: the player models' cut-off season is the last entry of `players.json` → `generated_from.seasons`, which `/sobre`'s Liga row reads (`loadLigaPlayers`, CL2-02) as the player hub and the Liga methodology do, and `meta.ligaDescription` takes `{season}` (the latest prediction's `season`, else `CURRENT_LIGA_SEASON` in `config/football.ts`). In `config/football.ts`: `teamDisplayName` (accents, e.g. Paços de Ferreira), `teamPhoneName` (narrow columns), `teamColorOnPaper` (a club colour that reads on paper), `distinctTeamColors` (lines that stay apart on one chart), `teamWithArticle(team, form)` (Portuguese copy never writes "para Porto" or "de Benfica": "para o Porto", "do Benfica", "no Casa Pia") and `OUTCOME_TONES`, the 1X2 split-bar encoding (home dark, draw pale, away mid, on the match page; club colours never fill the split bar; lists of games use the `Coupon`'s figures instead). `src/components/football/ClubFixtures.tsx` lists a club's played and remaining fixtures on its page.
+- **The reader's clock**: a Liga page is exported once per forecast, so what changes with time is read in the browser. `ClockSwitch` / `useClockReached` (`src/components/football/ClockSwitch.tsx`) swap a line once an instant has passed, using `clockValue`, `roundPlayedAt`, `matchStartedLine`, `roundPlayedLine` and `forecastStatusLinePlayed` from `football-status.ts` ("Jogo começou · previsão de 25 set.", "Jornada 8 · jogada, nova previsão em preparação"). The server render, and the first client render, are always the published state; the clock is read only after mount, and re-read every minute. `football-status.ts` owns the instants, so the hub, the club pages, the simulator and the match pages turn stale together; the homepage's Liga instrument (`LigaInstrument`) states the forecast's own date and time and lets its `Coupon` rows turn with `kickoffSteps`, so it holds no round rule of its own. The helpers: `nextRoundTiming` (used by the hub, the simulator, the club and match pages; the round the next forecast waits for: the round in progress when the forecast came out mid-round, else the next; its kickoffs, start, `playedAt`, and the postponed leftovers it also prices), `roundPlayedAt` (the last kickoff plus `ROUND_SETTLE_MS`, two hours), `kickoffSteps` / `matchPlayedLine` (a game reads "Jogo começou" at kickoff and "Jogo disputado · previsão de …" two hours later), and `forecastAsOf` ("na previsão de 25 set.", what "agora" becomes once the forecast is out of date). A postponed game ("jogo em atraso") says its new forecast comes "com a próxima atualização", never "depois da jornada".
 - **Scenarios** (`src/lib/football-scenarios.ts`, behind the club scenario cards and the match page's impact panel): a rival result is part of a scenario only when it happens in at least 90% of the scenario's simulations (`RIVAL_CONDITION_MIN_SHARE`), and never when it is one of the club's own games; the final-duel bins carry a tie bar (`duelBins`), and `samplingMargin` states the simulation margin beside a share.
 - **The prediction game's record** (`src/lib/utils/prediction-game-record.ts`): `frozenBeforePreviousRoundEnded` lists the rounds whose odds were frozen before the previous round's last game (2026-27: matchdays 3, 5, 6 and 7), `roundsWithoutSource` the rounds whose games carry no `probs_source`, and `roundLockAt` the instant a round closes in the game (its earliest lock); `/desporto/liga/dados` names both kinds of round and `/jogo-previsoes` the frozen ones. The dates in the files: an `mdNN.json` `timestamp` is its last regeneration, not its first publication; its `next_matchday` may differ from the game's record (md01, md03 and md04 by up to 0.2 pp in 2026-27) and may list only part of the round, which `/desporto/liga/dados` states, read from the files by `src/lib/football-next-matchday.ts`; and `game_fixtures.json` (its `published_at`, its frozen odds) is the record that counts.
 - **One percentage rule** for every football figure: `formatPercent` / `formatPp` in `football-format.ts` (whole numbers from 10%, one decimal below, `<0,1%` and `>99%` at the ends so nothing non-zero reads 0% and nothing short of certain reads 100%, U+2212 for minus, pp for changes), grouped four-digit counts, and `matchLabel(home, away)` with an en dash ("Benfica – Vitória"). No `Math.round(p * 100)` in new code. Posteriors (`p_above_replacement`, `p_above_average`) go through `formatPosterior`, so 1.0 prints ">99%" and 0 "<0,1%"; `formatPercent`'s "100%" and "0%" are for exact shares of simulations only. Probability table twins (title race, relegation) list matchdays newest first, while the charts stay oldest first.
