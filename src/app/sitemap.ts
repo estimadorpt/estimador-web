@@ -35,7 +35,6 @@ const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number
   '/desporto/liga': { changeFrequency: 'daily', priority: 0.9 },
   '/desporto/liga/jogadores': { changeFrequency: 'weekly', priority: 0.7 },
   '/desporto/liga/jogo-previsoes': { changeFrequency: 'weekly', priority: 0.7 },
-  '/desporto/liga/simulador': { changeFrequency: 'weekly', priority: 0.7 },
   '/desporto/liga/modelo': { changeFrequency: 'monthly', priority: 0.6 },
   '/desporto/liga/dados': { changeFrequency: 'monthly', priority: 0.6 },
   '/desporto/liga/metodologia': { changeFrequency: 'monthly', priority: 0.5 },
@@ -128,7 +127,6 @@ function contentDates({ liga, players }: { liga?: Date; players?: Date }): Recor
     // The homepage shows the Liga forecast and the population release.
     '/': newestDate(liga, population),
     '/desporto/liga': liga,
-    '/desporto/liga/simulador': liga,
     '/desporto/liga/jogo-previsoes': newestDate(liga, fixtures),
     '/desporto/liga/dados': newestDate(liga, fixtures, injuries, scorecard),
     '/desporto/liga/jogadores': players,

@@ -1,30 +1,122 @@
-// Pure helpers behind the club scenario cards and the match page's impact
-// panel, kept out of the components so they can be tested without JSX.
+// Pure helpers behind the club page's what-ifs (its frame, the other games
+// that weigh on it, the final duel) and the match page's impact panel, kept
+// out of the components so they can be tested without JSX.
 
 import { relevantObjective, type ClubObjective } from '@/lib/football-fixtures';
-import type { NarrativeScenario, NextMatchdayScenarioMatch, ScenarioRivalCondition } from '@/types/football';
+import type { NextMatchdayScenarioMatch, NextMatchdayScenarios } from '@/types/football';
 
-/** A rival result counts as part of the scenario only when it happens in at
- * least this share of the scenario's simulations (audit FA2-01): 53% against
- * 48% overall is a tendency, not something that "has to happen". */
-export const RIVAL_CONDITION_MIN_SHARE = 0.9;
+/* ----------------------------------------------------------- the frame */
+
+/** From this title chance up, a club's page is about the title. */
+export const TITLE_DEFAULT_FROM = 0.01;
+/** Below the title line, a club's page is about relegation from the same 1%
+ * (the line the club page folds its figures at). */
+export const RELEGATION_FRAME_FROM = 0.01;
+
+export type ClubFrame = 'title' | 'relegation';
 
 /**
- * The rival results that come with a scenario almost every time. Two kinds
- * of row are left out (audit FA2-01, PUB2-11):
- *  - any game the club itself plays ("Porto perde pontos vs Benfica (J24)" on
- *    Benfica's page is Benfica's own game seen from the other side, whether
- *    or not it is one of the scenario's steps);
- *  - any result that happens in fewer than RIVAL_CONDITION_MIN_SHARE of the
- *    scenario's simulations.
+ * The one race a club's page is about, the same on every part of it (the
+ * next game's stakes, the timeline, the scenario builder, the other games
+ * that weigh on it, the final duel): the title from 1% of title chance, else
+ * relegation (17th or 18th) from 1%, else none. Casa Pia's page used to
+ * switch between "despromoção 53%" and "permanência 47%" for one fact
+ * (review, October 2026); it now says "despromoção" throughout. A club with
+ * neither race above 1% (mid-table) has no what-if to read: null.
  */
-export function rivalConditionsWithoutOwnMatches(
+export function clubFrame(probs: { p_champion?: number; p_relegation?: number } | undefined): ClubFrame | null {
+  if ((probs?.p_champion ?? 0) >= TITLE_DEFAULT_FROM) return 'title';
+  if ((probs?.p_relegation ?? 0) >= RELEGATION_FRAME_FROM) return 'relegation';
+  return null;
+}
+
+/** The probability field a frame reads. */
+export function frameMetric(frame: ClubFrame): 'p_champion' | 'p_relegation' {
+  return frame === 'title' ? 'p_champion' : 'p_relegation';
+}
+
+/** Whether a higher value of the frame's chance is good news for the club. */
+export function frameUpIsGood(frame: ClubFrame): boolean {
+  return frame === 'title';
+}
+
+/**
+ * The objective a match page's impact panel reads for a club: its frame,
+ * the same rule as its club page, and for a club in neither race the most
+ * telling other figure (top three, or relegation under 1%), so the panel
+ * still has something to draw.
+ */
+export function clubObjective(probs: TeamProbs | undefined): ClubObjective {
+  const frame = clubFrame(probs);
+  return frame ? frameMetric(frame) : (relevantObjective(probs) ?? 'p_top3');
+}
+
+/* --------------------------------------------- other games that weigh */
+
+/** Below this spread between results, a game's effect on a club is within
+ * the Monte Carlo noise of thin conditional buckets (audit FA2-06): the
+ * simulator's line, kept when its list moved to the club pages. */
+export const RIVAL_GAME_MIN_SWING = 0.03;
+
+export interface RivalGame {
+  /** Index in next_matchday_scenarios.matches (and in the supported fixtures). */
+  index: number;
+  home: string;
+  away: string;
+  matchday: number;
+  /** The club's frame chance if the home side wins, if they draw, if the away side wins. */
+  home_win: number;
+  draw: number;
+  away_win: number;
+  /** Largest minus smallest of the three. */
+  swing: number;
+}
+
+/**
+ * The games of other clubs, in the published round, whose result moves this
+ * club's frame chance by RIVAL_GAME_MIN_SWING or more: "Outros jogos que
+ * pesam". Never one of the club's own games (its next game has its own
+ * section; a rival's game against it is that same game seen from the other
+ * side, audit FA2-01). In the file's order; callers order them by kickoff.
+ */
+export function rivalGames(team: string, frame: ClubFrame, nms: NextMatchdayScenarios | null | undefined): RivalGame[] {
+  if (!nms) return [];
+  const metric = frameMetric(frame);
+  const base = nms.baseline[team]?.[metric];
+  if (typeof base !== 'number') return [];
+  const out: RivalGame[] = [];
+  nms.matches.forEach((match, index) => {
+    if (match.home_team === team || match.away_team === team) return;
+    const value = (o: 'H' | 'D' | 'A') => {
+      const v = match.conditionals?.[o]?.teams?.[team]?.[metric];
+      return typeof v === 'number' ? v : base;
+    };
+    const [h, d, a] = [value('H'), value('D'), value('A')];
+    const swing = Math.max(h, d, a) - Math.min(h, d, a);
+    if (swing < RIVAL_GAME_MIN_SWING) return;
+    out.push({ index, home: match.home_team, away: match.away_team, matchday: match.matchday, home_win: h, draw: d, away_win: a, swing });
+  });
+  return out;
+}
+
+/**
+ * The club the final duel opens on: the other club whose chance in the same
+ * race is closest to this one's, among those at 1% or more. Null when no
+ * other club is in the race, or the club has no frame.
+ */
+export function duelRival(
   team: string,
-  scenario: NarrativeScenario,
-): ScenarioRivalCondition[] {
-  return (scenario.rival_conditions ?? []).filter(
-    rc => rc.opponent !== team && rc.rival !== team && rc.p_rival_drops_in_scenario >= RIVAL_CONDITION_MIN_SHARE,
-  );
+  frame: ClubFrame | null,
+  table: Array<{ team: string; p_champion: number; p_relegation: number }>,
+): string | null {
+  if (!frame) return null;
+  const metric = frameMetric(frame);
+  const own = table.find(r => r.team === team)?.[metric];
+  if (typeof own !== 'number') return null;
+  const others = table
+    .filter(r => r.team !== team && r[metric] >= (frame === 'title' ? TITLE_DEFAULT_FROM : RELEGATION_FRAME_FROM))
+    .sort((a, b) => Math.abs(a[metric] - own) - Math.abs(b[metric] - own) || b[metric] - a[metric]);
+  return others[0]?.team ?? null;
 }
 
 export type TeamProbs = { p_champion: number; p_top3: number; p_relegation: number };
@@ -64,7 +156,7 @@ export function initialImpactSide(
 ): 'home' | 'away' {
   if (!scenario?.conditionals || !baseline) return 'home';
   const swing = (team: string) => {
-    const objective = relevantObjective(baseline[team]) ?? 'p_top3';
+    const objective = clubObjective(baseline[team]);
     const st = impactStakes(scenario, baseline, team, home, objective);
     return st ? Math.max(st.win, st.draw, st.loss) - Math.min(st.win, st.draw, st.loss) : 0;
   };

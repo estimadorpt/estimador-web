@@ -12,6 +12,7 @@ import {
 import { positionCodeEn, positionCodePt } from "@/lib/i18n/football-labels";
 import { formatInteger, formatLongDate, formatPosterior, formatSigned } from "@/lib/football-format";
 import { PLAYER_MARKS } from "@/components/charts/football/player-marks";
+import { IntervalBand } from "@/components/instrument";
 import { BRAND } from "@/lib/brand";
 import {
   formatShortDate,
@@ -500,33 +501,24 @@ export function PlayerProfile({
                 className="absolute top-1/2 -translate-y-1/2 w-px h-8"
                 style={{ left: `${prZero}%`, backgroundColor: PLAYER_MARKS.zero }}
               />
-              {prEntry.lo !== null && prEntry.hi !== null && (
-                <>
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 h-px"
-                    style={{
-                      left: `${prPct(prEntry.lo)}%`,
-                      width: `${Math.max(
-                        prPct(prEntry.hi) - prPct(prEntry.lo),
-                        0.4,
-                      )}%`,
-                      backgroundColor: SOFT,
-                    }}
+              {/* The model's 90% interval is the site's band: yellow between
+                  ink caps, the estimate as its ink tick (the reading rule). */}
+              {prEntry.lo !== null && prEntry.hi !== null ? (
+                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2">
+                  <IntervalBand
+                    lo={prEntry.lo}
+                    md={prEntry.value}
+                    hi={prEntry.hi}
+                    min={prDomain.min}
+                    max={prDomain.max}
                   />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-px h-4"
-                    style={{ left: `${prPct(prEntry.lo)}%`, backgroundColor: SOFT }}
-                  />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-px h-4"
-                    style={{ left: `${prPct(prEntry.hi)}%`, backgroundColor: SOFT }}
-                  />
-                </>
+                </div>
+              ) : (
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 w-0.5 h-8"
+                  style={{ left: `${prPct(prEntry.value)}%`, backgroundColor: INK }}
+                />
               )}
-              <div
-                className="absolute top-1/2 -translate-y-1/2 w-1 h-8"
-                style={{ left: `${prPct(prEntry.value)}%`, backgroundColor: color }}
-              />
             </div>
             <div className="flex justify-between text-[11px] tabular-nums text-stone-500">
               <span>{sar(prDomain.min)}</span>
@@ -706,28 +698,11 @@ export function PlayerProfile({
                 />
               ) : null,
             )}
-            {/* The credible interval (its mass is read from the feed) */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 h-px"
-              style={{
-                left: `${pct(lo)}%`,
-                width: `${Math.max(pct(hi) - pct(lo), 0.4)}%`,
-                backgroundColor: SOFT,
-              }}
-            />
-            <div
-              className="absolute top-1/2 -translate-y-1/2 w-px h-4"
-              style={{ left: `${pct(lo)}%`, backgroundColor: SOFT }}
-            />
-            <div
-              className="absolute top-1/2 -translate-y-1/2 w-px h-4"
-              style={{ left: `${pct(hi)}%`, backgroundColor: SOFT }}
-            />
-            {/* Point estimate */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 w-1 h-8"
-              style={{ left: `${pct(sarValue)}%`, backgroundColor: color }}
-            />
+            {/* The credible interval (its mass is read from the feed) as the
+                site's band, the estimate as its ink tick (the reading rule). */}
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2">
+              <IntervalBand lo={lo} md={sarValue} hi={hi} min={0} max={maxHi} />
+            </div>
           </div>
           <div className="flex justify-between text-[11px] tabular-nums text-stone-500">
             <span>{sar(0)}</span>

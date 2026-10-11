@@ -60,6 +60,15 @@ describe('player chart marks', () => {
     }
   });
 
+  it('draws the model\'s 90% intervals as the site\'s band, never as grey whiskers', () => {
+    const read = (file: string) => fs.readFileSync(path.join(process.cwd(), 'src/components/charts/football', file), 'utf8');
+    for (const file of ['PlayerRatingList.tsx', 'PlayerProfile.tsx']) {
+      expect(read(file), file).toContain('<IntervalBand');
+    }
+    // The ranked lists keep no whisker of their own.
+    expect(read('PlayerRatingList.tsx')).not.toMatch(/PLAYER_MARKS\.whisker|const SOFT/);
+  });
+
   it('no longer uses the faint grey that failed on paper', () => {
     for (const file of ['PlayerRatingList.tsx', 'PlayerProfile.tsx', 'PlayerSkillRanking.tsx']) {
       const src = fs.readFileSync(path.join(process.cwd(), 'src/components/charts/football', file), 'utf8');

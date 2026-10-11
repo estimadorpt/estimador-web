@@ -384,6 +384,16 @@
       "statusCode": 301
     },
     {
+      "route": "/pt/desporto/liga/simulador",
+      "redirect": "/pt/desporto/liga/",
+      "statusCode": 301
+    },
+    {
+      "route": "/en/desporto/liga/simulador",
+      "redirect": "/en/desporto/liga/",
+      "statusCode": 301
+    },
+    {
       "route": "/populacao/misteriosa",
       "redirect": "/pt/populacao/misteriosa/",
       "statusCode": 301
@@ -405,7 +415,7 @@
     },
     {
       "route": "/desporto/liga/simulador",
-      "redirect": "/pt/desporto/liga/simulador/",
+      "redirect": "/pt/desporto/liga/",
       "statusCode": 301
     },
     {

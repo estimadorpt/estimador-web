@@ -120,7 +120,6 @@ export function PlayerRatingsHub({
     noInterval: pt ? "sem intervalo" : "no interval",
     showAll: (n: number) =>
       pt ? `Ver a lista completa (${n})` : `Show the full list (${n})`,
-    showLess: pt ? "Mostrar menos" : "Show less",
     movement: pt ? "vs golos" : "vs goals",
     newEntry: pt ? "fora da lista de finalização" : "not in the finishing list",
     playerPage: pt ? "Página do jogador" : "Player page",

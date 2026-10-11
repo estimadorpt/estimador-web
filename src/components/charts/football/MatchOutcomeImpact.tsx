@@ -6,8 +6,9 @@ import { useClockReached } from "@/components/football/ClockSwitch";
 import { matchPlayedAt } from "@/lib/football-status";
 import { OUTCOME_TONES, teamColorOnPaper, teamDisplayName, teamWithArticle } from "@/lib/config/football";
 import { Link } from "@/i18n/routing";
-import { relevantObjective, formatObjectiveLabel, type ClubObjective } from "@/lib/football-fixtures";
-import { impactStakes as stakesFor, initialImpactSide, type TeamProbs } from "@/lib/football-scenarios";
+import { formatObjectiveLabel, type ClubObjective } from "@/lib/football-fixtures";
+import { clubObjective, impactStakes as stakesFor, initialImpactSide, type TeamProbs } from "@/lib/football-scenarios";
+import { ChoiceGroup } from "@/components/brand/Choice";
 import type {
   DecisiveMatch,
   NextMatchdayScenarioMatch,
@@ -72,7 +73,9 @@ export function MatchOutcomeImpact({
   const otherTeam = chosen === "home" ? away : home;
   // Bars by outcome, not by club: a red kit drew a good result as a "bad"
   // bar and Moreirense's loss row in its own green (audit UXD3-07). The
-  // baseline is a pale neutral, the three results ink.
+  // baseline (the forecast as published) is a pale neutral bar; the three
+  // results are what-ifs, drawn hollow in ink: solid black is the site's
+  // mark for what has already happened (review, October 2026).
   const nowWord = stale
     ? pt ? `na previsão de ${forecastDate}${staleRound ? `, antes da jornada ${staleRound}` : ""}` : `in the ${forecastDate} forecast${staleRound ? `, before matchday ${staleRound}` : ""}`
     : started
@@ -97,7 +100,7 @@ export function MatchOutcomeImpact({
       : stale
         ? pt ? `Na previsão de ${forecastDate}` : `In the ${forecastDate} forecast`
         : pt ? "Agora" : "Now",
-    win: (team: string) => (pt ? `Se ${teamWithArticle(team)} vencer` : `If ${teamDisplayName(team)} win`),
+    win: (team: string) => (pt ? `Se ${teamWithArticle(team)} ganhar` : `If ${teamDisplayName(team)} win`),
     draw: pt ? "Se empatar" : "If they draw",
     loss: (team: string) => (pt ? `Se ${teamWithArticle(team)} perder` : `If ${teamDisplayName(team)} lose`),
     // "Sp. Braga's title chance is currently 0.2%", not "has 0.2% of title" (FA3-13).
@@ -123,7 +126,7 @@ export function MatchOutcomeImpact({
 
   const hasConditionals = !!scenario?.conditionals && !!baseline;
   const objective: ClubObjective | null = hasConditionals
-    ? (relevantObjective(baseline![chosenTeam]) ?? "p_top3")
+    ? clubObjective(baseline![chosenTeam])
     : null;
   const stakes =
     hasConditionals && objective ? stakesFor(scenario!, baseline!, chosenTeam, home, objective) : null;
@@ -139,11 +142,11 @@ export function MatchOutcomeImpact({
   };
 
   if (hasConditionals && objective && stakes) {
-    const rows: { key: "baseline" | "win" | "draw" | "loss"; label: string; value: number; color: string }[] = [
-      { key: "baseline", label: L.baselineNow, value: stakes.baseline, color: OUTCOME_TONES.away },
-      { key: "win", label: L.win(chosenTeam), value: stakes.win, color: "var(--color-ink)" },
-      { key: "draw", label: L.draw, value: stakes.draw, color: "var(--color-ink)" },
-      { key: "loss", label: L.loss(chosenTeam), value: stakes.loss, color: "var(--color-ink)" },
+    const rows: { key: "baseline" | "win" | "draw" | "loss"; label: string; value: number }[] = [
+      { key: "baseline", label: L.baselineNow, value: stakes.baseline },
+      { key: "win", label: L.win(chosenTeam), value: stakes.win },
+      { key: "draw", label: L.draw, value: stakes.draw },
+      { key: "loss", label: L.loss(chosenTeam), value: stakes.loss },
     ];
     const maxValue = Math.max(0.05, ...rows.map(r => r.value));
 
@@ -151,23 +154,15 @@ export function MatchOutcomeImpact({
       <div>
         <div className="flex flex-wrap items-baseline justify-between gap-3 mb-1">
           <h2 className="text-2xl md:text-[28px]">{L.title}</h2>
-          <div className="inline-flex border border-rule bg-paper p-1 text-sm font-semibold" role="group" aria-label={L.switchLabel}>
-            {(["home", "away"] as const).map(side => {
-              const team = side === "home" ? home : away;
-              const active = chosen === side;
-              return (
-                <button
-                  key={side}
-                  type="button"
-                  onClick={() => setChosen(side)}
-                  aria-pressed={active}
-                  className={`min-h-11 px-3 transition-colors duration-150 ${active ? "bg-ink text-paper" : "text-stone-600 hover:bg-field"}`}
-                >
-                  {teamDisplayName(team)}
-                </button>
-              );
-            })}
-          </div>
+          <ChoiceGroup<"home" | "away">
+            label={L.switchLabel}
+            value={chosen}
+            onChange={setChosen}
+            options={[
+              { value: "home", label: teamDisplayName(home) },
+              { value: "away", label: teamDisplayName(away) },
+            ]}
+          />
         </div>
         <p className="text-sm text-stone-500 mb-6">{L.withData(objective)}</p>
 
@@ -183,10 +178,18 @@ export function MatchOutcomeImpact({
               <div className="col-span-2 text-xs text-stone-600 sm:w-52 sm:shrink-0">{row.label}</div>
               {/* One scale, from the ink zero edge, no grey track. */}
               <div aria-hidden="true" className="min-w-0 flex-1 h-6 border-l border-ink relative overflow-hidden">
-                <div
-                  className="h-full"
-                  style={{ width: `${(row.value / maxValue) * 100}%`, backgroundColor: row.color }}
-                />
+                {row.key === "baseline" ? (
+                  <div
+                    className="h-full"
+                    style={{ width: `${(row.value / maxValue) * 100}%`, backgroundColor: OUTCOME_TONES.away }}
+                  />
+                ) : (
+                  // A what-if, hollow: an ink outline on white, never filled.
+                  <div
+                    className="h-full border-[1.5px] border-l-0 border-ink bg-paper forced-colors:border-[CanvasText]"
+                    style={{ width: `${(row.value / maxValue) * 100}%` }}
+                  />
+                )}
                 {row.key !== "baseline" && (
                   <div
                     aria-hidden="true"
@@ -210,15 +213,15 @@ export function MatchOutcomeImpact({
         <p className="text-[11px] text-stone-500 mt-3">
           {started
             ? pt
-              ? `${finished ? "O jogo já foi disputado" : "O jogo já começou"}: a linha vertical marca a probabilidade antes do jogo, na previsão de ${forecastDate}; as barras mostram cada resultado, na mesma escala. Isto não é a probabilidade de o jogo terminar assim.`
-              : `${finished ? "The match has been played" : "The match has started"}: the vertical line marks the probability before it, in the forecast of ${forecastDate}; the bars show each result, on the same scale. This is not the chance the match ends that way.`
+              ? `${finished ? "O jogo já foi disputado" : "O jogo já começou"}: a linha vertical marca a probabilidade antes do jogo, na previsão de ${forecastDate}; as barras vazadas mostram cada resultado possível, na mesma escala. Isto não é a probabilidade de o jogo terminar assim.`
+              : `${finished ? "The match has been played" : "The match has started"}: the vertical line marks the probability before it, in the forecast of ${forecastDate}; the hollow bars show each possible result, on the same scale. This is not the chance the match ends that way.`
             : stale
               ? pt
-                ? `A linha vertical marca a probabilidade ${nowWord}; as barras mostram cada resultado, na mesma escala. Isto não é a probabilidade de o jogo terminar assim.`
-                : `The vertical line marks the probability ${nowWord}; the bars show each result, on the same scale. This is not the chance the match ends that way.`
+                ? `A linha vertical marca a probabilidade ${nowWord}; as barras vazadas mostram cada resultado possível, na mesma escala. Isto não é a probabilidade de o jogo terminar assim.`
+                : `The vertical line marks the probability ${nowWord}; the hollow bars show each possible result, on the same scale. This is not the chance the match ends that way.`
               : pt
-                ? "A linha vertical marca a probabilidade atual (agora); as barras mostram cada resultado, na mesma escala. Isto não é a probabilidade de o jogo terminar assim — ver a secção de probabilidades do jogo acima."
-                : "The vertical line marks the current probability (now); the bars show each result, on the same scale. This is not the chance the match ends that way — see the match-probabilities section above."}{" "}
+                ? "A linha vertical marca a probabilidade atual (agora); as barras vazadas mostram cada resultado possível, na mesma escala. Isto não é a probabilidade de o jogo terminar assim — ver a secção de probabilidades do jogo acima."
+                : "The vertical line marks the current probability (now); the hollow bars show each possible result, on the same scale. This is not the chance the match ends that way — see the match-probabilities section above."}{" "}
           {/* The method behind these numbers, not the generic page (METH3-17). */}
           <Link
             href={pt ? "/desporto/liga/metodologia#jogos-decisivos" : "/desporto/liga/metodologia#decisive-matches"}

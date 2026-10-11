@@ -7,7 +7,7 @@ const PUBLIC_ROUTES = new Set([
   'marca', 'artigos/tema',
   'desporto/liga', 'desporto/liga2', 'desporto/liga/jogadores', 'desporto/liga/modelo',
   'desporto/liga/metodologia', 'desporto/liga/dados', 'desporto/liga/2025-26',
-  'desporto/liga/simulador', 'desporto/liga/jogo-previsoes',
+  'desporto/liga/jogo-previsoes',
 ]);
 /**
  * The population section's page categories. A parish code or a region slug is

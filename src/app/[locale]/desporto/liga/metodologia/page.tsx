@@ -6,6 +6,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import { createPageMetadata } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
+import { LigaSectionNav } from "@/components/football/LigaSectionNav";
 import { SiteFooter } from '@/components/SiteFooter';
 import { RevisedDate } from '@/components/brand/RevisedDate';
 import { Callout } from '@/components/mdx/Callout';
@@ -209,6 +210,7 @@ export default async function LigaMethodologyPage({
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <LigaSectionNav current="previsoes" locale={locale} />
         <PageHero
           measure="reading"
           compact

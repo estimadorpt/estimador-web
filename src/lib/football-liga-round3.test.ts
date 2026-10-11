@@ -13,8 +13,8 @@ import {
   roundStartsAt,
 } from '@/lib/football-status';
 import { disagreementSentence, leadVerdictSentence, selectionCaveat } from '@/lib/football-model-evaluation';
-import { initialImpactSide, rivalConditionsWithoutOwnMatches, RIVAL_CONDITION_MIN_SHARE } from '@/lib/football-scenarios';
-import type { NarrativeScenario, ScenarioData } from '@/types/football';
+import { clubFrame, duelRival, initialImpactSide, rivalGames, RIVAL_GAME_MIN_SWING, TITLE_DEFAULT_FROM } from '@/lib/football-scenarios';
+import type { ScenarioData } from '@/types/football';
 
 const root = process.cwd();
 const messages = (locale: string) => JSON.parse(readFileSync(path.join(root, `messages/${locale}.json`), 'utf8'));
@@ -74,36 +74,54 @@ describe('club names take their article (audit CL2-01, UXD2-06)', () => {
   });
 });
 
-describe('scenario rival conditions (audit FA2-01, PUB2-11)', () => {
-  const all = Object.values(scenarios.narrative_scenarios ?? {});
+describe('one frame per club page (review, October 2026)', () => {
+  it('reads the title from 1% of title chance, else relegation from 1%, else nothing', () => {
+    expect(clubFrame({ p_champion: 0.51, p_relegation: 0 })).toBe('title');
+    expect(clubFrame({ p_champion: TITLE_DEFAULT_FROM, p_relegation: 0 })).toBe('title');
+    expect(clubFrame({ p_champion: 0.0009, p_relegation: 0 })).toBeNull();
+    expect(clubFrame({ p_champion: 0, p_relegation: 0.5266 })).toBe('relegation');
+    expect(clubFrame({ p_champion: 0, p_relegation: 0.0005 })).toBeNull();
+    expect(clubFrame(undefined)).toBeNull();
+  });
 
-  it('never lists a game the club plays itself, nor a result short of 90% in the scenario', () => {
-    for (const club of all) {
-      for (const scenario of club.scenarios) {
-        for (const rc of rivalConditionsWithoutOwnMatches(club.team, scenario)) {
-          expect(rc.opponent).not.toBe(club.team);
-          expect(rc.p_rival_drops_in_scenario).toBeGreaterThanOrEqual(RIVAL_CONDITION_MIN_SHARE);
-        }
+  it('matches the scenario builder\'s own target for every club that has one', () => {
+    for (const [team, path] of Object.entries(scenarios.critical_paths ?? {})) {
+      const frame = clubFrame(scenarios.next_matchday_scenarios?.baseline[team]);
+      expect(frame, team).toBe(path.target === 'champion' ? 'title' : 'relegation');
+    }
+  });
+});
+
+describe('other games that weigh on a club (the simulator\'s list, now on the club page)', () => {
+  const nms = scenarios.next_matchday_scenarios!;
+
+  it('never lists the club\'s own game, and keeps only games that move its chance by 3 pp', () => {
+    for (const team of Object.keys(nms.baseline)) {
+      const frame = clubFrame(nms.baseline[team]);
+      if (!frame) continue;
+      for (const game of rivalGames(team, frame, nms)) {
+        expect(game.home).not.toBe(team);
+        expect(game.away).not.toBe(team);
+        expect(game.swing).toBeGreaterThanOrEqual(RIVAL_GAME_MIN_SWING);
       }
     }
   });
 
-  it('drops Porto\'s "Sporting perde pontos vs Sp. Braga (J8)" at 53% against 48%', () => {
-    const porto = scenarios.narrative_scenarios!['Porto'];
-    const realistic = porto.scenarios.find(s => s.label === 'realistic') as NarrativeScenario;
-    expect(realistic.rival_conditions.some(rc => rc.opponent === 'SC Braga' && rc.matchday === 8)).toBe(true);
-    expect(rivalConditionsWithoutOwnMatches('Porto', realistic)).toEqual([]);
+  it('reads the club\'s frame chance in each of the three results', () => {
+    const games = rivalGames('Porto', 'title', nms);
+    expect(games.length).toBeGreaterThan(0);
+    const g = games[0];
+    const match = nms.matches[g.index];
+    expect(g.home_win).toBe(match.conditionals.H.teams['Porto'].p_champion);
+    expect(g.away_win).toBe(match.conditionals.A.teams['Porto'].p_champion);
   });
 
-  it('keeps a near-certain result between two other clubs', () => {
-    const scenario = {
-      label: 'x',
-      steps: [],
-      rival_conditions: [
-        { rival: 'Sporting CP', opponent: 'SC Braga', matchday: 8, p_rival_drops_baseline: 0.48, p_rival_drops_in_scenario: 0.95, drop_uplift: 0.47 },
-      ],
-    } as unknown as NarrativeScenario;
-    expect(rivalConditionsWithoutOwnMatches('Porto', scenario)).toHaveLength(1);
+  it('opens the final duel on the closest club in the same race', () => {
+    const table = Object.entries(nms.baseline).map(([team, b]) => ({ team, ...b }));
+    expect(duelRival('Porto', 'title', table)).not.toBe('Porto');
+    expect(duelRival('Porto', null, table)).toBeNull();
+    const rival = duelRival('Casa Pia', 'relegation', table);
+    expect(rival && nms.baseline[rival].p_relegation).toBeGreaterThanOrEqual(0.01);
   });
 });
 
@@ -151,11 +169,11 @@ describe('the Liga clock (audit FRESH-01)', () => {
 
   it('writes the lines the brief asks for', () => {
     expect(matchStartedLine('2026-09-25T14:50:48+00:00', 'pt')).toBe('Jogo começou · previsão de 25 set.');
-    expect(roundPlayedLine(8, 'pt')).toBe('Jornada 8 · jogada, nova previsão em preparação');
+    expect(roundPlayedLine(8, 'pt')).toBe('Jornada 8 jogada, nova previsão em preparação');
     const input = { matchday: 7, timestamp: '2026-09-25T14:50:48+00:00', inProgress: false, nextRound: 8, nextRoundKickoffs: md8 };
-    expect(forecastStatusLine(input, 'pt')).toContain('próxima atualização após a jornada 8');
+    expect(forecastStatusLine(input, 'pt')).toContain('próxima previsão depois da jornada 8');
     expect(forecastStatusLinePlayed(input, 'pt')).toBe(
-      'Depois da jornada 7 · atualizado a 25 set. · jornada 8 jogada, nova previsão em preparação',
+      'Previsão de 25 set., depois da jornada 7 · jornada 8 jogada, nova previsão em preparação',
     );
   });
 });

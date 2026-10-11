@@ -19,7 +19,7 @@ describe('clubStake', () => {
     const s = clubStake(match('Estrela Amadora', 'Casa Pia', { 'Casa Pia': 0.61, 'Estrela Amadora': 0.08 }, { 'Casa Pia': 0.53, 'Estrela Amadora': 0.1 }, { 'Casa Pia': 0.41, 'Estrela Amadora': 0.13 }))!;
     expect(s.team).toBe('Casa Pia');
     expect([s.win, s.draw, s.lose]).toEqual([0.41, 0.53, 0.61]);
-    expect(stakeSentence(s, 'pt')).toBe('Descida do Casa Pia: 41% se ganhar, 53% se empatar, 61% se perder.');
+    expect(stakeSentence(s, 'pt')).toBe('Despromoção do Casa Pia: 41% se ganhar, 53% se empatar, 61% se perder.');
   });
   it('never names a rival who is not playing', () => {
     const s = clubStake(match('Gil Vicente', 'Porto', { Porto: 0.39, Sporting: 0.45, 'Gil Vicente': 0 }, { Porto: 0.43, Sporting: 0.4, 'Gil Vicente': 0 }, { Porto: 0.55, Sporting: 0.2, 'Gil Vicente': 0 }, 'p_champion'))!;

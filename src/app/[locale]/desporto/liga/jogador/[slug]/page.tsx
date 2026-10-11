@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
+import { LigaSectionNav } from "@/components/football/LigaSectionNav";
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import {
@@ -141,6 +142,7 @@ export default async function PlayerPage({
       <div className="min-h-screen bg-paper">
         <Header />
         <main id="main-content" tabIndex={-1}>
+        <LigaSectionNav current="jogadores" locale={locale} />
           <PageHero
             measure="wide"
             compact
@@ -180,6 +182,7 @@ export default async function PlayerPage({
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <LigaSectionNav current="jogadores" locale={locale} />
       <PageHero
         measure="wide"
         compact

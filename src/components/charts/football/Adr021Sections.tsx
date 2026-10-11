@@ -28,7 +28,6 @@ interface Labels {
   interval: string;
   noInterval: string;
   showAll: (n: number) => string;
-  showLess: string;
   movement: string;
   newEntry: string;
   playerPage: string;
@@ -46,7 +45,6 @@ function makeLabels(pt: boolean, intervalPct: number): Labels {
     noInterval: pt ? "sem intervalo" : "no interval",
     showAll: (n: number) =>
       pt ? `Ver a lista completa (${n})` : `Show the full list (${n})`,
-    showLess: pt ? "Mostrar menos" : "Show less",
     movement: pt ? "vs golos" : "vs goals",
     newEntry: pt ? "novo" : "new",
     playerPage: pt ? "Página do jogador" : "Player page",

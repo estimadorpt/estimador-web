@@ -4,6 +4,7 @@ import {
   nextSeason,
   playerDataCutoffLabel,
   playerDataCutoffSentence,
+  playerSeasonReach,
   sortAppearancesNewestFirst,
 } from './player-pages';
 import { withPublishedGoalsRanks, rankMovement, normaliseRatings } from './player-ratings';
@@ -25,6 +26,17 @@ describe('player data cut-off (audit F-H6)', () => {
     const s = playerDataCutoffSentence('2026-05-16', ['2023-24', '2025-26'], 'pt')!;
     expect(s).toContain('16 de maio de 2026, o fim da época 2025-26');
     expect(s).toContain('jogos de 2026-27');
+  });
+
+  it('says a fit that includes the season being played stops inside it (review, October 2026)', () => {
+    const seasons = ['2023-24', '2024-25', '2025-26', '2026-27'];
+    expect(playerDataCutoffLabel('2026-10-10', seasons, 'pt', '2026-27')).toBe('Dados até 10 out. 2026 (época 2026-27 em curso)');
+    expect(playerDataCutoffLabel('2026-10-10', seasons, 'en', '2026-27')).toBe('Data to 10 Oct 2026 (2026-27 season in progress)');
+    const s = playerDataCutoffSentence('2026-10-10', seasons, 'pt', '2026-27')!;
+    expect(s).toContain('10 de outubro de 2026, com a época 2026-27 em curso');
+    expect(s).not.toMatch(/fim da época|2027-28/);
+    expect(playerSeasonReach(seasons, 'pt', '2026-27')).toBe('incluem a época 2026-27, em curso');
+    expect(playerSeasonReach(['2025-26'], 'pt', '2026-27')).toBe('vão até ao fim da época 2025-26');
   });
 
   it('orders appearances newest first across seasons (Tiago Gouveia)', () => {

@@ -58,8 +58,8 @@ const EXPECTED_TYPES = {
 
 /**
  * The Liga club slugs, read from the config so only real clubs are grouped as
- * club pages (and capped by --sample); /desporto/liga/simulador, /jogadores
- * and the other section pages stay in the always-checked core.
+ * club pages (and capped by --sample); /desporto/liga/jogadores and the
+ * other section pages stay in the always-checked core.
  */
 const CLUB_SLUGS = new Set(
   [...(/ligaTeamSlugs[^=]*=\s*\{([\s\S]*?)\};/.exec(

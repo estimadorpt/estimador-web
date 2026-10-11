@@ -19,13 +19,10 @@ export function FixtureStakes({
   locale,
   entry,
   matchLink = false,
-  simulatorLink = false,
 }: {
   locale: Locale;
   entry: ClubOutlookEntry;
   matchLink?: boolean;
-  /** Also link to the simulator, set to this club and its objective (audit FA3-03). */
-  simulatorLink?: boolean;
 }) {
   const pt = locale === 'pt';
   const clubFor = pt ? teamWithArticle(entry.team, 'para') : entry.label;
@@ -47,24 +44,17 @@ export function FixtureStakes({
   ) : null;
 
   const linkClass = 'inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-ink underline underline-offset-4';
-  const link = (matchLink && entry.matchHref) || simulatorLink ? (
-    <p className="flex flex-wrap gap-x-6">
-      {matchLink && entry.matchHref && (
-        <Link href={entry.matchHref} locale={locale} className={linkClass}>
-          {pt ? 'Análise do jogo' : 'Match analysis'} <span aria-hidden="true">→</span>
-        </Link>
-      )}
-      {simulatorLink && (
-        <Link href={entry.simulatorHref} locale={locale} className={linkClass}>
-          {pt ? 'Ver no simulador' : 'See it in the simulator'} <span aria-hidden="true">→</span>
-        </Link>
-      )}
+  const link = matchLink && entry.matchHref ? (
+    <p>
+      <Link href={entry.matchHref} locale={locale} className={linkClass}>
+        {pt ? 'Análise do jogo' : 'Match analysis'} <span aria-hidden="true">→</span>
+      </Link>
     </p>
   ) : null;
 
   if (!entry.objective || entry.baseline == null) {
-    // No season figure reaches 1% (Santa Clara): the next game's own 1X2 is
-    // still worth showing (audit FA2-14).
+    // Neither the title nor relegation reaches 1% (Santa Clara, Sp. Braga):
+    // the next game's own 1X2 is still worth showing (audit FA2-14).
     return (
       <div className="space-y-3">
         {statusLine && (
@@ -73,15 +63,15 @@ export function FixtureStakes({
         {entry.matchOutcome && (
           <dl className="grid grid-cols-3 gap-x-4 gap-y-3 sm:max-w-md">
             <div>
-              <dt className="text-xs text-stone-500">{pt ? 'Vitória' : 'Win'}</dt>
+              <dt className="text-xs text-stone-500">{pt ? 'Ganhar' : 'Win'}</dt>
               <dd className="font-display text-2xl font-extrabold tabular-nums text-ink">{formatClubPercent(entry.matchOutcome.win, locale)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-stone-500">{pt ? 'Empate' : 'Draw'}</dt>
+              <dt className="text-xs text-stone-500">{pt ? 'Empatar' : 'Draw'}</dt>
               <dd className="font-display text-2xl font-extrabold tabular-nums text-ink">{formatClubPercent(entry.matchOutcome.draw, locale)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-stone-500">{pt ? 'Derrota' : 'Loss'}</dt>
+              <dt className="text-xs text-stone-500">{pt ? 'Perder' : 'Lose'}</dt>
               <dd className="font-display text-2xl font-extrabold tabular-nums text-ink">{formatClubPercent(entry.matchOutcome.loss, locale)}</dd>
             </div>
           </dl>
@@ -89,11 +79,11 @@ export function FixtureStakes({
         <p className="text-sm leading-relaxed text-stone-600">
           {entry.matchOutcome
             ? pt
-              ? `Probabilidades deste jogo, do lado ${clubOf}. Nenhuma das probabilidades de época (título, top 3, despromoção) chega a 1% ${clubFor} nesta previsão.`
-              : `This match's probabilities, from ${entry.label}'s side. None of the season probabilities (title, top 3, relegation) reach 1% for ${entry.label} in this forecast.`
+              ? `Probabilidades deste jogo, do lado ${clubOf}. Nem o título nem a despromoção chegam a 1% ${clubFor} nesta previsão.`
+              : `This match's probabilities, from ${entry.label}'s side. Neither the title nor relegation reaches 1% for ${entry.label} in this forecast.`
             : pt
-              ? `Nenhuma das probabilidades de época (título, top 3, despromoção) chega a 1% ${clubFor} nesta previsão.`
-              : `None of the season probabilities (title, top 3, relegation) reach 1% for ${entry.label} in this forecast.`}
+              ? `Nem o título nem a despromoção chegam a 1% ${clubFor} nesta previsão.`
+              : `Neither the title nor relegation reaches 1% for ${entry.label} in this forecast.`}
         </p>
         {link}
       </div>
@@ -105,7 +95,7 @@ export function FixtureStakes({
   return (
     <div className="space-y-3">
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-semibold text-graphite">
-        <span>{entry.objectiveLabel}</span>
+        <span>{pt ? `${entry.objectiveLabel} ${clubOf}` : `${entry.label}: ${entry.objectiveLabel?.toLowerCase()}`}</span>
         {statusLine && (
           <span className="font-medium text-graphite">· {statusLine}</span>
         )}
@@ -157,14 +147,14 @@ export function FixtureStakes({
       ) : entry.hasFixture ? (
         <p className="text-sm leading-relaxed text-stone-600">
           {pt
-            ? `Agora ${formatClubPercent(entry.baseline, locale)}. Esta previsão não publica o efeito deste jogo em ${entry.objectiveLabel}.`
-            : `Now ${formatClubPercent(entry.baseline, locale)}. This forecast does not publish this match's effect on ${entry.objectiveLabel}.`}
+            ? `${entry.objectiveLabel} ${clubOf}: agora ${formatClubPercent(entry.baseline, locale)}. Esta previsão não publica o efeito deste jogo.`
+            : `${entry.label}'s ${entry.objectiveLabel?.toLowerCase()} chance: now ${formatClubPercent(entry.baseline, locale)}. This forecast does not publish this match's effect on it.`}
         </p>
       ) : (
         <p className="text-sm leading-relaxed text-stone-600">
           {pt
-            ? `Agora ${formatClubPercent(entry.baseline, locale)}. A previsão publicada não inclui um jogo em aberto ${clubFor}.`
-            : `Now ${formatClubPercent(entry.baseline, locale)}. The published forecast includes no outstanding match for ${entry.label}.`}
+            ? `${entry.objectiveLabel} ${clubOf}: agora ${formatClubPercent(entry.baseline, locale)}. A previsão publicada não inclui um jogo em aberto ${clubFor}.`
+            : `${entry.label}'s ${entry.objectiveLabel?.toLowerCase()} chance: now ${formatClubPercent(entry.baseline, locale)}. The published forecast includes no outstanding match for ${entry.label}.`}
         </p>
       )}
       {link}

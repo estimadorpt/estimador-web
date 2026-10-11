@@ -9,8 +9,11 @@ export interface ForecastStatusInput {
   matchday: number;
   /** prediction.timestamp. */
   timestamp: string;
-  /** True when the forecast's matchday still has games to play. */
+  /** True when the forecast's matchday still had games to play. */
   inProgress: boolean;
+  /** How many of that matchday's games the forecast had seen, when it came
+   * out mid-round: "com 7 dos 9 jogos da jornada 8 disputados". */
+  roundSeen?: { played: number; total: number } | null;
   /** The round whose results trigger the next update; null at season's end. */
   nextRound: number | null;
   /** Kickoffs of that round's games (UTC ISO), for its date span. */
@@ -18,28 +21,56 @@ export interface ForecastStatusInput {
 }
 
 /**
- * "Depois da jornada 7 · atualizado a 25 set. · próxima atualização após a
- * jornada 8 (9–12 out.)" / "After matchday 7 · updated 25 Sept · next update
- * after matchday 8 (9–12 Oct)". Every part comes from the data; the span is
- * dropped when no kickoff is known.
+ * What the forecast had seen, in the one vocabulary every Liga page uses:
+ * "depois da jornada 7" once a round is complete, "com 7 dos 9 jogos da
+ * jornada 8 disputados" when it came out mid-round (the homepage's Liga
+ * instrument says it the same way). "Durante a jornada 8" and "depois da
+ * jornada 8" named one state on two pages, and "Durante a jornada 8 · …
+ * jornada 8 jogada" contradicted itself once the round was over (review,
+ * October 2026).
+ */
+export function forecastCoverage(
+  input: Pick<ForecastStatusInput, 'matchday' | 'inProgress' | 'roundSeen'>,
+  locale: string,
+): string {
+  const pt = locale !== 'en';
+  const md = input.matchday;
+  if (!input.inProgress) return pt ? `depois da jornada ${md}` : `after matchday ${md}`;
+  const seen = input.roundSeen;
+  if (seen && seen.total > 0) {
+    return pt
+      ? `com ${seen.played} dos ${seen.total} jogos da jornada ${md} disputados`
+      : `with ${seen.played} of matchday ${md}’s ${seen.total} games played`;
+  }
+  return pt ? `a meio da jornada ${md}` : `partway through matchday ${md}`;
+}
+
+/** "Previsão de 11 out., com 7 dos 9 jogos da jornada 8 disputados". */
+function forecastHead(input: ForecastStatusInput, locale: string): string {
+  const date = formatShortDate(input.timestamp, locale);
+  const coverage = forecastCoverage(input, locale);
+  if (locale === 'en') return date ? `Forecast of ${date}, ${coverage}` : `Forecast ${coverage}`;
+  return date ? `Previsão de ${date}, ${coverage}` : `Previsão ${coverage}`;
+}
+
+/**
+ * The dated status of a Liga forecast, one line for every hero that shows
+ * it (the hub, the club and the match pages): "Previsão de 25 set., depois
+ * da jornada 7 · próxima previsão depois da jornada 8 (9–12 out.)" /
+ * "Forecast of 25 Sept, after matchday 7 · next forecast after matchday 8
+ * (9–12 Oct)". Every part comes from the data; the span is dropped when no
+ * kickoff is known. `forecastStatus` adds the line it turns into.
  */
 export function forecastStatusLine(input: ForecastStatusInput, locale: string): string {
   const pt = locale !== 'en';
-  const parts: string[] = [];
-  parts.push(
-    input.inProgress
-      ? pt ? `Durante a jornada ${input.matchday}` : `During matchday ${input.matchday}`
-      : pt ? `Depois da jornada ${input.matchday}` : `After matchday ${input.matchday}`,
-  );
-  const updated = formatShortDate(input.timestamp, locale);
-  if (updated) parts.push(pt ? `atualizado a ${updated}` : `updated ${updated}`);
+  const parts = [forecastHead(input, locale)];
   if (input.nextRound == null) {
-    parts.push(pt ? 'época terminada' : 'season finished');
+    parts.push(pt ? 'época terminada' : 'season over');
   } else {
     const span = formatDateSpan(input.nextRoundKickoffs, locale, { short: true });
     const next = pt
-      ? `próxima atualização após a jornada ${input.nextRound}`
-      : `next update after matchday ${input.nextRound}`;
+      ? `próxima previsão depois da jornada ${input.nextRound}`
+      : `next forecast after matchday ${input.nextRound}`;
     parts.push(span ? `${next} (${span})` : next);
   }
   return parts.join(' · ');
@@ -100,28 +131,25 @@ export function matchStartedLine(forecastTimestamp: string, locale: string): str
     : `Jogo começou · previsão de ${date}`;
 }
 
-/** "Jornada 8 · jogada, nova previsão em preparação". */
+/** "Jornada 8 jogada, nova previsão em preparação": the status line's tail
+ * once the round is over, said on its own. */
 export function roundPlayedLine(matchday: number, locale: string): string {
   return locale === 'en'
-    ? `Matchday ${matchday} · played, new forecast in preparation`
-    : `Jornada ${matchday} · jogada, nova previsão em preparação`;
+    ? `Matchday ${matchday} played, new forecast in preparation`
+    : `Jornada ${matchday} jogada, nova previsão em preparação`;
 }
 
 /**
- * The status line once the next round is played: "Depois da jornada 7 ·
- * atualizado a 25 set. · jornada 8 jogada, nova previsão em preparação".
+ * The status line once the next round is played: "Previsão de 11 out., com
+ * 7 dos 9 jogos da jornada 8 disputados · jornada 8 jogada, nova previsão em
+ * preparação".
  */
 export function forecastStatusLinePlayed(input: ForecastStatusInput, locale: string): string {
   const pt = locale !== 'en';
-  const base = forecastStatusLine({ ...input, nextRound: null }, locale).split(' · ').slice(0, -1);
-  if (input.nextRound != null) {
-    base.push(
-      pt
-        ? `jornada ${input.nextRound} jogada, nova previsão em preparação`
-        : `matchday ${input.nextRound} played, new forecast in preparation`,
-    );
-  }
-  return base.join(' · ');
+  const parts = [forecastHead(input, locale)];
+  if (input.nextRound == null) parts.push(pt ? 'época terminada' : 'season over');
+  else parts.push(roundPlayedLine(input.nextRound, locale).replace(/^./, c => c.toLowerCase()));
+  return parts.join(' · ');
 }
 
 /* ------------------------------------------------- one game, one round --- */
@@ -198,7 +226,7 @@ export interface NextRoundTiming {
 /**
  * When the round the next forecast waits for starts and ends: the round in
  * progress when the forecast came out mid-round, else the next one. One
- * source for the hub, the club pages, the simulator and the match pages, so
+ * source for the hub, the club pages and the match pages, so
  * they all turn stale at the same instant (audit FR3-01, FR3-02).
  */
 export function nextRoundTiming<F extends TimedFixture>(
@@ -218,5 +246,60 @@ export function nextRoundTiming<F extends TimedFixture>(
     startsAt: roundStartsAt(kickoffs),
     playedAt: roundPlayedAt(kickoffs),
     postponed: round == null ? [] : upcoming.filter(f => f.matchday < round),
+  };
+}
+
+/* --------------------------------------------- one status, every hero --- */
+
+/** The fields of a published forecast the status line reads. */
+export interface StatusPrediction {
+  matchday: number;
+  timestamp: string;
+  matches_remaining?: unknown[] | null;
+  matchday_results?: Array<{ matchday?: number }> | null;
+  next_matchday?: { matchday?: number } | null;
+}
+
+/**
+ * The status line's input, read from the forecast and the games to come:
+ * how many of its round's games it had seen (played from `matchday_results`,
+ * still to play from `matches_remaining`, as the homepage counts them), the
+ * round the next forecast waits for and when that round counts as played.
+ */
+export function forecastStatusInput<F extends TimedFixture>(
+  prediction: StatusPrediction,
+  upcoming: F[],
+): ForecastStatusInput & { playedAt: string | null } {
+  const timing = nextRoundTiming(prediction, upcoming);
+  const remaining = prediction.matches_remaining?.length ?? 0;
+  const played = (prediction.matchday_results ?? []).filter(r => r.matchday === prediction.matchday).length;
+  return {
+    matchday: prediction.matchday,
+    timestamp: prediction.timestamp,
+    inProgress: remaining > 0,
+    roundSeen: remaining > 0 ? { played, total: played + remaining } : null,
+    nextRound: timing.round,
+    nextRoundKickoffs: timing.kickoffs,
+    playedAt: timing.playedAt,
+  };
+}
+
+/**
+ * Every Liga hero's status, ready for a ClockSwitch: the line as published,
+ * and the line it becomes once the round the next forecast waits for is
+ * played. The hub, the club pages and the match pages read it, so they say
+ * the same thing in the same words and turn stale at the same instant.
+ */
+export function forecastStatus<F extends TimedFixture>(
+  prediction: StatusPrediction,
+  upcoming: F[],
+  locale: string,
+): { initial: string; steps: Array<ClockStep<string>> } {
+  const input = forecastStatusInput(prediction, upcoming);
+  return {
+    initial: forecastStatusLine(input, locale),
+    steps: input.playedAt && input.nextRound != null
+      ? [{ at: input.playedAt, value: forecastStatusLinePlayed(input, locale) }]
+      : [],
   };
 }

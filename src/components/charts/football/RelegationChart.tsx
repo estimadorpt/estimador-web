@@ -3,6 +3,7 @@
 import { useRef, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
+import { ChoiceGroup } from "@/components/brand/Choice";
 import { BRAND, FONT_STACK } from '@/lib/brand';
 import { distinctTeamColors, teamDisplayName } from "@/lib/config/football";
 import { formatPercent } from "@/lib/football-format";
@@ -188,16 +189,19 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
   return (
     <div className="w-full">
       <div ref={containerRef} className="w-full min-h-[280px]" />
+      {/* Which clubs the chart draws changes the chart in place: a choice
+          (the grammar's ChoiceGroup), not a show-more; the twin follows. */}
       {hiddenCount > 0 && (
-        <button
-          type="button"
-          onClick={() => setShowAll(s => !s)}
-          className="mt-2 min-h-11 text-sm font-semibold text-ink underline underline-offset-4"
-        >
-          {showAll
-            ? (pt ? "Mostrar só as equipas relevantes" : "Show only the relevant teams")
-            : (pt ? `Ver todas as equipas (+${hiddenCount})` : `See all teams (+${hiddenCount})`)}
-        </button>
+        <ChoiceGroup
+          className="mt-3"
+          label={pt ? "Clubes no gráfico" : "Clubs on the chart"}
+          value={showAll ? "all" : "focus"}
+          onChange={v => setShowAll(v === "all")}
+          options={[
+            { value: "focus", label: pt ? `Os ${focusTeams.length} com mais risco` : `The ${focusTeams.length} most at risk` },
+            { value: "all", label: pt ? `Todos os ${allRiskTeams.length}` : `All ${allRiskTeams.length}` },
+          ]}
+        />
       )}
       <ChartTable caption={yAxisLabel} columns={table.columns} rows={table.rows} />
     </div>

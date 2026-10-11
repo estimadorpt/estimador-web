@@ -245,7 +245,10 @@ export function MatchProbabilityHero({
                   style={{ borderColor: isHappened ? "var(--color-ink)" : dimmed ? "var(--color-line)" : o.rule }}
                 >
                   <div className="text-[12px] font-semibold text-graphite mb-1 break-words">
-                    <i aria-hidden="true" className="mr-1.5 inline-block h-2.5 w-2.5 border border-scale align-[-1px]" style={{ backgroundColor: o.tone }} />
+                    {/* A short bar, the split bar's own segment: a black
+                        square is the reading rule's mark for what has
+                        already happened, and a forecast is not that. */}
+                    <i aria-hidden="true" className="mr-1.5 inline-block h-1.5 w-4 border border-scale align-[2px]" style={{ backgroundColor: o.tone }} />
                     {o.label}
                   </div>
                   <div className={`text-3xl md:text-6xl font-display font-extrabold tabular-nums leading-none ${dimmed ? "text-stone-500" : "text-stone-900"}`}>

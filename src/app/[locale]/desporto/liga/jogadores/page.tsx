@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
+import { LigaSectionNav } from "@/components/football/LigaSectionNav";
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { PlayerRatingsHub } from "@/components/charts/football/PlayerRatingsHub";
@@ -94,6 +95,7 @@ export default async function PlayerRatingsPage({
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <LigaSectionNav current="jogadores" locale={locale} />
       <PageHero
         measure="wide"
         compact

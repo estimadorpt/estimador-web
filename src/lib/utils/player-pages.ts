@@ -1,4 +1,5 @@
 import { formatLongDate } from '@/lib/football-format';
+import { CURRENT_LIGA_SEASON } from '@/lib/config/football';
 
 // The player pages, /jogadores and the methodology say how far the player
 // data goes. The player model is refitted less often than the forecast, so a
@@ -26,34 +27,79 @@ function lastSeason(seasons: readonly string[] | null | undefined): string | nul
 }
 
 /**
- * "Dados até 16 mai. 2026 (fim da época 2025-26)" — the label that sits next
- * to every number from the player fit. Null without a cut-off date.
+ * Whether the player fit's last season is the one being played: then its
+ * cut-off is a date inside that season, not "the end of the season" (the fit
+ * of October 2026 covers 2026-27 up to 10 October, and /jogadores said "fim
+ * da época 2026-27… ainda sem jogos de 2027-28", review October 2026).
+ */
+export function playerFitInProgress(
+  seasons: readonly string[] | null | undefined,
+  currentSeason: string = CURRENT_LIGA_SEASON,
+): boolean {
+  const season = lastSeason(seasons);
+  return season != null && season >= currentSeason;
+}
+
+/**
+ * How far the finishing and contribution fits reach, for a sentence: "vão
+ * até ao fim da época 2025-26" / "incluem a época 2026-27, em curso".
+ * Null without a season list.
+ */
+export function playerSeasonReach(
+  seasons: readonly string[] | null | undefined,
+  locale: string,
+  currentSeason: string = CURRENT_LIGA_SEASON,
+): string | null {
+  const season = lastSeason(seasons);
+  if (!season) return null;
+  if (playerFitInProgress(seasons, currentSeason)) {
+    return locale === 'en' ? `include the ${season} season, in progress` : `incluem a época ${season}, em curso`;
+  }
+  return locale === 'en' ? `run to the end of the ${season} season` : `vão até ao fim da época ${season}`;
+}
+
+/**
+ * "Dados até 16 mai. 2026 (fim da época 2025-26)", or, while that season is
+ * being played, "Dados até 10 out. 2026 (época 2026-27 em curso)": the label
+ * that sits next to every number from the player fit. Null without a
+ * cut-off date.
  */
 export function playerDataCutoffLabel(
   through: string | null | undefined,
   seasons: readonly string[] | null | undefined,
   locale: string,
+  currentSeason: string = CURRENT_LIGA_SEASON,
 ): string | null {
   const date = formatShortDate(through, locale);
   if (!date) return null;
   const season = lastSeason(seasons);
-  if (locale === 'en') return `Data to ${date}${season ? ` (end of the ${season} season)` : ''}`;
-  return `Dados até ${date}${season ? ` (fim da época ${season})` : ''}`;
+  const inProgress = playerFitInProgress(seasons, currentSeason);
+  if (locale === 'en') {
+    return `Data to ${date}${season ? (inProgress ? ` (${season} season in progress)` : ` (end of the ${season} season)`) : ''}`;
+  }
+  return `Dados até ${date}${season ? (inProgress ? ` (época ${season} em curso)` : ` (fim da época ${season})`) : ''}`;
 }
 
 /**
  * The full sentence for the methodology and the player pages: the date, the
- * season it closes, and that the current season is not in the fit yet.
+ * season it closes and that the current season is not in the fit yet, or,
+ * while the fit's season is the one being played, that it stops at that date.
  */
 export function playerDataCutoffSentence(
   through: string | null | undefined,
   seasons: readonly string[] | null | undefined,
   locale: string,
+  currentSeason: string = CURRENT_LIGA_SEASON,
 ): string | null {
   const date = through ? formatLongDate(through, locale) : '';
   if (!date) return null;
   const season = lastSeason(seasons);
   const next = season ? nextSeason(season) : null;
+  if (season && playerFitInProgress(seasons, currentSeason)) {
+    return locale === 'en'
+      ? `The finishing and contribution data runs to ${date}, with the ${season} season in progress: minutes, goals and recent appearances stop there until those models are refitted; contested possession, goalkeepers and defenders use the seasons their own files list.`
+      : `Os dados de finalização e de contribuição vão até ${date}, com a época ${season} em curso: minutos, golos e últimas partidas param aí até esses modelos serem reajustados; a posse disputada, os guarda-redes e as defesas usam as épocas que os seus ficheiros indicam.`;
+  }
   if (locale === 'en') {
     return `The finishing and contribution data runs to ${date}${season ? `, the end of the ${season} season` : ''}. Those models have not been refitted with ${next ? `${next} matches` : 'this season’s matches'} yet, so minutes, goals and recent appearances stop there; contested possession, goalkeepers and defenders use the seasons their own files list.`;
   }

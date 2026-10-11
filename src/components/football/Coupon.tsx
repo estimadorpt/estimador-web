@@ -1,5 +1,5 @@
 import { Link } from '@/i18n/routing';
-import { teamPhoneName } from '@/lib/config/football';
+import { teamDisplayName } from '@/lib/config/football';
 import { byKickoff } from '@/lib/football-fixtures';
 import { formatKickoffShort, matchLabel } from '@/lib/football-format';
 import { kickoffSteps, matchPlayedLine, matchStartedLine } from '@/lib/football-status';
@@ -64,7 +64,7 @@ export function Coupon({ fixtures, locale, forecastTimestamp, columns = 1 }: {
           const p = [g.p_home, g.p_draw, g.p_away];
           const top = p.indexOf(Math.max(...p));
           const when = formatKickoffShort(g.kickoff, locale, { confirmed: g.kickoffConfirmed });
-          const name = matchLabel(teamPhoneName(g.home), teamPhoneName(g.away));
+          const name = matchLabel(teamDisplayName(g.home), teamDisplayName(g.away));
           const key = `${g.matchday}-${g.home}-${g.away}`;
           return [
             <tr key={`${key}-1x2`}>
