@@ -6,6 +6,7 @@ import { DataCard } from "@/components/viz/DataCard";
 import { teamDisplayName } from "@/lib/config/football";
 import { formatInteger, formatLongDate, formatPercent } from "@/lib/football-format";
 import { SERIES } from "@/components/viz/theme";
+import { BRAND } from "@/lib/brand";
 import { blockVerdict, SIGNIFICANCE_T, type PointsCalibration } from "@/lib/football-scorecard";
 import {
   crossingSentence,
@@ -125,13 +126,16 @@ interface Props {
 // the legend repeat the identity.
 const MODEL_COLOR = SERIES[0];
 const MARKET_COLOR = SERIES[1];
-const GRID = "#e2e2df"; // stone-200
-const AXIS_TEXT = "#5c5c5c"; // stone-500
-// The chart sits in a DataCard, so its ground is cream: the marker cut-outs
-// and the axis-break mask are cream, and the early-season wash is paper, a
-// shade darker than the card.
-const SURFACE = "#ffffff"; // cream
-const EARLY_WASH = "#ffffff"; // paper
+const GRID = BRAND.line;
+const AXIS_TEXT = BRAND.muted;
+/** The axis line, and the neutral tile's swatch (stone-300). */
+const AXIS_LINE = "#bdbdbd";
+/** The ±2 SE whiskers on the difference strip (stone-700). */
+const WHISKER = "#383838";
+// The chart sits on the page's white: the marker cut-outs and the
+// axis-break mask are white, and so is the early-season wash.
+const SURFACE = BRAND.paper;
+const EARLY_WASH = BRAND.paper;
 
 /* ------------------------------------------------------------- formatting */
 
@@ -146,7 +150,7 @@ function makeFmt(pt: boolean) {
 
 /* ---------------------------------------------------------------- helpers */
 
-/** Rect with a rounded data-end and a square baseline end. */
+/** A bar from the baseline; r rounds its data end (0: square, as drawn). */
 function barPath(x: number, w: number, y0: number, y1: number, r: number) {
   const up = y1 < y0;
   const h = Math.abs(y1 - y0);
@@ -325,7 +329,7 @@ function CheckpointChart({
           x2={boundaryX}
           y1={padT}
           y2={padT + plotH}
-          stroke="#cbccbb"
+          stroke={AXIS_LINE}
           strokeWidth="1"
         />
 
@@ -336,7 +340,7 @@ function CheckpointChart({
             x2={hoverX}
             y1={padT}
             y2={stripTop + stripH}
-            stroke="#cbccbb"
+            stroke={AXIS_LINE}
             strokeWidth="1"
           />
         )}
@@ -378,8 +382,6 @@ function CheckpointChart({
           y={padT + 12}
           fontSize={11}
           fill={AXIS_TEXT}
-          className="uppercase"
-          letterSpacing="0.06em"
         >
           {pt ? "Início" : "Early"}
         </text>
@@ -388,8 +390,6 @@ function CheckpointChart({
           y={padT + 12}
           fontSize={11}
           fill={AXIS_TEXT}
-          className="uppercase"
-          letterSpacing="0.06em"
         >
           {lateFrom != null
             ? narrow
@@ -404,14 +404,14 @@ function CheckpointChart({
           x2={padL + innerW}
           y1={padT + plotH}
           y2={padT + plotH}
-          stroke="#cbccbb"
+          stroke={AXIS_LINE}
           strokeWidth="1"
         />
         {breakXs.map((bx) => (
           <g key={`brk-${bx}`} aria-hidden="true">
             <rect x={bx - 5} y={padT + plotH - 4} width={10} height={8} fill={SURFACE} />
-            <line x1={bx - 5} x2={bx - 1} y1={padT + plotH + 4} y2={padT + plotH - 4} stroke="#8a8a87" strokeWidth="1" />
-            <line x1={bx + 1} x2={bx + 5} y1={padT + plotH + 4} y2={padT + plotH - 4} stroke="#8a8a87" strokeWidth="1" />
+            <line x1={bx - 5} x2={bx - 1} y1={padT + plotH + 4} y2={padT + plotH - 4} stroke={BRAND.faint} strokeWidth="1" />
+            <line x1={bx + 1} x2={bx + 5} y1={padT + plotH + 4} y2={padT + plotH - 4} stroke={BRAND.faint} strokeWidth="1" />
           </g>
         ))}
         {cps.map((c, i) => (
@@ -433,8 +433,6 @@ function CheckpointChart({
           textAnchor="middle"
           fontSize={11}
           fill={AXIS_TEXT}
-          className="uppercase"
-          letterSpacing="0.06em"
         >
           {pt ? "Jornada prevista" : "Matchday forecast"}
         </text>
@@ -445,7 +443,7 @@ function CheckpointChart({
           y={stripTop - 26}
           fontSize={11}
           fontWeight={600}
-          fill="#4f5f57"
+          fill={BRAND.ink}
         >
           {pt
             ? `Diferença (modelo − mercado), com ±${K} erros padrão`
@@ -478,7 +476,7 @@ function CheckpointChart({
           x2={padL + innerW}
           y1={dy(0)}
           y2={dy(0)}
-          stroke="#8a8a87"
+          stroke={BRAND.faint}
           strokeWidth="1"
         />
         <text
@@ -498,7 +496,7 @@ function CheckpointChart({
           return (
             <g key={`d-${c.checkpoint}`}>
               <path
-                d={barPath(xs[i] - bw / 2, bw, dy(0), dy(c.delta), 3)}
+                d={barPath(xs[i] - bw / 2, bw, dy(0), dy(c.delta), 0)}
                 fill={col}
                 opacity={0.85}
               />
@@ -507,7 +505,7 @@ function CheckpointChart({
                 x2={xs[i]}
                 y1={dy(c.delta - K * c.se)}
                 y2={dy(c.delta + K * c.se)}
-                stroke="#434d48"
+                stroke={WHISKER}
                 strokeWidth="1"
               />
               <line
@@ -515,7 +513,7 @@ function CheckpointChart({
                 x2={xs[i] + 3}
                 y1={dy(c.delta + K * c.se)}
                 y2={dy(c.delta + K * c.se)}
-                stroke="#434d48"
+                stroke={WHISKER}
                 strokeWidth="1"
               />
               <line
@@ -523,7 +521,7 @@ function CheckpointChart({
                 x2={xs[i] + 3}
                 y1={dy(c.delta - K * c.se)}
                 y2={dy(c.delta - K * c.se)}
-                stroke="#434d48"
+                stroke={WHISKER}
                 strokeWidth="1"
               />
             </g>
@@ -555,7 +553,7 @@ function CheckpointChart({
       {/* Tooltip — enhances; every value is also in the table below */}
       {h && (
         <div
-          className="pointer-events-none absolute z-10 rounded-md border border-stone-200 bg-cream/95 px-3 py-2 text-xs shadow-sm"
+          className="pointer-events-none absolute z-10 border border-ink bg-paper px-3 py-2 text-xs"
           style={{
             left: Math.min(Math.max(hoverX - 92, 0), Math.max(0, width - 184)),
             top: padT + 4,
@@ -633,9 +631,9 @@ function PhaseTile({
 }) {
   const { num, signed } = makeFmt(pt);
   const color =
-    tone === "model" ? MODEL_COLOR : tone === "market" ? MARKET_COLOR : "#cbccbb";
+    tone === "model" ? MODEL_COLOR : tone === "market" ? MARKET_COLOR : AXIS_LINE;
   return (
-    <div className="rounded-2xl border border-line bg-cream p-4">
+    <div className="border-t border-ink pt-3">
       <div className="flex items-baseline gap-2">
         <span
           className="inline-block w-2 h-2 rounded-full flex-shrink-0"
@@ -675,21 +673,21 @@ function Disagreements({ data, pt, locale }: { data: MarketScorecardData; pt: bo
     const map = {
       model: {
         text: pt ? "Modelo certo" : "Model right",
-        cls: "bg-parchment text-ink border-line",
+        cls: "text-ink",
       },
       market: {
         text: pt ? "Mercado certo" : "Market right",
-        cls: "bg-parchment text-ink border-line",
+        cls: "text-ink",
       },
       neither: {
         text: pt ? "Nenhum" : "Neither",
-        cls: "bg-cream text-stone-600 border-line",
+        cls: "text-graphite",
       },
     } as const;
     const m = map[v];
-    // The site's rounded pill, sentence case (audit UXD2-09).
+    // The verdict as a word, sentence case; no pill (audit UXD2-09).
     return (
-      <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${m.cls}`}>
+      <span className={`text-[12px] font-semibold ${m.cls}`}>
         {m.text}
       </span>
     );
@@ -702,7 +700,7 @@ function Disagreements({ data, pt, locale }: { data: MarketScorecardData; pt: bo
         {disagreementSentence(s, data.n, locale)}
       </p>
 
-      <ul className="mt-5 divide-y divide-stone-100 border-t border-stone-200">
+      <ul className="mt-5 divide-y divide-grid border-t border-ink">
         {data.disagreements.map((d, i) => (
           <li key={`${d.season}-${d.home_team}-${d.away_team}-${i}`} className="py-3">
             <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -735,7 +733,7 @@ function Disagreements({ data, pt, locale }: { data: MarketScorecardData; pt: bo
               </div>
               <div className="flex items-center gap-1.5">
                 <span
-                  className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                  className="inline-block w-2 h-2 flex-shrink-0"
                   style={{ backgroundColor: MARKET_COLOR }}
                   aria-hidden="true"
                 />
@@ -788,7 +786,7 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
     <div className="space-y-12">
       {/* Headline numbers */}
       <section>
-        <h2 className="text-2xl tracking-tight mb-1">
+        <h2 className="text-2xl md:text-[28px] mb-1">
           {pt ? "O resultado, em três números" : "The result, in three numbers"}
         </h2>
         <p className="text-sm text-stone-500 mb-5 max-w-3xl">
@@ -796,7 +794,7 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
             ? `Diferença de RPS entre o modelo e a linha de fecho, jogo a jogo. Negativo = o modelo erra menos. ${data.n} jogos, ${data.n_seasons} épocas.`
             : `RPS difference between the model and the closing line, match by match. Negative = the model errs less. ${data.n} matches, ${data.n_seasons} seasons.`}
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-6">
           <PhaseTile
             pt={pt}
             label={pt ? "Todas as jornadas avaliadas" : "Every matchday evaluated"}
@@ -826,10 +824,8 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
 
       {/* The chart */}
       <section>
-        <h2 className="text-2xl tracking-tight mb-1">
-          {pt
-            ? "Como muda a diferença ao longo da época?"
-            : "How does the gap change through the season?"}
+        <h2 className="text-2xl md:text-[28px] mb-1">
+          {pt ? "A diferença ao longo da época" : "The gap through the season"}
         </h2>
         <p className="text-sm text-stone-500 mb-5 max-w-3xl">
           {pt
@@ -839,7 +835,7 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
         </p>
         {/* The one chart frame (CLAUDE.md, "Visualisations"): title, then the
             source, the evaluation's date and the method under the plot; the
-            table twin sits on the card's cream. */}
+            table twin sits under it. */}
         <DataCard
           title={pt
             ? "Erro de previsão do modelo e do mercado, jornada a jornada"
@@ -861,8 +857,8 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
       </section>
 
       {/* Explainer */}
-      <section className="rounded-2xl border border-line bg-cream p-5 sm:p-6">
-        <h2 className="text-base tracking-tight mb-3">
+      <section className="border-t border-ink pt-3">
+        <h2 className="text-base mb-3">
           {pt ? "Como lemos isto" : "How to read this"}
         </h2>
         <dl className="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm">
@@ -905,7 +901,7 @@ export function MarketScorecard({ data, locale = "pt" }: Props) {
 
       {/* Disagreements */}
       <section>
-        <h2 className="text-2xl tracking-tight mb-1">
+        <h2 className="text-2xl md:text-[28px] mb-1">
           {pt ? "Quando discordámos do mercado" : "When we disagreed with the market"}
         </h2>
         <p className="text-sm text-stone-500 mb-4 max-w-3xl">

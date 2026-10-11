@@ -11,7 +11,6 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { MatchdayPicker } from "@/components/charts/football/MatchdayPicker";
 import { DueloFinal } from "@/components/charts/football/DueloFinal";
 import { getTranslations } from "next-intl/server";
-import { Trophy } from "lucide-react";
 import type { Metadata } from "next";
 import { setRequestLocale } from '@/i18n/request-locale';
 
@@ -111,13 +110,9 @@ export default async function SimuladorPage({
     <div className="football-page min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
-      {/* The section's painting, eager, as on the Liga hub: a section entrance
-          (the header table in CLAUDE.md's Design Language). */}
       <PageHero
-        illustration="football"
         compact
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
-        icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t("football.title")}
         title={locale === "pt" ? `Simulador da jornada ${simRound}` : `Matchday ${simRound} simulator`}
         lede={<ClockSwitch initial={t("football.simulatorLede", { round: simRound })} steps={[{ at: simRoundPlayedAt, value: ledePlayed }]} />}
@@ -125,7 +120,7 @@ export default async function SimuladorPage({
       />
 
       {/* Simulator */}
-      <section className="border-b border-stone-200 last:border-b-0">
+      <section className="border-b border-rule last:border-b-0">
         <div className="max-w-7xl mx-auto px-4 py-10">
           {/* Where the numbers come from and how the method works, beside
               the tool (audit MR2-07). */}
@@ -164,22 +159,22 @@ export default async function SimuladorPage({
         </div>
       </section>
 
-      {/* A separate, unrelated question — kept out of the scenario flow above
+      {/* A separate, unrelated reading — kept out of the scenario flow above
           so that flow never needs a warning that half the page ignores the
-          chosen result (diagnosis §5 "Simulator"). The question is this
+          chosen result (diagnosis §5 "Simulator"). Its name is this
           section's h2, as on the Liga page; DueloFinal is its DataCard, whose
           title names the chart (the card's h3 cannot carry an id). */}
       {seasonSamples && (
-        <section aria-labelledby="duelo-final-heading" className="border-b border-stone-200 last:border-b-0">
+        <section aria-labelledby="duelo-final-heading" className="border-b border-rule last:border-b-0">
           <div className="max-w-7xl mx-auto px-4 py-10">
             {/* A plain kicker, no icon (UXD2-07). */}
             <p className="mb-2 text-[12px] font-semibold text-graphite">
-              {locale === 'pt' ? 'Outra pergunta' : 'A different question'}
+              {locale === 'pt' ? 'Outra leitura' : 'A separate reading'}
             </p>
-            <h2 id="duelo-final-heading" className="mb-3 text-2xl tracking-tight">
-              {locale === 'pt' ? 'Quem acaba à frente?' : 'Who finishes ahead?'}
+            <h2 id="duelo-final-heading" className="mb-3 text-2xl md:text-[28px]">
+              {locale === 'pt' ? 'Duelo final' : 'Final duel'}
             </h2>
-            <p className="mb-6 border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-muted">{locale === 'pt' ? 'Previsão de base: esta comparação usa as épocas simuladas da previsão publicada, sem nenhum resultado escolhido no simulador.' : 'Baseline forecast: this comparison uses the published forecast\'s simulated seasons, with no result picked in the simulator.'}</p>
+            <p className="mb-6 border-l-2 border-rule pl-4 text-sm leading-relaxed text-graphite">{locale === 'pt' ? 'Previsão de base: esta comparação usa as épocas simuladas da previsão publicada, sem nenhum resultado escolhido no simulador.' : 'Baseline forecast: this comparison uses the published forecast\'s simulated seasons, with no result picked in the simulator.'}</p>
             <DueloFinal samples={seasonSamples} locale={locale} forecastTimestamp={prediction.timestamp} />
           </div>
         </section>

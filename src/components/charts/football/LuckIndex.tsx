@@ -102,7 +102,7 @@ export function LuckIndex({ entries, labels, locale = "pt" }: LuckIndexProps) {
                 <div className="relative h-5 flex-1">
                   <div className="absolute top-0 bottom-0 w-px bg-ink" style={{ left: '50%' }} />
                   <div
-                    className="absolute top-0 h-full"
+                    className="absolute top-[3px] bottom-[3px]"
                     style={isPositive
                       ? { left: '50%', width: `${barPct}%`, backgroundColor: BRAND.tree }
                       : { left: `${50 - barPct}%`, width: `${barPct}%`, backgroundColor: BRAND.terracotta }}

@@ -21,6 +21,7 @@ import {
   predictedMatchday,
   selectionCaveat,
   titleCalibrationParagraphs,
+  TITLE_CALIBRATION,
 } from "@/lib/football-model-evaluation";
 import { CURRENT_LIGA_SEASON } from "@/lib/config/football";
 import { formatInteger, formatLongDate } from "@/lib/football-format";
@@ -93,10 +94,13 @@ const copy = {
     evaluated: "Modelo avaliado",
     footnoteTitle: "A letra pequena",
     methodology: "Como funciona o modelo",
-    calibrationTitle: "As probabilidades de título estão calibradas?",
+    // The title-calibration finding, as the methodology heads it; the label
+    // stands in if a re-run of the assessment no longer supports it.
+    calibrationFinding: "Quem lidera ganha o título mais vezes do que o modelo diz",
+    calibrationTitle: "Calibração das probabilidades de título",
     calibrationScope:
       "Esta página avalia uma coisa: a previsão de vitória, empate ou derrota de cada jogo da jornada seguinte. As probabilidades de título e de despromoção são outra pergunta, e verificamo-las à parte.",
-    pointsTitle: "E os intervalos de pontos?",
+    pointsTitle: "Calibração dos intervalos de pontos",
   },
   en: {
     title: "Model vs market",
@@ -111,10 +115,11 @@ const copy = {
     evaluated: "Model evaluated",
     footnoteTitle: "The small print",
     methodology: "How the model works",
-    calibrationTitle: "Are the title probabilities calibrated?",
+    calibrationFinding: "Leaders win the title more often than the model says",
+    calibrationTitle: "Calibration of the title probabilities",
     calibrationScope:
       "This page evaluates one thing: the win, draw or loss forecast for each game of the next matchday. Title and relegation probabilities are a different question, and we check them separately.",
-    pointsTitle: "And the points ranges?",
+    pointsTitle: "Calibration of the points ranges",
   },
 } as const;
 
@@ -192,9 +197,11 @@ export default async function LigaModelPage({
 
           {/* What this page does not evaluate (audit F-H2, X-01). */}
           <section className="mt-12 max-w-3xl" aria-labelledby="calibracao-titulo">
-            <h2 id="calibracao-titulo" className="text-2xl tracking-tight mb-3">{c.calibrationTitle}</h2>
+            <h2 id="calibracao-titulo" className="text-2xl md:text-[28px] mb-3">
+              {TITLE_CALIBRATION.leadersWonClean > TITLE_CALIBRATION.modelMeanClean ? c.calibrationFinding : c.calibrationTitle}
+            </h2>
             <p className="text-sm text-stone-600 leading-relaxed mb-4">{c.calibrationScope}</p>
-            <p className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium leading-relaxed text-stone-800">
+            <p className="mb-4 border-t border-rule pt-2 text-sm font-medium leading-relaxed text-amber-800">
               {t("football.titleCalibrationCaveat")}
             </p>
             <div className="space-y-3 text-sm text-stone-600 leading-relaxed">
@@ -208,7 +215,7 @@ export default async function LigaModelPage({
             )}
           </section>
 
-          <section className="mt-12 pt-8 border-t border-stone-200">
+          <section className="mt-12 pt-8 border-t border-rule">
             <h2 className="text-sm font-bold text-stone-500 mb-3">
               {c.footnoteTitle}
             </h2>

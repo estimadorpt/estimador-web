@@ -7,6 +7,7 @@ import { ligaTeamSlugs, teamColorOnPaper, teamLogoSrc, teamDisplayName, teamWith
 import { describePp, formatKickoffShort, formatPercent, formatPp, matchLabel } from "@/lib/football-format";
 import { Link } from "@/i18n/routing";
 import { Disclosure } from "@/components/viz/Disclosure";
+import { PRESSED_IN_FORCED_COLORS } from "@/lib/election-display";
 import type { NextMatchdayScenarios, ScenarioData } from "@/types/football";
 
 import { conditionalProbabilities, defaultObjective, rankMatches, readFootballExplorationState, writeFootballExplorationState, shouldPushSelectionState, type Objective, type Outcome } from "@/lib/football-exploration";
@@ -286,11 +287,11 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
     return (
       <div>
         {staleVersion && (
-          <div role="alert" className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <div role="alert" className="mb-4 border-t border-rule pt-2 text-sm text-amber-800">
             {shareNotice}
           </div>
         )}
-      <div className="rounded-2xl border border-line bg-cream p-5 md:p-8">
+      <div className="border-t border-ink pt-4">
         <h2 className="mb-2 text-xl font-bold text-ink">{pt ? 'Escolhe uma equipa' : 'Choose a club'}</h2>
         <p className="mb-4 max-w-xl text-sm leading-relaxed text-ink-muted">
           {pt
@@ -321,7 +322,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 setPendingTeam(e.target.value);
                 setChooseHint(false);
               }}
-              className="block min-h-11 w-full rounded-none border border-line bg-paper px-2 text-base text-ink sm:text-sm"
+              className="block min-h-11 w-full border border-rule bg-paper px-2 text-base text-ink sm:text-sm"
             >
               <option value="" disabled>
                 {pt ? 'Escolhe um clube' : 'Choose a club'}
@@ -335,7 +336,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 ))}
             </select>
           </span>
-          <button type="submit" className="min-h-11 rounded-none bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-forest">
+          <button type="submit" className="min-h-11 bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-ink-dark">
             {pt ? 'Seguir' : 'Follow'}
           </button>
           {chooseHint && (
@@ -361,7 +362,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 )}
                 {matchLabel(teamDisplayName(f.home), teamDisplayName(f.away))}
                 {f.postponed && (
-                  <span className="ml-2 rounded bg-parchment px-1 text-[12px] font-semibold text-graphite">
+                  <span className="ml-2 text-[12px] font-semibold text-ink">
                     {pt ? 'jogo em atraso' : 'postponed'}
                   </span>
                 )}
@@ -389,15 +390,15 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
     // Layout and delta animations stop under prefers-reduced-motion (A11Y2-03).
     <MotionConfig reducedMotion="user">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-      <h2 ref={viewHeadingRef} tabIndex={-1} className="col-span-full text-2xl tracking-tight">
-        {pt ? `${teamDisplayName(focusTeam)}: o que muda na próxima jornada?` : `${teamDisplayName(focusTeam)}: what changes in the next round?`}
+      <h2 ref={viewHeadingRef} tabIndex={-1} className="col-span-full text-2xl md:text-[28px]">
+        {pt ? `O que a próxima jornada muda ${teamWithArticle(focusTeam, 'para')}` : `What the next round changes for ${teamDisplayName(focusTeam)}`}
       </h2>
       {/* Not sticky: a sticky panel this tall hid the control that had focus
           when tabbing backwards (audit A11Y2-02). */}
-      <section aria-label={pt?'A tua pergunta':'Your question'} className="col-span-full rounded-2xl border border-line bg-cream p-3 md:p-5">
+      <section aria-label={pt?'A tua pergunta':'Your question'} className="col-span-full border-t border-ink pt-3">
         <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
-          <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-team`} className="text-xs font-semibold text-ink-muted">{pt?'Equipa a seguir':'Club to follow'}</label><select id={`${ids}-team`} value={focusTeam} onChange={e=>setFocusTeam(e.target.value)} className="block min-h-11 w-full rounded-none border border-line bg-paper px-2 text-base text-ink sm:text-sm">{Object.keys(data.baseline).sort((a,b)=>teamDisplayName(a).localeCompare(teamDisplayName(b),'pt')).map(team=><option key={team} value={team}>{teamDisplayName(team)}</option>)}</select></span>
-          <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-goal`} className="text-xs font-semibold text-ink-muted">{pt?'O que queres saber?':'What matters to you?'}</label><select id={`${ids}-goal`} value={objective} onChange={e=>setObjective(e.target.value as typeof objective)} className="block min-h-11 w-full rounded-none border border-line bg-paper px-2 text-base text-ink sm:text-sm"><option value="p_champion">{pt?'Ganhar o título':'Win the title'}</option><option value="p_relegation">{pt?'Despromoção':'Relegation'}</option></select></span>
+          <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-team`} className="text-xs font-semibold text-ink-muted">{pt?'Equipa a seguir':'Club to follow'}</label><select id={`${ids}-team`} value={focusTeam} onChange={e=>setFocusTeam(e.target.value)} className="block min-h-11 w-full border border-rule bg-paper px-2 text-base text-ink sm:text-sm">{Object.keys(data.baseline).sort((a,b)=>teamDisplayName(a).localeCompare(teamDisplayName(b),'pt')).map(team=><option key={team} value={team}>{teamDisplayName(team)}</option>)}</select></span>
+          <span className="flex min-w-0 flex-col gap-1"><label htmlFor={`${ids}-goal`} className="text-xs font-semibold text-ink-muted">{pt?'O que queres saber?':'What matters to you?'}</label><select id={`${ids}-goal`} value={objective} onChange={e=>setObjective(e.target.value as typeof objective)} className="block min-h-11 w-full border border-rule bg-paper px-2 text-base text-ink sm:text-sm"><option value="p_champion">{pt?'Ganhar o título':'Win the title'}</option><option value="p_relegation">{pt?'Despromoção':'Relegation'}</option></select></span>
           {/* Why the question is relegation, when the reader did not choose it (FA3-03). */}
           {objectiveIsDefault && objective === 'p_relegation' && (
             <p className="text-xs leading-relaxed text-ink-muted sm:col-span-2">
@@ -416,7 +417,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         </div>
       </section>
       {staleVersion && (
-        <div role="alert" className="col-span-full rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div role="alert" className="col-span-full border-t border-rule pt-2 text-sm text-amber-800">
           {shareNotice}
         </div>
       )}
@@ -429,9 +430,9 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
       {/* "O meu próximo jogo" — the club's own outstanding fixture, always
           shown with all three outcomes, team-labelled, no click required
           (diagnosis §5/9 "Simulator"). */}
-      <div className="col-span-full rounded-2xl border border-line bg-cream p-5 md:p-6">
+      <div className="col-span-full border-t border-ink pt-3">
         <h3 className="text-[12px] font-semibold text-graphite mb-3">
-          {pt ? `O próximo jogo do ${teamDisplayName(focusTeam)}` : `${teamDisplayName(focusTeam)}'s next match`}
+          {pt ? `O próximo jogo ${teamWithArticle(focusTeam, 'de')}` : `${teamDisplayName(focusTeam)}'s next match`}
         </h3>
         {!myFixture && (
           <p className="text-sm leading-relaxed text-ink-muted">
@@ -454,16 +455,16 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
               )}
             </p>
             <div className="grid gap-2 sm:grid-cols-4">
-              <div className="rounded-lg border border-line bg-paper p-3">
+              <div className="border-t-2 border-ink p-3">
                 <div className="text-[12px] font-semibold text-graphite">
                   {myFixture.kickoffConfirmed && started(myFixture.kickoff) ? (pt ? 'Antes do jogo' : 'Before the match') : (pt ? 'Agora' : 'Now')}
                 </div>
                 <div className="mt-1 text-lg font-bold tabular-nums text-ink">{formatClubPercent(myStakes.baseline, localeCode)}</div>
               </div>
               {([
-                { outcome: myWinOutcome, label: pt ? `Se o ${teamDisplayName(focusTeam)} ganhar` : `If ${teamDisplayName(focusTeam)} win`, value: myStakes.win },
+                { outcome: myWinOutcome, label: pt ? `Se ${teamWithArticle(focusTeam)} ganhar` : `If ${teamDisplayName(focusTeam)} win`, value: myStakes.win },
                 { outcome: 'D' as Outcome, label: pt ? 'Se empatar' : 'If they draw', value: myStakes.draw },
-                { outcome: myLossOutcome, label: pt ? `Se o ${teamDisplayName(focusTeam)} perder` : `If ${teamDisplayName(focusTeam)} lose`, value: myStakes.loss },
+                { outcome: myLossOutcome, label: pt ? `Se ${teamWithArticle(focusTeam)} perder` : `If ${teamDisplayName(focusTeam)} lose`, value: myStakes.loss },
               ]).map(row => {
                 const active = selections[myFixture.index] === row.outcome;
                 return (
@@ -472,15 +473,12 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     type="button"
                     onClick={() => toggleSelection(myFixture.index, row.outcome)}
                     aria-pressed={active}
-                    className="rounded-lg border p-3 text-left transition-colors"
-                    style={{
-                      borderColor: active ? '#141414' : '#e2e2df',
-                      backgroundColor: active ? '#141414' : 'var(--color-paper, #fff)',
-                    }}
+                    // An action, square: ink fill and white text when chosen.
+                    className={`border p-3 text-left transition-colors ${PRESSED_IN_FORCED_COLORS} ${active ? 'border-ink bg-ink' : 'border-rule bg-paper hover:border-ink'}`}
                   >
-                    <div className={`text-[12px] font-semibold text-graphite ${active ? 'text-cream' : 'text-stone-500'}`}>{row.label}</div>
-                    <div className={`mt-1 text-lg font-bold tabular-nums ${active ? 'text-cream' : 'text-ink'}`}>{formatClubPercent(row.value, localeCode)}</div>
-                    <div className={`text-[11px] tabular-nums ${active ? 'text-cream/80' : 'text-ink-muted'}`}>{formatDeltaPrecise(row.value - myStakes.baseline, localeCode)}</div>
+                    <div className={`text-[12px] font-semibold ${active ? 'text-paper' : 'text-graphite'}`}>{row.label}</div>
+                    <div className={`mt-1 text-lg font-bold tabular-nums ${active ? 'text-paper' : 'text-ink'}`}>{formatClubPercent(row.value, localeCode)}</div>
+                    <div className={`text-[11px] tabular-nums ${active ? 'text-paper' : 'text-graphite'}`}>{formatDeltaPrecise(row.value - myStakes.baseline, localeCode)}</div>
                   </button>
                 );
               })}
@@ -492,7 +490,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
       {/* Left: Match picker — explicitly a different path: every other
           fixture the bundle covers, ranked by outcome spread, not causally
           and not by date (diagnosis §5/9 "Simulator"). */}
-      <div className="min-w-0 rounded-2xl border border-line bg-cream p-5 md:p-6">
+      <div className="min-w-0 border-t border-ink pt-3">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <h3 className="text-[12px] font-semibold text-graphite">
             {pt ? 'Outros jogos que afetam este objetivo' : 'Other matches that affect this objective'}
@@ -501,7 +499,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
             type="button"
             onClick={resetAll}
             aria-disabled={!hasSelections || undefined}
-            className={`min-h-11 rounded-lg border border-line px-3 text-xs font-bold transition-colors ${hasSelections ? "text-ink hover:bg-paper" : "cursor-not-allowed text-stone-500"}`}
+            className={`min-h-11 border px-3 text-xs font-bold transition-colors ${hasSelections ? "border-ink text-ink hover:bg-field" : "cursor-not-allowed border-rule text-stone-500"}`}
           >
             {labels.resetAll}
           </button>
@@ -510,14 +508,12 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         <p className="mb-3 text-sm leading-relaxed text-ink-muted">{showAll
           ? (pt ? 'Todos os jogos, por ordem de início (hora de Lisboa). Abaixo de 3 pontos percentuais, a diferença entre desfechos confunde-se com o ruído das simulações.' : 'Every match, in kickoff order (Lisbon time). Below 3 percentage points, the difference between outcomes blends into the simulations\' noise.')
           : aboveNoise.length === 0
-            ? (pt ? `Nenhum outro jogo muda as contas do ${teamDisplayName(focusTeam)} em 3 pontos percentuais ou mais.` : `No other match moves ${teamDisplayName(focusTeam)}'s chances by 3 percentage points or more.`)
-            : (pt ? `Os jogos (até três) cujo resultado mexe pelo menos 3 pontos percentuais nas contas do ${teamDisplayName(focusTeam)}, por ordem de início (hora de Lisboa).` : `The matches (up to three) whose result moves ${teamDisplayName(focusTeam)}'s chances by at least 3 percentage points, in kickoff order (Lisbon time).`)}</p>
+            ? (pt ? `Nenhum outro jogo muda as contas ${teamWithArticle(focusTeam, 'de')} em 3 pontos percentuais ou mais.` : `No other match moves ${teamDisplayName(focusTeam)}'s chances by 3 percentage points or more.`)
+            : (pt ? `Os jogos (até três) cujo resultado mexe pelo menos 3 pontos percentuais nas contas ${teamWithArticle(focusTeam, 'de')}, por ordem de início (hora de Lisboa).` : `The matches (up to three) whose result moves ${teamDisplayName(focusTeam)}'s chances by at least 3 percentage points, in kickoff order (Lisbon time).`)}</p>
         <div className="space-y-1">
           {visibleOtherMatches.map(({match, index:idx, swing}) => {
             const meta = supportedByIndex.get(idx);
             const selected = selections[idx] ?? null;
-            const homeColor = "#141414";
-            const awayColor = "#141414";
             const outcomeLabels = matchOutcomeLabels(match, focusTeam, pt);
 
             return (
@@ -565,16 +561,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     onClick={() => toggleSelection(idx, "H")}
                     aria-pressed={selected === "H"}
                     aria-label={`${matchLabel(teamDisplayName(match.home_team), teamDisplayName(match.away_team))}: ${outcomeLabels.home}`}
-                    className="h-12 flex-1 sm:w-11 sm:flex-none rounded-lg text-[12px] font-bold transition-colors duration-150"
-                    style={{
-                      backgroundColor:
-                        selected === "H" ? homeColor : "transparent",
-                      color: selected === "H" ? "#fff" : "#141414",
-                      border:
-                        selected === "H"
-                          ? `2px solid ${homeColor}`
-                          : "2px solid #e2e2df",
-                    }}
+                    className={`h-12 flex-1 border-2 text-[12px] font-bold transition-colors duration-150 sm:w-11 sm:flex-none ${PRESSED_IN_FORCED_COLORS} ${selected === "H" ? "border-ink bg-ink text-paper" : "border-rule bg-transparent text-ink hover:border-ink"}`}
                   >
                     <span className="sm:hidden">{outcomeLabels.home}</span><span className="hidden sm:inline" aria-hidden="true">{outcomeLabels.shortHome}</span>
                   </button>
@@ -582,16 +569,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     onClick={() => toggleSelection(idx, "D")}
                     aria-pressed={selected === "D"}
                     aria-label={`${matchLabel(teamDisplayName(match.home_team), teamDisplayName(match.away_team))}: ${outcomeLabels.draw}`}
-                    className="h-12 flex-1 sm:w-11 sm:flex-none rounded-lg text-[12px] font-bold transition-colors duration-150"
-                    style={{
-                      backgroundColor:
-                        selected === "D" ? "#5c5c5c" : "transparent",
-                      color: selected === "D" ? "#fff" : "#141414",
-                      border:
-                        selected === "D"
-                          ? "2px solid #5c5c5c"
-                          : "2px solid #e2e2df",
-                    }}
+                    className={`h-12 flex-1 border-2 text-[12px] font-bold transition-colors duration-150 sm:w-11 sm:flex-none ${PRESSED_IN_FORCED_COLORS} ${selected === "D" ? "border-graphite bg-graphite text-paper" : "border-rule bg-transparent text-ink hover:border-ink"}`}
                   >
                     <span className="sm:hidden">{outcomeLabels.draw}</span><span className="hidden sm:inline" aria-hidden="true">{outcomeLabels.shortDraw}</span>
                   </button>
@@ -599,16 +577,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     onClick={() => toggleSelection(idx, "A")}
                     aria-pressed={selected === "A"}
                     aria-label={`${matchLabel(teamDisplayName(match.home_team), teamDisplayName(match.away_team))}: ${outcomeLabels.away}`}
-                    className="h-12 flex-1 sm:w-11 sm:flex-none rounded-lg text-[12px] font-bold transition-colors duration-150"
-                    style={{
-                      backgroundColor:
-                        selected === "A" ? awayColor : "transparent",
-                      color: selected === "A" ? "#fff" : "#141414",
-                      border:
-                        selected === "A"
-                          ? `2px solid ${awayColor}`
-                          : "2px solid #e2e2df",
-                    }}
+                    className={`h-12 flex-1 border-2 text-[12px] font-bold transition-colors duration-150 sm:w-11 sm:flex-none ${PRESSED_IN_FORCED_COLORS} ${selected === "A" ? "border-ink bg-ink text-paper" : "border-rule bg-transparent text-ink hover:border-ink"}`}
                   >
                     <span className="sm:hidden">{outcomeLabels.away}</span><span className="hidden sm:inline" aria-hidden="true">{outcomeLabels.shortAway}</span>
                   </button>
@@ -641,8 +610,8 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
       </div>
 
       {/* Right: Probability impact */}
-      <div className="min-w-0 rounded-2xl border border-line bg-cream p-5 md:p-6">
-        <div className="mb-5 rounded-xl bg-paper p-4">
+      <div className="min-w-0 border-t border-ink pt-3">
+        <div className="mb-5">
           <p className="text-[12px] font-semibold text-graphite">{pt ? 'A resposta para a equipa que segues' : 'The answer for your club'}</p>
           <p className="mt-1 text-sm text-ink"><strong>{teamDisplayName(focusTeam)}</strong> · {objective === 'p_champion' ? (pt ? 'ganhar o título' : 'win the title') : (pt ? 'despromoção' : 'relegation')}</p>
           {selectedFixture && selectedOutcome ? <p className="mt-2 text-sm leading-relaxed text-ink-muted">{teamDisplayName(selectedFixture.home_team)} {selectedOutcome === 'H' ? (pt ? 'vence' : 'win') : selectedOutcome === 'D' ? (pt ? 'empata com' : 'draw') : (pt ? 'perde para' : 'lose to')} {teamDisplayName(selectedFixture.away_team)}: <strong className="text-ink">{formatPct(focalCurrent)}</strong> ({formatDelta(focalCurrent - focalBaseline, locale)} {pt ? 'face à base' : 'from baseline'}).</p> : <p className="mt-2 text-sm leading-relaxed text-ink-muted">{pt ? 'Escolhe vitória caseira, empate ou vitória visitante para comparar cada desfecho com a previsão de base.' : 'Choose a home win, draw or away win to compare that outcome with the baseline forecast.'}</p>}
@@ -687,8 +656,8 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     </div>
 
                     {/* Bar */}
-                    <div className="min-w-0 flex-1 h-3 rounded-sm bg-parchment relative">
-                      <div aria-hidden="true" className="absolute inset-y-0 left-0 rounded-sm" style={{ backgroundColor: teamColor, width: `${current.p_champion * 100}%` }} />
+                    <div className="min-w-0 flex-1 h-3 border-b border-scale relative">
+                      <div aria-hidden="true" className="absolute top-0 bottom-px left-0" style={{ backgroundColor: teamColor, width: `${current.p_champion * 100}%` }} />
                       {hasSelections && <span aria-hidden="true" className="absolute -top-1 h-5 w-[2px] bg-ink ring-1 ring-cream" style={{ left: `${base.p_champion * 100}%` }} />}
 
                     </div>
@@ -764,8 +733,8 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                       </span>
                     </div>
 
-                    <div className="min-w-0 flex-1 h-3 rounded-sm bg-parchment relative">
-                      <div aria-hidden="true" className="absolute inset-y-0 left-0 rounded-sm" style={{ backgroundColor: teamColor, width: `${current.p_relegation * 100}%` }} />
+                    <div className="min-w-0 flex-1 h-3 border-b border-scale relative">
+                      <div aria-hidden="true" className="absolute top-0 bottom-px left-0" style={{ backgroundColor: teamColor, width: `${current.p_relegation * 100}%` }} />
                       {hasSelections && <span aria-hidden="true" className="absolute -top-1 h-5 w-[2px] bg-ink ring-1 ring-cream" style={{ left: `${base.p_relegation * 100}%` }} />}
 
                     </div>
@@ -813,7 +782,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
       {/* Full probability table */}
       {labels.simulatedStandings && (
         <Disclosure
-          className="col-span-1 lg:col-span-2 mt-2 border-t border-stone-200 pt-5"
+          className="col-span-1 lg:col-span-2 mt-2 border-t border-rule pt-5"
           summary={pt ? 'Abrir a tabela completa' : 'Open the full table'}
         >
           <SimulatedTable probabilities={probabilities} baseline={data.baseline} hasSelections={hasSelections} labels={labels} />
@@ -851,14 +820,14 @@ function SimulatedTable({
   }, [probabilities]);
 
   return (
-    <div className="col-span-1 lg:col-span-2 mt-8 border-t border-stone-200 pt-8">
+    <div className="col-span-1 lg:col-span-2 mt-8 border-t border-rule pt-8">
       <div className="text-[12px] font-semibold text-graphite mb-4">
         {labels.simulatedStandings}
       </div>
       <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={labels.simulatedStandings}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b-2 border-stone-800 text-left">
+            <tr className="border-b border-ink text-left">
               <th className="py-2 pr-2 w-8 text-stone-500 font-medium">#</th>
               <th className="py-2 pr-4 font-medium">{labels.team}</th>
               <th className="py-2 px-3 text-right font-medium">{labels.championship}</th>
@@ -871,9 +840,9 @@ function SimulatedTable({
               const base = baseline[team];
               const champDelta = probs.p_champion - base.p_champion;
               const relegDelta = probs.p_relegation - base.p_relegation;
-              // 17th and 18th only: the 16th plays off (audit VUXD-01).
-              const isRelegationZone = i >= sorted.length - 2;
-              const isChampionZone = i < 3;
+              // Relegation is 17th and 18th only: the 16th plays off (audit
+              // VUXD-01), so the rule sits under the 16th row.
+              const aboveRelegation = i === sorted.length - 3;
               const teamColor = teamColorOnPaper(team);
 
               return (
@@ -881,9 +850,9 @@ function SimulatedTable({
                   key={team}
                   layout={!reduceMotion}
                   transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 35 }}
-                  className={`border-b border-stone-200 ${
-                    isRelegationZone ? "bg-red-50/40" : isChampionZone ? "bg-stone-50" : ""
-                  }`}
+                  // No row tints: an ink rule under the 16th marks where
+                  // relegation starts (17th and 18th).
+                  className={`border-b ${aboveRelegation ? "border-b-ink" : "border-grid"}`}
                 >
                   <td className="py-2 pr-2 text-stone-500 tabular-nums">{i + 1}</td>
                   <td className="py-2 pr-4">

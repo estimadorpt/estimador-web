@@ -61,7 +61,7 @@ const copy = {
     tableTitle: "Classificação final",
     tableIntro:
       "Os 306 jogos da época, com os pontos esperados (xPts) calculados a partir do xG de cada jogo. A última coluna é a diferença entre os pontos reais e os esperados.",
-    luckTitle: "Quem fez mais pontos do que o xG dizia?",
+    luckTitle: "Pontos acima e abaixo do xG",
     luckIntro:
       "Para cada jogo, o xG das duas equipas é convertido em probabilidades de vitória, empate e derrota, e daí em pontos esperados. Somando a época inteira, mostra quem fez mais ou menos pontos do que as oportunidades sugeriam, uma diferença que mistura finalização, guarda-redes e acaso.",
     luckNote:
@@ -92,7 +92,7 @@ const copy = {
     tableTitle: "Final table",
     tableIntro:
       "All 306 matches, with expected points (xPts) computed from each match's xG. The last column is the gap between real and expected points.",
-    luckTitle: "Who took more points than their xG said?",
+    luckTitle: "Points above and below xG",
     luckIntro:
       "For every match, both teams' xG is turned into win, draw and loss probabilities, and from there into expected points. Summed over the season, it shows who took more or fewer points than their chances suggested, a gap that mixes finishing, goalkeeping and chance.",
     luckNote:
@@ -246,8 +246,8 @@ export default async function SeasonReviewPage({
         </p>
 
         {/* Headline numbers */}
-        {/* Rounded tiles, like the rest of the site (audit UXD2-09). */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
+        {/* The four numbers, each under an ink rule (no tiles). */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 mb-12">
           {[
             {
               value: `${review.table[0].points}`,
@@ -274,8 +274,8 @@ export default async function SeasonReviewPage({
                 : `points below what xG suggested for relegated ${teamDisplayName(unluckiest.team)} (finishing, goalkeeping and chance together)`,
             },
           ].map((kpi) => (
-            <div key={kpi.label} className="rounded-2xl border border-line bg-cream p-4">
-              <div className="text-3xl font-display font-extrabold text-stone-900 tabular-nums">
+            <div key={kpi.label} className="border-t border-ink pt-3">
+              <div className="text-3xl font-display font-extrabold text-ink tabular-nums">
                 {kpi.value}
               </div>
               <div className="text-xs text-stone-500 mt-1 leading-snug">{kpi.label}</div>
@@ -285,14 +285,14 @@ export default async function SeasonReviewPage({
 
         {/* Final table */}
         <section className="mb-14">
-          <h2 className="text-2xl tracking-tight mb-1">{c.tableTitle}</h2>
+          <h2 className="text-2xl md:text-[28px] mb-1">{c.tableTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.tableIntro}</p>
           <FinalTable data={review} locale={locale} />
         </section>
 
         {/* Luck index */}
         <section className="mb-14">
-          <h2 className="text-2xl tracking-tight mb-1">{c.luckTitle}</h2>
+          <h2 className="text-2xl md:text-[28px] mb-1">{c.luckTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.luckIntro}</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -402,7 +402,7 @@ export default async function SeasonReviewPage({
 
         {/* Title race evolution */}
         <section className="mb-14">
-          <h2 className="text-2xl tracking-tight mb-1">{c.raceTitle}</h2>
+          <h2 className="text-2xl md:text-[28px] mb-1">{c.raceTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.raceIntro}</p>
           <DataCard
             title={pt ? "Probabilidade de ser campeão, previsão a previsão" : "Chance of the title, forecast by forecast"}
@@ -429,9 +429,9 @@ export default async function SeasonReviewPage({
         {/* Report card */}
         {rc && (
           <section className="mb-14">
-            <h2 className="text-2xl tracking-tight mb-1">{c.reportTitle}</h2>
+            <h2 className="text-2xl md:text-[28px] mb-1">{c.reportTitle}</h2>
             <p className="text-sm text-stone-500 mb-3 max-w-3xl">{c.reportIntro}</p>
-            <div className="mb-6 max-w-3xl space-y-2 rounded-2xl border border-line bg-cream px-4 py-3 text-sm leading-relaxed text-stone-700">
+            <div className="mb-6 max-w-3xl space-y-2 border-t border-rule pt-3 text-sm leading-relaxed text-stone-700">
               {provenance.map((line) => <p key={line.slice(0, 32)}>{line}</p>)}
               <p>
                 {pt ? "O modelo que publica as previsões de 2026-27 é outro, e é avaliado em " : "The model publishing the 2026-27 forecasts is a different one, evaluated on "}

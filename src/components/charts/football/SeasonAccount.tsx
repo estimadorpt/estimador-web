@@ -94,12 +94,12 @@ export function SeasonAccount({
   const named = !!player?.displayName && !renaming;
 
   return (
-    <div className="border border-stone-200 rounded-xl bg-cream overflow-hidden">
-      <div className="p-4 sm:p-5">
+    <div className="border-t border-ink">
+      <div className="py-3">
         {!named ? (
           <>
             <div className="flex items-center gap-2 mb-1">
-              <UserRound className="w-4 h-4 text-emerald-700" />
+              <UserRound aria-hidden="true" className="w-4 h-4 text-ink" />
               <span className="font-bold text-stone-900 text-sm">
                 {renaming ? t.rename : t.join}
               </span>
@@ -114,14 +114,14 @@ export function SeasonAccount({
                 }}
                 maxLength={24}
                 placeholder={t.placeholder}
-                className="flex-1 min-w-[10rem] min-h-11 px-3 py-1.5 rounded-none border border-stone-300 bg-paper text-base sm:text-sm focus:border-emerald-700"
+                className="flex-1 min-w-[10rem] min-h-11 px-3 py-1.5 border border-rule bg-paper text-base sm:text-sm focus:border-ink"
                 aria-label={t.placeholder}
               />
               <button
                 type="button"
                 onClick={submit}
                 disabled={!draft.trim() || saving}
-                className="min-h-11 px-4 py-1.5 rounded-none bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 disabled:opacity-40 disabled:hover:bg-stone-900 transition-colors"
+                className="min-h-11 px-4 py-1.5 bg-ink text-paper text-sm font-semibold hover:bg-ink-dark disabled:opacity-40 disabled:hover:bg-ink transition-colors"
               >
                 {renaming ? t.confirm : t.save}
               </button>
@@ -129,7 +129,7 @@ export function SeasonAccount({
                 <button
                   type="button"
                   onClick={() => setRenaming(false)}
-                  className="min-h-11 px-3 py-1.5 rounded-none text-sm text-stone-500 hover:text-stone-900 transition-colors"
+                  className="min-h-11 px-3 py-1.5 text-sm text-stone-500 hover:text-ink transition-colors"
                 >
                   {t.cancel}
                 </button>
@@ -139,7 +139,7 @@ export function SeasonAccount({
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
-              <UserRound className="w-4 h-4 text-emerald-700 shrink-0" />
+              <UserRound aria-hidden="true" className="w-4 h-4 text-ink shrink-0" />
               <span className="text-sm text-stone-500">{t.playingAs}</span>
               <span className="text-sm font-bold text-stone-900 truncate">
                 {player!.displayName}
@@ -171,7 +171,7 @@ export function SeasonAccount({
       </div>
 
       {rejected.length > 0 && (
-        <div className="px-4 sm:px-5 py-2 bg-amber-50 border-t border-amber-100 text-[11px] text-amber-800">
+        <div className="py-2 border-t border-rule text-[12px] text-amber-800">
           <span className="inline-flex items-center gap-1 font-semibold">
             <AlertTriangle className="w-3.5 h-3.5" />
             {t.rejectedTitle}
@@ -186,7 +186,7 @@ export function SeasonAccount({
         </div>
       )}
 
-      <div className="px-4 sm:px-5 py-2.5 bg-stone-50 border-t border-stone-200 text-[11px]">
+      <div className="py-2.5 border-t border-grid text-[12px]">
         {usesClerk() ? (
           // Clerk owns its signed-in / signed-out states and the provider
           // buttons; the only copy left to us is the hint about why anyone
@@ -204,7 +204,7 @@ export function SeasonAccount({
           <span className="text-stone-500">
             <a
               href={signInUrl}
-              className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 hover:underline"
+              className="inline-flex items-center gap-1.5 font-semibold text-ink underline underline-offset-4"
             >
               <LogIn className="w-3.5 h-3.5" />
               {t.signIn}

@@ -74,16 +74,16 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
   const relegated = rows.slice(-2);
 
   return (
-    <div className="border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
+    <div className="border-t border-ink pt-3">
       <div className="flex items-center gap-2 mb-1">
-        <Dices className="w-5 h-5 text-emerald-700" />
-        <h3 className="text-stone-900">{t.title}</h3>
+        <Dices aria-hidden="true" className="w-5 h-5 text-ink" />
+        <h3 className="text-ink">{t.title}</h3>
       </div>
       <p className="text-sm text-stone-500 mb-4">{t.intro}</p>
 
       <button
         onClick={draw}
-        className="mb-4 min-h-11 px-4 py-2 rounded-lg bg-emerald-700 text-white text-sm font-semibold hover:bg-emerald-800 transition-colors"
+        className="mb-4 min-h-12 px-4 py-2 bg-ink text-paper text-sm font-semibold hover:bg-ink-dark transition-colors"
       >
         {t.button}
       </button>
@@ -96,7 +96,7 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
             <span className="inline-flex items-center gap-1.5 font-bold text-ink">
               <i
                 aria-hidden="true"
-                className="inline-block h-3.5 w-[3px] shrink-0 rounded-full"
+                className="inline-block h-3.5 w-[3px] shrink-0"
                 style={{ backgroundColor: teamColorOnPaper(champion.team) }}
               />
               {t.champion}: {teamDisplayName(champion.team)} ({champion.pts} {t.ptsLabel})
@@ -108,12 +108,8 @@ export function SeasonDraw({ samples, locale = "pt" }: SeasonDrawProps) {
             {rows.map((r) => (
               <div
                 key={r.team}
-                className={`flex items-center gap-2 py-0.5 px-1 rounded ${
-                  r.pos === 1
-                    ? "bg-emerald-100"
-                    : r.pos >= samples.teams.length - 1
-                      ? "bg-red-50"
-                      : ""
+                className={`flex items-center gap-2 border-b border-grid py-0.5 ${
+                  r.pos === 1 || r.pos >= samples.teams.length - 1 ? "font-semibold" : ""
                 }`}
               >
                 <span className="w-5 text-right text-stone-500 tabular-nums">{r.pos}</span>

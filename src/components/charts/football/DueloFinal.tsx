@@ -3,6 +3,7 @@
 import { useId, useMemo, useState } from "react";
 import { teamColorOnPaper, teamDisplayName, teamLogoSrc, teamWithArticle } from "@/lib/config/football";
 import { formatInteger, formatPercent, formatShortDate } from "@/lib/football-format";
+import { BRAND } from "@/lib/brand";
 
 const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 import { duelBins, samplingMargin } from "@/lib/football-scenarios";
@@ -17,9 +18,10 @@ interface DueloFinalProps {
   forecastTimestamp?: string | null;
 }
 
-const TIE_COLOR = "#8b9a8e";
+/** The tie on points: the scale grey, 3.4:1 on paper, never a club's colour. */
+const TIE_COLOR = BRAND.faint;
 
-/** Head-to-head "who finishes ahead?" duel computed over the real sampled
+/** The final duel (which of two clubs finishes ahead), computed over the real sampled
  *  seasons from the Monte Carlo (same samples.json the SeasonDraw uses).
  *  The tie on points has its own bar; the share carries its sampling margin
  *  (300 seasons, about ±5 points, audit MR2-07); the bins are in a table
@@ -132,7 +134,7 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
     <div className="flex items-center gap-2 text-xs text-stone-600">
       <span
         aria-hidden="true"
-        className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+        className="inline-block w-2.5 h-2.5 shrink-0"
         style={{ backgroundColor: teamColorOnPaper(samples.teams[idx]) }}
       />
       <span>
@@ -158,7 +160,7 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
           id={`${selectId}-${which}`}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="min-h-11 w-full rounded-none border border-line bg-paper px-2 text-base font-medium text-ink sm:text-sm"
+          className="min-h-11 w-full border border-ink bg-paper px-2 text-base font-medium text-ink sm:text-sm"
         >
           {teamOptions
             .filter((o) => o.i !== other)
@@ -207,7 +209,7 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
           {shownBins.map((b) => (
             <div key={`${b.lo}`} className="flex-1 flex flex-col justify-end h-full">
               <div
-                className="w-full max-w-[56px] mx-auto rounded-none"
+                className="w-full max-w-[56px] mx-auto"
                 style={{
                   height: `${Math.max(b.count > 0 ? 3 : 0, (100 * b.count) / maxCount)}%`,
                   backgroundColor: b.side === "a" ? colorA : b.side === "b" ? colorB : TIE_COLOR,
@@ -216,7 +218,7 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
             </div>
           ))}
         </div>
-        <div aria-hidden="true" className="flex gap-1 border-t border-stone-300 pt-1">
+        <div aria-hidden="true" className="flex gap-1 border-t border-ink pt-1">
           {shownBins.map((b) => (
             <span key={`${b.lo}`} className="flex-1 text-center text-[11px] leading-tight text-stone-600 tabular-nums">
               {b.side === "tie" ? (pt ? "Empate" : "Level") : rangeLabel(b.lo, b.hi)}
@@ -225,12 +227,12 @@ export function DueloFinal({ samples, locale = "pt", forecastTimestamp }: DueloF
         </div>
         <div aria-hidden="true" className="flex justify-between mt-1 text-[11px] text-stone-600">
           <span className="flex items-center gap-1">
-            <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: colorA }} />
+            <span className="inline-block w-2 h-2" style={{ backgroundColor: colorA }} />
             {t.ahead(nameA)}
           </span>
           <span className="flex items-center gap-1">
             {t.ahead(nameB)}
-            <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: colorB }} />
+            <span className="inline-block w-2 h-2" style={{ backgroundColor: colorB }} />
           </span>
         </div>
         <p aria-hidden="true" className="text-[11px] text-stone-600 mt-2 text-center">{pt ? "Diferença de pontos no fim da época" : "Points gap at the end of the season"}</p>

@@ -286,13 +286,12 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
   return (
     <div className="space-y-8">
       {/* ----------------------------------------------------------- intro */}
-      <div className="max-w-3xl border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
+      <div className="max-w-3xl border-t border-ink pt-3">
         {/* Not the game's name: the page hero already carries it, and
-            printing it twice made the card read as a second page header.
-            This card's job is explaining how the scoring works. */}
-        <div className="flex items-center gap-2 mb-2">
-          <Swords className="w-4 h-4 text-emerald-700" />
-          <h2 className="text-[12px] font-semibold text-graphite">
+            printing it twice made the block read as a second page header.
+            Its job is explaining how the scoring works. */}
+        <div className="mb-2">
+          <h2 className="text-[13px] font-semibold text-ink">
             {t.howItWorks}
           </h2>
         </div>
@@ -322,9 +321,9 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
         {season.matchesScored === 0 ? (
           <p className="text-sm text-stone-500">{t.noScore}</p>
         ) : (
-          <div className="border border-stone-200 rounded-xl overflow-hidden">
-            <div className="grid grid-cols-2 divide-x divide-stone-200">
-              <div className="p-4 sm:p-6">
+          <div className="border-t border-ink">
+            <div className="grid grid-cols-2 divide-x divide-rule">
+              <div className="py-4 pr-4 sm:py-5">
                 <div className="text-[12px] font-semibold text-graphite mb-1">
                   {t.yourScore}
                 </div>
@@ -335,7 +334,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
                   {rpsFmt(season.userMean!, pt)}
                 </div>
               </div>
-              <div className="p-4 sm:p-6">
+              <div className="py-4 pl-4 sm:py-5 sm:pl-6">
                 <div className="text-[12px] font-semibold text-graphite mb-1">
                   {t.modelScore}
                 </div>
@@ -347,7 +346,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
                 </div>
               </div>
             </div>
-            <div className="border-t border-stone-200 px-4 sm:px-6 py-3 bg-stone-50 text-sm">
+            <div className="border-t border-rule py-3 text-sm">
               <span className="font-semibold text-stone-900">
                 {season.userMean! < season.modelMean!
                   ? t.aheadNow
@@ -362,7 +361,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
                     lucky round can top the table, and saying so is better
                     than a minimum-rounds rule that empties it. */}
                 {season.roundsCounted < 3 && (
-                  <span className="ml-1.5 text-[12px] text-graphite bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">
+                  <span className="ml-1.5 text-[12px] font-semibold text-graphite">
                     {t.provisional}
                   </span>
                 )}
@@ -397,7 +396,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
           outcomeLabel={outcomeLabel}
         />
       ) : (
-        <p className="max-w-3xl text-sm text-stone-500 border border-stone-200 rounded-2xl p-4 sm:p-6">
+        <p className="max-w-3xl border-t border-rule pt-3 text-sm text-stone-500">
           {t.noOpen}
         </p>
       )}
@@ -424,11 +423,11 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
       {season.matchesScored > 0 && (
         <section className="max-w-3xl">
           <div
-            className="border-2 border-stone-900 rounded-2xl p-5 sm:p-6 bg-cream"
+            className="border-y border-ink py-5"
             aria-label={t.share}
           >
             <div className="flex items-center gap-2 mb-3">
-              <Swords className="w-4 h-4 text-emerald-700" />
+              <Swords aria-hidden="true" className="w-4 h-4 text-ink" />
               <span className="text-[12px] font-semibold text-graphite">
                 {t.title} · Liga Portugal {data.season}
               </span>
@@ -466,7 +465,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
             <button
               type="button"
               onClick={copyShare}
-              className="inline-flex min-h-11 items-center gap-1.5 px-4 rounded-none bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 transition-colors"
+              className="inline-flex min-h-12 items-center gap-1.5 px-4 bg-ink text-paper text-sm font-semibold hover:bg-ink-dark transition-colors"
             >
               {copied ? <Check aria-hidden="true" className="w-4 h-4" /> : <Share2 aria-hidden="true" className="w-4 h-4" />}
               {copied ? t.shareDone : t.share}
@@ -553,7 +552,7 @@ function RoundPicker({
 
       {/* Two cards to a row from lg: nine games in one 784px column left
           the right half empty and the page 2,700px tall (UXD3-10). */}
-      <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
+      <div className="grid gap-x-8 gap-y-6 lg:grid-cols-2 lg:items-start">
         {round.fixtures.map(fixture => {
           const stored = picks[fixture.key];
           const probs = stored?.p ?? null;
@@ -567,7 +566,7 @@ function RoundPicker({
               key={fixture.key}
               role="group"
               aria-label={fixtureName}
-              className="border border-stone-200 rounded-2xl p-3 sm:p-4 bg-cream"
+              className="border-t border-ink pt-3"
             >
               {/* fixture line */}
               <div className="flex items-center gap-2 mb-3 text-sm font-semibold text-stone-900">
@@ -607,10 +606,10 @@ function RoundPicker({
                         })
                       }
                       // One selected style for both rows: ink with a check (UXD3-10).
-                      className={`min-h-11 px-2 py-2 rounded-none text-xs sm:text-sm font-semibold border transition-colors leading-tight break-words ${
+                      className={`min-h-11 px-2 py-2 text-xs sm:text-sm font-semibold border transition-colors leading-tight break-words ${
                         active
                           ? "bg-ink border-ink text-paper"
-                          : "bg-cream border-stone-300 text-stone-700 hover:border-stone-400"
+                          : "bg-paper border-rule text-ink hover:border-ink"
                       }`}
                     >
                       {active && <Check aria-hidden="true" className="mr-1 inline-block h-3.5 w-3.5 -mt-0.5" />}
@@ -642,10 +641,10 @@ function RoundPicker({
                               mode: "quick",
                             })
                           }
-                          className={`min-h-11 px-1.5 py-1.5 rounded-none text-xs font-medium border transition-colors leading-tight ${
+                          className={`min-h-11 px-1.5 py-1.5 text-xs font-medium border transition-colors leading-tight ${
                             active
                               ? "bg-ink border-ink text-paper"
-                              : "bg-cream border-stone-300 text-stone-700 hover:border-stone-400"
+                              : "bg-paper border-rule text-ink hover:border-ink"
                           }`}
                         >
                           {active && <Check aria-hidden="true" className="mr-1 inline-block h-3.5 w-3.5 -mt-0.5" />}
@@ -673,7 +672,7 @@ function RoundPicker({
                       aria-expanded={fineOpen}
                       aria-controls={finePanelId}
                       className={`inline-flex min-h-11 items-center gap-1 text-xs font-medium transition-colors ${
-                        fineOpen ? "text-emerald-700" : "text-stone-600 hover:text-stone-900"
+                        fineOpen ? "text-ink underline underline-offset-4" : "text-stone-600 hover:text-ink"
                       }`}
                     >
                       <SlidersHorizontal aria-hidden="true" className="w-3.5 h-3.5" />
@@ -682,7 +681,7 @@ function RoundPicker({
                   </div>
 
                   {fineOpen && (
-                    <div id={finePanelId} className="mt-1 space-y-2 border-t border-stone-100 pt-3">
+                    <div id={finePanelId} className="mt-1 space-y-2 border-t border-grid pt-3">
                       {OUTCOME_ORDER.map((o, i) => (
                         <div key={o} className="flex items-center gap-3">
                           <span className="w-20 sm:w-28 shrink-0 truncate text-[11px] text-stone-600" aria-hidden="true">
@@ -702,7 +701,7 @@ function RoundPicker({
                                 mode: "fine",
                               })
                             }
-                            className="flex-1 min-h-11 accent-emerald-700"
+                            className="flex-1 min-h-11 accent-ink"
                             aria-label={`${o === "D" ? t.draw : `${outcomeLabel(o, fixture)} ${pt ? "vence" : "wins"}`}, ${fixtureName}`}
                             aria-valuetext={`${pct[i]}%`}
                           />
@@ -722,7 +721,7 @@ function RoundPicker({
 
       {/* Every game picked: say they are kept and what comes next (audit PUB2-22). */}
       {pickedCount === round.fixtures.length && round.fixtures.length > 0 && (
-        <div role="status" className="mt-4 rounded-2xl border border-line bg-parchment px-4 py-3 text-sm leading-relaxed text-stone-700">
+        <div role="status" className="mt-6 border-t border-rule pt-3 text-sm leading-relaxed text-stone-700">
           <p>
             {pt
               ? `As tuas ${pickedCount} previsões estão guardadas neste dispositivo e podes mudá-las até ao primeiro jogo.${lastKickoff ? ` Os resultados chegam depois do último jogo da jornada (${formatKickoffShort(lastKickoff, "pt")}).` : ""}`
@@ -747,7 +746,7 @@ function ProbBar({ pct }: { pct: [number, number, number] }) {
     { v: pct[2], color: OUTCOME_TONES.away },
   ];
   return (
-    <div className="flex h-2 rounded-full overflow-hidden bg-stone-100">
+    <div className="flex h-2 gap-px overflow-hidden">
       {segments.map((s, i) => (
         <div key={i} style={{ width: `${s.v}%`, backgroundColor: s.color }} />
       ))}
@@ -769,15 +768,15 @@ function RoundReview({
   const lock = roundLockState(round, Date.now());
 
   return (
-    <div className="border border-stone-200 rounded-xl overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 bg-stone-50 border-b border-stone-200">
+    <div className="border-t border-ink">
+      <div className="flex items-center justify-between py-2.5 border-b border-rule">
         <div className="flex items-center gap-2">
           <Lock className="w-3.5 h-3.5 text-stone-500" />
           <span className="font-semibold text-stone-900 text-sm">
             {t.matchday} {round.matchday}
           </span>
           {!score.complete && (
-            <span className="text-[12px] font-semibold text-graphite text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+            <span className="text-[12px] font-semibold text-amber-800">
               {t.inProgress}
             </span>
           )}
@@ -794,10 +793,10 @@ function RoundReview({
       </div>
 
       {score.scored.length === 0 ? (
-        <p className="px-4 py-4 text-sm text-stone-500">{t.notPlayed}</p>
+        <p className="py-4 text-sm text-stone-500">{t.notPlayed}</p>
       ) : (
         <>
-          <div className="px-4 py-3 flex flex-wrap gap-x-6 gap-y-1 text-sm border-b border-stone-100">
+          <div className="py-3 flex flex-wrap gap-x-6 gap-y-1 text-sm border-b border-grid">
             <span className="text-stone-500">
               {t.you}{" "}
               <span className="font-bold tabular-nums" style={{ color: USER_COLOR }}>
@@ -815,14 +814,14 @@ function RoundReview({
             )}
           </div>
 
-          <div className="divide-y divide-stone-100">
+          <div className="divide-y divide-grid">
             {score.scored.map(s => {
               const fixture = round.fixtures.find(f => f.key === s.key)!;
               const userPct = toPercents(s.user);
               const modelPct = toPercents(s.model);
               const oi = s.outcome === "H" ? 0 : s.outcome === "D" ? 1 : 2;
               return (
-                <div key={s.key} className="px-4 py-3 text-sm">
+                <div key={s.key} className="py-3 text-sm">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="font-medium text-stone-900 truncate">
                       {teamDisplayName(s.home)} {fixture.result!.homeGoals}
@@ -853,7 +852,7 @@ function RoundReview({
         </>
       )}
 
-      <div className="px-4 py-2 bg-stone-50 border-t border-stone-100 text-[11px] text-stone-500">
+      <div className="py-2 border-t border-grid text-[11px] text-stone-500">
         {lock.reason === "kickoff" ? t.lockedKickoff : t.lockedResults}
         {/* No "N you didn't predict" tally. Unpredicted matches do not enter
             the mean, so counting them only tells a late joiner they were

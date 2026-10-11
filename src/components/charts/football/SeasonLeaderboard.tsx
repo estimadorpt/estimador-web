@@ -11,7 +11,7 @@
  * local-only and there is nothing to rank.
  */
 
-import { Trophy, Bot, RefreshCw } from "lucide-react";
+import { Bot, RefreshCw } from "lucide-react";
 import { formatDecimal, formatLongDate } from "@/lib/football-format";
 import { useState } from "react";
 import type { LeaderboardResponse, LeaderboardRow } from "@/lib/utils/prediction-game-api";
@@ -77,8 +77,7 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh, recordNote 
   return (
     <section>
       <div className="flex items-baseline justify-between mb-2 gap-3">
-        <h3 className="text-stone-900 flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-emerald-700" />
+        <h3 className="text-ink">
           {t.title}
         </h3>
         {onRefresh && (
@@ -95,10 +94,9 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh, recordNote 
       </div>
 
       {humanCount === 0 ? (
-        <div className="border border-stone-200 rounded-2xl p-4 sm:p-6 bg-stone-50">
-          <div className="flex items-center gap-2 mb-1">
-            <Trophy className="w-4 h-4" style={{ color: USER_COLOR }} />
-            <h4 className="font-bold text-stone-900">{t.emptyTitle}</h4>
+        <div className="border-t border-ink pt-3">
+          <div className="mb-1">
+            <h4 className="font-semibold text-ink">{t.emptyTitle}</h4>
           </div>
           <p className="text-sm text-stone-600">{t.emptyBody}</p>
           {board?.model?.meanRps != null && (
@@ -110,11 +108,11 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh, recordNote 
           )}
         </div>
       ) : (
-        <div className="border border-stone-200 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t.title}>
+        <div>
+          <div className="scroll-cue overflow-x-auto" tabIndex={0} role="region" aria-label={t.title}>
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-stone-50 border-b border-stone-200 text-[12px] font-semibold text-graphite">
+                <tr className="border-b border-ink text-[12px] font-semibold text-graphite">
                   <th scope="col" className="text-left px-3 py-2 w-10">{t.rank}</th>
                   <th scope="col" className="text-left px-3 py-2">{t.player}</th>
                   <th scope="col" className="text-right px-3 py-2">{t.mean}</th>
@@ -123,7 +121,7 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh, recordNote 
                   <th scope="col" className="text-right px-3 py-2">{t.beat}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-grid">
                 {rows.map(row => (
                   <Row
                     locale={locale}
@@ -138,7 +136,7 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh, recordNote 
             </table>
           </div>
 
-          <div className="px-3 py-2 bg-stone-50 border-t border-stone-100 text-[11px] text-stone-500">
+          <div className="py-2 border-t border-rule text-[12px] text-stone-500">
             {t.note}
             {recordNote ? ` ${recordNote}` : ""}
             {board?.updatedAt && (
@@ -167,10 +165,10 @@ function Row({
   modelLabel: string;
   locale: string;
 }) {
-  const background = row.isModel ? "bg-stone-50" : isYou ? "bg-emerald-50" : "";
-
+  // No row tints: the model's row is marked by its icon and name, the
+  // reader's by "tu" and a semibold name.
   return (
-    <tr className={background}>
+    <tr>
       <td className="px-3 py-2 tabular-nums text-stone-500 text-xs">
         {row.isModel ? <Bot className="w-3.5 h-3.5" /> : row.rank}
       </td>
@@ -181,7 +179,7 @@ function Row({
           {row.isModel ? modelLabel : row.displayName}
         </span>
         {isYou && !row.isModel && (
-          <span className="ml-1.5 text-[12px] font-semibold text-graphite text-emerald-700">
+          <span className="ml-1.5 text-[12px] font-semibold text-emerald-700">
             {youLabel}
           </span>
         )}

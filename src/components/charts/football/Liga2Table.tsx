@@ -158,10 +158,10 @@ function TeamBadge({ team }: { team: string }) {
     );
   }
   return (
-    // Two letters on cream inside the club's colour: the letters always fit
-    // and never sit in white on a club fill (audit UXD-29, S-H6).
+    // Two ink letters in a square of the club's colour: the letters always
+    // fit and never sit in white on a club fill (audit UXD-29, S-H6).
     <span
-      className="w-6 h-6 flex-shrink-0 flex items-center justify-center rounded-full border-2 bg-cream text-[11px] font-bold leading-none text-ink"
+      className="w-6 h-6 flex-shrink-0 flex items-center justify-center border-2 bg-paper text-[11px] font-bold leading-none text-ink"
       style={{ borderColor: liga2TeamColor(team) }}
       aria-hidden
     >
@@ -209,12 +209,12 @@ export function Liga2FinalTable({
   const n = rows.length;
 
   return (
-    <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="scroll-cue overflow-x-auto rounded-2xl border border-line bg-cream">
+    <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="scroll-cue overflow-x-auto border-t border-ink">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-stone-50 border-b border-stone-200 text-[12px] text-graphite">
-            <th className="sticky left-0 z-10 w-8 bg-stone-50 py-2 pl-3 pr-1 text-left font-bold">#</th>
-            <th className="sticky left-8 z-10 bg-stone-50 py-2 px-2 text-left font-bold">
+          <tr className="border-b border-ink text-[12px] text-graphite">
+            <th className="sticky left-0 z-10 w-8 bg-paper py-2 pl-0 pr-1 text-left font-semibold">#</th>
+            <th className="sticky left-8 z-10 bg-paper py-2 px-2 text-left font-semibold">
               {pt ? "Clube" : "Club"}
             </th>
             <th className="hidden py-2 px-2 text-right font-bold sm:table-cell">J</th>
@@ -254,11 +254,14 @@ export function Liga2FinalTable({
             return (
               <tr
                 key={row.team}
-                className={`border-b border-stone-100 last:border-0 ${
-                  borderAfter ? "border-b-2 border-b-stone-300" : ""
-                } ${up ? "bg-emerald-50/60" : down ? "bg-red-50/60" : ""}`}
+                // No row tints: the rule after the last promoted club and
+                // before the relegated ones, and the green or red tick by the
+                // rank, mark the zones.
+                className={`border-b border-grid last:border-0 ${
+                  borderAfter ? "border-b-ink" : ""
+                }`}
               >
-                <td className="sticky left-0 z-10 bg-cream py-2 pl-3 pr-1 text-stone-500 tabular-nums text-xs">
+                <td className="sticky left-0 z-10 bg-paper py-2 pl-0 pr-1 text-stone-500 tabular-nums text-xs">
                   <span className="inline-flex items-center gap-1">
                     <span
                       className="w-0.5 h-4"
@@ -274,7 +277,7 @@ export function Liga2FinalTable({
                     {row.rank}
                   </span>
                 </td>
-                <td className="sticky left-8 z-10 max-w-[9rem] bg-cream py-2 px-2 md:max-w-none">
+                <td className="sticky left-8 z-10 max-w-[9rem] bg-paper py-2 px-2 md:max-w-none">
                   <TeamCell team={row.team} />
                 </td>
                 <td className="hidden py-2 px-2 text-right tabular-nums text-stone-500 sm:table-cell">
@@ -306,7 +309,7 @@ export function Liga2FinalTable({
           })}
         </tbody>
       </table>
-      <div className="flex flex-wrap gap-x-5 gap-y-1 px-3 py-2 bg-stone-50 border-t border-stone-200 text-[11px] text-stone-500">
+      <div className="flex flex-wrap gap-x-5 gap-y-1 py-2 border-t border-rule text-[12px] text-stone-500">
         <span className="inline-flex items-center gap-1.5">
           <span className="w-2 h-2 bg-emerald-700" />
           {pt ? "Subiu à Primeira Liga" : "Promoted to the Primeira"}
@@ -342,11 +345,11 @@ export function Liga2ProbabilityTable({
   const pt = locale !== "en";
 
   return (
-    <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="scroll-cue overflow-x-auto rounded-2xl border border-line bg-cream">
+    <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="scroll-cue overflow-x-auto border-t border-ink">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-stone-50 border-b border-stone-200 text-[12px] text-graphite">
-            <th className="sticky left-0 z-10 bg-stone-50 py-2 pl-3 pr-2 text-left font-bold">
+          <tr className="border-b border-ink text-[12px] text-graphite">
+            <th className="sticky left-0 z-10 bg-paper py-2 pl-0 pr-2 text-left font-semibold">
               {pt ? "Clube" : "Club"}
             </th>
             <th className="hidden py-2 px-2 text-right font-bold sm:table-cell">J</th>
@@ -374,9 +377,9 @@ export function Liga2ProbabilityTable({
           {rows.map(row => (
             <tr
               key={row.team}
-              className="border-b border-stone-100 last:border-0"
+              className="border-b border-grid last:border-0"
             >
-              <td className="sticky left-0 z-10 max-w-[9rem] bg-cream py-2 pl-3 pr-2 md:max-w-none">
+              <td className="sticky left-0 z-10 max-w-[9rem] bg-paper py-2 pl-0 pr-2 md:max-w-none">
                 <TeamCell team={row.team} />
               </td>
               <td className="hidden py-2 px-2 text-right tabular-nums text-stone-500 sm:table-cell">
@@ -579,15 +582,15 @@ export function Liga2PromotionRace({
         >
           {[0, 0.25, 0.5, 0.75, 1].map(g => (
             <g key={g}>
-              <line x1={padL} x2={W - padR} y1={y(g)} y2={y(g)} stroke="#e2e2df" strokeWidth={1} />
-              <text x={padL - 8} y={y(g) + 4} textAnchor="end" fill="#5c5c5c" fontSize={11}>
+              <line x1={padL} x2={W - padR} y1={y(g)} y2={y(g)} stroke={BRAND.line} strokeWidth={1} />
+              <text x={padL - 8} y={y(g) + 4} textAnchor="end" fill={BRAND.muted} fontSize={11}>
                 {Math.round(g * 100)}%
               </text>
             </g>
           ))}
 
           {checkpoints.map((cp, i) => (
-            <text key={cp.matchday} x={xs[i]} y={H - 10} textAnchor="middle" fill="#5c5c5c" fontSize={11}>
+            <text key={cp.matchday} x={xs[i]} y={H - 10} textAnchor="middle" fill={BRAND.muted} fontSize={11}>
               {pt ? `J${cp.matchday}` : `MD${cp.matchday}`}
             </text>
           ))}
@@ -620,7 +623,7 @@ export function Liga2PromotionRace({
               x={e.x + 8}
               y={e.y + 4}
               fontSize={11}
-              fill={wentUpOf(e.team) ? "#141414" : "#5c5c5c"}
+              fill={wentUpOf(e.team) ? BRAND.ink : BRAND.muted}
               fontWeight={wentUpOf(e.team) ? 700 : 400}
             >
               {liga2DisplayName(e.team)} {pct(e.v, pt)}
@@ -640,7 +643,7 @@ export function Liga2PromotionRace({
           <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-stone-600">
             {up.map(e => (
               <li key={e.team} className="inline-flex items-center gap-1.5">
-                <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: colourOf(e.team) }} />
+                <span aria-hidden="true" className="inline-block h-2 w-2" style={{ backgroundColor: colourOf(e.team) }} />
                 <span className="font-bold text-ink">{liga2DisplayName(e.team)} {pct(e.v, pt)}</span>
               </li>
             ))}
@@ -692,8 +695,8 @@ export function Liga2Strengths({
   const bar = (v: number) => Math.round((Math.abs(v) / span) * 50);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-cream">
-      <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-3 py-2 bg-stone-50 border-b border-stone-200 text-[12px] text-graphite font-bold">
+    <div className="border-t border-ink">
+      <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 py-2 border-b border-ink text-[12px] text-graphite font-semibold">
         <span>{pt ? "Clube" : "Club"}</span>
         <span className="w-28 text-center">{pt ? "Ataque" : "Attack"}</span>
         <span className="w-28 text-center">{pt ? "Defesa" : "Defence"}</span>
@@ -701,7 +704,7 @@ export function Liga2Strengths({
       {rows.map(row => (
         <div
           key={row.team}
-          className="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center px-3 py-1.5 border-b border-stone-100 last:border-0 text-sm"
+          className="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center py-1.5 border-b border-grid last:border-0 text-sm"
         >
           <span className="min-w-0">
             <TeamCell team={row.team} />
@@ -709,7 +712,7 @@ export function Liga2Strengths({
           {[row.attack, row.defense].map((v, i) => (
             <span key={i} className="w-28 flex items-center justify-center">
               <span className="relative w-24 h-3 flex items-center">
-                <span className="absolute left-1/2 top-0 bottom-0 w-px bg-stone-300" />
+                <span className="absolute left-1/2 top-0 bottom-0 w-px bg-ink" />
                 <span
                   className={`absolute h-2 ${v >= 0 ? "bg-emerald-600" : "bg-stone-400"}`}
                   style={{
@@ -722,7 +725,7 @@ export function Liga2Strengths({
           ))}
         </div>
       ))}
-      <p className="px-3 py-2 text-[11px] text-stone-500 bg-stone-50 border-t border-stone-200 leading-relaxed">
+      <p className="py-2 text-[12px] text-stone-500 border-t border-rule leading-relaxed">
         {pt
           ? "Desvios em relação à média da liga, na escala logarítmica do modelo. Barra à direita é melhor: mais golos marcados no ataque, menos sofridos na defesa."
           : "Offsets from the league average, on the model's log scale. Bars to the right are better: more goals scored in attack, fewer conceded in defence."}

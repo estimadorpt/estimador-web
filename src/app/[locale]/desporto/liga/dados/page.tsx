@@ -536,7 +536,7 @@ export default async function LigaDataPage({
 
         {/* Published files */}
         <section className="mb-14">
-          <h2 className="text-2xl tracking-tight mb-1">{c.filesTitle}</h2>
+          <h2 className="text-2xl md:text-[28px] mb-1">{c.filesTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.filesIntro}</p>
 
           {seasons.length === 0 ? (
@@ -628,7 +628,7 @@ export default async function LigaDataPage({
 
         {/* Schema */}
         <section className="mb-14">
-          <h2 className="text-2xl tracking-tight mb-1">{c.schemaTitle}</h2>
+          <h2 className="text-2xl md:text-[28px] mb-1">{c.schemaTitle}</h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">{c.schemaIntro}</p>
           <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={c.schemaTitle}>
             <table className="w-full text-sm">
@@ -668,7 +668,7 @@ export default async function LigaDataPage({
         {/* Game manifest notes */}
         {notes.length > 0 && (
           <section className="mb-14" aria-labelledby="notas-jogo">
-            <h2 id="notas-jogo" className="text-2xl tracking-tight mb-1">
+            <h2 id="notas-jogo" className="text-2xl md:text-[28px] mb-1">
               {pt ? "Notas sobre o jogo Contra o Modelo" : "Notes on the Beat the Model game"}
             </h2>
             <p className="text-sm text-stone-500 mb-4 max-w-3xl">
@@ -684,9 +684,9 @@ export default async function LigaDataPage({
 
         {/* Usage */}
         <section className="mb-14">
-          <h2 className="text-2xl tracking-tight mb-1">{c.usageTitle}</h2>
+          <h2 className="text-2xl md:text-[28px] mb-1">{c.usageTitle}</h2>
           <p className="text-sm text-stone-500 mb-4 max-w-3xl">{c.usageIntro}</p>
-          <pre tabIndex={0} role="region" aria-label={c.usageTitle} className="rounded-2xl bg-forest text-paper text-xs overflow-x-auto p-4 leading-relaxed max-sm:whitespace-pre-wrap max-sm:[overflow-wrap:anywhere]">
+          <pre tabIndex={0} role="region" aria-label={c.usageTitle} className="bg-forest text-paper text-xs overflow-x-auto p-4 leading-relaxed max-sm:whitespace-pre-wrap max-sm:[overflow-wrap:anywhere]">
             <code>{pt
               ? `# um ficheiro de jornada (o mais recente é o NN mais alto)
 curl -s ${SITE}/data/football/liga-2026-27/md01.json | jq '.table[0]'

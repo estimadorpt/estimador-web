@@ -9,6 +9,7 @@ import {
 } from "@/lib/config/football";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { formatPercent } from "@/lib/football-format";
+import { BRAND } from "@/lib/brand";
 
 /* ------------------------------------------------------------------ types */
 
@@ -175,14 +176,17 @@ export function FinalTable({
           {data.table.map((row) => {
             const x = xpts.get(row.team);
             const l = luck.get(row.team);
-            const color = ligaTeamColors[row.team] || "#5c5c5c";
+            const color = ligaTeamColors[row.team] || BRAND.muted;
             const isChampion = row.pos === 1;
             const isRelegated = relegated.has(row.team);
             return (
               <tr
                 key={row.team}
-                className={`border-b border-stone-100 ${
-                  isChampion ? "bg-emerald-50/60" : isRelegated ? "bg-red-50/50" : ""
+                // No row tints: the champion's name is set heavier and an
+                // ink rule closes the row above the relegated ones (a bottom
+                // rule: in collapsed borders the upper row's wins).
+                className={`border-b ${
+                  !isRelegated && relegated.has(data.table[row.pos]?.team ?? "") ? "border-b-ink" : "border-grid"
                 }`}
               >
                 <td className="py-2 tabular-nums text-stone-500 text-xs">{row.pos}</td>
@@ -204,14 +208,14 @@ export function FinalTable({
                         className="w-4 h-4 object-contain flex-shrink-0"
                       />
                     )}
-                    <span className="font-medium text-stone-800 truncate sm:hidden">
+                    <span className={`${isChampion ? "font-semibold text-ink" : "font-medium text-stone-800"} truncate sm:hidden`}>
                       {ligaTeamShortNames[row.team] || row.team}
                     </span>
-                    <span className="font-medium text-stone-800 truncate hidden sm:inline">
+                    <span className={`${isChampion ? "font-semibold text-ink" : "font-medium text-stone-800"} truncate hidden sm:inline`}>
                       {teamDisplayName(row.team)}
                     </span>
                     {row.lost === 0 && (
-                      <span className="flex-shrink-0 rounded-full border border-line bg-parchment px-2 py-px text-[11px] font-semibold text-emerald-700">
+                      <span className="flex-shrink-0 text-[12px] font-semibold text-emerald-700">
                         {pt ? "invicto" : "unbeaten"}
                       </span>
                     )}
@@ -369,7 +373,7 @@ export function TitleRaceEvolution({
               x2={padL + innerW}
               y1={y(tk)}
               y2={y(tk)}
-              stroke="#e2e2df"
+              stroke={BRAND.line}
               strokeWidth="1"
             />
             <text
@@ -390,15 +394,14 @@ export function TitleRaceEvolution({
           y={padT}
           width={Math.max(0, x(lastMd) - x(lastForecastMd))}
           height={plotH}
-          fill="#f5f4ed"
-          opacity={0.8}
+          fill={BRAND.parchment}
         />
         <line
           x1={x(lastForecastMd)}
           x2={x(lastForecastMd)}
           y1={padT}
           y2={padT + plotH}
-          stroke="#8a8a87"
+          stroke={BRAND.faint}
           strokeWidth="1"
           strokeDasharray="3 3"
         />
@@ -407,7 +410,7 @@ export function TitleRaceEvolution({
 
         {/* series */}
         {race.series.map((s) => {
-          const color = ligaTeamColors[s.team] || "#5c5c5c";
+          const color = ligaTeamColors[s.team] || BRAND.muted;
           const lastIdx = s.values.length - 1;
           const lastVal = s.values[lastIdx];
           return (
@@ -415,7 +418,7 @@ export function TitleRaceEvolution({
               <path d={lineFor(s.values)} fill="none" stroke={color} strokeWidth="2" />
               {s.values.map((v, i) =>
                 v === null ? null : rebuilt.has(mds[i]) ? (
-                  <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill="#ffffff" stroke={color} strokeWidth="1.5" />
+                  <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill={BRAND.paper} stroke={color} strokeWidth="1.5" />
                 ) : (
                   <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill={color} />
                 )
@@ -431,7 +434,7 @@ export function TitleRaceEvolution({
                     y={endY.get(s.team)!}
                     fontSize="11"
                     fontWeight="600"
-                    fill="#141414"
+                    fill={BRAND.ink}
                   >
                     {teamDisplayName(s.team)} {pctText(lastVal)}
                   </text>
@@ -447,7 +450,7 @@ export function TitleRaceEvolution({
           x2={padL + innerW}
           y1={padT + plotH}
           y2={padT + plotH}
-          stroke="#cbccbb"
+          stroke={BRAND.ink}
           strokeWidth="1"
         />
         {xTicks.map((tk) => (
@@ -478,7 +481,7 @@ export function TitleRaceEvolution({
             x2={x(mds[hover])}
             y1={padT}
             y2={padT + plotH}
-            stroke="#5c5c5c"
+            stroke={BRAND.muted}
             strokeWidth="1"
           />
         )}
@@ -501,7 +504,7 @@ export function TitleRaceEvolution({
 
       {hover !== null && (
         <div
-          className="pointer-events-none absolute top-2 rounded-lg border border-line bg-cream px-3 py-2 text-xs shadow-none"
+          className="pointer-events-none absolute top-2 border border-ink bg-paper px-3 py-2 text-xs"
           style={{
             left: Math.min(Math.max(0, x(mds[hover]) + 10), Math.max(0, width - 170)),
           }}
@@ -529,7 +532,7 @@ export function TitleRaceEvolution({
             <span key={s.team} className="inline-flex items-center gap-1.5">
               <span
                 className="inline-block w-3 h-0.5"
-                style={{ backgroundColor: ligaTeamColors[s.team] || "#5c5c5c" }}
+                style={{ backgroundColor: ligaTeamColors[s.team] || BRAND.muted }}
               />
               <span className="text-stone-600">{teamDisplayName(s.team)}</span>
             </span>
@@ -540,11 +543,11 @@ export function TitleRaceEvolution({
       {rebuilt.size > 0 && (
         <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2 text-[11px] text-stone-600">
           <span className="inline-flex items-center gap-1.5">
-            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#4f5f57" /></svg>
+            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill={BRAND.muted} /></svg>
             {pt ? "Publicada na altura" : "Published at the time"}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#ffffff" stroke="#4f5f57" strokeWidth="1.5" /></svg>
+            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill={BRAND.paper} stroke={BRAND.muted} strokeWidth="1.5" /></svg>
             {pt ? "Reconstituída depois" : "Reconstructed afterwards"}
           </span>
         </div>
@@ -596,7 +599,7 @@ export function ReportCard({
 
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-6 mb-6">
         {[
           {
             value: `${rc.checkpoints.filter((c) => c.favourite_correct).length}/${rc.n_forecasts}`,
@@ -622,8 +625,8 @@ export function ReportCard({
               : "average error on predicted final points in the last published forecast",
           },
         ].map((kpi) => (
-          <div key={kpi.label} className="rounded-2xl border border-line bg-cream p-4">
-            <div className="text-2xl font-display font-extrabold text-stone-900 tabular-nums">
+          <div key={kpi.label} className="border-t border-ink pt-3">
+            <div className="text-2xl font-display font-extrabold text-ink tabular-nums">
               {kpi.value}
             </div>
             <div className="text-xs text-stone-500 mt-1 leading-snug">{kpi.label}</div>
@@ -639,7 +642,7 @@ export function ReportCard({
               : "Mean absolute error of predicted final points, by forecast"}
           </caption>
           <thead>
-            <tr className="border-b border-stone-300">
+            <tr className="border-b border-ink">
               <th
                 scope="col"
                 className="text-[12px] font-semibold text-graphite py-2 text-left"
@@ -664,7 +667,7 @@ export function ReportCard({
           </thead>
           <tbody>
             {rc.checkpoints.map((c) => (
-              <tr key={c.matchday} className="border-b border-stone-100">
+              <tr key={c.matchday} className="border-b border-grid">
                 <td className="py-1.5 tabular-nums text-stone-600">
                   {c.matchday}
                   {rebuilt.has(c.matchday) && (
@@ -678,12 +681,11 @@ export function ReportCard({
                 </td>
                 <td className="py-1.5 pl-4">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-3 bg-stone-50 relative min-w-[60px]">
+                    <div className="flex-1 h-3 border-b border-scale relative min-w-[60px]">
                       <div
-                        className="absolute inset-y-0 left-0 bg-stone-400"
+                        className="absolute top-0 bottom-px left-0 bg-stone-400"
                         style={{
                           width: `${((c.points_mae ?? 0) / maxMae) * 100}%`,
-                          opacity: 0.5,
                         }}
                       />
                     </div>

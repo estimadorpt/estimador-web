@@ -163,11 +163,11 @@ export default async function Liga2Page({
       <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
 
         {/* Lighter-model label, stated before any number is shown */}
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 mb-8 max-w-3xl">
+        <div className="border-t border-rule pt-3 mb-8 max-w-3xl">
           <div className="flex items-start gap-3">
             <TriangleAlert aria-hidden="true" className="w-5 h-5 text-amber-700 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-bold text-stone-900 mb-1">
+              <p className="text-sm font-bold text-amber-800 mb-1">
                 {c.lighterLabel} — {pt ? data.model_label.pt : data.model_label.en}
               </p>
               <p className="text-sm text-stone-600 leading-relaxed">
@@ -248,7 +248,7 @@ export default async function Liga2Page({
         )}
 
         {/* Headline numbers */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden rounded-2xl bg-line border border-line mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 mb-12">
           {[
             {
               value: formatInteger(totalMatches, locale),
@@ -273,8 +273,8 @@ export default async function Liga2Page({
               label: pt ? "descidas à Liga 3" : "clubs relegated to Liga 3",
             },
           ].map(kpi => (
-            <div key={kpi.label} className="bg-cream p-4">
-              <div className="text-3xl font-display font-extrabold text-stone-900 tabular-nums">
+            <div key={kpi.label} className="border-t border-ink pt-3">
+              <div className="text-3xl font-display font-extrabold text-ink tabular-nums">
                 {kpi.value}
               </div>
               <div className="text-xs text-stone-500 mt-1 leading-snug">
@@ -287,7 +287,7 @@ export default async function Liga2Page({
         {/* Live season, when the data has one */}
         {live && (
           <section className="mb-14">
-            <h2 className="text-2xl tracking-tight mb-1">
+            <h2 className="text-2xl md:text-[28px] mb-1">
               {c.liveTitle} — {live.season}
             </h2>
             <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -296,7 +296,7 @@ export default async function Liga2Page({
                 : `Matchday ${live.matchday}, with ${live.matches_remaining} matches left. Fitted on ${live.training_matches} matches from ${live.seasons_fitted.join(", ")}.`}
             </p>
             <Liga2ProbabilityTable rows={live.teams} locale={locale} label={`${c.liveTitle} ${live.season}`} />
-            <h3 className="text-lg tracking-tight mt-10 mb-4">
+            <h3 className="text-lg mt-10 mb-4">
               {c.strengthsTitle}
             </h3>
             <Liga2Strengths rows={live.team_strengths} locale={locale} />
@@ -307,7 +307,7 @@ export default async function Liga2Page({
           <>
             {/* Final table */}
             <section className="mb-14">
-              <h2 className="text-2xl tracking-tight mb-1">
+              <h2 className="text-2xl md:text-[28px] mb-1">
                 {c.tableTitle} — {review.season}
               </h2>
               <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -327,7 +327,7 @@ export default async function Liga2Page({
             {/* Promotion race across checkpoints */}
             {review.checkpoints.length > 1 && (
               <section className="mb-14">
-                <h2 className="text-2xl tracking-tight mb-1">
+                <h2 className="text-2xl md:text-[28px] mb-1">
                   {c.raceTitle}
                 </h2>
                 <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -368,7 +368,7 @@ export default async function Liga2Page({
 
             {/* Checkpoint tables */}
             <section className="mb-14">
-              <h2 className="text-2xl tracking-tight mb-1">
+              <h2 className="text-2xl md:text-[28px] mb-1">
                 {c.checkpointTitle}
               </h2>
               <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -400,7 +400,7 @@ export default async function Liga2Page({
 
             {/* Team strengths */}
             <section className="mb-14">
-              <h2 className="text-2xl tracking-tight mb-1">
+              <h2 className="text-2xl md:text-[28px] mb-1">
                 {c.strengthsTitle}
               </h2>
               <p className="text-sm text-stone-500 mb-6 max-w-3xl">
@@ -413,7 +413,7 @@ export default async function Liga2Page({
 
         {/* Caveats */}
         <section className="mb-14">
-          <h2 className="text-2xl tracking-tight mb-1">
+          <h2 className="text-2xl md:text-[28px] mb-1">
             {c.caveatsTitle}
           </h2>
           <p className="text-sm text-stone-500 mb-6 max-w-3xl">

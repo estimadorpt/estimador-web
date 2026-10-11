@@ -13,7 +13,6 @@ import { ContraOModelo } from "@/components/charts/football/ContraOModelo";
 import { GameAuthProvider } from "@/components/GameAuthProvider";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { Swords } from "lucide-react";
 import type { Metadata } from "next";
 import { setRequestLocale } from '@/i18n/request-locale';
 
@@ -102,7 +101,6 @@ export default async function JogoPrevisoesPage({
         measure="reading"
         compact
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
-        icon={<Swords aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t("football.title")}
         title={t("nav.game")}
         lede={pt
