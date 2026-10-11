@@ -11,7 +11,7 @@ export function HouseholdInspector({ household, locale, onClose, onChange, selec
   const person=home.people[member] ?? home.people[0], info=details(person);
   const labels=FIELD_LABELS[locale];
   return <section id="mini-household-detail" className="mini-inspector" aria-label={pt?'Detalhe do agregado':'Household details'}>
-    <div className="mini-inspector-top"><span>{pt?'DENTRO DE CASA':'INSIDE THE HOME'}</span><button onClick={onClose} aria-label={pt?'Sair do agregado':'Leave household'}><X size={17}/></button></div>
+    <div className="mini-inspector-top"><span>{pt?'Dentro de casa':'Inside the home'}</span><button onClick={onClose} aria-label={pt?'Sair do agregado':'Leave household'}><X size={17}/></button></div>
     <h2>{pt?'Agregado':'Household'} {String(household+1).padStart(2,'0')}</h2>
     <p className="mini-inspector-sub">{home.people.length} {pt?(home.people.length===1?'pessoa fictícia':'pessoas fictícias'):(home.people.length===1?'fictional person':'fictional people')} · {housing.rooms} {pt?'divisões':'rooms'}</p>
     <div className="mini-members" role="group" aria-label={pt?'Escolher uma pessoa':'Choose a person'}>{home.people.map((p,i)=><button key={p.id} aria-pressed={member===i} onClick={()=>onPersonSelect(p.id)} aria-label={`${pt?'Pessoa':'Person'} ${p.id+1}, ${p.age} ${pt?'anos':'years'}`}><span className="mini-avatar" style={{background:COLOURS[p.band]}}><i/></span><span>{p.age}<small>{pt?'anos':'years'}</small></span></button>)}</div>

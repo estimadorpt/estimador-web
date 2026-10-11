@@ -51,8 +51,6 @@ export function postcardSvg(source: SVGSVGElement, locale: 'pt' | 'en', view: Vi
       ['.land-tram', 'translate', '0 0;425 140;425 140;0 0', '18s'],
       ['.land-boat', 'translate', '-15 35;45 -60;-15 35', '22s'],
       ['.land-windmill', 'rotate', '0;360', '13s'],
-      ['.land-bird', 'translate', '-80 0;170 -22;-80 0', '15s'],
-      ['.land-cloud, .land-mist', 'translate', '-40 0;110 0;-40 0', '35s'],
       ['.land-wave', 'translate', '0 0;8 4;0 0', '4s'],
     ];
     motions.forEach(([selector, type, values, duration]) => {
@@ -64,11 +62,13 @@ export function postcardSvg(source: SVGSVGElement, locale: 'pt' | 'en', view: Vi
       });
     });
   }
-  const labels = locale === 'pt' ? {views:{village:'Um bairro imaginado',ages:'As idades de um pequeno mundo',households:'Há muitas maneiras de ser família'},demo:'DEMONSTRAÇÃO · DADOS FICTÍCIOS',note:'100 pessoas inventadas · 30 agregados · não representa Portugal',filter:'Em destaque: quem vive sozinho'} : {views:{village:'An imagined neighbourhood',ages:'The ages of a small world',households:'Many ways to be a household'},demo:'DEMONSTRATION · FICTIONAL DATA',note:'100 invented people · 30 households · not representative of Portugal',filter:'Highlighted: people living alone'};
+  const labels = locale === 'pt' ? {views:{village:'Um bairro imaginado',ages:'As idades de um pequeno mundo',households:'Há muitas maneiras de ser família'},demo:'Demonstração, dados fictícios',note:'100 pessoas inventadas · 30 agregados · não representa Portugal',filter:'Em destaque: quem vive sozinho'} : {views:{village:'An imagined neighbourhood',ages:'The ages of a small world',households:'Many ways to be a household'},demo:'Demonstration, fictional data',note:'100 invented people · 30 households · not representative of Portugal',filter:'Highlighted: people living alone'};
   const groupNote = source.dataset.selectedGroup !== undefined ? ` · ${FIELD_LABELS[locale][source.dataset.lens as Lens][Number(source.dataset.selectedGroup)]}` : '';
-  // The signature where the old serif "estimador / Portugal em miniatura" stood:
-  // its baseline on the old title's (y 59), at 1.25 × the logo's 24px box.
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="880" viewBox="0 0 1200 880"><rect width="1200" height="880" fill="${BRAND.paper}"/>${signature(55, 35, 1.25)}<text x="55" y="109" fill="${BRAND.ink}" font-family="${SANS}" font-size="34" font-weight="700" letter-spacing="-0.5">${labels.views[view]}${source.dataset.selectedHouse ? ` · ${locale==='pt'?'Agregado':'Household'} ${Number(source.dataset.selectedHouse)+1}` : ''}</text><text x="1145" y="54" text-anchor="end" fill="${BRAND.terracotta}" font-family="${SANS}" font-size="14" font-weight="700" letter-spacing="1.5">${labels.demo}</text>${new XMLSerializer().serializeToString(scene)}<g fill="${BRAND.muted}" font-family="${SANS}" font-size="16"><text x="55" y="811">${labels.note}${groupNote}${alone ? ` · ${labels.filter}` : ''}</text><text x="55" y="845">estimador.pt/populacao/miniatura</text></g></svg>`;
+  // The card in the instrument's grammar: white ground, the outlined signature top left (its
+  // baseline on y 59, at 1.25 × the logo's 24px box), the title in ink, the demonstration label
+  // in sentence case, semibold ink, on the right, a 1px ink rule under the head and a rule
+  // above the foot, which is in graphite.
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="880" viewBox="0 0 1200 880"><rect width="1200" height="880" fill="${BRAND.paper}"/>${signature(55, 35, 1.25)}<text x="1145" y="54" text-anchor="end" fill="${BRAND.ink}" font-family="${SANS}" font-size="16" font-weight="600">${labels.demo}</text><text x="55" y="109" fill="${BRAND.ink}" font-family="${SANS}" font-size="34" font-weight="700">${labels.views[view]}${source.dataset.selectedHouse ? ` · ${locale==='pt'?'Agregado':'Household'} ${Number(source.dataset.selectedHouse)+1}` : ''}</text><path d="M55 124.5H1145" stroke="${BRAND.ink}" stroke-width="1"/>${new XMLSerializer().serializeToString(scene)}<path d="M55 784.5H1145" stroke="${BRAND.line}" stroke-width="1"/><g fill="${BRAND.muted}" font-family="${SANS}" font-size="16"><text x="55" y="811">${labels.note}${groupNote}${alone ? ` · ${labels.filter}` : ''}</text><text x="55" y="845">estimador.pt/populacao/miniatura</text></g></svg>`;
 }
 export async function pngFromSvg(svg: string): Promise<Blob> {
   const url = URL.createObjectURL(new Blob([svg], {type:'image/svg+xml'}));
