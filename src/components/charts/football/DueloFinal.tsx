@@ -28,6 +28,20 @@ interface DueloFinalProps {
 const TIE_COLOR = BRAND.faint;
 
 /**
+ * A club's colour for the duel's bars and keys. A club drawn in near-black
+ * on paper (Nacional) would make solid black bars and a black square key,
+ * the reading rule's mark for what has already happened: it gets graphite.
+ */
+function duelColor(team: string): string {
+  const hex = teamColorOnPaper(team);
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b < 48 ? BRAND.muted : hex;
+}
+
+/**
  * The final duel, on a club's page: which of two clubs finishes the season
  * with more points, counted over the complete seasons samples.json draws
  * from the simulations. The page's club is fixed; the other is a select that
@@ -73,8 +87,8 @@ export function DueloFinal({ samples, team, rival, frame, locale = "pt", forecas
 
   const nameA = teamDisplayName(samples.teams[iA]);
   const nameB = teamDisplayName(samples.teams[iB]);
-  const colorA = teamColorOnPaper(samples.teams[iA]);
-  const colorB = teamColorOnPaper(samples.teams[iB]);
+  const colorA = duelColor(samples.teams[iA]);
+  const colorB = duelColor(samples.teams[iB]);
   const shareA = stats.n ? stats.aheadA / stats.n : 0;
   const shareB = stats.n ? stats.aheadB / stats.n : 0;
   const shareTie = stats.n ? stats.ptsTie / stats.n : 0;
