@@ -26,7 +26,7 @@ export function ChartTable({ caption, columns, rows, summaryLabel, align, classN
   const textAlign = (j: number) => (aligns[j] === 'right' ? 'text-right' : 'text-left');
   // The label column: sticky, opaque, a hairline on its right, and allowed to
   // wrap so a long name does not take the whole phone width.
-  const labelCell = 'sticky left-0 border-r border-line bg-cream';
+  const labelCell = 'sticky left-0 border-r border-line bg-paper';
   return (
     <Disclosure summary={label} srSuffix={caption} className={`mt-3 ${className}`}>
       <div className="scroll-cue mt-2 max-h-[32rem] overflow-auto" tabIndex={0} role="region" aria-label={caption}>
@@ -35,7 +35,7 @@ export function ChartTable({ caption, columns, rows, summaryLabel, align, classN
           <thead>
             <tr>
               {columns.map((c, j) => (
-                <th key={c} scope="col" className={`sticky top-0 border-b-2 border-ink bg-cream px-3 py-2 ${textAlign(j)} text-[12px] font-semibold text-graphite ${j === 0 ? `${labelCell} z-20` : 'z-10'}`}>{c}</th>
+                <th key={c} scope="col" className={`sticky top-0 border-b-2 border-ink bg-paper px-3 py-2 ${textAlign(j)} text-[12px] font-semibold text-graphite ${j === 0 ? `${labelCell} z-20` : 'z-10'}`}>{c}</th>
               ))}
             </tr>
           </thead>

@@ -23,7 +23,7 @@ export const SECTIONS: SectionConfig[] = [
     descriptionKey: 'sections.populationDescription',
     isActive: true,
     // The data pastel for the atlas's people (see Design Language in CLAUDE.md).
-    accentColor: BRAND.mint,
+    accentColor: BRAND.ink,
     // The versioned release directory: /data/population/v<POPULATION_RELEASE>.
     dataPath: POPULATION_DATA_PATH,
     href: POPULATION_ROUTES.hub,

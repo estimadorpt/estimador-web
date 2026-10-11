@@ -1,5 +1,4 @@
 export { DataCard } from './DataCard';
-export { StatTile, KpiRow } from './StatTile';
 export { Sparkline } from './Sparkline';
 export { Segmented } from './Segmented';
 export { Legend } from './Legend';

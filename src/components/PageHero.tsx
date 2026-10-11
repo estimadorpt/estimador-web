@@ -7,8 +7,6 @@ import { kickerWithoutBack } from '@/components/brand/hero-kicker';
 interface PageHeroProps {
   /** The section and, if useful, the edition, above the title ("Liga Portugal — época 2026-27"). */
   eyebrow?: ReactNode;
-  /** Accepted for compatibility; heroes draw no icons. */
-  icon?: ReactNode;
   title: ReactNode;
   /** One or two sentences under the title. */
   lede?: ReactNode;
@@ -16,16 +14,6 @@ interface PageHeroProps {
   back?: { href: string; label: ReactNode; locale?: string };
   /** The meta line: update date, methodology link, next release. */
   meta?: ReactNode;
-  /**
-   * Brand art on the right on wide screens: only /marca uses it. Section pages
-   * take `illustration`, data pages a `field`, reference pages neither
-   * (CLAUDE.md, header table). Never over data.
-   */
-  art?: ReactNode;
-  /** Accepted for compatibility; section scenes are no longer drawn. */
-  illustration?: string;
-  /** Accepted for compatibility; heroes are plain white. */
-  field?: string;
   /** One main action and, at most, one secondary. */
   actions?: ReactNode;
   /**
@@ -37,7 +25,7 @@ interface PageHeroProps {
   width?: ContainerWidth;
   /** A narrower text column inside the full container, aligned to its left edge. */
   measure?: Measure;
-  /** Dashboards and listings: a shallower header, so the data arrives sooner. Large art stays on entrances and explainers. */
+  /** Dashboards and listings: a shallower header, so the data arrives sooner. */
   compact?: boolean;
   className?: string;
 }
@@ -47,16 +35,11 @@ interface PageHeroProps {
  * the page has one), a lede and the reading's facts, on white, closed by a
  * rule. No icon, no tinted field, no painting.
  */
-export function PageHero({ eyebrow: givenEyebrow, title, lede, back, meta, art, actions, width = '7xl', measure = 'full', compact = false, className = '' }: PageHeroProps) {
+export function PageHero({ eyebrow: givenEyebrow, title, lede, back, meta, actions, width = '7xl', measure = 'full', compact = false, className = '' }: PageHeroProps) {
   // Under a back link, the kicker does not say the section's name again (CL3-07).
   const eyebrow = back ? kickerWithoutBack(givenEyebrow, back.label) : givenEyebrow;
   return (
-    <section className={`relative overflow-hidden border-b border-rule bg-paper ${className}`}>
-      {art && (
-        <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 hidden w-[38%] max-w-[520px] lg:block">
-          {art}
-        </div>
-      )}
+    <section className={`relative border-b border-rule bg-paper ${className}`}>
       <div className={`relative ${containerClass(width)} ${compact ? 'pt-6 pb-6 md:pt-7 md:pb-7' : 'pt-8 pb-8 md:pt-10 md:pb-10'}`}>
         <div className={`min-w-0 ${MEASURES[measure]}`}>
         {back && (

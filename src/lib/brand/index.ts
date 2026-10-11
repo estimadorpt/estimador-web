@@ -38,21 +38,9 @@ export const BRAND = {
   // The model's margin: the band of an interval, and nothing else.
   signal: '#ffd400',
   signalLow: '#fff1b3',
-  // Data pastels: chart categoricals and the atlas's people.
-  mint: '#72c8b4',
-  mustard: '#e5b958',
-  coral: '#e29a83',
-  periwinkle: '#a9b9ed',
-  // Surface pastels: the same hues a step quieter, for mosaic, covers and backgrounds.
-  mintSoft: '#9dcec1',
-  mustardSoft: '#e3c994',
-  coralSoft: '#dcafa1',
-  periwinkleSoft: '#bdc7e7',
   terracotta: '#b91c1c',
   gold: '#b7791f',
   tree: '#15803d',
   teal: '#0f766e',
 } as const;
 
-export const SOFT_PASTELS = [BRAND.mintSoft, BRAND.mustardSoft, BRAND.coralSoft, BRAND.periwinkleSoft] as const;
-export const DATA_PASTELS = [BRAND.mint, BRAND.mustard, BRAND.coral, BRAND.periwinkle] as const;

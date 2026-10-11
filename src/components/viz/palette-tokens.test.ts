@@ -30,11 +30,11 @@ const GROUNDS = ['color-paper', 'color-cream', 'color-parchment'];
 
 /**
  * A11Y2-08: the green steps and aliases that colour text (gains, the model's
- * figures on /modelo, "success" states) read at 4.5:1 on every ground text
+ * figures on /modelo, positive states) read at 4.5:1 on every ground text
  * sits on. #4e8056 gave 4.16:1 on paper.
  */
 describe('green text tokens', () => {
-  for (const name of ['color-green-600', 'color-green-700', 'color-positive', 'color-tree', 'success', 'green-medium']) {
+  for (const name of ['color-green-600', 'color-green-700', 'color-positive', 'color-tree']) {
     it(`${name} reaches 4.5:1`, () => {
       for (const ground of GROUNDS) {
         expect(contrast(variable(name), variable(ground)), `${name} on ${ground}`).toBeGreaterThanOrEqual(4.5);
