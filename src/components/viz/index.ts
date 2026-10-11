@@ -1,6 +1,5 @@
 export { DataCard } from './DataCard';
 export { Sparkline } from './Sparkline';
-export { Segmented } from './Segmented';
 export { Legend } from './Legend';
 export { ChartTable } from './ChartTable';
 export { Disclosure } from './Disclosure';
