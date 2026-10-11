@@ -14,16 +14,16 @@ export const MARK_FULL = `${MARK_LEFT} ${MARK_BAND} ${MARK_RIGHT}`;
 /** Compact marks retain shorter whiskers and thicker caps in a 32×32 box. */
 /** Same values as the tokens in globals.css; exported for SVG and canvas code that cannot read CSS variables. */
 export const BRAND = {
-  paper: '#f5f3ea',
-  cream: '#fcfbf5',
-  parchment: '#ece9dc',
-  line: '#dadccf',
-  ink: '#234c40',
-  inkDark: '#16362e',
-  muted: '#5f7062',
-  faint: '#7f9284',
-  forest: '#122f2c',
-  forestDeep: '#0d2927',
+  paper: '#ffffff',
+  cream: '#ffffff',
+  parchment: '#f3f3f1',
+  line: '#e2e2df',
+  ink: '#141414',
+  inkDark: '#000000',
+  muted: '#5c5c5c',
+  faint: '#8a8a87',
+  forest: '#1f1f1f',
+  forestDeep: '#141414',
   // Data pastels: chart categoricals and the atlas's people.
   mint: '#72c8b4',
   mustard: '#e5b958',
@@ -34,10 +34,10 @@ export const BRAND = {
   mustardSoft: '#e3c994',
   coralSoft: '#dcafa1',
   periwinkleSoft: '#bdc7e7',
-  terracotta: '#a3543a',
-  gold: '#c49536',
-  tree: '#377455',
-  teal: '#245c68',
+  terracotta: '#b91c1c',
+  gold: '#b7791f',
+  tree: '#15803d',
+  teal: '#0f766e',
 } as const;
 
 export const SOFT_PASTELS = [BRAND.mintSoft, BRAND.mustardSoft, BRAND.coralSoft, BRAND.periwinkleSoft] as const;

@@ -98,7 +98,7 @@ export function PresidentialForecastBars({
                   backgroundColor: candidate.color,
                   top: '50%',
                   transform: 'translate(-50%, -50%)',
-                  border: '1px solid #fcfbf5',
+                  border: '1px solid #ffffff',
                 }}
               />
 

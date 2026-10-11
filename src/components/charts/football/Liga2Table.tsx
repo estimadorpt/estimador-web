@@ -579,15 +579,15 @@ export function Liga2PromotionRace({
         >
           {[0, 0.25, 0.5, 0.75, 1].map(g => (
             <g key={g}>
-              <line x1={padL} x2={W - padR} y1={y(g)} y2={y(g)} stroke="#dadccf" strokeWidth={1} />
-              <text x={padL - 8} y={y(g) + 4} textAnchor="end" fill="#5f7062" fontSize={11}>
+              <line x1={padL} x2={W - padR} y1={y(g)} y2={y(g)} stroke="#e2e2df" strokeWidth={1} />
+              <text x={padL - 8} y={y(g) + 4} textAnchor="end" fill="#5c5c5c" fontSize={11}>
                 {Math.round(g * 100)}%
               </text>
             </g>
           ))}
 
           {checkpoints.map((cp, i) => (
-            <text key={cp.matchday} x={xs[i]} y={H - 10} textAnchor="middle" fill="#5f7062" fontSize={11}>
+            <text key={cp.matchday} x={xs[i]} y={H - 10} textAnchor="middle" fill="#5c5c5c" fontSize={11}>
               {pt ? `J${cp.matchday}` : `MD${cp.matchday}`}
             </text>
           ))}
@@ -620,7 +620,7 @@ export function Liga2PromotionRace({
               x={e.x + 8}
               y={e.y + 4}
               fontSize={11}
-              fill={wentUpOf(e.team) ? "#234c40" : "#5f7062"}
+              fill={wentUpOf(e.team) ? "#141414" : "#5c5c5c"}
               fontWeight={wentUpOf(e.team) ? 700 : 400}
             >
               {liga2DisplayName(e.team)} {pct(e.v, pt)}

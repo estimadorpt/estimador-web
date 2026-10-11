@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 
-/** A cream panel: 16px corners, a hairline, no shadow, and it clips what bleeds to its edges. */
+/** A module: a heavy ink rule on top, a hairline around, square corners, the page's own white. */
 export function HomePanel({ children, labelledBy, className = '' }: { children: ReactNode; labelledBy: string; className?: string }) {
   return (
-    <section aria-labelledby={labelledBy} className={`overflow-hidden rounded-2xl border border-line bg-cream ${className}`}>
+    <section aria-labelledby={labelledBy} className={`overflow-hidden border border-line border-t-[3px] border-t-ink bg-paper ${className}`}>
       {children}
     </section>
   );
@@ -11,9 +11,9 @@ export function HomePanel({ children, labelledBy, className = '' }: { children: 
 
 export function Kicker({ children, pill }: { children: ReactNode; pill?: ReactNode }) {
   return (
-    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">
+    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[12px] font-bold uppercase tracking-wide text-ink">
       <span>{children}</span>
-      {pill && <span className="rounded-md bg-parchment px-2 py-0.5 tracking-wider text-stone-600">{pill}</span>}
+      {pill && <span className="font-medium normal-case tracking-normal text-stone-500">{pill}</span>}
     </p>
   );
 }

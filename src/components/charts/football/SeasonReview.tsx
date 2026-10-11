@@ -175,7 +175,7 @@ export function FinalTable({
           {data.table.map((row) => {
             const x = xpts.get(row.team);
             const l = luck.get(row.team);
-            const color = ligaTeamColors[row.team] || "#5f7062";
+            const color = ligaTeamColors[row.team] || "#5c5c5c";
             const isChampion = row.pos === 1;
             const isRelegated = relegated.has(row.team);
             return (
@@ -369,7 +369,7 @@ export function TitleRaceEvolution({
               x2={padL + innerW}
               y1={y(tk)}
               y2={y(tk)}
-              stroke="#dadccf"
+              stroke="#e2e2df"
               strokeWidth="1"
             />
             <text
@@ -398,7 +398,7 @@ export function TitleRaceEvolution({
           x2={x(lastForecastMd)}
           y1={padT}
           y2={padT + plotH}
-          stroke="#7f9284"
+          stroke="#8a8a87"
           strokeWidth="1"
           strokeDasharray="3 3"
         />
@@ -407,7 +407,7 @@ export function TitleRaceEvolution({
 
         {/* series */}
         {race.series.map((s) => {
-          const color = ligaTeamColors[s.team] || "#5f7062";
+          const color = ligaTeamColors[s.team] || "#5c5c5c";
           const lastIdx = s.values.length - 1;
           const lastVal = s.values[lastIdx];
           return (
@@ -415,7 +415,7 @@ export function TitleRaceEvolution({
               <path d={lineFor(s.values)} fill="none" stroke={color} strokeWidth="2" />
               {s.values.map((v, i) =>
                 v === null ? null : rebuilt.has(mds[i]) ? (
-                  <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill="#fcfbf5" stroke={color} strokeWidth="1.5" />
+                  <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill="#ffffff" stroke={color} strokeWidth="1.5" />
                 ) : (
                   <circle key={i} cx={x(mds[i])} cy={y(v)} r="3" fill={color} />
                 )
@@ -431,7 +431,7 @@ export function TitleRaceEvolution({
                     y={endY.get(s.team)!}
                     fontSize="11"
                     fontWeight="600"
-                    fill="#234c40"
+                    fill="#141414"
                   >
                     {teamDisplayName(s.team)} {pctText(lastVal)}
                   </text>
@@ -478,7 +478,7 @@ export function TitleRaceEvolution({
             x2={x(mds[hover])}
             y1={padT}
             y2={padT + plotH}
-            stroke="#5f7062"
+            stroke="#5c5c5c"
             strokeWidth="1"
           />
         )}
@@ -529,7 +529,7 @@ export function TitleRaceEvolution({
             <span key={s.team} className="inline-flex items-center gap-1.5">
               <span
                 className="inline-block w-3 h-0.5"
-                style={{ backgroundColor: ligaTeamColors[s.team] || "#5f7062" }}
+                style={{ backgroundColor: ligaTeamColors[s.team] || "#5c5c5c" }}
               />
               <span className="text-stone-600">{teamDisplayName(s.team)}</span>
             </span>
@@ -544,7 +544,7 @@ export function TitleRaceEvolution({
             {pt ? "Publicada na altura" : "Published at the time"}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#fcfbf5" stroke="#4f5f57" strokeWidth="1.5" /></svg>
+            <svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#ffffff" stroke="#4f5f57" strokeWidth="1.5" /></svg>
             {pt ? "Reconstituída depois" : "Reconstructed afterwards"}
           </span>
         </div>

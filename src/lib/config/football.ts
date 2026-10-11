@@ -161,8 +161,8 @@ export function teamPhoneName(team: string): string {
 export const OUTCOME_TONES = { home: '#434d48', draw: '#d6d8cc', away: '#8b9a8e' } as const;
 
 /** The page ground the team colours are drawn on (globals.css --color-paper). */
-const PAPER = '#f5f3ea';
-const INK = '#234c40';
+const PAPER = '#ffffff';
+const INK = '#141414';
 
 function hexToRgb(hex: string): [number, number, number] | null {
   const m = /^#?([a-f\d]{6})$/i.exec(hex.trim());
@@ -201,9 +201,9 @@ export function contrastRatio(a: string, b: string): number {
  * colour. For bars, swatches, lines and borders — numbers stay in ink.
  */
 export function teamColorOnPaper(team: string): string {
-  const base = ligaTeamColors[team] ?? liga2TeamColors[team] ?? '#5f7062';
+  const base = ligaTeamColors[team] ?? liga2TeamColors[team] ?? '#5c5c5c';
   const rgb = hexToRgb(base);
-  if (!rgb) return '#5f7062';
+  if (!rgb) return '#5c5c5c';
   let current: [number, number, number] = rgb;
   for (let i = 0; i < 40 && contrastRatio(rgbToHex(current), PAPER) < 3; i++) {
     current = [current[0] * 0.92, current[1] * 0.92, current[2] * 0.92];
@@ -224,7 +224,7 @@ function colourDistance(a: string, b: string): number {
 }
 
 /** Neutral line colours for a club whose own colour another line already uses (all ≥ 3:1 on paper). */
-const LINE_FALLBACKS = ['#434d48', '#8a5a2b', '#4d5b8c', '#7a4a6a', INK, '#5f7062'];
+const LINE_FALLBACKS = ['#434d48', '#8a5a2b', '#4d5b8c', '#7a4a6a', INK, '#5c5c5c'];
 
 /**
  * Line colours for several clubs on one chart: each club keeps its on-paper

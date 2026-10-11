@@ -49,7 +49,7 @@ export function VizShowcase({ pt }: { pt: boolean }) {
       <div className="grid min-w-0 grid-cols-1 gap-4">
         <DataCard title={pt ? 'Probabilidade de ser campeão' : 'Title probability'} badge={example} source={invented} updated={pt ? 'Jornada de exemplo' : 'Example matchday'}>
           <RankedBars rows={[
-            { label: 'Equipa A', value: 0.42, display: '42%', color: '#234c40' },
+            { label: 'Equipa A', value: 0.42, display: '42%', color: '#141414' },
             { label: 'Equipa B', value: 0.28, display: '28%', color: '#697fc5' },
             { label: 'Equipa C', value: 0.2, display: '20%', color: '#a27d27' },
             { label: 'Equipa D', value: 0.1, display: '10%', color: '#ba6b4f' },

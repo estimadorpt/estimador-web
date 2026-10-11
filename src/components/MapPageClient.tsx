@@ -62,8 +62,8 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
                             variant="outline" 
                             className="text-xs font-medium"
                             style={{ 
-                              backgroundColor: `${partyColors[party] || '#dadccf'}20`,
-                              borderColor: partyColors[party] || '#dadccf'
+                              backgroundColor: `${partyColors[party] || '#e2e2df'}20`,
+                              borderColor: partyColors[party] || '#e2e2df'
                             }}
                           >
                             {party}
@@ -77,7 +77,7 @@ export default function MapPageClient({ districtForecast }: MapPageClientProps) 
                             className="h-2 rounded-full transition-all duration-300"
                             style={{ 
                               width: `${percentage}%`,
-                              backgroundColor: partyColors[party] || '#dadccf'
+                              backgroundColor: partyColors[party] || '#e2e2df'
                             }}
                           />
                         </div>

@@ -73,7 +73,7 @@ export function EndPanel({ record, answer, choices, ruledOut, tier, errors, stat
     <section aria-labelledby="misteriosa-end" className="rounded-2xl border border-line bg-cream p-5 md:p-6">
       <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] md:gap-8">
         <div className="min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{t.wonKicker(record.cluesOpened, errors)}</p>
+          <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{t.wonKicker(record.cluesOpened, errors)}</p>
           {/* Focus lands here when a pick ends the game (MysteryGame), so the result is the next thing read. */}
           <h2 id="misteriosa-end" tabIndex={-1} className="mt-2 text-base font-bold text-stone-600 outline-none">{t.revealHeading}</h2>
           <p className="mt-1 font-display text-2xl font-extrabold leading-tight text-ink sm:text-3xl md:text-4xl">{answer.name}</p>

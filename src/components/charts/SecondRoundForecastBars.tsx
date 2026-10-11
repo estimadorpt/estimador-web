@@ -86,7 +86,7 @@ export function SecondRoundForecastBars({
                   backgroundColor: candidate.color,
                   top: '50%',
                   transform: 'translate(-50%, -50%)',
-                  border: '2px solid #fcfbf5',
+                  border: '2px solid #ffffff',
                 }}
               />
             </div>

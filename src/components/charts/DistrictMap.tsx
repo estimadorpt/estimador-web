@@ -119,15 +119,15 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
               role="group" aria-label={pt ? 'Previsão legislativa de 2025 por distrito e região' : '2025 parliamentary forecast by district and region'}>
               <defs>
                 <pattern id="district-close-lead" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                  <line x1="0" y1="0" x2="0" y2="6" stroke="#122f2c" strokeWidth="1.6" strokeOpacity="0.55" />
+                  <line x1="0" y1="0" x2="0" y2="6" stroke="#1f1f1f" strokeWidth="1.6" strokeOpacity="0.55" />
                 </pattern>
               </defs>
               {/* Inset frames and names: decoration, the list and the table name every region. */}
               <g aria-hidden="true">
                 {Object.entries(INSETS).map(([name, { frame: [x, y, w, h] }]) => (
                   <g key={name}>
-                    <rect x={x} y={y} width={w} height={h} rx={8} fill="none" stroke="#dadccf" strokeWidth={1} />
-                    <text x={x + 8} y={y + 20} fontSize={17} fontWeight={700} fill="#234c40">{name}</text>
+                    <rect x={x} y={y} width={w} height={h} rx={8} fill="none" stroke="#e2e2df" strokeWidth={1} />
+                    <text x={x + 8} y={y + 20} fontSize={17} fontWeight={700} fill="#141414">{name}</text>
                   </g>
                 ))}
               </g>
@@ -147,8 +147,8 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
                       if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(region); }
                     }}>
                     <title>{name}</title>
-                    {paths.map((d, i) => <path key={i} d={d} fill={partyColors[data?.winning_party ?? ''] ?? '#dadccf'}
-                      stroke={on ? '#16362e' : '#fcfbf5'} strokeWidth={on ? 2.5 : 0.8} />)}
+                    {paths.map((d, i) => <path key={i} d={d} fill={partyColors[data?.winning_party ?? ''] ?? '#e2e2df'}
+                      stroke={on ? '#000000' : '#ffffff'} strokeWidth={on ? 2.5 : 0.8} />)}
                     {closeNames.has(region) && paths.map((d, i) => <path key={`close-${i}`} d={d} fill="url(#district-close-lead)" pointerEvents="none" />)}
                   </g>
                 );
@@ -161,13 +161,13 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
             <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-ink" aria-label={pt ? 'Cores do mapa' : 'Map colours'}>
               {leaders.map(party => (
                 <li key={party} className="flex items-center gap-1.5">
-                  <span aria-hidden="true" className="inline-block size-3 rounded-sm" style={{ backgroundColor: partyColors[party] ?? '#dadccf' }} />
+                  <span aria-hidden="true" className="inline-block size-3 rounded-sm" style={{ backgroundColor: partyColors[party] ?? '#e2e2df' }} />
                   {partyNames[party as keyof typeof partyNames] ?? party} {pt ? 'à frente' : 'ahead'}
                 </li>
               ))}
               {close.length > 0 && (
                 <li className="flex items-center gap-1.5">
-                  <svg aria-hidden="true" width="12" height="12" className="rounded-sm"><rect width="12" height="12" fill="#e8e6dc" /><path d="M-2 4 L4 -2 M-2 10 L10 -2 M4 14 L14 4" stroke="#122f2c" strokeWidth="1.6" strokeOpacity="0.55" /></svg>
+                  <svg aria-hidden="true" width="12" height="12" className="rounded-sm"><rect width="12" height="12" fill="#e8e6dc" /><path d="M-2 4 L4 -2 M-2 10 L10 -2 M4 14 L14 4" stroke="#1f1f1f" strokeWidth="1.6" strokeOpacity="0.55" /></svg>
                   {pt ? 'Menos de 1 ponto entre os dois primeiros' : 'Under 1 point between the top two'}
                 </li>
               )}

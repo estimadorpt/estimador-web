@@ -1,3 +1,4 @@
+import type React from 'react';
 import { Link } from '@/i18n/routing';
 import { ligaTeamSlugs, teamColorOnPaper, teamDisplayName } from '@/lib/config/football';
 import { describePp, formatPercent, formatPp } from '@/lib/football-format';
@@ -17,8 +18,8 @@ export function TitleProbabilities({ teams, deltas, locale, compact = false }: {
       const slug = ligaTeamSlugs[team.team];
       const value = formatPercent(team.p_champion, locale);
       const [number, unit] = value.endsWith('%') ? [value.slice(0, -1), '%'] : [value, ''];
-      return <li key={team.team}>
-        <span className="football-team-label"><i aria-hidden="true" style={{ backgroundColor: teamColorOnPaper(team.team) }} />{teamDisplayName(team.team)}</span>
+      return <li key={team.team} style={{ '--team': teamColorOnPaper(team.team) } as React.CSSProperties}>
+        <span className="football-team-label">{teamDisplayName(team.team)}</span>
         <span className="football-probability">{number}<span>{unit}</span></span>
         {delta != null && Math.abs(delta) >= 1 && (
           <span className="football-change">

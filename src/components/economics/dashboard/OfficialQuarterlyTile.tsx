@@ -37,7 +37,7 @@ function isNum(v: number | null | undefined): v is number {
 // Combo member display: fixed order + i18n key + a muted editorial palette.
 // The raw model id is kept as the HTML `title` so the provenance stays visible.
 const COMBO_MEMBERS: Array<{ id: string; nameKey: string; color: string }> = [
-  { id: 'ar1', nameKey: 'comboAr1', color: '#7f9284' },
+  { id: 'ar1', nameKey: 'comboAr1', color: '#8a8a87' },
   { id: 'supply_side_bridge', nameKey: 'comboBridge', color: '#245c68' },
   { id: 'factor_dfm', nameKey: 'comboFactorDfm', color: '#427893' },
   { id: 'esi_momentum', nameKey: 'comboEsiMomentum', color: '#8a6a26' },
@@ -287,7 +287,7 @@ export async function OfficialQuarterlyTile({
             // Include any unexpected member keys so nothing is silently dropped.
             const extras = Object.keys(data.combo_weights!)
               .filter((k) => !COMBO_MEMBERS.some((m) => m.id === k))
-              .map((k) => ({ id: k, nameKey: '', color: '#5f7062' }));
+              .map((k) => ({ id: k, nameKey: '', color: '#5c5c5c' }));
             const all = [...members, ...extras];
             const total = all.reduce(
               (s, m) => s + (data.combo_weights?.[m.id] ?? 0),

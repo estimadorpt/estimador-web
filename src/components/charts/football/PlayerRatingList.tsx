@@ -148,7 +148,7 @@ export function PlayerRatingList({
         {visible.map((e) => {
           const isOpen = openKey === e.key;
           const slug = playerSlugs?.[e.player];
-          const chip = (e.team && ligaTeamColors[e.team]) || "#5f7062";
+          const chip = (e.team && ligaTeamColors[e.team]) || "#5c5c5c";
           const hasInterval = e.lo !== null && e.hi !== null;
           const move = showMovement ? rankMovement(e, goalsRankByPlayer) : null;
 

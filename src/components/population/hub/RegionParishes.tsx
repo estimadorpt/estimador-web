@@ -28,7 +28,7 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
   return (
     <div>
       <nav id="concelhos" aria-label={pt ? 'Concelhos' : 'Municipalities'} className="mb-6">
-        <h2 className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500">{pt ? 'Ir para o concelho' : 'Jump to a municipality'}</h2>
+        <h2 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-stone-500">{pt ? 'Ir para o concelho' : 'Jump to a municipality'}</h2>
         <ul className="flex flex-wrap gap-2">
           {municipalities.map(m => (
             <li key={m.code}>

@@ -10,8 +10,8 @@ import {
   loadLigaPlayers,
   loadUpcomingFixtures,
 } from "@/lib/utils/football-data-loader";
-import { CURRENT_LIGA_SEASON, teamDisplayName } from "@/lib/config/football";
-import { formatDateSpan, formatInteger, formatLongDate, formatPp } from "@/lib/football-format";
+import { CURRENT_LIGA_SEASON, teamDisplayName, teamWithArticle } from "@/lib/config/football";
+import { formatDateSpan, formatInteger, formatLongDate, formatPercent, formatPp } from "@/lib/football-format";
 import {
   forecastAsOf,
   forecastStatusLine,
@@ -174,6 +174,12 @@ export default async function LigaPage({
   const matchdayComplete = !prediction.matches_remaining?.length;
   const updatedDate = formatLongDate(prediction.timestamp, locale);
   const simsLabel = formatInteger(prediction.n_sims, locale);
+  // The headline states the finding: the favourite and its title chance.
+  const favourite = [...prediction.table].sort((a, b) => b.p_champion - a.p_champion)[0];
+  const favouriteName = teamWithArticle(favourite.team);
+  const headline = locale === "pt"
+    ? `${favouriteName.charAt(0).toUpperCase()}${favouriteName.slice(1)} tem ${formatPercent(favourite.p_champion, locale)} de hipóteses de ser campeão`
+    : `${teamDisplayName(favourite.team)} have a ${formatPercent(favourite.p_champion, locale)} chance of winning the title`;
 
   // A concise factual change beside the forecast date (diagnosis §5 "League
   // page" — "a concise factual change"): the club whose title probability
@@ -325,11 +331,10 @@ export default async function LigaPage({
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        illustration="football"
         compact
         icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
         eyebrow={`${t("football.title")} — ${t("football.season")} ${prediction.season}`}
-        title={t("football.subtitle")}
+        title={headline}
         lede={locale === "pt"
           ? `Quem fica com o título, quem acaba nos três primeiros e quem desce: as hipóteses de cada clube em ${simsLabel} simulações do resto da época, atualizadas depois de cada jornada.`
           : `Who takes the title, who finishes in the top three and who goes down: each club's chances across ${simsLabel} simulations of the rest of the season, updated after every matchday.`}

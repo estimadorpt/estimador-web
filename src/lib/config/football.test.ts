@@ -8,7 +8,7 @@ import {
   teamPhoneName,
 } from './football';
 
-const PAPER = '#f5f3ea';
+const PAPER = '#ffffff';
 
 describe('team colours on paper', () => {
   it('reaches 3:1 on the page ground for every club', () => {

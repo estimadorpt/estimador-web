@@ -15,28 +15,28 @@
    Party and team colours are hex constants and are deliberately untouched.
    --------------------------------------------------------------------------- */
 @theme {
-  --font-sans: 'Manrope', system-ui, sans-serif;
-  --font-display: 'Manrope', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
   /* The reading face: only inside the body of long-form pieces. */
-  /* Self-hosted (src/app/fonts.ts): Manrope by family name from @fontsource,
+  /* Self-hosted (src/app/fonts.ts): Inter by family name from @fontsource,
      Newsreader through the variable next/font sets on <html>. */
   --font-serif: var(--font-newsreader), Georgia, 'Times New Roman', serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 
   /* Surfaces and ink */
-  --color-paper: #f5f3ea;       /* page ground */
-  --color-cream: #fcfbf5;       /* raised panels, cards, table rows */
-  --color-parchment: #ece9dc;   /* sunken areas, hover states */
-  --color-line: #dadccf;        /* hairline borders and grid gaps */
-  --color-moss: #e7ecdc;        /* green-tinted highlight surface */
-  --color-ink: #234c40;         /* text and primary actions */
-  --color-ink-dark: #16362e;
-  --color-ink-muted: #5f7062;   /* secondary text, 4.5:1 on paper */
-  --color-forest: #122f2c;      /* the atlas world; dark surfaces */
-  --color-forest-deep: #0d2927;
+  --color-paper: #ffffff;       /* page ground */
+  --color-cream: #ffffff;       /* raised panels, cards, table rows */
+  --color-parchment: #f3f3f1;   /* sunken areas, hover states */
+  --color-line: #e2e2df;        /* hairline borders and grid gaps */
+  --color-moss: #f1f1ef;        /* green-tinted highlight surface */
+  --color-ink: #141414;         /* text and primary actions */
+  --color-ink-dark: #000000;
+  --color-ink-muted: #5c5c5c;   /* secondary text, 4.5:1 on paper */
+  --color-forest: #1f1f1f;      /* the atlas world; dark surfaces */
+  --color-forest-deep: #141414;
 
   /* Accents */
-  --color-gold: #c49536;
+  --color-gold: #b7791f;
   --color-mustard: #e5b958;
   --color-mint: #72c8b4;
   --color-periwinkle: #a9b9ed;
@@ -46,13 +46,13 @@
   --color-mustard-soft: #e3c994;
   --color-coral-soft: #dcafa1;
   --color-periwinkle-soft: #bdc7e7;
-  --color-terracotta: #a3543a;
+  --color-terracotta: #b91c1c;
   --color-rust: #bd714e;
   /* #377455, not #4e8056 (4.16:1 on paper): tree, positive, success and
      green-600 are used as text, so they share emerald-600's retuned value
      (A11Y2-08; src/components/viz/palette-tokens.test.ts). */
-  --color-tree: #377455;
-  --color-teal: #245c68;
+  --color-tree: #15803d;
+  --color-teal: #0f766e;
   /* Chart series, validated on cream (light) and on forest (dark): fixed
      order, never cycled, never on text; a fifth series folds into "other".
      Mirrors src/components/viz/theme.ts. */
@@ -64,110 +64,110 @@
   --color-series-dark-2: #9f7a23;
   --color-series-dark-3: #677cc2;
   --color-series-dark-4: #b7684c;
-  --color-deemphasis: #c3c8bb;   /* context series and "other" */
+  --color-deemphasis: #c8c8c4;   /* context series and "other" */
 
   /* Semantic aliases */
-  --color-positive: #377455;
-  --color-negative: #a3543a;
+  --color-positive: #15803d;
+  --color-negative: #b91c1c;
 
   /* Compatibility with the pre-atlas brand names. */
-  --color-navy: #234c40;
-  --color-navy-light: #5f7062;
-  --color-navy-dark: #16362e;
-  --color-brand-teal: #245c68;
+  --color-navy: #141414;
+  --color-navy-light: #5c5c5c;
+  --color-navy-dark: #000000;
+  --color-brand-teal: #0f766e;
   --color-brand-gold: #c49536;
 
   /* Neutrals: a warm green-grey ramp anchored on cream, the hairline and ink. */
-  --color-stone-50: #fcfbf5;
-  --color-stone-100: #f5f4ed;
-  --color-stone-200: #dadccf;
-  --color-stone-300: #cbccbb;
-  --color-stone-400: #607265;   /* 4.6:1 on paper; supporting text must read as live */
-  --color-stone-500: #546457;
-  --color-stone-600: #485750;
-  --color-stone-700: #434d48;
-  --color-stone-800: #234c40;
-  --color-stone-900: #16362e;
-  --color-stone-950: #0d2723;
+  --color-stone-50: #fafafa;
+  --color-stone-100: #f4f4f3;
+  --color-stone-200: #e2e2df;
+  --color-stone-300: #cfcfcb;
+  --color-stone-400: #6b6b6b;   /* 4.6:1 on paper; supporting text must read as live */
+  --color-stone-500: #5c5c5c;
+  --color-stone-600: #4a4a4a;
+  --color-stone-700: #383838;
+  --color-stone-800: #242424;
+  --color-stone-900: #141414;
+  --color-stone-950: #0a0a0a;
 
   /* Warnings and provisional flags: gold instead of stock amber. */
-  --color-amber-50: #fffaef;
-  --color-amber-100: #fff1d7;
-  --color-amber-200: #fde2b3;
-  --color-amber-300: #f9d187;
-  --color-amber-400: #e5b958;
-  --color-amber-500: #c49536;
-  --color-amber-600: #a67d2c;
-  --color-amber-700: #8a6a26;
-  --color-amber-800: #6e5520;
-  --color-amber-900: #553f1a;
-  --color-amber-950: #2f2410;
-  --color-yellow-50: #fffaef;
-  --color-yellow-100: #fff1d7;
-  --color-yellow-200: #fde2b3;
-  --color-yellow-300: #f9d187;
-  --color-yellow-400: #e5b958;
-  --color-yellow-500: #c49536;
-  --color-yellow-600: #a67d2c;
-  --color-yellow-700: #8a6a26;
-  --color-yellow-800: #6e5520;
-  --color-yellow-900: #553f1a;
-  --color-yellow-950: #2f2410;
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #b45309;
+  --color-amber-700: #92400e;
+  --color-amber-800: #78350f;
+  --color-amber-900: #5c2a0c;
+  --color-amber-950: #3a1a06;
+  --color-yellow-50: #fffbeb;
+  --color-yellow-100: #fef3c7;
+  --color-yellow-200: #fde68a;
+  --color-yellow-300: #fcd34d;
+  --color-yellow-400: #fbbf24;
+  --color-yellow-500: #f59e0b;
+  --color-yellow-600: #b45309;
+  --color-yellow-700: #92400e;
+  --color-yellow-800: #78350f;
+  --color-yellow-900: #5c2a0c;
+  --color-yellow-950: #3a1a06;
 
   /* Positive movement and "live" badges. */
-  --color-emerald-50: #f1fbf5;
-  --color-emerald-100: #def5e7;
-  --color-emerald-200: #c1ecd1;
-  --color-emerald-300: #9ddcb8;
-  --color-emerald-400: #74c899;
-  --color-emerald-500: #5eb184;
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
   /* 600 is a text colour too (deltas, "live" labels): 5.0:1 on paper, 5.3:1
      on cream and on its own 50 tint. Keep it above 4.5:1 when retuning. */
-  --color-emerald-600: #377455;
-  --color-emerald-700: #3a6b50;
-  --color-emerald-800: #345343;
-  --color-emerald-900: #2c4238;
-  --color-emerald-950: #1a2a22;
-  --color-green-50: #f2fbf4;
-  --color-green-100: #e0f5e4;
-  --color-green-200: #c4ebcd;
-  --color-green-300: #a1ddb0;
-  --color-green-400: #7cc691;
-  --color-green-500: #67b07c;
-  --color-green-600: #377455;
-  --color-green-700: #426b4a;
-  --color-green-800: #3a553f;
-  --color-green-900: #304434;
-  --color-green-950: #1b2a1f;
+  --color-emerald-600: #047857;
+  --color-emerald-700: #065f46;
+  --color-emerald-800: #064e3b;
+  --color-emerald-900: #053d2e;
+  --color-emerald-950: #022c22;
+  --color-green-50: #f0fdf4;
+  --color-green-100: #dcfce7;
+  --color-green-200: #bbf7d0;
+  --color-green-300: #86efac;
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+  --color-green-600: #15803d;
+  --color-green-700: #166534;
+  --color-green-800: #14532d;
+  --color-green-900: #0f3f22;
+  --color-green-950: #052e16;
 
   /* Negative movement and errors: terracotta instead of stock red. 500, 600
      and 700 are used as text (losses, "<1%" relegation cells, deltas), so each
      clears 4.5:1 on paper, cream and the 50/100 tints; fills inherit the same
      steps. src/lib/palette-contrast.test.ts holds them to it. */
-  --color-red-50: #fff2ee;
-  --color-red-100: #ffe2d9;
-  --color-red-200: #ffcab9;
-  --color-red-300: #e29a83;
-  --color-red-400: #d4886a;
-  --color-red-500: #9f5b3b;
-  --color-red-600: #955441;
-  --color-red-700: #8c4832;
-  --color-red-800: #7d4230;
-  --color-red-900: #5f3526;
-  --color-red-950: #3a2017;
+  --color-red-50: #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-red-300: #fca5a5;
+  --color-red-400: #f87171;
+  --color-red-500: #cc2222;
+  --color-red-600: #c81e1e;
+  --color-red-700: #b91c1c;
+  --color-red-800: #991b1b;
+  --color-red-900: #7f1d1d;
+  --color-red-950: #450a0a;
 
   /* Informational tints: the atlas's deep teal. */
-  --color-blue-50: #eef7fb;
-  --color-blue-100: #d9ecf7;
-  --color-blue-200: #badef2;
-  --color-blue-300: #92c9e7;
-  --color-blue-400: #65aace;
-  --color-blue-500: #4a90b3;
-  --color-blue-600: #427893;
-  --color-blue-700: #245c68;
-  --color-blue-800: #1f4b55;
-  --color-blue-900: #1a3b43;
-  --color-blue-950: #10262b;
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-300: #93c5fd;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-800: #1e40af;
+  --color-blue-900: #1e3a8a;
+  --color-blue-950: #172554;
 }
 
 @theme inline {
@@ -205,43 +205,45 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: calc(var(--radius) + 2px);
 }
 
 :root {
   --chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  --radius: 0.625rem;
-  --background: #f5f3ea;
-  --foreground: #234c40;
-  --card: #fcfbf5;
-  --card-foreground: #234c40;
-  --popover: #fcfbf5;
-  --popover-foreground: #234c40;
-  --primary: #234c40;
-  --primary-foreground: #f5f3ea;
-  --secondary: #ece9dc;
-  --secondary-foreground: #234c40;
-  --muted: #ece9dc;
-  --muted-foreground: #5f7062;
-  --accent: #e7ecdc;
-  --accent-foreground: #234c40;
-  --destructive: #a3543a;
-  --border: #dadccf;
-  --input: #dadccf;
-  --ring: #234c40;
+  --radius: 0.25rem;
+  --background: #ffffff;
+  --foreground: #141414;
+  --card: #ffffff;
+  --card-foreground: #141414;
+  --popover: #ffffff;
+  --popover-foreground: #141414;
+  --primary: #141414;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f3f1;
+  --secondary-foreground: #141414;
+  --muted: #f3f3f1;
+  --muted-foreground: #5c5c5c;
+  --accent: #f1f1ef;
+  --accent-foreground: #141414;
+  --destructive: #b91c1c;
+  --border: #e2e2df;
+  --input: #cfcfcb;
+  --ring: #141414;
   --chart-1: #e5b958;
   --chart-2: #72c8b4;
   --chart-3: #a9b9ed;
   --chart-4: #e29a83;
   --chart-5: #377455;
-  --sidebar: #fcfbf5;
-  --sidebar-foreground: #234c40;
-  --sidebar-primary: #234c40;
-  --sidebar-primary-foreground: #f5f3ea;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #141414;
+  --sidebar-primary: #141414;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #e7ecdc;
-  --sidebar-accent-foreground: #234c40;
-  --sidebar-border: #dadccf;
-  --sidebar-ring: #234c40;
+  --sidebar-accent-foreground: #141414;
+  --sidebar-border: #e2e2df;
+  --sidebar-ring: #141414;
 
   /* Political party colours (Portugal). Semantic; not part of the palette. */
   --ps-color: #e91e63;
@@ -254,10 +256,10 @@
   --pan-color: #689f38;
 
   /* Legacy accent names still referenced by a few election components. */
-  --green-dark: #234c40;
+  --green-dark: #141414;
   --green-medium: #377455;
   --green-light: #5eb184;
-  --green-pale: #f5f3ea;
+  --green-pale: #ffffff;
 
   /* Semantic colours */
   --success: #377455;
@@ -356,7 +358,7 @@
     line-height: 1.6;
   }
 
-  /* One family. Titles are Manrope at heavy weights; uppercase kicker
+  /* One family. Titles are Inter at bold weights; uppercase kicker
      headings marked up as h2/h3 keep the label weight. */
   h1, h2, h3 {
     font-family: var(--font-display);
@@ -364,7 +366,7 @@
     letter-spacing: -0.03em;
   }
 
-  h1 { font-weight: 800; }
+  h1 { font-weight: 700; }
   h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
 
   :is(h1, h2, h3).uppercase {
@@ -512,15 +514,15 @@
   .panel {
     background: var(--color-cream);
     border: 1px solid var(--color-line);
-    border-radius: 16px;
+    border-radius: var(--radius);
   }
 
   /* Soft fields: one leading decorative colour per page, mixed towards paper so
      text stays pine and the field never competes with data. */
-  .field-mint { background: color-mix(in oklab, var(--color-mint-soft) 42%, var(--color-paper)); }
-  .field-periwinkle { background: color-mix(in oklab, var(--color-periwinkle-soft) 48%, var(--color-paper)); }
-  .field-coral { background: color-mix(in oklab, var(--color-coral-soft) 42%, var(--color-paper)); }
-  .field-mustard { background: color-mix(in oklab, var(--color-mustard-soft) 42%, var(--color-paper)); }
+  .field-mint { background: var(--color-paper); }
+  .field-periwinkle { background: var(--color-paper); }
+  .field-coral { background: var(--color-paper); }
+  .field-mustard { background: var(--color-paper); }
 
   /* Party colour classes */
   .text-ps { color: var(--ps-color); }
@@ -579,16 +581,17 @@
 .football-page .illustrated-hero { grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; }
 .football-page .illustrated-hero > .section-illustration--football { width: 320px; border-radius: 16px 16px 4px 4px; }
 .football-probabilities { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 16px; list-style: none; padding: 0; }
-.football-probabilities > li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 0 24px; border-left: 1px solid var(--color-line); }
-.football-probabilities > li:first-child { padding-left: 0; border-left: 0; }
+.football-probabilities { gap: 16px; }
+.football-probabilities > li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 2px 16px; border-left: 4px solid var(--team, var(--color-line)); }
 .football-team-label { display: flex; align-items: center; gap: 8px; width: 100%; font-size: 13px; font-weight: 700; color: var(--color-ink); }
 .football-team-label i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.football-probability { font-size: 44px; font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.football-probability { font-size: 52px; font-weight: 900; letter-spacing: -.045em; font-variant-numeric: tabular-nums; line-height: 1.2; }
 .football-probability > span { font-size: .48em; margin-left: 2px; color: var(--color-ink-muted); }
 .football-change { font-size: 12px; color: var(--color-ink-muted); font-variant-numeric: tabular-nums; }
 .football-team-link { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; font-size: 12px; color: var(--color-ink); }
 .football-team-link:hover { text-decoration: underline; }
-.football-probabilities--compact > li { padding: 0 10px; gap: 4px; }
+.football-probabilities--compact { gap: 10px; }
+.football-probabilities--compact > li { padding: 0 10px; gap: 4px; border-left-width: 3px; }
 .football-probabilities--compact .football-team-label { font-size: 12px; gap: 5px; }
 .football-probabilities--compact .football-probability { font-size: 30px; }
 .football-probabilities--compact .football-change { width: 100%; font-size: 11px; }
@@ -598,7 +601,8 @@
 @media(max-width:760px) {
   .football-page .illustrated-hero { grid-template-columns: minmax(0,1fr); gap: 20px; }
   .football-page .illustrated-hero > .section-illustration--football { width: 100%; }
-  .football-probabilities > li { padding: 0 10px; gap: 3px; }
+  .football-probabilities { gap: 8px; }
+  .football-probabilities > li { padding: 0 8px; gap: 3px; border-left-width: 3px; }
   .football-probability { font-size: 32px; }
   .football-team-label { font-size: 12px; gap: 5px; }
   .football-change { width: 100%; }

@@ -5,7 +5,6 @@ import { HomeEconomyFreshness } from '@/components/economics/HomeEconomyFreshnes
 import { fmtDate, fmtProbPct, fmtSignedPctValue } from '@/lib/utils/economy-format';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyState } from '@/lib/config/economy-status';
-import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import { HomePanel, Kicker, Status } from './HomePanel';
 
 /**
@@ -25,7 +24,7 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
   const live = state === 'live' && economy && typeof pulse === 'number' && typeof recession === 'number';
   const preparing = state === 'preparing';
   return (
-    <HomePanel labelledBy="home-economy-title" className="home-media home-media--economy">
+    <HomePanel labelledBy="home-economy-title">
       <div className="min-w-0 p-5 md:p-6">
         <div>
           <Kicker pill={live ? undefined : tSections(preparing ? 'preparingSection' : 'pausedSection')}>{t('economyKicker')}</Kicker>
@@ -52,7 +51,6 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
           </p>
         )}
       </div>
-      <SectionIllustration scene="economy" sizes="720px" className="home-media__art home-media__art--economy" />
     </HomePanel>
   );
 }

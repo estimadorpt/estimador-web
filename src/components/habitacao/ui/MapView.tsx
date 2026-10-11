@@ -127,9 +127,9 @@ function layerSpec(layer: Layer, s: GameState, lang: 'pt' | 'en'): LayerSpec | n
       const closed = (c: string) => r.alFrozen || r.alClosed.includes(c);
       return {
         value: (c) => (closed(c) ? 1 : 0),
-        fill: (c) => (closed(c) ? '#e5b958' : '#fcfbf5'),
+        fill: (c) => (closed(c) ? '#e5b958' : '#ffffff'),
         fmt: (c) => (closed(c) ? (lang === 'pt' ? 'novos registos suspensos' : 'new registrations suspended') : lang === 'pt' ? 'aberto a novos registos' : 'open to new registrations'),
-        legend: { title: { pt: 'Novos registos de alojamento local', en: 'New short-let registrations' }, keys: [{ color: '#fcfbf5', label: { pt: 'Abertos', en: 'Open' } }, { color: '#e5b958', label: { pt: 'Suspensos', en: 'Suspended' } }] },
+        legend: { title: { pt: 'Novos registos de alojamento local', en: 'New short-let registrations' }, keys: [{ color: '#ffffff', label: { pt: 'Abertos', en: 'Open' } }, { color: '#e5b958', label: { pt: 'Suspensos', en: 'Suspended' } }] },
       };
     }
     case 'viz':
@@ -155,12 +155,12 @@ function layerSpec(layer: Layer, s: GameState, lang: 'pt' | 'en'): LayerSpec | n
 type SiteView = { site: Site; p?: Project; state: ReturnType<typeof siteState> };
 
 const MARK = {
-  open: { fill: '#fcfbf5', stroke: '#234c40' },
+  open: { fill: '#ffffff', stroke: '#141414' },
   review: { fill: '#e5b958', stroke: '#8a6a26' },
-  fin: { fill: '#fcfbf5', stroke: '#a3543a' },
+  fin: { fill: '#ffffff', stroke: '#a3543a' },
   obra: { fill: '#a9b9ed', stroke: '#2f4277' },
-  done: { fill: '#377455', stroke: '#234c40' },
-  dead: { fill: '#dadccf', stroke: '#7f9284' },
+  done: { fill: '#377455', stroke: '#141414' },
+  dead: { fill: '#e2e2df', stroke: '#8a8a87' },
 };
 
 export function MapView({ s, selected, onSelect, layer, names }: {
@@ -241,7 +241,7 @@ export function MapView({ s, selected, onSelect, layer, names }: {
         onPointerUp={onUp}
         onPointerLeave={() => { drag.current = null; setHover(null); setHoverFr(null); }}
       >
-        <rect x={0} y={0} width={W} height={H} fill="#ece9dc" />
+        <rect x={0} y={0} width={W} height={H} fill="#f3f3f1" />
         <g transform={`translate(${view.x} ${view.y}) scale(${k})`}>
           <path d={TEJO_D} fill="#d7def3" />
           {PATHS.map(({ code, d }) => (
@@ -249,7 +249,7 @@ export function MapView({ s, selected, onSelect, layer, names }: {
               key={code}
               d={d}
               className={`fr${hoverFr === code ? ' hover' : ''}`}
-              fill={spec ? spec.fill(code) : FREGUESIAS[code].centro ? '#f7f4e8' : '#fcfbf5'}
+              fill={spec ? spec.fill(code) : FREGUESIAS[code].centro ? '#f7f4e8' : '#ffffff'}
               onPointerMove={(e) => {
                 if (drag.current?.moved) return;
                 setHoverFr(code);
@@ -295,13 +295,13 @@ export function MapView({ s, selected, onSelect, layer, names }: {
                   <g>
                     <rect x={x - r * 0.9} y={y - tall} width={r * 1.8} height={tall} fill="none" stroke={m.stroke} strokeWidth={1 / k} strokeDasharray={kind === 'obra' ? `${3 / k} ${2 / k}` : undefined} />
                     <rect x={x - r * 0.9} y={y - tall * progress} width={r * 1.8} height={tall * progress} fill={m.fill} opacity={0.9} />
-                    <rect x={x - r * 0.9} y={y - tall * progress} width={r * 1.8} height={1.6 / k} fill={kind === 'done' && p && p.affUnits / p.units >= 0.25 ? '#e5b958' : '#fcfbf5'} />
+                    <rect x={x - r * 0.9} y={y - tall * progress} width={r * 1.8} height={1.6 / k} fill={kind === 'done' && p && p.affUnits / p.units >= 0.25 ? '#e5b958' : '#ffffff'} />
                   </g>
                 )}
                 {alert && <circle cx={x} cy={y} r={r + 5 / k} fill="none" stroke="#a3543a" strokeWidth={2.5 / k} />}
-                <rect className="mark" x={x - r} y={y - r} width={r * 2} height={r * 2} rx={r * 0.35} fill={m.fill} stroke={sel ? '#16362e' : m.stroke} strokeWidth={(sel ? 3 : 1.5) / k} strokeDasharray={kind === 'fin' ? `${3 / k} ${2 / k}` : undefined} />
-                {kind === 'open' && <path d={`M${x - r * 0.5},${y}H${x + r * 0.5}M${x},${y - r * 0.5}V${y + r * 0.5}`} stroke="#234c40" strokeWidth={1.5 / k} />}
-                {kind === 'dead' && <path d={`M${x - r * 0.5},${y - r * 0.5}L${x + r * 0.5},${y + r * 0.5}M${x + r * 0.5},${y - r * 0.5}L${x - r * 0.5},${y + r * 0.5}`} stroke="#7f9284" strokeWidth={1.5 / k} />}
+                <rect className="mark" x={x - r} y={y - r} width={r * 2} height={r * 2} rx={r * 0.35} fill={m.fill} stroke={sel ? '#000000' : m.stroke} strokeWidth={(sel ? 3 : 1.5) / k} strokeDasharray={kind === 'fin' ? `${3 / k} ${2 / k}` : undefined} />
+                {kind === 'open' && <path d={`M${x - r * 0.5},${y}H${x + r * 0.5}M${x},${y - r * 0.5}V${y + r * 0.5}`} stroke="#141414" strokeWidth={1.5 / k} />}
+                {kind === 'dead' && <path d={`M${x - r * 0.5},${y - r * 0.5}L${x + r * 0.5},${y + r * 0.5}M${x + r * 0.5},${y - r * 0.5}L${x - r * 0.5},${y + r * 0.5}`} stroke="#8a8a87" strokeWidth={1.5 / k} />}
               </g>
             );
           })}

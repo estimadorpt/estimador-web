@@ -3,7 +3,6 @@ import { getTranslations } from 'next-intl/server';
 import { Action } from '@/components/brand/Action';
 import { buildClubOutlooks } from '@/components/football/club-outlook';
 import { loadGameFixtures } from '@/components/football/load-game-fixtures';
-import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import type { TeamDelta } from '@/types/football';
 import { HomePanel, Kicker } from './HomePanel';
 import { FootballClubPicker } from './FootballClubPicker';
@@ -11,6 +10,8 @@ import { TitleProbabilities } from '@/components/football/TitleProbabilities';
 import { forecastStatusLine, forecastStatusLinePlayed, roundPlayedAt } from '@/lib/football-status';
 import { ClockSwitch } from '@/components/football/ClockSwitch';
 import { splitForecastRound } from './football-status-pill';
+import { teamDisplayName, teamWithArticle } from '@/lib/config/football';
+import { formatPercent } from '@/lib/football-format';
 
 export interface FootballSnapshot {
   matchday: number;
@@ -88,13 +89,22 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
       }
     : undefined;
 
+  // The heading states the finding when there is one: the favourite's title chance.
+  const favourite = snapshot?.top3.length ? [...snapshot.top3].sort((a, b) => b.p_champion - a.p_champion)[0] : null;
+  const favouriteName = favourite ? teamWithArticle(favourite.team) : '';
+  const heading = favourite
+    ? locale === 'pt'
+      ? `${favouriteName.charAt(0).toUpperCase()}${favouriteName.slice(1)} tem ${formatPercent(favourite.p_champion, locale)} de hipóteses de ser campeão`
+      : `${teamDisplayName(favourite.team)} have a ${formatPercent(favourite.p_champion, locale)} chance of the title`
+    : t('footballTitle');
+
   const copy = (
     <>
       <div>
         <div className="min-w-0">
           <Kicker pill={pill}>{t('footballKicker')}</Kicker>
           <h2 id="home-football-title" className={`mt-1 ${rail ? 'text-xl md:text-[1.5rem] md:leading-[1.15]' : 'text-lg md:text-[1.35rem] md:leading-[1.2]'}`}>
-            {t('footballTitle')}
+            {heading}
           </h2>
           {snapshot ? (
             <p className="mt-1 text-[13px] font-semibold text-stone-600">{statusLine}</p>
@@ -131,14 +141,12 @@ export async function FootballPanel({ locale, variant, snapshot, deltas }: { loc
     return (
       <HomePanel labelledBy="home-football-title" className="flex flex-col">
         <div className="p-4 md:p-5">{copy}</div>
-        <SectionIllustration scene="football" sizes="(min-width: 1100px) 32vw, 100vw" className="home-band home-band--football" />
       </HomePanel>
     );
   }
   return (
     <HomePanel labelledBy="home-football-title" className="flex flex-col">
       <div className="min-w-0 p-5 md:p-6">{copy}</div>
-      <SectionIllustration scene="football" sizes="(min-width: 900px) 50vw, 100vw" className="home-band home-band--football" />
     </HomePanel>
   );
 }

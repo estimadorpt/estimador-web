@@ -179,7 +179,7 @@ export function PlayerProfile({
     </>
   );
 
-  const color = ligaTeamColors[player.team] ?? "#5f7062";
+  const color = ligaTeamColors[player.team] ?? "#5c5c5c";
   const teamSlug = ligaTeamSlugs[player.team];
   const posLabel =
     (pt ? positionCodePt[player.position] : positionCodeEn[player.position]) ??
@@ -483,7 +483,7 @@ export function PlayerProfile({
             <div className="relative h-10">
               <div
                 className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-6"
-                style={{ backgroundColor: "#fcfbf5" }}
+                style={{ backgroundColor: "#ffffff" }}
               />
               {pr.peers.map((p, i) =>
                 p.value !== null && p.key !== prEntry.key ? (
@@ -694,7 +694,7 @@ export function PlayerProfile({
           <div className="relative h-10">
             <div
               className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-6"
-              style={{ backgroundColor: "#fcfbf5" }}
+              style={{ backgroundColor: "#ffffff" }}
             />
             {ranked.map(p =>
               p.sar !== null && p.slug !== player.slug ? (

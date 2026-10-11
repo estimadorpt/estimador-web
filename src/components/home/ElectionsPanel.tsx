@@ -6,7 +6,6 @@ import { PARLIAMENTARY_2025_FORECAST_CUTOFF, PRESIDENTIAL_2026_SECOND_ROUND_DATE
 import { credibleIntervalLabel, formatElectionLongDate, formatElectionPercent } from '@/lib/election-display';
 import { loadSecondRoundData } from '@/lib/utils/data-loader';
 import type { ElectionConfig } from '@/types';
-import { SectionIllustration } from '@/components/brand/SectionIllustration';
 import { HomePanel, Kicker } from './HomePanel';
 
 /** What the lead needs from a configured election's published data. */
@@ -58,7 +57,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
       updatedAt = PARLIAMENTARY_2025_FORECAST_CUTOFF;
     }
     return (
-      <HomePanel labelledBy="home-elections-title" className="relative min-[1100px]:pr-[45%]">
+      <HomePanel labelledBy="home-elections-title" className="relative">
         <div className="min-w-0 px-5 pt-5 md:px-7 md:pt-6">
           <Kicker pill={past(election) ? t('electionsArchived') : t('electionsForecast')}>{t('electionsKicker')}</Kicker>
           <h2 id="home-elections-title" className="mt-3 max-w-xl text-[2rem] leading-[1.06] md:text-[2.4rem]">{electionName(election)}</h2>
@@ -66,7 +65,6 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
             {longDate(election.date)}{updatedAt ? ` · ${t('electionsForecastAsOf', { date: longDate(updatedAt) })}` : ''}
           </p>
         </div>
-        <SectionIllustration scene="elections" className="mx-5 mt-5 md:mx-7 min-[1100px]:absolute min-[1100px]:right-0 min-[1100px]:top-8 min-[1100px]:w-[40%]" />
         <div className="min-w-0 px-5 pb-5 pt-4 md:px-7 md:pb-6">
           {leadLine && (
             <>
@@ -103,7 +101,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
   const questionLine = (e: ElectionConfig) => e.type === 'presidential' ? t('electionsQuestionRunoff') : t('electionsQuestionSeats');
 
   return (
-    <HomePanel labelledBy="home-elections-title" className="home-media home-media--elections">
+    <HomePanel labelledBy="home-elections-title">
       <div className="min-w-0 p-5 md:p-6">
         <div>
           <Kicker pill={tSections('archiveSection')}>{t('electionsKicker')}</Kicker>
@@ -131,7 +129,6 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
         </ul>
         <div className="mt-3"><Action href="/eleicoes/arquivo" locale={locale} variant="text" arrow>{t('electionsArchiveGuide')}</Action></div>
       </div>
-      <SectionIllustration scene="elections" sizes="720px" className="home-media__art home-media__art--elections" />
     </HomePanel>
   );
 }

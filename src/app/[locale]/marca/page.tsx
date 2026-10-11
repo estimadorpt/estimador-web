@@ -141,7 +141,7 @@ function Section({ id, kicker, title, lede, children }: { id: string; kicker: st
   return (
     <section id={id} className="border-b border-line py-12 last:border-b-0 md:py-16">
       <div className="mx-auto w-full max-w-7xl px-4"><div className="max-w-5xl">
-        <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{kicker}</p>
+        <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-stone-500">{kicker}</p>
         <h2 className="text-2xl md:text-3xl">{title}</h2>
         {lede && <p className="mt-3 max-w-2xl text-base leading-relaxed text-stone-600">{lede}</p>}
         <div className="mt-8">{children}</div>
@@ -266,7 +266,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
             about the Manrope column's height and neither column ends in a blank band. */}
         <div className="grid divide-y divide-line rounded-xl border border-line bg-cream md:grid-cols-[1.4fr_1fr] md:divide-x md:divide-y-0 lg:grid-cols-[2fr_1fr]">
           <div className="p-6 md:p-8">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">Manrope</p>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">Manrope</p>
             <p lang="pt" className="mt-4 text-4xl font-extrabold tracking-[-0.03em] text-ink md:text-5xl">Portugal, à escala humana.</p>
             <p lang="pt" className="mt-3 text-2xl font-bold tracking-[-0.02em] text-ink">Classificação prevista</p>
             <p lang="pt" className="mt-3 max-w-md text-base leading-relaxed text-ink">Classificação prevista com base em 50 000 simulações. Pontos médios e probabilidades de cada resultado.</p>
@@ -275,7 +275,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
             <p className="mt-4 text-xs text-stone-500">{pt ? 'Títulos 800, subtítulos 700, texto 400 e 500, etiquetas 700 em versaletes, números 800 com algarismos tabulares.' : 'Titles 800, subtitles 700, text 400 and 500, labels 700 in small caps, numbers 800 with tabular figures.'}</p>
           </div>
           <div className="p-6 md:p-8">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">Newsreader</p>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">Newsreader</p>
             <div lang="pt" className="article-body mt-4">
               <p>O estimador.pt utiliza modelos estatísticos Bayesianos para prever eleições portuguesas. A nossa abordagem é fundamentalmente probabilística: em vez de prever um único resultado, estimamos distribuições de probabilidade.</p>
             </div>
@@ -381,7 +381,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
       <Section id="componentes" kicker="07" title={pt ? 'Os componentes' : 'Components'} lede={pt ? 'Três níveis de expressão: as entradas de secção têm a sua pintura; páginas de dados, painéis e ferramentas ficam contidos, com um campo de cor compacto; referência, metodologia e textos editoriais ficam sobre papel liso (a tabela de cabeçalhos está em 05.1). As peças partilhadas são poucas e iguais em todo o lado.' : 'Three levels of expression: section entrances carry their painting; data pages, dashboards and tools stay restrained, with a compact tinted field; reference, methodology and editorial pieces sit on plain paper (the header table is in 05.1). The shared pieces are few and the same everywhere.'}>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-line bg-cream p-6">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Ações' : 'Actions'}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{pt ? 'Ações' : 'Actions'}</p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Action href="/populacao" locale={locale} arrow>{pt ? 'Explorar' : 'Explore'}</Action>
               <Action href="/economia" locale={locale} variant="secondary" arrow>{pt ? 'Comparar' : 'Compare'}</Action>
@@ -391,7 +391,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
             <p className="mt-4 text-xs leading-relaxed text-stone-500">{pt ? 'Pinho para a ação principal, uma por vista; creme com contorno para a secundária; tinta pervinca para entradas suaves; texto em tinta, sempre sublinhado. 48 px de altura, cantos de 10 px, seta só quando a ação leva a algum lado. O foco de teclado é um anel duplo, papel por dentro e pinho por fora, igual em todos os elementos.' : 'Pine for the main action, one per view; bordered cream for the secondary; periwinkle tint for soft entrances; ink text, always underlined. 48px tall, 10px corners, an arrow only when the action leads somewhere. Keyboard focus is a double ring, paper inside and pine outside, the same on every element.'}</p>
           </div>
           <div className="rounded-2xl border border-line bg-cream p-6">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Campos e seletores' : 'Fields and selectors'}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{pt ? 'Campos e seletores' : 'Fields and selectors'}</p>
             <label className="mt-4 block text-sm font-medium text-ink" htmlFor="marca-demo-select">{pt ? 'Selecionar tema' : 'Select a topic'}</label>
             <select id="marca-demo-select" className="mt-1.5 block min-h-12 w-full rounded-[10px] border border-line bg-cream px-3 text-sm text-ink" defaultValue="populacao">
               <option value="populacao">{pt ? 'População' : 'Population'}</option>
@@ -432,7 +432,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
             bottom. */}
         <div className="divide-y divide-line rounded-2xl border border-line bg-cream">
           <div className="p-6">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Frase e descrição' : 'Line and description'}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{pt ? 'Frase e descrição' : 'Line and description'}</p>
             <p lang="pt" className="mt-4 text-2xl font-extrabold tracking-[-0.03em] text-ink">{BRAND_LINE.pt}</p>
             <div className="mt-3 grid gap-x-8 gap-y-4 md:grid-cols-2">
               <div>
@@ -440,14 +440,14 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
                 <p lang="en" className="mt-2 text-sm leading-relaxed text-stone-600">{BRAND_LINE.en} {BRAND_DESCRIPTOR.en}</p>
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Biografia · 160 caracteres' : 'Bio · 160 characters'}</p>
+                <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{pt ? 'Biografia · 160 caracteres' : 'Bio · 160 characters'}</p>
                 <p lang="pt" className="mt-2 text-sm leading-relaxed text-ink">{BRAND_BIO.pt}</p>
                 <p lang="en" className="mt-2 text-sm leading-relaxed text-stone-600">{BRAND_BIO.en}</p>
               </div>
             </div>
           </div>
           <div className="p-6">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Como se escreve' : 'How it is written'}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{pt ? 'Como se escreve' : 'How it is written'}</p>
             <ul className="mt-4 grid gap-x-8 gap-y-2 md:grid-cols-2">
               <Rule yes>{pt ? 'Frases em caixa baixa; versaletes só em categorias editoriais.' : 'Sentence case; small caps only for editorial categories.'}</Rule>
               <Rule yes>{pt ? 'Perguntas como títulos onde há uma pergunta a responder: "Como está a economia?"' : 'Questions as headings where there is a question to answer: "How is the economy doing?"'}</Rule>

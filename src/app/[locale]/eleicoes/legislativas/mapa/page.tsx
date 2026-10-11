@@ -186,7 +186,7 @@ function MapStats({ districtForecast, t, locale }: { districtForecast: DistrictF
         {sortedParties.map(([party, count]) => (
           <div key={party} className="flex justify-between items-center">
             <span className="inline-flex items-center gap-2 text-sm font-medium">
-              <span aria-hidden="true" className="inline-block size-3 rounded-sm" style={{ backgroundColor: partyColors[party] ?? '#dadccf' }} />
+              <span aria-hidden="true" className="inline-block size-3 rounded-sm" style={{ backgroundColor: partyColors[party] ?? '#e2e2df' }} />
               {party}
             </span>
             <span className="text-sm font-medium">{count}</span>

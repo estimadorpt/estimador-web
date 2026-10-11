@@ -120,7 +120,7 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
         marginLeft: 45,
         marginRight: width < 500 ? 92 : 128,
         marginBottom: 35,
-        style: { fontFamily: "Manrope, system-ui, sans-serif", fontSize: "12px", background: "transparent", color: "#5f7062", overflow: "visible" },
+        style: { fontFamily: "Inter, system-ui, sans-serif", fontSize: "12px", background: "transparent", color: "#5c5c5c", overflow: "visible" },
         x: {
           label: pt ? "Jornada" : "Matchday",
           // Whole matchdays only, thinned to roughly one per 60px.
@@ -136,10 +136,10 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
         },
         color: {
           domain: Array.from(teamsAtRisk),
-          range: Array.from(teamsAtRisk).map(t => colours[t] ?? '#5f7062'),
+          range: Array.from(teamsAtRisk).map(t => colours[t] ?? '#5c5c5c'),
         },
         marks: [
-          Plot.ruleY([0], { stroke: "#dadccf" }),
+          Plot.ruleY([0], { stroke: "#e2e2df" }),
           // No band: see TitleRaceChart (audit F-H1).
           Plot.lineY(lineData, {
             x: "matchday",
@@ -165,7 +165,7 @@ export function RelegationChart({ historical, yAxisLabel = "Relegation (%)", def
               text: (d: { team: string; p_relegation: number }) => `${teamDisplayName(d.team)} ${formatPercent(d.p_relegation / 100, locale)}`,
               textAnchor: "start",
               dx: 6,
-              fill: "#234c40",
+              fill: "#141414",
               fontSize: width < 500 ? 11 : 12,
               fontWeight: "bold",
             }

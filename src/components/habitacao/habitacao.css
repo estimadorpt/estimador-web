@@ -1,22 +1,22 @@
 /*
  * Aguarda parecer: the game's own stylesheet, scoped under .hab so it can be mounted inside
- * estimador.pt (like miniatura.css). Follows the site's rules: paper, cream and ink; Manrope;
+ * estimador.pt (like miniatura.css). Follows the site's rules: paper, cream and ink; Inter;
  * hairlines instead of shadows; nothing below 11px; 44px tap targets; motion 140-300ms and
  * none under prefers-reduced-motion.
  */
 .hab {
   /* estimador.pt tokens (src/app/globals.css), scoped so the game never depends on which
      theme variables a host page happens to emit. Same values as the site. */
-  --font-sans: 'Manrope', system-ui, sans-serif;
-  --color-paper: #f5f3ea;
-  --color-cream: #fcfbf5;
-  --color-parchment: #ece9dc;
-  --color-line: #dadccf;
-  --color-ink: #234c40;
-  --color-ink-dark: #16362e;
-  --color-ink-muted: #5f7062;
-  --color-faint: #7f9284;
-  --color-forest: #122f2c;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --color-paper: #ffffff;
+  --color-cream: #ffffff;
+  --color-parchment: #f3f3f1;
+  --color-line: #e2e2df;
+  --color-ink: #141414;
+  --color-ink-dark: #000000;
+  --color-ink-muted: #5c5c5c;
+  --color-faint: #8a8a87;
+  --color-forest: #1f1f1f;
   --color-gold: #c49536;
   --color-mustard: #e5b958;
   --color-mint: #72c8b4;
@@ -80,7 +80,7 @@
 .hab-btn.icon { width: 44px; padding: 0; }
 
 .hab-seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--color-line); border-radius: var(--radius-sm); background: var(--color-cream); padding: 2px; gap: 2px; }
-.hab-seg button { min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--color-ink-muted); }
+.hab-seg button { min-height: 40px; padding: 0 12px; border: 0; border-radius: 4px; background: transparent; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--color-ink-muted); }
 .hab-seg button[aria-pressed='true'] { background: var(--color-ink); color: var(--color-paper); }
 .hab-seg button:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -137,7 +137,7 @@
 
 /* Lists */
 .hab-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.hab-item { width: 100%; text-align: left; border: 1px solid var(--color-line); background: var(--color-cream); border-radius: 12px; padding: 10px 12px; cursor: pointer; display: grid; gap: 4px; transition: background 140ms, border-color 140ms; }
+.hab-item { width: 100%; text-align: left; border: 1px solid var(--color-line); background: var(--color-cream); border-radius: 4px; padding: 10px 12px; cursor: pointer; display: grid; gap: 4px; transition: background 140ms, border-color 140ms; }
 .hab-item:hover { background: var(--color-parchment); }
 .hab-item[aria-current='true'] { border-color: var(--color-ink); box-shadow: inset 0 0 0 1px var(--color-ink); }
 .hab-item.alert { border-color: var(--color-terracotta); }
@@ -168,14 +168,14 @@
 .hab-map .site:focus-visible .mark { stroke: var(--color-ink); stroke-width: 3; }
 .hab-zoom { position: absolute; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
 .hab-zoom .hab-btn { width: 40px; min-height: 40px; padding: 0; font-size: 18px; }
-.hab-legend { position: absolute; left: 12px; bottom: 12px; background: var(--color-cream); border: 1px solid var(--color-line); border-radius: 12px; padding: 8px 10px; font-size: 12px; max-width: min(320px, calc(100% - 80px)); }
+.hab-legend { position: absolute; left: 12px; bottom: 12px; background: var(--color-cream); border: 1px solid var(--color-line); border-radius: 4px; padding: 8px 10px; font-size: 12px; max-width: min(320px, calc(100% - 80px)); }
 .hab-legend-ramp { display: flex; height: 10px; border-radius: 3px; overflow: hidden; margin: 6px 0 2px; }
 .hab-legend-ramp span { flex: 1; }
 .hab-legend-ends { display: flex; justify-content: space-between; color: var(--color-ink-muted); font-size: 11px; }
 .hab-legend-keys { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; }
 .hab-legend-keys span { display: inline-flex; align-items: center; gap: 5px; }
 .hab-legend-keys i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; border: 1px solid var(--color-ink); }
-.hab-tip { position: absolute; pointer-events: none; background: var(--color-forest); color: var(--color-paper); padding: 6px 10px; border-radius: 8px; font-size: 12px; max-width: 260px; z-index: 5; line-height: 1.35; }
+.hab-tip { position: absolute; pointer-events: none; background: var(--color-forest); color: var(--color-paper); padding: 6px 10px; border-radius: 4px; font-size: 12px; max-width: 260px; z-index: 5; line-height: 1.35; }
 .hab-tip strong { display: block; font-size: 13px; }
 
 /* News bar */
@@ -215,7 +215,7 @@
 .hab-pf td { padding: 3px 0; border-bottom: 1px solid var(--color-line); }
 .hab-pf td:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
 .hab-pf tr.total td { font-weight: 800; border-bottom: 0; padding-top: 6px; }
-.hab-verdict { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+.hab-verdict { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; }
 .hab-verdict.good { background: var(--color-emerald-50); color: var(--color-emerald-700); }
 .hab-verdict.bad { background: var(--color-red-50); color: var(--color-red-700); }
 .hab-verdict.caveat { background: var(--color-amber-50); color: var(--color-amber-700); }
@@ -238,7 +238,7 @@
 .hab-real { border-left: 3px solid var(--color-tree); background: var(--color-emerald-50); padding: 8px 12px; border-radius: 0 10px 10px 0; font-size: 13px; }
 .hab-real strong { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-emerald-700); }
 .hab-options { display: grid; gap: 8px; }
-.hab-option { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 10px 14px; min-height: 52px; border: 1px solid var(--color-line); border-radius: 12px; background: var(--color-cream); cursor: pointer; text-align: left; transition: background 140ms, border-color 140ms; }
+.hab-option { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 10px 14px; min-height: 52px; border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-cream); cursor: pointer; text-align: left; transition: background 140ms, border-color 140ms; }
 .hab-option:hover:not(:disabled) { background: var(--color-parchment); border-color: var(--color-ink); }
 .hab-option:disabled { opacity: 0.5; cursor: not-allowed; }
 .hab-option .t { font-weight: 700; }
@@ -258,7 +258,7 @@
 .hab-paper .mast b { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
 .hab-paper .head { font-size: 26px; font-weight: 800; line-height: 1.15; }
 .hab-paper .body { display: grid; gap: 8px; font-size: 15px; }
-.hab-paper .game { border: 1px solid var(--color-line); border-radius: 12px; padding: 10px 12px; background: var(--color-paper); font-size: 13px; }
+.hab-paper .game { border: 1px solid var(--color-line); border-radius: 4px; padding: 10px 12px; background: var(--color-paper); font-size: 13px; }
 .hab-paper .game strong { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
 .hab-paper .briefs { display: grid; gap: 6px; font-size: 13px; border-top: 1px solid var(--color-line); padding-top: 8px; }
 
@@ -267,7 +267,7 @@
 .hab-title h1 { font-size: clamp(36px, 7vw, 56px); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
 .hab-title .lede { font-size: 18px; line-height: 1.5; max-width: 60ch; }
 .hab-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
-.hab-choice { text-align: left; border: 1px solid var(--color-line); background: var(--color-cream); border-radius: 12px; padding: 12px 14px; cursor: pointer; display: grid; gap: 4px; min-height: 72px; }
+.hab-choice { text-align: left; border: 1px solid var(--color-line); background: var(--color-cream); border-radius: 4px; padding: 12px 14px; cursor: pointer; display: grid; gap: 4px; min-height: 72px; }
 .hab-choice[aria-pressed='true'] { border-color: var(--color-ink); box-shadow: inset 0 0 0 1px var(--color-ink); }
 .hab-choice b { font-size: 15px; }
 .hab-fine { font-size: 12px; color: var(--color-ink-muted); display: grid; gap: 6px; border-top: 1px solid var(--color-line); padding-top: 16px; }
@@ -283,7 +283,7 @@
 .hab-bars-x span { flex: 1; text-align: center; }
 
 .hab-toast-stack { position: fixed; right: 16px; bottom: 16px; display: grid; gap: 8px; z-index: 55; width: min(360px, calc(100vw - 32px)); }
-.hab-toast { background: var(--color-forest); color: var(--color-paper); border-radius: 12px; padding: 10px 14px; font-size: 13px; cursor: pointer; text-align: left; border: 0; animation: hab-rise 200ms ease-out; }
+.hab-toast { background: var(--color-forest); color: var(--color-paper); border-radius: 4px; padding: 10px 14px; font-size: 13px; cursor: pointer; text-align: left; border: 0; animation: hab-rise 200ms ease-out; }
 
 .hab-mobile-tabs { display: none; }
 

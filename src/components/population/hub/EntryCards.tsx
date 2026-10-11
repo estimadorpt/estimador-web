@@ -86,7 +86,7 @@ export function EntryCards({ locale }: { locale: Locale }) {
     <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {entries(locale).map(entry => (
         <li key={entry.key} className={`flex flex-col rounded-2xl border border-line bg-cream p-5 md:p-6 ${entry.wide ? 'md:col-span-2' : ''}`}>
-          <p className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500">
+          <p className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-stone-500">
             {entry.icon}
             {entry.kicker}
           </p>

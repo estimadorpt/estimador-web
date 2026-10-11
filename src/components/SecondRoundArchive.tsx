@@ -55,7 +55,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
       <section id="forecast" className="bg-paper border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-7">
           <div className="max-w-3xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500 mb-2">{t('title')}</p>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500 mb-2">{t('title')}</p>
             <h2 className="text-2xl md:text-3xl text-stone-900 mb-3 leading-tight">{t('archiveTitle')}</h2>
             <p className="text-lg text-stone-600 mb-4 leading-relaxed">
               {t('headlineDescription', { date: cutoffLabel, election: electionLabel, candidateA: candidateA?.name ?? '', candidateB: candidateB?.name ?? '' })}

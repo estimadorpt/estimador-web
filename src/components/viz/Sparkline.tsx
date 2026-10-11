@@ -11,7 +11,7 @@ export function Sparkline({ points, width = 96, height = 28, color = DEEMPHASIS,
   return (
     <svg className={className} width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true" focusable="false">
       <path d={d} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={lx} cy={ly} r="4" fill={endColor} stroke="#fcfbf5" strokeWidth="2" />
+      <circle cx={lx} cy={ly} r="4" fill={endColor} stroke="#ffffff" strokeWidth="2" />
     </svg>
   );
 }

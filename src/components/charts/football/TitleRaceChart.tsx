@@ -87,7 +87,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
         marginLeft: 45,
         marginRight: width < 500 ? 92 : 128,
         marginBottom: 35,
-        style: { fontFamily: "Manrope, system-ui, sans-serif", fontSize: "12px", background: "transparent", color: "#5f7062", overflow: "visible" },
+        style: { fontFamily: "Inter, system-ui, sans-serif", fontSize: "12px", background: "transparent", color: "#5c5c5c", overflow: "visible" },
         x: {
           label: pt ? "Jornada" : "Matchday",
           ticks: Array.from(new Set(lineData.map(d => d.matchday))).sort((a, b) => a - b).filter((_, i, arr) => i % Math.max(1, Math.ceil(arr.length / Math.max(2, width / 60))) === 0),
@@ -102,7 +102,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
         },
         color: { domain: teams, range: teams.map(t => colours[t]) },
         marks: [
-          Plot.ruleY([0], { stroke: "#dadccf" }),
+          Plot.ruleY([0], { stroke: "#e2e2df" }),
           Plot.lineY(lineData, { x: "matchday", y: "p_champion", stroke: "team", strokeWidth: 2, curve: "monotone-x" }),
           // A dot per published forecast: the curve between them is drawn,
           // the dots are the publications (audit FA2-16).
@@ -120,7 +120,7 @@ export function TitleRaceChart({ historical, yAxisLabel = "Champion (%)", caveat
             text: (d: { team: string; p_champion: number }) => `${teamDisplayName(d.team)} ${formatPercent(d.p_champion / 100, locale)}`,
             textAnchor: "start",
             dx: 6,
-            fill: "#234c40",
+            fill: "#141414",
             fontSize: width < 500 ? 11 : 12,
             fontWeight: "bold",
           }),

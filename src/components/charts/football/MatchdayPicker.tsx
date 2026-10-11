@@ -475,8 +475,8 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     aria-pressed={active}
                     className="rounded-lg border p-3 text-left transition-colors"
                     style={{
-                      borderColor: active ? '#234c40' : '#dadccf',
-                      backgroundColor: active ? '#234c40' : 'var(--color-paper, #fff)',
+                      borderColor: active ? '#141414' : '#e2e2df',
+                      backgroundColor: active ? '#141414' : 'var(--color-paper, #fff)',
                     }}
                   >
                     <div className={`text-[11px] font-bold uppercase tracking-wider ${active ? 'text-cream' : 'text-stone-500'}`}>{row.label}</div>
@@ -517,8 +517,8 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           {visibleOtherMatches.map(({match, index:idx, swing}) => {
             const meta = supportedByIndex.get(idx);
             const selected = selections[idx] ?? null;
-            const homeColor = "#234c40";
-            const awayColor = "#234c40";
+            const homeColor = "#141414";
+            const awayColor = "#141414";
             const outcomeLabels = matchOutcomeLabels(match, focusTeam, pt);
 
             return (
@@ -570,11 +570,11 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     style={{
                       backgroundColor:
                         selected === "H" ? homeColor : "transparent",
-                      color: selected === "H" ? "#fff" : "#234c40",
+                      color: selected === "H" ? "#fff" : "#141414",
                       border:
                         selected === "H"
                           ? `2px solid ${homeColor}`
-                          : "2px solid #dadccf",
+                          : "2px solid #e2e2df",
                     }}
                   >
                     <span className="sm:hidden">{outcomeLabels.home}</span><span className="hidden sm:inline" aria-hidden="true">{outcomeLabels.shortHome}</span>
@@ -586,12 +586,12 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     className="h-12 flex-1 sm:w-11 sm:flex-none rounded-lg text-[12px] font-bold transition-colors duration-150"
                     style={{
                       backgroundColor:
-                        selected === "D" ? "#5f7062" : "transparent",
-                      color: selected === "D" ? "#fff" : "#234c40",
+                        selected === "D" ? "#5c5c5c" : "transparent",
+                      color: selected === "D" ? "#fff" : "#141414",
                       border:
                         selected === "D"
-                          ? "2px solid #5f7062"
-                          : "2px solid #dadccf",
+                          ? "2px solid #5c5c5c"
+                          : "2px solid #e2e2df",
                     }}
                   >
                     <span className="sm:hidden">{outcomeLabels.draw}</span><span className="hidden sm:inline" aria-hidden="true">{outcomeLabels.shortDraw}</span>
@@ -604,11 +604,11 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     style={{
                       backgroundColor:
                         selected === "A" ? awayColor : "transparent",
-                      color: selected === "A" ? "#fff" : "#234c40",
+                      color: selected === "A" ? "#fff" : "#141414",
                       border:
                         selected === "A"
                           ? `2px solid ${awayColor}`
-                          : "2px solid #dadccf",
+                          : "2px solid #e2e2df",
                     }}
                   >
                     <span className="sm:hidden">{outcomeLabels.away}</span><span className="hidden sm:inline" aria-hidden="true">{outcomeLabels.shortAway}</span>

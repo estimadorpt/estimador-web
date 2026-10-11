@@ -121,10 +121,10 @@ export function fmtDateShort(iso: string | null | undefined, locale: string): st
 export const COLORS = {
   teal: BRAND.teal, // brand accent
   tealLight: '#427893',
-  stone: '#7f9284',
+  stone: '#8a8a87',
   stoneDark: '#4f5f57',
-  stoneFaint: '#dadccf',
-  grid: '#dadccf',
+  stoneFaint: '#e2e2df',
+  grid: '#e2e2df',
   red: '#8f4530',
   redSoft: '#bd714e',
   amber: '#8a6a26',

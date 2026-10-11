@@ -125,13 +125,13 @@ interface Props {
 // the legend repeat the identity.
 const MODEL_COLOR = SERIES[0];
 const MARKET_COLOR = SERIES[1];
-const GRID = "#dadccf"; // stone-200
-const AXIS_TEXT = "#5f7062"; // stone-500
+const GRID = "#e2e2df"; // stone-200
+const AXIS_TEXT = "#5c5c5c"; // stone-500
 // The chart sits in a DataCard, so its ground is cream: the marker cut-outs
 // and the axis-break mask are cream, and the early-season wash is paper, a
 // shade darker than the card.
-const SURFACE = "#fcfbf5"; // cream
-const EARLY_WASH = "#f5f3ea"; // paper
+const SURFACE = "#ffffff"; // cream
+const EARLY_WASH = "#ffffff"; // paper
 
 /* ------------------------------------------------------------- formatting */
 
@@ -410,8 +410,8 @@ function CheckpointChart({
         {breakXs.map((bx) => (
           <g key={`brk-${bx}`} aria-hidden="true">
             <rect x={bx - 5} y={padT + plotH - 4} width={10} height={8} fill={SURFACE} />
-            <line x1={bx - 5} x2={bx - 1} y1={padT + plotH + 4} y2={padT + plotH - 4} stroke="#7f9284" strokeWidth="1" />
-            <line x1={bx + 1} x2={bx + 5} y1={padT + plotH + 4} y2={padT + plotH - 4} stroke="#7f9284" strokeWidth="1" />
+            <line x1={bx - 5} x2={bx - 1} y1={padT + plotH + 4} y2={padT + plotH - 4} stroke="#8a8a87" strokeWidth="1" />
+            <line x1={bx + 1} x2={bx + 5} y1={padT + plotH + 4} y2={padT + plotH - 4} stroke="#8a8a87" strokeWidth="1" />
           </g>
         ))}
         {cps.map((c, i) => (
@@ -478,7 +478,7 @@ function CheckpointChart({
           x2={padL + innerW}
           y1={dy(0)}
           y2={dy(0)}
-          stroke="#7f9284"
+          stroke="#8a8a87"
           strokeWidth="1"
         />
         <text

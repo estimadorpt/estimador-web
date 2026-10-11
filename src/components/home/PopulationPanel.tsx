@@ -7,7 +7,6 @@ import { formatCount } from '@/lib/population/format';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 import { formatDay } from '@/components/population/quality/copy';
 import type { PopulationMeta } from '@/types/population';
-import { HomeArt } from './HomeArt';
 import { HomePanel, Kicker, Status } from './HomePanel';
 
 /**
@@ -42,13 +41,7 @@ export async function PopulationPanel({ locale, variant, meta }: { locale: strin
   const figures = meta && (
     <>
       <p className={lead ? 'mt-3 max-w-lg text-base leading-relaxed text-stone-600 md:text-[17px]' : 'mt-2 text-[15px] leading-relaxed text-stone-600'}>
-        {t('populationText', {
-          // The one population count formatter: "3 092" in Portuguese, where
-          // Intl's pt-PT would leave a four-digit count ungrouped.
-          persons: formatCount(meta.counts.persons, lang),
-          households: formatCount(meta.counts.households, lang),
-          parishes: formatCount(meta.counts.parishes, lang),
-        })}
+        {t('populationText')}
       </p>
       <p className="mt-1.5 text-[13px] leading-snug text-stone-500">{HONESTY.synthetic[lang]}</p>
     </>
@@ -70,38 +63,48 @@ export async function PopulationPanel({ locale, variant, meta }: { locale: strin
     </>
   );
 
+  // The release's own counts, as figures: the numbers lead, the words follow.
+  // formatCount is the one population count formatter: "3 092" in Portuguese,
+  // where Intl's pt-PT would leave a four-digit count ungrouped.
+  const counts = meta && (
+    <dl className={lead ? 'grid grid-cols-1 gap-y-1 md:gap-y-5' : 'mt-4 grid grid-cols-1 gap-y-1'}>
+      {([
+        [formatCount(meta.counts.persons, lang), lang === 'pt' ? 'pessoas' : 'people'],
+        [formatCount(meta.counts.households, lang), lang === 'pt' ? 'agregados' : 'households'],
+        [formatCount(meta.counts.parishes, lang), lang === 'pt' ? 'freguesias' : 'parishes'],
+      ] as const).map(([value, label]) => (
+        <div key={label} className={`flex min-w-0 flex-row-reverse items-baseline justify-end gap-2 ${lead ? 'md:flex-col-reverse md:items-start md:gap-0.5' : ''}`}>
+          <dt className="text-[12px] font-semibold uppercase tracking-wide text-stone-500">{label}</dt>
+          <dd className={`font-black tabular-nums tracking-tight text-ink ${lead ? 'text-2xl md:text-5xl' : 'text-2xl'}`}>{value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+
   if (!lead) {
     return (
-      <HomePanel labelledBy="home-population-title" className="!overflow-visible flex flex-col md:flex-row md:items-stretch">
-        <div className="flex min-w-0 flex-1 flex-col p-5 md:p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <Kicker pill={pill}>{t('populationKicker')}</Kicker>
-              <Heading id="home-population-title" className="mt-2 text-2xl md:text-[1.75rem] md:leading-[1.15]">{t('populationTitle')}</Heading>
-            </div>
-            <HomeArt name="population" shape="square" sizes="72px" className="h-[72px] w-[72px] shrink-0 rounded-xl md:hidden" />
-          </div>
+      <HomePanel labelledBy="home-population-title" className="!overflow-visible">
+        <div className="flex min-w-0 flex-col p-5 md:p-6">
+          <Kicker pill={pill}>{t('populationKicker')}</Kicker>
+          <Heading id="home-population-title" className="mt-2 text-2xl md:text-[1.75rem] md:leading-[1.15]">{t('populationTitle')}</Heading>
+          {counts}
           {figures}
           {actions}
         </div>
-        <HomeArt name="population" shape="square" sizes="200px" className="hidden h-auto w-[200px] shrink-0 self-stretch rounded-r-2xl md:block" />
       </HomePanel>
     );
   }
 
   return (
-    <HomePanel labelledBy="home-population-title" className="!overflow-visible md:grid md:grid-cols-[minmax(0,1.1fr)_minmax(220px,.9fr)] min-[1100px]:grid-cols-[minmax(0,1.25fr)_minmax(270px,1fr)]">
-      <div className="min-w-0 px-5 pb-5 pt-5 md:flex md:flex-col md:justify-center md:px-6 md:py-6 min-[1100px]:px-7">
+    <HomePanel labelledBy="home-population-title" className="!overflow-visible md:grid md:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="min-w-0 px-5 pb-5 pt-5 md:px-6 md:py-6 min-[1100px]:px-7">
         <Kicker pill={pill}>{t('populationKicker')}</Kicker>
-        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_90px] items-center gap-3 md:block">
-          <Heading id="home-population-title" className="max-w-xl text-[1.75rem] leading-[1.1] md:text-[2.4rem]">{t('populationTitle')}</Heading>
-          {/* Phones only: the media query keeps desktop from fetching it eagerly behind md:hidden (UXM2V-04). */}
-          <HomeArt name="population" shape="lead" priority media="(max-width: 767.98px)" sizes="90px" className="h-[90px] w-[90px] rounded-xl md:hidden" />
-        </div>
+        <Heading id="home-population-title" className="mt-3 max-w-xl text-[1.75rem] leading-[1.1] md:text-[2.4rem]">{t('populationTitle')}</Heading>
+        <div className="mt-5 md:hidden">{counts}</div>
         {figures}
         {actions}
       </div>
-      <HomeArt name="population" shape="lead" priority media="(min-width: 768px)" sizes="(min-width: 1100px) 40vw, 42vw" className="hidden md:block md:col-start-2 md:!m-0 md:h-full md:max-h-[430px] md:self-center md:w-full md:rounded-r-2xl md:py-4 md:[&_img]:object-center" />
+      <div className="hidden border-l border-line px-6 py-6 md:block min-[1100px]:px-8">{counts}</div>
     </HomePanel>
   );
 }

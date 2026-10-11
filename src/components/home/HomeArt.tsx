@@ -20,7 +20,7 @@ const SHAPES: Record<HomeArtShape, { width: number; height: number; widths: numb
  * The panel's cream (BRAND.cream), which scripts/generate-home-art.mjs tones the
  * house's ground onto, so a contained image reads edge to edge.
  */
-export const ART_FIELD = '#fcfbf5';
+export const ART_FIELD = '#ffffff';
 
 /** A 1×1 transparent GIF: what a viewport outside `media` gets instead of the art. */
 const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';

@@ -203,7 +203,7 @@ export function wrapLines(text: string, maxWidth: number, measure: (text: string
   return kept;
 }
 
-const FONT = 'Manrope, system-ui, sans-serif';
+const FONT = 'Inter, system-ui, sans-serif';
 const font = (weight: number, size: number) => `${weight} ${size}px ${FONT}`;
 
 /** The weights the card uses; load them before drawing (document.fonts.load). */

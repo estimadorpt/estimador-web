@@ -234,7 +234,7 @@ export function PlayerSkillRanking({
           const stale = teamSet ? !teamSet.has(p.team) : false;
           const outReason = unavailable?.[p.player];
           const isOpen = openRank === p.rank;
-          const chip = ligaTeamColors[p.team] || "#5f7062";
+          const chip = ligaTeamColors[p.team] || "#5c5c5c";
           const slug = playerSlugs?.[p.player];
 
           return (

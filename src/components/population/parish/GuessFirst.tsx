@@ -55,7 +55,7 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
 
   const before = phase === 'guessing' ? (
     <div className="mb-2 rounded-xl border border-line bg-paper p-4 md:p-5">
-      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-stone-500">{t.kicker}</p>
+      <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{t.kicker}</p>
       <label htmlFor={`${id}-guess`} className="mt-1.5 block text-base font-semibold text-ink">
         {PROMPT[recipeName][locale](where)}
       </label>
@@ -96,12 +96,12 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
     <div ref={result} tabIndex={-1} className="mb-4 flex flex-wrap items-stretch gap-3 rounded-xl border border-line bg-paper p-4">
       {phase === 'revealed' && (
         <div className="min-w-[8rem]">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-stone-500">{t.yours}</p>
+          <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{t.yours}</p>
           <p className="font-display text-3xl font-extrabold tabular-nums text-ink">{formatGuess(guess)}</p>
         </div>
       )}
       <div className="min-w-[8rem]">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-stone-500">{t.published}</p>
+        <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{t.published}</p>
         <p className="font-display text-3xl font-extrabold tabular-nums text-ink">{published}</p>
         <p className="text-xs text-stone-500">{headlineValue}</p>
       </div>

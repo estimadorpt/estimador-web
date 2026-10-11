@@ -403,7 +403,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
             <a
               href={item.href}
               aria-current={here ? 'location' : undefined}
-              className={`flex min-h-11 items-center rounded-md border-l-2 px-2 py-1.5 leading-snug lg:pointer-fine:min-h-9 transition-colors duration-150 hover:bg-parchment hover:text-ink ${here ? 'border-ink font-semibold text-ink' : 'border-transparent'} ${item.group ? 'mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-500' : here ? '' : 'text-stone-600'}`}
+              className={`flex min-h-11 items-center rounded-md border-l-2 px-2 py-1.5 leading-snug lg:pointer-fine:min-h-9 transition-colors duration-150 hover:bg-parchment hover:text-ink ${here ? 'border-ink font-semibold text-ink' : 'border-transparent'} ${item.group ? 'mt-2 text-[11px] font-bold uppercase tracking-wide text-stone-500' : here ? '' : 'text-stone-600'}`}
             >
               {item.label}
             </a>
@@ -490,7 +490,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
           <nav aria-label={pt ? 'Nesta página' : 'On this page'} className="hidden lg:block">
             {/* Pulled left by the links' rule and padding, so the rail's text lines up with the hero's (UXD2-14). */}
             <div className="sticky top-24 -ml-2.5">
-              <p className="mb-1 px-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{pt ? 'Nesta página' : 'On this page'}</p>
+              <p className="mb-1 px-2.5 text-[11px] font-bold uppercase tracking-wide text-stone-500">{pt ? 'Nesta página' : 'On this page'}</p>
               {renderToc('', true)}
             </div>
           </nav>

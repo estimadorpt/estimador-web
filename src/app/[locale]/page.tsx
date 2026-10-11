@@ -139,7 +139,7 @@ export default async function HomePage({
           </p>
         </div>
         <nav aria-labelledby="home-shortcuts-label" className="mb-5 lg:hidden">
-          <p id="home-shortcuts-label" className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{t('shortcutsLabel')}</p>
+          <p id="home-shortcuts-label" className="mb-2 text-[11px] font-bold uppercase tracking-wide text-stone-500">{t('shortcutsLabel')}</p>
           <ul className="grid grid-cols-3 gap-2">
             {shortcuts.map(task => (
               <li key={task.href} className="min-w-0">
@@ -173,7 +173,7 @@ export default async function HomePage({
           {support.map(section => panel(section, 'support'))}
         </div>
         <p className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-stone-600 md:mt-8">
-          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-stone-500">{t('moreKicker')}</span>
+          <span className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{t('moreKicker')}</span>
           <Link href="/metodologia" locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{t('moreMethodology')}</Link>
           {latestArticle && (
             <span>

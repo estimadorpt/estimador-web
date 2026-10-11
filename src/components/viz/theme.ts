@@ -16,7 +16,7 @@ export const SERIES_NAMES = ['teal', 'ouro', 'pervinca', 'coral'] as const;
 /** The one series when only one thing is plotted, and the emphasis hue when one series is the point. */
 export const ACCENT = SERIES[0];
 /** Context series when one series is the point. */
-export const DEEMPHASIS = '#c3c8bb';
+export const DEEMPHASIS = '#c8c8c4';
 
 export const STATUS = {
   good: BRAND.tree,
@@ -29,13 +29,13 @@ export const FURNITURE = {
   surface: BRAND.cream,
   surfaceDark: BRAND.forest,
   grid: BRAND.line,
-  gridDark: '#2a4b43',
+  gridDark: '#3a3a3a',
   axis: BRAND.muted,
-  axisDark: '#9bb3a3',
+  axisDark: '#a8a8a5',
   text: BRAND.ink,
   textMuted: BRAND.muted,
   track: BRAND.parchment,
-  font: 'Manrope, system-ui, sans-serif',
+  font: 'Inter, system-ui, sans-serif',
 } as const;
 
 export const NUMBER = {
