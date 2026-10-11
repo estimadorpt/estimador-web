@@ -1,18 +1,15 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import { createPageMetadata } from '@/lib/metadata';
-import { loadPredictionGameData } from "@/lib/utils/football-data-loader";
+import { FOOTBALL_DIR, loadGameFixtures, loadPredictionGameData } from "@/lib/utils/football-data-loader";
 import { findOpenRound, roundLockState } from "@/lib/utils/prediction-game";
-import { formatLongDate } from "@/lib/football-format";
-import { frozenBeforePreviousRoundEnded, latePublications, type ManifestRoundLike } from "@/lib/utils/prediction-game-record";
+import { frozenBeforePreviousRoundEnded } from "@/lib/utils/prediction-game-record";
 import { DeadlineLine } from "./DeadlineLine";
+import { HowItCounts } from "./HowItCounts";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { ContraOModelo } from "@/components/charts/football/ContraOModelo";
-import { GameAuthProvider } from "@/components/GameAuthProvider";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { setRequestLocale } from '@/i18n/request-locale';
 
@@ -32,33 +29,28 @@ export async function generateMetadata({
     // a colon, not a second separator before the site suffix (SP2-11).
     title: `${t("nav.game")}: Liga Portugal`,
     description: pt
-      ? "Faz as tuas previsões para a próxima jornada da Liga Portugal e vê se bates o modelo, avaliado pela mesma medida que tu: o Ranked Probability Score."
-      : "Forecast the next Liga Portugal matchday and see if you can beat the model. Scored with the Ranked Probability Score, the same measure we grade the model with.",
+      ? "Escolhe o resultado de cada jogo da próxima jornada da Liga Portugal e vê, depois dos jogos, em quantos ficaste mais perto do que o modelo. Sem conta."
+      : "Pick the result of each game of the next Liga Portugal matchday and see, once they are played, in how many you came closer than the model. No account.",
   });
 }
 
-/** The raw game manifest's rounds, for the notes the scoring server does not carry. */
-async function loadManifestRounds(): Promise<ManifestRoundLike[]> {
-  try {
-    const file = path.join(process.cwd(), "public", "data", "football", "liga-2026-27", "game_fixtures.json");
-    const raw = JSON.parse(await readFile(file, "utf8"));
-    return Array.isArray(raw?.matchdays) ? raw.matchdays : [];
-  } catch {
-    return [];
-  }
-}
-
+/**
+ * Contra o Modelo, the weekly game: no account, no server. The page carries
+ * the season's rounds from game_fixtures.json (the model's frozen 1X2 and the
+ * results known at build time); the reader's picks stay in their browser.
+ */
 export default async function JogoPrevisoesPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  const pt = locale !== "en";
+  const { locale: raw } = await params;
+  setRequestLocale(raw);
+  const locale = raw === "en" ? "en" : "pt";
+  const pt = locale === "pt";
   const t = await getTranslations({ locale });
 
-  const [data, manifestRounds] = await Promise.all([loadPredictionGameData(), loadManifestRounds()]);
+  const [data, manifest] = await Promise.all([loadPredictionGameData(), loadGameFixtures()]);
 
   // The deadline of the round open when the page was built, from the game
   // manifest's locks_at. The line re-reads the clock in the browser and says
@@ -76,94 +68,54 @@ export default async function JogoPrevisoesPage({
       />
     ) : null;
 
-  // The model's season record counts rounds it published after kickoff
-  // (2026-27 matchday 1); the table says so (audit M2).
-  // It also counts rounds whose odds were frozen while the previous round
-  // was still being played (audit FA2-04, FRESH-02).
-  const frozen = frozenBeforePreviousRoundEnded(manifestRounds).map(f => f.matchday);
-  const frozenNote = frozen.length
-    ? pt
-      ? `As probabilidades ${frozen.length > 1 ? `das jornadas ${frozen.slice(0, -1).join(", ")} e ${frozen[frozen.length - 1]}` : `da jornada ${frozen[0]}`} foram congeladas antes do fim da jornada anterior, sem os resultados que faltavam; o modelo é avaliado com elas tal como foram congeladas.`
-      : `The probabilities for ${frozen.length > 1 ? `matchdays ${frozen.slice(0, -1).join(", ")} and ${frozen[frozen.length - 1]}` : `matchday ${frozen[0]}`} were frozen before the previous round ended, without the results still to come; the model is scored on them as frozen.`
-    : null;
-  const recordNote = [
-    ...latePublications(manifestRounds).map(l => pt
-      ? `O registo do modelo inclui a jornada ${l.matchday}, cujas probabilidades foram publicadas a ${formatLongDate(l.publishedAt, locale)}, depois de ${l.startedBefore} dos ${l.total} jogos terem começado.`
-      : `The model's record includes matchday ${l.matchday}, whose probabilities were published on ${formatLongDate(l.publishedAt, locale)}, after ${l.startedBefore} of its ${l.total} games had started.`),
-    ...(frozenNote ? [frozenNote] : []),
-  ].join(" ") || null;
+  // Rounds whose odds were frozen while the previous round was still being
+  // played (audit FA2-04, FRESH-02): "Como se conta" names them.
+  const frozenRounds = frozenBeforePreviousRoundEnded(manifest?.matchdays ?? []).map(f => f.matchday);
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
       <PageHero
-        measure="reading"
         compact
-        back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
-        eyebrow={t("football.title")}
+        measure="reading"
+        eyebrow="Liga Portugal"
         title={t("nav.game")}
         lede={pt
-          ? "Consegues prever melhor do que o modelo? Escolhe as tuas probabilidades antes da jornada e compara-te com ele, semana após semana."
-          : "Can you forecast better than the model? Set your own probabilities before the matchday and go head to head, week after week."}
+          ? "Escolhe o resultado de cada jogo da jornada. Depois dos jogos, vês em quantos ficaste mais perto do que o modelo."
+          : "Pick the result of each game of the matchday. Once they are played, you see in how many you came closer than the model."}
         meta={deadline ?? undefined}
       />
 
-      <section>
-        {/* A wider measure: the round's cards go two to a row from lg; the
-            text inside keeps its reading width (audit UXD3-10). */}
-        <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
-          {data ? (
-            // Auth wraps this page only: readers of forecast pages never
-            // download an auth bundle they have no use for.
-            <GameAuthProvider>
-              <ContraOModelo data={data} locale={locale} recordNote={recordNote} builtAt={buildNow} />
-            </GameAuthProvider>
-          ) : (
-            <p className="text-stone-500 text-sm">
-              {pt
-                ? "Dados do jogo não disponíveis de momento."
-                : "Game data is not available right now."}
-            </p>
-          )}
-        </div></div>
-      </section>
-
-      <section className="border-t border-stone-200">
-        <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-3xl text-xs text-stone-500 space-y-2">
-          {/* Where a season is stored, and what is kept, depends on whether
-              the season backend answers, which only the browser can know: the
-              game states it once, in its own storage note (audit pub-PP-10,
-              F21). */}
-          <p>
-            {pt ? (
-              <>
-                Sobre o modelo e como é avaliado:{" "}
-                <Link
-                  href="/desporto/liga/modelo"
-                  locale={locale}
-                  className="text-ink underline underline-offset-4"
-                >
-                  modelo vs mercado
-                </Link>
-                .
-              </>
-            ) : (
-              <>
-                About the model and how it is graded:{" "}
-                <Link
-                  href="/desporto/liga/modelo"
-                  locale={locale}
-                  className="text-ink underline underline-offset-4"
-                >
-                  model vs market
-                </Link>
-                .
-              </>
-            )}
+      <div className="mx-auto w-full max-w-7xl px-4 pb-14 pt-4 md:pt-6">
+        <noscript>
+          <p className="mb-4 max-w-3xl border-l-2 border-ink pl-3 text-[15px] leading-relaxed text-ink">
+            {pt
+              ? "O jogo precisa de JavaScript: as tuas escolhas ficam guardadas no teu navegador. Sem ele, vês os jogos da jornada mas não podes escolher."
+              : "The game needs JavaScript: your picks are kept in your browser. Without it you can see the matchday's games but not pick."}
           </p>
-        </div></div>
-      </section>
+        </noscript>
+        <div className="mb-6 max-w-3xl">
+          <HowItCounts locale={locale} frozenRounds={frozenRounds} />
+        </div>
+        {data ? (
+          <ContraOModelo
+            data={data}
+            locale={locale}
+            builtAt={buildNow}
+            manifestUrl={`/data/${FOOTBALL_DIR}/game_fixtures.json`}
+          />
+        ) : (
+          <div className="flex max-w-3xl items-start gap-4 border-t border-rule pt-4">
+            <EmptyStateMark className="mt-1" />
+            <p className="text-[15px] leading-relaxed text-ink">
+              {pt
+                ? "Os jogos da jornada não estão disponíveis de momento."
+                : "The matchday's games are not available right now."}
+            </p>
+          </div>
+        )}
+      </div>
       </main>
       <SiteFooter locale={locale} />
     </div>

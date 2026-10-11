@@ -1,20 +1,28 @@
 /**
- * "Contra o Modelo" — pure logic for the weekly prediction game.
+ * "Contra o Modelo": pure logic for the weekly prediction game.
  *
- * Deliberately dependency-free and free of React/DOM/Next imports so it can be
- * unit tested in isolation. Everything that touches localStorage is guarded and
- * returns a value rather than throwing.
+ * The game has no server and no account. The reader's picks live in their
+ * own browser (localStorage, one versioned key), and each game is scored
+ * against the results published in game_fixtures.json: the page carries
+ * them from the build, and re-reads that same published file when a game
+ * the reader picked has been played since (`awaitingResults`,
+ * `withPublishedResults`).
+ *
+ * Dependency-free apart from one constant, and free of React/DOM/Next
+ * imports, so it can be unit tested in isolation. Everything that touches
+ * localStorage is guarded and returns a value rather than throwing.
  *
  * Team names are always the RAW names used in the published JSON
- * ('Famalicao', 'Vitoria SC'). Display names are applied at render time only —
- * stored picks must survive a change to the display map.
+ * ('Famalicao', 'Vitoria SC'). Display names are applied at render time
+ * only, so stored picks survive a change to the display map.
  */
+import { ROUND_SETTLE_MS } from '@/lib/football-status';
 
 /* --------------------------------------------------------------- outcomes */
 
 export type Outcome = 'H' | 'D' | 'A';
 
-/** [p_home, p_draw, p_away] — the order the model publishes and RPS assumes. */
+/** [p_home, p_draw, p_away]: the order the model publishes and RPS assumes. */
 export type ProbVector = [number, number, number];
 
 export const OUTCOMES: readonly Outcome[] = ['H', 'D', 'A'];
@@ -35,7 +43,8 @@ export function matchOutcome(homeGoals: number, awayGoals: number): Outcome {
 /* -------------------------------------------------------------------- RPS */
 
 /**
- * Ranked Probability Score for one ordered three-outcome forecast.
+ * Ranked Probability Score for one ordered three-outcome forecast: the
+ * measure that decides, game by game, whose forecast was closer.
  *
  * Mirrors `rps_single` in the model repo
  * (src/liga_predict/model/evaluate.py):
@@ -64,13 +73,6 @@ export function rps(probs: ProbVector, outcome: Outcome): number {
 /* ------------------------------------------------- probability bookkeeping */
 
 const EPS = 1e-9;
-
-function clamp01(x: number): number {
-  if (!Number.isFinite(x)) return 0;
-  if (x < 0) return 0;
-  if (x > 1) return 1;
-  return x;
-}
 
 /** Drop non-finite values and negatives; scale is left to the caller. */
 function nonNegative(x: unknown): number {
@@ -104,8 +106,9 @@ export function isProbVector(v: unknown): v is ProbVector {
 }
 
 /**
- * Integer percentages that still add up to 100 (largest remainder).
- * Display only — scoring always uses the underlying floats.
+ * Integer percentages that still add up to 100 (largest remainder), for the
+ * reader's own split, which they read as three numbers that make a whole.
+ * Display only: scoring always uses the underlying floats.
  */
 export function toPercents(v: ProbVector): [number, number, number] {
   const scaled = v.map(x => x * 100);
@@ -125,27 +128,35 @@ export function toPercents(v: ProbVector): [number, number, number] {
   return out as [number, number, number];
 }
 
-/* ---------------------------------------------------- pick + confidence UI */
+/* ------------------------------------------------------- pick + certainty */
 
+/**
+ * How sure the reader is of the outcome they picked. A pick is one tap: the
+ * outcome, at the middle step; the certainty is optional and moves the share
+ * the picked outcome gets. The reader never sets a free split.
+ */
 export type Confidence = 'leve' | 'media' | 'alta';
 
 export const CONFIDENCE_LEVELS: readonly Confidence[] = ['leve', 'media', 'alta'];
 
-/** Probability handed to the picked outcome at each confidence step. */
-const CONFIDENCE_WEIGHT: Record<Confidence, number> = {
+/** The step a pick starts at. */
+export const DEFAULT_CONFIDENCE: Confidence = 'media';
+
+/** Probability handed to the picked outcome at each certainty step. */
+export const CONFIDENCE_WEIGHT: Record<Confidence, number> = {
   leve: 0.4,
   media: 0.55,
   alta: 0.7,
 };
 
 /**
- * Long-run Liga Portugal 1X2 base rates. Used only when the user picks the
+ * Long-run Liga Portugal 1X2 base rates. Used only when the reader picks the
  * draw, to split the leftover between a home and an away win.
  */
 const NEUTRAL_PRIOR: ProbVector = [0.45, 0.27, 0.28];
 
 /**
- * Share of the leftover that goes to the draw when the user picks a side.
+ * Share of the leftover that goes to the draw when the reader picks a side.
  * Splitting by the base rates instead left an away pick with home at 0.45
  * of the rest against a draw at 0.27 (F19): someone who backs the visitors
  * is not saying the hosts are the likelier alternative. The draw gets at
@@ -153,7 +164,7 @@ const NEUTRAL_PRIOR: ProbVector = [0.45, 0.27, 0.28];
  */
 const DRAW_SHARE_OF_REST = 0.55;
 
-/** Turn a (pick, confidence) pair into a full probability vector. */
+/** Turn a (pick, certainty) pair into a full probability vector. */
 export function probsFromPick(pick: Outcome, confidence: Confidence): ProbVector {
   const idx = OUTCOME_INDEX[pick];
   const p = CONFIDENCE_WEIGHT[confidence];
@@ -168,32 +179,6 @@ export function probsFromPick(pick: Outcome, confidence: Confidence): ProbVector
   } else {
     out[1] = rest * DRAW_SHARE_OF_REST;
     out[idx === 0 ? 2 : 0] = rest * (1 - DRAW_SHARE_OF_REST);
-  }
-  return normalizeProbs(out);
-}
-
-/**
- * Move one slider and absorb the difference in the other two, keeping the sum
- * at exactly 1. The untouched pair keeps its internal ratio; when it has
- * collapsed to zero the leftover is split evenly.
- */
-export function setSliderValue(
-  current: ProbVector,
-  index: 0 | 1 | 2,
-  value: number,
-): ProbVector {
-  const target = clamp01(value);
-  const rest = 1 - target;
-
-  const others = [0, 1, 2].filter(i => i !== index) as [number, number];
-  const othersSum = current[others[0]] + current[others[1]];
-
-  const out: number[] = [0, 0, 0];
-  out[index] = target;
-  if (othersSum > EPS) {
-    for (const i of others) out[i] = rest * (current[i] / othersSum);
-  } else {
-    for (const i of others) out[i] = rest / 2;
   }
   return normalizeProbs(out);
 }
@@ -215,12 +200,12 @@ export interface GameFixture {
   key: string;
   home: string;
   away: string;
-  /** The model's published 1X2 for this fixture — the opponent. */
+  /** The model's published 1X2 for this fixture, frozen when its round opened: the opponent. */
   model: ProbVector;
   /** Naive ISO timestamp as published, or null when unknown. */
   kickoff: string | null;
   /**
-   * When the server stops accepting picks for this fixture (game_fixtures.json
+   * When the game stops taking picks for this fixture (game_fixtures.json
    * `locks_at`). Equal to the kickoff once it is confirmed; an unconfirmed
    * kickoff locks at the earliest plausible slot of its round. Optional: the
    * fallback built from the md files has no lock times.
@@ -228,7 +213,7 @@ export interface GameFixture {
   locksAt?: string | null;
   /** False while the kickoff is a placeholder ("horário por confirmar"). */
   kickoffConfirmed?: boolean;
-  /** The server's fixture id (`md08-moreirense-vs-gil-vicente`), when known. */
+  /** The manifest's fixture id (`md08-moreirense-vs-gil-vicente`), when known. */
   id?: string;
   /** Which publication froze these probabilities (`md07.json@10877c9`). */
   probsSource?: string | null;
@@ -259,11 +244,12 @@ export interface RoundLock {
 }
 
 /**
- * Kickoff timestamps arrive naive (`2026-08-10T19:15:00`) because the model
- * serialises a tz-less pandas Timestamp. They are Portuguese local time.
- * Rather than ship a timezone database we read a naive stamp as UTC+01:00:
- * exact during Portuguese summer time and one hour EARLY in winter. Erring
- * early is the safe direction — the lock can never open after kickoff.
+ * Kickoff timestamps in game_fixtures.json carry a zone (`…Z`). The md files
+ * once published them naive (`2026-08-10T19:15:00`), from a tz-less pandas
+ * Timestamp, in Portuguese local time. Rather than ship a timezone database
+ * a naive stamp is read as UTC+01:00: exact during Portuguese summer time and
+ * one hour EARLY in winter. Erring early is the safe direction: the lock can
+ * never open after kickoff.
  */
 export function parseKickoff(kickoff: string | null | undefined): number | null {
   if (!kickoff) return null;
@@ -278,9 +264,8 @@ export function parseKickoff(kickoff: string | null | undefined): number | null 
 /**
  * A round locks as a unit.
  *
- * 1. Any published result means the round has demonstrably started — lock,
- *    whatever the clock says. This is the fallback the brief asks for and the
- *    only signal available for a next matchday, which carries no timestamps.
+ * 1. Any published result means the round has demonstrably started: lock,
+ *    whatever the clock says.
  * 2. Otherwise lock at the earliest known lock time (or kickoff).
  * 3. With neither signal the round is open.
  */
@@ -313,150 +298,238 @@ export function findOpenRound(
   return null;
 }
 
+/**
+ * Whether a game has been played by the reader's clock: its confirmed
+ * kickoff plus the site's settle time (two hours, ROUND_SETTLE_MS), the
+ * instant the Liga pages say "Jogo disputado".
+ */
+export function playedByClock(fixture: GameFixture, nowMs: number): boolean {
+  if (fixture.result) return true;
+  if (fixture.kickoffConfirmed === false) return false;
+  const kickoff = parseKickoff(fixture.kickoff);
+  return kickoff !== null && nowMs >= kickoff + ROUND_SETTLE_MS;
+}
+
 /* ----------------------------------------------------------------- picks */
 
 export interface StoredPick {
   /** The scored quantity. Always a normalised [pH, pD, pA]. */
   p: ProbVector;
-  /** Remembered UI state so the quick picker reopens where it was left. */
+  /** The outcome picked and its certainty, so the picker reopens where it was left. */
   pick?: Outcome;
   conf?: Confidence;
-  mode?: 'quick' | 'fine';
 }
 
 export type PickMap = Record<string, StoredPick>;
 
+/**
+ * The outcome a stored pick backs: the one the reader chose, or, for a pick
+ * stored without it (an older free split), the outcome its split favours.
+ */
+export function pickedOutcome(stored: StoredPick): Outcome {
+  if (stored.pick) return stored.pick;
+  const p = stored.p;
+  const top = p.indexOf(Math.max(...p));
+  return OUTCOMES[top] ?? 'H';
+}
+
 /* --------------------------------------------------------------- scoring */
 
-export interface FixtureScore {
-  key: string;
-  home: string;
-  away: string;
-  user: ProbVector;
-  model: ProbVector;
-  outcome: Outcome;
-  userRps: number;
-  modelRps: number;
-  /** Positive when the user was closer than the model on this match. */
-  edge: number;
+/** Who was closer on one game, or why the game does not count (yet). */
+export type GameStatus =
+  /** Played and picked: the reader's forecast was closer. */
+  | 'closer'
+  /** Played and picked: the model's forecast was closer. */
+  | 'model'
+  /** Played and picked: exactly as close as each other. */
+  | 'level'
+  /** Played, not picked: it does not count. */
+  | 'unpicked'
+  /** No result yet (picked or not). */
+  | 'unplayed';
+
+export interface GameVerdict {
+  fixture: GameFixture;
+  /** The reader's forecast, normalised, or null when they did not pick this game. */
+  user: ProbVector | null;
+  /** The outcome the reader picked, or null. */
+  pick: Outcome | null;
+  status: GameStatus;
+  userRps: number | null;
+  modelRps: number | null;
 }
 
-export interface RoundScore {
+export interface RoundTally {
   matchday: number;
-  scored: FixtureScore[];
-  /** Fixtures picked whose result has not been published yet. */
-  pending: number;
-  /** Fixtures already decided that the user never picked. */
-  missed: number;
-  userTotal: number;
-  modelTotal: number;
-  userMean: number | null;
-  modelMean: number | null;
-  /** Every fixture of the round has a result. */
+  games: GameVerdict[];
+  /** Games the reader picked. */
+  picked: number;
+  /** Games picked and played: the denominator of "em 5 de 9 jogos". */
+  scored: number;
+  /** Games where the reader was closer than the model. */
+  closer: number;
+  /** Games where the model was closer. */
+  modelCloser: number;
+  /** Games scored level. */
+  level: number;
+  /** The round's games still without a result, picked or not. */
+  remaining: GameFixture[];
+  /** Every game of the round has a result. */
   complete: boolean;
-  /** null while nothing is scoreable. Ties count as NOT beating the model. */
-  beatModel: boolean | null;
+  /**
+   * Who took the round: the reader when closer in more games than the
+   * model, the model when the other way round, level when even. Null while
+   * nothing the reader picked has been played.
+   */
+  outcome: 'won' | 'lost' | 'level' | null;
 }
+
+/** Two RPS values this close are the same forecast quality. */
+const RPS_TIE = 1e-12;
 
 /**
- * Score one round on the fixtures the user actually picked. The model is
- * scored on exactly the same subset, so a partial entry is still a fair
- * comparison — it is simply a comparison over fewer matches.
+ * Score one round on the games the reader picked, game by game: whose
+ * forecast was closer to what happened, by RPS (the rule the game always
+ * had). Unpicked games do not count; unplayed ones wait.
  */
-export function scoreRound(round: GameRound, picks: PickMap): RoundScore {
-  const scored: FixtureScore[] = [];
-  let pending = 0;
-  let missed = 0;
-
-  for (const fixture of round.fixtures) {
-    const pick = picks[fixture.key];
-    if (!pick) {
-      if (fixture.result) missed += 1;
-      continue;
-    }
-    if (!fixture.result) {
-      pending += 1;
-      continue;
-    }
-    const user = normalizeProbs(pick.p);
+export function tallyRound(round: GameRound, picks: PickMap): RoundTally {
+  const games: GameVerdict[] = round.fixtures.map(fixture => {
+    const stored = picks[fixture.key];
+    const user = stored ? normalizeProbs(stored.p) : null;
+    const pick = stored ? pickedOutcome(stored) : null;
+    if (!fixture.result) return { fixture, user, pick, status: 'unplayed', userRps: null, modelRps: null };
+    if (!user) return { fixture, user, pick, status: 'unpicked', userRps: null, modelRps: null };
     const userRps = rps(user, fixture.result.outcome);
     const modelRps = rps(fixture.model, fixture.result.outcome);
-    scored.push({
-      key: fixture.key,
-      home: fixture.home,
-      away: fixture.away,
-      user,
-      model: fixture.model,
-      outcome: fixture.result.outcome,
-      userRps,
-      modelRps,
-      edge: modelRps - userRps,
-    });
-  }
+    const status: GameStatus =
+      Math.abs(userRps - modelRps) <= RPS_TIE ? 'level' : userRps < modelRps ? 'closer' : 'model';
+    return { fixture, user, pick, status, userRps, modelRps };
+  });
 
-  const userTotal = scored.reduce((s, f) => s + f.userRps, 0);
-  const modelTotal = scored.reduce((s, f) => s + f.modelRps, 0);
-  const n = scored.length;
+  const count = (s: GameStatus) => games.filter(g => g.status === s).length;
+  const closer = count('closer');
+  const modelCloser = count('model');
+  const level = count('level');
+  const scored = closer + modelCloser + level;
 
   return {
     matchday: round.matchday,
+    games,
+    picked: games.filter(g => g.user !== null).length,
     scored,
-    pending,
-    missed,
-    userTotal,
-    modelTotal,
-    userMean: n > 0 ? userTotal / n : null,
-    modelMean: n > 0 ? modelTotal / n : null,
+    closer,
+    modelCloser,
+    level,
+    remaining: round.fixtures.filter(f => !f.result),
     complete: round.fixtures.length > 0 && round.fixtures.every(f => f.result !== null),
-    beatModel: n > 0 ? userTotal < modelTotal : null,
+    outcome: scored === 0 ? null : closer > modelCloser ? 'won' : closer < modelCloser ? 'lost' : 'level',
   };
 }
 
-export interface SeasonScore {
-  rounds: RoundScore[];
-  /** Rounds fully played with at least one scored pick. */
-  roundsCounted: number;
-  roundsWon: number;
-  matchesScored: number;
-  userTotal: number;
-  modelTotal: number;
-  userMean: number | null;
-  modelMean: number | null;
-  /**
-   * Brier-style skill against the model: 1 - user/model. Positive means the
-   * user is ahead. null when the model scored a perfect 0 (no reference).
-   */
-  skill: number | null;
+export interface SeasonTally {
+  /** Every round the reader picked at least one game of, ascending. */
+  rounds: RoundTally[];
+  /** Completed rounds (every game played) with at least one game scored. */
+  completed: number;
+  /** Completed rounds the reader took. */
+  won: number;
+  /** Completed rounds that ended level. */
+  level: number;
 }
 
-export function scoreSeason(
-  data: PredictionGameData,
-  picks: PickMap,
-): SeasonScore {
-  const rounds = data.rounds.map(r => scoreRound(r, picks));
-
-  const counted = rounds.filter(r => r.complete && r.scored.length > 0);
-  const userTotal = rounds.reduce((s, r) => s + r.userTotal, 0);
-  const modelTotal = rounds.reduce((s, r) => s + r.modelTotal, 0);
-  const matchesScored = rounds.reduce((s, r) => s + r.scored.length, 0);
-
+/**
+ * The season line counts completed rounds only: a round with a game still to
+ * play (a postponed one included) is reported "até agora" and joins the count
+ * when its last game is in.
+ */
+export function tallySeason(data: PredictionGameData, picks: PickMap): SeasonTally {
+  const rounds = data.rounds.map(r => tallyRound(r, picks)).filter(r => r.picked > 0);
+  const completed = rounds.filter(r => r.complete && r.scored > 0);
   return {
     rounds,
-    roundsCounted: counted.length,
-    roundsWon: counted.filter(r => r.beatModel === true).length,
-    matchesScored,
-    userTotal,
-    modelTotal,
-    userMean: matchesScored > 0 ? userTotal / matchesScored : null,
-    modelMean: matchesScored > 0 ? modelTotal / matchesScored : null,
-    skill: modelTotal > 0 ? 1 - userTotal / modelTotal : null,
+    completed: completed.length,
+    won: completed.filter(r => r.outcome === 'won').length,
+    level: completed.filter(r => r.outcome === 'level').length,
   };
+}
+
+/* ------------------------------------------------ results since the build */
+
+/** The parts of game_fixtures.json the browser re-reads. */
+export interface ManifestResultsLike {
+  season?: string;
+  matchdays?: Array<{
+    matchday: number;
+    fixtures?: Array<{ home: string; away: string; home_goals?: number | null; away_goals?: number | null }>;
+  }>;
+}
+
+/**
+ * True when a game the reader picked is played by their clock but the page
+ * has no result for it: the page was built before it, and the published
+ * game_fixtures.json may be newer than the page (a tab left open, a page
+ * restored from the browser's cache).
+ */
+export function awaitingResults(data: PredictionGameData, picks: PickMap, nowMs: number): boolean {
+  return data.rounds.some(r =>
+    r.fixtures.some(f => !f.result && picks[f.key] !== undefined && playedByClock(f, nowMs)),
+  );
+}
+
+const isGoals = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0;
+
+/**
+ * The page's rounds with the results of a newer copy of game_fixtures.json
+ * filled in, by matchday and ordered pair. Nothing else is taken from it:
+ * the model's frozen 1X2 never changes once a round opens, and a round the
+ * page does not know waits for the next build. A manifest for another season
+ * changes nothing. Returns the same object when nothing changed.
+ */
+export function withPublishedResults(data: PredictionGameData, manifest: ManifestResultsLike | null): PredictionGameData {
+  if (!manifest || !Array.isArray(manifest.matchdays)) return data;
+  if (manifest.season && data.season && manifest.season !== data.season) return data;
+
+  const results = new Map<string, FixtureResult>();
+  for (const md of manifest.matchdays) {
+    for (const fx of md?.fixtures ?? []) {
+      if (!fx || !isGoals(fx.home_goals) || !isGoals(fx.away_goals)) continue;
+      results.set(`${md.matchday}|${fixtureKey(fx.home, fx.away)}`, {
+        homeGoals: fx.home_goals,
+        awayGoals: fx.away_goals,
+        outcome: matchOutcome(fx.home_goals, fx.away_goals),
+      });
+    }
+  }
+
+  let changed = false;
+  const rounds = data.rounds.map(round => {
+    let roundChanged = false;
+    const fixtures = round.fixtures.map(f => {
+      const fresh = results.get(`${round.matchday}|${f.key}`);
+      if (!fresh) return f;
+      if (f.result && f.result.homeGoals === fresh.homeGoals && f.result.awayGoals === fresh.awayGoals) return f;
+      roundChanged = true;
+      return { ...f, result: fresh };
+    });
+    if (!roundChanged) return round;
+    changed = true;
+    return { ...round, fixtures };
+  });
+  return changed ? { ...data, rounds } : data;
 }
 
 /* --------------------------------------------------------- persistence */
 
 export const STORAGE_VERSION = 1;
+/** The game's one localStorage key; the picks never leave the browser. */
 export const STORAGE_KEY = `estimador:contra-o-modelo:v${STORAGE_VERSION}`;
+
+/**
+ * Keys an earlier version of the game wrote and nothing reads any more: the
+ * season server's player id and the secret that went with it. Removed on
+ * the reader's next visit.
+ */
+export const RETIRED_KEYS: readonly string[] = ['estimador:contra-o-modelo:player:v1'];
 
 export interface StoredGame {
   version: number;
@@ -467,7 +540,7 @@ export interface StoredGame {
 /**
  * Parse whatever is in localStorage into a usable pick map.
  *
- * Returns null for anything unusable — bad JSON, an older schema, a different
+ * Returns null for anything unusable: bad JSON, an older schema, a different
  * season, a hand-edited blob. Individual malformed picks are dropped rather
  * than poisoning the whole store, so one bad entry never costs a season.
  */
@@ -481,15 +554,16 @@ export function parseStoredGame(raw: string | null, season: string): StoredGame 
     return null;
   }
 
-  if (typeof parsed !== 'object' || parsed === null) return null;
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return null;
   const obj = parsed as Record<string, unknown>;
 
   if (obj.version !== STORAGE_VERSION) return null;
   if (obj.season !== season) return null;
-  if (typeof obj.picks !== 'object' || obj.picks === null) return null;
+  if (typeof obj.picks !== 'object' || obj.picks === null || Array.isArray(obj.picks)) return null;
 
   const picks: PickMap = {};
   for (const [key, value] of Object.entries(obj.picks as Record<string, unknown>)) {
+    if (!key.includes('|')) continue;
     if (typeof value !== 'object' || value === null) continue;
     const entry = value as Record<string, unknown>;
     if (!isProbVector(entry.p)) continue;
@@ -498,13 +572,8 @@ export function parseStoredGame(raw: string | null, season: string): StoredGame 
     if (entry.pick === 'H' || entry.pick === 'D' || entry.pick === 'A') {
       pick.pick = entry.pick;
     }
-    if (
-      entry.conf === 'leve' || entry.conf === 'media' || entry.conf === 'alta'
-    ) {
+    if (entry.conf === 'leve' || entry.conf === 'media' || entry.conf === 'alta') {
       pick.conf = entry.conf;
-    }
-    if (entry.mode === 'quick' || entry.mode === 'fine') {
-      pick.mode = entry.mode;
     }
     picks[key] = pick;
   }
@@ -516,7 +585,7 @@ export function serializeGame(season: string, picks: PickMap): string {
   return JSON.stringify({ version: STORAGE_VERSION, season, picks });
 }
 
-/** Read persisted picks. Never throws — private mode and SSR both yield {}. */
+/** Read persisted picks. Never throws: private mode, blocked storage and SSR all yield {}. */
 export function loadPicks(season: string): PickMap {
   if (typeof window === 'undefined') return {};
   try {
@@ -526,25 +595,36 @@ export function loadPicks(season: string): PickMap {
   }
 }
 
-/** Persist picks. Never throws — a full or blocked store is a silent no-op. */
-export function savePicks(season: string, picks: PickMap): void {
-  if (typeof window === 'undefined') return;
+/** Persist picks. Never throws: a full or blocked store is a silent no-op. */
+export function savePicks(season: string, picks: PickMap): boolean {
+  if (typeof window === 'undefined') return false;
   try {
     window.localStorage.setItem(STORAGE_KEY, serializeGame(season, picks));
+    return true;
   } catch {
-    /* quota exceeded or storage disabled — the game just won't persist */
+    /* quota exceeded or storage disabled: the game just won't persist */
+    return false;
   }
 }
 
-/** Wipe the saved game, including any stale schema versions. */
+/** Wipe the saved game. Never throws. */
 export function clearPicks(): void {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.removeItem(STORAGE_KEY);
-    for (let v = 1; v <= STORAGE_VERSION; v += 1) {
-      window.localStorage.removeItem(`estimador:contra-o-modelo:v${v}`);
-    }
   } catch {
     /* nothing we can do */
+  }
+}
+
+/** Remove what earlier versions of the game left behind. Never throws. */
+export function forgetRetiredKeys(): void {
+  if (typeof window === 'undefined') return;
+  for (const key of RETIRED_KEYS) {
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      /* blocked storage: nothing to remove either */
+    }
   }
 }

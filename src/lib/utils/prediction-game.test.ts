@@ -1,25 +1,36 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
+  RETIRED_KEYS,
+  STORAGE_KEY,
   STORAGE_VERSION,
+  awaitingResults,
+  clearPicks,
   fixtureKey,
   findOpenRound,
+  forgetRetiredKeys,
+  loadPicks,
   matchOutcome,
   normalizeProbs,
   parseKickoff,
   parseStoredGame,
+  pickedOutcome,
   probsFromPick,
   roundLockState,
   rps,
-  scoreRound,
-  scoreSeason,
+  savePicks,
   serializeGame,
-  setSliderValue,
+  tallyRound,
+  tallySeason,
   toPercents,
+  withPublishedResults,
+  type Confidence,
   type GameFixture,
   type GameRound,
+  type Outcome,
   type PickMap,
   type PredictionGameData,
   type ProbVector,
+  type StoredPick,
 } from './prediction-game';
 
 /* ------------------------------------------------------------- fixtures */
@@ -28,15 +39,16 @@ function fixture(
   home: string,
   away: string,
   model: ProbVector,
-  opts: { goals?: [number, number]; kickoff?: string | null } = {},
+  opts: { goals?: [number, number]; kickoff?: string | null; confirmed?: boolean } = {},
 ): GameFixture {
-  const { goals, kickoff = null } = opts;
+  const { goals, kickoff = null, confirmed } = opts;
   return {
     key: fixtureKey(home, away),
     home,
     away,
     model,
     kickoff,
+    ...(confirmed !== undefined ? { kickoffConfirmed: confirmed } : {}),
     result: goals
       ? { homeGoals: goals[0], awayGoals: goals[1], outcome: matchOutcome(goals[0], goals[1]) }
       : null,
@@ -44,6 +56,9 @@ function fixture(
 }
 
 const round = (matchday: number, fixtures: GameFixture[]): GameRound => ({ matchday, fixtures });
+
+/** A pick as the page stores it: one outcome at one certainty step. */
+const pick = (o: Outcome, conf: Confidence = 'media'): StoredPick => ({ p: probsFromPick(o, conf), pick: o, conf });
 
 /* ------------------------------------------------------------------ RPS */
 
@@ -166,33 +181,6 @@ describe('probsFromPick', () => {
   });
 });
 
-describe('setSliderValue', () => {
-  it('keeps the vector summing to 1', () => {
-    const out = setSliderValue([0.4, 0.3, 0.3], 0, 0.8);
-    expect(out[0]).toBeCloseTo(0.8, 12);
-    expect(out[0] + out[1] + out[2]).toBeCloseTo(1, 12);
-  });
-
-  it('preserves the ratio between the two untouched outcomes', () => {
-    const out = setSliderValue([0.5, 0.3, 0.2], 0, 0.2);
-    // draw:away was 3:2 and must stay 3:2 across the new 0.8 of mass
-    expect(out[1] / out[2]).toBeCloseTo(1.5, 9);
-    expect(out[1]).toBeCloseTo(0.48, 9);
-    expect(out[2]).toBeCloseTo(0.32, 9);
-  });
-
-  it('splits evenly when the untouched pair has collapsed to zero', () => {
-    const out = setSliderValue([1, 0, 0], 0, 0.5);
-    expect(out[1]).toBeCloseTo(0.25, 12);
-    expect(out[2]).toBeCloseTo(0.25, 12);
-  });
-
-  it('clamps out-of-range input', () => {
-    expect(setSliderValue([0.4, 0.3, 0.3], 1, 5)[1]).toBeCloseTo(1, 12);
-    expect(setSliderValue([0.4, 0.3, 0.3], 1, -2)[1]).toBeCloseTo(0, 12);
-  });
-});
-
 /* -------------------------------------------------------------- locking */
 
 describe('parseKickoff', () => {
@@ -294,125 +282,263 @@ describe('findOpenRound', () => {
 
 /* -------------------------------------------------------------- scoring */
 
-describe('scoreRound', () => {
-  const r = round(1, [
+describe('tallyRound: closer than the model, game by game', () => {
+  // Matchday 8, three games played and one still to play.
+  const r = round(8, [
+    fixture('Porto', 'Alverca', [0.77, 0.15, 0.08], { goals: [2, 0] }), // H, as the model said
     fixture('Estoril', 'Famalicao', [0.37, 0.27, 0.36], { goals: [1, 1] }), // D
-    fixture('Porto', 'Alverca', [0.77, 0.15, 0.08], { goals: [2, 0] }), // H
-    fixture('Santa Clara', 'Nacional', [0.47, 0.28, 0.25]), // not played
+    fixture('Rio Ave', 'Porto', [0.11, 0.2, 0.69], { goals: [2, 1] }), // H, an upset
+    fixture('Santa Clara', 'Nacional', [0.47, 0.28, 0.25], { kickoff: '2026-10-12T19:15:00Z' }),
   ]);
+  const picks: PickMap = {
+    'Porto|Alverca': pick('H', 'alta'), // 70% on the win: the model's 77% was closer
+    'Estoril|Famalicao': pick('D'), // 55% on the draw: closer
+    'Rio Ave|Porto': pick('H', 'leve'), // 40% on the upset: closer
+    'Santa Clara|Nacional': pick('H'),
+  };
 
-  it('scores only fixtures that were both picked and played', () => {
-    const picks: PickMap = {
-      'Estoril|Famalicao': { p: [0.3, 0.4, 0.3] },
-      'Santa Clara|Nacional': { p: [0.5, 0.3, 0.2] },
-    };
-    const s = scoreRound(r, picks);
-    expect(s.scored.map(f => f.key)).toEqual(['Estoril|Famalicao']);
-    expect(s.pending).toBe(1); // Santa Clara picked, no result yet
-    expect(s.missed).toBe(1); // Porto played, never picked
-    expect(s.complete).toBe(false);
+  it('counts the games where the reader was closer, out of the games picked and played', () => {
+    const t = tallyRound(r, picks);
+    expect(t.picked).toBe(4);
+    expect(t.scored).toBe(3);
+    expect(t.closer).toBe(2);
+    expect(t.modelCloser).toBe(1);
+    expect(t.level).toBe(0);
+    expect(t.games.map(g => g.status)).toEqual(['model', 'closer', 'closer', 'unplayed']);
+    expect(t.outcome).toBe('won');
   });
 
-  it('compares user and model over the identical subset', () => {
-    const picks: PickMap = { 'Porto|Alverca': { p: [0.9, 0.07, 0.03] } };
-    const s = scoreRound(r, picks);
-    expect(s.scored).toHaveLength(1);
-    expect(s.userTotal).toBeCloseTo(rps([0.9, 0.07, 0.03], 'H'), 12);
-    expect(s.modelTotal).toBeCloseTo(rps([0.77, 0.15, 0.08], 'H'), 12);
-    // Backing the favourite harder than the model beats it when it comes in.
-    expect(s.beatModel).toBe(true);
-    expect(s.scored[0].edge).toBeGreaterThan(0);
+  it('decides each game by RPS, the rule the game always had: lower is closer', () => {
+    const t = tallyRound(r, picks);
+    for (const g of t.games.filter(x => x.fixture.result)) {
+      expect(g.userRps).toBeCloseTo(rps(g.user!, g.fixture.result!.outcome), 12);
+      expect(g.modelRps).toBeCloseTo(rps(g.fixture.model, g.fixture.result!.outcome), 12);
+      expect(g.status).toBe(g.userRps! < g.modelRps! ? 'closer' : 'model');
+    }
   });
 
-  it('reports beatModel false when the model was closer', () => {
-    const picks: PickMap = { 'Porto|Alverca': { p: [0.2, 0.3, 0.5] } };
-    expect(scoreRound(r, picks).beatModel).toBe(false);
+  it('says which games of a partly played round are still to come', () => {
+    const t = tallyRound(r, picks);
+    expect(t.complete).toBe(false);
+    expect(t.remaining.map(f => f.key)).toEqual(['Santa Clara|Nacional']);
   });
 
-  it('returns null verdict and null means when nothing is scoreable', () => {
-    const s = scoreRound(r, {});
-    expect(s.beatModel).toBeNull();
-    expect(s.userMean).toBeNull();
-    expect(s.modelMean).toBeNull();
-    expect(s.scored).toHaveLength(0);
+  it('leaves the games the reader did not pick out of the count', () => {
+    const t = tallyRound(r, { 'Rio Ave|Porto': pick('H', 'leve') });
+    expect(t.scored).toBe(1);
+    expect(t.closer).toBe(1);
+    expect(t.games.map(g => g.status)).toEqual(['unpicked', 'unpicked', 'closer', 'unplayed']);
+    expect(t.games[0].pick).toBeNull();
+    expect(t.games[2].pick).toBe('H');
+  });
+
+  it('has no outcome while nothing the reader picked has been played', () => {
+    const t = tallyRound(r, { 'Santa Clara|Nacional': pick('A') });
+    expect(t.picked).toBe(1);
+    expect(t.scored).toBe(0);
+    expect(t.outcome).toBeNull();
+  });
+
+  it('calls a game level when both forecasts are the same, and a round level when the counts are', () => {
+    const t = tallyRound(r, {
+      'Porto|Alverca': { p: [0.77, 0.15, 0.08] },
+      'Estoril|Famalicao': pick('D'),
+      'Rio Ave|Porto': { p: [0.02, 0.08, 0.9] }, // all but certain of the away win
+    });
+    expect(t.games.map(g => g.status).slice(0, 3)).toEqual(['level', 'closer', 'model']);
+    expect(t.level).toBe(1);
+    expect(t.outcome).toBe('level');
   });
 
   it('normalises a stored vector that drifted off 1', () => {
-    const picks: PickMap = { 'Porto|Alverca': { p: [0.8, 0.1, 0.1] } };
-    const s = scoreRound(r, picks);
-    expect(s.scored[0].user[0] + s.scored[0].user[1] + s.scored[0].user[2]).toBeCloseTo(1, 12);
+    const t = tallyRound(r, { 'Porto|Alverca': { p: [0.8, 0.1, 0.1] } });
+    const user = t.games[0].user!;
+    expect(user[0] + user[1] + user[2]).toBeCloseTo(1, 12);
   });
 
-  it('marks a round complete only when every fixture has a result', () => {
+  it('marks a round complete only when every game has a result', () => {
     const full = round(1, [
       fixture('Estoril', 'Famalicao', [0.37, 0.27, 0.36], { goals: [1, 1] }),
       fixture('Porto', 'Alverca', [0.77, 0.15, 0.08], { goals: [2, 0] }),
     ]);
-    expect(scoreRound(full, { 'Porto|Alverca': { p: [0.5, 0.3, 0.2] } }).complete).toBe(true);
+    const t = tallyRound(full, { 'Porto|Alverca': pick('H') });
+    expect(t.complete).toBe(true);
+    expect(t.remaining).toEqual([]);
   });
 });
 
-describe('scoreSeason', () => {
+describe('tallySeason: completed rounds only', () => {
   const data: PredictionGameData = {
     season: '2026-27',
-    generatedAt: '2026-08-10T21:33:52Z',
+    generatedAt: '2026-10-11T19:04:45Z',
     rounds: [
-      // complete round, user beats the model
-      round(1, [fixture('Porto', 'Alverca', [0.77, 0.15, 0.08], { goals: [2, 0] })]),
-      // complete round, model beats the user
-      round(2, [fixture('Rio Ave', 'Porto', [0.11, 0.2, 0.69], { goals: [0, 2] })]),
-      // still in progress: one played, one not
+      // complete: the reader closer in 2 of 2
+      round(1, [
+        fixture('Estoril', 'Famalicao', [0.37, 0.27, 0.36], { goals: [1, 1] }),
+        fixture('Rio Ave', 'Porto', [0.11, 0.2, 0.69], { goals: [2, 1] }),
+      ]),
+      // complete: the model closer
+      round(2, [fixture('Porto', 'Alverca', [0.77, 0.15, 0.08], { goals: [2, 0] })]),
+      // a postponed game still to play: closer so far, but not counted yet
       round(3, [
-        fixture('Arouca', 'Moreirense', [0.43, 0.28, 0.29], { goals: [1, 0] }),
-        fixture('SC Braga', 'Gil Vicente', [0.59, 0.23, 0.18]),
+        fixture('Arouca', 'Moreirense', [0.43, 0.28, 0.29], { goals: [0, 0] }),
+        fixture('SC Braga', 'Gil Vicente', [0.59, 0.23, 0.18], { kickoff: '2026-10-19T19:15:00Z' }),
+      ]),
+      // never picked
+      round(4, [fixture('Benfica', 'Casa Pia', [0.8, 0.12, 0.08], { goals: [3, 0] })]),
+    ],
+  };
+  const picks: PickMap = {
+    'Estoril|Famalicao': pick('D'),
+    'Rio Ave|Porto': pick('H', 'leve'),
+    'Porto|Alverca': pick('A'),
+    'Arouca|Moreirense': pick('D', 'alta'),
+    'SC Braga|Gil Vicente': pick('H'),
+  };
+
+  it('counts the rounds won out of the completed rounds the reader played', () => {
+    const s = tallySeason(data, picks);
+    expect(s.completed).toBe(2);
+    expect(s.won).toBe(1);
+    expect(s.level).toBe(0);
+  });
+
+  it('keeps a partly played round, and rounds never picked, out of the count', () => {
+    const s = tallySeason(data, picks);
+    expect(s.rounds.map(r => r.matchday)).toEqual([1, 2, 3]);
+    const r3 = s.rounds.find(r => r.matchday === 3)!;
+    expect(r3.complete).toBe(false);
+    expect(r3.outcome).toBe('won'); // so far
+    expect(r3.remaining.map(f => f.key)).toEqual(['SC Braga|Gil Vicente']);
+  });
+
+  it('counts the partly played round once its last game is in', () => {
+    const later = withPublishedResults(data, {
+      season: '2026-27',
+      matchdays: [{ matchday: 3, fixtures: [{ home: 'SC Braga', away: 'Gil Vicente', home_goals: 2, away_goals: 0 }] }],
+    });
+    const s = tallySeason(later, picks);
+    expect(s.completed).toBe(3);
+    expect(s.rounds.find(r => r.matchday === 3)!.complete).toBe(true);
+  });
+
+  it('is empty and safe with no picks at all', () => {
+    const s = tallySeason(data, {});
+    expect(s.rounds).toEqual([]);
+    expect(s.completed).toBe(0);
+    expect(s.won).toBe(0);
+  });
+});
+
+describe('pickedOutcome', () => {
+  it('reads the outcome the reader chose', () => {
+    expect(pickedOutcome(pick('D', 'leve'))).toBe('D');
+  });
+
+  it('falls back to the outcome an older free split favours', () => {
+    expect(pickedOutcome({ p: [0.2, 0.3, 0.5] })).toBe('A');
+  });
+});
+
+/* ------------------------------------------------ results since the build */
+
+describe('awaitingResults', () => {
+  const data: PredictionGameData = {
+    season: '2026-27',
+    generatedAt: '2026-10-11T19:04:45Z',
+    rounds: [
+      round(8, [
+        fixture('Arouca', 'Estrela Amadora', [0.45, 0.28, 0.27], { kickoff: '2026-10-11T19:30:00Z', confirmed: true }),
+        fixture('Famalicao', 'Alverca', [0.5, 0.27, 0.23], { kickoff: '2026-10-12T19:15:00Z', confirmed: false }),
+      ]),
+    ],
+  };
+  const picks: PickMap = { 'Arouca|Estrela Amadora': pick('H'), 'Famalicao|Alverca': pick('H') };
+
+  it('waits two hours after kickoff before looking for a result', () => {
+    expect(awaitingResults(data, picks, Date.parse('2026-10-11T21:29:00Z'))).toBe(false);
+    expect(awaitingResults(data, picks, Date.parse('2026-10-11T21:30:00Z'))).toBe(true);
+  });
+
+  it('only looks for games the reader picked, with a confirmed kickoff', () => {
+    expect(awaitingResults(data, { 'Famalicao|Alverca': pick('H') }, Date.parse('2026-10-20T00:00:00Z'))).toBe(false);
+    expect(awaitingResults(data, {}, Date.parse('2026-10-20T00:00:00Z'))).toBe(false);
+  });
+});
+
+describe('withPublishedResults', () => {
+  const data: PredictionGameData = {
+    season: '2026-27',
+    generatedAt: '2026-10-11T19:04:45Z',
+    rounds: [
+      round(2, [fixture('SC Braga', 'Gil Vicente', [0.59, 0.23, 0.18])]),
+      round(8, [
+        fixture('Benfica', 'Vitoria SC', [0.6, 0.22, 0.18], { goals: [2, 0] }),
+        fixture('Arouca', 'Estrela Amadora', [0.45, 0.28, 0.27]),
       ]),
     ],
   };
 
-  const picks: PickMap = {
-    'Porto|Alverca': { p: [0.9, 0.07, 0.03] }, // right, confident → beats model
-    'Rio Ave|Porto': { p: [0.6, 0.25, 0.15] }, // badly wrong → loses
-    'Arouca|Moreirense': { p: [0.5, 0.3, 0.2] },
-    'SC Braga|Gil Vicente': { p: [0.6, 0.25, 0.15] },
-  };
-
-  it('counts only completed rounds in the N-of-M line', () => {
-    const s = scoreSeason(data, picks);
-    expect(s.roundsCounted).toBe(2); // round 3 is still in progress
-    expect(s.roundsWon).toBe(1);
+  it('fills in a result published after the page was built, by matchday and ordered pair', () => {
+    const fresh = withPublishedResults(data, {
+      season: '2026-27',
+      matchdays: [
+        { matchday: 8, fixtures: [{ home: 'Arouca', away: 'Estrela Amadora', home_goals: 1, away_goals: 2 }] },
+        // The reverse pairing, or the same pair in another round, is another game.
+        { matchday: 9, fixtures: [{ home: 'SC Braga', away: 'Gil Vicente', home_goals: 5, away_goals: 0 }] },
+        { matchday: 2, fixtures: [{ home: 'Gil Vicente', away: 'SC Braga', home_goals: 1, away_goals: 0 }] },
+      ],
+    });
+    expect(fresh.rounds[1].fixtures[1].result).toEqual({ homeGoals: 1, awayGoals: 2, outcome: 'A' });
+    expect(fresh.rounds[0].fixtures[0].result).toBeNull();
+    // The model's frozen forecast is never taken from the newer file.
+    expect(fresh.rounds[1].fixtures[1].model).toEqual([0.45, 0.28, 0.27]);
   });
 
-  it('still scores the in-progress round provisionally', () => {
-    const s = scoreSeason(data, picks);
-    expect(s.matchesScored).toBe(3); // 1 + 1 + 1 played of round 3
-    const r3 = s.rounds.find(r => r.matchday === 3)!;
-    expect(r3.complete).toBe(false);
-    expect(r3.scored).toHaveLength(1);
-    expect(r3.pending).toBe(1);
+  it('changes nothing for another season, a missing file or unusable scores', () => {
+    const other = withPublishedResults(data, {
+      season: '2027-28',
+      matchdays: [{ matchday: 8, fixtures: [{ home: 'Arouca', away: 'Estrela Amadora', home_goals: 1, away_goals: 2 }] }],
+    });
+    expect(other).toBe(data);
+    expect(withPublishedResults(data, null)).toBe(data);
+    expect(withPublishedResults(data, {} as never)).toBe(data);
+    const junk = withPublishedResults(data, {
+      season: '2026-27',
+      matchdays: [
+        { matchday: 8, fixtures: [
+          { home: 'Arouca', away: 'Estrela Amadora', home_goals: null, away_goals: null },
+          { home: 'Arouca', away: 'Estrela Amadora', home_goals: -1, away_goals: 2 },
+          { home: 'Arouca', away: 'Estrela Amadora', home_goals: 1.5, away_goals: 2 },
+          null as never,
+        ] },
+      ],
+    });
+    expect(junk).toBe(data);
   });
 
-  it('aggregates means over every scored match', () => {
-    const s = scoreSeason(data, picks);
-    expect(s.userMean).toBeCloseTo(s.userTotal / 3, 12);
-    expect(s.modelMean).toBeCloseTo(s.modelTotal / 3, 12);
-  });
-
-  it('is empty and safe with no picks at all', () => {
-    const s = scoreSeason(data, {});
-    expect(s.matchesScored).toBe(0);
-    expect(s.roundsCounted).toBe(0);
-    expect(s.roundsWon).toBe(0);
-    expect(s.userMean).toBeNull();
-    expect(s.skill).toBeNull();
+  it('returns the same object when the newer file has nothing new', () => {
+    const same = withPublishedResults(data, {
+      season: '2026-27',
+      matchdays: [{ matchday: 8, fixtures: [{ home: 'Benfica', away: 'Vitoria SC', home_goals: 2, away_goals: 0 }] }],
+    });
+    expect(same).toBe(data);
   });
 });
 
 /* ---------------------------------------------------------- persistence */
 
+describe('the storage key', () => {
+  it('is the one versioned key the privacy page lists', () => {
+    expect(STORAGE_KEY).toBe('estimador:contra-o-modelo:v1');
+    expect(RETIRED_KEYS).toEqual(['estimador:contra-o-modelo:player:v1']);
+  });
+});
+
 describe('parseStoredGame', () => {
   const season = '2026-27';
   const good = serializeGame(season, {
-    'Porto|Alverca': { p: [0.5, 0.3, 0.2], pick: 'H', conf: 'media', mode: 'quick' },
+    'Porto|Alverca': { p: [0.5, 0.3, 0.2], pick: 'H', conf: 'media' },
   });
 
   it('round-trips a valid store', () => {
@@ -422,43 +548,60 @@ describe('parseStoredGame', () => {
     expect(parsed?.picks['Porto|Alverca'].conf).toBe('media');
   });
 
+  it('reads what the earlier game stored under the same key', () => {
+    // The season server's version kept a fine-tune flag beside each pick.
+    const earlier = JSON.stringify({
+      version: 1,
+      season,
+      picks: { 'Porto|Alverca': { p: [0.62, 0.23, 0.15], pick: 'H', conf: 'alta', mode: 'fine' } },
+    });
+    const parsed = parseStoredGame(earlier, season);
+    expect(parsed?.picks['Porto|Alverca']).toEqual({ p: [0.62, 0.23, 0.15], pick: 'H', conf: 'alta' });
+  });
+
   it('discards absent, unparseable or non-object payloads', () => {
-    expect(parseStoredGame(null, season)).toBeNull();
-    expect(parseStoredGame('', season)).toBeNull();
-    expect(parseStoredGame('{not json', season)).toBeNull();
-    expect(parseStoredGame('42', season)).toBeNull();
-    expect(parseStoredGame('null', season)).toBeNull();
+    for (const raw of [null, '', '{not json', '42', 'null', 'true', '"text"', '[]', '[{"version":1}]']) {
+      expect(parseStoredGame(raw, season)).toBeNull();
+    }
   });
 
   it('discards a store written by another schema version', () => {
     const stale = JSON.stringify({ version: STORAGE_VERSION + 1, season, picks: {} });
     expect(parseStoredGame(stale, season)).toBeNull();
-    const ancient = JSON.stringify({ season, picks: {} });
-    expect(parseStoredGame(ancient, season)).toBeNull();
+    expect(parseStoredGame(JSON.stringify({ season, picks: {} }), season)).toBeNull();
+    expect(parseStoredGame(JSON.stringify({ version: '1', season, picks: {} }), season)).toBeNull();
   });
 
   it('discards a store from a different season', () => {
     expect(parseStoredGame(good, '2027-28')).toBeNull();
   });
 
-  it('drops individual malformed picks without losing the good ones', () => {
-    const mixed = JSON.stringify({
-      version: STORAGE_VERSION,
-      season,
-      picks: {
-        'Porto|Alverca': { p: [0.5, 0.3, 0.2] },
-        'Bad|Sum': { p: [0.9, 0.9, 0.9] },
-        'Bad|Length': { p: [0.5, 0.5] },
-        'Bad|Type': { p: ['a', 'b', 'c'] },
-        'Bad|Shape': 7,
-        'Bad|Missing': {},
-      },
-    });
-    const parsed = parseStoredGame(mixed, season);
-    expect(Object.keys(parsed!.picks)).toEqual(['Porto|Alverca']);
+  it('discards a store whose picks are not a map', () => {
+    for (const picks of [null, [], 'H', 3]) {
+      expect(parseStoredGame(JSON.stringify({ version: STORAGE_VERSION, season, picks }), season)).toBeNull();
+    }
   });
 
-  it('ignores unrecognised UI hints rather than rejecting the pick', () => {
+  it('drops individual malformed picks without losing the good ones', () => {
+    const mixed = `{"version":${STORAGE_VERSION},"season":"${season}","picks":{
+      "Porto|Alverca": {"p":[0.5,0.3,0.2]},
+      "Bad|Sum": {"p":[0.9,0.9,0.9]},
+      "Bad|Length": {"p":[0.5,0.5]},
+      "Bad|Type": {"p":["a","b","c"]},
+      "Bad|Negative": {"p":[1.2,-0.1,-0.1]},
+      "Bad|Huge": {"p":[1e308,1e308,1e308]},
+      "Bad|Shape": 7,
+      "Bad|Null": null,
+      "Bad|Missing": {},
+      "NoSeparator": {"p":[0.5,0.3,0.2]},
+      "__proto__": {"p":[0.5,0.3,0.2]}
+    }}`;
+    const parsed = parseStoredGame(mixed, season);
+    expect(Object.keys(parsed!.picks)).toEqual(['Porto|Alverca']);
+    expect(({} as Record<string, unknown>).p).toBeUndefined();
+  });
+
+  it('ignores unrecognised hints rather than rejecting the pick', () => {
     const odd = JSON.stringify({
       version: STORAGE_VERSION,
       season,
@@ -468,6 +611,71 @@ describe('parseStoredGame', () => {
     expect(parsed!.picks['Porto|Alverca'].p[0]).toBeCloseTo(0.5, 12);
     expect(parsed!.picks['Porto|Alverca'].pick).toBeUndefined();
     expect(parsed!.picks['Porto|Alverca'].conf).toBeUndefined();
+  });
+});
+
+describe('loadPicks / savePicks / clearPicks in the browser', () => {
+  const g = globalThis as unknown as { window?: unknown };
+
+  /** A localStorage stand-in; `fail` makes every call throw, as a blocked store does. */
+  function fakeWindow(initial: Record<string, string> = {}, fail = false) {
+    const store = new Map(Object.entries(initial));
+    const guard = () => {
+      if (fail) throw new DOMException('blocked', 'SecurityError');
+    };
+    g.window = {
+      localStorage: {
+        getItem: (k: string) => (guard(), store.get(k) ?? null),
+        setItem: (k: string, v: string) => (guard(), void store.set(k, v)),
+        removeItem: (k: string) => (guard(), void store.delete(k)),
+      },
+    };
+    return store;
+  }
+
+  afterEach(() => {
+    delete g.window;
+  });
+
+  it('round-trips the picks under the one key', () => {
+    const store = fakeWindow();
+    expect(savePicks('2026-27', { 'Porto|Alverca': pick('H') })).toBe(true);
+    expect([...store.keys()]).toEqual([STORAGE_KEY]);
+    expect(loadPicks('2026-27')['Porto|Alverca'].pick).toBe('H');
+  });
+
+  it('starts empty on corrupt data instead of failing', () => {
+    fakeWindow({ [STORAGE_KEY]: '{"version":1,"season":"2026-27","picks":' });
+    expect(loadPicks('2026-27')).toEqual({});
+    fakeWindow({ [STORAGE_KEY]: 'undefined' });
+    expect(loadPicks('2026-27')).toEqual({});
+  });
+
+  it('never throws when the browser blocks storage', () => {
+    fakeWindow({}, true);
+    expect(loadPicks('2026-27')).toEqual({});
+    expect(savePicks('2026-27', { 'Porto|Alverca': pick('H') })).toBe(false);
+    expect(() => clearPicks()).not.toThrow();
+    expect(() => forgetRetiredKeys()).not.toThrow();
+  });
+
+  it('clears the game, and removes the retired season-server key', () => {
+    const store = fakeWindow({
+      [STORAGE_KEY]: serializeGame('2026-27', { 'Porto|Alverca': pick('H') }),
+      'estimador:contra-o-modelo:player:v1': '{"playerId":"a3f1","secret":"x"}',
+      'estimador.club': 'Porto',
+    });
+    forgetRetiredKeys();
+    expect(store.has('estimador:contra-o-modelo:player:v1')).toBe(false);
+    expect(store.has(STORAGE_KEY)).toBe(true);
+    clearPicks();
+    expect(store.has(STORAGE_KEY)).toBe(false);
+    expect(store.get('estimador.club')).toBe('Porto');
+  });
+
+  it('does nothing outside a browser', () => {
+    expect(loadPicks('2026-27')).toEqual({});
+    expect(savePicks('2026-27', {})).toBe(false);
   });
 });
 

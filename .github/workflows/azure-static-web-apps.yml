@@ -24,8 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Matches the Azure Static Web Apps apiRuntime in
-          # staticwebapp.config.json. Node 20 left support in April 2026.
+          # Node 20 left support in April 2026.
           node-version: '22'
           cache: 'npm'
 
@@ -49,13 +48,6 @@ jobs:
           # Where the subscribe form posts. Unset, the card on the article
           # pages renders the feed link only and no email field.
           NEXT_PUBLIC_NEWSLETTER_ENDPOINT: ${{ secrets.NEWSLETTER_ENDPOINT }}
-      - name: Install API dependencies
-        working-directory: api
-        run: npm ci
-
-      - name: Build and test API
-        working-directory: api
-        run: npm run build
 
       - name: Build And Deploy
         id: builddeploy
@@ -65,14 +57,9 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "/"
-          # Managed Azure Functions for the "Contra o Modelo" season game.
-          # The API is TypeScript, so Oryx must compile it before packaging —
-          # without api_build_command the dist/ that the function.json files
-          # point at would never exist. Deploying the API is safe before any
-          # storage account is provisioned: every endpoint answers "not
-          # configured" and the site stays in local-only mode.
-          api_location: "api"
-          api_build_command: "npm run build"
+          # No api_location: the site has no functions. The prediction game
+          # keeps its picks in the reader's browser (October 2026), and an
+          # absent api_location deploys the static export alone.
           output_location: "out"
 
       # A local preview does not apply staticwebapp.config.json. This asks the
