@@ -9,6 +9,7 @@ import { PageHero } from '@/components/PageHero';
 import { Action } from '@/components/brand/Action';
 import { Disclosure } from '@/components/viz/Disclosure';
 import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
+import { NoMargin, Register } from '@/components/instrument';
 import { ParishLink } from '@/components/population/ParishLink';
 import { ParishSearch } from '@/components/population/ParishSearch';
 import { QualityBadge } from '@/components/population/QualityBadge';
@@ -20,10 +21,10 @@ import { fetchMeta, fetchParish, fetchPlaces } from '@/lib/population/client';
 import { parishCitation, SHORT_ATTRIBUTION } from '@/lib/population/cite';
 import { formatCount } from '@/lib/population/format';
 import { GUESS_RECIPES } from '@/lib/population/guess';
-import { HONESTY, RECIPE_COPY, tierMeaningFor, type Locale, type WorstTable } from '@/lib/population/labels';
+import { HONESTY, RECIPE_COPY, TIER_COPY, tierMeaningFor, type Locale, type WorstTable } from '@/lib/population/labels';
 import { breadcrumbJsonLd, jsonLd } from '@/lib/structured-data';
 import { indexPlaces, NEARBY_KEY, normaliseParishCode, regionSlug, regionTitle, type Parish, type PlaceIndex } from '@/lib/population/places';
-import { parishQuestion, shareCardModel } from '@/lib/population/share-card';
+import { shareCardModel } from '@/lib/population/share-card';
 import type { ParishRecord, PopulationMeta, PortraitRecipe } from '@/types/population';
 import { formatDay } from '../quality/copy';
 import { GuessFirstCard } from './GuessFirst';
@@ -162,7 +163,7 @@ export function ParishPage({ locale }: { locale: Locale }) {
         locale,
         code,
         // Within 70 and 155 characters for every parish, union names included (SPV-01).
-        title: parishTitle(place.name, locale),
+        title: parishTitle(place.name, place.municipalityName, locale),
         description: parishDescription({
           name: place.name,
           municipalityName: place.municipalityName,
@@ -184,9 +185,9 @@ export function ParishPage({ locale }: { locale: Locale }) {
   if (state.kind === 'unknown') {
     return (
       <main id="main-content" tabIndex={-1}>
+        <PopulationSectionNav current="parish" locale={locale} />
         <PageHero
           compact
-          field="periwinkle"
           measure="wide"
           eyebrow={EYEBROW[locale]}
           title={pt ? 'Não encontrámos esta freguesia' : 'We could not find this parish'}
@@ -194,13 +195,12 @@ export function ParishPage({ locale }: { locale: Locale }) {
             ? (pt ? `O código ${state.code} não corresponde a nenhuma freguesia da carta administrativa de 2021. Procura-a pelo nome.` : `The code ${state.code} does not match any parish in the 2021 administrative map. Search for it by name.`)
             : (pt ? 'Este endereço não tem um código de freguesia válido. Procura-a pelo nome.' : 'This address does not carry a valid parish code. Search for it by name.')}
         />
-        <PopulationSectionNav current="parish" locale={locale} />
         <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
-          <div className="flex flex-col gap-6 rounded-2xl border border-line bg-cream p-5 md:flex-row md:items-start md:p-8">
+          <div className="flex flex-col gap-6 md:flex-row md:items-start">
             <EmptyStateMark />
             <div className="min-w-0 flex-1">
               <ParishSearch locale={locale} withLocation />
-              <p className="mt-6 text-[15px] text-stone-600">
+              <p className="mt-6 text-[15px] text-graphite">
                 {pt ? 'Ou explora as freguesias no mapa.' : 'Or explore the parishes on the map.'}
               </p>
               <Action href={POPULATION_ROUTES.hub} locale={locale} variant="text" arrow>
@@ -216,16 +216,15 @@ export function ParishPage({ locale }: { locale: Locale }) {
   if (state.kind === 'error') {
     return (
       <main id="main-content" tabIndex={-1}>
+        <PopulationSectionNav current="parish" locale={locale} />
         <PageHero
           compact
-          field="periwinkle"
           measure="wide"
           eyebrow={EYEBROW[locale]}
           title={pt ? 'Não foi possível carregar esta freguesia' : 'This parish could not be loaded'}
           lede={pt ? 'Os dados não chegaram. Pode ser a ligação; tenta outra vez.' : 'The data did not arrive. It may be the connection; try again.'}
           actions={<Action onClick={() => void load(state.code, null, false)}>{pt ? 'Tentar de novo' : 'Try again'}</Action>}
         />
-        <PopulationSectionNav current="parish" locale={locale} />
         <div className="min-h-[50vh]" />
       </main>
     );
@@ -235,44 +234,43 @@ export function ParishPage({ locale }: { locale: Locale }) {
 }
 
 /**
- * The page before its data: the hero, the section row and the first blocks at
+ * The page before its data: the section row, the hero and the first blocks at
  * their real heights, so nothing below moves when the parish arrives (and the
  * footer does not start in view and then jump down).
  */
 function Skeleton({ locale }: { locale: Locale }) {
   const pt = locale === 'pt';
-  const bar = 'rounded-md bg-parchment motion-safe:animate-pulse';
+  const bar = 'bg-field motion-safe:animate-pulse';
   return (
     <main id="main-content" tabIndex={-1} aria-busy="true">
+      <PopulationSectionNav current="parish" locale={locale} />
       <PageHero
-        compact
-        field="periwinkle"
-        measure="wide"
         back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
-        eyebrow={EYEBROW[locale]}
         title={<span className="sr-only" role="status">{pt ? 'A carregar a freguesia…' : 'Loading the parish…'}</span>}
         lede={
           <span aria-hidden="true" className="block">
-            <span className={`block h-9 w-4/5 md:h-11 ${bar}`} />
-            <span className={`mt-5 block h-4 w-full ${bar}`} />
-            <span className={`mt-2 block h-4 w-11/12 ${bar}`} />
-            <span className={`mt-2 block h-4 w-2/3 ${bar}`} />
+            <span className={`block h-10 w-3/5 md:h-14 ${bar}`} />
+            <span className={`mt-4 block h-5 w-2/3 ${bar}`} />
           </span>
         }
-        meta={<span aria-hidden="true" className={`inline-block h-7 w-48 ${bar}`} />}
+        meta={
+          <span aria-hidden="true" className="grid w-full gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)]">
+            <span className={`block h-12 ${bar}`} />
+            <span className={`block h-[212px] ${bar}`} />
+          </span>
+        }
       />
-      <PopulationSectionNav current="parish" locale={locale} />
       <div aria-hidden="true" className="mx-auto w-full max-w-7xl px-4 pb-16 pt-8"><div className="max-w-5xl">
         <div className="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
           <div className="hidden lg:block"><div className={`h-[520px] ${bar}`} /></div>
           <div className="flex min-w-0 flex-col gap-12">
             <div className={`h-12 lg:hidden ${bar}`} />
             {/* "Como ler" (closed at every width), then "Pessoas" and its first two cards, at their measured heights. */}
-            <div className="h-[54px] rounded-2xl border border-line bg-cream" />
+            <div className="h-[50px] border-y border-rule" />
             <div className="flex flex-col gap-5">
               <div className={`h-8 w-1/3 md:h-9 ${bar}`} />
-              <div className="h-[800px] rounded-2xl border border-line bg-cream sm:h-[600px]" />
-              <div className="h-[860px] rounded-2xl border border-line bg-cream sm:h-[470px]" />
+              <div className="h-[800px] border-t border-ink sm:h-[600px]" />
+              <div className="h-[860px] border-t border-ink sm:h-[470px]" />
             </div>
           </div>
         </div>
@@ -380,13 +378,13 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
     ? (pt
       ? `Os números desta página são valores do concelho de ${fallbackName ?? place.municipalityName}, que inclui esta freguesia: os da própria freguesia não atingem a qualidade necessária para publicar.`
       : `The figures on this page are those of ${fallbackName ?? place.municipalityName} municipality, which includes this parish: the parish's own figures do not reach the quality needed to publish.`)
-    : (pt ? 'Todas as respostas desta página usam os números da própria freguesia.' : 'Every answer on this page uses the parish’s own figures.');
+    : (pt ? 'todas com os números da própria freguesia.' : 'all with the parish’s own figures.');
 
-  // The rail names each card by its own title (the question), so the two read the same (UXD2-11).
+  // The rail names each card by its own title, so the two read the same (UXD2-11).
   const toc = [
     ...groups.flatMap(group => [
       { href: `#${group.id}`, label: group.title[locale], group: true },
-      ...group.recipes.map(recipe => ({ href: `#${RECIPE_COPY[recipe].anchor}`, label: RECIPE_COPY[recipe].question[locale] })),
+      ...group.recipes.map(recipe => ({ href: `#${RECIPE_COPY[recipe].anchor}`, label: RECIPE_COPY[recipe].short[locale] })),
     ]),
     { href: '#partilhar', label: pt ? 'Partilhar' : 'Share', after: true },
     { href: '#citar', label: pt ? 'Como citar' : 'How to cite' },
@@ -403,7 +401,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
             <a
               href={item.href}
               aria-current={here ? 'location' : undefined}
-              className={`flex min-h-11 items-center rounded-md border-l-2 px-2 py-1.5 leading-snug lg:pointer-fine:min-h-9 transition-colors duration-150 hover:bg-parchment hover:text-ink ${here ? 'border-ink font-semibold text-ink' : 'border-transparent'} ${item.group ? 'mt-2 text-[12px] font-semibold text-graphite' : here ? '' : 'text-stone-600'}`}
+              className={`flex min-h-11 items-center border-l-2 px-2 py-1.5 leading-snug lg:pointer-fine:min-h-9 transition-colors duration-150 hover:bg-field hover:text-ink ${here ? 'border-ink font-semibold text-ink' : 'border-transparent'} ${item.group ? 'mt-2 text-[12px] text-graphite' : 'text-ink'}`}
             >
               {item.label}
             </a>
@@ -440,50 +438,82 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
     { name: place.name },
   ]));
 
+  // The parish's facts, stated once, as the hero's register (the tier with its
+  // meaning for this parish, the release, how many answers and whose figures).
+  const answered = groups.reduce((sum, group) => sum + group.recipes.filter(recipe => record.responses[recipe]?.decision !== 'refuse').length, 0);
+  const asked = groups.reduce((sum, group) => sum + group.recipes.length, 0);
+  const facts = [
+    {
+      label: pt ? 'Residentes' : 'Residents',
+      value: <><b className="fig text-[17px]">{formatCount(place.censusPopulation, locale)}</b> <span className="font-normal">{pt ? 'pelo INE, Censos 2021' : 'counted by INE, 2021 Census'}</span></>,
+    },
+    {
+      label: pt ? 'Agregados' : 'Households',
+      value: <><b className="fig text-[17px]">{formatCount(place.generatedHouseholds, locale)}</b> <span className="font-normal">{pt ? 'gerados; cada alojamento coletivo conta como um' : 'generated; each collective living quarter counts as one'}</span></>,
+    },
+    {
+      label: pt ? 'Nível' : 'Tier',
+      value: (
+        <>
+          <b className="fig text-[17px]" aria-hidden="true">{place.tier}</b>
+          <span className="sr-only">{TIER_COPY[place.tier].label[locale]}.</span>{' '}
+          {/* What the tier means for this parish, on screen rather than in a tooltip (CL3-05). */}
+          <span className="font-normal">{tierMeaning}{subsetNote && ` ${subsetNote}`}</span>{' '}
+          <Link href={`${POPULATION_ROUTES.quality}#niveis`} locale={locale} className="font-normal text-ink underline decoration-scale underline-offset-4 hover:decoration-ink">
+            {pt ? 'Os três níveis' : 'The three tiers'}
+          </Link>
+        </>
+      ),
+    },
+    {
+      label: pt ? 'Versão' : 'Release',
+      // The release's own date; GitHub's upload day is on /dados (FR3-09).
+      value: <span className="font-normal">{pt ? `v${POPULATION_RELEASE}, datada de ${formatDay(POPULATION_PUBLISHED, locale)}` : `v${POPULATION_RELEASE}, dated ${formatDay(POPULATION_PUBLISHED, locale)}`}</span>,
+    },
+    {
+      label: pt ? 'Respostas' : 'Answers',
+      value: (
+        <>
+          <b className="fig text-[17px]">{answered === asked ? asked : `${answered}/${asked}`}</b>{municipalityFigures ? ' ' : ', '}
+          {municipalityFigures && (
+            <><QualityBadge kind="municipality" locale={locale} label={pt ? `Valores do concelho de ${fallbackName ?? place.municipalityName}` : `${fallbackName ?? place.municipalityName} municipality figures`} />{' '}</>
+          )}
+          <span className="font-normal">{publication}</span>{' '}
+          <a href="#citar" className="font-normal text-ink underline decoration-scale underline-offset-4 hover:decoration-ink">{pt ? 'Como citar' : 'How to cite'}</a>
+        </>
+      ),
+    },
+  ];
+
   return (
     <main id="main-content" tabIndex={-1}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbs }} />
+      <PopulationSectionNav current="parish" locale={locale} />
+      {/* The parish's name is the title; the page states its place, the sign of a
+          single run with the honesty line, and the parish's facts as a register. */}
       <PageHero
-        compact
-        field="periwinkle"
-        measure="wide"
+        compact={long}
         back={{ href: regionHref, label: regionHeading, locale }}
-        eyebrow={EYEBROW[locale]}
-        title={parishQuestion(place.name, locale)}
-        lede={
-          <>
-            {pt
-              ? `${Subject} fica no ${municipalityPhrase(place.municipalityName, locale)} (${regionInline}). Os Censos 2021 contaram ${formatCount(place.censusPopulation, locale)} residentes (INE). A população gerada tem ${formatCount(place.generatedHouseholds, locale)} agregados, contando cada alojamento coletivo como um.`
-              : `${Subject} is in ${place.municipalityName} municipality (${regionInline}). The 2021 Census counted ${formatCount(place.censusPopulation, locale)} residents (INE). The generated population has ${formatCount(place.generatedHouseholds, locale)} households, counting each collective living quarter as one.`}
-            {' '}
-            <strong className="font-semibold text-ink">{HONESTY.synthetic[locale]}</strong>
-          </>
-        }
+        title={place.name}
+        lede={pt
+          ? `Freguesia do ${municipalityPhrase(place.municipalityName, locale)}. Código ${code}.`
+          : `A parish in ${place.municipalityName} municipality. Code ${code}.`}
         meta={
-          <>
-            <QualityBadge kind={place.tier} locale={locale} />
-            {municipalityFigures && (
-              <QualityBadge
-                kind="municipality"
-                locale={locale}
-                label={pt ? `Valores do concelho de ${fallbackName ?? place.municipalityName}` : `${fallbackName ?? place.municipalityName} municipality figures`}
-              />
-            )}
-            <span className="font-mono text-[13px] text-stone-600">{pt ? 'Código' : 'Code'} {code}</span>
-            <span className="basis-full text-[13px] text-stone-600 sm:basis-auto">{publication}</span>
-            {/* What the tier means for this parish, on screen rather than in a tooltip (CL3-05). */}
-            <span className="basis-full max-w-3xl text-[13px] leading-relaxed text-stone-600">
-              {tierMeaning}{subsetNote && ` ${subsetNote}`}
-            </span>
-            {nearby && (
-              <span className="basis-full text-[13px] font-semibold text-ink">
-                {pt ? 'Freguesia mais próxima da tua localização (calculada no teu dispositivo).' : 'The parish nearest your location (worked out on your device).'}
-              </span>
-            )}
-          </>
+          <div className="grid w-full gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)]">
+            {/* One model run, so no margin: the sign and the caveat come before the first figure. */}
+            <p className="flex max-w-xl flex-col gap-1 border-t border-rule pt-3 text-[15px] leading-[22px] text-ink lg:self-start">
+              <NoMargin locale={locale} />
+              <span>{HONESTY.synthetic[locale]}</span>
+              {nearby && (
+                <span className="mt-2 font-semibold">
+                  {pt ? 'Freguesia mais próxima da tua localização (calculada no teu dispositivo).' : 'The parish nearest your location (worked out on your device).'}
+                </span>
+              )}
+            </p>
+            <Register title={pt ? 'Ficha desta freguesia' : 'This parish on file'} items={facts} className="text-ink" />
+          </div>
         }
       />
-      <PopulationSectionNav current="parish" locale={locale} />
 
       <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-8"><div className="max-w-5xl">
         <div className="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10">
@@ -497,11 +527,11 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
 
           <div className="flex min-w-0 flex-col gap-12">
             <Disclosure
-              className="rounded-2xl border border-line bg-cream lg:hidden"
-              summaryClassName="w-full px-4 py-0.5"
-              summary={pt ? 'Nesta página: oito perguntas' : 'On this page: eight questions'}
+              className="border-y border-rule lg:hidden"
+              summaryClassName="w-full py-0.5"
+              summary={pt ? 'Nesta página' : 'On this page'}
             >
-              {renderToc('px-2 pb-3')}
+              {renderToc('-ml-2.5 pb-3')}
             </Disclosure>
 
             <HowToRead
@@ -516,7 +546,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
 
             {groups.map(group => (
               <section key={group.id} aria-labelledby={group.id} className="flex flex-col gap-5">
-                <h2 id={group.id} data-rail className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
+                <h2 id={group.id} data-rail className="text-[26px] leading-7 text-ink md:text-[28px] md:leading-8">
                   {group.title[locale]}
                 </h2>
                 {group.recipes.map(recipe => {
@@ -558,46 +588,50 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
             ))}
 
             <section id="partilhar" data-rail aria-labelledby="partilhar-title">
-              <h2 id="partilhar-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
-                {pt ? `Queres mostrar ${long ? THIS_PARISH.subject.pt : 'esta freguesia'} a alguém?` : 'Want to show this parish to someone?'}
+              <h2 id="partilhar-title" className="border-b border-ink pb-2 text-[26px] leading-7 text-ink md:text-[28px] md:leading-8">
+                {pt ? 'Partilhar' : 'Share'}
               </h2>
-              <div className="mt-4 rounded-2xl border border-line bg-cream p-5 md:p-6">
-                <ShareTools model={shareModel} url={url} title={parishQuestion(place.name, locale)} locale={locale} />
+              <div className="mt-4">
+                <ShareTools model={shareModel} url={url} title={place.name} locale={locale} />
               </div>
             </section>
 
             <section id="citar" data-rail aria-labelledby="citar-title">
-              <h2 id="citar-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
-                {pt ? 'Como cito esta página?' : 'How do I cite this page?'}
+              <h2 id="citar-title" className="text-[26px] leading-7 text-ink md:text-[28px] md:leading-8">
+                {pt ? 'Como citar' : 'How to cite'}
               </h2>
-              <div className="mt-4 rounded-2xl border border-line bg-cream p-5 md:p-6">
-                <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-[140px_minmax(0,1fr)]">
-                  <dt className="font-bold text-ink">{pt ? 'Freguesia' : 'Parish'}</dt>
-                  <dd className="text-stone-700">{place.name} <span className="font-mono text-[13px]">({code})</span>, CAOP 2021</dd>
-                  <dt className="font-bold text-ink">{pt ? 'Versão' : 'Release'}</dt>
-                  <dd className="text-stone-700">
-                    {/* The release's own date; GitHub's upload day is on /dados (FR3-09). */}
-                    {pt
-                      ? `População sintética v${POPULATION_RELEASE}, datada de ${formatDay(POPULATION_PUBLISHED, locale)}`
-                      : `Synthetic population v${POPULATION_RELEASE}, dated ${formatDay(POPULATION_PUBLISHED, locale)}`}
-                  </dd>
-                  <dt className="font-bold text-ink">{pt ? 'Licença' : 'Licence'}</dt>
-                  <dd className="text-stone-700">
-                    <a href={pt ? 'https://creativecommons.org/licenses/by-nc/4.0/deed.pt' : 'https://creativecommons.org/licenses/by-nc/4.0/'} className="tap-target font-semibold text-ink underline underline-offset-4">CC BY-NC 4.0</a>
-                    {pt ? ' (população sintética); dados do INE: CC BY 4.0' : ' (synthetic population); INE data: CC BY 4.0'}
-                  </dd>
-                  <dt className="font-bold text-ink">{pt ? 'Atribuição' : 'Attribution'}</dt>
-                  <dd className="text-stone-700">{SHORT_ATTRIBUTION[locale]}</dd>
-                </dl>
-                <p className="mt-5 text-[12px] font-semibold text-graphite">{pt ? 'Citar como' : 'Cite as'}</p>
-                <p className="mt-1 break-words text-[15px] leading-relaxed text-ink">{citation}</p>
+              <div className="mt-3">
+                <Register
+                  className="text-[14px]"
+                  items={[
+                    { label: pt ? 'Citar como' : 'Cite as', value: <span className="break-words font-normal">{citation}</span> },
+                    { label: pt ? 'Freguesia' : 'Parish', value: <span className="font-normal">{place.name} <span className="font-mono text-[13px]">({code})</span>, CAOP 2021</span> },
+                    {
+                      label: pt ? 'Versão' : 'Release',
+                      // The release's own date; GitHub's upload day is on /dados (FR3-09).
+                      value: <span className="font-normal">{pt
+                        ? `População sintética v${POPULATION_RELEASE}, datada de ${formatDay(POPULATION_PUBLISHED, locale)}`
+                        : `Synthetic population v${POPULATION_RELEASE}, dated ${formatDay(POPULATION_PUBLISHED, locale)}`}</span>,
+                    },
+                    {
+                      label: pt ? 'Licença' : 'Licence',
+                      value: (
+                        <span className="font-normal">
+                          <a href={pt ? 'https://creativecommons.org/licenses/by-nc/4.0/deed.pt' : 'https://creativecommons.org/licenses/by-nc/4.0/'} className="tap-target font-semibold text-ink underline underline-offset-4">CC BY-NC 4.0</a>
+                          {pt ? ' (população sintética); dados do INE: CC BY 4.0' : ' (synthetic population); INE data: CC BY 4.0'}
+                        </span>
+                      ),
+                    },
+                    { label: pt ? 'Atribuição' : 'Attribution', value: <span className="font-normal">{SHORT_ATTRIBUTION[locale]}</span> },
+                  ]}
+                />
                 <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
                   <CopyButton text={citation} label={pt ? 'Copiar citação' : 'Copy citation'} locale={locale} />
                   <Link href={`${POPULATION_ROUTES.data}#citar`} locale={locale} className="inline-flex min-h-11 items-center text-sm font-semibold text-ink underline underline-offset-4">
                     {pt ? 'Atribuição completa e ficheiros' : 'Full attribution and files'}
                   </Link>
                 </div>
-                <p className="mt-3 text-xs text-stone-500">
+                <p className="mt-3 text-[12.5px] text-graphite">
                   {pt
                     ? 'Cada resposta tem também o seu link permanente, com a versão: «Copiar link», no fundo de cada cartão.'
                     : 'Each answer also has its own permanent link, with the release: “Copy link”, at the foot of each card.'}
@@ -606,15 +640,15 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
             </section>
 
             <section id="outras" data-rail aria-labelledby="outras-title">
-              <h2 id="outras-title" className="text-2xl font-bold tracking-[-0.02em] text-ink md:text-[1.75rem]">
+              <h2 id="outras-title" className="border-b border-ink pb-2 text-[26px] leading-7 text-ink md:text-[28px] md:leading-8">
                 {pt ? `Outras freguesias do ${municipalityPhrase(place.municipalityName, locale)}` : `Other parishes in ${place.municipalityName} municipality`}
               </h2>
               {neighbours === null ? (
-                <div aria-hidden="true" className="mt-4 h-24 rounded-xl bg-parchment motion-safe:animate-pulse" />
+                <div aria-hidden="true" className="mt-4 h-24 bg-field motion-safe:animate-pulse" />
               ) : neighbours.length > 0 ? (
                 <ul className="mt-4 grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
                   {neighbours.map(other => (
-                    <li key={other.code} className="border-b border-line">
+                    <li key={other.code} className="border-b border-grid">
                       <ParishLink code={other.code} locale={locale} className="flex min-h-11 items-center py-2 text-[15px] text-ink underline decoration-line underline-offset-4 hover:decoration-ink">
                         {other.name}
                       </ParishLink>
@@ -622,7 +656,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                   ))}
                 </ul>
               ) : (
-                <p className="mt-3 text-[15px] text-stone-600">
+                <p className="mt-3 text-[15px] text-graphite">
                   {pt ? `${Subject} é a única freguesia do concelho.` : `${Subject} is the only parish in the municipality.`}
                 </p>
               )}
@@ -656,23 +690,23 @@ function HowToRead(props: HowToReadInput & { union: boolean }) {
   const pt = locale === 'pt';
   const items = howToReadItems(props);
   return (
-    <details className="group rounded-2xl border border-line bg-cream">
-      <summary className="flex min-h-12 cursor-pointer list-none items-center gap-1.5 px-5 py-3 [&::-webkit-details-marker]:hidden">
+    <details className="group border-y border-rule">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center gap-1.5 py-2.5 [&::-webkit-details-marker]:hidden">
         <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-ink transition-transform duration-150 group-open:rotate-180 motion-reduce:transition-none" />
-        <h2 id="ler-title" className="text-lg font-bold tracking-[-0.02em] text-ink">{pt ? 'Como ler esta página' : 'How to read this page'}</h2>
+        <h2 id="ler-title" className="text-[17px] font-semibold text-ink">{pt ? 'Como ler esta página' : 'How to read this page'}</h2>
       </summary>
-      <div className="border-t border-line px-5 pb-5 pt-4">
+      <div className="border-t border-grid pb-5 pt-4">
         <dl className="grid gap-x-8 gap-y-3 md:grid-cols-2">
           {items.map(item => (
             <div key={item.term}>
-              <dt className="text-sm font-bold text-ink">{item.term}</dt>
-              <dd className="mt-0.5 text-sm leading-relaxed text-stone-600">{item.body}</dd>
+              <dt className="text-sm font-semibold text-ink">{item.term}</dt>
+              <dd className="mt-0.5 text-sm leading-relaxed text-graphite">{item.body}</dd>
             </div>
           ))}
           {union && (
             <div>
-              <dt className="text-sm font-bold text-ink">{pt ? 'Uma união de freguesias de 2021' : 'A 2021 union of parishes'}</dt>
-              <dd className="mt-0.5 text-sm leading-relaxed text-stone-600">
+              <dt className="text-sm font-semibold text-ink">{pt ? 'Uma união de freguesias de 2021' : 'A 2021 union of parishes'}</dt>
+              <dd className="mt-0.5 text-sm leading-relaxed text-graphite">
                 {pt
                   ? 'Esta é a freguesia tal como existia nos Censos 2021 (CAOP 2021). A Lei n.º 25-A/2025 desagregou 135 uniões em 302 freguesias, com efeito a partir das eleições autárquicas de outubro de 2025; se esta foi uma delas, os números referem-se à união de 2021.'
                   : 'This is the parish as it stood in the 2021 Census (CAOP 2021). Law 25-A/2025 split 135 unions into 302 parishes, effective from the October 2025 local elections; if this was one of them, the figures refer to the 2021 union.'}

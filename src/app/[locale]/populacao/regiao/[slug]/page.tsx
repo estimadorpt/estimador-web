@@ -1,7 +1,6 @@
 import { setRequestLocale } from '@/i18n/request-locale';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { MapPinned } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PageHero } from '@/components/PageHero';
@@ -73,20 +72,18 @@ export default async function RegionPage({ params }: { params: Params }) {
       ])) }} />
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <PopulationSectionNav current="region" locale={locale} />
       {/* The parish pages' header: population data pages share one. */}
       <PageHero
         compact
-        field="periwinkle"
         measure="wide"
-        back={{ href: POPULATION_ROUTES.hub, label: pt ? 'Todas as regiões' : 'All regions', locale }}
-        icon={<MapPinned aria-hidden="true" className="h-4 w-4" />}
+        back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
         eyebrow={pt ? `População sintética · v${POPULATION_RELEASE} · Censos 2021` : `Synthetic population · v${POPULATION_RELEASE} · 2021 Census`}
         title={pt ? `Freguesias ${ofRegion(region.id, region.name, locale)}` : `Parishes of ${ofRegion(region.id, region.name, locale)}`}
         lede={pt
           ? `${counts} Escolhe uma no mapa ou na lista para ver as respostas da população gerada.`
           : `${counts} Pick one on the map or in the list to see the generated population’s answers.`}
       />
-      <PopulationSectionNav current="region" locale={locale} />
 
       <div className="mx-auto max-w-7xl px-4 py-8 md:py-10">
         <PopulationMap locale={locale} initialRegion={region.id} height={480} />

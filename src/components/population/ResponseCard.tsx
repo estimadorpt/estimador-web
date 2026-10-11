@@ -25,7 +25,7 @@ export interface ResponseCardProps {
   placeName: string;
   /** The município whose figures a fallback shows. */
   fallbackName?: string | null;
-  /** Hide the question (when the surrounding page already asks it, e.g. a game clue). */
+  /** No permalink in the footer (a game clue, where the page already names the parish). */
   bare?: boolean;
   /** Slot above the chart, e.g. a guess-before-you-look control. */
   before?: ReactNode;
@@ -48,7 +48,7 @@ export interface ResponseCardProps {
 }
 
 /**
- * One approved response as a card: the question, who is counted, where the
+ * One approved response as a card: its title, who is counted, where the
  * figures are from (parish, or the município when the bundle falls back), the
  * chart, its table twin, the source (how the field was made) and a versioned
  * link to the response. A refused response is a designed empty state with the
@@ -59,23 +59,24 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
   const cells = readCells(record, recipe, locale);
   const status = statusLine(record, locale, placeName, fallbackName);
   const anchor = copy.anchor;
-  const title = bare ? copy.short[locale] : copy.question[locale];
+  // A statement of what the card shows ("Escolaridade"), not a question.
+  const title = copy.short[locale];
   const caveat = RECIPE_CAVEAT[recipeName]?.[locale];
 
   return (
     <div
       id={anchor}
       data-rail
-      className={`rounded-2xl outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-300 ${highlight ? 'outline-2 outline-ink outline-solid' : 'outline-2 outline-transparent outline-solid'} ${className}`}
+      className={`outline-offset-4 motion-safe:transition-[outline-color] motion-safe:duration-300 ${highlight ? 'outline-2 outline-ink outline-solid' : 'outline-2 outline-transparent outline-solid'} ${className}`}
     >
-      {/* The footer is drawn here rather than by DataCard so the copy-link action can sit in it, out of the way of the question. */}
+      {/* The footer is drawn here rather than by DataCard so the copy-link action can sit in it, out of the way of the title. */}
       <DataCard title={title} subtitle={copy.population[locale]} locale={locale}>
         {/* Only on the parish's own figures: a município fallback names its município in the status line. */}
-        {place && record.decision === 'publish' && <p className="-mt-1 mb-4 text-xs font-semibold leading-relaxed text-stone-600">{place}</p>}
+        {place && record.decision === 'publish' && <p className="-mt-1 mb-4 text-[12px] leading-relaxed text-graphite">{place}</p>}
         {(status.badge || status.text) && (
           <div className="mb-4 flex flex-wrap items-center gap-2">
             {status.badge}
-            {status.text && <p className="text-sm text-stone-600">{status.text}</p>}
+            {status.text && <p className="text-sm text-graphite">{status.text}</p>}
           </div>
         )}
         {record.decision === 'refuse' ? (
@@ -86,18 +87,20 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
             {revealed && <ResponseChart recipeName={recipeName} recipe={recipe} record={record} cells={cells} locale={locale} bars={bars} guess={guess} />}
             {revealed && (
               <ChartTable
-                caption={`${copy.question[locale]} ${status.where}`}
+                caption={`${copy.short[locale]} ${status.where}`}
                 columns={[...recipe.dimensions.map(dimension => DIMENSION_LABEL[dimension]?.[locale] ?? dimension), locale === 'pt' ? 'Percentagem' : 'Share']}
                 rows={twinRows(recipeName, cells, locale)}
               />
             )}
           </>
         )}
-        {/* A caveat we owe a correction for (POP3-ACC-01): set apart from the source line, in the caveat colour. */}
+        {/* A caveat we owe a correction for (POP3-ACC-01): set apart from the source line, with a bold lead-in and an ink rule. */}
         {caveat && record.decision !== 'refuse' && (
-          <p role="note" className="mt-4 border-l-2 border-amber-500 pl-3 text-xs leading-relaxed text-stone-700">{caveat}</p>
+          <p role="note" className="mt-4 border-l-2 border-ink pl-3 text-[13px] leading-relaxed text-ink">
+            <b className="font-semibold">{locale === 'pt' ? 'Nota.' : 'Note.'}</b> {caveat}
+          </p>
         )}
-        <CardFooter source={sourceLine(recipeName, locale, { withCaveat: false })} id={bare ? null : record.id} question={copy.question[locale]} recipe={recipeName} locale={locale} />
+        <CardFooter source={sourceLine(recipeName, locale, { withCaveat: false })} id={bare ? null : record.id} title={copy.short[locale]} recipe={recipeName} locale={locale} />
       </DataCard>
     </div>
   );
@@ -107,23 +110,23 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
  * A card's footer, in the same two rows on every card whatever the source's
  * length (UXD2-12): the source sentence on its own; then "Como foi feito",
  * which opens the methodology at the row of the field this card groups or
- * derives and names the card's question to a screen reader (MR2-10,
+ * derives and names the card's title to a screen reader (MR2-10,
  * PRO2-11), on the left, and the release with the full result id (the one a
  * permalink resolves, PRO2-01) and "Copiar link" on the right.
  */
-export function CardFooter({ source, id, question, recipe, locale }: { source: string; id: string | null; question: string; recipe: string; locale: Locale }) {
+export function CardFooter({ source, id, title, recipe, locale }: { source: string; id: string | null; title: string; recipe: string; locale: Locale }) {
   return (
-    <footer className="mt-4 border-t border-line pt-2 text-xs text-stone-500">
+    <footer className="mt-4 border-t border-grid pt-2 text-[12.5px] text-graphite">
       <p className="pt-1">{source}</p>
       <div className="flex flex-wrap items-center justify-between gap-x-4">
         <TextLink href={`${POPULATION_ROUTES.methodology}#${methodologyAnchorForRecipe(recipe, locale)}`} locale={locale}>
           {locale === 'pt' ? 'Como foi feito' : 'How it was made'}
-          <span className="sr-only">: {question}</span>
+          <span className="sr-only">: {title}</span>
         </TextLink>
         {id && (
           <span className="inline-flex flex-wrap items-center justify-end gap-x-3">
-            <span className="font-mono text-[11px] text-stone-500 [overflow-wrap:anywhere]">v{POPULATION_RELEASE} · {id}</span>
-            <CopyPermalink id={id} question={question} locale={locale} />
+            <span className="font-mono text-[11px] text-graphite [overflow-wrap:anywhere]">v{POPULATION_RELEASE} · {id}</span>
+            <CopyPermalink id={id} title={title} locale={locale} />
           </span>
         )}
       </div>
@@ -155,7 +158,7 @@ function statusLine(record: CompactResponse, locale: Locale, placeName: string, 
 }
 
 /**
- * "Quem vive sozinho trabalha?": each age band has its own percentages. A band
+ * "Quem vive sozinho e o trabalho": each age band has its own percentages. A band
  * with nobody living alone in it has every share at zero: it gets a sentence
  * instead of three empty bars, and one row in the table twin.
  */
@@ -166,9 +169,9 @@ function AloneByAge({ cells, locale }: { cells: ReturnType<typeof readCells>; lo
         const nobody = emptyBand(rows);
         return (
           <div key={band}>
-            <h4 className="mb-2 text-[12px] font-semibold text-graphite">{band}</h4>
+            <h4 className="mb-2 border-b border-ink pb-1 text-[12px] font-semibold text-graphite">{band}</h4>
             {nobody ? (
-              <p className="rounded-xl bg-parchment px-3 py-2.5 text-sm text-stone-600">{NOBODY_ALONE[locale]}</p>
+              <p className="text-sm text-graphite">{NOBODY_ALONE[locale]}</p>
             ) : (
               <ShareBars cells={rows} locale={locale} stacked />
             )}
@@ -203,9 +206,9 @@ export function ResponseChart({ recipeName, recipe, record, cells, locale, bars 
 
 function Refused({ locale }: { locale: Locale }) {
   return (
-    <div className="flex items-center gap-4 rounded-xl bg-parchment p-4">
+    <div className="flex items-center gap-4 border-t border-grid pt-3">
       <EmptyStateMark />
-      <p className="text-sm text-stone-600">
+      <p className="text-sm text-graphite">
         {locale === 'pt'
           ? 'Sem resposta publicada para esta freguesia na versão 1.0. Não mostramos um número que não passou o controlo de qualidade.'
           : 'No published answer for this parish in release 1.0. We do not show a number that did not pass the quality check.'}
@@ -219,13 +222,13 @@ function Refused({ locale }: { locale: Locale }) {
  * names the release and resolves to this card on its parish page. The button
  * names its card for a screen reader, and the result is announced.
  */
-function CopyPermalink({ id, question, locale }: { id: string; question: string; locale: Locale }) {
+function CopyPermalink({ id, title, locale }: { id: string; title: string; locale: Locale }) {
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const pt = locale === 'pt';
   const url = () => responsePermalink(window.location.origin, locale, id);
   return (
     <span className="inline-flex flex-wrap items-center gap-x-2">
-      <span role="status" className="text-xs text-stone-600">
+      <span role="status" className="text-[12.5px] text-graphite">
         {state === 'copied' ? (pt ? 'Link copiado.' : 'Link copied.') : state === 'failed' ? url() : ''}
       </span>
       <button
@@ -239,11 +242,11 @@ function CopyPermalink({ id, question, locale }: { id: string; question: string;
             setState('failed');
           }
         }}
-        className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-ink"
+        className="inline-flex min-h-11 items-center gap-1.5 text-[12.5px] font-semibold text-ink underline decoration-scale underline-offset-4 hover:decoration-ink"
       >
         <Link2 aria-hidden="true" className="h-3.5 w-3.5" />
         {pt ? 'Copiar link' : 'Copy link'}
-        <span className="sr-only">{pt ? ` para «${question}»` : ` to “${question}”`}</span>
+        <span className="sr-only">{pt ? ` para «${title}»` : ` to “${title}”`}</span>
       </button>
     </span>
   );

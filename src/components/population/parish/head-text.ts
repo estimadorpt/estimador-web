@@ -2,9 +2,10 @@
  * A parish page's <title> and meta description (SPV-01, SEO3-04), the one
  * implementation the page ships. 6,184 parish URLs are in the sitemap, and a
  * third of the names are unions of two to five parishes, so the full name
- * cannot always fit: the title is the page's question with the "União das
- * freguesias de" prefix dropped and the one site suffix (no section tag, no
- * second separator), and the description names the full union while it fits,
+ * cannot always fit: the title is the parish's name with the "União das
+ * freguesias de" prefix dropped, its município while it fits, what the page
+ * is ("população sintética") and the one site suffix (no second separator),
+ * and the description names the full union while it fits,
  * then the short name, and adds the INE count only while it stays within 155
  * characters. A name that still does not fit is cut before a whole word, never
  * after "de" or "e", and a parenthesis it cuts into is closed (S-08). The
@@ -30,11 +31,11 @@ export function shortParishName(name: string): string {
 }
 
 /**
- * The preposition and the name a sentence puts after "Quem vive" or
- * "agregados": a union's full name is feminine ("na União das freguesias do
- * Vade"); with the prefix dropped, the article it ended on still agrees ("no
- * Vade", "na Ribeira do Neiva", "em Milhazes, Vilar de Figos e Faria"); any
- * other name takes "em", as the h1 does (parishQuestion). English: "in".
+ * The preposition and the name a sentence puts after "agregados": a union's
+ * full name is feminine ("na União das freguesias do Vade"); with the prefix
+ * dropped, the article it ended on still agrees ("no Vade", "na Ribeira do
+ * Neiva", "em Milhazes, Vilar de Figos e Faria"); any other name takes "em".
+ * English: "in".
  */
 export function placePhrase(name: string, locale: Locale, { short }: { short: boolean }): { lead: string; place: string } {
   const match = UNION_PREFIX.exec(name);
@@ -100,14 +101,21 @@ function fit(text: string, max: number): string {
   return `${tidy || text.slice(0, max - 1).replace(TRAILING_PUNCTUATION, '')}…`;
 }
 
-/** "Quem vive no Vade? | estimador.pt": the page's question and the one site suffix. */
-export function parishTitle(name: string, locale: Locale): string {
-  const { lead, place } = placePhrase(name, locale, { short: true });
-  const ask = (text: string) => (locale === 'pt' ? `Quem vive ${lead} ${text}?` : `Who lives ${lead} ${text}?`);
-  const question = ask(place);
-  if (question.length <= TITLE_MAX) return siteTitle(question);
-  const room = TITLE_MAX - (question.length - place.length);
-  return siteTitle(ask(fit(place, room)));
+/**
+ * "Misericórdia, Lisboa: população sintética | estimador.pt": the parish's
+ * name (the page's h1, without a union's prefix), its município while the
+ * whole fits, what the page is, and the one site suffix. A name too long
+ * for both drops the município (a name that long is told apart by itself),
+ * then is cut before a whole word.
+ */
+export function parishTitle(name: string, municipalityName: string, locale: Locale): string {
+  const place = shortParishName(name);
+  const tail = locale === 'pt' ? ': população sintética' : ': synthetic population';
+  const withMunicipality = `${place}, ${municipalityName}${tail}`;
+  if (withMunicipality.length <= TITLE_MAX) return siteTitle(withMunicipality);
+  const alone = `${place}${tail}`;
+  if (alone.length <= TITLE_MAX) return siteTitle(alone);
+  return siteTitle(`${fit(place, TITLE_MAX - tail.length)}${tail}`);
 }
 
 export function parishDescription({ name, municipalityName, censusPopulation, municipalityFigures, locale }: {

@@ -21,6 +21,7 @@ import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent
 import { interpolateZoom } from 'd3';
 import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus, RotateCcw, Shuffle } from 'lucide-react';
 import { MarkLoading } from '@/components/brand/MarkLoading';
+import { hatchTransform, TierPatterns, TierSwatch, tierFill } from './tier-hatch';
 
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { parishHref } from '@/components/population/ParishLink';
@@ -58,15 +59,6 @@ export interface PopulationMapProps {
 type Kind = 'region' | 'municipality' | 'parish';
 interface Subject { kind: Kind; code: string }
 
-/**
- * Quality tier, as calm fills: A and B in two mint shades, C in the caveat
- * tint (amber means caveat on this site). The tier is metadata, not a statistic.
- */
-const TIER_FILL = {
-  A: 'var(--color-mint-soft)',
-  B: 'color-mix(in srgb, var(--color-mint-soft) 45%, var(--color-cream))',
-  C: 'var(--color-amber-200)',
-} as const;
 const MAX_ZOOM = 10;
 /** The zoom controls' column (44px and its 12px inset): a region framed beside them keeps clear of it (UXM3V-01: Santa Maria sat under them). */
 const CONTROL_ROOM = 56;
@@ -98,7 +90,7 @@ const copy = {
     concelho: (name: string) => `Concelho de ${name}`,
     residents: 'Residentes',
     ine: 'INE, Censos 2021',
-    tier: (tier: 'A' | 'B' | 'C') => `Qualidade ${tier}`,
+    tier: (tier: 'A' | 'B' | 'C') => `Nível ${tier}`,
     tierLegend: { A: 'A · ajuste próximo, 2 000 ou mais residentes', B: 'B · ajuste próximo, 500 ou mais residentes', C: 'C · freguesia pequena ou ajuste mais fraco' },
     tierShort: { A: 'Ajuste próximo às tabelas do INE.', B: 'Ajuste próximo às tabelas do INE.', C: 'Lê estes números com mais cuidado.' },
     tierWhy: (tier: 'A' | 'B' | 'C') => `O que quer dizer o nível ${tier}?`,
@@ -115,7 +107,7 @@ const copy = {
     hintRegion: 'Escolhe um concelho para ver as suas freguesias.',
     hintMunicipality: 'Escolhe uma freguesia para ver o seu retrato. Num ecrã tátil, aproxima com dois dedos.',
     legendTitle: 'Nível de qualidade: A / B / C',
-    legendLater: 'As freguesias ganham a cor do seu nível de qualidade (A, B ou C) quando escolhes um concelho.',
+    legendLater: 'As freguesias ganham o preenchimento do seu nível de qualidade (A em branco, B tracejado, C quadriculado) quando escolhes um concelho.',
     list: 'Ver como lista',
     listCountry: 'Distritos e regiões autónomas',
     listRegion: (name: string) => `Concelhos: ${name}`,
@@ -148,7 +140,7 @@ const copy = {
     concelho: (name: string) => `Municipality of ${name}`,
     residents: 'Residents',
     ine: 'INE, 2021 Census',
-    tier: (tier: 'A' | 'B' | 'C') => `Quality ${tier}`,
+    tier: (tier: 'A' | 'B' | 'C') => `Tier ${tier}`,
     tierLegend: { A: 'A · close fit, 2,000 or more residents', B: 'B · close fit, 500 or more residents', C: 'C · small parish or weaker fit' },
     tierShort: { A: 'A close fit to INE’s tables.', B: 'A close fit to INE’s tables.', C: 'Read these numbers with more care.' },
     tierWhy: (tier: 'A' | 'B' | 'C') => `What does tier ${tier} mean?`,
@@ -165,7 +157,7 @@ const copy = {
     hintRegion: 'Choose a municipality to see its parishes.',
     hintMunicipality: 'Choose a parish to see its portrait. On a touch screen, zoom with two fingers.',
     legendTitle: 'Quality tier: A / B / C',
-    legendLater: 'Parishes take the colour of their quality tier (A, B or C) once you pick a municipality.',
+    legendLater: 'Parishes take the fill of their quality tier (A plain, B hatched, C cross-hatched) once you pick a municipality.',
     list: 'View as a list',
     listCountry: 'Districts and autonomous regions',
     listRegion: (name: string) => `Municipalities: ${name}`,
@@ -330,6 +322,8 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
 
   const apply = useCallback((next: Camera) => {
     if (viewport && cameraGroup.current) cameraGroup.current.setAttribute('transform', cameraTransform(next, viewport));
+    // The tier hatches keep their screen spacing while the camera moves.
+    svgRef.current?.querySelectorAll('pattern[data-hatch]').forEach(pattern => pattern.setAttribute('patternTransform', hatchTransform(1 / next.k)));
   }, [viewport]);
 
   useEffect(() => {
@@ -603,7 +597,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
           d={shape.d}
           data-code={shape.code}
           data-kind="region"
-          className={`${styles.shape} cursor-pointer ${interactive ? 'fill-cream stroke-stone-300 hover:fill-moss' : current ? 'fill-cream stroke-stone-300' : 'fill-paper stroke-line hover:fill-moss'}`}
+          className={`${styles.shape} cursor-pointer ${interactive ? 'fill-paper stroke-stone-300 hover:fill-grid' : current ? 'fill-paper stroke-stone-300' : 'fill-paper stroke-rule hover:fill-grid'}`}
           strokeWidth={interactive ? 1 : 0.75}
           vectorEffect="non-scaling-stroke"
           tabIndex={interactive ? 0 : undefined}
@@ -627,7 +621,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
           d={shape.d}
           data-code={shape.code}
           data-kind="municipality"
-          className={`${styles.shape} cursor-pointer ${interactive || current ? 'fill-cream stroke-stone-300 hover:fill-moss' : 'fill-paper stroke-stone-300 hover:fill-moss'}`}
+          className={`${styles.shape} cursor-pointer fill-paper stroke-stone-300 hover:fill-grid`}
           strokeWidth={interactive ? 1 : 0.75}
           vectorEffect="non-scaling-stroke"
           tabIndex={interactive ? 0 : undefined}
@@ -646,7 +640,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
     return byName(parishShapes, s => s.name).map(shape => {
       const parish = parishByCode?.get(shape.code);
       const tier = parish?.tier;
-      const fill = tier ? TIER_FILL[tier] : 'var(--color-cream)';
+      const fill = tierFill(tier, uid);
       // Parishes arrive as a ripple from the middle of the município (decorative, 0–220 ms).
       const delay = Math.round((Math.hypot(shape.label[0] - centre[0], shape.label[1] - centre[1]) / reach) * 220);
       return (
@@ -655,9 +649,9 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
           d={shape.d}
           data-code={shape.code}
           data-kind="parish"
-          className={`${styles.shape} ${styles.parish} cursor-pointer stroke-cream`}
+          className={`${styles.shape} ${styles.parish} cursor-pointer stroke-scale`}
           style={{ fill, animationDelay: `${delay}ms` }}
-          strokeWidth={1.25}
+          strokeWidth={1}
           vectorEffect="non-scaling-stroke"
           tabIndex={0}
           role={onSelectParish ? 'button' : 'link'}
@@ -665,7 +659,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
         />
       );
     });
-  }, [parishShapes, currentMunicipality, municipalityShapes, parishByCode, t, onSelectParish]);
+  }, [parishShapes, currentMunicipality, municipalityShapes, parishByCode, t, onSelectParish, uid]);
 
   const currentOutline = useMemo(() => {
     if (!currentMunicipality || !parishShapes) return null;
@@ -774,11 +768,11 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
       onPointerDownCapture={() => setWantPlaces(true)}
       onFocusCapture={() => setWantPlaces(true)}
     >
-      <div className="overflow-hidden rounded-2xl border border-line bg-cream">
+      <div className="overflow-hidden border border-rule bg-paper">
         {/* Where you are, and a way back up */}
-        <div className="flex min-h-14 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-line px-3 py-1.5 sm:px-4">
+        <div className="flex min-h-14 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-rule px-3 py-1.5 sm:px-4">
           <nav aria-label={t.breadcrumb} className="flex min-w-0 items-center gap-1">
-            <button type="button" onClick={up} disabled={view.level === 'country'} aria-label={t.up} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-none text-ink hover:bg-parchment disabled:pointer-events-none disabled:opacity-30">
+            <button type="button" onClick={up} disabled={view.level === 'country'} aria-label={t.up} className="inline-flex h-11 w-11 shrink-0 items-center justify-center text-ink hover:bg-field disabled:pointer-events-none disabled:opacity-30">
               <ChevronLeft aria-hidden="true" className="h-5 w-5" />
             </button>
             <ol className="flex min-w-0 flex-wrap items-center gap-x-1 text-sm">
@@ -786,16 +780,16 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                 const last = index === crumbs.length - 1;
                 return (
                   <li key={crumb.label + index} className="flex min-w-0 items-center gap-1">
-                    {index > 0 && <ChevronRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-stone-500" />}
+                    {index > 0 && <ChevronRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-graphite" />}
                     {last
                       ? <span aria-current="location" className="truncate font-bold text-ink">{crumb.label}</span>
-                      : <button type="button" onClick={() => goTo(crumb.view)} className="inline-flex min-h-11 items-center truncate text-stone-600 underline underline-offset-4 hover:text-ink">{crumb.label}</button>}
+                      : <button type="button" onClick={() => goTo(crumb.view)} className="inline-flex min-h-11 items-center truncate text-ink underline decoration-scale underline-offset-4 hover:decoration-ink">{crumb.label}</button>}
                   </li>
                 );
               })}
             </ol>
           </nav>
-          <button type="button" onClick={() => { void random(); }} className="inline-flex min-h-11 items-center gap-2 rounded-none px-2 text-sm font-semibold text-ink hover:bg-parchment">
+          <button type="button" onClick={() => { void random(); }} className="inline-flex min-h-11 items-center gap-2 px-2 text-sm font-semibold text-ink hover:bg-field">
             <Shuffle aria-hidden="true" className="h-4 w-4" />
             {t.random}
           </button>
@@ -805,8 +799,8 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
           // The archipelago spans 600 km: its three groups, each framed on its own, make every
           // island tappable on a phone (UXM3V-01). Rendered from the first paint on this region,
           // so the map does not move when it arrives.
-          <div role="group" aria-label={t.islandGroups} className="flex flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-line px-3 py-1.5 sm:gap-x-2 sm:px-4">
-            <span aria-hidden="true" className="text-[12px] font-semibold text-graphite">{t.islands}</span>
+          <div role="group" aria-label={t.islandGroups} className="flex flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-rule px-3 py-1.5 sm:gap-x-2 sm:px-4">
+            <span aria-hidden="true" className="text-[12px] text-graphite">{t.islands}</span>
             {AZORES_GROUPS.map(item => (
               <button
                 key={item.id}
@@ -814,7 +808,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                 aria-pressed={group === item.id}
                 aria-label={t.islandGroup(item.label[locale])}
                 onClick={() => frameGroup(item.id)}
-                className={`inline-flex min-h-11 items-center rounded-none border px-2.5 text-sm font-semibold transition-colors duration-150 sm:px-3 ${group === item.id ? 'border-ink bg-ink text-paper' : 'border-line bg-cream text-ink hover:bg-parchment'}`}
+                className={`inline-flex min-h-11 items-center border px-2.5 text-sm font-semibold transition-colors duration-150 sm:px-3 ${group === item.id ? 'border-ink bg-ink text-paper' : 'border-rule bg-paper text-ink hover:bg-field'}`}
               >
                 {item.label[locale]}
               </button>
@@ -828,7 +822,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
             basis-auto, not flex-1, in the column layout: a zero basis there overrode the
             height and collapsed the frame to 0px until the drawing arrived (UXM3-03).
           */}
-          <div ref={frameRef} className={`relative min-w-0 shrink-0 basis-auto bg-parchment @3xl:flex-1 ${styles.frame}`} style={{ ['--map-height' as string]: `${height}px` }}>
+          <div ref={frameRef} className={`relative min-w-0 shrink-0 basis-auto bg-field @3xl:flex-1 ${styles.frame}`} style={{ ['--map-height' as string]: `${height}px` }}>
             {/* A bypass for keyboard readers: every place on the map is a Tab stop (A11Y3-05). */}
             <a
               href={`#${uid}-list`}
@@ -838,7 +832,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                 if (details) details.open = true;
                 listRef.current?.querySelector<HTMLElement>('summary')?.focus();
               }}
-              className="sr-only z-10 min-h-11 items-center rounded-none border border-line bg-cream px-3 text-sm font-semibold text-ink underline underline-offset-4 focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:inline-flex"
+              className="sr-only z-10 min-h-11 items-center border border-ink bg-paper px-3 text-sm font-semibold text-ink underline underline-offset-4 focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:inline-flex"
             >
               {t.skip}
             </a>
@@ -863,6 +857,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                 onPointerUp={endDrag}
                 onPointerCancel={endDrag}
               >
+                <defs><TierPatterns uid={uid} scale={camera ? 1 / camera.k : 1} /></defs>
                 <g ref={cameraGroup} transform={camera ? cameraTransform(camera, viewport) : undefined} id={`${uid}-plane`}>
                   <g id={`${uid}-land`}>{regionLayer}</g>
                   {insetFrames}
@@ -887,7 +882,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                       textAnchor="middle"
                       dominantBaseline="central"
                       className="fill-ink"
-                      style={{ fontSize: 12, fontWeight: 600, paintOrder: 'stroke', stroke: 'var(--color-cream)', strokeWidth: 3, strokeLinejoin: 'round' }}
+                      style={{ fontSize: 12, fontWeight: 600, paintOrder: 'stroke', stroke: 'var(--color-paper)', strokeWidth: 3, strokeLinejoin: 'round' }}
                     >
                       {label.text}
                     </text>
@@ -897,41 +892,41 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
             )}
 
             {!countryShapes && !failed && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-sm text-stone-600" role="status">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-sm text-graphite" role="status">
                 <MarkLoading height={22} color="var(--color-ink)" />
                 {t.loading}
               </div>
             )}
             {countryShapes && loadingLevel && (
-              <div className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-2 rounded-md bg-cream/90 px-2 py-1 text-xs text-stone-600" role="status">
+              <div className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-2 bg-field px-1 text-[12px] text-graphite" role="status">
                 <MarkLoading height={12} color="var(--color-ink)" />
                 {t.loadingLevel}
               </div>
             )}
             {failed && (
-              <div className="absolute inset-x-3 top-3 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-cream p-3 text-sm text-ink" role="alert">
+              <div className="absolute inset-x-3 top-3 flex flex-wrap items-center gap-3 border-t-2 border-ink bg-paper p-3 text-sm text-ink" role="alert">
                 <span>{t.failed}</span>
-                <button type="button" onClick={() => setAttempt(n => n + 1)} className="inline-flex min-h-11 items-center rounded-none border border-line bg-cream px-4 font-semibold hover:bg-parchment">{t.retry}</button>
+                <button type="button" onClick={() => setAttempt(n => n + 1)} className="inline-flex min-h-11 items-center border border-rule bg-paper px-4 font-semibold hover:bg-field">{t.retry}</button>
               </div>
             )}
 
             {/* Locator: where the current view sits in the country */}
             {countryShapes && view.level !== 'country' && !compact && (
-              <button type="button" onClick={() => goTo(COUNTRY)} className="absolute bottom-3 left-3 rounded-xl border border-line bg-cream/90 p-1.5 hover:bg-cream" aria-label="Portugal">
+              <button type="button" onClick={() => goTo(COUNTRY)} className="absolute bottom-3 left-3 border border-rule bg-paper p-1.5 hover:border-ink" aria-label="Portugal">
                 <Locator countryShapes={countryShapes} region={currentRegion} landId={`${uid}-land`} />
               </button>
             )}
 
             {/* Zoom controls */}
-            <div className="absolute bottom-3 right-3 flex flex-col overflow-hidden rounded-xl border border-line bg-cream" role="group" aria-label={t.controls}>
-              <button type="button" onClick={() => zoomBy(1.6)} disabled={!canZoomIn} aria-label={t.zoomIn} className="inline-flex h-11 w-11 items-center justify-center text-ink hover:bg-parchment disabled:opacity-30">
+            <div className="absolute bottom-3 right-3 flex flex-col overflow-hidden border border-rule bg-paper" role="group" aria-label={t.controls}>
+              <button type="button" onClick={() => zoomBy(1.6)} disabled={!canZoomIn} aria-label={t.zoomIn} className="inline-flex h-11 w-11 items-center justify-center text-ink hover:bg-field disabled:opacity-30">
                 <Plus aria-hidden="true" className="h-5 w-5" />
               </button>
-              <button type="button" onClick={zoomOut} disabled={!canZoomOut} aria-label={t.zoomOut} className="inline-flex h-11 w-11 items-center justify-center border-t border-line text-ink hover:bg-parchment disabled:opacity-30">
+              <button type="button" onClick={zoomOut} disabled={!canZoomOut} aria-label={t.zoomOut} className="inline-flex h-11 w-11 items-center justify-center border-t border-rule text-ink hover:bg-field disabled:opacity-30">
                 <Minus aria-hidden="true" className="h-5 w-5" />
               </button>
               {manual && (
-                <button type="button" onClick={() => setManual(null)} aria-label={t.reset} className="inline-flex h-11 w-11 items-center justify-center border-t border-line text-ink hover:bg-parchment">
+                <button type="button" onClick={() => setManual(null)} aria-label={t.reset} className="inline-flex h-11 w-11 items-center justify-center border-t border-rule text-ink hover:bg-field">
                   <RotateCcw aria-hidden="true" className="h-4 w-4" />
                 </button>
               )}
@@ -939,63 +934,62 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
           </div>
 
           {/* What the pointer, the keyboard or a tap is on */}
-          <div className="flex flex-col gap-4 border-t border-line p-4 @3xl:w-80 @3xl:shrink-0 @3xl:border-l @3xl:border-t-0">
+          <div className="flex flex-col gap-4 border-t border-rule p-4 @3xl:w-80 @3xl:shrink-0 @3xl:border-l @3xl:border-t-0">
             {/* Not a live region: the focused shape names itself, and level changes are announced below. */}
             <div ref={readoutRef} className="sm:min-h-[9.5rem]">
               {readout?.kind === 'parish' ? (
                 <>
-                  <p className="text-[12px] font-semibold text-graphite">{t.parish}</p>
-                  <p className="mt-1 font-display text-xl font-extrabold leading-tight text-ink">{readout.name}</p>
+                  <p className="text-[12px] text-graphite">{t.parish}</p>
+                  <p className="mt-1 text-xl font-bold leading-tight text-ink">{readout.name}</p>
                   {readout.parish && (
                     <>
-                      <p className="mt-1 text-sm text-stone-600">{t.concelho(readout.parish.municipalityName)}</p>
+                      <p className="mt-1 text-sm text-graphite">{t.concelho(readout.parish.municipalityName)}</p>
                       <p className="mt-2 text-sm text-ink">
-                        {t.residents}: <span className="font-display font-extrabold tabular-nums">{formatCount(readout.parish.censusPopulation, locale)}</span>
-                        <span className="text-stone-500"> · {t.ine}</span>
+                        {t.residents}: <span className="fig">{formatCount(readout.parish.censusPopulation, locale)}</span>
+                        <span className="text-graphite"> · {t.ine}</span>
                       </p>
                       <TierLine parish={readout.parish} t={t} locale={locale} />
                     </>
                   )}
                   <div className="mt-1">{parishAction(readout.code, onSelectParish ? t.choose : t.open)}</div>
-                  {preview?.code === readout.code && preview.touch && <p className="text-xs text-stone-500">{t.tapAgain}</p>}
+                  {preview?.code === readout.code && preview.touch && <p className="text-[12px] text-graphite">{t.tapAgain}</p>}
                 </>
               ) : readout ? (
                 <>
-                  <p className="text-[12px] font-semibold text-graphite">{readout.kind === 'region' ? t.region(readout.code) : t.municipality}</p>
-                  <p className="mt-1 font-display text-xl font-extrabold leading-tight text-ink">{readout.name}</p>
+                  <p className="text-[12px] text-graphite">{readout.kind === 'region' ? t.region(readout.code) : t.municipality}</p>
+                  <p className="mt-1 text-xl font-bold leading-tight text-ink">{readout.name}</p>
                   {readout.kind === 'municipality' && places && (
-                    <p className="mt-1 text-sm text-stone-600">{regionTitle(regionOfMunicipality(readout.code), regionName(regionOfMunicipality(readout.code)) ?? '', locale)}</p>
+                    <p className="mt-1 text-sm text-graphite">{regionTitle(regionOfMunicipality(readout.code), regionName(regionOfMunicipality(readout.code)) ?? '', locale)}</p>
                   )}
                   {countOf(readout.kind, readout.code) && <p className="mt-2 text-sm text-ink">{countOf(readout.kind, readout.code)}</p>}
                 </>
               ) : (
                 <>
-                  <p className="text-[12px] font-semibold text-graphite">{view.level === 'country' ? t.map : view.level === 'region' ? t.region(view.region) : t.municipality}</p>
-                  <p className="mt-1 font-display text-xl font-extrabold leading-tight text-ink">{here}</p>
-                  <p className="mt-2 text-sm text-stone-600">{hint}</p>
+                  <p className="text-[12px] text-graphite">{view.level === 'country' ? t.map : view.level === 'region' ? t.region(view.region) : t.municipality}</p>
+                  <p className="mt-1 text-xl font-bold leading-tight text-ink">{here}</p>
+                  <p className="mt-2 text-sm text-graphite">{hint}</p>
                 </>
               )}
             </div>
 
-            {/* The tier colours exist only once a município's parishes are drawn; before that the legend would explain nothing on screen. */}
+            {/* The tier fills exist only once a município's parishes are drawn; before that the legend would explain nothing on screen. */}
             {view.level === 'municipality' ? (
               <div>
-                <p className="mb-1.5 text-[12px] font-semibold text-graphite">{t.legendTitle}</p>
-                <ul className="flex flex-col gap-1.5 text-xs text-stone-700">
+                <p className="mb-1.5 text-[12px] text-graphite">{t.legendTitle}</p>
+                <ul className="flex flex-col gap-1.5 text-[12.5px] text-ink">
                   {(['A', 'B', 'C'] as const).map(tier => (
                     <li key={tier} className="flex items-center gap-2">
-                      {/* The letter sits in the swatch: A and B are close in colour. */}
-                      <span aria-hidden="true" className="inline-flex h-5 w-6 shrink-0 items-center justify-center rounded-none border border-line text-[11px] font-bold text-ink" style={{ backgroundColor: TIER_FILL[tier] }}>{tier}</span>
+                      <TierSwatch tier={tier} />
                       <span>{t.tierLegend[tier]}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             ) : (
-              <p className="text-xs leading-relaxed text-stone-500">{t.legendLater}</p>
+              <p className="text-[12px] leading-relaxed text-graphite">{t.legendLater}</p>
             )}
 
-            <p className="mt-auto text-xs leading-relaxed text-stone-500">
+            <p className="mt-auto text-[12px] leading-relaxed text-graphite">
               {t.source}{' '}
               {view.level === 'country' ? t.insets : currentRegion === 'madeira' ? t.selvagens : ''}
             </p>
@@ -1005,28 +999,28 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
 
         {/* The table twin: the same places as a list */}
         <div ref={listRef} id={`${uid}-list`}>
-        <Disclosure className="border-t border-line px-3 sm:px-4" summary={t.list}>
+        <Disclosure className="border-t border-rule px-3 sm:px-4" summary={t.list}>
           {children && (
             <div className="pb-4">
               <p className="mb-2 text-sm font-bold text-ink">
                 {view.level === 'country' ? t.listCountry : view.level === 'region' ? t.listRegion(regionTitle(view.region, here, locale)) : t.listMunicipality(here)}
               </p>
-              {children.kind === 'parish' && <p className="mb-2 text-xs text-stone-500">{t.residents}: {t.ine}.</p>}
+              {children.kind === 'parish' && <p className="mb-2 text-[12px] text-graphite">{t.residents}: {t.ine}.</p>}
               <ul className="grid max-h-[28rem] grid-cols-1 gap-x-6 overflow-auto @md:grid-cols-2 @3xl:grid-cols-3">
                 {children.kind === 'parish'
                   ? (children.items as Parish[]).map(parish => (
-                    <li key={parish.code} className="flex items-center justify-between gap-3 border-b border-line py-1.5 text-sm">
+                    <li key={parish.code} className="flex items-center justify-between gap-3 border-b border-grid py-1.5 text-sm">
                       {onSelectParish
                         ? <button type="button" onClick={() => chooseParish(parish.code)} className="min-h-11 text-left text-ink underline underline-offset-4">{parish.name}</button>
                         : <a href={parishHref(parish.code, locale)} className="inline-flex min-h-11 items-center text-ink underline underline-offset-4">{parish.name}</a>}
-                      <span className="shrink-0 text-right text-xs text-stone-500">
+                      <span className="shrink-0 text-right text-[12px] text-graphite">
                         {t.tier(parish.tier)}{parish.level === 'municipality' ? ` · ${t.fallback}` : ''}
                         <span className="block tabular-nums">{t.residents}: {formatCount(parish.censusPopulation, locale)}</span>
                       </span>
                     </li>
                   ))
                   : (children.items as Array<{ code: string; name: string }>).map(item => (
-                    <li key={item.code} className="border-b border-line py-1.5 text-sm">
+                    <li key={item.code} className="border-b border-grid py-1.5 text-sm">
                       <button
                         type="button"
                         onClick={() => goTo(children.kind === 'region' ? { level: 'region', region: item.code } : { level: 'municipality', region: regionOfMunicipality(item.code), municipality: item.code })}
@@ -1056,14 +1050,14 @@ function TierLine({ parish, t, locale }: { parish: Parish; t: (typeof copy)['pt'
   return (
     <div className="mt-2 space-y-1">
       <div className="flex flex-wrap items-center gap-1.5">
-        <QualityBadge kind={parish.tier} locale={locale} />
-        {fallback && <QualityBadge kind="municipality" locale={locale} label={t.fallback} />}
-        <span className="text-xs text-stone-600">{t.tierShort[parish.tier]}</span>
+        <QualityBadge kind={parish.tier} locale={locale} className="text-sm" />
+        {fallback && <QualityBadge kind="municipality" locale={locale} label={t.fallback} className="text-sm" />}
+        <span className="text-[12.5px] text-graphite">{t.tierShort[parish.tier]}</span>
       </div>
       <Disclosure summary={t.tierWhy(parish.tier)}>
-        <p className="pb-1 text-xs leading-relaxed text-stone-600">{tierMeaningFor(parish.tier, parish.publicationPopulation, parish.censusPopulation)[locale]}</p>
+        <p className="pb-1 text-[12.5px] leading-relaxed text-graphite">{tierMeaningFor(parish.tier, parish.publicationPopulation, parish.censusPopulation)[locale]}</p>
       </Disclosure>
-      {fallback && <p className="text-xs leading-relaxed text-stone-600">{t.fallbackLong(parish.municipalityName)}</p>}
+      {fallback && <p className="text-[12.5px] leading-relaxed text-graphite">{t.fallbackLong(parish.municipalityName)}</p>}
     </div>
   );
 }

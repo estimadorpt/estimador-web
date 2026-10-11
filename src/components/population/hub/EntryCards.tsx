@@ -1,12 +1,9 @@
-import type { ReactNode } from 'react';
-import { BookOpen, Download, Puzzle, ShieldCheck, Shapes } from 'lucide-react';
 import { Action } from '@/components/brand/Action';
 import { POPULATION_DOWNLOADS, POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import type { Locale } from '@/lib/population/labels';
 
 interface Entry {
   key: string;
-  icon: ReactNode;
   kicker: string;
   title: string;
   text: string;
@@ -18,11 +15,9 @@ interface Entry {
 
 function entries(locale: Locale): Entry[] {
   const pt = locale === 'pt';
-  const icon = (Icon: typeof Puzzle) => <Icon aria-hidden="true" className="h-4 w-4" />;
   return [
     {
       key: 'game',
-      icon: icon(Puzzle),
       kicker: pt ? 'Freguesia misteriosa' : 'Mystery parish',
       title: pt ? 'Qual destas quatro é a freguesia de hoje?' : 'Which of these four is today’s parish?',
       text: pt
@@ -34,9 +29,8 @@ function entries(locale: Locale): Entry[] {
     },
     {
       key: 'quality',
-      icon: icon(ShieldCheck),
       kicker: pt ? 'Qualidade' : 'Quality',
-      title: pt ? 'Como sabemos que funciona?' : 'How do we know it works?',
+      title: pt ? 'A população gerada, medida contra o INE' : 'The generated population, measured against INE',
       text: pt
         ? 'A população gerada comparada com as tabelas que o INE publica, e o que quer dizer cada nível de qualidade.'
         : 'The generated population set against the tables INE publishes, and what each quality tier means.',
@@ -45,7 +39,6 @@ function entries(locale: Locale): Entry[] {
     },
     {
       key: 'data',
-      icon: icon(Download),
       kicker: pt ? 'Dados' : 'Data',
       title: pt ? 'Faz download da população' : 'Download the population',
       text: pt
@@ -57,9 +50,8 @@ function entries(locale: Locale): Entry[] {
     },
     {
       key: 'methodology',
-      icon: icon(BookOpen),
       kicker: pt ? 'Metodologia' : 'Methodology',
-      title: pt ? 'Como foi gerada?' : 'How was it generated?',
+      title: pt ? 'Como a população foi gerada' : 'How the population was generated',
       text: pt
         ? 'O modelo, os dados dos Censos 2021 em que foi calibrado e o que esta versão ainda não permite dizer.'
         : 'The model, the 2021 Census data it was calibrated to, and what this release cannot yet tell you.',
@@ -68,9 +60,8 @@ function entries(locale: Locale): Entry[] {
     },
     {
       key: 'explainer',
-      icon: icon(Shapes),
       kicker: pt ? 'Explicador' : 'Explainer',
-      title: pt ? 'Como se lê uma população sintética?' : 'How do you read a synthetic population?',
+      title: pt ? 'Como ler uma população sintética' : 'How to read a synthetic population',
       text: pt
         ? 'Um bairro imaginado, com 100 pessoas inventadas, mostra como ler e como se constrói uma população sintética.'
         : 'An imagined neighbourhood of 100 invented people shows how a synthetic population is read and how it is built.',
@@ -80,19 +71,20 @@ function entries(locale: Locale): Entry[] {
   ];
 }
 
-/** Where to go next: the daily game first, then quality, data, method and the explainer. */
+/**
+ * Where to go next: the daily game first, then quality, data, method and the
+ * explainer. Each is a ruled entry (a rule above, the name, a line, one
+ * action), not a card. The game's title stays a question: it is the game's.
+ */
 export function EntryCards({ locale }: { locale: Locale }) {
   return (
-    <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <ul className="grid gap-x-8 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
       {entries(locale).map(entry => (
-        <li key={entry.key} className={`flex flex-col rounded-2xl border border-line bg-cream p-5 md:p-6 ${entry.wide ? 'md:col-span-2' : ''}`}>
-          <p className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-graphite">
-            {entry.icon}
-            {entry.kicker}
-          </p>
-          <h3 className={`text-ink ${entry.wide ? 'text-2xl' : 'text-xl'}`}>{entry.title}</h3>
-          <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-stone-600">{entry.text}</p>
-          <div className="mt-auto pt-4">
+        <li key={entry.key} className={`flex flex-col border-t ${entry.wide ? 'border-ink md:col-span-2' : 'border-rule'} pt-3`}>
+          <p className="mb-1 text-[12px] text-graphite">{entry.kicker}</p>
+          <h3 className={`text-ink ${entry.wide ? 'text-[24px] leading-7' : 'text-[19px] leading-6'}`}>{entry.title}</h3>
+          <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-graphite">{entry.text}</p>
+          <div className="mt-auto pt-2">
             <Action
               href={entry.href}
               locale={entry.external ? undefined : locale}

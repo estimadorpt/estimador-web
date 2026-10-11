@@ -6,10 +6,12 @@
  * value, never draw a remainder, and show suppressed or absent categories as
  * words, never as zero. A published zero ("0.0%" with a share of 0) is drawn
  * as no bar at all, so an empty category never looks like a sliver of people. Bars are on an absolute 0–100% scale, so a bar's length
- * is its share, not its rank among the others.
+ * is its share, not its rank among the others. Bars and columns are ink on a
+ * scale rule, with no grey track behind them (the instrument's ProbBar).
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ACCENT, DEEMPHASIS, FURNITURE, SERIES } from '@/components/viz/theme';
+import { BRAND } from '@/lib/brand';
+import { DEEMPHASIS, FURNITURE, SERIES } from '@/components/viz/theme';
 import { NOT_PUBLISHED, REASON_COPY, type Locale } from '@/lib/population/labels';
 import type { ReadCell } from '@/lib/population/compact';
 
@@ -17,15 +19,32 @@ const muted = (cell: ReadCell, locale: Locale) =>
   cell.state === 'suppressed' ? REASON_COPY.cell_below_minimum[locale] : NOT_PUBLISHED[locale];
 
 /**
+ * An ink bar on a thin scale rule, as wide as its column: `fraction` of the
+ * rule (0–1), ticks at the ends and the middle. No track behind it; a zero
+ * draws no bar. Decorative: the figure beside it carries the value.
+ */
+export function BarMark({ fraction, className = '' }: { fraction: number | null; className?: string }) {
+  const width = fraction === null || fraction <= 0 ? 0 : Math.max(0.8, Math.min(1, fraction) * 100);
+  return (
+    <span className={`relative block h-3.5 ${className}`} aria-hidden="true">
+      {width > 0 && <span className="absolute left-0 top-0.5 block h-2 bg-ink" style={{ width: `${width}%` }} />}
+      <span className="absolute inset-x-0 bottom-0 block h-px bg-scale" />
+      <span className="absolute bottom-0 left-0 block h-1 w-px bg-scale" />
+      <span className="absolute bottom-0 left-1/2 block h-1 w-px bg-scale" />
+      <span className="absolute bottom-0 right-0 block h-1 w-px bg-scale" />
+    </span>
+  );
+}
+
+/**
  * Horizontal bars, one per category, value at the tip. On a wide screen the
  * label, bar and value share a row; `stacked` keeps the narrow layout (label
  * and value on one line, the bar under them) at every width, for bars set in
  * narrow columns.
  */
-export function ShareBars({ cells, locale, color = ACCENT, stacked = false }: {
+export function ShareBars({ cells, locale, stacked = false }: {
   cells: ReadCell[];
   locale: Locale;
-  color?: string;
   stacked?: boolean;
 }) {
   return (
@@ -36,13 +55,9 @@ export function ShareBars({ cells, locale, color = ACCENT, stacked = false }: {
           className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 ${stacked ? '' : 'sm:grid-cols-[minmax(120px,190px)_minmax(0,1fr)_64px]'}`}
         >
           <span className="text-sm text-ink">{cell.labels[cell.labels.length - 1]}</span>
-          <span className={`order-3 col-span-2 h-2.5 overflow-hidden rounded-none ${stacked ? '' : 'sm:order-none sm:col-span-1'}`} style={{ backgroundColor: FURNITURE.track }} aria-hidden="true">
-            {cell.share !== null && cell.share > 0 && (
-              <span className="block h-full rounded-none" style={{ width: `${Math.max(0.8, cell.share * 100)}%`, backgroundColor: color }} />
-            )}
-          </span>
+          <BarMark fraction={cell.share} className={`order-3 col-span-2 ${stacked ? '' : 'sm:order-none sm:col-span-1'}`} />
           <span
-            className={`text-right text-sm tabular-nums ${cell.state === 'published' ? 'font-bold text-ink' : 'text-stone-500'}`}
+            className={`text-right text-sm tabular-nums ${cell.state === 'published' ? 'font-bold text-ink' : 'text-graphite'}`}
             title={cell.state === 'published' ? undefined : muted(cell, locale)}
           >
             {cell.display}
@@ -93,10 +108,10 @@ export function AgeColumns({ cells, locale, height = 200, hint = true }: {
   return (
     <div>
       {/* The slider below announces each step itself (aria-valuetext); this line is for the eye. */}
-      <p className="mb-1 min-h-5 text-sm text-stone-600" aria-hidden="true">
+      <p className="mb-1 min-h-5 text-sm text-graphite" aria-hidden="true">
         {readout
           ? <><span className="font-semibold text-ink">{readout.labels[0]}</span>{locale === 'pt' ? ' anos: ' : ': '}<span className="font-bold tabular-nums text-ink">{readout.display}</span></>
-          : hint && <span className="text-stone-500">{locale === 'pt' ? 'Toca numa coluna, passa-lhe o cursor ou usa as setas para ler o valor.' : 'Tap or hover over a column, or use the arrow keys, to read its value.'}</span>}
+          : hint && <span>{locale === 'pt' ? 'Toca numa coluna, passa-lhe o cursor ou usa as setas para ler o valor.' : 'Tap or hover over a column, or use the arrow keys, to read its value.'}</span>}
       </p>
       {/*
         One tab stop for the whole chart, exposed as a slider over the age
@@ -105,7 +120,7 @@ export function AgeColumns({ cells, locale, height = 200, hint = true }: {
       */}
       <div
         ref={box}
-        className="relative w-full overflow-hidden rounded-md"
+        className="relative w-full overflow-hidden"
         style={{ height }}
         tabIndex={0}
         role="slider"
@@ -150,7 +165,7 @@ export function AgeColumns({ cells, locale, height = 200, hint = true }: {
               <rect x={left + i * band} y={0} width={band} height={height - bottom} fill="transparent" />
               {cell.share === null
                 ? <line x1={x + 2} x2={x + bar - 2} y1={8 + plotHeight - 3} y2={8 + plotHeight - 3} stroke={DEEMPHASIS} strokeWidth={2} strokeDasharray="2 2" />
-                : cell.share === 0 ? null : <rect x={x} y={8 + plotHeight - h} width={bar} height={Math.max(1, h)} rx={3} fill={active === null || active === i ? ACCENT : DEEMPHASIS} />}
+                : cell.share === 0 ? null : <rect x={x} y={8 + plotHeight - h} width={bar} height={Math.max(1, h)} fill={active === null || active === i ? BRAND.ink : DEEMPHASIS} />}
               {showLabel && (() => {
                 // The last label ("90+") would overhang the right edge when centred: end-align it there.
                 const centre = x + bar / 2;
@@ -208,11 +223,12 @@ export function HundredPeople({ cells, locale, unit = 'people', guess, compact =
           <span
             key={i}
             className="aspect-square w-full rounded-full"
-            style={{ backgroundColor: SERIES[series] ?? DEEMPHASIS, boxShadow: yours !== null && i < yours ? `0 0 0 1.5px var(--color-paper), 0 0 0 3px var(--color-ink)` : undefined }}
+            // The reader's guess is an ink outline set off the dot, not a shadow.
+            style={{ backgroundColor: SERIES[series] ?? DEEMPHASIS, ...(yours !== null && i < yours ? { outline: '1.5px solid var(--color-ink)', outlineOffset: '1.5px' } : {}) }}
           />
         ))}
       </div>
-      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-600">
+      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-graphite">
         {published.map((cell, i) => (
           <li key={cell.values.join('|')} className="flex items-center gap-1.5">
             <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: SERIES[i] ?? DEEMPHASIS }} aria-hidden="true" />
@@ -226,7 +242,7 @@ export function HundredPeople({ cells, locale, unit = 'people', guess, compact =
           </li>
         )}
       </ul>
-      <p className="mt-2 text-xs text-stone-500">{each}</p>
+      <p className="mt-2 text-xs text-graphite">{each}</p>
     </div>
   );
 }

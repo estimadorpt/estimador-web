@@ -49,7 +49,9 @@ export interface ShareFact {
 }
 
 export interface ShareCardModel {
+  /** The section, in sentence case: "População sintética · Censos 2021". */
   eyebrow: string;
+  /** The parish's name, as the page's h1 gives it. */
   title: string;
   /** "Águeda · Aveiro". */
   place: string;
@@ -57,13 +59,15 @@ export interface ShareCardModel {
   /** "Valores do concelho de Águeda" when any fact is the município's. */
   scopeNote: string | null;
   /**
-   * "Qualidade A · números da própria freguesia", when the facts are the
+   * "Nível A · números da própria freguesia", when the facts are the
    * parish's own; under 500 residents (the count the tier uses) it adds INE's
    * count of residents, since the card travels without the page that states it
    * (PRO3-02).
    */
   tierNote: string | null;
   honesty: string;
+  /** Beside the lone tick, before the facts: "Uma corrida do modelo, sem margem". */
+  runNote: string;
   /**
    * The licence's attribution, short form, for a card that travels on its own:
    * the source (INE, Censos 2021), that the information was modified, the
@@ -89,12 +93,6 @@ function shortDate(iso: string, locale: Locale): string {
 /** "https://estimador.pt/pt/populacao/freguesia/010103/" → "estimador.pt/pt/populacao/freguesia/010103". */
 function bareUrl(url: string): string {
   return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-}
-
-/** "Quem vive em Aguada de Cima?" / "Quem vive na União das freguesias de …?" */
-export function parishQuestion(name: string, locale: Locale): string {
-  if (locale === 'en') return `Who lives in ${name}?`;
-  return /^União (das|de) freguesias/i.test(name) ? `Quem vive na ${name}?` : `Quem vive em ${name}?`;
 }
 
 function slug(text: string): string {
@@ -162,7 +160,7 @@ export function shareCardModel({ record, recipes, name, municipalityName, region
     : null;
   return {
     eyebrow: locale === 'pt' ? 'População sintética · Censos 2021' : 'Synthetic population · 2021 Census',
-    title: parishQuestion(name, locale),
+    title: name,
     place: [municipalityName, regionLabel].filter(Boolean).join(' · '),
     facts,
     scopeNote: anyFallback
@@ -170,6 +168,7 @@ export function shareCardModel({ record, recipes, name, municipalityName, region
       : null,
     tierNote,
     honesty: HONESTY.synthetic[locale],
+    runNote: locale === 'pt' ? 'Uma corrida do modelo, sem margem' : 'One model run, no margin',
     attribution: locale === 'pt'
       ? `${SHORT_ATTRIBUTION.pt} · atribuição completa em estimador.pt/pt/populacao/dados`
       : `${SHORT_ATTRIBUTION.en} · full attribution at estimador.pt/en/populacao/dados`,
@@ -207,13 +206,40 @@ export function wrapLines(text: string, maxWidth: number, measure: (text: string
 const FONT = FONT_STACK;
 const font = (weight: number, size: number) => `${weight} ${size}px ${FONT}`;
 
-/** The weights the card uses; load them before drawing (document.fonts.load). */
-export const SHARE_CARD_FONTS = [font(800, 52), font(700, 20), font(600, 21), font(500, 24)];
+/** The weights the card uses; load them before drawing (document.fonts.load). Plex stops at 700. */
+export const SHARE_CARD_FONTS = [font(700, 64), font(700, 22), font(600, 21), font(500, 24)];
 
 /**
- * Lays the model out: the signature top left, the question and the place on
- * the left, up to three facts in a cream panel on the right, and the honesty
- * line and the source along the bottom. Paper ground, ink text, no mosaic.
+ * The lone tick on a short ruler (TickGlyph, NoMargin): one model run, no
+ * margin. Drawn at `x`, its ruler on `baseline`, `height` tall.
+ */
+function drawTick(ctx: CanvasRenderingContext2D, x: number, baseline: number, height: number) {
+  const width = Math.round(height * 1.7);
+  ctx.fillStyle = BRAND.ink;
+  ctx.fillRect(x, baseline - 1.5, width, 1.5);
+  ctx.fillRect(x, baseline - height * 0.3, 1.5, height * 0.3);
+  ctx.fillRect(x + width - 1.5, baseline - height * 0.3, 1.5, height * 0.3);
+  ctx.fillRect(x + width / 2 - 1.25, baseline - height, 2.5, height);
+  return width;
+}
+
+function rule(ctx: CanvasRenderingContext2D, x1: number, x2: number, y: number, color: string, lineWidth: number) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.beginPath();
+  ctx.moveTo(x1, y);
+  ctx.lineTo(x2, y);
+  ctx.stroke();
+}
+
+/**
+ * Lays the model out in the instrument's grammar, as the population link
+ * card does (scripts/lib/og-cards.mjs): the signature top left; the section
+ * over an ink rule; the parish's name and its place on the left; on the
+ * right, the lone tick of a single model run before the facts, set as a
+ * ruled register (an ink rule on top, hairlines between rows, no panel); and
+ * along the bottom, under an ink rule, the honesty line and the source. Ink
+ * on white, sentence case, no fill, no radius.
  */
 export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardModel): void {
   const { width, height } = SHARE_CARD;
@@ -227,9 +253,9 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
 
   // Signature: the published logo drawing (the interval mark in its 48×24
   // box and the outlined wordmark in the logo's 220×24 box), so it needs no font.
-  const markHeight = 30;
+  const markHeight = 28;
   ctx.save();
-  ctx.translate(pad, 56);
+  ctx.translate(pad, 48);
   ctx.scale(markHeight / 24, markHeight / 24);
   ctx.fillStyle = BRAND.ink;
   ctx.fill(new Path2D(MARK_FULL));
@@ -239,18 +265,20 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
   ctx.fill(new Path2D(WORDMARK_TLD));
   ctx.restore();
 
-  // Left column: eyebrow, question, place.
+  // The instrument's head: the section, in sentence case, over an ink rule.
+  ctx.fillStyle = BRAND.ink;
+  ctx.font = font(700, 22);
+  ctx.fillText(model.eyebrow, pad, 132);
+  rule(ctx, pad, width - pad, 150, BRAND.ink, 2);
+
+  // Left column: the parish's name, its place, the tier or município note.
   const hasFacts = model.facts.length > 0;
   const leftWidth = hasFacts ? 500 : width - pad * 2;
-  ctx.fillStyle = BRAND.muted;
-  ctx.font = font(700, 20);
-  ctx.fillText(model.eyebrow.toUpperCase(), pad, 172);
-
-  // The title takes the largest size at which the whole left column (question,
-  // place, tier or município note) ends above the bottom rule; long União names step down.
+  // The name takes the largest size at which the whole left column ends
+  // above the bottom rule; long União names step down.
   const divider = SHARE_CARD_DIVIDER;
   const leftBottom = divider - 28;
-  const titleTop = 172 + 22;
+  const titleTop = 160;
   ctx.font = font(500, 26);
   const placeLines = wrapLines(model.place, leftWidth, t => ctx.measureText(t).width, 2);
   ctx.font = font(600, 21);
@@ -258,23 +286,23 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
   // Three lines at most: a small parish's tier line also names its residents.
   const noteLines = note ? wrapLines(note, leftWidth, t => ctx.measureText(t).width, 3) : [];
   const layoutAt = (size: number) => {
-    ctx.font = font(800, size);
+    ctx.font = font(700, size);
     const lines = wrapLines(model.title, leftWidth, t => ctx.measureText(t).width, 5);
-    const lineHeight = Math.round(size * 1.12);
+    const lineHeight = Math.round(size * 1.1);
     const titleBaselines = lines.map((_, i) => titleTop + lineHeight * (i + 1));
-    let y = titleBaselines[titleBaselines.length - 1] + 42;
+    let y = titleBaselines[titleBaselines.length - 1] + 40;
     const placeBaselines = placeLines.map((_, i) => y + i * 32);
     y = placeBaselines[placeBaselines.length - 1] + (noteLines.length ? 40 : 0);
     const noteBaselines = noteLines.map((_, i) => y + i * 27);
     return { size, lines, titleBaselines, placeBaselines, noteBaselines, bottom: noteBaselines.at(-1) ?? placeBaselines.at(-1) ?? y };
   };
-  const sizes = [56, 50, 44, 40, 36, 32, 28, 24];
+  const sizes = [64, 56, 50, 44, 40, 36, 32, 28, 24];
   let left = layoutAt(sizes[sizes.length - 1]);
   for (const size of sizes) {
     const candidate = layoutAt(size);
     if (candidate.bottom <= leftBottom && candidate.lines.every(line => !line.endsWith('…'))) { left = candidate; break; }
   }
-  ctx.font = font(800, left.size);
+  ctx.font = font(700, left.size);
   ctx.fillStyle = BRAND.ink;
   left.lines.forEach((line, i) => ctx.fillText(line, pad, left.titleBaselines[i]));
   ctx.font = font(500, 26);
@@ -284,51 +312,37 @@ export function drawShareCard(ctx: CanvasRenderingContext2D, model: ShareCardMod
   ctx.fillStyle = BRAND.ink;
   noteLines.forEach((line, i) => ctx.fillText(line, pad, left.noteBaselines[i]));
 
-  // Right column: the facts in a cream panel with a hairline.
+  // Right column: the lone tick of a single run before any figure, then the
+  // facts as a register: label on the left, the figure on the right.
   if (hasFacts) {
-    const panelX = 620;
-    const panelY = 100;
-    const panelW = width - pad - panelX;
-    const panelH = divider - 24 - panelY;
-    ctx.fillStyle = BRAND.cream;
-    ctx.strokeStyle = BRAND.line;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    if (typeof ctx.roundRect === 'function') ctx.roundRect(panelX, panelY, panelW, panelH, 20);
-    else ctx.rect(panelX, panelY, panelW, panelH);
-    ctx.fill();
-    ctx.stroke();
+    const colX = 620;
+    const colW = width - pad - colX;
+    const tickWidth = drawTick(ctx, colX, 196, 20);
+    ctx.font = font(500, 20);
+    ctx.fillStyle = BRAND.muted;
+    ctx.fillText(wrapLines(model.runNote, colW - tickWidth - 12, t => ctx.measureText(t).width, 1)[0], colX + tickWidth + 12, 196);
 
-    const inner = panelW - 64;
-    const rowH = panelH / 3;
+    const top = 216;
+    rule(ctx, colX, colX + colW, top, BRAND.ink, 2);
+    const rowH = Math.floor((divider - 24 - top) / 3);
+    const valueWidth = 150;
     model.facts.forEach((fact, i) => {
-      const top = panelY + i * rowH;
-      if (i > 0) {
-        ctx.strokeStyle = BRAND.line;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(panelX + 32, top);
-        ctx.lineTo(panelX + panelW - 32, top);
-        ctx.stroke();
-      }
-      ctx.fillStyle = BRAND.ink;
-      ctx.font = font(800, 44);
-      ctx.fillText(fact.value, panelX + 32, top + 52);
+      const rowTop = top + i * rowH;
+      if (i > 0) rule(ctx, colX, colX + colW, rowTop, BRAND.grid, 1.5);
       ctx.font = font(500, 21);
       ctx.fillStyle = BRAND.ink;
-      wrapLines(fact.label, inner, t => ctx.measureText(t).width, 2).forEach((line, j) => {
-        ctx.fillText(line, panelX + 32, top + 80 + j * 24);
-      });
+      const lines = wrapLines(fact.label, colW - valueWidth - 16, t => ctx.measureText(t).width, 2);
+      const first = lines.length === 1 ? rowTop + 46 : rowTop + 34;
+      lines.forEach((line, j) => ctx.fillText(line, colX, first + j * 25));
+      ctx.font = font(700, 40);
+      ctx.textAlign = 'right';
+      ctx.fillText(fact.value, colX + colW, rowTop + 52);
+      ctx.textAlign = 'left';
     });
   }
 
-  // Bottom: the honesty line, never shortened, then the source.
-  ctx.strokeStyle = BRAND.line;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(pad, divider);
-  ctx.lineTo(width - pad, divider);
-  ctx.stroke();
+  // Bottom: an ink rule, then the honesty line, never shortened, and the source.
+  rule(ctx, pad, width - pad, divider, BRAND.ink, 1.5);
   // Four lines at most, 20 px each: the honesty line, the licence attribution
   // (it may take two), and the release, its date and the parish's address.
   const bottomWidth = width - pad * 2;

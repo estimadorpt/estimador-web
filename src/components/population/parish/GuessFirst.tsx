@@ -54,8 +54,8 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
   };
 
   const before = phase === 'guessing' ? (
-    <div className="mb-2 rounded-xl border border-line bg-paper p-4 md:p-5">
-      <p className="text-[12px] font-semibold text-graphite">{t.kicker}</p>
+    <div className="mb-2 border-t border-grid pt-3">
+      <p className="text-[12px] text-graphite">{t.kicker}</p>
       <label htmlFor={`${id}-guess`} className="mt-1.5 block text-base font-semibold text-ink">
         {PROMPT[recipeName][locale](where)}
       </label>
@@ -77,9 +77,9 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
           className="guess-range h-11 w-full min-w-0 flex-none cursor-pointer accent-[var(--color-ink)] sm:flex-1"
         />
         {/* The reader's number, not a published one: labelled, in a bordered field, and muted until they move the slider. */}
-        <div className="w-24 shrink-0 self-start rounded-none border border-dashed border-line px-2 py-1 text-right sm:self-auto" aria-hidden="true">
-          <p className="text-[11px] font-semibold text-stone-500">{t.yours}</p>
-          <output htmlFor={`${id}-guess`} className={`block font-display text-2xl font-extrabold tabular-nums ${touched ? 'text-ink' : 'text-stone-500'}`}>
+        <div className="w-24 shrink-0 self-start border border-dashed border-rule px-2 py-1 text-right sm:self-auto" aria-hidden="true">
+          <p className="text-[11px] text-graphite">{t.yours}</p>
+          <output htmlFor={`${id}-guess`} className={`fig block text-2xl ${touched ? 'text-ink' : 'text-graphite'}`}>
             {formatGuess(guess)}
           </output>
         </div>
@@ -93,17 +93,17 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
   ) : phase === 'open' ? null : (
     // Focus moves here after a reveal or a skip, so the result is read once (no live region on top
     // of it) and a keyboard reader sees where they are: the global ring on a visible block (A11Y3-12).
-    <div ref={result} tabIndex={-1} className="mb-4 flex flex-wrap items-stretch gap-3 rounded-xl border border-line bg-paper p-4">
+    <div ref={result} tabIndex={-1} className="mb-4 flex flex-wrap items-stretch gap-x-8 gap-y-3 border-t border-grid pt-3">
       {phase === 'revealed' && (
         <div className="min-w-[8rem]">
-          <p className="text-[12px] font-semibold text-graphite">{t.yours}</p>
-          <p className="font-display text-3xl font-extrabold tabular-nums text-ink">{formatGuess(guess)}</p>
+          <p className="text-[12px] text-graphite">{t.yours}</p>
+          <p className="fig text-3xl text-ink">{formatGuess(guess)}</p>
         </div>
       )}
       <div className="min-w-[8rem]">
-        <p className="text-[12px] font-semibold text-graphite">{t.published}</p>
-        <p className="font-display text-3xl font-extrabold tabular-nums text-ink">{published}</p>
-        <p className="text-xs text-stone-500">{headlineValue}</p>
+        <p className="text-[12px] text-graphite">{t.published}</p>
+        <p className="fig text-3xl text-ink">{published}</p>
+        <p className="text-[12px] text-graphite">{headlineValue}</p>
       </div>
       {phase === 'revealed' && (
         <p className="basis-full text-sm font-semibold text-ink sm:basis-auto sm:self-center">
@@ -139,7 +139,7 @@ function GuessDots({ guess, label }: { guess: number; label: string }) {
         {Array.from({ length: 100 }, (_, i) => (
           <span
             key={i}
-            className={`aspect-square w-full rounded-full motion-safe:transition-colors motion-safe:duration-150 ${i < guess ? 'bg-ink' : 'bg-parchment'}`}
+            className={`aspect-square w-full rounded-full motion-safe:transition-colors motion-safe:duration-150 ${i < guess ? 'bg-ink' : 'bg-rule'}`}
           />
         ))}
       </div>

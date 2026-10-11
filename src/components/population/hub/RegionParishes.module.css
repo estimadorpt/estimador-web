@@ -25,13 +25,11 @@
 
 
 .table thead th {
-  border-bottom: 2px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-ink);
   padding: 0.5rem;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-stone-600);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-graphite);
   text-align: left;
 }
 
@@ -40,7 +38,7 @@
 }
 
 .table tbody tr {
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-grid);
 }
 
 .table tbody tr:last-child {
@@ -59,7 +57,7 @@
   align-items: center;
   color: var(--color-ink);
   text-decoration: underline;
-  text-decoration-color: var(--color-line);
+  text-decoration-color: var(--color-scale);
   text-underline-offset: 4px;
 }
 
@@ -78,38 +76,24 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* The tier, as a letter chip: A and B plain, C a caveat (amber, with an info
-   mark), as QualityBadge draws them in the legend above the tables. */
+/* The tier, as a letter in semibold ink (tiers are reading guides, every
+   tier reads the same way); a município's figures, which the contract can
+   still express, as the word in the caveat colour with an info mark. No chip. */
 .table tbody td:nth-child(3) span {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  border-radius: 0.375rem;
-  padding: 0.125rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 600;
   white-space: nowrap;
-  background: var(--color-moss);
   color: var(--color-ink);
 }
 
-.table tbody td:nth-child(3) span[data-t='C'],
 .table tbody td:nth-child(3) span[data-t='M'] {
-  background: var(--color-amber-100);
-  color: var(--color-amber-900);
+  font-size: 0.75rem;
+  color: var(--color-amber-700);
 }
 
-.table tbody td:nth-child(3) span::before {
-  content: '';
-  width: 0.8rem;
-  height: 0.8rem;
-  flex-shrink: 0;
-  background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
-.table tbody td:nth-child(3) span[data-t='C']::before,
 .table tbody td:nth-child(3) span[data-t='M']::before {
   content: '';
   width: 0.8rem;
@@ -121,7 +105,7 @@
 }
 
 /* Last, so it wins over the rules above. On a phone the two short columns take only what they need (the count and a
-   letter chip), so the parish name gets the rest of the row instead of 62px. */
+   letter), so the parish name gets the rest of the row instead of 62px. */
 @media (max-width: 639.98px) {
   .table {
     table-layout: auto;

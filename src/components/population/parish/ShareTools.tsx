@@ -91,7 +91,7 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="max-w-2xl text-[15px] leading-relaxed text-stone-600">
+        <p className="max-w-2xl text-[15px] leading-relaxed text-graphite">
           {pt
             ? 'Partilha o link desta página ou faz download de um cartão (1200 × 630 px) para publicar. O cartão leva a fonte, a licença e o link para esta página.'
             : 'Share this page’s link or download a card (1200 × 630 px) to post. The card carries the source, the licence and the link to this page.'}
@@ -106,7 +106,7 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
             {pt ? 'Download do cartão' : 'Download card'}
           </Action>
         </div>
-        <p className="mt-2 min-h-5 text-sm text-stone-600" role="status">{message}</p>
+        <p className="mt-2 min-h-5 text-sm text-graphite" role="status">{message}</p>
       </div>
       {/*
         The preview stays closed until asked for: the card quotes the answers the
@@ -116,16 +116,16 @@ export function ShareTools({ model, url, title, locale }: { model: ShareCardMode
         of 1200) renders at 11 px or more.
       */}
       <Disclosure
-        className="rounded-xl border border-line bg-paper"
-        summaryClassName="w-full px-4 py-0.5"
+        className="border-y border-rule"
+        summaryClassName="w-full py-0.5"
         summary={pt ? 'Ver o cartão (mostra as respostas)' : 'See the card (it shows the answers)'}
       >
-        <div className="border-t border-line p-4">
+        <div className="border-t border-grid pb-4 pt-3">
           <canvas
             ref={preview}
             width={SHARE_CARD.width}
             height={SHARE_CARD.height}
-            className="block h-auto w-full rounded-lg border border-line bg-paper"
+            className="block h-auto w-full border border-rule bg-paper"
             aria-hidden="true"
           />
           <div className="sr-only">

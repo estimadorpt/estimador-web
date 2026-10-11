@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR, POPULATION_RELEASE } from '@/lib/config/population';
 import type { ParishRecord, PopulationMeta } from '@/types/population';
 import { HONESTY } from './labels';
-import { drawShareCard, parishQuestion, SHARE_CARD, SHARE_CARD_DIVIDER, shareCardModel, wrapLines } from './share-card';
+import { drawShareCard, SHARE_CARD, SHARE_CARD_DIVIDER, SHARE_CARD_FONTS, shareCardModel, wrapLines } from './share-card';
 
 const DIR = path.join(process.cwd(), 'public/data', POPULATION_DATA_DIR);
 const json = <T,>(file: string): T => JSON.parse(fs.readFileSync(path.join(DIR, file), 'utf8')) as T;
@@ -24,18 +24,12 @@ function asFallback(record: ParishRecord, name: string): ParishRecord {
   };
 }
 
-describe('parishQuestion', () => {
-  it('asks the page question, with the contraction a União needs', () => {
-    expect(parishQuestion('Aguada de Cima', 'pt')).toBe('Quem vive em Aguada de Cima?');
-    expect(parishQuestion('União das freguesias de Barrô e Aguada de Baixo', 'pt')).toBe('Quem vive na União das freguesias de Barrô e Aguada de Baixo?');
-    expect(parishQuestion('Mosteiro', 'en')).toBe('Who lives in Mosteiro?');
-  });
-});
-
 describe('shareCardModel', () => {
   it('quotes up to three published cells with their population, in the reader’s number format (tier A)', () => {
     const model = shareCardModel({ record: parish('010103'), recipes: meta.recipes, name: 'Aguada de Cima', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'pt' });
-    expect(model.title).toBe('Quem vive em Aguada de Cima?');
+    // The parish's name, as the page's h1 gives it: a name, not a question.
+    expect(model.title).toBe('Aguada de Cima');
+    expect(model.eyebrow).toBe('População sintética · Censos 2021');
     expect(model.place).toBe('Águeda · Aveiro');
     expect(model.facts.map(f => f.text)).toEqual([
       'Pessoas com 65+ em agregados privados que vivem sozinhas: 18,0%',
@@ -43,7 +37,7 @@ describe('shareCardModel', () => {
       'Agregados privados de uma só pessoa: 19,8%',
     ]);
     expect(model.scopeNote).toBeNull();
-    expect(model.tierNote).toBe('Qualidade A · números da própria freguesia.');
+    expect(model.tierNote).toBe('Nível A · números da própria freguesia.');
     expect(model.honesty).toBe(HONESTY.synthetic.pt);
     expect(model.footer).toBe(`População sintética v${POPULATION_RELEASE} de 5 out. 2026 · estimador.pt`);
     expect(model.fileName).toBe('estimador-010103-aguada-de-cima.png');
@@ -72,9 +66,9 @@ describe('shareCardModel', () => {
       expect(fact.label).not.toContain('concelho');
     }
     expect(model.scopeNote).toBeNull();
-    expect(model.tierNote).toBe('Qualidade C · números da própria freguesia, a ler com mais cuidado.');
+    expect(model.tierNote).toBe('Nível C · números da própria freguesia, a ler com mais cuidado.');
     const en = shareCardModel({ record, recipes: meta.recipes, name: 'X', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'en' });
-    expect(en.tierNote).toBe('Quality C · the parish’s own figures, to read with more care.');
+    expect(en.tierNote).toBe('Tier C · the parish’s own figures, to read with more care.');
   });
 
   it('names a small parish’s INE residents in the tier line, since the card travels on its own (PRO3-02, Mosteiro 480107)', () => {
@@ -83,13 +77,13 @@ describe('shareCardModel', () => {
     expect(publication).toBeLessThan(500);
     const input = { record, recipes: meta.recipes, name: 'Mosteiro', municipalityName: 'Lajes das Flores', regionName: 'Açores', region: 'azores', censusPopulation: census, publicationPopulation: publication };
     const pt = shareCardModel({ ...input, locale: 'pt' });
-    expect(pt.tierNote).toBe(`Qualidade C · ${census} residentes (INE) · números da própria freguesia: com tão poucas pessoas, cada uma pesa muito numa percentagem.`);
+    expect(pt.tierNote).toBe(`Nível C · ${census} residentes (INE) · números da própria freguesia: com tão poucas pessoas, cada uma pesa muito numa percentagem.`);
     const en = shareCardModel({ ...input, locale: 'en' });
-    expect(en.tierNote).toBe(`Quality C · ${census} residents (INE) · the parish’s own figures: with so few people, each one weighs a lot in a percentage.`);
+    expect(en.tierNote).toBe(`Tier C · ${census} residents (INE) · the parish’s own figures: with so few people, each one weighs a lot in a percentage.`);
     // 500 or more on the tier's count: no resident count on the card (Fátima, 142106).
     const fatima = parish('142106');
     expect(shareCardModel({ record: fatima, recipes: meta.recipes, name: 'Fátima', municipalityName: 'Ourém', regionName: 'Santarém', locale: 'pt', censusPopulation: fatima.place!.census_population, publicationPopulation: fatima.place!.publication_population }).tierNote)
-      .toBe('Qualidade C · números da própria freguesia, a ler com mais cuidado.');
+      .toBe('Nível C · números da própria freguesia, a ler com mais cuidado.');
   });
 
   it('names the município on every fact of a fallback record (synthetic)', () => {
@@ -177,11 +171,15 @@ describe('drawShareCard', () => {
     return ctx;
   }
 
-  it('draws the question, every fact, the honesty line and the source, at 20px or more', () => {
+  it('draws the name, the section in sentence case, the lone tick’s note, every fact, the honesty line and the source, at 20px or more and 700 at most', () => {
     const model = shareCardModel({ record: parish('010122'), recipes: meta.recipes, name: 'União das freguesias de Barrô e Aguada de Baixo', municipalityName: 'Águeda', regionName: 'Aveiro', locale: 'pt' });
     drawShareCard(fakeContext() as unknown as CanvasRenderingContext2D, model);
     const all = calls.map(c => c.text).join(' ');
-    expect(all).toContain('Quem vive na');
+    expect(all).toContain('União das');
+    // Sentence case: the eyebrow is drawn as written, never upper-cased.
+    expect(calls.some(c => c.text === model.eyebrow)).toBe(true);
+    expect(all).not.toContain(model.eyebrow.toUpperCase());
+    expect(calls.some(c => c.text === model.runNote)).toBe(true);
     for (const fact of model.facts) expect(all).toContain(fact.value);
     expect(calls.some(c => c.text === HONESTY.synthetic.pt)).toBe(true);
     expect(calls.some(c => c.text === model.footer)).toBe(true);
@@ -192,6 +190,12 @@ describe('drawShareCard', () => {
     // Everything sits on the 630 px canvas.
     for (const call of calls) expect(call.y).toBeLessThanOrEqual(SHARE_CARD.height - 20);
     for (const call of calls) expect(Number(/(\d+)px/.exec(call.font)?.[1])).toBeGreaterThanOrEqual(20);
+    // IBM Plex Sans stops at 700.
+    for (const call of calls) expect(Number(/^(\d+) /.exec(call.font)?.[1])).toBeLessThanOrEqual(700);
+    for (const spec of SHARE_CARD_FONTS) expect(Number(/^(\d+) /.exec(spec)?.[1])).toBeLessThanOrEqual(700);
+    // Everything inside the canvas, left and right.
+    for (const call of calls) expect(call.x).toBeGreaterThanOrEqual(0);
+    for (const call of calls) expect(call.x).toBeLessThanOrEqual(SHARE_CARD.width);
     // No emoji anywhere on the card.
     expect(all).not.toMatch(/\p{Extended_Pictographic}/u);
     expect(SHARE_CARD).toEqual({ width: 1200, height: 630 });

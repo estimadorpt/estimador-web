@@ -1,9 +1,9 @@
 /**
- * Words for the synthetic population: card questions, category labels and the
+ * Words for the synthetic population: card titles, category labels and the
  * quality / fallback / refusal copy. Every surface takes its wording from here
  * so the same thing is never called two names.
  *
- * Each question below states its population in full (from v1.0.2 the
+ * Each card below states its population in full (from v1.0.2 the
  * producer's own titles do too). The household questions, "who lives alone"
  * and "elders alone" count private households only (is_institutional = 0,
  * INE's household universe). Categories are listed in their natural order, never by
@@ -17,9 +17,10 @@ export type Locale = 'pt' | 'en';
 type Text = Record<Locale, string>;
 
 export interface RecipeCopy {
-  /** The card's question, the heading a reader scans for. */
-  question: Text;
-  /** A short name for tables of contents, share cards and the game. */
+  /**
+   * The card's title, a statement of what it shows ("Escolaridade"), the
+   * heading a reader scans for in the page, the rail and the game's clues.
+   */
   short: Text;
   /** Who is counted, and anything a reader would get wrong without it. */
   population: Text;
@@ -31,10 +32,6 @@ export interface RecipeCopy {
 
 export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
   elders_alone: {
-    question: {
-      pt: 'Quantas pessoas com 65 ou mais anos vivem sozinhas?',
-      en: 'How many people aged 65 or over live alone?',
-    },
     short: { pt: 'Pessoas com 65+ que vivem sozinhas', en: 'People aged 65+ living alone' },
     population: {
       pt: 'Pessoas com 65 ou mais anos em agregados privados. Quem vive num lar ou noutro alojamento coletivo não entra nesta pergunta.',
@@ -44,7 +41,6 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     headline: { living_alone: 'yes' },
   },
   who_lives_alone: {
-    question: { pt: 'Quem vive sozinho trabalha?', en: 'Do people who live alone work?' },
     short: { pt: 'Quem vive sozinho e o trabalho', en: 'Living alone and work' },
     population: {
       pt: 'Pessoas que vivem sozinhas num agregado privado. Em cada faixa etária, como se dividem entre empregadas, desempregadas e inativas; cada faixa etária soma 100% por si.',
@@ -53,10 +49,6 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     anchor: 'quem-vive-sozinho',
   },
   multigenerational: {
-    question: {
-      pt: 'Quantas casas juntam crianças e pessoas com 65 ou mais anos?',
-      en: 'How many homes bring together children and people aged 65 or over?',
-    },
     short: { pt: 'Agregados com criança e pessoa de 65+', en: 'Households with a child and someone 65+' },
     population: {
       pt: 'Agregados privados com pelo menos uma pessoa com menos de 15 anos e outra com 65 ou mais. Não são necessariamente avós e netos.',
@@ -66,13 +58,11 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     headline: { multigenerational: 'yes' },
   },
   age: {
-    question: { pt: 'Que idades têm?', en: 'How old are they?' },
     short: { pt: 'Idades', en: 'Ages' },
     population: { pt: 'Todas as pessoas, por grupo de cinco anos de idade.', en: 'Everyone, in five-year age groups.' },
     anchor: 'idades',
   },
   employment: {
-    question: { pt: 'Qual é a condição perante o trabalho?', en: 'What is their employment status?' },
     short: { pt: 'Condição perante o trabalho', en: 'Employment status' },
     population: {
       pt: 'Todas as pessoas. Crianças, estudantes e reformados contam como inativos.',
@@ -81,7 +71,6 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     anchor: 'trabalho',
   },
   education: {
-    question: { pt: 'Que escolaridade têm?', en: 'What education do they have?' },
     short: { pt: 'Escolaridade', en: 'Education' },
     population: {
       pt: 'Todas as pessoas, pelo nível mais alto que completaram. As crianças contam em «Nenhum» até completarem o 1.º ciclo.',
@@ -90,7 +79,6 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     anchor: 'escolaridade',
   },
   household_size: {
-    question: { pt: 'Quantas pessoas vivem em cada casa?', en: 'How many people live in each home?' },
     short: { pt: 'Pessoas por agregado', en: 'People per household' },
     population: {
       pt: 'Agregados privados por número de pessoas. Os lares e outros alojamentos coletivos não entram nesta pergunta.',
@@ -99,7 +87,6 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
     anchor: 'pessoas-por-casa',
   },
   household_type: {
-    question: { pt: 'Que famílias formam?', en: 'What families do they form?' },
     short: { pt: 'Núcleos familiares por agregado', en: 'Family nuclei per household' },
     population: {
       pt: 'Agregados privados pelo número de núcleos familiares: um casal, com ou sem filhos, ou um pai ou uma mãe com filhos. Os lares e outros alojamentos coletivos não entram nesta pergunta.',
@@ -189,21 +176,21 @@ export function valueLabel(dimension: string, value: string, locale: Locale): st
  */
 export const TIER_COPY: Record<'A' | 'B' | 'C', { label: Text; meaning: Text }> = {
   A: {
-    label: { pt: 'Qualidade A', en: 'Quality A' },
+    label: { pt: 'Nível A', en: 'Tier A' },
     meaning: {
       pt: 'Freguesia com 2 000 ou mais residentes em que a população gerada reproduz de perto as tabelas publicadas pelo INE.',
       en: 'A parish of 2,000 or more residents where the generated population closely reproduces the tables INE publishes.',
     },
   },
   B: {
-    label: { pt: 'Qualidade B', en: 'Quality B' },
+    label: { pt: 'Nível B', en: 'Tier B' },
     meaning: {
       pt: 'Freguesia com 500 ou mais residentes e um ajuste próximo às tabelas do INE. Abaixo de 2 000 residentes, uma freguesia fica em B mesmo com um ajuste igual ao de A.',
       en: 'A parish of 500 or more residents with a close fit to INE’s tables. Under 2,000 residents a parish sits in B even when its fit is as close as tier A’s.',
     },
   },
   C: {
-    label: { pt: 'Qualidade C', en: 'Quality C' },
+    label: { pt: 'Nível C', en: 'Tier C' },
     meaning: {
       pt: 'Freguesia com menos de 500 residentes, ou em que o erro típico ou a pior tabela (nas maiores, quase sempre a idade ano a ano, que as respostas do site não usam) passa os limiares do nível B: lê os números com mais cuidado.',
       en: 'A parish of under 500 residents, or one whose typical error or worst table (in the larger ones, almost always single-year age, which the site’s answers do not use) is past the tier B thresholds: read the numbers with more care.',

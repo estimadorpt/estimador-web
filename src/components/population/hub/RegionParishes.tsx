@@ -28,11 +28,11 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
   return (
     <div>
       <nav id="concelhos" aria-label={pt ? 'Concelhos' : 'Municipalities'} className="mb-6">
-        <h2 className="mb-2 text-[12px] font-semibold text-graphite">{pt ? 'Ir para o concelho' : 'Jump to a municipality'}</h2>
-        <ul className="flex flex-wrap gap-2">
+        <h2 className="mb-1 text-[12px] font-normal text-graphite">{pt ? 'Ir para o concelho' : 'Jump to a municipality'}</h2>
+        <ul className="flex flex-wrap gap-x-5 border-t border-rule">
           {municipalities.map(m => (
             <li key={m.code}>
-              <a href={`#concelho-${m.code}`} className="inline-flex min-h-11 items-center rounded-none border border-line bg-cream px-3 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-parchment">
+              <a href={`#concelho-${m.code}`} className="inline-flex min-h-11 items-center text-[15px] text-ink underline decoration-scale underline-offset-4 hover:decoration-ink">
                 {m.name}
               </a>
             </li>
@@ -40,7 +40,7 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
         </ul>
       </nav>
 
-      <div className="mb-6 max-w-3xl space-y-3 text-sm leading-relaxed text-stone-600">
+      <div className="mb-6 max-w-3xl space-y-3 text-sm leading-relaxed text-graphite">
         <p>
           {pt
             ? 'Cada freguesia abre a sua página, com as respostas da população sintética nos números da própria freguesia. O nível de qualidade junta o ajuste às tabelas do INE e o número de residentes:'
@@ -63,16 +63,16 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
       {/*
         Two columns of concelhos on a wide screen, so a name, its count and its
         tier sit within about 600px instead of across the whole page (and the
-        page is half as long); one column below that. The cards run in rows,
-        left to right, so A→Z reads as the chip row above does (UXD3-14), and
-        each card ends at its own last row.
+        page is half as long); one column below that. The concelhos run in
+        rows, left to right, so A→Z reads as the list above does (UXD3-14), and
+        each ends at its own last row: a rule and a name, no card.
       */}
       <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6">
         {municipalities.map(m => (
-          <section key={m.code} id={`concelho-${m.code}`} aria-labelledby={`concelho-${m.code}-title`} className="mb-6 rounded-2xl border border-line bg-cream p-3 sm:p-4 md:p-5">
-            <header className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <h2 id={`concelho-${m.code}-title`} className="text-xl text-ink">{m.name}</h2>
-              <p className="text-sm text-stone-500">
+          <section key={m.code} id={`concelho-${m.code}`} aria-labelledby={`concelho-${m.code}-title`} className="mb-8 border-t border-ink pt-2">
+            <header className="mb-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h2 id={`concelho-${m.code}-title`} className="text-[19px] leading-6 text-ink">{m.name}</h2>
+              <p className="text-[13px] text-graphite">
                 {m.rows.length === 1
                   ? (pt ? '1 freguesia' : '1 parish')
                   : (pt ? `${formatCount(m.rows.length, locale)} freguesias` : `${formatCount(m.rows.length, locale)} parishes`)}
@@ -111,7 +111,7 @@ export function RegionParishes({ municipalities, locale }: { municipalities: Reg
             {m.rows.length > 8 && (
               <a href="#concelhos" className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink underline underline-offset-4">
                 <ArrowUp aria-hidden="true" className="h-4 w-4" />
-                {pt ? 'Voltar à lista de concelhos' : 'Back to the list of municipalities'}
+                {pt ? 'Lista de concelhos' : 'List of municipalities'}
               </a>
             )}
           </section>

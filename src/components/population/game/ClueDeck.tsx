@@ -252,7 +252,7 @@ function Clue({ recipe, record, meta, locale, revealed, compact }: {
       )}
       <ResponseChart recipeName={recipe} recipe={definition} record={record} cells={cells} locale={locale} compact={compact} />
       <ChartTable
-        caption={`${RECIPE_COPY[recipe].question[locale]} (${where})`}
+        caption={`${RECIPE_COPY[recipe].short[locale]} (${where})`}
         columns={[...definition.dimensions.map(d => DIMENSION_LABEL[d]?.[locale] ?? d), locale === 'pt' ? 'Percentagem' : 'Share']}
         rows={cells.map(cell => [...cell.labels, cell.display])}
       />
