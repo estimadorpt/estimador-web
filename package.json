@@ -30,10 +30,7 @@
     "@next/mdx": "15.5.25",
     "@observablehq/plot": "^0.6.17",
     "@radix-ui/react-accordion": "^1.2.12",
-    "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "d3": "^7.9.0",
     "framer-motion": "^12.35.0",
     "lucide-react": "^0.541.0",
@@ -45,7 +42,6 @@
     "react-dom": "^19.2.8",
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1",
-    "tailwind-merge": "^3.3.1",
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {

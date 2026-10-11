@@ -16,13 +16,13 @@ export function TagLinks({ tags, locale }: { tags: string[]; locale: string }) {
     <>
       {tags.map(tag => {
         const slug = tagSlug(tag);
-        if (!slug) return <span key={tag} className="text-stone-400">{tag}</span>;
+        if (!slug) return <span key={tag} className="text-graphite">{tag}</span>;
         return (
           <Link
             key={tag}
             href={`/artigos/tema/${slug}`}
             locale={locale}
-            className="text-stone-400 underline decoration-stone-200 underline-offset-4 hover:text-stone-800 hover:decoration-stone-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className="text-graphite underline decoration-scale underline-offset-4 hover:text-ink hover:decoration-ink"
           >
             {tag}
           </Link>

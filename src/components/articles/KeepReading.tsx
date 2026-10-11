@@ -29,28 +29,28 @@ export async function KeepReading({
   });
 
   return (
-    <section className="mt-12 border-t-2 border-stone-800 pt-3">
+    <section className="mt-12 border-t border-ink pt-3">
       <h2 className="text-[12px] font-semibold text-graphite">
         {t('articles.keepReading')}
       </h2>
       <ul className="mt-1">
         {articles.map(article => (
-          <li key={article.slug} className="border-b border-stone-200">
+          <li key={article.slug} className="border-b border-grid">
             <Link
               href={`/artigos/${article.slug}`}
               locale={locale}
               className="group block py-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
             >
               <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-semibold text-graphite">
-                <span className="text-stone-800">
+                <span className="text-ink">
                   {t(article.kind === 'nota' ? 'articles.kindNota' : 'articles.kindExplicador')}
                 </span>
                 <time dateTime={article.date}>{dateFormat.format(new Date(article.date))}</time>
               </div>
-              <h3 className="text-base leading-snug text-stone-900 group-hover:text-ink">
+              <h3 className="text-base leading-snug text-ink">
                 {article.title}
               </h3>
-              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-stone-600">
+              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-graphite">
                 {article.excerpt}
               </p>
             </Link>
