@@ -284,12 +284,12 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
 
   if (failed) {
     return (
-      <div className="rounded-2xl border border-line bg-cream p-6 text-center">
-        <p className="text-[15px] text-stone-600">{t.loadError}</p>
+      <div className="border-t border-ink pt-4">
+        <p className="text-[15px] text-ink">{t.loadError}</p>
         <button
           type="button"
           onClick={() => { setFailed(false); setAttempt(n => n + 1); }}
-          className="mt-4 inline-flex min-h-12 items-center justify-center rounded-none border border-line bg-cream px-5 text-[15px] font-semibold text-ink hover:bg-parchment"
+          className="mt-4 inline-flex min-h-12 items-center justify-center border border-rule bg-paper px-5 text-[15px] font-semibold text-ink hover:bg-field"
         >
           {t.retry}
         </button>
@@ -301,7 +301,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     // About the board's own height at each width (the clue deck, the four
     // choices and the map), so the footer does not start in view and jump.
     return (
-      <div role="status" className="flex min-h-[1600px] flex-col items-center justify-start gap-3 rounded-2xl border border-line bg-cream p-6 pt-24 text-sm text-stone-600 sm:min-h-[1640px] lg:min-h-[1060px]">
+      <div role="status" className="flex min-h-[1600px] flex-col items-center justify-start gap-3 border-t border-rule p-6 pt-24 text-sm text-graphite sm:min-h-[1640px] lg:min-h-[1060px]">
         <MarkLoading height={28} color={BRAND.ink} />
         {t.loading}
       </div>
@@ -309,7 +309,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
   }
 
   if (!answer) {
-    return <div className="rounded-2xl border border-line bg-cream p-6 text-[15px] text-stone-600">{t.loadError}</div>;
+    return <div className="border-t border-ink pt-4 text-[15px] text-ink">{t.loadError}</div>;
   }
 
   const playing = record.status === 'playing';
@@ -325,8 +325,8 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
       <p role="status" aria-live="polite" className="sr-only">{announcement}</p>
 
       {practice && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-parchment px-4 py-3">
-          <p className="flex items-center gap-2 text-sm text-stone-600">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-y border-rule py-2">
+          <p className="flex items-center gap-2 text-sm text-ink">
             <History aria-hidden="true" className="h-4 w-4 shrink-0 text-ink" />
             {replay ? t.replayBanner : t.practiceBanner}
           </p>
@@ -343,18 +343,18 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
       )}
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-        <p className="text-[12px] font-semibold text-graphite">
+        <p className="text-[13px] font-semibold text-ink">
           {t.dayLabel(day + 1)} · {formatGameDate(date, locale)}
         </p>
         {playing && (
           <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold text-stone-600">
+            <span className="text-sm text-graphite">
               {t.clueProgress(record.cluesOpened, CLUE_COUNT)}{errors > 0 ? ` · ${t.errorsShort(errors)}` : ''}
             </span>
-            {/* The clues opened, as pips: what the score will be. */}
-            <span className="flex gap-1" aria-hidden="true">
+            {/* The clues opened, as square marks on a short ruler: what the score will be. */}
+            <span className="flex gap-0.5 border-b border-scale pb-0.5" aria-hidden="true">
               {Array.from({ length: CLUE_COUNT }, (_, i) => (
-                <span key={i} className={`h-2.5 w-5 rounded-full ${i < record.cluesOpened ? 'bg-ink' : 'border border-line bg-cream'}`} />
+                <span key={i} className={`h-2.5 w-4 ${i < record.cluesOpened ? 'bg-ink' : 'bg-grid'}`} />
               ))}
             </span>
           </div>

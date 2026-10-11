@@ -43,10 +43,9 @@ export default async function MysteryParishPage({ params }: { params: Promise<{ 
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
-      {/* A tool: the population section's compact periwinkle field, no art. */}
+      <PopulationSectionNav current="game" locale={locale} />
       <PageHero
         compact
-        field="periwinkle"
         measure="wide"
         eyebrow={t.heroEyebrow}
         title={t.heroTitle}
@@ -54,7 +53,6 @@ export default async function MysteryParishPage({ params }: { params: Promise<{ 
         lede={<span className="hidden sm:inline">{t.heroLede}</span>}
         meta={<span>{t.heroMeta}</span>}
       />
-      <PopulationSectionNav current="game" locale={locale} />
       <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">
         <div className="mb-6 max-w-3xl">
           <HowToPlay locale={locale} honesty={honesty} />

@@ -35,16 +35,16 @@ export function ArchivePicker({ epoch, today, current, store, locale, onPlay }: 
   };
 
   return (
-    <section aria-labelledby={`${id}-title`} className="rounded-2xl border border-line bg-cream p-5 md:p-6">
-      <h2 id={`${id}-title`} className="text-xl text-ink">{t.archiveTitle}</h2>
+    <section aria-labelledby={`${id}-title`} className="border-t border-ink pt-3">
+      <h2 id={`${id}-title`} className="text-[19px] leading-6 text-ink">{t.archiveTitle}</h2>
       {earlier.length === 0 ? (
         <div className="mt-3 flex items-center gap-4">
           <EmptyStateMark />
-          <p className="text-sm text-stone-600">{t.archiveEmpty}</p>
+          <p className="text-sm text-graphite">{t.archiveEmpty}</p>
         </div>
       ) : (
         <>
-          <p className="mt-1 text-sm text-stone-600">{t.archiveLede}</p>
+          <p className="mt-1 text-sm text-graphite">{t.archiveLede}</p>
           <form
             className="mt-4 flex flex-wrap items-end gap-3"
             onSubmit={event => { event.preventDefault(); if (choice >= 0) onPlay(choice); }}
@@ -55,7 +55,7 @@ export function ArchivePicker({ epoch, today, current, store, locale, onPlay }: 
                 id={`${id}-day`}
                 value={choice}
                 onChange={event => setChoice(Number(event.target.value))}
-                className="h-12 w-full rounded-none border border-line bg-cream px-3 text-[15px] text-ink"
+                className="h-12 w-full border border-rule bg-paper px-3 text-[16px] text-ink sm:text-[15px]"
               >
                 {earlier.map(day => (
                   <option key={day} value={day}>

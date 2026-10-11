@@ -76,7 +76,7 @@ const pt = {
   // After the badge, which names the tier: what it means in one line (the full reading is under «Porquê?»).
   tierShort: {
     A: `Ajuste próximo às tabelas do INE, numa freguesia com ${formatCount(2000, 'pt')} residentes ou mais.`,
-    B: `Ajuste próximo às tabelas do INE; a qualidade A pede ${formatCount(2000, 'pt')} residentes ou mais e limiares mais apertados.`,
+    B: `Ajuste próximo às tabelas do INE; o nível A pede ${formatCount(2000, 'pt')} residentes ou mais e limiares mais apertados.`,
     C: 'Lê estes números com mais cuidado.',
   },
   tierWhy: 'Porquê?',
@@ -168,7 +168,7 @@ const en: Copy = {
   shareFailed: 'Sharing did not work. Copy the text below.',
   tierShort: {
     A: `A close fit to INE’s tables, in a parish of ${formatCount(2000, 'en')} residents or more.`,
-    B: `A close fit to INE’s tables; quality A needs ${formatCount(2000, 'en')} residents or more and tighter thresholds.`,
+    B: `A close fit to INE’s tables; tier A needs ${formatCount(2000, 'en')} residents or more and tighter thresholds.`,
     C: 'Read these numbers with more care.',
   },
   tierWhy: 'Why?',

@@ -1,7 +1,7 @@
 'use client';
 
 import { Check, X } from 'lucide-react';
-import { ACCENT, FURNITURE } from '@/components/viz/theme';
+import { FURNITURE } from '@/components/viz/theme';
 import { BRAND } from '@/lib/brand';
 import type { Locale } from '@/lib/population/labels';
 import type { Parish } from '@/lib/population/places';
@@ -25,7 +25,7 @@ export function locate(point: { lat: number; lon: number }): { x: number; y: num
 /**
  * The four parishes of the day on a light outline of Portugal, numbered 1–4 in
  * the order of the list. A parish ruled out by a wrong pick keeps its numeral
- * in full ink inside a quiet dashed ring, with a coral X beside it (the list
+ * in full ink inside a quiet dashed ring, with a terracotta X beside it (the list
  * says it in a word); at the end the answer is ringed. Drawn at its real pixel size so
  * the numbers stay at 11px. Markers that would overlap move out on a short
  * leader line from a dot at their true point (PUB3-07). The figure's label,
@@ -65,8 +65,8 @@ export function Locator({ choices, ruledOut, answer, locale, withKey = false, sc
         const f = OUTLINE_FRAMES[name];
         return (
           <g key={name}>
-            {name !== 'mainland' && <rect x={f.ox - 3} y={f.oy - 3} width={f.w + 6} height={f.h + 6} rx={4} fill="none" stroke={FURNITURE.grid} />}
-            <path d={OUTLINE_PATHS[name]} fill={BRAND.parchment} stroke={BRAND.parchment} strokeWidth={0.8} strokeLinejoin="round" />
+            {name !== 'mainland' && <rect x={f.ox - 3} y={f.oy - 3} width={f.w + 6} height={f.h + 6} fill="none" stroke={BRAND.line} strokeDasharray="3 3" />}
+            <path d={OUTLINE_PATHS[name]} fill={BRAND.grid} stroke={BRAND.line} strokeWidth={0.8} strokeLinejoin="round" />
           </g>
         );
       })}
@@ -82,13 +82,13 @@ export function Locator({ choices, ruledOut, answer, locale, withKey = false, sc
                 <circle cx={at.x} cy={at.y} r={2} fill={s === 'out' ? BRAND.muted : BRAND.ink} />
               </>
             )}
-            {s === 'answer' && <circle cx={spot.x} cy={spot.y} r={r + 4} fill="none" stroke={ACCENT} strokeWidth={2.5} />}
-            {/* Ruled out: the ring goes quiet (dashed, on parchment) and a coral X sits off the numeral, which stays in full ink. */}
+            {s === 'answer' && <circle cx={spot.x} cy={spot.y} r={r + 4} fill="none" stroke={BRAND.ink} strokeWidth={2} />}
+            {/* Ruled out: the ring goes quiet (dashed) and a terracotta X sits off the numeral, which stays in full ink. */}
             <circle
               cx={spot.x}
               cy={spot.y}
               r={r}
-              fill={s === 'answer' ? BRAND.ink : s === 'out' ? BRAND.parchment : BRAND.cream}
+              fill={s === 'answer' ? BRAND.ink : BRAND.paper}
               stroke={s === 'out' ? BRAND.muted : BRAND.ink}
               strokeWidth={s === 'out' ? 1 : 1.5}
               strokeDasharray={s === 'out' ? '2 2' : undefined}
@@ -96,8 +96,8 @@ export function Locator({ choices, ruledOut, answer, locale, withKey = false, sc
             <text x={spot.x} y={spot.y + 4} textAnchor="middle" fontSize="11" fontWeight={700} fill={s === 'answer' ? BRAND.paper : BRAND.ink} fontFamily={FURNITURE.font}>{n}</text>
             {s === 'out' && (
               <g transform={`translate(${spot.x + r - 1} ${spot.y - r + 1})`}>
-                <circle r={4.5} fill={BRAND.coral} stroke={BRAND.cream} strokeWidth={1} />
-                <path d="M -2 -2 L 2 2 M 2 -2 L -2 2" stroke={BRAND.ink} strokeWidth={1.3} strokeLinecap="round" />
+                <circle r={4.5} fill={BRAND.paper} />
+                <path d="M -2.5 -2.5 L 2.5 2.5 M 2.5 -2.5 L -2.5 2.5" stroke={BRAND.terracotta} strokeWidth={1.8} strokeLinecap="square" />
               </g>
             )}
           </g>
@@ -107,8 +107,8 @@ export function Locator({ choices, ruledOut, answer, locale, withKey = false, sc
   );
 
   return (
-    <figure className={`rounded-2xl border border-line bg-cream p-4 ${className}`}>
-      <figcaption className="mb-2 text-[12px] font-semibold text-graphite">{t.locatorTitle}</figcaption>
+    <figure className={`border-t border-rule pt-3 ${className}`}>
+      <figcaption className="mb-2 text-[12px] text-graphite">{t.locatorTitle}</figcaption>
       {withKey ? (
         <div className="flex flex-col items-center gap-4 min-[480px]:flex-row min-[480px]:items-start">
           {map}
@@ -118,13 +118,13 @@ export function Locator({ choices, ruledOut, answer, locale, withKey = false, sc
               const s = state(parish);
               return (
                 <li key={parish.code} className="flex items-start gap-2">
-                  <span className={`mt-px inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-ink text-xs font-bold tabular-nums ${s === 'answer' ? 'bg-ink text-paper' : s === 'out' ? 'border-dashed bg-parchment text-ink' : 'bg-cream text-ink'}`}>{i + 1}</span>
+                  <span className={`mt-px inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold tabular-nums ${s === 'answer' ? 'border-ink bg-ink text-paper' : s === 'out' ? 'border-dashed border-scale bg-paper text-ink' : 'border-ink bg-paper text-ink'}`}>{i + 1}</span>
                   <span className="min-w-0">
-                    <span className={`block font-semibold leading-snug ${s === 'out' ? 'text-stone-500 line-through decoration-1' : 'text-ink'}`}>{parish.name}</span>
-                    <span className="block text-xs text-stone-500">{parish.municipalityName}</span>
+                    <span className={`block font-semibold leading-snug ${s === 'out' ? 'text-graphite line-through decoration-1' : 'text-ink'}`}>{parish.name}</span>
+                    <span className="block text-[12px] text-graphite">{parish.municipalityName}</span>
                     {s !== 'open' && (
-                      <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-ink">
-                        {s === 'answer' ? <Check aria-hidden="true" className="h-3.5 w-3.5" /> : <X aria-hidden="true" className="h-3.5 w-3.5" />}
+                      <span className="mt-0.5 inline-flex items-center gap-1 text-[12px] font-semibold text-ink">
+                        {s === 'answer' ? <Check aria-hidden="true" className="h-3.5 w-3.5" /> : <X aria-hidden="true" className="h-3.5 w-3.5 text-terracotta" strokeWidth={2.5} />}
                         {s === 'answer' ? t.locatorAnswer : t.locatorRuledOut}
                       </span>
                     )}
@@ -137,7 +137,7 @@ export function Locator({ choices, ruledOut, answer, locale, withKey = false, sc
       ) : (
         <>
           <div className="flex justify-center">{map}</div>
-          <p className="mt-2 text-xs text-stone-500">{t.locatorKey}</p>
+          <p className="mt-2 text-[12px] text-graphite">{t.locatorKey}</p>
         </>
       )}
     </figure>

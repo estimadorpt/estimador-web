@@ -117,9 +117,9 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
   return (
     <div className="min-w-0">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 className="text-xl text-ink md:text-2xl">{t.cluesTitle}</h2>
+        <h2 className="text-[22px] leading-7 text-ink md:text-[26px]">{t.cluesTitle}</h2>
         {/* Said once for the deck: every published clue is the parish's own figures. A município fallback says so on its own clue. */}
-        <p className="text-xs text-stone-500 sm:text-right">
+        <p className="text-[12px] text-graphite sm:text-right">
           {revealed ? t.answerFigures(revealed.name) : t.mysteryFigures} {HONESTY.synthetic[locale]} · {t.sourceStamp}
         </p>
       </div>
@@ -140,18 +140,18 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
               disabled={!unlocked}
               title={unlocked ? label : t.clueLocked}
               onClick={() => { setSelected(i); setFresh(null); setMoved(true); }}
-              className={`relative flex min-h-12 flex-col items-center justify-center rounded-none border text-[15px] font-extrabold tabular-nums transition-colors duration-150 ${
+              className={`relative flex min-h-12 flex-col items-center justify-center border text-[15px] font-bold tabular-nums transition-colors duration-150 ${
                 active
                   ? 'border-ink bg-ink text-paper'
                   : unlocked
-                    ? 'border-line bg-cream text-ink hover:bg-parchment'
-                    : 'cursor-not-allowed border-dashed border-line bg-parchment text-stone-500'
+                    ? 'border-rule bg-paper text-ink hover:bg-field'
+                    : 'cursor-not-allowed border-dashed border-rule bg-paper text-graphite'
               }`}
             >
               {/* The numeral is for the eye; the sr-only line names the clue, so it is not read twice ("1 Pista 1", A11Y3-08). */}
               {unlocked ? <span aria-hidden="true">{i + 1}</span> : <Lock aria-hidden="true" className="h-4 w-4" />}
               <span className="sr-only">{unlocked ? `${t.clue(i + 1)}: ${label}` : `${t.clue(i + 1)}: ${t.clueLocked}`}</span>
-              {fresh === i && !active && <span aria-hidden="true" className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-coral" />}
+              {fresh === i && !active && <span aria-hidden="true" className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-ink" />}
             </button>
           );
         })}
@@ -210,8 +210,8 @@ function ClueCard({ number, recipes, entry, meta, locale, revealed, fresh, title
           <div key={recipe} className="min-w-0">
             {!single && (
               <>
-                <h4 className="text-base font-bold text-ink">{RECIPE_COPY[recipe].short[locale]}</h4>
-                <p className="mb-3 mt-0.5 text-sm text-stone-500">{RECIPE_COPY[recipe].population[locale]}</p>
+                <h4 className="text-base font-semibold text-ink">{RECIPE_COPY[recipe].short[locale]}</h4>
+                <p className="mb-3 mt-0.5 text-sm text-graphite">{RECIPE_COPY[recipe].population[locale]}</p>
               </>
             )}
             <Clue recipe={recipe} record={entry.responses[recipe]} meta={meta} locale={locale} revealed={revealed} compact={compact} />
@@ -234,9 +234,9 @@ function Clue({ recipe, record, meta, locale, revealed, compact }: {
   const definition = meta.recipes[recipe];
   if (!record || !definition || record.decision === 'refuse') {
     return (
-      <div className="flex items-center gap-4 rounded-xl bg-parchment p-4">
+      <div className="flex items-center gap-4 border-t border-grid pt-3">
         <EmptyStateMark />
-        <p className="text-sm text-stone-600">{t.refused}</p>
+        <p className="text-sm text-graphite">{t.refused}</p>
       </div>
     );
   }
@@ -247,7 +247,7 @@ function Clue({ recipe, record, meta, locale, revealed, compact }: {
       {record.decision === 'fallback' && (
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <QualityBadge kind="municipality" locale={locale} />
-          <p className="text-sm text-stone-600">{revealed ? t.fallbackNamed(revealed.municipalityName) : t.fallbackHidden}</p>
+          <p className="text-sm text-graphite">{revealed ? t.fallbackNamed(revealed.municipalityName) : t.fallbackHidden}</p>
         </div>
       )}
       <ResponseChart recipeName={recipe} recipe={definition} record={record} cells={cells} locale={locale} compact={compact} />

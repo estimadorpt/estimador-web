@@ -25,10 +25,10 @@ export function Choices({ choices, ruledOut, locale, canOpenMore, onPick, onNext
 }) {
   const t = GAME_COPY[locale];
   return (
-    <section aria-labelledby="misteriosa-choices" className="rounded-2xl border border-line bg-cream p-4 sm:p-5">
-      <h2 id="misteriosa-choices" className="text-xl text-ink">{t.choicesTitle}</h2>
+    <section aria-labelledby="misteriosa-choices" className="border-t border-ink pt-3">
+      <h2 id="misteriosa-choices" className="text-[19px] leading-6 text-ink">{t.choicesTitle}</h2>
       {/* On a phone the heading says it; the line would push the four further from the clue. */}
-      <p className="mt-0.5 hidden text-sm text-stone-600 sm:block">{t.choicesLede}</p>
+      <p className="mt-0.5 hidden text-sm text-graphite sm:block">{t.choicesLede}</p>
       <ol className="mt-3 flex flex-col gap-2">
         {choices.map((parish, i) => {
           const out = ruledOut.has(parish.code);
@@ -39,22 +39,21 @@ export function Choices({ choices, ruledOut, locale, canOpenMore, onPick, onNext
                 aria-label={out ? t.ruledOutName(parish.name, parish.municipalityName) : t.choose(parish.name, parish.municipalityName)}
                 aria-disabled={out || undefined}
                 onClick={() => { if (!out) onPick(parish); }}
-                className={`group flex min-h-14 w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition-colors duration-150 motion-reduce:transition-none ${
+                className={`group flex min-h-14 w-full items-center gap-3 border px-3 py-2 text-left transition-colors duration-150 motion-reduce:transition-none ${
                   out
-                    ? 'cursor-not-allowed border-dashed border-line bg-parchment'
-                    : 'border-line bg-paper hover:border-ink hover:bg-parchment active:bg-parchment'
+                    ? 'cursor-not-allowed border-dashed border-rule bg-paper'
+                    : 'border-rule bg-paper hover:border-ink hover:bg-field active:bg-field'
                 }`}
               >
-                <span aria-hidden="true" className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[13px] font-bold tabular-nums ${out ? 'border-line text-stone-500' : 'border-ink text-ink'}`}>{i + 1}</span>
+                <span aria-hidden="true" className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[13px] font-bold tabular-nums ${out ? 'border-dashed border-scale text-ink' : 'border-ink text-ink'}`}>{i + 1}</span>
                 <span className="min-w-0 flex-1">
-                  <span className={`block text-[15px] font-semibold leading-snug ${out ? 'text-stone-500 line-through decoration-1' : 'text-ink'}`}>{parish.name}</span>
-                  <span className="block text-xs text-stone-500">{parish.municipalityName}</span>
+                  <span className={`block text-[15px] font-semibold leading-snug ${out ? 'text-graphite line-through decoration-1' : 'text-ink'}`}>{parish.name}</span>
+                  <span className="block text-[12px] text-graphite">{parish.municipalityName}</span>
                 </span>
                 {out && (
-                  <span aria-hidden="true" className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-ink">
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-coral">
-                      <X className="h-3.5 w-3.5" />
-                    </span>
+                  <span aria-hidden="true" className="inline-flex shrink-0 items-center gap-1 text-[12px] font-semibold text-ink">
+                    {/* The ruled-out cross: the game's one mark in the terracotta red. */}
+                    <X className="h-4 w-4 text-terracotta" strokeWidth={2.5} />
                     {t.ruledOut}
                   </span>
                 )}
@@ -67,13 +66,13 @@ export function Choices({ choices, ruledOut, locale, canOpenMore, onPick, onNext
         <button
           type="button"
           onClick={onNextClue}
-          className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-none border border-line bg-cream px-5 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-parchment sm:w-auto"
+          className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 border border-rule bg-paper px-5 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-field sm:w-auto"
         >
           <Eye aria-hidden="true" className="h-4 w-4" />
           {t.nextClue}
         </button>
       ) : (
-        <p className="mt-3 rounded-xl bg-parchment px-3 py-2.5 text-sm text-stone-600">{t.allClues}</p>
+        <p className="mt-3 border-t border-grid pt-2 text-sm text-graphite">{t.allClues}</p>
       )}
     </section>
   );
