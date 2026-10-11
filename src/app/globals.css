@@ -592,6 +592,11 @@
 .football-history-chart svg [aria-label="y-grid"] { color: var(--color-line); }
 .football-history-chart svg [aria-label="x-axis"], .football-history-chart svg [aria-label="y-axis"] { color: var(--color-ink-muted); }
 
+/* Observable Plot's tip (Plot.tip, or a mark's tip: true) draws its box with a
+   drop shadow, set as the path's filter attribute. The instrument has no
+   shadows: the box keeps its 1px rule and white fill, nothing under it. */
+svg [aria-label="tip"] path { filter: none; }
+
 @media(max-width:400px) {
   .scenario-probability-row { flex-wrap: wrap; row-gap: 8px; }
   .scenario-probability-row > div:first-child { width: 100%; }
