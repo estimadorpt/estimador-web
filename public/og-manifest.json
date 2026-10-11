@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-11T20:19:38.166Z",
+  "generatedAt": "2026-10-11T21:58:38.587Z",
   "files": {
     "pt": "og-image-pt-493c1a8d.png",
     "en": "og-image-en-fc618587.png"
@@ -28,12 +28,5 @@
     "width": 2400,
     "height": 1260
   },
-  "retained": [
-    "og-image-pt-25f86d84.png",
-    "og-image-en-37c8bc43.png",
-    "og-image-liga-pt-0e45e953.png",
-    "og-image-populacao-pt-c09f0644.png",
-    "og-image-liga-en-eb25c055.png",
-    "og-image-populacao-en-c70973df.png"
-  ]
+  "retained": []
 }
