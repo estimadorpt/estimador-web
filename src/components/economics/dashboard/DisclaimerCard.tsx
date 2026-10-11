@@ -41,16 +41,16 @@ export async function DisclaimerCard({
     }`;
 
   return (
-    <section className="rounded-lg border-l-4 border-l-[#245c68] border-y border-r border-stone-200 bg-stone-50 p-4 md:p-5">
+    <section className="border-t border-ink pt-3">
       <div className="flex items-center gap-2 mb-1.5">
-        <Info className="w-4 h-4 text-[#245c68]" />
-        <h2 className="text-xs font-bold text-stone-700">
+        <Info aria-hidden="true" className="w-4 h-4 text-ink" />
+        <h2 className="text-xs font-bold text-ink">
           {t('aboutTitle')}
         </h2>
       </div>
 
       {/* Compact, always-visible lead. */}
-      <p className="text-sm leading-relaxed text-stone-700 max-w-3xl">
+      <p className="text-sm leading-relaxed text-ink max-w-3xl">
         {t('disclaimerLead')}
       </p>
 
@@ -59,16 +59,16 @@ export async function DisclaimerCard({
         {t('disclaimerFull')}
       </ReadMore>
 
-      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-stone-500">
+      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-graphite">
         {fmtVintage && (
           <span>
-            <span className="font-semibold text-stone-600">{t('dataVintage')}:</span>{' '}
+            <span className="font-semibold text-graphite">{t('dataVintage')}:</span>{' '}
             {fmtVintage}
           </span>
         )}
         {coverage && (
           <span>
-            <span className="font-semibold text-stone-600">
+            <span className="font-semibold text-graphite">
               {t('quarterCoverage')}:
             </span>{' '}
             {coverage}
@@ -76,7 +76,7 @@ export async function DisclaimerCard({
         )}
         {fmtNextUpdate && (
           <span>
-            <span className="font-semibold text-stone-600">{t('nextUpdate')}:</span>{' '}
+            <span className="font-semibold text-graphite">{t('nextUpdate')}:</span>{' '}
             {fmtNextUpdate}
           </span>
         )}

@@ -52,33 +52,33 @@ export async function SavingsGapStory({
     >
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 tabular-nums">
         <span>
-          <span className="text-3xl font-display font-extrabold tracking-tight text-stone-900">
+          <span className="text-3xl font-display font-extrabold text-ink">
             {fmtPctLoc(data?.deposit_rate_new_time?.value_pct, locale, 2)}
           </span>
-          <span className="text-xs text-stone-500">
+          <span className="text-xs text-graphite">
             {' '}
             {t('savingsDeposit')} ({fmtMonthLoc(data?.deposit_rate_new_time?.period, locale)})
           </span>
         </span>
         <span>
-          <span className="text-3xl font-display font-extrabold tracking-tight text-stone-900">
+          <span className="text-3xl font-display font-extrabold text-ink">
             {fmtPctLoc(data?.hicp_yoy?.value_pct, locale, 1)}
           </span>
-          <span className="text-xs text-stone-500">
+          <span className="text-xs text-graphite">
             {' '}
             {t('savingsHicp')} ({fmtMonthLoc(data?.hicp_yoy?.period, locale)})
           </span>
         </span>
         <span>
           <span
-            className="text-3xl font-display font-extrabold tracking-tight"
+            className="text-3xl font-display font-extrabold"
             style={{
               color: isNum(real) ? (real >= 0 ? COLORS.teal : COLORS.red) : COLORS.stoneDark,
             }}
           >
             {fmtSignedPctLoc(real, locale, 1)}
           </span>
-          <span className="text-xs text-stone-500"> {t('savingsRealReturn')}</span>
+          <span className="text-xs text-graphite"> {t('savingsRealReturn')}</span>
         </span>
       </div>
 

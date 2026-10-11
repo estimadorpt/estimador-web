@@ -86,7 +86,7 @@ export async function HealthScoreTile({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <div
-              className="text-2xl md:text-3xl font-bold tracking-tight tabular-nums"
+              className="text-2xl md:text-3xl font-bold tabular-nums"
               style={{ color: vColor }}
             >
               {verdictWord}
@@ -96,21 +96,21 @@ export async function HealthScoreTile({
 
           {/* HONESTY: short caveat ALWAYS visible next to the headline — this is
               a fixed-rule presentation composite, not a model or skill claim. */}
-          <p className="mt-2 text-xs leading-relaxed text-stone-500">
+          <p className="mt-2 text-xs leading-relaxed text-graphite">
             {t('healthCaveat')}
           </p>
 
           {/* Component breakdown */}
-          <div className="mt-5 border-t border-stone-100 pt-4">
+          <div className="mt-5 border-t border-grid pt-4">
             <div className="text-[12px] font-semibold text-graphite mb-3">
               {t('healthComposedOf')}
             </div>
 
             <dl className="space-y-2.5">
               <div className="flex items-baseline justify-between gap-3">
-                <dt className="text-sm text-stone-600">{t('healthActivity')}</dt>
+                <dt className="text-sm text-graphite">{t('healthActivity')}</dt>
                 <dd className="flex items-baseline gap-2 text-sm">
-                  <span className="font-semibold tabular-nums text-stone-800">
+                  <span className="font-semibold tabular-nums text-ink">
                     {fmtScore(components?.activity_subscore)}
                   </span>
                   <span className="text-[11px] tabular-nums text-stone-400">
@@ -120,9 +120,9 @@ export async function HealthScoreTile({
               </div>
 
               <div className="flex items-baseline justify-between gap-3">
-                <dt className="text-sm text-stone-600">{t('healthDownside')}</dt>
+                <dt className="text-sm text-graphite">{t('healthDownside')}</dt>
                 <dd className="flex items-baseline gap-2 text-sm">
-                  <span className="font-semibold tabular-nums text-stone-800">
+                  <span className="font-semibold tabular-nums text-ink">
                     {fmtScore(components?.downside_subscore)}
                   </span>
                   <span className="text-[11px] tabular-nums text-stone-400">
@@ -132,11 +132,11 @@ export async function HealthScoreTile({
               </div>
 
               <div className="flex items-baseline justify-between gap-3">
-                <dt className="text-sm text-stone-600">
+                <dt className="text-sm text-graphite">
                   {t('healthRecessionCap')}
                 </dt>
                 <dd className="flex items-baseline gap-2 text-sm">
-                  <span className="font-semibold tabular-nums text-stone-800">
+                  <span className="font-semibold tabular-nums text-ink">
                     {fmtScore(components?.recession_cap)}
                   </span>
                 </dd>

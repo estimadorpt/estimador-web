@@ -74,7 +74,7 @@ export async function TrackRecordTile({
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b-2 border-stone-300 text-left">
+                <tr className="border-b-2 border-rule text-left">
                   <th className="py-1.5 pr-3 text-[12px] font-semibold text-graphite">
                     {t('trackHorizon')}
                   </th>
@@ -97,18 +97,18 @@ export async function TrackRecordTile({
                   const s = summary[h];
                   const ex = s?.excl_covid;
                   return (
-                    <tr key={h} className="border-b border-stone-200">
-                      <td className="py-1.5 pr-3 font-semibold text-stone-800">{h}</td>
-                      <td className="py-1.5 pr-3 text-right tabular-nums text-stone-600">
+                    <tr key={h} className="border-b border-rule">
+                      <td className="py-1.5 pr-3 font-semibold text-ink">{h}</td>
+                      <td className="py-1.5 pr-3 text-right tabular-nums text-graphite">
                         {isNum(ex?.n_scored) ? ex!.n_scored : '—'}
                       </td>
-                      <td className="py-1.5 pr-3 text-right tabular-nums font-semibold text-stone-800">
+                      <td className="py-1.5 pr-3 text-right tabular-nums font-semibold text-ink">
                         {fmtNum(ex?.rel_vs_ar1_first_release)}
                       </td>
-                      <td className="py-1.5 pr-3 text-right tabular-nums text-stone-600">
+                      <td className="py-1.5 pr-3 text-right tabular-nums text-graphite">
                         {fmtNum(ex?.rel_vs_ar1_latest)}
                       </td>
-                      <td className="py-1.5 text-right tabular-nums text-stone-600">
+                      <td className="py-1.5 text-right tabular-nums text-graphite">
                         {isNum(ex?.band_hit_rate_80)
                           ? `${Math.round((ex!.band_hit_rate_80 as number) * 100)}%`
                           : '—'}
@@ -140,7 +140,7 @@ export async function TrackRecordTile({
       </div>
 
       {/* ---- era 2: live --------------------------------------------------------- */}
-      <div className="mt-5 border-t border-stone-100 pt-4">
+      <div className="mt-5 border-t border-grid pt-4">
         <h3 className="text-[12px] font-semibold text-graphite">
           {t('trackLiveTitle')}
         </h3>
@@ -154,14 +154,14 @@ export async function TrackRecordTile({
             {liveRows.map((r, i) => (
               <li
                 key={`lr-${i}`}
-                className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs text-stone-600 tabular-nums"
+                className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs text-graphite tabular-nums"
               >
                 <span className="text-stone-400 w-24 shrink-0">{fmtDate(r?.date, locale)}</span>
-                <span className="font-medium text-stone-700">
+                <span className="font-medium text-ink">
                   {r?.target_quarter ?? '—'} · {r?.position ?? '—'}
                 </span>
                 <span className="text-stone-400">{r?.model ?? '—'}</span>
-                <span className="font-semibold text-stone-800">
+                <span className="font-semibold text-ink">
                   {fmtSignedPct(r?.our_call, 2)}
                 </span>
                 {Array.isArray(r?.ci_80) && (
@@ -178,7 +178,7 @@ export async function TrackRecordTile({
         ) : (
           // Emptiness as integrity: no live quarter has been scored yet — say
           // so plainly instead of leaving a bare dash.
-          <p className="mt-2 text-xs text-stone-500">{t('trackLiveEmpty')}</p>
+          <p className="mt-2 text-xs text-graphite">{t('trackLiveEmpty')}</p>
         )}
 
         {/* "every dot is a call we actually published" — honest only while it

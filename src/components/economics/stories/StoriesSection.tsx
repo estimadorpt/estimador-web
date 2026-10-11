@@ -40,19 +40,19 @@ export async function StoriesSection({
 
   return (
     <section id="historias" aria-labelledby="stories-heading" className="pt-4">
-      <div className="border-t border-stone-200 pt-8">
+      <div className="border-t border-rule pt-8">
         <div className="flex items-center gap-2 mb-1">
           <Newspaper className="w-4 h-4 text-stone-400" aria-hidden />
           <span className="text-[12px] font-semibold text-graphite">
             {t('storiesEyebrow')}
           </span>
         </div>
-        <h2 id="stories-heading" className="text-2xl md:text-3xl tracking-tight text-stone-900">
+        <h2 id="stories-heading" className="text-2xl md:text-3xl text-ink">
           {t('storiesTitle')}
         </h2>
         {/* feed-level disclaimer, verbatim from the payload (bilingual) */}
         {pickText(locale, stories?.disclaimer) && (
-          <p className="mt-2 text-xs leading-relaxed text-stone-500 max-w-3xl">
+          <p className="mt-2 text-xs leading-relaxed text-graphite max-w-3xl">
             {pickText(locale, stories.disclaimer)}
           </p>
         )}

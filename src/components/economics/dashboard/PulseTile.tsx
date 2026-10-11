@@ -151,7 +151,7 @@ export async function PulseTile({
         t('pulseHonesty')
       }
     >
-      <p className="text-sm text-stone-500">{t('pulseSubtitle')}</p>
+      <p className="text-sm text-graphite">{t('pulseSubtitle')}</p>
 
       {/* ---- LEAD: the ANCHOR level (BdP Coincident Activity) ---------------- */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-5 md:gap-8">
@@ -161,19 +161,19 @@ export async function PulseTile({
           </div>
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span
-              className="text-4xl md:text-5xl font-display font-extrabold tabular-nums tracking-tighter leading-none"
+              className="text-4xl md:text-5xl font-display font-extrabold tabular-nums leading-none"
               style={{ color: anchorColor }}
             >
               {fmtSignedPctValue(anchor?.value, 1)}
             </span>
-            <span className="text-sm text-stone-500">
+            <span className="text-sm text-graphite">
               {t('yoy')}
               {anchor?.date ? ` · ${fmtDate(anchor.date, locale)}` : ''}
             </span>
             <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
           </div>
           {/* source + the anchor's measured correlation */}
-          <p className="mt-1.5 text-[11px] text-stone-500">
+          <p className="mt-1.5 text-[11px] text-graphite">
             {anchor?.source ?? '—'}
             {isNum(anchor?.corr_yoy_gdp_exclcovid) && (
               <>
@@ -191,12 +191,12 @@ export async function PulseTile({
         </div>
 
         {/* ---- TILT: small directional chip + combined read (secondary) ------ */}
-        <div className="md:col-span-2 mt-4 md:mt-0 md:border-l md:border-stone-100 md:pl-6">
+        <div className="md:col-span-2 mt-4 md:mt-0 md:border-l md:border-grid md:pl-6">
           <div className="text-[12px] font-semibold text-graphite mb-1">
             {t('pulseTiltTitle')}
           </div>
           <div
-            className="inline-flex items-center gap-1.5 border border-stone-200 px-2 py-1 text-sm font-semibold tabular-nums"
+            className="inline-flex items-center gap-1.5 border border-rule px-2 py-1 text-sm font-semibold tabular-nums"
             style={{ color: tiltColor }}
           >
             <TiltIcon className="w-4 h-4" strokeWidth={2.5} />
@@ -220,7 +220,7 @@ export async function PulseTile({
               </div>
               {/* When the producer marks render_as='direction', the combined
                   number is NOT a validated level — show the direction word only. */}
-              <span className="text-lg font-bold tabular-nums text-stone-500">
+              <span className="text-lg font-bold tabular-nums text-graphite">
                 {data?.render_as === 'direction'
                   ? tiltWord
                   : fmtSignedPctValue(data.combined_read, 1)}
@@ -233,7 +233,7 @@ export async function PulseTile({
 
       {/* ---- demoted weekly-index sparkline (cadence context, not the level) -- */}
       {history.length >= 2 && (
-        <div className="mt-5 border-t border-stone-100 pt-3">
+        <div className="mt-5 border-t border-grid pt-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
             <h3 className="text-[12px] font-semibold text-graphite">
               {t('pulseWeeklyTitle')}

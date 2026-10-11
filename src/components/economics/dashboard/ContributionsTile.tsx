@@ -86,24 +86,24 @@ export async function ContributionsTile({
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
         {moversLine && (
-          <p className="w-full text-sm leading-relaxed text-stone-700 sm:w-auto sm:flex-1">
+          <p className="w-full text-sm leading-relaxed text-ink sm:w-auto sm:flex-1">
             {moversLine}
           </p>
         )}
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3 text-[11px] text-stone-500">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3 text-[11px] text-graphite">
         <span className="inline-flex items-center gap-1.5">
           <span
-            className="inline-block w-3 h-3 rounded-sm"
+            className="inline-block w-3 h-3"
             style={{ backgroundColor: COLORS.teal }}
           />
           {t('contributionsPushUp')}
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span
-            className="inline-block w-3 h-3 rounded-sm"
+            className="inline-block w-3 h-3"
             style={{ backgroundColor: COLORS.red }}
           />
           {t('contributionsPullDown')}
@@ -122,7 +122,7 @@ export async function ContributionsTile({
             return (
               <div key={`${g.group ?? 'group'}-${i}`}>
                 <div className="flex items-baseline justify-between gap-2 mb-1">
-                  <span className="text-xs font-medium text-stone-700 truncate">
+                  <span className="text-xs font-medium text-ink truncate">
                     {gname(g.group)}
                   </span>
                   <span
@@ -133,14 +133,14 @@ export async function ContributionsTile({
                   </span>
                 </div>
                 {/* track with centered zero axis */}
-                <div className="relative h-2 w-full rounded-sm bg-stone-100">
+                <div className="relative h-2 w-full border-b border-grid">
                   <span
                     aria-hidden
                     className="absolute top-[-2px] bottom-[-2px] left-1/2 w-px bg-stone-300"
                   />
                   <span
                     aria-hidden
-                    className="absolute top-0 bottom-0 rounded-sm"
+                    className="absolute top-0 bottom-0"
                     style={{
                       backgroundColor: positive ? COLORS.teal : COLORS.red,
                       width: `${pct}%`,

@@ -47,15 +47,15 @@ export async function WhatChanged({
   if (!hasComparison && !nextReleaseHeadline) return null;
 
   return (
-    <section aria-labelledby="what-changed-heading" className="rounded-2xl border border-line bg-cream p-5 md:p-6">
+    <section aria-labelledby="what-changed-heading" className="border border-line bg-paper p-5 md:p-6">
       <div className="flex items-center gap-2">
-        <RefreshCw aria-hidden="true" className="h-4 w-4 text-stone-500" />
-        <h2 id="what-changed-heading" className="text-[12px] font-semibold text-graphitest text-stone-500">
+        <RefreshCw aria-hidden="true" className="h-4 w-4 text-graphite" />
+        <h2 id="what-changed-heading" className="text-[12px] font-semibold text-graphite">
           {t('whatChangedEyebrow')}
         </h2>
       </div>
 
-      <p className="mt-2 text-sm leading-relaxed text-stone-700">
+      <p className="mt-2 text-sm leading-relaxed text-ink">
         {hasComparison
           ? t('whatChangedRevision', {
               quarter: quarterLabel,
@@ -69,7 +69,7 @@ export async function WhatChanged({
       </p>
 
       {nextReleaseHeadline && (
-        <p className="mt-3 flex items-start gap-1.5 text-xs text-stone-500">
+        <p className="mt-3 flex items-start gap-1.5 text-xs text-graphite">
           <CalendarDays aria-hidden="true" className="mt-[1px] h-3.5 w-3.5 shrink-0" />
           <span>{nextReleaseHeadline}</span>
         </p>

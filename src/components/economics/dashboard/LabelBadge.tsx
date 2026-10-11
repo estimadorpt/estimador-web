@@ -1,14 +1,15 @@
-// Small uppercase badge used to surface each tile's `label` (e.g. "preliminary",
-// "risk context, not a forecast"). Pure presentational server component.
+// The tile's `label` (e.g. "preliminary", "risk context, not a forecast") as a
+// word in the label's tone, sentence case, no chip or fill. Pure presentational
+// server component.
 
 export type Tone = 'neutral' | 'amber' | 'red' | 'emerald' | 'teal';
 
 const TONE_CLASSES: Record<Tone, string> = {
-  neutral: 'bg-stone-100 text-stone-600',
-  amber: 'bg-amber-100 text-amber-800',
-  red: 'bg-red-100 text-red-800',
-  emerald: 'bg-emerald-100 text-emerald-800',
-  teal: 'bg-[#245c68]/10 text-[#245c68]',
+  neutral: 'text-graphite',
+  amber: 'text-amber-800',
+  red: 'text-red-800',
+  emerald: 'text-emerald-800',
+  teal: 'text-teal',
 };
 
 export function LabelBadge({
@@ -24,7 +25,7 @@ export function LabelBadge({
   return (
     <span
       title={title}
-      className={`inline-block text-[12px] font-semibold text-graphite px-1.5 py-0.5 rounded ${TONE_CLASSES[tone]}`}
+      className={`inline-block text-[12px] font-semibold ${TONE_CLASSES[tone]}`}
     >
       {children}
     </span>

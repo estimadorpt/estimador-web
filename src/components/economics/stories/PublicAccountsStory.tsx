@@ -98,7 +98,7 @@ export async function PublicAccountsStory({
               <span className="text-right">{t('paNominal')}</span>
               <span className="text-right">{t('paReal')}</span>
             </div>
-            <ul className="divide-y divide-stone-100">
+            <ul className="divide-y divide-rule">
               {taxes.map((tax, i) => {
                 const real = tax?.rolling_12m_real_growth_pct;
                 return (
@@ -106,13 +106,13 @@ export async function PublicAccountsStory({
                     key={i}
                     className="grid grid-cols-[4rem_1fr_4.2rem_4.2rem] items-center gap-x-2 py-1.5 text-xs tabular-nums"
                   >
-                    <span className="font-semibold text-stone-700">
+                    <span className="font-semibold text-ink">
                       {pickText(locale, tax?.label)}
                     </span>
-                    <span className="text-right text-stone-600">
+                    <span className="text-right text-graphite">
                       {fmtIntLoc(tax?.rolling_12m_sum_meur, locale)}
                     </span>
-                    <span className="text-right text-stone-500">
+                    <span className="text-right text-graphite">
                       {fmtSignedPctLoc(tax?.rolling_12m_nominal_growth_pct, locale, 1)}
                     </span>
                     <span
@@ -141,12 +141,12 @@ export async function PublicAccountsStory({
               {t('paDebtTitle', { month: fmtMonthLoc(debt.period, locale) })}
             </h4>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="text-3xl font-display font-extrabold tabular-nums tracking-tight text-stone-900">
+              <span className="text-3xl font-display font-extrabold tabular-nums text-ink">
                 {meurToBn(debt.level_meur, locale, 1)}
               </span>
-              <span className="text-xs text-stone-500">{t('paBnEur')}</span>
+              <span className="text-xs text-graphite">{t('paBnEur')}</span>
               {isNum(debt.change_12m_meur) && (
-                <span className="text-xs tabular-nums text-stone-500">
+                <span className="text-xs tabular-nums text-graphite">
                   {t('pa12m')}: {debt.change_12m_meur >= 0 ? '+' : '−'}
                   {fmtIntLoc(Math.abs(debt.change_12m_meur), locale)} M€ (
                   {fmtSignedPctLoc(debt.change_12m_pct, locale, 1)})

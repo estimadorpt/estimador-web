@@ -93,7 +93,7 @@ export function Gauge({
         y={cy - 6}
         textAnchor="middle"
         fontSize={S.value}
-        fontWeight={800}
+        fontWeight={700}
         fill={hasValue ? color : COLORS.stone}
         className="tabular-nums"
       >

@@ -94,7 +94,7 @@ export async function GrowthAtRiskTile({
       }
       accent={COLORS.teal}
     >
-      <p className="text-sm text-stone-500 mb-4">{t('garSubtitle')}</p>
+      <p className="text-sm text-graphite mb-4">{t('garSubtitle')}</p>
 
       {/* LEAD WITH THE DOWNSIDE: headline = q05, with an always-visible caveat */}
       <div className="mb-1 flex items-baseline gap-2 flex-wrap">
@@ -109,7 +109,7 @@ export async function GrowthAtRiskTile({
         </span>
         <StatusBadge kind="risk" label={t('badgeRisk')} title={t('badgeRiskDef')} />
       </div>
-      <p className="text-xs text-stone-500 leading-relaxed mb-5 max-w-2xl">
+      <p className="text-xs text-graphite leading-relaxed mb-5 max-w-2xl">
         {t('garCaveat')}
       </p>
 
@@ -127,7 +127,6 @@ export async function GrowthAtRiskTile({
             y={baselineY - bandH / 2}
             width={Math.max(xAt(q95 as number) - xAt(q05 as number), 1)}
             height={bandH}
-            rx={3}
             fill={COLORS.stoneFaint}
           />
         )}
@@ -139,7 +138,6 @@ export async function GrowthAtRiskTile({
             y={baselineY - innerH / 2}
             width={Math.max(xAt(q90 as number) - xAt(q10 as number), 1)}
             height={innerH}
-            rx={2}
             fill={COLORS.teal}
             fillOpacity={0.16}
           />
@@ -311,7 +309,7 @@ export async function GrowthAtRiskTile({
 
       {/* compact downside / median / upside read-out (tabular, null-safe) */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-        <div className="rounded-lg border border-stone-200 p-3">
+        <div className="border border-rule p-3">
           <div className="text-[12px] font-semibold text-graphite mb-1">
             {t('garDownsideRange')}
           </div>
@@ -322,19 +320,19 @@ export async function GrowthAtRiskTile({
             {fmtSignedPct(q05)} {DASH} {fmtSignedPct(q10)}
           </div>
         </div>
-        <div className="rounded-lg border border-stone-200 p-3">
+        <div className="border border-rule p-3">
           <div className="text-[12px] font-semibold text-graphite mb-1">
             {t('garMedian')}
           </div>
-          <div className="text-lg font-bold tabular-nums text-stone-500">
+          <div className="text-lg font-bold tabular-nums text-graphite">
             {fmtSignedPct(q50)}
           </div>
         </div>
-        <div className="rounded-lg border border-stone-200 p-3">
+        <div className="border border-rule p-3">
           <div className="text-[12px] font-semibold text-graphite mb-1">
             {t('garUpsideRange')}
           </div>
-          <div className="text-lg font-bold tabular-nums text-stone-500">
+          <div className="text-lg font-bold tabular-nums text-graphite">
             {fmtSignedPct(q90)} {DASH} {fmtSignedPct(q95)}
           </div>
         </div>

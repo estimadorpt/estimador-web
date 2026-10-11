@@ -41,7 +41,7 @@ export async function FoodBasketStory({
     >
       {/* aggregates strip */}
       {aggs.length > 0 && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-600 tabular-nums mb-4">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-graphite tabular-nums mb-4">
           {aggs.map((a, i) => (
             <span key={i}>
               <span className="text-stone-400">{pickText(locale, a?.label)}</span>{' '}
@@ -75,15 +75,15 @@ export async function FoodBasketStory({
                   className="grid grid-cols-[7rem_1fr_3.4rem_3.4rem] items-center gap-2"
                 >
                   <span
-                    className="text-xs text-stone-600 truncate"
+                    className="text-xs text-graphite truncate"
                     title={`${pickText(locale, it.label)} · ${fmtMonthLoc(it.period, locale)}`}
                   >
                     {pickText(locale, it.label)}
                   </span>
-                  <span className="relative block h-2.5 rounded-sm bg-stone-100">
+                  <span className="relative block h-2.5 border-b border-grid">
                     <span className="absolute inset-y-0 left-1/2 w-px bg-stone-300" aria-hidden />
                     <span
-                      className="absolute inset-y-0 rounded-sm"
+                      className="absolute inset-y-0"
                       style={{
                         backgroundColor: barColor,
                         opacity: 0.8,
@@ -98,7 +98,7 @@ export async function FoodBasketStory({
                   >
                     {fmtSignedPctLoc(v, locale, 1)}
                   </span>
-                  <span className="text-xs tabular-nums text-right text-stone-500">
+                  <span className="text-xs tabular-nums text-right text-graphite">
                     {fmtSignedPctLoc(it.cumulative_5y_pct, locale, 1)}
                   </span>
                 </li>
@@ -115,7 +115,7 @@ export async function FoodBasketStory({
 
       {/* 5-year cumulative comparison (our arithmetic on official rates) */}
       {cum?.rows && cum.rows.length > 0 && (
-        <div className="mt-4 border-t border-stone-100 pt-3">
+        <div className="mt-4 border-t border-grid pt-3">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="text-[12px] font-semibold text-graphite">
               {t('foodCumTitle', { years: cum.window_years ?? 5 })}
@@ -131,8 +131,8 @@ export async function FoodBasketStory({
           <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm tabular-nums">
             {cum.rows.map((r, i) => (
               <span key={r.id ?? i} title={r.window}>
-                <span className="text-xs text-stone-500">{pickText(locale, r.label)}</span>{' '}
-                <span className="font-bold text-stone-800">
+                <span className="text-xs text-graphite">{pickText(locale, r.label)}</span>{' '}
+                <span className="font-bold text-ink">
                   {fmtSignedPctLoc(r.cumulative_pct, locale, 1)}
                 </span>
               </span>

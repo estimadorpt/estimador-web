@@ -80,9 +80,9 @@ export async function MortgageResetStory({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* ---------------- part 1: já decidido (observed fixings) ---------- */}
         {decided && decidedTenors.length > 0 && (
-          <div className="rounded border border-stone-200 p-4">
+          <div className="border border-rule p-4">
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="text-xs font-bold text-stone-700">
+              <span className="text-xs font-bold text-ink">
                 {pickText(locale, decided.label) ?? '—'}
               </span>
               {decided.badge && (
@@ -99,11 +99,11 @@ export async function MortgageResetStory({
               )}
             </div>
 
-            <ul className="divide-y divide-stone-100">
+            <ul className="divide-y divide-rule">
               {decidedTenors.map(([key, tn]) => (
                 <li key={key} className="py-2.5 first:pt-0 last:pb-0">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-sm font-semibold text-stone-800">
+                    <span className="text-sm font-semibold text-ink">
                       {tn.label ?? key}
                     </span>
                     <span
@@ -117,9 +117,9 @@ export async function MortgageResetStory({
                       </span>
                     </span>
                   </div>
-                  <div className="mt-0.5 text-[11px] text-stone-500 tabular-nums">
+                  <div className="mt-0.5 text-[11px] text-graphite tabular-nums">
                     {fmtEurLoc(tn.instalment_old_eur, locale)} →{' '}
-                    <span className="font-semibold text-stone-700">
+                    <span className="font-semibold text-ink">
                       {fmtEurLoc(tn.instalment_new_eur, locale)}
                     </span>
                     {isNum(tn.delta_pct) && (
@@ -137,7 +137,7 @@ export async function MortgageResetStory({
             </ul>
 
             {pickText(locale, decided.note) && (
-              <p className="mt-3 text-[11px] leading-relaxed text-stone-500 border-t border-stone-100 pt-2">
+              <p className="mt-3 text-[11px] leading-relaxed text-graphite border-t border-grid pt-2">
                 {pickText(locale, decided.note)}
               </p>
             )}
@@ -146,9 +146,9 @@ export async function MortgageResetStory({
 
         {/* ---------------- part 2: ainda em aberto (scenarios) -------------- */}
         {open && openTenors.length > 0 && (
-          <div className="rounded border border-dashed border-stone-300 bg-stone-50/60 p-4">
+          <div className="border-t border-dashed border-rule pt-3">
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="text-xs font-bold text-stone-600">
+              <span className="text-xs font-bold text-graphite">
                 {pickText(locale, open.label) ?? '—'}
               </span>
               {open.badge && (
@@ -160,13 +160,13 @@ export async function MortgageResetStory({
               )}
             </div>
 
-            <ul className="divide-y divide-stone-200/70">
+            <ul className="divide-y divide-rule/70">
               {openTenors.map(([key, tn]) => {
                 const s = tn.scenarios;
                 return (
                   <li key={key} className="py-2.5 first:pt-0 last:pb-0">
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-sm font-semibold text-stone-700">
+                      <span className="text-sm font-semibold text-ink">
                         {tn.label ?? key}
                       </span>
                       <span className="text-[11px] text-stone-400">
@@ -174,7 +174,7 @@ export async function MortgageResetStory({
                       </span>
                     </div>
                     <div className="mt-1.5 grid grid-cols-3 gap-1.5 text-center">
-                      <div className="rounded bg-cream border border-stone-200 px-1 py-1.5">
+                      <div className="bg-paper border border-rule px-1 py-1.5">
                         <div className="text-[12px] font-semibold text-graphite">
                           −50 {t('mortgageBp')}
                         </div>
@@ -185,15 +185,15 @@ export async function MortgageResetStory({
                           {fmtSignedEurLoc(s?.down_50bp?.delta_vs_decided_eur, locale, 0)}
                         </div>
                       </div>
-                      <div className="rounded bg-cream border border-stone-200 px-1 py-1.5">
+                      <div className="bg-paper border border-rule px-1 py-1.5">
                         <div className="text-[12px] font-semibold text-graphite">
                           {t('mortgageFlat')}
                         </div>
-                        <div className="text-xs font-bold tabular-nums mt-0.5 text-stone-600">
+                        <div className="text-xs font-bold tabular-nums mt-0.5 text-graphite">
                           {fmtEurLoc(s?.flat?.instalment_eur, locale, 0)}
                         </div>
                       </div>
-                      <div className="rounded bg-cream border border-stone-200 px-1 py-1.5">
+                      <div className="bg-paper border border-rule px-1 py-1.5">
                         <div className="text-[12px] font-semibold text-graphite">
                           +50 {t('mortgageBp')}
                         </div>
@@ -211,7 +211,7 @@ export async function MortgageResetStory({
             </ul>
 
             {pickText(locale, open.note) && (
-              <p className="mt-3 text-[11px] leading-relaxed text-stone-500 border-t border-stone-200/70 pt-2">
+              <p className="mt-3 text-[11px] leading-relaxed text-graphite border-t border-rule/70 pt-2">
                 {pickText(locale, open.note)}
               </p>
             )}
@@ -221,7 +221,7 @@ export async function MortgageResetStory({
 
       {/* ---------------- assumptions (published, not buried) ---------------- */}
       {a && (
-        <p className="mt-4 text-[11px] leading-relaxed text-stone-500 max-w-prose">
+        <p className="mt-4 text-[11px] leading-relaxed text-graphite max-w-prose">
           {t('mortgageAssumptions', {
             principal: fmtEurLoc(a.principal_eur, locale, 0),
             years: isNum(a.term_months) ? Math.round(a.term_months / 12) : 30,

@@ -43,10 +43,10 @@ export async function ReleaseCalendarCard({
   if (entries.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-stone-200 bg-stone-50/60 p-5 md:p-6">
+    <section className="border-t border-ink pt-3">
       <div className="flex items-center gap-2">
         <CalendarDays className="w-4 h-4 text-stone-400" aria-hidden />
-        <h3 className="text-base tracking-tight text-stone-900">
+        <h3 className="text-base text-ink">
           {pickText(locale, data?.title) ?? t('calendarTitle')}
         </h3>
       </div>
@@ -55,16 +55,16 @@ export async function ReleaseCalendarCard({
         {entries.map((e, i) => (
           <li
             key={e.id ?? i}
-            className="rounded border border-stone-200 bg-cream px-3 py-2"
+            className="border border-rule bg-paper px-3 py-2"
             title={e.rule}
           >
-            <div className="text-xs font-semibold text-stone-800 leading-snug">
+            <div className="text-xs font-semibold text-ink leading-snug">
               {pickText(locale, e.name)}
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-stone-500 tabular-nums">
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-graphite tabular-nums">
               <span>{fmtPeriodLoc(e.date_estimated, locale)}</span>
               {e.estimated !== false && (
-                <span className="inline-block text-[12px] font-semibold text-graphite px-1 py-0.5 rounded bg-stone-100 text-stone-500">
+                <span className="inline-block text-[12px] font-semibold text-graphite">
                   {t('calendarEstimated')}
                 </span>
               )}

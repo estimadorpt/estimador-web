@@ -64,10 +64,10 @@ function AsOfBadge({
   return (
     <span
       title={isStale ? staleTitle : undefined}
-      className={`inline-block text-[11px] px-1.5 py-0.5 rounded tabular-nums ${
+      className={`inline-block text-[11px] px-1.5 py-0.5 tabular-nums ${
         isStale
-          ? 'bg-amber-100 text-amber-800 font-semibold'
-          : 'bg-stone-100 text-stone-500'
+          ? 'text-amber-800 font-semibold'
+          : 'text-graphite'
       }`}
     >
       {asOfLabel} {fmtDate(date, locale)}
@@ -95,10 +95,10 @@ export async function LabourTile({
   const verdictWord = verdictKey ? t(verdictKey) : data?.verdict ?? '—';
   const verdictClasses =
     verdict === 'improving'
-      ? 'bg-emerald-100 text-emerald-800'
+      ? 'text-emerald-800'
       : verdict === 'deteriorating'
-        ? 'bg-red-100 text-red-800'
-        : 'bg-stone-100 text-stone-600';
+        ? 'text-red-800'
+        : 'text-graphite';
 
   // Honesty: payload note (bilingual when shipped) + the fixed verdict rule, verbatim.
   const honesty = [
@@ -118,10 +118,10 @@ export async function LabourTile({
     >
       {/* headline: UR level + verdict chip */}
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="text-4xl md:text-5xl font-display font-extrabold tabular-nums tracking-tighter leading-none text-stone-900">
+        <span className="text-4xl md:text-5xl font-display font-extrabold tabular-nums leading-none text-ink">
           {fmtPctValue(ur?.level_pct, 1)}
         </span>
-        <span className="text-sm text-stone-500">{t('labourUrLabel')}</span>
+        <span className="text-sm text-graphite">{t('labourUrLabel')}</span>
         <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
         <span
           className={`inline-block text-[12px] font-semibold text-graphite px-1.5 py-0.5 ${verdictClasses}`}
@@ -139,13 +139,13 @@ export async function LabourTile({
       </div>
 
       {/* the no-forecast honesty line — always visible, not only collapsed */}
-      <p className="mt-1.5 text-xs leading-relaxed text-stone-500 max-w-prose">
+      <p className="mt-1.5 text-xs leading-relaxed text-graphite max-w-prose">
         {t('labourNoForecast')}
       </p>
 
       {/* 3m changes + expectations — divider grid, no cards */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-stone-200">
-        <div className="bg-cream p-3">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-rule">
+        <div className="bg-paper p-3">
           <div className="text-[12px] font-semibold text-graphite">
             {t('labourUr3m')}
           </div>
@@ -167,7 +167,7 @@ export async function LabourTile({
           </div>
         </div>
 
-        <div className="bg-cream p-3">
+        <div className="bg-paper p-3">
           <div className="text-[12px] font-semibold text-graphite">
             {t('labourIefp3m')}
           </div>
@@ -190,7 +190,7 @@ export async function LabourTile({
           </div>
         </div>
 
-        <div className="bg-cream p-3">
+        <div className="bg-paper p-3">
           <div className="text-[12px] font-semibold text-graphite">
             {t('labourEmpExp')}
           </div>

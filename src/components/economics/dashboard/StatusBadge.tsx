@@ -4,9 +4,9 @@
 // (see /economia/metodologia for the definitions); labels are bilingual via the
 // message files and the badge links to the methodology's taxonomy section.
 //
-// Distinct styling from LabelBadge (which carries the producer's free-text
-// maturity label at the card's top-right): this one is an outlined pill with a
-// status dot, so the two never read as duplicates.
+// Distinct from LabelBadge (the producer's free-text maturity label at the
+// card's top-right): this one is a link in the status's own text colour,
+// underlined, so the two never read as duplicates. No pill, no dot.
 
 import { Link } from '@/i18n/routing';
 
@@ -20,15 +20,15 @@ export type BadgeKind =
   | 'officialCalc' // Dado oficial, cálculo nosso — official numbers recombined
   | 'scenario'; // Cenário — hypothetical arithmetic, never a forecast
 
-const KIND_STYLE: Record<BadgeKind, { border: string; text: string; dot: string }> = {
-  reading: { border: 'border-[#245c68]/30', text: 'text-[#245c68]', dot: 'bg-[#245c68]' },
-  indicative: { border: 'border-amber-300', text: 'text-amber-800', dot: 'bg-amber-500' },
-  forecast: { border: 'border-stone-300', text: 'text-stone-600', dot: 'bg-stone-400' },
-  officialCalls: { border: 'border-emerald-300', text: 'text-emerald-800', dot: 'bg-emerald-600' },
-  risk: { border: 'border-red-200', text: 'text-red-800', dot: 'bg-red-600' },
-  official: { border: 'border-emerald-300', text: 'text-emerald-800', dot: 'bg-emerald-600' },
-  officialCalc: { border: 'border-[#245c68]/30', text: 'text-[#245c68]', dot: 'bg-[#245c68]' },
-  scenario: { border: 'border-stone-300', text: 'text-stone-600', dot: 'bg-stone-400' },
+const KIND_STYLE: Record<BadgeKind, string> = {
+  reading: 'text-ink',
+  indicative: 'text-amber-800',
+  forecast: 'text-graphite',
+  officialCalls: 'text-emerald-800',
+  risk: 'text-red-800',
+  official: 'text-emerald-800',
+  officialCalc: 'text-ink',
+  scenario: 'text-graphite',
 };
 
 /** i18n message key (economics namespace) for each badge kind. */
@@ -62,14 +62,12 @@ export function StatusBadge({
   /** Optional already-localized tooltip (the badge definition). */
   title?: string;
 }) {
-  const s = KIND_STYLE[kind];
   return (
     <Link
       href="/economia/metodologia"
       title={title}
-      className={`inline-flex items-center gap-1 rounded-full border bg-cream px-2 py-0.5 text-[12px] font-semibold text-graphite no-underline hover:opacity-80 transition-opacity ${s.border} ${s.text}`}
+      className={`inline-flex min-h-6 items-center text-[12px] font-semibold underline decoration-current/40 underline-offset-4 hover:decoration-current ${KIND_STYLE[kind]}`}
     >
-      <span aria-hidden className={`inline-block w-1.5 h-1.5 rounded-full ${s.dot}`} />
       {label}
     </Link>
   );

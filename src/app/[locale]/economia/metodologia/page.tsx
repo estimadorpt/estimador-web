@@ -84,10 +84,10 @@ export default async function EconomicsMethodologyPage({
   const components = getMDXComponents({
     h1: () => null,
     h2: ({ children }) => (
-      <h2 id={headingSlug(headingText(children))} className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight">{children}</h2>
+      <h2 id={headingSlug(headingText(children))} className="text-2xl text-ink mt-12 mb-3">{children}</h2>
     ),
     h3: ({ children }) => (
-      <h3 id={headingSlug(headingText(children))} className="text-lg text-stone-900 mt-8 mb-2">{children}</h3>
+      <h3 id={headingSlug(headingText(children))} className="text-lg text-ink mt-8 mb-2">{children}</h3>
     ),
   });
 
@@ -110,13 +110,12 @@ export default async function EconomicsMethodologyPage({
       <div className="mx-auto w-full max-w-7xl px-4 py-8"><div className="max-w-4xl">
 
         {actualLocale !== locale && (
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <p className="text-sm text-amber-800">
-              {locale === 'en'
-                ? 'This page is only available in Portuguese. Showing the Portuguese version.'
-                : 'Esta página apenas está disponível em inglês. A mostrar a versão inglesa.'}
-            </p>
-          </div>
+          <p className="mb-6 border-t border-rule pt-3 text-sm text-amber-800">
+            <strong className="font-semibold">{locale === 'en' ? 'Note:' : 'Nota:'}</strong>{' '}
+            {locale === 'en'
+              ? 'This page is only available in Portuguese. Showing the Portuguese version.'
+              : 'Esta página apenas está disponível em inglês. A mostrar a versão inglesa.'}
+          </p>
         )}
 
         <article className="article-body max-w-none" lang={actualLocale}>

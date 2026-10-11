@@ -27,6 +27,6 @@ export function HomeStoryHeadline({ items }: { items: HomeStoryItem[] }) {
   if (!item) return null;
 
   return (
-    <span className="text-xs text-stone-500 leading-snug">{item.headline}</span>
+    <span className="text-xs text-graphite leading-snug">{item.headline}</span>
   );
 }

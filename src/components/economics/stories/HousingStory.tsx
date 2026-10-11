@@ -44,35 +44,35 @@ export async function HousingStory({
       honesty={pickText(locale, data?.honesty_note_i18n)}
       locale={locale}
     >
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-stone-200">
-        <div className="bg-cream p-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-rule">
+        <div className="bg-paper p-3">
           <div className="text-[12px] font-semibold text-graphite">
             {t('housingRents')}
           </div>
-          <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
+          <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-ink">
             {fmtNumLoc(rents?.median_eur_m2, locale, 2)}
             <span className="text-xs font-bold text-stone-400"> €/m²</span>
           </div>
-          <div className="text-[11px] text-stone-500 tabular-nums mt-0.5">
+          <div className="text-[11px] text-graphite tabular-nums mt-0.5">
             {fmtSignedPctLoc(rents?.yoy_pct, locale, 1)} {t('yoy')}
           </div>
-          <span className="mt-1 inline-block text-[11px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-500">
+          <span className="mt-1 inline-block text-[12px] text-graphite">
             {fmtQuarterLoc(rents?.period, locale)}
           </span>
         </div>
-        <div className="bg-cream p-3">
+        <div className="bg-paper p-3">
           <div className="text-[12px] font-semibold text-graphite">
             {t('housingHpi')}
           </div>
-          <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
+          <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-ink">
             {fmtSignedPctLoc(hpi?.yoy_pct, locale, 1)}
           </div>
-          <div className="text-[11px] text-stone-500 mt-0.5">{t('yoy')}</div>
+          <div className="text-[11px] text-graphite mt-0.5">{t('yoy')}</div>
           <span
-            className={`mt-1 inline-block text-[11px] px-1.5 py-0.5 rounded ${
+            className={`mt-1 inline-block text-[11px] px-1.5 py-0.5 ${
               hpi?.stale
-                ? 'bg-amber-100 text-amber-800 font-semibold'
-                : 'bg-stone-100 text-stone-500'
+                ? 'text-amber-800 font-semibold'
+                : 'text-graphite'
             }`}
             title={hpi?.stale ? t('labourStaleTitle') : undefined}
           >
@@ -80,14 +80,14 @@ export async function HousingStory({
             {isNum(hpi?.age_days) ? ` · ${Math.round(hpi.age_days)}d` : ''}
           </span>
         </div>
-        <div className="bg-cream p-3">
+        <div className="bg-paper p-3">
           <div className="text-[12px] font-semibold text-graphite">
             {t('housingSince2020')}
           </div>
-          <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
+          <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-ink">
             {fmtSignedPctLoc(cmp?.new_lease_rents_pct, locale, 1)}
           </div>
-          <div className="text-[11px] text-stone-500 tabular-nums mt-0.5">
+          <div className="text-[11px] text-graphite tabular-nums mt-0.5">
             {t('housingVsHicp', {
               hicp: fmtSignedPctLoc(cmp?.hicp_pct, locale, 1),
             })}

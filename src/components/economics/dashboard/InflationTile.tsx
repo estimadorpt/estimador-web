@@ -89,7 +89,7 @@ export async function InflationTile({
             <span className="text-[12px] font-semibold text-graphite">
               {data.model?.name ?? 'estimativa indicativa da inflação'}
             </span>
-            <span className="text-3xl md:text-4xl font-display font-extrabold tabular-nums tracking-tight text-stone-900">
+            <span className="text-3xl md:text-4xl font-display font-extrabold tabular-nums text-ink">
               {fmtSignedPpLoc(data.model?.point_mm_pp, locale, 2)}
             </span>
             <span className="text-xs text-stone-400">
@@ -102,14 +102,14 @@ export async function InflationTile({
             />
           </div>
           {isNum(data.model?.implied_yoy_pct) && (
-            <p className="mt-1 text-sm text-stone-600 tabular-nums">
+            <p className="mt-1 text-sm text-graphite tabular-nums">
               {t('inflationImpliedYoy')}:{' '}
               <span className="font-bold">{fmtPctLoc(data.model?.implied_yoy_pct, locale, 1)}</span>{' '}
               {t('yoy')}
             </p>
           )}
           {Array.isArray(data.model?.band80_mm_pp) && (
-            <p className="mt-1 text-xs text-stone-500 tabular-nums">
+            <p className="mt-1 text-xs text-graphite tabular-nums">
               {t('officialBand80')}: {fmtSignedPpLoc(data.model?.band80_mm_pp?.[0], locale, 2)} …{' '}
               {fmtSignedPpLoc(data.model?.band80_mm_pp?.[1], locale, 2)}
             </p>
@@ -122,12 +122,12 @@ export async function InflationTile({
             {data.model?.band_note ? ` · ${data.model.band_note}` : ''}
           </p>
           {/* scored-vs-flash ledger (fills as INE flashes land) */}
-          <div className="mt-3 border-t border-stone-100 pt-2">
+          <div className="mt-3 border-t border-grid pt-2">
             <h3 className="text-[12px] font-semibold text-graphite mb-1">
               {t('inflationLedgerTitle')}
             </h3>
             {ledger?.rows && ledger.rows.length > 0 ? (
-              <ul className="text-xs text-stone-600 space-y-0.5 tabular-nums">
+              <ul className="text-xs text-graphite space-y-0.5 tabular-nums">
                 {ledger.rows.map((r, i) => (
                   <li key={r.month ?? i}>
                     {fmtMonthLoc(r.month, locale)}: {fmtSignedPpLoc(r.model_mm_pp, locale, 2)}{' '}
@@ -152,13 +152,13 @@ export async function InflationTile({
           )}
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span
-              className={`font-display font-extrabold tabular-nums tracking-tighter leading-none text-stone-900 ${
+              className={`font-display font-extrabold tabular-nums leading-none text-ink ${
                 isModelMode ? 'text-2xl md:text-3xl' : 'text-4xl md:text-5xl'
               }`}
             >
               {fmtPctLoc(official?.headline_yoy_pct, locale, 1)}
             </span>
-            <span className="text-sm text-stone-500">
+            <span className="text-sm text-graphite">
               {t('yoy')} · {fmtMonthLoc(official?.month, locale)}
             </span>
             <StatusBadge
@@ -175,7 +175,7 @@ export async function InflationTile({
 
           {/* The honest gate sentence — ALWAYS visible in tracker mode. */}
           {!isModelMode && (
-            <p className="mt-1.5 text-xs leading-relaxed text-stone-500 max-w-prose">
+            <p className="mt-1.5 text-xs leading-relaxed text-graphite max-w-prose">
               {t('inflationGateLine')}
             </p>
           )}
@@ -186,36 +186,36 @@ export async function InflationTile({
           )}
 
           {/* component grid: core / energy / food / m-m */}
-          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-px bg-stone-200 border border-stone-200">
-            <div className="bg-cream p-3">
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-px bg-stone-200 border border-rule">
+            <div className="bg-paper p-3">
               <div className="text-[12px] font-semibold text-graphite">
                 {t('inflationCore')}
               </div>
-              <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
+              <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-ink">
                 {fmtPctLoc(official?.core_yoy_pct, locale, 1)}
               </div>
             </div>
-            <div className="bg-cream p-3">
+            <div className="bg-paper p-3">
               <div className="text-[12px] font-semibold text-graphite">
                 {t('inflationEnergy')}
               </div>
-              <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
+              <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-ink">
                 {fmtPctLoc(official?.energy_yoy_pct, locale, 1)}
               </div>
             </div>
-            <div className="bg-cream p-3">
+            <div className="bg-paper p-3">
               <div className="text-[12px] font-semibold text-graphite">
                 {t('inflationFood')}
               </div>
-              <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
+              <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-ink">
                 {fmtPctLoc(official?.food_yoy_pct, locale, 1)}
               </div>
             </div>
-            <div className="bg-cream p-3">
+            <div className="bg-paper p-3">
               <div className="text-[12px] font-semibold text-graphite">
                 {t('inflationMm')}
               </div>
-              <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
+              <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-ink">
                 {fmtSignedPpLoc(official?.mm_pp, locale, 2)}
               </div>
               {/* compound badge string from the producer, verbatim */}
@@ -228,13 +228,13 @@ export async function InflationTile({
       )}
 
       {!officialOk && !isModelMode && (
-        <p className="text-sm text-stone-500">{t('unavailable')}</p>
+        <p className="text-sm text-graphite">{t('unavailable')}</p>
       )}
 
       {/* ---- seasonal-carry reference (tracker mode only; labelled, NOT a
               model estimate, NOT an 'estimativa indicativa', NOT a forecast) -- */}
       {carry && isNum(carry.mm_pp_same_month_mean) && (
-        <div className="mt-4 rounded border border-stone-200 bg-stone-50 p-3 max-w-xl">
+        <div className="mt-4 border-t border-rule pt-3 max-w-xl">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-[12px] font-semibold text-graphite">
               {pickI18n(locale, carry.label_i18n) ?? t('inflationCarryTitle')}
@@ -245,21 +245,21 @@ export async function InflationTile({
             )}
           </div>
           <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1 tabular-nums">
-            <span className="text-lg font-bold text-stone-700">
+            <span className="text-lg font-bold text-ink">
               {fmtSignedPpLoc(carry.mm_pp_same_month_mean, locale, 2)}
             </span>
-            <span className="text-xs text-stone-500">
+            <span className="text-xs text-graphite">
               {t('inflationMm')} · {fmtMonthLoc(carry.reference_month, locale)}
             </span>
             {isNum(carry.implied_yoy_pct) && (
-              <span className="text-xs text-stone-500">
+              <span className="text-xs text-graphite">
                 {t('inflationImpliedYoy')}: {fmtPctLoc(carry.implied_yoy_pct, locale, 1)}
               </span>
             )}
           </div>
           {/* the "NOT a model estimate / NOT a forecast" note, verbatim */}
           {pickI18n(locale, carry.note_i18n) && (
-            <p className="mt-1.5 text-[11px] leading-relaxed text-stone-500">
+            <p className="mt-1.5 text-[11px] leading-relaxed text-graphite">
               {pickI18n(locale, carry.note_i18n)}
             </p>
           )}

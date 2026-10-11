@@ -44,7 +44,7 @@ export function HomeEconomyFreshness({
   }
 
   return (
-    <span className="text-xs text-stone-500">
+    <span className="text-xs text-graphite">
       {t('updated')} {dateLabel}
     </span>
   );

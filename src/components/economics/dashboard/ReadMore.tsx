@@ -19,7 +19,7 @@ export function ReadMore({
   return (
     <div className="mt-2">
       {open && (
-        <div className="mb-2 text-xs leading-relaxed text-stone-600 max-w-4xl">
+        <div className="mb-2 text-xs leading-relaxed text-graphite max-w-4xl">
           {children}
         </div>
       )}
@@ -27,7 +27,7 @@ export function ReadMore({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="inline-flex items-center gap-1 text-[12px] font-semibold text-graphite hover:text-stone-800 transition-colors"
+        className="inline-flex items-center gap-1 text-[12px] font-semibold text-graphite hover:text-ink transition-colors"
       >
         {open ? lessLabel : moreLabel}
         <ChevronDown

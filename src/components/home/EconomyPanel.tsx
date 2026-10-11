@@ -27,7 +27,7 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
     <HomePanel labelledBy="home-economy-title">
       <div className="min-w-0 p-5 md:p-6">
         <div>
-          <Kicker pill={live ? undefined : tSections(preparing ? 'preparingSection' : 'pausedSection')}>{t('economyKicker')}</Kicker>
+          <Kicker status={live ? undefined : tSections(preparing ? 'preparingSection' : 'pausedSection')}>{t('economyKicker')}</Kicker>
           <h2 id="home-economy-title" className="mt-2 text-xl md:text-[1.5rem] md:leading-[1.2]">{live ? t('economyTitleLive') : t('economyTitlePaused')}</h2>
         </div>
         {live ? (
@@ -38,7 +38,7 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
           </>
         ) : (
           <>
-            <p className="mt-2 text-[14px] leading-relaxed text-stone-600">{t('economyPausedText')}</p>
+            <p className="mt-2 text-[14px] leading-relaxed text-graphite">{t('economyPausedText')}</p>
             <div className="mt-3"><Action href="/economia#compreender" locale={locale} variant="secondary" arrow className="whitespace-nowrap">{t('economyMethodsAction')}</Action></div>
             {preparing
               ? <Status tone="paused">{t('economyPreparingStatus')}</Status>
@@ -46,7 +46,7 @@ export async function EconomyPanel({ locale, economy, state, article }: { locale
           </>
         )}
         {article && (
-          <p className="mt-3 text-[13px] text-stone-600">
+          <p className="mt-3 text-[13px] text-graphite">
             {t('moreArticle')}: <Link href={`/artigos/${article.slug}`} locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">{article.title}</Link>
           </p>
         )}

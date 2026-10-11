@@ -20,18 +20,18 @@ export async function UnavailableTile({
   const t = await getTranslations({ locale, namespace: 'economics' });
   return (
     <section
-      className={`flex gap-5 rounded-2xl border border-line bg-stone-50 p-5 md:p-6 ${className}`}
+      className={`flex gap-5 border-t border-rule pt-3 ${className}`}
     >
       <div className="min-w-0 flex-1">
         <div className="mb-2 flex items-start justify-between gap-3">
-          <h2 className="text-base tracking-tight text-stone-500 md:text-lg">
+          <h2 className="text-base text-graphite md:text-lg">
             {title}
           </h2>
-          <span className="inline-block rounded bg-stone-200 px-1.5 py-0.5 text-[12px] font-semibold text-graphite">
+          <span className="text-[12px] font-semibold text-graphite">
             {t('unavailableBadge')}
           </span>
         </div>
-        <p className="text-sm text-stone-500">{reason || t('unavailable')}</p>
+        <p className="text-sm text-graphite">{reason || t('unavailable')}</p>
         <Link href="/economia/metodologia" locale={locale} className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-ink underline-offset-4 hover:underline">
           {t('methodologyLink')}
         </Link>

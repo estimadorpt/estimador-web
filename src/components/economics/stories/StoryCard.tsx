@@ -43,10 +43,10 @@ export async function StoryCard({
 
   return (
     <section
-      className={`relative overflow-hidden rounded-lg border border-stone-200 bg-cream p-5 md:p-6 ${className}`}
+      className={`relative overflow-hidden border border-rule bg-paper p-5 md:p-6 ${className}`}
     >
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-base md:text-lg tracking-tight text-stone-900 min-w-0">
+        <h3 className="text-base md:text-lg text-ink min-w-0">
           {pickText(locale, title) ?? '—'}
         </h3>
         {badge != null && (
@@ -62,7 +62,7 @@ export async function StoryCard({
 
       {/* Rule-generated headline sentence — the payload's own words, verbatim. */}
       {pickText(locale, headline) && (
-        <p className="mt-2 text-sm leading-relaxed text-stone-700 max-w-prose">
+        <p className="mt-2 text-sm leading-relaxed text-ink max-w-prose">
           {pickText(locale, headline)}
         </p>
       )}

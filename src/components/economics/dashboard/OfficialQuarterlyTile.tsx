@@ -20,6 +20,8 @@ import { labelKey, pickNote } from '@/lib/i18n/economy-labels';
 import { ProducerNote } from './ProducerNote';
 import type { OfficialQuarterlyTileData } from '@/types/economy-dashboard';
 import { fmtSignedPct, fmtSignedNum, COLORS } from '@/lib/utils/economy-format';
+import { BRAND } from '@/lib/brand';
+import { SERIES } from '@/components/viz/theme';
 
 // Map backend sector composite keys -> i18n key (fallback to the raw name).
 const SECTOR_KEYS: Record<string, string> = {
@@ -34,13 +36,14 @@ function isNum(v: number | null | undefined): v is number {
   return typeof v === 'number' && Number.isFinite(v);
 }
 
-// Combo member display: fixed order + i18n key + a muted editorial palette.
+// Combo member display: fixed order + i18n key + the SERIES hues (the AR(1)
+// reference in the scale grey).
 // The raw model id is kept as the HTML `title` so the provenance stays visible.
 const COMBO_MEMBERS: Array<{ id: string; nameKey: string; color: string }> = [
-  { id: 'ar1', nameKey: 'comboAr1', color: '#8a8a87' },
-  { id: 'supply_side_bridge', nameKey: 'comboBridge', color: '#245c68' },
-  { id: 'factor_dfm', nameKey: 'comboFactorDfm', color: '#427893' },
-  { id: 'esi_momentum', nameKey: 'comboEsiMomentum', color: '#8a6a26' },
+  { id: 'ar1', nameKey: 'comboAr1', color: BRAND.faint },
+  { id: 'supply_side_bridge', nameKey: 'comboBridge', color: SERIES[0] },
+  { id: 'factor_dfm', nameKey: 'comboFactorDfm', color: SERIES[2] },
+  { id: 'esi_momentum', nameKey: 'comboEsiMomentum', color: SERIES[1] },
 ];
 
 export async function OfficialQuarterlyTile({
@@ -131,7 +134,7 @@ export async function OfficialQuarterlyTile({
       </div>
 
       {/* ALWAYS-visible inline caveat (not only in the collapsible). */}
-      <p className="mt-1.5 text-xs leading-relaxed text-stone-500 max-w-prose">
+      <p className="mt-1.5 text-xs leading-relaxed text-graphite max-w-prose">
         {t('officialCaveat')}
       </p>
 
@@ -141,7 +144,7 @@ export async function OfficialQuarterlyTile({
           <span className="text-[12px] font-semibold text-graphite">
             {t('officialImpliedYoy')}
           </span>
-          <span className="text-lg font-bold tabular-nums text-stone-700">
+          <span className="text-lg font-bold tabular-nums text-ink">
             {fmtSignedPct(data.implied_yoy!.point_yoy, 1)}
           </span>
           <span className="text-xs text-stone-400">{t('yoy')}</span>
@@ -196,7 +199,6 @@ export async function OfficialQuarterlyTile({
               y={trackY - outerH / 2}
               width={Math.max(xAt(ci95hi!) - xAt(ci95lo!), 1)}
               height={outerH}
-              rx={2}
               fill={COLORS.teal}
               fillOpacity={0.16}
             />
@@ -208,7 +210,6 @@ export async function OfficialQuarterlyTile({
                 y={trackY - innerH / 2}
                 width={Math.max(xAt(ci80hi!) - xAt(ci80lo!), 1)}
                 height={innerH}
-                rx={2}
                 fill={COLORS.teal}
                 fillOpacity={0.32}
               />
@@ -251,10 +252,10 @@ export async function OfficialQuarterlyTile({
           </svg>
 
           {/* legend: 80% vs 95% band, exact values */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-[11px] text-stone-500">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-[11px] text-graphite">
             <span className="inline-flex items-center gap-1.5">
               <span
-                className="inline-block w-3 h-3 rounded-sm"
+                className="inline-block w-3 h-3"
                 style={{ backgroundColor: COLORS.teal, opacity: 0.32 }}
               />
               <span className="tabular-nums">
@@ -263,7 +264,7 @@ export async function OfficialQuarterlyTile({
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span
-                className="inline-block w-3 h-3 rounded-sm"
+                className="inline-block w-3 h-3"
                 style={{ backgroundColor: COLORS.teal, opacity: 0.16 }}
               />
               <span className="tabular-nums">
@@ -276,7 +277,7 @@ export async function OfficialQuarterlyTile({
 
       {/* Member-weights strip: who carries the combination, drawn to scale. */}
       {data?.combo_weights && Object.keys(data.combo_weights).length > 0 && (
-        <div className="mt-5 border-t border-stone-100 pt-4">
+        <div className="mt-5 border-t border-grid pt-4">
           <h3 className="text-[12px] font-semibold text-graphite mb-2">
             {t('officialWeightsTitle')}
           </h3>
@@ -287,7 +288,7 @@ export async function OfficialQuarterlyTile({
             // Include any unexpected member keys so nothing is silently dropped.
             const extras = Object.keys(data.combo_weights!)
               .filter((k) => !COMBO_MEMBERS.some((m) => m.id === k))
-              .map((k) => ({ id: k, nameKey: '', color: '#5c5c5c' }));
+              .map((k) => ({ id: k, nameKey: '', color: BRAND.muted }));
             const all = [...members, ...extras];
             const total = all.reduce(
               (s, m) => s + (data.combo_weights?.[m.id] ?? 0),
@@ -310,7 +311,7 @@ export async function OfficialQuarterlyTile({
                   })}
                 </div>
                 {/* labelled chips: name · weight · member point */}
-                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-stone-500">
+                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-graphite">
                   {all.map((m) => {
                     const w = data.combo_weights?.[m.id];
                     const pt = data.combo_member_points?.[m.id];
@@ -320,7 +321,7 @@ export async function OfficialQuarterlyTile({
                           className="inline-block w-2.5 h-2.5"
                           style={{ backgroundColor: m.color }}
                         />
-                        <span className="font-medium text-stone-600">
+                        <span className="font-medium text-graphite">
                           {m.nameKey ? t(m.nameKey) : m.id}
                         </span>
                         <span className="tabular-nums">
@@ -370,12 +371,12 @@ export async function OfficialQuarterlyTile({
         )}
 
       {/* First-release footnote (verbatim payload string). */}
-      <ProducerNote locale={locale} text={data?.first_release_note} i18n={data?.first_release_note_i18n} className="mt-2 border-t border-stone-100 pt-2" />
+      <ProducerNote locale={locale} text={data?.first_release_note} i18n={data?.first_release_note_i18n} className="mt-2 border-t border-grid pt-2" />
 
       {/* Sector composites: small diverging bars (z-scores). */}
       {Array.isArray(data?.sector_composites) &&
         data.sector_composites.length > 0 && (
-          <div className="mt-5 border-t border-stone-100 pt-4">
+          <div className="mt-5 border-t border-grid pt-4">
             <h3 className="text-[12px] font-semibold text-graphite mb-2.5">
               {t('officialSectorsTitle')}
             </h3>
@@ -426,15 +427,15 @@ function SectorComposites({
             key={`${c?.name ?? 'sector'}-${i}`}
             className="grid grid-cols-[7.5rem_1fr_3rem] items-center gap-2"
           >
-            <span className="text-xs text-stone-600 truncate" title={label(c?.name ?? '')}>
+            <span className="text-xs text-graphite truncate" title={label(c?.name ?? '')}>
               {label(c?.name ?? '')}
             </span>
             {/* diverging track, centred */}
-            <span className="relative block h-2.5 rounded-sm bg-stone-100">
+            <span className="relative block h-2.5 border-b border-grid">
               <span className="absolute inset-y-0 left-1/2 w-px bg-stone-300" aria-hidden />
               {hasVal && (
                 <span
-                  className="absolute inset-y-0 rounded-sm"
+                  className="absolute inset-y-0"
                   style={{
                     backgroundColor: barColor,
                     opacity: 0.8,

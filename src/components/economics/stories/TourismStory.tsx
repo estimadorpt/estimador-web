@@ -48,18 +48,18 @@ export async function TourismStory({
       locale={locale}
     >
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="text-4xl font-display font-extrabold tabular-nums tracking-tighter leading-none text-stone-900">
+        <span className="text-4xl font-display font-extrabold tabular-nums leading-none text-ink">
           {fmtIntLoc(total?.value, locale)}
         </span>
-        <span className="text-sm text-stone-500">
+        <span className="text-sm text-graphite">
           {t('tourismStays')} · {fmtMonthLoc(total?.period, locale)}
         </span>
-        <span className="text-sm font-bold tabular-nums text-stone-700">
+        <span className="text-sm font-bold tabular-nums text-ink">
           {fmtSignedPctLoc(total?.yoy_pct, locale, 1)} {t('yoy')}
         </span>
       </div>
 
-      <div className="mt-3 space-y-1 text-xs text-stone-600">
+      <div className="mt-3 space-y-1 text-xs text-graphite">
         {isNum(nonRes?.share_of_total_pct) && (
           <p className="tabular-nums">
             {t('tourismNonRes', {

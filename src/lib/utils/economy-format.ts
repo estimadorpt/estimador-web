@@ -116,18 +116,20 @@ export function fmtDateShort(iso: string | null | undefined, locale: string): st
   });
 }
 
-// ---- shared palette (brand teal + stone + semantic) -------------------------
+// ---- shared palette (brand teal + greys + semantic) -------------------------
 
+// Instrumento's values (src/lib/brand, the SERIES hues): no sage, cream or
+// September terracotta, so publishing the section brings none of it back.
 export const COLORS = {
   teal: BRAND.teal, // brand accent
-  tealLight: '#427893',
-  stone: '#8a8a87',
-  stoneDark: '#4f5f57',
-  stoneFaint: '#e2e2df',
-  grid: '#e2e2df',
-  red: '#8f4530',
-  redSoft: '#bd714e',
-  amber: '#8a6a26',
+  tealLight: '#159881', // SERIES[0]
+  stone: BRAND.faint,
+  stoneDark: BRAND.muted,
+  stoneFaint: BRAND.line,
+  grid: BRAND.grid,
+  red: BRAND.terracotta,
+  redSoft: '#ba6b4f', // SERIES[3]
+  amber: BRAND.gold,
   green: '#15803d',
   // The text-strength green token, not #4e8056 (4.16:1 on paper; A11Y2-08).
   emerald: BRAND.tree,

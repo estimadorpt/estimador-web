@@ -151,15 +151,15 @@ export async function AnnualOutlookTile({
       {/* ---- headline: median annual growth ---------------------------------- */}
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span
-          className="text-4xl md:text-5xl font-display font-extrabold tabular-nums tracking-tighter leading-none"
+          className="text-4xl md:text-5xl font-display font-extrabold tabular-nums leading-none"
           style={{ color: isNum(data?.median) && (data.median as number) < 0 ? COLORS.red : COLORS.teal }}
         >
           {fmtSignedPctValue(data?.median, 1)}
         </span>
-        <span className="text-sm text-stone-500">{t('annualMedianLabel')}</span>
+        <span className="text-sm text-graphite">{t('annualMedianLabel')}</span>
         <StatusBadge kind="forecast" label={t('badgeForecast')} title={t('badgeForecastDef')} />
       </div>
-      <p className="mt-1.5 text-xs leading-relaxed text-stone-500 max-w-prose">
+      <p className="mt-1.5 text-xs leading-relaxed text-graphite max-w-prose">
         {t('annualCaveat', {
           published: data?.published_through ?? '—',
           nowcast: data?.nowcast_quarter ?? '—',
@@ -335,11 +335,11 @@ export async function AnnualOutlookTile({
           <h3 className="text-[12px] font-semibold text-graphite mb-1.5">
             {t('annualConsensusTitle')}
           </h3>
-          <ul className="flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-stone-500">
+          <ul className="flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-graphite">
             {dots.map((f: ConsensusForecast & { pct: number }, i) => (
               <li key={`c-${i}`} className="inline-flex items-baseline gap-1.5">
-                <span className="font-medium text-stone-600">{f.institution ?? '—'}</span>
-                <span className="font-semibold tabular-nums text-stone-700">
+                <span className="font-medium text-graphite">{f.institution ?? '—'}</span>
+                <span className="font-semibold tabular-nums text-ink">
                   {fmtSignedPctValue(f.value_pct, 1)}
                 </span>
                 {f.pub_date && (
@@ -356,13 +356,13 @@ export async function AnnualOutlookTile({
       )}
 
       {/* ---- probability ladder ------------------------------------------------ */}
-      <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-px bg-stone-200 border border-stone-200">
+      <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-px bg-stone-200 border border-rule">
         {ladderItems.map((item, i) => (
-          <div key={`l-${i}`} className="bg-cream p-3">
+          <div key={`l-${i}`} className="bg-paper p-3">
             <div className="text-[12px] font-semibold text-graphite">
               {item.label}
             </div>
-            <div className="text-2xl font-display font-extrabold tabular-nums text-stone-800 mt-0.5">
+            <div className="text-2xl font-display font-extrabold tabular-nums text-ink mt-0.5">
               {fmtProbPct(item.p, 0)}
             </div>
           </div>

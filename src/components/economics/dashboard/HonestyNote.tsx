@@ -29,7 +29,7 @@ export function HonestyNote({
     <div className="mt-4 border-t border-line pt-1">
       <Disclosure summary={t('howToRead')} defaultOpen={defaultOpen}>
         <div className="mb-1 max-w-3xl">
-          <p className="text-xs leading-relaxed text-stone-600">{note}</p>
+          <p className="text-xs leading-relaxed text-graphite">{note}</p>
           <Link
             href="/economia/metodologia"
             className="mt-1 inline-flex min-h-11 items-center text-xs font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink"

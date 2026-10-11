@@ -131,11 +131,11 @@ function ProbSparkline({
 // Small neutral scorecard chip — a stat shown plainly, no alarm styling.
 function ScoreChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded border border-stone-200 px-2 py-1.5">
+    <div className="border border-rule px-2 py-1.5">
       <div className="text-[12px] font-semibold text-graphite leading-tight">
         {label}
       </div>
-      <div className="text-sm font-bold tabular-nums leading-tight mt-0.5 text-stone-700">
+      <div className="text-sm font-bold tabular-nums leading-tight mt-0.5 text-ink">
         {value}
       </div>
     </div>
@@ -173,12 +173,12 @@ export async function RecessionTile({
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* ---- A) CURRENT recession risk ---- */}
-        <div className="md:border-r md:border-stone-100 md:pr-6">
+        <div className="md:border-r md:border-grid md:pr-6">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm text-stone-900">{t('recessionCurrentTitle')}</h3>
+            <h3 className="text-sm text-ink">{t('recessionCurrentTitle')}</h3>
             <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
           </div>
-          <p className="text-[11px] text-stone-500 mt-0.5">
+          <p className="text-[11px] text-graphite mt-0.5">
             {t('recessionCurrentSub', { quarter: current?.as_of_quarter ?? '—' })}
           </p>
 
@@ -197,7 +197,7 @@ export async function RecessionTile({
           </div>
 
           {/* always-visible inline caveat next to the headline number */}
-          <p className="mt-2 text-[11px] leading-snug text-stone-500">
+          <p className="mt-2 text-[11px] leading-snug text-graphite">
             {t('recessionCurrentCaveat')}
           </p>
 
@@ -248,10 +248,10 @@ export async function RecessionTile({
         {/* ---- B) 2-QUARTER OUTLOOK ---- */}
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-sm text-stone-900">{t('recessionLeadingTitle')}</h3>
+            <h3 className="text-sm text-ink">{t('recessionLeadingTitle')}</h3>
             <LabelBadge tone="amber">{t('recessionOutlookBadge')}</LabelBadge>
           </div>
-          <p className="text-[11px] text-stone-500 mt-0.5">
+          <p className="text-[11px] text-graphite mt-0.5">
             {t('recessionLeadingSub', { quarter: leading?.as_of_quarter ?? '—' })}
           </p>
 
@@ -270,7 +270,7 @@ export async function RecessionTile({
           </div>
 
           {/* always-visible inline caveat next to the headline number */}
-          <p className="mt-2 text-[11px] leading-snug text-stone-500">
+          <p className="mt-2 text-[11px] leading-snug text-graphite">
             {t('recessionLeadingCaveat')}
           </p>
 
@@ -288,18 +288,18 @@ export async function RecessionTile({
       </div>
 
       {/* ---- Sahm labour-market tripwire (full width) ---- */}
-      <div className="mt-6 border-t border-stone-100 pt-4">
+      <div className="mt-6 border-t border-grid pt-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-sm text-stone-900">{t('sahmTitle')}</h3>
+          <h3 className="text-sm text-ink">{t('sahmTitle')}</h3>
           <span
-            className={`inline-block text-[12px] font-semibold text-graphite px-1.5 py-0.5 rounded ${
-              sahmTriggered ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'
+            className={`inline-block text-[12px] font-semibold text-graphite px-1.5 py-0.5 ${
+              sahmTriggered ? 'text-red-800' : 'text-emerald-800'
             }`}
           >
             {sahmTriggered ? t('sahmTriggered') : t('sahmNotTriggered')}
           </span>
         </div>
-        <p className="mt-1.5 text-[11px] leading-snug text-stone-500 tabular-nums">
+        <p className="mt-1.5 text-[11px] leading-snug text-graphite tabular-nums">
           {t('sahmDetail', {
             gap: fmtNum(sahm?.latest_gap_pp),
             threshold: fmtNum(sahm?.threshold_pp),

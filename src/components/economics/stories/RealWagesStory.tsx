@@ -36,20 +36,20 @@ export async function RealWagesStory({
       honesty={pickText(locale, data?.honesty_note_i18n)}
       locale={locale}
     >
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-stone-200">
-        <div className="bg-cream p-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-rule">
+        <div className="bg-paper p-3">
           <div className="text-[12px] font-semibold text-graphite">
             {t('wagesNominal')}
           </div>
-          <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
+          <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-ink">
             {fmtSignedPctLoc(nominal?.value_pct, locale, 1)}
           </div>
           {nominal?.period && (
             <span
-              className={`mt-1 inline-block text-[11px] px-1.5 py-0.5 rounded ${
+              className={`mt-1 inline-block text-[11px] px-1.5 py-0.5 ${
                 nominal?.stale
-                  ? 'bg-amber-100 text-amber-800 font-semibold'
-                  : 'bg-stone-100 text-stone-500'
+                  ? 'text-amber-800 font-semibold'
+                  : 'text-graphite'
               }`}
               title={nominal?.stale ? t('labourStaleTitle') : undefined}
             >
@@ -57,20 +57,20 @@ export async function RealWagesStory({
             </span>
           )}
         </div>
-        <div className="bg-cream p-3">
+        <div className="bg-paper p-3">
           <div className="text-[12px] font-semibold text-graphite">
             {t('wagesInflation')}
           </div>
-          <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
+          <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-ink">
             {fmtPctLoc(data?.deflator?.hicp_yoy_pct, locale, 1)}
           </div>
           {data?.deflator?.period && (
-            <span className="mt-1 inline-block text-[11px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-500">
+            <span className="mt-1 inline-block text-[12px] text-graphite">
               {fmtMonthLoc(data.deflator.period, locale)}
             </span>
           )}
         </div>
-        <div className="bg-cream p-3">
+        <div className="bg-paper p-3">
           <div className="text-[12px] font-semibold text-graphite">
             {t('wagesReal')}
           </div>

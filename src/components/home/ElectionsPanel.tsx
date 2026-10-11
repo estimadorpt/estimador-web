@@ -62,23 +62,23 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
     return (
       <HomePanel labelledBy="home-elections-title" className="relative">
         <div className="min-w-0 px-5 pt-5 md:px-7 md:pt-6">
-          <Kicker pill={past(election) ? t('electionsArchived') : t('electionsForecast')}>{t('electionsKicker')}</Kicker>
+          <Kicker status={past(election) ? t('electionsArchived') : t('electionsForecast')}>{t('electionsKicker')}</Kicker>
           <h2 id="home-elections-title" className="mt-3 max-w-xl text-[2rem] leading-[1.06] md:text-[2.4rem]">{electionName(election)}</h2>
-          <p className="mt-3 text-[13px] font-semibold text-stone-600">
+          <p className="mt-3 text-[13px] font-semibold text-graphite">
             {longDate(election.date)}{updatedAt ? ` · ${t('electionsForecastAsOf', { date: longDate(updatedAt) })}` : ''}
           </p>
         </div>
         <div className="min-w-0 px-5 pb-5 pt-4 md:px-7 md:pb-6">
           {leadLine && (
             <>
-              <p className="max-w-lg text-base leading-relaxed text-stone-700">
+              <p className="max-w-lg text-base leading-relaxed text-ink">
                 <span className="font-semibold text-ink">{leadLine.name}</span> {leadLine.share}
-                <span className="text-stone-600"> ({leadLine.range})</span>
+                <span className="text-graphite"> ({leadLine.range})</span>
               </p>
-              <p className="mt-1 text-[13px] text-stone-600">{leadLine.label}</p>
+              <p className="mt-1 text-[13px] text-graphite">{leadLine.label}</p>
             </>
           )}
-          <p className="mt-2 text-[13px] text-stone-600">{t('electionsUncertainty')}</p>
+          <p className="mt-2 text-[13px] text-graphite">{t('electionsUncertainty')}</p>
           <div className="mt-6">{href && <Action href={href} locale={locale} arrow>{t('electionsAction')}</Action>}</div>
         </div>
       </HomePanel>

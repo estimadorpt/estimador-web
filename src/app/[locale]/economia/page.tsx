@@ -9,12 +9,10 @@ import { Action } from "@/components/brand/Action";
 import { Header } from "@/components/Header";
 import { EconomyReading } from '@/components/economics/EconomyReading';
 import { PageHero } from '@/components/PageHero';
-import { TeaserBand } from '@/components/brand/TeaserBand';
 import { SiteFooter } from '@/components/SiteFooter';
 import { getTranslations } from "next-intl/server";
 import { generatedByKey } from "@/lib/i18n/economy-labels";
 import { Link } from "@/i18n/routing";
-import { TrendingUp, BookOpen } from "lucide-react";
 import type { Metadata } from "next";
 
 import {
@@ -60,10 +58,10 @@ export async function generateMetadata({
 }
 
 /**
- * A status beside the card's kicker: one box that wraps as a box on a phone.
- * A rounded-full inline span broke into two ragged pills (UXM3-10).
+ * A status beside the card's kicker: a word in semibold, no pill or fill (the
+ * paused state in the caveat colour, as text).
  */
-const STATUS_PILL = 'inline-block rounded-lg px-2.5 py-1';
+const STATUS_TEXT = 'font-semibold';
 
 export default async function EconomiaPage({
   params,
@@ -87,7 +85,7 @@ export default async function EconomiaPage({
       section="economics"
       locale={locale}
       className="pt-4"
-      containerClassName="mt-8 border-t border-stone-200 pt-8"
+      containerClassName="mt-8 border-t border-rule pt-8"
     />
   );
 
@@ -100,17 +98,14 @@ export default async function EconomiaPage({
         <main id="main-content" tabIndex={-1}>
         <PageHero
           measure="wide"
-          field="mint"
           compact
-          icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
           eyebrow={t("preparingEyebrow")}
           title={t("preparingTitle")}
           lede={t("preparingLede")}
         />
         <div className="mx-auto w-full max-w-7xl px-4 py-6"><div className="max-w-5xl">
-          {/* The status is the kicker's and the lede's: the card says it no
-              third time (CL3-09), and carries no painting, since a data page
-              takes a tinted field and no art (VUXD-03). */}
+          {/* The status is the kicker's and the lede's: the reading says it no
+              third time (CL3-09). */}
           <EconomyReading locale={locale} />
           {/* Why there are no numbers is in the lede above; what remains here
               is where the method is explained. */}
@@ -135,9 +130,7 @@ export default async function EconomiaPage({
         <main id="main-content" tabIndex={-1}>
         <PageHero
           measure="wide"
-          field="mint"
           compact
-          icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
           eyebrow={t("eyebrow")}
           title={t("title")}
           lede={t("explainerLede")}
@@ -146,12 +139,12 @@ export default async function EconomiaPage({
           <EconomyReading
             locale={locale}
             status={
-              <span className={`${STATUS_PILL} bg-stone-200 text-stone-700`}>
+              <span className={`${STATUS_TEXT} text-ink`}>
                 {t("statusUnavailable")}
               </span>
             }
           />
-          <p className="mt-6 max-w-prose border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-muted">
+          <p className="mt-6 max-w-prose border-t border-rule pt-3 text-sm leading-relaxed text-ink-muted">
             {t("unavailableBody")}
           </p>
           {notes}
@@ -175,9 +168,7 @@ export default async function EconomiaPage({
         <main id="main-content" tabIndex={-1}>
         <PageHero
           measure="wide"
-          field="mint"
           compact
-          icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
           eyebrow={t("eyebrow")}
           title={t("title")}
           lede={t("explainerLede")}
@@ -186,7 +177,7 @@ export default async function EconomiaPage({
           <EconomyReading
             locale={locale}
             status={
-              <span className={`${STATUS_PILL} bg-amber-100 text-amber-800`}>
+              <span className={`${STATUS_TEXT} text-amber-800`}>
                 {t("statusPaused", { date: updatedDate })}
               </span>
             }
@@ -222,9 +213,7 @@ export default async function EconomiaPage({
       <main id="main-content" tabIndex={-1}>
       <PageHero
         measure="wide"
-        field="mint"
         compact
-        icon={<TrendingUp aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t("eyebrow")}
         title={t("title")}
         lede={t("pageIntro")}
@@ -233,9 +222,8 @@ export default async function EconomiaPage({
             <span>{t("updated")} {updatedDate}</span>
             <Link
               href="/economia/metodologia"
-              className="inline-flex items-center gap-1 font-semibold text-ink hover:underline"
+              className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4 hover:decoration-2"
             >
-              <BookOpen aria-hidden="true" className="w-3.5 h-3.5" />
               {t("methodologyLink")}
             </Link>
           </>
@@ -430,19 +418,17 @@ export default async function EconomiaPage({
         {/* Data stories — official numbers + explicit arithmetic, no models. */}
         {stories && <StoriesSection stories={stories} locale={locale} />}
 
-        {/* The explainer teaser comes after the useful data, never above it. */}
-        <TeaserBand
-          field="mint"
-          title={locale === "pt" ? "O que significam estes números?" : "What do these numbers mean?"}
-          href="/economia/metodologia"
-          locale={locale}
-          action={locale === "pt" ? "Ler a metodologia" : "Read the methodology"}
-          className="mt-4"
-        >
-          {locale === "pt"
-            ? "De onde vêm os dados, o que é oficial e o que é estimativa nossa, e porque é que cada painel diz a data a que se refere."
-            : "Where the data comes from, what is official and what is our estimate, and why every panel says the date it refers to."}
-        </TeaserBand>
+        {/* The way to the method comes after the useful data, never above it:
+            a ruled block, a statement and one action (no tinted band). */}
+        <section aria-labelledby="economy-method" className="mt-4 border-t border-ink pt-3">
+          <h2 id="economy-method" className="text-2xl">{locale === "pt" ? "O que estes números querem dizer" : "What these numbers mean"}</h2>
+          <p className="mt-2 max-w-xl text-base leading-relaxed text-ink">
+            {locale === "pt"
+              ? "De onde vêm os dados, o que é oficial e o que é estimativa nossa, e porque é que cada painel diz a data a que se refere."
+              : "Where the data comes from, what is official and what is our estimate, and why every panel says the date it refers to."}
+          </p>
+          <div className="mt-3"><Action href="/economia/metodologia" locale={locale} variant="text" arrow>{locale === "pt" ? "Ler a metodologia" : "Read the methodology"}</Action></div>
+        </section>
 
         {/* Written analysis, framed like the stories block above it: the tiles
             are the dashboard, and prose is what follows the dashboard. */}
@@ -450,7 +436,7 @@ export default async function EconomiaPage({
           section="economics"
           locale={locale}
           className="pt-4"
-          containerClassName="border-t border-stone-200 pt-8"
+          containerClassName="border-t border-rule pt-8"
         />
       </div></div>
       </main>

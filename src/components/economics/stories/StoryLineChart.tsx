@@ -159,20 +159,12 @@ export function StoryChartLegend({
   items: Array<{ label: string; color: string; value?: string; dashed?: boolean }>;
 }) {
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-[11px] text-stone-600">
+    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-[11px] text-graphite">
       {items.map((it, i) => (
         <span key={i} className="inline-flex items-center gap-1.5">
-          <span
-            aria-hidden
-            className="inline-block w-3.5 h-0.5 rounded"
-            style={{
-              backgroundColor: it.dashed ? 'transparent' : it.color,
-              backgroundImage: it.dashed
-                ? `linear-gradient(to right, ${it.color} 60%, transparent 40%)`
-                : undefined,
-              backgroundSize: it.dashed ? '5px 2px' : undefined,
-            }}
-          />
+          <svg aria-hidden="true" width="14" height="2" className="shrink-0">
+            <line x1="0" x2="14" y1="1" y2="1" stroke={it.color} strokeWidth="2" strokeDasharray={it.dashed ? '3 2' : undefined} />
+          </svg>
           <span>{it.label}</span>
           {it.value && <span className="tabular-nums font-semibold">{it.value}</span>}
         </span>

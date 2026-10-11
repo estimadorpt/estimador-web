@@ -82,7 +82,7 @@ export function StalenessBanner({
   return (
     <div
       role="status"
-      className="rounded-lg border-l-4 border-l-amber-500 border-y border-r border-amber-200 bg-amber-50 p-4"
+      className="border-t border-rule pt-3"
     >
       {stale && (
         <div className="flex items-start gap-2">
@@ -141,15 +141,15 @@ export function StaleAwareNarrative({
   const dateLabel = fmtDate(vintageDate ?? asOf, locale);
 
   return (
-    <section className={`border-l-2 pl-4 ${stale ? 'border-amber-300' : 'border-stone-300'}`}>
+    <section className={`border-l-2 pl-4 ${stale ? 'border-amber-300' : 'border-rule'}`}>
       {stale && (
-        <p className="mb-1 text-[12px] font-semibold text-graphite text-amber-700">
+        <p className="mb-1 text-[12px] font-semibold text-amber-800">
           {t('staleNarrativeNote', { date: dateLabel })}
         </p>
       )}
       <p
         className={`text-base md:text-lg leading-relaxed max-w-4xl ${
-          stale ? 'text-stone-500' : 'text-stone-700'
+          stale ? 'text-graphite' : 'text-ink'
         }`}
       >
         {text}
