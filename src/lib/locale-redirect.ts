@@ -16,7 +16,7 @@
  */
 export const LOCALE_SECTIONS = [
   'populacao', 'desporto', 'eleicoes', 'economia', 'artigos',
-  'sobre', 'metodologia', 'privacidade', 'marca', 'habitacao',
+  'sobre', 'metodologia', 'privacidade', 'marca',
 ] as const;
 
 export const LOCALE_REDIRECT_SCRIPT = `(function(){try{var l=window.location,p=l.pathname;`

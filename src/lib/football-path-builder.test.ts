@@ -107,7 +107,8 @@ describe('the md07 Benfica acceptance case (audit B1)', () => {
 });
 
 describe('the decisive games the builder marks (md08)', () => {
-  const md08 = load('public/data/football/liga-2026-27/md08_scenarios.json');
+  // A frozen copy of md08's scenarios as first published mid-round.
+  const md08 = load('src/test-fixtures/liga-2026-27/md08_scenarios.json');
   const paths = md08.critical_paths ?? {};
   const marked = (team: string) => {
     const p = paths[team];
@@ -116,7 +117,6 @@ describe('the decisive games the builder marks (md08)', () => {
   };
 
   it('marks a title contender\'s direct duels and nothing else', () => {
-    if (md08.matchday !== 8) return;
     expect(marked('Porto')).toEqual(['12 Sporting CP', '24 Benfica', '29 Sporting CP']);
     for (const team of ['Benfica', 'Sporting CP']) {
       for (const row of marked(team)) expect(row, team).toMatch(/Porto|Benfica|Sporting CP/);
@@ -124,11 +124,10 @@ describe('the decisive games the builder marks (md08)', () => {
   });
 
   it('marks none of Casa Pia\'s games, which all weigh about the same', () => {
-    if (md08.matchday !== 8) return;
     expect(marked('Casa Pia')).toEqual([]);
     const { range } = decisiveGames(paths['Casa Pia'].p_current, paths['Casa Pia'].matches);
-    // The sentence the builder says instead: every game between 17 and 22 points.
-    expect(Math.round(range[0] * 100)).toBe(17);
+    // The sentence the builder says instead: every game between 16 and 22 points.
+    expect(Math.round(range[0] * 100)).toBe(16);
     expect(Math.round(range[1] * 100)).toBe(22);
   });
 
