@@ -177,17 +177,17 @@ pastel mosaic, question headlines) is retired; do not bring any of it back.
   and `palette-tokens.test.ts` hold them. Colour otherwise belongs to the data: team and party
   colours keep their own maps (`teamColorOnPaper` reaches 3:1 on white), as swatches, bars and
   lines, never as text.
-- **Type** (owner's pick of seven options, `docs/design/directions-2026-10-11/type/`): **IBM
-  Plex Sans** for text (`--font-sans`, `@fontsource-variable/ibm-plex-sans`, the weight axis)
-  and **IBM Plex Sans Condensed** for the display cut (`--font-display`,
-  `@fontsource/ibm-plex-sans-condensed` 500/600/700): h1 and h2 700, h3 600, headline figures
-  (`.disp`, or `font-display font-extrabold tabular-nums`) and names in tables (`.name-cut`,
-  600). Figures are tabular in every `td`/`th` and `.tnum`. `FONT_STACK` and
-  `DISPLAY_FONT_STACK` in `src/lib/brand` mirror the two CSS stacks for Plot, SVG and canvas;
-  change them together (`--display-stretch` exists for a face whose condensed cut is a width
-  axis). Newsreader (`--font-serif`) stays the reading face inside `.article-body` only. Labels
-  are sentence case at 12px in graphite: no letter-spaced uppercase kickers anywhere. Nothing
-  below 11px. Fonts are self-hosted; no page view contacts a font host.
+- **Type** (owner's pick of seven options, `docs/design/directions-2026-10-11/type/`, then one
+  width rather than a condensed display cut): **IBM Plex Sans** for everything
+  (`@fontsource-variable/ibm-plex-sans`, the weight axis). `--font-sans` is text;
+  `--font-display` is the headline role, the same face today: h1 and h2 700
+  (`--display-weight`), h3 600, headline figures (`.disp`, `.fig`, or `font-display
+  font-extrabold tabular-nums`) and names in tables (`.name-cut`, 600). Figures are tabular in
+  every `td`/`th` and `.tnum`. `FONT_STACK` and `DISPLAY_FONT_STACK` in `src/lib/brand` mirror
+  the two CSS stacks for Plot, SVG and canvas; change them together. Newsreader
+  (`--font-serif`) stays the reading face inside `.article-body` only. Labels are sentence case
+  at 12px in graphite: no letter-spaced uppercase kickers anywhere. Nothing below 11px. Fonts
+  are self-hosted; no page view contacts a font host.
 - **Primitives** (`src/components/instrument/`, server-safe): `IntervalBand` (lo/md/hi on the
   cell's own scale, `now` square, `result`, `reference`, `low`), `Ruler` (the scale printed in a
   column head, same min/max as the bands below it), `ReadingRule` and the three glyphs,

@@ -20,17 +20,15 @@
    `text-red-700` keep their meaning on white.
    --------------------------------------------------------------------------- */
 @theme {
-  /* IBM Plex Sans for text, IBM Plex Sans Condensed for the display cut
-     (headlines, headline figures, names in tables); self-hosted
+  /* IBM Plex Sans, one width, for everything but the long-form reading face:
+     text, headlines, headline figures and names in tables; self-hosted
      (src/app/fonts.ts). Every font name in code reads from here or from
      FONT_STACK / DISPLAY_FONT_STACK in src/lib/brand, so a change of typeface
-     is one edit in each. --display-stretch serves a face whose condensed cut
-     is a width axis rather than a family (100% here). */
+     is one edit in each. --font-display is the headline role (h1 to h3,
+     .disp, .fig, .name-cut), kept apart so a display cut can return in one
+     place. */
   --font-sans: 'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif;
-  --font-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans Variable', system-ui, sans-serif;
-  /* Headline figures and names in tables (.fig, .name-cut). */
-  --font-figures: 'IBM Plex Sans Condensed', 'IBM Plex Sans Variable', system-ui, sans-serif;
-  --display-stretch: 100%;
+  --font-display: 'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif;
   --display-weight: 700;
   /* The reading face: only inside the body of long-form pieces. */
   --font-serif: var(--font-newsreader), Georgia, 'Times New Roman', serif;
@@ -386,12 +384,10 @@
     font-variant-numeric: tabular-nums lining-nums;
   }
 
-  /* One family. Titles use the display cut (condensed where the face has a
-     width axis, --display-stretch), set heavy and close; uppercase labels
-     marked up as h2/h3 keep the label weight and the normal width. */
+  /* One family. Titles use the headline role, set heavy and close; uppercase
+     labels marked up as h2/h3 keep the label weight. */
   h1, h2, h3 {
     font-family: var(--font-display);
-    font-stretch: var(--display-stretch);
     line-height: 1.05;
     letter-spacing: -0.005em;
     text-wrap: balance;
@@ -404,15 +400,8 @@
   :is(h1, h2, h3).uppercase {
     font-family: var(--font-sans);
     font-weight: 700;
-    font-stretch: 100%;
     letter-spacing: inherit;
     line-height: 1.3;
-  }
-
-  /* Headline figures (font-display font-extrabold tabular-nums) take the
-     display cut too. */
-  [class~="font-display"] {
-    font-stretch: var(--display-stretch);
   }
 
   h4, h5, h6 {
@@ -560,20 +549,19 @@
      --------------------------------------------------------------------- */
   .disp {
     font-family: var(--font-display);
-    font-stretch: var(--display-stretch);
     font-weight: var(--display-weight);
     letter-spacing: -0.005em;
     font-variant-numeric: tabular-nums lining-nums;
   }
-  /* Headline figures: the figures face, heavy, tabular. */
+  /* Headline figures: heavy, tabular. */
   .fig {
-    font-family: var(--font-figures);
+    font-family: var(--font-display);
     font-weight: var(--display-weight);
     letter-spacing: -0.005em;
     font-variant-numeric: tabular-nums lining-nums;
   }
-  /* Club, parish and candidate names in tables: the figures face at 600. */
-  .name-cut { font-family: var(--font-figures); font-weight: 600; }
+  /* Club, parish and candidate names in tables, at 600. */
+  .name-cut { font-family: var(--font-display); font-weight: 600; }
 
   .iv { position: relative; display: block; height: 20px; min-width: 80px; }
   .iv::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--color-grid); }

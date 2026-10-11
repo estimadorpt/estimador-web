@@ -18,7 +18,7 @@ export const MARK_FULL = `${MARK_LEFT} ${MARK_BAND} ${MARK_RIGHT}`;
  * change them together.
  */
 export const FONT_STACK = "'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif";
-export const DISPLAY_FONT_STACK = "'IBM Plex Sans Condensed', 'IBM Plex Sans Variable', system-ui, sans-serif";
+export const DISPLAY_FONT_STACK = FONT_STACK;
 
 /** Same values as the tokens in globals.css; exported for SVG and canvas code that cannot read CSS variables. */
 export const BRAND = {

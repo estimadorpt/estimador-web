@@ -1,13 +1,13 @@
 /*
  * Aguarda parecer: the game's own stylesheet, scoped under .hab so it can be mounted inside
- * estimador.pt (like miniatura.css). Follows the site's rules: paper, cream and ink; Inter;
+ * estimador.pt (like miniatura.css). Follows the site's rules: paper and ink; IBM Plex Sans;
  * hairlines instead of shadows; nothing below 11px; 44px tap targets; motion 140-300ms and
  * none under prefers-reduced-motion.
  */
 .hab {
   /* estimador.pt tokens (src/app/globals.css), scoped so the game never depends on which
      theme variables a host page happens to emit. Same values as the site. */
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'IBM Plex Sans Variable', 'IBM Plex Sans', system-ui, sans-serif;
   --color-paper: #ffffff;
   --color-cream: #ffffff;
   --color-parchment: #f3f3f1;

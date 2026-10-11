@@ -4,17 +4,14 @@ import { Newsreader } from 'next/font/google';
  * The site's faces, served from estimador.pt itself: no page view asks
  * Google (or any other font host) for anything.
  *
- * IBM Plex Sans is the interface face (one variable file per subset, the
- * weight axis), and IBM Plex Sans Condensed the display cut: headlines,
- * headline figures, names in tables (500, 600 and 700). Both come from
- * @fontsource, whose @font-face rules keep plain family names ('IBM Plex
- * Sans Variable', 'IBM Plex Sans Condensed'), which matters: Plot charts, SVG
- * scenes and the canvas share card name the families directly through
- * FONT_STACK and DISPLAY_FONT_STACK (src/lib/brand), and next/font would
- * register them under hashed names those call sites cannot see.
- * unicode-range keeps a browser to the subsets it needs (Portuguese and
- * English are wholly latin): about 45 KB of text face and 19 KB per
- * condensed weight.
+ * IBM Plex Sans is the one interface face, for text and headlines alike (one
+ * variable file per subset, the weight axis). It comes from @fontsource,
+ * whose @font-face rules keep the plain family name ('IBM Plex Sans
+ * Variable'), which matters: Plot charts, SVG scenes and the canvas share
+ * card name the family directly through FONT_STACK and DISPLAY_FONT_STACK
+ * (src/lib/brand), and next/font would register it under a hashed name those
+ * call sites cannot see. unicode-range keeps a browser to the subsets it
+ * needs (Portuguese and English are wholly latin): about 45 KB.
  *
  * The logo needs no font: LogoHorizontal draws the published wordmark as
  * outlined paths (src/lib/brand/wordmark.ts).
@@ -24,9 +21,6 @@ import { Newsreader } from 'next/font/google';
  * serves them from /_next/static. The variable is mapped in globals.css.
  */
 import '@fontsource-variable/ibm-plex-sans/wght.css';
-import '@fontsource/ibm-plex-sans-condensed/500.css';
-import '@fontsource/ibm-plex-sans-condensed/600.css';
-import '@fontsource/ibm-plex-sans-condensed/700.css';
 
 /*
  * Not preloaded: only `.article-body` (methodology, about, privacy, articles)

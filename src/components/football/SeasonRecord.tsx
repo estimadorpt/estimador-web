@@ -22,7 +22,7 @@ export function SeasonRecord({ record, locale }: { record: Record; locale: strin
           <span className="block font-semibold">{r.label}</span>
           <span className="block text-[12.5px] text-graphite">{pt ? `${formatInteger(r.games, locale)} jogos` : `${formatInteger(r.games, locale)} games`}</span>
         </th>
-        <td className="w-[38%] min-w-[140px] py-2 pr-3">
+        <td className="w-[38%] min-w-[88px] py-2 pr-3 sm:min-w-[140px]">
           <IntervalBand lo={r.q05} md={r.q50} hi={r.q95} min={0} max={scaleMax} now={r.happened} />
           <span className="mt-0.5 flex justify-between text-[11px] text-graphite" aria-hidden="true"><span>0</span><span>{scaleMax}</span></span>
         </td>
