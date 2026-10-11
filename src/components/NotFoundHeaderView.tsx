@@ -47,7 +47,7 @@ export function NotFoundHeaderView({ locale, items }: { locale: 'pt' | 'en'; ite
         <div className="flex items-stretch gap-3">
           <nav aria-label={pt ? 'Navegação principal' : 'Main navigation'} className="hidden items-stretch lg:flex">
             {items.map(item => item.dropdown ? (
-              <details key={item.id} className="group/menu relative flex">
+              <details key={item.id} name="site-menu" className="group/menu relative flex">
                 <summary className="inline-flex h-full cursor-pointer list-none items-center gap-1 px-3 text-[15px] font-medium text-ink hover:bg-field [&::-webkit-details-marker]:hidden">
                   {item.label}<ChevronDown aria-hidden="true" className="h-3 w-3 text-graphite group-open/menu:rotate-180" />
                 </summary>
@@ -75,7 +75,7 @@ export function NotFoundHeaderView({ locale, items }: { locale: 'pt' | 'en'; ite
             <div className="absolute inset-x-0 top-full h-[calc(100dvh-61px)] overflow-y-auto border-t border-ink bg-paper">
               <nav aria-label={pt ? 'Navegação principal móvel' : 'Mobile main navigation'} className="mx-auto max-w-7xl px-4 py-2">
                 {items.map(item => item.dropdown ? (
-                  <details key={item.id} className="group/section">
+                  <details key={item.id} name="site-menu-section" className="group/section">
                     <summary className="flex w-full cursor-pointer list-none items-center justify-between border-b border-grid py-3 text-[17px] font-medium text-ink [&::-webkit-details-marker]:hidden">
                       {item.label}<ChevronDown aria-hidden="true" className="h-4 w-4 text-graphite group-open/section:rotate-180" />
                     </summary>

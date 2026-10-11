@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type SyntheticEvent } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Menu, X, ChevronDown } from 'lucide-react';
@@ -13,6 +13,20 @@ import { isExactPath, isNavItemActive, siteNavigation, type NavLabels } from '@/
 // Keyboard focus is the global double ring in globals.css (CLAUDE.md,
 // "Primitives"); nothing here declares its own outline.
 
+/**
+ * The menus are native <details>, as on the root 404's static header
+ * (NotFoundHeaderView): without JavaScript, or before it loads, a tap on
+ * "Menu" or on a section opens it and the links inside are plain links, and
+ * a shared `name` keeps one section open at a time. When the script runs,
+ * React keeps each one's `open` in state (synced through the toggle event),
+ * so the header adds what <details> alone does not: Escape closes and returns
+ * focus to its summary, focus or a pointer leaving the header closes
+ * everything, the arrow keys open a section on its first or last link, and
+ * the open phone sheet holds the page still.
+ */
+const SUMMARY_RESET = 'cursor-pointer list-none [&::-webkit-details-marker]:hidden';
+const isOpen = (event: SyntheticEvent<HTMLDetailsElement>) => event.currentTarget.open;
+
 export function Header() {
   const t = useTranslations();
   const locale = useLocale();
@@ -21,8 +35,8 @@ export function Header() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
-  const mobileToggleRef = useRef<HTMLButtonElement>(null);
-  const dropdownButtons = useRef<Record<string, HTMLButtonElement | null>>({});
+  const mobileToggleRef = useRef<HTMLElement>(null);
+  const dropdownButtons = useRef<Record<string, HTMLElement | null>>({});
   const ptPath = useArticleLanguagePath(pathname, 'pt');
   const enPath = useArticleLanguagePath(pathname, 'en');
   const isPortuguese = locale === 'pt';
@@ -180,22 +194,25 @@ export function Header() {
         <div className="flex items-stretch gap-3">
           <nav aria-label={isPortuguese ? 'Navegação principal' : 'Main navigation'} className="hidden lg:flex items-stretch">
             {navigationItems.map(item => item.dropdown ? (
-              <div key={item.id} className="relative flex" onBlur={event => {
-                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpenDropdown(current => current === item.id ? null : current);
-              }}>
-                <button type="button" ref={element => { dropdownButtons.current[item.id] = element; }}
-                  aria-expanded={openDropdown === item.id} aria-controls={`desktop-${item.id}`}
-                  onClick={() => setOpenDropdown(current => current === item.id ? null : item.id)}
+              <details key={item.id} name="site-menu" open={openDropdown === item.id} className="group/menu relative flex"
+                onToggle={event => {
+                  const open = isOpen(event);
+                  setOpenDropdown(current => (open ? item.id : current === item.id ? null : current));
+                }}
+                onBlur={event => {
+                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpenDropdown(current => current === item.id ? null : current);
+                }}>
+                <summary ref={element => { dropdownButtons.current[item.id] = element; }}
                   onKeyDown={event => {
                     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
                       event.preventDefault();
                       openAndFocusDropdown(item.id, event.key === 'ArrowUp');
                     }
                   }}
-                  className={`relative inline-flex items-center gap-1 px-3 text-[15px] hover:bg-field ${isActive(item) ? 'font-bold text-ink after:absolute after:inset-x-3 after:-bottom-px after:border-b-[3px] after:border-ink forced-colors:after:border-[Highlight]' : 'font-medium text-ink'}`}>
-                  {item.label}<ChevronDown aria-hidden="true" className={`h-3 w-3 text-graphite ${openDropdown === item.id ? 'rotate-180' : ''}`} />
-                </button>
-                <ul id={`desktop-${item.id}`} hidden={openDropdown !== item.id} className="absolute right-0 top-full z-50 min-w-[16rem] border border-ink bg-paper py-1">
+                  className={`relative inline-flex h-full items-center gap-1 px-3 text-[15px] hover:bg-field ${SUMMARY_RESET} ${isActive(item) ? 'font-bold text-ink after:absolute after:inset-x-3 after:-bottom-px after:border-b-[3px] after:border-ink forced-colors:after:border-[Highlight]' : 'font-medium text-ink'}`}>
+                  {item.label}<ChevronDown aria-hidden="true" className="h-3 w-3 text-graphite group-open/menu:rotate-180" />
+                </summary>
+                <ul id={`desktop-${item.id}`} className="absolute right-0 top-full z-50 min-w-[16rem] border border-ink bg-paper py-1">
                   {item.dropdown.map(sub => <li key={sub.href}>
                     <Link href={sub.href} onClick={closeNavigation} aria-current={exactActive(sub.href) ? 'page' : undefined}
                       className={`block whitespace-nowrap px-4 py-2.5 text-[15px] ${exactActive(sub.href) ? 'font-bold text-ink underline decoration-2 underline-offset-4' : 'text-ink hover:bg-field'}`}>
@@ -203,7 +220,7 @@ export function Header() {
                     </Link>
                   </li>)}
                 </ul>
-              </div>
+              </details>
             ) : (
               <Link key={item.id} href={item.href!} onClick={closeNavigation} aria-current={exactActive(item.href!) ? 'page' : undefined}
                 className={`relative inline-flex items-center gap-1 px-3 text-[15px] hover:bg-field ${isActive(item) ? 'font-bold text-ink after:absolute after:inset-x-3 after:-bottom-px after:border-b-[3px] after:border-ink forced-colors:after:border-[Highlight]' : 'font-medium text-ink'}`}>
@@ -212,45 +229,56 @@ export function Header() {
             ))}
           </nav>
           <div className="hidden lg:flex items-center border-l border-rule pl-3"><LanguageLinks /></div>
-          <button type="button" ref={mobileToggleRef} onClick={() => setMobileMenuOpen(current => !current)}
-            aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation"
-            aria-label={isPortuguese ? (mobileMenuOpen ? 'Fechar menu' : 'Abrir menu') : (mobileMenuOpen ? 'Close menu' : 'Open menu')}
-            className="lg:hidden inline-flex min-h-11 items-center gap-2 self-center border-l border-rule pl-4 text-[15px] font-semibold text-ink">
-            {mobileMenuOpen ? <X aria-hidden="true" className="h-5 w-5" /> : <Menu aria-hidden="true" className="h-5 w-5" />}
-            <span aria-hidden="true">{isPortuguese ? (mobileMenuOpen ? 'Fechar' : 'Menu') : (mobileMenuOpen ? 'Close' : 'Menu')}</span>
-          </button>
-        </div>
-      </div>
-      {/* A full-height sheet under the 60px bar: shorter, the page showed
-          through below it and read as part of the menu (UXM3-08). */}
-      <div id="mobile-navigation" hidden={!mobileMenuOpen} className="lg:hidden bg-paper h-[calc(100dvh-61px)] overflow-y-auto overscroll-contain">
-        <nav aria-label={isPortuguese ? 'Navegação principal móvel' : 'Mobile main navigation'} className="max-w-7xl mx-auto px-4 py-2">
-          {navigationItems.map(item => item.dropdown ? (
-            <div key={item.id}>
-              <button type="button" aria-expanded={mobileExpanded === item.id} aria-controls={`mobile-${item.id}`}
-                onClick={() => setMobileExpanded(current => current === item.id ? null : item.id)}
-                className={`flex w-full items-center justify-between border-b border-grid py-3 text-[17px] ${isActive(item) ? 'font-bold text-ink' : 'font-medium text-ink'}`}>
-                {item.label}<ChevronDown aria-hidden="true" className={`h-4 w-4 text-graphite ${mobileExpanded === item.id ? 'rotate-180' : ''}`} />
-              </button>
-              <ul id={`mobile-${item.id}`} hidden={mobileExpanded !== item.id} className="border-b border-grid py-1 pl-4">
-                {item.dropdown.map(sub => <li key={sub.href}>
-                  <Link href={sub.href} onClick={closeNavigation} aria-current={exactActive(sub.href) ? 'page' : undefined}
-                    className={`block py-3 text-[15px] ${exactActive(sub.href) ? 'font-bold text-ink underline decoration-2 underline-offset-4' : 'text-ink'}`}>
-                    {sub.label}
+          {/* Below 1024px: "Menu" opens a full-height sheet under the 60px bar
+              (UXM3-08; shorter, the page showed through below it and read as part
+              of the menu). The sheet hangs from the header (top-full), redrawing
+              the bar's ink rule along its top edge. */}
+          <details open={mobileMenuOpen} className="group/mobile flex lg:hidden"
+            onToggle={event => {
+              const open = isOpen(event);
+              setMobileMenuOpen(open);
+              if (open) setOpenDropdown(null); else setMobileExpanded(null);
+            }}>
+            <summary ref={mobileToggleRef}
+              className={`inline-flex min-h-11 items-center gap-2 self-center border-l border-rule pl-4 text-[15px] font-semibold text-ink ${SUMMARY_RESET}`}>
+              <Menu aria-hidden="true" className="h-5 w-5 group-open/mobile:hidden" />
+              <X aria-hidden="true" className="hidden h-5 w-5 group-open/mobile:block" />
+              {/* The name is what it shows; the summary's own expanded state says whether it is open. */}
+              Menu
+            </summary>
+            <div id="mobile-navigation" className="absolute inset-x-0 top-full h-[calc(100dvh-61px)] overflow-y-auto overscroll-contain border-t border-ink bg-paper">
+              <nav aria-label={isPortuguese ? 'Navegação principal móvel' : 'Mobile main navigation'} className="max-w-7xl mx-auto px-4 py-2">
+                {navigationItems.map(item => item.dropdown ? (
+                  <details key={item.id} name="site-menu-section" open={mobileExpanded === item.id} className="group/section"
+                    onToggle={event => {
+                      const open = isOpen(event);
+                      setMobileExpanded(current => (open ? item.id : current === item.id ? null : current));
+                    }}>
+                    <summary className={`flex w-full items-center justify-between border-b border-grid py-3 text-[17px] ${SUMMARY_RESET} ${isActive(item) ? 'font-bold text-ink' : 'font-medium text-ink'}`}>
+                      {item.label}<ChevronDown aria-hidden="true" className="h-4 w-4 text-graphite group-open/section:rotate-180" />
+                    </summary>
+                    <ul id={`mobile-${item.id}`} className="border-b border-grid py-1 pl-4">
+                      {item.dropdown.map(sub => <li key={sub.href}>
+                        <Link href={sub.href} onClick={closeNavigation} aria-current={exactActive(sub.href) ? 'page' : undefined}
+                          className={`block py-3 text-[15px] ${exactActive(sub.href) ? 'font-bold text-ink underline decoration-2 underline-offset-4' : 'text-ink'}`}>
+                          {sub.label}
+                        </Link>
+                      </li>)}
+                    </ul>
+                  </details>
+                ) : (
+                  <Link key={item.id} href={item.href!} onClick={closeNavigation} aria-current={exactActive(item.href!) ? 'page' : undefined}
+                    className={`block border-b border-grid py-3 text-[17px] ${isActive(item) ? 'font-bold text-ink' : 'font-medium text-ink'}`}>
+                    {item.label}
                   </Link>
-                </li>)}
-              </ul>
+                ))}
+                <div className="mt-4 flex items-center gap-3">
+                  <span className="mr-auto text-[15px] text-graphite">{isPortuguese ? 'Idioma' : 'Language'}</span><LanguageLinks mobile />
+                </div>
+              </nav>
             </div>
-          ) : (
-            <Link key={item.id} href={item.href!} onClick={closeNavigation} aria-current={exactActive(item.href!) ? 'page' : undefined}
-              className={`block border-b border-grid py-3 text-[17px] ${isActive(item) ? 'font-bold text-ink' : 'font-medium text-ink'}`}>
-              {item.label}
-            </Link>
-          ))}
-          <div className="mt-4 flex items-center gap-3">
-            <span className="mr-auto text-[15px] text-graphite">{isPortuguese ? 'Idioma' : 'Language'}</span><LanguageLinks mobile />
-          </div>
-        </nav>
+          </details>
+        </div>
       </div>
     </header>
   );
