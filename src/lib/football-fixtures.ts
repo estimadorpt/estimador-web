@@ -39,7 +39,7 @@ export interface GameFixtureEntry {
   /** UTC ISO timestamp. A placeholder until `kickoff_confirmed` is true. */
   kickoff: string;
   kickoff_confirmed: boolean;
-  /** When the game server stops taking picks for this fixture. */
+  /** When the game stops taking picks for this fixture. */
   locks_at?: string | null;
   /** The model's pre-round 1X2, frozen when the round opened; null until priced. */
   p_home?: number | null;

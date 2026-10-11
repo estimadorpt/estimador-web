@@ -391,8 +391,8 @@ function gameNotes(rounds: ManifestRoundLike[], locale: string): string[] {
   const notes: string[] = [];
   for (const l of latePublications(rounds)) {
     notes.push(pt
-      ? `Jornada ${l.matchday}: as probabilidades do modelo foram publicadas a ${formatLongDate(l.publishedAt, locale)}, depois de ${l.startedBefore} dos ${l.total} jogos terem começado. Ninguém podia jogar essa jornada, mas ela conta no registo do modelo na classificação da época. A partir da jornada ${l.matchday + 1}, as probabilidades são publicadas antes do primeiro jogo.`
-      : `Matchday ${l.matchday}: the model's probabilities were published on ${formatLongDate(l.publishedAt, locale)}, after ${l.startedBefore} of its ${l.total} games had started. Nobody could play that round, but it counts in the model's record in the season table. From matchday ${l.matchday + 1} on, the probabilities are published before the first game.`);
+      ? `Jornada ${l.matchday}: as probabilidades do modelo foram publicadas a ${formatLongDate(l.publishedAt, locale)}, depois de ${l.startedBefore} dos ${l.total} jogos terem começado. Ninguém podia jogar essa jornada. A partir da jornada ${l.matchday + 1}, as probabilidades são publicadas antes do primeiro jogo.`
+      : `Matchday ${l.matchday}: the model's probabilities were published on ${formatLongDate(l.publishedAt, locale)}, after ${l.startedBefore} of its ${l.total} games had started. Nobody could play that round. From matchday ${l.matchday + 1} on, the probabilities are published before the first game.`);
   }
   for (const e of earlyLocks(rounds)) {
     // The round's lock, the earliest of its games, is when the game closed

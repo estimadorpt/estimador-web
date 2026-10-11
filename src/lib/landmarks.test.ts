@@ -21,7 +21,7 @@ function walk(dir: string, found: string[] = []): string[] {
 }
 
 /** Components that render the page's main themselves. */
-const MAIN_OWNERS = ['ParishPage', 'Miniature', 'NotFoundBody', 'NotFoundByLocale'];
+const MAIN_OWNERS = ['ParishPage', 'NotFoundBody', 'NotFoundByLocale'];
 
 /** Each render branch opens one main, closes it, and never shows a hero outside it. */
 function expectHeroInsideMain(file: string, text: string) {

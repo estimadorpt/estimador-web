@@ -91,15 +91,6 @@ export function pollsterDisplayName(name: string): string {
 }
 
 /**
- * The pressed state of a toggle without colour: forced-colours mode drops an
- * ink fill, so the pressed one gets a 2px outline in the system colour
- * (A11Y3-11). Kept only for the Liga prediction game's picks; the archives'
- * round switch and charts no longer have toggles, and a new choice uses
- * choiceClass (src/components/brand/Choice.tsx), which carries the same rule.
- */
-export const PRESSED_IN_FORCED_COLORS = 'forced-colors:aria-pressed:outline-2 forced-colors:aria-pressed:outline-offset-2 forced-colors:aria-pressed:outline-solid';
-
-/**
  * The 2025 parliamentary parties in one order for every party chip, matrix
  * column, bloc card and table twin on the archive (AEE3-06): the forecast's
  * election-day vote share, largest first, which is also the seat chart's

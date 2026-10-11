@@ -11,6 +11,8 @@ interface ActionProps {
   external?: boolean;
   onClick?: () => void;
   type?: 'button' | 'submit';
+  /** A button that cannot act yet (links are never disabled). */
+  disabled?: boolean;
   variant?: Variant;
   /** Trailing arrow, for actions that lead somewhere. */
   arrow?: boolean;
@@ -30,7 +32,7 @@ const variants: Record<Variant, string> = {
   text: 'inline-flex min-h-12 items-center gap-1.5 text-[15px] font-semibold text-ink underline-offset-4 hover:underline',
 };
 
-export function Action({ href, locale, external, onClick, type = 'button', variant = 'primary', arrow, className = '', children }: ActionProps) {
+export function Action({ href, locale, external, onClick, type = 'button', disabled, variant = 'primary', arrow, className = '', children }: ActionProps) {
   const cls = `${variants[variant]} ${className}`;
   const content = (
     <>
@@ -40,5 +42,5 @@ export function Action({ href, locale, external, onClick, type = 'button', varia
   );
   if (href && external) return <a href={href} className={cls}>{content}</a>;
   if (href) return <Link href={href} locale={locale} className={cls}>{content}</Link>;
-  return <button type={type} onClick={onClick} className={cls}>{content}</button>;
+  return <button type={type} onClick={onClick} disabled={disabled} className={cls}>{content}</button>;
 }

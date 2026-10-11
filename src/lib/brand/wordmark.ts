@@ -5,7 +5,7 @@ import wordmark from './wordmark-paths.json';
  * the same drawing as public/brand/estimador-logo.svg, which
  * scripts/generate-brand-identity.mjs writes from this file and geometry.json
  * (wordmark.test.ts holds the two together). For SVG that leaves the page,
- * such as the miniatura's exported postcard, where no web font loads. In the
+ * such as the OG cards and the population share card, where no web font loads. In the
  * logo's WORDMARK_WIDTH×24 box the mark
  * (MARK_FULL) sits at 0–48 and the wordmark at
  * `translate(WORDMARK_X WORDMARK_BASELINE)`, "estimador" in BRAND.ink and

@@ -17,6 +17,7 @@ import { Link } from '@/i18n/routing';
 import { fmtDate } from '@/lib/utils/economy-format';
 import { POPULATION_RELEASE } from '@/lib/config/population';
 import { HONESTY } from '@/lib/population/labels';
+import { playerSeasonReach } from '@/lib/utils/player-pages';
 
 export async function generateMetadata({
   params
@@ -138,8 +139,8 @@ function EstadoAtual({
       href: '/desporto/liga',
       status: ligaStatus,
       text: pt
-        ? `Um modelo bayesiano que simula milhares de épocas possíveis para estimar a classificação final, as probabilidades de título e de despromoção e o peso de cada jogo nessas contas.${playerSeason ? ` Modelos bayesianos próprios medem também os jogadores, um por dimensão; os de finalização e de contribuição ofensiva vão até ao fim da época ${playerSeason}.` : ''}`
-        : `A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.${playerSeason ? ` Dedicated Bayesian models also rate the players, one per dimension; the finishing and attacking contribution models run to the end of the ${playerSeason} season.` : ''}`,
+        ? `Um modelo bayesiano que simula milhares de épocas possíveis para estimar a classificação final, as probabilidades de título e de despromoção e o peso de cada jogo nessas contas.${playerSeason ? ` Modelos bayesianos próprios medem também os jogadores, um por dimensão; os de finalização e de contribuição ofensiva ${playerSeason}.` : ''}`
+        : `A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.${playerSeason ? ` Dedicated Bayesian models also rate the players, one per dimension; the finishing and attacking contribution models ${playerSeason}.` : ''}`,
       method: { href: '/desporto/liga/metodologia', label: pt ? 'Metodologia da Liga Portugal' : 'Liga Portugal methodology' },
     },
     {
@@ -214,7 +215,8 @@ export default async function AboutPage({
   // The player models' cut-off, the same season /desporto/liga/jogadores and
   // the Liga methodology name (CL2-02).
   const [players, ligaSummary] = await Promise.all([loadLigaPlayers(), loadLigaSummary()]);
-  const playerSeason = players?.generated_from?.seasons?.at(-1) ?? null;
+  // "vão até ao fim da época 2025-26", or "incluem a época 2026-27, em curso".
+  const playerSeason = playerSeasonReach(players?.generated_from?.seasons, locale);
   // The latest forecast's round and update date, as the Liga page's status line has them.
   const ligaUpdated = ligaSummary?.timestamp ? formatLongDate(ligaSummary.timestamp, locale) : '';
   const ligaLatest = ligaSummary && ligaUpdated ? { matchday: ligaSummary.matchday, updated: ligaUpdated } : null;

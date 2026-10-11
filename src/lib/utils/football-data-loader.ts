@@ -614,9 +614,9 @@ export async function loadFixtureBySlug(slug: string): Promise<UpcomingFixture |
 /**
  * game_fixtures.json: the game's manifest, and the only file carrying every
  * fixture of the season with its real kickoff, its lock time, the model's
- * frozen pre-round probabilities and the result. The server scores against a
- * byte-identical copy (api/data/game_fixtures.json). Absence is a normal
- * outcome (an older season, a broken sync), so this returns null.
+ * frozen pre-round probabilities and the result; Contra o Modelo scores the
+ * reader's picks against it in the browser. Absence is a normal outcome (an
+ * older season, a broken sync), so this returns null.
  */
 export async function loadGameFixtures(): Promise<GameFixturesData | null> {
   try {

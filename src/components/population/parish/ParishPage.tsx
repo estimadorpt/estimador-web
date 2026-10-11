@@ -721,6 +721,9 @@ function HowToRead(props: HowToReadInput & { union: boolean }) {
           <Link href={`${POPULATION_ROUTES.quality}#glossario`} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4">
             {pt ? 'O que quer dizer cada termo' : 'What each term means'}
           </Link>
+          <Link href={POPULATION_ROUTES.explainer} locale={locale} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4">
+            {pt ? 'Um exemplo com 100 pessoas inventadas' : 'An example with 100 invented people'}
+          </Link>
         </p>
       </div>
     </details>

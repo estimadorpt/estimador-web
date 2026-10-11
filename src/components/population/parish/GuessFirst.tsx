@@ -27,7 +27,7 @@ const PROMPT: Record<'elders_alone' | 'multigenerational', { pt: (where: string)
  * Nothing is drawn, and "Ver o valor" stays off, until the slider moves: the
  * slider has to start somewhere, and that start is not a guess. The reveal
  * states the published value as a sentence ("Cerca de 39 em cada 100…") and
- * how far the guess was from it, in whole points (guess-reveal.ts). Skippable,
+ * how close the guess came, as a word with its band (guess-reveal.ts). Skippable,
  * and never offered for a refused response or a suppressed headline cell —
  * then it is a plain card.
  */
@@ -100,11 +100,8 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
       </div>
       <p id={`${id}-hint`} className="mt-3 text-[13px] text-graphite">{touched ? t.preview(value, unit) : t.hint}</p>
       <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1">
-        {/* Off until the slider moves: revealing from the starting point would score a guess nobody made.
-            The fieldset carries the disabled state, so the button keeps the site's Action look. */}
-        <fieldset disabled={!touched} className="contents">
-          <Action onClick={() => reveal(true)}>{t.reveal}</Action>
-        </fieldset>
+        {/* Off until the slider moves: revealing from the starting point would score a guess nobody made. */}
+        <Action disabled={!touched} onClick={() => reveal(true)}>{t.reveal}</Action>
         <Action variant="text" onClick={() => reveal(false)}>{t.skip}</Action>
       </div>
     </div>

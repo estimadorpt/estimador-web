@@ -1,17 +1,16 @@
 /**
  * What a guess-first card says once the value is shown: the published share
  * as a sentence in the card's own unit ("Cerca de 39 em cada 100 pessoas…"),
- * and how far the reader's guess was from it, in whole points.
- *
- * Both work from the published value as printed on the card ("39,4%"),
- * rounded to a whole number of the 100, the figure the sentence states, so
- * the distance is the reader's own arithmetic on two numbers in front of them
- * (their guess and "cerca de 39"), not a new statistic about the parish:
- * nothing is computed from the cells beyond rounding the one published value.
- * Every function takes that value in points (0–100), not as a share, so
- * "17,5%" rounds to 18 as a reader would round it (0.175 × 100 is 17.4999…).
+ * and how close the reader's guess came, as a word with its band ("perto: a
+ * 10 pontos ou menos"), never as a computed number of points: a difference
+ * printed from a cell would be a new statistic (handoff §3, src/lib/population/
+ * guess.ts), and the band still gives "longe" a reference (review, October
+ * 2026). Every function takes the published value in points (0–100), read
+ * from the card's display ("39,4%"), so "17,5%" rounds to 18 as a reader would
+ * round it (0.175 × 100 is 17.4999…).
  */
 import type { Locale } from '@/lib/population/labels';
+import { GUESS_BANDS, guessVerdict } from '@/lib/population/guess';
 
 export type GuessRecipe = 'elders_alone' | 'multigenerational';
 
@@ -27,11 +26,6 @@ export function publishedPoints(display: string, share: number): number {
 /** The published value (in points) as a whole number of the 100, halves up. */
 export function roundedOf100(points: number): number {
   return Math.min(100, Math.max(0, Math.floor(points + 0.5 + 1e-9)));
-}
-
-/** The reader's guess minus the rounded published value, in whole points. */
-export function guessDistance(guess: number, points: number): number {
-  return Math.round(guess) - roundedOf100(points);
 }
 
 /**
@@ -56,15 +50,24 @@ export function revealSentence(recipe: GuessRecipe, points: number, where: strin
     : `${lead} in every 100 private households ${where} ${one ? 'brings' : 'bring'} together a child and someone aged 65 or over.`;
 }
 
-/** "O teu palpite, 50, ficou 11 pontos acima." */
+/**
+ * "O teu palpite, 50, ficou perto, acima do valor publicado: a 10 pontos ou
+ * menos." The word and its band come from guessVerdict and GUESS_BANDS; the
+ * direction only says on which side the guess fell.
+ */
 export function distanceSentence(guess: number, points: number, locale: Locale): string {
   const g = Math.round(guess);
-  const d = guessDistance(g, points);
-  const size = Math.abs(d);
+  const verdict = guessVerdict(g, points / 100);
+  const above = g > points;
+  const { veryClose, close } = GUESS_BANDS;
   if (locale === 'pt') {
-    if (d === 0) return `O teu palpite, ${g}, é o valor publicado arredondado.`;
-    return `O teu palpite, ${g}, ficou ${size} ${size === 1 ? 'ponto' : 'pontos'} ${d > 0 ? 'acima' : 'abaixo'}.`;
+    const side = above ? 'acima' : 'abaixo';
+    if (verdict === 'very_close') return `O teu palpite, ${g}, ficou muito perto do valor publicado: a ${veryClose} pontos ou menos.`;
+    if (verdict === 'close') return `O teu palpite, ${g}, ficou perto, ${side} do valor publicado: a ${close} pontos ou menos.`;
+    return `O teu palpite, ${g}, ficou longe, ${side} do valor publicado: a mais de ${close} pontos.`;
   }
-  if (d === 0) return `Your guess, ${g}, is the published value rounded.`;
-  return `Your guess, ${g}, was ${size} ${size === 1 ? 'point' : 'points'} too ${d > 0 ? 'high' : 'low'}.`;
+  const side = above ? 'above' : 'below';
+  if (verdict === 'very_close') return `Your guess, ${g}, was very close to the published value: within ${veryClose} points.`;
+  if (verdict === 'close') return `Your guess, ${g}, was close, ${side} the published value: within ${close} points.`;
+  return `Your guess, ${g}, was far off, ${side} the published value: more than ${close} points away.`;
 }

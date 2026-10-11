@@ -746,7 +746,7 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
               ] : [
                 'Sentence case in headlines, labels and buttons.',
                 'Portuguese is PT-PT; the terms readers say in English stay in English: download, link, checksums, online, email, feed, app.',
-                'Stakes are stated from the club’s side: "Porto’s title chance: 55% with a win, 43% with a draw, 39% with a defeat"; under 5 pp, "Little at stake".',
+                'Stakes are stated from the club’s side: "Porto’s title chance: 55% if they win, 43% if they draw, 39% if they lose"; under 5 pp, "Little at stake".',
                 'Page titles through siteTitle(), with the " | estimador.pt" suffix once.',
               ]} />
             </Part>

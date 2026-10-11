@@ -36,23 +36,19 @@ Expected points come from each match's xG, from FotMob. For every match, both te
 
 xPts do not use the forecasting model: they are an independent read. The gap between real points and xPts mixes finishing, goalkeeping and chance, so it is not a clean split between luck and skill.
 
-## The simulator
+## Other games that weigh, and the final duel
 
-The [simulator](/en/desporto/liga/simulador/) uses the same simulations. When you pick a result for one of next matchday's games, the probabilities become those of the simulations in which that result happened: a conditional probability, not a new run of the model. An unlikely result has fewer simulations behind it, so its probabilities are noisier. That is why the simulator works with one result at a time, and only lists other matches that move your club's chances by at least 3 percentage points: below that, the difference blends into the noise.
+Club pages read one objective per club: the title from a 1% chance of winning it, else relegation from 1%. "Other games that weigh" lists other clubs' games, in the published round and postponed, whose result moves that objective by at least 3 percentage points, with the chance under each of the three results. Each figure is the probability in the simulations where that result happened: a conditional probability, not a new run of the model. Below 3 percentage points, the difference blends into the simulations' noise.
 
-The final duel on the same page uses something else: <Samples /> complete seasons drawn from the simulations. It counts who finishes with more points, and says separately how many seasons end level on points and which way the model splits them. With that sample, a share like 64% carries a margin of about ±5 percentage points, much larger than that of the title probabilities computed from every simulation.
+The final duel uses something else: <Samples /> complete seasons drawn from the simulations. It counts who finishes with more points, and how many seasons end level on points. With that sample, a share such as 64% can be about 5 percentage points higher or lower, far more than the title probabilities computed from every simulation.
 
 ## Decisive matches
 
-To measure the weight of each match, we split the <Sims /> simulations by that match's result (home win, draw, away win) and compare the title probability, or the relegation probability, in each group. We do not simulate the season again: it is the same count, made within each group. The matches where the gap between the best and worst result is largest are the most decisive. Because each simulation also draws the teams' strengths, splitting by the result mixes the effect of the points with what that result says about each club's strength: the gap is a conditional reading, not the isolated effect of winning. The same holds for what each result changes on the match and club pages, and in the simulator.
-
-## Winning scenarios
-
-On the pages of clubs in the title race or the relegation fight, the scenarios pick the four games of the club that most separate the simulations where it reaches its goal from the rest, and show the three combinations of results in those games that turn up most often in those simulations, with the probability after each step. Together they cover only part of the simulations (each page says how much): they are examples of what can happen, not the forecast path. Another club's result only appears beside a scenario when it happens in at least 90% of that scenario's simulations.
+To measure the weight of each match, we split the <Sims /> simulations by that match's result (home win, draw, away win) and compare the title probability, or the relegation probability, in each group. We do not simulate the season again: it is the same count, made within each group. The matches where the gap between the best and worst result is largest are the most decisive. Because each simulation also draws the teams' strengths, splitting by the result mixes the effect of the points with what that result says about each club's strength: the gap is a conditional reading, not the isolated effect of winning. The same holds for what each result changes on the match and club pages.
 
 ## Build your own scenario
 
-On the same page you can fix the result of any game the club has left. With one pick, the number is the conditional probability read from the simulations, as in the simulator. With several, the picks are combined as if independent of one another: an approximation, because the published file holds each game's effect, not each combination of games.
+On each club's page you can fix the result of any game it has left and read the title or relegation chance after each pick (a club fighting to stay up is always read by relegation). Games where winning or losing moves the chance at least 5 percentage points more than the club's typical remaining game are marked as decisive; when none stands out, the page says how much each game moves it. With one pick, the number is the conditional probability read from the simulations. With several, the picks are combined as if independent of one another: an approximation, because the published file holds each game's effect, not each combination of games.
 
 ## How we measure players
 
@@ -71,7 +67,7 @@ A player "separates" from the average when their 90% interval leaves out the pos
 - **Evaluated**: the win, draw or loss forecast for each game of the next matchday, against the market's closing line, over past seasons. The result is on [model vs market](/en/desporto/liga/modelo/).
 - **Evaluated**: the 90% ranges for final points (section above).
 - **Partly checked**: the title probabilities of the team in front, which the model tends to underrate (section above).
-- **Not evaluated**: the relegation and top-three probabilities, the decisive matches, the winning scenarios, "Build your own scenario" and the simulator.
+- **Not evaluated**: the relegation and top-three probabilities, the decisive matches, "Build your own scenario", the other games that weigh and the final duel.
 
 The comparison with the market is not independent of the model's choice either: the current model was picked among variants backtested on those same seasons, which tends to favour it. The first clean test will be the 2026-27 season.
 

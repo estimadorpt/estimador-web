@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { distanceSentence, guessDistance, publishedPoints, revealSentence, roundedOf100 } from './guess-reveal';
+import { distanceSentence, publishedPoints, revealSentence, roundedOf100 } from './guess-reveal';
 
 describe('the guess-first reveal', () => {
   it('reads the value as printed and rounds it as a reader would, halves up', () => {
@@ -10,12 +10,6 @@ describe('the guess-first reveal', () => {
     expect(roundedOf100(39.4)).toBe(39);
     expect(roundedOf100(0)).toBe(0);
     expect(roundedOf100(100)).toBe(100);
-  });
-
-  it('measures the guess against that rounded value, in whole points', () => {
-    expect(guessDistance(50, 39.4)).toBe(11);
-    expect(guessDistance(30, 39.4)).toBe(-9);
-    expect(guessDistance(39, 39.4)).toBe(0);
   });
 
   it('states the value as a sentence in the card’s unit', () => {
@@ -34,10 +28,14 @@ describe('the guess-first reveal', () => {
     expect(revealSentence('multigenerational', 0.4, 'here', 'en')).toMatch(/^Fewer than 1 in every 100 .* brings together/);
   });
 
-  it('says how far the guess was, and which way', () => {
-    expect(distanceSentence(50, 39.4, 'pt')).toBe('O teu palpite, 50, ficou 11 pontos acima.');
-    expect(distanceSentence(38, 39.4, 'pt')).toBe('O teu palpite, 38, ficou 1 ponto abaixo.');
-    expect(distanceSentence(39, 39.4, 'pt')).toBe('O teu palpite, 39, é o valor publicado arredondado.');
-    expect(distanceSentence(30, 39.4, 'en')).toBe('Your guess, 30, was 9 points too low.');
+  it('says how close the guess came as a word with its band, never as a computed number', () => {
+    expect(distanceSentence(38, 39.4, 'pt')).toBe('O teu palpite, 38, ficou muito perto do valor publicado: a 3 pontos ou menos.');
+    expect(distanceSentence(30, 39.4, 'pt')).toBe('O teu palpite, 30, ficou perto, abaixo do valor publicado: a 10 pontos ou menos.');
+    expect(distanceSentence(50, 39.4, 'pt')).toBe('O teu palpite, 50, ficou longe, acima do valor publicado: a mais de 10 pontos.');
+    expect(distanceSentence(30, 39.4, 'en')).toBe('Your guess, 30, was close, below the published value: within 10 points.');
+    // No sentence prints the distance itself (handoff §3).
+    for (const g of [0, 12, 38, 50, 77, 100]) {
+      expect(distanceSentence(g, 39.4, 'pt')).not.toMatch(/\b(1[1-9]|[2-9]\d|[4-9]) pontos? (acima|abaixo)/);
+    }
   });
 });

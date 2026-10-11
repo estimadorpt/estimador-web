@@ -36,23 +36,19 @@ Os pontos esperados vêm do xG de cada jogo, da FotMob. Para cada jogo, o xG das
 
 Os xPts não usam o modelo de previsão: são uma leitura independente. A diferença entre pontos reais e xPts mistura a eficácia de quem remata, as defesas do guarda-redes e o acaso, por isso não é uma separação limpa entre sorte e talento.
 
-## O simulador
+## Outros jogos que pesam e o duelo final
 
-O [simulador](/pt/desporto/liga/simulador/) usa as mesmas simulações. Quando escolhes um resultado para um jogo da jornada seguinte, as probabilidades passam a ser as das simulações em que esse resultado aconteceu: é uma probabilidade condicional, não uma nova corrida do modelo. Um resultado pouco provável tem menos simulações por trás, e as suas probabilidades têm mais ruído. Por isso o simulador trabalha com um resultado de cada vez, e só lista outros jogos que mudam as contas do teu clube em pelo menos 3 pontos percentuais: abaixo disso, a diferença confunde-se com o ruído.
+As páginas dos clubes leem um só objetivo por clube: o título a partir de 1% de probabilidade de ser campeão, senão a despromoção a partir de 1%. «Outros jogos que pesam» lista os jogos de outros clubes, na jornada publicada e em atraso, cujo resultado mexe pelo menos 3 pontos percentuais nesse objetivo, com a probabilidade em cada um dos três resultados. Cada número é a probabilidade nas simulações em que esse resultado aconteceu: uma probabilidade condicional, não uma nova corrida do modelo. Abaixo de 3 pontos percentuais, a diferença confunde-se com o ruído das simulações.
 
-O duelo final, na mesma página, usa outra coisa: <Samples /> épocas completas sorteadas das simulações. Conta quem acaba com mais pontos, e diz à parte quantas épocas acabam empatadas em pontos e para que lado o modelo as desempata. Com essa amostra, uma percentagem como 64% tem uma margem de cerca de ±5 pontos percentuais, muito maior do que a das probabilidades de título calculadas com todas as simulações.
+O duelo final usa outra coisa: <Samples /> épocas completas sorteadas das simulações. Conta quem acaba com mais pontos e quantas épocas acabam empatadas em pontos. Com essa amostra, uma percentagem como 64% pode estar uns 5 pontos percentuais acima ou abaixo, muito mais do que as probabilidades de título calculadas com todas as simulações.
 
 ## Jogos decisivos
 
-Para medir o peso de cada jogo, separamos as <Sims /> simulações pelo resultado desse jogo (vitória da casa, empate, vitória de fora) e comparamos a probabilidade de título, ou de despromoção, em cada grupo. Não voltamos a simular a época: é a mesma contagem, feita dentro de cada grupo. Os jogos em que a diferença entre o melhor e o pior resultado é maior são os mais decisivos. Como cada simulação sorteia também a força das equipas, separar pelo resultado mistura o efeito dos pontos com o que esse resultado diz sobre a força de cada clube: a diferença é uma leitura condicional, não o efeito isolado de ganhar. O mesmo vale para o que muda com cada resultado nas páginas dos jogos e dos clubes, e no simulador.
-
-## Cenários de vitória
-
-Nas páginas dos clubes que lutam pelo título ou contra a descida, os cenários escolhem os quatro jogos do clube que mais separam as simulações em que atinge o objetivo das outras, e mostram as três combinações de resultados nesses jogos que mais vezes aparecem nessas simulações, com a probabilidade depois de cada passo. Juntas, cobrem só uma parte das simulações (cada página diz quanto): são exemplos do que pode acontecer, não o caminho previsto. Um resultado de outro clube só aparece ao lado de um cenário quando acontece em pelo menos 90% das simulações desse cenário.
+Para medir o peso de cada jogo, separamos as <Sims /> simulações pelo resultado desse jogo (vitória da casa, empate, vitória de fora) e comparamos a probabilidade de título, ou de despromoção, em cada grupo. Não voltamos a simular a época: é a mesma contagem, feita dentro de cada grupo. Os jogos em que a diferença entre o melhor e o pior resultado é maior são os mais decisivos. Como cada simulação sorteia também a força das equipas, separar pelo resultado mistura o efeito dos pontos com o que esse resultado diz sobre a força de cada clube: a diferença é uma leitura condicional, não o efeito isolado de ganhar. O mesmo vale para o que muda com cada resultado nas páginas dos jogos e dos clubes.
 
 ## Cria o teu cenário
 
-Na mesma página, podes fixar o resultado de qualquer jogo que falte ao clube. Com uma escolha, o número é a probabilidade condicional tirada das simulações, como no simulador. Com várias, as escolhas combinam-se como se fossem independentes entre si: é uma aproximação, porque o ficheiro publicado guarda o efeito de cada jogo, não o de cada combinação de jogos.
+Na página de cada clube, podes fixar o resultado de qualquer jogo que lhe falte e ler o título ou a despromoção depois de cada escolha (um clube que luta pela permanência lê-se sempre pela despromoção). Ficam marcados como decisivos os jogos em que ganhar ou perder mexe pelo menos mais 5 pontos percentuais do que num jogo típico dos que faltam ao clube; quando nenhum se destaca, a página diz quanto mexe cada jogo. Com uma escolha, o número é a probabilidade condicional tirada das simulações. Com várias, as escolhas combinam-se como se fossem independentes entre si: é uma aproximação, porque o ficheiro publicado guarda o efeito de cada jogo, não o de cada combinação de jogos.
 
 ## Como medimos os jogadores
 
@@ -71,7 +67,7 @@ Um jogador «separa-se» da média quando o seu intervalo de 90% deixa de fora a
 - **Avaliado**: a previsão de vitória, empate ou derrota de cada jogo da jornada seguinte, contra a linha de fecho do mercado, em épocas passadas. O resultado está em [modelo vs mercado](/pt/desporto/liga/modelo/).
 - **Avaliado**: os intervalos de 90% para os pontos finais (secção acima).
 - **Verificado em parte**: as probabilidades de título de quem lidera, que o modelo tende a subestimar (secção acima).
-- **Não avaliado**: as probabilidades de despromoção e de top 3, os jogos decisivos, os cenários de vitória, o «Cria o teu cenário» e o simulador.
+- **Não avaliado**: as probabilidades de despromoção e de top 3, os jogos decisivos, o «Cria o teu cenário», os outros jogos que pesam e o duelo final.
 
 A comparação com o mercado também não é independente da escolha do modelo: o modelo atual foi escolhido entre variantes testadas nessas mesmas épocas, o que tende a favorecê-lo. A primeira avaliação limpa será a da época 2026-27.
 

@@ -9,6 +9,7 @@ import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { ContraOModelo } from "@/components/charts/football/ContraOModelo";
+import { LigaSectionNav } from "@/components/football/LigaSectionNav";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { setRequestLocale } from '@/i18n/request-locale';
@@ -76,6 +77,7 @@ export default async function JogoPrevisoesPage({
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <LigaSectionNav current="jogo" locale={locale} />
       <PageHero
         compact
         measure="reading"

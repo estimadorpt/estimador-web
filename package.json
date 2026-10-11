@@ -23,7 +23,6 @@
     "messages:unused": "node scripts/lib/unused-messages.mjs"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.61.9",
     "@fontsource-variable/ibm-plex-sans": "^5.3.0",
     "@mdx-js/loader": "^3.1.0",
     "@mdx-js/react": "^3.1.0",
