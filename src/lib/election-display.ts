@@ -91,27 +91,13 @@ export function pollsterDisplayName(name: string): string {
 }
 
 /**
- * The pressed state of the archives' toggles and pills (the round switch, the
- * candidate and party chips) without colour: forced-colours mode drops their
- * ink fill, so the pressed one gets a 2px outline in the system colour and
- * every one a transparent border, which forced colours draws as the button's
- * edge (A11Y3-11). Keyboard focus keeps its own ring.
+ * The pressed state of a toggle without colour: forced-colours mode drops an
+ * ink fill, so the pressed one gets a 2px outline in the system colour
+ * (A11Y3-11). Kept only for the Liga prediction game's picks; the archives'
+ * round switch and charts no longer have toggles, and a new choice uses
+ * choiceClass (src/components/brand/Choice.tsx), which carries the same rule.
  */
 export const PRESSED_IN_FORCED_COLORS = 'forced-colors:aria-pressed:outline-2 forced-colors:aria-pressed:outline-offset-2 forced-colors:aria-pressed:outline-solid';
-
-/** The row of a segmented text control: words side by side, wrapping on a phone. */
-export const SEGMENT_GROUP_CLASS = 'flex flex-wrap items-end gap-x-5 gap-y-1';
-
-/**
- * One option of the archives' segmented text controls (the round switch, the
- * candidate and party choices): a word, square, 44px tall, the pressed one in
- * ink and semibold over a 2px ink rule, the others in graphite over a
- * transparent one (which forced colours draws, with the outline above for the
- * pressed option). Same grammar as the "Gráfico | Tabela" tabs; no pill, no fill.
- */
-export function segmentClass(pressed: boolean): string {
-  return `inline-flex min-h-11 max-w-full items-center gap-2 border-b-2 text-left text-[14px] leading-5 ${PRESSED_IN_FORCED_COLORS} ${pressed ? 'border-ink font-semibold text-ink' : 'border-transparent text-graphite hover:border-rule hover:text-ink'}`;
-}
 
 /**
  * The 2025 parliamentary parties in one order for every party chip, matrix

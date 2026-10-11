@@ -36,7 +36,6 @@
     "generalStats": "Leading party by district",
     "districtsLed": "Districts each party leads",
     "totalDistricts": "Districts and autonomous regions:",
-    "voteShareCaption": "Predicted vote share (estimate) for each party in this district.",
     "topTwoGap": "Gap between the top two: {gap} percentage points."
   },
   "forecast": {
@@ -188,6 +187,7 @@
     "roundDateLine": "Runoff on {election} · forecast of {forecast}",
     "roundDateLineNoForecast": "Runoff on {election}",
     "methodologyLink": "How the runoff forecast was made",
+    "officialResult": "Official 2nd-round result (SGMAI)",
     "unavailable": "The runoff data is not available in this version of the site.",
     "noTrend": "This archived forecast has no runoff time series.",
     "axisLabel": "Valid vote on election day (%)",
@@ -206,7 +206,7 @@
     "voteShare": "Projected vote share on election day",
     "partyAffiliation": "Party",
     "supportTrajectory": "Estimated support through the campaign",
-    "trendDescription": "Choose one of the five leading candidates to see their estimated support over time; the other four appear as faint lines.",
+    "trendDescription": "Estimated support for the five leading candidates, day by day, with each one’s 50% interval and the polls as dots; the table also has the 90% interval.",
     "projectedVoteShare": "Projected vote share",
     "aboutModel": "About this model",
     "modelDescription": "This forecast used a Bayesian model that combined polling data with candidate-specific priors based on party affiliation. The model accounted for pollster house effects and uncertainty in voter preferences.",
@@ -241,6 +241,7 @@
     "firstRoundKicker": "First round · archived forecast",
     "firstRoundTitle": "A runoff would be needed, with a probability of {probability}",
     "firstRoundLede": "In the forecast of {date}, made from {polls} polls. To win in the first round, a candidate needed more than half of the valid vote.",
+    "officialResultRound1": "Official 1st-round result (SGMAI)",
     "forecastForElectionDay": "Forecast of {forecast} for election day, {election}",
     "unavailable": "The first-round data is not available in this version of the site.",
     "runoffEmpty": "No runoff pairs published in this forecast.",

@@ -184,20 +184,60 @@ export function AgeColumns({ cells, locale, height = 200, hint = true }: {
 }
 
 /**
+ * The 10×10 grid both 100-dot charts share: square cells, so a guess drawn as
+ * a hollow square outline sits on the same cell as a published dot.
+ */
+const GRID = { full: 'max-w-[220px] gap-[5px]', compact: 'max-w-[170px] gap-1' } as const;
+
+/**
+ * One cell of the 100: an optional dot (a published share) and an optional
+ * hollow ink square around it (the reader's guess, never filled: a guess is
+ * not something that happened). An empty slot is a faint square outline.
+ */
+function DotCell({ fill, guessed, slot = false }: { fill?: string; guessed: boolean; slot?: boolean }) {
+  return (
+    <span className="relative block aspect-square w-full">
+      {fill && <span className="absolute inset-px rounded-full" style={{ backgroundColor: fill }} />}
+      {guessed
+        ? <span className="absolute -inset-[2px] border-[1.5px] border-ink" />
+        : slot && <span className="absolute inset-0 border border-grid" />}
+    </span>
+  );
+}
+
+/**
+ * The reader's guess before the reveal: 100 empty slots, and as many hollow
+ * ink squares as they have guessed. Nothing is drawn until the slider moves,
+ * so no number of ours, and no default, reads as data.
+ */
+export function GuessGrid({ guess, label }: { guess: number | null; label: string }) {
+  const n = guess === null ? 0 : Math.min(100, Math.max(0, Math.round(guess)));
+  return (
+    <div className={`grid grid-cols-10 ${GRID.full}`} role="img" aria-label={label}>
+      {Array.from({ length: 100 }, (_, i) => <DotCell key={i} guessed={i < n} slot />)}
+    </div>
+  );
+}
+
+/**
  * "If this place were 100 people": one hundred dots split by the response's
  * shares, by largest remainder so they always add to 100. Only for responses
  * with nothing suppressed (see isWhole) and at most four categories.
  *
- * `guess` (a guess-first card, after the reveal): the reader's own number,
- * outlined on the first dots, which belong to the card's headline category,
- * so their guess and the published value sit on one grid (VUXD-07). It is the
- * reader's number; nothing is computed from the cells.
+ * `ink` (the guess-first cards): the first category, the card's headline
+ * ("vivem sozinhas"), in ink and the rest in grey, a published value against
+ * its complement. `guess` (after the reveal): the reader's own number as
+ * hollow ink squares on the first cells, the headline's, so their guess and
+ * the published value sit on one grid (VUXD-07). It is the reader's number;
+ * nothing is computed from the cells.
  */
-export function HundredPeople({ cells, locale, unit = 'people', guess, compact = false }: {
+export function HundredPeople({ cells, locale, unit = 'people', guess, ink = false, compact = false }: {
   cells: ReadCell[];
   locale: Locale;
   unit?: 'people' | 'households';
   guess?: number;
+  /** The headline category in ink, the others grey (guess-first cards). */
+  ink?: boolean;
   /** A smaller grid (the game's clue on a phone). */
   compact?: boolean;
 }) {
@@ -211,6 +251,7 @@ export function HundredPeople({ cells, locale, unit = 'people', guess, compact =
     return floors;
   }, [published]);
   const dots = counts.flatMap((count, i) => Array.from({ length: count }, () => i));
+  const colour = (series: number) => (ink ? (series === 0 ? BRAND.ink : DEEMPHASIS) : SERIES[series] ?? DEEMPHASIS);
   const each = unit === 'people'
     ? (locale === 'pt' ? 'Cada ponto, cerca de 1 pessoa em cada 100.' : 'Each dot, about 1 person in 100.')
     : (locale === 'pt' ? 'Cada ponto, cerca de 1 agregado em cada 100.' : 'Each dot, about 1 household in 100.');
@@ -218,27 +259,20 @@ export function HundredPeople({ cells, locale, unit = 'people', guess, compact =
   const guessWords = yours === null ? '' : locale === 'pt' ? `O teu palpite: ${yours} em cada 100` : `Your guess: ${yours} in every 100`;
   return (
     <div>
-      <div className={`grid grid-cols-10 ${compact ? 'max-w-[170px] gap-1' : 'max-w-[220px] gap-[5px]'}`} role="img" aria-label={[...published.map(cell => `${cell.labels.at(-1)} ${cell.display}`), guessWords].filter(Boolean).join(', ')}>
-        {dots.map((series, i) => (
-          <span
-            key={i}
-            className="aspect-square w-full rounded-full"
-            // The reader's guess is an ink outline set off the dot, not a shadow.
-            style={{ backgroundColor: SERIES[series] ?? DEEMPHASIS, ...(yours !== null && i < yours ? { outline: '1.5px solid var(--color-ink)', outlineOffset: '1.5px' } : {}) }}
-          />
-        ))}
+      <div className={`grid grid-cols-10 ${compact ? GRID.compact : GRID.full}`} role="img" aria-label={[...published.map(cell => `${cell.labels.at(-1)} ${cell.display}`), guessWords].filter(Boolean).join(', ')}>
+        {dots.map((series, i) => <DotCell key={i} fill={colour(series)} guessed={yours !== null && i < yours} />)}
       </div>
       <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-graphite">
         {published.map((cell, i) => (
           <li key={cell.values.join('|')} className="flex items-center gap-1.5">
-            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: SERIES[i] ?? DEEMPHASIS }} aria-hidden="true" />
+            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: colour(i) }} aria-hidden="true" />
             {cell.labels.at(-1)} <strong className="tabular-nums text-ink">{cell.display}</strong>
           </li>
         ))}
         {yours !== null && (
           <li className="flex items-center gap-1.5">
-            <span className="inline-block h-2.5 w-2.5 rounded-full border-[1.5px] border-ink" aria-hidden="true" />
-            {locale === 'pt' ? 'Contorno: o teu palpite,' : 'Outline: your guess,'} <strong className="tabular-nums text-ink">{yours}</strong>
+            <span className="inline-block h-3 w-3 border-[1.5px] border-ink" aria-hidden="true" />
+            {locale === 'pt' ? 'Quadrado vazio: o teu palpite,' : 'Hollow square: your guess,'} <strong className="tabular-nums text-ink">{yours}</strong>
           </li>
         )}
       </ul>

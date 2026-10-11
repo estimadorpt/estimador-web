@@ -1,5 +1,3 @@
-'use client';
-
 import type { ReactNode } from 'react';
 import { Check } from 'lucide-react';
 
@@ -15,6 +13,11 @@ import { Check } from 'lucide-react';
  * give the same look to markup of its own (a 1X2 pick with figures inside, a
  * round switch made of links so it can be shared): put `aria-pressed` on
  * buttons, `aria-current` on links, and draw `<ChoiceCheck />` in the chosen one.
+ *
+ * The module has no 'use client' of its own: the class helpers and the check
+ * are plain values, so a server component (the /marca reference, a static
+ * row of links) can use them too. `ChoiceGroup` takes an onChange, so only a
+ * client component can render it.
  */
 
 /** The row: boxes share their 1px ink borders and wrap on a phone. */
@@ -22,7 +25,7 @@ export const CHOICE_GROUP_CLASS = 'flex max-w-full flex-wrap pl-px pt-px';
 
 /** One box: 44px tall, square; the chosen one in ink with white text. */
 export function choiceClass(selected: boolean, extra = ''): string {
-  return `-ml-px -mt-px inline-flex min-h-11 items-center justify-center gap-1.5 border border-ink px-3.5 text-[14px] font-semibold leading-5 transition-colors duration-150 disabled:cursor-not-allowed disabled:text-graphite aria-disabled:cursor-not-allowed aria-disabled:text-graphite forced-colors:aria-pressed:outline-2 forced-colors:aria-pressed:outline-offset-2 forced-colors:aria-pressed:outline-solid forced-colors:aria-[current]:outline-2 forced-colors:aria-[current]:outline-offset-2 forced-colors:aria-[current]:outline-solid ${selected ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-field'} ${extra}`;
+  return `-ml-px -mt-px inline-flex min-h-11 items-center justify-center gap-1.5 border border-ink px-3.5 text-[14px] font-semibold leading-5 transition-colors duration-150 disabled:cursor-not-allowed disabled:text-graphite aria-disabled:cursor-not-allowed aria-disabled:text-graphite forced-colors:aria-pressed:outline-2 forced-colors:aria-pressed:outline-offset-2 forced-colors:aria-pressed:outline-solid forced-colors:aria-[current]:outline-2 forced-colors:aria-[current]:outline-offset-2 forced-colors:aria-[current]:outline-solid ${selected ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-field disabled:hover:bg-paper aria-disabled:hover:bg-paper'} ${extra}`;
 }
 
 /** The check drawn in the chosen box, so the choice never rests on fill alone. */
@@ -39,7 +42,8 @@ export interface ChoiceOption<T extends string> {
 export function ChoiceGroup<T extends string>({ options, value, onChange, label, className = '' }: {
   options: ChoiceOption<T>[];
   value: T;
-  onChange: (value: T) => void;
+  /** Takes the options' type, so a useState setter can be passed as it is. */
+  onChange: (value: NoInfer<T>) => void;
   /** The group's accessible name, e.g. "Volta". */
   label: string;
   className?: string;

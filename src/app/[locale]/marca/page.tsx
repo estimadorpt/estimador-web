@@ -21,6 +21,7 @@ import {
   BandGlyph, ChannelHead, ChartTabs, IntervalBand, NoMargin, NowGlyph, PosHist, ProbBar, ReadingRule, Register, Ruler, TickGlyph,
 } from '@/components/instrument';
 import { Chapter, DoDont, ExampleTag, MarkConstruction, Part, Rules, Specimen, Swatch, tr, type Copy } from '@/components/design-system/parts';
+import { ChoiceSpecimen } from '@/components/design-system/ChoiceSpecimen';
 import { BRAND, MARK_BAND, MARK_LEFT, MARK_RIGHT } from '@/lib/brand';
 import { BRAND_BIO, BRAND_DESCRIPTOR, BRAND_LINE } from '@/lib/brand/descriptor';
 import { WORDMARK_WIDTH } from '@/lib/brand/wordmark';
@@ -611,10 +612,13 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
           {/* §9 Components */}
           <Chapter id="componentes" n={chapterNumber('componentes')} title={chapterTitle('componentes', pt)}
             lede={pt
-              ? 'Ações, ligações, divulgação, estados vazios e carregamento. Quadrados, a tinta, com 44 a 48 px de altura e o anel de foco global.'
-              : 'Actions, links, disclosure, empty states and loading. Square, in ink, 44 to 48px tall, with the global focus ring.'}>
+              ? 'Escolhas, ações, ligações, divulgação, estados vazios e carregamento. Quadrados, a tinta, com 44 a 48 px de altura e o anel de foco global. Cada trabalho tem uma só forma, e a gramática no fim do capítulo diz qual.'
+              : 'Choices, actions, links, disclosure, empty states and loading. Square, in ink, 44 to 48px tall, with the global focus ring. Each job has one form, and the grammar at the end of the chapter says which.'}>
             <div className="grid gap-x-10 gap-y-10 lg:grid-cols-2">
-              <Specimen name="Action" code={'<Action variant="primary | secondary | text" />'} note={pt ? 'Uma ação primária por instrumento. Quadrada, 48 px. A secundária é contornada; a de texto, sublinhada.' : 'One primary action per instrument. Square, 48px. The secondary is outlined; the text one is underlined.'}>
+              <Specimen name="ChoiceGroup" code={'<ChoiceGroup label options value onChange />, choiceClass(selected), CHOICE_GROUP_CLASS, <ChoiceCheck />'} note={pt ? 'Escolher uma de várias, mudando o que se vê no mesmo sítio: caixas quadradas num só caixilho a tinta, a escolhida a tinta e com um visto, para que a escolha nunca dependa só do preenchimento. aria-pressed nos botões, aria-current nas ligações (uma vista que se partilha por endereço). A leitura que muda fica ao lado.' : 'Choosing one of several, changing what is shown in place: square boxes on one ink frame, the chosen one in ink and checked, so the choice never rests on the fill alone. aria-pressed on buttons, aria-current on links (a view shared by its address). The readout it changes sits beside it.'}>
+                <ChoiceSpecimen pt={pt} />
+              </Specimen>
+              <Specimen name="Action" code={'<Action variant="primary | secondary | text" />'} note={pt ? 'Uma ação primária por instrumento. Quadrada, 48 px. A secundária tem filete ("Copiar link", "Download"); a de texto sublinha-se ao passar ("Limpar", "Mostrar sem adivinhar").' : 'One primary action per instrument. Square, 48px. The secondary is ruled ("Copy link", "Download"); the text one underlines on hover ("Clear", "Show without guessing").'}>
                 <div className="flex flex-wrap items-center gap-3">
                   <Action href="/populacao" locale={locale}>{pt ? 'Procurar a freguesia' : 'Find the parish'}</Action>
                   <Action href="/desporto/liga" locale={locale} variant="secondary" arrow>{pt ? 'Ver a Liga' : 'See the Liga'}</Action>
@@ -645,6 +649,40 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
                 </label>
               </Specimen>
             </div>
+            <Part title={pt ? 'A gramática: uma forma para cada trabalho' : 'The grammar: one form for each job'} note={pt ? 'Um leitor aprende uma vez o que cada forma quer dizer. Se duas formas fazem o mesmo trabalho, ou uma forma faz dois, a página obriga-o a adivinhar.' : 'A reader learns once what each form means. If two forms do one job, or one form does two, the page makes them guess.'}>
+              <Rules items={pt ? [
+                <><b className="font-semibold">Escolher uma, mudando o que se vê no mesmo sítio:</b> ChoiceGroup, ou choiceClass, CHOICE_GROUP_CLASS e ChoiceCheck para marcação própria. A escolhida a tinta e com visto; aria-pressed em botões, aria-current em ligações. Um sublinhado nunca quer dizer &quot;escolhido&quot;. Num gráfico arquivado não há filtros de escolha múltipla: desenha-se tudo e a tabela gémea leva o resto.</>,
+                <><b className="font-semibold">Ir a outro sítio:</b> um sublinhado, e só nas ligações, no cabeçalho e nos separadores de secção.</>,
+                <><b className="font-semibold">Escolher de uma lista longa</b> (clubes, dias): um select nativo que atua ao mudar, sem botão &quot;Ver&quot; nem &quot;Ir&quot;, com uma linha que diz o que vai acontecer. Os lugares procuram-se no campo de procura.</>,
+                <><b className="font-semibold">Mostrar mais:</b> Disclosure, e só Disclosure.</>,
+                <><b className="font-semibold">Agir:</b> Action. &quot;Copiar link&quot; é uma ação secundária; &quot;Limpar&quot; é uma ação de texto, nunca uma legenda cinzenta com um ícone.</>,
+                <><b className="font-semibold">Um palpite ou um &quot;e se&quot;:</b> desenhado oco, em contorno, nunca a tinta cheia. O preto cheio quer dizer o que já aconteceu (a regra de leitura).</>,
+                <><b className="font-semibold">Uma leitura:</b> ao lado do controlo que a mudou (por baixo, no telemóvel, à vista), numa região viva que está na página desde o primeiro desenho.</>,
+                <><b className="font-semibold">A linguagem da incerteza</b> (bandas, &quot;intervalo de 90%&quot;, probabilidades) é só dos modelos do site. Um palpite do leitor não tem banda.</>,
+              ] : [
+                <><b className="font-semibold">Choose one, changing what is shown in place:</b> ChoiceGroup, or choiceClass, CHOICE_GROUP_CLASS and ChoiceCheck for markup of its own. The chosen one in ink and checked; aria-pressed on buttons, aria-current on links. An underline never means &quot;chosen&quot;. An archived chart has no multi-select filters: draw everything and let the table twin carry the rest.</>,
+                <><b className="font-semibold">Go somewhere:</b> an underline, and only on links, the header and section tabs.</>,
+                <><b className="font-semibold">Pick from a long list</b> (clubs, days): a native select that acts on change, with no &quot;See&quot; or &quot;Go&quot; button, and a line that says what will happen. Places are found with the search field.</>,
+                <><b className="font-semibold">Show more:</b> Disclosure, and only Disclosure.</>,
+                <><b className="font-semibold">Act:</b> Action. &quot;Copy link&quot; is a secondary action; &quot;Clear&quot; is a text action, never a grey caption with an icon.</>,
+                <><b className="font-semibold">A guess or a what-if:</b> drawn hollow, in outline, never in solid ink. Solid black means what has already happened (the reading rule).</>,
+                <><b className="font-semibold">A readout:</b> beside the control that changed it (under it on a phone, in view), in a live region that is on the page from the first paint.</>,
+                <><b className="font-semibold">The language of uncertainty</b> (bands, &quot;90% interval&quot;, odds) belongs to the site’s own models only. A reader’s guess has no band.</>,
+              ]} />
+              <div className="mt-6">
+                <DoDont pt={pt} rows={pt ? [
+                  ['A vista escolhida numa caixa a tinta, com visto.', 'A vista escolhida sublinhada ou a negrito.', 'O sublinhado é das ligações; um leitor carrega nele à espera de ir a outro sítio.'],
+                  ['Todas as linhas desenhadas, cada uma com o nome no fim.', 'Um filtro que esconde quatro de cinco candidatos.', 'Um arquivo não pede ao leitor que escolha o que ver para o poder ler.'],
+                  ['O palpite em quadrados ocos.', 'O palpite em pontos pretos cheios.', 'Preto cheio é o que já aconteceu; um palpite ainda não é nada.'],
+                  ['A leitura ao lado do mapa, à vista depois do toque.', 'A leitura 1 000 px abaixo, acrescentada só quando tem conteúdo.', 'O que um toque muda deve ver-se e ouvir-se onde o toque foi.'],
+                ] : [
+                  ['The chosen view in an ink box, checked.', 'The chosen view underlined or in bold.', 'The underline belongs to links; a reader clicks it expecting to go somewhere.'],
+                  ['Every line drawn, each named at its end.', 'A filter that hides four of five candidates.', 'An archive does not ask the reader to choose what to see before it can be read.'],
+                  ['The guess as hollow squares.', 'The guess as solid black dots.', 'Solid black is what has already happened; a guess is nothing yet.'],
+                  ['The readout beside the map, in view after the tap.', 'The readout 1,000px below, added only once it has content.', 'What a tap changes should be seen and heard where the tap was.'],
+                ]} />
+              </div>
+            </Part>
           </Chapter>
 
           {/* §10 Charts and tables */}
@@ -747,7 +785,7 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
             <Rules items={pt ? [
               'Texto em AA pelo menos: tinta 18,9:1, grafite 6,4:1; stone-400 e acima leem-se como texto. --color-scale nunca é texto.',
               'O significado nunca depende só da cor: a banda tem tampas, mediana e intervalo impresso; os estados têm ícone e palavra; as cores de clube vão em quadrados e barras, nunca em texto.',
-              'Cores forçadas: bandas, marcas e o estado vazio em CanvasText; o estado premido dos botões de alternar com contorno (PRESSED_IN_FORCED_COLORS).',
+              'Cores forçadas: bandas, marcas e o estado vazio em CanvasText; a escolha feita (choiceClass) com um contorno do sistema e o visto, já que o preenchimento a tinta desaparece.',
               'Um só elemento main por página (id main-content, tabIndex −1), aberto antes do PageHero; a ligação "saltar para o conteúdo" aponta para ele.',
               'Foco: o anel global de globals.css em todos os elementos; nada o retira.',
               'Movimento: transições de 140 a 300 ms; nenhuma animação com prefers-reduced-motion.',
@@ -755,7 +793,7 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
             ] : [
               'Text at least AA: ink 18.9:1, graphite 6.4:1; stone-400 and up read as text. --color-scale is never text.',
               'Meaning never depends on colour alone: the band has caps, a median and a printed range; statuses have an icon and a word; club colours go on squares and bars, never on text.',
-              'Forced colours: bands, marks and the empty state in CanvasText; the pressed state of toggles as an outline (PRESSED_IN_FORCED_COLORS).',
+              'Forced colours: bands, marks and the empty state in CanvasText; the chosen option (choiceClass) with a system outline and its check, as the ink fill drops out.',
               'One main element per page (id main-content, tabIndex −1), opened before the PageHero; the skip link targets it.',
               'Focus: the global ring from globals.css on every element; nothing removes it.',
               'Motion: transitions of 140 to 300ms; no animation under prefers-reduced-motion.',

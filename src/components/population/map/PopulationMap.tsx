@@ -20,6 +20,7 @@ import { Disclosure } from '@/components/viz/Disclosure';
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, FocusEvent as ReactFocusEvent } from 'react';
 import { interpolateZoom } from 'd3';
 import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus, RotateCcw, Shuffle } from 'lucide-react';
+import { CHOICE_GROUP_CLASS, ChoiceCheck, choiceClass } from '@/components/brand/Choice';
 import { MarkLoading } from '@/components/brand/MarkLoading';
 import { hatchTransform, TierPatterns, TierSwatch, tierFill } from './tier-hatch';
 
@@ -799,20 +800,24 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
           // The archipelago spans 600 km: its three groups, each framed on its own, make every
           // island tappable on a phone (UXM3V-01). Rendered from the first paint on this region,
           // so the map does not move when it arrives.
-          <div role="group" aria-label={t.islandGroups} className="flex flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-rule px-3 py-1.5 sm:gap-x-2 sm:px-4">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule px-3 py-1.5 sm:px-4">
             <span aria-hidden="true" className="text-[12px] text-graphite">{t.islands}</span>
-            {AZORES_GROUPS.map(item => (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={group === item.id}
-                aria-label={t.islandGroup(item.label[locale])}
-                onClick={() => frameGroup(item.id)}
-                className={`inline-flex min-h-11 items-center border px-2.5 text-sm font-semibold transition-colors duration-150 sm:px-3 ${group === item.id ? 'border-ink bg-ink text-paper' : 'border-rule bg-paper text-ink hover:bg-field'}`}
-              >
-                {item.label[locale]}
-              </button>
-            ))}
+            {/* A choice in place: the site's choice boxes, the framed group in ink and checked. */}
+            <div role="group" aria-label={t.islandGroups} className={CHOICE_GROUP_CLASS}>
+              {AZORES_GROUPS.map(item => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={group === item.id}
+                  aria-label={t.islandGroup(item.label[locale])}
+                  onClick={() => frameGroup(item.id)}
+                  className={choiceClass(group === item.id, 'px-2.5 sm:px-3')}
+                >
+                  {group === item.id && <ChoiceCheck />}
+                  {item.label[locale]}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -1006,7 +1011,10 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                 {view.level === 'country' ? t.listCountry : view.level === 'region' ? t.listRegion(regionTitle(view.region, here, locale)) : t.listMunicipality(here)}
               </p>
               {children.kind === 'parish' && <p className="mb-2 text-[12px] text-graphite">{t.residents}: {t.ine}.</p>}
-              <ul className="grid max-h-[28rem] grid-cols-1 gap-x-6 overflow-auto @md:grid-cols-2 @3xl:grid-cols-3">
+              <ul className={children.kind === 'parish'
+                ? 'grid max-h-[28rem] grid-cols-1 gap-x-6 overflow-auto @md:grid-cols-2 @3xl:grid-cols-3'
+                // Choice boxes share their 1px borders (CHOICE_GROUP_CLASS's offsets), in columns.
+                : 'grid max-h-[28rem] grid-cols-1 overflow-auto pl-px pt-px @md:grid-cols-2 @3xl:grid-cols-3'}>
                 {children.kind === 'parish'
                   ? (children.items as Parish[]).map(parish => (
                     <li key={parish.code} className="flex items-center justify-between gap-3 border-b border-grid py-1.5 text-sm">
@@ -1020,11 +1028,13 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                     </li>
                   ))
                   : (children.items as Array<{ code: string; name: string }>).map(item => (
-                    <li key={item.code} className="border-b border-grid py-1.5 text-sm">
+                    // A district or município here frames the map on it, in place: a
+                    // choice box (a button), not an underline, which means "go to a page".
+                    <li key={item.code} className="flex">
                       <button
                         type="button"
                         onClick={() => goTo(children.kind === 'region' ? { level: 'region', region: item.code } : { level: 'municipality', region: regionOfMunicipality(item.code), municipality: item.code })}
-                        className="inline-flex min-h-11 items-center text-left text-ink underline underline-offset-4"
+                        className={choiceClass(false, 'w-full justify-start text-left font-medium')}
                       >
                         {item.name}
                       </button>

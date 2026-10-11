@@ -91,10 +91,10 @@ export function EndPanel({ record, answer, choices, ruledOut, tier, errors, stat
               <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </ParishLink>
             {onReplay && (
-              <button type="button" onClick={onReplay} className="inline-flex min-h-12 items-center gap-2 px-1 text-[15px] font-semibold text-ink underline underline-offset-4">
+              <Action variant="text" onClick={onReplay}>
                 <RotateCcw aria-hidden="true" className="h-4 w-4" />
                 {t.replay}
-              </button>
+              </Action>
             )}
           </div>
           {/* Spoken either way; seen only on a failure (the button itself says "copied"). */}

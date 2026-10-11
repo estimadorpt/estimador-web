@@ -53,7 +53,7 @@ export const CLIENT_MESSAGE_KEYS = [
   'model.uncertainty.based_on_polls', 'model.uncertainty.ci_explanation', 'model.uncertainty.wider_bands',
 
   // Legislativas district map.
-  'map.topTwoGap', 'map.voteShareByParty', 'map.voteShareCaption',
+  'map.topTwoGap', 'map.voteShareByParty',
   'about.title',
   'nav.populationData',
   'nav.populationGame',
