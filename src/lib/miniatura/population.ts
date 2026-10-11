@@ -1,96 +1,114 @@
-/** Design fixture only. Never import unpublished population records here. */
-export const DEMO_RELEASE = 'miniatura-demo-v2';
-export type View = 'village' | 'ages' | 'households';
-export type Person = { id: number; household: number; member: number; size: number; age: number; band: number };
-export const VIEWS: View[] = ['village', 'ages', 'households'];
-export const AGE_LABELS = ['0–17', '18–39', '40–64', '65+'];
-export const PEOPLE: Person[] = [];
-for (let household = 0; household < 30; household++) {
-  const size = [1, 2, 3, 4, 5, 5][household % 6];
-  for (let member = 0; member < size; member++) {
-    // Adults anchor every household; larger households can include children.
-    const age = size === 1 ? 24 + (household / 6) * 15 : member >= 2 ? 4 + ((household * 3 + member * 2) % 14) : 24 + ((household * 11 + member * 7) % 62);
-    PEOPLE.push({ id: PEOPLE.length, household, member, size, age, band: age < 18 ? 0 : age < 40 ? 1 : age < 65 ? 2 : 3 });
-  }
-}
-export const HOUSEHOLDS = Array.from({ length: 30 }, (_, id) => ({ id, people: PEOPLE.filter(p => p.household === id) }));
-export function housePosition(id: number) {
-  const col = id % 6, row = Math.floor(id / 6);
-  return { x: 450 + (col - row) * 67, y: 102 + (col + row) * 38 };
-}
-export function personPosition(person: Person, view: View, compact = false) {
-  if (view === 'village') {
-    const house = housePosition(person.household);
-    return { x: house.x + 19 + person.member * 8, y: house.y + 36 + (person.member % 2) * 6 };
-  }
-  const group = view === 'ages' ? person.band : person.size - 1;
-  const members = PEOPLE.filter(p => view === 'ages' ? p.band === group : p.size - 1 === group);
-  const index = members.findIndex(p => p.id === person.id);
-  if (compact) return { x: 31 + (group % 2) * 200 + (index % 10) * 14, y: 88 + Math.floor(group / 2) * 240 + Math.floor(index / 10) * 20 };
-  const cols = view === 'ages' ? 8 : 6;
-  return { x: (view === 'ages' ? 145 + group * 215 : 104 + group * 178) + (index % cols) * 15, y: 215 + Math.floor(index / cols) * 23 };
-}
-export function parseView(value: string | null): View {
-  return VIEWS.includes(value as View) ? value as View : 'village';
+/**
+ * The explainer's neighbourhood: 100 people in 30 households, written by hand
+ * for /populacao/miniatura. Nothing here comes from the published population
+ * or from anyone real; never import release records into this file.
+ */
+
+/** The three ways the scene arranges the same 100 people. */
+export type View = 'homes' | 'age' | 'size';
+export const VIEWS: View[] = ['homes', 'age', 'size'];
+
+export type Person = {
+  id: number;
+  household: number;
+  /** Place in the household, oldest first as written below. */
+  member: number;
+  /** People in the person's household. */
+  size: number;
+  age: number;
+  /** Age group, an index into AGE_BANDS. */
+  band: number;
+};
+
+/** Each household's ages, one array per home, in the order the homes are drawn. */
+const HOUSEHOLD_AGES: number[][] = [
+  [48], [68, 71], [41, 39, 9], [45, 43, 16, 12], [44, 41, 8, 5, 70], [52, 50, 22, 19, 81],
+  [79], [29, 31], [57, 55, 24], [36, 34, 6, 2], [47, 45, 17, 14, 76], [42, 40, 11, 7, 3],
+  [69], [74, 77], [30, 28, 1], [58, 56, 27, 23], [43, 40, 13, 10, 68], [67, 65, 37, 33, 4],
+  [86], [46, 15], [66, 65, 39], [42, 44, 18, 15], [45, 43, 12, 9, 6], [55, 53, 29, 26, 72],
+  [25], [73, 70], [35, 33, 4], [71, 49, 47, 20], [49, 46, 21, 18, 80], [31, 30, 5, 3, 0],
+];
+
+/** Age groups as INE's summary tables group them: under 15, 15 to 24, 25 to 64, 65 and over. */
+export const AGE_BANDS = {
+  pt: ['0–14 anos', '15–24 anos', '25–64 anos', '65 ou mais'],
+  en: ['Ages 0–14', 'Ages 15–24', 'Ages 25–64', 'Ages 65+'],
+} as const;
+
+export function ageBand(age: number): number {
+  return age < 15 ? 0 : age < 25 ? 1 : age < 65 ? 2 : 3;
 }
 
-export type Neighbourhood = 'village' | 'town' | 'city' | 'hills';
-export type Lens = 'age' | 'education' | 'employment' | 'transport';
-export const LENSES: Lens[] = ['age', 'education', 'employment', 'transport'];
-export const NEIGHBOURHOODS: Neighbourhood[] = ['village', 'town', 'city', 'hills'];
-export const FIELD_LABELS = {
-  pt: {
-    age: ['0–17 anos', '18–39 anos', '40–64 anos', '65+ anos'],
-    education: ['Em idade escolar', 'Básico', 'Secundário', 'Superior'],
-    employment: ['Empregado', 'Desempregado', 'Inativo'],
-    transport: ['A pé / bicicleta', 'Automóvel', 'Transp. coletivo', 'Não aplicável'],
-  },
-  en: {
-    age: ['Ages 0–17', 'Ages 18–39', 'Ages 40–64', 'Ages 65+'],
-    education: ['School age', 'Basic', 'Secondary', 'Higher'],
-    employment: ['Employed', 'Unemployed', 'Inactive'],
-    transport: ['Walk / bicycle', 'Car', 'Public transport', 'Not applicable'],
-  },
-};
-// All detail values below are invented fixtures. These concepts map to the
-// producer schema; their presence here does not assert release availability.
+export const PEOPLE: Person[] = HOUSEHOLD_AGES.flatMap((ages, household) =>
+  ages.map((age, member) => ({ id: 0, household, member, size: ages.length, age, band: ageBand(age) })),
+).map((person, id) => ({ ...person, id }));
+
+export const HOUSEHOLDS = HOUSEHOLD_AGES.map((_, id) => ({ id, people: PEOPLE.filter(p => p.household === id) }));
+
+/** Household sizes drawn in the "by size" view, 1 to 5 people. */
+export const SIZES = [1, 2, 3, 4, 5];
+
+/** The people in each age group, in AGE_BANDS order. */
+export function byAge(): Person[][] {
+  return AGE_BANDS.pt.map((_, band) => PEOPLE.filter(p => p.band === band));
+}
+
+/** The people in households of each size, in SIZES order. */
+export function bySize(): Person[][] {
+  return SIZES.map(size => PEOPLE.filter(p => p.size === size));
+}
+
+export const EDUCATION = {
+  pt: ['Menos de 15 anos', 'Básico', 'Secundário', 'Superior'],
+  en: ['Under 15', 'Basic', 'Secondary', 'Higher'],
+} as const;
+export const ACTIVITY = {
+  pt: ['Empregado', 'Desempregado', 'Inativo'],
+  en: ['Employed', 'Unemployed', 'Inactive'],
+} as const;
+export const MARITAL = {
+  pt: ['Solteiro/a', 'Casado/a', 'Divorciado/a', 'Viúvo/a'],
+  en: ['Single', 'Married', 'Divorced', 'Widowed'],
+} as const;
+export const COMMUTE = {
+  pt: ['A pé', 'Automóvel', 'Transporte coletivo', 'Não se aplica'],
+  en: ['On foot', 'Car', 'Public transport', 'Not applicable'],
+} as const;
+
+/** A person's other columns, invented by rule (the same kinds of column the published population has). */
 export function details(person: Person) {
-  const employment = person.age < 18 || person.age >= 66 ? 2 : person.id % 7 === 0 ? 1 : 0;
+  const { id, age, household, member } = person;
+  const activity = age < 21 || age >= 66 ? 2 : id % 9 === 4 ? 1 : 0;
   return {
-    sex: person.id % 2 === 0 ? 'F' : 'M',
-    education: person.age < 18 ? 0 : 1 + ((person.household + person.member) % 3),
-    employment,
-    transport: employment !== 0 && person.age >= 18 || person.age < 6 ? 3 : person.id % 3,
-    marital: person.age < 18 || person.id % 3 === 0 ? 0 : person.id % 5 === 0 ? 2 : 1,
-    workplace: employment === 0 ? person.id % 3 : null,
+    sex: (id + household) % 2 === 0 ? 'F' : 'M',
+    education: age < 15 ? 0 : age >= 65 ? (id % 4 === 0 ? 2 : 1) : 1 + ((household + member) % 3),
+    activity,
+    marital: age < 25 ? 0 : age >= 75 && id % 2 === 0 ? 3 : person.size === 1 && id % 3 === 0 ? 2 : member < 2 && person.size > 1 ? 1 : 0,
+    commute: activity === 0 ? id % 3 : 3,
   };
 }
+
+/** The home's own columns, invented by rule. */
 export function householdDetails(id: number) {
-  return { rooms: 2 + id % 5, tenure: id % 3 === 0 ? 1 : 0, heating: id % 3,
-    buildingPeriod: id % 3, elevator: id % 4 === 0, accessibility: id % 3 !== 0 };
+  return { rooms: 2 + ((id * 7) % 5), rented: id % 3 === 0 };
 }
-export function groupFor(person: Person, lens: Lens) {
-  return lens === 'age' ? person.band : details(person)[lens];
+
+/**
+ * The fit, in miniature: the table the neighbourhood has to match (invented,
+ * standing in for one of INE's tables for a parish) and 30 households drawn
+ * at random from the candidates before any fit, by age group in AGE_BANDS
+ * order. The neighbourhood's own counts, after the fit, are counted from PEOPLE.
+ */
+export const FIT = {
+  target: [20, 12, 48, 20],
+  unfitted: [28, 9, 41, 15],
+} as const;
+
+export function fittedCounts(): number[] {
+  return byAge().map(group => group.length);
 }
-export function distribution(lens: Lens) {
-  return FIELD_LABELS.pt[lens].map((_, i) => PEOPLE.filter(p => groupFor(p, lens) === i));
-}
-export function neighbourhoodPosition(id: number, neighbourhood: Neighbourhood) {
-  const col = id % 6, row = Math.floor(id / 6);
-  if (neighbourhood === 'village') return { x: 200 + col * 116 + (row % 2) * 22, y: 175 + row * 74 + Math.sin(id * 2) * 9 };
-  if (neighbourhood === 'town') return { x: 430 + col * 80 - row * 28, y: 120 + row * 78 + col * 13 };
-  if (neighbourhood === 'hills') return { x: 220 + col * 105 + (row % 2) * 35, y: 150 + row * 78 + Math.sin(col * .9) * 30 };
-  return { x: 310 + col * 82 - row * 31, y: 145 + row * 65 + col * 27 };
-}
-export function exploredPosition(person: Person, view: View, compact: boolean, neighbourhood: Neighbourhood, lens: Lens) {
-  if (view === 'village') {
-    const house = neighbourhoodPosition(person.household, neighbourhood);
-    return { x: house.x + 19 + person.member * 8, y: house.y + 36 + person.member % 2 * 6 };
-  }
-  if (view === 'households') return personPosition(person, view, compact);
-  const group = groupFor(person, lens), members = distribution(lens)[group];
-  const index = members.findIndex(p => p.id === person.id), n = distribution(lens).length;
-  if (compact) return { x: 31 + group % 2 * 200 + index % 10 * 14, y: 88 + Math.floor(group / 2) * 240 + Math.floor(index / 10) * 20 };
-  const center = 90 + (group + .5) * (820 / n);
-  return { x: center - 60 + index % 9 * 15, y: 215 + Math.floor(index / 9) * 23 };
+
+/** How many people a set of counts is away from the table: the sum of the gaps, group by group. */
+export function distanceFromTarget(counts: readonly number[]): number {
+  return counts.reduce((sum, n, i) => sum + Math.abs(n - FIT.target[i]), 0);
 }

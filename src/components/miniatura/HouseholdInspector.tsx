@@ -1,31 +1,77 @@
 'use client';
-import { useState } from 'react';
-import { ArrowLeft, ArrowRight, X } from 'lucide-react';
-import { HOUSEHOLDS, FIELD_LABELS, details, householdDetails } from '@/lib/miniatura/population';
-import { COLOURS } from './Scene';
 
-export function HouseholdInspector({ household, locale, onClose, onChange, selectedPerson, onPersonSelect }: { household: number; locale: 'pt' | 'en'; onClose: () => void; onChange: (id:number) => void; selectedPerson: number | null; onPersonSelect: (id:number) => void }) {
-  const pt=locale==='pt',home=HOUSEHOLDS[household],housing=householdDetails(household);
-  const [housingOpen,setHousingOpen]=useState(false);
-  const member=Math.max(0,home.people.findIndex(p=>p.id===selectedPerson));
-  const person=home.people[member] ?? home.people[0], info=details(person);
-  const labels=FIELD_LABELS[locale];
-  return <section id="mini-household-detail" className="mini-inspector" aria-label={pt?'Detalhe do agregado':'Household details'}>
-    <div className="mini-inspector-top"><span>{pt?'Dentro de casa':'Inside the home'}</span><button onClick={onClose} aria-label={pt?'Sair do agregado':'Leave household'}><X size={17}/></button></div>
-    <h2>{pt?'Agregado':'Household'} {String(household+1).padStart(2,'0')}</h2>
-    <p className="mini-inspector-sub">{home.people.length} {pt?(home.people.length===1?'pessoa fictícia':'pessoas fictícias'):(home.people.length===1?'fictional person':'fictional people')} · {housing.rooms} {pt?'divisões':'rooms'}</p>
-    <div className="mini-members" role="group" aria-label={pt?'Escolher uma pessoa':'Choose a person'}>{home.people.map((p,i)=><button key={p.id} aria-pressed={member===i} onClick={()=>onPersonSelect(p.id)} aria-label={`${pt?'Pessoa':'Person'} ${p.id+1}, ${p.age} ${pt?'anos':'years'}`}><span className="mini-avatar" style={{background:COLOURS[p.band]}}><i/></span><span>{p.age}<small>{pt?'anos':'years'}</small></span></button>)}</div>
-    <div className="mini-person-details" aria-live="polite"><h3>{pt?'Pessoa fictícia':'Fictional person'} #{String(person.id+1).padStart(3,'0')}</h3><dl>
-      <div><dt>{pt?'Idade / sexo':'Age / sex'}</dt><dd>{person.age} · {info.sex==='F'?(pt?'Feminino':'Female'):(pt?'Masculino':'Male')}</dd></div>
-      <div><dt>{pt?'Escolaridade':'Education'}</dt><dd>{labels.education[info.education]}</dd></div>
-      <div><dt>{pt?'Atividade':'Activity'}</dt><dd>{labels.employment[info.employment]}</dd></div>
-      <div><dt>{pt?'Deslocação':'Transport'}</dt><dd>{labels.transport[info.transport]}</dd></div>
-      <div><dt>{pt?'Estado civil':'Marital status'}</dt><dd>{(pt?['Solteiro/a','Casado/a','Divorciado/a']:['Single','Married','Divorced'])[info.marital]}</dd></div>
-      <div><dt>{pt?'Local de trabalho':'Work location'}</dt><dd>{info.workplace===null?(pt?'Não aplicável':'Not applicable'):(pt?['Em casa','No município','Noutro município']:['At home','In the municipality','Another municipality'])[info.workplace]}</dd></div>
-    </dl></div>
-    <button className="mini-housing-toggle" onClick={()=>setHousingOpen(!housingOpen)} aria-expanded={housingOpen}>{pt?'Explorar a habitação':'Explore the dwelling'}<span>{housingOpen?'−':'+'}</span></button>
-    {housingOpen&&<dl className="mini-housing-facts"><div><dt>{pt?'Ocupação':'Tenure'}</dt><dd>{housing.tenure?(pt?'Arrendamento':'Rented'):(pt?'Propriedade':'Owned')}</dd></div><div><dt>{pt?'Construção':'Built'}</dt><dd>{['Antes de 1946','1946–1990','1991–2021'].map((s,i)=>pt?s:['Before 1946','1946–1990','1991–2021'][i])[housing.buildingPeriod]}</dd></div><div><dt>{pt?'Aquecimento':'Heating'}</dt><dd>{(pt?['Central','Individual','Sem aquecimento']:['Central','Individual','No heating'])[housing.heating]}</dd></div><div><dt>{pt?'Elevador':'Lift'}</dt><dd>{housing.elevator?(pt?'Sim':'Yes'):(pt?'Não':'No')}</dd></div><div><dt>{pt?'Acesso sem barreiras':'Step-free access'}</dt><dd>{housing.accessibility?(pt?'Sim':'Yes'):(pt?'Não':'No')}</dd></div></dl>}
-    <p className="mini-detail-note">{pt?'Atributos inventados com base nos campos previstos. Não se inferem parentescos nem rotinas.':'Invented attributes based on planned fields. No relationships or routines are inferred.'}</p>
-    <div className="mini-house-nav"><button onClick={()=>onChange((household+29)%30)} aria-label={pt?'Agregado anterior':'Previous household'}><ArrowLeft size={16}/></button><span>{household+1} / 30</span><button onClick={()=>onChange((household+1)%30)} aria-label={pt?'Agregado seguinte':'Next household'}><ArrowRight size={16}/></button></div>
-  </section>;
+import { ArrowLeft } from 'lucide-react';
+import { Action } from '@/components/brand/Action';
+import { ChoiceGroup } from '@/components/brand/Choice';
+import { Register } from '@/components/instrument';
+import { ACTIVITY, COMMUTE, EDUCATION, HOUSEHOLDS, MARITAL, details, householdDetails } from '@/lib/miniatura/population';
+
+/**
+ * Inside one invented home: who lives there (one person at a time, chosen
+ * with the site's choice boxes) and that person's columns as a ruled register.
+ */
+export function HouseholdInspector({ household, person, locale, onPerson, onHousehold, onClear }: {
+  household: number;
+  person: number | null;
+  locale: 'pt' | 'en';
+  onPerson: (id: number) => void;
+  onHousehold: (id: number) => void;
+  onClear: () => void;
+}) {
+  const pt = locale === 'pt';
+  const home = HOUSEHOLDS[household];
+  const shown = home.people.find(p => p.id === person) ?? home.people[0];
+  const info = details(shown);
+  const dwelling = householdDetails(household);
+  const n = home.people.length;
+  const count = HOUSEHOLDS.length;
+
+  return (
+    <section id="mini-agregado" aria-labelledby="mini-agregado-title" className="border-t border-ink pt-2">
+      <div className="flex items-baseline justify-between gap-4">
+        <h3 id="mini-agregado-title" className="text-[19px] leading-6">{pt ? `Agregado ${household + 1}` : `Household ${household + 1}`}</h3>
+        <Action variant="text" onClick={onClear}>{pt ? 'Limpar' : 'Clear'}</Action>
+      </div>
+      <p className="text-[14px] leading-snug text-graphite">
+        {pt
+          ? `${n} ${n === 1 ? 'pessoa inventada' : 'pessoas inventadas'}, numa casa de ${dwelling.rooms} divisões, ${dwelling.rented ? 'arrendada' : 'própria'}.`
+          : `${n} invented ${n === 1 ? 'person' : 'people'}, in a ${dwelling.rooms}-room home, ${dwelling.rented ? 'rented' : 'owned'}.`}
+      </p>
+
+      {n > 1 && (
+        <ChoiceGroup
+          className="mt-3"
+          label={pt ? 'Pessoa' : 'Person'}
+          value={String(shown.id)}
+          onChange={value => onPerson(Number(value))}
+          options={home.people.map(p => ({ value: String(p.id), label: pt ? `${p.age} anos` : `${p.age} years` }))}
+        />
+      )}
+
+      <Register
+        className="mt-3"
+        items={[
+          { label: pt ? 'Idade e sexo' : 'Age and sex', value: `${shown.age} · ${info.sex === 'F' ? (pt ? 'mulher' : 'woman') : (pt ? 'homem' : 'man')}` },
+          { label: pt ? 'Escolaridade' : 'Education', value: EDUCATION[locale][info.education] },
+          { label: pt ? 'Atividade' : 'Activity', value: ACTIVITY[locale][info.activity] },
+          { label: pt ? 'Estado civil' : 'Marital status', value: MARITAL[locale][info.marital] },
+          { label: pt ? 'Vai trabalhar' : 'Commute', value: COMMUTE[locale][info.commute] },
+        ]}
+      />
+      <p className="mt-2 text-[13px] leading-snug text-graphite">
+        {pt
+          ? 'Valores inventados para este exemplo. Na população publicada, cada pessoa e cada agregado têm colunas como estas.'
+          : 'Values invented for this example. In the published population, every person and every household has columns like these.'}
+      </p>
+
+      <div className="flex flex-wrap gap-x-6">
+        <Action variant="text" onClick={() => onHousehold((household + count - 1) % count)}>
+          <ArrowLeft aria-hidden="true" className="h-4 w-4" />{pt ? 'Agregado anterior' : 'Previous household'}
+        </Action>
+        <Action variant="text" arrow onClick={() => onHousehold((household + 1) % count)}>
+          {pt ? 'Agregado seguinte' : 'Next household'}
+        </Action>
+      </div>
+    </section>
+  );
 }

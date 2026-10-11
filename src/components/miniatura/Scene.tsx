@@ -1,113 +1,191 @@
-import { useId, useEffect, useRef, useState, type CSSProperties, type Ref } from 'react';
+'use client';
+
+import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react';
 import { FONT_STACK } from '@/lib/brand';
-import { FIELD_LABELS, HOUSEHOLDS, PEOPLE, neighbourhoodPosition, exploredPosition, distribution, groupFor, type Lens, type Neighbourhood, type View } from '@/lib/miniatura/population';
-
-import { Landscape } from './Landscape';
-import { houseShape, nearestHouse } from './hit-test';
-import { COLOURS, FIELD, GRAPHITE, GRID, HAIR, INK, LINE, PAPER, RULE, STONE } from './scene-palette';
-
-export { COLOURS };
+import { AGE_BANDS, HOUSEHOLDS, PEOPLE, SIZES, byAge, bySize, type View } from '@/lib/miniatura/population';
+import { nearestHouse } from './hit-test';
+import { SCENE, arrangement, columns, houseCell, housePosition, streets, type Layout } from './layout';
+import { COLOURS, FIELD, GRAPHITE, INK, LINE, PAPER, RULE } from './scene-palette';
 
 /** How far from a house a finger may land and still choose it, in CSS pixels. */
 const TAP_RADIUS_PX = 44;
 
-/**
- * One household's home, as an ink line drawing on light greys: the lit wall
- * (left) in field grey, the shaded wall in rule grey, the roof between. Each
- * landscape keeps its own kind of house through line work, not colour: the
- * Alentejo's base band and chimney, the coast's striped boards, the hills'
- * stone courses, the city's flat-roofed blocks with a band per floor.
- */
-function House({ id, neighbourhood, selected, onSelect, locale }: { id: number; neighbourhood: Neighbourhood; selected: boolean; onSelect?: () => void; locale: 'pt' | 'en' }) {
-  const { x, y } = neighbourhoodPosition(id, neighbourhood);
-  const urban=neighbourhood==='city',stone=neighbourhood==='hills',coast=neighbourhood==='town';
-  const { floors, height } = houseShape(id, neighbourhood);
-  return <g className={`mini-house ${selected ? 'mini-house-selected' : ''}`} style={{ transform: `translate(${x}px, ${y}px)` }} role={onSelect ? 'button' : undefined} tabIndex={onSelect ? 0 : undefined} aria-label={onSelect ? `${locale === 'pt' ? 'Entrar no agregado' : 'Enter household'} ${id + 1}` : undefined} aria-pressed={onSelect ? selected : undefined} onClick={onSelect} onKeyDown={e => { if (onSelect && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onSelect(); } }}>
-    <ellipse className="mini-house-target" cx="6" cy="5" rx="40" ry="34" fill="transparent" />
-    {/* The chosen home: a ruled ellipse on the ground around it. */}
-    {selected && <ellipse className="mini-mark" cx="6" cy="10" rx="39" ry="23" fill={FIELD} stroke={INK} strokeWidth="1.5" vectorEffect="non-scaling-stroke"/>}
-    <path d={`M-24 1 L5 17 L5 ${17-height} L-24 ${1-height}Z`} fill={urban||stone?FIELD:PAPER} {...LINE} />
-    <path d={`M5 17 L31 2 L31 ${2-height} L5 ${17-height}Z`} fill={RULE} {...LINE} />
-    {stone&&[0,1,2,3].map(row=><path key={row} d={`M-23 ${-row*8}l27 15M-12 ${-row*8+4}v-7`} fill="none" {...HAIR}/>)}
-    {coast&&[0,1,2,3].map(i=><path key={i} d={`M${-20+i*7} ${3+i*4}v${-height}`} fill="none" {...HAIR}/>)}
-    {[...Array(floors)].map((_,floor)=><g key={floor} transform={`translate(0 ${-floor*16})`}>
-      <path d="M-18 -3l7 4v-10l-7 -4Z M-5 4l7 4v-10l-7 -4Z M12 9l9 -5v-10l-9 5Z" fill={PAPER} {...LINE}/>
-      {urban&&<path d="M-21 0l25 14 5 -3 -25 -14Z" fill={GRID} {...LINE}/>}
-    </g>)}
-    <path d="M12 11l7 -4v-14l-7 4Z" fill={STONE} {...LINE}/>
-    {/* The base band (the Alentejo's barra, a plinth elsewhere). */}
-    <path d="M-23 2l27 15v-4l-27 -15Z" fill={neighbourhood==='village'?INK:GRID} />
-    <g className="mini-roof" style={{transform:selected?'translateY(-35px)':'translateY(0)',opacity:selected?.25:1}}>
-      {urban?<><path d={`M-27 ${1-height}l29 17 32 -17 -30 -17Z`} fill={GRID} {...LINE}/><path d={`M-27 ${1-height}v-5l29 17 32 -17v5l-32 17Z`} fill={PAPER} {...LINE}/><path d={`M-12 ${-height-2}l11 6 8 -5 -11 -6Z`} fill={RULE} {...LINE}/><path d={`M16 ${-height-7}v-18m-6 6h12`} stroke={INK} fill="none" strokeWidth="1.5"/></>:
-      <><path d={`M-29 ${2-height}L-3 ${-17-height}L35 ${1-height}L5 ${20-height}Z`} fill={GRID} {...LINE}/><path d={`M-29 ${2-height}L-3 ${-17-height}L3 ${-5-height}L-23 ${13-height}Z`} fill={FIELD} {...LINE}/>{[0,1,2,3].map(i=><path key={i} d={`M${-20+i*8} ${-4-height+i*4}l24 13`} {...HAIR}/>)}{!coast&&<path d={`M14 ${-height}v-17l8 4v17Z`} fill={PAPER} {...LINE}/>}</>}
-    </g>
-    {selected&&<text x="3" y={-height-43} textAnchor="middle" fontSize="12" fontWeight="600" fill={INK} fontFamily={FONT_STACK}>{locale==='pt'?'Casa':'Home'} {id+1}</text>}
-    {coast&&id%3===0&&<path d="M-28 3l30 17 7 -4 -30 -17Z" fill={GRID} {...LINE}/>}
-    {neighbourhood==='village'&&<><path d="M-33 18l26 15" stroke={FIELD} strokeWidth="7"/><circle cx="-26" cy="11" r="6" fill={GRID} {...LINE}/></>}
+type Locale = 'pt' | 'en';
 
-  </g>;
-}
-export type Camera = { x: number; y: number; scale: number };
-export function Scene({ view, alone, paused, locale, svgRef, neighbourhood = 'town', lens = 'age', selectedHouse = null, selectedPerson = null, selectedGroup = null, onHouseSelect, camera = { x: 0, y: 0, scale: 1 }, onCameraChange }: { view: View; alone: boolean; paused: boolean; locale: 'pt' | 'en'; svgRef?: Ref<SVGSVGElement>; neighbourhood?: Neighbourhood; lens?: Lens; selectedHouse?: number | null; selectedPerson?: number | null; selectedGroup?: number | null; onHouseSelect?: (id: number) => void; camera?: Camera; onCameraChange?: (next: Camera) => void }) {
-  const id = useId().replace(/:/g, '');
+/** Each group's name and count, as the grouped views label their rows. */
+export function groupLabels(view: Exclude<View, 'homes'>, locale: Locale): Array<{ name: string; detail: string }> {
   const pt = locale === 'pt';
-  const localRef = useRef<SVGSVGElement>(null);
-  const [compact, setCompact] = useState(false);
-  const drag = useRef<{ x: number; y: number; camera: Camera; moved: boolean } | null>(null);
-  // The input behind the latest press: only a finger gets nearest-house matching.
+  const people = (n: number) => (pt ? `${n} ${n === 1 ? 'pessoa' : 'pessoas'}` : `${n} ${n === 1 ? 'person' : 'people'}`);
+  if (view === 'age') return byAge().map((members, i) => ({ name: AGE_BANDS[locale][i], detail: people(members.length) }));
+  return bySize().map((members, i) => {
+    const homes = HOUSEHOLDS.filter(h => h.people.length === SIZES[i]).length;
+    return {
+      name: pt ? `Agregados de ${SIZES[i]}` : `Households of ${SIZES[i]}`,
+      detail: pt ? `${homes} ${homes === 1 ? 'agregado' : 'agregados'}, ${people(members.length)}` : `${homes} ${homes === 1 ? 'household' : 'households'}, ${people(members.length)}`,
+    };
+  });
+}
+
+/** One home: a front-on house, ink lines on white; the chosen one filled with ink, like a chosen box. */
+function HouseGlyph({ selected }: { selected: boolean }) {
+  return <>
+    <path d="M0 -30 L28 -52 L56 -30 Z" fill={selected ? INK : FIELD} {...LINE} />
+    <rect x={4} y={-30} width={48} height={30} fill={selected ? INK : PAPER} {...LINE} />
+    <rect x={10} y={-24} width={9} height={8} fill={PAPER} {...LINE} />
+    <rect x={37} y={-24} width={9} height={8} fill={PAPER} {...LINE} />
+    <rect x={22.5} y={-17} width={11} height={17} fill={selected ? PAPER : RULE} {...LINE} />
+  </>;
+}
+
+/**
+ * The invented neighbourhood: 30 homes and the 100 people who live in them,
+ * then the same people regrouped by age or by household size. The figures
+ * move between the views (CSS transitions, off under reduced motion); a
+ * chosen household's members stay in full ink in every view, the others fade.
+ * The homes are one tab stop: the arrow keys move between them (a roving
+ * tabindex), Enter or Space chooses one. A finger that lands between houses
+ * chooses the nearest within TAP_RADIUS_PX.
+ */
+export function Scene({ view, layout, locale, motion, selectedHouse, selectedPerson, onHouseSelect }: {
+  view: View;
+  layout: Layout;
+  locale: Locale;
+  /** Animate the move to new spots (a change of view, not of layout). */
+  motion: boolean;
+  selectedHouse: number | null;
+  selectedPerson: number | null;
+  onHouseSelect: (id: number) => void;
+}) {
+  const pt = locale === 'pt';
+  const id = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const houses = useRef<Array<SVGGElement | null>>([]);
   const pointerType = useRef('');
-  const [dragging, setDragging] = useState(false);
-  useEffect(() => {
-    const observer = new ResizeObserver(entries => setCompact(entries[0].contentRect.width < 500));
-    if (localRef.current) observer.observe(localRef.current);
-    return () => observer.disconnect();
-  }, []);
-  const grouped = view !== 'village';
-  const count = PEOPLE.filter(p => (!alone || p.size === 1) && (selectedGroup === null || groupFor(p,lens) === selectedGroup) && (selectedHouse === null || p.household === selectedHouse)).length;
-  // Drags convert screen pixels to scene units through the screen matrix, not the box width: on a short screen the
-  // block fits the viewport (P206) and the drawing is letterboxed inside a wider box.
-  return <svg ref={node => { localRef.current = node; if (typeof svgRef === 'function') svgRef(node); else if (svgRef) svgRef.current = node; }} className="mini-scene" data-paused={paused} data-view={view} data-lens={lens} data-neighbourhood={neighbourhood} data-selected-house={selectedHouse ?? undefined} data-selected-group={selectedGroup ?? undefined} data-compact={compact} viewBox={compact && grouped ? `0 0 400 ${view === 'ages' ? 500 : 745}` : '0 0 1000 600'} role={onHouseSelect ? 'group' : 'img'} onPointerDown={event => { pointerType.current = event.pointerType; if (!onCameraChange || view !== 'village') return; drag.current = {x:event.clientX,y:event.clientY,camera,moved:false}; }} onPointerMove={event => { if (!drag.current || !onCameraChange || view !== 'village') return; const dx = event.clientX-drag.current.x, dy=event.clientY-drag.current.y; if(Math.abs(dx)+Math.abs(dy)>5){drag.current.moved=true;setDragging(true);event.currentTarget.setPointerCapture(event.pointerId);const matrix=event.currentTarget.getScreenCTM();const ratio=matrix?1/matrix.a:1000/event.currentTarget.getBoundingClientRect().width;onCameraChange({...camera,x:drag.current.camera.x+dx*ratio,y:drag.current.camera.y+dy*ratio});} }} onPointerUp={() => {setDragging(false);setTimeout(()=>{drag.current=null;},0);}} onPointerCancel={() => {drag.current=null;setDragging(false);}} onClick={event => {
-      // A tap that lands between the houses (UXM2V-05): houses are about 29×28px on a phone, so a finger
-      // chooses the nearest one within TAP_RADIUS_PX instead. A house's own click has already been handled.
-      if (!onHouseSelect || view !== 'village' || pointerType.current !== 'touch' || drag.current?.moved) return;
-      if ((event.target as Element).closest('.mini-house')) return;
-      const matrix = event.currentTarget.getScreenCTM();
-      if (!matrix) return;
-      const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-      const world = { x: (point.x - camera.x) / camera.scale, y: (point.y - camera.y) / camera.scale };
-      const house = nearestHouse(world, neighbourhood, TAP_RADIUS_PX / (matrix.a * camera.scale));
-      if (house !== null) onHouseSelect(house);
-    }} style={{touchAction: camera.scale > 1 ? 'none' : 'pan-y'}} aria-labelledby={`${id}-title ${id}-desc`} xmlns="http://www.w3.org/2000/svg">
-    <title id={`${id}-title`}>{pt ? 'Um bairro imaginado em movimento' : 'An imagined neighbourhood in motion'}</title>
-    <desc id={`${id}-desc`}>{pt ? `${count} pessoas em destaque. Dados fictícios: 100 pessoas em 30 agregados. O movimento e os edifícios são ilustrativos.` : `${count} highlighted people. Fictional data: 100 people in 30 households. Motion and buildings are illustrative.`}</desc>
-    <g data-camera="true" className="mini-camera" style={{transform:view==='village'?`translate(${camera.x}px, ${camera.y}px) scale(${camera.scale})`:'translate(0, 0) scale(1)',transition:dragging?'none':undefined}}>
-    <g className="mini-world" opacity={grouped ? compact ? 0 : .07 : 1}>
-      <Landscape kind={neighbourhood}/>
-      {[...HOUSEHOLDS].sort((a,b)=>neighbourhoodPosition(a.id,neighbourhood).y-neighbourhoodPosition(b.id,neighbourhood).y).map(h=><House id={h.id} key={h.id} locale={locale} neighbourhood={neighbourhood} selected={selectedHouse===h.id} onSelect={onHouseSelect && view==='village'?()=>{if(!drag.current?.moved)onHouseSelect(h.id);}:undefined}/>)}
-    </g>
-    {grouped && <g className="mini-group-labels" fill={INK} fontFamily={FONT_STACK} textAnchor="middle">
-      {(view === 'ages' ? FIELD_LABELS[locale][lens] : ['1','2','3','4','5']).map((label,i)=>{
-        const group = PEOPLE.filter(p=>view==='ages'?groupFor(p,lens)===i:p.size===i+1);
-        const x = compact ? 100 + (i % 2) * 200 : view==='ages'?90+(i+.5)*(820/distribution(lens).length):142+i*178;
-        const row = compact ? Math.floor(i / 2) * 240 : 0;
-        return <g key={label}><text x={x} y={compact ? 38 + row : 145} fontSize={view==='ages' ? compact ? 13 : 22 : compact ? 25 : 34} fontFamily={FONT_STACK} fontWeight="700">{label}</text><text x={x} y={compact ? 59 + row : 174} fontSize={compact ? 12 : 15} fill={GRAPHITE}>{view==='ages'?(pt?'pessoas':'people'):(pt?i===0?'pessoa por agregado':'pessoas por agregado':i===0?'person per household':'people per household')}</text><text x={x} y={compact ? 220 + row : 454} fontSize={compact ? 15 : 22}>{group.length} {pt?'pessoas':'people'}</text>{view==='households' && !compact && <text x={x} y="480" fontSize="15" fill={GRAPHITE}>{HOUSEHOLDS.filter(h=>h.people.length===i+1).length} {pt?'agregados':'households'}</text>}</g>;
-      })}
-    </g>}
-    {PEOPLE.map(person=>{
-      const pos = exploredPosition(person,view,compact && grouped,neighbourhood,lens);
-      const highlighted = (!alone || person.size===1) && (selectedGroup === null || groupFor(person,lens) === selectedGroup) && (selectedHouse === null || person.household === selectedHouse);
-      return <g key={person.id} className="mini-person" data-person={person.id} data-x={pos.x} data-y={pos.y} data-highlighted={highlighted} style={{transform:`translate(${pos.x}px, ${pos.y}px)`,opacity:highlighted?1:.12}}>
-        <g className={!grouped?'mini-stroll':undefined} style={{'--delay':`${-(person.id%11)}s`,'--drift':`${person.id%2?42:-42}px`,'--pace':`${8+person.id%7}s`} as CSSProperties}>
-        {/* The person chosen in the household panel: a ruled ring around the figure. */}
-        {selectedHouse!==null && selectedPerson===person.id && <ellipse className="mini-mark" cy="-4" rx="8" ry="12" fill="none" stroke={INK} strokeWidth="1.2" vectorEffect="non-scaling-stroke"/>}
-          {/* A figure: ink legs and head, the body in its group's series colour. */}
-          <path className={!grouped?'mini-legs':undefined} d="M-1 0 l-1 4 M1 0 l1 4" stroke={INK} strokeWidth="1.4" strokeLinecap="square" />
-          <rect x="-3" y="-8" width="6" height="8" fill={COLOURS[groupFor(person,lens)]} />
-          <circle cy="-11" r="2.8" fill={INK} />
+  const [focusIndex, setFocusIndex] = useState(0);
+  useEffect(() => { if (selectedHouse !== null) setFocusIndex(selectedHouse); }, [selectedHouse]);
+
+  const { width, height } = SCENE[layout];
+  const { spots, labels, rules } = arrangement(view, layout);
+  const homes = view === 'homes';
+  const names = homes ? [] : groupLabels(view, locale);
+  const wide = layout === 'wide';
+
+  const chosen = selectedHouse === null ? null : HOUSEHOLDS[selectedHouse];
+  const description = homes
+    ? (pt ? '30 casas e 100 pessoas inventadas, cada pessoa junto da sua casa.' : '30 homes and 100 invented people, each beside their home.')
+    : `${view === 'age' ? (pt ? 'As 100 pessoas por idade: ' : 'The 100 people by age: ') : (pt ? 'As 100 pessoas por tamanho do agregado: ' : 'The 100 people by household size: ')}${names.map(n => `${n.name}, ${n.detail}`).join('; ')}.`;
+  const highlight = chosen ? (pt ? ` Em destaque, as pessoas do agregado ${chosen.id + 1}.` : ` Highlighted: the people of household ${chosen.id + 1}.`) : '';
+
+  function move(event: KeyboardEvent<SVGGElement>, from: number) {
+    const cols = columns(layout);
+    const last = HOUSEHOLDS.length - 1;
+    const next = ({ ArrowRight: from + 1, ArrowLeft: from - 1, ArrowDown: from + cols, ArrowUp: from - cols, Home: 0, End: last } as Record<string, number>)[event.key];
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onHouseSelect(from);
+      return;
+    }
+    if (next === undefined) return;
+    event.preventDefault();
+    if (next < 0 || next > last) return;
+    setFocusIndex(next);
+    houses.current[next]?.focus();
+  }
+
+  // A tap that lands between the houses (UXM2V-05): a finger chooses the nearest one within TAP_RADIUS_PX.
+  // A house's own click has already been handled.
+  function tapNearest(event: MouseEvent<SVGSVGElement>) {
+    if (!homes || pointerType.current !== 'touch') return;
+    if ((event.target as Element).closest('.mini-house')) return;
+    const matrix = event.currentTarget.getScreenCTM();
+    if (!matrix) return;
+    const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+    const house = nearestHouse(point, layout, TAP_RADIUS_PX / matrix.a);
+    if (house !== null) onHouseSelect(house);
+  }
+
+  return (
+    <svg
+      className="mini-scene"
+      viewBox={`0 0 ${width} ${height}`}
+      data-view={view}
+      data-layout={layout}
+      data-motion={motion ? 'on' : 'off'}
+      role="group"
+      aria-labelledby={`${id}-title`}
+      aria-describedby={`${id}-desc`}
+      onPointerDown={event => { pointerType.current = event.pointerType; }}
+      onClick={tapNearest}
+      fontFamily={FONT_STACK}
+    >
+      <title id={`${id}-title`}>{pt ? 'O bairro inventado' : 'The invented neighbourhood'}</title>
+      <desc id={`${id}-desc`}>{description}{highlight}</desc>
+
+      <g className="mini-homes" aria-hidden={homes ? undefined : true}>
+        {streets(layout).map(s => <line key={s.y} x1={s.x1} x2={s.x2} y1={s.y} y2={s.y} stroke={RULE} strokeWidth={1} vectorEffect="non-scaling-stroke" />)}
+        <g role="group" aria-label={pt ? 'As 30 casas: setas para mudar de casa, Enter para a escolher' : 'The 30 homes: arrow keys to move, Enter to choose'}>
+          {HOUSEHOLDS.map(home => {
+            const selected = selectedHouse === home.id;
+            const cell = houseCell(home.id, layout);
+            const at = housePosition(home.id, layout);
+            const n = home.people.length;
+            return (
+              <g
+                key={home.id}
+                ref={node => { houses.current[home.id] = node; }}
+                className="mini-house"
+                role={homes ? 'button' : undefined}
+                tabIndex={homes ? (home.id === focusIndex ? 0 : -1) : undefined}
+                aria-pressed={homes ? selected : undefined}
+                aria-label={homes ? (pt ? `Agregado ${home.id + 1}, ${n} ${n === 1 ? 'pessoa' : 'pessoas'}` : `Household ${home.id + 1}, ${n} ${n === 1 ? 'person' : 'people'}`) : undefined}
+                onClick={homes ? () => onHouseSelect(home.id) : undefined}
+                onKeyDown={homes ? event => move(event, home.id) : undefined}
+                onFocus={() => setFocusIndex(home.id)}
+              >
+                <rect className="mini-house-hit" x={cell.x} y={cell.y} width={cell.width} height={cell.height} fill="transparent" />
+                <g transform={`translate(${at.x} ${at.y}) scale(${at.scale})`}><HouseGlyph selected={selected} /></g>
+                {/* The chosen home's number over its roof; on a phone the rows are too close for it, and the readout says it. */}
+                {selected && wide && <text x={at.x + 28} y={at.y - 58} textAnchor="middle" fontSize={18} fontWeight={700} fill={INK}>{home.id + 1}</text>}
+              </g>
+            );
+          })}
         </g>
-      </g>;
-    })}
-    </g>
-    <g className="mini-scene-caption" opacity={compact && grouped ? 0 : 1} fill={GRAPHITE} fontSize="12" fontFamily={FONT_STACK}><text x="36" y="565">{pt?'Bairro imaginado, sem localização real':'Imagined neighbourhood, no real location'}</text><text x="965" y="565" textAnchor="end">{count} / 100</text></g>
-  </svg>;
+      </g>
+
+      {!homes && (
+        <g className="mini-groups" aria-hidden="true">
+          {rules.map(r => <line key={`${r.x1}-${r.y}`} x1={r.x1} x2={r.x2} y1={r.y} y2={r.y} stroke={RULE} strokeWidth={1} vectorEffect="non-scaling-stroke" />)}
+          {labels.map(l => wide ? (
+            <g key={l.group}>
+              <text x={l.x} y={l.y - 8} fontSize={21} fontWeight={700} fill={INK}>{names[l.group].name}</text>
+              <text x={l.x} y={l.y + 22} fontSize={19} fill={GRAPHITE}>{names[l.group].detail}</text>
+            </g>
+          ) : (
+            <text key={l.group} x={l.x} y={l.y + 12} fontSize={16}>
+              <tspan fontWeight={700} fill={INK}>{names[l.group].name}</tspan>
+              <tspan dx={8} fill={GRAPHITE}>{names[l.group].detail}</tspan>
+            </text>
+          ))}
+        </g>
+      )}
+
+      <g className="mini-people" aria-hidden="true">
+        {PEOPLE.map(person => {
+          const spot = spots[person.id];
+          const dim = selectedHouse !== null && person.household !== selectedHouse;
+          return (
+            <g
+              key={person.id}
+              className="mini-person"
+              style={{ transform: `translate(${spot.x}px, ${spot.y}px) scale(${spot.scale})`, opacity: dim ? 0.16 : 1, '--i': person.id } as CSSProperties}
+            >
+              {selectedPerson === person.id && <ellipse cy={-11} rx={7.5} ry={14.5} fill="none" stroke={INK} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />}
+              <path d="M-1.6 -5.5 L-2.6 0 M1.6 -5.5 L2.6 0" stroke={INK} strokeWidth={1.4} strokeLinecap="square" fill="none" />
+              <rect x={-3.5} y={-15.5} width={7} height={10} fill={COLOURS[person.band]} />
+              <circle cy={-19.5} r={3.3} fill={INK} />
+            </g>
+          );
+        })}
+      </g>
+    </svg>
+  );
 }
