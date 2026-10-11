@@ -94,9 +94,11 @@ const COPY = {
     closerIn: (c: number, n: number) => `mais perto do que o modelo em ${c} de ${n} ${PLURAL(n, "jogo", "jogos")}`,
     levelIn: (l: number) => `, igual em ${l}`,
     soFar: "até agora, ",
-    waiting: (p: number, total: number) => `escolheste ${p} de ${total} ${PLURAL(total, "jogo", "jogos")}; o resultado de cada um aparece aqui depois de jogado.`,
+    waiting: (p: number, total: number) => `escolheste ${p} de ${total} ${PLURAL(total, "jogo", "jogos")}.`,
     toPlay: (list: string) => `Por jogar: ${list}.`,
+    toPlayMany: (n: number, last: string) => `Por jogar: ${n} jogos, o último ${last}.`,
     toCome: (list: string) => `À espera do resultado: ${list}.`,
+    toComeMany: (n: number) => `À espera do resultado: ${n} jogos.`,
     season: (won: number, done: number, level: number) =>
       `Ganhaste ao modelo em ${won} de ${done} ${PLURAL(done, "jornada completa", "jornadas completas")}${level ? `; empataste ${level}` : ""}.`,
     gameByGame: "Ver jogo a jogo",
@@ -144,9 +146,11 @@ const COPY = {
     closerIn: (c: number, n: number) => `closer than the model in ${c} of ${n} ${PLURAL(n, "game", "games")}`,
     levelIn: (l: number) => `, level in ${l}`,
     soFar: "so far, ",
-    waiting: (p: number, total: number) => `you picked ${p} of ${total} ${PLURAL(total, "game", "games")}; each result appears here once it is played.`,
+    waiting: (p: number, total: number) => `you picked ${p} of ${total} ${PLURAL(total, "game", "games")}.`,
     toPlay: (list: string) => `Still to play: ${list}.`,
+    toPlayMany: (n: number, last: string) => `Still to play: ${n} games, the last ${last}.`,
     toCome: (list: string) => `Result to come: ${list}.`,
+    toComeMany: (n: number) => `Result to come: ${n} games.`,
     season: (won: number, done: number, level: number) =>
       `You beat the model in ${won} of ${done} completed ${PLURAL(done, "matchday", "matchdays")}${level ? `; ${level} level` : ""}.`,
     gameByGame: "See game by game",
@@ -550,21 +554,27 @@ function LatestRound({
   );
 }
 
+/** Up to this many games are named; more are counted ("8 jogos, o último …"). */
+const NAMED_GAMES = 3;
+
 /** Which of the round's games have no result yet: still to play, or played and waiting. */
 function Remaining({ tally, clock, locale, t }: { tally: RoundTally; clock: number; locale: Locale; t: Copy }) {
   if (tally.remaining.length === 0) return null;
   const name = (f: GameFixture) => matchLabel(shortName(f.home), shortName(f.away));
+  const when = (f: GameFixture) => formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed !== false });
   const toPlay = tally.remaining.filter(f => !playedByClock(f, clock));
   const toCome = tally.remaining.filter(f => playedByClock(f, clock));
-  const playLine = toPlay.map(f => {
-    const when = formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed !== false });
-    return when ? `${name(f)} (${when})` : name(f);
-  });
+  const last = [...toPlay].sort((a, b) => (a.kickoff ?? "").localeCompare(b.kickoff ?? "")).at(-1);
+  const playLine =
+    toPlay.length > NAMED_GAMES && last
+      ? t.toPlayMany(toPlay.length, when(last))
+      : t.toPlay(listOf(toPlay.map(f => (when(f) ? `${name(f)} (${when(f)})` : name(f))), locale));
+  const comeLine = toCome.length > NAMED_GAMES ? t.toComeMany(toCome.length) : t.toCome(listOf(toCome.map(name), locale));
   return (
     <p>
-      {toPlay.length > 0 && t.toPlay(listOf(playLine, locale))}
+      {toPlay.length > 0 && playLine}
       {toPlay.length > 0 && toCome.length > 0 && " "}
-      {toCome.length > 0 && t.toCome(listOf(toCome.map(name), locale))}
+      {toCome.length > 0 && comeLine}
     </p>
   );
 }
