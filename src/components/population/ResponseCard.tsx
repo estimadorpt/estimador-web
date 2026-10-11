@@ -6,6 +6,7 @@ import { DataCard } from '@/components/viz/DataCard';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { TextLink } from '@/components/brand/TextLink';
+import { Action } from '@/components/brand/Action';
 import { methodologyAnchorForRecipe } from '@/components/population/quality/anchors';
 import { POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { isWhole, readCells } from '@/lib/population/compact';
@@ -31,8 +32,10 @@ export interface ResponseCardProps {
   before?: ReactNode;
   /** Hides the chart until true (guess-first). */
   revealed?: boolean;
-  /** The reader's guess (0–100), outlined on the 100 dots once revealed (guess-first, VUXD-07). */
+  /** The reader's guess (0–100), as hollow squares on the 100 dots once revealed (guess-first, VUXD-07). */
   guess?: number;
+  /** The 100 dots' headline category in ink and the rest grey (guess-first cards). */
+  inkHeadline?: boolean;
   /** Draw the shares as bars even where a 100-dot grid would fit (the page already has that grid). */
   bars?: boolean;
   /** Briefly marks the card a shared link pointed to. */
@@ -54,7 +57,7 @@ export interface ResponseCardProps {
  * link to the response. A refused response is a designed empty state with the
  * reason and nothing that looks like a number.
  */
-export function ResponseCard({ recipeName, recipe, record, locale, placeName, fallbackName, bare, before, revealed = true, guess, bars = false, highlight = false, place, className = '' }: ResponseCardProps) {
+export function ResponseCard({ recipeName, recipe, record, locale, placeName, fallbackName, bare, before, revealed = true, guess, inkHeadline = false, bars = false, highlight = false, place, className = '' }: ResponseCardProps) {
   const copy = RECIPE_COPY[recipeName];
   const cells = readCells(record, recipe, locale);
   const status = statusLine(record, locale, placeName, fallbackName);
@@ -84,7 +87,7 @@ export function ResponseCard({ recipeName, recipe, record, locale, placeName, fa
         ) : (
           <>
             {before}
-            {revealed && <ResponseChart recipeName={recipeName} recipe={recipe} record={record} cells={cells} locale={locale} bars={bars} guess={guess} />}
+            {revealed && <ResponseChart recipeName={recipeName} recipe={recipe} record={record} cells={cells} locale={locale} bars={bars} guess={guess} ink={inkHeadline} />}
             {revealed && (
               <ChartTable
                 caption={`${copy.short[locale]} ${status.where}`}
@@ -118,7 +121,7 @@ export function CardFooter({ source, id, title, recipe, locale }: { source: stri
   return (
     <footer className="mt-4 border-t border-grid pt-2 text-[12.5px] text-graphite">
       <p className="pt-1">{source}</p>
-      <div className="flex flex-wrap items-center justify-between gap-x-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pb-1">
         <TextLink href={`${POPULATION_ROUTES.methodology}#${methodologyAnchorForRecipe(recipe, locale)}`} locale={locale}>
           {locale === 'pt' ? 'Como foi feito' : 'How it was made'}
           <span className="sr-only">: {title}</span>
@@ -183,15 +186,17 @@ function AloneByAge({ cells, locale }: { cells: ReturnType<typeof readCells>; lo
 }
 
 /** The chart a response gets: the same choice on the parish page and in the game's clues. */
-export function ResponseChart({ recipeName, recipe, record, cells, locale, bars = false, guess, compact = false }: {
+export function ResponseChart({ recipeName, recipe, record, cells, locale, bars = false, guess, ink = false, compact = false }: {
   recipeName: PortraitRecipe;
   recipe: PopulationRecipe;
   record: CompactResponse;
   cells: ReturnType<typeof readCells>;
   locale: Locale;
   bars?: boolean;
-  /** The reader's guess, outlined on the 100 dots (guess-first cards only). */
+  /** The reader's guess, as hollow squares on the 100 dots (guess-first cards only). */
   guess?: number;
+  /** The headline category in ink (guess-first cards only). */
+  ink?: boolean;
   /** A shorter age chart with no hint line and a smaller dot grid: the game's clue on a phone, where the four choices must stay close. */
   compact?: boolean;
 }) {
@@ -199,7 +204,7 @@ export function ResponseChart({ recipeName, recipe, record, cells, locale, bars 
   if (recipeName === 'who_lives_alone') return <AloneByAge cells={cells} locale={locale} />;
   const whole = isWhole(record) && cells.filter(cell => cell.state === 'published').length <= 4;
   if (!bars && whole && (recipeName === 'elders_alone' || recipeName === 'multigenerational' || recipeName === 'employment')) {
-    return <HundredPeople cells={cells.filter(cell => cell.state !== 'absent')} locale={locale} unit={recipe.unit === 'household' ? 'households' : 'people'} guess={guess} compact={compact} />;
+    return <HundredPeople cells={cells.filter(cell => cell.state !== 'absent')} locale={locale} unit={recipe.unit === 'household' ? 'households' : 'people'} guess={guess} ink={ink} compact={compact} />;
   }
   return <ShareBars cells={cells} locale={locale} />;
 }
@@ -231,8 +236,9 @@ function CopyPermalink({ id, title, locale }: { id: string; title: string; local
       <span role="status" className="text-[12.5px] text-graphite">
         {state === 'copied' ? (pt ? 'Link copiado.' : 'Link copied.') : state === 'failed' ? url() : ''}
       </span>
-      <button
-        type="button"
+      {/* An action, not a link: the site's secondary Action (ruled, square), as "Copiar link" is everywhere. */}
+      <Action
+        variant="secondary"
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(url());
@@ -242,12 +248,11 @@ function CopyPermalink({ id, title, locale }: { id: string; title: string; local
             setState('failed');
           }
         }}
-        className="inline-flex min-h-11 items-center gap-1.5 text-[12.5px] font-semibold text-ink underline decoration-scale underline-offset-4 hover:decoration-ink"
       >
-        <Link2 aria-hidden="true" className="h-3.5 w-3.5" />
+        <Link2 aria-hidden="true" className="h-4 w-4" />
         {pt ? 'Copiar link' : 'Copy link'}
         <span className="sr-only">{pt ? ` para «${title}»` : ` to “${title}”`}</span>
-      </button>
+      </Action>
     </span>
   );
 }

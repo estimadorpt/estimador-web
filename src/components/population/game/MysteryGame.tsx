@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { History } from 'lucide-react';
+import { Action } from '@/components/brand/Action';
 import { MarkLoading } from '@/components/brand/MarkLoading';
 import { BRAND } from '@/lib/brand';
 import { POPULATION_GAME_EPOCH } from '@/lib/config/population';
@@ -286,13 +287,9 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
     return (
       <div className="border-t border-ink pt-4">
         <p className="text-[15px] text-ink">{t.loadError}</p>
-        <button
-          type="button"
-          onClick={() => { setFailed(false); setAttempt(n => n + 1); }}
-          className="mt-4 inline-flex min-h-12 items-center justify-center border border-rule bg-paper px-5 text-[15px] font-semibold text-ink hover:bg-field"
-        >
+        <Action variant="secondary" onClick={() => { setFailed(false); setAttempt(n => n + 1); }} className="mt-4">
           {t.retry}
-        </button>
+        </Action>
       </div>
     );
   }
@@ -331,13 +328,9 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
             {replay ? t.replayBanner : t.practiceBanner}
           </p>
           {day !== today ? (
-            <button type="button" onClick={() => play(today)} className="inline-flex min-h-11 items-center text-sm font-semibold text-ink underline underline-offset-4">
-              {t.backToToday}
-            </button>
+            <Action variant="text" onClick={() => play(today)}>{t.backToToday}</Action>
           ) : (
-            <button type="button" onClick={stopReplay} className="inline-flex min-h-11 items-center text-sm font-semibold text-ink underline underline-offset-4">
-              {t.replayStop}
-            </button>
+            <Action variant="text" onClick={stopReplay}>{t.replayStop}</Action>
           )}
         </div>
       )}

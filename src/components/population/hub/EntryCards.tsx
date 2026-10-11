@@ -58,23 +58,14 @@ function entries(locale: Locale): Entry[] {
       action: pt ? 'Ler a metodologia' : 'Read the methodology',
       href: POPULATION_ROUTES.methodology,
     },
-    {
-      key: 'explainer',
-      kicker: pt ? 'Explicador' : 'Explainer',
-      title: pt ? 'Como ler uma população sintética' : 'How to read a synthetic population',
-      text: pt
-        ? 'Um bairro imaginado, com 100 pessoas inventadas, mostra como ler e como se constrói uma população sintética.'
-        : 'An imagined neighbourhood of 100 invented people shows how a synthetic population is read and how it is built.',
-      action: pt ? 'Ver o explicador' : 'See the explainer',
-      href: POPULATION_ROUTES.explainer,
-    },
   ];
 }
 
 /**
- * Where to go next: the daily game first, then quality, data, method and the
- * explainer. Each is a ruled entry (a rule above, the name, a line, one
- * action), not a card. The game's title stays a question: it is the game's.
+ * Where to go next: the daily game first, then quality, data and method (the
+ * explainer is linked from the hero, where a first-time reader starts). Each
+ * is a ruled entry (a rule above, the name, a line, one action), not a card.
+ * The game's title stays a question: it is the game's.
  */
 export function EntryCards({ locale }: { locale: Locale }) {
   return (

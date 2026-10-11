@@ -1,6 +1,7 @@
 'use client';
 
 import { Eye, X } from 'lucide-react';
+import { Action } from '@/components/brand/Action';
 import type { Locale } from '@/lib/population/labels';
 import type { Parish } from '@/lib/population/places';
 import { GAME_COPY } from './copy';
@@ -63,14 +64,10 @@ export function Choices({ choices, ruledOut, locale, canOpenMore, onPick, onNext
         })}
       </ol>
       {canOpenMore ? (
-        <button
-          type="button"
-          onClick={onNextClue}
-          className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 border border-rule bg-paper px-5 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-field sm:w-auto"
-        >
+        <Action variant="secondary" onClick={onNextClue} className="mt-3 w-full sm:w-auto">
           <Eye aria-hidden="true" className="h-4 w-4" />
           {t.nextClue}
-        </button>
+        </Action>
       ) : (
         <p className="mt-3 border-t border-grid pt-2 text-sm text-graphite">{t.allClues}</p>
       )}

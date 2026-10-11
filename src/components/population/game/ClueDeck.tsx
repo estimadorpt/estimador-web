@@ -5,6 +5,7 @@ import { Lock } from 'lucide-react';
 import { DataCard } from '@/components/viz/DataCard';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
+import { CHOICE_GROUP_CLASS, ChoiceCheck, choiceClass } from '@/components/brand/Choice';
 import { POPULATION_ROUTES } from '@/lib/config/population';
 import { readCells } from '@/lib/population/compact';
 import { CLUE_ORDER } from '@/lib/population/game';
@@ -124,8 +125,10 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
         </p>
       </div>
 
-      {/* Plain buttons that say which clue is on show (aria-pressed): a tab list would promise arrow-key moves. */}
-      <div role="group" aria-label={t.cluesTitle} className="mb-4 grid grid-cols-6 gap-1.5 sm:gap-2">
+      {/* The clue on show is a choice in place (choiceClass): plain buttons with
+          aria-pressed, the chosen one in ink and checked; a tab list would promise
+          arrow-key moves. A locked clue is disabled and shows a lock. */}
+      <div role="group" aria-label={t.cluesTitle} className={`mb-4 ${CHOICE_GROUP_CLASS}`}>
         {CLUE_ORDER.map((clueRecipes, i) => {
           const unlocked = i < open;
           const active = i === shown;
@@ -140,18 +143,13 @@ export function ClueDeck({ entry, meta, locale, open, revealed }: ClueDeckProps)
               disabled={!unlocked}
               title={unlocked ? label : t.clueLocked}
               onClick={() => { setSelected(i); setFresh(null); setMoved(true); }}
-              className={`relative flex min-h-12 flex-col items-center justify-center border text-[15px] font-bold tabular-nums transition-colors duration-150 ${
-                active
-                  ? 'border-ink bg-ink text-paper'
-                  : unlocked
-                    ? 'border-rule bg-paper text-ink hover:bg-field'
-                    : 'cursor-not-allowed border-dashed border-rule bg-paper text-graphite'
-              }`}
+              className={choiceClass(active, 'relative min-h-12 min-w-0 flex-1 basis-0 px-1 text-[15px] tabular-nums')}
             >
               {/* The numeral is for the eye; the sr-only line names the clue, so it is not read twice ("1 Pista 1", A11Y3-08). */}
+              {active && <ChoiceCheck />}
               {unlocked ? <span aria-hidden="true">{i + 1}</span> : <Lock aria-hidden="true" className="h-4 w-4" />}
               <span className="sr-only">{unlocked ? `${t.clue(i + 1)}: ${label}` : `${t.clue(i + 1)}: ${t.clueLocked}`}</span>
-              {fresh === i && !active && <span aria-hidden="true" className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-ink" />}
+              {fresh === i && !active && <span aria-hidden="true" className="absolute right-1 top-1 h-2 w-2 rounded-full bg-ink" />}
             </button>
           );
         })}

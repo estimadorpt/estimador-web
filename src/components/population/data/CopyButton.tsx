@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import { Action } from '@/components/brand/Action';
 
 /**
- * Copies a fixed text (an attribution, a citation, a command). The result is
- * announced in words; when the clipboard is unavailable the reader is told to
- * select the text instead.
+ * Copies a fixed text (an attribution, a citation, a command): a secondary
+ * Action, as every copy on the site is. The result is announced in words;
+ * when the clipboard is unavailable the reader is told to select the text
+ * instead.
  */
 export function CopyButton({ text, label, locale }: { text: string; label: string; locale: 'pt' | 'en' }) {
   const pt = locale === 'pt';
@@ -30,14 +32,10 @@ export function CopyButton({ text, label, locale }: { text: string; label: strin
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <button
-        type="button"
-        onClick={copy}
-        className="inline-flex min-h-11 items-center gap-2 border border-rule bg-paper px-4 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-field"
-      >
+      <Action variant="secondary" onClick={copy}>
         {state === 'copied' ? <Check aria-hidden="true" className="h-4 w-4" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
         {label}
-      </button>
+      </Action>
       <span role="status" aria-live="polite" className="text-sm text-graphite">
         {state === 'copied' ? (pt ? 'Copiado.' : 'Copied.') : state === 'failed' ? (pt ? 'Não foi possível copiar: seleciona o texto acima.' : 'Could not copy: select the text above.') : ''}
       </span>

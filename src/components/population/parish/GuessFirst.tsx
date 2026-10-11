@@ -3,9 +3,11 @@
 import { useId, useRef, useState } from 'react';
 import { Action } from '@/components/brand/Action';
 import { ResponseCard, type ResponseCardProps } from '@/components/population/ResponseCard';
+import { GuessGrid } from '@/components/population/charts';
 import { formatDisplay } from '@/lib/population/compact';
-import { clampGuess, formatGuess, GUESS_START, guessTarget, guessVerdict, VERDICT_COPY } from '@/lib/population/guess';
+import { clampGuess, formatGuess, GUESS_START, guessTarget } from '@/lib/population/guess';
 import { RECIPE_COPY, VALUES, valueLabel, type Locale } from '@/lib/population/labels';
+import { distanceSentence, publishedPoints, revealSentence } from './guess-reveal';
 
 const PROMPT: Record<'elders_alone' | 'multigenerational', { pt: (where: string) => string; en: (where: string) => string }> = {
   elders_alone: {
@@ -20,9 +22,14 @@ const PROMPT: Record<'elders_alone' | 'multigenerational', { pt: (where: string)
 
 /**
  * A response card that asks for a guess before it shows the chart. The guess
- * is the reader's; the comparison comes back as a word ("Perto"), never as a
- * computed difference. Skippable, and never offered for a refused response or
- * a suppressed headline cell — then it is a plain card.
+ * is the reader's, and is drawn as one: hollow ink squares on an empty 10×10
+ * grid, never solid dots, which on this site mean something that happened.
+ * Nothing is drawn, and "Ver o valor" stays off, until the slider moves: the
+ * slider has to start somewhere, and that start is not a guess. The reveal
+ * states the published value as a sentence ("Cerca de 39 em cada 100…") and
+ * how far the guess was from it, in whole points (guess-reveal.ts). Skippable,
+ * and never offered for a refused response or a suppressed headline cell —
+ * then it is a plain card.
  */
 export function GuessFirstCard(props: ResponseCardProps & { where: string; initiallyRevealed?: boolean }) {
   const { recipeName, record, recipe, locale, where, initiallyRevealed = false, ...rest } = props;
@@ -44,8 +51,11 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
   const published = formatDisplay(target.display, locale);
   const unit = recipe.unit === 'household' ? t.households : t.people;
   // The 100 dots fill the headline category first ("vivem sozinhas", natural order), so the
-  // reader's guess can be outlined on the same dots after the reveal (VUXD-07).
+  // reader's guess can be drawn on the same cells after the reveal (VUXD-07).
   const headlineFirst = VALUES[dimension]?.[0]?.value === RECIPE_COPY[recipeName].headline?.[dimension];
+  const value = clampGuess(guess);
+  // The published value as printed on the card ("17,5%"), which the sentences round.
+  const points = publishedPoints(target.display, target.share);
 
   const reveal = (withGuess: boolean) => {
     setPhase(withGuess ? 'revealed' : 'skipped');
@@ -72,44 +82,53 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
           max={100}
           step={1}
           value={guess}
-          aria-valuetext={t.valueText(clampGuess(guess), unit)}
+          aria-valuetext={touched ? t.valueText(value, unit) : t.noGuessYet}
+          aria-describedby={`${id}-hint`}
           onChange={event => { setGuess(clampGuess(Number(event.target.value))); setTouched(true); }}
           className="guess-range h-11 w-full min-w-0 flex-none cursor-pointer accent-[var(--color-ink)] sm:flex-1"
         />
-        {/* The reader's number, not a published one: labelled, in a bordered field, and muted until they move the slider. */}
-        <div className="w-24 shrink-0 self-start border border-dashed border-rule px-2 py-1 text-right sm:self-auto" aria-hidden="true">
+        {/* The reader's number, not a published one: labelled, in a dashed (hollow) field, and empty until they move the slider. */}
+        <div className="w-24 shrink-0 self-start border border-dashed border-ink px-2 py-1 text-right sm:self-auto" aria-hidden="true">
           <p className="text-[11px] text-graphite">{t.yours}</p>
           <output htmlFor={`${id}-guess`} className={`fig block text-2xl ${touched ? 'text-ink' : 'text-graphite'}`}>
-            {formatGuess(guess)}
+            {touched ? formatGuess(guess) : '—'}
           </output>
         </div>
       </div>
-      <GuessDots guess={guess} label={t.preview(clampGuess(guess), unit)} />
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1">
-        <Action onClick={() => reveal(true)}>{t.reveal}</Action>
+      <div className="mt-3">
+        <GuessGrid guess={touched ? value : null} label={touched ? t.preview(value, unit) : t.noGuessYet} />
+      </div>
+      <p id={`${id}-hint`} className="mt-3 text-[13px] text-graphite">{touched ? t.preview(value, unit) : t.hint}</p>
+      <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1">
+        {/* Off until the slider moves: revealing from the starting point would score a guess nobody made.
+            The fieldset carries the disabled state, so the button keeps the site's Action look. */}
+        <fieldset disabled={!touched} className="contents">
+          <Action onClick={() => reveal(true)}>{t.reveal}</Action>
+        </fieldset>
         <Action variant="text" onClick={() => reveal(false)}>{t.skip}</Action>
       </div>
     </div>
   ) : phase === 'open' ? null : (
     // Focus moves here after a reveal or a skip, so the result is read once (no live region on top
     // of it) and a keyboard reader sees where they are: the global ring on a visible block (A11Y3-12).
-    <div ref={result} tabIndex={-1} className="mb-4 flex flex-wrap items-stretch gap-x-8 gap-y-3 border-t border-grid pt-3">
-      {phase === 'revealed' && (
+    <div ref={result} tabIndex={-1} className="mb-4 border-t border-grid pt-3">
+      <div className="flex flex-wrap items-stretch gap-x-8 gap-y-3">
         <div className="min-w-[8rem]">
-          <p className="text-[12px] text-graphite">{t.yours}</p>
-          <p className="fig text-3xl text-ink">{formatGuess(guess)}</p>
+          <p className="text-[12px] text-graphite">{t.published}</p>
+          <p className="fig text-3xl text-ink">{published}</p>
+          <p className="text-[12px] text-graphite">{headlineValue}</p>
         </div>
-      )}
-      <div className="min-w-[8rem]">
-        <p className="text-[12px] text-graphite">{t.published}</p>
-        <p className="fig text-3xl text-ink">{published}</p>
-        <p className="text-[12px] text-graphite">{headlineValue}</p>
+        {phase === 'revealed' && (
+          <div className="min-w-[8rem]">
+            <p className="text-[12px] text-graphite">{t.yours}</p>
+            <p className="fig text-3xl text-ink">{formatGuess(guess)}</p>
+          </div>
+        )}
       </div>
-      {phase === 'revealed' && (
-        <p className="basis-full text-sm font-semibold text-ink sm:basis-auto sm:self-center">
-          {VERDICT_COPY[guessVerdict(guess, target.share)][locale]}
-        </p>
-      )}
+      <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-ink">
+        {revealSentence(recipeName, points, where, locale)}
+        {phase === 'revealed' && <> <b className="font-semibold">{distanceSentence(value, points, locale)}</b></>}
+      </p>
     </div>
   );
 
@@ -121,29 +140,10 @@ export function GuessFirstCard(props: ResponseCardProps & { where: string; initi
       locale={locale}
       before={before}
       revealed={phase !== 'guessing'}
-      guess={phase === 'revealed' && headlineFirst ? clampGuess(guess) : undefined}
+      guess={phase === 'revealed' && headlineFirst ? value : undefined}
+      inkHeadline={headlineFirst}
       {...rest}
     />
-  );
-}
-
-/**
- * The reader's guess as 100 dots: how many they think, filled as they slide. It is their
- * number, not ours. Ten by ten, the geometry of the published value's 100 dots (HundredPeople),
- * so the two can be compared by shape (VUXD-07).
- */
-function GuessDots({ guess, label }: { guess: number; label: string }) {
-  return (
-    <div className="mt-3" role="img" aria-label={label}>
-      <div className="grid max-w-[220px] grid-cols-10 gap-[5px]">
-        {Array.from({ length: 100 }, (_, i) => (
-          <span
-            key={i}
-            className={`aspect-square w-full rounded-full motion-safe:transition-colors motion-safe:duration-150 ${i < guess ? 'bg-ink' : 'bg-rule'}`}
-          />
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -157,6 +157,8 @@ function copy(locale: Locale) {
       published: 'Valor publicado',
       people: 'pessoas',
       households: 'agregados',
+      hint: 'Move o cursor para dares o teu palpite; depois, «Ver o valor».',
+      noGuessYet: 'Ainda sem palpite',
       preview: (value: number, unit: string) => `O teu palpite: ${value} em cada 100 ${unit}.`,
       valueText: (value: number, unit: string) => `${value} em cada 100 ${unit}`,
     }
@@ -168,6 +170,8 @@ function copy(locale: Locale) {
       published: 'Published value',
       people: 'people',
       households: 'households',
+      hint: 'Move the slider to make your guess, then “Show the value”.',
+      noGuessYet: 'No guess yet',
       preview: (value: number, unit: string) => `Your guess: ${value} in every 100 ${unit}.`,
       valueText: (value: number, unit: string) => `${value} in every 100 ${unit}`,
     };
