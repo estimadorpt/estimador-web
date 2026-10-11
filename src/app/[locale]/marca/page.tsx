@@ -11,6 +11,7 @@ import { Action } from '@/components/brand/Action';
 import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 import { MarkLoading } from '@/components/brand/MarkLoading';
 import { CONTAINER_CLASS } from '@/components/brand/Container';
+import { RulerEdge } from '@/components/instrument/RulerEdge';
 import { LogoHorizontal, Mark, MarkSmall } from '@/components/Logo';
 import { Disclosure } from '@/components/viz/Disclosure';
 import { ChartTable } from '@/components/viz/ChartTable';
@@ -181,7 +182,7 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
                 [['Tinta sobre branco.', 'Ink on white.'], ['Preto, branco e filetes. A cor pertence aos dados (clubes, partidos, séries); o amarelo pertence à margem do modelo e a mais nada.', 'Black, white and rules. Colour belongs to the data (clubs, parties, series); the yellow belongs to the model’s margin and nothing else.']],
                 [['Datado e com fonte.', 'Dated and sourced.'], ['Datas absolutas, à hora de Lisboa. Cada gráfico tem título, fonte, data, ligação ao método e uma tabela gémea.', 'Absolute dates, in Lisbon time. Every chart has a title, a source, a date, a link to the method and a table twin.']],
                 [['Uma ação por peça.', 'One action per piece.'], ['Um instrumento pede no máximo uma coisa ao leitor: procurar a freguesia, ver o clube, abrir o método.', 'An instrument asks at most one thing of the reader: find the parish, see the club, open the method.']],
-                [['Nada de enfeites.', 'No ornament.'], ['Sem pílulas, etiquetas em maiúsculas espaçadas, pinturas, mosaicos, sombras, cantos redondos, gradientes nem emoji.', 'No pills, letter-spaced uppercase labels, paintings, mosaics, shadows, rounded corners, gradients or emoji.']],
+                [['Nada de enfeites.', 'No ornament.'], ['Sem pílulas, etiquetas em maiúsculas espaçadas, pinturas, mosaicos, sombras, cantos redondos, gradientes nem emoji. A única decoração é a aresta da régua, no cabeçalho e no rodapé.', 'No pills, letter-spaced uppercase labels, paintings, mosaics, shadows, rounded corners, gradients or emoji. The one decoration is the ruler edge, in the header and the footer.']],
               ] as const).map(([title, body], i) => (
                 <li key={i} className="grid grid-cols-[32px_minmax(0,1fr)] border-b border-grid py-3.5">
                   <span className="disp text-[15px]">{i + 1}</span>
@@ -524,6 +525,22 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
                 <div className="mt-4"><IntervalBand lo={72} md={81} hi={90} min={0} max={100} now={24} /></div>
                 <p className="mt-3 text-[12.5px] text-graphite"><ReadingRule locale={locale} variant="short" marks={['now', 'band']} /></p>
                 <p className="mt-1 text-[12.5px] text-graphite">{pt ? 'Fonte: modelo estimador.pt, 50 000 simulações.' : 'Source: estimador.pt model, 50,000 simulations.'} <span className="ml-1">{ex}</span></p>
+              </div>
+            </Part>
+            <Part title={pt ? 'A aresta da régua' : 'The ruler edge'} note={pt
+              ? 'A única decoração: graduações num filete de tinta, alinhadas com a coluna (uma marca fina a cada 8 px, uma mais longa a cada 40 px, uma inteira a tinta a cada 80 px), terminadas sempre numa marca inteira. As marcas apontam para longe do conteúdo, para nunca parecerem a escala de um gráfico: no cabeçalho sobem do filete, só do lado do logótipo, e param antes do menu, longe do sublinhado da secção atual; no rodapé descem do filete de 2 px. Sem números, sem amarelo, escondida em cores forçadas, nunca ao lado de um número.'
+              : 'The one decoration: graduations on an ink rule, aligned to the column (a fine tick every 8px, a longer one every 40px, a full ink one every 80px), always ending on a full tick. The ticks point away from the content, so they never read as a chart’s scale: in the header they rise from the rule, on the logo’s side only, and stop before the menu, clear of the current section’s underline; in the footer they hang from the 2px rule. No numbers, no yellow, hidden in forced colours, never beside a figure.'}>
+              <div className="grid gap-8 md:grid-cols-2">
+                <Specimen name={pt ? 'Cabeçalho' : 'Header'} code={'<RulerEdge direction="up" />'}>
+                  <div className="relative flex h-[60px] items-center border-b border-ink">
+                    <RulerEdge direction="up" className="absolute bottom-0 left-0" />
+                    <LogoHorizontal size={18} />
+                  </div>
+                </Specimen>
+                <Specimen name={pt ? 'Rodapé' : 'Footer'} code={'<RulerEdge direction="down" />'}>
+                  <div className="h-[52px]" aria-hidden="true" />
+                  <div className="border-t-2 border-ink"><RulerEdge direction="down" /></div>
+                </Specimen>
               </div>
             </Part>
           </Chapter>

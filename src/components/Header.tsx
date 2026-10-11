@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { LogoHorizontal } from './Logo';
+import { RulerEdge } from '@/components/instrument/RulerEdge';
 import { useArticleLanguagePath, useHasArticles } from '@/lib/article-navigation';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 import { isExactPath, isNavItemActive, siteNavigation, type NavLabels } from '@/components/brand/site-navigation';
@@ -164,12 +165,18 @@ export function Header() {
         {isPortuguese ? 'Saltar para o conteúdo' : 'Skip to content'}
       </a>
       <div className="max-w-7xl mx-auto flex h-[60px] items-stretch justify-between gap-3 px-4">
-        {/* The name starts with the wordmark it shows (A11Y3-M2). */}
-        <Link href="/" aria-label={isPortuguese ? 'estimador.pt — página inicial' : 'estimador.pt — home'}
-          onClick={closeNavigation} className="brand-link inline-flex min-h-11 shrink-0 items-center self-center">
-          <span className="hidden sm:block" aria-hidden="true"><LogoHorizontal size={22} /></span>
-          <span className="sm:hidden" aria-hidden="true"><LogoHorizontal size={18} /></span>
-        </Link>
+        {/* The logo's side of the bar: the ruler's edge rises from the bar's
+            bottom rule here only, ending a clear margin before the menu, so
+            the current section's underline never meets a tick. */}
+        <div className="relative flex min-w-0 flex-1 items-center">
+          <RulerEdge direction="up" className="absolute bottom-0 left-0 [--ruler-clear:24px]" />
+          {/* The name starts with the wordmark it shows (A11Y3-M2). */}
+          <Link href="/" aria-label={isPortuguese ? 'estimador.pt — página inicial' : 'estimador.pt — home'}
+            onClick={closeNavigation} className="brand-link inline-flex min-h-11 shrink-0 items-center">
+            <span className="hidden sm:block" aria-hidden="true"><LogoHorizontal size={22} /></span>
+            <span className="sm:hidden" aria-hidden="true"><LogoHorizontal size={18} /></span>
+          </Link>
+        </div>
         <div className="flex items-stretch gap-3">
           <nav aria-label={isPortuguese ? 'Navegação principal' : 'Main navigation'} className="hidden lg:flex items-stretch">
             {navigationItems.map(item => item.dropdown ? (

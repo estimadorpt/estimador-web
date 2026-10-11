@@ -2,6 +2,8 @@ import { getTranslations } from 'next-intl/server';
 import { Rss } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { LogoHorizontal } from './Logo';
+import { RulerEdge } from '@/components/instrument/RulerEdge';
+import { CONTAINER_CLASS } from '@/components/brand/Container';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 import { brandDescriptor, brandLine } from '@/lib/brand/descriptor';
@@ -76,7 +78,9 @@ export async function SiteFooter({ locale }: { locale: string }) {
 
   return (
     <footer className="mt-16 border-t-2 border-ink bg-paper">
-      <div className="mx-auto max-w-7xl px-4 py-10">
+      {/* The ruler's edge hangs from the footer's rule, away from the page above. */}
+      <div className={CONTAINER_CLASS}><RulerEdge direction="down" /></div>
+      <div className="mx-auto max-w-7xl px-4 pb-10 pt-[33px]">
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
             <Link href="/" locale={locale} className="brand-link inline-flex min-h-11 items-center" aria-label={pt ? 'estimador.pt — página inicial' : 'estimador.pt — home'}>

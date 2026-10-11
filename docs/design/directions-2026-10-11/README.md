@@ -12,9 +12,10 @@ The owner chose **Instrumento** (finalist 1 below) on 11 October 2026, with four
    in `variants/`); the owner picked "4. Median-slot mark + IBM Plex Sans 700".
 3. **IBM Plex Sans, in one width.** The pick was made from seven type pairings in `type/`; the
    condensed display cut was dropped, so headlines, figures and text share one family.
-4. **One decoration, from the instrument.** A ruler's edge under the header and on the footer's
-   rule was proposed in place of the retired mosaic; it was kept off `main` until the owner
-   decides (commit `47195488`, reverted).
+4. **One decoration, from the instrument.** A ruler's edge in place of the retired mosaic. The
+   owner took it with two changes: the ticks point away from the content (up inside the header,
+   down from the footer's rule), so they never read as a chart's scale, and the header's ruler
+   stops before the menu, clear of the current section's underline.
 
 What shipped, and the rules that hold it, are documented in two places:
 - `/marca`, the design system's reference page, built from the live components;

@@ -2,6 +2,7 @@
 
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { LogoHorizontal } from '@/components/Logo';
+import { RulerEdge } from '@/components/instrument/RulerEdge';
 import type { NavItem } from '@/components/brand/site-navigation';
 
 /** A section address with the locale written out and the export's trailing slash. */
@@ -35,10 +36,14 @@ export function NotFoundHeaderView({ locale, items }: { locale: 'pt' | 'en'; ite
         {pt ? 'Saltar para o conteúdo' : 'Skip to content'}
       </a>
       <div className="mx-auto flex h-[60px] max-w-7xl items-stretch justify-between gap-3 px-4">
-        <a href={`/${locale}/`} className="brand-link inline-flex min-h-11 shrink-0 items-center self-center" aria-label={pt ? 'estimador.pt — página inicial' : 'estimador.pt — home'}>
-          <span className="hidden sm:block" aria-hidden="true"><LogoHorizontal size={22} /></span>
-          <span className="sm:hidden" aria-hidden="true"><LogoHorizontal size={18} /></span>
-        </a>
+        {/* The site header's ruler edge, on the logo's side only, the same way. */}
+        <div className="relative flex min-w-0 flex-1 items-center">
+          <RulerEdge direction="up" className="absolute bottom-0 left-0 [--ruler-clear:24px]" />
+          <a href={`/${locale}/`} className="brand-link inline-flex min-h-11 shrink-0 items-center" aria-label={pt ? 'estimador.pt — página inicial' : 'estimador.pt — home'}>
+            <span className="hidden sm:block" aria-hidden="true"><LogoHorizontal size={22} /></span>
+            <span className="sm:hidden" aria-hidden="true"><LogoHorizontal size={18} /></span>
+          </a>
+        </div>
         <div className="flex items-stretch gap-3">
           <nav aria-label={pt ? 'Navegação principal' : 'Main navigation'} className="hidden items-stretch lg:flex">
             {items.map(item => item.dropdown ? (
