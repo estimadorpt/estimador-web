@@ -168,10 +168,9 @@ the system changes.
   (square tiles) and the downloads from those two files (`wordmark.test.ts` holds them together):
   changing the logo is replacing the two JSON files and running `npm run brand`. Below 24px the
   small mark (`MARK_SMALL`, 32×32). `MarkLoading` cuts its travelling slot with a mask.
-- **The ruler edge** (`RulerEdge`, `.ruler-edge`; a proposal of 11 October 2026 awaiting the
-  owner's call): the site's one decoration, graduations hanging from the ink rule under the
-  header and on the footer's rule, aligned to the content column (8px, 40px, 80px ticks).
-  Decorative, unlabelled, no yellow, hidden in forced colours; never beside a figure.
+- **The ruler edge** (a proposed decoration, 11 October 2026, not shipped; awaiting the owner's
+  call): graduations hanging from the ink rule under the header and on the footer's rule. Its
+  code is commit `47195488` (reverted before the merge to main); `git revert` the revert to add it.
 - **Surfaces and rules**: `bg-paper` (white, the page and every panel; `cream` is a legacy alias
   for it), `bg-field` (`#f4f4f4`, hovers, sunken areas; `parchment` is its alias), `border-rule`
   (`#d9d9d9`, 1px between instruments; `line` is its alias), `border-grid` (`#ececec`, table row
