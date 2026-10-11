@@ -19,7 +19,6 @@ const eslintConfig = [
       // Vendored DuckDB-WASM worker bundles, shipped verbatim.
       "public/duckdb/**",
       "build/**",
-      "api/dist/**",
       "output/**",
       // Agent worktrees (git-ignored checkouts of this repository).
       ".claude/**",

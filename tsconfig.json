@@ -37,7 +37,6 @@
     "out/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "api"
+    "node_modules"
   ]
 }
