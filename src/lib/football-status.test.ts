@@ -41,7 +41,9 @@ describe('forecast status line (audit CL-11, CL-M4)', () => {
 });
 
 describe('a forecast published mid-round (md08: 7 of 9 games played)', () => {
-  const md08 = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data/football/liga-2026-27/md08.json'), 'utf8'));
+  // A frozen copy of md08 as first published mid-round (the live file is
+  // regenerated as the round's last games are played).
+  const md08 = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src/test-fixtures/liga-2026-27/md08.json'), 'utf8'));
   // The two games of round 8 still to play when md08 came out, as the
   // fixture loader hands them to the pages.
   const upcoming = [
