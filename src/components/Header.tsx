@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { LogoHorizontal } from './Logo';
+import { RulerEdge } from '@/components/instrument/RulerEdge';
 import { useArticleLanguagePath, useHasArticles } from '@/lib/article-navigation';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
 import { isExactPath, isNavItemActive, siteNavigation, type NavLabels } from '@/components/brand/site-navigation';
@@ -245,6 +246,7 @@ export function Header() {
           </div>
         </nav>
       </div>
+      <RulerEdge className="absolute inset-x-0 top-full" />
     </header>
   );
 }

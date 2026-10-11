@@ -574,6 +574,20 @@
   .iv > s { position: absolute; z-index: 1; top: 6px; left: calc(var(--now) - 4px); width: 8px; height: 8px; background: var(--color-ink); box-shadow: 0 0 0 1px var(--color-paper); text-decoration: none; }
   .iv > u { position: absolute; z-index: 1; top: 5px; left: calc(var(--res) - 5px); width: 10px; height: 10px; background: var(--color-ink); text-decoration: none; }
   .iv > .iv-ref { position: absolute; top: 0; bottom: 0; left: var(--ref); border-left: 1px dashed var(--color-ink); }
+  /* The ruler edge (RulerEdge): graduations hanging from a rule, drawn with
+     hard-stop stripes, so no image and no script. Hidden in forced colours,
+     where it would only add noise. */
+  .ruler-edge {
+    background-image:
+      repeating-linear-gradient(to right, var(--color-ink) 0 1px, transparent 1px 80px),
+      repeating-linear-gradient(to right, var(--color-scale) 0 1px, transparent 1px 40px),
+      repeating-linear-gradient(to right, var(--color-scale) 0 1px, transparent 1px 8px);
+    background-size: 100% 7px, 100% 5px, 100% 3px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+  }
+  @media (forced-colors: active) { .ruler-edge { display: none; } }
+
   /* The empty instrument (EmptyStateMark): CanvasText in forced colours. */
   @media (forced-colors: active) {
     .empty-mark rect { fill: CanvasText; }
