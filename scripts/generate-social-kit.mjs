@@ -1,24 +1,21 @@
 #!/usr/bin/env node
 /**
  * The social kit: profile avatars, banners, covers and post templates, built
- * from the same renderer as the Open Graph cards so a timeline shows one
- * publication. Copy lives here with the OG copy for the same reason: no page
- * ever renders it.
+ * from the same renderer and the same pieces as the Open Graph cards
+ * (scripts/lib/og-cards.mjs), so a timeline shows one publication. Copy lives
+ * here with the OG copy for the same reason: no page ever renders it.
  *
  *   node scripts/generate-social-kit.mjs
  *
- * Playful register: these are entrances, so the mosaic gets room. On paper
- * it uses the surface pastels; on forest the data pastels, which need the
- * extra chroma to read on a dark ground.
+ * The instrument's grammar: ink on white (or white on ink for the dark
+ * versions), the logo, the line, the descriptor, and the reading rule, the
+ * three marks the whole site is read by. No mosaic, no one's name.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { h, svg, renderCard, ROOT_DIR, COLOR } from './lib/og-render.mjs';
-import { mosaic as coverMosaic } from './lib/og-cards.mjs';
-
-const geometry = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'src', 'lib', 'brand', 'geometry.json'), 'utf8'));
-const MARK_D = [geometry.MARK_LEFT, geometry.MARK_BAND, geometry.MARK_RIGHT].join(' ');
+import { h, svg, renderCard, ROOT_DIR, FONT_FAMILY } from './lib/og-render.mjs';
+import { logo, readingKey, tones, MARK_SMALL_D } from './lib/og-cards.mjs';
 
 // The line and the descriptor are written once, in src/lib/brand/descriptor.json,
 // and read here the same way the app imports them (descriptor.test.ts holds it).
@@ -29,89 +26,75 @@ const COPY = {
   url: 'estimador.pt',
 };
 
-function mark(height, color) {
-  return svg('svg', { width: height * 2, height, viewBox: '0 0 48 24' }, svg('path', { d: MARK_D, fill: color }));
-}
-
-function lockup(size, dark) {
-  const ink = dark ? COLOR.ground : COLOR.ink, muted = dark ? '#b7c2b9' : COLOR.muted;
-  return h('div', { display: 'flex', alignItems: 'center' },
-    mark(size, ink),
-    h('div', { display: 'flex', marginLeft: Math.round(size * 0.42), fontSize: Math.round(size * 1.1), fontWeight: 800, color: ink, letterSpacing: -Math.round(size * 0.04) },
-      h('div', {}, 'estimador'), h('div', { color: muted }, '.pt')));
-}
-
-/**
- * Four blocks in the site's vocabulary: a share, a person, a place, a share.
- * The OG cards' drawing (scripts/lib/og-cards.mjs), which is `<Mosaic
- * variant="cover">`; on forest, its data-pastel version.
- */
-function mosaic(size, dark) {
-  return coverMosaic(size, { dark });
-}
-
 function ground(width, height, dark, children, style = {}) {
-  return h('div', { width, height, display: 'flex', backgroundColor: dark ? COLOR.forest : COLOR.ground, fontFamily: 'Manrope', ...style }, ...children);
+  const t = tones(dark);
+  return h('div', { width, height, display: 'flex', backgroundColor: t.ground, color: t.ink, fontFamily: FONT_FAMILY, ...style }, ...children);
 }
 
-const text = (dark) => ({ ink: dark ? COLOR.ground : COLOR.ink, muted: dark ? '#b7c2b9' : COLOR.muted });
+const line = (size, dark, style = {}) => h('div', { fontSize: size, fontWeight: 700, color: tones(dark).ink, letterSpacing: -size * 0.025, lineHeight: 1.04, ...style }, COPY.tagline);
+const descriptor = (size, dark, style = {}) => h('div', { fontSize: size, color: tones(dark).muted, lineHeight: 1.38, ...style }, COPY.descriptor);
+const key = (size, dark, direction = 'column') => readingKey(['now', 'band', 'tick'], 'pt', { fontSize: size, dark, direction, gap: Math.round(size * (direction === 'column' ? 0.9 : 1.4)) });
 
 /** X and Bluesky header. The avatar overlaps the bottom-left, so the copy sits high and starts past it. */
 function banner(width, height, dark) {
-  const t = text(dark);
   return ground(width, height, dark, [
     h('div', { display: 'flex', flexDirection: 'column', justifyContent: 'center', flexGrow: 1, padding: `0 0 ${Math.round(height * 0.14)}px ${Math.round(width * 0.06)}px` },
-      lockup(Math.round(height * 0.11), dark),
-      h('div', { fontSize: Math.round(height * 0.105), fontWeight: 800, color: t.ink, letterSpacing: -2, lineHeight: 1.05, marginTop: Math.round(height * 0.07), maxWidth: width * 0.56 }, COPY.tagline),
-      h('div', { fontSize: Math.round(height * 0.05), color: t.muted, marginTop: Math.round(height * 0.04), maxWidth: width * 0.52, lineHeight: 1.35 }, COPY.descriptor)),
-    h('div', { display: 'flex', alignItems: 'center', paddingRight: Math.round(width * 0.06) }, mosaic(Math.round(height * 0.68), dark)),
+      logo(Math.round(height * 0.085), { dark }),
+      line(Math.round(height * 0.12), dark, { marginTop: Math.round(height * 0.07), maxWidth: width * 0.56 }),
+      descriptor(Math.round(height * 0.05), dark, { marginTop: Math.round(height * 0.04), maxWidth: width * 0.5 })),
+    h('div', { display: 'flex', alignItems: 'center', paddingRight: Math.round(width * 0.06), paddingBottom: Math.round(height * 0.08) }, key(Math.round(height * 0.05), dark)),
   ]);
 }
 
-/** LinkedIn cover: the profile photo covers the bottom-left corner, so nothing lives there. */
+/**
+ * LinkedIn cover: the profile photo covers the bottom-left corner, so nothing
+ * lives there; too shallow for the reading rule beside the line, so the cover
+ * carries the line and the descriptor only.
+ */
 function cover(width, height, dark) {
-  const t = text(dark);
   return ground(width, height, dark, [
-    h('div', { display: 'flex', flexDirection: 'column', justifyContent: 'center', flexGrow: 1, padding: `0 0 ${Math.round(height * 0.12)}px ${Math.round(width * 0.27)}px` },
-      lockup(Math.round(height * 0.12), dark),
-      h('div', { fontSize: Math.round(height * 0.11), fontWeight: 800, color: t.ink, letterSpacing: -2, lineHeight: 1.05, marginTop: Math.round(height * 0.07) }, COPY.tagline),
-      h('div', { fontSize: Math.round(height * 0.052), color: t.muted, marginTop: Math.round(height * 0.035), maxWidth: width * 0.42, lineHeight: 1.35 }, COPY.descriptor)),
-    h('div', { display: 'flex', alignItems: 'center', paddingRight: Math.round(width * 0.05) }, mosaic(Math.round(height * 0.7), dark)),
+    h('div', { display: 'flex', flexDirection: 'column', justifyContent: 'center', flexGrow: 1, padding: `0 ${Math.round(width * 0.06)}px ${Math.round(height * 0.1)}px ${Math.round(width * 0.27)}px` },
+      logo(Math.round(height * 0.09), { dark }),
+      line(Math.round(height * 0.13), dark, { marginTop: Math.round(height * 0.07) }),
+      descriptor(Math.round(height * 0.05), dark, { marginTop: Math.round(height * 0.035), maxWidth: width * 0.5 })),
   ]);
 }
 
-/** Square post: the announcement template. Headline copy is the tagline unless a headline is passed. */
+/** Square post: the announcement template. Headline copy is the line unless a headline is passed. */
 function post(size, dark, headline = COPY.tagline, standfirst = COPY.descriptor) {
-  const t = text(dark), pad = Math.round(size * 0.075);
+  const t = tones(dark), pad = Math.round(size * 0.075);
   return ground(size, size, dark, [
-    h('div', { display: 'flex', flexDirection: 'column', width: '100%', padding: pad },
-      h('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'center' }, lockup(Math.round(size * 0.04), dark), h('div', { fontSize: Math.round(size * 0.024), color: t.muted }, COPY.url)),
-      h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center', paddingTop: Math.round(size * 0.05) },
-        h('div', { fontSize: Math.round(size * 0.085), fontWeight: 800, color: t.ink, letterSpacing: -3, lineHeight: 1.05, maxWidth: size * 0.8 }, headline),
-        h('div', { fontSize: Math.round(size * 0.032), color: t.muted, marginTop: Math.round(size * 0.035), maxWidth: size * 0.72, lineHeight: 1.4 }, standfirst)),
-      h('div', { display: 'flex', justifyContent: 'flex-end' }, mosaic(Math.round(size * 0.3), dark))),
+    h('div', { display: 'flex', flexDirection: 'column', width: '100%', height: '100%', padding: pad },
+      h('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'center' }, logo(Math.round(size * 0.032), { dark }), h('div', { fontSize: Math.round(size * 0.022), color: t.muted }, COPY.url)),
+      h('div', { height: 2, backgroundColor: t.ink, marginTop: Math.round(size * 0.025) }),
+      h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center', paddingBottom: Math.round(size * 0.04) },
+        h('div', { fontSize: Math.round(size * 0.08), fontWeight: 700, color: t.ink, letterSpacing: -Math.round(size * 0.002), lineHeight: 1.04, maxWidth: size * 0.82 }, headline),
+        h('div', { fontSize: Math.round(size * 0.03), color: t.muted, marginTop: Math.round(size * 0.035), maxWidth: size * 0.74, lineHeight: 1.4 }, standfirst)),
+      h('div', { height: 1, backgroundColor: t.ink, marginBottom: Math.round(size * 0.025) }),
+      key(Math.round(size * 0.022), dark)),
   ], { flexDirection: 'column' });
 }
 
-/** Story: mosaic on top, the message in the middle, the address at the bottom. */
+/** Story: the message in the upper middle, the reading rule below it, the address at the bottom. */
 function story(width, height, dark) {
-  const t = text(dark), pad = Math.round(width * 0.09);
+  const t = tones(dark), pad = Math.round(width * 0.09);
   return ground(width, height, dark, [
-    h('div', { display: 'flex', flexDirection: 'column', width: '100%', height: '100%', padding: `${Math.round(height * 0.12)}px ${pad}px ${Math.round(height * 0.1)}px` },
-      h('div', { display: 'flex', justifyContent: 'center' }, mosaic(Math.round(width * 0.56), dark)),
+    h('div', { display: 'flex', flexDirection: 'column', width: '100%', height: '100%', padding: `${Math.round(height * 0.1)}px ${pad}px ${Math.round(height * 0.08)}px` },
+      logo(Math.round(width * 0.055), { dark }),
       h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center' },
-        lockup(Math.round(width * 0.05), dark),
-        h('div', { fontSize: Math.round(width * 0.085), fontWeight: 800, color: t.ink, letterSpacing: -3, lineHeight: 1.05, marginTop: Math.round(width * 0.06) }, COPY.tagline),
-        h('div', { fontSize: Math.round(width * 0.036), color: t.muted, marginTop: Math.round(width * 0.04), lineHeight: 1.4 }, COPY.descriptor)),
-      h('div', { fontSize: Math.round(width * 0.03), fontWeight: 700, color: t.ink }, COPY.url)),
+        line(Math.round(width * 0.105), dark),
+        descriptor(Math.round(width * 0.038), dark, { marginTop: Math.round(width * 0.045) }),
+        h('div', { height: 2, backgroundColor: t.ink, marginTop: Math.round(width * 0.09), marginBottom: Math.round(width * 0.05) }),
+        key(Math.round(width * 0.036), dark)),
+      h('div', { fontSize: Math.round(width * 0.034), fontWeight: 700, color: t.ink }, COPY.url)),
   ]);
 }
 
-/** Avatar: the compact mark on a tile, the same drawing as the app icon. */
+/** Avatar: the compact mark on a square tile, the same drawing as the app icon. */
 function avatar(size, dark) {
-  const tile = dark ? COLOR.forest : COLOR.ground, ink = dark ? COLOR.ground : COLOR.ink;
-  return h('div', { width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: tile },
-    svg('svg', { width: size * 0.78, height: size * 0.78, viewBox: '0 0 32 32' }, svg('path', { d: geometry.MARK_SMALL, fill: ink })));
+  const t = tones(dark);
+  return h('div', { width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: t.ground },
+    svg('svg', { width: size * 0.78, height: size * 0.78, viewBox: '0 0 32 32' }, svg('path', { d: MARK_SMALL_D, fill: t.ink })));
 }
 
 const OUT = [

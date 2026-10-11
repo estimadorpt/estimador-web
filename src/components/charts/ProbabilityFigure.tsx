@@ -2,7 +2,7 @@ import { electionProbabilityParts } from '@/lib/election-display';
 
 /**
  * A headline probability. Bounded values ("mais de 99%", "menos de 1%") set
- * the bound as small text before the number: in Manrope 800 a bare ">" or "<"
+ * the bound as small text before the number: in IBM Plex Sans 700 a bare ">" or "<"
  * reads as a chevron. No hooks, so server and client components share it.
  */
 export function ProbabilityFigure({ probability, locale, className = '' }: { probability: number; locale: string; className?: string }) {

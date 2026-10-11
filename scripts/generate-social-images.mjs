@@ -14,19 +14,12 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { h, rule, renderCard, ROOT_DIR, COLOR } from './lib/og-render.mjs';
-import { shell, badge, eyebrow, rankedRow, CARD_WIDTH } from './lib/og-cards.mjs';
-import { teamName, teamColor } from './lib/football-brand.mjs';
+import { h, renderCard, ROOT_DIR, COLOR, formatPercent, formatCount, formatReadingTime } from './lib/og-render.mjs';
+import { shell, headline, probBar, label, CARD_WIDTH } from './lib/og-cards.mjs';
+import { teamName, teamColor, titleFinding, titleSeasons } from './lib/football-brand.mjs';
 
 const CARD_HEIGHT = 675;
-const CONTENDER_THRESHOLD = 0.001;
-
-/** Movement worth colouring. Below this, a swing is model noise between rounds. */
-const MEANINGFUL_SWING_PP = 1;
-// The deltas are text: the text-strength green (--color-positive, BRAND.tree),
-// not #4e8056 (4.16:1 on paper; audit A11Y2-08).
-const UP = '#377455';
-const DOWN = '#a3543a';
+const CONTENDER_THRESHOLD = 0.0005;
 
 function seasonDir() {
   const footballDir = path.join(ROOT_DIR, 'public', 'data', 'football');
@@ -47,76 +40,70 @@ function availableMatchdays(dir) {
     .sort((a, b) => a - b);
 }
 
+/** A change in percentage points, signed with U+2212 as the site prints it. */
 function formatPp(delta) {
-  return `${delta >= 0 ? '+' : '−'}${Math.abs(delta).toFixed(1).replace('.', ',')}pp`;
-}
-
-function formatPct(value) {
-  return `${(value * 100).toFixed(1).replace('.', ',')}%`;
+  return `${delta >= 0 ? '+' : '\u2212'}${Math.abs(delta).toFixed(1).replace('.', ',')} pp`;
 }
 
 /**
- * The headline is the reason to post at all: what moved this round. With no
- * previous file to compare against, it falls back to stating the position.
+ * The matchday post: the finding as the headline (the homepage's words), the
+ * count behind it, and the contenders' title shares as ink bars on a 0–100
+ * ruler with their change since the previous forecast. Changes are words in
+ * graphite with their sign; colour belongs to the clubs' swatches.
  */
-function headlineFor(leader) {
-  const rounded = Math.round(leader.pct);
-  if (leader.delta !== null && leader.delta > 2) return `${leader.name} sobe para ${rounded}% pelo título`;
-  if (leader.delta !== null && leader.delta < -2) return `${leader.name} desce para ${rounded}% pelo título`;
-  return `${leader.name} a ${rounded}% pelo título`;
-}
-
 function buildCard(current, previous, scenarios) {
   const standings = Object.fromEntries((current.actual_standings ?? []).map(row => [row.team, row]));
   const previousTable = Object.fromEntries((previous?.table ?? []).map(row => [row.team, row]));
 
   const contenders = current.table
-    .filter(team => team.p_champion > CONTENDER_THRESHOLD)
+    .filter(team => team.p_champion >= CONTENDER_THRESHOLD)
     .sort((a, b) => b.p_champion - a.p_champion)
     .slice(0, 5)
     .map(team => {
       const before = previousTable[team.team];
       const played = standings[team.team];
       return {
+        team: team.team,
         name: teamName(team.team),
         probability: team.p_champion,
-        pct: team.p_champion * 100,
         delta: before ? (team.p_champion - before.p_champion) * 100 : null,
         color: teamColor(team.team),
-        note: played ? `${played.points} pts · ${played.played}J` : null,
+        note: played ? `${played.points} pontos em ${played.played} jogos` : null,
       };
     });
 
   const leader = contenders[0];
+  const seasons = titleSeasons(leader.team, leader.probability, current.n_sims, scenarios?.victory_paths);
   const decisive = scenarios?.decisive_matches?.[0];
+  const when = formatReadingTime(current.timestamp, 'pt');
 
   return shell({
     height: CARD_HEIGHT,
-    headerRight: badge(`Jornada ${current.matchday} · ${current.season}`),
+    head: { title: 'Liga Portugal', serial: `J${current.matchday}`, aside: when ? `previsão de ${when}` : current.season },
     footerLeft: decisive
-      ? `Jogo decisivo: ${teamName(decisive.home_team)} vs ${teamName(decisive.away_team)} (J${decisive.matchday})`
+      ? `Jogo decisivo: ${teamName(decisive.home_team)} \u2013 ${teamName(decisive.away_team)} (J${decisive.matchday}), ${(decisive.title_swing * 100).toFixed(1).replace('.', ',')} pp no título`
       : `Liga Portugal ${current.season}`,
-    footerRight: decisive ? `${(decisive.title_swing * 100).toFixed(1).replace('.', ',')}pp de oscilação` : 'estimador.pt',
+    footerRight: 'estimador.pt/pt/desporto/liga',
   },
-    h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, paddingTop: 28, paddingBottom: 24 },
-      h('div', { fontSize: 52, fontWeight: 700, color: COLOR.ink, letterSpacing: -1.2, lineHeight: 1.1 }, headlineFor(leader)),
-      // Centred in whatever is left: the contender list is four rows in
-      // September and two in April, and a table pinned to the top leaves the
-      // card looking unfinished once the race narrows.
-      h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center' },
-        eyebrow('Probabilidade de título', COLOR.muted, { marginTop: 22 }),
-        rule(COLOR.ink, { marginTop: 10 }),
-        ...contenders.map((team, index) => rankedRow({
-          name: team.name,
-          note: team.note,
-          value: formatPct(team.probability),
-          fraction: team.probability / leader.probability,
-          color: team.color,
-          trailing: team.delta === null ? null : {
-            text: formatPp(team.delta),
-            color: Math.abs(team.delta) < MEANINGFUL_SWING_PP ? COLOR.muted : (team.delta > 0 ? UP : DOWN),
-          },
-        }, index === 0)))));
+    h('div', { display: 'flex', flexDirection: 'column', marginTop: 20 },
+      headline(titleFinding(leader.team, leader.probability, 'pt'), { lines: 2, size: 50 }),
+      current.n_sims ? label(`Em ${formatCount(seasons)} de ${formatCount(current.n_sims)} épocas simuladas.`, { fontSize: 21, marginTop: 8 }) : null),
+    // Centred in whatever is left: the contender list is five rows in
+    // September and two in April.
+    h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center', paddingTop: 10, paddingBottom: 14 },
+      h('div', { display: 'flex', justifyContent: 'space-between', borderBottom: `2px solid ${COLOR.ink}`, paddingBottom: 6 },
+        label('Probabilidade de título, em 0–100%', { fontSize: 16 }),
+        label('Desde a previsão anterior', { fontSize: 16 })),
+      ...contenders.map(team => h('div', { display: 'flex', alignItems: 'center', height: 50, borderBottom: `1px solid ${COLOR.grid}` },
+        h('div', { display: 'flex', alignItems: 'center', width: 380 },
+          h('div', { width: 14, height: 14, backgroundColor: team.color, marginRight: 12 }),
+          h('div', { fontSize: 25, fontWeight: 600 }, team.name),
+          team.note ? label(team.note, { fontSize: 16, marginLeft: 12 }) : null),
+        h('div', { display: 'flex', width: 120, justifyContent: 'flex-end', alignItems: 'baseline', paddingRight: 24 },
+          h('div', { fontSize: 28, fontWeight: 700 }, formatPercent(team.probability)),
+          h('div', { fontSize: 16, fontWeight: 600, marginLeft: 2 }, '%')),
+        h('div', { display: 'flex', width: 360 }, probBar(team.probability, { width: 360 })),
+        h('div', { display: 'flex', flexGrow: 1, justifyContent: 'flex-end', fontSize: 19, color: COLOR.muted }, team.delta === null ? '' : formatPp(team.delta))))));
 }
 
 async function main() {

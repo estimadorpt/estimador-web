@@ -1,131 +1,196 @@
 /**
- * The card designs themselves.
+ * The card designs, in the site's instrument grammar.
  *
- * Every card is the same object the site's pages are: an off-white stone
- * ground, a hairline masthead, one thing said loudly, and a dated footer. A
- * card that looks like a different product than the page it links to is a card
- * the reader does not trust, which is why there are no gradients here: the
- * ink, the paper and, on editorial covers only, the four surface pastels.
+ * A card is the page it links to, read at a glance: ink on white, the logo,
+ * the instrument's name and the reading's date over an ink rule, the finding
+ * as the headline, the figures with their marks, and a footer with the key to
+ * the marks and the address. The three marks mean what they mean on the site:
+ * a black square is what already happened, a yellow band between ink caps
+ * with a median tick is the model's margin (90%), a lone tick on a short ruler
+ * is one model run with no margin. No pills, no uppercase kickers, no mosaic,
+ * and never the owner's name.
  */
 
 import { readFileSync } from 'node:fs';
-import { h, svg, rule, COLOR } from './og-render.mjs';
+import { h, svg, rule, COLOR, FONT_FAMILY } from './og-render.mjs';
 
 export const CARD_WIDTH = 1200;
 export const CARD_HEIGHT = 630;
-const PAD = 64;
-const ASIDE_WIDTH = 400;
+const PAD_X = 64;
 
-/** The mark: the site's credible interval, one colour, at card scale. */
 const geometry = JSON.parse(readFileSync(new URL('../../src/lib/brand/geometry.json', import.meta.url), 'utf8'));
-const MARK_D = [geometry.MARK_LEFT, geometry.MARK_BAND, geometry.MARK_RIGHT].join(' ');
-function mark(height = 28, color = COLOR.ink) {
+const wordmark = JSON.parse(readFileSync(new URL('../../src/lib/brand/wordmark-paths.json', import.meta.url), 'utf8'));
+export const MARK_D = [geometry.MARK_LEFT, geometry.MARK_BAND, geometry.MARK_RIGHT].join(' ');
+export const MARK_SMALL_D = geometry.MARK_SMALL;
+
+/** Ink and secondary colours for a ground: white by default, ink for the dark social kit. */
+export function tones(dark = false) {
+  return dark
+    ? { ground: COLOR.inkGround, ink: COLOR.onInk, muted: COLOR.onInkMuted, rule: COLOR.onInkRule, grid: COLOR.onInkRule }
+    : { ground: COLOR.ground, ink: COLOR.ink, muted: COLOR.muted, rule: COLOR.rule, grid: COLOR.grid };
+}
+
+/** The mark alone, in its 48×24 box. */
+export function mark(height = 24, color = COLOR.ink) {
   return svg('svg', { width: height * 2, height, viewBox: '0 0 48 24' }, svg('path', { d: MARK_D, fill: color }));
 }
 
-/** A thin ink rule where the old three-colour band was: the card is ours by its mark, not by stripes. */
-function brandBand() {
-  return h('div', { display: 'flex', height: 6, width: '100%', backgroundColor: COLOR.ink });
+/**
+ * The signature as published (public/brand/estimador-logo.svg): the mark and
+ * the outlined wordmark from src/lib/brand, so a card never depends on a font
+ * to spell the name.
+ */
+export function logo(height = 30, { dark = false } = {}) {
+  const t = tones(dark);
+  const W = wordmark.WORDMARK_WIDTH, H = wordmark.WORDMARK_HEIGHT;
+  return svg('svg', { width: Math.round((height * W) / H), height, viewBox: `0 0 ${W} ${H}` },
+    svg('path', { d: MARK_D, fill: t.ink }),
+    svg('g', { transform: `translate(${wordmark.WORDMARK_X} ${wordmark.WORDMARK_BASELINE})` },
+      svg('path', { d: wordmark.WORDMARK_NAME, fill: t.ink }),
+      svg('path', { d: wordmark.WORDMARK_TLD, fill: t.muted })));
 }
 
-function logotype() {
-  return h('div', { display: 'flex', alignItems: 'center' },
-    mark(26, COLOR.ink),
-    h('div', { display: 'flex', marginLeft: 12, fontSize: 29, fontWeight: 800, color: COLOR.ink, letterSpacing: -1 },
-      h('div', {}, 'estimador'),
-      h('div', { color: COLOR.muted }, '.pt')));
+/* --------------------------------------------------------------- marks ---- */
+
+/** What already happened: a black square. */
+export function nowGlyph(size = 14, { dark = false } = {}) {
+  return h('div', { width: size, height: size, backgroundColor: tones(dark).ink, flexShrink: 0 });
+}
+
+/** The model's margin: the yellow band between thin caps, with its median tick. */
+export function bandGlyph(width = 44, height = 20, { dark = false } = {}) {
+  const ink = tones(dark).ink, band = Math.round(height * 0.5), top = (height - band) / 2;
+  return svg('svg', { width, height, viewBox: `0 0 ${width} ${height}` },
+    svg('rect', { x: 1, y: top, width: width - 2, height: band, fill: COLOR.signal }),
+    svg('rect', { x: 0, y: height * 0.1, width: 1.5, height: height * 0.8, fill: ink }),
+    svg('rect', { x: width - 1.5, y: height * 0.1, width: 1.5, height: height * 0.8, fill: ink }),
+    svg('rect', { x: width / 2 - 1.25, y: 0, width: 2.5, height, fill: ink }));
+}
+
+/** One model run, no margin: a lone tick on a short ruler. */
+export function tickGlyph(width = 34, height = 20, { dark = false } = {}) {
+  const ink = tones(dark).ink, base = height * 0.72;
+  return svg('svg', { width, height, viewBox: `0 0 ${width} ${height}` },
+    svg('rect', { x: 0, y: base, width, height: 1.5, fill: ink }),
+    svg('rect', { x: 0, y: base - height * 0.2, width: 1.5, height: height * 0.22, fill: ink }),
+    svg('rect', { x: width - 1.5, y: base - height * 0.2, width: 1.5, height: height * 0.22, fill: ink }),
+    svg('rect', { x: width / 2 - 1.25, y: 0, width: 2.5, height: base + 1.5, fill: ink }));
+}
+
+const RULE_WORDS = {
+  pt: { now: 'o que já aconteceu', band: 'a margem do modelo, 90%', tick: 'uma corrida do modelo, sem margem' },
+  en: { now: 'what has already happened', band: 'the model’s margin, 90%', tick: 'one model run, no margin' },
+};
+
+/**
+ * The reading rule as a key: the marks a card uses, each with its words. The
+ * Liga card says "points today" for the square, so its words can be passed.
+ */
+export function readingKey(marks, locale = 'pt', { fontSize = 19, dark = false, words = {}, direction = 'row', gap = 30 } = {}) {
+  const t = tones(dark), w = { ...(RULE_WORDS[locale] ?? RULE_WORDS.pt), ...words };
+  const glyph = { now: () => nowGlyph(Math.round(fontSize * 0.7), { dark }), band: () => bandGlyph(Math.round(fontSize * 2.2), Math.round(fontSize * 1.05), { dark }), tick: () => tickGlyph(Math.round(fontSize * 1.7), Math.round(fontSize * 1.05), { dark }) };
+  return h('div', { display: 'flex', flexDirection: direction, alignItems: direction === 'row' ? 'center' : 'flex-start' },
+    ...marks.map((m, i) => h('div', {
+      display: 'flex', alignItems: 'center',
+      [direction === 'row' ? 'marginLeft' : 'marginTop']: i === 0 ? 0 : gap,
+    },
+      glyph[m](),
+      h('div', { fontSize, color: t.muted, marginLeft: Math.round(fontSize * 0.55) }, w[m]))));
 }
 
 /**
- * The mosaic: four surface pastels in the site's small vocabulary (a quarter
- * circle is a share, a circle a person, a block a place). Only on the brand
- * card and on explainer covers; never beside a number.
- *
- * The same drawing as `<Mosaic variant="cover">` (src/components/brand/Mosaic.tsx),
- * in its 200-unit box: four 98-unit cells with 4-unit gutters; the top-left and
- * bottom-right cells are quarter circles whose right angle sits at the cell's
- * top-left corner, so both arcs face the bottom-right; the top-right block
- * holds a 48-unit circle of the ground. `dark` is the forest version the
- * social kit uses: the data pastels, which need the chroma on a dark ground,
- * around a forest window.
+ * An interval on its row's own scale, as the site draws it (.iv in
+ * globals.css): a grid line, the band from lo to hi between ink caps, the
+ * median tick, and the square of what already happened.
  */
-export const PASTEL = { mint: '#72c8b4', mustard: '#e5b958', coral: '#e29a83', periwinkle: '#a9b9ed' };
-export function mosaic(size = 260, { dark = false } = {}) {
-  const unit = size / 200, cell = 98 * unit, gutter = 4 * unit;
-  const [a, b, c, d] = dark
-    ? [PASTEL.mint, PASTEL.mustard, PASTEL.coral, PASTEL.periwinkle]
-    : [COLOR.mintSoft, COLOR.mustardSoft, COLOR.coralSoft, COLOR.periwinkleSoft];
-  const window = dark ? COLOR.forest : COLOR.ground;
-  const block = (backgroundColor, style = {}, child = null) => h('div', { width: cell, height: cell, backgroundColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, ...style }, child);
-  const quarter = (backgroundColor, style = {}) => block(backgroundColor, { borderBottomRightRadius: cell, ...style });
-  return h('div', { display: 'flex', flexDirection: 'column', width: size, height: size, flexShrink: 0 },
-    h('div', { display: 'flex' },
-      quarter(a),
-      block(b, { marginLeft: gutter }, h('div', { width: 48 * unit, height: 48 * unit, borderRadius: 999, backgroundColor: window }))),
-    h('div', { display: 'flex', marginTop: gutter },
-      block(c),
-      quarter(d, { marginLeft: gutter })));
+export function intervalBand({ lo, md, hi, min = 0, max = 100, now = null, width = 420, height = 26, low = false }) {
+  const x = v => ((Math.min(max, Math.max(min, v)) - min) / (max - min)) * width;
+  const mid = height / 2, band = 10;
+  return svg('svg', { width, height, viewBox: `0 0 ${width} ${height}` },
+    svg('rect', { x: 0, y: mid - 0.5, width, height: 1, fill: COLOR.grid }),
+    svg('rect', { x: x(lo), y: mid - band / 2, width: Math.max(3, x(hi) - x(lo)), height: band, fill: low ? COLOR.signalLow : COLOR.signal }),
+    svg('rect', { x: x(lo) - 0.75, y: mid - 8, width: 1.5, height: 16, fill: COLOR.ink }),
+    svg('rect', { x: x(hi) - 0.75, y: mid - 8, width: 1.5, height: 16, fill: COLOR.ink }),
+    svg('rect', { x: x(md) - 1.25, y: mid - 10, width: 2.5, height: 20, fill: COLOR.ink }),
+    now == null ? null : svg('rect', { x: x(now) - 6, y: mid - 6, width: 12, height: 12, fill: COLOR.ink, stroke: COLOR.paper, strokeWidth: 1.5 }));
 }
 
-/** The uppercase tracked micro-label the site uses above every section. */
-export function eyebrow(text, color = COLOR.faint, style = {}) {
-  return h('div', {
-    fontSize: 15, fontWeight: 700, color, textTransform: 'uppercase',
-    letterSpacing: 2.2, ...style,
-  }, text);
+/** The scale printed above a column of bands: same min and max as the bands below it. */
+export function ruler({ min = 0, max = 100, ticks = [0, 25, 50, 75, 100], width = 420, fontSize = 15 }) {
+  const x = v => ((v - min) / (max - min)) * width;
+  return h('div', { display: 'flex', flexDirection: 'column', width },
+    h('div', { display: 'flex', position: 'relative', height: fontSize + 4, width },
+      ...ticks.map((v, i) => {
+        const place = i === 0 ? { left: 0 } : i === ticks.length - 1 ? { right: 0 } : { left: x(v) - 20, width: 40, justifyContent: 'center' };
+        return h('div', { position: 'absolute', top: 0, display: 'flex', fontSize, color: COLOR.muted, ...place }, String(v));
+      })),
+    svg('svg', { width, height: 8, viewBox: `0 0 ${width} 8` },
+      svg('rect', { x: 0, y: 7, width, height: 1, fill: COLOR.scale }),
+      ...ticks.map(v => svg('rect', { x: Math.min(width - 1, Math.max(0, x(v) - 0.5)), y: 2, width: 1, height: 6, fill: COLOR.scale }))));
 }
 
-/** A solid square-cornered tag — the register badge and the section label. */
-export function badge(text, backgroundColor = COLOR.ink) {
-  return h('div', {
-    display: 'flex', backgroundColor, color: COLOR.paper, padding: '8px 14px 9px',
-    fontSize: 15, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2.2,
-  }, text);
+/** An ink bar on a 0–100 ruler, no grey track (ProbBar). */
+export function probBar(p, { width = 260, height = 12 } = {}) {
+  return svg('svg', { width, height: height + 6, viewBox: `0 0 ${width} ${height + 6}` },
+    svg('rect', { x: 0, y: 0, width: Math.max(2, p * width), height, fill: COLOR.ink }),
+    svg('rect', { x: 0, y: height + 5, width, height: 1, fill: COLOR.scale }),
+    ...[0, 0.25, 0.5, 0.75, 1].map(v => svg('rect', { x: Math.min(width - 1, v * width), y: height + 2, width: 1, height: 4, fill: COLOR.scale })));
+}
+
+/* --------------------------------------------------------------- chrome --- */
+
+/**
+ * An instrument's head: its name in bold, an optional serial ("J8",
+ * "v1.0.3"), the reading's date on the right, over an ink rule (ChannelHead).
+ */
+export function channelHead({ title, serial, aside, dark = false, fontSize = 26 }) {
+  const t = tones(dark);
+  return h('div', { display: 'flex', flexDirection: 'column' },
+    h('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' },
+      h('div', { display: 'flex', alignItems: 'baseline' },
+        h('div', { fontSize, fontWeight: 700, color: t.ink, letterSpacing: -0.3 }, title),
+        serial ? h('div', { fontSize: Math.round(fontSize * 0.7), fontWeight: 600, color: t.ink, marginLeft: 12 }, serial) : null),
+      aside ? h('div', { fontSize: Math.round(fontSize * 0.74), color: t.muted }, aside) : h('div', {})),
+    rule(t.ink, { marginTop: 10, height: 2 }));
+}
+
+/** A label in sentence case: 12px graphite on the site, scaled for a card. */
+export function label(text, style = {}) {
+  return h('div', { fontSize: 18, color: COLOR.muted, ...style }, text);
 }
 
 function footer(left, right) {
   return h('div', { display: 'flex', flexDirection: 'column' },
-    rule(COLOR.rule),
-    h('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 18 },
-      h('div', { fontSize: 20, color: COLOR.muted }, left),
-      right ? h('div', { fontSize: 20, color: COLOR.faint }, right) : h('div', {})));
+    rule(COLOR.ink),
+    h('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, minHeight: 40 },
+      typeof left === 'string' ? h('div', { fontSize: 19, color: COLOR.muted }, left) : (left ?? h('div', {})),
+      right ? h('div', { fontSize: 21, fontWeight: 600, color: COLOR.ink }, right) : h('div', {})));
 }
 
 /**
- * The chrome every card shares. Exported because the matchday post card lives
- * in its own script but is the same publication.
+ * The chrome every card shares: the logo, then the instrument, then the
+ * footer. Exported because the matchday post lives in its own script but is
+ * the same publication.
  */
-export function shell({ height = CARD_HEIGHT, headerRight, footerLeft = '', footerRight }, ...children) {
+export function shell({ height = CARD_HEIGHT, head, footerLeft, footerRight, headerRight }, ...children) {
   return h('div', {
     width: CARD_WIDTH, height, display: 'flex', flexDirection: 'column',
-    backgroundColor: COLOR.ground, fontFamily: 'Manrope',
+    backgroundColor: COLOR.ground, fontFamily: FONT_FAMILY, color: COLOR.ink,
+    padding: `40px ${PAD_X}px 30px`,
   },
-    brandBand(),
-    h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, padding: `40px ${PAD}px 34px` },
-      h('div', { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-        logotype(), headerRight ?? h('div', {})),
-      rule(COLOR.rule, { marginTop: 26 }),
-      ...children,
-      footer(footerLeft, footerRight)));
-}
-
-/**
- * Headlines are set as large as they can be without spilling: satori measures
- * the text, but the step-down keeps a 120-character title from arriving as six
- * cramped lines while a six-word one floats in white space.
- */
-function headlineSize(text) {
-  if (text.length <= 46) return 66;
-  if (text.length <= 72) return 58;
-  if (text.length <= 104) return 50;
-  return 43;
+    h('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+      logo(28),
+      headerRight ? h('div', { fontSize: 19, color: COLOR.muted }, headerRight) : h('div', {})),
+    head ? h('div', { display: 'flex', flexDirection: 'column', marginTop: 30 }, channelHead(head)) : null,
+    h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }, ...children),
+    footer(footerLeft, footerRight));
 }
 
 /**
  * Satori only honours the line clamp when an ellipsis is asked for as well, and
  * without the clamp a pathological headline pushes the footer off the canvas.
  */
-function clampedText(text, { fontSize, lines, ...style }) {
+export function clampedText(text, { fontSize, lines, ...style }) {
   return h('div', {
     fontSize,
     display: '-webkit-box',
@@ -137,59 +202,99 @@ function clampedText(text, { fontSize, lines, ...style }) {
   }, text);
 }
 
+/** A finding, set as large as it can be without spilling. */
+export function headline(text, { lines = 2, size } = {}) {
+  const fontSize = size ?? (text.length <= 40 ? 64 : text.length <= 60 ? 56 : text.length <= 90 ? 48 : 42);
+  return clampedText(text, { fontSize, lines, fontWeight: 700, color: COLOR.ink, lineHeight: 1.06, letterSpacing: -1.2 });
+}
+
+/* ---------------------------------------------------------------- cards --- */
+
 const REGISTER = {
-  nota: { pt: 'Nota', en: 'Note', color: COLOR.ink },
-  explicador: { pt: 'Explicador', en: 'Explainer', color: COLOR.teal },
+  nota: { pt: 'Nota', en: 'Note' },
+  explicador: { pt: 'Explicador', en: 'Explainer' },
 };
 
 /**
- * An article card carries the piece itself: the headline at reading size, the
- * register, and the date. The old card showed a logo, which told a reader
- * scrolling X nothing about what they were being offered.
+ * An article card carries the piece itself: the register and the date as the
+ * instrument's head, the headline at reading size, the excerpt, the reading
+ * time. No byline: the cards carry no one's name.
  */
-export function articleCard({ title, excerpt, kind, dateLabel, byline, readTime, locale = 'pt' }) {
+export function articleCard({ title, excerpt, kind, dateLabel, readTime, url, locale = 'pt' }) {
   const register = REGISTER[kind] ?? REGISTER.explicador;
-  const playful = kind === 'explicador';
   return shell({
-    headerRight: badge(register[locale] ?? register.pt, register.color),
-    footerLeft: byline ? `${dateLabel} · ${byline}` : dateLabel,
-    footerRight: readTime,
+    head: { title: register[locale] ?? register.pt, aside: dateLabel },
+    footerLeft: readTime,
+    footerRight: url,
   },
-    h('div', { display: 'flex', flexGrow: 1, alignItems: 'center', paddingTop: 30, paddingBottom: 30 },
-      h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, flexShrink: 1, minWidth: 0, paddingRight: playful ? 48 : 0 },
-        clampedText(title, {
-          fontSize: playful ? Math.min(headlineSize(title), 58) : headlineSize(title), lines: 4, fontWeight: 800, color: COLOR.ink,
-          lineHeight: 1.12, letterSpacing: -1.4,
-        }),
-        excerpt ? clampedText(excerpt, {
-          fontSize: 25, lines: 3, color: COLOR.muted, lineHeight: 1.45, marginTop: 24,
-        }) : null),
-      playful ? mosaic(240) : null));
+    h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'center', paddingTop: 18, paddingBottom: 22 },
+      headline(title, { lines: 3 }),
+      excerpt ? clampedText(excerpt, { fontSize: 24, lines: 3, color: COLOR.muted, lineHeight: 1.4, marginTop: 22 }) : null));
 }
 
 /**
- * A ranked row — name, proportional bar, value. Used for the title race, where
- * the second and third numbers are the story as much as the first.
+ * The Liga card: the finding, the count of seasons behind it, and the
+ * contenders on one 0–100 points ruler (title share, today's points as a
+ * square, the final-points band), as the homepage's Liga instrument draws them.
  */
-export function rankedRow({ name, value, note, fraction, color, trailing }, isLead = false) {
-  return h('div', { display: 'flex', flexDirection: 'column', marginTop: 16 },
-    h('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' },
-      h('div', { display: 'flex', alignItems: 'baseline' },
-        h('div', { fontSize: 21, fontWeight: isLead ? 700 : 500, color: isLead ? COLOR.ink : COLOR.inkSoft }, name),
-        note ? h('div', { fontSize: 16, color: COLOR.muted, marginLeft: 10 }, note) : null),
-      h('div', { display: 'flex', alignItems: 'baseline' },
-        h('div', { fontSize: 21, fontWeight: 700, color: isLead ? COLOR.ink : COLOR.muted }, value),
-        trailing ? h('div', { fontSize: 17, fontWeight: 500, color: trailing.color, marginLeft: 12 }, trailing.text) : null)),
-    h('div', { display: 'flex', height: 10, marginTop: 7, backgroundColor: COLOR.rule },
-      h('div', { width: `${Math.max(1.5, fraction * 100)}%`, backgroundColor: color })));
+export function ligaCard({ head, finding, standfirst, rows, footerLeft, footerRight, locale = 'pt' }) {
+  const pt = locale !== 'en';
+  const BAND_W = 400;
+  const col = { name: 250, share: 150, band: BAND_W, final: 150 };
+  const headRow = h('div', { display: 'flex', alignItems: 'flex-end', paddingBottom: 8 },
+    h('div', { width: col.name, fontSize: 16, color: COLOR.muted }, pt ? 'Clube' : 'Club'),
+    h('div', { width: col.share, fontSize: 16, color: COLOR.muted, display: 'flex', justifyContent: 'flex-end', paddingRight: 30 }, pt ? 'Título' : 'Title'),
+    h('div', { display: 'flex', flexDirection: 'column', width: col.band },
+      h('div', { fontSize: 16, color: COLOR.muted, marginBottom: 2 }, pt ? 'Pontos, agora e no fim' : 'Points, now and at the end'),
+      ruler({ width: col.band, fontSize: 14 })),
+    h('div', { flexGrow: 1, fontSize: 16, color: COLOR.muted, display: 'flex', justifyContent: 'flex-end' }, pt ? 'No fim, 90%' : 'At the end, 90%'));
+  const row = (r, i) => h('div', { display: 'flex', alignItems: 'center', height: 52, borderTop: i === 0 ? `2px solid ${COLOR.ink}` : `1px solid ${COLOR.grid}` },
+    h('div', { width: col.name, display: 'flex', alignItems: 'center' },
+      h('div', { width: 15, height: 15, backgroundColor: r.color, marginRight: 14 }),
+      h('div', { fontSize: 29, fontWeight: 600 }, r.name)),
+    h('div', { width: col.share, display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline', paddingRight: 30 },
+      h('div', { fontSize: 36, fontWeight: 700, letterSpacing: -0.5 }, r.share),
+      h('div', { fontSize: 19, fontWeight: 600, marginLeft: 2 }, '%')),
+    h('div', { width: col.band, display: 'flex' }, r.band ? intervalBand({ ...r.band, width: col.band }) : null),
+    h('div', { flexGrow: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline' },
+      r.band ? h('div', { fontSize: 25, fontWeight: 700 }, String(r.band.md)) : null,
+      r.band ? h('div', { fontSize: 21, color: COLOR.muted, marginLeft: 8 }, `${r.band.lo}–${r.band.hi}`) : null));
+  return shell({ head, footerLeft, footerRight },
+    h('div', { display: 'flex', flexDirection: 'column', marginTop: 20 },
+      headline(finding, { lines: 2, size: 52 }),
+      standfirst ? clampedText(standfirst, { fontSize: 22, lines: 1, color: COLOR.muted, marginTop: 8 }) : null),
+    h('div', { display: 'flex', flexDirection: 'column', marginTop: 'auto', marginBottom: 16, paddingTop: 14 },
+      headRow,
+      ...rows.map(row)));
 }
 
 /**
- * A single-path sparkline. Satori lays out an <svg> child as a layout node, so
- * one path per element is the whole budget — enough for a trend line, which is
- * all the context a headline number needs on a card.
+ * The population card: what the release is, the counter-sign of a single run
+ * and the release's own caveat before any figure, then its counts as a
+ * register. Every figure is a release count; nothing is computed.
  */
-function sparkline(values, { width, height, color }) {
+export function populationCard({ head, statement, caveat, register, footerLeft, footerRight }) {
+  return shell({ head, footerLeft, footerRight },
+    h('div', { display: 'flex', flexDirection: 'column', marginTop: 22 },
+      headline(statement, { lines: 2, size: 56 }),
+      h('div', { display: 'flex', alignItems: 'flex-start', marginTop: 16 },
+        h('div', { display: 'flex', marginTop: 4 }, tickGlyph(34, 20)),
+        clampedText(caveat, { fontSize: 19, lines: 2, color: COLOR.muted, lineHeight: 1.35, marginLeft: 12, flexShrink: 1 }))),
+    h('div', { display: 'flex', marginTop: 'auto', marginBottom: 22 },
+      ...register.map((item, i) => h('div', {
+        display: 'flex', flexDirection: 'column', flexBasis: 0, flexGrow: 1,
+        marginLeft: i === 0 ? 0 : 28, borderTop: `1px solid ${COLOR.rule}`, paddingTop: 10,
+      },
+        label(item.label, { fontSize: 18 }),
+        h('div', { fontSize: 40, fontWeight: 700, letterSpacing: -0.6, marginTop: 4 }, item.value),
+        item.note ? label(item.note, { fontSize: 16, marginTop: 2 }) : null))));
+}
+
+/**
+ * A single-path sparkline in ink over a baseline. Satori lays out an <svg>
+ * child as a layout node, so one path per element is the whole budget.
+ */
+function sparkline(values, { width, height }) {
   if (!values || values.length < 2) return null;
   const max = Math.max(...values, 0.0001);
   const points = values.map((value, index) => {
@@ -197,70 +302,53 @@ function sparkline(values, { width, height, color }) {
     const y = height - (value / max) * (height - 4) - 2;
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   });
-  return h('div', { display: 'flex', flexDirection: 'column' },
-    svg('svg', { width, height, viewBox: `0 0 ${width} ${height}` },
-      svg('polyline', {
-        points: points.join(' '), fill: 'none', stroke: color,
-        strokeWidth: 2.5, strokeLinejoin: 'round',
-      })),
-    h('div', { height: 1, width, backgroundColor: COLOR.ink }));
+  return svg('svg', { width, height: height + 2, viewBox: `0 0 ${width} ${height + 2}` },
+    svg('polyline', { points: points.join(' '), fill: 'none', stroke: COLOR.ink, strokeWidth: 2.5, strokeLinejoin: 'round' }),
+    svg('rect', { x: 0, y: height + 1, width, height: 1, fill: COLOR.scale }));
 }
 
 /**
- * A section card leads with the number the section exists to publish. The
- * subject and the as-of line are not decoration: a probability with no date
- * next to it is the thing a screenshot turns into a false claim.
+ * A section that publishes one headline number (the economy, once it
+ * publishes): the number, what it is of, and its trend, dated in the head.
  */
-export function figureCard({
-  sectionLabel, sectionColor = COLOR.ink, label, value, unit, subject, caption,
-  rows, spark, footerLeft, footerRight,
-}) {
-  // The aside never yields width: without this the left column's caption pushes
-  // the ranked list off the right edge of the card, where nobody would see it.
-  const asideStyle = { display: 'flex', flexDirection: 'column', width: ASIDE_WIDTH, flexShrink: 0 };
-  const aside = rows?.length
-    ? h('div', asideStyle,
-      rule(COLOR.ink),
-      ...rows.map((row, index) => rankedRow(row, index === 0)))
-    : spark
-      ? h('div', asideStyle,
-        eyebrow(spark.label, COLOR.faint),
-        h('div', { display: 'flex', marginTop: 20 }, sparkline(spark.values, { width: ASIDE_WIDTH, height: 130, color: spark.color ?? COLOR.navy })),
-        h('div', { fontSize: 17, color: COLOR.faint, marginTop: 12 }, spark.caption))
-      : null;
-
-  return shell({ headerRight: badge(sectionLabel, sectionColor), footerLeft, footerRight },
-    h('div', { display: 'flex', flexGrow: 1, paddingTop: 30, paddingBottom: 26, alignItems: 'center' },
-      h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, flexShrink: 1, minWidth: 0, paddingRight: 56 },
-        eyebrow(label),
-        // The unit is set small and on the baseline: at 140px Inter's percent
-        // glyph is nearly as wide as the number and stops reading as a unit.
-        h('div', { display: 'flex', alignItems: 'baseline', marginTop: 12 },
-          h('div', { fontSize: 142, fontWeight: 800, color: COLOR.ink, lineHeight: 1.05, letterSpacing: -5 }, value),
-          unit ? h('div', { fontSize: 58, fontWeight: 700, color: COLOR.ink, marginLeft: 8, letterSpacing: -1 }, unit) : null),
-        h('div', { fontSize: 36, fontWeight: 600, color: COLOR.ink, marginTop: 12, letterSpacing: -0.6 }, subject),
-        caption ? clampedText(caption, { fontSize: 21, lines: 3, color: COLOR.muted, lineHeight: 1.4, marginTop: 14 }) : null),
-      aside));
+export function figureCard({ head, labelText, value, unit, subject, caption, spark, footerLeft, footerRight }) {
+  return shell({ head, footerLeft, footerRight },
+    h('div', { display: 'flex', flexGrow: 1, alignItems: 'center' },
+      h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, flexShrink: 1, minWidth: 0, paddingRight: 48 },
+        label(labelText, { fontSize: 20 }),
+        h('div', { display: 'flex', alignItems: 'baseline', marginTop: 6 },
+          h('div', { fontSize: 132, fontWeight: 700, lineHeight: 1, letterSpacing: -4 }, value),
+          unit ? h('div', { fontSize: 52, fontWeight: 600, marginLeft: 6 }, unit) : null),
+        h('div', { fontSize: 32, fontWeight: 600, marginTop: 10 }, subject),
+        caption ? clampedText(caption, { fontSize: 20, lines: 3, color: COLOR.muted, lineHeight: 1.4, marginTop: 12 }) : null),
+      spark ? h('div', { display: 'flex', flexDirection: 'column', width: 400, flexShrink: 0 },
+        label(spark.label),
+        h('div', { display: 'flex', marginTop: 14 }, sparkline(spark.values, { width: 400, height: 130 })),
+        label(spark.caption, { fontSize: 16, marginTop: 8 })) : null));
 }
 
 /**
- * The fallback card, used by every page without a card of its own. It replaces
- * a navy gradient whose tagline still called the site an election forecast, two
- * sections after that stopped being true.
+ * The card for every page without one of its own: the line as the headline,
+ * the descriptor, the reading rule, and the sections over ink rules, in the
+ * order of what is live.
  */
-export function brandCard({ headline, standfirst, columns, footerLeft, footerRight }) {
-  return shell({ footerLeft, footerRight },
-    h('div', { display: 'flex', flexGrow: 1, alignItems: 'center', paddingTop: 24, paddingBottom: 28 },
-      h('div', { display: 'flex', flexDirection: 'column', flexGrow: 1, flexShrink: 1, minWidth: 0, paddingRight: 56 },
-        h('div', { fontSize: 62, fontWeight: 800, color: COLOR.ink, letterSpacing: -2, lineHeight: 1.08 }, headline),
-        h('div', { fontSize: 26, color: COLOR.muted, marginTop: 20, lineHeight: 1.4 }, standfirst)),
-      mosaic(250)),
-    h('div', { display: 'flex', marginBottom: 30 },
+export function brandCard({ headline: line, standfirst, columns, locale = 'pt', footerRight }) {
+  return h('div', {
+    width: CARD_WIDTH, height: CARD_HEIGHT, display: 'flex', flexDirection: 'column',
+    backgroundColor: COLOR.ground, fontFamily: FONT_FAMILY, color: COLOR.ink,
+    padding: `46px ${PAD_X}px 30px`,
+  },
+    logo(40),
+    h('div', { display: 'flex', flexDirection: 'column', marginTop: 30 },
+      clampedText(line, { fontSize: 74, lines: 2, fontWeight: 700, lineHeight: 1.04, letterSpacing: -1.8 }),
+      clampedText(standfirst, { fontSize: 25, lines: 3, color: COLOR.muted, lineHeight: 1.4, marginTop: 16, maxWidth: 1000 })),
+    h('div', { display: 'flex', marginTop: 'auto' }, readingKey(['now', 'band', 'tick'], locale, { fontSize: 20, gap: 34 })),
+    h('div', { display: 'flex', marginTop: 26, marginBottom: 24 },
       ...columns.map((column, index) => h('div', {
         display: 'flex', flexDirection: 'column', flexBasis: 0, flexGrow: 1,
-        marginLeft: index === 0 ? 0 : 32,
+        marginLeft: index === 0 ? 0 : 28, borderTop: `2px solid ${COLOR.ink}`, paddingTop: 10,
       },
-        rule(COLOR.ink),
-        eyebrow(column.name, COLOR.ink, { marginTop: 12 }),
-        h('div', { fontSize: 19, color: COLOR.muted, marginTop: 7, lineHeight: 1.35 }, column.blurb)))));
+        h('div', { fontSize: 22, fontWeight: 700 }, column.name),
+        h('div', { fontSize: 17, color: COLOR.muted, marginTop: 5, lineHeight: 1.35 }, column.blurb)))),
+    footer(null, footerRight));
 }

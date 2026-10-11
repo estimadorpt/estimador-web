@@ -24,7 +24,7 @@ export interface PlacedLabel {
   y: number;
 }
 
-/** Manrope at 12px, semibold: a generous average advance per character. */
+/** IBM Plex Sans at 12px, semibold: a generous average advance per character. */
 export const LABEL_SIZE = 12;
 const CHAR = 6.6;
 

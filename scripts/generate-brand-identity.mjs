@@ -1,5 +1,11 @@
 #!/usr/bin/env node
-/** Regenerate the current identity, including compatibility filenames. */
+/**
+ * Regenerate the identity, including compatibility filenames, from two files:
+ * src/lib/brand/geometry.json (the mark) and src/lib/brand/wordmark-paths.json
+ * (the outlined wordmark). Changing the logo is replacing those two files and
+ * running `npm run brand`. Tiles are square, like everything else on the site;
+ * a platform that rounds its icons does so itself.
+ */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -8,21 +14,25 @@ const root = new URL('../', import.meta.url);
 const read = name => readFileSync(new URL(name, root), 'utf8');
 const write = (name, data) => writeFileSync(new URL(name, root), data);
 const geometry = JSON.parse(read('src/lib/brand/geometry.json'));
+const wordmark = JSON.parse(read('src/lib/brand/wordmark-paths.json'));
 const full = [geometry.MARK_LEFT, geometry.MARK_BAND, geometry.MARK_RIGHT].join(' ');
-const ink = '#111111', paper = '#ffffff', forest = '#111111';
+// BRAND.ink, BRAND.paper, BRAND.muted (src/lib/brand); ".pt" on ink is a light grey.
+const ink = '#111111', paper = '#ffffff', forest = '#111111', muted = '#5e5e5e', mutedOnInk = '#a8a8a8';
 const svg = (w, h, body) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${body}</svg>`;
 const mark = (small, color) => `<path d="${small ? geometry.MARK_SMALL : full}" fill="${color}"/>`;
-const icon = (color, ground) => svg(32, 32, `<rect width="32" height="32" rx="7" fill="${ground}"/>${mark(true, color)}`);
+const icon = (color, ground) => svg(32, 32, `<rect width="32" height="32" fill="${ground}"/>${mark(true, color)}`);
 const png = async (name, source, width) => sharp(Buffer.from(source)).resize({ width }).png().toFile(fileURLToPath(new URL(name, root)));
 for (const dir of ['public/brand', 'public/branding', 'public/images/brand']) mkdirSync(new URL(dir, root), { recursive: true });
 
-// Preserve the approved outlined Manrope wordmark; only the mark geometry changes.
+// The signature: the mark at 0–48, "estimador" in ink and ".pt" in grey.
+const W = wordmark.WORDMARK_WIDTH, H = wordmark.WORDMARK_HEIGHT;
+const signature = (color, tld) => `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><title>estimador.pt</title>${mark(false, color)}<g transform="translate(${wordmark.WORDMARK_X} ${wordmark.WORDMARK_BASELINE})"><path d="${wordmark.WORDMARK_NAME}" fill="${color}"/><path d="${wordmark.WORDMARK_TLD}" fill="${tld}"/></g></svg>\n`;
 const logos = {};
-for (const [suffix, color] of [['', ink], ['-paper', paper]]) {
+for (const [suffix, color, tld] of [['', ink, muted], ['-paper', paper, mutedOnInk]]) {
   const name = `public/brand/estimador-logo${suffix}.svg`;
-  logos[suffix] = read(name).replace(/<path d="[^"]+" fill="[^"]+"\s*\/>/, mark(false, color));
+  logos[suffix] = signature(color, tld);
   write(name, logos[suffix]);
-  await png(name.replace('.svg', '@4x.png'), logos[suffix], 880);
+  await png(name.replace('.svg', '@4x.png'), logos[suffix], W * 4);
   write(`public/brand/estimador-mark${suffix}.svg`, svg(48, 24, mark(false, color)));
 }
 const compact = svg(32, 32, mark(true, ink));
@@ -53,8 +63,8 @@ frames.forEach((frame,i) => {
 write('public/favicon.ico',Buffer.concat([header,...frames]));
 const inner = source => source.trim().replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
 const lockup = (w,h,dark=false) => {
-  const width = w * 0.72, scale = width/220;
-  return svg(w,h,`<rect width="${w}" height="${h}" fill="${dark ? forest : paper}"/><g transform="translate(${(w-width)/2} ${(h-24*scale)/2}) scale(${scale})">${inner(logos[dark ? '-paper' : ''])}</g>`);
+  const width = w * 0.72, scale = width/W;
+  return svg(w,h,`<rect width="${w}" height="${h}" fill="${dark ? forest : paper}"/><g transform="translate(${(w-width)/2} ${(h-H*scale)/2}) scale(${scale})">${inner(logos[dark ? '-paper' : ''])}</g>`);
 };
 const sources = {
   'logo-icon-large': app,

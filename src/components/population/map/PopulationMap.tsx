@@ -898,13 +898,13 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
 
             {!countryShapes && !failed && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-sm text-stone-600" role="status">
-                <MarkLoading height={22} color="var(--color-ink)" ground="var(--color-parchment)" />
+                <MarkLoading height={22} color="var(--color-ink)" />
                 {t.loading}
               </div>
             )}
             {countryShapes && loadingLevel && (
               <div className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-2 rounded-md bg-cream/90 px-2 py-1 text-xs text-stone-600" role="status">
-                <MarkLoading height={12} color="var(--color-ink)" ground="var(--color-cream)" />
+                <MarkLoading height={12} color="var(--color-ink)" />
                 {t.loadingLevel}
               </div>
             )}

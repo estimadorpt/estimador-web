@@ -1,39 +1,39 @@
 {
-  "generatedAt": "2026-10-06T12:30:55.337Z",
+  "generatedAt": "2026-10-11T15:44:42.472Z",
   "files": {
-    "pt": "og-image-pt-25f86d84.png",
-    "en": "og-image-en-37c8bc43.png"
+    "pt": "og-image-pt-493c1a8d.png",
+    "en": "og-image-en-fc618587.png"
   },
   "cards": {
     "pt": {
-      "/": "og-image-pt-25f86d84.png",
-      "/desporto/liga": "og-image-liga-pt-70c60f14.png",
-      "/populacao": "og-image-populacao-pt-c09f0644.png"
+      "/": "og-image-pt-493c1a8d.png",
+      "/desporto/liga": "og-image-liga-pt-6754624d.png",
+      "/populacao": "og-image-populacao-pt-26890f84.png"
     },
     "en": {
-      "/": "og-image-en-37c8bc43.png",
-      "/desporto/liga": "og-image-liga-en-c22709bb.png",
-      "/populacao": "og-image-populacao-en-c70973df.png"
+      "/": "og-image-en-fc618587.png",
+      "/desporto/liga": "og-image-liga-en-e421fb81.png",
+      "/populacao": "og-image-populacao-en-e7cc2ff5.png"
     }
   },
   "alt": {
-    "og-image-pt-25f86d84.png": "estimador.pt. Dados para compreender Portugal. Dados e modelos sobre Portugal, com a incerteza à vista: quem vive em cada freguesia, como pode acabar a Liga e o que diziam as previsões eleitorais.",
-    "og-image-liga-pt-70c60f14.png": "Liga Portugal 2026-27 depois da jornada 7 (atualizado a 25 set. 2026): probabilidade de título, Porto 51%, Sporting 26%, Benfica 22%.",
-    "og-image-populacao-pt-c09f0644.png": "População sintética aberta: 3 092 freguesias dos Censos 2021, versão 1.0.3 de 5 de outubro de 2026.",
-    "og-image-en-37c8bc43.png": "estimador.pt. Data to understand Portugal. Data and models about Portugal, with the uncertainty in view: who lives in each parish, how the Liga could end, and what the election forecasts said.",
-    "og-image-liga-en-c22709bb.png": "Liga Portugal 2026-27 after matchday 7 (updated 25 Sept 2026): title probability, Porto 51%, Sporting 26%, Benfica 22%.",
-    "og-image-populacao-en-c70973df.png": "Open synthetic population: 3,092 parishes of the 2021 Census, version 1.0.3 dated 5 October 2026."
+    "og-image-pt-493c1a8d.png": "estimador.pt. Dados para compreender Portugal. Dados e modelos sobre Portugal, com a incerteza à vista: quem vive em cada freguesia, como pode acabar a Liga e o que diziam as previsões eleitorais.",
+    "og-image-liga-pt-6754624d.png": "Liga Portugal 2026-27, previsão de 11 out. 2026, 00:11: o Porto ganha a Liga em metade das épocas simuladas. Probabilidade de título: Porto 51%, Sporting 30%, Benfica 20%.",
+    "og-image-populacao-pt-26890f84.png": "População sintética, versão 1.0.3 datada de 5 de outubro de 2026: as 3 092 freguesias dos Censos 2021, uma a uma.",
+    "og-image-en-fc618587.png": "estimador.pt. Data to understand Portugal. Data and models about Portugal, with the uncertainty in view: who lives in each parish, how the Liga could end, and what the election forecasts said.",
+    "og-image-liga-en-e421fb81.png": "Liga Portugal 2026-27, forecast of 11 Oct 2026, 00:11: Porto win the league in half of the simulated seasons. Title probability: Porto 51%, Sporting 30%, Benfica 20%.",
+    "og-image-populacao-en-e7cc2ff5.png": "Synthetic population, version 1.0.3 dated 5 October 2026: the 3,092 parishes of the 2021 Census, one by one."
   },
   "size": {
     "width": 2400,
     "height": 1260
   },
   "retained": [
-    "og-image-pt-98c61d68.png",
-    "og-image-en-791edd88.png",
-    "og-image-liga-pt-3c459aab.png",
-    "og-image-economia-pt-4e3d3bf7.png",
-    "og-image-liga-en-d1b51d8a.png",
-    "og-image-economia-en-a63fc5ab.png"
+    "og-image-pt-25f86d84.png",
+    "og-image-en-37c8bc43.png",
+    "og-image-liga-pt-fe8bc411.png",
+    "og-image-populacao-pt-c09f0644.png",
+    "og-image-liga-en-3b8d6c9c.png",
+    "og-image-populacao-en-c70973df.png"
   ]
 }

@@ -110,7 +110,7 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
     return (
       <div className={RESERVED}>
       <div role="status" aria-live="polite" className="flex flex-col items-start gap-4 py-6">
-        <MarkLoading height={36} color={BRAND.ink} ground={BRAND.paper} />
+        <MarkLoading height={36} color={BRAND.ink} />
         <p className="text-base text-stone-600">
           {pt ? 'A abrir o resultado deste link…' : 'Opening the result this link points to…'}
         </p>

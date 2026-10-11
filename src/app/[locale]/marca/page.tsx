@@ -278,7 +278,7 @@ export default async function BrandPage({ params }: { params: Promise<{ locale: 
 
       <Section id="movimento" kicker="06" title={pt ? 'O movimento' : 'Motion'} lede={pt ? 'Um só gesto, sempre na mesma tinta: a incerteza mexe-se. Enquanto algo carrega, o ponto percorre a faixa; ao passar o cursor pela assinatura, o intervalo abre e fecha. Nada disto acontece sobre uma previsão já publicada.' : 'One gesture, always in the same ink: the uncertainty moves. While something loads, the counter travels the band; on hover, the interval opens and closes. None of it happens over a published forecast.'}>
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="flex h-36 flex-col items-center justify-center gap-3 rounded-xl bg-forest"><MarkLoading height={36} color={BRAND.paper} ground={BRAND.forest} label={pt ? 'A estimar' : 'Estimating'} /><span className="text-xs text-stone-300">{pt ? 'A estimar…' : 'Estimating…'}</span></div>
+          <div className="flex h-36 flex-col items-center justify-center gap-3 rounded-xl bg-forest"><MarkLoading height={36} color={BRAND.paper} label={pt ? 'A estimar' : 'Estimating'} /><span className="text-xs text-stone-300">{pt ? 'A estimar…' : 'Estimating…'}</span></div>
           <div className="flex h-36 flex-col items-center justify-center gap-3 rounded-xl border border-line bg-cream"><span className="brand-link inline-block"><Mark height={36} color={BRAND.ink} /></span><span className="text-xs text-stone-500">{pt ? 'Passa o cursor por cima.' : 'Hover over it.'}</span></div>
         </div>
         <ul className="mt-8 grid gap-2 md:grid-cols-2">

@@ -19,11 +19,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  ROOT_DIR, COLOR, renderCard, contentHash,
-  formatPercent, formatDate, formatShortDate, formatQuarter,
+  ROOT_DIR, renderCard, contentHash,
+  formatPercent, formatCount, formatDate, formatReadingTime, formatQuarter,
 } from './lib/og-render.mjs';
-import { articleCard, figureCard, brandCard, CARD_WIDTH, CARD_HEIGHT } from './lib/og-cards.mjs';
-import { teamName, teamColor } from './lib/football-brand.mjs';
+import { articleCard, figureCard, brandCard, ligaCard as ligaLayout, populationCard as populationLayout, readingKey, CARD_WIDTH, CARD_HEIGHT } from './lib/og-cards.mjs';
+import { teamName, teamColor, titleFinding, titleSeasons } from './lib/football-brand.mjs';
 
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 const ARTICLES_DIR = path.join(ROOT_DIR, 'src', 'content', 'articles');
@@ -39,75 +39,83 @@ const BRAND_COPY = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'src', 'lib', 
  * script, and adding build-only keys to the message catalogues would put
  * strings in front of translators that no page can ever show.
  */
+/** A finding in the middle of a sentence: its leading article in lower case ("o Porto", "the 3,092 parishes"). */
+const midSentence = text => text.replace(/^(O|A|Os|As|The) /, word => word.toLowerCase());
+
+const MESSAGES = Object.fromEntries(LOCALES.map(locale => [locale, JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'messages', `${locale}.json`), 'utf8'))]));
+
 const COPY = {
   pt: {
     brandHeadline: BRAND_COPY.line.pt,
     brandStandfirst: BRAND_COPY.descriptor.pt,
-    // Live sections first, in the navigation's order; the elections are
-    // archives and say so; the economy says it is in preparation until its flag.
+    // What is live, in the navigation's order; the economy joins only once it
+    // publishes, as everywhere else on the site. No one's name on any card.
     columns: (economyPublished) => [
       { name: 'População', blurb: 'Uma população sintética aberta, freguesia a freguesia' },
-      { name: 'Liga Portugal', blurb: 'Probabilidades de título e despromoção' },
-      { name: 'Eleições', blurb: 'Previsões arquivadas: presidenciais 2026 e legislativas 2025' },
-      { name: 'Economia', blurb: economyPublished ? 'Estado da economia e risco de recessão' : 'Como ler os indicadores (em preparação)' },
-    ],
-    brandFooter: 'Metodologia aberta · Bernardo Caldas',
+      { name: 'Liga Portugal', blurb: 'Título e despromoção, a cada jornada' },
+      { name: 'Eleições, arquivo', blurb: 'As previsões das presidenciais 2026 e das legislativas 2025' },
+      economyPublished ? { name: 'Economia', blurb: 'O estado da economia e o risco de recessão' } : null,
+    ].filter(Boolean),
     readSuffix: 'de leitura',
     updated: 'atualizado a',
-    ligaSection: 'Liga Portugal',
-    ligaLabel: 'Probabilidade de título',
-    ligaCaption: (sims, matchday) => `${sims} simulações da época a partir da classificação depois da jornada\u00a0${matchday}.`,
-    // The as-of line is what keeps a screenshot of the card honest weeks later (FA2-08).
-    ligaFooter: (matchday, date, season) => [`Depois da jornada ${matchday}`, date ? `atualizado a ${date}` : null, `Liga Portugal ${season}`].filter(Boolean).join(' · '),
-    ligaAlt: (season, matchday, date, rows) => `Liga Portugal ${season} depois da jornada ${matchday}${date ? ` (atualizado a ${date})` : ''}: probabilidade de título, ${rows}.`,
+    ligaSerial: (matchday) => `J${matchday}`,
+    ligaAside: (when) => `previsão de ${when}`,
+    ligaStandfirst: (seasons, sims) => `Em ${seasons} de ${sims} épocas simuladas.`,
+    ligaNow: 'pontos que já tem',
+    ligaAlt: (season, when, finding, rows) => `Liga Portugal ${season}, previsão de ${when}: ${finding}. Probabilidade de título: ${rows}.`,
     brandAlt: (line, descriptor) => `estimador.pt. ${line} ${descriptor}`,
-    populationAlt: (parishes, version, date) => `População sintética aberta: ${parishes} freguesias dos Censos 2021, versão ${version} de ${date}.`,
+    populationAlt: (statement, version, date) => `População sintética, versão ${version} datada de ${date}: ${statement}.`,
     economyAlt: (value, quarter) => `Economia: risco de recessão de ${value}% em ${quarter}.`,
     articleAlt: (title, kind, date) => `${title} (${kind === 'nota' ? 'nota' : 'explicador'}, ${date}).`,
     economySection: 'Economia',
     economyLabel: 'Risco de recessão',
-    economySubject: (quarter) => `este trimestre · ${quarter}`,
-    economyCaption: 'Onde está o risco de recessão agora — uma leitura calibrada, disponível antes da divulgação do PIB.',
+    economySubject: (quarter) => `este trimestre, ${quarter}`,
+    economyCaption: 'Onde está o risco de recessão agora: uma leitura calibrada, disponível antes da divulgação do PIB.',
     economySpark: 'Probabilidade por trimestre',
-    economyFooter: (date) => `Dados de ${date}`,
-    populationSection: 'População',
-    populationLabel: 'População sintética aberta',
-    populationSubject: 'freguesias · Censos 2021',
-    populationCaption: (persons, households, parishes) => `${persons} pessoas e ${households} agregados gerados para as ${parishes} freguesias dos Censos 2021 (CAOP\u00a02021).`,
-    populationFooter: (version, date) => `Versão ${version} · ${date}`,
+    economyAside: (date) => `dados de ${date}`,
+    populationSection: 'População sintética',
+    populationAside: (date) => `datada de ${date}`,
+    populationRegister: (persons, households, parishes) => [
+      { label: 'Pessoas geradas', value: persons },
+      { label: 'Agregados gerados', value: households },
+      { label: 'Freguesias', value: parishes, note: 'INE, Censos 2021' },
+    ],
+    populationFooter: (version) => `Versão ${version} · CC BY-NC 4.0, dados do INE CC BY 4.0`,
   },
   en: {
     brandHeadline: BRAND_COPY.line.en,
     brandStandfirst: BRAND_COPY.descriptor.en,
     columns: (economyPublished) => [
       { name: 'Population', blurb: 'An open synthetic population, parish by parish' },
-      { name: 'Liga Portugal', blurb: 'Title and relegation probabilities' },
-      { name: 'Elections', blurb: 'Archived forecasts: 2026 presidential, 2025 legislative' },
-      { name: 'Economy', blurb: economyPublished ? 'State of the economy and recession risk' : 'Reading the indicators (in preparation)' },
-    ],
-    brandFooter: 'Open methodology · Bernardo Caldas',
+      { name: 'Liga Portugal', blurb: 'The title and relegation, every matchday' },
+      { name: 'Elections, archive', blurb: 'The 2026 presidential and 2025 parliamentary forecasts' },
+      economyPublished ? { name: 'Economy', blurb: 'The state of the economy and recession risk' } : null,
+    ].filter(Boolean),
     readSuffix: 'read',
     updated: 'updated',
-    ligaSection: 'Liga Portugal',
-    ligaLabel: 'Title probability',
-    ligaCaption: (sims, matchday) => `${sims} simulations of the season from the table after matchday\u00a0${matchday}.`,
-    ligaFooter: (matchday, date, season) => [`After matchday ${matchday}`, date ? `updated ${date}` : null, `Liga Portugal ${season}`].filter(Boolean).join(' · '),
-    ligaAlt: (season, matchday, date, rows) => `Liga Portugal ${season} after matchday ${matchday}${date ? ` (updated ${date})` : ''}: title probability, ${rows}.`,
+    ligaSerial: (matchday) => `MD${matchday}`,
+    ligaAside: (when) => `forecast of ${when}`,
+    ligaStandfirst: (seasons, sims) => `In ${seasons} of ${sims} simulated seasons.`,
+    ligaNow: 'points so far',
+    ligaAlt: (season, when, finding, rows) => `Liga Portugal ${season}, forecast of ${when}: ${finding}. Title probability: ${rows}.`,
     brandAlt: (line, descriptor) => `estimador.pt. ${line} ${descriptor}`,
-    populationAlt: (parishes, version, date) => `Open synthetic population: ${parishes} parishes of the 2021 Census, version ${version} dated ${date}.`,
+    populationAlt: (statement, version, date) => `Synthetic population, version ${version} dated ${date}: ${statement}.`,
     economyAlt: (value, quarter) => `Economy: recession risk of ${value}% in ${quarter}.`,
     articleAlt: (title, kind, date) => `${title} (${kind === 'nota' ? 'note' : 'explainer'}, ${date}).`,
     economySection: 'Economy',
     economyLabel: 'Recession risk',
-    economySubject: (quarter) => `this quarter · ${quarter}`,
-    economyCaption: 'Where recession risk stands now — a calibrated read available before the GDP print.',
+    economySubject: (quarter) => `this quarter, ${quarter}`,
+    economyCaption: 'Where recession risk stands now: a calibrated reading, available before the GDP release.',
     economySpark: 'Probability by quarter',
-    economyFooter: (date) => `Data as of ${date}`,
-    populationSection: 'Population',
-    populationLabel: 'Open synthetic population',
-    populationSubject: 'parishes · 2021 Census',
-    populationCaption: (persons, households, parishes) => `${persons} people and ${households} households generated for the ${parishes} parishes of the 2021 Census (CAOP\u00a02021).`,
-    populationFooter: (version, date) => `Version ${version} · ${date}`,
+    economyAside: (date) => `data of ${date}`,
+    populationSection: 'Synthetic population',
+    populationAside: (date) => `dated ${date}`,
+    populationRegister: (persons, households, parishes) => [
+      { label: 'Generated people', value: persons },
+      { label: 'Generated households', value: households },
+      { label: 'Parishes', value: parishes, note: 'INE, 2021 Census' },
+    ],
+    populationFooter: (version) => `Version ${version} · CC BY-NC 4.0, INE data CC BY 4.0`,
   },
 };
 
@@ -197,7 +205,11 @@ function latestLigaMatchday() {
     const files = fs.readdirSync(dir).filter(name => /^md\d+\.json$/.test(name)).sort();
     for (const file of files.reverse()) {
       const data = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
-      if (data.table?.length) return data;
+      if (!data.table?.length) continue;
+      const read = name => (fs.existsSync(path.join(dir, name)) ? JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8')) : null);
+      // The final-points quantiles (samples.json) and the exact title count
+      // (the scenarios file's victory_paths), as the homepage reads them.
+      return { ...data, samples: read('samples.json'), scenarios: read(file.replace('.json', '_scenarios.json')) };
     }
   }
   return null;
@@ -229,10 +241,10 @@ function populationMeta() {
 function defaultCard(locale, economyIsPublished) {
   const copy = COPY[locale];
   const node = brandCard({
+    locale,
     headline: copy.brandHeadline,
     standfirst: copy.brandStandfirst,
     columns: copy.columns(economyIsPublished),
-    footerLeft: copy.brandFooter,
     footerRight: 'estimador.pt',
   });
   return { node, alt: copy.brandAlt(copy.brandHeadline, copy.brandStandfirst) };
@@ -246,48 +258,55 @@ function articleCardFor(article, locale) {
     title: article.title,
     excerpt: article.excerpt,
     kind: article.kind ?? 'explicador',
-    dateLabel: article.updated ? `${date} · ${copy.updated} ${formatDate(article.updated, locale)}` : date,
-    byline: article.author,
+    dateLabel: article.updated ? `${date}, ${copy.updated} ${formatDate(article.updated, locale)}` : date,
     readTime: `${article.readMinutes} min ${copy.readSuffix}`,
+    url: printedUrl(locale, `/artigos/${article.slug}`),
   });
   return { node, alt: copy.articleAlt(article.title, article.kind ?? 'explicador', date) };
 }
 
+/**
+ * The finding and the contenders as the homepage's Liga instrument shows
+ * them: the title share in the site's percentage rule, today's points as a
+ * square and the final-points band (median and 90% interval) on one 0–100
+ * ruler. No band on the title share: p_champion_lo/hi is the spread of
+ * 500-simulation blocks, not the model's uncertainty (audit F-H1).
+ */
 function ligaCard(data, locale) {
   const copy = COPY[locale];
   const contenders = [...data.table]
-    .filter(team => team.p_champion > 0)
+    .filter(team => team.p_champion >= 0.0005)
     .sort((a, b) => b.p_champion - a.p_champion)
     .slice(0, 3);
   if (!contenders.length) return null;
 
   const leader = contenders[0];
-  const groupedSims = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB').format(data.n_sims ?? 0);
-  const updated = data.timestamp ? formatShortDate(data.timestamp, locale) : null;
-  // No bracketed range beside the probability: p_champion_lo/hi is the spread
-  // of 500-simulation blocks, about ten times the Monte Carlo error of the
-  // published 50 000-simulation figure, and the site no longer shows it
-  // anywhere (audit F-H1). The card carries the number and its simulation count.
-  const node = figureCard({
-    sectionLabel: copy.ligaSection,
-    label: copy.ligaLabel,
-    value: formatPercent(leader.p_champion),
-    unit: '%',
-    subject: teamName(leader.team),
-    caption: data.n_sims ? copy.ligaCaption(groupedSims, data.matchday) : null,
-    // On the probability's own 0–100% scale: scaled to the leader, a 51% bar
-    // filled the track and read as certainty once the card travelled alone.
+  const when = formatReadingTime(data.timestamp, locale);
+  const points = new Map((data.actual_standings ?? []).map(s => [s.team, s.points]));
+  const q = {};
+  data.samples?.teams?.forEach((team, i) => {
+    const lo = data.samples.points_q05?.[i], md = data.samples.points_q50?.[i], hi = data.samples.points_q95?.[i];
+    if (lo != null && md != null && hi != null) q[team] = { lo, md, hi };
+  });
+  const finding = titleFinding(leader.team, leader.p_champion, locale);
+  const seasons = titleSeasons(leader.team, leader.p_champion, data.n_sims, data.scenarios?.victory_paths);
+  const hasBands = contenders.every(team => q[team.team]);
+  const node = ligaLayout({
+    locale,
+    head: { title: 'Liga Portugal', serial: copy.ligaSerial(data.matchday), aside: when ? copy.ligaAside(when) : null },
+    finding,
+    standfirst: data.n_sims ? copy.ligaStandfirst(formatCount(seasons, locale), formatCount(data.n_sims, locale)) : null,
     rows: contenders.map(team => ({
       name: teamName(team.team),
-      value: `${formatPercent(team.p_champion)}%`,
-      fraction: team.p_champion,
+      share: formatPercent(team.p_champion, locale),
       color: teamColor(team.team),
+      band: q[team.team] ? { ...q[team.team], now: points.get(team.team) ?? null } : null,
     })),
-    footerLeft: copy.ligaFooter(data.matchday, updated, data.season),
+    footerLeft: hasBands ? readingKey(['now', 'band'], locale, { fontSize: 18, words: { now: copy.ligaNow } }) : null,
     footerRight: printedUrl(locale, SITE_PATH.liga),
   });
-  const rows = contenders.map(team => `${teamName(team.team)} ${formatPercent(team.p_champion)}%`).join(', ');
-  return { node, alt: copy.ligaAlt(data.season, data.matchday, updated, rows) };
+  const rows = contenders.map(team => `${teamName(team.team)} ${formatPercent(team.p_champion, locale)}%`).join(', ');
+  return { node, alt: copy.ligaAlt(data.season, when, midSentence(finding), rows) };
 }
 
 /**
@@ -311,46 +330,41 @@ function economyCard(dashboard, locale, isPublished) {
 
   const quarter = formatQuarter(current.as_of_quarter ?? tile.as_of_quarter, locale);
   const node = figureCard({
-    sectionLabel: copy.economySection,
-    label: copy.economyLabel,
-    value: formatPercent(current.probability),
+    head: { title: copy.economySection, aside: copy.economyAside(formatDate(dashboard.vintage_date, locale)) },
+    labelText: copy.economyLabel,
+    value: formatPercent(current.probability, locale),
     unit: '%',
     subject: copy.economySubject(quarter),
     caption: copy.economyCaption,
-    spark: {
-      label: copy.economySpark,
-      values: history.map(point => point.p),
-      caption: quarterRange,
-      color: COLOR.navy,
-    },
-    footerLeft: copy.economyFooter(formatDate(dashboard.vintage_date, locale)),
+    spark: { label: copy.economySpark, values: history.map(point => point.p), caption: quarterRange },
     footerRight: printedUrl(locale, SITE_PATH.economy),
   });
-  return { node, alt: copy.economyAlt(formatPercent(current.probability), quarter) };
+  return { node, alt: copy.economyAlt(formatPercent(current.probability, locale), quarter) };
 }
 
 /**
- * Every figure is one of the release's own counts and the caveat is the
- * release's own sentence: nothing here is computed from the data, and the
- * synthetic people are never shown as anyone in particular.
+ * The homepage's population statement, the release's own caveat beside the
+ * no-margin sign before any figure, and the release counts as a register:
+ * nothing here is computed from the data, and the synthetic people are never
+ * shown as anyone in particular.
  */
 function populationCard(meta, locale) {
   const copy = COPY[locale];
   const counts = meta?.counts;
   const honesty = meta?.honesty?.portrait?.[locale];
   if (!counts?.parishes || !counts.persons || !counts.households || !honesty) return null;
-  // Grouped like formatCount on the site ("3 092"): Intl's pt-PT leaves four digits ungrouped.
-  const number = new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-GB', { useGrouping: 'always' });
-  const node = figureCard({
-    sectionLabel: copy.populationSection,
-    label: copy.populationLabel,
-    value: number.format(counts.parishes),
-    subject: copy.populationSubject,
-    caption: `${copy.populationCaption(number.format(counts.persons), number.format(counts.households), number.format(counts.parishes))} ${honesty}`,
-    footerLeft: copy.populationFooter(meta.release_version, formatDate(meta.published, locale)),
+  const parishes = formatCount(counts.parishes, locale);
+  const statement = MESSAGES[locale].home.populationTitle.replace('{parishes}', parishes);
+  const date = formatDate(meta.published, locale);
+  const node = populationLayout({
+    head: { title: copy.populationSection, serial: `v${meta.release_version}`, aside: copy.populationAside(date) },
+    statement,
+    caveat: honesty,
+    register: copy.populationRegister(formatCount(counts.persons, locale), formatCount(counts.households, locale), parishes),
+    footerLeft: copy.populationFooter(meta.release_version),
     footerRight: printedUrl(locale, SITE_PATH.population),
   });
-  return { node, alt: copy.populationAlt(number.format(counts.parishes), meta.release_version, formatDate(meta.published, locale)) };
+  return { node, alt: copy.populationAlt(midSentence(statement), meta.release_version, date) };
 }
 
 /* --------------------------------------------------------------- output --- */

@@ -7,8 +7,10 @@
  * metrics, so wrapping, ellipsis and vertical centring are measured rather than
  * estimated.
  *
- * Fonts come from the vendored `@fontsource/inter` files, never from the
- * network: the generator has to produce byte-identical output offline.
+ * The face is IBM Plex Sans, the site's own, from the vendored
+ * `@fontsource/ibm-plex-sans` files (static weights: satori reads neither
+ * woff2 nor variable fonts), never from the network: the generator has to
+ * produce byte-identical output offline.
  */
 
 import fs from 'node:fs';
@@ -20,41 +22,48 @@ import { Resvg } from '@resvg/resvg-js';
 
 export const ROOT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-/** The site's stone palette and brand accents, mirroring src/app/globals.css. */
+/**
+ * The instrument's palette, mirroring the tokens in src/app/globals.css and
+ * BRAND in src/lib/brand: ink on white, graphite for secondary words, the
+ * scale grey for ticks only, two rules, and the signal yellow, which means the
+ * model's margin and nothing else.
+ */
 export const COLOR = {
-  ground: '#f5f3ea',
-  paper: '#fcfbf5',
-  ink: '#234c40',
-  inkSoft: '#434d48',
-  muted: '#5f7062',
-  faint: '#7f9284',
-  rule: '#dadccf',
-  navy: '#234c40',
-  teal: '#245c68',
-  gold: '#c49536',
-  forest: '#122f2c',
-  // Surface pastels, for the mosaic on brand and explainer covers only.
-  mintSoft: '#9dcec1',
-  mustardSoft: '#e3c994',
-  coralSoft: '#dcafa1',
-  periwinkleSoft: '#bdc7e7',
+  ground: '#ffffff',
+  paper: '#ffffff',
+  ink: '#111111',
+  muted: '#5e5e5e',
+  scale: '#8a8a8a',
+  rule: '#d9d9d9',
+  grid: '#ececec',
+  field: '#f4f4f4',
+  signal: '#ffd400',
+  signalLow: '#fff1b3',
+  positive: '#15803d',
+  negative: '#b91c1c',
+  // On an ink ground (the dark social kit).
+  inkGround: '#111111',
+  onInk: '#ffffff',
+  onInkMuted: '#a8a8a8',
+  onInkRule: '#3a3a3a',
 };
 
+export const FONT_FAMILY = 'IBM Plex Sans';
+
 const FONT_FILES = [
-  [400, 'manrope-latin-400-normal.woff'],
-  [500, 'manrope-latin-500-normal.woff'],
-  [600, 'manrope-latin-600-normal.woff'],
-  [700, 'manrope-latin-700-normal.woff'],
-  [800, 'manrope-latin-800-normal.woff'],
+  [400, 'ibm-plex-sans-latin-400-normal.woff'],
+  [500, 'ibm-plex-sans-latin-500-normal.woff'],
+  [600, 'ibm-plex-sans-latin-600-normal.woff'],
+  [700, 'ibm-plex-sans-latin-700-normal.woff'],
 ];
 
 let fontCache = null;
 
 function loadFonts() {
   if (fontCache) return fontCache;
-  const dir = path.join(ROOT_DIR, 'node_modules', '@fontsource', 'manrope', 'files');
+  const dir = path.join(ROOT_DIR, 'node_modules', '@fontsource', 'ibm-plex-sans', 'files');
   fontCache = FONT_FILES.map(([weight, file]) => ({
-    name: 'Manrope',
+    name: FONT_FAMILY,
     weight,
     style: 'normal',
     data: fs.readFileSync(path.join(dir, file)),
@@ -84,7 +93,7 @@ export function svg(type, attributes, ...children) {
   return { type, props: { ...attributes, children: kids.length === 1 ? kids[0] : kids } };
 }
 
-/** A 1px stone rule — the divider the whole site is built out of. */
+/** A 1px rule, the divider the whole site is built out of. */
 export function rule(color = COLOR.rule, style = {}) {
   return h('div', { height: 1, backgroundColor: color, ...style });
 }
@@ -112,12 +121,26 @@ export function contentHash(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 8);
 }
 
-/** Formats a probability the way the site does: no false precision at the tails. */
-export function formatPercent(value) {
+/**
+ * A share of simulations the way the site prints it (formatPercent in
+ * src/lib/football-format.ts): whole numbers from 10%, one decimal below,
+ * "<0,1" and ">99" at the ends. Without the % sign, which cards set smaller.
+ */
+export function formatPercent(value, locale = 'pt') {
+  if (!Number.isFinite(value)) return '—';
+  if (value <= 0) return '0';
+  if (value >= 1) return '100';
+  if (value < 0.0005) return locale === 'en' ? '<0.1' : '<0,1';
+  if (value >= 0.995) return '>99';
   const pct = value * 100;
-  if (pct >= 99.5) return '>99';
-  if (pct > 0 && pct < 1) return '<1';
+  if (pct < 9.95) return pct.toFixed(1).replace('.', locale === 'en' ? '.' : ',');
   return String(Math.round(pct));
+}
+
+/** Counts grouped from four digits, with a no-break space in Portuguese ("3 092"), like formatCount. */
+export function formatCount(value, locale = 'pt') {
+  const text = new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', { useGrouping: 'always' }).format(value);
+  return locale === 'en' ? text : text.replace(/[\s\u202f]/g, '\u00a0');
 }
 
 const MONTHS = {
@@ -161,4 +184,23 @@ export function formatQuarter(quarter, locale = 'pt') {
   const match = /^(\d{4})Q([1-4])$/.exec(quarter ?? '');
   if (!match) return quarter ?? '';
   return `${match[1]} ${locale === 'pt' ? 'T' : 'Q'}${match[2]}`;
+}
+
+/**
+ * A reading's date and time in Lisbon, as the site prints it beside an
+ * instrument (formatReadingTime in src/lib/football-format.ts): "11 out.
+ * 2026, 00:11", "11 Oct 2026, 00:11".
+ */
+export function formatReadingTime(iso, locale = 'pt') {
+  if (!iso) return '';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Lisbon', year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(date).map(part => [part.type, part.value]));
+  const month = Number(parts.month);
+  const name = locale === 'en'
+    ? new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'Europe/Lisbon' }).format(date)
+    : SHORT_MONTHS.pt[month - 1];
+  return `${Number(parts.day)} ${name} ${parts.year}, ${parts.hour}:${parts.minute}`;
 }

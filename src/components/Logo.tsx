@@ -11,8 +11,8 @@ interface MarkProps {
 }
 
 /**
- * The interval mark at 24px and above: square caps, one band, a slightly left-offset
- * counter. One colour. The whiskers are separate paths so a hover on the
+ * The interval mark at 24px and above: square caps on whiskers, a square-ended
+ * band and a median slot a little left of centre. One colour. The whiskers are separate paths so a hover on the
  * wrapping `.brand-link` can open the interval (see globals.css).
  */
 export function Mark({ height = 24, color = 'currentColor', className = '', title }: MarkProps) {
@@ -36,7 +36,7 @@ export function Mark({ height = 24, color = 'currentColor', className = '', titl
   );
 }
 
-/** Below 24px: shorter whiskers, thicker caps, and the same offset counter. Square, so it fits a favicon or an avatar. */
+/** Below 24px: shorter whiskers, a taller band and the same offset slot. Square, so it fits a favicon or an avatar. */
 export function MarkSmall({ size = 16, color = 'currentColor', className = '', title }: { size?: number; color?: string; className?: string; title?: string }) {
   return (
     <svg

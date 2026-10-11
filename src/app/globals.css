@@ -517,8 +517,8 @@
   }
 
   /* The mark. On a hover or focus of the wrapping link the interval opens
-     by two units and closes again; while something loads, the counter travels
-     the band. Both stop under prefers-reduced-motion. */
+     by two units and closes again; while something loads, the median slot
+     travels the band. Both stop under prefers-reduced-motion. */
   .brand-mark-left, .brand-mark-right {
     transition: transform 0.26s cubic-bezier(0.2, 0.75, 0.2, 1);
   }
@@ -529,14 +529,14 @@
     from { transform: translateX(-3px); }
     to { transform: translateX(7px); }
   }
-  .brand-mark-loading-dot {
+  .brand-mark-loading-slot {
     animation: brand-estimating 1.1s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .brand-mark-left, .brand-mark-right { transition: none; }
     .brand-link:hover .brand-mark-left, .brand-link:hover .brand-mark-right { transform: none; }
-    .brand-mark-loading-dot { animation: none; }
+    .brand-mark-loading-slot { animation: none; }
   }
 
 

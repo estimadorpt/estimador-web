@@ -1,17 +1,19 @@
 /**
  * The estimador.pt mark and palette, in one place.
  *
- * The mark is a credible interval: square caps, one rounded band and a
- * slightly left-offset counter, drawn as a single colour. It is split into three paths so
- * the whiskers can move on hover; the combined path is what the static SVG
- * assets in public/brand use. All coordinates live in a 48×24 box.
+ * The mark is a credible interval drawn the way the pages draw one: square
+ * caps on whiskers, a square-ended band and a median slot a little left of
+ * centre (COUNTER_X), in a single colour. It is split into three paths so the
+ * whiskers can move on hover; the combined path is what the static SVG assets
+ * in public/brand use. All coordinates live in a 48×24 box; the slot is a
+ * hole (counter-wound), so the mark reads on any ground.
  */
 import geometry from './geometry.json';
 
 export const { MARK_LEFT, MARK_BAND, MARK_RIGHT, MARK_SMALL, COUNTER_X } = geometry;
 export const MARK_FULL = `${MARK_LEFT} ${MARK_BAND} ${MARK_RIGHT}`;
 
-/** Compact marks retain shorter whiskers and thicker caps in a 32×32 box. */
+/** Compact marks keep shorter whiskers and a taller band in a 32×32 box (MARK_SMALL). */
 /**
  * The interface font stacks, for SVG, Plot and canvas code that cannot read
  * CSS variables. They mirror --font-sans and --font-display in globals.css;
