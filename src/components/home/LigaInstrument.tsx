@@ -91,7 +91,7 @@ export function LigaInstrument({ locale, prediction, scenarios, deltas, quantile
         {moverSentence}
       </p>
 
-      <div className="mt-5 grid gap-x-8 gap-y-8 min-[1560px]:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="mt-5 grid gap-x-8 gap-y-8">
         <div className="min-w-0">
           <table className="w-full border-collapse text-[14px]">
             <caption className="sr-only">
@@ -156,7 +156,7 @@ export function LigaInstrument({ locale, prediction, scenarios, deltas, quantile
           </p>
         </div>
 
-        <div className="grid min-w-0 gap-x-8 gap-y-7 md:grid-cols-2 min-[1560px]:grid-cols-1">
+        <div className="grid min-w-0 gap-x-8 gap-y-7 md:grid-cols-2">
           <div>
             <h3 className="flex items-baseline gap-2 text-[19px] leading-[22px]">
               {pt ? 'Despromoção' : 'Relegation'}

@@ -504,14 +504,14 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
             <Rules items={pt ? [
               <><code className="font-mono text-[13px]">CONTAINER_CLASS</code> (mx-auto w-full max-w-7xl px-4) para tudo. Uma coluna mais estreita é uma medida alinhada à esquerda dentro dele, nunca uma segunda caixa centrada.</>,
               'Filetes: 1 px border-rule entre instrumentos, border-grid entre linhas de tabela, 1 px border-ink sob a cabeça de um instrumento ou de uma tabela, 2 px de tinta por cima do rodapé.',
-              'Pontos de quebra: sm 640, md 768, lg 1024, xl 1280, e 1560 px onde a página inicial põe a despromoção e os jogos ao lado da tabela.',
+              'Pontos de quebra: sm 640, md 768, lg 1024, xl 1280. O contentor para nos 1280 px, por isso nada se reorganiza acima disso: num ecrã largo a página ganha margens, não colunas.',
               'Página inicial: Liga em dois terços e a população no último terço a partir de lg; empilhados abaixo.',
               'Alvos de toque com 44 px pelo menos (min-h-11); campos de formulário com 44 a 48 px, etiqueta visível e 16 px de letra abaixo de 640 px.',
               'scroll-padding-top de 5rem no html, para as âncoras não ficarem debaixo do cabeçalho.',
             ] : [
               <><code className="font-mono text-[13px]">CONTAINER_CLASS</code> (mx-auto w-full max-w-7xl px-4) for everything. A narrower column is a left-aligned measure inside it, never a second centred box.</>,
               'Rules: 1px border-rule between instruments, border-grid between table rows, 1px border-ink under an instrument’s or a table’s head, 2px of ink above the footer.',
-              'Breakpoints: sm 640, md 768, lg 1024, xl 1280, and 1560px where the homepage puts relegation and the games beside the table.',
+              'Breakpoints: sm 640, md 768, lg 1024, xl 1280. The container stops at 1280px, so nothing rearranges above it: a wide screen gains margins, not columns.',
               'Homepage: the Liga in two thirds and the population in the last third from lg; stacked below.',
               'Tap targets at least 44px (min-h-11); form fields 44 to 48px, with a visible label and 16px type below 640px.',
               'scroll-padding-top of 5rem on html, so anchors do not land under the header.',

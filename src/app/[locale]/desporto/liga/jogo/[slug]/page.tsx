@@ -263,7 +263,7 @@ export default async function MatchPage({
   const roundPlayedAtIso = timing?.playedAt ?? null;
   // A game of an earlier round, still to play, outlives the round its
   // forecast waits for: it goes stale before its own kickoff.
-  const staleAt = !isPlayed && timing?.round != null && fixture.matchday !== timing.round ? roundPlayedAtIso : null;
+  const staleAt = !isPlayed && timing?.round != null && fixture.matchday < timing.round ? roundPlayedAtIso : null;
   const forecastShort = prediction?.timestamp ? formatShortDate(prediction.timestamp, locale) : "";
   const statusInput = prediction && timing
     ? {

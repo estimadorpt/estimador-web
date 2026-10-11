@@ -312,8 +312,10 @@ Then:
   of the round's games the forecast had seen and the biggest title move since the previous
   forecast; the clubs with a title chance on one 0–100 points ruler (title share, change, today's
   points as a square and the final-points band from `samples.json`, the place histogram); then,
-  stacked below until 1560px and beside the table from there, relegation (17th or 18th, `ProbBar`)
-  and the next five games as a `Coupon`.
+  below the table at every width (two columns from `md`), relegation (17th or 18th, `ProbBar`)
+  and the next five games as a `Coupon`. The container stops at 1280px, so there is never room
+  beside the table: a wide screen gains margins, not columns (a 1560px side-by-side layout
+  squeezed both into 134px columns on wide screens, 11 October 2026).
 - **População sintética** (`PopulationPanel`, the first row's last third): `ChannelHead` with the
   release version and its own date (`home.populationStatus`, "datada de 5 de outubro de 2026"),
   the statement "As 3 092 freguesias dos Censos 2021, uma a uma" (`home.populationTitle`), the
