@@ -219,7 +219,7 @@
     "aboutDescription": "As eleições presidenciais portuguesas têm duas voltas: se nenhum candidato tiver mais de 50% dos votos válidos na primeira, os dois mais votados disputam uma segunda volta. Esta previsão modelou a intenção de voto declarada nas sondagens disponíveis à data de cada previsão.",
     "candidatesModeled": "{count} candidatos modelados, mais «outros»",
     "headToHeadTitle": "Os dois primeiros, frente a frente",
-    "headToHeadFinding": "{leader} estava à frente de {other} com {probability} de probabilidade na última sondagem",
+    "headToHeadFinding": "Na última sondagem, {leader} tinha {probability} de probabilidade de estar à frente de {other}",
     "headToHeadDescription": "Probabilidade de {candidateA} estar à frente de {candidateB}, por data, até à última sondagem.",
     "leads": "lidera",
     "runoffScenariosTitle": "Os pares mais prováveis na 2.ª volta",

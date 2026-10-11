@@ -219,7 +219,7 @@
     "aboutDescription": "Portuguese presidential elections have two rounds: if no candidate wins more than 50% of the valid vote in the first, the top two contest a runoff. This forecast modelled the declared voting intention in the polls available at the date of each forecast.",
     "candidatesModeled": "{count} candidates modelled, plus “others”",
     "headToHeadTitle": "The top two, head to head",
-    "headToHeadFinding": "{leader} was ahead of {other} with a probability of {probability} at the last poll",
+    "headToHeadFinding": "At the last poll, {leader} had a {probability} chance of being ahead of {other}",
     "headToHeadDescription": "Probability that {candidateA} was ahead of {candidateB}, by date, up to the last poll.",
     "leads": "leads",
     "runoffScenariosTitle": "The most likely runoff pairs",

@@ -21,6 +21,8 @@ const eslintConfig = [
       "build/**",
       "api/dist/**",
       "output/**",
+      // Agent worktrees (git-ignored checkouts of this repository).
+      ".claude/**",
       ".playwright-cli/**",
       "coverage/**",
       "next-env.d.ts",
