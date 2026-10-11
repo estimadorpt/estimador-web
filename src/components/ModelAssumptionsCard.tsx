@@ -3,16 +3,16 @@
 import { useTranslations } from 'next-intl';
 
 /**
- * Display model assumptions prominently on forecast pages
- * Improves transparency and helps users understand model limitations
+ * The model's assumptions on the presidential archive, as a ruled list (no
+ * filled box): what the forecast modelled and what it left out.
  */
 export function ModelAssumptionsCard() {
   const t = useTranslations('model');
 
   return (
-    <div className="rounded border-l-4 border-stone-600 bg-stone-50 p-4">
-      <h3 className="text-base font-bold text-stone-900">{t('assumptions.title')}</h3>
-      <ul className="mt-2 space-y-1 text-sm text-stone-700">
+    <div className="border-t border-rule pt-3">
+      <h3 className="text-[15px] font-semibold text-ink">{t('assumptions.title')}</h3>
+      <ul className="mt-2 space-y-1 text-sm text-ink">
         {/* One bullet for the declared intention and the undecided it leaves out. */}
         <li>• {t('assumptions.declared_voters')}</li>
         <li>• {t('assumptions.house_effects')}</li>

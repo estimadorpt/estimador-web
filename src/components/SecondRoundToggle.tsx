@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from 'react';
-import { PRESSED_IN_FORCED_COLORS } from '@/lib/election-display';
+import { segmentClass, SEGMENT_GROUP_CLASS } from '@/lib/election-display';
 
 export type Round = 1 | 2;
 
@@ -48,7 +48,7 @@ interface SecondRoundToggleProps {
   };
 }
 
-/** The round switch. A plain segmented control: it never pulses or animates. */
+/** The round switch: two words in the segmented text grammar. It never pulses or animates. */
 export function SecondRoundToggle({ translations }: SecondRoundToggleProps) {
   const [currentRound, choose] = useRound();
   const button = (round: Round, label: string) => (
@@ -56,19 +56,13 @@ export function SecondRoundToggle({ translations }: SecondRoundToggleProps) {
       type="button"
       onClick={() => choose(round)}
       aria-pressed={currentRound === round}
-      // The transparent border is what forced-colours mode draws as each
-      // button's edge, and the pressed round gets an outline there, where the
-      // ink fill is dropped (A11Y3-11).
-      className={`min-h-11 px-4 py-2 text-xs font-bold rounded-md border border-transparent transition-colors ${PRESSED_IN_FORCED_COLORS} ${
-        // Ink, not ink-muted: muted ink on parchment is 4.33:1 (A11Y-15).
-        currentRound === round ? 'bg-ink text-cream' : 'text-ink hover:bg-cream'
-      }`}
+      className={segmentClass(currentRound === round)}
     >
       {label}
     </button>
   );
   return (
-    <div role="group" aria-label={translations.label} className="flex items-center gap-1 bg-parchment rounded-lg p-1">
+    <div role="group" aria-label={translations.label} className={SEGMENT_GROUP_CLASS}>
       {button(1, translations.firstRound)}
       {button(2, translations.secondRound)}
     </div>

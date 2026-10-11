@@ -1,7 +1,8 @@
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { useLocale } from 'next-intl';
+import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 
 interface Props {
   children: ReactNode;
@@ -43,26 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      return (
-        <div className="flex flex-col items-center justify-center p-8 bg-red-50 border border-red-200 rounded-lg">
-          <AlertTriangle className="w-8 h-8 text-red-500 mb-4" />
-          <h3 className="text-lg text-red-800 mb-2">
-            Something went wrong
-          </h3>
-          <p className="text-red-600 text-center mb-4">
-            {this.props.componentName 
-              ? `Failed to load ${this.props.componentName}` 
-              : 'An error occurred while rendering this component'
-            }
-          </p>
-          <button
-            onClick={() => this.setState({ hasError: false, error: undefined })}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      );
+      return <ErrorFallback kind="chart" onRetry={() => this.setState({ hasError: false, error: undefined })} />;
     }
 
     return this.props.children;
@@ -95,22 +77,34 @@ export function MapErrorBoundary({ children }: { children: ReactNode }) {
   return (
     <ErrorBoundary
       componentName="Interactive Map"
-      fallback={
-        <div className="flex flex-col items-center justify-center p-8 bg-stone-50 border border-stone-200 rounded-lg min-h-[400px]">
-          <AlertTriangle className="w-12 h-12 text-stone-400 mb-4" />
-          <h3 className="text-xl text-stone-700 mb-2">
-            Map Loading Error
-          </h3>
-          <p className="text-stone-600 text-center mb-4 max-w-md">
-            Unable to load the interactive district map. This might be due to a network issue or browser compatibility problem.
-          </p>
-          <div className="text-sm text-stone-500">
-            Please try refreshing the page or use a different browser.
-          </div>
-        </div>
-      }
+      fallback={<ErrorFallback kind="map" />}
     >
       {children}
     </ErrorBoundary>
+  );
+}
+
+/**
+ * What a reader sees when a chart or the map fails: the instrument with no
+ * reading (EmptyStateMark), one sentence in the page's language and, for a
+ * chart, one way on. No coloured box: the mark and the words carry it.
+ */
+function ErrorFallback({ kind, onRetry }: { kind: 'chart' | 'map'; onRetry?: () => void }) {
+  const pt = useLocale() !== 'en';
+  const message = kind === 'map'
+    ? (pt ? 'O mapa não carregou. Atualiza a página ou experimenta outro browser.' : 'The map did not load. Refresh the page or try another browser.')
+    : (pt ? 'Este gráfico não carregou.' : 'This chart did not load.');
+  return (
+    <div role="status" className={`flex items-center gap-4 border-t border-rule py-6 ${kind === 'map' ? 'min-h-[400px]' : ''}`}>
+      <EmptyStateMark />
+      <div>
+        <p className="text-[15px] text-ink">{message}</p>
+        {onRetry && (
+          <button type="button" onClick={onRetry} className="mt-2 inline-flex min-h-11 items-center border border-ink px-4 text-[14px] font-semibold text-ink hover:bg-field">
+            {pt ? 'Tentar outra vez' : 'Try again'}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

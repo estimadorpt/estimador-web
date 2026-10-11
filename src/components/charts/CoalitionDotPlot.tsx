@@ -6,6 +6,7 @@ import { ChartTable } from "@/components/viz/ChartTable";
 import { FURNITURE } from "@/components/viz/theme";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { leftBlocParties, rightBlocParties, majorityThreshold } from "@/lib/config/blocs";
+import { partyColors } from "@/lib/config/colors";
 import { dotsPerRowToFit, everyKthIndex, stackDots, summariseBlocs, type BlocSimulations, type SeatDraw } from "@/lib/election-aggregates";
 import { formatElectionNumber, formatElectionProbability } from "@/lib/election-display";
 import { quietPlot } from "@/components/viz/plot-a11y";
@@ -25,7 +26,13 @@ interface CoalitionDotPlotProps {
   tableCaption?: string;
 }
 
-const BLOC_COLOURS: Record<string, string> = { left: "#5eb184", right: "#c49536" };
+/**
+ * Each bloc in its largest party's colour (left: PS, right: AD), from the one
+ * party map. Neither reaches 3:1 on white (PS 2.99:1, AD 2.33:1), so the colour
+ * never carries the meaning alone: each row is named with its bloc above the
+ * dots, and the table twin holds every figure.
+ */
+const BLOC_COLOURS: Record<string, string> = { left: partyColors.PS, right: partyColors.AD };
 const PHONE_TARGET = 200;
 
 const SEAT_DOMAIN: [number, number] = [40, 140];
@@ -111,7 +118,6 @@ export function CoalitionDotPlot({
             y: "y",
             fy: "bloc",
             fill: "bloc",
-            fillOpacity: 0.8,
             r,
             title: (d: { bloc: string; seats: number }) => `${d.bloc}: ${d.seats} ${pt ? "mandatos" : "seats"}`,
             tip: true,
@@ -150,7 +156,7 @@ export function CoalitionDotPlot({
   }, [simulations, labels.left, labels.right, projectedSeatsLabel, majorityLabel, pt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (simulations.total === 0) {
-    return <p className="py-8 text-center text-stone-500">{t("noSimulations")}</p>;
+    return <p className="py-8 text-center text-graphite">{t("noSimulations")}</p>;
   }
 
   return (
@@ -160,7 +166,7 @@ export function CoalitionDotPlot({
         <span aria-hidden="true" className="inline-block w-5 border-t-2 border-dashed border-ink" />
         {majorityLabel}
       </p>
-      <p className="text-xs text-stone-500 mt-1">
+      <p className="text-xs text-graphite mt-1">
         {showingOutcomesLabel
           .replaceAll("{drawn}", formatElectionNumber(drawnHere, locale))
           .replaceAll("{total}", formatElectionNumber(simulations.total, locale))

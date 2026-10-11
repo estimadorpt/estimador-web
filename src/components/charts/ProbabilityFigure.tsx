@@ -9,7 +9,7 @@ export function ProbabilityFigure({ probability, locale, className = '' }: { pro
   const { bound, value } = electionProbabilityParts(probability, locale);
   return (
     <span className={className}>
-      {bound && <span className="mr-1 text-[max(11px,0.42em)] font-bold tracking-normal">{bound}</span>}
+      {bound && <span className="mr-1 text-[max(11px,0.42em)] font-bold">{bound}</span>}
       {value}
     </span>
   );

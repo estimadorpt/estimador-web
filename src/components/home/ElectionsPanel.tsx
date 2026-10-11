@@ -6,6 +6,7 @@ import { PARLIAMENTARY_2025_FORECAST_CUTOFF, PRESIDENTIAL_2026_SECOND_ROUND_DATE
 import { credibleIntervalLabel, formatElectionLongDate, formatElectionPercent, formatElectionProbability } from '@/lib/election-display';
 import { loadForecastData, loadSecondRoundData } from '@/lib/utils/data-loader';
 import { ChannelHead } from '@/components/instrument';
+import { likeliestWinner, mostSeats, partyWithArticle } from '@/lib/election-findings';
 import type { ElectionConfig } from '@/types';
 import { HomePanel, Kicker } from './HomePanel';
 
@@ -95,7 +96,7 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
   if (elections.some(e => e.id === 'presidential-2026')) {
     const second = await loadSecondRoundData();
     forecastCutoffs['presidential-2026'] = second.forecast.updated_at || undefined;
-    const leader = [...second.winProbability.candidates].sort((a, b) => b.win_probability - a.win_probability)[0];
+    const leader = likeliestWinner(second.winProbability.candidates);
     if (leader) findings['presidential-2026'] = t('electionsFindingRunoff', { name: leader.name, p: formatElectionProbability(leader.win_probability, locale) });
   }
   if (elections.some(e => e.id === 'parliamentary-2025')) {
@@ -130,24 +131,4 @@ export async function ElectionsPanel({ locale, variant, elections, current }: { 
       </ul>
     </section>
   );
-}
-
-/** The party with most seats in the most draws, and the share of draws it leads (ties count for no one). */
-function mostSeats(draws: Array<Record<string, number>>): { party: string; share: number } | null {
-  if (!draws.length) return null;
-  const parties = Object.keys(draws[0]).filter(k => typeof draws[0][k] === 'number' && !/scenario|sample|_id$/.test(k));
-  const wins: Record<string, number> = {};
-  for (const draw of draws) {
-    const ranked = parties.map(p => [p, draw[p]] as const).sort((a, b) => b[1] - a[1]);
-    if (ranked.length > 1 && ranked[0][1] > ranked[1][1]) wins[ranked[0][0]] = (wins[ranked[0][0]] ?? 0) + 1;
-  }
-  const [party, count] = Object.entries(wins).sort((a, b) => b[1] - a[1])[0] ?? [];
-  return party ? { party, share: count / draws.length } : null;
-}
-
-/** "A AD", "O PS": the party as the subject of a Portuguese sentence. */
-function partyWithArticle(party: string, locale: string): string {
-  if (locale === 'en') return party;
-  const feminine = new Set(['AD', 'IL', 'CDU']);
-  return `${feminine.has(party) ? 'A' : 'O'} ${party}`;
 }

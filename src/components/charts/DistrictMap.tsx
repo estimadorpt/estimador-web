@@ -9,7 +9,11 @@ import { getRegionForIsland } from '@/lib/geography/regionMapping';
 import { useTopoJsonData } from '@/hooks/useTopoJsonData';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { closeLeads } from '@/lib/election-aggregates';
+import { BRAND } from '@/lib/brand';
 import type { DistrictForecast, SelectedDistrict } from '@/types/geography';
+
+/** A district with no modelled leader: a neutral grey, never a party colour. */
+const NO_PARTY = '#bdbdbd';
 
 interface DistrictMapProps {
   districtForecast: DistrictForecast[];
@@ -98,18 +102,18 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
   }, [districtForecast]);
 
   return (
-    <div className={`w-full sm:p-3 ${className}`}>
+    <div className={`w-full ${className}`}>
       {onDistrictClick && (
-        <label className="mb-3 block text-sm font-medium text-stone-700">
+        <label className="mb-3 block text-sm font-medium text-ink">
           {pt ? 'Escolher distrito ou região' : 'Choose a district or region'}
-          <select className="mt-1 block min-h-11 w-full rounded border border-stone-300 bg-cream p-2" value={selectedDistrict ?? ''}
+          <select className="mt-1 block min-h-11 w-full border border-rule bg-paper p-2" value={selectedDistrict ?? ''}
             onChange={e => choose(e.target.value)}>
             <option value="" disabled>{pt ? 'Escolhe uma região' : 'Select a region'}</option>
             {[...regions.keys()].sort((a, b) => a.localeCompare(b, pt ? 'pt' : 'en')).map(name => <option key={name}>{name}</option>)}
           </select>
         </label>
       )}
-      {isLoading ? <p role="status" className="py-10 text-center text-stone-500">{pt ? 'A carregar mapa…' : 'Loading map…'}</p>
+      {isLoading ? <p role="status" className="py-10 text-center text-graphite">{pt ? 'A carregar mapa…' : 'Loading map…'}</p>
         : error || !groups ? <div role="alert" className="py-6 text-center">
           <p>{pt ? 'Não foi possível carregar o mapa. Podes continuar a escolher uma região na lista.' : 'The map could not load. You can still choose a region from the list.'}</p>
           <button type="button" onClick={retry} className="mt-3 underline">{pt ? 'Tentar novamente' : 'Try again'}</button>
@@ -119,15 +123,15 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
               role="group" aria-label={pt ? 'Previsão legislativa de 2025 por distrito e região' : '2025 parliamentary forecast by district and region'}>
               <defs>
                 <pattern id="district-close-lead" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                  <line x1="0" y1="0" x2="0" y2="6" stroke="#1f1f1f" strokeWidth="1.6" strokeOpacity="0.55" />
+                  <line x1="0" y1="0" x2="0" y2="6" stroke={BRAND.ink} strokeWidth="1.6" strokeOpacity="0.55" />
                 </pattern>
               </defs>
               {/* Inset frames and names: decoration, the list and the table name every region. */}
               <g aria-hidden="true">
                 {Object.entries(INSETS).map(([name, { frame: [x, y, w, h] }]) => (
                   <g key={name}>
-                    <rect x={x} y={y} width={w} height={h} rx={8} fill="none" stroke="#e2e2df" strokeWidth={1} />
-                    <text x={x + 8} y={y + 20} fontSize={17} fontWeight={700} fill="#141414">{name}</text>
+                    <rect x={x} y={y} width={w} height={h} fill="none" stroke={BRAND.line} strokeWidth={1} />
+                    <text x={x + 8} y={y + 20} fontSize={17} fontWeight={700} fill={BRAND.ink}>{name}</text>
                   </g>
                 ))}
               </g>
@@ -147,8 +151,8 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
                       if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(region); }
                     }}>
                     <title>{name}</title>
-                    {paths.map((d, i) => <path key={i} d={d} fill={partyColors[data?.winning_party ?? ''] ?? '#e2e2df'}
-                      stroke={on ? '#000000' : '#ffffff'} strokeWidth={on ? 2.5 : 0.8} />)}
+                    {paths.map((d, i) => <path key={i} d={d} fill={partyColors[data?.winning_party ?? ''] ?? NO_PARTY}
+                      stroke={on ? BRAND.inkDark : BRAND.paper} strokeWidth={on ? 2.5 : 0.8} />)}
                     {closeNames.has(region) && paths.map((d, i) => <path key={`close-${i}`} d={d} fill="url(#district-close-lead)" pointerEvents="none" />)}
                   </g>
                 );
@@ -161,19 +165,19 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
             <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-ink" aria-label={pt ? 'Cores do mapa' : 'Map colours'}>
               {leaders.map(party => (
                 <li key={party} className="flex items-center gap-1.5">
-                  <span aria-hidden="true" className="inline-block size-3 rounded-sm" style={{ backgroundColor: partyColors[party] ?? '#e2e2df' }} />
+                  <span aria-hidden="true" className="inline-block size-3" style={{ backgroundColor: partyColors[party] ?? NO_PARTY }} />
                   {partyNames[party as keyof typeof partyNames] ?? party} {pt ? 'à frente' : 'ahead'}
                 </li>
               ))}
               {close.length > 0 && (
                 <li className="flex items-center gap-1.5">
-                  <svg aria-hidden="true" width="12" height="12" className="rounded-sm"><rect width="12" height="12" fill="#e8e6dc" /><path d="M-2 4 L4 -2 M-2 10 L10 -2 M4 14 L14 4" stroke="#1f1f1f" strokeWidth="1.6" strokeOpacity="0.55" /></svg>
+                  <svg aria-hidden="true" width="12" height="12"><rect width="12" height="12" fill={BRAND.parchment} /><path d="M-2 4 L4 -2 M-2 10 L10 -2 M4 14 L14 4" stroke={BRAND.ink} strokeWidth="1.6" strokeOpacity="0.55" /></svg>
                   {pt ? 'Menos de 1 ponto entre os dois primeiros' : 'Under 1 point between the top two'}
                 </li>
               )}
             </ul>
             {close.length > 0 && (
-              <p className="mt-2 text-xs text-stone-600">
+              <p className="mt-2 text-xs text-graphite">
                 {close.map(c => pt
                   ? `${c.district}: ${c.first.party} ${format(c.first.share)} e ${c.second.party} ${format(c.second.share)}. A cor dá o distrito ao ${c.first.party}, mas a previsão era praticamente um empate.`
                   : `${c.district}: ${c.first.party} ${format(c.first.share)} and ${c.second.party} ${format(c.second.share)}. The colour gives the district to ${c.first.party}, but the forecast was close to a tie.`).join(' ')}
@@ -182,7 +186,7 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
           </>
         )}
       {active && activeSorted && (
-        <div className="mt-3 text-sm text-stone-700" aria-live="polite">
+        <div className="mt-3 text-sm text-ink" aria-live="polite">
           <p><strong>{active.district_name}</strong> · {pt ? 'percentagem de votos prevista (estimativa)' : 'predicted vote share (estimate)'}</p>
           <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 tabular-nums">
             {activeSorted.map(([party, value]) => <li key={party}>{party} {format(value)}</li>)}
@@ -195,7 +199,7 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
         columns={[pt ? 'Distrito ou região' : 'District or region', pt ? 'À frente' : 'Leading', ...tableParties]}
         rows={[...districtForecast].sort((a, b) => a.district_name.localeCompare(b.district_name, pt ? 'pt' : 'en')).map(d => [d.district_name, d.winning_party, ...tableParties.map(p => d.probs[p] != null ? format(d.probs[p]) : '—')])}
       />
-      <p className="mt-2 text-xs text-stone-500">{pt ? 'A cor indica o partido com maior percentagem de votos prevista (estimativa), não uma probabilidade de vitória. Arquivo da previsão, não resultados oficiais.' : 'Colour shows the party with the highest estimated vote share, not a probability of winning. Archived forecast, not official results.'}</p>
+      <p className="mt-2 text-xs text-graphite">{pt ? 'A cor indica o partido com maior percentagem de votos prevista (estimativa), não uma probabilidade de vitória. Arquivo da previsão, não resultados oficiais.' : 'Colour shows the party with the highest estimated vote share, not a probability of winning. Archived forecast, not official results.'}</p>
     </div>
   );
 }

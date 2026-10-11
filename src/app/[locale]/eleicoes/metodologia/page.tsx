@@ -37,10 +37,10 @@ const anchorClass = `tap-target ${linkClass}`;
  */
 const headingsWithIds = getMDXComponents({
   h2: ({ children }) => (
-    <h2 id={headingSlug(headingText(children))} className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight">{children}</h2>
+    <h2 id={headingSlug(headingText(children))} className="text-2xl text-ink mt-12 mb-3">{children}</h2>
   ),
   h3: ({ children }) => (
-    <h3 id={headingSlug(headingText(children))} className="text-lg text-stone-900 mt-8 mb-2">{children}</h3>
+    <h3 id={headingSlug(headingText(children))} className="text-lg text-ink mt-8 mb-2">{children}</h3>
   ),
 });
 
@@ -62,7 +62,7 @@ export default async function ElectionMethodologyPage({ params }: { params: Prom
           measure="reading"
           compact
           eyebrow={pt ? 'Eleições · arquivo' : 'Elections · archive'}
-          title={pt ? 'Como foram feitas as previsões eleitorais?' : 'How were the election forecasts made?'}
+          title={pt ? 'Como foram feitas as previsões eleitorais' : 'How the election forecasts were made'}
           lede={pt
             ? 'Os modelos das previsões arquivadas, tal como correram: as legislativas de 2025, com sondagens até 15 de maio de 2025, e as presidenciais de 2026, com sondagens até 15 de janeiro (1.ª volta) e 6 de fevereiro de 2026 (2.ª volta).'
             : 'The models behind the archived forecasts, as they ran: the 2025 parliamentary election, with polls up to 15 May 2025, and the 2026 presidential election, with polls up to 15 January (first round) and 6 February 2026 (runoff).'}

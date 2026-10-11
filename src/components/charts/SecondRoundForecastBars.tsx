@@ -56,19 +56,19 @@ export function SecondRoundForecastBars({
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: candidate.color }} />
-                <span className="text-sm font-medium text-stone-800">{candidate.label}</span>
+                <span className="text-sm font-medium text-ink">{candidate.label}</span>
                 {index === 0 && !candidate.isBlankNull && (
-                  <span className="text-[11px] text-stone-500">{translations.leading}</span>
+                  <span className="text-[11px] text-graphite">{translations.leading}</span>
                 )}
               </div>
-              <span className="text-sm font-semibold text-stone-900 tabular-nums">{formatPercent(candidate.mean)}</span>
+              <span className="text-sm font-semibold text-ink tabular-nums">{formatPercent(candidate.mean)}</span>
             </div>
 
             <div className="relative h-5 flex items-center" aria-hidden="true">
               <div className="absolute inset-x-0 top-1/2 h-px bg-line" />
               {showUncertainty && (
                 <div
-                  className="absolute h-1 rounded-full"
+                  className="absolute h-1"
                   style={{
                     left: `${ciLowerPos}%`,
                     width: `${ciUpperPos - ciLowerPos}%`,
@@ -92,7 +92,7 @@ export function SecondRoundForecastBars({
             </div>
 
             {showUncertainty && (
-              <div className="text-[11px] text-stone-500 mt-1 tabular-nums">
+              <div className="text-[11px] text-graphite mt-1 tabular-nums">
                 {translations.confidenceInterval}: {formatPercent(candidate.ci_lower)}–{formatPercent(candidate.ci_upper)}
               </div>
             )}
@@ -100,11 +100,11 @@ export function SecondRoundForecastBars({
         );
       })}
 
-      <div className="relative h-5 mt-3 border-t border-stone-200" aria-hidden="true">
+      <div className="relative h-5 mt-3 border-t border-rule" aria-hidden="true">
         {ticks.map((tick, i) => (
           <span
             key={tick}
-            className="absolute top-1.5 text-xs text-stone-500 tabular-nums"
+            className="absolute top-1.5 text-xs text-graphite tabular-nums"
             style={i === 0 ? { left: 0 } : i === ticks.length - 1 ? { right: 0 } : { left: `${(tick / scaleMax) * 100}%`, transform: 'translateX(-50%)' }}
           >
             {formatElectionPercent(tick, locale, 0)}

@@ -7,7 +7,6 @@ import { formatElectionLongDate, formatElectionNumber, formatElectionPercent, fo
 import { closeLeads } from "@/lib/election-aggregates";
 import { electionMethodHref } from "@/lib/election-methodology";
 import { ProbabilityFigure } from "@/components/charts/ProbabilityFigure";
-import { Calendar, BarChart3, TrendingUp, Users, Vote } from "lucide-react";
 import { PollingChart } from "@/components/charts/PollingChart";
 import { SeatChart } from "@/components/charts/SeatChart";
 import { DistrictSummary } from "@/components/charts/DistrictSummary";
@@ -48,8 +47,8 @@ const linkClass = 'text-ink underline underline-offset-4 hover:text-ink-muted';
  * The gap stands in for the space before an arrow, which a flex box collapses.
  */
 const standaloneLinkClass = `inline-flex min-h-11 items-center gap-1 ${linkClass}`;
-/** A section's question over its chart frame, as on the Liga hub. */
-const sectionTitleClass = 'text-2xl text-stone-900 mb-3 tracking-tight';
+/** A section's heading over its chart frame, as on the Liga hub. */
+const sectionTitleClass = 'text-2xl text-ink mb-3';
 
 export default async function ParliamentaryArchivePage({
   params
@@ -103,7 +102,7 @@ export default async function ParliamentaryArchivePage({
     return (
       <>
         <span className="font-bold">{pct(mean)}</span>
-        {low != null && high != null && <> <span className="whitespace-nowrap font-normal text-stone-600">({pct(low)}–{pct(high)})</span></>}
+        {low != null && high != null && <> <span className="whitespace-nowrap font-normal text-graphite">({pct(low)}–{pct(high)})</span></>}
       </>
     );
   };
@@ -125,30 +124,28 @@ export default async function ParliamentaryArchivePage({
   const external = <span aria-hidden="true"> ↗</span>;
   const arrow = <span aria-hidden="true"> →</span>;
 
-  // One column per group of parties, in one card: the two blocs with their
-  // majority odds, and the parties in neither bloc (CH, PAN), so every
-  // modelled party's projected share is on the page. The groups hold two to
-  // four parties, so as three cards the shorter ones were stretched to the
-  // tallest and ended in blank cream; as columns of one card, split by
-  // hairlines, each reads top-down at its own length.
+  // One column per group of parties: the two blocs with their majority odds,
+  // and the parties in neither bloc (CH, PAN), so every modelled party's
+  // projected share is on the page. Columns under one ink rule, no card:
+  // each reads top-down at its own length.
   const blocColumn = (title: string, parties: string[], majority: number | null) => (
-    <div className="p-6">
-      <h3 className="text-lg text-stone-900 mb-4">{title}</h3>
+    <div className="border-b border-rule py-4 lg:border-b-0">
+      <h3 className="text-lg text-ink mb-3">{title}</h3>
       <div className="space-y-3">
         {parties.map(party => (
           <div key={party} className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 pt-0.5">
-              <div aria-hidden="true" className="w-3 h-3 shrink-0 rounded" style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }} />
-              <span className="text-sm font-medium text-stone-900">{t(`parties.${party}`)}</span>
+              <div aria-hidden="true" className="w-3 h-3 shrink-0" style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }} />
+              <span className="text-sm font-medium text-ink">{t(`parties.${party}`)}</span>
             </div>
-            <span className="text-right text-sm text-stone-900 tabular-nums">{projection(party)}</span>
+            <span className="text-right text-sm text-ink tabular-nums">{projection(party)}</span>
           </div>
         ))}
         {majority != null && (
           <div className="border-t border-line pt-3 mt-3">
             <div className="flex items-center justify-between font-semibold">
-              <span className="text-sm text-stone-900">{t('forecast.majorityChance')}</span>
-              <ProbabilityFigure probability={majority} locale={locale} className="text-lg text-stone-900 tabular-nums" />
+              <span className="text-sm text-ink">{t('forecast.majorityChance')}</span>
+              <ProbabilityFigure probability={majority} locale={locale} className="text-lg text-ink tabular-nums" />
             </div>
           </div>
         )}
@@ -165,24 +162,19 @@ export default async function ParliamentaryArchivePage({
           (CL3-V01); the kicker then names the archive's year, not the section. */}
       <PageHero
         compact
-        illustration="elections"
         back={{ href: '/eleicoes/arquivo', label: t('nav.elections'), locale }}
-        icon={<Vote aria-hidden="true" className="w-4 h-4" />}
         eyebrow={t('forecast.archiveEyebrow')}
         lede={t('forecast.archiveLede')}
         title={t('forecast.subtitle')}
         meta={
           <>
-            <span className="inline-flex items-center gap-1">
-              <Calendar aria-hidden="true" className="w-3 h-3" />
-              {t('forecast.forecastDateLine', { forecast: forecastDate, election: electionDate })}
-            </span>
+            <span>{t('forecast.forecastDateLine', { forecast: forecastDate, election: electionDate })}</span>
             <a href={officialResults.href} className={standaloneLinkClass} rel="noopener noreferrer">{t('forecast.officialResults')}{external}</a>
           </>
         }
       />
 
-      <nav aria-label={t('presidential.inThisArchive')} className="border-b border-line bg-paper">
+      <nav aria-label={t('presidential.inThisArchive')} className="border-b border-line">
         <div className="mx-auto flex max-w-7xl flex-wrap gap-x-5 gap-y-2 px-4 py-3 text-sm">
           <a href="#overview" className={`tap-target ${linkClass}`}>{t('presidential.navForecast')}</a>
           <a href="#polling" className={`tap-target ${linkClass}`}>{t('presidential.navUncertainty')}</a>
@@ -193,7 +185,7 @@ export default async function ParliamentaryArchivePage({
       {!archive.available ? (
         <section id="overview">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <p className="max-w-2xl text-stone-600">{t('forecast.unavailable')}</p>
+            <p className="max-w-2xl text-graphite">{t('forecast.unavailable')}</p>
           </div>
         </section>
       ) : (
@@ -225,7 +217,7 @@ export default async function ParliamentaryArchivePage({
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4 space-y-12">
 
-          {/* Each chart under its question and in the one chart frame
+          {/* Each chart under its heading and in the one chart frame
               (DataCard: title, plot, source, forecast date, method). */}
           <div id="polling">
             <h2 className={sectionTitleClass}>{t('forecast.pollingTrends')}</h2>
@@ -278,7 +270,7 @@ export default async function ParliamentaryArchivePage({
 
           <div id="district-analysis">
             <div className="flex flex-wrap items-center justify-between gap-x-3 mb-3">
-              <h2 className="text-2xl text-stone-900 tracking-tight">{t('forecast.districtAnalysis')}</h2>
+              <h2 className="text-2xl text-ink">{t('forecast.districtAnalysis')}</h2>
               <Link href="/eleicoes/legislativas/mapa" locale={locale} className={`text-sm font-medium ${standaloneLinkClass}`}>
                 {t('map.title')}{arrow}
               </Link>
@@ -295,8 +287,8 @@ export default async function ParliamentaryArchivePage({
 
           {/* One caption for the three cards: it was repeated in each. */}
           <div>
-            <p className="mb-4 max-w-3xl text-sm text-stone-600">{t('forecast.blocProjectionCaption', { election: electionDate, date: forecastDate })}</p>
-            <div className="grid divide-y divide-line rounded-2xl border border-line bg-cream lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+            <p className="mb-4 max-w-3xl text-sm text-graphite">{t('forecast.blocProjectionCaption', { election: electionDate, date: forecastDate })}</p>
+            <div className="grid border-t border-ink lg:grid-cols-3 lg:gap-x-10">
               {blocColumn(leftName, leftParties, probabilities.leftMajority)}
               {blocColumn(rightName, rightParties, probabilities.rightMajority)}
               {blocColumn(t('forecast.otherParties'), otherParties, null)}
@@ -307,7 +299,7 @@ export default async function ParliamentaryArchivePage({
               main-path answer, so the matrix sits behind the one show/hide
               control inside its chart frame. The heading stays outside. */}
           <div>
-            <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('forecast.pollingHouseEffects')}</h2>
+            <h2 className="text-2xl text-ink mb-3">{t('forecast.pollingHouseEffects')}</h2>
             <DataCard
               title={pt ? 'Desvio de cada empresa de sondagens, por partido' : 'Each polling firm’s deviation, by party'}
               source={pollsSource}
@@ -333,29 +325,20 @@ export default async function ParliamentaryArchivePage({
 
       <section className="pb-8">
         <div className="max-w-7xl mx-auto px-4 space-y-8">
-          <div id="evidence" className="bg-paper border border-line rounded-2xl p-6">
-            <h2 className="text-2xl text-stone-900 mb-4">{t('forecast.aboutModel')}</h2>
-            <div className="grid md:grid-cols-3 gap-6 text-sm text-stone-600">
+          <div id="evidence">
+            <h2 className="border-b border-ink pb-2 text-2xl text-ink mb-4">{t('forecast.aboutModel')}</h2>
+            <div className="grid md:grid-cols-3 gap-6 text-sm text-graphite">
               <div>
-                <h3 className="flex items-center gap-2 mb-2 text-base font-bold text-ink">
-                  <Users aria-hidden="true" className="w-4 h-4" />
-                  {t('forecast.dataSources')}
-                </h3>
+                <h3 className="mb-2 text-base font-semibold text-ink">{t('forecast.dataSources')}</h3>
                 <p>{t('forecast.dataSourcesDescription')}</p>
               </div>
               <div>
-                <h3 className="flex items-center gap-2 mb-2 text-base font-bold text-ink">
-                  <BarChart3 aria-hidden="true" className="w-4 h-4" />
-                  {t('forecast.methodology')}
-                </h3>
+                <h3 className="mb-2 text-base font-semibold text-ink">{t('forecast.methodology')}</h3>
                 <p>{t('forecast.methodologyDescription')}</p>
                 <Link href="/eleicoes/metodologia#legislativas" locale={locale} className={`mt-1 ${standaloneLinkClass}`}>{t('common.methodology')}{arrow}</Link>
               </div>
               <div>
-                <h3 className="flex items-center gap-2 mb-2 text-base font-bold text-ink">
-                  <TrendingUp aria-hidden="true" className="w-4 h-4" />
-                  {t('forecast.updates')}
-                </h3>
+                <h3 className="mb-2 text-base font-semibold text-ink">{t('forecast.updates')}</h3>
                 <p>{t('forecast.updatesDescription', { date: forecastDate })}</p>
                 <a href={officialResults.href} className={`mt-1 ${standaloneLinkClass}`} rel="noopener noreferrer">{t('forecast.officialResults')}{external}</a>
               </div>
@@ -367,7 +350,7 @@ export default async function ParliamentaryArchivePage({
           <SectionNotes
             section="elections"
             locale={locale}
-            containerClassName="border-t border-stone-200 pt-8"
+            containerClassName="border-t border-rule pt-8"
           />
         </div>
       </section>

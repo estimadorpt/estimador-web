@@ -25,32 +25,33 @@ export function SecondRoundScenarios({ simulations, locale, translations }: Seco
   ];
 
   return (
-    <div className="space-y-4" data-testid="scenarios">
+    <div data-testid="scenarios">
       {/* A section of the page like its siblings, so the same level and size. */}
-      <h2 className="text-2xl text-stone-900 tracking-tight">
+      <h2 className="text-2xl text-ink">
         {translations.keyScenarios}
       </h2>
 
-      <div className="space-y-4">
+      <ul className="mt-4 border-t border-ink">
         {scenarios.map((scenario) => (
-          <div key={scenario.key} className="bg-cream rounded-2xl border border-stone-200 p-4">
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <span className="text-sm text-stone-700">{scenario.label}</span>
-              <span className="shrink-0 whitespace-nowrap text-sm font-bold text-stone-900 tabular-nums">
+          <li key={scenario.key} className="border-b border-grid py-3">
+            <div className="flex items-baseline justify-between gap-3 mb-2">
+              <span className="text-sm text-ink">{scenario.label}</span>
+              <span className="shrink-0 whitespace-nowrap text-sm font-bold text-ink tabular-nums">
                 {formatElectionProbability(scenario.probability, locale)}
               </span>
             </div>
-            <div className="relative h-3 bg-parchment rounded-full overflow-hidden" aria-hidden="true">
+            {/* An ink bar on a thin scale rule, no grey track. */}
+            <div className="relative h-3 border-b border-scale" aria-hidden="true">
               <div
-                className="absolute left-0 top-0 h-full rounded-full bg-stone-500"
+                className="absolute left-0 top-0 h-2 bg-ink"
                 style={{ width: `${Math.min(100, scenario.probability * 100)}%` }}
               />
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
 
-      <p className="text-xs text-stone-500">
+      <p className="mt-3 text-xs text-graphite">
         {translations.scenarioDescription}
       </p>
     </div>

@@ -57,7 +57,7 @@ export function PresidentialHeadToHead({ data, cutoffDate, height = 260, transla
   }, [dates, probability_a_leads, cutoffDate]);
 
   if (filteredDates.length === 0) {
-    return <p className="text-stone-500 text-center py-8">{translations.empty}</p>;
+    return <p className="text-graphite text-center py-8">{translations.empty}</p>;
   }
 
   const phone = width < 640;
@@ -121,16 +121,16 @@ export function PresidentialHeadToHead({ data, cutoffDate, height = 260, transla
           )}
         </svg>
         {hover != null && (
-          <div aria-hidden="true" className="pointer-events-none absolute top-2 z-10 rounded-lg border border-line bg-cream px-3 py-2 text-xs text-ink"
+          <div aria-hidden="true" className="pointer-events-none absolute top-2 z-10 border border-line bg-paper px-3 py-2 text-xs text-ink"
             style={tipX > width / 2 ? { right: width - tipX + 8 } : { left: tipX + 8 }}>
             <div className="font-bold">{formatElectionShortDate(filteredDates[hover], locale)}</div>
             <div className="tabular-nums">{candidate_a} {translations.probability}: <strong>{formatElectionProbability(filteredProbs[hover], locale)}</strong></div>
           </div>
         )}
       </div>
-      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-stone-600">
-        <span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: color_a, opacity: 0.5 }} />{candidate_a} {translations.probability}</span>
-        <span className="inline-flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: color_b, opacity: 0.5 }} />{candidate_b} {translations.probability}</span>
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-graphite">
+        <span className="inline-flex items-center gap-2"><span className="size-3" style={{ background: color_a, opacity: 0.5 }} />{candidate_a} {translations.probability}</span>
+        <span className="inline-flex items-center gap-2"><span className="size-3" style={{ background: color_b, opacity: 0.5 }} />{candidate_b} {translations.probability}</span>
         <span className="text-ink">{translations.lastValue} ({formatElectionLongDate(filteredDates[filteredDates.length - 1], locale)}): <strong>{leaderLast} {formatElectionProbability(leaderProb, locale)}</strong></span>
       </div>
       {/* Newest first: the last poll's value, which the line above quotes, opens the table. */}

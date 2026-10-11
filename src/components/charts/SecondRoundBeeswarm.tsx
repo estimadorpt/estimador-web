@@ -130,7 +130,7 @@ export function SecondRoundBeeswarm({ simulations, translations }: SecondRoundBe
         <span aria-hidden="true" className="inline-block w-5 border-t-2 border-dashed border-ink" />
         {translations.fiftyPercentLine}
       </p>
-      <p className="text-xs text-stone-500 mt-1">
+      <p className="text-xs text-graphite mt-1">
         {translations.drawnCaption
           .replaceAll('{drawn}', formatElectionNumber(drawnHere, locale))
           .replaceAll('{total}', formatElectionNumber(simulations.total, locale))}

@@ -4,8 +4,9 @@ import { PageHero } from '@/components/PageHero';
 import { Action } from '@/components/brand/Action';
 import { createPageMetadata } from '@/lib/metadata';
 import { OFFICIAL_RESULTS, PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE, PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from '@/lib/config/elections';
-import { formatElectionLongDate } from '@/lib/election-display';
-import { loadSecondRoundData, loadPresidentialData } from '@/lib/utils/data-loader';
+import { formatElectionLongDate, formatElectionProbability } from '@/lib/election-display';
+import { likeliestWinner, mostSeats, partyWithArticle } from '@/lib/election-findings';
+import { loadSecondRoundData, loadPresidentialData, loadForecastData } from '@/lib/utils/data-loader';
 import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -28,8 +29,13 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
   setRequestLocale(locale);
   const pt = locale === 'pt';
   const date = (value: string) => formatElectionLongDate(value, locale);
-  const [first, second] = await Promise.all([loadPresidentialData(), loadSecondRoundData()]);
+  const [first, second, parliamentary] = await Promise.all([loadPresidentialData(), loadSecondRoundData(), loadForecastData()]);
   const forecastOf = (value?: string | null) => (value ? (pt ? `previsão de ${date(value)}` : `forecast of ${date(value)}`) : null);
+  // Each archive's finding, read from its own files: the same sentences the
+  // homepage states (src/lib/election-findings.ts).
+  const winner = likeliestWinner(second.winProbability.candidates);
+  const seatsLeader = mostSeats(parliamentary.seatData);
+  const p = (value: number) => formatElectionProbability(value, locale);
   // One entry per archived forecast, naming its own election, round(s),
   // forecast date and the kind of question it answers — so a visitor can
   // tell "winner/runoff" and "seats/majority" apart before opening either
@@ -45,6 +51,9 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
       question: pt
         ? 'Pergunta de vencedor e segunda volta: quem venceria e se seria precisa uma segunda volta.'
         : 'A winner and runoff question: who would win, and whether a runoff would be needed.',
+      finding: winner
+        ? (pt ? `${winner.name} vencia a 2.ª volta em ${p(winner.win_probability)} das simulações` : `${winner.name} won the runoff in ${p(winner.win_probability)} of the simulations`)
+        : null,
       results: OFFICIAL_RESULTS['presidential-2026'],
     },
     {
@@ -54,6 +63,9 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
       question: pt
         ? 'Pergunta de mandatos e maioria: que partido teria mais mandatos e se um bloco atingiria a maioria. É uma pergunta diferente da de um vencedor.'
         : 'A seats and majority question: which party would win most seats and whether a bloc would reach a majority. It is a different question from a winner.',
+      finding: seatsLeader
+        ? (pt ? `${partyWithArticle(seatsLeader.party, locale)} elegia mais deputados do que qualquer outro partido em ${p(seatsLeader.share)} das simulações` : `${seatsLeader.party} won more seats than any other party in ${p(seatsLeader.share)} of the simulations`)
+        : null,
       results: OFFICIAL_RESULTS['parliamentary-2025'],
     },
   ];
@@ -75,21 +87,21 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
     <PageHero
       measure="wide"
       compact
-      illustration="elections"
       eyebrow={pt ? 'Eleições · arquivo' : 'Elections · archive'}
-      title={pt ? 'As eleições passaram. O que diziam as previsões?' : 'The elections are over. What did the forecasts say?'}
+      title={pt ? 'As previsões eleitorais, como foram publicadas' : 'The election forecasts, as they were published'}
       lede={pt ? 'Um arquivo permite voltar à informação disponível na altura. Não é uma página de resultados oficiais. Não há eleição em curso.' : 'An archive lets you revisit the information available at the time. It is not a page of official results. There is no election under way.'}
     />
     <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
       <section aria-labelledby="archive-choice-title" className="border-b border-line pb-7">
-        <p className="text-[12px] font-semibold text-graphite text-ink-muted">{pt ? 'Começar por aqui' : 'Start here'}</p>
-        <h2 id="archive-choice-title" className="mt-2 text-2xl">{pt ? 'Escolhe uma previsão' : 'Choose a forecast'}</h2>
+        <p className="text-[12px] text-graphite">{pt ? 'Começar por aqui' : 'Start here'}</p>
+        <h2 id="archive-choice-title" className="mt-1 text-2xl">{pt ? 'Escolhe uma previsão' : 'Choose a forecast'}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">{pt ? 'Abre a previsão que queres situar no tempo. Encontrarás a data, a volta e as estimativas então publicadas.' : 'Open the forecast you want to place in time. It contains the date, election round and estimates published then.'}</p>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="mt-5 grid gap-x-10 gap-y-6 sm:grid-cols-2">
           {entries.map(entry => (
-            <div key={entry.href} className="rounded-2xl border border-line bg-cream p-5">
+            <div key={entry.href} className="border-t border-ink pt-3">
               <h3 className="text-lg font-semibold text-ink">{entry.name}</h3>
               {entry.rounds.map(line => <p key={line} className="mt-1 text-sm text-ink-muted">{line}</p>)}
+              {entry.finding && <p className="disp mt-3 text-[22px] leading-[1.1] md:text-[24px]">{entry.finding}</p>}
               <p className="mt-3 text-sm leading-relaxed text-ink-muted">{entry.question}</p>
               <div className="mt-4">
                 {/* Two equal choices, one style: a primary on the first card read as a recommendation. */}
@@ -123,7 +135,7 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
         <h2 id="archive-guide-title" className="text-2xl">{pt ? 'Antes de tirar conclusões' : 'Before drawing conclusions'}</h2>
         <div className="mt-5 grid gap-8 md:grid-cols-3">
           {guide.map(([label, title, body]) => <section key={label} className="border-t border-line pt-5">
-            <p className="text-xs font-semibold text-ink-muted">{label}</p>
+            <p className="text-[12px] text-graphite">{label}</p>
             <h3 className="mt-3 text-xl">{title}</h3>
             <p className="mt-3 leading-relaxed text-ink-muted">{body}</p>
           </section>)}

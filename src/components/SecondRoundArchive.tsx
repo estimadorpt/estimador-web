@@ -10,7 +10,8 @@ import { TextLink } from './brand/TextLink';
 import { DataCard } from './viz/DataCard';
 import { PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections';
 import { BLANK_NULL } from '@/lib/election-aggregates';
-import { credibleIntervalLabel, formatElectionLongDate, formatElectionNumber } from '@/lib/election-display';
+import { credibleIntervalLabel, formatElectionLongDate, formatElectionNumber, formatElectionProbability } from '@/lib/election-display';
+import { likeliestWinner } from '@/lib/election-findings';
 import type { SecondRoundArchive as SecondRoundArchiveData } from '@/lib/utils/data-loader';
 
 /**
@@ -26,7 +27,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
     return (
       <section id="forecast" className="border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-10">
-          <p className="max-w-2xl text-stone-600">{t('unavailable')}</p>
+          <p className="max-w-2xl text-graphite">{t('unavailable')}</p>
         </div>
       </section>
     );
@@ -37,6 +38,9 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
   const electionLabel = formatElectionLongDate(PRESIDENTIAL_2026_SECOND_ROUND_DATE, locale);
   const interval95 = credibleIntervalLabel(.025, .975, locale);
   const [candidateA, candidateB] = data.winProbability.candidates;
+  // The headline is the finding the homepage states too: who won the runoff
+  // in what share of the simulations.
+  const winner = likeliestWinner(data.winProbability.candidates);
   const hasTrend = Object.keys(data.trends.candidates || {}).length > 0 && data.trends.dates.length > 0;
   const total = formatElectionNumber(simulations.total, locale);
   const pt = locale === 'pt';
@@ -56,8 +60,8 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
         <div className="max-w-7xl mx-auto px-4 py-7">
           <div className="max-w-3xl">
             <p className="text-[12px] font-semibold text-graphite mb-2">{t('title')}</p>
-            <h2 className="text-2xl md:text-3xl text-stone-900 mb-3 leading-tight">{t('archiveTitle')}</h2>
-            <p className="text-lg text-stone-600 mb-4 leading-relaxed">
+            <h2 className="text-2xl md:text-3xl text-ink mb-3 leading-tight">{t('archiveTitle', { name: winner?.name ?? '', p: winner ? formatElectionProbability(winner.win_probability, locale) : '' })}</h2>
+            <p className="text-lg text-graphite mb-4 leading-relaxed">
               {t('headlineDescription', { date: cutoffLabel, election: electionLabel, candidateA: candidateA?.name ?? '', candidateB: candidateB?.name ?? '' })}
             </p>
             <TextLink href="/eleicoes/metodologia#segunda-volta-2026" locale={locale} className="text-sm">
@@ -67,7 +71,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
         </div>
       </section>
 
-      <section className="py-8 bg-paper border-b border-line">
+      <section className="py-8 border-b border-line">
         <div className="max-w-7xl mx-auto px-4">
           <ErrorBoundary componentName="Winner Cards">
             <SecondRoundWinnerCards
@@ -85,7 +89,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
         </div>
       </section>
 
-      <section className="py-8 bg-cream border-b border-stone-200">
+      <section className="py-8 border-b border-rule">
         <div className="mx-auto w-full max-w-7xl px-4"><div className="max-w-3xl">
           <ErrorBoundary componentName="Vote Split">
             <SecondRoundVoteSplit validVotes={data.validVotes} translations={{ validVotesNote: t('validVotesNote') }} />
@@ -93,12 +97,12 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
         </div></div>
       </section>
 
-      <section id="trajectory" className="py-10 border-b border-stone-300">
+      <section id="trajectory" className="py-10 border-b border-rule">
         <div className="max-w-7xl mx-auto px-4">
-          {/* The question, its caveat, then the frame: the explanation is the
+          {/* The heading, its caveat, then the frame: the explanation is the
               frame's subtitle, not a second grey line above it (UXD3-11). */}
-          <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('supportTrends')}</h2>
-          <p className="text-xs text-stone-600 mb-6 max-w-xl border-l-2 border-line pl-3">
+          <h2 className="text-2xl text-ink mb-3">{t('supportTrends')}</h2>
+          <p className="text-[13px] leading-5 text-graphite mb-6 max-w-xl">
             {t('noRunoffPollsNote', { date: cutoffLabel })}
           </p>
           {hasTrend ? (
@@ -121,14 +125,14 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
               </ErrorBoundary>
             </DataCard>
           ) : (
-            <p className="text-sm text-stone-500">{t('noTrend')}</p>
+            <p className="text-sm text-graphite">{t('noTrend')}</p>
           )}
         </div>
       </section>
 
-      <section className="py-10 border-b border-stone-300">
+      <section className="py-10 border-b border-rule">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('simulationDistribution')}</h2>
+          <h2 className="text-2xl text-ink mb-3">{t('simulationDistribution')}</h2>
           <DataCard
             title={pt ? 'Votos válidos de cada candidato no dia da eleição, por simulação' : 'Each candidate’s valid-vote share on election day, by simulation'}
             subtitle={t('simulationDescription')}
@@ -154,7 +158,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
         </div>
       </section>
 
-      <section className="py-10 bg-paper border-b border-line">
+      <section className="py-10 border-b border-line">
         <div className="mx-auto w-full max-w-7xl px-4"><div className="max-w-3xl">
           <SecondRoundScenarios
             simulations={simulations}
@@ -169,9 +173,9 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
         </div></div>
       </section>
 
-      <section className="py-10 border-b border-stone-300">
+      <section className="py-10 border-b border-rule">
         <div className="mx-auto w-full max-w-7xl px-4"><div className="max-w-3xl">
-          <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('projectedVoteShare')}</h2>
+          <h2 className="text-2xl text-ink mb-3">{t('projectedVoteShare')}</h2>
           <DataCard
             title={pt ? 'Percentagem de todos os boletins, com o intervalo de 95%' : 'Share of all ballots, with the 95% interval'}
             subtitle={t('projectedVoteShareNote')}

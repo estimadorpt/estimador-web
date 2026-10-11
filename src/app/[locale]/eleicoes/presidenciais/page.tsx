@@ -1,6 +1,6 @@
 import { createPageMetadata } from '@/lib/metadata';
 import { loadPresidentialData, loadSecondRoundData } from "@/lib/utils/data-loader";
-import { ArrowRight, Users, Vote } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { PresidentialCandidateCards, SecondRoundIndicator } from "@/components/charts/PresidentialCandidateCards";
 import { PresidentialTrendChart } from "@/components/charts/PresidentialTrendChart";
 import { PresidentialForecastBars } from "@/components/charts/PresidentialForecastBars";
@@ -22,6 +22,7 @@ import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { OFFICIAL_RESULTS, PRESIDENTIAL_2026, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from "@/lib/config/elections";
 import { credibleIntervalLabel, formatElectionDayMonth, formatElectionLongDate, formatElectionNumber, formatElectionProbabilityText } from "@/lib/election-display";
+import { headToHeadAtCutoff, likeliestPair } from "@/lib/election-findings";
 import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
@@ -86,6 +87,12 @@ export default async function PresidentialArchivePage({
   const modelledCandidates = forecast.candidates.filter(c => c.name !== 'Others').length;
   const results = OFFICIAL_RESULTS['presidential-2026'];
   const pt = locale === 'pt';
+  const probability = (p: number) => formatElectionProbabilityText(p, locale);
+
+  // Findings, not questions: each section states what the archived forecast
+  // said, read from its own files (src/lib/election-findings.ts).
+  const headToHeadLead = headToHeadAtCutoff(headToHead, lastPollDate);
+  const topPair = likeliestPair(runoffPairs.pairs);
 
   // The chart frame's footer (CLAUDE.md, "Chart frame"): the source, the
   // forecast's own date and where the method is explained. The first-round
@@ -119,25 +126,25 @@ export default async function PresidentialArchivePage({
   const firstRound = !first.available ? (
     <section id="forecast" className="border-b border-line">
       <div className="max-w-7xl mx-auto px-4 py-10">
-        <p className="max-w-2xl text-stone-600">{t('presidential.unavailable')}</p>
+        <p className="max-w-2xl text-graphite">{t('presidential.unavailable')}</p>
       </div>
     </section>
   ) : (
     <>
-      <section id="forecast" className="bg-paper border-b border-line">
-        <div className="max-w-7xl mx-auto px-4 py-7">
+      <section id="forecast">
+        <div className="max-w-7xl mx-auto px-4 pt-7 pb-5">
           <div className="max-w-3xl">
             <p className="text-[12px] font-semibold text-graphite mb-2">{t('presidential.firstRoundKicker')}</p>
-            <h2 className="text-2xl md:text-3xl text-stone-900 mb-3 leading-tight">{t('presidential.firstRoundTitle')}</h2>
-            <p className="text-lg text-stone-600 leading-relaxed">
-              {t('presidential.firstRoundLede', { date: firstForecast ?? firstElection, probability: formatElectionProbabilityText(winProbabilities.second_round_probability, locale) })}
+            <h2 className="text-2xl md:text-3xl text-ink mb-3 leading-tight">{t('presidential.firstRoundTitle', { probability: probability(winProbabilities.second_round_probability) })}</h2>
+            <p className="text-lg text-graphite leading-relaxed">
+              {t('presidential.firstRoundLede', { date: firstForecast ?? firstElection, polls: formatElectionNumber(polls.polls.length, locale) })}
             </p>
           </div>
         </div>
       </section>
 
-      <section className="bg-parchment border-b border-line">
-        <div className="max-w-7xl mx-auto px-4 py-5">
+      <section className="border-b border-line">
+        <div className="max-w-7xl mx-auto px-4 pb-7">
           <SecondRoundIndicator
             probability={winProbabilities.second_round_probability}
             locale={locale}
@@ -149,10 +156,10 @@ export default async function PresidentialArchivePage({
         </div>
       </section>
 
-      <section className="py-8 bg-cream border-b border-stone-200">
+      <section className="py-8 bg-paper border-b border-rule">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl text-stone-900 mb-1">{t('presidential.winProbabilitiesToday')}</h2>
-          <p className="text-sm text-stone-500 mb-6">{firstRoundDateLine}</p>
+          <h2 className="text-2xl text-ink mb-1">{t('presidential.winProbabilitiesToday')}</h2>
+          <p className="text-sm text-graphite mb-6">{firstRoundDateLine}</p>
           <ErrorBoundary componentName="Candidate Cards">
             <PresidentialCandidateCards
               winProbabilities={winProbabilities}
@@ -169,11 +176,11 @@ export default async function PresidentialArchivePage({
         </div>
       </section>
 
-      <section id="trajectory" className="py-10 border-b border-stone-300">
+      <section id="trajectory" className="py-10 border-b border-rule">
         <div className="max-w-7xl mx-auto px-4">
           {/* One chart per section: the question, then the frame, whose
               subtitle carries the explanation (no second grey line, UXD3-11). */}
-          <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('presidential.supportTrajectory')}</h2>
+          <h2 className="text-2xl text-ink mb-3">{t('presidential.supportTrajectory')}</h2>
           <DataCard
             title={pt ? 'Apoio estimado por candidato, dia a dia' : 'Estimated support by candidate, day by day'}
             subtitle={t('presidential.trendDescription')}
@@ -196,9 +203,13 @@ export default async function PresidentialArchivePage({
       </section>
 
       {headToHead.dates.length > 0 && (
-        <section className="py-10 border-b border-stone-300">
+        <section className="py-10 border-b border-rule">
           <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('presidential.headToHeadTitle')}</h2>
+            <h2 className="text-2xl text-ink mb-3">
+              {headToHeadLead
+                ? t('presidential.headToHeadFinding', { leader: headToHeadLead.leader, other: headToHeadLead.other, probability: probability(headToHeadLead.probability) })
+                : t('presidential.headToHeadTitle')}
+            </h2>
             <DataCard
               title={pt ? `${headToHead.candidate_a} contra ${headToHead.candidate_b}, dia a dia` : `${headToHead.candidate_a} against ${headToHead.candidate_b}, day by day`}
               subtitle={t('presidential.headToHeadDescription', { candidateA: headToHead.candidate_a, candidateB: headToHead.candidate_b })}
@@ -222,10 +233,14 @@ export default async function PresidentialArchivePage({
         </section>
       )}
 
-      <section className="py-10 border-b border-stone-300">
+      <section className="py-10 border-b border-rule">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl text-stone-900 mb-1 tracking-tight">{t('presidential.runoffScenariosTitle')}</h2>
-          <p className="text-sm text-stone-500 mb-8 max-w-xl">{t('presidential.runoffScenariosDescription')}</p>
+          <h2 className="text-2xl text-ink mb-1">
+            {topPair
+              ? t('presidential.runoffPairFinding', { a: topPair.candidate_a, b: topPair.candidate_b, probability: probability(topPair.probability) })
+              : t('presidential.runoffScenariosTitle')}
+          </h2>
+          <p className="text-sm text-graphite mb-8 max-w-xl">{t('presidential.runoffScenariosDescription')}</p>
           <ErrorBoundary componentName="Runoff Pairs">
             <PresidentialRunoffPairs
               data={runoffPairs}
@@ -241,11 +256,11 @@ export default async function PresidentialArchivePage({
         </div>
       </section>
 
-      <section className="py-10 border-b border-stone-300">
+      <section className="py-10 border-b border-rule">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
             <div className="lg:col-span-3">
-              <h2 className="text-2xl text-stone-900 mb-3 tracking-tight">{t('presidential.projectedVoteShare')}</h2>
+              <h2 className="text-2xl text-ink mb-3">{t('presidential.projectedVoteShare')}</h2>
               <DataCard
                 title={pt ? 'Percentagem de votos por candidato, com o intervalo de 95%' : 'Vote share by candidate, with the 95% interval'}
                 subtitle={t('presidential.forecastForElectionDay', { forecast: firstForecast ?? '', election: firstElection })}
@@ -266,16 +281,15 @@ export default async function PresidentialArchivePage({
               </DataCard>
             </div>
 
-            <div className="lg:col-span-2 lg:border-l lg:border-stone-200 lg:pl-12">
-              <h3 className="text-sm font-bold text-stone-500 mb-4">{t('presidential.aboutModel')}</h3>
-              <div className="space-y-4 text-sm text-stone-600">
+            <div className="lg:col-span-2 lg:border-l lg:border-rule lg:pl-12">
+              <h3 className="border-b border-ink pb-2 text-[19px] leading-6 text-ink mb-4">{t('presidential.aboutModel')}</h3>
+              <div className="space-y-4 text-sm text-graphite">
                 <p className="leading-relaxed">{t('presidential.modelDescription')}</p>
-                <div className="border-l-2 border-amber-500 pl-4 py-2 bg-amber-50/50">
-                  <p className="text-amber-800 text-sm">{t('presidential.undecidedWarning')}</p>
-                </div>
+                {/* A caveat: a bold lead word and amber text, no fill. */}
+                <p className="text-sm leading-relaxed text-amber-800"><strong className="font-semibold">{pt ? 'Ressalva' : 'Caveat'}:</strong> {t('presidential.undecidedWarning')}</p>
                 <div className="pt-2">
-                  <h4 className="text-xs font-bold text-stone-500 mb-2">{t('presidential.keyFactors')}</h4>
-                  <ul className="space-y-1 text-stone-600 text-sm">
+                  <h4 className="text-[13px] font-semibold text-ink mb-2">{t('presidential.keyFactors')}</h4>
+                  <ul className="space-y-1 text-graphite text-sm">
                     {[t('presidential.factor1'), t('presidential.factor2'), t('presidential.factor3')].map(factor => (
                       <li key={factor}><span aria-hidden="true">→ </span>{factor}</li>
                     ))}
@@ -308,9 +322,7 @@ export default async function PresidentialArchivePage({
         {/* The way back to the archive guide (CL3-V01); the kicker names the year. */}
         <PageHero
           compact
-          illustration="elections"
           back={{ href: '/eleicoes/arquivo', label: t('nav.elections'), locale }}
-          icon={<Vote aria-hidden="true" className="w-4 h-4" />}
           eyebrow={t('presidential.archiveEyebrow')}
           title={t('presidential.archiveTitle')}
           lede={t('presidential.archiveLede')}
@@ -322,7 +334,7 @@ export default async function PresidentialArchivePage({
           }
         />
 
-        <nav aria-label={t('presidential.inThisArchive')} className="border-b border-line bg-cream">
+        <nav aria-label={t('presidential.inThisArchive')} className="border-b border-line">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3">
             <SecondRoundToggle
               translations={{
@@ -348,14 +360,14 @@ export default async function PresidentialArchivePage({
         <SectionNotes
           section="elections"
           locale={locale}
-          className="py-8 border-b border-stone-300"
+          className="py-8 border-b border-rule"
           containerClassName="max-w-7xl mx-auto px-4"
         />
 
-        <section className="py-8 border-b border-stone-300">
+        <section className="py-8 border-b border-rule">
           <div className="max-w-7xl mx-auto px-4">
             {/* A kicker, not a heading: the links below are navigation, not a section. */}
-            <p className="text-xs font-bold text-stone-500 mb-4">{t('nav.moreFrom')}</p>
+            <p className="text-[12px] text-graphite mb-2">{t('nav.moreFrom')}</p>
             <div className="flex flex-wrap gap-6">
               {[
                 { href: '/eleicoes/legislativas', label: t('nav.parliamentaryForecast') },
@@ -375,18 +387,15 @@ export default async function PresidentialArchivePage({
           <div className="max-w-7xl mx-auto px-4 py-10">
             <div className="max-w-2xl">
               <h2 className="text-2xl mb-3">{t('presidential.aboutForecast')}</h2>
-              <p className="text-sm leading-relaxed text-stone-600 mb-5">{t('presidential.aboutDescription')}</p>
+              <p className="text-sm leading-relaxed text-graphite mb-5">{t('presidential.aboutDescription')}</p>
               {/* One fact per line: inline "·" separators were left dangling
                   at the end of a wrapped line. */}
-              <ul className="space-y-1 text-sm text-stone-600">
-                <li className="flex items-center gap-2">
-                  <Users aria-hidden="true" className="w-4 h-4" />
-                  {t('presidential.candidatesModeled', { count: formatElectionNumber(modelledCandidates, locale) })}
-                </li>
+              <ul className="space-y-1 text-sm text-graphite">
+                <li>{t('presidential.candidatesModeled', { count: formatElectionNumber(modelledCandidates, locale) })}</li>
                 <li>{firstRoundDateLine}</li>
                 <li>{secondRoundDateLine}</li>
               </ul>
-              <p className="mt-4 text-sm text-stone-600">{officialResults}</p>
+              <p className="mt-4 text-sm text-graphite">{officialResults}</p>
             </div>
           </div>
         </section>

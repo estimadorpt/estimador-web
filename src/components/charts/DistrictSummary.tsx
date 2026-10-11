@@ -39,7 +39,7 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
   const CardHeading = headingLevel === 4 ? 'h5' : 'h4';
   if (!districtData || districtData.length === 0) {
     return (
-      <div className="text-center py-8 text-stone-500">
+      <div className="text-center py-8 text-graphite">
         <p>{t("districtsLoading")}</p>
       </div>
     );
@@ -80,36 +80,37 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
       {/* Contested Districts */}
       {contestedDistricts.length > 0 && (
         <div>
-          <Heading className="text-lg font-bold tracking-[-0.02em] text-stone-900 mb-4">
+          <Heading className="text-lg font-bold text-ink mb-4">
             {t("seatsInPlayTitle", { count: contestedDistricts.length })}
           </Heading>
-          <p className="text-sm text-stone-600 mb-2">
+          <p className="text-sm text-graphite mb-2">
             {t("seatsInPlayLede")}
           </p>
           {/* Named and explained before the ENSC badges below use it, so the
               term is never seen before its definition. */}
-          <p className="text-xs text-stone-500 mb-2">
+          <p className="text-xs text-graphite mb-2">
             <strong>{t("enscTerm")}</strong> {t("enscExplainer")}
           </p>
           {/* The +1/−1 below are measured against each party's own most
               frequent seat count in that district (the exporter's
               convention), not against 2024 or one joint allocation, so a
               district's gains and losses need not balance. */}
-          <p className="text-xs text-stone-500 mb-4">{t("seatChangeBaseline")}</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <p className="text-xs text-graphite mb-4">{t("seatChangeBaseline")}</p>
+          <div className="grid grid-cols-1 gap-x-8 md:grid-cols-2 lg:grid-cols-3">
             {contestedDistricts.slice(0, 9).map(district => {
               // Every party past the 5% mark, not the first three: Lisboa's
               // CDU +1 (43%) was hidden behind three other rows (AEE3-V01).
               const partiesWithChanges = seatChangesOf(contestedData?.districts?.[district.district_name]);
 
               return (
-                // A normal grid of results: cream cards and a neutral chip.
-                // Amber is the site's caveat colour, not emphasis.
-                <div key={district.district_name} className="bg-cream border border-line rounded-2xl p-4">
-                  <div className="flex items-center justify-between gap-3 mb-3">
+                // A grid of readings under hairlines, the ENSC as plain text
+                // beside the name: no card, no chip. Amber is the site's
+                // caveat colour, not emphasis.
+                <div key={district.district_name} className="border-t border-rule py-3">
+                  <div className="flex items-baseline justify-between gap-3 mb-2">
                     <CardHeading className="font-semibold text-ink">{district.district_name}</CardHeading>
-                    <span className="whitespace-nowrap rounded-full border border-line bg-parchment px-2 py-0.5 text-xs font-medium text-stone-700 tabular-nums">
-                      ENSC: {formatElectionNumber(district.competitiveness, locale, 2)}
+                    <span className="whitespace-nowrap text-xs text-graphite tabular-nums">
+                      ENSC <span className="font-semibold text-ink">{formatElectionNumber(district.competitiveness, locale, 2)}</span>
                     </span>
                   </div>
                   <div className="space-y-2">
@@ -118,14 +119,14 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
                         <div className="flex items-center gap-2">
                           <div
                             aria-hidden="true"
-                            className="w-3 h-3 rounded"
+                            className="w-3 h-3"
                             style={{ backgroundColor: partyColors[party as keyof typeof partyColors] }}
                           />
                           <span className="text-sm font-medium">
                             {partyNames[party as keyof typeof partyNames] || party}
                           </span>
                         </div>
-                        <div className="ml-5 text-xs text-stone-600">
+                        <div className="ml-5 text-xs text-graphite">
                           {gainProb > SEAT_CHANGE_SHOWN && (
                             <span className="text-green-700">{t("seatGain", { pct: formatElectionNumber(gainProb * 100, locale) })}</span>
                           )}
@@ -136,7 +137,7 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
                         </div>
                       </div>
                     )) : (
-                      <div className="text-xs text-stone-500">{t("closeRace")}</div>
+                      <div className="text-xs text-graphite">{t("closeRace")}</div>
                     )}
                   </div>
                 </div>
@@ -149,14 +150,14 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
       {/* The party ahead in votes in every district and region: the same
           count as the map (14/5/1), not a likely-winner count over a subset. */}
       <div>
-        <Heading className="text-lg font-bold tracking-[-0.02em] text-stone-900 mb-1">
+        <Heading className="text-lg font-bold text-ink mb-1">
           {t("likelyWinners")}
         </Heading>
-        <p className="text-xs text-stone-500 mb-4">
+        <p className="text-xs text-graphite mb-4">
           {t("likelyWinnersSubtitle", { total: districtData.length })}
         </p>
-        <div className="bg-cream border border-line rounded-2xl p-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="border-t border-rule pt-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-4">
             {Object.values(partyColors).map((color, index) => {
               const party = Object.keys(partyColors)[index];
               const wins = districtData.filter(d => d.winning_party === party).length;
@@ -164,46 +165,42 @@ export function DistrictSummary({ districtData, contestedData, closeLeadNote, he
               if (wins === 0) return null;
               
               return (
-                <div key={party} className="text-center">
-                  {/* Ink on cream inside a party-coloured ring: white on the
-                      lighter party colours failed contrast. */}
-                  <div
-                    className="w-12 h-12 mx-auto mb-2 rounded-lg border-[3px] bg-cream flex items-center justify-center text-lg text-ink font-bold tabular-nums"
-                    style={{ borderColor: color }}
-                  >
-                    {wins}
-                  </div>
-                  <div className="text-sm font-medium text-stone-900">
+                <div key={party}>
+                  {/* The count in ink, the party's colour as a swatch beside
+                      its name: colour belongs to the data, never to text. */}
+                  <div className="disp text-[28px] leading-8 text-ink tabular-nums">{wins}</div>
+                  <div className="flex items-center gap-2 text-sm font-medium text-ink">
+                    <span aria-hidden="true" className="inline-block size-3 shrink-0" style={{ backgroundColor: color }} />
                     {partyNames[party as keyof typeof partyNames] || party}
                   </div>
-                  <div className="text-xs text-stone-500">{t("districtsUnit", { count: wins })}</div>
+                  <div className="text-xs text-graphite">{t("districtsUnit", { count: wins })}</div>
                 </div>
               );
             })}
           </div>
         </div>
-        {closeLeadNote && <p className="mt-3 text-xs text-stone-600">{closeLeadNote}</p>}
+        {closeLeadNote && <p className="mt-3 text-xs text-graphite">{closeLeadNote}</p>}
       </div>
 
       {/* Summary Stats */}
-      <div className="bg-cream border border-line rounded-2xl p-4">
-        <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="border-t border-ink pt-3">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <div className="text-2xl font-bold text-ink tabular-nums">{districtData.length}</div>
-            <div className="text-sm text-stone-600">{t("totalDistricts")}</div>
+            <div className="text-sm text-graphite">{t("totalDistricts")}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-ink tabular-nums">{contestedDistricts.length}</div>
-            <div className="text-sm text-stone-600">{t("seatsInPlay")}</div>
+            <div className="text-sm text-graphite">{t("seatsInPlay")}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-ink tabular-nums">{belowThreshold.length}</div>
-            <div className="text-sm text-stone-600">{t("belowThreshold")}</div>
+            <div className="text-sm text-graphite">{t("belowThreshold")}</div>
           </div>
         </div>
       </div>
       {watchList.length > 0 && (
-        <p className="-mt-3 text-xs text-stone-600">
+        <p className="-mt-4 text-xs text-graphite">
           {t("belowThresholdWatch", { list: new Intl.ListFormat(locale === "en" ? "en-GB" : "pt-PT", { type: "conjunction" }).format(watchList) })}
         </p>
       )}

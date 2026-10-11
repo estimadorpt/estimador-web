@@ -51,27 +51,27 @@ export function SecondRoundWinnerCards({
       {/* Candidate A Card */}
       <div className="min-w-0 border-t border-line">
         <div
-          className="mt-5 h-1 w-8 rounded"
+          className="mt-5 h-1 w-8"
           style={{ backgroundColor: candidateA.color }}
         />
         <div className="py-4">
-          <h3 className="text-lg text-stone-900 mb-1">
+          <h3 className="text-lg text-ink mb-1">
             {candidateA.name}
           </h3>
           <ProbabilityFigure probability={candidateA.win_probability} locale={locale} className="block text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2" />
-          <div className="text-xs text-stone-500 mb-4">
+          <div className="text-xs text-graphite mb-4">
             {translations.winProbability}
           </div>
           {validVotesA && (
-            <div className="pt-4 border-t border-stone-100">
-              <div className="text-sm text-stone-600">
+            <div className="pt-4 border-t border-grid">
+              <div className="text-sm text-graphite">
                 <span className="font-semibold">{formatPercent(validVotesA.mean)}</span>
-                <span className="text-stone-500 ml-1">({formatCI(validVotesA.ci_lower, validVotesA.ci_upper)})</span>
+                <span className="text-graphite ml-1">({formatCI(validVotesA.ci_lower, validVotesA.ci_upper)})</span>
               </div>
-              <div className="text-xs text-stone-500">
+              <div className="text-xs text-graphite">
                 {translations.validVoteShare}
               </div>
-              <div className="text-[11px] text-stone-500">
+              <div className="text-[11px] text-graphite">
                 {translations.intervalLabel} · {translations.validVotesNote}
               </div>
             </div>
@@ -82,27 +82,27 @@ export function SecondRoundWinnerCards({
       {/* Candidate B Card */}
       <div className="min-w-0 border-t border-line">
         <div
-          className="mt-5 h-1 w-8 rounded"
+          className="mt-5 h-1 w-8"
           style={{ backgroundColor: candidateB.color }}
         />
         <div className="py-4">
-          <h3 className="text-lg text-stone-900 mb-1">
+          <h3 className="text-lg text-ink mb-1">
             {candidateB.name}
           </h3>
           <ProbabilityFigure probability={candidateB.win_probability} locale={locale} className="block text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2" />
-          <div className="text-xs text-stone-500 mb-4">
+          <div className="text-xs text-graphite mb-4">
             {translations.winProbability}
           </div>
           {validVotesB && (
-            <div className="pt-4 border-t border-stone-100">
-              <div className="text-sm text-stone-600">
+            <div className="pt-4 border-t border-grid">
+              <div className="text-sm text-graphite">
                 <span className="font-semibold">{formatPercent(validVotesB.mean)}</span>
-                <span className="text-stone-500 ml-1">({formatCI(validVotesB.ci_lower, validVotesB.ci_upper)})</span>
+                <span className="text-graphite ml-1">({formatCI(validVotesB.ci_lower, validVotesB.ci_upper)})</span>
               </div>
-              <div className="text-xs text-stone-500">
+              <div className="text-xs text-graphite">
                 {translations.validVoteShare}
               </div>
-              <div className="text-[11px] text-stone-500">
+              <div className="text-[11px] text-graphite">
                 {translations.intervalLabel} · {translations.validVotesNote}
               </div>
             </div>

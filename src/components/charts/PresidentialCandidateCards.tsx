@@ -72,59 +72,60 @@ export function PresidentialCandidateCards({
     .sort((a, b) => b.displayRunoffProb - a.displayRunoffProb);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-0 divide-x divide-stone-200 border-y border-stone-200">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-0 divide-x divide-rule border-t border-ink border-b border-rule">
       {candidateData.map((candidate, index) => (
         <div
           key={candidate.name}
-          className={`p-4 ${index === 0 ? 'bg-stone-50' : 'bg-cream'}`}
+          className="p-4"
         >
           {/* Color indicator + name */}
           <div className="flex items-start gap-2 mb-3">
             <div
+              aria-hidden="true"
               className="w-1 h-12 flex-shrink-0"
               style={{ backgroundColor: candidate.color }}
             />
             <div className="min-w-0">
-              <h3 className="text-stone-900 text-sm leading-tight">
+              <h3 className="text-ink text-sm leading-tight">
                 {candidate.name}
               </h3>
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-graphite">
                 {candidate.party ?? (pt ? 'Indep.' : 'Ind.')}
               </p>
               {index === 0 && (
-                <p className="text-[11px] font-bold text-stone-500 uppercase">{pt ? 'À frente' : 'Leading'}</p>
+                <p className="text-[12px] font-semibold text-ink">{pt ? 'À frente' : 'Leading'}</p>
               )}
             </div>
           </div>
 
           {/* Runoff probability, the big number. Ink, not the candidate
-              colour: several candidate colours fail contrast on cream. */}
+              colour: colour belongs to the swatch, never to text. */}
           <div className="mb-2">
             <ProbabilityFigure
               probability={candidate.displayRunoffProb}
               locale={locale}
-              className="block text-4xl font-display font-extrabold tabular-nums tracking-tighter text-ink"
+              className="block text-4xl font-display font-extrabold tabular-nums text-ink"
             />
-            <div className="text-[11px] text-stone-500">
+            <div className="text-[12px] text-graphite">
               {translations.chanceOfRunoff}
             </div>
           </div>
 
           {/* Vote share on election day, its interval as a range */}
           {candidate.forecastData && (
-            <div className="pt-2 mt-2 border-t border-stone-100">
+            <div className="pt-2 mt-2 border-t border-grid">
               <div className="text-sm tabular-nums">
-                <span className="font-semibold text-stone-800">
+                <span className="font-semibold text-ink">
                   {formatElectionPercent(candidate.forecastData.mean, locale)}
                 </span>
-                <span className="block text-xs text-stone-500">
+                <span className="block text-xs text-graphite">
                   {formatElectionRange(candidate.forecastData.ci_lower, candidate.forecastData.ci_upper, locale)}
                 </span>
               </div>
-              <div className="text-[11px] text-stone-500">
+              <div className="text-[12px] text-graphite">
                 {translations.voteShare}
               </div>
-              <div className="text-[11px] text-stone-500">
+              <div className="text-[12px] text-graphite">
                 {intervalLabel}
               </div>
             </div>
@@ -151,15 +152,12 @@ interface SecondRoundIndicatorProps {
  */
 export function SecondRoundIndicator({ probability, locale, translations }: SecondRoundIndicatorProps) {
   return (
-    <div className="flex items-center justify-between gap-4">
-      <div className="flex items-center gap-4">
-        <div className="w-1 h-12 bg-ink" aria-hidden="true" />
-        <div>
-          <div className="text-lg font-bold text-stone-900">{translations.secondRoundNeeded}</div>
-          <div className="text-sm text-stone-500">{translations.probabilityLabel}</div>
-        </div>
+    <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1 border-t border-ink pt-3">
+      <div>
+        <div className="text-lg font-bold text-ink">{translations.secondRoundNeeded}</div>
+        <div className="text-sm text-graphite">{translations.probabilityLabel}</div>
       </div>
-      <ProbabilityFigure probability={probability} locale={locale} className="text-5xl font-display font-extrabold tabular-nums tracking-tighter text-ink" />
+      <ProbabilityFigure probability={probability} locale={locale} className="text-5xl font-display font-extrabold tabular-nums text-ink" />
     </div>
   );
 }

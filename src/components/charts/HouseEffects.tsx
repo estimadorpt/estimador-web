@@ -36,7 +36,7 @@ export function HouseEffects({ data, labels }: HouseEffectsProps) {
   const regionLabel = labels?.regionLabel ?? (pt ? 'Efeitos das empresas de sondagens' : 'Polling house effects');
   if (!data || data.length === 0) {
     return (
-      <div className="text-center py-8 text-stone-500">
+      <div className="text-center py-8 text-graphite">
         <p>{t("houseEffectsLoading")}</p>
       </div>
     );
@@ -65,11 +65,11 @@ export function HouseEffects({ data, labels }: HouseEffectsProps) {
     <div className="w-full">
       {/* A scroll area: focusable, so a keyboard can scroll it, and named
           (A11Y2-06); the edge shadow says there is more to the side. */}
-      <div tabIndex={0} role="region" aria-label={regionLabel} className="scroll-cue overflow-x-auto rounded-2xl border border-line">
+      <div tabIndex={0} role="region" aria-label={regionLabel} className="scroll-cue overflow-x-auto">
         <table className="min-w-full">
-          <thead className="bg-parchment">
-            <tr>
-              <th scope="col" className="px-4 py-3 text-left text-sm font-semibold text-stone-700 w-40">
+          <thead>
+            <tr className="border-b border-ink">
+              <th scope="col" className="px-4 py-3 text-left text-sm font-semibold text-ink w-40">
                 {t("pollsterHeader")}
               </th>
               {parties.map(party => (
@@ -80,10 +80,10 @@ export function HouseEffects({ data, labels }: HouseEffectsProps) {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody className="divide-y divide-grid">
             {pollsters.map(pollster => (
               <tr key={pollster}>
-                <th scope="row" className="px-4 py-3 text-left text-sm font-medium text-ink bg-parchment">
+                <th scope="row" className="px-4 py-3 text-left text-sm font-medium text-ink">
                   {pollster}
                 </th>
                 {parties.map(party => {
@@ -108,7 +108,7 @@ export function HouseEffects({ data, labels }: HouseEffectsProps) {
         </table>
       </div>
 
-      <div className="mt-4 text-sm text-stone-600 space-y-2">
+      <div className="mt-4 text-sm text-graphite space-y-2">
         <p>
           <strong>{t("houseEffectsTerm")}</strong> {t("houseEffectsExplainer")}
         </p>

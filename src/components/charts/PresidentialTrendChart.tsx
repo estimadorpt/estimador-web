@@ -5,7 +5,7 @@ import { useLocale } from 'next-intl';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { FURNITURE } from '@/components/viz/theme';
 import { PresidentialPollsData } from '@/types';
-import { credibleIntervalLabel, formatElectionDate, formatElectionLongDate, formatElectionNumber, formatElectionPercent, formatElectionShortDate, pollsterDisplayName, PRESSED_IN_FORCED_COLORS } from '@/lib/election-display';
+import { credibleIntervalLabel, formatElectionDate, formatElectionLongDate, formatElectionNumber, formatElectionPercent, formatElectionShortDate, pollsterDisplayName, segmentClass, SEGMENT_GROUP_CLASS } from '@/lib/election-display';
 
 /** Structural shape shared by presidential_trends.json and second_round_trends.json,
  * so this chart can render either without a second, near-duplicate component. */
@@ -146,8 +146,8 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
   const tipX = tipIndex != null ? x(parsedDates[tipIndex]) : 0;
 
   return <div className="w-full">
-    <div className="mb-5 flex flex-wrap gap-2" role="group" aria-label={pt ? 'Escolher candidato' : 'Choose candidate'}>
-      {candidates.map(([name, candidate]) => <button key={name} type="button" onClick={() => selectCandidate(name)} aria-pressed={selectedName === name} className={`min-h-11 max-w-full rounded-full border px-3 text-left text-sm ${PRESSED_IN_FORCED_COLORS} ${selectedName === name ? 'border-ink bg-ink text-paper' : 'border-line bg-paper text-ink hover:bg-cream'}`}><span aria-hidden="true" className="mr-2 inline-block size-2 rounded-full" style={{ background: candidate.color }} />{name}</button>)}
+    <div className={`mb-5 ${SEGMENT_GROUP_CLASS}`} role="group" aria-label={pt ? 'Escolher candidato' : 'Choose candidate'}>
+      {candidates.map(([name, candidate]) => <button key={name} type="button" onClick={() => selectCandidate(name)} aria-pressed={selectedName === name} className={segmentClass(selectedName === name)}><span aria-hidden="true" className="inline-block size-2 shrink-0 rounded-full" style={{ background: candidate.color }} />{name}</button>)}
     </div>
     <div className="mb-4 border-l-2 pl-4" style={{ borderColor: selected.color }}>
       {/* The chosen series' name, not a heading: the chart frame's title is the heading. */}
@@ -168,12 +168,12 @@ export function PresidentialTrendChart({ trends, polls, cutoffDate, height = 400
         {tipIndex != null && <g pointerEvents="none"><line x1={tipX} x2={tipX} y1={margin.top} y2={height - margin.bottom} stroke={FURNITURE.text} strokeDasharray="3,3" /><circle cx={tipX} cy={y(selected.mean[tipIndex])} r="4.5" fill={selected.color} stroke={FURNITURE.surface} strokeWidth="2" /></g>}
       </svg>
       {tipIndex != null && (
-        <div aria-hidden="true" className="pointer-events-none absolute top-2 z-10 max-w-[16rem] rounded-lg border border-line bg-cream px-3 py-2 text-xs text-ink shadow-none"
+        <div aria-hidden="true" className="pointer-events-none absolute top-2 z-10 max-w-[16rem] border border-rule bg-paper px-3 py-2 text-xs text-ink"
           style={tipX > width / 2 ? { right: width - tipX + 8 } : { left: tipX + 8 }}>
           <div className="font-bold">{formatElectionShortDate(dates[tipIndex], locale)}</div>
           <div className="tabular-nums">{selectedName}: <strong>{fmt(selected.mean[tipIndex])}</strong></div>
-          <div className="tabular-nums text-stone-600">P25–P75: {fmt(selected.ci_25[tipIndex])}–{fmt(selected.ci_75[tipIndex])}</div>
-          <div className="tabular-nums text-stone-600">P5–P95: {fmt(selected.ci_05[tipIndex])}–{fmt(selected.ci_95[tipIndex])}</div>
+          <div className="tabular-nums text-graphite">P25–P75: {fmt(selected.ci_25[tipIndex])}–{fmt(selected.ci_75[tipIndex])}</div>
+          <div className="tabular-nums text-graphite">P5–P95: {fmt(selected.ci_05[tipIndex])}–{fmt(selected.ci_95[tipIndex])}</div>
         </div>
       )}
     </div>

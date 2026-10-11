@@ -99,6 +99,20 @@ export function pollsterDisplayName(name: string): string {
  */
 export const PRESSED_IN_FORCED_COLORS = 'forced-colors:aria-pressed:outline-2 forced-colors:aria-pressed:outline-offset-2 forced-colors:aria-pressed:outline-solid';
 
+/** The row of a segmented text control: words side by side, wrapping on a phone. */
+export const SEGMENT_GROUP_CLASS = 'flex flex-wrap items-end gap-x-5 gap-y-1';
+
+/**
+ * One option of the archives' segmented text controls (the round switch, the
+ * candidate and party choices): a word, square, 44px tall, the pressed one in
+ * ink and semibold over a 2px ink rule, the others in graphite over a
+ * transparent one (which forced colours draws, with the outline above for the
+ * pressed option). Same grammar as the "Gráfico | Tabela" tabs; no pill, no fill.
+ */
+export function segmentClass(pressed: boolean): string {
+  return `inline-flex min-h-11 max-w-full items-center gap-2 border-b-2 text-left text-[14px] leading-5 ${PRESSED_IN_FORCED_COLORS} ${pressed ? 'border-ink font-semibold text-ink' : 'border-transparent text-graphite hover:border-rule hover:text-ink'}`;
+}
+
 /**
  * The 2025 parliamentary parties in one order for every party chip, matrix
  * column, bloc card and table twin on the archive (AEE3-06): the forecast's

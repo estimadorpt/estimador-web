@@ -21,7 +21,7 @@ export function UncertaintyExplainer({ numPolls, intervals }: UncertaintyExplain
 
   return (
     <Disclosure summary={t('uncertainty.title')} className="mt-4">
-      <div className="mt-1 text-sm text-stone-600">
+      <div className="mt-1 text-sm text-graphite">
         <p className="mb-2">{t('uncertainty.description')}</p>
         <ul className="mt-2 space-y-1">
           {intervals.map(interval => (

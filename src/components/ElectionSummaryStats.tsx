@@ -22,7 +22,7 @@ interface SummaryStatsProps {
   };
 }
 
-const figureClass = 'block text-4xl font-display font-extrabold tabular-nums text-stone-900 mb-1';
+const figureClass = 'block text-4xl font-display font-extrabold tabular-nums text-ink mb-1';
 
 /** The parliamentary archive's headline probabilities. */
 export function ElectionSummaryStats({
@@ -45,12 +45,12 @@ export function ElectionSummaryStats({
         {tiles.map(([probability, label]) => (
           <div key={label} className="border-l border-line pl-4 first:border-0 first:pl-0">
             <ProbabilityFigure probability={probability} locale={locale} className={figureClass} />
-            <div className="text-sm text-stone-600">{label}</div>
+            <div className="text-sm text-graphite">{label}</div>
           </div>
         ))}
       </div>
       {translations.notes.map(note => (
-        <p key={note} className="text-xs text-stone-500 mt-3 max-w-3xl">{note}</p>
+        <p key={note} className="text-xs text-graphite mt-3 max-w-3xl">{note}</p>
       ))}
     </div>
   );

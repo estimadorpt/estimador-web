@@ -7,7 +7,8 @@ import { ChartTable } from "@/components/viz/ChartTable";
 import { FURNITURE } from "@/components/viz/theme";
 import { partyColors } from "@/lib/config/colors";
 import { compactTrendSeries, recentTrendRows, type TrendSeries } from "@/lib/election-aggregates";
-import { electionIntlLocale, formatElectionDate, formatElectionShortDate, PRESSED_IN_FORCED_COLORS, sortByPartyOrder } from "@/lib/election-display";
+import { electionIntlLocale, formatElectionDate, formatElectionShortDate, segmentClass, SEGMENT_GROUP_CLASS, sortByPartyOrder } from "@/lib/election-display";
+import { BRAND } from "@/lib/brand";
 import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface TrendData {
@@ -233,16 +234,16 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
 
   return (
     <div className="w-full">
-      <div className="mb-4 flex flex-wrap items-center gap-2" role="group" aria-label={pt ? "Escolher partidos" : "Choose parties"}>
+      <div className={`mb-4 ${SEGMENT_GROUP_CLASS}`} role="group" aria-label={pt ? "Escolher partidos" : "Choose parties"}>
         {allParties.map(party => (
           <button
             key={party}
             type="button"
             onClick={() => { setViewMode("selected"); toggleParty(party); }}
             aria-pressed={viewMode === "selected" && activeParties.includes(party)}
-            className={`min-h-11 rounded-full border px-3 text-sm ${PRESSED_IN_FORCED_COLORS} ${viewMode === "selected" && activeParties.includes(party) ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:bg-cream"}`}
+            className={segmentClass(viewMode === "selected" && activeParties.includes(party))}
           >
-            <span aria-hidden="true" className="mr-1.5 inline-block size-2 rounded-full" style={{ background: partyColors[party as keyof typeof partyColors] || "#888" }} />
+            <span aria-hidden="true" className="inline-block size-2 shrink-0 rounded-full" style={{ background: partyColors[party as keyof typeof partyColors] || BRAND.faint }} />
             {party}
           </button>
         ))}
@@ -250,12 +251,12 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
           type="button"
           onClick={() => setViewMode(viewMode === "all" ? "selected" : "all")}
           aria-pressed={viewMode === "all"}
-          className={`min-h-11 rounded-full border px-3 text-sm ${PRESSED_IN_FORCED_COLORS} ${viewMode === "all" ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink hover:bg-cream"}`}
+          className={segmentClass(viewMode === "all")}
         >
           {pt ? "Todos os partidos" : "All parties"}
         </button>
       </div>
-      <p className="mb-2 text-xs text-stone-500">
+      <p className="mb-2 text-xs text-graphite">
         {viewMode === "all"
           ? (pt
             ? "Todos os partidos: só as linhas, sem as bandas, que se sobreporiam. A tabela abaixo tem a banda de cada partido."
@@ -273,10 +274,10 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
               <span
                 aria-hidden="true"
                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: partyColors[party as keyof typeof partyColors] || '#888' }}
+                style={{ backgroundColor: partyColors[party as keyof typeof partyColors] || BRAND.faint }}
               />
               <span className="font-medium">{party}</span>
-              <span className="text-stone-600">{fmtPct(value)}</span>
+              <span className="text-graphite">{fmtPct(value)}</span>
             </div>
           ))}
         </div>
