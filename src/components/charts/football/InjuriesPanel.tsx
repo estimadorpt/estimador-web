@@ -1,6 +1,6 @@
 "use client";
 
-import { teamDisplayName, teamLogoSrc, teamPhoneName } from "@/lib/config/football";
+import { teamDisplayName, teamLogoSrc } from "@/lib/config/football";
 import { injuryReasonLabel, positionLabel } from "@/lib/i18n/football-labels";
 import { Stethoscope } from "lucide-react";
 import { BRAND } from "@/lib/brand";
@@ -133,12 +133,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                     className="w-4 h-4 object-contain self-center flex-shrink-0"
                   />
                 )}
-                <span className="text-sm font-bold text-stone-900 truncate">
-                  <span className="sm:hidden">
-                    {teamPhoneName(team.team)}
-                  </span>
-                  <span className="hidden sm:inline">{teamDisplayName(team.team)}</span>
-                </span>
+                <span className="text-sm font-bold text-stone-900 truncate">{teamDisplayName(team.team)}</span>
                 <span className="ml-auto text-lg font-display font-extrabold tabular-nums text-stone-900">
                   {sharePct.toLocaleString(pt ? "pt-PT" : "en-GB", {
                     maximumFractionDigits: sharePct < 10 ? 1 : 0,

@@ -43,12 +43,12 @@ export function clubStake(match: NextMatchdayScenarioMatch | null | undefined): 
 /** "Título do Porto: 55% se ganhar, 43% se empatar, 39% se perder." */
 export function stakeSentence(stake: ClubStake | null, locale: string): string {
   const pt = locale !== 'en';
-  if (!stake) return pt ? 'Pouco em jogo: nenhum dos dois clubes muda 5 pontos percentuais no título ou na descida.' : 'Little at stake: neither club’s title or relegation chance moves by 5 percentage points.';
+  if (!stake) return pt ? 'Pouco em jogo: nenhum dos dois clubes muda 5 pontos percentuais no título ou na despromoção.' : 'Little at stake: neither club’s title or relegation chance moves by 5 percentage points.';
   const [w, d, l] = [stake.win, stake.draw, stake.lose].map(p => formatPercent(p, locale));
   if (pt) {
-    const what = stake.metric === 'p_champion' ? 'Título' : 'Descida';
+    const what = stake.metric === 'p_champion' ? 'Título' : 'Despromoção';
     return `${what} ${teamWithArticle(stake.team, 'de')}: ${w} se ganhar, ${d} se empatar, ${l} se perder.`;
   }
   const what = stake.metric === 'p_champion' ? 'title chance' : 'relegation chance';
-  return `${teamDisplayName(stake.team)}’s ${what}: ${w} with a win, ${d} with a draw, ${l} with a defeat.`;
+  return `${teamDisplayName(stake.team)}’s ${what}: ${w} if they win, ${d} if they draw, ${l} if they lose.`;
 }

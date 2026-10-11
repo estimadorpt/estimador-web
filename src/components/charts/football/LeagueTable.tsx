@@ -13,10 +13,10 @@ import { Ruler } from "@/components/instrument/Ruler";
 import { ReadingRule } from "@/components/instrument/ReadingRule";
 
 /**
- * The league page's club chooser: a labelled select and an explicit "Ver"
- * button. Choosing in the select changes nothing until the button (or
- * Enter) submits, so arrowing through the list with a keyboard never
- * navigates away (audit A11Y-14).
+ * The league page's club chooser: a labelled native select that goes to the
+ * club's page as soon as a club is chosen, with no "Ver" button (the site's
+ * one way to pick from a long list, owner decision of October 2026). The
+ * placeholder stays selected until then, so nothing happens on load.
  */
 export function ClubChooser({
   teams,
@@ -31,58 +31,30 @@ export function ClubChooser({
   const locale = useLocale();
   const id = useId();
   const [value, setValue] = useState("");
-  const [hint, setHint] = useState(false);
   const sorted = [...teams].sort((a, b) => teamDisplayName(a).localeCompare(teamDisplayName(b), "pt"));
   return (
-    <form
-      className="flex min-w-0 flex-wrap items-end gap-2 text-left"
-      onSubmit={e => {
-        e.preventDefault();
-        const slug = ligaTeamSlugs[value];
-        // Never a disabled button that looks broken (audit CL2-04): with no
-        // club chosen, the select gets focus and a hint says why.
-        if (!slug) {
-          setHint(true);
-          document.getElementById(id)?.focus();
-          return;
-        }
-        router.push(`/${locale}/desporto/liga/${slug}`);
-      }}
-    >
-      <span className="flex min-w-0 flex-col gap-1">
-        <label htmlFor={id} className="text-[12px] font-semibold text-graphite">{label}</label>
-        <select
-          id={id}
-          value={value}
-          aria-describedby={hint ? `${id}-hint` : undefined}
-          onChange={e => {
-            setValue(e.target.value);
-            setHint(false);
-          }}
-          className="min-h-11 min-w-[200px] rounded-none border border-line bg-paper px-3 text-base text-ink sm:text-sm"
-        >
-          <option value="" disabled>
-            {placeholder}
-          </option>
-          {sorted.map(team => (
-            <option key={team} value={team}>
-              {teamDisplayName(team)}
-            </option>
-          ))}
-        </select>
-      </span>
-      <button
-        type="submit"
-        className="min-h-11 rounded-none bg-ink px-4 text-sm font-semibold text-paper transition-colors duration-150 hover:bg-forest"
+    <span className="flex min-w-0 flex-col gap-1 text-left">
+      <label htmlFor={id} className="text-[12px] font-semibold text-graphite">{label}</label>
+      <select
+        id={id}
+        value={value}
+        onChange={e => {
+          setValue(e.target.value);
+          const slug = ligaTeamSlugs[e.target.value];
+          if (slug) router.push(`/${locale}/desporto/liga/${slug}`);
+        }}
+        className="min-h-11 min-w-[200px] rounded-none border border-ink bg-paper px-3 text-base text-ink sm:text-sm"
       >
-        {locale === "en" ? "See club" : "Ver equipa"}
-      </button>
-      {hint && (
-        <p id={`${id}-hint`} role="status" className="w-full text-sm text-stone-600">
-          {locale === "en" ? "Choose a club from the list first." : "Escolhe primeiro um clube na lista."}
-        </p>
-      )}
-    </form>
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {sorted.map(team => (
+          <option key={team} value={team}>
+            {teamDisplayName(team)}
+          </option>
+        ))}
+      </select>
+    </span>
   );
 }
 

@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import pt from '../../../messages/pt.json';
 import en from '../../../messages/en.json';
 import { NAV_LABEL_KEYS, isNavItemActive, navLabels, siteNavigation, type NavItem } from './site-navigation';
+import { LIGA_TABS } from '@/components/football/liga-tabs';
 
 const lookup = (catalogue: unknown) => (key: string) => {
   const value = key.split('.').reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], catalogue);
@@ -49,12 +50,18 @@ describe('site navigation', () => {
     expect(nav('pt', false).map(item => item.id)).not.toContain('articles');
   });
 
-  it('gives the Liga its method, its evaluation and a game that says it is one', () => {
+  it('gives the Liga menu the tab row\'s items, in its order, and a game that says it is one', () => {
     const sport = nav('pt').find(item => item.id === 'sport')!;
-    const hrefs = sport.dropdown!.map(link => link.href);
-    expect(hrefs).toEqual(expect.arrayContaining(['/desporto/liga/modelo', '/desporto/liga/metodologia']));
-    expect(sport.dropdown!.find(link => link.href === '/desporto/liga/jogo-previsoes')?.label).toBe('Contra o Modelo (jogo semanal)');
+    expect(sport.dropdown!.map(link => link.href)).toEqual(LIGA_TABS.map(tab => tab.href));
+    expect(sport.dropdown!.map(link => link.label)).toEqual(['Previsões', 'Jogadores', 'Contra o Modelo (jogo semanal)', 'Modelo', 'Dados']);
     expect(nav('en').find(item => item.id === 'sport')!.dropdown!.find(link => link.href === '/desporto/liga/jogo-previsoes')?.label).toBe('Beat the Model (weekly game)');
+    // The simulator was retired: its two parts live on the club pages.
+    expect(sport.dropdown!.map(link => link.href)).not.toContain('/desporto/liga/simulador');
+  });
+
+  it('keeps the tab row\'s game label the same as the menu\'s, without the suffix', () => {
+    expect(LIGA_TABS.find(tab => tab.key === 'jogo')?.pt).toBe(pt.nav.game);
+    expect(LIGA_TABS.find(tab => tab.key === 'jogo')?.en).toBe(en.nav.game);
   });
 
   it('lights the section a page belongs to, Liga 2 included', () => {

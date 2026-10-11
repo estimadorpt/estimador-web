@@ -93,10 +93,30 @@ export async function loadLigaHistorical(): Promise<LigaHistorical> {
   }
 }
 
-// Load sampled complete seasons for the SeasonDraw widget (null if absent)
+/** samples.json: complete simulated seasons drawn from the Monte Carlo, with
+ * each club's final-points quantiles and finish distribution. */
+export interface SeasonSamples {
+  season: string;
+  matchday: number;
+  n_sims: number;
+  n_samples: number;
+  teams: string[];
+  p_champion: number[];
+  position_probs: number[][];
+  points_q05: number[];
+  /** Quartiles, published next to the 90% bounds, used by the league table. */
+  points_q25?: number[];
+  points_q50: number[];
+  points_q75?: number[];
+  points_q95: number[];
+  samples: { pos: number[]; pts: number[]; gd: number[] }[];
+}
+
+// Sampled complete seasons, for the league table's final-points ranges, the
+// homepage's bands and the club pages' final duel (null if absent).
 export async function loadLigaSamples() {
   try {
-    return await loadFootballJson<import('@/components/charts/football/SeasonDraw').SeasonSamples>('samples.json');
+    return await loadFootballJson<SeasonSamples>('samples.json');
   } catch {
     return null;
   }

@@ -1,6 +1,6 @@
 import type { ContestedRatings, GkChannels } from '@/lib/utils/football-data-loader';
 import type { RatingsBlock } from '@/lib/utils/player-ratings';
-import { nextSeason, playerDataCutoffLabel } from '@/lib/utils/player-pages';
+import { nextSeason, playerDataCutoffLabel, playerFitInProgress } from '@/lib/utils/player-pages';
 
 /**
  * What /desporto/liga/jogadores ranks, what it measures without ranking, and
@@ -116,6 +116,13 @@ export function playerCutoffMeta(
 ): string | null {
   const label = playerDataCutoffLabel(through, seasons, locale);
   if (!label) return null;
+  // While the fit's season is the one being played, the label already says
+  // so ("época 2026-27 em curso"): no "ainda sem jogos de 2027-28".
+  if (playerFitInProgress(seasons)) {
+    return locale === 'en'
+      ? `${label} for finishing and contribution; the other metrics state the seasons they cover.`
+      : `${label} em finalização e contribuição; as outras métricas dizem as épocas que cobrem.`;
+  }
   const last = seasons?.length ? seasons[seasons.length - 1] : null;
   const next = last ? nextSeason(last) : null;
   return locale === 'en'

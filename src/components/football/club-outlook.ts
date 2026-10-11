@@ -14,16 +14,21 @@ import { formatKickoffShort, formatPercent } from '@/lib/football-format';
 import {
   clubStakes,
   fixtureStatus,
-  formatObjectiveLabel,
   listSupportedFixtures,
   nextSupportedFixtureFor,
   postponedLeftoverFor,
-  relevantObjective,
   type ClubObjective,
   type FixtureStatus,
   type GameFixturesData,
 } from '@/lib/football-fixtures';
 import { ligaTeamSlugs, teamDisplayName, teamWithArticle } from '@/lib/config/football';
+import { clubFrame, frameMetric, type ClubFrame } from '@/lib/football-scenarios';
+
+/** The frame's name, as the page's other what-ifs say it. */
+const FRAME_LABEL: Record<ClubFrame, Record<'pt' | 'en', string>> = {
+  title: { pt: 'Título', en: 'Title' },
+  relegation: { pt: 'Despromoção', en: 'Relegation' },
+};
 
 export type Locale = 'pt' | 'en';
 
@@ -36,9 +41,9 @@ export interface ClubOutlookEntry {
   label: string;
   /** Route for this club's own page. */
   clubHref: string;
-  /** The relevant season objective for this club (per relevantObjective), or
-   * null when nothing clears its threshold — callers then fall back to the
-   * finish distribution instead of forcing a stat. */
+  /** The club's frame as an objective (clubFrame: the title from 1%, else
+   * relegation from 1%), or null for a club in neither race: callers then
+   * show the next game's own 1X2 instead of forcing a stat. */
   objective: ClubObjective | null;
   objectiveLabel: string | null;
   /** Raw probability (0-1) for `objective`, before the supported match, from
@@ -76,19 +81,6 @@ export interface ClubOutlookEntry {
   /** `/desporto/liga/jogo/<slug>`, or null when the fixture has no resolvable
    * match page (e.g. an unresolved postponed leftover). */
   matchHref: string | null;
-  /** Carries this club, its objective and the bundle version into the
-   * simulator, per src/lib/football-exploration.ts's read/write contract.
-   * The simulator only understands 'p_champion' | 'p_relegation' as `goal`,
-   * so a top-three objective (or none) leaves `goal` out and the simulator
-   * picks its own default for the club (audit FA3-03). */
-  simulatorHref: string;
-}
-
-/** The simulator's goal for a club, or null to let the simulator pick its
- * default (the title from 1%, else relegation: audit FA3-03), since it has
- * no top-three objective. */
-function simulatorGoal(objective: ClubObjective | null): 'p_champion' | 'p_relegation' | null {
-  return objective === 'p_relegation' || objective === 'p_champion' ? objective : null;
 }
 
 /**
@@ -105,7 +97,6 @@ export function buildClubOutlooks(
 ): ClubOutlookEntry[] {
   const fixtures = listSupportedFixtures(prediction, scenarios, gameFixtures);
   const baselines = scenarios?.next_matchday_scenarios?.baseline ?? {};
-  const version = `${prediction.season}-${prediction.timestamp}`;
 
   const entries: ClubOutlookEntry[] = [];
   for (const row of prediction.table) {
@@ -113,12 +104,14 @@ export function buildClubOutlooks(
     const slug = ligaTeamSlugs[team];
     if (!slug) continue;
 
-    // Prefer the next-match-scenario baseline (what clubStakes' deltas are
-    // relative to); fall back to the standings row so the lead objective can
-    // still be picked when scenarios are unavailable (e.g. end of season).
-    const objectiveSource = baselines[team] ?? row;
-    const objective = relevantObjective(objectiveSource);
-    const baseline = objective ? (objectiveSource[objective] ?? null) : null;
+    // The club page's one frame (clubFrame: the title from 1%, else
+    // relegation from 1%), read from the standings row like the rest of the
+    // page; the baseline is the next-match-scenario one, what clubStakes'
+    // figures are relative to, else the row (e.g. at the end of the season).
+    const frame = clubFrame(row);
+    const objective: ClubObjective | null = frame ? frameMetric(frame) : null;
+    const baselineSource = baselines[team] ?? row;
+    const baseline = objective ? (baselineSource[objective] ?? null) : null;
 
     const fixture = nextSupportedFixtureFor(team, fixtures);
     const leftover = postponedLeftoverFor(team, fixtures);
@@ -180,16 +173,13 @@ export function buildClubOutlooks(
       }
     }
 
-    const goal = simulatorGoal(objective);
-    const simParams = new URLSearchParams({ v: version, team, ...(goal ? { goal } : {}) });
-
     entries.push({
       team,
       slug,
       label: teamDisplayName(team),
       clubHref: `/desporto/liga/${slug}`,
       objective,
-      objectiveLabel: objective ? formatObjectiveLabel(objective, locale) : null,
+      objectiveLabel: frame ? FRAME_LABEL[frame][locale] : null,
       baseline,
       win,
       draw,
@@ -206,7 +196,6 @@ export function buildClubOutlooks(
       fixtureStatusLabel,
       postponedLabel,
       matchHref,
-      simulatorHref: `/desporto/liga/simulador?${simParams.toString()}`,
     });
   }
   return entries;

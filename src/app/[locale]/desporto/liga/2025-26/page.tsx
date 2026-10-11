@@ -3,6 +3,7 @@ import path from 'node:path';
 import { createPageMetadata, siteTitle } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
+import { LigaSectionNav } from "@/components/football/LigaSectionNav";
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
@@ -143,6 +144,7 @@ export default async function SeasonReviewPage({
       <div className="min-h-screen bg-paper">
         <Header />
         <main id="main-content" tabIndex={-1}>
+        <LigaSectionNav current="previsoes" locale={locale} />
           <PageHero
             measure="wide"
             compact
@@ -231,6 +233,7 @@ export default async function SeasonReviewPage({
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <LigaSectionNav current="previsoes" locale={locale} />
       <PageHero
         measure="wide"
         compact

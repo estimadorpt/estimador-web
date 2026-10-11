@@ -104,8 +104,8 @@ export function ClubFixtures({
             </span>
             {r.probs && (
               <span className="hidden shrink-0 text-xs tabular-nums text-stone-600 sm:inline">
-                {pt ? "Vitória" : "Win"} <strong className="text-ink">{formatPercent(r.probs.win, locale)}</strong> · {pt ? "Empate" : "Draw"}{" "}
-                <strong className="text-ink">{formatPercent(r.probs.draw, locale)}</strong> · {pt ? "Derrota" : "Loss"}{" "}
+                {pt ? "Ganhar" : "Win"} <strong className="text-ink">{formatPercent(r.probs.win, locale)}</strong> · {pt ? "Empatar" : "Draw"}{" "}
+                <strong className="text-ink">{formatPercent(r.probs.draw, locale)}</strong> · {pt ? "Perder" : "Lose"}{" "}
                 <strong className="text-ink">{formatPercent(r.probs.loss, locale)}</strong>
               </span>
             )}

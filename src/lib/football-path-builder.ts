@@ -122,3 +122,44 @@ export function pickedPoints(selections: Record<number, PathOutcome | undefined>
 export function expectedPoints(matches: CriticalPathMatch[]): number {
   return matches.reduce((sum, m) => sum + 3 * m.p_win_overall + m.p_draw_overall, 0);
 }
+
+/* ------------------------------------------------- the decisive games --- */
+
+/**
+ * How much one game moves the target between winning and losing it, read on
+ * its own (the exact single-pick conditionals): |P(T | W) − P(T | L)|.
+ */
+export function singleGameSwing(pCurrent: number, match: CriticalPathMatch): number {
+  return Math.abs(
+    scenarioProbability(pCurrent, [match], { 0: 'W' }) - scenarioProbability(pCurrent, [match], { 0: 'L' }),
+  );
+}
+
+/** A game is marked decisive when it moves the target this much more than
+ * the club's typical remaining game (the median) does. */
+export const DECISIVE_ABOVE_TYPICAL = 0.05;
+
+/**
+ * The games the builder marks "decisivo", by index in `matches`: those whose
+ * swing beats the club's median game by DECISIVE_ABOVE_TYPICAL or more. For a
+ * title contender that is the direct duels (in md08, Porto's two games with
+ * Sporting and one with Benfica move its title chance by 26 to 27 points, the
+ * others by 16 to 18); for Casa Pia every game moves its relegation chance by
+ * 16 to 22 points, so none is marked and the builder says so in a sentence,
+ * instead of the ten near-identical rows of the old decisive list (review,
+ * October 2026).
+ */
+export function decisiveGames(pCurrent: number, matches: CriticalPathMatch[]): {
+  indices: Set<number>;
+  swings: number[];
+  /** The smallest and largest swing over every remaining game. */
+  range: [number, number];
+} {
+  const swings = matches.map(m => singleGameSwing(pCurrent, m));
+  if (swings.length === 0) return { indices: new Set(), swings, range: [0, 0] };
+  const sorted = [...swings].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  const median = sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  const indices = new Set(swings.flatMap((s, i) => (s >= median + DECISIVE_ABOVE_TYPICAL ? [i] : [])));
+  return { indices, swings, range: [sorted[0], sorted[sorted.length - 1]] };
+}

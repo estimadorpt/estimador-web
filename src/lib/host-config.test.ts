@@ -28,8 +28,16 @@ describe('host config', () => {
     }
   });
 
+  it('sends the retired simulator to the Liga hub of the same language', () => {
+    for (const locale of ['pt', 'en']) {
+      expect(firstMatch(`/${locale}/desporto/liga/simulador/`)?.redirect).toBe(`/${locale}/desporto/liga/`);
+      expect(firstMatch(`/${locale}/desporto/liga/simulador`)?.statusCode).toBe(301);
+    }
+    expect(firstMatch('/desporto/liga/simulador')?.redirect).toBe('/pt/desporto/liga/');
+  });
+
   it('answers the shareable pages typed without a locale with a 301 (SP-12)', () => {
-    for (const page of ['/populacao/misteriosa', '/populacao/dados', '/desporto/liga/simulador', '/marca']) {
+    for (const page of ['/populacao/misteriosa', '/populacao/dados', '/desporto/liga/jogadores', '/marca']) {
       const rule = firstMatch(page);
       expect(rule?.redirect, page).toBe(`/pt${page}/`);
       expect(rule?.statusCode, page).toBe(301);

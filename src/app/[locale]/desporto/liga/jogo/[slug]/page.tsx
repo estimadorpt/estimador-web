@@ -35,15 +35,14 @@ import {
   kickoffSteps,
   matchPlayedLine,
   matchStartedLine,
+  forecastStatus,
   nextRoundTiming,
 } from "@/lib/football-status";
 import { ClockSwitch } from "@/components/football/ClockSwitch";
+import { LigaSectionNav } from "@/components/football/LigaSectionNav";
+import { TextLink } from "@/components/brand/TextLink";
+import { roundLockAt } from "@/lib/utils/prediction-game-record";
 import { setRequestLocale } from '@/i18n/request-locale';
-
-/** A sentence's full stop, unless it already ends on one ("25 set."). */
-function withStop(text: string): string {
-  return text.endsWith(".") ? text : `${text}.`;
-}
 
 /* ------------------------------------------------------------- static params */
 
@@ -156,6 +155,7 @@ export default async function MatchPage({
       <div className="min-h-screen bg-paper">
         <Header />
         <main id="main-content" tabIndex={-1}>
+          <LigaSectionNav current="previsoes" locale={locale} />
           <PageHero
             measure="wide"
             compact
@@ -180,7 +180,6 @@ export default async function MatchPage({
 
   const L = {
     back: pt ? "Liga Portugal" : "Liga Portugal",
-    live: pt ? "Jornada em curso" : "Matchday in progress",
     otherMatches: pt ? "Outros jogos" : "Other fixtures",
     teamPage: pt ? "Página da equipa" : "Team page",
     noData: pt ? "Dados indisponíveis." : "Data not available.",
@@ -265,15 +264,18 @@ export default async function MatchPage({
   // forecast waits for: it goes stale before its own kickoff.
   const staleAt = !isPlayed && timing?.round != null && fixture.matchday < timing.round ? roundPlayedAtIso : null;
   const forecastShort = prediction?.timestamp ? formatShortDate(prediction.timestamp, locale) : "";
-  const statusInput = prediction && timing
-    ? {
-        matchday: prediction.matchday,
-        timestamp: prediction.timestamp,
-        inProgress: Boolean(prediction.matches_remaining?.length),
-        nextRound: timing.round,
-        nextRoundKickoffs: timing.kickoffs,
-      }
-    : null;
+
+  // Contra o Modelo: when this game's round is open in the weekly game (its
+  // odds published in game_fixtures.json, its lock still to come), the page
+  // says where to call it, and stops saying so at the lock (the reader's
+  // clock). The server render decides by the forecast's own instant.
+  const gameRound = gameFixtures?.matchdays.find(md => md.matchday === fixture.matchday) ?? null;
+  const gameRoundPublished = Boolean(gameRound?.fixtures?.some(fx => fx.published_at && typeof fx.p_home === "number"));
+  const gameLockAt = gameRound ? roundLockAt(gameRound) : null;
+  const inGameRound = gameRound?.fixtures?.some(fx => fx.home === fixture.home && fx.away === fixture.away) ?? false;
+  const gameOpen = !isPlayed && gameRoundPublished && inGameRound && gameLockAt != null
+    && (!prediction?.timestamp || Date.parse(gameLockAt) > Date.parse(prediction.timestamp));
+  const status = prediction ? forecastStatus(prediction, fixtures, locale) : null;
 
   // The frozen 1X2 a postponed game is scored on in Contra o Modelo and
   // recorded with once played, beside the current forecast's (audit VFA-M2).
@@ -293,11 +295,15 @@ export default async function MatchPage({
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <LigaSectionNav current="previsoes" locale={locale} />
       <PageHero
         measure="wide"
         compact
         back={{ href: "/desporto/liga", label: L.back, locale }}
-        eyebrow={`Liga Portugal · ${pt ? "Jornada" : "Matchday"} ${fixture.matchday}${fixture.inProgressMatchday ? ` · ${L.live}` : ""}${fixture.postponed ? (pt ? " · jogo em atraso" : " · postponed") : ""}${isPlayed ? (pt ? " · jogo disputado" : " · played") : ""}`}
+        // The round and the game's own state; what the forecast had seen is
+        // the meta line's, in the hub's words (a static "Jornada em curso"
+        // here named the state a third way, review October 2026).
+        eyebrow={`Liga Portugal · ${pt ? "Jornada" : "Matchday"} ${fixture.matchday}${fixture.postponed ? (pt ? " · jogo em atraso" : " · postponed") : ""}${isPlayed ? (pt ? " · jogo disputado" : " · played") : ""}`}
         title={matchLabel(teamDisplayName(home), teamDisplayName(away))}
         lede={isPlayed
           ? fixture.p_home != null
@@ -309,26 +315,27 @@ export default async function MatchPage({
               : "This match's result. The season forecast is on the Liga page."
           : (() => {
               // After kickoff the page stops previewing the game (audit
-              // FRESH-01); a postponed game's new forecast comes with the next
-              // update, not "after the matchday" (FR3-02).
+              // FRESH-01). The game's state ("Jogo começou", "Jogo
+              // disputado") is said once, over the 1X2, and the forecast's
+              // in the meta line: the lede only says what the page holds
+              // (review, October 2026: "Jogo começou" twice in one hero). A
+              // postponed game's new forecast comes with the next update
+              // (FR3-02).
               const ts = prediction?.timestamp;
-              const next = fixture.postponed
-                ? pt ? "a nova previsão sai com a próxima atualização." : "the new forecast comes with the next update."
-                : pt ? "a nova previsão sai depois da jornada." : "the new forecast follows the matchday."
-              const after = (status: string) => pt
-                ? `${withStop(status)} O que o modelo dava antes do jogo e o que cada resultado mudava; ${next}`
-                : `${withStop(status)} What the model gave before the match and what each result would change; ${next}`;
+              const after = pt
+                ? "O que o modelo dava antes do jogo e o que cada resultado mudava."
+                : "What the model gave before the match and what each result would change.";
               const steps = ts
                 ? [
                     ...(staleAt && timing?.round != null
                       ? [{
                           at: staleAt,
                           value: pt
-                            ? `Jogo em atraso · previsão de ${forecastShort}, antes da jornada ${timing.round}. O que o modelo dava e o que cada resultado mudava; a nova previsão sai com a próxima atualização.`
-                            : `Postponed match · forecast of ${forecastShort}, before matchday ${timing.round}. What the model gave and what each result would change; the new forecast comes with the next update.`,
+                            ? `Jogo em atraso: o que o modelo dava na previsão de ${forecastShort} e o que cada resultado mudava. A nova previsão sai com a próxima atualização.`
+                            : `Postponed match: what the model gave in the ${forecastShort} forecast and what each result would change. The new forecast comes with the next update.`,
                         }]
                       : []),
-                    ...kickoffSteps(fixture.kickoff, fixture.kickoffConfirmed, after(matchStartedLine(ts, locale)), after(matchPlayedLine(ts, locale))),
+                    ...kickoffSteps(fixture.kickoff, fixture.kickoffConfirmed, after, after),
                   ]
                 : [];
               return (
@@ -343,22 +350,8 @@ export default async function MatchPage({
         // The forecast's date where the first number is, not only in the
         // footer (audit FR3-08, PRO3-13), and its staleness once the round
         // is played.
-        meta={!isPlayed && statusInput ? (
-          <span>
-            <ClockSwitch
-              initial={pt
-                ? `Previsão de ${forecastShort} (depois da jornada ${statusInput.matchday})${statusInput.nextRound != null ? ` · próxima atualização após a jornada ${statusInput.nextRound}` : ""}`
-                : `Forecast of ${forecastShort} (after matchday ${statusInput.matchday})${statusInput.nextRound != null ? ` · next update after matchday ${statusInput.nextRound}` : ""}`}
-              steps={roundPlayedAtIso && statusInput.nextRound != null
-                ? [{
-                    at: roundPlayedAtIso,
-                    value: pt
-                      ? `Previsão de ${forecastShort} (depois da jornada ${statusInput.matchday}) · jornada ${statusInput.nextRound} jogada, nova previsão em preparação`
-                      : `Forecast of ${forecastShort} (after matchday ${statusInput.matchday}) · matchday ${statusInput.nextRound} played, new forecast in preparation`,
-                  }]
-                : []}
-            />
-          </span>
+        meta={!isPlayed && status ? (
+          <span><ClockSwitch initial={status.initial} steps={status.steps} /></span>
         ) : undefined}
       />
 
@@ -384,6 +377,18 @@ export default async function MatchPage({
             forecastTimestamp={prediction?.timestamp ?? null}
             frozenProbs={frozen}
           />
+          {gameOpen && gameLockAt && (
+            <ClockSwitch
+              initial={
+                <p className="mt-3">
+                  <TextLink href="/desporto/liga/jogo-previsoes" locale={locale}>
+                    {pt ? "Prevê este jogo em Contra o Modelo" : "Call this match in Beat the Model"}
+                  </TextLink>
+                </p>
+              }
+              steps={[{ at: gameLockAt, value: null }]}
+            />
+          )}
         </div></div>
       </section>
 

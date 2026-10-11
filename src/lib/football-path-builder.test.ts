@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { ScenarioData } from '@/types/football';
-import { likelihoodRatio, pickedPoints, runningProbabilities, scenarioProbability, type PathOutcome } from './football-path-builder';
+import { decisiveGames, likelihoodRatio, pickedPoints, runningProbabilities, scenarioProbability, singleGameSwing, type PathOutcome } from './football-path-builder';
 
 function load(file: string): ScenarioData {
   return JSON.parse(fs.readFileSync(path.join(process.cwd(), file), 'utf8'));
@@ -103,6 +103,42 @@ describe('the md07 Benfica acceptance case (audit B1)', () => {
     const p = scenarioProbability(benfica.p_current, benfica.matches, { [i]: 'W' });
     expect(Math.round(p * 1000) / 1000).toBeCloseTo(0.252, 3);
     expect(Math.round(benfica.p_current * 100)).toBe(22);
+  });
+});
+
+describe('the decisive games the builder marks (md08)', () => {
+  const md08 = load('public/data/football/liga-2026-27/md08_scenarios.json');
+  const paths = md08.critical_paths ?? {};
+  const marked = (team: string) => {
+    const p = paths[team];
+    const { indices } = decisiveGames(p.p_current, p.matches);
+    return [...indices].map(i => `${p.matches[i].matchday} ${p.matches[i].opponent}`).sort();
+  };
+
+  it('marks a title contender\'s direct duels and nothing else', () => {
+    if (md08.matchday !== 8) return;
+    expect(marked('Porto')).toEqual(['12 Sporting CP', '24 Benfica', '29 Sporting CP']);
+    for (const team of ['Benfica', 'Sporting CP']) {
+      for (const row of marked(team)) expect(row, team).toMatch(/Porto|Benfica|Sporting CP/);
+    }
+  });
+
+  it('marks none of Casa Pia\'s games, which all weigh about the same', () => {
+    if (md08.matchday !== 8) return;
+    expect(marked('Casa Pia')).toEqual([]);
+    const { range } = decisiveGames(paths['Casa Pia'].p_current, paths['Casa Pia'].matches);
+    // The sentence the builder says instead: every game between 16 and 22 points.
+    expect(Math.round(range[0] * 100)).toBe(16);
+    expect(Math.round(range[1] * 100)).toBe(22);
+  });
+
+  it('reads each swing from the exact single-pick conditionals', () => {
+    const p = paths['Porto'];
+    const m = p.matches[0];
+    expect(singleGameSwing(p.p_current, m)).toBeCloseTo(
+      scenarioProbability(p.p_current, [m], { 0: 'W' }) - scenarioProbability(p.p_current, [m], { 0: 'L' }),
+      12,
+    );
   });
 });
 

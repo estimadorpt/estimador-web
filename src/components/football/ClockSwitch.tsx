@@ -9,7 +9,7 @@ import { clockValue, type ClockStep } from "@/lib/football-status";
  * render, show `initial` (the forecast as published). After mount the clock
  * is read and re-read every minute, and the content of the latest step whose
  * instant has passed replaces it: "Jogo começou · previsão de 25 set." after
- * a kickoff, "Jornada 8 · jogada, nova previsão em preparação" once a round
+ * a kickoff, "Jornada 8 jogada, nova previsão em preparação" once a round
  * is over. Server components pass the strings in; nothing here reads
  * messages.
  */

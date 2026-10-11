@@ -30,8 +30,7 @@ describe('buildClubOutlooks (frozen md06 bundle)', () => {
     expect(sporting?.fixtureStatusKind).not.toBeNull();
     expect(sporting?.matchHref).toBe('/desporto/liga/jogo/sporting-arouca');
     expect(sporting?.clubHref).toBe('/desporto/liga/sporting');
-    expect(sporting?.simulatorHref).toContain('goal=p_champion');
-    expect(sporting?.simulatorHref).toContain('team=Sporting');
+    expect(sporting?.objectiveLabel).toBe('Título');
   });
 
   it("builds Arouca's relegation stakes for the same fixture, oriented as the away club", async () => {
@@ -46,7 +45,7 @@ describe('buildClubOutlooks (frozen md06 bundle)', () => {
     expect(arouca?.loss).toBeCloseTo(0.0245, 3);
     expect(arouca?.venue).toBe('away');
     expect(arouca?.opponent).toBe('Sporting CP');
-    expect(arouca?.simulatorHref).toContain('goal=p_relegation');
+    expect(arouca?.objectiveLabel).toBe('Despromoção');
   });
 
   it('leads with the current-round game and carries the postponed leftover as a secondary line', async () => {

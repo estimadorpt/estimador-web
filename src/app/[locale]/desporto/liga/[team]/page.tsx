@@ -10,18 +10,15 @@ import {
 import { Link } from "@/i18n/routing";
 import { DataCard } from "@/components/viz/DataCard";
 import { ClubFixtures, clubFixtureRows } from "@/components/football/ClubFixtures";
-import { titleDecisive, relegationDecisive } from "@/components/charts/football/DecisiveMatches";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
-import { NarrativeScenarios } from "@/components/charts/football/NarrativeScenarios";
-import { DecisiveMatches, type DecisiveRace } from "@/components/charts/football/DecisiveMatches";
 import { TeamTimeline } from "@/components/charts/football/TeamTimeline";
-import { RemainingSchedule } from "@/components/charts/football/RemainingSchedule";
 import { PathBuilder } from "@/components/charts/football/PathBuilder";
+import { DueloFinal } from "@/components/charts/football/DueloFinal";
 import { PositionDistribution } from "@/components/charts/football/PositionDistribution";
 import { getTranslations } from "next-intl/server";
-import { formatInteger, formatLongDate, formatOrdinal, formatPercent, formatShortDate } from "@/lib/football-format";
+import { formatInteger, formatLongDate, formatOrdinal, formatPercent } from "@/lib/football-format";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { buildClubOutlooks, positionSpread } from "@/components/football/club-outlook";
@@ -29,28 +26,16 @@ import { loadGameFixtures } from "@/components/football/load-game-fixtures";
 import { FixtureStakes } from "@/components/football/FixtureStakes";
 import { ClockSwitch } from "@/components/football/ClockSwitch";
 import { ShareLink } from "@/components/football/ShareLink";
-import { forecastAsOf, nextRoundTiming } from "@/lib/football-status";
+import { LigaSectionNav } from "@/components/football/LigaSectionNav";
+import { RivalGames, type RivalGameRow } from "@/components/football/RivalGames";
+import { forecastStatus, nextRoundTiming } from "@/lib/football-status";
+import { clubFrame, duelRival, frameMetric, rivalGames } from "@/lib/football-scenarios";
+import { byKickoff } from "@/lib/football-fixtures";
 import { previousModelMatchdays, publicationLabel } from "@/components/charts/football/probability-history-table";
 import { setRequestLocale } from '@/i18n/request-locale';
 import { Register } from '@/components/instrument';
 
 const ordinal = formatOrdinal;
-
-/**
- * The race a club's page is about, for its meta description (audit FA2-09):
- * a relegation club is not described by "cenários de título".
- */
-function clubRace(
-  team: string,
-  prediction: Awaited<ReturnType<typeof loadLigaData>>["prediction"],
-  scenarios: Awaited<ReturnType<typeof loadLigaData>>["scenarios"],
-): "title" | "relegation" | "other" {
-  const row = prediction?.table.find((r) => r.team === team);
-  if (scenarios?.narrative_scenarios?.[team]?.target === "survival") return "relegation";
-  if (row && row.p_champion >= 0.01) return "title";
-  if (row && row.p_relegation >= 0.01) return "relegation";
-  return "other";
-}
 
 // Any other slug is a 404, in development as in the export.
 export const dynamicParams = false;
@@ -80,14 +65,17 @@ export async function generateMetadata({
   if (!teamName) return {};
 
   const t = await getTranslations({ locale });
-  const { prediction, scenarios } = await loadLigaData();
+  const { prediction } = await loadLigaData();
+  // The race the page is about, the page's own frame (audit FA2-09): a
+  // relegation club is not described by "cenários de título".
+  const frame = clubFrame(prediction?.table.find((r) => r.team === teamName));
 
   return createPageMetadata({
     locale,
     path: `/desporto/liga/${slug}`,
     title: t("football.teamPageTitle", { team: teamDisplayName(teamName) }),
     description: t("football.teamPageDescription", {
-      race: clubRace(teamName, prediction, scenarios),
+      race: frame ?? "other",
       team: teamDisplayName(teamName),
       teamFor: teamWithArticle(teamName, "para"),
       teamOf: teamWithArticle(teamName, "de"),
@@ -120,6 +108,7 @@ export default async function TeamDetailPage({
       <div className="min-h-screen bg-paper">
         <Header />
         <main id="main-content" tabIndex={-1}>
+          <LigaSectionNav current="previsoes" locale={locale} />
           <PageHero
             compact
             back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
@@ -135,32 +124,30 @@ export default async function TeamDetailPage({
     );
   }
 
+  const pt = locale !== "en";
   // The club colour as drawn on paper: contrast-checked, never used for text.
   const teamColor = teamColorOnPaper(teamName);
   const standing = prediction.table.find((t) => t.team === teamName);
-  const narrativeData = scenarios?.narrative_scenarios?.[teamName];
-  const isSurvival = narrativeData?.target === "survival";
-
-  // Determine team archetype: title contender, relegation candidate, or mid-table
-  const pChampion = standing ? standing.p_champion * 100 : 0;
-  const pRelegation = standing ? standing.p_relegation * 100 : 0;
-  const isTitleContender = pChampion >= 1;
-  const isRelegationCandidate = pRelegation >= 1;
-
   const forecastDate = formatLongDate(prediction.timestamp, locale);
-  const pt = locale !== "en";
+
+  // The page's one frame: the title from 1% of title chance, else relegation
+  // from 1%, else none (clubFrame). Every what-if below reads it, so the page
+  // never says "despromoção" in one block and "permanência" in the next.
+  const frame = clubFrame(standing);
+  const metric = frame ? frameMetric(frame) : null;
 
   // The page is exported once per forecast. Once the round the next forecast
-  // waits for has been played, every "agora" on it is the forecast of
-  // 25 September, and the page says so (audit FR3-01): the hub's instant.
+  // waits for has been played, every "agora" on it is the forecast of its
+  // date, and the page says so (audit FR3-01): the hub's instant.
   const timing = nextRoundTiming(prediction, upcomingFixtures);
   const staleAt = timing.playedAt;
-  const asOfCapital = forecastAsOf(prediction.timestamp, locale, { capital: true });
-  const staleSteps = <T,>(value: T) => (staleAt ? [{ at: staleAt, value }] : []);
+  const status = forecastStatus(prediction, upcomingFixtures, locale);
 
-  // Which of the three fixed cards (title / top 3 / relegation) carry
-  // information worth their own card — below 1% they fold into one line
+  // Which of the three fixed figures (title / top 3 / relegation) carry
+  // information worth their own figure — below 1% they fold into one line
   // instead of three confident-looking 0% headlines (diagnosis §5).
+  const pChampion = standing ? standing.p_champion * 100 : 0;
+  const pRelegation = standing ? standing.p_relegation * 100 : 0;
   const metricCards = [
     { key: "championship", label: t("football.championship"), value: pChampion },
     { key: "top3", label: t("football.top3"), value: standing ? standing.p_top3 * 100 : 0 },
@@ -180,56 +167,44 @@ export default async function TeamDetailPage({
     ? "17.º ou 18.º lugar; o 16.º joga o play-off e não conta"
     : "17th or 18th; 16th plays off and is not counted";
 
-  // This club's own supported fixture and three-outcome stakes, from the
-  // same helper the homepage module uses (diagnosis §5's "a stronger answer
-  // format exists in the product and should be promoted/reused").
-  const clubOutlook = buildClubOutlooks(locale === "pt" ? "pt" : "en", prediction, scenarios, gameFixtures)
+  // This club's next game and what each result does to its frame.
+  const clubOutlook = buildClubOutlooks(pt ? "pt" : "en", prediction, scenarios, gameFixtures)
     .find((entry) => entry.team === teamName) ?? null;
   const clubNextMatchday = clubOutlook?.matchHref
     ? (upcomingFixtures.find((f) => `/desporto/liga/jogo/${f.slug}` === clubOutlook.matchHref)?.matchday ?? null)
     : null;
 
-  // Timeline: the club's own race — the title, else the top three when it is
-  // a real prospect (Sp. Braga at 8%, audit F14), else relegation. No band:
-  // the published lo/hi fields are not the uncertainty of the probability
-  // (audit F-H1, owner decision). A mid-table club with nothing above 1% has
-  // no line worth drawing.
-  const pTop3 = standing ? standing.p_top3 * 100 : 0;
-  const timelineMetric: "p_champion" | "p_top3" | "p_relegation" | null = isTitleContender
-    ? "p_champion"
-    : pTop3 >= 1
-      ? "p_top3"
-      : isRelegationCandidate
-        ? "p_relegation"
-        : null;
+  // Timeline: the frame's chance, jornada by jornada. No band: the published
+  // lo/hi fields are not the uncertainty of the probability (audit F-H1,
+  // owner decision). A club in neither race has no line worth drawing.
   // Each point is a dated publication, as on the hub ("J2 · 14 ago."), and
   // the pre-season one from the previous model says so (FA3-05, VFA-M4).
   const previousModel = new Set(previousModelMatchdays(historical));
-  const timelineData = timelineMetric
+  const timelineData = metric
     ? historical.flatMap((md) => {
         const row = md.table.find((t) => t.team === teamName);
         return row
           ? [{
               matchday: md.matchday,
-              value: row[timelineMetric] * 100,
+              value: row[metric] * 100,
               label: publicationLabel(md, locale, previousModel.has(md.matchday)),
             }]
           : [];
       })
     : [];
-  const timelineLabel = timelineMetric === "p_champion"
-    ? t("football.championPercent")
-    : timelineMetric === "p_top3"
-      ? (locale === "pt" ? "Top 3 (%)" : "Top 3 (%)")
-      : t("football.relegationPercent");
-  const timelineTarget = timelineMetric === "p_champion"
-    ? (locale === "pt" ? "ser campeão" : "winning the title")
-    : timelineMetric === "p_top3"
-      ? (locale === "pt" ? "acabar nos três primeiros" : "finishing in the top three")
-      : (locale === "pt" ? "despromoção" : "relegation");
+  const timelineLabel = metric === "p_champion" ? t("football.championPercent") : t("football.relegationPercent");
+  const timelineTarget = metric === "p_champion"
+    ? (pt ? "ser campeão" : "winning the title")
+    : (pt ? "despromoção" : "relegation");
 
-  // Remaining schedule from critical paths
-  const remainingMatches = scenarios?.critical_paths?.[teamName]?.matches;
+  // The scenario builder, when the published paths count this page's race
+  // (a title path for a title club, a survival path, read as relegation, for
+  // a relegation club).
+  const criticalPath = scenarios?.critical_paths?.[teamName];
+  const builderPath = criticalPath && frame
+    && (criticalPath.target === "champion") === (frame === "title")
+    ? criticalPath
+    : null;
 
   // Position distribution
   const positionProbs = prediction.position_probs?.[teamName];
@@ -269,7 +244,7 @@ export default async function TeamDetailPage({
   const sampleIndex = samples?.teams?.indexOf(teamName) ?? -1;
   const pointsRange =
     sampleIndex >= 0 && samples?.points_q05?.[sampleIndex] != null && samples?.points_q95?.[sampleIndex] != null
-      ? { lo: samples.points_q05[sampleIndex], hi: samples.points_q95[sampleIndex], median: samples.points_q50?.[sampleIndex] ?? null }
+      ? { lo: samples.points_q05[sampleIndex], hi: samples.points_q95[sampleIndex] }
       : null;
 
   // Remaining games from the fixture manifest, postponed ones included, for
@@ -299,6 +274,27 @@ export default async function TeamDetailPage({
   for (const row of fixtureRows) {
     if (row.kickoff && row.kickoffConfirmed) builderKickoffs[row.matchday] = row.kickoff;
   }
+
+  // "Outros jogos que pesam": the other clubs' games in the published round
+  // that move this club's frame chance by 3 pp or more (the simulator's list,
+  // moved here), in kickoff order with their match pages.
+  const nms = scenarios?.next_matchday_scenarios;
+  const rivalRows: RivalGameRow[] = frame
+    ? byKickoff(rivalGames(teamName, frame, nms).map((g) => {
+        const f = nextRoundByKey.get(`${g.matchday}|${g.home}|${g.away}`);
+        return {
+          ...g,
+          kickoff: f?.kickoff ?? null,
+          kickoffConfirmed: f?.kickoffConfirmed ?? false,
+          postponed: f?.postponed === true,
+          href: f ? `/desporto/liga/jogo/${f.slug}` : null,
+        };
+      }))
+    : [];
+  const frameBaseline = metric ? (nms?.baseline[teamName]?.[metric] ?? standing?.[metric] ?? 0) : 0;
+
+  // The final duel: this club against the closest club in the same race.
+  const rival = duelRival(teamName, frame, prediction.table);
 
   // Magic numbers: compute for this team, from the run-in only.
   //
@@ -350,76 +346,34 @@ export default async function TeamDetailPage({
       });
   }
 
-  // Decisive matches: the club's own race only, with the threshold applied
-  // before deciding there is anything to show. Benfica's eleven rows all
-  // swing its title chance by under 3 pp, so the old filter let them through
-  // and the list then rendered other clubs' relegation games under "Jogos
-  // decisivos para Benfica" (audit F-H5).
-  const ownRace: Exclude<DecisiveRace, "both"> | null = isSurvival || (!isTitleContender && isRelegationCandidate)
-    ? "relegation"
-    : isTitleContender
-      ? "title"
-      : null;
-  const teamDecisiveMatches = ownRace === "title"
-    ? titleDecisive(scenarios?.decisive_matches, teamName)
-    : ownRace === "relegation"
-      ? relegationDecisive(scenarios?.decisive_matches, teamName)
-      : [];
-  const hasDirectDecisive = teamDecisiveMatches.length > 0;
-
-  // Otherwise: this club's own games that swing another club's race. Every
-  // row names that club ("Se o Nacional vencer").
-  const teamFeaturedMatches = !hasDirectDecisive
-    ? (scenarios?.decisive_matches ?? []).filter(
-        (m) =>
-          (m.home_team === teamName || m.away_team === teamName) &&
-          (titleDecisive([m]).length > 0 || relegationDecisive([m]).length > 0),
-      )
-    : [];
-  const decisiveLabels = {
-    // "Atual" until the round is played, then the forecast's date (FR3-01).
-    current: <ClockSwitch initial={t("football.current")} steps={staleSteps(asOfCapital)} />,
-    ifTeamWins: t("football.ifWinsTemplate"),
-    ifTeamLoses: t("football.ifLosesTemplate"),
-    titleRaceSection: t("football.titleRaceSection"),
-    relegationSection: t("football.relegationSection"),
-    matchdayPrefix: t("football.matchdayPrefix"),
-  };
+  const sourceLine = (perForecast = false) => pt
+    ? `Fonte: modelo estimador.pt, ${formatInteger(prediction.n_sims, locale)} simulações${perForecast ? " por previsão" : ""}`
+    : `Source: estimador.pt model, ${formatInteger(prediction.n_sims, locale)} simulations${perForecast ? " per forecast" : ""}`;
+  const updatedLine = pt ? `Atualizado a ${forecastDate}` : `Updated ${forecastDate}`;
+  const methodLabel = pt ? "Como funciona o modelo" : "How the model works";
 
   return (
     <div className="min-h-screen bg-paper">
       <Header />
 
       <main id="main-content" tabIndex={-1}>
+      <LigaSectionNav current="previsoes" locale={locale} />
       {/* Hero: the club colour is a swatch beside the name, never the
           background — a readable neutral surface works for all 18 clubs,
           including a bright yellow one like Arouca (diagnosis §10). No crest:
-          a hero carries no icon. The intro
-          recognises a deep arrival: the club, the forecast date and what the
-          page answers. */}
+          a hero carries no icon. The meta line is the hub's dated status,
+          from the same helper, so the two say the same thing (review,
+          October 2026). */}
       <PageHero
         compact
         back={{ href: "/desporto/liga", label: t("football.backToLeague"), locale }}
-        // "depois da jornada 7 · atualizado a 25 set.", like the hub: a bare
-        // "Jornada 7" read as the current or next matchday (FRESH-06, CL2-14).
-        // Once the next round is played it says so, as the hub does (FR3-01).
-        eyebrow={
-          <ClockSwitch
-            initial={pt
-              ? `Liga Portugal · ${prediction.season} · depois da jornada ${prediction.matchday} · atualizado a ${formatShortDate(prediction.timestamp, locale)}`
-              : `Liga Portugal · ${prediction.season} · after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)}`}
-            steps={staleSteps(pt
-              ? `Liga Portugal · ${prediction.season} · depois da jornada ${prediction.matchday} · atualizado a ${formatShortDate(prediction.timestamp, locale)} · jornada ${timing.round} jogada, nova previsão em preparação`
-              : `Liga Portugal · ${prediction.season} · after matchday ${prediction.matchday} · updated ${formatShortDate(prediction.timestamp, locale)} · matchday ${timing.round} played, new forecast in preparation`)}
-          />
-        }
+        eyebrow={pt ? `Época ${prediction.season}` : `${prediction.season} season`}
         title={
           <span className="flex items-center gap-3">
             <span aria-hidden="true" className="h-9 w-1.5 shrink-0 md:h-11" style={{ backgroundColor: teamColor }} />
             <span>{teamDisplayName(teamName)}</span>
           </span>
         }
-        // The date is in the kicker; the lede says what the page answers (CL3-14).
         lede={t("football.clubPageIntro", {
           team: teamDisplayName(teamName),
           teamFor: teamWithArticle(teamName, "para"),
@@ -432,6 +386,7 @@ export default async function TeamDetailPage({
             locale={pt ? "pt" : "en"}
           />
         }
+        meta={<span><ClockSwitch initial={status.initial} steps={status.steps} /></span>}
       />
 
       {/* Key stats + season projection */}
@@ -440,17 +395,17 @@ export default async function TeamDetailPage({
           <div className="max-w-7xl mx-auto px-4 py-8">
             {shownMetrics.length > 0 && (
               <div className="grid gap-6 md:gap-8" style={{ gridTemplateColumns: `repeat(${shownMetrics.length}, minmax(0, 1fr))` }}>
-                {shownMetrics.map((metric, index) => (
+                {shownMetrics.map((m, index) => (
                   <div
-                    key={metric.key}
+                    key={m.key}
                     className="border-t-2 pt-3"
                     style={{ borderColor: index === 0 ? teamColor : "var(--color-line)" }}
                   >
                     <div className="text-[12px] font-semibold text-graphite mb-1">
-                      {metric.label}
+                      {m.label}
                     </div>
                     <div className="text-3xl md:text-4xl font-display font-extrabold tabular-nums text-ink">
-                      {formatPercent(metric.value / 100, locale)}
+                      {formatPercent(m.value / 100, locale)}
                     </div>
                   </div>
                 ))}
@@ -485,7 +440,7 @@ export default async function TeamDetailPage({
                 {pointsRange && (
                   <>
                     {" "}
-                    {locale === "pt"
+                    {pt
                       ? `(90% das simulações entre ${formatInteger(pointsRange.lo, locale)} e ${formatInteger(pointsRange.hi, locale)})`
                       : `(90% of simulations between ${formatInteger(pointsRange.lo, locale)} and ${formatInteger(pointsRange.hi, locale)})`}
                   </>
@@ -573,14 +528,12 @@ export default async function TeamDetailPage({
             </p>
             {/* Framed like every other chart: title, source, date, method (UXD2-07). */}
             <DataCard
-              title={locale === "pt" ? `Onde ${teamWithArticle(teamName)} pode acabar` : `Where ${teamDisplayName(teamName)} can finish`}
-              subtitle={locale === "pt" ? "Parte das simulações em que termina em cada posição, numa escala de 0 a 100%." : "Share of simulations finishing in each position, on a 0–100% scale."}
-              source={locale === "pt"
-                ? `Fonte: modelo estimador.pt, ${formatInteger(prediction.n_sims, locale)} simulações`
-                : `Source: estimador.pt model, ${formatInteger(prediction.n_sims, locale)} simulations`}
-              updated={locale === "pt" ? `Atualizado a ${forecastDate}` : `Updated ${forecastDate}`}
+              title={pt ? `Onde ${teamWithArticle(teamName)} pode acabar` : `Where ${teamDisplayName(teamName)} can finish`}
+              subtitle={pt ? "Parte das simulações em que termina em cada posição, numa escala de 0 a 100%." : "Share of simulations finishing in each position, on a 0–100% scale."}
+              source={sourceLine()}
+              updated={updatedLine}
               methodologyHref="/desporto/liga/metodologia"
-              methodologyLabel={locale === "pt" ? "Como funciona o modelo" : "How the model works"}
+              methodologyLabel={methodLabel}
               locale={locale}
             >
               <PositionDistribution
@@ -598,7 +551,7 @@ export default async function TeamDetailPage({
                   position: ordinal(spread.modalPosition, locale),
                   probability: formatPercent(spread.modalProb, locale),
                   range:
-                    locale === "pt"
+                    pt
                       ? `${ordinal(spread.rangeStart, locale)} e o ${ordinal(spread.rangeEnd, locale)}`
                       : `${ordinal(spread.rangeStart, locale)} and ${ordinal(spread.rangeEnd, locale)}`,
                   share: formatPercent(spread.rangeProb, locale),
@@ -609,9 +562,8 @@ export default async function TeamDetailPage({
         </section>
       )}
 
-      {/* This club's own supported fixture: its relevant objective, dated
-          baseline and the three-outcome stakes, oriented from its own
-          perspective (diagnosis §5's club page, second step). */}
+      {/* This club's next game: what each result does to its frame, from
+          its own side (diagnosis §5's club page, second step). */}
       {clubOutlook && (
         <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
@@ -657,14 +609,13 @@ export default async function TeamDetailPage({
                   })
                 : t("football.fixtureStakesHeadingNoOpponent", { team: clubOutlook.label, teamFor: teamWithArticle(teamName, "para") })}
             </h2>
-            <FixtureStakes locale={pt ? "pt" : "en"} entry={clubOutlook} matchLink simulatorLink />
+            <FixtureStakes locale={pt ? "pt" : "en"} entry={clubOutlook} matchLink />
           </div>
         </section>
       )}
 
-      {/* Probability timeline — title/relegation contenders, once there is
-          actually a line to read. Two points are a segment, not a trend, and
-          the axis has nothing to say about a season two matchdays old. */}
+      {/* The frame's chance over the season, once there is a line to read:
+          two points are a segment, not a trend. */}
       {timelineData.length >= 5 && (
         <section className="border-b border-rule">
           <div className="max-w-7xl mx-auto px-4 py-10">
@@ -674,19 +625,17 @@ export default async function TeamDetailPage({
               {t("football.probabilityOverTime")}
             </h2>
             <DataCard
-              title={locale === "pt" ? `Probabilidade de ${timelineTarget}, jornada a jornada` : `Chance of ${timelineTarget}, matchday by matchday`}
+              title={pt ? `Probabilidade de ${timelineTarget}, jornada a jornada` : `Chance of ${timelineTarget}, matchday by matchday`}
               subtitle={`${pt
                 ? "Cada ponto é uma previsão publicada, com os jogos disputados até então; a data de cada uma está na dica e na tabela."
                 : "Each dot is a published forecast, with the matches played up to then; each one's date is in the tip and the table."}${
                 previousModel.size > 0
                   ? pt ? " O ponto da pré-época (J0) vem do modelo anterior." : " The pre-season point (MD0) comes from the previous model."
                   : ""}`}
-              source={locale === "pt"
-                ? `Fonte: modelo estimador.pt, ${formatInteger(prediction.n_sims, locale)} simulações por previsão`
-                : `Source: estimador.pt model, ${formatInteger(prediction.n_sims, locale)} simulations per forecast`}
-              updated={locale === "pt" ? `Atualizado a ${forecastDate}` : `Updated ${forecastDate}`}
+              source={sourceLine(true)}
+              updated={updatedLine}
               methodologyHref="/desporto/liga/metodologia"
-              methodologyLabel={locale === "pt" ? "Como funciona o modelo" : "How the model works"}
+              methodologyLabel={methodLabel}
               locale={locale}
             >
               <TeamTimeline
@@ -701,173 +650,79 @@ export default async function TeamDetailPage({
         </section>
       )}
 
-      {/* Narrative Scenarios */}
-      {narrativeData && (
-        <section className="border-b border-rule">
+      {/* "Cria o teu cenário": the one what-if over the season, in the
+          page's frame, with the decisive games marked in it (the separate
+          decisive list and the "Caminhos" cards were cut, review October
+          2026). */}
+      {builderPath && frame && builderPath.matches.length > 0 && (
+        <section className="border-b border-rule" aria-labelledby="cria-o-teu-cenario">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl md:text-[28px] mb-1">
-              {isSurvival
-                ? t("football.survivalScenariosTitle")
-                : t("football.scenariosTitle")}
+            <h2 id="cria-o-teu-cenario" className="text-2xl md:text-[28px] mb-1">
+              {t("football.buildYourPath")}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {isSurvival
-                ? t("football.survivalScenariosDescription")
-                : t("football.scenariosDescription")}{" "}
-              {/* How the paths are chosen, in the methodology (audit MR2-06). */}
+            <p className="text-sm text-stone-500 mb-6 max-w-3xl">
+              {pt
+                ? `Escolhe resultados nos jogos que faltam ${teamWithArticle(teamName, "a")} e vê como muda a probabilidade de ${frame === "title" ? "ser campeão" : "despromoção"}, jogo a jogo.`
+                : `Pick results in ${teamDisplayName(teamName)}'s remaining games and see how the chance of ${frame === "title" ? "winning the title" : "relegation"} moves, game by game.`}{" "}
               <Link
-                href={locale === "pt" ? "/desporto/liga/metodologia#cenarios-de-vitoria" : "/desporto/liga/metodologia#winning-scenarios"}
+                href={pt ? "/desporto/liga/metodologia#cria-o-teu-cenario" : "/desporto/liga/metodologia#build-your-own-scenario"}
                 locale={locale}
                 className="font-medium text-ink underline underline-offset-4"
               >
-                {locale === "pt" ? "Como se escolhem" : "How they are chosen"}
+                {pt ? "Como funciona" : "How it works"}
               </Link>
             </p>
-            <NarrativeScenarios
-              data={narrativeData}
+            <PathBuilder
+              team={teamName}
+              matches={builderPath.matches}
+              pCurrent={builderPath.p_current}
+              target={builderPath.target}
+              frame={frame}
               locale={locale}
+              nSims={prediction.n_sims}
               staleAt={staleAt}
               forecastTimestamp={prediction.timestamp}
-              labels={{
-                scenarioComfortable: t("football.scenarioComfortable"),
-                scenarioRealistic: t("football.scenarioRealistic"),
-                scenarioUnlikely: t("football.scenarioUnlikely"),
-                ofChampionSims: t("football.ofChampionSims"),
-                ofSurvivalSims: t("football.ofSurvivalSims"),
-                thisWorksBecause: t("football.thisWorksBecause"),
-                dropsPointsVs: t("football.dropsPointsVs"),
-                resultWin: t("football.resultWin"),
-                resultDraw: t("football.resultDraw"),
-                resultLoss: t("football.resultLoss"),
-                matchdayPrefix: t("football.matchdayPrefix"),
-                home: t("football.homeAbbr"),
-                away: t("football.awayAbbr"),
-                winAbbr: t("football.winAbbr"),
-                winAbbrPlural: t("football.winAbbrPlural"),
-                drawAbbr: t("football.drawAbbr"),
-                drawAbbrPlural: t("football.drawAbbrPlural"),
-                lossAbbr: t("football.lossAbbr"),
-                lossAbbrPlural: t("football.lossAbbrPlural"),
-              }}
+              kickoffs={builderKickoffs}
             />
           </div>
         </section>
       )}
 
-      {/* Build Your Path / Remaining schedule */}
-      {remainingMatches && remainingMatches.length > 0 && (
-        <section className="border-b border-rule">
+      {/* Other clubs' games that weigh on this one, from the published
+          round: the simulator's list, static, with the figures. */}
+      {frame && nms && (
+        <section className="border-b border-rule" aria-labelledby="outros-jogos">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            {scenarios?.critical_paths?.[teamName] ? (
-              <>
-                <h2 className="text-2xl md:text-[28px] mb-1">
-                  {t("football.buildYourPath")}
-                </h2>
-                <p className="text-sm text-stone-500 mb-6">
-                  {t("football.buildYourPathDescription")}{" "}
-                  <Link
-                    href={locale === "pt" ? "/desporto/liga/metodologia#cria-o-teu-cenario" : "/desporto/liga/metodologia#build-your-own-scenario"}
-                    locale={locale}
-                    className="font-medium text-ink underline underline-offset-4"
-                  >
-                    {locale === "pt" ? "Como funciona" : "How it works"}
-                  </Link>
-                </p>
-                <PathBuilder
-                  matches={remainingMatches}
-                  pCurrent={scenarios.critical_paths[teamName].p_current}
-                  target={scenarios.critical_paths[teamName].target}
-                  locale={locale}
-                  nSims={prediction.n_sims}
-                  staleAt={staleAt}
-                  forecastTimestamp={prediction.timestamp}
-                  kickoffs={builderKickoffs}
-                  labels={{
-                    matchdayAbbr: t("football.matchdayAbbr"),
-                    win: t("football.win"),
-                    draw: t("football.draw"),
-                    loss: t("football.loss"),
-                    home: t("football.homeAbbr"),
-                    away: t("football.awayAbbr"),
-                    resetAll: t("football.resetAll"),
-                    pointsFromPicks: t("football.pointsFromPicks"),
-                    expectedPoints: t("football.expectedPointsFromPicks"),
-                    yourScenario: t("football.yourScenario"),
-                    championship: t("football.championship"),
-                    survival: t("football.survival"),
-                  }}
-                />
-              </>
-            ) : (
-              <>
-                <h2 className="text-2xl md:text-[28px] mb-1">
-                  {t("football.remainingSchedule")}
-                </h2>
-                <p className="text-sm text-stone-500 mb-6">
-                  {t("football.remainingScheduleDescription")}
-                </p>
-                <RemainingSchedule
-                  matches={remainingMatches}
-                  teamColor={teamColor}
-                  labels={{
-                    matchdayAbbr: t("football.matchdayAbbr"),
-                    win: t("football.win"),
-                    draw: t("football.draw"),
-                    loss: t("football.loss"),
-                    home: t("football.homeAbbr"),
-                    away: t("football.awayAbbr"),
-                  }}
-                />
-              </>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* Decisive Matches — direct impact on this team */}
-      {hasDirectDecisive && (
-        <section className="border-b border-rule">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl md:text-[28px] mb-1">
-              {t("football.decisiveMatchesFor", { team: teamDisplayName(teamName), teamOf: teamWithArticle(teamName, "de") })}
+            <h2 id="outros-jogos" className="text-2xl md:text-[28px] mb-1">
+              {pt ? "Outros jogos que pesam" : "Other games that weigh"}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {ownRace === "relegation"
-                ? t("football.decisiveMatchesForDescriptionSurvival", { team: teamDisplayName(teamName) })
-                : t("football.decisiveMatchesForDescription", { team: teamDisplayName(teamName) })}
-            </p>
-            <DecisiveMatches
-              matches={teamDecisiveMatches}
-              race={ownRace ?? "both"}
+            <RivalGames
+              team={teamName}
+              frame={frame}
+              baseline={frameBaseline}
+              games={rivalRows}
               locale={locale}
-              labels={decisiveLabels}
-              maxItemsPerTeam={10}
+              forecastTimestamp={prediction.timestamp}
             />
           </div>
         </section>
       )}
 
-      {/* Featured matches — this club has no direct stake of its own in these
-          (hasDirectDecisive is false), so every probability shown belongs to
-          the OTHER, named club, not this page's team. The heading and
-          description say so explicitly: a reader must never have to infer
-          whose number is on screen (diagnosis §5/§9, the Casa Pia panel on
-          Arouca's page). Each row's own team badge/name (in DecisiveMatches)
-          still names that club again. */}
-      {teamFeaturedMatches.length > 0 && (
-        <section className="border-b border-rule">
+      {/* The final duel: who finishes ahead, this club or the closest club in
+          its race (or any other, from the select). */}
+      {frame && rival && samples && samples.teams.includes(teamName) && (
+        <section className="border-b border-rule" aria-labelledby="duelo-final">
           <div className="max-w-7xl mx-auto px-4 py-10">
-            <h2 className="text-2xl md:text-[28px] mb-1">
-              {t("football.otherClubsImpactFor", { team: teamDisplayName(teamName), teamOf: teamWithArticle(teamName, "de") })}
+            <h2 id="duelo-final" className="text-2xl md:text-[28px] mb-6">
+              {pt ? "Duelo final" : "Final duel"}
             </h2>
-            <p className="text-sm text-stone-500 mb-6">
-              {t("football.otherClubsImpactForDescription", { team: teamDisplayName(teamName) })}
-            </p>
-            <DecisiveMatches
-              matches={teamFeaturedMatches}
+            <DueloFinal
+              samples={samples}
+              team={teamName}
+              rival={rival}
+              frame={frame}
               locale={locale}
-              labels={decisiveLabels}
-              maxItemsPerTeam={10}
+              forecastTimestamp={prediction.timestamp}
             />
           </div>
         </section>
@@ -876,14 +731,14 @@ export default async function TeamDetailPage({
       {/* A club without a scenario builder still gets its calendar: every
           game left, from the fixture manifest, postponed ones included
           (audit F14). */}
-      {!scenarios?.critical_paths?.[teamName] && fixtureRows.length > 0 && (
+      {!builderPath && fixtureRows.length > 0 && (
         <section className="border-b border-rule" aria-labelledby="club-fixtures">
           <div className="max-w-7xl mx-auto px-4 py-10">
             <h2 id="club-fixtures" className="text-2xl md:text-[28px] mb-1">
-              {locale === "pt" ? `Os jogos que faltam ${teamWithArticle(teamName, "a")}` : `The games ${teamDisplayName(teamName)} has left`}
+              {pt ? `Os jogos que faltam ${teamWithArticle(teamName, "a")}` : `The games ${teamDisplayName(teamName)} has left`}
             </h2>
             <p className="text-sm text-stone-500 mb-6 max-w-3xl">
-              {locale === "pt"
+              {pt
                 ? "Por ordem de data, hora de Lisboa. O modelo dá probabilidades para a próxima jornada; as datas mais distantes ainda podem mudar."
                 : "In date order, Lisbon time. The model prices the next round; later dates can still change."}
             </p>
@@ -895,15 +750,15 @@ export default async function TeamDetailPage({
       {/* Where every number on this page comes from (audit pro-PP-14). */}
       <section>
         <div className="max-w-7xl mx-auto px-4 py-8 text-xs leading-relaxed text-stone-500">
-          {locale === "pt"
-            ? `Fonte: modelo bayesiano de Poisson bivariado do estimador.pt, ajustado aos golos e aos remates à baliza; ${formatInteger(prediction.n_sims, locale)} simulações do resto da época, depois da jornada ${prediction.matchday} (previsão de ${forecastDate}). `
-            : `Source: estimador.pt's bivariate Poisson Bayesian model, fitted to goals and shots on target; ${formatInteger(prediction.n_sims, locale)} simulations of the rest of the season, after matchday ${prediction.matchday} (forecast of ${forecastDate}). `}
+          {pt
+            ? `Fonte: modelo bayesiano de Poisson bivariado do estimador.pt, ajustado aos golos e aos remates à baliza; ${formatInteger(prediction.n_sims, locale)} simulações do resto da época (previsão de ${forecastDate}). `
+            : `Source: estimador.pt's bivariate Poisson Bayesian model, fitted to goals and shots on target; ${formatInteger(prediction.n_sims, locale)} simulations of the rest of the season (forecast of ${forecastDate}). `}
           <Link href="/desporto/liga/metodologia" locale={locale} className="font-semibold text-ink underline underline-offset-4">
-            {locale === "pt" ? "Como funciona o modelo" : "How the model works"}
+            {methodLabel}
           </Link>
           <span aria-hidden="true"> · </span>
           <Link href="/desporto/liga/dados" locale={locale} className="font-semibold text-ink underline underline-offset-4">
-            {locale === "pt" ? "Dados abertos" : "Open data"}
+            {pt ? "Dados abertos" : "Open data"}
           </Link>
         </div>
       </section>

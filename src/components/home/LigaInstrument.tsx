@@ -1,9 +1,10 @@
 import { Link } from '@/i18n/routing';
 import { ChannelHead, IntervalBand, PosHist, ProbBar, ReadingRule, Ruler } from '@/components/instrument';
-import { ligaTeamSlugs, teamColorOnPaper, teamDisplayName, teamPhoneName } from '@/lib/config/football';
+import { ligaTeamSlugs, teamColorOnPaper, teamDisplayName } from '@/lib/config/football';
 import { formatInteger, formatPercent, formatPp, formatReadingTime } from '@/lib/football-format';
 import { titleFinding, titleSeasons } from '@/lib/football-finding';
 import { byKickoff } from '@/lib/football-fixtures';
+import { forecastCoverage, forecastStatusInput } from '@/lib/football-status';
 import { Coupon } from '@/components/football/Coupon';
 import type { LigaPrediction, ScenarioData, TeamDelta } from '@/types/football';
 import type { UpcomingFixture } from '@/lib/utils/football-data-loader';
@@ -52,12 +53,10 @@ export function LigaInstrument({ locale, prediction, scenarios, deltas, quantile
   const seasons = titleSeasons(favourite.team, favourite.p_champion, prediction.n_sims, scenarios?.victory_paths);
 
   // The round the forecast was made in: how many of its games were played.
-  const remaining = prediction.matches_remaining?.length ?? 0;
-  const played = (prediction.matchday_results ?? []).filter(r => r.matchday === md).length;
+  // In the words every Liga page uses (forecastCoverage, football-status.ts).
   const when = formatReadingTime(prediction.timestamp, locale);
-  const roundNote = remaining > 0
-    ? (pt ? `numa previsão feita com ${played} dos ${played + remaining} jogos da jornada ${md} disputados` : `in a forecast made with ${played} of matchday ${md}’s ${played + remaining} games played`)
-    : (pt ? `numa previsão feita depois da jornada ${md}` : `in a forecast made after matchday ${md}`);
+  const coverage = forecastCoverage(forecastStatusInput(prediction, fixtures), locale);
+  const roundNote = pt ? `numa previsão feita ${coverage}` : `in a forecast made ${coverage}`;
   // The biggest move in the title race since the previous forecast.
   const mover = md > 1
     ? contenders
@@ -122,7 +121,7 @@ export function LigaInstrument({ locale, prediction, scenarios, deltas, quantile
                     <th scope="row" className="py-1.5 pr-2 text-left font-normal">
                       <span className="name-cut inline-flex items-center gap-[7px] whitespace-nowrap text-[15.5px]">
                         <i aria-hidden="true" className="inline-block h-2.5 w-2.5 shrink-0" style={{ background: teamColorOnPaper(r.team) }} />
-                        {slug ? <Link href={`/desporto/liga/${slug}`} locale={locale} className="no-underline hover:underline max-sm:inline-flex max-sm:min-h-11 max-sm:items-center">{teamPhoneName(r.team)}</Link> : teamPhoneName(r.team)}
+                        {slug ? <Link href={`/desporto/liga/${slug}`} locale={locale} className="no-underline hover:underline max-sm:inline-flex max-sm:min-h-11 max-sm:items-center">{teamDisplayName(r.team)}</Link> : teamDisplayName(r.team)}
                       </span>
                     </th>
                     <td className="py-1.5 pr-2 text-right">
@@ -170,7 +169,7 @@ export function LigaInstrument({ locale, prediction, scenarios, deltas, quantile
                     <th scope="row" className="py-1.5 pr-2 text-left font-normal">
                       <span className="name-cut inline-flex items-center gap-[7px] whitespace-nowrap">
                         <i aria-hidden="true" className="inline-block h-2.5 w-2.5 shrink-0" style={{ background: teamColorOnPaper(r.team) }} />
-                        {teamPhoneName(r.team)}
+                        {teamDisplayName(r.team)}
                       </span>
                     </th>
                     <td className="w-[110px] py-1.5 pr-2"><ProbBar p={r.p_relegation} width={100} /></td>

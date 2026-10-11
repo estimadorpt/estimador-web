@@ -14,15 +14,14 @@ import { CURRENT_LIGA_SEASON, teamDisplayName } from "@/lib/config/football";
 import { titleFinding, titleSeasons } from "@/lib/football-finding";
 import { seasonRecord } from "@/lib/football-record";
 import { SeasonRecord } from "@/components/football/SeasonRecord";
-import { formatDateSpan, formatInteger, formatLongDate, formatPercent, formatPp } from "@/lib/football-format";
+import { formatDateSpan, formatInteger, formatLongDate, formatPp } from "@/lib/football-format";
 import {
-  forecastAsOf,
-  forecastStatusLine,
-  forecastStatusLinePlayed,
+  forecastStatus,
   nextRoundTiming,
   roundPlayedLine,
 } from "@/lib/football-status";
 import { ClockSwitch } from "@/components/football/ClockSwitch";
+import { LigaSectionNav } from "@/components/football/LigaSectionNav";
 import { evaluatesCurrentModel } from "@/lib/football-scorecard";
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
@@ -43,12 +42,8 @@ import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { setRequestLocale } from '@/i18n/request-locale';
-
-/** A sentence's full stop, unless it already ends on one ("25 set."). */
-function withStop(text: string): string {
-  return text.endsWith(".") ? text : `${text}.`;
-}
+import { setRequestLocale } from "@/i18n/request-locale";
+import { playerSeasonReach } from "@/lib/utils/player-pages";
 
 export async function generateMetadata({
   params,
@@ -92,7 +87,7 @@ export default async function LigaPage({
   const record = seasonRecord(playedFixtures, locale);
   // The player models' cut-off, read the way /sobre reads it: the last season
   // in players.json's fit, never a typed year.
-  const playerSeason = players?.generated_from?.seasons?.at(-1) ?? null;
+  const playerReach = playerSeasonReach(players?.generated_from?.seasons, locale);
 
   // The two probability charts get only what they draw (SP-08).
   const probabilities = probabilityHistory(historical);
@@ -134,6 +129,7 @@ export default async function LigaPage({
       <div className="football-page min-h-screen bg-paper">
         <Header />
         <main id="main-content" tabIndex={-1}>
+        <LigaSectionNav current="previsoes" locale={locale} />
           <PageHero
             compact
             eyebrow={t("football.title")}
@@ -183,9 +179,17 @@ export default async function LigaPage({
   const seasonsOf = (r: (typeof byTitle)[number]) => formatInteger(titleSeasons(r.team, r.p_champion, prediction.n_sims, scenarios?.victory_paths), locale);
   const chasers = byTitle.slice(1, 3).filter(r => r.p_champion >= 0.01);
   const longShot = byTitle.slice(1).find(r => r.p_champion > 0 && r.p_champion < 0.01);
+  // A count of seasons for every club named, never a count beside a
+  // percentage ("Sp. Braga em 0,1%", review October 2026): "Sporting em
+  // 14 314, Benfica em 11 031 e Sp. Braga em 45."
+  const named = [...chasers, ...(longShot ? [longShot] : [])].map(r =>
+    `${teamDisplayName(r.team)} ${locale === "pt" ? "em" : "in"} ${seasonsOf(r)}`);
+  const namedList = named.length > 1
+    ? `${named.slice(0, -1).join(", ")} ${locale === "pt" ? "e" : "and"} ${named[named.length - 1]}`
+    : named[0] ?? "";
   const standfirst = locale === "pt"
-    ? `Em ${seasonsOf(favourite)} de ${simsLabel} épocas simuladas.${chasers.length ? ` ${chasers.map(r => `${teamDisplayName(r.team)} em ${seasonsOf(r)}`).join(", ")}` : ""}${longShot ? `; ${teamDisplayName(longShot.team)} em ${formatPercent(longShot.p_champion, locale)}` : ""}${chasers.length ? "." : ""}`
-    : `In ${seasonsOf(favourite)} of ${simsLabel} simulated seasons.${chasers.length ? ` ${chasers.map(r => `${teamDisplayName(r.team)} in ${seasonsOf(r)}`).join(", ")}` : ""}${longShot ? `; ${teamDisplayName(longShot.team)} in ${formatPercent(longShot.p_champion, locale)}` : ""}${chasers.length ? "." : ""}`;
+    ? `Em ${seasonsOf(favourite)} de ${simsLabel} épocas simuladas.${namedList ? ` ${namedList}.` : ""}`
+    : `In ${seasonsOf(favourite)} of ${simsLabel} simulated seasons.${namedList ? ` ${namedList}.` : ""}`;
 
   // A concise factual change beside the forecast date (diagnosis §5 "League
   // page" — "a concise factual change"): the club whose title probability
@@ -206,20 +210,13 @@ export default async function LigaPage({
         : `${teamDisplayName(biggestMover.team)} ${formatPp(biggestMover.p_champion_delta / 100, locale)} on the title since the forecast after matchday ${prediction.matchday - 1}`
       : null;
 
-  // "Depois da jornada 7 · atualizado a 25 set. · próxima atualização após a
-  // jornada 8 (9–12 out.)", every part from the data (audit CL-11, CL-M4).
+  // "Previsão de 11 out., com 7 dos 9 jogos da jornada 8 disputados ·
+  // próxima previsão depois da jornada 8 (11–12 out.)", every part from the
+  // data, in the words every Liga hero uses (football-status.ts); once the
+  // round is over it says the new forecast is in preparation (FRESH-01).
   const timing = nextRoundTiming(prediction, upcomingFixtures);
   const nextRound = timing.round;
-  const statusInput = {
-    matchday: prediction.matchday,
-    timestamp: prediction.timestamp,
-    inProgress: !matchdayComplete,
-    nextRound,
-    nextRoundKickoffs: timing.kickoffs,
-  };
-  const statusLine = forecastStatusLine(statusInput, locale);
-  // Once the round the next update waits for is over, the line says the new
-  // forecast is in preparation instead of promising it (audit FRESH-01).
+  const status = forecastStatus(prediction, upcomingFixtures, locale);
   const nextRoundPlayedAt = timing.playedAt;
   const nextRoundStartsAt = timing.startsAt;
 
@@ -244,7 +241,6 @@ export default async function LigaPage({
       : locale === "en"
         ? `Matchdays ${cardRounds.slice(0, -1).join(", ")} and ${cardRounds[cardRounds.length - 1]}`
         : `Jornadas ${cardRounds.slice(0, -1).join(", ")} e ${cardRounds[cardRounds.length - 1]}`;
-  const asOf = forecastAsOf(prediction.timestamp, locale);
   const sourceLine = locale === "pt"
     ? `Fonte: modelo estimador.pt, ${simsLabel} simulações do resto da época`
     : `Source: estimador.pt model, ${simsLabel} simulations of the rest of the season`;
@@ -268,36 +264,22 @@ export default async function LigaPage({
       : "The model compared with the market's closing line.";
 
   const pt = locale !== "en";
-  // Once the round is played, the two invitations stop offering it: the
-  // simulator shows what each result would have changed, and the game's
-  // next round opens with the next forecast (audit FR3V-M1).
+  // Once the round is played, the game stops offering it: its next round
+  // opens with the next forecast (audit FR3V-M1).
   const playedSteps = (value: ReactNode) => (nextRoundPlayedAt ? [{ at: nextRoundPlayedAt, value }] : []);
   const teasers: Array<{ href: string; title: string; body: ReactNode; action: string }> = [
-    ...(scenarios?.next_matchday_scenarios ? [{
-      href: "/desporto/liga/simulador",
-      title: t("football.simulator"),
-      body: (
-        <ClockSwitch
-          initial={t("football.simulatorCta")}
-          steps={playedSteps(pt
-            ? `Vê o que cada resultado da jornada ${nextRound} mudava, ${withStop(asOf)}`
-            : `See what each matchday ${nextRound} result would have changed, ${withStop(asOf)}`)}
-        />
-      ),
-      action: t("football.trySimulator"),
-    }] : []),
     {
       href: "/desporto/liga/jogo-previsoes",
       // Marked as a game: the name alone does not say it (audit CL2-13).
-      title: pt ? "Contra o Modelo (jogo semanal)" : "Beat the model (weekly game)",
+      title: pt ? "Contra o Modelo (jogo semanal)" : "Beat the Model (weekly game)",
       body: (
         <ClockSwitch
           initial={pt
-            ? "Prevê a próxima jornada antes de começar e compara-te com o modelo, a época inteira."
-            : "Call the next matchday before it kicks off and get scored against the model, all season long."}
+            ? "Prevê os jogos de uma jornada antes de começarem e vê, depois de jogados, em quantos ficaste mais perto do que o modelo. Sem conta: fica no teu browser."
+            : "Call a matchday’s games before they kick off and see, once they are played, in how many you came closer than the model. No account: it stays in your browser."}
           steps={playedSteps(pt
-            ? "A próxima jornada abre com a nova previsão; até lá, vê como te saíste e compara-te com o modelo, a época inteira."
-            : "The next matchday opens with the new forecast; until then, see how you did and how you compare with the model, all season long.")}
+            ? "A próxima jornada abre com a nova previsão; até lá, vê em quantos jogos ficaste mais perto do que o modelo."
+            : "The next matchday opens with the new forecast; until then, see in how many games you came closer than the model.")}
         />
       ),
       action: pt ? "Jogar" : "Play",
@@ -321,8 +303,8 @@ export default async function LigaPage({
       // Neutral title, and the data cut-off on the way in (UXD2-15, CL2-02).
       title: pt ? "Jogadores: uma métrica por dimensão" : "Players: one metric per dimension",
       body: pt
-        ? `Finalização, contribuição ofensiva, posse disputada e guarda-redes, cada uma com a sua escala e a sua incerteza.${playerSeason ? ` Finalização e contribuição vão até ao fim da época ${playerSeason}.` : ""}`
-        : `Finishing, attacking contribution, contested possession and goalkeeping, each with its own scale and its own uncertainty.${playerSeason ? ` Finishing and contribution run to the end of the ${playerSeason} season.` : ""}`,
+        ? `Finalização, contribuição ofensiva, posse disputada e guarda-redes, cada uma com a sua escala e a sua incerteza.${playerReach ? ` Finalização e contribuição ${playerReach}.` : ""}`
+        : `Finishing, attacking contribution, contested possession and goalkeeping, each with its own scale and its own uncertainty.${playerReach ? ` Finishing and contribution ${playerReach}.` : ""}`,
       action: pt ? "Ver os jogadores" : "See the players",
     },
   ];
@@ -331,6 +313,7 @@ export default async function LigaPage({
     <div className="football-page min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <LigaSectionNav current="previsoes" locale={locale} />
       <PageHero
         compact
         eyebrow={`${t("football.title")} ${prediction.season} · ${locale === "pt" ? `J${prediction.matchday}` : `MD${prediction.matchday}`}`}
@@ -345,10 +328,7 @@ export default async function LigaPage({
         }
         meta={
           <span>
-            <ClockSwitch
-              initial={statusLine}
-              steps={[{ at: nextRoundPlayedAt, value: forecastStatusLinePlayed(statusInput, locale) }]}
-            />
+            <ClockSwitch initial={status.initial} steps={status.steps} />
             {factualChange ? ` · ${factualChange}` : ""}
           </span>
         }
@@ -457,8 +437,8 @@ export default async function LigaPage({
             </h2>
             <p className="text-sm text-stone-500 mb-6 max-w-3xl">
               {locale === "en"
-                ? "In kickoff order, Lisbon time. Under each game, what it puts at stake for the club playing whose title or relegation chance it moves most: that chance with a win, a draw or a defeat."
-                : "Por ordem de início, hora de Lisboa. Por baixo de cada jogo, o que ele põe em jogo para o clube em campo cujas hipóteses de título ou de descida mais mexe: essas hipóteses se ganhar, empatar ou perder."}{" "}
+                ? "In kickoff order, Lisbon time. Under each game, what it puts at stake for the club playing whose title or relegation chance it moves most: that chance if they win, draw or lose."
+                : "Por ordem de início, hora de Lisboa. Por baixo de cada jogo, o que ele põe em jogo para o clube em campo cujas hipóteses de título ou de despromoção mais mexe: essas hipóteses se ganhar, empatar ou perder."}{" "}
               {/* The method behind these swings, not the generic page (audit METH3-17). */}
               <Link
                 href={locale === "pt" ? "/desporto/liga/metodologia#jogos-decisivos" : "/desporto/liga/metodologia#decisive-matches"}

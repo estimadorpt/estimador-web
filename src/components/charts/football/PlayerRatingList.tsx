@@ -3,6 +3,8 @@
 import { formatInteger } from "@/lib/football-format";
 
 import { useState } from "react";
+import { BandGlyph, IntervalBand } from "@/components/instrument";
+import { Disclosure } from "@/components/viz/Disclosure";
 import { ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import {
@@ -36,7 +38,6 @@ import {
 // 3:1 on every ground (audit A11Y3-10; player-marks.test.ts).
 const BAR = PLAYER_MARKS.bar;
 const BAR_NEG = PLAYER_MARKS.barNegative;
-const SOFT = PLAYER_MARKS.whisker;
 const ZERO = PLAYER_MARKS.zero;
 
 export interface PlayerRatingListProps {
@@ -63,7 +64,6 @@ export interface PlayerRatingListProps {
     interval: string;
     noInterval: string;
     showAll: (n: number) => string;
-    showLess: string;
     movement: string;
     newEntry: string;
     playerPage: string;
@@ -94,7 +94,6 @@ export function PlayerRatingList({
   labels,
 }: PlayerRatingListProps) {
   const pt = locale !== "en";
-  const [showAll, setShowAll] = useState(false);
   const [openKey, setOpenKey] = useState<string | null>(null);
 
   if (!entries.length) return null;
@@ -110,43 +109,9 @@ export function PlayerRatingList({
 
   const domain = ratingDomain(entries);
   const zeroPct = ratingPct(0, domain);
-  const visible = showAll ? entries : entries.slice(0, initialCount);
   const posLabel = (p: string) => (pt ? positionCodePt[p] : positionCodeEn[p]) ?? p;
 
-  return (
-    <div>
-      <p className="sm:hidden mb-1 text-[12px] font-semibold text-graphite">
-        {metricHeader}
-      </p>
-      {/* Column header */}
-      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-stone-200">
-        <div className="w-6 flex-shrink-0" />
-        <div className="w-24 sm:w-52 flex-shrink-0 text-[12px] font-semibold text-graphite">
-          {labels.player}
-        </div>
-        {/* On a phone the bar column is too narrow for its name, which then
-            sits above the list instead (audit UXM-03). */}
-        <div className="flex-1 min-w-0 text-[12px] font-semibold text-graphite">
-          <span className="hidden sm:inline">{metricHeader}</span>
-        </div>
-        {showMovement && (
-          <div className="w-10 flex-shrink-0 text-right text-[12px] font-semibold text-graphite hidden sm:block">
-            {labels.movement}
-          </div>
-        )}
-        <div className="w-[4.5rem] sm:w-28 flex-shrink-0 text-right">
-          <div className="text-[12px] font-semibold text-graphite">
-            {valueHeader}
-          </div>
-          <div className="text-[12px] text-graphite leading-tight">
-            {labels.interval}
-          </div>
-        </div>
-        <div className="w-11 flex-shrink-0" />
-      </div>
-
-      <div className="divide-y divide-stone-100">
-        {visible.map((e) => {
+  const renderRow = (e: RatingEntry) => {
           const isOpen = openKey === e.key;
           const slug = playerSlugs?.[e.player];
           const chip = (e.team && ligaTeamColors[e.team]) || BRAND.muted;
@@ -154,8 +119,6 @@ export function PlayerRatingList({
           const move = showMovement ? rankMovement(e, goalsRankByPlayer) : null;
 
           const vPct = e.value === null ? null : ratingPct(e.value, domain);
-          const loPct = e.lo === null ? null : ratingPct(e.lo, domain);
-          const hiPct = e.hi === null ? null : ratingPct(e.hi, domain);
           const negative = (e.value ?? 0) < 0;
 
           const cells = detailCells?.(e) ?? [];
@@ -226,9 +189,25 @@ export function PlayerRatingList({
                     </div>
                   </div>
 
-                  {/* Diverging bar from the zero reference, with the
-                      credible interval drawn on top; no grey track. */}
+                  {/* The model's credible interval is the site's band: yellow
+                      between ink caps, the estimate as its ink tick, zero as
+                      a dashed reference (review, October 2026: the grey
+                      whiskers did not say they were the model's margin). A
+                      value without an interval keeps its bar from zero. */}
                   <div className="flex-1 min-w-0 h-6 relative">
+                    {hasInterval && e.value !== null ? (
+                      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2">
+                        <IntervalBand
+                          lo={e.lo!}
+                          md={e.value}
+                          hi={e.hi!}
+                          min={domain.min}
+                          max={domain.max}
+                          reference={0}
+                        />
+                      </div>
+                    ) : (
+                    <>
                     <div
                       className="absolute inset-y-0 w-px"
                       style={{ left: `${zeroPct}%`, backgroundColor: ZERO }}
@@ -244,25 +223,7 @@ export function PlayerRatingList({
                         }}
                       />
                     )}
-                    {hasInterval && loPct !== null && hiPct !== null && (
-                      <>
-                        <div
-                          className="absolute top-1/2 -translate-y-1/2 h-px"
-                          style={{
-                            left: `${loPct}%`,
-                            width: `${Math.max(hiPct - loPct, 0.4)}%`,
-                            backgroundColor: SOFT,
-                          }}
-                        />
-                        <div
-                          className="absolute top-1/2 -translate-y-1/2 w-px h-3"
-                          style={{ left: `${loPct}%`, backgroundColor: SOFT }}
-                        />
-                        <div
-                          className="absolute top-1/2 -translate-y-1/2 w-px h-3"
-                          style={{ left: `${hiPct}%`, backgroundColor: SOFT }}
-                        />
-                      </>
+                    </>
                     )}
                   </div>
 
@@ -378,18 +339,61 @@ export function PlayerRatingList({
               )}
             </div>
           );
-        })}
+  };
+
+  return (
+    <div>
+      <p className="sm:hidden mb-1 text-[12px] font-semibold text-graphite">
+        {metricHeader}
+      </p>
+      {/* Column header */}
+      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-stone-200">
+        <div className="w-6 flex-shrink-0" />
+        <div className="w-24 sm:w-52 flex-shrink-0 text-[12px] font-semibold text-graphite">
+          {labels.player}
+        </div>
+        {/* On a phone the bar column is too narrow for its name, which then
+            sits above the list instead (audit UXM-03). */}
+        <div className="flex-1 min-w-0 text-[12px] font-semibold text-graphite">
+          <span className="hidden sm:inline">{metricHeader}</span>
+        </div>
+        {showMovement && (
+          <div className="w-10 flex-shrink-0 text-right text-[12px] font-semibold text-graphite hidden sm:block">
+            {labels.movement}
+          </div>
+        )}
+        <div className="w-[4.5rem] sm:w-28 flex-shrink-0 text-right">
+          <div className="text-[12px] font-semibold text-graphite">
+            {valueHeader}
+          </div>
+          <div className="text-[12px] text-graphite leading-tight">
+            {labels.interval}
+          </div>
+        </div>
+        <div className="w-11 flex-shrink-0" />
       </div>
 
+      <div className="divide-y divide-stone-100">
+        {entries.slice(0, initialCount).map(renderRow)}
+      </div>
+
+      {/* The marks' key, under the chart (the reading rule's short form). */}
+      {entries.some(e => e.lo !== null && e.hi !== null) && (
+        <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-graphite">
+          <BandGlyph />
+          {pt
+            ? `${labels.interval}: a margem do modelo; o traço preto é a estimativa e o tracejado, o zero.`
+            : `${labels.interval}: the model’s margin; the black tick is the estimate and the dashed line, zero.`}
+        </p>
+      )}
+
+      {/* The rest of the list folds into the one show/hide control. */}
       {entries.length > initialCount && (
-        <button
-          type="button"
-          onClick={() => setShowAll(!showAll)}
-          aria-expanded={showAll}
-          className="mt-1 inline-flex min-h-11 items-center text-xs font-medium text-ink underline underline-offset-4 hover:text-ink-dark"
-        >
-          {showAll ? labels.showLess : labels.showAll(entries.length)}
-        </button>
+        <Disclosure className="mt-1" summary={labels.showAll(entries.length)}>
+          <div className="divide-y divide-stone-100 border-t border-stone-100">
+            {entries.slice(initialCount).map(renderRow)}
+          </div>
+        </Disclosure>
       )}
     </div>
   );

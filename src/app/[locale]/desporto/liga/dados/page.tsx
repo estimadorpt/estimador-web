@@ -3,6 +3,7 @@ import path from 'node:path';
 import { createPageMetadata, siteTitle } from '@/lib/metadata';
 import { Header } from "@/components/Header";
 import { PageHero } from '@/components/PageHero';
+import { LigaSectionNav } from "@/components/football/LigaSectionNav";
 import { SiteFooter } from '@/components/SiteFooter';
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
@@ -38,7 +39,7 @@ const copy = {
     back: "Liga Portugal",
     kicker: "Dados abertos",
     standfirstA:
-      "As previsões das páginas da Liga Portugal vêm de ficheiros JSON estáticos servidos deste site, sem chave a pedir nem limite de pedidos. Só o jogo Contra o Modelo usa uma API própria, para guardar as previsões de quem joga; os dados do modelo estão todos aqui.",
+      "As previsões das páginas da Liga Portugal vêm de ficheiros JSON estáticos servidos deste site, sem chave a pedir nem limite de pedidos. O jogo Contra o Modelo guarda as previsões de quem joga no próprio browser, sem conta nem servidor; os dados do modelo estão todos aqui.",
     standfirstB:
       "Se construíres alguma coisa com eles, podes usar as saídas do modelo nos termos da licença CC BY-NC 4.0: uso não comercial, com atribuição a estimador.pt e um link para a página de origem. Os dados de terceiros que alguns ficheiros trazem ficam fora dessa licença (vê abaixo). E se publicares, diz-nos: gostamos de ver.",
     filesTitle: "Ficheiros publicados",
@@ -82,7 +83,7 @@ const copy = {
     back: "Liga Portugal",
     kicker: "Open data",
     standfirstA:
-      "The forecasts on the Liga Portugal pages come from static JSON files served from this site, with no key to request and no rate limit. Only the Beat the Model game uses an API of its own, to store players' picks; the model's data is all here.",
+      "The forecasts on the Liga Portugal pages come from static JSON files served from this site, with no key to request and no rate limit. The Beat the Model game keeps each player's picks in their own browser, with no account and no server; the model's data is all here.",
     standfirstB:
       "If you build something with them, you may use the model's outputs under the CC BY-NC 4.0 licence: non-commercial use, with attribution to estimador.pt and a link back to the source page. The third-party data some files carry are outside that licence (see below). And if you publish, tell us: we like seeing it.",
     filesTitle: "Published files",
@@ -520,6 +521,7 @@ export default async function LigaDataPage({
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <LigaSectionNav current="dados" locale={locale} />
       <PageHero
         measure="wide"
         compact

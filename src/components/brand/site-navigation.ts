@@ -1,4 +1,5 @@
 import { POPULATION_ROUTES } from '@/lib/config/population';
+import { LIGA_TABS } from '@/components/football/liga-tabs';
 
 /**
  * The site's navigation, defined once: the order, the hrefs, the labels and
@@ -112,19 +113,18 @@ export function siteNavigation(
       ],
     },
     {
-      // "Liga Portugal" at the top; the hub is the season forecast inside it.
-      // The model evaluation and the method are in the menu, as the other
-      // sections' are (audit CL2-M2), and the weekly game says it is a game
-      // (CL2-13).
+      // "Liga Portugal" at the top; the menu is the section's tab row
+      // (LigaSectionNav), item for item, as População's is: the season
+      // forecast, the players, the weekly game (which says it is a game,
+      // CL2-13), the model's evaluation and the open data. The method is
+      // linked from every chart and from the forecast.
       id: 'sport', label: labels.sport, match: ['/desporto'],
-      dropdown: [
-        { href: '/desporto/liga', label: pt ? 'Previsões da época' : 'Season forecast' },
-        { href: '/desporto/liga/jogadores', label: pt ? 'Jogadores' : 'Players' },
-        { href: '/desporto/liga/simulador', label: pt ? 'Simulador' : 'Simulator' },
-        { href: '/desporto/liga/jogo-previsoes', label: `${labels.game} ${pt ? '(jogo semanal)' : '(weekly game)'}` },
-        { href: '/desporto/liga/modelo', label: pt ? 'Modelo vs mercado' : 'Model vs market' },
-        { href: '/desporto/liga/metodologia', label: labels.methodology },
-      ],
+      dropdown: LIGA_TABS.map(tab => ({
+        href: tab.href,
+        label: tab.key === 'jogo'
+          ? `${labels.game} ${pt ? '(jogo semanal)' : '(weekly game)'}`
+          : pt ? tab.pt : tab.en,
+      })),
     },
     {
       // The overview of the archive first; both forecasts are archives and
