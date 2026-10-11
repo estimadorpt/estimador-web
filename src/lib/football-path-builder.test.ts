@@ -127,8 +127,8 @@ describe('the decisive games the builder marks (md08)', () => {
     if (md08.matchday !== 8) return;
     expect(marked('Casa Pia')).toEqual([]);
     const { range } = decisiveGames(paths['Casa Pia'].p_current, paths['Casa Pia'].matches);
-    // The sentence the builder says instead: every game between 16 and 22 points.
-    expect(Math.round(range[0] * 100)).toBe(16);
+    // The sentence the builder says instead: every game between 17 and 22 points.
+    expect(Math.round(range[0] * 100)).toBe(17);
     expect(Math.round(range[1] * 100)).toBe(22);
   });
 

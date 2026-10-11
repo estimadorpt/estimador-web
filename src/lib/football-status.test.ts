@@ -40,7 +40,7 @@ describe('forecast status line (audit CL-11, CL-M4)', () => {
   });
 });
 
-describe('a forecast published mid-round (md08: 7 of 9 games played)', () => {
+describe('a forecast published mid-round (md08: 8 of 9 games played)', () => {
   const md08 = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data/football/liga-2026-27/md08.json'), 'utf8'));
   // The two games of round 8 still to play when md08 came out, as the
   // fixture loader hands them to the pages.
@@ -53,7 +53,7 @@ describe('a forecast published mid-round (md08: 7 of 9 games played)', () => {
 
   it('counts the games it had seen, from the file', () => {
     const input = forecastStatusInput(md08, upcoming);
-    expect(input.roundSeen).toEqual({ played: 7, total: 9 });
+    expect(input.roundSeen).toEqual({ played: 8, total: 9 });
     expect(input.nextRound).toBe(8);
     expect(input.playedAt).toBe('2026-10-12T21:15:00.000Z');
   });
@@ -61,23 +61,23 @@ describe('a forecast published mid-round (md08: 7 of 9 games played)', () => {
   it('names the state once, in the same words before and after the round is played', () => {
     const { initial, steps } = forecastStatus(md08, upcoming, 'pt');
     expect(initial).toBe(
-      'Previsão de 11 out., com 7 dos 9 jogos da jornada 8 disputados · próxima previsão depois da jornada 8 (11–12 out.)',
+      'Previsão de 11 out., com 8 dos 9 jogos da jornada 8 disputados · próxima previsão depois da jornada 8 (11–12 out.)',
     );
     const played = clockValue(initial, steps, Date.parse('2026-10-13T08:00:00Z'));
     expect(played).toBe(
-      'Previsão de 11 out., com 7 dos 9 jogos da jornada 8 disputados · jornada 8 jogada, nova previsão em preparação',
+      'Previsão de 11 out., com 8 dos 9 jogos da jornada 8 disputados · jornada 8 jogada, nova previsão em preparação',
     );
     // No "Durante" beside "jogada", no "depois da jornada 8" for a round with games to play.
     for (const line of [initial, played]) {
       expect(line).not.toMatch(/Durante|depois da jornada 8 ·|atualizado/);
     }
     expect(forecastStatus(md08, upcoming, 'en').initial).toBe(
-      'Forecast of 11 Oct, with 7 of matchday 8’s 9 games played · next forecast after matchday 8 (11–12 Oct)',
+      'Forecast of 11 Oct, with 8 of matchday 8’s 9 games played · next forecast after matchday 8 (11–12 Oct)',
     );
   });
 
   it('says the same as the homepage instrument about what the forecast had seen', () => {
-    expect(forecastCoverage(forecastStatusInput(md08, upcoming), 'pt')).toBe('com 7 dos 9 jogos da jornada 8 disputados');
+    expect(forecastCoverage(forecastStatusInput(md08, upcoming), 'pt')).toBe('com 8 dos 9 jogos da jornada 8 disputados');
   });
 
   it('keeps "jogo em atraso" for a postponed game, never a round state', () => {
