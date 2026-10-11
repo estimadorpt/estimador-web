@@ -59,7 +59,9 @@
   stroke-width: 2px;
   vector-effect: non-scaling-stroke;
 }
-.mini-house:hover .mini-house-hit { fill: var(--color-field); }
+@media (hover: hover) {
+  .mini-house:hover .mini-house-hit { fill: var(--color-field); }
+}
 .mini-homes { transition: opacity 300ms, visibility 0s; }
 .mini-scene:not([data-view=homes]) .mini-homes {
   opacity: 0;

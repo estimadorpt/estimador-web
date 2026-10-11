@@ -26,16 +26,36 @@ export function groupLabels(view: Exclude<View, 'homes'>, locale: Locale): Array
   });
 }
 
-/** One home: a front-on house, ink lines on white; the chosen one filled with ink, like a chosen box. */
-function HouseGlyph({ selected }: { selected: boolean }) {
-  return <>
+/**
+ * The two drawings every home and figure reuse (one <use> each, so 30 homes
+ * and 100 figures stay light in the exported HTML): a front-on house in ink
+ * lines on white, the chosen one filled with ink like a chosen box; and a
+ * figure, ink legs and head, its body in the colour given to its <use>.
+ */
+function Glyphs({ id }: { id: string }) {
+  // LINE on every shape: vector-effect is not inherited, and the phone drawing scales the house down.
+  const house = (selected: boolean) => <>
     <path d="M0 -30 L28 -52 L56 -30 Z" fill={selected ? INK : FIELD} {...LINE} />
     <rect x={4} y={-30} width={48} height={30} fill={selected ? INK : PAPER} {...LINE} />
     <rect x={10} y={-24} width={9} height={8} fill={PAPER} {...LINE} />
     <rect x={37} y={-24} width={9} height={8} fill={PAPER} {...LINE} />
     <rect x={22.5} y={-17} width={11} height={17} fill={selected ? PAPER : RULE} {...LINE} />
   </>;
+  return (
+    <defs>
+      <g id={`${id}-house`}>{house(false)}</g>
+      <g id={`${id}-house-on`}>{house(true)}</g>
+      <g id={`${id}-figure`}>
+        <path d="M-1.6 -5.5 L-2.6 0 M1.6 -5.5 L2.6 0" stroke={INK} strokeWidth={1.4} strokeLinecap="square" fill="none" />
+        <rect x={-3.5} y={-15.5} width={7} height={10} fill="currentColor" />
+        <circle cy={-19.5} r={3.3} fill={INK} />
+      </g>
+    </defs>
+  );
 }
+
+/** Scene units, to one decimal: the exported HTML carries every spot. */
+const r1 = (n: number) => Math.round(n * 10) / 10;
 
 /**
  * The invented neighbourhood: 30 homes and the 100 people who live in them,
@@ -57,7 +77,7 @@ export function Scene({ view, layout, locale, motion, selectedHouse, selectedPer
   onHouseSelect: (id: number) => void;
 }) {
   const pt = locale === 'pt';
-  const id = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const id = `mini${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   const houses = useRef<Array<SVGGElement | null>>([]);
   const pointerType = useRef('');
   const [focusIndex, setFocusIndex] = useState(0);
@@ -119,6 +139,7 @@ export function Scene({ view, layout, locale, motion, selectedHouse, selectedPer
     >
       <title id={`${id}-title`}>{pt ? 'O bairro inventado' : 'The invented neighbourhood'}</title>
       <desc id={`${id}-desc`}>{description}{highlight}</desc>
+      <Glyphs id={id} />
 
       <g className="mini-homes" aria-hidden={homes ? undefined : true}>
         {streets(layout).map(s => <line key={s.y} x1={s.x1} x2={s.x2} y1={s.y} y2={s.y} stroke={RULE} strokeWidth={1} vectorEffect="non-scaling-stroke" />)}
@@ -142,7 +163,7 @@ export function Scene({ view, layout, locale, motion, selectedHouse, selectedPer
                 onFocus={() => setFocusIndex(home.id)}
               >
                 <rect className="mini-house-hit" x={cell.x} y={cell.y} width={cell.width} height={cell.height} fill="transparent" />
-                <g transform={`translate(${at.x} ${at.y}) scale(${at.scale})`}><HouseGlyph selected={selected} /></g>
+                <use href={`#${id}-house${selected ? '-on' : ''}`} transform={`translate(${at.x} ${at.y})${at.scale === 1 ? '' : ` scale(${at.scale})`}`} />
                 {/* The chosen home's number over its roof; on a phone the rows are too close for it, and the readout says it. */}
                 {selected && wide && <text x={at.x + 28} y={at.y - 58} textAnchor="middle" fontSize={18} fontWeight={700} fill={INK}>{home.id + 1}</text>}
               </g>
@@ -176,12 +197,10 @@ export function Scene({ view, layout, locale, motion, selectedHouse, selectedPer
             <g
               key={person.id}
               className="mini-person"
-              style={{ transform: `translate(${spot.x}px, ${spot.y}px) scale(${spot.scale})`, opacity: dim ? 0.16 : 1, '--i': person.id } as CSSProperties}
+              style={{ transform: `translate(${r1(spot.x)}px, ${r1(spot.y)}px) scale(${spot.scale})`, opacity: dim ? 0.16 : undefined, '--i': person.id } as CSSProperties}
             >
               {selectedPerson === person.id && <ellipse cy={-11} rx={7.5} ry={14.5} fill="none" stroke={INK} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />}
-              <path d="M-1.6 -5.5 L-2.6 0 M1.6 -5.5 L2.6 0" stroke={INK} strokeWidth={1.4} strokeLinecap="square" fill="none" />
-              <rect x={-3.5} y={-15.5} width={7} height={10} fill={COLOURS[person.band]} />
-              <circle cy={-19.5} r={3.3} fill={INK} />
+              <use href={`#${id}-figure`} color={COLOURS[person.band]} />
             </g>
           );
         })}
