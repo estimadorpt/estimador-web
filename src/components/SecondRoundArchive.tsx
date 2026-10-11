@@ -8,7 +8,7 @@ import { PresidentialTrendChart } from './charts/PresidentialTrendChart';
 import { ErrorBoundary } from './ErrorBoundary';
 import { TextLink } from './brand/TextLink';
 import { DataCard } from './viz/DataCard';
-import { PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections';
+import { OFFICIAL_RESULTS, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections';
 import { BLANK_NULL } from '@/lib/election-aggregates';
 import { credibleIntervalLabel, formatElectionLongDate, formatElectionNumber, formatElectionProbability } from '@/lib/election-display';
 import { likeliestWinner } from '@/lib/election-findings';
@@ -44,6 +44,7 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
   const hasTrend = Object.keys(data.trends.candidates || {}).length > 0 && data.trends.dates.length > 0;
   const total = formatElectionNumber(simulations.total, locale);
   const pt = locale === 'pt';
+  const officialResult = OFFICIAL_RESULTS['presidential-2026'].find(r => r.round === 2);
   // The chart frame's footer (CLAUDE.md, "Chart frame"): an archived forecast
   // names its run, its date and where the method is explained.
   const frame = {
@@ -64,9 +65,16 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
             <p className="text-lg text-graphite mb-4 leading-relaxed">
               {t('headlineDescription', { date: cutoffLabel, election: electionLabel, candidateA: candidateA?.name ?? '', candidateB: candidateB?.name ?? '' })}
             </p>
-            <TextLink href="/eleicoes/metodologia#segunda-volta-2026" locale={locale} className="text-sm">
-              {t('methodologyLink')}
-            </TextLink>
+            <div className="flex flex-wrap gap-x-6">
+              <TextLink href="/eleicoes/metodologia#segunda-volta-2026" locale={locale} className="text-sm">
+                {t('methodologyLink')}
+              </TextLink>
+              {officialResult && (
+                <TextLink href={officialResult.href} external className="text-sm">
+                  {t('officialResult')}<span aria-hidden="true">&nbsp;↗</span>
+                </TextLink>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -120,7 +128,6 @@ export async function SecondRoundArchive({ data, locale }: { data: SecondRoundAr
                   maxCandidates={2}
                   exclude={['Others', BLANK_NULL]}
                   height={380}
-                  candidateParam="candidate2"
                 />
               </ErrorBoundary>
             </DataCard>

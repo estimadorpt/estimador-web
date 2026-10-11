@@ -1,13 +1,15 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useMemo, useRef, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { geoMercator, geoPath } from 'd3';
 import { feature } from 'topojson-client';
 import { partyColors, partyNames } from '@/lib/config/colors';
+import { formatElectionNumber } from '@/lib/election-display';
 import { getRegionForIsland } from '@/lib/geography/regionMapping';
 import { useTopoJsonData } from '@/hooks/useTopoJsonData';
 import { ChartTable } from '@/components/viz/ChartTable';
+import { Action } from '@/components/brand/Action';
 import { closeLeads } from '@/lib/election-aggregates';
 import { BRAND } from '@/lib/brand';
 import type { DistrictForecast, SelectedDistrict } from '@/types/geography';
@@ -43,10 +45,20 @@ const slug = (name: string) => name.normalize('NFD').replace(/[̀-ͯ]/g, '').toL
  * named briefly ("Lisboa: AD à frente") with the full shares as its
  * description. A colour key sits under the map; the table twin holds every
  * figure.
+ *
+ * The readout (the district's shares, each with a bar) sits beside the map
+ * from 640px and right under it on a phone, so a tap and its answer are on
+ * one screen. It is a polite live region on the page from the first paint,
+ * holding a one-line instruction until a district is chosen; a pointer over
+ * a district previews it there, a click, a tap, Enter or the list choose it.
+ * Keyboard focus alone does not change it: each district already reads its
+ * shares as its description.
  */
 export default function DistrictMap({ districtForecast, className = '', onDistrictClick,
   selectedDistrict }: DistrictMapProps) {
   const pt = useLocale() === 'pt';
+  const t = useTranslations('map');
+  const readoutRef = useRef<HTMLDivElement>(null);
   const { portugalTopoJson, isLoading, error, retry } = useTopoJsonData();
   const [inspected, setInspected] = useState<string | null>(null);
   const regions = useMemo(() => new Map(districtForecast.map(d => [d.district_name, d])), [districtForecast]);
@@ -84,7 +96,12 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
     const data = regions.get(name);
     setInspected(name);
     if (data) onDistrictClick?.({ id: name, probs: data.probs });
+    // On a phone the readout is under the map: bring it into view if the tap left it below the fold.
+    if (window.matchMedia('(max-width: 639px)').matches) {
+      window.requestAnimationFrame(() => readoutRef.current?.scrollIntoView({ block: 'nearest', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
+    }
   };
+
   // Table twin columns: every party in the file, largest national presence first.
   const tableParties = useMemo(() => {
     const totals = new Map<string, number>();
@@ -101,6 +118,41 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([party]) => party);
   }, [districtForecast]);
 
+  const gap = activeSorted && activeSorted.length >= 2 ? (activeSorted[0][1] - activeSorted[1][1]) * 100 : null;
+  const readout = (
+    <div ref={readoutRef} aria-live="polite" aria-atomic="true" className="min-w-0 border-t border-ink pt-2">
+      {active && activeSorted ? (
+        <>
+          <h3 className="text-[19px] leading-6 text-ink">{active.district_name}</h3>
+          <p className="text-[12px] text-graphite">{t('voteShareByParty')}</p>
+          <ul className="mt-1.5">
+            {activeSorted.map(([party, share]) => (
+              <li key={party} className="border-b border-grid py-1">
+                <div className="flex items-baseline justify-between gap-3 text-[13px]">
+                  <span className="inline-flex items-center gap-2 font-medium text-ink">
+                    <span aria-hidden="true" className="inline-block size-2.5" style={{ backgroundColor: partyColors[party] ?? NO_PARTY }} />
+                    {party}
+                  </span>
+                  <span className="font-semibold tabular-nums">{format(share)}</span>
+                </div>
+                <div aria-hidden="true" className="relative mt-0.5 h-1.5 border-b border-scale">
+                  <div className="absolute left-0 top-0 h-1" style={{ width: `${Math.min(100, share * 100)}%`, backgroundColor: partyColors[party] ?? NO_PARTY }} />
+                </div>
+              </li>
+            ))}
+          </ul>
+          {gap != null && <p className="mt-2 text-[12px] text-graphite">{t('topTwoGap', { gap: formatElectionNumber(gap, pt ? 'pt' : 'en', 1) })}</p>}
+        </>
+      ) : (
+        <p className="text-sm text-graphite">
+          {pt
+            ? 'Escolhe um distrito no mapa ou na lista: a percentagem de votos prevista de cada partido aparece aqui.'
+            : 'Choose a district on the map or from the list: each party’s predicted vote share appears here.'}
+        </p>
+      )}
+    </div>
+  );
+
   return (
     <div className={`w-full ${className}`}>
       {onDistrictClick && (
@@ -113,12 +165,12 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
           </select>
         </label>
       )}
+      <div className="grid items-start gap-x-6 gap-y-4 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,17rem)]">
       {isLoading ? <p role="status" className="py-10 text-center text-graphite">{pt ? 'A carregar mapa…' : 'Loading map…'}</p>
         : error || !groups ? <div role="alert" className="py-6 text-center">
           <p>{pt ? 'Não foi possível carregar o mapa. Podes continuar a escolher uma região na lista.' : 'The map could not load. You can still choose a region from the list.'}</p>
-          <button type="button" onClick={retry} className="mt-3 underline">{pt ? 'Tentar novamente' : 'Try again'}</button>
+          <Action variant="secondary" onClick={retry} className="mt-3">{pt ? 'Tentar novamente' : 'Try again'}</Action>
         </div> : (
-          <>
             <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="mx-auto block w-full" style={{ maxWidth: WIDTH * 1.25 }}
               role="group" aria-label={pt ? 'Previsão legislativa de 2025 por distrito e região' : '2025 parliamentary forecast by district and region'}>
               <defs>
@@ -146,7 +198,7 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
                     // A tap focuses the group; only keyboard focus draws the ring
                     // (the selection is the ink outline), so no grey box on touch.
                     className="cursor-pointer [&:focus:not(:focus-visible)]:outline-none"
-                    onFocus={() => setInspected(region)} onMouseEnter={() => setInspected(region)}
+                    onMouseEnter={() => setInspected(region)} onMouseLeave={() => setInspected(null)}
                     onClick={() => choose(region)} onKeyDown={event => {
                       if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(region); }
                     }}>
@@ -158,6 +210,11 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
                 );
               })}
             </svg>
+        )}
+        {readout}
+      </div>
+      {!isLoading && !error && groups && (
+          <>
             {/* Descriptions for the groups above, read after each short name. */}
             <div className="sr-only">
               {districtForecast.map(d => <p key={d.district_name} id={`district-${slug(d.district_name)}`}>{`${pt ? 'Percentagem de votos prevista' : 'Predicted vote share'}: ${shares(d.probs)}`}</p>)}
@@ -185,14 +242,6 @@ export default function DistrictMap({ districtForecast, className = '', onDistri
             )}
           </>
         )}
-      {active && activeSorted && (
-        <div className="mt-3 text-sm text-ink" aria-live="polite">
-          <p><strong>{active.district_name}</strong> · {pt ? 'percentagem de votos prevista (estimativa)' : 'predicted vote share (estimate)'}</p>
-          <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 tabular-nums">
-            {activeSorted.map(([party, value]) => <li key={party}>{party} {format(value)}</li>)}
-          </ul>
-        </div>
-      )}
       <ChartTable
         caption={pt ? 'Percentagem de votos prevista por distrito e região' : 'Predicted vote share by district and region'}
         summaryLabel={pt ? 'Ver os distritos e regiões como tabela' : 'View districts and regions as a table'}

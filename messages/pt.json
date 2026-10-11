@@ -36,7 +36,6 @@
     "generalStats": "Partido à frente por distrito",
     "districtsLed": "Distritos com cada partido à frente",
     "totalDistricts": "Distritos e regiões autónomas:",
-    "voteShareCaption": "Percentagem de votos prevista (estimativa) para cada partido neste distrito.",
     "topTwoGap": "Diferença entre os dois primeiros: {gap} pontos percentuais."
   },
   "forecast": {
@@ -188,6 +187,7 @@
     "roundDateLine": "2.ª volta a {election} · previsão de {forecast}",
     "roundDateLineNoForecast": "2.ª volta a {election}",
     "methodologyLink": "Como foi feita a previsão da segunda volta",
+    "officialResult": "Resultado oficial da 2.ª volta (SGMAI)",
     "unavailable": "Os dados da segunda volta não estão disponíveis nesta versão do site.",
     "noTrend": "Esta previsão arquivada não tem uma série temporal da segunda volta.",
     "axisLabel": "Votos válidos no dia da eleição (%)",
@@ -206,7 +206,7 @@
     "voteShare": "Intenção de voto prevista para o dia da eleição",
     "partyAffiliation": "Partido",
     "supportTrajectory": "O apoio estimado ao longo da campanha",
-    "trendDescription": "Escolhe um dos cinco principais candidatos para ver a evolução do apoio estimado; os outros quatro aparecem como linhas discretas.",
+    "trendDescription": "O apoio estimado aos cinco principais candidatos, dia a dia, com o intervalo de 50% de cada um e as sondagens em pontos; a tabela tem também o intervalo de 90%.",
     "projectedVoteShare": "Intenção de voto prevista",
     "aboutModel": "Sobre este modelo",
     "modelDescription": "Esta previsão usou um modelo bayesiano que combinou dados de sondagens com priors específicos de cada candidato, baseados na afiliação partidária. O modelo considerou os efeitos das empresas de sondagens e a incerteza nas preferências dos eleitores.",
@@ -241,6 +241,7 @@
     "firstRoundKicker": "1.ª volta · previsão arquivada",
     "firstRoundTitle": "Uma segunda volta seria precisa, com {probability} de probabilidade",
     "firstRoundLede": "Na previsão de {date}, feita com {polls} sondagens. Para vencer à primeira volta, um candidato precisava de mais de metade dos votos válidos.",
+    "officialResultRound1": "Resultado oficial da 1.ª volta (SGMAI)",
     "forecastForElectionDay": "Previsão de {forecast} para o dia da eleição, {election}",
     "unavailable": "Os dados da primeira volta não estão disponíveis nesta versão do site.",
     "runoffEmpty": "Sem pares de segunda volta publicados nesta previsão.",

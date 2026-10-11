@@ -1,14 +1,13 @@
 "use client";
 
 import * as Plot from "@observablehq/plot";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ChartTable } from "@/components/viz/ChartTable";
 import { FURNITURE } from "@/components/viz/theme";
 import { partyColors } from "@/lib/config/colors";
 import { compactTrendSeries, recentTrendRows, type TrendSeries } from "@/lib/election-aggregates";
-import { electionIntlLocale, formatElectionDate, formatElectionShortDate, segmentClass, SEGMENT_GROUP_CLASS, sortByPartyOrder } from "@/lib/election-display";
-import { BRAND } from "@/lib/brand";
+import { electionIntlLocale, formatElectionDate, formatElectionShortDate, sortByPartyOrder } from "@/lib/election-display";
 import { quietPlot } from "@/components/viz/plot-a11y";
 
 interface TrendData {
@@ -36,17 +35,18 @@ interface Point {
 }
 
 const MOBILE_BREAKPOINT = 640;
-/** Parties selected on load: the largest by the last estimate, at most four series (CLAUDE.md). */
-const DEFAULT_PARTIES = 3;
+/** The parties drawn with their band: the largest by the last estimate. */
+const BANDED_PARTIES = 3;
 
 const day = (iso: string) => new Date(`${iso}T12:00:00Z`);
 
 /**
  * The model's estimate of each party's vote share on the dates of the polls
- * it read, over the two years before the election, with its 94% HDI band. In
- * the default view the largest parties are drawn with their bands; "Todos os
- * partidos" draws every party's line without bands (they would overlap), and
- * the table always holds every party with its band.
+ * it read, over the two years before the election. Every party is drawn, with
+ * no filter (an archived chart has nothing to choose): the three largest
+ * carry their 94% HDI band, the smaller parties' bands would sit on top of
+ * each other near the floor, so their lines go without, and the table holds
+ * every party with its band.
  */
 export function PollingChart({ series: provided, data, voteShareLabel: voteShareLabelProp }: PollingChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,20 +77,9 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
       .map(([party]) => party),
     [series, lastIndex],
   );
-  const defaultParties = useMemo(() => ranked.slice(0, DEFAULT_PARTIES), [ranked]);
-  // Chips and table columns in the archive's one party order (AEE3-06).
+  const banded = useMemo(() => ranked.slice(0, BANDED_PARTIES), [ranked]);
+  // Table columns in the archive's one party order (AEE3-06).
   const allParties = useMemo(() => sortByPartyOrder(ranked), [ranked]);
-
-  const [viewMode, setViewMode] = useState<"selected" | "all">("selected");
-  const [selectedParties, setSelectedParties] = useState<string[] | null>(null);
-  // Memoized so the render effect only sees a new reference when the selection changes.
-  const activeParties = useMemo(() => selectedParties ?? defaultParties, [selectedParties, defaultParties]);
-
-  const toggleParty = (party: string) => {
-    const current = selectedParties ?? defaultParties;
-    const next = current.includes(party) ? current.filter(p => p !== party) : [...current, party];
-    setSelectedParties(next.length > 0 ? next : current);
-  };
 
   // The table twin: every estimate in the window, every party, with its band,
   // newest first, so the values the end labels quote open the table on a phone.
@@ -112,12 +101,6 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
     };
   }, [series, allParties, pt, locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const shown = viewMode === "all" ? allParties : activeParties;
-  const latestValues = useMemo(
-    () => ranked.filter(p => shown.includes(p)).map(party => ({ party, value: series.parties[party].mean[lastIndex] as number })),
-    [ranked, shown, series, lastIndex],
-  );
-
   useEffect(() => {
     if (points.length === 0 || !containerRef.current) return;
 
@@ -127,8 +110,8 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
       const mobile = containerWidth < MOBILE_BREAKPOINT;
       const containerHeight = mobile ? 300 : 360;
 
-      const drawn = points.filter(d => shown.includes(d.party));
-      const withBand = viewMode === "selected" ? drawn.filter(d => d.low != null && d.high != null) : [];
+      const drawn = points;
+      const withBand = drawn.filter(d => banded.includes(d.party) && d.low != null && d.high != null);
       const latest = drawn.filter(d => d.date.getTime() === day(series.dates[lastIndex]).getTime()).sort((a, b) => b.mean - a.mean);
 
       // Axis limit from what is drawn (bands included), plus a legible buffer.
@@ -176,27 +159,26 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
         })),
       ];
 
-      // End labels on wider screens; the legend below carries them on a phone.
-      if (!mobile) {
-        marks.push(
-          Plot.text(labels, {
-            x: "date",
-            y: "ly",
-            text: (d: Point) => `${d.party} ${fmtPct(d.mean)}`,
-            fill: FURNITURE.text,
-            dx: 8,
-            fontSize: 12,
-            fontWeight: "600",
-            textAnchor: "start",
-          }),
-        );
-      }
+      // End labels at every width: the party codes are short enough for a
+      // phone's gutter, so no legend is needed to tell the lines apart.
+      marks.push(
+        Plot.text(labels, {
+          x: "date",
+          y: "ly",
+          text: (d: Point) => `${d.party} ${fmtPct(d.mean)}`,
+          fill: FURNITURE.text,
+          dx: mobile ? 6 : 8,
+          fontSize: mobile ? 11 : 12,
+          fontWeight: "600",
+          textAnchor: "start",
+        }),
+      );
 
       const plot = Plot.plot({
         width: containerWidth,
         height: containerHeight,
         marginLeft: mobile ? 45 : 60,
-        marginRight: mobile ? 16 : 120,
+        marginRight: mobile ? 72 : 120,
         marginTop,
         marginBottom,
         style: { backgroundColor: "transparent", color: FURNITURE.textMuted, fontSize: mobile ? "11px" : "12px", fontFamily: FURNITURE.font },
@@ -230,58 +212,16 @@ export function PollingChart({ series: provided, data, voteShareLabel: voteShare
     const resizeObserver = new ResizeObserver(() => setTimeout(render, 100));
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
-  }, [points, series, lastIndex, voteShareLabel, locale, viewMode, shown]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [points, series, lastIndex, voteShareLabel, locale, banded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="w-full">
-      <div className={`mb-4 ${SEGMENT_GROUP_CLASS}`} role="group" aria-label={pt ? "Escolher partidos" : "Choose parties"}>
-        {allParties.map(party => (
-          <button
-            key={party}
-            type="button"
-            onClick={() => { setViewMode("selected"); toggleParty(party); }}
-            aria-pressed={viewMode === "selected" && activeParties.includes(party)}
-            className={segmentClass(viewMode === "selected" && activeParties.includes(party))}
-          >
-            <span aria-hidden="true" className="inline-block size-2 shrink-0 rounded-full" style={{ background: partyColors[party as keyof typeof partyColors] || BRAND.faint }} />
-            {party}
-          </button>
-        ))}
-        <button
-          type="button"
-          onClick={() => setViewMode(viewMode === "all" ? "selected" : "all")}
-          aria-pressed={viewMode === "all"}
-          className={segmentClass(viewMode === "all")}
-        >
-          {pt ? "Todos os partidos" : "All parties"}
-        </button>
-      </div>
       <p className="mb-2 text-xs text-graphite">
-        {viewMode === "all"
-          ? (pt
-            ? "Todos os partidos: só as linhas, sem as bandas, que se sobreporiam. A tabela abaixo tem a banda de cada partido."
-            : "All parties: lines only, without the bands, which would overlap. The table below has every party's band.")
-          : (pt
-            ? "A linha é a estimativa do modelo; a faixa clara à volta, o intervalo de credibilidade de 94% (HDI)."
-            : "The line is the model's estimate; the light band around it, the 94% credible interval (HDI).")}
+        {pt
+          ? "Todos os partidos, cada um com o nome ao fim da sua linha. A faixa clara (94%) só nos três maiores: a dos outros sobrepor-se-ia junto ao fundo."
+          : "Every party, each named at the end of its line. The light band (94%) on the three largest only: the others' would overlap near the floor."}
       </p>
       <div ref={containerRef} />
-      {/* Legend: always present, and the only labels on small screens */}
-      {latestValues.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 justify-center px-2">
-          {latestValues.map(({ party, value }) => (
-            <div key={party} className="flex items-center gap-1.5 text-xs">
-              <span
-                aria-hidden="true"
-                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: partyColors[party as keyof typeof partyColors] || BRAND.faint }}
-              />
-              <span className="font-medium">{party}</span>
-              <span className="text-graphite">{fmtPct(value)}</span>
-            </div>
-          ))}
-        </div>
-      )}
       <ChartTable
         caption={`${voteShareLabel} · ${pt ? "estimativa e banda de 94% (HDI), todos os partidos" : "estimate and 94% HDI band, every party"}`}
         summaryLabel={pt ? "Ver como tabela, mais recente primeiro" : "View as table, latest first"}

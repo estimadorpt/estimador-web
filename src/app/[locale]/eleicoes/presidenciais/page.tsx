@@ -14,6 +14,7 @@ import { PageHero } from '@/components/PageHero';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SectionNotes } from "@/components/articles/SectionNotes";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { TextLink } from "@/components/brand/TextLink";
 import { DataCard } from "@/components/viz/DataCard";
 import { ModelAssumptionsCard } from "@/components/ModelAssumptionsCard";
 import { UncertaintyExplainer } from "@/components/UncertaintyExplainer";
@@ -86,6 +87,7 @@ export default async function PresidentialArchivePage({
   const interval90 = credibleIntervalLabel(.05, .95, locale);
   const modelledCandidates = forecast.candidates.filter(c => c.name !== 'Others').length;
   const results = OFFICIAL_RESULTS['presidential-2026'];
+  const firstResult = results.find(r => r.round === 1);
   const pt = locale === 'pt';
   const probability = (p: number) => formatElectionProbabilityText(p, locale);
 
@@ -139,6 +141,11 @@ export default async function PresidentialArchivePage({
             <p className="text-lg text-graphite leading-relaxed">
               {t('presidential.firstRoundLede', { date: firstForecast ?? firstElection, polls: formatElectionNumber(polls.polls.length, locale) })}
             </p>
+            {firstResult && (
+              <TextLink href={firstResult.href} external className="mt-3 text-sm">
+                {t('presidential.officialResultRound1')}<span aria-hidden="true">&nbsp;↗</span>
+              </TextLink>
+            )}
           </div>
         </div>
       </section>
@@ -326,12 +333,10 @@ export default async function PresidentialArchivePage({
           eyebrow={t('presidential.archiveEyebrow')}
           title={t('presidential.archiveTitle')}
           lede={t('presidential.archiveLede')}
-          meta={
-            <>
-              <span><RoundSwitch firstRound={firstRoundDateLine} secondRound={secondRoundDateLine} /></span>
-              {officialResults}
-            </>
-          }
+          // The official results are linked from each round's own opening and
+          // from "Dados e método", not here: just above the round switch, two
+          // more "1.ª volta" and "2.ª volta" read as a second switch.
+          meta={<span><RoundSwitch firstRound={firstRoundDateLine} secondRound={secondRoundDateLine} /></span>}
         />
 
         <nav aria-label={t('presidential.inThisArchive')} className="border-b border-line">

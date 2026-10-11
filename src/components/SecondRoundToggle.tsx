@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from 'react';
-import { segmentClass, SEGMENT_GROUP_CLASS } from '@/lib/election-display';
+import { CHOICE_GROUP_CLASS, ChoiceCheck, choiceClass } from '@/components/brand/Choice';
 
 export type Round = 1 | 2;
 
@@ -48,23 +48,42 @@ interface SecondRoundToggleProps {
   };
 }
 
-/** The round switch: two words in the segmented text grammar. It never pulses or animates. */
+/** The address of a round's view: `?round=1` for the first, no parameter for the runoff. */
+const roundHref = (round: Round) => (round === 1 ? '?round=1' : '?');
+
+/**
+ * The round switch: two choice boxes (choiceClass), the chosen one in ink and
+ * checked. They are links, so a round can be opened in a new tab or shared
+ * (`?round=1`); with JavaScript a click swaps the view in place. The static
+ * HTML marks the runoff as current, as the page shows it first. Without
+ * JavaScript `?round=1` still shows the runoff: a static export serves one
+ * HTML file whatever the query string, and only a script can read it.
+ */
 export function SecondRoundToggle({ translations }: SecondRoundToggleProps) {
   const [currentRound, choose] = useRound();
-  const button = (round: Round, label: string) => (
-    <button
-      type="button"
-      onClick={() => choose(round)}
-      aria-pressed={currentRound === round}
-      className={segmentClass(currentRound === round)}
-    >
-      {label}
-    </button>
-  );
+  const link = (round: Round, label: string) => {
+    const current = currentRound === round;
+    return (
+      <a
+        href={roundHref(round)}
+        aria-current={current ? 'true' : undefined}
+        onClick={event => {
+          // A modified click (a new tab or window) keeps the browser's own behaviour.
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+          event.preventDefault();
+          if (!current) choose(round);
+        }}
+        className={choiceClass(current)}
+      >
+        {current && <ChoiceCheck />}
+        {label}
+      </a>
+    );
+  };
   return (
-    <div role="group" aria-label={translations.label} className={SEGMENT_GROUP_CLASS}>
-      {button(1, translations.firstRound)}
-      {button(2, translations.secondRound)}
+    <div role="group" aria-label={translations.label} className={CHOICE_GROUP_CLASS}>
+      {link(1, translations.firstRound)}
+      {link(2, translations.secondRound)}
     </div>
   );
 }
