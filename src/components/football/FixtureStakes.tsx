@@ -117,15 +117,15 @@ export function FixtureStakes({
               <dd className="font-display text-2xl font-extrabold tabular-nums text-ink">{formatClubPercent(entry.baseline, locale)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-stone-500">{pt ? 'Se ganhar' : 'If it wins'}</dt>
+              <dt className="text-xs text-stone-500">{pt ? 'Se ganhar' : 'If they win'}</dt>
               <dd className="font-display text-2xl font-extrabold tabular-nums text-ink">{formatClubPercent(entry.win as number, locale)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-stone-500">{pt ? 'Se empatar' : 'If it draws'}</dt>
+              <dt className="text-xs text-stone-500">{pt ? 'Se empatar' : 'If they draw'}</dt>
               <dd className="font-display text-2xl font-extrabold tabular-nums text-ink">{formatClubPercent(entry.draw as number, locale)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-stone-500">{pt ? 'Se perder' : 'If it loses'}</dt>
+              <dt className="text-xs text-stone-500">{pt ? 'Se perder' : 'If they lose'}</dt>
               <dd className="font-display text-2xl font-extrabold tabular-nums text-ink">{formatClubPercent(entry.loss as number, locale)}</dd>
             </div>
           </dl>

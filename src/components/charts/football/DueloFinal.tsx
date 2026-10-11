@@ -107,8 +107,8 @@ export function DueloFinal({ samples, team, rival, frame, locale = "pt", forecas
     : `${nameA} finish with more points than ${nameB} in ${formatPercent(shareA, "en")} of the seasons; ${nameB}, in ${formatPercent(shareB, "en")}; they finish level on points in ${formatPercent(shareTie, "en")}.`;
   // The margin in one plain sentence.
   const marginNote = pt
-    ? `Contámos ${formatInteger(stats.n, "pt")} épocas completas tiradas à sorte das ${formatInteger(samples.n_sims, "pt")} simulações, por isso cada uma destas percentagens pode estar uns ${margin} pontos acima ou abaixo.`
-    : `We counted ${formatInteger(stats.n, "en")} complete seasons drawn at random from the ${formatInteger(samples.n_sims, "en")} simulations, so each of these percentages can be about ${margin} points higher or lower.`;
+    ? `Contámos ${formatInteger(stats.n, "pt")} épocas completas tiradas à sorte das ${formatInteger(samples.n_sims, "pt")} simulações, por isso cada uma destas percentagens pode estar uns ${margin} pontos percentuais acima ou abaixo.`
+    : `We counted ${formatInteger(stats.n, "en")} complete seasons drawn at random from the ${formatInteger(samples.n_sims, "en")} simulations, so each of these percentages can be about ${margin} percentage points higher or lower.`;
   const axis = pt
     ? `Diferença de pontos no fim da época: ${nameA} e ${nameB}`
     : `Points gap at the end of the season: ${nameA} and ${nameB}`;
