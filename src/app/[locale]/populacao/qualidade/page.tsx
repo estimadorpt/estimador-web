@@ -42,8 +42,8 @@ function qualityFinding(passed: boolean, locale: Locale): { title: string; metaT
   const pt = locale === 'pt';
   if (passed) {
     return pt
-      ? { title: `A versão ${POPULATION_RELEASE} passou os critérios de publicação`, metaTitle: `A população sintética ${POPULATION_RELEASE} passou os critérios de publicação` }
-      : { title: `Release ${POPULATION_RELEASE} passed its publication gates`, metaTitle: `The synthetic population ${POPULATION_RELEASE} passed its publication gates` };
+      ? { title: `A versão ${POPULATION_RELEASE} passou os critérios de publicação`, metaTitle: `A versão ${POPULATION_RELEASE} passou os critérios de publicação` }
+      : { title: `Release ${POPULATION_RELEASE} passed its publication gates`, metaTitle: `Release ${POPULATION_RELEASE} passed its publication gates` };
   }
   return pt
     ? { title: `A qualidade da versão ${POPULATION_RELEASE}, medida contra o INE`, metaTitle: `A qualidade da população sintética ${POPULATION_RELEASE}` }

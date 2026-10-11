@@ -30,8 +30,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     locale,
     path: '/populacao',
     title: pt
-      ? `População sintética: as ${parishes} freguesias dos Censos 2021`
-      : `Synthetic population: the ${parishes} parishes of the 2021 Census`,
+      ? `As ${parishes} freguesias dos Censos 2021, uma a uma`
+      : `The ${parishes} parishes of the 2021 Census, one by one`,
     description: pt
       ? `Uma população sintética aberta para as ${parishes} freguesias dos Censos 2021: procura a tua freguesia, explora o mapa e faz download dos dados.`
       : `An open synthetic population for the ${parishes} parishes of the 2021 Census: find your parish, explore the map and download the data.`,

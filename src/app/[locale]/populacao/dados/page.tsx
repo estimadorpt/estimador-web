@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return createPageMetadata({
     locale,
     path: POPULATION_ROUTES.data,
-    title: pt ? 'Os dados da população sintética, abertos para uso não comercial' : 'The synthetic population data, open for non-commercial use',
+    title: pt ? 'Dados abertos da população sintética' : 'Synthetic population open data',
     description: pt
       ? `Faz download da População Sintética de Portugal v${POPULATION_RELEASE}: licença CC BY-NC 4.0, unidades, geografia, dicionário de colunas, qualidade, verificação e citação.`
       : `Download the Synthetic Population of Portugal v${POPULATION_RELEASE}: CC BY-NC 4.0 licence, units, geography, column dictionary, quality, verification and citation.`,
