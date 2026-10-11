@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameFixtures, loadPredictionGameData, roundsFromGameFixtures } from '@/lib/utils/football-data-loader';
-import { roundLockState, scoreSeason } from '@/lib/utils/prediction-game';
+import {
+  awaitingResults,
+  probsFromPick,
+  roundLockState,
+  tallySeason,
+  withPublishedResults,
+  type PickMap,
+  type PredictionGameData,
+} from '@/lib/utils/prediction-game';
 
 /**
  * Integration check against the JSON actually published in public/data.
@@ -119,9 +127,45 @@ describe('loadPredictionGameData (real published data)', () => {
 
   it('scores an empty entry over real data without throwing', async () => {
     const data = (await loadPredictionGameData())!;
-    const season = scoreSeason(data, {});
-    expect(season.matchesScored).toBe(0);
-    expect(season.roundsWon).toBe(0);
-    expect(season.userMean).toBeNull();
+    const season = tallySeason(data, {});
+    expect(season.rounds).toEqual([]);
+    expect(season.completed).toBe(0);
+    expect(season.won).toBe(0);
+  });
+
+  it('scores a full season of picks game by game over real data', async () => {
+    const data = (await loadPredictionGameData())!;
+    // Back the home side, fairly sure, in every game of the season.
+    const picks: PickMap = Object.fromEntries(
+      data.rounds.flatMap(r => r.fixtures.map(f => [f.key, { p: probsFromPick('H', 'media'), pick: 'H' as const, conf: 'media' as const }])),
+    );
+    const season = tallySeason(data, picks);
+    for (const r of season.rounds) {
+      const round = data.rounds.find(x => x.matchday === r.matchday)!;
+      const played = round.fixtures.filter(f => f.result).length;
+      expect(r.scored).toBe(played);
+      expect(r.closer + r.modelCloser + r.level).toBe(r.scored);
+      expect(r.remaining.length).toBe(round.fixtures.length - played);
+    }
+    expect(season.completed).toBe(season.rounds.filter(r => r.complete).length);
+    expect(season.won + season.level).toBeLessThanOrEqual(season.completed);
+  });
+
+  it('takes the results of the published game_fixtures.json back into a page built before them', async () => {
+    const data = (await loadPredictionGameData())!;
+    const manifest = (await loadGameFixtures())!;
+    // The page as it was before any result came in.
+    const stale: PredictionGameData = {
+      ...data,
+      rounds: data.rounds.map(r => ({ ...r, fixtures: r.fixtures.map(f => ({ ...f, result: null })) })),
+    };
+    const picks: PickMap = Object.fromEntries(
+      data.rounds.flatMap(r => r.fixtures.map(f => [f.key, { p: probsFromPick('D', 'leve'), pick: 'D' as const, conf: 'leve' as const }])),
+    );
+    const played = data.rounds.some(r => r.fixtures.some(f => f.result));
+    expect(awaitingResults(stale, picks, Date.now())).toBe(played);
+    const fresh = withPublishedResults(stale, manifest);
+    expect(fresh.rounds.map(r => r.fixtures.map(f => f.result))).toEqual(data.rounds.map(r => r.fixtures.map(f => f.result)));
+    expect(tallySeason(fresh, picks)).toEqual(tallySeason(data, picks));
   });
 });

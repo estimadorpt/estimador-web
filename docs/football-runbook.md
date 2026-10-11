@@ -22,6 +22,36 @@ the latest kickoff would put the sync weeks late. `frozenBeforePreviousRoundEnde
 - **Matchday 8** ends with Famalicão – Alverca on Monday 12 October 2026 at 20:15 Lisbon
   time (19:15 UTC): md08 should be live by Tuesday 13 October, 20:15.
 
+## Contra o Modelo: no server
+
+Since 11 October 2026 the weekly game (`/desporto/liga/jogo-previsoes`) has no account, no
+names, no leaderboard and no server. Everything it needs is `game_fixtures.json`, which the
+football sync already publishes:
+
+- **The round to pick** is the first one with no result and its earliest `locks_at` still
+  ahead (`findOpenRound`), with the model's 1X2 frozen when it opened. It is in the page's
+  HTML, so a new round reaches readers with the deploy that publishes it.
+- **The picks** stay in the reader's browser under one key, `estimador:contra-o-modelo:v1`
+  (`src/lib/utils/prediction-game.ts`), listed on `/privacidade`. Nothing is sent anywhere.
+- **The results** are scored in the browser, game by game, by RPS (who was closer), from the
+  results baked into the page at build. When a game the reader picked is two hours past its
+  kickoff and the page has no result for it (a tab left open, a page restored from the
+  cache), the page re-reads the published `/data/football/liga-2026-27/game_fixtures.json`
+  once (at most every ten minutes) and takes only the results from it
+  (`withPublishedResults`). So the game waits for the same thing the forecast does: the sync
+  and deploy after the round's last game.
+
+Nothing else to run each week: there is no `api/data` copy and no `/api/score` POST. In the
+model repository, run `scripts/export_game_fixtures.py` without `--api-dir` and
+`--post-score`, which pointed at the retired server.
+
+Retired outside this repository, still to do once: the Azure Static Web App's game settings
+(`GAME_STORAGE_CONNECTION_STRING`, `GAME_ADMIN_TOKEN`, `GAME_SEASON`, `CLERK_ISSUER`,
+`CLERK_AUDIENCE`), the storage account with the leaderboard tables (`gamePlayers`,
+`gameAuthLinks`, `gamePicks`, `gameScores`, `gameStandings`, `gameManifest`), which
+`/privacidade` says will be deleted, the Clerk application and its `CLERK_PUBLISHABLE_KEY`
+secret, if they were ever created, and the `@clerk/clerk-react` dependency in `package.json`.
+
 ## Before 2027-28: season-scoped match addresses
 
 Deferred in round 3 (audit SP2-07).

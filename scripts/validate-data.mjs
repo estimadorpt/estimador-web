@@ -79,11 +79,10 @@ if (matchdays.length === 0) {
 }
 
 // ---- football: content checks ----------------------------------------------
-// The per-matchday publish refreshes the md files; the game manifest, the
-// server's copy of it and the player feeds are refreshed by separate steps
-// that have fallen behind before (site review, 5 October 2026). These checks
-// fail the build when the feeds disagree, instead of publishing the
-// disagreement.
+// The per-matchday publish refreshes the md files; the game manifest and the
+// player feeds are refreshed by separate steps that have fallen behind before
+// (site review, 5 October 2026). These checks fail the build when the feeds
+// disagree, instead of publishing the disagreement.
 
 const readLiga = name => read(`football/liga-2026-27/${name}`).value;
 const manifest = readLiga('game_fixtures.json');
@@ -129,13 +128,13 @@ if (matchdays.length > 0 && !isObject(manifest)) {
   if (countMismatch.length) problems.push(`${where}: result counts disagree with actual_standings in ${mdFiles[mdFiles.length - 1].name}: ${countMismatch.join('; ')}`);
 
   // 3. The open round (the first one with no result at all) is priced, so
-  //    the server can accept picks for it.
+  //    the prediction game has the model's forecast to set picks against.
   const rounds = [...(manifest.matchdays ?? [])].sort((a, b) => a.matchday - b.matchday);
   const open = rounds.find(md => (md.fixtures ?? []).every(fx => typeof fx.home_goals !== 'number'));
   const priced = fx => [fx.p_home, fx.p_draw, fx.p_away].every(p => typeof p === 'number' && Number.isFinite(p));
   if (open && latest && open.matchday <= (latest.next_matchday?.matchday ?? latest.matchday + 1)) {
     const unpriced = (open.fixtures ?? []).filter(fx => !priced(fx));
-    if (unpriced.length) problems.push(`${where}: open matchday ${open.matchday} has ${unpriced.length} fixture(s) without model probabilities — every pick would be refused as not_priced`);
+    if (unpriced.length) problems.push(`${where}: open matchday ${open.matchday} has ${unpriced.length} fixture(s) without model probabilities — the prediction game would have nothing to score picks against`);
   }
 
   // 4. The manifest is at least as new as the newest forecast.
@@ -143,15 +142,6 @@ if (matchdays.length > 0 && !isObject(manifest)) {
   const generated = Date.parse(manifest.generated_at ?? '');
   if (Number.isFinite(newest) && (!Number.isFinite(generated) || generated < newest)) {
     problems.push(`${where}: generated_at ${manifest.generated_at ?? '(none)'} is older than ${mdFiles[mdFiles.length - 1].name} (${latest.timestamp}) — re-export the manifest with the forecast`);
-  }
-
-  // 5. The game server scores against its own copy, which must be the same file.
-  const apiCopy = path.join(process.cwd(), 'api/data/game_fixtures.json');
-  const publicCopy = path.join(DATA, 'football/liga-2026-27/game_fixtures.json');
-  if (!fs.existsSync(apiCopy)) {
-    problems.push('api/data/game_fixtures.json: missing — the game server has no manifest');
-  } else if (!fs.readFileSync(apiCopy).equals(fs.readFileSync(publicCopy))) {
-    problems.push('api/data/game_fixtures.json: differs from public/data/football/liga-2026-27/game_fixtures.json — copy the published manifest to the API');
   }
 }
 

@@ -3,7 +3,6 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { CLUB_PREFERENCE_KEY } from '@/components/football/club-preference';
 import { GAME_STORAGE_KEY } from '@/lib/population/game';
-import { CREDENTIALS_KEY } from '@/lib/utils/prediction-game-api';
 import { STORAGE_KEY } from '@/lib/utils/prediction-game';
 
 /**
@@ -18,7 +17,7 @@ const privacy = ['pt', 'en'].map(locale => ({
 }));
 
 /** Keys the code names through exported constants. */
-const KNOWN_KEYS = [CLUB_PREFERENCE_KEY, GAME_STORAGE_KEY, CREDENTIALS_KEY, STORAGE_KEY, 'liga-team-hint-seen'];
+const KNOWN_KEYS = [CLUB_PREFERENCE_KEY, GAME_STORAGE_KEY, STORAGE_KEY, 'liga-team-hint-seen'];
 
 function sourceFiles(dir: string): string[] {
   return readdirSync(dir).flatMap(name => {

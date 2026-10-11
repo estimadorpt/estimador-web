@@ -46,28 +46,17 @@ Some parts of the site remember you without sending anything anywhere: they keep
 | `estimador.club` | The club you picked, to show it first on your next visit | Homepage |
 | `liga-team-hint-seen` | That you have seen the hint about the table, so it is not repeated | Liga Portugal |
 | `estimador:misteriosa:v2` | The parishes you picked, the clues you opened and your record (games, days in a row, the clue you got it on) in the Mystery parish | Mystery parish |
-| `estimador:contra-o-modelo:v1` | Your picks in the prediction game | Prediction game |
-| `estimador:contra-o-modelo:player:v1` | Your player identifier and the secret that protects it | Prediction game |
+| `estimador:contra-o-modelo:v1` | Your picks in Beat the Model (the result and how sure you are, game by game), to set them against the model once the games are played | Beat the Model |
 
-The first three never leave the browser. The two prediction-game keys go with the picks you send to the leaderboard, as the next section explains.
+None of them leaves the browser.
 
 ---
 
-## Prediction game
+## Beat the Model
 
-The [prediction game](/en/desporto/liga/jogo-previsoes/) is the only part of the site that keeps per-person state on our server. You can play **without an account**.
+[Beat the Model](/en/desporto/liga/jogo-previsoes/) has no accounts, no names and no leaderboard. Your picks stay in your browser, under the `estimador:contra-o-modelo:v1` key, and are sent nowhere. To show the results, the page reads the results estimador.pt publishes for everyone, like any other page on the site; that request does not carry your picks.
 
-Per player, we store exactly this:
-
-- a random identifier minted on the first prediction;
-- the display name you chose (it appears on the leaderboard);
-- the SHA-256 digest of a random secret held in your browser;
-- if you linked the game to an account, the SHA-256 digest of that account's identifier, and the name of the authentication provider;
-- two timestamps: creation and last update.
-
-**We do not store the account's email address or username.** The account identifier is hashed before it is written, and the session token is never stored.
-
-If you choose to sign in, authentication is handled by [Clerk](https://clerk.com/) or by the Azure Static Web Apps authentication service. Those providers handle your account data under their own policies and keep their own session in your browser. When Clerk sign-in is enabled, the game page loads Clerk's code from Clerk's servers; no other page on the site loads it.
+Until October 2026 the game had a leaderboard on a server of ours, which kept per player a random identifier, the display name they chose and the cryptographic digest of a secret, never an email address or an account name. That server has been switched off and its records will be deleted. The game page removes the key that went with it (`estimador:contra-o-modelo:player:v1`) from your browser on your next visit.
 
 ---
 
@@ -105,4 +94,4 @@ This page describes the site. The privacy properties of each published dataset a
 
 ## Contact
 
-For questions about this page, or to request removal of a player record, write to [info@estimador.pt](mailto:info@estimador.pt).
+For questions about this page, or to have a record from Beat the Model's old leaderboard removed now, write to [info@estimador.pt](mailto:info@estimador.pt).

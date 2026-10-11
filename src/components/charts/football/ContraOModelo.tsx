@@ -1,862 +1,675 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { OUTCOME_TONES, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
-import { Link } from "@/i18n/routing";
-import { Swords, Lock, Trash2, SlidersHorizontal, Check, Share2 } from "lucide-react";
-import { useSeasonGame } from "@/hooks/useSeasonGame";
-import { formatDecimal, formatKickoffShort, formatLongDate, formatSigned } from "@/lib/football-format";
-
-/** RPS values: three decimals in the page's number format. */
-const rpsFmt = (v: number, pt: boolean) => formatDecimal(v, pt ? "pt" : "en", 3);
-import { SeasonAccount } from "./SeasonAccount";
-import { SeasonLeaderboard } from "./SeasonLeaderboard";
+import { Action } from "@/components/brand/Action";
+import { CHOICE_GROUP_CLASS, ChoiceCheck, choiceClass } from "@/components/brand/Choice";
+import { EmptyStateMark } from "@/components/brand/EmptyStateMark";
+import { ChannelHead } from "@/components/instrument/ChannelHead";
+import { NowGlyph } from "@/components/instrument/glyphs";
+import { Disclosure } from "@/components/viz/Disclosure";
+import { BRAND } from "@/lib/brand";
+import { teamDisplayName, teamWithArticle } from "@/lib/config/football";
+import { formatDateSpan, formatKickoffShort, formatPercent, intlLocale, matchLabel } from "@/lib/football-format";
 import {
   CONFIDENCE_LEVELS,
+  DEFAULT_CONFIDENCE,
+  OUTCOMES,
+  awaitingResults,
   clearPicks,
   findOpenRound,
+  forgetRetiredKeys,
   loadPicks,
+  normalizeProbs,
+  outcomeIndex,
+  pickedOutcome,
+  playedByClock,
   probsFromPick,
   roundLockState,
   savePicks,
-  scoreSeason,
-  setSliderValue,
+  tallySeason,
   toPercents,
+  withPublishedResults,
   type Confidence,
   type GameFixture,
-  type GameRound,
+  type GameVerdict,
   type Outcome,
   type PickMap,
   type PredictionGameData,
-  type ProbVector,
-  type RoundScore,
+  type RoundTally,
+  type SeasonTally,
+  type StoredPick,
 } from "@/lib/utils/prediction-game";
+
+/**
+ * Contra o Modelo: the reader picks the result of each game of the open
+ * round, and once the games are played the page says, game by game, whether
+ * their forecast or the model's was closer to what happened, and in how many
+ * games of the round they were closer.
+ *
+ * No account and no server: the picks live in this browser only
+ * (STORAGE_KEY), and the results come from the site's own published
+ * game_fixtures.json, baked into the page at build time and re-read from the
+ * same published file when a game the reader picked has been played since
+ * the build (a tab left open, a page restored from the cache).
+ *
+ * The server HTML is the round open when the page was built, unpicked, so
+ * the page does not grow on hydration (audit SEO3-01); the reader's picks,
+ * their results and the clock fill in after mount.
+ */
+
+type Locale = "pt" | "en";
 
 interface ContraOModeloProps {
   data: PredictionGameData;
-  locale?: string;
-  /** A caveat on the model's season record, shown under the season table. */
-  recordNote?: string | null;
-  /** The build's clock (ms): the round open when the page was exported is in
-   * its HTML, unpicked, so the page does not grow after hydration (audit
-   * SEO3-01: CLS 0.35 on phones when only the intro was server-rendered). */
-  builtAt?: number | null;
+  locale: Locale;
+  /** The build's clock (ms): what the server HTML shows. */
+  builtAt: number;
+  /** The published game_fixtures.json, re-read only for results played since the build. */
+  manifestUrl: string;
 }
 
-const OUTCOME_ORDER: Outcome[] = ["H", "D", "A"];
+/** At most one re-read of the published results per this long. */
+const REFETCH_MS = 10 * 60 * 1000;
 
-/** Emerald for the user, stone for the model — consistent everywhere below. */
-// The tokens, not literals: the text-strength green (#377455; #4e8056 was
-// 4,16:1, audit A11Y2-08) and the muted ink, used only in inline styles.
-const USER_COLOR = "var(--color-positive)";
-const MODEL_COLOR = "var(--color-ink-muted)";
+const PLURAL = (n: number, one: string, many: string) => (n === 1 ? one : many);
 
-export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt = null }: ContraOModeloProps) {
-  const pt = locale !== "en";
+const COPY = {
+  pt: {
+    matchday: (md: number) => `Jornada ${md}`,
+    picked: (n: number, total: number) => `${n} de ${total} ${PLURAL(n, "escolhido", "escolhidos")}`,
+    wins: " ganha",
+    draw: "Empate",
+    certainty: "Certeza",
+    confidence: { leve: "Pouca", media: "Bastante", alta: "Muita" } as Record<Confidence, string>,
+    readout: (parts: string[]) => `A tua previsão: ${parts.join(", ")}.`,
+    drawWord: "empate",
+    allPicked: (n: number, when: string | null) =>
+      `As tuas ${n} escolhas estão guardadas neste navegador. Podes mudá-las até ao primeiro jogo${when ? ` (${when})` : ""}; os resultados aparecem aqui depois dos jogos.`,
+    noOpenTitle: "Próxima jornada",
+    noOpen: "Não há jornada aberta neste momento. A próxima abre quando publicarmos a nova previsão, depois dos jogos.",
+    storage: "As tuas escolhas ficam só neste navegador: não as recebemos nem as guardamos noutro lado. Noutro dispositivo, ou depois de limpares os dados do navegador, começas do zero.",
+    notStored: "Este navegador não deixa guardar as escolhas: ficam só enquanto a página estiver aberta.",
+    reset: "Limpar as minhas escolhas",
+    resetConfirm: "Apagar todas as tuas escolhas desta época neste navegador?",
+    closerIn: (c: number, n: number) => `mais perto do que o modelo em ${c} de ${n} ${PLURAL(n, "jogo", "jogos")}`,
+    levelIn: (l: number) => `, igual em ${l}`,
+    soFar: "até agora, ",
+    waiting: (p: number, total: number) => `escolheste ${p} de ${total} ${PLURAL(total, "jogo", "jogos")}.`,
+    toPlay: (list: string) => `Por jogar: ${list}.`,
+    toPlayMany: (n: number, last: string) => `Por jogar: ${n} jogos, o último ${last}.`,
+    toCome: (list: string) => `À espera do resultado: ${list}.`,
+    toComeMany: (n: number) => `À espera do resultado: ${n} jogos.`,
+    season: (won: number, done: number, level: number) =>
+      `Ganhaste ao modelo em ${won} de ${done} ${PLURAL(done, "jornada completa", "jornadas completas")}${level ? `; empataste ${level}` : ""}.`,
+    gameByGame: "Ver jogo a jogo",
+    earlier: "As tuas jornadas anteriores",
+    keyResult: "o que aconteceu",
+    keyPick: "a tua escolha",
+    picked1: (pick: string, pct: number) => `Escolheste ${pick}, ${pct}%.`,
+    pickName: (o: Outcome, f: GameFixture) => (o === "D" ? "o empate" : teamWithArticle(o === "H" ? f.home : f.away, "o")),
+    result: (o: Outcome, f: GameFixture) => (o === "D" ? "Empate" : `Ganhou ${teamWithArticle(o === "H" ? f.home : f.away, "o")}`),
+    onResult: (user: number, model: string) => `davas-lhe ${user}%, o modelo ${model}.`,
+    modelOnResult: (model: string) => `o modelo dava-lhe ${model}.`,
+    modelOnPick: (model: string) => `O modelo dava-lhe ${model}.`,
+    notPicked: "Não escolheste este jogo.",
+    verdict: {
+      closer: "Ficaste mais perto",
+      model: "O modelo ficou mais perto",
+      level: "Igual ao modelo",
+      unpicked: "Não conta",
+      played: "Jogado · resultado por publicar",
+      toPlay: (when: string) => (when ? `Por jogar · ${when}` : "Por jogar"),
+    },
+    share: (md: number, c: number, n: number) => `Contra o Modelo, jornada ${md}: mais perto do que o modelo em ${c} de ${n} ${PLURAL(n, "jogo", "jogos")}.`,
+    copy: "Copiar",
+    copyWhat: " o resultado e o link",
+    copied: "Copiado.",
+    copyFailed: "Não foi possível copiar: seleciona o texto acima.",
+  },
+  en: {
+    matchday: (md: number) => `Matchday ${md}`,
+    picked: (n: number, total: number) => `${n} of ${total} picked`,
+    wins: " to win",
+    draw: "Draw",
+    certainty: "How sure",
+    confidence: { leve: "A little", media: "Fairly", alta: "Very" } as Record<Confidence, string>,
+    readout: (parts: string[]) => `Your forecast: ${parts.join(", ")}.`,
+    drawWord: "draw",
+    allPicked: (n: number, when: string | null) =>
+      `Your ${n} picks are saved in this browser. You can change them until the first game${when ? ` (${when})` : ""}; the results appear here after the games.`,
+    noOpenTitle: "Next matchday",
+    noOpen: "No matchday is open right now. The next one opens when we publish the new forecast, after the games.",
+    storage: "Your picks stay in this browser only: we never receive them or keep them anywhere else. On another device, or once you clear your browser data, you start from scratch.",
+    notStored: "This browser does not let the page save your picks: they last only while the page is open.",
+    reset: "Clear my picks",
+    resetConfirm: "Delete all your picks for this season from this browser?",
+    closerIn: (c: number, n: number) => `closer than the model in ${c} of ${n} ${PLURAL(n, "game", "games")}`,
+    levelIn: (l: number) => `, level in ${l}`,
+    soFar: "so far, ",
+    waiting: (p: number, total: number) => `you picked ${p} of ${total} ${PLURAL(total, "game", "games")}.`,
+    toPlay: (list: string) => `Still to play: ${list}.`,
+    toPlayMany: (n: number, last: string) => `Still to play: ${n} games, the last ${last}.`,
+    toCome: (list: string) => `Result to come: ${list}.`,
+    toComeMany: (n: number) => `Result to come: ${n} games.`,
+    season: (won: number, done: number, level: number) =>
+      `You beat the model in ${won} of ${done} completed ${PLURAL(done, "matchday", "matchdays")}${level ? `; ${level} level` : ""}.`,
+    gameByGame: "See game by game",
+    earlier: "Your earlier matchdays",
+    keyResult: "what happened",
+    keyPick: "your pick",
+    picked1: (pick: string, pct: number) => `You picked ${pick}, ${pct}%.`,
+    pickName: (o: Outcome, f: GameFixture) => (o === "D" ? "the draw" : teamDisplayName(o === "H" ? f.home : f.away)),
+    result: (o: Outcome, f: GameFixture) => (o === "D" ? "Draw" : `${teamDisplayName(o === "H" ? f.home : f.away)} won`),
+    onResult: (user: number, model: string) => `you gave it ${user}%, the model ${model}.`,
+    modelOnResult: (model: string) => `the model gave it ${model}.`,
+    modelOnPick: (model: string) => `The model gave it ${model}.`,
+    notPicked: "You did not pick this game.",
+    verdict: {
+      closer: "You were closer",
+      model: "The model was closer",
+      level: "Level with the model",
+      unpicked: "Not counted",
+      played: "Played · result to come",
+      toPlay: (when: string) => (when ? `To play · ${when}` : "To play"),
+    },
+    share: (md: number, c: number, n: number) => `Beat the Model, matchday ${md}: closer than the model in ${c} of ${n} ${PLURAL(n, "game", "games")}.`,
+    copy: "Copy",
+    copyWhat: " the result and the link",
+    copied: "Copied.",
+    copyFailed: "That did not work: select the text above.",
+  },
+};
 
-  // Static export ships HTML with no picks and a build-time clock. Everything
-  // that depends on localStorage or the real clock waits for mount.
+type Copy = (typeof COPY)[Locale];
+
+/** The reader's own pick: drawn hollow, as every guess on the site is. */
+function GuessGlyph() {
+  return (
+    <svg className="inline-block shrink-0 align-[-3px]" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true" focusable="false">
+      <rect x="1.5" y="3.5" width="7" height="7" fill="none" stroke={BRAND.ink} strokeWidth="1.25" />
+    </svg>
+  );
+}
+
+const shortName = (team: string) => teamDisplayName(team);
+
+function listOf(items: string[], locale: Locale): string {
+  return new Intl.ListFormat(intlLocale(locale), { type: "conjunction" }).format(items);
+}
+
+/**
+ * "Mais perto do que o modelo em 5 de 9 jogos." and its in-progress and
+ * waiting forms; lower case to follow "Jornada 7: ", capitalised to stand alone.
+ */
+function roundFinding(tally: RoundTally, total: number, t: Copy, { capital = false } = {}): string {
+  const body =
+    tally.scored === 0
+      ? t.waiting(tally.picked, total)
+      : `${tally.complete ? "" : t.soFar}${t.closerIn(tally.closer, tally.scored)}${tally.level ? t.levelIn(tally.level) : ""}.`;
+  return capital ? body.charAt(0).toUpperCase() + body.slice(1) : body;
+}
+
+export function ContraOModelo({ data, locale, builtAt, manifestUrl }: ContraOModeloProps) {
+  const t = COPY[locale];
+
+  // Static export: the HTML has no picks and the build's clock. Everything
+  // that reads localStorage or the real clock waits for mount.
   const [mounted, setMounted] = useState(false);
+  const [now, setNow] = useState(builtAt);
   const [picks, setPicks] = useState<PickMap>({});
-  const [now, setNow] = useState(0);
-  const [openFine, setOpenFine] = useState<Record<string, boolean>>({});
-  const [copied, setCopied] = useState(false);
+  // The page's rounds, plus any result published since the build.
+  const [game, setGame] = useState(data);
+  const [stored, setStored] = useState(true);
+  const dirty = useRef(false);
+  const lastFetch = useRef(0);
 
   useEffect(() => {
+    forgetRetiredKeys();
     setPicks(loadPicks(data.season));
     setNow(Date.now());
     setMounted(true);
-    // Re-check the clock so a kickoff lock engages without a reload.
-    const id = setInterval(() => setNow(Date.now()), 30_000);
-    return () => clearInterval(id);
+    const tick = () => setNow(Date.now());
+    // Re-read the clock so a lock, or a game's end, turns without a reload.
+    const id = window.setInterval(tick, 30_000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") tick();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [data.season]);
 
-  // Season-long play, when a backend exists. `status` stays 'local' otherwise
-  // and every branch below collapses to the original local-only behaviour.
-  const game = useSeasonGame(data);
-  const online = game.status === "online";
-  const openRoundRef = useRef<GameRound | null>(null);
-  const hydrated = useRef(false);
-  const { push, serverPicks } = game;
+  // Save after the reader changes something (never on the first read).
+  useEffect(() => {
+    if (!dirty.current) return;
+    setStored(savePicks(data.season, picks));
+  }, [picks, data.season]);
 
-  const updatePick = useCallback(
-    (key: string, next: { p: ProbVector; pick?: Outcome; conf?: Confidence; mode: "quick" | "fine" }) => {
-      setPicks(prev => {
-        const merged: PickMap = { ...prev, [key]: { ...prev[key], ...next } };
-        savePicks(data.season, merged);
-        // A no-op offline. Debounced, so holding a slider is one request.
-        const round = openRoundRef.current;
-        if (round) push(round.matchday, merged, round.fixtures.map(f => f.key));
-        return merged;
-      });
-    },
-    [data.season, push],
-  );
+  // A game the reader picked has been played since this page was built:
+  // re-read the published game_fixtures.json (same origin, revalidated) for
+  // its result. Nothing else is taken from it.
+  useEffect(() => {
+    if (!mounted || !awaitingResults(game, picks, now)) return;
+    if (lastFetch.current && now - lastFetch.current < REFETCH_MS) return;
+    lastFetch.current = now;
+    fetch(manifestUrl, { cache: "no-cache" })
+      .then(response => (response.ok ? response.json() : null))
+      .then(manifest => setGame(current => withPublishedResults(current, manifest)))
+      .catch(() => undefined);
+  }, [mounted, game, picks, now, manifestUrl]);
+
+  const choose = useCallback((fixture: GameFixture, outcome: Outcome) => {
+    dirty.current = true;
+    setPicks(prev => {
+      const conf = prev[fixture.key]?.conf ?? DEFAULT_CONFIDENCE;
+      return { ...prev, [fixture.key]: { p: probsFromPick(outcome, conf), pick: outcome, conf } };
+    });
+  }, []);
+
+  const setCertainty = useCallback((fixture: GameFixture, conf: Confidence) => {
+    dirty.current = true;
+    setPicks(prev => {
+      const current = prev[fixture.key];
+      if (!current) return prev;
+      const outcome = pickedOutcome(current);
+      return { ...prev, [fixture.key]: { p: probsFromPick(outcome, conf), pick: outcome, conf } };
+    });
+  }, []);
 
   const reset = useCallback(() => {
-    // Online, this clears the browser copy only. Deleting a season off the
-    // server on a single click is not a mistake anyone should be able to make.
-    const question = online
-      ? pt
-        ? "Limpar as previsões guardadas neste navegador? A tua época no ranking mantém-se e volta se voltares a entrar."
-        : "Clear the predictions stored in this browser? Your season in the standings stays, and returns when you sign back in."
-      : pt
-        ? "Apagar todas as tuas previsões e o resultado da época?"
-        : "Delete all your predictions and your season score?";
-    if (typeof window !== "undefined" && !window.confirm(question)) return;
+    if (typeof window !== "undefined" && !window.confirm(t.resetConfirm)) return;
+    dirty.current = false;
     clearPicks();
     setPicks({});
-  }, [pt, online]);
+  }, [t]);
 
-  // Before mount, the build's clock: the server HTML and the first client
-  // render show the round that was open at export time, with no picks; the
-  // reader's clock takes over after mount (the same round, in launch week).
   const clock = mounted ? now : builtAt;
-  const openRound = useMemo(
-    () => (clock != null ? findOpenRound(data, clock) : null),
-    [data, clock],
-  );
+  const openRound = useMemo(() => findOpenRound(game, clock), [game, clock]);
+  const season = useMemo(() => tallySeason(game, picks), [game, picks]);
 
-  useEffect(() => {
-    openRoundRef.current = openRound;
-  }, [openRound]);
-
-  /**
-   * Fold the server's copy in, once.
-   *
-   * The server wins where it has a pick — that is the copy that survived a
-   * cleared browser — and local-only picks for the open round are pushed back
-   * up so work done before signing in is not lost. Guarded to run a single time
-   * per mount so it can never fight the user's own edits.
-   */
-  useEffect(() => {
-    if (!online || hydrated.current || serverPicks === null) return;
-    hydrated.current = true;
-
-    const merged: PickMap = { ...picks };
-    for (const [key, value] of Object.entries(serverPicks)) {
-      merged[key] = { ...picks[key], ...value };
-    }
-    setPicks(merged);
-    savePicks(data.season, merged);
-
-    const round = openRoundRef.current;
-    if (round) push(round.matchday, merged, round.fixtures.map(f => f.key));
-  }, [online, serverPicks, push, data.season, picks]);
-
-  const season = useMemo(() => scoreSeason(data, picks), [data, picks]);
-
-  // Only rounds this player actually took part in. Including rounds they
-  // missed showed someone who joined at matchday 5 a wall of "9 you didn't
-  // predict" for matches that never counted against them anyway — the score
-  // is a mean over rounds played, so an absent round is not a bad round. The
-  // game is joinable at any point and the history should say so.
-  const playedRounds = useMemo(
+  // Rounds the reader picked in that have closed, newest first: the latest
+  // leads the page, the others wait below the open round.
+  const closed = useMemo(
     () =>
       season.rounds
-        .filter(r => r.scored.length > 0)
+        .filter(r => {
+          const round = game.rounds.find(x => x.matchday === r.matchday);
+          return round !== undefined && roundLockState(round, clock).locked;
+        })
         .sort((a, b) => b.matchday - a.matchday),
-    [season.rounds],
+    [season.rounds, game.rounds, clock],
   );
+  const [latest, ...earlier] = closed;
+  const hasPicks = Object.keys(picks).length > 0;
 
-  const t = {
-    title: pt ? "Contra o Modelo" : "Beat the Model",
-    howItWorks: pt ? "Como funciona" : "How it works",
-    intro: pt
-      ? "Diz o que achas que vai acontecer na próxima jornada. Quando os resultados chegarem, as tuas probabilidades são comparadas com as do modelo pela mesma medida que usamos para avaliar o modelo: o Ranked Probability Score."
-      : "Say what you think will happen next matchday. When the results land, your probabilities are scored against the model's using the same measure we grade the model with: the Ranked Probability Score.",
-    rpsNote: pt
-      ? "No RPS, menos é melhor. Zero é uma previsão perfeita. A regra castiga o excesso de confiança: dar 90% a uma vitória que não acontece custa muito mais do que dar 50%."
-      : "In RPS, lower is better. Zero is a perfect forecast. The rule punishes overconfidence: giving 90% to a win that doesn't happen costs far more than giving 50%.",
-    // True of this page only: the same 1X2 is on the Liga page and the match
-    // pages (audit F20, pub-PP-M2).
-    hidden: pt
-      ? "Aqui não mostramos as probabilidades do modelo até a jornada fechar. Estão na página da Liga, se quiseres espreitar antes de escolher."
-      : "We don't show the model's probabilities here until the matchday locks. They are on the Liga page if you want a look before you pick.",
-    home: pt ? "Casa" : "Home",
-    draw: pt ? "Empate" : "Draw",
-    away: pt ? "Fora" : "Away",
-    confidence: pt ? "Confiança" : "Confidence",
-    fine: pt ? "Ajuste fino" : "Fine tune",
-    matchday: pt ? "Jornada" : "Matchday",
-    locked: pt ? "Jornada fechada" : "Matchday locked",
-    // The round locks as a unit at its first lock time (game_fixtures.json
-    // locks_at), shown in Lisbon time.
-    closes: (when: string) =>
-      pt
-        ? `Fecha ${when} (hora de Lisboa), no primeiro jogo da jornada.`
-        : `Closes ${when} (Lisbon time), at the round's first game.`,
-    closesUnconfirmed: pt
-      ? "Há horários por confirmar: a jornada fecha no primeiro jogo."
-      : "Some kickoffs are still to be confirmed: the round closes at its first game.",
-    toBeConfirmed: pt ? "horário por confirmar" : "kickoff to be confirmed",
-    lockedKickoff: pt
-      ? "Fechou ao primeiro pontapé de saída."
-      : "Locked at the first kickoff.",
-    lockedResults: pt
-      ? "Fechou porque já há resultados desta jornada."
-      : "Locked because results for this matchday are in.",
-    noOpen: pt
-      ? "Não há jornada aberta neste momento. Volta quando publicarmos a próxima previsão."
-      : "No matchday is open right now. Come back when the next forecast is published.",
-    reset: pt ? "Limpar" : "Reset",
-    you: pt ? "Tu" : "You",
-    model: pt ? "Modelo" : "Model",
-    yourScore: pt ? "O teu RPS médio" : "Your average RPS",
-    modelScore: pt ? "RPS médio do modelo" : "Model's average RPS",
-    matches: pt ? "jogos avaliados" : "matches scored",
-    beatLine: (won: number, total: number) =>
-      pt
-        ? `Ganhaste ao modelo em ${won} de ${total} ${total === 1 ? "jornada" : "jornadas"}.`
-        : `You beat the model in ${won} of ${total} ${total === 1 ? "round" : "rounds"}.`,
-    aheadNow: pt ? "Estás à frente do modelo." : "You're ahead of the model.",
-    behindNow: pt ? "O modelo está à frente." : "The model is ahead.",
-    levelNow: pt ? "Estás empatado com o modelo." : "You're level with the model.",
-    noScore: pt
-      ? "Ainda não tens previsões avaliadas. Faz as tuas escolhas e volta depois dos jogos."
-      : "You have no scored predictions yet. Make your picks and come back after the games.",
-    // Says the quiet part out loud: joining late costs nothing. The ranking
-    // is a mean over the rounds you played, so somebody arriving at matchday
-    // 20 starts level with somebody who has been here since matchday 1.
-    joinAnytime: pt
-      ? "Entras quando quiseres: contam as jornadas que jogares, e a classificação é pela média — quem entra hoje não fica atrás de quem começou na primeira jornada."
-      : "Join whenever: only the matchdays you play count, and the table ranks on the average — joining today does not put you behind someone who started on matchday 1.",
-    picked: (n: number, total: number) =>
-      pt ? `${n} de ${total} escolhidos` : `${n} of ${total} picked`,
-    inProgress: pt ? "Em curso" : "In progress",
-    provisional: pt ? "Resultado provisório" : "Provisional score",
-    notPlayed: pt ? "Não jogaste esta jornada." : "You didn't play this matchday.",
-    result: pt ? "Resultado" : "Result",
-    yourRps: pt ? "O teu RPS" : "Your RPS",
-    modelRps: pt ? "RPS do modelo" : "Model RPS",
-    won: pt ? "Ganhaste" : "You won",
-    lost: pt ? "Perdeste" : "You lost",
-    share: pt ? "Copiar resultado" : "Copy result",
-    shareDone: pt ? "Copiado" : "Copied",
-    shareHint: pt
-      ? "Tira um screenshot deste cartão ou copia o texto."
-      : "Screenshot this card or copy the text.",
-    // Words for any of the three picks: a draw is not a "favorito" (PUB3-09).
-    confLabels: {
-      leve: pt ? "Pouco confiante" : "Not very sure",
-      media: pt ? "Confiante" : "Fairly sure",
-      alta: pt ? "Muito confiante" : "Very sure",
-    } as Record<Confidence, string>,
-    // The one privacy line on the page, and the only one that knows whether
-    // the season table is reachable (audit pub-PP-10, F21).
-    storageNote: online
-      ? pt
-        ? "Jogar é anónimo. As tuas previsões ficam guardadas neste dispositivo e na classificação da época; guardamos apenas o nome que escolheste, as tuas probabilidades e a pontuação, nunca o teu email nem o teu perfil."
-        : "Playing is anonymous. Your predictions are kept on this device and in the season standings; we keep only the name you chose, your probabilities and your score, never your email or your profile."
-      : pt
-        ? "A classificação da época não está disponível agora: as tuas escolhas ficam guardadas só neste dispositivo e contam para a tua pontuação aqui. Se limpares os dados do navegador, perdes o histórico."
-        : "The season standings are not available right now: your picks are kept on this device only and count towards your score here. Clearing your browser data wipes your history.",
-  };
-
-  const outcomeLabel = (o: Outcome, fixture: GameFixture) => {
-    if (o === "D") return t.draw;
-    return teamDisplayName(o === "H" ? fixture.home : fixture.away);
-  };
-
-  const shareText = useMemo(() => {
-    if (season.matchesScored === 0) return "";
-    const u = season.userMean != null ? rpsFmt(season.userMean, pt) : "-";
-    const m = season.modelMean != null ? rpsFmt(season.modelMean, pt) : "-";
-    return pt
-      ? `Contra o Modelo — Liga Portugal ${data.season}\nEu ${u} vs Modelo ${m} (RPS médio, ${season.matchesScored} jogos)\n${t.beatLine(season.roundsWon, season.roundsCounted)}\nestimador.pt/pt/desporto/liga/jogo-previsoes`
-      : `Beat the Model — Liga Portugal ${data.season}\nMe ${u} vs Model ${m} (mean RPS, ${season.matchesScored} matches)\n${t.beatLine(season.roundsWon, season.roundsCounted)}\nestimador.pt/en/desporto/liga/jogo-previsoes`;
-  }, [season, data.season, pt, t]);
-
-  const copyShare = useCallback(() => {
-    if (!shareText || typeof navigator === "undefined" || !navigator.clipboard) return;
-    navigator.clipboard.writeText(shareText).then(
-      () => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      },
-      () => undefined,
-    );
-  }, [shareText]);
-
-  /* ------------------------------------------------------------ rendering */
-
-  // One tree before and after mount (audit SEO3-01): the server HTML has the
-  // intro, an empty scoreboard and the round open at build time, unpicked;
-  // after mount the reader's picks and clock fill the same places.
   return (
-    <div className="space-y-8">
-      {/* ----------------------------------------------------------- intro */}
-      <div className="max-w-3xl border-t border-ink pt-3">
-        {/* Not the game's name: the page hero already carries it, and
-            printing it twice made the block read as a second page header.
-            Its job is explaining how the scoring works. */}
-        <div className="mb-2">
-          <h2 className="text-[13px] font-semibold text-ink">
-            {t.howItWorks}
-          </h2>
-        </div>
-        <p className="text-sm text-stone-600 mb-3">{t.intro}</p>
-        <p className="text-xs text-stone-500 mb-2">{t.rpsNote}</p>
-        <p className="text-xs text-stone-500">{t.joinAnytime}</p>
-      </div>
-
-      {/* ------------------------------------------------- season identity */}
-      {online && (
-        <div className="max-w-3xl">
-        <SeasonAccount
-          player={game.player}
-          authenticated={game.authenticated}
-          syncState={game.syncState}
-          rejected={game.rejected}
-          deadline={game.deadline}
-          signInUrl={game.signInUrl}
-          onName={game.setDisplayName}
-          locale={locale}
-        />
-        </div>
+    <div className="space-y-12">
+      {latest && (
+        <LatestRound tally={latest} season={season} game={game} clock={clock} locale={locale} t={t} />
       )}
 
-      {/* ------------------------------------------------------ scoreboard */}
-      <section className="max-w-3xl">
-        {season.matchesScored === 0 ? (
-          <p className="text-sm text-stone-500">{t.noScore}</p>
-        ) : (
-          <div className="border-t border-ink">
-            <div className="grid grid-cols-2 divide-x divide-rule">
-              <div className="py-4 pr-4 sm:py-5">
-                <div className="text-[12px] font-semibold text-graphite mb-1">
-                  {t.yourScore}
-                </div>
-                <div
-                  className="text-3xl sm:text-4xl font-bold tabular-nums"
-                  style={{ color: USER_COLOR }}
-                >
-                  {rpsFmt(season.userMean!, pt)}
-                </div>
-              </div>
-              <div className="py-4 pl-4 sm:py-5 sm:pl-6">
-                <div className="text-[12px] font-semibold text-graphite mb-1">
-                  {t.modelScore}
-                </div>
-                <div
-                  className="text-3xl sm:text-4xl font-bold tabular-nums"
-                  style={{ color: MODEL_COLOR }}
-                >
-                  {rpsFmt(season.modelMean!, pt)}
-                </div>
-              </div>
-            </div>
-            <div className="border-t border-rule py-3 text-sm">
-              <span className="font-semibold text-stone-900">
-                {season.userMean! < season.modelMean!
-                  ? t.aheadNow
-                  : season.userMean! > season.modelMean!
-                    ? t.behindNow
-                    : t.levelNow}
-              </span>{" "}
-              <span className="text-stone-500">
-                {t.beatLine(season.roundsWon, season.roundsCounted)} ·{" "}
-                <span className="tabular-nums">{season.matchesScored}</span> {t.matches}
-                {/* Flag a thin sample rather than hiding the player: one
-                    lucky round can top the table, and saying so is better
-                    than a minimum-rounds rule that empties it. */}
-                {season.roundsCounted < 3 && (
-                  <span className="ml-1.5 text-[12px] font-semibold text-graphite">
-                    {t.provisional}
-                  </span>
-                )}
-              </span>
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* ---------------------------------------------------- leaderboard */}
-      {online && (
-        <div className="max-w-3xl">
-          <SeasonLeaderboard
-            board={game.leaderboard}
-            locale={locale}
-            onRefresh={game.refreshLeaderboard}
-            recordNote={recordNote}
-          />
-        </div>
-      )}
-
-      {/* ---------------------------------------------------- active round */}
       {openRound ? (
-        <RoundPicker
-          round={openRound}
+        <OpenRound
+          round={openRound.fixtures}
+          matchday={openRound.matchday}
+          lockAt={roundLockState(openRound, clock).lockAt}
           picks={picks}
-          openFine={openFine}
-          onToggleFine={key => setOpenFine(prev => ({ ...prev, [key]: !prev[key] }))}
-          onPick={updatePick}
+          onChoose={choose}
+          onCertainty={setCertainty}
+          locale={locale}
           t={t}
-          pt={pt}
-          outcomeLabel={outcomeLabel}
         />
       ) : (
-        <p className="max-w-3xl border-t border-rule pt-3 text-sm text-stone-500">
-          {t.noOpen}
-        </p>
-      )}
-
-      {/* ------------------------------------------------------- history */}
-      {playedRounds.length > 0 && (
-        <section className="max-w-3xl space-y-4">
-          {playedRounds.map(roundScore => {
-            const round = data.rounds.find(r => r.matchday === roundScore.matchday)!;
-            return (
-              <RoundReview
-                key={roundScore.matchday}
-                round={round}
-                score={roundScore}
-                t={t}
-                pt={pt}
-              />
-            );
-          })}
-        </section>
-      )}
-
-      {/* ---------------------------------------------------- share + reset */}
-      {season.matchesScored > 0 && (
-        <section className="max-w-3xl">
-          <div
-            className="border-y border-ink py-5"
-            aria-label={t.share}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <Swords aria-hidden="true" className="w-4 h-4 text-ink" />
-              <span className="text-[12px] font-semibold text-graphite">
-                {t.title} · Liga Portugal {data.season}
-              </span>
-            </div>
-
-            <div className="flex items-end gap-6 mb-4">
-              <div>
-                <div className="text-[12px] font-semibold text-graphite">
-                  {t.you}
-                </div>
-                <div className="text-4xl font-bold tabular-nums" style={{ color: USER_COLOR }}>
-                  {rpsFmt(season.userMean!, pt)}
-                </div>
-              </div>
-              <div className="text-xl font-bold text-stone-500 pb-2" aria-hidden="true">vs</div>
-              <div>
-                <div className="text-[12px] font-semibold text-graphite">
-                  {t.model}
-                </div>
-                <div className="text-4xl font-bold tabular-nums" style={{ color: MODEL_COLOR }}>
-                  {rpsFmt(season.modelMean!, pt)}
-                </div>
-              </div>
-            </div>
-
-            <p className="text-sm font-semibold text-stone-900">
-              {t.beatLine(season.roundsWon, season.roundsCounted)}
-            </p>
-            <p className="text-xs text-stone-500 mt-1">
-              {season.matchesScored} {t.matches} · RPS · estimador.pt
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 mt-3">
-            <button
-              type="button"
-              onClick={copyShare}
-              className="inline-flex min-h-12 items-center gap-1.5 px-4 bg-ink text-paper text-sm font-semibold hover:bg-ink-dark transition-colors"
-            >
-              {copied ? <Check aria-hidden="true" className="w-4 h-4" /> : <Share2 aria-hidden="true" className="w-4 h-4" />}
-              {copied ? t.shareDone : t.share}
-            </button>
-            <span className="text-xs text-stone-500" role="status">{copied ? t.shareDone : t.shareHint}</span>
+        <section aria-labelledby="cm-aberta" className="max-w-3xl">
+          <ChannelHead id="cm-aberta" title={t.noOpenTitle} />
+          <div className="mt-4 flex items-start gap-4">
+            <EmptyStateMark className="mt-1" />
+            <p className="text-[15px] leading-relaxed text-ink">{t.noOpen}</p>
           </div>
         </section>
       )}
 
-      <section className="max-w-3xl pt-2 space-y-2">
-        <button
-          type="button"
-          onClick={reset}
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm text-stone-600 hover:text-red-700 transition-colors"
-        >
-          <Trash2 aria-hidden="true" className="w-4 h-4" />
-          {t.reset}
-        </button>
-        {/* The honest version of where a season lives, which only the client
-            knows — the page is rendered at build time. */}
-        <p className="text-xs text-stone-500 max-w-xl">{t.storageNote}</p>
+      {earlier.length > 0 && (
+        <section aria-labelledby="cm-anteriores" className="max-w-3xl">
+          <ChannelHead id="cm-anteriores" title={t.earlier} />
+          <ul>
+            {earlier.map(tally => {
+              const fixtures = game.rounds.find(r => r.matchday === tally.matchday)?.fixtures ?? [];
+              return (
+                <li key={tally.matchday} className="border-b border-rule py-1">
+                  <Disclosure summary={`${t.matchday(tally.matchday)}: ${roundFinding(tally, fixtures.length, t)}`}>
+                    <div className="space-y-4 pb-4 pt-1 text-[15px] leading-relaxed">
+                      <Remaining tally={tally} clock={clock} locale={locale} t={t} />
+                      <GameList games={tally.games} clock={clock} locale={locale} t={t} />
+                      {tally.complete && tally.scored > 0 && <ShareRound tally={tally} locale={locale} t={t} />}
+                    </div>
+                  </Disclosure>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      <section className="max-w-3xl space-y-2 border-t border-rule pt-4 noscript:hidden">
+        <p className="text-[13px] leading-relaxed text-graphite">{t.storage}</p>
+        {!stored && <p className="text-[13px] font-semibold text-ink">{t.notStored}</p>}
+        {hasPicks && (
+          <Action variant="text" onClick={reset}>
+            {t.reset}
+          </Action>
+        )}
       </section>
     </div>
   );
 }
 
-/* ------------------------------------------------------------- sub-views */
+/* ------------------------------------------------------------ open round */
 
-type Labels = {
-  home: string; draw: string; away: string; confidence: string; fine: string;
-  matchday: string; locked: string; lockedKickoff: string; lockedResults: string;
-  hidden: string; picked: (n: number, total: number) => string;
-  inProgress: string; provisional: string; notPlayed: string; result: string;
-  yourRps: string; modelRps: string; won: string; lost: string;
-  you: string; model: string; confLabels: Record<Confidence, string>;
-  closes: (when: string) => string; closesUnconfirmed: string; toBeConfirmed: string;
-  [k: string]: unknown;
-};
-
-function RoundPicker({
+function OpenRound({
   round,
+  matchday,
+  lockAt,
   picks,
-  openFine,
-  onToggleFine,
-  onPick,
+  onChoose,
+  onCertainty,
+  locale,
   t,
-  pt,
-  outcomeLabel,
 }: {
-  round: GameRound;
-  pt: boolean;
+  round: GameFixture[];
+  matchday: number;
+  lockAt: number | null;
   picks: PickMap;
-  openFine: Record<string, boolean>;
-  onToggleFine: (key: string) => void;
-  onPick: (
-    key: string,
-    next: { p: ProbVector; pick?: Outcome; conf?: Confidence; mode: "quick" | "fine" },
-  ) => void;
-  t: Labels;
-  outcomeLabel: (o: Outcome, f: GameFixture) => string;
+  onChoose: (fixture: GameFixture, outcome: Outcome) => void;
+  onCertainty: (fixture: GameFixture, conf: Confidence) => void;
+  locale: Locale;
+  t: Copy;
 }) {
-  const pickedCount = round.fixtures.filter(f => picks[f.key]).length;
-  const lock = roundLockState(round, Date.now());
-  const allConfirmed = round.fixtures.every(f => f.kickoffConfirmed !== false);
-  const kickoffs = round.fixtures.map(f => (f.kickoff ? Date.parse(f.kickoff) : NaN)).filter(ms => !Number.isNaN(ms));
-  const lastKickoff = allConfirmed && kickoffs.length ? new Date(Math.max(...kickoffs)).toISOString() : null;
+  const pickedCount = round.filter(f => picks[f.key]).length;
+  const allPicked = round.length > 0 && pickedCount === round.length;
+  const when = lockAt !== null ? formatKickoffShort(new Date(lockAt).toISOString(), locale) : null;
 
   return (
-    <section>
-      <div className="flex items-baseline justify-between mb-1">
-        <h3 className="text-stone-900">
-          {t.matchday} {round.matchday}
-        </h3>
-        <span className="text-xs text-stone-500 tabular-nums" role="status">
-          {t.picked(pickedCount, round.fixtures.length)}
-        </span>
-      </div>
-      {/* The deadline is the hero's line (it re-reads the clock); here only
-          the note for kickoffs still to be confirmed (audit UXD3-10). */}
-      {lock.lockAt !== null && !allConfirmed && (
-        <p className="text-xs text-stone-600 mb-1">{t.closesUnconfirmed}</p>
-      )}
-      <p className="max-w-3xl text-xs text-stone-500 mb-4">{t.hidden}</p>
-
-      {/* Two cards to a row from lg: nine games in one 784px column left
-          the right half empty and the page 2,700px tall (UXD3-10). */}
-      <div className="grid gap-x-8 gap-y-6 lg:grid-cols-2 lg:items-start">
-        {round.fixtures.map(fixture => {
-          const stored = picks[fixture.key];
-          const probs = stored?.p ?? null;
-          const pct = probs ? toPercents(probs) : null;
-          const fineOpen = !!openFine[fixture.key];
-          const fixtureName = `${teamDisplayName(fixture.home)} – ${teamDisplayName(fixture.away)}`;
-          const finePanelId = `fine-${fixture.key.replace(/[^a-z0-9]+/gi, "-")}`;
-
-          return (
-            <div
-              key={fixture.key}
-              role="group"
-              aria-label={fixtureName}
-              className="border-t border-ink pt-3"
-            >
-              {/* fixture line */}
-              <div className="flex items-center gap-2 mb-3 text-sm font-semibold text-stone-900">
-                {teamLogoSrc(fixture.home) && (
-                  <img src={teamLogoSrc(fixture.home)} alt="" width={20} height={20} loading="lazy" decoding="async" className="w-5 h-5 object-contain" />
-                )}
-                <span className="truncate">{teamDisplayName(fixture.home)}</span>
-                <span className="text-stone-500 font-normal" aria-hidden="true">–</span>
-                <span className="truncate">{teamDisplayName(fixture.away)}</span>
-                {teamLogoSrc(fixture.away) && (
-                  <img src={teamLogoSrc(fixture.away)} alt="" width={20} height={20} loading="lazy" decoding="async" className="w-5 h-5 object-contain" />
-                )}
-              </div>
-              {fixture.kickoff && (
-                <p className="-mt-2 mb-3 text-[11px] text-stone-500">
-                  {fixture.kickoffConfirmed === false
-                    ? `${formatLongDate(fixture.kickoff, pt ? "pt" : "en", { year: false })} · ${t.toBeConfirmed}`
-                    : formatKickoffShort(fixture.kickoff, pt ? "pt" : "en")}
-                </p>
-              )}
-
-              {/* quick pick */}
-              <div className="grid grid-cols-3 gap-2">
-                {OUTCOME_ORDER.map(o => {
-                  const active = stored?.pick === o;
-                  return (
-                    <button
-                      key={o}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() =>
-                        onPick(fixture.key, {
-                          p: probsFromPick(o, stored?.conf ?? "media"),
-                          pick: o,
-                          conf: stored?.conf ?? "media",
-                          mode: "quick",
-                        })
-                      }
-                      // One selected style for both rows: ink with a check (UXD3-10).
-                      className={`min-h-11 px-2 py-2 text-xs sm:text-sm font-semibold border transition-colors leading-tight break-words ${
-                        active
-                          ? "bg-ink border-ink text-paper"
-                          : "bg-paper border-rule text-ink hover:border-ink"
-                      }`}
-                    >
-                      {active && <Check aria-hidden="true" className="mr-1 inline-block h-3.5 w-3.5 -mt-0.5" />}
-                      {outcomeLabel(o, fixture)}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* confidence */}
-              {stored?.pick && (
-                <div className="mt-3" role="group" aria-labelledby={`${finePanelId}-conf`}>
-                  <div id={`${finePanelId}-conf`} className="text-[12px] font-semibold text-graphite mb-1.5">
-                    {t.confidence}
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {CONFIDENCE_LEVELS.map(c => {
-                      const active = stored.conf === c && stored.mode === "quick";
-                      return (
-                        <button
-                          key={c}
-                          type="button"
-                          aria-pressed={active}
-                          onClick={() =>
-                            onPick(fixture.key, {
-                              p: probsFromPick(stored.pick!, c),
-                              pick: stored.pick,
-                              conf: c,
-                              mode: "quick",
-                            })
-                          }
-                          className={`min-h-11 px-1.5 py-1.5 text-xs font-medium border transition-colors leading-tight ${
-                            active
-                              ? "bg-ink border-ink text-paper"
-                              : "bg-paper border-rule text-ink hover:border-ink"
-                          }`}
-                        >
-                          {active && <Check aria-hidden="true" className="mr-1 inline-block h-3.5 w-3.5 -mt-0.5" />}
-                          {t.confLabels[c]}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* current probabilities + fine tune */}
-              {probs && pct && (
-                <div className="mt-3">
-                  <ProbBar pct={pct} />
-                  <div className="flex flex-wrap items-center justify-between gap-x-3 mt-1">
-                    <div className="flex gap-3 text-[11px] text-stone-600 tabular-nums" aria-live="polite">
-                      <span>{t.home} {pct[0]}%</span>
-                      <span>{t.draw} {pct[1]}%</span>
-                      <span>{t.away} {pct[2]}%</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => onToggleFine(fixture.key)}
-                      aria-expanded={fineOpen}
-                      aria-controls={finePanelId}
-                      className={`inline-flex min-h-11 items-center gap-1 text-xs font-medium transition-colors ${
-                        fineOpen ? "text-ink underline underline-offset-4" : "text-stone-600 hover:text-ink"
-                      }`}
-                    >
-                      <SlidersHorizontal aria-hidden="true" className="w-3.5 h-3.5" />
-                      {t.fine}
-                    </button>
-                  </div>
-
-                  {fineOpen && (
-                    <div id={finePanelId} className="mt-1 space-y-2 border-t border-grid pt-3">
-                      {OUTCOME_ORDER.map((o, i) => (
-                        <div key={o} className="flex items-center gap-3">
-                          <span className="w-20 sm:w-28 shrink-0 truncate text-[11px] text-stone-600" aria-hidden="true">
-                            {outcomeLabel(o, fixture)}
-                          </span>
-                          <input
-                            type="range"
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={Math.round(probs[i] * 100)}
-                            onChange={e =>
-                              onPick(fixture.key, {
-                                p: setSliderValue(probs, i as 0 | 1 | 2, Number(e.target.value) / 100),
-                                pick: stored?.pick,
-                                conf: stored?.conf,
-                                mode: "fine",
-                              })
-                            }
-                            className="flex-1 min-h-11 accent-ink"
-                            aria-label={`${o === "D" ? t.draw : `${outcomeLabel(o, fixture)} ${pt ? "vence" : "wins"}`}, ${fixtureName}`}
-                            aria-valuetext={`${pct[i]}%`}
-                          />
-                          <span className="w-10 text-right text-[11px] tabular-nums text-stone-700">
-                            {pct[i]}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Every game picked: say they are kept and what comes next (audit PUB2-22). */}
-      {pickedCount === round.fixtures.length && round.fixtures.length > 0 && (
-        <div role="status" className="mt-6 border-t border-rule pt-3 text-sm leading-relaxed text-stone-700">
-          <p>
-            {pt
-              ? `As tuas ${pickedCount} previsões estão guardadas neste dispositivo e podes mudá-las até ao primeiro jogo.${lastKickoff ? ` Os resultados chegam depois do último jogo da jornada (${formatKickoffShort(lastKickoff, "pt")}).` : ""}`
-              : `Your ${pickedCount} picks are saved on this device and you can change them until the first game.${lastKickoff ? ` The results come in after the round's last game (${formatKickoffShort(lastKickoff, "en")}).` : ""}`}
-          </p>
-          <p className="mt-1">
-            <Link href="/desporto/liga" locale={pt ? "pt" : "en"} className="inline-flex min-h-11 items-center font-semibold text-ink underline underline-offset-4">
-              {pt ? "Ver a previsão da Liga" : "See the Liga forecast"}
-            </Link>
-          </p>
-        </div>
+    <section aria-labelledby="cm-aberta">
+      <ChannelHead
+        id="cm-aberta"
+        title={t.matchday(matchday)}
+        className="max-w-5xl"
+        aside={
+          <span role="status" className="tabular-nums noscript:hidden">
+            {t.picked(pickedCount, round.length)}
+          </span>
+        }
+      />
+      {/* Two games to a row from lg: nine games in one column left half the
+          screen empty and the page twice as tall (UXD3-10). */}
+      <ul className="grid max-w-5xl gap-x-10 lg:grid-cols-2">
+        {round.map(fixture => (
+          <li key={fixture.key} className="border-b border-rule pb-4 pt-3">
+            <GamePicker
+              fixture={fixture}
+              stored={picks[fixture.key] ?? null}
+              onChoose={onChoose}
+              onCertainty={onCertainty}
+              locale={locale}
+              t={t}
+            />
+          </li>
+        ))}
+      </ul>
+      {allPicked && (
+        <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-ink">{t.allPicked(pickedCount, when)}</p>
       )}
     </section>
   );
 }
 
-function ProbBar({ pct }: { pct: [number, number, number] }) {
-  const segments = [
-    // The site's one 1X2 encoding (audit UXD2-V06).
-    { v: pct[0], color: OUTCOME_TONES.home },
-    { v: pct[1], color: OUTCOME_TONES.draw },
-    { v: pct[2], color: OUTCOME_TONES.away },
-  ];
+function GamePicker({
+  fixture,
+  stored,
+  onChoose,
+  onCertainty,
+  locale,
+  t,
+}: {
+  fixture: GameFixture;
+  stored: StoredPick | null;
+  onChoose: (fixture: GameFixture, outcome: Outcome) => void;
+  onCertainty: (fixture: GameFixture, conf: Confidence) => void;
+  locale: Locale;
+  t: Copy;
+}) {
+  const id = `cm-${fixture.key.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`;
+  const name = matchLabel(shortName(fixture.home), shortName(fixture.away));
+  const picked = stored ? pickedOutcome(stored) : null;
+  const pct = stored ? toPercents(normalizeProbs(stored.p)) : null;
+  const confirmed = fixture.kickoffConfirmed !== false;
+  const when = formatKickoffShort(fixture.kickoff, locale, { confirmed });
+  const label = (o: Outcome) => (o === "D" ? t.draw : shortName(o === "H" ? fixture.home : fixture.away));
+  const readoutWord = (o: Outcome) => (o === "D" ? t.drawWord : shortName(o === "H" ? fixture.home : fixture.away));
+
   return (
-    <div className="flex h-2 gap-px overflow-hidden">
-      {segments.map((s, i) => (
-        <div key={i} style={{ width: `${s.v}%`, backgroundColor: s.color }} />
-      ))}
+    <div role="group" aria-labelledby={`${id}-name`}>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+        <h3 id={`${id}-name`} className="name-cut text-[16px] leading-6">{name}</h3>
+        {when && (
+          <p className="text-[12.5px] text-graphite">
+            {when}
+            {!confirmed && (locale === "pt" ? " · horário por confirmar" : " · kickoff to be confirmed")}
+          </p>
+        )}
+      </div>
+
+      <div className={`mt-2 ${CHOICE_GROUP_CLASS} noscript:hidden`}>
+        {OUTCOMES.map(o => (
+          <button
+            key={o}
+            type="button"
+            aria-pressed={picked === o}
+            onClick={() => onChoose(fixture, o)}
+            className={choiceClass(picked === o, "min-w-0 flex-1 basis-0 text-center")}
+          >
+            {picked === o && <ChoiceCheck />}
+            <span className="min-w-0">{label(o)}</span>
+            {o !== "D" && <span className="sr-only">{t.wins}</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* How sure: optional, already set to the middle step, so it sits
+          beside its label at its own width, under the pick it qualifies. */}
+      {stored && (
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 noscript:hidden" role="group" aria-label={`${t.certainty}: ${name}`}>
+          <span aria-hidden="true" className="text-[12.5px] text-graphite">{t.certainty}</span>
+          <div className={CHOICE_GROUP_CLASS}>
+            {CONFIDENCE_LEVELS.map(c => {
+              const on = (stored.conf ?? null) === c;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => onCertainty(fixture, c)}
+                  className={choiceClass(on)}
+                >
+                  {on && <ChoiceCheck />}
+                  {t.confidence[c]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* The readout, beside the control that sets it; on the page from load. */}
+      <p aria-live="polite" className="mt-2 text-[13px] leading-5 text-graphite noscript:hidden">
+        {picked && pct ? t.readout(OUTCOMES.map((o, i) => `${readoutWord(o)} ${pct[i]}%`)) : ""}
+      </p>
     </div>
   );
 }
 
-function RoundReview({
-  round,
-  score,
+/* --------------------------------------------------------- closed rounds */
+
+function LatestRound({
+  tally,
+  season,
+  game,
+  clock,
+  locale,
   t,
-  pt,
 }: {
-  round: GameRound;
-  score: RoundScore;
-  t: Labels;
-  pt: boolean;
+  tally: RoundTally;
+  season: SeasonTally;
+  game: PredictionGameData;
+  clock: number;
+  locale: Locale;
+  t: Copy;
 }) {
-  const lock = roundLockState(round, Date.now());
+  const fixtures = game.rounds.find(r => r.matchday === tally.matchday)?.fixtures ?? [];
+  const span = formatDateSpan(fixtures.map(f => f.kickoff), locale);
+  const headingId = `cm-jornada-${tally.matchday}`;
 
   return (
-    <div className="border-t border-ink">
-      <div className="flex items-center justify-between py-2.5 border-b border-rule">
-        <div className="flex items-center gap-2">
-          <Lock className="w-3.5 h-3.5 text-stone-500" />
-          <span className="font-semibold text-stone-900 text-sm">
-            {t.matchday} {round.matchday}
-          </span>
-          {!score.complete && (
-            <span className="text-[12px] font-semibold text-amber-800">
-              {t.inProgress}
-            </span>
-          )}
+    <section aria-labelledby={headingId} className="max-w-3xl">
+      <ChannelHead id={headingId} title={t.matchday(tally.matchday)} aside={span || undefined} />
+      <p className="disp mt-3 text-[24px] leading-tight text-ink md:text-[28px]">{roundFinding(tally, fixtures.length, t, { capital: true })}</p>
+      <div className="mt-2 space-y-1 text-[15px] leading-relaxed text-ink">
+        <Remaining tally={tally} clock={clock} locale={locale} t={t} />
+        {season.completed > 0 && <p>{t.season(season.won, season.completed, season.level)}</p>}
+      </div>
+      {tally.complete && tally.scored > 0 && (
+        <div className="mt-4">
+          <ShareRound tally={tally} locale={locale} t={t} />
         </div>
-        {score.scored.length > 0 && (
-          <span
-            className={`text-xs font-bold ${
-              score.beatModel ? "text-emerald-700" : "text-stone-500"
-            }`}
-          >
-            {score.beatModel ? t.won : t.lost}
+      )}
+      <Disclosure summary={t.gameByGame} className="mt-3">
+        <div className="pb-2 pt-1">
+          <GameList games={tally.games} clock={clock} locale={locale} t={t} />
+        </div>
+      </Disclosure>
+    </section>
+  );
+}
+
+/** Up to this many games are named; more are counted ("8 jogos, o último …"). */
+const NAMED_GAMES = 3;
+
+/** Which of the round's games have no result yet: still to play, or played and waiting. */
+function Remaining({ tally, clock, locale, t }: { tally: RoundTally; clock: number; locale: Locale; t: Copy }) {
+  if (tally.remaining.length === 0) return null;
+  const name = (f: GameFixture) => matchLabel(shortName(f.home), shortName(f.away));
+  const when = (f: GameFixture) => formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed !== false });
+  const toPlay = tally.remaining.filter(f => !playedByClock(f, clock));
+  const toCome = tally.remaining.filter(f => playedByClock(f, clock));
+  const last = [...toPlay].sort((a, b) => (a.kickoff ?? "").localeCompare(b.kickoff ?? "")).at(-1);
+  const playLine =
+    toPlay.length > NAMED_GAMES && last
+      ? t.toPlayMany(toPlay.length, when(last))
+      : t.toPlay(listOf(toPlay.map(f => (when(f) ? `${name(f)} (${when(f)})` : name(f))), locale));
+  const comeLine = toCome.length > NAMED_GAMES ? t.toComeMany(toCome.length) : t.toCome(listOf(toCome.map(name), locale));
+  return (
+    <p>
+      {toPlay.length > 0 && playLine}
+      {toPlay.length > 0 && toCome.length > 0 && " "}
+      {toCome.length > 0 && comeLine}
+    </p>
+  );
+}
+
+function GameList({ games, clock, locale, t }: { games: GameVerdict[]; clock: number; locale: Locale; t: Copy }) {
+  return (
+    <div>
+      <p className="flex flex-wrap gap-x-4 gap-y-1 pb-2 text-[12.5px] text-graphite">
+        <span className="inline-flex items-center gap-1.5"><NowGlyph />{t.keyResult}</span>
+        <span className="inline-flex items-center gap-1.5"><GuessGlyph />{t.keyPick}</span>
+      </p>
+      <ul>
+        {games.map(g => (
+          <li key={g.fixture.key} className="border-t border-grid py-2.5">
+            <GameLine verdict={g} clock={clock} locale={locale} t={t} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function GameLine({ verdict, clock, locale, t }: { verdict: GameVerdict; clock: number; locale: Locale; t: Copy }) {
+  const f = verdict.fixture;
+  const home = shortName(f.home);
+  const away = shortName(f.away);
+  const title = f.result ? `${home} ${f.result.homeGoals}–${f.result.awayGoals} ${away}` : matchLabel(home, away);
+  const userPct = verdict.user ? toPercents(verdict.user) : null;
+  const pick = verdict.pick;
+
+  let word: string;
+  switch (verdict.status) {
+    case "closer": word = t.verdict.closer; break;
+    case "model": word = t.verdict.model; break;
+    case "level": word = t.verdict.level; break;
+    case "unpicked": word = t.verdict.unpicked; break;
+    default:
+      word = playedByClock(f, clock)
+        ? t.verdict.played
+        : t.verdict.toPlay(formatKickoffShort(f.kickoff, locale, { confirmed: f.kickoffConfirmed !== false }));
+  }
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+        <p className="name-cut text-[15px] leading-6">{title}</p>
+        <p className={`text-[13px] text-ink ${verdict.status === "closer" ? "font-semibold" : ""}`}>{word}</p>
+      </div>
+      <p className="text-[13px] leading-5 text-graphite">
+        {pick && userPct && (
+          <span className="mr-2 inline">
+            <GuessGlyph /> {t.picked1(t.pickName(pick, f), userPct[outcomeIndex(pick)])}
+            {!f.result && <> {t.modelOnPick(formatPercent(f.model[outcomeIndex(pick)], locale))}</>}
           </span>
         )}
-      </div>
+        {f.result && (
+          <span className="mr-2 inline">
+            <NowGlyph /> {t.result(f.result.outcome, f)}:{" "}
+            {userPct
+              ? t.onResult(userPct[outcomeIndex(f.result.outcome)], formatPercent(f.model[outcomeIndex(f.result.outcome)], locale))
+              : t.modelOnResult(formatPercent(f.model[outcomeIndex(f.result.outcome)], locale))}
+          </span>
+        )}
+        {!verdict.user && <span className="inline">{t.notPicked}</span>}
+      </p>
+    </div>
+  );
+}
 
-      {score.scored.length === 0 ? (
-        <p className="py-4 text-sm text-stone-500">{t.notPlayed}</p>
-      ) : (
-        <>
-          <div className="py-3 flex flex-wrap gap-x-6 gap-y-1 text-sm border-b border-grid">
-            <span className="text-stone-500">
-              {t.you}{" "}
-              <span className="font-bold tabular-nums" style={{ color: USER_COLOR }}>
-                {rpsFmt(score.userMean!, pt)}
-              </span>
-            </span>
-            <span className="text-stone-500">
-              {t.model}{" "}
-              <span className="font-bold tabular-nums" style={{ color: MODEL_COLOR }}>
-                {rpsFmt(score.modelMean!, pt)}
-              </span>
-            </span>
-            {!score.complete && (
-              <span className="text-xs text-amber-700">{t.provisional}</span>
-            )}
-          </div>
+function ShareRound({ tally, locale, t }: { tally: RoundTally; locale: Locale; t: Copy }) {
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://estimador.pt";
+  const text = `${t.share(tally.matchday, tally.closer, tally.scored)} ${origin}/${locale}/desporto/liga/jogo-previsoes/`;
 
-          <div className="divide-y divide-grid">
-            {score.scored.map(s => {
-              const fixture = round.fixtures.find(f => f.key === s.key)!;
-              const userPct = toPercents(s.user);
-              const modelPct = toPercents(s.model);
-              const oi = s.outcome === "H" ? 0 : s.outcome === "D" ? 1 : 2;
-              return (
-                <div key={s.key} className="py-3 text-sm">
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="font-medium text-stone-900 truncate">
-                      {teamDisplayName(s.home)} {fixture.result!.homeGoals}
-                      <span className="text-stone-500">-</span>
-                      {fixture.result!.awayGoals} {teamDisplayName(s.away)}
-                    </span>
-                    <span
-                      className={`text-xs font-bold tabular-nums shrink-0 ${
-                        s.edge > 0 ? "text-emerald-700" : s.edge < 0 ? "text-red-700" : "text-stone-500"
-                      }`}
-                    >
-                      {/* U+2212 when the model was closer (audit FA2-17). */}
-                      {formatSigned(s.edge, pt ? "pt" : "en", 3)}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-stone-500 tabular-nums">
-                    <span>
-                      {t.you} {userPct[oi]}% → {t.yourRps} {rpsFmt(s.userRps, pt)}
-                    </span>
-                    <span>
-                      {t.model} {modelPct[oi]}% → {t.modelRps} {rpsFmt(s.modelRps, pt)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setState("copied");
+      window.setTimeout(() => setState("idle"), 2400);
+    } catch {
+      setState("failed");
+    }
+  };
 
-      <div className="py-2 border-t border-grid text-[11px] text-stone-500">
-        {lock.reason === "kickoff" ? t.lockedKickoff : t.lockedResults}
-        {/* No "N you didn't predict" tally. Unpredicted matches do not enter
-            the mean, so counting them only tells a late joiner they were
-            late. */}
+  return (
+    <div className="space-y-2">
+      <p className="select-all break-words border-l-2 border-rule pl-3 text-[13px] leading-5 text-graphite">{text}</p>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <Action variant="secondary" onClick={() => void copy()}>
+          {t.copy}
+          <span className="sr-only">{t.copyWhat}</span>
+        </Action>
+        <span role="status" className="text-[13px] text-graphite">
+          {state === "copied" ? t.copied : state === "failed" ? t.copyFailed : ""}
+        </span>
       </div>
     </div>
   );
