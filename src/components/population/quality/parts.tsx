@@ -4,8 +4,10 @@ import { Action } from '@/components/brand/Action';
 import { EmptyStateMark } from '@/components/brand/EmptyStateMark';
 
 /**
- * A state, always as an icon and a word: `pass` on the plain moss surface,
- * `caveat` in amber (amber is a caveat on this site, never emphasis).
+ * A state as a ruled item: its name, then an icon and a word, never a chip:
+ * `pass` in ink, `caveat` in the caveat colour as text (amber 700, never a
+ * fill; amber is a caveat on this site, never emphasis), then a line on what
+ * it means.
  */
 export function StatusItem({ tone, label, value, children }: {
   tone: 'pass' | 'caveat';
@@ -15,26 +17,26 @@ export function StatusItem({ tone, label, value, children }: {
 }) {
   const Icon = tone === 'pass' ? CircleCheck : Info;
   return (
-    <div className="rounded-2xl border border-line bg-cream p-5">
-      <p className="text-[12px] font-semibold text-graphite">{label}</p>
-      <p className={`mt-3 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-bold ${tone === 'pass' ? 'bg-moss text-ink' : 'bg-amber-100 text-amber-900'}`}>
+    <div className="border-t border-ink pt-2">
+      <p className="text-[12px] text-graphite">{label}</p>
+      <p className={`mt-1.5 inline-flex items-center gap-1.5 text-[17px] font-semibold ${tone === 'pass' ? 'text-ink' : 'text-amber-700'}`}>
         <Icon aria-hidden="true" className="h-4 w-4 shrink-0" />
         {value}
       </p>
-      {children && <div className="mt-3 text-sm leading-relaxed text-stone-600">{children}</div>}
+      {children && <div className="mt-2 text-sm leading-relaxed text-graphite">{children}</div>}
     </div>
   );
 }
 
 /**
- * A section with a question as its heading, under a hairline; the first one on
- * a page sits under the section tabs' own rule, so it draws none (UXD2-13).
+ * A section with a statement as its heading, over an ink rule (an
+ * instrument's head); its explicit id keeps the anchors other pages link to.
  */
 export function Section({ id, title, lede, children }: { id: string; title: string; lede?: ReactNode; children: ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="border-t border-line pt-8 first:border-t-0 first:pt-0 md:pt-10 md:first:pt-0">
-      <h2 id={`${id}-title`} className="text-2xl text-ink md:text-[1.75rem]">{title}</h2>
-      {lede && <div className="mt-3 max-w-3xl leading-relaxed text-stone-600">{lede}</div>}
+    <section id={id} aria-labelledby={`${id}-title`}>
+      <h2 id={`${id}-title`} className="border-b border-ink pb-2 text-[26px] leading-7 text-ink md:text-[28px] md:leading-8">{title}</h2>
+      {lede && <div className="mt-3 max-w-3xl leading-relaxed text-graphite">{lede}</div>}
       <div className="mt-6">{children}</div>
     </section>
   );
@@ -44,16 +46,16 @@ export function Section({ id, title, lede, children }: { id: string; title: stri
 export function PopulationUnavailable({ locale }: { locale: string }) {
   const pt = locale === 'pt';
   return (
-    <div className="flex flex-col gap-6 rounded-2xl border border-line bg-cream p-6 md:flex-row md:items-start md:p-8">
+    <div className="flex flex-col gap-6 border-t border-ink pt-4 md:flex-row md:items-start">
       <EmptyStateMark />
       <div className="min-w-0 flex-1">
-        <h2 className="text-xl font-bold text-ink">{pt ? 'Os ficheiros desta versão não estão disponíveis' : 'This release’s files are not available'}</h2>
-        <p className="mt-3 max-w-xl leading-relaxed text-stone-600">
+        <h2 className="text-xl text-ink">{pt ? 'Os ficheiros desta versão não estão disponíveis' : 'This release’s files are not available'}</h2>
+        <p className="mt-3 max-w-xl leading-relaxed text-graphite">
           {pt
             ? 'Não mostramos números que não conseguimos ler da versão publicada. Tenta mais tarde, ou consulta a ficha do modelo no repositório público.'
             : 'We do not show figures we could not read from the published release. Try again later, or read the model card in the public repository.'}
         </p>
-        <div className="mt-6"><Action href="/populacao" locale={locale} arrow>{pt ? 'Voltar à população' : 'Back to population'}</Action></div>
+        <div className="mt-6"><Action href="/populacao" locale={locale} arrow>{pt ? 'Ver a população sintética' : 'See the synthetic population'}</Action></div>
       </div>
     </div>
   );

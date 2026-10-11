@@ -46,18 +46,18 @@ export default async function PopulationMethodology({ params }: { params: Promis
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <PopulationSectionNav current="methodology" locale={locale} />
       <PageHero
         measure="reading"
         compact
         back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
         eyebrow={pt ? `População sintética · versão ${POPULATION_RELEASE}` : `Synthetic population · release ${POPULATION_RELEASE}`}
-        title={pt ? 'Como foi feita a população sintética?' : 'How was the synthetic population made?'}
+        title={pt ? 'Como foi feita a população sintética' : 'How the synthetic population was made'}
         lede={pt
           ? 'Pessoas e agregados inventados por um modelo e depois escolhidos para ficar o mais perto possível das tabelas dos Censos 2021 de cada freguesia, e o que quer dizer o nível de qualidade de cada uma.'
           : 'People and households invented by a model and then chosen to come as close as possible to each parish’s 2021 Census tables, and what each parish’s quality tier means.'}
         meta={<><span>{pt ? 'Censos 2021 (INE)' : '2021 Census (INE)'}</span><span>{pt ? `Versão de ${formatDay(POPULATION_PUBLISHED, locale)}` : `Release dated ${formatDay(POPULATION_PUBLISHED, locale)}`}</span></>}
       />
-      <PopulationSectionNav current="methodology" locale={locale} />
       <div className="mx-auto w-full max-w-7xl px-4 py-10 md:py-14"><div className="max-w-3xl">
         {!meta || !release || !scorecard ? (
           <PopulationUnavailable locale={locale} />

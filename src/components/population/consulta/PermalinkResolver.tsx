@@ -111,7 +111,7 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
       <div className={RESERVED}>
       <div role="status" aria-live="polite" className="flex flex-col items-start gap-4 py-6">
         <MarkLoading height={36} color={BRAND.ink} />
-        <p className="text-base text-stone-600">
+        <p className="text-base text-graphite">
           {pt ? 'A abrir o resultado deste link…' : 'Opening the result this link points to…'}
         </p>
         {state.kind === 'redirecting' && (
@@ -127,15 +127,15 @@ export function PermalinkResolver({ locale }: { locale: 'pt' | 'en' }) {
   const otherRelease = state.kind === 'other-release';
   return (
     <div className={RESERVED}>
-    <div className="flex flex-col gap-6 rounded-2xl border border-line bg-cream p-6 md:flex-row md:items-start md:p-8">
+    <div className="flex flex-col gap-6 border-t border-ink pt-4 md:flex-row md:items-start">
       <EmptyStateMark />
       <div className="min-w-0 flex-1">
-        <h2 className="text-xl font-bold text-ink md:text-2xl">
+        <h2 className="text-xl text-ink md:text-2xl">
           {otherRelease
             ? (pt ? 'Este link é de outra versão da população' : 'This link is from another release of the population')
             : (pt ? 'Não encontrámos este resultado' : 'We could not find this result')}
         </h2>
-        <p className="mt-3 max-w-xl leading-relaxed text-stone-600">
+        <p className="mt-3 max-w-xl leading-relaxed text-graphite">
           {/* What changed between the releases, question by question (PRO3-07). */}
           {otherRelease
             ? otherReleaseText(state.release, locale)

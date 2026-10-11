@@ -138,7 +138,7 @@ export default async function PopulationHub({ params }: { params: Promise<{ loca
       <SectionNotes
         section="demographics"
         locale={locale}
-        className="border-t border-line py-10"
+        className="border-t border-rule py-10"
         containerClassName="mx-auto max-w-7xl px-4"
       />
       </main>

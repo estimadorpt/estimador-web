@@ -2,7 +2,7 @@
 
 Esta página explica, para quem não é especialista, como foi gerada a População Sintética de Portugal (versão <Release />), o que se pode e não se pode fazer com ela, e onde estão os seus limites. A versão técnica completa é a <ModelCardLink>ficha do modelo</ModelCardLink>, em inglês.
 
-## O que é uma população sintética?
+## Pessoas geradas, não pessoas reais
 
 É um conjunto de pessoas e agregados gerados por computador, com um registo por pessoa, cujas contagens somadas seguem as tabelas que o INE publicou nos Censos 2021 para cada freguesia. Nenhum registo é uma pessoa real.
 
@@ -12,17 +12,17 @@ Para que serve, então? As tabelas publicadas dão, para cada freguesia, quantas
 
 <Positioning />
 
-## Como foi gerada?
+## Cinco passos para a gerar
 
 O resultado não sai diretamente de uma rede neuronal: um modelo inventa pessoas e agregados possíveis, e depois escolhem-se os que, somados, ficam o mais perto possível das tabelas do INE (um processo generativo com restrições). São cinco passos:
 
 1. **Aprender como os atributos se combinam.** O computador aprende, com a amostra pública dos Censos 2021 (o Ficheiro de Uso Público), que combinações de idade, escolaridade, trabalho e família são comuns numa pessoa e no seu agregado. Esse modelo (um gerador autorregressivo) é treinado uma vez e depois fica fixo. As idades ano a ano e o tipo de local de trabalho são gerados por ele, não deduzidos depois.
-2. **Ajustar cada freguesia às suas tabelas.** Para cada freguesia, o modelo inventa muitos agregados possíveis (os candidatos), evitando as combinações que o INE publica como zero nessa freguesia (uma máscara). A máscara restringe os candidatos, mas o resultado pode ainda deixar algumas pessoas nessas combinações: nas tabelas de pessoas do ajuste, cerca de 7 900 entradas (ver «Onde é que os dados são mais fracos?»). Depois, dá mais peso aos candidatos que aproximam as somas das tabelas do INE para a freguesia, mudando o peso de cada um o menos possível (um ajuste de máxima entropia). Antes disso, uma verificação recusaria qualquer freguesia cujas tabelas impliquem totais incoerentes entre si; nenhuma das 3 092 foi recusada.
+2. **Ajustar cada freguesia às suas tabelas.** Para cada freguesia, o modelo inventa muitos agregados possíveis (os candidatos), evitando as combinações que o INE publica como zero nessa freguesia (uma máscara). A máscara restringe os candidatos, mas o resultado pode ainda deixar algumas pessoas nessas combinações: nas tabelas de pessoas do ajuste, cerca de 7 900 entradas (ver «Onde os dados são mais fracos»). Depois, dá mais peso aos candidatos que aproximam as somas das tabelas do INE para a freguesia, mudando o peso de cada um o menos possível (um ajuste de máxima entropia). Antes disso, uma verificação recusaria qualquer freguesia cujas tabelas impliquem totais incoerentes entre si; nenhuma das 3 092 foi recusada.
 3. **Escolher agregados inteiros.** Uma pessoa não se divide: dos candidatos escolhem-se agregados inteiros, tão perto quanto possível das contagens que as tabelas da freguesia pedem (uma alocação inteira). Nas freguesias com menos de 500 pessoas, essa escolha é resolvida até ao ótimo (uma seleção exata, sem aproximação), o que ainda assim não garante o total do INE. <AllocationGap />
 4. **Acrescentar quem vive em alojamentos coletivos.** As pessoas que vivem em lares e noutros alojamentos coletivos são acrescentadas depois do ajuste, a partir das contagens publicadas pelo INE, como registos parciais: o sexo e a idade vêm dessas contagens, a escolaridade é imputada a partir de registos semelhantes, e o núcleo familiar e os campos de trabalho ficam vazios (o [dicionário de colunas](/pt/populacao/dados/#dicionario) diz quais). Os códigos finos de profissão são derivados nesta fase.
-5. **Publicar com um esquema declarado e o nível de qualidade.** Cada coluna publicada tem um significado declarado, e o [dicionário de colunas](/pt/populacao/dados/#dicionario) explica cada uma; tudo o resto é retirado, com a razão registada. A versão não inclui ligações entre cônjuges. Cada freguesia sai com um nível de qualidade, A, B ou C (ver «Quando é que um número aparece?»).
+5. **Publicar com um esquema declarado e o nível de qualidade.** Cada coluna publicada tem um significado declarado, e o [dicionário de colunas](/pt/populacao/dados/#dicionario) explica cada uma; tudo o resto é retirado, com a razão registada. A versão não inclui ligações entre cônjuges. Cada freguesia sai com um nível de qualidade, A, B ou C (ver «Todas as freguesias respondem, com um nível de qualidade»).
 
-## O que é ajustado e o que é derivado?
+## Campos ajustados e campos derivados
 
 Os números que o site mostra usam nove campos. Seis são agrupamentos de um campo gerado cuja tabela do INE entra no ajuste (a idade em grupos de 5 anos agrupa a idade gerada, ano a ano, e as faixas etárias juntam esses grupos); dois são derivados por uma regra fixa e nenhuma tabela do ajuste os verifica (por exemplo, «vive sozinho» quer dizer que o agregado tem uma só pessoa); e um é um indicador. A tabela diz, para cada um, a coluna dos microdados ou a regra que o calcula a partir delas, com as mesmas letras do dicionário de colunas.
 
@@ -34,7 +34,7 @@ Nos microdados para download, cada coluna traz também a sua origem: gerada pelo
 
 Para ver a ideia com pessoas inventadas, num bairro imaginado, há um [exemplo ilustrado](/pt/populacao/miniatura/). Não usa dados desta população.
 
-## Quando é que um número aparece?
+## Todas as freguesias respondem, com um nível de qualidade
 
 Sempre. Todas as 3 092 freguesias são publicadas e respondem a todas as perguntas com os seus próprios números. Cada uma tem um nível de qualidade, que junta quão perto a população gerada fica das tabelas do INE e o número de residentes. O nível é um guia de leitura, não um filtro: não esconde nenhum número, diz com que cuidado o ler. Uma freguesia pequena tem poucas pessoas em cada tabela, e cada pessoa pesa mais.
 
@@ -46,13 +46,13 @@ As freguesias com menos de 500 residentes ficam sempre no nível C. Entre as de 
 
 <Superseded />
 
-## O que muda por haver uma só execução?
+## Uma só execução: sem intervalos nem ordenações
 
 <SingleRun />
 
 Por isso, não há intervalos nos números do site, nem ordenações de freguesias, nem comparações do tipo «mais do que» entre resultados. Uma segunda execução será feita depois da publicação, como medição; a partir de duas execuções, a variação entre elas volta a poder ser mostrada. Mesmo então, só lhe chamaremos intervalo de confiança se a sua cobertura for demonstrada.
 
-## Estes dados protegem quem respondeu aos Censos?
+## A privacidade de quem respondeu aos Censos
 
 Os registos são gerados e não pretendem representar pessoas identificáveis: não têm nomes nem moradas, e as ligações internas aos registos da amostra foram retiradas.
 
@@ -60,17 +60,17 @@ Os registos são gerados e não pretendem representar pessoas identificáveis: n
 
 Os pormenores estão na [página de qualidade](/pt/populacao/qualidade/#privacidade).
 
-## Para que serve, e para que não serve?
+## Para que serve e para que não serve
 
 <Uses />
 
-## Onde é que os dados são mais fracos?
+## Onde os dados são mais fracos
 
 São limitações da população gerada, a mesma da versão 1.0.0 à <Release />, declaradas em vez de escondidas:
 
 <Limitations />
 
-## Como se corrige e se atualiza?
+## Correções e novas versões
 
 - As versões publicadas no GitHub (1.0.0, 1.0.1 e 1.0.3) continuam disponíveis e citáveis; a 1.0.2 não chegou a ser publicada. Os links permanentes de cada resposta indicam a versão a que se referem; a página de uma freguesia mostra sempre a versão atual, por isso cita-a com a data da consulta.
 - As correções ficam registadas numa <ErrataLink>lista pública de erratas</ErrataLink>.
@@ -78,7 +78,7 @@ São limitações da população gerada, a mesma da versão 1.0.0 à <Release />
 - A próxima versão (1.1) será uma versão corrigida da população sintética de 2021. Uma versão posterior, com dados de 2025, dirá que campos foram atualizados para 2025, quais foram mantidos de 2021 e quais são novos modelos.
 - Os pesos do modelo não são publicados: isso exigiria uma revisão própria de memorização, privacidade e licença.
 
-## Como cito?
+## Como citar
 
 A população sintética é publicada por estimador.pt com a licença CC BY-NC 4.0 (Atribuição-NãoComercial 4.0 Internacional): o uso comercial não está abrangido. Os dados do INE em que se baseia são reutilizados com a licença CC BY 4.0 do INE. Ao redistribuir os dados (os ficheiros, ou tabelas tiradas deles), inclui esta atribuição:
 

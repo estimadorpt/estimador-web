@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-/** A stable anchor from a heading's text ("O que é ajustado e o que é derivado?" → o-que-e-ajustado-e-o-que-e-derivado). */
+/** A stable anchor from a heading's text ("Campos ajustados e campos derivados" → campos-ajustados-e-campos-derivados). */
 export function headingSlug(node: ReactNode): string | undefined {
   const text = typeof node === 'string' ? node : Array.isArray(node) ? node.filter(n => typeof n === 'string').join('') : '';
   if (!text) return undefined;
@@ -19,9 +19,9 @@ export function headingSlug(node: ReactNode): string | undefined {
  * step), and one id per field row, the same in both locales.
  */
 export const METHODOLOGY_ANCHORS = {
-  fitted: { pt: 'o-que-e-ajustado-e-o-que-e-derivado', en: 'what-is-fitted-and-what-is-derived' },
-  tiers: { pt: 'quando-e-que-um-numero-aparece', en: 'when-does-a-figure-appear' },
-  cite: { pt: 'como-cito', en: 'how-do-i-cite-it' },
+  fitted: { pt: 'campos-ajustados-e-campos-derivados', en: 'fitted-fields-and-derived-fields' },
+  tiers: { pt: 'todas-as-freguesias-respondem-com-um-nivel-de-qualidade', en: 'every-parish-answers-with-a-quality-tier' },
+  cite: { pt: 'como-citar', en: 'how-to-cite' },
 } as const;
 
 export function methodologyFieldAnchor(field: string): string {

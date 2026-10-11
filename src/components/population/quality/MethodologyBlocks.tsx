@@ -4,7 +4,7 @@ import { Callout } from '@/components/mdx/Callout';
 import { QualityBadge } from '@/components/population/QualityBadge';
 import { Link } from '@/i18n/routing';
 import { POPULATION_DOWNLOADS, POPULATION_ROUTES } from '@/lib/config/population';
-import { DIMENSION_LABEL, HONESTY, RECIPE_CAVEAT, TIER_COPY, type Locale } from '@/lib/population/labels';
+import { DIMENSION_LABEL, HONESTY, RECIPE_CAVEAT, RECIPE_COPY, TIER_COPY, type Locale } from '@/lib/population/labels';
 import type { PopulationMeta, PopulationReleaseInfo, PopulationScorecard } from '@/types/population';
 import { SHORT_ATTRIBUTION } from '@/lib/population/cite';
 import { ACCIDENTAL_MATCHES, INTENDED_USES, LIMITATIONS, NON_USES, NOVELTY, REPLACED, formatCount, generatedGap } from './copy';
@@ -68,7 +68,7 @@ export function methodologyBlocks({ locale, meta, release, scorecard, ineResiden
   return {
     // Every h2 gets an anchor from its own text, so other pages can link to a section.
     h2: ({ children }: { children?: ReactNode }) => (
-      <h2 id={headingSlug(children)} className="text-2xl text-stone-900 mt-12 mb-3 tracking-tight">{children}</h2>
+      <h2 id={headingSlug(children)} className="mb-3 mt-12 border-b border-ink pb-2 text-[26px] leading-7 text-ink">{children}</h2>
     ),
     // Step 3's gap between the generated total and INE's (MR2-V02), inline in the list item.
     AllocationGap: () => (ineResidents === null ? null : (
@@ -110,21 +110,21 @@ export function methodologyBlocks({ locale, meta, release, scorecard, ineResiden
       ];
       // A definition list, not a three-column table: on a phone a table hid the rule column behind a sideways scroll.
       return (
-        <dl className="my-6 divide-y divide-line border-y border-line font-sans text-sm">
+        <dl className="my-6 divide-y divide-grid border-y border-ink font-sans text-sm">
           {rows.map(row => (
             <div key={row.field} id={methodologyFieldAnchor(row.field)} className="grid gap-1 py-3 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4">
               <dt className="text-ink">
                 <span className="font-semibold">{FIELD_LABEL[row.field]?.[locale] ?? row.field}</span>
-                {row.kind && <span className="block text-xs text-stone-600">{KIND_LABEL[row.kind][locale]}</span>}
+                {row.kind && <span className="block text-[12px] text-graphite">{KIND_LABEL[row.kind][locale]}</span>}
               </dt>
-              <dd className="leading-relaxed text-stone-700">
+              <dd className="leading-relaxed text-ink">
                 {row.column
                   ? <code className="mr-1.5 text-xs text-ink">{row.column}</code>
-                  : <span className="mr-1.5 text-xs font-semibold text-stone-600">{pt ? 'Não é uma coluna:' : 'Not a column:'}</span>}
+                  : <span className="mr-1.5 text-[12px] text-graphite">{pt ? 'Não é uma coluna:' : 'Not a column:'}</span>}
                 {row.rule?.[locale] ?? String(meta.provenance.fields[row.field])}
                 {'caveat' in row && row.caveat && (
-                  <span role="note" className="mt-2 block border-l-2 border-amber-500 pl-3 text-[13px] text-stone-700">
-                    {pt ? 'Resposta «Que famílias formam?». ' : 'Answer “What families do they form?”. '}{row.caveat[locale]}
+                  <span role="note" className="mt-2 block border-l-2 border-ink pl-3 text-[13px] text-ink">
+                    <b className="font-semibold">{pt ? `Nota sobre «${RECIPE_COPY.household_type.short.pt}». ` : `Note on “${RECIPE_COPY.household_type.short.en}”. `}</b>{row.caveat[locale]}
                   </span>
                 )}
               </dd>
@@ -136,14 +136,14 @@ export function methodologyBlocks({ locale, meta, release, scorecard, ineResiden
     Tiers: () => (
       <ul className="my-6 list-none space-y-4 pl-0 font-sans">
         {(['A', 'B', 'C'] as const).map(tier => (
-          <li key={tier} className="max-w-none rounded-2xl border border-line bg-cream p-4 text-base">
-            <div className="flex flex-wrap items-center gap-3">
+          <li key={tier} className="max-w-none border-t border-ink pt-2 text-base">
+            <div className="flex flex-wrap items-baseline gap-3">
               <QualityBadge kind={tier} locale={locale} />
-              <span className="text-sm font-semibold tabular-nums text-ink">
-                {formatCount(meta.counts.tiers[tier], locale)} {pt ? 'freguesias' : 'parishes'}
+              <span className="text-sm tabular-nums text-graphite">
+                <span className="fig text-ink">{formatCount(meta.counts.tiers[tier], locale)}</span> {pt ? 'freguesias' : 'parishes'}
               </span>
             </div>
-            <p className="mb-0 mt-2 text-[15px] leading-relaxed text-stone-700">{TIER_COPY[tier].meaning[locale]}</p>
+            <p className="mb-0 mt-2 text-[15px] leading-relaxed text-ink">{TIER_COPY[tier].meaning[locale]}</p>
           </li>
         ))}
       </ul>
@@ -223,16 +223,15 @@ export function methodologyBlocks({ locale, meta, release, scorecard, ineResiden
       </>
     ),
     Uses: () => (
-      // One card, two columns split by a hairline (stacked below md): the two
-      // lists differ in length, and as two cards the shorter one ended in blank cream.
-      <div className="my-6 grid divide-y divide-line rounded-2xl border border-line bg-cream font-sans md:grid-cols-2 md:divide-x md:divide-y-0">
+      // Two ruled columns (stacked below md), each under an ink rule: no card.
+      <div className="my-6 grid gap-x-8 gap-y-6 font-sans md:grid-cols-2">
         {[
           { title: pt ? 'Serve para' : 'Suitable for', items: INTENDED_USES },
           { title: pt ? 'Não serve para' : 'Not suitable for', items: NON_USES },
         ].map(group => (
-          <div key={group.title} className="p-5">
-            <h3 className="mt-0 text-base font-bold text-ink">{group.title}</h3>
-            <ul className="mb-0 mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-stone-700">
+          <div key={group.title} className="border-t border-ink pt-2">
+            <h3 className="mt-0 text-base font-semibold text-ink">{group.title}</h3>
+            <ul className="mb-0 mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-ink">
               {group.items.map(item => <li key={item.en}>{item[locale]}</li>)}
             </ul>
           </div>
@@ -243,17 +242,17 @@ export function methodologyBlocks({ locale, meta, release, scorecard, ineResiden
       <ol className="my-6 list-decimal space-y-3 pl-6">
         {LIMITATIONS.map(limitation => (
           <li key={limitation.title.en}>
-            <strong className="font-bold">{limitation.title[locale]}.</strong> {limitation.body[locale]}
+            <strong className="font-semibold">{limitation.title[locale]}.</strong> {limitation.body[locale]}
           </li>
         ))}
       </ol>
     ),
     Attribution: () => (
-      <blockquote className="my-6 border-l-2 border-ink pl-5 text-[0.95em] text-stone-700">
+      <blockquote className="my-6 border-l-2 border-ink pl-5 text-[0.95em] text-ink">
         <p className="mb-0">{release.attribution[locale]}</p>
       </blockquote>
     ),
-    CiteAs: () => <code className="bg-parchment px-1.5 py-0.5 font-mono text-[0.85em] text-ink">{release.attribution.cite_as}</code>,
+    CiteAs: () => <code className="font-mono text-[0.85em] text-ink">{release.attribution.cite_as}</code>,
     ModelCardLink: ({ children }: { children?: ReactNode }) => (
       <a href={POPULATION_DOWNLOADS.modelCard} className="text-ink underline decoration-ink/30 underline-offset-2 hover:decoration-ink">{children}</a>
     ),

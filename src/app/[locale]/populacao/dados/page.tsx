@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return createPageMetadata({
     locale,
     path: POPULATION_ROUTES.data,
-    title: pt ? 'Posso usar os dados da população sintética?' : 'Can I use the synthetic population data?',
+    title: pt ? 'Os dados da população sintética, abertos para uso não comercial' : 'The synthetic population data, open for non-commercial use',
     description: pt
       ? `Faz download da População Sintética de Portugal v${POPULATION_RELEASE}: licença CC BY-NC 4.0, unidades, geografia, dicionário de colunas, qualidade, verificação e citação.`
       : `Download the Synthetic Population of Portugal v${POPULATION_RELEASE}: CC BY-NC 4.0 licence, units, geography, column dictionary, quality, verification and citation.`,
@@ -83,7 +83,7 @@ const QUALITY_COLUMNS: Array<{ name: string; source: QualitySource; meaning: { p
 function Code({ children, label }: { children: string; label: string }) {
   return (
     // A scrollable region: focusable so a keyboard can scroll it, and named so a screen reader says what it holds.
-    <pre role="region" aria-label={label} tabIndex={0} className="scroll-cue overflow-x-auto rounded-xl border border-line bg-parchment p-4 font-mono text-[13px] leading-relaxed text-ink [--scroll-cue-ground:var(--color-parchment)]">
+    <pre role="region" aria-label={label} tabIndex={0} className="scroll-cue overflow-x-auto border-l-2 border-ink bg-field p-4 font-mono text-[13px] leading-relaxed text-ink [--scroll-cue-ground:var(--color-field)]">
       <code>{children}</code>
     </pre>
   );
@@ -96,11 +96,11 @@ function Code({ children, label }: { children: string; label: string }) {
  */
 function Facts({ rows }: { rows: Array<[string, ReactNode]> }) {
   return (
-    <dl className="divide-y divide-line">
+    <dl className="divide-y divide-grid">
       {rows.map(([label, value]) => (
         <div key={label} className="grid gap-1 py-4 md:grid-cols-[220px_1fr] md:gap-4">
-          <dt className="font-bold text-ink">{label}</dt>
-          <dd className="leading-relaxed text-stone-700">{value}</dd>
+          <dt className="font-semibold text-ink">{label}</dt>
+          <dd className="leading-relaxed text-ink">{value}</dd>
         </div>
       ))}
     </dl>
@@ -144,7 +144,7 @@ WHERE p.freguesia = '060318'
 GROUP BY h.hh_size_bin
 ORDER BY h.hh_size_bin;`;
 
-  const card = `-- DuckDB: ${pt ? 'reproduz um cartão do site, «Quantas pessoas com 65 ou mais anos vivem sozinhas?»' : 'reproduces a card on the site, “How many people aged 65 or over live alone?”'}
+  const card = `-- DuckDB: ${pt ? 'reproduz um cartão do site, «Pessoas com 65+ que vivem sozinhas»' : 'reproduces a card on the site, “People aged 65+ living alone”'}
 -- ${pt ? 'em Moreira de Cónegos (030831); deve dar 0,149, o 14,9% da página' : 'in Moreira de Cónegos (030831); it should return 0.149, the page’s 14.9%'}
 SELECT avg(CASE WHEN h.hh_size = 1 THEN 1 ELSE 0 END) AS ${pt ? 'vivem_sozinhas' : 'living_alone'}
 FROM '${personsFile}' AS p
@@ -182,19 +182,19 @@ sha256sum checksums.sha256`;
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <PopulationSectionNav current="data" locale={locale} />
       <PageHero
         measure="wide"
         compact
         back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
         eyebrow={pt ? `População sintética · dados · versão ${POPULATION_RELEASE}` : `Synthetic population · data · release ${POPULATION_RELEASE}`}
-        title={pt ? 'Posso usar estes dados?' : 'Can I use these data?'}
+        title={pt ? 'Os microdados, abertos para uso não comercial' : 'The microdata, open for non-commercial use'}
         lede={pt
           ? 'Os microdados completos estão publicados, com a licença CC BY-NC 4.0. Esta página diz o que contêm, para que servem e para que não servem, como verificar os ficheiros e como citar.'
           : 'The full microdata are published under the CC BY-NC 4.0 licence. This page says what they contain, what they are and are not for, how to verify the files and how to cite them.'}
         actions={pkg && <Action external href={pkg.url} arrow>{pt ? 'Fazer download do pacote completo' : 'Download the full package'}</Action>}
         meta={pkg && <span>{pkg.name} · {formatBytes(pkg.bytes, locale)} · GitHub</span>}
       />
-      <PopulationSectionNav current="data" locale={locale} />
       {release && (
         // schema.org Dataset, so dataset search can list the release.
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(populationDatasetJsonLd(locale, release)) }} />
@@ -205,7 +205,7 @@ sha256sum checksums.sha256`;
           <PopulationUnavailable locale={locale} />
         ) : (
           <>
-            <Section id="versao" title={pt ? 'Que versão é esta?' : 'Which release is this?'}>
+            <Section id="versao" title={pt ? 'A versão' : 'The release'}>
               <Facts rows={[
                 [pt ? 'Versão' : 'Release', <>
                   {release.name} {release.version}, {pt ? 'datada de' : 'dated'} {formatDay(release.published, locale)}
@@ -234,20 +234,20 @@ sha256sum checksums.sha256`;
 
             <Section
               id="licenca"
-              title={pt ? 'Posso usar e partilhar?' : 'May I use and share them?'}
+              title={pt ? 'Licença e partilha' : 'Licence and sharing'}
               lede={<p>{pt
-                ? <>Sim, para fins não comerciais. A população sintética é publicada por estimador.pt com a licença <a className={link} href="https://creativecommons.org/licenses/by-nc/4.0/deed.pt">CC BY-NC 4.0</a>: podes usá-la, transformá-la e redistribuí-la para fins não comerciais, desde que incluas a atribuição indicada mais abaixo. A licença não cobre o uso comercial. Os dados do INE em que se baseia (quadros publicados e Ficheiro de Uso Público dos Censos 2021) são reutilizados com a licença <a className={link} href="https://creativecommons.org/licenses/by/4.0/deed.pt">CC BY 4.0</a> do INE. Não são microdados oficiais do INE.</>
-                : <>Yes, for non-commercial purposes. estimador.pt publishes the synthetic population under the <a className={link} href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a> licence: you may use, adapt and redistribute it for non-commercial purposes, as long as you include the attribution given below. The licence does not cover commercial use. The INE data it is based on (the 2021 Census published tables and Public Use File) are reused under INE’s <a className={link} href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> licence. They are not official INE microdata.</>}</p>}
+                ? <>Podes usar os dados para fins não comerciais. A população sintética é publicada por estimador.pt com a licença <a className={link} href="https://creativecommons.org/licenses/by-nc/4.0/deed.pt">CC BY-NC 4.0</a>: podes usá-la, transformá-la e redistribuí-la para fins não comerciais, desde que incluas a atribuição indicada mais abaixo. A licença não cobre o uso comercial. Os dados do INE em que se baseia (quadros publicados e Ficheiro de Uso Público dos Censos 2021) são reutilizados com a licença <a className={link} href="https://creativecommons.org/licenses/by/4.0/deed.pt">CC BY 4.0</a> do INE. Não são microdados oficiais do INE.</>
+                : <>You may use the data for non-commercial purposes. estimador.pt publishes the synthetic population under the <a className={link} href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a> licence: you may use, adapt and redistribute it for non-commercial purposes, as long as you include the attribution given below. The licence does not cover commercial use. The INE data it is based on (the 2021 Census published tables and Public Use File) are reused under INE’s <a className={link} href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> licence. They are not official INE microdata.</>}</p>}
             >
-              {/* One card, two columns split by a hairline (stacked below md), as on the methodology page. */}
-              <div className="grid divide-y divide-line rounded-2xl border border-line bg-cream md:grid-cols-2 md:divide-x md:divide-y-0">
+              {/* Two ruled columns (stacked below md), as on the methodology page: no card. */}
+              <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
                 {[
-                  { title: pt ? 'Serve para…' : 'Suitable for…', items: INTENDED_USES },
-                  { title: pt ? 'Não serve para…' : 'Not suitable for…', items: NON_USES },
+                  { title: pt ? 'Serve para' : 'Suitable for', items: INTENDED_USES },
+                  { title: pt ? 'Não serve para' : 'Not suitable for', items: NON_USES },
                 ].map(group => (
-                  <div key={group.title} className="p-5">
-                    <h3 className="text-base font-bold text-ink">{group.title}</h3>
-                    <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-stone-700">
+                  <div key={group.title} className="border-t border-ink pt-2">
+                    <h3 className="text-base font-semibold text-ink">{group.title}</h3>
+                    <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[15px] leading-relaxed text-ink">
                       {group.items.map(item => <li key={item.en}>{item[locale]}</li>)}
                     </ul>
                   </div>
@@ -260,7 +260,7 @@ sha256sum checksums.sha256`;
               </p>
             </Section>
 
-            <Section id="unidades" title={pt ? 'O que é cada linha?' : 'What is each row?'} lede={<p>{HONESTY.synthetic[locale]}</p>}>
+            <Section id="unidades" title={pt ? 'O que é cada linha' : 'What each row is'} lede={<p>{HONESTY.synthetic[locale]}</p>}>
               <Facts rows={[
                 [pt ? 'Pessoas' : 'Persons', pt
                   ? `${formatCount(release.counts.persons, locale)} linhas, uma por pessoa gerada, incluindo quem vive em alojamentos coletivos (is_institutional = 1, registos parciais).`
@@ -274,7 +274,7 @@ sha256sum checksums.sha256`;
               ]} />
             </Section>
 
-            <Section id="geografia" title={pt ? 'Que geografia cobre?' : 'What geography does it cover?'}>
+            <Section id="geografia" title={pt ? 'Geografia' : 'Geography'}>
               <Facts rows={[
                 [pt ? 'Freguesias' : 'Parishes', pt
                   ? `${formatCount(release.counts.parishes_published, locale)} freguesias publicadas, nenhuma suprimida pelo tamanho. As pequenas levam um nível de qualidade em vez de serem retiradas.`
@@ -297,33 +297,33 @@ sha256sum checksums.sha256`;
               ]} />
             </Section>
 
-            <Section id="descarregar" title={pt ? 'Onde faço o download?' : 'Where do I download them?'} lede={<p>{pt
+            <Section id="descarregar" title={pt ? 'Download' : 'Download'} lede={<p>{pt
               ? <>Os ficheiros estão numa <a className={link} href={POPULATION_DOWNLOADS.release}>versão publicada no GitHub</a>, num repositório público de dados.</>
               : <>The files are in a <a className={link} href={POPULATION_DOWNLOADS.release}>release published on GitHub</a>, in a public data repository.</>}</p>}>
-              <div tabIndex={0} role="region" aria-label={pt ? 'Ficheiros da versão' : 'Release files'} className="scroll-cue overflow-x-auto rounded-2xl border border-line">
+              <div tabIndex={0} role="region" aria-label={pt ? 'Ficheiros da versão' : 'Release files'} className="scroll-cue overflow-x-auto">
                 <table className="min-w-full border-collapse text-sm">
                   <caption className="sr-only">{pt ? 'Ficheiros da versão' : 'Release files'}</caption>
                   <thead>
                     <tr>
-                      <th scope="col" className="border-b-2 border-ink px-4 py-3 text-left text-[12px] font-semibold text-graphite">{pt ? 'Ficheiro e conteúdo' : 'File and contents'}</th>
-                      <th scope="col" className="border-b-2 border-ink px-4 py-3 text-right text-[12px] font-semibold text-graphite">{pt ? 'Tamanho' : 'Size'}</th>
+                      <th scope="col" className="border-b border-ink py-2 pr-4 text-left text-[12px] font-normal text-graphite">{pt ? 'Ficheiro e conteúdo' : 'File and contents'}</th>
+                      <th scope="col" className="border-b border-ink py-2 pl-4 text-right text-[12px] font-normal text-graphite">{pt ? 'Tamanho' : 'Size'}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {POPULATION_DOWNLOADS.files.map(file => (
                       <tr key={file.key} className="align-top">
-                        <th scope="row" className="border-b border-line px-4 py-3 text-left font-normal">
+                        <th scope="row" className="border-b border-grid py-3 pr-4 text-left font-normal">
                           <a href={file.url} className="tap-target font-mono text-[13px] font-semibold text-ink underline underline-offset-4 [overflow-wrap:anywhere]">{file.name}</a>
-                          <span className="mt-1 block leading-relaxed text-stone-700">{FILE_COPY[file.key]?.[locale]}</span>
+                          <span className="mt-1 block leading-relaxed text-graphite">{FILE_COPY[file.key]?.[locale]}</span>
                         </th>
-                        <td className="whitespace-nowrap border-b border-line px-4 py-3 text-right tabular-nums text-ink">{formatBytes(file.bytes, locale)}</td>
+                        <td className="whitespace-nowrap border-b border-grid py-3 pl-4 text-right tabular-nums text-ink">{formatBytes(file.bytes, locale)}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              <h3 className="mt-8 text-lg font-bold text-ink">{pt ? 'Primeiros passos' : 'First steps'}</h3>
-              <p className="mt-2 max-w-3xl leading-relaxed text-stone-600">
+              <h3 className="mt-8 text-[19px] leading-6 text-ink">{pt ? 'Primeiros passos' : 'First steps'}</h3>
+              <p className="mt-2 max-w-3xl leading-relaxed text-graphite">
                 {pt
                   ? 'Três exemplos que ligam pessoas a agregados; o último reproduz um cartão do site. Como nas perguntas do site sobre agregados, ficam só os agregados privados (is_institutional = 0). Se publicares tabelas feitas com estes dados, segue as regras do site: diz o nível de qualidade de cada freguesia, lê com mais cuidado as categorias com poucas pessoas e as freguesias de nível C, e não faças ordenações nem comparações «mais do que» a partir de uma única execução.'
                   : 'Three examples that join persons to households; the last one reproduces a card on the site. As in the site’s household questions, they keep private households only (is_institutional = 0). If you publish tables made from these data, follow the site’s rules: state each parish’s quality tier, read categories with few people and tier C parishes with more care, and make no rankings or “more than” comparisons from a single run.'}
@@ -338,17 +338,17 @@ sha256sum checksums.sha256`;
 
             <Section
               id="dicionario"
-              title={pt ? 'Que colunas tem?' : 'What columns does it have?'}
+              title={pt ? 'As colunas' : 'The columns'}
               lede={<p>{pt
                 ? <>O dicionário de colunas do ficheiro de metadados, em inglês, como lá está, com duas diferenças. Em {formatCount(revisedColumns, locale)} colunas, marcadas «texto revisto pelo site», a descrição foi reescrita: ou remetia para documentos internos, ou dizia o contrário da ficha do modelo e dos dados (por exemplo, que o ramo de atividade e a profissão são ajustados por freguesia, quando não são); onde os dois diferem, vale a do site, e o texto original continua no ficheiro. E três colunas de códigos (setor de atividade, escolaridade em cinco níveis e nuts2) não têm mapa de etiquetas em <code className="font-mono text-[13px]">label_maps</code>: o site dá-o aqui. As restantes etiquetas estão nesse mesmo ficheiro, em <code className="font-mono text-[13px]">label_maps</code>.</>
                 : <>The metadata file’s column dictionary, as it stands there, with two differences. In {formatCount(revisedColumns, locale)} columns, marked “wording revised by the site”, the description was rewritten: it either pointed to internal documents or said the opposite of the model card and the data (for example, that industry and occupation are fitted per parish, when they are not); where the two differ, the site’s holds, and the original text stays in the file. And three code columns (activity sector, five-level education and nuts2) have no map in <code className="font-mono text-[13px]">label_maps</code>: the site gives it here. The other labels are in that same file, under <code className="font-mono text-[13px]">label_maps</code>.</>}</p>}
             >
-              <h3 className="text-base font-bold text-ink">{pt ? 'De onde vem cada coluna' : 'Where each column comes from'}</h3>
+              <h3 className="text-base font-semibold text-ink">{pt ? 'De onde vem cada coluna' : 'Where each column comes from'}</h3>
               <dl className="mt-3 grid gap-x-6 gap-y-3 md:grid-cols-2">
                 {PROVENANCE_CODES.map(entry => (
                   <div key={entry.code} className="flex gap-3">
                     <dt className="w-12 shrink-0 font-mono text-sm font-bold text-ink">{entry.code}</dt>
-                    <dd className="text-sm leading-relaxed text-stone-700"><span className="font-semibold text-ink">{entry.name[locale]}.</span> {entry.meaning[locale]}</dd>
+                    <dd className="text-sm leading-relaxed text-ink"><span className="font-semibold">{entry.name[locale]}.</span> {entry.meaning[locale]}</dd>
                   </div>
                 ))}
               </dl>
@@ -359,91 +359,91 @@ sha256sum checksums.sha256`;
 
             <Section
               id="qualidade"
-              title={pt ? 'Quão bons são os dados de cada freguesia?' : 'How good are each parish’s data?'}
+              title={pt ? 'A qualidade de cada freguesia' : 'Each parish’s quality'}
               lede={<p>{pt
                 ? 'O ficheiro de qualidade tem uma linha por freguesia, com a sua população de publicação e o seu nível. Lê-o antes de usar uma freguesia isolada: abaixo de 500 residentes nenhuma chega ao nível A ou B.'
                 : 'The quality file has one row per parish, with its publication population and its tier. Read it before using a single parish on its own: below 500 residents none reaches tier A or B.'}</p>}
             >
-              <ul className="flex flex-wrap gap-3">
+              <ul className="flex flex-wrap gap-x-8 gap-y-3">
                 {(['A', 'B', 'C'] as const).map(tier => (
-                  <li key={tier} className="flex items-center gap-2 rounded-2xl border border-line bg-cream px-4 py-3">
+                  <li key={tier} className="flex items-baseline gap-2 border-t border-ink pt-2 pr-4">
                     <QualityBadge kind={tier} locale={locale} />
-                    <span className="text-sm tabular-nums text-ink">{formatCount(meta.counts.tiers[tier], locale)} {pt ? 'freguesias' : 'parishes'}</span>
+                    <span className="text-sm tabular-nums text-graphite"><span className="fig text-ink">{formatCount(meta.counts.tiers[tier], locale)}</span> {pt ? 'freguesias' : 'parishes'}</span>
                   </li>
                 ))}
               </ul>
-              <h3 className="mt-8 text-lg font-bold text-ink">{pt ? 'O que diz cada coluna do ficheiro de qualidade' : 'What each column of the quality file says'}</h3>
-              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-stone-600">
+              <h3 className="mt-8 text-[19px] leading-6 text-ink">{pt ? 'O que diz cada coluna do ficheiro de qualidade' : 'What each column of the quality file says'}</h3>
+              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-graphite">
                 {pt
                   ? <>O ficheiro <code className="font-mono text-[13px]">quality.csv</code>, que o README do pacote manda ler primeiro. Origem: INE (contagem publicada), gerado (contado na população gerada), avaliação (medido contra as tabelas do INE) ou geográfico.</>
                   : <>The <code className="font-mono text-[13px]">quality.csv</code> file, which the package README says to read first. Source: INE (a published count), generated (counted in the generated population), evaluation (measured against INE’s tables) or geographic.</>}
               </p>
               {/* Phones: one stacked entry per column, so the meaning is not clipped behind a sideways scroll. */}
-              <dl className="mt-4 divide-y divide-line rounded-2xl border border-line bg-cream sm:hidden">
+              <dl className="mt-4 divide-y divide-grid border-y border-ink sm:hidden">
                 {QUALITY_COLUMNS.map(column => (
-                  <div key={column.name} className="px-4 py-3">
+                  <div key={column.name} className="py-3">
                     <dt className="flex flex-wrap items-baseline gap-x-2">
                       <span className="font-mono text-[13px] font-semibold text-ink [overflow-wrap:anywhere]">{column.name}</span>
-                      <span className="text-xs text-stone-500">{QUALITY_SOURCE[column.source][locale]}</span>
+                      <span className="text-[12px] text-graphite">{QUALITY_SOURCE[column.source][locale]}</span>
                     </dt>
-                    <dd className="mt-1 text-sm leading-relaxed text-stone-700">{column.meaning[locale]}</dd>
+                    <dd className="mt-1 text-sm leading-relaxed text-ink">{column.meaning[locale]}</dd>
                   </div>
                 ))}
               </dl>
               {/* A scroll area: focusable and named, with the edge shadow while there is more (A11Y2-06). */}
-              <div tabIndex={0} role="region" aria-label={pt ? 'Colunas do ficheiro de qualidade' : 'Columns of the quality file'} className="scroll-cue mt-4 hidden overflow-x-auto rounded-2xl border border-line sm:block">
+              <div tabIndex={0} role="region" aria-label={pt ? 'Colunas do ficheiro de qualidade' : 'Columns of the quality file'} className="scroll-cue mt-4 hidden overflow-x-auto sm:block">
                 <table className="min-w-full border-collapse text-sm">
                   <caption className="sr-only">{pt ? 'Colunas do ficheiro de qualidade' : 'Columns of the quality file'}</caption>
                   <thead>
                     <tr>
                       {[pt ? 'Coluna' : 'Column', pt ? 'Origem' : 'Source', pt ? 'O que é' : 'What it is'].map(header => (
-                        <th key={header} scope="col" className="border-b-2 border-ink px-3 py-2 text-left text-[12px] font-semibold text-graphite">{header}</th>
+                        <th key={header} scope="col" className="border-b border-ink px-3 py-2 text-left text-[12px] font-normal text-graphite first:pl-0">{header}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {QUALITY_COLUMNS.map(column => (
                       <tr key={column.name} className="align-top">
-                        <th scope="row" className="whitespace-nowrap border-b border-line px-3 py-2 text-left font-mono text-[13px] font-normal text-ink">{column.name}</th>
-                        <td className="whitespace-nowrap border-b border-line px-3 py-2 text-ink">{QUALITY_SOURCE[column.source][locale]}</td>
-                        <td className="min-w-[18rem] border-b border-line px-3 py-2 leading-relaxed text-stone-700">{column.meaning[locale]}</td>
+                        <th scope="row" className="whitespace-nowrap border-b border-grid py-2 pl-0 pr-3 text-left font-mono text-[13px] font-normal text-ink">{column.name}</th>
+                        <td className="whitespace-nowrap border-b border-grid px-3 py-2 text-ink">{QUALITY_SOURCE[column.source][locale]}</td>
+                        <td className="min-w-[18rem] border-b border-grid px-3 py-2 leading-relaxed text-ink">{column.meaning[locale]}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
               {ineResidents !== null && (
-                <p id="total-gerado" className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-700">{generatedGap(release.counts.persons, ineResidents, locale)}</p>
+                <p id="total-gerado" className="mt-4 max-w-3xl text-sm leading-relaxed text-ink">{generatedGap(release.counts.persons, ineResidents, locale)}</p>
               )}
               <Disclosure className="mt-3" summary={pt ? 'Que tabela é cada código de worst_constraint' : 'Which table each worst_constraint code is'}>
                 <dl className="mt-2 grid max-w-3xl gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[auto_1fr]">
                   {Object.entries(CONSTRAINT_LABEL).map(([key, label]) => (
                     <div key={key} className="contents">
                       <dt className="font-mono text-[13px] text-ink [overflow-wrap:anywhere]">srmse_{key}</dt>
-                      <dd className="mb-1.5 text-stone-700 sm:mb-0">{label[locale]}</dd>
+                      <dd className="mb-1.5 text-ink sm:mb-0">{label[locale]}</dd>
                     </div>
                   ))}
                 </dl>
               </Disclosure>
               <p className="mt-4">
-                <Action href={POPULATION_ROUTES.quality} locale={locale} variant="text" arrow>{pt ? 'Como sabemos que funciona?' : 'How do we know it works?'}</Action>
+                <Action href={POPULATION_ROUTES.quality} locale={locale} variant="text" arrow>{pt ? 'Ver a qualidade da versão' : 'See the release’s quality'}</Action>
               </p>
             </Section>
 
             <Section
               id="verificar"
-              title={pt ? 'Como verifico os ficheiros?' : 'How do I verify the files?'}
+              title={pt ? 'Verificar os ficheiros' : 'Verifying the files'}
               lede={<p>{pt
                 ? <>O checksum SHA-256 da lista de checksums do pacote (<code className="font-mono text-[13px]">checksums.sha256</code>) é <code className="break-all font-mono text-[13px] text-ink">{release.checksums_sha256}</code>. Se coincidir, cada ficheiro do pacote pode ser verificado contra essa lista.</>
                 : <>The SHA-256 of the package’s list of sums (<code className="font-mono text-[13px]">checksums.sha256</code>) is <code className="break-all font-mono text-[13px] text-ink">{release.checksums_sha256}</code>. If it matches, every file in the package can be checked against that list.</>}</p>}
             >
               <Code label={pt ? 'Comandos de verificação' : 'Verification commands'}>{verify}</Code>
-              <p className="mt-3 text-sm text-stone-600">
+              <p className="mt-3 text-sm text-graphite">
                 {pt ? 'No macOS, usa ' : 'On macOS, use '}<code className="font-mono text-[13px]">shasum -a 256</code>{pt ? ' em vez de ' : ' instead of '}<code className="font-mono text-[13px]">sha256sum</code>.
               </p>
             </Section>
 
-            <Section id="citar" title={pt ? 'Como cito?' : 'How do I cite them?'} lede={<>
+            <Section id="citar" title={pt ? 'Como citar' : 'How to cite'} lede={<>
               <p>{pt
                 ? 'A licença CC BY-NC 4.0 pede atribuição em qualquer uso. Ao redistribuir os dados (os ficheiros, ou tabelas tiradas deles), inclui a atribuição completa abaixo. Numa notícia, num gráfico ou num cartão, basta a forma curta, com um link para esta página:'
                 : 'The CC BY-NC 4.0 licence asks for attribution in any use. When you redistribute the data (the files, or tables taken from them), include the full attribution below. In a news story, a chart or a card, the short form is enough, with a link to this page:'}</p>
@@ -451,8 +451,8 @@ sha256sum checksums.sha256`;
             </>}>
               <div className="space-y-5">
                 {(locale === 'pt' ? (['pt', 'en'] as const) : (['en', 'pt'] as const)).map(language => (
-                  <div key={language} className="rounded-2xl border border-line bg-cream p-5">
-                    <p className="text-[12px] font-semibold text-graphite">
+                  <div key={language} className="border-t border-rule pt-3">
+                    <p className="text-[12px] text-graphite">
                       {language === 'pt' ? (pt ? 'Atribuição em português' : 'Attribution in Portuguese') : (pt ? 'Atribuição em inglês' : 'Attribution in English')}
                     </p>
                     <p lang={language} className="mt-2 leading-relaxed text-ink">{release.attribution[language]}</p>
@@ -461,14 +461,14 @@ sha256sum checksums.sha256`;
                     </div>
                   </div>
                 ))}
-                <div className="rounded-2xl border border-line bg-cream p-5">
-                  <p className="text-[12px] font-semibold text-graphite">{pt ? 'Citar como' : 'Cite as'}</p>
+                <div className="border-t border-rule pt-3">
+                  <p className="text-[12px] text-graphite">{pt ? 'Citar como' : 'Cite as'}</p>
                   <p className="mt-2 leading-relaxed text-ink">{citeWithLocator}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
                     <CopyButton text={citeWithLocator} label={pt ? 'Copiar citação' : 'Copy citation'} locale={locale} />
                     <a href={citationUrl} className={`${link} inline-flex min-h-11 items-center text-sm`}>{`CITATION.cff (v${POPULATION_RELEASE})`}</a>
                   </div>
-                  <p className="mt-3 text-xs text-stone-500">
+                  <p className="mt-3 text-[12.5px] text-graphite">
                     {pt
                       ? 'O link da citação é a página da versão no GitHub, que não muda. Ainda não há DOI.'
                       : 'The citation’s link is the release page on GitHub, which does not change. There is no DOI yet.'}
@@ -477,8 +477,8 @@ sha256sum checksums.sha256`;
               </div>
             </Section>
 
-            <Section id="erratas" title={pt ? 'Encontraste um erro?' : 'Found an error?'}>
-              <p className="max-w-3xl leading-relaxed text-stone-700">
+            <Section id="erratas" title={pt ? 'Erros e correções' : 'Errors and corrections'}>
+              <p className="max-w-3xl leading-relaxed text-ink">
                 {pt
                   ? <>As correções a esta versão ficam registadas nas <a className={link} href={POPULATION_DOWNLOADS.errata}>erratas</a>. Para reportar um problema, abre uma <a className={link} href={POPULATION_DOWNLOADS.issues}>questão no GitHub</a> ou escreve para <a className={link} href="mailto:info@estimador.pt">info@estimador.pt</a>. A <a className={link} href={POPULATION_DOWNLOADS.modelCard}>ficha do modelo</a> tem a descrição técnica completa.</>
                   : <>Corrections to this release are recorded in the <a className={link} href={POPULATION_DOWNLOADS.errata}>errata</a>. To report a problem, open a <a className={link} href={POPULATION_DOWNLOADS.issues}>GitHub issue</a> or write to <a className={link} href="mailto:info@estimador.pt">info@estimador.pt</a>. The <a className={link} href={POPULATION_DOWNLOADS.modelCard}>model card</a> has the full technical account.</>}

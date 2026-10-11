@@ -36,14 +36,15 @@ export const DESCRIPTION_OVERRIDES: Record<string, string> = {
 /**
  * A note in the reader's language under a column's description, for something
  * the reader of that column must know about the site's own answers. Keyed by
- * "table.column". hh_type_top: the site's "Que famílias formam?" answer was
+ * "table.column" (the dictionary sets "Nota do site." before it). hh_type_top:
+ * the site's "Núcleos familiares por agregado" answer was
  * computed before the release's final packaging and does not always reproduce
  * from this column (POP3-ACC-01); the producer will correct it.
  */
 export const SITE_NOTES: Record<string, { pt: string; en: string }> = {
   'households.hh_type_top': {
-    pt: 'Nota do site: os valores da resposta «Que famílias formam?» podem diferir ligeiramente dos que se obtêm a partir desta coluna nos microdados para download. Vamos corrigi-los na próxima versão.',
-    en: 'Note from the site: the figures in the answer “What families do they form?” can differ slightly from what you get from this column in the downloadable microdata. We will correct them in the next release.',
+    pt: 'Os valores da resposta «Núcleos familiares por agregado» podem diferir ligeiramente dos que se obtêm a partir desta coluna nos microdados para download. Vamos corrigi-los na próxima versão.',
+    en: 'The figures in the answer “Family nuclei per household” can differ slightly from what you get from this column in the downloadable microdata. We will correct them in the next release.',
   },
 };
 

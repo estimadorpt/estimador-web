@@ -4,6 +4,7 @@ import { Link } from '@/i18n/routing';
 import { SiteFooter } from '@/components/SiteFooter';
 import { PageHero } from '@/components/PageHero';
 import { Action } from '@/components/brand/Action';
+import { NoMargin } from '@/components/instrument';
 import { DataCard } from '@/components/viz/DataCard';
 import { Disclosure } from '@/components/viz/Disclosure';
 import { QualityBadge } from '@/components/population/QualityBadge';
@@ -32,14 +33,35 @@ import { loadPopulationMeta, loadPopulationPlaces, loadPopulationScorecard } fro
 import { createPageMetadata } from '@/lib/metadata';
 import type { PortraitRecipe } from '@/types/population';
 
+/**
+ * The page's finding, read from the scorecard: the release passed its gates
+ * (headline.passes_gate with status "ok", as the gates item below says), or,
+ * without that, a plain statement of what the page is.
+ */
+function qualityFinding(passed: boolean, locale: Locale): { title: string; metaTitle: string } {
+  const pt = locale === 'pt';
+  if (passed) {
+    return pt
+      ? { title: `A versão ${POPULATION_RELEASE} passou os critérios de publicação`, metaTitle: `A população sintética ${POPULATION_RELEASE} passou os critérios de publicação` }
+      : { title: `Release ${POPULATION_RELEASE} passed its publication gates`, metaTitle: `The synthetic population ${POPULATION_RELEASE} passed its publication gates` };
+  }
+  return pt
+    ? { title: `A qualidade da versão ${POPULATION_RELEASE}, medida contra o INE`, metaTitle: `A qualidade da população sintética ${POPULATION_RELEASE}` }
+    : { title: `The quality of release ${POPULATION_RELEASE}, measured against INE`, metaTitle: `The quality of the synthetic population ${POPULATION_RELEASE}` };
+}
+
+const releasePassed = (scorecard: { headline: { passes_gate: boolean }; status: string } | null) =>
+  Boolean(scorecard && scorecard.headline.passes_gate && scorecard.status === 'ok');
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const pt = locale === 'pt';
+  const scorecard = await loadPopulationScorecard();
   return createPageMetadata({
     locale,
     path: POPULATION_ROUTES.quality,
-    title: pt ? 'Como sabemos que a população sintética funciona?' : 'How do we know the synthetic population works?',
+    title: qualityFinding(releasePassed(scorecard), pt ? 'pt' : 'en').metaTitle,
     description: pt
       ? `Critérios de publicação, ajuste às tabelas do INE por tamanho de freguesia, níveis de qualidade, privacidade e limitações conhecidas da versão ${POPULATION_RELEASE}.`
       : `Release gates, fit to INE’s tables by parish size, quality tiers, privacy and the known limitations of release ${POPULATION_RELEASE}.`,
@@ -163,37 +185,44 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
     : [];
   const fitTop = Math.max(...fitValues, 0.0001);
 
+  const passed = releasePassed(scorecard);
+  const privacyPassed = scorecard?.privacy.status === 'pass';
+
   return (
     <div className="min-h-screen bg-paper">
       <Header />
       <main id="main-content" tabIndex={-1}>
+      <PopulationSectionNav current="quality" locale={locale} />
       <PageHero
         measure="wide"
         compact
         back={{ href: POPULATION_ROUTES.hub, label: pt ? 'População sintética' : 'Synthetic population', locale }}
         eyebrow={pt ? `População sintética · versão ${POPULATION_RELEASE}` : `Synthetic population · release ${POPULATION_RELEASE}`}
-        title={pt ? 'Como sabemos que funciona?' : 'How do we know it works?'}
+        title={qualityFinding(passed, locale).title}
         lede={pt
           ? 'O que verificámos antes de publicar, quão perto a população gerada fica das tabelas dos Censos, o que fizemos pela privacidade e onde os dados são mais fracos.'
           : 'What we checked before publishing, how close the generated population comes to the Census tables, what we did for privacy, and where the data are weakest.'}
         meta={<><span>{pt ? 'Censos 2021 (INE)' : '2021 Census (INE)'}</span><span>{updated}</span></>}
       />
-      <PopulationSectionNav current="quality" locale={locale} />
 
       <div className="mx-auto w-full max-w-7xl px-4 py-8 md:py-12"><div className="max-w-5xl space-y-12">
         {!scorecard || !meta ? (
           <PopulationUnavailable locale={locale} />
         ) : (
           <>
-            <p className="max-w-3xl text-sm text-stone-600">{HONESTY.synthetic[locale]}</p>
+            {/* One model run, so no margin: the sign and the caveat come before the first figure. */}
+            <p className="flex max-w-3xl flex-col gap-1">
+              <NoMargin locale={locale} />
+              <span className="text-sm text-ink">{HONESTY.synthetic[locale]}</span>
+            </p>
 
             <section aria-labelledby="estado-title" className="space-y-6">
-              <h2 id="estado-title" className="text-2xl text-ink md:text-[1.75rem]">
-                {pt ? 'Esta versão passou nos critérios de publicação?' : 'Did this release pass its gates?'}
+              <h2 id="estado-title" className="border-b border-ink pb-2 text-[26px] leading-7 text-ink md:text-[28px] md:leading-8">
+                {pt ? 'Critérios de publicação' : 'Release gates'}
               </h2>
-              <div role="note" className="max-w-3xl border-l-2 border-amber-500 bg-amber-50 py-4 pl-5 pr-4 text-sm leading-relaxed text-stone-700">
-                <p className="mb-1.5 text-[12px] font-semibold text-graphite">{pt ? 'Antes de ler qualquer número' : 'Before reading any figure'}</p>
-                <p className="font-semibold text-ink">{scorecard.honesty_notes[2]?.[locale]}</p>
+              <div role="note" className="max-w-3xl border-l-2 border-ink pl-4 text-sm leading-relaxed text-ink">
+                <p className="mb-1 font-semibold">{pt ? 'Antes de ler qualquer número.' : 'Before reading any figure.'}</p>
+                <p>{scorecard.honesty_notes[2]?.[locale]}</p>
                 <p className="mt-1.5">
                   {pt
                     ? 'Na prática: lê cada número por si, sem o ordenar nem o comparar com outro como se a diferença fosse certa.'
@@ -211,7 +240,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   </ul>
                 </Disclosure>
               </div>
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-x-8 gap-y-5 md:grid-cols-3">
                 <StatusItem
                   tone={scorecard.headline.passes_gate && scorecard.status === 'ok' ? 'pass' : 'caveat'}
                   label={pt ? 'Critérios de publicação' : 'Release gates'}
@@ -236,9 +265,9 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                     : `A national audit, run on the release 1.0.0 population, which release ${POPULATION_RELEASE} keeps unchanged.`}
                 </StatusItem>
               </div>
-              <div className="rounded-2xl border border-line bg-cream p-5 md:p-6">
-                <h3 className="text-lg font-bold text-ink">{pt ? 'Os critérios que decidem a publicação' : 'The gates the release depends on'}</h3>
-                <p className="mt-1 text-sm text-stone-500">{pt ? `Da ficha do modelo, versão ${POPULATION_RELEASE}` : `From the model card, release ${POPULATION_RELEASE}`}</p>
+              <div className="border-t border-rule pt-3">
+                <h3 className="text-[19px] leading-6 text-ink">{pt ? 'Os critérios que decidem a publicação' : 'The gates the release depends on'}</h3>
+                <p className="mt-1 text-sm text-graphite">{pt ? `Da ficha do modelo, versão ${POPULATION_RELEASE}` : `From the model card, release ${POPULATION_RELEASE}`}</p>
                 <ul className="mt-4 space-y-2.5">
                   {RELEASE_GATES.map(gate => (
                     <li key={gate.en} className="flex gap-2.5 text-[15px] leading-relaxed text-ink">
@@ -252,7 +281,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
 
             <Section
               id="ajuste"
-              title={pt ? 'Quão perto ficam das tabelas do INE?' : 'How close do they come to INE’s tables?'}
+              title={pt ? 'O ajuste às tabelas do INE' : 'The fit to INE’s tables'}
               lede={<p>{FIT_EXPLAINED[locale]}</p>}
             >
               {/* Stacked, each at its own height: 4 bars beside 12 left the shorter card
@@ -304,43 +333,43 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   />
                 </DataCard>
               </div>
-              <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
+              <p className="mt-4 max-w-3xl text-sm leading-relaxed text-graphite">
                 {pt
                   ? 'Com poucas pessoas, cada uma pesa mais em cada tabela: por isso cada freguesia tem um nível de qualidade, mostrado no topo da sua página.'
                   : 'With few people, each one weighs more in every table: that is why every parish carries a quality tier, shown at the top of its page.'}
               </p>
-              <div id="tabelas" className="mt-6 rounded-2xl border border-line bg-cream p-5 md:p-6">
-                <h3 className="text-base font-bold text-ink">{pt ? 'Que tabelas foram usadas?' : 'Which tables were used?'}</h3>
+              <div id="tabelas" className="mt-8 border-t border-rule pt-3">
+                <h3 className="text-[19px] leading-6 text-ink">{pt ? 'As tabelas usadas' : 'The tables used'}</h3>
                 <div className="mt-3 grid gap-6 md:grid-cols-2">
                   <div>
-                    <p className="text-[12px] font-semibold text-graphite">{pt ? 'Usadas no ajuste e avaliadas' : 'Fitted and scored'}</p>
-                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-stone-700">
+                    <p className="text-[12px] text-graphite">{pt ? 'Usadas no ajuste e avaliadas' : 'Fitted and scored'}</p>
+                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-ink">
                       {FITTED_TABLES.map(item => <li key={item.en}>{item[locale]}</li>)}
                     </ul>
                   </div>
                   <div>
-                    <p className="text-[12px] font-semibold text-graphite">{pt ? 'Só avaliadas, fora do ajuste' : 'Scored only, not fitted'}</p>
-                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-stone-700">
+                    <p className="text-[12px] text-graphite">{pt ? 'Só avaliadas, fora do ajuste' : 'Scored only, not fitted'}</p>
+                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-ink">
                       {SCORED_ONLY_TABLES.map(item => <li key={item.en}>{item[locale]}</li>)}
                     </ul>
                   </div>
                 </div>
-                <p className="mt-4 text-sm leading-relaxed text-stone-700">
+                <p className="mt-4 text-sm leading-relaxed text-graphite">
                   {pt
                     ? 'A ficha de avaliação publica a mediana só das 12 tabelas de pessoas do gráfico. A idade ano a ano também é medida e entra na «pior tabela» que decide o nível (na maior parte das freguesias, é essa a pior), mas não é uma das 21 tabelas da cobertura nem das 12 tabelas de pessoas do ajuste. O ficheiro de qualidade traz, para cada freguesia, a pior tabela e o seu erro (worst_constraint); a página de dados diz que tabela é cada código.'
                     : 'The scorecard publishes a median only for the 12 person tables in the chart. Single-year age is also measured and counts towards the “worst table” that decides the tier (in most parishes it is the worst one), but it is not one of the 21 coverage tables nor of the 12 fitted person tables. The quality file gives, for each parish, its worst table and that table’s error (worst_constraint); the data page says which table each code is.'}
                 </p>
-                <p className="mt-2 text-sm leading-relaxed text-stone-700">
+                <p className="mt-2 text-sm leading-relaxed text-graphite">
                   {pt
-                    ? <>Os erros dos gráficos são medidos nas tabelas usadas no ajuste: dizem quão perto o ajuste chegou. A ficha do modelo refere uma verificação independente, com uma tabela de agregados deixada de fora do ajuste, mas não publica o seu erro (ver <a href="#retrodicao" className="font-semibold text-ink underline underline-offset-4">«Acerta no que não viu?»</a>).</>
-                    : <>The errors in the charts are measured on the tables used in the fit: they say how close the fit came. The model card mentions an independent check, with a household table held out of the fit, but does not publish its error (see <a href="#retrodicao" className="font-semibold text-ink underline underline-offset-4">“Does it get right what it did not see?”</a>).</>}
+                    ? <>Os erros dos gráficos são medidos nas tabelas usadas no ajuste: dizem quão perto o ajuste chegou. A ficha do modelo refere uma verificação independente, com uma tabela de agregados deixada de fora do ajuste, mas não publica o seu erro (ver <a href="#retrodicao" className="font-semibold text-ink underline underline-offset-4">«A verificação fora do ajuste»</a>).</>
+                    : <>The errors in the charts are measured on the tables used in the fit: they say how close the fit came. The model card mentions an independent check, with a household table held out of the fit, but does not publish its error (see <a href="#retrodicao" className="font-semibold text-ink underline underline-offset-4">“The out-of-fit check”</a>).</>}
                 </p>
               </div>
             </Section>
 
             <Section
               id="niveis"
-              title={pt ? 'O que quer dizer qualidade A, B ou C?' : 'What do quality A, B and C mean?'}
+              title={pt ? 'Os três níveis de qualidade' : 'The three quality tiers'}
               lede={<p>{pt
                 ? 'Todas as freguesias são publicadas, e todas respondem com os seus próprios números; a página de cada uma mostra o nível no topo. O nível junta o ajuste às tabelas do INE e o número de residentes, e diz com que cuidado ler os números, mas não esconde nada. As contagens são as da versão publicada.'
                 : 'Every parish is published, and every parish answers with its own figures; each parish page shows its tier at the top. The tier combines the fit to INE’s tables and the number of residents, and says how carefully to read the numbers, but it hides nothing. The counts are the published release’s.'}</p>}
@@ -353,44 +382,44 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                   A's): with equal thirds, A carried an 80 to 100px band above its hairline
                   and a 50px one under its reading. From md to lg, A and B share a row and
                   C takes the next one, whole. */}
-              <div className="grid gap-4 md:grid-cols-2 md:gap-y-0 lg:grid-cols-[1fr_1.3fr_1.4fr]">
+              <div className="grid gap-x-8 gap-y-6 md:grid-cols-2 md:gap-y-0 lg:grid-cols-[1fr_1.3fr_1.4fr]">
                 {(['A', 'B', 'C'] as const).map(tier => (
-                  <div key={tier} className={`flex flex-col rounded-2xl border border-line bg-cream p-5 md:row-span-4 md:grid md:grid-rows-subgrid ${tier === 'C' ? 'md:col-span-2 md:mt-4 lg:col-span-1 lg:mt-0' : ''}`}>
-                    <QualityBadge kind={tier} locale={locale} className="self-start justify-self-start" />
-                    <div className="mt-4">
-                      <p className="font-display text-3xl font-extrabold tabular-nums text-ink">{formatCount(meta.counts.tiers[tier], locale)}</p>
-                      <p className="text-sm text-stone-500">{pt ? 'freguesias' : 'parishes'}</p>
+                  <div key={tier} className={`flex flex-col border-t border-ink pt-3 md:row-span-4 md:grid md:grid-rows-subgrid ${tier === 'C' ? 'md:col-span-2 md:mt-6 lg:col-span-1 lg:mt-0' : ''}`}>
+                    <QualityBadge kind={tier} locale={locale} className="self-start justify-self-start text-[15px]" />
+                    <div className="mt-3">
+                      <p className="fig text-3xl text-ink">{formatCount(meta.counts.tiers[tier], locale)}</p>
+                      <p className="text-sm text-graphite">{pt ? 'freguesias' : 'parishes'}</p>
                     </div>
                     <p className="mt-4 text-sm leading-relaxed text-ink">{TIER_COPY[tier].meaning[locale]}</p>
-                    <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-stone-600">
+                    <p className="mt-3 border-t border-grid pt-3 text-sm leading-relaxed text-graphite">
                       {tier === 'C' && showTierCReadings ? TIER_C_POINTER[locale] : tierOnPage(tier)}
                     </p>
                   </div>
                 ))}
               </div>
               {showTierCReadings && (
-                <ul className="mt-4 grid gap-x-8 gap-y-3 rounded-2xl bg-parchment p-5 text-sm leading-relaxed text-stone-600 md:grid-cols-2">
+                <ul className="mt-6 grid gap-x-8 gap-y-3 border-t border-rule pt-3 text-sm leading-relaxed text-graphite md:grid-cols-2">
                   {tierCReadings(tierCSmall, tierCLarge, locale).map(reading => (
                     <li key={reading.key}><span className="font-semibold text-ink">{reading.lead}</span> {reading.body}</li>
                   ))}
                 </ul>
               )}
-              <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
+              <p className="mt-4 max-w-3xl text-sm leading-relaxed text-graphite">
                 {pt ? 'Os limiares de cada nível: ' : 'Each tier’s thresholds: '}
                 {pt
                   ? 'A, erro típico até 0,10, a pior tabela até 0,18 e 2 000 ou mais residentes; B, até 0,15 e 0,26 com 500 ou mais residentes; C, as restantes. Uma freguesia com menos de 500 residentes fica no nível C. Os limiares de 500 e 2 000 usam a contagem de publicação, a menor entre os residentes do INE e as pessoas geradas: uma freguesia em que o INE contou 500 pessoas pode ficar abaixo de 500 nessa contagem.'
                   : 'A, typical error up to 0.10, worst table up to 0.18 and 2,000 or more residents; B, up to 0.15 and 0.26 with 500 or more residents; C, the rest. A parish under 500 residents sits in tier C. The 500 and 2,000 thresholds use the publication count, the smaller of INE’s residents and the generated people: a parish where INE counted 500 people can fall below 500 on that count.'}
               </p>
               {meta.counts.suppressed_cells > 0 ? (
-                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-stone-600">
+                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-graphite">
                   {pt
                     ? `Em qualquer nível, uma categoria com menos de ${meta.minimum_cell} pessoas ou agregados gerados aparece como «Suprimido», nunca como zero.`
                     : `At any tier, a category with fewer than ${meta.minimum_cell} generated people or households shows as “Suppressed”, never as zero.`}
                 </p>
               ) : (
-                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-stone-600">{HONESTY.zero[locale]}</p>
+                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-graphite">{HONESTY.zero[locale]}</p>
               )}
-              <p className="mt-4 max-w-3xl text-sm leading-relaxed text-stone-600">
+              <p className="mt-4 max-w-3xl text-sm leading-relaxed text-graphite">
                 {REPLACED[locale]}{' '}
                 <Link href={`${POPULATION_ROUTES.data}#versao`} locale={locale} className="font-semibold text-ink underline underline-offset-4">
                   {pt ? 'O que mudou entre elas' : 'What changed between them'}
@@ -400,13 +429,13 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
 
             <Section
               id="glossario"
-              title={pt ? 'O que quer dizer cada termo?' : 'What does each term mean?'}
+              title={pt ? 'Glossário' : 'Glossary'}
             >
-              <dl className="divide-y divide-line border-y border-line">
+              <dl className="divide-y divide-grid border-y border-ink">
                 {GLOSSARY.map(entry => (
                   <div key={entry.term.en} className="grid gap-2 py-4 md:grid-cols-[240px_1fr]">
-                    <dt className="font-bold text-ink">{entry.term[locale]}</dt>
-                    <dd className="leading-relaxed text-stone-700">{entry.body[locale]}</dd>
+                    <dt className="font-semibold text-ink">{entry.term[locale]}</dt>
+                    <dd className="leading-relaxed text-ink">{entry.body[locale]}</dd>
                   </div>
                 ))}
               </dl>
@@ -414,16 +443,18 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
 
             <Section
               id="privacidade"
-              title={pt ? 'Estes dados protegem quem respondeu aos Censos?' : 'Do these data protect the people who answered the Census?'}
+              title={privacyPassed
+                ? (pt ? 'A auditoria de privacidade foi aprovada' : 'The privacy audit passed')
+                : (pt ? 'Privacidade' : 'Privacy')}
               lede={<p>{pt
                 ? 'Os registos são gerados: não têm nomes nem moradas, e não há uma ligação registo a registo a quem respondeu. A auditoria nacional de privacidade, feita sobre a população publicada, foi aprovada. A amostra de que se fala é o Ficheiro de Uso Público dos Censos 2021, de onde o modelo aprendeu as relações entre atributos.'
                 : 'The records are generated: they carry no names or addresses, and there is no record-to-record link to respondents. The national privacy audit, run on the published population, passed. The sample referred to is the Census 2021 Public Use File, from which the model learned how attributes relate.'}</p>}
             >
-              <dl className="divide-y divide-line border-y border-line">
+              <dl className="divide-y divide-grid border-y border-ink">
                 {PRIVACY_FINDINGS.map(finding => (
                   <div key={finding.title.en} className="grid gap-2 py-5 md:grid-cols-[240px_1fr]">
-                    <dt className="font-bold text-ink">{finding.title[locale]}</dt>
-                    <dd className="leading-relaxed text-stone-700">{finding.body[locale]}</dd>
+                    <dt className="font-semibold text-ink">{finding.title[locale]}</dt>
+                    <dd className="leading-relaxed text-ink">{finding.body[locale]}</dd>
                   </div>
                 ))}
               </dl>
@@ -434,22 +465,22 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
 
             <Section
               id="limitacoes"
-              title={pt ? 'Onde é que os dados são mais fracos?' : 'Where are the data weakest?'}
+              title={pt ? 'Onde os dados são mais fracos' : 'Where the data are weakest'}
               lede={<p>{pt
                 ? <>Limitações conhecidas da população gerada (a mesma da versão 1.0.0 à {POPULATION_RELEASE}), declaradas em vez de escondidas. A <a href={POPULATION_DOWNLOADS.modelCard} className="font-semibold text-ink underline underline-offset-4">ficha do modelo</a> remete o plano para as resolver para a próxima versão (a 1.1, uma versão corrigida da população sintética de 2021); cada correção fica registada nas <a href={POPULATION_DOWNLOADS.errata} className="font-semibold text-ink underline underline-offset-4">erratas</a>.</>
                 : <>Known limitations of the generated population (the same from release 1.0.0 to {POPULATION_RELEASE}), declared rather than hidden. The <a href={POPULATION_DOWNLOADS.modelCard} className="font-semibold text-ink underline underline-offset-4">model card</a> leaves the plan to remove them to the next release (1.1, a corrected synthetic population for 2021); every correction is recorded in the <a href={POPULATION_DOWNLOADS.errata} className="font-semibold text-ink underline underline-offset-4">errata</a>.</>}</p>}
             >
-              <ol className="grid gap-4 md:grid-cols-2">
+              <ol className="grid gap-x-8 gap-y-6 md:grid-cols-2">
                 {LIMITATIONS.map(limitation => (
-                  <li key={limitation.title.en} className="rounded-2xl border border-line bg-cream p-5">
-                    <h3 className="text-base font-bold text-ink">{limitation.title[locale]}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-stone-700">{limitation.body[locale]}</p>
+                  <li key={limitation.title.en} className="border-t border-rule pt-3">
+                    <h3 className="text-base font-semibold text-ink">{limitation.title[locale]}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-ink">{limitation.body[locale]}</p>
                   </li>
                 ))}
               </ol>
               {/* The out-of-fit check is not published yet: one paragraph here, not an empty section (FRESH-13). */}
-              <div id="retrodicao" className="mt-6 max-w-3xl text-sm leading-relaxed text-stone-700">
-                <h3 className="text-base font-bold text-ink">{pt ? 'Acerta no que não viu?' : 'Does it get right what it did not see?'}</h3>
+              <div id="retrodicao" className="mt-8 max-w-3xl border-t border-rule pt-3 text-sm leading-relaxed text-ink">
+                <h3 className="text-base font-semibold text-ink">{pt ? 'A verificação fora do ajuste' : 'The out-of-fit check'}</h3>
                 <p className="mt-2">
                   {scorecard.retrodiction.status === 'unavailable'
                     ? (pt
@@ -466,7 +497,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
             </Section>
 
 
-            <section aria-label={pt ? 'Para saber mais' : 'Further reading'} className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-8">
+            <section aria-label={pt ? 'Para saber mais' : 'Further reading'} className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-rule pt-8">
               <Action href={POPULATION_ROUTES.methodology} locale={locale} arrow>{pt ? 'Como foi feita a população' : 'How the population was made'}</Action>
               <Action external href={POPULATION_DOWNLOADS.modelCard} variant="text" arrow>{pt ? 'Ficha do modelo (GitHub, em inglês)' : 'Model card (GitHub)'}</Action>
               <Action href={POPULATION_ROUTES.data} locale={locale} variant="text" arrow>{pt ? 'Fazer download dos dados' : 'Download the data'}</Action>

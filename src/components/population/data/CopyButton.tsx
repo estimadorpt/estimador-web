@@ -33,12 +33,12 @@ export function CopyButton({ text, label, locale }: { text: string; label: strin
       <button
         type="button"
         onClick={copy}
-        className="inline-flex min-h-11 items-center gap-2 rounded-none border border-line bg-cream px-4 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-parchment"
+        className="inline-flex min-h-11 items-center gap-2 border border-rule bg-paper px-4 text-sm font-semibold text-ink transition-colors duration-150 hover:bg-field"
       >
         {state === 'copied' ? <Check aria-hidden="true" className="h-4 w-4" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
         {label}
       </button>
-      <span role="status" aria-live="polite" className="text-sm text-stone-600">
+      <span role="status" aria-live="polite" className="text-sm text-graphite">
         {state === 'copied' ? (pt ? 'Copiado.' : 'Copied.') : state === 'failed' ? (pt ? 'Não foi possível copiar: seleciona o texto acima.' : 'Could not copy: select the text above.') : ''}
       </span>
     </div>

@@ -221,7 +221,7 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
             window.setTimeout(() => setOpen(false), 150);
           }}
         >
-          <Search aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" />
+          <Search aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-graphite" />
           <input
             ref={input}
             id={`${id}-input`}
@@ -268,20 +268,20 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
                 setOpen(false);
               }
             }}
-            className={`parish-search h-12 w-full rounded-none border border-line bg-cream pl-10 pr-11 text-base text-ink placeholder:text-stone-500 sm:text-[15px] [&::-webkit-search-cancel-button]:appearance-none ${inputClassName}`}
+            className={`parish-search h-12 w-full border border-rule bg-paper pl-10 pr-11 text-base text-ink placeholder:text-graphite sm:text-[15px] [&::-webkit-search-cancel-button]:appearance-none ${inputClassName}`}
           />
           {query && !disabled && (
             <button
               type="button"
               onClick={() => { setQuery(''); setMoved(null); input.current?.focus(); }}
-              className="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-ink hover:bg-parchment"
+              className="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center text-ink hover:bg-field"
             >
               <X aria-hidden="true" className="h-4 w-4" />
               <span className="sr-only">{t.clear}</span>
             </button>
           )}
           {showList && (
-            <div className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden rounded-none border border-line bg-cream shadow-[0_8px_24px_rgba(18,47,44,0.12)]">
+            <div className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden border border-ink bg-paper">
             <ul
               ref={list}
               id={listId}
@@ -294,7 +294,7 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
                 const key = hit.kind === 'municipality' ? `m-${hit.municipality.code}` : hit.parish.code;
                 // The concelho's group is closed before the other matches (PUB3-V02).
                 const divider = i === othersStart && (
-                  <li role="presentation" aria-hidden="true" className="mt-1 border-y border-line bg-paper px-4 py-2 text-xs font-bold text-stone-600">
+                  <li role="presentation" aria-hidden="true" className="mt-1 border-y border-grid bg-paper px-4 py-2 text-[12px] font-semibold text-graphite">
                     {t.others(query.trim())}
                   </li>
                 );
@@ -308,19 +308,19 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
                     aria-selected={selected}
                     onMouseDown={event => { event.preventDefault(); choose(hit); }}
                     onMouseEnter={() => setMoved(i)}
-                    className={`relative cursor-pointer py-2.5 pr-4 ${hit.kind === 'parish' && hit.underMunicipality ? 'pl-7' : 'pl-4'} ${selected ? 'bg-parchment' : ''} ${hit.kind === 'municipality' ? 'border-b border-line' : ''}`}
+                    className={`relative cursor-pointer py-2.5 pr-4 ${hit.kind === 'parish' && hit.underMunicipality ? 'pl-7' : 'pl-4'} ${selected ? 'bg-field' : ''} ${hit.kind === 'municipality' ? 'border-b border-grid' : ''}`}
                   >
                     {/* The active option carries an ink bar, not only a tint. */}
-                    {selected && <span aria-hidden="true" className="absolute inset-y-1 left-0 w-1 rounded-r bg-ink" />}
+                    {selected && <span aria-hidden="true" className="absolute inset-y-1 left-0 w-1 bg-ink" />}
                     {hit.kind === 'municipality' ? (
                       <>
                         <span className="block text-[15px] font-bold text-ink">{t.municipality(hit.municipality.name)}</span>
-                        <span className="block text-xs text-stone-600">{regionLabel(hit.municipality.region, hit.municipality.regionName, locale)} · {t.municipalityCount(hit.municipality.parishCount)}</span>
+                        <span className="block text-[12px] text-graphite">{regionLabel(hit.municipality.region, hit.municipality.regionName, locale)} · {t.municipalityCount(hit.municipality.parishCount)}</span>
                       </>
                     ) : (
                       <>
                         <span className="block text-[15px] font-semibold text-ink">{hit.parish.name}</span>
-                        <span className="block text-xs text-stone-500">
+                        <span className="block text-[12px] text-graphite">
                           {hit.underMunicipality ? t.underMunicipality : `${hit.parish.municipalityName} · ${regionLabel(hit.parish.region, hit.parish.regionName, locale)}`}
                         </span>
                       </>
@@ -331,12 +331,12 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
               })}
             </ul>
             {hidden > 0 && (
-              <p aria-hidden="true" className="border-t border-line px-4 py-2 text-xs text-stone-600">{countLine}</p>
+              <p aria-hidden="true" className="border-t border-grid px-4 py-2 text-[12px] text-graphite">{countLine}</p>
             )}
             </div>
           )}
           {showPanel && (
-            <div className="absolute left-0 right-0 top-full z-30 mt-1 rounded-none border border-line bg-cream px-4 py-3 text-sm text-stone-600 shadow-[0_8px_24px_rgba(18,47,44,0.12)]">
+            <div className="absolute left-0 right-0 top-full z-30 mt-1 border border-ink bg-paper px-4 py-3 text-sm text-graphite">
               {failed ? (
                 <p>
                   {t.error}{' '}
@@ -361,7 +361,7 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
             // While it locates the button stays focusable (aria-disabled, not disabled), so focus does not fall to the page (A11Y3-01).
             disabled={disabled}
             aria-disabled={locating === 'busy' || undefined}
-            className="inline-flex min-h-12 items-center gap-2 rounded-none border border-line bg-cream px-4 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-parchment disabled:opacity-50 aria-disabled:cursor-wait aria-disabled:opacity-50"
+            className="inline-flex min-h-12 items-center gap-2 border border-rule bg-paper px-4 text-[15px] font-semibold text-ink transition-colors duration-150 hover:bg-field disabled:opacity-50 aria-disabled:cursor-wait aria-disabled:opacity-50"
           >
             <LocateFixed aria-hidden="true" className="h-4 w-4" />
             {locating === 'busy' ? t.locating : t.locate}
@@ -373,7 +373,7 @@ export function ParishSearch({ locale, label, placeholder, withLocation, disable
         {typed && index ? (hits.length === 0 ? t.none : countLine) : ''}
       </p>
       {withLocation && (
-        <p className={`mt-1.5 text-xs ${locating === 'far' || locating === 'denied' ? 'font-semibold text-ink' : 'text-stone-500'}`} aria-live="polite">{locationMessage}</p>
+        <p className={`mt-1.5 text-[12px] ${locating === 'far' || locating === 'denied' ? 'font-semibold text-ink' : 'text-graphite'}`} aria-live="polite">{locationMessage}</p>
       )}
     </div>
   );

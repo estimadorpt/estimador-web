@@ -62,15 +62,15 @@ function Description({ table, name, column, locale }: { table: 'persons' | 'hous
   return (
     <>
       {text}
-      {edited && <span className="ml-1 text-xs text-stone-500">{pt ? '(texto revisto pelo site)' : '(wording revised by the site)'}</span>}
-      {note && <span role="note" className="mt-1.5 block border-l-2 border-amber-500 pl-2.5 text-xs leading-relaxed text-stone-700">{note[locale]}</span>}
+      {edited && <span className="ml-1 text-[12px] text-graphite">{pt ? '(texto revisto pelo site)' : '(wording revised by the site)'}</span>}
+      {note && <span role="note" className="mt-1.5 block border-l-2 border-ink pl-2.5 text-[12.5px] leading-relaxed text-ink"><b className="font-semibold">{pt ? 'Nota do site. ' : 'Site note. '}</b>{note[locale]}</span>}
       {column.label_map && (
-        <span className="mt-1 block text-xs text-stone-500">
+        <span className="mt-1 block text-[12px] text-graphite">
           {pt ? 'Etiquetas: ' : 'Labels: '}<code className="font-mono">label_maps.{column.label_map}</code>
         </span>
       )}
       {siteMap && (
-        <span className="mt-1 block text-xs leading-relaxed text-stone-600">
+        <span className="mt-1 block text-[12px] leading-relaxed text-graphite">
           <span className="font-semibold text-ink">{pt ? 'Etiquetas (do site; o ficheiro ainda não as tem): ' : 'Labels (from the site; the file does not carry them yet): '}</span>
           {siteMap.map((entry, i) => (
             <span key={entry.code}>{i > 0 && ' · '}<code className="font-mono">{entry.code}</code> {entry.label[locale]}</span>
@@ -87,14 +87,14 @@ function Table({ table, title, columns, locale }: { table: 'persons' | 'househol
   return (
     <>
       {/* Phones: one stacked entry per column, so the description wraps under the name instead of hiding behind a sideways scroll (PRO2-V02). */}
-      <dl className="divide-y divide-line sm:hidden">
+      <dl className="divide-y divide-grid sm:hidden">
         {entries.map(([name, column]) => (
-          <div key={name} className="px-3 py-3">
+          <div key={name} className="py-3">
             <dt className="flex flex-wrap items-baseline gap-x-2 font-mono text-[13px] text-ink">
               <span className="font-semibold [overflow-wrap:anywhere]">{name}</span>
-              <span className="text-stone-500">{pt ? 'origem' : 'provenance'} {column.provenance}</span>
+              <span className="text-graphite">{pt ? 'origem' : 'provenance'} {column.provenance}</span>
             </dt>
-            <dd className="mt-1 text-sm leading-relaxed text-stone-700">
+            <dd className="mt-1 text-sm leading-relaxed text-ink">
               <Description table={table} name={name} column={column} locale={locale} />
             </dd>
           </div>
@@ -106,16 +106,16 @@ function Table({ table, title, columns, locale }: { table: 'persons' | 'househol
           <thead>
             <tr>
               {[pt ? 'Coluna' : 'Column', pt ? 'Origem' : 'Provenance', pt ? 'Descrição (em inglês)' : 'Description'].map(header => (
-                <th key={header} scope="col" className="sticky top-0 border-b-2 border-ink bg-cream px-3 py-2 text-left text-[12px] font-semibold text-graphite">{header}</th>
+                <th key={header} scope="col" className="sticky top-0 border-b border-ink bg-paper px-3 py-2 text-left text-[12px] font-normal text-graphite first:pl-0">{header}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {entries.map(([name, column]) => (
               <tr key={name} className="align-top">
-                <th scope="row" className="whitespace-nowrap border-b border-line px-3 py-2 text-left font-mono text-[13px] font-normal text-ink">{name}</th>
-                <td className="whitespace-nowrap border-b border-line px-3 py-2 font-mono text-[13px] text-ink">{column.provenance}</td>
-                <td className="min-w-[18rem] border-b border-line px-3 py-2 leading-relaxed text-stone-700">
+                <th scope="row" className="whitespace-nowrap border-b border-grid py-2 pl-0 pr-3 text-left font-mono text-[13px] font-normal text-ink">{name}</th>
+                <td className="whitespace-nowrap border-b border-grid px-3 py-2 font-mono text-[13px] text-ink">{column.provenance}</td>
+                <td className="min-w-[18rem] border-b border-grid px-3 py-2 leading-relaxed text-ink">
                   <Description table={table} name={name} column={column} locale={locale} />
                 </td>
               </tr>
@@ -138,15 +138,15 @@ export function ColumnDictionary({ dictionary, locale }: {
     { key: 'households' as const, title: pt ? 'Agregados' : 'Households', columns: dictionary.households },
   ];
   return (
-    <div className="space-y-4">
+    <div className="border-b border-rule">
       {groups.map(group => (
         <Disclosure
           key={group.key}
-          className="rounded-2xl border border-line bg-cream"
-          summaryClassName="w-full px-5 py-1.5"
-          summary={<>{group.title} <span className="font-normal text-stone-500">· {Object.keys(group.columns).length} {pt ? 'colunas' : 'columns'}</span></>}
+          className="border-t border-rule"
+          summaryClassName="w-full py-1.5"
+          summary={<>{group.title} <span className="font-normal text-graphite">· {Object.keys(group.columns).length} {pt ? 'colunas' : 'columns'}</span></>}
         >
-          <div className="border-t border-line p-2 md:p-3">
+          <div className="border-t border-grid pb-3">
             <Table table={group.key} title={group.title} columns={group.columns} locale={locale} />
           </div>
         </Disclosure>

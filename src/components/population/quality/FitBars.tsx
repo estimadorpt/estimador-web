@@ -1,5 +1,5 @@
 import { ChartTable } from '@/components/viz/ChartTable';
-import { ACCENT, FURNITURE } from '@/components/viz/theme';
+import { BarMark } from '@/components/population/charts';
 
 export interface FitRow {
   key: string;
@@ -40,11 +40,10 @@ export function FitBars({ rows, caption, columns, noteColumn, max }: {
           <li key={row.key} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 sm:grid-cols-[220px_minmax(0,1fr)_64px]">
             <span className="min-w-0 text-sm font-semibold text-ink">
               {row.label}
-              {row.note && <span className="block text-xs font-normal text-stone-500">{row.note}</span>}
+              {row.note && <span className="block text-[12px] font-normal text-graphite">{row.note}</span>}
             </span>
-            <span className="order-3 col-span-2 h-2.5 overflow-hidden rounded-none sm:order-none sm:col-span-1" style={{ backgroundColor: FURNITURE.track }} aria-hidden="true">
-              <span className="block h-full rounded-none" style={{ width: `${Math.max(1.5, (row.value / top) * 100)}%`, backgroundColor: ACCENT }} />
-            </span>
+            {/* An ink bar on the shared scale rule, no track (ProbBar). */}
+            <BarMark fraction={Math.max(0.015, row.value / top)} className="order-3 col-span-2 sm:order-none sm:col-span-1" />
             <span className="text-right text-sm font-bold tabular-nums text-ink">{row.display}</span>
           </li>
         ))}

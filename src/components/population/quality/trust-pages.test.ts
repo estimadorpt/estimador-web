@@ -129,9 +129,10 @@ describe('methodology headings (MR2-10, PRO2-11, PRO2-13, POP2-ACC-04)', () => {
     const text = mdx(locale);
     const headings = [...text.matchAll(/^## (.+)$/gm)].map(match => match[1]);
 
-    it(`${locale}: every section heading is a question and has an anchor; the shared anchors exist`, () => {
+    it(`${locale}: every section heading is a statement and has an anchor; the shared anchors exist`, () => {
       expect(headings.length).toBeGreaterThan(6);
-      for (const heading of headings) expect(heading, heading).toMatch(/\?$/);
+      // Findings and statements, not questions (the Instrumento design language).
+      for (const heading of headings) expect(heading, heading).not.toMatch(/\?/);
       const slugs = headings.map(heading => headingSlug(heading));
       for (const anchor of Object.values(METHODOLOGY_ANCHORS)) expect(slugs).toContain(anchor[locale]);
       expect(new Set(slugs).size).toBe(slugs.length);
