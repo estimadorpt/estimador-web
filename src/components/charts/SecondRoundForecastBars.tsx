@@ -58,7 +58,7 @@ export function SecondRoundForecastBars({
                 <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: candidate.color }} />
                 <span className="text-sm font-medium text-stone-800">{candidate.label}</span>
                 {index === 0 && !candidate.isBlankNull && (
-                  <span className="text-[11px] text-stone-500 uppercase tracking-wide">{translations.leading}</span>
+                  <span className="text-[11px] text-stone-500">{translations.leading}</span>
                 )}
               </div>
               <span className="text-sm font-semibold text-stone-900 tabular-nums">{formatPercent(candidate.mean)}</span>

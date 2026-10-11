@@ -95,7 +95,7 @@ function SideColumn({
       <div className="px-4 py-3 border-b border-stone-100">
         <div className="flex items-center gap-1.5 mb-2">
           <Stethoscope className="w-3.5 h-3.5 text-stone-500" />
-          <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+          <span className="text-[12px] font-semibold text-graphite">
             {pt ? "Indisponíveis" : "Unavailable"}
           </span>
           {absencesStatus === "current" && side.injurySummary?.share_of_squad != null && (
@@ -148,7 +148,7 @@ function SideColumn({
 
       {/* Top players by SAR */}
       <div className="px-4 py-3">
-        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">
+        <div className="text-[12px] font-semibold text-graphite mb-2">
           {pt ? "Finalização (SAR)" : "Finishing (SAR)"}
         </div>
         <p className="text-[11px] text-stone-500 mb-2 leading-relaxed">
@@ -187,7 +187,7 @@ function SideColumn({
                       {codes[p.position] ?? p.position}
                     </span>
                     {out && (
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-red-700">
+                      <span className="text-[12px] font-semibold text-graphite text-red-700">
                         {pt ? "fora" : "out"}
                       </span>
                     )}

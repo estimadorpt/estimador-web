@@ -60,7 +60,7 @@ export default async function TopicsPage({
           <Link
             href="/artigos"
             locale={locale}
-            className="text-xs font-bold uppercase tracking-wider text-stone-500 hover:text-stone-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className="text-xs font-bold text-stone-500 hover:text-stone-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
             ← {t('articles.backToArticles')}
           </Link>

@@ -57,7 +57,7 @@ export async function FoodBasketStory({
       {/* tracked items: diverging y/y bars + 5y cumulative column */}
       {items.length > 0 && (
         <div>
-          <div className="grid grid-cols-[7rem_1fr_3.4rem_3.4rem] items-center gap-2 mb-1 text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="grid grid-cols-[7rem_1fr_3.4rem_3.4rem] items-center gap-2 mb-1 text-[12px] font-semibold text-graphite">
             <span />
             <span />
             <span className="text-right">{t('yoy')}</span>
@@ -117,7 +117,7 @@ export async function FoodBasketStory({
       {cum?.rows && cum.rows.length > 0 && (
         <div className="mt-4 border-t border-stone-100 pt-3">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            <span className="text-[12px] font-semibold text-graphite">
               {t('foodCumTitle', { years: cum.window_years ?? 5 })}
             </span>
             {cum.badge && (

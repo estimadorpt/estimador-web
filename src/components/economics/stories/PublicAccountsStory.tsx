@@ -87,12 +87,12 @@ export async function PublicAccountsStory({
         {/* rolling-12m tax receipts, nominal + real */}
         {taxes.length > 0 && (
           <div>
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">
+            <h4 className="text-[12px] font-semibold text-graphite mb-2">
               {t('paTaxesTitle', {
                 month: fmtMonthLoc(taxes[0]?.period, locale),
               })}
             </h4>
-            <div className="grid grid-cols-[4rem_1fr_4.2rem_4.2rem] items-center gap-x-2 gap-y-0 mb-1 text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <div className="grid grid-cols-[4rem_1fr_4.2rem_4.2rem] items-center gap-x-2 gap-y-0 mb-1 text-[12px] font-semibold text-graphite">
               <span />
               <span className="text-right">M€ (12m)</span>
               <span className="text-right">{t('paNominal')}</span>
@@ -137,7 +137,7 @@ export async function PublicAccountsStory({
         {/* Maastricht debt level + 24m path */}
         {debt && (
           <div>
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">
+            <h4 className="text-[12px] font-semibold text-graphite mb-2">
               {t('paDebtTitle', { month: fmtMonthLoc(debt.period, locale) })}
             </h4>
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">

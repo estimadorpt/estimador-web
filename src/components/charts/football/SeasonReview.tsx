@@ -121,7 +121,7 @@ export function FinalTable({
   const luck = new Map(data.luck.map((r) => [r.team, r]));
   const relegated = new Set(data.relegated);
 
-  const th = "text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2";
+  const th = "text-[12px] font-semibold text-graphite py-2";
   // Numbers need air between them on a phone: at 360 px "13 11 10" ran
   // together as "131110" (audit UXM-V01). Draws and defeats drop below sm.
   const num = "py-2 pl-2 text-right tabular-nums";
@@ -642,13 +642,13 @@ export function ReportCard({
             <tr className="border-b border-stone-300">
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left"
+                className="text-[12px] font-semibold text-graphite py-2 text-left"
               >
                 {pt ? "Jornada" : "Matchday"}
               </th>
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-right w-20"
+                className="text-[12px] font-semibold text-graphite py-2 text-right w-20"
               >
                 {pt
                   ? `${teamDisplayName(rc.champion)} campeão`
@@ -656,7 +656,7 @@ export function ReportCard({
               </th>
               <th
                 scope="col"
-                className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left pl-4"
+                className="text-[12px] font-semibold text-graphite py-2 text-left pl-4"
               >
                 {pt ? "Erro médio nos pontos finais" : "Mean error on final points"}
               </th>

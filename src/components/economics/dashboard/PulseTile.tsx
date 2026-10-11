@@ -156,7 +156,7 @@ export async function PulseTile({
       {/* ---- LEAD: the ANCHOR level (BdP Coincident Activity) ---------------- */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-5 md:gap-8">
         <div className="md:col-span-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[12px] font-semibold text-graphite mb-1">
             {t('pulseAnchorTitle')}
           </div>
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -192,7 +192,7 @@ export async function PulseTile({
 
         {/* ---- TILT: small directional chip + combined read (secondary) ------ */}
         <div className="md:col-span-2 mt-4 md:mt-0 md:border-l md:border-stone-100 md:pl-6">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[12px] font-semibold text-graphite mb-1">
             {t('pulseTiltTitle')}
           </div>
           <div
@@ -215,7 +215,7 @@ export async function PulseTile({
 
           {isNum(data?.combined_read) && (
             <div className="mt-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-0.5">
+              <div className="text-[12px] font-semibold text-graphite mb-0.5">
                 {t('pulseCombinedTitle')}
               </div>
               {/* When the producer marks render_as='direction', the combined
@@ -235,7 +235,7 @@ export async function PulseTile({
       {history.length >= 2 && (
         <div className="mt-5 border-t border-stone-100 pt-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
-            <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <h3 className="text-[12px] font-semibold text-graphite">
               {t('pulseWeeklyTitle')}
             </h3>
             <span className="text-[11px] text-stone-400">{t('pulseWeeklyNote')}</span>

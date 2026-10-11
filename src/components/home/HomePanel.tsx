@@ -11,7 +11,7 @@ export function HomePanel({ children, labelledBy, className = '' }: { children: 
 
 export function Kicker({ children, pill }: { children: ReactNode; pill?: ReactNode }) {
   return (
-    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[12px] font-bold uppercase tracking-wide text-ink">
+    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[12px] font-bold text-ink">
       <span>{children}</span>
       {pill && <span className="font-medium normal-case tracking-normal text-stone-500">{pill}</span>}
     </p>

@@ -27,7 +27,7 @@ export async function UnavailableTile({
           <h2 className="text-base tracking-tight text-stone-500 md:text-lg">
             {title}
           </h2>
-          <span className="inline-block rounded bg-stone-200 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+          <span className="inline-block rounded bg-stone-200 px-1.5 py-0.5 text-[12px] font-semibold text-graphite">
             {t('unavailableBadge')}
           </span>
         </div>

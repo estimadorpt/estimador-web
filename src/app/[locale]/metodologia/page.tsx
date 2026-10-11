@@ -151,7 +151,7 @@ export default async function MethodologyPage({
               <div key={area.href} id={area.href === '/eleicoes/metodologia' ? 'eleicoes' : undefined} className="py-5">
                 {/* Old shared links (/metodologia#eleicoes, #segunda-volta-2026) land on the elections row. */}
                 {area.href === '/eleicoes/metodologia' && <span id="segunda-volta-2026" className="block" />}
-                <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">{area.label}</p>
+                <p className="text-[12px] font-semibold text-graphite">{area.label}</p>
                 <Link href={area.href} locale={locale} className="mt-2 inline-flex min-h-11 items-center text-lg font-bold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">
                   {/* One inline run, so a wrapped question keeps its arrow on its last line. */}
                   <span>{area.question}&nbsp;<span aria-hidden="true">→</span></span>

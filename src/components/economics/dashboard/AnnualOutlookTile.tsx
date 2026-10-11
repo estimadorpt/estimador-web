@@ -171,7 +171,7 @@ export async function AnnualOutlookTile({
       {haveStrip && (
         <div className="mt-5">
           <div className="flex items-baseline justify-between mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[12px] font-semibold text-graphite">
               {t('annualStripTitle')}
             </span>
             <span className="text-[11px] text-stone-400">{t('annualStripUnits')}</span>
@@ -332,7 +332,7 @@ export async function AnnualOutlookTile({
       {/* ---- consensus inline list (accessible, exact values + dates) --------- */}
       {dots.length > 0 && (
         <div className="mt-2">
-          <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1.5">
+          <h3 className="text-[12px] font-semibold text-graphite mb-1.5">
             {t('annualConsensusTitle')}
           </h3>
           <ul className="flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-stone-500">
@@ -359,7 +359,7 @@ export async function AnnualOutlookTile({
       <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-px bg-stone-200 border border-stone-200">
         {ladderItems.map((item, i) => (
           <div key={`l-${i}`} className="bg-cream p-3">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <div className="text-[12px] font-semibold text-graphite">
               {item.label}
             </div>
             <div className="text-2xl font-display font-extrabold tabular-nums text-stone-800 mt-0.5">

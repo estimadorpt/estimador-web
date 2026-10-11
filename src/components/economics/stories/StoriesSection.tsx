@@ -43,7 +43,7 @@ export async function StoriesSection({
       <div className="border-t border-stone-200 pt-8">
         <div className="flex items-center gap-2 mb-1">
           <Newspaper className="w-4 h-4 text-stone-400" aria-hidden />
-          <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <span className="text-[12px] font-semibold text-graphite">
             {t('storiesEyebrow')}
           </span>
         </div>

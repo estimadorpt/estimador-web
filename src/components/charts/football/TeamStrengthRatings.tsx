@@ -73,7 +73,7 @@ export function TeamStrengthRatings({ strengths, labels }: TeamStrengthRatingsPr
 
   const trackHead = (label: string) => (
     <div className="flex-1">
-      <div className="text-center text-[11px] font-bold uppercase tracking-wider text-stone-600">{label}</div>
+      <div className="text-center text-[12px] font-semibold text-graphite">{label}</div>
       <div className="flex justify-between text-[11px] text-stone-600">
         <span><span aria-hidden="true">← </span>{worse}</span>
         <span>{pt ? "média" : "average"}</span>

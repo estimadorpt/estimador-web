@@ -401,7 +401,7 @@ export function PlayerRatingsHub({
       (r.range !== null && r.range < 0.02);
     return (
       <div className="mt-6 border-t border-stone-200 pt-4 max-w-3xl">
-        <h3 className="text-xs font-bold uppercase tracking-wide sm:tracking-wider text-stone-500 mb-1">
+        <h3 className="text-xs font-bold sm:tracking-wider text-stone-500 mb-1">
           {pt ? "A distribuição por posição" : "The distribution by position"}
         </h3>
         <p className="text-[11px] text-stone-500 mb-3 leading-relaxed">
@@ -413,19 +413,19 @@ export function PlayerRatingsHub({
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-stone-300 text-left">
-              <th className="py-1.5 pr-2 sm:pr-3 font-medium text-[11px] uppercase tracking-wide sm:tracking-wider text-stone-500">
+              <th className="py-1.5 pr-2 sm:pr-3 font-medium text-[12px] text-graphite sm:tracking-wider text-stone-500">
                 {pt ? "Posição" : "Position"}
               </th>
-              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[11px] uppercase tracking-wide sm:tracking-wider text-stone-500">
+              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[12px] text-graphite sm:tracking-wider text-stone-500">
                 n
               </th>
-              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[11px] uppercase tracking-wide sm:tracking-wider text-stone-500">
+              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[12px] text-graphite sm:tracking-wider text-stone-500">
                 {pt ? "mediana" : "median"}
               </th>
-              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[11px] uppercase tracking-wide sm:tracking-wider text-stone-500">
+              <th className="py-1.5 px-1.5 sm:px-2 text-right font-medium text-[12px] text-graphite sm:tracking-wider text-stone-500">
                 {pt ? "amplitude" : "range"}
               </th>
-              <th className="py-1.5 pl-1.5 sm:pl-2 text-right font-medium text-[11px] uppercase tracking-wide sm:tracking-wider text-stone-500">
+              <th className="py-1.5 pl-1.5 sm:pl-2 text-right font-medium text-[12px] text-graphite sm:tracking-wider text-stone-500">
                 <span className="sm:hidden">{pt ? "distintos" : "distinct"}</span>
                 <span className="hidden sm:inline">{pt ? "valores distintos" : "distinct values"}</span>
               </th>
@@ -446,7 +446,7 @@ export function PlayerRatingsHub({
                     {/* On its own line and unbroken, so "Guarda-redes" and the
                         badge never split over three lines (audit UXM3-17). */}
                     {flat && (
-                      <span className="mt-0.5 block w-fit whitespace-nowrap text-[11px] uppercase tracking-wide bg-amber-50 text-amber-700 px-1 py-px">
+                      <span className="mt-0.5 block w-fit whitespace-nowrap text-[12px] text-graphite bg-amber-50 text-amber-700 px-1 py-px">
                         {pt ? "não medido" : "not measured"}
                       </span>
                     )}
@@ -503,7 +503,7 @@ export function PlayerRatingsHub({
       <section className="mb-12 max-w-3xl">
         {showHeading && (
           <>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">
+            <p className="text-[12px] font-semibold text-graphite mb-2">
               {pt ? "Jogadores" : "Players"}
             </p>
             <h1 className="text-3xl sm:text-4xl tracking-tight text-stone-900 mb-4">
@@ -876,7 +876,7 @@ export function PlayerRatingsHub({
                 <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 border-t border-stone-200 pt-4 max-w-3xl">
                   {defNumbers.map((d) => (
                     <div key={d.label}>
-                      <dt className="text-[11px] uppercase tracking-wider text-stone-500">
+                      <dt className="text-[12px] text-graphite">
                         {d.label}
                       </dt>
                       <dd className="text-sm font-semibold tabular-nums text-stone-800">
@@ -890,7 +890,7 @@ export function PlayerRatingsHub({
                 <dl className="mt-4 space-y-2 max-w-3xl">
                   {defText.map((d) => (
                     <div key={d.label}>
-                      <dt className="text-[11px] uppercase tracking-wider text-stone-500">
+                      <dt className="text-[12px] text-graphite">
                         {d.label}
                       </dt>
                       <dd className="text-xs text-stone-600 leading-relaxed">

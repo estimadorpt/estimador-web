@@ -59,7 +59,7 @@ export function SecondRoundWinnerCards({
             {candidateA.name}
           </h3>
           <ProbabilityFigure probability={candidateA.win_probability} locale={locale} className="block text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2" />
-          <div className="text-xs uppercase tracking-wide text-stone-500 mb-4">
+          <div className="text-xs text-stone-500 mb-4">
             {translations.winProbability}
           </div>
           {validVotesA && (
@@ -68,7 +68,7 @@ export function SecondRoundWinnerCards({
                 <span className="font-semibold">{formatPercent(validVotesA.mean)}</span>
                 <span className="text-stone-500 ml-1">({formatCI(validVotesA.ci_lower, validVotesA.ci_upper)})</span>
               </div>
-              <div className="text-xs text-stone-500 uppercase tracking-wide">
+              <div className="text-xs text-stone-500">
                 {translations.validVoteShare}
               </div>
               <div className="text-[11px] text-stone-500">
@@ -90,7 +90,7 @@ export function SecondRoundWinnerCards({
             {candidateB.name}
           </h3>
           <ProbabilityFigure probability={candidateB.win_probability} locale={locale} className="block text-4xl md:text-5xl text-ink tabular-nums font-display font-extrabold mb-2" />
-          <div className="text-xs uppercase tracking-wide text-stone-500 mb-4">
+          <div className="text-xs text-stone-500 mb-4">
             {translations.winProbability}
           </div>
           {validVotesB && (
@@ -99,7 +99,7 @@ export function SecondRoundWinnerCards({
                 <span className="font-semibold">{formatPercent(validVotesB.mean)}</span>
                 <span className="text-stone-500 ml-1">({formatCI(validVotesB.ci_lower, validVotesB.ci_upper)})</span>
               </div>
-              <div className="text-xs text-stone-500 uppercase tracking-wide">
+              <div className="text-xs text-stone-500">
                 {translations.validVoteShare}
               </div>
               <div className="text-[11px] text-stone-500">

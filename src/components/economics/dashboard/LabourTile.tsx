@@ -124,7 +124,7 @@ export async function LabourTile({
         <span className="text-sm text-stone-500">{t('labourUrLabel')}</span>
         <StatusBadge kind="reading" label={t('badgeReading')} title={t('badgeReadingDef')} />
         <span
-          className={`inline-block text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 ${verdictClasses}`}
+          className={`inline-block text-[12px] font-semibold text-graphite px-1.5 py-0.5 ${verdictClasses}`}
         >
           {verdictWord}
         </span>
@@ -146,7 +146,7 @@ export async function LabourTile({
       {/* 3m changes + expectations — divider grid, no cards */}
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-stone-200">
         <div className="bg-cream p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[12px] font-semibold text-graphite">
             {t('labourUr3m')}
           </div>
           <div
@@ -168,7 +168,7 @@ export async function LabourTile({
         </div>
 
         <div className="bg-cream p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[12px] font-semibold text-graphite">
             {t('labourIefp3m')}
           </div>
           <div
@@ -191,7 +191,7 @@ export async function LabourTile({
         </div>
 
         <div className="bg-cream p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[12px] font-semibold text-graphite">
             {t('labourEmpExp')}
           </div>
           <div

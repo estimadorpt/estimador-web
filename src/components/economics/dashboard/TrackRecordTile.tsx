@@ -62,7 +62,7 @@ export async function TrackRecordTile({
 
       {/* ---- era 1: backtest ---------------------------------------------------- */}
       <div className="mt-5">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-stone-600">
+        <h3 className="text-[12px] font-semibold text-graphite">
           {t('trackBacktestTitle')}
         </h3>
         {(() => {
@@ -75,19 +75,19 @@ export async function TrackRecordTile({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b-2 border-stone-300 text-left">
-                  <th className="py-1.5 pr-3 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                  <th className="py-1.5 pr-3 text-[12px] font-semibold text-graphite">
                     {t('trackHorizon')}
                   </th>
-                  <th className="py-1.5 pr-3 text-[11px] font-bold uppercase tracking-wider text-stone-500 text-right">
+                  <th className="py-1.5 pr-3 text-[12px] font-semibold text-graphite text-right">
                     {t('trackN')}
                   </th>
-                  <th className="py-1.5 pr-3 text-[11px] font-bold uppercase tracking-wider text-stone-500 text-right">
+                  <th className="py-1.5 pr-3 text-[12px] font-semibold text-graphite text-right">
                     {t('trackRelFirst')}
                   </th>
-                  <th className="py-1.5 pr-3 text-[11px] font-bold uppercase tracking-wider text-stone-500 text-right">
+                  <th className="py-1.5 pr-3 text-[12px] font-semibold text-graphite text-right">
                     {t('trackRelRevised')}
                   </th>
-                  <th className="py-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500 text-right">
+                  <th className="py-1.5 text-[12px] font-semibold text-graphite text-right">
                     {t('trackHit80')}
                   </th>
                 </tr>
@@ -141,7 +141,7 @@ export async function TrackRecordTile({
 
       {/* ---- era 2: live --------------------------------------------------------- */}
       <div className="mt-5 border-t border-stone-100 pt-4">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-stone-600">
+        <h3 className="text-[12px] font-semibold text-graphite">
           {t('trackLiveTitle')}
         </h3>
         {(() => {

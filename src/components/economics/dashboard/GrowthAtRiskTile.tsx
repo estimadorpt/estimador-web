@@ -104,7 +104,7 @@ export async function GrowthAtRiskTile({
         >
           {fmtSignedPct(q05)}
         </span>
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">
+        <span className="text-[12px] font-semibold text-graphite">
           {t('garDownsideRange')}
         </span>
         <StatusBadge kind="risk" label={t('badgeRisk')} title={t('badgeRiskDef')} />
@@ -312,7 +312,7 @@ export async function GrowthAtRiskTile({
       {/* compact downside / median / upside read-out (tabular, null-safe) */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
         <div className="rounded-lg border border-stone-200 p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[12px] font-semibold text-graphite mb-1">
             {t('garDownsideRange')}
           </div>
           <div
@@ -323,7 +323,7 @@ export async function GrowthAtRiskTile({
           </div>
         </div>
         <div className="rounded-lg border border-stone-200 p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[12px] font-semibold text-graphite mb-1">
             {t('garMedian')}
           </div>
           <div className="text-lg font-bold tabular-nums text-stone-500">
@@ -331,7 +331,7 @@ export async function GrowthAtRiskTile({
           </div>
         </div>
         <div className="rounded-lg border border-stone-200 p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <div className="text-[12px] font-semibold text-graphite mb-1">
             {t('garUpsideRange')}
           </div>
           <div className="text-lg font-bold tabular-nums text-stone-500">

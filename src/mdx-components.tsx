@@ -38,7 +38,7 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
       </h3>
     ),
     h4: ({ children }) => (
-      <h4 className="font-sans text-[11px] font-bold uppercase tracking-wider text-stone-500 mt-8 mb-2">
+      <h4 className="font-sans text-[12px] font-semibold text-graphite mt-8 mb-2">
         {children}
       </h4>
     ),
@@ -80,7 +80,7 @@ export function getMDXComponents(components: MDXComponents = {}): MDXComponents 
     ),
     table: ({ children }) => <MdxTable>{children}</MdxTable>,
     th: ({ children }) => (
-      <th className="border-b-2 border-stone-800 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">
+      <th className="border-b-2 border-stone-800 px-3 py-2 text-left text-[12px] font-semibold text-graphite">
         {children}
       </th>
     ),

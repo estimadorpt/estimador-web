@@ -176,7 +176,7 @@ export function DecisiveMatches({ matches, race = "both", labels, maxItemsPerTea
   const column = (isTitle: boolean, groups: typeof titleGroups) => (
     <div>
       {both && (
-        <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-stone-500">
+        <h3 className="mb-3 text-xs font-bold text-stone-500">
           {isTitle ? labels.titleRaceSection : labels.relegationSection}
         </h3>
       )}

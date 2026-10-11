@@ -75,13 +75,13 @@ export function VizShowcase({ pt }: { pt: boolean }) {
       <DataCard title={pt ? 'Cores de série e de estado' : 'Series and status colours'} subtitle={pt ? 'Validadas sobre creme e sobre floresta: banda de luminosidade, croma, separação para daltonismo e contraste' : 'Validated on cream and on forest: lightness band, chroma, colour-vision separation and contrast'}>
         <div className="grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Séries, por esta ordem, sobre creme' : 'Series, in this order, on cream'}</p>
+            <p className="mb-2 text-[12px] font-semibold text-graphite">{pt ? 'Séries, por esta ordem, sobre creme' : 'Series, in this order, on cream'}</p>
             <div className="flex flex-wrap gap-2">{SERIES.map((c, i) => <div key={c} className="flex flex-col items-center gap-1"><span className="h-10 w-14 rounded-md" style={{ backgroundColor: c }} /><span className="text-[11px] text-stone-500">{i + 1} · {SERIES_NAMES[i]}</span><span className="font-mono text-[11px] text-stone-500">{c}</span></div>)}</div>
-            <p className="mt-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Sobre floresta' : 'On forest'}</p>
+            <p className="mt-2 text-[12px] font-semibold text-graphite">{pt ? 'Sobre floresta' : 'On forest'}</p>
             <div className="mt-1 flex gap-2 rounded-md bg-forest p-2">{SERIES_DARK.map(c => <span key={c} className="h-8 w-14 rounded-md" style={{ backgroundColor: c }} />)}</div>
           </div>
           <div>
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Estados, sempre com ícone e palavra' : 'Status, always with an icon and a word'}</p>
+            <p className="mb-2 text-[12px] font-semibold text-graphite">{pt ? 'Estados, sempre com ícone e palavra' : 'Status, always with an icon and a word'}</p>
             <div className="flex flex-wrap gap-2">{Object.entries(STATUS).map(([k, c]) => <div key={k} className="flex flex-col items-center gap-1"><span className="h-10 w-14 rounded-md" style={{ backgroundColor: c }} /><span className="text-[11px] text-stone-500">{k}</span></div>)}</div>
             <p className="mt-3 text-xs leading-relaxed text-stone-600">{pt ? 'Nunca mais de quatro séries: a quinta dobra-se em "Outras" ou o gráfico divide-se. A cor segue a entidade, nunca a posição. O texto nunca usa a cor da série.' : 'Never more than four series: the fifth folds into "Others" or the chart is faceted. Colour follows the entity, never its rank. Text never wears the series colour.'}</p>
           </div>

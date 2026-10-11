@@ -1,10 +1,10 @@
 import { Link } from '@/i18n/routing';
 import { ChannelHead, IntervalBand, PosHist, ProbBar, ReadingRule, Ruler } from '@/components/instrument';
 import { ligaTeamSlugs, teamColorOnPaper, teamDisplayName, teamPhoneName } from '@/lib/config/football';
-import { formatInteger, formatKickoffShort, formatPercent, formatPp, formatReadingTime, matchLabel } from '@/lib/football-format';
+import { formatInteger, formatPercent, formatPp, formatReadingTime } from '@/lib/football-format';
 import { titleFinding, titleSeasons } from '@/lib/football-finding';
-import { clubStake, stakeSentence } from '@/lib/football-stakes';
 import { byKickoff } from '@/lib/football-fixtures';
+import { Coupon } from '@/components/football/Coupon';
 import type { LigaPrediction, ScenarioData, TeamDelta } from '@/types/football';
 import type { UpcomingFixture } from '@/lib/utils/football-data-loader';
 
@@ -185,42 +185,17 @@ export function LigaInstrument({ locale, prediction, scenarios, deltas, quantile
           {games.length > 0 && (
             <div>
               <h3 className="text-[19px] leading-[22px]">{pt ? 'Próximos jogos' : 'Next games'}</h3>
-              <table className="mt-1.5 w-full border-collapse text-[14px]">
-                <caption className="sr-only">{pt ? 'Probabilidades de vitória da casa, empate e vitória de fora, e o que cada jogo põe em jogo' : 'Chances of a home win, a draw and an away win, and what each game puts at stake'}</caption>
-                <thead>
-                  <tr className="border-b border-ink text-[12.5px] text-graphite">
-                    <th scope="col" className="pb-1 text-left font-medium">{pt ? 'Jogo, hora de Lisboa' : 'Game, Lisbon time'}</th>
-                    <th scope="col" className="pb-1 text-right font-medium">{pt ? 'Casa' : 'Home'}</th>
-                    <th scope="col" className="pb-1 text-right font-medium">{pt ? 'Empate' : 'Draw'}</th>
-                    <th scope="col" className="pb-1 text-right font-medium">{pt ? 'Fora' : 'Away'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {games.map(g => {
-                    const p = [g.p_home as number, g.p_draw as number, g.p_away as number];
-                    const top = p.indexOf(Math.max(...p));
-                    return [
-                      <tr key={`${g.slug}-1x2`}>
-                        <th scope="row" className="pt-2 pr-2 text-left font-normal">
-                          <span className="block text-[12px] leading-4 text-graphite">
-                            {formatKickoffShort(g.kickoff, locale, { confirmed: g.kickoffConfirmed })}
-                            {g.postponed ? (pt ? ' · jogo em atraso' : ' · postponed game') : ''}
-                          </span>
-                          <Link href={`/desporto/liga/jogo/${g.slug}`} locale={locale} className="name-cut no-underline hover:underline max-sm:inline-flex max-sm:min-h-11 max-sm:items-center">
-                            {matchLabel(teamPhoneName(g.home), teamPhoneName(g.away))}
-                          </Link>
-                        </th>
-                        {p.map((v, i) => (
-                          <td key={i} className={`pt-2 text-right align-bottom ${i === top ? 'disp text-[18px]' : 'text-[14.5px]'}`}>{Math.round(v * 100)}</td>
-                        ))}
-                      </tr>,
-                      <tr key={`${g.slug}-stake`} className="border-b border-grid">
-                        <td colSpan={4} className="pb-2 pt-0.5 text-[12.5px] leading-[17px] text-graphite">{stakeSentence(clubStake(g.scenario), locale)}</td>
-                      </tr>,
-                    ];
-                  })}
-                </tbody>
-              </table>
+              <div className="mt-1.5">
+                <Coupon
+                  locale={locale}
+                  forecastTimestamp={prediction.timestamp}
+                  fixtures={games.map(g => ({
+                    home: g.home, away: g.away, matchday: g.matchday, kickoff: g.kickoff, kickoffConfirmed: g.kickoffConfirmed,
+                    p_home: g.p_home as number, p_draw: g.p_draw as number, p_away: g.p_away as number,
+                    scenario: g.scenario, postponed: g.postponed === true, href: `/desporto/liga/jogo/${g.slug}`,
+                  }))}
+                />
+              </div>
               <p className="mt-2">
                 <Link href="/desporto/liga" locale={locale} className="inline-flex min-h-11 items-center text-[15px] font-semibold underline underline-offset-4">
                   {pt ? 'A Liga inteira: tabela, jogos e clubes' : 'The whole league: table, games and clubs'}

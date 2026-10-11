@@ -156,7 +156,7 @@ export function MatchProbabilityHero({
           </span>
         ) : centre ? (
           // On a phone the names need the width; the kickoff is on the line below.
-          <span className="hidden shrink-0 text-center text-[11px] font-bold uppercase tracking-wider tabular-nums text-stone-500 sm:inline md:text-xs">
+          <span className="hidden shrink-0 text-center text-[12px] font-semibold text-graphite tabular-nums text-stone-500 sm:inline md:text-xs">
             {centre}
           </span>
         ) : null}
@@ -187,7 +187,7 @@ export function MatchProbabilityHero({
           ? kickoffSteps(kickoff, kickoffConfirmed, matchStartedLine(forecastTimestamp, locale), matchPlayedLine(forecastTimestamp, locale))
           : [];
         const shownFromSm = Boolean(centre) && !played && kickoffConfirmed;
-        const line = "mb-4 text-[11px] font-bold uppercase tracking-wider text-stone-500";
+        const line = "mb-4 text-[12px] font-semibold text-graphite";
         // The whole line is the switched node, so no empty margin is left
         // on wide screens before kickoff.
         const initial = <div className={shownFromSm ? `${line} sm:hidden` : line}>{when}</div>;
@@ -199,7 +199,7 @@ export function MatchProbabilityHero({
           />
         );
       })()}
-      {!when && <div className="mb-4 text-[11px] font-bold uppercase tracking-wider text-stone-500">{labels.matchday}</div>}
+      {!when && <div className="mb-4 text-[12px] font-semibold text-graphite">{labels.matchday}</div>}
 
       {played && hasProbs && (
         <p className="mb-4 text-sm text-stone-600">
@@ -244,7 +244,7 @@ export function MatchProbabilityHero({
                   // two are muted, never below AA (UXD3-03).
                   style={{ borderColor: isHappened ? "var(--color-ink)" : dimmed ? "var(--color-line)" : o.rule }}
                 >
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1 break-words">
+                  <div className="text-[12px] font-semibold text-graphite mb-1 break-words">
                     <i aria-hidden="true" className="mr-1.5 inline-block h-2.5 w-2.5 rounded-sm border border-line align-[-1px]" style={{ backgroundColor: o.tone }} />
                     {o.label}
                   </div>
@@ -253,7 +253,7 @@ export function MatchProbabilityHero({
                     <span className="text-lg md:text-2xl font-bold text-stone-500">%</span>
                   </div>
                   {isHappened ? (
-                    <div className="mt-1.5 inline-flex items-center gap-1 rounded bg-ink px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-paper">
+                    <div className="mt-1.5 inline-flex items-center gap-1 rounded bg-ink px-1.5 py-0.5 text-[12px] font-semibold text-graphite text-paper">
                       <Check aria-hidden="true" className="h-3 w-3" />
                       {pt ? "Aconteceu" : "Happened"}
                     </div>

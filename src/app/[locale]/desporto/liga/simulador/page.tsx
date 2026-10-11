@@ -174,7 +174,7 @@ export default async function SimuladorPage({
         <section aria-labelledby="duelo-final-heading" className="border-b border-stone-200 last:border-b-0">
           <div className="max-w-7xl mx-auto px-4 py-10">
             {/* A plain kicker, no icon (UXD2-07). */}
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            <p className="mb-2 text-[12px] font-semibold text-graphite">
               {locale === 'pt' ? 'Outra pergunta' : 'A different question'}
             </p>
             <h2 id="duelo-final-heading" className="mb-3 text-2xl tracking-tight">

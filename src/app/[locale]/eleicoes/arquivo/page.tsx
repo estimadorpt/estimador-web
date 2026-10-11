@@ -82,7 +82,7 @@ export default async function Archive({ params }: { params: Promise<{ locale: st
     />
     <div className="mx-auto w-full max-w-7xl px-4 py-10"><div className="max-w-5xl">
       <section aria-labelledby="archive-choice-title" className="border-b border-line pb-7">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">{pt ? 'Começar por aqui' : 'Start here'}</p>
+        <p className="text-[12px] font-semibold text-graphite text-ink-muted">{pt ? 'Começar por aqui' : 'Start here'}</p>
         <h2 id="archive-choice-title" className="mt-2 text-2xl">{pt ? 'Escolhe uma previsão' : 'Choose a forecast'}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">{pt ? 'Abre a previsão que queres situar no tempo. Encontrarás a data, a volta e as estimativas então publicadas.' : 'Open the forecast you want to place in time. It contains the date, election round and estimates published then.'}</p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">

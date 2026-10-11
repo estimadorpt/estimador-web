@@ -192,7 +192,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 {pt ? 'Esta versão passou nos critérios de publicação?' : 'Did this release pass its gates?'}
               </h2>
               <div role="note" className="max-w-3xl border-l-2 border-amber-500 bg-amber-50 py-4 pl-5 pr-4 text-sm leading-relaxed text-stone-700">
-                <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Antes de ler qualquer número' : 'Before reading any figure'}</p>
+                <p className="mb-1.5 text-[12px] font-semibold text-graphite">{pt ? 'Antes de ler qualquer número' : 'Before reading any figure'}</p>
                 <p className="font-semibold text-ink">{scorecard.honesty_notes[2]?.[locale]}</p>
                 <p className="mt-1.5">
                   {pt
@@ -313,13 +313,13 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
                 <h3 className="text-base font-bold text-ink">{pt ? 'Que tabelas foram usadas?' : 'Which tables were used?'}</h3>
                 <div className="mt-3 grid gap-6 md:grid-cols-2">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Usadas no ajuste e avaliadas' : 'Fitted and scored'}</p>
+                    <p className="text-[12px] font-semibold text-graphite">{pt ? 'Usadas no ajuste e avaliadas' : 'Fitted and scored'}</p>
                     <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-stone-700">
                       {FITTED_TABLES.map(item => <li key={item.en}>{item[locale]}</li>)}
                     </ul>
                   </div>
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Só avaliadas, fora do ajuste' : 'Scored only, not fitted'}</p>
+                    <p className="text-[12px] font-semibold text-graphite">{pt ? 'Só avaliadas, fora do ajuste' : 'Scored only, not fitted'}</p>
                     <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-stone-700">
                       {SCORED_ONLY_TABLES.map(item => <li key={item.en}>{item[locale]}</li>)}
                     </ul>

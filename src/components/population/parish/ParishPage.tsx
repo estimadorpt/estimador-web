@@ -403,7 +403,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
             <a
               href={item.href}
               aria-current={here ? 'location' : undefined}
-              className={`flex min-h-11 items-center rounded-md border-l-2 px-2 py-1.5 leading-snug lg:pointer-fine:min-h-9 transition-colors duration-150 hover:bg-parchment hover:text-ink ${here ? 'border-ink font-semibold text-ink' : 'border-transparent'} ${item.group ? 'mt-2 text-[11px] font-bold uppercase tracking-wide text-stone-500' : here ? '' : 'text-stone-600'}`}
+              className={`flex min-h-11 items-center rounded-md border-l-2 px-2 py-1.5 leading-snug lg:pointer-fine:min-h-9 transition-colors duration-150 hover:bg-parchment hover:text-ink ${here ? 'border-ink font-semibold text-ink' : 'border-transparent'} ${item.group ? 'mt-2 text-[12px] font-semibold text-graphite' : here ? '' : 'text-stone-600'}`}
             >
               {item.label}
             </a>
@@ -490,7 +490,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
           <nav aria-label={pt ? 'Nesta página' : 'On this page'} className="hidden lg:block">
             {/* Pulled left by the links' rule and padding, so the rail's text lines up with the hero's (UXD2-14). */}
             <div className="sticky top-24 -ml-2.5">
-              <p className="mb-1 px-2.5 text-[11px] font-bold uppercase tracking-wide text-stone-500">{pt ? 'Nesta página' : 'On this page'}</p>
+              <p className="mb-1 px-2.5 text-[12px] font-semibold text-graphite">{pt ? 'Nesta página' : 'On this page'}</p>
               {renderToc('', true)}
             </div>
           </nav>
@@ -589,7 +589,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                   <dt className="font-bold text-ink">{pt ? 'Atribuição' : 'Attribution'}</dt>
                   <dd className="text-stone-700">{SHORT_ATTRIBUTION[locale]}</dd>
                 </dl>
-                <p className="mt-5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Citar como' : 'Cite as'}</p>
+                <p className="mt-5 text-[12px] font-semibold text-graphite">{pt ? 'Citar como' : 'Cite as'}</p>
                 <p className="mt-1 break-words text-[15px] leading-relaxed text-ink">{citation}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
                   <CopyButton text={citation} label={pt ? 'Copiar citação' : 'Copy citation'} locale={locale} />

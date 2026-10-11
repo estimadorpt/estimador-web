@@ -180,7 +180,7 @@ function TeamCell({ team, muted = false }: { team: string; muted?: boolean }) {
         {liga2DisplayName(team)}
       </span>
       {isReserveSide(team) && (
-        <span className="text-[11px] uppercase tracking-wider text-stone-500 font-bold flex-shrink-0">
+        <span className="text-[12px] text-graphite font-bold flex-shrink-0">
           B
         </span>
       )}
@@ -212,7 +212,7 @@ export function Liga2FinalTable({
     <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="scroll-cue overflow-x-auto rounded-2xl border border-line bg-cream">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500">
+          <tr className="bg-stone-50 border-b border-stone-200 text-[12px] text-graphite">
             <th className="sticky left-0 z-10 w-8 bg-stone-50 py-2 pl-3 pr-1 text-left font-bold">#</th>
             <th className="sticky left-8 z-10 bg-stone-50 py-2 px-2 text-left font-bold">
               {pt ? "Clube" : "Club"}
@@ -345,7 +345,7 @@ export function Liga2ProbabilityTable({
     <div tabIndex={0} role="region" aria-label={label ?? (pt ? "Tabela" : "Table")} className="scroll-cue overflow-x-auto rounded-2xl border border-line bg-cream">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500">
+          <tr className="bg-stone-50 border-b border-stone-200 text-[12px] text-graphite">
             <th className="sticky left-0 z-10 bg-stone-50 py-2 pl-3 pr-2 text-left font-bold">
               {pt ? "Clube" : "Club"}
             </th>
@@ -693,7 +693,7 @@ export function Liga2Strengths({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-line bg-cream">
-      <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-3 py-2 bg-stone-50 border-b border-stone-200 text-[11px] uppercase tracking-wider text-stone-500 font-bold">
+      <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 px-3 py-2 bg-stone-50 border-b border-stone-200 text-[12px] text-graphite font-bold">
         <span>{pt ? "Clube" : "Club"}</span>
         <span className="w-28 text-center">{pt ? "Ataque" : "Attack"}</span>
         <span className="w-28 text-center">{pt ? "Defesa" : "Defence"}</span>

@@ -105,7 +105,7 @@ export function PresidentialCandidateCards({
               locale={locale}
               className="block text-4xl font-display font-extrabold tabular-nums tracking-tighter text-ink"
             />
-            <div className="text-[11px] text-stone-500 uppercase tracking-wide">
+            <div className="text-[11px] text-stone-500">
               {translations.chanceOfRunoff}
             </div>
           </div>
@@ -121,7 +121,7 @@ export function PresidentialCandidateCards({
                   {formatElectionRange(candidate.forecastData.ci_lower, candidate.forecastData.ci_upper, locale)}
                 </span>
               </div>
-              <div className="text-[11px] text-stone-500 uppercase tracking-wide">
+              <div className="text-[11px] text-stone-500">
                 {translations.voteShare}
               </div>
               <div className="text-[11px] text-stone-500">

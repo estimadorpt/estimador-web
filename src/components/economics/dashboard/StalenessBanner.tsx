@@ -143,7 +143,7 @@ export function StaleAwareNarrative({
   return (
     <section className={`border-l-2 pl-4 ${stale ? 'border-amber-300' : 'border-stone-300'}`}>
       {stale && (
-        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-amber-700">
+        <p className="mb-1 text-[12px] font-semibold text-graphite text-amber-700">
           {t('staleNarrativeNote', { date: dateLabel })}
         </p>
       )}

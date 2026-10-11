@@ -64,7 +64,7 @@ export default async function ArticlesPage({
     return (
       <section className="mb-14 last:mb-0">
         <div className="border-b-2 border-stone-800 pb-2 mb-1">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-stone-800">{heading}</h2>
+          <h2 className="text-xs font-bold text-stone-800">{heading}</h2>
         </div>
         <p className="text-sm text-stone-500 py-3 border-b border-stone-200">{intro}</p>
         <ul>
@@ -91,7 +91,7 @@ export default async function ArticlesPage({
         meta={articles.length > 0 ? (
           <a
             href={`/${locale}/feed.xml`}
-            className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-graphite hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
             <Rss aria-hidden="true" className="w-3.5 h-3.5" />
             {t('articles.feedLink')}
@@ -128,7 +128,7 @@ export default async function ArticlesPage({
             {topics.length > 0 && (
               <section className="mt-14">
                 <div className="border-b-2 border-stone-800 pb-2 mb-1">
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-stone-800">
+                  <h2 className="text-xs font-bold text-stone-800">
                     {t('articles.topicsHeading')}
                   </h2>
                 </div>

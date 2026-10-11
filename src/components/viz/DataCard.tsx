@@ -35,7 +35,7 @@ export function DataCard({ title, subtitle, badge, controls, children, source, u
           <h3 id={titleId} tabIndex={titleId ? -1 : undefined} className="text-lg font-bold tracking-[-0.02em] text-ink md:text-xl">{title}</h3>
           {subtitle && <p className="mt-0.5 text-sm text-stone-500">{subtitle}</p>}
         </div>
-        {badge && <span className="inline-block rounded-md bg-parchment px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-stone-600">{badge}</span>}
+        {badge && <span className="inline-block rounded-md bg-parchment px-2 py-1 text-[12px] font-semibold text-graphite">{badge}</span>}
       </header>
       {controls && <div className="mb-4 flex flex-wrap items-center gap-3">{controls}</div>}
       <div className="min-w-0">{children}</div>

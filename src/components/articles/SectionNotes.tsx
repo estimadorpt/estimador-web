@@ -59,7 +59,7 @@ export async function SectionNotes({
                 locale={locale}
                 className="group block py-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
               >
-                <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-semibold text-graphite">
                   <span className="text-stone-800">
                     {t(article.kind === 'nota' ? 'articles.kindNota' : 'articles.kindExplicador')}
                   </span>

@@ -49,7 +49,7 @@ export async function Subscribe({ variant = 'page', locale }: SubscribeProps) {
       aria-labelledby="subscribe-heading"
     >
       <div className="max-w-2xl">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">
+        <p className="text-[12px] font-semibold text-graphite mb-2">
           {ENDPOINT ? t('eyebrow') : t('eyebrowFeed')}
         </p>
         <h2 id="subscribe-heading" className={`font-semibold text-stone-900 ${compact ? 'text-lg' : 'text-xl'} mb-2`}>

@@ -267,7 +267,7 @@ export function MatchOutcomeImpact({
               <div className="grid grid-cols-3 gap-3">
                 {metrics.map(m => (
                   <div key={m.key}>
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-0.5">
+                    <div className="text-[12px] font-semibold text-graphite mb-0.5">
                       {m.label}
                     </div>
                     <div className="text-xl sm:text-2xl font-display font-extrabold tabular-nums text-stone-900">

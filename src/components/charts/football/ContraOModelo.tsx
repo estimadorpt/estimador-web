@@ -292,7 +292,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
             This card's job is explaining how the scoring works. */}
         <div className="flex items-center gap-2 mb-2">
           <Swords className="w-4 h-4 text-emerald-700" />
-          <h2 className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+          <h2 className="text-[12px] font-semibold text-graphite">
             {t.howItWorks}
           </h2>
         </div>
@@ -325,7 +325,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
           <div className="border border-stone-200 rounded-xl overflow-hidden">
             <div className="grid grid-cols-2 divide-x divide-stone-200">
               <div className="p-4 sm:p-6">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+                <div className="text-[12px] font-semibold text-graphite mb-1">
                   {t.yourScore}
                 </div>
                 <div
@@ -336,7 +336,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
                 </div>
               </div>
               <div className="p-4 sm:p-6">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+                <div className="text-[12px] font-semibold text-graphite mb-1">
                   {t.modelScore}
                 </div>
                 <div
@@ -362,7 +362,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
                     lucky round can top the table, and saying so is better
                     than a minimum-rounds rule that empties it. */}
                 {season.roundsCounted < 3 && (
-                  <span className="ml-1.5 text-[11px] uppercase tracking-wider bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">
+                  <span className="ml-1.5 text-[12px] text-graphite bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">
                     {t.provisional}
                   </span>
                 )}
@@ -429,14 +429,14 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
           >
             <div className="flex items-center gap-2 mb-3">
               <Swords className="w-4 h-4 text-emerald-700" />
-              <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+              <span className="text-[12px] font-semibold text-graphite">
                 {t.title} · Liga Portugal {data.season}
               </span>
             </div>
 
             <div className="flex items-end gap-6 mb-4">
               <div>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                <div className="text-[12px] font-semibold text-graphite">
                   {t.you}
                 </div>
                 <div className="text-4xl font-bold tabular-nums" style={{ color: USER_COLOR }}>
@@ -445,7 +445,7 @@ export function ContraOModelo({ data, locale = "pt", recordNote = null, builtAt 
               </div>
               <div className="text-xl font-bold text-stone-500 pb-2" aria-hidden="true">vs</div>
               <div>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                <div className="text-[12px] font-semibold text-graphite">
                   {t.model}
                 </div>
                 <div className="text-4xl font-bold tabular-nums" style={{ color: MODEL_COLOR }}>
@@ -623,7 +623,7 @@ function RoundPicker({
               {/* confidence */}
               {stored?.pick && (
                 <div className="mt-3" role="group" aria-labelledby={`${finePanelId}-conf`}>
-                  <div id={`${finePanelId}-conf`} className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
+                  <div id={`${finePanelId}-conf`} className="text-[12px] font-semibold text-graphite mb-1.5">
                     {t.confidence}
                   </div>
                   <div className="grid grid-cols-3 gap-2">
@@ -777,7 +777,7 @@ function RoundReview({
             {t.matchday} {round.matchday}
           </span>
           {!score.complete && (
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+            <span className="text-[12px] font-semibold text-graphite text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
               {t.inProgress}
             </span>
           )}

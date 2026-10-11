@@ -106,7 +106,7 @@ function Table({ table, title, columns, locale }: { table: 'persons' | 'househol
           <thead>
             <tr>
               {[pt ? 'Coluna' : 'Column', pt ? 'Origem' : 'Provenance', pt ? 'Descrição (em inglês)' : 'Description'].map(header => (
-                <th key={header} scope="col" className="sticky top-0 border-b-2 border-ink bg-cream px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{header}</th>
+                <th key={header} scope="col" className="sticky top-0 border-b-2 border-ink bg-cream px-3 py-2 text-left text-[12px] font-semibold text-graphite">{header}</th>
               ))}
             </tr>
           </thead>

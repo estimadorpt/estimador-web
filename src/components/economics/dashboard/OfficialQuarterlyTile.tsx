@@ -108,7 +108,7 @@ export async function OfficialQuarterlyTile({
     >
       {/* Headline: deliberately SMALLER than a hero tile, muted stone tone. */}
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">
+        <span className="text-[12px] font-semibold text-graphite">
           {t('officialPoint')}
         </span>
         <span
@@ -138,7 +138,7 @@ export async function OfficialQuarterlyTile({
       {/* Implied YoY: nowcast q/q plus the three published prior quarters. */}
       {isNum(data?.implied_yoy?.point_yoy) && (
         <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">
+          <span className="text-[12px] font-semibold text-graphite">
             {t('officialImpliedYoy')}
           </span>
           <span className="text-lg font-bold tabular-nums text-stone-700">
@@ -158,7 +158,7 @@ export async function OfficialQuarterlyTile({
       {haveBand && (
         <div className="mt-4">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            <span className="text-[12px] font-semibold text-graphite">
               {t('officialBand95')}
             </span>
             {calibrated && (
@@ -277,7 +277,7 @@ export async function OfficialQuarterlyTile({
       {/* Member-weights strip: who carries the combination, drawn to scale. */}
       {data?.combo_weights && Object.keys(data.combo_weights).length > 0 && (
         <div className="mt-5 border-t border-stone-100 pt-4">
-          <h3 className="text-[11px] font-semibold uppercase tracking-wide text-stone-600 mb-2">
+          <h3 className="text-[12px] font-semibold text-graphite mb-2">
             {t('officialWeightsTitle')}
           </h3>
           {(() => {
@@ -376,7 +376,7 @@ export async function OfficialQuarterlyTile({
       {Array.isArray(data?.sector_composites) &&
         data.sector_composites.length > 0 && (
           <div className="mt-5 border-t border-stone-100 pt-4">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wide text-stone-600 mb-2.5">
+            <h3 className="text-[12px] font-semibold text-graphite mb-2.5">
               {t('officialSectorsTitle')}
             </h3>
             <SectorComposites

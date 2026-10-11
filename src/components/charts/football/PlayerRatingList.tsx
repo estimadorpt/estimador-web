@@ -114,30 +114,30 @@ export function PlayerRatingList({
 
   return (
     <div>
-      <p className="sm:hidden mb-1 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+      <p className="sm:hidden mb-1 text-[12px] font-semibold text-graphite">
         {metricHeader}
       </p>
       {/* Column header */}
       <div className="flex items-center gap-2 mb-2 pb-2 border-b border-stone-200">
         <div className="w-6 flex-shrink-0" />
-        <div className="w-24 sm:w-52 flex-shrink-0 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+        <div className="w-24 sm:w-52 flex-shrink-0 text-[12px] font-semibold text-graphite">
           {labels.player}
         </div>
         {/* On a phone the bar column is too narrow for its name, which then
             sits above the list instead (audit UXM-03). */}
-        <div className="flex-1 min-w-0 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+        <div className="flex-1 min-w-0 text-[12px] font-semibold text-graphite">
           <span className="hidden sm:inline">{metricHeader}</span>
         </div>
         {showMovement && (
-          <div className="w-10 flex-shrink-0 text-right text-[11px] font-bold uppercase tracking-wider text-stone-500 hidden sm:block">
+          <div className="w-10 flex-shrink-0 text-right text-[12px] font-semibold text-graphite hidden sm:block">
             {labels.movement}
           </div>
         )}
         <div className="w-[4.5rem] sm:w-28 flex-shrink-0 text-right">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+          <div className="text-[12px] font-semibold text-graphite">
             {valueHeader}
           </div>
-          <div className="text-[11px] uppercase tracking-wider text-stone-500 leading-tight">
+          <div className="text-[12px] text-graphite leading-tight">
             {labels.interval}
           </div>
         </div>
@@ -340,7 +340,7 @@ export function PlayerRatingList({
                 <div className="pl-8 pr-2 pb-3 pt-1 bg-stone-50/60">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-xs">
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
+                      <div className="text-[12px] text-graphite">
                         {labels.interval}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -355,7 +355,7 @@ export function PlayerRatingList({
                     </div>
                     {cells.map((cell) => (
                       <div key={cell.label}>
-                        <div className="text-[11px] uppercase tracking-wider text-stone-500">
+                        <div className="text-[12px] text-graphite">
                           {cell.label}
                         </div>
                         <div className="font-semibold tabular-nums text-stone-800">

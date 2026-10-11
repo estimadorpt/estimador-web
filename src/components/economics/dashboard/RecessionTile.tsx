@@ -132,7 +132,7 @@ function ProbSparkline({
 function ScoreChip({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded border border-stone-200 px-2 py-1.5">
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-stone-400 leading-tight">
+      <div className="text-[12px] font-semibold text-graphite leading-tight">
         {label}
       </div>
       <div className="text-sm font-bold tabular-nums leading-tight mt-0.5 text-stone-700">
@@ -219,7 +219,7 @@ export async function RecessionTile({
 
           {/* track record — calibration & skill stats, shown plainly */}
           <div className="mt-4">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">
+            <h4 className="text-[12px] font-semibold text-graphite mb-2">
               {t('scTitle')}
             </h4>
             <div className="grid grid-cols-2 gap-2">
@@ -292,7 +292,7 @@ export async function RecessionTile({
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="text-sm text-stone-900">{t('sahmTitle')}</h3>
           <span
-            className={`inline-block text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+            className={`inline-block text-[12px] font-semibold text-graphite px-1.5 py-0.5 rounded ${
               sahmTriggered ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'
             }`}
           >

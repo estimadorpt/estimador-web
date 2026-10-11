@@ -127,7 +127,7 @@ export default async function PresidentialArchivePage({
       <section id="forecast" className="bg-paper border-b border-line">
         <div className="max-w-7xl mx-auto px-4 py-7">
           <div className="max-w-3xl">
-            <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500 mb-2">{t('presidential.firstRoundKicker')}</p>
+            <p className="text-[12px] font-semibold text-graphite mb-2">{t('presidential.firstRoundKicker')}</p>
             <h2 className="text-2xl md:text-3xl text-stone-900 mb-3 leading-tight">{t('presidential.firstRoundTitle')}</h2>
             <p className="text-lg text-stone-600 leading-relaxed">
               {t('presidential.firstRoundLede', { date: firstForecast ?? firstElection, probability: formatElectionProbabilityText(winProbabilities.second_round_probability, locale) })}
@@ -267,14 +267,14 @@ export default async function PresidentialArchivePage({
             </div>
 
             <div className="lg:col-span-2 lg:border-l lg:border-stone-200 lg:pl-12">
-              <h3 className="text-sm font-bold text-stone-500 uppercase tracking-wider mb-4">{t('presidential.aboutModel')}</h3>
+              <h3 className="text-sm font-bold text-stone-500 mb-4">{t('presidential.aboutModel')}</h3>
               <div className="space-y-4 text-sm text-stone-600">
                 <p className="leading-relaxed">{t('presidential.modelDescription')}</p>
                 <div className="border-l-2 border-amber-500 pl-4 py-2 bg-amber-50/50">
                   <p className="text-amber-800 text-sm">{t('presidential.undecidedWarning')}</p>
                 </div>
                 <div className="pt-2">
-                  <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">{t('presidential.keyFactors')}</h4>
+                  <h4 className="text-xs font-bold text-stone-500 mb-2">{t('presidential.keyFactors')}</h4>
                   <ul className="space-y-1 text-stone-600 text-sm">
                     {[t('presidential.factor1'), t('presidential.factor2'), t('presidential.factor3')].map(factor => (
                       <li key={factor}><span aria-hidden="true">→ </span>{factor}</li>
@@ -355,7 +355,7 @@ export default async function PresidentialArchivePage({
         <section className="py-8 border-b border-stone-300">
           <div className="max-w-7xl mx-auto px-4">
             {/* A kicker, not a heading: the links below are navigation, not a section. */}
-            <p className="text-xs font-bold text-stone-500 uppercase tracking-widest mb-4">{t('nav.moreFrom')}</p>
+            <p className="text-xs font-bold text-stone-500 mb-4">{t('nav.moreFrom')}</p>
             <div className="flex flex-wrap gap-6">
               {[
                 { href: '/eleicoes/legislativas', label: t('nav.parliamentaryForecast') },

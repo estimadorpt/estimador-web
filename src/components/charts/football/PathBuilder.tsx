@@ -127,7 +127,7 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
         </p>
 
         {/* Column heads, wide screens only (on phones each row names its own parts). */}
-        <div aria-hidden="true" className="hidden grid-cols-[2.5rem_minmax(0,1fr)_auto_6.5rem] items-end gap-3 border-b border-stone-200 pb-1 text-[11px] font-bold uppercase tracking-wider text-stone-500 sm:grid">
+        <div aria-hidden="true" className="hidden grid-cols-[2.5rem_minmax(0,1fr)_auto_6.5rem] items-end gap-3 border-b border-stone-200 pb-1 text-[12px] font-semibold text-graphite sm:grid">
           <span className="text-center">{labels.matchdayAbbr}</span>
           <span>{pt ? "Adversário" : "Opponent"}</span>
           <span className="w-[9.5rem] text-center">{pt ? "Resultado" : "Result"}</span>
@@ -236,7 +236,7 @@ export function PathBuilder({ matches, pCurrent, target, locale, nSims, labels, 
       <div data-scenario-bar className="mt-4 rounded-2xl border border-line bg-cream p-4 lg:sticky lg:top-24 lg:mt-0">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <div aria-live="polite">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            <p className="text-[12px] font-semibold text-graphite">
               {hasSelections ? `${labels.yourScenario} · ${targetLabel}` : `${targetLabel} · ${nowWord}`}
             </p>
             <p className="flex items-baseline gap-1.5">

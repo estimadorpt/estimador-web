@@ -166,7 +166,7 @@ function AloneByAge({ cells, locale }: { cells: ReturnType<typeof readCells>; lo
         const nobody = emptyBand(rows);
         return (
           <div key={band}>
-            <h4 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{band}</h4>
+            <h4 className="mb-2 text-[12px] font-semibold text-graphite">{band}</h4>
             {nobody ? (
               <p className="rounded-xl bg-parchment px-3 py-2.5 text-sm text-stone-600">{NOBODY_ALONE[locale]}</p>
             ) : (

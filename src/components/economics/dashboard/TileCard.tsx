@@ -48,7 +48,7 @@ export function TileCard({
       <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
         <div className="min-w-0">
           {eyebrow && (
-            <div className="text-[11px] font-bold uppercase tracking-wider text-ink-muted mb-2">
+            <div className="text-[12px] font-semibold text-graphite text-ink-muted mb-2">
               {eyebrow}
             </div>
           )}

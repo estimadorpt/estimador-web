@@ -27,7 +27,7 @@ export function ReadMore({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-stone-500 hover:text-stone-800 transition-colors"
+        className="inline-flex items-center gap-1 text-[12px] font-semibold text-graphite hover:text-stone-800 transition-colors"
       >
         {open ? lessLabel : moreLabel}
         <ChevronDown

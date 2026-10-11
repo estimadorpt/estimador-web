@@ -67,7 +67,7 @@ export function StatusBadge({
     <Link
       href="/economia/metodologia"
       title={title}
-      className={`inline-flex items-center gap-1 rounded-full border bg-cream px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider no-underline hover:opacity-80 transition-opacity ${s.border} ${s.text}`}
+      className={`inline-flex items-center gap-1 rounded-full border bg-cream px-2 py-0.5 text-[12px] font-semibold text-graphite no-underline hover:opacity-80 transition-opacity ${s.border} ${s.text}`}
     >
       <span aria-hidden className={`inline-block w-1.5 h-1.5 rounded-full ${s.dot}`} />
       {label}

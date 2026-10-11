@@ -1,4 +1,3 @@
-import { TitleProbabilities } from '@/components/football/TitleProbabilities';
 import { createPageMetadata } from '@/lib/metadata';
 import {
   loadLigaData,
@@ -9,8 +8,12 @@ import {
   loadLigaMarketScorecard,
   loadLigaPlayers,
   loadUpcomingFixtures,
+  loadPlayedFixtures,
 } from "@/lib/utils/football-data-loader";
-import { CURRENT_LIGA_SEASON, teamDisplayName, teamWithArticle } from "@/lib/config/football";
+import { CURRENT_LIGA_SEASON, teamDisplayName } from "@/lib/config/football";
+import { titleFinding, titleSeasons } from "@/lib/football-finding";
+import { seasonRecord } from "@/lib/football-record";
+import { SeasonRecord } from "@/components/football/SeasonRecord";
 import { formatDateSpan, formatInteger, formatLongDate, formatPercent, formatPp } from "@/lib/football-format";
 import {
   forecastAsOf,
@@ -27,7 +30,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { DataCard } from "@/components/viz/DataCard";
 import { LeagueTable, ClubChooser } from "@/components/charts/football/LeagueTable";
 import type { PointsInterval } from "@/components/charts/football/LeagueTable";
-import { MatchdayPredictions, type MatchdayFixture } from "@/components/charts/football/MatchdayPredictions";
+import { Coupon, type CouponFixture } from "@/components/football/Coupon";
 import { TitleRaceChart } from "@/components/charts/football/TitleRaceChart";
 import { previousModelMatchdays } from "@/components/charts/football/probability-history-table";
 import { RelegationChart } from "@/components/charts/football/RelegationChart";
@@ -37,7 +40,7 @@ import type { LuckEntry } from "@/components/charts/football/LuckIndex";
 import { SectionNotes } from "@/components/articles/SectionNotes";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { Trophy, ArrowRight, SlidersHorizontal, Scale, History, Users, Gamepad2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { setRequestLocale } from '@/i18n/request-locale';
@@ -76,7 +79,7 @@ export default async function LigaPage({
 
   // seasonSamples stays for the table's final-points intervals; the
   // draw-a-season widget that also read it was cut in the 2026-08 trim.
-  const [{ prediction, scenarios, deltas }, historical, seasonSamples, upcomingFixtures, scorecard, players] =
+  const [{ prediction, scenarios, deltas }, historical, seasonSamples, upcomingFixtures, scorecard, players, playedFixtures] =
     await Promise.all([
       loadLigaWithDeltas(),
       loadLigaHistorical(),
@@ -84,7 +87,9 @@ export default async function LigaPage({
       loadUpcomingFixtures(),
       loadLigaMarketScorecard(),
       loadLigaPlayers(),
+      loadPlayedFixtures(),
     ]);
+  const record = seasonRecord(playedFixtures, locale);
   // The player models' cut-off, read the way /sobre reads it: the last season
   // in players.json's fit, never a typed year.
   const playerSeason = players?.generated_from?.seasons?.at(-1) ?? null;
@@ -108,7 +113,7 @@ export default async function LigaPage({
   // Every fixture still to play that carries a published 1X2, with its own
   // kickoff (game_fixtures.json), conditionals and match page: the round in
   // progress and the next one alike (audit F-H4).
-  const fixtureCards: MatchdayFixture[] = upcomingFixtures
+  const fixtureCards: CouponFixture[] = upcomingFixtures
     .filter(f => f.p_home != null && f.p_draw != null && f.p_away != null)
     .map(f => ({
       home: f.home,
@@ -131,7 +136,6 @@ export default async function LigaPage({
         <main id="main-content" tabIndex={-1}>
           <PageHero
             compact
-            icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
             eyebrow={t("football.title")}
             title={t("football.subtitle")}
             lede={locale === "pt"
@@ -168,18 +172,20 @@ export default async function LigaPage({
     });
   }
 
-  const leader = prediction.table[0];
-  const second = prediction.table[1];
-  const third = prediction.table[2];
   const matchdayComplete = !prediction.matches_remaining?.length;
   const updatedDate = formatLongDate(prediction.timestamp, locale);
   const simsLabel = formatInteger(prediction.n_sims, locale);
-  // The headline states the finding: the favourite and its title chance.
-  const favourite = [...prediction.table].sort((a, b) => b.p_champion - a.p_champion)[0];
-  const favouriteName = teamWithArticle(favourite.team);
-  const headline = locale === "pt"
-    ? `${favouriteName.charAt(0).toUpperCase()}${favouriteName.slice(1)} tem ${formatPercent(favourite.p_champion, locale)} de hipóteses de ser campeão`
-    : `${teamDisplayName(favourite.team)} have a ${formatPercent(favourite.p_champion, locale)} chance of winning the title`;
+  // The headline states the finding in words people repeat; the standfirst
+  // gives the counts behind it, read from the scenarios file when published.
+  const byTitle = [...prediction.table].sort((a, b) => b.p_champion - a.p_champion);
+  const favourite = byTitle[0];
+  const headline = titleFinding(favourite.team, favourite.p_champion, locale);
+  const seasonsOf = (r: (typeof byTitle)[number]) => formatInteger(titleSeasons(r.team, r.p_champion, prediction.n_sims, scenarios?.victory_paths), locale);
+  const chasers = byTitle.slice(1, 3).filter(r => r.p_champion >= 0.01);
+  const longShot = byTitle.slice(1).find(r => r.p_champion > 0 && r.p_champion < 0.01);
+  const standfirst = locale === "pt"
+    ? `Em ${seasonsOf(favourite)} de ${simsLabel} épocas simuladas.${chasers.length ? ` ${chasers.map(r => `${teamDisplayName(r.team)} em ${seasonsOf(r)}`).join(", ")}` : ""}${longShot ? `; ${teamDisplayName(longShot.team)} em ${formatPercent(longShot.p_champion, locale)}` : ""}${chasers.length ? "." : ""}`
+    : `In ${seasonsOf(favourite)} of ${simsLabel} simulated seasons.${chasers.length ? ` ${chasers.map(r => `${teamDisplayName(r.team)} in ${seasonsOf(r)}`).join(", ")}` : ""}${longShot ? `; ${teamDisplayName(longShot.team)} in ${formatPercent(longShot.p_champion, locale)}` : ""}${chasers.length ? "." : ""}`;
 
   // A concise factual change beside the forecast date (diagnosis §5 "League
   // page" — "a concise factual change"): the club whose title probability
@@ -266,10 +272,9 @@ export default async function LigaPage({
   // simulator shows what each result would have changed, and the game's
   // next round opens with the next forecast (audit FR3V-M1).
   const playedSteps = (value: ReactNode) => (nextRoundPlayedAt ? [{ at: nextRoundPlayedAt, value }] : []);
-  const teasers: Array<{ href: string; Icon: typeof Trophy; title: string; body: ReactNode; action: string }> = [
+  const teasers: Array<{ href: string; title: string; body: ReactNode; action: string }> = [
     ...(scenarios?.next_matchday_scenarios ? [{
       href: "/desporto/liga/simulador",
-      Icon: SlidersHorizontal,
       title: t("football.simulator"),
       body: (
         <ClockSwitch
@@ -283,7 +288,6 @@ export default async function LigaPage({
     }] : []),
     {
       href: "/desporto/liga/jogo-previsoes",
-      Icon: Gamepad2,
       // Marked as a game: the name alone does not say it (audit CL2-13).
       title: pt ? "Contra o Modelo (jogo semanal)" : "Beat the model (weekly game)",
       body: (
@@ -300,14 +304,12 @@ export default async function LigaPage({
     },
     {
       href: "/desporto/liga/modelo",
-      Icon: Scale,
       title: pt ? "Modelo vs mercado" : "Model vs market",
       body: scorecardCard,
       action: pt ? "Ver a avaliação" : "See the scorecard",
     },
     {
       href: "/desporto/liga/2025-26",
-      Icon: History,
       title: pt ? "A época 2025-26 em revista" : "The 2025-26 season, reviewed",
       body: pt
         ? "O Porto foi campeão com 88 pontos, o Sporting marcou 89 golos e ficou em segundo, e o Benfica acabou invicto em terceiro. O que o xG diz sobre a qualidade das oportunidades de cada um, e como se portaram as nossas previsões."
@@ -316,7 +318,6 @@ export default async function LigaPage({
     },
     {
       href: "/desporto/liga/jogadores",
-      Icon: Users,
       // Neutral title, and the data cut-off on the way in (UXD2-15, CL2-02).
       title: pt ? "Jogadores: uma métrica por dimensão" : "Players: one metric per dimension",
       body: pt
@@ -332,12 +333,9 @@ export default async function LigaPage({
       <main id="main-content" tabIndex={-1}>
       <PageHero
         compact
-        icon={<Trophy aria-hidden="true" className="w-4 h-4" />}
-        eyebrow={`${t("football.title")} — ${t("football.season")} ${prediction.season}`}
+        eyebrow={`${t("football.title")} ${prediction.season} · ${locale === "pt" ? `J${prediction.matchday}` : `MD${prediction.matchday}`}`}
         title={headline}
-        lede={locale === "pt"
-          ? `Quem fica com o título, quem acaba nos três primeiros e quem desce: as hipóteses de cada clube em ${simsLabel} simulações do resto da época, atualizadas depois de cada jornada.`
-          : `Who takes the title, who finishes in the top three and who goes down: each club's chances across ${simsLabel} simulations of the rest of the season, updated after every matchday.`}
+        lede={standfirst}
         actions={
           <ClubChooser
             teams={allTeams}
@@ -355,63 +353,6 @@ export default async function LigaPage({
           </span>
         }
       />
-
-      {/* Key stats — top 3 championship probabilities */}
-      <section className="border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-4">
-            {t("football.championshipProbability")}
-          </div>
-          <TitleProbabilities teams={[leader, second, third]} deltas={deltas} locale={locale} />
-          <Link
-            href="/desporto/liga/modelo"
-            locale={locale}
-            className="mt-4 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-ink underline underline-offset-4"
-          >
-            {locale === "pt" ? "Como se compara o modelo com o mercado?" : "How does the model compare with the market?"}
-            <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-      </section>
-
-      {/* The games to come, in kickoff order with Lisbon dates and times,
-          ahead of the table (reading the outlook and finding what's next are
-          the first tasks). Each card's stakes come from its own published
-          conditionals (audit F-H4). */}
-      {fixtureCards.length > 0 && (
-        <section className="border-b border-stone-200" aria-labelledby="liga-next-round">
-          <div className="max-w-7xl mx-auto px-4 py-10">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
-              <ClockSwitch
-                initial={matchdayComplete && cardRounds.length === 1 ? t("football.nextMatchday") : (locale === "en" ? "Fixtures to come" : "Jogos por disputar")}
-                steps={nextRound != null ? [
-                  { at: nextRoundStartsAt, value: locale === "en" ? `Matchday ${nextRound} under way` : `Jornada ${nextRound} a decorrer` },
-                  { at: nextRoundPlayedAt, value: roundPlayedLine(nextRound, locale) },
-                ] : []}
-              />
-            </p>
-            <h2 id="liga-next-round" className="text-2xl tracking-tight mb-1">
-              {roundsHeading}
-              {cardSpan ? ` · ${cardSpan}` : ""}
-              {postponedPhrase}
-            </h2>
-            <p className="text-sm text-stone-500 mb-6 max-w-3xl">
-              {locale === "en"
-                ? "In kickoff order, Lisbon time. Under each match, the club whose title or relegation chances its result moves most, and the gap between that club's best and worst of the three results, in percentage points."
-                : "Por ordem de início, hora de Lisboa. Em cada jogo, o clube cujas hipóteses de título ou de despromoção o resultado mais mexe, e a distância entre o melhor e o pior dos três resultados para esse clube, em pontos percentuais."}{" "}
-              {/* The method behind these swings, not the generic page (audit METH3-17). */}
-              <Link
-                href={locale === "pt" ? "/desporto/liga/metodologia#jogos-decisivos" : "/desporto/liga/metodologia#decisive-matches"}
-                locale={locale}
-                className="font-medium text-ink underline underline-offset-4"
-              >
-                {locale === "pt" ? "Como medimos o peso de cada jogo" : "How we measure each match's weight"}
-              </Link>
-            </p>
-            <MatchdayPredictions fixtures={fixtureCards} locale={locale} forecastTimestamp={prediction.timestamp} />
-          </div>
-        </section>
-      )}
 
       {/* League Table */}
       <section className="border-b border-stone-200">
@@ -492,6 +433,63 @@ export default async function LigaPage({
           })()}
         </div>
       </section>
+
+      {/* The games to come, in kickoff order with Lisbon dates and times,
+          ahead of the table (reading the outlook and finding what's next are
+          the first tasks). Each card's stakes come from its own published
+          conditionals (audit F-H4). */}
+      {fixtureCards.length > 0 && (
+        <section className="border-b border-stone-200" aria-labelledby="liga-next-round">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <p className="text-[12px] font-semibold text-graphite mb-1">
+              <ClockSwitch
+                initial={matchdayComplete && cardRounds.length === 1 ? t("football.nextMatchday") : (locale === "en" ? "Fixtures to come" : "Jogos por disputar")}
+                steps={nextRound != null ? [
+                  { at: nextRoundStartsAt, value: locale === "en" ? `Matchday ${nextRound} under way` : `Jornada ${nextRound} a decorrer` },
+                  { at: nextRoundPlayedAt, value: roundPlayedLine(nextRound, locale) },
+                ] : []}
+              />
+            </p>
+            <h2 id="liga-next-round" className="text-2xl tracking-tight mb-1">
+              {roundsHeading}
+              {cardSpan ? ` · ${cardSpan}` : ""}
+              {postponedPhrase}
+            </h2>
+            <p className="text-sm text-stone-500 mb-6 max-w-3xl">
+              {locale === "en"
+                ? "In kickoff order, Lisbon time. Under each game, what it puts at stake for the club playing whose title or relegation chance it moves most: that chance with a win, a draw or a defeat."
+                : "Por ordem de início, hora de Lisboa. Por baixo de cada jogo, o que ele põe em jogo para o clube em campo cujas hipóteses de título ou de descida mais mexe: essas hipóteses se ganhar, empatar ou perder."}{" "}
+              {/* The method behind these swings, not the generic page (audit METH3-17). */}
+              <Link
+                href={locale === "pt" ? "/desporto/liga/metodologia#jogos-decisivos" : "/desporto/liga/metodologia#decisive-matches"}
+                locale={locale}
+                className="font-medium text-ink underline underline-offset-4"
+              >
+                {locale === "pt" ? "Como medimos o peso de cada jogo" : "How we measure each match's weight"}
+              </Link>
+            </p>
+            <Coupon fixtures={fixtureCards} locale={locale} forecastTimestamp={prediction.timestamp} columns={2} />
+          </div>
+        </section>
+      )}
+
+      {/* What the model said and what happened: the season's pre-kickoff
+          record against the model's own ranges. */}
+      {record.games > 0 && (
+        <section className="border-b border-rule" aria-labelledby="liga-record">
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <h2 id="liga-record" className="text-2xl md:text-[28px] mb-1">
+              {locale === "pt" ? "O que dissemos e o que aconteceu" : "What we said and what happened"}
+            </h2>
+            <p className="mb-5 max-w-3xl text-[15px] text-stone-600">
+              {locale === "pt"
+                ? "Cada contagem da época, com a margem que o modelo lhe dava antes dos jogos."
+                : "Each count of the season, with the range the model gave it before the games."}
+            </p>
+            <SeasonRecord record={record} locale={locale} />
+          </div>
+        </section>
+      )}
 
       {/* Title Race */}
       {historical.length > 1 && (
@@ -612,22 +610,19 @@ export default async function LigaPage({
               count: simsLabel,
             })}
           </p>
-          <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+          <ul className="mt-6 grid gap-x-8 gap-y-2 sm:grid-cols-2">
             {teasers.map(teaser => (
               <li key={teaser.href} className="min-w-0">
                 <Link
                   href={teaser.href}
                   locale={locale}
-                  className="flex h-full flex-col rounded-2xl border border-line bg-cream p-4 transition-colors duration-150 hover:bg-parchment md:p-5"
+                  className="flex h-full flex-col border-t border-ink pt-3 pb-4 transition-colors duration-150 hover:bg-field"
                 >
-                  <div className="flex items-start gap-3">
-                    <teaser.Icon aria-hidden="true" className="mt-1 h-5 w-5 flex-shrink-0 text-stone-500" />
-                    <div className="min-w-0">
-                      <h3 className="text-xl font-bold leading-snug text-ink">{teaser.title}</h3>
-                      <p className="mt-1 text-sm leading-relaxed text-stone-600">{teaser.body}</p>
-                    </div>
+                  <div className="min-w-0">
+                    <h3 className="text-[21px] leading-snug text-ink">{teaser.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-stone-600">{teaser.body}</p>
                   </div>
-                  <span className="mt-3 inline-flex items-center gap-1 self-start pl-8 text-sm font-semibold text-ink underline underline-offset-4 md:mt-auto md:pt-3">
+                  <span className="mt-3 inline-flex items-center gap-1 self-start text-sm font-semibold text-ink underline underline-offset-4 md:mt-auto md:pt-3">
                     {teaser.action}
                     <ArrowRight aria-hidden="true" className="h-4 w-4" />
                   </span>

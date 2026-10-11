@@ -86,7 +86,7 @@ export async function InflationTile({
         <div className="mb-5">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             {/* producer's own name for the number, verbatim — never INE's name */}
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">
+            <span className="text-[12px] font-semibold text-graphite">
               {data.model?.name ?? 'estimativa indicativa da inflação'}
             </span>
             <span className="text-3xl md:text-4xl font-display font-extrabold tabular-nums tracking-tight text-stone-900">
@@ -123,7 +123,7 @@ export async function InflationTile({
           </p>
           {/* scored-vs-flash ledger (fills as INE flashes land) */}
           <div className="mt-3 border-t border-stone-100 pt-2">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wide text-stone-600 mb-1">
+            <h3 className="text-[12px] font-semibold text-graphite mb-1">
               {t('inflationLedgerTitle')}
             </h3>
             {ledger?.rows && ledger.rows.length > 0 ? (
@@ -146,7 +146,7 @@ export async function InflationTile({
       {officialOk && (
         <div>
           {isModelMode && (
-            <h3 className="text-[11px] font-semibold uppercase tracking-wide text-stone-600 mb-1.5">
+            <h3 className="text-[12px] font-semibold text-graphite mb-1.5">
               {t('inflationOfficialBlockTitle')}
             </h3>
           )}
@@ -188,7 +188,7 @@ export async function InflationTile({
           {/* component grid: core / energy / food / m-m */}
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-px bg-stone-200 border border-stone-200">
             <div className="bg-cream p-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+              <div className="text-[12px] font-semibold text-graphite">
                 {t('inflationCore')}
               </div>
               <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
@@ -196,7 +196,7 @@ export async function InflationTile({
               </div>
             </div>
             <div className="bg-cream p-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+              <div className="text-[12px] font-semibold text-graphite">
                 {t('inflationEnergy')}
               </div>
               <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
@@ -204,7 +204,7 @@ export async function InflationTile({
               </div>
             </div>
             <div className="bg-cream p-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+              <div className="text-[12px] font-semibold text-graphite">
                 {t('inflationFood')}
               </div>
               <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
@@ -212,7 +212,7 @@ export async function InflationTile({
               </div>
             </div>
             <div className="bg-cream p-3">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+              <div className="text-[12px] font-semibold text-graphite">
                 {t('inflationMm')}
               </div>
               <div className="text-xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
@@ -236,7 +236,7 @@ export async function InflationTile({
       {carry && isNum(carry.mm_pp_same_month_mean) && (
         <div className="mt-4 rounded border border-stone-200 bg-stone-50 p-3 max-w-xl">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+            <span className="text-[12px] font-semibold text-graphite">
               {pickI18n(locale, carry.label_i18n) ?? t('inflationCarryTitle')}
             </span>
             {/* compound badge string from the producer, verbatim */}

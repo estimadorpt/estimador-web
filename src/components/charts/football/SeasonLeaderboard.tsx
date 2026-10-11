@@ -114,7 +114,7 @@ export function SeasonLeaderboard({ board, locale = "pt", onRefresh, recordNote 
           <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t.title}>
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-stone-50 border-b border-stone-200 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                <tr className="bg-stone-50 border-b border-stone-200 text-[12px] font-semibold text-graphite">
                   <th scope="col" className="text-left px-3 py-2 w-10">{t.rank}</th>
                   <th scope="col" className="text-left px-3 py-2">{t.player}</th>
                   <th scope="col" className="text-right px-3 py-2">{t.mean}</th>
@@ -181,7 +181,7 @@ function Row({
           {row.isModel ? modelLabel : row.displayName}
         </span>
         {isYou && !row.isModel && (
-          <span className="ml-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+          <span className="ml-1.5 text-[12px] font-semibold text-graphite text-emerald-700">
             {youLabel}
           </span>
         )}

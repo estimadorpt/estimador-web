@@ -95,7 +95,7 @@ function RivalConditions({ conditions, labels, locale }: { conditions: ScenarioR
   const pt = locale !== "en";
   return (
     <div className="border-t border-line bg-paper px-3 py-2 md:px-4">
-      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{labels.thisWorksBecause}</p>
+      <p className="mb-1.5 text-[12px] font-semibold text-graphite">{labels.thisWorksBecause}</p>
       <ul className="space-y-1">
         {conditions.map((rc, i) => (
           <li key={i} className="flex items-start gap-1.5 text-xs text-stone-600">
@@ -166,7 +166,7 @@ function ScenarioCard({
         </div>
         {/* "22% → 47%", read left to right: now, then in this scenario (audit UXD-19). */}
         <p className="shrink-0 text-right">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500">
+          <span className="block text-[12px] font-semibold text-graphite">
             <ClockSwitch
               initial={`${target}: ${nowWord} → ${scenarioWord}`}
               steps={staleAt && forecastTimestamp

@@ -38,7 +38,7 @@ export async function RealWagesStory({
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-stone-200">
         <div className="bg-cream p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[12px] font-semibold text-graphite">
             {t('wagesNominal')}
           </div>
           <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
@@ -58,7 +58,7 @@ export async function RealWagesStory({
           )}
         </div>
         <div className="bg-cream p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[12px] font-semibold text-graphite">
             {t('wagesInflation')}
           </div>
           <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
@@ -71,7 +71,7 @@ export async function RealWagesStory({
           )}
         </div>
         <div className="bg-cream p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[12px] font-semibold text-graphite">
             {t('wagesReal')}
           </div>
           <div

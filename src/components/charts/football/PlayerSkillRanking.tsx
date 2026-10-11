@@ -199,13 +199,13 @@ export function PlayerSkillRanking({
       {/* Column header */}
       <div className="flex items-center gap-2 mb-2 pb-2 border-b border-stone-200">
         <div className="w-6 flex-shrink-0" />
-        <div className="w-32 sm:w-52 flex-shrink-0 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+        <div className="w-32 sm:w-52 flex-shrink-0 text-[12px] font-semibold text-graphite">
           {pt ? "Jogador" : "Player"}
         </div>
-        <div className="flex-1 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+        <div className="flex-1 text-[12px] font-semibold text-graphite">
           {t.metric}
         </div>
-        <div className="w-12 sm:w-16 flex-shrink-0 text-right text-[11px] font-bold uppercase tracking-wider text-stone-500">
+        <div className="w-12 sm:w-16 flex-shrink-0 text-right text-[12px] font-semibold text-graphite">
           SAR
         </div>
         {/* Keeps the header aligned with the per-row link column */}
@@ -301,7 +301,7 @@ export function PlayerSkillRanking({
                       · {int(p.minutes)}&apos;
                     </span>
                     {stale && (
-                      <span className="text-[11px] uppercase tracking-wide text-amber-600 bg-amber-50 px-1 py-px flex-shrink-0">
+                      <span className="text-[12px] text-graphite text-amber-600 bg-amber-50 px-1 py-px flex-shrink-0">
                         {t.notInLeague}
                       </span>
                     )}
@@ -376,7 +376,7 @@ export function PlayerSkillRanking({
                 <div className="pl-8 pr-2 pb-3 pt-1 bg-stone-50/60">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-xs">
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
+                      <div className="text-[12px] text-graphite">
                         {t.minutes}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -384,7 +384,7 @@ export function PlayerSkillRanking({
                       </div>
                     </div>
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
+                      <div className="text-[12px] text-graphite">
                         {t.goals} / {t.matches}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -392,7 +392,7 @@ export function PlayerSkillRanking({
                       </div>
                     </div>
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
+                      <div className="text-[12px] text-graphite">
                         {t.perNinety}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">
@@ -400,7 +400,7 @@ export function PlayerSkillRanking({
                       </div>
                     </div>
                     <div>
-                      <div className="text-[11px] uppercase tracking-wider text-stone-500">
+                      <div className="text-[12px] text-graphite">
                         {t.interval}
                       </div>
                       <div className="font-semibold tabular-nums text-stone-800">

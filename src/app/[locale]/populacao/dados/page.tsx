@@ -305,8 +305,8 @@ sha256sum checksums.sha256`;
                   <caption className="sr-only">{pt ? 'Ficheiros da versão' : 'Release files'}</caption>
                   <thead>
                     <tr>
-                      <th scope="col" className="border-b-2 border-ink px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{pt ? 'Ficheiro e conteúdo' : 'File and contents'}</th>
-                      <th scope="col" className="border-b-2 border-ink px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-stone-600">{pt ? 'Tamanho' : 'Size'}</th>
+                      <th scope="col" className="border-b-2 border-ink px-4 py-3 text-left text-[12px] font-semibold text-graphite">{pt ? 'Ficheiro e conteúdo' : 'File and contents'}</th>
+                      <th scope="col" className="border-b-2 border-ink px-4 py-3 text-right text-[12px] font-semibold text-graphite">{pt ? 'Tamanho' : 'Size'}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -397,7 +397,7 @@ sha256sum checksums.sha256`;
                   <thead>
                     <tr>
                       {[pt ? 'Coluna' : 'Column', pt ? 'Origem' : 'Source', pt ? 'O que é' : 'What it is'].map(header => (
-                        <th key={header} scope="col" className="border-b-2 border-ink px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-stone-600">{header}</th>
+                        <th key={header} scope="col" className="border-b-2 border-ink px-3 py-2 text-left text-[12px] font-semibold text-graphite">{header}</th>
                       ))}
                     </tr>
                   </thead>
@@ -452,7 +452,7 @@ sha256sum checksums.sha256`;
               <div className="space-y-5">
                 {(locale === 'pt' ? (['pt', 'en'] as const) : (['en', 'pt'] as const)).map(language => (
                   <div key={language} className="rounded-2xl border border-line bg-cream p-5">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                    <p className="text-[12px] font-semibold text-graphite">
                       {language === 'pt' ? (pt ? 'Atribuição em português' : 'Attribution in Portuguese') : (pt ? 'Atribuição em inglês' : 'Attribution in English')}
                     </p>
                     <p lang={language} className="mt-2 leading-relaxed text-ink">{release.attribution[language]}</p>
@@ -462,7 +462,7 @@ sha256sum checksums.sha256`;
                   </div>
                 ))}
                 <div className="rounded-2xl border border-line bg-cream p-5">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'Citar como' : 'Cite as'}</p>
+                  <p className="text-[12px] font-semibold text-graphite">{pt ? 'Citar como' : 'Cite as'}</p>
                   <p className="mt-2 leading-relaxed text-ink">{citeWithLocator}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
                     <CopyButton text={citeWithLocator} label={pt ? 'Copiar citação' : 'Copy citation'} locale={locale} />

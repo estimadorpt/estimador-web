@@ -424,7 +424,7 @@ export default async function Liga2Page({
 
         {/* Small print */}
         <section className="border-t border-stone-200 pt-6">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3">
+          <h2 className="text-xs font-bold text-stone-500 mb-3">
             {c.footnote}
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">

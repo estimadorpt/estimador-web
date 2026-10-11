@@ -93,7 +93,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
         <span className="text-sm font-bold text-stone-900">
           {teamDisplayName(panel.team)}
         </span>
-        <span className="ml-auto text-[11px] font-bold uppercase tracking-wider text-stone-500">
+        <span className="ml-auto text-[12px] font-semibold text-graphite">
           {panel.venue === "H" ? L.home : L.away}
         </span>
       </div>
@@ -120,7 +120,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
 
         {/* Form */}
         <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
+          <div className="text-[12px] font-semibold text-graphite mb-1.5">
             {L.form}
           </div>
           {panel.form.length === 0 ? (
@@ -155,7 +155,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
         {/* Model strength */}
         {(attackPct !== null || defensePct !== null) && (
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
+            <div className="text-[12px] font-semibold text-graphite mb-1.5">
               {pt ? "Força do modelo" : "Model strength"}
             </div>
             <div className="space-y-1.5">
@@ -194,7 +194,7 @@ function TeamCard({ panel, locale }: { panel: MatchTeamPanel; locale: string }) 
 
         {/* xPts */}
         <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1.5">
+          <div className="text-[12px] font-semibold text-graphite mb-1.5">
             {pt ? "Desempenho esperado" : "Expected performance"}
           </div>
           {!panel.xpts ? (

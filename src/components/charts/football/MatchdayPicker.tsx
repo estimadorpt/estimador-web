@@ -346,7 +346,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           )}
         </form>
 
-        <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-3">
+        <h3 className="text-[12px] font-semibold text-graphite mb-3">
           {pt ? 'Todos os jogos incluídos nesta previsão, por ordem de início' : 'Every fixture in this forecast, in kickoff order'}
         </h3>
         <ul className="space-y-1">
@@ -362,7 +362,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                 )}
                 {matchLabel(teamDisplayName(f.home), teamDisplayName(f.away))}
                 {f.postponed && (
-                  <span className="ml-2 rounded bg-parchment px-1 text-[11px] font-bold uppercase tracking-wider text-stone-600">
+                  <span className="ml-2 rounded bg-parchment px-1 text-[12px] font-semibold text-graphite">
                     {pt ? 'jogo em atraso' : 'postponed'}
                   </span>
                 )}
@@ -431,7 +431,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           shown with all three outcomes, team-labelled, no click required
           (diagnosis §5/9 "Simulator"). */}
       <div className="col-span-full rounded-2xl border border-line bg-cream p-5 md:p-6">
-        <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-3">
+        <h3 className="text-[12px] font-semibold text-graphite mb-3">
           {pt ? `O próximo jogo do ${teamDisplayName(focusTeam)}` : `${teamDisplayName(focusTeam)}'s next match`}
         </h3>
         {!myFixture && (
@@ -456,7 +456,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
             </p>
             <div className="grid gap-2 sm:grid-cols-4">
               <div className="rounded-lg border border-line bg-paper p-3">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                <div className="text-[12px] font-semibold text-graphite">
                   {myFixture.kickoffConfirmed && started(myFixture.kickoff) ? (pt ? 'Antes do jogo' : 'Before the match') : (pt ? 'Agora' : 'Now')}
                 </div>
                 <div className="mt-1 text-lg font-bold tabular-nums text-ink">{formatClubPercent(myStakes.baseline, localeCode)}</div>
@@ -479,7 +479,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                       backgroundColor: active ? '#141414' : 'var(--color-paper, #fff)',
                     }}
                   >
-                    <div className={`text-[11px] font-bold uppercase tracking-wider ${active ? 'text-cream' : 'text-stone-500'}`}>{row.label}</div>
+                    <div className={`text-[12px] font-semibold text-graphite ${active ? 'text-cream' : 'text-stone-500'}`}>{row.label}</div>
                     <div className={`mt-1 text-lg font-bold tabular-nums ${active ? 'text-cream' : 'text-ink'}`}>{formatClubPercent(row.value, localeCode)}</div>
                     <div className={`text-[11px] tabular-nums ${active ? 'text-cream/80' : 'text-ink-muted'}`}>{formatDeltaPrecise(row.value - myStakes.baseline, localeCode)}</div>
                   </button>
@@ -495,7 +495,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
           and not by date (diagnosis §5/9 "Simulator"). */}
       <div className="min-w-0 rounded-2xl border border-line bg-cream p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+          <h3 className="text-[12px] font-semibold text-graphite">
             {pt ? 'Outros jogos que afetam este objetivo' : 'Other matches that affect this objective'}
           </h3>
           <button
@@ -537,7 +537,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
                     )}
                     {meta && (pt ? `Jornada ${meta.matchday}` : `Matchday ${meta.matchday}`)}
                     {meta?.postponed && (
-                      <span className="ml-1.5 font-bold uppercase tracking-wider text-stone-600">{pt ? '· jogo em atraso' : '· postponed'}</span>
+                      <span className="ml-1.5 font-bold text-stone-600">{pt ? '· jogo em atraso' : '· postponed'}</span>
                     )}
                     {meta && ' · '}
                     {pt ? 'Diferença entre desfechos' : 'Difference between outcomes'}: {formatPp(swing, locale).replace('+', '')}
@@ -644,7 +644,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
       {/* Right: Probability impact */}
       <div className="min-w-0 rounded-2xl border border-line bg-cream p-5 md:p-6">
         <div className="mb-5 rounded-xl bg-paper p-4">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{pt ? 'A resposta para a equipa que segues' : 'The answer for your club'}</p>
+          <p className="text-[12px] font-semibold text-graphite">{pt ? 'A resposta para a equipa que segues' : 'The answer for your club'}</p>
           <p className="mt-1 text-sm text-ink"><strong>{teamDisplayName(focusTeam)}</strong> · {objective === 'p_champion' ? (pt ? 'ganhar o título' : 'win the title') : (pt ? 'despromoção' : 'relegation')}</p>
           {selectedFixture && selectedOutcome ? <p className="mt-2 text-sm leading-relaxed text-ink-muted">{teamDisplayName(selectedFixture.home_team)} {selectedOutcome === 'H' ? (pt ? 'vence' : 'win') : selectedOutcome === 'D' ? (pt ? 'empata com' : 'draw') : (pt ? 'perde para' : 'lose to')} {teamDisplayName(selectedFixture.away_team)}: <strong className="text-ink">{formatPct(focalCurrent)}</strong> ({formatDelta(focalCurrent - focalBaseline, locale)} {pt ? 'face à base' : 'from baseline'}).</p> : <p className="mt-2 text-sm leading-relaxed text-ink-muted">{pt ? 'Escolhe vitória caseira, empate ou vitória visitante para comparar cada desfecho com a previsão de base.' : 'Choose a home win, draw or away win to compare that outcome with the baseline forecast.'}</p>}
         </div>
@@ -658,7 +658,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         {/* Title race */}
         {titleTeams.length > 0 && (
           <div className="mb-6">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-3">
+            <div className="text-[12px] font-semibold text-graphite mb-3">
               {labels.impactOnTitle}
             </div>
             <div className="space-y-2">
@@ -736,7 +736,7 @@ export function MatchdayPicker({ data, labels, version = "demo", matchHrefs = {}
         {/* Relegation */}
         {relegationTeams.length > 0 && (
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-3">
+            <div className="text-[12px] font-semibold text-graphite mb-3">
               {labels.impactOnRelegation}
             </div>
             <div className="space-y-2">
@@ -853,7 +853,7 @@ function SimulatedTable({
 
   return (
     <div className="col-span-1 lg:col-span-2 mt-8 border-t border-stone-200 pt-8">
-      <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-4">
+      <div className="text-[12px] font-semibold text-graphite mb-4">
         {labels.simulatedStandings}
       </div>
       <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={labels.simulatedStandings}>

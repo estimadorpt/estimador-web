@@ -35,7 +35,7 @@ export function ChartTable({ caption, columns, rows, summaryLabel, align, classN
           <thead>
             <tr>
               {columns.map((c, j) => (
-                <th key={c} scope="col" className={`sticky top-0 border-b-2 border-ink bg-cream px-3 py-2 ${textAlign(j)} text-[11px] font-bold uppercase tracking-wider text-stone-600 ${j === 0 ? `${labelCell} z-20` : 'z-10'}`}>{c}</th>
+                <th key={c} scope="col" className={`sticky top-0 border-b-2 border-ink bg-cream px-3 py-2 ${textAlign(j)} text-[12px] font-semibold text-graphite ${j === 0 ? `${labelCell} z-20` : 'z-10'}`}>{c}</th>
               ))}
             </tr>
           </thead>

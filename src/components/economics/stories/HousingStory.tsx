@@ -46,7 +46,7 @@ export async function HousingStory({
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200 border border-stone-200">
         <div className="bg-cream p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[12px] font-semibold text-graphite">
             {t('housingRents')}
           </div>
           <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
@@ -61,7 +61,7 @@ export async function HousingStory({
           </span>
         </div>
         <div className="bg-cream p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[12px] font-semibold text-graphite">
             {t('housingHpi')}
           </div>
           <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
@@ -81,7 +81,7 @@ export async function HousingStory({
           </span>
         </div>
         <div className="bg-cream p-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+          <div className="text-[12px] font-semibold text-graphite">
             {t('housingSince2020')}
           </div>
           <div className="text-2xl font-display font-extrabold tabular-nums mt-0.5 text-stone-800">
@@ -98,7 +98,7 @@ export async function HousingStory({
       {/* 2015=100 chained index: house prices vs consumer prices */}
       {haveChart && (
         <div className="mt-4">
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <h4 className="text-[12px] font-semibold text-graphite mb-1">
             {t('housingChartTitle')}
           </h4>
           <StoryLineChart

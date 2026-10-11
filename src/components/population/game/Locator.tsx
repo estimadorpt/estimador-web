@@ -108,7 +108,7 @@ export function Locator({ choices, ruledOut, answer, locale, withKey = false, sc
 
   return (
     <figure className={`rounded-2xl border border-line bg-cream p-4 ${className}`}>
-      <figcaption className="mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.locatorTitle}</figcaption>
+      <figcaption className="mb-2 text-[12px] font-semibold text-graphite">{t.locatorTitle}</figcaption>
       {withKey ? (
         <div className="flex flex-col items-center gap-4 min-[480px]:flex-row min-[480px]:items-start">
           {map}

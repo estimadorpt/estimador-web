@@ -84,7 +84,7 @@ export async function SavingsGapStory({
 
       {chart.length >= 2 && (
         <div className="mt-4">
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-1">
+          <h4 className="text-[12px] font-semibold text-graphite mb-1">
             {t('savingsChartTitle')}
           </h4>
           <StoryLineChart

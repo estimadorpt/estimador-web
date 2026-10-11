@@ -16,7 +16,7 @@ export function StatusItem({ tone, label, value, children }: {
   const Icon = tone === 'pass' ? CircleCheck : Info;
   return (
     <div className="rounded-2xl border border-line bg-cream p-5">
-      <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{label}</p>
+      <p className="text-[12px] font-semibold text-graphite">{label}</p>
       <p className={`mt-3 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-bold ${tone === 'pass' ? 'bg-moss text-ink' : 'bg-amber-100 text-amber-900'}`}>
         <Icon aria-hidden="true" className="h-4 w-4 shrink-0" />
         {value}

@@ -24,7 +24,7 @@ export function RemainingSchedule({ matches, teamColor, labels }: RemainingSched
   return (
     <div className="space-y-1">
       {/* Header */}
-      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-stone-500 pb-1 border-b border-stone-200">
+      <div className="flex items-center gap-2 text-[12px] font-semibold text-graphite pb-1 border-b border-stone-200">
         <div className="w-8 text-center">{labels.matchdayAbbr}</div>
         <div className="w-36 md:w-44" />
         <div className="flex-1" />

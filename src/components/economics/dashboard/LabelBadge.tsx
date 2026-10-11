@@ -24,7 +24,7 @@ export function LabelBadge({
   return (
     <span
       title={title}
-      className={`inline-block text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${TONE_CLASSES[tone]}`}
+      className={`inline-block text-[12px] font-semibold text-graphite px-1.5 py-0.5 rounded ${TONE_CLASSES[tone]}`}
     >
       {children}
     </span>

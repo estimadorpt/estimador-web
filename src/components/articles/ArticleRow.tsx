@@ -36,7 +36,7 @@ export async function ArticleRow({
         locale={locale}
         className="group block py-6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
       >
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2 text-[12px] font-semibold text-graphite">
           {article.kind === 'nota' && (
             <time dateTime={article.date}>{dateFormat.format(new Date(article.date))}</time>
           )}

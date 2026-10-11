@@ -97,7 +97,7 @@ export function EconomyReading({
         {topics.map(topic => (
           <Tabs.Content key={topic.id} value={topic.id} className="rounded-2xl border border-line bg-cream p-6 md:p-7 focus-visible:outline-2 focus-visible:outline-ink">
             <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-ink-muted">{lang === 0 ? 'Ler um indicador' : 'Reading an indicator'}</p>
+              <p className="text-[12px] font-semibold text-graphitest text-ink-muted">{lang === 0 ? 'Ler um indicador' : 'Reading an indicator'}</p>
               {status && <div className="text-[11px] font-semibold text-ink-muted">{status}</div>}
             </div>
             <div className="mt-3 min-w-0">

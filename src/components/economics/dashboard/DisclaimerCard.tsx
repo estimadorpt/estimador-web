@@ -44,7 +44,7 @@ export async function DisclaimerCard({
     <section className="rounded-lg border-l-4 border-l-[#245c68] border-y border-r border-stone-200 bg-stone-50 p-4 md:p-5">
       <div className="flex items-center gap-2 mb-1.5">
         <Info className="w-4 h-4 text-[#245c68]" />
-        <h2 className="text-xs font-bold uppercase tracking-wide text-stone-700">
+        <h2 className="text-xs font-bold text-stone-700">
           {t('aboutTitle')}
         </h2>
       </div>

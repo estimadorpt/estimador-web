@@ -8,6 +8,9 @@ import { Link } from "@/i18n/routing";
 import { useState, useEffect, useId } from "react";
 import { describePp, formatDecimal, formatInteger, formatPercent, formatPp, formatSigned } from "@/lib/football-format";
 import { calibrationSentence, type PointsCalibration } from "@/lib/football-scorecard";
+import { IntervalBand } from "@/components/instrument/IntervalBand";
+import { Ruler } from "@/components/instrument/Ruler";
+import { ReadingRule } from "@/components/instrument/ReadingRule";
 
 /**
  * The league page's club chooser: a labelled select and an explicit "Ver"
@@ -47,7 +50,7 @@ export function ClubChooser({
       }}
     >
       <span className="flex min-w-0 flex-col gap-1">
-        <label htmlFor={id} className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{label}</label>
+        <label htmlFor={id} className="text-[12px] font-semibold text-graphite">{label}</label>
         <select
           id={id}
           value={value}
@@ -141,29 +144,14 @@ function Delta({ value, invert = false, since, locale }: { value: number; invert
 }
 
 /**
- * Final-points distribution as a horizontal range: the thin rule spans the
- * 90% interval (q05–q95), the block the middle half (q25–q75), the tick the
- * median. All teams share one scale, so positions compare down the column.
+ * Final points as the site's interval mark: the yellow band spans the 90%
+ * interval (q05–q95) between ink caps, the ink tick is the median, and the
+ * black square is the points the club has today. Every row shares one scale
+ * from zero, printed as a ruler in the column head, so the distance from the
+ * square to the band is the season still to play.
  */
-function PointsBand({ interval, min, max, color }: { interval: PointsInterval; min: number; max: number; color: string }) {
-  const span = Math.max(max - min, 1);
-  const pos = (v: number) => ((v - min) / span) * 100;
-  const left = pos(interval.q05);
-  const right = pos(interval.q95);
-  const iqrLeft = pos(interval.q25);
-  const iqrRight = pos(interval.q75);
-  return (
-    <div aria-hidden="true" className="relative h-4 w-full min-w-[120px]">
-      <div className="absolute top-1/2 h-px -translate-y-1/2 bg-stone-500" style={{ left: `${left}%`, width: `${Math.max(right - left, 0.5)}%` }} />
-      <div className="absolute top-1/2 h-2 w-px -translate-y-1/2 bg-stone-500" style={{ left: `${left}%` }} />
-      <div className="absolute top-1/2 h-2 w-px -translate-y-1/2 bg-stone-500" style={{ left: `${right}%` }} />
-      <div
-        className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-sm"
-        style={{ left: `${iqrLeft}%`, width: `${Math.max(iqrRight - iqrLeft, 0.8)}%`, backgroundColor: color, opacity: 0.6 }}
-      />
-      <div className="absolute top-1/2 h-3 w-[2px] -translate-y-1/2 bg-stone-900" style={{ left: `${pos(interval.q50)}%` }} />
-    </div>
-  );
+function PointsBand({ interval, now, max, low }: { interval: PointsInterval; now: number | null; max: number; low: boolean }) {
+  return <IntervalBand lo={interval.q05} md={interval.q50} hi={interval.q95} min={0} max={max} now={now} low={low} className="min-w-[120px]" />;
 }
 
 export function LeagueTable({
@@ -202,8 +190,9 @@ export function LeagueTable({
 
   const bandTeams = intervals ? data.filter(t => intervals[t.team]) : [];
   const hasBands = bandTeams.length > 0;
-  const bandMin = hasBands ? Math.min(...bandTeams.map(t => intervals![t.team].q05)) - 1 : 0;
-  const bandMax = hasBands ? Math.max(...bandTeams.map(t => intervals![t.team].q95)) + 1 : 1;
+  // One scale from zero for every row, rounded up to a ruler mark.
+  const bandMax = hasBands ? Math.ceil((Math.max(...bandTeams.map(t => intervals![t.team].q95)) + 1) / 20) * 20 : 1;
+  const bandLabels = Array.from({ length: bandMax / 20 + 1 }, (_, k) => k * 20);
 
   const since = previousMatchday
     ? pt ? `face à previsão depois da jornada ${previousMatchday}` : `since the forecast after matchday ${previousMatchday}`
@@ -244,12 +233,12 @@ export function LeagueTable({
       <div tabIndex={0} role="region" aria-label={pt ? "Classificação prevista" : "Predicted standings"} className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-[11px] uppercase tracking-wider text-stone-500 sm:hidden">
+            <tr className="text-left text-[12px] text-graphite sm:hidden">
               <th className="py-1 pr-2" colSpan={2}><span className="sr-only">{labels.team}</span></th>
               <th className="px-2 py-1 text-center" colSpan={3}>{pt ? "Previsão do modelo" : "Model forecast"}</th>
             </tr>
             {hasActual && (
-              <tr className="hidden text-left text-[11px] uppercase tracking-wider text-stone-500 sm:table-row">
+              <tr className="hidden text-left text-[12px] text-graphite sm:table-row">
                 <th className="py-1 pr-2" colSpan={2}><span className="sr-only">{labels.team}</span></th>
                 {/* True at any instant, also once the next round is played (FR3-07). */}
                 <th className="px-2 py-1 text-center" colSpan={2}>
@@ -257,12 +246,12 @@ export function LeagueTable({
                     ? pt ? `Depois da jornada ${matchday}` : `After matchday ${matchday}`
                     : pt ? "Classificação" : "Standings"}
                 </th>
-                <th className="border-l border-stone-200 px-3 py-1 text-center" colSpan={hasBands ? 5 : 4}>
+                <th className="border-l border-rule px-3 py-1 text-center" colSpan={hasBands ? 5 : 4}>
                   {pt ? "Previsão do modelo" : "Model forecast"}
                 </th>
               </tr>
             )}
-            <tr className="border-b border-ink/40 bg-cream text-left">
+            <tr className="border-b border-ink text-left align-bottom">
               <th scope="col" className="w-7 py-2 pr-1 font-medium text-stone-500">#</th>
               <th scope="col" className="py-2 pr-2 font-medium">{labels.team}</th>
               {hasActual && (
@@ -273,13 +262,14 @@ export function LeagueTable({
                   </th>
                 </>
               )}
-              <th scope="col" className={`px-2 py-2 text-right font-medium sm:px-3 ${hasActual ? "sm:border-l sm:border-stone-200" : ""}`}>
+              <th scope="col" className={`px-2 py-2 text-right font-medium sm:px-3 ${hasActual ? "sm:border-l sm:border-rule" : ""}`}>
                 <abbr aria-hidden="true" title={labels.meanPoints} className="no-underline sm:hidden">{pt ? "Prev." : "Pred."}</abbr>
                 <span className="sr-only sm:not-sr-only">{labels.meanPoints}</span>
               </th>
               {hasBands && (
-                <th scope="col" className="hidden w-[20%] px-3 py-2 text-xs font-medium text-stone-500 md:table-cell">
-                  {bandLabel} <span className="text-stone-500">90%</span>
+                <th scope="col" className="hidden w-[26%] px-3 py-2 text-xs font-medium text-graphite md:table-cell">
+                  {bandLabel}, {pt ? "agora e no fim" : "now and at the end"}
+                  <Ruler min={0} max={bandMax} minor={5} major={20} labels={bandLabels} />
                 </th>
               )}
               <th scope="col" className="hidden px-3 py-2 text-right font-medium sm:table-cell">{labels.goalDifference}</th>
@@ -303,10 +293,11 @@ export function LeagueTable({
               const i = data.indexOf(team);
               const color = teamColorOnPaper(team.team);
               const interval = intervals?.[team.team];
-              // Despromoção is 17th or 18th: the 16th plays off and is not
-              // tinted, as the footnote says (audit VUXD-01).
-              const isRelegationZone = i >= data.length - 2;
-              const isChampionZone = i < 3;
+              // Despromoção is 17th or 18th: an ink rule above the 17th; the
+              // 16th plays off and is not counted, as the footnote says
+              // (audit VUXD-01). Mid-table bands are drawn in the low yellow.
+              const firstRelegationRow = i === data.length - 2;
+              const midTable = i >= 4 && i < data.length - 4;
               const isSelected = i === selectedIndex;
               const slug = ligaTeamSlugs[team.team];
               const actual = actualLookup.get(team.team);
@@ -325,7 +316,7 @@ export function LeagueTable({
               return (
                 <tr
                   key={team.team}
-                  className={`border-b border-stone-200 ${isSelected ? "bg-parchment" : isRelegationZone ? "bg-red-50/40" : isChampionZone ? "bg-stone-50" : ""}`}
+                  className={`border-b border-grid ${firstRelegationRow ? "border-t border-t-ink" : ""} ${isSelected ? "bg-field" : ""}`}
                 >
                   <td className="py-2.5 pr-1 tabular-nums text-stone-500">{i + 1}</td>
                   <td className="py-1 pr-2">
@@ -347,23 +338,18 @@ export function LeagueTable({
                       <td className="hidden px-2 py-2.5 text-right font-semibold tabular-nums sm:table-cell">{actual ? formatInteger(actual.points, locale) : ""}</td>
                     </>
                   )}
-                  <td className={`px-2 py-2.5 text-right font-semibold tabular-nums sm:px-3 ${hasActual ? "sm:border-l sm:border-stone-200" : ""}`}>
+                  <td className={`px-2 py-2.5 text-right font-semibold tabular-nums sm:px-3 ${hasActual ? "sm:border-l sm:border-rule" : ""}`}>
                     {formatDecimal(team.mean_pts, locale, 1)}
                     {interval && (
-                      <div className="text-[11px] font-normal tabular-nums text-stone-500 md:hidden">{bandRange(interval)}</div>
+                      <div className="text-[11px] font-normal tabular-nums text-stone-500">
+                        <span className="sr-only">{pt ? "90% das simulações entre " : "90% of simulations between "}</span>
+                        {bandRange(interval)}
+                      </div>
                     )}
                   </td>
                   {hasBands && (
                     <td className="hidden px-3 py-2.5 md:table-cell" title={interval ? bandTitle(interval) : undefined}>
-                      {interval ? (
-                        <div className="flex items-center gap-2">
-                          <PointsBand interval={interval} min={bandMin} max={bandMax} color={color} />
-                          <span className="w-11 shrink-0 text-right text-[11px] tabular-nums text-stone-500">
-                            <span className="sr-only">{pt ? "90% das simulações entre " : "90% of simulations between "}</span>
-                            {bandRange(interval)}
-                          </span>
-                        </div>
-                      ) : null}
+                      {interval ? <PointsBand interval={interval} now={actual?.points ?? null} max={bandMax} low={midTable} /> : null}
                     </td>
                   )}
                   <td className="hidden px-3 py-2.5 text-right tabular-nums text-stone-500 sm:table-cell">
@@ -420,20 +406,10 @@ export function LeagueTable({
       {/* Legend + the calibration claim, next to the thing it is a claim about. */}
       {hasBands && (
         <div className="mt-3 hidden max-w-3xl md:block">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-stone-500">
-            <span className="inline-flex items-center gap-1.5">
-              <span aria-hidden="true" className="relative inline-block h-px w-6 bg-stone-500" />
-              {pt ? "90% das simulações" : "90% of simulations"}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span aria-hidden="true" className="inline-block h-1.5 w-4 rounded-sm bg-stone-500/60" />
-              {pt ? "metade das simulações" : "half of simulations"}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span aria-hidden="true" className="inline-block h-3 w-[2px] bg-stone-900" />
-              {pt ? "mediana" : "median"}
-            </span>
-          </div>
+          <p className="text-[12px] text-graphite">
+            <ReadingRule locale={locale} variant="short" marks={['now', 'band']} />
+            <span className="ml-[18px] whitespace-nowrap">{pt ? "traço a negro: a mediana" : "black tick: the median"}</span>
+          </p>
         </div>
       )}
       {hasBands && (

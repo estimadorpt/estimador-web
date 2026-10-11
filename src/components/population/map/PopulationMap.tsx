@@ -806,7 +806,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
           // island tappable on a phone (UXM3V-01). Rendered from the first paint on this region,
           // so the map does not move when it arrives.
           <div role="group" aria-label={t.islandGroups} className="flex flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-line px-3 py-1.5 sm:gap-x-2 sm:px-4">
-            <span aria-hidden="true" className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.islands}</span>
+            <span aria-hidden="true" className="text-[12px] font-semibold text-graphite">{t.islands}</span>
             {AZORES_GROUPS.map(item => (
               <button
                 key={item.id}
@@ -944,7 +944,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
             <div ref={readoutRef} className="sm:min-h-[9.5rem]">
               {readout?.kind === 'parish' ? (
                 <>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.parish}</p>
+                  <p className="text-[12px] font-semibold text-graphite">{t.parish}</p>
                   <p className="mt-1 font-display text-xl font-extrabold leading-tight text-ink">{readout.name}</p>
                   {readout.parish && (
                     <>
@@ -961,7 +961,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                 </>
               ) : readout ? (
                 <>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{readout.kind === 'region' ? t.region(readout.code) : t.municipality}</p>
+                  <p className="text-[12px] font-semibold text-graphite">{readout.kind === 'region' ? t.region(readout.code) : t.municipality}</p>
                   <p className="mt-1 font-display text-xl font-extrabold leading-tight text-ink">{readout.name}</p>
                   {readout.kind === 'municipality' && places && (
                     <p className="mt-1 text-sm text-stone-600">{regionTitle(regionOfMunicipality(readout.code), regionName(regionOfMunicipality(readout.code)) ?? '', locale)}</p>
@@ -970,7 +970,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
                 </>
               ) : (
                 <>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{view.level === 'country' ? t.map : view.level === 'region' ? t.region(view.region) : t.municipality}</p>
+                  <p className="text-[12px] font-semibold text-graphite">{view.level === 'country' ? t.map : view.level === 'region' ? t.region(view.region) : t.municipality}</p>
                   <p className="mt-1 font-display text-xl font-extrabold leading-tight text-ink">{here}</p>
                   <p className="mt-2 text-sm text-stone-600">{hint}</p>
                 </>
@@ -980,7 +980,7 @@ export function PopulationMap({ locale, initialRegion, focusParish, onSelectPari
             {/* The tier colours exist only once a município's parishes are drawn; before that the legend would explain nothing on screen. */}
             {view.level === 'municipality' ? (
               <div>
-                <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500">{t.legendTitle}</p>
+                <p className="mb-1.5 text-[12px] font-semibold text-graphite">{t.legendTitle}</p>
                 <ul className="flex flex-col gap-1.5 text-xs text-stone-700">
                   {(['A', 'B', 'C'] as const).map(tier => (
                     <li key={tier} className="flex items-center gap-2">

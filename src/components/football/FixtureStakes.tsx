@@ -68,7 +68,7 @@ export function FixtureStakes({
     return (
       <div className="space-y-3">
         {statusLine && (
-          <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">{statusLine}</p>
+          <p className="text-[12px] font-semibold text-graphite">{statusLine}</p>
         )}
         {entry.matchOutcome && (
           <dl className="grid grid-cols-3 gap-x-4 gap-y-3 sm:max-w-md">
@@ -104,7 +104,7 @@ export function FixtureStakes({
 
   return (
     <div className="space-y-3">
-      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold uppercase tracking-wider text-stone-500">
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-semibold text-graphite">
         <span>{entry.objectiveLabel}</span>
         {statusLine && (
           <span className="font-medium normal-case tracking-normal text-stone-500">· {statusLine}</span>

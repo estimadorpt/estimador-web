@@ -102,7 +102,7 @@ export async function HealthScoreTile({
 
           {/* Component breakdown */}
           <div className="mt-5 border-t border-stone-100 pt-4">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-3">
+            <div className="text-[12px] font-semibold text-graphite mb-3">
               {t('healthComposedOf')}
             </div>
 

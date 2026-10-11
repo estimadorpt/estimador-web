@@ -209,7 +209,7 @@ export default async function LigaModelPage({
           </section>
 
           <section className="mt-12 pt-8 border-t border-stone-200">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3">
+            <h2 className="text-sm font-bold text-stone-500 mb-3">
               {c.footnoteTitle}
             </h2>
             {/* The selection caveat is said once, in the callout at the top

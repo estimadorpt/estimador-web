@@ -550,7 +550,7 @@ export default async function LigaDataPage({
                     <h3 className="text-base text-stone-900">
                       {pt ? "Época" : "Season"} {season.season}
                     </h3>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                    <span className="text-[12px] font-semibold text-graphite">
                       {season.current ? c.currentSeason : c.archived}
                     </span>
                   </div>
@@ -565,19 +565,19 @@ export default async function LigaDataPage({
                         <tr className="border-b border-stone-300">
                           <th
                             scope="col"
-                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left w-28 sm:w-52"
+                            className="text-[12px] font-semibold text-graphite py-2 text-left w-28 sm:w-52"
                           >
                             {c.file}
                           </th>
                           <th
                             scope="col"
-                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left"
+                            className="text-[12px] font-semibold text-graphite py-2 text-left"
                           >
                             {c.meaning}
                           </th>
                           <th
                             scope="col"
-                            className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-right w-20"
+                            className="text-[12px] font-semibold text-graphite py-2 text-right w-20"
                           >
                             {c.size}
                           </th>
@@ -636,13 +636,13 @@ export default async function LigaDataPage({
                 <tr className="border-b border-stone-300">
                   <th
                     scope="col"
-                    className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left w-64"
+                    className="text-[12px] font-semibold text-graphite py-2 text-left w-64"
                   >
                     {c.field}
                   </th>
                   <th
                     scope="col"
-                    className="text-[11px] font-bold uppercase tracking-wider text-stone-500 py-2 text-left"
+                    className="text-[12px] font-semibold text-graphite py-2 text-left"
                   >
                     {c.meaning}
                   </th>
@@ -703,7 +703,7 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
 
         {/* Licence + provenance */}
         <section className="pt-8 border-t border-stone-200">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3">
+          <h2 className="text-sm font-bold text-stone-500 mb-3">
             {c.licenceTitle}
           </h2>
           <div className="space-y-3 text-sm text-stone-500 leading-relaxed max-w-3xl">
@@ -718,7 +718,7 @@ curl -s ${SITE}/data/football/liga-2025-26/review.json | jq '.luck[:3]'`}</code>
             <p>{c.licenceWarranty}</p>
           </div>
 
-          <h2 className="text-sm font-bold uppercase tracking-wider text-stone-500 mb-3 mt-8">
+          <h2 className="text-sm font-bold text-stone-500 mb-3 mt-8">
             {c.provenanceTitle}
           </h2>
           <p className="text-sm text-stone-500 leading-relaxed max-w-3xl">

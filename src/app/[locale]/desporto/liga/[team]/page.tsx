@@ -448,7 +448,7 @@ export default async function TeamDetailPage({
                     className="border-t-2 pt-3"
                     style={{ borderColor: index === 0 ? teamColor : "var(--color-line)" }}
                   >
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+                    <div className="text-[12px] font-semibold text-graphite mb-1">
                       {metric.label}
                     </div>
                     <div className="text-3xl md:text-4xl font-display font-extrabold tabular-nums text-ink">
@@ -525,7 +525,7 @@ export default async function TeamDetailPage({
             {/* Magic Numbers */}
             {magicNumbers.length > 0 && (
               <div className="mt-4 pt-4 border-t border-stone-100">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-0.5">
+                <div className="text-[12px] font-semibold text-graphite mb-0.5">
                   {t("football.magicNumbers")}
                 </div>
                 <div className="text-[11px] text-stone-500 mb-2">
@@ -536,7 +536,7 @@ export default async function TeamDetailPage({
                     const impossible = mn.pointsNeeded > mn.maxRemaining;
                     return (
                       <div key={mn.label} className="rounded-xl bg-cream border border-line px-3 py-2 min-w-[120px]">
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+                        <div className="text-[12px] font-semibold text-graphite mb-1">
                           {t(`football.${mn.label}`)}
                         </div>
                         {mn.clinched ? (
@@ -635,7 +635,7 @@ export default async function TeamDetailPage({
           <div className="max-w-7xl mx-auto px-4 py-10">
             {/* "Próximo jogo" until the club's game kicks off; then the block
                 is what the model gave before it, dated (FR3-01, FA3-07). */}
-            <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
+            <p className="text-[12px] font-semibold text-graphite mb-1">
               <ClockSwitch
                 initial={t("football.fixtureStakesSectionTitle")}
                 steps={clubOutlook.fixtureKickoff && clubNextMatchday != null

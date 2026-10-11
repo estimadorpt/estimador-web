@@ -50,7 +50,7 @@ export async function WhatChanged({
     <section aria-labelledby="what-changed-heading" className="rounded-2xl border border-line bg-cream p-5 md:p-6">
       <div className="flex items-center gap-2">
         <RefreshCw aria-hidden="true" className="h-4 w-4 text-stone-500" />
-        <h2 id="what-changed-heading" className="text-[11px] font-bold uppercase tracking-widest text-stone-500">
+        <h2 id="what-changed-heading" className="text-[12px] font-semibold text-graphitest text-stone-500">
           {t('whatChangedEyebrow')}
         </h2>
       </div>

@@ -64,7 +64,7 @@ export async function ReleaseCalendarCard({
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-stone-500 tabular-nums">
               <span>{fmtPeriodLoc(e.date_estimated, locale)}</span>
               {e.estimated !== false && (
-                <span className="inline-block text-[11px] font-bold uppercase tracking-wider px-1 py-0.5 rounded bg-stone-100 text-stone-500">
+                <span className="inline-block text-[12px] font-semibold text-graphite px-1 py-0.5 rounded bg-stone-100 text-stone-500">
                   {t('calendarEstimated')}
                 </span>
               )}

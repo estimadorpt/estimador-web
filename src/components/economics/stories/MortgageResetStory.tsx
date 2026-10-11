@@ -82,7 +82,7 @@ export async function MortgageResetStory({
         {decided && decidedTenors.length > 0 && (
           <div className="rounded border border-stone-200 p-4">
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-stone-700">
+              <span className="text-xs font-bold text-stone-700">
                 {pickText(locale, decided.label) ?? '—'}
               </span>
               {decided.badge && (
@@ -148,7 +148,7 @@ export async function MortgageResetStory({
         {open && openTenors.length > 0 && (
           <div className="rounded border border-dashed border-stone-300 bg-stone-50/60 p-4">
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-stone-600">
+              <span className="text-xs font-bold text-stone-600">
                 {pickText(locale, open.label) ?? '—'}
               </span>
               {open.badge && (
@@ -175,7 +175,7 @@ export async function MortgageResetStory({
                     </div>
                     <div className="mt-1.5 grid grid-cols-3 gap-1.5 text-center">
                       <div className="rounded bg-cream border border-stone-200 px-1 py-1.5">
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                        <div className="text-[12px] font-semibold text-graphite">
                           −50 {t('mortgageBp')}
                         </div>
                         <div
@@ -186,7 +186,7 @@ export async function MortgageResetStory({
                         </div>
                       </div>
                       <div className="rounded bg-cream border border-stone-200 px-1 py-1.5">
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                        <div className="text-[12px] font-semibold text-graphite">
                           {t('mortgageFlat')}
                         </div>
                         <div className="text-xs font-bold tabular-nums mt-0.5 text-stone-600">
@@ -194,7 +194,7 @@ export async function MortgageResetStory({
                         </div>
                       </div>
                       <div className="rounded bg-cream border border-stone-200 px-1 py-1.5">
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                        <div className="text-[12px] font-semibold text-graphite">
                           +50 {t('mortgageBp')}
                         </div>
                         <div

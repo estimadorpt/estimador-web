@@ -107,7 +107,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
       </div>
       <p className="text-sm text-stone-500 mb-1 max-w-3xl leading-relaxed">{t.intro}</p>
       {snapshot && (
-        <p className="text-[11px] uppercase tracking-wider text-stone-500 mb-6">
+        <p className="text-[12px] text-graphite mb-6">
           {t.snapshot(snapshot)}
         </p>
       )}
@@ -172,7 +172,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                           <div className="flex items-baseline gap-1.5 flex-wrap">
                             <span className="font-semibold text-stone-800">{p.player}</span>
                             {rank !== undefined && (
-                              <span className="text-[11px] uppercase tracking-wide bg-stone-800 text-white px-1 py-px">
+                              <span className="text-[12px] text-graphite bg-stone-800 text-white px-1 py-px">
                                 {t.modelRank(rank)}
                               </span>
                             )}

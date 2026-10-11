@@ -343,7 +343,7 @@ export function MysteryGame({ locale, meta }: { locale: Locale; meta: Population
       )}
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-        <p className="text-[11px] font-bold uppercase tracking-wide text-stone-500">
+        <p className="text-[12px] font-semibold text-graphite">
           {t.dayLabel(day + 1)} · {formatGameDate(date, locale)}
         </p>
         {playing && (
