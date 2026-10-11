@@ -108,7 +108,7 @@ the paths below omit it.
 /metodologia/                      → Methodology hub: short, dated, links each section's method
 /eleicoes/metodologia/             → Election methodology (archive)
 /privacidade/                      → Privacy
-/marca/                            → Brand guide (noindex)
+/marca/                            → Design system: the brand and component reference (noindex)
 ```
 
 `staticwebapp.config.json` answers with a 301 for the bare root and `/index.html` (both to
@@ -140,7 +140,11 @@ used the same way on every page. Everything lives in `src/app/globals.css` (toke
 CSS), `src/lib/brand/index.ts` (hex values and font stacks for SVG, Plot and canvas code) and
 `src/components/instrument/` (the primitives). The September system (cream paper, pine ink,
 Manrope, rounded cream cards, pills, letter-spaced uppercase kickers, painted section scenes, the
-pastel mosaic, question headlines) is retired; do not bring any of it back.
+pastel mosaic, question headlines) is retired from every page; do not bring any of it back.
+**`/marca` is the design system's reference** (`src/app/[locale]/marca/page.tsx`, noindex, its
+pieces in `src/components/design-system/parts.tsx`): fourteen chapters built from the live
+components, with figures from the site's own formatters and contrasts computed. Change it when
+the system changes.
 
 - **The reading rule**, printed in the homepage masthead and the footer (`<ReadingRule>`), and
   as a short key under any chart that uses the marks:
@@ -154,14 +158,20 @@ pastel mosaic, question headlines) is retired; do not bring any of it back.
     the synthetic population carries it (with `HONESTY.synthetic`) before the first number.
   The band's meaning never depends on the yellow (1.4:1): the ink caps, the median and the
   printed range carry it. In forced colours the band is drawn in CanvasText.
-- **Mark and signature**: the interval mark (two square caps with whiskers, a band, a counter
-  left of centre) and the wordmark, one colour (`#111` on white). `<LogoHorizontal>` draws the
-  published logo from paths (`src/lib/brand/geometry.json`, `wordmark-paths.json`, the same
-  drawing as `public/brand/estimador-logo.svg`; `wordmark.test.ts` holds them together), so it
-  never depends on the page's typeface; the canvas share card draws the same paths. A
-  straight-line revision of the mark and a Plex wordmark are drawn and waiting for the owner's
-  pick (`docs/design/directions-2026-10-11/logo/`; drop-in geometry and wordmark JSON in
-  `variants/`): swapping is replacing those two JSON files and the SVGs, then `npm run brand`.
+- **Mark and signature** (owner's pick, 11 October 2026): the interval mark drawn as the pages
+  draw one (square caps on whiskers, a square-ended band, a median slot a little left of centre,
+  `COUNTER_X`) and "estimador.pt" in IBM Plex Sans 700 with ".pt" in graphite, one colour (`#111`
+  on white, white on ink). `<LogoHorizontal>` draws it from paths (`src/lib/brand/geometry.json`,
+  `wordmark-paths.json`), so it never depends on the page's typeface; the OG cards, the social kit,
+  the population share card and the miniatura postcard draw the same paths.
+  `scripts/generate-brand-identity.mjs` writes `public/brand/estimador-logo*.svg`, the icons
+  (square tiles) and the downloads from those two files (`wordmark.test.ts` holds them together):
+  changing the logo is replacing the two JSON files and running `npm run brand`. Below 24px the
+  small mark (`MARK_SMALL`, 32×32). `MarkLoading` cuts its travelling slot with a mask.
+- **The ruler edge** (`RulerEdge`, `.ruler-edge`; a proposal of 11 October 2026 awaiting the
+  owner's call): the site's one decoration, graduations hanging from the ink rule under the
+  header and on the footer's rule, aligned to the content column (8px, 40px, 80px ticks).
+  Decorative, unlabelled, no yellow, hidden in forced colours; never beside a figure.
 - **Surfaces and rules**: `bg-paper` (white, the page and every panel; `cream` is a legacy alias
   for it), `bg-field` (`#f4f4f4`, hovers, sunken areas; `parchment` is its alias), `border-rule`
   (`#d9d9d9`, 1px between instruments; `line` is its alias), `border-grid` (`#ececec`, table row
@@ -205,17 +215,19 @@ pastel mosaic, question headlines) is retired; do not bring any of it back.
   metade das épocas simuladas" / "Em 25 335 de 50 000 épocas simuladas", from
   `src/lib/football-finding.ts`, which reads `victory_paths.n_target` when published). Questions
   stay only where the reader is asked something (the misteriosa game, a search label). The
-  population pages and several sub-pages still carry question headlines from September; replace
-  them when touched. Stakes are stated from the playing club's side (`src/lib/football-stakes.ts`:
+  election archive's headings are dated findings from its own files (`src/lib/election-findings.ts`);
+  the population hub, parish and trust pages, the Liga sub-pages and the methodologies use findings
+  or plain statements (methodology anchors follow the new slugs; `trust-pages.test.ts`,
+  `football-methodology-anchors.test.ts` and `election-methodology.test.ts` hold them). FAQ-style
+  `<Disclosure>` summaries, guess-first prompts and checklists may stay questions. Stakes are stated from the playing club's side (`src/lib/football-stakes.ts`:
   "Título do Porto: 55% se ganhar, 43% se empatar, 39% se perder"; under 5 pp, "Pouco em jogo").
   Uncertainty is shown as an object (a band, a range printed beside it), not declared in hedging
   prose; dates are absolute and in Lisbon time (`formatReadingTime`: "11 out. 2026, 00:11"),
   never "hoje" or "amanhã" in a static page (the reader's clock, `ClockSwitch`, handles change).
-- **No paintings, no mosaic on pages**: the September section scenes and the house are retired
-  from every page (`PageHero` ignores `illustration` and `field`; `SectionIllustration` survives
-  only as a specimen on `/marca`). `<EmptyStateMark>` (the `quarters` mosaic) still marks empty
-  and error states and the 404 until it is redrawn in the instrument's grammar; `/marca` still
-  documents the September system in places and needs rewriting for Instrumento.
+- **No paintings, no mosaic**: the section scenes, the home art, `SectionIllustration`, `Mosaic`
+  and their images are deleted; `PageHero` has no `icon`, `illustration`, `field` or `art`.
+  `<EmptyStateMark>` is an instrument with no reading (a ruler and a dashed, empty band) on every
+  empty, refused or error state; the 404 draws it larger (`size="lg"`).
 - **One container** (`src/components/brand/Container.tsx`): the header, section tab rows, every
   `<PageHero>` and the page body share `CONTAINER_CLASS` (`mx-auto w-full max-w-7xl px-4`), so
   their left edges line up at every width. A narrower column is a `measure` inside it,
@@ -237,7 +249,8 @@ pastel mosaic, question headlines) is retired; do not bring any of it back.
   `ordinal(n, locale, gender)` ("5.º", "1.ª"; "5th"); football keeps `formatOrdinal`.
 - **Chart frame**: every chart and standalone table of figures has a title, a source sentence
   (source, date, method link) and a table twin (`<ChartTable>` or `ChartTabs`); `<DataCard>`
-  provides that frame for the existing charts (now square and white), `<Figure>` inside articles.
+  provides that frame (a title over an ink rule, no box or fill; `badge` is graphite text),
+  `<Figure>` inside articles.
   Archived forecasts name their run ("Fonte: modelo estimador.pt, 9 000 simulações · Previsão de
   16 de maio de 2025"). A new chart without a twin is not finished.
 - **Wide tables on phones**: `ChartTable` keeps its first column and header row sticky with a
@@ -255,10 +268,14 @@ pastel mosaic, question headlines) is retired; do not bring any of it back.
   complete alternative: every point at the chart's resolution, bands or quantiles in their own
   columns. Nothing in an SVG is below 11px.
 - **Chrome**: every page opens with `<PageHero>` (section name in the display cut, the title, a
-  lede, the meta line; no icon, field or painting) and closes with `<SiteFooter locale={locale}
-  />`. OG cards come from `scripts/lib/og-cards.mjs` and `og-render.mjs`; they still draw the
-  September palette and must be redrawn in the instrument's grammar (the finalist's link-card
-  mock is `docs/design/directions-2026-10-11/instrument/final-og.png`), with no owner name.
+  lede, the meta line) and closes with `<SiteFooter locale={locale} />`. OG cards
+  (`scripts/lib/og-cards.mjs`, `og-render.mjs`, satori with the static `@fontsource/ibm-plex-sans`
+  files) are the page read at a glance: the outlined logo, a ChannelHead with the reading's date,
+  the finding, the figures with their marks and the reading rule as the key; no owner name, no
+  byline, no economy column while it is unpublished. The social kit
+  (`scripts/generate-social-kit.mjs`) and the matchday post (`generate-social-images.mjs`) use the
+  same pieces. The scripts keep their own copy of the club names, colours, finding, percentages
+  and reading times; `src/lib/football-brand-script.test.ts` holds them to the site's.
 - **Communications**: one line ("Dados para compreender Portugal."), one descriptor and two bios,
   written once in `src/lib/brand/descriptor.json` (`descriptor.ts` for the app) and read by
   `meta.defaultDescription`, the footer blurb, the feed description, the OG brand card, the social
@@ -330,7 +347,7 @@ a published one (the 20-business-day guard in `economy-time.ts`). While the flag
   a return), which gives its status once, in the kicker ("Economia · em preparação",
   `economics.preparingEyebrow`) and the lede ("Esta secção está em preparação e ainda não
   publica leituras nem estimativas da economia…"); the reading card under it has no pill and
-  no painting (`EconomyReading`), and its way on is "Como leríamos a economia?"
+  no painting (`EconomyReading`), and its way on is "A leitura que faríamos da economia"
   (`economics.methodologyTitle`). The homepage's status line is "Em preparação · ainda sem
   leituras da economia publicadas" / "In preparation · no economic figures published yet"
   (`home.economyPreparingStatus`); and
@@ -381,8 +398,8 @@ scorecard's pre-registered ranges (`band_reading`, `band_position`, the strata n
 the page's errors are in-sample, and none of them is shown (MR2-02); `scorecard.json`
 stays verbatim. Tiers are reading guides, not gates. The release is dated by its own date
 on the population pages and the homepage ("datada de 5 de outubro de 2026", "Versão de …"
-in heroes and the homepage status line; `/sobre`'s row still reads "Publicada · … de 5 de
-outubro de 2026" and should say "datada de" too); only `/populacao/dados` also gives
+in heroes and the homepage status line; `/sobre`'s row says "datada de" too); only
+`/populacao/dados` also gives
 GitHub's 6 October (`GITHUB_PUBLISHED`).
 The release is CC BY-NC 4.0, INE's data CC BY 4.0 (see "Licences" in "Design Language"):
 `/dados`, the parish page's licence row, the hub's data card, the methodology, the cite line,
@@ -393,7 +410,7 @@ do not match the packaged microdata: they were built from a pre-packaging nucleu
 differ from the private-household `hh_type_top` in 844 parishes, by at most 2.2 pp (producer
 ask 25 in `docs/population/producer-feedback-v1.0.0.md`). The site prints them as published,
 never recomputes them, and says so wherever they appear: `RECIPE_CAVEAT.household_type` in
-`labels.ts` is an amber note on the parish card (#familias, `ResponseCard` passes
+`labels.ts` is an ink-ruled note with a bold "Nota." on the parish card (#familias, `ResponseCard` passes
 `sourceLine(recipe, locale, { withCaveat: false })` and draws the note itself), is appended
 to the source line elsewhere (`withCaveat` defaults to true, which is how the game clue gets
 it), `MethodologyBlocks` shows it beside the methodology's `hh_type_top` row, and
@@ -431,7 +448,7 @@ status, live }`; v1 records are ignored), listed on `/privacidade`. Share text: 
 misteriosa n.º {n} ({date}): acertei à {k}.ª pista, {sem erros|com 1 erro|com {e} erros}."
 plus the address. On a phone, after a pick the new clue's card scrolls to the top, so the
 four stay on the same screen as the clue (clues 1–5); a ruled-out parish keeps its numeral
-on the map in full ink, with a coral cross beside it.
+on the map in full ink, with a terracotta (`BRAND.terracotta`) cross beside it.
 
 - **Routes** (`src/app/[locale]/populacao/`): hub `/populacao`, parish pages
   `/populacao/freguesia/{CODE}` (6-char DICOFRE, e.g. `0302FA`), regions
@@ -519,10 +536,11 @@ on the map in full ink, with a coral cross beside it.
 
 - **Places and the parish file**: `places.json` columns are `[code, name, municipality, tier, level, census_population, generated_households, lat, lon, publication_population]` (+ `households_source`); `generated_households` counts the generated population's households (a collective quarters counts one) and is never labelled INE. Each `parish/<code>.json` carries a `place` header (name, município code and name, region id and name, level, census_population, generated_households, publication_population, and `worst_constraint` / `worst_constraint_srmse` / `person_srmse_median` from quality.csv, verbatim: the code is shown only through its site label, never raw, and the median's value is never printed, only whether it is within tier B's limit), so a parish page draws from one file; `places.json` loads lazily: for search, the other-parishes list, and the map, which fetches it only at município level, on a pointer, tap or focus in the map, or for a focused parish (region pages do not fetch it on arrival; the map's country and region lists fall back to the geometry's names). Helpers: `tierMeaningFor(tier, publication_population, census_population?, worst?)` (pass INE's count too, so a parish whose two counts sit either side of a tier threshold says so; pass the place header's fit as a `WorstTable`, `{ key: worst_constraint, srmse: worst_constraint_srmse, median: person_srmse_median }`, and a tier C parish of 500 or more names the table, the typical error or both that set its tier, the table's SRMSE with three decimals in the reader's locale (`formatFit`); only a single-year-age parish whose median is known to be within tier B's limit is told its answers can be close to INE's tables, and without the median the sentence claims nothing of the kind; the map and the game read places.json, which has no worst table, and keep the generic words) and `sourceLine(recipe)` / `RECIPE_PROVENANCE` (fitted vs derived) in `labels.ts`; `searchPlaces` (município rows too), `NEARBY_KEY` and `NEAREST_MAX_KM` (25 km) in `places.ts`. `country.json` is rebuilt with `~/code/estimador-microsynthesis/.venv/bin/python scripts/build-atlas-country.py` (needs shapely). Coverage is worded "as 3 092 freguesias dos Censos 2021 (CAOP 2021)" (the 2025 split into 302 parishes post-dates the census), on the pages, `/sobre` and the OG card; the homepage panel names the Censos 2021 once and then says "as 3 092 freguesias que existiam nessa altura" (`home.populationText`).
 - **Trust-page vocabulary** (`src/components/population/quality/`, `data/`): `CONSTRAINT_LABEL` (in `src/lib/population/labels.ts`, with `formatFit`, both re-exported by `quality/copy.ts`) is the one name per evaluated table, keyed on the scorecard's bare `constraints[].key` (`p_age5`). `constraintLabel(key, fallback, locale)` in `quality/copy.ts` looks that bare key up and strips no prefix; quality.csv's and the place header's `worst_constraint` is `srmse_` + the key (`srmse_p_age_single`), so drop the prefix before a lookup, as `tierMeaningFor` does with its `worst` argument. `FITTED_PERSON_KEYS` are the 12 fitted person tables; single-year age is scored but is not one of them. The scorecard's own labels are not shown. `quality/anchors.ts` holds the methodology anchors other pages link to (`METHODOLOGY_ANCHORS`, `methodologyFieldAnchor(field)`, and `methodologyAnchorForRecipe(recipe, locale)` for a card's "Como foi feito"; a test keeps them in step with the MDX headings). `INSTITUTIONAL_RECORDS` (`quality/copy.ts`) is the one statement of what collective-quarters residents carry, and the education and employment source lines say those residents' values were assigned after the fit (`sourceLine`). `FitBars` takes `max`, so the two `/qualidade` fit charts share one scale; the `/qualidade` glossary defines "violação estrutural" from the producer's `release_gates.py`. `SITE_LABEL_MAPS` in `data/dictionary.ts` labels the three code columns the release's `label_maps` leaves out (`activity_sector_code`, `education_level_coarse5`, `nuts2`) on `/populacao/dados`, until the producer ships them.
-- **Map** (`src/components/population/map/`): the frame's height is CSS (`PopulationMap.module.css`, `--map-height`, and `min(var(--map-height), max(360px, 108cqw))` below 640px). The Azores region offers its three island groups as framings (`AZORES_GROUPS` in `src/lib/population/map/islands.ts`) and is fitted clear of the zoom controls; a tap on the sea within `TAP_REACH_PX` (22) of a small shape takes the nearest one; at country zoom a district name may be shortened (`COUNTRY_LABEL_SHORT`, `map/placement.ts`). A "Saltar o mapa e ver como lista" bypass link comes before the SVG. `regionLabel()` (`places.ts`) names the Azores "Azores" in English lists, breadcrumbs and labels. The section tab row (`SectionNav`) wraps below `sm`; no horizontal scroll or fade.
-- **Parish page sections**: the employment card draws the 100 dots; the separate "Se fosse 100" section was removed. Each card opens with a place line (`ResponseCard`'s `place`: name, code, concelho, and INE's residents under 500), so a shared card or a screenshot still says where its figures are from; the hero states the tier and its meaning as visible text (once per page), and under 500 residents (the count the tier uses) a one-line note says each question counts only its own group. Card footers have fixed rows: the source line, then "Como foi feito" with the response id and copy. A guess-first card (`GuessFirstCard`) takes the guess on a 10×10 grid like `HundredPeople`, which, after the reveal, outlines the guess on the published dots (`guess`). The table twin's rows come from `twin-rows.ts` (an age band where nobody lives alone becomes one row with the chart's sentence).
+- **Map** (`src/components/population/map/`): the frame's height is CSS (`PopulationMap.module.css`, `--map-height`, and `min(var(--map-height), max(360px, 108cqw))` below 640px). The Azores region offers its three island groups as framings (`AZORES_GROUPS` in `src/lib/population/map/islands.ts`) and is fitted clear of the zoom controls; a tap on the sea within `TAP_REACH_PX` (22) of a small shape takes the nearest one; at country zoom a district name may be shortened (`COUNTRY_LABEL_SHORT`, `map/placement.ts`). A "Saltar o mapa e ver como lista" bypass link comes before the SVG. `regionLabel()` (`places.ts`) names the Azores "Azores" in English lists, breadcrumbs and labels. The section tab row (`SectionNav`) sits under the header, above the hero, on every population page, and wraps below `sm`; no horizontal scroll or fade. The map fills parishes by quality tier only, as ink density (A plain, B hatched, C cross-hatched; `map/tier-hatch.tsx`), never by colour or by a statistic.
+- **Parish page head** (the finalist mock, `docs/design/directions-2026-10-11/instrument/final-parish-desktop.png`): the h1 is the parish's name, then "Freguesia do concelho de X. Código N.", the lone tick with `HONESTY.synthetic`, and a "Ficha desta freguesia" `Register` (INE residents, generated households, the tier and its meaning, the release, the responses). The document title is "Name, Município: população sintética" (`parish/head-text.ts`, at most 70 characters for every parish); the share card's title is the name too. Card titles are `RECIPE_COPY[*].short` statements; `QualityBadge` is words ("Nível A"), never a chip.
+- **Parish page sections**: the employment card draws the 100 dots; the separate "Se fosse 100" section was removed. Each card opens with a place line (`ResponseCard`'s `place`: name, code, concelho, and INE's residents under 500), so a shared card or a screenshot still says where its figures are from; the hero's register states the tier and its meaning as visible text (once per page), and under 500 residents (the count the tier uses) a one-line note says each question counts only its own group. Card footers have fixed rows: the source line, then "Como foi feito" with the response id and copy. A guess-first card (`GuessFirstCard`) takes the guess on a 10×10 grid like `HundredPeople`, which, after the reveal, outlines the guess on the published dots (`guess`). The table twin's rows come from `twin-rows.ts` (an age band where nobody lives alone becomes one row with the chart's sentence).
 - **Permalinks and citing**: `responsePermalink` (`src/lib/population/permalink.ts`) builds `/populacao/v/{release}/q/{id}` (with `/en` in front for an English reader); the host rewrites it to the consultation page, whose resolver opens the response on its parish page at the card's anchor (e.g. `/pt/populacao/freguesia/010103/#vivem-sozinhas`), upper-case ids and an `/en` prefix included. The parish page replaces its address with the upper-case, trailing-slash form, and the header's language switch is a plain anchor built from that address. Every parish page ends with a "Como citar" block (`#citar`) from `src/lib/population/cite.ts` (release citation, parish citation, short attribution).
-- **Miniatura**: an explainer with invented people, under `<PageHero>`, titled "Como se lê uma população sintética?". From 721px wide the stage ends at its own content, with no slack in it (the last block of `miniatura.css`, "Round 5"; the earlier blocks there are history): `.mini-stage-view` (the bar, the scene, its zoom controls, the caption and the legend) sits inside `.mini-stage-follow`, which ends above `.mini-stage-tools`, a row carrying a second copy of the filter, the count, the tour and the household picker (ids `mini-house` and `mini-house-stage`; one copy is shown at a time, the sidebar's on phones, where it keeps UXM2V-05's order; the row hides while a household is open). From 721 to 1199px wide with at least 560px of height the sidebar is the taller column, so the whole stage follows the reader down it, capped at the viewport less the header (`calc(100svh - 92px)`), the scene row giving way rather than the caption or the tools (P206); from 1200px, or below 560px of height, the stage neither follows nor shrinks, and a one-pixel shadow marks where a shorter stage ends. A touch tap (`pointerType === 'touch'`) that lands between the houses selects the nearest one within 44 screen pixels (`TAP_RADIUS_PX` in `Scene.tsx`, converted through the screen matrix and the camera's scale; `nearestHouse` and `houseCentre` in `src/components/miniatura/hit-test.ts`), since a house is about 29×28px on a phone; a tap on a house is that house's own click, a drag or a tap far from every house selects nothing, and on phones the "go to a household" menu comes before the scene (UXM2V-05).
+- **Miniatura**: an explainer with invented people, under `<PageHero>`, titled "Uma população sintética lê-se agregado a agregado" (`MINIATURA_TITLE`, h1 and metadata); the scene is an ink line drawing on white with figures in the `SERIES` colours (`scene-palette.ts`). From 721px wide the stage ends at its own content, with no slack in it (the last block of `miniatura.css`, "Round 5"; the earlier blocks there are history): `.mini-stage-view` (the bar, the scene, its zoom controls, the caption and the legend) sits inside `.mini-stage-follow`, which ends above `.mini-stage-tools`, a row carrying a second copy of the filter, the count, the tour and the household picker (ids `mini-house` and `mini-house-stage`; one copy is shown at a time, the sidebar's on phones, where it keeps UXM2V-05's order; the row hides while a household is open). From 721 to 1199px wide with at least 560px of height the sidebar is the taller column, so the whole stage follows the reader down it, capped at the viewport less the header (`calc(100svh - 92px)`), the scene row giving way rather than the caption or the tools (P206); from 1200px, or below 560px of height, the stage neither follows nor shrinks, and a 1px rule (`.mini-stage::after`) marks where a shorter stage ends. A touch tap (`pointerType === 'touch'`) that lands between the houses selects the nearest one within 44 screen pixels (`TAP_RADIUS_PX` in `Scene.tsx`, converted through the screen matrix and the camera's scale; `nearestHouse` and `houseCentre` in `src/components/miniatura/hit-test.ts`), since a house is about 29×28px on a phone; a tap on a house is that house's own click, a drag or a tap far from every house selects nothing, and on phones the "go to a household" menu comes before the scene (UXM2V-05).
 - **Formats**: `src/lib/population/format.ts` (`formatCount`) is the one count formatter for every INE and release count, the homepage panel included ("3 092" with a no-break space in Portuguese, where Intl's pt-PT leaves four digits ungrouped). Each page states the parish's quality tier once, in the hero; cards carry no repeated status line.
 
 ### Data Organization
@@ -601,7 +619,7 @@ All chart components follow a consistent pattern:
 1. **Responsive sizing**: Use `containerRef.current.offsetWidth` for dynamic width
 2. **ResizeObserver**: Handle container size changes
 3. **Observable Plot**: Primary charting library with D3 for data manipulation
-4. **Editorial style**: paper ground, hairline dividers, cream panels with gentle radii (see Design Language)
+4. **Instrument style**: white ground, rules between instruments, no panels, fills or radii (see Design Language)
 
 ### Football Chart Components (`src/components/charts/football/`)
 - **LeagueTable.tsx** — Predicted standings with probabilities
@@ -616,21 +634,21 @@ All chart components follow a consistent pattern:
 - **Scenarios** (`src/lib/football-scenarios.ts`, behind the club scenario cards and the match page's impact panel): a rival result is part of a scenario only when it happens in at least 90% of the scenario's simulations (`RIVAL_CONDITION_MIN_SHARE`), and never when it is one of the club's own games; the final-duel bins carry a tie bar (`duelBins`), and `samplingMargin` states the simulation margin beside a share.
 - **The prediction game's record** (`src/lib/utils/prediction-game-record.ts`): `frozenBeforePreviousRoundEnded` lists the rounds whose odds were frozen before the previous round's last game (2026-27: matchdays 3, 5, 6 and 7), `roundsWithoutSource` the rounds whose games carry no `probs_source`, and `roundLockAt` the instant a round closes in the game (its earliest lock); `/desporto/liga/dados` names both kinds of round and `/jogo-previsoes` the frozen ones. The dates in the files: an `mdNN.json` `timestamp` is its last regeneration, not its first publication; its `next_matchday` may differ from the game's record (md01, md03 and md04 by up to 0.2 pp in 2026-27) and may list only part of the round, which `/desporto/liga/dados` states, read from the files by `src/lib/football-next-matchday.ts`; and `game_fixtures.json` (its `published_at`, its frozen odds) is the record that counts.
 - **One percentage rule** for every football figure: `formatPercent` / `formatPp` in `football-format.ts` (whole numbers from 10%, one decimal below, `<0,1%` and `>99%` at the ends so nothing non-zero reads 0% and nothing short of certain reads 100%, U+2212 for minus, pp for changes), grouped four-digit counts, and `matchLabel(home, away)` with an en dash ("Benfica – Vitória"). No `Math.round(p * 100)` in new code. Posteriors (`p_above_replacement`, `p_above_average`) go through `formatPosterior`, so 1.0 prints ">99%" and 0 "<0,1%"; `formatPercent`'s "100%" and "0%" are for exact shares of simulations only. Probability table twins (title race, relegation) list matchdays newest first, while the charts stay oldest first.
-- **No probability bands** on the Liga title and relegation charts, club timelines, their table twins or the OG card (owner decision, October 2026): the published `p_champion_lo/hi` and `p_relegation_lo/hi` are the spread of 500-simulation blocks, not the model's uncertainty, and `/desporto/liga/dados` says so. The 90% final-points ranges stay. The title race carries the title-calibration caveat (`football.titleCalibrationCaveat`, read by the hub, `/modelo` and the methodology, linked to the methodology's answer); the caveat quotes only the clean values (leaders given 63% on average, champions in 82%) and says the two cases with a data error are left out, while the methodology paragraph built from `TITLE_CALIBRATION` (`titleCalibrationParagraphs`) gives the 17 clean cases first and all 19 second; both must match `TITLE_CALIBRATION`'s clean values (`cellsClean`, `modelMeanClean`, `leadersWonClean`; a test checks both texts), and "despromoção" means 17th or 18th wherever it is shown (the 16th goes to a play-off and is not counted): table footnote, relegation caption, club pages, methodology, `/dados`. The page passes the two charts a trimmed history (`probabilityHistory()`), not every prediction in full.
+- **No probability bands** on the Liga title and relegation charts, club timelines, their table twins or the OG card (owner decision, October 2026): the published `p_champion_lo/hi` and `p_relegation_lo/hi` are the spread of 500-simulation blocks, not the model's uncertainty, and `/desporto/liga/dados` says so. The 90% final-points ranges stay. The title race carries the title-calibration caveat (`football.titleCalibrationCaveat`, read by the hub, `/modelo` and the methodology, linked to the methodology's `#quem-lidera-ganha-o-titulo-mais-vezes-do-que-o-modelo-diz`; `football-methodology-anchors.test.ts` checks every link into the methodology); the caveat quotes only the clean values (leaders given 63% on average, champions in 82%) and says the two cases with a data error are left out, while the methodology paragraph built from `TITLE_CALIBRATION` (`titleCalibrationParagraphs`) gives the 17 clean cases first and all 19 second; both must match `TITLE_CALIBRATION`'s clean values (`cellsClean`, `modelMeanClean`, `leadersWonClean`; a test checks both texts), and "despromoção" means 17th or 18th wherever it is shown (the 16th goes to a play-off and is not counted): table footnote, relegation caption, club pages, methodology, `/dados`. The page passes the two charts a trimmed history (`probabilityHistory()`), not every prediction in full.
 - Match pages (`/jogo/{slug}`) cover the fixtures to come (`loadUpcomingFixtures`, postponed leftovers still in `next_matchday_scenarios` included, with `postponed: true` and a "jogo em atraso" label) and the season's played games (`loadPlayedFixtures`: the result plus the pre-match odds, only when they were published before kickoff); played pages stay online and are in the sitemap, dated by kickoff. The slug (`{home-away}`) has no season in it, so the 2027-28 fixtures would collide with this season's pages: move them to a season-scoped address before 2027-28 (plan in `docs/football-runbook.md`).
 - The methodology page renders `src/content/football-methodology/{pt,en}.mdx` (MDX plus data-bound components; the `REVISED` date lives in `metodologia/page.tsx`).
-- **Provenance**: the xG behind xPts (the md files' `xpts_table`, `review.json`) is FotMob's; results, shots on target and goalkeeper xGOT are SofaScore's, closing odds Pinnacle's and Bet365's via football-data.co.uk (which provider each past season's results field carries is producer ask 5 in `docs/football-producer-asks.md`). `/desporto/liga/dados` marks the third-party fields "Fora da licença" per file (see "Licences"), and `src/lib/football-provenance.test.ts` checks that `/dados`, `/2025-26` and the methodology name FotMob for every xG they attribute. The hub's source line (`football.xgAttribution` in `messages/*.json`) still says SofaScore and is outside that test: change it to FotMob and add the two message files to the test's `FILES`.
+- **Provenance**: the xG behind xPts (the md files' `xpts_table`, `review.json`) is FotMob's; results, shots on target and goalkeeper xGOT are SofaScore's, closing odds Pinnacle's and Bet365's via football-data.co.uk (which provider each past season's results field carries is producer ask 5 in `docs/football-producer-asks.md`). `/desporto/liga/dados` marks the third-party fields "Fora da licença" per file (see "Licences"), and `src/lib/football-provenance.test.ts` checks that `/dados`, `/2025-26` and the methodology name FotMob for every xG they attribute. The hub's source line (`football.xgAttribution`) names FotMob too; the test also reads `messages/pt.json` and `messages/en.json`.
 - The published forecasts come from `bivcross` (bivariate Poisson with shots on target) since matchday 1 of 2026-27; md00 was `joint_sot`. Each md file names its model in `model`. Model codenames appear only on `/desporto/liga/dados`, never in reader-facing copy.
 - Several older components in that folder (PositionHeatmap, CriticalPaths, PathsToVictory, PointsPace, MatchdayLive, ScheduleDifficulty) are imported by no page; do not build on them without checking.
 
 ### Election Chart Components (`src/components/charts/`)
 - **HouseEffects.tsx**: Custom HTML/CSS matrix with no hover tooltip (an exception to the hover-tip rule above): each cell's `title` and the `<ChartTable>` twin carry the exact values; the cell colours come from `src/lib/election-heatmap.ts` (one forest ink on every cell, the red and blue ramps capped where it still reaches 4.5:1, `election-heatmap.test.ts` sweeps them)
-- **CoalitionDotPlot.tsx**: the two blocs' seat totals as a dot histogram (stacked dots: `drawnSeatIndices`, every 12th model draw with its three emigration scenarios, 750 dots, about 200 on phones; never every k-th row, which drew only the 2024 scenario)
+- **CoalitionDotPlot.tsx**: the two blocs' seat totals as a dot histogram (stacked dots: `drawnSeatIndices`, every 12th model draw with its three emigration scenarios, 750 dots, about 200 on phones; never every k-th row, which drew only the 2024 scenario); the bloc colours are PS's and AD's (under 3:1 on white, so every row names its bloc)
 - **DistrictSummary.tsx**: ENSC methodology for contested seats; each district card shows every party above 5% (`seatChangesOf`, `SEAT_CHANGE_SHOWN`) with "+1/−1 mandato ou mais"; the third tile is "Abaixo do limiar (ENSC ≤ 0,8)", with a watch line for districts between 0,4 and 0,8 (`districtsToWatch`); `CONTESTED_ENSC` and `WATCH_ENSC` live in `election-aggregates.ts`
 - **PollingChart.tsx**: takes a columnar `TrendSeries` (`compactTrendSeries` in `election-aggregates.ts`) instead of long rows, so the page payload stays small
-- **Numbers** (`src/lib/election-display.ts`): election probabilities print "menos de 1%" / "mais de 99%" ("under 1%" / "over 99%") everywhere, tables and twins included, never "<1%" or 0% and 100% (`formatElectionProbability`, `electionProbabilityParts` for a headline figure); counts group from four digits (`formatElectionNumber` uses `useGrouping: 'always'`: "9 000" with a no-break space in Portuguese, like `formatInteger` and `formatCount`), and the methodology MDX writes its counts the same way by hand ("9 000", "8 000", "1 000"). Dates: `formatElectionDate` for table columns ("09/01/2026", dd/mm/aaaa so the column lines up; "9 Jan 2026"), `formatElectionShortDate` for chart ticks and tips ("6 fev. 2026"), `formatElectionLongDate` for readouts and footers. `PARLIAMENTARY_PARTY_ORDER` (AD PS CH IL L CDU BE PAN) and `sortByPartyOrder` are the archive's one party order, so the left bloc reads PS + L + CDU + BE (`src/lib/config/blocs.ts` still lists it PS, BE, CDU, L: sort it before showing it). `PRESSED_IN_FORCED_COLORS` is the pressed state in forced colours for the round toggle and the party and candidate pills.
-- **Sections with one chart**: an h2 question, then the `<DataCard>`, whose subtitle carries the explanation; no grey lede between them. Election heroes on phones crop the painting with `object-fit: cover` at `center 32%`.
-- The election methodology is its own page, `/eleicoes/metodologia` (`src/content/methodology/eleicoes/{pt,en}.mdx`, dated). Every h2 and h3 there and on `/economia/metodologia` gets a slug id (`headingSlug`, `headingText` in `src/lib/election-methodology.ts`), so keep heading texts unique; charts deep-link through `ELECTION_METHOD_ANCHORS` and `electionMethodHref(section, locale)`, and `election-methodology.test.ts` keeps the anchors and the MDX in step; `src/content/methodology/{pt,en}.mdx` is a short note that keeps the old `/metodologia#eleicoes` and `#segunda-volta-2026` anchors working.
+- **Numbers** (`src/lib/election-display.ts`): election probabilities print "menos de 1%" / "mais de 99%" ("under 1%" / "over 99%") everywhere, tables and twins included, never "<1%" or 0% and 100% (`formatElectionProbability`, `electionProbabilityParts` for a headline figure); counts group from four digits (`formatElectionNumber` uses `useGrouping: 'always'`: "9 000" with a no-break space in Portuguese, like `formatInteger` and `formatCount`), and the methodology MDX writes its counts the same way by hand ("9 000", "8 000", "1 000"). Dates: `formatElectionDate` for table columns ("09/01/2026", dd/mm/aaaa so the column lines up; "9 Jan 2026"), `formatElectionShortDate` for chart ticks and tips ("6 fev. 2026"), `formatElectionLongDate` for readouts and footers. `PARLIAMENTARY_PARTY_ORDER` (AD PS CH IL L CDU BE PAN) and `sortByPartyOrder` are the archive's one party order, so the left bloc reads PS + L + CDU + BE (`src/lib/config/blocs.ts` still lists it PS, BE, CDU, L: sort it before showing it). The round toggle and the party and candidate filters are segmented text controls (`segmentClass`, `SEGMENT_GROUP_CLASS`: pressed is an ink rule), with `PRESSED_IN_FORCED_COLORS` for the pressed state in forced colours.
+- **Sections with one chart**: an h2 finding (`src/lib/election-findings.ts`: "António José Seguro vencia a 2.ª volta em mais de 99% das simulações") or statement, then the `<DataCard>`, whose subtitle carries the explanation; no grey lede between them.
+- The election methodology is its own page, `/eleicoes/metodologia` (`src/content/methodology/eleicoes/{pt,en}.mdx`, dated). Every h2 and h3 there and on `/economia/metodologia` gets a slug id (`headingSlug`, `headingText` in `src/lib/election-methodology.ts`), so keep heading texts unique; charts deep-link through `ELECTION_METHOD_ANCHORS` and `electionMethodHref(section, locale)`, and `election-methodology.test.ts` keeps the anchors and the MDX in step; the `/metodologia` page's elections row carries the old `#eleicoes` and `#segunda-volta-2026` anchors.
 
 ## Azure Static Web Apps Configuration
 

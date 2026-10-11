@@ -1,5 +1,27 @@
 # Design directions, 11 October 2026
 
+## Outcome
+
+The owner chose **Instrumento** (finalist 1 below) on 11 October 2026, with four amendments:
+
+1. **No name in the masthead or on share cards.** The owner's name stays in the footer's credit
+   line and on `/sobre` only.
+2. **The logo is revised, not replaced.** Its composition stays (caps on whiskers, a band, the
+   name with ".pt" in grey), but the band became a square block with a median slot, the drawing
+   the pages use for the model's margin. Eight revisions are in `logo/` (sheets and drop-in JSON
+   in `variants/`); the owner picked "4. Median-slot mark + IBM Plex Sans 700".
+3. **IBM Plex Sans, in one width.** The pick was made from seven type pairings in `type/`; the
+   condensed display cut was dropped, so headlines, figures and text share one family.
+4. **One decoration, from the instrument.** A ruler's edge under the header and on the footer's
+   rule was proposed in place of the retired mosaic; it awaits the owner's call.
+
+What shipped, and the rules that hold it, are documented in two places:
+- `/marca`, the design system's reference page, built from the live components;
+- the "Design Language" section of `CLAUDE.md`, for anyone changing the code.
+
+The September system (cream, pine, Manrope, rounded cards, pills, uppercase kickers, paintings,
+the mosaic and question headlines) is gone from every page, the share cards and the social kit.
+
 Why: friends shared the site and called it "vibed", with a "Claude-ish aesthetic"; the owner agreed. This folder holds
 the exploration that followed: eight directions, each mocked with real data, challenged, revised and judged, and
 the three finalists in full.
