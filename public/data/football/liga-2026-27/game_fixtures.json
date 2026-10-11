@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "generated_at": "2026-10-10T23:12:08Z",
+  "generated_at": "2026-10-11T15:02:28Z",
   "n_matchdays": 34,
   "matchdays": [
     {
@@ -1015,21 +1015,6 @@
           "probs_source": "md07.json@10877c9"
         },
         {
-          "id": "md08-casa-pia-vs-santa-clara",
-          "home": "Casa Pia",
-          "away": "Santa Clara",
-          "kickoff": "2026-10-10T14:30:00Z",
-          "kickoff_confirmed": true,
-          "locks_at": "2026-10-10T14:30:00Z",
-          "p_home": 0.2837,
-          "p_draw": 0.3046,
-          "p_away": 0.4117,
-          "home_goals": 0,
-          "away_goals": 1,
-          "published_at": "2026-09-25T14:50:48.445152+00:00",
-          "probs_source": "md07.json@10877c9"
-        },
-        {
           "id": "md08-maritimo-vs-porto",
           "home": "Maritimo",
           "away": "Porto",
@@ -1055,6 +1040,21 @@
           "p_draw": 0.268,
           "p_away": 0.4349,
           "home_goals": 2,
+          "away_goals": 1,
+          "published_at": "2026-09-25T14:50:48.445152+00:00",
+          "probs_source": "md07.json@10877c9"
+        },
+        {
+          "id": "md08-casa-pia-vs-santa-clara",
+          "home": "Casa Pia",
+          "away": "Santa Clara",
+          "kickoff": "2026-10-10T19:30:00Z",
+          "kickoff_confirmed": true,
+          "locks_at": "2026-10-10T19:30:00Z",
+          "p_home": 0.2837,
+          "p_draw": 0.3046,
+          "p_away": 0.4117,
+          "home_goals": 0,
           "away_goals": 1,
           "published_at": "2026-09-25T14:50:48.445152+00:00",
           "probs_source": "md07.json@10877c9"
