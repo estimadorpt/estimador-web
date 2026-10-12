@@ -71,6 +71,11 @@ npm run smoke -- --base <url>  # Probe a deployed export: every route, asset and
 npm run check:export # Export budget (files, MB, per-file) + over-long titles/descriptions; runs as postbuild
 ```
 
+`scripts/patch-next.mjs` (postinstall and prebuild) fixes one Next 15.5 bug: when a link's RSC
+fetch fails, Next falls back to a full load of the payload's address, so the reader lands on raw
+text at `/pt/populacao/index.txt`; the patch sends that fallback to the page. `patch-next.test.ts`
+fails if a Next upgrade moves the code; delete both with the move to Next 16, which fixed it.
+
 `npm run check` misses static-export prerender failures (a `useSearchParams` without
 Suspense, a route with no params): before a release, build the export from a copy
 (`git archive HEAD` into a scratch folder, symlink `node_modules`, `npm run build`), never
