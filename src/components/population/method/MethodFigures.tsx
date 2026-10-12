@@ -8,6 +8,7 @@ import {
 } from '@/lib/population/method-example';
 import type { PopulationReleaseInfo } from '@/types/population';
 import { HouseGlyph, type HouseState } from './HouseGlyph';
+import { STEP_IDS, tierGrid, type TierThresholds } from './rules';
 
 /**
  * The methodology told in drawings: an overview of the five steps, then one
@@ -21,11 +22,13 @@ import { HouseGlyph, type HouseState } from './HouseGlyph';
  */
 type Locale = 'pt' | 'en';
 
+// Server-only: computed once per build (milliseconds); never import this module from a client component.
 const EX = methodExample();
 
 const people = (n: number, pt: boolean) => (pt ? `${n} ${n === 1 ? 'pessoa' : 'pessoas'}` : `${n} ${n === 1 ? 'person' : 'people'}`);
 const households = (n: number, pt: boolean) => (pt ? `${n} ${n === 1 ? 'agregado' : 'agregados'}` : `${n} ${n === 1 ? 'household' : 'households'}`);
 const one = (v: number, locale: Locale) => formatValue(Math.round(v * 10) / 10, locale);
+const two = (v: number, locale: Locale) => (locale === 'pt' ? v.toFixed(2).replace('.', ',') : v.toFixed(2));
 
 /** The note under every example figure: what is invented, and what it stands for. */
 function exampleNote(locale: Locale): string {
@@ -152,8 +155,6 @@ function Arrow({ children }: { children: ReactNode }) {
 
 /* ------------------------------------------------------------------ overview */
 
-const STEP_IDS = ['passo-1', 'passo-2', 'passo-3', 'passo-4', 'passo-5'] as const;
-
 function StepIcon({ step }: { step: number }) {
   const s = { stroke: BRAND.ink, strokeWidth: 1.2, fill: 'none' } as const;
   return (
@@ -168,7 +169,7 @@ function StepIcon({ step }: { step: number }) {
 }
 
 /** The five steps at a glance, each linking to its section below: a column on phones, a row from md. */
-export function MethodOverview({ locale }: { locale: Locale }) {
+export function MethodOverview({ locale, parishes }: { locale: Locale; parishes: number }) {
   const pt = locale === 'pt';
   const steps = pt
     ? [
@@ -194,7 +195,7 @@ export function MethodOverview({ locale }: { locale: Locale }) {
       </figcaption>
       <div className="mb-4 grid gap-2 text-[13px] sm:grid-cols-2">
         <p className="m-0 border-l-2 border-ink pl-3 text-ink"><b className="font-semibold">{pt ? 'Entra' : 'In'}:</b> {pt ? 'o Ficheiro de Uso Público dos Censos 2021 (pessoas reais, anónimas, sem freguesia)' : 'the 2021 Census Public Use File (real, anonymous people, with no parish)'}</p>
-        <p className="m-0 border-l-2 border-ink pl-3 text-ink"><b className="font-semibold">{pt ? 'Entra' : 'In'}:</b> {pt ? 'as tabelas que o INE publica para cada uma das 3 092 freguesias' : 'the tables INE publishes for each of the 3,092 parishes'}</p>
+        <p className="m-0 border-l-2 border-ink pl-3 text-ink"><b className="font-semibold">{pt ? 'Entra' : 'In'}:</b> {pt ? `as tabelas que o INE publica para cada uma das ${formatCount(parishes, locale)} freguesias` : `the tables INE publishes for each of the ${formatCount(parishes, locale)} parishes`}</p>
       </div>
       <ol className="relative m-0 grid list-none gap-0 pl-0 md:grid-cols-5 md:gap-3">
         {steps.map(([name, text], i) => (
@@ -314,14 +315,21 @@ export function FigureTilt({ locale }: { locale: Locale }) {
         ? 'Todos começam com o mesmo peso (o traço fino). Os candidatos ficaram novos de mais para esta freguesia, por isso os agregados de pessoas com 65 ou mais anos ganham peso e os casais jovens perdem.'
         : 'All start with the same weight (the thin tick). The candidates came out too young for this parish, so households of people aged 65 or over gain weight and young couples lose it.'}
       note={exampleNote(locale)}
-      twin={(
+      twin={(<>
+        <ChartTable
+          summaryLabel={pt ? 'Ver os pesos em tabela' : 'View the weights as a table'}
+          caption={pt ? 'O peso de cada candidato, antes e depois do ajuste' : 'Each candidate’s weight, before and after the fit'}
+          columns={pt ? ['Candidato', 'Idades', 'Peso antes', 'Peso depois'] : ['Candidate', 'Ages', 'Weight before', 'Weight after']}
+          align={[undefined, 'left', 'right', 'right']}
+          rows={EX.kept.map((ages, i) => [i + 1, ages.join(', '), two(EX.before[i], locale), two(EX.after[i], locale)])}
+        />
         <ChartTable
           summaryLabel={pt ? 'Ver as somas em tabela' : 'View the sums as a table'}
           caption={pt ? 'As tabelas da freguesia de exemplo, antes e depois dos pesos' : 'The example parish’s tables, before and after the weights'}
           columns={pt ? ['Célula', 'Tabela', 'Antes', 'Depois'] : ['Cell', 'Table', 'Before', 'After']}
           rows={[...rows(sizeLabels, TARGET.sizes, EX.countsBefore, EX.countsAfter, 'sizes'), ...rows(AGE_BANDS[locale], TARGET.ages, EX.countsBefore, EX.countsAfter, 'ages')]}
         />
-      )}
+      </>)}
     >
       <Pool label={pt ? `Os ${EX.kept.length} candidatos que ficaram, cada um com o seu peso` : `The ${EX.kept.length} remaining candidates, each with its weight`}>
         {EX.kept.map((ages, i) => <Home key={i} ages={ages} weight={EX.after[i]} prior={prior} maxWeight={maxW} />)}
@@ -377,7 +385,7 @@ export function FigureChoose({ locale }: { locale: Locale }) {
 export function FigureCollective({ locale }: { locale: Locale }) {
   const pt = locale === 'pt';
   const filled = 'inline-block size-3 shrink-0 bg-ink';
-  const imputed = 'inline-block size-3 shrink-0 border border-ink bg-[repeating-linear-gradient(45deg,#111_0_1px,transparent_1px_4px)]';
+  const imputed = 'inline-block size-3 shrink-0 border border-ink bg-[repeating-linear-gradient(45deg,var(--color-ink)_0_1px,transparent_1px_4px)]';
   const empty = 'inline-block size-3 shrink-0 border border-dashed border-ink';
   const fields: Array<[string, string, string]> = pt
     ? [
@@ -447,6 +455,7 @@ export function FigurePublish({ locale, release }: { locale: Locale; release: Po
     .map(([table, name]) => ({ table, name, provenance: release.column_dictionary[table]?.[name]?.provenance }))
     .filter((c): c is { table: 'persons' | 'households'; name: string; provenance: string } => typeof c.provenance === 'string');
   const residents = TARGET_PEOPLE + CARE_HOME.length;
+  const floor = formatCount(tierThresholds(release)?.B.min_population ?? 500, locale);
   return (
     <Frame
       id="figura-publicar"
@@ -491,8 +500,8 @@ export function FigurePublish({ locale, release }: { locale: Locale; release: Po
       </table>
       <p className="mb-0 mt-5 border-l-2 border-ink pl-3 text-[14px] text-ink">
         {pt
-          ? <>A freguesia de exemplo tem {people(residents, pt)}: fica no <b className="font-semibold">nível C</b>, como todas as que têm menos de 500 residentes.</>
-          : <>The example parish has {residents} people: it is <b className="font-semibold">tier C</b>, like every parish under 500 residents.</>}
+          ? <>A freguesia de exemplo tem {people(residents, pt)}: fica no <b className="font-semibold">nível C</b>, como todas as que têm menos de {floor} residentes.</>
+          : <>The example parish has {residents} people: it is <b className="font-semibold">tier C</b>, like every parish under {floor} residents.</>}
       </p>
     </Frame>
   );
@@ -500,10 +509,8 @@ export function FigurePublish({ locale, release }: { locale: Locale; release: Po
 
 /* ------------------------------------------------------------------ tiers */
 
-type Thresholds = { A: { max_person_srmse_median: number; max_worst_srmse: number; min_population: number }; B: { max_person_srmse_median: number; max_worst_srmse: number; min_population: number } };
-
-export function tierThresholds(release: PopulationReleaseInfo): Thresholds | null {
-  const t = (release.quality_tier_policy as { thresholds?: Thresholds }).thresholds;
+export function tierThresholds(release: PopulationReleaseInfo): TierThresholds | null {
+  const t = (release.quality_tier_policy as { thresholds?: TierThresholds }).thresholds;
   return t?.A && t?.B ? t : null;
 }
 
@@ -519,16 +526,17 @@ export function TierGrid({ locale, release, counts }: { locale: Locale; release:
     `${n(t.B.min_population)}–${n(t.A.min_population - 1)}`,
     pt ? `${n(t.A.min_population)} ou mais` : `${n(t.A.min_population)} or more`,
   ];
+  const grid = tierGrid(t);
   const rows: Array<[string, Array<'A' | 'B' | 'C'>]> = [
-    [pt ? `Até ${fit(t.A.max_person_srmse_median)}` : `Up to ${fit(t.A.max_person_srmse_median)}`, ['C', 'B', 'A']],
-    [pt ? `${fit(t.A.max_person_srmse_median)} a ${fit(t.B.max_person_srmse_median)}` : `${fit(t.A.max_person_srmse_median)} to ${fit(t.B.max_person_srmse_median)}`, ['C', 'B', 'B']],
-    [pt ? `Acima de ${fit(t.B.max_person_srmse_median)}` : `Above ${fit(t.B.max_person_srmse_median)}`, ['C', 'C', 'C']],
+    [pt ? `Até ${fit(t.A.max_person_srmse_median)}` : `Up to ${fit(t.A.max_person_srmse_median)}`, grid[0]],
+    [pt ? `${fit(t.A.max_person_srmse_median)} a ${fit(t.B.max_person_srmse_median)}` : `${fit(t.A.max_person_srmse_median)} to ${fit(t.B.max_person_srmse_median)}`, grid[1]],
+    [pt ? `Acima de ${fit(t.B.max_person_srmse_median)}` : `Above ${fit(t.B.max_person_srmse_median)}`, grid[2]],
   ];
   // Ink density, as the map draws the tiers: A plain, B hatched, C cross-hatched.
   const hatch: Record<'A' | 'B' | 'C', string> = {
     A: '',
-    B: 'bg-[repeating-linear-gradient(45deg,#8a8a8a_0_1px,transparent_1px_6px)]',
-    C: 'bg-[repeating-linear-gradient(45deg,#8a8a8a_0_1px,transparent_1px_6px),repeating-linear-gradient(-45deg,#8a8a8a_0_1px,transparent_1px_6px)]',
+    B: 'bg-[repeating-linear-gradient(45deg,var(--color-scale)_0_1px,transparent_1px_6px)]',
+    C: 'bg-[repeating-linear-gradient(45deg,var(--color-scale)_0_1px,transparent_1px_6px),repeating-linear-gradient(-45deg,var(--color-scale)_0_1px,transparent_1px_6px)]',
   };
   return (
     <figure className="not-prose my-8 border-t border-ink pt-3 font-sans">
@@ -536,8 +544,8 @@ export function TierGrid({ locale, release, counts }: { locale: Locale; release:
         <span className="block text-[17px] font-semibold leading-6 text-ink">{pt ? 'O nível sai de duas medidas: residentes e erro típico' : 'The tier comes from two measures: residents and typical error'}</span>
         <span className="mt-1 block max-w-[68ch] text-[14px] leading-5 text-graphite">
           {pt
-            ? 'Quanto mais tinta, mais cuidado na leitura, como no mapa. Com menos de 500 residentes, o nível é sempre C, por melhor que seja o ajuste.'
-            : 'The more ink, the more care in reading, as on the map. Under 500 residents the tier is always C, however good the fit.'}
+            ? `Quanto mais tinta, mais cuidado na leitura, como no mapa. Com menos de ${n(t.B.min_population)} residentes, o nível é sempre C, por melhor que seja o ajuste.`
+            : `The more ink, the more care in reading, as on the map. Under ${n(t.B.min_population)} residents the tier is always C, however good the fit.`}
         </span>
       </figcaption>
       <div className="scroll-cue overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? 'Regra dos níveis de qualidade' : 'Quality tier rule'}>
@@ -575,4 +583,3 @@ export function TierGrid({ locale, release, counts }: { locale: Locale; release:
   );
 }
 
-export { STEP_IDS };

@@ -3,8 +3,9 @@ import type { MDXComponents } from 'mdx/types';
 import type { Locale } from '@/lib/population/labels';
 import type { PopulationMeta, PopulationReleaseInfo } from '@/types/population';
 import {
-  FigureCandidates, FigureChoose, FigureCollective, FigureLearn, FigurePublish, FigureTilt, MethodOverview, STEP_IDS, TierGrid,
+  FigureCandidates, FigureChoose, FigureCollective, FigureLearn, FigurePublish, FigureTilt, MethodOverview, TierGrid,
 } from './MethodFigures';
+import { STEP_IDS } from './rules';
 
 /** "1. Aprender …" → 1; any other heading → null. */
 function stepNumber(children: ReactNode): number | null {
@@ -28,7 +29,7 @@ export function methodFigureBlocks({ locale, meta, release }: { locale: Locale; 
         </h3>
       );
     },
-    MethodOverview: () => <MethodOverview locale={locale} />,
+    MethodOverview: () => <MethodOverview locale={locale} parishes={meta.counts.parishes} />,
     FigureLearn: () => <FigureLearn locale={locale} />,
     FigureCandidates: () => <FigureCandidates locale={locale} />,
     FigureTilt: () => <FigureTilt locale={locale} />,
