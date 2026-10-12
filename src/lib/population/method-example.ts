@@ -101,10 +101,12 @@ export function tiltWeights(): { before: number[]; after: number[] } {
   const m = target.length;
   let lambda = new Array(m).fill(0);
   const weightsFor = (l: number[]) => feats.map(f => prior * Math.exp(f.reduce((s, v, k) => s + v * l[k], 0)));
-  for (let iter = 0; iter < 200; iter++) {
+  for (let iter = 0; ; iter++) {
     const w = weightsFor(lambda);
     const grad = target.map((t, k) => feats.reduce((s, f, i) => s + w[i] * f[k], 0) - t);
     if (Math.max(...grad.map(Math.abs)) < 1e-10) break;
+    // An edit to TARGET or CANDIDATES that no positive weights can meet fails here, not as a drawing that misses its tables.
+    if (iter >= 200) throw new Error('method example: the reweighting did not reach the tables');
     // The household totals repeat in both tables, so the Hessian is singular: a small ridge keeps the step defined.
     const hess = target.map((_, j) => target.map((__, k) => feats.reduce((s, f, i) => s + w[i] * f[j] * f[k], 0) + (j === k ? 1e-9 : 0)));
     const step = solve(hess, grad);
@@ -141,7 +143,7 @@ export function chooseWhole(weights: number[]): number[] {
       return;
     }
     for (let i = from; i <= n - (TARGET_HOUSEHOLDS - set.length); i++) {
-      // A size bin already full cannot take another household without moving away from the table.
+      // Once an exact set is known, a set that overfills a size bin cannot tie it: skip those branches.
       const bin = feats[i].sizes.findIndex(v => v > 0);
       if (set.filter(j => feats[j].sizes[bin] > 0).length >= TARGET.sizes[bin] && best.d === 0) continue;
       set.push(i);
