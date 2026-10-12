@@ -1,10 +1,11 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { POPULATION_DATA_DIR } from '@/lib/config/population';
 import { STEP_IDS, tierFor, tierGrid, type TierThresholds } from './rules';
 
 const root = process.cwd();
-const release = JSON.parse(readFileSync(path.join(root, 'public/data/population/v1.0.3/release.json'), 'utf8')) as { quality_tier_policy: { thresholds: TierThresholds } };
+const release = JSON.parse(readFileSync(path.join(root, 'public/data', POPULATION_DATA_DIR, 'release.json'), 'utf8')) as { quality_tier_policy: { thresholds: TierThresholds } };
 const t = release.quality_tier_policy.thresholds;
 
 describe('the methodology’s step anchors', () => {
