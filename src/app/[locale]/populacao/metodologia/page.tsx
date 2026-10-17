@@ -9,6 +9,7 @@ import { PageHero } from '@/components/PageHero';
 import { PopulationSectionNav } from '@/components/population/SectionNav';
 import { PopulationUnavailable } from '@/components/population/quality/parts';
 import { methodologyBlocks } from '@/components/population/quality/MethodologyBlocks';
+import { methodFigureBlocks } from '@/components/population/method/blocks';
 import { formatDay } from '@/components/population/quality/copy';
 import { getMDXComponents } from '@/mdx-components';
 import { POPULATION_PUBLISHED, POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
@@ -69,6 +70,7 @@ export default async function PopulationMethodology({ params }: { params: Promis
                 // The hero carries the title; the file's own "# " line would be a second h1.
                 h1: () => null,
                 ...methodologyBlocks({ locale, meta, release, scorecard, ineResidents }),
+                ...methodFigureBlocks({ locale, meta, release }),
               })}
               options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
             />
