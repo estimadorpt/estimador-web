@@ -137,6 +137,11 @@
   .mstory-beat h3 { scroll-margin-top: 0; }
 }
 
+/* Beats with no story around them (the release lacks what the drawing needs, so MethodStory renders the text alone)
+   read as plain text. */
+.mstory-plain .mstory-beat { padding: 0 0 1.5rem; border-left: 0; }
+.mstory-plain .mstory-beat h3 { scroll-margin-top: 0; }
+
 /* ---------------------------------------------------------------- the drawing's moves */
 
 /* Houses, figures, labels: they glide to their next place, a few at a time. */

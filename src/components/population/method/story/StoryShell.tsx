@@ -61,9 +61,11 @@ export function StoryShell({ locale, data, children }: { locale: Locale; data: S
       const shown = !!s && s.getClientRects().length > 0;
       const line = readingLine(window.innerHeight, window.matchMedia(BESIDE_QUERY).matches, shown && s ? s.getBoundingClientRect().bottom : null);
       const rects = beats.map(b => b.getBoundingClientRect());
-      const { index, progress } = activeBeat(rects, line);
+      const { index, progress: through } = activeBeat(rects, line);
       const inside = shown && rects[0].top <= line && rects[rects.length - 1].bottom > 0;
       const beat = (beats[index].dataset.beat ?? BEATS[0]) as BeatId;
+      // Only a scrubbed scene draws from the progress; elsewhere it stays 0, so the stage re-renders on a change of scene, not every frame.
+      const progress = SCRUBBED.includes(beat) ? through : 0;
       setState(prev => (prev.beat === beat && prev.inside === inside && Math.abs(prev.progress - progress) < 0.003
         ? prev
         : { beat, progress: Math.round(progress * 1000) / 1000, inside }));

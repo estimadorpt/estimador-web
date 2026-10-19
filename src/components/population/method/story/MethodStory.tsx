@@ -46,7 +46,7 @@ export function storyData(release: PopulationReleaseInfo, meta: PopulationMeta):
 /** The five steps as a scroll story: the page's text in beats beside (or under) one drawing that changes with them. */
 export function MethodStory({ locale, release, meta, children }: { locale: Locale; release: PopulationReleaseInfo; meta: PopulationMeta; children?: ReactNode }) {
   const data = storyData(release, meta);
-  if (!data) return <div>{children}</div>;
+  if (!data) return <div className="mstory-plain">{children}</div>;
   return <StoryShell locale={locale} data={data}>{children}</StoryShell>;
 }
 
