@@ -198,6 +198,60 @@ export function methodExample() {
 }
 
 /**
+ * The story's opening: the invented parish as its census saw it, 23 people in
+ * 10 homes whose counts are TARGET. The story uses it to show what the tables
+ * keep (the counts) and what they lose (who lives with whom), and at the end
+ * to set the generated answer beside the one it stands in for. Ages and sexes
+ * are written for the example, like everything else here.
+ */
+export const RESIDENTS: Array<{ age: number; sex: 'H' | 'M' }> = [
+  { age: 84, sex: 'H' }, { age: 79, sex: 'M' }, { age: 58, sex: 'M' },
+  { age: 77, sex: 'H' }, { age: 74, sex: 'M' }, { age: 72, sex: 'H' }, { age: 70, sex: 'M' }, { age: 30, sex: 'H' }, { age: 28, sex: 'M' },
+  { age: 36, sex: 'M' }, { age: 34, sex: 'H' }, { age: 2, sex: 'M' }, { age: 68, sex: 'H' }, { age: 66, sex: 'M' }, { age: 19, sex: 'H' },
+  { age: 45, sex: 'H' }, { age: 43, sex: 'M' }, { age: 12, sex: 'M' }, { age: 9, sex: 'H' },
+  { age: 41, sex: 'M' }, { age: 39, sex: 'H' }, { age: 16, sex: 'M' }, { age: 6, sex: 'H' },
+];
+
+/** The ten homes' sizes, in the order the drawing places them: the same homes in every arrangement below. */
+export const HOME_SIZES = [1, 2, 4, 1, 3, 2, 1, 4, 2, 3];
+
+/**
+ * Three ways the same 23 people can live in the same ten homes (indices into
+ * RESIDENTS, one list per home in HOME_SIZES order). All three give exactly
+ * the parish's two tables; they differ in how many people of 65 or over live
+ * alone: 2 in the parish as it is, none and 3 in the other two.
+ */
+export const ARRANGEMENTS: Record<'real' | 'none' | 'three', number[][]> = {
+  real: [[0], [3, 4], [15, 16, 17, 18], [1], [9, 10, 11], [5, 6], [2], [19, 20, 21, 22], [7, 8], [12, 13, 14]],
+  none: [[7], [3, 4], [15, 16, 17, 18], [8], [9, 10, 11], [5, 6], [2], [19, 20, 21, 22], [0, 1], [12, 13, 14]],
+  three: [[0], [3, 4], [15, 16, 17, 18], [1], [9, 10, 11], [5, 6], [13], [19, 20, 21, 22], [7, 8], [12, 2, 14]],
+};
+
+export const agesOf = (homes: number[][]): number[][] => homes.map(home => home.map(i => RESIDENTS[i].age));
+
+/** People of 65 or over who live alone, in a set of households given by their ages: the question the story asks. */
+export function eldersAlone(homes: number[][]): number {
+  return homes.filter(ages => ages.length === 1 && ageBand(ages[0]) === 3).length;
+}
+
+/** What the two tables allow that answer to be: no more than the one-person households or the people of 65 or over. */
+export const ELDERS_ALONE_RANGE = {
+  lo: Math.max(0, TARGET.sizes[0] - (TARGET_PEOPLE - TARGET.ages[3])),
+  hi: Math.min(TARGET.sizes[0], TARGET.ages[3]),
+};
+
+/**
+ * The public sample as the story draws it: households from anywhere in the
+ * country, with no parish. Invented like the rest, never the real sample's
+ * records (INE's terms do not allow redistributing them).
+ */
+export const SAMPLE: number[][] = [
+  [81], [34, 31, 5], [67, 65], [29], [52, 49, 17], [38, 36, 7, 4], [76], [44, 42, 15, 11, 8], [88, 61], [23, 22],
+  [70, 69], [41, 13], [33], [58, 55, 26], [79, 77], [36, 35, 3], [64], [72, 70, 44], [27, 25, 1], [55, 53],
+  [85], [40, 38, 12, 9], [47, 45, 20], [91], [31, 30], [62, 60, 33, 6], [74], [50, 18], [39, 37, 10, 8, 2], [68, 66],
+];
+
+/**
  * Step 4's collective quarters: the invented parish has a care home for which
  * INE counts five residents by sex and age. They join as partial records.
  */
