@@ -1,6 +1,6 @@
 /**
- * The scroll story's script: the scenes in order, which of the five steps
- * each belongs to, what the stage says in each, and the household that step 1
+ * The scroll story's script: the scenes in order, which part (why, or one of
+ * the five steps) each belongs to, what the stage says in each, and the household that step 1
  * writes token by token. Shared by the server (which checks the MDX against
  * it) and the client stage. Every number here belongs to the invented parish
  * of src/lib/population/method-example.ts; the probabilities in WRITE are
@@ -10,22 +10,31 @@
 type Locale = 'pt' | 'en';
 type Text = { pt: string; en: string };
 
-/** The scenes, in the order the reader meets them. Each `<Beat at="…">` in the MDX names one. */
-export const BEATS = ['learn', 'tables', 'candidates', 'mask', 'tilt', 'choose', 'collective', 'publish', 'tier'] as const;
+/**
+ * The scenes, in the order the reader meets them. Each `<Beat at="…">` in the MDX names one. The first five say
+ * why a synthetic population is needed (a parish's people become its tables, the tables cannot answer a question
+ * that crosses them, and the public sample knows how people live but not where); the rest are the five steps, with
+ * the opening question answered once the households are chosen.
+ */
+export const BEATS = [
+  'census', 'count', 'question', 'ambiguity', 'sample',
+  'learn', 'candidates', 'mask', 'tilt', 'choose', 'answer', 'collective', 'publish', 'tier',
+] as const;
 export type BeatId = (typeof BEATS)[number];
 
-/** Which of the five steps a scene belongs to (1 to 5). */
+/** Which part a scene belongs to: 0 for why, then the five steps (1 to 5). */
 export const BEAT_STEP: Record<BeatId, number> = {
-  learn: 1, tables: 2, candidates: 2, mask: 2, tilt: 2, choose: 3, collective: 4, publish: 5, tier: 5,
+  census: 0, count: 0, question: 0, ambiguity: 0, sample: 0,
+  learn: 1, candidates: 2, mask: 2, tilt: 2, choose: 3, answer: 3, collective: 4, publish: 5, tier: 5,
 };
 
 /** Scenes the scroll plays through rather than switches: the reader's position inside them is the animation's. */
-export const SCRUBBED: readonly BeatId[] = ['learn', 'tilt'];
+export const SCRUBBED: readonly BeatId[] = ['count', 'ambiguity', 'learn', 'tilt'];
 
-/** The five steps' short names, for the ruler over the stage. */
+/** The ruler over the stage: why, then the five steps' short names. */
 export const STEP_NAMES: Record<Locale, string[]> = {
-  pt: ['Aprender', 'Ajustar', 'Escolher', 'Coletivos', 'Publicar'],
-  en: ['Learn', 'Fit', 'Choose', 'Collective', 'Publish'],
+  pt: ['Porquê', 'Aprender', 'Ajustar', 'Escolher', 'Coletivos', 'Publicar'],
+  en: ['Why', 'Learn', 'Fit', 'Choose', 'Collective', 'Publish'],
 };
 
 /** One field of a person, as the stage writes it. */
@@ -103,23 +112,33 @@ export function tokensWritten(p: number): number {
 /** What the stage's caption says in each scene: one line, read out when the scene changes. */
 export const READOUT: Record<Locale, Record<BeatId, string>> = {
   pt: {
+    census: 'Uma freguesia inventada: 10 casas, 23 pessoas, cada uma com as suas respostas.',
+    count: 'O que o INE publica: contagens, tabela a tabela, sem dizer quem vive com quem.',
+    question: 'As tabelas não dizem quantas das 8 pessoas com 65 ou mais anos vivem sozinhas.',
+    ambiguity: 'As mesmas pessoas, as mesmas casas, as mesmas tabelas: 0 ou 3 a viver sozinhas.',
+    sample: 'A amostra mostra como as pessoas vivem juntas; as tabelas, quantas são na freguesia.',
     learn: 'O gerador escreve um atributo de cada vez; as probabilidades do desenho são ilustrativas.',
-    tables: 'A freguesia inventada: 10 agregados e 23 pessoas nas suas tabelas.',
-    candidates: '24 candidatos, todos com o mesmo peso.',
+    candidates: 'Para as 2 tabelas (10 agregados, 23 pessoas), 24 candidatos com o mesmo peso.',
     mask: '3 candidatos ficam de fora: a tabela não tem agregados de 5 ou mais pessoas.',
     tilt: 'Os pesos mudam até as somas darem as tabelas.',
     choose: '10 agregados inteiros, 23 pessoas: as somas dão as duas tabelas.',
+    answer: 'Nesta população, 3 das 8 pessoas com 65 ou mais vivem sozinhas; na freguesia do início, 2.',
     collective: 'Mais 5 pessoas num lar, a partir das contagens do INE.',
     publish: 'Um registo por pessoa, com as colunas declaradas.',
     tier: 'Com menos de 500 residentes, a freguesia fica no nível C.',
   },
   en: {
+    census: 'An invented parish: 10 homes, 23 people, each with their own answers.',
+    count: 'What INE publishes: counts, table by table, without saying who lives with whom.',
+    question: 'The tables do not say how many of the 8 people aged 65 or over live alone.',
+    ambiguity: 'The same people, the same homes, the same tables: 0 or 3 living alone.',
+    sample: 'The sample shows how people live together; the tables, how many there are.',
     learn: 'The generator writes one attribute at a time; the drawing’s probabilities are illustrative.',
-    tables: 'The invented parish: 10 households and 23 people in its tables.',
-    candidates: '24 candidates, all with the same weight.',
+    candidates: 'For the 2 tables (10 households, 23 people), 24 candidates of equal weight.',
     mask: '3 candidates are left out: the table has no households of 5 or more.',
     tilt: 'The weights move until the sums match the tables.',
     choose: '10 whole households, 23 people: the sums match both tables.',
+    answer: 'In this population, 3 of the 8 aged 65 or over live alone; in the parish we began with, 2.',
     collective: '5 more people in a care home, from INE’s counts.',
     publish: 'One record per person, with the declared columns.',
     tier: 'With under 500 residents, the parish is tier C.',

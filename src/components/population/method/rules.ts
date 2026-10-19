@@ -1,11 +1,14 @@
 /**
  * The methodology drawings' plain rules, kept out of the components so tests
- * can read them: the step anchors the overview links to, and the tier rule
+ * can read them: the anchors the story's ruler links to, and the tier rule
  * the grid draws, derived from the release's own thresholds.
  */
 
 /** The ids of the "### 1." to "### 5." headings, the same in both locales. */
 export const STEP_IDS = ['passo-1', 'passo-2', 'passo-3', 'passo-4', 'passo-5'] as const;
+
+/** The id of the "## " heading that opens the story's why, per locale: its own text's slug (a test holds them). */
+export const WHY_IDS = { pt: 'porque-e-precisa-uma-populacao-sintetica', en: 'why-a-synthetic-population-is-needed' } as const;
 
 export type TierLimits = { max_person_srmse_median: number; max_worst_srmse: number; min_population: number };
 export type TierThresholds = { A: TierLimits; B: TierLimits };

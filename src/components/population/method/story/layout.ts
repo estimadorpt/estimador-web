@@ -6,7 +6,7 @@
  * house's slot as wide as the house will ever get (the reweighting grows some),
  * so no two houses touch at any point of the story.
  */
-import { CANDIDATES, KEPT, WRITTEN } from '@/lib/population/method-example';
+import { ARRANGEMENTS, CANDIDATES, HOME_SIZES, KEPT, RESIDENTS, SAMPLE, WRITTEN, agesOf, ageBand } from '@/lib/population/method-example';
 import type { BeatId } from './data';
 
 export type Kind = 'wide' | 'compact';
@@ -169,6 +169,67 @@ export function houseGrids(f: Frame, after: number[], prior: number, chosen: num
   };
 }
 
+/** The room the opening keeps over its homes, for a line that names what they show. */
+export const HEAD_ROOM = 26;
+
+/**
+ * The opening's parish: its ten homes in two rows of five, as large as the field allows under the head line, each
+ * slot wide enough for the ages any arrangement writes under it.
+ */
+export function parishGrid(f: Frame): { k: number; spots: Point[] } {
+  const wide = f.kind === 'wide';
+  const box: Box = { ...f.field, y: f.field.y + HEAD_ROOM, h: f.field.h - HEAD_ROOM };
+  const items: Item[] = HOME_SIZES.map((n, slot) => ({
+    w: houseWidth(n),
+    grow: 1,
+    under: wide ? Math.max(...Object.values(ARRANGEMENTS).map(a => agesWidth(agesOf([a[slot]])[0]))) + 6 : 0,
+  }));
+  const rows = fit(items, box, f, wide ? 1.9 : 1.35, [5]);
+  return { k: rows.k, spots: rows.spots };
+}
+
+/** The public sample's homes, small, in rows under the head line. */
+export function sampleGrid(f: Frame): { k: number; spots: Point[] } {
+  const wide = f.kind === 'wide';
+  const box: Box = { ...f.field, y: f.field.y + HEAD_ROOM, h: f.field.h - HEAD_ROOM };
+  const items: Item[] = SAMPLE.map(ages => ({ w: houseWidth(ages.length), grow: 1, under: 0 }));
+  const rows = fit(items, box, f, wide ? 1.1 : 0.8, wide ? [10, 8] : [10, 8, 7, 6, 5]);
+  return { k: rows.k, spots: rows.spots };
+}
+
+/** The tables drawn as counts of marks: where the rows sit, and each mark's place in its row. */
+export function tally(f: Frame) {
+  const wide = f.kind === 'wide';
+  const colGap = wide ? 32 : 14;
+  const colW = (f.tables.w - colGap) / 2;
+  const labelW = wide ? 76 : 60;
+  const valueW = wide ? 34 : 24;
+  const rowH = wide ? 18 : 16;
+  const top = f.tables.y;
+  const longest = 9;
+  const room = colW - labelW - valueW - 4;
+  const step = Math.min(wide ? 14 : 10, room / longest);
+  const size = Math.min(wide ? 10 : 8, step - 1.5);
+  const x0 = (table: number) => f.tables.x + table * (colW + colGap);
+  const rowY = (row: number) => top + 28 + row * rowH;
+  /** The centre of mark j in a row of a table (0: households by size, 1: people by age). */
+  const mark = (table: number, row: number, j: number): Point => ({
+    x: x0(table) + labelW + j * step + size / 2,
+    y: rowY(row) + 1 + 9 / 2,
+  });
+  return { colW, colGap, labelW, valueW, rowH, top, size, step, x0, rowY, mark };
+}
+
+/** Each resident's mark in the age table (its row's j-th, in RESIDENTS order) and each home's in the size table. */
+export const RESIDENT_MARK: Array<{ row: number; j: number }> = RESIDENTS.map((r, i) => ({
+  row: ageBand(r.age),
+  j: RESIDENTS.slice(0, i).filter(o => ageBand(o.age) === ageBand(r.age)).length,
+}));
+export const HOME_MARK: Array<{ row: number; j: number }> = HOME_SIZES.map((n, slot) => ({
+  row: Math.min(n, 5) - 1,
+  j: HOME_SIZES.slice(0, slot).filter(m => Math.min(m, 5) === Math.min(n, 5)).length,
+}));
+
 /** Step 1's drawing: the rows of the written household, its house and the odds panel. */
 export function learnLayout(f: Frame) {
   const wide = f.kind === 'wide';
@@ -231,8 +292,10 @@ export function wrap(text: string, width: number, fontSize: number): string[] {
 /** The scenes in which each kind of thing is on the stage. */
 export const SHOWS = {
   learn: new Set<BeatId>(['learn']),
-  houses: new Set<BeatId>(['learn', 'tables', 'candidates', 'mask', 'tilt', 'choose', 'collective', 'publish']),
-  tables: new Set<BeatId>(['tables', 'candidates', 'mask', 'tilt', 'choose', 'collective']),
+  houses: new Set<BeatId>(['learn', 'candidates', 'mask', 'tilt', 'choose', 'answer', 'collective', 'publish']),
+  tables: new Set<BeatId>(['candidates', 'mask', 'tilt', 'choose', 'collective']),
+  tally: new Set<BeatId>(['count', 'question', 'ambiguity', 'sample']),
+  answer: new Set<BeatId>(['answer']),
   publish: new Set<BeatId>(['publish']),
   tier: new Set<BeatId>(['tier']),
 };
