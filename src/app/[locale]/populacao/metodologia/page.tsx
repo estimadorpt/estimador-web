@@ -63,8 +63,8 @@ export default async function PopulationMethodology({ params }: { params: Promis
         {!meta || !release || !scorecard ? (
           <div className="max-w-3xl"><PopulationUnavailable locale={locale} /></div>
         ) : (
-          // The text keeps a reading measure (story.css); the five steps' story takes the container's width.
-          <article className="method-article article-body max-w-none">
+          // The text keeps a reading measure; the five steps' story takes the container's width.
+          <article className="article-body max-w-none [&>:not(.mstory)]:max-w-3xl">
             <MDXRemote
               source={readMethodology(locale)}
               components={getMDXComponents({
