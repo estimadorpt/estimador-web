@@ -8,13 +8,14 @@ import {
 } from '@/lib/population/method-example';
 import type { PopulationReleaseInfo } from '@/types/population';
 import { HouseGlyph, type HouseState } from './HouseGlyph';
-import { STEP_IDS, tierGrid, type TierThresholds } from './rules';
+import { tierGrid, type TierThresholds } from './rules';
 
 /**
- * The methodology told in drawings: an overview of the five steps, then one
- * figure per step that follows the same invented parish (24 households the
- * generator proposes, two small tables to match) from the first guess to the
- * published file, and the tier rule as the grid it is. The figures are
+ * The methodology's fixed drawings: one figure per step that follows the same
+ * invented parish as the scroll story (24 households the generator proposes,
+ * two small tables to match) from the first guess to the published file, and
+ * the tier rule as the grid it is. They are the story's twin, with its tables,
+ * and what a reader without scripts sees. The figures are
  * server-rendered HTML with small SVG glyphs, so their words stay real text at
  * every width; every figure with numbers has its table beside it or a table
  * twin under it. Nothing here is from the published population: the example
@@ -150,72 +151,6 @@ function Arrow({ children }: { children: ReactNode }) {
       <svg width="14" height="22" viewBox="0 0 14 22" aria-hidden="true" focusable="false" className="shrink-0"><path d="M7 0 V20 M1 14 L7 20 L13 14" stroke={BRAND.ink} strokeWidth="1.5" fill="none" /></svg>
       <span>{children}</span>
     </p>
-  );
-}
-
-/* ------------------------------------------------------------------ overview */
-
-function StepIcon({ step }: { step: number }) {
-  const s = { stroke: BRAND.ink, strokeWidth: 1.2, fill: 'none' } as const;
-  return (
-    <svg width="44" height="28" viewBox="0 0 44 28" aria-hidden="true" focusable="false" className="shrink-0">
-      {step === 0 && <>{[0, 1, 2].map(i => <rect key={i} x={1 + i * 11} y={9} width={9} height={10} {...s} />)}<rect x={34} y={9} width={9} height={10} {...s} strokeDasharray="2 2" /></>}
-      {step === 1 && <>{[0, 1, 2, 3, 4, 5].map(i => <rect key={i} x={2 + (i % 3) * 14} y={3 + Math.floor(i / 3) * 13} width={10} height={9} {...s} />)}<path d="M30 16 L40 25 M40 16 L30 25" stroke={BRAND.terracotta} strokeWidth={1.6} /></>}
-      {step === 2 && <>{[0, 1, 2, 3, 4, 5].map(i => <rect key={i} x={2 + (i % 3) * 14} y={3 + Math.floor(i / 3) * 13} width={10} height={9} {...s} fill={[0, 2, 4].includes(i) ? BRAND.ink : 'none'} />)}</>}
-      {step === 3 && <><path d="M4 12 H26 V26 H4 Z M8 12 V6 H22 V12" {...s} /><rect x={30} y={14} width={10} height={12} {...s} strokeDasharray="2 2" /></>}
-      {step === 4 && <><rect x={2} y={4} width={40} height={20} {...s} /><path d="M2 10 H42 M15 4 V24 M28 4 V24" {...s} /></>}
-    </svg>
-  );
-}
-
-/** The five steps at a glance, each linking to its section below: a column on phones, a row from md. */
-export function MethodOverview({ locale, parishes }: { locale: Locale; parishes: number }) {
-  const pt = locale === 'pt';
-  const steps = pt
-    ? [
-      ['Aprender', 'com a amostra pública dos Censos, como idade, escolaridade, trabalho e família andam juntos'],
-      ['Inventar e pesar', 'muitos agregados possíveis para a freguesia, pesados até as somas darem as tabelas do INE'],
-      ['Escolher agregados inteiros', 'só inteiros, tão perto das tabelas quanto possível'],
-      ['Acrescentar coletivos', 'quem vive em lares e noutros alojamentos coletivos, das contagens do INE'],
-      ['Publicar', 'com cada coluna explicada e um nível de qualidade por freguesia'],
-    ]
-    : [
-      ['Learn', 'from the Census public-use sample, how age, education, work and family go together'],
-      ['Invent and weigh', 'many possible households for the parish, weighted until the sums give INE’s tables'],
-      ['Draw whole households', 'whole ones only, as close to the tables as possible'],
-      ['Add collective quarters', 'people in care homes and other collective quarters, from INE’s counts'],
-      ['Publish', 'with every column explained and a quality tier per parish'],
-    ];
-  return (
-    <figure className="not-prose my-8 border-y border-ink py-4 font-sans">
-      <figcaption className="mb-4 text-[14px] text-graphite">
-        {pt
-          ? 'Da amostra pública dos Censos e das tabelas de cada freguesia até aos ficheiros publicados, em cinco passos.'
-          : 'From the Census public-use sample and each parish’s tables to the published files, in five steps.'}
-      </figcaption>
-      <div className="mb-4 grid gap-2 text-[13px] sm:grid-cols-2">
-        <p className="m-0 border-l-2 border-ink pl-3 text-ink"><b className="font-semibold">{pt ? 'Entra' : 'In'}:</b> {pt ? 'o Ficheiro de Uso Público dos Censos 2021 (pessoas reais, anónimas, sem freguesia)' : 'the 2021 Census Public Use File (real, anonymous people, with no parish)'}</p>
-        <p className="m-0 border-l-2 border-ink pl-3 text-ink"><b className="font-semibold">{pt ? 'Entra' : 'In'}:</b> {pt ? `as tabelas que o INE publica para cada uma das ${formatCount(parishes, locale)} freguesias` : `the tables INE publishes for each of the ${formatCount(parishes, locale)} parishes`}</p>
-      </div>
-      <ol className="relative m-0 grid list-none gap-0 pl-0 md:grid-cols-5 md:gap-3">
-        {steps.map(([name, text], i) => (
-          <li key={name} className="relative m-0 grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-3 pb-5 md:block md:pb-0">
-            {/* The connecting rule: down the numbers on a phone, along the top from md. */}
-            {i < steps.length - 1 && <span aria-hidden="true" className="absolute left-[1.06rem] top-9 bottom-0 w-px bg-ink md:left-11 md:right-[-0.75rem] md:top-[1.05rem] md:bottom-auto md:h-px md:w-auto" />}
-            <span className="relative z-[1] flex size-9 items-center justify-center border border-ink bg-paper text-[15px] font-semibold tabular-nums text-ink">{i + 1}</span>
-            <a href={`#${STEP_IDS[i]}`} className="group block min-h-11 md:mt-3">
-              <StepIcon step={i} />
-              <span className="mt-1 block text-[15px] font-semibold leading-5 text-ink underline decoration-ink/30 underline-offset-2 group-hover:decoration-ink">{name}</span>
-              <span className="mt-0.5 block text-[13px] leading-[18px] text-graphite">{text}</span>
-            </a>
-          </li>
-        ))}
-      </ol>
-      <p className="m-0 mt-2 border-l-2 border-ink pl-3 text-[13px] text-ink">
-        <b className="font-semibold">{pt ? 'Sai' : 'Out'}:</b>{' '}
-        {pt ? 'pessoas e agregados gerados, freguesia a freguesia; nenhum registo é uma pessoa real' : 'generated people and households, parish by parish; no record is a real person'}
-      </p>
-    </figure>
   );
 }
 

@@ -14,7 +14,8 @@ describe('the methodology’s step anchors', () => {
       const mdx = readFileSync(path.join(root, 'src/content/population-methodology', `${locale}.mdx`), 'utf8');
       const steps = [...mdx.matchAll(/^### ([1-9])\. /gm)].map(m => Number(m[1]));
       expect(steps).toEqual(STEP_IDS.map((_, i) => i + 1));
-      expect(mdx).toContain('<MethodOverview />');
+      // The headings are plain text: the h3 component reads the step number from a string child.
+      expect(mdx.match(/^### [1-9]\. .*$/gm)?.filter(h => /[*_`[]/.test(h)) ?? []).toEqual([]);
     });
   }
 });
@@ -23,6 +24,7 @@ describe('the tier grid', () => {
   it('follows the release’s thresholds', () => {
     expect(tierGrid(t)).toEqual([['C', 'B', 'A'], ['C', 'B', 'B'], ['C', 'C', 'C']]);
   });
+  // The third row is any error just above B's limit; a release that moves the thresholds changes the grid, and this test.
   it('puts every parish under B’s floor in C, however good the fit', () => {
     expect(tierFor(t.B.min_population - 1, 0, t)).toBe('C');
     expect(tierFor(t.A.min_population, t.A.max_person_srmse_median, t)).toBe('A');

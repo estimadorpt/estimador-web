@@ -59,11 +59,12 @@ export default async function PopulationMethodology({ params }: { params: Promis
           : 'People and households invented by a model and then chosen to come as close as possible to each parish’s 2021 Census tables, and what each parish’s quality tier means.'}
         meta={<><span>{pt ? 'Censos 2021 (INE)' : '2021 Census (INE)'}</span><span>{pt ? `Versão de ${formatDay(POPULATION_PUBLISHED, locale)}` : `Release dated ${formatDay(POPULATION_PUBLISHED, locale)}`}</span></>}
       />
-      <div className="mx-auto w-full max-w-7xl px-4 py-10 md:py-14"><div className="max-w-3xl">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 md:py-14">
         {!meta || !release || !scorecard ? (
-          <PopulationUnavailable locale={locale} />
+          <div className="max-w-3xl"><PopulationUnavailable locale={locale} /></div>
         ) : (
-          <article className="article-body max-w-none">
+          // The text keeps a reading measure (story.css); the five steps' story takes the container's width.
+          <article className="method-article article-body max-w-none">
             <MDXRemote
               source={readMethodology(locale)}
               components={getMDXComponents({
@@ -76,7 +77,7 @@ export default async function PopulationMethodology({ params }: { params: Promis
             />
           </article>
         )}
-      </div></div>
+      </div>
       </main>
       <SiteFooter locale={locale} />
     </div>

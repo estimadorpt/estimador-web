@@ -41,6 +41,23 @@ export const CANDIDATES: number[][] = [
   [26], [36, 34, 1], [41, 39, 13, 10], [85], [58, 57],
 ];
 
+/**
+ * Each candidate's people's sex, in the same order as CANDIDATES: H homem, M
+ * mulher (the release's own codes). Invented like the ages; no table of the
+ * example counts it, so it only appears in the published rows of the drawings.
+ */
+export const CANDIDATE_SEX: Array<Array<'H' | 'M'>> = [
+  ['M'], ['M'], ['H'], ['H'],
+  ['M', 'H'], ['M', 'H'], ['H', 'M'], ['M', 'M'],
+  ['M', 'H', 'H'], ['M', 'H', 'M'], ['M', 'M', 'H'], ['H', 'M', 'M'],
+  ['M', 'H', 'H', 'M'], ['H', 'M', 'M', 'H'], ['M', 'H', 'M', 'H'], ['H', 'M', 'H', 'M'],
+  ['M', 'H', 'M', 'H', 'M'], ['M', 'H', 'M', 'H', 'M'], ['H', 'M', 'M', 'H', 'H'],
+  ['H'], ['M', 'H', 'M'], ['H', 'M', 'H', 'M'], ['M'], ['H', 'M'],
+];
+
+/** The candidate the drawings write token by token in step 1 (38, 36 and 4), so it can be followed to the end. */
+export const WRITTEN = 8;
+
 export type Counts = { sizes: number[]; ages: number[] };
 
 /**
@@ -153,6 +170,15 @@ export function chooseWhole(weights: number[]): number[] {
   };
   walk(0);
   return best.set;
+}
+
+/**
+ * The weights a share `t` of the way along the reweighting: the same tilt with
+ * its multipliers scaled by t, w(t) = prior · exp(t · λᵀφ), so t = 0 is the
+ * even start and t = 1 the solution. The animated drawing moves along it.
+ */
+export function weightsAt(before: number[], after: number[], t: number): number[] {
+  return before.map((b, i) => b * Math.exp(t * Math.log(after[i] / b)));
 }
 
 /** Everything the diagrams draw, computed once. */

@@ -24,6 +24,7 @@ export function tierFor(residents: number, typicalError: number, t: TierThreshol
  */
 export function tierGrid(t: TierThresholds): Array<Array<'A' | 'B' | 'C'>> {
   const residents = [t.B.min_population - 1, t.B.min_population, t.A.min_population];
+  // The third row stands for any error above B's limit: the limit plus a millionth is the first such value.
   const errors = [t.A.max_person_srmse_median, t.B.max_person_srmse_median, t.B.max_person_srmse_median + 1e-6];
   return errors.map(e => residents.map(r => tierFor(r, e, t)));
 }

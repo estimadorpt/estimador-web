@@ -2,8 +2,6 @@
 
 Esta página explica, para quem não é especialista, como foi gerada a População Sintética de Portugal (versão <Release />), o que se pode e não se pode fazer com ela, e onde estão os seus limites. A versão técnica completa é a <ModelCardLink>ficha do modelo</ModelCardLink>, em inglês.
 
-<MethodOverview />
-
 ## Pessoas geradas, não pessoas reais
 
 É um conjunto de pessoas e agregados gerados por computador, com um registo por pessoa, cujas contagens somadas seguem as tabelas que o INE publicou nos Censos 2021 para cada freguesia. Nenhum registo é uma pessoa real.
@@ -16,41 +14,85 @@ Para que serve, então? As tabelas publicadas dão, para cada freguesia, quantas
 
 ## Cinco passos para a gerar
 
-O resultado não sai diretamente de uma rede neuronal: um modelo inventa pessoas e agregados possíveis, e depois escolhem-se os que, somados, ficam o mais perto possível das tabelas do INE (um processo generativo com restrições). Os desenhos abaixo seguem uma freguesia inventada, com 24 agregados candidatos e duas tabelas pequenas, do primeiro palpite ao ficheiro publicado.
+O resultado não sai diretamente de uma rede neuronal: um modelo inventa pessoas e agregados possíveis, e depois escolhem-se os que, somados, ficam o mais perto possível das tabelas do INE (um processo generativo com restrições). O desenho segue uma freguesia inventada, com 24 agregados candidatos e duas tabelas pequenas, do primeiro agregado escrito ao ficheiro publicado: à medida que desces a página, ele avança passo a passo.
+
+<MethodStory>
+
+<Beat at="learn">
 
 ### 1. Aprender como os atributos se combinam
 
 O computador aprende, com a amostra pública dos Censos 2021 (o Ficheiro de Uso Público), que combinações de idade, escolaridade, trabalho e família são comuns numa pessoa e no seu agregado. Esse modelo (um gerador autorregressivo) é treinado uma vez e depois fica fixo. As idades ano a ano e o tipo de local de trabalho são gerados por ele, não deduzidos depois.
 
-<FigureLearn />
+O gerador escreve cada agregado como uma frase, um atributo de cada vez, e cada escolha lê tudo o que já foi escrito: a idade da segunda pessoa tende a ficar perto da idade da primeira, e uma criança de 4 anos não pode ter o ensino superior nem um emprego.
+
+</Beat>
+
+<Beat at="tables">
 
 ### 2. Ajustar cada freguesia às suas tabelas
 
-Para cada freguesia, o modelo inventa muitos agregados possíveis (os candidatos), evitando as combinações que o INE publica como zero nessa freguesia (uma máscara). A máscara restringe os candidatos, mas o resultado pode ainda deixar algumas pessoas nessas combinações: nas tabelas de pessoas do ajuste, cerca de 7 900 entradas (ver «Onde os dados são mais fracos»).
+Cada freguesia tem as suas tabelas do INE. A freguesia inventada tem duas, pequenas: 10 agregados, contados por número de pessoas, e 23 pessoas, contadas por idade. Os quadrados pretos são essas contagens.
 
-<FigureCandidates />
+</Beat>
+
+<Beat at="candidates">
+
+Para cada freguesia, o modelo inventa muitos agregados possíveis, os candidatos. Aqui são 24, e começam todos com o mesmo peso: as barras mostram o que somam, ainda longe dos quadrados.
+
+</Beat>
+
+<Beat at="mask">
+
+O modelo evita as combinações que o INE publica como zero nessa freguesia (uma máscara). Nesta não há agregados de 5 ou mais pessoas, por isso 3 candidatos ficam de fora. A máscara restringe os candidatos, mas o resultado pode ainda deixar algumas pessoas nessas combinações: nas tabelas de pessoas do ajuste, cerca de 7 900 entradas (ver «Onde os dados são mais fracos»).
+
+</Beat>
+
+<Beat at="tilt">
 
 Depois, dá mais peso aos candidatos que aproximam as somas das tabelas do INE para a freguesia, mudando o peso de cada um o menos possível (um ajuste de máxima entropia). Antes disso, uma verificação recusaria qualquer freguesia cujas tabelas impliquem totais incoerentes entre si; nenhuma das 3 092 foi recusada.
 
-<FigureTilt />
+Aqui os candidatos saíram novos de mais para a freguesia: à medida que desces, os agregados de pessoas com 65 ou mais anos crescem, os casais jovens encolhem e as barras chegam aos quadrados.
+
+</Beat>
+
+<Beat at="choose">
 
 ### 3. Escolher agregados inteiros
 
 Uma pessoa não se divide: dos candidatos escolhem-se agregados inteiros, tão perto quanto possível das contagens que as tabelas da freguesia pedem (uma alocação inteira). Nas freguesias com menos de 500 pessoas, essa escolha é resolvida até ao ótimo (uma seleção exata, sem aproximação), o que ainda assim não garante o total do INE. <AllocationGap />
 
-<FigureChoose />
+Aqui ficam 10 dos 21 candidatos, entre eles o agregado escrito no passo 1, e as somas dão exatamente as duas tabelas.
+
+</Beat>
+
+<Beat at="collective">
 
 ### 4. Acrescentar quem vive em alojamentos coletivos
 
 As pessoas que vivem em lares e noutros alojamentos coletivos são acrescentadas depois do ajuste, a partir das contagens publicadas pelo INE, como registos parciais: o sexo e a idade vêm dessas contagens, a escolaridade é imputada a partir de registos semelhantes, e o núcleo familiar e os campos de trabalho ficam vazios (o [dicionário de colunas](/pt/populacao/dados/#dicionario) diz quais). Os códigos finos de profissão são derivados nesta fase.
 
-<FigureCollective />
+Na freguesia inventada, o INE conta 5 pessoas num lar.
+
+</Beat>
+
+<Beat at="publish">
 
 ### 5. Publicar com um esquema declarado e o nível de qualidade
 
-Cada coluna publicada tem um significado declarado, e o [dicionário de colunas](/pt/populacao/dados/#dicionario) explica cada uma; tudo o resto é retirado, com a razão registada. A versão não inclui ligações entre cônjuges. Cada freguesia sai com um nível de qualidade, A, B ou C (ver «Todas as freguesias respondem, com um nível de qualidade»).
+Cada coluna publicada tem um significado declarado, e o [dicionário de colunas](/pt/populacao/dados/#dicionario) explica cada uma; tudo o resto é retirado, com a razão registada. A versão não inclui ligações entre cônjuges. Cada pessoa fica numa linha, e cada coluna diz de onde vem.
 
-<FigurePublish />
+</Beat>
+
+<Beat at="tier">
+
+Cada freguesia sai com um nível de qualidade, A, B ou C (ver «Todas as freguesias respondem, com um nível de qualidade»). Com 28 residentes, a freguesia inventada fica no nível C, como todas as que têm menos de 500.
+
+</Beat>
+
+</MethodStory>
+
+<MethodDrawings />
 
 ## Campos ajustados e campos derivados
 
