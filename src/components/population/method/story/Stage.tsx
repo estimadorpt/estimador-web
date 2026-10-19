@@ -2,6 +2,7 @@
 
 import { useId, type CSSProperties, type ReactNode, type SVGProps } from 'react';
 import { BRAND, FONT_STACK } from '@/lib/brand';
+import { formatCount } from '@/lib/population/format';
 import { DEEMPHASIS, SERIES } from '@/components/viz/theme';
 import {
   CANDIDATES, CANDIDATE_SEX, CARE_HOME, KEPT, TARGET, ageBand, countsOf, distance, weightsAt, type Counts,
@@ -48,11 +49,6 @@ const one = (v: number, locale: Locale) => {
   const rounded = Math.round(v * 10) / 10;
   const text = Math.abs(rounded - Math.round(rounded)) < 1e-9 ? String(Math.round(rounded)) : rounded.toFixed(1);
   return locale === 'pt' ? text.replace('.', ',') : text;
-};
-/** Grouped from four digits, with a no-break space in Portuguese (formatCount's rule, without the module). */
-const grouped = (n: number, locale: Locale) => {
-  const text = String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, locale === 'pt' ? ' ' : ',');
-  return n < 1000 ? String(n) : text;
 };
 const decimal = (v: number, locale: Locale) => (locale === 'pt' ? v.toFixed(2).replace('.', ',') : v.toFixed(2));
 
@@ -663,14 +659,14 @@ function Tiers({ f, locale, data, hatch, residents }: { f: Frame; locale: Locale
   const below = [
     pt ? `A freguesia inventada: ${residents} residentes, nível C.` : `The invented parish: ${residents} residents, tier C.`,
     pt
-      ? `Na versão ${t.release}: ${grouped(t.counts.A, locale)} freguesias no nível A, ${grouped(t.counts.B, locale)} no B e ${grouped(t.counts.C, locale)} no C.`
-      : `In release ${t.release}: ${grouped(t.counts.A, locale)} parishes in tier A, ${grouped(t.counts.B, locale)} in B and ${grouped(t.counts.C, locale)} in C.`,
+      ? `Na versão ${t.release}: ${formatCount(t.counts.A, locale)} freguesias no nível A, ${formatCount(t.counts.B, locale)} no B e ${formatCount(t.counts.C, locale)} no C.`
+      : `In release ${t.release}: ${formatCount(t.counts.A, locale)} parishes in tier A, ${formatCount(t.counts.B, locale)} in B and ${formatCount(t.counts.C, locale)} in C.`,
   ].map(s => wrap(s, Math.min(f.width, 640), 12));
   const belowH = 14 + below.reduce((n, l) => n + l.length * 16 + 4, 0);
   const cellH = Math.max(28, Math.min(wide ? 66 : 50, (f.height - top - headH - belowH) / 3));
   const cols = pt
-    ? [`menos de ${grouped(t.minB, locale)}`, `${grouped(t.minB, locale)} a ${grouped(t.minA - 1, locale)}`, `${grouped(t.minA, locale)} ou mais`]
-    : [`under ${grouped(t.minB, locale)}`, `${grouped(t.minB, locale)} to ${grouped(t.minA - 1, locale)}`, `${grouped(t.minA, locale)} or more`];
+    ? [`menos de ${formatCount(t.minB, locale)}`, `${formatCount(t.minB, locale)} a ${formatCount(t.minA - 1, locale)}`, `${formatCount(t.minA, locale)} ou mais`]
+    : [`under ${formatCount(t.minB, locale)}`, `${formatCount(t.minB, locale)} to ${formatCount(t.minA - 1, locale)}`, `${formatCount(t.minA, locale)} or more`];
   const rows = pt
     ? [`até ${decimal(t.maxA, locale)}`, `${decimal(t.maxA, locale)} a ${decimal(t.maxB, locale)}`, `mais de ${decimal(t.maxB, locale)}`]
     : [`up to ${decimal(t.maxA, locale)}`, `${decimal(t.maxA, locale)} to ${decimal(t.maxB, locale)}`, `over ${decimal(t.maxB, locale)}`];

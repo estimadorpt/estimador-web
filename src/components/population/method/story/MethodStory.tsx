@@ -46,7 +46,11 @@ export function storyData(release: PopulationReleaseInfo, meta: PopulationMeta):
 /** The five steps as a scroll story: the page's text in beats beside (or under) one drawing that changes with them. */
 export function MethodStory({ locale, release, meta, children }: { locale: Locale; release: PopulationReleaseInfo; meta: PopulationMeta; children?: ReactNode }) {
   const data = storyData(release, meta);
-  if (!data) return <div className="mstory-plain">{children}</div>;
+  if (!data) {
+    // Rendered at build time: say so in the log, so a release that drops the story does not go unnoticed.
+    console.warn(`[populacao/metodologia] release ${release.version} lacks the column provenance or tier policy the story draws; the five steps render as text.`);
+    return <div className="mstory-plain">{children}</div>;
+  }
   return <StoryShell locale={locale} data={data}>{children}</StoryShell>;
 }
 
