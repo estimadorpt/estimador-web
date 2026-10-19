@@ -7,7 +7,7 @@ import {
 } from '@/lib/population/method-example';
 import { BEATS, BEAT_STEP, FIELDS, READOUT, WRITE, tokensWritten } from './data';
 import {
-  CARE_WIDTH, HEAD_ROOM, HOME_MARK, HOUSE_HEIGHT, RESIDENT_MARK, WRITTEN, frame, houseGrids, houseWidth, learnLayout, parishGrid, sampleGrid, tally,
+  CARE_WIDTH, HEAD_ROOM, HOME_MARK, HOUSE_HEIGHT, RESIDENT_MARK, WRITTEN, agesWidth, frame, houseGrids, houseWidth, learnLayout, parishGrid, sampleGrid, tally,
   weightScale, wrap,
 } from './layout';
 
@@ -195,7 +195,8 @@ describe('the stage’s layout', () => {
       const p = parishGrid(f);
       const ages = Object.values(ARRANGEMENTS).map(a => agesOf(a));
       const under = f.agesUnder ? 16 : 0;
-      const wides = HOME_SIZES.map((n, slot) => Math.max(houseWidth(n) * p.k, ...(f.agesUnder ? ages.map(a => a[slot].join('  ').length * 6.4) : [0])));
+      // The ages under a home at the width the layout reserves for them.
+      const wides = HOME_SIZES.map((n, slot) => Math.max(houseWidth(n) * p.k, ...(f.agesUnder ? ages.map(a => agesWidth(a[slot])) : [0])));
       const inField = { ...f, field: { ...f.field, y: f.field.y + HEAD_ROOM, h: f.field.h - HEAD_ROOM - under } };
       checkIn(inField, p.spots, wides, HOME_SIZES.map(() => HOUSE_HEIGHT * p.k), under);
       expect(p.k).toBeGreaterThan(0.75);

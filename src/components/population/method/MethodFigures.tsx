@@ -36,8 +36,8 @@ const one = (v: number, locale: Locale) => formatValue(Math.round(v * 10) / 10, 
 const two = (v: number, locale: Locale) => (locale === 'pt' ? v.toFixed(2).replace('.', ',') : v.toFixed(2));
 
 /** The note under every example figure: what is invented, and what it stands for. */
-function exampleNote(locale: Locale, candidates = true): string {
-  if (!candidates) {
+function exampleNote(locale: Locale, figure: 'why' | 'steps' = 'steps'): string {
+  if (figure === 'why') {
     return locale === 'pt'
       ? 'Esquema com uma freguesia inventada: casas, idades e tabelas escritas para este exemplo; numa freguesia real, as tabelas são as do INE (Censos 2021).'
       : 'Diagram with an invented parish: homes, ages and tables written for this example; in a real parish the tables are INE’s (2021 Census).';
@@ -176,7 +176,7 @@ function CrossTable({ locale }: { locale: Locale }) {
   const pt = locale === 'pt';
   const th = 'border-b border-ink px-2 py-1 text-right text-[12px] font-semibold text-graphite';
   const td = 'border-b border-grid px-2 py-1 text-right';
-  const unknown = <span aria-label={pt ? 'desconhecido' : 'unknown'} className="font-bold text-graphite">?</span>;
+  const unknown = <><span aria-hidden="true" className="font-bold text-graphite">?</span><span className="sr-only">{pt ? 'desconhecido' : 'unknown'}</span></>;
   const rows: Array<[string, ReactNode, ReactNode, number]> = [
     [pt ? 'Vivem sozinhas' : 'Live alone', unknown, unknown, ALONE],
     [pt ? 'Não vivem sozinhas' : 'Do not live alone', unknown, unknown, TARGET_PEOPLE - ALONE],
@@ -227,7 +227,7 @@ export function FigureWhy({ locale }: { locale: Locale }) {
       lede={pt
         ? `O INE publica contagens, tabela a tabela. Estas duas dizem que ${ALONE} pessoas vivem sozinhas e que ${ELDERS} têm 65 ou mais anos, mas não quantas são as duas coisas. As mesmas ${TARGET_PEOPLE} pessoas cabem nas mesmas ${TARGET_HOUSEHOLDS} casas de muitas maneiras que dão estas tabelas; três delas, abaixo.`
         : `INE publishes counts, table by table. These two say that ${ALONE} people live alone and ${ELDERS} are aged 65 or over, but not how many are both. The same ${TARGET_PEOPLE} people fit the same ${TARGET_HOUSEHOLDS} homes in many ways that give these tables; three of them below.`}
-      note={exampleNote(locale, false)}
+      note={exampleNote(locale, 'why')}
       twin={(
         <ChartTable
           summaryLabel={pt ? 'Ver as três maneiras em tabela' : 'View the three ways as a table'}

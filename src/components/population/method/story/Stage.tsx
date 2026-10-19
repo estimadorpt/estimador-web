@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, type CSSProperties, type ReactNode, type SVGProps } from 'react';
+import { useId, useMemo, type CSSProperties, type ReactNode, type SVGProps } from 'react';
 import { BRAND, FONT_STACK } from '@/lib/brand';
 import { formatCount } from '@/lib/population/format';
 import { DEEMPHASIS, SERIES } from '@/components/viz/theme';
@@ -165,15 +165,24 @@ export function Stage({ locale, beat, progress, width, height, data, scrub }: {
 }) {
   const pt = locale === 'pt';
   const id = `ms${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
-  const f = frame(width, height);
+  // Everything placed from the stage's size alone, computed once per size rather than on every scroll tick of a scrubbed scene.
+  const { f, grids, learn, parish, T, sampleSpots } = useMemo(() => {
+    const f = frame(width, height);
+    return {
+      f,
+      grids: houseGrids(f, data.after, data.before[0], data.chosen),
+      learn: learnLayout(f),
+      parish: parishGrid(f),
+      T: tally(f),
+      sampleSpots: sampleGrid(f),
+    };
+  }, [width, height, data]);
   const wide = f.kind === 'wide';
   const index = BEATS.indexOf(beat);
   const past = (b: BeatId) => index > BEATS.indexOf(b);
   const from = (b: BeatId) => index >= BEATS.indexOf(b);
 
   const prior = data.before[0];
-  const grids = houseGrids(f, data.after, prior, data.chosen);
-  const learn = learnLayout(f);
   const chosenSet = new Set(data.chosen);
   const k = grids.k;
 
@@ -204,9 +213,6 @@ export function Stage({ locale, beat, progress, width, height, data, scrub }: {
 
   // The opening: the parish as the census saw it, its homes and people becoming the tables' marks, then the same
   // people in the same homes two other ways. Each scrubbed scene runs on windows of the reader's progress.
-  const parish = parishGrid(f);
-  const T = tally(f);
-  const sampleSpots = sampleGrid(f);
   const pk = parish.k;
   const countP = beat === 'count' ? progress : past('count') ? 1 : 0;
   /** How far resident i has gone from their home into the age table, and home `slot` into the size table. */
@@ -576,7 +582,7 @@ function Head({ f, locale, beat, alone, shown }: { f: Frame; locale: Locale; bea
   const line = lines[beat];
   if (!line || !shown) return null;
   return (
-    <text key={`${beat}-${alone}`} className="ms-head" x={0} y={f.field.y + (wide ? 16 : 14)} fontSize={wide ? 14 : 13} fontWeight={600} fill={INK}>
+    <text key={beat} className="ms-head" x={0} y={f.field.y + (wide ? 16 : 14)} fontSize={wide ? 14 : 13} fontWeight={600} fill={INK}>
       {line[wide ? 0 : 1]}
       {beat === 'ambiguity' && <tspan className="tnum" fontWeight={800}>{alone}</tspan>}
     </text>
