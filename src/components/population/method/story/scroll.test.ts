@@ -1,5 +1,16 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { activeBeat, readingLine } from './scroll';
+import { BESIDE_QUERY, activeBeat, readingLine } from './scroll';
+
+describe('BESIDE_QUERY', () => {
+  it('is the width story.css lays the stage beside the text from', () => {
+    const css = readFileSync(path.join(__dirname, 'story.css'), 'utf8');
+    const width = Number(BESIDE_QUERY.match(/min-width: (\d+)px/)?.[1]);
+    expect(css).toContain(`@media ${BESIDE_QUERY}`);
+    expect(css).toContain(`(max-width: ${width - 1}px)`);
+  });
+});
 
 describe('readingLine', () => {
   it('sits a little past the middle beside the text', () => {

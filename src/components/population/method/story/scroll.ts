@@ -3,6 +3,9 @@
  * measures, so the boundaries can be tested without a browser.
  */
 
+/** The width from which the stage sits beside the text rather than above it; story.css uses the same (a test holds them). */
+export const BESIDE_QUERY = '(min-width: 1024px)';
+
 /**
  * Where the reader's eye is taken to be, in viewport pixels from the top. Beside
  * the text, a little past the middle of the window; stacked, the text shows under

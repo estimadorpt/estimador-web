@@ -2,15 +2,13 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { BEATS, BEAT_STEP, READOUT, SCRUBBED, STEP_NAMES, type BeatId } from './data';
-import { activeBeat, readingLine } from './scroll';
+import { BESIDE_QUERY, activeBeat, readingLine } from './scroll';
 import { Stage, type StoryData } from './Stage';
 import { STEP_IDS } from '../rules';
 import './story.css';
 
 type Locale = 'pt' | 'en';
 
-/** The width from which the stage sits beside the text rather than above it (story.css uses the same). */
-const BESIDE_QUERY = '(min-width: 1024px)';
 const REDUCED_QUERY = '(prefers-reduced-motion: reduce)';
 /** How long a change of scene takes to land (story.css's longest move plus its delays). */
 const SETTLE_MS = 1100;
@@ -74,9 +72,14 @@ export function StoryShell({ locale, data, children }: { locale: Locale; data: S
     measure();
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
+    // The text can change height without a scroll (the font arriving, a note opening): measure again then too.
+    const observer = new ResizeObserver(schedule);
+    const text = el.querySelector('.mstory-beats');
+    if (text) observer.observe(text);
     return () => {
       window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
+      observer.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
   }, []);
