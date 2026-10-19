@@ -21,6 +21,8 @@ export const injuryReasonPt: Record<string, string> = {
   "Foot injury": "Lesão no pé",
   "Cruciate ligament injury": "Lesão nos ligamentos cruzados",
   "Meniscus injury": "Lesão no menisco",
+  "Meniscus tear": "Rotura do menisco",
+  Fitness: "Falta de forma física",
   "Torn lateral knee ligament": "Rotura do ligamento lateral do joelho",
   "Broken ankle": "Fratura do tornozelo",
   "Pubic bone bruise": "Contusão no osso púbico",
