@@ -25,6 +25,7 @@ interface DisclosureProps {
  */
 export function Disclosure({ summary, srSuffix, children, defaultOpen = false, className = '', summaryClassName = '' }: DisclosureProps) {
   return (
+    // globals.css keys on group/disclosure to keep its MDX <details> look off this one: keep the class.
     <details className={`group/disclosure ${className}`} open={defaultOpen || undefined}>
       <summary
         className={`inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-ink underline-offset-4 hover:underline [&::-webkit-details-marker]:hidden ${summaryClassName}`}

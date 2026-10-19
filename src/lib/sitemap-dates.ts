@@ -26,7 +26,7 @@ export const COPY_REVISED: Readonly<Record<string, string>> = {
   '/desporto/liga/2025-26': '2026-10-06',
   '/desporto/liga/jogadores': '2026-10-06',
   '/desporto/liga/modelo': '2026-10-06',
-  '/populacao/metodologia': '2026-10-06',
+  '/populacao/metodologia': '2026-10-12',
   '/populacao/qualidade': '2026-10-06',
   '/populacao/dados': '2026-10-06',
   '/eleicoes/arquivo': '2026-10-06',

@@ -353,8 +353,9 @@
      a piece of writing should not be typeset like a chart legend. Headings,
      captions, tables and figures inside it keep the interface face. */
   /* Hand-written <details>/<summary> in MDX bypass the components map: give
-     them the disclosure look and a 44px target here. */
-  .article-body details {
+     them the disclosure look and a 44px target here. A <Disclosure> inside the
+     article (a figure's table twin) already has it, and would get two chevrons. */
+  .article-body details:not(.group\/disclosure) {
     margin-block: 1.5rem;
     border-top: 1px solid var(--color-ink);
     border-bottom: 1px solid var(--color-rule);
@@ -362,7 +363,7 @@
     font-family: var(--font-sans);
     font-size: 0.875rem;
   }
-  .article-body details > summary {
+  .article-body details:not(.group\/disclosure) > summary {
     display: flex;
     align-items: center;
     gap: 0.375rem;
@@ -373,12 +374,12 @@
     font-weight: 600;
     color: var(--color-ink);
   }
-  .article-body details > summary::-webkit-details-marker { display: none; }
+  .article-body details:not(.group\/disclosure) > summary::-webkit-details-marker { display: none; }
   /* The same hover as <Disclosure>'s summary. */
-  .article-body details > summary:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .article-body details:not(.group\/disclosure) > summary:hover { text-decoration: underline; text-underline-offset: 4px; }
   /* The Disclosure primitive's chevron (viz/Disclosure.tsx): on the left,
      turning when open, so an MDX <details> reads as the same control. */
-  .article-body details > summary::before {
+  .article-body details:not(.group\/disclosure) > summary::before {
     content: '';
     flex: none;
     width: 1rem;
@@ -388,12 +389,12 @@
     mask: var(--chevron-down) center / contain no-repeat;
     transition: transform 150ms ease;
   }
-  .article-body details[open] > summary::before { transform: rotate(180deg); }
+  .article-body details:not(.group\/disclosure)[open] > summary::before { transform: rotate(180deg); }
   @media (prefers-reduced-motion: reduce) {
-    .article-body details > summary::before { transition: none; }
+    .article-body details:not(.group\/disclosure) > summary::before { transition: none; }
   }
-  .article-body details[open] > summary { border-bottom: 1px solid var(--color-line); }
-  .article-body details > :not(summary) { padding-inline: 1rem; }
+  .article-body details:not(.group\/disclosure)[open] > summary { border-bottom: 1px solid var(--color-line); }
+  .article-body details:not(.group\/disclosure) > :not(summary) { padding-inline: 1rem; }
 
   .article-body {
     font-family: var(--font-serif);
