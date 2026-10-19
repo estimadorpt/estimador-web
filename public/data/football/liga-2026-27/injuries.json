@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "snapshot_date": "2026-10-11",
+  "snapshot_date": "2026-10-16",
   "stale": false,
   "source": "transfermarkt",
   "n_out": 21,
@@ -9,17 +9,24 @@
   "teams": [
     {
       "team": "Porto",
-      "n_out": 6,
-      "value_out_eur": 63500000,
+      "n_out": 4,
+      "value_out_eur": 48500000,
       "squad_value_eur": 467100000,
-      "share_of_squad": 0.1359
+      "share_of_squad": 0.1038
+    },
+    {
+      "team": "Sporting CP",
+      "n_out": 2,
+      "value_out_eur": 32000000,
+      "squad_value_eur": 446700000,
+      "share_of_squad": 0.0716
     },
     {
       "team": "Benfica",
-      "n_out": 3,
-      "value_out_eur": 62000000,
+      "n_out": 1,
+      "value_out_eur": 17000000,
       "squad_value_eur": 385550000,
-      "share_of_squad": 0.1608
+      "share_of_squad": 0.0441
     },
     {
       "team": "SC Braga",
@@ -41,13 +48,6 @@
       "value_out_eur": 6500000,
       "squad_value_eur": 35030000,
       "share_of_squad": 0.1856
-    },
-    {
-      "team": "Sporting CP",
-      "n_out": 1,
-      "value_out_eur": 6000000,
-      "squad_value_eur": 446700000,
-      "share_of_squad": 0.0134
     },
     {
       "team": "Nacional",
@@ -76,17 +76,40 @@
       "value_out_eur": 1500000,
       "squad_value_eur": 28300000,
       "share_of_squad": 0.053
+    },
+    {
+      "team": "Alverca",
+      "n_out": 2,
+      "value_out_eur": 1000000,
+      "squad_value_eur": 35680000,
+      "share_of_squad": 0.028
+    },
+    {
+      "team": "Estoril",
+      "n_out": 1,
+      "value_out_eur": 100000,
+      "squad_value_eur": 42250000,
+      "share_of_squad": 0.0024
     }
   ],
   "players": [
     {
-      "player": "Georgiy Sudakov",
-      "team": "Benfica",
+      "player": "Julián Martínez",
+      "team": "Alverca",
       "kind": "injury",
-      "position": "Attacking Midfield",
-      "reason": "Ankle sprain",
+      "position": "Centre-Back",
+      "reason": "Meniscus tear",
       "expected_return": null,
-      "market_value_eur": 25000000
+      "market_value_eur": 500000
+    },
+    {
+      "player": "Sabit Abdulai",
+      "team": "Alverca",
+      "kind": "injury",
+      "position": "Defensive Midfield",
+      "reason": "Knee injury",
+      "expected_return": null,
+      "market_value_eur": 500000
     },
     {
       "player": "Jakub Kamiński",
@@ -98,15 +121,6 @@
       "market_value_eur": 17000000
     },
     {
-      "player": "Leandro Barreiro",
-      "team": "Benfica",
-      "kind": "injury",
-      "position": "Central Midfield",
-      "reason": "Back problems",
-      "expected_return": null,
-      "market_value_eur": 20000000
-    },
-    {
       "player": "André Gomes",
       "team": "Casa Pia",
       "kind": "injury",
@@ -114,6 +128,15 @@
       "reason": "Muscle injury",
       "expected_return": null,
       "market_value_eur": 2500000
+    },
+    {
+      "player": "Israel Salazar",
+      "team": "Estoril",
+      "kind": "injury",
+      "position": "Centre-Forward",
+      "reason": "Cruciate ligament tear",
+      "expected_return": null,
+      "market_value_eur": 100000
     },
     {
       "player": "Jeremy Arévalo",
@@ -179,15 +202,6 @@
       "market_value_eur": 500000
     },
     {
-      "player": "Martim Fernandes",
-      "team": "Porto",
-      "kind": "injury",
-      "position": "Right-Back",
-      "reason": "unknown injury",
-      "expected_return": null,
-      "market_value_eur": 12000000
-    },
-    {
       "player": "Vasco Sousa",
       "team": "Porto",
       "kind": "injury",
@@ -201,18 +215,9 @@
       "team": "Porto",
       "kind": "injury",
       "position": "Right Winger",
-      "reason": "unknown injury",
+      "reason": "Ankle sprain",
       "expected_return": null,
       "market_value_eur": 30000000
-    },
-    {
-      "player": "Zaidu Sanusi",
-      "team": "Porto",
-      "kind": "injury",
-      "position": "Left-Back",
-      "reason": "Adductor injury",
-      "expected_return": null,
-      "market_value_eur": 3000000
     },
     {
       "player": "Brandon Aguilera",
@@ -260,13 +265,22 @@
       "market_value_eur": 3000000
     },
     {
-      "player": "Georgios Vagiannidis",
+      "player": "Nuno Santos",
       "team": "Sporting CP",
       "kind": "injury",
-      "position": "Right-Back",
-      "reason": "unknown injury",
+      "position": "Left-Back",
+      "reason": "Fitness",
       "expected_return": null,
-      "market_value_eur": 6000000
+      "market_value_eur": 2000000
+    },
+    {
+      "player": "Rodrigo Zalazar",
+      "team": "Sporting CP",
+      "kind": "injury",
+      "position": "Attacking Midfield",
+      "reason": "Muscle injury",
+      "expected_return": "2026-10-24",
+      "market_value_eur": 30000000
     }
   ]
 }
