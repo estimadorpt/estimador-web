@@ -1,7 +1,7 @@
 {
   "season": "2026-27",
   "snapshot_date": "2026-10-16",
-  "stale": false,
+  "stale": true,
   "source": "transfermarkt",
   "n_out": 21,
   "n_injuries": 21,
