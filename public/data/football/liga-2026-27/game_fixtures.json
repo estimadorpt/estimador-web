@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "generated_at": "2026-10-25T23:04:32Z",
+  "generated_at": "2026-10-31T14:05:39Z",
   "n_matchdays": 34,
   "matchdays": [
     {
@@ -1256,8 +1256,8 @@
           "p_home": 0.1371,
           "p_draw": 0.2172,
           "p_away": 0.6457,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 1,
+          "away_goals": 2,
           "published_at": "2026-10-10T23:11:24.521701+00:00",
           "probs_source": "md08.json"
         }
@@ -1278,8 +1278,8 @@
           "p_home": 0.0602,
           "p_draw": 0.1315,
           "p_away": 0.8083,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 0,
+          "away_goals": 2,
           "published_at": "2026-10-24T13:04:14.091713+00:00",
           "probs_source": "md09.json"
         },
@@ -1417,11 +1417,13 @@
           "kickoff": "2026-11-06T20:45:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-11-06T20:45:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.4779,
+          "p_draw": 0.267,
+          "p_away": 0.2551,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-31T14:04:49.757726+00:00",
+          "probs_source": "md10.json"
         },
         {
           "id": "md11-nacional-vs-academico-viseu",
@@ -1430,11 +1432,13 @@
           "kickoff": "2026-11-07T15:30:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-11-07T15:30:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.4273,
+          "p_draw": 0.2732,
+          "p_away": 0.2995,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-31T14:04:49.757726+00:00",
+          "probs_source": "md10.json"
         },
         {
           "id": "md11-alverca-vs-casa-pia",
@@ -1443,11 +1447,13 @@
           "kickoff": "2026-11-07T18:00:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-11-07T18:00:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.5092,
+          "p_draw": 0.2632,
+          "p_away": 0.2276,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-31T14:04:49.757726+00:00",
+          "probs_source": "md10.json"
         },
         {
           "id": "md11-sporting-cp-vs-moreirense",
@@ -1456,11 +1462,13 @@
           "kickoff": "2026-11-07T20:30:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-11-07T20:30:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.8439,
+          "p_draw": 0.1107,
+          "p_away": 0.0453,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-31T14:04:49.757726+00:00",
+          "probs_source": "md10.json"
         },
         {
           "id": "md11-santa-clara-vs-gil-vicente",
@@ -1469,11 +1477,13 @@
           "kickoff": "2026-11-08T15:30:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-11-08T15:30:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.3908,
+          "p_draw": 0.3124,
+          "p_away": 0.2968,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-31T14:04:49.757726+00:00",
+          "probs_source": "md10.json"
         },
         {
           "id": "md11-estoril-vs-maritimo",
@@ -1482,11 +1492,13 @@
           "kickoff": "2026-11-08T15:30:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-11-08T15:30:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.5522,
+          "p_draw": 0.2382,
+          "p_away": 0.2096,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-31T14:04:49.757726+00:00",
+          "probs_source": "md10.json"
         },
         {
           "id": "md11-vitoria-sc-vs-porto",
@@ -1495,11 +1507,13 @@
           "kickoff": "2026-11-08T18:00:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-11-08T18:00:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.1519,
+          "p_draw": 0.2332,
+          "p_away": 0.6149,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-31T14:04:49.757726+00:00",
+          "probs_source": "md10.json"
         },
         {
           "id": "md11-rio-ave-vs-sc-braga",
@@ -1508,11 +1522,13 @@
           "kickoff": "2026-11-08T20:30:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-11-08T20:30:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.1834,
+          "p_draw": 0.2229,
+          "p_away": 0.5937,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-31T14:04:49.757726+00:00",
+          "probs_source": "md10.json"
         },
         {
           "id": "md11-estrela-amadora-vs-benfica",
@@ -1521,11 +1537,13 @@
           "kickoff": "2026-11-08T20:30:00Z",
           "kickoff_confirmed": true,
           "locks_at": "2026-11-08T20:30:00Z",
-          "p_home": null,
-          "p_draw": null,
-          "p_away": null,
+          "p_home": 0.0848,
+          "p_draw": 0.1546,
+          "p_away": 0.7607,
           "home_goals": null,
-          "away_goals": null
+          "away_goals": null,
+          "published_at": "2026-10-31T14:04:49.757726+00:00",
+          "probs_source": "md10.json"
         }
       ]
     },
