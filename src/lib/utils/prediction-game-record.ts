@@ -92,14 +92,19 @@ export interface EarlyLock {
  * The kickoff test is what finds a postponed game after it is played: the
  * producer then rewrites its locks_at to the real kickoff, so the lock alone
  * no longer shows it (Sp. Braga–Gil Vicente, matchday 2, from the 24 October
- * sync on).
+ * sync on). It is a workaround: it misses a leftover played before the middle
+ * of the next round, and any in the season's last round. Drop it once a
+ * passed lock stops moving (producer ask 12).
  */
 export function earlyLocks(rounds: readonly ManifestRoundLike[], minDays = 1): EarlyLock[] {
   const out: EarlyLock[] = [];
   for (const r of rounds) {
     const roundLock = roundLockAt(r);
     const next = rounds.find(x => x.matchday === r.matchday + 1);
+    // A placeholder kickoff (unscheduled round) says nothing about when the
+    // next round is played.
     const nextKickoffs = (next?.fixtures ?? [])
+      .filter(f => f.kickoff_confirmed !== false)
       .map(f => parseKickoff(f.kickoff ?? null))
       .filter((ms): ms is number => ms !== null)
       .sort((a, b) => a - b);
