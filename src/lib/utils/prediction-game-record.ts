@@ -70,36 +70,65 @@ export interface EarlyLock {
   home: string;
   away: string;
   kickoff: string;
-  locksAt: string;
+  /**
+   * The game's own original lock (its original kickoff), when the manifest
+   * still carries it: only while the game is unplayed. Once it is played the
+   * producer gives it its real kickoff as locks_at (`merge_preserving_probs`
+   * in estimador-football), so this is null.
+   */
+  locksAt: string | null;
   /** When its round closed (the round's earliest lock): the game's real lock. */
   roundLocksAt: string;
 }
 
 /**
- * Games with a confirmed kickoff that lock more than `minDays` before it: in
- * practice a postponed game that keeps its original round's lock and
- * probabilities.
+ * Postponed games: a confirmed kickoff after the middle of the next round
+ * (a postponed leftover; the median, so one of its games brought forward
+ * does not turn this round's Monday game into one), or a lock more than `minDays` before the
+ * kickoff (an unplayed postponed game that keeps its original lock). Either
+ * way the game closed with its round, as a round locks as a unit, and is
+ * scored on the probabilities published for that round.
+ *
+ * The kickoff test is what finds a postponed game after it is played: the
+ * producer then rewrites its locks_at to the real kickoff, so the lock alone
+ * no longer shows it (Sp. Braga–Gil Vicente, matchday 2, from the 24 October
+ * sync on). It is a workaround: it misses a leftover played before the middle
+ * of the next round, and any in the season's last round. Drop it once a
+ * passed lock stops moving (producer ask 12).
  */
 export function earlyLocks(rounds: readonly ManifestRoundLike[], minDays = 1): EarlyLock[] {
   const out: EarlyLock[] = [];
   for (const r of rounds) {
+    const roundLock = roundLockAt(r);
+    const next = rounds.find(x => x.matchday === r.matchday + 1);
+    // A placeholder kickoff (unscheduled round) says nothing about when the
+    // next round is played.
+    const nextKickoffs = (next?.fixtures ?? [])
+      .filter(f => f.kickoff_confirmed !== false)
+      .map(f => parseKickoff(f.kickoff ?? null))
+      .filter((ms): ms is number => ms !== null)
+      .sort((a, b) => a - b);
+    const nextMiddle = nextKickoffs.length ? nextKickoffs[Math.floor(nextKickoffs.length / 2)] : null;
     for (const f of r.fixtures ?? []) {
       // A placeholder kickoff (unscheduled round) is not a postponement.
       if (f.kickoff_confirmed === false) continue;
       const kickoff = parseKickoff(f.kickoff ?? null);
+      if (kickoff === null) continue;
       const lock = parseKickoff(f.locks_at ?? null);
-      if (kickoff === null || lock === null) continue;
-      if (kickoff - lock > minDays * 86_400_000) {
-        out.push({
-          matchday: r.matchday,
-          id: f.id ?? null,
-          home: f.home,
-          away: f.away,
-          kickoff: f.kickoff as string,
-          locksAt: f.locks_at as string,
-          roundLocksAt: roundLockAt(r) ?? (f.locks_at as string),
-        });
-      }
+      const keptLock = lock !== null && kickoff - lock > minDays * 86_400_000;
+      const afterNextRound = nextMiddle !== null && kickoff > nextMiddle;
+      if (!keptLock && !afterNextRound) continue;
+      const closedAt = roundLock ?? f.locks_at;
+      if (!closedAt) continue;
+      out.push({
+        matchday: r.matchday,
+        id: f.id ?? null,
+        home: f.home,
+        away: f.away,
+        kickoff: f.kickoff as string,
+        locksAt: keptLock ? (f.locks_at as string) : null,
+        roundLocksAt: closedAt,
+      });
     }
   }
   return out;

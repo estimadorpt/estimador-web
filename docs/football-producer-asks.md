@@ -75,3 +75,15 @@ Added in round 4 (2026-10-06):
    (audit METH3-V02). A variant that conditions on the result with the strengths held at
    their posterior means would isolate the points. *Web:* says so in the methodology
    (`#jogos-decisivos`), and the swings stay a conditional reading.
+
+Added on 2026-11-01:
+
+12. **A passed lock never moves, played or not.** `merge_preserving_probs` in
+   `analysis/game.py` keeps a passed lock only while the game is unplayed; once it is played
+   the game takes its real kickoff as `locks_at`. So the 24 October sync rewrote Sp.
+   Braga–Gil Vicente (matchday 2, played 19 October) from its original 16 August lock to 19
+   October, and the record no longer says when the game stopped taking picks, against
+   the rule in `confirm_priced_rounds` (same file) that a passed lock never moves. Drop the `home_goals is None` condition, and restore
+   `2026-08-16T19:30:00Z` on `md02-sc-braga-vs-gil-vicente` in the output manifest. *Web:*
+   finds a postponed game by its kickoff after the next round began (`earlyLocks`), takes its
+   lock from its round, and prints the original kickoff only when the file still carries it.
