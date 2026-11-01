@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "generated_at": "2026-11-01T20:05:02Z",
+  "generated_at": "2026-11-01T22:34:53Z",
   "n_matchdays": 34,
   "matchdays": [
     {
@@ -1368,8 +1368,8 @@
           "p_home": 0.5753,
           "p_draw": 0.2385,
           "p_away": 0.1862,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 3,
+          "away_goals": 0,
           "published_at": "2026-10-24T13:04:14.091713+00:00",
           "probs_source": "md09.json"
         },
