@@ -83,7 +83,7 @@ Added on 2026-11-01:
    the game takes its real kickoff as `locks_at`. So the 24 October sync rewrote Sp.
    Braga–Gil Vicente (matchday 2, played 19 October) from its original 16 August lock to 19
    October, and the record no longer says when the game stopped taking picks, against
-   `confirm_priced_rounds`' own rule. Drop the `home_goals is None` condition, and restore
+   the rule in `confirm_priced_rounds` (same file) that a passed lock never moves. Drop the `home_goals is None` condition, and restore
    `2026-08-16T19:30:00Z` on `md02-sc-braga-vs-gil-vicente` in the output manifest. *Web:*
    finds a postponed game by its kickoff after the next round began (`earlyLocks`), takes its
    lock from its round, and prints the original kickoff only when the file still carries it.

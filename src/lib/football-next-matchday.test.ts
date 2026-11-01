@@ -48,8 +48,8 @@ describe('next_matchday against the game record (audit FA3-06)', () => {
       if (r.maxDiff > 0.00005) expect(drift).toContain(r.file.replace('.json', ''));
       // An mdNN.json regenerated after the next round was frozen drifts
       // from the frozen odds (md09 by 1.45 pp after the late md09 results).
-      // The bound only catches a mismatched game (a swapped home and away).
-      expect(r.maxDiff).toBeLessThan(0.05);
+      // The bound catches a mismatched game (a swapped home and away).
+      expect(r.maxDiff).toBeLessThan(0.03);
     }
     expect(nextMatchdayDriftSentence(rows, 'en')).toMatch(/^The next_matchday of /);
   });

@@ -82,8 +82,9 @@ export interface EarlyLock {
 }
 
 /**
- * Postponed games: a confirmed kickoff after the next round began (the
- * runbook's "postponed leftover"), or a lock more than `minDays` before the
+ * Postponed games: a confirmed kickoff after the middle of the next round
+ * (a postponed leftover; the median, so one of its games brought forward
+ * does not turn this round's Monday game into one), or a lock more than `minDays` before the
  * kickoff (an unplayed postponed game that keeps its original lock). Either
  * way the game closed with its round, as a round locks as a unit, and is
  * scored on the probabilities published for that round.
@@ -100,8 +101,9 @@ export function earlyLocks(rounds: readonly ManifestRoundLike[], minDays = 1): E
     const next = rounds.find(x => x.matchday === r.matchday + 1);
     const nextKickoffs = (next?.fixtures ?? [])
       .map(f => parseKickoff(f.kickoff ?? null))
-      .filter((ms): ms is number => ms !== null);
-    const nextStart = nextKickoffs.length ? Math.min(...nextKickoffs) : null;
+      .filter((ms): ms is number => ms !== null)
+      .sort((a, b) => a - b);
+    const nextMiddle = nextKickoffs.length ? nextKickoffs[Math.floor(nextKickoffs.length / 2)] : null;
     for (const f of r.fixtures ?? []) {
       // A placeholder kickoff (unscheduled round) is not a postponement.
       if (f.kickoff_confirmed === false) continue;
@@ -109,8 +111,10 @@ export function earlyLocks(rounds: readonly ManifestRoundLike[], minDays = 1): E
       if (kickoff === null) continue;
       const lock = parseKickoff(f.locks_at ?? null);
       const keptLock = lock !== null && kickoff - lock > minDays * 86_400_000;
-      const afterNextRound = nextStart !== null && kickoff > nextStart;
+      const afterNextRound = nextMiddle !== null && kickoff > nextMiddle;
       if (!keptLock && !afterNextRound) continue;
+      const closedAt = roundLock ?? f.locks_at;
+      if (!closedAt) continue;
       out.push({
         matchday: r.matchday,
         id: f.id ?? null,
@@ -118,7 +122,7 @@ export function earlyLocks(rounds: readonly ManifestRoundLike[], minDays = 1): E
         away: f.away,
         kickoff: f.kickoff as string,
         locksAt: keptLock ? (f.locks_at as string) : null,
-        roundLocksAt: roundLock ?? (f.locks_at as string),
+        roundLocksAt: closedAt,
       });
     }
   }

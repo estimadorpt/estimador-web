@@ -60,6 +60,20 @@ describe('earlyLocks', () => {
     ])).toEqual([]);
   });
 
+  it('does not take a Monday game for a postponement when the next round has a game brought forward', () => {
+    expect(earlyLocks([
+      round(2, [
+        { kickoff: '2026-08-14T19:15:00Z', locks_at: '2026-08-14T19:15:00Z' },
+        { kickoff: '2026-08-17T19:15:00Z', locks_at: '2026-08-17T19:15:00Z' },
+      ]),
+      round(3, [
+        { kickoff: '2026-08-16T19:15:00Z', locks_at: '2026-08-16T19:15:00Z' },
+        { kickoff: '2026-08-22T14:30:00Z', locks_at: '2026-08-22T14:30:00Z' },
+        { kickoff: '2026-08-23T14:30:00Z', locks_at: '2026-08-23T14:30:00Z' },
+      ]),
+    ])).toEqual([]);
+  });
+
   it('ignores placeholder kickoffs of rounds not yet scheduled', () => {
     const r = round(13, [{ id: 'md13-x', kickoff: '2026-12-06T00:00:00Z', locks_at: '2026-12-04T19:00:00Z' }]);
     (r.fixtures[0] as Record<string, unknown>).kickoff_confirmed = false;
