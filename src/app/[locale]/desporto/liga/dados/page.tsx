@@ -396,10 +396,14 @@ function gameNotes(rounds: ManifestRoundLike[], locale: string): string[] {
   }
   for (const e of earlyLocks(rounds)) {
     // The round's lock, the earliest of its games, is when the game closed
-    // (audit FA2-05); its own locks_at is the original kickoff.
+    // (audit FA2-05); its own locks_at is the original kickoff only while
+    // the game is unplayed, so that aside is printed only when known.
+    const original = e.locksAt
+      ? (pt ? ` (a hora original do jogo era ${formatLongDate(e.locksAt, locale)})` : ` (its original kickoff was ${formatLongDate(e.locksAt, locale)})`)
+      : "";
     notes.push(pt
-      ? `${teamDisplayName(e.home)} – ${teamDisplayName(e.away)} (jornada ${e.matchday}) foi adiado para ${formatKickoff(e.kickoff, locale)}, mas fechou com a jornada ${e.matchday}, a ${formatLongDate(e.roundLocksAt, locale)} (a hora original do jogo era ${formatLongDate(e.locksAt, locale)}): é avaliado com as probabilidades que o modelo publicou para essa jornada.`
-      : `${teamDisplayName(e.home)} – ${teamDisplayName(e.away)} (matchday ${e.matchday}) was postponed to ${formatKickoff(e.kickoff, locale)}, but it closed with matchday ${e.matchday}, on ${formatLongDate(e.roundLocksAt, locale)} (its original kickoff was ${formatLongDate(e.locksAt, locale)}): it is scored on the probabilities the model published for that round.`);
+      ? `${teamDisplayName(e.home)} – ${teamDisplayName(e.away)} (jornada ${e.matchday}) foi adiado para ${formatKickoff(e.kickoff, locale)}, mas fechou com a jornada ${e.matchday}, a ${formatLongDate(e.roundLocksAt, locale)}${original}: é avaliado com as probabilidades que o modelo publicou para essa jornada.`
+      : `${teamDisplayName(e.home)} – ${teamDisplayName(e.away)} (matchday ${e.matchday}) was postponed to ${formatKickoff(e.kickoff, locale)}, but it closed with matchday ${e.matchday}, on ${formatLongDate(e.roundLocksAt, locale)}${original}: it is scored on the probabilities the model published for that round.`);
   }
   // Odds frozen while the previous round was still being played (audit
   // FA2-04, FRESH-02): they miss the results still to come.
