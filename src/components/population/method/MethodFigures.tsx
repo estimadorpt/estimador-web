@@ -4,16 +4,20 @@ import { DEEMPHASIS, SERIES, formatValue } from '@/components/viz/theme';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { formatCount } from '@/lib/population/format';
 import {
-  AGE_BANDS, CANDIDATES as EX_ALL, CARE_HOME, SIZE_LABELS, TARGET, TARGET_HOUSEHOLDS, TARGET_PEOPLE, methodExample, type Counts,
+  AGE_BANDS, ARRANGEMENTS, CANDIDATES as EX_ALL, CARE_HOME, ELDERS_ALONE_RANGE, SAMPLE, SIZE_LABELS, TARGET, TARGET_HOUSEHOLDS, TARGET_PEOPLE,
+  ageBand, agesOf, eldersAlone, methodExample, type Counts,
 } from '@/lib/population/method-example';
 import type { PopulationReleaseInfo } from '@/types/population';
 import { HouseGlyph, type HouseState } from './HouseGlyph';
+import { TickGlyph } from '@/components/instrument/glyphs';
 import { tierGrid, type TierThresholds } from './rules';
 
 /**
- * The methodology's fixed drawings: one figure per step that follows the same
- * invented parish as the scroll story (24 households the generator proposes,
- * two small tables to match) from the first guess to the published file, and
+ * The methodology's fixed drawings: why the population is needed (the same
+ * tables fit different parishes; the public sample has no parish), then one
+ * figure per step that follows the same invented parish as the scroll story
+ * (24 households the generator proposes, two small tables to match) from the
+ * first guess to the published file and the opening question's answer, and
  * the tier rule as the grid it is. They are the story's twin, with its tables,
  * and what a reader without scripts sees. The figures are
  * server-rendered HTML with small SVG glyphs, so their words stay real text at
@@ -32,7 +36,12 @@ const one = (v: number, locale: Locale) => formatValue(Math.round(v * 10) / 10, 
 const two = (v: number, locale: Locale) => (locale === 'pt' ? v.toFixed(2).replace('.', ',') : v.toFixed(2));
 
 /** The note under every example figure: what is invented, and what it stands for. */
-function exampleNote(locale: Locale): string {
+function exampleNote(locale: Locale, figure: 'why' | 'steps' = 'steps'): string {
+  if (figure === 'why') {
+    return locale === 'pt'
+      ? 'Esquema com uma freguesia inventada: casas, idades e tabelas escritas para este exemplo; numa freguesia real, as tabelas são as do INE (Censos 2021).'
+      : 'Diagram with an invented parish: homes, ages and tables written for this example; in a real parish the tables are INE’s (2021 Census).';
+  }
   return locale === 'pt'
     ? 'Esquema com uma freguesia inventada: agregados, idades e tabelas escritos para este exemplo; numa freguesia real, as tabelas são as do INE (Censos 2021) e os candidatos são muitos mais.'
     : 'Diagram with an invented parish: households, ages and tables written for this example; in a real parish the tables are INE’s (2021 Census) and the candidates are many more.';
@@ -151,6 +160,174 @@ function Arrow({ children }: { children: ReactNode }) {
       <svg width="14" height="22" viewBox="0 0 14 22" aria-hidden="true" focusable="false" className="shrink-0"><path d="M7 0 V20 M1 14 L7 20 L13 14" stroke={BRAND.ink} strokeWidth="1.5" fill="none" /></svg>
       <span>{children}</span>
     </p>
+  );
+}
+
+/* ------------------------------------------------------------------ why */
+
+const ELDERS = TARGET.ages[3];
+const ALONE = TARGET.sizes[0];
+/** The opening question's answer in a set of households: people of 65 or over living alone. */
+const aloneIn = (homes: number[][]) => eldersAlone(homes);
+const isElderAlone = (ages: number[]) => ages.length === 1 && ageBand(ages[0]) === 3;
+
+/** The question as the two tables leave it: the margins known, the inside not. */
+function CrossTable({ locale }: { locale: Locale }) {
+  const pt = locale === 'pt';
+  const th = 'border-b border-ink px-2 py-1 text-right text-[12px] font-semibold text-graphite';
+  const td = 'border-b border-grid px-2 py-1 text-right';
+  const unknown = <><span aria-hidden="true" className="font-bold text-graphite">?</span><span className="sr-only">{pt ? 'desconhecido' : 'unknown'}</span></>;
+  const rows: Array<[string, ReactNode, ReactNode, number]> = [
+    [pt ? 'Vivem sozinhas' : 'Live alone', unknown, unknown, ALONE],
+    [pt ? 'Não vivem sozinhas' : 'Do not live alone', unknown, unknown, TARGET_PEOPLE - ALONE],
+  ];
+  return (
+    <table className="mt-6 w-full max-w-[30rem] border-collapse text-[13px] tabular-nums">
+      <caption className="mb-1 text-left text-[13px] font-semibold text-ink">{pt ? `Quantas das ${ELDERS} pessoas com 65 ou mais anos vivem sozinhas?` : `How many of the ${ELDERS} people aged 65 or over live alone?`}</caption>
+      <thead>
+        <tr>
+          <th scope="col" className="border-b border-ink py-1 pl-0 pr-2 text-left text-[12px] font-semibold text-graphite"><span className="sr-only">{pt ? 'Pessoas' : 'People'}</span></th>
+          <th scope="col" className={th}>{pt ? '65 ou mais' : '65 or over'}</th>
+          <th scope="col" className={th}>{pt ? 'Menos de 65' : 'Under 65'}</th>
+          <th scope="col" className={`${th} pr-0`}>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(([label, a, b, total]) => (
+          <tr key={label}>
+            <th scope="row" className="border-b border-grid py-1 pl-0 pr-2 text-left font-normal text-ink">{label}</th>
+            <td className={td}>{a}</td><td className={td}>{b}</td><td className={`${td} pr-0 font-semibold`}>{total}</td>
+          </tr>
+        ))}
+        <tr>
+          <th scope="row" className="py-1 pl-0 text-left font-normal text-graphite">Total</th>
+          <td className="px-2 py-1 text-right font-semibold">{ELDERS}</td>
+          <td className="px-2 py-1 text-right font-semibold">{TARGET_PEOPLE - ELDERS}</td>
+          <td className="py-1 pl-2 pr-0 text-right text-graphite">{TARGET_PEOPLE}</td>
+        </tr>
+      </tbody>
+    </table>
+  );
+}
+
+/** The same tables, three parishes: the 23 people in the 10 homes three ways, each giving both tables. */
+export function FigureWhy({ locale }: { locale: Locale }) {
+  const pt = locale === 'pt';
+  const ways = [
+    { key: 'real', homes: agesOf(ARRANGEMENTS.real), name: pt ? 'A freguesia do início' : 'The parish we began with' },
+    { key: 'none', homes: agesOf(ARRANGEMENTS.none), name: pt ? 'Outra maneira' : 'Another way' },
+    { key: 'three', homes: agesOf(ARRANGEMENTS.three), name: pt ? 'Mais outra' : 'And another' },
+  ];
+  const counts = ways.map(w => aloneIn(w.homes)).sort((a, b) => a - b);
+  const list = pt ? `${counts[0]}, ${counts[1]} ou ${counts[2]}` : `${counts[0]}, ${counts[1]} or ${counts[2]}`;
+  return (
+    <Frame
+      id="figura-porque"
+      title={pt ? `As mesmas tabelas servem freguesias com ${list} pessoas de 65 ou mais a viver sozinhas` : `The same tables fit parishes where ${list} people aged 65 or over live alone`}
+      lede={pt
+        ? `O INE publica contagens, tabela a tabela. Estas duas dizem que ${ALONE} pessoas vivem sozinhas e que ${ELDERS} têm 65 ou mais anos, mas não quantas são as duas coisas. As mesmas ${TARGET_PEOPLE} pessoas cabem nas mesmas ${TARGET_HOUSEHOLDS} casas de muitas maneiras que dão estas tabelas; três delas, abaixo.`
+        : `INE publishes counts, table by table. These two say that ${ALONE} people live alone and ${ELDERS} are aged 65 or over, but not how many are both. The same ${TARGET_PEOPLE} people fit the same ${TARGET_HOUSEHOLDS} homes in many ways that give these tables; three of them below.`}
+      note={exampleNote(locale, 'why')}
+      twin={(
+        <ChartTable
+          summaryLabel={pt ? 'Ver as três maneiras em tabela' : 'View the three ways as a table'}
+          caption={pt ? 'Três maneiras de viver nas mesmas casas, com as mesmas tabelas' : 'Three ways of living in the same homes, with the same tables'}
+          columns={pt ? ['Maneira', 'Idades, casa a casa', 'Com 65 ou mais, a viver sozinhas'] : ['Way', 'Ages, home by home', 'Aged 65 or over, living alone']}
+          align={[undefined, 'left', 'right']}
+          rows={ways.map(w => [w.name, w.homes.map(h => h.join(', ')).join(' | '), aloneIn(w.homes)])}
+        />
+      )}
+    >
+      <ParishTables locale={locale} />
+      <CrossTable locale={locale} />
+      {ways.map(w => (
+        <div key={w.key} className="mt-6">
+          <p className="mb-2 text-[13px] text-ink"><span className="font-semibold">{w.name}</span>{pt ? `: ${aloneIn(w.homes)} com 65 ou mais a viver sozinhas` : `: ${aloneIn(w.homes)} aged 65 or over living alone`}</p>
+          <Pool label={pt ? `${w.name}: as ${TARGET_HOUSEHOLDS} casas, com as idades de cada uma; o telhado preenchido marca uma pessoa de 65 ou mais a viver sozinha` : `${w.name}: the ${TARGET_HOUSEHOLDS} homes, with each one’s ages; a filled roof marks someone aged 65 or over living alone`}>
+            {w.homes.map((ages, i) => <Home key={i} ages={ages} state={isElderAlone(ages) ? 'chosen' : 'plain'} label={isElderAlone(ages) ? (pt ? 'sozinha, 65+' : 'alone, 65+') : undefined} />)}
+          </Pool>
+        </div>
+      ))}
+      <AgeKey locale={locale} />
+    </Frame>
+  );
+}
+
+/** The public sample: whole households, from anywhere in the country, with no parish. */
+export function FigureSample({ locale }: { locale: Locale }) {
+  const pt = locale === 'pt';
+  return (
+    <Frame
+      id="figura-amostra"
+      title={pt ? 'A amostra pública mostra agregados inteiros, sem a freguesia' : 'The public sample shows whole households, without the parish'}
+      lede={pt
+        ? 'O Ficheiro de Uso Público dos Censos 2021 guarda as respostas de cada pessoa juntas, para cerca de 1 em cada 20 agregados do país, e diz só a região (NUTS II). Mostra como as pessoas vivem juntas; as tabelas, quantas são em cada freguesia.'
+        : 'The 2021 Census Public Use File keeps each person’s answers together, for about 1 in 20 households in the country, and gives only the region (NUTS II). It shows how people live together; the tables, how many there are in each parish.'}
+      note={pt
+        ? `Agregados inventados para este exemplo (${SAMPLE.length}); os registos da amostra do INE não podem ser redistribuídos.`
+        : `Households invented for this example (${SAMPLE.length}); INE’s sample records may not be redistributed.`}
+    >
+      <Pool label={pt ? `${SAMPLE.length} agregados de uma amostra inventada, com as idades de cada um` : `${SAMPLE.length} households from an invented sample, with each one’s ages`}>
+        {SAMPLE.map((ages, i) => <Home key={i} ages={ages} />)}
+      </Pool>
+      <AgeKey locale={locale} />
+    </Frame>
+  );
+}
+
+/** The opening question, answered by counting the chosen households. */
+export function FigureAnswer({ locale }: { locale: Locale }) {
+  const pt = locale === 'pt';
+  const { lo, hi } = ELDERS_ALONE_RANGE;
+  const real = aloneIn(agesOf(ARRANGEMENTS.real));
+  const generated = aloneIn(EX.chosen.map(i => EX.kept[i]));
+  const W = 320;
+  const x = (v: number) => 12 + ((v - lo) / Math.max(1, hi - lo)) * (W - 40);
+  const ry = 22;
+  return (
+    <Frame
+      id="figura-resposta"
+      title={pt ? `Nesta população sintética, ${generated} das ${ELDERS} pessoas com 65 ou mais vivem sozinhas` : `In this synthetic population, ${generated} of the ${ELDERS} people aged 65 or over live alone`}
+      lede={pt
+        ? `As tabelas só garantiam uma resposta entre ${lo} e ${hi}; na freguesia do início eram ${real}. A população sintética dá uma resposta possível e coerente com as tabelas, não a verdadeira.`
+        : `The tables only guaranteed an answer between ${lo} and ${hi}; in the parish we began with, it was ${real}. The synthetic population gives a possible answer, consistent with the tables, not the true one.`}
+      note={exampleNote(locale)}
+      twin={(
+        <ChartTable
+          summaryLabel={pt ? 'Ver em tabela' : 'View as a table'}
+          caption={pt ? 'Pessoas com 65 ou mais anos que vivem sozinhas, na freguesia de exemplo' : 'People aged 65 or over who live alone, in the example parish'}
+          columns={pt ? ['', 'Pessoas'] : ['', 'People']}
+          align={[undefined, 'right']}
+          rows={[
+            [pt ? 'O que as duas tabelas permitem' : 'What the two tables allow', pt ? `${lo} a ${hi}` : `${lo} to ${hi}`],
+            [pt ? 'A freguesia do início' : 'The parish we began with', real],
+            [pt ? 'A população sintética, uma execução do modelo' : 'The synthetic population, one model run', generated],
+          ]}
+        />
+      )}
+    >
+      <svg width={W} height={44} viewBox={`0 0 ${W} 44`} aria-hidden="true" focusable="false" className="block overflow-visible">
+        <line x1={0} x2={W} y1={ry} y2={ry} stroke={BRAND.ink} strokeWidth={1} />
+        {Array.from({ length: hi - lo + 1 }, (_, i) => lo + i).map(v => (
+          <g key={v}>
+            <line x1={x(v)} x2={x(v)} y1={ry} y2={ry + 5} stroke={BRAND.ink} strokeWidth={1} />
+            <text x={x(v)} y={ry + 18} fontSize={12} fill={BRAND.muted} textAnchor="middle" fontFamily="inherit">{v}</text>
+          </g>
+        ))}
+        <rect x={x(real) - 5} y={ry - 5} width={10} height={10} fill={BRAND.ink} stroke={BRAND.paper} strokeWidth={1.5} />
+        <rect x={x(generated) - 1} y={ry - 13} width={2} height={18} fill={BRAND.ink} />
+      </svg>
+      <ul className="m-0 mt-3 list-none space-y-1 pl-0 text-[13px] text-ink">
+        <li className="m-0 flex items-center gap-2">
+          <span aria-hidden="true" className="inline-flex w-[26px] shrink-0 justify-center"><span className="inline-block size-2.5 bg-ink" /></span>
+          <span>{pt ? 'A freguesia do início: ' : 'The parish we began with: '}<b className="tabular-nums">{real}</b></span>
+        </li>
+        <li className="m-0 flex items-center gap-2">
+          <TickGlyph />
+          <span>{pt ? 'A população sintética: ' : 'The synthetic population: '}<b className="tabular-nums">{generated}</b><span className="text-graphite">{pt ? ', uma execução do modelo' : ', one model run'}</span></span>
+        </li>
+      </ul>
+    </Frame>
   );
 }
 

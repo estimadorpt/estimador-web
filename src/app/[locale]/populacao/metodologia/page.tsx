@@ -26,8 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     path: POPULATION_ROUTES.methodology,
     title: pt ? 'Como foi feita a população sintética de Portugal' : 'How the synthetic population of Portugal was made',
     description: pt
-      ? 'O que é uma população sintética, como foi gerada em cinco passos, o que quer dizer cada nível de qualidade, privacidade, usos, limitações e como citar.'
-      : 'What a synthetic population is, how it was generated in five steps, what each quality tier means, privacy, suitable uses, limitations and how to cite it.',
+      ? 'Porque é precisa uma população sintética, como foi gerada em cinco passos, o que quer dizer cada nível de qualidade, privacidade, usos, limites e como citar.'
+      : 'Why a synthetic population is needed, how it was generated in five steps, what each quality tier means, privacy, suitable uses, limits and how to cite it.',
   });
 }
 
@@ -55,8 +55,8 @@ export default async function PopulationMethodology({ params }: { params: Promis
         eyebrow={pt ? `População sintética · versão ${POPULATION_RELEASE}` : `Synthetic population · release ${POPULATION_RELEASE}`}
         title={pt ? 'Como foi feita a população sintética' : 'How the synthetic population was made'}
         lede={pt
-          ? 'Pessoas e agregados inventados por um modelo e depois escolhidos para ficar o mais perto possível das tabelas dos Censos 2021 de cada freguesia, e o que quer dizer o nível de qualidade de cada uma.'
-          : 'People and households invented by a model and then chosen to come as close as possible to each parish’s 2021 Census tables, and what each parish’s quality tier means.'}
+          ? 'As tabelas dos Censos 2021 contam pessoas e agregados, mas não dizem quem vive com quem. Uma população sintética preenche essa falta com agregados inventados por um modelo e escolhidos para dar as tabelas de cada freguesia, cada uma com o seu nível de qualidade.'
+          : 'The 2021 Census tables count people and households, but do not say who lives with whom. A synthetic population fills that gap with households invented by a model and chosen to match each parish’s tables, every parish with its quality tier.'}
         meta={<><span>{pt ? 'Censos 2021 (INE)' : '2021 Census (INE)'}</span><span>{pt ? `Versão de ${formatDay(POPULATION_PUBLISHED, locale)}` : `Release dated ${formatDay(POPULATION_PUBLISHED, locale)}`}</span></>}
       />
       <div className="mx-auto w-full max-w-7xl px-4 py-10 md:py-14">

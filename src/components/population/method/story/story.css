@@ -42,7 +42,8 @@
   color: var(--color-graphite);
 }
 
-/* The five steps over the drawing, as section tabs: the current one underlined, a link to its heading. */
+/* Why and the five steps over the drawing, as section tabs: the current one underlined, a link to its heading.
+   On a phone the steps show their numbers and only the current one its name; "why" has no number, so its name stays. */
 .mstory-steps ol {
   display: flex;
   margin: 0;
@@ -73,7 +74,9 @@
   .mstory-steps a { min-width: 34px; justify-content: center; }
   .mstory-steps a[aria-current] { justify-content: flex-start; padding-right: 8px; }
   .mstory-step-name { display: none; }
-  .mstory-steps a[aria-current] .mstory-step-name { display: inline; }
+  .mstory-steps a[aria-current] .mstory-step-name,
+  .mstory-steps a[data-why] .mstory-step-name { display: inline; }
+  .mstory-steps a[data-why] { padding-right: 10px; }
 }
 
 /* The beats: each holds its scene for a stretch of scrolling; the scrubbed ones (written token by token, weights
@@ -82,9 +85,10 @@
 .mstory-beat { padding-bottom: 45svh; }
 .mstory-beat[data-scrubbed] { padding-bottom: 85svh; }
 .mstory-beat:last-child { padding-bottom: 8svh; }
-.mstory-beat > h3:first-child { margin-top: 0; }
-/* A step link lands its heading just under the drawing (html's scroll-padding-top adds 5rem to this). */
-.mstory-beat h3 { scroll-margin-top: calc(var(--mstory-h) + 81px); }
+.mstory-beat > :is(h2, h3):first-child { margin-top: 0; }
+.mstory-beat > h2 + h3 { margin-top: 1.5rem; }
+/* A ruler link lands its heading just under the drawing (html's scroll-padding-top adds 5rem to this). */
+.mstory-beat :is(h2, h3) { scroll-margin-top: calc(var(--mstory-h) + 81px); }
 
 /* Under 1024px and too short for the drawing and some text at once (a phone held sideways): no stage, the beats
    close up, and a line says where the drawing is. */
@@ -93,7 +97,7 @@
   .mstory-stage { display: none; }
   .mstory-beats { padding: 0; }
   .mstory-beat, .mstory-beat[data-scrubbed] { padding-bottom: 1.5rem; }
-  .mstory-beat h3 { scroll-margin-top: 0; }
+  .mstory-beat :is(h2, h3) { scroll-margin-top: 0; }
   .article-body .mstory-short {
     display: block;
     margin: 0 0 1.5rem;
@@ -134,13 +138,13 @@
   .mstory-beat[data-scrubbed] { padding-bottom: 110vh; }
   .mstory-beat:last-child { padding-bottom: 12vh; }
   .mstory-beat[data-active] { border-left-color: var(--color-ink); }
-  .mstory-beat h3 { scroll-margin-top: 0; }
+  .mstory-beat :is(h2, h3) { scroll-margin-top: 0; }
 }
 
 /* Beats with no story around them (the release lacks what the drawing needs, so MethodStory renders the text alone)
    read as plain text. */
 .mstory-plain .mstory-beat { padding: 0 0 1.5rem; border-left: 0; }
-.mstory-plain .mstory-beat h3 { scroll-margin-top: 0; }
+.mstory-plain .mstory-beat :is(h2, h3) { scroll-margin-top: 0; }
 
 /* ---------------------------------------------------------------- the drawing's moves */
 
@@ -184,13 +188,21 @@
 .ms-mark { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 900ms ease; }
 .ms-fade[data-show=on] .ms-mark { stroke-dashoffset: 0; transition-delay: 650ms; }
 
+/* The opening: its line over the field comes in as it changes; the rows the question sets aside dim. */
+.ms-head { animation: ms-in 350ms ease both; }
+.ms-dim { transition: opacity 300ms ease; }
+
+/* The answer's two marks land on the ruler once the panel is in. */
+.ms-pop { opacity: 0; transition: opacity 300ms ease; }
+.ms-fade[data-show=on] .ms-pop { opacity: 1; transition-delay: var(--delay, 0ms); }
+
 @keyframes ms-in { from { opacity: 0; } }
 @keyframes ms-grow { from { transform: scaleX(0); } }
 @keyframes ms-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .ms-t, .ms-bar, .ms-fade, .ms-fade[data-show=on], .ms-row, .ms-token, .ms-mark, .mstory-beat { transition: none !important; }
-  .ms-choice, .ms-grow, .ms-draw, .ms-cross { animation: none !important; }
+  .ms-t, .ms-bar, .ms-fade, .ms-fade[data-show=on], .ms-row, .ms-token, .ms-mark, .ms-dim, .ms-pop, .mstory-beat { transition: none !important; }
+  .ms-choice, .ms-grow, .ms-draw, .ms-cross, .ms-head { animation: none !important; }
 }
 
 @media (forced-colors: active) {

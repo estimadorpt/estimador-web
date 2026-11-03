@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { POPULATION_DATA_DIR } from '@/lib/config/population';
-import { STEP_IDS, tierFor, tierGrid, type TierThresholds } from './rules';
+import { headingSlug } from '@/components/population/quality/anchors';
+import { STEP_IDS, WHY_IDS, tierFor, tierGrid, type TierThresholds } from './rules';
 
 const root = process.cwd();
 const release = JSON.parse(readFileSync(path.join(root, 'public/data', POPULATION_DATA_DIR, 'release.json'), 'utf8')) as { quality_tier_policy: { thresholds: TierThresholds } };
@@ -16,6 +17,11 @@ describe('the methodology’s step anchors', () => {
       expect(steps).toEqual(STEP_IDS.map((_, i) => i + 1));
       // The headings are plain text: the h3 component reads the step number from a string child.
       expect(mdx.match(/^### [1-9]\. .*$/gm)?.filter(h => /[*_`[]/.test(h)) ?? []).toEqual([]);
+    });
+    it(`${locale}: has the "## " heading the ruler's "why" links to`, () => {
+      const mdx = readFileSync(path.join(root, 'src/content/population-methodology', `${locale}.mdx`), 'utf8');
+      const slugs = [...mdx.matchAll(/^## (.+)$/gm)].map(m => headingSlug(m[1]));
+      expect(slugs).toContain(WHY_IDS[locale as 'pt' | 'en']);
     });
   }
 });

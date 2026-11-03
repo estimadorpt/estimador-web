@@ -4,7 +4,7 @@ import { Disclosure } from '@/components/viz/Disclosure';
 import type { Locale } from '@/lib/population/labels';
 import type { PopulationMeta, PopulationReleaseInfo } from '@/types/population';
 import {
-  FigureCandidates, FigureChoose, FigureCollective, FigureLearn, FigurePublish, FigureTilt, TierGrid,
+  FigureAnswer, FigureCandidates, FigureChoose, FigureCollective, FigureLearn, FigurePublish, FigureSample, FigureTilt, FigureWhy, TierGrid,
 } from './MethodFigures';
 import { STEP_IDS } from './rules';
 import { Beat, MethodStory } from './story/MethodStory';
@@ -37,14 +37,17 @@ export function methodFigureBlocks({ locale, meta, release }: { locale: Locale; 
     },
     MethodStory: ({ children }: { children?: ReactNode }) => <MethodStory locale={locale} release={release} meta={meta}>{children}</MethodStory>,
     Beat: ({ at, children }: { at: BeatId; children?: ReactNode }) => <Beat at={at}>{children}</Beat>,
-    // The story's twin: every step as a fixed drawing, with the weights and sums as tables.
+    // The story's twin: the why and every step as fixed drawings, with the weights and sums as tables.
     MethodDrawings: () => (
-      <Disclosure summary={pt ? 'Ver os cinco passos em desenhos fixos, com as tabelas' : 'View the five steps as fixed drawings, with the tables'} className="not-prose my-8 border-y border-rule py-1 font-sans">
+      <Disclosure summary={pt ? 'Ver a história em desenhos fixos, com as tabelas' : 'View the story as fixed drawings, with the tables'} className="not-prose my-8 border-y border-rule py-1 font-sans">
         <div className="pb-4">
+          <FigureWhy locale={locale} />
+          <FigureSample locale={locale} />
           <FigureLearn locale={locale} />
           <FigureCandidates locale={locale} />
           <FigureTilt locale={locale} />
           <FigureChoose locale={locale} />
+          <FigureAnswer locale={locale} />
           <FigureCollective locale={locale} />
           <FigurePublish locale={locale} release={release} />
         </div>

@@ -1,16 +1,18 @@
 'use client';
 
-import { useId, type CSSProperties, type ReactNode, type SVGProps } from 'react';
+import { useId, useMemo, type CSSProperties, type ReactNode, type SVGProps } from 'react';
 import { BRAND, FONT_STACK } from '@/lib/brand';
 import { formatCount } from '@/lib/population/format';
 import { DEEMPHASIS, SERIES } from '@/components/viz/theme';
 import {
-  CANDIDATES, CANDIDATE_SEX, CARE_HOME, KEPT, TARGET, ageBand, countsOf, distance, weightsAt, type Counts,
+  ARRANGEMENTS, CANDIDATES, CANDIDATE_SEX, CARE_HOME, ELDERS_ALONE_RANGE, HOME_SIZES, KEPT, RESIDENTS, SAMPLE, TARGET,
+  ageBand, agesOf, countsOf, distance, eldersAlone, weightsAt, type Counts,
 } from '@/lib/population/method-example';
-import { BEATS, WRITE, FIELDS, tokensWritten, type BeatId } from './data';
+import { BEATS, BEAT_STEP, WRITE, FIELDS, tokensWritten, type BeatId } from './data';
 import {
-  BAR_MAX, CARE_WIDTH, FIGURE_STEP, HOUSE_HEIGHT, KEPT_INDEX, SHOWS, WRITTEN, frame, houseGrids, houseWidth, learnLayout,
-  publishTable, weightScale, wrap, type Frame, type Spot,
+  CARE_WIDTH, FIGURE_STEP, HEAD_ROOM, HOME_MARK, HOUSE_HEIGHT, KEPT_INDEX, RESIDENT_MARK, SHOWS, WRITTEN, frame,
+  houseGrids, houseWidth, learnLayout, parishGrid, publishTable, sampleGrid, tally, weightScale, wrap, type Frame, type Point,
+  type Spot,
 } from './layout';
 
 type Locale = 'pt' | 'en';
@@ -76,6 +78,29 @@ function eased(p: number, from = 0.08, to = 0.82): number {
   return t * t * (3 - 2 * t);
 }
 
+/** How far through its own window [start, start + length] of a scrubbed scene something is, eased. */
+function within(p: number, start: number, length: number): number {
+  const t = Math.min(1, Math.max(0, (p - start) / length));
+  return t * t * (3 - 2 * t);
+}
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const between = (a: Point, b: Point, t: number): Point => ({ x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t) });
+
+/** Where each resident lives in an arrangement: the home's slot and their place in it, oldest first. */
+function placeIn(arrangement: number[][], resident: number): { slot: number; member: number; n: number } {
+  const slot = arrangement.findIndex(home => home.includes(resident));
+  const home = [...arrangement[slot]].sort((a, b) => RESIDENTS[b].age - RESIDENTS[a].age);
+  return { slot, member: home.indexOf(resident), n: home.length };
+}
+
+/** The residents who move between the ambiguity's two arrangements. */
+const MOVERS = RESIDENTS.map((_, i) => i).filter(i => {
+  const a = placeIn(ARRANGEMENTS.none, i);
+  const b = placeIn(ARRANGEMENTS.three, i);
+  return a.slot !== b.slot || a.member !== b.member;
+});
+
 /** A house in ink lines, its foot centre at 0,0: a pitched roof for a home, a flat one for the care home. */
 function HouseShape({ people, chosen, collective }: { people: number; chosen?: boolean; collective?: boolean }) {
   const w = collective ? CARE_WIDTH : houseWidth(people);
@@ -140,15 +165,24 @@ export function Stage({ locale, beat, progress, width, height, data, scrub }: {
 }) {
   const pt = locale === 'pt';
   const id = `ms${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
-  const f = frame(width, height);
+  // Everything placed from the stage's size alone, computed once per size rather than on every scroll tick of a scrubbed scene.
+  const { f, grids, learn, parish, T, sampleSpots } = useMemo(() => {
+    const f = frame(width, height);
+    return {
+      f,
+      grids: houseGrids(f, data.after, data.before[0], data.chosen),
+      learn: learnLayout(f),
+      parish: parishGrid(f),
+      T: tally(f),
+      sampleSpots: sampleGrid(f),
+    };
+  }, [width, height, data]);
   const wide = f.kind === 'wide';
   const index = BEATS.indexOf(beat);
   const past = (b: BeatId) => index > BEATS.indexOf(b);
   const from = (b: BeatId) => index >= BEATS.indexOf(b);
 
   const prior = data.before[0];
-  const grids = houseGrids(f, data.after, prior, data.chosen);
-  const learn = learnLayout(f);
   const chosenSet = new Set(data.chosen);
   const k = grids.k;
 
@@ -158,7 +192,7 @@ export function Stage({ locale, beat, progress, width, height, data, scrub }: {
   const evenAll = CANDIDATES.map(() => 10 / CANDIDATES.length);
   const keptAges = KEPT.map(c => c.ages);
 
-  const counts: Counts = beat === 'tables' || beat === 'learn'
+  const counts: Counts = BEAT_STEP[beat] < 2
     ? zero()
     : beat === 'candidates'
       ? countsOf(CANDIDATES, evenAll)
@@ -177,6 +211,80 @@ export function Stage({ locale, beat, progress, width, height, data, scrub }: {
   // Step 1: how far the household is written.
   const written = beat === 'learn' ? tokensWritten(progress) : WRITE.length;
 
+  // The opening: the parish as the census saw it, its homes and people becoming the tables' marks, then the same
+  // people in the same homes two other ways. Each scrubbed scene runs on windows of the reader's progress.
+  const pk = parish.k;
+  const countP = beat === 'count' ? progress : past('count') ? 1 : 0;
+  /** How far resident i has gone from their home into the age table, and home `slot` into the size table. */
+  const residentIn = (i: number) => within(countP, 0.04 + (i / RESIDENTS.length) * 0.34, 0.26);
+  const homeIn = (slot: number) => within(countP, 0.46 + (slot / HOME_SIZES.length) * 0.2, 0.26);
+  const ambP = beat === 'ambiguity' ? progress : past('ambiguity') ? 1 : 0;
+  /** How far resident i has come out of the table into the first arrangement, and moved into the second. */
+  const outOf = (i: number) => within(ambP, 0.04 + (i / RESIDENTS.length) * 0.16, 0.16);
+  const movedTo = (i: number) => (MOVERS.includes(i) ? within(ambP, 0.52 + (MOVERS.indexOf(i) / MOVERS.length) * 0.06, 0.16) : 0);
+  const arranged = ambP >= 0.36 && (ambP < 0.5 || ambP > 0.76);
+  const world: 'none' | 'three' = ambP > 0.62 ? 'three' : 'none';
+  const shownAlone = beat === 'ambiguity' ? eldersAlone(agesOf(ARRANGEMENTS[world])) : 0;
+  const markOf = (table: number, row: number, j: number): Point => T.mark(table, row, j);
+
+  /** A resident's place in a home of an arrangement, at the parish's scale. */
+  function residentAt(arrangement: number[][], i: number): Point {
+    const { slot, member, n } = placeIn(arrangement, i);
+    const h = parish.spots[slot];
+    return { x: h.x + (member - (n - 1) / 2) * FIGURE_STEP * pk, y: h.y - 3 * pk };
+  }
+
+  /** Each resident of the opening's parish, in this scene. */
+  function residentSpot(i: number): Spot & { delay: number } {
+    const mark = markOf(1, RESIDENT_MARK[i].row, RESIDENT_MARK[i].j);
+    // Feet a little under the mark's centre, so a shrinking figure lands on its square.
+    const onMark = { x: mark.x, y: mark.y + 4 };
+    if (beat === 'census') return { ...residentAt(ARRANGEMENTS.real, i), s: pk, o: 1, delay: 0 };
+    if (beat === 'count') {
+      const t = residentIn(i);
+      return { ...between(residentAt(ARRANGEMENTS.real, i), onMark, t), s: lerp(pk, 0.45, t * t), o: t < 0.8 ? 1 : 1 - (t - 0.8) / 0.2, delay: 0 };
+    }
+    if (beat === 'question') return { ...onMark, s: 0.45, o: 0, delay: 0 };
+    if (beat === 'ambiguity') {
+      const a = outOf(i);
+      const first = between(onMark, residentAt(ARRANGEMENTS.none, i), a);
+      const b = movedTo(i);
+      const at = b > 0 ? between(residentAt(ARRANGEMENTS.none, i), residentAt(ARRANGEMENTS.three, i), b) : first;
+      return { ...at, s: lerp(0.45, pk, a), o: Math.min(1, a * 4), delay: 0 };
+    }
+    return { ...residentAt(ARRANGEMENTS.three, i), s: pk, o: 0, delay: 0 };
+  }
+
+  /** Each of the opening's ten homes, in this scene. */
+  function homeSpot(slot: number): Spot & { delay: number } {
+    const at = parish.spots[slot];
+    const mark = markOf(0, HOME_MARK[slot].row, HOME_MARK[slot].j);
+    const onMark = { x: mark.x, y: mark.y + 5 };
+    if (beat === 'census') return { ...at, s: pk, o: 1, delay: 0 };
+    if (beat === 'count') {
+      const t = homeIn(slot);
+      return { ...between(at, onMark, t), s: lerp(pk, 0.22, t), o: t < 0.75 ? 1 : 1 - (t - 0.75) / 0.25, delay: 0 };
+    }
+    if (beat === 'question') return { ...onMark, s: 0.22, o: 0, delay: 0 };
+    if (beat === 'ambiguity') return { ...at, s: pk, o: 1, delay: 120 + slot * 40 };
+    return { ...at, s: pk, o: 0, delay: 0 };
+  }
+
+  /** How visible each mark of the tables is: they arrive with their person or home during the count, then stay. */
+  const residentMark = (i: number) => (beat === 'count' ? within(residentIn(i), 0.72, 0.28) : SHOWS.tally.has(beat) ? 1 : 0);
+  const homeMark = (slot: number) => (beat === 'count' ? within(homeIn(slot), 0.68, 0.32) : SHOWS.tally.has(beat) ? 1 : 0);
+  const tallied = {
+    sizes: TARGET.sizes.map((_, row) => HOME_SIZES.filter((n, slot) => HOME_MARK[slot].row === row && homeMark(slot) > 0.5).length),
+    ages: TARGET.ages.map((_, row) => RESIDENTS.filter((_, i) => RESIDENT_MARK[i].row === row && residentMark(i) > 0.5).length),
+  };
+  // The question picks one row of each table: households of one person, people of 65 or over.
+  const focus = beat === 'question' ? [{ table: 0, row: 0 }, { table: 1, row: 3 }] : null;
+
+  // The answer: the chosen households' people of 65 or over who live alone.
+  const chosenAges = data.chosen.map(i => KEPT[i].ages);
+  const generatedAlone = eldersAlone(chosenAges);
+  const aloneHouse = (kept: number) => KEPT[kept].ages.length === 1 && ageBand(KEPT[kept].ages[0]) === 3;
+
   /** Each candidate's house: where it stands in this scene. */
   function houseSpot(candidate: number): Spot & { chosen: boolean; masked: boolean; delay: number } {
     const kept = KEPT_INDEX[candidate];
@@ -184,13 +292,10 @@ export function Stage({ locale, beat, progress, width, height, data, scrub }: {
     const isChosen = !masked && chosenSet.has(kept);
     const all = grids.all[candidate];
     const base = { chosen: false, masked, delay: 0 };
+    if (BEAT_STEP[beat] === 0) return { ...all, s: k * 0.6, o: 0, ...base };
     if (beat === 'learn') {
       if (candidate !== WRITTEN) return { ...all, s: k * 0.6, o: 0, ...base };
       return { ...learn.house, o: 1, ...base };
-    }
-    if (beat === 'tables') {
-      if (candidate !== WRITTEN) return { ...all, s: k * 0.6, o: 0, ...base };
-      return { x: f.field.x + f.field.w / 2, y: f.field.y + f.field.h / 2 + HOUSE_HEIGHT * 0.6, s: Math.min(1.8, grids.bigger * 1.25), o: 1, ...base };
     }
     if (beat === 'candidates') return { ...all, s: k, o: 1, ...base, delay: candidate === WRITTEN ? 0 : 140 + candidate * 30 };
     if (beat === 'mask') return { ...all, s: k, o: masked ? 0.4 : 1, ...base, delay: masked ? 500 : 0 };
@@ -199,7 +304,8 @@ export function Stage({ locale, beat, progress, width, height, data, scrub }: {
     if (beat === 'tilt') return { ...keptSpot, s: k * weightScale(weights[kept] / prior), o: 1, ...base };
     if (!isChosen) return { ...keptSpot, s: k * weightScale(data.after[kept] / prior), o: 0, ...base };
     const slot = data.chosen.indexOf(kept);
-    const o = beat === 'publish' || beat === 'tier' ? 0 : 1;
+    // The answer keeps in full ink only the homes of people of 65 or over who live alone.
+    const o = beat === 'publish' || beat === 'tier' ? 0 : beat === 'answer' && !aloneHouse(kept) ? 0.25 : 1;
     return { ...grids.parish[slot], s: grids.bigger, o, ...base, chosen: true, delay: beat === 'choose' ? 250 + slot * 45 : 0 };
   }
 
@@ -245,8 +351,7 @@ export function Stage({ locale, beat, progress, width, height, data, scrub }: {
     return home;
   }
 
-  const labelled = f.agesUnder && ['candidates', 'mask', 'tilt', 'choose', 'collective'].includes(beat);
-  const maxW = Math.max(...data.after);
+  const labelled = f.agesUnder && ['candidates', 'mask', 'tilt', 'choose', 'answer', 'collective'].includes(beat);
 
   return (
     <svg
@@ -278,26 +383,91 @@ export function Stage({ locale, beat, progress, width, height, data, scrub }: {
         <Learn f={f} locale={locale} written={written} arrow={`${id}-arrow`} />
       </Fade>
 
-      {/* The household step 1 wrote, named while it waits alone in the field. */}
-      <Fade show={beat === 'tables'} delay={beat === 'tables' ? 500 : 0}>
-        <text x={f.field.x + f.field.w / 2} y={f.field.y + f.field.h / 2 + HOUSE_HEIGHT * 0.6 + 22} textAnchor="middle" fontSize={12} fill={GRAPHITE}>
-          {pt ? 'o agregado escrito no passo 1' : 'the household written in step 1'}
-        </text>
+      {/* The opening's line over the field: what the homes, the counts or the sample show. */}
+      <Head f={f} locale={locale} beat={beat} alone={shownAlone} shown={beat !== 'ambiguity' || ambP >= 0.3} />
+
+      {/* The public sample: households from anywhere, with no parish. */}
+      <Fade show={beat === 'sample'} delay={beat === 'sample' ? 350 : 0}>
+        {SAMPLE.map((ages, i) => {
+          const at = sampleSpots.spots[i];
+          return (
+            <g key={i} transform={`translate(${at.x} ${at.y}) scale(${sampleSpots.k})`}>
+              <HouseShape people={ages.length} />
+              {ages.map((age, m) => (
+                <g key={m} transform={`translate(${(m - (ages.length - 1) / 2) * FIGURE_STEP} -3)`}><Figure age={age} /></g>
+              ))}
+            </g>
+          );
+        })}
       </Fade>
 
-      {/* The weights under the houses while they move (wide stage), each with the even start as a tick. */}
+      {/* The opening's ten homes, and the ages under each (wide stage). */}
       <g>
-        {KEPT.map((c, kept) => {
-          const h = houseSpot(c.id);
-          const show = wide && beat === 'tilt';
+        {HOME_SIZES.map((n, slot) => {
+          const h = homeSpot(slot);
           return (
-            <g key={c.id} className="ms-t" style={spotStyle({ x: h.x - BAR_MAX / 2, y: h.y + 20, o: show ? 1 : 0 })}>
-              <rect className="ms-bar" x={0} y={0} width={1} height={5} fill={INK} style={{ transform: `scaleX(${Math.max(1, (weights[kept] / maxW) * BAR_MAX)})` }} />
-              <line x1={(prior / maxW) * BAR_MAX} x2={(prior / maxW) * BAR_MAX} y1={-3} y2={8} stroke={GRAPHITE} strokeWidth={1.5} />
+            <g key={slot} className="ms-t" style={spotStyle(h, h.delay)}>
+              <HouseShape people={n} />
             </g>
           );
         })}
       </g>
+      <g>
+        {HOME_SIZES.map((_, slot) => {
+          const at = parish.spots[slot];
+          const arrangement = beat === 'ambiguity' ? ARRANGEMENTS[world] : ARRANGEMENTS.real;
+          const ages = agesOf([arrangement[slot]])[0].sort((a, b) => b - a);
+          const show = f.agesUnder && (beat === 'census' || (beat === 'count' && countP < 0.04) || (beat === 'ambiguity' && arranged));
+          return (
+            <text key={slot} className="ms-t tnum" style={spotStyle({ x: at.x, y: at.y + 14, o: show ? 1 : 0 })} textAnchor="middle" fontSize={11} fill={INK}>
+              {ages.join(' ')}
+            </text>
+          );
+        })}
+      </g>
+
+      {/* The opening's residents, and a ring round each one of 65 or over who lives alone. */}
+      <g>
+        {RESIDENTS.map((r, i) => {
+          const at = residentSpot(i);
+          return (
+            <g key={i} className="ms-t" style={spotStyle(at, at.delay)}>
+              <Figure age={r.age} />
+            </g>
+          );
+        })}
+      </g>
+      <g>
+        {RESIDENTS.map((r, i) => {
+          if (ageBand(r.age) !== 3) return null;
+          const at = residentAt(ARRANGEMENTS[world], i);
+          const alone = ARRANGEMENTS[world].some(home => home.length === 1 && home[0] === i);
+          const show = beat === 'ambiguity' && arranged && alone;
+          return <Ring key={i} at={at} s={pk} show={show} />;
+        })}
+      </g>
+
+      {/* The tables as INE publishes them: one mark per household and per person, the count at the row's end. */}
+      <Fade show={SHOWS.tally.has(beat)} delay={beat === 'count' ? 150 : 0}>
+        <TallyFrame f={f} locale={locale} counts={tallied} focus={focus} note={beat === 'ambiguity' && ambP > 0.4} />
+      </Fade>
+      <g>
+        {HOME_SIZES.map((_, slot) => {
+          const m = markOf(0, HOME_MARK[slot].row, HOME_MARK[slot].j);
+          const dim = focus && !focus.some(c => c.table === 0 && c.row === HOME_MARK[slot].row);
+          return <rect key={slot} className="ms-t" x={m.x - T.size / 2} y={m.y - T.size / 2} width={T.size} height={T.size} fill={INK} style={{ opacity: homeMark(slot) * (dim ? 0.2 : 1) }} />;
+        })}
+        {RESIDENTS.map((r, i) => {
+          const m = markOf(1, RESIDENT_MARK[i].row, RESIDENT_MARK[i].j);
+          const dim = focus && !focus.some(c => c.table === 1 && c.row === RESIDENT_MARK[i].row);
+          return <rect key={i} className="ms-t" x={m.x - T.size / 2} y={m.y - T.size / 2} width={T.size} height={T.size} fill={INK} style={{ opacity: residentMark(i) * (dim ? 0.2 : 1) }} />;
+        })}
+      </g>
+
+      {/* The question the two tables cannot answer. */}
+      <Fade show={beat === 'question'} delay={beat === 'question' ? 300 : 0}>
+        <Question f={f} locale={locale} />
+      </Fade>
 
       {/* The houses. */}
       <g>
@@ -348,9 +518,23 @@ export function Stage({ locale, beat, progress, width, height, data, scrub }: {
         })}
       </g>
 
+      {/* The answer: a ring round each chosen person of 65 or over who lives alone. */}
+      <g>
+        {data.chosen.filter(aloneHouse).map(kept => {
+          const p = PEOPLE.find(q => q.candidate === KEPT[kept].id)!;
+          const at = personSpot(p);
+          return <Ring key={kept} at={at} s={at.s} show={beat === 'answer'} delay={beat === 'answer' ? 500 : 0} />;
+        })}
+      </g>
+
       {/* The parish's tables: what INE counted (squares) and what the candidates add up to (bars). */}
-      <Fade show={SHOWS.tables.has(beat)} delay={beat === 'tables' ? 300 : 0}>
+      <Fade show={SHOWS.tables.has(beat)} delay={beat === 'candidates' ? 300 : 0}>
         <Tables f={f} locale={locale} counts={counts} beat={beat} gap={gap} scale={scale} />
+      </Fade>
+
+      {/* The opening question, answered: what the tables allow, the generated answer and the parish's own. */}
+      <Fade show={SHOWS.answer.has(beat)} delay={beat === 'answer' ? 300 : 0}>
+        <Answer f={f} locale={locale} generated={generatedAlone} real={eldersAlone(agesOf(ARRANGEMENTS.real))} />
       </Fade>
 
       {/* Step 5: one row per person. */}
@@ -373,6 +557,212 @@ function Fade({ show, delay = 0, children }: { show: boolean; delay?: number; ch
     </g>
   );
 }
+
+/** The opening's line over the field, one per scene; in the ambiguity it counts who lives alone. */
+function Head({ f, locale, beat, alone, shown }: { f: Frame; locale: Locale; beat: BeatId; alone: number; shown: boolean }) {
+  const pt = locale === 'pt';
+  const wide = f.kind === 'wide';
+  const homes = HOME_SIZES.length;
+  const people = RESIDENTS.length;
+  const lines: Partial<Record<BeatId, [string, string]>> = pt
+    ? {
+      census: [`Uma freguesia: ${homes} casas, ${people} pessoas`, `Uma freguesia: ${homes} casas, ${people} pessoas`],
+      count: ['O que sai do INE: contagens', 'O que sai do INE: contagens'],
+      question: [`Quantas das ${TARGET.ages[3]} pessoas com 65 ou mais anos vivem sozinhas?`, `Quantas das ${TARGET.ages[3]} com 65+ vivem sozinhas?`],
+      ambiguity: ['Pessoas com 65 ou mais anos que vivem sozinhas: ', 'Com 65+ e a viver sozinhas: '],
+      sample: ['A amostra pública: agregados de todo o país, sem a freguesia', 'Amostra pública: todo o país, sem freguesia'],
+    }
+    : {
+      census: [`A parish: ${homes} homes, ${people} people`, `A parish: ${homes} homes, ${people} people`],
+      count: ['What leaves INE: counts', 'What leaves INE: counts'],
+      question: [`How many of the ${TARGET.ages[3]} people aged 65 or over live alone?`, `How many of the ${TARGET.ages[3]} aged 65+ live alone?`],
+      ambiguity: ['People aged 65 or over who live alone: ', 'Aged 65+ and living alone: '],
+      sample: ['The public sample: households from all over the country, with no parish', 'Public sample: whole country, no parish'],
+    };
+  const line = lines[beat];
+  if (!line || !shown) return null;
+  return (
+    <text key={beat} className="ms-head" x={0} y={f.field.y + (wide ? 16 : 14)} fontSize={wide ? 14 : 13} fontWeight={600} fill={INK}>
+      {line[wide ? 0 : 1]}
+      {beat === 'ambiguity' && <tspan className="tnum" fontWeight={800}>{alone}</tspan>}
+    </text>
+  );
+}
+
+/** An ink ring round a figure (feet at the spot): someone of 65 or over who lives alone. */
+function Ring({ at, s, show, delay = 0 }: { at: Point; s: number; show: boolean; delay?: number }) {
+  return (
+    <g className="ms-t" style={spotStyle({ x: at.x, y: at.y, s, o: show ? 1 : 0 }, delay)}>
+      <circle cx={0} cy={-11} r={11.5} fill="none" stroke={INK} strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
+    </g>
+  );
+}
+
+/** The tables of the opening, drawn as counts of marks (the marks themselves move with their people and homes). */
+function TallyFrame({ f, locale, counts, focus, note }: {
+  f: Frame; locale: Locale; counts: Counts; focus: Array<{ table: number; row: number }> | null; note: boolean;
+}) {
+  const pt = locale === 'pt';
+  const wide = f.kind === 'wide';
+  const T = tally(f);
+  const tables = [
+    { title: pt ? (wide ? 'Agregados por número de pessoas' : 'Agregados por pessoas') : 'Households by size', labels: sizeLabelsFor(locale, wide), values: counts.sizes },
+    { title: pt ? 'Pessoas por idade' : 'People by age', labels: ageLabelsFor(locale, wide), values: counts.ages },
+  ];
+  return (
+    <g>
+      <line x1={0} x2={f.width} y1={T.top} y2={T.top} stroke={INK} strokeWidth={1} />
+      {tables.map((t, ti) => {
+        const x0 = T.x0(ti);
+        return (
+          <g key={ti}>
+            <text x={x0} y={T.top + 18} fontSize={wide ? 13 : 12} fontWeight={600} fill={INK}>{t.title}</text>
+            {t.labels.map((label, i) => {
+              const y = T.rowY(i);
+              const on = !focus || focus.some(c => c.table === ti && c.row === i);
+              const strong = !!focus && on;
+              return (
+                <g key={i} className="ms-dim" style={{ opacity: on ? 1 : 0.3 }}>
+                  {ti === 1 && <rect x={x0} y={y + 0.5} width={5.6} height={9} fill={SERIES[i]} />}
+                  <text x={x0 + (ti === 1 ? 9 : 0)} y={y + 9} fontSize={11.5} fontWeight={strong ? 600 : 400} fill={INK}>{label}</text>
+                  <text x={x0 + T.colW} y={y + 9} fontSize={strong ? 13 : 11.5} fontWeight={strong ? 700 : 400} fill={INK} textAnchor="end" className="tnum">{t.values[i]}</text>
+                </g>
+              );
+            })}
+          </g>
+        );
+      })}
+      <rect x={0} y={f.height - 12} width={8} height={8} fill={INK} />
+      <text x={12} y={f.height - 4} fontSize={11.5} fill={GRAPHITE}>
+        {pt ? (wide ? 'cada quadrado: um agregado ou uma pessoa, contados pelo INE' : 'um agregado ou uma pessoa') : (wide ? 'each square: one household or one person, counted by INE' : 'one household or person')}
+      </text>
+      <text className="ms-fade" data-show={note ? 'on' : 'off'} style={{ opacity: note ? 1 : 0 }} x={f.width} y={f.height - 4} fontSize={11.5} fontWeight={600} fill={INK} textAnchor="end">
+        {pt ? 'As tabelas não mudam' : 'The tables do not change'}
+      </text>
+    </g>
+  );
+}
+
+/**
+ * The question the two tables cannot answer, as the cross-table it asks for: the totals come from the tables (who
+ * lives alone from the households' sizes, who is 65 or over from the ages), the four cells inside from neither.
+ */
+function Question({ f, locale }: { f: Frame; locale: Locale }) {
+  const pt = locale === 'pt';
+  const wide = f.kind === 'wide';
+  const alone = TARGET.sizes[0];
+  const elders = TARGET.ages[3];
+  const people = TARGET.ages.reduce((a, b) => a + b, 0);
+  const labelW = wide ? 168 : 116;
+  const colW = Math.min(wide ? 118 : 80, (f.width - labelW) / 3);
+  const headH = wide ? 26 : 22;
+  const note = wrap(pt ? 'Os totais vêm das duas tabelas; o que está dentro, não.' : 'The totals come from the two tables; what is inside does not.', f.width, wide ? 12.5 : 11.5);
+  const noteH = (wide ? 26 : 21) + (note.length - 1) * 15;
+  const room = f.field.h - HEAD_ROOM;
+  // A short phone gives the field little height: the rows close up, down to 20px, before anything is dropped.
+  const rowH = wide ? 36 : Math.max(20, Math.min(25, (room - headH - noteH - 4) / 3));
+  const tableH = headH + rowH * 3;
+  const withNote = room >= tableH + noteH;
+  const top = f.field.y + HEAD_ROOM + Math.max(4, (room - tableH - noteH) / 2);
+  const heads = pt ? ['65 ou mais', 'Menos de 65', 'Total'] : ['65 or over', 'Under 65', 'Total'];
+  const rows: Array<{ label: string; cells: Array<number | null> }> = [
+    { label: pt ? 'Vivem sozinhas' : 'Live alone', cells: [null, null, alone] },
+    { label: pt ? 'Não vivem sozinhas' : 'Do not live alone', cells: [null, null, people - alone] },
+    { label: 'Total', cells: [elders, people - elders, people] },
+  ];
+  const cx = (c: number) => labelW + colW * c + colW / 2;
+  const fs = wide ? 13 : 12;
+  return (
+    <g>
+      {heads.map((h, c) => <text key={c} x={cx(c)} y={top + headH - 8} fontSize={wide ? 12 : 11} fill={GRAPHITE} textAnchor="middle">{h}</text>)}
+      <line x1={0} x2={labelW + colW * 3} y1={top + headH} y2={top + headH} stroke={INK} strokeWidth={1} />
+      {rows.map((r, i) => {
+        const y = top + headH + rowH * i;
+        const base = y + rowH / 2 + (wide ? 5 : 4);
+        return (
+          <g key={i}>
+            {i > 0 && <line x1={0} x2={labelW + colW * 3} y1={y} y2={y} stroke={BRAND.grid} strokeWidth={1} />}
+            <text x={0} y={base} fontSize={fs} fill={INK}>{r.label}</text>
+            {r.cells.map((v, c) => (
+              v === null
+                ? <text key={c} x={cx(c)} y={base + (wide ? 2 : 1)} fontSize={wide ? 20 : 16} fontWeight={700} fill={i === 0 && c === 0 ? INK : GRAPHITE} textAnchor="middle">?</text>
+                : <text key={c} x={cx(c)} y={base} fontSize={fs} fontWeight={c === 2 && i === 2 ? 400 : 600} fill={c === 2 && i === 2 ? GRAPHITE : INK} textAnchor="middle" className="tnum">{v}</text>
+            ))}
+          </g>
+        );
+      })}
+      {/* The cell the question asks for. */}
+      <rect x={labelW + 3} y={top + headH + 3} width={colW - 6} height={rowH - 6} fill="none" stroke={INK} strokeWidth={2} />
+      {withNote && <Lines
+        x={0}
+        y={top + tableH + (wide ? 22 : 17)}
+        lines={note}
+        step={15}
+        fontSize={wide ? 12.5 : 11.5}
+        fill={GRAPHITE}
+      />}
+    </g>
+  );
+}
+
+/**
+ * The opening question, answered on a ruler of what the two tables allow: the parish we began with as a black
+ * square (what happened), the generated population as a lone tick (one model run, no margin), the reading rule's
+ * own marks.
+ */
+function Answer({ f, locale, generated, real }: { f: Frame; locale: Locale; generated: number; real: number }) {
+  const pt = locale === 'pt';
+  const wide = f.kind === 'wide';
+  const { lo, hi } = ELDERS_ALONE_RANGE;
+  const top = f.tables.y;
+  const w = Math.min(f.width, wide ? 460 : f.width);
+  // The scale stops short of the ruler's ends, so the generated tick at the top of the range never reads as an end cap.
+  const x0 = 10;
+  const x1 = w - 22;
+  const x = (v: number) => x0 + ((v - lo) / Math.max(1, hi - lo)) * (x1 - x0);
+  const ry = top + (wide ? 70 : 62);
+  const ticks = Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
+  const legendY = ry + (wide ? 44 : 38);
+  const step = wide ? 20 : 18;
+  return (
+    <g>
+      <line x1={0} x2={f.width} y1={top} y2={top} stroke={INK} strokeWidth={1} />
+      <text x={0} y={top + 18} fontSize={wide ? 13 : 12} fontWeight={600} fill={INK}>{pt ? 'Pessoas com 65 ou mais anos que vivem sozinhas' : 'People aged 65 or over who live alone'}</text>
+      <text x={0} y={top + (wide ? 36 : 33)} fontSize={11.5} fill={GRAPHITE}>{pt ? `As duas tabelas permitem de ${lo} a ${hi}` : `The two tables allow ${lo} to ${hi}`}</text>
+      <line x1={0} x2={w} y1={ry} y2={ry} stroke={INK} strokeWidth={1} />
+      {ticks.map(v => (
+        <g key={v}>
+          <line x1={x(v)} x2={x(v)} y1={ry} y2={ry + 5} stroke={INK} strokeWidth={1} />
+          <text x={x(v)} y={ry + 18} fontSize={11.5} fill={GRAPHITE} textAnchor="middle" className="tnum">{v}</text>
+        </g>
+      ))}
+      <rect className="ms-pop" x={x(real) - 5} y={ry - 5} width={10} height={10} fill={INK} stroke={PAPER} strokeWidth={1.5} style={{ '--delay': '700ms' } as CSSProperties} />
+      <rect className="ms-pop" x={x(generated) - 1} y={ry - 13} width={2} height={18} fill={INK} style={{ '--delay': '1000ms' } as CSSProperties} />
+      <g>
+        <rect x={8} y={legendY - 9} width={8} height={8} fill={INK} />
+        <text x={30} y={legendY} fontSize={12} fill={INK}>
+          {pt ? 'A freguesia do início: ' : 'The parish we began with: '}<tspan fontWeight={700} className="tnum">{real}</tspan>
+        </text>
+        {/* The reading rule's lone tick on a short ruler. */}
+        <rect x={0} y={legendY + step - 2} width={24} height={1} fill={INK} />
+        <rect x={0} y={legendY + step - 5} width={1} height={4} fill={INK} />
+        <rect x={23} y={legendY + step - 5} width={1} height={4} fill={INK} />
+        <rect x={11} y={legendY + step - 13} width={2} height={12} fill={INK} />
+        <text x={30} y={legendY + step} fontSize={12} fill={INK}>
+          {pt ? 'A população sintética: ' : 'The synthetic population: '}<tspan fontWeight={700} className="tnum">{generated}</tspan>
+          <tspan fill={GRAPHITE}>{pt ? (wide ? ', uma execução do modelo' : '') : (wide ? ', one model run' : '')}</tspan>
+        </text>
+      </g>
+    </g>
+  );
+}
+
+const sizeLabelsFor = (locale: Locale, wide: boolean) => (wide
+  ? (locale === 'pt' ? ['1 pessoa', '2 pessoas', '3 pessoas', '4 pessoas', '5 ou mais'] : ['1 person', '2 people', '3 people', '4 people', '5 or more'])
+  : ['1', '2', '3', '4', '5+']);
+const ageLabelsFor = (locale: Locale, wide: boolean) => (wide
+  ? (locale === 'pt' ? ['0–14 anos', '15–24 anos', '25–64 anos', '65 ou mais'] : ['Ages 0–14', 'Ages 15–24', 'Ages 25–64', 'Ages 65+'])
+  : ['0–14', '15–24', '25–64', '65+']);
 
 /** Step 1: the household's rows, the token being written, and its odds. */
 function Learn({ f, locale, written, arrow }: { f: Frame; locale: Locale; written: number; arrow: string }) {
@@ -537,12 +927,8 @@ function Tables({ f, locale, counts, beat, gap, scale }: { f: Frame; locale: Loc
   const valueW = wide ? 34 : 24;
   const rowH = wide ? 18 : 16;
   const integer = BEATS.indexOf(beat) >= BEATS.indexOf('choose');
-  const sizeLabels = wide
-    ? (pt ? ['1 pessoa', '2 pessoas', '3 pessoas', '4 pessoas', '5 ou mais'] : ['1 person', '2 people', '3 people', '4 people', '5 or more'])
-    : ['1', '2', '3', '4', '5+'];
-  const ageLabels = wide
-    ? (pt ? ['0–14 anos', '15–24 anos', '25–64 anos', '65 ou mais'] : ['Ages 0–14', 'Ages 15–24', 'Ages 25–64', 'Ages 65+'])
-    : ['0–14', '15–24', '25–64', '65+'];
+  const sizeLabels = sizeLabelsFor(locale, wide);
+  const ageLabels = ageLabelsFor(locale, wide);
   const tables = [
     { title: pt ? (wide ? 'Agregados por número de pessoas' : 'Agregados por pessoas') : 'Households by size', labels: sizeLabels, values: counts.sizes, targets: TARGET.sizes, max: scale.sizes },
     { title: pt ? 'Pessoas por idade' : 'People by age', labels: ageLabels, values: counts.ages, targets: TARGET.ages, max: scale.ages },
@@ -573,7 +959,7 @@ function Tables({ f, locale, counts, beat, gap, scale }: { f: Frame; locale: Loc
                   <text x={x0 + (ti === 1 && !extra ? 9 : 0)} y={y + 9} fontSize={11.5} fontWeight={r.strong ? 600 : 400} fill={INK}>{r.label}</text>
                   <rect className="ms-bar" x={0} y={0} width={1} height={9} fill={INK} style={{ transform: `translate(${barX}px, ${y + 1}px) scaleX(${Math.max(0.001, (r.v / t.max) * barMax)})`, '--delay': extra && collective ? '700ms' : '0ms' } as CSSProperties} />
                   <rect x={barX + (r.target / t.max) * barMax - 4} y={y + 1.5} width={8} height={8} fill={INK} stroke={PAPER} strokeWidth={1.5} />
-                  <text x={x0 + colW} y={y + 9} fontSize={11.5} fill={INK} textAnchor="end" className="tnum">{integer || beat === 'tables' || extra ? String(Math.round(r.v)) : one(r.v, locale)}</text>
+                  <text x={x0 + colW} y={y + 9} fontSize={11.5} fill={INK} textAnchor="end" className="tnum">{integer || extra ? String(Math.round(r.v)) : one(r.v, locale)}</text>
                 </g>
               );
             })}
@@ -588,7 +974,7 @@ function Tables({ f, locale, counts, beat, gap, scale }: { f: Frame; locale: Loc
         <text x={(wide ? 118 : 42) + 20} y={f.height - 4} fontSize={11.5} fill={GRAPHITE}>{pt ? 'soma dos agregados' : 'sum of the households'}</text>
       </g>
       <text x={f.width} y={f.height - 4} fontSize={11.5} fill={INK} textAnchor="end" fontWeight={600} className="tnum">
-        {beat === 'tables' ? '' : `${pt ? (wide ? 'Diferença para as tabelas' : 'Diferença') : (wide ? 'Gap to the tables' : 'Gap')}: ${one(gap, locale)}`}
+        {`${pt ? (wide ? 'Diferença para as tabelas' : 'Diferença') : (wide ? 'Gap to the tables' : 'Gap')}: ${one(gap, locale)}`}
       </text>
     </g>
   );

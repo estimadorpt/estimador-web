@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { BEATS, BEAT_STEP, READOUT, SCRUBBED, STEP_NAMES, type BeatId } from './data';
 import { BESIDE_QUERY, activeBeat, readingLine } from './scroll';
 import { Stage, type StoryData } from './Stage';
-import { STEP_IDS } from '../rules';
+import { STEP_IDS, WHY_IDS } from '../rules';
 import './story.css';
 
 type Locale = 'pt' | 'en';
@@ -14,8 +14,8 @@ const REDUCED_QUERY = '(prefers-reduced-motion: reduce)';
 const SETTLE_MS = 1100;
 
 /**
- * The scroll story's frame: a sticky stage (the step ruler, the drawing and a
- * caption) and the page's own text, split into beats. Which beat crosses the
+ * The scroll story's frame: a sticky stage (the ruler of why and the five
+ * steps, the drawing and a caption) and the page's own text, split into beats. Which beat crosses the
  * reading line sets the scene; inside a scrubbed beat, how far it has crossed
  * sets the drawing's progress. The server renders the text; the drawing
  * appears once the stage is measured. A screen reader hears the caption of a
@@ -107,12 +107,12 @@ export function StoryShell({ locale, data, children }: { locale: Locale; data: S
           : 'With your phone upright, a drawing follows these steps. The fixed drawings are at the end of this section.'}
       </p>
       <div ref={stage} className="mstory-stage">
-        <nav className="mstory-steps" aria-label={pt ? 'Os cinco passos' : 'The five steps'}>
+        <nav className="mstory-steps" aria-label={pt ? 'Porquê e os cinco passos' : 'Why, and the five steps'}>
           <ol>
             {STEP_NAMES[locale].map((name, i) => (
               <li key={name}>
-                <a href={`#${STEP_IDS[i]}`} aria-current={step === i + 1 ? 'step' : undefined}>
-                  <span className="tnum">{i + 1}</span>
+                <a href={`#${i === 0 ? WHY_IDS[locale] : STEP_IDS[i - 1]}`} aria-current={step === i ? 'step' : undefined} data-why={i === 0 ? '' : undefined}>
+                  {i > 0 && <span className="tnum">{i}</span>}
                   <span className="mstory-step-name">{name}</span>
                 </a>
               </li>

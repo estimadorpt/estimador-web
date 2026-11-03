@@ -1,44 +1,70 @@
 # Como foi feita a população sintética
 
-Esta página explica, para quem não é especialista, como foi gerada a População Sintética de Portugal (versão <Release />), o que se pode e não se pode fazer com ela, e onde estão os seus limites. A versão técnica completa é a <ModelCardLink>ficha do modelo</ModelCardLink>, em inglês.
+Esta página explica, para quem não é especialista, porque é precisa uma população sintética, como foi gerada a População Sintética de Portugal (versão <Release />), o que se pode e não se pode fazer com ela, e onde estão os seus limites. A versão técnica completa é a <ModelCardLink>ficha do modelo</ModelCardLink>, em inglês.
 
 ## Pessoas geradas, não pessoas reais
 
-É um conjunto de pessoas e agregados gerados por computador, com um registo por pessoa, cujas contagens somadas seguem as tabelas que o INE publicou nos Censos 2021 para cada freguesia. Nenhum registo é uma pessoa real.
+Uma população sintética é um conjunto de pessoas e agregados gerados por computador, com um registo por pessoa, cujas contagens somadas seguem as tabelas que o INE publicou nos Censos 2021 para cada freguesia. Nenhum registo é uma pessoa real. Pode servir de camada de base para análises demográficas, mas não substitui as estatísticas oficiais.
 
 <Synthetic />
 
-Para que serve, então? As tabelas publicadas dão, para cada freguesia, quantas pessoas há por idade, por escolaridade ou por tipo de agregado, mas raramente cruzam essas variáveis entre si a uma escala tão pequena. Uma população sintética permite fazer esses cruzamentos, dentro das regras de qualidade que esta página descreve. Pode servir de camada de base para análises demográficas, mas não substitui as estatísticas oficiais.
-
 <Positioning />
 
-## Cinco passos para a gerar
-
-O resultado não sai diretamente de uma rede neuronal: um modelo inventa pessoas e agregados possíveis, e depois escolhem-se os que, somados, ficam o mais perto possível das tabelas do INE (um processo generativo com restrições). O desenho segue uma freguesia inventada, com 24 agregados candidatos e duas tabelas pequenas, do primeiro agregado escrito ao ficheiro publicado: à medida que desces a página, ele avança passo a passo.
+O desenho que se segue conta, com uma freguesia inventada, porque é precisa e como se faz: à medida que desces a página, ele avança.
 
 <MethodStory>
 
+<Beat at="census">
+
+## Porque é precisa uma população sintética
+
+Imagina uma freguesia pequena, com 10 casas e 23 pessoas. Nos Censos 2021, cada pessoa respondeu sobre a sua idade, a sua escolaridade, o seu trabalho e com quem vive. O INE guarda essas respostas, uma a uma.
+
+</Beat>
+
+<Beat at="count">
+
+Mas não as publica assim: protege quem respondeu (é o segredo estatístico). O que sai do INE são contagens, tabela a tabela: quantas pessoas há em cada grupo de idade, quantos agregados há de cada tamanho. Nesta freguesia, 3 pessoas vivem sozinhas e 8 têm 65 ou mais anos. Quem vive em que casa, e com quem, fica de fora.
+
+</Beat>
+
+<Beat at="question">
+
+Muitas perguntas cruzam duas tabelas. Quantas das 8 pessoas com 65 ou mais anos vivem sozinhas? Uma tabela diz que 3 pessoas vivem sozinhas, a outra que 8 têm 65 ou mais anos; nenhuma diz quantas são as duas coisas. O INE publica alguns cruzamentos por freguesia, mas não todos: seriam demasiadas tabelas, com muitas células de uma ou duas pessoas.
+
+</Beat>
+
+<Beat at="ambiguity">
+
+E fazer contas com as tabelas não chega. As mesmas 23 pessoas cabem nas mesmas 10 casas de muitas maneiras, e todas dão exatamente as mesmas tabelas. Numa, nenhuma pessoa com 65 ou mais anos vive sozinha; noutra, vivem 3 sozinhas. As tabelas, por si só, não escolhem entre elas.
+
+</Beat>
+
+<Beat at="sample">
+
+O INE publica também uma amostra de respostas, o Ficheiro de Uso Público dos Censos 2021: cerca de 1 em cada 20 agregados do país, com as respostas de cada pessoa juntas, mas sem a freguesia (só a região, NUTS II). A amostra mostra como as pessoas vivem juntas; as tabelas, quantas são em cada freguesia. Nenhuma das duas, sozinha, dá as pessoas de uma freguesia.
+
+Uma população sintética junta as duas: agregados que se parecem com os da amostra, escolhidos para que as suas contagens deem as tabelas de cada freguesia. Com ela, qualquer cruzamento faz-se contando pessoas.
+
+</Beat>
+
 <Beat at="learn">
+
+## Cinco passos para a gerar
 
 ### 1. Aprender como os atributos se combinam
 
-O computador aprende, com a amostra pública dos Censos 2021 (o Ficheiro de Uso Público), que combinações de idade, escolaridade, trabalho e família são comuns numa pessoa e no seu agregado. Esse modelo (um gerador autorregressivo) é treinado uma vez e depois fica fixo. As idades ano a ano e o tipo de local de trabalho são gerados por ele, não deduzidos depois.
+O computador aprende, com essa amostra, que combinações de idade, escolaridade, trabalho e família são comuns numa pessoa e no seu agregado. Esse modelo (um gerador autorregressivo) é treinado uma vez e depois fica fixo. As idades ano a ano e o tipo de local de trabalho são gerados por ele, não deduzidos depois.
 
 O gerador escreve cada agregado como uma frase, um atributo de cada vez, e cada escolha lê tudo o que já foi escrito: a idade da segunda pessoa tende a ficar perto da idade da primeira, e uma criança de 4 anos não pode ter o ensino superior nem um emprego.
 
 </Beat>
 
-<Beat at="tables">
+<Beat at="candidates">
 
 ### 2. Ajustar cada freguesia às suas tabelas
 
-Cada freguesia tem as suas tabelas do INE. A freguesia inventada tem duas, pequenas: 10 agregados, contados por número de pessoas, e 23 pessoas, contadas por idade. Os quadrados pretos são essas contagens.
-
-</Beat>
-
-<Beat at="candidates">
-
-Para cada freguesia, o modelo inventa muitos agregados possíveis, os candidatos. Aqui são 24, e começam todos com o mesmo peso: as barras mostram o que somam, ainda longe dos quadrados.
+O resultado não sai diretamente do gerador: ele inventa pessoas e agregados possíveis, e depois escolhem-se os que, somados, ficam o mais perto possível das tabelas do INE (um processo generativo com restrições). Para a freguesia inventada, inventa 24 agregados candidatos, todos com o mesmo peso. As barras mostram o que somam; os quadrados pretos, o que as tabelas da freguesia pedem: 10 agregados e 23 pessoas.
 
 </Beat>
 
@@ -66,13 +92,21 @@ Aqui ficam 10 dos 21 candidatos, entre eles o agregado escrito no passo 1, e as 
 
 </Beat>
 
+<Beat at="answer">
+
+Agora a pergunta do início tem resposta, e basta contar: nesta população, 3 das 8 pessoas com 65 ou mais anos vivem sozinhas. As tabelas só garantiam que a resposta ficava entre 0 e 3; o número vem do que o gerador aprendeu com a amostra sobre quem vive com quem.
+
+Na freguesia do início eram 2. A população sintética dá uma resposta possível e coerente com as tabelas, não a verdadeira, e numa freguesia real não temos a verdadeira para comparar. Por isso o site diz, em cada resposta, se vem de um campo ajustado às tabelas ou de um cruzamento que nenhuma tabela do ajuste verifica (ver «Campos ajustados e campos derivados»), e cada freguesia tem um nível de qualidade. É assim que a [página de cada freguesia](/pt/populacao/) responde a esta mesma pergunta.
+
+</Beat>
+
 <Beat at="collective">
 
 ### 4. Acrescentar quem vive em alojamentos coletivos
 
 As pessoas que vivem em lares e noutros alojamentos coletivos são acrescentadas depois do ajuste, a partir das contagens publicadas pelo INE, como registos parciais: o sexo e a idade vêm dessas contagens, a escolaridade é imputada a partir de registos semelhantes, e o núcleo familiar e os campos de trabalho ficam vazios (o [dicionário de colunas](/pt/populacao/dados/#dicionario) diz quais). Os códigos finos de profissão são derivados nesta fase.
 
-Na freguesia inventada, o INE conta 5 pessoas num lar.
+Na freguesia inventada, além das 10 casas, o INE conta 5 pessoas num lar.
 
 </Beat>
 
