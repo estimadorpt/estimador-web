@@ -1,7 +1,7 @@
 export const metadata = {
-  "title": "Juros e rendimentos explicam um terço da subida das casas",
+  "title": "Dois terços da subida das casas ficam por explicar",
   "excerpt": "Descontada a inflação, as casas subiram 65% do fim de 2019 a meados de 2026. Um modelo de juros, rendimentos e construção, estimado até 2019, chega a +19%.",
-  "author": "Bernardo Caldas",
+  "author": "estimador.pt",
   "date": "2026-11-04",
   "kind": "nota",
   "draft": true,
@@ -50,11 +50,11 @@ A mediana das simulações dá +19% em termos reais, e 90% delas ficam entre −
 
 ## A subida dos juros não travou os preços
 
-Entre o fim de 2021 e o fim de 2023, a taxa de juro dos novos créditos à habitação passou de 0,8% para 4,3% (médias trimestrais, [BCE](https://data.ecb.europa.eu/data/datasets/MIR/MIR.M.PT.B.A2C.A.R.A.2250.EUR.N)). No modelo, como na Austrália, isso pesa nos preços: do fim de 2021 ao fim de 2024, a mediana das simulações desce 4%. Os preços reais subiram 15%.
+Entre o fim de 2021 e o fim de 2023, a taxa de juro dos novos créditos à habitação passou de 0,8% para 4,3% (médias trimestrais, [BCE](https://data.ecb.europa.eu/data/datasets/MIR/MIR.M.PT.B.A2C.A.R.A.2250.EUR.N)). No modelo, como na Austrália, isso pesa nos preços: a mediana das simulações passa de +7,7% no fim de 2021 para +2,2% no fim de 2024. Os preços reais subiram 15% nesses três anos.
 
 ## Uma regra simples acerta mais do que o modelo
 
-Supor que os preços continuavam a subir ao ritmo de 2015–2019 erra cinco vezes menos do que o modelo ao longo de 2020–2026: um erro quadrático médio de 0,04 contra 0,21, nos logaritmos dos preços reais. Supor que os preços ficavam parados, ou que acompanhavam o rendimento por família, erra um pouco mais do que o modelo (0,27 e 0,21).
+Supor que os preços continuavam a subir ao ritmo de 2015–2019 erra cerca de cinco vezes menos do que o modelo ao longo de 2020–2026: um erro quadrático médio de 0,043 contra 0,206, nos logaritmos dos preços reais. Supor que os preços ficavam parados erra mais do que o modelo (0,267), e supor que acompanhavam o rendimento por família erra quase o mesmo (0,215). O registo fazia destas duas regras o critério de sucesso, e o modelo bate-as; a tendência de 2015–2019 era só para relatar, porque se limita a prolongar a subida.
 
 ## O que o modelo não vê
 
@@ -70,5 +70,5 @@ Este resultado diz o que não explica a subida, não o que a explica. Não diz q
 O Banco de Portugal estimou que, entre municípios, um aumento de 1% na procura, medida pelo número de famílias, faz subir os preços cerca de 0,69% e as rendas 0,37%, e menos onde a construção responde ([Amador, Revista de Estudos Económicos, outubro de 2026](https://www.bportugal.pt/sites/default/files/documents/2026-10/ree_vol12_n4_pt.pdf)). Esse estudo trata a procura como um todo e deixa em aberto o peso de cada fonte: imigração, rendimento, crédito, turismo, compradores não residentes. É essa a pergunta que queremos responder a seguir, comparando os municípios.
 
 <Callout kind="method" label="Como fizemos">
-  Registámos o desenho do modelo, as amostras e os critérios de sucesso a 3 de novembro de 2026, antes de carregarmos os dados. Séries trimestrais nacionais: preços da habitação do INE desde 2009, prolongados para trás com a série do BIS; IHPC e rendas efetivas do IHPC (Eurostat); taxa de juro dos novos empréstimos à habitação (BCE, desde 2003); custo de construção de habitação nova, fogos licenciados e concluídos e parque habitacional (INE); população (Eurostat) e dimensão média das famílias nos Censos de 2001, 2011 e 2021; rendimento disponível das famílias (Eurostat). Mínimos quadrados com erros robustos (Newey–West), estimados até ao fim de 2019, e 2 000 simulações com incerteza nos parâmetros e nos choques. Usámos os dados de hoje, já revistos (a população foi revista em alta em 2024 e 2025), por isso o teste é à estrutura do modelo, não a uma previsão feita em 2019. Com as rendas do IHPC em vez do rendimento por família como âncora dos preços, o modelo chega a +10%.
+  Registámos o desenho do modelo, as amostras e os critérios de sucesso a 3 de novembro de 2026, antes de carregarmos os dados. Séries trimestrais nacionais: preços da habitação do INE desde 2009, prolongados para trás com a série do BIS; IHPC e rendas efetivas do IHPC (Eurostat); taxa de juro dos novos empréstimos à habitação (BCE, desde 2003); custo de construção de habitação nova, fogos licenciados e concluídos e parque habitacional (INE); população (Eurostat) e dimensão média das famílias nos Censos de 2001, 2011 e 2021; rendimento disponível das famílias (Eurostat). Mínimos quadrados com erros robustos (Newey–West), estimados até ao fim de 2019, e 2 000 simulações com incerteza nos parâmetros e nos choques. Usámos os dados de hoje, já revistos (a população foi revista em alta em 2024 e 2025), por isso o teste é à estrutura do modelo, não a uma previsão feita em 2019. Com as rendas do IHPC em vez do rendimento por família como âncora dos preços, o modelo chega a +10%. O terço mede-se em logaritmos: o modelo sobe 0,17 e os preços 0,50 (35%); em percentagem, +19% contra +65% (29%).
 </Callout>

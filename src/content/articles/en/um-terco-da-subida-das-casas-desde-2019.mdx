@@ -1,7 +1,7 @@
 export const metadata = {
-  "title": "Rates and incomes explain a third of house price growth",
+  "title": "Two thirds of the house price rise remains unexplained",
   "excerpt": "After inflation, Portuguese homes rose 65% from late 2019 to mid-2026. A model of rates, incomes and building, estimated to 2019, gets to +19%.",
-  "author": "Bernardo Caldas",
+  "author": "estimador.pt",
   "date": "2026-11-04",
   "kind": "nota",
   "draft": true,
@@ -50,11 +50,11 @@ The median simulation gives +19% in real terms, and 90% of them fall between −
 
 ## Higher interest rates did not stop prices rising
 
-Between the end of 2021 and the end of 2023, the interest rate on new housing loans rose from 0.8% to 4.3% (quarterly averages, [ECB](https://data.ecb.europa.eu/data/datasets/MIR/MIR.M.PT.B.A2C.A.R.A.2250.EUR.N)). In the model, as in Australia, that weighs on prices: from the end of 2021 to the end of 2024 the median simulation falls 4%. Real prices rose 15%.
+Between the end of 2021 and the end of 2023, the interest rate on new housing loans rose from 0.8% to 4.3% (quarterly averages, [ECB](https://data.ecb.europa.eu/data/datasets/MIR/MIR.M.PT.B.A2C.A.R.A.2250.EUR.N)). In the model, as in Australia, that weighs on prices: the median simulation goes from +7.7% at the end of 2021 to +2.2% at the end of 2024. Real prices rose 15% over those three years.
 
 ## A simple rule does better than the model
 
-Assuming prices kept rising at their 2015–2019 pace errs five times less than the model over 2020–2026: a root-mean-square error of 0.04 against 0.21, in the logarithm of real prices. Assuming prices stood still, or kept pace with income per household, errs slightly more than the model (0.27 and 0.21).
+Assuming prices kept rising at their 2015–2019 pace errs about five times less than the model over 2020–2026: a root-mean-square error of 0.043 against 0.206, in the logarithm of real prices. Assuming prices stood still errs more than the model (0.267), and assuming they kept pace with income per household errs about as much (0.215). The registration made those two rules the pass mark, and the model beats them; the 2015–2019 trend was to be reported only, because it simply extends the boom.
 
 ## What the model cannot see
 
@@ -70,5 +70,5 @@ This result says what does not explain the rise, not what does. It does not say 
 Banco de Portugal estimated that, across municipalities, a 1% rise in demand, measured by the number of households, raises prices by about 0.69% and rents by 0.37%, less where building responds ([Amador, Revista de Estudos Económicos, October 2026](https://www.bportugal.pt/sites/default/files/documents/2026-10/ree_vol12_n4_pt.pdf), in Portuguese). That study treats demand as one thing and leaves open how much each source weighs: immigration, income, credit, tourism, non-resident buyers. That is the question we want to answer next, by comparing municipalities.
 
 <Callout kind="method" label="How we did it">
-  We registered the model’s design, samples and pass marks on 3 November 2026, before loading any data. National quarterly series: INE house prices from 2009, extended back with the BIS series; the HICP and its actual rentals (Eurostat); the interest rate on new housing loans (ECB, from 2003); the construction cost index for new housing, dwellings licensed and completed, and the housing stock (INE); population (Eurostat) and average household size in the 2001, 2011 and 2021 censuses; households’ disposable income (Eurostat). Least squares with robust (Newey–West) errors, estimated to the end of 2019, and 2,000 simulations with uncertainty in the parameters and the shocks. We used today’s data, already revised (population was revised up in 2024 and 2025), so this tests the model’s structure, not a forecast made in 2019. With HICP rents instead of income per household as the anchor for prices, the model gets to +10%.
+  We registered the model’s design, samples and pass marks on 3 November 2026, before loading any data. National quarterly series: INE house prices from 2009, extended back with the BIS series; the HICP and its actual rentals (Eurostat); the interest rate on new housing loans (ECB, from 2003); the construction cost index for new housing, dwellings licensed and completed, and the housing stock (INE); population (Eurostat) and average household size in the 2001, 2011 and 2021 censuses; households’ disposable income (Eurostat). Least squares with robust (Newey–West) errors, estimated to the end of 2019, and 2,000 simulations with uncertainty in the parameters and the shocks. We used today’s data, already revised (population was revised up in 2024 and 2025), so this tests the model’s structure, not a forecast made in 2019. With HICP rents instead of income per household as the anchor for prices, the model gets to +10%. The third is measured in logarithms: the model rises 0.17 and prices 0.50 (35%); in percentages, +19% against +65% (29%).
 </Callout>
