@@ -1,0 +1,74 @@
+export const metadata = {
+  "title": "Juros e rendimentos explicam um terço da subida das casas",
+  "excerpt": "Descontada a inflação, as casas subiram 65% do fim de 2019 a meados de 2026. Um modelo de juros, rendimentos e construção, estimado até 2019, chega a +19%.",
+  "author": "Bernardo Caldas",
+  "date": "2026-11-04",
+  "kind": "nota",
+  "draft": true,
+  "tags": [
+    "Habitação",
+    "Modelo"
+  ],
+  "slug": "um-terco-da-subida-das-casas-desde-2019"
+};
+
+<Callout kind="context" label="Contexto">
+  Escrito a 4 de novembro de 2026 com os dados disponíveis nessa data. É o primeiro teste de um modelo nacional da habitação do estimador.pt, e o modelo não passou.
+</Callout>
+
+Descontada a inflação, as casas em Portugal custavam no 2.º trimestre de 2026 mais 65% do que no fim de 2019; em euros correntes, mais do dobro (+106%). Pusemos à prova o modelo com que o banco central da Austrália explica os preços das casas. Estimado com dados portugueses até 2019, e alimentado com o que aconteceu depois aos juros, à inflação, aos rendimentos, aos custos de construção e ao número de famílias, chega a +19%. Explica cerca de um terço da subida; os outros dois terços ficam por explicar.
+
+## O modelo fica muito abaixo do que aconteceu
+
+O modelo é o de Saunders e Tulip ([Reserve Bank of Australia, 2019](https://www.rba.gov.au/publications/rdp/2019/2019-01.html)). Os preços tendem para o que custa ter casa (o juro, menos a inflação esperada, mais a manutenção e os impostos) face ao rendimento das famílias; as licenças de construção respondem aos preços e aos custos de construir; as casas concluídas somam-se ao parque habitacional. Estimámo-lo com dados até ao fim de 2019 e simulámos 2 000 trajetórias de 2020 a meados de 2026, cada uma com os juros, a inflação, os custos de construção, as famílias e os rendimentos que de facto se observaram.
+
+A mediana das simulações dá +19% em termos reais, e 90% delas ficam entre −5% e +57%. Os preços observados saíram desse intervalo no fim de 2024 e não voltaram a entrar.
+
+<Figure caption="Os preços reais das casas subiram 65% do fim de 2019 ao 2.º trimestre de 2026; o modelo, com os juros, a inflação, os rendimentos, os custos de construção e as famílias observados, chega a +19%." source="Fontes: INE (Índice de Preços da Habitação; antes de 2009, BIS), Eurostat (IHPC), BCE, INE e Eurostat para as restantes séries. Modelo estimador.pt, 2 000 simulações, estimado até ao 4.º trimestre de 2019." asOf="Dados consultados a 4 de novembro de 2026">
+  <div tabIndex={0} role="region" aria-label="Tabela: variação real dos preços das casas desde o fim de 2019, observada e no modelo" className="scroll-cue overflow-x-auto [--scroll-cue-ground:var(--color-paper)]">
+    <table className="min-w-full border-collapse font-sans text-sm tabular-nums">
+      <thead>
+        <tr>
+          <th scope="col" className="border-b border-ink px-3 py-2 text-left text-[12px] font-semibold text-graphite">Trimestre</th>
+          <th scope="col" className="border-b border-ink px-3 py-2 text-right text-[12px] font-semibold text-graphite">Observado</th>
+          <th scope="col" className="border-b border-ink px-3 py-2 text-right text-[12px] font-semibold text-graphite">Modelo, mediana</th>
+          <th scope="col" className="border-b border-ink px-3 py-2 text-right text-[12px] font-semibold text-graphite">Modelo, intervalo de 90%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">4.º trim. 2020</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+8,4%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+4,6%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−1,7% a +13,0%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">4.º trim. 2021</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+18,1%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+7,7%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−4,1% a +24,0%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">4.º trim. 2022</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+19,3%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+7,3%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−7,8% a +30,4%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">4.º trim. 2023</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+25,6%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+1,6%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−15,1% a +28,8%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">4.º trim. 2024</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+36,3%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+2,2%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−16,1% a +34,3%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">4.º trim. 2025</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+58,6%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+12,1%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−9,5% a +48,9%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">2.º trim. 2026</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+65,2%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+19,1%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−5,1% a +56,8%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</Figure>
+
+## A subida dos juros não travou os preços
+
+Entre o fim de 2021 e o fim de 2023, a taxa de juro dos novos créditos à habitação passou de 0,8% para 4,3% (médias trimestrais, [BCE](https://data.ecb.europa.eu/data/datasets/MIR/MIR.M.PT.B.A2C.A.R.A.2250.EUR.N)). No modelo, como na Austrália, isso pesa nos preços: do fim de 2021 ao fim de 2024, a mediana das simulações desce 4%. Os preços reais subiram 15%.
+
+## Uma regra simples acerta mais do que o modelo
+
+Supor que os preços continuavam a subir ao ritmo de 2015–2019 erra cinco vezes menos do que o modelo ao longo de 2020–2026: um erro quadrático médio de 0,04 contra 0,21, nos logaritmos dos preços reais. Supor que os preços ficavam parados, ou que acompanhavam o rendimento por família, erra um pouco mais do que o modelo (0,27 e 0,21).
+
+## O que o modelo não vê
+
+O modelo deixa de fora dois canais.
+
+- **As rendas de mercado.** O modelo lê as rendas no índice de preços no consumidor, que acompanha os contratos em vigor, cujas atualizações a lei limita (em 2023, a 2%, quando o coeficiente seria de 5,43%). Nesse índice, mais famílias por casa não fazem subir as rendas, e no modelo o aumento da população, incluindo a imigração de 2022–2024, não chega aos preços.
+- **A procura de fora.** O turismo, o alojamento local, os compradores estrangeiros e os vistos gold ficaram de fora de propósito, para ver até onde chegam os canais que o modelo australiano usa.
+
+Este resultado diz o que não explica a subida, não o que a explica. Não diz quanto dos dois terços que faltam vem de cada um destes canais, nem de limites à construção que o modelo capte mal.
+
+## O que já se sabe
+
+O Banco de Portugal estimou que, entre municípios, um aumento de 1% na procura, medida pelo número de famílias, faz subir os preços cerca de 0,69% e as rendas 0,37%, e menos onde a construção responde ([Amador, Revista de Estudos Económicos, outubro de 2026](https://www.bportugal.pt/sites/default/files/documents/2026-10/ree_vol12_n4_pt.pdf)). Esse estudo trata a procura como um todo e deixa em aberto o peso de cada fonte: imigração, rendimento, crédito, turismo, compradores não residentes. É essa a pergunta que queremos responder a seguir, comparando os municípios.
+
+<Callout kind="method" label="Como fizemos">
+  Registámos o desenho do modelo, as amostras e os critérios de sucesso a 3 de novembro de 2026, antes de carregarmos os dados. Séries trimestrais nacionais: preços da habitação do INE desde 2009, prolongados para trás com a série do BIS; IHPC e rendas efetivas do IHPC (Eurostat); taxa de juro dos novos empréstimos à habitação (BCE, desde 2003); custo de construção de habitação nova, fogos licenciados e concluídos e parque habitacional (INE); população (Eurostat) e dimensão média das famílias nos Censos de 2001, 2011 e 2021; rendimento disponível das famílias (Eurostat). Mínimos quadrados com erros robustos (Newey–West), estimados até ao fim de 2019, e 2 000 simulações com incerteza nos parâmetros e nos choques. Usámos os dados de hoje, já revistos (a população foi revista em alta em 2024 e 2025), por isso o teste é à estrutura do modelo, não a uma previsão feita em 2019. Com as rendas do IHPC em vez do rendimento por família como âncora dos preços, o modelo chega a +10%.
+</Callout>
