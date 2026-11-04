@@ -1,0 +1,74 @@
+export const metadata = {
+  "title": "Two thirds of the house price rise remains unexplained",
+  "excerpt": "After inflation, Portuguese homes rose 65% from late 2019 to mid-2026. A model of rates, incomes and building, estimated to 2019, gets to +19%.",
+  "author": "estimador.pt",
+  "date": "2026-11-04",
+  "kind": "nota",
+  "draft": true,
+  "tags": [
+    "Housing",
+    "Model"
+  ],
+  "slug": "um-terco-da-subida-das-casas-desde-2019"
+};
+
+<Callout kind="context" label="Context">
+  Written on 4 November 2026 with the data available that day. It is the first test of a national housing model at estimador.pt, and the model failed it.
+</Callout>
+
+After inflation, homes in Portugal cost 65% more in the second quarter of 2026 than at the end of 2019; in current euros, more than twice as much (+106%). We tested the model Australia’s central bank uses to explain house prices. Estimated on Portuguese data up to 2019, and fed what then happened to interest rates, inflation, incomes, building costs and the number of households, it gets to +19%. It explains about a third of the rise; the other two thirds are left unexplained.
+
+## The model falls far short of what happened
+
+The model is Saunders and Tulip’s ([Reserve Bank of Australia, 2019](https://www.rba.gov.au/publications/rdp/2019/2019-01.html)). Prices move towards what it costs to own a home (the interest rate, less expected inflation, plus upkeep and taxes) relative to household income; building permits respond to prices and to building costs; completed homes add to the housing stock. We estimated it on data to the end of 2019 and simulated 2,000 paths from 2020 to mid-2026, each with the interest rates, inflation, building costs, households and incomes actually observed.
+
+The median simulation gives +19% in real terms, and 90% of them fall between −5% and +57%. Observed prices left that range at the end of 2024 and have stayed above it.
+
+<Figure caption="Real house prices rose 65% from the end of 2019 to the second quarter of 2026; the model, given the observed interest rates, inflation, incomes, building costs and households, gets to +19%." source="Sources: INE (house price index; before 2009, BIS), Eurostat (HICP), ECB, INE and Eurostat for the other series. estimador.pt model, 2,000 simulations, estimated to 2019 Q4." asOf="Data retrieved on 4 November 2026">
+  <div tabIndex={0} role="region" aria-label="Table: real change in house prices since the end of 2019, observed and in the model" className="scroll-cue overflow-x-auto [--scroll-cue-ground:var(--color-paper)]">
+    <table className="min-w-full border-collapse font-sans text-sm tabular-nums">
+      <thead>
+        <tr>
+          <th scope="col" className="border-b border-ink px-3 py-2 text-left text-[12px] font-semibold text-graphite">Quarter</th>
+          <th scope="col" className="border-b border-ink px-3 py-2 text-right text-[12px] font-semibold text-graphite">Observed</th>
+          <th scope="col" className="border-b border-ink px-3 py-2 text-right text-[12px] font-semibold text-graphite">Model, median</th>
+          <th scope="col" className="border-b border-ink px-3 py-2 text-right text-[12px] font-semibold text-graphite">Model, 90% interval</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">2020 Q4</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+8.4%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+4.6%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−1.7% to +13.0%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">2021 Q4</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+18.1%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+7.7%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−4.1% to +24.0%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">2022 Q4</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+19.3%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+7.3%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−7.8% to +30.4%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">2023 Q4</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+25.6%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+1.6%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−15.1% to +28.8%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">2024 Q4</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+36.3%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+2.2%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−16.1% to +34.3%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">2025 Q4</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+58.6%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+12.1%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−9.5% to +48.9%</td></tr>
+        <tr><th scope="row" className="border-b border-rule px-3 py-2 text-left font-normal text-ink">2026 Q2</th><td className="border-b border-rule px-3 py-2 text-right text-ink">+65.2%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">+19.1%</td><td className="border-b border-rule px-3 py-2 text-right text-ink">−5.1% to +56.8%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</Figure>
+
+## Higher interest rates did not stop prices rising
+
+Between the end of 2021 and the end of 2023, the interest rate on new housing loans rose from 0.8% to 4.3% (quarterly averages, [ECB](https://data.ecb.europa.eu/data/datasets/MIR/MIR.M.PT.B.A2C.A.R.A.2250.EUR.N)). In the model, as in Australia, that weighs on prices: the median simulation goes from +7.7% at the end of 2021 to +2.2% at the end of 2024. Real prices rose 15% over those three years.
+
+## A simple rule does better than the model
+
+Assuming prices kept rising at their 2015–2019 pace errs about five times less than the model over 2020–2026: a root-mean-square error of 0.043 against 0.206, in the logarithm of real prices. Assuming prices stood still errs more than the model (0.267), and assuming they kept pace with income per household errs about as much (0.215). The registration made those two rules the pass mark, and the model beats them; the 2015–2019 trend was to be reported only, because it simply extends the boom.
+
+## What the model cannot see
+
+The model leaves out two channels.
+
+- **Market rents.** The model reads rents from the consumer price index, which follows existing leases, whose yearly increases the law caps (at 2% in 2023, when the statutory coefficient would have been 5.43%). In that index, more households per home do not push rents up, so in the model population growth, including the immigration of 2022–2024, does not reach prices.
+- **Demand from outside.** Tourism, short lets, foreign buyers and golden visas were left out on purpose, to see how far the channels of the Australian model go.
+
+This result says what does not explain the rise, not what does. It does not say how much of the missing two thirds comes from each of these channels, or from limits on building that the model misses.
+
+## What is already known
+
+Banco de Portugal estimated that, across municipalities, a 1% rise in demand, measured by the number of households, raises prices by about 0.69% and rents by 0.37%, less where building responds ([Amador, Revista de Estudos Económicos, October 2026](https://www.bportugal.pt/sites/default/files/documents/2026-10/ree_vol12_n4_pt.pdf), in Portuguese). That study treats demand as one thing and leaves open how much each source weighs: immigration, income, credit, tourism, non-resident buyers. That is the question we want to answer next, by comparing municipalities.
+
+<Callout kind="method" label="How we did it">
+  We registered the model’s design, samples and pass marks on 3 November 2026, before loading any data. National quarterly series: INE house prices from 2009, extended back with the BIS series; the HICP and its actual rentals (Eurostat); the interest rate on new housing loans (ECB, from 2003); the construction cost index for new housing, dwellings licensed and completed, and the housing stock (INE); population (Eurostat) and average household size in the 2001, 2011 and 2021 censuses; households’ disposable income (Eurostat). Least squares with robust (Newey–West) errors, estimated to the end of 2019, and 2,000 simulations with uncertainty in the parameters and the shocks. We used today’s data, already revised (population was revised up in 2024 and 2025), so this tests the model’s structure, not a forecast made in 2019. With HICP rents instead of income per household as the anchor for prices, the model gets to +10%. The third is measured in logarithms: the model rises 0.17 and prices 0.50 (35%); in percentages, +19% against +65% (29%).
+</Callout>
