@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "generated_at": "2026-11-07T14:04:33Z",
+  "generated_at": "2026-11-07T20:06:31Z",
   "n_matchdays": 34,
   "matchdays": [
     {
@@ -1450,8 +1450,8 @@
           "p_home": 0.5092,
           "p_draw": 0.2632,
           "p_away": 0.2276,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 1,
+          "away_goals": 1,
           "published_at": "2026-10-31T14:04:49.757726+00:00",
           "probs_source": "md10.json"
         },
@@ -1871,9 +1871,9 @@
           "away_goals": null
         },
         {
-          "id": "md14-casa-pia-vs-nacional",
-          "home": "Casa Pia",
-          "away": "Nacional",
+          "id": "md14-moreirense-vs-famalicao",
+          "home": "Moreirense",
+          "away": "Famalicao",
           "kickoff": "2026-12-13T15:30:00Z",
           "kickoff_confirmed": false,
           "locks_at": "2026-12-11T00:00:00Z",
@@ -1884,9 +1884,9 @@
           "away_goals": null
         },
         {
-          "id": "md14-moreirense-vs-famalicao",
-          "home": "Moreirense",
-          "away": "Famalicao",
+          "id": "md14-casa-pia-vs-nacional",
+          "home": "Casa Pia",
+          "away": "Nacional",
           "kickoff": "2026-12-13T15:30:00Z",
           "kickoff_confirmed": false,
           "locks_at": "2026-12-11T00:00:00Z",
