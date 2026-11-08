@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "generated_at": "2026-11-07T22:35:17Z",
+  "generated_at": "2026-11-08T17:34:56Z",
   "n_matchdays": 34,
   "matchdays": [
     {
@@ -1435,8 +1435,8 @@
           "p_home": 0.4273,
           "p_draw": 0.2732,
           "p_away": 0.2995,
-          "home_goals": null,
-          "away_goals": null,
+          "home_goals": 1,
+          "away_goals": 0,
           "published_at": "2026-10-31T14:04:49.757726+00:00",
           "probs_source": "md10.json"
         },
@@ -1471,21 +1471,6 @@
           "probs_source": "md10.json"
         },
         {
-          "id": "md11-santa-clara-vs-gil-vicente",
-          "home": "Santa Clara",
-          "away": "Gil Vicente",
-          "kickoff": "2026-11-08T15:30:00Z",
-          "kickoff_confirmed": true,
-          "locks_at": "2026-11-08T15:30:00Z",
-          "p_home": 0.3908,
-          "p_draw": 0.3124,
-          "p_away": 0.2968,
-          "home_goals": null,
-          "away_goals": null,
-          "published_at": "2026-10-31T14:04:49.757726+00:00",
-          "probs_source": "md10.json"
-        },
-        {
           "id": "md11-estoril-vs-maritimo",
           "home": "Estoril",
           "away": "Maritimo",
@@ -1497,6 +1482,21 @@
           "p_away": 0.2096,
           "home_goals": null,
           "away_goals": null,
+          "published_at": "2026-10-31T14:04:49.757726+00:00",
+          "probs_source": "md10.json"
+        },
+        {
+          "id": "md11-santa-clara-vs-gil-vicente",
+          "home": "Santa Clara",
+          "away": "Gil Vicente",
+          "kickoff": "2026-11-08T15:30:00Z",
+          "kickoff_confirmed": true,
+          "locks_at": "2026-11-08T15:30:00Z",
+          "p_home": 0.3908,
+          "p_draw": 0.3124,
+          "p_away": 0.2968,
+          "home_goals": 1,
+          "away_goals": 2,
           "published_at": "2026-10-31T14:04:49.757726+00:00",
           "probs_source": "md10.json"
         },
