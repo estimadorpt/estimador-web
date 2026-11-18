@@ -28,7 +28,7 @@ import {
   formatFit,
 } from '@/components/population/quality/copy';
 import { POPULATION_DOWNLOADS, POPULATION_PUBLISHED, POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
-import { HONESTY, RECIPE_COPY, TIER_COPY, type Locale } from '@/lib/population/labels';
+import { HONESTY, RECIPE_COPY, TIER_COPY, isPortraitRecipe, type Locale } from '@/lib/population/labels';
 import { loadPopulationMeta, loadPopulationPlaces, loadPopulationScorecard } from '@/lib/utils/population-data-loader';
 import { createPageMetadata } from '@/lib/metadata';
 import type { PortraitRecipe } from '@/types/population';
@@ -153,7 +153,7 @@ export default async function PopulationQuality({ params }: { params: Promise<{ 
 
   // Only A-tier questions: the cross-tabulations a B parish does not get.
   const aOnly = meta
-    ? meta.recipe_order.filter(recipe => meta.recipes[recipe]?.minimum_tier === 'A').map(recipe => RECIPE_COPY[recipe as PortraitRecipe].short[locale])
+    ? meta.recipe_order.filter(recipe => meta.recipes[recipe]?.minimum_tier === 'A' && isPortraitRecipe(recipe)).map(recipe => RECIPE_COPY[recipe as PortraitRecipe].short[locale])
     : [];
 
   // What a tier means for its parish page, from this release's own decisions:

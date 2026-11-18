@@ -12,7 +12,7 @@ import { ColumnDictionary, PROVENANCE_CODES } from '@/components/population/data
 import { DESCRIPTION_OVERRIDES } from '@/components/population/data/dictionary';
 import { CopyButton } from '@/components/population/data/CopyButton';
 import { formatBytes } from '@/components/population/data/format';
-import { POPULATION_DOWNLOADS, POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
+import { LICENCE_URL, POPULATION_DOWNLOADS, POPULATION_RELEASE, POPULATION_ROUTES } from '@/lib/config/population';
 import { HONESTY, type Locale } from '@/lib/population/labels';
 import { SHORT_ATTRIBUTION } from '@/lib/population/cite';
 import { Disclosure } from '@/components/viz/Disclosure';
@@ -48,6 +48,21 @@ const FILE_COPY: Record<string, { pt: string; en: string }> = {
   },
   checksums: { pt: 'Checksums SHA-256 de cada ficheiro do pacote.', en: 'SHA-256 sums of every file in the package.' },
   sums: { pt: 'Checksums SHA-256 dos ficheiros publicados na versão.', en: 'SHA-256 sums of the files published with the release.' },
+  // From v1.2: the layer files beside the population, one row per person, joined on
+  // (freguesia, synthetic_hh_id, person_row). Listed only once the release ships them.
+  census_facts: {
+    pt: 'Factos dos Censos: origem, migração e escola, cinco sorteios por pessoa (Parquet).',
+    en: 'Census facts: origin, migration and schooling, five draws per person (Parquet).',
+  },
+  income: { pt: 'Rendimento bruto declarado em 2021, por pessoa (Parquet).', en: 'Gross income declared for 2021, per person (Parquet).' },
+  vote: {
+    pt: 'Voto, com os casais, a partir do Estudo Eleitoral Português (Parquet).',
+    en: 'Vote, with couples, from the Portuguese Election Study (Parquet).',
+  },
+  attitudes: {
+    pt: 'Vinte atitudes, a partir do European Social Survey, com o grau de informação de cada uma (Parquet).',
+    en: 'Twenty attitudes, from the European Social Survey, each labelled by how informative it is (Parquet).',
+  },
 };
 
 type QualitySource = 'ine' | 'generated' | 'evaluation' | 'geographic' | 'release';
@@ -306,6 +321,7 @@ sha256sum checksums.sha256`;
                   <thead>
                     <tr>
                       <th scope="col" className="border-b border-ink py-2 pr-4 text-left text-[12px] font-normal text-graphite">{pt ? 'Ficheiro e conteúdo' : 'File and contents'}</th>
+                      <th scope="col" className="border-b border-ink py-2 px-4 text-left text-[12px] font-normal text-graphite">{pt ? 'Licença' : 'Licence'}</th>
                       <th scope="col" className="border-b border-ink py-2 pl-4 text-right text-[12px] font-normal text-graphite">{pt ? 'Tamanho' : 'Size'}</th>
                     </tr>
                   </thead>
@@ -316,6 +332,7 @@ sha256sum checksums.sha256`;
                           <a href={file.url} className="tap-target font-mono text-[13px] font-semibold text-ink underline underline-offset-4 [overflow-wrap:anywhere]">{file.name}</a>
                           <span className="mt-1 block leading-relaxed text-graphite">{FILE_COPY[file.key]?.[locale]}</span>
                         </th>
+                        <td className="whitespace-nowrap border-b border-grid py-3 px-4 text-ink"><a className={link} href={LICENCE_URL[file.licence][locale]}>{file.licence}</a></td>
                         <td className="whitespace-nowrap border-b border-grid py-3 pl-4 text-right tabular-nums text-ink">{formatBytes(file.bytes, locale)}</td>
                       </tr>
                     ))}
