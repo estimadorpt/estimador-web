@@ -1,4 +1,4 @@
-import type { Locale } from '@/lib/population/labels';
+import { isPortraitRecipe, type Locale } from '@/lib/population/labels';
 import type { ParishRecord, PopulationMeta, PortraitRecipe } from '@/types/population';
 
 export interface ParishGroup {
@@ -39,6 +39,6 @@ export const GROUPS: ParishGroup[] = [
 export function parishGroups(order: readonly string[], record: Pick<ParishRecord, 'responses'>, recipes: PopulationMeta['recipes']): ParishGroup[] {
   const answers = (recipe: PortraitRecipe) => Boolean(record.responses[recipe] && recipes[recipe]);
   return GROUPS
-    .map(group => ({ ...group, recipes: order.filter((name): name is PortraitRecipe => group.recipes.includes(name as PortraitRecipe) && answers(name as PortraitRecipe)) }))
+    .map(group => ({ ...group, recipes: order.filter((name): name is PortraitRecipe => isPortraitRecipe(name) && group.recipes.includes(name) && answers(name)) }))
     .filter(group => group.recipes.length > 0);
 }
