@@ -780,6 +780,10 @@ a chart a piece needs goes into that list, never into `mdx-components.tsx`.
 
 Optional `updated: "YYYY-MM-DD"` renders an "atualizado a" line and sets `modifiedTime`.
 
+**Byline:** every piece is signed `"author": "estimador.pt"` (the owner's name appears only in the
+footer credit and on `/sobre`); the JSON-LD makes that byline the site's Organization
+(`articleAuthor` in `src/lib/structured-data.ts`), and `content.test.ts` holds it.
+
 **Until a locale publishes:** the chrome offers articles only once that locale has at
 least one published piece (`getMDXArticlesByLocale(locale).length > 0`; in the client
 Header, `useHasArticles` from `src/lib/article-navigation.tsx`). Before that the header
