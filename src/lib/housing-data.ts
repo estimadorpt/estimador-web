@@ -102,3 +102,10 @@ export function yearsOverTwoYears(years: LicenceYear[]): LicenceYear[] {
 
 /** Lisbon's short-let ratio thresholds (RMAL, 2.ª alteração, in force 6 Dec 2025). */
 export const RMAL_THRESHOLDS = { relative: 5, absolute: 10 } as const;
+
+/** "2 de novembro de 2026" / "2 November 2026": a full, absolute date. */
+export function housingDate(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  }).format(new Date(`${iso.slice(0, 10)}T00:00:00Z`));
+}

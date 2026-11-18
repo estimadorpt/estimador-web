@@ -10,15 +10,16 @@ import { Disclosure } from '@/components/viz/Disclosure';
 import { RevisedDate } from '@/components/brand/RevisedDate';
 import { TextLink } from '@/components/brand/TextLink';
 import { YearChart } from '@/components/housing/YearChart';
+import { LisbonLicenceTimes } from '@/components/housing/LisbonLicenceTimes';
 import { ShortLetsBars } from '@/components/housing/ShortLetsBars';
 import { createPageMetadata } from '@/lib/metadata';
 import { HOUSING_PUBLISHED } from '@/lib/config/housing-status';
 import { formatCount } from '@/lib/population/format';
 import {
   RMAL_THRESHOLDS,
-  TWO_YEARS_DAYS,
   loadHousingLicensing,
   loadHousingShortLets,
+  housingDate,
   yearsOverTwoYears,
 } from '@/lib/housing-data';
 import { setRequestLocale } from '@/i18n/request-locale';
@@ -28,13 +29,6 @@ const REVISED = '2026-11-19';
 
 type L = 'pt' | 'en';
 const lang = (locale: string): L => (locale === 'en' ? 'en' : 'pt');
-
-/** "2 de novembro de 2026" / "2 November 2026": a full, absolute date. */
-function longDate(iso: string, locale: L): string {
-  return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
-    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
-  }).format(new Date(`${iso.slice(0, 10)}T00:00:00Z`));
-}
 
 /** One decimal, the locale's mark ("40,8" / "40.8"). */
 const oneDecimal = (value: number, locale: L) =>
@@ -74,67 +68,17 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
   if (!licensing || !shortLets) notFound();
 
   const count = (n: number) => formatCount(n, locale);
-  const days = (n: number | null) => (n === null ? '—' : count(n));
 
   // ---- Lisbon licence times ----
   const { lisbon, national } = licensing;
-  const cml = licensing.sources.find(s => s.id === 'cml_rjue');
   const ine = licensing.sources.find(s => s.id === 'ine_0008309');
-  const snapshot = longDate(lisbon.snapshot, locale);
-  const lastAlvara = cml?.last_alvara_date ? longDate(cml.last_alvara_date, locale) : snapshot;
+  const snapshot = housingDate(lisbon.snapshot, locale);
   const run = yearsOverTwoYears(lisbon.by_alvara_year);
   const runDays = run.map(y => y.new_build.median_days as number);
   const runLow = run.find(y => y.new_build.median_days === Math.min(...runDays));
   const runHigh = run.find(y => y.new_build.median_days === Math.max(...runDays));
   const overall = lisbon.overall;
   const [firstYear, lastYear] = overall.years;
-  const partial = lisbon.by_alvara_year.find(y => y.partial_year);
-  const newCounts = lisbon.by_alvara_year.filter(y => !y.partial_year).map(y => y.new_build.alvaras);
-  const newRange = `${count(Math.min(...newCounts))} ${pt ? 'a' : 'to'} ${count(Math.max(...newCounts))}`;
-  const simplex = longDate(lisbon.simplex_date, locale);
-  const simplexAt = Number(lisbon.simplex_date.slice(0, 4)) + (Date.parse(`${lisbon.simplex_date}T00:00:00Z`) - Date.parse(`${lisbon.simplex_date.slice(0, 4)}-01-01T00:00:00Z`)) / (365 * 864e5);
-
-  const licenceChart = (
-    <YearChart
-      label={pt
-        ? `Dias da entrada do processo ao alvará em Lisboa, mediana por ano, ${firstYear} a ${lastYear}`
-        : `Days from a process entering Lisbon's câmara to its alvará, median by year, ${firstYear} to ${lastYear}`}
-      yMax={1400}
-      yTicks={[
-        { value: 0, label: '0' },
-        { value: 365, label: pt ? '1 ano' : '1 yr' },
-        { value: 1095, label: pt ? '3 anos' : '3 yrs' },
-      ]}
-      references={[{ value: TWO_YEARS_DAYS, label: pt ? '2 anos' : '2 years' }]}
-      markers={[{ at: simplexAt, label: pt ? 'Simplex' : 'Simplex' }]}
-      series={[
-        {
-          key: 'all', label: pt ? 'Todas as licenças' : 'All licences', tone: 'graphite',
-          points: lisbon.by_alvara_year.flatMap(y => y.all_licences.median_days === null ? [] : [{ year: y.year, value: y.all_licences.median_days, soft: y.partial_year }]),
-        },
-        {
-          key: 'new', label: pt ? 'Construção nova' : 'New build', tone: 'ink',
-          points: lisbon.by_alvara_year.flatMap(y => y.new_build.median_days === null ? [] : [{ year: y.year, value: y.new_build.median_days, soft: y.partial_year }]),
-        },
-      ]}
-      xTicks={[2009, 2011, 2013, 2015, 2017, 2019, 2021, 2023, 2025]}
-      phoneXTicks={[2009, 2013, 2017, 2021, 2025]}
-    />
-  );
-  const licenceTable = (
-    <ChartTable
-      caption={pt ? 'Lisboa: dias da entrada ao alvará, mediana por ano do alvará' : 'Lisbon: days from entry to alvará, median by year of the alvará'}
-      columns={pt
-        ? ['Ano', 'Construção nova, mediana (dias)', 'Alvarás', 'Todas as licenças, mediana (dias)', 'Alvarás']
-        : ['Year', 'New build, median (days)', 'Alvarás', 'All licences, median (days)', 'Alvarás']}
-      rows={[...lisbon.by_alvara_year].reverse().map(y => [
-        y.partial_year ? `${y.year} (${pt ? 'até' : 'to'} ${lastAlvara})` : String(y.year),
-        days(y.new_build.median_days), count(y.new_build.alvaras),
-        days(y.all_licences.median_days), count(y.all_licences.alvaras),
-      ])}
-      align={['left', 'right', 'right', 'right', 'right']}
-    />
-  );
 
   // ---- National licences and completions ----
   const lastNational = national[national.length - 1];
@@ -177,7 +121,7 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
   const above5 = shortLets.parishes.filter(p => p.per_100_dwellings >= RMAL_THRESHOLDS.relative);
   const above10 = shortLets.parishes.filter(p => p.per_100_dwellings >= RMAL_THRESHOLDS.absolute);
   const lx = shortLets.municipality;
-  const rnalDate = longDate(shortLets.snapshot, locale);
+  const rnalDate = housingDate(shortLets.snapshot, locale);
   const shortLetsBars = (
     <ShortLetsBars
       parishes={shortLets.parishes}
@@ -250,16 +194,7 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
                   ? <>Nos {count(overall.new_build.alvaras)} alvarás de construção nova emitidos de {firstYear} a {lastYear}, a mediana foi de {count(overall.new_build.median_days)} dias entre a entrada do processo na câmara e o alvará. De {run[0]?.year} a {lastYear}, a mediana de cada ano ficou entre {count(runLow?.new_build.median_days ?? 0)} dias ({runLow?.year}) e {count(runHigh?.new_build.median_days ?? 0)} ({runHigh?.year}). <strong>Só contam as licenças que chegaram a ser emitidas</strong>: um processo ainda à espera, recusado ou desistido não tem alvará e fica de fora.</>
                   : <>Across the {count(overall.new_build.alvaras)} new-build alvarás issued from {firstYear} to {lastYear}, the median time from a process entering the câmara to its alvará was {count(overall.new_build.median_days)} days. From {run[0]?.year} to {lastYear}, each year&apos;s median was between {count(runLow?.new_build.median_days ?? 0)} days ({runLow?.year}) and {count(runHigh?.new_build.median_days ?? 0)} ({runHigh?.year}). <strong>Only licences that were issued count</strong>: a process still waiting, refused or withdrawn has no alvará and is left out.</>}
               </Standfirst>
-              <ChartTabs
-                id="licence-days"
-                locale={locale}
-                title={pt ? 'Dias da entrada do processo ao alvará, mediana por ano do alvará' : 'Days from entry to alvará, median by year of the alvará'}
-                chart={licenceChart}
-                table={licenceTable}
-                note={pt
-                  ? <>Fonte: Câmara Municipal de Lisboa, processos de obras abrangidos pelo RJUE e alvarás (CC0), registos de {snapshot}; cálculo estimador.pt. Cada processo conta uma vez, pelo primeiro alvará, no procedimento de licença. O alvará vem depois da aprovação e do pedido e pagamento do requerente, por isso o tempo inclui o dele; a câmara não publica a data da decisão. {partial?.year} vai até {lastAlvara} (quadrados mais pequenos). Desde {simplex} (Simplex Urbanístico) muitas licenças deixaram de ter alvará: falta a câmara confirmar o que a data regista nesses casos. Há poucas obras novas por ano ({newRange} alvarás), por isso a mediana de um ano mexe muito.</>
-                  : <>Source: Câmara Municipal de Lisboa, building processes under the RJUE and alvarás (CC0), records of {snapshot}; estimador.pt&apos;s calculation. Each process counts once, by its first alvará, under the licence procedure. The alvará comes after approval and after the applicant asks and pays for it, so the time includes the applicant&apos;s; the câmara publishes no decision date. {partial?.year} runs to {lastAlvara} (smaller squares). Since {simplex} (Simplex Urbanístico) many licences no longer get an alvará: what the date records for them is still to be confirmed with the câmara. New builds are few ({newRange} alvarás a year), so one year&apos;s median moves a lot.</>}
-              />
+              <LisbonLicenceTimes locale={locale} data={licensing} />
 
               <h3 className="mt-12 max-w-[40ch] text-[1.35rem] leading-tight">
                 {allOutrun
@@ -278,8 +213,8 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
                 chart={nationalChart}
                 table={nationalTable}
                 note={pt
-                  ? <>Fonte: INE, fogos licenciados (0008309) e concluídos (0013249) em construções novas para habitação familiar, recolhidos a {ine?.retrieved_at ? longDate(ine.retrieved_at, locale) : '—'}. Os concluídos de {provisional.join(' e ')} são estimativas do INE (quadrados mais pequenos).</>
-                  : <>Source: INE, dwellings licensed (0008309) and completed (0013249) in new buildings for family housing, collected on {ine?.retrieved_at ? longDate(ine.retrieved_at, locale) : '—'}. Completions for {provisional.join(' and ')} are INE estimates (smaller squares).</>}
+                  ? <>Fonte: INE, fogos licenciados (0008309) e concluídos (0013249) em construções novas para habitação familiar, recolhidos a {ine?.retrieved_at ? housingDate(ine.retrieved_at, locale) : '—'}. Os concluídos de {provisional.join(' e ')} são estimativas do INE (quadrados mais pequenos).</>
+                  : <>Source: INE, dwellings licensed (0008309) and completed (0013249) in new buildings for family housing, collected on {ine?.retrieved_at ? housingDate(ine.retrieved_at, locale) : '—'}. Completions for {provisional.join(' and ')} are INE estimates (smaller squares).</>}
               />
             </div>
           </section>
