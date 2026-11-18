@@ -76,8 +76,11 @@ jobs:
           if [ -n "$NUMBER" ]; then
             gh issue comment "$NUMBER" --repo "$GITHUB_REPOSITORY" --body-file freshness-report.md
           else
+            # An alert nobody is assigned to is still better than no alert.
             gh issue create --repo "$GITHUB_REPOSITORY" --title "$ALERT_TITLE" \
-              --body-file freshness-report.md --assignee "$ALERT_ASSIGNEE"
+              --body-file freshness-report.md --assignee "$ALERT_ASSIGNEE" ||
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$ALERT_TITLE" \
+                --body-file freshness-report.md
           fi
 
       - name: Close the alert once the site is updating again
