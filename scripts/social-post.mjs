@@ -47,7 +47,8 @@ function buildPost(matchday) {
 /* ------------------------------------------------------------- GitHub --- */
 
 async function github(method, route, body) {
-  const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}${route}`, {
+  const url = route.startsWith('/search/') ? `https://api.github.com${route}` : `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}${route}`;
+  const response = await fetch(url, {
     method,
     headers: {
       authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
@@ -60,10 +61,12 @@ async function github(method, route, body) {
   return response.status === 204 ? null : response.json();
 }
 
+/** An earlier draft for this post, open or closed, found by its exact title (not its label). */
 async function findIssue(id) {
-  // By title, not by label, so a draft is never repeated even if the label went missing.
-  const issues = await github('GET', '/issues?state=all&sort=created&direction=desc&per_page=100');
-  return issues.find(issue => issue.title === `Social post: ${id}`) ?? null;
+  const title = `Social post: ${id}`;
+  const q = encodeURIComponent(`repo:${process.env.GITHUB_REPOSITORY} is:issue in:title "${title}"`);
+  const { items } = await github('GET', `/search/issues?q=${q}&per_page=20`);
+  return items.find(issue => issue.title === title) ?? null;
 }
 
 function issueBody({ forecast, post, texts }) {
