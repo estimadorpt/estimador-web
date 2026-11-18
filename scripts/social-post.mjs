@@ -61,8 +61,9 @@ async function github(method, route, body) {
 }
 
 async function findIssue(id) {
-  const issues = await github('GET', `/issues?labels=${LABEL}&state=all&per_page=100`);
-  return issues.find(issue => issue.title.endsWith(`: ${id}`)) ?? null;
+  // By title, not by label, so a draft is never repeated even if the label went missing.
+  const issues = await github('GET', '/issues?state=all&sort=created&direction=desc&per_page=100');
+  return issues.find(issue => issue.title === `Social post: ${id}`) ?? null;
 }
 
 function issueBody({ forecast, post, texts }) {
