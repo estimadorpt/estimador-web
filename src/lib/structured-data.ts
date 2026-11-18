@@ -44,9 +44,11 @@ export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
  * Organization (owner decision of 11 October 2026: pieces are signed
  * "estimador.pt"), any other name a Person.
  */
+export const PUBLICATION_AUTHOR = 'estimador.pt';
+
 export function articleAuthor(author: string) {
-  return author === 'estimador.pt'
-    ? { '@type': 'Organization' as const, '@id': ORGANIZATION_ID, name: 'estimador.pt', url: SITE_URL }
+  return author === PUBLICATION_AUTHOR
+    ? { '@type': 'Organization' as const, '@id': ORGANIZATION_ID, name: PUBLICATION_AUTHOR, url: SITE_URL }
     : { '@type': 'Person' as const, name: author };
 }
 /**

@@ -9,6 +9,7 @@ import {
   ARTICLE_KINDS,
   ARTICLE_SECTIONS,
 } from './mdx-articles';
+import { PUBLICATION_AUTHOR } from './structured-data';
 import { createPageMetadata, languageAlternates, localizedUrl, SITE_LOCALES } from './metadata';
 import { GET as feedRoute } from '@/app/[locale]/feed.xml/route';
 
@@ -137,7 +138,7 @@ describe('article registers', () => {
   it('are signed by the publication, not a person', () => {
     for (const locale of SITE_LOCALES) {
       for (const article of publishedArticles(locale)) {
-        expect(article.author, `${locale}/${article.slug}`).toBe('estimador.pt');
+        expect(article.author, `${locale}/${article.slug}`).toBe(PUBLICATION_AUTHOR);
       }
     }
   });
