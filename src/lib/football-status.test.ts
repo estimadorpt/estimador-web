@@ -14,6 +14,7 @@ import {
   matchPlayedLine,
   nextRoundTiming,
   roundPlayedLine,
+  slotPassedBeforeForecast,
 } from './football-status';
 
 const md8 = ['2026-10-09T17:45:00Z', '2026-10-11T17:00:00Z', '2026-10-12T19:15:00Z'];
@@ -55,7 +56,7 @@ describe('a forecast published mid-round (md08: 7 of 9 games played)', () => {
 
   it('counts the games it had seen, from the file', () => {
     const input = forecastStatusInput(md08, upcoming);
-    expect(input.roundSeen).toEqual({ played: 7, total: 9 });
+    expect(input.roundSeen).toEqual({ played: 7, total: 9, postponed: 0 });
     expect(input.nextRound).toBe(8);
     expect(input.playedAt).toBe('2026-10-12T21:15:00.000Z');
   });
@@ -125,5 +126,66 @@ describe('one game and the round it belongs to (audit FR3-01, FR3-02, FR3-04)', 
     expect(timing.postponed.map(f => f.matchday)).toEqual([2]);
     // A forecast published mid-round waits for that round.
     expect(nextRoundTiming({ matchday: 7, matches_remaining: [{}], next_matchday: { matchday: 8 } }, upcoming).round).toBe(7);
+  });
+});
+
+describe('a game of the forecast\'s own round that was postponed (md11: Estoril–Marítimo)', () => {
+  // md11 came out on 8 November at 22:33 UTC with eight of round 11's nine
+  // games played. Estoril–Marítimo's confirmed slot (15:30) had passed
+  // without a result, and the fixture record kept that slot for weeks.
+  const md11 = {
+    matchday: 11,
+    timestamp: '2026-11-08T22:33:16+00:00',
+    matches_remaining: [{ home: 'Estoril', away: 'Maritimo' }],
+    matchday_results: Array.from({ length: 8 }, () => ({ matchday: 11 })),
+    next_matchday: { matchday: 12 },
+  };
+  // As the fixture loader hands them over: the postponed game without its
+  // old slot, then round 12.
+  const upcoming = [
+    { matchday: 11, kickoff: null, postponed: true },
+    { matchday: 12, kickoff: '2026-11-27T20:15:00Z' },
+    { matchday: 12, kickoff: '2026-11-30T20:15:00Z' },
+  ];
+
+  it('tells a passed, confirmed slot from a game still to come and from a placeholder', () => {
+    expect(slotPassedBeforeForecast('2026-11-08T15:30:00Z', true, md11.timestamp)).toBe(true);
+    // The settle time has not passed: the result may simply not be in yet.
+    expect(slotPassedBeforeForecast('2026-11-08T21:00:00Z', true, md11.timestamp)).toBe(false);
+    expect(slotPassedBeforeForecast('2026-11-27T20:15:00Z', true, md11.timestamp)).toBe(false);
+    // An unconfirmed kickoff is the round's first day, not the game's slot.
+    expect(slotPassedBeforeForecast('2026-11-08T15:30:00Z', false, md11.timestamp)).toBe(false);
+    expect(slotPassedBeforeForecast(null, true, md11.timestamp)).toBe(false);
+  });
+
+  it('waits for the next round, not for the game with no date', () => {
+    const timing = nextRoundTiming(md11, upcoming);
+    expect(timing.round).toBe(12);
+    expect(timing.playedAt).toBe('2026-11-30T22:15:00.000Z');
+    expect(timing.postponed).toHaveLength(1);
+  });
+
+  it('says the round is over but for the postponed game, and never that it was played', () => {
+    const status = forecastStatus(md11, upcoming, 'pt');
+    expect(status.initial).toBe(
+      'Previsão de 8 nov., com 8 dos 9 jogos da jornada 11 disputados e um adiado · próxima previsão depois da jornada 12 (27–30 nov.)',
+    );
+    // Ten days later the line is the same; it turns only once round 12 is played.
+    expect(clockValue(status.initial, status.steps, Date.parse('2026-11-18T23:00:00Z'))).toBe(status.initial);
+    expect(clockValue(status.initial, status.steps, Date.parse('2026-11-30T23:00:00Z'))).toContain('jornada 12 jogada');
+    expect(forecastStatus(md11, upcoming, 'en').initial).toBe(
+      'Forecast of 8 Nov, with 8 of matchday 11’s 9 games played and one postponed · next forecast after matchday 12 (27–30 Nov)',
+    );
+  });
+
+  it('keeps waiting for the round while one of its games is still to come', () => {
+    const mixed = { ...md11, matches_remaining: [{}, {}] };
+    const timing = nextRoundTiming(mixed, [
+      { matchday: 11, kickoff: null, postponed: true },
+      { matchday: 11, kickoff: '2026-11-09T20:15:00Z' },
+      ...upcoming.slice(1),
+    ]);
+    expect(timing.round).toBe(11);
+    expect(timing.playedAt).toBe('2026-11-09T22:15:00.000Z');
   });
 });
