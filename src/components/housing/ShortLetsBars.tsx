@@ -29,7 +29,7 @@ export function ShortLetsBars({ parishes, municipality, max, thresholds, format,
   );
   return (
     <div className="py-2">
-      <div aria-hidden="true" className="grid grid-cols-[minmax(0,9.5rem)_1fr_3.25rem] gap-x-3 pb-1 text-[12px] text-graphite sm:grid-cols-[13rem_1fr_4rem]">
+      <div aria-hidden="true" className="hidden grid-cols-[minmax(0,9.5rem)_1fr_3.25rem] gap-x-3 pb-1 sm:grid text-[12px] text-graphite sm:grid-cols-[13rem_1fr_4rem]">
         <span />
         <span className="relative block h-4">
           {thresholds.map(t => (

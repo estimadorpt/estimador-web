@@ -44,7 +44,7 @@ function Frame({ props, width, height, compact }: { props: YearChartProps; width
   const x0 = Math.min(...years);
   const x1 = Math.max(...years);
   const labelRoom = compact ? 0 : 150;
-  const left = compact ? 38 : 52;
+  const left = compact ? 50 : 56;
   const right = width - 12 - labelRoom;
   const top = compact ? 34 : 18;
   const bottom = height - 28;
@@ -66,7 +66,7 @@ function Frame({ props, width, height, compact }: { props: YearChartProps; width
       {references.map(r => (
         <g key={`ref-${r.value}`}>
           <line x1={left} x2={right} y1={y(r.value)} y2={y(r.value)} stroke={BRAND.ink} strokeDasharray="2 3" />
-          <text x={left + 4} y={y(r.value) - 5} fill={BRAND.ink} {...font}>{r.label}</text>
+          <text x={left - 6} y={y(r.value) + 4} textAnchor="end" fill={BRAND.ink} {...font} fontWeight={600}>{r.label}</text>
         </g>
       ))}
       {markers.map(m => (

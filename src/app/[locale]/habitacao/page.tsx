@@ -195,6 +195,11 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
                   : <>Across the {count(overall.new_build.alvaras)} new-build alvarás issued from {firstYear} to {lastYear}, the median time from a process entering the câmara to its alvará was {count(overall.new_build.median_days)} days. From {run[0]?.year} to {lastYear}, each year&apos;s median was between {count(runLow?.new_build.median_days ?? 0)} days ({runLow?.year}) and {count(runHigh?.new_build.median_days ?? 0)} ({runHigh?.year}). <strong>Only licences that were issued count</strong>: a process still waiting, refused or withdrawn has no alvará and is left out.</>}
               </Standfirst>
               <LisbonLicenceTimes locale={locale} data={licensing} />
+              <p className="mt-3 max-w-[84ch] text-[12.5px] leading-[17px] text-graphite">
+                {pt
+                  ? <>Outra leitura dos mesmos registos da câmara: o <a href="https://flatin.pt/pt/barometro-construcao/" className="underline underline-offset-2">barómetro da construção do flatin.pt</a> (fixado a 8 de novembro de 2026) dá 940 dias para a construção nova nos 12 meses até 29 de outubro de 2026, em 35 títulos. Aqui está a série de cada ano desde 2009.</>
+                  : <>Another reading of the same câmara records: <a href="https://flatin.pt/pt/barometro-construcao/" className="underline underline-offset-2">flatin.pt&apos;s construction barometer</a> (fixed on 8 November 2026) gives 940 days for new builds in the 12 months to 29 October 2026, on 35 titles. This page gives the series for each year since 2009.</>}
+              </p>
 
               <h3 className="mt-12 max-w-[40ch] text-[1.35rem] leading-tight">
                 {allOutrun
