@@ -821,8 +821,8 @@ export const RECIPE_PROVENANCE: Record<PortraitRecipe, RecipeProvenance> = {
  */
 export const MODELLED_ANCHOR: Partial<Record<PortraitRecipe, Text>> = {
   income: {
-    pt: 'o modelo é ancorado às declarações de IRS de 2021 por concelho (INE) e às pensões da Segurança Social; a repartição pela freguesia é do modelo',
-    en: 'the model is anchored to the 2021 income tax returns by municipality (INE) and to Social Security pensions; the split by parish is the model’s',
+    pt: 'ancorado às declarações de IRS de 2021 por concelho (INE) e às pensões da Segurança Social; a repartição pela freguesia é do modelo',
+    en: 'anchored to the 2021 income tax returns by municipality (INE) and to Social Security pensions; the split by parish is the model’s',
   },
   birthplace: {
     pt: 'o quadro 12296 do INE fixa, por freguesia, os portugueses nascidos no estrangeiro; o resto da repartição é do modelo',

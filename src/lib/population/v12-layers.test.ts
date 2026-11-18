@@ -51,6 +51,7 @@ describe('v1.2 parish questions: the words', () => {
     // No dimension a card draws is left without words: a raw code never reaches a live card.
     for (const recipe of LAYER_RECIPES) for (const dimension of fixture.recipes[recipe].dimensions) expect(VALUES[dimension]?.length, dimension).toBeGreaterThan(0);
     expect(VALUES.income_band.find(entry => entry.value === '0')!.label.pt).not.toMatch(/sem rendimento/i);
+    expect(VALUES.income_band.find(entry => entry.value === '0')!.label.en).not.toMatch(/no income/i);
   });
 
   it('gives every card a unique anchor that no section heading uses', () => {
