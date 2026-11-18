@@ -216,6 +216,11 @@ export function forecastAsOf(
  * disputado" and its round "jogada, nova previsão em preparação" for three
  * weeks. An unconfirmed kickoff is a placeholder for the round's first day
  * (md06's three Monday games sat on Saturday's), so it proves nothing.
+ *
+ * Known limit: a forecast built after a game that was played but whose result
+ * had not reached the data yet would read that game as postponed until the
+ * next forecast. The update fetches results before it fits, so the two hours
+ * of `ROUND_SETTLE_MS` have been enough; widen the window here if that changes.
  */
 export function slotPassedBeforeForecast(
   kickoff: string | null | undefined,
