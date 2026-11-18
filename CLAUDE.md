@@ -107,6 +107,7 @@ the paths below omit it.
 /desporto/liga/metodologia/        → Liga Portugal methodology
 /economia/                         → Economy (in preparation; noindex while unpublished)
 /economia/metodologia/             → Economy methodology
+/habitacao/                        → Housing (draft until 9 Dec 2026; noindex while unpublished)
 /eleicoes/arquivo/                 → How to read the archived election forecasts
 /eleicoes/presidenciais/           → Presidential 2026 forecast (archive)
 /eleicoes/legislativas/            → Parliamentary 2025 forecast (archive)

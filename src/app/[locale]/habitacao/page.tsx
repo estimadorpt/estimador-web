@@ -24,6 +24,7 @@ import {
   oneDecimal,
   TWO_YEARS_DAYS,
   yearsOverTwoYears,
+  runHoldsFinding,
 } from '@/lib/housing-data';
 import { setRequestLocale } from '@/i18n/request-locale';
 import { COPY_REVISED } from '@/lib/sitemap-dates';
@@ -92,7 +93,7 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
         ? `Fogos licenciados e concluídos em construções novas para habitação familiar, Portugal, ${national[0].year} a ${lastNational.year}`
         : `Dwellings licensed and completed in new family housing, Portugal, ${national[0].year} to ${lastNational.year}`}
       yMax={nationalMax}
-      yTicks={Array.from({ length: Math.floor(nationalMax / 10000) }, (_, i) => i * 10000).map(v => ({ value: v, label: v === 0 ? '0' : `${v / 1000}${pt ? ' mil' : 'k'}` }))}
+      yTicks={Array.from({ length: Math.floor(nationalMax / 10000) + 1 }, (_, i) => i * 10000).map(v => ({ value: v, label: v === 0 ? '0' : `${v / 1000}${pt ? ' mil' : 'k'}` }))}
       series={[
         { key: 'licensed', label: pt ? 'Licenciados' : 'Licensed', tone: 'ink', points: national.map(n => ({ year: n.year, value: n.licensed })) },
         { key: 'completed', label: pt ? 'Concluídos' : 'Completed', tone: 'graphite', points: national.map(n => ({ year: n.year, value: n.completed, soft: n.completed_provisional })) },
@@ -189,7 +190,7 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
             />
             <div className="max-w-5xl">
               <Finding>
-                {run.length >= 2
+                {runHoldsFinding(run)
                   ? (pt ? `Desde ${run[0].year}, a mediana de cada ano passa os dois anos` : `Since ${run[0].year}, every year's median has passed two years`)
                   : (pt ? `A mediana foi de ${count(overall.new_build.median_days)} dias da entrada ao alvará` : `The median was ${count(overall.new_build.median_days)} days from entry to alvará`)}
               </Finding>

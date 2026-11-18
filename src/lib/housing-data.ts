@@ -93,6 +93,16 @@ function readHousing<T>(file: string, schema: string): T | null {
   return null;
 }
 
+function emptyFeed(file: string): null {
+  if (HOUSING_PUBLISHED) throw new Error(`housing: ${file} is missing or has no rows`);
+  return null;
+}
+
+/** The finding needs two whole years past the line: a partial year alone never carries it. */
+export function runHoldsFinding(run: LicenceYear[]): boolean {
+  return run.filter(y => !y.partial_year).length >= 2;
+}
+
 /** Ten-thousand ceiling over every value, so a resync never draws outside the frame. */
 export function niceCeiling(values: number[], step = 10000): number {
   const top = Math.max(0, ...values);
@@ -102,7 +112,7 @@ export function niceCeiling(values: number[], step = 10000): number {
 /** The licensing file, its years in order (the charts and yearsOverTwoYears read them in order). */
 export function loadHousingLicensing(): LicensingFile | null {
   const file = readHousing<LicensingFile>('licensing.json', 'estimador.housing.licensing/1');
-  if (!file) return null;
+  if (!file || !file.lisbon?.by_alvara_year?.length || !file.national?.length) return emptyFeed('licensing.json');
   return {
     ...file,
     lisbon: { ...file.lisbon, by_alvara_year: [...file.lisbon.by_alvara_year].sort((a, b) => a.year - b.year) },
@@ -113,7 +123,7 @@ export function loadHousingLicensing(): LicensingFile | null {
 /** The short-lets file, parishes from the highest ratio down (the finding names the first). */
 export function loadHousingShortLets(): ShortLetsFile | null {
   const file = readHousing<ShortLetsFile>('short-lets-lisbon.json', 'estimador.housing.short-lets/1');
-  if (!file) return null;
+  if (!file || !file.parishes?.length) return emptyFeed('short-lets-lisbon.json');
   return { ...file, parishes: [...file.parishes].sort((a, b) => b.per_100_dwellings - a.per_100_dwellings || a.name.localeCompare(b.name, 'pt')) };
 }
 

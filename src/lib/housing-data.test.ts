@@ -1,6 +1,6 @@
 import type { LicenceYear } from './housing-data';
 import { describe, expect, it } from 'vitest';
-import { housingDate, niceCeiling, oneDecimal, yearsOverTwoYears, loadHousingLicensing, loadHousingShortLets } from './housing-data';
+import { housingDate, niceCeiling, oneDecimal, runHoldsFinding, yearsOverTwoYears, loadHousingLicensing, loadHousingShortLets } from './housing-data';
 
 const y = (year: number, days: number): LicenceYear => ({
   year,
@@ -39,5 +39,15 @@ describe('niceCeiling', () => {
   it('rounds up past every value with room', () => {
     expect(niceCeiling([41000, 20000])).toBe(50000);
     expect(niceCeiling([])).toBe(10000);
+  });
+});
+
+describe('runHoldsFinding', () => {
+  it('needs two whole years past the line', () => {
+    const whole = (year: number) => ({ year, partial_year: false }) as unknown as LicenceYear;
+    const part = (year: number) => ({ year, partial_year: true }) as unknown as LicenceYear;
+    expect(runHoldsFinding([whole(2024), whole(2025)])).toBe(true);
+    expect(runHoldsFinding([whole(2025), part(2026)])).toBe(false);
+    expect(runHoldsFinding([])).toBe(false);
   });
 });

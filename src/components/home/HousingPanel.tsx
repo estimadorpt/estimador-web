@@ -1,7 +1,7 @@
 import { ChannelHead, NowGlyph } from '@/components/instrument';
 import { Action } from '@/components/brand/Action';
 import { formatCount } from '@/lib/population/format';
-import { housingDate, loadHousingLicensing, loadHousingShortLets, oneDecimal, yearsOverTwoYears } from '@/lib/housing-data';
+import { housingDate, loadHousingLicensing, loadHousingShortLets, oneDecimal, runHoldsFinding, yearsOverTwoYears } from '@/lib/housing-data';
 
 /**
  * Habitação on the homepage, once the page publishes (housing-status.json):
@@ -34,7 +34,7 @@ export function HousingPanel({ locale: given }: { locale: string }) {
       <div className="mt-4 grid gap-x-10 gap-y-6 md:grid-cols-2">
         <div>
           <p className="disp text-[1.35rem] leading-tight">
-            {run.length >= 2
+            {runHoldsFinding(run)
               ? (pt ? `Desde ${run[0].year}, a mediana de uma licença de obra nova em Lisboa passa os dois anos` : `Since ${run[0].year}, the median new-build licence in Lisbon has taken more than two years`)
               : (pt ? `Uma licença de obra nova em Lisboa demorou, a meio, ${count(overall.new_build.median_days)} dias` : `A new-build licence in Lisbon took a median of ${count(overall.new_build.median_days)} days`)}
           </p>
