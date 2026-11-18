@@ -31,6 +31,18 @@
       }
     },
     {
+      "route": "/og-image-artigo-as-regras-da-habitacao-mudam-a-meio-dos-projetos-en-ab3f513d.png",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "route": "/og-image-artigo-as-regras-da-habitacao-mudam-a-meio-dos-projetos-pt-9a8a4571.png",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
       "route": "/og-image-artigo-as-regras-da-habitacao-mudam-a-meio-dos-projetos-pt-ccc3ffce.png",
       "headers": {
         "cache-control": "public, max-age=0, must-revalidate"
