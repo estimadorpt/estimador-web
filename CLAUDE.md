@@ -69,6 +69,7 @@ npm run check        # validate:data + typecheck + lint + tests (CI runs it befo
 npm run og           # Regenerate the OG cards + public/og-manifest.json (also run by prebuild)
 npm run smoke -- --base <url>  # Probe a deployed export: every route, asset and redirect
 npm run check:export # Export budget (files, MB, per-file) + over-long titles/descriptions; runs as postbuild
+npm run freshness    # Is the site still updating? The daily check (see "Deployment"); run from main
 ```
 
 `scripts/patch-next.mjs` (postinstall and prebuild) fixes one Next 15.5 bug: when a link's RSC
@@ -93,6 +94,23 @@ The project deploys automatically to Azure Static Web Apps via GitHub Actions wh
 - `AZURE_DEPLOYMENT_TOKEN` secret for Azure authentication
 - Static export configuration (`output: 'export'` in next.config.js)
 - Builds to `out/` directory
+
+**Freshness.** A static export stands still without anyone noticing: from 24 October to
+1 November 2026 a data sync kept `npm run check` red and nothing deployed for eight days.
+`.github/workflows/site-freshness.yml` runs `scripts/check-freshness.mjs` every morning (07:17 UTC)
+and after every deploy from `main`. It asks three questions: did the last push to `main` deploy; did
+a new forecast file reach `main` after the Liga games that were played (two or more games that
+kicked off over 36 hours ago, with no data commit made after they could have ended, mean the
+publishing job on the Mac did not run; one such game alone is taken for a postponement, which keeps
+its date in the file); and does the live site serve the `game_fixtures.json` that `main` holds, an
+hour after the commit. While any answer is no, the run is red and one issue, "estimador.pt has
+stopped updating", stays open and assigned to the owner, with a new report each day; it is closed
+by the first healthy run. The rules and thresholds are in `scripts/lib/freshness.mjs`
+(`site-freshness.test.ts`, which also reads the published fixtures file, so a renamed field fails
+the tests instead of silencing the check). The script uses Node alone, so it still runs when a
+broken lock file is why the deploys fail. The job on the Mac (`com.estimador.publish`, documented
+in estimador-football `docs/com.estimador.publish.plist`) commits only when there is a new result,
+on the days it is scheduled: a game played on another day waits for the next scheduled day.
 
 ## Route Structure
 
