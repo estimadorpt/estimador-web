@@ -106,7 +106,8 @@ export function fitTo(network, post) {
   const parts = post.text.split('\n\n');
   const [finding, link] = [parts[0], parts[parts.length - 1]];
   const middle = parts.slice(1, -1);
-  // Drop the move line first, then the count: the finding and the link always stay.
+  // First drop everything after the first middle line (the move line), then all of them:
+  // the finding and the link always stay.
   const candidates = [parts, [finding, ...middle.slice(0, 1), link], [finding, link]];
   for (const candidate of candidates) {
     const text = candidate.join('\n\n');
