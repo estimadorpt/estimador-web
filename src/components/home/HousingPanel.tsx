@@ -35,8 +35,8 @@ export function HousingPanel({ locale: given }: { locale: string }) {
         <div>
           <p className="disp text-[1.35rem] leading-tight">
             {pt
-              ? `Uma licença de obra nova em Lisboa demora mais de dois anos em cada ano desde ${run[0]?.year}`
-              : `A new-build licence in Lisbon has taken more than two years in every year since ${run[0]?.year}`}
+              ? `Desde ${run[0]?.year}, a mediana de uma licença de obra nova em Lisboa passa os dois anos`
+              : `Since ${run[0]?.year}, the median new-build licence in Lisbon has taken more than two years`}
           </p>
           <p className="mt-2 flex gap-2 text-[15px] leading-relaxed">
             <NowGlyph className="mt-1" />
