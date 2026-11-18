@@ -300,7 +300,8 @@ the system changes.
   (`scripts/generate-social-kit.mjs`) and the matchday post (`generate-social-images.mjs`) use the
   same pieces. After each deploy, `.github/workflows/social.yml` drafts the latest Liga forecast's post as a
   `social` issue (`scripts/social-post.mjs`, text from templates in `scripts/lib/social-posts.mjs`,
-  never an LLM); the owner's `approved` label posts it to Bluesky and X (`docs/brand/social-kit.md`). The scripts keep their own copy of the club names, colours, finding, percentages
+  never an LLM); the owner's `approved` label posts it to Bluesky and X (`docs/brand/social-kit.md`).
+  The scripts keep their own copy of the club names, colours, finding, percentages
   and reading times; `src/lib/football-brand-script.test.ts` holds them to the site's.
 - **Communications**: one line ("Dados para compreender Portugal."), one descriptor and two bios,
   written once in `src/lib/brand/descriptor.json` (`descriptor.ts` for the app) and read by

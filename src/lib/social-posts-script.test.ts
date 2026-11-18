@@ -64,3 +64,20 @@ describe('the social posts', () => {
     expect(new TextDecoder().decode(bytes.slice(facet.index.byteStart, facet.index.byteEnd))).toBe('https://estimador.pt/pt/desporto/liga/');
   });
 });
+
+describe('the X request signature', () => {
+  it('matches the OAuth 1.0a worked example in X’s documentation', async () => {
+    const { oauthHeader } = await import('../../scripts/social-post.mjs');
+    const header = oauthHeader('POST', 'https://api.twitter.com/1.1/statuses/update.json', {
+      apiKey: 'xvz1evFS4wEEPTGEFPHBog',
+      apiSecret: 'kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw',
+      accessToken: '370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb',
+      accessSecret: 'LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE',
+    }, {
+      nonce: 'kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg',
+      timestamp: 1318622958,
+      signed: { include_entities: 'true', status: 'Hello Ladies + Gentlemen, a signed OAuth request!' },
+    });
+    expect(header).toContain('oauth_signature="hCtSmYh%2BiHYCEqBWrE7C7hYmtUk%3D"');
+  });
+});

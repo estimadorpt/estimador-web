@@ -32,7 +32,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          # The commit that was just deployed, not whatever main is now.
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -59,12 +60,14 @@ jobs:
           if-no-files-found: ignore
 
   publish:
-    # Only the repository owner's label posts: anyone else's is ignored.
+    # Only the approver's label posts (the repository variable SOCIAL_APPROVER,
+    # else bernardocaldas): the repository belongs to an organisation, so
+    # github.repository_owner is not a person who could ever add the label.
     if: >-
       github.event_name == 'issues'
       && github.event.label.name == 'approved'
       && contains(github.event.issue.labels.*.name, 'social')
-      && github.event.sender.login == github.repository_owner
+      && github.event.sender.login == (vars.SOCIAL_APPROVER || 'bernardocaldas')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
