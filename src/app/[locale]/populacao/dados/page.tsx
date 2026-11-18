@@ -321,7 +321,7 @@ sha256sum checksums.sha256`;
                   <thead>
                     <tr>
                       <th scope="col" className="border-b border-ink py-2 pr-4 text-left text-[12px] font-normal text-graphite">{pt ? 'Ficheiro e conteúdo' : 'File and contents'}</th>
-                      <th scope="col" className="border-b border-ink py-2 px-4 text-left text-[12px] font-normal text-graphite">{pt ? 'Licença' : 'Licence'}</th>
+                      <th scope="col" className="hidden border-b border-ink py-2 px-4 text-left text-[12px] font-normal text-graphite sm:table-cell">{pt ? 'Licença' : 'Licence'}</th>
                       <th scope="col" className="border-b border-ink py-2 pl-4 text-right text-[12px] font-normal text-graphite">{pt ? 'Tamanho' : 'Size'}</th>
                     </tr>
                   </thead>
@@ -331,8 +331,10 @@ sha256sum checksums.sha256`;
                         <th scope="row" className="border-b border-grid py-3 pr-4 text-left font-normal">
                           <a href={file.url} className="tap-target font-mono text-[13px] font-semibold text-ink underline underline-offset-4 [overflow-wrap:anywhere]">{file.name}</a>
                           <span className="mt-1 block leading-relaxed text-graphite">{FILE_COPY[file.key]?.[locale]}</span>
+                          {/* On a phone the licence goes under the description, so the names keep their width. */}
+                          <span className="mt-1 block text-graphite sm:hidden">{pt ? 'Licença' : 'Licence'}: <a className={link} href={LICENCE_URL[file.licence][locale]}>{file.licence}</a></span>
                         </th>
-                        <td className="whitespace-nowrap border-b border-grid py-3 px-4 text-ink"><a className={link} href={LICENCE_URL[file.licence][locale]}>{file.licence}</a></td>
+                        <td className="hidden whitespace-nowrap border-b border-grid py-3 px-4 text-ink sm:table-cell"><a className={link} href={LICENCE_URL[file.licence][locale]}>{file.licence}</a></td>
                         <td className="whitespace-nowrap border-b border-grid py-3 pl-4 text-right tabular-nums text-ink">{formatBytes(file.bytes, locale)}</td>
                       </tr>
                     ))}
