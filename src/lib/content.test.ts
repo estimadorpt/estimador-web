@@ -132,14 +132,12 @@ describe('article registers', () => {
     }
   });
 
-  // The byline is emitted as a schema.org Person and as dc:creator. The site's
-  // own name in that slot is both wrong markup and the wrong positioning for
-  // analysis that wants to be cited.
-  it('carry a named byline rather than the publication itself', () => {
+  // Owner decision (11 October 2026): the owner's name appears only in the
+  // footer's credit line and on /sobre, so a piece is signed by the publication.
+  it('are signed by the publication, not a person', () => {
     for (const locale of SITE_LOCALES) {
       for (const article of publishedArticles(locale)) {
-        expect(article.author, `${locale}/${article.slug}`).not.toBe('estimador.pt');
-        expect(article.author.split(' ').length, `${locale}/${article.slug}`).toBeGreaterThan(1);
+        expect(article.author, `${locale}/${article.slug}`).toBe('estimador.pt');
       }
     }
   });
