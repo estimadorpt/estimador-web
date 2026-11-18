@@ -29,4 +29,16 @@ Tudo aqui é gerado por `npm run brand` a partir de `src/lib/brand/geometry.json
 
 ## Voz
 
-Frase: **Dados para compreender Portugal.** Descrição: *Dados e modelos sobre Portugal, com a incerteza à vista: quem vive em cada freguesia, como pode acabar a Liga e o que diziam as previsões eleitorais.* (Ambas vivem em `src/lib/brand/descriptor.json`.) Escreve-se em frases, em caixa baixa; perguntas como títulos; a incerteza diz-se, não se esconde; cada publicação com data e fonte; uma ação por peça.
+Frase: **Dados para compreender Portugal.** Descrição: *Dados e modelos sobre Portugal, com a incerteza à vista: quem vive em cada freguesia, como pode acabar a Liga e o que diziam as previsões eleitorais.* (Ambas vivem em `src/lib/brand/descriptor.json`.) Escreve-se em frases, em caixa baixa; o resultado como título, nunca uma pergunta; a incerteza desenha-se e data-se, não se declara; trata-se o leitor por tu; sem emoji nem pontos de exclamação; cada publicação com data e fonte; uma ação por peça.
+
+## Publicação automática
+
+Depois de cada deploy de `main`, `.github/workflows/social.yml` corre `node scripts/social-post.mjs --draft`: se a previsão da Liga mais recente tem menos de sete dias e ainda não tem issue, abre uma issue com a etiqueta `social` com o texto para o Bluesky, para o X e para o LinkedIn, e o cartão nos artefactos da execução. Quando `bernardocaldas` (ou quem a variável `SOCIAL_APPROVER` indicar) lhe junta a etiqueta `approved`, o mesmo script publica no Bluesky e no X, comenta os links e fecha a issue. Se uma rede falhar, a issue fica aberta; tirar e voltar a pôr `approved` tenta outra vez, saltando as redes já publicadas. Com a variável de repositório `SOCIAL_MODE=auto`, publica logo, e a issue fica como registo; se essa publicação falhar, a issue fica aberta e publica-se juntando-lhe `approved` à mão (o deploy seguinte não volta a tentar). O LinkedIn copia-se à mão a partir da issue.
+
+O texto vem de `scripts/lib/social-posts.mjs`: modelos fixos preenchidos com os números que a página imprime (a frase do título, as percentagens e a hora de Lisboa), nunca um modelo de linguagem. `src/lib/social-posts-script.test.ts` confere os números, a voz e o comprimento de cada rede em todas as previsões da época. Para ver o que sairia: `node scripts/social-post.mjs --dry-run [--matchday 11] [--out pasta]`.
+
+Segredos (GitHub, estimador-web): `BLUESKY_HANDLE`, `BLUESKY_APP_PASSWORD`, `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET`. Uma rede sem os seus segredos é saltada, com uma nota na issue.
+
+## Perfis: texto
+
+Nome: **estimador.pt**. Bio (X, Bluesky): a `bio.pt` de `descriptor.json`. Sobre (LinkedIn): o `descriptor`, em português e em inglês. Link: https://estimador.pt/pt/. O nome do dono não entra na bio.
