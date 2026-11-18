@@ -84,6 +84,7 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
   // ---- National licences and completions ----
   const lastNational = national[national.length - 1];
   const twoBefore = national.find(n => n.year === lastNational.year - 2);
+  const listYears = (ys: number[], l: string) => new Intl.ListFormat(l === 'pt' ? 'pt-PT' : 'en-GB', { type: 'conjunction' }).format(ys.map(String));
   const provisional = national.filter(n => n.completed_provisional).map(n => n.year);
   const allOutrun = national.every(n => n.licensed > n.completed);
   const nationalMax = niceCeiling(national.flatMap(n => [n.licensed, n.completed]));
@@ -224,8 +225,8 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
                 chart={nationalChart}
                 table={nationalTable}
                 note={pt
-                  ? <>Fonte: INE, fogos licenciados (0008309) e concluídos (0013249) em construções novas para habitação familiar, recolhidos a {ine?.retrieved_at ? housingDate(ine.retrieved_at, locale) : '—'}. Os concluídos de {provisional.join(' e ')} são estimativas do INE (quadrados mais pequenos).</>
-                  : <>Source: INE, dwellings licensed (0008309) and completed (0013249) in new buildings for family housing, collected on {ine?.retrieved_at ? housingDate(ine.retrieved_at, locale) : '—'}. Completions for {provisional.join(' and ')} are INE estimates (smaller squares).</>}
+                  ? <>Fonte: INE, fogos licenciados (0008309) e concluídos (0013249) em construções novas para habitação familiar, recolhidos a {ine?.retrieved_at ? housingDate(ine.retrieved_at, locale) : '—'}. {provisional.length > 0 && <>Os concluídos de {listYears(provisional, locale)} são estimativas do INE (quadrados mais pequenos).</>}</>
+                  : <>Source: INE, dwellings licensed (0008309) and completed (0013249) in new buildings for family housing, collected on {ine?.retrieved_at ? housingDate(ine.retrieved_at, locale) : '—'}. {provisional.length > 0 && <>Completions for {listYears(provisional, locale)} are INE estimates (smaller squares).</>}</>}
               />
             </div>
           </section>

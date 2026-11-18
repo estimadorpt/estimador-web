@@ -31,7 +31,7 @@ export const COPY_REVISED: Readonly<Record<string, string>> = {
   '/populacao/dados': '2026-10-06',
   '/eleicoes/arquivo': '2026-10-06',
   // A draft (housing-status.json): no sitemap entry until it is published.
-  '/habitacao': '2026-11-19',
+  '/habitacao': '2026-11-18',
 };
 
 /** The later of the dates given (any may be missing); undefined when none is. */
