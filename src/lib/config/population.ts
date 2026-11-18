@@ -46,18 +46,31 @@ export const POPULATION_DOWNLOADS = {
    */
   releases: `${REPO}/releases`,
   issues: `${REPO}/issues`,
-  files: [
+  files: ([
     // Sizes of the GitHub release assets; the four single files are also in
-    // release.json's package list (tested), the zip only on GitHub.
-    { key: 'package', name: `pt-synthpop-v${POPULATION_RELEASE}.zip`, bytes: 181_732_980 },
-    { key: 'persons', name: `pt-synthpop-v${POPULATION_RELEASE}-persons.parquet`, bytes: 78_216_701 },
-    { key: 'households', name: `pt-synthpop-v${POPULATION_RELEASE}-households.parquet`, bytes: 6_766_320 },
-    { key: 'quality', name: `pt-synthpop-v${POPULATION_RELEASE}-quality.csv`, bytes: 668_145 },
-    { key: 'metadata', name: `pt-synthpop-v${POPULATION_RELEASE}-metadata.json`, bytes: 67_080 },
-    { key: 'checksums', name: 'checksums.sha256', bytes: 7_318 },
-    { key: 'sums', name: 'SHA256SUMS', bytes: 573 },
-  ].map(file => ({ ...file, url: ASSET(file.name) })),
+    // release.json's package list (tested), the zip only on GitHub. Each file
+    // names its licence: from v1.2 the layer files beside the population carry
+    // their sources' terms (EEP vote columns CC BY-NC, ESS attitude columns
+    // CC BY-NC-SA), so /dados prints one licence per file. At the v1.2 bump,
+    // add the layer files here (keys census_facts, income, vote, attitudes;
+    // their words are in FILE_COPY on /dados) with the sizes release.json gives.
+    { key: 'package', name: `pt-synthpop-v${POPULATION_RELEASE}.zip`, bytes: 181_732_980, licence: 'CC BY-NC 4.0' },
+    { key: 'persons', name: `pt-synthpop-v${POPULATION_RELEASE}-persons.parquet`, bytes: 78_216_701, licence: 'CC BY-NC 4.0' },
+    { key: 'households', name: `pt-synthpop-v${POPULATION_RELEASE}-households.parquet`, bytes: 6_766_320, licence: 'CC BY-NC 4.0' },
+    { key: 'quality', name: `pt-synthpop-v${POPULATION_RELEASE}-quality.csv`, bytes: 668_145, licence: 'CC BY-NC 4.0' },
+    { key: 'metadata', name: `pt-synthpop-v${POPULATION_RELEASE}-metadata.json`, bytes: 67_080, licence: 'CC BY-NC 4.0' },
+    { key: 'checksums', name: 'checksums.sha256', bytes: 7_318, licence: 'CC BY-NC 4.0' },
+    { key: 'sums', name: 'SHA256SUMS', bytes: 573, licence: 'CC BY-NC 4.0' },
+  ] satisfies Array<{ key: string; name: string; bytes: number; licence: PopulationLicence }>).map(file => ({ ...file, url: ASSET(file.name) })),
 } as const;
+
+/** The licences a population file can carry (Creative Commons 4.0). */
+export type PopulationLicence = 'CC BY-NC 4.0' | 'CC BY-NC-SA 4.0';
+
+export const LICENCE_URL: Record<PopulationLicence, { pt: string; en: string }> = {
+  'CC BY-NC 4.0': { pt: 'https://creativecommons.org/licenses/by-nc/4.0/deed.pt', en: 'https://creativecommons.org/licenses/by-nc/4.0/' },
+  'CC BY-NC-SA 4.0': { pt: 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.pt', en: 'https://creativecommons.org/licenses/by-nc-sa/4.0/' },
+};
 
 /** Site routes of the population section (locale-less, trailing slash added by links). */
 export const POPULATION_ROUTES = {
