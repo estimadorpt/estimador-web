@@ -1,6 +1,6 @@
 import type { LicenceYear } from './housing-data';
 import { describe, expect, it } from 'vitest';
-import { housingDate, oneDecimal, yearsOverTwoYears, loadHousingLicensing, loadHousingShortLets } from './housing-data';
+import { housingDate, niceCeiling, oneDecimal, yearsOverTwoYears, loadHousingLicensing, loadHousingShortLets } from './housing-data';
 
 const y = (year: number, days: number): LicenceYear => ({
   year,
@@ -32,5 +32,12 @@ describe('housing helpers', () => {
     expect(years).toEqual([...years].sort((a, b) => a - b));
     const ratios = sl.parishes.map(p => p.per_100_dwellings);
     expect(ratios).toEqual([...ratios].sort((a, b) => b - a));
+  });
+});
+
+describe('niceCeiling', () => {
+  it('rounds up past every value with room', () => {
+    expect(niceCeiling([41000, 20000])).toBe(50000);
+    expect(niceCeiling([])).toBe(10000);
   });
 });

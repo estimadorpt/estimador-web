@@ -20,6 +20,7 @@ import {
   loadHousingLicensing,
   loadHousingShortLets,
   housingDate,
+  niceCeiling,
   oneDecimal,
   TWO_YEARS_DAYS,
   yearsOverTwoYears,
@@ -84,13 +85,14 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
   const twoBefore = national.find(n => n.year === lastNational.year - 2);
   const provisional = national.filter(n => n.completed_provisional).map(n => n.year);
   const allOutrun = national.every(n => n.licensed > n.completed);
+  const nationalMax = niceCeiling(national.flatMap(n => [n.licensed, n.completed]));
   const nationalChart = (
     <YearChart
       label={pt
         ? `Fogos licenciados e concluídos em construções novas para habitação familiar, Portugal, ${national[0].year} a ${lastNational.year}`
         : `Dwellings licensed and completed in new family housing, Portugal, ${national[0].year} to ${lastNational.year}`}
-      yMax={45000}
-      yTicks={[0, 10000, 20000, 30000, 40000].map(v => ({ value: v, label: v === 0 ? '0' : `${v / 1000}${pt ? ' mil' : 'k'}` }))}
+      yMax={nationalMax}
+      yTicks={Array.from({ length: Math.floor(nationalMax / 10000) }, (_, i) => i * 10000).map(v => ({ value: v, label: v === 0 ? '0' : `${v / 1000}${pt ? ' mil' : 'k'}` }))}
       series={[
         { key: 'licensed', label: pt ? 'Licenciados' : 'Licensed', tone: 'ink', points: national.map(n => ({ year: n.year, value: n.licensed })) },
         { key: 'completed', label: pt ? 'Concluídos' : 'Completed', tone: 'graphite', points: national.map(n => ({ year: n.year, value: n.completed, soft: n.completed_provisional })) },
@@ -143,8 +145,8 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
         : ['Parish', 'Short-let registrations', 'Classic dwellings (Census 2021)', 'Registrations per 100', 'Above the threshold']}
       rows={[...shortLets.parishes, { ...lx, name: pt ? 'Lisboa, concelho' : 'Lisbon, municipality' }].map(p => [
         p.name, count(p.registrations), count(p.classic_dwellings), oneDecimal(p.per_100_dwellings, locale),
-        p.per_100_dwellings > RMAL_THRESHOLDS.absolute ? (pt ? 'de 10' : 'of 10')
-          : p.per_100_dwellings > RMAL_THRESHOLDS.relative ? (pt ? 'de 5' : 'of 5') : '—',
+        p.per_100_dwellings > RMAL_THRESHOLDS.absolute ? (pt ? 'passa de 10' : 'above 10')
+          : p.per_100_dwellings > RMAL_THRESHOLDS.relative ? (pt ? 'passa de 5' : 'above 5') : '—',
       ])}
       align={['left', 'right', 'right', 'right', 'left']}
     />

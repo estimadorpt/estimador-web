@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { HOUSING_PUBLISHED } from './config/housing-status';
 
 /**
  * The housing page's two files (public/data/housing/), written by
@@ -76,12 +77,26 @@ export interface ShortLetsFile {
 }
 
 function readHousing<T>(file: string, schema: string): T | null {
+  const full = path.join(process.cwd(), 'public/data/housing', file);
+  let value: { schema?: string } | null = null;
   try {
-    const value = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public/data/housing', file), 'utf8'));
-    return value?.schema === schema ? (value as T) : null;
-  } catch {
+    value = JSON.parse(fs.readFileSync(full, 'utf8'));
+  } catch (error) {
+    // Once the page is published a missing or broken file must fail the build, never ship a 404.
+    if (HOUSING_PUBLISHED) throw new Error(`housing: cannot read ${file}: ${String(error)}`);
+    console.warn(`housing: ${file} missing or unreadable; /habitacao renders a 404 while unpublished`);
     return null;
   }
+  if (value?.schema === schema) return value as T;
+  if (HOUSING_PUBLISHED) throw new Error(`housing: ${file} is not ${schema}`);
+  console.warn(`housing: ${file} is not ${schema}`);
+  return null;
+}
+
+/** Ten-thousand ceiling over every value, so a resync never draws outside the frame. */
+export function niceCeiling(values: number[], step = 10000): number {
+  const top = Math.max(0, ...values);
+  return Math.max(step, Math.ceil((top * 1.1) / step) * step);
 }
 
 /** The licensing file, its years in order (the charts and yearsOverTwoYears read them in order). */
