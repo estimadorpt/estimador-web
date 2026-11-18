@@ -143,6 +143,14 @@ export function yearsOverTwoYears(years: LicenceYear[]): LicenceYear[] {
   return run;
 }
 
+/**
+ * Dated figures from outside the two files, typed once here so they are rechecked together before
+ * launch (CLAUDE.md, "Housing section"): flatin.pt's construction barometer (same CML records,
+ * read 18 Nov 2026) and the RNAL cancellations named in the short-lets file's caveats.
+ */
+export const FLATIN_BAROMETER = { days: 940, titles: 35, periodEnd: '2026-10-29', fixedOn: '2026-11-08' } as const;
+export const RNAL_INSURANCE_CANCELLATIONS_2026 = 6765;
+
 /** Lisbon's short-let ratio thresholds (RMAL, 2.ª alteração, in force 6 Dec 2025). */
 export const RMAL_THRESHOLDS = { relative: 5, absolute: 10 } as const;
 

@@ -39,7 +39,8 @@ async function NotFoundHeader({ locale }: { locale: 'pt' | 'en' }) {
   const items = siteNavigation(navLabels(key => t(key as never)), {
     locale,
     hasArticles: getMDXArticlesByLocale(locale).length > 0,
-    economyPublished: ECONOMY_PUBLISHED, housingPublished: HOUSING_PUBLISHED,
+    economyPublished: ECONOMY_PUBLISHED,
+    housingPublished: HOUSING_PUBLISHED,
   });
   return <NotFoundHeaderView locale={locale} items={items} />;
 }

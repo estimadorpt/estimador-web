@@ -16,7 +16,9 @@ import { createPageMetadata } from '@/lib/metadata';
 import { HOUSING_PUBLISHED } from '@/lib/config/housing-status';
 import { formatCount } from '@/lib/population/format';
 import {
+  FLATIN_BAROMETER,
   RMAL_THRESHOLDS,
+  RNAL_INSURANCE_CANCELLATIONS_2026,
   loadHousingLicensing,
   loadHousingShortLets,
   housingDate,
@@ -204,8 +206,8 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
               <LisbonLicenceTimes locale={locale} data={licensing} />
               <p className="mt-3 max-w-[84ch] text-[12.5px] leading-[17px] text-graphite">
                 {pt
-                  ? <>Outra leitura dos mesmos registos da câmara: o <a href="https://flatin.pt/pt/barometro-construcao/" className="underline underline-offset-2">barómetro da construção do flatin.pt</a> (fixado a 8 de novembro de 2026) dá 940 dias para a construção nova nos 12 meses até 29 de outubro de 2026, em 35 títulos. Aqui está a série de cada ano desde 2009.</>
-                  : <>Another reading of the same câmara records: <a href="https://flatin.pt/pt/barometro-construcao/" className="underline underline-offset-2">flatin.pt&apos;s construction barometer</a> (fixed on 8 November 2026) gives 940 days for new builds in the 12 months to 29 October 2026, on 35 titles. This page gives the series for each year since 2009.</>}
+                  ? <>Outra leitura dos mesmos registos da câmara: o <a href="https://flatin.pt/pt/barometro-construcao/" className="underline underline-offset-2">barómetro da construção do flatin.pt</a> (fixado a {housingDate(FLATIN_BAROMETER.fixedOn, locale)}) dá {count(FLATIN_BAROMETER.days)} dias para a construção nova nos 12 meses até {housingDate(FLATIN_BAROMETER.periodEnd, locale)}, em {count(FLATIN_BAROMETER.titles)} títulos. Aqui está a série de cada ano desde {firstYear}.</>
+                  : <>Another reading of the same câmara records: <a href="https://flatin.pt/pt/barometro-construcao/" className="underline underline-offset-2">flatin.pt&apos;s construction barometer</a> (fixed on {housingDate(FLATIN_BAROMETER.fixedOn, locale)}) gives {count(FLATIN_BAROMETER.days)} days for new builds in the 12 months to {housingDate(FLATIN_BAROMETER.periodEnd, locale)}, on {count(FLATIN_BAROMETER.titles)} titles. This page gives the series for each year since {firstYear}.</>}
               </p>
 
               <h3 className="mt-12 max-w-[40ch] text-[1.35rem] leading-tight">
@@ -257,8 +259,8 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
                 chart={shortLetsBars}
                 table={shortLetsTable}
                 note={pt
-                  ? <>Fonte: Turismo de Portugal, RNAL (registos ativos a {rnalDate}); INE, Censos 2021 (CC BY 4.0); cálculo estimador.pt. As marcas em 5 e 10 são os limiares de contenção relativa e absoluta do regulamento municipal de alojamento local (em vigor desde 6 de dezembro de 2025), que usa esta mesma razão. Em 2026 a câmara cancelou cerca de {count(6765)} registos por falta de prova de seguro; os números da própria câmara do fim de 2025, anteriores a esses cancelamentos, são mais altos.</>
-                  : <>Source: Turismo de Portugal, RNAL (active registrations on {rnalDate}); INE, Census 2021 (CC BY 4.0); estimador.pt&apos;s calculation. The marks at 5 and 10 are the relative and absolute containment thresholds of Lisbon&apos;s short-let regulation (in force since 6 December 2025), which uses this same ratio. In 2026 the câmara cancelled about {count(6765)} registrations for missing proof of insurance; the câmara&apos;s own late-2025 figures, from before those cancellations, are higher.</>}
+                  ? <>Fonte: Turismo de Portugal, RNAL (registos ativos a {rnalDate}); INE, Censos 2021 (CC BY 4.0); cálculo estimador.pt. As marcas em 5 e 10 são os limiares de contenção relativa e absoluta do regulamento municipal de alojamento local (em vigor desde 6 de dezembro de 2025), que usa esta mesma razão. Em 2026 a câmara cancelou cerca de {count(RNAL_INSURANCE_CANCELLATIONS_2026)} registos por falta de prova de seguro; os números da própria câmara do fim de 2025, anteriores a esses cancelamentos, são mais altos.</>
+                  : <>Source: Turismo de Portugal, RNAL (active registrations on {rnalDate}); INE, Census 2021 (CC BY 4.0); estimador.pt&apos;s calculation. The marks at 5 and 10 are the relative and absolute containment thresholds of Lisbon&apos;s short-let regulation (in force since 6 December 2025), which uses this same ratio. In 2026 the câmara cancelled about {count(RNAL_INSURANCE_CANCELLATIONS_2026)} registrations for missing proof of insurance; the câmara&apos;s own late-2025 figures, from before those cancellations, are higher.</>}
               />
             </div>
           </section>

@@ -97,7 +97,7 @@ export function navLabels(t: (key: string) => string): NavLabels {
 
 export function siteNavigation(
   labels: NavLabels,
-  { locale, hasArticles, economyPublished, housingPublished = false }: { locale: string; hasArticles: boolean; economyPublished: boolean; housingPublished?: boolean },
+  { locale, hasArticles, economyPublished, housingPublished }: { locale: string; hasArticles: boolean; economyPublished: boolean; housingPublished: boolean },
 ): NavItem[] {
   const pt = locale !== 'en';
   return [

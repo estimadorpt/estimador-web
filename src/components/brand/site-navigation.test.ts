@@ -13,7 +13,7 @@ const lookup = (catalogue: unknown) => (key: string) => {
 };
 
 const nav = (locale: 'pt' | 'en', hasArticles = false, economyPublished = false) =>
-  siteNavigation(navLabels(lookup(locale === 'pt' ? pt : en)), { locale, hasArticles, economyPublished });
+  siteNavigation(navLabels(lookup(locale === 'pt' ? pt : en)), { locale, hasArticles, economyPublished, housingPublished: false });
 
 const active = (items: NavItem[], pathname: string) => items.filter(item => isNavItemActive(item, pathname)).map(item => item.id);
 
