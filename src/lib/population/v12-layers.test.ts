@@ -87,6 +87,8 @@ describe('v1.2 parish questions: the words', () => {
     // Income is anchored to fiscal units per município, not to an INE table of persons; residence in 2019 has no anchor at any level.
     expect(sourceLine('income', 'pt')).toMatch(/ancorado às declarações de IRS de 2021 por concelho/);
     expect(sourceLine('income', 'pt')).not.toMatch(/quadro/);
+    expect(sourceLine('income', 'en')).toMatch(/anchored to the 2021 income tax returns by municipality/);
+    expect(sourceLine('income', 'en')).not.toMatch(/table/);
     expect(sourceLine('residence_2019', 'en')).toMatch(/no INE table fixes it/);
   });
 });
