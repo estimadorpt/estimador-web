@@ -20,19 +20,18 @@ import {
   loadHousingLicensing,
   loadHousingShortLets,
   housingDate,
+  oneDecimal,
+  TWO_YEARS_DAYS,
   yearsOverTwoYears,
 } from '@/lib/housing-data';
 import { setRequestLocale } from '@/i18n/request-locale';
+import { COPY_REVISED } from '@/lib/sitemap-dates';
 
 /** When this page's wording was last checked. */
-const REVISED = '2026-11-19';
+const REVISED = COPY_REVISED['/habitacao'];
 
 type L = 'pt' | 'en';
 const lang = (locale: string): L => (locale === 'en' ? 'en' : 'pt');
-
-/** One decimal, the locale's mark ("40,8" / "40.8"). */
-const oneDecimal = (value: number, locale: L) =>
-  value.toLocaleString(locale === 'en' ? 'en-GB' : 'pt-PT', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -118,15 +117,16 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
 
   // ---- Short lets ----
   const top = shortLets.parishes[0];
-  const above5 = shortLets.parishes.filter(p => p.per_100_dwellings >= RMAL_THRESHOLDS.relative);
-  const above10 = shortLets.parishes.filter(p => p.per_100_dwellings >= RMAL_THRESHOLDS.absolute);
+  // "passam de": strictly above each threshold.
+  const above5 = shortLets.parishes.filter(p => p.per_100_dwellings > RMAL_THRESHOLDS.relative);
+  const above10 = shortLets.parishes.filter(p => p.per_100_dwellings > RMAL_THRESHOLDS.absolute);
   const lx = shortLets.municipality;
   const rnalDate = housingDate(shortLets.snapshot, locale);
   const shortLetsBars = (
     <ShortLetsBars
       parishes={shortLets.parishes}
       municipality={{ ...lx, name: pt ? 'Lisboa, concelho' : 'Lisbon, municipality' }}
-      max={Math.ceil(top.per_100_dwellings / 5) * 5}
+      max={Math.max(RMAL_THRESHOLDS.absolute, Math.ceil(top.per_100_dwellings / 5) * 5)}
       thresholds={[
         { value: RMAL_THRESHOLDS.relative, label: '5' },
         { value: RMAL_THRESHOLDS.absolute, label: '10' },
@@ -139,12 +139,14 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
     <ChartTable
       caption={pt ? 'Lisboa: registos de alojamento local e alojamentos dos Censos 2021, por freguesia' : 'Lisbon: short-let registrations and Census 2021 dwellings, by parish'}
       columns={pt
-        ? ['Freguesia', 'Registos de AL', 'Alojamentos clássicos (Censos 2021)', 'Registos por 100']
-        : ['Parish', 'Short-let registrations', 'Classic dwellings (Census 2021)', 'Registrations per 100']}
+        ? ['Freguesia', 'Registos de AL', 'Alojamentos clássicos (Censos 2021)', 'Registos por 100', 'Acima do limiar']
+        : ['Parish', 'Short-let registrations', 'Classic dwellings (Census 2021)', 'Registrations per 100', 'Above the threshold']}
       rows={[...shortLets.parishes, { ...lx, name: pt ? 'Lisboa, concelho' : 'Lisbon, municipality' }].map(p => [
         p.name, count(p.registrations), count(p.classic_dwellings), oneDecimal(p.per_100_dwellings, locale),
+        p.per_100_dwellings > RMAL_THRESHOLDS.absolute ? (pt ? 'de 10' : 'of 10')
+          : p.per_100_dwellings > RMAL_THRESHOLDS.relative ? (pt ? 'de 5' : 'of 5') : '—',
       ])}
-      align={['left', 'right', 'right', 'right']}
+      align={['left', 'right', 'right', 'right', 'left']}
     />
   );
 
@@ -159,9 +161,9 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
         <PageHero
           measure="wide"
           eyebrow={pt ? 'Habitação' : 'Housing'}
-          title={pt
-            ? 'Em Lisboa, a licença de uma obra nova demora mais de dois anos'
-            : 'In Lisbon, a licence for a new building takes more than two years'}
+          title={overall.new_build.median_days > TWO_YEARS_DAYS
+            ? (pt ? 'Em Lisboa, a licença de uma obra nova demora mais de dois anos' : 'In Lisbon, a licence for a new building takes more than two years')
+            : (pt ? 'Quanto tempo demora uma licença de construção em Lisboa' : 'How long a building licence takes in Lisbon')}
           lede={pt
             ? 'Duas leituras feitas só com registos: quanto tempo a câmara de Lisboa leva da entrada de um processo ao alvará, e quantos registos de alojamento local há por cada 100 casas em cada freguesia. Nada nesta página é um modelo ou uma previsão.'
             : "Two readings made from records alone: how long Lisbon's câmara takes from a process entering to its alvará, and how many short-let registrations there are per 100 homes in each parish. Nothing on this page is a model or a forecast."}
@@ -185,14 +187,14 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
             />
             <div className="max-w-5xl">
               <Finding>
-                {pt
-                  ? `Desde ${run[0]?.year}, a mediana de cada ano passa os dois anos`
-                  : `Since ${run[0]?.year}, every year's median has passed two years`}
+                {run.length >= 2
+                  ? (pt ? `Desde ${run[0].year}, a mediana de cada ano passa os dois anos` : `Since ${run[0].year}, every year's median has passed two years`)
+                  : (pt ? `A mediana foi de ${count(overall.new_build.median_days)} dias da entrada ao alvará` : `The median was ${count(overall.new_build.median_days)} days from entry to alvará`)}
               </Finding>
               <Standfirst>
                 {pt
-                  ? <>Nos {count(overall.new_build.alvaras)} alvarás de construção nova emitidos de {firstYear} a {lastYear}, a mediana foi de {count(overall.new_build.median_days)} dias entre a entrada do processo na câmara e o alvará. De {run[0]?.year} a {lastYear}, a mediana de cada ano ficou entre {count(runLow?.new_build.median_days ?? 0)} dias ({runLow?.year}) e {count(runHigh?.new_build.median_days ?? 0)} ({runHigh?.year}). <strong>Só contam as licenças que chegaram a ser emitidas</strong>: um processo ainda à espera, recusado ou desistido não tem alvará e fica de fora.</>
-                  : <>Across the {count(overall.new_build.alvaras)} new-build alvarás issued from {firstYear} to {lastYear}, the median time from a process entering the câmara to its alvará was {count(overall.new_build.median_days)} days. From {run[0]?.year} to {lastYear}, each year&apos;s median was between {count(runLow?.new_build.median_days ?? 0)} days ({runLow?.year}) and {count(runHigh?.new_build.median_days ?? 0)} ({runHigh?.year}). <strong>Only licences that were issued count</strong>: a process still waiting, refused or withdrawn has no alvará and is left out.</>}
+                  ? <>Nos {count(overall.new_build.alvaras)} alvarás de construção nova emitidos de {firstYear} a {lastYear}, a mediana foi de {count(overall.new_build.median_days)} dias entre a entrada do processo na câmara e o alvará.{runLow && runHigh && <> De {run[0].year} a {lastYear}, a mediana de cada ano ficou entre {count(runLow.new_build.median_days ?? 0)} dias ({runLow.year}) e {count(runHigh.new_build.median_days ?? 0)} ({runHigh.year}{runHigh.partial_year ? ', ano incompleto' : ''}).</>} <strong>Só contam as licenças que chegaram a ser emitidas</strong>: um processo ainda à espera, recusado ou desistido não tem alvará e fica de fora.</>
+                  : <>Across the {count(overall.new_build.alvaras)} new-build alvarás issued from {firstYear} to {lastYear}, the median time from a process entering the câmara to its alvará was {count(overall.new_build.median_days)} days.{runLow && runHigh && <> From {run[0].year} to {lastYear}, each year&apos;s median was between {count(runLow.new_build.median_days ?? 0)} days ({runLow.year}) and {count(runHigh.new_build.median_days ?? 0)} ({runHigh.year}{runHigh.partial_year ? ', a partial year' : ''}).</>} <strong>Only licences that were issued count</strong>: a process still waiting, refused or withdrawn has no alvará and is left out.</>}
               </Standfirst>
               <LisbonLicenceTimes locale={locale} data={licensing} />
               <p className="mt-3 max-w-[84ch] text-[12.5px] leading-[17px] text-graphite">

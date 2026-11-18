@@ -84,13 +84,31 @@ function readHousing<T>(file: string, schema: string): T | null {
   }
 }
 
-export const loadHousingLicensing = () => readHousing<LicensingFile>('licensing.json', 'estimador.housing.licensing/1');
-export const loadHousingShortLets = () => readHousing<ShortLetsFile>('short-lets-lisbon.json', 'estimador.housing.short-lets/1');
+/** The licensing file, its years in order (the charts and yearsOverTwoYears read them in order). */
+export function loadHousingLicensing(): LicensingFile | null {
+  const file = readHousing<LicensingFile>('licensing.json', 'estimador.housing.licensing/1');
+  if (!file) return null;
+  return {
+    ...file,
+    lisbon: { ...file.lisbon, by_alvara_year: [...file.lisbon.by_alvara_year].sort((a, b) => a.year - b.year) },
+    national: [...file.national].sort((a, b) => a.year - b.year),
+  };
+}
+
+/** The short-lets file, parishes from the highest ratio down (the finding names the first). */
+export function loadHousingShortLets(): ShortLetsFile | null {
+  const file = readHousing<ShortLetsFile>('short-lets-lisbon.json', 'estimador.housing.short-lets/1');
+  if (!file) return null;
+  return { ...file, parishes: [...file.parishes].sort((a, b) => b.per_100_dwellings - a.per_100_dwellings || a.name.localeCompare(b.name, 'pt')) };
+}
 
 /** Two years, the line the Lisbon finding is stated against. */
 export const TWO_YEARS_DAYS = 730;
 
-/** The run of latest whole-or-partial years whose new-build median passes two years. */
+/**
+ * The run of latest years whose new-build median passes two years, partial year
+ * included (the chart and its note mark it). Empty when the latest year does not.
+ */
 export function yearsOverTwoYears(years: LicenceYear[]): LicenceYear[] {
   const run: LicenceYear[] = [];
   for (const y of [...years].reverse()) {
@@ -109,3 +127,7 @@ export function housingDate(iso: string, locale: string): string {
     day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
   }).format(new Date(`${iso.slice(0, 10)}T00:00:00Z`));
 }
+
+/** One decimal in the locale's mark ("40,8" / "40.8"). */
+export const oneDecimal = (value: number, locale: string) =>
+  value.toLocaleString(locale === 'en' ? 'en-GB' : 'pt-PT', { minimumFractionDigits: 1, maximumFractionDigits: 1 });

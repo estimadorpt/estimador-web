@@ -1,7 +1,7 @@
 import { ChannelHead, NowGlyph } from '@/components/instrument';
 import { Action } from '@/components/brand/Action';
 import { formatCount } from '@/lib/population/format';
-import { housingDate, loadHousingLicensing, loadHousingShortLets, yearsOverTwoYears } from '@/lib/housing-data';
+import { housingDate, loadHousingLicensing, loadHousingShortLets, oneDecimal, yearsOverTwoYears } from '@/lib/housing-data';
 
 /**
  * Habitação on the homepage, once the page publishes (housing-status.json):
@@ -18,7 +18,7 @@ export function HousingPanel({ locale: given }: { locale: string }) {
   const run = yearsOverTwoYears(licensing.lisbon.by_alvara_year);
   const overall = licensing.lisbon.overall;
   const top = shortLets.parishes[0];
-  const ratio = top.per_100_dwellings.toLocaleString(pt ? 'pt-PT' : 'en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const ratio = oneDecimal(top.per_100_dwellings, locale);
   return (
     <section aria-labelledby="home-housing">
       <ChannelHead
@@ -34,9 +34,9 @@ export function HousingPanel({ locale: given }: { locale: string }) {
       <div className="mt-4 grid gap-x-10 gap-y-6 md:grid-cols-2">
         <div>
           <p className="disp text-[1.35rem] leading-tight">
-            {pt
-              ? `Desde ${run[0]?.year}, a mediana de uma licença de obra nova em Lisboa passa os dois anos`
-              : `Since ${run[0]?.year}, the median new-build licence in Lisbon has taken more than two years`}
+            {run.length >= 2
+              ? (pt ? `Desde ${run[0].year}, a mediana de uma licença de obra nova em Lisboa passa os dois anos` : `Since ${run[0].year}, the median new-build licence in Lisbon has taken more than two years`)
+              : (pt ? `Uma licença de obra nova em Lisboa demorou, a meio, ${count(overall.new_build.median_days)} dias` : `A new-build licence in Lisbon took a median of ${count(overall.new_build.median_days)} days`)}
           </p>
           <p className="mt-2 flex gap-2 text-[15px] leading-relaxed">
             <NowGlyph className="mt-1" />

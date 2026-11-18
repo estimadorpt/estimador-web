@@ -17,7 +17,7 @@ export function ShortLetsBars({ parishes, municipality, max, thresholds, format,
   const pct = (v: number) => `${Math.min(100, (v / max) * 100)}%`;
   const row = (p: ShortLetsArea, strong = false) => (
     <li key={p.code} className={`grid grid-cols-[minmax(0,9.5rem)_1fr_3.25rem] items-center gap-x-3 border-b border-grid py-1.5 sm:grid-cols-[13rem_1fr_4rem] ${strong ? 'border-t border-ink' : ''}`}>
-      <span className={`truncate text-[14px] ${strong ? 'font-semibold' : 'name-cut'}`}>{p.name}</span>
+      <span className={`break-words text-[14px] leading-tight ${strong ? 'font-semibold' : 'name-cut'}`}>{p.name}</span>
       <span className="relative block h-3.5">
         {thresholds.map(t => (
           <span key={t.value} aria-hidden="true" className="absolute top-[-3px] h-[20px] w-px bg-scale" style={{ left: pct(t.value) }} />

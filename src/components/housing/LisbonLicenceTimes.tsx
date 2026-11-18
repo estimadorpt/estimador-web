@@ -30,7 +30,7 @@ export function LisbonLicenceTimes({ locale: given, data, id = 'licence-days', h
   const [firstYear, lastYear] = lisbon.overall.years;
   const partial = lisbon.by_alvara_year.find(y => y.partial_year);
   const newCounts = lisbon.by_alvara_year.filter(y => !y.partial_year).map(y => y.new_build.alvaras);
-  const newRange = `${count(Math.min(...newCounts))} ${pt ? 'a' : 'to'} ${count(Math.max(...newCounts))}`;
+  const newRange = newCounts.length ? `${count(Math.min(...newCounts))} ${pt ? 'a' : 'to'} ${count(Math.max(...newCounts))}` : null;
   const simplex = housingDate(lisbon.simplex_date, locale);
   const simplexYear = Number(lisbon.simplex_date.slice(0, 4));
   const simplexAt = simplexYear + (Date.parse(`${lisbon.simplex_date}T00:00:00Z`) - Date.parse(`${simplexYear}-01-01T00:00:00Z`)) / (365 * 864e5);
@@ -85,8 +85,8 @@ export function LisbonLicenceTimes({ locale: given, data, id = 'licence-days', h
       chart={chart}
       table={table}
       note={pt
-        ? <>Fonte: Câmara Municipal de Lisboa, processos de obras abrangidos pelo RJUE e alvarás (CC0), registos de {snapshot}; cálculo estimador.pt. Só contam as licenças que chegaram a ser emitidas, cada processo uma vez, pelo primeiro alvará. O alvará vem depois da aprovação e do pedido e pagamento do requerente, por isso o tempo inclui o dele; a câmara não publica a data da decisão. Os alvarás de {partial?.year} contam até {lastAlvara} (quadrados mais pequenos). Desde {simplex} (Simplex Urbanístico) muitas licenças deixaram de ter alvará: falta a câmara confirmar o que a data regista nesses casos. Há poucas obras novas por ano ({newRange} alvarás), por isso a mediana de um ano mexe muito.</>
-        : <>Source: Câmara Municipal de Lisboa, building processes under the RJUE and alvarás (CC0), records of {snapshot}; estimador.pt&apos;s calculation. Only licences that were issued count, each process once, by its first alvará. The alvará comes after approval and after the applicant asks and pays for it, so the time includes the applicant&apos;s; the câmara publishes no decision date. The alvarás of {partial?.year} count up to {lastAlvara} (smaller squares). Since {simplex} (Simplex Urbanístico) many licences no longer get an alvará: what the date records for them is still to be confirmed with the câmara. New builds are few ({newRange} alvarás a year), so one year&apos;s median moves a lot.</>}
+        ? <>Fonte: Câmara Municipal de Lisboa, processos de obras abrangidos pelo RJUE e alvarás (CC0), registos de {snapshot}; cálculo estimador.pt. Só contam as licenças que chegaram a ser emitidas, cada processo uma vez, pelo primeiro alvará. O alvará vem depois da aprovação e do pedido e pagamento do requerente, por isso o tempo inclui o dele; a câmara não publica a data da decisão. {partial && <>Os alvarás de {partial.year} contam até {lastAlvara} (quadrados mais pequenos). </>} Desde {simplex} (Simplex Urbanístico) muitas licenças deixaram de ter alvará: falta a câmara confirmar o que a data regista nesses casos.{newRange && <> Há poucas obras novas por ano ({newRange} alvarás), por isso a mediana de um ano mexe muito.</>}</>
+        : <>Source: Câmara Municipal de Lisboa, building processes under the RJUE and alvarás (CC0), records of {snapshot}; estimador.pt&apos;s calculation. Only licences that were issued count, each process once, by its first alvará. The alvará comes after approval and after the applicant asks and pays for it, so the time includes the applicant&apos;s; the câmara publishes no decision date. {partial && <>The alvarás of {partial.year} count up to {lastAlvara} (smaller squares). </>} Since {simplex} (Simplex Urbanístico) many licences no longer get an alvará: what the date records for them is still to be confirmed with the câmara.{newRange && <> New builds are few ({newRange} alvarás a year), so one year&apos;s median moves a lot.</>}</>}
     />
   );
 }

@@ -98,7 +98,7 @@ function Frame({ props, width, height, compact }: { props: YearChartProps; width
                   y={y(p.value) - size / 2}
                   width={size}
                   height={size}
-                  fill={p.soft ? BRAND.faint : colour}
+                  fill={p.soft ? BRAND.muted : colour}
                 />
               );
             })}
