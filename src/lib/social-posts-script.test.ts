@@ -86,8 +86,8 @@ describe('fitting a long post', () => {
   it('drops the move line first, then the count, and keeps the finding and the link', () => {
     const long = (n: number) => 'x'.repeat(n);
     const post = { id: 't', link: 'https://estimador.pt/pt/desporto/liga/', text: '' };
-    post.text = ['Finding.', `Count ${long(100)}.`, `Move ${long(100)}.`, post.link].join('\n\n');
-    expect(social.fitTo('x', post)).toBe(['Finding.', `Count ${long(100)}.`, post.link].join('\n\n'));
+    post.text = ['Finding.', `Count ${long(150)}.`, `Move ${long(150)}.`, post.link].join('\n\n');
+    expect(social.fitTo('x', post)).toBe(['Finding.', `Count ${long(150)}.`, post.link].join('\n\n'));
     post.text = ['Finding.', `Count ${long(300)}.`, `Move ${long(10)}.`, post.link].join('\n\n');
     expect(social.fitTo('x', post)).toBe(['Finding.', post.link].join('\n\n'));
   });
