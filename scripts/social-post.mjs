@@ -38,6 +38,11 @@ function arg(name) {
 }
 const has = (name) => process.argv.includes(name);
 
+/** A short fingerprint of what each network would receive, so the approved words are the posted words. */
+function textHash(texts) {
+  return crypto.createHash('sha256').update(JSON.stringify(texts)).digest('hex').slice(0, 16);
+}
+
 function buildPost(matchday) {
   const forecast = loadForecast(matchday);
   const post = ligaPost({ ...forecast, locale: 'pt' });
@@ -77,7 +82,7 @@ async function findIssue(id) {
 }
 
 function issueBody({ forecast, post, texts }) {
-  const marker = JSON.stringify({ kind: 'liga', season: forecast.current.season, matchday: forecast.matchday, id: post.id });
+  const marker = JSON.stringify({ kind: 'liga', season: forecast.current.season, matchday: forecast.matchday, id: post.id, hash: textHash(texts) });
   return [
     `Draft post for the Liga Portugal forecast of matchday ${forecast.matchday}. Add the \`approved\` label to post it to Bluesky and X; close the issue to drop it.`,
     '',
@@ -220,6 +225,9 @@ async function publish(issueNumber) {
     throw new Error(`Issue #${issueNumber} is not a draft this workflow opened (title or author do not match its marker)`);
   }
   const built = buildPost(draft.matchday);
+  if (built.post.id === draft.id && draft.hash && textHash(built.texts) !== draft.hash) {
+    throw new Error(`Issue #${issueNumber}: the text built from main now differs from the approved draft (the forecast file was regenerated). Close this draft; the next deploy drafts again.`);
+  }
   if (built.post.id !== draft.id) throw new Error(`Issue #${issueNumber} drafted ${draft.id}, but main now builds ${built.post.id} from the same matchday: the forecast files changed after the draft. Close this draft; the next deploy drafts again.`);
   const png = await renderMatchdayCard(built.forecast);
   const blueskyPng = png.length > BLUESKY_MAX_BYTES ? await renderMatchdayCard(built.forecast, { scale: 1 }) : png;
@@ -247,7 +255,7 @@ async function publish(issueNumber) {
       lines.push(`- ${network}: failed, ${error.message}`);
     }
   }
-  const retry = failed ? '\n\nThe issue stays open. Remove and add `approved` again to retry; networks already posted are skipped.' : '';
+  const retry = failed ? '\n\nThe issue stays open. Add `approved` (remove it first if it is there) to retry; networks already posted are skipped.' : '';
   await github('POST', `/issues/${issueNumber}/comments`, { body: `Summary:\n${lines.join('\n')}${retry}` });
   if (!failed) await github('PATCH', `/issues/${issueNumber}`, { state: 'closed', state_reason: 'completed' });
   console.log(lines.join('\n'));
