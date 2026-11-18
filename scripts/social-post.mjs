@@ -216,6 +216,9 @@ async function publish(issueNumber) {
   const match = MARKER.exec(issue.body ?? '');
   if (!match) throw new Error(`Issue #${issueNumber} has no social-post marker`);
   const draft = JSON.parse(match[1]);
+  if (issue.title !== `Social post: ${draft.id}` || issue.user?.login !== 'github-actions[bot]') {
+    throw new Error(`Issue #${issueNumber} is not a draft this workflow opened (title or author do not match its marker)`);
+  }
   const built = buildPost(draft.matchday);
   if (built.post.id !== draft.id) throw new Error(`Issue #${issueNumber} drafted ${draft.id}, but main now builds ${built.post.id} from the same matchday: the forecast files changed after the draft. Close this draft; the next deploy drafts again.`);
   const png = await renderMatchdayCard(built.forecast);
@@ -262,6 +265,8 @@ async function draft() {
     console.log(`${built.post.id} already has an issue; nothing to do.`);
     return;
   }
+  // Rendered before the issue exists, so a failing card never leaves a draft that blocks a redraft.
+  const card = await renderMatchdayCard(built.forecast);
   const issue = await github('POST', '/issues', {
     title: `Social post: ${built.post.id}`,
     body: issueBody(built),
@@ -271,7 +276,7 @@ async function draft() {
   const outDir = arg('--out');
   if (outDir) {
     fs.mkdirSync(outDir, { recursive: true });
-    fs.writeFileSync(path.join(outDir, `${built.post.id}.png`), await renderMatchdayCard(built.forecast));
+    fs.writeFileSync(path.join(outDir, `${built.post.id}.png`), card);
   }
   if (process.env.SOCIAL_MODE === 'auto') await publish(issue.number);
 }
