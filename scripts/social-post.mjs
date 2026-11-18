@@ -249,7 +249,12 @@ async function publish(issueNumber) {
       const line = result.url ? `- ${network}: ${result.url}` : `- ${network}: skipped, ${result.skipped}`;
       lines.push(line);
       // Recorded at once, so a retry after a later failure never posts this network twice.
-      if (result.url) await github('POST', `/issues/${issueNumber}/comments`, { body: `Posted:\n${line}` });
+      // A failed record is logged, never counted as a failed post.
+      if (result.url) {
+        console.log(line);
+        await github('POST', `/issues/${issueNumber}/comments`, { body: `Posted:\n${line}` })
+          .catch(error => console.error(`Posted to ${network} but could not record it on #${issueNumber}: ${error.message}`));
+      }
     } catch (error) {
       failed = true;
       lines.push(`- ${network}: failed, ${error.message}`);
@@ -257,7 +262,9 @@ async function publish(issueNumber) {
   }
   const retry = failed ? '\n\nThe issue stays open. Add `approved` (remove it first if it is there) to retry; networks already posted are skipped.' : '';
   await github('POST', `/issues/${issueNumber}/comments`, { body: `Summary:\n${lines.join('\n')}${retry}` });
-  if (!failed) await github('PATCH', `/issues/${issueNumber}`, { state: 'closed', state_reason: 'completed' });
+  // Closed only when something went out: a run with every network skipped (no secrets yet) stays open.
+  const postedAny = lines.some(line => /: (https:\/\/|already posted)/.test(line));
+  if (!failed && postedAny) await github('PATCH', `/issues/${issueNumber}`, { state: 'closed', state_reason: 'completed' });
   console.log(lines.join('\n'));
   if (failed) process.exit(1);
 }
