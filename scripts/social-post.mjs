@@ -210,7 +210,7 @@ async function publish(issueNumber) {
   if (!match) throw new Error(`Issue #${issueNumber} has no social-post marker`);
   const draft = JSON.parse(match[1]);
   const built = buildPost(draft.matchday);
-  if (built.post.id !== draft.id) throw new Error(`Issue #${issueNumber} drafted ${draft.id}, but the files now give ${built.post.id}`);
+  if (built.post.id !== draft.id) throw new Error(`Issue #${issueNumber} drafted ${draft.id}, but main now builds ${built.post.id} from the same matchday: the forecast files changed after the draft. Close this draft; the next deploy drafts again.`);
   const png = await renderMatchdayCard(built.forecast);
   const blueskyPng = png.length > BLUESKY_MAX_BYTES ? await renderMatchdayCard(built.forecast, { scale: 1 }) : png;
 
@@ -228,14 +228,17 @@ async function publish(issueNumber) {
     }
     try {
       const result = await send();
-      lines.push(result.url ? `- ${network}: ${result.url}` : `- ${network}: skipped, ${result.skipped}`);
+      const line = result.url ? `- ${network}: ${result.url}` : `- ${network}: skipped, ${result.skipped}`;
+      lines.push(line);
+      // Recorded at once, so a retry after a later failure never posts this network twice.
+      if (result.url) await github('POST', `/issues/${issueNumber}/comments`, { body: `Posted:\n${line}` });
     } catch (error) {
       failed = true;
       lines.push(`- ${network}: failed, ${error.message}`);
     }
   }
   const retry = failed ? '\n\nThe issue stays open. Remove and add `approved` again to retry; networks already posted are skipped.' : '';
-  await github('POST', `/issues/${issueNumber}/comments`, { body: `Posted:\n${lines.join('\n')}${retry}` });
+  await github('POST', `/issues/${issueNumber}/comments`, { body: `Summary:\n${lines.join('\n')}${retry}` });
   if (!failed) await github('PATCH', `/issues/${issueNumber}`, { state: 'closed', state_reason: 'completed' });
   console.log(lines.join('\n'));
   if (failed) process.exit(1);
