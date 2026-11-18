@@ -48,7 +48,7 @@ export function HousingPanel({ locale: given }: { locale: string }) {
         <div>
           <p className="disp text-[1.35rem] leading-tight">
             {pt
-              ? `Em ${top.name} há ${ratio} registos de alojamento local por cada 100 casas`
+              ? `A freguesia de ${top.name} tem ${ratio} registos de alojamento local por cada 100 casas`
               : `${top.name} has ${ratio} short-let registrations for every 100 homes`}
           </p>
           <p className="mt-2 flex gap-2 text-[15px] leading-relaxed">

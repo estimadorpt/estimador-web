@@ -9,10 +9,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Sections
 - **População** (`/populacao/`) — open synthetic population v1.0.3 (Censos 2021), parish by parish (see "Population section")
 - **Liga Portugal** (`/desporto/liga/`) — Bayesian football league forecasts, updated every matchday
+- **Habitação** (`/habitacao/`) — **draft** until 9 December 2026 (see "Housing section"): Lisbon licence times and short lets, records only
 - **Presidential Elections 2026** (`/eleicoes/presidenciais/`) — archived forecast (both rounds)
 - **Parliamentary Elections 2025** (`/eleicoes/legislativas/`) — archived forecast; `/eleicoes/arquivo/` explains how to read both
 - **Economia** (`/economia/`) — **in preparation** (see "Economy section"): explainers online, no figures published
-- **Habitação** (`/habitacao/`) — **draft** until 9 December 2026 (see "Housing section"): Lisbon licence times and short lets, records only
 
 This is also the order of what is live, and the site lists its sections in it everywhere: the
 header (Início, População, Liga Portugal, Eleições, Sobre; Economia joins only once it publishes),
@@ -426,7 +426,9 @@ key), the footer's "Secções", the homepage (`HousingPanel`, before the electio
   transcription of the 2 November 2026 report (`status: "transcribed"`), which `validate-data`
   refuses once the flag is on.
 - **Before publishing**: resync on the Mac; ask CML what `DATA_ALVARA` records after DL 10/2024
-  (4 March 2024), and adjust the Simplex caveat to the answer.
+  (4 March 2024), and adjust the Simplex caveat to the answer; recheck the figures typed into
+  `habitacao/page.tsx` rather than read from the files (flatin.pt's 940 days to 29 October 2026,
+  the ~6 765 RNAL cancellations, the RMAL thresholds of 5 and 10 per 100).
 - `LisbonLicenceTimes` (`src/components/housing/`) is the licensing chart, shared with the
   licensing note in `/artigos`; `YearChart` draws a recorded series twice (wide and phone frames)
   so chart text stays at 12px. flatin.pt publishes the same CML measure: the page cites it.
