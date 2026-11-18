@@ -7,7 +7,8 @@
  *       Print each network's text and write the card. Needs nothing.
  *   node scripts/social-post.mjs --draft
  *       Open a "social" issue for the latest forecast, unless one exists for
- *       it already (open or closed) or the forecast is older than MAX_AGE_DAYS.
+ *       it already (open or closed), the forecast is older than MAX_AGE_DAYS,
+ *       or the freshness check's "estimador.pt has stopped updating" is open.
  *       With SOCIAL_MODE=auto it then publishes straight away.
  *   node scripts/social-post.mjs --publish --issue 123
  *       Post what issue 123 drafted, comment the links, close the issue.
@@ -29,6 +30,8 @@ import { CARD_WIDTH } from './lib/og-cards.mjs';
 import { ligaPost, fitTo, linkFacets } from './lib/social-posts.mjs';
 
 const MAX_AGE_DAYS = 7;
+/** The freshness check's open issue (.github/workflows/site-freshness.yml, ALERT_TITLE): while it is open, no draft. */
+const STALE_ALERT_TITLE = 'estimador.pt has stopped updating';
 const LABEL = 'social';
 const MARKER = /<!-- social-post: (\{.*?\}) -->/;
 
@@ -269,7 +272,21 @@ async function publish(issueNumber) {
   if (failed) process.exit(1);
 }
 
+/** Whether the freshness check says the site is stale. Read only: the alert issue is never labelled, edited or closed here. */
+async function siteMarkedStale() {
+  for (let page = 1; page <= 10; page += 1) {
+    const issues = await github('GET', `/issues?state=open&per_page=100&page=${page}`);
+    if (issues.some(issue => issue.title === STALE_ALERT_TITLE)) return true;
+    if (issues.length < 100) return false;
+  }
+  return false;
+}
+
 async function draft() {
+  if (await siteMarkedStale()) {
+    console.log(`"${STALE_ALERT_TITLE}" is open; not drafting from a deploy the freshness check calls stale.`);
+    return;
+  }
   const built = buildPost(null);
   const ageDays = (Date.now() - new Date(built.forecast.current.timestamp).getTime()) / 86_400_000;
   if (ageDays > MAX_AGE_DAYS) {
