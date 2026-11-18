@@ -486,12 +486,12 @@ export const VALUES: Record<string, Array<{ value: string; label: Text }>> = {
   // exactly 5 000 € is in the second band). Code 0 is "filed no return", never "no income".
   income_band: [
     { value: '0', label: { pt: 'Não entregou IRS em nome próprio', en: 'Filed no return in their own name' } },
-    { value: '1', label: { pt: 'Menos de 5 000 €', en: 'Under €5,000' } },
-    { value: '2', label: { pt: '5 000 a 10 000 €', en: '€5,000 to €10,000' } },
-    { value: '3', label: { pt: '10 000 a 13 500 €', en: '€10,000 to €13,500' } },
-    { value: '4', label: { pt: '13 500 a 19 000 €', en: '€13,500 to €19,000' } },
-    { value: '5', label: { pt: '19 000 a 32 500 €', en: '€19,000 to €32,500' } },
-    { value: '6', label: { pt: '32 500 € ou mais', en: '€32,500 or more' } },
+    { value: '1', label: { pt: 'Menos de 5 000 €', en: 'Under €5,000' } },
+    { value: '2', label: { pt: '5 000 a 10 000 €', en: '€5,000 to €10,000' } },
+    { value: '3', label: { pt: '10 000 a 13 500 €', en: '€10,000 to €13,500' } },
+    { value: '4', label: { pt: '13 500 a 19 000 €', en: '€13,500 to €19,000' } },
+    { value: '5', label: { pt: '19 000 a 32 500 €', en: '€19,000 to €32,500' } },
+    { value: '6', label: { pt: '32 500 € ou mais', en: '€32,500 or more' } },
   ],
   birthplace: [
     { value: '1', label: { pt: 'Nesta freguesia', en: 'In this parish' } },
