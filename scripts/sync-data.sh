@@ -133,6 +133,9 @@ sync_housing() {
   if [ -n "$REPORT" ]; then
     ARGS+=(--licensing-report "$REPORT")
     echo "Lisbon licensing report: $REPORT"
+  elif grep -q '"published": *true' "$(dirname "$0")/../src/lib/config/housing-status.json"; then
+    echo "Error: the housing page is published and no Lisbon licensing report was found under $LICENSING_DIR"
+    return 1
   else
     echo "No Lisbon licensing report under $LICENSING_DIR: using estimador-housing's transcription of 2 November 2026"
   fi

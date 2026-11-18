@@ -1,11 +1,18 @@
+import type { LicenceYear } from './housing-data';
 import { describe, expect, it } from 'vitest';
 import { housingDate, oneDecimal, yearsOverTwoYears, loadHousingLicensing, loadHousingShortLets } from './housing-data';
 
-const y = (year: number, days: number) => ({ year, new_build: { median_days: days, alvaras: 10 } }) as never;
+const y = (year: number, days: number): LicenceYear => ({
+  year,
+  new_build: { median_days: days, alvaras: 10 },
+  all_licences: { median_days: days, alvaras: 10 },
+  partial_year: false,
+  after_simplex: year >= 2024,
+} as LicenceYear);
 
 describe('housing helpers', () => {
   it('returns the trailing run of years above two years', () => {
-    expect(yearsOverTwoYears([y(2018, 800), y(2019, 700), y(2020, 760), y(2021, 900)]).map(r => (r as { year: number }).year)).toEqual([2020, 2021]);
+    expect(yearsOverTwoYears([y(2018, 800), y(2019, 700), y(2020, 760), y(2021, 900)]).map(r => r.year)).toEqual([2020, 2021]);
     expect(yearsOverTwoYears([y(2020, 700)])).toEqual([]);
     expect(yearsOverTwoYears([])).toEqual([]);
   });
@@ -18,6 +25,8 @@ describe('housing helpers', () => {
   it('loads the published files sorted', () => {
     const lic = loadHousingLicensing();
     const sl = loadHousingShortLets();
+    expect(lic).not.toBeNull();
+    expect(sl).not.toBeNull();
     if (!lic || !sl) return;
     const years = lic.lisbon.by_alvara_year.map(r => r.year);
     expect(years).toEqual([...years].sort((a, b) => a - b));
