@@ -229,6 +229,11 @@
       "statusCode": 301
     },
     {
+      "route": "/habitacao",
+      "redirect": "/pt/habitacao/",
+      "statusCode": 301
+    },
+    {
       "route": "/eleicoes",
       "redirect": "/pt/eleicoes/arquivo/",
       "statusCode": 301

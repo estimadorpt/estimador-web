@@ -13,8 +13,8 @@ import { LIGA_TABS } from '@/components/football/liga-tabs';
  * the client message payload test sees them); the few labels that only the
  * menu uses are written here in both languages.
  *
- * Ordered by what is live: Início, População, Liga Portugal, Eleições
- * (arquivo), Economia once it publishes, then Sobre.
+ * Ordered by what is live: Início, População, Liga Portugal, Habitação once
+ * it publishes, Eleições (arquivo), Economia once it publishes, then Sobre.
  * Football has one public name, "Liga Portugal" (CLAUDE.md); the URLs keep
  * /desporto.
  */
@@ -25,7 +25,7 @@ export interface NavLink {
 }
 
 export interface NavItem {
-  id: 'home' | 'population' | 'sport' | 'elections' | 'economics' | 'articles' | 'about';
+  id: 'home' | 'population' | 'sport' | 'housing' | 'elections' | 'economics' | 'articles' | 'about';
   label: string;
   /** A plain link (no dropdown). */
   href?: string;
@@ -97,7 +97,7 @@ export function navLabels(t: (key: string) => string): NavLabels {
 
 export function siteNavigation(
   labels: NavLabels,
-  { locale, hasArticles, economyPublished }: { locale: string; hasArticles: boolean; economyPublished: boolean },
+  { locale, hasArticles, economyPublished, housingPublished = false }: { locale: string; hasArticles: boolean; economyPublished: boolean; housingPublished?: boolean },
 ): NavItem[] {
   const pt = locale !== 'en';
   return [
@@ -126,6 +126,10 @@ export function siteNavigation(
           : pt ? tab.pt : tab.en,
       })),
     },
+    // Housing joins once its page publishes (src/lib/config/housing-status.json),
+    // after the live sections and before the archive. The label is a bilingual
+    // literal, like the menu-only labels, so it needs no client message key.
+    ...(housingPublished ? [{ id: 'housing' as const, href: '/habitacao', label: pt ? 'Habitação' : 'Housing' }] : []),
     {
       // The overview of the archive first; both forecasts are archives and
       // the labels say so before the click.
