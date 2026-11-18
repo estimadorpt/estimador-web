@@ -1,0 +1,215 @@
+{
+  "schema": "estimador.housing.short-lets/1",
+  "generated_at": "2026-11-18T23:01:05Z",
+  "title": {
+    "pt": "Registos de alojamento local por cada 100 casas, freguesias de Lisboa",
+    "en": "Short-let registrations per 100 homes, Lisbon parishes"
+  },
+  "universe": "Active registrations in the national short-let register (RNAL) with an address in Lisbon, by the parish the register records, over the classic family dwellings (alojamentos familiares clássicos, all occupancy types) of the Censos 2021 in that parish. This is the ratio Lisbon's own regulation (RMAL) uses.",
+  "sources": [
+    {
+      "id": "rnal",
+      "publisher": "Turismo de Portugal",
+      "name": "Registo Nacional de Alojamento Local (RNAL), list_RNAL, Concelho=Lisboa",
+      "url": "https://webservices.turismodeportugal.pt/RNT_External/rest/RNT/list_RNAL?Concelho=Lisboa",
+      "credit": "Fonte: Turismo de Portugal, RNAL",
+      "licence": "Public register; parish counts published with credit (owner's call, 3 November 2026). No record-level or personal data are kept.",
+      "snapshot": "2026-10-10",
+      "period": "Snapshot downloaded 2026-10-10; latest DataRegisto in the file 2026-10-07"
+    },
+    {
+      "id": "ine_0012501",
+      "publisher": "INE",
+      "name": "Censos 2021: alojamentos familiares clássicos por localização geográfica",
+      "url": "https://www.ine.pt/xurl/ind/0012501",
+      "licence": "CC BY 4.0",
+      "credit": "INE, Censos 2021"
+    }
+  ],
+  "licence_note": "RNAL counts credited to Turismo de Portugal; the Census dwellings are INE's (CC BY 4.0). The ratios estimador.pt computes are CC BY-NC 4.0.",
+  "caveats": [
+    "A registration is not a home: one registration can be a room, a flat, a house or a hostel, so registrations per 100 homes is not the share of homes used as short lets.",
+    "The register lists active registrations on the day of the snapshot (10 October 2026), after the câmara cancelled about 6,765 in 2026 for missing proof of insurance; the câmara's own ratios from late 2025 are higher (Santa Maria Maior 66.9).",
+    "The dwellings are those of the Censos 2021: homes built or lost since are not counted.",
+    "Parish is the register's own parish field (DTMNFR)."
+  ],
+  "snapshot": "2026-10-10",
+  "census_year": 2021,
+  "municipality": {
+    "code": "1106",
+    "name": "Lisboa",
+    "registrations": 11863,
+    "classic_dwellings": 319640,
+    "per_100_dwellings": 3.71
+  },
+  "parishes": [
+    {
+      "code": "110665",
+      "name": "Santa Maria Maior",
+      "registrations": 3141,
+      "classic_dwellings": 7692,
+      "per_100_dwellings": 40.83
+    },
+    {
+      "code": "110661",
+      "name": "Misericórdia",
+      "registrations": 2174,
+      "classic_dwellings": 8657,
+      "per_100_dwellings": 25.11
+    },
+    {
+      "code": "110666",
+      "name": "Santo António",
+      "registrations": 922,
+      "classic_dwellings": 8252,
+      "per_100_dwellings": 11.17
+    },
+    {
+      "code": "110667",
+      "name": "São Vicente",
+      "registrations": 929,
+      "classic_dwellings": 10170,
+      "per_100_dwellings": 9.13
+    },
+    {
+      "code": "110660",
+      "name": "Estrela",
+      "registrations": 744,
+      "classic_dwellings": 12657,
+      "per_100_dwellings": 5.88
+    },
+    {
+      "code": "110656",
+      "name": "Arroios",
+      "registrations": 1199,
+      "classic_dwellings": 20848,
+      "per_100_dwellings": 5.75
+    },
+    {
+      "code": "110602",
+      "name": "Alcântara",
+      "registrations": 233,
+      "classic_dwellings": 8858,
+      "per_100_dwellings": 2.63
+    },
+    {
+      "code": "110657",
+      "name": "Avenidas Novas",
+      "registrations": 343,
+      "classic_dwellings": 14777,
+      "per_100_dwellings": 2.32
+    },
+    {
+      "code": "110658",
+      "name": "Belém",
+      "registrations": 205,
+      "classic_dwellings": 9374,
+      "per_100_dwellings": 2.19
+    },
+    {
+      "code": "110659",
+      "name": "Campo de Ourique",
+      "registrations": 281,
+      "classic_dwellings": 13624,
+      "per_100_dwellings": 2.06
+    },
+    {
+      "code": "110601",
+      "name": "Ajuda",
+      "registrations": 179,
+      "classic_dwellings": 8811,
+      "per_100_dwellings": 2.03
+    },
+    {
+      "code": "110663",
+      "name": "Penha de França",
+      "registrations": 319,
+      "classic_dwellings": 17691,
+      "per_100_dwellings": 1.8
+    },
+    {
+      "code": "110662",
+      "name": "Parque das Nações",
+      "registrations": 196,
+      "classic_dwellings": 11321,
+      "per_100_dwellings": 1.73
+    },
+    {
+      "code": "110610",
+      "name": "Campolide",
+      "registrations": 128,
+      "classic_dwellings": 9103,
+      "per_100_dwellings": 1.41
+    },
+    {
+      "code": "110607",
+      "name": "Beato",
+      "registrations": 96,
+      "classic_dwellings": 7519,
+      "per_100_dwellings": 1.28
+    },
+    {
+      "code": "110655",
+      "name": "Areeiro",
+      "registrations": 154,
+      "classic_dwellings": 12529,
+      "per_100_dwellings": 1.23
+    },
+    {
+      "code": "110654",
+      "name": "Alvalade",
+      "registrations": 153,
+      "classic_dwellings": 18871,
+      "per_100_dwellings": 0.81
+    },
+    {
+      "code": "110633",
+      "name": "Olivais",
+      "registrations": 115,
+      "classic_dwellings": 16942,
+      "per_100_dwellings": 0.68
+    },
+    {
+      "code": "110639",
+      "name": "São Domingos de Benfica",
+      "registrations": 91,
+      "classic_dwellings": 20309,
+      "per_100_dwellings": 0.45
+    },
+    {
+      "code": "110621",
+      "name": "Marvila",
+      "registrations": 74,
+      "classic_dwellings": 16773,
+      "per_100_dwellings": 0.44
+    },
+    {
+      "code": "110611",
+      "name": "Carnide",
+      "registrations": 33,
+      "classic_dwellings": 9009,
+      "per_100_dwellings": 0.37
+    },
+    {
+      "code": "110618",
+      "name": "Lumiar",
+      "registrations": 89,
+      "classic_dwellings": 24073,
+      "per_100_dwellings": 0.37
+    },
+    {
+      "code": "110608",
+      "name": "Benfica",
+      "registrations": 55,
+      "classic_dwellings": 20880,
+      "per_100_dwellings": 0.26
+    },
+    {
+      "code": "110664",
+      "name": "Santa Clara",
+      "registrations": 10,
+      "classic_dwellings": 10900,
+      "per_100_dwellings": 0.09
+    }
+  ]
+}

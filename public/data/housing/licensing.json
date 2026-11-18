@@ -1,0 +1,391 @@
+{
+  "schema": "estimador.housing.licensing/1",
+  "generated_at": "2026-11-18T23:01:05Z",
+  "title": {
+    "pt": "Quanto tempo demora uma licença de construção em Lisboa",
+    "en": "How long a building licence takes in Lisbon"
+  },
+  "status": "transcribed",
+  "status_note": "Transcribed on 18 November 2026 from the published figures of estimador-data scripts/licensing_report.py run on the Lisbon snapshot of 2 November 2026 (the report itself lives only on the Mac: ~/code/estimador-data-licensing/data/housing/licensing/reports/2026-11-02/lisboa_durations.json). Only the fields the housing page reads are kept: p50 and n by year of alvará for procedure 'licenca' (all operations) and for 'licenca' + 'construcao_nova', and the all-years quantiles. Replace this file with the report's own JSON (housing-page build --licensing-report) before anything is published.",
+  "universe": {
+    "lisbon": "Building processes under the RJUE at the Câmara Municipal de Lisboa that received an alvará, one per process (its first), counted by the year the alvará was issued. Procedure: licença. 'New build' is operation 'construção nova'. Processes with no alvará (pending, refused, withdrawn, prior information requests, comunicações prévias) are not in the medians.",
+    "national": "Portugal, new construction for family housing: dwellings in licensed buildings (INE 0008309) and dwellings in completed buildings (INE 0013249), per calendar year, all promoters."
+  },
+  "sources": [
+    {
+      "id": "cml_rjue",
+      "publisher": "Câmara Municipal de Lisboa",
+      "name": "Processos de obras de edificação e demolição abrangidas pelo RJUE, desde 2009; alvarás",
+      "url": "https://dados.gov.pt/datasets/processos-de-obras-de-edificacao-e-demolicao-abrangidas-pelo-rjue-desde-2009",
+      "licence": "CC0 1.0",
+      "snapshot": "2026-11-02",
+      "last_alvara_date": "2026-10-29",
+      "collector": "estimador-data: collect-data licensing; scripts/licensing_report.py"
+    },
+    {
+      "id": "ine_0008309",
+      "publisher": "INE",
+      "name": "Fogos licenciados em construções novas para habitação familiar",
+      "url": "https://www.ine.pt/xurl/ind/0008309",
+      "licence": "INE: free reuse with source attribution (https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_politica_privacidade)",
+      "retrieved_at": "2026-11-04T12:49:17Z",
+      "sha256": "53406c5966ec5844a7c5329334d906a5311b7ca12a4d918fc05d541a4fc14b65",
+      "collector": "estimador-data: collect-data housing-macro"
+    },
+    {
+      "id": "ine_0013249",
+      "publisher": "INE",
+      "name": "Fogos concluídos em construções novas para habitação familiar",
+      "url": "https://www.ine.pt/xurl/ind/0013249",
+      "licence": "INE: free reuse with source attribution (https://www.ine.pt/xportal/xmain?xpid=INE&xpgid=ine_politica_privacidade)",
+      "retrieved_at": "2026-11-04T12:57:38Z",
+      "sha256": "d95a9b6a353a8392bfb94ab2d71eff58d34f622ce938bc5edae71ad5b669295b",
+      "collector": "estimador-data: collect-data housing-macro"
+    }
+  ],
+  "licence_note": "Third-party data keep their own licences: CML's process data CC0, INE's counts INE's terms (free reuse with attribution). The medians and ratios estimador.pt computes from them are CC BY-NC 4.0.",
+  "caveats": [
+    "The medians cover only licences that were issued. A process still pending, refused or withdrawn has no alvará and is not counted, so the medians say nothing about how long those wait.",
+    "The alvará comes after approval and after the applicant asks for it and pays the fees, so the time includes the applicant's own; Lisbon publishes no decision date.",
+    "From 2024-03-04 (Simplex Urbanístico, DL 10/2024) many licences get proof of fee payment instead of an alvará; what Lisbon's alvará date records for them is not yet confirmed with the câmara.",
+    "New builds are few: 15 to 66 alvarás a year, so one year's median moves a lot.",
+    "2026 runs only to the last alvará in the snapshot (2026-10-29).",
+    "Licences outrun completions every year in the national counts; the ratio of completions to licences two years before compares two counts, not the same dwellings.",
+    "INE's completions for 2024 and 2025 are estimates."
+  ],
+  "lisbon": {
+    "snapshot": "2026-11-02",
+    "simplex_date": "2024-03-04",
+    "overall": {
+      "years": [
+        2009,
+        2026
+      ],
+      "new_build": {
+        "median_days": 854,
+        "p75_days": 1330,
+        "alvaras": 727
+      },
+      "all_licences": {
+        "median_days": 646,
+        "p75_days": 1016,
+        "alvaras": 10647
+      }
+    },
+    "by_alvara_year": [
+      {
+        "year": 2009,
+        "new_build": {
+          "median_days": 928,
+          "alvaras": 58
+        },
+        "all_licences": {
+          "median_days": 628,
+          "alvaras": 948
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2010,
+        "new_build": {
+          "median_days": 833,
+          "alvaras": 51
+        },
+        "all_licences": {
+          "median_days": 598,
+          "alvaras": 859
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2011,
+        "new_build": {
+          "median_days": 749,
+          "alvaras": 37
+        },
+        "all_licences": {
+          "median_days": 736,
+          "alvaras": 577
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2012,
+        "new_build": {
+          "median_days": 587,
+          "alvaras": 22
+        },
+        "all_licences": {
+          "median_days": 671,
+          "alvaras": 459
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2013,
+        "new_build": {
+          "median_days": 790,
+          "alvaras": 27
+        },
+        "all_licences": {
+          "median_days": 671,
+          "alvaras": 507
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2014,
+        "new_build": {
+          "median_days": 1346,
+          "alvaras": 21
+        },
+        "all_licences": {
+          "median_days": 549,
+          "alvaras": 513
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2015,
+        "new_build": {
+          "median_days": 736,
+          "alvaras": 37
+        },
+        "all_licences": {
+          "median_days": 517,
+          "alvaras": 496
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2016,
+        "new_build": {
+          "median_days": 623,
+          "alvaras": 61
+        },
+        "all_licences": {
+          "median_days": 473,
+          "alvaras": 659
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2017,
+        "new_build": {
+          "median_days": 572,
+          "alvaras": 66
+        },
+        "all_licences": {
+          "median_days": 514,
+          "alvaras": 518
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2018,
+        "new_build": {
+          "median_days": 804,
+          "alvaras": 60
+        },
+        "all_licences": {
+          "median_days": 640,
+          "alvaras": 632
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2019,
+        "new_build": {
+          "median_days": 838,
+          "alvaras": 62
+        },
+        "all_licences": {
+          "median_days": 718,
+          "alvaras": 577
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2020,
+        "new_build": {
+          "median_days": 926,
+          "alvaras": 43
+        },
+        "all_licences": {
+          "median_days": 782,
+          "alvaras": 570
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2021,
+        "new_build": {
+          "median_days": 1119,
+          "alvaras": 56
+        },
+        "all_licences": {
+          "median_days": 840,
+          "alvaras": 688
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2022,
+        "new_build": {
+          "median_days": 808,
+          "alvaras": 38
+        },
+        "all_licences": {
+          "median_days": 718,
+          "alvaras": 462
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2023,
+        "new_build": {
+          "median_days": 771,
+          "alvaras": 15
+        },
+        "all_licences": {
+          "median_days": 532,
+          "alvaras": 459
+        },
+        "partial_year": false,
+        "after_simplex": false
+      },
+      {
+        "year": 2024,
+        "new_build": {
+          "median_days": 872,
+          "alvaras": 24
+        },
+        "all_licences": {
+          "median_days": 665,
+          "alvaras": 601
+        },
+        "partial_year": false,
+        "after_simplex": true
+      },
+      {
+        "year": 2025,
+        "new_build": {
+          "median_days": 1242,
+          "alvaras": 34
+        },
+        "all_licences": {
+          "median_days": 720,
+          "alvaras": 642
+        },
+        "partial_year": false,
+        "after_simplex": true
+      },
+      {
+        "year": 2026,
+        "new_build": {
+          "median_days": 1125,
+          "alvaras": 15
+        },
+        "all_licences": {
+          "median_days": 564,
+          "alvaras": 480
+        },
+        "partial_year": true,
+        "after_simplex": true
+      }
+    ]
+  },
+  "national": [
+    {
+      "year": 2015,
+      "licensed": 8686,
+      "completed": 7148,
+      "completed_provisional": false,
+      "completed_per_licensed_two_years_before": 0.95
+    },
+    {
+      "year": 2016,
+      "licensed": 11817,
+      "completed": 7909,
+      "completed_provisional": false,
+      "completed_per_licensed_two_years_before": 1.13
+    },
+    {
+      "year": 2017,
+      "licensed": 14967,
+      "completed": 8213,
+      "completed_provisional": false,
+      "completed_per_licensed_two_years_before": 0.95
+    },
+    {
+      "year": 2018,
+      "licensed": 21896,
+      "completed": 10751,
+      "completed_provisional": false,
+      "completed_per_licensed_two_years_before": 0.91
+    },
+    {
+      "year": 2019,
+      "licensed": 25824,
+      "completed": 12954,
+      "completed_provisional": false,
+      "completed_per_licensed_two_years_before": 0.87
+    },
+    {
+      "year": 2020,
+      "licensed": 26168,
+      "completed": 16923,
+      "completed_provisional": false,
+      "completed_per_licensed_two_years_before": 0.77
+    },
+    {
+      "year": 2021,
+      "licensed": 30094,
+      "completed": 19926,
+      "completed_provisional": false,
+      "completed_per_licensed_two_years_before": 0.77
+    },
+    {
+      "year": 2022,
+      "licensed": 32232,
+      "completed": 21047,
+      "completed_provisional": false,
+      "completed_per_licensed_two_years_before": 0.8
+    },
+    {
+      "year": 2023,
+      "licensed": 33560,
+      "completed": 22280,
+      "completed_provisional": false,
+      "completed_per_licensed_two_years_before": 0.74
+    },
+    {
+      "year": 2024,
+      "licensed": 35371,
+      "completed": 24666,
+      "completed_provisional": true,
+      "completed_per_licensed_two_years_before": 0.77
+    },
+    {
+      "year": 2025,
+      "licensed": 42066,
+      "completed": 27301,
+      "completed_provisional": true,
+      "completed_per_licensed_two_years_before": 0.81
+    }
+  ]
+}

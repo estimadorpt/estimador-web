@@ -12,6 +12,7 @@ import { getMDXArticlesByLocale } from '@/lib/mdx-articles'
 import { buildTagIndex } from '@/lib/article-discovery'
 import { SITE_LOCALES, languageAlternates, localizedUrl } from '@/lib/metadata'
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status'
+import { HOUSING_PUBLISHED } from '@/lib/config/housing-status'
 import { PARLIAMENTARY_2025, PRESIDENTIAL_2026_SECOND_ROUND_DATE } from '@/lib/config/elections'
 import { loadPopulationPlaces } from '@/lib/utils/population-data-loader'
 import { POPULATION_PUBLISHED, POPULATION_ROUTES } from '@/lib/config/population'
@@ -52,6 +53,7 @@ const ROUTE_HINTS: Record<string, { changeFrequency: Frequency; priority: number
   '/populacao/qualidade': { changeFrequency: 'monthly', priority: 0.6 },
   '/populacao/dados': { changeFrequency: 'monthly', priority: 0.6 },
   '/populacao/metodologia': { changeFrequency: 'monthly', priority: 0.5 },
+  '/habitacao': { changeFrequency: 'monthly', priority: 0.6 },
 }
 
 /**
@@ -76,6 +78,12 @@ const HIDDEN_ROUTES = new Set([
  * (src/lib/config/economy-status.json); setting it restores these entries.
  */
 const ECONOMY_ROUTES = ['/economia', '/economia/metodologia']
+
+/**
+ * The housing page is a draft, noindexed, while its flag is off
+ * (src/lib/config/housing-status.json).
+ */
+const HOUSING_ROUTES = ['/habitacao']
 
 /**
  * Frozen pages: dated by what they archive, not by the build: the elections
@@ -148,6 +156,7 @@ function contentDates({ liga, players }: { liga?: Date; players?: Date }): Recor
 function listedRoute(route: string, { hasArticles }: { hasArticles: boolean }): boolean {
   if (HIDDEN_ROUTES.has(route)) return false
   if (!ECONOMY_PUBLISHED && ECONOMY_ROUTES.includes(route)) return false
+  if (!HOUSING_PUBLISHED && HOUSING_ROUTES.includes(route)) return false
   // An empty index is noindexed (artigos/page.tsx, artigos/tema/page.tsx).
   if (!hasArticles && (route === '/artigos' || route.startsWith('/artigos/'))) return false
   return true

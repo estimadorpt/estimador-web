@@ -6,6 +6,7 @@
 #   ./scripts/sync-data.sh football # sync football only
 #   ./scripts/sync-data.sh elections # sync elections only
 #   ./scripts/sync-data.sh economics # the economy, only ever on its own (see below)
+#   ./scripts/sync-data.sh housing  # the housing page's two files (a draft section)
 
 set -e
 
@@ -115,6 +116,29 @@ sync_population() {
   "$PYTHON" "$SCRIPT_DIR/sync-population.py" --source "$MS_DIR"
 }
 
+sync_housing() {
+  # The housing page's two files (/habitacao, a draft: src/lib/config/housing-status.json).
+  # estimador-housing's housing-page builds them from records only: Lisbon's licensing
+  # report (estimador-data scripts/licensing_report.py on the newest snapshot), INE's
+  # national licensed and completed dwellings, and RNAL short-let counts by Lisbon parish.
+  local HOUSING_DIR="${HOUSING_DIR:-$HOME/code/estimador-housing}"
+  local LICENSING_DIR="${LICENSING_DIR:-$HOME/code/estimador-data-licensing}"
+  if [ ! -d "$HOUSING_DIR" ]; then
+    echo "Warning: estimador-housing not found at $HOUSING_DIR"
+    return 1
+  fi
+  local REPORT
+  REPORT="$(ls -d "$LICENSING_DIR"/data/housing/licensing/reports/*/lisboa_durations.json 2>/dev/null | sort | tail -1 || true)"
+  local ARGS=(--out "$DATA_DIR/housing")
+  if [ -n "$REPORT" ]; then
+    ARGS+=(--licensing-report "$REPORT")
+    echo "Lisbon licensing report: $REPORT"
+  else
+    echo "No Lisbon licensing report under $LICENSING_DIR: using estimador-housing's transcription of 2 November 2026"
+  fi
+  (cd "$HOUSING_DIR" && uv run housing-page "${ARGS[@]}")
+}
+
 case "$SECTION" in
   football)
     sync_football
@@ -128,6 +152,9 @@ case "$SECTION" in
   population)
     sync_population
     ;;
+  housing)
+    sync_housing
+    ;;
   all)
     # Economics is deliberately not part of "all": an economy sync is always
     # its own decision (./scripts/sync-data.sh economics), reviewed before a
@@ -138,7 +165,7 @@ case "$SECTION" in
     ;;
   *)
     echo "Unknown section: $SECTION"
-    echo "Usage: $0 [football|elections|economics|population|all]"
+    echo "Usage: $0 [football|elections|economics|population|housing|all]"
     exit 1
     ;;
 esac
