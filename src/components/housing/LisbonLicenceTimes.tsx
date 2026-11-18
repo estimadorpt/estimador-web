@@ -2,7 +2,7 @@ import { ChartTabs } from '@/components/instrument';
 import { ChartTable } from '@/components/viz/ChartTable';
 import { YearChart } from '@/components/housing/YearChart';
 import { formatCount } from '@/lib/population/format';
-import { TWO_YEARS_DAYS, housingDate, loadHousingLicensing, type LicensingFile } from '@/lib/housing-data';
+import { TWO_YEARS_DAYS, housingDate, loadHousingLicensing, niceCeiling, type LicensingFile } from '@/lib/housing-data';
 
 /**
  * Lisbon's licence times as one instrument piece: the chart (median days from
@@ -35,12 +35,16 @@ export function LisbonLicenceTimes({ locale: given, data, id = 'licence-days', h
   const simplexYear = Number(lisbon.simplex_date.slice(0, 4));
   const simplexAt = simplexYear + (Date.parse(`${lisbon.simplex_date}T00:00:00Z`) - Date.parse(`${simplexYear}-01-01T00:00:00Z`)) / (365 * 864e5);
 
+  const years = lisbon.by_alvara_year.map(y => y.year);
+  const medians = lisbon.by_alvara_year.flatMap(y => [y.new_build.median_days, y.all_licences.median_days]).filter((v): v is number => v !== null);
+  const yMax = niceCeiling(medians, 100);
+
   const chart = (
     <YearChart
       label={pt
         ? `Dias da entrada do processo ao alvará em Lisboa, mediana por ano, ${firstYear} a ${lastYear}`
         : `Days from a process entering Lisbon's câmara to its alvará, median by year, ${firstYear} to ${lastYear}`}
-      yMax={1400}
+      yMax={yMax}
       yTicks={[
         { value: 0, label: '0' },
         { value: 365, label: pt ? '1 ano' : '1 yr' },
@@ -58,8 +62,8 @@ export function LisbonLicenceTimes({ locale: given, data, id = 'licence-days', h
           points: lisbon.by_alvara_year.flatMap(y => y.new_build.median_days === null ? [] : [{ year: y.year, value: y.new_build.median_days, soft: y.partial_year }]),
         },
       ]}
-      xTicks={[2009, 2011, 2013, 2015, 2017, 2019, 2021, 2023, 2025]}
-      phoneXTicks={[2009, 2013, 2017, 2021, 2025]}
+      xTicks={years.filter(y => (y - years[0]) % 2 === 0)}
+      phoneXTicks={years.filter(y => (y - years[0]) % 4 === 0)}
     />
   );
   const table = (
