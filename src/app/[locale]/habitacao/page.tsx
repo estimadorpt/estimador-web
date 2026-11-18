@@ -134,6 +134,7 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
         { value: RMAL_THRESHOLDS.relative, label: '5' },
         { value: RMAL_THRESHOLDS.absolute, label: '10' },
       ]}
+      phoneKey={pt ? 'Traços finos: os limiares de 5 e 10 registos por 100 casas.' : 'Thin ticks: the thresholds of 5 and 10 registrations per 100 homes.'}
       format={v => oneDecimal(v, locale)}
       label={pt ? 'Registos de alojamento local por cada 100 casas, por freguesia de Lisboa' : 'Short-let registrations per 100 homes, by Lisbon parish'}
     />
@@ -255,8 +256,8 @@ export default async function HabitacaoPage({ params }: { params: Promise<{ loca
                 chart={shortLetsBars}
                 table={shortLetsTable}
                 note={pt
-                  ? <>Fonte: Turismo de Portugal, RNAL (registos ativos a {rnalDate}); INE, Censos 2021 (CC BY 4.0); cálculo estimador.pt. As marcas em 5 e 10 são os limiares de contenção relativa e absoluta do regulamento municipal de alojamento local (em vigor desde 6 de dezembro de 2025), que usa esta mesma razão. Em 2026 a câmara cancelou cerca de {count(6765)} registos por falta de prova de seguro, por isso os seus números do fim de 2025 são mais altos.</>
-                  : <>Source: Turismo de Portugal, RNAL (active registrations on {rnalDate}); INE, Census 2021 (CC BY 4.0); estimador.pt&apos;s calculation. The marks at 5 and 10 are the relative and absolute containment thresholds of Lisbon&apos;s short-let regulation (in force since 6 December 2025), which uses this same ratio. In 2026 the câmara cancelled about {count(6765)} registrations for missing proof of insurance, so its own late-2025 figures are higher.</>}
+                  ? <>Fonte: Turismo de Portugal, RNAL (registos ativos a {rnalDate}); INE, Censos 2021 (CC BY 4.0); cálculo estimador.pt. As marcas em 5 e 10 são os limiares de contenção relativa e absoluta do regulamento municipal de alojamento local (em vigor desde 6 de dezembro de 2025), que usa esta mesma razão. Em 2026 a câmara cancelou cerca de {count(6765)} registos por falta de prova de seguro; os números da própria câmara do fim de 2025, anteriores a esses cancelamentos, são mais altos.</>
+                  : <>Source: Turismo de Portugal, RNAL (active registrations on {rnalDate}); INE, Census 2021 (CC BY 4.0); estimador.pt&apos;s calculation. The marks at 5 and 10 are the relative and absolute containment thresholds of Lisbon&apos;s short-let regulation (in force since 6 December 2025), which uses this same ratio. In 2026 the câmara cancelled about {count(6765)} registrations for missing proof of insurance; the câmara&apos;s own late-2025 figures, from before those cancellations, are higher.</>}
               />
             </div>
           </section>

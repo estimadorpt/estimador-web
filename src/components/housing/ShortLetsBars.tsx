@@ -6,13 +6,15 @@ import type { ShortLetsArea } from '@/lib/housing-data';
  * Thin ink ticks mark the câmara's two thresholds on every row. HTML, so it
  * reflows on a phone; the twin table carries the counts behind each ratio.
  */
-export function ShortLetsBars({ parishes, municipality, max, thresholds, format, label }: {
+export function ShortLetsBars({ parishes, municipality, max, thresholds, format, label, phoneKey }: {
   parishes: ShortLetsArea[];
   municipality: ShortLetsArea;
   max: number;
   thresholds: { value: number; label: string }[];
   format: (value: number) => string;
   label: string;
+  /** On phones the ticks have no labels above them, so this line names them. */
+  phoneKey: string;
 }) {
   const pct = (v: number) => `${Math.min(100, (v / max) * 100)}%`;
   const row = (p: ShortLetsArea, strong = false) => (
@@ -38,6 +40,9 @@ export function ShortLetsBars({ parishes, municipality, max, thresholds, format,
         </span>
         <span />
       </div>
+      <p aria-hidden="true" className="pb-1 text-[12px] text-graphite sm:hidden">
+        {phoneKey}
+      </p>
       <ul aria-label={label}>
         {parishes.map(p => row(p))}
         {row(municipality, true)}

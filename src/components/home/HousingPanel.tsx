@@ -36,7 +36,7 @@ export function HousingPanel({ locale: given }: { locale: string }) {
           <p className="disp text-[1.35rem] leading-tight">
             {runHoldsFinding(run)
               ? (pt ? `Desde ${run[0].year}, a mediana de uma licença de obra nova em Lisboa passa os dois anos` : `Since ${run[0].year}, the median new-build licence in Lisbon has taken more than two years`)
-              : (pt ? `Uma licença de obra nova em Lisboa demorou, a meio, ${count(overall.new_build.median_days)} dias` : `A new-build licence in Lisbon took a median of ${count(overall.new_build.median_days)} days`)}
+              : (pt ? `Em Lisboa, a mediana de uma licença de obra nova foi de ${count(overall.new_build.median_days)} dias` : `A new-build licence in Lisbon took a median of ${count(overall.new_build.median_days)} days`)}
           </p>
           <p className="mt-2 flex gap-2 text-[15px] leading-relaxed">
             <NowGlyph className="mt-1" />
