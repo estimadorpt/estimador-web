@@ -136,26 +136,93 @@ export function deployProblems({ run, now }) {
       : [];
   }
   if (run.conclusion === 'success') return [];
+  // A red run is not always an undeployed push: the checks and the build come
+  // before the upload, the smoke check after it.
   return [
     `The last deploy from \`main\` did not succeed (${run.conclusion}): ${where}. ` +
-      'Nothing pushed since then is on the site. Open the run, fix the first failing check, and push.',
+      'Open the run and read which step stopped it. A red check or build means nothing pushed since then is on the ' +
+      'site: fix it and push. A red smoke check, or a run stopped while it waited for the site, means the upload ' +
+      'was made and the site did not answer as expected.',
   ];
+}
+
+/**
+ * What to check when the homepage gives no HTTP answer, by the kind of failure
+ * scripts/lib/reach.mjs read from it. Only a name that does not resolve has a
+ * known history: on 18 November 2026 a disabled Azure subscription took the DNS
+ * zone and the site down together, and every deploy still reported success.
+ */
+const NO_ANSWER_ADVICE = {
+  dns:
+    'A deploy cannot cause that: check that the domain is still registered, that its DNS zone answers, ' +
+    'and that the Azure subscription holding the zone and the site is active.',
+};
+
+/**
+ * What the app's own Azure address says about a homepage that is not there.
+ * The custom domain and the host can fail separately: the same page asked for
+ * at the address Azure gave the app tells which one it is. `appStatus` is that
+ * answer's HTTP status, null when there was none; a null `appBase` means the
+ * address was not asked.
+ */
+export function hostVerdict({ appBase = null, appStatus = null, appFailure = null }) {
+  if (!appBase) return null;
+  if (appStatus === 200) {
+    return (
+      `The same page answers 200 at the app's own Azure address (${appBase}), so what was deployed is being served: ` +
+      'the fault is in the domain, its DNS or its link to the app.'
+    );
+  }
+  if (appStatus != null) {
+    return (
+      `The app's own Azure address (${appBase}) answered ${appStatus} for the same page, so the host is not serving ` +
+      'what was deployed: check the Static Web App and its subscription in the Azure portal.'
+    );
+  }
+  return (
+    `The app's own Azure address (${appBase}) did not answer either${appFailure?.text ? `: ${appFailure.text}` : ''}. ` +
+    'When nothing answers, the network this check ran on may be at fault: run it again before acting.'
+  );
 }
 
 /**
  * Does the live site serve what `main` holds? Compares the `generated_at` of
  * the fixtures file on both sides, once a deploy has had time to finish.
  * `pageStatus` and `fixturesStatus` are the HTTP statuses of the Portuguese
- * homepage and of the live fixtures file (null when the host did not answer).
+ * homepage and of the live fixtures file (null when the host did not answer;
+ * `pageFailure` and `fixturesFailure` then say why, as scripts/lib/reach.mjs
+ * describes a failure). When the homepage is not there, `appBase`, `appStatus`
+ * and `appFailure` carry what the app's own Azure address answered for it.
  */
-export function liveProblems({ base, pageStatus, fixturesStatus, mainGeneratedAt, liveGeneratedAt, lastDataCommit, now }) {
+export function liveProblems({
+  base,
+  pageStatus,
+  pageFailure = null,
+  fixturesStatus,
+  fixturesFailure = null,
+  appBase = null,
+  appStatus = null,
+  appFailure = null,
+  mainGeneratedAt,
+  liveGeneratedAt,
+  lastDataCommit,
+  now,
+}) {
   if (pageStatus !== 200) {
-    return [pageStatus == null ? `${base}/pt/ did not answer.` : `${base}/pt/ answered ${pageStatus} instead of 200.`];
+    const said =
+      pageStatus == null
+        ? `${base}/pt/ did not answer${pageFailure?.text ? `: ${pageFailure.text}` : ''}.`
+        : `${base}/pt/ answered ${pageStatus} instead of 200.`;
+    const advice = pageStatus == null ? NO_ANSWER_ADVICE[pageFailure?.kind] : null;
+    return [[said, advice, hostVerdict({ appBase, appStatus, appFailure })].filter(Boolean).join(' ')];
   }
   if (fixturesStatus !== 200) {
     return [
-      `The live site ${fixturesStatus == null ? 'did not answer' : `answered ${fixturesStatus}`} ` +
-        'for the Liga fixtures file, which `main` has.',
+      `The live site ${
+        fixturesStatus == null
+          ? `did not answer${fixturesFailure?.text ? ` (${fixturesFailure.text})` : ''}`
+          : `answered ${fixturesStatus}`
+      } ` + 'for the Liga fixtures file, which `main` has.',
     ];
   }
   const committed = Date.parse(lastDataCommit);

@@ -67,7 +67,7 @@ npm run lint         # Run ESLint
 ./scripts/sync-data.sh economics # Economy feeds, only ever on their own (see "Economy section")
 npm run check        # validate:data + typecheck + lint + tests (CI runs it before the build)
 npm run og           # Regenerate the OG cards + public/og-manifest.json (also run by prebuild)
-npm run smoke -- --base <url>  # Probe a deployed export: every route, asset and redirect
+npm run smoke -- --base <url>  # Probe a deployed export: every route, asset and redirect (exit 3: the host gave no answer)
 npm run check:export # Export budget (files, MB, per-file) + over-long titles/descriptions; runs as postbuild
 npm run freshness    # Is the site still updating? The daily check (see "Deployment"); run from main
 ```
@@ -111,6 +111,20 @@ the tests instead of silencing the check). The script uses Node alone, so it sti
 broken lock file is why the deploys fail. The job on the Mac (`com.estimador.publish`, documented
 in estimador-football `docs/com.estimador.publish.plist`) commits only when there is a new result,
 on the days it is scheduled: a game played on another day waits for the next scheduled day.
+
+**When the host does not answer.** "Deployment Complete" is Azure's word for an accepted upload,
+not proof that the site serves it: on 18 November 2026 the Azure subscription was disabled, the
+domain's DNS zone stopped answering and the app answered 404 on every path, while every deploy
+still reported success. Both checks now say which failure they met (`scripts/lib/reach.mjs`:
+`describeFailure` reads the code `fetch` hides behind "fetch failed", `reach` asks one URL a few
+times; `site-reach.test.ts`). The smoke check asks the host once before its walk and exits 3
+within two minutes when there is no HTTP answer at all (it used to sit for up to 47 minutes), every
+request has a time limit (`--timeout`, 30 s), and the deploy job and its smoke step have
+`timeout-minutes`. The freshness report names why the homepage did not answer and, when it is not
+there, asks the app's own Azure address for it (`APP_BASE` in `scripts/check-freshness.mjs`,
+`hostVerdict`): 200 there means the fault is the domain or its DNS, anything else that the host is
+not serving. A name that does not resolve is never a deploy's doing: check the domain, its DNS
+zone and the subscription before re-running anything.
 
 ## Route Structure
 
