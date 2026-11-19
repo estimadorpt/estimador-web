@@ -59,7 +59,7 @@ const copy = {
     licenceOwnAfter:
       ": podes usá-las, redistribuí-las e transformá-las, incluindo para fins comerciais, desde que atribuas a fonte («estimador.pt», com link para a página correspondente).",
     licenceThirdParty:
-      "A licença não abrange os dados de terceiros que alguns ficheiros trazem, marcados na lista acima como «Fora da licença»: resultados e estatísticas de jogo (SofaScore), xG (FotMob), cotações de casas de apostas (Pinnacle e Bet365, via football-data.co.uk) baixas por lesão ou castigo (SofaScore) e valores de mercado (Transfermarkt). Esses dados vêm da fonte original e não são redistribuíveis por nós: para os reutilizar, segue os termos de cada fonte.",
+      "A licença não abrange os dados de terceiros que alguns ficheiros trazem, marcados na lista acima como «Fora da licença»: resultados e estatísticas de jogo (SofaScore), xG (FotMob), cotações de casas de apostas (Pinnacle e Bet365, via football-data.co.uk), baixas por lesão ou castigo (SofaScore) e valores de mercado (Transfermarkt). Esses dados vêm da fonte original e não são redistribuíveis por nós: para os reutilizar, segue os termos de cada fonte.",
     licenceWarranty:
       "Os dados são fornecidos como estão, sem garantias — são previsões probabilísticas de um modelo estatístico, e por definição vão estar erradas parte do tempo.",
     licenceUrl: "https://creativecommons.org/licenses/by-nc/4.0/deed.pt",

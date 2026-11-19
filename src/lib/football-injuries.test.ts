@@ -91,6 +91,15 @@ describe('currentAbsences', () => {
       expect(currentAbsences(lastGame(), '2026-11-26T10:00:00+00:00').status).toBe('stale');
     });
 
+    it('keeps a club exactly 15 days after its game and drops one with no date', () => {
+      const edge = currentAbsences(lastGame(), '2026-11-24T00:00:00+00:00');
+      expect(edge.status).toBe('current');
+      expect(edge.players.map(p => p.player)).toEqual(['A']);
+      const undated = lastGame();
+      undated.teams = undated.teams.map(t => ({ ...t, as_of: undefined }));
+      expect(currentAbsences(undated, '2026-11-14T10:00:00+00:00').players).toEqual([]);
+    });
+
     it('leaves out a club whose own last game is too old', () => {
       const result = currentAbsences(lastGame(), '2026-11-14T10:00:00+00:00');
       expect(result.players.map(p => p.player)).toEqual(['A']);

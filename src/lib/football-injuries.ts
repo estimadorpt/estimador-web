@@ -62,7 +62,8 @@ export function currentAbsences(
     if (age === null || age > maxAge) return none('stale');
   }
   const recentTeam = (team: InjuryTeam) => {
-    if (!lastGame || !predictionTimestamp || !team.as_of) return true;
+    if (!lastGame || !predictionTimestamp) return true;
+    if (!team.as_of) return false;
     const age = daysBetween(team.as_of, predictionTimestamp);
     return age !== null && age <= maxAge;
   };
