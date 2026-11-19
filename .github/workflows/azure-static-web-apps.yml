@@ -44,6 +44,18 @@ jobs:
       - name: Required data, types, lint and tests
         run: npm run check
 
+      # `/data/population/v*` is served immutable for a year, so a release the
+      # site already serves must never change in place: readers who hold its
+      # files would keep the old ones, and no later deploy could reach them.
+      # This checks each release folder against its own manifest, and that
+      # manifest against the one the live site serves, and stops the run when
+      # either differs. A release that is not on the site yet passes, and so
+      # does a site that cannot be asked (the output says which): it never
+      # takes more than about a minute a folder.
+      - name: Published population releases are unchanged
+        timeout-minutes: 5
+        run: node scripts/check-published-data.mjs
+
       - name: Build application
         run: npm run build
         env:

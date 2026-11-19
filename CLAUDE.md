@@ -70,6 +70,7 @@ npm run og           # Regenerate the OG cards + public/og-manifest.json (also r
 npm run smoke -- --base <url>  # Probe a deployed export: every route, asset and redirect (exit 3: the host gave no answer)
 npm run check:export # Export budget (files, MB, per-file) + over-long titles/descriptions; runs as postbuild
 npm run freshness    # Is the site still updating? The daily check (see "Deployment"); run from main
+npm run check:published  # Did this checkout change a population release the live site already serves? (the deploy runs it)
 ```
 
 `scripts/patch-next.mjs` (postinstall and prebuild) fixes one Next 15.5 bug: when a link's RSC
@@ -125,6 +126,22 @@ there, asks the app's own Azure address for it (`APP_BASE` in `scripts/check-fre
 `hostVerdict`): 200 there means the fault is the domain or its DNS, anything else that the host is
 not serving. A name that does not resolve is never a deploy's doing: check the domain, its DNS
 zone and the subscription before re-running anything.
+
+**A published population release never changes in place.** `/data/population/v*` is served
+immutable for a year, so a browser that holds one of a release's files never asks for it again: a
+deploy that edits a file of a release the site already serves leaves those readers on the old
+bytes, with every check green. The deploy workflow runs `scripts/check-published-data.mjs` before
+the build (`npm run check:published`; rules in `scripts/lib/published-data.mjs`,
+`published-data.test.ts`). For every release folder it makes two comparisons: the folder against
+its own `manifest.json` (the SHA-256 of every other file: a hand edit or a half-finished sync
+stops the run, with no network needed), and that manifest against the one the live site serves
+(the run stops when both can be read and say different things, and the files are named; spacing
+and key order alone are not a difference). A release that is not on the site yet passes; a site
+that cannot be asked is reported and does not stop the run. The correction to a published
+release is a new release number, as v1.0.1 to v1.0.3 were; a folder that is retired is removed
+whole. Only on the owner's word, `PUBLISHED_DATA_CHANGE_OK` in that
+workflow step's `env` lets one change through: the stopped run prints the value to set
+(`<folder>@<hash>`), which names the content it accepts, so it opens nothing that comes later.
 
 ## Route Structure
 
@@ -722,7 +739,7 @@ All chart components follow a consistent pattern:
 ### staticwebapp.config.json
 - 301 redirects: old URLs, locale-less section paths and the bare root (see "Route Structure")
 - Rewrites: `/{locale}/populacao/freguesia/*` to the parish shell, after two exact rules that serve the shell's own RSC payload (`/{pt,en}/populacao/freguesia/_/index.txt`) as itself rather than as the shell's HTML; `/pt/populacao/v/*` and `/en/populacao/v/*` to each locale's consultation page, and the locale-less `/populacao/v/*` (the producer's `canonical_path`) to the Portuguese one
-- Cache headers: `/_next/static/*` and the hashed `og-image-*-{hash}.png` cards immutable for a year, except the names matched first by exact routes, which revalidate (`max-age=0, must-revalidate`): the unversioned `og-image-{pt,en}.png` and every retained card name (see the OG paragraph below), whose routes `scripts/generate-og-images.mjs` writes just ahead of the `/og-image-*.png` wildcard; `/favicon.ico` a day; `/data/population/v*` immutable (a release never changes, its `manifest.json` included; there is no rule for anything else under `/data/population`, and `host-config.test.ts` keeps it that way); `/data/population-geography/*` a day; `/images/*`, `/brand/*`, `/branding/*` a week with stale-while-revalidate; everything else `max-age=0, must-revalidate`
+- Cache headers: `/_next/static/*` and the hashed `og-image-*-{hash}.png` cards immutable for a year, except the names matched first by exact routes, which revalidate (`max-age=0, must-revalidate`): the unversioned `og-image-{pt,en}.png` and every retained card name (see the OG paragraph below), whose routes `scripts/generate-og-images.mjs` writes just ahead of the `/og-image-*.png` wildcard; `/favicon.ico` a day; `/data/population/v*` immutable (a release never changes, its `manifest.json` included, and the deploy checks it: see "Deployment"; there is no rule for anything else under `/data/population`, and `host-config.test.ts` keeps it that way); `/data/population-geography/*` a day; `/images/*`, `/brand/*`, `/branding/*` a week with stale-while-revalidate; everything else `max-age=0, must-revalidate`
 - MIME types for `.json`, `.txt` (RSC payloads), `.wasm`, `.parquet`, `.xml`, `.avif`
 - 404s rewrite to `/404.html`; there is no navigation fallback
 - Bare `"statusCode": 404` rules for the pages the export must write but nobody should reach: `/{pt,en}/artigos/sem-artigos/` and `/{pt,en}/artigos/tema/sem-temas/` (placeholders while nothing is published) and `/404/`. `scripts/smoke-check.mjs` reads these rules, probes each for a 404 and leaves them out of its 200 walk.
