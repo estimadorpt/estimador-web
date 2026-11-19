@@ -98,15 +98,17 @@ The project deploys automatically to Azure Static Web Apps via GitHub Actions wh
 
 **Freshness.** A static export stands still without anyone noticing: from 24 October to
 1 November 2026 a data sync kept `npm run check` red and nothing deployed for eight days.
-`.github/workflows/site-freshness.yml` runs `scripts/check-freshness.mjs` every morning (07:17 UTC)
-and after every deploy from `main`. It asks three questions: did the last push to `main` deploy; did
+`.github/workflows/site-freshness.yml` runs `scripts/check-freshness.mjs` twice a day (07:17 and
+15:47 UTC: GitHub may delay a scheduled run or drop it, and the first one due, on 19 November
+2026, had not started an hour later) and after every deploy from `main`. It asks three questions:
+did the last push to `main` deploy; did
 a new forecast file reach `main` after the Liga games that were played (two or more games that
 kicked off over 36 hours ago, with no data commit made after they could have ended, mean the
 publishing job on the Mac did not run; one such game alone is taken for a postponement, which keeps
 its date in the file); and does the live site serve the `game_fixtures.json` that `main` holds, an
 hour after the commit. While any answer is no, the run is red and one issue, "estimador.pt has
-stopped updating", stays open and assigned to the owner, with a new report each day; it is closed
-by the first healthy run. The rules and thresholds are in `scripts/lib/freshness.mjs`
+stopped updating", stays open and assigned to the owner, with a new report at every run; it is
+closed by the first healthy run. The rules and thresholds are in `scripts/lib/freshness.mjs`
 (`site-freshness.test.ts`, which also reads the published fixtures file, so a renamed field fails
 the tests instead of silencing the check). The script uses Node alone, so it still runs when a
 broken lock file is why the deploys fail. The job on the Mac (`com.estimador.publish`, documented
