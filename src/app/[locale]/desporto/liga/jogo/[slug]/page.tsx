@@ -475,6 +475,7 @@ export default async function MatchPage({
               unavailable={unavailable}
               absencesStatus={absences.status}
               snapshotDate={absences.snapshotDate}
+              absencesBasis={injuries?.basis ?? null}
               publishedCount={players?.players?.length ?? 0}
               sarCutoffLabel={playerDataCutoffLabel(
                 playersDetail?.appearances_through,

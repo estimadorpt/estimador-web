@@ -17,6 +17,10 @@ export interface InjuryPlayer {
 
 export interface InjuryTeam {
   team: string;
+  /** SofaScore feed: the date of the club's last game, which the list is read from. */
+  as_of?: string;
+  /** SofaScore feed: that game's opponent. */
+  opponent?: string;
   n_out: number;
   value_out_eur: number;
   squad_value_eur: number | null;
@@ -28,7 +32,10 @@ export interface InjuriesData {
   snapshot_date: string | null;
   /** Set by the collector when it could not refresh the list. */
   stale?: boolean;
+  /** "sofascore" since 19 Nov 2026; "transfermarkt" before. */
   source: string;
+  /** "last_game": each club's absentees at its last game (SofaScore). */
+  basis?: string;
   n_out: number;
   n_injuries: number;
   n_suspensions: number;
@@ -74,7 +81,13 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
       ? `${data.n_out} jogadores indisponíveis em ${data.teams.length} clubes. A barra mostra a fatia do plantel — em valor de mercado — que cada treinador não pode utilizar. É isso, e não o número de lesionados, que diz o tamanho real do problema.`
       : `${data.n_out} players unavailable across ${data.teams.length} clubs. The bar shows the share of the squad — by market value — that each coach cannot pick. That, not the headcount, is the size of the problem.`,
     snapshot: (d: string) =>
-      pt ? `Dados de ${d} · Transfermarkt` : `As of ${d} · Transfermarkt`,
+      data.basis === "last_game"
+        ? pt
+          ? `Baixas no último jogo de cada clube, até ${d} · SofaScore`
+          : `Absences at each club's last game, up to ${d} · SofaScore`
+        : pt
+          ? `Dados de ${d} · Transfermarkt`
+          : `As of ${d} · Transfermarkt`,
     outOfSquad: pt ? "do plantel indisponível" : "of squad unavailable",
     back: pt ? "Regresso previsto" : "Expected back",
     noSuspensions: pt

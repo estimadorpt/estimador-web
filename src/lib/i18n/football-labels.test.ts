@@ -62,7 +62,7 @@ describe('injury reason labels', () => {
     expect(injuryReasonLabel('Torn knee ligaments', 'pt')).toBe('Rotura dos ligamentos do joelho');
     expect(injuryReasonLabel('Corona virus', 'pt')).toBe('Indisponível');
     expect(injuryReasonLabel('Mystery', 'pt', 'injury')).toBe('Indisponível');
-    expect(injuryReasonLabel('Red card suspension', 'pt', 'suspension')).toBe('Suspensão');
+    expect(injuryReasonLabel('Match ban', 'pt', 'suspension')).toBe('Suspensão');
     expect(composeInjuryReasonPt('Mystery problem in the spleen')).toBeNull();
   });
 

@@ -33,6 +33,9 @@ interface MatchSquadNewsProps {
    * (see currentAbsences); anything else hides the lists and says so. */
   absencesStatus: AbsencesStatus;
   snapshotDate?: string | null;
+  /** "last_game" when the list is each club's absentees at its last game
+   * (SofaScore line-ups, since 19 Nov 2026). */
+  absencesBasis?: string | null;
   /** "Dados até 16 mai. 2026 (fim da época 2025-26)": the SAR fit's last
    * appearance (playerDataCutoffLabel), shown next to the SAR lists (F-H6). */
   sarCutoffLabel?: string | null;
@@ -221,9 +224,11 @@ export function MatchSquadNews({
   unavailable,
   absencesStatus,
   snapshotDate,
+  absencesBasis,
   sarCutoffLabel,
   publishedCount = 0,
 }: MatchSquadNewsProps) {
+  const lastGame = absencesBasis === "last_game";
   const pt = locale !== "en";
   const current = absencesStatus === "current";
   const snapshot = snapshotDate ? formatLongDate(snapshotDate, locale) : "";
@@ -238,7 +243,9 @@ export function MatchSquadNews({
         {pt
           ? `Baixas conhecidas e os jogadores de cada equipa que entram na lista de finalização publicada${publishedCount ? `, de ${publishedCount} jogadores` : ""} (SAR, valor acima do substituto). Baixas e jogadores individuais não entram nesta previsão: o modelo usa golos, remates à baliza e o valor de cada plantel.`
           : `Known absentees and each side's players on the published finishing list${publishedCount ? ` of ${publishedCount}` : ""} (SAR, skill above replacement). Neither absences nor individual players feed this forecast: the model uses goals, shots on target and each squad's value.`}
-        {current && snapshot
+        {current && snapshot && lastGame
+          ? ` ${pt ? `As baixas são as de cada equipa no seu último jogo, segundo a SofaScore (até ${snapshot}): quem se lesionou depois ainda não aparece.` : `Absences are each side's at its last game, from SofaScore (up to ${snapshot}): anyone hurt since then is not listed yet.`}`
+          : current && snapshot
           ? ` ${pt ? "Baixas registadas a" : "Absences recorded as of"} ${snapshot}.`
           : !current
             ? ` ${

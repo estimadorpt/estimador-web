@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { currentAbsences, INJURY_MAX_AGE_DAYS } from './football-injuries';
+import { currentAbsences, INJURY_MAX_AGE_DAYS, LAST_GAME_MAX_AGE_DAYS } from './football-injuries';
 import type { InjuriesData } from '@/components/charts/football/InjuriesPanel';
 
 function feed(overrides: Partial<InjuriesData> = {}): InjuriesData {
@@ -67,5 +67,34 @@ describe('currentAbsences', () => {
       forecast,
     );
     expect(result.players.map(p => p.player)).toEqual(['D']);
+  });
+
+  describe('a list read off each club\'s last game (SofaScore)', () => {
+    const lastGame = (overrides: Partial<InjuriesData> = {}) =>
+      feed({
+        source: 'sofascore',
+        basis: 'last_game',
+        snapshot_date: '2026-11-09',
+        teams: [
+          { team: 'Benfica', as_of: '2026-11-09', opponent: 'Porto', n_out: 1, value_out_eur: 20_000_000, squad_value_eur: 300_000_000, share_of_squad: 0.0667 },
+          { team: 'Porto', as_of: '2026-10-20', opponent: 'Braga', n_out: 1, value_out_eur: 5_000_000, squad_value_eur: 400_000_000, share_of_squad: 0.0125 },
+        ],
+        players: [
+          { player: 'A', team: 'Benfica', kind: 'injury', position: 'Defender', reason: null, expected_return: null, market_value_eur: 20_000_000 },
+          { player: 'C', team: 'Porto', kind: 'suspension', position: 'Forward', reason: 'Red card suspension', expected_return: null, market_value_eur: 5_000_000 },
+        ],
+        ...overrides,
+      });
+
+    it(`stays current up to ${LAST_GAME_MAX_AGE_DAYS} days after the latest game (an international break)`, () => {
+      expect(currentAbsences(lastGame(), '2026-11-21T10:00:00+00:00').status).toBe('current');
+      expect(currentAbsences(lastGame(), '2026-11-26T10:00:00+00:00').status).toBe('stale');
+    });
+
+    it('leaves out a club whose own last game is too old', () => {
+      const result = currentAbsences(lastGame(), '2026-11-14T10:00:00+00:00');
+      expect(result.players.map(p => p.player)).toEqual(['A']);
+      expect(result.teams.map(t => t.team)).toEqual(['Benfica']);
+    });
   });
 });
