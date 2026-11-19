@@ -139,7 +139,10 @@ stops the run, with no network needed), and that manifest against the one the li
 and key order alone are not a difference). A release that is not on the site yet passes; a site
 that cannot be asked is reported and does not stop the run. The correction to a published
 release is a new release number, as v1.0.1 to v1.0.3 were; a folder that is retired is removed
-whole. Only on the owner's word, `PUBLISHED_DATA_CHANGE_OK` in that
+whole. A number the site has served stays spent, even after a rollback: once its folder is gone
+from the site the check takes the same name with other content for a new release, while the
+readers of those hours keep the old files, so what comes back is the next number. Only on the
+owner's word, `PUBLISHED_DATA_CHANGE_OK` in that
 workflow step's `env` lets one change through: the stopped run prints the value to set
 (`<folder>@<hash>`), which names the content it accepts, so it opens nothing that comes later.
 
