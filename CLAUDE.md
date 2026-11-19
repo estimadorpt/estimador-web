@@ -487,7 +487,11 @@ calendar; day 0 (N.º 1, parish 030857) is `POPULATION_GAME_EPOCH` in
 `game/index.json`, and `game.test.ts` checks that they match. The epoch must equal the
 first deploy date: if the merge or deploy is not on 6 October 2026, change the constant,
 re-run the sync and only then deploy (`/data/population/v*` is served immutable, so the
-epoch cannot move after).
+epoch cannot move after). A release changes the figures in the deck, never the calendar:
+readers' records are kept by day number and the archive replays past days. `game.test.ts`
+holds it with two digests (`CALENDAR`: the parish each day plays, and the four on each
+day's board), so a release whose deck comes in another order, or whose `places.json` moves
+a parish, a region or an INE count, fails `npm run check` instead of changing the game.
 
 **Freguesia misteriosa's rules (v2, owner decision of 6 October 2026: "qual destas
 quatro?").** Each day shows four parishes, named with their concelho, listed alphabetically
