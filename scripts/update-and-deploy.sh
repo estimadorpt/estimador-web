@@ -27,10 +27,9 @@
 # (launchd, the mechanism that demonstrably works on this Mac). See
 # estimador-football/docs/COLLECTORS.md.
 #
-# Two steps here are not in the launchd job, because neither ever ran and
-# neither is needed to deploy: `generate-social-content.py` (needs Azure
-# OpenAI; liga-predict writes social.json itself) and `npm run build` (Azure
-# SWA builds on push). Run them by hand if you want them.
+# One step here is not in the launchd job, because it is not needed to deploy:
+# `npm run build` (Azure SWA builds on push). The social posts are drafted
+# after each deploy by .github/workflows/social.yml.
 
 echo "update-and-deploy.sh is retired — it never worked. See the comments above." >&2
 echo "Use: cd ~/code/estimador-football && uv run liga-predict --update --scenarios --sync" >&2

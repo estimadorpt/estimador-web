@@ -173,7 +173,7 @@ export function InjuriesPanel({ data, locale = "pt", skillRanks }: InjuriesPanel
                             )}
                           </div>
                           <div className="text-stone-500">
-                            {injuryReasonLabel(p.reason, locale)}
+                            {injuryReasonLabel(p.reason, locale, p.kind)}
                             {p.position && (
                               <span className="text-stone-500">
                                 {" · "}

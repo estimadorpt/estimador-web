@@ -41,7 +41,14 @@ literals, not message keys, so they need no `CLIENT_MESSAGE_KEYS` entry. The 404
 `NotFoundHeaderView` (`src/components/NotFoundHeaderView.tsx`), a client component with no
 state or effects: Next puts the root not-found into every exported page's RSC payload, and
 as a client view each page carries a reference and the item list instead of the whole
-menu twice (about 40 KB a page). The mobile menu is a full-height sheet
+menu twice (about 40 KB a page). The same rule, for the same reason, makes `Logo.tsx`,
+`SiteFooterView` and `NotFoundBodyView` client components with no state or effects: every
+page's payload holds five footers and four 404 bodies (its own footer, and both not-found
+boundaries in both languages), and the logo's outlined paths were serialised five times.
+`SiteFooter` and `NotFoundBody` stay the server components pages use; they read the copy
+and pass strings. This took the export from 200 MB to 138 MB (November 2026);
+`payload-views.test.ts` fails if one of them loses its `'use client'`. Do not render the
+wordmark paths, or any long repeated markup of the chrome, from a server component. The mobile menu is a full-height sheet
 (`h-[calc(100dvh-61px)]`); the language links are named "PT, Português" / "EN, English",
 the current one underlined in forced colours; the logo link is "estimador.pt — página
 inicial" / "estimador.pt — home".
@@ -67,8 +74,10 @@ npm run lint         # Run ESLint
 ./scripts/sync-data.sh economics # Economy feeds, only ever on their own (see "Economy section")
 npm run check        # validate:data + typecheck + lint + tests (CI runs it before the build)
 npm run og           # Regenerate the OG cards + public/og-manifest.json (also run by prebuild)
-npm run smoke -- --base <url>  # Probe a deployed export: every route, asset and redirect
+npm run smoke -- --base <url>  # Probe a deployed export: every route, asset and redirect (exit 3: the host gave no answer)
 npm run check:export # Export budget (files, MB, per-file) + over-long titles/descriptions; runs as postbuild
+npm run freshness    # Is the site still updating? The daily check (see "Deployment"); run from main
+npm run check:published  # Did this checkout change a population release the live site already serves? (the deploy runs it)
 ```
 
 `scripts/patch-next.mjs` (postinstall and prebuild) fixes one Next 15.5 bug: when a link's RSC
@@ -93,6 +102,58 @@ The project deploys automatically to Azure Static Web Apps via GitHub Actions wh
 - `AZURE_DEPLOYMENT_TOKEN` secret for Azure authentication
 - Static export configuration (`output: 'export'` in next.config.js)
 - Builds to `out/` directory
+
+**Freshness.** A static export stands still without anyone noticing: from 24 October to
+1 November 2026 a data sync kept `npm run check` red and nothing deployed for eight days.
+`.github/workflows/site-freshness.yml` runs `scripts/check-freshness.mjs` twice a day (07:17 and
+15:47 UTC: GitHub may delay a scheduled run or drop it, and the first one due, on 19 November
+2026, had not started an hour later) and after every deploy from `main`. It asks three questions:
+did the last push to `main` deploy; did
+a new forecast file reach `main` after the Liga games that were played (two or more games that
+kicked off over 36 hours ago, with no data commit made after they could have ended, mean the
+publishing job on the Mac did not run; one such game alone is taken for a postponement, which keeps
+its date in the file); and does the live site serve the `game_fixtures.json` that `main` holds, an
+hour after the commit. While any answer is no, the run is red and one issue, "estimador.pt has
+stopped updating", stays open and assigned to the owner, with a new report at every run; it is
+closed by the first healthy run. The rules and thresholds are in `scripts/lib/freshness.mjs`
+(`site-freshness.test.ts`, which also reads the published fixtures file, so a renamed field fails
+the tests instead of silencing the check). The script uses Node alone, so it still runs when a
+broken lock file is why the deploys fail. The job on the Mac (`com.estimador.publish`, documented
+in estimador-football `docs/com.estimador.publish.plist`) commits only when there is a new result,
+on the days it is scheduled: a game played on another day waits for the next scheduled day.
+
+**When the host does not answer.** "Deployment Complete" is Azure's word for an accepted upload,
+not proof that the site serves it: on 18 November 2026 the Azure subscription was disabled, the
+domain's DNS zone stopped answering and the app answered 404 on every path, while every deploy
+still reported success. Both checks now say which failure they met (`scripts/lib/reach.mjs`:
+`describeFailure` reads the code `fetch` hides behind "fetch failed", `reach` asks one URL a few
+times; `site-reach.test.ts`). The smoke check asks the host once before its walk and exits 3
+within two minutes when there is no HTTP answer at all (it used to sit for up to 47 minutes), every
+request has a time limit (`--timeout`, 30 s), and the deploy job and its smoke step have
+`timeout-minutes`. The freshness report names why the homepage did not answer and, when it is not
+there, asks the app's own Azure address for it (`APP_BASE` in `scripts/check-freshness.mjs`,
+`hostVerdict`): 200 there means the fault is the domain or its DNS, anything else that the host is
+not serving. A name that does not resolve is never a deploy's doing: check the domain, its DNS
+zone and the subscription before re-running anything.
+
+**A published population release never changes in place.** `/data/population/v*` is served
+immutable for a year, so a browser that holds one of a release's files never asks for it again: a
+deploy that edits a file of a release the site already serves leaves those readers on the old
+bytes, with every check green. The deploy workflow runs `scripts/check-published-data.mjs` before
+the build (`npm run check:published`; rules in `scripts/lib/published-data.mjs`,
+`published-data.test.ts`). For every release folder it makes two comparisons: the folder against
+its own `manifest.json` (the SHA-256 of every other file: a hand edit or a half-finished sync
+stops the run, with no network needed), and that manifest against the one the live site serves
+(the run stops when both can be read and say different things, and the files are named; spacing
+and key order alone are not a difference). A release that is not on the site yet passes; a site
+that cannot be asked is reported and does not stop the run. The correction to a published
+release is a new release number, as v1.0.1 to v1.0.3 were; a folder that is retired is removed
+whole. A number the site has served stays spent, even after a rollback: once its folder is gone
+from the site the check takes the same name with other content for a new release, while the
+readers of those hours keep the old files, so what comes back is the next number. Only on the
+owner's word, `PUBLISHED_DATA_CHANGE_OK` in that
+workflow step's `env` lets one change through: the stopped run prints the value to set
+(`<folder>@<hash>`), which names the content it accepts, so it opens nothing that comes later.
 
 ## Route Structure
 
@@ -298,7 +359,10 @@ the system changes.
   the finding, the figures with their marks and the reading rule as the key; no owner name, no
   byline, no economy column while it is unpublished. The social kit
   (`scripts/generate-social-kit.mjs`) and the matchday post (`generate-social-images.mjs`) use the
-  same pieces. The scripts keep their own copy of the club names, colours, finding, percentages
+  same pieces. After each deploy, `.github/workflows/social.yml` drafts the latest Liga forecast's post as a
+  `social` issue (`scripts/social-post.mjs`, text from templates in `scripts/lib/social-posts.mjs`,
+  never an LLM); the owner's `approved` label posts it to Bluesky and X (`docs/brand/social-kit.md`).
+  The scripts keep their own copy of the club names, colours, finding, percentages
   and reading times; `src/lib/football-brand-script.test.ts` holds them to the site's.
 - **Communications**: one line ("Dados para compreender Portugal."), one descriptor and two bios,
   written once in `src/lib/brand/descriptor.json` (`descriptor.ts` for the app) and read by
@@ -452,7 +516,11 @@ calendar; day 0 (N.º 1, parish 030857) is `POPULATION_GAME_EPOCH` in
 `game/index.json`, and `game.test.ts` checks that they match. The epoch must equal the
 first deploy date: if the merge or deploy is not on 6 October 2026, change the constant,
 re-run the sync and only then deploy (`/data/population/v*` is served immutable, so the
-epoch cannot move after).
+epoch cannot move after). A release changes the figures in the deck, never the calendar:
+readers' records are kept by day number and the archive replays past days. `game.test.ts`
+holds it with two digests (`CALENDAR`: the parish each day plays, and the four on each
+day's board), so a release whose deck comes in another order, or whose `places.json` moves
+a parish, a region or an INE count, fails `npm run check` instead of changing the game.
 
 **Freguesia misteriosa's rules (v2, owner decision of 6 October 2026: "qual destas
 quatro?").** Each day shows four parishes, named with their concelho, listed alphabetically
@@ -659,7 +727,7 @@ All chart components follow a consistent pattern:
 - **LigaSectionNav** (`src/components/football/LigaSectionNav.tsx`) — the Liga tab row (Previsões, Jogadores, Contra o Modelo, Modelo, Dados; `LIGA_TABS`) under the header on every Liga page; club and match pages light Previsões
 - **MarketScorecard.tsx** — model vs closing line (`/desporto/liga/modelo`); every figure, the RPS axis range, n per point, the season span and the bookmakers (`market_sources`) are read from `market_scorecard.json`
 - Helpers: `src/lib/football-format.ts` (pt-PT/en-GB numbers, Lisbon dates), `src/lib/football-injuries.ts` (when an injury list is recent enough to show), `src/lib/football-scorecard.ts` (verdicts, model names, market sources, and the league table's calibration sentence from `market_scorecard.json` → `calibration`, quoted only for the model it was measured on), `src/lib/football-path-builder.ts` (the club page's scenario builder maths), `src/lib/football-status.ts` (the dated forecast line), `src/lib/football-model-evaluation.ts` (the one ±2 SE verdict source for `/modelo`; `TITLE_CALIBRATION` is a dated constant from the 2026-09 assessment, to update when it is re-run), `src/lib/season-review-provenance.ts` (published vs reconstructed forecasts on `/2025-26`), `src/lib/utils/prediction-game-record.ts` (the model's frozen-odds record and the matchday-1 late-publication flag; the game itself has no server: picks stay in localStorage, `estimador:contra-o-modelo:v1`, and each game is scored in the browser from `game_fixtures.json`, "Mais perto do que o modelo em 5 de 9 jogos", the season line counting completed rounds only; see `docs/football-runbook.md`), `src/lib/utils/player-pages.ts` (`playerDataCutoffLabel`/`Sentence`, `playerFitInProgress`, `playerSeasonReach`: the player models' data cut-off, "(época 2026-27 em curso)" while that season is played, shown beside every SAR figure, match pages and player meta descriptions included; on `/jogadores` it is said once in the hero's meta line and again in the finishing and contribution footers, not above each list), `src/lib/utils/player-inventory.ts` (`playerInventory`, `playerInventorySentence`, `playerCutoffMeta`: what `/jogadores` ranks and what it does not, stated once in the hero, from 640px up), `src/components/charts/football/player-marks.ts` (`PLAYER_MARKS`: the player charts' bars and marks, at least 3:1, held by `player-marks.test.ts`; their 90% intervals are drawn as the band, `IntervalBand`; `BRAND.faint` is not used for a meaningful mark), `src/lib/football-next-matchday.ts` (where an `mdNN`'s `next_matchday` and the game record disagree, for `/dados`) and `src/lib/football-scenarios.ts` (`clubFrame`: one frame per club page, the title from 1% of title chance, `TITLE_DEFAULT_FROM`, else relegation from 1%, else none; `clubObjective`, `rivalGames`, `duelRival`). The simulator page was retired on 11 October 2026; its unique parts live on club pages. Seasons in the copy are read, not typed: the player models' cut-off season is the last entry of `players.json` → `generated_from.seasons`, which `/sobre`'s Liga row reads (`loadLigaPlayers`, CL2-02) as the player hub and the Liga methodology do, and `meta.ligaDescription` takes `{season}` (the latest prediction's `season`, else `CURRENT_LIGA_SEASON` in `config/football.ts`). In `config/football.ts`: `teamDisplayName` (accents, e.g. Paços de Ferreira), `teamPhoneName` (narrow columns), `teamColorOnPaper` (a club colour that reads on paper), `distinctTeamColors` (lines that stay apart on one chart), `teamWithArticle(team, form)` (Portuguese copy never writes "para Porto" or "de Benfica": "para o Porto", "do Benfica", "no Casa Pia") and `OUTCOME_TONES`, the 1X2 split-bar encoding (home dark, draw pale, away mid, on the match page; club colours never fill the split bar; lists of games use the `Coupon`'s figures instead). `src/components/football/ClubFixtures.tsx` lists a club's played and remaining fixtures on its page.
-- **The reader's clock**: a Liga page is exported once per forecast, so what changes with time is read in the browser. `ClockSwitch` / `useClockReached` (`src/components/football/ClockSwitch.tsx`) swap a line once an instant has passed, using `clockValue`, `roundPlayedAt`, `matchStartedLine`, `roundPlayedLine` and `forecastStatusLinePlayed` from `football-status.ts` ("Jogo começou · previsão de 25 set.", "Jornada 8 jogada, nova previsão em preparação"). Every Liga hero's status comes from one helper, `forecastStatus` ("Previsão de 11 out., com 7 dos 9 jogos da jornada 8 disputados · …"), with one vocabulary for a forecast published mid-round. The server render, and the first client render, are always the published state; the clock is read only after mount, and re-read every minute. `football-status.ts` owns the instants, so the hub, the club pages and the match pages turn stale together; the homepage's Liga instrument (`LigaInstrument`) states the forecast's own date and time and lets its `Coupon` rows turn with `kickoffSteps`, so it holds no round rule of its own. The helpers: `nextRoundTiming` (used by the hub, the club and match pages; the round the next forecast waits for: the round in progress when the forecast came out mid-round, else the next; its kickoffs, start, `playedAt`, and the postponed leftovers it also prices), `roundPlayedAt` (the last kickoff plus `ROUND_SETTLE_MS`, two hours), `kickoffSteps` / `matchPlayedLine` (a game reads "Jogo começou" at kickoff and "Jogo disputado · previsão de …" two hours later), and `forecastAsOf` ("na previsão de 25 set.", what "agora" becomes once the forecast is out of date). A postponed game ("jogo em atraso") says its new forecast comes "com a próxima atualização", never "depois da jornada".
+- **The reader's clock**: a Liga page is exported once per forecast, so what changes with time is read in the browser. `ClockSwitch` / `useClockReached` (`src/components/football/ClockSwitch.tsx`) swap a line once an instant has passed, using `clockValue`, `roundPlayedAt`, `matchStartedLine`, `roundPlayedLine` and `forecastStatusLinePlayed` from `football-status.ts` ("Jogo começou · previsão de 25 set.", "Jornada 8 jogada, nova previsão em preparação"). Every Liga hero's status comes from one helper, `forecastStatus` ("Previsão de 11 out., com 7 dos 9 jogos da jornada 8 disputados · …"), with one vocabulary for a forecast published mid-round. The server render, and the first client render, are always the published state; the clock is read only after mount, and re-read every minute. `football-status.ts` owns the instants, so the hub, the club pages and the match pages turn stale together; the homepage's Liga instrument (`LigaInstrument`) states the forecast's own date and time and lets its `Coupon` rows turn with `kickoffSteps`, so it holds no round rule of its own. The helpers: `nextRoundTiming` (used by the hub, the club and match pages; the round the next forecast waits for: the round in progress when the forecast came out mid-round, else the next; its kickoffs, start, `playedAt`, and the postponed leftovers it also prices), `roundPlayedAt` (the last kickoff plus `ROUND_SETTLE_MS`, two hours), `kickoffSteps` / `matchPlayedLine` (a game reads "Jogo começou" at kickoff and "Jogo disputado · previsão de …" two hours later), and `forecastAsOf` ("na previsão de 25 set.", what "agora" becomes once the forecast is out of date). A postponed game ("jogo em atraso") says its new forecast comes "com a próxima atualização", never "depois da jornada". A game of the forecast's own round is also postponed when its confirmed slot (kickoff plus `ROUND_SETTLE_MS`) had passed without a result when the forecast was made (`slotPassedBeforeForecast`; Estoril–Marítimo, jornada 11, 8 November 2026, read "Jogo disputado" and its round "jogada, nova previsão em preparação" for weeks): the loaders (`loadUpcomingFixtures`, `listSupportedFixtures`, `clubFixtureRows`) then mark it `postponed` and drop the old slot, the round counts as over ("com 8 dos 9 jogos da jornada 11 disputados e um adiado") and the next forecast waits for the next round. An unconfirmed kickoff is a placeholder and proves nothing.
 - **Scenarios** (`src/lib/football-scenarios.ts`, behind the club page's scenario builder, "Outros jogos que pesam" and final duel, and the match page's impact panel): each club page keeps one frame (`clubFrame`: title or relegation, never "permanência" for the same thing); the rival list uses that frame and a 3 pp floor (`RIVAL_GAME_MIN_SWING`) and never the club's own games; the builder marks the decisive games itself (or says none stands out); the impact panel draws its what-ifs hollow; the final-duel bins carry a tie bar (`duelBins`), and `samplingMargin` states the simulation margin, in one plain sentence, beside a share.
 - **The prediction game's record** (`src/lib/utils/prediction-game-record.ts`): `frozenBeforePreviousRoundEnded` lists the rounds whose odds were frozen before the previous round's last game (2026-27: matchdays 3, 5, 6 and 7), `roundsWithoutSource` the rounds whose games carry no `probs_source`, `earlyLocks` the postponed games that closed with their round (found by a kickoff after the next round began, since the producer rewrites a played game's `locks_at` to its real kickoff), and `roundLockAt` the instant a round closes in the game (its earliest lock); `/desporto/liga/dados` names both kinds of round and `/jogo-previsoes` the frozen ones. The dates in the files: an `mdNN.json` `timestamp` is its last regeneration, not its first publication; its `next_matchday` may differ from the game's record (md01, md03, md04 and md08 to md10 in 2026-27, md09 by 1.45 pp: a file regenerated after the next round was frozen) and may list only part of the round, which `/desporto/liga/dados` states, read from the files by `src/lib/football-next-matchday.ts`; and `game_fixtures.json` (its `published_at`, its frozen odds) is the record that counts.
 - **One percentage rule** for every football figure: `formatPercent` / `formatPp` in `football-format.ts` (whole numbers from 10%, one decimal below, `<0,1%` and `>99%` at the ends so nothing non-zero reads 0% and nothing short of certain reads 100%, U+2212 for minus, pp for changes), grouped four-digit counts, and `matchLabel(home, away)` with an en dash ("Benfica – Vitória"). No `Math.round(p * 100)` in new code. Posteriors (`p_above_replacement`, `p_above_average`) go through `formatPosterior`, so 1.0 prints ">99%" and 0 "<0,1%"; `formatPercent`'s "100%" and "0%" are for exact shares of simulations only. Probability table twins (title race, relegation) list matchdays newest first, while the charts stay oldest first.
@@ -684,7 +752,7 @@ All chart components follow a consistent pattern:
 ### staticwebapp.config.json
 - 301 redirects: old URLs, locale-less section paths and the bare root (see "Route Structure")
 - Rewrites: `/{locale}/populacao/freguesia/*` to the parish shell, after two exact rules that serve the shell's own RSC payload (`/{pt,en}/populacao/freguesia/_/index.txt`) as itself rather than as the shell's HTML; `/pt/populacao/v/*` and `/en/populacao/v/*` to each locale's consultation page, and the locale-less `/populacao/v/*` (the producer's `canonical_path`) to the Portuguese one
-- Cache headers: `/_next/static/*` and the hashed `og-image-*-{hash}.png` cards immutable for a year, except the names matched first by exact routes, which revalidate (`max-age=0, must-revalidate`): the unversioned `og-image-{pt,en}.png` and every retained card name (see the OG paragraph below), whose routes `scripts/generate-og-images.mjs` writes just ahead of the `/og-image-*.png` wildcard; `/favicon.ico` a day; `/data/population/v*` immutable (a release never changes, its `manifest.json` included; there is no rule for anything else under `/data/population`, and `host-config.test.ts` keeps it that way); `/data/population-geography/*` a day; `/images/*`, `/brand/*`, `/branding/*` a week with stale-while-revalidate; everything else `max-age=0, must-revalidate`
+- Cache headers: `/_next/static/*` and the hashed `og-image-*-{hash}.png` cards immutable for a year, except the names matched first by exact routes, which revalidate (`max-age=0, must-revalidate`): the unversioned `og-image-{pt,en}.png` and every retained card name (see the OG paragraph below), whose routes `scripts/generate-og-images.mjs` writes just ahead of the `/og-image-*.png` wildcard; `/favicon.ico` a day; `/data/population/v*` immutable (a release never changes, its `manifest.json` included, and the deploy checks it: see "Deployment"; there is no rule for anything else under `/data/population`, and `host-config.test.ts` keeps it that way); `/data/population-geography/*` a day; `/images/*`, `/brand/*`, `/branding/*` a week with stale-while-revalidate; everything else `max-age=0, must-revalidate`
 - MIME types for `.json`, `.txt` (RSC payloads), `.wasm`, `.parquet`, `.xml`, `.avif`
 - 404s rewrite to `/404.html`; there is no navigation fallback
 - Bare `"statusCode": 404` rules for the pages the export must write but nobody should reach: `/{pt,en}/artigos/sem-artigos/` and `/{pt,en}/artigos/tema/sem-temas/` (placeholders while nothing is published) and `/404/`. `scripts/smoke-check.mjs` reads these rules, probes each for a 404 and leaves them out of its 200 walk.

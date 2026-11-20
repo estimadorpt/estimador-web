@@ -70,14 +70,22 @@ export function Coupon({ fixtures, locale, forecastTimestamp, columns = 1 }: {
             <tr key={`${key}-1x2`}>
               <th scope="row" className="pr-2 pt-2 text-left font-normal">
                 <span className="block text-[12px] leading-4 text-graphite">
-                  <ClockSwitch
-                    initial={<>
-                      {when || (pt ? `Jornada ${g.matchday}` : `Matchday ${g.matchday}`)}
-                      {when && !g.kickoffConfirmed && (pt ? ' · horário por confirmar' : ' · kickoff to be confirmed')}
-                    </>}
-                    steps={kickoffSteps(g.kickoff, g.kickoffConfirmed, matchStartedLine(forecastTimestamp, locale), matchPlayedLine(forecastTimestamp, locale))}
-                  />
-                  {g.postponed ? (pt ? ` · jogo em atraso, jornada ${g.matchday}` : ` · postponed, matchday ${g.matchday}`) : ''}
+                  {/* A postponed game with no new date is dated by nothing:
+                      it says only what it is. */}
+                  {g.postponed && !when ? (
+                    pt ? `Jogo em atraso da jornada ${g.matchday}, data por marcar` : `Postponed from matchday ${g.matchday}, date to be set`
+                  ) : (
+                    <>
+                      <ClockSwitch
+                        initial={<>
+                          {when || (pt ? `Jornada ${g.matchday}` : `Matchday ${g.matchday}`)}
+                          {when && !g.kickoffConfirmed && (pt ? ' · horário por confirmar' : ' · kickoff to be confirmed')}
+                        </>}
+                        steps={kickoffSteps(g.kickoff, g.kickoffConfirmed, matchStartedLine(forecastTimestamp, locale), matchPlayedLine(forecastTimestamp, locale))}
+                      />
+                      {g.postponed ? (pt ? ` · jogo em atraso, jornada ${g.matchday}` : ` · postponed, matchday ${g.matchday}`) : ''}
+                    </>
+                  )}
                 </span>
                 {g.href ? (
                   <Link href={g.href} locale={locale} className="name-cut no-underline hover:underline max-sm:inline-flex max-sm:min-h-11 max-sm:items-center">{name}</Link>

@@ -21,6 +21,7 @@ import {
 } from '@/lib/utils/prediction-game';
 import type { GameFixturesData, GameFixtureEntry } from '@/lib/football-fixtures';
 import { frozenBeforePreviousRoundEnded } from '@/lib/utils/prediction-game-record';
+import { slotPassedBeforeForecast } from '@/lib/football-status';
 
 /** The current season's data directory under public/data. One constant for
  * every football loader, so the season rollover is a one-line change. */
@@ -358,7 +359,10 @@ export interface UpcomingFixture {
   kickoffConfirmed: boolean;
   /** True when the fixture is a leftover of the matchday already in progress. */
   inProgressMatchday: boolean;
-  /** True for a game postponed from an earlier, finished round. */
+  /** True for a game postponed from an earlier, finished round, and for a
+   * game of the round in progress whose slot had passed without a result
+   * when the forecast was made. Its `kickoff` is then its new date or null,
+   * never the slot it was postponed from. */
   postponed?: boolean;
   p_home: number | null;
   p_draw: number | null;
@@ -442,6 +446,16 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
       return { kickoff: fallback, kickoffConfirmed: false };
     };
 
+    // A game still to play whose slot had passed when the forecast was made
+    // was postponed: the manifest's kickoff is the slot it left, not a date
+    // to print or to count "jogo disputado" from.
+    const slotFor = (md: number, home: string, away: string, fallback: string | null) => {
+      const slot = kickoffFor(md, home, away, fallback);
+      return slotPassedBeforeForecast(slot.kickoff, slot.kickoffConfirmed, prediction.timestamp)
+        ? { kickoff: null, kickoffConfirmed: false, postponed: true }
+        : slot;
+    };
+
     const scenarioMatches = scenarios?.next_matchday_scenarios?.matches ?? [];
     const findScenario = (home: string, away: string) =>
       scenarioMatches.find(m => m.home_team === home && m.away_team === away) ?? null;
@@ -458,7 +472,7 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
         home: m.home,
         away: m.away,
         matchday: prediction.matchday,
-        ...kickoffFor(prediction.matchday, m.home, m.away, m.kickoff ?? null),
+        ...slotFor(prediction.matchday, m.home, m.away, m.kickoff ?? null),
         inProgressMatchday: true,
         ...probsFromConditionals(scenario),
         scenario,
@@ -499,7 +513,7 @@ export async function loadUpcomingFixtures(): Promise<UpcomingFixture[]> {
           home: m.home_team,
           away: m.away_team,
           matchday: m.matchday,
-          ...kickoffFor(m.matchday, m.home_team, m.away_team, null),
+          ...slotFor(m.matchday, m.home_team, m.away_team, null),
           inProgressMatchday: false,
           postponed: true,
           ...probsFromConditionals(m),

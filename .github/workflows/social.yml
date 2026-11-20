@@ -1,0 +1,97 @@
+name: Social posts
+
+# After each production deploy, drafts a post for the latest Liga Portugal
+# forecast as a "social" issue (scripts/social-post.mjs). The owner adding the
+# "approved" label posts it to Bluesky and X and closes the issue. With the
+# SOCIAL_MODE repository variable set to "auto", the draft is posted at once
+# and the issue stays as the record.
+
+on:
+  workflow_run:
+    workflows: ['Azure Static Web Apps CI/CD']
+    types: [completed]
+    branches: [main]
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  draft:
+    # One draft at a time; an approval below never waits in this queue, where
+    # GitHub could cancel it in favour of a newer pending run.
+    concurrency:
+      group: social-draft
+      cancel-in-progress: false
+    if: >-
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+      || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The commit that was just deployed, not whatever main is now.
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm install -g npm@11
+      - run: npm ci
+      - name: Draft (or, in auto mode, post) the latest forecast
+        run: node scripts/social-post.mjs --draft --out social-out
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          SOCIAL_MODE: ${{ vars.SOCIAL_MODE }}
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: social-card
+          path: social-out/
+          if-no-files-found: ignore
+
+  publish:
+    concurrency:
+      group: social-publish-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    # Only the approver's label posts (the repository variable SOCIAL_APPROVER,
+    # else bernardocaldas): the repository belongs to an organisation, so
+    # github.repository_owner is not a person who could ever add the label.
+    if: >-
+      github.event_name == 'issues'
+      && github.event.label.name == 'approved'
+      && contains(github.event.issue.labels.*.name, 'social')
+      && github.event.sender.login == (vars.SOCIAL_APPROVER || 'bernardocaldas')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm install -g npm@11
+      - run: npm ci
+      - name: Post the approved draft
+        run: node scripts/social-post.mjs --publish --issue ${{ github.event.issue.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}

@@ -2,7 +2,7 @@ import { Link } from "@/i18n/routing";
 import { teamColorOnPaper, teamDisplayName, teamLogoSrc } from "@/lib/config/football";
 import { byKickoff, type GameFixturesData } from "@/lib/football-fixtures";
 import { formatKickoffShort, formatPercent } from "@/lib/football-format";
-import { kickoffSteps } from "@/lib/football-status";
+import { kickoffSteps, slotPassedBeforeForecast } from "@/lib/football-status";
 import { ClockSwitch } from "./ClockSwitch";
 
 export interface ClubFixtureRow {
@@ -28,19 +28,23 @@ export function clubFixtureRows(
   team: string,
   manifest: GameFixturesData | null,
   currentRound: number,
+  /** The forecast's timestamp: a game with no result whose slot had passed
+   * when the forecast was made was postponed, and has no date yet. */
+  forecastTimestamp?: string,
 ): ClubFixtureRow[] {
   const rows: ClubFixtureRow[] = [];
   for (const md of manifest?.matchdays ?? []) {
     for (const fx of md.fixtures ?? []) {
       if (fx.home !== team && fx.away !== team) continue;
       if (typeof fx.home_goals === "number" && typeof fx.away_goals === "number") continue;
+      const slotPassed = slotPassedBeforeForecast(fx.kickoff, fx.kickoff_confirmed, forecastTimestamp);
       rows.push({
         matchday: md.matchday,
         opponent: fx.home === team ? fx.away : fx.home,
         venue: fx.home === team ? "H" : "A",
-        kickoff: fx.kickoff ?? null,
-        kickoffConfirmed: fx.kickoff_confirmed === true,
-        postponed: md.matchday < currentRound,
+        kickoff: slotPassed ? null : (fx.kickoff ?? null),
+        kickoffConfirmed: !slotPassed && fx.kickoff_confirmed === true,
+        postponed: md.matchday < currentRound || slotPassed,
       });
     }
   }
