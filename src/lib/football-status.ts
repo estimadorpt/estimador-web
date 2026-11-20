@@ -13,7 +13,7 @@ export interface ForecastStatusInput {
   inProgress: boolean;
   /** How many of that matchday's games the forecast had seen, when it came
    * out mid-round: "com 7 dos 9 jogos da jornada 8 disputados". */
-  roundSeen?: { played: number; total: number } | null;
+  roundSeen?: { played: number; total: number; postponed?: number } | null;
   /** The round whose results trigger the next update; null at season's end. */
   nextRound: number | null;
   /** Kickoffs of that round's games (UTC ISO), for its date span. */
@@ -38,9 +38,14 @@ export function forecastCoverage(
   if (!input.inProgress) return pt ? `depois da jornada ${md}` : `after matchday ${md}`;
   const seen = input.roundSeen;
   if (seen && seen.total > 0) {
+    // Games whose slot had passed without a result when the forecast was
+    // made: the round is over but for them, and the line says so.
+    const off = seen.postponed ?? 0;
+    const offPt = off === 0 ? '' : off === 1 ? ' e um adiado' : ` e ${off} adiados`;
+    const offEn = off === 0 ? '' : off === 1 ? ' and one postponed' : ` and ${off} postponed`;
     return pt
-      ? `com ${seen.played} dos ${seen.total} jogos da jornada ${md} disputados`
-      : `with ${seen.played} of matchday ${md}’s ${seen.total} games played`;
+      ? `com ${seen.played} dos ${seen.total} jogos da jornada ${md} disputados${offPt}`
+      : `with ${seen.played} of matchday ${md}’s ${seen.total} games played${offEn}`;
   }
   return pt ? `a meio da jornada ${md}` : `partway through matchday ${md}`;
 }
@@ -202,6 +207,33 @@ export function forecastAsOf(
   return `${capital ? 'Na' : 'na'} previsão de ${date}`;
 }
 
+/**
+ * True when a forecast still lists a game as to play although it was made
+ * after the game's confirmed slot (kickoff plus the settle time): the game
+ * was not played then, and the fixture record has no new date for it yet.
+ * Such a kickoff is the slot the game was postponed from, never an instant
+ * to count from: Estoril–Marítimo (jornada 11, 8 November 2026) read "Jogo
+ * disputado" and its round "jogada, nova previsão em preparação" for three
+ * weeks. An unconfirmed kickoff is a placeholder for the round's first day
+ * (md06's three Monday games sat on Saturday's), so it proves nothing.
+ *
+ * Known limit: a forecast built after a game that was played but whose result
+ * had not reached the data yet would read that game as postponed until the
+ * next forecast. The update fetches results before it fits, so the two hours
+ * of `ROUND_SETTLE_MS` have been enough; widen the window here if that changes.
+ */
+export function slotPassedBeforeForecast(
+  kickoff: string | null | undefined,
+  confirmed: boolean | null | undefined,
+  forecastTimestamp: string | null | undefined,
+): boolean {
+  if (!kickoff || confirmed !== true || !forecastTimestamp) return false;
+  const slot = Date.parse(kickoff);
+  const forecast = Date.parse(forecastTimestamp);
+  if (Number.isNaN(slot) || Number.isNaN(forecast)) return false;
+  return slot + ROUND_SETTLE_MS <= forecast;
+}
+
 /** The fields of an upcoming fixture the round timing reads. */
 export interface TimedFixture {
   matchday: number;
@@ -237,15 +269,20 @@ export function nextRoundTiming<F extends TimedFixture>(
   },
   upcoming: F[],
 ): NextRoundTiming & { postponed: F[] } {
-  const complete = !prediction.matches_remaining?.length;
+  // The forecast's own round is over once nothing is left of it, or once
+  // every game left of it is a postponed one (its slot had passed when the
+  // forecast was made): the next forecast then waits for the next round.
+  const remaining = prediction.matches_remaining?.length ?? 0;
+  const postponedOwn = upcoming.filter(f => f.matchday === prediction.matchday && f.postponed).length;
+  const complete = remaining === 0 || postponedOwn >= remaining;
   const round = complete ? (prediction.next_matchday?.matchday ?? null) : prediction.matchday;
-  const kickoffs = upcoming.filter(f => f.matchday === round).map(f => f.kickoff);
+  const kickoffs = upcoming.filter(f => f.matchday === round && !f.postponed).map(f => f.kickoff);
   return {
     round,
     kickoffs,
     startsAt: roundStartsAt(kickoffs),
     playedAt: roundPlayedAt(kickoffs),
-    postponed: round == null ? [] : upcoming.filter(f => f.matchday < round),
+    postponed: round == null ? [] : upcoming.filter(f => f.matchday < round || f.postponed),
   };
 }
 
@@ -273,11 +310,12 @@ export function forecastStatusInput<F extends TimedFixture>(
   const timing = nextRoundTiming(prediction, upcoming);
   const remaining = prediction.matches_remaining?.length ?? 0;
   const played = (prediction.matchday_results ?? []).filter(r => r.matchday === prediction.matchday).length;
+  const postponed = upcoming.filter(f => f.matchday === prediction.matchday && f.postponed).length;
   return {
     matchday: prediction.matchday,
     timestamp: prediction.timestamp,
     inProgress: remaining > 0,
-    roundSeen: remaining > 0 ? { played, total: played + remaining } : null,
+    roundSeen: remaining > 0 ? { played, total: played + remaining, postponed } : null,
     nextRound: timing.round,
     nextRoundKickoffs: timing.kickoffs,
     playedAt: timing.playedAt,
