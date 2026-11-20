@@ -65,8 +65,16 @@ jobs:
           # pages renders the feed link only and no email field.
           NEXT_PUBLIC_NEWSLETTER_ENDPOINT: ${{ secrets.NEWSLETTER_ENDPOINT }}
 
+      # On a pull request this uploads a preview. The Free plan holds three
+      # staging environments, and every open pull request keeps one until it
+      # closes, so the upload is often refused ("maximum number of staging
+      # environments"). The checks above are what a pull request must pass;
+      # a refused preview is not a failed change, so on a pull request this
+      # step may fail without failing the run, and the next step says so.
+      # On main it must succeed: that upload is the deploy.
       - name: Build And Deploy
         id: builddeploy
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_DEPLOYMENT_TOKEN }}
@@ -77,6 +85,11 @@ jobs:
           # keeps its picks in the reader's browser (October 2026), and an
           # absent api_location deploys the static export alone.
           output_location: "out"
+
+      - name: Preview not uploaded
+        if: github.event_name == 'pull_request' && steps.builddeploy.outcome == 'failure'
+        run: |
+          echo "::warning title=No preview::Azure refused the preview upload (usually: all three staging environments are held by open pull requests). Data, types, lint, tests and the build passed."
 
       # A local preview does not apply staticwebapp.config.json. This asks the
       # deployed host for every exported route and asset, and fails the run if
