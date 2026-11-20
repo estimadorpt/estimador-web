@@ -13,6 +13,7 @@
 //
 //   node scripts/check-freshness.mjs                       # https://estimador.pt
 //   node scripts/check-freshness.mjs --base https://x.net   # another host
+//   node scripts/check-freshness.mjs --app ''               # do not ask the app's own Azure address
 //   node scripts/check-freshness.mjs --report report.md     # also write the report to a file
 //
 // Run it from a checkout of `main`: the Liga fixtures are read from disk. The
@@ -35,6 +36,7 @@ import {
   report,
   seasonFolders,
 } from './lib/freshness.mjs';
+import { describeFailure } from './lib/reach.mjs';
 
 const args = process.argv.slice(2);
 const readFlag = (name, fallback) => {
@@ -43,6 +45,13 @@ const readFlag = (name, fallback) => {
 };
 
 const BASE = readFlag('base', 'https://estimador.pt').replace(/\/+$/, '');
+// The address Azure gave the Static Web App, which answers whatever happens to
+// the custom domain. It is asked only when the homepage is not there, to tell a
+// broken domain from a host that serves nothing (18 November 2026 was both).
+const APP_BASE = readFlag(
+  'app',
+  process.env.FRESHNESS_APP_BASE ?? 'https://thankful-bush-04fd3f303.6.azurestaticapps.net',
+).replace(/\/+$/, '');
 const REPORT_FILE = readFlag('report', null);
 const REPO = process.env.GITHUB_REPOSITORY || 'estimadorpt/estimador-web';
 const TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
@@ -79,11 +88,14 @@ async function github(resource) {
   return response.json();
 }
 
-/** The host's answer for a path: its status, and its JSON when it sent some. Null status = no answer. */
-async function live(pathname) {
+/**
+ * A host's answer for a path: its status, and its JSON when it sent some. A
+ * null status means no HTTP answer, and `failure` then says why.
+ */
+async function live(pathname, base = BASE) {
   try {
     return await patiently(async () => {
-      const response = await fetch(`${BASE}${pathname}`, {
+      const response = await fetch(`${base}${pathname}`, {
         cache: 'no-store',
         redirect: 'follow',
         headers: { 'user-agent': 'estimador-freshness-check' },
@@ -96,10 +108,10 @@ async function live(pathname) {
       } catch {
         // An HTML page, or an error body: the status is the answer.
       }
-      return { status: response.status, json };
+      return { status: response.status, json, failure: null };
     });
-  } catch {
-    return { status: null, json: null };
+  } catch (error) {
+    return { status: null, json: null, failure: describeFailure(error) };
   }
 }
 
@@ -140,6 +152,8 @@ const [page, liveFixtures] = await Promise.all([
   live('/pt/'),
   live(`/data/football/${season}/game_fixtures.json`),
 ]);
+const app = page.status !== 200 && APP_BASE && APP_BASE !== BASE ? await live('/pt/', APP_BASE) : null;
+const answer = reply => reply.status ?? `no answer (${reply.failure?.text ?? 'unknown reason'})`;
 
 const problems = [
   ...deployProblems({ run, now }),
@@ -147,7 +161,12 @@ const problems = [
   ...liveProblems({
     base: BASE,
     pageStatus: page.status,
+    pageFailure: page.failure,
     fixturesStatus: liveFixtures.status,
+    fixturesFailure: liveFixtures.failure,
+    appBase: app ? APP_BASE : null,
+    appStatus: app?.status ?? null,
+    appFailure: app?.failure ?? null,
     mainGeneratedAt: fixtures.generated_at,
     liveGeneratedAt: liveFixtures.json?.generated_at ?? null,
     lastDataCommit,
@@ -166,7 +185,8 @@ const facts = [
   lastGame
     ? `Last game to kick off: ${lastGame.home} – ${lastGame.away}, ${lisbonTime(lastGame.at)}.`
     : 'No game of this season has kicked off yet.',
-  `Live site (${BASE}): homepage ${page.status ?? 'no answer'}, forecasts generated at ${liveFixtures.json?.generated_at ?? 'unknown'}.`,
+  `Live site (${BASE}): homepage ${answer(page)}, forecasts generated at ${liveFixtures.json?.generated_at ?? 'unknown'}.`,
+  ...(app ? [`The app's own Azure address (${APP_BASE}): homepage ${answer(app)}.`] : []),
 ];
 
 const text = report({ problems, facts, now });

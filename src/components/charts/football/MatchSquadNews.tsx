@@ -128,7 +128,7 @@ function SideColumn({
                   </span>
                 )}
                 <span className="ml-auto text-[11px] text-stone-500 text-right">
-                  {injuryReasonLabel(p.reason, locale) ||
+                  {injuryReasonLabel(p.reason, locale, p.kind) ||
                     (p.kind === "suspension"
                       ? pt
                         ? "Suspensão"

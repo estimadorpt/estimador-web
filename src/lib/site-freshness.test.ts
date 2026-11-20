@@ -8,6 +8,7 @@ import {
   STALE_AFTER_HOURS,
   deployProblems,
   forecastProblems,
+  hostVerdict,
   kickoffs,
   latestPastKickoff,
   lisbonTime,
@@ -186,6 +187,13 @@ describe('site freshness: did the last push to main deploy?', () => {
     expect(problems).toHaveLength(1);
     expect(problems[0]).toContain('run 316');
     expect(problems[0]).toContain(run.html_url);
+    // The checks come before the upload and the smoke check after it, so a red
+    // run alone does not say whether the push is on the site.
+    expect(problems[0]).toContain('A red check or build means nothing pushed since then is on the site');
+    expect(problems[0]).toContain('the upload was made');
+    for (const conclusion of ['cancelled', 'timed_out']) {
+      expect(deployProblems({ run: { ...run, conclusion }, now })[0]).toContain(`did not succeed (${conclusion})`);
+    }
   });
 
   it('lets a deploy run for an hour before calling it stuck', () => {
@@ -221,6 +229,57 @@ describe('site freshness: does the live site serve what main holds?', () => {
     expect(liveProblems({ ...healthy, pageStatus: null })[0]).toBe('https://estimador.pt/pt/ did not answer.');
     expect(liveProblems({ ...healthy, fixturesStatus: null, liveGeneratedAt: null })[0]).toContain('did not answer');
     expect(liveProblems({ ...healthy, fixturesStatus: 404, liveGeneratedAt: null })[0]).toContain('answered 404');
+  });
+
+  it('says why the host did not answer, and what a deploy cannot cause', () => {
+    const dns = { kind: 'dns', text: 'its name does not resolve (EAI_AGAIN: the DNS servers gave no usable answer)' };
+    const [unresolved] = liveProblems({ ...healthy, pageStatus: null, pageFailure: dns });
+    expect(unresolved).toContain(
+      'https://estimador.pt/pt/ did not answer: its name does not resolve (EAI_AGAIN: the DNS servers gave no usable answer).',
+    );
+    expect(unresolved).toContain('A deploy cannot cause that');
+    expect(unresolved).toContain('Azure subscription');
+
+    const slow = { kind: 'timeout', text: 'no answer in time (the request timed out)' };
+    expect(liveProblems({ ...healthy, pageStatus: null, pageFailure: slow })).toEqual([
+      'https://estimador.pt/pt/ did not answer: no answer in time (the request timed out).',
+    ]);
+    // A status is an answer: the advice about names is for no answer at all.
+    expect(liveProblems({ ...healthy, pageStatus: 404, pageFailure: dns })).toEqual([
+      'https://estimador.pt/pt/ answered 404 instead of 200.',
+    ]);
+    expect(
+      liveProblems({ ...healthy, fixturesStatus: null, fixturesFailure: slow, liveGeneratedAt: null })[0],
+    ).toBe(
+      'The live site did not answer (no answer in time (the request timed out)) for the Liga fixtures file, which `main` has.',
+    );
+  });
+
+  it('asks the app\'s own address which side failed: the domain or the host', () => {
+    const appBase = 'https://app.example.net';
+    // 18 November 2026: the name did not resolve and the app served nothing.
+    const dns = { kind: 'dns', text: 'its name does not resolve (EAI_AGAIN: the DNS servers gave no usable answer)' };
+    const [both] = liveProblems({ ...healthy, pageStatus: null, pageFailure: dns, appBase, appStatus: 404 });
+    expect(both).toContain('did not answer: its name does not resolve');
+    expect(both).toContain("The app's own Azure address (https://app.example.net) answered 404 for the same page");
+    expect(both).toContain('the host is not serving what was deployed');
+
+    const [domainOnly] = liveProblems({ ...healthy, pageStatus: null, pageFailure: dns, appBase, appStatus: 200 });
+    expect(domainOnly).toContain('what was deployed is being served');
+    expect(domainOnly).toContain('the fault is in the domain, its DNS or its link to the app');
+
+    const [hostOnly] = liveProblems({ ...healthy, pageStatus: 404, appBase, appStatus: 404 });
+    expect(hostOnly).toMatch(/^https:\/\/estimador\.pt\/pt\/ answered 404 instead of 200\. The app's own Azure address/);
+
+    const slow = { kind: 'timeout', text: 'no answer in time (the request timed out)' };
+    expect(hostVerdict({ appBase, appStatus: null, appFailure: slow })).toBe(
+      "The app's own Azure address (https://app.example.net) did not answer either: no answer in time (the request timed out). " +
+        'When nothing answers, the network this check ran on may be at fault: run it again before acting.',
+    );
+    // Not asked: nothing is said about it, and a healthy site never asks.
+    expect(hostVerdict({})).toBeNull();
+    expect(hostVerdict({ appBase: null, appStatus: 404 })).toBeNull();
+    expect(liveProblems({ ...healthy, appBase, appStatus: 404 })).toEqual([]);
   });
 
   it('raises the alarm when the live site trails main after the deploy had its hour', () => {

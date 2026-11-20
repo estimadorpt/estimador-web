@@ -20,6 +20,7 @@
     "brand": "node scripts/generate-brand-identity.mjs && node scripts/generate-social-kit.mjs",
     "smoke": "node scripts/smoke-check.mjs",
     "freshness": "node scripts/check-freshness.mjs",
+    "check:published": "node scripts/check-published-data.mjs",
     "check": "npm run validate:data && npm run typecheck && npm run lint && npm run test",
     "note": "node scripts/new-note.mjs",
     "messages:unused": "node scripts/lib/unused-messages.mjs"

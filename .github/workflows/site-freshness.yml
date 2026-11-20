@@ -8,8 +8,11 @@ name: Site freshness
 
 on:
   schedule:
-    # 07:17 UTC, every day. Off the hour, where scheduled runs queue.
+    # 07:17 and 15:47 UTC, every day. Off the hour, where scheduled runs queue.
+    # Twice, because GitHub may delay a scheduled run or drop it: the first run
+    # this workflow was due, on 19 November 2026, had not started an hour later.
     - cron: '17 7 * * *'
+    - cron: '47 15 * * *'
   workflow_run:
     workflows: ['Azure Static Web Apps CI/CD']
     types: [completed]

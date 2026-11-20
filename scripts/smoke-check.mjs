@@ -11,11 +11,15 @@
 //   node scripts/smoke-check.mjs                       # https://estimador.pt
 //   node scripts/smoke-check.mjs --base https://x.net   # a preview environment
 //   node scripts/smoke-check.mjs --sample 20            # cap per dynamic group
+//   node scripts/smoke-check.mjs --timeout 10           # seconds one request may take (default 30)
 //
-// Exits non-zero on the first failing check, after reporting all of them.
+// Exit codes: 0 every URL answered as expected; 1 some did not (all of them are
+// listed); 2 there is no export to read; 3 the host gave no HTTP answer at all
+// (its name does not resolve, nothing answers in time), so no URL was asked for.
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { describeFailure, reach } from './lib/reach.mjs';
 
 const args = process.argv.slice(2);
 const readFlag = (name, fallback) => {
@@ -26,6 +30,9 @@ const readFlag = (name, fallback) => {
 const BASE = (readFlag('base', process.env.SMOKE_BASE_URL || 'https://estimador.pt')).replace(/\/+$/, '');
 const SAMPLE = Number(readFlag('sample', '0')) || Infinity;
 const CONCURRENCY = Number(readFlag('concurrency', '8'));
+// One request may take this long. Without a limit a host that never answers
+// holds the run until the job is killed.
+const TIMEOUT_MS = (Number(readFlag('timeout', '30')) || 30) * 1000;
 const OUT_DIR = path.join(process.cwd(), readFlag('out', 'out'));
 
 // The population release the site serves, read from its config so the probes
@@ -188,7 +195,7 @@ function sampleTree(name, perDirectory) {
 
 async function head(url, { follow = true, hops = 0 } = {}) {
   // Some CDNs treat HEAD differently from GET; use GET and drop the body.
-  const response = await fetch(url, { redirect: 'manual' });
+  const response = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(TIMEOUT_MS) });
   const type = response.headers.get('content-type') ?? '';
   if (response.body) await response.arrayBuffer().catch(() => {});
   // The host may answer a route with a redirect (Azure sends / to /pt/);
@@ -223,7 +230,7 @@ async function runAll(checks) {
           failures.push({ check, message: `${status} ${check.route}${detail ? ` (${detail})` : ''}` });
         }
       } catch (error) {
-        failures.push({ check, message: `ERR ${check.route} — ${error.message}` });
+        failures.push({ check, message: `ERR ${check.route} — ${describeFailure(error).text}` });
       }
     }
   });
@@ -269,6 +276,21 @@ const checks = [
   ...MUST_404.map(route => ({ route, expect: 404 })),
   ...MUST_REDIRECT,
 ];
+
+// One question before the hundreds: does the host answer at all? A host whose
+// name does not resolve fails every check the same way: on 18 November 2026 the
+// domain's DNS stopped answering, and deploy runs either listed "fetch failed"
+// 587 times or sat in this step for up to 47 minutes. Any HTTP status passes
+// here; judging statuses is the walk's job.
+const host = await reach(`${BASE}/`, { timeoutMs: Math.min(TIMEOUT_MS, 20_000) });
+if (!host.ok) {
+  console.error(
+    `${BASE} gave no HTTP answer, so none of the ${checks.length} URLs was asked for: ${host.reason}.\n` +
+      'This is the host, its DNS or the network, not a missing file: the upload itself may be fine. ' +
+      'Run "npm run freshness" for what the live site and the last deploy say.',
+  );
+  process.exit(3);
+}
 
 const RETRIES = Number(readFlag('retry', '2'));
 console.log(`Checking ${checks.length} URLs against ${BASE} …`);

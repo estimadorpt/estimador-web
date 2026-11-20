@@ -74,9 +74,10 @@ npm run lint         # Run ESLint
 ./scripts/sync-data.sh economics # Economy feeds, only ever on their own (see "Economy section")
 npm run check        # validate:data + typecheck + lint + tests (CI runs it before the build)
 npm run og           # Regenerate the OG cards + public/og-manifest.json (also run by prebuild)
-npm run smoke -- --base <url>  # Probe a deployed export: every route, asset and redirect
+npm run smoke -- --base <url>  # Probe a deployed export: every route, asset and redirect (exit 3: the host gave no answer)
 npm run check:export # Export budget (files, MB, per-file) + over-long titles/descriptions; runs as postbuild
 npm run freshness    # Is the site still updating? The daily check (see "Deployment"); run from main
+npm run check:published  # Did this checkout change a population release the live site already serves? (the deploy runs it)
 ```
 
 `scripts/patch-next.mjs` (postinstall and prebuild) fixes one Next 15.5 bug: when a link's RSC
@@ -104,20 +105,55 @@ The project deploys automatically to Azure Static Web Apps via GitHub Actions wh
 
 **Freshness.** A static export stands still without anyone noticing: from 24 October to
 1 November 2026 a data sync kept `npm run check` red and nothing deployed for eight days.
-`.github/workflows/site-freshness.yml` runs `scripts/check-freshness.mjs` every morning (07:17 UTC)
-and after every deploy from `main`. It asks three questions: did the last push to `main` deploy; did
+`.github/workflows/site-freshness.yml` runs `scripts/check-freshness.mjs` twice a day (07:17 and
+15:47 UTC: GitHub may delay a scheduled run or drop it, and the first one due, on 19 November
+2026, had not started an hour later) and after every deploy from `main`. It asks three questions:
+did the last push to `main` deploy; did
 a new forecast file reach `main` after the Liga games that were played (two or more games that
 kicked off over 36 hours ago, with no data commit made after they could have ended, mean the
 publishing job on the Mac did not run; one such game alone is taken for a postponement, which keeps
 its date in the file); and does the live site serve the `game_fixtures.json` that `main` holds, an
 hour after the commit. While any answer is no, the run is red and one issue, "estimador.pt has
-stopped updating", stays open and assigned to the owner, with a new report each day; it is closed
-by the first healthy run. The rules and thresholds are in `scripts/lib/freshness.mjs`
+stopped updating", stays open and assigned to the owner, with a new report at every run; it is
+closed by the first healthy run. The rules and thresholds are in `scripts/lib/freshness.mjs`
 (`site-freshness.test.ts`, which also reads the published fixtures file, so a renamed field fails
 the tests instead of silencing the check). The script uses Node alone, so it still runs when a
 broken lock file is why the deploys fail. The job on the Mac (`com.estimador.publish`, documented
 in estimador-football `docs/com.estimador.publish.plist`) commits only when there is a new result,
 on the days it is scheduled: a game played on another day waits for the next scheduled day.
+
+**When the host does not answer.** "Deployment Complete" is Azure's word for an accepted upload,
+not proof that the site serves it: on 18 November 2026 the Azure subscription was disabled, the
+domain's DNS zone stopped answering and the app answered 404 on every path, while every deploy
+still reported success. Both checks now say which failure they met (`scripts/lib/reach.mjs`:
+`describeFailure` reads the code `fetch` hides behind "fetch failed", `reach` asks one URL a few
+times; `site-reach.test.ts`). The smoke check asks the host once before its walk and exits 3
+within two minutes when there is no HTTP answer at all (it used to sit for up to 47 minutes), every
+request has a time limit (`--timeout`, 30 s), and the deploy job and its smoke step have
+`timeout-minutes`. The freshness report names why the homepage did not answer and, when it is not
+there, asks the app's own Azure address for it (`APP_BASE` in `scripts/check-freshness.mjs`,
+`hostVerdict`): 200 there means the fault is the domain or its DNS, anything else that the host is
+not serving. A name that does not resolve is never a deploy's doing: check the domain, its DNS
+zone and the subscription before re-running anything.
+
+**A published population release never changes in place.** `/data/population/v*` is served
+immutable for a year, so a browser that holds one of a release's files never asks for it again: a
+deploy that edits a file of a release the site already serves leaves those readers on the old
+bytes, with every check green. The deploy workflow runs `scripts/check-published-data.mjs` before
+the build (`npm run check:published`; rules in `scripts/lib/published-data.mjs`,
+`published-data.test.ts`). For every release folder it makes two comparisons: the folder against
+its own `manifest.json` (the SHA-256 of every other file: a hand edit or a half-finished sync
+stops the run, with no network needed), and that manifest against the one the live site serves
+(the run stops when both can be read and say different things, and the files are named; spacing
+and key order alone are not a difference). A release that is not on the site yet passes; a site
+that cannot be asked is reported and does not stop the run. The correction to a published
+release is a new release number, as v1.0.1 to v1.0.3 were; a folder that is retired is removed
+whole. A number the site has served stays spent, even after a rollback: once its folder is gone
+from the site the check takes the same name with other content for a new release, while the
+readers of those hours keep the old files, so what comes back is the next number. Only on the
+owner's word, `PUBLISHED_DATA_CHANGE_OK` in that
+workflow step's `env` lets one change through: the stopped run prints the value to set
+(`<folder>@<hash>`), which names the content it accepts, so it opens nothing that comes later.
 
 ## Route Structure
 
@@ -480,7 +516,11 @@ calendar; day 0 (N.º 1, parish 030857) is `POPULATION_GAME_EPOCH` in
 `game/index.json`, and `game.test.ts` checks that they match. The epoch must equal the
 first deploy date: if the merge or deploy is not on 6 October 2026, change the constant,
 re-run the sync and only then deploy (`/data/population/v*` is served immutable, so the
-epoch cannot move after).
+epoch cannot move after). A release changes the figures in the deck, never the calendar:
+readers' records are kept by day number and the archive replays past days. `game.test.ts`
+holds it with two digests (`CALENDAR`: the parish each day plays, and the four on each
+day's board), so a release whose deck comes in another order, or whose `places.json` moves
+a parish, a region or an INE count, fails `npm run check` instead of changing the game.
 
 **Freguesia misteriosa's rules (v2, owner decision of 6 October 2026: "qual destas
 quatro?").** Each day shows four parishes, named with their concelho, listed alphabetically
@@ -711,7 +751,7 @@ All chart components follow a consistent pattern:
 ### staticwebapp.config.json
 - 301 redirects: old URLs, locale-less section paths and the bare root (see "Route Structure")
 - Rewrites: `/{locale}/populacao/freguesia/*` to the parish shell, after two exact rules that serve the shell's own RSC payload (`/{pt,en}/populacao/freguesia/_/index.txt`) as itself rather than as the shell's HTML; `/pt/populacao/v/*` and `/en/populacao/v/*` to each locale's consultation page, and the locale-less `/populacao/v/*` (the producer's `canonical_path`) to the Portuguese one
-- Cache headers: `/_next/static/*` and the hashed `og-image-*-{hash}.png` cards immutable for a year, except the names matched first by exact routes, which revalidate (`max-age=0, must-revalidate`): the unversioned `og-image-{pt,en}.png` and every retained card name (see the OG paragraph below), whose routes `scripts/generate-og-images.mjs` writes just ahead of the `/og-image-*.png` wildcard; `/favicon.ico` a day; `/data/population/v*` immutable (a release never changes, its `manifest.json` included; there is no rule for anything else under `/data/population`, and `host-config.test.ts` keeps it that way); `/data/population-geography/*` a day; `/images/*`, `/brand/*`, `/branding/*` a week with stale-while-revalidate; everything else `max-age=0, must-revalidate`
+- Cache headers: `/_next/static/*` and the hashed `og-image-*-{hash}.png` cards immutable for a year, except the names matched first by exact routes, which revalidate (`max-age=0, must-revalidate`): the unversioned `og-image-{pt,en}.png` and every retained card name (see the OG paragraph below), whose routes `scripts/generate-og-images.mjs` writes just ahead of the `/og-image-*.png` wildcard; `/favicon.ico` a day; `/data/population/v*` immutable (a release never changes, its `manifest.json` included, and the deploy checks it: see "Deployment"; there is no rule for anything else under `/data/population`, and `host-config.test.ts` keeps it that way); `/data/population-geography/*` a day; `/images/*`, `/brand/*`, `/branding/*` a week with stale-while-revalidate; everything else `max-age=0, must-revalidate`
 - MIME types for `.json`, `.txt` (RSC payloads), `.wasm`, `.parquet`, `.xml`, `.avif`
 - 404s rewrite to `/404.html`; there is no navigation fallback
 - Bare `"statusCode": 404` rules for the pages the export must write but nobody should reach: `/{pt,en}/artigos/sem-artigos/` and `/{pt,en}/artigos/tema/sem-temas/` (placeholders while nothing is published) and `/404/`. `scripts/smoke-check.mjs` reads these rules, probes each for a 404 and leaves them out of its 200 walk.

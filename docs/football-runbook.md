@@ -41,9 +41,13 @@ football sync already publishes:
   (`withPublishedResults`). So the game waits for the same thing the forecast does: the sync
   and deploy after the round's last game.
 
-Nothing else to run each week: there is no `api/data` copy and no `/api/score` POST. In the
-model repository, run `scripts/export_game_fixtures.py` without `--api-dir` and
-`--post-score`, which pointed at the retired server.
+Nothing else to run each week: there is no `api/data` copy and no `/api/score` POST. The
+model repository's publish job stopped writing both in November 2026 (the flags pointed at
+the retired server and logged an error on every run); `api/data/game_fixtures.json`, the
+136 KB copy every data commit still rewrote, was deleted here. The model repository's
+`--sync` deletes it again if it is still tracked (`RETIRED_WEB_PATHS` in
+`liga_predict/cli/predict.py`, estimador-football PR 2), so a weekend sync from a Mac
+checkout older than that PR may re-add it once, and the first sync after the pull removes it.
 
 Retired outside this repository, still to do once: the Azure Static Web App's game settings
 (`GAME_STORAGE_CONNECTION_STRING`, `GAME_ADMIN_TOKEN`, `GAME_SEASON`, `CLERK_ISSUER`,
