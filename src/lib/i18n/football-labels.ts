@@ -1,5 +1,6 @@
 // Portuguese labels for the English strings that arrive in the football data
-// feeds (Transfermarkt injury reasons and positions, model position codes).
+// feeds (injury reasons and positions from SofaScore line-ups, and earlier
+// from Transfermarkt; model position codes).
 // Kept out of the message files on purpose: these are data values, not UI copy.
 
 export const injuryReasonPt: Record<string, string> = {
@@ -40,6 +41,13 @@ export const injuryReasonPt: Record<string, string> = {
   "Lumbar vertebra problems": "Problemas nas vértebras lombares",
   "Torn knee ligaments": "Rotura dos ligamentos do joelho",
   Suspension: "Suspensão",
+  // SofaScore's reasons, as the football export words them (19 Nov 2026).
+  "Red card suspension": "Castigo por expulsão",
+  "Yellow card accumulation": "Acumulação de amarelos",
+  "Card suspension": "Castigo por cartões",
+  "Disciplinary suspension": "Castigo disciplinar",
+  "Physical discomfort": "Desconforto físico",
+  "Broken leg": "Fratura da perna",
 };
 
 // Transfermarkt adds new reasons through the season, and the injury collector
@@ -156,6 +164,10 @@ export const positionPt: Record<string, string> = {
   "Right Winger": "Extremo direito",
   "Second Striker": "Segundo avançado",
   "Centre-Forward": "Ponta de lança",
+  // SofaScore's broad positions (the line-ups give G/D/M/F).
+  Defender: "Defesa",
+  Midfielder: "Médio",
+  Forward: "Avançado",
 };
 
 /** Model position codes (G/D/M/F) used by the player skill feed. */
@@ -175,7 +187,7 @@ export const positionCodeEn: Record<string, string> = {
 
 /**
  * The reason as the reader's language should show it. English pages keep
- * Transfermarkt's text. Portuguese pages use the table, then a composed label,
+ * the source's text. Portuguese pages use the table, then a composed label,
  * then the neutral "Indisponível" (or "Suspensão" for a suspension): never English.
  */
 export function injuryReasonLabel(

@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { composeInjuryReasonPt, injuryReasonLabel, injuryReasonPt } from './football-labels';
+import { composeInjuryReasonPt, injuryReasonLabel, injuryReasonPt, positionLabel } from './football-labels';
 
 // A Portuguese page must never print Transfermarkt's English (audit F6:
 // "Torn lateral knee ligament" on /pt/desporto/liga/jogo/rio-ave-nacional/).
@@ -62,7 +62,7 @@ describe('injury reason labels', () => {
     expect(injuryReasonLabel('Torn knee ligaments', 'pt')).toBe('Rotura dos ligamentos do joelho');
     expect(injuryReasonLabel('Corona virus', 'pt')).toBe('Indisponível');
     expect(injuryReasonLabel('Mystery', 'pt', 'injury')).toBe('Indisponível');
-    expect(injuryReasonLabel('Red card suspension', 'pt', 'suspension')).toBe('Suspensão');
+    expect(injuryReasonLabel('Match ban', 'pt', 'suspension')).toBe('Suspensão');
     expect(composeInjuryReasonPt('Mystery problem in the spleen')).toBeNull();
   });
 
@@ -76,5 +76,27 @@ describe('injury reason labels', () => {
     expect(injuryReasonLabel('Broken ankle', 'en')).toBe('Broken ankle');
     expect(injuryReasonLabel('Something new', 'en')).toBe('Something new');
     expect(injuryReasonLabel(null, 'pt')).toBe('');
+  });
+});
+
+describe('SofaScore reasons and positions (19 Nov 2026)', () => {
+  it.each([
+    ['Red card suspension', 'Castigo por expulsão'],
+    ['Yellow card accumulation', 'Acumulação de amarelos'],
+    ['Card suspension', 'Castigo por cartões'],
+    ['Disciplinary suspension', 'Castigo disciplinar'],
+    ['Physical discomfort', 'Desconforto físico'],
+    ['Broken leg', 'Fratura da perna'],
+  ])('labels %s', (reason, pt) => {
+    expect(injuryReasonLabel(reason, 'pt')).toBe(pt);
+  });
+
+  it.each([
+    ['Goalkeeper', 'Guarda-redes'],
+    ['Defender', 'Defesa'],
+    ['Midfielder', 'Médio'],
+    ['Forward', 'Avançado'],
+  ])('labels the position %s', (position, pt) => {
+    expect(positionLabel(position, 'pt')).toBe(pt);
   });
 });

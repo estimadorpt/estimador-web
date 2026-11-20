@@ -59,14 +59,14 @@ const copy = {
     licenceOwnAfter:
       ": podes usá-las, redistribuí-las e transformá-las, incluindo para fins comerciais, desde que atribuas a fonte («estimador.pt», com link para a página correspondente).",
     licenceThirdParty:
-      "A licença não abrange os dados de terceiros que alguns ficheiros trazem, marcados na lista acima como «Fora da licença»: resultados e estatísticas de jogo (SofaScore), xG (FotMob), cotações de casas de apostas (Pinnacle e Bet365, via football-data.co.uk) e lesões e valores de mercado (Transfermarkt). Esses dados vêm da fonte original e não são redistribuíveis por nós: para os reutilizar, segue os termos de cada fonte.",
+      "A licença não abrange os dados de terceiros que alguns ficheiros trazem, marcados na lista acima como «Fora da licença»: resultados e estatísticas de jogo (SofaScore), xG (FotMob), cotações de casas de apostas (Pinnacle e Bet365, via football-data.co.uk), baixas por lesão ou castigo (SofaScore) e valores de mercado (Transfermarkt). Esses dados vêm da fonte original e não são redistribuíveis por nós: para os reutilizar, segue os termos de cada fonte.",
     licenceWarranty:
       "Os dados são fornecidos como estão, sem garantias — são previsões probabilísticas de um modelo estatístico, e por definição vão estar erradas parte do tempo.",
     licenceUrl: "https://creativecommons.org/licenses/by-nc/4.0/deed.pt",
     thirdPartyLabel: "Fora da licença:",
     provenanceTitle: "Proveniência",
     provenance:
-      "Resultados e estatísticas de jogo (incluindo remates à baliza) da SofaScore; xG da FotMob; cotações de fecho (Pinnacle e Bet365) via football-data.co.uk; lesões e valores de mercado do Transfermarkt. As probabilidades vêm de um modelo bayesiano de Poisson bivariado (bivcross), ajustado aos golos e aos remates à baliza das últimas quatro épocas da Primeira Liga e da Liga 2, com os jogos mais antigos a pesar menos e o valor de cada plantel como ponto de partida, e de 50 000 simulações de Monte Carlo por publicação. A pré-época (md00) foi publicada pelo modelo anterior, joint_sot.",
+      "Resultados e estatísticas de jogo (incluindo remates à baliza) da SofaScore; xG da FotMob; cotações de fecho (Pinnacle e Bet365) via football-data.co.uk; baixas por lesão ou castigo, lidas nos onzes da SofaScore (até 16 de outubro de 2026, do Transfermarkt); valores de mercado do Transfermarkt. As probabilidades vêm de um modelo bayesiano de Poisson bivariado (bivcross), ajustado aos golos e aos remates à baliza das últimas quatro épocas da Primeira Liga e da Liga 2, com os jogos mais antigos a pesar menos e o valor de cada plantel como ponto de partida, e de 50 000 simulações de Monte Carlo por publicação. A pré-época (md00) foi publicada pelo modelo anterior, joint_sot.",
     unavailable: "Não foi possível listar os ficheiros publicados.",
     methodology: "Como funciona o modelo",
     review: "A época 2025-26 em revista",
@@ -103,14 +103,14 @@ const copy = {
     licenceOwnAfter:
       ": you may use, redistribute and transform them, commercial use included, as long as you credit the source (“estimador.pt”, with a link to the corresponding page).",
     licenceThirdParty:
-      "The licence does not cover the third-party data some files carry, marked “Not under the licence” in the list above: results and match statistics (SofaScore), xG (FotMob), bookmaker odds (Pinnacle and Bet365, via football-data.co.uk), and injuries and market values (Transfermarkt). Those data come from their original sources and are not ours to redistribute: to reuse them, follow each source's terms.",
+      "The licence does not cover the third-party data some files carry, marked “Not under the licence” in the list above: results and match statistics (SofaScore), xG (FotMob), bookmaker odds (Pinnacle and Bet365, via football-data.co.uk), absences through injury or suspension (SofaScore), and market values (Transfermarkt). Those data come from their original sources and are not ours to redistribute: to reuse them, follow each source's terms.",
     licenceWarranty:
       "The data is provided as is, with no warranty — these are probabilistic forecasts from a statistical model, and by definition they will be wrong some of the time.",
     licenceUrl: "https://creativecommons.org/licenses/by-nc/4.0/",
     thirdPartyLabel: "Not under the licence:",
     provenanceTitle: "Provenance",
     provenance:
-      "Results and match statistics (shots on target included) from SofaScore; xG from FotMob; closing odds (Pinnacle and Bet365) via football-data.co.uk; injuries and market values from Transfermarkt. The probabilities come from a bivariate Poisson Bayesian model (bivcross), fitted to goals and shots on target from the last four seasons of the Primeira Liga and Liga 2, with older games counting for less and each squad's value as the starting point, and from 50,000 Monte Carlo season simulations per publication. The pre-season file (md00) was published by the previous model, joint_sot.",
+      "Results and match statistics (shots on target included) from SofaScore; xG from FotMob; closing odds (Pinnacle and Bet365) via football-data.co.uk; absences through injury or suspension from SofaScore line-ups (until 16 October 2026, from Transfermarkt); market values from Transfermarkt. The probabilities come from a bivariate Poisson Bayesian model (bivcross), fitted to goals and shots on target from the last four seasons of the Primeira Liga and Liga 2, with older games counting for less and each squad's value as the starting point, and from 50,000 Monte Carlo season simulations per publication. The pre-season file (md00) was published by the previous model, joint_sot.",
     unavailable: "Could not list the published files.",
     methodology: "How the model works",
     review: "The 2025-26 season reviewed",
@@ -236,12 +236,12 @@ const FILE_DOCS: { match: RegExp; label: string; doc: Doc; thirdParty?: Doc }[] 
     match: /^injuries\.json$/,
     label: "injuries.json",
     doc: {
-      pt: "Lesionados e suspensos por clube, com motivo, regresso previsto quando conhecido e valor de mercado. Instantâneo com data.",
-      en: "Injuries and suspensions by club, with reason, expected return where known, and market value. A dated snapshot.",
+      pt: "Lesionados e suspensos de cada clube no seu último jogo (data e adversário em cada clube), com motivo, regresso previsto quando conhecido e valor de mercado.",
+      en: "Each club's injured and suspended players at its last game (date and opponent per club), with reason, expected return where known, and market value.",
     },
     thirdParty: {
-      pt: "o ficheiro inteiro: lesões, castigos e valores de mercado do Transfermarkt.",
-      en: "the whole file: injuries, suspensions and market values from Transfermarkt.",
+      pt: "o ficheiro inteiro: lesões e castigos da SofaScore, valores de mercado do Transfermarkt.",
+      en: "the whole file: injuries and suspensions from SofaScore, market values from Transfermarkt.",
     },
   },
   {
