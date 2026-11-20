@@ -89,7 +89,7 @@ jobs:
       - name: Preview not uploaded
         if: github.event_name == 'pull_request' && steps.builddeploy.outcome == 'failure'
         run: |
-          echo "::warning title=No preview::Azure refused the preview upload (usually: all three staging environments are held by open pull requests). Data, types, lint, tests and the build passed."
+          echo "::warning title=No preview::The preview upload failed; the Build And Deploy log says why (usually all three staging environments are held by open pull requests). Data, types, lint, tests and the build passed."
 
       # A local preview does not apply staticwebapp.config.json. This asks the
       # deployed host for every exported route and asset, and fails the run if
