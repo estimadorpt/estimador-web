@@ -48,6 +48,10 @@ describe('v1.2 parish questions: the words', () => {
       for (const dimension of fixture.recipes[recipe].dimensions) expect(DIMENSION_LABEL[dimension], dimension).toBeDefined();
     }
     expect(isPortraitRecipe('vote')).toBe(false);
+    // No dimension a card draws is left without words: a raw code never reaches a live card.
+    for (const recipe of LAYER_RECIPES) for (const dimension of fixture.recipes[recipe].dimensions) expect(VALUES[dimension]?.length, dimension).toBeGreaterThan(0);
+    expect(VALUES.income_band.find(entry => entry.value === '0')!.label.pt).not.toMatch(/sem rendimento/i);
+    expect(VALUES.income_band.find(entry => entry.value === '0')!.label.en).not.toMatch(/no income/i);
   });
 
   it('gives every card a unique anchor that no section heading uses', () => {
@@ -77,11 +81,14 @@ describe('v1.2 parish questions: the words', () => {
         } else if (RECIPE_TABLE[recipe]) {
           expect(line, recipe).toContain(RECIPE_TABLE[recipe]![locale]);
         }
-        if (provenance === 'tilted') expect(line).toMatch(locale === 'pt' ? /média de cinco sorteios/ : /mean of five draws/);
+        if (provenance === 'tilted' || provenance === 'modelled') expect(line).toMatch(locale === 'pt' ? /média de cinco sorteios/ : /mean of five draws/);
       }
     }
-    // Income is one column, not five draws; residence in 2019 has no anchor at any level.
-    expect(sourceLine('income', 'pt')).not.toMatch(/sorteios/);
+    // Income is anchored to fiscal units per município, not to an INE table of persons; residence in 2019 has no anchor at any level.
+    expect(sourceLine('income', 'pt')).toMatch(/ancorado às declarações de IRS de 2021 por concelho/);
+    expect(sourceLine('income', 'pt')).not.toMatch(/quadro/);
+    expect(sourceLine('income', 'en')).toMatch(/anchored to the 2021 income tax returns by municipality/);
+    expect(sourceLine('income', 'en')).not.toMatch(/table/);
     expect(sourceLine('residence_2019', 'en')).toMatch(/no INE table fixes it/);
   });
 });
@@ -91,10 +98,9 @@ describe('v1.2 parish questions: against the fixture', () => {
     expect(fixture.data_status).toBe('fixture');
   });
 
-  it('knows every category code the fixture carries (income bands wait for the producer)', () => {
+  it('knows every category code the fixture carries', () => {
     for (const recipe of LAYER_RECIPES) {
       const [dimension] = fixture.recipes[recipe].dimensions;
-      if (dimension === 'income_band') continue;
       const known = new Set(VALUES[dimension].map(entry => entry.value));
       const cells = fixture.responses[recipe].cells.map(cell => cell[0][0]);
       expect(cells.filter(code => !known.has(code)), recipe).toEqual([]);

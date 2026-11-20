@@ -212,8 +212,8 @@ export const RECIPE_COPY: Record<PortraitRecipe, RecipeCopy> = {
   income: {
     short: { pt: 'Rendimento bruto declarado', en: 'Gross declared income' },
     population: {
-      pt: 'Pessoas com 18 ou mais anos, pelo rendimento bruto anual declarado ao fisco em 2021, em escalões. Não conta o que não se declara no IRS, como a maior parte das prestações sociais.',
-      en: 'People aged 18 or over, by gross yearly income declared to the tax authority in 2021, in bands. It leaves out what is not declared for income tax, such as most social benefits.',
+      pt: 'Pessoas com 18 ou mais anos em alojamentos familiares, pelo rendimento bruto que declararam no IRS de 2021 em nome próprio, em escalões. Quem não entregou declaração em nome próprio conta à parte: muitas dessas pessoas têm rendimento, só não declaram. Quem vive em alojamentos coletivos não entra.',
+      en: 'People aged 18 or over in private households, by the gross income they declared in their own name for 2021 income tax, in bands. Those who filed no return in their own name are counted apart: many of them have an income, they just do not file. Residents of collective quarters are not included.',
     },
     anchor: 'rendimento',
   },
@@ -482,9 +482,17 @@ export const VALUES: Record<string, Array<{ value: string; label: Text }>> = {
     { value: '1', label: { pt: 'Sabem ler e escrever', en: 'Can read and write' } },
     { value: '2', label: { pt: 'Não sabem ler nem escrever', en: 'Cannot read or write' } },
   ],
-  // income_band: the producer sets the bands (contract §2e). Until its label map arrives, the
-  // site knows no code, and readCells shows the response's own codes in the order it sends them.
-  income_band: [],
+  // income_band: INE's bracket edges, the ones the model holds per município (half-open:
+  // exactly 5 000 € is in the second band). Code 0 is "filed no return", never "no income".
+  income_band: [
+    { value: '0', label: { pt: 'Não entregou IRS em nome próprio', en: 'Filed no return in their own name' } },
+    { value: '1', label: { pt: 'Menos de 5 000 €', en: 'Under €5,000' } },
+    { value: '2', label: { pt: '5 000 a 10 000 €', en: '€5,000 to €10,000' } },
+    { value: '3', label: { pt: '10 000 a 13 500 €', en: '€10,000 to €13,500' } },
+    { value: '4', label: { pt: '13 500 a 19 000 €', en: '€13,500 to €19,000' } },
+    { value: '5', label: { pt: '19 000 a 32 500 €', en: '€19,000 to €32,500' } },
+    { value: '6', label: { pt: '32 500 € ou mais', en: '€32,500 or more' } },
+  ],
   birthplace: [
     { value: '1', label: { pt: 'Nesta freguesia', en: 'In this parish' } },
     { value: '2', label: { pt: 'Noutra freguesia do concelho', en: 'In another parish of the municipality' } },
@@ -813,8 +821,8 @@ export const RECIPE_PROVENANCE: Record<PortraitRecipe, RecipeProvenance> = {
  */
 export const MODELLED_ANCHOR: Partial<Record<PortraitRecipe, Text>> = {
   income: {
-    pt: 'ajustado, concelho a concelho, às declarações de IRS de 2021 e aos dados da Segurança Social; a repartição entre as freguesias do concelho é do modelo',
-    en: 'fitted, municipality by municipality, to the 2021 income tax returns and Social Security data; the split between the municipality’s parishes is the model’s',
+    pt: 'ancorado às declarações de IRS de 2021 por concelho (INE) e às pensões da Segurança Social; a repartição pela freguesia é do modelo',
+    en: 'anchored to the 2021 income tax returns by municipality (INE) and to Social Security pensions; the split by parish is the model’s',
   },
   birthplace: {
     pt: 'o quadro 12296 do INE fixa, por freguesia, os portugueses nascidos no estrangeiro; o resto da repartição é do modelo',
@@ -891,14 +899,14 @@ export function sourceLine(recipe: PortraitRecipe, locale: Locale, { withCaveat 
   const caveat = withCaveat && RECIPE_CAVEAT[recipe] ? `. ${RECIPE_CAVEAT[recipe]![locale]}` : '';
   if (locale === 'pt') {
     if (provenance === 'derived') return `População sintética v${POPULATION_RELEASE} · derivada da população gerada a partir dos Censos 2021 (INE); não é uma das tabelas usadas no ajuste${caveat}`;
-    if (provenance === 'modelled') return `População sintética v${POPULATION_RELEASE} · modelado: atribuído a cada pessoa por um modelo${recipe === 'income' ? '' : ' da amostra de microdados dos Censos 2021'}; ${MODELLED_ANCHOR[recipe]?.pt ?? 'nenhum quadro de freguesia o fixa'}${recipe === 'income' ? '' : '; média de cinco sorteios'}${caveat}`;
+    if (provenance === 'modelled') return `População sintética v${POPULATION_RELEASE} · modelado: atribuído a cada pessoa por um modelo${recipe === 'income' ? '' : ' da amostra de microdados dos Censos 2021'}; ${MODELLED_ANCHOR[recipe]?.pt ?? 'nenhum quadro de freguesia o fixa'}; média de cinco sorteios${caveat}`;
     if (provenance === 'tilted') return `População sintética v${POPULATION_RELEASE}, factos dos Censos · atribuídos a cada pessoa por um modelo da amostra de microdados dos Censos 2021 e ajustados, freguesia a freguesia, ${table ?? 'ao quadro do INE'}; média de cinco sorteios${caveat}`;
     return table
       ? `População sintética v${POPULATION_RELEASE} · grupos de um campo ajustado, freguesia a freguesia, ${table} (Censos 2021)${institutional}${caveat}`
       : `População sintética v${POPULATION_RELEASE} · grupos de um campo ajustado às tabelas dos Censos 2021 (INE)${institutional}${caveat}`;
   }
   if (provenance === 'derived') return `Synthetic population v${POPULATION_RELEASE} · derived from the population generated from the 2021 Census (INE); not one of the tables it was fitted to${caveat}`;
-  if (provenance === 'modelled') return `Synthetic population v${POPULATION_RELEASE} · modelled: assigned to each person by a model${recipe === 'income' ? '' : ' of the 2021 Census public-use sample'}; ${MODELLED_ANCHOR[recipe]?.en ?? 'no parish table fixes it'}${recipe === 'income' ? '' : '; mean of five draws'}${caveat}`;
+  if (provenance === 'modelled') return `Synthetic population v${POPULATION_RELEASE} · modelled: assigned to each person by a model${recipe === 'income' ? '' : ' of the 2021 Census public-use sample'}; ${MODELLED_ANCHOR[recipe]?.en ?? 'no parish table fixes it'}; mean of five draws${caveat}`;
   if (provenance === 'tilted') return `Synthetic population v${POPULATION_RELEASE}, census facts · drawn for each person by a model of the 2021 Census public-use sample and tilted, parish by parish, to ${table ?? 'INE’s table'}; mean of five draws${caveat}`;
   return table
     ? `Synthetic population v${POPULATION_RELEASE} · groups of a field fitted, parish by parish, to ${table} (2021 Census)${institutional}${caveat}`

@@ -83,6 +83,9 @@ describe('population release files', () => {
     // Every question the release answers has the site's words; the site may know more (the v1.2
     // questions, which render only when a release carries them: docs/population/v1.2-parish-questions.md).
     expect(meta.recipe_order.filter(name => !(name in RECIPE_COPY))).toEqual([]);
+    // ...and every release answers the eight core questions.
+    const core: PortraitRecipe[] = ['elders_alone', 'who_lives_alone', 'multigenerational', 'age', 'employment', 'education', 'household_size', 'household_type'];
+    expect(core.filter(name => !meta.recipe_order.includes(name))).toEqual([]);
   });
 
   it('asks the household questions of private households, and says so (v1.0.2 onwards)', () => {
