@@ -1,3 +1,5 @@
+'use client';
+
 import { BRAND, MARK_BAND, MARK_LEFT, MARK_RIGHT, MARK_SMALL } from '@/lib/brand';
 import { WORDMARK_BASELINE, WORDMARK_HEIGHT, WORDMARK_NAME, WORDMARK_TLD, WORDMARK_WIDTH, WORDMARK_X } from '@/lib/brand/wordmark';
 

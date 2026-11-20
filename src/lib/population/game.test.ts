@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -231,6 +232,37 @@ describe('the four on the board', () => {
 
   it('refuses an answer that is not a parish', () => {
     expect(() => gameChoices(0, 'XXXXXX', places.parishes)).toThrow();
+  });
+});
+
+describe('the calendar across releases', () => {
+  // A release changes every figure in the deck and never the calendar: a reader's record is kept
+  // by day number, a share text names its number, and the archive replays past days. These two
+  // digests are the calendar of v1.0.3's deck, the one the game has played since it opened on
+  // 6 October 2026. If one fails after a population sync, the new release moved the calendar: the
+  // producer's deck must keep the order of the release before it (the list of `freguesia` by
+  // `daily_order` in `mystery_deck.json`), and `places.json` its order, regions and INE counts.
+  // Change a digest only when the calendar is meant to change, and say so in the release notes.
+  const CALENDAR = {
+    /** Which parish each day plays: the deck's codes, one a line, in deck order. */
+    answers: 'def1cd3f6fb0d7e4ac5caa170aed1ced7e5958f2429e557f391d1a7046944c4a',
+    /** The four on each day's board: the answer, then the other three sorted by code. */
+    boards: 'c3ad140f298faa019bf931f96d583fd0f8eb60b34847035e7bca5a1682755cdf',
+  };
+  const digest = (lines: readonly string[]) => createHash('sha256').update(lines.join('\n')).digest('hex');
+  const answerOf = (day: number) => deck[answerOrder(day, index.candidates)].code;
+
+  it('plays the same parish on the same day as the release before it', () => {
+    expect(deck).toHaveLength(3092);
+    expect(digest(deck.map(entry => entry.code)), 'the deck’s order moved: a day would play another parish').toBe(CALENDAR.answers);
+  });
+
+  it('puts the same four on each day’s board', () => {
+    const boards = deck.map((_, day) => {
+      const answer = answerOf(day);
+      return [answer, ...gameChoices(day, answer, places.parishes).sort()].join(' ');
+    });
+    expect(digest(boards), 'a day’s board changed: places.json moved a parish, a region or an INE count').toBe(CALENDAR.boards);
   });
 });
 

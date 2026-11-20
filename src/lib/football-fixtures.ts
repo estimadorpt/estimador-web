@@ -26,6 +26,7 @@ import type {
 } from '@/types/football';
 import { assignFixtureSlugs, fixtureSlug } from '@/lib/config/fixtures';
 import { formatLongDate } from '@/lib/football-format';
+import { slotPassedBeforeForecast } from '@/lib/football-status';
 
 /* --------------------------------------------------------- game_fixtures */
 
@@ -80,7 +81,8 @@ export interface SupportedFixture {
   kickoffConfirmed: boolean;
   /** True when this fixture's matchday is below the bundle's current matchday
    * (scenarios.matchday) — a leftover from an earlier round, not the club's
-   * next scheduled game. */
+   * next scheduled game — or when its slot had passed without a result when
+   * the forecast was made. */
   postponed: boolean;
   /** 1X2 for this fixture, from prediction.next_matchday, when available. */
   matchProbabilities?: { p_home: number; p_draw: number; p_away: number };
@@ -192,8 +194,11 @@ export function listSupportedFixtures(
     const matchday = match.matchday ?? scenarios.matchday;
     const key = matchdayFixtureKey(match.home_team, match.away_team, matchday);
     const gameFixture = gameFixtureByKey.get(key);
-    const postponed = matchday < scenarios.matchday;
     let kickoff = gameFixture?.kickoff ?? remainingKickoffByKey.get(key);
+    // A leftover from an earlier round, or a game of the round in progress
+    // whose slot had passed without a result when the forecast was made.
+    const postponed = matchday < scenarios.matchday
+      || slotPassedBeforeForecast(gameFixture?.kickoff, gameFixture?.kickoff_confirmed, prediction.timestamp);
     // A leftover's kickoff is only its new date when it lies after this
     // forecast; an earlier one is the original slot it was postponed from.
     if (postponed && kickoff) {

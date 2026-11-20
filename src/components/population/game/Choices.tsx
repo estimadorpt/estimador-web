@@ -37,7 +37,6 @@ export function Choices({ choices, ruledOut, locale, canOpenMore, onPick, onNext
             <li key={parish.code}>
               <button
                 type="button"
-                aria-label={out ? t.ruledOutName(parish.name, parish.municipalityName) : t.choose(parish.name, parish.municipalityName)}
                 aria-disabled={out || undefined}
                 onClick={() => { if (!out) onPick(parish); }}
                 className={`group flex min-h-14 w-full items-center gap-3 border px-3 py-2 text-left transition-colors duration-150 motion-reduce:transition-none ${
@@ -46,15 +45,19 @@ export function Choices({ choices, ruledOut, locale, canOpenMore, onPick, onNext
                     : 'border-rule bg-paper hover:border-ink hover:bg-field active:bg-field'
                 }`}
               >
-                <span aria-hidden="true" className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[13px] font-bold tabular-nums ${out ? 'border-dashed border-scale text-ink' : 'border-ink text-ink'}`}>{i + 1}</span>
+                {/* The button is named by what it shows: the map's numeral, the
+                    parish, its concelho and, once ruled out, "não é esta". An
+                    aria-label with other words left voice control unable to
+                    find it by its visible text (WCAG 2.5.3). */}
+                <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[13px] font-bold tabular-nums ${out ? 'border-dashed border-scale text-ink' : 'border-ink text-ink'}`}>{i + 1}</span>
                 <span className="min-w-0 flex-1">
                   <span className={`block text-[15px] font-semibold leading-snug ${out ? 'text-graphite line-through decoration-1' : 'text-ink'}`}>{parish.name}</span>
                   <span className="block text-[12px] text-graphite">{parish.municipalityName}</span>
                 </span>
                 {out && (
-                  <span aria-hidden="true" className="inline-flex shrink-0 items-center gap-1 text-[12px] font-semibold text-ink">
+                  <span className="inline-flex shrink-0 items-center gap-1 text-[12px] font-semibold text-ink">
                     {/* The ruled-out cross: the game's one mark in the terracotta red. */}
-                    <X className="h-4 w-4 text-terracotta" strokeWidth={2.5} />
+                    <X aria-hidden="true" className="h-4 w-4 text-terracotta" strokeWidth={2.5} />
                     {t.ruledOut}
                   </span>
                 )}

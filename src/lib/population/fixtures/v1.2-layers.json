@@ -1,5 +1,5 @@
 {
- "_comment": "Synthetic values for the v1.2 parish questions (docs/population/v1.2-parish-questions.md). data_status fixture: never served, never a real figure. income_band codes are placeholders until the producer sets the bands.",
+ "_comment": "Synthetic values for the v1.2 parish questions (docs/population/v1.2-parish-questions.md). data_status fixture: never served, never a real figure. income_band codes are the income thread’s seven bands (18 Nov 2026).",
  "data_status": "fixture",
  "parish": "010103",
  "recipes": {
@@ -306,24 +306,17 @@
    ],
    "filters": [
     {
-     "field": "age_5y",
-     "operator": "in",
+     "field": "adult_18_plus",
+     "operator": "eq",
      "values": [
-      "20 - 24 anos",
-      "25 - 29 anos",
-      "30 - 34 anos",
-      "35 - 39 anos",
-      "40 - 44 anos",
-      "45 - 49 anos",
-      "50 - 54 anos",
-      "55 - 59 anos",
-      "60 - 64 anos",
-      "65 - 69 anos",
-      "70 - 74 anos",
-      "75 - 79 anos",
-      "80 - 84 anos",
-      "85 - 89 anos",
-      "90 ou mais anos"
+      "1"
+     ]
+    },
+    {
+     "field": "is_institutional",
+     "operator": "eq",
+     "values": [
+      "0"
      ]
     }
    ],
@@ -1149,43 +1142,50 @@
      [
       "0"
      ],
-     0.6247027878090065,
-     "62,5%"
+     0.21,
+     "21,0%"
     ],
     [
      [
       "1"
      ],
-     0.21225198368789053,
-     "21,2%"
+     0.18,
+     "18,0%"
     ],
     [
      [
       "2"
      ],
-     0.09413275498868262,
-     "9,4%"
+     0.2,
+     "20,0%"
     ],
     [
      [
       "3"
      ],
-     0.06653571402294811,
-     "6,7%"
+     0.12,
+     "12,0%"
     ],
     [
      [
       "4"
      ],
-     0.0023767594914723576,
-     "0,2%"
+     0.13,
+     "13,0%"
     ],
     [
      [
       "5"
      ],
-     0.0,
-     "0,0%"
+     0.11,
+     "11,0%"
+    ],
+    [
+     [
+      "6"
+     ],
+     0.05,
+     "5,0%"
     ]
    ]
   },

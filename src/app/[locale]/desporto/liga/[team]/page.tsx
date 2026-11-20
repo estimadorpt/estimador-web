@@ -251,7 +251,7 @@ export default async function TeamDetailPage({
   // a club without a scenario builder (audit F14). The next round's games
   // carry the model's 1X2 from the club's side and a match page.
   const nextRoundByKey = new Map(upcomingFixtures.map((f) => [`${f.matchday}|${f.home}|${f.away}`, f]));
-  const fixtureRows = clubFixtureRows(teamName, gameFixtures, prediction.next_matchday?.matchday ?? prediction.matchday + 1).map((row) => {
+  const fixtureRows = clubFixtureRows(teamName, gameFixtures, prediction.next_matchday?.matchday ?? prediction.matchday + 1, prediction.timestamp).map((row) => {
     const home = row.venue === "H" ? teamName : row.opponent;
     const away = row.venue === "H" ? row.opponent : teamName;
     const f = nextRoundByKey.get(`${row.matchday}|${home}|${away}`);

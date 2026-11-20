@@ -547,6 +547,7 @@ function Ready({ code, place, record, meta, target, nearby, locale }: Extract<St
                 </h2>
                 {group.lede && <p className="-mt-2 max-w-3xl leading-relaxed text-graphite">{group.lede[locale]}</p>}
                 {group.recipes.map(recipe => {
+                  // parishGroups keeps only the questions this record answers, so the response is there.
                   const response = record.responses[recipe]!;
                   const scope: Scope = response.decision === 'fallback'
                     ? { name: fallbackName ?? place.municipalityName, municipality: true }

@@ -519,13 +519,19 @@ export default async function MatchPage({
                       className="block h-full border-t border-rule py-2.5 transition-colors duration-150 hover:bg-field"
                     >
                       <span className="block text-[11px] font-semibold tabular-nums text-stone-500">
-                        <ClockSwitch
-                          initial={when || (pt ? `Jornada ${f.matchday}` : `Matchday ${f.matchday}`)}
-                          steps={prediction?.timestamp
-                            ? kickoffSteps(f.kickoff, f.kickoffConfirmed, matchStartedLine(prediction.timestamp, locale), matchPlayedLine(prediction.timestamp, locale))
-                            : []}
-                        />
-                        {f.postponed && (pt ? ` · jogo em atraso, jornada ${f.matchday}` : ` · postponed, matchday ${f.matchday}`)}
+                        {f.postponed && !when ? (
+                          pt ? `Jogo em atraso da jornada ${f.matchday}, data por marcar` : `Postponed from matchday ${f.matchday}, date to be set`
+                        ) : (
+                          <>
+                            <ClockSwitch
+                              initial={when || (pt ? `Jornada ${f.matchday}` : `Matchday ${f.matchday}`)}
+                              steps={prediction?.timestamp
+                                ? kickoffSteps(f.kickoff, f.kickoffConfirmed, matchStartedLine(prediction.timestamp, locale), matchPlayedLine(prediction.timestamp, locale))
+                                : []}
+                            />
+                            {f.postponed && (pt ? ` · jogo em atraso, jornada ${f.matchday}` : ` · postponed, matchday ${f.matchday}`)}
+                          </>
+                        )}
                       </span>
                       <span className="block text-sm font-medium text-ink">
                         {matchLabel(teamDisplayName(f.home), teamDisplayName(f.away))}
