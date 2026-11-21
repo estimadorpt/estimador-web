@@ -102,6 +102,7 @@ The project deploys automatically to Azure Static Web Apps via GitHub Actions wh
 - `AZURE_DEPLOYMENT_TOKEN` secret for Azure authentication
 - Static export configuration (`output: 'export'` in next.config.js)
 - Builds to `out/` directory
+- A pull request runs the same checks and build, then tries a preview upload; the Free plan's three staging environments are usually held by open pull requests, so a refused preview only warns (`continue-on-error` on pull requests) and never fails the run. On `main` the upload is the deploy and must succeed.
 
 **Freshness.** A static export stands still without anyone noticing: from 24 October to
 1 November 2026 a data sync kept `npm run check` red and nothing deployed for eight days.
