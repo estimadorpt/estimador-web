@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
+import { HOUSING_PUBLISHED } from '@/lib/config/housing-status';
 import { brandDescriptor, brandLine } from '@/lib/brand/descriptor';
 import { SiteFooterView, type FooterItem } from './SiteFooterView';
 
@@ -23,6 +24,8 @@ export async function SiteFooter({ locale }: { locale: string }) {
     { href: '/populacao', label: t('nav.population') },
     // One public name for football, the league's own (CLAUDE.md).
     { href: '/desporto/liga', label: t('nav.liga') },
+    // Housing once its page publishes (src/lib/config/housing-status.json).
+    ...(HOUSING_PUBLISHED ? [{ href: '/habitacao', label: locale === 'en' ? 'Housing' : 'Habitação' }] : []),
     // One entry for both archived forecasts, as the header groups them under
     // "Eleições": the archive's own page leads to each (CL3-06).
     { href: '/eleicoes/arquivo', label: t('footer.electionsArchive') },

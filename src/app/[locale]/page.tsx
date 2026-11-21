@@ -14,6 +14,8 @@ import { homepageConfig, resolveHomepageLayout } from "@/lib/config/homepage";
 import { PopulationPanel } from "@/components/home/PopulationPanel";
 import { LigaInstrument, pointsQuantiles } from "@/components/home/LigaInstrument";
 import { EconomyPanel } from "@/components/home/EconomyPanel";
+import { HousingPanel } from "@/components/home/HousingPanel";
+import { HOUSING_PUBLISHED } from "@/lib/config/housing-status";
 import { ElectionsPanel, type ElectionSnapshot } from "@/components/home/ElectionsPanel";
 import { setRequestLocale } from '@/i18n/request-locale';
 import { CONTAINER_CLASS } from '@/components/brand/Container';
@@ -137,6 +139,14 @@ export default async function HomePage({
           )}
           <PopulationPanel locale={locale} meta={populationMeta} />
         </div>
+
+        {/* Habitação, once its page publishes (src/lib/config/housing-status.json):
+            live readings before the election archive. */}
+        {HOUSING_PUBLISHED && (
+          <div className="mt-12">
+            <HousingPanel locale={locale} />
+          </div>
+        )}
 
         {!current && (
           <div className="mt-12">

@@ -8,6 +8,7 @@ import { LogoHorizontal } from './Logo';
 import { RulerEdge } from '@/components/instrument/RulerEdge';
 import { useArticleLanguagePath, useHasArticles } from '@/lib/article-navigation';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
+import { HOUSING_PUBLISHED } from '@/lib/config/housing-status';
 import { isExactPath, isNavItemActive, siteNavigation, type NavLabels } from '@/components/brand/site-navigation';
 
 // Keyboard focus is the global double ring in globals.css (CLAUDE.md,
@@ -75,7 +76,7 @@ export function Header() {
     aboutSite: t('about.title'),
     methodology: t('methodology.title'),
   };
-  const navigationItems = siteNavigation(labels, { locale, hasArticles, economyPublished: ECONOMY_PUBLISHED });
+  const navigationItems = siteNavigation(labels, { locale, hasArticles, economyPublished: ECONOMY_PUBLISHED, housingPublished: HOUSING_PUBLISHED });
 
   const exactActive = (href: string) => isExactPath(pathname, href);
   const isActive = (item: (typeof navigationItems)[number]) => isNavItemActive(item, pathname);

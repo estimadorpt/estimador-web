@@ -3,6 +3,7 @@ import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import sitemap from '@/app/sitemap';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
+import { HOUSING_PUBLISHED } from '@/lib/config/housing-status';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { SITE_LOCALES } from '@/lib/metadata';
 import { ligaTeamSlugs } from '@/lib/config/football';
@@ -57,6 +58,10 @@ describe('sitemap', () => {
       expect(urls.has(url(locale, '/economia'))).toBe(ECONOMY_PUBLISHED);
       expect(urls.has(url(locale, '/economia/metodologia'))).toBe(ECONOMY_PUBLISHED);
     }
+  });
+
+  it('follows the housing flag', () => {
+    for (const locale of SITE_LOCALES) expect(urls.has(url(locale, '/habitacao'))).toBe(HOUSING_PUBLISHED);
   });
 
   it('lists the articles index only in a locale that has published a piece', () => {

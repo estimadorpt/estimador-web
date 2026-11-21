@@ -13,6 +13,7 @@ import { loadEconomyDashboard } from '@/lib/utils/data-loader';
 import { loadLigaPlayers, loadLigaSummary } from '@/lib/utils/football-data-loader';
 import { formatLongDate } from '@/lib/football-format';
 import { ECONOMY_PUBLISHED, economyState, type EconomyState } from '@/lib/config/economy-status';
+import { HOUSING_PUBLISHED } from '@/lib/config/housing-status';
 import { Link } from '@/i18n/routing';
 import { fmtDate } from '@/lib/utils/economy-format';
 import { POPULATION_RELEASE } from '@/lib/config/population';
@@ -143,6 +144,16 @@ function EstadoAtual({
         : `A Bayesian model that simulates thousands of possible seasons to estimate the final table, the title and relegation probabilities and what each match does to them.${playerSeason ? ` Dedicated Bayesian models also rate the players, one per dimension; the finishing and attacking contribution models ${playerSeason}.` : ''}`,
       method: { href: '/desporto/liga/metodologia', label: pt ? 'Metodologia da Liga Portugal' : 'Liga Portugal methodology' },
     },
+    // Habitação, once its page publishes (src/lib/config/housing-status.json).
+    ...(HOUSING_PUBLISHED ? [{
+      label: pt ? 'Habitação' : 'Housing',
+      href: '/habitacao',
+      status: pt ? 'Publicada · só registos, sem modelo.' : 'Published · records only, no model.',
+      text: pt
+        ? 'Duas leituras contadas em registos públicos: quanto tempo a câmara de Lisboa leva da entrada de um processo de obras ao alvará, com os fogos licenciados e concluídos no país, e quantos registos de alojamento local há por cada 100 casas em cada freguesia de Lisboa.'
+        : "Two readings counted in public records: how long Lisbon's câmara takes from a building process entering to its alvará, with the dwellings licensed and completed nationally, and how many short-let registrations there are per 100 homes in each Lisbon parish.",
+      method: { href: '/habitacao#dados-habitacao', label: pt ? 'Os dados da habitação' : 'The housing data' },
+    }] : []),
     {
       label: pt ? 'Eleições presidenciais 2026' : 'Presidential election 2026',
       href: '/eleicoes/presidenciais',

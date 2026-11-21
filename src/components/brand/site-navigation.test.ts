@@ -13,11 +13,21 @@ const lookup = (catalogue: unknown) => (key: string) => {
 };
 
 const nav = (locale: 'pt' | 'en', hasArticles = false, economyPublished = false) =>
-  siteNavigation(navLabels(lookup(locale === 'pt' ? pt : en)), { locale, hasArticles, economyPublished });
+  siteNavigation(navLabels(lookup(locale === 'pt' ? pt : en)), { locale, hasArticles, economyPublished, housingPublished: false });
 
 const active = (items: NavItem[], pathname: string) => items.filter(item => isNavItemActive(item, pathname)).map(item => item.id);
 
 describe('site navigation', () => {
+  it('adds Habitação after Liga Portugal only once the housing page publishes', () => {
+    expect(nav('pt').map(item => item.id)).not.toContain('housing');
+    for (const locale of ['pt', 'en'] as const) {
+      const items = siteNavigation(navLabels(lookup(locale === 'pt' ? pt : en)), { locale, hasArticles: false, economyPublished: false, housingPublished: true });
+      const ids = items.map(item => item.id);
+      expect(ids.indexOf('housing')).toBe(ids.indexOf('sport') + 1);
+      expect(items.find(item => item.id === 'housing')?.label).toBe(locale === 'pt' ? 'Habitação' : 'Housing');
+    }
+  });
+
   it('reads every label key from both catalogues', () => {
     for (const catalogue of [pt, en]) {
       for (const key of Object.values(NAV_LABEL_KEYS)) expect(() => lookup(catalogue)(key), key).not.toThrow();

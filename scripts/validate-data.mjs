@@ -258,6 +258,27 @@ feed(`${populationDir}/meta.json`, meta => {
 });
 feed(`${populationDir}/scorecard.json`, card => (isObject(card) && card.status === 'ok' ? null : 'scorecard status is not ok'));
 
+// ---- housing (draft section) ------------------------------------------------
+// The two files estimador-housing's housing-page writes (./scripts/sync-data.sh
+// housing). Optional while /habitacao is a draft (src/lib/config/housing-status.json);
+// required once it is published, and then the Lisbon licensing figures must come
+// from the report itself, not the 2 November 2026 transcription.
+
+const HOUSING_PUBLISHED = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src/lib/config/housing-status.json'), 'utf8')).published === true;
+feed('housing/licensing.json', value => {
+  if (!isObject(value) || value.schema !== 'estimador.housing.licensing/1') return 'unknown schema';
+  if (!isObject(value.lisbon) || !nonEmptyArray(value.lisbon.by_alvara_year)) return 'no Lisbon years';
+  if (!nonEmptyArray(value.national)) return 'no national years';
+  if (HOUSING_PUBLISHED && value.status !== 'report') return `status "${value.status}": rebuild from the Lisbon licensing report before publishing`;
+  return null;
+}, { required: HOUSING_PUBLISHED });
+feed('housing/short-lets-lisbon.json', value => {
+  if (!isObject(value) || value.schema !== 'estimador.housing.short-lets/1') return 'unknown schema';
+  if (!nonEmptyArray(value.parishes) || !isObject(value.municipality)) return 'no parishes';
+  const sum = value.parishes.reduce((total, p) => total + p.registrations, 0);
+  return sum === value.municipality.registrations ? null : 'parish registrations do not add up to the municipality';
+}, { required: HOUSING_PUBLISHED });
+
 // ---- report ----------------------------------------------------------------
 
 for (const note of notes) console.warn(`optional  ${note}`);

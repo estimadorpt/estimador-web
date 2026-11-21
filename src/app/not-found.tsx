@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { LocaleOnlyProvider } from '@/components/LocaleOnlyProvider';
 import { navLabels, siteNavigation } from '@/components/brand/site-navigation';
 import { ECONOMY_PUBLISHED } from '@/lib/config/economy-status';
+import { HOUSING_PUBLISHED } from '@/lib/config/housing-status';
 import { getMDXArticlesByLocale } from '@/lib/mdx-articles';
 import { NotFoundBody } from '@/components/NotFoundBody';
 import { NotFoundHeaderView } from '@/components/NotFoundHeaderView';
@@ -39,6 +40,7 @@ async function NotFoundHeader({ locale }: { locale: 'pt' | 'en' }) {
     locale,
     hasArticles: getMDXArticlesByLocale(locale).length > 0,
     economyPublished: ECONOMY_PUBLISHED,
+    housingPublished: HOUSING_PUBLISHED,
   });
   return <NotFoundHeaderView locale={locale} items={items} />;
 }

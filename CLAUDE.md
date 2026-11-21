@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Sections
 - **População** (`/populacao/`) — open synthetic population v1.0.3 (Censos 2021), parish by parish (see "Population section")
 - **Liga Portugal** (`/desporto/liga/`) — Bayesian football league forecasts, updated every matchday
+- **Habitação** (`/habitacao/`) — **draft** until 9 December 2026 (see "Housing section"): Lisbon licence times and short lets, records only
 - **Presidential Elections 2026** (`/eleicoes/presidenciais/`) — archived forecast (both rounds)
 - **Parliamentary Elections 2025** (`/eleicoes/legislativas/`) — archived forecast; `/eleicoes/arquivo/` explains how to read both
 - **Economia** (`/economia/`) — **in preparation** (see "Economy section"): explainers online, no figures published
@@ -167,6 +168,7 @@ the paths below omit it.
 /desporto/liga/metodologia/        → Liga Portugal methodology
 /economia/                         → Economy (in preparation; noindex while unpublished)
 /economia/metodologia/             → Economy methodology
+/habitacao/                        → Housing (draft until 9 Dec 2026; noindex while unpublished)
 /eleicoes/arquivo/                 → How to read the archived election forecasts
 /eleicoes/presidenciais/           → Presidential 2026 forecast (archive)
 /eleicoes/legislativas/            → Parliamentary 2025 forecast (archive)
@@ -465,6 +467,35 @@ the live track record, a link to the code), then set `published: true`, remove
 restore a required `economics/dashboard.json` check in `scripts/validate-data.mjs`. The flag
 alone restores indexing, the sitemap entries, the share card, the nav and footer items and the
 homepage panel.
+
+## Housing section
+
+`/habitacao`, a draft until launch day (owner's call, 18 November 2026: publish with the launch,
+9 December 2026). One flag, `src/lib/config/housing-status.json` (`{ "published": false }`, read by
+`housing-status.ts` as `HOUSING_PUBLISHED` and by `scripts/validate-data.mjs`). While it is off the
+page is noindex, out of the sitemap, and absent from the header, footer, homepage and `/sobre`;
+setting it adds "Habitação" to the header (after Liga Portugal, a bilingual literal, no message
+key), the footer's "Secções", the homepage (`HousingPanel`, before the election archive) and the
+`/sobre` status list. `/habitacao` (locale-less) already redirects to `/pt/habitacao/`.
+
+- **Records only**: Lisbon's entry-to-alvará medians by year (CML's RJUE processes and alvarás,
+  CC0; issued licences only, and the page says so), INE's dwellings licensed (0008309) and
+  completed (0013249), and RNAL registrations per 100 Censos 2021 classic dwellings by Lisbon parish
+  ("Fonte: Turismo de Portugal, RNAL"; aggregates only). No model, forecast, band or causal claim,
+  and no null result (owner's rule). Black squares; every chart has a table twin.
+- **Data**: `./scripts/sync-data.sh housing` runs estimador-housing's `housing-page` into
+  `public/data/housing/` (`licensing.json`, `short-lets-lisbon.json`; each carries sources,
+  licences, dates, universe and caveats). Run it on the Mac: it picks the newest Lisbon report under
+  `~/code/estimador-data-licensing/data/housing/licensing/reports/`. Without one it falls back to a
+  transcription of the 2 November 2026 report (`status: "transcribed"`), which `validate-data`
+  refuses once the flag is on.
+- **Before publishing**: resync on the Mac; ask CML what `DATA_ALVARA` records after DL 10/2024
+  (4 March 2024), and adjust the Simplex caveat to the answer; recheck the figures typed into
+  `habitacao/page.tsx` rather than read from the files (flatin.pt's 940 days to 29 October 2026,
+  the ~6 765 RNAL cancellations, the RMAL thresholds of 5 and 10 per 100).
+- `LisbonLicenceTimes` (`src/components/housing/`) is the licensing chart, shared with the
+  licensing note in `/artigos`; `YearChart` draws a recorded series twice (wide and phone frames)
+  so chart text stays at 12px. flatin.pt publishes the same CML measure: the page cites it.
 
 ## Population section
 
