@@ -37,7 +37,20 @@ export function jsonLd(data: object): string {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
-const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+
+/**
+ * An article's byline as schema.org: the publication's own name is the
+ * Organization (owner decision of 11 October 2026: pieces are signed
+ * "estimador.pt"), any other name a Person.
+ */
+export const PUBLICATION_AUTHOR = 'estimador.pt';
+
+export function articleAuthor(author: string) {
+  return author === PUBLICATION_AUTHOR
+    ? { '@type': 'Organization' as const, '@id': ORGANIZATION_ID, name: PUBLICATION_AUTHOR, url: SITE_URL }
+    : { '@type': 'Person' as const, name: author };
+}
 /**
  * One WebSite node per language, each named by its own start page: a single
  * id would carry a different url and inLanguage on every Portuguese and

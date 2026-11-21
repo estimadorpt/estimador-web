@@ -1,0 +1,44 @@
+export const metadata = {
+  "title": "Uma licença de obra nova em Lisboa demora mais de dois anos",
+  "excerpt": "Metade das 727 licenças de obra nova emitidas em Lisboa desde 2009 levou mais de 854 dias da entrada do pedido ao alvará; em 2025, a mediana foi de 1 242 dias.",
+  "author": "estimador.pt",
+  "date": "2026-11-24",
+  "kind": "nota",
+  "draft": true,
+  "tags": [
+    "Habitação",
+    "Lisboa",
+    "Licenciamento"
+  ],
+  "slug": "licenca-de-obra-nova-em-lisboa-demora-mais-de-dois-anos"
+};
+
+<Callout kind="context" label="Contexto">
+  Escrito com os processos publicados pela Câmara de Lisboa até 29 de outubro de 2026 e os números do INE consultados a 4 de novembro de 2026.
+</Callout>
+
+Metade das 727 licenças para construir de raiz que a Câmara de Lisboa emitiu entre 2009 e outubro de 2026 demorou mais de 854 dias, cerca de dois anos e quatro meses, entre a entrada do pedido e o alvará; um quarto demorou mais de 1 330 dias. Desde 2019, a mediana de cada ano passou sempre dos dois anos, e em 2025 foi de 1 242 dias, sobre 34 alvarás.
+
+Estes tempos contam só as licenças que chegaram a alvará. Os pedidos ainda pendentes, recusados ou desistidos não entram nas medianas.
+
+## Como medimos
+
+A Câmara de Lisboa publica, em dados abertos, cada processo de obras abrangido pelo regime jurídico da urbanização e edificação (RJUE) desde 2009, com a data de entrada e a data do alvará ([dados.gov.pt](https://dados.gov.pt/datasets/processos-de-obras-de-edificacao-e-demolicao-abrangidas-pelo-rjue-desde-2009), licença CC0). Contámos, para cada processo de licença que recebeu um alvará, os dias entre as duas datas, e agrupámos os processos pelo ano do alvará. «Obra nova» é a operação de construção nova; as alterações e ampliações, que são a maior parte das licenças, contam em separado.
+
+{/* TODO: <LisbonLicenceTimes locale="pt" headingLevel={3} /> quando o componente chegar a main (ramo claude/project-thread-3bq6zt) e entrar em ARTICLE_CHARTS. */}
+
+Três cuidados na leitura:
+
+- **O alvará não é a decisão.** A Câmara emite o alvará depois de aprovar o projeto e depois de o requerente o pedir e pagar as taxas, por isso estes dias incluem o tempo do próprio requerente. A Câmara não publica a data da decisão.
+- **São poucos alvarás por ano.** A Câmara emitiu entre 15 e 66 alvarás de obra nova por ano, por isso a mediana de um só ano mexe muito.
+- **Em 2024, o título mudou.** Desde 4 de março de 2024, com o Simplex urbanístico (Decreto-Lei 10/2024), o alvará de licença de construção deixou de existir e passou a valer o comprovativo do pagamento das taxas. Ainda não sabemos se a data que a Câmara publica depois disso é a desse comprovativo; os anos de 2024 a 2026 devem ler-se com essa ressalva.
+
+A plataforma imobiliária flatin.pt publica, desde 9 de novembro de 2026, a mesma medida a partir dos mesmos dados, para os títulos dos últimos 12 meses: 940 dias de mediana em 35 títulos de construção nova emitidos até 29 de outubro de 2026 ([flatin.pt](https://flatin.pt/pt/barometro-construcao/)). Os nossos números juntam todos os anos desde 2009.
+
+## As licenças passam à frente das obras acabadas
+
+Em 2025 foram licenciados em Portugal 42 066 fogos em construções novas para habitação familiar, e concluídos 27 301 ([INE, licenciados](https://www.ine.pt/xurl/ind/0008309); [INE, concluídos](https://www.ine.pt/xurl/ind/0013249); os concluídos de 2024 e 2025 são estimativas do INE). Os fogos concluídos em 2025 equivalem a 81 em cada 100 dos licenciados em 2023, que foram 33 560. É uma razão entre contagens de anos diferentes, não o destino das mesmas casas: o INE não publica que licenças chegaram a obra acabada.
+
+<Callout kind="caveat" label="O que esta nota não mostra">
+  Não diz se o licenciamento é o que trava a construção de casas em Lisboa: os tempos medem só as licenças emitidas, e a razão entre fogos licenciados e concluídos não segue as mesmas obras. Também não compara Lisboa com outras câmaras: só Lisboa publica as duas datas de cada processo.
+</Callout>

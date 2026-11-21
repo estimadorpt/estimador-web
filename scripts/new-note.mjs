@@ -21,7 +21,7 @@ const KINDS = ['nota', 'explicador'];
 // under one of these surfaces on that section's page as well as in /artigos.
 const SECTIONS = ['football', 'elections', 'economics', 'demographics'];
 const LOCALES = ['pt', 'en'];
-const AUTHOR = 'Bernardo Caldas';
+const AUTHOR = 'estimador.pt';
 
 const argv = process.argv.slice(2);
 const flags = new Map();

@@ -1,0 +1,55 @@
+export const metadata = {
+  "title": "TODO: título com a descoberta da v1.2 (acordar com a página das freguesias)",
+  "excerpt": "TODO: resumo numa frase.",
+  "author": "estimador.pt",
+  "date": "2026-12-09",
+  "kind": "nota",
+  "section": "demographics",
+  "draft": true,
+  "tags": [
+    "População",
+    "Censos 2021"
+  ],
+  "slug": "populacao-sintetica-v1-2"
+};
+
+{/*
+  Rascunho da nota 3 (lançamento, 9 de dezembro de 2026). Regras para o texto final:
+  - Todos os números vêm de respostas publicadas da v1.2, do scorecard ou das contagens de release/meta.json; nada calculado a partir de células.
+  - Uma só execução do modelo: nada de rankings, superlativos, «mais do que» ou ordenações por valor. O traço sem margem (NoMargin, já disponível nos artigos) e HONESTY.synthetic vêm antes do primeiro número.
+  - A descoberta é acordada com o tópico «Mostrar os novos atributos nas páginas das freguesias».
+  - HONESTY.positioning citado à letra, se for usado.
+*/}
+
+TODO: primeiro parágrafo. A descoberta, como frase que se repete, com a contagem por trás.
+
+## O que é
+
+<NoMargin locale="pt">Pessoas e agregados gerados, não pessoas, famílias ou moradas reais.</NoMargin>
+
+A população sintética do estimador.pt é um conjunto de pessoas e agregados gerados, um a um, para cada uma das 3 092 freguesias dos Censos 2021 (CAOP 2021). Cada freguesia responde às mesmas perguntas com os seus próprios números e o seu nível de qualidade medido.
+
+## Porque é precisa
+
+O INE publica, por freguesia, quadros que contam uma coisa de cada vez: quantas pessoas há por idade, quantos agregados por dimensão. Não diz como essas coisas se cruzam dentro das casas, por exemplo quantas pessoas com 65 anos ou mais vivem sozinhas numa dada freguesia. A [metodologia](/pt/populacao/metodologia) mostra o problema com uma freguesia inventada de 10 casas e 23 pessoas, e os cinco passos com que a população é gerada.
+
+## O que há de novo na v1.2
+
+Cada página de freguesia responde a novas perguntas. Umas são fixadas, freguesia a freguesia, por um quadro do INE dessa freguesia a que a população foi ajustada:
+
+- **Trabalho:** situação na profissão, profissão, atividade económica, onde as pessoas trabalham ou estudam e como lá chegam (quadros 12306, 12370, 12369 e 12371 do INE, ajustados por freguesia pela primeira vez).
+- **Casa:** se é própria ou arrendada, quantas divisões tem, quando foi construído o edifício e se uma cadeira de rodas consegue entrar.
+- **Origem e escolaridade:** quem já viveu no estrangeiro e quem não sabe ler nem escrever (quadros 12297 e 12274), em média de cinco sorteios.
+- TODO: nacionalidade, estado civil e principal meio de vida, se ficarem como cartões novos.
+
+Outras são do modelo e aparecem numa secção à parte, «Modelado», com o que as ancora: o rendimento declarado (ancorado nos quadros do IRS por município), onde as pessoas nasceram, onde viviam em 2019 e a frequência de ensino. O voto e as 20 atitudes ficam só no download, com a indicação de quanto dizem sobre cada pessoa.
+
+TODO: confirmar a lista contra o pacote final e o ficheiro /mnt/project-files/launch/v1.2-parish-questions.md.
+
+## O que a v1.2 diz
+
+TODO: uma freguesia com nome e o cartão «Onde trabalham ou estudam» (receita work_place, âncora #local-de-trabalho, quadro 12369): «Em X, N% das pessoas empregadas e estudantes trabalham ou estudam noutro concelho.» Sem comparação com outras freguesias. Segunda escolha: «Já viveram no estrangeiro» (#viveram-no-estrangeiro, média de cinco sorteios). Só com os valores do pacote real da v1.2 (depois de ~29 de novembro).
+
+## Descarregar e citar
+
+TODO: tamanhos e ficheiros da v1.2 a partir de release.json. Os dados estão em [/populacao/dados](/pt/populacao/dados), com licença CC BY-NC 4.0; os dados do INE e a geometria da DGT mantêm a licença CC BY 4.0. Cada página de freguesia termina com um bloco «Como citar».

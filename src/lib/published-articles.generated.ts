@@ -3,5 +3,5 @@
 // Slugs of every published article, in either language. analyticsPath() checks
 // a path under /artigos against this list instead of trusting the URL.
 export const PUBLISHED_ARTICLE_SLUGS: readonly string[] = [
-
+  'as-regras-da-habitacao-mudam-a-meio-dos-projetos',
 ];

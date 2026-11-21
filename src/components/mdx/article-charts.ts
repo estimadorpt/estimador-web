@@ -4,6 +4,7 @@ import { PollingChart } from '@/components/charts/PollingChart';
 import { SeatChart } from '@/components/charts/SeatChart';
 import { HouseEffects } from '@/components/charts/HouseEffects';
 import { DistrictSummary } from '@/components/charts/DistrictSummary';
+import { NoMargin } from '@/components/instrument/NoMargin';
 
 /**
  * The chart components an article can call with inline data:
@@ -19,4 +20,6 @@ export const ARTICLE_CHARTS: MDXComponents = {
   SeatChart,
   HouseEffects,
   DistrictSummary,
+  // The lone tick a piece about the synthetic population puts before its first figure.
+  NoMargin,
 };
