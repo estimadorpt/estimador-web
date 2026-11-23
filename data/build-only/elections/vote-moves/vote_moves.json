@@ -250,7 +250,7 @@
      "key": "ABST",
      "central": 12.9,
      "lo": 10.5,
-     "hi": 12.9
+     "hi": 13.6
     },
     {
      "key": "PSD_CDS",
@@ -268,12 +268,12 @@
      "key": "CH",
      "central": 64.4,
      "lo": 63.1,
-     "hi": 64.4
+     "hi": 68.3
     },
     {
      "key": "REST",
      "central": 8.0,
-     "lo": 7.9,
+     "lo": 3.1,
      "hi": 14.7
     }
    ]
@@ -293,7 +293,33 @@
   "2024-2025": {
    "central": 190,
    "lo": 151,
-   "hi": 194
+   "hi": 195
+  }
+ },
+ "split_to_ch_thousands": {
+  "2022-2024": {
+   "PS": {
+    "lo": 160,
+    "hi": 230,
+    "ei": 225
+   },
+   "PSD_CDS": {
+    "lo": 155,
+    "hi": 180,
+    "ei": 70
+   }
+  },
+  "2024-2025": {
+   "PS": {
+    "lo": 65,
+    "hi": 95,
+    "ei": 160
+   },
+   "PSD_CDS": {
+    "lo": 95,
+    "hi": 100,
+    "ei": 25
+   }
   }
  },
  "flows": {
@@ -416,6 +442,7 @@
     "hi": 14.5,
     "others": {
      "jp_eep_res": 10.9,
+     "erc_polls_raked": 11.0,
      "ei_entropy_region": 4.4,
      "ei_entropy_national": 2.3
     }
@@ -428,6 +455,7 @@
     "hi": 12.1,
     "others": {
      "jp_eep_res": 7.5,
+     "erc_polls_raked": 7.9,
      "ei_entropy_region": 10.4,
      "ei_entropy_national": 10.0
     }
@@ -440,6 +468,7 @@
     "hi": 10.1,
     "others": {
      "jp_eep_res": 8.1,
+     "erc_polls_raked": 9.3,
      "ei_entropy_region": 3.5,
      "ei_entropy_national": 4.0
     }
@@ -502,6 +531,7 @@
     "hi": 6.6,
     "others": {
      "exitpoll_catolica_raked": 5.7,
+     "eep2025_chart": 6.0,
      "ei_entropy_region": 5.1,
      "ei_entropy_national": 4.7
     }
@@ -514,6 +544,8 @@
     "hi": 6.7,
     "others": {
      "exitpoll_catolica_raked": 5.8,
+     "eep2025_chart": 5.8,
+     "erc_polls_raked": 5.5,
      "ei_entropy_region": 1.4,
      "ei_entropy_national": 0.0
     }
@@ -526,6 +558,8 @@
     "hi": 6.8,
     "others": {
      "exitpoll_catolica_raked": 5.5,
+     "eep2025_chart": 5.6,
+     "erc_polls_raked": 3.8,
      "ei_entropy_region": 9.4,
      "ei_entropy_national": 8.9
     }
@@ -538,6 +572,8 @@
     "hi": 8.0,
     "others": {
      "exitpoll_catolica_raked": 6.9,
+     "eep2025_chart": 5.8,
+     "erc_polls_raked": 4.6,
      "ei_entropy_region": 6.1,
      "ei_entropy_national": 6.9
     }
@@ -550,6 +586,7 @@
     "hi": 13.1,
     "others": {
      "exitpoll_catolica_raked": 10.1,
+     "eep2025_chart": 12.2,
      "ei_entropy_region": 10.4,
      "ei_entropy_national": 15.4
     }
@@ -562,6 +599,7 @@
     "hi": 16.3,
     "others": {
      "exitpoll_catolica_raked": 14.5,
+     "eep2025_chart": 9.4,
      "ei_entropy_region": 11.8,
      "ei_entropy_national": 10.2
     }
@@ -574,6 +612,7 @@
     "hi": 0.7,
     "others": {
      "exitpoll_catolica_raked": 0.7,
+     "eep2025_chart": 4.5,
      "ei_entropy_region": 6.8,
      "ei_entropy_national": 5.0
     }
@@ -586,6 +625,7 @@
     "hi": 81.3,
     "others": {
      "exitpoll_catolica_raked": 78.3,
+     "eep2025_chart": 82.8,
      "ei_entropy_region": 76.7,
      "ei_entropy_national": 76.5
     }
@@ -605,11 +645,14 @@
   ],
   "2022-2024": [
    "jp_eep_res",
+   "erc_polls_raked",
    "ei_entropy_region",
    "ei_entropy_national"
   ],
   "2024-2025": [
    "exitpoll_catolica_raked",
+   "eep2025_chart",
+   "erc_polls_raked",
    "ei_entropy_region",
    "ei_entropy_national"
   ]
