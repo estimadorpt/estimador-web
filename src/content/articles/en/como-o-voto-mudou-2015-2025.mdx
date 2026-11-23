@@ -1,0 +1,97 @@
+export const metadata = {
+  "title": "Half of Chega's first big vote came from people who had not voted",
+  "excerpt": "Between 2019 and 2025 the right went from 1.78 to 3.63 million votes. What is counted, what can be estimated, and what the data cannot settle.",
+  "author": "Bernardo Caldas",
+  "date": "2026-11-23",
+  "kind": "nota",
+  "section": "elections",
+  "draft": true,
+  "tags": [
+    "Elections",
+    "Parliamentary elections",
+    "Chega"
+  ],
+  "slug": "como-o-voto-mudou-2015-2025"
+};
+
+<Callout kind="context" label="Context">
+  Parliamentary elections from 2015 to 2025, votes cast in Portugal. What is counted (official results) is drawn in black. The transfers between parties are estimates: in yellow, the central estimate’s 90% margin; in grey, what the other methods give.
+</Callout>
+
+Between 2019 and 2025, Chega, PSD/CDS and IL went from <VoteMovesNumber locale="en" path="counts.right_2019" scale="1e6" digits="2" /> to <VoteMovesNumber locale="en" path="counts.right_2025" scale="1e6" digits="2" /> million votes. Over the same years PS and the left fell from <VoteMovesNumber locale="en" path="counts.ps_left_2019" scale="1e6" digits="2" /> to <VoteMovesNumber locale="en" path="counts.ps_left_2025" scale="1e6" digits="2" /> million, and abstention from <VoteMovesNumber locale="en" path="counts.abst_2019" scale="1e6" digits="2" /> to <VoteMovesNumber locale="en" path="counts.abst_2025" scale="1e6" digits="2" /> million. Those numbers are counted. How they connect, who moved from where to where, is not: the ballot is secret, so it has to be estimated.
+
+We did it in two ways, which fail in different ways. Surveys ask each person how they voted now and last time, but they are small and people misremember their previous vote. Parish results are complete, but they only say how many voted for what in each place, not who. Where the two agree, the finding is solid. Where they do not, we show the range.
+
+## The right gained 1.86 million votes it did not have in 2019
+
+<Figure caption="As a share of registered voters, the right went from just over a third to more than half of the votes cast, and abstention fell by almost ten points." source="Source: official parliamentary results (SGMAI), 3,092 parishes (CAOP 2021), votes cast in Portugal, % of registered voters." asOf="Results of 2015, 2019, 2022, 2024 and 2025">
+  <VoteMovesBlocs locale="en" />
+</Figure>
+
+Even if every 2019 voter for the right voted for it again, at least <VoteMovesNumber locale="en" path="counts.right_gain_min" scale="1e6" digits="2" /> million of its 2025 voters had not done so in 2019. They came from somewhere: abstention, PS, the left, or people new to the roll.
+
+A note on abstention. There are 9.27 million registered voters but about 8.24 million resident adult citizens (Censos 2021). The gap, about 11% of the roll, is mostly emigrants still registered in Portugal. They never vote here, so abstention never falls below that floor.
+
+## Chega rose in all 3,092 parishes, and by almost the same amount in each
+
+<Figure caption="In every parish Chega had a larger share of registered voters in 2025 than in 2019; in most, between 8 and 18 points more." source="Source: official results of the 2019 and 2025 parliamentary elections (SGMAI), 3,092 parishes (CAOP 2021), votes cast in Portugal." asOf="Results of 2019 and 2025">
+  <VoteMovesParishes locale="en" />
+</Figure>
+
+On average Chega rose by <VoteMovesNumber locale="en" path="chega_rise.mean" digits="1" /> percentage points of the roll. Nine in ten voters live in a parish where it rose by between <VoteMovesNumber locale="en" path="chega_rise.p05" digits="1" /> and <VoteMovesNumber locale="en" path="chega_rise.p95" digits="1" /> points. A rise equal to the average in every parish would account for 93% of the measured change (as a sum of squares): the country moved almost as one.
+
+Where it moved most was PS country. Of the <VoteMovesNumber locale="en" path="chega_rise.ch_won_2025" /> parishes where Chega came first in 2025, <VoteMovesNumber locale="en" path="chega_rise.ch_won_ps_2022" /> had been won by PS in 2022. That does not mean PS voters switched: it can be the whole parish moving, whoever its voters were. This is where the estimates begin.
+
+## Half of Chega's first big vote came from people who had not voted
+
+<Figure caption="In 2022, about half of Chega’s votes came from people who had not voted in 2019. By 2025, almost two thirds came from people who already voted Chega." source="Central estimate: patterns from the Portuguese Election Study (ICS) for 2022 and 2024 and from the Católica/CESOP exit poll for 2025 (ERC deposit 2025062), fitted to both results of every mainland parish. In the table, in brackets, the range across methods." asOf="Parliamentary elections of 2022, 2024 and 2025">
+  <VoteMovesOrigins locale="en" />
+</Figure>
+
+This is the finding every method agrees on. In 2022, between 46% and 53% of Chega’s votes came from people who had not voted in 2019, about 5% of that year’s abstainers. In 2024 abstention was again the largest source of new votes: about one in ten 2022 abstainers voted Chega.
+
+## In 2024, PS and PSD/CDS together gave Chega 250 to 350 thousand votes
+
+<Figure caption="Between 2022 and 2024, about one in ten abstainers voted Chega. How much each of the two old parties gave depends on the method." source="Central estimate: patterns from the Portuguese Election Study 2024 (ICS), corrected for respondents who over-claim the previous winner, fitted to both results of every mainland parish; 90% margin from a survey bootstrap. Other methods: the survey without that correction, and entropy ecological inference by region and nationally." asOf="Parliamentary elections of 2022 and 2024">
+  <VoteMovesFlows locale="en" pair="2022-2024" />
+</Figure>
+
+The total the two old parties gave Chega is solid: between <VoteMovesNumber locale="en" path="combined_ps_ad_to_ch_thousands.2022-2024.lo" /> and <VoteMovesNumber locale="en" path="combined_ps_ad_to_ch_thousands.2022-2024.hi" /> thousand votes in 2024, and between <VoteMovesNumber locale="en" path="combined_ps_ad_to_ch_thousands.2024-2025.lo" /> and <VoteMovesNumber locale="en" path="combined_ps_ad_to_ch_thousands.2024-2025.hi" /> thousand in 2025, whichever method is used.
+
+How much came from each, the data cannot settle. The surveys send more PSD/CDS voters to Chega; the parish results send more PS voters. Each side has a known bias here. In surveys, more people say they voted for the previous winner than the results allow. In parish data, when Chega grows where PS was strong, the method reads it as PS voters switching, even if the whole parish moved.
+
+## In 2025, Chega kept about three quarters of its voters
+
+<Figure caption="Between 2024 and 2025, Chega kept between 76% and 81% of its voters, depending on the method." source="Central estimate: Católica/CESOP exit poll, 18 May 2025 (ERC deposit 2025062), fitted to both results of every mainland parish; for 2024, as in the previous chart. Other methods: the exit poll on its own, weighted to the result, and entropy ecological inference." asOf="Parliamentary elections of 2022, 2024 and 2025">
+  <VoteMovesRetention locale="en" />
+</Figure>
+
+<Figure caption="Between 2024 and 2025, about 6% of abstainers voted Chega, and between 10% and 15% of Chega voters stayed at home." source="Central estimate: Católica/CESOP exit poll 2025 (ERC deposit 2025062), fitted to both results of every mainland parish; 90% margin from a bootstrap. Other methods: the exit poll on its own, and entropy ecological inference by region and nationally." asOf="Parliamentary elections of 2024 and 2025">
+  <VoteMovesFlows locale="en" pair="2024-2025" />
+</Figure>
+
+In 2025 the exit poll and the parish results agree, within three points, on how much Chega kept. To abstention, Chega lost between 10% and 15% of its 2024 voters. Here the exit poll does not help: it only interviews people who voted, and its abstention column is what the official results leave over. For the same reason it puts almost no AD voters at home: its respondents claim more 2024 AD votes than AD received, which leaves no room for those who abstained. In 2024 the margin is wider: between 77% and 94% of Chega’s 2022 voters voted Chega again, depending on whether the survey’s recall error is corrected.
+
+## Who stays at home is the least certain part
+
+Whether PS and Chega voters abstained, and how many, depends on how the surveys’ recall error is read. If the sample simply holds too many PS voters, the right fix is weighting. If other people claim to have voted PS when they did not, they have to be returned to where they came from first. In 2024 the first reading puts 5% of PS’s 2022 voters at home; the second, almost none; the parish results, 6% to 7%. We tested both readings on simulated elections, and the second costs less when it is wrong. We show the second as central and the other as the edge.
+
+## Age divides the 2025 vote more than anything else
+
+<Figure caption="Chega has about a third of voters aged 25 to 44 and a tenth of those aged 65 and over; PS is the mirror image." source="Sources: Católica/CESOP exit poll, 18 May 2025, 35,022 mainland interviews (ERC deposit 2025062; mean of the women’s and men’s figures); Portuguese Election Study 2024 (ICS), weighted to the official result, a year earlier, when Chega had about a fifth fewer votes." asOf="Parliamentary elections of 2024 and 2025">
+  <VoteMovesAge locale="en" />
+</Figure>
+
+The two sources tell the same story a year apart. Chega is stronger among people with secondary education than among the least schooled, and weakest among graduates. Men vote Chega more than women at every age.
+
+This is the question parish results cannot answer. Regressing results on each parish’s age and education gives Chega 0% of graduates (both surveys: 14%) and only 18% of 25 to 34 year olds (surveys: about a third). Age and education go together with place, city or country, coast or interior, and the regression credits the group with what belongs to the place. To know who votes for whom, only surveys will do.
+
+## A national table is an average, not a rule
+
+The transfers above are for the whole country. Applied to each parish, they do not say where Chega grew most: their correlation with the real growth runs from −0.36 to +0.18, depending on the election, and they miss by district more than assuming every district moved the same. Voters change differently in different places, which is why our district model starts from a uniform swing rather than from these tables.
+
+## How we did it
+
+<Callout kind="method" label="Method">
+  The central estimates take a survey’s patterns (who voted for what, both times) and fit them to the two official results of every mainland parish, so that they add up exactly to what was counted. For 2019 to 2024 the survey is the Portuguese Election Study (ICS), with about 700 to 800 respondents who say how they voted; for 2025, the Católica/CESOP exit poll. Alongside, we show pure ecological inference, which uses only the parish results. We tested the methods in New Zealand, where the truth is known (every polling place publishes both the party and the candidate vote): the best ecological method puts 7.9% of votes in the wrong cell of the table. In simulated elections on Portugal’s parishes, with the survey’s real size and recall error, the hybrid method puts 8% to 9% of votes in the wrong cell and pure ecological inference 10% to 12%, with the errors in different cells. Adding the census and other elections to the parish results helps predict results, but does not settle the cells where the methods disagree. So we only state what both methods say together.
+</Callout>

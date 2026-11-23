@@ -4,6 +4,7 @@ import { PollingChart } from '@/components/charts/PollingChart';
 import { SeatChart } from '@/components/charts/SeatChart';
 import { HouseEffects } from '@/components/charts/HouseEffects';
 import { DistrictSummary } from '@/components/charts/DistrictSummary';
+import { VOTE_MOVES_CHARTS } from '@/components/articles/vote-moves/VoteMoves';
 
 /**
  * The chart components an article can call with inline data:
@@ -19,4 +20,7 @@ export const ARTICLE_CHARTS: MDXComponents = {
   SeatChart,
   HouseEffects,
   DistrictSummary,
+  // "How the vote moved": server components that read their figures from
+  // data/build-only/elections/vote-moves/vote_moves.json at build time.
+  ...VOTE_MOVES_CHARTS,
 };

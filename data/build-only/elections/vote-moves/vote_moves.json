@@ -1,0 +1,699 @@
+{
+ "as_of": "2026-11-23",
+ "years": [
+  2015,
+  2019,
+  2022,
+  2024,
+  2025
+ ],
+ "blocs": [
+  {
+   "key": "CH",
+   "values": [
+    null,
+    0.7,
+    4.1,
+    12.0,
+    14.5
+   ]
+  },
+  {
+   "key": "PSD_CDS",
+   "values": [
+    22.1,
+    17.6,
+    17.9,
+    19.5,
+    21.1
+   ]
+  },
+  {
+   "key": "IL",
+   "values": [
+    null,
+    0.7,
+    2.9,
+    3.4,
+    3.6
+   ]
+  },
+  {
+   "key": "PS",
+   "values": [
+    18.5,
+    20.0,
+    24.2,
+    19.0,
+    15.1
+   ]
+  },
+  {
+   "key": "LEFT",
+   "values": [
+    11.0,
+    9.4,
+    5.9,
+    7.3,
+    5.9
+   ]
+  },
+  {
+   "key": "ABST",
+   "values": [
+    43.0,
+    45.5,
+    42.0,
+    33.8,
+    35.6
+   ]
+  }
+ ],
+ "counts": {
+  "registered_2025": 9265493,
+  "right_2019": 1776966,
+  "right_2025": 3633111,
+  "right_gain_min": 1856145,
+  "ps_left_2019": 2743919,
+  "ps_left_2025": 1945306,
+  "abst_2019": 4251108,
+  "abst_2025": 3300047
+ },
+ "chega_rise": {
+  "parishes": 3092,
+  "rose": 3092,
+  "mean": 13.8,
+  "p05": 7.3,
+  "p95": 20.0,
+  "common_share": 0.93,
+  "bins": [
+   {
+    "lo": 0.0,
+    "hi": 2.0,
+    "count": 4
+   },
+   {
+    "lo": 2.0,
+    "hi": 4.0,
+    "count": 45
+   },
+   {
+    "lo": 4.0,
+    "hi": 6.0,
+    "count": 118
+   },
+   {
+    "lo": 6.0,
+    "hi": 8.0,
+    "count": 234
+   },
+   {
+    "lo": 8.0,
+    "hi": 10.0,
+    "count": 350
+   },
+   {
+    "lo": 10.0,
+    "hi": 12.0,
+    "count": 500
+   },
+   {
+    "lo": 12.0,
+    "hi": 14.0,
+    "count": 543
+   },
+   {
+    "lo": 14.0,
+    "hi": 16.0,
+    "count": 560
+   },
+   {
+    "lo": 16.0,
+    "hi": 18.0,
+    "count": 391
+   },
+   {
+    "lo": 18.0,
+    "hi": 20.0,
+    "count": 190
+   },
+   {
+    "lo": 20.0,
+    "hi": 22.0,
+    "count": 98
+   },
+   {
+    "lo": 22.0,
+    "hi": 24.0,
+    "count": 38
+   },
+   {
+    "lo": 24.0,
+    "hi": 26.0,
+    "count": 10
+   },
+   {
+    "lo": 26.0,
+    "hi": 28.0,
+    "count": 9
+   },
+   {
+    "lo": 28.0,
+    "hi": 30.0,
+    "count": 2
+   }
+  ],
+  "ch_won_2025": 309,
+  "ch_won_ps_2022": 302
+ },
+ "origins": [
+  {
+   "year": 2022,
+   "pair": "2019-2022",
+   "source": "jp_eep_detilt_res",
+   "segments": [
+    {
+     "key": "ABST",
+     "central": 49.9,
+     "lo": 45.8,
+     "hi": 52.5
+    },
+    {
+     "key": "PSD_CDS",
+     "central": 18.3,
+     "lo": 3.0,
+     "hi": 18.9
+    },
+    {
+     "key": "PS",
+     "central": 5.7,
+     "lo": 4.5,
+     "hi": 8.3
+    },
+    {
+     "key": "CH",
+     "central": 16.7,
+     "lo": 10.7,
+     "hi": 16.7
+    },
+    {
+     "key": "REST",
+     "central": 9.4,
+     "lo": 8.6,
+     "hi": 26.2
+    }
+   ]
+  },
+  {
+   "year": 2024,
+   "pair": "2022-2024",
+   "source": "jp_eep_detilt_res",
+   "segments": [
+    {
+     "key": "ABST",
+     "central": 29.8,
+     "lo": 29.8,
+     "hi": 41.2
+    },
+    {
+     "key": "PSD_CDS",
+     "central": 14.4,
+     "lo": 3.4,
+     "hi": 16.3
+    },
+    {
+     "key": "PS",
+     "central": 18.7,
+     "lo": 15.2,
+     "hi": 21.1
+    },
+    {
+     "key": "CH",
+     "central": 32.8,
+     "lo": 27.0,
+     "hi": 32.8
+    },
+    {
+     "key": "REST",
+     "central": 4.3,
+     "lo": 4.3,
+     "hi": 6.8
+    }
+   ]
+  },
+  {
+   "year": 2025,
+   "pair": "2024-2025",
+   "source": "jp_exitpoll",
+   "segments": [
+    {
+     "key": "ABST",
+     "central": 12.9,
+     "lo": 10.5,
+     "hi": 12.9
+    },
+    {
+     "key": "PSD_CDS",
+     "central": 7.4,
+     "lo": 0.0,
+     "hi": 7.8
+    },
+    {
+     "key": "PS",
+     "central": 7.3,
+     "lo": 7.2,
+     "hi": 12.3
+    },
+    {
+     "key": "CH",
+     "central": 64.4,
+     "lo": 63.1,
+     "hi": 64.4
+    },
+    {
+     "key": "REST",
+     "central": 8.0,
+     "lo": 7.9,
+     "hi": 14.7
+    }
+   ]
+  }
+ ],
+ "combined_ps_ad_to_ch_thousands": {
+  "2019-2022": {
+   "central": 89,
+   "lo": 28,
+   "hi": 101
+  },
+  "2022-2024": {
+   "central": 353,
+   "lo": 254,
+   "hi": 353
+  },
+  "2024-2025": {
+   "central": 190,
+   "lo": 151,
+   "hi": 194
+  }
+ },
+ "flows": {
+  "2019-2022": [
+   {
+    "from": "ABST",
+    "to": "CH",
+    "central": 4.7,
+    "lo": 3.4,
+    "hi": 6.5,
+    "others": {
+     "jp_eep_res": 4.7,
+     "ei_entropy_region": 4.3,
+     "ei_entropy_national": 4.9
+    }
+   },
+   {
+    "from": "PSD_CDS",
+    "to": "CH",
+    "central": 4.4,
+    "lo": 0.1,
+    "hi": 7.8,
+    "others": {
+     "jp_eep_res": 4.5,
+     "ei_entropy_region": 3.6,
+     "ei_entropy_national": 0.7
+    }
+   },
+   {
+    "from": "PS",
+    "to": "CH",
+    "central": 1.2,
+    "lo": 0.0,
+    "hi": 3.2,
+    "others": {
+     "jp_eep_res": 1.7,
+     "ei_entropy_region": 1.4,
+     "ei_entropy_national": 0.9
+    }
+   },
+   {
+    "from": "PS",
+    "to": "PSD_CDS",
+    "central": 3.1,
+    "lo": 0.0,
+    "hi": 6.0,
+    "others": {
+     "jp_eep_res": 4.1,
+     "ei_entropy_region": 5.1,
+     "ei_entropy_national": 4.4
+    }
+   },
+   {
+    "from": "CH",
+    "to": "ABST",
+    "central": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "others": {
+     "jp_eep_res": 6.8,
+     "ei_entropy_region": 3.9,
+     "ei_entropy_national": 0.0
+    }
+   },
+   {
+    "from": "PS",
+    "to": "ABST",
+    "central": 4.5,
+    "lo": 0.6,
+    "hi": 12.3,
+    "others": {
+     "jp_eep_res": 12.0,
+     "ei_entropy_region": 11.0,
+     "ei_entropy_national": 9.6
+    }
+   },
+   {
+    "from": "PSD_CDS",
+    "to": "ABST",
+    "central": 6.5,
+    "lo": 2.3,
+    "hi": 9.9,
+    "others": {
+     "jp_eep_res": 6.2,
+     "ei_entropy_region": 9.6,
+     "ei_entropy_national": 8.7
+    }
+   },
+   {
+    "from": "CH",
+    "to": "CH",
+    "central": 96.0,
+    "lo": 78.2,
+    "hi": 99.0,
+    "others": {
+     "jp_eep_res": 78.8,
+     "ei_entropy_region": 61.3,
+     "ei_entropy_national": 79.7
+    }
+   }
+  ],
+  "2022-2024": [
+   {
+    "from": "ABST",
+    "to": "CH",
+    "central": 8.7,
+    "lo": 6.5,
+    "hi": 11.2,
+    "others": {
+     "jp_eep_res": 9.7,
+     "ei_entropy_region": 11.4,
+     "ei_entropy_national": 12.1
+    }
+   },
+   {
+    "from": "PSD_CDS",
+    "to": "CH",
+    "central": 9.7,
+    "lo": 5.7,
+    "hi": 14.5,
+    "others": {
+     "jp_eep_res": 10.9,
+     "ei_entropy_region": 4.4,
+     "ei_entropy_national": 2.3
+    }
+   },
+   {
+    "from": "PS",
+    "to": "CH",
+    "central": 9.2,
+    "lo": 5.1,
+    "hi": 12.1,
+    "others": {
+     "jp_eep_res": 7.5,
+     "ei_entropy_region": 10.4,
+     "ei_entropy_national": 10.0
+    }
+   },
+   {
+    "from": "PS",
+    "to": "PSD_CDS",
+    "central": 7.2,
+    "lo": 2.9,
+    "hi": 10.1,
+    "others": {
+     "jp_eep_res": 8.1,
+     "ei_entropy_region": 3.5,
+     "ei_entropy_national": 4.0
+    }
+   },
+   {
+    "from": "CH",
+    "to": "ABST",
+    "central": 1.3,
+    "lo": 0.0,
+    "hi": 12.8,
+    "others": {
+     "jp_eep_res": 7.0,
+     "ei_entropy_region": 6.8,
+     "ei_entropy_national": 8.9
+    }
+   },
+   {
+    "from": "PS",
+    "to": "ABST",
+    "central": 0.0,
+    "lo": 0.0,
+    "hi": 3.5,
+    "others": {
+     "jp_eep_res": 5.2,
+     "ei_entropy_region": 7.3,
+     "ei_entropy_national": 6.0
+    }
+   },
+   {
+    "from": "PSD_CDS",
+    "to": "ABST",
+    "central": 5.4,
+    "lo": 2.5,
+    "hi": 7.6,
+    "others": {
+     "jp_eep_res": 5.0,
+     "ei_entropy_region": 3.8,
+     "ei_entropy_national": 3.0
+    }
+   },
+   {
+    "from": "CH",
+    "to": "CH",
+    "central": 93.8,
+    "lo": 80.7,
+    "hi": 97.0,
+    "others": {
+     "jp_eep_res": 86.5,
+     "ei_entropy_region": 77.1,
+     "ei_entropy_national": 80.5
+    }
+   }
+  ],
+  "2024-2025": [
+   {
+    "from": "ABST",
+    "to": "CH",
+    "central": 5.7,
+    "lo": 5.1,
+    "hi": 6.6,
+    "others": {
+     "exitpoll_catolica_raked": 5.7,
+     "ei_entropy_region": 5.1,
+     "ei_entropy_national": 4.7
+    }
+   },
+   {
+    "from": "PSD_CDS",
+    "to": "CH",
+    "central": 5.6,
+    "lo": 4.7,
+    "hi": 6.7,
+    "others": {
+     "exitpoll_catolica_raked": 5.8,
+     "ei_entropy_region": 1.4,
+     "ei_entropy_national": 0.0
+    }
+   },
+   {
+    "from": "PS",
+    "to": "CH",
+    "central": 5.6,
+    "lo": 4.5,
+    "hi": 6.8,
+    "others": {
+     "exitpoll_catolica_raked": 5.5,
+     "ei_entropy_region": 9.4,
+     "ei_entropy_national": 8.9
+    }
+   },
+   {
+    "from": "PS",
+    "to": "PSD_CDS",
+    "central": 6.9,
+    "lo": 5.6,
+    "hi": 8.0,
+    "others": {
+     "exitpoll_catolica_raked": 6.9,
+     "ei_entropy_region": 6.1,
+     "ei_entropy_national": 6.9
+    }
+   },
+   {
+    "from": "CH",
+    "to": "ABST",
+    "central": 10.0,
+    "lo": 6.7,
+    "hi": 13.1,
+    "others": {
+     "exitpoll_catolica_raked": 10.1,
+     "ei_entropy_region": 10.4,
+     "ei_entropy_national": 15.4
+    }
+   },
+   {
+    "from": "PS",
+    "to": "ABST",
+    "central": 14.2,
+    "lo": 11.7,
+    "hi": 16.3,
+    "others": {
+     "exitpoll_catolica_raked": 14.5,
+     "ei_entropy_region": 11.8,
+     "ei_entropy_national": 10.2
+    }
+   },
+   {
+    "from": "PSD_CDS",
+    "to": "ABST",
+    "central": 0.7,
+    "lo": 0.6,
+    "hi": 0.7,
+    "others": {
+     "exitpoll_catolica_raked": 0.7,
+     "ei_entropy_region": 6.8,
+     "ei_entropy_national": 5.0
+    }
+   },
+   {
+    "from": "CH",
+    "to": "CH",
+    "central": 78.1,
+    "lo": 75.6,
+    "hi": 81.3,
+    "others": {
+     "exitpoll_catolica_raked": 78.3,
+     "ei_entropy_region": 76.7,
+     "ei_entropy_national": 76.5
+    }
+   }
+  ]
+ },
+ "central_sources": {
+  "2019-2022": "jp_eep_detilt_res",
+  "2022-2024": "jp_eep_detilt_res",
+  "2024-2025": "jp_exitpoll"
+ },
+ "other_sources": {
+  "2019-2022": [
+   "jp_eep_res",
+   "ei_entropy_region",
+   "ei_entropy_national"
+  ],
+  "2022-2024": [
+   "jp_eep_res",
+   "ei_entropy_region",
+   "ei_entropy_national"
+  ],
+  "2024-2025": [
+   "exitpoll_catolica_raked",
+   "ei_entropy_region",
+   "ei_entropy_national"
+  ]
+ },
+ "age": [
+  {
+   "group": "18-24",
+   "exit_CH": 25,
+   "exit_PS": 12,
+   "exit_AD": 28,
+   "eep_CH": 29.0,
+   "eep_PS": 21.0
+  },
+  {
+   "group": "25-34",
+   "exit_CH": 32,
+   "exit_PS": 10,
+   "exit_AD": 28,
+   "eep_CH": 34.0,
+   "eep_PS": 7.0
+  },
+  {
+   "group": "35-44",
+   "exit_CH": 34,
+   "exit_PS": 16,
+   "exit_AD": 26,
+   "eep_CH": 25.0,
+   "eep_PS": 22.0
+  },
+  {
+   "group": "45-54",
+   "exit_CH": 24,
+   "exit_PS": 22,
+   "exit_AD": 34,
+   "eep_CH": 21.0,
+   "eep_PS": 21.0
+  },
+  {
+   "group": "55-64",
+   "exit_CH": 19,
+   "exit_PS": 28,
+   "exit_AD": 38,
+   "eep_CH": 16.0,
+   "eep_PS": 34.0
+  },
+  {
+   "group": "65+",
+   "exit_CH": 10,
+   "exit_PS": 40,
+   "exit_AD": 36,
+   "eep_CH": [
+    3.0,
+    8.0
+   ],
+   "eep_PS": [
+    54.0,
+    40.0
+   ]
+  }
+ ],
+ "education": [
+  {
+   "group": "below_secondary",
+   "exit_CH": 24,
+   "exit_PS": 32,
+   "exit_AD": 31,
+   "eep_CH": 19.0,
+   "eep_PS": 37.0
+  },
+  {
+   "group": "secondary",
+   "exit_CH": 31,
+   "exit_PS": 21,
+   "exit_AD": 28,
+   "eep_CH": 24.0,
+   "eep_PS": 22.0
+  },
+  {
+   "group": "tertiary",
+   "exit_CH": 14,
+   "exit_PS": 19,
+   "exit_AD": 39,
+   "eep_CH": 14.0,
+   "eep_PS": 19.0
+  }
+ ]
+}

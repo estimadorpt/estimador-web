@@ -1,0 +1,97 @@
+export const metadata = {
+  "title": "Metade dos primeiros votos do Chega veio de quem não votava",
+  "excerpt": "Entre 2019 e 2025, a direita passou de 1,78 para 3,63 milhões de votos. O que está contado, o que se pode estimar e o que os dados não decidem.",
+  "author": "Bernardo Caldas",
+  "date": "2026-11-23",
+  "kind": "nota",
+  "section": "elections",
+  "draft": true,
+  "tags": [
+    "Eleições",
+    "Legislativas",
+    "Chega"
+  ],
+  "slug": "como-o-voto-mudou-2015-2025"
+};
+
+<Callout kind="context" label="Contexto">
+  Legislativas de 2015 a 2025, votos no território nacional. O que está contado (resultados oficiais) aparece a preto. As transferências entre partidos são estimativas: a amarelo, a margem de 90% da estimativa central; a cinzento, o que dão os outros métodos.
+</Callout>
+
+Entre 2019 e 2025, o Chega, o PSD/CDS e a IL passaram de <VoteMovesNumber locale="pt" path="counts.right_2019" scale="1e6" digits="2" /> para <VoteMovesNumber locale="pt" path="counts.right_2025" scale="1e6" digits="2" /> milhões de votos. No mesmo período, o PS e a esquerda caíram de <VoteMovesNumber locale="pt" path="counts.ps_left_2019" scale="1e6" digits="2" /> para <VoteMovesNumber locale="pt" path="counts.ps_left_2025" scale="1e6" digits="2" /> milhões, e a abstenção de <VoteMovesNumber locale="pt" path="counts.abst_2019" scale="1e6" digits="2" /> para <VoteMovesNumber locale="pt" path="counts.abst_2025" scale="1e6" digits="2" /> milhões. Estes números estão contados. Como se ligam uns aos outros, quem passou de onde para onde, não está: o voto é secreto, e é preciso estimá-lo.
+
+Fizemo-lo de duas maneiras, que falham de formas diferentes. Os inquéritos perguntam a cada pessoa em quem votou agora e da última vez, mas são pequenos e as pessoas lembram-se mal do voto anterior. Os resultados por freguesia são completos, mas só dizem quantos votaram em quê em cada sítio, não quem. Onde as duas maneiras concordam, o resultado é sólido. Onde não concordam, mostramos o intervalo.
+
+## A direita ganhou 1,86 milhões de votos que não tinha em 2019
+
+<Figure caption="Em % dos inscritos, a direita passou de pouco mais de um terço para mais de metade do voto expresso, e a abstenção caiu quase dez pontos." source="Fonte: resultados oficiais das legislativas (SGMAI), 3 092 freguesias (CAOP 2021), votos no território nacional, em % dos inscritos." asOf="Resultados de 2015, 2019, 2022, 2024 e 2025">
+  <VoteMovesBlocs locale="pt" />
+</Figure>
+
+Mesmo que todos os eleitores da direita de 2019 tenham voltado a votar nela, pelo menos <VoteMovesNumber locale="pt" path="counts.right_gain_min" scale="1e6" digits="2" /> milhões dos seus eleitores de 2025 não o tinham feito em 2019. Vieram de algum lado: da abstenção, do PS, da esquerda, ou de quem entrou nos cadernos.
+
+Uma nota sobre a abstenção. Há 9,27 milhões de inscritos, mas cerca de 8,24 milhões de cidadãos adultos residentes (Censos 2021). A diferença, cerca de 11% dos cadernos, é sobretudo emigrantes ainda recenseados em Portugal. Esses nunca votam aqui, por isso a abstenção nunca desce abaixo desse piso.
+
+## O Chega subiu em todas as 3 092 freguesias, e quase o mesmo em todas
+
+<Figure caption="Em todas as freguesias o Chega teve em 2025 uma parte maior dos inscritos do que em 2019; na maior parte, entre 8 e 18 pontos a mais." source="Fonte: resultados oficiais das legislativas de 2019 e 2025 (SGMAI), 3 092 freguesias (CAOP 2021), votos no território nacional." asOf="Resultados de 2019 e 2025">
+  <VoteMovesParishes locale="pt" />
+</Figure>
+
+Em média, o Chega subiu <VoteMovesNumber locale="pt" path="chega_rise.mean" digits="1" /> pontos percentuais dos inscritos. Nove em cada dez eleitores vivem numa freguesia onde subiu entre <VoteMovesNumber locale="pt" path="chega_rise.p05" digits="1" /> e <VoteMovesNumber locale="pt" path="chega_rise.p95" digits="1" /> pontos. Uma subida igual à média em todas as freguesias daria conta de 93% da mudança medida (em soma de quadrados): o país mexeu-se quase em bloco.
+
+Onde se mexeu mais, foi em terra do PS. Das <VoteMovesNumber locale="pt" path="chega_rise.ch_won_2025" /> freguesias onde o Chega ficou em primeiro em 2025, <VoteMovesNumber locale="pt" path="chega_rise.ch_won_ps_2022" /> tinham sido ganhas pelo PS em 2022. Isto não quer dizer que foram eleitores do PS a mudar: pode ser a freguesia inteira a mudar, fossem quais fossem os seus eleitores. É aqui que começam as estimativas.
+
+## Metade dos primeiros votos do Chega veio de quem não votava
+
+<Figure caption="Em 2022, cerca de metade dos votos do Chega veio de quem não votara em 2019. Em 2025, quase dois terços eram de quem já votava Chega." source="Estimativa central: padrões do Estudo Eleitoral Português (ICS) para 2022 e 2024 e da sondagem à boca das urnas Católica/CESOP para 2025 (depósito ERC 2025062), ajustados aos dois resultados de cada freguesia do continente. Na tabela, entre parênteses, o intervalo entre métodos." asOf="Legislativas de 2022, 2024 e 2025">
+  <VoteMovesOrigins locale="pt" />
+</Figure>
+
+Este é o resultado em que todos os métodos concordam. Em 2022, entre 46% e 53% dos votos do Chega vieram de pessoas que não tinham votado em 2019, ou seja, cerca de 5% dos abstencionistas de 2019. Em 2024 a abstenção voltou a ser a maior fonte de votos novos: cerca de um em cada dez abstencionistas de 2022 votou Chega.
+
+## Em 2024, o PS e o PSD/CDS deram juntos ao Chega 250 a 350 mil votos
+
+<Figure caption="Entre 2022 e 2024, cerca de um em cada dez abstencionistas votou Chega. Quanto deu cada um dos dois partidos tradicionais depende do método." source="Estimativa central: padrões do Estudo Eleitoral Português 2024 (ICS), corrigidos do excesso de quem diz ter votado no vencedor anterior, ajustados aos dois resultados de cada freguesia do continente; margem de 90% por bootstrap do inquérito. Outros métodos: o inquérito sem essa correção e a inferência ecológica por entropia, por região e nacional." asOf="Legislativas de 2022 e 2024">
+  <VoteMovesFlows locale="pt" pair="2022-2024" />
+</Figure>
+
+O total que os dois partidos tradicionais deram ao Chega é sólido: entre <VoteMovesNumber locale="pt" path="combined_ps_ad_to_ch_thousands.2022-2024.lo" /> e <VoteMovesNumber locale="pt" path="combined_ps_ad_to_ch_thousands.2022-2024.hi" /> mil votos em 2024, e entre <VoteMovesNumber locale="pt" path="combined_ps_ad_to_ch_thousands.2024-2025.lo" /> e <VoteMovesNumber locale="pt" path="combined_ps_ad_to_ch_thousands.2024-2025.hi" /> mil em 2025, qualquer que seja o método.
+
+Quanto veio de cada um, os dados não decidem. Os inquéritos mandam mais eleitores do PSD/CDS para o Chega; os resultados por freguesia mandam mais do PS. Cada lado tem um viés conhecido nesta conta. Nos inquéritos, há mais gente a dizer que votou no vencedor da eleição anterior do que os resultados permitem. Nas freguesias, quando o Chega cresce onde o PS era forte, o método lê isso como eleitores do PS a mudar, mesmo que tenha sido a freguesia toda.
+
+## Em 2025, o Chega manteve cerca de três quartos dos seus eleitores
+
+<Figure caption="Entre 2024 e 2025, o Chega manteve entre 76% e 81% dos seus eleitores, conforme o método." source="Estimativa central: sondagem à boca das urnas Católica/CESOP, 18 de maio de 2025 (depósito ERC 2025062), ajustada aos dois resultados de cada freguesia do continente; para 2024, como no gráfico anterior. Outros métodos: a sondagem sozinha, ponderada ao resultado, e a inferência ecológica por entropia." asOf="Legislativas de 2022, 2024 e 2025">
+  <VoteMovesRetention locale="pt" />
+</Figure>
+
+<Figure caption="Entre 2024 e 2025, cerca de 6% dos abstencionistas votaram Chega, e entre 10% e 15% dos eleitores do Chega ficaram em casa." source="Estimativa central: sondagem à boca das urnas Católica/CESOP 2025 (depósito ERC 2025062), ajustada aos dois resultados de cada freguesia do continente; margem de 90% por bootstrap. Outros métodos: a sondagem sozinha e a inferência ecológica por entropia, por região e nacional." asOf="Legislativas de 2024 e 2025">
+  <VoteMovesFlows locale="pt" pair="2024-2025" />
+</Figure>
+
+Em 2025 a sondagem à boca das urnas e os resultados por freguesia concordam, a três pontos, em quanto o Chega manteve. Para a abstenção, o Chega perdeu entre 10% e 15% dos seus eleitores de 2024. Aqui a sondagem não ajuda: só entrevista quem votou, e a sua coluna da abstenção é o que sobra dos resultados oficiais. Pela mesma razão, dá quase zero eleitores da AD em casa: os seus entrevistados dizem ter votado mais na AD em 2024 do que a AD teve, e não sobra lugar para os que se abstiveram. Em 2024 a margem é maior: entre 77% e 94% dos eleitores do Chega de 2022 voltaram a votar Chega, conforme se corrige ou não a memória do voto anterior.
+
+## Quem fica em casa é a parte menos certa
+
+Se os eleitores do PS e do Chega se abstiveram, e quantos, depende de como se lê o erro de memória dos inquéritos. Se a amostra tem simplesmente eleitores do PS a mais, a correção certa é ponderar. Se outras pessoas dizem ter votado PS quando não votaram, é preciso devolvê-las primeiro à sua origem. Em 2024, a primeira leitura dá 5% dos eleitores do PS de 2022 em casa; a segunda, quase nenhum; os resultados por freguesia, 6% a 7%. Testámos as duas leituras em eleições simuladas, e a segunda erra menos quando se engana. Mostramos a segunda como central e a outra como limite.
+
+## A idade divide o voto de 2025 mais do que tudo o resto
+
+<Figure caption="O Chega tem cerca de um terço dos votantes entre os 25 e os 44 anos e um décimo dos que têm 65 ou mais; o PS é o contrário." source="Fontes: sondagem à boca das urnas Católica/CESOP, 18 de maio de 2025, 35 022 entrevistas no continente (depósito ERC 2025062; média das percentagens de mulheres e de homens); Estudo Eleitoral Português 2024 (ICS), ponderado ao resultado oficial, um ano antes, quando o Chega tinha cerca de um quinto menos votos." asOf="Legislativas de 2024 e 2025">
+  <VoteMovesAge locale="pt" />
+</Figure>
+
+As duas fontes contam a mesma história com um ano de distância. O Chega é mais forte entre quem tem o ensino secundário do que entre quem tem menos escolaridade, e mais fraco entre os licenciados. Os homens votam mais Chega do que as mulheres em todas as idades.
+
+Esta é a pergunta a que os resultados por freguesia não sabem responder. Uma regressão dos resultados sobre a idade e a escolaridade de cada freguesia dá ao Chega 0% dos licenciados (os dois inquéritos: 14%) e só 18% dos 25 aos 34 anos (inquéritos: cerca de um terço). Idade e escolaridade andam juntas com o lugar, cidade ou campo, litoral ou interior, e a regressão atribui ao grupo o que é do lugar. Para saber quem vota em quem, só os inquéritos.
+
+## Uma tabela nacional é uma média, não uma regra
+
+As transferências acima são do país inteiro. Aplicadas a cada freguesia, não dizem onde o Chega cresceu mais: a correlação com o crescimento real vai de −0,36 a +0,18, conforme a eleição, e erram por distrito mais do que supor que todos os distritos se mexeram o mesmo. Os eleitores mudam de forma diferente em sítios diferentes, e é por isso que o nosso modelo de distritos parte da mudança uniforme, não destas tabelas.
+
+## Como fizemos
+
+<Callout kind="method" label="Método">
+  As estimativas centrais tomam os padrões de um inquérito (quem votou em quê, das duas vezes) e ajustam-nos aos dois resultados oficiais de cada freguesia do continente, para que somem exatamente o que se contou. Para 2019 a 2024 o inquérito é o Estudo Eleitoral Português (ICS), com cerca de 700 a 800 respondentes que dizem em quem votaram; para 2025, a sondagem à boca das urnas da Católica/CESOP. Ao lado, mostramos a inferência ecológica pura, que usa só os resultados por freguesia. Testámos os métodos na Nova Zelândia, onde a verdade se conhece (cada mesa publica o voto no partido e no candidato): o melhor método ecológico põe 7,9% dos votos na casa errada da tabela. Em eleições simuladas sobre as freguesias portuguesas, com o tamanho e o erro de memória reais do inquérito, o método híbrido põe 8% a 9% dos votos na casa errada e a inferência ecológica pura 10% a 12%, com os erros em casas diferentes. Juntar os Censos e outras eleições aos resultados por freguesia ajuda a prever resultados, mas não resolve as casas em que os métodos discordam. Por isso só afirmamos o que os dois métodos dizem em conjunto.
+</Callout>
