@@ -1,34 +1,32 @@
 'use client';
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChoiceGroup } from '@/components/brand/Choice';
 import { Action } from '@/components/brand/Action';
+import { Disclosure } from '@/components/viz/Disclosure';
 import { BRAND } from '@/lib/brand';
 import { formatElectionNumber, formatElectionPercent } from '@/lib/election-display';
 import { formatSignedNumber } from '@/lib/typography';
 import {
-  ABSTENTION, MAX_TRANSFERS, MAX_TRANSFER_POINTS, applyTransfers, baseVotes, decodeScenario, encodeScenario, isScenarioHash, nextHash,
-  presetVotes, runScenario, swingLists, type Scenario, type SimulatorData, type Transfer,
+  ABSTENTION, decodeShares, encodeShares, isScenarioHash, nextHash, presetShares, presetVotes, runScenario, sameShares, setShare,
+  sharesToVotes, type ScenarioResult, type Shares, type SimulatorData,
 } from '@/lib/simulator/engine';
 import {
   BLANK_NULL, MAX_GROUP_MOVES, decodeGroupMoves, encodeGroupMoves, runGroupScenario, type GroupData, type GroupMove,
 } from '@/lib/simulator/groups';
-import { GroupMovesPanel } from './GroupMovesPanel';
+import { BLANK_MOVE, GroupMovesPanel } from './GroupMovesPanel';
+import { Hemicycle, SEAT_ORDER } from './Hemicycle';
 import { LastSeatsTable, type LastSeatRow } from './LastSeatsTable';
+import { PartySliders } from './PartySliders';
 import { listColor, listName, type Locale } from './copy';
 
 const MAJORITY = 116;
-/** The group file, fetched when the reader first opens "Por grupos" (about 40 KB). */
+const TOTAL_SEATS = 230;
+/** The group file, fetched when the reader first opens the groups (about 40 KB). */
 const GROUPS_URL = '/data/elections/parliamentary-2025/simulator-groups.json';
+/** The address and the screen-reader summary wait this long after the last change (a dragged slider fires many). */
+const SETTLE_MS = 400;
 type Mode = 'parties' | 'groups';
-
-/** Ready-made transfers to start from: one move each, the reader edits from there. */
-const EXAMPLES: Transfer[] = [
-  { from: 'PS', to: 'L', points: 3 },
-  { from: 'AD', to: 'CH', points: 3 },
-  { from: ABSTENTION, to: 'CH', points: 2 },
-];
 
 /** The archive's blocs, and the arithmetic of AD with Chega (seat sums, not governments). */
 const BLOCS: Array<{ key: string; lists: string[] }> = [
@@ -37,26 +35,54 @@ const BLOCS: Array<{ key: string; lists: string[] }> = [
   { key: 'left', lists: ['PS', 'L', 'CDU', 'BE'] },
 ];
 
+/** A value that follows `value` once it has stopped changing for `ms`. */
+function useSettled<T>(value: T, ms: number): T {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setSettled(value), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return settled;
+}
+
 /**
- * One row's seats on a ruler: the scenario as a hollow bar (a what-if is drawn hollow), 2025
- * as a black square (what happened), and, for blocs, the 116 line.
+ * A bloc's seats on a 0–230 ruler: the scenario as a hollow bar (a what-if is drawn hollow),
+ * 2025 as a black square (what happened), the 116 line.
  */
-function SeatBar({ value, before, max, majority }: { value: number; before: number; max: number; majority?: number }) {
-  const width = 160;
-  const x = (v: number) => 1 + (Math.min(v, max) / max) * (width - 2);
+function BlocBar({ value, before }: { value: number; before: number }) {
+  const width = 150;
+  const x = (v: number) => 1 + (Math.min(v, TOTAL_SEATS) / TOTAL_SEATS) * (width - 2);
   return (
-    <svg className="block" width={width} height={16} viewBox={`0 0 ${width} 16`} aria-hidden="true" focusable="false">
+    <svg className="block shrink-0" width={width} height={16} viewBox={`0 0 ${width} 16`} aria-hidden="true" focusable="false">
+      <line x1={1} x2={width - 1} y1={14.5} y2={14.5} stroke={BRAND.faint} />
       {value > 0 && <rect x={1.5} y={3.5} width={Math.max(1, x(value) - 2)} height={8} fill={BRAND.paper} stroke={BRAND.ink} strokeWidth={1.25} />}
       <rect x={x(before) - 3} y={4.5} width={6} height={6} fill={BRAND.ink} />
-      {majority != null && <line x1={x(majority)} x2={x(majority)} y1={0} y2={16} stroke={BRAND.ink} strokeWidth={1.5} />}
-      <line x1={1} x2={width - 1} y1={14.5} y2={14.5} stroke={BRAND.faint} />
+      <line x1={x(MAJORITY)} x2={x(MAJORITY)} y1={0} y2={16} stroke={BRAND.ink} strokeWidth={1.5} />
+    </svg>
+  );
+}
+
+/** The parliament in one thin row, for the phone's bar that stays in view under the controls. */
+function SeatStrip({ seats }: { seats: Record<string, number> }) {
+  let x = 0;
+  return (
+    <svg viewBox={`0 0 ${TOTAL_SEATS} 10`} preserveAspectRatio="none" className="block h-2.5 w-full" aria-hidden="true" focusable="false">
+      {SEAT_ORDER.map(list => {
+        const n = seats[list] ?? 0;
+        const r = <rect key={list} x={x} y={0} width={n} height={10} fill={listColor(list)} />;
+        x += n;
+        return r;
+      })}
+      <line x1={TOTAL_SEATS / 2} x2={TOTAL_SEATS / 2} y1={0} y2={10} stroke={BRAND.paper} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }
 
 /**
- * `anchorId` is the page section's id: a shared scenario link scrolls there, and going back to
- * 2025 leaves it in the address.
+ * "Mover votos": the reader changes the 2025 vote, by party (a share per list) or by group
+ * (a share of a group of voters, abstainers included), and the parliament beside the controls
+ * follows. `anchorId` is the page section's id: a shared scenario link scrolls there, and
+ * going back to 2025 leaves it in the address.
  */
 export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
   data: SimulatorData;
@@ -66,22 +92,16 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
   groupsMethodHref?: string;
 }) {
   const pt = locale === 'pt';
-  const id = useId();
-  const swing = swingLists(data);
-  const sources = [...swing, ABSTENTION];
-  const [scenario, setScenario] = useState<Scenario>({ preset: '2025', transfers: [] });
+  const base2025 = useMemo(() => presetShares(data, '2025'), [data]);
   const [mode, setMode] = useState<Mode>('parties');
+  const [shares, setShares] = useState<Shares>(base2025);
   const [groups, setGroups] = useState<GroupData | null>(null);
   const [groupsFailed, setGroupsFailed] = useState(false);
-  const [groupMoves, setGroupMoves] = useState<GroupMove[]>([]);
+  const [groupMoves, setGroupMoves] = useState<GroupMove[]>([BLANK_MOVE]);
   const groupOptions = useMemo(() => [...data.movable, ...data.fixed, data.others, BLANK_NULL, ABSTENTION], [data]);
-  const [draft, setDraft] = useState<Transfer>({ from: 'PS', to: 'L', points: 2 });
   // Set once the address has been read. State, not a ref: the write below must not run in the
   // mount commit, when the scenario is still the default and would wipe the reader's address.
   const [loaded, setLoaded] = useState(false);
-  const removeButtons = useRef<Array<HTMLButtonElement | null>>([]);
-  const fromSelect = useRef<HTMLSelectElement>(null);
-  const [focusAfterRemove, setFocusAfterRemove] = useState<number | null>(null);
 
   // The scenario lives in the address. It is read after mount only, so the exported HTML
   // (and the first render) is always 2025's result; a static export serves one file.
@@ -90,10 +110,11 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
     const g = new URLSearchParams(hash.replace(/^#/, '')).get('g');
     if (g != null) {
       setMode('groups');
-      setGroupMoves(decodeGroupMoves(g, groupOptions));
+      const moves = decodeGroupMoves(g, groupOptions);
+      if (moves.length) setGroupMoves(moves);
     } else {
-      const fromHash = decodeScenario(hash, data);
-      if (fromHash.preset !== '2025' || fromHash.transfers.length) setScenario(fromHash);
+      const fromHash = decodeShares(hash, data);
+      if (fromHash) setShares(fromHash);
     }
     setLoaded(true);
     // A scenario link replaces the section's anchor, so bring the section into view.
@@ -109,51 +130,40 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
       .catch(() => { if (live) setGroupsFailed(true); });
     return () => { live = false; };
   }, [mode, groups, groupsFailed]);
+
+  const activeMoves = groupMoves.filter(m => m.share > 0 && m.from !== m.to);
   const ownHash = mode === 'groups'
-    ? (groupMoves.length ? `#g=${encodeGroupMoves(groupMoves)}` : '')
-    : encodeScenario(scenario);
+    ? (activeMoves.length ? `#g=${encodeGroupMoves(activeMoves)}` : '')
+    : encodeShares(data, shares);
+  // Browsers limit how often the address may change (Safari: 100 times in 30 seconds), and a
+  // dragged slider changes it on every step: write it once the scenario has settled.
+  const settledHash = useSettled(ownHash, SETTLE_MS);
   useEffect(() => {
     if (!loaded) return;
-    const hash = nextHash(ownHash, window.location.hash, anchorId);
+    const hash = nextHash(settledHash, window.location.hash, anchorId);
     if (hash == null) return;
     try {
       window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
     } catch { /* the address is a convenience */ }
-  }, [ownHash, loaded, anchorId]);
-  // After a removal, focus the move now in that place, the one before it, or the form.
-  useEffect(() => {
-    if (focusAfterRemove == null) return;
-    const n = scenario.transfers.length;
-    const target = n > 0 ? removeButtons.current[Math.min(focusAfterRemove, n - 1)] : fromSelect.current;
-    target?.focus();
-    setFocusAfterRemove(null);
-  }, [focusAfterRemove, scenario.transfers.length]);
+  }, [settledHash, loaded, anchorId]);
 
   const base = useMemo(() => runScenario(data, presetVotes(data, '2025')), [data]);
-  // One point in votes, rounded to the thousand for the help line.
-  const pointVotes = useMemo(() => Math.round(Object.values(baseVotes(data)).reduce((a, b) => a + b, 0) / 100 / 1000), [data]);
-  const { result: partyResult, moved } = useMemo(() => {
-    const start = presetVotes(data, scenario.preset);
-    const applied = applyTransfers(data, start, scenario.transfers);
-    return { result: runScenario(data, applied.votes), moved: applied.moved };
-  }, [data, scenario]);
+  const partyResult = useMemo(() => runScenario(data, sharesToVotes(data, shares)), [data, shares]);
   const groupResult = useMemo(() => (groups ? runGroupScenario(data, groups, groupMoves) : null), [data, groups, groupMoves]);
   // Until the group file is in, the groups show 2025's result.
-  const result = mode === 'groups' ? groupResult ?? base : partyResult;
+  const result: ScenarioResult = mode === 'groups' ? groupResult ?? base : partyResult;
 
   const pct = (v: number) => formatElectionPercent(v, locale);
   const num = (v: number) => formatElectionNumber(v, locale);
   const signed = (v: number) => formatSignedNumber(v, locale);
-  const pts = (v: number) => formatElectionNumber(v, locale, Number.isInteger(v) ? 0 : 1);
-  const seatsOf = (r: typeof result, list: string) => r.totals[list] ?? 0;
-
+  const seatsOf = (r: ScenarioResult, list: string) => r.totals[list] ?? 0;
   const partyRows = [...data.movable, ...data.fixed];
-  const maxSeats = Math.max(100, ...partyRows.map(p => seatsOf(result, p)));
+
   const changedCircles = result.circles
     .map((c, i) => {
       const before = base.circles[i].won;
       const lists = Array.from(new Set([...Object.keys(before), ...Object.keys(c.won)]));
-      const diff = lists.map(p => ({ p, d: (c.won[p] ?? 0) - (before[p] ?? 0) })).filter(x => x.d !== 0);
+      const diff = lists.map(p => ({ p, d: (c.won[p] ?? 0) - (before[p] ?? 0) })).filter(x => x.d !== 0).sort((a, b) => b.d - a.d);
       return { name: c.name, diff };
     })
     .filter(c => c.diff.length > 0);
@@ -167,183 +177,206 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
     changed: c.lastSeat.list !== base.circles[i].lastSeat.list,
   }));
 
-  const summary = partyRows
-    .filter(p => seatsOf(result, p) > 0 || seatsOf(base, p) > 0)
-    .map(p => {
-      const d = seatsOf(result, p) - seatsOf(base, p);
-      return `${listName(p, locale)} ${num(seatsOf(result, p))}${d ? ` (${signed(d)})` : ''}`;
-    })
-    .join(', ');
+  const seatText = (p: string) => {
+    const d = seatsOf(result, p) - seatsOf(base, p);
+    return `${listName(p, locale)} ${num(seatsOf(result, p))}${d ? ` (${signed(d)})` : ''}`;
+  };
+  const shown = SEAT_ORDER.filter(p => seatsOf(result, p) > 0 || seatsOf(base, p) > 0);
+  const summary = `${pt ? 'Mandatos com estes votos' : 'Seats with these votes'}: ${partyRows.filter(p => seatsOf(result, p) > 0 || seatsOf(base, p) > 0).map(seatText).join(', ')}.`;
+  const settledSummary = useSettled(summary, SETTLE_MS);
+  const changes = shown.filter(p => seatsOf(result, p) !== seatsOf(base, p));
 
-  const update = (next: Scenario) => setScenario(next);
-  const addTransfer = (t: Transfer) => {
-    if (t.from === t.to || !(t.points > 0)) return;
-    update({ ...scenario, transfers: [...scenario.transfers, { ...t, points: Math.min(MAX_TRANSFER_POINTS, t.points) }].slice(0, MAX_TRANSFERS) });
-  };
-  const removeTransfer = (i: number) => {
-    update({ ...scenario, transfers: scenario.transfers.filter((_, j) => j !== i) });
-    setFocusAfterRemove(i);
-  };
-  const reset = () => (mode === 'groups' ? setGroupMoves([]) : update({ preset: '2025', transfers: [] }));
-  const addGroupMove = (m: GroupMove) => {
-    if (m.from === m.to || !(m.share > 0)) return;
-    setGroupMoves(list => [...list, { ...m, share: Math.min(100, m.share) }].slice(0, MAX_GROUP_MOVES));
-  };
-  const removeGroupMove = (i: number) => setGroupMoves(list => list.filter((_, j) => j !== i));
-  const changed = mode === 'groups' ? groupMoves.length > 0 : scenario.transfers.length > 0 || scenario.preset !== '2025';
-
+  const changed = mode === 'groups' ? activeMoves.length > 0 : !sameShares(shares, base2025);
+  const reset = () => (mode === 'groups' ? setGroupMoves([BLANK_MOVE]) : setShares(base2025));
   const presetOptions = [
-    { value: '2025', label: pt ? 'Resultado de 2025' : '2025 result' },
-    ...Object.keys(data.presets).sort().reverse().map(y => ({ value: y, label: pt ? `Votos de ${y}` : `${y} votes` })),
+    { value: '2025', label: '2025' },
+    ...Object.keys(data.presets).sort().reverse().map(y => ({ value: y, label: y })),
   ];
+  const preset = presetOptions.find(o => sameShares(shares, presetShares(data, o.value)))?.value ?? '';
 
-  const selectClass = 'min-h-11 w-full border border-ink bg-paper px-2 text-base font-medium text-ink sm:text-sm';
+  const changeMove = (i: number, m: GroupMove) => setGroupMoves(list => list.map((x, j) => (j === i ? { ...m, share: Math.min(100, Math.max(0, m.share)) } : x)));
+  const addMove = () => setGroupMoves(list => [...list, BLANK_MOVE].slice(0, MAX_GROUP_MOVES));
+  const removeMove = (i: number) => setGroupMoves(list => (list.length > 1 ? list.filter((_, j) => j !== i) : [BLANK_MOVE]));
+  // An example replaces moves that move nothing yet, and otherwise joins them.
+  const example = (m: GroupMove) => setGroupMoves(list => (list.every(x => !(x.share > 0)) ? [m] : [...list, m].slice(0, MAX_GROUP_MOVES)));
+
   const labelClass = 'mb-1 block text-[12px] font-semibold text-graphite';
-  const transferText = (t: Transfer, done: number) => {
-    const amount = pts(done);
-    const what = pt
-      ? `${amount} ${done === 1 ? 'ponto' : 'pontos'} ${t.from === ABSTENTION ? 'da abstenção' : `de ${listName(t.from, locale)}`} para ${t.to === ABSTENTION ? 'a abstenção' : listName(t.to, locale)}`
-      : `${amount} ${done === 1 ? 'point' : 'points'} from ${t.from === ABSTENTION ? 'abstention' : listName(t.from, locale)} to ${t.to === ABSTENTION ? 'abstention' : listName(t.to, locale)}`;
-    const short = done + 1e-9 < t.points
-      ? (pt ? ` (pedidos ${pts(t.points)}; não havia mais)` : ` (${pts(t.points)} asked; there was no more)`)
-      : '';
-    return what + short;
-  };
+
+  // Seat sums and the circles that change: under the parliament from 1024px, after the controls on a phone.
+  const details = (
+    <>
+      <div>
+        <p className="border-b border-ink pb-1 text-[12px] font-semibold text-graphite">
+          {pt ? `Somas de mandatos (maioria: ${MAJORITY})` : `Seat sums (majority: ${MAJORITY})`}
+        </p>
+        <ul className="divide-y divide-grid">
+          {BLOCS.map(b => {
+            const now = b.lists.reduce((a, p) => a + seatsOf(result, p), 0);
+            const before = b.lists.reduce((a, p) => a + seatsOf(base, p), 0);
+            return (
+              <li key={b.key} className="flex min-h-10 items-center justify-between gap-3 text-[14px] tabular-nums">
+                <span className="min-w-0 text-ink">{b.lists.map(p => listName(p, locale)).join(' + ')}</span>
+                <span className="flex items-center gap-3">
+                  <span className="text-right">
+                    <span className="font-bold text-ink">{num(now)}</span>
+                    {now >= MAJORITY && <span className="ml-1 font-semibold text-ink">{pt ? 'maioria' : 'majority'}</span>}
+                  </span>
+                  <BlocBar value={now} before={before} />
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-1 text-[12px] text-graphite">
+          {pt ? 'Somas, não governos. Barra vazada: cenário; quadrado: 2025; traço: 116.' : 'Sums, not governments. Hollow bar: scenario; square: 2025; line: 116.'}
+        </p>
+      </div>
+
+      <div>
+        <p className="border-b border-ink pb-1 text-[12px] font-semibold text-graphite">{pt ? 'Onde mudam os mandatos' : 'Where the seats change'}</p>
+        {changedCircles.length === 0 ? (
+          <p className="py-2 text-[14px] text-graphite">{pt ? 'Em nenhum círculo: os mandatos são os de 2025.' : 'In no circle: the seats are 2025’s.'}</p>
+        ) : (
+          <ul className="divide-y divide-grid text-[14px] tabular-nums">
+            {changedCircles.map(c => (
+              <li key={c.name} className="flex flex-wrap gap-x-3 py-1.5">
+                <span className="min-w-[7.5rem] font-semibold text-ink">{c.name}</span>
+                <span className="text-ink">{c.diff.map(x => `${listName(x.p, locale)} ${signed(x.d)}`).join(', ')}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
+  );
+
 
   return (
-    <div className="space-y-8">
-      {/* Controls: the kind of move, then (between parties) the starting point and the moves,
-          or (by groups) who changes. */}
-      <div className="space-y-5">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className={labelClass} aria-hidden="true">{pt ? 'Mover votos' : 'Move votes'}</p>
+          <p className={labelClass} aria-hidden="true">{pt ? 'Mudar o voto' : 'Change the vote'}</p>
           <ChoiceGroup
-            label={pt ? 'Mover votos' : 'Move votes'}
+            label={pt ? 'Mudar o voto' : 'Change the vote'}
             options={[
-              { value: 'parties' as Mode, label: pt ? 'Entre partidos' : 'Between parties' },
-              { value: 'groups' as Mode, label: pt ? 'Por grupos' : 'By group' },
+              { value: 'parties' as Mode, label: pt ? 'Por partido' : 'By party' },
+              { value: 'groups' as Mode, label: pt ? 'Por grupo de eleitores' : 'By group of voters' },
             ]}
             value={mode}
             onChange={setMode}
           />
         </div>
-
-        {mode === 'groups' ? (
-          groupsFailed ? (
-            <p className="max-w-[72ch] text-[14px] text-graphite">
-              {pt ? 'Não foi possível carregar os grupos. Tenta recarregar a página.' : 'The groups could not be loaded. Try reloading the page.'}
-            </p>
-          ) : (
-            <GroupMovesPanel
-              groups={groups}
-              options={groupOptions}
-              moves={groupMoves}
-              moved={groupResult?.moved ?? []}
-              onAdd={addGroupMove}
-              onRemove={removeGroupMove}
-              locale={locale}
-              methodHref={groupsMethodHref}
-            />
-          )
-        ) : (
-        <>
-        <div>
-          <p className={labelClass} aria-hidden="true">{pt ? 'Ponto de partida' : 'Starting point'}</p>
-          <ChoiceGroup
-            label={pt ? 'Ponto de partida' : 'Starting point'}
-            options={presetOptions}
-            value={scenario.preset}
-            onChange={preset => update({ ...scenario, preset })}
-          />
-          {scenario.preset !== '2025' && (
-            <p className="mt-2 max-w-[72ch] text-[14px] text-graphite">
-              {pt
-                ? `A percentagem nacional de cada partido em ${scenario.preset}, distribuída pelos círculos a partir da geografia de 2025. Não é o resultado de ${scenario.preset}: o mapa e os eleitores mudaram.`
-                : `Each party's national share in ${scenario.preset}, spread over the circles from 2025's geography. It is not the ${scenario.preset} result: the map and the voters changed.`}
-            </p>
-          )}
-        </div>
-
-        <fieldset>
-          <legend className="mb-2 text-[15px] font-semibold text-ink">{pt ? 'De um partido para outro' : 'From one party to another'}</legend>
-          <div className="grid max-w-3xl gap-3 sm:grid-cols-[1fr_1fr_7rem_auto] sm:items-end">
-            <div>
-              <label htmlFor={`${id}-from`} className={labelClass}>{pt ? 'De' : 'From'}</label>
-              <select ref={fromSelect} id={`${id}-from`} className={selectClass} value={draft.from} onChange={e => setDraft({ ...draft, from: e.target.value })}>
-                {sources.map(p => <option key={p} value={p}>{listName(p, locale)}</option>)}
-              </select>
-            </div>
-            <div>
-              <label htmlFor={`${id}-to`} className={labelClass}>{pt ? 'Para' : 'To'}</label>
-              <select id={`${id}-to`} className={selectClass} value={draft.to} onChange={e => setDraft({ ...draft, to: e.target.value })}>
-                {sources.map(p => <option key={p} value={p}>{listName(p, locale)}</option>)}
-              </select>
-            </div>
-            <div>
-              <label htmlFor={`${id}-pts`} className={labelClass}>{pt ? 'Pontos' : 'Points'}</label>
-              <input
-                id={`${id}-pts`}
-                type="number"
-                inputMode="decimal"
-                min={0.5}
-                max={MAX_TRANSFER_POINTS}
-                step={0.5}
-                value={Number.isFinite(draft.points) ? draft.points : ''}
-                onChange={e => setDraft({ ...draft, points: Number(e.target.value) })}
-                className={`${selectClass} tabular-nums`}
-              />
-            </div>
-            <Action variant="secondary" onClick={() => addTransfer(draft)} disabled={draft.from === draft.to || !(draft.points > 0)}>
-              {pt ? 'Mover' : 'Move'}
-            </Action>
-          </div>
-          <p className="mt-2 max-w-[72ch] text-[13px] text-graphite">
-            {pt
-              ? `Um ponto é 1% dos votos em listas no território nacional em 2025 (cerca de ${num(pointVotes)} mil votos). Da abstenção, os votos somam-se; para a abstenção, perdem-se.`
-              : `A point is 1% of the 2025 vote for lists in Portugal (about ${num(pointVotes * 1000)} votes). From abstention, votes are added; to abstention, they are lost.`}
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[14px]">
-            <span className="text-graphite">{pt ? 'Exemplos:' : 'Examples:'}</span>
-            {EXAMPLES.map(t => (
-              <button key={`${t.from}-${t.to}`} type="button" onClick={() => addTransfer(t)} className="tap-target min-h-11 font-semibold text-ink underline underline-offset-4 hover:decoration-2">
-                {transferText(t, t.points)}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
-        {scenario.transfers.length > 0 && (
-          <div>
-            <p className={labelClass}>{pt ? 'Votos movidos' : 'Votes moved'}</p>
-            <ul className="divide-y divide-grid border-y border-grid">
-              {scenario.transfers.map((t, i) => (
-                <li key={i} className="flex min-h-11 items-center justify-between gap-3 text-[15px] text-ink">
-                  <span>{transferText(t, moved[i] ?? 0)}</span>
-                  <button ref={el => { removeButtons.current[i] = el; }} type="button" onClick={() => removeTransfer(i)} className="inline-flex min-h-11 min-w-11 items-center justify-center text-ink hover:bg-field" aria-label={pt ? `Retirar: ${transferText(t, moved[i] ?? 0)}` : `Remove: ${transferText(t, moved[i] ?? 0)}`}>
-                    <X aria-hidden="true" className="h-4 w-4" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        </>
-        )}
-        {changed && (
-          <Action variant="text" onClick={reset}>{pt ? 'Voltar a 2025' : 'Back to 2025'}</Action>
-        )}
+        {changed && <Action variant="secondary" onClick={reset}>{pt ? 'Voltar a 2025' : 'Back to 2025'}</Action>}
       </div>
 
-      {/* The readout: present from load, announced when it changes. */}
-      <p aria-live="polite" className="max-w-[72ch] border-l-2 border-ink pl-3 text-[15px] text-ink">
-        <span className="font-semibold">{pt ? 'Mandatos com estes votos: ' : 'Seats with these votes: '}</span>
-        {summary}.
-      </p>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12">
+        {/* The parliament: first on a phone, beside the controls (and in view while they
+            scroll) from 1024px. */}
+        <div className="min-w-0 lg:order-2">
+          <div className="space-y-5 lg:sticky lg:top-20">
+            <div>
+              <p className="text-[12px] font-semibold text-graphite">{pt ? 'Parlamento com estes votos' : 'Parliament with these votes'}</p>
+              <div className="mx-auto max-w-[26rem]">
+                <Hemicycle seats={result.totals} majority={MAJORITY} caption={pt ? 'para a maioria' : 'for a majority'} />
+              </div>
+              <ul className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[14px] tabular-nums">
+                {shown.map(p => {
+                  const d = seatsOf(result, p) - seatsOf(base, p);
+                  return (
+                    <li key={p} className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                      <span aria-hidden="true" className="inline-block h-2.5 w-2.5" style={{ backgroundColor: listColor(p) }} />
+                      <span className="text-ink">{listName(p, locale)}</span>
+                      <span className="font-bold text-ink">{num(seatsOf(result, p))}</span>
+                      {d !== 0 && <span className="font-semibold text-ink">{signed(d)}</span>}
+                    </li>
+                  );
+                })}
+              </ul>
+              {/* What a screen reader hears once the scenario settles; the drawing above is hidden from it. */}
+              <p aria-live="polite" className="sr-only">{settledSummary}</p>
+            </div>
 
-      <div className="grid gap-10 lg:grid-cols-2">
-        <div className="min-w-0">
-          <h4 className="mb-2 text-[16px] font-semibold text-ink">{pt ? 'Votos e mandatos por partido' : 'Votes and seats by party'}</h4>
-          <div className="scroll-cue overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? 'Votos e mandatos por partido' : 'Votes and seats by party'}>
+            <div className="hidden space-y-5 lg:block">{details}</div>
+          </div>
+        </div>
+
+        {/* The controls. */}
+        <div className="min-w-0 lg:order-1">
+          {mode === 'groups' ? (
+            groupsFailed ? (
+              <p className="max-w-[72ch] text-[14px] text-graphite">
+                {pt ? 'Não foi possível carregar os grupos. Tenta recarregar a página.' : 'The groups could not be loaded. Try reloading the page.'}
+              </p>
+            ) : (
+              <GroupMovesPanel
+                groups={groups}
+                options={groupOptions}
+                moves={groupMoves}
+                moved={groupResult?.moved ?? []}
+                onChange={changeMove}
+                onAdd={addMove}
+                onRemove={removeMove}
+                onExample={example}
+                locale={locale}
+                methodHref={groupsMethodHref}
+              />
+            )
+          ) : (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="text-[14px] text-graphite">{pt ? 'Partir dos votos de' : 'Start from the vote of'}</span>
+                <ChoiceGroup
+                  label={pt ? 'Partir dos votos de' : 'Start from the vote of'}
+                  options={presetOptions}
+                  value={preset}
+                  onChange={p => setShares(presetShares(data, p))}
+                />
+              </div>
+              <PartySliders
+                lists={data.movable}
+                others={data.others}
+                shares={shares}
+                base={base2025}
+                seats={result.totals}
+                seatsBase={base.totals}
+                onChange={(list, v) => setShares(s => setShare(data, s, list, v))}
+                locale={locale}
+              />
+              <p className="max-w-[68ch] text-[13px] text-graphite">
+                {pt
+                  ? 'Quando um partido sobe, os outros descem na proporção do que têm. O JPP fica como em 2025 (1 mandato, na Madeira); as outras listas nunca recebem mandatos.'
+                  : 'When one party goes up, the others go down in proportion to what they have. JPP stays as in 2025 (1 seat, in Madeira); the other lists never get seats.'}
+                {preset && preset !== '2025' && (pt
+                  ? ` Os votos de ${preset} são as percentagens nacionais desse ano sobre a geografia de 2025, não o resultado de ${preset}.`
+                  : ` The ${preset} vote is that year's national shares on 2025's geography, not the ${preset} result.`)}
+              </p>
+              <Disclosure summary={pt ? 'Como o voto nacional se distribui pelos círculos' : 'How the national vote is spread over the circles'}>
+                <p className="mt-1 max-w-[68ch] text-[14px] text-graphite">
+                  {pt
+                    ? 'Cada mudança nacional é distribuída pelos 20 círculos do território nacional metade em proporção ao peso de cada partido em 2025, metade por igual, e os mandatos saem do método de Hondt em cada círculo. Mesmo com o voto nacional certo, esta regra deu a outro partido entre 3 e 8 dos 226 mandatos do território nacional em cada eleição de 2019 a 2025. Os círculos da emigração ficam como em 2025.'
+                    : 'Each national change is spread over the 20 circles in Portugal half in proportion to each party’s weight there in 2025, half evenly, and the seats come from the D’Hondt method in each circle. Even given the right national vote, this rule gave between 3 and 8 of the 226 seats in Portugal to another party in each election from 2019 to 2025. The emigration circles stay as in 2025.'}
+                </p>
+              </Disclosure>
+            </div>
+          )}
+
+          {/* On a phone the parliament is above the controls: this line keeps its changes in
+              view while the reader works below it. */}
+          <div className="sticky bottom-0 z-10 mt-4 border-t border-ink bg-paper py-2 lg:hidden" aria-hidden="true">
+            <SeatStrip seats={result.totals} />
+            <p className="mt-1 text-[13px] tabular-nums text-ink">
+              {changes.length === 0
+                ? (pt ? 'Mandatos como em 2025' : 'Seats as in 2025')
+                : changes.map(p => `${listName(p, locale)} ${num(seatsOf(result, p))} (${signed(seatsOf(result, p) - seatsOf(base, p))})`).join(' · ')}
+            </p>
+          </div>
+        </div>
+        <div className="min-w-0 space-y-5 lg:hidden">{details}</div>
+      </div>
+
+      <div className="space-y-1 border-t border-rule pt-2">
+        <Disclosure summary={pt ? 'Tabela: votos e mandatos por partido' : 'Table: votes and seats by party'}>
+          <div className="scroll-cue mt-2 overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? 'Votos e mandatos por partido' : 'Votes and seats by party'}>
             <table className="min-w-full border-collapse text-sm tabular-nums">
               <caption className="sr-only">{pt ? 'Votos e mandatos por partido, em 2025 e com estes votos' : 'Votes and seats by party, in 2025 and with these votes'}</caption>
               <thead>
@@ -352,8 +385,7 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
                   <th scope="col" className="px-2 py-2 text-right">{pt ? '% em 2025' : '% in 2025'}</th>
                   <th scope="col" className="px-2 py-2 text-right">{pt ? '% no cenário' : '% in scenario'}</th>
                   <th scope="col" className="px-2 py-2 text-right">{pt ? 'Mandatos em 2025' : 'Seats in 2025'}</th>
-                  <th scope="col" className="px-2 py-2 text-right">{pt ? 'Mandatos no cenário' : 'Seats in scenario'}</th>
-                  <th scope="col" className="py-2 pl-2 text-left"><span className="sr-only">{pt ? 'Gráfico' : 'Chart'}</span></th>
+                  <th scope="col" className="py-2 pl-2 text-right">{pt ? 'Mandatos no cenário' : 'Seats in scenario'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -364,19 +396,13 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
                   const before = seatsOf(base, p);
                   return (
                     <tr key={p} className="border-b border-grid">
-                      <th scope="row" className="py-2 pr-3 text-left font-medium text-ink">
-                        <span className="inline-flex items-center gap-2">
-                          <span aria-hidden="true" className="inline-block h-2.5 w-2.5 shrink-0" style={{ backgroundColor: listColor(p) }} />
-                          {listName(p, locale)}
-                        </span>
-                      </th>
+                      <th scope="row" className="py-2 pr-3 text-left font-medium text-ink">{listName(p, locale)}</th>
                       <td className="px-2 py-2 text-right text-graphite">{isFixed ? '—' : pct(base.national[p])}</td>
                       <td className="px-2 py-2 text-right">{isFixed ? '—' : pct(result.national[p])}</td>
                       <td className="px-2 py-2 text-right text-graphite">{isOthers ? '—' : num(before)}</td>
-                      <td className="px-2 py-2 text-right font-semibold">
+                      <td className="py-2 pl-2 text-right font-semibold">
                         {isOthers ? '—' : <>{num(now)}{now !== before && <span className="ml-1 font-normal">({signed(now - before)})</span>}</>}
                       </td>
-                      <td className="py-2 pl-2">{!isOthers && <SeatBar value={now} before={before} max={maxSeats} />}</td>
                     </tr>
                   );
                 })}
@@ -385,79 +411,22 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
           </div>
           <p className="mt-2 text-[12.5px] text-graphite">
             {pt
-              ? 'Percentagens dos votos em listas no território nacional. O JPP e os dois círculos da emigração ficam como em 2025. As outras listas nunca recebem mandatos: são muitas e nenhuma chegou perto de um em 2025.'
-              : 'Shares of the vote for lists in Portugal. JPP and the two emigration circles stay as in 2025. The other lists never get seats: they are many, and none came close to one in 2025.'}
+              ? 'Percentagens dos votos em listas no território nacional. O JPP e os dois círculos da emigração ficam como em 2025.'
+              : 'Shares of the vote for lists in Portugal. JPP and the two emigration circles stay as in 2025.'}
           </p>
-        </div>
-
-        <div className="min-w-0 space-y-8">
-          <div>
-            <h4 className="mb-2 text-[16px] font-semibold text-ink">{pt ? `Somas de mandatos e a maioria de ${MAJORITY}` : `Seat sums and the ${MAJORITY}-seat majority`}</h4>
-            <div className="scroll-cue overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? 'Somas de mandatos' : 'Seat sums'}>
-            <table className="min-w-full border-collapse text-sm tabular-nums">
-              <caption className="sr-only">{pt ? 'Somas de mandatos, em 2025 e com estes votos' : 'Seat sums, in 2025 and with these votes'}</caption>
-              <thead>
-                <tr className="border-b-2 border-ink text-[12px] font-semibold text-graphite">
-                  <th scope="col" className="py-2 pr-3 text-left">{pt ? 'Partidos' : 'Parties'}</th>
-                  <th scope="col" className="px-2 py-2 text-right">2025</th>
-                  <th scope="col" className="px-2 py-2 text-right">{pt ? 'Cenário' : 'Scenario'}</th>
-                  <th scope="col" className="py-2 pl-2 text-left"><span className="sr-only">{pt ? 'Gráfico' : 'Chart'}</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {BLOCS.map(b => {
-                  const now = b.lists.reduce((a, p) => a + seatsOf(result, p), 0);
-                  const before = b.lists.reduce((a, p) => a + seatsOf(base, p), 0);
-                  return (
-                    <tr key={b.key} className="border-b border-grid">
-                      <th scope="row" className="py-2 pr-3 text-left font-medium text-ink">{b.lists.map(p => listName(p, locale)).join(' + ')}</th>
-                      <td className="px-2 py-2 text-right text-graphite">{num(before)}</td>
-                      <td className="px-2 py-2 text-right font-semibold">
-                        {num(now)}
-                        {now >= MAJORITY && <span className="ml-1 font-normal">{pt ? '(maioria)' : '(majority)'}</span>}
-                      </td>
-                      <td className="py-2 pl-2"><SeatBar value={now} before={before} max={230} majority={MAJORITY} /></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            </div>
-            <p className="mt-2 text-[12.5px] text-graphite">
-              {pt
-                ? 'Somas de mandatos, não governos. Barra vazada: o cenário; quadrado preto: 2025; traço vertical: 116 mandatos.'
-                : 'Seat sums, not governments. Hollow bar: the scenario; black square: 2025; vertical line: 116 seats.'}
-            </p>
+        </Disclosure>
+        <Disclosure summary={pt ? 'O último mandato de cada círculo, com estes votos' : 'Each circle’s last seat, with these votes'}>
+          <div className="mt-2">
+            <LastSeatsTable
+              rows={lastSeatRows}
+              locale={locale}
+              caption={pt ? 'O último mandato de cada círculo, com estes votos' : 'Each circle’s last seat, with these votes'}
+              votesHeading={pt ? 'Votos que faltariam' : 'Votes it would need'}
+              restLabel={pt ? 'Ver os outros círculos' : 'Show the other circles'}
+              fixedNote={pt ? 'como em 2025' : 'as in 2025'}
+            />
           </div>
-
-          <div>
-            <h4 className="mb-2 text-[16px] font-semibold text-ink">{pt ? 'Círculos onde os mandatos mudam' : 'Circles where seats change'}</h4>
-            {changedCircles.length === 0 ? (
-              <p className="text-[14px] text-graphite">{pt ? 'Nenhum: os mandatos são os de 2025.' : 'None: the seats are 2025’s.'}</p>
-            ) : (
-              <ul className="divide-y divide-grid border-y border-grid text-[14px] tabular-nums">
-                {changedCircles.map(c => (
-                  <li key={c.name} className="flex flex-wrap gap-x-3 py-2">
-                    <span className="min-w-[8rem] font-medium text-ink">{c.name}</span>
-                    <span className="text-ink">{c.diff.sort((a, b) => b.d - a.d).map(x => `${listName(x.p, locale)} ${signed(x.d)}`).join(', ')}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h4 className="mb-2 text-[16px] font-semibold text-ink">{pt ? 'O último mandato de cada círculo, com estes votos' : 'Each circle’s last seat, with these votes'}</h4>
-        <LastSeatsTable
-          rows={lastSeatRows}
-          locale={locale}
-          caption={pt ? 'O último mandato de cada círculo, com estes votos' : 'Each circle’s last seat, with these votes'}
-          votesHeading={pt ? 'Votos que faltariam' : 'Votes it would need'}
-          restLabel={pt ? 'Ver os outros círculos' : 'Show the other circles'}
-          fixedNote={pt ? 'como em 2025' : 'as in 2025'}
-        />
+        </Disclosure>
       </div>
     </div>
   );

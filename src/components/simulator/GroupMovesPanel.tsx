@@ -1,38 +1,59 @@
 'use client';
 
 import { Link } from '@/i18n/routing';
-import { useEffect, useId, useRef, useState } from 'react';
-import { X } from 'lucide-react';
-import { Action } from '@/components/brand/Action';
+import { useEffect, useRef, useState } from 'react';
+import { Plus, X } from 'lucide-react';
 import { formatElectionNumber } from '@/lib/election-display';
 import { ABSTENTION } from '@/lib/simulator/engine';
 import {
   AGE_CHOICES, BLANK_NULL, EDU_CHOICES, MAX_GROUP_MOVES, SEX_CHOICES, groupSize,
   type AgeChoice, type EduChoice, type GroupData, type GroupMove, type SexChoice,
 } from '@/lib/simulator/groups';
+import { Disclosure } from '@/components/viz/Disclosure';
 import { inList, listName, type Locale } from './copy';
+import styles from './Simulator.module.css';
 
-const SEX_LABEL: Record<SexChoice, { pt: string; en: string }> = {
-  all: { pt: 'Homens e mulheres', en: 'Men and women' },
-  men: { pt: 'Homens', en: 'Men' },
-  women: { pt: 'Mulheres', en: 'Women' },
+type Words = { pt: string; en: string };
+
+/** The sentence's words for each choice: "Das pessoas de 18 a 34 anos com o ensino superior…". */
+const SEX_WORDS: Record<SexChoice, Words> = {
+  all: { pt: 'Das pessoas', en: 'Of people' },
+  men: { pt: 'Dos homens', en: 'Of men' },
+  women: { pt: 'Das mulheres', en: 'Of women' },
 };
-const AGE_LABEL: Record<AgeChoice, { pt: string; en: string }> = {
-  all: { pt: 'Todas as idades', en: 'All ages' },
-  '18-24': { pt: '18 a 24 anos', en: '18 to 24' },
-  '25-34': { pt: '25 a 34 anos', en: '25 to 34' },
-  '18-34': { pt: '18 a 34 anos', en: '18 to 34' },
-  '35-44': { pt: '35 a 44 anos', en: '35 to 44' },
-  '45-54': { pt: '45 a 54 anos', en: '45 to 54' },
-  '55-64': { pt: '55 a 64 anos', en: '55 to 64' },
-  '65-74': { pt: '65 a 74 anos', en: '65 to 74' },
-  '75+': { pt: '75 ou mais anos', en: '75 and over' },
-  '65+': { pt: '65 ou mais anos', en: '65 and over' },
+const AGE_WORDS: Record<AgeChoice, Words> = {
+  all: { pt: 'de todas as idades', en: 'of all ages' },
+  '18-24': { pt: 'de 18 a 24 anos', en: 'aged 18 to 24' },
+  '25-34': { pt: 'de 25 a 34 anos', en: 'aged 25 to 34' },
+  '18-34': { pt: 'de 18 a 34 anos', en: 'aged 18 to 34' },
+  '35-44': { pt: 'de 35 a 44 anos', en: 'aged 35 to 44' },
+  '45-54': { pt: 'de 45 a 54 anos', en: 'aged 45 to 54' },
+  '55-64': { pt: 'de 55 a 64 anos', en: 'aged 55 to 64' },
+  '65-74': { pt: 'de 65 a 74 anos', en: 'aged 65 to 74' },
+  '75+': { pt: 'com 75 ou mais anos', en: 'aged 75 or over' },
+  '65+': { pt: 'com 65 ou mais anos', en: 'aged 65 or over' },
 };
-const EDU_LABEL: Record<EduChoice, { pt: string; en: string }> = {
-  all: { pt: 'Qualquer escolaridade', en: 'Any schooling' },
-  basic: { pt: 'Até ao 3.º ciclo', en: 'Up to lower secondary' },
-  secondary: { pt: 'Secundário', en: 'Upper secondary' },
+const EDU_WORDS: Record<EduChoice, Words> = {
+  all: { pt: 'com qualquer escolaridade', en: 'with any schooling' },
+  basic: { pt: 'com o 3.º ciclo ou menos', en: 'with lower secondary or less' },
+  secondary: { pt: 'com o secundário', en: 'with upper secondary' },
+  tertiary: { pt: 'com o ensino superior', en: 'with a degree' },
+};
+
+function fromWords(o: string, locale: Locale): string {
+  if (locale === 'pt') return o === ABSTENTION ? 'se abstiveram' : o === BLANK_NULL ? 'votaram branco ou nulo' : `votaram ${inList(o)}`;
+  return o === ABSTENTION ? 'abstained' : o === BLANK_NULL ? 'voted blank or spoilt' : o === 'OUT' ? 'voted for other lists' : `voted ${listName(o, 'en')}`;
+}
+
+function toWords(o: string, locale: Locale): string {
+  if (locale === 'pt') return o === ABSTENTION ? 'passam a abster-se' : o === BLANK_NULL ? 'passam a votar branco ou nulo' : `passam a votar ${inList(o)}`;
+  return o === ABSTENTION ? 'now abstain' : o === BLANK_NULL ? 'now vote blank or spoilt' : o === 'OUT' ? 'now vote for other lists' : `now vote ${listName(o, 'en')}`;
+}
+
+/** Short names for the examples' groups. */
+const EXAMPLE_GROUP: Record<string, Words> = {
+  '18-34': { pt: '18–34 anos', en: '18–34' },
+  '65+': { pt: '65 ou mais', en: '65+' },
   tertiary: { pt: 'Ensino superior', en: 'Degree' },
 };
 
@@ -40,182 +61,196 @@ const EDU_LABEL: Record<EduChoice, { pt: string; en: string }> = {
 export const GROUP_EXAMPLES: GroupMove[] = [
   { sex: 'all', age: '18-34', edu: 'all', from: ABSTENTION, to: 'CH', share: 25 },
   { sex: 'all', age: 'all', edu: 'tertiary', from: 'AD', to: 'IL', share: 20 },
+  { sex: 'all', age: '18-34', edu: 'all', from: 'PS', to: 'L', share: 20 },
   { sex: 'all', age: '65+', edu: 'all', from: 'PS', to: ABSTENTION, share: 10 },
 ];
 
-export function optionName(o: string, locale: Locale): string {
-  return listName(o, locale);
-}
+/** A new move: everyone who abstained, nothing moved yet; the reader picks the rest. */
+export const BLANK_MOVE: GroupMove = { sex: 'all', age: 'all', edu: 'all', from: ABSTENTION, to: 'AD', share: 0 };
 
-/** "25% das pessoas de 18 a 34 anos que se abstiveram passam a votar no Chega". */
+/** "25% das pessoas de 18 a 34 anos que em 2025 se abstiveram passam a votar no Chega". */
 export function groupMoveText(m: GroupMove, locale: Locale, share = m.share): string {
   const pct = `${formatElectionNumber(share, locale, Number.isInteger(share) ? 0 : 1)}%`;
+  const age = m.age === 'all' ? '' : ` ${AGE_WORDS[m.age][locale]}`;
+  const edu = m.edu === 'all' ? '' : ` ${EDU_WORDS[m.edu][locale]}`;
   if (locale === 'pt') {
     const who = m.sex === 'men' ? 'dos homens' : m.sex === 'women' ? 'das mulheres' : 'das pessoas';
-    const age = m.age === 'all' ? '' : m.age === '75+' || m.age === '65+' ? ` com ${AGE_LABEL[m.age].pt}` : ` de ${AGE_LABEL[m.age].pt}`;
-    const edu = m.edu === 'all' ? '' : m.edu === 'basic' ? ' com o 3.º ciclo ou menos' : m.edu === 'secondary' ? ' com o secundário' : ' com o ensino superior';
-    const from = m.from === ABSTENTION ? 'se abstiveram' : m.from === BLANK_NULL ? 'votaram branco ou nulo' : `votaram ${inList(m.from)}`;
-    const to = m.to === ABSTENTION ? 'passam a abster-se' : m.to === BLANK_NULL ? 'passam a votar branco ou nulo' : `passam a votar ${inList(m.to)}`;
-    return `${pct} ${who}${age}${edu} que em 2025 ${from} ${to}`;
+    return `${pct} ${who}${age}${edu} que em 2025 ${fromWords(m.from, 'pt')} ${toWords(m.to, 'pt')}`;
   }
   const who = m.sex === 'men' ? 'men' : m.sex === 'women' ? 'women' : 'people';
-  const age = m.age === 'all' ? '' : ` aged ${AGE_LABEL[m.age].en}`;
-  const edu = m.edu === 'all' ? '' : m.edu === 'basic' ? ' with lower secondary schooling or less' : m.edu === 'secondary' ? ' with upper secondary schooling' : ' with a degree';
-  const from = m.from === ABSTENTION ? 'abstained' : m.from === BLANK_NULL ? 'voted blank or spoilt' : `voted ${listName(m.from, 'en')}`;
-  const to = m.to === ABSTENTION ? 'now abstain' : m.to === BLANK_NULL ? 'now vote blank or spoilt' : `now vote ${listName(m.to, 'en')}`;
-  return `${pct} of ${who}${age}${edu} who ${from} in 2025 ${to}`;
+  return `${pct} of ${who}${age}${edu} who ${fromWords(m.from, 'en')} in 2025 ${toWords(m.to, 'en')}`;
+}
+
+function exampleLabel(m: GroupMove, locale: Locale): string {
+  const group = EXAMPLE_GROUP[m.age !== 'all' ? m.age : m.edu]?.[locale] ?? '';
+  const name = (o: string) => (o === ABSTENTION ? (locale === 'pt' ? 'abstenção' : 'abstention') : listName(o, locale));
+  return `${group}: ${name(m.from)} → ${name(m.to)}`;
+}
+
+function InlineSelect<T extends string>({ label, value, options, words, onChange }: {
+  label: string;
+  value: T;
+  options: readonly T[];
+  words: (o: T) => string;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <span className={styles.choice}>
+      <span aria-hidden="true">{words(value)}</span>
+      <select aria-label={label} value={value} onChange={e => onChange(e.target.value as T)}>
+        {options.map(o => <option key={o} value={o}>{words(o)}</option>)}
+      </select>
+    </span>
+  );
 }
 
 /**
- * The controls of "Por grupos": who (sex, age, schooling), what they did in 2025, what they do
- * now, and what share of them. The state lives in MoveVotes; this draws the form and the list.
+ * "Por grupo de eleitores": each move is a sentence the reader edits in place ("Das pessoas de 18 a 34
+ * anos que em 2025 se abstiveram, 25% passam a votar no Chega"), and the seats follow as it
+ * changes. Moves apply in order.
  */
-export function GroupMovesPanel({ groups, options, moves, moved, onAdd, onRemove, locale, methodHref }: {
+export function GroupMovesPanel({ groups, options, moves, moved, onChange, onAdd, onRemove, onExample, locale, methodHref }: {
   groups: GroupData | null;
   /** The lists, BLANK_NULL and ABS, in the file's order. */
   options: string[];
   moves: GroupMove[];
   /** Votes each move actually moved (all circles together). */
   moved: number[];
-  onAdd: (m: GroupMove) => void;
+  onChange: (i: number, m: GroupMove) => void;
+  onAdd: () => void;
   onRemove: (i: number) => void;
+  onExample: (m: GroupMove) => void;
   locale: Locale;
   /** The methodology's section on the group mode (no locale prefix). */
   methodHref?: string;
 }) {
   const pt = locale === 'pt';
-  const id = useId();
-  const [draft, setDraft] = useState<GroupMove>(GROUP_EXAMPLES[0]);
-  const removeButtons = useRef<Array<HTMLButtonElement | null>>([]);
-  const firstSelect = useRef<HTMLSelectElement>(null);
-  const [focusAfterRemove, setFocusAfterRemove] = useState<number | null>(null);
-  useEffect(() => {
-    if (focusAfterRemove == null) return;
-    const n = moves.length;
-    const target = n > 0 ? removeButtons.current[Math.min(focusAfterRemove, n - 1)] : firstSelect.current;
-    target?.focus();
-    setFocusAfterRemove(null);
-  }, [focusAfterRemove, moves.length]);
-
   const num = (v: number) => formatElectionNumber(v, locale);
   const roundVotes = (v: number) => (v >= 10000 ? Math.round(v / 1000) * 1000 : Math.round(v / 100) * 100);
-  const selectClass = 'min-h-11 w-full border border-ink bg-paper px-2 text-base font-medium text-ink sm:text-sm';
-  const labelClass = 'mb-1 block text-[12px] font-semibold text-graphite';
-  const valid = draft.from !== draft.to && draft.share > 0 && draft.share <= 100;
-  const preview = groups && valid ? groupSize(groups, draft) * (draft.share / 100) : null;
-  const label = (o: string) => optionName(o, locale);
+  const blocks = useRef<Array<HTMLDivElement | null>>([]);
+  const [focusMove, setFocusMove] = useState<number | null>(null);
+  // After an add or a removal, focus the first control of the move now in that place.
+  useEffect(() => {
+    if (focusMove == null) return;
+    blocks.current[Math.min(focusMove, moves.length - 1)]?.querySelector('select')?.focus();
+    setFocusMove(null);
+  }, [focusMove, moves.length]);
 
   return (
     <div className="space-y-5">
-      <fieldset>
-        <legend className="mb-2 text-[15px] font-semibold text-ink">{pt ? 'Quem muda' : 'Who changes'}</legend>
-        <div className="grid max-w-3xl gap-3 sm:grid-cols-3">
-          <div>
-            <label htmlFor={`${id}-sex`} className={labelClass}>{pt ? 'Sexo' : 'Sex'}</label>
-            <select ref={firstSelect} id={`${id}-sex`} className={selectClass} value={draft.sex} onChange={e => setDraft({ ...draft, sex: e.target.value as SexChoice })}>
-              {SEX_CHOICES.map(s => <option key={s} value={s}>{SEX_LABEL[s][locale]}</option>)}
-            </select>
-          </div>
-          <div>
-            <label htmlFor={`${id}-age`} className={labelClass}>{pt ? 'Idade' : 'Age'}</label>
-            <select id={`${id}-age`} className={selectClass} value={draft.age} onChange={e => setDraft({ ...draft, age: e.target.value as AgeChoice })}>
-              {AGE_CHOICES.map(a => <option key={a} value={a}>{AGE_LABEL[a][locale]}</option>)}
-            </select>
-          </div>
-          <div>
-            <label htmlFor={`${id}-edu`} className={labelClass}>{pt ? 'Escolaridade' : 'Schooling'}</label>
-            <select id={`${id}-edu`} className={selectClass} value={draft.edu} onChange={e => setDraft({ ...draft, edu: e.target.value as EduChoice })}>
-              {EDU_CHOICES.map(e => <option key={e} value={e}>{EDU_LABEL[e][locale]}</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="mt-3 grid max-w-3xl gap-3 sm:grid-cols-[1fr_1fr_7rem_auto] sm:items-end">
-          <div>
-            <label htmlFor={`${id}-from`} className={labelClass}>{pt ? 'Em 2025' : 'In 2025'}</label>
-            <select id={`${id}-from`} className={selectClass} value={draft.from} onChange={e => setDraft({ ...draft, from: e.target.value })}>
-              {options.map(o => <option key={o} value={o}>{label(o)}</option>)}
-            </select>
-          </div>
-          <div>
-            <label htmlFor={`${id}-to`} className={labelClass}>{pt ? 'Passam a' : 'Now'}</label>
-            <select id={`${id}-to`} className={selectClass} value={draft.to} onChange={e => setDraft({ ...draft, to: e.target.value })}>
-              {options.map(o => <option key={o} value={o}>{label(o)}</option>)}
-            </select>
-          </div>
-          <div>
-            <label htmlFor={`${id}-share`} className={labelClass}>{pt ? 'Que parte (%)' : 'Share (%)'}</label>
-            <input
-              id={`${id}-share`}
-              type="number"
-              inputMode="decimal"
-              min={1}
-              max={100}
-              step={1}
-              value={Number.isFinite(draft.share) ? draft.share : ''}
-              onChange={e => setDraft({ ...draft, share: Number(e.target.value) })}
-              className={`${selectClass} tabular-nums`}
-            />
-          </div>
-          <Action variant="secondary" onClick={() => onAdd(draft)} disabled={!valid || !groups || moves.length >= MAX_GROUP_MOVES}>
-            {pt ? 'Mover' : 'Move'}
-          </Action>
-        </div>
-        {/* The group's size beside the control, so a reader sees how many votes a share is. */}
-        <p aria-live="polite" className="mt-2 max-w-[72ch] text-[13px] text-graphite">
-          {!groups
-            ? (pt ? 'A carregar os grupos…' : 'Loading the groups…')
-            : preview == null
-              ? (pt ? 'Escolhe de onde e para onde.' : 'Choose from where and to where.')
-              : pt
-                ? `${groupMoveText(draft, locale)}: cerca de ${num(roundVotes(preview))} pessoas.`
-                : `${groupMoveText(draft, locale)}: about ${num(roundVotes(preview))} people.`}
-        </p>
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[14px]">
-          <span className="text-graphite">{pt ? 'Exemplos:' : 'Examples:'}</span>
-          {GROUP_EXAMPLES.map(m => (
-            <button key={`${m.age}-${m.edu}-${m.from}-${m.to}`} type="button" disabled={!groups} onClick={() => onAdd(m)} className="tap-target min-h-11 text-left font-semibold text-ink underline underline-offset-4 hover:decoration-2 disabled:text-graphite">
-              {groupMoveText(m, locale)}
-            </button>
-          ))}
-        </div>
-      </fieldset>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-0 text-[14px]">
+        <span className="text-graphite">{pt ? 'Exemplos' : 'Examples'}</span>
+        {GROUP_EXAMPLES.map(m => (
+          <button
+            key={`${m.age}-${m.edu}-${m.from}-${m.to}`}
+            type="button"
+            disabled={!groups}
+            onClick={() => onExample(m)}
+            aria-label={groupMoveText(m, locale)}
+            className="tap-target min-h-11 whitespace-nowrap font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink disabled:text-graphite"
+          >
+            {exampleLabel(m, locale)}
+          </button>
+        ))}
+      </div>
 
-      {moves.length > 0 && (
-        <div>
-          <p className={labelClass}>{pt ? 'Votos movidos' : 'Votes moved'}</p>
-          <ul className="divide-y divide-grid border-y border-grid">
-            {moves.map((m, i) => {
-              const text = groupMoveText(m, locale);
-              const votes = moved[i];
-              return (
-                <li key={i} className="flex min-h-11 items-center justify-between gap-3 py-1 text-[15px] text-ink">
-                  <span>
-                    {text}
-                    {votes != null && <span className="text-graphite">{pt ? ` (cerca de ${num(roundVotes(votes))} votos)` : ` (about ${num(roundVotes(votes))} votes)`}</span>}
-                  </span>
-                  <button ref={el => { removeButtons.current[i] = el; }} type="button" onClick={() => { onRemove(i); setFocusAfterRemove(i); }} className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-ink hover:bg-field" aria-label={pt ? `Retirar: ${text}` : `Remove: ${text}`}>
+      <div className="border-t border-ink">
+        {moves.map((m, i) => {
+          const size = groups ? groupSize(groups, m) : null;
+          const votes = moved[i];
+          const set = (patch: Partial<GroupMove>) => onChange(i, { ...m, ...patch });
+          return (
+            <div key={i} ref={el => { blocks.current[i] = el; }} role="group" aria-label={pt ? `Mudança ${i + 1}` : `Move ${i + 1}`} className="border-b border-grid py-3">
+              <p className="text-[16px] leading-[2.75rem] text-ink">
+                <InlineSelect label={pt ? 'Sexo' : 'Sex'} value={m.sex} options={SEX_CHOICES} words={o => SEX_WORDS[o][locale]} onChange={sex => set({ sex })} />{' '}
+                <InlineSelect label={pt ? 'Idade' : 'Age'} value={m.age} options={AGE_CHOICES} words={o => AGE_WORDS[o][locale]} onChange={age => set({ age })} />{' '}
+                <InlineSelect label={pt ? 'Escolaridade' : 'Schooling'} value={m.edu} options={EDU_CHOICES} words={o => EDU_WORDS[o][locale]} onChange={edu => set({ edu })} />{' '}
+                {pt ? 'que em 2025' : 'who in 2025'}{' '}
+                <span className="whitespace-nowrap">
+                  <InlineSelect label={pt ? 'O que fizeram em 2025' : 'What they did in 2025'} value={m.from} options={options} words={o => fromWords(o, locale)} onChange={from => set({ from })} />,
+                </span>
+              </p>
+              <div className="mt-1 grid grid-cols-[minmax(0,1fr)_3.5rem] items-center gap-3">
+                <div className={styles.slider}>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={m.share}
+                    disabled={!groups}
+                    onChange={e => set({ share: Number(e.target.value) })}
+                    aria-label={pt ? 'Que parte muda' : 'What share changes'}
+                    aria-valuetext={`${num(m.share)}%`}
+                    className={styles.range}
+                  />
+                </div>
+                <span className="text-right text-[18px] font-bold tabular-nums text-ink" aria-hidden="true">{num(m.share)}%</span>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-x-4">
+                <p className="text-[16px] leading-[2.75rem] text-ink">
+                  <InlineSelect label={pt ? 'O que passam a fazer' : 'What they do instead'} value={m.to} options={options} words={o => toWords(o, locale)} onChange={to => set({ to })} />
+                </p>
+                {moves.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => { onRemove(i); setFocusMove(Math.max(0, i - 1)); }}
+                    className="inline-flex min-h-11 items-center gap-1 text-[14px] font-semibold text-ink hover:bg-field"
+                    aria-label={pt ? `Retirar: ${groupMoveText(m, locale)}` : `Remove: ${groupMoveText(m, locale)}`}
+                  >
                     <X aria-hidden="true" className="h-4 w-4" />
+                    {pt ? 'Retirar' : 'Remove'}
                   </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+                )}
+              </div>
+              <p className="mt-1 text-[13px] tabular-nums text-graphite">
+                {m.from === m.to
+                  ? (pt ? 'Escolhe outra opção.' : 'Pick another option.')
+                  : size == null
+                    ? (pt ? 'A carregar os grupos…' : 'Loading the groups…')
+                    : pt
+                      ? `Cerca de ${num(roundVotes(votes ?? 0))} votos mudam, de ${num(roundVotes(size))} pessoas neste grupo.`
+                      : `About ${num(roundVotes(votes ?? 0))} votes change, of ${num(roundVotes(size))} people in this group.`}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {moves.length < MAX_GROUP_MOVES && (
+        <button
+          type="button"
+          onClick={() => { onAdd(); setFocusMove(moves.length); }}
+          disabled={!groups}
+          className="inline-flex min-h-11 items-center gap-2 border border-ink px-3 text-[14px] font-semibold text-ink hover:bg-field disabled:border-rule disabled:text-graphite"
+        >
+          <Plus aria-hidden="true" className="h-4 w-4" />
+          {pt ? 'Juntar outra mudança' : 'Add another move'}
+        </button>
       )}
 
-      <p className="max-w-[72ch] text-[13px] text-graphite">
-        {pt
-          ? 'Os grupos são os cidadãos portugueses residentes com 18 ou mais anos (Censos 2021). Quanto votou cada grupo vem do resultado de 2025 em cada círculo; as diferenças entre grupos vêm do Estudo Eleitoral Português 2024, um inquérito a cerca de 800 pessoas, por isso as dos partidos pequenos são pouco precisas, e as ilhas usam as do continente. Os votos movidos ficam nos círculos onde esse grupo vive e votou assim. As mudanças aplicam-se pela ordem da lista, cada uma sobre o que as anteriores deixaram; votos que passam à abstenção ou a brancos e nulos deixam de contar para os mandatos.'
-          : 'The groups are Portuguese citizens aged 18 and over living in Portugal (2021 census). How much each group voted comes from the 2025 result in each circle; the gaps between groups come from the 2024 Portuguese Election Study, a survey of about 800 people, so those of small parties are imprecise, and the islands use the mainland’s. Votes moved stay in the circles where that group lives and voted that way. Moves apply in the order of the list, each to what the earlier ones left; votes that go to abstention or to blank and spoilt no longer count towards seats.'}
-        {methodHref && (
-          <>
-            {' '}
-            <Link href={methodHref} locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">
-              {pt ? 'Como foi feita a tabela de grupos' : 'How the group table was made'}
-            </Link>
-          </>
-        )}
-      </p>
+      <Disclosure summary={pt ? 'De onde vêm os grupos e o que não sabem' : 'Where the groups come from, and what they miss'}>
+        <div className="mt-1 max-w-[68ch] space-y-2 text-[14px] text-graphite">
+          <p>
+            {pt
+              ? 'Os grupos são os cidadãos portugueses residentes com 18 ou mais anos (Censos 2021). Quanto votou cada grupo em cada lista vem do resultado de 2025 em cada círculo; as diferenças entre grupos vêm do Estudo Eleitoral Português 2024, um inquérito a cerca de 800 pessoas, por isso as dos partidos pequenos são pouco precisas, e a Madeira e os Açores usam as do continente.'
+              : 'The groups are Portuguese citizens aged 18 and over living in Portugal (2021 census). How much each group voted for each list comes from the 2025 result in each circle; the gaps between groups come from the 2024 Portuguese Election Study, a survey of about 800 people, so those of small parties are imprecise, and Madeira and the Azores use the mainland’s.'}
+          </p>
+          <p>
+            {pt
+              ? 'Os votos movidos ficam nos círculos onde esse grupo vive e votou assim. As mudanças aplicam-se pela ordem da lista, cada uma sobre o que as anteriores deixaram. Votos que passam à abstenção ou a brancos e nulos deixam de contar para os mandatos. Os círculos da emigração ficam como em 2025.'
+              : 'Votes moved stay in the circles where that group lives and voted that way. Moves apply in the order of the list, each to what the earlier ones left. Votes that go to abstention or to blank and spoilt no longer count towards seats. The emigration circles stay as in 2025.'}
+            {methodHref && (
+              <>
+                {' '}
+                <Link href={methodHref} locale={locale} className="font-semibold text-ink underline decoration-ink/40 underline-offset-4 hover:decoration-ink">
+                  {pt ? 'Como foi feita a tabela de grupos' : 'How the group table was made'}
+                </Link>
+              </>
+            )}
+          </p>
+        </div>
+      </Disclosure>
     </div>
   );
 }

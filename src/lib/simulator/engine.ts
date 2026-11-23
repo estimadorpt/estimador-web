@@ -184,8 +184,8 @@ export function runScenario(data: SimulatorData, nationalVotes: NationalVotes): 
     const s = swing.reduce((a, p) => a + (c.votes[p] ?? 0), 0);
     return swing.map(p => (c.votes[p] ?? 0) / s);
   });
-  // applyTransfers keeps the parties above PARTY_FLOOR_POINTS, so this is never zero from the
-  // form or a link; the floor here only keeps a direct caller from dividing by zero.
+  // setShare and decodeShares keep the parties at half the vote or more, so this is never zero
+  // from the sliders or a link; the floor here only keeps a direct caller from dividing by zero.
   const natTotal = Math.max(swing.reduce((a, p) => a + Math.max(0, nationalVotes[p] ?? 0), 0), EPS);
   const national = swing.map(p => Math.max(0, nationalVotes[p] ?? 0) / natTotal);
   const core = blendSwing(national, lastNational, lastDistrict);
@@ -214,93 +214,109 @@ export function runScenario(data: SimulatorData, nationalVotes: NationalVotes): 
   return { circles, totals, national: Object.fromEntries(swing.map((p, j) => [p, national[j]])) };
 }
 
-/** The key for abstention in a transfer: votes that come from, or go to, people who did not vote. */
+/** The key for abstention, in the group moves: votes that come from, or go to, people who did not vote. */
 export const ABSTENTION = 'ABS';
 
-export interface Transfer {
-  from: string;
-  to: string;
-  /** Points of 2025's domestic vote for lists (a fixed base, so transfers add up). */
-  points: number;
+/** National shares of the movable lists and the other lists, summing to 1: the reader's scenario. */
+export type Shares = Record<string, number>;
+
+/** The most the other lists may hold: above it the parties would have no one to seat. */
+export const OTHERS_MAX_SHARE = 0.5;
+/** A party's slider runs from 0 to this; a share pushed above it by the others' moves is kept. */
+export const PARTY_MAX_SHARE = 0.6;
+
+/** A starting point's shares: 2025's domestic vote, or a past election's national shares. */
+export function presetShares(data: SimulatorData, preset: string): Shares {
+  const votes = presetVotes(data, preset);
+  const swing = swingLists(data);
+  const total = swing.reduce((a, p) => a + Math.max(0, votes[p] ?? 0), 0) || 1;
+  return Object.fromEntries(swing.map(p => [p, Math.max(0, votes[p] ?? 0) / total]));
 }
 
 /**
- * The eight parties together always keep at least this many points: below it a scenario has
- * no one to give seats to (every vote sent to abstention or the other lists).
+ * Set one list's share and let every other list absorb the difference in proportion to its
+ * own share (the usual swingometer rule: a party's gain is everyone else's loss, pro rata).
+ * The value is clamped to the list's range. The other lists never pass OTHERS_MAX_SHARE: what
+ * they would hold above it goes back to the parties, in proportion, so a scenario always has
+ * parties to seat.
  */
-export const PARTY_FLOOR_POINTS = 1;
-
-/**
- * Apply transfers in order. A point is 1% of 2025's domestic vote for the movable lists and
- * the other lists. Abstention is a bottomless source and sink. A transfer larger than what the
- * donor has left moves only what it has, and a move out of the parties stops at
- * PARTY_FLOOR_POINTS for the parties together; the amounts actually moved are returned.
- */
-export function applyTransfers(data: SimulatorData, start: NationalVotes, transfers: Transfer[]): { votes: NationalVotes; moved: number[] } {
-  const base = baseVotes(data);
-  const unit = Object.values(base).reduce((a, b) => a + b, 0) / 100;
-  const votes: NationalVotes = { ...start };
-  const parties = new Set(data.movable);
-  const partyVotes = () => data.movable.reduce((a, p) => a + Math.max(0, votes[p] ?? 0), 0);
-  const moved = transfers.map(t => {
-    if (t.from === t.to || !(t.points > 0)) return 0;
-    const want = t.points * unit;
-    let have = t.from === ABSTENTION ? Infinity : Math.max(0, votes[t.from] ?? 0);
-    if (parties.has(t.from) && !parties.has(t.to)) have = Math.min(have, Math.max(0, partyVotes() - PARTY_FLOOR_POINTS * unit));
-    const amount = Math.min(want, have);
-    if (t.from !== ABSTENTION) votes[t.from] = (votes[t.from] ?? 0) - amount;
-    if (t.to !== ABSTENTION) votes[t.to] = (votes[t.to] ?? 0) + amount;
-    return amount / unit;
-  });
-  return { votes, moved };
-}
-
-/** The largest single move the form and a link accept, in points. */
-export const MAX_TRANSFER_POINTS = 30;
-/** The most moves a scenario keeps. */
-export const MAX_TRANSFERS = 20;
-
-export interface Scenario {
-  /** The starting point: '2025', or a past election's national vote on 2025 geography. */
-  preset: string;
-  transfers: Transfer[];
-}
-
-/** The scenario as an address fragment: `#p=2024&t=PS.L.3~ABS.CH.1.5`. */
-export function encodeScenario(s: Scenario): string {
-  const parts: string[] = [];
-  if (s.preset !== '2025') parts.push(`p=${s.preset}`);
-  const t = s.transfers.filter(x => x.points > 0).map(x => `${x.from}.${x.to}.${Number(x.points.toFixed(2))}`);
-  if (t.length) parts.push(`t=${t.join('~')}`);
-  return parts.length ? `#${parts.join('&')}` : '';
-}
-
-/** Read a fragment back; anything it does not recognise is dropped, never guessed. */
-export function decodeScenario(hash: string, data: SimulatorData): Scenario {
-  const known = new Set([...swingLists(data), ABSTENTION]);
-  const params = new URLSearchParams(hash.replace(/^#/, ''));
-  const p = params.get('p');
-  const preset = p && data.presets[p] ? p : '2025';
-  const transfers: Transfer[] = [];
-  for (const item of (params.get('t') ?? '').split('~')) {
-    // List keys are upper-case letters today (AD, CH, OUT, ABS); a key with a digit or a
-    // lower-case letter would need this pattern widened, or its moves are dropped.
-    const m = /^([A-Z]+)\.([A-Z]+)\.(\d+(?:\.\d+)?)$/.exec(item);
-    if (!m) continue;
-    const [, from, to, pts] = m;
-    const points = Math.min(MAX_TRANSFER_POINTS, Number(pts));
-    if (known.has(from) && known.has(to) && from !== to && points > 0) transfers.push({ from, to, points });
+export function setShare(data: SimulatorData, shares: Shares, list: string, value: number): Shares {
+  const swing = swingLists(data);
+  if (!swing.includes(list) || !Number.isFinite(value)) return shares;
+  const cap = list === data.others ? OTHERS_MAX_SHARE : PARTY_MAX_SHARE;
+  const v = Math.min(cap, Math.max(0, value));
+  const rest = swing.filter(p => p !== list);
+  const restNow = rest.reduce((a, p) => a + Math.max(0, shares[p] ?? 0), 0);
+  const out: Shares = { [list]: v };
+  for (const p of rest) out[p] = restNow > EPS ? (Math.max(0, shares[p] ?? 0) / restNow) * (1 - v) : (1 - v) / rest.length;
+  const others = out[data.others] ?? 0;
+  if (others > OTHERS_MAX_SHARE) {
+    const parties = data.movable.reduce((a, p) => a + out[p], 0);
+    out[data.others] = OTHERS_MAX_SHARE;
+    for (const p of data.movable) {
+      out[p] = parties > EPS ? (out[p] / parties) * (1 - OTHERS_MAX_SHARE) : (1 - OTHERS_MAX_SHARE) / data.movable.length;
+    }
   }
-  return { preset, transfers: transfers.slice(0, MAX_TRANSFERS) };
+  return out;
 }
 
-/** A fragment that holds a scenario (`p=`, `t=` or the group moves' `g=`), as opposed to a plain anchor such as `#mover-votos`. */
-export function isScenarioHash(hash: string): boolean {
-  return /(?:^#?|&)[ptg]=/.test(hash);
+/** The votes a set of shares stands for, on 2025's domestic total (what runScenario takes). */
+export function sharesToVotes(data: SimulatorData, shares: Shares): NationalVotes {
+  const base = baseVotes(data);
+  const total = Object.values(base).reduce((a, b) => a + b, 0);
+  return Object.fromEntries(swingLists(data).map(p => [p, Math.max(0, shares[p] ?? 0) * total]));
+}
+
+/** Whether two sets of shares are the same to within a rounding of the address (0.001 points). */
+export function sameShares(a: Shares, b: Shares): boolean {
+  return Object.keys({ ...a, ...b }).every(p => Math.abs((a[p] ?? 0) - (b[p] ?? 0)) < 5e-6);
 }
 
 /**
- * The fragment the address should carry, given the scenario's own (`encodeScenario`, or the
+ * The shares as an address fragment, `#s=AD.30.512~PS.26~…` (percent, three decimals: a
+ * rounding of at most about 30 votes nationally, well inside the closest last seat), or ''
+ * when they are 2025's.
+ */
+export function encodeShares(data: SimulatorData, shares: Shares): string {
+  if (sameShares(shares, presetShares(data, '2025'))) return '';
+  const items = swingLists(data).map(p => `${p}.${Number(((shares[p] ?? 0) * 100).toFixed(3))}`);
+  return `#s=${items.join('~')}`;
+}
+
+/**
+ * Read the shares back from a fragment, or null when it holds none. Lists it does not know are
+ * dropped; a known list left out keeps its 2025 share; the result is rescaled to sum to 1 and
+ * held to the same limits as the sliders.
+ */
+export function decodeShares(hash: string, data: SimulatorData): Shares | null {
+  const value = new URLSearchParams(hash.replace(/^#/, '')).get('s');
+  if (value == null) return null;
+  const swing = swingLists(data);
+  const out: Shares = { ...presetShares(data, '2025') };
+  let any = false;
+  for (const item of value.split('~')) {
+    // List keys are upper-case letters today (AD, CH, OUT); a key with a digit or a lower-case
+    // letter would need this pattern widened, or its share is dropped.
+    const m = /^([A-Z]+)\.(\d+(?:\.\d+)?)$/.exec(item);
+    if (!m || !swing.includes(m[1])) continue;
+    out[m[1]] = Math.min(100, Number(m[2])) / 100;
+    any = true;
+  }
+  if (!any) return null;
+  const total = swing.reduce((a, p) => a + out[p], 0);
+  if (!(total > EPS)) return null;
+  for (const p of swing) out[p] /= total;
+  // Hold the other lists to their limit the way the slider does.
+  return out[data.others] > OTHERS_MAX_SHARE ? setShare(data, out, data.others, OTHERS_MAX_SHARE) : out;
+}
+
+/** A fragment that holds a scenario (the shares' `s=` or the group moves' `g=`), as opposed to a plain anchor such as `#mover-votos`. */
+export function isScenarioHash(hash: string): boolean {
+  return /(?:^#?|&)[sg]=/.test(hash);
+}
+
+/**
+ * The fragment the address should carry, given the scenario's own (`encodeShares`, or the
  * group moves'), or null to leave it alone. The scenario's own fragment while anything is
  * moved; with nothing moved, a plain anchor is kept as it is, and a scenario fragment gives way
  * to `anchor` (the section's id), so a reader who goes back to 2025 still has a link to it.

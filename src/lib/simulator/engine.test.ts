@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  ABSTENTION, MAX_TRANSFER_POINTS, PARTY_FLOOR_POINTS, applyTransfers, baseVotes, blendSwing, decodeScenario, dhondt, encodeScenario,
-  isScenarioHash, nextHash, presetVotes, runScenario, swingLists, type SimulatorData,
+  OTHERS_MAX_SHARE, baseVotes, blendSwing, decodeShares, dhondt, encodeShares, isScenarioHash, nextHash, presetShares, presetVotes,
+  runScenario, sameShares, setShare, sharesToVotes, swingLists, type SimulatorData,
 } from './engine';
 
 const data = JSON.parse(readFileSync(path.join(process.cwd(), 'public/data/elections/parliamentary-2025/simulator.json'), 'utf8')) as SimulatorData;
@@ -55,29 +55,26 @@ describe('runScenario', () => {
   });
 
   it('gives seats to every one of 230 places whatever the scenario', () => {
-    const start = baseVotes(data);
-    const { votes } = applyTransfers(data, start, [{ from: 'AD', to: 'CH', points: 12 }, { from: 'PS', to: ABSTENTION, points: 5 }]);
-    const r = runScenario(data, votes);
+    let shares = setShare(data, presetShares(data, '2025'), 'CH', 0.35);
+    shares = setShare(data, shares, 'PS', 0.15);
+    const r = runScenario(data, sharesToVotes(data, shares));
     expect(Object.values(r.totals).reduce((a, b) => a + b, 0)).toBe(230);
     expect(r.totals.CH).toBeGreaterThan(OFFICIAL_2025.CH);
   });
 
-  it('survives every vote sent to abstention or to the other lists: the parties keep a floor', () => {
-    const unit = Object.values(baseVotes(data)).reduce((a, b) => a + b, 0) / 100;
-    for (const sink of [ABSTENTION, data.others]) {
-      const drain = data.movable.flatMap(p => [{ from: p, to: sink, points: 30 }, { from: p, to: sink, points: 30 }]);
-      const { votes } = applyTransfers(data, baseVotes(data), drain);
-      const parties = data.movable.reduce((a, p) => a + votes[p], 0);
-      expect(parties).toBeCloseTo(PARTY_FLOOR_POINTS * unit, 3);
-      const r = runScenario(data, votes);
-      expect(Object.values(r.totals).reduce((a, b) => a + b, 0)).toBe(230);
-      for (const c of r.circles) for (const v of Object.values(c.votes)) expect(Number.isFinite(v)).toBe(true);
-    }
+  it('survives every party set to zero: the other lists stop at their limit and the parties keep the rest', () => {
+    let shares = presetShares(data, '2025');
+    for (const p of data.movable) shares = setShare(data, shares, p, 0);
+    expect(shares[data.others]).toBeCloseTo(OTHERS_MAX_SHARE, 10);
+    expect(Object.values(shares).reduce((a, b) => a + b, 0)).toBeCloseTo(1, 10);
+    const r = runScenario(data, sharesToVotes(data, shares));
+    expect(Object.values(r.totals).reduce((a, b) => a + b, 0)).toBe(230);
+    for (const c of r.circles) for (const v of Object.values(c.votes)) expect(Number.isFinite(v)).toBe(true);
   });
 
   it('never gives the other lists a seat, even with a large vote', () => {
-    const { votes } = applyTransfers(data, baseVotes(data), [{ from: 'AD', to: data.others, points: 20 }]);
-    expect(runScenario(data, votes).totals[data.others]).toBeUndefined();
+    const shares = setShare(data, presetShares(data, '2025'), data.others, 0.4);
+    expect(runScenario(data, sharesToVotes(data, shares)).totals[data.others]).toBeUndefined();
   });
 });
 
@@ -135,25 +132,23 @@ describe('dhondt', () => {
   });
 });
 
-describe('applyTransfers', () => {
-  const unit = Object.values(baseVotes(data)).reduce((a, b) => a + b, 0) / 100;
-
-  it('moves points of the 2025 vote and keeps the total unless abstention is involved', () => {
-    const start = baseVotes(data);
-    const { votes } = applyTransfers(data, start, [{ from: 'PS', to: 'L', points: 3 }]);
-    expect(votes.PS).toBeCloseTo(start.PS - 3 * unit, 6);
-    expect(votes.L).toBeCloseTo(start.L + 3 * unit, 6);
-    const sum = (v: Record<string, number>) => Object.values(v).reduce((a, b) => a + b, 0);
-    expect(sum(votes)).toBeCloseTo(sum(start), 6);
-    const fromAbs = applyTransfers(data, start, [{ from: ABSTENTION, to: 'CH', points: 2 }]).votes;
-    expect(sum(fromAbs)).toBeCloseTo(sum(start) + 2 * unit, 6);
+describe('setShare', () => {
+  it('sets one share and takes the difference from every other list in proportion', () => {
+    const start = presetShares(data, '2025');
+    const next = setShare(data, start, 'L', start.L + 0.03);
+    expect(next.L).toBeCloseTo(start.L + 0.03, 12);
+    expect(Object.values(next).reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12);
+    // Every other list keeps its proportion to the others.
+    expect(next.AD / next.PS).toBeCloseTo(start.AD / start.PS, 12);
+    expect(next[data.others] / next.CH).toBeCloseTo(start[data.others] / start.CH, 12);
   });
 
-  it('moves no more than the donor has', () => {
-    const start = baseVotes(data);
-    const { votes, moved } = applyTransfers(data, start, [{ from: 'PAN', to: 'L', points: 10 }]);
-    expect(votes.PAN).toBe(0);
-    expect(moved[0]).toBeCloseTo(start.PAN / unit, 6);
+  it('clamps a share to its range and ignores unknown lists and bad values', () => {
+    const start = presetShares(data, '2025');
+    expect(setShare(data, start, 'CH', 0.9).CH).toBeCloseTo(0.6, 12);
+    expect(setShare(data, start, 'CH', -1).CH).toBe(0);
+    expect(setShare(data, start, 'JPP', 0.2)).toBe(start);
+    expect(setShare(data, start, 'CH', Number.NaN)).toBe(start);
   });
 });
 
@@ -168,38 +163,42 @@ describe('presets', () => {
 });
 
 describe('scenario links', () => {
-  it('round-trips a scenario through the address', () => {
-    const s = { preset: '2024', transfers: [{ from: 'PS', to: 'L', points: 3 }, { from: ABSTENTION, to: 'CH', points: 1.5 }] };
-    const hash = encodeScenario(s);
-    expect(hash).toBe('#p=2024&t=PS.L.3~ABS.CH.1.5');
-    expect(decodeScenario(hash, data)).toEqual(s);
+  it('writes nothing for 2025 and round-trips a scenario through the address', () => {
+    expect(encodeShares(data, presetShares(data, '2025'))).toBe('');
+    const shares = setShare(data, presetShares(data, '2024'), 'L', 0.07);
+    const hash = encodeShares(data, shares);
+    expect(hash).toMatch(/^#s=AD\.[\d.]+~PS\./);
+    const back = decodeShares(hash, data)!;
+    for (const p of swingLists(data)) expect(back[p]).toBeCloseTo(shares[p], 5);
+    // The rounding never moves a seat.
+    expect(runScenario(data, sharesToVotes(data, back)).totals).toEqual(runScenario(data, sharesToVotes(data, shares)).totals);
   });
 
-  it('drops what it does not recognise', () => {
-    expect(decodeScenario('#p=1999&t=PS.XX.3~AD.AD.2~CH.IL.-1~L.BE.abc~IL.AD.4', data)).toEqual({
-      preset: '2025', transfers: [{ from: 'IL', to: 'AD', points: 4 }],
-    });
-    expect(encodeScenario({ preset: '2025', transfers: [] })).toBe('');
-  });
-
-  it('caps a hand-edited link at the form\'s largest move', () => {
-    expect(decodeScenario('#t=PS.L.80', data).transfers).toEqual([{ from: 'PS', to: 'L', points: MAX_TRANSFER_POINTS }]);
+  it('drops what it does not recognise and rescales what it keeps', () => {
+    expect(decodeShares('#mover-votos', data)).toBeNull();
+    expect(decodeShares('#s=XX.5~CH.abc', data)).toBeNull();
+    const back = decodeShares('#s=CH.40~XX.10', data)!;
+    expect(Object.values(back).reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12);
+    expect(back.CH).toBeGreaterThan(0.3);
+    // A link cannot give the other lists more than the sliders allow.
+    expect(decodeShares('#s=OUT.100~AD.0~PS.0', data)![data.others]).toBeCloseTo(OTHERS_MAX_SHARE, 10);
   });
 
   it('keeps a plain anchor while nothing is moved, and writes only what changed', () => {
-    const none = { preset: '2025', transfers: [] };
-    const moved = { preset: '2025', transfers: [{ from: 'PS', to: 'L', points: 3 }] };
+    const none = encodeShares(data, presetShares(data, '2025'));
+    const moved = encodeShares(data, setShare(data, presetShares(data, '2025'), 'L', 0.07));
     // A direct load of the section's anchor: nothing to write.
-    expect(nextHash(encodeScenario(none), '#mover-votos', 'mover-votos')).toBeNull();
-    expect(nextHash(encodeScenario(none), '', 'mover-votos')).toBeNull();
+    expect(nextHash(none, '#mover-votos', 'mover-votos')).toBeNull();
+    expect(nextHash(none, '', 'mover-votos')).toBeNull();
     // A shared scenario, read back: already in the address.
-    expect(nextHash(encodeScenario(moved), '#t=PS.L.3', 'mover-votos')).toBeNull();
+    expect(nextHash(moved, moved, 'mover-votos')).toBeNull();
     // A move: the scenario replaces the anchor.
-    expect(nextHash(encodeScenario(moved), '#mover-votos', 'mover-votos')).toBe('#t=PS.L.3');
-    // Back to 2025, or a link that held no valid move: the section's anchor again.
-    expect(nextHash(encodeScenario(none), '#t=PS.L.3', 'mover-votos')).toBe('#mover-votos');
-    expect(nextHash(encodeScenario(none), '#t=garbage', 'mover-votos')).toBe('#mover-votos');
-    expect(isScenarioHash('#p=2024')).toBe(true);
+    expect(nextHash(moved, '#mover-votos', 'mover-votos')).toBe(moved);
+    // Back to 2025, or a link that held no valid share: the section's anchor again.
+    expect(nextHash(none, moved, 'mover-votos')).toBe('#mover-votos');
+    expect(nextHash(none, '#s=garbage', 'mover-votos')).toBe('#mover-votos');
+    expect(isScenarioHash('#g=x.x.x.PS.L.5')).toBe(true);
     expect(isScenarioHash('#mover-votos')).toBe(false);
+    expect(sameShares(presetShares(data, '2025'), presetShares(data, '2025'))).toBe(true);
   });
 });

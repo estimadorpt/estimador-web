@@ -1,0 +1,118 @@
+/*
+ * The simulator's sliders, in the instrument's grammar: a thin ink rule, the reader's value as a
+ * hollow square (a what-if is drawn hollow) and 2025's value as a small black square under the
+ * rule (what happened). 44px tall for touch; the global focus ring stays.
+ */
+.slider {
+  position: relative;
+  min-width: 0;
+}
+
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+.range::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--color-ink, #111);
+}
+
+.range::-moz-range-track {
+  height: 2px;
+  background: var(--color-ink, #111);
+}
+
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -9px;
+  border: 2px solid var(--color-ink, #111);
+  border-radius: 0;
+  background: var(--color-paper, #fff);
+}
+
+.range::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-ink, #111);
+  border-radius: 0;
+  background: var(--color-paper, #fff);
+}
+
+.range:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* 2025's value, under the rule. The thumb is 20px wide, so its centre runs from 10px to
+   100% − 10px: --at is the value as a fraction of the slider's range. */
+.marker {
+  position: absolute;
+  top: calc(50% + 13px);
+  left: calc(10px + var(--at, 0) * (100% - 20px));
+  width: 6px;
+  height: 6px;
+  transform: translateX(-50%);
+  background: var(--color-ink, #111);
+  pointer-events: none;
+}
+
+/* A choice written into a sentence: the words stay words, as wide as the chosen one, with an
+   ink underline and a chevron. The native select lies invisible over them, so the keyboard,
+   the phone's picker and screen readers get a real select. */
+.choice {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  max-width: 100%;
+  padding-right: 18px;
+  border-bottom: 2px solid var(--color-ink, #111);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23111' stroke-width='1.75'/%3E%3C/svg%3E");
+  background-position: right 2px center;
+  background-repeat: no-repeat;
+  font-weight: 600;
+  line-height: 1.25;
+  vertical-align: bottom;
+}
+
+.choice:hover {
+  background-color: var(--color-field, #f4f4f4);
+}
+
+.choice:has(select:focus-visible) {
+  outline: 2px solid var(--color-ink, #111);
+  outline-offset: 2px;
+}
+
+.choice select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+@media (forced-colors: active) {
+  .marker {
+    background: CanvasText;
+    forced-color-adjust: none;
+  }
+  .choice {
+    background-image: none;
+    padding-right: 0;
+  }
+}
