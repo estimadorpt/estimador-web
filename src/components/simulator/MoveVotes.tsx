@@ -369,9 +369,16 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
         <div className="min-w-0 lg:order-1">
           {mode === 'groups' ? (
             groupsUnavailable ? (
-              <p className="max-w-[72ch] text-[14px] text-graphite">
-                {pt ? 'Não foi possível carregar os grupos. Tenta recarregar a página.' : 'The groups could not be loaded. Try reloading the page.'}
-              </p>
+              <div className="space-y-3">
+                <p className="max-w-[72ch] text-[14px] text-graphite">
+                  {pt ? 'Não foi possível carregar os grupos.' : 'The groups could not be loaded.'}
+                </p>
+                {/* A failed request is asked again (the effect above refetches once the flag clears);
+                    a scenario that failed with the file in hand is undone by "Voltar a 2025". */}
+                {groupsFailed && (
+                  <Action variant="secondary" onClick={() => setGroupsFailed(false)}>{pt ? 'Tentar de novo' : 'Try again'}</Action>
+                )}
+              </div>
             ) : (
               <GroupMovesPanel
                 groups={groups}
