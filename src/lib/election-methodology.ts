@@ -37,6 +37,10 @@ export const ELECTION_METHOD_ANCHORS = {
   seats: { pt: 'metodo-de-hondt-e-atribuicao-de-mandatos', en: 'd-hondt-method-and-seat-allocation' },
   /** Blocs, majorities and the ENSC: what the legislativas page shows. */
   pageShows: { pt: 'o-que-a-pagina-mostra', en: 'what-the-page-shows' },
+  /** The 2025 result's last seat in each circle (from the official count, not the forecast). */
+  lastSeats: { pt: 'o-ultimo-mandato-de-cada-circulo', en: 'each-circle-s-last-seat' },
+  /** "Mover votos": the seat simulator on the 2025 map. */
+  simulator: { pt: 'o-simulador-mover-votos', en: 'the-move-votes-simulator' },
 } as const;
 
 export function electionMethodHref(section: keyof typeof ELECTION_METHOD_ANCHORS, locale: string): string {
@@ -48,7 +52,7 @@ export function electionMethodHref(section: keyof typeof ELECTION_METHOD_ANCHORS
  * src/content/methodology/eleicoes/. The /metodologia hub keeps the old
  * #eleicoes and #segunda-volta-2026 anchors on its elections row.
  */
-export const ELECTION_METHODOLOGY_REVISED = '2026-10-06';
+export const ELECTION_METHODOLOGY_REVISED = '2026-11-23';
 
 export function electionMethodologySource(locale: string): string {
   const file = (l: string) => path.join(process.cwd(), 'src/content/methodology/eleicoes', `${l}.mdx`);

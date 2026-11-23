@@ -198,6 +198,18 @@ feed('elections/parliamentary-2025/seat_forecast_simulations.json', value => {
 }, { buildOnly: true });
 feed('elections/parliamentary-2025/contested_summary.json', value =>
   isObject(value) && isObject(value.districts) ? null : 'no districts');
+// The seat simulator and the last-seat table: the 2025 result by circle, on
+// the 2025 seat map (22 circles, 230 seats), with each circle's last seat.
+feed('elections/parliamentary-2025/simulator.json', value => {
+  if (!isObject(value) || !nonEmptyArray(value.circles)) return 'no circles';
+  if (value.circles.length !== 22) return `expected 22 circles, found ${value.circles.length}`;
+  const seats = value.circles.reduce((a, c) => a + (Number.isInteger(c.seats) ? c.seats : 0), 0);
+  if (seats !== 230) return `the circles hold ${seats} seats, not 230`;
+  if (!value.circles.every(c => isObject(c.votes) && isObject(c.lastSeat) && typeof c.lastSeat.list === 'string')) {
+    return 'a circle without votes or a last seat';
+  }
+  return nonEmptyArray(value.movable) && isObject(value.presets) ? null : 'no movable lists or presets';
+});
 
 for (const name of ['presidential_forecast.json', 'presidential_trends.json', 'presidential_win_probabilities.json']) {
   feed(`elections/presidential-2026/${name}`, value =>

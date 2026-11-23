@@ -2,7 +2,8 @@ import { createPageMetadata } from '@/lib/metadata';
 import { leftBlocParties, rightBlocParties, majorityThreshold } from "@/lib/config/blocs";
 import { partyColors } from "@/lib/config/colors";
 import { OFFICIAL_RESULTS, PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from "@/lib/config/elections";
-import { loadParliamentaryArchive } from "@/lib/utils/data-loader";
+import { loadParliamentaryArchive, loadSimulatorData } from "@/lib/utils/data-loader";
+import { closeLastSeats } from "@/lib/simulator/last-seats";
 import { formatElectionLongDate, formatElectionNumber, formatElectionPercent, formatElectionProbabilityText, pollsterDisplayName, sortByPartyOrder } from "@/lib/election-display";
 import { closeLeads } from "@/lib/election-aggregates";
 import { electionMethodHref } from "@/lib/election-methodology";
@@ -22,6 +23,9 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { ElectionSummaryStats } from '@/components/ElectionSummaryStats';
+import { LastSeatsTable } from '@/components/simulator/LastSeatsTable';
+import { MoveVotes } from '@/components/simulator/MoveVotes';
+import { listName, toList, withArticle } from '@/components/simulator/copy';
 import { setRequestLocale } from '@/i18n/request-locale';
 
 export async function generateMetadata({
@@ -49,6 +53,8 @@ const linkClass = 'text-ink underline underline-offset-4 hover:text-ink-muted';
 const standaloneLinkClass = `inline-flex min-h-11 items-center gap-1 ${linkClass}`;
 /** A section's heading over its chart frame, as on the Liga hub. */
 const sectionTitleClass = 'text-2xl text-ink mb-3';
+/** The last seats under this many votes make the section's finding. */
+const CLOSE_LAST_SEAT = 2500;
 
 export default async function ParliamentaryArchivePage({
   params
@@ -58,7 +64,7 @@ export default async function ParliamentaryArchivePage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale });
-  const archive = await loadParliamentaryArchive();
+  const [archive, simulator] = await Promise.all([loadParliamentaryArchive(), loadSimulatorData()]);
   const { probabilities, adChArithmetic, blocs, seats, trends, trendDates, districtForecast, contestedSeats, houseEffects } = archive;
 
   const pt = locale === 'pt';
@@ -121,6 +127,25 @@ export default async function ParliamentaryArchivePage({
       list: close.map(c => `${c.district} (${c.first.party} ${pct(c.first.share)}, ${c.second.party} ${pct(c.second.share)})`).join('; '),
     })
     : undefined;
+  // The 2025 result's last seats (the official count, not the forecast): the
+  // finding counts the circles decided by under CLOSE_LAST_SEAT votes.
+  const closeSeats = simulator ? closeLastSeats(simulator.circles, CLOSE_LAST_SEAT) : null;
+  const closest = closeSeats?.closest;
+  const closestRunner = closest?.lastSeat.runnerUp;
+  const num = (v: number) => formatElectionNumber(v, locale);
+  const lastSeatStandfirst = closest && closestRunner && closeSeats
+    ? (pt
+      ? `Em ${closest.name}, ${withArticle(closestRunner.list)} precisava de mais ${num(closestRunner.votes)} votos para tirar ${toList(closest.lastSeat.list)} o último dos ${num(closest.seats)} mandatos. As margens destes ${num(closeSeats.count)} círculos somam ${num(closeSeats.votes)} votos.`
+      : `In ${closest.name}, ${listName(closestRunner.list, 'en')} needed ${num(closestRunner.votes)} more votes to take the last of ${num(closest.seats)} seats from ${listName(closest.lastSeat.list, 'en')}. The margins of these ${num(closeSeats.count)} circles add up to ${num(closeSeats.votes)} votes.`)
+    : '';
+  const resultsSource = pt
+    ? 'Fonte: resultados oficiais (SGMAI, por freguesia; Mapa Oficial n.º 2-A/2025 para a emigração), contas estimador.pt'
+    : 'Source: official results (SGMAI, by parish; Mapa Oficial n.º 2-A/2025 for the emigration circles), estimador.pt calculations';
+  const resultsFrame = {
+    updated: pt ? `Eleição de ${electionDate}, mapa de mandatos de 2025` : `Election of ${electionDate}, 2025 seat map`,
+    methodologyLabel: t('common.methodology'),
+    locale,
+  };
   const external = <span aria-hidden="true"> ↗</span>;
   const arrow = <span aria-hidden="true"> →</span>;
 
@@ -178,6 +203,12 @@ export default async function ParliamentaryArchivePage({
         <div className="mx-auto flex max-w-7xl flex-wrap gap-x-5 gap-y-2 px-4 py-3 text-sm">
           <a href="#overview" className={`tap-target ${linkClass}`}>{t('presidential.navForecast')}</a>
           <a href="#polling" className={`tap-target ${linkClass}`}>{t('presidential.navUncertainty')}</a>
+          {simulator && (
+            <>
+              <a href="#ultimos-mandatos" className={`tap-target ${linkClass}`}>{pt ? 'Últimos mandatos' : 'Last seats'}</a>
+              <a href="#mover-votos" className={`tap-target ${linkClass}`}>{pt ? 'Mover votos' : 'Move votes'}</a>
+            </>
+          )}
           <a href="#evidence" className={`tap-target ${linkClass}`}>{t('presidential.navEvidence')}</a>
         </div>
       </nav>
@@ -321,6 +352,66 @@ export default async function ParliamentaryArchivePage({
         </div>
       </section>
       </>
+      )}
+
+      {/* After the forecast, the result: two sections from the official 2025
+          count (not the forecast's run), each in the one chart frame. */}
+      {simulator && closeSeats && (
+        <section className="pb-12">
+          <div className="max-w-7xl mx-auto px-4 space-y-12">
+            <p className="max-w-3xl border-t border-rule pt-8 text-sm text-graphite">
+              {pt
+                ? `As duas secções seguintes partem do resultado oficial de ${electionDate}, não da previsão.`
+                : `The next two sections start from the official result of ${electionDate}, not from the forecast.`}
+            </p>
+
+            <div id="ultimos-mandatos">
+              <h2 className={sectionTitleClass}>
+                {pt
+                  ? `Em ${num(closeSeats.count)} dos ${num(closeSeats.total)} círculos, o último mandato decidiu-se por menos de ${num(CLOSE_LAST_SEAT)} votos`
+                  : `In ${num(closeSeats.count)} of the ${num(closeSeats.total)} circles, the last seat came down to fewer than ${num(CLOSE_LAST_SEAT)} votes`}
+              </h2>
+              <DataCard
+                title={pt ? 'O último mandato de cada círculo, em 2025' : 'Each circle’s last seat, in 2025'}
+                subtitle={`${pt
+                  ? 'A lista que ficou com o último mandato, a lista seguinte e quantos votos a mais esta precisava para o levar, com tudo o resto igual. Os mais renhidos primeiro.'
+                  : 'The list that took the last seat, the next list in line and how many more votes it needed to take it, everything else equal. The closest first.'} ${lastSeatStandfirst}`}
+                source={resultsSource}
+                {...resultsFrame}
+                methodologyHref={electionMethodHref('lastSeats', locale)}
+              >
+                <LastSeatsTable
+                  rows={simulator.circles.map(c => ({ circle: c.name, seats: c.seats, list: c.lastSeat.list, runnerUp: c.lastSeat.runnerUp }))}
+                  locale={pt ? 'pt' : 'en'}
+                  shown={Math.max(closeSeats.count, 1)}
+                  caption={pt ? 'O último mandato de cada círculo em 2025, e os votos que faltavam à lista seguinte' : 'Each circle’s last seat in 2025, and the votes the next list needed'}
+                  votesHeading={pt ? 'Votos que faltavam' : 'Votes it needed'}
+                  restLabel={pt
+                    ? `Ver os outros ${num(closeSeats.total - closeSeats.count)} círculos`
+                    : `Show the other ${num(closeSeats.total - closeSeats.count)} circles`}
+                />
+              </DataCard>
+            </div>
+
+            <div id="mover-votos">
+              <h2 className={sectionTitleClass}>
+                {pt ? 'Move votos entre partidos e vê onde mudam os mandatos' : 'Move votes between parties and see where the seats change'}
+              </h2>
+              <DataCard
+                title={pt ? 'Mandatos com os votos que escolheres, sobre o mapa de 2025' : 'Seats with the votes you choose, on the 2025 map'}
+                badge={pt ? 'Cenário, não previsão' : 'A scenario, not a forecast'}
+                subtitle={pt
+                  ? 'Cada mudança nacional é distribuída pelos círculos metade em proporção ao peso de cada partido em 2025, metade por igual, e os mandatos saem do método de Hondt em cada círculo. Mesmo com o voto nacional certo, esta regra deu a outro partido entre 3 e 8 dos 226 mandatos do território nacional em cada eleição de 2019 a 2025; e onde a mudança acontece pode valer 3 a 5 mandatos.'
+                  : 'Each national shift is spread over the circles half in proportion to each party’s weight there in 2025, half evenly, and the seats come from the D’Hondt method in each circle. Even given the right national vote, this rule gave between 3 and 8 of the 226 seats in Portugal to another party in each election from 2019 to 2025; and where a shift happens can be worth 3 to 5 seats.'}
+                source={resultsSource}
+                {...resultsFrame}
+                methodologyHref={electionMethodHref('simulator', locale)}
+              >
+                <MoveVotes data={simulator} locale={pt ? 'pt' : 'en'} />
+              </DataCard>
+            </div>
+          </div>
+        </section>
       )}
 
       <section className="pb-8">

@@ -109,6 +109,18 @@ From the simulations, the page publishes:
 - **Seats by party**: the mean and 50% (P25–P75) and 80% (P10–P90) credible intervals.
 - **Seats in play by district**, with the **ENSC** (effective number of seat changes). For each party, it counts the share of simulations in which the party ends with a seat count different from its most frequent one in that district; the ENSC adds those shares across parties. An ENSC of 0 says every simulation gives the same allocation; above 0.8 (the threshold used), at least one seat changes party in a large share of the simulations, and the district counts as "in play". The +1 and −1 on the cards compare each party with its own most frequent count and also count two seats or more, so a district's gains and losses need not balance. Each card shows every party with a chance above 5% of gaining or losing a seat. Below the threshold a seat can still change party often: the page names the districts with an ENSC between 0.4 and 0.8.
 
+### Each circle’s last seat
+
+Two sections of the page come not from the forecast but from the official result of 18 May 2025. The first applies the D'Hondt method to each list's official votes in the 22 circles, on the 2025 seat map (Mapa Oficial n.º 1/2025: Setúbal with 19 seats and Viana do Castelo with 5), and reproduces the 230 official seats, circle by circle. A circle's last seat is the last quotient to get in; the next list in line holds the largest quotient left out, from another list. The votes it needed are the extra votes that list needed, everything else equal, for its quotient to pass the last one: the gap between the two quotients, times the next list's divisor, plus one vote. The votes in Portugal are SGMAI's results by parish; those of the Europe and Outside Europe circles come from Mapa Oficial n.º 2-A/2025.
+
+### The “Move votes” simulator
+
+The simulator starts from the 2025 national vote for lists in Portugal, or from the 2024 or 2022 national shares laid over the 2025 geography (these are not those results: the map and the voters changed). Its user moves points between the parties, the other lists and abstention; a point is 1% of the 2025 vote for lists in Portugal, about 58,000 votes. Votes taken from abstention are added to the total, and votes sent to it leave the total.
+
+The new national vote is spread over the 20 circles in Portugal by the rule we used to test the district model: half proportional swing (each party grows or shrinks in each circle in proportion to its weight there in 2025), half uniform swing (the same points in every circle, never below zero), each half rescaled to add up to 100%. Then the D'Hondt method runs in each circle. Three things stay as in 2025: JPP, with its share in each circle (it only wins a seat in Madeira); the two emigration circles, where the rule was never tested; and the other lists, which count towards the shares but never get seats, because they are many and none came close to one in 2025.
+
+It is a scenario, not a forecast, and it has no margin. Even given the right national vote, this rule gave between 3 and 8 of the 226 seats in Portugal to another party in each of the four elections from 2019 to 2025, applied to the previous result and the 2025 map. And where a shift happens matters: the same 3-point transfer can be worth 3 to 5 seats either way depending on the circles it happens in, which the rule does not know. The scenario is kept in the page's address, so it can be shared.
+
 ---
 
 <span id="presidenciais" className="block"></span>
