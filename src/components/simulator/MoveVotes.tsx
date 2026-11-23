@@ -29,6 +29,8 @@ const MAJORITY = 116;
 const TOTAL_SEATS = 230;
 /** The group file, fetched when the reader first opens the groups (about 40 KB): public/data/elections/parliamentary-2025/simulator-groups.json, which validate-data checks. */
 const GROUPS_URL = '/data/elections/parliamentary-2025/simulator-groups.json';
+/** How long the group file may take before the page says it could not be loaded. */
+const GROUPS_TIMEOUT_MS = 20_000;
 /** The address and the screen-reader summary wait this long after the last change (a dragged slider fires many). */
 const SETTLE_MS = 400;
 type Mode = 'parties' | 'groups';
@@ -135,15 +137,19 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
   useEffect(() => {
     if (mode !== 'groups' || groups || groupsFailed) return;
     let live = true;
-    fetch(GROUPS_URL)
+    // A request that stalls counts as failed after GROUPS_TIMEOUT_MS, so the page never waits forever.
+    const abort = new AbortController();
+    const timer = window.setTimeout(() => abort.abort(), GROUPS_TIMEOUT_MS);
+    fetch(GROUPS_URL, { signal: abort.signal })
       .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((g: unknown) => {
         if (!live) return;
         if (isGroupData(g, data)) setGroups(g);
         else setGroupsFailed(true);
       })
-      .catch(() => { if (live) setGroupsFailed(true); });
-    return () => { live = false; };
+      .catch(() => { if (live) setGroupsFailed(true); })
+      .finally(() => window.clearTimeout(timer));
+    return () => { live = false; window.clearTimeout(timer); abort.abort(); };
   }, [mode, groups, groupsFailed, data]);
 
   const activeMoves = groupMoves.filter(m => m.share > 0 && m.from !== m.to);
@@ -208,7 +214,11 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
   const changes = shown.filter(p => seatsOf(result, p) !== seatsOf(base, p));
 
   const changed = mode === 'groups' ? activeMoves.length > 0 : !sameShares(shares, base2025);
-  const reset = () => (mode === 'groups' ? setGroupMoves([BLANK_MOVE]) : setShares(base2025));
+  // Back to 2025 in both modes, so the other mode does not keep a scenario the reader thinks is gone.
+  const reset = () => {
+    setGroupMoves([BLANK_MOVE]);
+    setShares(base2025);
+  };
   const presetOptions = [
     { value: '2025', label: '2025' },
     ...Object.keys(data.presets).sort().reverse().map(y => ({ value: y, label: y })),

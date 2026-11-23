@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ABSTENTION, type SimulatorData } from './engine';
+import { ABSTENTION, decodeShares, type SimulatorData } from './engine';
 import {
   BLANK_NULL, MAX_GROUP_MOVES, applyGroupMoves, decodeGroupMoves, encodeGroupMoves, groupSize, isGroupData, runGroupScenario, type GroupData, type GroupMove,
 } from './groups';
@@ -77,6 +77,15 @@ describe('runGroupScenario', () => {
 });
 
 describe('group links', () => {
+  it('carries every list of both files through the address, so a renamed list fails here, not in shared links', () => {
+    for (const p of [...data.movable, data.others]) expect(decodeShares(`#s=${p}.12.5`, data), p).not.toBeNull();
+    for (const from of groups.options) {
+      const to = groups.options.find(o => o !== from)!;
+      const move: GroupMove = { ...everyone, from, to, share: 5 };
+      expect(decodeGroupMoves(encodeGroupMoves([move]), groups.options), from).toEqual([move]);
+    }
+  });
+
   it('round-trips moves through the address and drops what it does not know', () => {
     const moves: GroupMove[] = [
       { sex: 'all', age: '18-34', edu: 'all', from: ABSTENTION, to: 'CH', share: 25 },

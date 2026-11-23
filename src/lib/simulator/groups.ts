@@ -109,7 +109,6 @@ export function groupSize(groups: GroupData, m: Pick<GroupMove, 'sex' | 'age' | 
   return groups.circles.reduce((a, c) => a + c.cells.reduce((b, row, r) => b + (match[r] ? row[f] : 0), 0), 0);
 }
 
-/** Seats per circle and in total after the group moves (the result shape of runScenario). */
 /**
  * Whether a fetched file has the shape the moves need: every domestic circle of `data` by name,
  * one row per group and one finite, non-negative count per option. validate-data checks the
@@ -131,6 +130,7 @@ export function isGroupData(value: unknown, data: SimulatorData): value is Group
   });
 }
 
+/** Seats per circle and in total after the group moves (the result shape of runScenario). */
 export function runGroupScenario(data: SimulatorData, groups: GroupData, moves: GroupMove[]): ScenarioResult & { moved: number[] } {
   const { deltas, moved } = applyGroupMoves(groups, moves);
   const byName = new Map(groups.circles.map((c, i) => [c.name, deltas[i]]));
