@@ -29,6 +29,7 @@ import { compactTrendSeries, noBlocMajorityShare, recentTrendRows, seatSumArithm
 import { PARLIAMENTARY_PARTY_ORDER } from '@/lib/election-display';
 import type { EconomyDashboard } from '@/types/economy-dashboard';
 import type { EconomyStories } from '@/types/economy-stories';
+import type { SimulatorData } from '@/lib/simulator/engine';
 
 // Load data from the public directory
 export async function loadJsonData<T>(filename: string, subdirectory?: string): Promise<T> {
@@ -151,6 +152,23 @@ export async function loadParliamentaryArchive() {
 }
 
 export type ParliamentaryArchive = Awaited<ReturnType<typeof loadParliamentaryArchive>>;
+
+/**
+ * The 2025 result by circle for the seat simulator and the last-seat table
+ * (written by estimador-elections `src/simulator_export.py`). Small (about 7 KB),
+ * so the page passes it whole to the client component. Null when missing: the
+ * page then leaves both sections out.
+ */
+export async function loadSimulatorData(): Promise<SimulatorData | null> {
+  try {
+    return await loadJsonData<SimulatorData>('simulator.json', PARLIAMENTARY_DIR);
+  } catch (error) {
+    // validate-data requires the file, so this is a malformed or unreadable one: say so in the
+    // build log rather than drop both sections without a trace.
+    console.warn('[elections] simulator.json could not be read; the last-seat and simulator sections are left out.', error);
+    return null;
+  }
+}
 
 const EMPTY_PRESIDENTIAL_TRENDS = { election_date: PRESIDENTIAL_2026.date, dates: [] as string[], candidates: {} };
 

@@ -198,6 +198,33 @@ feed('elections/parliamentary-2025/seat_forecast_simulations.json', value => {
 }, { buildOnly: true });
 feed('elections/parliamentary-2025/contested_summary.json', value =>
   isObject(value) && isObject(value.districts) ? null : 'no districts');
+// The seat simulator and the last-seat table: the 2025 result by circle, on
+// the 2025 seat map (22 circles, 230 seats), with each circle's last seat. The
+// counts are fixed: this is a past election, and the seat map is the law's.
+feed('elections/parliamentary-2025/simulator.json', value => {
+  if (!isObject(value) || !nonEmptyArray(value.circles)) return 'no circles';
+  if (value.circles.length !== 22) return `expected 22 circles, found ${value.circles.length}`;
+  const seats = value.circles.reduce((a, c) => a + (Number.isInteger(c.seats) ? c.seats : 0), 0);
+  if (seats !== 230) return `the circles hold ${seats} seats, not 230`;
+  if (!value.circles.every(c => isObject(c.votes) && isObject(c.lastSeat) && typeof c.lastSeat.list === 'string')) {
+    return 'a circle without votes or a last seat';
+  }
+  return nonEmptyArray(value.movable) && isObject(value.presets) ? null : 'no movable lists or presets';
+});
+// "Por grupos": the 2025 result in the 20 domestic circles split by sex, age
+// and education (42 groups) and by what each group did (12 options, abstention
+// included). The engine adds the reader's moves to these cells.
+feed('elections/parliamentary-2025/simulator-groups.json', value => {
+  if (!isObject(value) || !nonEmptyArray(value.circles)) return 'no circles';
+  if (value.circles.length !== 20) return `expected 20 domestic circles, found ${value.circles.length}`;
+  if (!nonEmptyArray(value.options) || !nonEmptyArray(value.sex) || !nonEmptyArray(value.age) || !nonEmptyArray(value.edu)) {
+    return 'no options or group dimensions';
+  }
+  const rows = value.sex.length * value.age.length * value.edu.length;
+  const bad = value.circles.find(c => !Array.isArray(c.cells) || c.cells.length !== rows
+    || !c.cells.every(r => Array.isArray(r) && r.length === value.options.length && r.every(n => Number.isFinite(n) && n >= 0)));
+  return bad ? `${bad.name}: expected ${rows} rows of ${value.options.length} counts` : null;
+});
 
 for (const name of ['presidential_forecast.json', 'presidential_trends.json', 'presidential_win_probabilities.json']) {
   feed(`elections/presidential-2026/${name}`, value =>
