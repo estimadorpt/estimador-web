@@ -4,7 +4,8 @@ Writes `src/lib/simulator/seat-map-layout.json`, the drawing behind the simulato
 (`SeatMap.tsx`): mainland Portugal's 18 districts from the site's own TopoJSON, grown towards
 their seats by a partial cartogram so that Lisboa's 48 seats and Porto's 40 have room while
 the country keeps its shape, one dot per seat spread evenly inside each district, the labels,
-and the islands and the emigration circles in a column on the left.
+the country's outline, the islands in the sea at lower left and the emigration circles in a row
+at the foot. The frame is cropped to what it draws.
 
     python3 scripts/build-seat-map.py [--preview out.png]
 
@@ -21,14 +22,18 @@ How:
    Algarve); every other district has it near its middle, over a paper halo where it crosses a
    border, in a hole that every district's seats keep clear of.
 5. Each district's seats are spread by Lloyd's algorithm over its raster (farthest-point
-   start, fixed seed), then sorted from west to east, which is the order the parliament's
-   lists fill them in (left to right), so each list's seats sit together.
+   start, fixed seed), then sorted in rows, top to bottom and each west to east: the lists fill
+   them like a tally, largest first (`circleSeats`), so each list's seats sit together and
+   where they sit says nothing about where its votes were.
+6. The islands' outlines, at one span each, go in the lower-left sea with their seats on them;
+   the emigration circles go in one row under a rule at the foot.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import math
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -40,8 +45,9 @@ SIM = ROOT / 'public/data/elections/parliamentary-2025/simulator.json'
 OUT = ROOT / 'src/lib/simulator/seat-map-layout.json'
 FONT_BOLD = ROOT / 'node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-700-normal.woff'
 
-# The drawing, in its own units (the SVG's viewBox). Labels are LABEL_SIZE units, so the map
-# prints them at 11px from WIDTH pixels wide.
+# The drawing, in its own units (the SVG's viewBox). It is laid out on a WIDTH-wide workspace
+# and then cropped to what it draws; labels are LABEL_SIZE units, so the map prints them at
+# 11px from its own width in pixels.
 WIDTH = 312
 LABEL_SIZE = 11
 DOT_R = 3.1
@@ -73,8 +79,10 @@ LABELS = {
 }
 # Districts whose label goes in the sea beside their coast (their seats fill them).
 COAST_LABEL = {'Viana do Castelo', 'Braga', 'Porto', 'Aveiro', 'Lisboa', 'Setúbal', 'Leiria', 'Coimbra'}
-# The tops of the island insets in the left column (Açores level with Aveiro, Madeira below Lisboa).
-INSETS = {'Açores': 112, 'Madeira': 318}
+# The island insets' width (the archipelago's span), drawn in the sea at lower left.
+INSET_SPAN = {'Açores': 52, 'Madeira': 30}
+# The emigration row's heading, in both languages.
+EMIGRATION = ['Emigração', 'Emigration']
 # Hand nudges to a coast label's baseline, in units (positive: down).
 COAST_NUDGE = {'Braga': 2, 'Viana do Castelo': -2}
 
@@ -180,6 +188,21 @@ def path_of(polys: list[list[np.ndarray]]) -> str:
     return ''.join(parts).replace(' -', '-').replace('l ', 'l')
 
 
+def open_path_of(lines: list[np.ndarray]) -> str:
+    """Open SVG polylines, as `path_of` writes them, without the closing Z."""
+    out = []
+    for q in lines:
+        q = np.round(q, 1)
+        steps = []
+        for dx, dy in np.diff(q, axis=0):
+            if abs(dx) < 0.05 and abs(dy) < 0.05:
+                continue
+            b = num(dy)
+            steps.append(f'{num(dx)}{b if b.startswith("-") else " " + b}')
+        out.append(f'M{num(q[0, 0])} {num(q[0, 1])}l' + ' '.join(steps))
+    return ''.join(out).replace(' -', '-').replace('l ', 'l')
+
+
 # --- cartogram --------------------------------------------------------------------------
 
 def cartogram(polys: dict[str, list[list[np.ndarray]]], seats: dict[str, int], pts: np.ndarray) -> np.ndarray:
@@ -279,8 +302,26 @@ def lloyd(px: np.ndarray, k: int, rng: np.random.Generator) -> np.ndarray:
 
 
 def fill_order(c: np.ndarray) -> np.ndarray:
-    """West to east (top to bottom where they tie), the order the lists fill a district's seats in."""
-    return c[np.lexsort((c[:, 1], np.round(c[:, 0], 1)))]
+    """
+    Rows from top to bottom, each from west to east, the order the lists fill a district's seats
+    in (largest list first, `circleSeats`): a tally, so a list's seats sit together and where
+    they sit says nothing about where its votes were.
+    """
+    if len(c) < 2:
+        return c
+    d = np.hypot(*(c[:, None] - c[None]).transpose(2, 0, 1))
+    np.fill_diagonal(d, np.inf)
+    pitch = float(np.median(d.min(1)))
+    c = c[np.argsort(c[:, 1], kind='stable')]
+    rows, row = [], [c[0]]
+    for q in c[1:]:
+        if q[1] - row[0][1] > 0.5 * pitch:
+            rows.append(row)
+            row = [q]
+        else:
+            row.append(q)
+    rows.append(row)
+    return np.array([q for r in rows for q in sorted(r, key=lambda v: v[0])])
 
 
 def main() -> None:
@@ -320,13 +361,18 @@ def main() -> None:
             out.append(a if not out else a[1:])
         return np.concatenate(out)
 
-    polys = {n: [[ring(r) for r in poly] for poly in geo[n]] for n in mainland}
     # Drop specks (river islands in the Tejo, the Ria Formosa's barrier islands) and holes the
     # size of a seat or two: at this scale they draw as knots on the border.
-    polys = {n: [[p[0], *[h for h in p[1:] if abs(area(h)) > SPECK]] for p in ps if abs(area(p[0])) > SPECK] for n, ps in polys.items()}
+    kept: dict[str, list[list[list[int]]]] = {}
+    for n in mainland:
+        kept[n] = [[poly[0], *[h for h in poly[1:] if abs(area(ring(h))) > SPECK]] for poly in geo[n] if abs(area(ring(poly[0]))) > SPECK]
+    polys = {n: [[ring(r) for r in poly] for poly in kept[n]] for n in mainland}
+    # The coast and the border with Spain: the arcs only one district draws.
+    uses = Counter(i if i >= 0 else ~i for ps in kept.values() for poly in ps for r in poly for i in r)
+    outline = [new_arcs[i] for i, c in sorted(uses.items()) if c == 1]
     main_bottom = max(float(np.concatenate([p[0] for p in ps]).max(0)[1]) for ps in polys.values())
 
-    HEIGHT = int(math.ceil(main_bottom + 22))
+    HEIGHT = int(math.ceil(main_bottom + 60))
     land = raster([p for ps in polys.values() for p in ps], WIDTH, HEIGHT)
     rng = np.random.default_rng(SEED)
     layout: dict[str, dict] = {}
@@ -370,8 +416,8 @@ def main() -> None:
         w = label_width(font, n)
         cy, cx = np.argwhere(m).mean(0) / RASTER
         best, best_score = None, math.inf
-        for dy in np.arange(-24, 24.1, 1.0):
-            for dx in np.arange(-24, 24.1, 1.0):
+        for dy in np.arange(-30, 30.1, 1.0):
+            for dx in np.arange(-30, 30.1, 1.0):
                 x0, base = cx + dx - w / 2, cy + dy + (asc - desc) / 2
                 box = (x0, base - asc, x0 + w, base + desc)
                 if box[0] < 0 or box[2] > WIDTH or box[1] < 0 or box[3] > HEIGHT or overlaps(box, 3):
@@ -379,7 +425,7 @@ def main() -> None:
                 cells = (slice(int(box[1] * RASTER), int(box[3] * RASTER)), slice(int(box[0] * RASTER), int(box[2] * RASTER)))
                 own = m[cells].mean()
                 on_land = land[cells].mean()
-                score = math.hypot(dx, dy) + 60 * (1 - own) + 400 * (1 - on_land)
+                score = math.hypot(dx, dy) + 150 * (1 - own) + 400 * (1 - on_land)
                 if score < best_score:
                     best, best_score = box, score
         assert best is not None, n
@@ -402,42 +448,97 @@ def main() -> None:
             m[int(y0):int(math.ceil(y1)), int(x0):int(math.ceil(x1))] = False
         px = np.argwhere(m)[:, ::-1].astype(float) / RASTER + 0.5 / RASTER
         layout[n]['dots'] = [[round(x, 1), round(y, 1)] for x, y in fill_order(lloyd(px, seats[n], rng))]
-        layout[n]['path'] = path_of(polys[n])
 
-    # The column on the left: the emigration circles at the top, the islands below.
+    # The frame's left edge: the leftmost coast label or cape, less a margin.
+    X0 = math.floor(min(min(b[0] for _, b in labels), float(np.argwhere(land.any(0)).min()) / RASTER) - 3)
     pitch = 2 * DOT_R + 2.2
+
+    # The islands, in the sea at lower left: each archipelago's outline at its own span, its label
+    # above and its seats on it. Madeira is placed first, as low and as far left as the land and
+    # the labels allow; the Açores above it. Each keeps 4 units from the land and 7 from any
+    # label or other inset, so the tap boxes around them (`circleBox`, 3 units out) meet nothing.
     islands = {
         'Açores': [n for n in geo if n.startswith('Ilha') and n not in ('Ilha da Madeira', 'Ilha de Porto Santo')],
         'Madeira': ['Ilha da Madeira', 'Ilha de Porto Santo'],
     }
-    column = {
-        'Europa': (8, 22),
-        'Fora da Europa': (8, 58),
-    }
-    for n, (x, base) in column.items():
-        w = label_width(font, n)
-        layout[n] = {'label': {'x': x, 'y': base, 'anchor': 'start', 'w': round(w, 1)}}
-        labels.append((n, (x, base - asc, x + w, base + desc)))
-        dots = np.array([[x + DOT_R + i * pitch, base + desc + 2 + DOT_R] for i in range(seats[n])])
-        layout[n]['dots'] = [[round(a, 1), round(b, 1)] for a, b in dots]
-    # The islands: their outlines at one scale for both archipelagos, the seats under the label.
-    inset = {'Açores': (8, INSETS['Açores'], 76), 'Madeira': (8, INSETS['Madeira'], 34)}
-    for n, (x, top, span) in inset.items():
+    k = 4 * RASTER
+    S = np.pad(land.astype(np.int32), ((k + 1, k), (k + 1, k))).cumsum(0).cumsum(1)
+    near_land = (S[2 * k + 1:, 2 * k + 1:] - S[:-2 * k - 1, 2 * k + 1:] - S[2 * k + 1:, :-2 * k - 1] + S[:-2 * k - 1, :-2 * k - 1]) > 0
+    limit = main_bottom + 16
+    shapes: dict[str, list[list[np.ndarray]]] = {}
+    for n in ('Madeira', 'Açores'):
         rings = [ring_arcs(r, arcs) for g in islands[n] for poly in geo[g] for r in poly[:1]]
         allr = np.concatenate(rings)
         lo, hi = allr.min(0), allr.max(0)
-        s = span / (hi[0] - lo[0])
-        shapes = [[douglas_peucker((r - lo) * s + [x, top], 0.25)] for r in rings]
-        h = (hi[1] - lo[1]) * s
+        sc = INSET_SPAN[n] / (hi[0] - lo[0])
+        arch_h = (hi[1] - lo[1]) * sc
+        per_row = 5 if n == 'Açores' else 3
+        rows = math.ceil(seats[n] / per_row)
+        dots_w, dots_h = (min(per_row, seats[n]) - 1) * pitch + 2 * DOT_R, (rows - 1) * pitch + 2 * DOT_R
+        w_label = label_width(font, n)
+        bw = max(w_label, INSET_SPAN[n], dots_w)
+        body = max(arch_h, dots_h)
+        bh = asc + desc + 3 + body
+        spot = None
+        for y in np.arange(limit - bh, 0, -1.0):
+            for x in np.arange(X0 + 1, X0 + 120, 1.0):
+                box = (x, y, x + bw, y + bh)
+                cells = (slice(int(y * RASTER), int(math.ceil((y + bh) * RASTER))), slice(int(x * RASTER), int(math.ceil((x + bw) * RASTER))))
+                if near_land[cells].any() or overlaps(box, 7):
+                    continue
+                spot = box
+                break
+            if spot:
+                break
+        assert spot, n
+        x, y = spot[0], spot[1]
+        top = y + asc + desc + 3
+        mid_x = x + max(INSET_SPAN[n], dots_w) / 2
+        mid_y = top + body / 2
+        shapes[n] = [[douglas_peucker((r - lo) * sc + [mid_x - INSET_SPAN[n] / 2, mid_y - arch_h / 2], 0.25)] for r in rings]
+        dots = []
+        for i in range(seats[n]):
+            r, c = divmod(i, per_row)
+            in_row = min(per_row, seats[n] - r * per_row)
+            dots.append((mid_x + (c - (in_row - 1) / 2) * pitch, mid_y + (r - (rows - 1) / 2) * pitch))
+        layout[n] = {'label': {'x': x, 'y': round(y + asc, 1), 'anchor': 'start', 'w': round(w_label, 1)}, 'dots': [[round(a, 1), round(b, 1)] for a, b in dots]}
+        labels.append((n, (x, y, x + w_label, y + asc + desc)))
+        labels.append((n + ' (inset)', spot))
+
+    # The emigration circles: one row under a rule at the foot of the map.
+    rule_y = math.ceil(max(limit, max(b[3] for _, b in labels)) + 6)
+    base = rule_y + 7 + asc
+    heading_w = max(font.getlength(t) for t in EMIGRATION) / 10 + 2
+    x = X0 + 1
+    emigration = {'x': x, 'y': base, 'w': round(heading_w, 1), 'rule': rule_y}
+    labels.append(('Emigração', (x, base - asc, x + heading_w, base + desc)))
+    x += heading_w + 8
+    for n in ('Europa', 'Fora da Europa'):
         w = label_width(font, n)
-        base = top + h + 3 + asc
-        layout[n] = {
-            'label': {'x': x, 'y': round(base, 1), 'anchor': 'start', 'w': round(w, 1)},
-            'path': path_of(shapes),
-        }
+        layout[n] = {'label': {'x': round(x, 1), 'y': base, 'anchor': 'start', 'w': round(w, 1)}}
         labels.append((n, (x, base - asc, x + w, base + desc)))
-        dots = np.array([[x + DOT_R + i * pitch, base + desc + 2 + DOT_R] for i in range(seats[n])])
+        dots = [(x + w + 3 + DOT_R + i * pitch, base - 3.5) for i in range(seats[n])]
         layout[n]['dots'] = [[round(a, 1), round(b, 1)] for a, b in dots]
+        x = dots[-1][0] + DOT_R + 12
+    width = int(math.ceil(max(MAIN_X1 + 3, x) - X0))
+    height = int(math.ceil(base + desc + 4))
+    labels = [(n, b) for n, b in labels if not n.endswith('(inset)')]
+
+    # Into the frame: everything moves X0 units left.
+    def shift(a: np.ndarray) -> np.ndarray:
+        return a - [X0, 0]
+
+    for n, c in layout.items():
+        c['dots'] = [[round(a - X0, 1), b] for a, b in c['dots']]
+        c['label']['x'] = round(c['label']['x'] - X0, 1)
+        c['label']['y'] = round(c['label']['y'], 1)
+    for n in mainland:
+        layout[n]['path'] = path_of([[shift(r) for r in poly] for poly in polys[n]])
+    for n, sh in shapes.items():
+        layout[n]['path'] = path_of([[shift(r) for r in poly] for poly in sh])
+    labels = [(n, (b[0] - X0, b[1], b[2] - X0, b[3])) for n, b in labels]
+    emigration['x'] = round(emigration['x'] - X0, 1)
+    WIDTH_OUT, HEIGHT_OUT = width, height
 
     # Checks: every seat drawn, inside the frame, apart from the others and from every label.
     allp = np.array([d for v in layout.values() for d in v['dots']])
@@ -446,21 +547,23 @@ def main() -> None:
     for n in seats:
         assert len(layout[n]['dots']) == seats[n], n
     for n, (x0, y0, x1, y1) in labels:
-        assert 0 <= x0 and x1 <= WIDTH and 0 <= y0 and y1 <= HEIGHT, (n, x0, y0, x1, y1)
+        assert 0 <= x0 and x1 <= WIDTH_OUT and 0 <= y0 and y1 <= HEIGHT_OUT, (n, x0, y0, x1, y1)
         near = (allp[:, 0] > x0 - DOT_R) & (allp[:, 0] < x1 + DOT_R) & (allp[:, 1] > y0 - DOT_R) & (allp[:, 1] < y1 + DOT_R)
         assert not near.any(), (n, allp[near])
     for i, (a, ba) in enumerate(labels):
         for b, bb in labels[i + 1:]:
             apart = ba[2] + 2 <= bb[0] or bb[2] + 2 <= ba[0] or ba[3] + 1 <= bb[1] or bb[3] + 1 <= ba[1]
             assert apart, (a, b)
-    print(f'frame {WIDTH}x{HEIGHT}, closest seats {dd.min():.2f} apart (5th percentile {np.percentile(dd.min(1), 5):.2f})')
+    print(f'frame {WIDTH_OUT}x{HEIGHT_OUT}, closest seats {dd.min():.2f} apart (5th percentile {np.percentile(dd.min(1), 5):.2f})')
     print('labels inside:', sorted(inside_holes))
 
     out = {
-        'width': WIDTH,
-        'height': HEIGHT,
+        'width': WIDTH_OUT,
+        'height': HEIGHT_OUT,
         'dotR': DOT_R,
         'labelSize': LABEL_SIZE,
+        'coast': open_path_of([shift(a) for a in outline]),
+        'emigration': emigration,
         'circles': {n: layout[n] for n in sorted(layout)},
     }
     OUT.write_text(json.dumps(out, ensure_ascii=False, separators=(',', ':')) + '\n')
@@ -473,22 +576,39 @@ def main() -> None:
 def preview(out: dict, sim: dict, path: Path) -> None:
     col = {'AD': '#FF8C00', 'PS': '#E57373', 'CH': '#377EB8', 'IL': '#A6CEE3', 'L': '#90EE90', 'CDU': '#E41A1C',
            'BE': '#000000', 'PAN': '#4CAF50', 'JPP': '#8a8a8a'}
-    order = ['CDU', 'BE', 'L', 'PS', 'PAN', 'JPP', 'AD', 'IL', 'CH']
     S = 4
     im = Image.new('RGB', (out['width'] * S, out['height'] * S), 'white')
     d = ImageDraw.Draw(im)
     font = ImageFont.truetype(str(FONT_BOLD).replace('700', '400'), out['labelSize'] * S)
     import re
-    for n, c in out['circles'].items():
-        if 'path' in c:
-            for sub in re.findall(r'M([^Z]*)Z', c['path']):
-                v = [float(t) for t in re.findall(r'-?\d+\.?\d*', sub)]
-                pts = [(v[i] * S, v[i + 1] * S) for i in range(0, len(v), 2)]
-                d.line(pts + pts[:1], fill='#c8c8c8', width=3)
+
+    def lines(path: str) -> list[list[tuple[float, float]]]:
+        res = []
+        for sub in re.findall(r'M[^M]*', path):
+            closed = sub.endswith('Z')
+            start, _, steps = sub[1:].rstrip('Z').partition('l')
+            x, y = (float(t) for t in re.findall(r'-?\d*\.?\d+', start))
+            pts = [(x, y)]
+            v = [float(t) for t in re.findall(r'-?\d*\.?\d+', steps)]
+            for i in range(0, len(v) - 1, 2):
+                x, y = x + v[i], y + v[i + 1]
+                pts.append((x, y))
+            res.append([(a * S, b * S) for a, b in pts] + (pts[:1] and [(pts[0][0] * S, pts[0][1] * S)] if closed else []))
+        return res
+
+    for c in out['circles'].values():
+        for q in lines(c.get('path', '')):
+            d.line(q, fill='#d9d9d9', width=3)
+    for q in lines(out['coast']):
+        d.line(q, fill='#5e5e5e', width=4)
+    e = out['emigration']
+    d.line([(e['x'] * S, e['rule'] * S), ((out['width'] - e['x']) * S, e['rule'] * S)], fill='#d9d9d9', width=3)
+    d.text((e['x'] * S, e['y'] * S), EMIGRATION[0], fill='#5e5e5e', font=font, anchor='ls')
     won = {c['name']: c['seats2025'] for c in sim['circles']}
     r = out['dotR']
     for n, c in out['circles'].items():
-        fills = [col[p] for p in order for _ in range(won[n].get(p, 0))]
+        # Largest list first, as `circleSeats` fills them.
+        fills = [col[p] for p, k in sorted(won[n].items(), key=lambda kv: -kv[1]) for _ in range(k)]
         for (x, y), f in zip(c['dots'], fills):
             d.ellipse([(x - r) * S, (y - r) * S, (x + r) * S, (y + r) * S], fill=f)
         lab = c['label']

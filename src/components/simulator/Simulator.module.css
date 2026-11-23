@@ -114,6 +114,21 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* The seat map's frame (MoveVotes): at least the drawing's own width in pixels, so labels print
+   at 11px or more; below 1280px no taller than 58% of the screen, and from 1280px, where it stays
+   in view beside its panel, as tall as the screen leaves room for, up to 420px wide. */
+.mapFrame {
+  width: min(100%, max(var(--seat-map-min), calc(58svh * var(--seat-map-ratio))));
+  margin-inline: auto;
+}
+
+@media (min-width: 1280px) {
+  .mapFrame {
+    width: min(420px, max(var(--seat-map-min), calc((100svh - 250px) * var(--seat-map-ratio))));
+    margin-inline: 0;
+  }
+}
+
 .seatMap .passive {
   pointer-events: none;
 }
@@ -142,6 +157,7 @@
   .area:hover { fill: transparent; }
   .halo { stroke: Canvas; }
   .border { stroke: GrayText; }
+  .coast { stroke: CanvasText; }
 }
 
 @media (forced-colors: active) {

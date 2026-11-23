@@ -3,7 +3,8 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { SimulatorData } from './engine';
 import {
-  DOT_R, LABEL_SIZE, SEAT_MAP, SEAT_MAP_CIRCLES, circleBox, circleChanges, circleSeats, labelBox, nearestSeat,
+  DOT_R, LABEL_SIZE, SEAT_MAP, SEAT_MAP_CIRCLES, SEAT_MAP_COAST, circleBox, circleChanges, circleSeats, emigrationBox, labelBox,
+  nearestSeat, pathPoints,
 } from './seat-map';
 import { circleLabel, circleName } from './circle-names';
 
@@ -70,12 +71,15 @@ describe('seat map', () => {
     for (let i = 0; i < seats.length; i++) {
       for (let j = i + 1; j < seats.length; j++) closest = Math.min(closest, Math.hypot(seats[i].x - seats[j].x, seats[i].y - seats[j].y));
     }
-    // The ring around a seat that changed hands reaches 3.8 units out (SeatMap.tsx).
-    expect(closest).toBeGreaterThanOrEqual(2 * 3.8);
+    // The ring around a seat that changed hands reaches 3.9 units out (SeatMap.tsx).
+    expect(closest).toBeGreaterThanOrEqual(2 * 3.9);
   });
 
   it('keeps labels, in both languages, inside the frame, off every seat and apart', () => {
-    const boxes = Object.entries(SEAT_MAP_CIRCLES).map(([name, c]) => ({ name, box: labelBox(c.label) }));
+    const boxes = [
+      ...Object.entries(SEAT_MAP_CIRCLES).map(([name, c]) => ({ name, box: labelBox(c.label) })),
+      { name: 'Emigração', box: emigrationBox() },
+    ];
     for (const [name, c] of Object.entries(SEAT_MAP_CIRCLES)) {
       // The stored width is the bold label measured in IBM Plex Sans; a label longer than it
       // was measured for (a renamed circle) would spill.
@@ -102,7 +106,7 @@ describe('seat map', () => {
     }
   });
 
-  it('gives the islands and the emigration circles tap boxes that do not overlap', () => {
+  it('gives the islands and the emigration circles tap boxes that overlap neither each other nor the mainland', () => {
     const boxes = ISLANDS_AND_ABROAD.map(n => ({ n, b: circleBox(SEAT_MAP_CIRCLES[n]) }));
     for (const a of boxes) {
       for (const b of boxes) {
@@ -110,23 +114,46 @@ describe('seat map', () => {
         expect(a.b.x1 <= b.b.x0 || b.b.x1 <= a.b.x0 || a.b.y1 <= b.b.y0 || b.b.y1 <= a.b.y0, `${a.n} / ${b.n}`).toBe(true);
       }
     }
+    const mainland = pathPoints(SEAT_MAP_COAST);
+    expect(mainland.length).toBeGreaterThan(100);
+    for (const { n, b } of boxes) {
+      const hit = mainland.find(([x, y]) => x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1);
+      expect(hit, n).toBeUndefined();
+    }
   });
 
-  it('fills a circle\'s seats in the parliament\'s order, ringing only the ones that changed hands', () => {
+  it('draws the mainland\'s outline as open lines inside the frame', () => {
+    expect(SEAT_MAP_COAST.startsWith('M')).toBe(true);
+    expect(SEAT_MAP_COAST).not.toContain('Z');
+    for (const [x, y] of pathPoints(SEAT_MAP_COAST)) {
+      expect(x >= 0 && x <= SEAT_MAP.width && y >= 0 && y <= SEAT_MAP.height, `${x},${y}`).toBe(true);
+    }
+  });
+
+  it('fills a circle\'s seats like a tally, largest list first, ringing only the ones that changed hands', () => {
     const lisboa = data.circles.find(c => c.name === 'Lisboa')!;
     const same = circleSeats(lisboa.seats2025, lisboa.seats2025);
     expect(same).toHaveLength(48);
     expect(same.some(s => s.gained)).toBe(false);
+    // 2025: AD 15, PS 12, Chega 11. One seat from PS to Chega puts Chega second.
     const moved = { ...lisboa.seats2025, PS: lisboa.seats2025.PS - 1, CH: lisboa.seats2025.CH + 1 };
     const out = circleSeats(moved, lisboa.seats2025);
     expect(out).toHaveLength(48);
     expect(out.filter(s => s.gained)).toEqual([{ list: 'CH', gained: true }]);
     const lists = out.map(s => s.list);
-    expect(lists.indexOf('PS')).toBeLessThan(lists.indexOf('AD'));
+    expect(lists.slice(0, 15).every(p => p === 'AD')).toBe(true);
+    expect(lists.indexOf('CH')).toBeLessThan(lists.indexOf('PS'));
+    expect(lists.lastIndexOf('CH')).toBe(out.findIndex(s => s.gained));
     expect(new Set(lists).size).toBe(lists.filter((p, i) => p !== lists[i - 1]).length);
-    // The dots run west to east, so the left's seats sit on the west of the district.
-    const xs = SEAT_MAP_CIRCLES.Lisboa.dots.map(d => d[0]);
-    expect(xs).toEqual([...xs].sort((a, b) => a - b));
+    // Equal lists keep the parliament's order: PS (left) before IL.
+    expect(circleSeats({ IL: 2, PS: 2 }, {}).map(s => s.list)).toEqual(['PS', 'PS', 'IL', 'IL']);
+    // The dots run in rows, top to bottom, each west to east.
+    for (const [name, c] of Object.entries(SEAT_MAP_CIRCLES)) {
+      const starts = [0, ...c.dots.flatMap((d, i) => (i > 0 && d[0] < c.dots[i - 1][0] ? [i] : []))];
+      for (let r = 1; r < starts.length; r++) {
+        expect(c.dots[starts[r]][1], `${name} row ${r}`).toBeGreaterThan(c.dots[starts[r - 1]][1]);
+      }
+    }
   });
 
   it('takes a tap near a seat to its circle, and one out at sea to none', () => {

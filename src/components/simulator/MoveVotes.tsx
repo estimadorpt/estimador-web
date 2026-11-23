@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ChoiceGroup } from '@/components/brand/Choice';
 import { Action } from '@/components/brand/Action';
 import { Disclosure } from '@/components/viz/Disclosure';
@@ -23,7 +23,7 @@ import { listColor, listName, type Locale } from './copy';
 import { useSettled } from './use-settled';
 import styles from './Simulator.module.css';
 import { circleName } from '@/lib/simulator/circle-names';
-import { circleChanges } from '@/lib/simulator/seat-map';
+import { SEAT_MAP, circleChanges } from '@/lib/simulator/seat-map';
 
 const MAJORITY = 116;
 const TOTAL_SEATS = 230;
@@ -233,6 +233,12 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
   const labelClass = 'mb-1 block text-[12px] font-semibold text-graphite';
 
   // The lists' colours with their seats: under the parliament, or under the seat map.
+  // The seat map's width: its labels never print below 11px (the frame's width in pixels), and
+  // its height is held to a share of the screen, so the controls stay near it.
+  const mapFrame = {
+    '--seat-map-min': `${SEAT_MAP.width}px`,
+    '--seat-map-ratio': `${(SEAT_MAP.width / SEAT_MAP.height).toFixed(4)}`,
+  } as CSSProperties;
   const legend = (
     <ul className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[14px] tabular-nums">
       {shown.map(p => {
@@ -316,7 +322,8 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
         {changed && <Action variant="secondary" onClick={reset}>{pt ? 'Voltar a 2025' : 'Back to 2025'}</Action>}
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12 xl:grid-cols-2">
+      {/* From 1280px the seat map takes the wider column, so it can sit beside its panel. */}
+      <div className={`grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12 ${view === 'map' ? 'xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]' : 'xl:grid-cols-2'}`}>
         {/* The parliament: first on a phone, beside the controls (and in view while they
             scroll) from 1024px. */}
         <div className="min-w-0 lg:order-2">
@@ -341,13 +348,16 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
                   <Hemicycle seats={result.totals} majority={MAJORITY} caption={pt ? 'para a maioria' : 'for a majority'} />
                 </div>
               ) : (
-                <div className="mt-3 xl:grid xl:grid-cols-[328px_minmax(0,1fr)] xl:gap-5">
-                  <div className="mx-auto w-full max-w-[344px] xl:max-w-none">
+                <div className="mt-3 xl:grid xl:grid-cols-[auto_minmax(0,1fr)] xl:gap-5">
+                  <div className={styles.mapFrame} style={mapFrame}>
                     <SeatMap result={result} base={base} selected={circle} onSelect={setCircle} locale={locale} />
                     {legend}
                     <p className="mt-1 flex items-center justify-center gap-1.5 text-[12px] text-graphite">
                       <RingKey />
                       {pt ? 'Anel: mandato que muda de partido face a 2025.' : 'Ring: a seat that changes party against 2025.'}
+                    </p>
+                    <p className="mt-1 text-balance text-center text-[12px] text-graphite">
+                      {pt ? 'A posição dos pontos dentro de um círculo não indica onde se votou.' : 'Where a seat sits inside a circle says nothing about where its votes were.'}
                     </p>
                   </div>
                   <div className="mt-4 xl:mt-0">
