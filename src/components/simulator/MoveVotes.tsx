@@ -18,7 +18,11 @@ import { BLANK_MOVE, GroupMovesPanel } from './GroupMovesPanel';
 import { Hemicycle, SEAT_ORDER } from './Hemicycle';
 import { LastSeatsTable, type LastSeatRow } from './LastSeatsTable';
 import { PartySliders } from './PartySliders';
+import { CirclePanel, RingKey, SeatMap } from './SeatMap';
 import { listColor, listName, type Locale } from './copy';
+import { useSettled } from './use-settled';
+import { circleName } from '@/lib/simulator/circle-names';
+import { circleChanges } from '@/lib/simulator/seat-map';
 
 const MAJORITY = 116;
 const TOTAL_SEATS = 230;
@@ -27,6 +31,8 @@ const GROUPS_URL = '/data/elections/parliamentary-2025/simulator-groups.json';
 /** The address and the screen-reader summary wait this long after the last change (a dragged slider fires many). */
 const SETTLE_MS = 400;
 type Mode = 'parties' | 'groups';
+/** What the column beside the controls draws: the parliament, or the seats circle by circle. */
+type View = 'parliament' | 'map';
 
 /** The archive's blocs, and the arithmetic of AD with Chega (seat sums, not governments). */
 const BLOCS: Array<{ key: string; lists: string[] }> = [
@@ -34,16 +40,6 @@ const BLOCS: Array<{ key: string; lists: string[] }> = [
   { key: 'adch', lists: ['AD', 'CH'] },
   { key: 'left', lists: ['PS', 'L', 'CDU', 'BE'] },
 ];
-
-/** A value that follows `value` once it has stopped changing for `ms`. */
-function useSettled<T>(value: T, ms: number): T {
-  const [settled, setSettled] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setSettled(value), ms);
-    return () => clearTimeout(t);
-  }, [value, ms]);
-  return settled;
-}
 
 /**
  * A bloc's seats on a 0–230 ruler: the scenario as a hollow bar (a what-if is drawn hollow),
@@ -98,6 +94,8 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
   const [groups, setGroups] = useState<GroupData | null>(null);
   const [groupsFailed, setGroupsFailed] = useState(false);
   const [groupMoves, setGroupMoves] = useState<GroupMove[]>([BLANK_MOVE]);
+  const [view, setView] = useState<View>('parliament');
+  const [circle, setCircle] = useState<string | null>(null);
   const groupOptions = useMemo(() => [...data.movable, ...data.fixed, data.others, BLANK_NULL, ABSTENTION], [data]);
   // Set once the address has been read. State, not a ref: the write below must not run in the
   // mount commit, when the scenario is still the default and would wipe the reader's address.
@@ -160,12 +158,7 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
   const partyRows = [...data.movable, ...data.fixed];
 
   const changedCircles = result.circles
-    .map((c, i) => {
-      const before = base.circles[i].won;
-      const lists = Array.from(new Set([...Object.keys(before), ...Object.keys(c.won)]));
-      const diff = lists.map(p => ({ p, d: (c.won[p] ?? 0) - (before[p] ?? 0) })).filter(x => x.d !== 0).sort((a, b) => b.d - a.d);
-      return { name: c.name, diff };
-    })
+    .map((c, i) => ({ name: c.name, diff: circleChanges(c, base.circles[i]) }))
     .filter(c => c.diff.length > 0);
 
   const lastSeatRows: LastSeatRow[] = result.circles.map((c, i) => ({
@@ -201,6 +194,23 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
   const example = (m: GroupMove) => setGroupMoves(list => (list.every(x => !(x.share > 0)) ? [m] : [...list, m].slice(0, MAX_GROUP_MOVES)));
 
   const labelClass = 'mb-1 block text-[12px] font-semibold text-graphite';
+
+  // The lists' colours with their seats: under the parliament, or under the seat map.
+  const legend = (
+    <ul className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[14px] tabular-nums">
+      {shown.map(p => {
+        const d = seatsOf(result, p) - seatsOf(base, p);
+        return (
+          <li key={p} className="inline-flex items-center gap-1.5 whitespace-nowrap">
+            <span aria-hidden="true" className="inline-block h-2.5 w-2.5" style={{ backgroundColor: listColor(p) }} />
+            <span className="text-ink">{listName(p, locale)}</span>
+            <span className="font-bold text-ink">{num(seatsOf(result, p))}</span>
+            {d !== 0 && <span className="font-semibold text-ink">{signed(d)}</span>}
+          </li>
+        );
+      })}
+    </ul>
+  );
 
   // Seat sums and the circles that change: under the parliament from 1024px, after the controls on a phone.
   const details = (
@@ -240,8 +250,8 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
           <ul className="divide-y divide-grid text-[14px] tabular-nums">
             {changedCircles.map(c => (
               <li key={c.name} className="flex flex-wrap gap-x-3 py-1.5">
-                <span className="min-w-[7.5rem] font-semibold text-ink">{c.name}</span>
-                <span className="text-ink">{c.diff.map(x => `${listName(x.p, locale)} ${signed(x.d)}`).join(', ')}</span>
+                <span className="min-w-[7.5rem] font-semibold text-ink">{circleName(c.name, locale)}</span>
+                <span className="text-ink">{c.diff.map(x => `${listName(x.list, locale)} ${signed(x.d)}`).join(', ')}</span>
               </li>
             ))}
           </ul>
@@ -269,34 +279,49 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
         {changed && <Action variant="secondary" onClick={reset}>{pt ? 'Voltar a 2025' : 'Back to 2025'}</Action>}
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12 xl:grid-cols-2">
         {/* The parliament: first on a phone, beside the controls (and in view while they
             scroll) from 1024px. */}
         <div className="min-w-0 lg:order-2">
           <div className="space-y-5 lg:sticky lg:top-20">
             <div>
-              <p className="text-[12px] font-semibold text-graphite">{pt ? 'Parlamento com estes votos' : 'Parliament with these votes'}</p>
-              <div className="mx-auto max-w-[26rem]">
-                <Hemicycle seats={result.totals} majority={MAJORITY} caption={pt ? 'para a maioria' : 'for a majority'} />
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                <p className="text-[12px] font-semibold text-graphite">{pt ? 'Com estes votos' : 'With these votes'}</p>
+                <ChoiceGroup
+                  label={pt ? 'Ver os mandatos' : 'Show the seats'}
+                  options={[
+                    { value: 'parliament' as View, label: pt ? 'Parlamento' : 'Parliament' },
+                    { value: 'map' as View, label: pt ? 'Por círculo' : 'By circle' },
+                  ]}
+                  value={view}
+                  onChange={setView}
+                />
               </div>
-              <ul className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-[14px] tabular-nums">
-                {shown.map(p => {
-                  const d = seatsOf(result, p) - seatsOf(base, p);
-                  return (
-                    <li key={p} className="inline-flex items-center gap-1.5 whitespace-nowrap">
-                      <span aria-hidden="true" className="inline-block h-2.5 w-2.5" style={{ backgroundColor: listColor(p) }} />
-                      <span className="text-ink">{listName(p, locale)}</span>
-                      <span className="font-bold text-ink">{num(seatsOf(result, p))}</span>
-                      {d !== 0 && <span className="font-semibold text-ink">{signed(d)}</span>}
-                    </li>
-                  );
-                })}
-              </ul>
+              {view === 'parliament' ? (
+                <div className="mx-auto mt-2 max-w-[26rem]">
+                  <Hemicycle seats={result.totals} majority={MAJORITY} caption={pt ? 'para a maioria' : 'for a majority'} />
+                </div>
+              ) : (
+                <div className="mt-3 xl:grid xl:grid-cols-[328px_minmax(0,1fr)] xl:gap-5">
+                  <div className="mx-auto w-full max-w-[344px] xl:max-w-none">
+                    <SeatMap result={result} base={base} selected={circle} onSelect={setCircle} locale={locale} />
+                    {legend}
+                    <p className="mt-1 flex items-center justify-center gap-1.5 text-[12px] text-graphite">
+                      <RingKey />
+                      {pt ? 'Anel: mandato que muda de partido face a 2025.' : 'Ring: a seat that changes party against 2025.'}
+                    </p>
+                  </div>
+                  <div className="mt-4 xl:mt-0">
+                    <CirclePanel result={result} base={base} selected={circle} onSelect={setCircle} locale={locale} />
+                  </div>
+                </div>
+              )}
+              {view === 'parliament' && legend}
               {/* What a screen reader hears once the scenario settles; the drawing above is hidden from it. */}
               <p aria-live="polite" className="sr-only">{settledSummary}</p>
             </div>
 
-            <div className="hidden space-y-5 lg:block">{details}</div>
+            {view === 'parliament' && <div className="hidden space-y-5 lg:block">{details}</div>}
           </div>
         </div>
 

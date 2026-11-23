@@ -106,6 +106,19 @@
   cursor: pointer;
 }
 
+/* The seat map: a block takes a tap or a click anywhere near it (SeatMap picks the nearest). */
+.seatMap {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .block:hover .blockHit {
+    fill: var(--color-field, #f4f4f4);
+  }
+}
+
 @media (forced-colors: active) {
   .marker {
     background: CanvasText;

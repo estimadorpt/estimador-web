@@ -1,5 +1,6 @@
 import { formatElectionNumber } from '@/lib/election-display';
 import { Disclosure } from '@/components/viz/Disclosure';
+import { circleName } from '@/lib/simulator/circle-names';
 import { listColor, listName, type Locale } from './copy';
 
 export interface LastSeatRow {
@@ -64,7 +65,7 @@ export function LastSeatsTable({ rows, locale, shown = 8, caption, votesHeading,
       {list.map(r => (
         <tr key={r.circle} className="border-b border-grid">
           <th scope="row" className="py-2 pr-3 text-left font-medium text-ink">
-            {r.circle}
+            {circleName(r.circle, locale)}
             {r.fixed && fixedNote && <span className="block text-[12px] font-normal text-graphite">{fixedNote}</span>}
           </th>
           <td className="px-3 py-2 text-right">{formatElectionNumber(r.seats, locale)}</td>
