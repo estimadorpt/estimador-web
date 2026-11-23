@@ -199,7 +199,8 @@ feed('elections/parliamentary-2025/seat_forecast_simulations.json', value => {
 feed('elections/parliamentary-2025/contested_summary.json', value =>
   isObject(value) && isObject(value.districts) ? null : 'no districts');
 // The seat simulator and the last-seat table: the 2025 result by circle, on
-// the 2025 seat map (22 circles, 230 seats), with each circle's last seat.
+// the 2025 seat map (22 circles, 230 seats), with each circle's last seat. The
+// counts are fixed: this is a past election, and the seat map is the law's.
 feed('elections/parliamentary-2025/simulator.json', value => {
   if (!isObject(value) || !nonEmptyArray(value.circles)) return 'no circles';
   if (value.circles.length !== 22) return `expected 22 circles, found ${value.circles.length}`;
