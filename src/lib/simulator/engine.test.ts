@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  ABSTENTION, applyTransfers, baseVotes, blendSwing, decodeScenario, dhondt, encodeScenario,
-  presetVotes, runScenario, swingLists, type SimulatorData,
+  ABSTENTION, MAX_TRANSFER_POINTS, applyTransfers, baseVotes, blendSwing, decodeScenario, dhondt, encodeScenario,
+  isScenarioHash, nextHash, presetVotes, runScenario, swingLists, type SimulatorData,
 } from './engine';
 
 const data = JSON.parse(readFileSync(path.join(process.cwd(), 'public/data/elections/parliamentary-2025/simulator.json'), 'utf8')) as SimulatorData;
@@ -133,5 +133,26 @@ describe('scenario links', () => {
       preset: '2025', transfers: [{ from: 'IL', to: 'AD', points: 4 }],
     });
     expect(encodeScenario({ preset: '2025', transfers: [] })).toBe('');
+  });
+
+  it('caps a hand-edited link at the form\'s largest move', () => {
+    expect(decodeScenario('#t=PS.L.80', data).transfers).toEqual([{ from: 'PS', to: 'L', points: MAX_TRANSFER_POINTS }]);
+  });
+
+  it('keeps a plain anchor while nothing is moved, and writes only what changed', () => {
+    const none = { preset: '2025', transfers: [] };
+    const moved = { preset: '2025', transfers: [{ from: 'PS', to: 'L', points: 3 }] };
+    // A direct load of the section's anchor: nothing to write.
+    expect(nextHash(none, '#mover-votos', 'mover-votos')).toBeNull();
+    expect(nextHash(none, '', 'mover-votos')).toBeNull();
+    // A shared scenario, read back: already in the address.
+    expect(nextHash(moved, '#t=PS.L.3', 'mover-votos')).toBeNull();
+    // A move: the scenario replaces the anchor.
+    expect(nextHash(moved, '#mover-votos', 'mover-votos')).toBe('#t=PS.L.3');
+    // Back to 2025, or a link that held no valid move: the section's anchor again.
+    expect(nextHash(none, '#t=PS.L.3', 'mover-votos')).toBe('#mover-votos');
+    expect(nextHash(none, '#t=garbage', 'mover-votos')).toBe('#mover-votos');
+    expect(isScenarioHash('#p=2024')).toBe(true);
+    expect(isScenarioHash('#mover-votos')).toBe(false);
   });
 });

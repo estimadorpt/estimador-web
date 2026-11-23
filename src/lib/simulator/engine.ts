@@ -229,6 +229,11 @@ export function applyTransfers(data: SimulatorData, start: NationalVotes, transf
   return { votes, moved };
 }
 
+/** The largest single move the form and a link accept, in points. */
+export const MAX_TRANSFER_POINTS = 30;
+/** The most moves a scenario keeps. */
+export const MAX_TRANSFERS = 20;
+
 export interface Scenario {
   /** The starting point: '2025', or a past election's national vote on 2025 geography. */
   preset: string;
@@ -255,8 +260,26 @@ export function decodeScenario(hash: string, data: SimulatorData): Scenario {
     const m = /^([A-Z]+)\.([A-Z]+)\.(\d+(?:\.\d+)?)$/.exec(item);
     if (!m) continue;
     const [, from, to, pts] = m;
-    const points = Math.min(100, Number(pts));
+    const points = Math.min(MAX_TRANSFER_POINTS, Number(pts));
     if (known.has(from) && known.has(to) && from !== to && points > 0) transfers.push({ from, to, points });
   }
-  return { preset, transfers: transfers.slice(0, 20) };
+  return { preset, transfers: transfers.slice(0, MAX_TRANSFERS) };
+}
+
+/** A fragment that holds a scenario (`p=` or `t=`), as opposed to a plain anchor such as `#mover-votos`. */
+export function isScenarioHash(hash: string): boolean {
+  return /(?:^#?|&)[pt]=/.test(hash);
+}
+
+/**
+ * The fragment the address should carry for `scenario`, or null to leave it alone. The
+ * scenario's own fragment while anything is moved; with nothing moved, a plain anchor is
+ * kept as it is, and a scenario fragment gives way to `anchor` (the section's id), so a
+ * reader who goes back to 2025 still has a link to the section.
+ */
+export function nextHash(scenario: Scenario, current: string, anchor?: string): string | null {
+  const own = encodeScenario(scenario);
+  if (own) return own === current ? null : own;
+  if (!isScenarioHash(current)) return null;
+  return anchor ? `#${anchor}` : '';
 }

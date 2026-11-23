@@ -8,14 +8,13 @@ import { BRAND } from '@/lib/brand';
 import { formatElectionNumber, formatElectionPercent } from '@/lib/election-display';
 import { formatSignedNumber } from '@/lib/typography';
 import {
-  ABSTENTION, applyTransfers, baseVotes, decodeScenario, encodeScenario, presetVotes, runScenario,
-  swingLists, type Scenario, type SimulatorData, type Transfer,
+  ABSTENTION, MAX_TRANSFERS, MAX_TRANSFER_POINTS, applyTransfers, baseVotes, decodeScenario, isScenarioHash, nextHash,
+  presetVotes, runScenario, swingLists, type Scenario, type SimulatorData, type Transfer,
 } from '@/lib/simulator/engine';
 import { LastSeatsTable, type LastSeatRow } from './LastSeatsTable';
 import { listColor, listName, type Locale } from './copy';
 
 const MAJORITY = 116;
-const MAX_POINTS = 30;
 
 /** Ready-made transfers to start from: one move each, the reader edits from there. */
 const EXAMPLES: Transfer[] = [
@@ -48,29 +47,50 @@ function SeatBar({ value, before, max, majority }: { value: number; before: numb
   );
 }
 
-export function MoveVotes({ data, locale }: { data: SimulatorData; locale: Locale }) {
+/**
+ * `anchorId` is the page section's id: a shared scenario link scrolls there, and going back to
+ * 2025 leaves it in the address.
+ */
+export function MoveVotes({ data, locale, anchorId }: { data: SimulatorData; locale: Locale; anchorId?: string }) {
   const pt = locale === 'pt';
   const id = useId();
   const swing = swingLists(data);
   const sources = [...swing, ABSTENTION];
   const [scenario, setScenario] = useState<Scenario>({ preset: '2025', transfers: [] });
   const [draft, setDraft] = useState<Transfer>({ from: 'PS', to: 'L', points: 2 });
-  const ready = useRef(false);
+  // Set once the address has been read. State, not a ref: the write below must not run in the
+  // mount commit, when the scenario is still the default and would wipe the reader's address.
+  const [loaded, setLoaded] = useState(false);
+  const removeButtons = useRef<Array<HTMLButtonElement | null>>([]);
+  const fromSelect = useRef<HTMLSelectElement>(null);
+  const [focusAfterRemove, setFocusAfterRemove] = useState<number | null>(null);
 
   // The scenario lives in the address. It is read after mount only, so the exported HTML
   // (and the first render) is always 2025's result; a static export serves one file.
   useEffect(() => {
-    const fromHash = decodeScenario(window.location.hash, data);
+    const hash = window.location.hash;
+    const fromHash = decodeScenario(hash, data);
     if (fromHash.preset !== '2025' || fromHash.transfers.length) setScenario(fromHash);
-    ready.current = true;
-  }, [data]);
+    setLoaded(true);
+    // A scenario link replaces the section's anchor, so bring the section into view.
+    if (anchorId && isScenarioHash(hash)) document.getElementById(anchorId)?.scrollIntoView();
+  }, [data, anchorId]);
   useEffect(() => {
-    if (!ready.current) return;
-    const hash = encodeScenario(scenario);
+    if (!loaded) return;
+    const hash = nextHash(scenario, window.location.hash, anchorId);
+    if (hash == null) return;
     try {
       window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
     } catch { /* the address is a convenience */ }
-  }, [scenario]);
+  }, [scenario, loaded, anchorId]);
+  // After a removal, focus the move now in that place, the one before it, or the form.
+  useEffect(() => {
+    if (focusAfterRemove == null) return;
+    const n = scenario.transfers.length;
+    const target = n > 0 ? removeButtons.current[Math.min(focusAfterRemove, n - 1)] : fromSelect.current;
+    target?.focus();
+    setFocusAfterRemove(null);
+  }, [focusAfterRemove, scenario.transfers.length]);
 
   const base = useMemo(() => runScenario(data, presetVotes(data, '2025')), [data]);
   // One point in votes, rounded to the thousand for the help line.
@@ -118,9 +138,12 @@ export function MoveVotes({ data, locale }: { data: SimulatorData; locale: Local
   const update = (next: Scenario) => setScenario(next);
   const addTransfer = (t: Transfer) => {
     if (t.from === t.to || !(t.points > 0)) return;
-    update({ ...scenario, transfers: [...scenario.transfers, { ...t, points: Math.min(MAX_POINTS, t.points) }].slice(0, 20) });
+    update({ ...scenario, transfers: [...scenario.transfers, { ...t, points: Math.min(MAX_TRANSFER_POINTS, t.points) }].slice(0, MAX_TRANSFERS) });
   };
-  const removeTransfer = (i: number) => update({ ...scenario, transfers: scenario.transfers.filter((_, j) => j !== i) });
+  const removeTransfer = (i: number) => {
+    update({ ...scenario, transfers: scenario.transfers.filter((_, j) => j !== i) });
+    setFocusAfterRemove(i);
+  };
   const reset = () => update({ preset: '2025', transfers: [] });
 
   const presetOptions = [
@@ -167,7 +190,7 @@ export function MoveVotes({ data, locale }: { data: SimulatorData; locale: Local
           <div className="grid max-w-3xl gap-3 sm:grid-cols-[1fr_1fr_7rem_auto] sm:items-end">
             <div>
               <label htmlFor={`${id}-from`} className={labelClass}>{pt ? 'De' : 'From'}</label>
-              <select id={`${id}-from`} className={selectClass} value={draft.from} onChange={e => setDraft({ ...draft, from: e.target.value })}>
+              <select ref={fromSelect} id={`${id}-from`} className={selectClass} value={draft.from} onChange={e => setDraft({ ...draft, from: e.target.value })}>
                 {sources.map(p => <option key={p} value={p}>{listName(p, locale)}</option>)}
               </select>
             </div>
@@ -184,7 +207,7 @@ export function MoveVotes({ data, locale }: { data: SimulatorData; locale: Local
                 type="number"
                 inputMode="decimal"
                 min={0.5}
-                max={MAX_POINTS}
+                max={MAX_TRANSFER_POINTS}
                 step={0.5}
                 value={Number.isFinite(draft.points) ? draft.points : ''}
                 onChange={e => setDraft({ ...draft, points: Number(e.target.value) })}
@@ -217,7 +240,7 @@ export function MoveVotes({ data, locale }: { data: SimulatorData; locale: Local
               {scenario.transfers.map((t, i) => (
                 <li key={i} className="flex min-h-11 items-center justify-between gap-3 text-[15px] text-ink">
                   <span>{transferText(t, moved[i] ?? 0)}</span>
-                  <button type="button" onClick={() => removeTransfer(i)} className="inline-flex min-h-11 min-w-11 items-center justify-center text-ink hover:bg-field" aria-label={pt ? `Retirar: ${transferText(t, moved[i] ?? 0)}` : `Remove: ${transferText(t, moved[i] ?? 0)}`}>
+                  <button ref={el => { removeButtons.current[i] = el; }} type="button" onClick={() => removeTransfer(i)} className="inline-flex min-h-11 min-w-11 items-center justify-center text-ink hover:bg-field" aria-label={pt ? `Retirar: ${transferText(t, moved[i] ?? 0)}` : `Remove: ${transferText(t, moved[i] ?? 0)}`}>
                     <X aria-hidden="true" className="h-4 w-4" />
                   </button>
                 </li>

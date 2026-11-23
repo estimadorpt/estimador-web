@@ -407,7 +407,7 @@ export default async function ParliamentaryArchivePage({
                 {...resultsFrame}
                 methodologyHref={electionMethodHref('simulator', locale)}
               >
-                <MoveVotes data={simulator} locale={pt ? 'pt' : 'en'} />
+                <MoveVotes data={simulator} locale={pt ? 'pt' : 'en'} anchorId="mover-votos" />
               </DataCard>
             </div>
           </div>
