@@ -237,7 +237,7 @@ export function MoveVotes({ data, locale }: { data: SimulatorData; locale: Local
       </p>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <div>
+        <div className="min-w-0">
           <h4 className="mb-2 text-[16px] font-semibold text-ink">{pt ? 'Votos e mandatos por partido' : 'Votes and seats by party'}</h4>
           <div className="scroll-cue overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? 'Votos e mandatos por partido' : 'Votes and seats by party'}>
             <table className="min-w-full border-collapse text-sm tabular-nums">
@@ -286,9 +286,10 @@ export function MoveVotes({ data, locale }: { data: SimulatorData; locale: Local
           </p>
         </div>
 
-        <div className="space-y-8">
+        <div className="min-w-0 space-y-8">
           <div>
             <h4 className="mb-2 text-[16px] font-semibold text-ink">{pt ? `Somas de mandatos e a maioria de ${MAJORITY}` : `Seat sums and the ${MAJORITY}-seat majority`}</h4>
+            <div className="scroll-cue overflow-x-auto" tabIndex={0} role="region" aria-label={pt ? 'Somas de mandatos' : 'Seat sums'}>
             <table className="min-w-full border-collapse text-sm tabular-nums">
               <caption className="sr-only">{pt ? 'Somas de mandatos, em 2025 e com estes votos' : 'Seat sums, in 2025 and with these votes'}</caption>
               <thead>
@@ -317,6 +318,7 @@ export function MoveVotes({ data, locale }: { data: SimulatorData; locale: Local
                 })}
               </tbody>
             </table>
+            </div>
             <p className="mt-2 text-[12.5px] text-graphite">
               {pt
                 ? 'Somas de mandatos, não governos. Barra vazada: o cenário; quadrado preto: 2025; traço vertical: 116 mandatos.'
