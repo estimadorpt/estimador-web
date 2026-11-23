@@ -50,7 +50,7 @@ export function SeatMap({ result, base, selected, onSelect, locale }: {
   return (
     <svg
       viewBox={`0 0 ${SEAT_MAP.width} ${SEAT_MAP.height}`}
-      className={`block h-auto w-full ${styles.seatMap}`}
+      className={`block h-auto w-full ${styles.seatMap} ${styles.inkMarks}`}
       aria-hidden="true"
       focusable="false"
       onClick={pick}
@@ -84,10 +84,10 @@ export function SeatMap({ result, base, selected, onSelect, locale }: {
               return s.gained ? (
                 <g key={i}>
                   <circle cx={c.x} cy={c.y} r={RING_R} fill="none" stroke={BRAND.ink} strokeWidth={1.2} />
-                  <circle cx={c.x} cy={c.y} r={GAINED_R} fill={listColor(s.list)} />
+                  <circle className={styles.dot} cx={c.x} cy={c.y} r={GAINED_R} fill={listColor(s.list)} />
                 </g>
               ) : (
-                <circle key={i} cx={c.x} cy={c.y} r={DOT_R} fill={listColor(s.list)} />
+                <circle key={i} className={styles.dot} cx={c.x} cy={c.y} r={DOT_R} fill={listColor(s.list)} />
               );
             })}
           </g>
@@ -100,7 +100,7 @@ export function SeatMap({ result, base, selected, onSelect, locale }: {
 /** The ring's key: one seat with its ink ring, as the map draws a seat that changed hands. */
 export function RingKey() {
   return (
-    <svg width={12} height={12} viewBox="0 0 12 12" className="inline-block shrink-0 align-[-1px]" aria-hidden="true" focusable="false">
+    <svg width={12} height={12} viewBox="0 0 12 12" className={`inline-block shrink-0 align-[-1px] ${styles.inkMarks}`} aria-hidden="true" focusable="false">
       <circle cx={6} cy={6} r={5} fill="none" stroke={BRAND.ink} strokeWidth={1.4} />
       <circle cx={6} cy={6} r={3.1} fill={BRAND.muted} />
     </svg>

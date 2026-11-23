@@ -21,6 +21,7 @@ import { PartySliders } from './PartySliders';
 import { CirclePanel, RingKey, SeatMap } from './SeatMap';
 import { listColor, listName, type Locale } from './copy';
 import { useSettled } from './use-settled';
+import styles from './Simulator.module.css';
 import { circleName } from '@/lib/simulator/circle-names';
 import { circleChanges } from '@/lib/simulator/seat-map';
 
@@ -49,7 +50,7 @@ function BlocBar({ value, before }: { value: number; before: number }) {
   const width = 150;
   const x = (v: number) => 1 + (Math.min(v, TOTAL_SEATS) / TOTAL_SEATS) * (width - 2);
   return (
-    <svg className="block shrink-0" width={width} height={16} viewBox={`0 0 ${width} 16`} aria-hidden="true" focusable="false">
+    <svg className={`block shrink-0 ${styles.inkMarks}`} width={width} height={16} viewBox={`0 0 ${width} 16`} aria-hidden="true" focusable="false">
       <line x1={1} x2={width - 1} y1={14.5} y2={14.5} stroke={BRAND.faint} />
       {value > 0 && <rect x={1.5} y={3.5} width={Math.max(1, x(value) - 2)} height={8} fill={BRAND.paper} stroke={BRAND.ink} strokeWidth={1.25} />}
       <rect x={x(before) - 3} y={4.5} width={6} height={6} fill={BRAND.ink} />

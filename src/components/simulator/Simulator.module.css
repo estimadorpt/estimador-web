@@ -119,6 +119,18 @@
   }
 }
 
+/* The simulator's drawings (parliament, seat map, bloc bars) keep their party colours in forced
+   colours; their ink and paper turn to the system's, and every seat gets an outline, so a black
+   list (BE) still shows on a dark ground. */
+@media (forced-colors: active) {
+  .inkMarks text { fill: CanvasText; }
+  .inkMarks [fill="#111111"] { fill: CanvasText; }
+  .inkMarks [stroke="#111111"] { stroke: CanvasText; }
+  .inkMarks [fill="#ffffff"] { fill: Canvas; }
+  .inkMarks .dot { stroke: CanvasText; stroke-width: 0.75px; }
+  .block:hover .blockHit { fill: transparent; }
+}
+
 @media (forced-colors: active) {
   .marker {
     background: CanvasText;

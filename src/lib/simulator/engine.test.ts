@@ -177,6 +177,8 @@ describe('scenario links', () => {
   it('drops what it does not recognise and rescales what it keeps', () => {
     expect(decodeShares('#mover-votos', data)).toBeNull();
     expect(decodeShares('#s=XX.5~CH.abc', data)).toBeNull();
+    // A truncated or garbled link falls back to 2025 rather than to a half-read scenario.
+    for (const hash of ['#s=', '#s=AD.', '#s=AD', '#s=~~', '#s=AD.30.5.1', '#s=AD.-5']) expect(decodeShares(hash, data), hash).toBeNull();
     const back = decodeShares('#s=CH.40~XX.10', data)!;
     expect(Object.values(back).reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12);
     expect(back.CH).toBeGreaterThan(0.3);

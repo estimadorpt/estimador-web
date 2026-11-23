@@ -1,6 +1,7 @@
 import { BRAND, FONT_STACK } from '@/lib/brand';
 import { HEMICYCLE, SEAT_ORDER, hemicycleLayout } from '@/lib/simulator/hemicycle';
 import { listColor } from './copy';
+import styles from './Simulator.module.css';
 
 export { SEAT_ORDER };
 
@@ -17,10 +18,11 @@ export function Hemicycle({ seats, majority = 116, caption }: { seats: Record<st
   const fills: string[] = [];
   for (const list of SEAT_ORDER) for (let i = 0; i < (seats[list] ?? 0); i++) fills.push(listColor(list));
   return (
-    <svg viewBox={`0 0 ${W} ${CY + 14}`} className="block h-auto w-full" aria-hidden="true" focusable="false">
+    <svg viewBox={`0 0 ${W} ${CY + 14}`} className={`block h-auto w-full ${styles.inkMarks}`} aria-hidden="true" focusable="false">
       {LAYOUT.map((p, i) => (
         <circle
           key={i}
+          className={fills[i] ? styles.dot : undefined}
           cx={p.x.toFixed(2)}
           cy={p.y.toFixed(2)}
           r={5.6}

@@ -89,6 +89,7 @@ describe('group links', () => {
       .toEqual([{ ...everyone, from: 'PS', to: 'L', share: 100 }]);
     // Unknown age or education codes are dropped, and a link keeps at most MAX_GROUP_MOVES moves.
     expect(decodeGroupMoves('x.17.x.PS.L.5~x.x.z.PS.L.5', groups.options)).toEqual([]);
+    for (const value of ['', 'x.18a', '~~', 'x.x.x.PS.L.', 'x.x.x.PS.L.-5', 'x.x.x.PS.L.0']) expect(decodeGroupMoves(value, groups.options), value).toEqual([]);
     expect(decodeGroupMoves(Array.from({ length: MAX_GROUP_MOVES + 5 }, () => 'x.x.x.PS.L.1').join('~'), groups.options)).toHaveLength(MAX_GROUP_MOVES);
     // A share that rounds to 0 is not written, so the address never holds a move it would drop.
     expect(encodeGroupMoves([{ ...everyone, from: 'PS', to: 'L', share: 0.04 }, { ...everyone, from: 'AD', to: 'IL', share: 0.06 }])).toBe('x.x.x.AD.IL.0.1');
