@@ -190,15 +190,15 @@ describe('scenario links', () => {
     const none = { preset: '2025', transfers: [] };
     const moved = { preset: '2025', transfers: [{ from: 'PS', to: 'L', points: 3 }] };
     // A direct load of the section's anchor: nothing to write.
-    expect(nextHash(none, '#mover-votos', 'mover-votos')).toBeNull();
-    expect(nextHash(none, '', 'mover-votos')).toBeNull();
+    expect(nextHash(encodeScenario(none), '#mover-votos', 'mover-votos')).toBeNull();
+    expect(nextHash(encodeScenario(none), '', 'mover-votos')).toBeNull();
     // A shared scenario, read back: already in the address.
-    expect(nextHash(moved, '#t=PS.L.3', 'mover-votos')).toBeNull();
+    expect(nextHash(encodeScenario(moved), '#t=PS.L.3', 'mover-votos')).toBeNull();
     // A move: the scenario replaces the anchor.
-    expect(nextHash(moved, '#mover-votos', 'mover-votos')).toBe('#t=PS.L.3');
+    expect(nextHash(encodeScenario(moved), '#mover-votos', 'mover-votos')).toBe('#t=PS.L.3');
     // Back to 2025, or a link that held no valid move: the section's anchor again.
-    expect(nextHash(none, '#t=PS.L.3', 'mover-votos')).toBe('#mover-votos');
-    expect(nextHash(none, '#t=garbage', 'mover-votos')).toBe('#mover-votos');
+    expect(nextHash(encodeScenario(none), '#t=PS.L.3', 'mover-votos')).toBe('#mover-votos');
+    expect(nextHash(encodeScenario(none), '#t=garbage', 'mover-votos')).toBe('#mover-votos');
     expect(isScenarioHash('#p=2024')).toBe(true);
     expect(isScenarioHash('#mover-votos')).toBe(false);
   });

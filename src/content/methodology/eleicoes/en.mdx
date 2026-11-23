@@ -121,6 +121,14 @@ The new national vote is spread over the 20 circles in Portugal by the rule we u
 
 It is a scenario, not a forecast, and it has no margin. Even given the right national vote, this rule gave between 3 and 8 of the 226 seats in Portugal to another party in each of the four elections from 2019 to 2025, applied to the previous result and the 2025 map. And where a shift happens matters: the same 3-point transfer can be worth 3 to 5 seats either way depending on the circles it happens in, which the rule does not know. The scenario is kept in the page's address, so it can be shared.
 
+### Moving votes by group
+
+In the “By group” mode, the simulator does not use the swing rule. It starts from a table that splits the 2025 result in each of the 20 circles in Portugal into 42 groups (sex, seven age bands and three education levels) and by what each group did: voted for a party, for JPP, for the other lists, blank or spoilt, or abstained. Its user picks a group, what it did in 2025, what it does instead and what share of it changes. The simulator takes that share in each circle, where the group lives and voted that way, adds the change to the official result and runs the D'Hondt method. Moves apply in the order they were made. With none, it gives the 2025 seats.
+
+The table brings three sources together. The groups are the Portuguese citizens aged 18 or over living in each district and autonomous region in the 2021 census (about 8.2 million, not aged forward to 2025). The gaps between groups (how much each age, sex and education level votes for each party, and how much it abstains) come from an additive multinomial model fitted to the 2024 Portuguese Election Study (Estudo Eleitoral Português, ICS, University of Lisbon): 791 mainland respondents whose vote or abstention is known, weighted to match the 2024 result. The levels come from the result: in each circle, every group's shares rise or fall, party by party, until they add up exactly to the 2025 votes for each list, the blank and spoilt ballots and abstention (the residents who did not vote).
+
+The limits are several. The gaps between groups come from a survey of about 800 people: they serve for the larger parties and for abstention, and are imprecise for the smaller ones (between 10 and 19 respondents voted for each of IL, Livre, CDU, BE and PAN). The other lists and JPP have the same share in every group. Madeira and the Azores use the mainland's gaps. Abstention is among residents, not registered voters: the rolls in Portugal held about a million more names in 2025 than there are resident adult Portuguese citizens. The two emigration circles stay as in 2025. As in the other mode, it is a scenario with no margin.
+
 ---
 
 <span id="presidenciais" className="block"></span>

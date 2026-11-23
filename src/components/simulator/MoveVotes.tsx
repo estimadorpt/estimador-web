@@ -8,13 +8,20 @@ import { BRAND } from '@/lib/brand';
 import { formatElectionNumber, formatElectionPercent } from '@/lib/election-display';
 import { formatSignedNumber } from '@/lib/typography';
 import {
-  ABSTENTION, MAX_TRANSFERS, MAX_TRANSFER_POINTS, applyTransfers, baseVotes, decodeScenario, isScenarioHash, nextHash,
+  ABSTENTION, MAX_TRANSFERS, MAX_TRANSFER_POINTS, applyTransfers, baseVotes, decodeScenario, encodeScenario, isScenarioHash, nextHash,
   presetVotes, runScenario, swingLists, type Scenario, type SimulatorData, type Transfer,
 } from '@/lib/simulator/engine';
+import {
+  BLANK_NULL, MAX_GROUP_MOVES, decodeGroupMoves, encodeGroupMoves, runGroupScenario, type GroupData, type GroupMove,
+} from '@/lib/simulator/groups';
+import { GroupMovesPanel } from './GroupMovesPanel';
 import { LastSeatsTable, type LastSeatRow } from './LastSeatsTable';
 import { listColor, listName, type Locale } from './copy';
 
 const MAJORITY = 116;
+/** The group file, fetched when the reader first opens "Por grupos" (about 40 KB). */
+const GROUPS_URL = '/data/elections/parliamentary-2025/simulator-groups.json';
+type Mode = 'parties' | 'groups';
 
 /** Ready-made transfers to start from: one move each, the reader edits from there. */
 const EXAMPLES: Transfer[] = [
@@ -51,12 +58,23 @@ function SeatBar({ value, before, max, majority }: { value: number; before: numb
  * `anchorId` is the page section's id: a shared scenario link scrolls there, and going back to
  * 2025 leaves it in the address.
  */
-export function MoveVotes({ data, locale, anchorId }: { data: SimulatorData; locale: Locale; anchorId?: string }) {
+export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
+  data: SimulatorData;
+  locale: Locale;
+  anchorId?: string;
+  /** The methodology's section on the group mode, linked under the group controls. */
+  groupsMethodHref?: string;
+}) {
   const pt = locale === 'pt';
   const id = useId();
   const swing = swingLists(data);
   const sources = [...swing, ABSTENTION];
   const [scenario, setScenario] = useState<Scenario>({ preset: '2025', transfers: [] });
+  const [mode, setMode] = useState<Mode>('parties');
+  const [groups, setGroups] = useState<GroupData | null>(null);
+  const [groupsFailed, setGroupsFailed] = useState(false);
+  const [groupMoves, setGroupMoves] = useState<GroupMove[]>([]);
+  const groupOptions = useMemo(() => [...data.movable, ...data.fixed, data.others, BLANK_NULL, ABSTENTION], [data]);
   const [draft, setDraft] = useState<Transfer>({ from: 'PS', to: 'L', points: 2 });
   // Set once the address has been read. State, not a ref: the write below must not run in the
   // mount commit, when the scenario is still the default and would wipe the reader's address.
@@ -69,20 +87,39 @@ export function MoveVotes({ data, locale, anchorId }: { data: SimulatorData; loc
   // (and the first render) is always 2025's result; a static export serves one file.
   useEffect(() => {
     const hash = window.location.hash;
-    const fromHash = decodeScenario(hash, data);
-    if (fromHash.preset !== '2025' || fromHash.transfers.length) setScenario(fromHash);
+    const g = new URLSearchParams(hash.replace(/^#/, '')).get('g');
+    if (g != null) {
+      setMode('groups');
+      setGroupMoves(decodeGroupMoves(g, groupOptions));
+    } else {
+      const fromHash = decodeScenario(hash, data);
+      if (fromHash.preset !== '2025' || fromHash.transfers.length) setScenario(fromHash);
+    }
     setLoaded(true);
     // A scenario link replaces the section's anchor, so bring the section into view.
     if (anchorId && isScenarioHash(hash)) document.getElementById(anchorId)?.scrollIntoView();
-  }, [data, anchorId]);
+  }, [data, anchorId, groupOptions]);
+  // The group file is fetched once, the first time the groups are opened.
+  useEffect(() => {
+    if (mode !== 'groups' || groups || groupsFailed) return;
+    let live = true;
+    fetch(GROUPS_URL)
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((g: GroupData) => { if (live) setGroups(g); })
+      .catch(() => { if (live) setGroupsFailed(true); });
+    return () => { live = false; };
+  }, [mode, groups, groupsFailed]);
+  const ownHash = mode === 'groups'
+    ? (groupMoves.length ? `#g=${encodeGroupMoves(groupMoves)}` : '')
+    : encodeScenario(scenario);
   useEffect(() => {
     if (!loaded) return;
-    const hash = nextHash(scenario, window.location.hash, anchorId);
+    const hash = nextHash(ownHash, window.location.hash, anchorId);
     if (hash == null) return;
     try {
       window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
     } catch { /* the address is a convenience */ }
-  }, [scenario, loaded, anchorId]);
+  }, [ownHash, loaded, anchorId]);
   // After a removal, focus the move now in that place, the one before it, or the form.
   useEffect(() => {
     if (focusAfterRemove == null) return;
@@ -95,11 +132,14 @@ export function MoveVotes({ data, locale, anchorId }: { data: SimulatorData; loc
   const base = useMemo(() => runScenario(data, presetVotes(data, '2025')), [data]);
   // One point in votes, rounded to the thousand for the help line.
   const pointVotes = useMemo(() => Math.round(Object.values(baseVotes(data)).reduce((a, b) => a + b, 0) / 100 / 1000), [data]);
-  const { result, moved } = useMemo(() => {
+  const { result: partyResult, moved } = useMemo(() => {
     const start = presetVotes(data, scenario.preset);
     const applied = applyTransfers(data, start, scenario.transfers);
     return { result: runScenario(data, applied.votes), moved: applied.moved };
   }, [data, scenario]);
+  const groupResult = useMemo(() => (groups ? runGroupScenario(data, groups, groupMoves) : null), [data, groups, groupMoves]);
+  // Until the group file is in, the groups show 2025's result.
+  const result = mode === 'groups' ? groupResult ?? base : partyResult;
 
   const pct = (v: number) => formatElectionPercent(v, locale);
   const num = (v: number) => formatElectionNumber(v, locale);
@@ -144,7 +184,13 @@ export function MoveVotes({ data, locale, anchorId }: { data: SimulatorData; loc
     update({ ...scenario, transfers: scenario.transfers.filter((_, j) => j !== i) });
     setFocusAfterRemove(i);
   };
-  const reset = () => update({ preset: '2025', transfers: [] });
+  const reset = () => (mode === 'groups' ? setGroupMoves([]) : update({ preset: '2025', transfers: [] }));
+  const addGroupMove = (m: GroupMove) => {
+    if (m.from === m.to || !(m.share > 0)) return;
+    setGroupMoves(list => [...list, { ...m, share: Math.min(100, m.share) }].slice(0, MAX_GROUP_MOVES));
+  };
+  const removeGroupMove = (i: number) => setGroupMoves(list => list.filter((_, j) => j !== i));
+  const changed = mode === 'groups' ? groupMoves.length > 0 : scenario.transfers.length > 0 || scenario.preset !== '2025';
 
   const presetOptions = [
     { value: '2025', label: pt ? 'Resultado de 2025' : '2025 result' },
@@ -166,8 +212,41 @@ export function MoveVotes({ data, locale, anchorId }: { data: SimulatorData; loc
 
   return (
     <div className="space-y-8">
-      {/* Controls: the starting point, then the moves. */}
+      {/* Controls: the kind of move, then (between parties) the starting point and the moves,
+          or (by groups) who changes. */}
       <div className="space-y-5">
+        <div>
+          <p className={labelClass} aria-hidden="true">{pt ? 'Mover votos' : 'Move votes'}</p>
+          <ChoiceGroup
+            label={pt ? 'Mover votos' : 'Move votes'}
+            options={[
+              { value: 'parties' as Mode, label: pt ? 'Entre partidos' : 'Between parties' },
+              { value: 'groups' as Mode, label: pt ? 'Por grupos' : 'By group' },
+            ]}
+            value={mode}
+            onChange={setMode}
+          />
+        </div>
+
+        {mode === 'groups' ? (
+          groupsFailed ? (
+            <p className="max-w-[72ch] text-[14px] text-graphite">
+              {pt ? 'Não foi possível carregar os grupos. Tenta recarregar a página.' : 'The groups could not be loaded. Try reloading the page.'}
+            </p>
+          ) : (
+            <GroupMovesPanel
+              groups={groups}
+              options={groupOptions}
+              moves={groupMoves}
+              moved={groupResult?.moved ?? []}
+              onAdd={addGroupMove}
+              onRemove={removeGroupMove}
+              locale={locale}
+              methodHref={groupsMethodHref}
+            />
+          )
+        ) : (
+        <>
         <div>
           <p className={labelClass} aria-hidden="true">{pt ? 'Ponto de partida' : 'Starting point'}</p>
           <ChoiceGroup
@@ -186,7 +265,7 @@ export function MoveVotes({ data, locale, anchorId }: { data: SimulatorData; loc
         </div>
 
         <fieldset>
-          <legend className="mb-2 text-[15px] font-semibold text-ink">{pt ? 'Mover votos' : 'Move votes'}</legend>
+          <legend className="mb-2 text-[15px] font-semibold text-ink">{pt ? 'De um partido para outro' : 'From one party to another'}</legend>
           <div className="grid max-w-3xl gap-3 sm:grid-cols-[1fr_1fr_7rem_auto] sm:items-end">
             <div>
               <label htmlFor={`${id}-from`} className={labelClass}>{pt ? 'De' : 'From'}</label>
@@ -248,7 +327,9 @@ export function MoveVotes({ data, locale, anchorId }: { data: SimulatorData; loc
             </ul>
           </div>
         )}
-        {(scenario.transfers.length > 0 || scenario.preset !== '2025') && (
+        </>
+        )}
+        {changed && (
           <Action variant="text" onClick={reset}>{pt ? 'Voltar a 2025' : 'Back to 2025'}</Action>
         )}
       </div>

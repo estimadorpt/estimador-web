@@ -41,6 +41,8 @@ export const ELECTION_METHOD_ANCHORS = {
   lastSeats: { pt: 'o-ultimo-mandato-de-cada-circulo', en: 'each-circle-s-last-seat' },
   /** "Mover votos": the seat simulator on the 2025 map. */
   simulator: { pt: 'o-simulador-mover-votos', en: 'the-move-votes-simulator' },
+  /** "Por grupos": the simulator's group mode (Censos 2021 groups, EEP 2024 gaps). */
+  simulatorGroups: { pt: 'mover-votos-por-grupos', en: 'moving-votes-by-group' },
 } as const;
 
 export function electionMethodHref(section: keyof typeof ELECTION_METHOD_ANCHORS, locale: string): string {

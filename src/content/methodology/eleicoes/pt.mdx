@@ -121,6 +121,14 @@ O novo voto nacional é distribuído pelos 20 círculos do território nacional 
 
 É um cenário, não uma previsão, e não tem margem. Mesmo com o voto nacional certo, esta regra atribuiu a outro partido entre 3 e 8 dos 226 mandatos do território nacional em cada uma das quatro eleições de 2019 a 2025, aplicada ao resultado anterior e ao mapa de 2025. E onde uma mudança acontece pesa: a mesma transferência de 3 pontos pode valer 3 a 5 mandatos de diferença conforme os círculos onde se dá, o que a regra não sabe. O cenário fica no endereço da página, para ser partilhado.
 
+### Mover votos por grupos
+
+No modo «Por grupos», o simulador não usa a regra de mudança. Parte de uma tabela que divide o resultado de 2025 em cada um dos 20 círculos do território nacional por 42 grupos (sexo, sete escalões de idade e três níveis de escolaridade) e pelo que cada grupo fez: votou num partido, no JPP, nas outras listas, em branco ou nulo, ou absteve-se. Quem o usa escolhe um grupo, o que fez em 2025, o que passa a fazer e que parte dele muda. O simulador tira essa parte em cada círculo, onde o grupo vive e votou assim, soma a mudança ao resultado oficial e aplica o método de Hondt. As mudanças aplicam-se pela ordem em que foram feitas. Sem nenhuma, dá os mandatos de 2025.
+
+A tabela junta três fontes. Os grupos são os cidadãos portugueses com 18 ou mais anos residentes em cada distrito e região autónoma nos Censos 2021 (cerca de 8,2 milhões, sem os envelhecer até 2025). As diferenças entre grupos (quanto cada idade, sexo e escolaridade vota em cada partido e quanto se abstém) vêm de um modelo multinomial aditivo ajustado ao Estudo Eleitoral Português de 2024 (ICS, Universidade de Lisboa): 791 inquiridos do continente com voto ou abstenção conhecidos, ponderados para reproduzir o resultado de 2024. Os níveis vêm do resultado: em cada círculo, as percentagens de todos os grupos sobem ou descem, partido a partido, até que somem exatamente os votos de 2025 em cada lista, os brancos e nulos e a abstenção (os residentes que não votaram).
+
+Os limites são vários. As diferenças entre grupos vêm de um inquérito de cerca de 800 pessoas: servem para os partidos maiores e para a abstenção, e são imprecisas para os mais pequenos (entre 10 e 19 inquiridos votaram em cada um de IL, Livre, CDU, BE e PAN). As outras listas e o JPP têm a mesma percentagem em todos os grupos. A Madeira e os Açores usam as diferenças do continente. A abstenção é a dos residentes, não a dos inscritos: os cadernos do território nacional tinham em 2025 cerca de um milhão de nomes a mais do que os residentes adultos portugueses. Os dois círculos da emigração ficam como em 2025. Como no outro modo, é um cenário sem margem.
+
 ---
 
 <span id="presidenciais" className="block"></span>

@@ -20,6 +20,7 @@ const SHORT: Record<string, { pt: string; en: string }> = {
   PAN: { pt: 'PAN', en: 'PAN' },
   JPP: { pt: 'JPP', en: 'JPP' },
   OUT: { pt: 'Outras listas', en: 'Other lists' },
+  BLANK_NULL: { pt: 'Brancos e nulos', en: 'Blank and spoilt' },
   [ABSTENTION]: { pt: 'Abstenção', en: 'Abstention' },
 };
 
@@ -44,4 +45,10 @@ export function withArticle(list: string): string {
 /** "ao PS", "à AD": a list after "a" (to take from, to give to). */
 export function toList(list: string): string {
   return `${FEMININE.has(list) ? 'à' : 'ao'} ${listName(list, 'pt')}`;
+}
+
+/** "no PS", "na AD", "nas outras listas": where a vote goes, for "votaram …" / "passam a votar …". */
+export function inList(list: string): string {
+  if (list === 'OUT') return 'nas outras listas';
+  return `${FEMININE.has(list) ? 'na' : 'no'} ${listName(list, 'pt')}`;
 }

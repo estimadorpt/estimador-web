@@ -395,19 +395,26 @@ export default async function ParliamentaryArchivePage({
 
             <div id="mover-votos">
               <h2 className={sectionTitleClass}>
-                {pt ? 'Move votos entre partidos e vê onde mudam os mandatos' : 'Move votes between parties and see where the seats change'}
+                {pt ? 'Move votos entre partidos, ou de um grupo de eleitores, e vê onde mudam os mandatos' : 'Move votes between parties, or a group of voters, and see where the seats change'}
               </h2>
               <DataCard
                 title={pt ? 'Mandatos com os votos que escolheres, sobre o mapa de 2025' : 'Seats with the votes you choose, on the 2025 map'}
                 badge={pt ? 'Cenário, não previsão' : 'A scenario, not a forecast'}
                 subtitle={pt
-                  ? 'Cada mudança nacional é distribuída pelos círculos metade em proporção ao peso de cada partido em 2025, metade por igual, e os mandatos saem do método de Hondt em cada círculo. Mesmo com o voto nacional certo, esta regra deu a outro partido entre 3 e 8 dos 226 mandatos do território nacional em cada eleição de 2019 a 2025; e onde a mudança acontece pode valer 3 a 5 mandatos.'
-                  : 'Each national shift is spread over the circles half in proportion to each party’s weight there in 2025, half evenly, and the seats come from the D’Hondt method in each circle. Even given the right national vote, this rule gave between 3 and 8 of the 226 seats in Portugal to another party in each election from 2019 to 2025; and where a shift happens can be worth 3 to 5 seats.'}
-                source={resultsSource}
+                  ? 'Entre partidos, cada mudança nacional é distribuída pelos círculos metade em proporção ao peso de cada partido em 2025, metade por igual; mesmo com o voto nacional certo, esta regra deu a outro partido entre 3 e 8 dos 226 mandatos do território nacional em cada eleição de 2019 a 2025. Por grupos, uma parte de um grupo (sexo, idade, escolaridade e o que fez em 2025, abstenção incluída) muda de voto nos círculos onde vive. Em ambos, os mandatos saem do método de Hondt em cada círculo.'
+                  : 'Between parties, each national shift is spread over the circles half in proportion to each party’s weight there in 2025, half evenly; even given the right national vote, this rule gave between 3 and 8 of the 226 seats in Portugal to another party in each election from 2019 to 2025. By group, a share of a group (sex, age, education and what it did in 2025, abstention included) changes its vote in the circles where it lives. In both, the seats come from the D’Hondt method in each circle.'}
+                source={pt
+                  ? 'Fonte: resultados oficiais (SGMAI, por freguesia; Mapa Oficial n.º 2-A/2025 para a emigração); por grupos, também INE, Censos 2021, e Estudo Eleitoral Português 2024 (ICS); contas estimador.pt'
+                  : 'Source: official results (SGMAI, by parish; Mapa Oficial n.º 2-A/2025 for the emigration circles); by group, also INE, Censos 2021, and the Portuguese Election Study 2024 (ICS); estimador.pt calculations'}
                 {...resultsFrame}
                 methodologyHref={electionMethodHref('simulator', locale)}
               >
-                <MoveVotes data={simulator} locale={pt ? 'pt' : 'en'} anchorId="mover-votos" />
+                <MoveVotes
+                  data={simulator}
+                  locale={pt ? 'pt' : 'en'}
+                  anchorId="mover-votos"
+                  groupsMethodHref={electionMethodHref('simulatorGroups', locale)}
+                />
               </DataCard>
             </div>
           </div>

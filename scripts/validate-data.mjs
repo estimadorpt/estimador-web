@@ -210,6 +210,20 @@ feed('elections/parliamentary-2025/simulator.json', value => {
   }
   return nonEmptyArray(value.movable) && isObject(value.presets) ? null : 'no movable lists or presets';
 });
+// "Por grupos": the 2025 result in the 20 domestic circles split by sex, age
+// and education (42 groups) and by what each group did (12 options, abstention
+// included). The engine adds the reader's moves to these cells.
+feed('elections/parliamentary-2025/simulator-groups.json', value => {
+  if (!isObject(value) || !nonEmptyArray(value.circles)) return 'no circles';
+  if (value.circles.length !== 20) return `expected 20 domestic circles, found ${value.circles.length}`;
+  if (!nonEmptyArray(value.options) || !nonEmptyArray(value.sex) || !nonEmptyArray(value.age) || !nonEmptyArray(value.edu)) {
+    return 'no options or group dimensions';
+  }
+  const rows = value.sex.length * value.age.length * value.edu.length;
+  const bad = value.circles.find(c => !Array.isArray(c.cells) || c.cells.length !== rows
+    || !c.cells.every(r => Array.isArray(r) && r.length === value.options.length && r.every(n => Number.isFinite(n) && n >= 0)));
+  return bad ? `${bad.name}: expected ${rows} rows of ${value.options.length} counts` : null;
+});
 
 for (const name of ['presidential_forecast.json', 'presidential_trends.json', 'presidential_win_probabilities.json']) {
   feed(`elections/presidential-2026/${name}`, value =>

@@ -294,19 +294,18 @@ export function decodeScenario(hash: string, data: SimulatorData): Scenario {
   return { preset, transfers: transfers.slice(0, MAX_TRANSFERS) };
 }
 
-/** A fragment that holds a scenario (`p=` or `t=`), as opposed to a plain anchor such as `#mover-votos`. */
+/** A fragment that holds a scenario (`p=`, `t=` or the group moves' `g=`), as opposed to a plain anchor such as `#mover-votos`. */
 export function isScenarioHash(hash: string): boolean {
-  return /(?:^#?|&)[pt]=/.test(hash);
+  return /(?:^#?|&)[ptg]=/.test(hash);
 }
 
 /**
- * The fragment the address should carry for `scenario`, or null to leave it alone. The
- * scenario's own fragment while anything is moved; with nothing moved, a plain anchor is
- * kept as it is, and a scenario fragment gives way to `anchor` (the section's id), so a
- * reader who goes back to 2025 still has a link to the section.
+ * The fragment the address should carry, given the scenario's own (`encodeScenario`, or the
+ * group moves'), or null to leave it alone. The scenario's own fragment while anything is
+ * moved; with nothing moved, a plain anchor is kept as it is, and a scenario fragment gives way
+ * to `anchor` (the section's id), so a reader who goes back to 2025 still has a link to it.
  */
-export function nextHash(scenario: Scenario, current: string, anchor?: string): string | null {
-  const own = encodeScenario(scenario);
+export function nextHash(own: string, current: string, anchor?: string): string | null {
   if (own) return own === current ? null : own;
   if (!isScenarioHash(current)) return null;
   return anchor ? `#${anchor}` : '';
