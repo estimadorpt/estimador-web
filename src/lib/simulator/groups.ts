@@ -110,6 +110,27 @@ export function groupSize(groups: GroupData, m: Pick<GroupMove, 'sex' | 'age' | 
 }
 
 /** Seats per circle and in total after the group moves (the result shape of runScenario). */
+/**
+ * Whether a fetched file has the shape the moves need: every domestic circle of `data` by name,
+ * one row per group and one finite, non-negative count per option. validate-data checks the
+ * file at build time; this catches a stale or half-written copy in the browser, so the page
+ * says the groups could not be loaded instead of failing.
+ */
+export function isGroupData(value: unknown, data: SimulatorData): value is GroupData {
+  if (!value || typeof value !== 'object') return false;
+  const g = value as Partial<GroupData>;
+  if (![g.sex, g.age, g.edu, g.options, g.circles].every(Array.isArray)) return false;
+  const rows = g.sex!.length * g.age!.length * g.edu!.length;
+  const width = g.options!.length;
+  if (!rows || !width) return false;
+  const byName = new Map(g.circles!.map(c => [c?.name, c]));
+  return data.circles.filter(c => !c.fixed).every(c => {
+    const cells = byName.get(c.name)?.cells;
+    return Array.isArray(cells) && cells.length === rows
+      && cells.every(r => Array.isArray(r) && r.length === width && r.every(v => typeof v === 'number' && Number.isFinite(v) && v >= 0));
+  });
+}
+
 export function runGroupScenario(data: SimulatorData, groups: GroupData, moves: GroupMove[]): ScenarioResult & { moved: number[] } {
   const { deltas, moved } = applyGroupMoves(groups, moves);
   const byName = new Map(groups.circles.map((c, i) => [c.name, deltas[i]]));
@@ -152,8 +173,10 @@ const OPTION_FROM: Record<string, string> = { BN: BLANK_NULL };
 /** The moves as an address parameter: `g=x.18a34.x.ABS.CH.25~x.x.t.AD.IL.20`. */
 export function encodeGroupMoves(moves: GroupMove[]): string {
   return moves
+    .map(m => ({ ...m, share: Number(m.share.toFixed(1)) }))
+    // After rounding: a share that rounds to 0 would be written and then dropped on reading.
     .filter(m => m.share > 0)
-    .map(m => [SEX_CODE[m.sex], AGE_CODE[m.age], EDU_CODE[m.edu], OPTION_CODE[m.from] ?? m.from, OPTION_CODE[m.to] ?? m.to, Number(m.share.toFixed(1))].join('.'))
+    .map(m => [SEX_CODE[m.sex], AGE_CODE[m.age], EDU_CODE[m.edu], OPTION_CODE[m.from] ?? m.from, OPTION_CODE[m.to] ?? m.to, m.share].join('.'))
     .join('~');
 }
 

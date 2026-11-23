@@ -12,7 +12,7 @@ import {
   sharesToVotes, type ScenarioResult, type Shares, type SimulatorData,
 } from '@/lib/simulator/engine';
 import {
-  BLANK_NULL, MAX_GROUP_MOVES, decodeGroupMoves, encodeGroupMoves, runGroupScenario, type GroupData, type GroupMove,
+  BLANK_NULL, MAX_GROUP_MOVES, decodeGroupMoves, encodeGroupMoves, isGroupData, runGroupScenario, type GroupData, type GroupMove,
 } from '@/lib/simulator/groups';
 import { BLANK_MOVE, GroupMovesPanel } from './GroupMovesPanel';
 import { Hemicycle, SEAT_ORDER } from './Hemicycle';
@@ -102,21 +102,33 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
   const [loaded, setLoaded] = useState(false);
 
   // The scenario lives in the address. It is read after mount only, so the exported HTML
-  // (and the first render) is always 2025's result; a static export serves one file.
+  // (and the first render) is always 2025's result; a static export serves one file. It is read
+  // again when the reader pastes or edits a scenario link in the same tab (the page's own writes
+  // use replaceState, which fires no hashchange; a jump to a plain anchor changes nothing).
   useEffect(() => {
-    const hash = window.location.hash;
-    const g = new URLSearchParams(hash.replace(/^#/, '')).get('g');
-    if (g != null) {
-      setMode('groups');
-      const moves = decodeGroupMoves(g, groupOptions);
-      if (moves.length) setGroupMoves(moves);
-    } else {
-      const fromHash = decodeShares(hash, data);
-      if (fromHash) setShares(fromHash);
-    }
+    const read = (onLoad: boolean) => {
+      const hash = window.location.hash;
+      if (!onLoad && !isScenarioHash(hash)) return;
+      const g = new URLSearchParams(hash.replace(/^#/, '')).get('g');
+      if (g != null) {
+        setMode('groups');
+        const moves = decodeGroupMoves(g, groupOptions);
+        setGroupMoves(moves.length ? moves : [BLANK_MOVE]);
+      } else {
+        const fromHash = decodeShares(hash, data);
+        if (fromHash) {
+          setMode('parties');
+          setShares(fromHash);
+        }
+      }
+      // A scenario link replaces the section's anchor, so bring the section into view.
+      if (anchorId && isScenarioHash(hash)) document.getElementById(anchorId)?.scrollIntoView();
+    };
+    read(true);
     setLoaded(true);
-    // A scenario link replaces the section's anchor, so bring the section into view.
-    if (anchorId && isScenarioHash(hash)) document.getElementById(anchorId)?.scrollIntoView();
+    const onHash = () => read(false);
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
   }, [data, anchorId, groupOptions]);
   // The group file is fetched once, the first time the groups are opened.
   useEffect(() => {
@@ -124,10 +136,14 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
     let live = true;
     fetch(GROUPS_URL)
       .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((g: GroupData) => { if (live) setGroups(g); })
+      .then((g: unknown) => {
+        if (!live) return;
+        if (isGroupData(g, data)) setGroups(g);
+        else setGroupsFailed(true);
+      })
       .catch(() => { if (live) setGroupsFailed(true); });
     return () => { live = false; };
-  }, [mode, groups, groupsFailed]);
+  }, [mode, groups, groupsFailed, data]);
 
   const activeMoves = groupMoves.filter(m => m.share > 0 && m.from !== m.to);
   const ownHash = mode === 'groups'
@@ -147,7 +163,18 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
 
   const base = useMemo(() => runScenario(data, presetVotes(data, '2025')), [data]);
   const partyResult = useMemo(() => runScenario(data, sharesToVotes(data, shares)), [data, shares]);
-  const groupResult = useMemo(() => (groups ? runGroupScenario(data, groups, groupMoves) : null), [data, groups, groupMoves]);
+  // The file's shape was checked when it arrived; a scenario that still fails shows the same
+  // message as a failed fetch instead of taking the section down.
+  const groupRun = useMemo(() => {
+    if (!groups) return { result: null, failed: false };
+    try {
+      return { result: runGroupScenario(data, groups, groupMoves), failed: false };
+    } catch {
+      return { result: null, failed: true };
+    }
+  }, [data, groups, groupMoves]);
+  const groupResult = groupRun.result;
+  const groupsUnavailable = groupsFailed || groupRun.failed;
   // Until the group file is in, the groups show 2025's result.
   const result: ScenarioResult = mode === 'groups' ? groupResult ?? base : partyResult;
 
@@ -328,7 +355,7 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
         {/* The controls. */}
         <div className="min-w-0 lg:order-1">
           {mode === 'groups' ? (
-            groupsFailed ? (
+            groupsUnavailable ? (
               <p className="max-w-[72ch] text-[14px] text-graphite">
                 {pt ? 'Não foi possível carregar os grupos. Tenta recarregar a página.' : 'The groups could not be loaded. Try reloading the page.'}
               </p>

@@ -90,7 +90,7 @@
     "pollsterHeader": "Empresa de sondagens",
     "showHouseEffects": "Ver a matriz: {pollsters} empresas × {parties} partidos",
     "archiveEyebrow": "Arquivo · 2025",
-    "archiveLede": "Previsão preservada com a informação disponível à data. Não são resultados eleitorais.",
+    "archiveLede": "Previsão preservada com a informação disponível à data; não são resultados eleitorais. Depois dela, a partir do resultado oficial de 2025: o último mandato de cada círculo e um simulador para mudar o voto.",
     "forecastDateLine": "Previsão de {forecast} · eleição a {election}",
     "officialResults": "Resultados oficiais (SGMAI)",
     "unavailable": "Os dados desta previsão arquivada não estão disponíveis nesta versão do site.",

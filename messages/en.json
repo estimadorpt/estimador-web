@@ -90,7 +90,7 @@
     "pollsterHeader": "Pollster",
     "showHouseEffects": "View the matrix: {pollsters} pollsters × {parties} parties",
     "archiveEyebrow": "Archive · 2025",
-    "archiveLede": "A forecast preserved with the information available at the time. These are not election results.",
+    "archiveLede": "A forecast preserved with the information available at the time; these are not election results. After it, from the official 2025 result: each circle’s last seat and a simulator to change the vote.",
     "forecastDateLine": "Forecast of {forecast} · election on {election}",
     "officialResults": "Official results (SGMAI)",
     "unavailable": "The data for this archived forecast is not available in this version of the site.",

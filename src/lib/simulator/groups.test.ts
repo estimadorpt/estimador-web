@@ -2,7 +2,9 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ABSTENTION, type SimulatorData } from './engine';
-import { BLANK_NULL, MAX_GROUP_MOVES, applyGroupMoves, decodeGroupMoves, encodeGroupMoves, groupSize, runGroupScenario, type GroupData, type GroupMove } from './groups';
+import {
+  BLANK_NULL, MAX_GROUP_MOVES, applyGroupMoves, decodeGroupMoves, encodeGroupMoves, groupSize, isGroupData, runGroupScenario, type GroupData, type GroupMove,
+} from './groups';
 
 const dir = path.join(process.cwd(), 'public/data/elections/parliamentary-2025');
 const data = JSON.parse(readFileSync(path.join(dir, 'simulator.json'), 'utf8')) as SimulatorData;
@@ -25,6 +27,17 @@ describe('group file', () => {
         expect(Math.abs(g.cells.reduce((a, row) => a + row[j], 0) - c.votes[p])).toBeLessThanOrEqual(21);
       }
     }
+  });
+
+  it('takes the published file and refuses a stale or half-written one', () => {
+    expect(isGroupData(groups, data)).toBe(true);
+    expect(isGroupData(null, data)).toBe(false);
+    expect(isGroupData({ ...groups, circles: groups.circles.slice(1) }, data)).toBe(false);
+    expect(isGroupData({ ...groups, circles: groups.circles.map((c, i) => (i ? c : { ...c, name: 'Lisbon' })) }, data)).toBe(false);
+    expect(isGroupData({ ...groups, circles: groups.circles.map((c, i) => (i ? c : { ...c, cells: c.cells.slice(1) })) }, data)).toBe(false);
+    expect(isGroupData({ ...groups, options: groups.options.slice(1) }, data)).toBe(false);
+    const bad = groups.circles.map((c, i) => (i ? c : { ...c, cells: c.cells.map((r, j) => (j ? r : [Number.NaN, ...r.slice(1)])) }));
+    expect(isGroupData({ ...groups, circles: bad }, data)).toBe(false);
   });
 });
 
@@ -77,6 +90,8 @@ describe('group links', () => {
     // Unknown age or education codes are dropped, and a link keeps at most MAX_GROUP_MOVES moves.
     expect(decodeGroupMoves('x.17.x.PS.L.5~x.x.z.PS.L.5', groups.options)).toEqual([]);
     expect(decodeGroupMoves(Array.from({ length: MAX_GROUP_MOVES + 5 }, () => 'x.x.x.PS.L.1').join('~'), groups.options)).toHaveLength(MAX_GROUP_MOVES);
+    // A share that rounds to 0 is not written, so the address never holds a move it would drop.
+    expect(encodeGroupMoves([{ ...everyone, from: 'PS', to: 'L', share: 0.04 }, { ...everyone, from: 'AD', to: 'IL', share: 0.06 }])).toBe('x.x.x.AD.IL.0.1');
   });
 
   it('lets a later move draw on what an earlier one added to the same cells', () => {
