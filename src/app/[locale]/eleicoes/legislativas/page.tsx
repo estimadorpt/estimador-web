@@ -4,6 +4,7 @@ import { partyColors } from "@/lib/config/colors";
 import { OFFICIAL_RESULTS, PARLIAMENTARY_2025, PARLIAMENTARY_2025_FORECAST_CUTOFF } from "@/lib/config/elections";
 import { loadParliamentaryArchive, loadSimulatorData } from "@/lib/utils/data-loader";
 import { closeLastSeats } from "@/lib/simulator/last-seats";
+import { circleName } from "@/lib/simulator/circle-names";
 import { formatElectionLongDate, formatElectionNumber, formatElectionPercent, formatElectionProbabilityText, pollsterDisplayName, sortByPartyOrder } from "@/lib/election-display";
 import { closeLeads } from "@/lib/election-aggregates";
 import { electionMethodHref } from "@/lib/election-methodology";
@@ -136,7 +137,7 @@ export default async function ParliamentaryArchivePage({
   const lastSeatStandfirst = closest && closestRunner && closeSeats
     ? (pt
       ? `Em ${closest.name}, ${withArticle(closestRunner.list)} precisava de mais ${num(closestRunner.votes)} votos para tirar ${toList(closest.lastSeat.list)} o último dos ${num(closest.seats)} mandatos. As margens destes ${num(closeSeats.count)} círculos somam ${num(closeSeats.votes)} votos.`
-      : `In ${closest.name}, ${listName(closestRunner.list, 'en')} needed ${num(closestRunner.votes)} more votes to take the last of ${num(closest.seats)} seats from ${listName(closest.lastSeat.list, 'en')}. The margins of these ${num(closeSeats.count)} circles add up to ${num(closeSeats.votes)} votes.`)
+      : `In ${circleName(closest.name, 'en')}, ${listName(closestRunner.list, 'en')} needed ${num(closestRunner.votes)} more votes to take the last of ${num(closest.seats)} seats from ${listName(closest.lastSeat.list, 'en')}. The margins of these ${num(closeSeats.count)} circles add up to ${num(closeSeats.votes)} votes.`)
     : '';
   const resultsSource = pt
     ? 'Fonte: resultados oficiais (SGMAI, por freguesia; Mapa Oficial n.º 2-A/2025 para a emigração), contas estimador.pt'

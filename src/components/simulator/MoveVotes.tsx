@@ -8,7 +8,7 @@ import { BRAND } from '@/lib/brand';
 import { formatElectionNumber, formatElectionPercent } from '@/lib/election-display';
 import { formatSignedNumber } from '@/lib/typography';
 import {
-  ABSTENTION, decodeShares, encodeShares, isScenarioHash, nextHash, presetShares, presetVotes, runScenario, sameShares, setShare,
+  ABSTENTION, addressToWrite, decodeShares, encodeShares, isScenarioHash, presetShares, presetVotes, runScenario, sameShares, setShare,
   sharesToVotes, type ScenarioResult, type Shares, type SimulatorData,
 } from '@/lib/simulator/engine';
 import {
@@ -160,13 +160,12 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
   // dragged slider changes it on every step: write it once the scenario has settled.
   const settledHash = useSettled(ownHash, SETTLE_MS);
   useEffect(() => {
-    if (!loaded) return;
-    const hash = nextHash(settledHash, window.location.hash, anchorId);
+    const hash = addressToWrite(loaded, settledHash, ownHash, window.location.hash, anchorId);
     if (hash == null) return;
     try {
       window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${hash}`);
     } catch { /* the address is a convenience */ }
-  }, [settledHash, loaded, anchorId]);
+  }, [settledHash, ownHash, loaded, anchorId]);
 
   const base = useMemo(() => runScenario(data, presetVotes(data, '2025')), [data]);
   const partyResult = useMemo(() => runScenario(data, sharesToVotes(data, shares)), [data, shares]);

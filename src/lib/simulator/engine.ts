@@ -326,3 +326,14 @@ export function nextHash(own: string, current: string, anchor?: string): string 
   if (!isScenarioHash(current)) return null;
   return anchor ? `#${anchor}` : '';
 }
+
+/**
+ * What the page writes to the address once a render has committed, or null for nothing: only
+ * after the address has been read (`loaded`) and once the settled scenario has caught up with
+ * the one on screen. Right after a scenario link is read, the scenario on screen is the link's
+ * while the settled one is still the default; writing then would strip the link for a moment.
+ */
+export function addressToWrite(loaded: boolean, settled: string, own: string, current: string, anchor?: string): string | null {
+  if (!loaded || settled !== own) return null;
+  return nextHash(own, current, anchor);
+}

@@ -110,8 +110,9 @@ export function groupSize(groups: GroupData, m: Pick<GroupMove, 'sex' | 'age' | 
 }
 
 /**
- * Whether a fetched file has the shape the moves need: every domestic circle of `data` by name,
- * one row per group and one finite, non-negative count per option. validate-data checks the
+ * Whether a fetched file has the shape the moves need: every option the moves offer, every
+ * domestic circle of `data` by name, one row per group and one finite, non-negative count per
+ * option. validate-data checks the
  * file at build time; this catches a stale or half-written copy in the browser, so the page
  * says the groups could not be loaded instead of failing.
  */
@@ -122,6 +123,9 @@ export function isGroupData(value: unknown, data: SimulatorData): value is Group
   const rows = g.sex!.length * g.age!.length * g.edu!.length;
   const width = g.options!.length;
   if (!rows || !width) return false;
+  // Every option the moves offer must be in the file, or a move would silently do nothing.
+  const offered = [...data.movable, ...data.fixed, data.others, BLANK_NULL, ABSTENTION];
+  if (!offered.every(o => g.options!.includes(o))) return false;
   const byName = new Map(g.circles!.map(c => [c?.name, c]));
   return data.circles.filter(c => !c.fixed).every(c => {
     const cells = byName.get(c.name)?.cells;

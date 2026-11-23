@@ -2,11 +2,13 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  OTHERS_MAX_SHARE, baseVotes, blendSwing, decodeShares, dhondt, encodeShares, isScenarioHash, nextHash, presetShares, presetVotes,
+  OTHERS_MAX_SHARE, addressToWrite, baseVotes, blendSwing, decodeShares, dhondt, encodeShares, isScenarioHash, nextHash, presetShares, presetVotes,
   runScenario, sameShares, setShare, sharesToVotes, swingLists, type SimulatorData,
 } from './engine';
 
 const data = JSON.parse(readFileSync(path.join(process.cwd(), 'public/data/elections/parliamentary-2025/simulator.json'), 'utf8')) as SimulatorData;
+// Written by estimadorpt/estimador-elections `scripts/simulator_fixture.py` from `district_swing.py`;
+// regenerate it there if the Python rule changes.
 const fixture = JSON.parse(readFileSync(path.join(import.meta.dirname, '__fixtures__/blend-swing.json'), 'utf8')) as {
   circles: string[];
   cases: Array<{ national: Record<string, number>; shares: Array<Record<string, number>>; seats: Array<Record<string, number>> }>;
@@ -202,5 +204,19 @@ describe('scenario links', () => {
     expect(isScenarioHash('#g=x.x.x.PS.L.5')).toBe(true);
     expect(isScenarioHash('#mover-votos')).toBe(false);
     expect(sameShares(presetShares(data, '2025'), presetShares(data, '2025'))).toBe(true);
+  });
+
+  it('never strips a scenario link while the page is reading it', () => {
+    const none = encodeShares(data, presetShares(data, '2025'));
+    const link = encodeShares(data, setShare(data, presetShares(data, '2025'), 'L', 0.07));
+    // The mount commit: the address is not read yet.
+    expect(addressToWrite(false, none, none, link, 'mover-votos')).toBeNull();
+    // The link has been read: the scenario on screen is the link's, the settled one still 2025's.
+    expect(addressToWrite(true, none, link, link, 'mover-votos')).toBeNull();
+    // Settled: the address already holds it.
+    expect(addressToWrite(true, link, link, link, 'mover-votos')).toBeNull();
+    // A slider dragged from the link back to 2025: nothing until it settles, then the anchor.
+    expect(addressToWrite(true, link, none, link, 'mover-votos')).toBeNull();
+    expect(addressToWrite(true, none, none, link, 'mover-votos')).toBe('#mover-votos');
   });
 });

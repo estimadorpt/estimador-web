@@ -36,6 +36,7 @@ describe('group file', () => {
     expect(isGroupData({ ...groups, circles: groups.circles.map((c, i) => (i ? c : { ...c, name: 'Lisbon' })) }, data)).toBe(false);
     expect(isGroupData({ ...groups, circles: groups.circles.map((c, i) => (i ? c : { ...c, cells: c.cells.slice(1) })) }, data)).toBe(false);
     expect(isGroupData({ ...groups, options: groups.options.slice(1) }, data)).toBe(false);
+    expect(isGroupData({ ...groups, options: groups.options.map(o => (o === 'L' ? 'LIVRE' : o)) }, data)).toBe(false);
     const bad = groups.circles.map((c, i) => (i ? c : { ...c, cells: c.cells.map((r, j) => (j ? r : [Number.NaN, ...r.slice(1)])) }));
     expect(isGroupData({ ...groups, circles: bad }, data)).toBe(false);
   });
