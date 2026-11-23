@@ -113,6 +113,9 @@ export function presetVotes(data: SimulatorData, preset: string): NationalVotes 
 /**
  * Blend swing for one set of national shares: `blend_swing` of district_swing.py.
  * national, lastNational: (P); lastDistrict: (D, P). Returns (D, P).
+ * As in the Python, a list under 0.1% of the last national vote counts as new (it swings
+ * uniformly). One guard the Python lacks: a circle where no list with national votes stood
+ * last time has no proportional half, so it takes the uniform half alone.
  */
 export function blendSwing(national: number[], lastNational: number[], lastDistrict: number[][], weightProportional = 0.5): number[][] {
   const P = national.length;
@@ -127,35 +130,46 @@ export function blendSwing(national: number[], lastNational: number[], lastDistr
     }
     const ps = prop.reduce((a, b) => a + b, 0);
     const us = Math.max(unif.reduce((a, b) => a + b, 0), EPS);
+    if (ps <= EPS) return unif.map(v => v / us);
     return prop.map((v, j) => weightProportional * (v / ps) + (1 - weightProportional) * (unif[j] / us));
   });
 }
 
 /**
  * D'Hondt among `lists`, with the last seat and the next list in line. Ties go to the list
- * with more votes, then to the earlier one in `lists` (the exporter's rule).
+ * with fewer votes, as the electoral law says (Lei n.º 14/79, art. 16.º, d)), then to the
+ * earlier one in `lists`: the exporter's rule. With no list holding a vote, no seat is given.
  */
 export function dhondt(votes: Record<string, number>, seats: number, lists: string[]): { won: Record<string, number>; lastSeat: LastSeat } {
   const q: Array<{ q: number; v: number; i: number; list: string; k: number }> = [];
   lists.forEach((list, i) => {
     const v = votes[list] ?? 0;
-    if (v <= 0) return;
+    if (!(v > 0)) return;
     for (let k = 1; k <= seats; k++) q.push({ q: v / k, v, i, list, k });
   });
-  q.sort((a, b) => b.q - a.q || b.v - a.v || a.i - b.i);
+  q.sort((a, b) => b.q - a.q || a.v - b.v || a.i - b.i);
   const won: Record<string, number> = {};
   for (const x of q.slice(0, seats)) won[x.list] = (won[x.list] ?? 0) + 1;
-  const last = q[seats - 1];
+  const last = q[Math.min(seats, q.length) - 1];
+  if (!last) return { won, lastSeat: { list: '', runnerUp: null } };
   const runner = q.slice(seats).find(x => x.list !== last.list);
   return {
     won,
-    lastSeat: {
-      list: last.list,
-      // The tolerance absorbs blend swing's rounding, so a gap that is a whole number of votes
-      // reads as in the exporter, which counts whole votes.
-      runnerUp: runner ? { list: runner.list, votes: Math.floor((last.q - runner.q) * runner.k + 1e-6) + 1 } : null,
-    },
+    lastSeat: { list: last.list, runnerUp: runner ? { list: runner.list, votes: votesToPass(last, runner) } : null },
   };
+}
+
+/**
+ * The fewest extra votes that give the next list the last seat, all else equal: a larger
+ * quotient, or an equal one with fewer votes than the holder (the law's tie rule; with equal
+ * votes too the law does not say, so it is not counted as a win). The tolerance absorbs blend
+ * swing's rounding, so a whole-vote gap reads as in the exporter, which counts whole votes.
+ */
+function votesToPass(last: { q: number; v: number }, runner: { q: number; v: number; k: number }): number {
+  const gap = (last.q - runner.q) * runner.k;
+  const n = Math.round(gap);
+  if (Math.abs(gap - n) < 1e-6) return runner.v + n < last.v ? n : n + 1;
+  return Math.floor(gap) + 1;
 }
 
 /** Seats per circle and in total for a national vote of the movable lists and the other lists. */
@@ -170,7 +184,9 @@ export function runScenario(data: SimulatorData, nationalVotes: NationalVotes): 
     const s = swing.reduce((a, p) => a + (c.votes[p] ?? 0), 0);
     return swing.map(p => (c.votes[p] ?? 0) / s);
   });
-  const natTotal = swing.reduce((a, p) => a + Math.max(0, nationalVotes[p] ?? 0), 0);
+  // applyTransfers keeps the parties above PARTY_FLOOR_POINTS, so this is never zero from the
+  // form or a link; the floor here only keeps a direct caller from dividing by zero.
+  const natTotal = Math.max(swing.reduce((a, p) => a + Math.max(0, nationalVotes[p] ?? 0), 0), EPS);
   const national = swing.map(p => Math.max(0, nationalVotes[p] ?? 0) / natTotal);
   const core = blendSwing(national, lastNational, lastDistrict);
 
@@ -209,18 +225,28 @@ export interface Transfer {
 }
 
 /**
+ * The eight parties together always keep at least this many points: below it a scenario has
+ * no one to give seats to (every vote sent to abstention or the other lists).
+ */
+export const PARTY_FLOOR_POINTS = 1;
+
+/**
  * Apply transfers in order. A point is 1% of 2025's domestic vote for the movable lists and
  * the other lists. Abstention is a bottomless source and sink. A transfer larger than what the
- * donor has left moves only what it has; the amounts actually moved are returned.
+ * donor has left moves only what it has, and a move out of the parties stops at
+ * PARTY_FLOOR_POINTS for the parties together; the amounts actually moved are returned.
  */
 export function applyTransfers(data: SimulatorData, start: NationalVotes, transfers: Transfer[]): { votes: NationalVotes; moved: number[] } {
   const base = baseVotes(data);
   const unit = Object.values(base).reduce((a, b) => a + b, 0) / 100;
   const votes: NationalVotes = { ...start };
+  const parties = new Set(data.movable);
+  const partyVotes = () => data.movable.reduce((a, p) => a + Math.max(0, votes[p] ?? 0), 0);
   const moved = transfers.map(t => {
     if (t.from === t.to || !(t.points > 0)) return 0;
     const want = t.points * unit;
-    const have = t.from === ABSTENTION ? Infinity : Math.max(0, votes[t.from] ?? 0);
+    let have = t.from === ABSTENTION ? Infinity : Math.max(0, votes[t.from] ?? 0);
+    if (parties.has(t.from) && !parties.has(t.to)) have = Math.min(have, Math.max(0, partyVotes() - PARTY_FLOOR_POINTS * unit));
     const amount = Math.min(want, have);
     if (t.from !== ABSTENTION) votes[t.from] = (votes[t.from] ?? 0) - amount;
     if (t.to !== ABSTENTION) votes[t.to] = (votes[t.to] ?? 0) + amount;
@@ -257,6 +283,8 @@ export function decodeScenario(hash: string, data: SimulatorData): Scenario {
   const preset = p && data.presets[p] ? p : '2025';
   const transfers: Transfer[] = [];
   for (const item of (params.get('t') ?? '').split('~')) {
+    // List keys are upper-case letters today (AD, CH, OUT, ABS); a key with a digit or a
+    // lower-case letter would need this pattern widened, or its moves are dropped.
     const m = /^([A-Z]+)\.([A-Z]+)\.(\d+(?:\.\d+)?)$/.exec(item);
     if (!m) continue;
     const [, from, to, pts] = m;

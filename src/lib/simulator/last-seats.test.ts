@@ -12,8 +12,8 @@ describe('closeLastSeats', () => {
     expect(r.count).toBe(8);
     expect(r.total).toBe(22);
     expect(r.closest?.name).toBe('Santarém');
-    expect(r.closest?.lastSeat).toEqual({ list: 'AD', runnerUp: { list: 'PS', votes: 493 } });
-    // 493 + 668 + 777 + 1 018 + 1 139 + 1 643 + 2 204 + 2 306
-    expect(r.votes).toBe(10248);
+    expect(r.closest?.lastSeat).toEqual({ list: 'AD', runnerUp: { list: 'PS', votes: 492 } });
+    // 492 + 668 + 776 + 1 018 + 1 139 + 1 643 + 2 204 + 2 306
+    expect(r.votes).toBe(10246);
   });
 });

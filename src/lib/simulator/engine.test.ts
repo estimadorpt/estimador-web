@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  ABSTENTION, MAX_TRANSFER_POINTS, applyTransfers, baseVotes, blendSwing, decodeScenario, dhondt, encodeScenario,
+  ABSTENTION, MAX_TRANSFER_POINTS, PARTY_FLOOR_POINTS, applyTransfers, baseVotes, blendSwing, decodeScenario, dhondt, encodeScenario,
   isScenarioHash, nextHash, presetVotes, runScenario, swingLists, type SimulatorData,
 } from './engine';
 
@@ -62,9 +62,45 @@ describe('runScenario', () => {
     expect(r.totals.CH).toBeGreaterThan(OFFICIAL_2025.CH);
   });
 
+  it('survives every vote sent to abstention or to the other lists: the parties keep a floor', () => {
+    const unit = Object.values(baseVotes(data)).reduce((a, b) => a + b, 0) / 100;
+    for (const sink of [ABSTENTION, data.others]) {
+      const drain = data.movable.flatMap(p => [{ from: p, to: sink, points: 30 }, { from: p, to: sink, points: 30 }]);
+      const { votes } = applyTransfers(data, baseVotes(data), drain);
+      const parties = data.movable.reduce((a, p) => a + votes[p], 0);
+      expect(parties).toBeCloseTo(PARTY_FLOOR_POINTS * unit, 3);
+      const r = runScenario(data, votes);
+      expect(Object.values(r.totals).reduce((a, b) => a + b, 0)).toBe(230);
+      for (const c of r.circles) for (const v of Object.values(c.votes)) expect(Number.isFinite(v)).toBe(true);
+    }
+  });
+
   it('never gives the other lists a seat, even with a large vote', () => {
     const { votes } = applyTransfers(data, baseVotes(data), [{ from: 'AD', to: data.others, points: 20 }]);
     expect(runScenario(data, votes).totals[data.others]).toBeUndefined();
+  });
+});
+
+describe('last seats', () => {
+  // Whether adding `extra` votes to the next list gives it the circle's last seat.
+  const flips = (c: (typeof data.circles)[number], extra: number) => {
+    const lists = [...data.movable, ...data.fixed];
+    const runner = c.lastSeat.runnerUp!.list;
+    const after = dhondt({ ...c.votes, [runner]: (c.votes[runner] ?? 0) + extra }, c.seats, lists).won;
+    return (after[runner] ?? 0) > (c.seats2025[runner] ?? 0);
+  };
+
+  it('names, in every 2025 circle, exactly the votes the next list needed', () => {
+    for (const c of data.circles) {
+      if (!c.lastSeat.runnerUp) continue;
+      const { list, votes } = c.lastSeat.runnerUp;
+      expect(flips(c, votes), c.name).toBe(true);
+      // One vote fewer must not do it, except where it would leave the two lists level on
+      // votes as well as on quotients (Portalegre: PS 16 125, AD 15 458 + 667). The law does
+      // not settle that tie, so the margin counts the vote that wins it for sure.
+      if ((c.votes[list] ?? 0) + votes - 1 === c.votes[c.lastSeat.list]) continue;
+      expect(flips(c, votes - 1), c.name).toBe(false);
+    }
   });
 });
 
@@ -77,6 +113,17 @@ describe('blendSwing', () => {
 });
 
 describe('dhondt', () => {
+  it('gives a tie to the list with fewer votes (Lei n.º 14/79, art. 16.º)', () => {
+    // A 60, B 30, 2 seats: A's second quotient (30) ties B's first.
+    const r = dhondt({ A: 60, B: 30 }, 2, ['A', 'B']);
+    expect(r.won).toEqual({ A: 1, B: 1 });
+    expect(r.lastSeat.list).toBe('B');
+  });
+
+  it('gives no seat when no list has a vote, instead of failing', () => {
+    expect(dhondt({ A: 0 }, 3, ['A'])).toEqual({ won: {}, lastSeat: { list: '', runnerUp: null } });
+  });
+
   it('allocates by the highest averages and names the next list in line', () => {
     // 100 000, 80 000, 30 000 for 7 seats: quotients 100k 80k 50k 40k 33.3k 30k 26.7k
     const r = dhondt({ A: 100000, B: 80000, C: 30000 }, 7, ['A', 'B', 'C']);
