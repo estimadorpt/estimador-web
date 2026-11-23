@@ -39,8 +39,10 @@ export function PartySliders({ lists, others, shares, base, seats, seatsBase, on
       <ul>
         {[...lists, others].map(list => {
           const isOthers = list === others;
-          const max = isOthers ? OTHERS_MAX_SHARE : PARTY_MAX_SHARE;
           const value = shares[list] ?? 0;
+          // A party the others' moves pushed past its range (zero every other one) widens its
+          // slider, so the thumb and the printed share never disagree.
+          const max = Math.max(isOthers ? OTHERS_MAX_SHARE : PARTY_MAX_SHARE, Math.ceil(value * 10) / 10);
           const now = seats[list] ?? 0;
           const d = now - (seatsBase[list] ?? 0);
           const id = `share-${list}`;
@@ -57,7 +59,7 @@ export function PartySliders({ lists, others, shares, base, seats, seatsBase, on
                   min={0}
                   max={max * 100}
                   step={0.1}
-                  value={Math.min(value, max) * 100}
+                  value={value * 100}
                   onChange={e => onChange(list, Number(e.target.value) / 100)}
                   aria-valuetext={pct(value)}
                   className={styles.range}

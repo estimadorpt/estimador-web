@@ -162,7 +162,10 @@ export type ParliamentaryArchive = Awaited<ReturnType<typeof loadParliamentaryAr
 export async function loadSimulatorData(): Promise<SimulatorData | null> {
   try {
     return await loadJsonData<SimulatorData>('simulator.json', PARLIAMENTARY_DIR);
-  } catch {
+  } catch (error) {
+    // validate-data requires the file, so this is a malformed or unreadable one: say so in the
+    // build log rather than drop both sections without a trace.
+    console.warn('[elections] simulator.json could not be read; the last-seat and simulator sections are left out.', error);
     return null;
   }
 }

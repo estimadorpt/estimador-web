@@ -22,7 +22,7 @@ import { listColor, listName, type Locale } from './copy';
 
 const MAJORITY = 116;
 const TOTAL_SEATS = 230;
-/** The group file, fetched when the reader first opens the groups (about 40 KB). */
+/** The group file, fetched when the reader first opens the groups (about 40 KB): public/data/elections/parliamentary-2025/simulator-groups.json, which validate-data checks. */
 const GROUPS_URL = '/data/elections/parliamentary-2025/simulator-groups.json';
 /** The address and the screen-reader summary wait this long after the last change (a dragged slider fires many). */
 const SETTLE_MS = 400;

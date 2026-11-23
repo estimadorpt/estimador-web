@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ABSTENTION, type SimulatorData } from './engine';
-import { BLANK_NULL, applyGroupMoves, decodeGroupMoves, encodeGroupMoves, groupSize, runGroupScenario, type GroupData, type GroupMove } from './groups';
+import { BLANK_NULL, MAX_GROUP_MOVES, applyGroupMoves, decodeGroupMoves, encodeGroupMoves, groupSize, runGroupScenario, type GroupData, type GroupMove } from './groups';
 
 const dir = path.join(process.cwd(), 'public/data/elections/parliamentary-2025');
 const data = JSON.parse(readFileSync(path.join(dir, 'simulator.json'), 'utf8')) as SimulatorData;
@@ -74,5 +74,16 @@ describe('group links', () => {
     expect(decodeGroupMoves(value, groups.options)).toEqual(moves);
     expect(decodeGroupMoves('x.18a34.x.ABS.XX.25~q.x.x.PS.L.5~x.x.x.PS.PS.5~x.x.x.PS.L.500', groups.options))
       .toEqual([{ ...everyone, from: 'PS', to: 'L', share: 100 }]);
+    // Unknown age or education codes are dropped, and a link keeps at most MAX_GROUP_MOVES moves.
+    expect(decodeGroupMoves('x.17.x.PS.L.5~x.x.z.PS.L.5', groups.options)).toEqual([]);
+    expect(decodeGroupMoves(Array.from({ length: MAX_GROUP_MOVES + 5 }, () => 'x.x.x.PS.L.1').join('~'), groups.options)).toHaveLength(MAX_GROUP_MOVES);
+  });
+
+  it('lets a later move draw on what an earlier one added to the same cells', () => {
+    const there: GroupMove = { ...everyone, age: '18-34', from: ABSTENTION, to: 'CH', share: 25 };
+    const back: GroupMove = { ...everyone, age: '18-34', from: 'CH', to: ABSTENTION, share: 100 };
+    const { moved } = applyGroupMoves(groups, [there, back]);
+    // All of CH's 18-34 votes go back, the ones the first move added included.
+    expect(moved[1]).toBeCloseTo(groupSize(groups, { ...back }) + moved[0], 3);
   });
 });
