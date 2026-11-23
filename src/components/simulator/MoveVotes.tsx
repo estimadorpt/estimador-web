@@ -311,7 +311,9 @@ export function MoveVotes({ data, locale, anchorId, groupsMethodHref }: {
         {/* The parliament: first on a phone, beside the controls (and in view while they
             scroll) from 1024px. */}
         <div className="min-w-0 lg:order-2">
-          <div className="space-y-5 lg:sticky lg:top-20">
+          {/* The seat map and its panel are too tall to stay in view beside the controls until
+              they sit side by side, from 1280px. */}
+          <div className={`space-y-5 ${view === 'parliament' ? 'lg:sticky lg:top-20' : 'xl:sticky xl:top-20'}`}>
             <div>
               <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                 <p className="text-[12px] font-semibold text-graphite">{pt ? 'Com estes votos' : 'With these votes'}</p>

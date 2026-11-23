@@ -7,24 +7,29 @@ import { formatSignedNumber } from '@/lib/typography';
 import type { CircleResult, ScenarioResult } from '@/lib/simulator/engine';
 import { circleLabel, circleName } from '@/lib/simulator/circle-names';
 import {
-  DOT_R, LABEL_LINE, LABEL_SIZE, SEAT_MAP, SEAT_MAP_BLOCKS, blockBox, blockSeats, circleChanges, nearestBlock, seatCentre,
+  DOT_R, LABEL_SIZE, SEAT_MAP, SEAT_MAP_CIRCLES, circleBox, circleChanges, circleSeats, nearestSeat,
 } from '@/lib/simulator/seat-map';
 import { listColor, listName, type Locale } from './copy';
 import styles from './Simulator.module.css';
 import { useSettled } from './use-settled';
 
-/** How far (in the drawing's units) a tap may land from a circle and still choose it. */
-const TAP_REACH = 10;
-/** A seat that changed hands: a smaller dot inside an ink ring, with paper between them, so the ring reads on dark lists too and never touches a neighbour. */
-const GAINED_R = 2.3;
-const RING_R = 3.65;
+/** How far (in the drawing's units) a tap off every district may land from a seat and still choose its circle. */
+const TAP_REACH = 12;
+/** A seat that changed hands: a smaller dot inside an ink ring, with paper between them, so the ring reads on dark lists too; the ring reaches 3.8 units out, and seats are at least 7.6 apart (seat-map.test.ts). */
+const GAINED_R = 2;
+const RING_R = 3.3;
+const RING_W = 1;
+/** The islands and the emigration circles, drawn in the column on the left: a box takes their taps. */
+const INSETS = new Set(['Açores', 'Madeira', 'Europa', 'Fora da Europa']);
 
 /**
- * The seat map: each of the 22 circles as a block of its seats, placed roughly where it is,
- * coloured by the list that holds each seat under the scenario. A seat that changed hands
- * against 2025 has an ink ring, and the circle's name turns ink. A tap or click on a block
- * chooses it; the drawing is hidden from screen readers, which choose a circle with the select
- * in the panel beside it (`CirclePanel`) and hear the same figures there.
+ * The seat map: mainland Portugal's districts grown towards their seats, with the islands and
+ * the emigration circles on the left (`src/lib/simulator/seat-map.ts`). Each dot is a seat,
+ * coloured by the list that holds it under the scenario, the lists filling a district from west
+ * to east in the parliament's order. A seat that changed hands against 2025 has an ink ring, and
+ * the circle's name turns ink. A tap or click on a district chooses it; the drawing is hidden
+ * from screen readers, which choose a circle with the select in the panel beside it
+ * (`CirclePanel`) and hear the same figures there.
  */
 export function SeatMap({ result, base, selected, onSelect, locale }: {
   result: ScenarioResult;
@@ -33,20 +38,26 @@ export function SeatMap({ result, base, selected, onSelect, locale }: {
   onSelect: (circle: string) => void;
   locale: Locale;
 }) {
-  const blocks = result.circles.map((c, i) => {
-    const at = SEAT_MAP_BLOCKS[c.name] ?? { x: 0, y: 0 };
-    const label = circleLabel(c.name, locale);
-    const seats = blockSeats(c.won, base.circles[i].won);
-    return { name: c.name, at, label, seats, changed: seats.some(s => s.gained), box: blockBox(at.x, at.y, c.seats, label.length) };
-  });
+  const circles = result.circles.map((c, i) => {
+    const at = SEAT_MAP_CIRCLES[c.name];
+    const seats = circleSeats(c.won, base.circles[i].won);
+    return { name: c.name, at, label: circleLabel(c.name, locale), seats, changed: seats.some(s => s.gained) };
+  }).filter(c => c.at);
   const pick = (e: MouseEvent<SVGSVGElement>) => {
-    const svg = e.currentTarget;
-    const ctm = svg.getScreenCTM();
+    const hit = (e.target as Element).closest?.('[data-circle]');
+    const named = hit?.getAttribute('data-circle');
+    if (named) {
+      onSelect(named);
+      return;
+    }
+    const ctm = e.currentTarget.getScreenCTM();
     if (!ctm) return;
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
-    const name = nearestBlock(p.x, p.y, blocks, TAP_REACH);
+    const name = nearestSeat(p.x, p.y, SEAT_MAP_CIRCLES, TAP_REACH);
     if (name) onSelect(name);
   };
+  const chosen = circles.find(c => c.name === selected);
+  const chosenBox = chosen && INSETS.has(chosen.name) ? circleBox(chosen.at) : null;
   return (
     <svg
       viewBox={`0 0 ${SEAT_MAP.width} ${SEAT_MAP.height}`}
@@ -55,44 +66,67 @@ export function SeatMap({ result, base, selected, onSelect, locale }: {
       focusable="false"
       onClick={pick}
     >
-      {blocks.map(b => {
-        const isSelected = b.name === selected;
+      {/* The districts: what a tap hits, and their borders. */}
+      {circles.filter(c => !INSETS.has(c.name)).map(c => (
+        <path
+          key={c.name}
+          data-circle={c.name}
+          className={`${styles.area} ${styles.border}`}
+          d={c.at.path}
+          fill="transparent"
+          stroke={BRAND.line}
+          strokeWidth={0.75}
+          strokeLinejoin="round"
+        />
+      ))}
+      {/* The islands and the emigration circles: a box each, and the islands' outlines. */}
+      {circles.filter(c => INSETS.has(c.name)).map(c => {
+        const b = circleBox(c.at);
         return (
-          <g key={b.name} className={styles.block}>
-            <rect
-              className={styles.blockHit}
-              x={b.box.x0 - 3}
-              y={b.box.y0 - 1}
-              width={b.box.x1 - b.box.x0 + 6}
-              height={b.box.y1 - b.box.y0 + 4}
-              fill="transparent"
-              stroke={isSelected ? BRAND.ink : 'none'}
-              strokeWidth={1.5}
-            />
-            <text
-              x={b.at.x}
-              y={b.at.y - (LABEL_LINE - LABEL_SIZE) - 1}
-              fontFamily={FONT_STACK}
-              fontSize={LABEL_SIZE}
-              fontWeight={b.changed || isSelected ? 700 : 400}
-              fill={b.changed || isSelected ? BRAND.ink : BRAND.muted}
-            >
-              {b.label}
-            </text>
-            {b.seats.map((s, i) => {
-              const c = seatCentre(b.at.x, b.at.y, b.seats.length, i);
-              return s.gained ? (
-                <g key={i}>
-                  <circle cx={c.x} cy={c.y} r={RING_R} fill="none" stroke={BRAND.ink} strokeWidth={1.2} />
-                  <circle className={styles.dot} cx={c.x} cy={c.y} r={GAINED_R} fill={listColor(s.list)} />
-                </g>
-              ) : (
-                <circle key={i} className={styles.dot} cx={c.x} cy={c.y} r={DOT_R} fill={listColor(s.list)} />
-              );
-            })}
+          <g key={c.name}>
+            <rect data-circle={c.name} className={styles.area} x={b.x0} y={b.y0} width={b.x1 - b.x0} height={b.y1 - b.y0} fill="transparent" />
+            {c.at.path && <path className={`${styles.passive} ${styles.border}`} d={c.at.path} fill="none" stroke={BRAND.line} strokeWidth={0.75} strokeLinejoin="round" />}
           </g>
         );
       })}
+      {chosen && (chosenBox ? (
+        <rect className={styles.passive} x={chosenBox.x0} y={chosenBox.y0} width={chosenBox.x1 - chosenBox.x0} height={chosenBox.y1 - chosenBox.y0} fill="none" stroke={BRAND.ink} strokeWidth={1.5} />
+      ) : (
+        <path className={styles.passive} d={chosen.at.path} fill="none" stroke={BRAND.ink} strokeWidth={1.5} strokeLinejoin="round" />
+      ))}
+      <g className={styles.passive}>
+        {circles.map(c => c.seats.map((s, i) => {
+          const [x, y] = c.at.dots[i] ?? [0, 0];
+          return s.gained ? (
+            <g key={`${c.name}-${i}`}>
+              <circle cx={x} cy={y} r={RING_R} fill="none" stroke={BRAND.ink} strokeWidth={RING_W} />
+              <circle className={styles.dot} cx={x} cy={y} r={GAINED_R} fill={listColor(s.list)} />
+            </g>
+          ) : (
+            <circle key={`${c.name}-${i}`} className={styles.dot} cx={x} cy={y} r={DOT_R} fill={listColor(s.list)} />
+          );
+        }))}
+        {circles.map(c => {
+          const strong = c.changed || c.name === selected;
+          return (
+            <text
+              key={c.name}
+              className={styles.halo}
+              x={c.at.label.x}
+              y={c.at.label.y}
+              textAnchor={c.at.label.anchor}
+              fontFamily={FONT_STACK}
+              fontSize={LABEL_SIZE}
+              fontWeight={strong ? 700 : 400}
+              fill={strong ? BRAND.ink : BRAND.muted}
+              stroke={BRAND.paper}
+              strokeWidth={3}
+            >
+              {c.label}
+            </text>
+          );
+        })}
+      </g>
     </svg>
   );
 }

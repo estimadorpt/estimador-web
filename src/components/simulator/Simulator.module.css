@@ -106,17 +106,28 @@
   cursor: pointer;
 }
 
-/* The seat map: a block takes a tap or a click anywhere near it (SeatMap picks the nearest). */
+/* The seat map: a district, an island inset or an emigration circle takes a tap anywhere on
+   it; seats and labels let the pointer through, so the district under them answers. */
 .seatMap {
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
+.seatMap .passive {
+  pointer-events: none;
+}
+
 @media (hover: hover) {
-  .block:hover .blockHit {
+  .area:hover {
     fill: var(--color-field, #f4f4f4);
   }
+}
+
+/* A label sits on a paper halo, so a border under it breaks instead of crossing the word. */
+.halo {
+  paint-order: stroke;
+  stroke-linejoin: round;
 }
 
 /* The simulator's drawings (parliament, seat map, bloc bars) keep their party colours in forced
@@ -128,7 +139,9 @@
   .inkMarks [stroke="#111111"] { stroke: CanvasText; }
   .inkMarks [fill="#ffffff"] { fill: Canvas; }
   .inkMarks .dot { stroke: CanvasText; stroke-width: 0.75px; }
-  .block:hover .blockHit { fill: transparent; }
+  .area:hover { fill: transparent; }
+  .halo { stroke: Canvas; }
+  .border { stroke: GrayText; }
 }
 
 @media (forced-colors: active) {
