@@ -108,7 +108,10 @@ describe('sitemap', () => {
       }
     };
     const feeds = [feedDay('game_fixtures.json', 'generated_at'), feedDay('injuries.json', 'snapshot_date'), feedDay('market_scorecard.json', 'generated_at')];
-    const known = new Set([ligaDay, POPULATION_PUBLISHED, ...Object.values(COPY_REVISED), ...feeds.filter((d): d is string => !!d)]);
+    // A published article (and its tag pages) is dated by its own `date` or `updated`, which
+    // is today on the day it goes live.
+    const articleDays = SITE_LOCALES.flatMap(locale => getMDXArticlesByLocale(locale).map(article => article.updated ?? article.date));
+    const known = new Set([ligaDay, POPULATION_PUBLISHED, ...Object.values(COPY_REVISED), ...articleDays, ...feeds.filter((d): d is string => !!d)]);
     const stamped = entries.filter(entry => entry.lastModified && new Date(entry.lastModified).toISOString().slice(0, 10) === today && !known.has(today));
     expect(stamped.map(entry => entry.url)).toEqual([]);
   });

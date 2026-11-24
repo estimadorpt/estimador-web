@@ -25,18 +25,6 @@
       }
     },
     {
-      "route": "/og-image-liga-en-2877741c.png",
-      "headers": {
-        "cache-control": "public, max-age=0, must-revalidate"
-      }
-    },
-    {
-      "route": "/og-image-liga-pt-3adc335f.png",
-      "headers": {
-        "cache-control": "public, max-age=0, must-revalidate"
-      }
-    },
-    {
       "route": "/og-image-*.png",
       "headers": {
         "cache-control": "public, max-age=31536000, immutable"
